@@ -18,16 +18,32 @@ services:
       timeout: 5s
       retries: 5
 
+  usertour-redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   usertour:
     image: usertour/usertour:latest
     ports:
-      - "8090:8080"
+      - "8090:80"
     environment:
       DATABASE_URL: "postgres://usertour:usertour_dev_pw@usertour-db:5432/usertour?sslmode=disable"
+      DATABASE_DIRECT_URL: "postgres://usertour:usertour_dev_pw@usertour-db:5432/usertour?sslmode=disable"
+      Redis_HOST: usertour-redis
+      Redis_PORT: "6379"
       USRTOUR_SERVER_HOST: "0.0.0.0"
       USRTOUR_SERVER_PORT: "8080"
     depends_on:
       usertour-db:
+        condition: service_healthy
+      usertour-redis:
         condition: service_healthy
     restart: unless-stopped
 
@@ -62,7 +78,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-postiz-db:
+  postiz-db:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: postiz
@@ -78,20 +94,110 @@ postiz-db:
       timeout: 5s
       retries: 5
 
-  postiz:
-    image: gitroomhq/postiz:latest
+  postiz-redis:
+    image: redis:7-alpine
     ports:
-      - "8100:3000"
+      - "6380:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postiz:
+    image: ghcr.io/gitroomhq/postiz-app:latest
+    ports:
+      - "8100:5000"
     environment:
-      DATABASE_URL: "postgres://postiz:postiz_dev_pw@postiz-db:5432/postiz?sslmode=disable"
-      NODE_ENV: development
-      POSTIZ_SECRET_KEY: "mercenta-postiz-dev-key"
+      MAIN_URL: "http://localhost:5000"
+      FRONTEND_URL: "http://localhost:5000"
+      NEXT_PUBLIC_BACKEND_URL: "http://localhost:5000/api"
+      JWT_SECRET: "mercenta-postiz-jwt-secret-change-me"
+      DATABASE_URL: "postgresql://postiz:postiz_dev_pw@postiz-db:5432/postiz-db-local"
+      REDIS_URL: "redis://postiz-redis:6379"
+      TEMPORAL_ADDRESS: "temporal:7233"
+      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      IS_GENERAL: "true"
+      DISABLE_REGISTRATION: "false"
+      RUN_CRON: "true"
+      STORAGE_PROVIDER: "local"
+      UPLOAD_DIRECTORY: "/uploads"
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: "/uploads"
     depends_on:
       postiz-db:
         condition: service_healthy
+      postiz-redis:
+        condition: service_healthy
+      temporal:
+        condition: service_healthy
     restart: unless-stopped
+
+  temporal-postgresql:
+    container_name: temporal-postgresql
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_USER: temporal
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - temporal_postgres_data:/var/lib/postgresql/data
+
+  temporal-elasticsearch:
+    container_name: temporal-elasticsearch
+    image: elasticsearch:7.17.27
+    restart: always
+    environment:
+      ES_JAVA_OPTS: "-Xms256m -Xmx256m"
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+    expose:
+      - "9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    volumes:
+      - temporal_elasticsearch_data:/usr/share/elasticsearch/data
+
+  temporal:
+    container_name: temporal
+    restart: always
+    image: temporalio/auto-setup:1.28.1
+    depends_on:
+      temporal-postgresql:
+        condition: service_healthy
+      temporal-elasticsearch:
+        condition: service_healthy
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: temporal
+      POSTGRES_PWD: temporal
+      POSTGRES_SEEDS: temporal-postgresql
+      ENABLE_ES: "true"
+      ES_SEEDS: temporal-elasticsearch
+      ES_VERSION: v7
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "temporal:7233"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
 volumes:
   usertour_pgdata:
   rocketchat_mongodb:
   postiz_pgdata:
+  temporal_postgres_data:
+  temporal_elasticsearch_data:
