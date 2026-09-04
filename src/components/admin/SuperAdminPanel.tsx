@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Card, Badge, Button, Input, Select } from '@/components/ui';
+import { useState, useEffect } from 'react';
+import { Card, Badge, Button, Input, Select, Textarea } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { StaffMember, StaffRole } from '@/types';
 import {
@@ -8,7 +8,17 @@ import {
   Trash2,
   Power,
   Users,
+  Globe,
+  Save,
+  CheckCircle2,
 } from 'lucide-react';
+import {
+  fetchHomepageContent,
+  publishHomepageContent,
+  type HomepageContent,
+  type GlobalPathway,
+  type Service,
+} from '@/services/homepage';
 
 const ROLE_OPTIONS: { value: StaffRole; label: string }[] = [
   { value: 'Super Admin', label: 'Super Admin' },
@@ -81,6 +91,22 @@ export function SuperAdminPanel() {
   const [newRole, setNewRole] = useState<StaffRole>('Business Development');
   const [newChannel, setNewChannel] = useState('Global Operations');
 
+  // Homepage editor state
+  const [heroText, setHeroText] = useState('');
+  const [navItemsText, setNavItemsText] = useState('');
+  const [globalPathwaysText, setGlobalPathwaysText] = useState('');
+  const [servicesText, setServicesText] = useState('');
+  const [publishStatus, setPublishStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  useEffect(() => {
+    fetchHomepageContent().then((data) => {
+      setHeroText(data.hero_text);
+      setNavItemsText(data.nav_items.join('\n'));
+      setGlobalPathwaysText(JSON.stringify(data.global_pathways, null, 2));
+      setServicesText(JSON.stringify(data.services, null, 2));
+    });
+  }, []);
+
   const addStaff = () => {
     if (!newName || !newEmail) return;
     const member: StaffMember = {
@@ -114,6 +140,27 @@ export function SuperAdminPanel() {
     setStaff((prev) =>
       prev.map((s) => (s.id === id ? { ...s, channel } : s))
     );
+
+  const handlePublish = async () => {
+    setPublishStatus('saving');
+    try {
+      const parsedPathways: GlobalPathway[] = JSON.parse(globalPathwaysText);
+      const parsedServices: Service[] = JSON.parse(servicesText);
+      const navItems = navItemsText.split('\n').map((s) => s.trim()).filter(Boolean);
+
+      await publishHomepageContent({
+        nav_items: navItems,
+        global_pathways: parsedPathways,
+        services: parsedServices,
+        hero_text: heroText,
+      });
+      setPublishStatus('saved');
+      setTimeout(() => setPublishStatus('idle'), 3000);
+    } catch {
+      setPublishStatus('error');
+      setTimeout(() => setPublishStatus('idle'), 3000);
+    }
+  };
 
   const activeCount = staff.filter((s) => s.active).length;
 
@@ -289,6 +336,71 @@ export function SuperAdminPanel() {
               ))}
             </tbody>
           </table>
+        </div>
+      </Card>
+
+      {/* Homepage Editor */}
+      <Card
+        title="Homepage Editor"
+        subtitle="Edit the content shown on the public homepage"
+        className="mt-6"
+        action={
+          <div className="flex items-center gap-3">
+            {publishStatus === 'saved' && (
+              <span className="flex items-center gap-1 text-xs text-emerald-400">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Saved
+              </span>
+            )}
+            {publishStatus === 'error' && (
+              <span className="text-xs text-red-400">Invalid JSON — check format</span>
+            )}
+            <Button
+              size="sm"
+              onClick={handlePublish}
+              disabled={publishStatus === 'saving'}
+            >
+              <Save className="w-3.5 h-3.5" />
+              {publishStatus === 'saving' ? 'Publishing...' : 'Publish'}
+            </Button>
+          </div>
+        }
+      >
+        <div className="p-5 space-y-4">
+          <Input
+            label="Hero Badge Text"
+            value={heroText}
+            onChange={(e) => setHeroText(e.target.value)}
+            placeholder="Global 1P Wholesale Trade Platform"
+          />
+
+          <Textarea
+            label="Nav Items (one per line)"
+            value={navItemsText}
+            onChange={(e) => setNavItemsText(e.target.value)}
+            rows={4}
+            placeholder="Home&#10;About Us&#10;Services&#10;Global Network"
+          />
+
+          <Textarea
+            label="Global Pathways (JSON)"
+            value={globalPathwaysText}
+            onChange={(e) => setGlobalPathwaysText(e.target.value)}
+            rows={8}
+            placeholder='[{ "region": "North America", "flag": "🇺🇸", ... }]'
+          />
+
+          <Textarea
+            label="Services (JSON)"
+            value={servicesText}
+            onChange={(e) => setServicesText(e.target.value)}
+            rows={8}
+            placeholder='[{ "icon": "Package", "title": "...", "description": "..." }]'
+          />
+
+          <p className="text-xs text-zinc-600">
+            Changes are saved to the database and will appear on the public homepage immediately after publishing.
+          </p>
         </div>
       </Card>
     </div>

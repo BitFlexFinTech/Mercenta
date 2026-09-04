@@ -1,69 +1,39 @@
+import { useEffect, useState } from 'react';
 import { useApp } from '@/store';
 import { cn } from '@/utils/cn';
 import {
   Globe2,
   ArrowRight,
-  Truck,
-  ShieldCheck,
-  Package,
-  TrendingUp,
   Building2,
-  Plane,
-  Ship,
   Warehouse,
 } from 'lucide-react';
+import {
+  fetchHomepageContent,
+  getIconByName,
+  type HomepageContent,
+} from '@/services/homepage';
 
-const NAV_ITEMS = ['Home', 'About Us', 'Services', 'Global Network'];
-
-const GLOBAL_PATHWAYS = [
-  {
-    region: 'North America',
-    flag: '🇺🇸',
-    icon: Plane,
-    route: 'US Brands → DHL/FedEx Air Courier → UK Amazon 1P',
-    color: 'border-blue-500/30 text-blue-400',
-  },
-  {
-    region: 'Europe',
-    flag: '🇪🇺',
-    icon: Truck,
-    route: 'EU Brands → Trucking Network → UK Amazon 1P',
-    color: 'border-emerald-500/30 text-emerald-400',
-  },
-  {
-    region: 'Africa',
-    flag: '🌍',
-    icon: Ship,
-    route: 'African Brands → BAK Logistics → UK Amazon 1P',
-    color: 'border-amber-500/30 text-amber-400',
-  },
-];
-
-const SERVICES = [
-  {
-    icon: Package,
-    title: '1P Wholesale Distribution',
-    description: 'We purchase your inventory at Ex-Works pricing and route it directly to Amazon Vendor Central UK.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Importer of Record',
-    description: 'Boxbee holds UK EORI numbers, manages HMRC customs declarations, and ensures full UKCA compliance.',
-  },
-  {
-    icon: Truck,
-    title: 'Global Logistics Network',
-    description: 'DHL and FedEx for air courier parcels worldwide. BAK Logistics for heavy freight from African origins.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Revenue Acceleration',
-    description: 'Bi-weekly payouts in USD, EUR, or GBP. We handle the complexity so you can focus on production.',
-  },
-];
+const FALLBACK_DEFAULTS: HomepageContent = {
+  nav_items: ['Home', 'About Us', 'Services', 'Global Network'],
+  global_pathways: [],
+  services: [],
+  hero_text: 'Global 1P Wholesale Trade Platform',
+};
 
 export function Home() {
   const { setEnvironment } = useApp();
+  const [content, setContent] = useState<HomepageContent>(FALLBACK_DEFAULTS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchHomepageContent().then((data) => {
+      setContent(data);
+      setLoading(false);
+    });
+  }, []);
+
+  // Render nothing until data is available (prevents flash of wrong content)
+  if (loading) return null;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -77,7 +47,7 @@ export function Home() {
             <span className="text-lg font-semibold">Boxbee Commerce</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            {NAV_ITEMS.map((item) => (
+            {content.nav_items.map((item) => (
               <button
                 key={item}
                 className="text-sm text-zinc-400 hover:text-white transition-colors"
@@ -101,7 +71,7 @@ export function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-neon-500/10 border border-neon-500/20 rounded-full px-4 py-1.5 mb-6">
             <Globe2 className="w-3.5 h-3.5 text-neon-400" />
-            <span className="text-xs text-neon-400 font-medium">Global 1P Wholesale Trade Platform</span>
+            <span className="text-xs text-neon-400 font-medium">{content.hero_text}</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
             Scale your brand into the{' '}
@@ -138,8 +108,8 @@ export function Home() {
             Three regional pathways, one UK distribution hub
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {GLOBAL_PATHWAYS.map((path) => {
-              const Icon = path.icon;
+            {content.global_pathways.map((path) => {
+              const Icon = getIconByName(path.icon);
               return (
                 <div
                   key={path.region}
@@ -169,8 +139,8 @@ export function Home() {
             End-to-end wholesale distribution infrastructure
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {SERVICES.map((service) => {
-              const Icon = service.icon;
+            {content.services.map((service) => {
+              const Icon = getIconByName(service.icon);
               return (
                 <div
                   key={service.title}
