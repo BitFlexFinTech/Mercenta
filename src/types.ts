@@ -911,12 +911,24 @@ export interface TourProgress {
   tourDismissed: boolean;
   /** Checklist items completed (by id). */
   checklistCompleted: string[];
+  /** IDs of tours that have been fully completed. */
+  toursCompleted: string[];
+  /** IDs of tours that have been skipped. */
+  toursSkipped: string[];
+  /** The currently active tour ID, if any. */
+  currentTourId: string | null;
+  /** Per-tour completed step IDs. */
+  tourStepsCompleted: Record<string, string[]>;
 }
 
 export const DEFAULT_TOUR_PROGRESS: TourProgress = {
   completedSteps: [],
   tourDismissed: false,
   checklistCompleted: [],
+  toursCompleted: [],
+  toursSkipped: [],
+  currentTourId: null,
+  tourStepsCompleted: {},
 };
 
 export const CHECKLIST_ITEMS = [

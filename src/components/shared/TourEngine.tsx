@@ -4,9 +4,15 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { cn } from '@/utils/cn';
-import { TOUR_STEPS, CHECKLIST_ITEMS, DEFAULT_TOUR_PROGRESS, type TourProgress } from '@/types';
+import { CHECKLIST_ITEMS, DEFAULT_TOUR_PROGRESS, type TourProgress } from '@/types';
 import { Button } from '@/components/ui';
-import { X, ChevronRight, CheckCircle2, Circle, HelpCircle } from 'lucide-react';
+import { X, ChevronRight, CheckCircle2, Circle, HelpCircle, AlertTriangle } from 'lucide-react';
+import {
+  ALL_TOUR_DEFINITIONS,
+  TOUR_REGISTRY,
+  type TourDefinition,
+  type TourStep,
+} from '@/config/tours/tourDefinitions';
 
 /* ── Reactive per-brand progress store ───────────────────────────── */
 // Module-level Map persists progress across renders.
@@ -42,6 +48,70 @@ export function markTourStepCompleted(brandId: string, stepId: string): void {
 export function dismissTour(brandId: string): void {
   const p = getTourProgress(brandId);
   p.tourDismissed = true;
+  setTourProgress(brandId, p);
+}
+
+export function markTourCompleted(brandId: string, tourId: string): void {
+  const p = getTourProgress(brandId);
+  if (!p.toursCompleted.includes(tourId)) {
+    p.toursCompleted = [...p.toursCompleted, tourId];
+    p.currentTourId = null;
+    setTourProgress(brandId, p);
+  }
+}
+
+export function markTourSkipped(brandId: string, tourId: string): void {
+  const p = getTourProgress(brandId);
+  if (!p.toursSkipped.includes(tourId)) {
+    p.toursSkipped = [...p.toursSkipped, tourId];
+    p.currentTourId = null;
+    setTourProgress(brandId, p);
+  }
+}
+
+export function markTourStepDone(brandId: string, tourId: string, stepId: string): void {
+  const p = getTourProgress(brandId);
+  const steps = p.tourStepsCompleted[tourId] ?? [];
+  if (!steps.includes(stepId)) {
+    p.tourStepsCompleted = {
+      ...p.tourStepsCompleted,
+      [tourId]: [...steps, stepId],
+    };
+    setTourProgress(brandId, p);
+  }
+}
+
+export function isTourCompleted(brandId: string, tourId: string): boolean {
+  const p = getTourProgress(brandId);
+  return p.toursCompleted.includes(tourId);
+}
+
+export function isTourSkipped(brandId: string, tourId: string): boolean {
+  const p = getTourProgress(brandId);
+  return p.toursSkipped.includes(tourId);
+}
+
+export function isTourDoneOrSkipped(brandId: string, tourId: string): boolean {
+  return isTourCompleted(brandId, tourId) || isTourSkipped(brandId, tourId);
+}
+
+export function hasCompletedAllTours(brandId: string): boolean {
+  const p = getTourProgress(brandId);
+  return ALL_TOUR_DEFINITIONS.every(
+    (t) => p.toursCompleted.includes(t.id) || p.toursSkipped.includes(t.id)
+  );
+}
+
+export function startTour(brandId: string, tourId: string): void {
+  const p = getTourProgress(brandId);
+  p.currentTourId = tourId;
+  p.tourDismissed = false;
+  setTourProgress(brandId, p);
+}
+
+export function stopTour(brandId: string): void {
+  const p = getTourProgress(brandId);
+  p.currentTourId = null;
   setTourProgress(brandId, p);
 }
 
@@ -85,7 +155,7 @@ function getTargetRect(targetSelector: string): { top: number; left: number; wid
 /* ── Tour step card ────────────────────────────────────────────── */
 
 function TourStepCard(props: {
-  step: (typeof TOUR_STEPS)[number]; currentIndex: number; totalSteps: number;
+  step: TourStep; currentIndex: number; totalSteps: number;
   onNext: () => void; onFinish: () => void; onSkip: () => void;
 }) {
   const { step, currentIndex, totalSteps, onNext, onFinish, onSkip } = props;
@@ -147,6 +217,32 @@ function TourStepCard(props: {
   );
 }
 
+/* ── Skip confirmation modal ─────────────────────────────────────── */
+
+function SkipConfirmModal(props: {
+  tourName: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const { tourName, onConfirm, onCancel } = props;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-ink-900 border border-white/[0.08] rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4">
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <span className="text-sm font-semibold text-white">Skip Tour?</span>
+        </div>
+        <p className="text-xs text-zinc-400 mb-4">
+          Are you sure? You can restart tours anytime from Settings.
+        </p>
+        <div className="flex items-center justify-end gap-2">
+          <Button className="text-[10px]" variant="ghost" onClick={onCancel}>Continue Tour</Button>
+          <Button className="text-[10px] bg-zinc-700 hover:bg-zinc-600 text-white" onClick={onConfirm}>Skip Tour</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 /* ── Checklist widget ──────────────────────────────────────────── */
 
 function ChecklistWidget(props: { brandId: string; compact?: boolean }) {
@@ -189,12 +285,56 @@ export function TourEngine(props: TourEngineProps) {
   const brandId = session?.tenantId ?? '';
   const progress = useTourProgressReactive(brandId);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const remainingSteps = useMemo(function() {
-    return TOUR_STEPS.filter(function(s) { return !progress.completedSteps.includes(s.id); });
-  }, [progress.completedSteps]);
+  const [showSkipConfirm, setShowSkipConfirm] = useState(false);
 
+  // Determine which tour to show
+  const activeTour = useMemo<TourDefinition | null>(function() {
+    if (progress.currentTourId && TOUR_REGISTRY[progress.currentTourId]) {
+      return TOUR_REGISTRY[progress.currentTourId];
+    }
+    return null;
+  }, [progress.currentTourId]);
+
+  // Auto-trigger logic: runs when conditions change
   useEffect(function() {
-    if (!isBrandPortal || progress.tourDismissed || remainingSteps.length === 0) return;
+    if (!isBrandPortal || !brandId) return;
+    if (progress.currentTourId) return;
+
+    // Tour 1: Orientation — auto-start if no tours completed/skipped at all
+    if (!isTourDoneOrSkipped(brandId, 'orientation')) {
+      const hasAnyTourProgress = progress.toursCompleted.length > 0 || progress.toursSkipped.length > 0;
+      if (!hasAnyTourProgress) {
+        startTour(brandId, 'orientation');
+        return;
+      }
+    }
+
+    // Tour 3: PO Acknowledgment — auto-start when navigating to purchase_orders
+    if (currentView === 'purchase_orders' && !isTourDoneOrSkipped(brandId, 'po-acknowledgment')) {
+      startTour(brandId, 'po-acknowledgment');
+      return;
+    }
+  }, [isBrandPortal, brandId, currentView, progress.currentTourId]);
+
+  // Reset step index when active tour changes
+  useEffect(function() {
+    setCurrentStepIndex(0);
+  }, [activeTour?.id]);
+
+  // Compute remaining steps for the active tour
+  const remainingSteps = useMemo(function() {
+    if (!activeTour) return [];
+    const tourSteps = activeTour.steps;
+    const doneSteps = progress.tourStepsCompleted[activeTour.id] ?? [];
+    if (activeTour.forceFirst && !isTourDoneOrSkipped(brandId, activeTour.id)) {
+      return tourSteps;
+    }
+    return tourSteps.filter(function(s) { return !doneSteps.includes(s.id); });
+  }, [activeTour, progress.tourStepsCompleted]);
+
+  // Auto-advance when user navigates to the section targeted by the current step
+  useEffect(function() {
+    if (!isBrandPortal || !activeTour || remainingSteps.length === 0) return;
     if (currentStepIndex >= remainingSteps.length) return;
     const navMap: Record<string, string> = {
       'nav-purchase_orders': 'purchase_orders', 'nav-catalog': 'catalog',
@@ -205,22 +345,40 @@ export function TourEngine(props: TourEngineProps) {
     if (navMap[navId] && currentView === navMap[navId]) {
       setCurrentStepIndex(function(i) { return Math.min(i + 1, remainingSteps.length - 1); });
     }
-  }, [isBrandPortal, progress.tourDismissed, remainingSteps, currentStepIndex, currentView]);
+  }, [isBrandPortal, activeTour, remainingSteps, currentStepIndex, currentView]);
 
-  const showTour = isBrandPortal && !progress.tourDismissed && remainingSteps.length > 0 && currentStepIndex < remainingSteps.length;
+  const showTour = isBrandPortal && activeTour && remainingSteps.length > 0 && currentStepIndex < remainingSteps.length;
   const currentStep = showTour ? remainingSteps[currentStepIndex] : null;
 
   function handleNext() {
-    if (currentStepIndex < remainingSteps.length - 1) { setCurrentStepIndex(function(i) { return i + 1; }); }
-    else { handleFinish(); }
+    if (!activeTour) return;
+    if (currentStepIndex < remainingSteps.length - 1) {
+      setCurrentStepIndex(function(i) { return i + 1; });
+    } else {
+      handleFinish();
+    }
   }
+
   function handleFinish() {
-    if (currentStep) markTourStepCompleted(brandId, currentStep.id);
-    dismissTour(brandId); setCurrentStepIndex(0);
+    if (!activeTour || !currentStep) return;
+    markTourStepDone(brandId, activeTour.id, currentStep.id);
+    markTourCompleted(brandId, activeTour.id);
+    setCurrentStepIndex(0);
   }
-  /** X button: dismisses the tour without marking remaining steps done. User can restart later. */
+
+  function handleSkipConfirm() {
+    if (!activeTour) return;
+    markTourSkipped(brandId, activeTour.id);
+    setCurrentStepIndex(0);
+    setShowSkipConfirm(false);
+  }
+
+  function handleSkipCancel() {
+    setShowSkipConfirm(false);
+  }
+
   function handleDismiss() {
-    dismissTour(brandId); setCurrentStepIndex(0);
+    setShowSkipConfirm(true);
   }
 
   return (
@@ -232,7 +390,14 @@ export function TourEngine(props: TourEngineProps) {
             onNext={handleNext} onFinish={handleFinish} onSkip={handleDismiss} />
         </>
       )}
-      {isBrandPortal && brandId && !getTourProgress(brandId).tourDismissed && (
+      {showSkipConfirm && activeTour && (
+        <SkipConfirmModal
+          tourName={activeTour.name}
+          onConfirm={handleSkipConfirm}
+          onCancel={handleSkipCancel}
+        />
+      )}
+      {isBrandPortal && brandId && !getTourProgress(brandId).tourDismissed && !activeTour && (
         <div className="fixed bottom-4 right-4 z-30 w-56">
           <ChecklistWidget brandId={brandId} compact />
         </div>
