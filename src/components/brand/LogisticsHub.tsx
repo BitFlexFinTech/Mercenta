@@ -46,6 +46,7 @@ export function LogisticsHub() {
   const [uploadedDocs, setUploadedDocs] = useState<Set<string>>(new Set());
   const [waybillShipment, setWaybillShipment] = useState<string | null>(null);
   const [trackingShipment, setTrackingShipment] = useState<string | null>(null);
+  const [labelsShipment, setLabelsShipment] = useState<string | null>(null);
 
   const toggleDoc = (id: string) =>
     setUploadedDocs((prev) => {
@@ -208,6 +209,14 @@ export function LogisticsHub() {
                   <Button
                     size="sm"
                     variant="secondary"
+                    onClick={() => setLabelsShipment(s.id)}
+                  >
+                    <Barcode className="w-3 h-3" />
+                    Labels
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
                     onClick={() => setTrackingShipment(s.id)}
                   >
                     <Truck className="w-3 h-3" />
@@ -240,6 +249,12 @@ export function LogisticsHub() {
         <WaybillModal
           shipment={shipments.find((s) => s.id === waybillShipment)!}
           onClose={() => setWaybillShipment(null)}
+        />
+      )}
+      {labelsShipment && (
+        <LabelsModal
+          shipment={shipments.find((s) => s.id === labelsShipment)!}
+          onClose={() => setLabelsShipment(null)}
         />
       )}
     </div>
@@ -370,6 +385,49 @@ function getNextMilestones(current: ShipmentStatus): (typeof MILESTONES) {
   return MILESTONES.slice(0, idx + 2);
 }
 
+function LabelsModal({
+  shipment,
+  onClose,
+}: {
+  shipment: Shipment;
+  onClose: () => void;
+}) {
+  /**
+   * TODO: Replace with DHL API call when enterprise account is live
+   * POST /shipments/v4  or  GET /labels/{shipmentId}
+   */
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white text-black rounded-xl max-w-3xl w-full p-8 shadow-2xl animate-fade-in" style={{ fontFamily: 'monospace' }}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-400 hover:text-black"><X className="w-4 h-4" /></button>
+        <div className="text-center mb-6">
+          <div className="text-xs text-zinc-500 mb-2">
+            Carrier labels will be generated automatically once the DHL integration is live.<br />
+            For now, please use the manual label template below.
+          </div>
+        </div>
+        <div className="border-2 border-black p-6 rounded-none mb-6 bg-white" id="printable-label">
+          <div className="text-center border-b-2 border-black pb-3 mb-4">
+            <div className="text-lg font-bold uppercase">Shipping Label</div>
+            <div className="text-xs text-zinc-500">{BRAND_NAME}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs mb-4">
+            <div className="font-bold">Brand:</div><div>{shipment.customer || shipment.brandId}</div>
+            <div className="font-bold">PO Number:</div><div>{shipment.poNumber || '—'}</div>
+            <div className="font-bold">Destination FC:</div><div>{shipment.destination}</div>
+            <div className="font-bold">Carton Number:</div><div>_ / _</div>
+            <div className="font-bold">Reference:</div><div>{shipment.reference}</div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={onClose}>Close</Button>
+          <Button onClick={() => window.print()}><Printer className="w-3 h-3" /> Print Labels</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 function ShipmentTrackingTimeline({
   shipment,
   products,

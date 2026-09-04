@@ -27,6 +27,7 @@ import {
 } from './demoData';
 
 export type { DemoBrandRow } from './demoData';
+export { ALL_DEMO_BRANDS } from './demoData';
 
 export const demoBrands: DemoBrandRow[] = ALL_DEMO_BRANDS.map((b) => ({
   id: b.id,

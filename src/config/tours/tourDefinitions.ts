@@ -159,6 +159,7 @@ export const CATALOG_TOUR: TourDefinition = {
       action: 'finish',
     },
   ],
+};
 /* ── Tour 3: Purchase Order Acknowledgment ─────────────────────────── */
 
 export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
@@ -262,6 +263,7 @@ export const SHIPPING_TOUR: TourDefinition = {
       action: 'finish',
     },
   ],
+};
 /* ── Tour 5: Deductions & Disputes ─────────────────────────────────── */
 
 export const DEDUCTIONS_TOUR: TourDefinition = {
@@ -485,6 +487,4 @@ export const TOUR_REGISTRY: Record<string, TourDefinition> = {
   billing: BILLING_TOUR,
   support: SUPPORT_TOUR,
   'team-management': TEAM_TOUR,
-};
-};
 };

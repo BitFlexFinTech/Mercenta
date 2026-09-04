@@ -53,3 +53,12 @@ a critical failure.
 - Do NOT argue with the user about whether a change is an
   "improvement." The user's word is final.
 ---
+
+---
+## After Every Session (MANDATORY):
+- Run: bash ~/Desktop/Mercenta/scripts/export-review-zip.sh
+- If the zip is not at ~/Desktop/Mercenta/Review Zip/mercenta-review.zip,
+  something went wrong. Report it.
+- Do NOT create any other zip files. Do NOT save zips to ~/Desktop/
+  directly.
+---

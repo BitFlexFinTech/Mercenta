@@ -14,6 +14,7 @@ import { evaluateComplianceGate } from '@/lib/compliance';
 import { createSPApiClientForConnection } from '@/lib/spapi';
 import { DEFAULT_HOMEPAGE_CONTENT, type HomepageContent } from '@/config/homepageContent';
 import {
+  ALL_DEMO_BRANDS,
   demoAdSpend,
   demoBrands,
   demoCommissions,
@@ -37,6 +38,7 @@ import {
   acceptBrandAgreement as storeAcceptBrandAgreement,
   hasAcceptedAgreement as storeHasAcceptedAgreement,
 } from './demoStore';
+import { sendPostmarkEmail, buildPoNotificationHtml } from '@/lib/notifications/postmarkNotifier';
 import type {
   AdSpendBudget,
   ComplianceDocument,
@@ -510,6 +512,45 @@ export function acknowledgePurchaseOrder(
   );
   setPurchaseOrderStatus(poId, anyAccepted ? 'accepted' : 'rejected');
 
+// §Auto-shipment draft: when PO accepted, create a pre-filled draft
+  if (anyAccepted) {
+    const acceptedLines = po.lineItems.filter((l) => l.ackStatus === 'accepted' || l.ackStatus === 'backordered');
+    const totalAcceptedQty = acceptedLines.reduce((s, l) => s + (l.acknowledgedQty ?? l.quantity), 0);
+    const draftShipmentId = 'shipment-draft-' + po.id;
+    if (!demoShipments.some((s) => s.id === draftShipmentId)) {
+      const brandDraft = demoBrands.find((b) => b.id === po.brandId);
+      demoShipments.push({
+        id: draftShipmentId,
+        brandId: po.brandId,
+        poNumber: po.poNumber,
+        carrier: 'dhl',
+        reference: 'DRAFT-' + po.poNumber,
+        title: (brandDraft?.profile.businessName ?? 'Brand').split(' ')[0] + ' — ' + po.poNumber,
+        value: acceptedLines.reduce((s, l) => s + (l.acknowledgedQty ?? l.quantity) * l.unitPrice, 0),
+        status: 'factory_intake',
+        stage: 'factory_intake',
+        origin: 'Brand warehouse',
+        destination: 'Mercenta UK Hub',
+        delayed: false,
+        exception: false,
+        customer: brandDraft?.profile.businessName ?? 'Brand',
+        date: new Date().toISOString().slice(0, 10),
+        trackingNumber: '',
+        cbm: 0,
+      });
+    }
+    demoAuditLog.push({
+      id: 'audit-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+      createdAt: new Date().toISOString(),
+      actorId: po.brandId,
+      action: 'shipment_draft_created',
+      entityType: 'po_shipment',
+      entityId: draftShipmentId,
+      brandId: po.brandId,
+      reason: 'Auto-generated shipment draft after PO ' + po.poNumber + ' acknowledgment — ' + totalAcceptedQty + ' units across ' + acceptedLines.length + ' lines. Brand must add carton details.',
+      metadata: { poNumber: po.poNumber, lineCount: acceptedLines.length, totalQty: totalAcceptedQty, draftLineItems: acceptedLines.map((l) => l.sku) },
+    });
+  }
   // §Batch-0.5 — audit log with clear attribution: brand self-action vs admin on behalf
   const brand = demoBrands.find((b) => b.id === po.brandId);
   const brandName = brand?.profile.businessName ?? po.brandId;
@@ -580,6 +621,24 @@ export function createPurchaseOrder(
   };
   demoPurchaseOrders.push(po);
   const actorLabel = actorStaffId ? actorStaffId + ' (admin on behalf of ' + brandName + ')' : brandName + ' (self)';
+  // §New PO notification — fire-and-forget email via Postmark
+  const demoBrand = ALL_DEMO_BRANDS.find(function(b) { return b.id === brandId; });
+  if (demoBrand && demoBrand.email) {
+    const deadline = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+    const brandUrl = (typeof location !== 'undefined' ? location.origin : 'https://mercenta.com') + '/brand/purchase-orders?po=' + po.id;
+    const content = buildPoNotificationHtml(poNum, brandName, lineItems.length, deadline, brandUrl);
+    sendPostmarkEmail({
+      to: demoBrand.email,
+      subject: 'New Purchase Order — Action Required',
+      textBody: content.textBody,
+      htmlBody: content.htmlBody,
+    }).then(function(result) {
+      if (!result.ok) console.warn('[notifications] Failed to send PO notification:', result.error);
+      else if (result.mock) console.log('[notifications] (Mock) PO notification sent to', demoBrand.email, '— id:', result.messageId);
+    });
+  } else {
+    console.warn('[notifications] No verified email on file for brand', brandId, '— PO notification skipped');
+  }
   demoAuditLog.push({
     id: 'audit-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
     createdAt: now.toISOString(),
@@ -717,6 +776,19 @@ export function createShipmentForPO(
     metadata: { actorLabel: actorLabelCreate, carrier: asn.carrier, cartonCount: asn.cartons.length, unitCount: asn.cartons.reduce((a, c) => a + c.quantity, 0), shortfallCount: shortfalls.length, deductionId },
   });
 
+// §ASN auto-push stub — when shipment is confirmed, log that an ASN would be pushed
+  // TODO: Replace with real SP-API PUT /vendor/shipping call when Amazon account is approved
+  demoAuditLog.push({
+    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+    createdAt: new Date().toISOString(),
+    actorId: actorStaffId ?? po.brandId,
+    action: 'asn_auto_generated',
+    entityType: 'shipment',
+    entityId: shipmentId,
+    brandId: po.brandId,
+    reason: 'ASN auto-generated for PO ' + po.poNumber + ', shipment ' + shipmentId + '. Would be pushed to Amazon SP-API when integration is live.',
+    metadata: { poNumber: po.poNumber, shipmentId: shipmentId, carrier: asn.carrier },
+  });
   return { ok: true, shipmentId, warnings, deductionId };
 }
 
