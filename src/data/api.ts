@@ -58,20 +58,90 @@ import {
 
 export type DataSource = 'supabase' | 'seed';
 
+/* ── ID translation layer ──────────────────────────────────────────── */
+/* Frontend uses string IDs (e.g. "brand-zambezi") while Supabase uses
+ * UUIDs. The brands table maps via legacy_demo_id. Loaded lazily. */
+let _brandIdByUuid: Map<string, string> | null = null;
+
+async function _ensureBrandIdMap(): Promise<void> {
+  if (_brandIdByUuid !== null || !supabase) return;
+  _brandIdByUuid = new Map();
+  const { data, error } = await supabase.from('brands').select('id, legacy_demo_id');
+  if (error) {
+    console.warn('[api] Failed to load brand ID map:', error.message);
+    return;
+  }
+  for (const row of data ?? []) {
+    if (row.legacy_demo_id) _brandIdByUuid.set(row.id, row.legacy_demo_id);
+  }
+}
+
+/** Convert Supabase brand UUID → frontend string ID (e.g. "brand-zambezi"). */
+function _fromBrandUuid(uuid: string): string {
+  return _brandIdByUuid?.get(uuid) ?? uuid;
+}
+
+/** Convert frontend string brand ID → Supabase UUID. */
+async function _toBrandUuid(brandId: string): Promise<string> {
+  await _ensureBrandIdMap();
+  if (_brandIdByUuid) {
+    for (const [uuid, legacyId] of _brandIdByUuid) {
+      if (legacyId === brandId) return uuid;
+    }
+  }
+  return brandId;
+}
+
+/** Translate brand_id (UUID) → brandId (string ID) in a row. Returns a
+ *  shallow copy only when translation actually changes the value. */
+function _translateRow<T>(row: T): T {
+  const r = row as Record<string, unknown>;
+  const rawId = (r.brand_id ?? r.brandId) as string | undefined;
+  if (!rawId) return row;
+  const mapped = _fromBrandUuid(rawId);
+  if (mapped === rawId) return row;
+  return { ...r, brandId: mapped } as T;
+}
+
+function _translateRows<T>(rows: T[]): T[] {
+  return rows.map(_translateRow);
+}
+
+/* ── Core query helper: try Supabase first, fall back to seed on error ── */
+
 async function queryOrSeed<T>(
   table: string,
   seed: T[],
   select = '*'
 ): Promise<{ data: T[]; source: DataSource }> {
   if (!supabase) return { data: seed, source: 'seed' };
+  await _ensureBrandIdMap();
   const { data, error } = await supabase.from(table).select(select);
-  if (error) throw new Error(`[api] ${table}: ${error.message}`);
-  return { data: (data ?? []) as T[], source: 'supabase' };
+  if (error) {
+    console.warn(`[api] Supabase query failed for "${table}", using demo fallback:`, error.message);
+    return { data: seed, source: 'seed' };
+  }
+  const rows = (data ?? []) as T[];
+  return { data: _translateRows(rows), source: 'supabase' };
 }
 
-/* ── Brands (single source of truth: demoStore while DEMO_MODE) ── */
-export function fetchBrands() {
-  return queryOrSeed<DemoBrandRow>('brands', demoBrands);
+/* ── Brands — custom query maps Supabase columns to DemoBrandRow shape ── */
+export async function fetchBrands(): Promise<{ data: DemoBrandRow[]; source: DataSource }> {
+  if (!supabase) return { data: demoBrands, source: 'seed' };
+  await _ensureBrandIdMap();
+  const { data, error } = await supabase.from('brands').select('*');
+  if (error) {
+    console.warn('[api] Supabase query failed for "brands", using demo fallback:', error.message);
+    return { data: demoBrands, source: 'seed' };
+  }
+  const mapped: DemoBrandRow[] = (data ?? []).map((row: Record<string, unknown>) => ({
+    id: (row.legacy_demo_id as string) ?? (row.id as string),
+    category: (row.category as string) ?? '',
+    track: (row.fulfillment_track as 'direct_fulfillment' | 'financed') ?? 'financed',
+    contractStatus: (row.contract_status as string) ?? (row.lifecycle_stage as string) ?? 'draft',
+    profile: { businessName: (row.business_name as string) ?? (row.name as string) ?? '' },
+  }));
+  return { data: mapped, source: 'supabase' };
 }
 
 export async function fetchBrand(id: string): Promise<DemoBrandRow | null> {
@@ -273,10 +343,11 @@ export async function updatePurchaseOrderStatus(
   const po = setPurchaseOrderStatus(id, status, rejectionReason);
   if (!po) return { ok: false, error: `Unknown purchase order: ${id}` };
   if (supabase) {
-    await supabase
+    const { error } = await supabase
       .from('purchase_orders')
       .update({ status, rejection_reason: rejectionReason })
       .eq('id', id);
+    if (error) console.warn('[api] Supabase write failed for "purchase_orders", using demo fallback:', error.message);
   }
   return { ok: true, po };
 }
@@ -651,23 +722,26 @@ export async function applyFulfillmentOverride(
   if (!reason.trim()) throw new Error('[api] override requires a reason');
 
   if (supabase) {
+    const brandUuid = await _toBrandUuid(brandId);
     const { error: updErr } = await supabase
       .from('fulfillment_scores')
       .update({ track, manual_override: true, override_reason: reason })
-      .eq('brand_id', brandId);
-    if (updErr) throw new Error(`[api] fulfillment_scores: ${updErr.message}`);
-
-    const { error: logErr } = await supabase.from('audit_log').insert({
-      actor_id: actorId,
-      action: 'fulfillment_track_override',
-      entity_type: 'fulfillment_score',
-      entity_id: brandId,
-      brand_id: brandId,
-      reason,
-      metadata: { track },
-    });
-    if (logErr) throw new Error(`[api] audit_log: ${logErr.message}`);
-    return { ok: true, source: 'supabase' };
+      .eq('brand_id', brandUuid);
+    if (updErr) {
+      console.warn('[api] Supabase write failed for "fulfillment_scores", using demo fallback:', updErr.message);
+    } else {
+      const { error: logErr } = await supabase.from('audit_log').insert({
+        actor_id: actorId,
+        action: 'fulfillment_track_override',
+        entity_type: 'fulfillment_score',
+        entity_id: brandId,
+        brand_id: brandUuid,
+        reason,
+        metadata: { track },
+      });
+      if (logErr) console.warn('[api] Supabase write failed for "audit_log", using demo fallback:', logErr.message);
+      return { ok: true, source: 'supabase' };
+    }
   }
 
   // Seed/demo mode: same shape, queryable in-memory store.
@@ -701,10 +775,10 @@ export function fetchAuditLog() {
 
 /** §5 Bulk recalculate all brands' fulfillment scores. */
 export function recalculateAllScores(): { updated: number } {
-  var updated = 0;
-  for (var i = 0; i < demoFulfillmentScores.length; i++) {
-    var score = demoFulfillmentScores[i];
-    var total = score.tradingHistoryScore + score.exportExperienceScore + score.scaleScore + score.workingCapitalScore + score.categoryRiskScore + score.reliabilityScore;
+  let updated = 0;
+  for (let i = 0; i < demoFulfillmentScores.length; i++) {
+    const score = demoFulfillmentScores[i];
+    const total = score.tradingHistoryScore + score.exportExperienceScore + score.scaleScore + score.workingCapitalScore + score.categoryRiskScore + score.reliabilityScore;
     score.totalScore = total;
     if (!score.manualOverride) {
       score.track = total >= 65 ? 'direct_fulfillment' : 'financed';
@@ -732,7 +806,7 @@ export function renameBrand(brandId: string, businessName: string): void {
       .update({ business_name: businessName })
       .eq('legacy_demo_id', brandId)
       .then(({ error }) => {
-        if (error) console.error('[api] renameBrand:', error.message);
+        if (error) console.warn('[api] Supabase write failed for "brands", using demo fallback:', error.message);
       });
   }
 }
@@ -785,7 +859,7 @@ export function setComplianceDocStatus(
       .update({ status, reviewed_by: reviewer })
       .eq('id', docId)
       .then(({ error }) => {
-        if (error) console.error('[api] compliance status:', error.message);
+        if (error) console.warn('[api] Supabase write failed for "compliance_documents", using demo fallback:', error.message);
       });
   }
 }
@@ -805,7 +879,7 @@ export function amendShipment(
       })
       .eq('id', shipmentId)
       .then(({ error }) => {
-        if (error) console.error('[api] amendShipment:', error.message);
+        if (error) console.warn('[api] Supabase write failed for "shipments", using demo fallback:', error.message);
       });
   }
 }
@@ -837,7 +911,7 @@ export function requestProfileChange(input: {
         requested_at: req.requestedAt,
       })
       .then(({ error }) => {
-        if (error) console.error('[api] profile_change_requests insert:', error.message);
+        if (error) console.warn('[api] Supabase write failed for "profile_change_requests", using demo fallback:', error.message);
       });
   }
   return req;
@@ -860,7 +934,7 @@ export function reviewProfileChangeRequest(
       })
       .eq('id', id)
       .then(({ error }) => {
-        if (error) console.error('[api] profile_change_requests update:', error.message);
+        if (error) console.warn('[api] Supabase write failed for "profile_change_requests", using demo fallback:', error.message);
       });
   }
     return storeReviewProfileChangeRequest(id, approve, reviewedByStaffId, reviewNote);
@@ -908,7 +982,7 @@ export async function disputeDeduction(id: string, notes: string) {
         dispute_notes: notes,
       })
       .eq('id', id);
-    if (error) throw new Error(`[api] deductions: ${error.message}`);
+    if (error) console.warn('[api] Supabase write failed for "deductions", using demo fallback:', error.message);
   }
   return disputeDeductionInStore(id, notes);
 }
@@ -923,7 +997,7 @@ export async function recordDisputeOutcome(
       .from('deductions')
       .update({ dispute_outcome: outcome, status: 'resolved' })
       .eq('id', id);
-    if (error) throw new Error(`[api] deductions: ${error.message}`);
+    if (error) console.warn('[api] Supabase write failed for "deductions", using demo fallback:', error.message);
   }
   return recordDisputeOutcomeInStore(id, outcome);
 }
@@ -948,13 +1022,14 @@ export async function fetchHomepageContent(): Promise<{
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (error) throw new Error(`[api] homepage_content: ${error.message}`);
-    return {
-      live: data?.content
-        ? structuredClone(data.content as unknown as HomepageContent)
-        : structuredClone(DEFAULT_HOMEPAGE_CONTENT),
-      draft: homepageState.draft ? structuredClone(homepageState.draft) : null,
-    };
+    if (error) {
+      console.warn('[api] Supabase query failed for "homepage_content", using demo fallback:', error.message);
+    } else if (data?.content) {
+      return {
+        live: structuredClone(data.content as unknown as HomepageContent),
+        draft: homepageState.draft ? structuredClone(homepageState.draft) : null,
+      };
+    }
   }
   // Seed/demo mode: live copy is DEFAULT_HOMEPAGE_CONTENT; drafts held in
   // session.
@@ -982,7 +1057,7 @@ export async function publishHomepageContent(
         { id: '00000000-0000-0000-0000-000000000001', content: toPublish as unknown as Record<string, unknown>, updated_at: new Date().toISOString() },
         { onConflict: 'id' }
       );
-    if (error) throw new Error(`[api] homepage_content publish: ${error.message}`);
+    if (error) console.warn('[api] Supabase write failed for "homepage_content", using demo fallback:', error.message);
   }
   return structuredClone(toPublish);
 }
@@ -1005,8 +1080,9 @@ export async function logMessage(
     createdAt: message.createdAt ?? new Date().toISOString(),
   } as Message;
   if (supabase) {
+    const brandUuid = await _toBrandUuid(full.brandId);
     const { error } = await supabase.from('messages').insert({
-      brand_id: full.brandId,
+      brand_id: brandUuid,
       lead_id: full.leadId,
       channel: full.channel,
       direction: full.direction,
@@ -1015,7 +1091,11 @@ export async function logMessage(
       sent_by: full.sentBy,
       requires_human: full.requiresHuman,
     });
-    if (error) throw new Error(`[api] messages: ${error.message}`);
+    if (error) {
+      console.warn('[api] Supabase write failed for "messages", using demo fallback:', error.message);
+      demoMessages.unshift(full);
+      return full;
+    }
   } else {
     // Seed mode: demoMessages IS the store — mutate it so every view
     // (Messages Hub, Brand CRM comm panel, PO contact actions) sees the
@@ -1115,6 +1195,7 @@ async function paginatedQueryOrSeed<T>(
     };
   }
 
+  await _ensureBrandIdMap();
   let query = supabase.from(table).select('*', { count: 'exact', head: false });
   if (brandFilter) {
     // brandFilter is a row-level predicate only usable in seed mode;
@@ -1124,10 +1205,29 @@ async function paginatedQueryOrSeed<T>(
   query = query.order(orderBy, { ascending: orderDir === 'asc' });
   query = query.range(page * pageSize, page * pageSize + pageSize - 1);
   const { data, count, error } = await query;
-  if (error) throw new Error(`[api] ${table}: ${error.message}`);
+  if (error) {
+    console.warn(`[api] Supabase paginated query failed for "${table}", using demo fallback:`, error.message);
+    // Fall through to seed-based pagination below
+    let all = [...seed];
+    if (brandFilter) all = all.filter(brandFilter);
+    const key = (row: T): string => {
+      const v = (row as any)[orderBy];
+      if (typeof v === 'string') return v;
+      const alt = (row as any)[orderBy === 'created_at' ? 'createdAt' : orderBy];
+      return typeof alt === 'string' ? (alt as string) : '';
+    };
+    all.sort((a, b) => {
+      const cmp = key(a).localeCompare(key(b));
+      return orderDir === 'asc' ? cmp : -cmp;
+    });
+    const total = all.length;
+    const start = page * pageSize;
+    const sliced = all.slice(start, start + pageSize);
+    return { data: sliced, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)), source: 'seed' as const };
+  }
   const total = count ?? 0;
   return {
-    data: (data ?? []) as T[],
+    data: _translateRows((data ?? []) as T[]),
     total,
     page,
     pageSize,
