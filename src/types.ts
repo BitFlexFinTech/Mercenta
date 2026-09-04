@@ -1249,7 +1249,27 @@ export interface TriageResult {
   source: 'mock' | 'openrouter';
 }
 
-/* ── §Batch-2 — Returns workflow types ────────────────────────────── */
+/* ── §Legal — Brand agreement acceptances ────────────────────────────── */
+
+export type BrandAgreementType = 'logistics_sla' | 'chargeback_indemnity';
+
+export const AGREEMENT_VERSIONS: Record<BrandAgreementType, string> = {
+  logistics_sla: '1.0',
+  chargeback_indemnity: '1.0',
+};
+
+export const AGREEMENT_LABELS: Record<BrandAgreementType, string> = {
+  logistics_sla: 'Logistics SLAs & Carrier Alignment',
+  chargeback_indemnity: 'Automated Chargeback Remediation & Financial Indemnity',
+};
+
+export interface BrandAgreement {
+  id: string;
+  brandId: string;
+  agreementType: BrandAgreementType;
+  acceptedAt: string; // ISO timestamp
+  version: string;
+}
 
 export type ReturnReason =
   | 'defective'

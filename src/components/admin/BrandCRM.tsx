@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useBrands, useContracts, usePurchaseOrders as usePOsHook, useComplianceDocuments as useCompDocsHook } from '@/data/queries';
+import { useBrands, useContracts, usePurchaseOrders as usePOsHook, useComplianceDocuments as useCompDocsHook, useBrandAgreements } from '@/data/queries';
 import { renameBrand, setBrandTrack } from '@/data/api';
 import { APPROVED_CATEGORIES } from '@/types';
 import { Badge, Button, Card } from '@/components/ui';
 import { BrandCommPanel } from '@/components/shared/BrandComm';
 import { BrandCrmDepth } from '@/components/admin/BrandCrmDepth';
 import { cn } from '@/utils/cn';
-import { Users, Edit3, Route, Shield, MessageSquare, X, Download } from 'lucide-react';
+import { Users, Edit3, Route, Shield, MessageSquare, X, Download, FileText } from 'lucide-react';
 import { demoProfileChangeRequests, reviewProfileChangeRequest } from '@/data/api';
 import { useApp } from '@/context/GlobalStateContext';
 import { downloadCsv } from '@/lib/csv';
@@ -37,6 +37,7 @@ export function BrandCRM() {
   const contractsQuery = useContracts();
   const poQuery = { data: usePOsHook().data?.data ?? [] };
   const complianceDocs = useCompDocsHook().data?.data ?? [];
+  const brandAgreementsQuery = useBrandAgreements();
   const brands = brandsQuery.data?.data ?? [];
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -50,6 +51,7 @@ export function BrandCRM() {
   const brandContracts = selected ? (contractsQuery.data?.data ?? []).filter(function(c) { return c.brandId === selected.id; }) : [];
   const brandPOs = selected ? poQuery.data.filter(function(p) { return p.brandId === selected.id; }) : [];
   const brandDocs = selected ? complianceDocs.filter(function(d) { return d.brandId === selected.id; }) : [];
+  const brandAgreements = selected ? (brandAgreementsQuery.data?.data ?? []).filter(function(a) { return a.brandId === selected.id; }) : [];
   function selectBrand(id: string) {
     setSelectedId(id); setActiveSection(null); setSavedNote(null);
     const b = brands.find(function(x) { return x.id === id; });
@@ -63,6 +65,7 @@ export function BrandCRM() {
     { id: 'detail', label: 'Brand Detail', icon: Edit3 },
     { id: 'fulfillment', label: 'Fulfillment Track', icon: Route },
     { id: 'compliance', label: 'Compliance', icon: Shield },
+    { id: 'agreements', label: 'Agreements', icon: FileText },
     { id: 'history', label: 'History', icon: Users },
     { id: 'contact', label: 'Contact', icon: MessageSquare },
     { id: 'crm_depth', label: 'CRM Tools', icon: Users },
@@ -91,6 +94,7 @@ export function BrandCRM() {
             {activeSection === 'detail' && (<div className="space-y-2"><div className="flex items-center gap-2"><input type="text" value={nameDraft} onChange={function(e) { setNameDraft(e.target.value); }} className="flex-1 bg-ink-900 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-white" /><Button className="text-[10px]" onClick={function() { if (nameDraft.trim() && nameDraft.trim() !== selected.profile.businessName) { renameBrand(selected.id, nameDraft.trim()); setSavedNote('Name updated.'); setTimeout(function() { setSavedNote(null); }, 3000); } }}>Rename</Button></div>{savedNote && <p className="text-[10px] text-emerald-400">{savedNote}</p>}<div className="text-[11px] space-y-1"><div className="flex justify-between"><span className="text-zinc-500">Category</span><span className="text-zinc-300">{selected.category}</span></div><div className="flex justify-between"><span className="text-zinc-500">Track</span><span className="text-zinc-300 capitalize">{selected.track.replace(/_/g, ' ')}</span></div><div className="flex justify-between"><span className="text-zinc-500">Contract</span><span className="text-zinc-300 capitalize">{selected.contractStatus.replace(/_/g, ' ')}</span></div></div><p className="text-[8px] text-zinc-700 mt-2 text-right">Admin action on behalf of brand</p></div>)}
             {activeSection === 'fulfillment' && (<div className="space-y-2"><select value={trackDraft} onChange={function(e) { setTrackDraft(e.target.value as 'direct_fulfillment' | 'financed'); }} className="bg-ink-900 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-white"><option value="direct_fulfillment">Direct Fulfillment</option><option value="financed">Financed</option></select><input type="text" value={overrideReason} onChange={function(e) { setOverrideReason(e.target.value); }} placeholder="Override reason" className="bg-ink-900 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-white ml-2" /><Button className="text-[10px]" onClick={function() { setBrandTrack(selected.id, trackDraft, overrideReason); setSavedNote('Track updated.'); setTimeout(function() { setSavedNote(null); }, 3000); }}>Override</Button>{savedNote && <p className="text-[10px] text-emerald-400">{savedNote}</p>}<p className="text-[8px] text-zinc-700 mt-2 text-right">Admin action on behalf of brand</p></div>)}
             {activeSection === 'compliance' && (<div className="space-y-1">{brandDocs.length === 0 ? <p className="text-xs text-zinc-600">No documents.</p> : brandDocs.map(function(d) { return (<div key={d.id} className="flex items-center justify-between border-b border-white/[0.04] py-1.5"><span className="text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</span><Badge className={cn('text-[9px]', d.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{d.status.replace(/_/g, ' ')}</Badge></div>);})}</div>)}
+            {activeSection === 'agreements' && (<div className="space-y-1">{brandAgreements.length === 0 ? <p className="text-xs text-zinc-500">No agreements accepted yet.</p> : brandAgreements.map(function(a) { return (<div key={a.id} className="flex items-center justify-between border-b border-white/[0.04] py-1.5"><span className="text-xs text-zinc-300">{a.agreementType === 'logistics_sla' ? 'Logistics SLAs (§4.1)' : 'Chargeback Indemnity (§4.2)'}</span><div className="flex items-center gap-2"><Badge className="text-[9px] bg-emerald-500/15 text-emerald-300">Accepted v{a.version}</Badge><span className="text-[8px] text-zinc-600">{new Date(a.acceptedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div></div>);})}</div>)}
             {activeSection === 'history' && (<div>{brandPOs.length > 0 && <div><p className="text-[10px] text-zinc-500 font-medium">Recent POs</p>{brandPOs.slice(0,5).map(function(po) { return (<div key={po.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1"><span className="font-mono text-zinc-300">{po.poNumber}</span><span className="text-zinc-500 capitalize">{po.status.replace(/_/g, ' ')}</span></div>);})}</div>}{brandContracts.length > 0 && <div className="mt-2"><p className="text-[10px] text-zinc-500 font-medium">Contracts</p>{brandContracts.map(function(c) { return (<div key={c.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1"><span className="text-zinc-300 capitalize">{c.type.replace(/_/g, ' ')}</span><span className="text-zinc-500">{c.status}</span></div>);})}</div>}</div>)}
             {activeSection === 'contact' && <BrandCommPanel brandId={selected.id} brandName={selected.profile.businessName} poRef={undefined} />}
             {activeSection === 'crm_depth' && <BrandCrmDepth brandId={selected.id} />}

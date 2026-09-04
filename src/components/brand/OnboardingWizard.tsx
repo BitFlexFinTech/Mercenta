@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { BRAND_NAME, BRAND_LEGAL_NAME } from '@/config/brand';
-import { APPROVED_CATEGORIES } from '@/types';
+import { APPROVED_CATEGORIES, AGREEMENT_VERSIONS, type BrandAgreementType } from '@/types';
+import { acceptBrandAgreement } from '@/data/api';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { Button, Input, Select, Checkbox } from '@/components/ui';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
@@ -19,6 +20,7 @@ import {
   CheckCircle2,
   Globe2,
   Scale,
+  ScrollText,
 } from 'lucide-react';
 
 const STEPS = [
@@ -26,7 +28,8 @@ const STEPS = [
   { id: 2, label: 'Legal Agreement', icon: FileText },
   { id: 3, label: 'Banking', icon: Landmark },
   { id: 4, label: 'Fulfillment Track', icon: Route },
-  { id: 5, label: 'Operational Guidance', icon: Scale },
+  { id: 5, label: 'Legal Agreements', icon: ScrollText },
+  { id: 6, label: 'Operational Guidance', icon: Scale },
 ];
 // §Stage-20.2 — the former "3PL Carrier Integration" step was REMOVED:
 // carrier relationships are admin-managed (Super Admin → 3PL Carrier
@@ -101,6 +104,10 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
     payment: false,
   });
   const [guidanceAck, setGuidanceAck] = useState(false);
+  const [legalAgreements, setLegalAgreements] = useState({
+    logisticsSla: false,
+    chargebackIndemnity: false,
+  });
 
   const update = (field: string, value: string) =>
     setBrandProfile({ ...brandProfile, [field]: value });
@@ -128,7 +135,8 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
     if (step === 3)
       return brandProfile.bic && brandProfile.iban && !!brandProfile.workingCapitalAnswer;
     if (step === 4) return !!brandProfile.fulfillmentTrack && brandProfile.fulfillmentTrack !== 'unassigned';
-    if (step === 5) return guidanceAck;
+    if (step === 5) return legalAgreements.logisticsSla && legalAgreements.chargebackIndemnity;
+    if (step === 6) return guidanceAck;
     return true;
   };
 
@@ -147,6 +155,14 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
   // §Stage-20.2 — no brand-side carrier connection testing; completion no
   // longer writes dhlConnected/fedexConnected/bakConnected from wizard state.
   const handleFinish = () => {
+    // §Legal — persist mandatory brand agreement acceptances before finishing
+    const brandId = brandProfile.id || `brand-${Date.now()}`;
+    if (legalAgreements.logisticsSla) {
+      acceptBrandAgreement(brandId, 'logistics_sla' as BrandAgreementType, AGREEMENT_VERSIONS.logistics_sla);
+    }
+    if (legalAgreements.chargebackIndemnity) {
+      acceptBrandAgreement(brandId, 'chargeback_indemnity' as BrandAgreementType, AGREEMENT_VERSIONS.chargeback_indemnity);
+    }
     completeOnboarding();
   };
 
@@ -534,6 +550,90 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
 
           {step === 5 && (
             <div className="space-y-4 animate-fade-in">
+              <h2 className="text-base font-semibold text-white mb-1">Mandatory Legal Agreements</h2>
+              <p className="text-xs text-zinc-500 mb-2">
+                Please review and accept both agreements below. You must scroll through each
+                section and click "I have read and agree" for each one before you can continue.
+              </p>
+
+              {/* 4.1 — Logistics SLAs & Carrier Alignment */}
+              <div className="border border-white/[0.06] rounded-lg overflow-hidden">
+                <div className="bg-ink-900/80 border-b border-white/[0.06] px-4 py-2.5">
+                  <h3 className="text-xs font-semibold text-white">
+                    4.1 — Logistics SLAs & Carrier Alignment
+                  </h3>
+                </div>
+                <div className="bg-ink-900 border-white/[0.06] p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+                  <p className="mb-3">
+                    The Supplier explicitly acknowledges that all logistical executions under
+                    this Agreement must strictly align with Amazon Vendor Central Core Metrics.
+                    The Platform dictates the exclusive utilization of DHL Express / DHL Cargo
+                    via integrated API label generation.
+                  </p>
+                  <p className="mb-3">
+                    The Supplier guarantees a Minimum Purchase Order Acceptance Rate of 95% and
+                    an On-Time Shipment Rate of 98% within the designated Amazon shipping window.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2.5 border-t border-white/[0.06] bg-black/20">
+                  <input
+                    type="checkbox"
+                    id="agreement-logistics"
+                    checked={legalAgreements.logisticsSla}
+                    onChange={(e) =>
+                      setLegalAgreements({ ...legalAgreements, logisticsSla: e.target.checked })
+                    }
+                    className="w-3.5 h-3.5 accent-brass-500"
+                  />
+                  <label htmlFor="agreement-logistics" className="text-[10px] text-zinc-400 cursor-pointer select-none">
+                    I have read and agree to the Logistics SLAs &amp; Carrier Alignment terms
+                  </label>
+                </div>
+              </div>
+
+              {/* 4.2 — Automated Chargeback Remediation & Financial Indemnity */}
+              <div className="border border-white/[0.06] rounded-lg overflow-hidden">
+                <div className="bg-ink-900/80 border-b border-white/[0.06] px-4 py-2.5">
+                  <h3 className="text-xs font-semibold text-white">
+                    4.2 — Automated Chargeback Remediation & Financial Indemnity
+                  </h3>
+                </div>
+                <div className="bg-ink-900 border-white/[0.06] p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
+                  <p className="mb-3">
+                    In the event that the retail channel issues an operational chargeback,
+                    cost-deduction, or logistical penalty resulting from Supplier
+                    negligence—including but not limited to: late handovers to DHL, missing
+                    Advanced Shipping Notices (ASNs), barcode non-compliance, or structural
+                    packaging defects—the Platform reserves the absolute right to automatically
+                    trace, attribute, and deduct 100% of the financial penalty directly from the
+                    Supplier's next rolling wholesale payout disbursement.
+                  </p>
+                  <p className="mb-3">
+                    Furthermore, the Supplier agrees to indemnify the Platform against any
+                    systemic account-level restrictions caused by a breach of these operational
+                    metrics.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2.5 border-t border-white/[0.06] bg-black/20">
+                  <input
+                    type="checkbox"
+                    id="agreement-chargeback"
+                    checked={legalAgreements.chargebackIndemnity}
+                    onChange={(e) =>
+                      setLegalAgreements({ ...legalAgreements, chargebackIndemnity: e.target.checked })
+                    }
+                    className="w-3.5 h-3.5 accent-brass-500"
+                  />
+                  <label htmlFor="agreement-chargeback" className="text-[10px] text-zinc-400 cursor-pointer select-none">
+                    I have read and agree to the Chargeback Remediation &amp; Financial Indemnity terms
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 6 && (
+            <div className="space-y-4 animate-fade-in">
               <h2 className="text-base font-semibold text-white mb-1">Operational Guidance</h2>
               <p className="text-xs text-zinc-500 mb-2">
                 Please review the following operational information. This is a required
@@ -561,9 +661,9 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
             <ArrowLeft className="w-3.5 h-3.5" />
             Back
           </Button>
-          {step < 5 ? (
+          {step < 6 ? (
             <Button
-              onClick={() => setStep((s) => Math.min(5, s + 1))}
+              onClick={() => setStep((s) => Math.min(6, s + 1))}
               disabled={!canProceed()}
             >
               Continue

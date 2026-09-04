@@ -25,6 +25,7 @@ import {
   demoPurchaseOrders,
   demoShipments,
   demoSubscriptions,
+  demoBrandAgreements,
   setPurchaseOrderStatus,
   createDeductionInStore,
   disputeDeduction as disputeDeductionInStore,
@@ -33,6 +34,8 @@ import {
   demoProfileChangeRequests,
   requestProfileChange as storeRequestProfileChange,
   reviewProfileChangeRequest as storeReviewProfileChangeRequest,
+  acceptBrandAgreement as storeAcceptBrandAgreement,
+  hasAcceptedAgreement as storeHasAcceptedAgreement,
 } from './demoStore';
 import type {
   AdSpendBudget,
@@ -44,6 +47,8 @@ import type {
   PurchaseOrder,
   AuditLogEntry,
   ShippingMargin,
+  BrandAgreement,
+  BrandAgreementType,
 } from '@/types';
 import {
   demoAuditLog,
@@ -191,7 +196,9 @@ export function hasSignedDistributionAgreement(brandId: string): boolean {
 export async function isComplianceGateCleared(brandId: string): Promise<boolean> {
   const docs = await fetchComplianceForBrand(brandId);
   const hasAgreement = hasSignedDistributionAgreement(brandId);
-  return evaluateComplianceGate(docs, hasAgreement).cleared;
+  const logisticsSlaAccepted = storeHasAcceptedAgreement(brandId, 'logistics_sla');
+  const chargebackIndemnityAccepted = storeHasAcceptedAgreement(brandId, 'chargeback_indemnity');
+  return evaluateComplianceGate(docs, hasAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted).cleared;
 }
 
 export interface CatalogSubmissionResult {
@@ -293,7 +300,37 @@ export async function fetchSpApiPurchaseOrders(sinceIso: string): Promise<{
   return client.fetchPurchaseOrders(sinceIso);
 }
 
-/* ── §11 Subscriptions ── */
+/* ── §Legal — Brand agreement acceptances ── */
+export function fetchBrandAgreements() {
+  return queryOrSeed<BrandAgreement>('brand_agreements', demoBrandAgreements);
+}
+
+export async function acceptBrandAgreement(
+  brandId: string,
+  agreementType: BrandAgreementType,
+  version: string
+): Promise<BrandAgreement> {
+  const record = storeAcceptBrandAgreement(brandId, agreementType, version);
+  // If Supabase is available, also persist
+  if (supabase) {
+    const uuid = await _toBrandUuid(brandId);
+    await supabase.from('brand_agreements').upsert({
+      brand_id: uuid,
+      agreement_type: agreementType,
+      accepted_at: record.acceptedAt,
+      version,
+    }, { onConflict: 'brand_id,agreement_type' });
+  }
+  return record;
+}
+
+export async function isLogisticsSlaAccepted(brandId: string): Promise<boolean> {
+  return storeHasAcceptedAgreement(brandId, 'logistics_sla');
+}
+
+export async function isChargebackIndemnityAccepted(brandId: string): Promise<boolean> {
+  return storeHasAcceptedAgreement(brandId, 'chargeback_indemnity');
+}
 export function fetchSubscriptions() {
   return queryOrSeed('subscriptions', demoSubscriptions);
 }

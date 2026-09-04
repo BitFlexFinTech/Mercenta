@@ -672,7 +672,44 @@ export function addReturn(ret: Omit<BrandReturn, 'id'>): BrandReturn {
   return full;
 }
 
-/* ── Product mutations (availability + lead time + cost edit) ─────── */
+import type { BrandAgreement, BrandAgreementType } from '@/types';
+
+/* ── §Legal — Brand agreements store ───────────────────────────────── */
+
+export const demoBrandAgreements: BrandAgreement[] = [];
+
+export function acceptBrandAgreement(
+  brandId: string,
+  agreementType: BrandAgreementType,
+  version: string
+): BrandAgreement {
+  // Remove any existing acceptance for this brand+type (re-acceptance)
+  const existingIdx = demoBrandAgreements.findIndex(
+    (a) => a.brandId === brandId && a.agreementType === agreementType
+  );
+  if (existingIdx !== -1) {
+    demoBrandAgreements.splice(existingIdx, 1);
+  }
+  const record: BrandAgreement = {
+    id: `ba-${brandId}-${agreementType}-${Date.now()}`,
+    brandId,
+    agreementType,
+    acceptedAt: new Date().toISOString(),
+    version,
+  };
+  demoBrandAgreements.push(record);
+  return record;
+}
+
+export function getBrandAgreements(brandId: string): BrandAgreement[] {
+  return demoBrandAgreements.filter((a) => a.brandId === brandId);
+}
+
+export function hasAcceptedAgreement(brandId: string, agreementType: BrandAgreementType): boolean {
+  return demoBrandAgreements.some(
+    (a) => a.brandId === brandId && a.agreementType === agreementType
+  );
+}
 export function updateProductAvailability(
   sku: string,
   isAvailable: boolean,

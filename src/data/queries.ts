@@ -19,6 +19,7 @@ import {
   fetchPurchaseOrders,
   fetchShipmentsAll,
   fetchSubscriptions,
+  fetchBrandAgreements,
   fetchProductsPaginated,
   fetchPurchaseOrdersPaginated,
   fetchShipmentsPaginated,
@@ -137,6 +138,14 @@ export function useShipmentsPaginated(opts: ListQueryOptions = {}, pagination?: 
 
 export function useMessagesPaginated(opts: ListQueryOptions = {}, pagination?: PaginationParams) {
   return usePaginatedList('messages-paginated', fetchMessagesPaginated, opts, pagination);
+}
+
+export function useBrandAgreements() {
+  return useQuery({
+    queryKey: ['brand-agreements'],
+    queryFn: fetchBrandAgreements,
+    staleTime: STALE_TIME,
+  });
 }
 
 export function useAuditLogPaginated(opts: ListQueryOptions = {}, pagination?: PaginationParams) {
