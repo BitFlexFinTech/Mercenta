@@ -1,29 +1,48 @@
-import { useState, useEffect } from 'react';
-import { Card, Badge, Button, Input, Select, Textarea } from '@/components/ui';
+import { useState } from 'react';
+import { useApp } from '@/context/GlobalStateContext';
+import { Card, Badge, Button, Input, Select } from '@/components/ui';
 import { cn } from '@/utils/cn';
-import type { StaffMember, StaffRole } from '@/types';
+import type { StaffMember, StaffRole, CarrierMarkupConfig } from '@/types';
+import { demoCarrierMarkup, updateCarrierMarkup } from '@/data/demoStore';
 import {
   ShieldCheck,
   UserPlus,
   Trash2,
   Power,
   Users,
-  Globe,
-  Save,
-  CheckCircle2,
+  Globe2,
+  DollarSign,
+  Truck,
+  Layout,
+  FileText,
+  Search,
+  Factory,
+  Handshake,
+  PiggyBank,
 } from 'lucide-react';
-import {
-  fetchHomepageContent,
-  publishHomepageContent,
-  type HomepageContent,
-  type GlobalPathway,
-  type Service,
-} from '@/services/homepage';
+
+const SUPER_ADMIN_TABS = [
+  { id: 'staff', label: 'Staff & RBAC', icon: Users },
+  { id: 'homepage', label: 'Homepage Editor', icon: Layout },
+  { id: 'research', label: 'Product Research', icon: Search },
+  { id: 'manufacturer', label: 'Manufacturer Sourcing', icon: Factory },
+  { id: 'grants', label: 'Grants & Investors', icon: Handshake },
+  { id: 'pitch', label: 'Investor Pitch', icon: FileText },
+  { id: 'financing', label: 'Bank Financing', icon: PiggyBank },
+];
+import { EU_MARKET_ENABLED } from '@/config/customs';
+import { HomepageEditor } from './HomepageEditor';
+import { ProductResearchSection } from './ProductResearchSection';
+import { ManufacturerSourcingSection } from './ManufacturerSourcingSection';
+import { GrantsInvestorsSection } from './GrantsInvestorsSection';
+import { InvestorPitchSection } from './InvestorPitchSection';
+import { BankFinancingSection } from './BankFinancingSection';
 
 const ROLE_OPTIONS: { value: StaffRole; label: string }[] = [
   { value: 'Super Admin', label: 'Super Admin' },
   { value: 'Business Development', label: 'Business Development' },
   { value: 'Logistics Coordinator', label: 'Logistics Coordinator' },
+  { value: 'Cross-Border Logistics Lead', label: 'Cross-Border Logistics Lead' },
   { value: 'UK HMRC Compliance Specialist', label: 'UK HMRC Compliance Specialist' },
   { value: 'Harare BAK Depot Lead', label: 'Harare BAK Depot Lead' },
   { value: 'Carrier Integration Manager', label: 'Carrier Integration Manager' },
@@ -40,150 +59,209 @@ const CHANNEL_OPTIONS = [
   'FedEx Carrier Integration',
 ];
 
-const INITIAL_STAFF: StaffMember[] = [
-  {
-    id: 'staff-001',
-    name: 'Dave Anderson',
-    email: 'dave@boxbee.com',
-    role: 'Super Admin',
-    channel: 'Global Operations',
-    active: true,
-  },
-  {
-    id: 'staff-002',
-    name: 'Sarah Chen',
-    email: 'sarah@boxbee.com',
-    role: 'Business Development',
-    channel: 'US Brand Pipeline',
-    active: true,
-  },
-  {
-    id: 'staff-003',
-    name: 'Klaus Bauer',
-    email: 'klaus@boxbee.com',
-    role: 'Logistics Coordinator',
-    channel: 'EU Brand Pipeline',
-    active: true,
-  },
-  {
-    id: 'staff-004',
-    name: 'Farai Chari',
-    email: 'farai@boxbee.com',
-    role: 'Harare BAK Depot Lead',
-    channel: 'BAK Logistics Network',
-    active: true,
-  },
-  {
-    id: 'staff-005',
-    name: 'Emily Watson',
-    email: 'emily@boxbee.com',
-    role: 'UK HMRC Compliance Specialist',
-    channel: 'UK HMRC Compliance',
-    active: false,
-  },
-];
+let staffIdCounter = 100;
 
 export function SuperAdminPanel() {
-  const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
+  const {
+    staff,
+    addStaff,
+    removeStaff,
+    toggleStaffActive,
+    updateStaffRole,
+    updateStaffChannel,
+    updateStaffTier,
+    actingStaffId,
+    setActingStaffId,
+    canCurrentUserMutate,
+  } = useApp();
+
   const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState('staff');
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<StaffRole>('Business Development');
   const [newChannel, setNewChannel] = useState('Global Operations');
+  const [markupVersion, setMarkupVersion] = useState(0);
 
-  // Homepage editor state
-  const [heroText, setHeroText] = useState('');
-  const [navItemsText, setNavItemsText] = useState('');
-  const [globalPathwaysText, setGlobalPathwaysText] = useState('');
-  const [servicesText, setServicesText] = useState('');
-  const [publishStatus, setPublishStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-
-  useEffect(() => {
-    fetchHomepageContent().then((data) => {
-      setHeroText(data.hero_text);
-      setNavItemsText(data.nav_items.join('\n'));
-      setGlobalPathwaysText(JSON.stringify(data.global_pathways, null, 2));
-      setServicesText(JSON.stringify(data.services, null, 2));
-    });
-  }, []);
-
-  const addStaff = () => {
+  const handleAddStaff = () => {
     if (!newName || !newEmail) return;
     const member: StaffMember = {
-      id: `staff-${String(staff.length + 1).padStart(3, '0')}`,
+      id: `staff-${staffIdCounter++}`,
       name: newName,
       email: newEmail,
       role: newRole,
       channel: newChannel,
       active: true,
+      permissionTier: 'full',
     };
-    setStaff([...staff, member]);
+    addStaff(member);
     setNewName('');
     setNewEmail('');
+    setNewRole('Business Development');
+    setNewChannel('Global Operations');
     setShowForm(false);
-  };
-
-  const toggleActive = (id: string) =>
-    setStaff((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, active: !s.active } : s))
-    );
-
-  const deleteStaff = (id: string) =>
-    setStaff((prev) => prev.filter((s) => s.id !== id));
-
-  const updateRole = (id: string, role: StaffRole) =>
-    setStaff((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, role } : s))
-    );
-
-  const updateChannel = (id: string, channel: string) =>
-    setStaff((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, channel } : s))
-    );
-
-  const handlePublish = async () => {
-    setPublishStatus('saving');
-    try {
-      const parsedPathways: GlobalPathway[] = JSON.parse(globalPathwaysText);
-      const parsedServices: Service[] = JSON.parse(servicesText);
-      const navItems = navItemsText.split('\n').map((s) => s.trim()).filter(Boolean);
-
-      await publishHomepageContent({
-        nav_items: navItems,
-        global_pathways: parsedPathways,
-        services: parsedServices,
-        hero_text: heroText,
-      });
-      setPublishStatus('saved');
-      setTimeout(() => setPublishStatus('idle'), 3000);
-    } catch {
-      setPublishStatus('error');
-      setTimeout(() => setPublishStatus('idle'), 3000);
-    }
   };
 
   const activeCount = staff.filter((s) => s.active).length;
 
   return (
     <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
+      {/* Tab navigation */}
+      <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-white/[0.06] rounded-xl p-1">
+        {SUPER_ADMIN_TABS.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors',
+                activeTab === tab.id
+                  ? 'bg-brass-500 text-white shadow-sm'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+              )}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {activeTab === 'staff' && (
+        <>
+          {/* Feature flags — disabled future capabilities */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center">
+              <Globe2 className={cn('w-5 h-5', EU_MARKET_ENABLED ? 'text-emerald-400' : 'text-zinc-600')} />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-white">EU Market Module</div>
+              <p className="text-[11px] text-zinc-500 mt-0.5 max-w-md">
+                EU distribution capability (CE marking, EU EORI, REACH/GPSR).
+                Currently disabled — UK-only operations. Enable when strategy
+                expands; the module scaffolding is preserved.
+              </p>
+            </div>
+          </div>
+          <Badge className="text-[10px] bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
+            {EU_MARKET_ENABLED ? 'Enabled' : 'Disabled — future capability'}
+          </Badge>
+        </div>
+      </Card>
+
+      {/* §Batch-14 — Shipping Markup Config */}
+      <Card className="p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <DollarSign className="w-4 h-4 text-brass-400" />
+          <span className="text-xs font-semibold text-white">Shipping Markup Configuration</span>
+          <Badge className="text-[9px] bg-amber-500/15 text-amber-300 border-amber-500/20 ml-auto">
+            Integrated Logistics Revenue
+          </Badge>
+        </div>
+        <p className="text-[11px] text-zinc-500 mb-3">
+          Set the markup percentage applied per carrier. The brand sees the marked-up price
+          in the shipping cost estimate. Markup revenue is tracked in the shipping margin ledger.
+        </p>
+        <div className="space-y-2">
+          {demoCarrierMarkup.map((cfg) => (
+            <div key={cfg.id} className="flex items-center gap-3 bg-ink-900 rounded-lg p-2.5">
+              <Truck className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <span className="text-xs font-medium text-white">{cfg.label}</span>
+                <span className="text-[10px] text-zinc-600 ml-2">
+                  ({cfg.carrier === 'global' ? 'fallback for all carriers' : cfg.carrier})
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  value={cfg.markupValue * 100}
+                  onChange={(e) => {
+                    const val = Number(e.target.value) / 100;
+                    updateCarrierMarkup(cfg.id, { markupValue: val });
+                    // Force re-render
+                    setMarkupVersion((v) => v + 1);
+                  }}
+                  className="w-20 bg-ink-850 border border-white/[0.08] rounded px-2 py-1 text-xs text-white text-right font-mono focus:outline-none focus:border-brass-500/40"
+                />
+                <span className="text-[10px] text-zinc-500 w-4">%</span>
+                <button
+                  onClick={() => {
+                    updateCarrierMarkup(cfg.id, { active: !cfg.active });
+                    setMarkupVersion((v) => v + 1);
+                  }}
+                  className={cn(
+                    'p-1 rounded text-[10px] border transition-colors',
+                    cfg.active
+                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                      : 'bg-zinc-500/15 text-zinc-500 border-zinc-500/20'
+                  )}
+                  title={cfg.active ? 'Active' : 'Disabled'}
+                >
+                  {cfg.active ? 'ON' : 'OFF'}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-crimson-accent/15 flex items-center justify-center">
           <ShieldCheck className="w-5 h-5 text-red-400" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-white">Super Admin Panel</h2>
+          <h2 className="text-lg font-semibold text-white">Super Admin Panel — Tadii</h2>
           <p className="text-xs text-zinc-500 mt-0.5">
             Master control matrix — staff, roles & channel assignments
           </p>
         </div>
       </div>
 
+      {/* §Stage-25 — act-as-staff selector: exercises the RBAC tiers end to
+          end. Selecting a view-only staff member disables mutating actions
+          across the admin surfaces that enforce canCurrentUserMutate. */}
+      <Card className="p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <span className="text-xs text-zinc-500 font-medium whitespace-nowrap">
+            Acting as staff:
+          </span>
+          <select
+            value={actingStaffId}
+            onChange={(e) => setActingStaffId(e.target.value)}
+            className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1.5 text-xs text-white cursor-pointer"
+          >
+            {staff.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} ({s.role}) — {s.permissionTier === 'full' ? 'Full admin' : 'View-only ops'}
+              </option>
+            ))}
+          </select>
+          <Badge
+            className={cn(
+              'text-[10px]',
+              canCurrentUserMutate
+                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+            )}
+          >
+            {canCurrentUserMutate ? 'Mutations allowed' : 'View-only — mutations blocked'}
+          </Badge>
+        </div>
+      </Card>
+
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-3.5 h-3.5 text-neon-400" />
+            <Users className="w-3.5 h-3.5 text-brass-400" />
             <span className="text-xs text-zinc-500 font-medium">Total Staff</span>
           </div>
           <div className="text-2xl font-bold text-white">{staff.length}</div>
@@ -220,7 +298,7 @@ export function SuperAdminPanel() {
                 type="email"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="name@boxbee.com"
+                placeholder="name@mercenta.co.uk"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -238,7 +316,7 @@ export function SuperAdminPanel() {
               />
             </div>
             <div className="flex items-center gap-3 pt-1">
-              <Button onClick={addStaff}>
+              <Button onClick={handleAddStaff}>
                 <UserPlus className="w-3.5 h-3.5" />
                 Create Profile
               </Button>
@@ -265,6 +343,7 @@ export function SuperAdminPanel() {
                 <th className="text-left font-medium px-4 py-3">Email</th>
                 <th className="text-left font-medium px-4 py-3">Role</th>
                 <th className="text-left font-medium px-4 py-3">Channel</th>
+                <th className="text-left font-medium px-4 py-3">Permission Tier</th>
                 <th className="text-center font-medium px-4 py-3">Status</th>
                 <th className="text-right font-medium px-4 py-3">Actions</th>
               </tr>
@@ -279,8 +358,8 @@ export function SuperAdminPanel() {
                   <td className="px-4 py-3.5">
                     <select
                       value={member.role}
-                      onChange={(e) => updateRole(member.id, e.target.value as StaffRole)}
-                      className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-neon-500/40 cursor-pointer"
+                      onChange={(e) => updateStaffRole(member.id, e.target.value as StaffRole)}
+                      className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
                     >
                       {ROLE_OPTIONS.map((r) => (
                         <option key={r.value} value={r.value} className="bg-ink-900">
@@ -292,14 +371,32 @@ export function SuperAdminPanel() {
                   <td className="px-4 py-3.5">
                     <select
                       value={member.channel}
-                      onChange={(e) => updateChannel(member.id, e.target.value)}
-                      className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-neon-500/40 cursor-pointer"
+                      onChange={(e) => updateStaffChannel(member.id, e.target.value)}
+                      className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
                     >
                       {CHANNEL_OPTIONS.map((c) => (
                         <option key={c} value={c} className="bg-ink-900">
                           {c}
                         </option>
                       ))}
+                    </select>
+                  </td>
+                  {/* §Stage-25 — RBAC permission tier: full vs view-only ops. */}
+                  <td className="px-4 py-3.5">
+                    <select
+                      value={member.permissionTier}
+                      onChange={(e) =>
+                        updateStaffTier(member.id, e.target.value as StaffMember['permissionTier'])
+                      }
+                      className={cn(
+                        'bg-ink-900 border rounded-md px-2.5 py-1 text-xs focus:outline-none cursor-pointer',
+                        member.permissionTier === 'full'
+                          ? 'border-emerald-500/30 text-emerald-300'
+                          : 'border-amber-500/30 text-amber-300'
+                      )}
+                    >
+                      <option value="full">Full admin</option>
+                      <option value="view_only">View-only ops</option>
                     </select>
                   </td>
                   <td className="px-4 py-3.5 text-center">
@@ -317,14 +414,14 @@ export function SuperAdminPanel() {
                   <td className="px-4 py-3.5">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => toggleActive(member.id)}
+                        onClick={() => toggleStaffActive(member.id)}
                         className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-emerald-400 transition-colors"
                         title={member.active ? 'Deactivate' : 'Activate'}
                       >
                         <Power className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={() => deleteStaff(member.id)}
+                        onClick={() => removeStaff(member.id)}
                         className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-red-400 transition-colors"
                         title="Delete"
                       >
@@ -339,70 +436,32 @@ export function SuperAdminPanel() {
         </div>
       </Card>
 
-      {/* Homepage Editor */}
-      <Card
-        title="Homepage Editor"
-        subtitle="Edit the content shown on the public homepage"
-        className="mt-6"
-        action={
-          <div className="flex items-center gap-3">
-            {publishStatus === 'saved' && (
-              <span className="flex items-center gap-1 text-xs text-emerald-400">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Saved
-              </span>
-            )}
-            {publishStatus === 'error' && (
-              <span className="text-xs text-red-400">Invalid JSON — check format</span>
-            )}
-            <Button
-              size="sm"
-              onClick={handlePublish}
-              disabled={publishStatus === 'saving'}
-            >
-              <Save className="w-3.5 h-3.5" />
-              {publishStatus === 'saving' ? 'Publishing...' : 'Publish'}
-            </Button>
-          </div>
-        }
-      >
-        <div className="p-5 space-y-4">
-          <Input
-            label="Hero Badge Text"
-            value={heroText}
-            onChange={(e) => setHeroText(e.target.value)}
-            placeholder="Global 1P Wholesale Trade Platform"
-          />
+        </>
+      )}
 
-          <Textarea
-            label="Nav Items (one per line)"
-            value={navItemsText}
-            onChange={(e) => setNavItemsText(e.target.value)}
-            rows={4}
-            placeholder="Home&#10;About Us&#10;Services&#10;Global Network"
-          />
+      {activeTab === 'homepage' && (
+        <HomepageEditor />
+      )}
 
-          <Textarea
-            label="Global Pathways (JSON)"
-            value={globalPathwaysText}
-            onChange={(e) => setGlobalPathwaysText(e.target.value)}
-            rows={8}
-            placeholder='[{ "region": "North America", "flag": "🇺🇸", ... }]'
-          />
+      {activeTab === 'research' && (
+        <ProductResearchSection />
+      )}
 
-          <Textarea
-            label="Services (JSON)"
-            value={servicesText}
-            onChange={(e) => setServicesText(e.target.value)}
-            rows={8}
-            placeholder='[{ "icon": "Package", "title": "...", "description": "..." }]'
-          />
+      {activeTab === 'manufacturer' && (
+        <ManufacturerSourcingSection />
+      )}
 
-          <p className="text-xs text-zinc-600">
-            Changes are saved to the database and will appear on the public homepage immediately after publishing.
-          </p>
-        </div>
-      </Card>
+      {activeTab === 'grants' && (
+        <GrantsInvestorsSection />
+      )}
+
+      {activeTab === 'pitch' && (
+        <InvestorPitchSection />
+      )}
+
+      {activeTab === 'financing' && (
+        <BankFinancingSection />
+      )}
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
-import { useApp } from '@/store';
+import { useApp } from '@/context/GlobalStateContext';
+import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 
 interface SidebarProps {
-  items: { id: string; label: string; icon: ReactNode }[];
+  items: { id: string; label: string; icon: ReactNode; tourAttr?: string }[];
   activeView: string;
   setActiveView: (v: string) => void;
   userName: string;
@@ -30,15 +31,14 @@ export function Sidebar({
     <aside className="w-60 flex-shrink-0 bg-ink-900 border-r border-white/[0.06] flex flex-col">
       <div className="px-5 py-5 border-b border-white/[0.06]">
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-            style={{ backgroundColor: themeAccent }}
-          >
-            B
-          </div>
+          <img
+            src={brandMark}
+            alt="Mercenta Partners hexagon mark"
+            className="w-8 h-8"
+          />
           <div>
             <div className="text-sm font-semibold text-white tracking-tight">
-              Boxbee
+              Mercenta
             </div>
             <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
               {envLabel}
@@ -52,6 +52,7 @@ export function Sidebar({
           <button
             key={item.id}
             onClick={() => setActiveView(item.id)}
+            data-tour={item.tourAttr}
             className={cn(
               'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 mb-0.5',
               activeView === item.id
@@ -74,7 +75,7 @@ export function Sidebar({
       </nav>
 
       <div className="px-3 py-3 border-t border-white/[0.06]">
-        <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.03] cursor-pointer">
+        <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center text-xs font-semibold text-white">
             {userName
               .split(' ')

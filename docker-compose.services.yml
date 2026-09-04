@@ -1,0 +1,97 @@
+# Batch B/C - Self-hosted services
+# Start: docker compose -f docker-compose.services.yml up -d
+
+services:
+  usertour-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: usertour
+      POSTGRES_USER: usertour
+      POSTGRES_PASSWORD: usertour_dev_pw
+    ports:
+      - "5433:5432"
+    volumes:
+      - usertour_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usertour"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  usertour:
+    image: usertour/usertour:latest
+    ports:
+      - "8090:8080"
+    environment:
+      DATABASE_URL: "postgres://usertour:usertour_dev_pw@usertour-db:5432/usertour?sslmode=disable"
+      USRTOUR_SERVER_HOST: "0.0.0.0"
+      USRTOUR_SERVER_PORT: "8080"
+    depends_on:
+      usertour-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  rocketchat-db:
+    image: mongo:7
+    command: ["mongod", "--oplogSize", "128", "--replSet", "rs0"]
+    ports:
+      - "27018:27017"
+    volumes:
+      - rocketchat_mongodb:/data/db
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:\"rs0\",members:[{_id:0,host:\"rocketchat-db:27017\"}]}) }" | mongosh
+      interval: 10s
+      timeout: 30s
+      start_period: 30s
+      retries: 5
+
+  rocketchat:
+    image: registry.rocket.chat/rocketchat/rocket.chat:latest
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URL: "mongodb://rocketchat-db:27017/rocketchat?replicaSet=rs0"
+      MONGO_OPLOG_URL: "mongodb://rocketchat-db:27017/local?replicaSet=rs0"
+      ROOT_URL: "http://localhost:3000"
+      PORT: "3000"
+      ADMIN_USERNAME: "mercenta-admin"
+      ADMIN_PASS: "mercenta_rocket_pw"
+      ADMIN_EMAIL: "admin@mercenta.co.uk"
+    depends_on:
+      rocketchat-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+postiz-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: postiz
+      POSTGRES_USER: postiz
+      POSTGRES_PASSWORD: postiz_dev_pw
+    ports:
+      - "5434:5432"
+    volumes:
+      - postiz_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postiz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postiz:
+    image: gitroomhq/postiz:latest
+    ports:
+      - "8100:3000"
+    environment:
+      DATABASE_URL: "postgres://postiz:postiz_dev_pw@postiz-db:5432/postiz?sslmode=disable"
+      NODE_ENV: development
+      POSTIZ_SECRET_KEY: "mercenta-postiz-dev-key"
+    depends_on:
+      postiz-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  usertour_pgdata:
+  rocketchat_mongodb:
+  postiz_pgdata:

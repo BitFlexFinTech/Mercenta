@@ -1,0 +1,197 @@
+import { useState, useMemo } from 'react';
+import { useBrands, useProducts } from '@/data/queries';
+import { updateProductAvailability, updateProductCost } from '@/data/demoStore';
+import { Button } from '@/components/ui';
+import { cn } from '@/utils/cn';
+import { DataTable } from '@/components/shared/DataTable';
+import type { DataTableColumn } from '@/components/shared/DataTable';
+import type { DemoProduct } from '@/data/demoData';
+import { X, Package, Filter } from 'lucide-react';
+import { ImageSetEditor } from '@/components/shared/ImageUploader';
+import { APPROVED_CATEGORIES } from '@/types';
+
+function ProductDetailModal(props: { product: DemoProduct; onClose: () => void }) {
+  const { product, onClose } = props;
+  const brands = useBrands().data?.data ?? [];
+  const bn = brands.find(function(b) { return b.id === product.brandId; })?.profile.businessName ?? product.brandId;
+  const bc = brands.find(function(b) { return b.id === product.brandId; })?.category ?? '';
+  const [tab, setTab] = useState('detail');
+  const [av, setAv] = useState(product.isAvailable ?? true);
+  const [lt, setLt] = useState(product.leadTimeDays ?? 14);
+  const [ep, setEp] = useState(product.exWorksPrice);
+  const [sv, setSv] = useState<string | null>(null);
+  function ha() { updateProductAvailability(product.sku, av, lt); setSv('Availability updated.'); setTimeout(function() { setSv(null); }, 3000); }
+  function hp() { updateProductCost(product.sku, ep); setSv('Price updated.'); setTimeout(function() { setSv(null); }, 3000); }
+  return (
+    <div className='fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4'>
+      <div className='bg-ink-850 border border-white/[0.08] rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'>
+        <div className='flex items-center justify-between px-5 py-4 border-b border-white/[0.06]'>
+          <div className='flex items-center gap-3'><Package className='w-5 h-5 text-brass-400' /><div><h2 className='text-sm font-semibold text-white'>{product.name}</h2><p className='text-[10px] text-zinc-500 font-mono'>{product.sku} · {product.barcode}</p></div></div>
+          <button onClick={onClose} className='text-zinc-400 hover:text-white'><X className='w-4 h-4' /></button>
+        </div>
+        <div className='flex gap-1 px-5 pt-3 border-b border-white/[0.06]'>
+          {['detail', 'images', 'pricing'].map(function(t) { return (
+            <button key={t} onClick={function() { setTab(t); }} className={cn('px-3 py-1.5 text-[11px] font-medium rounded-t', tab === t ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>{t === 'detail' ? 'Details' : t === 'images' ? 'Images (5)' : 'Pricing'}</button>
+          );})}
+        </div>
+        <div className='flex-1 overflow-y-auto p-5 space-y-4'>
+          {/* ── Detail Tab ── */}
+          {tab === 'detail' && (
+            <div className='grid grid-cols-2 gap-4 text-xs'>
+              <div className='space-y-2'>
+                <div><span className='text-zinc-500'>Brand</span><p className='text-white font-medium'>{bn}</p></div>
+                <div><span className='text-zinc-500'>Category</span><p className='text-white font-medium'>{bc}</p></div>
+                <div><span className='text-zinc-500'>Commodity Code</span><p className='text-white font-mono'>{product.commodityCode}</p></div>
+                <div><span className='text-zinc-500'>VAT Status</span><p className='text-white'>{product.vatStatus}</p></div>
+                <div><span className='text-zinc-500'>Hazmat</span><p className='text-white'>{product.hazmat ? 'Yes' : 'No'}</p></div>
+              </div>
+              <div className='space-y-2'>
+                <div><span className='text-zinc-500'>Unit Price (Ex-Works)</span><p className='text-white font-mono'>GBP {product.exWorksPrice.toFixed(2)}</p></div>
+                <div><span className='text-zinc-500'>UK Retail Price</span><p className='text-white font-mono'>GBP {product.ukRetailPrice.toFixed(2)}</p></div>
+                <div><span className='text-zinc-500'>Dimensions</span><p className='text-white font-mono'>{product.length} × {product.width} × {product.height} cm</p></div>
+                <div><span className='text-zinc-500'>Weight</span><p className='text-white font-mono'>{product.weight} kg</p></div>
+                {product.unitsPerCase != null && (
+                  <div><span className='text-zinc-500'>Units Per Case</span><p className='text-white font-mono'>{product.unitsPerCase} {product.caseOrderable ? '(orderable)' : ''}</p></div>
+                )}
+              </div>
+              {/* Availability edit section */}
+              <div className='col-span-2 border-t border-white/[0.06] pt-3 mt-2'>
+                <p className='text-zinc-400 mb-2 font-medium'>Availability</p>
+                <div className='flex items-center gap-4'>
+                  <label className='flex items-center gap-2 text-zinc-300'>
+                    <input type='checkbox' checked={av} onChange={function(e) { setAv(e.target.checked); }}
+                      className='rounded border-white/[0.2] bg-ink-900 accent-brass-500' />
+                    Available for new POs
+                  </label>
+                  <div className='flex items-center gap-2'>
+                    <span className='text-zinc-500 text-[10px]'>Lead time:</span>
+                    <input type='number' value={lt} min={1} max={90} onChange={function(e) { setLt(parseInt(e.target.value) || 1); }}
+                      className='w-16 bg-ink-900 border border-white/[0.08] rounded px-1.5 py-1 text-xs text-white text-center' /> days
+                  </div>
+                  <Button className='text-[10px]' onClick={ha}>Save Availability</Button>
+                </div>
+              </div>
+            </div>
+          )}
+{/* ── Images Tab ── */}
+          {tab === 'images' && (
+            <div>
+              <ImageSetEditor
+                images={product.productImages ?? []}
+                onImagesChange={function() { /* admin view - images shown from catalog */ }}
+                editable={false}
+              />
+            </div>
+          )}
+          {/* ── Pricing Tab ── */}
+          {tab === 'pricing' && (
+            <div className='space-y-3 max-w-sm'>
+              <div>
+                <label className='text-[10px] text-zinc-500 font-medium block mb-1'>Ex-Works Price (GBP)</label>
+                <input type='number' step='0.01' value={ep} onChange={function(e) { setEp(Number(e.target.value)); }}
+                  className='w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-sm text-white' />
+              </div>
+              <div className='text-[10px] text-zinc-500 space-y-1'>
+                <p>UK Retail: <span className='font-mono text-zinc-300'>GBP {product.ukRetailPrice.toFixed(2)}</span></p>
+                <p>Implied margin: <span className='font-mono text-zinc-300'>{((product.ukRetailPrice - ep) / product.ukRetailPrice * 100).toFixed(1)}%</span></p>
+              </div>
+              <Button className='text-xs' onClick={hp}>Update Price</Button>
+              {sv && <p className='text-[10px] text-emerald-400'>{sv}</p>}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Catalog Manager ── */
+export function CatalogManagerAdmin() {
+  const brands = useBrands().data?.data ?? [];
+  const products = useProducts().data?.data ?? [];
+  const [selectedProduct, setSelectedProduct] = useState<DemoProduct | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  const brandName = (id: string) => brands.find(function(b) { return b.id === id; })?.profile.businessName ?? id;
+  const brandCategory = (id: string) => brands.find(function(b) { return b.id === id; })?.category ?? '';
+
+  // Build a map of brandId → category for quick lookup
+  const brandCategoryMap = useMemo(function() {
+    const m = new Map<string, string>();
+    for (const b of brands) m.set(b.id, b.category);
+    return m;
+  }, [brands]);
+
+  // Filter products by brand category
+  const filteredProducts = useMemo(function() {
+    if (categoryFilter === 'all') return products;
+    return products.filter(function(p) {
+      return brandCategoryMap.get(p.brandId) === categoryFilter;
+    });
+  }, [products, categoryFilter, brandCategoryMap]);
+
+  // Count products per category
+  const categoryCounts = useMemo(function() {
+    const counts = new Map<string, number>();
+    for (const p of products) {
+      const cat = brandCategoryMap.get(p.brandId) ?? 'Uncategorized';
+      counts.set(cat, (counts.get(cat) ?? 0) + 1);
+    }
+    return counts;
+  }, [products, brandCategoryMap]);
+
+  const columns: DataTableColumn<DemoProduct>[] = [
+    { key: 'name', header: 'Product', value: function(p: DemoProduct) { return p.name; } },
+    { key: 'sku', header: 'SKU', value: function(p: DemoProduct) { return p.sku; } },
+    { key: 'brand', header: 'Brand', value: function(p: DemoProduct) { return brandName(p.brandId); } },
+    { key: 'category', header: 'Category', value: function(p: DemoProduct) { return brandCategory(p.brandId); } },
+    { key: 'price', header: 'Price', value: function(p: DemoProduct) { return 'GBP ' + p.exWorksPrice.toFixed(2); } },
+    { key: 'status', header: 'Status', value: function(p: DemoProduct) { return p.isAvailable !== false ? 'Active' : 'Inactive'; } },
+  ];
+
+  return (
+    <div className='p-6 space-y-6 max-w-[1400px] mx-auto'>
+      <div className='flex items-center justify-between'>
+        <div>
+          <h2 className='text-lg font-semibold text-white'>Global Catalog Manager</h2>
+          <p className='text-xs text-zinc-500 mt-0.5'>{filteredProducts.length} of {products.length} products across {brands.length} brands</p>
+        </div>
+      </div>
+
+      {/* Category filter bar */}
+      <div className='flex items-center gap-1.5 flex-wrap'>
+        <Filter className='w-3.5 h-3.5 text-zinc-500 mr-1' />
+        <button onClick={function() { setCategoryFilter('all'); }}
+          className={cn('px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors',
+            categoryFilter === 'all' ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
+          )}>
+          All ({products.length})
+        </button>
+        {APPROVED_CATEGORIES.map(function(cat) {
+          const count = categoryCounts.get(cat) ?? 0;
+          if (count === 0) return null;
+          return (
+            <button key={cat} onClick={function() { setCategoryFilter(cat); }}
+              className={cn('px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors',
+                categoryFilter === cat ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
+              )}>
+              {cat} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      <DataTable
+        rows={filteredProducts}
+        columns={columns}
+        searchText={function(p) { return p.name + ' ' + p.sku + ' ' + brandName(p.brandId) + ' ' + brandCategory(p.brandId); }}
+        onRowClick={function(p) { setSelectedProduct(p); }}
+        emptyMessage={categoryFilter !== 'all' ? 'No products in this category.' : 'No products found.'}
+      />
+
+      {selectedProduct && (
+        <ProductDetailModal product={selectedProduct} onClose={function() { setSelectedProduct(null); }} />
+      )}
+    </div>
+  );
+}

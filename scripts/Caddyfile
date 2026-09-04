@@ -1,0 +1,60 @@
+# Mercenta Self-Hosted Services — Caddy Reverse Proxy Configuration
+#
+# Place this file at /etc/caddy/Caddyfile on the VPS.
+# Caddy auto-provisions Let's Encrypt TLS certificates for each domain.
+#
+# Requirements:
+#   - DNS A records pointing to the VPS IP:
+#       usertour.mercenta.co.uk
+#       chat.mercenta.co.uk
+#       postiz.mercenta.co.uk
+#   - Ports 80 + 443 open in the firewall
+#
+# Deploy:  scp scripts/Caddyfile root@<vps-ip>:/etc/caddy/Caddyfile
+#          ssh root@<vps-ip> systemctl reload caddy
+
+usertour.mercenta.co.uk {
+    reverse_proxy localhost:8090
+    header /* {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+    }
+    log {
+        output file /var/log/caddy/usertour.log
+    }
+}
+
+chat.mercenta.co.uk {
+    reverse_proxy localhost:3000
+    header /* {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+    }
+    log {
+        output file /var/log/caddy/rocketchat.log
+    }
+}
+
+postiz.mercenta.co.uk {
+    reverse_proxy localhost:8100
+    header /* {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+    }
+    log {
+        output file /var/log/caddy/postiz.log
+    }
+}
+
+# Health-check endpoint for monitoring
+services.mercenta.co.uk {
+    respond /health 200 {
+        body "Mercenta self-hosted services are running."
+    }
+    header /* {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    }
+}

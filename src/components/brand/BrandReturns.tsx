@@ -1,0 +1,262 @@
+import { useMemo, useState } from 'react';
+import { useApp } from '@/context/GlobalStateContext';
+import { Card, Badge } from '@/components/ui';
+import { cn } from '@/utils/cn';
+import { demoReturns } from '@/data/api';
+import type { ReturnReason } from '@/types';
+import {
+  AlertTriangle,
+  Truck,
+  XCircle,
+  ThumbsDown,
+  RotateCcw,
+  ShieldAlert,
+  Search,
+  X,
+} from 'lucide-react';
+
+const REASON_ICONS: Record<ReturnReason, typeof AlertTriangle> = {
+  defective: AlertTriangle,
+  damaged_in_transit: Truck,
+  wrong_item: XCircle,
+  quality_issue: ThumbsDown,
+  customer_return: RotateCcw,
+  compliance_issue: ShieldAlert,
+};
+
+const REASON_LABELS: Record<ReturnReason, string> = {
+  defective: 'Defective',
+  damaged_in_transit: 'Damaged in Transit',
+  wrong_item: 'Wrong Item',
+  quality_issue: 'Quality Issue',
+  customer_return: 'Customer Return',
+  compliance_issue: 'Compliance Issue',
+};
+
+const REASON_BADGES: Record<ReturnReason, string> = {
+  defective: 'bg-red-500/15 text-red-300 border-red-500/20',
+  damaged_in_transit: 'bg-amber-500/15 text-amber-300 border-amber-500/20',
+  wrong_item: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
+  quality_issue: 'bg-orange-500/15 text-orange-300 border-orange-500/20',
+  customer_return: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  compliance_issue: 'bg-rose-500/15 text-rose-300 border-rose-500/20',
+};
+
+/**
+ * §Batch-2 — Brand-facing Returns workflow.
+ * Shows returned units per PO/product with quantity and reason.
+ * Feeds the Deductions module when a return indicates a quality/compliance issue.
+ * Tenant-scoped through session pin — never client-supplied ids.
+ */
+export function BrandReturns() {
+  const { session } = useApp();
+  const brandId = session?.tenantId ?? '';
+  const [drillCard, setDrillCard] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const returns = useMemo(() => demoReturns.filter((r) => r.brandId === brandId), [brandId]);
+  const filtered = useMemo(() => {
+    if (!searchQuery.trim()) return returns;
+    const q = searchQuery.toLowerCase();
+    return returns.filter((r) =>
+      r.poNumber.toLowerCase().includes(q) ||
+      r.productName.toLowerCase().includes(q) ||
+      r.productSku.toLowerCase().includes(q) ||
+      r.reason.toLowerCase().includes(q)
+    );
+  }, [returns, searchQuery]);
+
+  const totalUnits = filtered.reduce((s, r) => s + r.quantity, 0);
+  const qualityIssues = filtered.filter((r) => r.reason === 'defective' || r.reason === 'quality_issue' || r.reason === 'compliance_issue');
+  const deductedReturns = filtered.filter((r) => r.linkedDeductionId);
+
+  if (returns.length === 0) {
+    return (
+      <div className="p-6 max-w-[1400px] mx-auto">
+        <Card title="Returns">
+          <p className="text-xs text-zinc-600">No returns recorded for your brand.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
+      <div className="flex items-center gap-3">
+        <RotateCcw className="w-5 h-5 text-brass-400" />
+        <div>
+          <h2 className="text-lg font-semibold text-white">Returns</h2>
+          <p className="text-xs text-zinc-500 mt-0.5">Returned units per PO — {totalUnits} total units returned</p>
+        </div>
+      </div>
+
+      {/* Summary cards — §Batch-3 UX: every card opens drill-down detail */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <button
+          onClick={() => setDrillCard('Total returned units')}
+          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+        >
+          <p className="text-[10px] text-zinc-500">Total returned units</p>
+          <p className="text-lg font-semibold text-white">{totalUnits}</p>
+        </button>
+        <button
+          onClick={() => setDrillCard('Quality/compliance flags')}
+          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+        >
+          <p className="text-[10px] text-zinc-500">Quality/compliance flags</p>
+          <p className="text-lg font-semibold text-white">{qualityIssues.length}</p>
+        </button>
+        <button
+          onClick={() => setDrillCard('Deductions linked')}
+          className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
+        >
+          <p className="text-[10px] text-zinc-500">Deductions linked</p>
+          <p className="text-lg font-semibold text-white">{deductedReturns.length}</p>
+        </button>
+      </div>
+
+      {/* §Batch-3 UX — search + filtered returns table */}
+      <Card title="Returned Items">
+        <div className="px-4 pb-3">
+          <div className="relative mb-3 max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
+            <input
+              type="text"
+              placeholder="Search by PO, product, or reason…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-9 pr-4 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 transition-all"
+            />
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
+                <th className="text-left font-medium px-3 py-2">Date</th>
+                <th className="text-left font-medium px-3 py-2">PO</th>
+                <th className="text-left font-medium px-3 py-2">Product</th>
+                <th className="text-right font-medium px-3 py-2">Qty</th>
+                <th className="text-left font-medium px-3 py-2">Reason</th>
+                <th className="text-left font-medium px-3 py-2">Deduction</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04]">
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center text-xs text-zinc-600 py-8">
+                    {searchQuery ? 'No returns match your search.' : 'No returns recorded for your brand.'}
+                  </td>
+                </tr>
+              )}
+              {filtered.map((r) => {
+                const Icon = REASON_ICONS[r.reason];
+                return (
+                  <tr key={r.id} className="align-top">
+                    <td className="px-3 py-2 font-mono text-xs text-zinc-400">{r.returnDate}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-zinc-400">{r.poNumber}</td>
+                    <td className="px-3 py-2 text-xs text-zinc-300">
+                      <div className="font-medium">{r.productName}</div>
+                      <div className="text-[10px] text-zinc-500">{r.productSku}</div>
+                    </td>
+                    <td className="px-3 py-2 text-xs text-zinc-400 text-right">{r.quantity}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-1.5">
+                        <Icon className="w-3 h-3 text-zinc-500" />
+                        <Badge className={cn('text-[9px]', REASON_BADGES[r.reason])}>{REASON_LABELS[r.reason]}</Badge>
+                      </div>
+                      <p className="text-[10px] text-zinc-600 mt-0.5 max-w-[200px]">{r.description}</p>
+                    </td>
+                    <td className="px-3 py-2 text-xs">
+                      {r.linkedDeductionId ? (
+                        <Badge className="text-[9px] bg-red-500/15 text-red-300">{r.linkedDeductionId}</Badge>
+                      ) : (
+                        <span className="text-zinc-600">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <div className="text-[10px] text-zinc-600 pt-2 border-t border-white/[0.04] mt-1">
+            {filtered.length} of {returns.length} return record{returns.length === 1 ? '' : 's'}
+          </div>
+        </div>
+      </Card>
+
+      {/* §Batch-3 — Summary card drill-down modals */}
+      {drillCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setDrillCard(null)}>
+          <div className="bg-ink-850 border border-white/[0.08] rounded-xl p-5 w-[480px] max-h-[80vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-white">{drillCard}</h3>
+              <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-white transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {drillCard === 'Total returned units' && (
+              <div className="space-y-2">
+                <p className="text-xs text-zinc-400 mb-2">Returns by reason:</p>
+                <div className="space-y-1">
+                  {(Object.keys(REASON_LABELS) as ReturnReason[]).map((reason) => {
+                    const count = filtered.filter((r) => r.reason === reason).reduce((s, r) => s + r.quantity, 0);
+                    const Icon = REASON_ICONS[reason];
+                    if (count === 0) return null;
+                    return (
+                      <div key={reason} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1.5">
+                        <span className="flex items-center gap-2 text-zinc-300">
+                          <Icon className="w-3 h-3 text-zinc-500" />
+                          {REASON_LABELS[reason]}
+                        </span>
+                        <span className="font-mono text-zinc-400">{count} units</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {drillCard === 'Quality/compliance flags' && (
+              <div className="space-y-2">
+                <p className="text-xs text-zinc-400 mb-2">Returns flagged with quality or compliance issues:</p>
+                {qualityIssues.length === 0 ? (
+                  <p className="text-xs text-zinc-600">No quality/compliance flagged returns.</p>
+                ) : (
+                  <div className="max-h-60 overflow-y-auto space-y-1">
+                    {qualityIssues.map((r) => {
+                      const Icon = REASON_ICONS[r.reason];
+                      return (
+                        <div key={r.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1.5">
+                          <span className="flex items-center gap-2 text-zinc-300">
+                            <Icon className="w-3 h-3 text-zinc-500" />
+                            {r.productName}
+                          </span>
+                          <span className="font-mono text-zinc-400">{r.quantity} u</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+            {drillCard === 'Deductions linked' && (
+              <div className="space-y-2">
+                <p className="text-xs text-zinc-400 mb-2">Returns that triggered deductions:</p>
+                {deductedReturns.length === 0 ? (
+                  <p className="text-xs text-zinc-600">No returns with linked deductions.</p>
+                ) : (
+                  <div className="max-h-60 overflow-y-auto space-y-1">
+                    {deductedReturns.map((r) => (
+                      <div key={r.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1.5">
+                        <span className="text-zinc-300">{r.productName} — {r.poNumber}</span>
+                        <span className="text-zinc-400 font-mono">{r.linkedDeductionId}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

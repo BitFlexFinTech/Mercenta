@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Mercenta OAuth — connection callback</title>
+</head>
+<body style="font-family: monospace; background: #0C1219; color: #F1ECE1; padding: 32px">
+  <h3>Mercenta OAuth callback</h3>
+  <p id="status">Completing authorization…</p>
+  <script>
+    (function () {
+      // Providers redirect here with `code` (or `spapi_oauth_code` for Amazon SP-API)
+      // and optionally `state` in the URL. We hand the authorization code back to the
+      // opener via postMessage so the Integrations wizard can record it; the server-side
+      // token exchange happens in the Edge Function (encrypted storage), not in this page.
+      var params = new URLSearchParams(window.location.search);
+      // Amazon SP-API uses spapi_oauth_code; most other providers use code.
+      var code = params.get('code') || params.get('spapi_oauth_code');
+      var state = params.get('state') || '';
+      var status = document.getElementById('status');
+
+      if (window.opener) {
+        window.opener.postMessage(
+          { source: 'mercenta-oauth', code: code, state: state },
+          window.location.origin
+        );
+        status.textContent = code
+          ? 'Authorization code received — you can close this window. The server-side token exchange is pending.'
+          : 'No authorization code found in the redirect. Check the provider consent screen and try again.';
+      } else {
+        status.textContent = 'This page must be opened from the Integrations wizard popup.';
+      }
+      setTimeout(function () { if (window.opener) window.close(); }, 800);
+    })();
+  </script>
+</body>
+</html>

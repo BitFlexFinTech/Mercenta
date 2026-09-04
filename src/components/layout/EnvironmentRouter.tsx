@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useApp } from '@/store';
+import { useApp } from '@/context/GlobalStateContext';
 import type { Environment } from '@/types';
 import { cn } from '@/utils/cn';
 import { Boxes, ShieldCheck, Truck } from 'lucide-react';
@@ -10,7 +10,7 @@ const ENVIRONMENTS: {
   icon: ReactNode;
 }[] = [
   { id: 'brand', label: 'Brand Portal', icon: <Boxes className="w-3.5 h-3.5" /> },
-  { id: 'admin', label: 'Boxbee Admin Hub', icon: <ShieldCheck className="w-3.5 h-3.5" /> },
+  { id: 'admin', label: 'Mercenta Admin Hub', icon: <ShieldCheck className="w-3.5 h-3.5" /> },
   { id: 'carrier', label: '3PL Carrier View', icon: <Truck className="w-3.5 h-3.5" /> },
 ];
 
@@ -23,7 +23,7 @@ export function EnvironmentRouter() {
         <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider px-2 hidden sm:inline">
           Environment Router
         </span>
-        <span className="text-[10px] font-medium text-neon-400 uppercase tracking-wider px-1 sm:hidden">
+        <span className="text-[10px] font-medium text-brass-400 uppercase tracking-wider px-1 sm:hidden">
           Dev
         </span>
         {ENVIRONMENTS.map((env) => (
@@ -33,7 +33,7 @@ export function EnvironmentRouter() {
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
               environment === env.id
-                ? 'bg-neon-500 text-white shadow-lg shadow-neon-500/30'
+                ? 'bg-brass-500 text-white shadow-lg shadow-brass-500/30'
                 : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
             )}
           >

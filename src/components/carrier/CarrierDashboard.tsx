@@ -1,4 +1,4 @@
-import { useApp } from '@/store';
+import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { STATUS_COLORS, STATUS_LABELS } from '@/types';
@@ -27,6 +27,12 @@ const CARRIER_THEMES: Record<
     bg: 'bg-blue-500/10',
     accent: 'text-blue-400',
   },
+  palletline: {
+    label: 'Palletline Palletised Freight',
+    color: '#10B981',
+    bg: 'bg-emerald-500/10',
+    accent: 'text-emerald-400',
+  },
 };
 
 const STATUS_OPTIONS: ShipmentStatus[] = [
@@ -35,7 +41,7 @@ const STATUS_OPTIONS: ShipmentStatus[] = [
   'sea_transit',
   'air_transit',
   'uk_customs_cleared',
-  'boxbee_hub',
+  'mercenta_hub',
   'live_amazon',
 ];
 
@@ -100,7 +106,7 @@ export function CarrierDashboard() {
         <Card className="p-4">
           <div className="text-xs text-zinc-500 font-medium">Delivered</div>
           <div className="text-xl font-bold text-emerald-400 mt-1">
-            {carrierShipments.filter((s) => s.status === 'live_amazon' || s.status === 'boxbee_hub').length}
+            {carrierShipments.filter((s) => s.status === 'live_amazon' || s.status === 'mercenta_hub').length}
           </div>
         </Card>
       </div>

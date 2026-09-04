@@ -76,7 +76,7 @@ export function Button({
 }: ButtonProps) {
   const variants = {
     primary:
-      'bg-neon-500 hover:bg-neon-600 text-white font-medium shadow-lg shadow-neon-500/20',
+      'bg-brass-500 hover:bg-brass-600 text-white font-medium shadow-lg shadow-brass-500/20',
     secondary: 'bg-white/[0.06] hover:bg-white/[0.1] text-white border border-white/[0.08]',
     ghost: 'hover:bg-white/[0.04] text-zinc-400 hover:text-white',
     danger: 'bg-crimson-accent hover:bg-red-700 text-white',
@@ -138,7 +138,7 @@ export function Input({
         onChange={onChange}
         placeholder={placeholder}
         readOnly={readOnly}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-neon-500/50 focus:ring-1 focus:ring-neon-500/30 transition-colors"
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
       />
     </div>
   );
@@ -171,7 +171,7 @@ export function Select({
       <select
         value={value}
         onChange={onChange}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-neon-500/50 focus:ring-1 focus:ring-neon-500/30 transition-colors appearance-none cursor-pointer"
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors appearance-none cursor-pointer"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value} className="bg-ink-900">
@@ -212,7 +212,7 @@ export function Textarea({
         onChange={onChange}
         placeholder={placeholder}
         rows={rows}
-        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-neon-500/50 focus:ring-1 focus:ring-neon-500/30 transition-colors resize-none"
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors resize-none"
       />
     </div>
   );
@@ -244,7 +244,7 @@ export function Checkbox({
           className={cn(
             'w-4 h-4 rounded border transition-all flex items-center justify-center',
             checked
-              ? 'bg-neon-500 border-neon-500'
+              ? 'bg-brass-500 border-brass-500'
               : 'border-white/[0.15] group-hover:border-white/[0.3]'
           )}
         >

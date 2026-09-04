@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 120" role="img" aria-label="Mercenta Partners">
+  <!-- Full horizontal lockup with wordmark on ink background. -->
+  <rect width="440" height="120" fill="#0C1219"/>
+  <g transform="translate(10,10) scale(0.833)">
+    <polygon points="16.7,35 60,10 103.3,35 103.3,85" fill="#C9A15A"/>
+    <polygon points="16.7,35 103.3,85 60,110 16.7,85" fill="none" stroke="#C9A15A" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="103.3" cy="85" r="6.5" fill="none" stroke="#C9A15A" stroke-width="2.5"/>
+    <circle cx="103.3" cy="85" r="2.2" fill="#C9A15A"/>
+  </g>
+  <text x="125" y="66" font-family="Fraunces, Georgia, 'Times New Roman', serif" font-weight="600" font-size="34" fill="#F1ECE1">Mercenta</text>
+  <text x="125" y="92" font-family="'IBM Plex Mono', ui-monospace, monospace" font-weight="500" font-size="14" letter-spacing="4" fill="#C9A15A">PARTNERS</text>
+</svg>

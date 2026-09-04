@@ -1,0 +1,430 @@
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
+} from 'react';
+import type {
+  Environment,
+  SessionRole,
+  Shipment,
+  Product,
+  ActivityLog,
+  Lead,
+  Campaign,
+  ApiLogEntry,
+  BrandProfile,
+  ShipmentStatus,
+  StaffMember,
+  StaffRole,
+  DemoRegion,
+  FinancialRecord,
+  RegionalComplianceDoc,
+  CarrierTokens,
+  ComplianceDocument,
+  CarrierId,
+} from '../types';
+import { buildDistributionAgreement } from '@/lib/agreement';
+import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
+import { ALL_DEMO_BRANDS } from '@/data/demoData';
+import { tierForRole, canAccessEnvironment, staffCanMutate, type DemoSession } from '@/lib/auth/rbac';
+import {
+  INITIAL_SHIPMENTS,
+  INITIAL_PRODUCTS,
+  INITIAL_ACTIVITY_LOGS,
+  INITIAL_LEADS,
+  INITIAL_CAMPAIGNS,
+  INITIAL_API_LOGS,
+  INITIAL_STAFF,
+} from '@/data/bootstrap';
+import { REGIONAL_DOSSIERS } from '@/data/regionalDossiers';
+import { buildBrandDossier } from '@/data/brandDossiers';
+
+interface AppState {
+  environment: Environment;
+  setEnvironment: (env: Environment) => void;
+
+  role: SessionRole | null;
+  /** RBAC session — tier + tenant pinning for the active login. */
+  session: DemoSession | null;
+  signIn: (env: Environment, role: SessionRole) => void;
+  /** One-click brand login pinned to a specific demo tenant. */
+  activateDemoBrand: (brandId: string) => void;
+  signOut: () => void;
+
+  shipments: Shipment[];
+  updateShipmentStatus: (id: string, status: ShipmentStatus) => void;
+
+  products: Product[];
+  addProduct: (product: Product) => void;
+
+  activityLogs: ActivityLog[];
+  addActivityLog: (log: ActivityLog) => void;
+
+  leads: Lead[];
+  updateLeadStatus: (id: string, status: Lead['outreachStatus']) => void;
+  /** §7 — imported/sourced leads enter the pipeline here. */
+  addLead: (lead: Lead) => void;
+
+  campaigns: Campaign[];
+
+  apiLogs: ApiLogEntry[];
+  addApiLog: (log: ApiLogEntry) => void;
+
+  brandProfile: BrandProfile;
+  setBrandProfile: (profile: BrandProfile) => void;
+  completeOnboarding: () => void;
+  /** §3 — compliance-gate documents for the active brand; catalog sync blocked until all approved. */
+  gateDocs: ComplianceDocument[];
+  reviewGateDocument: (id: string, status: ComplianceDocument['status']) => void;
+  generatedAgreement: string;
+
+  carrierContext: CarrierId;
+  setCarrierContext: (c: CarrierId) => void;
+
+  staff: StaffMember[];
+  addStaff: (member: StaffMember) => void;
+  removeStaff: (id: string) => void;
+  toggleStaffActive: (id: string) => void;
+  updateStaffRole: (id: string, role: StaffRole) => void;
+  updateStaffChannel: (id: string, channel: string) => void;
+  /** §Stage-25 — the staff account performing admin actions + its RBAC tier. */
+  actingStaffId: string;
+  setActingStaffId: (id: string) => void;
+  actingStaff: StaffMember | null;
+  canCurrentUserMutate: boolean;
+  updateStaffTier: (id: string, tier: StaffMember['permissionTier']) => void;
+
+  demoRegion: DemoRegion | null;
+  financials: FinancialRecord[];
+  complianceDocs: RegionalComplianceDoc[];
+  carrierTokens: CarrierTokens;
+  activateDemo: (region: DemoRegion) => void;
+}
+
+const AppContext = createContext<AppState | null>(null);
+
+const DEFAULT_PROFILE: BrandProfile = {
+  businessName: '',
+  region: 'africa',
+  nation: '',
+  taxId: '',
+  email: '',
+  phone: '',
+  signatory: '',
+  agreed: false,
+  bic: '',
+  iban: '',
+  payoutCurrency: 'GBP',
+  dhlConnected: false,
+  fedexConnected: false,
+  bakConnected: false,
+  onboarded: false,
+  fulfillmentTrack: 'unassigned',
+  complianceGateStatus: 'blocked',
+  workingCapitalAnswer: undefined,
+  category: undefined,
+};
+
+let logCounter = 100;
+let apiCounter = 100;
+
+export function AppProvider({ children }: { children: ReactNode }) {
+  const [environment, setEnvironment] = useState<Environment>('home');
+  const [role, setRole] = useState<SessionRole | null>(null);
+  const [session, setSession] = useState<DemoSession | null>(null);
+  const [shipments, setShipments] = useState<Shipment[]>(INITIAL_SHIPMENTS);
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [activityLogs, setActivityLogs] =
+    useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
+  const [leads, setLeads] = useState<Lead[]>(INITIAL_LEADS);
+  const addLead = useCallback((lead: Lead) => {
+    setLeads((prev) => [lead, ...prev]);
+  }, []);
+
+  const [campaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS);
+  const [apiLogs, setApiLogs] = useState<ApiLogEntry[]>(INITIAL_API_LOGS);
+  const [brandProfile, setBrandProfile] = useState<BrandProfile>(DEFAULT_PROFILE);
+  const [carrierContext, setCarrierContext] = useState<CarrierId>('dhl');
+  const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
+  /** §Stage-25 — which staff account is performing admin actions (RBAC tier). */
+  const [actingStaffId, setActingStaffId] = useState<string>('staff-001');
+  const [demoRegion, setDemoRegion] = useState<DemoRegion | null>(null);
+  const [financials, setFinancials] = useState<FinancialRecord[]>([]);
+  const [complianceDocs, setComplianceDocs] = useState<RegionalComplianceDoc[]>([]);
+  const [carrierTokens, setCarrierTokens] = useState<CarrierTokens>({});
+  /** §3 compliance-gate documents for the active brand session. */
+  const [gateDocs, setGateDocs] = useState<ComplianceDocument[]>([]);
+  const [generatedAgreement, setGeneratedAgreement] = useState('');
+
+  const signIn = useCallback((env: Environment, nextRole: SessionRole) => {
+    const tier = tierForRole(nextRole);
+    // RBAC: a tier may only enter environments its allowlist permits.
+    if (!canAccessEnvironment(tier, env)) {
+      console.warn(`[rbac] ${tier} is not permitted to enter "${env}" — refused`);
+      return;
+    }
+    setSession({ tier, role: nextRole });
+    setRole(nextRole);
+    setEnvironment(env);
+  }, []);
+
+  /**
+   * One-click demo login pinned to one specific brand tenant.
+   * §Stage-20 fix #1 — hydrates the FULL brand state from a per-brand dossier
+   * (products, shipments, financials, compliance, carrier tokens, onboarded
+   * profile), exactly like activateDemo does for regional dossiers. Reference-
+   * implementation parity: same state depth, not just the same landing page.
+   */
+  const activateDemoBrand = useCallback((brandId: string) => {
+    const brand = ALL_DEMO_BRANDS.find((b) => b.id === brandId);
+    if (!brand) {
+      console.warn(`[rbac] unknown demo brand "${brandId}" — refused`);
+      return;
+    }
+    const dossier = buildBrandDossier(brand);
+    setSession({ tier: 'brand', tenantId: brand.id, role: 'Brand Partner' });
+    setRole('Brand Partner');
+    setBrandProfile(dossier.profile);
+    setProducts(dossier.products);
+    setShipments(dossier.shipments);
+    setFinancials(dossier.financials);
+    setComplianceDocs(dossier.compliance);
+    setCarrierTokens(dossier.tokens);
+    // Onboarding is complete for seeded brands — land on the dashboard,
+    // never the wizard (reference-implementation parity with activateDemo).
+    setDemoRegion(dossier.region);
+    setEnvironment('brand');
+  }, []);
+
+  const signOut = useCallback(() => {
+    setRole(null);
+    setEnvironment('home');
+  }, []);
+
+  const activateDemo = useCallback((region: DemoRegion) => {
+    const dossier = REGIONAL_DOSSIERS[region];
+    setDemoRegion(region);
+    setBrandProfile(dossier.profile);
+    setProducts(dossier.products);
+    setShipments(dossier.shipments);
+    setFinancials(dossier.financials);
+    setComplianceDocs(dossier.compliance);
+    setCarrierTokens(dossier.tokens);
+    setRole('Brand Partner');
+    setEnvironment('brand');
+  }, []);
+
+  const addApiLog = useCallback((log: ApiLogEntry) => {
+    setApiLogs((prev) => [log, ...prev].slice(0, 50));
+  }, []);
+
+  const addActivityLog = useCallback((log: ActivityLog) => {
+    setActivityLogs((prev) => [log, ...prev].slice(0, 30));
+  }, []);
+
+  const updateShipmentStatus = useCallback(
+    (id: string, status: ShipmentStatus) => {
+      setShipments((prev) =>
+        prev.map((s) =>
+          s.id === id
+            ? {
+                ...s,
+                status,
+                stage: statusToStage(status),
+              }
+            : s
+        )
+      );
+      const shipment = shipments.find((s) => s.id === id);
+      if (shipment) {
+        const log: ActivityLog = {
+          id: `log-${logCounter++}`,
+          timestamp: new Date().toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }) + ' — Today',
+          shipmentRef: shipment.reference,
+          carrier: shipment.carrier,
+          message: `Status updated to ${status.replace(/_/g, ' ')}`,
+          status,
+        };
+        addActivityLog(log);
+
+        const apiLog: ApiLogEntry = {
+          id: `api-${apiCounter++}`,
+          timestamp: new Date().toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
+          method: 'PUT',
+          endpoint: `/v1/shipments/${shipment.reference}/status`,
+          payload: { status, carrier: shipment.carrier },
+          status: 200,
+        };
+        addApiLog(apiLog);
+      }
+    },
+    [shipments, addActivityLog, addApiLog]
+  );
+
+  const addProduct = useCallback((product: Product) => {
+    setProducts((prev) => [product, ...prev]);
+  }, []);
+
+  const updateLeadStatus = useCallback(
+    (id: string, status: Lead['outreachStatus']) => {
+      setLeads((prev) =>
+        prev.map((l) => (l.id === id ? { ...l, outreachStatus: status } : l))
+      );
+    },
+    []
+  );
+
+  const completeOnboarding = useCallback(() => {
+    setBrandProfile((prev) => {
+      // §3: completing onboarding auto-generates the Distribution Agreement
+      // from the template and puts the compliance gate into review.
+      // Catalog sync stays BLOCKED until every required doc is approved.
+      const agreementText = buildDistributionAgreement({
+        businessName: prev.businessName || 'Unnamed Brand',
+        commissionRate: COMMISSION_RATE_PLACEHOLDER,
+        monthlyFee: MONTHLY_FEE_PLACEHOLDER_GBP,
+        category: prev.category || 'Uncategorised', // fallback if category not yet selected
+        fulfillmentTrack:
+          prev.fulfillmentTrack === 'direct_fulfillment'
+            ? 'direct_fulfillment'
+            : prev.workingCapitalAnswer === 'yes' && prev.fulfillmentTrack === 'unassigned'
+              ? 'financed' // default until brand confirms in wizard
+              : 'financed',
+      });
+      // §Batch-5 — distribution agreement is now the Contract itself,
+      // not a separate ComplianceDocument. The gate checks the Contract
+      // status directly. No need to push a second agreement doc.
+      setGateDocs((docs) => docs);
+      setGeneratedAgreement(agreementText);
+      return { ...prev, onboarded: true, complianceGateStatus: 'in_review' };
+    });
+  }, []);
+
+  /** §3 — admin/staff action: move a gate document to a new status. */
+  const reviewGateDocument = useCallback(
+    (id: string, status: ComplianceDocument['status']) => {
+      let nextDocs: ComplianceDocument[] = [];
+      setGateDocs((prev) => {
+        nextDocs = prev.map((d) => (d.id === id ? { ...d, status } : d));
+        return nextDocs;
+      });
+    },
+    []
+  );
+
+  const addStaff = useCallback((member: StaffMember) => {
+    setStaff((prev) => [...prev, member]);
+  }, []);
+
+  const removeStaff = useCallback((id: string) => {
+    setStaff((prev) => prev.filter((s) => s.id !== id));
+  }, []);
+
+  const toggleStaffActive = useCallback((id: string) => {
+    setStaff((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, active: !s.active } : s))
+    );
+  }, []);
+
+  const updateStaffRole = useCallback((id: string, staffRole: StaffRole) => {
+    setStaff((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, role: staffRole } : s))
+    );
+  }, []);
+
+  const updateStaffChannel = useCallback((id: string, channel: string) => {
+    setStaff((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, channel } : s))
+    );
+  }, []);
+
+  const updateStaffTier = useCallback(
+    (id: string, tier: StaffMember['permissionTier']) => {
+      setStaff((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, permissionTier: tier } : s))
+      );
+    },
+    []
+  );
+
+  /** §Stage-25 — acting staff identity + whether that account may mutate. */
+  const actingStaff =
+    staff.find((s) => s.id === actingStaffId) ?? null;
+  const canCurrentUserMutate = staffCanMutate(actingStaff);
+
+  const value: AppState = {
+    environment,
+    setEnvironment,
+    role,
+    signIn,
+    signOut,
+    shipments,
+    updateShipmentStatus,
+    products,
+    addProduct,
+    activityLogs,
+    addActivityLog,
+    leads,
+    updateLeadStatus,
+    addLead,
+    campaigns,
+    apiLogs,
+    addApiLog,
+    brandProfile,
+    setBrandProfile,
+    completeOnboarding,
+    gateDocs,
+    reviewGateDocument,
+    generatedAgreement,
+    carrierContext,
+    setCarrierContext,
+    staff,
+    addStaff,
+    removeStaff,
+    toggleStaffActive,
+    updateStaffRole,
+    updateStaffChannel,
+    actingStaffId,
+    setActingStaffId,
+    actingStaff,
+    canCurrentUserMutate,
+    updateStaffTier,
+    demoRegion,
+    financials,
+    complianceDocs,
+    carrierTokens,
+    activateDemo,
+    session,
+    activateDemoBrand,
+  };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
+
+function statusToStage(status: ShipmentStatus): Shipment['stage'] {
+  const map: Record<ShipmentStatus, Shipment['stage']> = {
+    factory_intake: 'factory_intake',
+    bak_depot: 'bak_depot',
+    sea_transit: 'international_forwarding',
+    air_transit: 'international_forwarding',
+    uk_customs_cleared: 'uk_port_hmrc',
+    mercenta_hub: 'mercenta_hub',
+    live_amazon: 'live_amazon',
+  };
+  return map[status];
+}
+
+export function useApp() {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useApp must be used within AppProvider');
+  return ctx;
+}

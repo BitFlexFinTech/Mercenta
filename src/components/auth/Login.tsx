@@ -1,5 +1,9 @@
-import { useApp } from '@/store';
+import { useApp } from '@/context/GlobalStateContext';
+import { BRAND_NAME } from '@/config/brand';
+import { ALL_DEMO_BRANDS } from '@/data/demoData';
+import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { cn } from '@/utils/cn';
+import type { Environment, SessionRole } from '@/types';
 import {
   ArrowLeft,
   Building2,
@@ -7,38 +11,72 @@ import {
   Truck,
   ArrowRight,
   Lock,
+  Crown,
 } from 'lucide-react';
 
-const DEMO_LOGINS = [
+/** §Stage-17 fix — flag per nation of every seeded demo brand. */
+const NATION_FLAGS: Record<string, string> = {
+  Zimbabwe: '🇿🇼',
+  Denmark: '🇩🇰',
+  'United States': '🇺🇸',
+  Germany: '🇩🇪',
+  Netherlands: '🇳🇱',
+  'South Africa': '🇿🇦',
+  Morocco: '🇲🇦',
+};
+
+/** Rotating accents so 11 cards don't render as one monochrome wall. */
+const ACCENTS = [
+  'border-amber-500/30 hover:bg-amber-500/10',
+  'border-blue-500/30 hover:bg-blue-500/10',
+  'border-emerald-500/30 hover:bg-emerald-500/10',
+];
+
+/**
+ * §Stage-17 fix #1 — demo login renders EVERY seeded brand from
+ * ALL_DEMO_BRANDS via activateDemoBrand(brandId). The list is derived, not
+ * hardcoded: adding a brand to demoData automatically adds its login card.
+ */
+const OPS_LOGINS: {
+  label: string;
+  description: string;
+  icon: typeof Building2;
+  color: string;
+  environment: Environment;
+  role: SessionRole;
+}[] = [
   {
-    label: 'Login as Brand Partner',
-    description: 'Access the 4-step onboarding wizard and brand overview dashboard',
-    icon: Building2,
-    color: 'border-neon-500/30 hover:bg-neon-500/10 text-neon-400',
-    environment: 'brand' as const,
-  },
-  {
-    label: 'Login as Boxbee Admin Hub',
-    description: 'Enter the corporate management space with full department access',
+    label: 'Mercenta Admin Hub',
+    description: 'Corporate control panel — departments & trade desk',
     icon: ShieldCheck,
     color: 'border-blue-500/30 hover:bg-blue-500/10 text-blue-400',
-    environment: 'admin' as const,
+    environment: 'admin',
+    role: 'Mercenta Admin',
   },
   {
-    label: 'Login as 3PL Carrier Terminal',
-    description: 'Jump to the DHL / FedEx / BAK simulation and manifest desk',
+    label: '3PL Carrier Terminal',
+    description: 'DHL / FedEx / BAK manifest & tracking desk',
     icon: Truck,
     color: 'border-amber-500/30 hover:bg-amber-500/10 text-amber-400',
-    environment: 'carrier' as const,
+    environment: 'carrier',
+    role: '3PL Carrier',
+  },
+  {
+    label: 'Super Admin — Tadii',
+    description: 'Master staff & role matrix with full deployment control',
+    icon: Crown,
+    color: 'border-red-500/30 hover:bg-red-500/10 text-red-400',
+    environment: 'admin',
+    role: 'Super Admin',
   },
 ];
 
 export function Login() {
-  const { setEnvironment } = useApp();
+  const { signIn, setEnvironment, activateDemoBrand } = useApp();
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-10">
+      <div className="w-full max-w-4xl">
         {/* Back to home */}
         <button
           onClick={() => setEnvironment('home')}
@@ -51,29 +89,71 @@ export function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
-            <div className="w-10 h-10 rounded-lg bg-neon-500 flex items-center justify-center text-white font-bold">
-              B
-            </div>
-            <span className="text-xl font-semibold text-white">Boxbee Commerce</span>
+            <img
+              src={brandMark}
+              alt="Mercenta Partners hexagon mark"
+              className="w-10 h-10"
+            />
+            <span className="text-xl font-semibold text-white">{BRAND_NAME}</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Client Portal Access</h1>
+          <h1 className="text-2xl font-bold text-white mb-1">Investor Demo Access</h1>
           <p className="text-sm text-zinc-500">
-            Choose your environment to enter the platform
+            One-click access as any seeded brand — or an operations environment
           </p>
         </div>
 
-        {/* Demo Login Buttons */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-xs text-zinc-600 mb-2">
-            <Lock className="w-3.5 h-3.5" />
-            <span>Developer Demo Access — skip database checks</span>
+        {/* §Stage-17 — ALL seeded demo brands, derived from ALL_DEMO_BRANDS. */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-xs mb-3">
+            <Building2 className="w-3.5 h-3.5 text-brass-400" />
+            <span className="font-medium text-zinc-400 uppercase tracking-wider">
+              Brand Partner Portals — all {ALL_DEMO_BRANDS.length} demo brands
+            </span>
           </div>
-          {DEMO_LOGINS.map((login) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {ALL_DEMO_BRANDS.map((brand, i) => (
+              <button
+                key={brand.id}
+                onClick={() => activateDemoBrand(brand.id)}
+                className={cn(
+                  'bg-ink-900 border rounded-xl p-4 text-left transition-all group',
+                  ACCENTS[i % ACCENTS.length]
+                )}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">{NATION_FLAGS[brand.nation] ?? '🌍'}</span>
+                  <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider truncate">
+                    {brand.category}
+                  </span>
+                </div>
+                <h3 className="text-sm font-semibold text-white leading-snug">{brand.name}</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">{brand.nation} · {brand.signatory}</p>
+                <p className="text-[11px] text-zinc-400 mt-2 leading-relaxed capitalize">
+                  {brand.track.replace(/_/g, ' ')} · contract {brand.contractStatus.replace(/_/g, ' ')}
+                </p>
+                <div className="flex items-center gap-1 mt-3 text-xs text-brass-400 font-medium">
+                  Enter as brand
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Operations Access */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-xs mb-2">
+            <Lock className="w-3.5 h-3.5" />
+            <span className="font-medium text-zinc-400 uppercase tracking-wider">
+              Operations & Control Access
+            </span>
+          </div>
+          {OPS_LOGINS.map((login) => {
             const Icon = login.icon;
             return (
               <button
                 key={login.label}
-                onClick={() => setEnvironment(login.environment)}
+                onClick={() => signIn(login.environment, login.role)}
                 className={cn(
                   'w-full bg-ink-900 border rounded-xl p-4 text-left transition-all group',
                   login.color
@@ -94,11 +174,11 @@ export function Login() {
           })}
         </div>
 
-        {/* Security note */}
+        {/* Demo mode notice */}
         <div className="mt-8 text-center">
           <p className="text-xs text-zinc-600">
-            Demo mode bypasses authentication for environment testing.
-            Production deployments require Supabase email/password verification.
+            Mercenta Partners Investor Demo — data shown is illustrative.
+            Production credentials and authentication can be activated at any time.
           </p>
         </div>
       </div>

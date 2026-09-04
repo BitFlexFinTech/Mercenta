@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useApp } from '@/store';
+import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
@@ -12,8 +12,17 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { CARRIER_VOLUME_DATA } from '@/mockData';
+import { CARRIER_VOLUME_DATA } from '@/data/demoCharts';
+import { ALL_DEMO_BRANDS } from '@/data/demoData';
 import { STATUS_COLORS, STATUS_LABELS } from '@/types';
+import {
+  useBrands,
+  useCommissions,
+  useComplianceDocuments,
+  useContracts,
+  usePurchaseOrders,
+} from '@/data/queries';
+import { renewalUrgency } from '@/lib/contracts';
 import type { AdminDepartment } from '@/types';
 import {
   TrendingUp,
@@ -35,26 +44,279 @@ const DEPARTMENTS: { id: AdminDepartment; label: string; icon: typeof Sparkles }
   { id: 'compliance', label: 'Compliance & Trade Legals', icon: FileCheck2 },
 ];
 
-const COMPLIANCE_DOCS = [
-  { brand: 'Sweet Pea Botanicals', docType: 'ZIMRA CD1 Form', region: 'Africa', status: 'verified' },
-  { brand: 'Lone Star Organics', docType: 'US FCC/FDA Exemption', region: 'North America', status: 'pending' },
-  { brand: 'Alpen Naturals GmbH', docType: 'CE Declaration', region: 'Europe', status: 'verified' },
-  { brand: 'Highland Tea Estates', docType: 'ZIMRA CD1 Form', region: 'Africa', status: 'pending' },
-  { brand: 'Bella Pelle Skincare', docType: 'CE Declaration', region: 'Europe', status: 'verified' },
-  { brand: 'Maple Wellness Co', docType: 'EIN Registration', region: 'North America', status: 'pending' },
-];
-
-export function AdminDashboard({ department }: { department?: AdminDepartment }) {
-  const { shipments, leads, campaigns, products } = useApp();
+export function AdminDashboard({ department, onNavigate }: { department?: AdminDepartment; onNavigate?: (view: string) => void }) {
+  const { shipments, leads, campaigns } = useApp();
   const [activeDept, setActiveDept] = useState<AdminDepartment>(department || 'business_dev');
+  /** §Stage-17 fix #4 — every summary card opens a drill-down detail modal. */
+  const [openCard, setOpenCard] = useState<string | null>(null);
 
   const totalRevenue = shipments.reduce((sum, s) => sum + s.value, 0);
-  const activeBrands = 12;
+  // §Stage-17 — derive from the canonical demo dataset, never hardcode a count.
+  const activeBrands = ALL_DEMO_BRANDS.length;
   const totalShipments = shipments.length;
   const totalLeads = leads.length;
 
+  /* ── §Stage-19.7 — Overview defined with REAL content ─────────────── */
+  const brandsList = useBrands().data?.data ?? [];
+  const posAll = usePurchaseOrders().data?.data ?? [];
+  const commissionsAll = useCommissions().data?.data ?? [];
+  const complianceDocsAll = useComplianceDocuments().data?.data ?? [];
+  const contractsAll = useContracts().data?.data ?? [];
+
+  const brandNameById = new Map(
+    brandsList.map((b) => [b.id, b.profile.businessName] as const)
+  );
+  const brandRegionById = new Map(
+    ALL_DEMO_BRANDS.map((b) => [b.id, b.region] as const)
+  );
+  const complianceDocsAgg = complianceDocsAll.slice(0, 8).map((d) => ({
+    brand: brandNameById.get(d.brandId) ?? 'Unknown',
+    region: brandRegionById.get(d.brandId) ?? 'north_america',
+    docType: d.type,
+    status: d.status === 'approved' ? 'verified' : 'pending',
+  }));
+  const monthPrefix = new Date().toISOString().slice(0, 7);
+  const revenueThisMonth = commissionsAll
+    .filter((c) => (c.createdAt ?? '').startsWith(monthPrefix))
+    .reduce((a, c) => a + c.commissionAmount, 0);
+  const posAwaitingAction = posAll.filter(
+    (p) => p.status === 'received' || p.status === 'under_review'
+  );
+  const docsAwaitingReview = complianceDocsAll.filter(
+    (d) => d.status === 'under_review' || d.status === 'uploaded'
+  );
+  const renewalsSoon = contractsAll
+    .map((c) => ({
+      c,
+      urgency: renewalUrgency(c.renewalDate, new Date().toISOString()),
+    }))
+    .filter(({ urgency }) => urgency !== 'ok');
+  // Category performance: PO value aggregated per owning brand's category.
+  const poValueByBrand = new Map<string, number>();
+  for (const p of posAll) {
+    poValueByBrand.set(p.brandId, (poValueByBrand.get(p.brandId) ?? 0) + p.poValue);
+  }
+  const poValueByCategory = new Map<string, number>();
+  for (const b of ALL_DEMO_BRANDS) {
+    const v = poValueByBrand.get(b.id) ?? 0;
+    poValueByCategory.set(b.category, (poValueByCategory.get(b.category) ?? 0) + v);
+  }
+  const topCategories = [...poValueByCategory.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  // Compliance gate: count brands with all docs approved vs blocked
+  const complianceGateCleared = ALL_DEMO_BRANDS.filter(function(b) {
+    var brandDocs = complianceDocsAll.filter(function(d) { return d.brandId === b.id; });
+    var hasContract = contractsAll.some(function(c) { return c.brandId === b.id && (c.status === 'signed' || c.status === 'active'); });
+    var requiredTypes = ['letter_of_authorization', 'product_safety_ukca', 'insurance_certificate', 'brand_registry_confirmation'];
+    var allApproved = requiredTypes.every(function(t) { return brandDocs.some(function(d) { return d.type === t && d.status === 'approved'; }); });
+    return allApproved && hasContract;
+  }).length;
+  const complianceGateBlocked = ALL_DEMO_BRANDS.length - complianceGateCleared;
+
+  const OVERVIEW_CARDS: { label: string; value: string; trend: string; trendUp: boolean; icon: React.ReactNode }[] = [
+    {
+      label: 'Revenue This Month',
+      value: `£${revenueThisMonth.toLocaleString()}`,
+      trend: 'commissions',
+      trendUp: true,
+      icon: <DollarSign className="w-4 h-4" />,
+    },
+    {
+      label: 'POs Awaiting Action',
+      value: String(posAwaitingAction.length),
+      trend: 'review needed',
+      trendUp: false,
+      icon: <Package className="w-4 h-4" />,
+    },
+    {
+      label: 'Docs Awaiting Review',
+      value: String(docsAwaitingReview.length),
+      trend: 'compliance',
+      trendUp: false,
+      icon: <FileCheck2 className="w-4 h-4" />,
+    },
+    {
+      label: 'Compliance Gate',
+      value: complianceGateCleared + '/' + ALL_DEMO_BRANDS.length + ' cleared',
+      trend: complianceGateBlocked > 0 ? complianceGateBlocked + ' blocked' : 'all clear',
+      trendUp: complianceGateBlocked === 0,
+      icon: <ShieldCheck className="w-4 h-4" />,
+    },
+    {
+      label: 'Renewals Due ≤60d',
+      value: String(renewalsSoon.length),
+      trend: 'contracts',
+      trendUp: false,
+      icon: <Users className="w-4 h-4" />,
+    },
+    {
+      label: 'Top Category',
+      value: topCategories[0]?.[0] ?? '—',
+      trend: `£${Math.round(topCategories[0]?.[1] ?? 0).toLocaleString()} PO value`,
+      trendUp: true,
+      icon: <Boxes className="w-4 h-4" />,
+    },
+  ];
+
+  /** Detail payloads behind each card — the data the number is made of. */
+  const CARD_DETAILS: Record<
+    string,
+    { title: string; subtitle: string; rows: string[][]; headers: string[] }
+  > = {
+    'Total Portfolio Revenue': {
+      title: 'Portfolio Revenue — shipment ledger',
+      subtitle: `£${totalRevenue.toLocaleString()} across ${shipments.length} shipments`,
+      headers: ['Reference', 'Title', 'Carrier', 'Status', 'Value (£)'],
+      rows: shipments.map((s) => [
+        s.reference,
+        s.title,
+        s.carrier.toUpperCase(),
+        STATUS_LABELS[s.status],
+        s.value.toLocaleString(),
+      ]),
+    },
+    'Active Brands': {
+      title: 'Active Brands — canonical demo dataset',
+      subtitle: `${activeBrands} brands covering all approved categories`,
+      headers: ['Brand', 'Category', 'Nation', 'Track'],
+      rows: ALL_DEMO_BRANDS.map((b) => [b.name, b.category, b.nation, b.track.replace(/_/g, ' ')]),
+    },
+    'Total Shipments': {
+      title: 'All Shipments',
+      subtitle: `${totalShipments} shipments in the aggregate manifest`,
+      headers: ['Reference', 'Title', 'Origin', 'Destination', 'CBM'],
+      rows: shipments.map((s) => [s.reference, s.title, s.origin, s.destination, String(s.cbm)]),
+    },
+    'Pipeline Leads': {
+      title: 'Pipeline Leads — sourcing engine output',
+      subtitle: `${totalLeads} leads · ${leads.filter((l) => l.priority === 'High').length} high priority`,
+      headers: ['Company', 'Persona', 'Region', 'Priority', 'Fit'],
+      rows: leads.map((l) => [l.company, l.persona, l.region.toUpperCase(), l.priority, String(l.fitScore)]),
+    },
+    'DHL Shipments': {
+      title: 'DHL Shipments',
+      subtitle: 'Air courier lane detail',
+      headers: ['Reference', 'Title', 'Status', 'Value (£)'],
+      rows: shipments
+        .filter((s) => s.carrier === 'dhl')
+        .map((s) => [s.reference, s.title, STATUS_LABELS[s.status], s.value.toLocaleString()]),
+    },
+    'FedEx Shipments': {
+      title: 'FedEx Shipments',
+      subtitle: 'Air courier lane detail',
+      headers: ['Reference', 'Title', 'Status', 'Value (£)'],
+      rows: shipments
+        .filter((s) => s.carrier === 'fedex')
+        .map((s) => [s.reference, s.title, STATUS_LABELS[s.status], s.value.toLocaleString()]),
+    },
+    'BAK Heavy Freight': {
+      title: 'BAK Logistics — heavy freight',
+      subtitle: 'Sea/air freight lane detail',
+      headers: ['Reference', 'Title', 'Status', 'Value (£)'],
+      rows: shipments
+        .filter((s) => s.carrier === 'bak')
+        .map((s) => [s.reference, s.title, STATUS_LABELS[s.status], s.value.toLocaleString()]),
+    },
+    'Verified Documents': {
+      title: 'Verified Compliance Documents',
+      subtitle: 'Customs & trade documentation cleared for trading',
+      headers: ['Brand', 'Document', 'Region'],
+      rows: complianceDocsAgg.filter((d) => d.status === 'verified').map((d) => [
+        d.brand,
+        d.docType,
+        d.region,
+      ]),
+    },
+    'Pending Review': {
+      title: 'Documents Pending Review',
+      subtitle: 'These block first PO until verified',
+      headers: ['Brand', 'Document', 'Region'],
+      rows: complianceDocsAgg.filter((d) => d.status === 'pending').map((d) => [
+        d.brand,
+        d.docType,
+        d.region,
+      ]),
+    },
+    /* ── §Stage-19.7 overview drill-downs ── */
+    'Revenue This Month': {
+      title: 'Revenue This Month — commissions',
+      subtitle: `£${revenueThisMonth.toLocaleString()} in ${monthPrefix}`,
+      headers: ['PO', 'Brand', 'Status', 'Commission (£)'],
+      rows: commissionsAll
+        .filter((c) => (c.createdAt ?? '').startsWith(monthPrefix))
+        .map((c) => [
+          c.purchaseOrderId,
+          brandNameById.get(c.brandId) ?? c.brandId,
+          c.status,
+          c.commissionAmount.toFixed(2),
+        ]),
+    },
+    'POs Awaiting Action': {
+      title: 'Purchase Orders Awaiting Action',
+      subtitle: `${posAwaitingAction.length} POs in received / under review`,
+      headers: ['PO', 'Brand', 'Status', 'Value (£)'],
+      rows: posAwaitingAction.map((p) => [
+        p.poNumber,
+        brandNameById.get(p.brandId) ?? p.brandId,
+        p.status.replace(/_/g, ' '),
+        p.poValue.toLocaleString(),
+      ]),
+    },
+    'Docs Awaiting Review': {
+      title: 'Compliance Docs Awaiting Review',
+      subtitle: `${docsAwaitingReview.length} document(s)`,
+      headers: ['Brand', 'Type', 'Status'],
+      rows: docsAwaitingReview.map((d) => [
+        brandNameById.get(d.brandId) ?? d.brandId,
+        d.type.replace(/_/g, ' '),
+        d.status.replace(/_/g, ' '),
+      ]),
+    },
+    'Renewals Due ≤60d': {
+      title: 'Upcoming Contract Renewals',
+      subtitle: `${renewalsSoon.length} contract(s) inside the renewal window`,
+      headers: ['Brand', 'Type', 'Renewal', 'Urgency'],
+      rows: renewalsSoon.map(({ c, urgency }) => [
+        brandNameById.get(c.brandId) ?? c.brandId,
+        c.type.replace(/_/g, ' '),
+        c.renewalDate,
+        urgency === 'expired' ? 'EXPIRED' : `≤ ${urgency.replace('d', '')} days`,
+      ]),
+    },
+    'Top Category': {
+      title: 'Category Performance — PO value by category',
+      subtitle: 'All approved categories, ranked',
+      headers: ['Category', 'PO Value (£)'],
+      rows: topCategories.map(([cat, v]) => [cat, Math.round(v).toLocaleString()]),
+    },
+  };
+
+  const detail = openCard ? CARD_DETAILS[openCard] : null;
+
+
+
   return (
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
+      {/* §Stage-19.7 — Business Overview (real metrics, all clickable) */}
+      <div>
+        <h2 className="text-sm font-semibold text-white mb-3">Business Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
+          {OVERVIEW_CARDS.map((c) => (
+            <StatCard
+              key={c.label}
+              label={c.label}
+              value={c.value}
+              trend={c.trend}
+              trendUp={c.trendUp}
+              icon={c.icon}
+              onClick={() => setOpenCard(c.label)}
+            />
+          ))}
+        </div>
+      </div>
+
       {/* Department Switcher */}
       <div className="flex items-center gap-2 flex-wrap">
         {DEPARTMENTS.map((dept) => {
@@ -67,7 +329,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-neon-500 text-white'
+                  ? 'bg-brass-500 text-white'
                   : 'bg-ink-850 text-zinc-400 hover:text-white border border-white/[0.06]'
               )}
             >
@@ -84,6 +346,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <StatCard
               label="Total Portfolio Revenue"
+              onClick={() => setOpenCard('Total Portfolio Revenue')}
               value={`£${(totalRevenue / 1000).toFixed(0)}k`}
               trend="↗ 12.5%"
               trendUp
@@ -91,6 +354,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
             />
             <StatCard
               label="Active Brands"
+              onClick={() => setOpenCard('Active Brands')}
               value={String(activeBrands)}
               trend="↗ 3 new"
               trendUp
@@ -98,6 +362,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
             />
             <StatCard
               label="Total Shipments"
+              onClick={() => setOpenCard('Total Shipments')}
               value={String(totalShipments)}
               trend="↗ 8%"
               trendUp
@@ -105,6 +370,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
             />
             <StatCard
               label="Pipeline Leads"
+              onClick={() => setOpenCard('Pipeline Leads')}
               value={String(totalLeads)}
               trend="↗ 5 new"
               trendUp
@@ -113,10 +379,10 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
           </div>
 
           <Card
-            title="Business Development — Explee AI Client Finder"
+            title="Business Development — Brand Sourcing"
             subtitle="Global brand sourcing engine — US, EU, Africa & Canada"
             action={
-              <Badge className="bg-neon-500/15 text-neon-400 border-neon-500/20">
+              <Badge className="bg-brass-500/15 text-brass-400 border-brass-500/20">
                 <Sparkles className="w-3 h-3" />
                 Active
               </Badge>
@@ -124,10 +390,9 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
           >
             <div className="p-5">
               <p className="text-sm text-zinc-400 mb-4">
-                The Explee AI agent continuously scans global trade directories to source
-                high-intent brands across four target segments. Navigate to the full Explee
-                Client Finder via the sidebar for the complete configuration wizard and live
-                lead table.
+                Sourcing scans global trade directories to source high-intent brands
+                across four target segments. Navigate to Marketing Hub for the
+                configuration wizard and live lead table.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {campaigns.map((c) => (
@@ -152,6 +417,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatCard
               label="DHL Shipments"
+              onClick={() => setOpenCard('DHL Shipments')}
               value={String(shipments.filter((s) => s.carrier === 'dhl').length)}
               trend="Air courier"
               trendUp
@@ -159,6 +425,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
             />
             <StatCard
               label="FedEx Shipments"
+              onClick={() => setOpenCard('FedEx Shipments')}
               value={String(shipments.filter((s) => s.carrier === 'fedex').length)}
               trend="Air courier"
               trendUp
@@ -166,6 +433,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
             />
             <StatCard
               label="BAK Heavy Freight"
+              onClick={() => setOpenCard('BAK Heavy Freight')}
               value={String(shipments.filter((s) => s.carrier === 'bak').length)}
               trend="Sea/air freight"
               trendUp
@@ -278,21 +546,24 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatCard
               label="Verified Documents"
-              value={String(COMPLIANCE_DOCS.filter((d) => d.status === 'verified').length)}
+              onClick={() => setOpenCard('Verified Documents')}
+              value={String(complianceDocsAgg.filter((d) => d.status === 'verified').length)}
               trend="Compliant"
               trendUp
               icon={<ShieldCheck className="w-4 h-4" />}
             />
             <StatCard
               label="Pending Review"
-              value={String(COMPLIANCE_DOCS.filter((d) => d.status === 'pending').length)}
+              onClick={() => setOpenCard('Pending Review')}
+              value={String(complianceDocsAgg.filter((d) => d.status === 'pending').length)}
               trend="Awaiting"
               trendUp={false}
               icon={<FileCheck2 className="w-4 h-4" />}
             />
             <StatCard
               label="Total Brands"
-              value={String(COMPLIANCE_DOCS.length)}
+              onClick={() => setOpenCard('Active Brands')}
+              value={String(complianceDocsAgg.length)}
               trend="Global"
               trendUp
               icon={<Boxes className="w-4 h-4" />}
@@ -314,7 +585,7 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.04]">
-                  {COMPLIANCE_DOCS.map((doc) => (
+                  {complianceDocsAgg.map((doc) => (
                     <tr key={doc.brand} className="hover:bg-white/[0.02] transition-colors">
                       <td className="px-5 py-3.5 text-sm font-medium text-white">{doc.brand}</td>
                       <td className="px-4 py-3.5 text-xs text-zinc-400">{doc.docType}</td>
@@ -339,6 +610,68 @@ export function AdminDashboard({ department }: { department?: AdminDepartment })
           </Card>
         </>
       )}
+
+      {/* §Stage-17 fix #4 — card drill-down modal */}
+      {detail && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setOpenCard(null)}
+        >
+          <div
+            className="bg-ink-900 border border-white/[0.08] rounded-xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between p-5 border-b border-white/[0.06]">
+              <div>
+                <h3 className="text-sm font-semibold text-white">{detail.title}</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">{detail.subtitle}</p>
+              </div>
+              <button
+                onClick={() => setOpenCard(null)}
+                className="text-zinc-500 hover:text-white text-lg leading-none px-2"
+                aria-label="Close detail view"
+              >
+                ×
+              </button>
+            </div>
+            <div className="overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-ink-900">
+                  <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
+                    {detail.headers.map((h) => (
+                      <th key={h} className="text-left font-medium px-4 py-2.5">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.04]">
+                      {detail.rows.map((row, i) => (
+                        <tr key={i} className="text-zinc-300">
+                          {row.map((cell, j) => {
+                            const isPo = typeof cell === 'string' && /^PO-\d+/.test(cell);
+                            const isBrand = j === 1 && typeof cell === 'string' && cell.length > 0 && !cell.startsWith('PO-');
+                            return (
+                              <td key={j} className="px-4 py-2 text-xs truncate max-w-[220px]">
+                                {isPo && onNavigate ? (
+                                  <button onClick={() => { setOpenCard(null); onNavigate('purchase_orders_admin'); }}
+                                    className="text-brass-400 hover:text-brass-300 underline underline-offset-2 transition-colors">{cell}</button>
+                                ) : isBrand && onNavigate ? (
+                                  <button onClick={() => { setOpenCard(null); onNavigate('crm'); }}
+                                    className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors">{cell}</button>
+                                ) : <span>{cell}</span>}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+              </table>
+              {detail.rows.length === 0 && (
+                <p className="text-xs text-zinc-600 text-center py-8">No underlying records.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -349,33 +682,52 @@ function StatCard({
   trend,
   trendUp,
   icon,
+  onClick,
 }: {
   label: string;
   value: string;
   trend: string;
   trendUp: boolean;
   icon: React.ReactNode;
+  onClick?: () => void;
 }) {
   return (
-    <Card className="p-5">
-      <div className="flex items-start justify-between mb-3">
-        <span className="text-xs text-zinc-500 font-medium">{label}</span>
-        <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-zinc-400">
-          {icon}
+    <Card
+      className={cn(
+        'p-5',
+        onClick && 'cursor-pointer hover:border-white/[0.14] transition-colors'
+      )}
+    >
+      <button
+        type="button"
+        disabled={!onClick}
+        onClick={onClick}
+        className="w-full text-left disabled:cursor-default"
+      >
+        <div className="flex items-start justify-between mb-3">
+          <span className="text-xs text-zinc-500 font-medium">{label}</span>
+          <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-zinc-400">
+            {icon}
+          </div>
         </div>
-      </div>
-      <div className="flex items-end justify-between">
-        <span className="text-2xl font-bold text-white tracking-tight">{value}</span>
-        <span
-          className={cn(
-            'flex items-center gap-1 text-xs font-medium',
-            trendUp ? 'text-emerald-400' : 'text-crimson-accent'
-          )}
-        >
-          <TrendingUp className="w-3 h-3" />
-          {trend}
-        </span>
-      </div>
+        <div className="flex items-end justify-between">
+          <span className="text-2xl font-bold text-white tracking-tight">{value}</span>
+          <span
+            className={cn(
+              'flex items-center gap-1 text-xs font-medium',
+              trendUp ? 'text-emerald-400' : 'text-crimson-accent'
+            )}
+          >
+            <TrendingUp className="w-3 h-3" />
+            {trend}
+          </span>
+        </div>
+        {onClick && (
+          <span className="mt-2 block text-[10px] text-zinc-600 group-hover:text-zinc-400">
+            Click for underlying data →
+          </span>
+        )}
+      </button>
     </Card>
   );
 }

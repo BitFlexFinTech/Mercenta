@@ -1,28 +1,37 @@
-import { useState } from 'react';
-import { useApp } from '@/store';
+import { useEffect, useState } from 'react';
+import { useApp } from '@/context/GlobalStateContext';
+import { BRAND_NAME, BRAND_LEGAL_NAME } from '@/config/brand';
+import { APPROVED_CATEGORIES } from '@/types';
+import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { Button, Input, Select, Checkbox } from '@/components/ui';
+import { BrandGuidance } from '@/components/shared/BrandGuidance';
 import { cn } from '@/utils/cn';
-import type { BrandRegion } from '@/types';
+import type { BrandRegion, FulfillmentTrack, FinancingPartner } from '@/types';
+import { getFinancingPartnerForRegion } from '@/types';
 import {
   Building2,
   FileText,
   Landmark,
-  Truck,
+  Route,
   Check,
-  Loader2,
   ArrowRight,
   ArrowLeft,
-  Upload,
   CheckCircle2,
   Globe2,
+  Scale,
 } from 'lucide-react';
 
 const STEPS = [
   { id: 1, label: 'Brand Profile', icon: Building2 },
   { id: 2, label: 'Legal Agreement', icon: FileText },
   { id: 3, label: 'Banking', icon: Landmark },
-  { id: 4, label: '3PL Carrier Integration', icon: Truck },
+  { id: 4, label: 'Fulfillment Track', icon: Route },
+  { id: 5, label: 'Operational Guidance', icon: Scale },
 ];
+// §Stage-20.2 — the former "3PL Carrier Integration" step was REMOVED:
+// carrier relationships are admin-managed (Super Admin → 3PL Carrier
+// Terminal). Brands never configure DHL/FedEx/BAK connections themselves.
+// §Batch-15 — step 5 added for required MOQ/pricing/packaging/PO-rejection guidance.
 
 const REGIONS: { value: BrandRegion; label: string }[] = [
   { value: 'north_america', label: 'North America (US / Canada)' },
@@ -57,7 +66,7 @@ const NATIONS_BY_REGION: Record<BrandRegion, { value: string; label: string }[]>
 
 const TAX_ID_LABELS: Record<BrandRegion, string> = {
   north_america: 'EIN (Employer Identification Number)',
-  europe: 'VAT / EORI Number',
+  europe: 'VAT Number',
   africa: 'TIN / BP Number',
 };
 
@@ -83,19 +92,15 @@ const CURRENCIES_BY_REGION: Record<BrandRegion, { value: string; label: string }
   ],
 };
 
-export function OnboardingWizard() {
+export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) {
   const { brandProfile, setBrandProfile, completeOnboarding } = useApp();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(initialStep);
   const [checks, setChecks] = useState({
     exclusive: false,
     compliance: false,
     payment: false,
   });
-  const [carrierTests, setCarrierTests] = useState({
-    dhl: 'idle' as 'idle' | 'testing' | 'success',
-    fedex: 'idle' as 'idle' | 'testing' | 'success',
-    bak: 'idle' as 'idle' | 'testing' | 'success',
-  });
+  const [guidanceAck, setGuidanceAck] = useState(false);
 
   const update = (field: string, value: string) =>
     setBrandProfile({ ...brandProfile, [field]: value });
@@ -117,46 +122,49 @@ export function OnboardingWizard() {
         brandProfile.nation &&
         brandProfile.taxId &&
         brandProfile.email
-      );
+      ) && !!brandProfile.category;
     if (step === 2)
       return brandProfile.signatory && checks.exclusive && checks.compliance && checks.payment;
-    if (step === 3) return brandProfile.bic && brandProfile.iban;
+    if (step === 3)
+      return brandProfile.bic && brandProfile.iban && !!brandProfile.workingCapitalAnswer;
+    if (step === 4) return !!brandProfile.fulfillmentTrack && brandProfile.fulfillmentTrack !== 'unassigned';
+    if (step === 5) return guidanceAck;
     return true;
   };
 
-  const testConnection = (carrier: 'dhl' | 'fedex' | 'bak') => {
-    setCarrierTests((prev) => ({ ...prev, [carrier]: 'testing' }));
-    setTimeout(() => {
-      setCarrierTests((prev) => ({ ...prev, [carrier]: 'success' }));
-      setBrandProfile({ ...brandProfile, [`${carrier}Connected`]: true });
-    }, 2000);
-  };
+  /** Provisional auto-score recommendation from what the brand answered so far. */
+  const recommendedTrack: FulfillmentTrack =
+    brandProfile.workingCapitalAnswer === 'yes' ? 'direct_fulfillment' : 'financed';
 
+  // Pre-fill the confirmation step with the recommendation until the brand edits it.
+  useEffect(() => {
+    if (step === 4 && (!brandProfile.fulfillmentTrack || brandProfile.fulfillmentTrack === 'unassigned')) {
+      setBrandProfile({ ...brandProfile, fulfillmentTrack: recommendedTrack });
+    }
+     
+  }, [step]);
+
+  // §Stage-20.2 — no brand-side carrier connection testing; completion no
+  // longer writes dhlConnected/fedexConnected/bakConnected from wizard state.
   const handleFinish = () => {
-    setBrandProfile({
-      ...brandProfile,
-      dhlConnected: carrierTests.dhl === 'success',
-      fedexConnected: carrierTests.fedex === 'success',
-      bakConnected: carrierTests.bak === 'success',
-    });
     completeOnboarding();
   };
-
-  const isAfrican = brandProfile.region === 'africa';
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-neon-500 flex items-center justify-center text-white font-bold">
-              B
-            </div>
-            <span className="text-lg font-semibold text-white">Boxbee Commerce</span>
+            <img
+              src={brandMark}
+              alt="Mercenta Partners hexagon mark"
+              className="w-9 h-9"
+            />
+            <span className="text-lg font-semibold text-white">{BRAND_NAME}</span>
           </div>
           <h1 className="text-2xl font-bold text-white mb-1">Brand Onboarding</h1>
           <p className="text-sm text-zinc-500">
-            Global 1P Wholesale Trade Platform — scale your brand into the UK market
+                        Global wholesale trade platform — scale your brand into the UK market
           </p>
         </div>
 
@@ -175,7 +183,7 @@ export function OnboardingWizard() {
                       isDone
                         ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         : isActive
-                        ? 'bg-neon-500 text-white shadow-lg shadow-neon-500/30'
+                        ? 'bg-brass-500 text-white shadow-lg shadow-brass-500/30'
                         : 'bg-ink-850 text-zinc-600 border border-white/[0.08]'
                     )}
                   >
@@ -222,7 +230,27 @@ export function OnboardingWizard() {
                 placeholder="e.g. Sweet Pea Botanicals"
                 required
               />
-              <div className="flex items-center gap-2 text-xs text-neon-400">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-400">Product Category</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  {APPROVED_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => update('category', cat)}
+                      className={cn(
+                        'text-[10px] px-2.5 py-2 rounded-lg border transition-colors text-left',
+                        brandProfile.category === cat
+                          ? 'border-brass-500/50 bg-brass-500/10 text-white'
+                          : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
+                      )}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-brass-400">
                 <Globe2 className="w-3.5 h-3.5" />
                 <span>Select your region to unlock country options</span>
               </div>
@@ -277,28 +305,28 @@ export function OnboardingWizard() {
               <div className="bg-ink-900 border border-white/[0.06] rounded-lg p-4 max-h-44 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
                 <p className="mb-3">
                   This Master Wholesale & Distribution Agreement ("Agreement") is entered
-                  into between Boxbee Commerce Ltd ("Boxbee"), acting as the Exclusive UK
+                  into between {BRAND_LEGAL_NAME} ("Mercenta"), acting as the Exclusive UK
                   Importer of Record, and the undersigned Brand ("Brand").
                 </p>
                 <p className="mb-3">
-                  <strong className="text-zinc-300">1. Appointment.</strong> Boxbee is
+                  <strong className="text-zinc-300">1. Appointment.</strong> Mercenta is
                   hereby appointed as the exclusive UK importer and wholesale distributor
-                  of the Brand's products, routing inventory via UK-established 1P Amazon
-                  Vendor Central distribution networks.
+                  of the Brand's products, routing inventory via direct UK retail placement
+                  through established national retail networks.
                 </p>
                 <p className="mb-3">
-                  <strong className="text-zinc-300">2. Importer of Record.</strong> Boxbee
+                  <strong className="text-zinc-300">2. Importer of Record.</strong> Mercenta
                   shall hold valid UK EORI numbers, manage HMRC customs declarations, and
                   ensure full UKCA compliance for all imported goods — regardless of
                   whether the Brand originates from North America, Europe, or Africa.
                 </p>
                 <p className="mb-3">
                   <strong className="text-zinc-300">3. Exclusivity.</strong> The Brand
-                  grants Boxbee exclusive rights to import, clear, and distribute its
-                  products through Amazon 1P channels within the United Kingdom territory.
+                  grants Mercenta exclusive rights to import, clear, and distribute its
+                                    products through the retail channel within the United Kingdom territory.
                 </p>
                 <p className="mb-3">
-                  <strong className="text-zinc-300">4. Payment Terms.</strong> Boxbee
+                  <strong className="text-zinc-300">4. Payment Terms.</strong> Mercenta
                   shall purchase inventory at agreed Ex-Works wholesale prices and remit
                   payouts to the Brand's nominated banking account in the selected payout
                   currency.
@@ -319,7 +347,7 @@ export function OnboardingWizard() {
               />
               <div className="space-y-2.5 pt-1">
                 <Checkbox
-                  label="I confirm Boxbee acts as Exclusive UK Importer of Record for my brand"
+                  label="I confirm Mercenta acts as Exclusive UK Importer of Record for my brand"
                   checked={checks.exclusive}
                   onChange={(c) => setChecks({ ...checks, exclusive: c })}
                   required
@@ -366,79 +394,161 @@ export function OnboardingWizard() {
                 onChange={(e) => update('payoutCurrency', e.target.value)}
                 options={CURRENCIES_BY_REGION[brandProfile.region]}
               />
-              <div className="bg-neon-500/10 border border-neon-500/20 rounded-lg p-3 text-xs text-zinc-400">
+              <div className="bg-brass-500/10 border border-brass-500/20 rounded-lg p-3 text-xs text-zinc-400">
                 Payouts are processed bi-weekly. Available currencies are based on your
                 region selection ({REGIONS.find((r) => r.value === brandProfile.region)?.label}).
-                GBP is always available for UK Vendor Central reconciliation.
+                GBP is always available for UK retail reconciliation.
               </div>
+
+              {/* §5 — working-capital qualification question */}
+              <div>
+                <label className="text-xs font-medium text-zinc-400 mb-1.5 block">
+                  Working Capital Qualification
+                </label>
+                <p className="text-xs text-zinc-500 mb-2">
+                  Can your business fund 30–90 days of stock before Mercenta payment lands?
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {(
+                    [
+                      { value: 'yes', label: 'Yes' },
+                      { value: 'partially', label: 'Partially' },
+                      { value: 'no', label: 'No' },
+                    ] as const
+                  ).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => update('workingCapitalAnswer', opt.value)}
+                      className={cn(
+                        'text-xs px-3 py-2 rounded-lg border transition-colors',
+                        brandProfile.workingCapitalAnswer === opt.value
+                          ? 'border-brass-500/50 bg-brass-500/10 text-white'
+                          : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-zinc-600 mt-1.5">
+                  This directly affects your fulfillment track assessment.
+                </p>
+              </div>
+
+              {/* §Stage-2 — fulfillment model selection moved to its own step (4) */}
             </div>
           )}
 
           {step === 4 && (
-            <div className="space-y-5 animate-fade-in">
-              <h2 className="text-base font-semibold text-white mb-1">
-                3PL Carrier Integration
-              </h2>
+            <div className="space-y-4 animate-fade-in">
+              <h2 className="text-base font-semibold text-white mb-1">Fulfillment Track</h2>
               <p className="text-xs text-zinc-500 mb-2">
-                Connect your logistics accounts to enable shipment tracking
+                Confirm how your goods reach the UK. This is pre-filled with the
+                system's provisional recommendation based on your answers — you can
+                change it. Mercenta may adjust the final track after document review;
+                any change to a signed agreement is issued as a formal amendment,
+                never a silent edit.
               </p>
 
-              {/* DHL */}
-              <CarrierCard
-                name="DHL Express"
-                description="Global air courier parcels — available for all regions (US, EU, Africa)"
-                color="text-amber-400"
-                fields={['Account Number', 'API Client ID', 'Client Secret', 'Webhook URL']}
-                testState={carrierTests.dhl}
-                onTest={() => testConnection('dhl')}
-              />
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-xs text-zinc-400">
+                System recommendation:{' '}
+                <span className="text-white font-medium">
+                  {recommendedTrack === 'direct_fulfillment'
+                    ? 'Direct Fulfillment'
+                    : 'Financed'}
+                </span>{' '}
+              </div>
 
-              {/* FedEx */}
-              <CarrierCard
-                name="FedEx International"
-                description="Global air courier parcels — available for all regions (US, EU, Africa)"
-                color="text-purple-400"
-                fields={['Account Number', 'API Client ID', 'Client Secret', 'Webhook URL']}
-                testState={carrierTests.fedex}
-                onTest={() => testConnection('fedex')}
-              />
+              <div className="grid grid-cols-2 gap-2">
+                {(
+                  [
+                    {
+                      value: 'direct_fulfillment',
+                      label: 'Direct Fulfillment',
+                      hint: 'You ship confirmed POs directly; we remit your share of net proceeds.',
+                    },
+                    {
+                      value: 'financed',
+                      label: 'Financed',
+                      hint: 'Mercenta purchases inventory at Ex-Works and handles fulfilment.',
+                    },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => update('fulfillmentTrack', opt.value)}
+                    className={cn(
+                      'text-left px-3 py-2.5 rounded-lg border transition-colors relative',
+                      brandProfile.fulfillmentTrack === opt.value
+                        ? 'border-brass-500/50 bg-brass-500/10'
+                        : 'border-white/[0.08] hover:border-white/20'
+                    )}
+                  >
+                    {recommendedTrack === opt.value && (
+                      <span className="absolute top-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
+                        Recommended
+                      </span>
+                    )}
+                    <span className="block text-xs font-medium text-white">{opt.label}</span>
+                    <span className="block text-[10px] text-zinc-500 mt-0.5">{opt.hint}</span>
+                  </button>
+                ))}
+              </div>
 
-              {/* BAK — conditional */}
-              {isAfrican && (
-                <CarrierCard
-                  name="BAK Logistics Integration"
-                  description="Heavy freight consolidation, bonded warehousing & multi-modal African transport — available when African networks are needed"
-                  color="text-blue-400"
-                  fields={[
-                    'BAK Client Account Number',
-                    'Primary Consolidation Depot',
-                  ]}
-                  depotOptions
-                  hasFileUpload
-                  fileLabel="ZIMRA Customs Clearing Power of Attorney"
-                  testState={carrierTests.bak}
-                  onTest={() => testConnection('bak')}
-                />
-              )}
-
-              {!isAfrican && (
-                <div className="bg-ink-900 border border-white/[0.04] rounded-lg p-4 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                    <Truck className="w-4 h-4 text-blue-500/50" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-zinc-600">BAK Logistics Integration</h3>
-                    <p className="text-[11px] text-zinc-700 mt-0.5">
-                      Available for African-origin brands. BAK provides heavy freight
-                      consolidation and bonded warehousing for Southern African transport
-                      networks. Your region ({REGIONS.find((r) => r.value === brandProfile.region)?.label})
-                      uses DHL/FedEx for courier service.
+              {/* §Batch-18 — Show regional financing partner when financed track is selected */}
+              {brandProfile.fulfillmentTrack === 'financed' && (function() {
+                const region = brandProfile.region as BrandRegion;
+                const partners = getFinancingPartnerForRegion(region);
+                if (partners.length === 0) return null;
+                return (
+                  <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3">
+                    <p className="text-[10px] font-medium text-emerald-300 mb-1.5">Your Region's Financing Partner</p>
+                    {partners.map(function(p) {
+                      return (
+                        <div key={p.id} className="text-[10px] text-zinc-400 space-y-0.5">
+                          <p className="text-white font-medium">{p.name}</p>
+                          <p>{p.description}</p>
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-1 text-[9px]">
+                            <span className="text-zinc-500">Advance rate:</span>
+                            <span className="font-mono text-zinc-300">{(p.advanceRate * 100).toFixed(0)}%</span>
+                            <span className="text-zinc-500">Fees:</span>
+                            <span className="font-mono text-zinc-300">{p.feeRange}</span>
+                            <span className="text-zinc-500">Turnaround:</span>
+                            <span className="font-mono text-zinc-300">{p.turnaroundDays}</span>
+                            <span className="text-zinc-500">Deal size:</span>
+                            <span className="font-mono text-zinc-300">{p.minDealSize} – {p.maxDealSize}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <p className="text-[9px] text-zinc-600 mt-1.5">
+                      This financing option is available to qualifying brands on the financed track.
                     </p>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
+
+          {step === 5 && (
+            <div className="space-y-4 animate-fade-in">
+              <h2 className="text-base font-semibold text-white mb-1">Operational Guidance</h2>
+              <p className="text-xs text-zinc-500 mb-2">
+                Please review the following operational information. This is a required
+                step — understanding how pricing, packaging, and PO rejections affect
+                your vendor performance is essential for a successful partnership.
+              </p>
+              <BrandGuidance
+                requireAck
+                ack={guidanceAck}
+                onAckChange={setGuidanceAck}
+              />
+            </div>
+          )}
+
+
         </div>
 
         {/* Navigation */}
@@ -451,9 +561,9 @@ export function OnboardingWizard() {
             <ArrowLeft className="w-3.5 h-3.5" />
             Back
           </Button>
-          {step < 4 ? (
+          {step < 5 ? (
             <Button
-              onClick={() => setStep((s) => Math.min(4, s + 1))}
+              onClick={() => setStep((s) => Math.min(5, s + 1))}
               disabled={!canProceed()}
             >
               Continue
@@ -466,90 +576,6 @@ export function OnboardingWizard() {
             </Button>
           )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function CarrierCard({
-  name,
-  description,
-  color,
-  fields,
-  depotOptions,
-  hasFileUpload,
-  fileLabel,
-  testState,
-  onTest,
-}: {
-  name: string;
-  description: string;
-  color: string;
-  fields: string[];
-  depotOptions?: boolean;
-  hasFileUpload?: boolean;
-  fileLabel?: string;
-  testState: 'idle' | 'testing' | 'success';
-  onTest: () => void;
-}) {
-  return (
-    <div className="bg-ink-900 border border-white/[0.06] rounded-lg p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className={`text-sm font-semibold ${color}`}>{name}</h3>
-          <p className="text-[11px] text-zinc-600">{description}</p>
-        </div>
-        {testState === 'success' && (
-          <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            API Connection Live & Bonded Account Linked
-          </span>
-        )}
-      </div>
-      <div className="grid grid-cols-2 gap-2.5">
-        {fields.map((field) =>
-          depotOptions && field === 'Primary Consolidation Depot' ? (
-            <Select
-              key={field}
-              label={field}
-              options={[
-                { value: 'Harare Willowvale Depot', label: 'Harare Willowvale Depot' },
-                { value: 'Bulawayo Hub', label: 'Bulawayo Hub' },
-                { value: 'Mutare Transit Hub', label: 'Mutare Transit Hub' },
-              ]}
-            />
-          ) : (
-            <Input key={field} label={field} placeholder={field} />
-          )
-        )}
-      </div>
-      {hasFileUpload && (
-        <div className="mt-2.5">
-          <label className="block text-xs font-medium text-zinc-400 mb-1.5">
-            {fileLabel}
-          </label>
-          <div className="border border-dashed border-white/[0.1] rounded-lg px-4 py-3 flex items-center gap-2 text-xs text-zinc-500 hover:border-neon-500/30 cursor-pointer transition-colors">
-            <Upload className="w-3.5 h-3.5" />
-            Click to upload PDF / DOC
-          </div>
-        </div>
-      )}
-      <div className="mt-3 flex items-center gap-3">
-        <Button size="sm" variant="secondary" onClick={onTest} disabled={testState === 'testing'}>
-          {testState === 'testing' ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Testing Connection...
-            </>
-          ) : (
-            'Test Connection'
-          )}
-        </Button>
-        {testState === 'testing' && (
-          <div className="flex-1 h-1 bg-ink-700 rounded-full overflow-hidden">
-            <div className="h-full bg-neon-500 rounded-full animate-pulse" style={{ width: '60%' }} />
-          </div>
-        )}
       </div>
     </div>
   );

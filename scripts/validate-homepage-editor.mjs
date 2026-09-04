@@ -1,0 +1,60 @@
+// §12 — validates the homepage content model + editor pipeline:
+//   Home renders FROM the content model (edited heading appears in output)
+//   wording lint blocks banned-term edits · draft/publish flow works
+import { createServer } from 'vite';
+import { createElement } from 'react';
+import { renderToString } from 'react-dom/server';
+
+const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
+let failures = 0;
+const test = (name, ok) => {
+  console.log(`${ok ? '✓' : '✗'} ${name}`);
+  if (!ok) failures++;
+};
+
+try {
+  const g = await server.ssrLoadModule('/src/context/GlobalStateContext.tsx');
+  const home = await server.ssrLoadModule('/src/components/marketing/Home.tsx');
+  const cfg = await server.ssrLoadModule('/src/config/homepageContent.ts');
+  const apiMod = await server.ssrLoadModule('/src/data/api.ts');
+  const w = await server.ssrLoadModule('/src/lib/discovery/wordingSafety.ts');
+
+  const render = (content) => renderToString(
+    createElement(g.AppProvider, null, createElement(home.Home, content ? { content } : {}))
+  );
+
+  // Default render contains the default hero heading + brand name.
+  const htmlDefault = render();
+  test('default render shows default hero highlight',
+    htmlDefault.includes('UK retail shelf.'));
+  test('default render is brand-name driven', htmlDefault.includes('Mercenta'));
+
+  // Edited content renders through the same component.
+  const edited = structuredClone(cfg.DEFAULT_HOMEPAGE_CONTENT);
+  edited.hero.headingStart = 'From our workshops to';
+  edited.about.heading = 'Partner with Mercenta';
+  const htmlEdited = render(edited);
+  test('edited heading renders instead of hardcoded text', htmlEdited.includes('From our workshops to'));
+  test('edited about heading renders', htmlEdited.includes('Partner with Mercenta'));
+  test('unedited sections still render from defaults', htmlEdited.includes('UK retail shelf.'));
+
+  // Wording lint catches a banned-term edit before it can go live.
+  const unsafeEdit = structuredClone(cfg.DEFAULT_HOMEPAGE_CONTENT);
+  unsafeEdit.hero.headingStart = 'Sell on Amazon today';
+  const lint = w.lintOutwardWording(unsafeEdit.hero.headingStart);
+  test('editor lint flags banned-term edits', !lint.safe);
+
+  // Draft/publish flow via api.
+  const before = await apiMod.fetchHomepageContent();
+  await apiMod.saveHomepageDraft(edited);
+  const during = await apiMod.fetchHomepageContent();
+  test('draft held separately from live', during.draft !== null && during.live !== null);
+  const published = await apiMod.publishHomepageContent();
+  test('publish promotes the draft', published.hero.headingStart === 'From our workshops to');
+  void before;
+
+  console.log(failures === 0 ? 'HOMEPAGE_EDITOR_VALIDATION_PASS' : `HOMEPAGE_EDITOR_VALIDATION_FAIL (${failures})`);
+} finally {
+  await server.close();
+}
+if (failures > 0) process.exit(1);
