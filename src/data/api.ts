@@ -937,17 +937,31 @@ export function fetchCatalogSubmissions() {
 
 const homepageState: { draft: HomepageContent | null } = { draft: null };
 
-export function fetchHomepageContent(): Promise<{
+export async function fetchHomepageContent(): Promise<{
   live: HomepageContent;
   draft: HomepageContent | null;
 }> {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('homepage_content')
+      .select('content')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(`[api] homepage_content: ${error.message}`);
+    return {
+      live: data?.content
+        ? structuredClone(data.content as unknown as HomepageContent)
+        : structuredClone(DEFAULT_HOMEPAGE_CONTENT),
+      draft: homepageState.draft ? structuredClone(homepageState.draft) : null,
+    };
+  }
   // Seed/demo mode: live copy is DEFAULT_HOMEPAGE_CONTENT; drafts held in
-  // session. Live projects read the latest published row from
-  // homepage_content (migration 0009) with DEFAULT as fallback.
-  return Promise.resolve({
+  // session.
+  return {
     live: structuredClone(DEFAULT_HOMEPAGE_CONTENT),
     draft: homepageState.draft ? structuredClone(homepageState.draft) : null,
-  });
+  };
 }
 
 export async function saveHomepageDraft(content: HomepageContent): Promise<void> {
@@ -961,6 +975,15 @@ export async function publishHomepageContent(
   const toPublish = content ?? homepageState.draft;
   if (!toPublish) throw new Error('[api] nothing to publish — save a draft first');
   homepageState.draft = null;
+  if (supabase) {
+    const { error } = await supabase
+      .from('homepage_content')
+      .upsert(
+        { id: '00000000-0000-0000-0000-000000000001', content: toPublish as unknown as Record<string, unknown>, updated_at: new Date().toISOString() },
+        { onConflict: 'id' }
+      );
+    if (error) throw new Error(`[api] homepage_content publish: ${error.message}`);
+  }
   return structuredClone(toPublish);
 }
 
