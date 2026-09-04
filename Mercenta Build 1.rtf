@@ -1,0 +1,211 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 This is Session 0 \'97 Setup.\
+\
+Add the following to the top of .clinerules/protection-rules.md,\
+before the existing content. Do not modify anything else in that file.\
+\
+---\
+## Design Freeze \'97 CRITICAL\
+\
+The visual design of the site is FROZEN. It must match\
+https://demo.mercenta.co.uk exactly.\
+\
+- Do NOT change any CSS, Tailwind classes, layout, spacing, colors,\
+  fonts, or visual styling.\
+- Do NOT change any text content visible to users (headings, buttons,\
+  labels, copy) unless explicitly told to in the current task.\
+- Do NOT change the structure of any component's rendered output\
+  (no adding/removing/moving visual elements).\
+- Backend logic, API calls, database queries, config, security,\
+  and infrastructure changes are allowed.\
+- If a task requires a visual change to fix a bug, STOP and ask me\
+  first.\
+\
+---\
+\
+Do not create any zip files. Do not commit or push.   \
+\
+\
+This is Session 1 \'97 Security Fix.\
+\
+Before starting: run git status. If dirty, commit with message\
+"checkpoint before security fix." Then proceed.\
+\
+Task: Fix the cross-tenant write vulnerability in\
+supabase/functions/recalc-fulfillment-score/index.ts.\
+\
+1. Derive brandId from auth.getUser() instead of the request body.\
+   Copy the exact pattern used in catalog-import and\
+   compliance-gate-check \'97 do not invent a new approach.\
+\
+2. Audit every other Edge Function that uses the service-role key.\
+   For each one, check: does it act on brand-specific data based on\
+   caller identity? If yes and it doesn't verify JWT, fix it the\
+   same way. Cron-triggered and public endpoints (health-check,\
+   webhooks) are exempt \'97 leave them alone.\
+\
+3. Write a Playwright/API test that authenticates as one brand,\
+   calls recalc-fulfillment-score with another brand's ID, and\
+   asserts it's rejected. Add it to the test suite.\
+\
+Rules:\
+- Only touch Edge Function files and test files.\
+- Do NOT touch any component, page, or styling file.\
+- Do NOT commit or push unless I say so.\
+- When done, show me git diff --stat and stop.   \
+\
+This is Session 2 \'97 Homepage Editor.\
+\
+Before starting: run git status. If dirty, commit with message\
+"checkpoint before homepage fix." Then proceed.\
+\
+Task: Fix the Homepage Editor so it actually persists and renders.\
+\
+1. Wire publishHomepageContent() to write to the homepage_content\
+   table (it already exists).\
+2. Update fetchHomepageContent() to read from that table instead of\
+   returning hardcoded defaults.\
+3. Update Home.tsx to call fetchHomepageContent() and render the\
+   result instead of hardcoded NAV_ITEMS/GLOBAL_PATHWAYS/strings.\
+4. Remove the "UK Amazon 1P" text from GLOBAL_PATHWAYS per the\
+   outward-facing wording rule.\
+5. Add a Playwright test: edit content in admin editor, publish,\
+   load the public homepage, confirm the change is visible.\
+\
+Rules:\
+- The rendered output of the homepage must look IDENTICAL to\
+  https://demo.mercenta.co.uk. You are changing WHERE the data\
+  comes from, not WHAT is displayed.\
+- Do NOT change any visual styling, layout, or component structure.\
+- If the fix would change how the page looks, STOP and ask me.\
+- Do NOT commit or push unless I say so.\
+- When done, show me git diff --stat and stop.   \
+\
+This is Session 3 \'97 Typecheck.\
+\
+Before starting: run git status. If dirty, commit with message\
+"checkpoint before typecheck fixes." Then proceed.\
+\
+Task: Fix all typecheck errors.\
+\
+1. Run: npm run typecheck\
+2. Categorize the errors by root cause. Show me the categorization\
+   before fixing anything.\
+3. Wait for my approval before proceeding to fix.\
+4. Fix by category, re-running typecheck after each category.\
+5. Do not consider this done until typecheck returns 0 errors.\
+\
+Rules:\
+- Type fixes only: type annotations, type imports, type casts,\
+  interface definitions. Do NOT change runtime logic or behavior.\
+- Do NOT touch any visual/styling files.\
+- If a type fix would change runtime behavior, STOP and ask me.\
+- Do NOT commit or push unless I say so.\
+- After each category is fixed, show me the error count and stop\
+  to let me review.   \
+\
+This is Session 4 \'97 Cleanup + Push.\
+\
+Before starting: run git status. If dirty, commit with message\
+"checkpoint before cleanup." Then proceed.\
+\
+Task: Clean up and push.\
+\
+1. Check if anything imports from src/mockData.ts.\
+   - If nothing imports it: leave it for now. Do NOT delete it.\
+   - If something does import it: leave it as-is. Do NOT change it.\
+   We are still in development. Demo data is intentional.\
+\
+2. Fix the "Boxbee Commerce" header comment in migration\
+   0001_init.sql (just the comment text, change it to "Mercenta").\
+\
+3. Run: git log --oneline origin/main..HEAD\
+   Show me what's unpushed. Wait for my approval before pushing.\
+4. Once I approve: git push origin main\
+\
+Rules:\
+- Do NOT delete any file.\
+- Do NOT touch any component, page, or styling file.\
+- Do NOT remove or modify any demo accounts, demo data, or\
+  demo-related content.\
+- Do NOT push until I explicitly say "push."\
+- When done, show me git status and stop.   \
+\
+This is Session 5 \'97 API Keys.\
+\
+Before starting: run git status. If dirty, commit with message\
+"checkpoint before API wiring." Then proceed.\
+\
+Task: Wire real API keys into the environment/config.\
+\
+We are still in development. Do NOT remove or replace any demo\
+accounts, demo data, or mock data. You are ADDING real credentials\
+so the services can actually work when we go live.\
+\
+First, make sure .env is in .gitignore. Then write the following\
+to ~/Desktop/Mercenta/.env:\
+\
+Supabase:\
+- SUPABASE_URL: [paste]\
+- SUPABASE_PUBLISHABLE_KEY: [paste]\
+- SUPABASE_SECRET_KEY: [paste]\
+- SUPABASE_JWKS_URL: [paste]\
+- SUPABASE_DB_PASSWORD: [paste]\
+\
+- INSTANTLY_API_KEY: [paste]\
+- POSTMARK_API_KEY: [paste]\
+- HUNTER_API_KEY: [paste]\
+- PANDADOC_API_KEY: [paste]\
+- FIRECRAWL_API_KEY: [paste]\
+\
+- DIGITALOCEAN_API_TOKEN: [paste]\
+\
+Do NOT connect: Explee, Keepa, Amazon SP-API.\
+\
+After writing .env, for each connected service, make a real test\
+call to confirm the key works (e.g. Hunter.io looks up a real\
+email, Postmark sends a test email, PandaDoc creates a test\
+envelope, DigitalOcean API lists current droplets). Show me the\
+results.\
+\
+Rules:\
+- Config/environment variable changes only.\
+- Do NOT remove or modify any demo accounts or demo data.\
+- Do NOT touch any component, page, or styling file.\
+- Do NOT commit or push unless I say so.\
+- Do NOT write keys to any .md or .clinerules file.\
+- Show me the test call results for each service before moving to\
+  the next.   \
+\
+This is Session 6 \'97 Droplet.\
+\
+Before starting: run git status. If dirty, commit with message\
+"checkpoint before droplet provisioning." Then proceed.\
+\
+Task: Provision a new DigitalOcean droplet for services.\
+\
+Use the DIGITALOCEAN_API_TOKEN from the .env file (already saved\
+in Session 5). Do NOT ask me for it again.\
+\
+1. Create a new 4GB DigitalOcean droplet (Ubuntu 22.04) using the\
+   API token. Name it "mercenta-services."\
+2. Deploy the existing docker-compose.services.yml onto it\
+   (Rocket.Chat, Usertour, Postiz).\
+3. Point the platform's integration config at the real service URLs.\
+4. Confirm each service is reachable with a real HTTP check.\
+5. Update requirements-registry.json and STATUS_CHECK.md (full\
+   rewrite) with the current state.\
+\
+Rules:\
+- Do NOT touch the existing Supabase or Rakazo droplets.\
+- Do NOT touch any component, page, or styling file.\
+- Do NOT commit or push unless I say so.\
+- Show me the HTTP check results before I approve.   \
+\
+}

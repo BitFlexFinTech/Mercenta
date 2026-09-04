@@ -1,4 +1,21 @@
 ---
+## Design Freeze — CRITICAL
+
+The visual design of the site is FROZEN. It must match
+https://demo.mercenta.co.uk exactly.
+
+- Do NOT change any CSS, Tailwind classes, layout, spacing, colors,
+  fonts, or visual styling.
+- Do NOT change any text content visible to users (headings, buttons,
+  labels, copy) unless explicitly told to in the current task.
+- Do NOT change the structure of any component's rendered output
+  (no adding/removing/moving visual elements).
+- Backend logic, API calls, database queries, config, security,
+  and infrastructure changes are allowed.
+- If a task requires a visual change to fix a bug, STOP and ask me
+  first.
+
+---
 # Protection Rules — MANDATORY
 
 These rules override all other instructions. Violating them is
