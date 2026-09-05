@@ -34,3 +34,8 @@ legal-agreements.spec.ts: 1 passed, 2 skipped, 0 failed
 tours.spec.ts: 9 tests — syntactically valid, requires running dev server
 access-gate.spec.ts: 6 passed, 3 skipped, 0 failed
 ```
+## Droplet resize (2026-09-05)
+
+| Work Item | Status | Notes |
+|---|---|---|
+| **Droplet resize: mercenta-agents-v2** | ✅ **DONE** | Resized from s-2vcpu-2gb (2GB) → s-2vcpu-4gb (4GB). Web UI responding at https://143-198-111-247.sslip.io (HTTP 200). SSH access requires key provisioning. |
