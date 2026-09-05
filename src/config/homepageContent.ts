@@ -70,7 +70,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     subheading:
       '{{brand}} purchases your inventory outright, clears UK customs, and delivers your products into direct UK retail placement — reaching the UK\'s largest national retail buyers through a single wholesale agreement. You focus on production; we carry the capital, compliance, and distribution risk.',
     primaryCta: 'Get Started',
-    secondaryCta: 'Portal Login',
+    secondaryCta: 'Partner Login',
     trustBadges: ['EORI REGISTERED', 'UKCA COMPLIANT', 'HMRC DIRECT'],
   },
   tracker: {

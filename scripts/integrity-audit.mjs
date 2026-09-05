@@ -62,7 +62,7 @@ check(
     homeContent.includes('Wholesale Distribution')
 );
 check('homepage has "Get Started" CTA', homeContent.includes('Get Started'));
-check('homepage has "Portal Login" action', homeContent.includes('Portal Login'));
+check('homepage has "Partner Login" action', homeContent.includes('Partner Login'));
 check(
   'homepage nav includes About/Services (no Global Network)',
   home.includes('About Us') && home.includes('Services') && !home.includes('Global Network')

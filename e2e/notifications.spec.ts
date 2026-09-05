@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 async function loginAsAdmin(page: any) {
   await page.goto('/');
-  await page.click('text=Portal Login');
+  await page.click('text=Partner Login');
   await page.waitForTimeout(500);
   await page.click('text=Mercenta Admin Hub');
   await page.waitForTimeout(800);
@@ -15,7 +15,7 @@ async function loginAsAdmin(page: any) {
 
 async function loginAsBrand(page: any, name: string) {
   await page.goto('/');
-  await page.click('text=Portal Login');
+  await page.click('text=Partner Login');
   await page.waitForTimeout(500);
   await page.click('text=' + name);
   await page.waitForTimeout(800);

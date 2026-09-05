@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { BRAND_NAME } from '@/config/brand';
 import { ALL_DEMO_BRANDS } from '@/data/demoData';
+import { approvedApplicationBrands } from '@/data/applicationStore';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { cn } from '@/utils/cn';
 import type { Environment, SessionRole } from '@/types';
+import { PartnerApplicationForm, ApplicationReceived } from './PartnerApplicationForm';
 import {
   ArrowLeft,
   Building2,
@@ -12,6 +15,7 @@ import {
   ArrowRight,
   Lock,
   Crown,
+  UserPlus,
 } from 'lucide-react';
 
 /** §Stage-17 fix — flag per nation of every seeded demo brand. */
@@ -73,6 +77,22 @@ const OPS_LOGINS: {
 
 export function Login() {
   const { signIn, setEnvironment, activateDemoBrand } = useApp();
+  const [showForm, setShowForm] = useState(false);
+  const [appSubmitted, setAppSubmitted] = useState(false);
+
+  // Combine demo brands + approved application brands for login cards
+  const allBrands = [
+    ...ALL_DEMO_BRANDS.map(b => ({ id: b.id, name: b.name, nation: b.nation, category: b.category, signatory: b.signatory, track: b.track, contractStatus: b.contractStatus, fromApp: false as const })),
+    ...approvedApplicationBrands.map(b => ({ id: b.id, name: b.name, nation: b.country, category: b.category, signatory: b.signatory, track: b.track, contractStatus: 'active' as const, fromApp: true as const })),
+  ];
+
+  if (appSubmitted) {
+    return <ApplicationReceived onBack={() => { setAppSubmitted(false); setShowForm(false); }} />;
+  }
+
+  if (showForm) {
+    return <PartnerApplicationForm onBack={() => setShowForm(false)} onSubmitted={() => setAppSubmitted(true)} />;
+  }
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4 py-10">
@@ -107,11 +127,11 @@ export function Login() {
           <div className="flex items-center gap-2 text-xs mb-3">
             <Building2 className="w-3.5 h-3.5 text-brass-400" />
             <span className="font-medium text-zinc-400 uppercase tracking-wider">
-              Brand Partner Portals — all {ALL_DEMO_BRANDS.length} demo brands
+              Brand Partner Portals — all {allBrands.length} brands
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {ALL_DEMO_BRANDS.map((brand, i) => (
+            {allBrands.map((brand, i) => (
               <button
                 key={brand.id}
                 onClick={() => activateDemoBrand(brand.id)}
@@ -172,6 +192,20 @@ export function Login() {
               </button>
             );
           })}
+        </div>
+
+        {/* Request Partner Access */}
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => setShowForm(true)}
+            className="inline-flex items-center gap-2 bg-brass-500 hover:bg-brass-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+          >
+            <UserPlus className="w-4 h-4" />
+            Request Partner Access
+          </button>
+          <p className="text-xs text-zinc-600 mt-2">
+            Don&apos;t have an account? Apply to distribute through {BRAND_NAME}&apos;s UK wholesale network
+          </p>
         </div>
 
         {/* Demo mode notice */}

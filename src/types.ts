@@ -1565,3 +1565,77 @@ export interface ProductResearchReport {
   /** Source URL / provider label. */
   sourceLabel: string;
 }
+
+/* ── §Access-gate — Brand applications ─────────────────────────────── */
+
+export type LinkVerificationStatus =
+  | 'verified'
+  | 'unreachable'
+  | 'no_content'
+  | 'not_found'
+  | 'unverified_manual_check';
+
+export const PRODUCT_CATEGORIES = [
+  'Health & Personal Care',
+  'Home',
+  'Baby',
+  'Office Products',
+  'Kitchen',
+  'Consumer Electronics',
+  'Automotive',
+  'Grocery',
+  'Apparel',
+  'Personal Computer',
+  'Other',
+] as const;
+
+export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
+
+export const MONTHLY_REVENUE_OPTIONS = [
+  'Under £5k',
+  '£5k–£20k',
+  '£20k–£50k',
+  '£50k–£100k',
+  '£100k+',
+] as const;
+
+export type MonthlyRevenue = (typeof MONTHLY_REVENUE_OPTIONS)[number];
+
+export type ApplicationStatus =
+  | 'pending'
+  | 'flagged'
+  | 'info_requested'
+  | 'approved'
+  | 'rejected';
+
+export interface BrandApplication {
+  id: string;
+  companyName: string;
+  country: string;
+  category: string;
+  skuCount: number | null;
+  monthlyRevenue: string | null;
+  websiteUrl: string | null;
+  instagramUrl: string | null;
+  facebookUrl: string | null;
+  websiteStatus: LinkVerificationStatus | null;
+  instagramStatus: LinkVerificationStatus | null;
+  facebookStatus: LinkVerificationStatus | null;
+  referralSource: string | null;
+  description: string | null;
+  status: ApplicationStatus;
+  adminNotes: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+}
+
+export const BRAND_SOURCE_OPTIONS = [
+  'Embassy Referral',
+  'Direct Outreach',
+  'Inbound Application',
+  'Partnership',
+  'Other',
+] as const;
+
+export type BrandSource = (typeof BRAND_SOURCE_OPTIONS)[number];
