@@ -16,7 +16,89 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { TourEngine } from '@/components/shared/TourEngine';
 import { useUsertour } from '@/lib/usertour/useUsertour';
-import { ONBOARDING_TOUR, tourToUsertourPayload } from '@/lib/usertour/tourDefinitions';
+/* ── Usertour-format tour definition (embedded — single onboarding tour
+     for the Usertour SDK path, kept here as its only consumer) ────── */
+
+interface UsertourStep {
+  id: string;
+  title: string;
+  description: string;
+  targetSelector: string;
+  position: 'top' | 'bottom' | 'left' | 'right' | 'center';
+  isLast?: boolean;
+}
+
+interface UsertourDefinition {
+  id: string;
+  name: string;
+  description: string;
+  targetRoles?: string[];
+  autoStart: boolean;
+  steps: UsertourStep[];
+}
+
+const ONBOARDING_TOUR: UsertourDefinition = {
+  id: 'brand-onboarding',
+  name: 'Brand Portal Onboarding',
+  description: 'Quick tour of the brand portal — shows you around the key sections.',
+  targetRoles: [],
+  autoStart: true,
+  steps: [
+    {
+      id: 'welcome', title: 'Welcome to Mercenta Partners',
+      description: 'This quick tour will show you around the brand portal. You can revisit this guide anytime from the Help menu.',
+      targetSelector: '[data-tour="brand-dashboard"]', position: 'bottom',
+    },
+    {
+      id: 'dashboard', title: 'Your Dashboard',
+      description: 'Your dashboard shows your revenue, active shipments, compliance score, and any deductions at a glance.',
+      targetSelector: '[data-tour="brand-dashboard"]', position: 'bottom',
+    },
+    {
+      id: 'purchase_orders', title: 'Purchase Orders',
+      description: 'Review and accept or reject POs here. Rejection affects your vendor performance — read the guidance in Settings > Operational Guidance.',
+      targetSelector: '[data-tour="nav-purchase_orders"]', position: 'right',
+    },
+    {
+      id: 'catalog', title: 'Product Catalog',
+      description: 'Upload and manage your products. Your first product submission requires compliance gate approval.',
+      targetSelector: '[data-tour="nav-catalog"]', position: 'right',
+    },
+    {
+      id: 'logistics', title: 'Inbound Shipments',
+      description: 'Track shipments from your factory to the UK retail fulfilment network.',
+      targetSelector: '[data-tour="nav-logistics"]', position: 'right',
+    },
+    {
+      id: 'compliance', title: 'UK Compliance',
+      description: 'Submit required compliance documents. The compliance gate must be cleared before you can submit products.',
+      targetSelector: '[data-tour="nav-compliance"]', position: 'right',
+    },
+    {
+      id: 'settings', title: 'Settings & Guidance',
+      description: 'Configure your brand profile, team members, and operational guidance. The Operational Guidance page contains PO-rejection rules, shipping defaults, and compliance deadlines.',
+      targetSelector: '[data-tour="nav-settings"]', position: 'right', isLast: true,
+    },
+  ],
+};
+
+function tourToUsertourPayload(tour: UsertourDefinition): Record<string, unknown> {
+  return {
+    id: tour.id,
+    name: tour.name,
+    description: tour.description,
+    autoStart: tour.autoStart,
+    targetRoles: tour.targetRoles,
+    steps: tour.steps.map((step, i) => ({
+      id: step.id,
+      title: step.title,
+      description: step.description,
+      targetSelector: step.targetSelector,
+      position: step.position,
+      isLast: step.isLast ?? i === tour.steps.length - 1,
+    })),
+  };
+}
 
 interface TourLoaderProps {
   currentView: string;
