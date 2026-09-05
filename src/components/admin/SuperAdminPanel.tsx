@@ -20,11 +20,15 @@ import {
   Handshake,
   PiggyBank,
   ClipboardList,
+  Receipt,
+  Bot,
 } from 'lucide-react';
 
 const SUPER_ADMIN_TABS = [
   { id: 'staff', label: 'Staff & RBAC', icon: Users },
   { id: 'applications', label: 'Applications', icon: ClipboardList },
+  { id: 'accounting', label: 'Accounting', icon: Receipt },
+  { id: 'rakazo', label: 'Rakazo', icon: Bot },
   { id: 'homepage', label: 'Homepage Editor', icon: Layout },
   { id: 'research', label: 'Product Research', icon: Search },
   { id: 'manufacturer', label: 'Manufacturer Sourcing', icon: Factory },
@@ -40,6 +44,8 @@ import { GrantsInvestorsSection } from './GrantsInvestorsSection';
 import { InvestorPitchSection } from './InvestorPitchSection';
 import { BankFinancingSection } from './BankFinancingSection';
 import { ApplicationsPanel } from './ApplicationsPanel';
+import { AccountingPanel } from './AccountingPanel';
+import { RakazoPanel } from './RakazoPanel';
 
 const ROLE_OPTIONS: { value: StaffRole; label: string }[] = [
   { value: 'Super Admin', label: 'Super Admin' },
@@ -444,6 +450,14 @@ export function SuperAdminPanel() {
 
       {activeTab === 'applications' && (
         <ApplicationsPanel />
+      )}
+
+      {activeTab === 'accounting' && (
+        <AccountingPanel />
+      )}
+
+      {activeTab === 'rakazo' && (
+        <RakazoPanel />
       )}
 
       {activeTab === 'homepage' && (

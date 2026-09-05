@@ -39,3 +39,5 @@ access-gate.spec.ts: 6 passed, 3 skipped, 0 failed
 | Work Item | Status | Notes |
 |---|---|---|
 | **Droplet consolidation: mercenta-agents-v2** | ✅ **DONE** | Recovery droplet (597960910) renamed → mercenta-agents-v2. Old droplet (596993347) deleted. Snapshot (244127812) deleted. New droplet: IP 24.144.86.50, size s-2vcpu-4gb (4GB). Web UI accessible at https://24-144-86-50.sslip.io (HTTP 200). All 6 containers running. |
+
+| | **Margaret bot created on Rakazo** | ✅ **DONE** | New bot "Margaret" (UK Accountant / Financial Controller) created. Routine "Daily Financial Report" 6:30am weekdays. Penny Pincher instructions updated with coordination note. DEMO_MODE.md updated (20 bots). Test run completed with sample output. |\n
