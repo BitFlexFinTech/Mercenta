@@ -92,6 +92,13 @@ Do NOT say "DONE" or "complete" until all 6 steps above are shown.
 If a test fails, report it honestly. Do not mark tests as fixme
 to hide failures.
 
+## Deployment rules — CRITICAL
+
+- Do NOT deploy unless the user explicitly says "deploy".
+- Only deploy to demo.mercenta.co.uk (Namecheap shared hosting).
+- The deploy script is scripts/deploy-demo.sh — do NOT create any other deploy script.
+- Never deploy to mercenta.co.uk (live domain) until the GO_LIVE.md playbook is executed.
+
 Additional standing rules:
 - Do NOT change any visual styling, layout, fonts, or colors
   unless explicitly told to in the current task

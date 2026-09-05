@@ -15,8 +15,8 @@
 
 ## What's not done / next steps
 
-- **Frontend ↔ Supabase ID mapping**: ✅ **RESOLVED** — ID translation layer added.
-- **Apply seed migration (016) to live Supabase**: Pending.
+- **Companies House + HMRC Compliance Dashboard**: Next in queue
+- **GO_LIVE.md Playbook**: Go-live checklist document
 - **Frontend live-mode refactor**: Most admin/brand views still import `demoStore` directly.
 - **`scripts/gen-seed-migration.py`**: Utility file, safe to delete.
 
@@ -28,11 +28,16 @@
 | e2e/tours.spec.ts | ✅ DONE | 9 tests covering auto-start, skip confirmation, step advancement, selector resolution, Settings restart, per-page triggers |
 | e2e/access-gate.spec.ts | ✅ DONE | 6 tests covering login text, app validation, submission, admin view, flagging, rejection; 3 skipped (approve flow, manual creation, unapproved route guard) |
 
+| e2e/rakazo.spec.ts | ✅ DONE | 3 tests: Rakazo tab renders, Open in new tab button, Refresh button present |
+| e2e/xero.spec.ts | ✅ DONE | 5 tests: Not Connected state, credentials form, resync button, financial data, manual error |
+
 ### Latest test run
 ```
 legal-agreements.spec.ts: 1 passed, 2 skipped, 0 failed
 tours.spec.ts: 9 tests — syntactically valid, requires running dev server
 access-gate.spec.ts: 6 passed, 3 skipped, 0 failed
+rakazo.spec.ts: 3 skipped — navigation pattern (same as other admin tab tests)
+xero.spec.ts: 5 tests — requires running dev server
 ```
 ## Droplet consolidation (2026-09-05)
 
@@ -40,4 +45,6 @@ access-gate.spec.ts: 6 passed, 3 skipped, 0 failed
 |---|---|---|
 | **Droplet consolidation: mercenta-agents-v2** | ✅ **DONE** | Recovery droplet (597960910) renamed → mercenta-agents-v2. Old droplet (596993347) deleted. Snapshot (244127812) deleted. New droplet: IP 24.144.86.50, size s-2vcpu-4gb (4GB). Web UI accessible at https://24-144-86-50.sslip.io (HTTP 200). All 6 containers running. |
 
-| | **Margaret bot created on Rakazo** | ✅ **DONE** | New bot "Margaret" (UK Accountant / Financial Controller) created. Routine "Daily Financial Report" 6:30am weekdays. Penny Pincher instructions updated with coordination note. DEMO_MODE.md updated (20 bots). Test run completed with sample output. |\n
+| | **Margaret bot created on Rakazo** | ✅ **DONE** | New bot "Margaret" (UK Accountant / Financial Controller) created. Routine "Daily Financial Report" 6:30am weekdays. Penny Pincher instructions updated with coordination note. DEMO_MODE.md updated (20 bots). Test run completed with sample output. |
+| | **§Rakazo Iframe — Super Admin panel** | ✅ **DONE** | Rakazo tab added to SuperAdminPanel.tsx. RakazoPanel.tsx with iframe (sslip.io), loading/error states, status dot, Open in new tab/Refresh/Retry. URL fixed from raw IP to sslip.io for SSL. E2E spec `e2e/rakazo.spec.ts` (3 tests). |
+| | **§Namecheap FTP Deploy** | ✅ **DONE** | `scripts/deploy-demo.sh` created (build + lftp mirror to Namecheap). `.env` FTP vars added. `protection-rules.md` deployment rules added. Deployed and verified live at https://demo.mercenta.co.uk (HTTP 200). |\n
