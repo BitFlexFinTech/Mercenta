@@ -8,7 +8,7 @@ type LoadState = 'loading' | 'loaded' | 'error';
 const RAKAZO_URL =
   (typeof import.meta !== 'undefined' &&
     (import.meta.env.VITE_RAKAZO_URL as string | undefined)) ||
-  'https://24.144.86.50';
+  'https://24-144-86-50.sslip.io';
 
 /**
  * If the iframe hasn't fired onLoad within TIMEOUT_MS we show the fallback
