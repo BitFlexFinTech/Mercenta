@@ -116,9 +116,9 @@ export function Login() {
             />
             <span className="text-xl font-semibold text-white">{BRAND_NAME}</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Investor Demo Access</h1>
+          <h1 className="text-2xl font-bold text-white mb-1">Partner Login</h1>
           <p className="text-sm text-zinc-500">
-            One-click access as any seeded brand — or an operations environment
+            Access your brand portal or operations environment
           </p>
         </div>
 
