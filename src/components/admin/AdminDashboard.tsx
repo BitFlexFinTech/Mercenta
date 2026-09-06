@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/utils/cn';
@@ -50,7 +50,7 @@ export function AdminDashboard({ department, onNavigate }: { department?: AdminD
   /** §Stage-17 fix #4 — every summary card opens a drill-down detail modal. */
   const [openCard, setOpenCard] = useState<string | null>(null);
 
-  const totalRevenue = shipments.reduce((sum, s) => sum + s.value, 0);
+  const totalRevenue = useMemo(() => shipments.reduce((sum, s) => sum + s.value, 0), [shipments]);
   // §Stage-17 — derive from the canonical demo dataset, never hardcode a count.
   const activeBrands = ALL_DEMO_BRANDS.length;
   const totalShipments = shipments.length;
@@ -63,56 +63,62 @@ export function AdminDashboard({ department, onNavigate }: { department?: AdminD
   const complianceDocsAll = useComplianceDocuments().data?.data ?? [];
   const contractsAll = useContracts().data?.data ?? [];
 
-  const brandNameById = new Map(
+  const brandNameById = useMemo(() => new Map(
     brandsList.map((b) => [b.id, b.profile.businessName] as const)
-  );
-  const brandRegionById = new Map(
+  ), [brandsList]);
+  const brandRegionById = useMemo(() => new Map(
     ALL_DEMO_BRANDS.map((b) => [b.id, b.region] as const)
-  );
-  const complianceDocsAgg = complianceDocsAll.slice(0, 8).map((d) => ({
+  ), []);
+  const complianceDocsAgg = useMemo(() => complianceDocsAll.slice(0, 8).map((d) => ({
     brand: brandNameById.get(d.brandId) ?? 'Unknown',
     region: brandRegionById.get(d.brandId) ?? 'north_america',
     docType: d.type,
     status: d.status === 'approved' ? 'verified' : 'pending',
-  }));
-  const monthPrefix = new Date().toISOString().slice(0, 7);
-  const revenueThisMonth = commissionsAll
+  })), [complianceDocsAll, brandNameById, brandRegionById]);
+  const monthPrefix = useMemo(() => new Date().toISOString().slice(0, 7), []);
+  const revenueThisMonth = useMemo(() => commissionsAll
     .filter((c) => (c.createdAt ?? '').startsWith(monthPrefix))
-    .reduce((a, c) => a + c.commissionAmount, 0);
-  const posAwaitingAction = posAll.filter(
+    .reduce((a, c) => a + c.commissionAmount, 0), [commissionsAll, monthPrefix]);
+  const posAwaitingAction = useMemo(() => posAll.filter(
     (p) => p.status === 'received' || p.status === 'under_review'
-  );
-  const docsAwaitingReview = complianceDocsAll.filter(
+  ), [posAll]);
+  const docsAwaitingReview = useMemo(() => complianceDocsAll.filter(
     (d) => d.status === 'under_review' || d.status === 'uploaded'
-  );
-  const renewalsSoon = contractsAll
+  ), [complianceDocsAll]);
+  const renewalsSoon = useMemo(() => contractsAll
     .map((c) => ({
       c,
       urgency: renewalUrgency(c.renewalDate, new Date().toISOString()),
     }))
-    .filter(({ urgency }) => urgency !== 'ok');
+    .filter(({ urgency }) => urgency !== 'ok'), [contractsAll]);
   // Category performance: PO value aggregated per owning brand's category.
-  const poValueByBrand = new Map<string, number>();
-  for (const p of posAll) {
-    poValueByBrand.set(p.brandId, (poValueByBrand.get(p.brandId) ?? 0) + p.poValue);
-  }
-  const poValueByCategory = new Map<string, number>();
-  for (const b of ALL_DEMO_BRANDS) {
-    const v = poValueByBrand.get(b.id) ?? 0;
-    poValueByCategory.set(b.category, (poValueByCategory.get(b.category) ?? 0) + v);
-  }
-  const topCategories = [...poValueByCategory.entries()]
+  const poValueByBrand = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const p of posAll) {
+      map.set(p.brandId, (map.get(p.brandId) ?? 0) + p.poValue);
+    }
+    return map;
+  }, [posAll]);
+  const poValueByCategory = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const b of ALL_DEMO_BRANDS) {
+      const v = poValueByBrand.get(b.id) ?? 0;
+      map.set(b.category, (map.get(b.category) ?? 0) + v);
+    }
+    return map;
+  }, [poValueByBrand]);
+  const topCategories = useMemo(() => [...poValueByCategory.entries()]
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
+    .slice(0, 5), [poValueByCategory]);
 
   // Compliance gate: count brands with all docs approved vs blocked
-  const complianceGateCleared = ALL_DEMO_BRANDS.filter(function(b) {
+  const complianceGateCleared = useMemo(() => ALL_DEMO_BRANDS.filter(function(b) {
     var brandDocs = complianceDocsAll.filter(function(d) { return d.brandId === b.id; });
     var hasContract = contractsAll.some(function(c) { return c.brandId === b.id && (c.status === 'signed' || c.status === 'active'); });
     var requiredTypes = ['letter_of_authorization', 'product_safety_ukca', 'insurance_certificate', 'brand_registry_confirmation'];
     var allApproved = requiredTypes.every(function(t) { return brandDocs.some(function(d) { return d.type === t && d.status === 'approved'; }); });
     return allApproved && hasContract;
-  }).length;
+  }).length, [complianceDocsAll, contractsAll]);
   const complianceGateBlocked = ALL_DEMO_BRANDS.length - complianceGateCleared;
 
   const OVERVIEW_CARDS: { label: string; value: string; trend: string; trendUp: boolean; icon: React.ReactNode }[] = [

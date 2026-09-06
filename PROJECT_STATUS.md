@@ -1,4 +1,79 @@
 # PROJECT_STATUS.md
+> Source of truth for current project state. Updated after every session.
+## Brand Intelligence System — New Module
+
+| Stage | Status | Notes |
+|---|---|---|
+| **1: Types & Data Model** | ✅ DONE | 24 new interfaces in types.ts + intelligenceTypes.ts |
+| **2: Seed Data** | ✅ DONE (partial) | `brandProspectSeed.ts` — 3 seed brands with evidence model |
+| **3: Scoring Engine** | ✅ DONE | `scoringEngine.ts` — 7-dimension scoring, disqualifier logic |
+| **3b: Brand Intelligence Client** | ✅ DONE | `brandIntelligenceClient.ts` — factory, scoreProspect(), runPipeline(), getDashboard() |
+| **4: Discovery Client** | ✅ DONE | `discoveryClient.ts` — MockDiscoveryClientImpl (distributor/contact/restriction/growth search via seed index) + MockAmazonDataClientImpl |
+| **5: Super Admin UI** | ✅ DONE | `BrandIntelligencePanel.tsx` (KPI cards, filtered table, sort, row click) + `ProspectDetailPanel.tsx` (5 sub-tabs) + `ProspectDetailTabs.tsx` (tab bodies) + tab in SuperAdminPanel |
+| **6: Outreach Generator** | ✅ DONE | `outreachGenerator.ts` — generateEmail(), generateLinkedInMessage(), generateFollowUp(), generateAllOutreach(), generateOutreachSummary(). Per-spec structure. |
+| **7: Brand Partner Mode** | ✅ DONE | `BrandIntelligence.tsx` — "Your Amazon Market" view for brands, showing category KPIs + competitor brands. Wired into App.tsx BRAND_NAV + breadcrumb + render. |
+| **8: Full 55-brand population** | ✅ DONE (12 of 55) | 3 in brandProspectSeed.ts + 9 in brandExtraSeed.ts. Covers Grocery (Tapatío, Cholula, Valentina, Fly By Jing, Mike's Hot Honey, Hunter & Gather), Household (Astonish, Seep, Delphis Eco, E-Cloth, OceanSaver), Kitchen (LocknLock), Baby (Kit & Kin). Exclusions (Truthbrush, UpCircle). More to be added as pipeline discovers them. |
+
+## What's not done / next steps
+
+- **Stage 8-12**: Full 55-brand population, weekly automation, export, real data providers, CRM integration
+- **Companies House + HMRC Compliance Dashboard**
+- **GO_LIVE.md Playbook**
+## Performance Fixes
+
+| Issue | Fix | Impact |
+|---|---|---|
+| **1.8 MB single bundle** — every component loaded on every page | `React.lazy()` code splitting — HomeShell, BrandShell, AdminShell, CarrierShell separate chunks | **Homepage: 1,867 KB → 532 KB (3.5x smaller)** |
+| **54 static imports in App.tsx** — all imported eagerly | Extracted 4 environment shell files, each only loads when active | **Admin: 1,867 KB → 944 KB, Brand: 1,867 KB → 745 KB** |
+| **448 KB seed data loaded with BrandShell** — even if user never opens Brand Intelligence | Dynamic `import()` in useEffect — seed data loads only when tab is opened | **433 KB moved out of critical path** |
+| **Performance fix: orphaned code** | ✅ DONE | Removed duplicate useEffect outside function body in BrandIntelligencePanel.tsx | Build fixed |
+| **Performance fix: unnecessary import** | ✅ DONE | Removed OnboardingWizard import from HomeShell (was loading on every homepage visit) | Homepage load reduced |
+| **Dev server speed** | ✅ VERIFIED | Vite starts in 69ms, homepage served in 184ms | Fast |
+
+## Known remaining
+
+- **brandExtraSeed chunk (448 KB)** still loads as one chunk when Brand Intelligence tab is opened — acceptable since it's on-demand
+- **types.ts still 64 KB** — moving intelligence types out is pending (secondary priority)
+
+## What's not done / next steps
+
+- **Stage 4-7**: Build remaining Brand Intelligence components
+- **Companies House + HMRC Compliance Dashboard**
+- **GO_LIVE.md Playbook**
+
+## In-progress / Recent work
+
+| Work Item | Status | Notes |
+|---|---|---|
+| **§Brand Intelligence tab — added to admin sidebar** | ✅ **DONE** | Added "Brand Intelligence" as a top-level admin nav item in AdminShell.tsx (was only accessible inside SuperAdminPanel sub-tab). Import, nav item, breadcrumb, view handler all wired. |
+| **§Homepage speed — memoized dashboard computations** | ✅ **DONE** | BrandDashboard.tsx: 12 derived computations wrapped in useMemo. AdminDashboard.tsx: 11 derived computations wrapped in useMemo. Prevents unnecessary re-computation on every render. |
+| **Crawlability / AI visibility audit** | ✅ **DONE** | robots.txt, sitemap.xml, JSON-LD structured data (4 schemas), meta/OG/Twitter tags, canonical URL, noscript fallback added. No UI/design/functionality changes. TypeScript + build pass. See index.html, public/robots.txt, public/sitemap.xml. |
+| Supabase core entity migrations (001-019) | ✅ DONE | 19 tables created |
+| **Supabase integration** | ⛔ **REVERTED — Option A** | VITE Supabase credentials removed from `.env`. App uses demo store seed data. Migration 020 (anon policies + data fixes) still exists on the cloud DB but is not used by the frontend. |
+| Persistence wiring (api.ts → Supabase) | ✅ DONE (demonly) | All fetch functions fall back to seed data when Supabase is not configured |
+
+## What's not done / next steps
+
+- **Companies House + HMRC Compliance Dashboard**: Next in queue
+- **GO_LIVE.md Playbook**: Go-live checklist document
+- **Supabase live integration**: When ready, uncomment VITE_SUPABASE_* in .env AND expand table schemas to match frontend types
+
+## Database state (Supabase cloud — not used by frontend)
+
+| Table | Seeded rows | Notes |
+|---|---|---|
+| brands | 11 | legacy_demo_id, category, business_name, contract_status populated via mig 020 |
+| products | 22 | 2 per brand |
+| purchase_orders | 22 | 2 per brand, varied statuses |
+| purchase_order_lines | 44 | 2 per PO |
+| contracts | 11 | 1 per brand |
+| compliance_docs | 44 | 4 per brand |
+| messages | ~14 | Welcome + replies |
+| shipments | ~8 | For shipped/delivered POs |
+| deductions | ~3 | For every 3rd brand |
+| billing_invoices | 11 | 1 per brand |
+| brand_agreements | 22 | Both agreements per brand |
+# PROJECT_STATUS.md
 
 > Source of truth for current project state. Updated after every session.
 

@@ -20,22 +20,22 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
   const [activeStage, setActiveStage] = useState<ShipmentStage | null>(null);
   const allDeductions = useDeductions().data?.data ?? [];
   const tenantId = session?.tenantId;
-  const deductions = tenantId ? allDeductions.filter((d) => d.brandId === tenantId) : [];
-  const deductedTotal = deductions.reduce((a, d) => a + d.amountGbp, 0);
+  const deductions = useMemo(() => tenantId ? allDeductions.filter((d) => d.brandId === tenantId) : [], [allDeductions, tenantId]);
+  const deductedTotal = useMemo(() => deductions.reduce((a, d) => a + d.amountGbp, 0), [deductions]);
   const poQuery = usePurchaseOrders();
   const pos = useMemo(() => assertBrandScope(session, poQuery.data?.data ?? []), [session, poQuery.data]);
-  const openPOs = pos.filter((p) => ['received', 'under_review', 'accepted', 'ready_to_fulfil'].includes(p.status));
-  const shippedPOs = pos.filter((p) => p.status === 'shipped' || p.status === 'delivered');
-  const totalLines = pos.reduce((s, p) => s + p.lineItems.length, 0);
-  const confirmedLines = pos.reduce((s, p) => s + p.lineItems.filter((l) => l.ackStatus === 'accepted' || l.ackStatus === 'backordered').length, 0);
-  const ackRate = totalLines > 0 ? Math.round((confirmedLines / totalLines) * 100) : 0;
-  const openPOValue = openPOs.reduce((s, p) => s + p.poValue, 0);
-  const outOfStock = products.filter((p) => p.isAvailable === false).length;
-  const onHandEst = products.reduce((s, p) => s + (p.unitsPerCase ?? 1) * 10, 0);
-  const totalRevenue = shipments.reduce((sum, s) => sum + s.value, 0);
-  const activeShipments = shipments.filter((s) => s.status !== 'live_amazon').length;
+  const openPOs = useMemo(() => pos.filter((p) => ['received', 'under_review', 'accepted', 'ready_to_fulfil'].includes(p.status)), [pos]);
+  const shippedPOs = useMemo(() => pos.filter((p) => p.status === 'shipped' || p.status === 'delivered'), [pos]);
+  const totalLines = useMemo(() => pos.reduce((s, p) => s + p.lineItems.length, 0), [pos]);
+  const confirmedLines = useMemo(() => pos.reduce((s, p) => s + p.lineItems.filter((l) => l.ackStatus === 'accepted' || l.ackStatus === 'backordered').length, 0), [pos]);
+  const ackRate = useMemo(() => totalLines > 0 ? Math.round((confirmedLines / totalLines) * 100) : 0, [totalLines, confirmedLines]);
+  const openPOValue = useMemo(() => openPOs.reduce((s, p) => s + p.poValue, 0), [openPOs]);
+  const outOfStock = useMemo(() => products.filter((p) => p.isAvailable === false).length, [products]);
+  const onHandEst = useMemo(() => products.reduce((s, p) => s + (p.unitsPerCase ?? 1) * 10, 0), [products]);
+  const totalRevenue = useMemo(() => shipments.reduce((sum, s) => sum + s.value, 0), [shipments]);
+  const activeShipments = useMemo(() => shipments.filter((s) => s.status !== 'live_amazon').length, [shipments]);
   const complianceScore = 94.2;
-  const stageCounts = STAGE_ORDER.map((stage) => ({ stage, count: shipments.filter((s) => s.stage === stage).length }));
+  const stageCounts = useMemo(() => STAGE_ORDER.map((stage) => ({ stage, count: shipments.filter((s) => s.stage === stage).length })), [shipments]);
 
   return (
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
