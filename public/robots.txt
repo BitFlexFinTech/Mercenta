@@ -1,0 +1,39 @@
+# robots.txt — Mercenta Partners
+# https://mercenta.co.uk
+#
+# The Mercenta platform is a single-page application (React) served from /.
+# All page routing is handled client-side; the server serves index.html for
+# every path. Crawlers that do not execute JavaScript will only see the
+# static bootstrap HTML. JavaScript-capable crawlers will see the full
+# public homepage content at /.
+
+# Allow legitimate crawlers to access public content
+User-agent: *
+Allow: /
+Allow: /$                  # Public homepage (SPA entry point)
+Allow: /privacy            # Privacy Policy (public)
+Allow: /terms              # Terms of Service (public)
+Allow: /how-it-works       # How Mercenta Works (public)
+Allow: /uk-market-access   # UK Market Access (public)
+Allow: /for-brands         # For Brands (public)
+Allow: /faq                # FAQ (public)
+Allow: /favicon.svg
+Allow: /favicon-32.png
+Allow: /apple-touch-icon.png
+Allow: /assets/            # JS/CSS bundles (required for rendering)
+
+# Block all authenticated/private areas
+Disallow: /admin           # Mercenta Admin Hub (requires login)
+Disallow: /account         # Account management (requires login)
+Disallow: /dashboard       # Brand/Admin dashboards (requires login)
+Disallow: /login           # Authentication gateway
+Disallow: /brand           # Brand Partner Portal (requires login)
+Disallow: /carrier         # 3PL Carrier Terminal (requires login)
+Disallow: /internal        # Internal tools and administration
+Disallow: /api/            # Private API endpoints
+
+# Sitemap
+Sitemap: https://mercenta.co.uk/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-Delay: 10

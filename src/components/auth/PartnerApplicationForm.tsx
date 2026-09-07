@@ -1,10 +1,48 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BRAND_NAME } from '@/config/brand';
 import { PRODUCT_CATEGORIES, MONTHLY_REVENUE_OPTIONS } from '@/types';
 import { submitApplication } from '@/data/applicationStore';
 import { verifyLinks } from '@/lib/verification/linkVerifier';
-import { ArrowLeft, Send, CheckCircle2, Globe, Instagram, Facebook } from 'lucide-react';
+import { ArrowLeft, Send, CheckCircle2, Globe, Instagram, Facebook, Search } from 'lucide-react';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
+
+const COUNTRIES_WITH_CODES = [
+  { name: 'United States', code: '+1' },
+  { name: 'Canada', code: '+1' },
+  { name: 'United Kingdom', code: '+44' },
+  { name: 'Germany', code: '+49' },
+  { name: 'France', code: '+33' },
+  { name: 'Italy', code: '+39' },
+  { name: 'Netherlands', code: '+31' },
+  { name: 'Spain', code: '+34' },
+  { name: 'Denmark', code: '+45' },
+  { name: 'Sweden', code: '+46' },
+  { name: 'Norway', code: '+47' },
+  { name: 'Poland', code: '+48' },
+  { name: 'Zimbabwe', code: '+263' },
+  { name: 'South Africa', code: '+27' },
+  { name: 'Kenya', code: '+254' },
+  { name: 'Nigeria', code: '+234' },
+  { name: 'Ghana', code: '+233' },
+  { name: 'Ethiopia', code: '+251' },
+  { name: 'Tanzania', code: '+255' },
+  { name: 'Rwanda', code: '+250' },
+  { name: 'Morocco', code: '+212' },
+  { name: 'Botswana', code: '+267' },
+  { name: 'Mauritius', code: '+230' },
+  { name: 'Egypt', code: '+20' },
+  { name: 'Australia', code: '+61' },
+  { name: 'New Zealand', code: '+64' },
+  { name: 'Japan', code: '+81' },
+  { name: 'South Korea', code: '+82' },
+  { name: 'China', code: '+86' },
+  { name: 'India', code: '+91' },
+  { name: 'Brazil', code: '+55' },
+  { name: 'Mexico', code: '+52' },
+  { name: 'UAE', code: '+971' },
+  { name: 'Turkey', code: '+90' },
+  { name: 'Israel', code: '+972' },
+];
 
 interface PartnerApplicationFormProps {
   onBack: () => void;
@@ -13,7 +51,11 @@ interface PartnerApplicationFormProps {
 
 export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicationFormProps) {
   const [companyName, setCompanyName] = useState('');
-  const [country, setCountry] = useState('');
+  const [countrySearch, setCountrySearch] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState<{ name: string; code: string } | null>(null);
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [phoneCode, setPhoneCode] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [category, setCategory] = useState<string>(PRODUCT_CATEGORIES[0]);
   const [skuCount, setSkuCount] = useState('');
   const [monthlyRevenue, setMonthlyRevenue] = useState<string>(MONTHLY_REVENUE_OPTIONS[0]);
@@ -25,13 +67,28 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch) return COUNTRIES_WITH_CODES;
+    const q = countrySearch.toLowerCase();
+    return COUNTRIES_WITH_CODES.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.code.includes(q)
+    );
+  }, [countrySearch]);
+
+  const selectCountry = (c: { name: string; code: string }) => {
+    setSelectedCountry(c);
+    setCountrySearch(c.name);
+    setPhoneCode(c.code);
+    setShowCountryDropdown(false);
+  };
+
   const atLeastOneLink = websiteUrl.trim() || instagramUrl.trim() || facebookUrl.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     if (!companyName.trim()) { setError('Company name is required.'); return; }
-    if (!country.trim()) { setError('Country is required.'); return; }
+    if (!selectedCountry) { setError('Please select your country.'); return; }
     if (!atLeastOneLink) { setError('Please provide at least one link so we can verify your brand.'); return; }
     setSubmitting(true);
     const vr = await verifyLinks({
@@ -40,7 +97,8 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
       facebookUrl: facebookUrl.trim() || null,
     });
     submitApplication({
-      companyName: companyName.trim(), country: country.trim(), category,
+      companyName: companyName.trim(), country: selectedCountry.name, category,
+      phone: phoneCode && phoneNumber ? `${phoneCode} ${phoneNumber.trim()}` : null,
       skuCount: skuCount ? parseInt(skuCount, 10) : null,
       monthlyRevenue: monthlyRevenue,
       websiteUrl: websiteUrl.trim() || null,
@@ -78,12 +136,44 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
               className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
               placeholder="Your registered business name" />
           </div>
-          <div>
+          <div className="relative">
             <label className="block text-xs font-medium text-zinc-400 mb-1.5">Country <span className="text-red-400">*</span></label>
-            <input type="text" value={country} onChange={e => setCountry(e.target.value)}
-              className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
-              placeholder="e.g. Zimbabwe, United States" />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 pointer-events-none" />
+              <input type="text" value={countrySearch} onChange={e => { setCountrySearch(e.target.value); setShowCountryDropdown(true); if (selectedCountry && e.target.value !== selectedCountry.name) setSelectedCountry(null); }}
+                onFocus={() => setShowCountryDropdown(true)} onBlur={() => setTimeout(() => setShowCountryDropdown(false), 200)}
+                className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                placeholder="Type your country name..." />
+            </div>
+            {showCountryDropdown && filteredCountries.length > 0 && (
+              <div className="absolute z-50 mt-1 w-full bg-zinc-900 border border-white/[0.08] rounded-lg shadow-2xl max-h-48 overflow-y-auto">
+                {filteredCountries.map((c) => (
+                  <button key={c.name} type="button" onMouseDown={() => selectCountry(c)}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-brass-500/10 transition-colors flex items-center justify-between ${selectedCountry?.name === c.name ? 'bg-brass-500/15 text-brass-400' : 'text-white'}`}>
+                    <span>{c.name}</span>
+                    <span className="text-xs text-zinc-500 font-mono">{c.code}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {selectedCountry && (
+              <p className="text-[10px] text-emerald-400 mt-1">Selected: {selectedCountry.name} ({selectedCountry.code})</p>
+            )}
           </div>
+          {selectedCountry && (
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Phone Number <span className="text-red-400">*</span></label>
+              <div className="flex gap-2">
+                <div className="flex-shrink-0 bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-zinc-400 font-mono flex items-center">
+                  {phoneCode || '—'}
+                </div>
+                <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)}
+                  className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
+                  placeholder="Your phone number after the country code" />
+              </div>
+              <p className="text-[10px] text-zinc-600 mt-1">Your country code is auto-filled. Enter the rest of your number.</p>
+            </div>
+          )}
           <div>
             <label className="block text-xs font-medium text-zinc-400 mb-1.5">Product Category <span className="text-red-400">*</span></label>
             <select value={category} onChange={e => setCategory(e.target.value)}

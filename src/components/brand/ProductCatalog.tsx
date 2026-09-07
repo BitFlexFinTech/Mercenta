@@ -5,7 +5,7 @@ import { cn } from '@/utils/cn';
 import { Plus, X, Flame, Lock, ShieldAlert, ImageUp, Upload } from 'lucide-react';
 import type { Product } from '@/types';
 import { evaluateComplianceGate } from '@/lib/compliance';
-import { useContracts } from '@/data/queries';
+import { useContracts, useBrandAgreements } from '@/data/queries';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { generateDefaultProductImages } from '@/lib/amazon/productImageValidator';
@@ -26,11 +26,19 @@ export function ProductCatalog() {
   const hasSignedAgreement = brandId
     ? contracts.some((c) => c.brandId === brandId && c.type === 'distribution_agreement' && (c.status === 'signed' || c.status === 'active'))
     : false;
+  // §Legal — brand agreement checks for the compliance gate
+  const brandAgreements = useBrandAgreements().data?.data ?? [];
+  const logisticsSlaAccepted = brandId
+    ? brandAgreements.some((a) => a.brandId === brandId && a.agreementType === 'logistics_sla')
+    : false;
+  const chargebackIndemnityAccepted = brandId
+    ? brandAgreements.some((a) => a.brandId === brandId && a.agreementType === 'chargeback_indemnity')
+    : false;
 
   // §3 — hard gate: catalog sync is blocked until every required
   // ComplianceDocument is approved AND the distribution agreement is signed.
   // This is the client-side check; the server-side trigger enforces it independently.
-  const gate = evaluateComplianceGate(gateDocs, hasSignedAgreement);
+  const gate = evaluateComplianceGate(gateDocs, brandProfile?.category as import('@/types').ApprovedCategory | undefined, hasSignedAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted);
   const gateCleared = gate.cleared;
 
   const handleAdd = (p: Product) => {

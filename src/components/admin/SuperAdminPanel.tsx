@@ -22,6 +22,7 @@ import {
   ClipboardList,
   Receipt,
   Bot,
+  Target,
 } from 'lucide-react';
 
 const SUPER_ADMIN_TABS = [
@@ -35,6 +36,7 @@ const SUPER_ADMIN_TABS = [
   { id: 'grants', label: 'Grants & Investors', icon: Handshake },
   { id: 'pitch', label: 'Investor Pitch', icon: FileText },
   { id: 'financing', label: 'Bank Financing', icon: PiggyBank },
+  { id: 'brandintelligence', label: 'Brand Intelligence', icon: Target },
 ];
 import { EU_MARKET_ENABLED } from '@/config/customs';
 import { HomepageEditor } from './HomepageEditor';
@@ -43,6 +45,7 @@ import { ManufacturerSourcingSection } from './ManufacturerSourcingSection';
 import { GrantsInvestorsSection } from './GrantsInvestorsSection';
 import { InvestorPitchSection } from './InvestorPitchSection';
 import { BankFinancingSection } from './BankFinancingSection';
+import { BrandIntelligencePanel } from './BrandIntelligencePanel';
 import { ApplicationsPanel } from './ApplicationsPanel';
 import { AccountingPanel } from './AccountingPanel';
 import { RakazoPanel } from './RakazoPanel';
@@ -482,6 +485,10 @@ export function SuperAdminPanel() {
 
       {activeTab === 'financing' && (
         <BankFinancingSection />
+      )}
+
+      {activeTab === 'brandintelligence' && (
+        <BrandIntelligencePanel />
       )}
     </div>
   );

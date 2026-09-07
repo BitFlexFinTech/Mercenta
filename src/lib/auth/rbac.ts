@@ -8,7 +8,6 @@
  * authorization — they only ever narrow an already-scoped query.
  */
 import type { Environment, SessionRole } from '@/types';
-import { ALL_DEMO_BRANDS } from '@/data/demoData';
 
 export type SessionTier = 'brand' | 'admin_staff' | 'super_admin' | '3pl';
 
@@ -74,14 +73,6 @@ export function filterNavForTier<T extends { id: string }>(
 ): T[] {
   return items.filter((i) => canAccessView(tier, i.id));
 }
-
-/** Every configured demo brand → one-click login entry. */
-export const DEMO_BRAND_SESSIONS = ALL_DEMO_BRANDS.map((b) => ({
-  brandId: b.id,
-  name: b.name,
-  nation: b.nation,
-  category: b.category,
-}));
 
 /* ── §Stage-25 — staff permission tiers ───────────────────────────────────── */
 

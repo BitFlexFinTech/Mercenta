@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { BRAND_NAME, BRAND_LEGAL_NAME } from '@/config/brand';
 import {
@@ -7,11 +7,18 @@ import {
   type HomeIconName,
 } from '@/config/homepageContent';
 import { cn } from '@/utils/cn';
-import logoMark from '@/assets/mercenta-mark-dark-bg.svg';
-import logoLockup from '@/assets/mercenta-logo-lockup.svg';
 import { TamSamAggregate } from '@/components/shared/TamSamDisplay';
 import { PrivacyPolicy } from '@/components/marketing/PrivacyPolicy';
 import { TermsOfService } from '@/components/marketing/TermsOfService';
+import { PublicNav, type PublicPage } from '@/components/marketing/PublicNav';
+import { PublicFooter } from '@/components/marketing/PublicFooter';
+
+// §Lazy-load — code-split these pages so they don't block the homepage bundle
+const HowItWorks = lazy(() => import('@/components/marketing/HowItWorks').then(m => ({ default: m.HowItWorks })));
+const UKMarketAccess = lazy(() => import('@/components/marketing/UKMarketAccess').then(m => ({ default: m.UKMarketAccess })));
+const ForBrands = lazy(() => import('@/components/marketing/ForBrands').then(m => ({ default: m.ForBrands })));
+const FAQ = lazy(() => import('@/components/marketing/FAQ').then(m => ({ default: m.FAQ })));
+
 import {
   ArrowRight,
   Truck,
@@ -43,12 +50,6 @@ function icon(name: HomeIconName | undefined) {
 
 const fillBrand = (s: string) => s.split('{{brand}}').join(BRAND_NAME);
 
-const NAV_ITEMS = [
-  { label: 'About Us', sectionId: 'about' },
-  { label: 'Services', sectionId: 'services' },
-  { label: 'UK Network', sectionId: 'network' },
-];
-
 /** Scroll-reveal via IntersectionObserver; no-ops for reduced-motion users. */
 function useScrollReveal(active: boolean) {
   useEffect(() => {
@@ -70,14 +71,63 @@ function useScrollReveal(active: boolean) {
   }, [active]);
 }
 
+function renderPublicPage(
+  page: PublicPage,
+  onNavigate: (p: PublicPage | null) => void,
+  openPortal: () => void,
+) {
+  if (page === 'privacy') return <PrivacyPolicy onBack={() => onNavigate(null)} />;
+  if (page === 'terms') return <TermsOfService onBack={() => onNavigate(null)} />;
+  if (page === 'how-it-works') return (
+    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+      <HowItWorks onNavigate={onNavigate as any} onOpenPortal={openPortal} />
+    </Suspense>
+  );
+  if (page === 'uk-market-access') return (
+    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+      <UKMarketAccess onNavigate={onNavigate as any} onOpenPortal={openPortal} />
+    </Suspense>
+  );
+  if (page === 'for-brands') return (
+    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+      <ForBrands onNavigate={onNavigate as any} onOpenPortal={openPortal} />
+    </Suspense>
+  );
+  if (page === 'faq') return (
+    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+      <FAQ onNavigate={onNavigate as any} onOpenPortal={openPortal} />
+    </Suspense>
+  );
+  return null;
+}
+
 export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: HomepageContent } = {}) {
   const { setEnvironment } = useApp();
-  const [legalPage, setLegalPage] = useState<'privacy' | 'terms' | null>(null);
+  const [publicView, setPublicView] = useState<PublicPage | null>(null);
 
+  // §Crawlability — detect direct URL access so crawlers see the correct page.
+  useEffect(() => {
+    const path = window.location.pathname.replace(/\/+$/, '');
+    if (path === '/privacy') setPublicView('privacy');
+    else if (path === '/terms') setPublicView('terms');
+    else if (path === '/how-it-works') setPublicView('how-it-works');
+    else if (path === '/uk-market-access') setPublicView('uk-market-access');
+    else if (path === '/for-brands') setPublicView('for-brands');
+    else if (path === '/faq') setPublicView('faq');
+  }, []);
+
+  const openPortal = () => setEnvironment('login');
+
+  // ALL hooks must run before any conditional logic (Rules of Hooks).
   const reducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   useScrollReveal(!reducedMotion);
+
+  // Conditional pages rendered as early return AFTER all hooks.
+  if (publicView && publicView !== 'home') {
+    return renderPublicPage(publicView, setPublicView, openPortal);
+  }
 
   const scrollTo = (sectionId: string) => {
     const el = document.getElementById(sectionId);
@@ -85,50 +135,11 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
   };
 
-  const openPortal = () => setEnvironment('login');
   const rv = !reducedMotion ? 'reveal' : '';
-
-  // Show legal pages when toggled from footer
-  if (legalPage === 'privacy') return <PrivacyPolicy onBack={() => setLegalPage(null)} />;
-  if (legalPage === 'terms') return <TermsOfService onBack={() => setLegalPage(null)} />;
 
   return (
     <div className="min-h-screen bg-ink text-parchment font-plex">
-      {/* Navigation */}
-      <nav className="fixed top-0 inset-x-0 z-50 bg-ink/80 backdrop-blur-xl border-b border-brass/10">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button
-            onClick={() => window.scrollTo({ top: 0 })}
-            className="flex items-center gap-2.5"
-            aria-label={`${BRAND_NAME} home`}
-          >
-            <img src={logoMark} alt="" className="w-8 h-8" />
-            <span className="font-display text-lg font-semibold text-parchment tracking-wide">
-              Mercenta
-              <span className="text-brass ml-1.5 font-mono text-xs tracking-[0.25em] uppercase">
-                Partners
-              </span>
-            </span>
-          </button>
-          <div className="hidden md:flex items-center gap-6">
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.sectionId}
-                onClick={() => scrollTo(item.sectionId)}
-                className="text-sm text-steel hover:text-parchment transition-colors"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={openPortal}
-            className="text-sm font-medium border border-brass/40 text-brass hover:bg-brass/10 px-4 py-1.5 rounded-lg transition-colors"
-          >
-            {c.hero.secondaryCta}
-          </button>
-        </div>
-      </nav>
+      <PublicNav currentPage="home" onNavigate={setPublicView} onOpenPortal={openPortal} />
 
       {/* Hero — two columns: pitch left, live tracker right */}
       <section id="home" className="pt-32 pb-20 px-6">
@@ -371,23 +382,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-6 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <img src={logoLockup} alt={BRAND_LEGAL_NAME} className="h-10 rounded-md" />
-          <div className="flex items-center gap-4">
-            <button onClick={() => setLegalPage('privacy')} className="font-mono text-[11px] text-zinc-600 hover:text-brass-400 transition-colors">
-              Privacy Policy
-            </button>
-            <button onClick={() => setLegalPage('terms')} className="font-mono text-[11px] text-zinc-600 hover:text-brass-400 transition-colors">
-              Terms of Service
-            </button>
-          </div>
-          <div className="font-mono text-xs text-steel tracking-wide">
-            {BRAND_LEGAL_NAME} · UK Importer of Record — EORI Registered
-          </div>
-        </div>
-      </footer>
+      <PublicFooter onNavigate={setPublicView} onOpenPortal={openPortal} />
     </div>
   );
 }

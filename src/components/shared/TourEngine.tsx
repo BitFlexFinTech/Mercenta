@@ -148,8 +148,11 @@ function useTourProgressReactive(brandId: string): TourProgress {
 function getTargetRect(targetSelector: string): { top: number; left: number; width: number; height: number } | null {
   const el = document.querySelector(targetSelector);
   if (!el) return null;
+  // Scroll the element into view so the tooltip can position near it
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   const rect = el.getBoundingClientRect();
   return { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
+/* ── Tour step card ────────────────────────────────────────────── */
 }
 
 /* ── Tour step card ────────────────────────────────────────────── */
@@ -385,7 +388,22 @@ export function TourEngine(props: TourEngineProps) {
     <>
       {showTour && currentStep && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/40 pointer-events-none" />
+          <div className="fixed inset-0 z-40 bg-black/60 pointer-events-none" />
+          {(() => {
+            const el = document.querySelector(currentStep.targetSelector);
+            if (!el) return null;
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const r = el.getBoundingClientRect();
+            return (
+              <div className="fixed z-40 pointer-events-none" style={{
+                top: r.top - 4, left: r.left - 4,
+                width: r.width + 8, height: r.height + 8,
+                borderRadius: 8,
+                boxShadow: '0 0 0 4px rgba(212, 168, 83, 0.7), 0 0 20px rgba(212, 168, 83, 0.3)',
+                transition: 'all 0.3s ease',
+              }} />
+            );
+          })()}
           <TourStepCard step={currentStep} currentIndex={currentStepIndex} totalSteps={remainingSteps.length}
             onNext={handleNext} onFinish={handleFinish} onSkip={handleDismiss} />
         </>

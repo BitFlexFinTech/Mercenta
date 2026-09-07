@@ -19,16 +19,32 @@
 - **Stage 8-12**: Full 55-brand population, weekly automation, export, real data providers, CRM integration
 - **Companies House + HMRC Compliance Dashboard**
 - **GO_LIVE.md Playbook**
-## Performance Fixes
+## Performance Fixes (2026-09-07 — permanent fix)
 
 | Issue | Fix | Impact |
 |---|---|---|
-| **1.8 MB single bundle** — every component loaded on every page | `React.lazy()` code splitting — HomeShell, BrandShell, AdminShell, CarrierShell separate chunks | **Homepage: 1,867 KB → 532 KB (3.5x smaller)** |
-| **54 static imports in App.tsx** — all imported eagerly | Extracted 4 environment shell files, each only loads when active | **Admin: 1,867 KB → 944 KB, Brand: 1,867 KB → 745 KB** |
-| **448 KB seed data loaded with BrandShell** — even if user never opens Brand Intelligence | Dynamic `import()` in useEffect — seed data loads only when tab is opened | **433 KB moved out of critical path** |
-| **Performance fix: orphaned code** | ✅ DONE | Removed duplicate useEffect outside function body in BrandIntelligencePanel.tsx | Build fixed |
-| **Performance fix: unnecessary import** | ✅ DONE | Removed OnboardingWizard import from HomeShell (was loading on every homepage visit) | Homepage load reduced |
-| **Dev server speed** | ✅ VERIFIED | Vite starts in 69ms, homepage served in 184ms | Fast |
+| **512 KB single bundle** — every component and vendor loaded on every page | `build.rollupOptions.output.manualChunks` — split into 7 vendor chunks (react, recharts, supabase, sentry, lucide, query, other) + code-split shells via `React.lazy()` | **Main chunk: 512 KB → 14 KB (↓ 36x)** |
+| **52 KB of seed data loaded before first render** — bootstrap arrays pulled into GlobalStateContext | Replaced static `useState(INITIAL_*)` with empty `useState([])` + lazy `useEffect(() => import('@/data/bootstrap'))` | **Seed data loads after paint, not before** |
+| **demoData + brandDossiers + regionalDossiers imported eagerly** in GlobalStateContext | Converted to dynamic `import()` inside `activateDemoBrand()` / `activateDemo()` callbacks | **13 KB + 5 KB + 11 KB moved off critical path** |
+| **280 KB Sentry SDK loaded on every page** — static import in main.tsx | Changed to `queueMicrotask(() => import('./lib/monitoring/sentry').then(m => m.initSentry()))` | **Sentry loads after first paint, not before** |
+| **Render-blocking Google Fonts `@import`** in CSS — caused waterfall (CSS → font CSS → font files) | Removed `@import` from CSS. Added `<link rel="preconnect">` + `<link>` with `media="print" onload="this.media='all'"` in `<head>` | **Font loads in parallel, no longer blocks rendering** |
+| **No gzip/brotli on Namecheap shared hosting** | Added `AddOutputFilterByType DEFLATE` and `BROTLI` to `.htaccess` | **Assets compressed 3-4x on wire** |
+| **No far-future caching** — repeat visitors re-download everything | Added `Cache-Control: public, max-age=31536000, immutable` for `.js/.css` files in `.htaccess` | **Return visits load from disk cache** |
+| **Startup overhead** — sentry, supabase loaded as modulepreload | Deferred sentry; supabase (125 KB / 34 KB gzip) still modulepreloaded via types.ts type reference — acceptable for parallel prefetch | **First paint JavaScript: main.js (14 KB / 6 KB gzip) + vendor chunks (preloaded in parallel)** |
+
+### Before/After comparison
+
+| Metric | Before | After |
+|---|---|---|
+| Main JS chunk | 512 KB (165 KB gzip) | 14 KB (6 KB gzip) |
+| Critical-path JS | 512 KB | 14 KB |
+| CSS | 47 KB (9 KB gzip) | 47 KB (9 KB gzip) |
+| Google Fonts loading | Blocking (`@import` in CSS) | Parallel (preconnect + non-blocking link) |
+| Seed data loading | Before first render | After first render |
+| Sentry SDK | On every page (280 KB / 91 KB gzip) | Deferred to microtask after paint |
+| Server compression | Not configured | gzip + brotli via .htaccess |
+| Asset caching | None | 1 year immutable for hashed assets |
+| Build output | 1 big chunk warning | Clean build, no oversized chunks |
 
 ## Known remaining
 

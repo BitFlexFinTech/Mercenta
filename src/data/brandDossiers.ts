@@ -10,17 +10,10 @@
  * Reference-implementation parity (rule 05): same state depth as
  * REGIONAL_DOSSIERS, not just the same UI.
  */
-import { DEMO_PRODUCTS, DEMO_SHIPMENTS } from './demoData'
+import { DEMO_PRODUCTS, DEMO_SHIPMENTS, CLEARED_BRAND_IDS } from './demoData'
 import type { DemoBrand, DemoShipment } from './demoData';
-import type {
-  BrandProfile,
-  RegionalComplianceDoc,
-  RegionalDossier,
-  Shipment,
-  FinancialRecord,
-  CarrierTokens,
-  FinancialCurrency,
-} from '@/types';
+import type { BrandProfile, RegionalComplianceDoc, RegionalDossier, Shipment, FinancialRecord, CarrierTokens, FinancialCurrency } from '@/types';
+import { BANKS_BY_COUNTRY } from './banksByCountry';
 
 const CURRENCY_BY_REGION: Record<DemoBrand['region'], FinancialCurrency> = {
   north_america: 'USD',
@@ -46,28 +39,111 @@ const STAGE_BY_STATUS: Record<DemoShipment['status'], Shipment['stage']> = {
 };
 
 function buildProfile(brand: DemoBrand): BrandProfile {
+  const isCleared = CLEARED_BRAND_IDS.includes(brand.id);
+  const countryBanks = BANKS_BY_COUNTRY[brand.nation];
+  const defaultBank = countryBanks?.[0] ?? { name: 'Unknown', swift: 'PENDING-SWIFT', accountFormat: 'pending' };
+  const bankAccount = generateBankAccount(brand.nation, defaultBank);
   return {
     businessName: brand.name,
     region: brand.region === 'africa' ? 'africa' : brand.region,
     nation: brand.nation,
-    // Unmistakable placeholders (mock-first rule) — real values are admin-
-    // supplied; banking changes route through admin approval (§19.6).
-    taxId: `TAX-${brand.id.slice(6).toUpperCase()}-PENDING`,
+    category: brand.category,
+    taxId: generateTaxId(brand),
     email: brand.email,
-    phone: '+00 0 000 0000 (pending)',
+    phone: generatePhone(brand),
     signatory: brand.signatory,
     agreed: true,
-    bic: 'PENDING-BIC',
-    iban: `${brand.nation.slice(0, 2).toUpperCase()}-PENDING-REGISTRATION`,
+    bic: defaultBank.swift,
+    iban: bankAccount,
     payoutCurrency: CURRENCY_BY_REGION[brand.region],
-    // §Stage-20.2 — carriers are admin-managed; brands never connect them.
     dhlConnected: false,
     fedexConnected: false,
     bakConnected: false,
-    onboarded: true,
+    onboarded: isCleared,
     fulfillmentTrack: brand.track,
-    complianceGateStatus: 'cleared',
+    complianceGateStatus: isCleared ? 'cleared' : 'blocked',
   };
+}
+
+/** Generate realistic bank account number for a country. */
+function generateBankAccount(nation: string, bank: { name: string; swift: string; accountFormat: string }): string {
+  const m: Record<string, () => string> = {
+    'United States': () => `US-${randDigits(9)}-${randDigits(8)}`,
+    Canada: () => `CA-${randDigits(3)}-${randDigits(5)}-${randDigits(7)}`,
+    'United Kingdom': () => `GB${randDigits(2)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(2)}`,
+    Germany: () => `DE${randDigits(2)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(2)}`,
+    France: () => `FR${randDigits(2)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(2)}`,
+    Italy: () => `IT${randDigits(2)} ${randChar()} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)}`,
+    Netherlands: () => `NL${randDigits(2)} ${randLetters(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(2)}`,
+    Spain: () => `ES${randDigits(2)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)} ${randDigits(4)}`,
+    Zimbabwe: () => `ZW-BK-${randDigits(7)}`,
+    'South Africa': () => `ZA-${randDigits(6)}-${randDigits(10)}`,
+    Kenya: () => `KE-${randDigits(10)}`,
+    Nigeria: () => `NG-${randDigits(10)}`,
+  };
+  const gen = m[nation];
+  if (gen) return gen();
+  return `${nation.slice(0, 2).toUpperCase()}-${randDigits(8)}-${randDigits(6)}`;
+}
+
+/** Generate realistic tax ID for a country. */
+function generateTaxId(brand: DemoBrand): string {
+  const m: Record<string, string> = {
+    'United States': `${randDigits(2)}-${randDigits(7)}`,
+    Canada: `BN${randDigits(9)}`,
+    'United Kingdom': `GB${randDigits(3)} ${randDigits(4)} ${randDigits(4)}`,
+    Germany: `DE${randDigits(9)}`,
+    France: `FR${randDigits(2)} ${randDigits(9)}`,
+    Italy: `IT${randDigits(11)}`,
+    Netherlands: `NL${randDigits(9)}B01`,
+    Spain: `ES${randChars(1)}${randDigits(8)}`,
+    Zimbabwe: `${randDigits(3)}-${randDigits(6)}-${randDigits(3)}`,
+    'South Africa': `${randDigits(2)}/${randDigits(7)}/${randDigits(2)}`,
+    Kenya: `P${randDigits(9)}${randChar()}`,
+    Nigeria: `${randDigits(8)}-${randDigits(3)}`,
+    Ghana: `C-${randDigits(8)}`,
+    Ethiopia: `${randDigits(3)}-${randDigits(6)}-${randDigits(3)}`,
+    Tanzania: `${randDigits(9)}-${randDigits(4)}`,
+    Rwanda: `${randDigits(7)}`,
+  };
+  return m[brand.nation] ?? `${brand.nation.slice(0, 2).toUpperCase()}TAX-${randDigits(6)}`;
+}
+
+/** Generate realistic phone number for a brand's country. */
+function generatePhone(brand: DemoBrand): string {
+  const m: Record<string, string> = {
+    'United States': `+1 (${randDigits(3)}) ${randDigits(3)}-${randDigits(4)}`,
+    Canada: `+1 (${randDigits(3)}) ${randDigits(3)}-${randDigits(4)}`,
+    'United Kingdom': `+44 ${randDigits(4)} ${randDigits(6)}`,
+    Germany: `+49 ${randDigits(3)} ${randDigits(7)}`,
+    France: `+33 ${randDigits(1)} ${randDigits(2)} ${randDigits(2)} ${randDigits(2)} ${randDigits(2)}`,
+    Italy: `+39 ${randDigits(3)} ${randDigits(7)}`,
+    Netherlands: `+31 ${randDigits(2)} ${randDigits(7)}`,
+    Spain: `+34 ${randDigits(3)} ${randDigits(3)} ${randDigits(3)}`,
+    Zimbabwe: `+263 ${randDigits(3)} ${randDigits(6)}`,
+    'South Africa': `+27 ${randDigits(2)} ${randDigits(7)}`,
+    Kenya: `+254 ${randDigits(3)} ${randDigits(6)}`,
+    Nigeria: `+234 ${randDigits(3)} ${randDigits(3)} ${randDigits(4)}`,
+    Ghana: `+233 ${randDigits(3)} ${randDigits(6)}`,
+    Ethiopia: `+251 ${randDigits(2)} ${randDigits(7)}`,
+    Tanzania: `+255 ${randDigits(3)} ${randDigits(6)}`,
+    Rwanda: `+250 ${randDigits(3)} ${randDigits(6)}`,
+  };
+  return m[brand.nation] ?? `+${randDigits(2)} ${randDigits(3)} ${randDigits(6)}`;
+}
+
+function randDigits(n: number): string {
+  return Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join('');
+}
+function randChar(): string {
+  return String.fromCharCode(65 + Math.floor(Math.random() * 26));
+}
+function randChars(n: number): string {
+  return Array.from({ length: n }, () => randChar()).join('');
+}
+function randLetters(n: number): string {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  return Array.from({ length: n }, () => letters[Math.floor(Math.random() * letters.length)]).join('');
 }
 
 /** §Stage-20 fix #1 — full dossier per brand, derived from canonical data. */

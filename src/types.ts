@@ -364,7 +364,15 @@ export interface ComplianceDocument {
     | 'letter_of_authorization'
     | 'brand_registry_confirmation'
     | 'product_safety_ukca'
-    | 'insurance_certificate';
+    | 'insurance_certificate'
+    // Category-specific documents required by Amazon UK:
+    | 'baby_product_safety'          // Baby (EN 71 / EN 1888)
+    | 'cosmetic_notification_cpnp'   // Health & Personal Care (CPNP/SCNP)
+    | 'food_contact_material'        // Kitchen (Food Contact Compliance)
+    | 'weee_compliance'              // Consumer Electronics, Personal Computer
+    | 'type_approval'                // Automotive (Type Approval Docs)
+    | 'food_safety_certificate'      // Grocery (HACCP/BRC)
+    | 'textile_labelling_compliance';// Apparel
   status: 'missing' | 'uploaded' | 'under_review' | 'approved' | 'expiring' | 'expired';
   fileUrl?: string;
   expiryDate?: string;
@@ -1612,6 +1620,7 @@ export interface BrandApplication {
   id: string;
   companyName: string;
   country: string;
+phone: string | null;
   category: string;
   skuCount: number | null;
   monthlyRevenue: string | null;
@@ -1638,4 +1647,380 @@ export const BRAND_SOURCE_OPTIONS = [
   'Other',
 ] as const;
 
+/* ── §Brand Intelligence — Amazon Brand Discovery & Prospect Scoring ── */
+
+/** §Amazon Retail presence classification for a given ASIN. */
+export type AmazonOfferClassification =
+  | 'DIRECT_AMAZON_RETAIL'
+  | 'AMAZON_PRESENT_BUT_UNCLEAR'
+  | 'MARKETPLACE_HEAVY'
+  | 'MARKETPLACE_ONLY_OBSERVED'
+  | 'NO_CURRENT_OFFER'
+  | 'UNKNOWN';
+
+export type ConfidenceLevel = 'high' | 'medium' | 'low';
+
+/** Every AI-generated or researched statement is tagged with its ontological class. */
+export type EvidenceClassification =
+  | 'FACT'
+  | 'ESTIMATE'
+  | 'INFERENCE'
+  | 'RECOMMENDATION'
+  | 'UNKNOWN';
+
+/** Single evidence datum with source attribution. */
+export interface ProspectEvidence {
+  /** The field this evidence pertains to (e.g. 'uk_distributor', 'amazon_restriction'). */
+  field: string;
+  /** The observed value. */
+  value: string;
+  /** Human-readable source name. */
+  source: string;
+  /** URL where the evidence was observed. */
+  sourceUrl: string;
+  /** ISO date of observation. */
+  dateObserved: string;
+  confidence: ConfidenceLevel;
+  classification: EvidenceClassification;
+  /** Free-form notes from the researcher. */
+  notes?: string;
+}
+
+/** An ASIN belonging to a prospect brand, with observed Amazon metrics. */
+export interface ProspectASIN {
+  asin: string;
+  title: string;
+  category: string;
+  subcategory?: string;
+  /** Current buy-box price in GBP. */
+  price: number;
+  packSize?: string;
+  rating: number;
+  reviewCount: number;
+  /** Best Sellers Rank (lower = better). */
+  bsr: number;
+  subcategoryRank?: number;
+  /** URL on Amazon UK. */
+  amazonUrl: string;
+  /** Who currently holds the Featured Offer. */
+  featuredOffer?: string;
+  /** Number of marketplace sellers observed. */
+  sellerCount: number;
+  /** Whether Amazon Retail appears to be a seller. */
+  amazonRetailSeller: boolean;
+  /** Marketplace sellers observed. */
+  marketplaceSellers?: string[];
+  /** Prime eligibility. */
+  prime: boolean;
+  /** Search terms with estimated volume. */
+  searchTerms?: { term: string; estimatedMonthlySearches: number }[];
+  /** Estimated monthly unit sales. */
+  estimatedSales?: number;
+  /** Estimated monthly revenue in GBP. */
+  estimatedRevenue?: number;
+  /** Classification of Amazon's offer structure for this ASIN. */
+  amazonOfferClass: AmazonOfferClassification;
+  /** Confidence in the classification. */
+  amazonOfferConfidence: ConfidenceLevel;
+  /** Last date Amazon offer data was observed. */
+  lastObserved: string;
+  /** Evidence trail for key data points. */
+  evidence: ProspectEvidence[];
+  /** Data source label. */
+  sourceLabel: string;
+}
+export type DistributorStatus =
+  | 'NONE_FOUND'
+  | 'BRAND_DIRECT'
+  | 'DISTRIBUTOR_IDENTIFIED'
+  | 'EXCLUSIVE_DISTRIBUTOR'
+  | 'UNKNOWN';
+
+/** A detected distributor relationship for a prospect brand. */
+export interface ProspectDistributor {
+  company: string;
+  website: string;
+  /** Territory covered (e.g. 'UK', 'UK & Ireland', 'Europe'). */
+  territory: string;
+  exclusive: boolean;
+  contact?: string;
+  email?: string;
+  phone?: string;
+  /** Source of the distributor information. */
+  source: string;
+  /** URL where distributor relationship was found. */
+  sourceUrl: string;
+  confidence: ConfidenceLevel;
+  /** Evidence for this relationship. */
+  evidence: ProspectEvidence[];
+  /** Suggested approach: 'approach_brand' | 'approach_distributor' | 'approach_both'. */
+  suggestedApproach?: 'approach_brand' | 'approach_distributor' | 'approach_both';
+}
+
+export type ContactConfidence = 'verified' | 'pattern_derived' | 'public_generic' | 'unverified';
+
+/** A commercial decision-maker contact for a prospect brand. */
+export interface ProspectContact {
+  name: string;
+  jobTitle: string;
+  linkedInUrl?: string;
+  company: string;
+  country?: string;
+  email?: string;
+  emailConfidence: ContactConfidence;
+  phone?: string;
+  phoneConfidence: ContactConfidence;
+  source: string;
+  /** ISO date when contact info was last verified. */
+  lastVerified: string;
+  evidence: ProspectEvidence[];
+}
+
+export type RestrictionSeverity = 'hard' | 'conditional' | 'unknown';
+
+/** An Amazon or marketplace restriction detected for a brand. */
+export interface ProspectRestriction {
+  /** Brief description of the restriction. */
+  description: string;
+  severity: RestrictionSeverity;
+  /** Verbatim text of the restriction if available. */
+  restrictionText?: string;
+  source: string;
+  sourceUrl: string;
+  dateObserved: string;
+  evidence: ProspectEvidence[];
+}
+
+export type BrandMaturity =
+  | 'incumbent'
+  | 'challenger'
+  | 'emerging'
+  | 'niche'
+  | 'amazon_native'
+  | 'amazon_sophisticated';
+
+export type ProspectTier = 'tier_1' | 'tier_2' | 'tier_3' | 'tier_4' | 'unscored';
+
+/** Seven-dimension scoring model for brand prospects. Total = 100. */
+export interface ProspectScore {
+  /** Amazon UK demand (0-25). */
+  amazonDemand: number;
+  /** Amazon PO potential (0-20). */
+  poPotential: number;
+  /** Challenger / growth potential (0-15). */
+  growth: number;
+  /** Distribution openness / gap (0-15). */
+  distributionOpenness: number;
+  /** Likelihood of acceptance (0-10, independent of PO potential). */
+  acceptanceProbability: number;
+  /** Mercenta self-service fit (0-10). */
+  mercentaFit: number;
+  /** Margin / logistics suitability (0-5). */
+  logisticsSuitability: number;
+  /** Weighted total (0-100). */
+  total: number;
+  tier: ProspectTier;
+  /** ISO date when score was calculated. */
+  calculatedAt: string;
+}
+export type GrowthSignalType =
+  | 'major_growth_announcement'
+  | 'new_national_retailer'
+  | 'amazon_growth'
+  | 'funding'
+  | 'new_distributor'
+  | 'major_product_launch'
+  | 'new_stockist'
+  | 'retail_expansion'
+  | 'international_expansion'
+  | 'uk_launch'
+  | 'increased_amazon_reviews'
+  | 'social_traction';
+
+/** A detected growth signal for a prospect brand. */
+export interface GrowthSignal {
+  type: GrowthSignalType;
+  description: string;
+  /** Score contribution (e.g. +5 for major growth announcement). */
+  scoreContribution: number;
+  source: string;
+  sourceUrl: string;
+  dateObserved: string;
+  confidence: ConfidenceLevel;
+  evidence: ProspectEvidence[];
+}
+
+export type OutreachStatus =
+  | 'uncontacted'
+  | 'researching'
+  | 'ready_to_contact'
+  | 'contacted'
+  | 'opened'
+  | 'replied'
+  | 'interested'
+  | 'meeting_scheduled'
+  | 'negotiating'
+  | 'pilot'
+  | 'won'
+  | 'lost'
+  | 'nurture'
+  | 'disqualified';
+
+/** Wholesale / trade programme information for a prospect brand. */
+export interface ProspectWholesale {
+  wholesaleAvailable: boolean;
+  distributorProgramme: boolean;
+  retailerProgramme: boolean;
+  minimumOrderQuantity?: string;
+  tradePricingAvailable?: boolean;
+  tradeUrl?: string;
+  retailerApplicationUrl?: string;
+  source: string;
+  sourceUrl: string;
+  confidence: ConfidenceLevel;
+  evidence: ProspectEvidence[];
+}
+/** The full aggregated prospect record — one per brand. */
+export interface BrandProspect {
+  /** Unique prospect ID. */
+  id: string;
+  /** Brand name. */
+  brand: string;
+  /** Approved category. */
+  category: string;
+  /** Official brand website. */
+  website?: string;
+  /** Countries where the brand operates. */
+  countries?: string[];
+  /** UK-specific presence. */
+  ukPresence?: boolean;
+  /** Brand maturity classification. */
+  brandMaturity: BrandMaturity;
+  /** If challenger, which incumbent(s) they're taking share from. */
+  incumbentChallenged?: string[];
+  /** Human-readable summary of why this brand is interesting. */
+  whyInteresting?: string;
+  /** Amazon UK ASINs discovered for this brand. */
+  asins: ProspectASIN[];
+  /** Detected distributor relationships. */
+  distributors: ProspectDistributor[];
+  /** Wholesale / trade programme information. */
+  wholesale: ProspectWholesale;
+  /** Detected marketplace restrictions (Amazon prohibition etc.). */
+  restrictions: ProspectRestriction[];
+  /** Detected growth signals. */
+  growthSignals: GrowthSignal[];
+  /** Commercial decision-makers. */
+  contacts: ProspectContact[];
+  /** Scoring results. */
+  score: ProspectScore;
+  /** Current outreach status. */
+  outreachStatus: OutreachStatus;
+  /** Outreach records (emails, LinkedIn messages). */
+  outreach?: ProspectOutreachRecord[];
+  /** ISO date when prospect was first created. */
+  createdAt: string;
+  /** ISO date of last research update. */
+  lastResearched: string;
+  /** ISO date of last Amazon data check. */
+  lastAmazonCheck?: string;
+  /** ISO date of last distributor check. */
+  lastDistributorCheck?: string;
+  /** ISO date of last contact verification. */
+  lastContactCheck?: string;
+  /** All evidence collected for this prospect. */
+  evidence: ProspectEvidence[];
+  /** Whether this prospect is hard-disqualified. */
+  disqualified: boolean;
+  /** Reason for disqualification if applicable. */
+  disqualificationReason?: string;
+  /** Data source mode. */
+  source: 'mock' | 'live';
+  /** Research owner (admin staff ID). */
+  owner?: string;
+  /** Internal notes. */
+  notes?: string;
+}
+
+/** An outreach message (email or LinkedIn) generated for a prospect. */
+export interface ProspectOutreachRecord {
+  id: string;
+  prospectId: string;
+  contactId?: string;
+  /** 'email' | 'linkedin' */
+  channel: string;
+  subject?: string;
+  body: string;
+  status: 'draft' | 'sent' | 'opened' | 'replied';
+  /** ISO date sent. */
+  sentAt?: string;
+  /** Follow-up sequence position (0 = initial, 3 = day 3, 7 = day 7, etc.). */
+  sequenceDay: number;
+}
+
+/** Weekly snapshot of brand intelligence scores for trend tracking. */
+export interface IntelligenceSnapshot {
+  snapshotDate: string;
+  brandId: string;
+  brand: string;
+  category: string;
+  score: ProspectScore;
+  totalAsins: number;
+  estimatedMonthlyRevenue?: number;
+  distributorStatus: DistributorStatus;
+  outreachStatus: OutreachStatus;
+}
+
+/** Configuration for the intelligence pipeline run. */
+export interface IntelligencePipelineConfig {
+  /** Categories to scan (defaults to APPROVED_CATEGORIES). */
+  categories: string[];
+  /** Minimum monthly estimated units per product. */
+  minMonthlyUnits?: number;
+  /** Minimum monthly estimated revenue per product (GBP). */
+  minMonthlyRevenue?: number;
+  /** Minimum rating. */
+  minRating?: number;
+  /** Minimum review count. */
+  minReviews?: number;
+  /** Maximum number of products to scan per category. */
+  maxProductsPerCategory: number;
+  /** Maximum number of brands to return. */
+  maxBrands: number;
+  /** Whether to automatically disqualify brands with hard restrictions. */
+  autoDisqualify: boolean;
+}
+
+/** Summary intelligence dashboard data for the Super Admin view. */
+export interface IntelligenceDashboard {
+  totalBrandsTracked: number;
+  tier1Count: number;
+  tier2Count: number;
+  tier3Count: number;
+  tier4Count: number;
+  newThisWeek: number;
+  distributorGaps: number;
+  highPriorityCount: number;
+  categoryBreakdown: { category: string; count: number }[];
+  topProspect?: BrandProspect;
+  generatedAt: string;
+}
+
+/** A brand-level view for Brand Partner self-service intelligence. */
+export interface BrandMarketIntelligence {
+  brandName: string;
+  category: string;
+  estimatedMonthlySales: number;
+  estimatedMonthlyRevenue: number;
+  categoryAverageSales: number;
+  categoryMarketSize: number;
+  topCompetitors: { brand: string; estimatedSales: number; marketShare: number }[];
+  salesTrend: { month: string; sales: number }[];
+  priceDistribution: { range: string; count: number }[];
+  reviewDistribution: { range: string; count: number }[];
+  categoryGrowth: number;
+  generatedAt: string;
+  source: 'mock' | 'live';
+  sourceLabel: string;
+}
 export type BrandSource = (typeof BRAND_SOURCE_OPTIONS)[number];

@@ -62,6 +62,21 @@ export const DEMO_BRAND_PC: DemoBrand = {
 export const ALL_DEMO_BRANDS: DemoBrand[] = [...DEMO_BRANDS, DEMO_BRAND_PC];
 
 /**
+ * Brands that have cleared the compliance gate and thus have operational
+ * data (products, POs, shipments). All other brands are still in onboarding
+ * with only their profile, compliance docs, and contract visible.
+ *
+ * Zambezi: Health & Personal Care — all 4 base docs + cosmetic_notification_cpnp approved,
+ *          contract active, both agreements accepted. ✅ CLEARED
+ * DeskForge: Office Products — all 4 base docs approved (no category-specific extras),
+ *            contract active, both agreements accepted. ✅ CLEARED
+ */
+export const CLEARED_BRAND_IDS: string[] = [
+  'brand-zambezi',
+  'brand-deskforge',
+];
+
+/**
  * The row shape served for brands via api.fetchBrands() (canonical definition —
  * demoStore re-exports it; views import from HERE, never from demoStore).
  */
@@ -117,7 +132,9 @@ function skuFor(brand: DemoBrand, n: number): string {
   return `${brand.id.slice(6, 10).toUpperCase()}-${String(n).padStart(3, '0')}`;
 }
 
-export const DEMO_PRODUCTS: DemoProduct[] = ALL_DEMO_BRANDS.flatMap((brand, bi) =>
+export const DEMO_PRODUCTS: DemoProduct[] = ALL_DEMO_BRANDS
+  .filter((b) => CLEARED_BRAND_IDS.includes(b.id))
+  .flatMap((brand, bi) =>
   [1, 2].map((n) => ({
     id: `${brand.id}-p${n}`,
     brandId: brand.id,
@@ -159,7 +176,9 @@ function poStatusFor(brandIndex: number, poIndex: number): PurchaseOrderStatus {
   return PO_STATUSES[(brandIndex + poIndex) % PO_STATUSES.length];
 }
 
-export const DEMO_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS.flatMap(
+export const DEMO_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
+  .filter((b) => CLEARED_BRAND_IDS.includes(b.id))
+  .flatMap(
   (brand, bi) =>
     [0, 1].map((pi): PurchaseOrder => {
       const status = poStatusFor(bi, pi);
@@ -278,12 +297,12 @@ export const DEMO_CONTRACTS: Contract[] = ALL_DEMO_BRANDS.map((brand, i) => {
   };
 });
 
-/* ── Compliance docs — rotating state patterns ──────────────────────── */
+/* ── Compliance docs — rotating state patterns + category-specific ── */
 
 const COMPLIANCE_PATTERNS: ComplianceDocument['status'][][] = [
-  ['approved', 'approved', 'approved', 'approved', 'approved'], // fully cleared
-  ['approved', 'under_review', 'missing', 'approved', 'approved'], // partially blocked
-  ['uploaded', 'uploaded', 'under_review', 'missing', 'uploaded'], // early stage
+  ['approved', 'approved', 'approved', 'approved'], // fully cleared (pattern 0)
+  ['approved', 'under_review', 'missing', 'approved'], // partially blocked (pattern 1)
+  ['uploaded', 'uploaded', 'under_review', 'missing'], // early stage (pattern 2)
 ];
 
 const COMPLIANCE_TYPES: ComplianceDocument['type'][] = [
@@ -293,15 +312,40 @@ const COMPLIANCE_TYPES: ComplianceDocument['type'][] = [
   'brand_registry_confirmation',
 ];
 
+/** Category-specific extra compliance docs per Amazon UK requirements. */
+const CATEGORY_EXTRA_DOCS: Record<string, { type: ComplianceDocument['type']; label: string }[]> = {
+  'Baby': [{ type: 'baby_product_safety', label: 'Baby Product Safety (EN 71 / EN 1888)' }],
+  'Health & Personal Care': [{ type: 'cosmetic_notification_cpnp', label: 'Cosmetic Product Notification (CPNP/SCNP)' }],
+  'Kitchen': [{ type: 'food_contact_material', label: 'Food Contact Material Compliance' }],
+  'Consumer Electronics': [{ type: 'weee_compliance', label: 'WEEE Compliance Registration' }],
+  'Automotive': [{ type: 'type_approval', label: 'Type Approval Documentation' }],
+  'Grocery': [{ type: 'food_safety_certificate', label: 'Food Safety Certificate (HACCP/BRC)' }],
+  'Personal Computer': [{ type: 'weee_compliance', label: 'WEEE Compliance Registration' }],
+  'Apparel': [{ type: 'textile_labelling_compliance', label: 'Textile Labelling Compliance' }],
+};
+
 export const DEMO_COMPLIANCE_DOCS: ComplianceDocument[] = ALL_DEMO_BRANDS.flatMap(
   (brand, bi) => {
     const pattern = COMPLIANCE_PATTERNS[bi % COMPLIANCE_PATTERNS.length];
-    return COMPLIANCE_TYPES.map((type, ti) => ({
+    const isCleared = CLEARED_BRAND_IDS.includes(brand.id);
+
+    // Base docs: cleared brands get all approved, others get rotating pattern
+    const baseDocs = COMPLIANCE_TYPES.map((type, ti) => ({
       id: `cd-${brand.id}-${ti}`,
       brandId: brand.id,
       type,
-      status: pattern[ti],
+      status: isCleared ? 'approved' as const : pattern[ti],
     }));
+
+    // Category-specific docs: cleared brands get approved, others get missing
+    const extraDocs = (CATEGORY_EXTRA_DOCS[brand.category] ?? []).map((extra, ei) => ({
+      id: `cd-${brand.id}-extra-${ei}`,
+      brandId: brand.id,
+      type: extra.type,
+      status: isCleared ? 'approved' as const : 'missing' as const,
+    }));
+
+    return [...baseDocs, ...extraDocs];
   }
 );
 

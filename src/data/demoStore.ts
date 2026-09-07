@@ -677,7 +677,24 @@ import type { BrandAgreement, BrandAgreementType } from '@/types';
 
 /* ── §Legal — Brand agreements store ───────────────────────────────── */
 
-export const demoBrandAgreements: BrandAgreement[] = [];
+/** Seed both mandatory agreements for all 11 demo brands. */
+const now = new Date();
+export const demoBrandAgreements: BrandAgreement[] = ALL_DEMO_BRANDS.flatMap((brand) => [
+  {
+    id: `ba-${brand.id}-logistics_sla-seed`,
+    brandId: brand.id,
+    agreementType: 'logistics_sla' as BrandAgreementType,
+    acceptedAt: new Date(now.getTime() - 864e5).toISOString(),
+    version: '1.0',
+  },
+  {
+    id: `ba-${brand.id}-chargeback_indemnity-seed`,
+    brandId: brand.id,
+    agreementType: 'chargeback_indemnity' as BrandAgreementType,
+    acceptedAt: new Date(now.getTime() - 864e5).toISOString(),
+    version: '1.0',
+  },
+]);
 
 export function acceptBrandAgreement(
   brandId: string,

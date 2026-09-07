@@ -15,7 +15,7 @@ import { MERCENTA_EORI, MERCENTA_VAT } from '@/config/customs';
 import { generateCustomsDocBundle, type CustomsDocumentBundle } from '@/lib/customsDocs';
 import { useBrands, useProducts, usePurchaseOrders, useComplianceDocuments, useContracts } from '@/data/queries';
 import { uploadComplianceDoc } from '@/data/api';
-import { evaluateComplianceGate, REQUIRED_DOCUMENT_TYPES } from '@/lib/compliance';
+import { evaluateComplianceGate, getRequiredDocumentsForCategory, CATEGORY_DOC_LABELS } from '@/lib/compliance';
 
 /**
  * §Stage-3 rewritten compliance hub.

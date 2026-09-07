@@ -1,9 +1,8 @@
 /**
- * §Batch -4 item 2 — Sentry error monitoring initialization.
+ * §Batch-4 item 2 — Sentry error monitoring initialization.
  * Conditionally initializes only when VITE_SENTRY_DSN is configured.
+ * Uses dynamic import to keep the Sentry SDK out of the critical path.
  */
-
-import * as Sentry from '@sentry/react';
 
 const SENTRY_DSN: string | undefined =
   typeof import.meta !== 'undefined'
@@ -12,11 +11,12 @@ const SENTRY_DSN: string | undefined =
 
 export const sentryEnabled = Boolean(SENTRY_DSN);
 
-export function initSentry(): void {
+export async function initSentry(): Promise<void> {
   if (!SENTRY_DSN) {
     console.info('[sentry] No VITE_SENTRY_DSN — running without error monitoring.');
     return;
   }
+  const Sentry = await import('@sentry/react');
   Sentry.init({
     dsn: SENTRY_DSN,
     environment: (import.meta as Record<string, any>).env?.MODE ?? 'development',
@@ -31,20 +31,22 @@ export function initSentry(): void {
   console.info('[sentry] Initialized.');
 }
 
-export function sentryCaptureException(
+export async function sentryCaptureException(
   error: Error,
   context?: Record<string, unknown>,
-): string | null {
+): Promise<string | null> {
   if (!SENTRY_DSN) return null;
+  const Sentry = await import('@sentry/react');
   const scope = new Sentry.Scope();
   if (context) scope.setContext('extra', context);
   return Sentry.captureException(error, scope);
 }
 
-export function sentrySetUser(
+export async function sentrySetUser(
   user: { id: string; email?: string; role?: string } | null,
-): void {
+): Promise<void> {
   if (!SENTRY_DSN) return;
+  const Sentry = await import('@sentry/react');
   if (user) Sentry.setUser({ id: user.id, email: user.email, role: user.role });
   else Sentry.setUser(null);
 }

@@ -3,6 +3,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { BRAND_NAME, BRAND_LEGAL_NAME } from '@/config/brand';
 import { APPROVED_CATEGORIES, AGREEMENT_VERSIONS, type BrandAgreementType } from '@/types';
 import { acceptBrandAgreement } from '@/data/api';
+import { BANKS_BY_COUNTRY, type BankEntry } from '@/data/banksByCountry';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { Button, Input, Select, Checkbox } from '@/components/ui';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
@@ -390,20 +391,43 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
               <p className="text-xs text-zinc-500 mb-4">
                 Where should we send your wholesale payouts?
               </p>
-              <Input
-                label="SWIFT/BIC Code"
-                value={brandProfile.bic}
-                onChange={(e) => update('bic', e.target.value)}
-                placeholder="e.g. BARTZWHXXXX"
-                required
-              />
-              <Input
-                label="IBAN / Account Number"
-                value={brandProfile.iban}
-                onChange={(e) => update('iban', e.target.value)}
-                placeholder="e.g. ZW64 BART 0000 1234 5678 90"
-                required
-              />
+
+              {(() => {
+                const nation = brandProfile.nation;
+                const banks = nation ? (BANKS_BY_COUNTRY[nation] ?? []) : [];
+                if (!nation) return <p className="text-xs text-zinc-600">Select a country in step 1 to see available banks.</p>;
+
+                const bankOptions = banks.map((b) => ({ value: b.swift, label: `${b.name} (${b.swift})` }));
+                const selectedBank = banks.find((b) => b.swift === brandProfile.bic);
+
+                return (
+                  <>
+                    <div>
+                      <label className="text-xs font-medium text-zinc-400 mb-1.5 block">Select Your Bank</label>
+                      <select
+                        value={brandProfile.bic}
+                        onChange={(e) => update('bic', e.target.value)}
+                        className="w-full bg-ink-800 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brass-500/40 appearance-none"
+                        required
+                      >
+                        <option value="">-- Select bank --</option>
+                        {bankOptions.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                      {selectedBank && (
+                        <div className="bg-brass-500/5 border border-brass-500/20 rounded-lg p-3 mt-2 text-[10px] text-zinc-400 space-y-1">
+                          <p><span className="text-zinc-500">Account format:</span> {selectedBank.accountFormat}</p>
+                          {selectedBank.routingLabel && <p><span className="text-zinc-500">{selectedBank.routingLabel}:</span> {selectedBank.routingExample}</p>}
+                          <p><span className="text-zinc-500">SWIFT/BIC:</span> <span className="text-white font-mono">{selectedBank.swift}</span> (pre-filled)</p>
+                        </div>
+                      )}
+                    </div>
+                    <Input label="IBAN / Account Number" value={brandProfile.iban} onChange={(e) => update('iban', e.target.value)} placeholder={selectedBank ? `e.g. ${selectedBank.accountFormat}` : 'Enter account number'} required />
+                  </>
+                );
+              })()}
+
               <Select
                 label="Payout Currency"
                 value={brandProfile.payoutCurrency}

@@ -3,6 +3,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from 'react';
 import type {
@@ -27,19 +28,7 @@ import type {
 } from '../types';
 import { buildDistributionAgreement } from '@/lib/agreement';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
-import { ALL_DEMO_BRANDS } from '@/data/demoData';
 import { tierForRole, canAccessEnvironment, staffCanMutate, type DemoSession } from '@/lib/auth/rbac';
-import {
-  INITIAL_SHIPMENTS,
-  INITIAL_PRODUCTS,
-  INITIAL_ACTIVITY_LOGS,
-  INITIAL_LEADS,
-  INITIAL_CAMPAIGNS,
-  INITIAL_API_LOGS,
-  INITIAL_STAFF,
-} from '@/data/bootstrap';
-import { REGIONAL_DOSSIERS } from '@/data/regionalDossiers';
-import { buildBrandDossier } from '@/data/brandDossiers';
 
 interface AppState {
   environment: Environment;
@@ -134,20 +123,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [environment, setEnvironment] = useState<Environment>('home');
   const [role, setRole] = useState<SessionRole | null>(null);
   const [session, setSession] = useState<DemoSession | null>(null);
-  const [shipments, setShipments] = useState<Shipment[]>(INITIAL_SHIPMENTS);
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
-  const [activityLogs, setActivityLogs] =
-    useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
-  const [leads, setLeads] = useState<Lead[]>(INITIAL_LEADS);
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const addLead = useCallback((lead: Lead) => {
     setLeads((prev) => [lead, ...prev]);
   }, []);
 
-  const [campaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS);
-  const [apiLogs, setApiLogs] = useState<ApiLogEntry[]>(INITIAL_API_LOGS);
+  const [campaigns] = useState<Campaign[]>([]);
+  const [apiLogs, setApiLogs] = useState<ApiLogEntry[]>([]);
   const [brandProfile, setBrandProfile] = useState<BrandProfile>(DEFAULT_PROFILE);
   const [carrierContext, setCarrierContext] = useState<CarrierId>('dhl');
-  const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+
+  // ── Lazy bootstrap: seed data loads after first render, not before ──
+  useEffect(() => {
+    import('@/data/bootstrap').then((m) => {
+      setShipments(m.INITIAL_SHIPMENTS);
+      setProducts(m.INITIAL_PRODUCTS);
+      setActivityLogs(m.INITIAL_ACTIVITY_LOGS);
+      setLeads(m.INITIAL_LEADS);
+      setCampaigns(m.INITIAL_CAMPAIGNS);
+      setApiLogs(m.INITIAL_API_LOGS);
+      setStaff(m.INITIAL_STAFF);
+    });
+  }, []);
   /** §Stage-25 — which staff account is performing admin actions (RBAC tier). */
   const [actingStaffId, setActingStaffId] = useState<string>('staff-001');
   const [demoRegion, setDemoRegion] = useState<DemoRegion | null>(null);
@@ -178,24 +179,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
    * implementation parity: same state depth, not just the same landing page.
    */
   const activateDemoBrand = useCallback((brandId: string) => {
-    const brand = ALL_DEMO_BRANDS.find((b) => b.id === brandId);
-    if (!brand) {
-      console.warn(`[rbac] unknown demo brand "${brandId}" — refused`);
-      return;
-    }
-    const dossier = buildBrandDossier(brand);
-    setSession({ tier: 'brand', tenantId: brand.id, role: 'Brand Partner' });
-    setRole('Brand Partner');
-    setBrandProfile(dossier.profile);
-    setProducts(dossier.products);
-    setShipments(dossier.shipments);
-    setFinancials(dossier.financials);
-    setComplianceDocs(dossier.compliance);
-    setCarrierTokens(dossier.tokens);
-    // Onboarding is complete for seeded brands — land on the dashboard,
-    // never the wizard (reference-implementation parity with activateDemo).
-    setDemoRegion(dossier.region);
-    setEnvironment('brand');
+    Promise.all([
+      import('@/data/demoData'),
+      import('@/data/brandDossiers'),
+    ]).then(([demoData, brandDossiers]) => {
+      const brand = demoData.ALL_DEMO_BRANDS.find((b: { id: string }) => b.id === brandId);
+      if (!brand) {
+        console.warn(`[rbac] unknown demo brand "${brandId}" — refused`);
+        return;
+      }
+      const dossier = brandDossiers.buildBrandDossier(brand);
+      setSession({ tier: 'brand', tenantId: brand.id, role: 'Brand Partner' });
+      setRole('Brand Partner');
+      setBrandProfile(dossier.profile);
+      setProducts(dossier.products);
+      setShipments(dossier.shipments);
+      setFinancials(dossier.financials);
+      setComplianceDocs(dossier.compliance);
+      setCarrierTokens(dossier.tokens);
+      // §FIX — populate gateDocs from the canonical DEMO_COMPLIANCE_DOCS so the
+      // Product Catalog's compliance gate reflects the brand's actual doc status
+      // instead of showing "all missing" (gateDocs was never set by this path).
+      const brandDocs = demoData.DEMO_COMPLIANCE_DOCS.filter((d: { brandId: string }) => d.brandId === brandId);
+      if (brandDocs.length > 0) {
+        setGateDocs(brandDocs);
+      } else {
+        // Fallback: if no compliance docs found in seed, set gate to 'under_review'
+        // so the brand can still interact with the compliance gate UI
+        setGateDocs([
+          { id: `gate-${brandId}-loa`, brandId, type: 'letter_of_authorization' as const, status: 'under_review' },
+          { id: `gate-${brandId}-ps`, brandId, type: 'product_safety_ukca' as const, status: 'under_review' },
+          { id: `gate-${brandId}-ic`, brandId, type: 'insurance_certificate' as const, status: 'under_review' },
+          { id: `gate-${brandId}-brc`, brandId, type: 'brand_registry_confirmation' as const, status: 'under_review' },
+        ]);
+      }
+      setDemoRegion(dossier.region);
+      setEnvironment('brand');
+    });
   }, []);
 
   const signOut = useCallback(() => {
@@ -204,16 +224,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const activateDemo = useCallback((region: DemoRegion) => {
-    const dossier = REGIONAL_DOSSIERS[region];
-    setDemoRegion(region);
-    setBrandProfile(dossier.profile);
-    setProducts(dossier.products);
-    setShipments(dossier.shipments);
-    setFinancials(dossier.financials);
-    setComplianceDocs(dossier.compliance);
-    setCarrierTokens(dossier.tokens);
-    setRole('Brand Partner');
-    setEnvironment('brand');
+    import('@/data/regionalDossiers').then((m) => {
+      const dossier = m.REGIONAL_DOSSIERS[region];
+      setDemoRegion(region);
+      setBrandProfile(dossier.profile);
+      setProducts(dossier.products);
+      setShipments(dossier.shipments);
+      setFinancials(dossier.financials);
+      setComplianceDocs(dossier.compliance);
+      setCarrierTokens(dossier.tokens);
+      setRole('Brand Partner');
+      setEnvironment('brand');
+    });
   }, []);
 
   const addApiLog = useCallback((log: ApiLogEntry) => {

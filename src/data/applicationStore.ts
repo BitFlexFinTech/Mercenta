@@ -14,6 +14,7 @@ export function submitApplication(input: {
   companyName: string;
   country: string;
   category: string;
+phone: string | null;
   skuCount: number | null;
   monthlyRevenue: string | null;
   websiteUrl: string | null;

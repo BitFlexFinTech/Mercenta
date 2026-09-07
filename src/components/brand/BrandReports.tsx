@@ -63,9 +63,179 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
     { label: 'On-Hand Inventory (est.)', value: String(onHandInv), icon: Package, trend: 'Estimated units', trendUp: true },
     { label: 'Net PPM', value: '\u00a3' + netPPM.toLocaleString(), icon: DollarSign, trend: 'Per 1000 units shipped', trendUp: netPPM > 500 },
   ];
-  const poStatuses = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'] as const;  return (
-    <div>
-      <p>Reports v2</p>
+  const poStatuses = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'] as const;
+
+  if (pos.length === 0) {
+    return (
+      <div className="p-6 max-w-[1400px] mx-auto">
+        <Card title="Reports">
+          <p className="text-xs text-zinc-600">No purchase orders yet for {brandProfile.businessName || 'your brand'} in the selected period.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="w-5 h-5 text-brass-400" />
+          <div>
+            <h2 className="text-lg font-semibold text-white">Reports</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Performance metrics for {brandProfile.businessName || 'your brand'}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex bg-ink-850 border border-white/[0.06] rounded-lg overflow-hidden">
+            {([30, 60, 90] as Period[]).map((p) => (
+              <button key={p} onClick={() => setPeriod(p)}
+                className={cn('px-3 py-1.5 text-[11px] font-medium transition-colors',
+                  period === p ? 'bg-brass-500/20 text-brass-400' : 'text-zinc-500 hover:text-zinc-300')}>
+                {p}d
+              </button>
+            ))}
+          </div>
+          <Button className="text-[10px]" onClick={() => {
+            const csv = [['PO','Status','Value','Units','ASIN Rate']];
+            for (const po of rp) {
+              const units = po.lineItems.reduce((s,l) => s + l.quantity, 0);
+              csv.push([po.poNumber, po.status, String(po.poValue), String(units), String(asinRate)+'%']);
+            }
+            downloadCsv('brand-reports.csv', csv[0], csv.slice(1).map(r => r.join(',')).join('\\n'));
+          }}>
+            <Download className="w-3 h-3 mr-1" /> Export CSV
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        {metrics.map((m) => {
+          const Icon = m.icon;
+          return (
+            <button key={m.label} type="button" onClick={() => setDrillCard(m.label)}
+              className="bg-ink-850 border border-white/[0.06] hover:border-white/[0.12] rounded-xl p-4 text-left transition-all">
+              <div className="flex items-center gap-2 mb-2">
+                <Icon className="w-4 h-4 text-zinc-500" />
+                <span className="text-[10px] text-zinc-500 font-medium">{m.label}</span>
+              </div>
+              <div className="text-xl font-bold text-white">{m.value}</div>
+              <div className="flex items-center gap-1 mt-1">
+                <span className={cn('text-[10px]', m.trendUp ? 'text-emerald-400' : 'text-zinc-500')}>{m.trend}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card title="Sales Trend (shipped)" subtitle="Monthly PO value shipped">
+          {salesChart.length > 0 ? (
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={salesChart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                  <XAxis dataKey="month" stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => '\\u00a3' + (v/1000).toFixed(0) + 'k'} />
+                  <Tooltip contentStyle={CHART_TT} formatter={(v: number) => ['\\u00a3' + v.toLocaleString(), 'Shipped Value']} />
+                  <Bar dataKey="value" fill={BRASS} radius={[4,4,0,0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : <p className="text-xs text-zinc-600 text-center py-8">No shipped POs in this period.</p>}
+        </Card>
+        <Card title="Dispatch Volume (shipped)" subtitle="Monthly units shipped">
+          {dispatchChart.length > 0 ? (
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={dispatchChart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                  <XAxis dataKey="month" stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={CHART_TT} formatter={(v: number) => [v.toLocaleString() + ' units', 'Dispatched']} />
+                  <Bar dataKey="units" fill={EMERALD} radius={[4,4,0,0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : <p className="text-xs text-zinc-600 text-center py-8">No shipped POs in this period.</p>}
+        </Card>
+      </div>
+
+      {/* PO Status Distribution */}
+      <Card title="PO Status Distribution" subtitle="All POs in selected period">
+        <div className="flex flex-wrap gap-2">
+          {poStatuses.map((s) => {
+            const count = rp.filter((p) => p.status === s).length;
+            const pct = rp.length > 0 ? Math.round((count/rp.length)*100) : 0;
+            if (count === 0) return null;
+            return (
+              <div key={s} className="bg-ink-850 border border-white/[0.06] rounded-lg px-3 py-2 text-center min-w-[80px]">
+                <div className="text-lg font-bold text-white">{count}</div>
+                <div className="text-[9px] text-zinc-500 capitalize">{s.replace(/_/g, ' ')}</div>
+                <div className="text-[9px] text-zinc-600">{pct}%</div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Drill-down modal */}
+      {drillCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setDrillCard(null)}>
+          <div className="bg-ink-850 border border-white/[0.08] rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+              <h3 className="text-sm font-semibold text-white">{drillCard}</h3>
+              <button onClick={() => setDrillCard(null)} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="px-5 py-4 space-y-3">
+              {drillCard === 'ASIN Confirmation Rate' && (
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-400">{confirmedLines} of {totalLines} lines confirmed ({asinRate}%)</p>
+                  <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="h-full bg-brass-500 rounded-full transition-all" style={{ width: asinRate + '%' }} />
+                  </div>
+                </div>
+              )}
+              {drillCard === 'Sourceable Products OOS' && (
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-400">{outOfStock} of {products.length} products out of stock</p>
+                  {products.filter((p) => !p.isAvailable).map((p) => (
+                    <div key={p.sku} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1">
+                      <span className="text-zinc-300">{p.name}</span>
+                      <span className="text-zinc-500 font-mono">{p.sku}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {drillCard === 'Open PO Quantity' && (
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-400">{openPOQty} units across {openPOs.length} open POs</p>
+                  {openPOs.map((po) => (
+                    <div key={po.id} className="flex items-center justify-between text-xs border-b border-white/[0.04] py-1">
+                      <span className="text-zinc-300">{po.poNumber}</span>
+                      <span className="text-zinc-500 font-mono">{po.lineItems.reduce((s,l) => s + l.quantity, 0)} units</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {drillCard === 'Net PPM' && (
+                <div className="text-center py-4">
+                  <p className="text-3xl font-bold text-brass-400 font-mono">\\u00a3{netPPM.toLocaleString()}</p>
+                  <p className="text-xs text-zinc-500 mt-2">Per 1000 units shipped</p>
+                </div>
+              )}
+              {drillCard === 'On-Hand Inventory (est.)' && (
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-400">Estimated {onHandInv} units on hand</p>
+                  <p className="text-[10px] text-zinc-600">Calculated from case-pack x 10 per SKU</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
