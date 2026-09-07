@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { rememberApiKey } from '@/integrations/types';
 import { pingForService } from '@/lib/integrations/testCalls';
+import { runHealthCheck } from '@/lib/integrations/health';
+import { INTEGRATION_MODE_LABELS } from '@/integrations/types';
+import type { IntegrationHealth, IntegrationId, IntegrationMode, IntegrationState } from '@/integrations/types';
 import { INTEGRATION_ORDER, INTEGRATION_REGISTRY } from '@/integrations/registry';
-import type { IntegrationId, IntegrationState } from '@/integrations/types';
 import { Badge, Button, Card, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
@@ -14,6 +16,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Unlink,
+  HeartPulse,
 } from 'lucide-react';
 
 function StatusBadge({ state }: { state: IntegrationState }) {
@@ -50,6 +53,180 @@ function StatusBadge({ state }: { state: IntegrationState }) {
     <Badge className="text-[10px] bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
       Not connected
     </Badge>
+  );
+}
+
+/** §8 — operational mode badge. SIMULATION is displayed amber, LIVE emerald. */
+function ModeBadge({ mode }: { mode: IntegrationMode }) {
+  const label = INTEGRATION_MODE_LABELS[mode];
+  const cls =
+    mode === 'live'
+      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+      : mode === 'simulation'
+      ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+      : mode === 'error'
+      ? 'bg-red-500/15 text-red-300 border-red-500/20'
+      : mode === 'degraded'
+      ? 'bg-orange-500/15 text-orange-300 border-orange-500/20'
+      : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20';
+  return (
+    <Badge className={cn('text-[10px] uppercase tracking-wide border', cls)}>
+      {label}
+    </Badge>
+  );
+}
+
+/** §11 — per-card health snapshot, rendered only from real/isolated state. */
+function HealthPanel({
+  id,
+  state,
+  mode,
+  authMethod,
+}: {
+  id: IntegrationId;
+  state: IntegrationState;
+  mode: IntegrationMode;
+  authMethod: 'oauth' | 'api_key';
+}) {
+  const { recordHealth } = useIntegrations();
+  const [busy, setBusy] = useState(false);
+  const [snapshot, setSnapshot] = useState<IntegrationHealth | null>(null);
+
+  async function check() {
+    setBusy(true);
+    const next = await runHealthCheck(
+      {
+        getMode: () => mode,
+        getState: () => state,
+      },
+      id,
+      authMethod,
+      state.provider
+    );
+    recordHealth(id, next);
+    setSnapshot(next);
+    setBusy(false);
+  }
+
+  const health = state.health ?? snapshot;
+  if (!health) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => void check()}
+        disabled={busy}
+        className="text-xs"
+      >
+        {busy ? (
+          <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> Checking…</>
+        ) : (
+          <><HeartPulse className="w-3.5 h-3.5 mr-1" /> Health check</>
+        )}
+      </Button>
+    );
+  }
+
+  return (
+    <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 space-y-1 text-[11px]">
+      <div className="flex items-center justify-between">
+        <span className="text-zinc-500">Auth</span>
+        <span className={health.authValid ? 'text-emerald-300' : 'text-red-300'}>
+          {health.authValid ? 'Valid' : 'Not verified'}
+        </span>
+      </div>
+      {health.lastSyncAt && (
+        <div className="flex items-center justify-between">
+          <span className="text-zinc-500">Last sync</span>
+          <span className="font-mono text-zinc-300">{new Date(health.lastSyncAt).toLocaleString()}</span>
+        </div>
+      )}
+      {health.providerStatus && (
+        <div className="flex items-center justify-between">
+          <span className="text-zinc-500">Provider</span>
+          <span className="font-mono text-zinc-300">{health.providerStatus}</span>
+        </div>
+      )}
+      {health.errorCount > 0 && (
+        <div className="flex items-center justify-between">
+          <span className="text-zinc-500">Errors</span>
+          <span className="text-red-300">{health.errorCount}</span>
+        </div>
+      )}
+      {health.lastErrorAt && (
+        <div className="flex items-center justify-between">
+          <span className="text-zinc-500">Last error</span>
+          <span className="text-red-300">{new Date(health.lastErrorAt).toLocaleString()}</span>
+        </div>
+      )}
+      <Button variant="ghost" size="sm" onClick={() => void check()} disabled={busy} className="text-xs mt-1">
+        {busy ? (
+          <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> Checking…</>
+        ) : (
+          <><RefreshCw className="w-3.5 h-3.5 mr-1" /> Re-check</>
+        )}
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * §10 — standardized wizard steps. Derived entirely from the existing
+ * IntegrationDefinition (never invents provider capabilities). The wizard is
+ * still the same generic connect flow; the stepper is progressive disclosure
+ * over it, not a replacement.
+ */
+const WIZARD_STEPS = [
+  { id: 'intro', label: 'Intro' },
+  { id: 'auth', label: 'Authenticate' },
+  { id: 'config', label: 'Configure' },
+  { id: 'scopes', label: 'Permissions' },
+  { id: 'test', label: 'Test connection' },
+  { id: 'health', label: 'Health' },
+  { id: 'activate', label: 'Activate' },
+] as const;
+
+/** Renders the stepper header. Completion derived from real connection state. */
+function WizardStepper({
+  def,
+  state,
+}: {
+  def: IntegrationDefinition;
+  state: IntegrationState | undefined;
+}) {
+  const isOAuth = def.authMethod === 'oauth';
+  const connectedLive = state?.status === 'connected' && !state.sandbox;
+  const completed: Record<string, boolean> = {
+    intro: true,
+    auth: isOAuth ? state?.status === 'code_received' || connectedLive : true,
+    config: !!state?.provider || state?.status !== 'disconnected',
+    scopes: isOAuth ? false : true,
+    test: connectedLive || !!state?.lastVerifiedAt,
+    health: !!state?.health,
+    activate: connectedLive,
+  };
+  return (
+    <div className="flex items-center gap-1 mb-5 overflow-x-auto pb-1" aria-label="Setup steps">
+      {WIZARD_STEPS.map((s, i) => (
+        <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
+          <div
+            className={cn(
+              'text-[10px] font-medium px-2 py-0.5 rounded-full border flex items-center gap-1',
+              completed[s.id]
+                ? 'bg-brass-500/10 text-brass-300 border-brass-500/20'
+                : 'bg-white/[0.02] text-zinc-500 border-white/[0.06]'
+            )}
+            data-state={completed[s.id] ? 'complete' : 'pending'}
+          >
+            <span className="text-[9px]">{i + 1}</span>
+            <span className="hidden sm:inline">{s.label}</span>
+          </div>
+          {i < WIZARD_STEPS.length - 1 && (
+            <div className="w-2 h-px bg-white/10" />
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -218,6 +395,8 @@ function ConnectWizard({ id, onClose }: WizardProps) {
         </div>
         <p className="text-xs text-zinc-500 mb-5">{def.description}</p>
 
+        <WizardStepper def={def} state={state} />
+
         {def.providerOptions && (
           <div className="mb-5">
             <label className="text-xs font-medium text-zinc-400 mb-2 block">Provider</label>
@@ -341,7 +520,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
 }
 
 export function IntegrationsPanel() {
-  const { integrations, disconnect } = useIntegrations();
+  const { integrations, disconnect, modes } = useIntegrations();
   const [wizardFor, setWizardFor] = useState<IntegrationId | null>(null);
 
   return (
@@ -376,16 +555,24 @@ export function IntegrationsPanel() {
           const def = INTEGRATION_REGISTRY[id];
           const state = integrations[id];
           const connected = state.status === 'connected';
+          const mode = modes[id];
           return (
             <Card key={id} className="p-5 bg-ink-850 border-white/[0.06]">
               <div className="flex items-start justify-between gap-3 mb-3">
-                <div>
+                <div className="flex items-start justify-between w-full">
                   <h3 className="text-sm font-semibold text-white">{def.name}</h3>
-                  <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed max-w-md">
-                    {def.description}
-                  </p>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <StatusBadge state={state} />
+                    <ModeBadge mode={mode} />
+                  </div>
                 </div>
-                <StatusBadge state={state} />
+              </div>
+              <p className="text-[11px] text-zinc-500 mb-3 leading-relaxed max-w-md">
+                {def.description}
+              </p>
+
+              <div className="mb-3">
+                <HealthPanel id={id} state={state} mode={mode} authMethod={def.authMethod} />
               </div>
 
               {state.status === 'connected' && (
