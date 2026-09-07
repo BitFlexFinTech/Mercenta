@@ -1,5 +1,19 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
+> Last updated: 2026-09-07
+
+## Master Redesign — Phase 0 PROTECT (IN PROGRESS → baseline DONE)
+
+| Step | Status | Notes |
+|---|---|---|
+| Inspect git | ✅ DONE | `main`, 8 commits ahead of origin, clean after commit |
+| Pre-baseline commit | ✅ DONE | `959b4d2` — tracked test artifacts only (Review Zip + test-results/.last-run.json) |
+| Immutable baseline tag | ✅ DONE | `mercenta-baseline-before-redesign-20260907` |
+| External backup | ✅ DONE | `/Users/tadii/Desktop/mercenta-baseline-backup-20260907.bundle` (99 MB, `--all`) |
+| Recovery verification | ✅ DONE | Bundle cloned → HEAD `959b4d2`, 201 src files; `npm run build` 2.38s OK; dev boot HTTP 200 |
+| Baseline doc | ✅ DONE | `docs/MERCENTA_BASELINE.md` |
+| Working branch | ✅ DONE | `redesign/foundation` created off baseline |
+| Known baseline defect | ⚠️ UNRESOLVED | `npx tsc --noEmit` → 27 errors: `outreachGenerator.ts` (24, syntax, unparseable) + `XeroConnection.tsx` (3, unmatched div). Build passes (files outside build graph). Fix before Phase 12. |
 ## Brand Intelligence System — New Module
 
 | Stage | Status | Notes |
