@@ -1,6 +1,14 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 > Last updated: 2026-09-07
+>
+> ## 0. Project-Memory Reconciliation (2026-09-07)
+> - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
+> - **Verified latest checkpoint: `c5ef1c5`** (`docs: update project status — Phase 2C scenario engine DONE`) — one commit ahead of the 2C code commit `4eeef45`.
+> - **Baseline:** tag `mercenta-baseline-before-redesign-20260907` / commit `959b4d2` — recoverable, immutable.
+> - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
+> - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
+> - Older sections below (Brand Intelligence, performance fixes, droplet consolidation, E2E suite) are historical/legacy and are preserved verbatim; they do not supersede the phase table above. Navigation: use section 1 for current phases/checkpoint/branch.
 
 ## 1. Master Redesign — Phases 0, 1, 2A, 2B complete; 2C DONE
 
