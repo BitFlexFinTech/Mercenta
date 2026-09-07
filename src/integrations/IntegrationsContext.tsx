@@ -27,8 +27,14 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { IntegrationId, IntegrationsMap } from './types';
-import { INITIAL_INTEGRATIONS, rememberApiKey } from './types';
+import type {
+  IntegrationId,
+  IntegrationMode,
+  IntegrationHealth,
+  IntegrationsMap,
+} from './types';
+import { INITIAL_INTEGRATIONS, modeForState, rememberApiKey } from './types';
+import { INTEGRATION_REGISTRY, integrationMeta } from './registry';
 
 const STORAGE_KEY = 'mercenta.integrations.v1';
 
@@ -41,6 +47,11 @@ export interface ConnectRequest {
 
 interface IntegrationsContextValue {
   integrations: IntegrationsMap;
+  /**
+   * §8 — derived operational mode per integration, computed from connection
+   * state + registry default. UI should read this, never re-derive colours.
+   */
+  modes: Record<IntegrationId, IntegrationMode>;
   startConnect: (req: ConnectRequest) => void;
   failConnect: (id: IntegrationId, error: string) => void;
   completeSandboxConnect: (
@@ -54,6 +65,14 @@ interface IntegrationsContextValue {
   ) => void;
   oauthCodeReceived: (id: IntegrationId, provider: string, codePreview: string) => void;
   disconnect: (id: IntegrationId) => void;
+  /** §2A — operator-forced mode change (disable / restore simulation). */
+  setMode: (id: IntegrationId, mode: IntegrationMode) => void;
+  /** §2A — write a health snapshot for the Hub. */
+  recordHealth: (id: IntegrationId, patch: Partial<IntegrationHealth>) => void;
+  /** §2A — record a completed sync. */
+  recordSync: (id: IntegrationId) => void;
+  /** §22 — record a provider failure (bumps errorCount, surfaces error). */
+  recordIntegrationError: (id: IntegrationId, error: string) => void;
 }
 
 const IntegrationsContext = createContext<IntegrationsContextValue | null>(null);
@@ -132,6 +151,15 @@ export function IntegrationsProvider({
     }
   }, [integrations]);
 
+  /** §8 — single derivation of every integration's operational mode. */
+  const modes = useMemo(() => {
+    const out = {} as Record<IntegrationId, IntegrationMode>;
+    (Object.keys(INTEGRATION_REGISTRY) as IntegrationId[]).forEach((id) => {
+      out[id] = modeForState(integrations[id], integrationMeta(id).defaultMode);
+    });
+    return out;
+  }, [integrations]);
+
   const startConnect = useCallback((req: ConnectRequest) => {
     setIntegrations((prev) => ({
       ...prev,
@@ -140,6 +168,7 @@ export function IntegrationsProvider({
         status: 'connecting',
         provider: req.provider,
         error: undefined,
+        disabled: false,
       },
     }));
   }, []);
@@ -163,6 +192,7 @@ export function IntegrationsProvider({
           lastVerifiedAt: now,
           metadata: { ...prev[id].metadata, ...metadata, sandbox: 'true' },
           sandbox: true,
+          disabled: false,
           error: undefined,
         },
       }));
@@ -183,6 +213,7 @@ export function IntegrationsProvider({
           lastVerifiedAt: now,
           provider,
           sandbox: false,
+          disabled: false,
           metadata: { ...prev[id].metadata, ...metadata, verified: 'live-test-call' },
           error: undefined,
         },
@@ -203,6 +234,7 @@ export function IntegrationsProvider({
           provider,
           lastVerifiedAt: now,
           sandbox: false,
+          disabled: false,
           metadata: {
             ...prev[id].metadata,
             codePreview,
@@ -218,21 +250,111 @@ export function IntegrationsProvider({
   const disconnect = useCallback((id: IntegrationId) => {
     setIntegrations((prev) => ({
       ...prev,
-      [id]: { ...INITIAL_INTEGRATIONS[id] },
+      [id]: { ...INITIAL_INTEGRATIONS[id], health: { errorCount: 0 } },
     }));
+  }, []);
+
+  /**
+   * §2A — operator-forced mode change. Supports `disabled` (keep config,
+   * stop using) and `simulation` (explicitly simulated). LIVE can never be
+   * forced — it is earned only by a completed non-sandbox connect.
+   */
+  const setMode = useCallback((id: IntegrationId, mode: IntegrationMode) => {
+    setIntegrations((prev) => {
+      const cur = prev[id];
+      if (mode === 'disabled') {
+        return { ...prev, [id]: { ...cur, disabled: true, error: undefined } };
+      }
+      if (mode === 'simulation') {
+        return { ...prev, [id]: { ...cur, disabled: false, sandbox: true } };
+      }
+      return { ...prev, [id]: { ...cur, disabled: false } };
+    });
+  }, []);
+
+  /** §2A — merge a health snapshot (errorCount defaults to existing). */
+  const recordHealth = useCallback((id: IntegrationId, patch: Partial<IntegrationHealth>) => {
+    setIntegrations((prev) => {
+      const cur = prev[id];
+      const base = cur.health ?? { errorCount: 0 };
+      return {
+        ...prev,
+        [id]: { ...cur, health: { ...base, ...patch, errorCount: patch.errorCount ?? base.errorCount } },
+      };
+    });
+  }, []);
+
+  /** §2A — record a completed sync (clears lastErrorAt, sets lastSyncAt). */
+  const recordSync = useCallback((id: IntegrationId) => {
+    setIntegrations((prev) => {
+      const cur = prev[id];
+      const base = cur.health ?? { errorCount: 0 };
+      return {
+        ...prev,
+        [id]: {
+          ...cur,
+          health: {
+            ...base,
+            lastSyncAt: new Date().toISOString(),
+            lastSuccessfulRequestAt: new Date().toISOString(),
+            lastErrorAt: undefined,
+          },
+        },
+      };
+    });
+  }, []);
+
+  /** §22 — record a provider failure (increments errorCount, surfaces error). */
+  const recordIntegrationError = useCallback((id: IntegrationId, error: string) => {
+    setIntegrations((prev) => {
+      const cur = prev[id];
+      const base = cur.health ?? { errorCount: 0 };
+      return {
+        ...prev,
+        [id]: {
+          ...cur,
+          status: 'needs_attention',
+          error,
+          health: {
+            ...base,
+            errorCount: base.errorCount + 1,
+            lastErrorAt: new Date().toISOString(),
+            authValid: false,
+          },
+        },
+      };
+    });
   }, []);
 
   const value = useMemo(
     () => ({
       integrations,
+      modes,
       startConnect,
       failConnect,
       completeSandboxConnect,
       completeApiKeyConnect,
       oauthCodeReceived,
       disconnect,
+      setMode,
+      recordHealth,
+      recordSync,
+      recordIntegrationError,
     }),
-    [integrations, startConnect, failConnect, completeSandboxConnect, completeApiKeyConnect, oauthCodeReceived, disconnect]
+    [
+      integrations,
+      modes,
+      startConnect,
+      failConnect,
+      completeSandboxConnect,
+      completeApiKeyConnect,
+      oauthCodeReceived,
+      disconnect,
+      setMode,
+      recordHealth,
+      recordSync,
+      recordIntegrationError,
+    ]
   );
 
   return (

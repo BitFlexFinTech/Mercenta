@@ -24,6 +24,95 @@ export type IntegrationStatus =
   | 'needs_attention'
   | /** OAuth: authorization code captured, server exchange pending */ 'code_received';
 
+/**
+ * §8 — standardized integration operational mode. The mode model the whole
+ * Integrations Hub reads. It is DERIVED from connection state + sandbox flag
+ * (see `modeForState`) and can be operator-forced via `disabled`.
+ *
+ * The cardinal rule: SIMULATION must never be presented or gated as LIVE.
+ */
+export type IntegrationMode =
+  | 'simulation'
+  | 'available'
+  | 'configuring'
+  | 'live'
+  | 'degraded'
+  | 'error'
+  | 'disabled';
+
+export const INTEGRATION_MODE_LABELS: Record<IntegrationMode, string> = {
+  simulation: 'Simulation',
+  available: 'Available',
+  configuring: 'Configuring',
+  live: 'Live',
+  degraded: 'Degraded',
+  error: 'Error',
+  disabled: 'Disabled',
+};
+
+/** §11 — health snapshot shown in the Hub; never fabricated for LIVE mode. */
+export interface IntegrationHealth {
+  /** False when the stored credential fails an auth check. */
+  authValid?: boolean;
+  lastSyncAt?: string;
+  lastTestOk?: boolean;
+  lastErrorAt?: string;
+  errorCount: number;
+  /** Provider-reported status when available (SIMULATION may report simulated). */
+  providerStatus?: string;
+  /** OAuth token expiry, when applicable. */
+  credentialExpiry?: string;
+  /** Last successful request to the provider. */
+  lastSuccessfulRequestAt?: string;
+}
+
+/** §36 — conceptual grouping for the Integrations Hub + admin IA. */
+export type IntegrationCategory =
+  | 'core'
+  | 'commerce'
+  | 'finance'
+  | 'logistics'
+  | 'communications'
+  | 'marketing'
+  | 'data'
+  | 'ai'
+  | 'compliance'
+  | 'infrastructure';
+
+export const INTEGRATION_CATEGORY_LABELS: Record<IntegrationCategory, string> = {
+  core: 'Core',
+  commerce: 'Commerce',
+  finance: 'Finance',
+  logistics: 'Logistics',
+  communications: 'Communications',
+  marketing: 'Marketing',
+  data: 'Data',
+  ai: 'AI & Research',
+  compliance: 'Compliance',
+  infrastructure: 'Infrastructure',
+};
+
+export interface IntegrationConnectionTestResult {
+  ok: boolean;
+  httpStatus?: number;
+  error?: string;
+  data?: unknown;
+}
+
+/**
+ * §4 — provider contract. Every real integration is a LIVE implementation of
+ * this contract; every simulated one is a Mock implementation of the same
+ * contract with `isLive: false`. Callers depend only on this interface.
+ */
+export interface IntegrationProvider {
+  id: IntegrationId;
+  /** True ONLY when this implementation talks to the real external service. */
+  isLive: boolean;
+  testConnection(): Promise<IntegrationConnectionTestResult>;
+  /** Optional real/simulated health probe. */
+  health?(): Promise<IntegrationHealth>;
+}
+
 export interface IntegrationField {
   key: string;
   label: string;
@@ -75,6 +164,10 @@ export interface IntegrationState {
    * as a verified production connection by gating code.
    */
   sandbox: boolean;
+  /** §2A — health snapshot for the Integrations Hub. */
+  health?: IntegrationHealth;
+  /** Operator-forced OFF. Keeps config intact; mode derives to 'disabled'. */
+  disabled?: boolean;
 }
 
 export type IntegrationsMap = Record<IntegrationId, IntegrationState>;
@@ -109,5 +202,23 @@ export function peekApiKey(id: IntegrationId): string | undefined {
 }
 
 export function isConnected(state: IntegrationState | undefined): boolean {
-  return state?.status === 'connected' && !state.sandbox;
+  return state?.status === 'connected' && !state.sandbox && !state.disabled;
+}
+
+/**
+ * §8 — derive the operational MODE from connection state. Deterministic:
+ * the same state always yields the same mode. Operator `disabled` always
+ * wins. A sandbox `connected` is NEVER 'live'.
+ */
+export function modeForState(
+  state: IntegrationState | undefined,
+  defaultMode: IntegrationMode
+): IntegrationMode {
+  if (!state) return defaultMode;
+  if (state.disabled) return 'disabled';
+  if (state.status === 'connected') return state.sandbox ? 'simulation' : 'live';
+  if (state.status === 'connecting') return 'configuring';
+  if (state.status === 'code_received') return 'configuring';
+  if (state.status === 'needs_attention') return state.error ? 'error' : 'degraded';
+  return defaultMode;
 }

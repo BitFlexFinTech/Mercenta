@@ -1,4 +1,9 @@
-import type { IntegrationDefinition, IntegrationId } from './types';
+import type {
+  IntegrationDefinition,
+  IntegrationCategory,
+  IntegrationId,
+  IntegrationMode,
+} from './types';
 
 /**
  * Registry of every §14 integration card. Order = display order.
@@ -242,3 +247,55 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   'twilio_whatsapp',
   'postiz',
 ];
+
+/**
+ * §2A — per-integration operating metadata (single source of truth for the
+ * Integrations Hub). `defaultMode` is what the integration reports while it
+ * has never been connected or explicitly configured. `liveCredentialHint`
+ * reflects only the absence/presence of a developer-provided demo key — it is
+ * NOT a verified live connection.
+ */
+export interface IntegrationMeta {
+  category: IntegrationCategory;
+  defaultMode: IntegrationMode;
+  /**
+   * Prompt-visible to the operator, never a hard gate: real verified LIVE
+   * status only comes from a completed non-sandbox connection.
+   */
+  demoKeyHint?: string;
+}
+
+export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
+  amazon_sp_api: { category: 'commerce', defaultMode: 'simulation' },
+  amazon_ads: { category: 'marketing', defaultMode: 'available' },
+  stripe: { category: 'finance', defaultMode: 'available' },
+  esignature: { category: 'commerce', defaultMode: 'available' },
+  email: { category: 'communications', defaultMode: 'available', demoKeyHint: 'VITE_POSTMARK_API_KEY' },
+  lead_sourcing: { category: 'marketing', defaultMode: 'available' },
+  openrouter: { category: 'ai', defaultMode: 'available', demoKeyHint: 'VITE_OPENROUTER_API_KEY' },
+  hunter: { category: 'data', defaultMode: 'available', demoKeyHint: 'VITE_HUNTER_API_KEY' },
+  instantly: { category: 'marketing', defaultMode: 'available', demoKeyHint: 'VITE_INSTANTLY_API_KEY' },
+  keepa: { category: 'data', defaultMode: 'available' },
+  firecrawl: { category: 'data', defaultMode: 'available' },
+  usertour: { category: 'communications', defaultMode: 'simulation' },
+  rocketchat: { category: 'communications', defaultMode: 'available' },
+  twilio_whatsapp: { category: 'communications', defaultMode: 'available' },
+  postiz: { category: 'marketing', defaultMode: 'available' },
+};
+
+export function integrationMeta(id: IntegrationId): IntegrationMeta {
+  return INTEGRATION_META[id];
+}
+
+/**
+ * Truthful developer-key presence check. Returns true only if the hinted env
+ * var actually has a non-empty value at runtime. This is a UI hint for the
+ * Hub ("a demo key exists for this provider") — NOT a verified LIVE status.
+ */
+export function hasLiveCredentialHint(id: IntegrationId): boolean {
+  const hint = INTEGRATION_META[id]?.demoKeyHint;
+  if (!hint) return false;
+  const env = (typeof import.meta !== 'undefined' && import.meta.env) as Record<string, string | undefined>;
+  const value = env[hint];
+  return typeof value === 'string' && value.length > 0;
+}
