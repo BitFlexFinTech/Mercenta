@@ -4,13 +4,13 @@
 >
 > ## 0. Project-Memory Reconciliation (2026-09-07)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
-> - **Verified latest checkpoint: `d58fc4c`** (checkpoint-correction commit). Prior checkpoints: `3379523` (reconciliation) → `c5ef1c5` (status update) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
+> - **Verified latest checkpoint: `(pending 2-file Phase 3 commit)` — prior: `d58fc4c` → `3379523` (reconciliation) → `c5ef1c5` → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
 > - **Baseline:** tag `mercenta-baseline-before-redesign-20260907` / commit `959b4d2` — recoverable, immutable.
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
 > - Older sections below (Brand Intelligence, performance fixes, droplet consolidation, E2E suite) are historical/legacy and are preserved verbatim; they do not supersede the phase table above. Navigation: use section 1 for current phases/checkpoint/branch.
 
-## 1. Master Redesign — Phases 0, 1, 2A, 2B complete; 2C DONE
+## 1. Master Redesign — Phases 0, 1, 2A, 2B, 2C complete; Phase 3 DONE
 
 | Phase | Status | Notes |
 |---|---|---|
@@ -19,7 +19,8 @@
 | **Phase 2A** | ✅ **DONE** | `a796f37` — integration mode model, health, provider contract, registry metadata. Probe PASS 11/11. |
 | **Phase 2B** | ✅ **DONE** | `ba99266` — health runner `src/lib/integrations/health.ts`, wizard stepper/mode badges/health panel in IntegrationsPanel. Probe PASS 7/7. |
 | **Phase 2C** | ✅ **DONE** | `4eeef45` — `src/lib/simulation/scenarioEngine.ts` (650 lines, 7 deterministic scenarios, safety gate, event+audit trail, extensible dispatch). Typecheck 0 new, eslint clean, build `✓ 3.22s`, scenario probe **PASS all**. |
-| **Phase 3** | ⏳ **NEXT** | Simulation Control Centre + functional simulation integration (requires approval). |
+| **Phase 3** | ✅ **DONE** | `SimulationControl.tsx` (377 lines) + SuperAdminPanel tab wiring. Super Admin-only (existing RBAC + boundary tier check). Reuses scenario engine; boundary safety check + engine gate (defense in depth); partial shared reset (`resetMockAmazonState` + `resetEvents`, labelled partial). Typecheck 0 new, eslint clean, build `✓ 2.20s`, Phase 3 regression probe **PASS** (determinism, all-7-ok, LIVE refusal, 0 network calls). |
+| **Phase 4** | ⏳ **NEXT** | Functional verification / critical workflow hardening (requires approval). |
 ## Brand Intelligence System — New Module
 
 | Stage | Status | Notes |
