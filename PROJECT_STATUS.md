@@ -2,18 +2,14 @@
 > Source of truth for current project state. Updated after every session.
 > Last updated: 2026-09-07
 
-## Master Redesign — Phase 0 PROTECT (IN PROGRESS → baseline DONE)
+## 1. Master Redesign — Phases 0–1 (baseline + understand)
 
-| Step | Status | Notes |
+| Phase | Status | Notes |
 |---|---|---|
-| Inspect git | ✅ DONE | `main`, 8 commits ahead of origin, clean after commit |
-| Pre-baseline commit | ✅ DONE | `959b4d2` — tracked test artifacts only (Review Zip + test-results/.last-run.json) |
-| Immutable baseline tag | ✅ DONE | `mercenta-baseline-before-redesign-20260907` |
-| External backup | ✅ DONE | `/Users/tadii/Desktop/mercenta-baseline-backup-20260907.bundle` (99 MB, `--all`) |
-| Recovery verification | ✅ DONE | Bundle cloned → HEAD `959b4d2`, 201 src files; `npm run build` 2.38s OK; dev boot HTTP 200 |
-| Baseline doc | ✅ DONE | `docs/MERCENTA_BASELINE.md` |
-| Working branch | ✅ DONE | `redesign/foundation` created off baseline |
-| Known baseline defect | ⚠️ UNRESOLVED | `npx tsc --noEmit` → 27 errors: `outreachGenerator.ts` (24, syntax, unparseable) + `XeroConnection.tsx` (3, unmatched div). Build passes (files outside build graph). Fix before Phase 12. |
+| **Phase 0 PROTECT** | ✅ **DONE** | Baseline committed `959b4d2`, tag `mercenta-baseline-before-redesign-20260907`, external bundle at `/Users/tadii/Desktop/mercenta-baseline-backup-20260907.bundle` (99 MB), recovery verified (clone → HEAD `959b4d2`, build OK, dev HTTP 200). Working branch `redesign/foundation`. |
+| **Phase 1 UNDERSTAND** | ✅ **DONE** | Repo mapped (201 src files, 4 shells, 53 screens, 15 integration registry, RBAC chain, env keys). Docs created: `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md` (product contract, architecture, integrations inventory, risk map all committed). |
+| Baseline defect | ⚠️ UNRESOLVED | `npx tsc --noEmit` → 27 errors. **Both files are DEAD code** (outreachGenerator.ts unimported; XeroConnection.tsx unimported, only interface name referenced). Build passes. Fix before Phase 12. |
+| **Phase 2 INTEGRATION FOUNDATION** | ⏳ **NEXT** | Provider abstractions, integration registry upgrade, mode model, wizard framework, health checks, scenario engine. |
 ## Brand Intelligence System — New Module
 
 | Stage | Status | Notes |
