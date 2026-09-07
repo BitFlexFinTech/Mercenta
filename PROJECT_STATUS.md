@@ -2,14 +2,16 @@
 > Source of truth for current project state. Updated after every session.
 > Last updated: 2026-09-07
 
-## 1. Master Redesign — Phases 0–1 (baseline + understand)
+## 1. Master Redesign — Phases 0, 1, 2A, 2B complete; 2C DONE
 
 | Phase | Status | Notes |
 |---|---|---|
-| **Phase 0 PROTECT** | ✅ **DONE** | Baseline committed `959b4d2`, tag `mercenta-baseline-before-redesign-20260907`, external bundle at `/Users/tadii/Desktop/mercenta-baseline-backup-20260907.bundle` (99 MB), recovery verified (clone → HEAD `959b4d2`, build OK, dev HTTP 200). Working branch `redesign/foundation`. |
-| **Phase 1 UNDERSTAND** | ✅ **DONE** | Repo mapped (201 src files, 4 shells, 53 screens, 15 integration registry, RBAC chain, env keys). Docs created: `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md` (product contract, architecture, integrations inventory, risk map all committed). |
-| Baseline defect | ⚠️ UNRESOLVED | `npx tsc --noEmit` → 27 errors. **Both files are DEAD code** (outreachGenerator.ts unimported; XeroConnection.tsx unimported, only interface name referenced). Build passes. Fix before Phase 12. |
-| **Phase 2 INTEGRATION FOUNDATION** | ⏳ **NEXT** | Provider abstractions, integration registry upgrade, mode model, wizard framework, health checks, scenario engine. |
+| **Phase 0 PROTECT** | ✅ **DONE** | Baseline commit `959b4d2`, tag `mercenta-baseline-before-redesign-20260907`, external bundle `/Users/tadii/Desktop/mercenta-baseline-backup-20260907.bundle`. Working branch `redesign/foundation`. |
+| **Phase 1 UNDERSTAND** | ✅ **DONE** | `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`. |
+| **Phase 2A** | ✅ **DONE** | `a796f37` — integration mode model, health, provider contract, registry metadata. Probe PASS 11/11. |
+| **Phase 2B** | ✅ **DONE** | `ba99266` — health runner `src/lib/integrations/health.ts`, wizard stepper/mode badges/health panel in IntegrationsPanel. Probe PASS 7/7. |
+| **Phase 2C** | ✅ **DONE** | `4eeef45` — `src/lib/simulation/scenarioEngine.ts` (650 lines, 7 deterministic scenarios, safety gate, event+audit trail, extensible dispatch). Typecheck 0 new, eslint clean, build `✓ 3.22s`, scenario probe **PASS all**. |
+| **Phase 3** | ⏳ **NEXT** | Simulation Control Centre + functional simulation integration (requires approval). |
 ## Brand Intelligence System — New Module
 
 | Stage | Status | Notes |
