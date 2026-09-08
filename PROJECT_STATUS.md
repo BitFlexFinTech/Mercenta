@@ -4,7 +4,7 @@
 >
 > ## 0. Project-Memory Reconciliation (2026-09-07)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
-> - **Verified latest checkpoint: `50b0420`** (Phase 4 — provider safety + submitCatalogItem fix + Playwright Control Centre spec 15/15). Prior: `9d8d18d` (Phase 3) → `d58fc4c` → `3379523` → `c5ef1c5` → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
+> - **Verified latest checkpoint: `774f6c4`** (Phase 5 — design-system foundation). Prior: `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
 > - **Baseline:** tag `mercenta-baseline-before-redesign-20260907` / commit `959b4d2` — recoverable, immutable.
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
