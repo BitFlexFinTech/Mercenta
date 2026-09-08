@@ -24,6 +24,7 @@ import {
   Bot,
   Target,
   FlaskConical,
+  Palette,
 } from 'lucide-react';
 
 const SUPER_ADMIN_TABS = [
@@ -39,6 +40,7 @@ const SUPER_ADMIN_TABS = [
   { id: 'financing', label: 'Bank Financing', icon: PiggyBank },
   { id: 'brandintelligence', label: 'Brand Intelligence', icon: Target },
   { id: 'simulation', label: 'Simulation', icon: FlaskConical },
+  { id: 'designsystem', label: 'Design System', icon: Palette },
 ];
 import { EU_MARKET_ENABLED } from '@/config/customs';
 import { HomepageEditor } from './HomepageEditor';
@@ -52,6 +54,7 @@ import { ApplicationsPanel } from './ApplicationsPanel';
 import { AccountingPanel } from './AccountingPanel';
 import { RakazoPanel } from './RakazoPanel';
 import { SimulationControl } from './integrations/SimulationControl';
+import { DesignSystemShowcase } from '../design/DesignSystemShowcase';
 
 const ROLE_OPTIONS: { value: StaffRole; label: string }[] = [
   { value: 'Super Admin', label: 'Super Admin' },
@@ -496,6 +499,10 @@ export function SuperAdminPanel() {
 
       {activeTab === 'simulation' && (
         <SimulationControl />
+      )}
+
+      {activeTab === 'designsystem' && (
+        <DesignSystemShowcase />
       )}
     </div>
   );

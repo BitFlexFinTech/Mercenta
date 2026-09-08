@@ -38,6 +38,52 @@ export default {
         crimson: {
           accent: '#DC2626',
         },
+        /**
+         * §Phase 5 — semantic state colours (design-system foundation).
+         * These are the ONLY semantic colours the canonical kit should use;
+         * they map to machine-readable statuses, not decoration.
+         */
+        state: {
+          success: '#2FBF71',
+          warning: '#F2A93B',
+          danger: '#E5533F',
+          info: '#6AA6FF',
+          muted: '#8A93A0',
+        },
+        /**
+         * §Phase 5 — surface elevation scale (dark theme). Lower = further away.
+         */
+        surface: {
+          DEFAULT: '#121214',
+          raised: '#161618',
+          overlay: '#1C1C1E',
+          hover: '#222225',
+        },
+      },
+      borderRadius: {
+        /**
+         * §Phase 5 — deliberate radius scale.
+         */
+        ds: {
+          sm: '6px',
+          md: '10px',
+          lg: '14px',
+          pill: '9999px',
+        },
+      },
+      boxShadow: {
+        /**
+         * §Phase 5 — minimal intentional elevation system.
+         */
+        'ds-none': 'none',
+        'ds-subtle': '0 1px 2px rgba(0,0,0,0.5)',
+        'ds-raised': '0 4px 16px rgba(0,0,0,0.45)',
+        'ds-overlay': '0 12px 40px rgba(0,0,0,0.6)',
+        'ds-focus': '0 0 0 2px rgba(201,161,90,0.45)',
+        'ds-focus-danger': '0 0 0 2px rgba(229,83,63,0.5)',
+      },
+      transitionProperty: {
+        ds: 'background-color, border-color, color, box-shadow, opacity, transform',
       },
     },
   },

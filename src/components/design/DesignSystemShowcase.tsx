@@ -1,0 +1,194 @@
+/**
+ * §Phase 5 — Design System Showcase.
+ *
+ * Canonical visual reference for all later redesign phases. It renders ONLY
+ * the canonical kit (`@/components/ui` + design tokens) — it does not touch
+ * any real application screen. This is the foundation reference surface, not
+ * a production feature.
+ */
+
+import { useState } from 'react';
+import {
+  Alert, Breadcrumb, Button, Card, Checkbox, DataTable, EmptyState,
+  EntityHeader, Input, Modal, PageHeader, Pagination, Select, Skeleton,
+  StatusBadge, Tabs, Textarea, type StatusTone,
+} from '@/components/ui';
+
+const STATUS_TONES: { tone: StatusTone; label: string }[] = [
+  { tone: 'success', label: 'On track' },
+  { tone: 'warning', label: 'Attention' },
+  { tone: 'danger', label: 'Blocked' },
+  { tone: 'info', label: 'Pending' },
+  { tone: 'neutral', label: 'Inactive' },
+  { tone: 'brass', label: 'Accent' },
+];
+
+const TABLE_ROWS = [
+  { id: 'PO-1001', brand: 'Zambezi Organics', value: '£12,480', status: 'Delivered' },
+  { id: 'PO-1002', brand: 'DeskForge', value: '£8,315', status: 'Shipped' },
+  { id: 'PO-1003', brand: 'Voltaic Audio', value: '£21,940', status: 'Received' },
+];
+
+export function DesignSystemShowcase() {
+  const [tab, setTab] = useState('overview');
+  const [checked, setChecked] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [inputVal, setInputVal] = useState('');
+  const [selectVal, setSelectVal] = useState('gbp');
+
+  return (
+    <div className="space-y-8 max-w-4xl">
+      <PageHeader
+        title="MERCENTA Design System"
+        description="Canonical tokens and UI primitives. This is the visual reference the application redesign will follow — it is not a production screen."
+        actions={<Button variant="secondary" onClick={() => setLoading((l) => !l)}>{loading ? 'Skeleton on' : 'Skeleton off'}</Button>}
+      />
+      <Breadcrumb items={[{ label: 'Super Admin' }, { label: 'Design System' }]} />
+{/* Typography */}
+      <section className="space-y-2" aria-labelledby="ds-typography">
+        <h2 id="ds-typography" className="text-xs uppercase tracking-wider text-zinc-500">Typography</h2>
+        <p className="font-display text-3xl font-semibold text-white">Display — Fraunces</p>
+        <p className="text-2xl font-semibold text-white">Page title</p>
+        <p className="text-lg font-semibold text-white">Section title</p>
+        <p className="text-sm text-zinc-300">Body — IBM Plex Sans. Regular reading copy.</p>
+        <p className="text-xs text-zinc-500">Label / caption — secondary info and meta.</p>
+        <p className="font-mono text-sm text-brass-300">Numeric / KPI — 12,480.50</p>
+      </section>
+
+      {/* Buttons */}
+      <section className="space-y-3" aria-labelledby="ds-buttons">
+        <h2 id="ds-buttons" className="text-xs uppercase tracking-wider text-zinc-500">Buttons</h2>
+        <div className="flex flex-wrap gap-3">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="tertiary">Tertiary</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="destructive">Destructive</Button>
+          <Button variant="link">Link</Button>
+          <Button loading>Loading</Button>
+          <Button disabled>Disabled</Button>
+        </div>
+      </section>
+
+      {/* Statuses */}
+      <section className="space-y-3" aria-labelledby="ds-status">
+        <h2 id="ds-status" className="text-xs uppercase tracking-wider text-zinc-500">Semantic status</h2>
+        <div className="flex flex-wrap gap-3">
+          {STATUS_TONES.map((s) => (
+            <StatusBadge key={s.tone} tone={s.tone} dataStatus={s.tone}>{s.label}</StatusBadge>
+          ))}
+        </div>
+      </section>
+
+      {/* Alerts */}
+      <section className="space-y-3" aria-labelledby="ds-alerts">
+        <h2 id="ds-alerts" className="text-xs uppercase tracking-wider text-zinc-500">Alerts</h2>
+        <Alert tone="success" title="Shipment delivered">Receipt matched confirmed quantities.</Alert>
+        <Alert tone="warning" title="Acknowledgment due">PO must be acknowledged within 24h.</Alert>
+        <Alert tone="error" title="Compliance gate blocked">Missing insurance certificate.</Alert>
+        <Alert tone="info" title="Syncing">Synchronising with the retail channel…</Alert>
+      </section>
+
+      {/* Forms */}
+      <section className="space-y-4" aria-labelledby="ds-forms">
+        <h2 id="ds-forms" className="text-xs uppercase tracking-wider text-zinc-500">Form foundation</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input
+            label="Business name"
+            required
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            helper="The registered trading name."
+          />
+          <Input label="Tax ID" value="" onChange={() => {}} error="Provide a valid UK VAT number." />
+          <Select
+            label="Payout currency"
+            value={selectVal}
+            onChange={(e) => setSelectVal(e.target.value)}
+            options={[
+              { value: 'gbp', label: 'GBP — Pound sterling' },
+              { value: 'usd', label: 'USD — US dollar' },
+              { value: 'eur', label: 'EUR — Euro' },
+            ]}
+          />
+          <Checkbox label="Agree to the distribution terms" checked={checked} onChange={setChecked} required />
+        </div>
+        <Textarea label="Notes" rows={2} value="" onChange={() => {}} placeholder="Optional operational notes…" />
+      </section>
+
+      {/* Tabs */}
+      <section className="space-y-3" aria-labelledby="ds-tabs">
+        <h2 id="ds-tabs" className="text-xs uppercase tracking-wider text-zinc-500">Tabs</h2>
+        <Tabs
+          ariaLabel="Showcase tabs"
+          items={[
+            { id: 'overview', label: 'Overview', testId: 'tab-overview' },
+            { id: 'activity', label: 'Activity', testId: 'tab-activity' },
+            { id: 'history', label: 'History', testId: 'tab-history' },
+          ]}
+          active={tab}
+          onSelect={setTab}
+        />
+        <p className="text-xs text-zinc-500">Active tab: {tab}</p>
+      </section>
+
+      {/* Table */}
+      <section className="space-y-3" aria-labelledby="ds-table">
+        <h2 id="ds-table" className="text-xs uppercase tracking-wider text-zinc-500">DataTable foundation</h2>
+        {loading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+          </div>
+        ) : (
+          <DataTable
+            columns={[
+              { key: 'id', label: 'PO' },
+              { key: 'brand', label: 'Brand' },
+              { key: 'value', label: 'Value' },
+              { key: 'status', label: 'Status' },
+            ]}
+            rows={TABLE_ROWS}
+            rowKey={(r) => r.id as string}
+          />
+        )}
+        <Pagination page={page} pageCount={4} onPage={setPage} />
+      </section>
+
+      {/* Empty + Modal */}
+      <section className="space-y-3" aria-labelledby="ds-feedback">
+        <h2 id="ds-feedback" className="text-xs uppercase tracking-wider text-zinc-500">Empty & overlays</h2>
+        <Card className="p-0">
+          <EmptyState title="No returns in this period" description="Returns will appear here once a return is authorised." />
+        </Card>
+        <div className="flex gap-3">
+          <Button onClick={() => setModalOpen(true)}>Open modal</Button>
+          <Button variant="secondary" onClick={() => setChecked(!checked)}>Toggle checkbox</Button>
+        </div>
+      </section>
+
+      {/* Entity header */}
+      <EntityHeader
+        eyebrow="Brand account"
+        title="Zambezi Organic Extracts Ltd"
+        status={<StatusBadge tone="success" dataStatus="active">Active</StatusBadge>}
+        description="Health & Personal Care · UK distribution · Direct fulfilment"
+        actions={<Button variant="secondary">Manage</Button>}
+      />
+
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Example dialog"
+        footer={<Button onClick={() => setModalOpen(false)}>Close</Button>}
+      >
+        <p className="text-sm text-zinc-300">
+          This is the canonical Modal primitive — ESC and backdrop click close it; it is labelled and keyboard-accessible.
+        </p>
+      </Modal>
+    </div>
+  );
+}

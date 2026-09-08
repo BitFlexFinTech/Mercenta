@@ -18,6 +18,49 @@ body {
   box-sizing: border-box;
 }
 
+/* ── §Phase 5 — canonical focus-visible (accessibility foundation) ──────── */
+:focus-visible {
+  outline: 2px solid rgba(201, 161, 90, 0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Legacy focus treatment: keep inputs' existing custom focus, but always
+   guarantee a visible keyboard indicator for interactive elements. */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(201, 161, 90, 0.7);
+  outline-offset: 2px;
+}
+
+/* §Phase 5 — semantic status text helpers (machine + human readable). */
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+}
+
+/* Consistent motion-reduce for the new design-system transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
