@@ -27,6 +27,9 @@ function amazonEvidence(p: BrandProspect): string {
 }
 
 function distNote(p: BrandProspect): string {
+  return `${p.brand} would keep full brand ownership while Mercenta manages UK wholesale distribution, compliance documentation, and Amazon Vendor operations end-to-end.`;
+}
+
 export function generateEmail(p: BrandProspect): ProspectOutreachRecord {
   const contact = pickContact(p);
   const greet = contact ? `Hi ${contact.name.split(' ')[0]},` : 'Hi there,';
@@ -82,8 +85,8 @@ export function generateFollowUp(p: BrandProspect, day: number): ProspectOutreac
   const msgs: Record<number, string> = {
     3: 'Just following up — would love to hear your thoughts on whether our Amazon UK distribution model might fit your brand.',
     7: `${p.brand} has ${p.asins.length} ASINs on Amazon UK with ${p.asins.reduce((s, a) => s + a.reviewCount, 0)} combined reviews — strong UK consumer demand. Our model is designed for brands at exactly this stage.`,
-    14: 'I appreciate you may be busy. If the right time comes to explore Amazon UK Vendor support, we'd welcome that conversation.',
-    30: 'Circling back after some time — we've continued tracking your Amazon UK growth. If your distribution strategy has evolved, we'd welcome a fresh conversation.',
+    14: 'I appreciate you may be busy. If the right time comes to explore Amazon UK Vendor support, we\'d welcome that conversation.',
+    30: 'Circling back after some time — we\'ve continued tracking your Amazon UK growth. If your distribution strategy has evolved, we\'d welcome a fresh conversation.',
   };
   return {
     id: `out-fu-${p.id}-d${day}`, prospectId: p.id,
@@ -113,6 +116,11 @@ export function generateOutreachSummary(p: BrandProspect): string {
     p.distributors.some(d => d.exclusive) ? `\n⚠️ ${p.distributors.find(d => d.exclusive)?.company} is exclusive UK distributor — approach them first.` : '',
   ].filter(Boolean).join('\n');
 }
+
+/** §7B — restored declaration for an orphaned helper body that the baseline
+ * itself shipped without a header (the corruption predates the protected
+ * baseline; the body was left as stray statements after generateOutreachSummary). */
+function distributorNote(p: BrandProspect): string {
   if (p.distributors.length === 0) return '';
   const d = p.distributors[0];
   if (d.exclusive) return `${d.company} manages UK distribution — we'd welcome a conversation with them about Amazon Vendor support.`;

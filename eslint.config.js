@@ -22,8 +22,12 @@ export default tseslint.config(
       // validation, never warn — a Rules-of-Hooks bug passes typecheck/build
       // cleanly and only crashes at render time.
       ...reactHooks.configs.recommended.rules,
-      'react-hooks/rules-of-hooks': 'off',
-      'react-hooks/exhaustive-deps': 'off',
+      // §7B repair — the repository documentation and the §Stage-18 pipeline
+      // require enforcement as errors (see DESIGN_SYSTEM.md and the Phase 6
+      // report: "Targeted hooks check (rules-of-hooks + exhaustive-deps as
+      // error)"). The previous 'off' overrides disabled the intended guard.
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },

@@ -25,7 +25,7 @@ test.describe('Brand Guided Tours', () => {
   }
 
   test('1. Tour 1 auto-starts for new brand', async ({ page }) => {
-    await loginAsBrand(page, 'Little Kiwi Baby Co');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const c = page.locator('text=Welcome to Mercenta Partners');
     if (await c.isVisible({ timeout: 3000 }).catch(() => false)) {
       await expect(c).toBeVisible({ timeout: 2000 });
@@ -33,7 +33,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('2. Completed Tour 1 does not re-trigger', async ({ page }) => {
-    await loginAsBrand(page, 'Little Kiwi Baby Co');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const wc = page.locator('text=Welcome to Mercenta Partners');
     if (await wc.isVisible({ timeout: 3000 }).catch(() => false)) {
       for (let i = 0; i < 8; i++) {
@@ -53,7 +53,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('3. Skip Tour 1 shows confirmation', async ({ page }) => {
-    await loginAsBrand(page, 'Nordhaus Living ApS');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const wc = page.locator('text=Welcome to Mercenta Partners');
     if (await wc.isVisible({ timeout: 3000 }).catch(() => false)) {
       const d = page.locator('button[aria-label="Dismiss tour"]');
@@ -72,7 +72,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('4. PO page triggers Tour 3', async ({ page }) => {
-    await loginAsBrand(page, 'Nordhaus Living ApS');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const a = page.locator('.animate-fade-in').first();
     if (await a.isVisible({ timeout: 2000 }).catch(() => false)) {
       const d = page.locator('button[aria-label="Dismiss tour"]');
@@ -95,7 +95,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('5. Deductions tour on Analytics', async ({ page }) => {
-    await loginAsBrand(page, 'Little Kiwi Baby Co');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const a = page.locator('.animate-fade-in').first();
     if (await a.isVisible({ timeout: 2000 }).catch(() => false)) {
       const d = page.locator('button[aria-label="Dismiss tour"]');
@@ -121,7 +121,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('6. Tour steps advance correctly', async ({ page }) => {
-    await loginAsBrand(page, 'Little Kiwi Baby Co');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const wc = page.locator('text=Welcome to Mercenta Partners');
     if (await wc.isVisible({ timeout: 3000 }).catch(() => false)) {
       await page.locator('button', { hasText: 'Next' }).click();
@@ -129,12 +129,14 @@ test.describe('Brand Guided Tours', () => {
       await expect(page.locator('text=Your Dashboard')).toBeVisible({ timeout: 2000 });
       await page.locator('button', { hasText: 'Next' }).click();
       await page.waitForTimeout(300);
-      await expect(page.locator('text=Purchase Orders')).toBeVisible({ timeout: 2000 });
+      // §7B — assert the exact tour-step title (sidebar also contains a
+      // shorter "Purchase Orders" nav label; the full title is unambiguous).
+      await expect(page.locator('text=Purchase Orders — 24-Hour Rule')).toBeVisible({ timeout: 2000 });
     } else test.fixme(true, 'Tour 1 not visible');
   });
 
   test('7. Settings has tour restart', async ({ page }) => {
-    await loginAsBrand(page, 'Little Kiwi Baby Co');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const s = page.locator('[data-tour="nav-settings"]');
     if (await s.isVisible({ timeout: 2000 }).catch(() => false)) {
       await s.click();
@@ -147,7 +149,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('8. Tour selectors resolve', async ({ page }) => {
-    await loginAsBrand(page, 'Little Kiwi Baby Co');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const selectors = [
       '[data-tour="brand-dashboard"]',
       '[data-tour="nav-purchase_orders"]',
@@ -162,7 +164,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('9. Catalog page triggers Tour 2', async ({ page }) => {
-    await loginAsBrand(page, 'Nordhaus Living ApS');
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const a = page.locator('.animate-fade-in').first();
     if (await a.isVisible({ timeout: 2000 }).catch(() => false)) {
       const d = page.locator('button[aria-label="Dismiss tour"]');

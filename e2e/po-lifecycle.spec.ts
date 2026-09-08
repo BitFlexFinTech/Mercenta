@@ -56,7 +56,11 @@ test.describe('PO Lifecycle', () => {
   });
 
   test('4. Partial ack (accept + reject + backorder) → each line independent', async ({ page }) => {
-    await loginAsBrand(page, 'Nordhaus Living ApS');
+    // §7B — DeskForge is onboarded with receivable POs (PO-9002/PO-9003).
+    // The line-ack UI labels changed since this test was written ('View
+    // Details' is no longer rendered); that interaction contract is a
+    // separate pre-existing staleness recorded via the honest skip below.
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const exp = page.locator('button', { hasText: 'View Details' }).first();
     if (await exp.isVisible({ timeout: 3000 }).catch(() => false)) {
       await exp.click(); await page.waitForTimeout(500);
@@ -91,7 +95,9 @@ test.describe('PO Lifecycle', () => {
   });
 
   test('6. 24-hour window expires → auto-flagged', async ({ page }) => {
-    await loginAsBrand(page, 'Sahara Threads SARL');
+    // §7B — DeskForge is onboarded; every seed PO's orderDate is 9–18 days
+    // old, so all acks show the passed-deadline badge.
+    await loginAsBrand(page, 'DeskForge Supplies Inc');
     const el = page.locator('text=hour').or(page.locator('text=expired')).or(page.locator('text=deadline')).first();
     if (await el.isVisible({ timeout: 3000 }).catch(() => false)) {
       await expect(el).toBeVisible({ timeout: 2000 });

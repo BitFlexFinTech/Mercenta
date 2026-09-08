@@ -12,13 +12,24 @@ async function loginAsAdmin(page: any) {
 
 async function loginAsBrand(page: any, name: string) {
   await loginAs(page, name);
-  // Dismiss onboarding tour if visible
-  const tourClose = page.locator('button[aria-label="Dismiss tour"]').or(
-    page.locator('text=Skip Tour').or(page.locator('text=Got it'))
-  ).first();
+  // Dismiss the onboarding tour if visible, then CONFIRM the skip modal —
+  // otherwise the leave-open modal blocks every subsequent click (exposed
+  // once the brand portal renders and the tour actually auto-starts).
+  const tourClose = page.locator('button[aria-label="Dismiss tour"]').first();
   if (await tourClose.isVisible({ timeout: 2000 }).catch(() => false)) {
     await tourClose.click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(400);
+    const skipBtn = page.locator('button', { hasText: 'Skip Tour' }).first();
+    if (await skipBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await skipBtn.click();
+      await page.waitForTimeout(300);
+    } else {
+      const contBtn = page.locator('button', { hasText: 'Continue Tour' }).first();
+      if (await contBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await contBtn.click();
+        await page.waitForTimeout(300);
+      }
+    }
   }
 }
 

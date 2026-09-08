@@ -207,7 +207,7 @@ useEffect(() => { loadConnection(); }, [loadConnection]);
           </div>
         )}
       </div>
+      </div>
     </Card>
   );
 }
-        </div>

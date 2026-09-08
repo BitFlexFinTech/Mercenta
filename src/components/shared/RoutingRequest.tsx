@@ -40,8 +40,14 @@ function formatCountdown(deadline: Date): { label: string; overdue: boolean } {
 export function RoutingRequestIndicator({
   poFreightTerm, shipWindowEnd, routingRequestFiled = false,
 }: RoutingRequestProps) {
-  if (poFreightTerm !== 'collect' || !shipWindowEnd) return null;
-  const deadline = useMemo(() => getRoutingRequestDeadline(shipWindowEnd), [shipWindowEnd]);
+  // §7B — hooks must run unconditionally (previously the useMemo below was
+  // gated behind an early return: a genuine Rules-of-Hooks violation that
+  // can crash at render time when the branch flips).
+  const deadline = useMemo(
+    () => (shipWindowEnd ? getRoutingRequestDeadline(shipWindowEnd) : null),
+    [shipWindowEnd]
+  );
+  if (poFreightTerm !== 'collect' || !shipWindowEnd || !deadline) return null;
   const countdown = formatCountdown(deadline);
 
   if (routingRequestFiled) {
@@ -90,12 +96,14 @@ export function RoutingRequestForm({
 }: RoutingRequestFormProps) {
   const [confirmChecked, setConfirmChecked] = useState(false);
   const [filing, setFiling] = useState(false);
-
-  if (poFreightTerm !== 'collect' || routingRequestFiled) return null;
-
+  // §7B — hooks must run unconditionally; the useMemo was previously called
+  // after the early-return guard below (Rules-of-Hooks violation).
   const deadline = useMemo(() =>
     shipWindowEnd ? getRoutingRequestDeadline(shipWindowEnd) : null, [shipWindowEnd]
   );
+
+  if (poFreightTerm !== 'collect' || routingRequestFiled) return null;
+
   const isOverdue = deadline && deadline.getTime() < Date.now();
 
   async function handleFile() {

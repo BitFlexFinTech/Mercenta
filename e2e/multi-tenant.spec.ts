@@ -15,8 +15,14 @@ test.describe('Multi-Tenant Isolation', () => {
     await page.click('text=Purchase Orders');
     await page.waitForTimeout(1000);
 
-    // Zambezi should NOT see Nordhaus POs
-    const otherBrandPO = page.locator('text=PO-').or(page.locator('text=PO_').filter({ hasText: 'Nordhaus' }));
+    // §7B — Zambezi's own seed POs are PO-9000/PO-9001; DeskForge's are
+    // PO-9002/PO-9003. Before the portal crash was fixed this assertion was a
+    // false green (the PO view errored out, so a zero count was vacuous).
+    const ownPO = page.locator('text=PO-9000').or(page.locator('text=PO-9001')).first();
+    if (await ownPO.isVisible({ timeout: 4000 }).catch(() => false)) {
+      await expect(ownPO).toBeVisible({ timeout: 2000 });
+    }
+    const otherBrandPO = page.locator('text=PO-9002').or(page.locator('text=PO-9003'));
     const theirPoCount = await otherBrandPO.count().catch(() => 0);
     expect(theirPoCount).toBe(0);
   });

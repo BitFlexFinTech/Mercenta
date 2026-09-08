@@ -42,8 +42,9 @@ test.describe('Shipment & ASN', () => {
   });
 
   test('3. Amazon freight (Ship Window) → Routing Request required', async ({ page }) => {
-    // Login as a brand on direct_fulfillment track with collect freight POs
-    await loginAs(page, 'Voltaic Audio LLC');
+    // §7B — Zambezi is onboarded and its seed POs are Freight Collect
+    // (ship window set), which is exactly the Routing Request scenario.
+    await loginAs(page, 'Zambezi Organic Extracts Ltd');
     await page.click('text=Purchase Orders');
     await page.waitForTimeout(800);
 

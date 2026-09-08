@@ -174,11 +174,18 @@ function TourStepCard(props: {
 
     const gap = 12; // px gap between target and tooltip
     const tooltipWidth = 400;
+    // §7B — clamp vertically so the card (including its Next/Got it button) is
+    // always reachable when the target sits near the bottom of the viewport
+    // (e.g. the last sidebar nav item). Without this the completion button
+    // rendered outside the viewport and the tour could not be finished.
+    const clampTop = function(raw: number) {
+      return Math.max(8, Math.min(raw, Math.max(8, window.innerHeight - 200)));
+    };
 
     if (step.position === 'right') {
       return {
         position: 'fixed',
-        top: `${Math.max(8, targetRect.top + targetRect.height / 2 - 80)}px`,
+        top: `${clampTop(targetRect.top + targetRect.height / 2 - 80)}px`,
         left: `${Math.min(targetRect.left + targetRect.width + gap, window.innerWidth - tooltipWidth - 16)}px`,
         zIndex: 50,
       };
@@ -186,7 +193,7 @@ function TourStepCard(props: {
     // 'bottom' or default: below the target
     return {
       position: 'fixed',
-      top: `${targetRect.top + targetRect.height + gap}px`,
+      top: `${clampTop(targetRect.top + targetRect.height + gap)}px`,
       left: `${Math.max(8, Math.min(targetRect.left + targetRect.width / 2 - tooltipWidth / 2, window.innerWidth - tooltipWidth - 16))}px`,
       zIndex: 50,
     };
