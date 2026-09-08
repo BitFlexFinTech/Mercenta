@@ -15,7 +15,12 @@ export type IntegrationId =
   | 'usertour'
   | 'rocketchat'
   | 'twilio_whatsapp'
-  | 'postiz';
+  | 'postiz'
+  // §Phase 4 — scenario-required providers registered so their mode is
+  // authoritative (docs-verified current state: DHL waiting/simulation,
+  // Xero demo/simulation). No longer implicit/unknown.
+  | 'dhl'
+  | 'xero';
 
 export type IntegrationStatus =
   | 'disconnected'
@@ -188,6 +193,11 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   rocketchat: { status: 'disconnected', sandbox: false },
   twilio_whatsapp: { status: 'disconnected', sandbox: false },
   postiz: { status: 'disconnected', sandbox: false },
+  // §Phase 4 — scenario-required providers with authoritative (docs-verified)
+  // simulation default. They are simulation-capable ONLY because current
+  // repository state confirms DHL = waiting/simulation, Xero = demo/simulation.
+  dhl: { status: 'disconnected', sandbox: false },
+  xero: { status: 'disconnected', sandbox: false },
 };
 
 /** API keys are held IN-MEMORY ONLY until Vault-backed storage is wired. */
@@ -221,4 +231,41 @@ export function modeForState(
   if (state.status === 'code_received') return 'configuring';
   if (state.status === 'needs_attention') return state.error ? 'error' : 'degraded';
   return defaultMode;
+}
+
+/* ── §Phase 4 — authoritative provider-mode safety resolution ───────────── */
+
+/**
+ * A provider-resolution mode adds the two states that are NOT positive
+ * configuration: `unknown` (a provider listed by a scenario that has no
+ * registry entry) and `not_registered`.
+ *
+ * §UNKNOWN ≠ SIMULATION — only a mode positively identified as `simulation`
+ * is safe for simulated execution. Everything else (including `available`,
+ * `configuring`, `disabled`, `unknown`, `not_registered`) is NOT provably
+ * simulation-isolated and must be treated as UNKNOWN/UNSAFE unless the
+ * scenario demonstrably does not require that provider's external execution.
+ */
+export type ProviderResolutionMode = IntegrationMode | 'unknown' | 'not_registered';
+
+/**
+ * The ONLY mode that is simulation-safe. All other modes — including
+ * AVAILABLE/UNCONFIGURED and DISABLED — are NOT safe by default.
+ */
+export function isProviderSimulationSafe(
+  mode: ProviderResolutionMode | undefined
+): mode is 'simulation' {
+  return mode === 'simulation';
+}
+
+/**
+ * Resolve a provider's current mode from the authoritative modes map.
+ * Not present in the map → `not_registered` (unsafe, never simulation).
+ */
+export function resolveProviderMode(
+  modes: Partial<Record<IntegrationId, IntegrationMode>>,
+  providerId: string
+): ProviderResolutionMode {
+  const mode = (modes as Record<string, IntegrationMode | undefined>)[providerId];
+  return mode ?? 'not_registered';
 }

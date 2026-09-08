@@ -200,7 +200,7 @@ export async function isComplianceGateCleared(brandId: string): Promise<boolean>
   const hasAgreement = hasSignedDistributionAgreement(brandId);
   const logisticsSlaAccepted = storeHasAcceptedAgreement(brandId, 'logistics_sla');
   const chargebackIndemnityAccepted = storeHasAcceptedAgreement(brandId, 'chargeback_indemnity');
-  return evaluateComplianceGate(docs, hasAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted).cleared;
+  return evaluateComplianceGate(docs, undefined, hasAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted).cleared;
 }
 
 export interface CatalogSubmissionResult {
@@ -231,10 +231,16 @@ export async function submitCatalogItem(
     return { ok: false, reason: `Missing required fields: ${missingFields.join(', ')}` };
   }
 
-  // Compliance gate — reject before submission, mirroring the DB trigger.
+  // §Phase 4 — minimal targeted fix: pass the SAME agreement inputs the
+  // authoritative compliance gate reads. The gate signature is
+  // (docs, category?, hasSignedAgreement, logisticsSlaAccepted,
+  // chargebackIndemnityAccepted) — category must be `undefined` here
+  // (base docs), otherwise the first boolean shifts every argument.
   const docs = await fetchComplianceForBrand(brandId);
   const hasAgreement = hasSignedDistributionAgreement(brandId);
-  const evaluation = evaluateComplianceGate(docs, hasAgreement);
+  const logisticsSlaAccepted = storeHasAcceptedAgreement(brandId, 'logistics_sla');
+  const chargebackIndemnityAccepted = storeHasAcceptedAgreement(brandId, 'chargeback_indemnity');
+  const evaluation = evaluateComplianceGate(docs, undefined, hasAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted);
   if (!evaluation.cleared) {
     return {
       ok: false,

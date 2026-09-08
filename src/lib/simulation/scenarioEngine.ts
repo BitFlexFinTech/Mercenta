@@ -55,7 +55,8 @@ import type {
   Shipment,
   Ticket,
 } from '@/types';
-import type { IntegrationMode } from '@/integrations/types';
+import { isProviderSimulationSafe } from '@/integrations/types';
+import type { ProviderResolutionMode } from '@/integrations/types';
 
 export type ScenarioId =
   | 'NORMAL_PO'
@@ -76,10 +77,11 @@ export interface ScenarioRunContext {
   /** Actor label written on audit entries. */
   actorId?: string;
   /**
-   * Per-provider mode lookup for the safety gate. Default returns
-   * 'simulation', the ONLY mode a scenario will execute under. Absence ⇒ safe.
+   * Per-provider mode lookup for the safety gate. Default returns `'unknown'`
+   * so an unprovided lookup is NEVER treated as simulation-safe.
+   * §Phase 4 — UNKNOWN ≠ SIMULATION.
    */
-  getMode?: (id: string) => IntegrationMode;
+  getMode?: (id: string) => ProviderResolutionMode;
 }
 
 export interface ScenarioStep {
@@ -179,17 +181,22 @@ function emitScenarioEvent(
   });
 }
 
-/** Ensure a scenario never executes against a LIVE provider. */
+/**
+ * §Phase 4 — safety gate. A scenario executes ONLY when every required
+ * provider is POSITIVELY resolved as `simulation`. `unknown`,
+ * `not_registered`, `available`, `configuring`, `disabled`, `degraded`,
+ * `error`, or `live` all REFUSE — never silently downgraded.
+ */
 function assertSimulationOnly(
   ctx: ScenarioRunContext,
   scenario: ScenarioId,
   requiredProviderIds: string[]
 ): string | null {
-  const getMode = ctx.getMode ?? (() => 'simulation' as const);
+  const getMode = ctx.getMode ?? (() => 'unknown' as const);
   for (const id of requiredProviderIds) {
     const mode = getMode(id);
-    if (mode === 'live' || mode === 'connected' || mode === 'degraded' || mode === 'error') {
-      return `${scenario} requires provider '${id}' which is configured '${mode}'. Scenario engine is simulation-only and refuses live execution.`;
+    if (!isProviderSimulationSafe(mode)) {
+      return `${scenario} requires provider '${id}' which resolved '${mode}' (not positively SIMULATION). Scenario engine refuses non-simulation execution.`;
     }
   }
   return null;

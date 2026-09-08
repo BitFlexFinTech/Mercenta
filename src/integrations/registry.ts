@@ -228,6 +228,27 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Fetch Postiz health endpoint to verify the server is reachable',
   },
+  // §Phase 4 — registered so their MODE is authoritative for scenario safety.
+  // Deliberately NOT added to INTEGRATION_ORDER: they have dedicated
+  // non-wizard integration paths (Xero: services/xero + AccountingPanel;
+  // DHL: provider adapter to be wired when credentials arrive). The wizard
+  // must not render an API-key form for an OAuth/enterprise provider.
+  dhl: {
+    id: 'dhl',
+    name: 'DHL UK',
+    description: 'Logistics / shipment API. Simulated until production credentials are configured.',
+    authMethod: 'api_key',
+    fields: [],
+    testCallDescription: 'Shipment status query against the connected DHL account',
+  },
+  xero: {
+    id: 'xero',
+    name: 'Xero',
+    description: 'Accounting / financial records. Demo mode (28-day reset + auto-reseed) until live OAuth credentials are configured.',
+    authMethod: 'api_key',
+    fields: [],
+    testCallDescription: 'OAuth connection verified via the dedicated Xero panel',
+  },
 };
 
 export const INTEGRATION_ORDER: IntegrationId[] = [
@@ -268,7 +289,7 @@ export interface IntegrationMeta {
 export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   amazon_sp_api: { category: 'commerce', defaultMode: 'simulation' },
   amazon_ads: { category: 'marketing', defaultMode: 'available' },
-  stripe: { category: 'finance', defaultMode: 'available' },
+  stripe: { category: 'finance', defaultMode: 'simulation' },
   esignature: { category: 'commerce', defaultMode: 'available' },
   email: { category: 'communications', defaultMode: 'available', demoKeyHint: 'VITE_POSTMARK_API_KEY' },
   lead_sourcing: { category: 'marketing', defaultMode: 'available' },
@@ -278,9 +299,14 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   keepa: { category: 'data', defaultMode: 'available' },
   firecrawl: { category: 'data', defaultMode: 'available' },
   usertour: { category: 'communications', defaultMode: 'simulation' },
-  rocketchat: { category: 'communications', defaultMode: 'available' },
+  rocketchat: { category: 'communications', defaultMode: 'simulation' },
   twilio_whatsapp: { category: 'communications', defaultMode: 'available' },
   postiz: { category: 'marketing', defaultMode: 'available' },
+  // §Phase 4 — scenario-required providers. Docs-verified simulation state:
+  // DHL waiting/simulation, Xero demo/simulation. Registered so every scenario
+  // provider resolves authoritatively (never falls to UNKNOWN).
+  dhl: { category: 'logistics', defaultMode: 'simulation' },
+  xero: { category: 'finance', defaultMode: 'simulation' },
 };
 
 export function integrationMeta(id: IntegrationId): IntegrationMeta {

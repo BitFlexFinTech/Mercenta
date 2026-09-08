@@ -29,7 +29,8 @@
 import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
-import type { IntegrationId, IntegrationMode } from '@/integrations/types';
+import { isProviderSimulationSafe, resolveProviderMode } from '@/integrations/types';
+import type { IntegrationId } from '@/integrations/types';
 import { Badge, Button, Card, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
@@ -106,8 +107,10 @@ const SCENARIO_META: Record<ScenarioId, ScenarioMeta> = {
   },
 };
 
-/** Modes that indicate a LIVE dependency that a simulation must refuse. */
-const UNSAFE_MODES: IntegrationMode[] = ['live', 'degraded', 'error'];
+/**
+ * §Phase 4 — authoritative boundary check is defined via the shared resolver
+ * (isProviderSimulationSafe / resolveProviderMode) in the scenario panel.
+ */
 
 export function SimulationControl() {
   const { session } = useApp();
@@ -121,21 +124,26 @@ export function SimulationControl() {
 
   const isSuperAdmin = session?.tier === 'super_admin';
 
-  /** Boundary safety check — refuses (never downgrades) if any required provider is LIVE. */
-  function scenarioIsSafe(id: ScenarioId): { safe: boolean; liveProviders: string[] } {
-    const liveProviders = SCENARIO_META[id].requiredProviders.filter((pid) => {
-      const mode = modes[pid as IntegrationId];
-      return mode ? UNSAFE_MODES.includes(mode) : false;
+  /**
+   * §Phase 4 — authoritative boundary check using the shared resolver.
+   * Safe ONLY when every required provider positively resolves `simulation`.
+   */
+  function scenarioIsSafe(id: ScenarioId): { safe: boolean; unsafeProviders: string[] } {
+    const unsafeProviders = SCENARIO_META[id].requiredProviders.filter((pid) => {
+      const mode = resolveProviderMode(modes, pid);
+      return !isProviderSimulationSafe(mode);
     });
-    return { safe: liveProviders.length === 0, liveProviders };
-async function runOne(id: ScenarioId) {
+    return { safe: unsafeProviders.length === 0, unsafeProviders };
+  }
+
+  async function runOne(id: ScenarioId) {
     if (running || runningAll) return;
     const { safe } = scenarioIsSafe(id);
     if (!safe) return; // boundary refusal — Run disabled below, engine gate is backstop
     setRunning(id);
     const ctx: ScenarioRunContext = {
       seed,
-      getMode: (pid: string) => modes[pid as IntegrationId] ?? 'simulation',
+      getMode: (pid: string) => resolveProviderMode(modes, pid),
     };
     try {
       const before = queryEvents().length;
@@ -152,7 +160,7 @@ async function runOne(id: ScenarioId) {
     setRunningAll(true);
     const ctx: ScenarioRunContext = {
       seed,
-      getMode: (pid: string) => modes[pid as IntegrationId] ?? 'simulation',
+      getMode: (pid: string) => resolveProviderMode(modes, pid),
     };
     try {
       const before = queryEvents().length;
@@ -243,7 +251,7 @@ async function runOne(id: ScenarioId) {
       <div className="space-y-3">
         {listScenarios().map((id) => {
           const meta = SCENARIO_META[id];
-          const { safe, liveProviders } = scenarioIsSafe(id);
+          const { safe, unsafeProviders } = scenarioIsSafe(id);
           const result = results[id];
           return (
             <Card key={id} className="p-4">
@@ -275,7 +283,7 @@ async function runOne(id: ScenarioId) {
                   </Badge>
                 ) : (
                   <Badge className="text-[10px] bg-red-500/15 text-red-300 border-red-500/20">
-                    <AlertTriangle className="w-3 h-3 mr-1" /> Refused — live dependency: {liveProviders.join(', ')}
+                    <AlertTriangle className="w-3 h-3 mr-1" /> Refused — provider not simulation-safe: {unsafeProviders.join(', ')}
                   </Badge>
                 )}
               </div>
@@ -374,4 +382,4 @@ function CreatedEntities({ result }: { result: ScenarioResult }) {
       ))}
     </div>
   );
-}}
+}

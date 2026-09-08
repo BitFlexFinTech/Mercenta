@@ -10,7 +10,7 @@
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
 > - Older sections below (Brand Intelligence, performance fixes, droplet consolidation, E2E suite) are historical/legacy and are preserved verbatim; they do not supersede the phase table above. Navigation: use section 1 for current phases/checkpoint/branch.
 
-## 1. Master Redesign — Phases 0, 1, 2A, 2B, 2C complete; Phase 3 DONE
+## 1. Master Redesign — Phases 0, 1, 2A, 2B, 2C, 3 complete; Phase 4 DONE
 
 | Phase | Status | Notes |
 |---|---|---|
@@ -20,7 +20,9 @@
 | **Phase 2B** | ✅ **DONE** | `ba99266` — health runner `src/lib/integrations/health.ts`, wizard stepper/mode badges/health panel in IntegrationsPanel. Probe PASS 7/7. |
 | **Phase 2C** | ✅ **DONE** | `4eeef45` — `src/lib/simulation/scenarioEngine.ts` (650 lines, 7 deterministic scenarios, safety gate, event+audit trail, extensible dispatch). Typecheck 0 new, eslint clean, build `✓ 3.22s`, scenario probe **PASS all**. |
 | **Phase 3** | ✅ **DONE** | `SimulationControl.tsx` (377 lines) + SuperAdminPanel tab wiring. Super Admin-only (existing RBAC + boundary tier check). Reuses scenario engine; boundary safety check + engine gate (defense in depth); partial shared reset (`resetMockAmazonState` + `resetEvents`, labelled partial). Typecheck 0 new, eslint clean, build `✓ 2.20s`, Phase 3 regression probe **PASS** (determinism, all-7-ok, LIVE refusal, 0 network calls). |
-| **Phase 4** | ⏳ **NEXT** | Functional verification / critical workflow hardening (requires approval). |
+| **Phase 4** | ✅ **DONE** | Provider safety (UNKNOWN≠SIMULATION) + `submitCatalogItem` critical fix + real Playwright verification. 4A: `types.ts` adds `ProviderResolutionMode`/`isProviderSimulationSafe`/`resolveProviderMode`; `dhl`/`xero` registered (docs-verified simulation); `stripe`/`rocketchat` META corrected to simulation; engine `assertSimulationOnly` default `unknown` (not simulation) + strict positive-simulation gate; Control Centre uses shared resolver. 4B: `submitCatalogItem` + `isComplianceGateCleared` fixed off-by-one arg → pass `undefined` category + both agreements (pre-existing defect discovered in Phase 4 → minimal targeted fix). 4C: `e2e/simulation-control.spec.ts` **15/15 PASS** (RBAC, rendering, run, LIVE-refusal UI+resolver, network isolation, partial-reset, 7-viewport screenshots captured at `test-screenshots/simulation-control/`). Probes: Phase 4A+B **PASS** (21 checks, `networkCalls===0`). Build `✓ 3.28s`. |
+| **Phase 5** | ⏳ **NEXT** | Design system (requires approval). |
+| **Discovered pre-existing defect (NOT yet fixed — out of scope)** | ⚠️ | `ComplianceHub.tsx:199` calls `evaluateComplianceGate(brandDocs, hasSignedAgreement)` — arg-shifted (agreement passed as `category`). Same off-by-one bug class fixed elsewhere in Phase 4. Propose minimal fix in a later approved increment. |
 ## Brand Intelligence System — New Module
 
 | Stage | Status | Notes |
