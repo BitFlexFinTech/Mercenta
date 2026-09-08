@@ -10,7 +10,8 @@ async function loginAsBrand(page: any, name: string) {
   await page.waitForTimeout(500);
   await page.click('text=' + name);
   await page.waitForTimeout(800);
-  await page.click('text=Compliance');
+  // §Phase 6 — sidebar is grouped; click the actual nav button (the "Compliance" section heading is not clickable).
+  await page.click('nav >> text=UK Compliance');
   await page.waitForTimeout(800);
 }
 
@@ -48,7 +49,8 @@ test.describe('Compliance Gate', () => {
     await page.waitForTimeout(500);
     await page.click('text=Mercenta Admin Hub');
     await page.waitForTimeout(800);
-    await page.click('text=Compliance');
+    // §Phase 6 — grouped sidebar: click the nav button (heading not clickable).
+    await page.click('nav >> text=Compliance Approvals');
     await page.waitForTimeout(800);
 
     const expired = page.locator('text=expired').or(page.locator('text=Expired')).or(page.locator('text=expiring')).first();

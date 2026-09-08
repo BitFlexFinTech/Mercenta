@@ -32,22 +32,51 @@ import {
   MessageSquare, ScrollText,
 } from 'lucide-react';
 
-const BRAND_NAV = [
-  { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { id: 'onboarding', label: 'Onboarding & Legal', icon: <FileCheck2 className="w-4 h-4" /> },
-  { id: 'contracts', label: 'Contracts', icon: <FileText className="w-4 h-4" /> },
-  { id: 'purchase_orders', label: 'Purchase Orders', icon: <Truck className="w-4 h-4" /> },
-  { id: 'catalog', label: 'Product Catalog', icon: <Package className="w-4 h-4" /> },
-  { id: 'logistics', label: 'Inbound Shipments', icon: <Truck className="w-4 h-4" /> },
-  { id: 'compliance', label: 'UK Compliance', icon: <ShieldCheck className="w-4 h-4" /> },
-  { id: 'returns', label: 'Returns', icon: <RotateCcw className="w-4 h-4" /> },
-  { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> },
-  { id: 'market', label: 'Market Intel', icon: <BarChart3 className="w-4 h-4" /> },
-  { id: 'reports', label: 'Reports', icon: <BarChart3 className="w-4 h-4" /> },
-  { id: 'documents', label: 'Documents & Account', icon: <ScrollText className="w-4 h-4" /> },
-  { id: 'team', label: 'Support & Team', icon: <MessageSquare className="w-4 h-4" /> },
-  { id: 'social', label: 'Social Accounts', icon: <Target className="w-4 h-4" /> },
-{ id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
+const BRAND_SECTIONS = [
+  {
+    label: 'Overview',
+    items: [{ id: 'overview', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Catalogue',
+    items: [{ id: 'catalog', label: 'Product Catalog', icon: <Package className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Commerce',
+    items: [
+      { id: 'purchase_orders', label: 'Purchase Orders', icon: <Truck className="w-4 h-4" /> },
+      { id: 'returns', label: 'Returns', icon: <RotateCcw className="w-4 h-4" /> },
+    ],
+  },
+  {
+    label: 'Logistics',
+    items: [{ id: 'logistics', label: 'Inbound Shipments', icon: <Truck className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Compliance',
+    items: [
+      { id: 'onboarding', label: 'Onboarding & Legal', icon: <FileCheck2 className="w-4 h-4" /> },
+      { id: 'compliance', label: 'UK Compliance', icon: <ShieldCheck className="w-4 h-4" /> },
+      { id: 'contracts', label: 'Contracts', icon: <FileText className="w-4 h-4" /> },
+    ],
+  },
+  {
+    label: 'Insights',
+    items: [
+      { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> },
+      { id: 'market', label: 'Market Intel', icon: <BarChart3 className="w-4 h-4" /> },
+      { id: 'reports', label: 'Reports', icon: <BarChart3 className="w-4 h-4" /> },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { id: 'documents', label: 'Documents & Account', icon: <ScrollText className="w-4 h-4" /> },
+      { id: 'team', label: 'Support & Team', icon: <MessageSquare className="w-4 h-4" /> },
+      { id: 'social', label: 'Social Accounts', icon: <Target className="w-4 h-4" /> },
+      { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
+    ],
+  },
 ];
 export default function BrandShell() {
   const { brandProfile } = useApp();
@@ -71,7 +100,7 @@ export default function BrandShell() {
     : 'Analytics';
 
   return (
-    <AppShell navItems={BRAND_NAV} activeView={brandView} setActiveView={setBrandView}
+    <AppShell navSections={BRAND_SECTIONS} activeView={brandView} setActiveView={setBrandView}
       breadcrumb={bc}
       userName={brandProfile.signatory || brandProfile.businessName || 'Brand Partner'}
       onNavSettings={() => setBrandView('settings')}

@@ -88,7 +88,8 @@ test.describe('PO Notifications & Auto-Fulfillment', () => {
       test.fixme(true, 'No PO detail button visible');
     }
 
-    await page.click('text=Logistics');
+    // §Phase 6 — grouped sidebar: click the nav button (heading not clickable).
+    await page.click('nav >> text=Inbound Shipments');
     await page.waitForTimeout(800);
     const draftRef = page.locator('text=DRAFT-').first();
     if (await draftRef.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -119,7 +120,8 @@ test.describe('PO Notifications & Auto-Fulfillment', () => {
 
   test('5. Labels modal opens for shipment', async ({ page }) => {
     await loginAsBrand(page, 'DeskForge Supplies Inc');
-    await page.click('text=Logistics');
+    // §Phase 6 — grouped sidebar: click the nav button (heading not clickable).
+    await page.click('nav >> text=Inbound Shipments');
     await page.waitForTimeout(800);
 
     const labelsBtn = page.locator('button', { hasText: 'Labels' }).first();

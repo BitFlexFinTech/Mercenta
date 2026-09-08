@@ -38,6 +38,12 @@ async function loginAsSuperAdmin(page: import('@playwright/test').Page) {
 
 /** Navigate from admin shell into the Super Admin panel's Simulation tab. */
 async function openSimulationTab(page: import('@playwright/test').Page) {
+  // §Phase 6 — below lg (1024px) the primary nav is an off-canvas drawer.
+  const vp = page.viewportSize();
+  if (vp && vp.width < 1024) {
+    await page.getByTestId('app-menu-toggle').click({ timeout: 4000 });
+    await page.waitForTimeout(400);
+  }
   await page.click('nav >> text=Super Admin');
   await page.waitForTimeout(600);
   await page.click('text=Simulation');

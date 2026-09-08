@@ -9,10 +9,17 @@ import { CarrierDashboard } from '@/components/carrier/CarrierDashboard';
 import { BakLogistics } from '@/components/carrier/BakLogistics';
 import { Terminal, Ship, BarChart3 } from 'lucide-react';
 
-const NAV = [
-  { id: 'manifest', label: 'Manifest Management', icon: <Terminal className="w-4 h-4" /> },
-  { id: 'bak', label: 'BAK Logistics Hub', icon: <Ship className="w-4 h-4" /> },
-  { id: 'auditor', label: 'API Request Auditor', icon: <BarChart3 className="w-4 h-4" /> },
+const NAV_SECTIONS = [
+  {
+    // §Phase 6 — single implied section: no heading so the three-item
+    // carrier navigation stays visually unchanged.
+    label: '',
+    items: [
+      { id: 'manifest', label: 'Manifest Management', icon: <Terminal className="w-4 h-4" /> },
+      { id: 'bak', label: 'BAK Logistics Hub', icon: <Ship className="w-4 h-4" /> },
+      { id: 'auditor', label: 'API Request Auditor', icon: <BarChart3 className="w-4 h-4" /> },
+    ],
+  },
 ];
 
 export default function CarrierShell() {
@@ -21,7 +28,7 @@ export default function CarrierShell() {
   const bc = carrierView === 'manifest' ? 'Manifest Management' : carrierView === 'bak' ? 'BAK Logistics Hub' : 'API Auditor';
 
   return (
-    <AppShell navItems={NAV} activeView={carrierView} setActiveView={setCarrierView} breadcrumb={bc} userName={role ?? '3PL Carrier'}>
+    <AppShell navSections={NAV_SECTIONS} activeView={carrierView} setActiveView={setCarrierView} breadcrumb={bc} userName={role ?? '3PL Carrier'}>
       {carrierView === 'bak' ? <BakLogistics /> : <CarrierDashboard />}
     </AppShell>
   );

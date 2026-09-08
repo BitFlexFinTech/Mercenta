@@ -85,7 +85,8 @@ test.describe('Shipment & ASN', () => {
     await page.waitForTimeout(500);
     await page.click('text=Mercenta Admin Hub');
     await page.waitForTimeout(800);
-    await page.click('text=Logistics');
+    // §Phase 6 — grouped sidebar: click the nav button (heading not clickable).
+    await page.click('nav >> text=Logistics Control');
     await page.waitForTimeout(800);
 
     const deliveredShip = page.locator('text=live_amazon').or(page.locator('text=Live on retail')).first();

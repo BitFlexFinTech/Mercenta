@@ -80,3 +80,53 @@ The canonical kit SHOULD use `state.*` for semantics.
 ## Showcase
 - `src/components/design/DesignSystemShowcase.tsx` mounts under Super Admin → **Design System**.
 - Playwright: `e2e/design-system.spec.ts`.
+
+## Shell & Navigation (§Phase 6)
+
+The application shell (`src/components/layout/AppShell.tsx` + role shells) is the
+canonical way to mount navigation around an environment. Conventions:
+
+### Grouped navigation
+- Nav is defined as **sections** of items: `{ label, items: [{ id, label, icon }] }`
+  (`NavSection` in `Sidebar.tsx`). Item `id` values are the SAME view ids the
+  shells already switched on — grouping is presentation only.
+- Section headings are static text (`<p>`), never interactive, never
+  `aria-expanded` — no collapsible sections in this phase.
+- A single unlabelled section (`label: ''`) renders **no heading** (used by the
+  three-item Carrier nav).
+
+### Active-state semantics
+- The active item is `aria-current="page"`, `data-state="active"`, brass-accented
+  icon + `bg-white/[0.08]` fill — never colour-only.
+- Inactive items are `data-state="idle"`.
+- The primary nav is a single `<nav aria-label="Primary">` landmark; the header
+  breadcrumb uses a separate `<nav aria-label="Breadcrumb">` (canonical
+  `Breadcrumb` component, `aria-current` on the last item).
+
+### Breadcrumb usage
+- `AppShell` derives the trail from the active section + the shell's existing
+  `breadcrumb` string: `Section › Current-label`. When one contains the other
+  (e.g. "Admin Overview" ⊇ "Overview") the more specific label wins, so the
+  trail never reads redundantly. Overview surfaces collapse to a single crumb.
+
+### Mobile drawer
+- Below `lg` (1024px) the SAME `<aside>` becomes a fixed off-canvas drawer
+  (`-translate-x-full` ↔ `translate-x-0`, `transition-ds`); at `lg`+ it is
+  `lg:static`. There is **one** nav DOM tree — never duplicated markup.
+- Header toggle (`data-testid="app-menu-toggle"`, `lg:hidden`) exposes
+  `aria-expanded` + `aria-controls="app-sidebar"`.
+- While open: a `z-40` backdrop closes on click; `Escape` closes and returns
+  focus to the toggle; selecting a nav item closes the drawer (focus unchanged).
+
+### Accessibility conventions
+- Skip link is the first tab stop → `#main-content` (`<main tabIndex={-1}>`).
+- Global Phase 5 `:focus-visible` outline provides keyboard focus on all nav
+  buttons (visible, brass, never colour-only).
+- Profile menu: `aria-haspopup="menu"`, `aria-expanded`, `aria-controls` on the
+  trigger; `role="menu"` / `role="menuitem"` on the panel and entries.
+
+### RBAC in the shell
+- Navigation hides super-only views for non-super admin
+  (`super_admin`, `audit_log`, `integrations`) directly in the shell's section
+  filter. Render-side guards in the shells are unchanged and still enforce
+  actual authorization (defense in depth). No third RBAC system was added.

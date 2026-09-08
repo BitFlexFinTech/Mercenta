@@ -39,37 +39,92 @@ import {
   Phone,
 } from 'lucide-react';
 
-const ADMIN_NAV = [
-  { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
-  { id: 'crm', label: 'Brand CRM', icon: <Users className="w-4 h-4" /> },
-  { id: 'fulfillment_track', label: 'Fulfillment Track', icon: <Gauge className="w-4 h-4" /> },
-  { id: 'retail_pipeline', label: 'Retail Pipeline', icon: <Boxes className="w-4 h-4" /> },
-  { id: 'purchase_orders_admin', label: 'Purchase Orders', icon: <Package className="w-4 h-4" /> },
-  { id: 'logistics', label: 'Logistics Control', icon: <Truck className="w-4 h-4" /> },
-  { id: 'carriers', label: 'Carrier Monitor', icon: <Plug className="w-4 h-4" /> },
-  { id: 'catalog', label: 'Global Catalog', icon: <Boxes className="w-4 h-4" /> },
-  { id: 'compliance', label: 'Compliance Approvals', icon: <ShieldCheck className="w-4 h-4" /> },
-  { id: 'billing', label: 'Billing', icon: <CreditCard className="w-4 h-4" /> },
-  { id: 'contracts_admin', label: 'Contract Cycle', icon: <FileText className="w-4 h-4" /> },
-  { id: 'messages', label: 'Communications', icon: <Inbox className="w-4 h-4" /> },
-  { id: 'helpdesk', label: 'Helpdesk', icon: <LifeBuoy className="w-4 h-4" /> },
-  { id: 'returns_tracking', label: 'Returns Tracking', icon: <RotateCcw className="w-4 h-4" /> },
-  { id: 'monitoring', label: 'Monitoring', icon: <Activity className="w-4 h-4" /> },
-  { id: 'marketing', label: 'Marketing', icon: <Target className="w-4 h-4" /> },
-  { id: 'brand_intelligence', label: 'Brand Intelligence', icon: <Target className="w-4 h-4" /> },
-  { id: 'super_admin', label: 'Super Admin', icon: <Crown className="w-4 h-4" /> },
-  { id: 'audit_log', label: 'Audit Log', icon: <ScrollText className="w-4 h-4" /> },
-  { id: 'integrations', label: 'Integration Settings', icon: <PlugZap className="w-4 h-4" /> },
-  { id: 'usertour', label: 'Onboarding Tours', icon: <MessageSquare className="w-4 h-4" /> },
-  { id: 'rocketchat', label: 'Rocket.Chat', icon: <MessageSquare className="w-4 h-4" /> },
-  { id: 'postiz', label: 'Social Media', icon: <Target className="w-4 h-4" /> },
-{ id: 'whatsapp', label: 'WhatsApp', icon: <Phone className="w-4 h-4" /> },
+const ADMIN_SECTIONS = [
+  {
+    label: 'Overview',
+    items: [{ id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Brands',
+    items: [
+      { id: 'crm', label: 'Brand CRM', icon: <Users className="w-4 h-4" /> },
+      { id: 'marketing', label: 'Marketing', icon: <Target className="w-4 h-4" /> },
+      { id: 'brand_intelligence', label: 'Brand Intelligence', icon: <Target className="w-4 h-4" /> },
+    ],
+  },
+  {
+    label: 'Catalogue',
+    items: [{ id: 'catalog', label: 'Global Catalog', icon: <Boxes className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Commerce',
+    items: [
+      { id: 'fulfillment_track', label: 'Fulfillment Track', icon: <Gauge className="w-4 h-4" /> },
+      { id: 'retail_pipeline', label: 'Retail Pipeline', icon: <Boxes className="w-4 h-4" /> },
+      { id: 'purchase_orders_admin', label: 'Purchase Orders', icon: <Package className="w-4 h-4" /> },
+      { id: 'returns_tracking', label: 'Returns Tracking', icon: <RotateCcw className="w-4 h-4" /> },
+    ],
+  },
+  {
+    label: 'Finance',
+    items: [
+      { id: 'billing', label: 'Billing', icon: <CreditCard className="w-4 h-4" /> },
+      { id: 'contracts_admin', label: 'Contract Cycle', icon: <FileText className="w-4 h-4" /> },
+    ],
+  },
+  {
+    label: 'Logistics',
+    items: [
+      { id: 'logistics', label: 'Logistics Control', icon: <Truck className="w-4 h-4" /> },
+      { id: 'carriers', label: 'Carrier Monitor', icon: <Plug className="w-4 h-4" /> },
+    ],
+  },
+  {
+    label: 'Compliance',
+    items: [{ id: 'compliance', label: 'Compliance Approvals', icon: <ShieldCheck className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Communications',
+    items: [{ id: 'messages', label: 'Messages', icon: <Inbox className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Support',
+    items: [{ id: 'helpdesk', label: 'Helpdesk', icon: <LifeBuoy className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Monitoring',
+    items: [{ id: 'monitoring', label: 'Monitoring', icon: <Activity className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Administration',
+    items: [
+      { id: 'super_admin', label: 'Super Admin', icon: <Crown className="w-4 h-4" /> },
+      { id: 'audit_log', label: 'Audit Log', icon: <ScrollText className="w-4 h-4" /> },
+      { id: 'usertour', label: 'Onboarding Tours', icon: <MessageSquare className="w-4 h-4" /> },
+    ],
+  },
+  {
+    label: 'Integrations',
+    items: [
+      { id: 'integrations', label: 'Integration Settings', icon: <PlugZap className="w-4 h-4" /> },
+      { id: 'rocketchat', label: 'Rocket.Chat', icon: <MessageSquare className="w-4 h-4" /> },
+      { id: 'postiz', label: 'Social Media', icon: <Target className="w-4 h-4" /> },
+      { id: 'whatsapp', label: 'WhatsApp', icon: <Phone className="w-4 h-4" /> },
+    ],
+  },
 ];
 export default function AdminShell() {
   const { role, actingStaff } = useApp();
   const [adminView, setAdminView] = useState('overview');
   const isSuper = role === 'Super Admin';
-  const adminNav = isSuper ? ADMIN_NAV : ADMIN_NAV.filter(i => i.id !== 'super_admin' && i.id !== 'integrations');
+  // §Phase 6 — navigation visibility only. Views super-only in the render
+  // guard remain guarded there for defense in depth.
+  const HIDDEN_FOR_NON_SUPER = new Set(['super_admin', 'audit_log', 'integrations']);
+  const navSections = isSuper
+    ? ADMIN_SECTIONS
+    : ADMIN_SECTIONS
+        .map((s) => ({ ...s, items: s.items.filter((i) => !HIDDEN_FOR_NON_SUPER.has(i.id)) }))
+        .filter((s) => s.items.length > 0);
 
   const deptMap: Record<string, AdminDepartment> = { overview: 'business_dev', crm: 'business_dev', logistics: 'logistics', carriers: 'logistics', compliance: 'compliance' };
   const breadcrumb: Record<string, string> = {
@@ -82,7 +137,7 @@ export default function AdminShell() {
   };
 
   return (
-    <AppShell navItems={adminNav} activeView={adminView} setActiveView={setAdminView}
+    <AppShell navSections={navSections} activeView={adminView} setActiveView={setAdminView}
       breadcrumb={breadcrumb[adminView] || 'Admin'}
       userName={actingStaff?.name ?? role ?? 'Admin'}
       onNavSettings={() => setAdminView('super_admin')}

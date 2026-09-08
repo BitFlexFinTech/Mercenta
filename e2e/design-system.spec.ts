@@ -14,6 +14,20 @@ import { test, expect } from '@playwright/test';
 
 const SHOTS = 'test-screenshots/design-system';
 
+/**
+ * §Phase 6 — below lg (1024px) the primary nav is an off-canvas drawer.
+ * Open it before clicking a nav item on narrow viewports.
+ */
+async function openPrimaryNav(page: import('@playwright/test').Page) {
+  const vp = page.viewportSize();
+  if (vp && vp.width < 1024) {
+    const toggle = page.getByTestId('app-menu-toggle');
+    await toggle.click({ timeout: 4000 });
+    await page.waitForTimeout(400);
+  }
+  await page.click('nav >> text=Super Admin');
+}
+
 async function openShowcase(page: import('@playwright/test').Page) {
   await page.goto('/');
   // Prefer the hero's Partner Login; fall back to the mobile-nav entry.
@@ -28,7 +42,7 @@ async function openShowcase(page: import('@playwright/test').Page) {
   await page.waitForTimeout(600);
   await page.click('text=Super Admin — Tadii');
   await page.waitForTimeout(900);
-  await page.click('nav >> text=Super Admin');
+  await openPrimaryNav(page);
   await page.waitForTimeout(600);
   await page.click('text=Design System');
   await page.waitForTimeout(500);

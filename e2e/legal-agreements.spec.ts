@@ -125,7 +125,8 @@ test.describe('Legal Agreements', () => {
 
   test('3. Admin Compliance page renders', async ({ page }) => {
     await loginAsAdmin(page);
-    const compNav = page.locator('text=Compliance').first();
+    // §Phase 6 — grouped sidebar: target the nav button (heading not clickable).
+    const compNav = page.locator('nav >> text=Compliance Approvals').first();
     if (await compNav.isVisible({ timeout: 3000 }).catch(() => false)) {
       await compNav.click();
       await page.waitForTimeout(1500);
