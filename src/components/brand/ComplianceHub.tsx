@@ -15,7 +15,7 @@ import { MERCENTA_EORI, MERCENTA_VAT } from '@/config/customs';
 import { generateCustomsDocBundle, type CustomsDocumentBundle } from '@/lib/customsDocs';
 import { useBrands, useProducts, usePurchaseOrders, useComplianceDocuments, useContracts } from '@/data/queries';
 import { uploadComplianceDoc } from '@/data/api';
-import { evaluateComplianceGate, getRequiredDocumentsForCategory, CATEGORY_DOC_LABELS } from '@/lib/compliance';
+import { evaluateComplianceGate, getRequiredDocumentsForCategory, CATEGORY_DOC_LABELS, REQUIRED_DOCUMENT_TYPES } from '@/lib/compliance';
 
 /**
  * §Stage-3 rewritten compliance hub.
@@ -196,7 +196,10 @@ function ComplianceUploadCard({ brandId, brandName }: { brandId: string | null; 
   const allContracts = contractsQuery.data?.data ?? [];
   const brandDocs = brandId ? allDocs.filter(function(d) { return d.brandId === brandId; }) : [];
   const hasSignedAgreement = allContracts.some(function(c) { return c.brandId === brandId && (c.status === 'signed' || c.status === 'active'); });
-  const gate = evaluateComplianceGate(brandDocs, hasSignedAgreement);
+  // §7B repair — agreement boolean MUST occupy the `hasSignedAgreement`
+  // parameter, not `category` (an array `docs` in slot 2 type-checks because
+  // both are positional; the previous shift fed the boolean into `category`).
+  const gate = evaluateComplianceGate(brandDocs, undefined, hasSignedAgreement);
   const [uploaded, setUploaded] = useState<string | null>(null);
   const [docVersion, setDocVersion] = useState(0);
   void docVersion;

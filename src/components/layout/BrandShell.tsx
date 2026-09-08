@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
+import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
 import { LiveChatWidget } from '@/components/shared/LiveChatWidget';
 import { TourLoader } from '@/components/shared/TourLoader';
 import { UsertourBrandBridge } from '@/components/shared/UsertourBrandBridge';
@@ -35,28 +36,28 @@ import {
 const BRAND_SECTIONS = [
   {
     label: 'Overview',
-    items: [{ id: 'overview', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> }],
+    items: [{ id: 'overview', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, tourAttr: 'brand-dashboard' }],
   },
   {
     label: 'Catalogue',
-    items: [{ id: 'catalog', label: 'Product Catalog', icon: <Package className="w-4 h-4" /> }],
+    items: [{ id: 'catalog', label: 'Product Catalog', icon: <Package className="w-4 h-4" />, tourAttr: 'nav-catalog' }],
   },
   {
     label: 'Commerce',
     items: [
-      { id: 'purchase_orders', label: 'Purchase Orders', icon: <Truck className="w-4 h-4" /> },
+      { id: 'purchase_orders', label: 'Purchase Orders', icon: <Truck className="w-4 h-4" />, tourAttr: 'nav-purchase_orders' },
       { id: 'returns', label: 'Returns', icon: <RotateCcw className="w-4 h-4" /> },
     ],
   },
   {
     label: 'Logistics',
-    items: [{ id: 'logistics', label: 'Inbound Shipments', icon: <Truck className="w-4 h-4" /> }],
+    items: [{ id: 'logistics', label: 'Inbound Shipments', icon: <Truck className="w-4 h-4" />, tourAttr: 'nav-logistics' }],
   },
   {
     label: 'Compliance',
     items: [
       { id: 'onboarding', label: 'Onboarding & Legal', icon: <FileCheck2 className="w-4 h-4" /> },
-      { id: 'compliance', label: 'UK Compliance', icon: <ShieldCheck className="w-4 h-4" /> },
+      { id: 'compliance', label: 'UK Compliance', icon: <ShieldCheck className="w-4 h-4" />, tourAttr: 'nav-compliance' },
       { id: 'contracts', label: 'Contracts', icon: <FileText className="w-4 h-4" /> },
     ],
   },
@@ -74,7 +75,7 @@ const BRAND_SECTIONS = [
       { id: 'documents', label: 'Documents & Account', icon: <ScrollText className="w-4 h-4" /> },
       { id: 'team', label: 'Support & Team', icon: <MessageSquare className="w-4 h-4" /> },
       { id: 'social', label: 'Social Accounts', icon: <Target className="w-4 h-4" /> },
-      { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
+      { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" />, tourAttr: 'nav-settings' },
     ],
   },
 ];
@@ -109,24 +110,26 @@ export default function BrandShell() {
       onNavNotification={(v) => setBrandView(v)}
     >
       <ErrorBoundary sectionLabel="Brand portal">
-        {brandView === 'overview' && <BrandDashboard onNavigate={setBrandView} />}
-        {brandView === 'onboarding' && (brandProfile.onboarded ? <OnboardingSummary onNavigate={setBrandView} /> : <OnboardingWizard />)}
-        {brandView === 'catalog' && <ProductCatalog />}
-        {brandView === 'contracts' && <BrandContractView />}
-        {brandView === 'purchase_orders' && <BrandPurchaseOrders />}
-        {brandView === 'logistics' && <LogisticsHub />}
-        {brandView === 'compliance' && <ComplianceHub />}
-        {brandView === 'analytics' && <SalesAnalytics />}
-        {brandView === 'documents' && <BrandSelfService />}
-        {brandView === 'returns' && <BrandReturns />}
-        {brandView === 'reports' && <BrandReports onNavigate={setBrandView} />}
-        {brandView === 'settings' && <BrandSettings />}
-        {brandView === 'team' && <BrandTeamMessages />}
-        {brandView === 'social' && <BrandSocialConnect />}
-        {brandView === 'market' && <BrandIntelligence />}
-        <LiveChatWidget />
-        <TourLoader currentView={brandView} isBrandPortal={true} />
-        <UsertourBrandBridge />
+        <IntegrationsProvider>
+          {brandView === 'overview' && <BrandDashboard onNavigate={setBrandView} />}
+          {brandView === 'onboarding' && (brandProfile.onboarded ? <OnboardingSummary onNavigate={setBrandView} /> : <OnboardingWizard />)}
+          {brandView === 'catalog' && <ProductCatalog />}
+          {brandView === 'contracts' && <BrandContractView />}
+          {brandView === 'purchase_orders' && <BrandPurchaseOrders />}
+          {brandView === 'logistics' && <LogisticsHub />}
+          {brandView === 'compliance' && <ComplianceHub />}
+          {brandView === 'analytics' && <SalesAnalytics />}
+          {brandView === 'documents' && <BrandSelfService />}
+          {brandView === 'returns' && <BrandReturns />}
+          {brandView === 'reports' && <BrandReports onNavigate={setBrandView} />}
+          {brandView === 'settings' && <BrandSettings />}
+          {brandView === 'team' && <BrandTeamMessages />}
+          {brandView === 'social' && <BrandSocialConnect />}
+          {brandView === 'market' && <BrandIntelligence />}
+          <LiveChatWidget />
+          <TourLoader currentView={brandView} isBrandPortal={true} />
+          <UsertourBrandBridge />
+        </IntegrationsProvider>
       </ErrorBoundary>
     </AppShell>
   );

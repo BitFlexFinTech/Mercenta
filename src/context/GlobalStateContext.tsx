@@ -131,7 +131,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLeads((prev) => [lead, ...prev]);
   }, []);
 
-  const [campaigns] = useState<Campaign[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [apiLogs, setApiLogs] = useState<ApiLogEntry[]>([]);
   const [brandProfile, setBrandProfile] = useState<BrandProfile>(DEFAULT_PROFILE);
   const [carrierContext, setCarrierContext] = useState<CarrierId>('dhl');
