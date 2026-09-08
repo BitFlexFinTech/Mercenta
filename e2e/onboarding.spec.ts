@@ -3,13 +3,10 @@
  * Tests the full onboarding flow and track-based Payment Terms.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 async function loginAsBrandForOnboarding(page: any, name: string) {
-  await page.goto('/');
-  await page.click('text=Get Started');
-  await page.waitForTimeout(500);
-  await page.click('text=' + name);
-  await page.waitForTimeout(800);
+  await loginAs(page, name);
   // Click Onboarding if available in sidebar
   const onboardingBtn = page.locator('text=Onboarding').first();
   if (await onboardingBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -75,11 +72,7 @@ test.describe('Onboarding Wizard', () => {
   });
 
   test('6. Override → logged with reason', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=CRM');
     await page.waitForTimeout(1000);
 

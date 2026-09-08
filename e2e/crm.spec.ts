@@ -3,14 +3,11 @@
  * Tests brand CRM timeline, tasks, profile changes, lifecycle, and audit.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 test.describe('Brand CRM', () => {
   test('1. Timeline: messages + calls + events in chronological order', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=CRM');
     await page.waitForTimeout(1000);
 
@@ -27,11 +24,7 @@ test.describe('Brand CRM', () => {
   });
 
   test('2. Task assigned → appears in queue', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=CRM');
     await page.waitForTimeout(1000);
 
@@ -43,11 +36,7 @@ test.describe('Brand CRM', () => {
   });
 
   test('3. Profile change: brand submits → admin approves → updates', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=CRM');
     await page.waitForTimeout(1000);
 
@@ -64,11 +53,7 @@ test.describe('Brand CRM', () => {
   });
 
   test('4. Profile change: admin rejects → brand notified', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=CRM');
     await page.waitForTimeout(1000);
 
@@ -79,11 +64,7 @@ test.describe('Brand CRM', () => {
   });
 
   test('5. Lifecycle transitions → each logged', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Super Admin — Tadii');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Super Admin — Tadii');
     await page.click('text=Audit Log');
     await page.waitForTimeout(1000);
 
@@ -94,11 +75,7 @@ test.describe('Brand CRM', () => {
   });
 
   test('6. On-behalf action → attributed in audit log', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Super Admin — Tadii');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Super Admin — Tadii');
     await page.click('text=Audit Log');
     await page.waitForTimeout(1000);
 

@@ -3,6 +3,7 @@
  * Tests every deduction category exists in the ledger.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 const DEDUCTION_TYPES = [
   'ASN accuracy',
@@ -15,11 +16,7 @@ const DEDUCTION_TYPES = [
 ];
 
 async function loginAsAdmin(page: any) {
-  await page.goto('/');
-  await page.click('text=Get Started');
-  await page.waitForTimeout(500);
-  await page.click('text=Mercenta Admin Hub');
-  await page.waitForTimeout(800);
+  await loginAs(page, 'Mercenta Admin Hub');
   await page.click('text=Billing');
   await page.waitForTimeout(1000);
 }

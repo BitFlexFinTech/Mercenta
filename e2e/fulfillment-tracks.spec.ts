@@ -3,13 +3,10 @@
  * Tests direct, financed, score recalculation, and borderline review.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 async function loginAsAdmin(page: any, view?: string) {
-  await page.goto('/');
-  await page.click('text=Get Started');
-  await page.waitForTimeout(500);
-  await page.click('text=Mercenta Admin Hub');
-  await page.waitForTimeout(800);
+  await loginAs(page, 'Mercenta Admin Hub');
   if (view) {
     await page.click('text=' + view);
     await page.waitForTimeout(800);

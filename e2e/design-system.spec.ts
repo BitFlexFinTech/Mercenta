@@ -11,6 +11,7 @@
  * Dev server started by playwright.config.ts (`npm run dev`, :5173).
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 const SHOTS = 'test-screenshots/design-system';
 
@@ -29,19 +30,7 @@ async function openPrimaryNav(page: import('@playwright/test').Page) {
 }
 
 async function openShowcase(page: import('@playwright/test').Page) {
-  await page.goto('/');
-  // Prefer the hero's Partner Login; fall back to the mobile-nav entry.
-  const heroLogin = page.locator('text=Partner Login').first();
-  try {
-    await heroLogin.click({ timeout: 4000 });
-  } catch {
-    await page.getByRole('button', { name: 'Open navigation' }).click();
-    await page.waitForTimeout(400);
-    await page.getByRole('button', { name: 'Partner Login' }).last().click();
-  }
-  await page.waitForTimeout(600);
-  await page.click('text=Super Admin — Tadii');
-  await page.waitForTimeout(900);
+  await loginAs(page, 'Super Admin — Tadii', 900);
   await openPrimaryNav(page);
   await page.waitForTimeout(600);
   await page.click('text=Design System');

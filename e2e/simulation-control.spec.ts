@@ -14,24 +14,13 @@
  * The dev server is started by playwright.config.ts (npm run dev, :5173).
  */
 import { test, expect } from '@playwright/test';
+import { openLogin } from './helpers/auth';
 
 const SHOTS = 'test-screenshots/simulation-control';
 
 /** Login as Super Admin via the one-click demo card. Handles the mobile nav. */
 async function loginAsSuperAdmin(page: import('@playwright/test').Page) {
-  await page.goto('/');
-  // Prefer the hero's Partner Login; fall back to the mobile-nav entry.
-  const heroLogin = page.locator('text=Partner Login').first();
-  try {
-    await heroLogin.click({ timeout: 4000 });
-  } catch {
-    // md-and-below: the desktop inline Login is hidden; open the mobile menu.
-    await page.getByRole('button', { name: 'Open navigation' }).click();
-    await page.waitForTimeout(400);
-    // The mobile menu renders its own full-width Partner Login button last.
-    await page.getByRole('button', { name: 'Partner Login' }).last().click();
-  }
-  await page.waitForTimeout(600);
+  await openLogin(page);
   await page.click('text=Super Admin — Tadii');
   await page.waitForTimeout(900);
 }
@@ -60,16 +49,7 @@ test.describe('Simulation Control Centre — access & RBAC', () => {
 
   test('non-Super-Admin cannot reach the Simulation tab', async ({ page }) => {
     // Mercenta Admin Hub = admin_staff tier → super_admin nav item is filtered.
-    await page.goto('/');
-    const heroLogin = page.locator('text=Partner Login').first();
-    try {
-      await heroLogin.click({ timeout: 4000 });
-    } catch {
-      await page.getByRole('button', { name: 'Open navigation' }).click();
-      await page.waitForTimeout(400);
-      await page.getByRole('button', { name: 'Partner Login' }).last().click();
-    }
-    await page.waitForTimeout(600);
+    await openLogin(page);
     await page.click('text=Mercenta Admin Hub');
     await page.waitForTimeout(900);
     // The Super Admin navigation item must NOT be present for a non-super admin.

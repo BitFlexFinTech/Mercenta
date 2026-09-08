@@ -4,21 +4,14 @@
  * auto-shipment draft creation on ack, ASN auto-push on shipment submit.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 async function loginAsAdmin(page: any) {
-  await page.goto('/');
-  await page.click('text=Partner Login');
-  await page.waitForTimeout(500);
-  await page.click('text=Mercenta Admin Hub');
-  await page.waitForTimeout(800);
+  await loginAs(page, 'Mercenta Admin Hub');
 }
 
 async function loginAsBrand(page: any, name: string) {
-  await page.goto('/');
-  await page.click('text=Partner Login');
-  await page.waitForTimeout(500);
-  await page.click('text=' + name);
-  await page.waitForTimeout(800);
+  await loginAs(page, name);
   // Dismiss onboarding tour if visible
   const tourClose = page.locator('button[aria-label="Dismiss tour"]').or(
     page.locator('text=Skip Tour').or(page.locator('text=Got it'))

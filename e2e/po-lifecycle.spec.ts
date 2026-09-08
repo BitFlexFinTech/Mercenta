@@ -3,13 +3,10 @@
  * Tests the full Vendor Central–style PO acknowledgment workflow.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 async function loginAsBrand(page: any, name: string) {
-  await page.goto('/');
-  await page.click('text=Get Started');
-  await page.waitForTimeout(500);
-  await page.click('text=' + name);
-  await page.waitForTimeout(800);
+  await loginAs(page, name);
   await page.click('text=Purchase Orders');
   await page.waitForTimeout(800);
 }

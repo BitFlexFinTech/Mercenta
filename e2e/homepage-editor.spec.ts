@@ -5,6 +5,7 @@
  * and publishing it updates the public homepage.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 test.describe('Homepage Editor', () => {
   test('edit hero text in admin panel and verify it appears on homepage', async ({
@@ -14,16 +15,8 @@ test.describe('Homepage Editor', () => {
 
     // Navigate to the admin Super Admin Panel
     // First go to the login page and select admin login
-    await page.goto('/');
-    await page.waitForTimeout(500);
-
-    // Navigate to login
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-
-    // Click the Super Admin — Tadii login button
-    await page.click('text=Super Admin — Tadii');
-    await page.waitForTimeout(500);
+    // Navigate to login and pick the Super Admin — Tadii card
+    await loginAs(page, 'Super Admin — Tadii', 500);
 
     // Navigate to Super Admin Panel via sidebar
     await page.click('text=Super Admin Panel');

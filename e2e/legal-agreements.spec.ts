@@ -10,21 +10,14 @@
  * 6. Admin Compliance page renders
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 async function loginAsBrand(page: any, name: string) {
-  await page.goto('/');
-  await page.click('text=Get Started');
-  await page.waitForTimeout(500);
-  await page.click('text=' + name);
-  await page.waitForTimeout(1000);
+  await loginAs(page, name, 1000);
 }
 
 async function loginAsAdmin(page: any) {
-  await page.goto('/');
-  await page.click('text=Get Started');
-  await page.waitForTimeout(500);
-  await page.click('text=Mercenta Admin Hub');
-  await page.waitForTimeout(1000);
+  await loginAs(page, 'Mercenta Admin Hub', 1000);
 }
 
 test.describe('Legal Agreements', () => {

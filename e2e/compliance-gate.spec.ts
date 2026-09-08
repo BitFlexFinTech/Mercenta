@@ -3,13 +3,10 @@
  * Tests doc upload flow and gate blocking behavior.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 async function loginAsBrand(page: any, name: string) {
-  await page.goto('/');
-  await page.click('text=Get Started');
-  await page.waitForTimeout(500);
-  await page.click('text=' + name);
-  await page.waitForTimeout(800);
+  await loginAs(page, name);
   // §Phase 6 — sidebar is grouped; click the actual nav button (the "Compliance" section heading is not clickable).
   await page.click('nav >> text=UK Compliance');
   await page.waitForTimeout(800);
@@ -44,11 +41,7 @@ test.describe('Compliance Gate', () => {
   });
 
   test('4. Doc expires → re-blocked, admin notified', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     // §Phase 6 — grouped sidebar: click the nav button (heading not clickable).
     await page.click('nav >> text=Compliance Approvals');
     await page.waitForTimeout(800);

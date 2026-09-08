@@ -3,15 +3,12 @@
  * Tests shipment creation, validation, and tracking.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 test.describe('Shipment & ASN', () => {
   test('1. Create shipment with correct carton detail → validates, submits', async ({ page }) => {
     // Login as admin to manage shipments
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=Purchase Orders');
     await page.waitForTimeout(800);
 
@@ -33,11 +30,7 @@ test.describe('Shipment & ASN', () => {
   });
 
   test('2. Carton contents do not match acknowledged qty → flagged', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=Purchase Orders');
     await page.waitForTimeout(800);
 
@@ -50,11 +43,7 @@ test.describe('Shipment & ASN', () => {
 
   test('3. Amazon freight (Ship Window) → Routing Request required', async ({ page }) => {
     // Login as a brand on direct_fulfillment track with collect freight POs
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Voltaic Audio LLC');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Voltaic Audio LLC');
     await page.click('text=Purchase Orders');
     await page.waitForTimeout(800);
 
@@ -65,11 +54,7 @@ test.describe('Shipment & ASN', () => {
   });
 
   test('4. Vendor freight (Delivery Window) → fixed date range respected', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=Purchase Orders');
     await page.waitForTimeout(800);
 
@@ -80,11 +65,7 @@ test.describe('Shipment & ASN', () => {
   });
 
   test('5. Shipment marked delivered → PO status updates', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     // §Phase 6 — grouped sidebar: click the nav button (heading not clickable).
     await page.click('nav >> text=Logistics Control');
     await page.waitForTimeout(800);

@@ -2,14 +2,10 @@
  * Tests the Super Admin Rakazo iframe panel states.
  */
 import { test, expect } from '@playwright/test';
+import { openLogin } from './helpers/auth';
 
 async function navigateToRakazo(page: any) {
-  await page.goto('/');
-  const getStarted = page.locator('text=Get Started');
-  if (await getStarted.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await getStarted.click();
-    await page.waitForTimeout(500);
-  }
+  await openLogin(page);
   const adminHub = page.locator('text=Mercenta Admin Hub').or(page.locator('text=Admin Hub'));
   if (await adminHub.isVisible({ timeout: 3000 }).catch(() => false)) {
     await adminHub.click();

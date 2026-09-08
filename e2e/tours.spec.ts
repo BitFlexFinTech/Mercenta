@@ -1,14 +1,11 @@
 /** Guided onboarding tour tests. */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 test.describe('Brand Guided Tours', () => {
 
   async function loginAsBrand(page, name) {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=' + name);
-    await page.waitForTimeout(800);
+    await loginAs(page, name);
     const ob = page.locator('text=Onboarding').first();
     if (await ob.isVisible({ timeout: 2000 }).catch(() => false)) {
       await ob.click();

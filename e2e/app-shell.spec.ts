@@ -12,23 +12,13 @@
  * Dev server started by playwright.config.ts (npm run dev, :5173).
  */
 import { test, expect } from '@playwright/test';
+import { loginAs as loginAsPortal } from './helpers/auth';
 
 const SHOTS = 'test-screenshots/app-shell';
 
 /** Login via the one-click demo card, handling the marketing mobile menu. */
 async function loginAs(page: import('@playwright/test').Page, card: string) {
-  await page.goto('/');
-  const heroLogin = page.locator('text=Partner Login').first();
-  try {
-    await heroLogin.click({ timeout: 4000 });
-  } catch {
-    await page.getByRole('button', { name: 'Open navigation' }).click();
-    await page.waitForTimeout(400);
-    await page.getByRole('button', { name: 'Partner Login' }).last().click();
-  }
-  await page.waitForTimeout(600);
-  await page.click('text=' + card);
-  await page.waitForTimeout(1000);
+  await loginAsPortal(page, card, 1000);
 }
 
 test.describe('App Shell — role coverage & grouped IA', () => {

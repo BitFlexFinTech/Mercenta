@@ -3,13 +3,10 @@
  * Tests that brands can only see their own data and admin can see all.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 async function loginAsBrand(page: any, name: string) {
-  await page.goto('/');
-  await page.click('text=Get Started');
-  await page.waitForTimeout(500);
-  await page.click('text=' + name);
-  await page.waitForTimeout(800);
+  await loginAs(page, name);
 }
 
 test.describe('Multi-Tenant Isolation', () => {
@@ -55,11 +52,7 @@ test.describe('Multi-Tenant Isolation', () => {
   });
 
   test('5. Admin can see all brands', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     // Navigate to any admin view that lists brands
     await page.click('text=Purchase Orders');
     await page.waitForTimeout(1000);
@@ -72,11 +65,7 @@ test.describe('Multi-Tenant Isolation', () => {
   });
 
   test('6. 3PL sees only own shipments', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=3PL Carrier Terminal');
-    await page.waitForTimeout(800);
+    await loginAs(page, '3PL Carrier Terminal');
 
     // 3PL should see carrier/manifest views
     const manifestView = page.locator('text=Manifest').or(page.locator('text=BAK')).or(page.locator('text=Auditor'));

@@ -3,14 +3,11 @@
  * Tests dispute lifecycle: open, won, lost, partial outcomes.
  */
 import { test, expect } from '@playwright/test';
+import { loginAs } from './helpers/auth';
 
 test.describe('Disputes', () => {
   test('1. Open dispute → status "disputed"', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=Billing');
     await page.waitForTimeout(1000);
 
@@ -22,11 +19,7 @@ test.describe('Disputes', () => {
   });
 
   test('2. Outcome: won → deduction zeroed, brand notified', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=Billing');
     await page.waitForTimeout(1000);
 
@@ -38,11 +31,7 @@ test.describe('Disputes', () => {
   });
 
   test('3. Outcome: lost → deduction stands, brand notified', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=Billing');
     await page.waitForTimeout(1000);
 
@@ -53,11 +42,7 @@ test.describe('Disputes', () => {
   });
 
   test('4. Outcome: partial → amount reduced, both notified', async ({ page }) => {
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Mercenta Admin Hub');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Mercenta Admin Hub');
     await page.click('text=Billing');
     await page.waitForTimeout(1000);
 
@@ -69,11 +54,7 @@ test.describe('Disputes', () => {
 
   test('5. Timeline logged in audit trail', async ({ page }) => {
     // Login as Super Admin to access audit log
-    await page.goto('/');
-    await page.click('text=Get Started');
-    await page.waitForTimeout(500);
-    await page.click('text=Super Admin — Tadii');
-    await page.waitForTimeout(800);
+    await loginAs(page, 'Super Admin — Tadii');
     await page.click('text=Audit Log');
     await page.waitForTimeout(1000);
 
