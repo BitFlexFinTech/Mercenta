@@ -127,6 +127,28 @@ export function resetTour(brandId: string): void {
   setTourProgress(brandId, { ...DEFAULT_TOUR_PROGRESS });
 }
 
+/**
+ * §Phase 7E — restart ONE tour for a brand. Unlike `resetTour` (which wipes the
+ * whole progress store), this clears only that tour's completion/skip markers
+ * and per-step progress, then relaunches it through the exact same mechanism
+ * `startTour` uses. No duplicate tour architecture — the running engine
+ * (`TourEngine`) picks it up from `progress.currentTourId` exactly as it does
+ * for any auto/forced start.
+ */
+export function restartTour(brandId: string, tourId: string): void {
+  const p = getTourProgress(brandId);
+  p.toursCompleted = p.toursCompleted.filter((id) => id !== tourId);
+  p.toursSkipped = p.toursSkipped.filter((id) => id !== tourId);
+  if (p.tourStepsCompleted) {
+    const next = { ...p.tourStepsCompleted };
+    delete next[tourId];
+    p.tourStepsCompleted = next;
+  }
+  p.currentTourId = tourId;
+  p.tourDismissed = false;
+  setTourProgress(brandId, p);
+}
+
 /** Reactive hook: returns brand's TourProgress and triggers re-render on mutation. */
 function useTourProgressReactive(brandId: string): TourProgress {
   const [v, setV] = useState(0);

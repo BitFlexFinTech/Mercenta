@@ -3,6 +3,7 @@
  * UI components should consume entities through these hooks only.
  */
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import type { PaginationParams } from '@/types';
 import {
   fetchAdSpendBudgets,
@@ -25,6 +26,9 @@ import {
   fetchShipmentsPaginated,
   fetchMessagesPaginated,
   fetchAuditLogPaginated,
+  fetchHomepageContent,
+  getHomepageLiveVersion,
+  subscribeHomepageLive,
 } from './api';
 import type { ListQueryOptions } from './api';
 
@@ -150,4 +154,28 @@ export function useBrandAgreements() {
 
 export function useAuditLogPaginated(opts: ListQueryOptions = {}, pagination?: PaginationParams) {
   return usePaginatedList('audit-log-paginated', fetchAuditLogPaginated, opts, pagination);
+}
+
+/* ── §Phase 7E — Homepage content ───────────────────────────────────── */
+
+/**
+ * Subscribes to the homepage publish version (module-level listener, same
+ * pattern as TourEngine). Re-renders subscribed hooks whenever a publish
+ * promotes a new live copy, so an already-mounted public Home refreshes
+ * without a page reload.
+ */
+function useHomepageLiveVersion(): number {
+  const [version, setVersion] = useState(getHomepageLiveVersion());
+  useEffect(() => subscribeHomepageLive(() => setVersion(getHomepageLiveVersion())), []);
+  return version;
+}
+
+/** Live/draft homepage content, keyed by publish version for instant refresh. */
+export function useHomepageContent() {
+  const version = useHomepageLiveVersion();
+  return useQuery({
+    queryKey: ['homepage-content', version],
+    queryFn: fetchHomepageContent,
+    staleTime: STALE_TIME,
+  });
 }

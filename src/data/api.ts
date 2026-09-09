@@ -1143,6 +1143,31 @@ export function fetchCatalogSubmissions() {
 
 const homepageState: { draft: HomepageContent | null; live: HomepageContent | null } = { draft: null, live: null };
 
+/* §Phase 7E — demo-mode live-refresh bridge. The public Home surface (HomeShell)
+ * subscribes to this version counter via the same module-level listener pattern
+ * TourEngine uses for tour progress. Publishing bumps the version so any mounted
+ * consumer re-fetches the live copy through the normal React Query path — no
+ * polling, no websockets, no backend, and no change to the content API contract. */
+let homepageLiveVersion = 0;
+const homepageLiveListeners = new Set<() => void>();
+
+export function getHomepageLiveVersion(): number {
+  return homepageLiveVersion;
+}
+
+/** Subscribe to publish events; returns an unsubscribe function. */
+export function subscribeHomepageLive(fn: () => void): () => void {
+  homepageLiveListeners.add(fn);
+  return () => {
+    homepageLiveListeners.delete(fn);
+  };
+}
+
+function notifyHomepageLiveChanged(): void {
+  homepageLiveVersion++;
+  homepageLiveListeners.forEach((fn) => fn());
+}
+
 export async function fetchHomepageContent(): Promise<{
   live: HomepageContent;
   draft: HomepageContent | null;
@@ -1183,6 +1208,7 @@ export async function publishHomepageContent(
   if (!toPublish) throw new Error('[api] nothing to publish — save a draft first');
   homepageState.draft = null;
   homepageState.live = structuredClone(toPublish);
+  notifyHomepageLiveChanged();
   if (supabase) {
     const { error } = await supabase
       .from('homepage_content')

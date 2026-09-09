@@ -26,7 +26,9 @@ test.describe('Brand Guided Tours', () => {
 
   test('1. Tour 1 auto-starts for new brand', async ({ page }) => {
     await loginAsBrand(page, 'DeskForge Supplies Inc');
-    const c = page.locator('text=Welcome to Mercenta Partners');
+    // §7E — scope to the tour card (`.animate-fade-in` is unique to the tour
+    // engine) so dashboard comms with tour-named subjects can't false-positive.
+    const c = page.locator('.animate-fade-in', { hasText: 'Welcome to Mercenta Partners' }).first();
     if (await c.isVisible({ timeout: 3000 }).catch(() => false)) {
       await expect(c).toBeVisible({ timeout: 2000 });
     } else test.fixme(true, 'Tour 1 not visible');
@@ -50,7 +52,13 @@ test.describe('Brand Guided Tours', () => {
       await page.waitForTimeout(500);
       await page.click('[data-tour="brand-dashboard"]');
       await page.waitForTimeout(500);
-      await expect(page.getByText('Welcome to Mercenta Partners').first()).not.toBeVisible({ timeout: 1500 });
+      // Assert Tour 1's own card is gone — scoped to the tour-engine card wrapper
+      // (`.animate-fade-in`) so the dashboard's real comms (which may contain
+      // tour-named subjects, §7E) can't false-match. Other per-view tours may
+      // legitimately be active after catalog navigation.
+      await expect(
+        page.locator('.animate-fade-in', { hasText: 'Welcome to Mercenta Partners' }).first()
+      ).not.toBeVisible({ timeout: 1500 });
     } else test.fixme(true, 'Tour 1 not visible');
   });
 
@@ -137,17 +145,40 @@ test.describe('Brand Guided Tours', () => {
     } else test.fixme(true, 'Tour 1 not visible');
   });
 
-  test('7. Settings has tour restart', async ({ page }) => {
+  test('7. Settings has restart tour', async ({ page }) => {
     await loginAsBrand(page, 'DeskForge Supplies Inc');
+    // Clear any auto-started orientation tour so Settings is reachable cleanly.
+    const a = page.locator('.animate-fade-in').first();
+    if (await a.isVisible({ timeout: 2000 }).catch(() => false)) {
+      const d = page.locator('button[aria-label="Dismiss tour"]');
+      if (await d.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await d.click();
+        await page.waitForTimeout(500);
+        const s = page.locator('button', { hasText: 'Skip Tour' });
+        if (await s.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await s.click();
+          await page.waitForTimeout(500);
+        }
+      }
+    }
     const s = page.locator('[data-tour="nav-settings"]');
-    if (await s.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await s.click();
-      await page.waitForTimeout(800);
-      const r = page.locator('text=Restart Tour').or(page.locator('text=Start Tour')).or(page.locator('text=Orientation')).first();
-      if (await r.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await expect(r).toBeVisible({ timeout: 1000 });
-      } else test.fixme(true, 'Restart option not found');
-    } else test.fixme(true, 'Settings not found');
+    await expect(s).toBeVisible({ timeout: 2000 });
+    await s.click();
+    await page.waitForTimeout(800);
+    // Guided Tours tab lists every tour with a Restart Tour control.
+    const tab = page.locator('button', { hasText: 'Guided Tours' });
+    await expect(tab).toBeVisible({ timeout: 2000 });
+    await tab.click();
+    await page.waitForTimeout(400);
+    const restartBtn = page.getByRole('button', { name: 'Restart Tour', exact: true }).first();
+    await expect(restartBtn).toBeVisible({ timeout: 2000 });
+    // Restarting the orientation tour relaunches it through the existing engine.
+    await page
+      .locator('li', { hasText: 'Welcome & Orientation' })
+      .getByRole('button', { name: 'Restart Tour' })
+      .click();
+    await page.waitForTimeout(800);
+    await expect(page.locator('text=Welcome to Mercenta Partners').first()).toBeVisible({ timeout: 3000 });
   });
 
   test('8. Tour selectors resolve', async ({ page }) => {

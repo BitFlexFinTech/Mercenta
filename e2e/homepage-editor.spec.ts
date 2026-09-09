@@ -42,4 +42,36 @@ test.describe('Homepage Editor', () => {
     await page.getByRole('button', { name: /^Publish/ }).click();
     await expect(page.locator('text=Published to live homepage')).toBeVisible({ timeout: 8000 });
   });
+
+  test('demo-mode publish reaches the mounted public homepage without a reload', async ({
+    page,
+  }) => {
+    // Load the public homepage first — it mounts with the DEFAULT live copy.
+    await page.goto('/');
+    await expect(page.getByText('Wholesale Distribution — United Kingdom').first()).toBeVisible({ timeout: 6000 });
+
+    // Enter the portal in-place (no page reload) and publish an edit as Super Admin.
+    await page.getByRole('button', { name: 'Partner Login' }).first().click();
+    await page.waitForTimeout(600);
+    await page.click('text=Super Admin — Tadii');
+    await page.waitForTimeout(900);
+    await page.click('nav[aria-label="Primary"] >> text=Super Admin');
+    await page.waitForTimeout(700);
+    await page.click('text=Homepage Editor');
+    await page.waitForTimeout(900);
+    await expect(page.locator('text=Every section of the public homepage').first()).toBeVisible({ timeout: 6000 });
+
+    const marker = 'Phase 7E Live Publish';
+    await page.getByLabel('Hero eyebrow').fill(marker);
+    await page.waitForTimeout(200);
+    await page.getByRole('button', { name: /^Publish/ }).click();
+    await expect(page.locator('text=Published to live homepage')).toBeVisible({ timeout: 8000 });
+
+    // Return to the public homepage via the in-app "Home" control (still no reload).
+    await page.getByTitle('Back to homepage').click();
+    await page.waitForTimeout(1000);
+
+    // The already-mounted public Home must reflect the published content.
+    await expect(page.getByText(marker).first()).toBeVisible({ timeout: 6000 });
+  });
 });

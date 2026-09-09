@@ -2,8 +2,10 @@ import { useState, useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useComplianceDocuments } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
-import { Badge, Button, Card, Input } from '@/components/ui';
+import { Badge, Button, Card, Input, StatusBadge } from '@/components/ui';
 import { BrandContractView } from '@/components/brand/BrandContractView';
+import { isTourCompleted, isTourSkipped, restartTour, useTourProgress } from '@/components/shared/TourEngine';
+import { ALL_TOUR_DEFINITIONS } from '@/config/tours/tourDefinitions';
 import { cn } from '@/utils/cn';
 import {
   demoTeamMembers,
@@ -31,12 +33,12 @@ import type {
 import {
   Landmark, Shield, Users, AlertOctagon, MapPin, FileCheck,
   Bell, FileText, Check, X, Plus, Trash2, Mail, Smartphone,
-  BookUser,
+  BookUser, Map,
 } from 'lucide-react';
 
 type SettingsTab =
   | 'bank' | 'login' | 'permissions' | 'outages' | 'returns_addr'
-  | 'compliance' | 'notifications' | 'contacts' | 'agreements';
+  | 'compliance' | 'notifications' | 'contacts' | 'agreements' | 'tours';
 
 const SETTINGS_TABS: { id: SettingsTab; label: string; icon: typeof Landmark }[] = [
   { id: 'bank', label: 'Bank Information', icon: Landmark },
@@ -48,6 +50,7 @@ const SETTINGS_TABS: { id: SettingsTab; label: string; icon: typeof Landmark }[]
   { id: 'notifications', label: 'Notification Preferences', icon: Bell },
   { id: 'contacts', label: 'Contacts', icon: BookUser },
   { id: 'agreements', label: 'Agreements', icon: FileText },
+  { id: 'tours', label: 'Guided Tours', icon: Map },
 ];
 
 function BankSection({ brandId }: { brandId: string }) {
@@ -474,6 +477,45 @@ function AgreementsSection() {
   );
 }
 
+/** §Phase 7E — restart any guided tour from the brand's own Settings. */
+function ToursSection({ brandId }: { brandId: string }) {
+  const progress = useTourProgress(brandId);
+  return (
+    <Card title="Guided Tours">
+      <p className="text-xs text-zinc-500 mb-3">
+        Re-run any onboarding tour whenever you need a refresher. Restarting a tour resumes it from its first
+        step and never touches your account, products, or orders.
+      </p>
+      <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+        {ALL_TOUR_DEFINITIONS.map((t) => {
+          const completed = isTourCompleted(brandId, t.id);
+          const skipped = isTourSkipped(brandId, t.id);
+          const inProgress = progress.currentTourId === t.id;
+          const state = inProgress ? 'In progress' : completed ? 'Completed' : skipped ? 'Skipped' : 'Not started';
+          const tone = inProgress ? 'info' : completed ? 'success' : skipped ? 'warning' : 'neutral';
+          return (
+            <li key={t.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-medium text-white truncate">{t.name}</span>
+                <span className="block text-[11px] text-zinc-500 truncate leading-snug">{t.description}</span>
+              </span>
+              <StatusBadge tone={tone} dataStatus={state.toLowerCase().replace(' ', '-')}>{state}</StatusBadge>
+              <Button
+                variant="tertiary"
+                size="sm"
+                onClick={() => restartTour(brandId, t.id)}
+                title={`Restart ${t.name} tour`}
+              >
+                Restart Tour
+              </Button>
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
+  );
+}
+
 /**
  * §Batch-2 — Brand-facing Settings suite.
  * 9 sections in a tabbed layout, all locked to the brand's own tenantId.
@@ -523,6 +565,7 @@ export function BrandSettings() {
         {activeTab === 'notifications' && <NotificationsSection brandId={brandId} />}
         {activeTab === 'contacts' && <ContactsSection brandId={brandId} />}
         {activeTab === 'agreements' && <AgreementsSection />}
+        {activeTab === 'tours' && <ToursSection brandId={brandId} />}
       </div>
     </div>
   );
