@@ -40,18 +40,38 @@ test.describe('Brand CRM', () => {
     await expect(page.locator('text=Tasks').first()).toBeVisible({ timeout: 4000 });
   });
 
-  test('3. Profile change review UI (conditional on pending requests)', async ({ page }) => {
+  test('3. Profile change review UI approves and rejects pending requests', async ({ page }) => {
     await openCrm(page);
-    // The seed has no pending requests; the review UI is verified when present.
-    const hasPending = await page.locator('text=Change Requests').first().isVisible({ timeout: 2000 }).catch(() => false);
-    if (hasPending) {
-      await page.locator('text=Change Requests').first().click();
-      await page.waitForTimeout(400);
-      await expect(page.locator('button:has-text("Approve")').first()).toBeVisible();
-      await expect(page.locator('button:has-text("Reject")').first()).toBeVisible();
-    } else {
-      test.fixme(true, 'No pending profile-change requests exist in the demo store');
-    }
+    await selectZambezi(page);
+    // §Phase 7F — deterministic seeded pending requests for Zambezi
+    // (signatory + phone) make the review UI genuinely assertable.
+    const card = page.locator('text=Change Requests').first();
+    await expect(card).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Tendai A. Moyo').first()).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=+263 713 555 999').first()).toBeVisible({ timeout: 3000 });
+
+    // Both review actions are available and enabled for a mutating admin tier.
+    const approveBtn = page.locator('button:has-text("Approve")').first();
+    const rejectBtn = page.locator('button:has-text("Reject")').first();
+    await expect(approveBtn).toBeVisible({ timeout: 3000 });
+    await expect(approveBtn).toBeEnabled();
+    await expect(rejectBtn).toBeVisible();
+    await expect(rejectBtn).toBeEnabled();
+
+    // Approve the first request → it leaves the pending list via the real mutation.
+    await approveBtn.click();
+    await page.waitForTimeout(500);
+    await expect(page.locator('text=Tendai A. Moyo')).not.toBeVisible({ timeout: 3000 });
+
+    // Reject the second request → nothing pending remains → card disappears.
+    await page.locator('button:has-text("Reject")').first().click();
+    await page.waitForTimeout(500);
+    await expect(page.locator('text=Change Requests')).not.toBeVisible({ timeout: 3000 });
+
+    // Cross-tenant: another brand never sees Zambezi's requests.
+    await page.locator('text=DeskForge Supplies Inc').first().click();
+    await page.waitForTimeout(500);
+    await expect(page.locator('text=Change Requests')).not.toBeVisible({ timeout: 2000 });
   });
 
   test('4. Fulfilment override logs the admin-on-behalf reason', async ({ page }) => {
