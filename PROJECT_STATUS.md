@@ -93,7 +93,7 @@
 
 ## 7E — Brand Dashboard redesign + small deferred items
 
-**PASS 2/2**.
+**Phase 7E commits:** `041de1a` (7E-A — small deferred product gaps: restart tour + homepage live refresh) · `ad97e9d` (7E-B — brand dashboard redesign + dashboard E2E + this status block). Protected baseline `959b4d2` + tag intact; checkout branch `redesign/foundation`.
 
 **7E-B — Brand Dashboard redesign (complete rewrite of src/components/brand/BrandDashboard.tsx, 524 lines)**
 - Reuses Phase 7C primitives (KpiGroup / DashboardSection / AttentionPanel) inside the Phase 6 shell; every list tenant-scoped; no new dependencies; recharts import REMOVED from the dashboard.
