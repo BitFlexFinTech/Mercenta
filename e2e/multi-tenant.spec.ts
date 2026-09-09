@@ -29,11 +29,18 @@ test.describe('Multi-Tenant Isolation', () => {
 
   test('2. Brand A cannot see Brand B messages', async ({ page }) => {
     await loginAsBrand(page, 'Zambezi Organic Extracts Ltd');
-    // Look for Messages/Communications in the sidebar or page
-    const messagesLink = page.locator('text=Messages').or(page.locator('text=Communications'));
-    const messagesVisible = await messagesLink.isVisible({ timeout: 2000 }).catch(() => false);
-    if (!messagesVisible) {
-      // It's OK — brand tenant may not have messages tab
+    // §7D — the support/team threads are the brand's own communication surface.
+    // Verify the view renders and contains no other-brand data at all.
+    const support = page.locator('nav[aria-label="Primary"] >> text=Support & Team').first();
+    if (await support.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await support.click();
+      await page.waitForTimeout(900);
+      const aThread = page.locator('text=Chat with Mercenta support and message your team').first();
+      await expect(aThread).toBeVisible({ timeout: 4000 });
+      // No other brand's name or messages leak into this tenant's support surface.
+      const foreign = page.locator('text=DeskForge').or(page.locator('text=Kwame'));
+      expect(await foreign.count()).toBe(0);
+    } else {
       test.fixme(true, 'Messages tab not accessible from brand view');
     }
   });
@@ -70,13 +77,18 @@ test.describe('Multi-Tenant Isolation', () => {
     else expect(count).toBeGreaterThanOrEqual(1);
   });
 
-  test('6. 3PL sees only own shipments', async ({ page }) => {
+  test('6. 3PL sees own shipments', async ({ page }) => {
     await loginAs(page, '3PL Carrier Terminal');
-
-    // 3PL should see carrier/manifest views
-    const manifestView = page.locator('text=Manifest').or(page.locator('text=BAK')).or(page.locator('text=Auditor'));
-    if (await manifestView.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await expect(manifestView.first()).toBeVisible({ timeout: 2000 });
+    // §7D — the `.or()`-chained strict Query is not addressable via `.isVisible()`
+    // (Playwright strict-mode violation). Use the canonical carrier shell: the
+    // default DHL operations desk renders its manifest table + the two other
+    // carrier-specific nav items (BAK Logistics Hub, API Request Auditor).
+    const desk = page.locator('text=Operational control desk — carrier terminal simulation').first();
+    if (await desk.isVisible({ timeout: 6000 }).catch(() => false)) {
+      await expect(desk).toBeVisible({ timeout: 3000 });
+      await expect(page.getByText('Bi-Directional Manifest Management').first()).toBeVisible({ timeout: 3000 });
+      await expect(page.locator('nav >> text=BAK Logistics Hub').first()).toBeVisible();
+      await expect(page.locator('nav >> text=API Request Auditor').first()).toBeVisible();
     } else test.fixme(true, '3PL manifest page not visible');
   });
 });

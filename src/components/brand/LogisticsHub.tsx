@@ -2,7 +2,7 @@ import { useState, useMemo, type ComponentType } from 'react';
 import { Card, Badge, Button, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
-import { usePurchaseOrders } from '@/data/queries';
+import { usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { BRAND_NAME } from '@/config/brand';
 import { STATUS_COLORS, STATUS_LABELS } from '@/types';
 import type { Shipment, ShipmentStatus } from '@/types';
@@ -40,7 +40,8 @@ function getRegionFromOrigin(origin: string): 'us' | 'eu' | 'africa' {
 }
 
 export function LogisticsHub() {
-  const { shipments, session, products } = useApp();
+  const { session, products } = useApp();
+  const shipmentsQuery = useShipmentsAll();
   const posQuery = usePurchaseOrders();
   const [tab, setTab] = useState<'air' | 'sea' | 'pallet'>('air');
   const [uploadedDocs, setUploadedDocs] = useState<Set<string>>(new Set());
@@ -59,7 +60,31 @@ export function LogisticsHub() {
       return next;
     });
 
-  const filteredShipments = shipments.filter((s) =>
+  // §7D — live shipment feed (single source of truth: demoShipments via
+  // useShipmentsAll) so shipments created in-session (auto-created drafts,
+  // filed ASNs) appear immediately. Tenant-scoped for brand sessions — a brand
+  // only ever sees its OWN shipments. Rows are normalised to the canonical
+  // Shipment shape (same enrichment brandDossiers applies) so every modal
+  // receives a well-formed shipment.
+  const liveShipments = ((shipmentsQuery.data?.data ?? []) as unknown as Shipment[])
+    .filter((s) => session?.tier !== 'brand' || (s as unknown as { brandId?: string }).brandId === session?.tenantId)
+    .map((s) => ({
+      id: s.id,
+      reference: s.reference,
+      title: s.title,
+      customer: (s as unknown as { customer?: string }).customer ?? '',
+      value: s.value,
+      status: s.status,
+      carrier: s.carrier,
+      stage: s.stage ?? 'factory_intake',
+      cbm: (s as unknown as { cbm?: number }).cbm ?? Math.max(6, Math.round(s.value / 9000)),
+      origin: s.origin,
+      destination: s.destination,
+      date: (s as unknown as { date?: string }).date ?? '',
+      trackingNumber: (s as unknown as { trackingNumber?: string }).trackingNumber ?? '',
+    }));
+
+  const filteredShipments = liveShipments.filter((s) =>
     tab === 'air' ? s.carrier === 'dhl' || s.carrier === 'fedex' :
     tab === 'pallet' ? s.carrier === 'palletline' : s.carrier === 'bak'
   );
@@ -231,10 +256,10 @@ export function LogisticsHub() {
 
       {trackingShipment && (
         <ShipmentTrackingTimeline
-          shipment={shipments.find((s) => s.id === trackingShipment)!}
+          shipment={liveShipments.find((s) => s.id === trackingShipment)!}
           products={products}
           poProducts={(() => {
-            const s = shipments.find((x) => x.id === trackingShipment);
+            const s = liveShipments.find((x) => x.id === trackingShipment);
             if (!s) return [];
             const pos = posQuery.data?.data ?? [];
             // Match by removing 'shipment-' prefix from shipment ID to get PO ID
@@ -247,13 +272,13 @@ export function LogisticsHub() {
       )}
       {waybillShipment && (
         <WaybillModal
-          shipment={shipments.find((s) => s.id === waybillShipment)!}
+          shipment={liveShipments.find((s) => s.id === waybillShipment)!}
           onClose={() => setWaybillShipment(null)}
         />
       )}
       {labelsShipment && (
         <LabelsModal
-          shipment={shipments.find((s) => s.id === labelsShipment)!}
+          shipment={liveShipments.find((s) => s.id === labelsShipment)!}
           onClose={() => setLabelsShipment(null)}
         />
       )}
@@ -389,7 +414,9 @@ function LabelsModal({
   shipment,
   onClose,
 }: {
-  shipment: Shipment;
+  // §7D — canonical Shipment plus the row-level identifiers the label needs
+  // (brandId/poNumber live on the canonical demoShipment rows).
+  shipment: Shipment & { brandId?: string; poNumber?: string };
   onClose: () => void;
 }) {
   /**

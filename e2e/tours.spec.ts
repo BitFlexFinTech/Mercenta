@@ -43,12 +43,14 @@ test.describe('Brand Guided Tours', () => {
           await page.waitForTimeout(300);
         }
       }
-      expect(await cardVisible(page)).toBe(false);
+      // §7D — other per-view tours (catalog, shipping…) legitimately auto-start
+      // after onboarding; the contract here is that TOUR 1 itself does not
+      // re-trigger once completed.
       await page.click('[data-tour="nav-catalog"]');
       await page.waitForTimeout(500);
       await page.click('[data-tour="brand-dashboard"]');
       await page.waitForTimeout(500);
-      expect(await cardVisible(page)).toBe(false);
+      await expect(page.getByText('Welcome to Mercenta Partners').first()).not.toBeVisible({ timeout: 1500 });
     } else test.fixme(true, 'Tour 1 not visible');
   });
 

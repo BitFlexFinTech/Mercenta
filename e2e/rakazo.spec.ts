@@ -1,45 +1,34 @@
-/** §E2E — Rakazo tab tests.
- * Tests the Super Admin Rakazo iframe panel states.
+/**
+ * Phase 7D - Rakazo tab tests.
+ *
+ * Super Admin -> Super Admin panel -> Rakazo. The droplet iframe may be
+ * unreachable from the test network; the panel always renders its header and
+ * its Open-in-new-tab / Refresh controls, so those are asserted.
  */
 import { test, expect } from '@playwright/test';
-import { openLogin } from './helpers/auth';
+import { loginAs } from './helpers/auth';
 
-async function navigateToRakazo(page: any) {
-  await openLogin(page);
-  const adminHub = page.locator('text=Mercenta Admin Hub').or(page.locator('text=Admin Hub'));
-  if (await adminHub.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await adminHub.click();
-    await page.waitForTimeout(800);
-  }
-  const rakazo = page.locator('text=Rakazo').first();
-  if (await rakazo.isVisible({ timeout: 3000 }).catch(() => false)) {
-    await rakazo.click();
-    await page.waitForTimeout(1000);
-  }
+async function openRakazo(page: any) {
+  await loginAs(page, 'Super Admin — Tadii', 1200);
+  await page.click('nav[aria-label="Primary"] >> text=Super Admin');
+  await page.waitForTimeout(600);
+  await page.locator('button', { hasText: 'Rakazo' }).first().click();
+  await page.waitForTimeout(900);
 }
 
 test.describe('Rakazo Bot Dashboard', () => {
   test('1. Rakazo tab renders in Super Admin panel', async ({ page }) => {
-    await navigateToRakazo(page);
-    const heading = page.locator('text=Rakazo Bot Dashboard');
-    if (await heading.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await expect(heading).toBeVisible({ timeout: 2000 });
-    } else test.fixme(true, 'Could not navigate to Rakazo tab');
+    await openRakazo(page);
+    await expect(page.locator('text=Rakazo Bot Dashboard').first()).toBeVisible({ timeout: 6000 });
   });
 
-  test('2. "Open in new tab" button has correct href', async ({ page }) => {
-    await navigateToRakazo(page);
-    const openBtn = page.locator('text=Open in new tab').first();
-    if (await openBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await expect(openBtn).toBeVisible();
-    } else test.fixme(true, 'Open in new tab button not visible');
+  test('2. "Open in new tab" button is present', async ({ page }) => {
+    await openRakazo(page);
+    await expect(page.locator('button', { hasText: 'Open in new tab' }).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('3. "Refresh" button is present', async ({ page }) => {
-    await navigateToRakazo(page);
-    const refreshBtn = page.locator('text=Refresh').first();
-    if (await refreshBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await expect(refreshBtn).toBeVisible();
-    } else test.fixme(true, 'Refresh button not visible');
+    await openRakazo(page);
+    await expect(page.locator('button', { hasText: 'Refresh' }).first()).toBeVisible({ timeout: 5000 });
   });
 });

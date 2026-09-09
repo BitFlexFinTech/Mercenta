@@ -114,6 +114,9 @@ export function BrandPurchaseOrders() {
     );
     setAckingPO(null);
     await qc.invalidateQueries({ queryKey: ['purchase_orders'] });
+    // §7D — acknowledgment auto-creates a shipment draft; invalidate the
+    // shipments feed so LogisticsHub reflects it immediately.
+    await qc.invalidateQueries({ queryKey: ['shipments'] });
   }
 
   function beginAsn(po: PurchaseOrder) {
@@ -171,6 +174,8 @@ export function BrandPurchaseOrders() {
     setAsnPO(null);
     void qc.invalidateQueries({ queryKey: ['purchase_orders'] });
     void qc.invalidateQueries({ queryKey: ['deductions'] });
+    // §7D — filed ASN creates a shipment; reflect it in the logistics feed.
+    void qc.invalidateQueries({ queryKey: ['shipments'] });
   }
 
   const brands = brandsQuery.data?.data ?? [];

@@ -215,6 +215,18 @@ export function disputeDeduction(id: string, notes: string): import('@/types').D
     notes: notes.trim(),
     outcome: d.dispute?.outcome,
   };
+  // §7D — audit trail: opening a dispute is an admin action that must be
+  // attributable in the platform-wide Admin Audit Log.
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+    actorId: 'admin',
+    action: 'deduction_disputed',
+    entityType: 'deduction',
+    entityId: d.id,
+    brandId: d.brandId,
+    reason: `Dispute opened on ${d.type.replace(/_/g, ' ')} (${d.purchaseOrderId}): ${notes.trim()}`,
+  });
   return d;
 }
 
@@ -226,6 +238,18 @@ export function recordDisputeOutcome(
   if (!d || !d.dispute) return null;
   d.dispute.outcome = outcome;
   d.status = 'resolved';
+  // §7D — audit trail: dispute resolutions are recorded with the outcome so the
+  // Admin Audit Log is a complete, attributable record of the workflow.
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+    actorId: 'admin',
+    action: 'deduction_dispute_resolved',
+    entityType: 'deduction',
+    entityId: d.id,
+    brandId: d.brandId,
+    reason: `Dispute resolved as ${outcome} on ${d.type.replace(/_/g, ' ')} (${d.purchaseOrderId})`,
+  });
   return d;
 }
 

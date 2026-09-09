@@ -121,7 +121,7 @@ async function queryOrSeed<T>(
   seed: T[],
   select = '*'
 ): Promise<{ data: T[]; source: DataSource }> {
-  if (!supabase) return { data: seed, source: 'seed' };
+  if (!supabase) return { data: seed.slice(), source: 'seed' };
   await _ensureBrandIdMap();
   const { data, error } = await supabase.from(table).select(select);
   if (error) {
@@ -1087,34 +1087,51 @@ export function fetchDeductions() {
 }
 
 /** §19.1 — admin opens a dispute against a deduction (status → disputed). */
-export async function disputeDeduction(id: string, notes: string) {
+export function disputeDeduction(id: string, notes: string) {
+  // §7D — write the demo store FIRST (the UI depends on it) and background the
+  // optional Supabase write. Awaiting a remote write before touching the store
+  // hung the whole demo flow whenever the host was unreachable.
+  const result = disputeDeductionInStore(id, notes);
   if (supabase) {
-    const { error } = await supabase
-      .from('deductions')
-      .update({
-        status: 'disputed',
-        dispute_opened_at: new Date().toISOString(),
-        dispute_notes: notes,
-      })
-      .eq('id', id);
-    if (error) console.warn('[api] Supabase write failed for "deductions", using demo fallback:', error.message);
+    void (async () => {
+      try {
+        const res = await supabase
+          .from('deductions')
+          .update({
+            status: 'disputed',
+            dispute_opened_at: new Date().toISOString(),
+            dispute_notes: notes,
+          })
+          .eq('id', id);
+        if (res.error) console.warn('[api] Supabase write failed for "deductions" (dispute):', res.error.message);
+      } catch (err) {
+        console.warn('[api] Supabase write failed for "deductions" (dispute):', err);
+      }
+    })();
   }
-  return disputeDeductionInStore(id, notes);
+  return result;
 }
 
 /** §19.1 — record the outcome of an open dispute (→ resolved). */
-export async function recordDisputeOutcome(
+export function recordDisputeOutcome(
   id: string,
   outcome: import('@/types').DisputeOutcome
 ) {
+  const result = recordDisputeOutcomeInStore(id, outcome);
   if (supabase) {
-    const { error } = await supabase
-      .from('deductions')
-      .update({ dispute_outcome: outcome, status: 'resolved' })
-      .eq('id', id);
-    if (error) console.warn('[api] Supabase write failed for "deductions", using demo fallback:', error.message);
+    void (async () => {
+      try {
+        const res = await supabase
+          .from('deductions')
+          .update({ dispute_outcome: outcome, status: 'resolved' })
+          .eq('id', id);
+        if (res.error) console.warn('[api] Supabase write failed for "deductions" (outcome):', res.error.message);
+      } catch (err) {
+        console.warn('[api] Supabase write failed for "deductions" (outcome):', err);
+      }
+    })();
   }
-  return recordDisputeOutcomeInStore(id, outcome);
+  return result;
 }
 
 export function fetchCatalogSubmissions() {
@@ -1124,7 +1141,7 @@ export function fetchCatalogSubmissions() {
 
 /* ── §12 Homepage content (draft/publish) ───────────────────────────── */
 
-const homepageState: { draft: HomepageContent | null } = { draft: null };
+const homepageState: { draft: HomepageContent | null; live: HomepageContent | null } = { draft: null, live: null };
 
 export async function fetchHomepageContent(): Promise<{
   live: HomepageContent;
@@ -1146,10 +1163,10 @@ export async function fetchHomepageContent(): Promise<{
       };
     }
   }
-  // Seed/demo mode: live copy is DEFAULT_HOMEPAGE_CONTENT; drafts held in
-  // session.
+  // Seed/demo mode: live copy reflects the last in-session publish, otherwise
+  // the canonical default; drafts are held in session.
   return {
-    live: structuredClone(DEFAULT_HOMEPAGE_CONTENT),
+    live: structuredClone(homepageState.live ?? DEFAULT_HOMEPAGE_CONTENT),
     draft: homepageState.draft ? structuredClone(homepageState.draft) : null,
   };
 }
@@ -1165,6 +1182,7 @@ export async function publishHomepageContent(
   const toPublish = content ?? homepageState.draft;
   if (!toPublish) throw new Error('[api] nothing to publish — save a draft first');
   homepageState.draft = null;
+  homepageState.live = structuredClone(toPublish);
   if (supabase) {
     const { error } = await supabase
       .from('homepage_content')

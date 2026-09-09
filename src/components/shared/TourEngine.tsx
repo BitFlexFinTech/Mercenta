@@ -319,10 +319,18 @@ export function TourEngine(props: TourEngineProps) {
       }
     }
 
-    // Tour 3: PO Acknowledgment — auto-start when navigating to purchase_orders
-    if (currentView === 'purchase_orders' && !isTourDoneOrSkipped(brandId, 'po-acknowledgment')) {
-      startTour(brandId, 'po-acknowledgment');
-      return;
+    // §7D — generic per-view auto-start: any tour declaring `autoStartViews`
+    // that includes the current view starts when not yet done/skipped. This
+    // completes the declared product intent in tourDefinitions.ts for the
+    // catalog, shipping, deductions, compliance, billing, support and
+    // team-management tours (orientation is handled above; po-acknowledgment is
+    // covered here through its own autoStartViews).
+    for (const def of ALL_TOUR_DEFINITIONS) {
+      if (isTourDoneOrSkipped(brandId, def.id)) continue;
+      if (def.autoStartViews && def.autoStartViews.includes(currentView)) {
+        startTour(brandId, def.id);
+        return;
+      }
     }
   }, [isBrandPortal, brandId, currentView, progress.currentTourId]);
 
