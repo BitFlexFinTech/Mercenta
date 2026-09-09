@@ -1,10 +1,10 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-09 (Phase 7E complete — Brand Dashboard redesign + small deferred items: 134/0/4)
+> Last updated: 2026-09-09 (Phase 7F complete — compliance state model + genuine compliance/CRM E2E + access-gate repair: 143/0/4)
 >
 > ## 0. Project-Memory Reconciliation (2026-09-08)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
-> - **Verified latest checkpoint: `e7fa882`** (Phase 6 — application shell & navigation). Prior: `774f6c4` (Phase 5) → `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
+> - **Verified latest checkpoint: `5f13ac1`** (Phase 7F part 1 — compliance test states). Prior: `9ef93eb` (7E docs) → `ad97e9d` (7E brand dashboard) → `041de1a` (7E deferred/product repairs) → `e7fa882` (Phase 6 — application shell & navigation) → `774f6c4` (Phase 5) → `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
 > - **Baseline:** tag `mercenta-baseline-before-redesign-20260907` / commit `959b4d2` — recoverable, immutable.
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
@@ -18,6 +18,7 @@
 | **Phase 7C DASHBOARD REDESIGN** | ✅ **DONE** | `6355979` — Admin Operations Overview redesigned as an operational command centre (Phase 5 primitives inside the Phase 6 shell). Brand dashboard fabricated `94.2` compliance score and fake inventory estimate removed (derived real metrics). Shared dashboard primitives `src/components/shared/dashboard.tsx` (KpiGroup / DashboardSection / AttentionPanel) now canonical (documented in `docs/DESIGN_SYSTEM.md`). AdminShell breadcrumb gap for `purchase_orders_admin` fixed. Dashboard E2E `e2e/dashboard.spec.ts` **7/7 PASS**. TS 45 pre-existing (0 new), lint 26 (0 new in changed files), build ✓. Browser-verified at all 7 viewports (no horizontal overflow), screenshots `test-screenshots/dashboard/`. Full regression **86 passed / 1 failed (pre-existing legal-agreements t1) / 48 skipped**. |
 | **Phase 7D — REGRESSION / SKIP-DEBT CLEANUP** | ✅ **DONE** | See the **7D details section** below this table. Result: **121 passed / 0 failed / 5 skipped** (19-suite set). Legal-agreements t1 fixed; 43 skips eliminated/justified; 5 skips retained (all classified + documented below). |
 | **Phase 7E — BRAND DASHBOARD REDESIGN + SMALL DEFERRED ITEMS** | ✅ **DONE** | See the **7E details section** below this table. Result: **134 passed / 0 failed / 4 skipped** (19-suite + dashboard). Brand Dashboard redesigned end-to-end (real tenant-scoped data, legacy static REVENUE_DATA chart removed, global activity feed removed for tenant safety, attention/quick actions to real routes). Brand Settings Guided Tours tab with per-tour Restart Tour. Demo-mode publish now live-refreshes the mounted public Home (module version/subscription + React Query hook). TS 43 (baseline, 0 new), lint 23 (< baseline 24, 0 new), build ✓. Screenshots at all 7 viewports × admin+brand captured; image inspection NOT supported in this environment — DOM/geometry probe passed all 7 viewports instead. |
+| **Phase 7F — COMPLIANCE STATE MODEL + GENUINE E2E + ACCESS-GATE REPAIR** | ✅ **DONE** | See the **7F details section** below this table. Result: **143 passed / 0 failed / 4 skipped** (21 suites: the 19-suite set + dashboard + access-gate). Deterministic compliance-scenario portal tenants added to the canonical demo dataset (0/5 and 4/5 doc states) → compliance-gate t1/t2 and crm t3 converted from skips to genuine passing tests; access-gate became a real green suite (6 passed / 3 pre-existing skip fixmes); Tour 5 honestly retained as a documented product gap (only remaining non-access-gate skip). Previously-dead ComplianceUploadCard mounted (category-aware gate). TS **43** (exact 7E baseline, 0 new), lint **18** (down from 23; 5 no-var fixed in the touched file), build ✓. Commits `5f13ac1` + `2f9e62f` + `3c5a88a`. |
 | **Phase 1 UNDERSTAND** | ✅ **DONE** | `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`. |
 | **Phase 2A** | ✅ **DONE** | `a796f37` — integration mode model, health, provider contract, registry metadata. Probe PASS 11/11. |
 | **Phase 2B** | ✅ **DONE** | `ba99266` — health runner `src/lib/integrations/health.ts`, wizard stepper/mode badges/health panel in IntegrationsPanel. Probe PASS 7/7. |
@@ -126,7 +127,74 @@ Remaining skips − exact 4: compliance-gate t1 (no 0-doc tenant) · compliance-
 
 **Gates:** TypeScript **43** (exact 7D baseline; 0 new — every changed file clean) · ESLint **23** (< baseline 24; 0 new; one pre-existing dashboard exhaustive-deps error removed) · build **PASS**. Browser verification at all 7 viewports (E2E + geometry probe allOk=true; zero overflow, 6/6 KPIs, 7/7 sections, drawer at 375px). Screenshots `test-screenshots/dashboard/admin-*.png` + `brand-*.png` × 7 (fresh 13:28–13:38). Actual pixel-level inspection NOT possible in this environment (model rejects image input) — strongest available DOM/geometry verification performed instead.
 
-- **Files changed (20):** `e2e/helpers/auth.ts` (new) + 19 migrated spec files. Production/marketing code UNTOUCHED. Baseline `959b4d2` + tag intact; Phase 6 checkpoints intact.
+## 7F — Compliance state model + genuine compliance/CRM E2E + access-gate repair (2026-09-09)
+
+**Result: 143 passed / 0 failed / 4 skipped** — 21 suites (19-suite gate + dashboard + access-gate) in 2.2 min. The three 7E-era skips (compliance-gate t1, t2; crm t3) are now GENUINE passing tests. The only remaining non-access-gate skip is `tours` t5 (documented product gap below).
+
+**Commits:** `5f13ac1` (deterministic compliance test states) + `2f9e62f` (compliance & regression coverage) + `3c5a88a` (access-gate test contract). Baseline `959b4d2` + tag intact; no history rewrite; no Phase 8 work started.
+
+### Compliance-state architecture
+- Compliance business logic UNCHANGED and canonical (`src/lib/compliance.ts` — docs + contract + §4.1/§4.2 agreement inputs). No second engine, no test-only branch, no bypassed onboarding.
+- `portal access` and `gate clearance` are now decoupled via two new canonical registries in `src/data/demoData.ts`:
+  - `CLEARED_BRAND_IDS` — cleared tenants (unchanged: Zambezi, DeskForge).
+  - `COMPLIANCE_SCENARIO_BRAND_IDS` — portal tenants that are NOT gate-cleared.
+  - `PORTAL_BRAND_IDS` = cleared + scenario (drives `onboarded` in `brandDossiers.ts`).
+  - `COMPLIANCE_SCENARIO_DOC_STATES` — explicit per-required-type statuses that OVERRIDE the rotating pattern for scenario tenants (see matrix).
+
+### Deterministic compliance test states
+| Tenant (brandId) | Category (required) | Approved / total | Present-but-not-approved | Contract | §4.1/§4.2 | Expected gate |
+|---|---|---|---|---|---|---|
+| **Reed & Oak Kitchen Co** (`brand-reedkitchen`) | Kitchen (5) | **0 / 5** | 5 (LOA uploaded, UKCA under_review, insurance uploaded, registry missing, food_contact missing) | active | accepted | **BLOCKED** |
+| **MotorVista Auto Supply Ltd** (`brand-motorvista`) | Automotive (5) | **4 / 5** | 1 (type_approval missing) | active | accepted | **BLOCKED** |
+| **Zambezi Organic Extracts Ltd** (`brand-zambezi`) | H&PC (5) | **5 / 5** | 0 | active | accepted | **CLEARED** |
+| **DeskForge Supplies Inc** (`brand-deskforge`) | Office Products (4) | **4 / 4** | 0 | active | accepted | **CLEARED** |
+
+Both scenario tenants are `onboarded:true` (portal) with empty operational data (no products/POs/shipments) so the document state is the ONLY gate variable. Every required doc HAS a demo record; status `missing` = present-but-not-approved (canonical gate classifies it `blocking`) — same convention as the pre-existing rotating patterns.
+
+### Compliance-gate test results (e2e/compliance-gate.spec.ts) — 4/4 PASS
+- t1 0/5 → catalog `Catalog Locked` (disabled) + banner lists the real pending/missing docs + compliance page card "5 item(s) remain" + no `Add New Product` anywhere (no cleared-tenant leakage).
+- t2 4/5 → still blocked; the single `type approval (missing)` keeps the gate closed.
+- t3 5/5 (Zambezi exact 5/5) + 4/4 (DeskForge) → `Add New Product` visible AND enabled; no locked state.
+- t4 Admin Compliance Approvals renders doc rows.
+
+### CRM pending-request result (e2e/crm.spec.ts) — 6/6 PASS
+The product already supports the workflow (`requestProfileChange` / `reviewProfileChangeRequest` in demoStore; ChangeRequestReview card in BrandCRM) — the store was merely seeded empty. Phase 7F seeds 2 deterministic pending requests (Zambezi signatory + phone). t3 is now a GENUINE test: pending card appears → Approve removes the request via the real mutation → Reject resolves the remainder → another brand never sees Zambezi's requests. No new workflow invented.
+
+### Access-gate result (e2e/access-gate.spec.ts) — 6 passed / 3 skipped (pre-existing fixmes)
+- 5 stale `placeholder*="Zimbabwe"` country fills → the real search-then-select path (`fillCountry` helper).
+- Obsolete "Super Admin Panel" second click removed; Phase 6 nav item "Super Admin" opens the panel, then the Applications tab.
+- Submit now waits for the confirmed "Application Received" state (the form runs REAL link verification capped at 10s/link) instead of a fixed 2s delay. All pre-existing business assertions retained.
+- Remaining skips t6/t8/t9 are the pre-existing intentional fixme branches (approve/manual-create/unapproved-route — documented in-file).
+
+### Tour 5 decision
+`tours` t5 (Deductions on Analytics) stays an HONEST skip — documented product gap. The Tour-5 definition targets a deductions LEDGER + category breakdown + dispute button + outcome info on the Analytics/Reports views; SalesAnalytics is a revenue/volume page with NO deductions surface and no `[data-tour="deductions-*"]` targets exist anywhere in src. No meaningless attributes were added to unrelated UI. Building the ledger/dispute surface is a LARGER product feature deferred to a later phase (see deferred list).
+
+### Regression verification
+- Zero previously-passing regressions: 21-suite set below. `dashboard.spec` t2's gate-KPI assertion had pinned the historical dataset size (`/11`); it now asserts KPI shape + invariant (N/M, N ≤ M) — a stale E2E contract aligned with the data-agnostic intent (precise gate semantics are asserted by compliance-gate.spec.ts).
+- `scripts/validate-review-s1.mjs` (legacy ad-hoc validator, not part of the phase gates): had 5 failures at the 7E HEAD; Phase 7F FIXED the stale brand-count check (canonical-derived) → 4 failures remain, ALL pre-existing (PO status diversity, carrier coverage, two demo banners) in areas 7F never touched — verified by stash/run/restore comparison.
+
+### Gates
+- TypeScript **43** (exact 7E baseline, 0 new; all changed files clean) · ESLint **18** (down from 23 — 5 `no-var` fixed in the touched ComplianceHub.tsx; 0 new) · build **PASS**.
+- Browser verification: 0/5, 4/5, 5/5 states, CRM pending review, access-gate country field, admin + brand dashboards all exercised in a real browser; 7-viewport sweep (1440→375) on the new tenant's catalog + compliance pages — zero horizontal overflow, drawer navigation exercised.
+- Screenshots `test-screenshots/compliance/` (9 files): reed-catalog-0of5, reed-compliance-0of5, motorvista-catalog-4of5, zambezi-catalog-5of5, zambezi-compliance-5of5, crm-pending-change-request, accessgate-country-field, admin-dashboard, brand-dashboard. **Visual QA: pixel-level inspection NOT possible in this environment (model rejects image input); DOM/geometry + functional assertions used instead — same limitation as 7E.**
+
+### Remaining skips (all 4 — every one pre-existing/intentional)
+| Suite | Test | Reason | Classification | Product gap | Blocks future |
+|---|---|---|---|---|---|
+| access-gate | t6 approve-login | requires in-app navigation preserving module state | pre-existing intentional fixme | no | no |
+| access-gate | t8 manual create | same | pre-existing intentional fixme | no | no |
+| access-gate | t9 unapproved route | requires server-side route guards | pre-existing intentional fixme | no | no |
+| tours | t5 deductions tour | SalesAnalytics has no deductions surface; tour targets don't exist | 4 - missing product feature | **yes** | no (recorded) |
+
+### Remaining failures
+NONE in the 21-suite regression. The legacy `validate-review-s1.mjs` has 4 pre-existing failures (PO status diversity / carrier coverage / two demo banners) — outside the phase gates, unchanged by 7F.
+
+### Deferred product features (NOT started)
+- Tour 5 Deductions & Disputes surface (brand deductions ledger + category breakdown + dispute workflow on Analytics/Reports).
+- Live provider credential activation, Amazon SP-API, Companies House, HMRC, Wise/Payoneer/Stripe/Xero production, Integration Hub breadth, Carrier Dashboard redesign, CRM/Compliance/Catalogue/PO/Finance/Logistics/Marketing redesigns.
+
+### Phase 8 readiness — assessment
+Phase 8 (live integrations) is NOT started. Phase 7F leaves: zero unexplained E2E failures, compliance states deterministically representable and genuinely tested, access-gate green, Tour 5 recorded, TS/lint debt inventoried (43/18, pre-existing, none in 7F regions), generated/forensic artifacts intentionally uncommitted. Baseline + 7E checkpoints intact.
 - **Helper:** `openLogin(page)` = goto `/` → prefer `getByRole('button', { name: "Partner Login" }).first()` → mobile fallback (`Open navigation` → last `Partner Login`). `loginAs(page, card, waitMs=800)` = openLogin + one-click demo card + caller wait.
 - **Login contract:** the product renamed the CTA from "Get Started" to "Partner Login" (`src/config/homepageContent.ts` → `hero.secondaryCta`; documented Access-gate change). Tests now follow the real UI; no obsolete copy re-introduced; no production change.
 - **Old login-blocked count (Phase 6):** 43 (compliance-gate 4 + shipment-asn 5 + crm 6 + multi-tenant 6 + legal-agreements 3 + po-lifecycle 6 + tours 9 + billing 4). All 43 now reach their assertions; 64 previously hard-failing tests at login now proceed past the entry.
