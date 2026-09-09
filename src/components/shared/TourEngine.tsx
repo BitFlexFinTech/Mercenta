@@ -158,7 +158,12 @@ function useTourProgressReactive(brandId: string): TourProgress {
     return () => { _versionListeners.delete(update); };
   }, [brandId]);
    
-  return useMemo(() => getTourProgress(brandId), [brandId, v]);
+  return useMemo(() => {
+    // `v` is the reactive version counter — referenced here so the memo
+    // recomputes when a store mutation bumps it even if brandId is unchanged.
+    void v;
+    return getTourProgress(brandId);
+  }, [brandId, v]);
 }
 
 /* ── Positioning helper ──────────────────────────────────────────── */
@@ -354,7 +359,7 @@ export function TourEngine(props: TourEngineProps) {
         return;
       }
     }
-  }, [isBrandPortal, brandId, currentView, progress.currentTourId]);
+  }, [isBrandPortal, brandId, currentView, progress.currentTourId, progress.toursCompleted.length, progress.toursSkipped.length]);
 
   // Reset step index when active tour changes
   useEffect(function() {
@@ -370,7 +375,7 @@ export function TourEngine(props: TourEngineProps) {
       return tourSteps;
     }
     return tourSteps.filter(function(s) { return !doneSteps.includes(s.id); });
-  }, [activeTour, progress.tourStepsCompleted]);
+  }, [activeTour, progress.tourStepsCompleted, brandId]);
 
   // Auto-advance when user navigates to the section targeted by the current step
   useEffect(function() {

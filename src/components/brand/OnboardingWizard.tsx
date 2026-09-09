@@ -97,7 +97,7 @@ const CURRENCIES_BY_REGION: Record<BrandRegion, { value: string; label: string }
 };
 
 export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) {
-  const { brandProfile, setBrandProfile, completeOnboarding } = useApp();
+  const { session, brandProfile, setBrandProfile, completeOnboarding } = useApp();
   const [step, setStep] = useState(initialStep);
   const [checks, setChecks] = useState({
     exclusive: false,
@@ -150,14 +150,13 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
     if (step === 4 && (!brandProfile.fulfillmentTrack || brandProfile.fulfillmentTrack === 'unassigned')) {
       setBrandProfile({ ...brandProfile, fulfillmentTrack: recommendedTrack });
     }
-     
-  }, [step]);
+  }, [step, brandProfile, recommendedTrack, setBrandProfile]);
 
   // §Stage-20.2 — no brand-side carrier connection testing; completion no
   // longer writes dhlConnected/fedexConnected/bakConnected from wizard state.
   const handleFinish = () => {
     // §Legal — persist mandatory brand agreement acceptances before finishing
-    const brandId = brandProfile.id || `brand-${Date.now()}`;
+    const brandId = session?.tenantId || `brand-${Date.now()}`;
     if (legalAgreements.logisticsSla) {
       acceptBrandAgreement(brandId, 'logistics_sla' as BrandAgreementType, AGREEMENT_VERSIONS.logistics_sla);
     }

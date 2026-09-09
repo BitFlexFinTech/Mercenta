@@ -88,7 +88,7 @@ export function FulfillmentTrackPanel() {
       score: applyOverride(score, overrides[score.brandId]),
       brand: brands.find((b) => b.id === score.brandId),
     }));
-  }, [brandsQuery.data, scoresQuery.data, overrides, scoresVersion]);
+  }, [brandsQuery.data, scoresQuery.data, overrides]);
 
   const filtered = rows.filter(({ score }) => {
     if (trackFilter !== 'all' && score.track !== trackFilter) return false;

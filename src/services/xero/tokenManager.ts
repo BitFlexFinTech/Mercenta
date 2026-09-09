@@ -6,7 +6,9 @@ import { isXeroDemoMode } from './xeroClient';
 import { supabase } from '@/lib/supabase';
 import { logSync } from './syncEngine';
 
-const refreshLocks = new Map<string, Promise<void>>();
+const refreshLocks = new Map<string, Promise<TokenResult>>();
+
+interface TokenResult { accessToken: string; refreshToken: string; error?: string; needsReauth?: boolean; }
 
 interface DemoToken { accessToken: string; refreshToken: string; expiresAt: number; }
 const demoTokenStore = new Map<string, DemoToken>();

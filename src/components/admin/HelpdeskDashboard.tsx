@@ -29,14 +29,14 @@ function useAiSug(brandId: string, _ctx: string): string | null {
       'brand-harvestlane': 'PO-9002 scheduled for next consolidation. Dispatch within 10 days.',
     };
     return m[brandId] ?? 'Thank you. Let me investigate and get back to you.';
-  }, [brandId, _ctx]);
+  }, [brandId]);
 }
 export function HelpdeskDashboard() {
   const { actingStaff, staff } = useApp();
   const brandsQuery = useBrands();
   const messagesQuery = useMessages();
-  const brands = brandsQuery.data?.data ?? [];
-  const allMessages = messagesQuery.data?.data ?? [];
+  const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
+  const allMessages = useMemo(() => messagesQuery.data?.data ?? [], [messagesQuery.data]);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>('tkt-001');
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>('all');
   const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'all'>('all');

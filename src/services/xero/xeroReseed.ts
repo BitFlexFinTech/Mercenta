@@ -61,8 +61,8 @@ export async function fullReseed(partnerId: string): Promise<XeroReseedResult> {
 
   let contactsSynced = 0;
   let invoicesSynced = 0;
-  let billsSynced = 0;
-  let paymentsSynced = 0;
+  const billsSynced = 0;
+  const paymentsSynced = 0;
   const errors: string[] = [];
 try {
     // 1. Sync brands as Xero contacts (idempotent — skip if name exists)

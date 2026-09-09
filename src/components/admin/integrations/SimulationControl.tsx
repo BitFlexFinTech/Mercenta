@@ -233,7 +233,7 @@ export function SimulationControl() {
               className="text-xs"
             />
           </div>
-          <Button onClick={() => void runAll()} disabled={running || runningAll} className="text-xs">
+          <Button onClick={() => void runAll()} disabled={running !== null || runningAll} className="text-xs">
             {runningAll ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> Running all…</> : <><Play className="w-3.5 h-3.5 mr-1" /> Run all scenarios</>}
           </Button>
           <Button variant="ghost" onClick={resetSharedState} className="text-xs">

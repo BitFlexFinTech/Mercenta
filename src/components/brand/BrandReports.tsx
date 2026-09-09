@@ -103,7 +103,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
               const units = po.lineItems.reduce((s,l) => s + l.quantity, 0);
               csv.push([po.poNumber, po.status, String(po.poValue), String(units), String(asinRate)+'%']);
             }
-            downloadCsv('brand-reports.csv', csv[0], csv.slice(1).map(r => r.join(',')).join('\\n'));
+            downloadCsv('brand-reports.csv', csv[0], csv.slice(1));
           }}>
             <Download className="w-3 h-3 mr-1" /> Export CSV
           </Button>
@@ -139,7 +139,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
                   <XAxis dataKey="month" stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => '\\u00a3' + (v/1000).toFixed(0) + 'k'} />
-                  <Tooltip contentStyle={CHART_TT} formatter={(v: number) => ['\\u00a3' + v.toLocaleString(), 'Shipped Value']} />
+                  <Tooltip contentStyle={CHART_TT} formatter={(v) => ['£' + Number(v ?? 0).toLocaleString(), 'Shipped Value']} />
                   <Bar dataKey="value" fill={BRASS} radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -154,7 +154,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
                   <XAxis dataKey="month" stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={CHART_TT} formatter={(v: number) => [v.toLocaleString() + ' units', 'Dispatched']} />
+                  <Tooltip contentStyle={CHART_TT} formatter={(v) => [Number(v ?? 0).toLocaleString() + ' units', 'Dispatched']} />
                   <Bar dataKey="units" fill={EMERALD} radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>

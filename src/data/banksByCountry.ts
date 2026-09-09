@@ -6,6 +6,8 @@ export interface BankEntry {
   routingLabel?: string;
   routingExample?: string;
 }
+/** Canonical country → bank directory type. */
+export type BanksByCountry = Record<string, BankEntry[]>;
 export const BANKS_BY_COUNTRY: BanksByCountry = {
   "United States": [
     { name: "JPMorgan Chase", swift: "CHASUS33", accountFormat: "9-digit routing + account", routingLabel: "ABA Routing", routingExample: "021000021" },

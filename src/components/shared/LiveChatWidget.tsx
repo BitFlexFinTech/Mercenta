@@ -17,7 +17,7 @@ import { Button } from '@/components/ui';
 export function LiveChatWidget() {
   const { session, brandProfile } = useApp();
   const messagesQuery = useMessages();
-  const allMessages = messagesQuery.data?.data ?? [];
+  const allMessages = useMemo(() => messagesQuery.data?.data ?? [], [messagesQuery.data]);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const [sentCount, setSentCount] = useState(0);

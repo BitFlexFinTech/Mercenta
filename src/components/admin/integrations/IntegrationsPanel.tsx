@@ -4,7 +4,7 @@ import { rememberApiKey } from '@/integrations/types';
 import { pingForService } from '@/lib/integrations/testCalls';
 import { runHealthCheck } from '@/lib/integrations/health';
 import { INTEGRATION_MODE_LABELS } from '@/integrations/types';
-import type { IntegrationHealth, IntegrationId, IntegrationMode, IntegrationState } from '@/integrations/types';
+import type { IntegrationDefinition, IntegrationHealth, IntegrationId, IntegrationMode, IntegrationState } from '@/integrations/types';
 import { INTEGRATION_ORDER, INTEGRATION_REGISTRY } from '@/integrations/registry';
 import { Badge, Button, Card, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';

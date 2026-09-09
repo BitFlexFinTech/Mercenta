@@ -101,6 +101,8 @@ export interface ScenarioResult {
   status: 'ok' | 'safety_refused' | 'error';
   /** Safety refusal reason when stopped at the LIVE gate. */
   safetyReason?: string;
+  /** Message when the scenario builder returned an error. */
+  error?: string;
   steps: ScenarioStep[];
   created: {
     purchaseOrder?: string;
@@ -142,8 +144,8 @@ function audit(
   entityId: string,
   brandId: string,
   reason: string,
-  actorId: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
+  actorId: string = 'system'
 ): string {
   const n = ctr();
   const id = deriveId(runId, 'audit', n);
@@ -286,7 +288,7 @@ async function scenarioNormalPo(ctx: ScenarioRunContext): Promise<ScenarioResult
     expiryDate: atDays(base, 365).slice(0, 10),
   });
   if (!ship.ok) {
-    return { scenario: 'NORMAL_PO', runId, status: 'error', steps, created: [], auditIds, error: ship.error };
+    return { scenario: 'NORMAL_PO', runId, status: 'error', steps, created: { deductions: [] }, auditIds, error: ship.error };
   }
   const shipmentId = ship.shipmentId ?? '';
   steps.push({ step: 3, action: 'shipment_created', entityType: 'shipment', entityId: shipmentId, from: 'accepted', to: 'ready_to_fulfil', detail: `ASN filed via ${ship.shipmentId}, carrier dhl`, at: new Date().toISOString() });
@@ -603,8 +605,6 @@ const SCENARIO_BUILDERS: Record<ScenarioId, (ctx: ScenarioRunContext) => Promise
   PRODUCT_FAILURE: scenarioProductFailure,
   INTEGRATION_FAILURE: scenarioIntegrationFailure,
 };
-
-export type { ScenarioRunContext, ScenarioResult, ScenarioStep };
 
 /**
  * Run a simulation scenario. Deterministic for a given (scenario, seed,

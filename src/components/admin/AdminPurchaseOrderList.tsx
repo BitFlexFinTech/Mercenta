@@ -18,10 +18,14 @@ const STATUS_ORDER = ['received', 'under_review', 'accepted', 'ready_to_fulfil',
 export function AdminPurchaseOrderList() {
   const qc = useQueryClient();
   const { actingStaff: _actingStaff } = useApp();
-  const brands = useBrands().data?.data ?? [];
-  const products = useProducts().data?.data ?? [];
-  const pos = usePurchaseOrders().data?.data ?? [];
-  const deductions = useDeductions().data?.data ?? [];
+  const brandsQuery = useBrands();
+  const productsQuery = useProducts();
+  const posQuery = usePurchaseOrders();
+  const deductionsQuery = useDeductions();
+  const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
+  const products = productsQuery.data?.data ?? [];
+  const pos = useMemo(() => posQuery.data?.data ?? [], [posQuery.data]);
+  const deductions = deductionsQuery.data?.data ?? [];
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedPoId, setSelectedPoId] = useState<string | null>(null);
@@ -38,7 +42,7 @@ export function AdminPurchaseOrderList() {
     if (statusFilter !== 'all') list = list.filter((p) => p.status === statusFilter);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      list = list.filter((p) => p.poNumber.toLowerCase().includes(q) || brandName(p.brandId).toLowerCase().includes(q));
+      list = list.filter((p) => p.poNumber.toLowerCase().includes(q) || (brands.find((b) => b.id === p.brandId)?.profile.businessName ?? p.brandId).toLowerCase().includes(q));
     }
     list.sort(function(a, b) { return STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status); });
     for (const po of list) {

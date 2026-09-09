@@ -534,15 +534,10 @@ export function acknowledgePurchaseOrder(
         title: (brandDraft?.profile.businessName ?? 'Brand').split(' ')[0] + ' — ' + po.poNumber,
         value: acceptedLines.reduce((s, l) => s + (l.acknowledgedQty ?? l.quantity) * l.unitPrice, 0),
         status: 'factory_intake',
-        stage: 'factory_intake',
         origin: 'Brand warehouse',
         destination: 'Mercenta UK Hub',
         delayed: false,
         exception: false,
-        customer: brandDraft?.profile.businessName ?? 'Brand',
-        date: new Date().toISOString().slice(0, 10),
-        trackingNumber: '',
-        cbm: 0,
       });
     }
     demoAuditLog.push({

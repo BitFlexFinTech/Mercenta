@@ -35,7 +35,7 @@ const STATUS_BADGE: Record<ReturnTrackingStatus, string> = {
 export function ReturnsTrackingDashboard() {
   const { actingStaff } = useApp();
   const brandsQuery = useBrands();
-  const brands = brandsQuery.data?.data ?? [];
+  const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);

@@ -13,7 +13,7 @@ interface HeaderProps {
   /** Set when the mobile navigation drawer is open (drives aria-expanded) */
   navOpen?: boolean;
   /** Ref back to the mobile menu toggle (Escape/focus-return). */
-  toggleRef?: RefObject<HTMLButtonElement | null>;
+  toggleRef?: RefObject<HTMLButtonElement>;
   /** Navigate to the account-settings view for the current session */
   onNavSettings?: () => void;
   /** Navigate to the billing/payouts view for the current session */

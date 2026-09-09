@@ -107,8 +107,10 @@ function ProductDetailModal(props: { product: DemoProduct; onClose: () => void }
 
 /* ── Main Catalog Manager ── */
 export function CatalogManagerAdmin() {
-  const brands = useBrands().data?.data ?? [];
-  const products = useProducts().data?.data ?? [];
+  const brandsQuery = useBrands();
+  const productsQuery = useProducts();
+  const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
+  const products = useMemo(() => productsQuery.data?.data ?? [], [productsQuery.data]);
   const [selectedProduct, setSelectedProduct] = useState<DemoProduct | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 

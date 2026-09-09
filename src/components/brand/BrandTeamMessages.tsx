@@ -19,7 +19,7 @@ import { MessageSquare, Send, Users, FileText, Bot } from 'lucide-react';
 export function BrandTeamMessages() {
   const { session, brandProfile } = useApp();
   const messagesQuery = useMessages();
-  const allMessages = messagesQuery.data?.data ?? [];
+  const allMessages = useMemo(() => messagesQuery.data?.data ?? [], [messagesQuery.data]);
   const brandId = session?.tenantId ?? '';
   const brandName = brandProfile?.businessName ?? 'Brand';
   const [supportDraft, setSupportDraft] = useState('');
