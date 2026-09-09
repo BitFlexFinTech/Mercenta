@@ -31,7 +31,7 @@
 
 ## 7C — Dashboard / overview redesign (admin primary; brand corrections)
 
-**Commits:** `6355979` (implementation + tests + docs); `(docs-commit)` (Phase 7C checkpoint record).
+**Commits:** `6355979` (implementation + tests + docs); `ac65ad1` (Phase 7C checkpoint record).
 
 **Scope delivered**
 - **Admin Operations Overview** (`src/components/admin/AdminDashboard.tsx` rewritten): single operational page inside the Phase 6 shell — PageHeader (h1) + derived operational summary; compact KPI band (Portfolio at a glance: POs awaiting action, POs in fulfilment, compliance docs pending, brands compliance-gate cleared, contract renewals due, open support tickets); severity-ordered actionable **Needs your attention** panel (Support / Purchase orders / Compliance / Contracts / Finance groups with semantic StatusBadge labels + Review buttons); **Next actions** operator queue (5 quick actions pre-counted to existing destinations); **Fulfilment in motion** (live shipments when they exist, else accepted/ready-to-fulfil POs, EmptyState when none); **Recent communications** (latest real message threads, human-reply flags). The old department-tab silo and its fabricated trend cards/detail modals were removed.
