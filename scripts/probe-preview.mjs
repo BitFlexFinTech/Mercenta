@@ -1,0 +1,13 @@
+import { chromium } from '@playwright/test';
+const b = await chromium.launch({ headless: true });
+const ctx = await b.newContext({ viewport: { width: 1280, height: 800 } });
+const p = await ctx.newPage();
+const log = [];
+p.on('pageerror', (e) => log.push('PAGEERROR: ' + String(e)));
+await p.goto('http://localhost:4199/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+await p.waitForTimeout(7000);
+const t = await p.locator('body').innerText();
+console.log('PAGEERROR-COUNT:', log.length);
+if (log.length) console.log(log[0]);
+console.log('BODYLEN:', t.length, '| head:', t.slice(0, 140).replace(/\n/g, ' | '));
+await b.close();
