@@ -1,739 +1,594 @@
-import { useState, useMemo } from 'react';
-import { useApp } from '@/context/GlobalStateContext';
-import { Card, Badge } from '@/components/ui';
-import { cn } from '@/utils/cn';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
-import { CARRIER_VOLUME_DATA } from '@/data/demoCharts';
-import { ALL_DEMO_BRANDS } from '@/data/demoData';
-import { STATUS_COLORS, STATUS_LABELS } from '@/types';
+/**
+ * §Phase 7C — Admin Operations Overview (dashboard redesign).
+ *
+ * Operational command centre, not a wall of decorative cards. Every number is
+ * derived from real application data at render time (React Query hooks over
+ * the canonical demo store / Supabase repositories) — no fabricated trends,
+ * no hardcoded counts, no invented business metrics.
+ *
+ * Hierarchy (single page, no department-tab silos):
+ *   1. Page context      — PageHeader (h1) + derived operational summary
+ *   2. At a glance       — compact KPI band (one surface, hairline cells)
+ *   3. Needs attention   — severity-sorted actionable exceptions
+ *   4. Next actions      — operator quick actions to existing destinations
+ *   5. Fulfilment motion — live shipments / POs awaiting fulfilment
+ *   6. Recent comms      — latest real message threads, human-reply flags
+ *
+ * Tenant/RBAC: this is the ADMIN overview — it aggregates the whole portfolio
+ * (admin tier has full access). All drill-downs use existing AdminShell view
+ * ids; the Phase 6 shell keeps enforcing nav visibility + render guards.
+ *
+ * `department` is retained for AdminShell call-site compatibility (the old
+ * department-tab silo was removed in this redesign; the prop is unused).
+ */
+import { useCallback, useMemo } from 'react';
 import {
   useBrands,
-  useCommissions,
   useComplianceDocuments,
   useContracts,
+  useDeductions,
+  useMessages,
   usePurchaseOrders,
+  useShipmentsAll,
 } from '@/data/queries';
 import { renewalUrgency } from '@/lib/contracts';
-import type { AdminDepartment } from '@/types';
+import { demoTickets } from '@/lib/helpdesk/ticketStore';
+import { Alert, Button, EmptyState, PageHeader, StatusBadge, Skeleton } from '@/components/ui';
+import type { StatusTone } from '@/components/ui';
 import {
-  TrendingUp,
-  Users,
-  Package,
-  Truck,
-  DollarSign,
-  Sparkles,
-  ShieldCheck,
-  Boxes,
-  FileCheck2,
-  Plane,
-  Ship,
-} from 'lucide-react';
+  AttentionPanel,
+  DashboardSection,
+  KpiGroup,
+  type KpiCellData,
+} from '@/components/shared/dashboard';
+import { STATUS_LABELS } from '@/types';
+import type { AdminDepartment, ShipmentStatus } from '@/types';
+import { ArrowRight, CreditCard, FileCheck2, FileText, LifeBuoy, Package } from 'lucide-react';
 
-const DEPARTMENTS: { id: AdminDepartment; label: string; icon: typeof Sparkles }[] = [
-  { id: 'business_dev', label: 'Business Development', icon: Sparkles },
-  { id: 'logistics', label: 'Logistics Coordination', icon: Truck },
-  { id: 'compliance', label: 'Compliance & Trade Legals', icon: FileCheck2 },
+const PO_AWAITING: ReadonlySet<string> = new Set(['received', 'under_review']);
+const PO_IN_FLIGHT: ReadonlySet<string> = new Set([
+  'accepted',
+  'ready_to_fulfil',
+  'shipped',
+  'delivered',
+]);
+const REQUIRED_DOC_TYPES: readonly string[] = [
+  'letter_of_authorization',
+  'product_safety_ukca',
+  'insurance_certificate',
+  'brand_registry_confirmation',
 ];
+const URGENCY_LABEL: Record<string, string> = {
+  expired: 'EXPIRED',
+  '7d': '≤7 DAYS',
+  '30d': '≤30 DAYS',
+  '60d': '≤60 DAYS',
+};
 
-export function AdminDashboard({ department, onNavigate }: { department?: AdminDepartment; onNavigate?: (view: string) => void }) {
-  const { shipments, leads, campaigns } = useApp();
-  const [activeDept, setActiveDept] = useState<AdminDepartment>(department || 'business_dev');
-  /** §Stage-17 fix #4 — every summary card opens a drill-down detail modal. */
-  const [openCard, setOpenCard] = useState<string | null>(null);
+export function AdminDashboard({
+  onNavigate,
+  department,
+}: {
+  /** @deprecated kept for AdminShell call-site compatibility — unused by the new overview. */
+  department?: AdminDepartment;
+  onNavigate?: (view: string) => void;
+}) {
+  void department;
+  /** Navigate to an existing shell view — no-op when rendered without a shell. */
+  const go = useCallback((view: string) => () => onNavigate?.(view), [onNavigate]);
 
-  const totalRevenue = useMemo(() => shipments.reduce((sum, s) => sum + s.value, 0), [shipments]);
-  // §Stage-17 — derive from the canonical demo dataset, never hardcode a count.
-  const activeBrands = ALL_DEMO_BRANDS.length;
-  const totalShipments = shipments.length;
-  const totalLeads = leads.length;
+  const brandsQuery = useBrands();
+  const posQuery = usePurchaseOrders();
+  const docsQuery = useComplianceDocuments();
+  const contractsQuery = useContracts();
+  const messagesQuery = useMessages();
+  const shipmentsQuery = useShipmentsAll();
+  const deductionsQuery = useDeductions();
 
-  /* ── §Stage-19.7 — Overview defined with REAL content ─────────────── */
-  const brandsList = useBrands().data?.data ?? [];
-  const posAll = usePurchaseOrders().data?.data ?? [];
-  const commissionsAll = useCommissions().data?.data ?? [];
-  const complianceDocsAll = useComplianceDocuments().data?.data ?? [];
-  const contractsAll = useContracts().data?.data ?? [];
+  /**
+   * Stable snapshot of the resolved query data. Arrays are memoised so derived
+   * useMemo hooks below keep stable dependencies (exhaustive-deps).
+   */
+  const brandsData = brandsQuery.data;
+  const posData = posQuery.data;
+  const docsData = docsQuery.data;
+  const contractsData = contractsQuery.data;
+  const messagesData = messagesQuery.data;
+  const shipmentsData = shipmentsQuery.data;
+  const deductionsData = deductionsQuery.data;
+  const q = useMemo(() => ({
+    brands: brandsData?.data ?? [] as NonNullable<typeof brandsData>['data'],
+    posAll: posData?.data ?? [] as NonNullable<typeof posData>['data'],
+    docsAll: docsData?.data ?? [] as NonNullable<typeof docsData>['data'],
+    contractsAll: contractsData?.data ?? [] as NonNullable<typeof contractsData>['data'],
+    messagesAll: messagesData?.data ?? [] as NonNullable<typeof messagesData>['data'],
+    shipmentsAll: shipmentsData?.data ?? [] as NonNullable<typeof shipmentsData>['data'],
+    deductionsAll: deductionsData?.data ?? [] as NonNullable<typeof deductionsData>['data'],
+  }), [
+    brandsData,
+    posData,
+    docsData,
+    contractsData,
+    messagesData,
+    shipmentsData,
+    deductionsData,
+  ]);
+  const {
+    brands,
+    posAll,
+    docsAll,
+    contractsAll,
+    messagesAll,
+    shipmentsAll,
+    deductionsAll,
+  } = q;
 
-  const brandNameById = useMemo(() => new Map(
-    brandsList.map((b) => [b.id, b.profile.businessName] as const)
-  ), [brandsList]);
-  const brandRegionById = useMemo(() => new Map(
-    ALL_DEMO_BRANDS.map((b) => [b.id, b.region] as const)
-  ), []);
-  const complianceDocsAgg = useMemo(() => complianceDocsAll.slice(0, 8).map((d) => ({
-    brand: brandNameById.get(d.brandId) ?? 'Unknown',
-    region: brandRegionById.get(d.brandId) ?? 'north_america',
-    docType: d.type,
-    status: d.status === 'approved' ? 'verified' : 'pending',
-  })), [complianceDocsAll, brandNameById, brandRegionById]);
-  const monthPrefix = useMemo(() => new Date().toISOString().slice(0, 7), []);
-  const revenueThisMonth = useMemo(() => commissionsAll
-    .filter((c) => (c.createdAt ?? '').startsWith(monthPrefix))
-    .reduce((a, c) => a + c.commissionAmount, 0), [commissionsAll, monthPrefix]);
-  const posAwaitingAction = useMemo(() => posAll.filter(
-    (p) => p.status === 'received' || p.status === 'under_review'
-  ), [posAll]);
-  const docsAwaitingReview = useMemo(() => complianceDocsAll.filter(
+  const dataReady = posAll.length > 0 && brands.length > 0;
+  const anyError =
+    brandsQuery.isError ||
+    posQuery.isError ||
+    docsQuery.isError ||
+    contractsQuery.isError ||
+    messagesQuery.isError ||
+    shipmentsQuery.isError ||
+    deductionsQuery.isError;
+  const loading =
+    !dataReady &&
+    (brandsQuery.isPending ||
+      posQuery.isPending ||
+      docsQuery.isPending ||
+      contractsQuery.isPending ||
+      messagesQuery.isPending ||
+      shipmentsQuery.isPending ||
+      deductionsQuery.isPending);
+
+  const brandName = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const b of brands) m.set(b.id, b.profile?.businessName ?? b.id);
+    return m;
+  }, [brands]);
+
+  /* ── Real, derivable operational measures (no invented metrics) ──────── */
+  const posAwaitingAction = posAll.filter((p) => PO_AWAITING.has(p.status));
+  const awaitingValue = posAwaitingAction.reduce((sum, p) => sum + p.poValue, 0);
+  const posInFulfilment = posAll.filter((p) => PO_IN_FLIGHT.has(p.status));
+
+  const docsPending = docsAll.filter(
     (d) => d.status === 'under_review' || d.status === 'uploaded'
-  ), [complianceDocsAll]);
-  const renewalsSoon = useMemo(() => contractsAll
-    .map((c) => ({
-      c,
-      urgency: renewalUrgency(c.renewalDate, new Date().toISOString()),
-    }))
-    .filter(({ urgency }) => urgency !== 'ok'), [contractsAll]);
-  // Category performance: PO value aggregated per owning brand's category.
-  const poValueByBrand = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const p of posAll) {
-      map.set(p.brandId, (map.get(p.brandId) ?? 0) + p.poValue);
-    }
-    return map;
-  }, [posAll]);
-  const poValueByCategory = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const b of ALL_DEMO_BRANDS) {
-      const v = poValueByBrand.get(b.id) ?? 0;
-      map.set(b.category, (map.get(b.category) ?? 0) + v);
-    }
-    return map;
-  }, [poValueByBrand]);
-  const topCategories = useMemo(() => [...poValueByCategory.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5), [poValueByCategory]);
+  );
+  const brandsWithPendingDocs = new Set(docsPending.map((d) => d.brandId)).size;
 
-  // Compliance gate: count brands with all docs approved vs blocked
-  const complianceGateCleared = useMemo(() => ALL_DEMO_BRANDS.filter(function(b) {
-    var brandDocs = complianceDocsAll.filter(function(d) { return d.brandId === b.id; });
-    var hasContract = contractsAll.some(function(c) { return c.brandId === b.id && (c.status === 'signed' || c.status === 'active'); });
-    var requiredTypes = ['letter_of_authorization', 'product_safety_ukca', 'insurance_certificate', 'brand_registry_confirmation'];
-    var allApproved = requiredTypes.every(function(t) { return brandDocs.some(function(d) { return d.type === t && d.status === 'approved'; }); });
-    return allApproved && hasContract;
-  }).length, [complianceDocsAll, contractsAll]);
-  const complianceGateBlocked = ALL_DEMO_BRANDS.length - complianceGateCleared;
+  /** Gate: every required doc approved AND a signed/active contract (existing rule). */
+  const complianceCleared = brands.filter((b) => {
+    const brandDocs = docsAll.filter((d) => d.brandId === b.id);
+    const hasContract = contractsAll.some(
+      (c) => c.brandId === b.id && (c.status === 'signed' || c.status === 'active')
+    );
+    return (
+      REQUIRED_DOC_TYPES.every((t) =>
+        brandDocs.some((d) => d.type === t && d.status === 'approved')
+      ) &&
+      hasContract
+    );
+  }).length;
+  const complianceBlocked = Math.max(brands.length - complianceCleared, 0);
 
-  const OVERVIEW_CARDS: { label: string; value: string; trend: string; trendUp: boolean; icon: React.ReactNode }[] = [
+  const nowIso = new Date().toISOString();
+  const renewalsDue = contractsAll
+    .map((c) => ({ c, urgency: renewalUrgency(c.renewalDate, nowIso) }))
+    .filter(({ urgency }) => urgency !== 'ok');
+  const earliestRenewal =
+    renewalsDue.length > 0 ? renewalsDue.map((r) => r.c.renewalDate).sort()[0] : '';
+
+  const activeTickets = demoTickets.filter(
+    (t) => t.status === 'open' || t.status === 'pending'
+  );
+  const urgentTickets = activeTickets.filter(
+    (t) => t.priority === 'urgent' || t.priority === 'high'
+  );
+
+  const openDeductions = deductionsAll.filter(
+    (d) => d.status === 'open' || d.status === 'disputed'
+  );
+
+  const kpis: KpiCellData[] = [
     {
-      label: 'Revenue This Month',
-      value: `£${revenueThisMonth.toLocaleString()}`,
-      trend: 'commissions',
-      trendUp: true,
-      icon: <DollarSign className="w-4 h-4" />,
-    },
-    {
-      label: 'POs Awaiting Action',
+      id: 'pending-pos',
+      label: 'POs awaiting action',
       value: String(posAwaitingAction.length),
-      trend: 'review needed',
-      trendUp: false,
-      icon: <Package className="w-4 h-4" />,
+      tone: posAwaitingAction.length > 0 ? 'warning' : 'success',
+      statusText: posAwaitingAction.length > 0 ? 'Action needed' : 'None pending',
+      context: `£${awaitingValue.toLocaleString()} open value`,
+      onOpen: go('purchase_orders_admin'),
     },
     {
-      label: 'Docs Awaiting Review',
-      value: String(docsAwaitingReview.length),
-      trend: 'compliance',
-      trendUp: false,
-      icon: <FileCheck2 className="w-4 h-4" />,
+      id: 'in-fulfilment',
+      label: 'POs in fulfilment',
+      value: String(posInFulfilment.length),
+      tone: posInFulfilment.length > 0 ? 'info' : 'neutral',
+      statusText: posInFulfilment.length > 0 ? 'Active' : 'No active POs',
+      context:
+        shipmentsAll.length > 0 ? `${shipmentsAll.length} live shipments` : 'No shipments created yet',
+      onOpen: go('fulfillment_track'),
     },
     {
-      label: 'Compliance Gate',
-      value: complianceGateCleared + '/' + ALL_DEMO_BRANDS.length + ' cleared',
-      trend: complianceGateBlocked > 0 ? complianceGateBlocked + ' blocked' : 'all clear',
-      trendUp: complianceGateBlocked === 0,
-      icon: <ShieldCheck className="w-4 h-4" />,
+      id: 'docs-pending',
+      label: 'Compliance docs pending',
+      value: String(docsPending.length),
+      tone: docsPending.length > 0 ? 'warning' : 'success',
+      statusText: docsPending.length > 0 ? 'Review needed' : 'All reviewed',
+      context: `${brandsWithPendingDocs} brand(s) affected`,
+      onOpen: go('compliance'),
     },
     {
-      label: 'Renewals Due ≤60d',
-      value: String(renewalsSoon.length),
-      trend: 'contracts',
-      trendUp: false,
-      icon: <Users className="w-4 h-4" />,
+      id: 'gate',
+      label: 'Brands compliance-gate cleared',
+      value: `${complianceCleared} / ${brands.length}`,
+      tone: complianceBlocked === 0 ? 'success' : 'info',
+      statusText: complianceBlocked === 0 ? 'All clear' : `${complianceBlocked} not cleared`,
+      context: 'Required docs + signed contract',
+      onOpen: go('compliance'),
     },
     {
-      label: 'Top Category',
-      value: topCategories[0]?.[0] ?? '—',
-      trend: `£${Math.round(topCategories[0]?.[1] ?? 0).toLocaleString()} PO value`,
-      trendUp: true,
-      icon: <Boxes className="w-4 h-4" />,
+      id: 'renewals',
+      label: 'Contract renewals due',
+      value: String(renewalsDue.length),
+      tone:
+        renewalsDue.some((r) => r.urgency === 'expired')
+          ? 'danger'
+          : renewalsDue.length > 0
+            ? 'warning'
+            : 'success',
+      statusText:
+        renewalsDue.some((r) => r.urgency === 'expired')
+          ? 'Expired'
+          : renewalsDue.length > 0
+            ? 'Inside window'
+            : 'None due',
+      context:
+        renewalsDue.length > 0
+          ? `soonest ${earliestRenewal}`
+          : 'Next renewals beyond 60 days',
+      onOpen: go('contracts_admin'),
+    },
+    {
+      id: 'tickets',
+      label: 'Open support tickets',
+      value: String(activeTickets.length),
+      tone:
+        urgentTickets.some((t) => t.priority === 'urgent')
+          ? 'danger'
+          : activeTickets.length > 0
+            ? 'warning'
+            : 'success',
+      statusText:
+        urgentTickets.some((t) => t.priority === 'urgent')
+          ? 'Urgent'
+          : activeTickets.length > 0
+            ? 'Open'
+            : 'Inbox clear',
+      context: `${urgentTickets.length} urgent / high priority`,
+      onOpen: go('helpdesk'),
     },
   ];
 
-  /** Detail payloads behind each card — the data the number is made of. */
-  const CARD_DETAILS: Record<
-    string,
-    { title: string; subtitle: string; rows: string[][]; headers: string[] }
-  > = {
-    'Total Portfolio Revenue': {
-      title: 'Portfolio Revenue — shipment ledger',
-      subtitle: `£${totalRevenue.toLocaleString()} across ${shipments.length} shipments`,
-      headers: ['Reference', 'Title', 'Carrier', 'Status', 'Value (£)'],
-      rows: shipments.map((s) => [
-        s.reference,
-        s.title,
-        s.carrier.toUpperCase(),
-        STATUS_LABELS[s.status],
-        s.value.toLocaleString(),
-      ]),
-    },
-    'Active Brands': {
-      title: 'Active Brands — canonical demo dataset',
-      subtitle: `${activeBrands} brands covering all approved categories`,
-      headers: ['Brand', 'Category', 'Nation', 'Track'],
-      rows: ALL_DEMO_BRANDS.map((b) => [b.name, b.category, b.nation, b.track.replace(/_/g, ' ')]),
-    },
-    'Total Shipments': {
-      title: 'All Shipments',
-      subtitle: `${totalShipments} shipments in the aggregate manifest`,
-      headers: ['Reference', 'Title', 'Origin', 'Destination', 'CBM'],
-      rows: shipments.map((s) => [s.reference, s.title, s.origin, s.destination, String(s.cbm)]),
-    },
-    'Pipeline Leads': {
-      title: 'Pipeline Leads — sourcing engine output',
-      subtitle: `${totalLeads} leads · ${leads.filter((l) => l.priority === 'High').length} high priority`,
-      headers: ['Company', 'Persona', 'Region', 'Priority', 'Fit'],
-      rows: leads.map((l) => [l.company, l.persona, l.region.toUpperCase(), l.priority, String(l.fitScore)]),
-    },
-    'DHL Shipments': {
-      title: 'DHL Shipments',
-      subtitle: 'Air courier lane detail',
-      headers: ['Reference', 'Title', 'Status', 'Value (£)'],
-      rows: shipments
-        .filter((s) => s.carrier === 'dhl')
-        .map((s) => [s.reference, s.title, STATUS_LABELS[s.status], s.value.toLocaleString()]),
-    },
-    'FedEx Shipments': {
-      title: 'FedEx Shipments',
-      subtitle: 'Air courier lane detail',
-      headers: ['Reference', 'Title', 'Status', 'Value (£)'],
-      rows: shipments
-        .filter((s) => s.carrier === 'fedex')
-        .map((s) => [s.reference, s.title, STATUS_LABELS[s.status], s.value.toLocaleString()]),
-    },
-    'BAK Heavy Freight': {
-      title: 'BAK Logistics — heavy freight',
-      subtitle: 'Sea/air freight lane detail',
-      headers: ['Reference', 'Title', 'Status', 'Value (£)'],
-      rows: shipments
-        .filter((s) => s.carrier === 'bak')
-        .map((s) => [s.reference, s.title, STATUS_LABELS[s.status], s.value.toLocaleString()]),
-    },
-    'Verified Documents': {
-      title: 'Verified Compliance Documents',
-      subtitle: 'Customs & trade documentation cleared for trading',
-      headers: ['Brand', 'Document', 'Region'],
-      rows: complianceDocsAgg.filter((d) => d.status === 'verified').map((d) => [
-        d.brand,
-        d.docType,
-        d.region,
-      ]),
-    },
-    'Pending Review': {
-      title: 'Documents Pending Review',
-      subtitle: 'These block first PO until verified',
-      headers: ['Brand', 'Document', 'Region'],
-      rows: complianceDocsAgg.filter((d) => d.status === 'pending').map((d) => [
-        d.brand,
-        d.docType,
-        d.region,
-      ]),
-    },
-    /* ── §Stage-19.7 overview drill-downs ── */
-    'Revenue This Month': {
-      title: 'Revenue This Month — commissions',
-      subtitle: `£${revenueThisMonth.toLocaleString()} in ${monthPrefix}`,
-      headers: ['PO', 'Brand', 'Status', 'Commission (£)'],
-      rows: commissionsAll
-        .filter((c) => (c.createdAt ?? '').startsWith(monthPrefix))
-        .map((c) => [
-          c.purchaseOrderId,
-          brandNameById.get(c.brandId) ?? c.brandId,
-          c.status,
-          c.commissionAmount.toFixed(2),
-        ]),
-    },
-    'POs Awaiting Action': {
-      title: 'Purchase Orders Awaiting Action',
-      subtitle: `${posAwaitingAction.length} POs in received / under review`,
-      headers: ['PO', 'Brand', 'Status', 'Value (£)'],
-      rows: posAwaitingAction.map((p) => [
-        p.poNumber,
-        brandNameById.get(p.brandId) ?? p.brandId,
-        p.status.replace(/_/g, ' '),
-        p.poValue.toLocaleString(),
-      ]),
-    },
-    'Docs Awaiting Review': {
-      title: 'Compliance Docs Awaiting Review',
-      subtitle: `${docsAwaitingReview.length} document(s)`,
-      headers: ['Brand', 'Type', 'Status'],
-      rows: docsAwaitingReview.map((d) => [
-        brandNameById.get(d.brandId) ?? d.brandId,
-        d.type.replace(/_/g, ' '),
-        d.status.replace(/_/g, ' '),
-      ]),
-    },
-    'Renewals Due ≤60d': {
-      title: 'Upcoming Contract Renewals',
-      subtitle: `${renewalsSoon.length} contract(s) inside the renewal window`,
-      headers: ['Brand', 'Type', 'Renewal', 'Urgency'],
-      rows: renewalsSoon.map(({ c, urgency }) => [
-        brandNameById.get(c.brandId) ?? c.brandId,
-        c.type.replace(/_/g, ' '),
-        c.renewalDate,
-        urgency === 'expired' ? 'EXPIRED' : `≤ ${urgency.replace('d', '')} days`,
-      ]),
-    },
-    'Top Category': {
-      title: 'Category Performance — PO value by category',
-      subtitle: 'All approved categories, ranked',
-      headers: ['Category', 'PO Value (£)'],
-      rows: topCategories.map(([cat, v]) => [cat, Math.round(v).toLocaleString()]),
-    },
-  };
+  /* ── Exceptions / attention — severity ordered, actionable ────────────── */
+  const attention: {
+    id: string;
+    group: string;
+    tone: StatusTone;
+    statusLabel: string;
+    title: string;
+    meta?: string;
+    onOpen: () => void;
+  }[] = [];
 
-  const detail = openCard ? CARD_DETAILS[openCard] : null;
+  urgentTickets.slice(0, 3).forEach((t) => {
+    attention.push({
+      id: `ticket-${t.id}`,
+      group: 'Support',
+      tone: t.priority === 'urgent' ? 'danger' : 'warning',
+      statusLabel: t.priority === 'urgent' ? 'URGENT' : 'HIGH',
+      title: t.subject,
+      meta: `${brandName.get(t.brandId) ?? t.brandId} · ${t.id} · ${t.lastMessagePreview}`,
+      onOpen: go('helpdesk'),
+    });
+  });
 
+  posAwaitingAction.forEach((p) => {
+    attention.push({
+      id: `po-${p.id}`,
+      group: 'Purchase orders',
+      tone: 'warning',
+      statusLabel: 'ACTION NEEDED',
+      title: `${p.poNumber} — ${brandName.get(p.brandId) ?? p.brandId}`,
+      meta: `£${p.poValue.toLocaleString()} · ${p.status.replace(/_/g, ' ')}`,
+      onOpen: go('purchase_orders_admin'),
+    });
+  });
 
+  const pendingBrandIds = [...new Set(docsPending.map((d) => d.brandId))];
+  pendingBrandIds.slice(0, 4).forEach((bid) => {
+    const pending = docsPending.filter((d) => d.brandId === bid);
+    attention.push({
+      id: `docs-${bid}`,
+      group: 'Compliance',
+      tone: 'warning',
+      statusLabel: 'REVIEW NEEDED',
+      title: `${brandName.get(bid) ?? bid} — ${pending.length} document${pending.length > 1 ? 's' : ''} pending`,
+      meta: pending.map((d) => d.type.replace(/_/g, ' ')).slice(0, 2).join(' · '),
+      onOpen: go('compliance'),
+    });
+  });
+if (pendingBrandIds.length > 4) {
+    attention.push({
+      id: 'docs-more',
+      group: 'Compliance',
+      tone: 'info',
+      statusLabel: 'MORE',
+      title: `${pendingBrandIds.length - 4} more brand(s) with pending documents`,
+      meta: 'View the full queue in Compliance Approvals',
+      onOpen: go('compliance'),
+    });
+  }
 
-  return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      {/* §Stage-19.7 — Business Overview (real metrics, all clickable) */}
-      <div>
-        <h2 className="text-sm font-semibold text-white mb-3">Business Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
-          {OVERVIEW_CARDS.map((c) => (
-            <StatCard
-              key={c.label}
-              label={c.label}
-              value={c.value}
-              trend={c.trend}
-              trendUp={c.trendUp}
-              icon={c.icon}
-              onClick={() => setOpenCard(c.label)}
-            />
-          ))}
-        </div>
-      </div>
+  renewalsDue.forEach(({ c, urgency }) => {
+    attention.push({
+      id: `renewal-${c.id}`,
+      group: 'Contracts',
+      tone: urgency === 'expired' ? 'danger' : 'warning',
+      statusLabel: URGENCY_LABEL[urgency] ?? 'DUE',
+      title: `${brandName.get(c.brandId) ?? c.brandId} — distribution agreement`,
+      meta: `renews ${c.renewalDate}`,
+      onOpen: go('contracts_admin'),
+    });
+  });
 
-      {/* Department Switcher */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {DEPARTMENTS.map((dept) => {
-          const Icon = dept.icon;
-          const isActive = activeDept === dept.id;
-          return (
-            <button
-              key={dept.id}
-              onClick={() => setActiveDept(dept.id)}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-brass-500 text-white'
-                  : 'bg-ink-850 text-zinc-400 hover:text-white border border-white/[0.06]'
-              )}
-            >
-              <Icon className="w-4 h-4" />
-              {dept.label}
-            </button>
-          );
-        })}
-      </div>
+  openDeductions.slice(0, 3).forEach((d) => {
+    attention.push({
+      id: `ded-${d.id}`,
+      group: 'Finance',
+      tone: d.status === 'disputed' ? 'danger' : 'warning',
+      statusLabel: d.status === 'disputed' ? 'DISPUTED' : 'OPEN',
+      title: `${d.type.replace(/_/g, ' ')} — £${d.amountGbp.toFixed(2)}`,
+      meta: `${brandName.get(d.brandId) ?? d.brandId} · ${d.purchaseOrderId} · ${d.date}`,
+      onOpen: go('billing'),
+    });
+  });
+  if (openDeductions.length > 3) {
+    attention.push({
+      id: 'ded-more',
+      group: 'Finance',
+      tone: 'info',
+      statusLabel: 'MORE',
+      title: `${openDeductions.length - 3} more deduction(s) unresolved`,
+      meta: 'Review the full ledger in Billing',
+      onOpen: go('billing'),
+    });
+  }
 
-      {/* Business Development Department */}
-      {activeDept === 'business_dev' && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            <StatCard
-              label="Total Portfolio Revenue"
-              onClick={() => setOpenCard('Total Portfolio Revenue')}
-              value={`£${(totalRevenue / 1000).toFixed(0)}k`}
-              trend="↗ 12.5%"
-              trendUp
-              icon={<DollarSign className="w-4 h-4" />}
-            />
-            <StatCard
-              label="Active Brands"
-              onClick={() => setOpenCard('Active Brands')}
-              value={String(activeBrands)}
-              trend="↗ 3 new"
-              trendUp
-              icon={<Users className="w-4 h-4" />}
-            />
-            <StatCard
-              label="Total Shipments"
-              onClick={() => setOpenCard('Total Shipments')}
-              value={String(totalShipments)}
-              trend="↗ 8%"
-              trendUp
-              icon={<Truck className="w-4 h-4" />}
-            />
-            <StatCard
-              label="Pipeline Leads"
-              onClick={() => setOpenCard('Pipeline Leads')}
-              value={String(totalLeads)}
-              trend="↗ 5 new"
-              trendUp
-              icon={<Package className="w-4 h-4" />}
-            />
-          </div>
+  /* ── Next actions — operator quick actions to existing destinations ───── */
+  const actions: {
+    id: string;
+    label: string;
+    count: number;
+    desc: string;
+    icon: typeof Package;
+  }[] = [
+    { id: 'purchase_orders_admin', label: 'Review purchase orders', count: posAwaitingAction.length, desc: 'awaiting action', icon: Package },
+    { id: 'compliance', label: 'Approve compliance documents', count: docsPending.length, desc: 'pending review', icon: FileCheck2 },
+    { id: 'contracts_admin', label: 'Run contract renewals', count: renewalsDue.length, desc: 'inside window', icon: FileText },
+    { id: 'helpdesk', label: 'Handle support tickets', count: activeTickets.length, desc: 'open tickets', icon: LifeBuoy },
+    { id: 'billing', label: 'Review deductions & billing', count: openDeductions.length, desc: 'unresolved', icon: CreditCard },
+  ];
 
-          <Card
-            title="Business Development — Brand Sourcing"
-            subtitle="Global brand sourcing engine — US, EU, Africa & Canada"
-            action={
-              <Badge className="bg-brass-500/15 text-brass-400 border-brass-500/20">
-                <Sparkles className="w-3 h-3" />
-                Active
-              </Badge>
-            }
-          >
-            <div className="p-5">
-              <p className="text-sm text-zinc-400 mb-4">
-                Sourcing scans global trade directories to source high-intent brands
-                across four target segments. Navigate to Marketing Hub for the
-                configuration wizard and live lead table.
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {campaigns.map((c) => (
-                  <div
-                    key={c.id}
-                    className="bg-ink-900 border border-white/[0.06] rounded-lg p-3"
-                  >
-                    <div className="text-xs font-medium text-white truncate">{c.name}</div>
-                    <div className="text-lg font-bold text-white mt-1">{c.leads}</div>
-                    <div className="text-[10px] text-zinc-500">leads · £{c.costPerLead}/lead</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
-        </>
-      )}
+  /* ── Fulfilment in motion ────────────────────────────────────────────── */
+  const fulfilmentRows = useMemo(() => {
+    if (shipmentsAll.length > 0) {
+      return shipmentsAll.map((s) => ({
+        id: s.id,
+        ref: s.reference,
+        title: s.title,
+        meta: `${s.carrier.toUpperCase()} · ${s.origin} → ${s.destination}`,
+        status: STATUS_LABELS[s.status as ShipmentStatus] ?? s.status,
+        tone:
+          s.status === 'live_amazon' || s.status === 'uk_customs_cleared'
+            ? ('success' as StatusTone)
+            : ('info' as StatusTone),
+        onOpen: go('fulfillment_track'),
+      }));
+    }
+    return posInFulfilment.map((p) => ({
+      id: p.id,
+      ref: p.poNumber,
+      title: brandName.get(p.brandId) ?? p.brandId,
+      meta: `awaiting fulfilment · ${p.status.replace(/_/g, ' ')}`,
+      status: p.status.replace(/_/g, ' ').toUpperCase(),
+      tone: 'info' as StatusTone,
+      onOpen: go('purchase_orders_admin'),
+    }));
+  }, [shipmentsAll, posInFulfilment, brandName, go]);
 
-      {/* Logistics Coordination Department */}
-      {activeDept === 'logistics' && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
-              label="DHL Shipments"
-              onClick={() => setOpenCard('DHL Shipments')}
-              value={String(shipments.filter((s) => s.carrier === 'dhl').length)}
-              trend="Air courier"
-              trendUp
-              icon={<Plane />}
-            />
-            <StatCard
-              label="FedEx Shipments"
-              onClick={() => setOpenCard('FedEx Shipments')}
-              value={String(shipments.filter((s) => s.carrier === 'fedex').length)}
-              trend="Air courier"
-              trendUp
-              icon={<Plane />}
-            />
-            <StatCard
-              label="BAK Heavy Freight"
-              onClick={() => setOpenCard('BAK Heavy Freight')}
-              value={String(shipments.filter((s) => s.carrier === 'bak').length)}
-              trend="Sea/air freight"
-              trendUp
-              icon={<Ship />}
-            />
-          </div>
-
-          <Card
-            title="Carrier Volume Comparison"
-            subtitle="Courier (DHL/FedEx) vs Heavy Freight (BAK Logistics)"
-          >
-            <div className="p-4 h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={CARRIER_VOLUME_DATA}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="courierGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#A855F7" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#A855F7" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="freightGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    stroke="#52525b"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke="#52525b"
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#121214',
-                      border: '1px solid #ffffff10',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '11px' }} iconType="circle" />
-                  <Area
-                    type="monotone"
-                    dataKey="courier"
-                    name="Courier (DHL/FedEx)"
-                    stroke="#A855F7"
-                    strokeWidth={2.5}
-                    fill="url(#courierGrad)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="freight"
-                    name="Heavy Freight (BAK)"
-                    stroke="#F59E0B"
-                    strokeWidth={2.5}
-                    fill="url(#freightGrad)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-
-          <Card title="Aggregate Container Manifest" subtitle="All active shipments across carriers">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-                    <th className="text-left font-medium px-5 py-3">Reference</th>
-                    <th className="text-left font-medium px-4 py-3">Title</th>
-                    <th className="text-left font-medium px-4 py-3">Carrier</th>
-                    <th className="text-left font-medium px-4 py-3">Origin</th>
-                    <th className="text-center font-medium px-4 py-3">CBM</th>
-                    <th className="text-left font-medium px-4 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.04]">
-                  {shipments.map((s) => (
-                    <tr key={s.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="px-5 py-3.5 text-xs font-mono text-zinc-400">{s.reference}</td>
-                      <td className="px-4 py-3.5 text-sm font-medium text-white">{s.title}</td>
-                      <td className="px-4 py-3.5 text-xs uppercase text-zinc-400">{s.carrier}</td>
-                      <td className="px-4 py-3.5 text-xs text-zinc-400">{s.origin}</td>
-                      <td className="px-4 py-3.5 text-center text-sm text-zinc-300">{s.cbm}</td>
-                      <td className="px-4 py-3.5">
-                        <Badge className={STATUS_COLORS[s.status]}>
-                          {STATUS_LABELS[s.status]}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </>
-      )}
-
-      {/* Compliance & Trade Legals Department */}
-      {activeDept === 'compliance' && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
-              label="Verified Documents"
-              onClick={() => setOpenCard('Verified Documents')}
-              value={String(complianceDocsAgg.filter((d) => d.status === 'verified').length)}
-              trend="Compliant"
-              trendUp
-              icon={<ShieldCheck className="w-4 h-4" />}
-            />
-            <StatCard
-              label="Pending Review"
-              onClick={() => setOpenCard('Pending Review')}
-              value={String(complianceDocsAgg.filter((d) => d.status === 'pending').length)}
-              trend="Awaiting"
-              trendUp={false}
-              icon={<FileCheck2 className="w-4 h-4" />}
-            />
-            <StatCard
-              label="Total Brands"
-              onClick={() => setOpenCard('Active Brands')}
-              value={String(complianceDocsAgg.length)}
-              trend="Global"
-              trendUp
-              icon={<Boxes className="w-4 h-4" />}
-            />
-          </div>
-
-          <Card
-            title="Customs & Trade Documentation"
-            subtitle="EORI, EIN, and ZIMRA customs clearance verification"
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-                    <th className="text-left font-medium px-5 py-3">Brand</th>
-                    <th className="text-left font-medium px-4 py-3">Document Type</th>
-                    <th className="text-left font-medium px-4 py-3">Region</th>
-                    <th className="text-center font-medium px-4 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.04]">
-                  {complianceDocsAgg.map((doc) => (
-                    <tr key={doc.brand} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="px-5 py-3.5 text-sm font-medium text-white">{doc.brand}</td>
-                      <td className="px-4 py-3.5 text-xs text-zinc-400">{doc.docType}</td>
-                      <td className="px-4 py-3.5 text-xs text-zinc-400">{doc.region}</td>
-                      <td className="px-4 py-3.5 text-center">
-                        <Badge
-                          className={cn(
-                            'text-[10px]',
-                            doc.status === 'verified'
-                              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                              : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
-                          )}
-                        >
-                          {doc.status === 'verified' ? 'Verified' : 'Pending Review'}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </>
-      )}
-
-      {/* §Stage-17 fix #4 — card drill-down modal */}
-      {detail && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => setOpenCard(null)}
-        >
-          <div
-            className="bg-ink-900 border border-white/[0.08] rounded-xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between p-5 border-b border-white/[0.06]">
-              <div>
-                <h3 className="text-sm font-semibold text-white">{detail.title}</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">{detail.subtitle}</p>
-              </div>
-              <button
-                onClick={() => setOpenCard(null)}
-                className="text-zinc-500 hover:text-white text-lg leading-none px-2"
-                aria-label="Close detail view"
-              >
-                ×
-              </button>
-            </div>
-            <div className="overflow-y-auto">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-ink-900">
-                  <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-                    {detail.headers.map((h) => (
-                      <th key={h} className="text-left font-medium px-4 py-2.5">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.04]">
-                      {detail.rows.map((row, i) => (
-                        <tr key={i} className="text-zinc-300">
-                          {row.map((cell, j) => {
-                            const isPo = typeof cell === 'string' && /^PO-\d+/.test(cell);
-                            const isBrand = j === 1 && typeof cell === 'string' && cell.length > 0 && !cell.startsWith('PO-');
-                            return (
-                              <td key={j} className="px-4 py-2 text-xs truncate max-w-[220px]">
-                                {isPo && onNavigate ? (
-                                  <button onClick={() => { setOpenCard(null); onNavigate('purchase_orders_admin'); }}
-                                    className="text-brass-400 hover:text-brass-300 underline underline-offset-2 transition-colors">{cell}</button>
-                                ) : isBrand && onNavigate ? (
-                                  <button onClick={() => { setOpenCard(null); onNavigate('crm'); }}
-                                    className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors">{cell}</button>
-                                ) : <span>{cell}</span>}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-              </table>
-              {detail.rows.length === 0 && (
-                <p className="text-xs text-zinc-600 text-center py-8">No underlying records.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+  /* ── Recent communications (real message store) ──────────────────────── */
+  const recentMessages = useMemo(
+    () =>
+      [...messagesAll]
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 6),
+    [messagesAll]
   );
-}
-
-function StatCard({
-  label,
-  value,
-  trend,
-  trendUp,
-  icon,
-  onClick,
-}: {
-  label: string;
-  value: string;
-  trend: string;
-  trendUp: boolean;
-  icon: React.ReactNode;
-  onClick?: () => void;
-}) {
-  return (
-    <Card
-      className={cn(
-        'p-5',
-        onClick && 'cursor-pointer hover:border-white/[0.14] transition-colors'
-      )}
-    >
-      <button
-        type="button"
-        disabled={!onClick}
-        onClick={onClick}
-        className="w-full text-left disabled:cursor-default"
-      >
-        <div className="flex items-start justify-between mb-3">
-          <span className="text-xs text-zinc-500 font-medium">{label}</span>
-          <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-zinc-400">
-            {icon}
+if (loading) {
+    return (
+      <div className="p-6 max-w-[1400px] mx-auto space-y-6" data-testid="dashboard-loading" aria-busy="true">
+        <PageHeader title="Operations Overview" description="Loading operational state…" />
+        <KpiGroup items={kpis} loading />
+        <DashboardSection title="Needs your attention">
+          <div className="space-y-2.5">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
           </div>
+        </DashboardSection>
+      </div>
+    );
+  }
+
+  if (!dataReady && (anyError || (posAll.length === 0 && docsAll.length === 0))) {
+    return (
+      <div className="p-6 max-w-[1400px] mx-auto space-y-6" data-testid="dashboard-error">
+        <PageHeader title="Operations Overview" description="Operational state could not be loaded." />
+        <Alert tone="error" title="Dashboard data unavailable">
+          The overview could not load purchase orders, brands or compliance documents. Check the
+          Monitoring view for integration health, then return to the overview.
+        </Alert>
+        <Button variant="secondary" onClick={go('monitoring')}>Open Monitoring</Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 max-w-[1400px] mx-auto space-y-6" data-testid="dashboard-loaded">
+      <PageHeader
+        title="Operations Overview"
+        description={`${brands.length} brands on platform · ${posAll.length} purchase orders · ${docsAll.length} compliance documents · ${messagesAll.length} messages in thread history`}
+      />
+
+      {anyError && (
+        <Alert tone="error" title="Some dashboard data is unavailable">
+          A datasource reported an error; seed data is shown where available. Check Monitoring for
+          integration health.
+        </Alert>
+      )}
+
+      <DashboardSection
+        title="Portfolio at a glance"
+        description="Derived live from purchase orders, compliance, contracts, support and billing data."
+      >
+        <KpiGroup items={kpis} />
+      </DashboardSection>
+
+      <DashboardSection
+        title="Needs your attention"
+        description="Priority-ordered exceptions across the portfolio. Each row routes to the existing destination view."
+        action={
+          activeTickets.length > 0 ? (
+            <Button variant="secondary" size="sm" onClick={go('helpdesk')}>
+              Open Helpdesk <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+            </Button>
+          ) : undefined
+        }
+      >
+        <AttentionPanel items={attention} />
+      </DashboardSection>
+
+      <DashboardSection
+        title="Next actions"
+        description="Highest-value operator moves, pre-counted from current data."
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {actions.map((a) => {
+            const Icon = a.icon;
+            return (
+              <button
+                key={a.id}
+                type="button"
+                onClick={go(a.id)}
+                data-testid={`action-${a.id}`}
+                className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-ink-850 px-3.5 py-3 text-left hover:border-brass-500/40 hover:bg-white/[0.02] transition-colors min-h-[36px]"
+              >
+                <Icon className="w-4 h-4 text-brass-400 flex-shrink-0" />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-xs font-medium text-white">{a.label}</span>
+                  <span className="block text-[11px] text-zinc-500">{a.count} {a.desc}</span>
+                </span>
+                <ArrowRight
+                  aria-hidden="true"
+                  className={
+                    a.count === 0
+                      ? 'w-3.5 h-3.5 flex-shrink-0 text-zinc-600'
+                      : 'w-3.5 h-3.5 flex-shrink-0 text-brass-400'
+                  }
+                />
+              </button>
+            );
+          })}
         </div>
-        <div className="flex items-end justify-between">
-          <span className="text-2xl font-bold text-white tracking-tight">{value}</span>
-          <span
-            className={cn(
-              'flex items-center gap-1 text-xs font-medium',
-              trendUp ? 'text-emerald-400' : 'text-crimson-accent'
-            )}
-          >
-            <TrendingUp className="w-3 h-3" />
-            {trend}
-          </span>
-        </div>
-        {onClick && (
-          <span className="mt-2 block text-[10px] text-zinc-600 group-hover:text-zinc-400">
-            Click for underlying data →
-          </span>
+      </DashboardSection>
+<DashboardSection
+        title="Fulfilment in motion"
+        description={
+          shipmentsAll.length > 0
+            ? 'Aggregated live shipments across all carriers.'
+            : 'Accepted and ready-to-fulfil POs awaiting dispatch.'
+        }
+      >
+        {fulfilmentRows.length === 0 ? (
+          <EmptyState
+            title="Nothing in fulfilment right now"
+            description="Accepted and ready-to-fulfil purchase orders will appear here, and shipments once a PO moves into dispatch."
+          />
+        ) : (
+          <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+            {fulfilmentRows.map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
+                <span className="font-mono text-[11px] text-zinc-400 flex-shrink-0">{r.ref}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-medium text-white truncate">{r.title}</span>
+                  <span className="block text-[11px] text-zinc-500 truncate leading-snug">{r.meta}</span>
+                </span>
+                <StatusBadge tone={r.tone} dataStatus={r.tone}>{r.status}</StatusBadge>
+                <Button variant="tertiary" size="sm" onClick={r.onOpen}>
+                  Review <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              </li>
+            ))}
+          </ul>
         )}
-      </button>
-    </Card>
+      </DashboardSection>
+
+      <DashboardSection
+        title="Recent communications"
+        description="Latest message threads from the shared inbox, newest first."
+        action={
+          recentMessages.length > 0 ? (
+            <Button variant="secondary" size="sm" onClick={go('messages')}>
+              Open Messages <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+            </Button>
+          ) : undefined
+        }
+      >
+        {recentMessages.length === 0 ? (
+          <EmptyState
+            title="No recent communications"
+            description="New inbound and outbound message threads will appear here as they are logged."
+          />
+        ) : (
+          <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+            {recentMessages.map((m) => (
+              <li key={m.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
+                <StatusBadge
+                  tone={m.direction === 'inbound' ? 'info' : 'neutral'}
+                  dataStatus={m.direction}
+                >
+                  {m.channel.toUpperCase()}
+                </StatusBadge>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-medium text-white truncate">{m.subject ?? m.body}</span>
+                  <span className="block text-[11px] text-zinc-500 truncate leading-snug">
+                    {brandName.get(m.brandId) ?? m.brandId} · {m.direction} · {m.createdAt.slice(0, 16).replace('T', ' ')}
+                  </span>
+                </span>
+                {m.requiresHuman && (
+                  <StatusBadge tone="warning" dataStatus="human">Human reply needed</StatusBadge>
+                )}
+                <Button variant="tertiary" size="sm" onClick={go('messages')}>
+                  Open <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DashboardSection>
+    </div>
   );
 }

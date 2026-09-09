@@ -130,3 +130,24 @@ canonical way to mount navigation around an environment. Conventions:
   (`super_admin`, `audit_log`, `integrations`) directly in the shell's section
   filter. Render-side guards in the shells are unchanged and still enforce
   actual authorization (defense in depth). No third RBAC system was added.
+## Dashboard primitives (§Phase 7C)
+
+Reusable dashboard compositions living in `src/components/shared/dashboard.tsx`.
+They are **pure presentation** — callers pass fully-resolved, already-scoped
+data (no fetching, no tenant logic inside). Used by the Admin Operations
+Overview and the Brand dashboard. All cells/rows build on the canonical kit
+(`StatusBadge`, `Button`, `Skeleton`).
+
+| Component | Purpose | Conventions |
+|---|---|---|
+| `DashboardSection` | Self-labelled section: `h3` heading + optional description/action + body | `aria-label`; keeps heading hierarchy h1 → h3 without card chrome |
+| `KpiGroup` | Compact KPI band (cells: value, label, optional context + semantic status) | ONE bordered surface with hairline dividers (`gap-px bg-white/[0.06]`) — never a wall of elevated cards; drill-down cells render as accessible `<button>` with `aria-label` + `min-h-[36px]`; `loading` variant shows `Skeleton` cells |
+| `AttentionPanel` | Scannable exceptions list | Severity-group headings (`<li>` group rows); each item = semantic `StatusBadge` (never colour-only, `data-status`) + title + meta + optional `Review` `Button`; empty list renders an "All clear" success row instead of a blank panel |
+
+Guidance:
+- KPI values use `font-mono` (numeric/data) with the label in muted `text-[11px]`.
+- Do not add icons to every cell; keep the band dense and scannable.
+- Dashboard sections are `<section aria-label>` elements — do not wrap every
+  section in an elevated `Card`.
+- New dashboards (Admin/Brand/Carrier overviews) should compose these
+  primitives instead of inventing per-screen stat-card layouts.

@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useDeductions, usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
-import { Card, Badge } from '@/components/ui';
+import { Card, Badge, PageHeader } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { REVENUE_DATA } from '@/data/demoCharts';
@@ -31,14 +31,28 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
   const ackRate = useMemo(() => totalLines > 0 ? Math.round((confirmedLines / totalLines) * 100) : 0, [totalLines, confirmedLines]);
   const openPOValue = useMemo(() => openPOs.reduce((s, p) => s + p.poValue, 0), [openPOs]);
   const outOfStock = useMemo(() => products.filter((p) => p.isAvailable === false).length, [products]);
-  const onHandEst = useMemo(() => products.reduce((s, p) => s + (p.unitsPerCase ?? 1) * 10, 0), [products]);
   const totalRevenue = useMemo(() => shipments.reduce((sum, s) => sum + s.value, 0), [shipments]);
   const activeShipments = useMemo(() => shipments.filter((s) => s.status !== 'live_amazon').length, [shipments]);
-  const complianceScore = 94.2;
+  // §Phase 7C — compliance coverage DERIVED from the brand's real dossier docs
+  // (previously a fabricated hardcoded 94.2).
+  const complianceTotal = complianceDocs.length;
+  const complianceVerified = useMemo(
+    () => complianceDocs.filter((d) => d.status === 'verified').length,
+    [complianceDocs]
+  );
+  const complianceScore = complianceTotal > 0
+    ? Math.round((complianceVerified / complianceTotal) * 100)
+    : null;
   const stageCounts = useMemo(() => STAGE_ORDER.map((stage) => ({ stage, count: shipments.filter((s) => s.stage === stage).length })), [shipments]);
+
+  const complianceScoreText = complianceScore === null ? '—' : complianceScore + '%';
 
   return (
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
+      <PageHeader
+        title="Dashboard"
+        description={`${brandProfile.businessName || 'Brand portal'} · ${pos.length} purchase orders · ${products.length} products · ${complianceDocs.length} compliance docs on file`}
+      />
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <button onClick={() => onNavigate?.('purchase_orders')} className="bg-ink-850 border border-white/[0.06] hover:border-brass-500/40 rounded-xl p-3 text-left transition-colors">
@@ -54,7 +68,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
         <button onClick={() => onNavigate?.('compliance')} className="bg-ink-850 border border-white/[0.06] hover:border-brass-500/40 rounded-xl p-3 text-left transition-colors">
           <ClipboardList className="w-4 h-4 text-brass-400 mb-1" />
           <div className="text-xs font-medium text-white">Compliance</div>
-          <div className="text-[10px] text-zinc-500">{complianceDocs.length} docs / {complianceScore}%</div>
+          <div className="text-[10px] text-zinc-500">{complianceVerified}/{complianceDocs.length} verified</div>
         </button>
         <button onClick={() => onNavigate?.('reports')} className="bg-ink-850 border border-white/[0.06] hover:border-brass-500/40 rounded-xl p-3 text-left transition-colors">
           <BarChart3 className="w-4 h-4 text-brass-400 mb-1" />
@@ -67,8 +81,8 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <MetricCard label="Revenue" value={'\u00a3' + Math.round(totalRevenue / 1000) + 'k'} trend={'\u00a3' + (openPOValue / 1000).toFixed(0) + 'k open PO'} trendUp icon={<Boxes className="w-4 h-4" />} onClick={() => onNavigate?.('reports')} />
         <MetricCard label="Active Shipments" value={String(activeShipments)} trend={openPOs.length + ' open POs'} trendUp icon={<Package className="w-4 h-4" />} onClick={() => onNavigate?.('logistics')} />
-        <MetricCard label="Compliance Score" value={complianceScore + '%'} trend={ackRate + '% ack rate'} trendUp={complianceScore > 80} icon={<CheckCircle2 className="w-4 h-4" />} onClick={() => onNavigate?.('compliance')} />
-        <MetricCard label="Inventory (est.)" value={String(onHandEst)} trend={outOfStock + ' SKUs OOS'} trendUp={outOfStock === 0} icon={<Truck className="w-4 h-4" />} onClick={() => onNavigate?.('catalog')} />
+        <MetricCard label="Compliance" value={complianceScoreText} trend={complianceVerified + '/' + complianceDocs.length + ' docs verified'} trendUp={complianceScore !== null && complianceScore > 80} icon={<CheckCircle2 className="w-4 h-4" />} onClick={() => onNavigate?.('compliance')} />
+        <MetricCard label="Product SKUs" value={String(products.length)} trend={outOfStock + ' SKUs OOS'} trendUp={outOfStock === 0} icon={<Truck className="w-4 h-4" />} onClick={() => onNavigate?.('catalog')} />
       </div>
 
       {/* Dossier */}

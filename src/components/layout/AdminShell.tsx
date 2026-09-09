@@ -128,7 +128,7 @@ export default function AdminShell() {
 
   const deptMap: Record<string, AdminDepartment> = { overview: 'business_dev', crm: 'business_dev', logistics: 'logistics', carriers: 'logistics', compliance: 'compliance' };
   const breadcrumb: Record<string, string> = {
-    overview: 'Admin Overview', crm: 'Brand CRM', fulfillment_track: 'Fulfillment Track', retail_pipeline: 'Retail Pipeline',
+    overview: 'Admin Overview', crm: 'Brand CRM', fulfillment_track: 'Fulfillment Track', retail_pipeline: 'Retail Pipeline', purchase_orders_admin: 'Purchase Orders',
     billing: 'Billing', messages: 'Messages', helpdesk: 'Helpdesk', returns_tracking: 'Returns Tracking', monitoring: 'Monitoring',
     contracts_admin: 'Contract Cycle', catalog: 'Global Catalog', logistics: 'Logistics Control', carriers: 'Carrier Monitor',
     compliance: 'Compliance Approvals', marketing: 'Marketing', brand_intelligence: 'Brand Intelligence', super_admin: 'Super Admin', audit_log: 'Audit Log',
