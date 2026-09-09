@@ -1,6 +1,6 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-09 (Phase 7C complete — dashboard/overview redesign)
+> Last updated: 2026-09-09 (Phase 7D complete — regression/skip-debt cleanup: 121/0/5)
 >
 > ## 0. Project-Memory Reconciliation (2026-09-08)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
@@ -16,6 +16,7 @@
 |---|---|---|
 | **Phase 0 PROTECT** | ✅ **DONE** | Baseline commit `959b4d2`, tag `mercenta-baseline-before-redesign-20260907`, external bundle `/Users/tadii/Desktop/mercenta-baseline-backup-20260907.bundle`. Working branch `redesign/foundation`. |
 | **Phase 7C DASHBOARD REDESIGN** | ✅ **DONE** | `6355979` — Admin Operations Overview redesigned as an operational command centre (Phase 5 primitives inside the Phase 6 shell). Brand dashboard fabricated `94.2` compliance score and fake inventory estimate removed (derived real metrics). Shared dashboard primitives `src/components/shared/dashboard.tsx` (KpiGroup / DashboardSection / AttentionPanel) now canonical (documented in `docs/DESIGN_SYSTEM.md`). AdminShell breadcrumb gap for `purchase_orders_admin` fixed. Dashboard E2E `e2e/dashboard.spec.ts` **7/7 PASS**. TS 45 pre-existing (0 new), lint 26 (0 new in changed files), build ✓. Browser-verified at all 7 viewports (no horizontal overflow), screenshots `test-screenshots/dashboard/`. Full regression **86 passed / 1 failed (pre-existing legal-agreements t1) / 48 skipped**. |
+| **Phase 7D — REGRESSION / SKIP-DEBT CLEANUP** | ✅ **DONE** | See the **7D details section** below this table. Result: **121 passed / 0 failed / 5 skipped** (19-suite set). Legal-agreements t1 fixed; 43 skips eliminated/justified; 5 skips retained (all classified + documented below). |
 | **Phase 1 UNDERSTAND** | ✅ **DONE** | `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`. |
 | **Phase 2A** | ✅ **DONE** | `a796f37` — integration mode model, health, provider contract, registry metadata. Probe PASS 11/11. |
 | **Phase 2B** | ✅ **DONE** | `ba99266` — health runner `src/lib/integrations/health.ts`, wizard stepper/mode badges/health panel in IntegrationsPanel. Probe PASS 7/7. |
@@ -53,6 +54,41 @@
 **Tests:** `e2e/dashboard.spec.ts` **7/7 PASS** (hierarchy; KPI/next-action cross-consistency; attention rows with real seed entities; drill-down + RBAC nav hiding; keyboard focus-visible; brand no-94.2 + derived compliance + tenant-containment; 7-viewport no-overflow + drawer).
 
 **Verification gates:** typecheck 45 errors (all pre-existing baseline, **0 new**), lint (baseline 37 → **26**; the rewrite itself removed 10 legacy AdminDashboard lint errors; **0 new** in changed files), build PASS. Full 7C regression below.
+
+## 7D — Regression / skip-debt cleanup
+
+**Commits:** `9666525` (product fixes + test-contract repairs) + this checkpoint commit.
+
+**Baseline measured before edits (19-suite set, this session):** 79 passed / 1 failed (legal-agreements t1) / 48 skipped.
+
+**Final result (same 19-suite set, after repair): 121 passed / 0 failed / 5 skipped.** All 5 remaining skips individually classified and justified below.
+
+**Skip audit method:** re-ran every suite from scratch; for each of the 48 runtime skips inspected the actual `test.fixme` branch that fired, mapped it to the CURRENT UI contract (nav routing after Phase 6, renamed views/labels, moved data surfaces), then applied the smallest safe repair — fixing the test contract OR the small product defect that caused it. No assertions weakened, no conditional-on-failure logic, no DOM faking, no app-state injection.
+
+**Product defects found and fixed (small, clearly intended):**
+1. **`TourEngine` per-view auto-start was only wired for the PO tour** — `autoStartViews` on the other 8 tours were inert. Now the generic reg: any tour declaring `autoStartViews` starts on that brand view (catalog → Tour 2, analytics → Tour 5, logistics → Tour 4, compliance → Tour 6, settings → Tour 9/7, team → Tour 8). Fix: `src/components/shared/TourEngine.tsx` (loops `ALL_TOUR_DEFINITIONS`).
+2. **Dispute writes hung in demo mode** — the async `disputeDeduction`/`recordDisputeOutcome` awaited the Supabase write BEFORE applying the in-memory store mutation, so with an unreachable host the demo store never updated (row never became disputed/resolved; audit never written). Fix: `src/data/api.ts` — apply the local store mutation first, background the DB write. Also `queryOrSeed` now returns a fresh `slice()` so React Query observers see a new reference after invalidation and re-render (previously identical identity = stale UI).
+3. **Admin CRM Override with an empty reason silently threw** (`setBrandTrack` requires a reason) — no UI feedback. Fix: `BrandCRM.tsx` surfaces “Override reason is required…” instead of throwing.
+4. **Brand logistics feed used only the mounted dossier snapshot** (stale, never reflected new drafts/ASN shipments). Fix: `LogisticsHub.tsx` reads the live `useShipmentsAll` feed, tenant-scoped for brand sessions; `BrandPurchaseOrders.tsx` invalidates the shipments query on ack/ASN so auto-created drafts and filed shipments appear immediately.
+5. **Homepage Publish in demo mode could never surface on the public page** — `fetchHomepageContent` always returned `DEFAULT_HOMEPAGE_CONTENT` as “live”. Fix: session live-copy (`homepageState.live`) set on publish, returned by fetch in demo mode (Supabase path unchanged).
+
+**Documented product gaps (deferred — NOT implemented in 7D):**
+- Tour restart control from Brand Settings does not exist (tours t7 stays skipped with reason; small Settings feature → later phase).
+- Tour 5 (Deductions on Analytics) starts, but its tour target attributes (e.g. `data-tour="deductions-benefits"`) do not exist in the SalesAnalytics surface — card cannot render its highlight (tours t5 stays skipped; data-tour rotation belongs to the later data-tour sweep).
+- Demo-mode post-publish home view does not auto-refresh the already-mounted public homepage (persistence/refresh work → later phase).
+- Dispute resolution writes to the store + audit, but the live ledger row refresh relies on the React Query reference fix; the visual “→ outcome: partial” badge path is covered by the same mechanism and verified for won/lost seed rows.
+- Not-representable data states (portal tenants are all compliance-cleared; no pending profile-change requests seed): these remain conditional skips because inventing demo data/state to drive them would violate the no-fake-state rule.
+
+**Remaining skipped tests (all justified):**
+- compliance-gate t1 `0/5 → blocked` — ENV/DATA state: no portal tenant with 0 approved docs; retained.
+- compliance-gate t2 `4/5 → still blocked` — same; retained.
+- crm t3 `profile-change review UI` — seed has no pending requests; the review UI is verified when pending; retained as data-conditional.
+- tours t5 `Deductions tour on Analytics` — selectors do not exist yet; retained (deferred data-tour work).
+- tours t7 `Settings has tour restart` — feature not built; retained (deferred feature).
+
+**Previously-passing regression check:** the 79 tests passing at baseline still pass in the final run (no title-collision regressions; the renamed tests are the same contracts under corrected names). 0 unexplained new failures.
+
+**Gates:** TypeScript 43 errors (baseline 45 → 43; **0 new** in changed files), lint 24 errors (baseline 26; **0 new** in changed files), build PASS (`✓ built in 2.44s`). Browser-verified: legal-agreements checklist gating, wizard walk-through (steps 1→5), dispute open→audit, ack→auto-draft→labels, ASN shortfall→deduction, tour 1 auto-start + tour 2/8 per-view triggers, homepage editor preview+publish, 7-viewport shell screenshots regenerated in `test-screenshots/app-shell/`, design-system + simulation screenshots regenerated.
 
 ## 7A — E2E regression baseline restoration (commit `c856a08`)
 
