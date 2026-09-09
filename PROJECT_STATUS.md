@@ -1,6 +1,6 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-09 (Phase 7F complete — compliance state model + genuine compliance/CRM E2E + access-gate repair: 143/0/4)
+> Last updated: 2026-09-09 (Golden-protocol run — Phase 1 zero-error repair 44→0 TS / 18→0 lint; Phase 2 runtime sweep ALL CLEAN; Phase 10 demo redeployed and production-only mount crash root-caused+fixed. E2E 143/0/4)
 >
 > ## 0. Project-Memory Reconciliation (2026-09-08)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
@@ -9,6 +9,15 @@
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
 > - Older sections below (Brand Intelligence, performance fixes, droplet consolidation, E2E suite) are historical/legacy and are preserved verbatim; they do not supersede the phase table above. Navigation: use section 1 for current phases/checkpoint/branch.
+
+## 1a. Golden-protocol continuation (2026-09-09) — Phases 1, 2, 10 DONE
+
+| Phase | Status | Notes |
+|---|---|---|
+| **Phase 1 — ZERO-ERROR REPAIR** | ✅ **DONE** | `0fc1265` — repaired ALL 44 TypeScript + 18 ESLint errors to **0** via root-cause fixes (no @ts-ignore, no config weakening, no rule disabling, no file exclusion). scenarioEngine `audit()` signature reordered (matches 26 call sites), `error?: string` added to ScenarioResult, dead re-export removed; SimulationControl `running !== null` + result.error typing; IntegrationsPanel missing `IntegrationDefinition` import; Header toggleRef type aligned to AppShell; OnboardingWizard brandId now `session?.tenantId` (was never-working `brandProfile.id` fallback — agreements now keyed to the real tenant) + exhaustive-deps-correct prefill effect; BrandReports CSV export aligned to canonical `downloadCsv` contract + recharts formatter param types; api.ts draft-shipment row aligned to canonical `DemoShipment` (removed non-row fields); banksByCountry `BanksByCountry` type declared; xero tokenManager refreshLocks typed to the token promise; 10 lint files fixed (memoized query fallbacks, removed/referenced stale deps, prefer-const). **Bonus:** corrected TourEngine dep arrays now make 2 previously-skipped tour tests PASS. Gates: **TS 0 · ESLint 0 · Build PASS · Full 21-suite E2E 143 passed / 0 failed / 4 skipped** (2.5m). |
+| **Phase 2 — CORE RUNTIME STABILITY** | ✅ **DONE** | `85aa056` — real-browser sweep (`scripts/runtime-sweep.mjs`) of EVERY Primary-nav destination for all roles: Super Admin 24 / Admin 21 / Brand×2 15 each / Carrier 3 — **0 page errors, 0 console errors, 0 ErrorBoundary crashes on every screen**. All 7A–7F repairs hold. |
+| **Phase 10 — ACTUAL PUBLIC DEMO** | ✅ **DONE** | `58c341e` — demo.mercenta.co.uk was serving a 5-week-stale build; REDEPLOYED the current code via the existing `scripts/deploy-demo.sh` (Namecheap FTP). Diagnosis surfaced a **pre-existing PRODUCTION-ONLY mount crash** (`Cannot read properties of undefined (reading 'unstable_scheduleCallback')` — dev worked, prod crashed): `node_modules/scheduler` (React 18.3.1's extracted scheduler) was chunked into `vendor-other` while react/react-dom went to `vendor-react` → split scheduler singleton. Root-cause fix in `vite.config.ts`: co-locate `scheduler` (+ `use-sync-external-store`, `react-redux`, `@reduxjs/toolkit`, `recharts`) with the react chunk. Verified locally via `npm run preview` (pageErrors 0, full render), redeployed, live URL now serves the fixed build (`index-QtIJfAir.js` matches local dist; all assets 200 + gzip). Live browser verification across 5 runs: homepage/login/Super Admin dashboard/brand portal/carrier terminal all rendered in at least one clean run with **zero page errors on every flow**. Residual: Namecheap shared-hosting throughput from this location was severely throttled during the session (~180 B/s observed), causing intermittent cold-load timeouts — an environmental variable, not an app defect. |
+| **Phase 8 (role-by-role) — read: covered by Phases 1–2 sweeps** | ⏳ | Brand finisher surfaces + carrier parity pass the runtime sweep; Phase 8's remaining fuller role-by-role audit (Tour 5 deductions surface, ComplianceUploadCard re-verification, Integration Hub breadth) is recorded as the next body of work in section "Remaining skips / deferred". |
 
 ## 1. Master Redesign — Phases 0–5 complete; Phase 6 DONE
 
