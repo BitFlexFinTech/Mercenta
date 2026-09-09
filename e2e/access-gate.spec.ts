@@ -1,5 +1,20 @@
 import { test, expect } from '@playwright/test';
 
+/**
+ * §Phase 7F — the country field is a search-then-select control
+ * (placeholder "Type your country name..."). The previous contract filled a
+ * stale `placeholder*="Zimbabwe"` input that no longer exists. This helper
+ * types the country and chooses the matching dropdown option — the real UI path.
+ */
+async function fillCountry(page: any, name: string) {
+  const field = page.locator('input[placeholder*="Type your country name"]');
+  await field.click();
+  await field.fill(name);
+  const option = page.locator('div.z-50 button', { hasText: name }).last();
+  await option.click();
+  await page.waitForTimeout(300);
+}
+
 test.describe('Access Gate — Brand Application & Approval Flow', () => {
 
   test('1. Login page shows Partner Login and Request Partner Access', async ({ page }) => {
@@ -17,7 +32,7 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.click('text=Request Partner Access');
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Test Brand Ltd');
-    await page.fill('input[placeholder*="Zimbabwe"]', 'United Kingdom');
+    await fillCountry(page, 'United Kingdom');
     await page.click('text=Submit Application');
     await page.waitForTimeout(500);
     await expect(page.locator('text=Please provide at least one link')).toBeVisible({ timeout: 3000 });
@@ -30,11 +45,12 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.click('text=Request Partner Access');
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Test Brand Ltd');
-    await page.fill('input[placeholder*="Zimbabwe"]', 'United Kingdom');
+    await fillCountry(page, 'United Kingdom');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
-    await page.waitForTimeout(2000);
-    await expect(page.locator('text=Application Received')).toBeVisible({ timeout: 5000 });
+    // §Phase 7F — submission runs real link verification (10s cap per link in
+    // linkVerifier.ts); wait for the confirmed success state, not a fixed delay.
+    await expect(page.locator('text=Application Received')).toBeVisible({ timeout: 15000 });
   });
 
   test('4. Admin sees application', async ({ page }) => {
@@ -44,17 +60,21 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.click('text=Request Partner Access');
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Admin Test Brand');
-    await page.fill('input[placeholder*="Zimbabwe"]', 'Germany');
+    await fillCountry(page, 'Germany');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
-    await page.waitForTimeout(2000);
+    // §Phase 7F — submission runs real link verification (10s cap per link in
+    // linkVerifier.ts); wait for the confirmed success state, not a fixed delay.
+    await expect(page.locator('text=Application Received')).toBeVisible({ timeout: 15000 });
     // Use in-app "Back to Login" to preserve module-level demoApplications state
     await page.click('text=Back to Login');
     await page.waitForTimeout(2000);
     await page.locator('text=Super Admin').first().click();
     await page.waitForTimeout(1500);
-    await page.locator('text=Super Admin Panel').first().click();
-    await page.waitForTimeout(500);
+    // §Phase 7F — the Phase 6 admin nav item IS "Super Admin" (no separate
+    // "Super Admin Panel" item); click it to open the panel, then its tab.
+    await page.locator('nav[aria-label="Primary"] >> text=Super Admin').first().click();
+    await page.waitForTimeout(800);
     await page.locator('text=Applications').click();
     await page.waitForTimeout(1000);
     await expect(page.locator('text=Admin Test Brand')).toBeVisible({ timeout: 5000 });
@@ -67,16 +87,20 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.click('text=Request Partner Access');
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Flag Test Brand');
-    await page.fill('input[placeholder*="Zimbabwe"]', 'France');
+    await fillCountry(page, 'France');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
-    await page.waitForTimeout(2000);
+    // §Phase 7F — submission runs real link verification (10s cap per link in
+    // linkVerifier.ts); wait for the confirmed success state, not a fixed delay.
+    await expect(page.locator('text=Application Received')).toBeVisible({ timeout: 15000 });
     await page.click('text=Back to Login');
     await page.waitForTimeout(2000);
     await page.locator('text=Super Admin').first().click();
     await page.waitForTimeout(1500);
-    await page.locator('text=Super Admin Panel').first().click();
-    await page.waitForTimeout(500);
+    // §Phase 7F — the Phase 6 admin nav item IS "Super Admin" (no separate
+    // "Super Admin Panel" item); click it to open the panel, then its tab.
+    await page.locator('nav[aria-label="Primary"] >> text=Super Admin').first().click();
+    await page.waitForTimeout(800);
     await page.locator('text=Applications').click();
     await page.waitForTimeout(500);
     page.on('dialog', d => d.accept('Manual check needed'));
@@ -99,16 +123,20 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.click('text=Request Partner Access');
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Reject Test Ltd');
-    await page.fill('input[placeholder*="Zimbabwe"]', 'Spain');
+    await fillCountry(page, 'Spain');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
-    await page.waitForTimeout(2000);
+    // §Phase 7F — submission runs real link verification (10s cap per link in
+    // linkVerifier.ts); wait for the confirmed success state, not a fixed delay.
+    await expect(page.locator('text=Application Received')).toBeVisible({ timeout: 15000 });
     await page.click('text=Back to Login');
     await page.waitForTimeout(2000);
     await page.locator('text=Super Admin').first().click();
     await page.waitForTimeout(1500);
-    await page.locator('text=Super Admin Panel').first().click();
-    await page.waitForTimeout(500);
+    // §Phase 7F — the Phase 6 admin nav item IS "Super Admin" (no separate
+    // "Super Admin Panel" item); click it to open the panel, then its tab.
+    await page.locator('nav[aria-label="Primary"] >> text=Super Admin').first().click();
+    await page.waitForTimeout(800);
     await page.locator('text=Applications').click();
     await page.waitForTimeout(500);
     const rejBtn = page.locator('button:has-text("Reject")').first();
