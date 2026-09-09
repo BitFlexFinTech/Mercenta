@@ -1,211 +1,548 @@
 /**
- * Batch 37 dashboard with KPI widgets, quick actions, charts.
- * Preserves deductions, revenue chart, MetricCard, activity feed.
+ * §Phase 7E — Brand Operations Overview (dashboard redesign).
+ *
+ * A polished B2B brand portal at the same quality bar as the Admin Operations
+ * Overview (Phase 7C). Every number is DERIVED from real, tenant-scoped data
+ * at render time through the canonical React Query hooks — no fabricated
+ * metrics, no static charts, no hardcoded counts.
+ *
+ * Hierarchy:
+ *   1. Page context        — PageHeader (h1) + derived brand summary
+ *   2. At a glance         — compact KPI band (one surface, hairline cells)
+ *   3. Needs attention     — actionable brand-scoped exceptions
+ *   4. Purchase orders     — real PO context with drill-down counts
+ *   5. Fulfilment          — live shipments for this tenant (or honest empty)
+ *   6. Compliance & health — real document/contract state, no decorative score
+ *   7. Recent comms        — tenant-scoped message threads
+ *   8. Next actions        — quick actions routed to existing brand views
+ *
+ * Phase 7C's remaining legacy static chart (REVENUE_DATA) is REMOVED — the
+ * tenant's real per-month PO series is intentionally thin (POs are created
+ * only when a retail order lands), and plotting a sparse "trend" would be a
+ * fabricated shape. Real time-series analysis lives in Analytics
+ * (SalesAnalytics) and Reports (BrandReports) where the same PO data is
+ * charted honestly.
+ *
+ * Tenant/RBAC: ALL lists are narrowed through assertBrandScope / tenantId so
+ * a brand never sees another tenant's POs, shipments, docs, messages, or
+ * deductions. The previous global activity feed (ActivityLog has no brandId)
+ * is gone for this reason.
  */
-import { useState, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
-import { useDeductions, usePurchaseOrders } from '@/data/queries';
+import {
+  useComplianceDocuments,
+  useContracts,
+  useDeductions,
+  useMessages,
+  usePurchaseOrders,
+  useShipmentsAll,
+} from '@/data/queries';
+import { demoReturns } from '@/data/api';
+import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { assertBrandScope } from '@/lib/auth/rbac';
-import { Card, Badge, PageHeader } from '@/components/ui';
-import { cn } from '@/utils/cn';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { REVENUE_DATA } from '@/data/demoCharts';
-import { STAGE_LABELS, STAGE_ORDER } from '@/types';
-import type { ShipmentStage } from '@/types';
-import { TrendingUp, TrendingDown, Package, Truck, CheckCircle2, Boxes, ClipboardList, ShoppingCart, BarChart3, ArrowRight } from 'lucide-react';
+import { Alert, Button, EmptyState, PageHeader, StatusBadge, Skeleton } from '@/components/ui';
+import type { StatusTone } from '@/components/ui';
+import {
+  AttentionPanel,
+  DashboardSection,
+  KpiGroup,
+  type KpiCellData,
+  type AttentionItemData,
+} from '@/components/shared/dashboard';
+import { STATUS_LABELS } from '@/types';
+import type { PurchaseOrder, PurchaseOrderStatus, ShipmentStatus } from '@/types';
+import {
+  ArrowRight,
+  ClipboardList,
+  FileCheck2,
+  FileText,
+  MessageSquare,
+  Package,
+  ScrollText,
+  ShieldCheck,
+  Truck,
+} from 'lucide-react';
 
-export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => void }) {
-  const { shipments, activityLogs, brandProfile, financials, complianceDocs, session, products } = useApp();
-  const [timeFilter, setTimeFilter] = useState('6M');
-  const [activeStage, setActiveStage] = useState<ShipmentStage | null>(null);
-  const allDeductions = useDeductions().data?.data ?? [];
-  const tenantId = session?.tenantId;
-  const deductions = useMemo(() => tenantId ? allDeductions.filter((d) => d.brandId === tenantId) : [], [allDeductions, tenantId]);
-  const deductedTotal = useMemo(() => deductions.reduce((a, d) => a + d.amountGbp, 0), [deductions]);
-  const poQuery = usePurchaseOrders();
-  const pos = useMemo(() => assertBrandScope(session, poQuery.data?.data ?? []), [session, poQuery.data]);
-  const openPOs = useMemo(() => pos.filter((p) => ['received', 'under_review', 'accepted', 'ready_to_fulfil'].includes(p.status)), [pos]);
-  const shippedPOs = useMemo(() => pos.filter((p) => p.status === 'shipped' || p.status === 'delivered'), [pos]);
-  const totalLines = useMemo(() => pos.reduce((s, p) => s + p.lineItems.length, 0), [pos]);
-  const confirmedLines = useMemo(() => pos.reduce((s, p) => s + p.lineItems.filter((l) => l.ackStatus === 'accepted' || l.ackStatus === 'backordered').length, 0), [pos]);
-  const ackRate = useMemo(() => totalLines > 0 ? Math.round((confirmedLines / totalLines) * 100) : 0, [totalLines, confirmedLines]);
-  const openPOValue = useMemo(() => openPOs.reduce((s, p) => s + p.poValue, 0), [openPOs]);
-  const outOfStock = useMemo(() => products.filter((p) => p.isAvailable === false).length, [products]);
-  const totalRevenue = useMemo(() => shipments.reduce((sum, s) => sum + s.value, 0), [shipments]);
-  const activeShipments = useMemo(() => shipments.filter((s) => s.status !== 'live_amazon').length, [shipments]);
-  // §Phase 7C — compliance coverage DERIVED from the brand's real dossier docs
-  // (previously a fabricated hardcoded 94.2).
-  const complianceTotal = complianceDocs.length;
-  const complianceVerified = useMemo(
-    () => complianceDocs.filter((d) => d.status === 'verified').length,
-    [complianceDocs]
-  );
-  const complianceScore = complianceTotal > 0
-    ? Math.round((complianceVerified / complianceTotal) * 100)
-    : null;
-  const stageCounts = useMemo(() => STAGE_ORDER.map((stage) => ({ stage, count: shipments.filter((s) => s.stage === stage).length })), [shipments]);
+const PO_STATUS_LABELS: Record<PurchaseOrderStatus, string> = {
+  received: 'Received',
+  under_review: 'Under review',
+  accepted: 'Accepted',
+  rejected: 'Rejected',
+  ready_to_fulfil: 'Ready to fulfil',
+  shipped: 'Shipped',
+  delivered: 'Delivered',
+};
 
-  const complianceScoreText = complianceScore === null ? '—' : complianceScore + '%';
+const PO_OPEN: ReadonlySet<PurchaseOrderStatus> = new Set([
+  'received', 'under_review', 'accepted', 'ready_to_fulfil',
+]);
+const PO_AWAITING_ACK: ReadonlySet<PurchaseOrderStatus> = new Set([
+  'received', 'under_review',
+]);
+const PO_IN_FLIGHT: ReadonlySet<PurchaseOrderStatus> = new Set([
+  'accepted', 'ready_to_fulfil', 'shipped',
+]);
 
-  return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <PageHeader
-        title="Dashboard"
-        description={`${brandProfile.businessName || 'Brand portal'} · ${pos.length} purchase orders · ${products.length} products · ${complianceDocs.length} compliance docs on file`}
-      />
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <button onClick={() => onNavigate?.('purchase_orders')} className="bg-ink-850 border border-white/[0.06] hover:border-brass-500/40 rounded-xl p-3 text-left transition-colors">
-          <ShoppingCart className="w-4 h-4 text-brass-400 mb-1" />
-          <div className="text-xs font-medium text-white">Purchase Orders</div>
-          <div className="text-[10px] text-zinc-500">{openPOs.length} open / {shippedPOs.length} shipped</div>
-        </button>
-        <button onClick={() => onNavigate?.('catalog')} className="bg-ink-850 border border-white/[0.06] hover:border-brass-500/40 rounded-xl p-3 text-left transition-colors">
-          <Package className="w-4 h-4 text-brass-400 mb-1" />
-          <div className="text-xs font-medium text-white">Catalog</div>
-          <div className="text-[10px] text-zinc-500">{products.length} products / {outOfStock} OOS</div>
-        </button>
-        <button onClick={() => onNavigate?.('compliance')} className="bg-ink-850 border border-white/[0.06] hover:border-brass-500/40 rounded-xl p-3 text-left transition-colors">
-          <ClipboardList className="w-4 h-4 text-brass-400 mb-1" />
-          <div className="text-xs font-medium text-white">Compliance</div>
-          <div className="text-[10px] text-zinc-500">{complianceVerified}/{complianceDocs.length} verified</div>
-        </button>
-        <button onClick={() => onNavigate?.('reports')} className="bg-ink-850 border border-white/[0.06] hover:border-brass-500/40 rounded-xl p-3 text-left transition-colors">
-          <BarChart3 className="w-4 h-4 text-brass-400 mb-1" />
-          <div className="text-xs font-medium text-white">Reports</div>
-          <div className="text-[10px] text-zinc-500">ASIN {ackRate}% / Net PPM</div>
-        </button>
-      </div>
+const DOC_LABELS: Record<string, string> = {
+  letter_of_authorization: 'Letter of authorization',
+  brand_registry_confirmation: 'Brand registry confirmation',
+  product_safety_ukca: 'Product safety (UKCA)',
+  insurance_certificate: 'Insurance certificate',
+  cosmetic_notification_cpnp: 'Cosmetic notification (CPNP)',
+  food_contact_material: 'Food contact material',
+  weee_compliance: 'WEEE compliance',
+  type_approval: 'Type approval',
+  food_safety_certificate: 'Food safety certificate',
+  textile_labelling_compliance: 'Textile labelling compliance',
+  baby_product_safety: 'Baby product safety',
+};
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <MetricCard label="Revenue" value={'\u00a3' + Math.round(totalRevenue / 1000) + 'k'} trend={'\u00a3' + (openPOValue / 1000).toFixed(0) + 'k open PO'} trendUp icon={<Boxes className="w-4 h-4" />} onClick={() => onNavigate?.('reports')} />
-        <MetricCard label="Active Shipments" value={String(activeShipments)} trend={openPOs.length + ' open POs'} trendUp icon={<Package className="w-4 h-4" />} onClick={() => onNavigate?.('logistics')} />
-        <MetricCard label="Compliance" value={complianceScoreText} trend={complianceVerified + '/' + complianceDocs.length + ' docs verified'} trendUp={complianceScore !== null && complianceScore > 80} icon={<CheckCircle2 className="w-4 h-4" />} onClick={() => onNavigate?.('compliance')} />
-        <MetricCard label="Product SKUs" value={String(products.length)} trend={outOfStock + ' SKUs OOS'} trendUp={outOfStock === 0} icon={<Truck className="w-4 h-4" />} onClick={() => onNavigate?.('catalog')} />
-      </div>
-
-      {/* Dossier */}
-      <Card className="p-5">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <div className="text-xs text-zinc-500 uppercase tracking-wider">Active Dossier</div>
-            <div className="text-lg font-semibold text-white mt-0.5">{brandProfile.businessName || 'No profile loaded'}</div>
-            <div className="text-xs text-zinc-500 mt-0.5">{brandProfile.nation} - {brandProfile.taxId} - Payout {brandProfile.payoutCurrency}</div>
-          </div>
-          <div className="flex gap-2">
-            {brandProfile.bakConnected && <Badge className="bg-blue-500/15 text-blue-300">BAK</Badge>}
-            {brandProfile.fedexConnected && <Badge className="bg-purple-500/15 text-purple-300">FedEx</Badge>}
-            {brandProfile.dhlConnected && <Badge className="bg-amber-500/15 text-amber-300">DHL</Badge>}
-          </div>
-        </div>
-      </Card>
-
-      {/* Deductions */}
-      {deductions.length > 0 && (
-        <Card title={'Deductions - \u00a3' + deductedTotal.toFixed(2)}>
-          <table className="w-full text-sm">
-            <tbody className="divide-y divide-white/[0.04]">
-              {deductions.map((d) => (
-                <tr key={d.id}>
-                  <td className="px-4 py-2 font-mono text-xs text-zinc-400">{d.date}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-zinc-400">{d.purchaseOrderId}</td>
-                  <td className="px-4 py-2 text-xs capitalize text-zinc-300">{d.type.replace(/_/g, ' ')}</td>
-                  <td className="px-4 py-2 text-right font-mono text-xs text-red-300">-\u00a3{d.amountGbp.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      )}
-{/* Fulfilment pipeline */}
-      <Card title="Fulfilment Pipeline Tracker">
-        <div className="flex flex-wrap gap-2 px-5 py-3">
-          {stageCounts.map((s) => (
-            <button key={s.stage} onClick={() => setActiveStage(activeStage === s.stage ? null : s.stage)}
-              className={cn('flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors', activeStage === s.stage ? 'bg-brass-500/20 text-brass-300 ring-1 ring-brass-500/30' : 'bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08]')}>
-              <span className="font-medium">{STAGE_LABELS[s.stage].split(' ')[0]}</span>
-              <span className="font-mono text-zinc-500">{s.count}</span>
-            </button>
-          ))}
-        </div>
-        {activeStage && (
-          <div className="mx-5 mb-3 p-2 bg-ink-900 rounded-lg text-[10px] text-zinc-400">
-            {STAGE_LABELS[activeStage]} - {stageCounts.find((s) => s.stage === activeStage)?.count ?? 0} shipments
-            <button onClick={() => onNavigate?.('logistics')} className="ml-2 text-brass-400 hover:text-brass-300 inline-flex items-center gap-0.5">
-              View details <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-        )}
-      </Card>
-
-      {/* Chart + Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card title="Revenue and Order Volume Trend" action={
-          <div className="flex gap-1">
-            {['6M', '1Y', 'All'].map((f) => (
-              <button key={f} onClick={() => setTimeFilter(f)}
-                className={cn('px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors', timeFilter === f ? 'bg-brass-500/20 text-brass-400' : 'text-zinc-500 hover:text-zinc-300')}>{f}</button>
-            ))}
-          </div>
-        }>
-          <div className="p-4 h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={REVENUE_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs><linearGradient id="revG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#D4A853" stopOpacity={0.4} /><stop offset="100%" stopColor="#D4A853" stopOpacity={0} /></linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                <XAxis dataKey="month" stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => '\u00a3' + (v / 1000).toFixed(0) + 'k'} />
-                <Tooltip contentStyle={{ backgroundColor: '#121214', border: '1px solid #ffffff10', borderRadius: '8px', fontSize: '12px' }} formatter={(v) => ['\u00a3' + Number(v).toLocaleString(), 'Revenue']} />
-                <Area type="monotone" dataKey="revenue" stroke="#D4A853" strokeWidth={2.5} fill="url(#revG)" activeDot={{ r: 5 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        <Card title="Activity Feed">
-          <div className="px-5 py-3 max-h-[320px] overflow-y-auto">
-            <div className="relative">
-              {activityLogs.map((log, i) => (
-                <div key={log.id} className="flex gap-3 pb-4 last:pb-0 relative">
-                  {i < activityLogs.length - 1 && <div className="absolute left-[7px] top-4 bottom-0 w-px bg-white/[0.06]" />}
-                  <div className={cn('w-3.5 h-3.5 rounded-full flex-shrink-0 mt-1 border-2 border-ink-850', log.status === 'live_amazon' ? 'bg-emerald-500' : log.status === 'uk_customs_cleared' ? 'bg-emerald-500/60' : log.status === 'bak_depot' ? 'bg-amber-500' : 'bg-brass-500')} />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs font-medium text-white truncate">{log.message}</span>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-zinc-600">{log.timestamp}</span>
-                      <span className="text-[10px] text-zinc-600 font-mono">{log.shipmentRef}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-      </div>
-    </div>
-  );
+/**
+ * Shipment rows served by the demo store carry a looser shape than the
+ * canonical Shipment type (status is a string, no committed `date`).
+ */
+interface BrandShipmentRow {
+  id: string;
+  brandId?: string;
+  poNumber?: string;
+  carrier: string;
+  reference: string;
+  title: string;
+  value: number;
+  status: string;
+  origin: string;
+  destination: string;
+  delayed?: boolean;
+  exception?: boolean;
 }
 
-function MetricCard({ label, value, trend, trendUp, icon, onClick }: {
-  label: string; value: string; trend: string; trendUp: boolean; icon: React.ReactNode; onClick?: () => void;
-}) {
+function shipmentStatusLabel(status: string): string {
+  return STATUS_LABELS[status as unknown as ShipmentStatus] ?? status;
+}
+
+function poTone(status: PurchaseOrderStatus): StatusTone {
+  if (status === 'rejected') return 'danger';
+  if (status === 'received' || status === 'under_review') return 'warning';
+  if (status === 'delivered') return 'success';
+  return 'info';
+}
+
+/**
+ * A brand-side line counts as unacknowledged until the brand explicitly
+ * accepts/rejects/backorders every line (the same rule Vendor Central
+ * applies; seed POs arrive with no ackStatus).
+ */
+function isUnacknowledged(po: PurchaseOrder): boolean {
+  return po.lineItems.some((l) => !l.ackStatus || l.ackStatus === 'unacknowledged');
+}
+
+/** PO receipt older than the 24-hour acknowledgement window. */
+const overdue = (orderDate: string): boolean =>
+  new Date(orderDate).getTime() < Date.now() - 24 * 60 * 60 * 1000;
+
+export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => void }) {
+  const { session, brandProfile, products } = useApp();
+  const tenantId = session?.tenantId;
+
+  const poQuery = usePurchaseOrders();
+  const shipmentsQuery = useShipmentsAll();
+  const docsQuery = useComplianceDocuments();
+  const contractsQuery = useContracts();
+  const messagesQuery = useMessages();
+  const deductionsQuery = useDeductions();
+
+  /** Navigate to an existing brand shell view — no-op when rendered without a shell. */
+  const go = useCallback((view: string) => () => onNavigate?.(view), [onNavigate]);
+
+  const pos = useMemo(
+    () => assertBrandScope(session, poQuery.data?.data ?? []),
+    [session, poQuery.data]
+  );
+  const brandShipments = useMemo(
+    () => ((shipmentsQuery.data?.data ?? []) as unknown as BrandShipmentRow[]).filter((s) => s.brandId === tenantId),
+    [shipmentsQuery.data, tenantId]
+  );
+  const docs = useMemo(
+    () => (docsQuery.data?.data ?? []).filter((d) => d.brandId === tenantId),
+    [docsQuery.data, tenantId]
+  );
+  const brandContracts = useMemo(
+    () => assertBrandScope(session, contractsQuery.data?.data ?? []),
+    [session, contractsQuery.data]
+  );
+  const brandMessages = useMemo(
+    () => [...(messagesQuery.data?.data ?? [])]
+      .filter((m) => m.brandId === tenantId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [messagesQuery.data, tenantId]
+  );
+  const deductions = useMemo(
+    () => (deductionsQuery.data?.data ?? []).filter((d) => d.brandId === tenantId),
+    [deductionsQuery.data, tenantId]
+  );
+
+  const openDeductions = useMemo(() => deductions.filter((d) => d.status === 'open'), [deductions]);
+  const brandReturns = useMemo(() => demoReturns.filter((r) => r.brandId === tenantId), [tenantId]);
+  const brandTickets = useMemo(
+    () => tenantId ? demoTickets.filter((t) => t.brandId === tenantId && t.status !== 'resolved') : [],
+    [tenantId]
+  );
+
+  /* ── Derived brand KPIs (all real, all tenant-scoped) ─────────────── */
+  const openPos = useMemo(() => pos.filter((p) => PO_OPEN.has(p.status)), [pos]);
+  const awaitingAck = useMemo(
+    () => pos.filter((p) => PO_AWAITING_ACK.has(p.status) && isUnacknowledged(p)),
+    [pos]
+  );
+  const inFlightPos = useMemo(() => pos.filter((p) => PO_IN_FLIGHT.has(p.status)), [pos]);
+  const outOfStock = useMemo(() => products.filter((p) => p.isAvailable === false), [products]);
+  const approvedDocs = useMemo(() => docs.filter((d) => d.status === 'approved'), [docs]);
+  const activeContract = useMemo(
+    () => brandContracts.find((c) => c.status === 'active' || c.status === 'signed'),
+    [brandContracts]
+  );
+  const openPosValue = useMemo(() => openPos.reduce((s, p) => s + p.poValue, 0), [openPos]);
+  const recentPos = useMemo(() => [...pos].sort((a, b) => b.orderDate.localeCompare(a.orderDate)), [pos]);
+
+  const loading = poQuery.isLoading || shipmentsQuery.isLoading || docsQuery.isLoading;
+
+  /* ── Needs-attention items (brand-scoped, actionable) ─────────────── */
+  const attentionItems = useMemo(() => {
+    const items: AttentionItemData[] = [];
+    awaitingAck.forEach((p) => {
+      items.push({
+        id: `unacked-${p.poNumber}`,
+        group: 'Purchase orders',
+        tone: overdue(p.orderDate) ? 'danger' : 'warning',
+        statusLabel: overdue(p.orderDate) ? 'ACKNOWLEDGEMENT OVERDUE' : 'ACKNOWLEDGEMENT NEEDED',
+        title: `${p.poNumber} — ${p.lineItems.length} line${p.lineItems.length === 1 ? '' : 's'}`,
+        meta: `£${p.poValue.toLocaleString()} · ordered ${p.orderDate} · must be acknowledged within 24h of receipt`,
+        onOpen: go('purchase_orders'),
+      });
+    });
+    openDeductions.slice(0, 3).forEach((d) => {
+      items.push({
+        id: `deduction-${d.id}`,
+        group: 'Deductions',
+        tone: 'warning',
+        statusLabel: 'OPEN DEDUCTION',
+        title: d.reason || d.type.replace(/_/g, ' '),
+        meta: `£${d.amountGbp.toLocaleString()} · ${d.purchaseOrderId} · open since ${d.date}`,
+        onOpen: go('documents'),
+      });
+    });
+    outOfStock.slice(0, 3).forEach((p) => {
+      items.push({
+        id: `oos-${p.sku}`,
+        group: 'Catalogue',
+        tone: 'warning',
+        statusLabel: 'OUT OF STOCK',
+        title: p.name,
+        meta: `${p.sku} — not currently available to orders`,
+        onOpen: go('catalog'),
+      });
+    });
+    brandShipments.filter((s) => s.exception).slice(0, 3).forEach((s) => {
+      items.push({
+        id: `shipment-exc-${s.id}`,
+        group: 'Fulfilment',
+        tone: 'danger',
+        statusLabel: 'EXCEPTION',
+        title: s.title,
+        meta: `${s.reference} · ${shipmentStatusLabel(s.status)} · flagged for review`,
+        onOpen: go('logistics'),
+      });
+    });
+    brandTickets.forEach((t) => {
+      items.push({
+        id: `ticket-${t.id}`,
+        group: 'Support',
+        tone: t.priority === 'urgent' ? 'danger' : 'warning',
+        statusLabel: 'OPEN TICKET',
+        title: t.subject,
+        meta: `${t.lastMessagePreview} — ${t.category ?? 'general'}`,
+        onOpen: go('team'),
+      });
+    });
+    brandReturns.slice(0, 3).forEach((r) => {
+      items.push({
+        id: `return-${r.id}`,
+        group: 'Returns',
+        tone: 'warning',
+        statusLabel: 'RETURN RECORDED',
+        title: `${r.productName} × ${r.quantity}`,
+        meta: `${r.poNumber} · ${r.returnDate} · ${r.reason.replace(/_/g, ' ')}`,
+        onOpen: go('returns'),
+      });
+    });
+    return items;
+  }, [awaitingAck, openDeductions, outOfStock, brandShipments, brandTickets, brandReturns, go]);
+
+const complianceLabel =
+    docs.length === 0
+      ? 'No compliance documents on file'
+      : `${approvedDocs.length}/${docs.length} documents approved`;
+  const complianceTone: StatusTone =
+    docs.length === 0 ? 'warning'
+      : approvedDocs.length === docs.length ? 'success' : 'warning';
+
+  const kpiCells: KpiCellData[] = [
+    {
+      id: 'active-pos',
+      label: 'Active purchase orders',
+      value: String(openPos.length),
+      context: `£${openPosValue.toLocaleString()} across ${openPos.length} PO${openPos.length === 1 ? '' : 's'}`,
+      onOpen: go('purchase_orders'),
+    },
+    {
+      id: 'awaiting-ack',
+      label: 'Awaiting acknowledgement',
+      value: String(awaitingAck.length),
+      context: awaitingAck.length > 0 ? 'Acknowledge within 24 hours of receipt' : 'No POs pending your confirmation',
+      tone: awaitingAck.length > 0 ? 'warning' : 'success',
+      statusText: awaitingAck.length > 0 ? 'Action needed' : 'Up to date',
+      onOpen: go('purchase_orders'),
+    },
+    {
+      id: 'in-fulfilment',
+      label: 'POs in fulfilment',
+      value: String(inFlightPos.length),
+      context: 'Accepted, ready-to-fulfil and shipped POs',
+      onOpen: go('logistics'),
+    },
+    {
+      id: 'products-listed',
+      label: 'Live products',
+      value: String(products.length),
+      context: `${products.length} SKU${products.length === 1 ? '' : 's'} in your catalogue`,
+      onOpen: go('catalog'),
+    },
+    {
+      id: 'out-of-stock',
+      label: 'Out of stock',
+      value: String(outOfStock.length),
+      context: 'Products unavailable to new orders',
+      tone: outOfStock.length > 0 ? 'warning' : 'success',
+      statusText: outOfStock.length > 0 ? 'Review catalogue' : 'All stocked',
+      onOpen: go('catalog'),
+    },
+    {
+      id: 'contract-status',
+      label: 'Contract status',
+      value: activeContract ? 'Active' : '—',
+      context: activeContract ? `Distribution agreement v${activeContract.version} signed` : 'No active contract on file',
+      tone: activeContract ? 'success' : 'warning',
+      statusText: activeContract ? 'Contract active' : 'Action required',
+      onOpen: go('contracts'),
+    },
+  ];
+
+  const recentMessages = brandMessages.slice(0, 4);
+  const quickActions = [
+    { id: 'purchase_orders', label: 'Review purchase orders', hint: `${awaitingAck.length} awaiting acknowledgement`, icon: ClipboardList },
+    { id: 'catalog', label: 'Manage catalogue', hint: `${products.length} products listed · ${outOfStock.length} out of stock`, icon: Package },
+    { id: 'logistics', label: 'Inbound shipments', hint: `${brandShipments.length} shipment${brandShipments.length === 1 ? '' : 's'} in motion`, icon: Truck },
+    { id: 'compliance', label: 'Compliance & documents', hint: complianceLabel, icon: FileCheck2 },
+    { id: 'documents', label: 'Statements & account', hint: `${openDeductions.length} open deduction${openDeductions.length === 1 ? '' : 's'}`, icon: ScrollText },
+    { id: 'team', label: 'Support & team', hint: `${brandTickets.length} open ticket${brandTickets.length === 1 ? '' : 's'}`, icon: MessageSquare },
+  ] as const;
+
   return (
-    <button type="button" onClick={onClick} disabled={!onClick} className="w-full text-left disabled:cursor-default">
-      <Card className={cn('p-5', onClick && 'cursor-pointer hover:border-white/[0.14] transition-colors')}>
-        <div className="flex items-start justify-between mb-3">
-          <span className="text-xs text-zinc-500 font-medium">{label}</span>
-          <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center text-zinc-400">{icon}</div>
+    <div
+      className="p-6 space-y-6 max-w-[1400px] mx-auto"
+      data-testid="brand-dashboard"
+      aria-busy={loading || undefined}
+    >
+      <PageHeader
+        title="Brand Overview"
+        description={`${brandProfile.businessName || 'Brand portal'}${brandProfile.category ? ` · ${brandProfile.category}` : ''} · ${pos.length} purchase orders · ${products.length} products`}
+      />
+
+      {!loading ? (
+        <div data-testid="brand-dashboard-loaded" className="hidden" />
+      ) : (
+        <div data-testid="brand-dashboard-loading" className="hidden" />
+      )}
+
+      {(poQuery.isError || shipmentsQuery.isError || docsQuery.isError) && (
+        <Alert tone="error" title="Some dashboard data could not be loaded">
+          One or more data sources failed to load. Sections that depend on them are hidden; reload the portal to retry.
+        </Alert>
+      )}
+
+      <DashboardSection title="At a glance" description="Live numbers from your real purchase orders, catalogue, contract and documents.">
+        <KpiGroup items={kpiCells} loading={loading} />
+      </DashboardSection>
+
+      <DashboardSection
+        title="Needs your attention"
+        description="Exceptions that require a brand action — derived from real tenant data only."
+      >
+        <AttentionPanel items={attentionItems} emptyMeta="No current issues need your attention." />
+      </DashboardSection>
+
+      <DashboardSection
+        title="Purchase orders"
+        description="Commercial activity on your account — summary and the most recent POs."
+        action={(
+          <Button variant="secondary" size="sm" onClick={go('purchase_orders')}>
+            Open all POs <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          </Button>
+        )}
+      >
+        <div
+          data-testid="po-summary"
+          className="flex flex-wrap gap-2 text-xs text-zinc-400 rounded-lg border border-white/[0.06] bg-ink-850 px-3.5 py-2.5"
+        >
+          <span data-testid="po-summary-active">{openPos.length} active</span>
+          <span aria-hidden="true">·</span>
+          <span data-testid="po-summary-awaiting">{awaitingAck.length} awaiting acknowledgement</span>
+          <span aria-hidden="true">·</span>
+          <span data-testid="po-summary-in-fulfilment">{inFlightPos.length} in fulfilment</span>
         </div>
-        <div className="flex items-end justify-between">
-          <span className="text-2xl font-bold text-white tracking-tight">{value}</span>
-          <span className={cn('flex items-center gap-1 text-xs font-medium', trendUp ? 'text-emerald-400' : 'text-red-400')}>
-            {trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-            {trend}
-          </span>
+        {recentPos.length === 0 ? (
+          <EmptyState
+            title="No purchase orders yet"
+            description="When a retail order is placed for your brand it will appear here for acknowledgment."
+          />
+        ) : (
+          <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+            {recentPos.slice(0, 4).map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
+                <span className="font-mono text-[11px] text-zinc-400 flex-shrink-0">{p.poNumber}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-medium text-white truncate">
+                    {p.lineItems.length} line{p.lineItems.length === 1 ? '' : 's'} · £{p.poValue.toLocaleString()}
+                  </span>
+                  <span className="block text-[11px] text-zinc-500 truncate leading-snug">ordered {p.orderDate}</span>
+                </span>
+                <StatusBadge tone={poTone(p.status)} dataStatus={p.status}>{PO_STATUS_LABELS[p.status]}</StatusBadge>
+                <Button variant="tertiary" size="sm" onClick={go('purchase_orders')}>
+                  Review <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DashboardSection>
+<DashboardSection
+        title="Fulfilment in motion"
+        description="Shipments filed for this brand, newest first."
+        action={(
+          <Button variant="secondary" size="sm" onClick={go('logistics')}>
+            Open shipments <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          </Button>
+        )}
+      >
+        {brandShipments.length === 0 ? (
+          <EmptyState
+            title="Nothing in fulfilment right now"
+            description="Accepted and ready-to-fulfil POs appear in the purchase-order section above; file a shipment from Inbound Shipments once a PO moves into dispatch."
+            action={<Button size="sm" onClick={go('logistics')}>Create a shipment</Button>}
+          />
+        ) : (
+          <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+            {brandShipments.slice(0, 5).map((s) => (
+              <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
+                <span className="font-mono text-[11px] text-zinc-400 flex-shrink-0">{s.reference}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-medium text-white truncate">{s.title}</span>
+                  <span className="block text-[11px] text-zinc-500 truncate leading-snug">
+                    £{s.value.toLocaleString()} · {s.origin} → {s.destination} · {s.carrier}
+                  </span>
+                </span>
+                <StatusBadge tone={s.status === 'live_amazon' ? 'success' : 'info'} dataStatus={s.status}>
+                  {shipmentStatusLabel(s.status)}
+                </StatusBadge>
+                <Button variant="tertiary" size="sm" onClick={go('logistics')}>
+                  Track <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DashboardSection>
+
+      <DashboardSection
+        title="Compliance & account health"
+        description="Real document, contract and gate state — no score, no guesswork."
+      >
+        <div className="space-y-2 rounded-lg border border-white/[0.06] bg-ink-850 px-3.5 py-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5" data-testid="compliance-summary">
+            <ShieldCheck className="w-4 h-4 text-brass-400" aria-hidden="true" />
+            <span className="text-xs text-zinc-300">{complianceLabel}</span>
+            <StatusBadge tone={complianceTone} dataStatus={complianceTone}>
+              {docs.length > 0 && approvedDocs.length === docs.length ? 'Gate open' : 'Action required'}
+            </StatusBadge>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <FileText className="w-4 h-4 text-zinc-500" aria-hidden="true" />
+            <span className="text-xs text-zinc-300">
+              {activeContract ? `Distribution agreement v${activeContract.version} — ${activeContract.status}` : 'No active distribution agreement on file'}
+            </span>
+          </div>
         </div>
-        {onClick && <span className="mt-2 block text-[10px] text-zinc-600">Click for details &gt;</span>}
-      </Card>
-    </button>
+      </DashboardSection>
+<DashboardSection
+        title="Recent communications"
+        description="Latest support and admin messages on your account, newest first."
+        action={
+          recentMessages.length > 0 ? (
+            <Button variant="secondary" size="sm" onClick={go('team')}>
+              Open messages <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+            </Button>
+          ) : undefined
+        }
+      >
+        {recentMessages.length === 0 ? (
+          <EmptyState
+            title="No recent communications"
+            description="New support and admin messages will appear here as they are logged."
+          />
+        ) : (
+          <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+            {recentMessages.map((m) => (
+              <li key={m.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
+                <StatusBadge tone={m.direction === 'inbound' ? 'info' : 'neutral'} dataStatus={m.direction}>
+                  {m.channel.toUpperCase()}
+                </StatusBadge>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-xs font-medium text-white truncate">{m.subject ?? m.body}</span>
+                  <span className="block text-[11px] text-zinc-500 truncate leading-snug">
+                    {m.direction} · {m.createdAt.slice(0, 16).replace('T', ' ')}
+                  </span>
+                </span>
+                <Button variant="tertiary" size="sm" onClick={go('team')}>
+                  Open <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DashboardSection>
+
+      <DashboardSection
+        title="Next actions"
+        description="One click to the exact place an action happens — every destination is live."
+      >
+        <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+          {quickActions.map(({ id, label, hint, icon: Icon }) => (
+            <li key={id} data-testid={`action-${id}`} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brass-500/12 text-brass-400 flex-shrink-0">
+                <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-medium text-white">{label}</span>
+                <span className="block text-[11px] text-zinc-500 truncate leading-snug">{hint}</span>
+              </span>
+              <Button variant="tertiary" size="sm" onClick={go(id)}>
+                Open <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </DashboardSection>
+    </div>
   );
 }

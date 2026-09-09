@@ -130,18 +130,92 @@ test.describe('Admin Operations Overview — redesigned dashboard', () => {
 });
 
 test.describe('Brand dashboard — tenant-correct, no fabricated metrics', () => {
-  test('6. loads for an onboarded brand, no 94.2, derived compliance coverage', async ({ page }) => {
+  test('6. loads for an onboarded brand, no 94.2, real derived compliance', async ({ page }) => {
     await loginAs(page, 'DeskForge Supplies Inc', 1500);
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: 'Brand Overview' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
     // The fabricated hardcoded compliance score must be GONE.
     await expect(page.getByText('94.2', { exact: false })).toHaveCount(0);
-    // Compliance coverage is derived from the brand's real docs "X/Y verified".
-    const complianceLine = page.getByText(/\d+\/\d+ verified/);
+    // Compliance coverage is derived from the brand's real gate docs (X/Y approved).
+    const complianceLine = page.getByText(/\d+\/\d+ documents approved/);
     await expect(complianceLine.first()).toBeVisible({ timeout: 5000 });
+    // The remaining legacy static chart (REVENUE_DATA) is removed, not hidden.
+    await expect(page.getByText('Revenue and Order Volume Trend')).toHaveCount(0);
+    await expect(page.getByText('Fulfilment Pipeline Tracker')).toHaveCount(0);
     // No admin-only content leaks into the brand shell.
     const nav = page.locator('nav[aria-label="Primary"]');
     await expect(nav.locator('text=Audit Log')).toHaveCount(0);
     await expect(nav.locator('text=Global Catalog')).toHaveCount(0);
+  });
+
+  test('7. brand KPI band renders real tenant-scoped values that agree with the PO summary', async ({ page }) => {
+    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
+    // KPIs are numeric strings derived from the tenant's own rows.
+    for (const id of ['active-pos', 'awaiting-ack', 'in-fulfilment', 'products-listed', 'out-of-stock']) {
+      const kpi = page.getByTestId(`kpi-value-${id}`);
+      await expect(kpi).toBeVisible();
+      await expect(kpi).toHaveText(/\d/);
+    }
+    // Contract status is a real state, not a score.
+    await expect(page.getByTestId('kpi-value-contract-status')).toHaveText(/Active|—/);
+    // KPI band and PO summary derive from the same source → identical active count.
+    const kpiActive = Number((await page.getByTestId('kpi-value-active-pos').textContent())!.trim());
+    const poActive = await page.getByTestId('po-summary-active').textContent();
+    expect(Number(poActive!.match(/\d+/)![0])).toBe(kpiActive);
+  });
+
+  test('8. attention rows are real, actionable, and cross-consistent with KPIs', async ({ page }) => {
+    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
+    // Awaiting-acknowledgement KPI == attention rows == PO summary (same source).
+    const awaitingKpi = Number((await page.getByTestId('kpi-value-awaiting-ack').textContent())!.trim());
+    const unackedRows = page.locator('[data-testid^="attention-unacked-"]');
+    const poAwaiting = Number((await page.getByTestId('po-summary-awaiting').textContent())!.match(/\d+/)![0]);
+    expect(await unackedRows.count()).toBe(awaitingKpi);
+    expect(poAwaiting).toBe(awaitingKpi);
+    // The first attention row's Review action drills to the real brand PO view.
+    await page.locator('[data-testid^="attention-"]').first().locator('button', { hasText: 'Review' }).click();
+    await page.waitForTimeout(900);
+    await expect(page.getByText('PO-900', { exact: false }).first()).toBeVisible({ timeout: 6000 });
+  });
+
+  test('9. quick actions route to existing brand destinations', async ({ page }) => {
+    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
+    await expect(page.getByTestId('action-purchase_orders')).toBeVisible();
+    // Every action row routes through a valid brand view id via its Open button.
+    await page.getByTestId('action-catalog').locator('button', { hasText: 'Open' }).click();
+    await page.waitForTimeout(900);
+    await expect(page.getByRole('heading', { name: 'Master Product Catalog' })).toBeVisible({ timeout: 6000 });
+  });
+
+  test('10. brand dashboard has no horizontal overflow at any viewport; drawer works on mobile', async ({ page }) => {
+    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
+    for (const vp of VIEWPORTS) {
+      await page.setViewportSize({ width: vp.w, height: vp.h });
+      await page.waitForTimeout(450);
+      const overflow = await page.evaluate(() => {
+        const doc = document.documentElement;
+        return Math.max(doc.scrollWidth - doc.clientWidth, 0);
+      });
+      expect(overflow, `horizontal overflow at ${vp.w}x${vp.h}`).toBeLessThanOrEqual(1);
+      await page.screenshot({
+        path: `${SHOTS}/brand-${vp.w}x${vp.h}.png`,
+        fullPage: true,
+      });
+    }
+    // Mobile drawer still works at the smallest viewport.
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.waitForTimeout(400);
+    const toggle = page.getByTestId('app-menu-toggle');
+    await expect(toggle).toBeVisible();
+    await toggle.click();
+    await page.waitForTimeout(350);
+    await expect(page.locator('#app-sidebar')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(350);
   });
 });
 
