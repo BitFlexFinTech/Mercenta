@@ -10,7 +10,7 @@
  * Reference-implementation parity (rule 05): same state depth as
  * REGIONAL_DOSSIERS, not just the same UI.
  */
-import { DEMO_PRODUCTS, DEMO_SHIPMENTS, CLEARED_BRAND_IDS } from './demoData'
+import { DEMO_PRODUCTS, DEMO_SHIPMENTS, CLEARED_BRAND_IDS, PORTAL_BRAND_IDS } from './demoData'
 import type { DemoBrand, DemoShipment } from './demoData';
 import type { BrandProfile, RegionalComplianceDoc, RegionalDossier, Shipment, FinancialRecord, CarrierTokens, FinancialCurrency } from '@/types';
 import { BANKS_BY_COUNTRY } from './banksByCountry';
@@ -59,7 +59,10 @@ function buildProfile(brand: DemoBrand): BrandProfile {
     dhlConnected: false,
     fedexConnected: false,
     bakConnected: false,
-    onboarded: isCleared,
+    // §Phase 7F — portal access is decoupled from gate clearance: cleared
+    // brands AND deterministic compliance-scenario tenants reach the portal;
+    // complianceGateStatus below still derives from the cleared state only.
+    onboarded: PORTAL_BRAND_IDS.includes(brand.id),
     fulfillmentTrack: brand.track,
     complianceGateStatus: isCleared ? 'cleared' : 'blocked',
   };

@@ -20,7 +20,9 @@ try {
 
   // ── Coverage ──
   const brands = (await api.fetchBrands()).data;
-  test('11 demo brands seeded', brands.length === 11);
+  // §Phase 7F — derive from the canonical dataset instead of a hardcoded count
+  // (the dataset now includes 2 deterministic compliance-scenario tenants).
+  test('every canonical demo brand is seeded', brands.length === demo.ALL_DEMO_BRANDS.length);
   const categoriesCovered = new Set(brands.map((b) => b.category));
   const missing = demo.approvedCategories?.() ?? [];
   // All 10 approved categories present:
@@ -32,7 +34,9 @@ try {
   // ── PO states ──
   const pos = (await api.fetchPurchaseOrders()).data;
   const statuses = new Set(pos.map((p) => p.status));
-  test('22 purchase orders seeded', pos.length === 22);
+  // §Phase 7F — derive from the canonical seed (cleared tenants only have POs;
+  // the compliant-state matrix tenants intentionally have none yet).
+  test('every canonical purchase order is seeded', pos.length === demo.DEMO_PURCHASE_ORDERS.length);
   test('every PO status represented',
     ['received', 'under_review', 'accepted', 'rejected', 'ready_to_fulfil', 'shipped', 'delivered']
       .every((s) => statuses.has(s)));

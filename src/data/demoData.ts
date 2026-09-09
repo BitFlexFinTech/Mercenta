@@ -59,7 +59,51 @@ export const DEMO_BRAND_PC: DemoBrand = {
   contractStatus: 'active',
 };
 
-export const ALL_DEMO_BRANDS: DemoBrand[] = [...DEMO_BRANDS, DEMO_BRAND_PC];
+/**
+ * §Phase 7F — Deterministic compliance-scenario tenants.
+ *
+ * These brands reached the PORTAL (onboarded = true) but are NOT gate-cleared,
+ * so the compliance gate can be genuinely exercised in the meaningful states
+ * the product claims to support (see `COMPLIANCE_SCENARIO_DOC_STATES` and the
+ * compliance matrix in PROJECT_STATUS.md):
+ *
+ *   Reed & Oak Kitchen Co   — 0/5 required docs approved (Kitchen → 5 required)
+ *   MotorVista Auto Supply — 4/5 required docs approved (Automotive → 5 required)
+ *
+ * Their contracts are 'active' and both mandatory §4.1/§4.2 agreements are
+ * accepted (derived automatically), so the ONLY reason their gate blocks is
+ * the document state — exactly what the compliance-gate E2E asserts.
+ */
+export const DEMO_BRANDS_COMPLIANCE_SCENARIOS: DemoBrand[] = [
+  {
+    id: 'brand-reedkitchen',
+    name: 'Reed & Oak Kitchen Co',
+    category: 'Kitchen',
+    region: 'europe',
+    nation: 'Netherlands',
+    email: 'trade@reedandoak.nl',
+    signatory: 'Lotte Vermeer',
+    track: 'direct_fulfillment',
+    contractStatus: 'active',
+  },
+  {
+    id: 'brand-motorvista',
+    name: 'MotorVista Auto Supply Ltd',
+    category: 'Automotive',
+    region: 'north_america',
+    nation: 'United States',
+    email: 'parts@motorvista.com',
+    signatory: 'Daniel Reyes',
+    track: 'financed',
+    contractStatus: 'active',
+  },
+];
+
+export const ALL_DEMO_BRANDS: DemoBrand[] = [
+  ...DEMO_BRANDS,
+  DEMO_BRAND_PC,
+  ...DEMO_BRANDS_COMPLIANCE_SCENARIOS,
+];
 
 /**
  * Brands that have cleared the compliance gate and thus have operational
@@ -74,6 +118,27 @@ export const ALL_DEMO_BRANDS: DemoBrand[] = [...DEMO_BRANDS, DEMO_BRAND_PC];
 export const CLEARED_BRAND_IDS: string[] = [
   'brand-zambezi',
   'brand-deskforge',
+];
+
+/**
+ * §Phase 7F — compliance-scenario tenant IDs (portal-accessible, NOT cleared).
+ * Deterministic demo states so the compliance gate can be genuinely exercised.
+ * See `DEMO_BRANDS_COMPLIANCE_SCENARIOS` above and `COMPLIANCE_SCENARIO_DOC_STATES` below.
+ */
+export const COMPLIANCE_SCENARIO_BRAND_IDS: string[] = [
+  'brand-reedkitchen',
+  'brand-motorvista',
+];
+
+/**
+ * Every demo tenant that completed onboarding and therefore lives in the
+ * PORTAL (brand shell + nav). Cleared tenants also get operational data
+ * (products/POs/shipments); scenario tenants reach the portal with empty
+ * operational data so their compliance state is the only variable under test.
+ */
+export const PORTAL_BRAND_IDS: string[] = [
+  ...CLEARED_BRAND_IDS,
+  ...COMPLIANCE_SCENARIO_BRAND_IDS,
 ];
 
 /**
@@ -305,6 +370,44 @@ const COMPLIANCE_PATTERNS: ComplianceDocument['status'][][] = [
   ['uploaded', 'uploaded', 'under_review', 'missing'], // early stage (pattern 2)
 ];
 
+/**
+ * §Phase 7F — Explicit per-required-type document states for the
+ * compliance-scenario tenants (overrides the rotating pattern so the gate can
+ * be exercised in exactly these states — the compliance MATRIX):
+ *
+ * NOTE on 'missing': every required document still HAS a demo record (the seed
+ * generates records for all required types); a 'missing' status means
+ * present-but-not-approved, so the canonical gate classifies it as BLOCKING —
+ * the same convention the pre-existing rotating patterns already used.
+ *
+ * | tenant (brandId)        | approved / total | present-but-not-approved                  | expected gate |
+ * |-------------------------|------------------|------------------------------------------|----------------|
+ * | brand-reedkitchen (0/5) | 0 / 5            | 5 (uploaded ×2, under_review ×1, missing ×2) | BLOCKED     |
+ * | brand-motorvista (4/5)  | 4 / 5            | 1 (type_approval missing)                   | BLOCKED     |
+ *
+ * Both tenants have an active contract + both §4.1/§4.2 agreements accepted,
+ * so the document state is the sole reason the gate blocks.
+ */
+export const COMPLIANCE_SCENARIO_DOC_STATES: Record<
+  string,
+  Partial<Record<ComplianceDocument['type'], ComplianceDocument['status']>>
+> = {
+  'brand-reedkitchen': {
+    letter_of_authorization: 'uploaded',
+    product_safety_ukca: 'under_review',
+    insurance_certificate: 'uploaded',
+    brand_registry_confirmation: 'missing',
+    food_contact_material: 'missing',
+  },
+  'brand-motorvista': {
+    letter_of_authorization: 'approved',
+    product_safety_ukca: 'approved',
+    insurance_certificate: 'approved',
+    brand_registry_confirmation: 'approved',
+    type_approval: 'missing',
+  },
+};
+
 const COMPLIANCE_TYPES: ComplianceDocument['type'][] = [
   'letter_of_authorization',
   'product_safety_ukca',
@@ -328,21 +431,30 @@ export const DEMO_COMPLIANCE_DOCS: ComplianceDocument[] = ALL_DEMO_BRANDS.flatMa
   (brand, bi) => {
     const pattern = COMPLIANCE_PATTERNS[bi % COMPLIANCE_PATTERNS.length];
     const isCleared = CLEARED_BRAND_IDS.includes(brand.id);
+    // §Phase 7F — explicit scenario override (see COMPLIANCE_SCENARIO_DOC_STATES).
+    const scenario = COMPLIANCE_SCENARIO_DOC_STATES[brand.id];
 
-    // Base docs: cleared brands get all approved, others get rotating pattern
+    // Base docs: cleared brands get all approved; scenario tenants use their
+    // declared statuses; everyone else gets the rotating pattern.
     const baseDocs = COMPLIANCE_TYPES.map((type, ti) => ({
       id: `cd-${brand.id}-${ti}`,
       brandId: brand.id,
       type,
-      status: isCleared ? 'approved' as const : pattern[ti],
+      status:
+        scenario?.[type] ??
+        (isCleared ? ('approved' as const) : pattern[ti]),
     }));
 
-    // Category-specific docs: cleared brands get approved, others get missing
+    // Category-specific docs: cleared brands get approved; scenario tenants use
+    // the declared status (so a missing 5th doc is exactly representable);
+    // everyone else gets missing.
     const extraDocs = (CATEGORY_EXTRA_DOCS[brand.category] ?? []).map((extra, ei) => ({
       id: `cd-${brand.id}-extra-${ei}`,
       brandId: brand.id,
       type: extra.type,
-      status: isCleared ? 'approved' as const : 'missing' as const,
+      status:
+        scenario?.[extra.type] ??
+        (isCleared ? ('approved' as const) : ('missing' as const)),
     }));
 
     return [...baseDocs, ...extraDocs];

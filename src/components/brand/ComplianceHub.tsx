@@ -13,9 +13,10 @@ import {
 } from 'lucide-react';
 import { MERCENTA_EORI, MERCENTA_VAT } from '@/config/customs';
 import { generateCustomsDocBundle, type CustomsDocumentBundle } from '@/lib/customsDocs';
-import { useBrands, useProducts, usePurchaseOrders, useComplianceDocuments, useContracts } from '@/data/queries';
+import { useBrands, useProducts, usePurchaseOrders, useComplianceDocuments, useContracts, useBrandAgreements } from '@/data/queries';
 import { uploadComplianceDoc } from '@/data/api';
 import { evaluateComplianceGate, getRequiredDocumentsForCategory, CATEGORY_DOC_LABELS, REQUIRED_DOCUMENT_TYPES } from '@/lib/compliance';
+import type { ApprovedCategory } from '@/types';
 
 /**
  * §Stage-3 rewritten compliance hub.
@@ -38,7 +39,7 @@ export function ComplianceHub() {
   const posListRaw = useMemo(() => posQuery.data?.data ?? [], [posQuery.data]);
   // §Stage-20.3 SECURITY FIX — scope to THIS brand's POs only. Previously the
   // customs-bundle generator processed every brand's purchase orders.
-  const { session } = useApp();
+  const { session, brandProfile } = useApp();
   const tenantId = session?.tier === 'brand' ? (session.tenantId ?? null) : null;
   const posList = useMemo(
     () => (tenantId ? posListRaw.filter((p) => p.brandId === tenantId) : posListRaw),
@@ -108,6 +109,16 @@ export function ComplianceHub() {
           </div>
         </div>
       </Card>
+
+      {/* Compliance documents + gate state — §Phase 7F: mounted so the brand's
+          document approval state is user-visible on this page (was previously
+          dead UI). Its gate uses the same canonical business rule as the
+          Product Catalog. */}
+      <ComplianceUploadCard
+        brandId={tenantId}
+        brandName={brandProfile?.businessName ?? ''}
+        category={brandProfile?.category as ApprovedCategory | undefined}
+      />
 
       {/* Auto-generated customs documentation */}
       <Card title="Customs Documentation — auto-generated, pre-filled">
@@ -188,18 +199,38 @@ export function ComplianceHub() {
 }
 
 
-/** Compliance document upload card with expiry tracking */
-function ComplianceUploadCard({ brandId, brandName }: { brandId: string | null; brandName: string }) {
+/** Compliance document upload card with expiry tracking + gate state. */
+function ComplianceUploadCard({
+  brandId,
+  brandName,
+  category,
+}: {
+  brandId: string | null;
+  brandName: string;
+  category?: ApprovedCategory;
+}) {
   const docsQuery = useComplianceDocuments();
   const contractsQuery = useContracts();
+  const agreementsQuery = useBrandAgreements();
   const allDocs = docsQuery.data?.data ?? [];
   const allContracts = contractsQuery.data?.data ?? [];
+  const allAgreements = agreementsQuery.data?.data ?? [];
   const brandDocs = brandId ? allDocs.filter(function(d) { return d.brandId === brandId; }) : [];
   const hasSignedAgreement = allContracts.some(function(c) { return c.brandId === brandId && (c.status === 'signed' || c.status === 'active'); });
+  const logisticsSlaAccepted = brandId
+    ? allAgreements.some(function(a) { return a.brandId === brandId && a.agreementType === 'logistics_sla'; })
+    : false;
+  const chargebackIndemnityAccepted = brandId
+    ? allAgreements.some(function(a) { return a.brandId === brandId && a.agreementType === 'chargeback_indemnity'; })
+    : false;
   // §7B repair — agreement boolean MUST occupy the `hasSignedAgreement`
   // parameter, not `category` (an array `docs` in slot 2 type-checks because
   // both are positional; the previous shift fed the boolean into `category`).
-  const gate = evaluateComplianceGate(brandDocs, undefined, hasSignedAgreement);
+  // §Phase 7F — category-aware required list + full agreement inputs so this
+  // card's gate agrees EXACTLY with the Product Catalog gate (5-doc categories
+  // previously fell through to an undefined-category 4-doc computation).
+  const requiredTypes = category ? getRequiredDocumentsForCategory(category) : REQUIRED_DOCUMENT_TYPES;
+  const gate = evaluateComplianceGate(brandDocs, category, hasSignedAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted);
   const [uploaded, setUploaded] = useState<string | null>(null);
   const [docVersion, setDocVersion] = useState(0);
   void docVersion;
@@ -214,7 +245,7 @@ function ComplianceUploadCard({ brandId, brandName }: { brandId: string | null; 
 
   function expiryStatus(doc: { status: string; expiryDate?: string }) {
     if (!doc.expiryDate) return null;
-    var days = Math.ceil((new Date(doc.expiryDate).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+    const days = Math.ceil((new Date(doc.expiryDate).getTime() - Date.now()) / (24 * 60 * 60 * 1000));
     if (doc.status === 'expired' || days < 0) return { label: 'Expired', color: 'bg-red-500/15 text-red-300' };
     if (days <= 30) return { label: 'Expires in ' + days + 'd', color: 'bg-amber-500/15 text-amber-300' };
     if (days <= 60) return { label: 'Expires in ' + days + 'd', color: 'bg-blue-500/15 text-blue-300' };
@@ -237,11 +268,11 @@ function ComplianceUploadCard({ brandId, brandName }: { brandId: string | null; 
           {gate.cleared ? 'Compliance gate cleared - all required documents approved.' : 'Compliance gate not yet cleared - ' + (gate.missing.length + gate.blocking.length) + ' item(s) remain.'}
         </div>
         <div className="divide-y divide-white/[0.04]">
-          {REQUIRED_DOCUMENT_TYPES.map(function(type) {
-            var doc = brandDocs.find(function(d) { return d.type === type; });
-            var status = doc ? doc.status : 'missing';
-            var isUploading = uploaded === type;
-            var expiry = doc ? expiryStatus(doc) : null;
+          {requiredTypes.map(function(type) {
+            const doc = brandDocs.find(function(d) { return d.type === type; });
+            const status = doc ? doc.status : 'missing';
+            const isUploading = uploaded === type;
+            const expiry = doc ? expiryStatus(doc) : null;
             return (
               <div key={type} className="flex items-center justify-between py-2.5">
                 <div className="flex items-center gap-2 min-w-0">
@@ -271,7 +302,7 @@ function ComplianceUploadCard({ brandId, brandName }: { brandId: string | null; 
           })}
         </div>
         {uploaded && <p className="text-[10px] text-emerald-400">Document uploaded and marked for review.</p>}
-        <p className="text-[10px] text-zinc-600">Required: Letter of Authorization, Product Safety (UKCA), Insurance Certificate, Brand Registry Confirmation. A signed distribution agreement is also required.</p>
+        <p className="text-[10px] text-zinc-600">Required: {requiredTypes.map((t) => CATEGORY_DOC_LABELS[t] ?? t.replace(/_/g, ' ')).join(', ')}. A signed distribution agreement is also required.</p>
       </div>
     </Card>
   );

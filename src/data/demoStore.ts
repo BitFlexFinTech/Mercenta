@@ -409,7 +409,35 @@ export function reconcileDelivery(
 
 /* ── §Stage-25 — brand self-service profile/banking change requests ───────── */
 
-export const demoProfileChangeRequests: import('@/types').ProfileChangeRequest[] = [];
+/**
+ * §Phase 7F — deterministic seeded pending requests so the admin CRM's
+ * profile-change review UI is genuinely exercisable (previously empty → the
+ * E2E could only conditionally skip). Both belong to Zambezi (the CRM's
+ * default test brand); them staying 'pending' is what makes the review card
+ * render. Reviewing mutates this array exactly like runtime requests.
+ */
+export const demoProfileChangeRequests: import('@/types').ProfileChangeRequest[] = [
+  {
+    id: 'pcr-seed-zambezi-signatory-001',
+    brandId: 'brand-zambezi',
+    field: 'signatory',
+    currentValue: 'Tendai Moyo',
+    requestedValue: 'Tendai A. Moyo',
+    reason: 'Official signatory title update after registration change',
+    status: 'pending',
+    requestedAt: '2026-09-01T09:15:00.000Z',
+  },
+  {
+    id: 'pcr-seed-zambezi-phone-002',
+    brandId: 'brand-zambezi',
+    field: 'phone',
+    currentValue: '+263 712 345 678',
+    requestedValue: '+263 713 555 999',
+    reason: 'HQ phone line changed with new carrier',
+    status: 'pending',
+    requestedAt: '2026-09-03T14:40:00.000Z',
+  },
+];
 
 export function requestProfileChange(input: {
   brandId: string;
