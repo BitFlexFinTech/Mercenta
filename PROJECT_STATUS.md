@@ -9,6 +9,22 @@
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
 > - Older sections below (Brand Intelligence, performance fixes, droplet consolidation, E2E suite) are historical/legacy and are preserved verbatim; they do not supersede the phase table above. Navigation: use section 1 for current phases/checkpoint/branch.
+## Phase 0 — Product Consolidation: Repository + Audit Reconciliation (2026-09-10)
+
+> Status: **DONE** — checkpoint doc `docs/PRODUCT_CONSOLIDATION_PHASE0_RECONCILIATION_2026-09-10.md`.
+> Master consolidation pass started. Phase 0 = reconcile docs vs code. **No product functionality changed.**
+> Reactivated baseline verified in-session: HEAD `9915656` (`redesign/foundation`), protected tag `mercenta-baseline-before-redesign-20260907` → `959b4d2` intact.
+> Re-verified in-session gates: `npm run typecheck` 0 errors · `npm run lint` 0 errors · `npm run build` ✓ 3.20s · full E2E **147 passed / 4 skipped / 0 failed** (2.0 min) · provider validators (mock-providers / mock-seam / provider-workflows / automation / postiz) all PASS.
+> **Key reconciliation findings (see checkpoint doc for the full classified inventory):**
+> - `STATUS_CHECK.md` "event-feed Edge Function" claim → **absent** (only `xero-token`/`xero-webhook` in `supabase/functions/`).
+> - `PRODUCTION_READINESS.md` "handleInboundReply wired" → **no caller** in src/supabase.
+> - `PRODUCTION_READINESS.md`/`STATUS_CHECK.md` Stage-17/21/22 Edge Functions (`payouts-transfer`, `catalog-import`+0010 RPC, `discovery-directory`, `esign-envelope`, `send-email`, `instantly-reply-webhook`) → **absent from tree**; `scripts/validate-edge-functions.mjs` crashes ENOENT (STALE tooling).
+> - `docs/ARCHITECTURE.md` §8 + `FUNCTIONAL_RISK_MAP.md` "typecheck red 27 errors" → **stale** (0 at HEAD; `outreachGenerator.ts`/`XeroConnection.tsx` now typecheck clean but remain unimported dead code).
+> - `PROJECT_STATUS.md` old "20 registry integrations" → **19**; `Rakazo` not in registry.
+> - Rakazo confirmed: iframe-only surface, zero domain imports, zero bot code in repo (Phase 2 target).
+> - Brand Intelligence: seed-only (12 prospects), always `MockClient`, no persistence/actions (Phase 3 target). ICP: separate 8-mock-lead universe, disconnected from BI (Phase 4 target).
+> - Rocket.Chat factory always returns mock; Postiz panel always passes `apiKey:''`; live Edge-Function layer absent (recorded, not a simulation blocker).
+> NEXT: **Phase 1 — Backend/Data/Domain Acceptance Gate** (the hard gate before any UI redesign).
 
 ## 1b. Provider Simulation-First completion (2026-09-09) — SIMULATION-COMPLETE core workflows
 
