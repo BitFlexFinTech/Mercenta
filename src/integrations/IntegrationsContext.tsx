@@ -35,6 +35,7 @@ import type {
 } from './types';
 import { INITIAL_INTEGRATIONS, modeForState, rememberApiKey } from './types';
 import { INTEGRATION_REGISTRY, integrationMeta } from './registry';
+import { rememberIntegrations } from './connections';
 
 const STORAGE_KEY = 'mercenta.integrations.v1';
 
@@ -144,8 +145,10 @@ export function IntegrationsProvider({
       // Secrets are intentionally NOT stored here — only status/metadata.
       const safe = Object.fromEntries(
         Object.entries(integrations).map(([k, v]) => [k, { ...v }])
-      );
+      ) as IntegrationsMap;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
+      // Mirror for non-React consumers (mock-first factories resolve LIVE here).
+      rememberIntegrations(safe);
     } catch {
       /* storage unavailable (private mode) — in-memory only */
     }

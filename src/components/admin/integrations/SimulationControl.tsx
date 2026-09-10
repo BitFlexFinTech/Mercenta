@@ -43,6 +43,8 @@ import {
 } from '@/lib/simulation/scenarioEngine';
 import { queryEvents, resetEvents } from '@/lib/events/eventFeed';
 import { resetMockAmazonState } from '@/lib/spapi/mockClient';
+import { resetMockDhlState } from '@/lib/dhl/mockClient';
+import { resetMockCompaniesHouseState, resetMockHmrcState } from '@/lib/compliance/index';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -104,6 +106,18 @@ const SCENARIO_META: Record<ScenarioId, ScenarioMeta> = {
     purpose: 'Provider failure with retry and eventual recovery (or gate-held outcome).',
     simulates: 'A catalog submission polled through the Mock SP-API seam — failure/retry semantics, honestly including gate-held outcomes.',
     requiredProviders: ['amazon_sp_api', 'dhl', 'stripe'],
+  },
+  SHIPMENT_PROGRESSION: {
+    name: 'Shipment Progression (DHL)',
+    purpose: 'A DHL consignment walked milestone-by-milestone through the carrier seam.',
+    simulates: 'PO received → acknowledged → DHL waybill booked → pickup → in-transit → customs → delivered, with deterministic delay/exception handling and per-milestone audit + event records.',
+    requiredProviders: ['dhl'],
+  },
+  COMPLIANCE_VERIFICATION: {
+    name: 'Compliance Verification (Companies House + HMRC)',
+    purpose: 'Company verification and HMRC VAT filing through the government adapters.',
+    simulates: 'Brand company verified at the registrar (with simulated rate-limit retry), VAT status read, VAT return filed — rejected returns are retried and accepted. Full audit + event trail.',
+    requiredProviders: ['companies_house', 'hmrc'],
   },
 };
 
@@ -181,6 +195,9 @@ export function SimulationControl() {
   /** PARTIAL shared reset — only the verified safe seams. */
   function resetSharedState() {
     resetMockAmazonState();
+    resetMockDhlState();
+    resetMockCompaniesHouseState();
+    resetMockHmrcState();
     resetEvents();
     setResults({});
     setLastResetAt(new Date().toISOString());

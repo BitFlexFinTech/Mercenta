@@ -5,6 +5,8 @@
 import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
 import { CarrierDashboard } from '@/components/carrier/CarrierDashboard';
 import { BakLogistics } from '@/components/carrier/BakLogistics';
 import { Terminal, Ship, BarChart3 } from 'lucide-react';
@@ -29,7 +31,11 @@ export default function CarrierShell() {
 
   return (
     <AppShell navSections={NAV_SECTIONS} activeView={carrierView} setActiveView={setCarrierView} breadcrumb={bc} userName={role ?? '3PL Carrier'}>
-      {carrierView === 'bak' ? <BakLogistics /> : <CarrierDashboard />}
+      <ErrorBoundary sectionLabel="Carrier portal">
+        <IntegrationsProvider>
+          {carrierView === 'bak' ? <BakLogistics /> : <CarrierDashboard />}
+        </IntegrationsProvider>
+      </ErrorBoundary>
     </AppShell>
   );
 }

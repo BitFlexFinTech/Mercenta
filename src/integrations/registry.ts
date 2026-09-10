@@ -249,6 +249,38 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     fields: [],
     testCallDescription: 'OAuth connection verified via the dedicated Xero panel',
   },
+  companies_house: {
+    id: 'companies_house',
+    name: 'Companies House',
+    description:
+      'UK company registry — brand company verification and incorporation lookups (compliance workflow). Simulated registrar until a real API key is configured. Free-tier API key from Companies House.',
+    authMethod: 'api_key',
+    fields: [
+      {
+        key: 'api_key',
+        label: 'API Key (free tier)',
+        placeholder: 'Paste the Companies House API key',
+        secret: true,
+      },
+    ],
+    testCallDescription: 'Search the registrar for the company record',
+  },
+  hmrc: {
+    id: 'hmrc',
+    name: 'HMRC (Making Tax Digital)',
+    description:
+      'HMRC — VAT registration status and VAT/CT return filing for the compliance workflow. Simulated until real MTD OAuth credentials are configured. Requires an HMRC developer account + fraud-prevention headers.',
+    authMethod: 'api_key',
+    fields: [
+      {
+        key: 'api_key',
+        label: 'OAuth access token (via Edge Function)',
+        placeholder: 'Paste the MTD access token',
+        secret: true,
+      },
+    ],
+    testCallDescription: 'Read VAT registration status for the connected VRN',
+  },
 };
 
 export const INTEGRATION_ORDER: IntegrationId[] = [
@@ -267,6 +299,12 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   'rocketchat',
   'twilio_whatsapp',
   'postiz',
+  // §Priority-1 — provider control-plane coverage: logistics + compliance +
+  // finance providers with authoritative simulation defaults.
+  'dhl',
+  'xero',
+  'companies_house',
+  'hmrc',
 ];
 
 /**
@@ -307,6 +345,10 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   // provider resolves authoritatively (never falls to UNKNOWN).
   dhl: { category: 'logistics', defaultMode: 'simulation' },
   xero: { category: 'finance', defaultMode: 'simulation' },
+  // §Priority-1 — compliance providers. No live credentials held today;
+  // simulation is the authoritative documented state.
+  companies_house: { category: 'compliance', defaultMode: 'simulation' },
+  hmrc: { category: 'compliance', defaultMode: 'simulation' },
 };
 
 export function integrationMeta(id: IntegrationId): IntegrationMeta {

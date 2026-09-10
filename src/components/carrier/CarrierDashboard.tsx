@@ -1,9 +1,13 @@
 import { useApp } from '@/context/GlobalStateContext';
-import { Card, Badge } from '@/components/ui';
+import { useIntegrations } from '@/integrations/IntegrationsContext';
+import { advanceShipmentViaDhl, recordDhlWaybill } from '@/lib/dhl/domain';
+import { resolveProviderMode } from '@/integrations/types';
+import { Card, Badge, Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { STATUS_COLORS, STATUS_LABELS } from '@/types';
 import type { ShipmentStatus, CarrierId } from '@/types';
-import { Terminal, Activity, Code2 } from 'lucide-react';
+import { Terminal, Activity, Code2, Truck, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
 
 const CARRIER_THEMES: Record<
   CarrierId,
@@ -46,8 +50,65 @@ const STATUS_OPTIONS: ShipmentStatus[] = [
 ];
 
 export function CarrierDashboard() {
-  const { shipments, updateShipmentStatus, apiLogs, carrierContext, setCarrierContext } =
+  const { shipments, updateShipmentStatus, addApiLog, apiLogs, carrierContext, setCarrierContext } =
     useApp();
+  const { modes } = useIntegrations();
+  const [busyShipmentId, setBusyShipmentId] = useState<string | null>(null);
+  const [lastDhlResult, setLastDhlResult] = useState<Record<string, string>>({});
+
+  /**
+   * USER ACTION → DOMAIN WORKFLOW → PROVIDER CONTRACT → SIMULATION ADAPTER →
+   * SIMULATED MILESTONE → DOMAIN STATE → AUDIT → EVENT → UI UPDATE.
+   * The button is the carrier's "request DHL status update" — the provider
+   * body (mock today, live later) decides the next milestone.
+   */
+  async function requestDhlUpdate(id: string) {
+    if (busyShipmentId) return;
+    const row = shipments.find((s) => s.id === id);
+    if (!row) return;
+    setBusyShipmentId(id);
+    try {
+      const res = await advanceShipmentViaDhl({
+        shipmentId: id,
+        brandId: 'brand-zambezi',
+        manifest: {
+          reference: row.reference,
+          customer: row.customer,
+          origin: row.origin,
+          destination: row.destination,
+          value: row.value,
+        },
+        getMode: (pid) => resolveProviderMode(modes, pid),
+        actorId: 'carrier-terminal',
+      });
+      if (res.ok && res.to) {
+        // Apply the provider-derived milestone to the visible terminal state.
+        updateShipmentStatus(id, res.to);
+        if (res.waybill) {
+          addApiLog({
+            id: `api-${Date.now()}`,
+            timestamp: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            method: 'GET',
+            endpoint: `/v1/dhl/shipments/${res.waybill}`,
+            payload: { milestone: res.milestone, exception: res.exception, delayed: res.delayed },
+            status: 200,
+          });
+        }
+        setLastDhlResult((prev) => ({
+          ...prev,
+          [id]: res.exception
+            ? `exception: ${res.milestone ?? 'hold'} (retry recovers)`
+            : `${res.from ?? ''} → ${res.to} · ${res.milestone ?? ''}`,
+        }));
+      } else if (res.status === 'safety_refused') {
+        setLastDhlResult((prev) => ({ ...prev, [id]: `refused: ${res.safetyReason ?? 'not simulation-safe'}` }));
+      } else {
+        setLastDhlResult((prev) => ({ ...prev, [id]: `${res.error ?? 'provider error'} — retry` }));
+      }
+    } finally {
+      setBusyShipmentId(null);
+    }
+  }
 
   const theme = CARRIER_THEMES[carrierContext];
   const carrierShipments = shipments.filter((s) => s.carrier === carrierContext);
@@ -181,6 +242,25 @@ export function CarrierDashboard() {
                           </option>
                         ))}
                       </select>
+                      {carrierContext === 'dhl' && (
+                        <div className="mt-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-[10px]"
+                            loading={busyShipmentId === s.id}
+                            onClick={() => void requestDhlUpdate(s.id)}
+                          >
+                            <RefreshCw className="w-3 h-3 mr-1" />
+                            DHL status → next milestone (sim)
+                          </Button>
+                          {lastDhlResult[s.id] && (
+                            <div className="text-[9px] font-mono text-zinc-500 mt-1 leading-tight">
+                              {lastDhlResult[s.id]}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

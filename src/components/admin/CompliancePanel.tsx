@@ -1,0 +1,290 @@
+/**
+ * §Priority-1 — Compliance panel (Super Admin): Companies House company
+ * verification + HMRC VAT status/filing, driven entirely through the
+ * simulation-first adapters behind the SAME contracts live providers will
+ * use. Every action is boundary-checked: it refuses unless the involved
+ * provider positively resolves SIMULATION (UNKNOWN is never simulated).
+ *
+ * RBAC: mounted only inside SuperAdminPanel tabs (super_admin tier); the
+ * component additionally enforces the tier at its own boundary.
+ */
+
+import { useState } from 'react';
+import { useApp } from '@/context/GlobalStateContext';
+import { useIntegrations } from '@/integrations/IntegrationsContext';
+import { isProviderSimulationSafe, resolveProviderMode } from '@/integrations/types';
+import type { IntegrationId } from '@/integrations/types';
+import { Badge, Button, Card } from '@/components/ui';
+import { cn } from '@/utils/cn';
+import { demoCompanyVerifications, demoHmrcFilings } from '@/data/demoStore';
+import { ALL_DEMO_BRANDS } from '@/data/demoData';
+import {
+  verifyBrandCompany,
+  checkHmrcStatus,
+  fileHmrcReturn,
+  getLatestVatFiling,
+} from '@/lib/compliance/complianceSync';
+import { ShieldCheck, FileText, RefreshCw } from 'lucide-react';
+
+const COMPLIANCE_PROVIDERS: IntegrationId[] = ['companies_house', 'hmrc'];
+
+function modeOf(modes: ReturnType<typeof useIntegrations>['modes'], id: IntegrationId) {
+  return resolveProviderMode(modes, id);
+}
+
+export function CompliancePanel() {
+  const { session } = useApp();
+  const { modes } = useIntegrations();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [outcome, setOutcome] = useState<Record<string, string>>({});
+
+  const isSuperAdmin = session?.tier === 'super_admin';
+  if (!isSuperAdmin) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-red-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white">Super Admin access required</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Compliance controls are restricted to the Super Admin tier.
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  const chSafe = isProviderSimulationSafe(modeOf(modes, 'companies_house'));
+  const hmrcSafe = isProviderSimulationSafe(modeOf(modes, 'hmrc'));
+
+  async function run(
+    key: string,
+    fn: () => Promise<{ ok: boolean; error?: string; safetyReason?: string; [k: string]: unknown }>
+  ) {
+    if (busy) return;
+    setBusy(key);
+    try {
+      const res = await fn();
+      setOutcome((prev) => ({
+        ...prev,
+        [key]: res.safetyReason
+          ? `REFUSED: ${res.safetyReason}`
+          : res.ok
+            ? 'Succeeded — audit + event recorded'
+            : `Failed (retryable): ${res.error ?? 'error'}`,
+      }));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const verifications = demoCompanyVerifications;
+  const filings = [...demoHmrcFilings].reverse();
+
+  return (
+    <div className="space-y-4">
+      <Card className="p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-11 h-11 rounded-lg bg-brand-500/15 flex items-center justify-center">
+            <ShieldCheck className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-white">Compliance — Companies House &amp; HMRC</h3>
+            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+              Simulated government-provider workflows: brand company verification at the registrar and
+              VAT status/filing with HMRC. Every action runs through the SAME adapter contracts a live
+              connection will use — today the deterministic mock bodies execute (no real government
+              endpoint is contacted). Actions are refused unless the provider mode is positively{' '}
+              <span className="text-amber-300">SIMULATION</span>.
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <Badge className={cn('text-[10px] border', chSafe ? 'bg-amber-500/15 text-amber-300 border-amber-500/20' : 'bg-red-500/15 text-red-300 border-red-500/20')}>
+              Companies House: {String(modeOf(modes, 'companies_house'))}
+            </Badge>
+            <Badge className={cn('text-[10px] border', hmrcSafe ? 'bg-amber-500/15 text-amber-300 border-amber-500/20' : 'bg-red-500/15 text-red-300 border-red-500/20')}>
+              HMRC: {String(modeOf(modes, 'hmrc'))}
+            </Badge>
+          </div>
+        </div>
+        {(!chSafe || !hmrcSafe) && (
+          <div className="mt-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-[11px] text-amber-200">
+            One or more compliance providers is not resolved as SIMULATION. Actions for that provider are
+            refused at the boundary and by the engine. Open Integrations to set the provider to simulation
+            (or connect real credentials there later — no code change).
+          </div>
+        )}
+      </Card>
+
+      {/* ── Companies House ── */}
+      <Card
+        className="p-5"
+        title="Companies House — company verification"
+        subtitle="Simulated registrar lookup: brand company → status → verified"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr>
+                <th className="px-3 py-2 text-xs text-zinc-500">Brand</th>
+                <th className="px-3 py-2 text-xs text-zinc-500">Company no.</th>
+                <th className="px-3 py-2 text-xs text-zinc-500">Verification</th>
+                <th className="px-3 py-2 text-xs text-zinc-500">Source</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody>
+              {ALL_DEMO_BRANDS.map((b) => {
+                const v = verifications.find((x) => x.brandId === b.id);
+                return (
+                  <tr key={b.id} className="border-t border-white/[0.05]">
+                    <td className="px-3 py-2 text-xs text-white">{b.name}</td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-zinc-400">
+                      {v?.companyNumber ?? '—'}
+                    </td>
+                    <td className="px-3 py-2">
+                      <Badge
+                        className={cn(
+                          'text-[10px]',
+                          !v
+                            ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20'
+                            : v.status === 'verified'
+                              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                              : 'bg-red-500/15 text-red-300 border-red-500/20'
+                        )}
+                      >
+                        {v ? v.status.replace(/_/g, ' ') : 'unverified'}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2 text-[10px] text-zinc-500">{v?.source ?? '—'}</td>
+                    <td className="px-3 py-2 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-[10px]"
+                        loading={busy === `ch-${b.id}`}
+                        disabled={!chSafe}
+                        onClick={() =>
+                          void run(`ch-${b.id}`, () =>
+                            verifyBrandCompany(b.id, {
+                              getMode: (pid) => resolveProviderMode(modes, pid),
+                              actorId: session?.tier ?? 'system',
+                            })
+                          )
+                        }
+                      >
+                        <RefreshCw className="w-3 h-3 mr-1" /> Verify (simulated)
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-2 space-y-1">
+          {Object.entries(outcome)
+            .filter(([k]) => k.startsWith('ch-'))
+            .map(([k, v]) => (
+              <div key={k} className="text-[10px] font-mono text-zinc-500">{k}: {v}</div>
+            ))}
+        </div>
+      </Card>
+      {/* ── HMRC ── */}
+      <Card
+        className="p-5"
+        title="HMRC — VAT status &amp; filing (Making Tax Digital)"
+        subtitle="Simulated VAT registration status, next-return deadline and return filing (accepted / rejected → retry)"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr>
+                <th className="px-3 py-2 text-xs text-zinc-500">Brand</th>
+                <th className="px-3 py-2 text-xs text-zinc-500">VRN (sim)</th>
+                <th className="px-3 py-2 text-xs text-zinc-500">Last filing</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody>
+              {ALL_DEMO_BRANDS.slice(0, 4).map((b) => {
+                const latest = getLatestVatFiling(b.id);
+                return (
+                  <tr key={b.id} className="border-t border-white/[0.05]">
+                    <td className="px-3 py-2 text-xs text-white">{b.name}</td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-zinc-400">MOCK-VRN-{b.id.slice(-6)}</td>
+                    <td className="px-3 py-2 text-[11px]">
+                      {latest ? `${latest.status} · ${latest.period}` : 'no filing yet'}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-[10px]"
+                        loading={busy === `hmrc-${b.id}`}
+                        disabled={!hmrcSafe}
+                        onClick={() =>
+                          void run(`hmrc-${b.id}`, async () => {
+                            const status = await checkHmrcStatus(b.id, {
+                              getMode: (pid) => resolveProviderMode(modes, pid),
+                              actorId: session?.tier ?? 'system',
+                            });
+                            if (!status.ok) return status;
+                            return await fileHmrcReturn(
+                              b.id,
+                              { period: 'Q3 2026', totalSalesGbp: 48250, vatDueGbp: 9650 },
+                              { getMode: (pid) => resolveProviderMode(modes, pid), actorId: session?.tier ?? 'system' }
+                            );
+                          })
+                        }
+                      >
+                        <FileText className="w-3 h-3 mr-1" /> Sync + File VAT (simulated)
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-3">
+          <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wide">Filing history</div>
+          <div className="mt-1 space-y-1 max-h-[180px] overflow-y-auto">
+            {filings.length === 0 ? (
+              <div className="text-[11px] text-zinc-600">No simulated filings yet — run Sync + File above.</div>
+            ) : (
+              filings.slice(0, 8).map((f) => (
+                <div key={f.id} className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                  <span>{f.brandId.slice(0, -4)}</span>
+                  <Badge className={cn('text-[9px] border', f.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' : 'bg-amber-500/15 text-amber-300 border-amber-500/20')}>
+                    {f.status}
+                  </Badge>
+                  <span className="text-zinc-600 truncate">{f.period} · {f.submissionId ?? (f.rejectionReason ?? '')}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="mt-2 space-y-1">
+          {Object.entries(outcome)
+            .filter(([k]) => k.startsWith('hmrc-'))
+            .map(([k, v]) => (
+              <div key={k} className="text-[10px] font-mono text-zinc-500">{k}: {v}</div>
+            ))}
+        </div>
+
+        <p className="mt-3 text-[10px] text-zinc-600 leading-relaxed">
+          Safe mock configuration (simulation): Companies House key{' '}
+          <span className="font-mono text-zinc-400">mock:ch-demo-key</span> · HMRC client{' '}
+          <span className="font-mono text-zinc-400">mock:hmrc-demo-client</span>. Live credentials, when
+          entered in Integrations, activate the same workflows with zero code change.
+        </p>
+      </Card>
+    </div>
+  );
+}

@@ -17,7 +17,23 @@ import {
   ShieldCheck,
   Unlink,
   HeartPulse,
+  FlaskConical,
+  Power,
 } from 'lucide-react';
+
+/**
+ * §Priority-1 — safe mock configuration labels for the provider control
+ * plane. Simulation-mode cards surface the deterministic mock values the
+ * workflow actually uses, so an operator never has to invent credentials.
+ */
+const SIM_MOCK_LABELS: Record<string, string> = {
+  'dhl:': `key ${'mock:dhl-eu-demo-key'} · account MOCK-DHL-ACCOUNT-0001`,
+  'companies_house:': `api key ${'mock:ch-demo-key'} · company ${'MOCK-CH-10000001'}`,
+  'hmrc:': `oauth client ${'mock:hmrc-demo-client'} · token ${'mock:hmrc-demo-secret'}`,
+  'stripe:': 'mock:sub-XXXX subscriptions (Billing labels itself (Mock) mode)',
+  'amazon_sp_api:': 'MOCK-SUB-XXXXX submissions · MOCK-PO-XXXX purchase-order pool',
+  'esignature:': 'mock:env-XXXX envelopes (PandaDoc/DocuSign catalogue)',
+};
 
 function StatusBadge({ state }: { state: IntegrationState }) {
   if (state.status === 'connecting') {
@@ -520,7 +536,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
 }
 
 export function IntegrationsPanel() {
-  const { integrations, disconnect, modes } = useIntegrations();
+  const { integrations, disconnect, modes, setMode } = useIntegrations();
   const [wizardFor, setWizardFor] = useState<IntegrationId | null>(null);
 
   return (
@@ -601,6 +617,47 @@ export function IntegrationsPanel() {
                   {state.error}
                 </div>
               )}
+
+              {/* §Priority-1 — provider control plane: simulation mode + safe mock config */}
+              {mode === 'simulation' && (
+                <div className="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-[10px] text-amber-200 leading-relaxed">
+                  <strong>Simulation mode.</strong> No live call is made and no real credential is
+                  used or stored. Safe mock configuration: {SIM_MOCK_LABELS[`${id}:${state.provider ?? ''}`] ?? 'deterministic mock adapter (see workflow surfaces)'}. Enter real credentials below to switch to LIVE later — no code change.
+                </div>
+              )}
+              {state.disabled && (
+                <div className="mb-3 bg-zinc-500/10 border border-zinc-500/20 rounded-lg p-2.5 text-[10px] text-zinc-400 leading-relaxed">
+                  <strong>Disabled.</strong> Configuration kept; no workflow uses this provider.
+                </div>
+              )}
+
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <span className="text-[10px] text-zinc-600">
+                  {mode === 'simulation' ? 'Simulation is executable with no credentials' : 'Operator: enable simulation to demonstrate workflows without credentials'}
+                </span>
+                <div className="flex items-center gap-2">
+                  {mode !== 'simulation' && !connected && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => setMode(id, 'simulation')}
+                    >
+                      <FlaskConical className="w-3.5 h-3.5 mr-1" /> Enable simulation
+                    </Button>
+                  )}
+                  {connected && state.sandbox && mode === 'simulation' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => setMode(id, 'disabled')}
+                    >
+                      <Power className="w-3.5 h-3.5 mr-1" /> Disable
+                    </Button>
+                  )}
+                </div>
+              </div>
 
               <div className="flex items-center justify-end gap-2">
                 {connected ? (

@@ -20,7 +20,11 @@ export type IntegrationId =
   // authoritative (docs-verified current state: DHL waiting/simulation,
   // Xero demo/simulation). No longer implicit/unknown.
   | 'dhl'
-  | 'xero';
+  | 'xero'
+  // §Priority-1 — compliance providers registered so their mode is
+  // authoritative and the safety gate can resolve them (never UNKNOWN).
+  | 'companies_house'
+  | 'hmrc';
 
 export type IntegrationStatus =
   | 'disconnected'
@@ -198,6 +202,11 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   // repository state confirms DHL = waiting/simulation, Xero = demo/simulation.
   dhl: { status: 'disconnected', sandbox: false },
   xero: { status: 'disconnected', sandbox: false },
+  // §Priority-1 — compliance providers simulation-capable by docs-verified
+  // current state (no live credentials held). Registered so the safety gate
+  // resolves them authoritatively — never UNKNOWN.
+  companies_house: { status: 'disconnected', sandbox: false },
+  hmrc: { status: 'disconnected', sandbox: false },
 };
 
 /** API keys are held IN-MEMORY ONLY until Vault-backed storage is wired. */
