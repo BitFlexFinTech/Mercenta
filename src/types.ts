@@ -356,6 +356,36 @@ export interface Contract {
   version: number;
 }
 
+/** §Priority-1 — Companies House verification record for a brand company. */
+export interface CompanyVerification {
+  id: string;
+  brandId: string;
+  companyNumber: string;
+  companyName: string;
+  /** Registrar status: active companies verify cleanly; dissolved do not. */
+  status: 'verified' | 'not_found' | 'dissolved' | 'error';
+  incorporatedAt?: string;
+  sicCodes?: string[];
+  verifiedAt?: string;
+  lastError?: string;
+  /** 'simulation' until a live Companies House connection verifies records. */
+  source: 'simulation' | 'live';
+}
+
+/** §Priority-1 — HMRC filing record (VAT/CT submission lifecycle). */
+export interface HmrcFiling {
+  id: string;
+  brandId: string;
+  vrn: string;
+  period: string;
+  type: 'vat_return' | 'ct_return';
+  status: 'accepted' | 'rejected' | 'error';
+  submissionId?: string;
+  rejectionReason?: string;
+  filedAt?: string;
+  agency: 'simulation' | 'live';
+}
+
 /** §3 Compliance gate documents */
 export interface ComplianceDocument {
   id: string;

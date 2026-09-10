@@ -13,7 +13,12 @@ export type EventType =
   | 'contract_expired'
   | 'brand_onboarding_complete'
   | 'security_alert'
-  | 'test_suite_failure';
+  | 'test_suite_failure'
+  // §Priority-1 — shipment/provider milestone + compliance verification events.
+  | 'shipment_milestone'
+  | 'provider_failure'
+  | 'company_verified'
+  | 'hmrc_filing';
 
 export interface PlatformEvent {
   id: string;
@@ -45,4 +50,8 @@ export const EVENT_SEVERITY_MAP: Record<EventType, EventSeverity> = {
   brand_onboarding_complete: 'informational',
   security_alert: 'critical',
   test_suite_failure: 'important',
+  shipment_milestone: 'informational',
+  provider_failure: 'important',
+  company_verified: 'informational',
+  hmrc_filing: 'important',
 };

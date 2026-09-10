@@ -12,6 +12,7 @@
 import { supabase } from '@/lib/supabase';
 import { evaluateComplianceGate } from '@/lib/compliance';
 import { createSPApiClientForConnection } from '@/lib/spapi';
+import { spApiConnectionCredentials } from '@/integrations/connections';
 import { DEFAULT_HOMEPAGE_CONTENT, type HomepageContent } from '@/config/homepageContent';
 import {
   ALL_DEMO_BRANDS,
@@ -254,7 +255,9 @@ export async function submitCatalogItem(
   // MockAmazonSPAPIClient until real credentials are configured in the
   // Integrations wizard (then the real client, zero code changes).
   const { client, mode } = createSPApiClientForConnection({
-    credentials: null, // real credentials arrive here once the wizard stores them
+    // Mock-first: the resolver returns real credentials ONLY when a verified
+    // non-sandbox connection with a vault secret-ref is stored by the wizard.
+    credentials: spApiConnectionCredentials(),
     edgeFunctionBase: '/functions/v1/spapi',
   });
   const spResult = await client.submitCatalogItem(product);
@@ -289,7 +292,7 @@ export async function pollSubmissionStatus(submissionId: string): Promise<{
   error?: string;
 }> {
   const { client } = createSPApiClientForConnection({
-    credentials: null,
+    credentials: spApiConnectionCredentials(),
     edgeFunctionBase: '/functions/v1/spapi',
   });
   return client.getSubmissionStatus(submissionId);
@@ -302,7 +305,7 @@ export async function fetchSpApiPurchaseOrders(sinceIso: string): Promise<{
   error?: string;
 }> {
   const { client } = createSPApiClientForConnection({
-    credentials: null,
+    credentials: spApiConnectionCredentials(),
     edgeFunctionBase: '/functions/v1/spapi',
   });
   return client.fetchPurchaseOrders(sinceIso);

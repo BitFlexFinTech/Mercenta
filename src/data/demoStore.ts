@@ -817,3 +817,44 @@ export function updateCarrierMarkup(id: string, updates: Partial<Pick<CarrierMar
   Object.assign(entry, updates);
   return true;
 }
+
+/* ── §Priority-1 — Compliance verification stores (Companies House / HMRC) ── */
+
+import type { CompanyVerification, HmrcFiling } from '@/types';
+
+export const demoCompanyVerifications: CompanyVerification[] = [];
+export const demoHmrcFilings: HmrcFiling[] = [];
+
+/** Upsert a brand's Companies House verification record (tenant-keyed). */
+export function setCompanyVerification(
+  brandId: string,
+  patch: Omit<CompanyVerification, 'id' | 'brandId'>
+): CompanyVerification {
+  const existing = demoCompanyVerifications.find((v) => v.brandId === brandId);
+  if (existing) {
+    Object.assign(existing, patch, { brandId });
+    return existing;
+  }
+  const record: CompanyVerification = { id: `ch-ver-${brandId}`, brandId, ...patch };
+  demoCompanyVerifications.push(record);
+  return record;
+}
+
+/** Append a HMRC filing record (history is append-only, tenant-keyed). */
+export function pushHmrcFiling(record: Omit<HmrcFiling, 'id'>): HmrcFiling {
+  const filing: HmrcFiling = {
+    id: `hmrc-file-${record.brandId}-${Date.now()}-${demoHmrcFilings.length}`,
+    ...record,
+  };
+  demoHmrcFilings.push(filing);
+  return filing;
+}
+
+/** Most recent filing per (brand, type) — the current submission state. */
+export function latestHmrcFiling(brandId: string, type: 'vat_return' | 'ct_return'): HmrcFiling | undefined {
+  let out: HmrcFiling | undefined;
+  for (const f of demoHmrcFilings) {
+    if (f.brandId === brandId && f.type === type && (!out || f.filedAt! > out.filedAt!)) out = f;
+  }
+  return out;
+}

@@ -314,6 +314,9 @@ export interface DemoShipment {
   destination: string;
   delayed: boolean;
   exception: boolean;
+  /** §Priority-1 — carrier waybill / tracking once booked through the DHL seam. */
+  waybill?: string;
+  trackingNumber?: string;
 }
 
 export const DEMO_SHIPMENTS: DemoShipment[] = DEMO_PURCHASE_ORDERS.filter(
