@@ -1,6 +1,6 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-09 (Golden-protocol run — Phase 1 zero-error repair 44→0 TS / 18→0 lint; Phase 2 runtime sweep ALL CLEAN; Phase 10 demo redeployed and production-only mount crash root-caused+fixed. E2E 143/0/4)
+> Last updated: 2026-09-09 (Provider Simulation-First completion pass — SIMULATION-COMPLETE core workflows. DHL/Companies House/HMRC adapter trios with deterministic mocks + factories; 2 new scenarios; live-boundary resolver; Super Admin Compliance tab + carrier DHL control; networkCalls===0 proofs; E2E 147/0/4)
 >
 > ## 0. Project-Memory Reconciliation (2026-09-08)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
@@ -9,6 +9,24 @@
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
 > - Older sections below (Brand Intelligence, performance fixes, droplet consolidation, E2E suite) are historical/legacy and are preserved verbatim; they do not supersede the phase table above. Navigation: use section 1 for current phases/checkpoint/branch.
+
+## 1b. Provider Simulation-First completion (2026-09-09) — SIMULATION-COMPLETE core workflows
+
+| Checkpoint | Covered | Notes |
+|---|---|---|
+| **Provider control plane** | 20 registry integrations (15 original + `dhl`/`xero` Phase 4 + `companies_house` + `hmrc` this pass), mode model authoritative, Integrations Hub now the provider control plane: per-card simulation enable/disable, safe mock-credential labels, LIVE boundary unchanged (sandbox never equals LIVE). | UNKNOWN ≠ SIMULATION enforced at resolver (`isProviderSimulationSafe`), scenario engine gate, DHL/compliance domain boundaries, and the Integrations UI. |
+| **DHL logistics adapter** | `src/lib/dhl/` — live client (`client.ts`, Edge-Function transport), deterministic mock (`mockClient.ts`: milestone sequence label→pickup→picked_up→in_transit→customs→delivered, every-6th exception + retry recovery, `simulateDhlTransientFailure`), factory (`index.ts`, `mock:` secret never reaches live transport), transform, domain seam (`domain.ts` USER ACTION → contract → mock → milestone → domain state (demoShipments) → audit → event). Carrier terminal "DHL status → next milestone (sim)" button wired + CarrierShell now wrapped in IntegrationsProvider (fixed pre-existing missing-provider crash). | |
+| **Companies House + HMRC** | `src/lib/compliance/` — live+mock+factory pairs; `complianceSync.ts` domain workflow (verifyBrandCompany / checkHmrcStatus / fileHmrcReturn) writing tenant-scoped verification + filing stores; safe mock credentials; Super Admin → **Compliance** tab. | |
+| **Scenarios** | 9 total (+2): `SHIPMENT_PROGRESSION` and `COMPLIANCE_VERIFICATION`. Every scenario deterministic, resettable, safety-gated, audit + event trail, zero network. | |
+| **Live-boundary** | `src/integrations/connections.ts` — non-React registry mirror; `spApiConnectionCredentials()` resolves the wizard-stored vault secret ref so `api.ts` factories flip mock→real on credentials alone. Same seam pattern for DHL/CH/HMRC. | |
+| **Validation** | `validate-mock-providers.mjs` extended (mock/factory/networkCalls===0 for DHL/CH/HMRC) — PASS; new `validate-provider-workflows.mjs` (scenario determinism, audit/event counts, fetch-instrumented ⇒ ZERO external network calls, LIVE/UNKNOWN refusal) — PASS. | |
+| **E2E** | `simulation-control.spec.ts` 17/17 (incl. 2 new scenario runs), new `compliance-sim.spec.ts` 2/2, full suite **147 passed / 0 failed / 4 skipped** (pre-existing conditional product gates). | |
+| **Gates** | `npx tsc --noEmit -p tsconfig.app.json` **0** · `npm run lint` **0** · `npm run build` **PASS**. | |
+
+- **Provider mode safety (unchanged + enforced):** only a mode positively resolved `simulation` is executable by any simulated action. `available`/`configuring`/`disabled`/`unknown`/`not_registered`/`live` are all refused by the scenario gate and each domain boundary (`dhl`, `companies_house`, `hmrc`).
+- **No business-workflow fork:** the domain workflows (PO/catalog/PO-ack/shipment/compliance/filing) are the SAME code paths for simulation and live; only the adapter behind the contract changes.
+- **Network isolation proof:** `validate-provider-workflows.mjs` instruments global fetch and runs both new scenarios + `verifyBrandCompany` — asserts and shows **0 external fetch calls**.
+- **Skips (4, all pre-existing product-guarded):** `access-gate` flag/reject/brand-visible ×3 + `tours` deductions-surface ×1 — pre-existing conditionals, unchanged classification.
 
 ## 1a. Golden-protocol continuation (2026-09-09) — Phases 1, 2, 10 DONE
 

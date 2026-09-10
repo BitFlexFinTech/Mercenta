@@ -93,7 +93,66 @@ popup. Replaced by `IntegrationsPanel` ConnectWizard upgrade.
 | Namecheap FTP | LIVE (deploy) | PRESENT |
 | Xero | DEMO (28-day reset, auto-reseed) | PRESENT + MODE=demo |
 | Amazon SP-API | SIMULATION | absent |
-| Stripe / DHL / Keepa / Companies House / HMRC | SIMULATION / UNCONFIGURED | absent |
+| DHL UK | SIMULATION | absent (safe mock: `mock:dhl-eu-demo-key` / `MOCK-DHL-ACCOUNT-0001`) |
+| Companies House | SIMULATION | absent (safe mock: `mock:ch-demo-key`) |
+| HMRC | SIMULATION | absent (safe mock: `mock:hmrc-demo-client` / `mock:hmrc-demo-secret`) |
+| Stripe / Keepa | SIMULATION / UNCONFIGURED | absent |
 
 Not a single fixed global mode — it must be per-integration and swappable by
 credentials alone.
+
+## 9. Provider Simulation-First completion (2026-09-09)
+
+### 9.1 Architecture (proved this pass)
+
+```
+USER ACTION
+→ MERCENTA DOMAIN WORKFLOW       (src/data/api.ts, src/lib/dhl/domain.ts,
+                                   src/lib/compliance/complianceSync.ts — the SAME
+                                   code paths for simulation and live; never a fork)
+→ PROVIDER CONTRACT               (src/lib/dhl/client.ts, src/lib/compliance/*.ts,
+                                   src/lib/spapi/client.ts, src/lib/billing/stripe.ts)
+→ SIMULATION ADAPTER              (…/mockClient.ts)   OR   LIVE ADAPTER (…/client.ts)
+   — chosen by factory (…/index.ts) from connection state ONLY
+   — `mock:` secret ref is NEVER forwarded to a live transport (unit-proven)
+→ PROVIDER RESPONSE / EVENT       (deterministic mock milestone/result)
+→ DOMAIN PROCESSING               (mapping via transform.ts / domain.ts)
+→ STATE TRANSITION                (shared demoStore arrays — every view reflects it)
+→ AUDIT EVENT                     (demoAuditLog)
+→ NOTIFICATION                    (eventFeed → NotificationCenter)
+→ UI UPDATE
+```
+
+### 9.2 Safe mock credential rule
+
+- Mock values are unmistakable (`mock:` prefix, `MOCK-DHL-…`, `SIM-TRK-…`),
+  deterministic, never real secrets, and never sent to a live endpoint.
+- An operator never invents values for simulation — the Integrations Hub
+  surfaces the exact mock configuration each simulated provider uses.
+- LIVE activation later is credentials-only: enter real credentials in
+  Integrations; the factory returns the live client; NO domain rewrite.
+
+### 9.3 Providers added this pass
+
+| Provider | Contract | Simulation | Live seam | Safety gate | UI | E2E |
+|---|---|---|---|---|---|---|
+| **DHL UK** | `src/lib/dhl/client.ts` | `mockClient.ts` milestone machine | `createDhlClientForConnection` factory | `isProviderSimulationSafe('dhl')` at domain | Carrier terminal button | compliance-sim + simulation-control |
+| **Companies House** | `companiesHouseClient.ts` | registrar mock (match/not-found/rate-limit) | factory | domain gate | Super Admin → Compliance | compliance-sim |
+| **HMRC** | `hmrcClient.ts` | VAT status + filing mock (reject→retry) | factory | domain gate | Super Admin → Compliance | compliance-sim |
+
+### 9.4 Scenario coverage (Simulation Control, Super Admin)
+
+NORMAL_PO · PARTIAL_PO · DELAYED_DELIVERY · FINANCIAL_EXCEPTION · CASE ·
+PRODUCT_FAILURE · INTEGRATION_FAILURE · **SHIPMENT_PROGRESSION** (new) ·
+**COMPLIANCE_VERIFICATION** (new). All deterministic/resettable/safety-gated.
+
+### 9.5 Live activation (exact, for GO_LIVE)
+
+| Provider | Live credentials | Where entered | Extra code needed |
+|---|---|---|---|
+| Amazon SP-API | LWA Client ID + Secret + OAuth consent | Integrations → Amazon SP-API | Edge Functions `/functions/v1/spapi/*`; store refresh token as `vault:` secretRef |
+| DHL | DHL Express API key + billing account | Integrations → DHL UK | EF `/functions/v1/dhl/*` |
+| Companies House | free-tier API key | Integrations → Companies House | EF `/functions/v1/companies-house` |
+| HMRC | MTD OAuth client id/secret + fraud headers | Integrations → HMRC | EF `/functions/v1/hmrc` |
+| Xero | client id/secret + tenant | Accounting panel / XERO_MODE | none (existing) |
+| Stripe | publishable + secret keys | Integrations → Stripe | none (existing) |
