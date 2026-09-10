@@ -68,6 +68,8 @@ test.describe('Simulation Control Centre — rendering', () => {
     await expect(page.locator('text=Support Case').first()).toBeVisible();
     await expect(page.locator('text=Product Validation Failure').first()).toBeVisible();
     await expect(page.locator('text=Integration Failure / Retry').first()).toBeVisible();
+    await expect(page.locator('text=Shipment Progression (DHL)').first()).toBeVisible();
+    await expect(page.locator('text=Compliance Verification (Companies House + HMRC)').first()).toBeVisible();
     await expect(page.locator('text=Deterministic seed').first()).toBeVisible();
     await expect(page.locator('text=Run all scenarios').first()).toBeVisible();
     await expect(page.locator('text=Simulation-safe').first()).toBeVisible();
@@ -83,6 +85,26 @@ test.describe('Simulation Control Centre — successful run', () => {
     await expect(normalCard.locator('text=State transitions').first()).toBeVisible();
     await expect(normalCard.locator('text=Purchase order').first()).toBeVisible();
     await expect(normalCard.locator('text=audit row').first()).toBeVisible();
+  });
+
+  test('Run SHIPMENT_PROGRESSION succeeds with milestone steps + waybill', async ({ page }) => {
+    await loginAsSuperAdmin(page);
+    await openSimulationTab(page);
+    const card = page.locator('div.p-4', { hasText: 'Shipment Progression (DHL)' }).first();
+    await card.locator('text=Run').click();
+    await expect(card.locator('text=Succeeded').first()).toBeVisible({ timeout: 15000 });
+    await expect(card.locator('text=State transitions').first()).toBeVisible();
+    // The provider boundary must have surfaced a waybill step.
+    await expect(card.locator('text=waybill_booked').first()).toBeVisible({ timeout: 8000 });
+  });
+
+  test('Run COMPLIANCE_VERIFICATION succeeds with company + VAT steps', async ({ page }) => {
+    await loginAsSuperAdmin(page);
+    await openSimulationTab(page);
+    const card = page.locator('div.p-4', { hasText: 'Compliance Verification (Companies House + HMRC)' }).first();
+    await card.locator('text=Run').click();
+    await expect(card.locator('text=Succeeded').first()).toBeVisible({ timeout: 15000 });
+    await expect(card.locator('text=vat_status_checked').first()).toBeVisible({ timeout: 8000 });
   });
 });
 

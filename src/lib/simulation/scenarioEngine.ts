@@ -48,6 +48,12 @@ import {
 } from '@/lib/helpdesk/ticketStore';
 import { validateProductImage } from '@/lib/amazon/productImageValidator';
 import { resetMockAmazonState } from '@/lib/spapi/mockClient';
+import { advanceShipmentViaDhl, recordDhlWaybill } from '@/lib/dhl/domain';
+import {
+  verifyBrandCompany,
+  checkHmrcStatus,
+  fileHmrcReturn,
+} from '@/lib/compliance/complianceSync';
 import type {
   Deduction,
   PurchaseOrder,
@@ -65,7 +71,11 @@ export type ScenarioId =
   | 'FINANCIAL_EXCEPTION'
   | 'CASE'
   | 'PRODUCT_FAILURE'
-  | 'INTEGRATION_FAILURE';
+  | 'INTEGRATION_FAILURE'
+  // §Priority-1 — provider-driven workflows (DHL milestone progression +
+  // government compliance verification), exercising the SAME domain seams.
+  | 'SHIPMENT_PROGRESSION'
+  | 'COMPLIANCE_VERIFICATION';
 
 export interface ScenarioRunContext {
   /** Brand whose tenant the scenario operates in. Defaults to the first cleared brand. */
@@ -595,6 +605,157 @@ async function scenarioIntegrationFailure(ctx: ScenarioRunContext): Promise<Scen
   return { scenario: 'INTEGRATION_FAILURE', runId, status: 'ok', steps, created: { deductions: [], submissionId }, auditIds };
 }
 
+/** §Priority-1 — DHL milestone progression through the real carrier seam. */
+async function scenarioShipmentProgression(ctx: ScenarioRunContext): Promise<ScenarioResult> {
+  const brandId = resolveBrandId(ctx);
+  const refuse = assertSimulationOnly(ctx, 'SHIPMENT_PROGRESSION', ['dhl']);
+  if (refuse) {
+    return { scenario: 'SHIPMENT_PROGRESSION', runId: deriveId(String(ctx.seed ?? 0), 'run'), status: 'safety_refused', safetyReason: refuse, steps: [], created: { deductions: [] }, auditIds: [] };
+  }
+  const seed = ctx.seed ?? 0;
+  const runId = `shipment-${seed}`;
+  const base = new Date(ctx.timestamp ?? Date.now());
+  const actorId = ctx.actorId ?? 'system';
+  const steps: ScenarioStep[] = [];
+  const auditIds: string[] = [];
+  const auditCounter = { n: 0 };
+
+  const lines = chooseLineItemsFor(brandId);
+  const po = buildScenarioPo(runId, brandId, lines, base, 'collect');
+  steps.push({ step: 1, action: 'po_received', entityType: 'purchase_order', entityId: po.id, to: 'received', detail: `${po.poNumber} received`, at: base.toISOString() });
+  auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_po_received', 'purchase_order', po.id, brandId, `${actorId}: SIM PO ${po.poNumber} received (SHIPMENT_PROGRESSION)`, { runId, scenario: 'SHIPMENT_PROGRESSION' }));
+
+  const ack = acknowledgePurchaseOrder(po.id, lines.map((l) => ({ sku: l.sku, ackStatus: 'accepted', acknowledgedQty: l.quantity })));
+  if (!ack.ok) return { scenario: 'SHIPMENT_PROGRESSION', runId, status: 'error', steps, created: { deductions: [], purchaseOrder: po.id }, auditIds, error: ack.error };
+  steps.push({ step: 2, action: 'po_acknowledged', entityType: 'purchase_order', entityId: po.id, from: 'received', to: 'accepted', at: new Date().toISOString() });
+  auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_acknowledged', 'purchase_order', po.id, brandId, `${actorId}: PO ${po.poNumber} acknowledged`, { runId, scenario: 'SHIPMENT_PROGRESSION' }));
+
+  const ship = createShipmentForPO(po.id, {
+    cartons: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, weightKg: 1.5, lengthCm: 20, widthCm: 15, heightCm: 10 })),
+    shipDate: atDays(base, 2).slice(0, 10),
+    carrier: 'dhl',
+    proNumber: `SIM-${runId}`,
+    lotNumber: `LOT-${runId.slice(-4)}`,
+    expiryDate: atDays(base, 365).slice(0, 10),
+  });
+  const shipmentId = ship.shipmentId ?? '';
+  if (!ship.ok) return { scenario: 'SHIPMENT_PROGRESSION', runId, status: 'error', steps, created: { deductions: [], purchaseOrder: po.id }, auditIds, error: ship.error };
+  steps.push({ step: 3, action: 'shipment_created', entityType: 'shipment', entityId: shipmentId, to: 'factory_intake', detail: 'DHL consignment booked into shared store', at: new Date().toISOString() });
+  auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_shipment_created', 'shipment', shipmentId, brandId, `${actorId}: shipment created for PO ${po.poNumber}`, { runId, scenario: 'SHIPMENT_PROGRESSION' }));
+
+  // Provider boundary: book the DHL waybill through the mock adapter.
+  const booked = await recordDhlWaybill({ shipmentId, getMode: ctx.getMode, actorId });
+  if (!booked.ok || !booked.waybill) {
+    return { scenario: 'SHIPMENT_PROGRESSION', runId, status: booked.safetyRefused ? 'safety_refused' : 'error', safetyReason: booked.safetyReason, steps, created: { deductions: [], purchaseOrder: po.id, shipmentId }, auditIds, error: booked.error ?? booked.safetyReason };
+  }
+  steps.push({ step: 4, action: 'waybill_booked', entityType: 'shipment', entityId: shipmentId, detail: `DHL ${booked.waybill} · ${booked.trackingNumber ?? ''}`, at: new Date().toISOString() });
+
+  // Walk milestone polls through the provider boundary: any transition,
+  // delay, or exception applies to the domain state via the SAME workflow.
+  let poll = 1;
+  let advanceCount = 0;
+  while (advanceCount < 3) {
+    const res = await advanceShipmentViaDhl({ shipmentId, getMode: ctx.getMode, actorId });
+    auditIds.push(...res.auditIds);
+    if (!res.ok) {
+      steps.push({ step: 4 + poll, action: 'provider_error', entityType: 'shipment', entityId: shipmentId, detail: res.error ?? 'provider error', at: new Date().toISOString() });
+      auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_provider_retry_scheduled', 'shipment', shipmentId, brandId, `${actorId}: DHL poll failed (${res.error ?? ''}) — retry scheduled deterministically`, { runId, scenario: 'SHIPMENT_PROGRESSION', poll }));
+      break;
+    }
+    steps.push({
+      step: 4 + poll,
+      action: res.exception ? 'milestone_exception' : 'milestone',
+      entityType: 'shipment',
+      entityId: shipmentId,
+      from: res.from,
+      to: res.to,
+      detail: res.exception ? (res.milestone ?? 'exception') : (res.milestone ?? 'poll'),
+      at: new Date().toISOString(),
+    });
+    if (res.exception) {
+      auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_exception_awaiting_retry', 'shipment', shipmentId, brandId, `${actorId}: DHL exception (${res.milestone ?? ''}) — retry next poll will verify recovery`, { runId, scenario: 'SHIPMENT_PROGRESSION' }));
+    }
+    advanceCount += 1;
+    poll += 1;
+  }
+
+  return { scenario: 'SHIPMENT_PROGRESSION', runId, status: 'ok', steps, created: { purchaseOrder: po.id, shipmentId, deductions: [] }, auditIds };
+}
+
+/** §Priority-1 — government compliance verification + filing workflow. */
+async function scenarioComplianceVerification(ctx: ScenarioRunContext): Promise<ScenarioResult> {
+  const brandId = resolveBrandId(ctx);
+  const refuse = assertSimulationOnly(ctx, 'COMPLIANCE_VERIFICATION', ['companies_house', 'hmrc']);
+  if (refuse) {
+    return { scenario: 'COMPLIANCE_VERIFICATION', runId: deriveId(String(ctx.seed ?? 0), 'run'), status: 'safety_refused', safetyReason: refuse, steps: [], created: { deductions: [] }, auditIds: [] };
+  }
+  const seed = ctx.seed ?? 0;
+  const runId = `compliance-${seed}`;
+  const actorId = ctx.actorId ?? 'system';
+  const steps: ScenarioStep[] = [];
+  const auditIds: string[] = [];
+  const auditCounter = { n: 0 };
+
+  // 1. Companies House company verification (with one deterministic retry
+  //    when the simulated registrar rate-limits).
+  let verify = await verifyBrandCompany(brandId, { getMode: ctx.getMode, actorId });
+  auditIds.push(...verify.auditIds);
+  if (!verify.ok && verify.status !== 'safety_refused') {
+    steps.push({ step: 1, action: 'company_lookup_failed', entityType: 'company', entityId: brandId, detail: verify.error ?? 'verification failed', at: new Date().toISOString() });
+    verify = await verifyBrandCompany(brandId, { getMode: ctx.getMode, actorId });
+    auditIds.push(...verify.auditIds);
+  }
+  if (verify.status === 'safety_refused') {
+    return { scenario: 'COMPLIANCE_VERIFICATION', runId, status: 'safety_refused', safetyReason: verify.safetyReason, steps, created: { deductions: [] }, auditIds };
+  }
+  steps.push({
+    step: 1, action: verify.ok ? 'company_verified' : 'company_not_verified',
+    entityType: 'company', entityId: brandId,
+    to: verify.ok ? 'verified' : 'error',
+    detail: verify.ok ? `${verify.companyName ?? ''} · ${verify.companyNumber ?? ''} · ${verify.registrarStatus ?? ''}` : 'registrar error',
+    at: new Date().toISOString(),
+  });
+  auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_company_check', 'company', brandId, brandId, `${actorId}: Companies House ${verify.ok ? 'verified' : 'not verified'} (${verify.error ?? 'ok'})`, { runId, scenario: 'COMPLIANCE_VERIFICATION' }));
+
+  // 2. HMRC VAT status check.
+  const vat = await checkHmrcStatus(brandId, { getMode: ctx.getMode, actorId });
+  auditIds.push(...vat.auditIds);
+  if (vat.status === 'safety_refused') {
+    return { scenario: 'COMPLIANCE_VERIFICATION', runId, status: 'safety_refused', safetyReason: vat.safetyReason, steps, created: { deductions: [] }, auditIds };
+  }
+  steps.push({ step: 2, action: 'vat_status_checked', entityType: 'vat', entityId: vat.vrn ?? brandId, to: vat.vatStatus ?? (vat.ok ? 'registered' : 'error'), at: new Date().toISOString() });
+  auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_vat_status', 'vat', vat.vrn ?? brandId, brandId, `${actorId}: HMRC VAT status ${vat.vatStatus ?? 'unknown'}`, { runId, scenario: 'COMPLIANCE_VERIFICATION' }));
+
+  // 3. HMRC VAT filing — rejected submissions are retried and accepted.
+  const period = 'Q3 2026';
+  let filing = await fileHmrcReturn(brandId, { period, totalSalesGbp: 48250, vatDueGbp: 9650 }, { getMode: ctx.getMode, actorId });
+  auditIds.push(...filing.auditIds);
+  if (filing.status === 'safety_refused') {
+    return { scenario: 'COMPLIANCE_VERIFICATION', runId, status: 'safety_refused', safetyReason: filing.safetyReason, steps, created: { deductions: [] }, auditIds };
+  }
+  steps.push({
+    step: 3, action: filing.ok ? 'vat_filed' : 'vat_filing_rejected', entityType: 'hmrc_filing',
+    entityId: filing.filingId ?? period,
+    to: filing.filingStatus ?? (filing.ok ? 'accepted' : 'rejected'),
+    detail: filing.ok ? `accepted · ${filing.submissionId ?? ''}` : (filing.rejectionReason ?? filing.error ?? 'rejected'),
+    at: new Date().toISOString(),
+  });
+  auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_vat_filing_attempt', 'hmrc_filing', period, brandId, `${actorId}: VAT ${period} ${filing.ok ? 'accepted' : `rejected: ${filing.rejectionReason ?? 'schema'}`}`, { runId, scenario: 'COMPLIANCE_VERIFICATION' }));
+
+  if (!filing.ok && filing.filingStatus === 'rejected') {
+    // Deterministic retry — the corrected filing is accepted.
+    filing = await fileHmrcReturn(brandId, { period, totalSalesGbp: 48250, vatDueGbp: 9320 }, { getMode: ctx.getMode, actorId });
+    auditIds.push(...filing.auditIds);
+    if (filing.status === 'safety_refused') {
+      return { scenario: 'COMPLIANCE_VERIFICATION', runId, status: 'safety_refused', safetyReason: filing.safetyReason, steps, created: { deductions: [] }, auditIds };
+    }
+    steps.push({ step: 4, action: filing.ok ? 'vat_filing_retry_accepted' : 'vat_filing_retry_failed', entityType: 'hmrc_filing', entityId: filing.filingId ?? period, to: filing.filingStatus ?? 'accepted', detail: filing.ok ? `retry accepted · ${filing.submissionId ?? ''}` : (filing.error ?? 'retry failed'), at: new Date().toISOString() });
+    auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_vat_filing_retry', 'hmrc_filing', period, brandId, `${actorId}: VAT ${period} retry ${filing.ok ? 'ACCEPTED' : 'failed'}`, { runId, scenario: 'COMPLIANCE_VERIFICATION' }));
+  }
+
+  return { scenario: 'COMPLIANCE_VERIFICATION', runId, status: 'ok', steps, created: { deductions: [] }, auditIds };
+}
+
 /** Dispatch table — extensible (add a scenario by registering its builder here). */
 const SCENARIO_BUILDERS: Record<ScenarioId, (ctx: ScenarioRunContext) => Promise<ScenarioResult>> = {
   NORMAL_PO: scenarioNormalPo,
@@ -604,6 +765,8 @@ const SCENARIO_BUILDERS: Record<ScenarioId, (ctx: ScenarioRunContext) => Promise
   CASE: scenarioCase,
   PRODUCT_FAILURE: scenarioProductFailure,
   INTEGRATION_FAILURE: scenarioIntegrationFailure,
+  SHIPMENT_PROGRESSION: scenarioShipmentProgression,
+  COMPLIANCE_VERIFICATION: scenarioComplianceVerification,
 };
 
 /**
