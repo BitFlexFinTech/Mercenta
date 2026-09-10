@@ -18,16 +18,7 @@ import { cn } from '@/utils/cn';
 import { AlertTriangle, Info, Target, Upload, Compass, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { runDiscoveryPipeline, createMockDiscoveryClients, type EnrichedLead } from '@/lib/discovery/engine';
 import { matchLeadsToProspects } from '@/lib/intelligence/prospectPipeline';
-import { SEED_PROSPECTS } from '@/data/brandProspectSeed';
-import { EXTRA_PROSPECTS } from '@/data/brandExtraSeed';
-
-/** §Phase A — the canonical BI prospect universe (seeded fixture, re-scored
- *  at load). Every lead that enters the ICP is linked against this set so
- *  canonical identity survives ingestion. */
-const CANONICAL_BI_UNIVERSE: readonly (typeof SEED_PROSPECTS[0])[] = [
-  ...SEED_PROSPECTS,
-  ...EXTRA_PROSPECTS,
-];
+import { getProspects } from '@/data/prospectStore';
 
 const REGIONS: { value: Lead['region']; label: string }[] = [
   { value: 'us', label: 'US origin' },
@@ -107,7 +98,7 @@ export function MarketingHub() {
     const { leads: imported } = await adapter.fetchNewLeads(new Date().toISOString(), csv);
     // §Phase A — canonical identity bridge: ingested leads matching a BI
     // prospect inherit its id + category so identity survives ingestion.
-    matchLeadsToProspects(imported, CANONICAL_BI_UNIVERSE).forEach(addLead);
+    matchLeadsToProspects(imported, getProspects()).forEach(addLead);
   };
 
   /** Run the full discovery pipeline: directory → research → enrichment → email → enrol */

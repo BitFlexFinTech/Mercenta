@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 5, 2026
+Last updated: September 10, 2026 (Phase B — Brand Intelligence lifecycle)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -25,7 +25,7 @@ Cline's output back. AI confirms, gives next prompt.
 - Supabase (142.93.46.155) — 14 tables + RLS
 - 20 Rakazo bots (24.144.86.50) — all demo mode
 - Services (46.101.75.185) — Rocket.Chat, Usertour, Postiz
-- Playwright suite (54+ tests)
+- Playwright suite (156 passing tests, 24 spec files)
 - Homepage: "Your brand. The UK market." (NO Amazon mention)
 - Partner Login + application gate + link verification
 - Legal agreements 4.1 + 4.2 in onboarding
@@ -33,14 +33,26 @@ Cline's output back. AI confirms, gives next prompt.
 - PO email + auto-shipment + label/ASN stubs
 - Penny Pincher (7am, real API data, USD)
 - Margaret (6:30am, UK accountant)
-- Xero integration (28-day reset, auto-reseed) — JUST FINISHED
+- Xero integration (28-day reset, auto-reseed)
+- Brand Intelligence REAL-DATA LIFECYCLE (Phase B, 2026-09-10): canonical
+  prospect store (12 tracked / 10 active), Admin "Run discovery" + run history,
+  candidate de-duplication, disqualify/re-qualify with audit history,
+  per-prospect History timeline. Tapatío, Seep, Astonish, Fly By Jing,
+  LocknLock, Mike's Hot Honey, Cholula, Valentina, Delphis Eco, Kit & Kin.
 - Review zip script + protection rules + handoff rule
 
 ## WHAT'S LEFT (IN ORDER):
-1. Rakazo iframe in Super Admin [CURRENTLY RUNNING]
-2. Namecheap FTP deploy script
-3. Companies House + HMRC compliance dashboard
-4. GO_LIVE.md playbook
+NOTE: Development follows the MASTER CONSOLIDATION ROADMAP in
+PROJECT_STATUS.md — CORE PRODUCT FIRST, RAKAZO LAST. Rakazo is deliberately
+the FINAL phase. The older list below is superseded by that roadmap.
+1. [DONE in roadmap] Rakazo iframe in Super Admin — exists; Rakazo bots + real
+   workforce integration = FINAL phase (M), NOT current.
+2. Namecheap FTP deploy script — DONE (scripts/deploy-demo.sh; demo live).
+3. Companies House + HMRC compliance dashboard — DONE (simulation-complete).
+4. GO_LIVE.md playbook — pending (production go-live after roadmap).
+NEXT in roadmap: Phase C — ICP consumes the canonical BI prospects (replaces
+the old mock lead universe with the real Tapatío-style prospects), then
+outreach preparation → human approval → send/track → opportunity → CRM.
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

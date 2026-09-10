@@ -1963,6 +1963,10 @@ export interface BrandProspect {
   lastDistributorCheck?: string;
   /** ISO date of last contact verification. */
   lastContactCheck?: string;
+  /** ISO timestamp when the BI lifecycle engine last checked this prospect. */
+  lastChecked?: string;
+  /** ISO timestamp when the next discovery re-check is due. */
+  nextCheck?: string;
   /** All evidence collected for this prospect. */
   evidence: ProspectEvidence[];
   /** Whether this prospect is hard-disqualified. */
@@ -2039,6 +2043,66 @@ export interface IntelligenceDashboard {
   categoryBreakdown: { category: string; count: number }[];
   topProspect?: BrandProspect;
   generatedAt: string;
+}
+
+/** Status of a recorded Brand Intelligence discovery run. */
+export type IntelligenceRunStatus = 'running' | 'completed' | 'failed';
+
+/** What triggered an intelligence discovery run. */
+export type IntelligenceRunTrigger = 'manual' | 'scheduled' | 'seed';
+
+/** Kind of change recorded against a canonical prospect. */
+export type ProspectChangeType = 'created' | 'updated' | 'disqualified' | 'requalified' | 'unchanged';
+
+/**
+ * A recorded Brand Intelligence discovery run — the pipeline's audit/history.
+ * Retained across runs so previous searches never disappear.
+ */
+export interface IntelligenceRun {
+  runId: string;
+  startedAt: string;
+  completedAt: string;
+  status: IntelligenceRunStatus;
+  trigger: IntelligenceRunTrigger;
+  mode: 'mock' | 'live';
+  scannedCount: number;
+  newCount: number;
+  updatedCount: number;
+  disqualifiedCount: number;
+  unchangedCount: number;
+  /** Prospect ids that changed during this run (excludes unchanged). */
+  changedProspectIds: string[];
+  candidatesCount: number;
+  errorCount: number;
+  summary: string;
+}
+
+/** A single auditable change event against a canonical prospect. */
+export interface ProspectChangeEvent {
+  id: string;
+  runId: string;
+  prospectId: string;
+  brand: string;
+  changeType: ProspectChangeType;
+  timestamp: string;
+  /** The field that changed (e.g. 'score', 'disqualified', 'discovery'). */
+  field?: string;
+  /** Previous value (human-readable). */
+  before?: string;
+  /** New value (human-readable). */
+  after?: string;
+  summary: string;
+}
+
+/** Derived pipeline status from the canonical prospect store. */
+export interface IntelligencePipelineStatus {
+  totalTracked: number;
+  activeCount: number;
+  disqualifiedCount: number;
+  runCount: number;
+  lastRun?: IntelligenceRun;
+  lastCheckedAt?: string;
+  nextScheduledCheck?: string;
 }
 
 /** A brand-level view for Brand Partner self-service intelligence. */

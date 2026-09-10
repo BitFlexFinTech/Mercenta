@@ -6,13 +6,9 @@ import { useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/utils/cn';
-import { createBrandIntelligenceClient } from '@/lib/intelligence/brandIntelligenceClient';
-import { SEED_PROSPECTS } from '@/data/brandProspectSeed';
-import { EXTRA_PROSPECTS } from '@/data/brandExtraSeed';
+import { getProspects } from '@/data/prospectStore';
 import { APPROVED_CATEGORIES } from '@/types';
 import { BarChart3, TrendingUp, ShoppingBag, Users } from 'lucide-react';
-
-const client = createBrandIntelligenceClient();
 
 export function BrandIntelligence() {
   const { brandProfile, session } = useApp();
@@ -20,9 +16,8 @@ export function BrandIntelligence() {
   const brandCategory = brandProfile?.category ?? 'Home';
 
   const catData = useMemo(() => {
-    const all = [...SEED_PROSPECTS, ...EXTRA_PROSPECTS];
-    const scored = all.map(p => client.scoreProspect(p)).filter(p => !p.disqualified);
-    const sameCat = scored.filter(p => p.category === brandCategory);
+    const scored = getProspects().filter((p) => !p.disqualified);
+    const sameCat = scored.filter((p) => p.category === brandCategory);
     return { scored, sameCat };
   }, [brandCategory]);
 

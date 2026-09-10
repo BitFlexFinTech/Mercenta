@@ -1,19 +1,81 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-10 (Phase A — CORE DATA/DOMAIN/WORKFLOW CONSOLIDATION: BI→ICP canonical identity bridge (`Lead.prospectId` + `prospectPipeline.ts`), real fit persistence at transitions, discovery no longer fabricates fit=85/'Home'; created MERCENTA_MASTER_CONTEXT.md + MERCENTA_ARCHITECTURE.md; E2E 154/0/4; prospect-pipeline validator 18/18)
+> Last updated: 2026-09-10 (Phase B — BRAND INTELLIGENCE REAL-DATA LIFECYCLE: canonical prospect store (`src/data/prospectStore.ts`), lifecycle engine (`src/lib/intelligence/prospectLifecycle.ts`), manual Admin discovery runs + Run History, candidate dedupe, sticky operator disqualify/requalify, per-prospect History + provenance, `MarketingHub`/Brand "Market Intel" single-source, new validator 29/29 + E2E 2/2; full E2E 156/0/4; typecheck 0 · lint 0 · build PASS)
 >
 > **Memory files (portable, AI-vendor-neutral):** `MERCENTA_MASTER_CONTEXT.md`
 > (project constitution §A–AF) · `MERCENTA_ARCHITECTURE.md` (technical
-> reference) · this file (operational handoff). Phase report:
-> `docs/PRODUCT_CONSOLIDATION_PHASEA_2026-09-10.md`.
+> reference) · this file (operational handoff). Phase reports:
+> `docs/PRODUCT_CONSOLIDATION_PHASEA_2026-09-10.md` ·
+> `docs/PRODUCT_CONSOLIDATION_PHASEB_2026-09-10.md`.
 >
 > ## 0. Project-Memory Reconciliation (2026-09-08)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
-> - **Verified latest checkpoint: `fe8c474` (Phase 1 gate). Prior: `5f13ac1`** (Phase 7F part 1 — compliance test states). Older chain: `9ef93eb` (7E docs) → `ad97e9d` (7E brand dashboard) → `041de1a` (7E deferred/product repairs) → `e7fa882` (Phase 6 — application shell & navigation) → `774f6c4` (Phase 5) → `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
+> - **Verified latest checkpoint: `dbbf567` (Phase A gate); Phase B completed on top — see the Phase B section below. Prior: `fe8c474` (Phase 1 gate) → `c3f676f` (Phase 0) → `9915656`.** Older chain: `5f13ac1` (Phase 7F part 1 — compliance test states) → `9ef93eb` (7E docs) → `ad97e9d` (7E brand dashboard) → `041de1a` (7E deferred/product repairs) → `e7fa882` (Phase 6 — application shell & navigation) → `774f6c4` (Phase 5) → `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
 > - **Baseline:** tag `mercenta-baseline-before-redesign-20260907` / commit `959b4d2` — recoverable, immutable.
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic/generated artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`. (`docs/ARCHITECTURE.md` retained as history; superseded by `MERCENTA_ARCHITECTURE.md`.)
 > - Older sections below are historical/legacy, preserved verbatim; their old phase-number pointers (e.g. "Phase 3/4 targets", "Phase 2 — Rakazo") are superseded by the MASTER ROADMAP A–M (Rakazo = Phase M, LAST) — see MERCENTA_MASTER_CONTEXT.md §AB.
+## Phase B — Brand Intelligence Real-Data Lifecycle (2026-09-10)
+
+> Status: **DONE** — phase gate passed. Report:
+> `docs/PRODUCT_CONSOLIDATION_PHASEB_2026-09-10.md`.
+> Objective (master roadmap Phase B): give BI a **real, persistent, auditable
+> lifecycle** behind the existing `BrandIntelligenceClient` seam — canonical
+> prospect store, manual Admin discovery runs, candidate dedupe, sticky
+> operator disqualify/re-qualify, run/change/snapshot history, single-source
+> runtime universe. **No UI redesign. No Rakazo. No Postiz exposure.**
+>
+> **Gate evidence (executed this session):** typecheck **0** · lint **0** ·
+> build **✓ 3.70s** · `validate-bi-lifecycle` **29/29 PASS** (incl. **0
+> external fetches**) · existing validators **10/10 PASS** · full Playwright
+> regression **156 passed / 4 skipped / 0 failed** (2.3m; +2 new lifecycle
+> tests, 0 regressions) · real-browser proof of run/disqualify/requalify with
+> **0 page errors**.
+>
+> **Implemented:**
+> 1. **Canonical prospect store** — `src/data/prospectStore.ts` (NEW): in-memory
+>    single runtime universe (12 canonical, 10 active) + run history + change
+>    events + weekly score snapshots; boots once per session from the
+>    authoritative seeds; records the `run-seed-baseline` origin + one
+>    `created` event per prospect.
+> 2. **Lifecycle engine** — `src/lib/intelligence/prospectLifecycle.ts` (NEW):
+>    `runBrandIntelligence` (deterministic re-check + candidate intake with
+>    canonical dedupe; classification created/updated/disqualified/unchanged),
+>    `disqualifyProspect` / `requalifyProspect` (audited, **sticky** — a re-scan
+>    never silently re-activates a human decision), `getPipelineStatus`,
+>    `lastChecked`/`nextCheck` (+7d) stamps, snapshot accumulation.
+> 3. **Types** — `src/types.ts`: `IntelligenceRun`, `ProspectChangeEvent`,
+>    `IntelligencePipelineStatus`, `BrandProspect.lastChecked?/nextCheck?`.
+> 4. **Admin UI (minimal, no redesign)** — Brand Intelligence panel is
+>    store-backed with a **Pipeline Control** ("Run discovery" + next-check),
+>    **Run History** (counts + expandable per-prospect changes), and a
+>    **Disqualified** section with re-qualification; prospect detail gained
+>    provenance badges, a **History** tab, and the **Disqualify** action.
+> 5. **Single-source wiring** — `MarketingHub` identity bridge + Brand "Market
+>    Intel" now read the store; the duplicate `CANONICAL_BI_UNIVERSE` literal
+>    was deleted (single source of truth).
+>
+> **Canonical prospect universe decision:** the 12 seeded prospects (10 active:
+> Tapatío, Seep, Astonish, Fly By Jing, LocknLock, Mike's Hot Honey, Cholula,
+> Valentina, Delphis Eco, Kit & Kin) are the **authoritative canonical
+> universe** — `source:'mock'` records only that no live provider produced
+> them; provenance is tracked by run/change/snapshot history. No fabricated
+> discoveries: candidate intake is the only path to `newCount > 0`.
+>
+> **Files changed:** `src/data/prospectStore.ts` (NEW) ·
+> `src/lib/intelligence/prospectLifecycle.ts` (NEW) · `scripts/validate-bi-lifecycle.mjs`
+> (NEW) · `e2e/brand-intelligence-lifecycle.spec.ts` (NEW) · `src/types.ts` ·
+> `src/components/admin/BrandIntelligencePanel.tsx` ·
+> `src/components/admin/ProspectDetailPanel.tsx` ·
+> `src/components/admin/ProspectDetailTabs.tsx` ·
+> `src/components/brand/BrandIntelligence.tsx` ·
+> `src/components/admin/MarketingHub.tsx` · docs + memory files.
+>
+> NEXT: **Phase C — ICP consumes canonical BI data** (replace the `INITIAL_LEADS`
+> mock acquisition universe with BI-derived real prospects; then outreach
+> preparation → human approval → send/track → response → Opportunity → CRM).
+> Do NOT begin UI redesign; do NOT begin Rakazo/Postiz.
+
 ## Phase A — Core Data / Domain / Workflow Consolidation (2026-09-10)
 
 > Status: **DONE** — phase gate passed. Report: `docs/PRODUCT_CONSOLIDATION_PHASEA_2026-09-10.md`.

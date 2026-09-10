@@ -8,15 +8,32 @@ fixed. Never cite the log as current status.
 ## Build & verification health
 
 - `npm run typecheck` — PASS (exit 0)
-- `npm run build` — PASS (vite)
-- `npm run audit` (integrity) — 58/58 PASSED
-- `validate:wording` — WORDING_LINT_PASS (0 outward-facing violations)
-- `validate:whatsapp` — WHATSAPP_VALIDATION_PASS (16/16)
-- `validate:postiz` — POSTIZ_VALIDATION_PASS (14/14)
-- `validate:event-feed` — EVENT_FEED_VALIDATION_PASS (19/19)
-- `validate:digest-extension` — DIGEST_EXTENSION_VALIDATION_PASS (15/15)
-- `validate:reseller-tracker` — RESELLER_TRACKER_VALIDATION_PASS (12/12)
-  **Playwright E2E** — 74 PASS / 1 skip across 14 spec files (23 admin + 13 brand + 3 carrier + 7 notification-nav + 3 popup-interactivity + 3 support-views + 5 account-menu + 4 integrations + 7 batch-abc/cross-role/full-order-lifecycle)
+- `npm run lint` — PASS (exit 0)
+- `npm run build` — PASS (vite, ~3.7s)
+- `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
+- `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (18/18)
+- `node scripts/validate-mock-providers.mjs` / `validate-mock-seam.mjs` /
+  `validate-provider-workflows.mjs` / `validate-discovery.mjs` /
+  `validate-postiz.mjs` / `validate-automation.mjs` / `validate-csv-import.mjs` /
+  `validate-demo-completeness.mjs` / `validate-design-tokens.mjs` — ALL PASS
+- `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
+  Edge Functions); repair-or-retire decision open (see Known open items).
+  **Not a live-path claim.**
+  **Playwright E2E** — **156 PASS / 4 skip / 0 fail** across 24 spec files.
+  The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
+  (deductions-surface product gap — documented, not fabricated away).
+
+## Brand Intelligence lifecycle (Phase B — 2026-09-10)
+
+- Canonical prospect store (`src/data/prospectStore.ts`) + lifecycle engine
+  (`src/lib/intelligence/prospectLifecycle.ts`) now give BI real run/re-check
+  history, candidate dedupe, sticky operator disqualify/requalify, per-prospect
+  change timeline, score snapshots, and single-source runtime universe.
+- Admin: Brand Intelligence panel "Run discovery" + Run History + Disqualified
+  section; prospect detail: provenance + History tab + Disqualify.
+- MarketingHub + Brand "Market Intel" read the store (duplicate universe
+  literal removed). ICP `INITIAL_LEADS` (8) remain SEEDED TEST FIXTURES —
+  Phase C replaces them with BI-derived real prospects.
 
 ## Registry health (Session 2026-09-01 — Batch F: fix confirmed gaps)
 

@@ -279,21 +279,21 @@ onboarding. **Not started yet.**
 
 ## AB. Current Roadmap (final order — Rakazo LAST)
 
-| Phase | Title |
-|---|---|
-| A | Core data / domain / workflow consolidation **(current)** |
-| B | Brand Intelligence real-data lifecycle |
-| C | ICP consumption of canonical BI data |
-| D | Partner acquisition / outreach connectivity |
-| E | CRM + communication + helpdesk consolidation |
-| F | Executive analytics + operations separation |
-| G | Screen-level UI/UX redesign |
-| H | Postiz exposure using the existing full app |
-| I | Mock / seed / placeholder data rationalization |
-| J | Full end-to-end business acceptance |
-| K | Accessibility / responsive / security / regression |
-| L | Public deployment + live demo verification |
-| M | Rakazo final integration layer **(LAST)** |
+| Phase | Title | State (2026-09-10) |
+|---|---|---|
+| A | Core data / domain / workflow consolidation | ✅ DONE (`dbbf567`) |
+| B | Brand Intelligence real-data lifecycle | ✅ DONE (canonical store + lifecycle engine; see PROJECT_STATUS.md Phase B) |
+| C | ICP consumption of canonical BI data | **NEXT** |
+| D | Partner acquisition / outreach connectivity | |
+| E | CRM + communication + helpdesk consolidation | |
+| F | Executive analytics + operations separation | |
+| G | Screen-level UI/UX redesign | |
+| H | Postiz exposure using the existing full app | |
+| I | Mock / seed / placeholder data rationalization | |
+| J | Full end-to-end business acceptance | |
+| K | Accessibility / responsive / security / regression | |
+| L | Public deployment + live demo verification | |
+| M | Rakazo final integration layer **(LAST)** | |
 
 ## AC. Permanent Do-Not-Change Decisions
 
@@ -322,11 +322,17 @@ onboarding. **Not started yet.**
 5. `src/types.ts` is the single shared schema; `APPROVED_CATEGORIES` single
    constant; demo data and schema both derived from it.
 6. BI→ICP canonical identity bridge (`prospectPipeline.ts`) — identity survives
-   ingestion; fit scores persisted at transitions.
+   ingestion; fit scores persisted at transitions. BI itself is a canonical
+   prospect STORE + lifecycle engine (`prospectStore.ts` +
+   `prospectLifecycle.ts`): deterministic discovery runs, candidate dedupe by
+   normalized brand key, sticky operator disqualification, run/change/snapshot
+   history, `lastChecked`/`nextCheck` (+7d).
 7. In-memory demo store as the default single source with optional Supabase
    dual-write.
 8. Deterministic scenario engine for provider-workflow simulation with
    networkCalls===0 proofs.
+9. ONE runtime BI universe: Admin panel, Brand "Market Intel", and the
+   MarketingHub identity bridge all read `getProspects()` — no second literal.
 
 ## AE. Known Limitations / Caveats
 
@@ -337,9 +343,15 @@ onboarding. **Not started yet.**
   nothing claims otherwise.
 - `outreachGenerator.ts` and `XeroConnection.tsx` are dead code (unimported,
   typecheck-clean); candidates for later rationalisation.
-- BI prospect `outreachStatus` ladder is UI-inert (no mutation path); no
-  Opportunity entity yet; campaign performance stats and monitoring health are
-  seeded (flagged).
+- BI canonical universe is the authoritative seeded prospect set (12 tracked /
+  10 active) with full run/change/snapshot history; `source:'mock'` only means
+  "no live provider produced this" — real providers behind the same client seam
+  are a Phase-6/live seam concern, not a data-classification blocker.
+- ICP `INITIAL_LEADS` (8) remain SEEDED TEST FIXTURES — unlinked by design;
+  Phase C replaces them with BI-derived real prospects. Prospect `outreachStatus`
+  ladder beyond disqualify/requalify is still UI-inert (no outreach sender yet);
+  no Opportunity entity yet; campaign performance stats and monitoring health
+  are seeded (flagged).
 - `validate-edge-functions.mjs` is stale (crashes: expects absent functions) —
   needs repair-or-retire evaluation.
 - No live credentials configured for real providers; demo/sandbox paths used.

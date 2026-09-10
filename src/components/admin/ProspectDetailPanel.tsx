@@ -3,23 +3,31 @@
  * Tab bodies are imported from ProspectDetailTabs.
  */
 import { useState } from 'react';
-import { Card, Badge } from '@/components/ui';
+import { Card, Badge, Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { BrandProspect } from '@/types';
-import { OverviewTab, AmazonTab, CommercialTab, PeopleTab, MercentaFitTab } from './ProspectDetailTabs';
-import { X, ShoppingCart, Building2, Users, Target, Globe } from 'lucide-react';
+import { OverviewTab, AmazonTab, CommercialTab, PeopleTab, MercentaFitTab, HistoryTab } from './ProspectDetailTabs';
+import { disqualifyProspect } from '@/lib/intelligence/prospectLifecycle';
+import { X, ShoppingCart, Building2, Users, Target, Globe, History, ShieldBan, RotateCcw } from 'lucide-react';
 
 const TC: Record<string, string> = { tier_1: 'text-emerald-400', tier_2: 'text-blue-400', tier_3: 'text-amber-400', tier_4: 'text-zinc-400', unscored: 'text-zinc-600' };
 const TL: Record<string, string> = { tier_1: 'Attack', tier_2: 'High Prob', tier_3: 'Upside', tier_4: 'Reserve', unscored: 'Below' };
 
-export function ProspectDetailPanel({ prospect, onClose }: { prospect: BrandProspect; onClose: () => void }) {
-  const [tab, setTab] = useState<'overview' | 'amazon' | 'commercial' | 'people' | 'mercenta'>('overview');
+export function ProspectDetailPanel({ prospect, onClose, onMutated }: { prospect: BrandProspect; onClose: () => void; onMutated?: () => void }) {
+  const [tab, setTab] = useState<'overview' | 'amazon' | 'commercial' | 'people' | 'mercenta' | 'history'>('overview');
   const p = prospect;
   const tabs = [
     { id: 'overview' as const, label: 'Overview', icon: Target }, { id: 'amazon' as const, label: 'Amazon', icon: ShoppingCart },
     { id: 'commercial' as const, label: 'Commercial', icon: Building2 }, { id: 'people' as const, label: 'People', icon: Users },
-    { id: 'mercenta' as const, label: 'Mercenta Fit', icon: Globe },
+    { id: 'mercenta' as const, label: 'Mercenta Fit', icon: Globe }, { id: 'history' as const, label: 'History', icon: History },
   ];
+  const handleDisqualify = () => {
+    const reason = window.prompt('Disqualification reason:');
+    if (reason === null) return;
+    disqualifyProspect(p.id, reason || 'Disqualified by operator');
+    onMutated?.();
+    onClose();
+  };
 
   return (
     <Card className="p-4 space-y-3">
@@ -31,6 +39,12 @@ export function ProspectDetailPanel({ prospect, onClose }: { prospect: BrandPros
               <h3 className="text-lg font-semibold text-white">{p.brand}</h3>
               <Badge className={cn('text-[10px] border', TC[p.score.tier])}>{TL[p.score.tier]}</Badge>
               <span className={cn('text-xl font-bold', TC[p.score.tier])}>{p.score.total}<span className="text-xs text-zinc-600">/100</span></span>
+            </div>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {p.lastChecked?<Badge className="text-[9px] bg-ink-850 text-zinc-400">checked {p.lastChecked.slice(0,10)}</Badge>:null}
+              {p.nextCheck?<Badge className="text-[9px] bg-ink-850 text-zinc-400">next {p.nextCheck.slice(0,10)}</Badge>:null}
+              {!p.disqualified&&<Button variant="danger" className="text-[10px] px-2 py-1" onClick={handleDisqualify}><ShieldBan className="w-3 h-3 text-crimson-accent" />Disqualify</Button>}
+              {p.disqualified&&<Badge className="text-[9px] bg-amber-500/15 text-amber-300">disqualified</Badge>}
             </div>
             <p className="text-xs text-zinc-500 mt-0.5">{p.category}{p.website ? <> · <a href={p.website} target="_blank" rel="noreferrer" className="text-brass-400 hover:underline">{p.website.replace('https://', '')}</a></> : null}</p>
           </div>
@@ -51,6 +65,7 @@ export function ProspectDetailPanel({ prospect, onClose }: { prospect: BrandPros
       {tab === 'commercial' && <CommercialTab p={p} />}
       {tab === 'people' && <PeopleTab p={p} />}
       {tab === 'mercenta' && <MercentaFitTab p={p} tierColors={TC} />}
+      {tab === 'history' && <HistoryTab p={p} />}
     </Card>
   );
 }

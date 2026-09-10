@@ -48,12 +48,15 @@ App.tsx
 
 - `src/data/` — `api.ts` (contract layer), `demoStore.ts` (in-memory demo
   single source in demo mode), `bootstrap.ts` (seed), `queries.ts` (TanStack
-  hooks), `demoData.ts` / `brandDossiers.ts` / `brandProspectSeed.ts` /
+  hooks), `prospectStore.ts` (canonical BI prospect universe + run/change/
+  snapshot history), `demoData.ts` / `brandDossiers.ts` / `brandProspectSeed.ts` /
   `brandExtraSeed.ts` (canonical demo/prospect fixtures).
 - `src/lib/` — domain libs: spapi, dhl, compliance, billing, crm, helpdesk,
-  intelligence, discovery, research, marketing, rocketchat, postiz, whatsapp,
-  mail, messaging, monitoring, automation, events, simulation, verification,
-  shipping, warehouse, esign, grants, notifications.
+  intelligence (incl. `prospectPipeline.ts` identity bridge +
+  `prospectLifecycle.ts` lifecycle engine), discovery, research, marketing,
+  rocketchat, postiz, whatsapp, mail, messaging, monitoring, automation,
+  events, simulation, verification, shipping, warehouse, esign, grants,
+  notifications.
 - `src/integrations/` — registry (19 providers) + IntegrationsContext (connect
   state, sandbox flag, per-card simulation controls).
 - `src/services/xero/` — real OAuth v2 client + sync engine (demo mode).
@@ -141,29 +144,39 @@ the provider adapter/mode changes.
   `BrandCrmMeta/CrmTask/CrmNote` (CRM), `Campaign`, `StaffMember`, `Product`,
   `PurchaseOrder`, `Shipment`, `ComplianceDocument`, `Contract`,
   `BrandProfile`, `FinancialRecord`, `ActivityLog`, `ApiLogEntry`.
+- BI lifecycle (`src/data/prospectStore.ts` + `src/lib/intelligence/prospectLifecycle.ts`):
+  `IntelligenceRun` (discovery-run history), `ProspectChangeEvent` (audited
+  per-prospect changes), `IntelligenceSnapshot` (score-over-time),
+  `IntelligencePipelineStatus`, `BrandProspect.lastChecked/nextCheck`.
 - `APPROVED_CATEGORIES` — single shared constant (mirrored as a DB CHECK).
 - Demo fixtures (`demoData.ts`, `brandProspectSeed.ts`, `brandExtraSeed.ts`,
   `bootstrap.ts` INITIAL_LEADS) derive from the same schema so they cannot drift.
 
-## 11. BI → ICP Pipeline (Phase A)
+## 11. BI → ICP Pipeline (Phase A/B)
 
 ```
-Brand Intelligence (seeded fixture universe, 12 prospects, re-scored at load)
-   │  createBrandIntelligenceClient() → MockClient (no live clients yet)
+Brand Intelligence — canonical prospect store (12 prospects, 10 active;
+   seeded authoritative universe, booted once per session)
+   │  runBrandIntelligence()  ← lifecycle engine (discovery runs, candidate
+   │    intake + canonical dedupe, sticky operator disqualify/requalify,
+   │    lastChecked/nextCheck +7d, run/change/snapshot history)
    ▼
-canonical prospect (BrandProspect)
+canonical prospect (BrandProspect)   provenance: IntelligenceRun /
+   │    ProspectChangeEvent / IntelligenceSnapshot — "previous searches never disappear"
    │  src/lib/intelligence/prospectPipeline.ts  ← canonical identity bridge
    │    · matchLeadToProspect / matchLeadsToProspects (deterministic brand key)
    │    · deriveLeadFromProspect(prospect, region) — never invents an origin
    ▼
-ICP lead (Lead.prospectId = prospect.id)   →  scoreLeadFit → threshold-70
+ICP lead (Lead.prospectId = prospect.id)   →   scoreLeadFit → threshold-70
    →  shouldAutoEnroll → 'Sequenced' (fitScore persisted at transition)
    →  (future) outreach → opportunity → CRM
 ```
 
 Wiring: MarketingHub CSV import + discovery enrollment link leads to the
-canonical BI universe; the seeded `INITIAL_LEADS` (8) stay unlinked demo
-fixtures (verified no false-positive collisions).
+canonical BI universe via the store (single source — no second literal);
+the seeded `INITIAL_LEADS` (8) stay unlinked demo fixtures (verified no
+false-positive collisions). Phase C replaces the mock acquisition universe
+with BI-derived real prospects.
 
 ## 12. Major Contracts
 
@@ -173,15 +186,22 @@ fixtures (verified no false-positive collisions).
 - `demoStore` arrays + `GlobalStateContext` `updateLeadStatus(id, status, fit?)`.
 - Provider factory seams (SP-API/DHL/CH/HMRC trio) — mock & real, same signatures.
 - BI bridge (`matchLeadsToProspects`, `deriveLeadFromProspect`) — identity+fit truth.
+- BI lifecycle (`runBrandIntelligence`, `disqualifyProspect`,
+  `requalifyProspect`, `getPipelineStatus` over `prospectStore`) — canonical
+  universe + run/change/snapshot history. All three consumers (Admin panel,
+  Brand Market Intel, MarketingHub bridge) read ONE store.
 
 ## 13. Future Extension Points
 
-- **BI real-data lifecycle (Phase B):** keep the `BrandIntelligenceClient`
-  interface; add RealClient behind the same seam; add persistence + refresh +
-  dedupe + provenance; wire discovery/firecrawl/keepa into BI (currently
-  consumed only by discovery engine / product research).
-- **ICP → acquisition (Phase D):** consume derived BI leads; add
-  contact/enrichment, approval, outreach sender, opportunity entity.
+- **Live BI provider seam:** the lifecycle runs through
+  `createBrandIntelligenceClient()` — same signatures, mock today; a RealClient
+  behind the seam activates live scoring without workflow changes. Candidate
+  intake (`runBrandIntelligence({ candidates })`) is the wire for real
+  discovery sources (firecrawl/keepa) once wired to BI.
+- **ICP → acquisition (Phase C/D):** replace the seeded `INITIAL_LEADS`
+  acquisition universe with BI-derived real prospects (store + bridge provide
+  the identity seam); add contact/enrichment, approval, outreach sender,
+  opportunity entity.
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep

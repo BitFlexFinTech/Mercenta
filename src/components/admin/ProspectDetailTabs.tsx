@@ -1,7 +1,8 @@
-/* Brand Intelligence detail sub-tabs: Overview, Amazon, Commercial, People, Mercenta Fit */
+/* Brand Intelligence detail sub-tabs: Overview, Amazon, Commercial, People, Mercenta Fit, History */
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { BrandProspect } from '@/types';
+import { getProspectTimeline } from '@/data/prospectStore';
 import { ExternalLink } from 'lucide-react';
 
 export function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -34,6 +35,8 @@ export function OverviewTab({ p }: { p: BrandProspect }) {
         <InfoRow label="Distributors" value={String(p.distributors.length)} />
         <InfoRow label="Contacts" value={String(p.contacts.length)} />
         <InfoRow label="Growth Signals" value={String(p.growthSignals.length)} />
+        {p.lastChecked?<InfoRow label="Last checked" value={p.lastChecked.slice(0,10)} />:null}
+        {p.nextCheck?<InfoRow label="Next check" value={p.nextCheck.slice(0,10)} />:null}
         <InfoRow label="Status" value={p.outreachStatus.replace(/_/g, ' ')} />
         {p.incumbentChallenged?.length ? <InfoRow label="Challenging" value={p.incumbentChallenged.join(', ')} /> : null}
       </div>
@@ -119,5 +122,30 @@ export function MercentaFitTab({ p, tierColors: colors }: { p: BrandProspect; ti
               : null}
           </div>}
     </div>
+  </div>;
+}
+
+const CT_COLORS: Record<string, string> = {
+  created: 'bg-emerald-500/15 text-emerald-300',
+  updated: 'bg-blue-500/15 text-blue-300',
+  disqualified: 'bg-amber-500/15 text-amber-300',
+  requalified: 'bg-cyan-500/15 text-cyan-300',
+  unchanged: 'bg-zinc-500/10 text-zinc-500',
+};
+
+/** §Phase B — auditable change history for a canonical prospect. */
+export function HistoryTab({ p }: { p: BrandProspect }) {
+  const events = getProspectTimeline(p.id);
+  if (events.length === 0) return <p className="text-xs text-zinc-600">No change events recorded yet.</p>;
+  return <div className="space-y-1.5">
+    {events.slice(-10).reverse().map((e) => (
+      <div key={e.id} className="flex items-start gap-2 bg-ink-850 border border-white/[0.06] rounded-lg p-2">
+        <Badge className={cn('text-[8px] px-1.5 py-0.5 font-mono', CT_COLORS[e.changeType] ?? 'text-zinc-500')}>{e.changeType}</Badge>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] text-zinc-300">{e.summary}</p>
+          <p className="text-[9px] text-zinc-500 font-mono">{e.timestamp.slice(0, 16).replace('T', ' ')} · {e.runId}{e.field ? ` · ${e.field}` : ''}{e.before && e.after ? ` · ${e.before} → ${e.after}` : ''}</p>
+        </div>
+      </div>
+    ))}
   </div>;
 }
