@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useReducer } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useMessages } from '@/data/queries';
 import { logMessage } from '@/data/api';
@@ -32,6 +33,10 @@ function useAiSug(brandId: string, _ctx: string): string | null {
   }, [brandId]);
 }
 export function HelpdeskDashboard() {
+  const qc = useQueryClient();
+  // The ticket store (demoTickets) mutates in place and is not observable by
+  // React — bump the component after every mutation so rows/selects refresh.
+  const [storeTick, bumpStore] = useReducer((x: number) => x + 1, 0);
   const { actingStaff, staff } = useApp();
   const brandsQuery = useBrands();
   const messagesQuery = useMessages();
@@ -47,7 +52,9 @@ export function HelpdeskDashboard() {
   const metrics = computeHelpdeskMetrics();
   const overdueCount = demoTickets.filter((t) => t.slaDeadline && new Date(t.slaDeadline) < new Date() && t.status !== 'resolved').length;
 
-  const filteredTickets = useMemo(() => {
+  // Deliberately NOT memoized: demoTickets mutates in place (not observable by
+  // React), so the list is recomputed on every render after a storeTick bump.
+  const filteredTickets = (() => {
     let list = [...demoTickets];
     if (statusFilter !== 'all') list = list.filter((t: Ticket) => t.status === statusFilter);
     if (priorityFilter !== 'all') list = list.filter((t: Ticket) => t.priority === priorityFilter);
@@ -57,7 +64,7 @@ export function HelpdeskDashboard() {
         brands.find((b: any) => b.id === t.brandId)?.profile.businessName.toLowerCase().includes(q));
     }
     return list.sort((a: Ticket, b: Ticket) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
-  }, [statusFilter, priorityFilter, searchQuery, brands]);
+  })();
 
   const selectedTicket = selectedTicketId ? getTicketById(selectedTicketId) : null;
   const ticketMessages = useMemo(() => {
@@ -73,6 +80,10 @@ export function HelpdeskDashboard() {
       subject: 'Re: ' + selectedTicket.subject, body: replyDraft, sentBy: 'staff', requiresHuman: false })
       .then((msg) => {
         appendMessageToTicket(selectedTicket.id, msg.id);
+        bumpStore();
+        // Single source of truth — every query-backed view (Messages Hub,
+        // Brand CRM comm panel) must re-read the canonical messages store.
+        void qc.invalidateQueries({ queryKey: ['messages'] });
         setReplyNote('Reply sent.'); setReplyDraft('');
         setTimeout(() => setReplyNote(null), 3000);
       });
@@ -155,20 +166,20 @@ return (
                     <span>{new Date(selectedTicket.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <select value={selectedTicket.status} onChange={(e) => updateTicketStatus(selectedTicket.id, e.target.value as TicketStatus, actingStaff?.id)}
+                <select value={selectedTicket.status} onChange={(e) => { updateTicketStatus(selectedTicket.id, e.target.value as TicketStatus, actingStaff?.id); bumpStore(); }}
                   className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-[10px] text-white">
                   {(['open', 'pending', 'resolved'] as const).map((s) => (<option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>))}
                 </select>
               </div>
               <div className="flex items-center gap-3 text-[10px]">
                 <User className="w-3 h-3 text-zinc-500" />
-                <select value={selectedTicket.assignedToStaffId ?? ''} onChange={(e) => assignTicket(selectedTicket.id, e.target.value, actingStaff?.id)}
+                <select value={selectedTicket.assignedToStaffId ?? ''} onChange={(e) => { assignTicket(selectedTicket.id, e.target.value, actingStaff?.id); bumpStore(); }}
                   className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-[10px] text-white">
                   <option value="">Unassigned</option>
                   {staff.filter((s: any) => s.active).map((s: any) => (<option key={s.id} value={s.id}>{s.name}</option>))}
                 </select>
                 <Filter className="w-3 h-3 text-zinc-500" />
-                <select value={selectedTicket.priority} onChange={(e) => setTicketPriority(selectedTicket.id, e.target.value as TicketPriority, actingStaff?.id)}
+                <select value={selectedTicket.priority} onChange={(e) => { setTicketPriority(selectedTicket.id, e.target.value as TicketPriority, actingStaff?.id); bumpStore(); }}
                   className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-[10px] text-white">
                   {(['urgent', 'high', 'medium', 'low'] as const).map((p) => (<option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>))}
                 </select>

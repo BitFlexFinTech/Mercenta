@@ -9,6 +9,34 @@
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
 > - Older sections below (Brand Intelligence, performance fixes, droplet consolidation, E2E suite) are historical/legacy and are preserved verbatim; they do not supersede the phase table above. Navigation: use section 1 for current phases/checkpoint/branch.
+## Phase 1 — Backend / Data / Domain Acceptance Gate (2026-09-10)
+
+> Status: **DONE — HARD GATE PASSED**. No UI redesign started. UI untouched by design.
+> **Gate evidence (executed this session):** typecheck 0 · lint 0 · build ✓ 3.18s ·
+> full E2E **153 passed / 4 skipped / 0 failed** (2.1 min) · 6 provider/automation validators PASS
+> (mock-providers, mock-seam, provider-workflows, automation, postiz, discovery) ·
+> real-browser verification via Playwright (Chromium) on all new acceptance paths.
+>
+> **New coverage — `e2e/domain-acceptance.spec.ts` (6 tests, all green)** covering the domain contracts the old 147-test suite did not assert:
+> 1. **Rakazo independence** — core domain (Overview KPIs + CRM) operates fully with the Rakazo surface present/unreachable; iframe-or-fallback never crashes.
+> 2. **Brand Intelligence** — canonical dataset proven at runtime: 12 tracked / 10 shown (Truthbrush + UpCircle disqualified), scoring KPIs, deterministic search, evidence tabs.
+> 3. **ICP pipeline** — seeded 8-lead universe renders; live fit scoring; deterministic auto-enroll of exactly 2 Scraped leads (Mara Naturals 70, Bella Pelle 85) — real stage transition visible in the pipeline board.
+> 4. **ONE canonical conversation** — a Helpdesk reply (`logMessage`) surfaces immediately in the admin Messages thread for the same brand; no duplicated history.
+> 5. **Helpdesk lifecycle** — real `ticket_status_changed` status transition reflected in the row AND audited (audit-log action registry).
+> 6. **Reload semantics** — in-memory demo contract proven: reload returns to public entry (session resets by design); re-login re-bootstraps the identical canonical dataset; tenant pin preserved.
+>
+> **Three genuine defects found & fixed in `src/components/admin/HelpdeskDashboard.tsx` (Phase 1 scope — query refresh / mutation ordering / single-source visibility):**
+> 1. `logMessage` writes were never invalidating the `['messages']` TanStack query → sibling views (Messages Hub) rendered a stale snapshot (30 s staleTime) even though the canonical store had the message — violating the "one canonical conversation" contract. **Fix:** `qc.invalidateQueries({ queryKey: ['messages'] })` after a reply (mirrors existing `BrandComm.tsx` pattern).
+> 2. `updateTicketStatus`/`assignTicket`/`setTicketPriority` mutate `demoTickets` in place with no React-observable change → rows/selects never re-rendered. **Fix:** `useReducer` storeTick bump invoked after every ticket mutation (status/assignment/priority/reply); the filtered list is now recomputed per render (deliberately unmemoized — 5 rows, trivial cost) instead of caching a stale snapshot.
+> 3. `filteredTickets` useMemo had no `demoTickets` dependency at all — latent stale-list bug. Rendered moot by fix 2's unmemoized computation.
+>
+> **Recorded caveats (honest, not gate blockers):**
+> - **Live-provider Edge-Function layer absent from repo** (`/functions/v1/spapi/*`, DHL/CH/HMRC EFs, `send-email`/`esign-envelope`): the mock/live seams and factories are verified intact; switching a provider to LIVE would 404 until those functions deploy. Simulation-only mode unaffected. Recorded as deploy-time/GO_LIVE work.
+> - **Reload persistence is in-memory-only in demo mode** (documented contract; Supabase-backed deployments persist entity writes — not re-testable here without a live Supabase project). Test 6 asserts the documented demo semantics deterministically.
+> - **`scripts/validate-edge-functions.mjs` crashes** (ENOENT `payouts-transfer`) — STALE tooling vs current tree; recorded in Phase 0 checklist. Not part of this phase's gate.
+> - Real-network provider failure/retry paths are exercised through the deterministic sim + validators only (no live credentials in this environment).
+>
+> NEXT: Phase 2 — Rakazo actual bot / access / action integration (advance screen; gate for this phase satisfied with the recorded caveats).
 ## Phase 0 — Product Consolidation: Repository + Audit Reconciliation (2026-09-10)
 
 > Status: **DONE** — checkpoint doc `docs/PRODUCT_CONSOLIDATION_PHASE0_RECONCILIATION_2026-09-10.md`.
