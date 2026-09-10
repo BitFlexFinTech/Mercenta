@@ -147,4 +147,21 @@ test.describe('Domain Acceptance Gate', () => {
     // Tenant pin preserved after re-bootstrap: own dashboard only.
     await expect(page.locator('text=something went wrong')).toHaveCount(0, { timeout: 2000 });
   });
+
+  test('7. BI → ICP identity continuity — imported leads link to canonical BI prospects', async ({ page }) => {
+    await loginAs(page, 'Mercenta Admin Hub', 1200);
+    await openNav(page, 'Marketing');
+    await expect(page.locator('text=ICP Builder').first()).toBeVisible({ timeout: 6000 });
+    // Import a CSV row for a canonical BI prospect (Tapatío — brandProspectSeed)
+    // with NO segment, so the canonical bridge supplements it from the BI
+    // record instead of the parse default 'Uncategorized'.
+    await page.locator('textarea').last().fill('Tapatío,Sherry Zhang,partners@tapatio.com,Austin TX,us,');
+    await page.locator('button:has-text("Import leads")').first().click();
+    await expect(page.locator('text=CSV imported into pipeline.').first()).toBeVisible({ timeout: 5000 });
+    // The imported lead renders in the live-scored ICP list…
+    await expect(page.locator('text=Tapatío').first()).toBeVisible({ timeout: 4000 });
+    // …and inherits the canonical BI segment (Grocery) — visible proof that
+    // the ingested lead is identity-linked to the BI prospect universe.
+    await expect(page.locator('text=US · Grocery').first()).toBeVisible({ timeout: 4000 });
+  });
 });

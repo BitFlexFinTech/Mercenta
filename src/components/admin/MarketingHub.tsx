@@ -17,6 +17,17 @@ import { Card, Badge, Button, Textarea } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AlertTriangle, Info, Target, Upload, Compass, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { runDiscoveryPipeline, createMockDiscoveryClients, type EnrichedLead } from '@/lib/discovery/engine';
+import { matchLeadsToProspects } from '@/lib/intelligence/prospectPipeline';
+import { SEED_PROSPECTS } from '@/data/brandProspectSeed';
+import { EXTRA_PROSPECTS } from '@/data/brandExtraSeed';
+
+/** §Phase A — the canonical BI prospect universe (seeded fixture, re-scored
+ *  at load). Every lead that enters the ICP is linked against this set so
+ *  canonical identity survives ingestion. */
+const CANONICAL_BI_UNIVERSE: readonly (typeof SEED_PROSPECTS[0])[] = [
+  ...SEED_PROSPECTS,
+  ...EXTRA_PROSPECTS,
+];
 
 const REGIONS: { value: Lead['region']; label: string }[] = [
   { value: 'us', label: 'US origin' },
@@ -79,7 +90,9 @@ export function MarketingHub() {
   const runAutoEnroll = () => {
     for (const { lead, fit } of autoEnrollable) {
       if (shouldAutoEnroll(fit, lead.outreachStatus as PipelineStage)) {
-        updateLeadStatus(lead.id, 'Sequenced');
+        // §Phase A — persist the live-computed fit at the transition (it was
+        // display-only before; downstream stages now see the true score).
+        updateLeadStatus(lead.id, 'Sequenced', fit);
       }
     }
   };
@@ -92,21 +105,25 @@ export function MarketingHub() {
       description: icpDescription,
     });
     const { leads: imported } = await adapter.fetchNewLeads(new Date().toISOString(), csv);
-    imported.forEach(addLead);
+    // §Phase A — canonical identity bridge: ingested leads matching a BI
+    // prospect inherit its id + category so identity survives ingestion.
+    matchLeadsToProspects(imported, CANONICAL_BI_UNIVERSE).forEach(addLead);
   };
 
   /** Run the full discovery pipeline: directory → research → enrichment → email → enrol */
   const runDiscovery = async () => {
     setDiscoveryRunning(true);
     setDiscoveryResult(null);
-    const events: { name: string; enrolled: boolean; reason?: string }[] = [];
+    const events: { name: string; enrolled: boolean; reason?: string; fitScore?: number; segment?: string }[] = [];
     const clients = createMockDiscoveryClients();
     const result = await runDiscoveryPipeline(icpCategories, icpDescription, {
       clients,
       minFitScore: 50,
       subjectTemplate: 'UK retail placement for {{company}}',
       onLead: (lead, enrolled, dropReason) => {
-        events.push({ name: lead.companyName, enrolled, reason: dropReason });
+        // §Phase A — carry the pipeline's REAL per-lead fit + segment instead
+        // of discarding them (the old wire stored a hardcoded 85 + 'Home').
+        events.push({ name: lead.companyName, enrolled, reason: dropReason, fitScore: lead.fitScore, segment: lead.segment });
       },
     });
     setDiscoveryRunning(false);
@@ -122,8 +139,8 @@ export function MarketingHub() {
           email: '',
           priority: 'Medium',
           outreachStatus: 'Sequenced',
-          segment: icpCategories[0] ?? 'Home',
-          fitScore: 85,
+          segment: ev.segment ?? icpCategories[0] ?? 'Home',
+          fitScore: ev.fitScore ?? 85,
           region: 'eu',
         });
       }

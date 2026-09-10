@@ -1,14 +1,72 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-09 (Provider Simulation-First completion pass — SIMULATION-COMPLETE core workflows. DHL/Companies House/HMRC adapter trios with deterministic mocks + factories; 2 new scenarios; live-boundary resolver; Super Admin Compliance tab + carrier DHL control; networkCalls===0 proofs; E2E 147/0/4)
+> Last updated: 2026-09-10 (Phase A — CORE DATA/DOMAIN/WORKFLOW CONSOLIDATION: BI→ICP canonical identity bridge (`Lead.prospectId` + `prospectPipeline.ts`), real fit persistence at transitions, discovery no longer fabricates fit=85/'Home'; created MERCENTA_MASTER_CONTEXT.md + MERCENTA_ARCHITECTURE.md; E2E 154/0/4; prospect-pipeline validator 18/18)
+>
+> **Memory files (portable, AI-vendor-neutral):** `MERCENTA_MASTER_CONTEXT.md`
+> (project constitution §A–AF) · `MERCENTA_ARCHITECTURE.md` (technical
+> reference) · this file (operational handoff). Phase report:
+> `docs/PRODUCT_CONSOLIDATION_PHASEA_2026-09-10.md`.
 >
 > ## 0. Project-Memory Reconciliation (2026-09-08)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
-> - **Verified latest checkpoint: `5f13ac1`** (Phase 7F part 1 — compliance test states). Prior: `9ef93eb` (7E docs) → `ad97e9d` (7E brand dashboard) → `041de1a` (7E deferred/product repairs) → `e7fa882` (Phase 6 — application shell & navigation) → `774f6c4` (Phase 5) → `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
+> - **Verified latest checkpoint: `fe8c474` (Phase 1 gate). Prior: `5f13ac1`** (Phase 7F part 1 — compliance test states). Older chain: `9ef93eb` (7E docs) → `ad97e9d` (7E brand dashboard) → `041de1a` (7E deferred/product repairs) → `e7fa882` (Phase 6 — application shell & navigation) → `774f6c4` (Phase 5) → `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
 > - **Baseline:** tag `mercenta-baseline-before-redesign-20260907` / commit `959b4d2` — recoverable, immutable.
-> - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic artifacts).
-> - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/ARCHITECTURE.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`.
-> - Older sections below (Brand Intelligence, performance fixes, droplet consolidation, E2E suite) are historical/legacy and are preserved verbatim; they do not supersede the phase table above. Navigation: use section 1 for current phases/checkpoint/branch.
+> - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic/generated artifacts).
+> - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`. (`docs/ARCHITECTURE.md` retained as history; superseded by `MERCENTA_ARCHITECTURE.md`.)
+> - Older sections below are historical/legacy, preserved verbatim; their old phase-number pointers (e.g. "Phase 3/4 targets", "Phase 2 — Rakazo") are superseded by the MASTER ROADMAP A–M (Rakazo = Phase M, LAST) — see MERCENTA_MASTER_CONTEXT.md §AB.
+## Phase A — Core Data / Domain / Workflow Consolidation (2026-09-10)
+
+> Status: **DONE** — phase gate passed. Report: `docs/PRODUCT_CONSOLIDATION_PHASEA_2026-09-10.md`.
+> Objective: continue the master consolidation **CORE PRODUCT FIRST / RAKAZO LAST** —
+> close the BI→ICP identity gap, persist real fit scores, classify all data
+> (REAL / SIMULATED / SEEDED / UNKNOWN), and create the portable memory files.
+> **No UI redesign. No Rakazo. No Postiz exposure.**
+>
+> **Gate evidence (executed this session):** typecheck **0** · lint **0** ·
+> build **✓ 3.15s** · full E2E **154 passed / 4 skipped / 0 failed** (2.2 min) ·
+> validators **7/7 PASS** (mock-providers, mock-seam, provider-workflows,
+> automation, postiz, discovery, **prospect-pipeline** (NEW — 18 tests)) ·
+> real-browser (Chromium) proof of the new identity flow in `domain-acceptance` test 7.
+>
+> **Implemented (minimal connective tissue, all data-truth):**
+> 1. **BI→ICP canonical identity bridge** — `Lead.prospectId?: string`
+>    (`src/types.ts`) + NEW `src/lib/intelligence/prospectPipeline.ts`:
+>    deterministic brand-key match (`matchLeadToProspect(s)`), CSV-ingestion
+>    linking (`matchLeadsToProspects` — canonical segment inherited only when
+>    the record left it blank; explicit user data never overwritten), and
+>    `deriveLeadFromProspect(prospect, region)` which returns `null` for an
+>    unmappable origin (**an origin is never invented**).
+> 2. **Discovery enrollment no longer fabricates data** — the old wire stored
+>    `fitScore: 85` + `segment: 'Home'` for every enrolled lead regardless of
+>    the pipeline's real values; the events now carry the real per-lead
+>    `EnrichedLead.fitScore` + `segment`.
+> 3. **Fit scores persisted at transitions** — `updateLeadStatus(id, status,
+>    fitScore?)`; auto-enroll now stores the live-computed score (was
+>    display-only).
+> 4. **Wiring:** MarketingHub CSV import + discovery enrollment both link
+>    ingested leads against the canonical BI universe.
+>
+> **Browser-verified (E2E test 7):** importing CSV row `Tapatío,…,us,` (no
+> segment) renders the linked lead with canonical segment — visible as
+> `US · Grocery` — proving identity survives ingestion end-to-end.
+>
+> **Data-classification output (complete table in phase report §4):** BI seeds
+> (12) + ICP `INITIAL_LEADS` (8) = SEEDED TEST FIXTURES · discovery/provider
+> sims = DETERMINISTIC PROVIDER SIMULATION · dashboards/helpdesk/analytics =
+> REAL INTERNAL DATA · campaign/monitoring-health = SEEDED (flagged) ·
+> Firecrawl/Keepa real clients + live Edge Functions = UNKNOWN/ABSENT (no live
+> credentials; never claimed working).
+>
+> **Files changed:** `src/types.ts` · `src/lib/intelligence/prospectPipeline.ts`
+> (NEW) · `src/context/GlobalStateContext.tsx` · `src/components/admin/MarketingHub.tsx`
+> (logic only) · `scripts/validate-prospect-pipeline.mjs` (NEW) ·
+> `e2e/domain-acceptance.spec.ts` (test 7) · `MERCENTA_MASTER_CONTEXT.md` (NEW) ·
+> `MERCENTA_ARCHITECTURE.md` (NEW) · `PROJECT_STATUS.md` (this entry).
+>
+> NEXT: **Phase B — Brand Intelligence real-data lifecycle** (BI persistence +
+> refresh/dedupe/provenance behind the existing `BrandIntelligenceClient` seam;
+> keep the mock working). Do NOT begin UI redesign; do NOT begin Rakazo/Postiz.
+
 ## Phase 1 — Backend / Data / Domain Acceptance Gate (2026-09-10)
 
 > Status: **DONE — HARD GATE PASSED**. No UI redesign started. UI untouched by design.
@@ -36,7 +94,10 @@
 > - **`scripts/validate-edge-functions.mjs` crashes** (ENOENT `payouts-transfer`) — STALE tooling vs current tree; recorded in Phase 0 checklist. Not part of this phase's gate.
 > - Real-network provider failure/retry paths are exercised through the deterministic sim + validators only (no live credentials in this environment).
 >
-> NEXT: Phase 2 — Rakazo actual bot / access / action integration (advance screen; gate for this phase satisfied with the recorded caveats).
+> NEXT (superseded by the master roadmap A–M): the former "Phase 2 — Rakazo"
+> is now **Phase M (LAST)**. The corrected continuation is **Phase A — Core
+> Data/Domain/Workflow Consolidation** (completed above), then Phase B — BI
+> real-data lifecycle. See MERCENTA_MASTER_CONTEXT.md §AB.
 ## Phase 0 — Product Consolidation: Repository + Audit Reconciliation (2026-09-10)
 
 > Status: **DONE** — checkpoint doc `docs/PRODUCT_CONSOLIDATION_PHASE0_RECONCILIATION_2026-09-10.md`.

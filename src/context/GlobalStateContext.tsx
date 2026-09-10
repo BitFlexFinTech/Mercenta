@@ -52,7 +52,13 @@ interface AppState {
   addActivityLog: (log: ActivityLog) => void;
 
   leads: Lead[];
-  updateLeadStatus: (id: string, status: Lead['outreachStatus']) => void;
+  /** §Phase A — status transition; `fitScore` persists the live-computed ICP
+   *  fit at the moment of the transition (was display-only before). */
+  updateLeadStatus: (
+    id: string,
+    status: Lead['outreachStatus'],
+    fitScore?: number
+  ) => void;
   /** §7 — imported/sourced leads enter the pipeline here. */
   addLead: (lead: Lead) => void;
 
@@ -297,9 +303,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateLeadStatus = useCallback(
-    (id: string, status: Lead['outreachStatus']) => {
+    (id: string, status: Lead['outreachStatus'], fitScore?: number) => {
       setLeads((prev) =>
-        prev.map((l) => (l.id === id ? { ...l, outreachStatus: status } : l))
+        prev.map((l) =>
+          l.id === id
+            ? {
+                ...l,
+                outreachStatus: status,
+                ...(fitScore !== undefined ? { fitScore } : {}),
+              }
+            : l
+        )
       );
     },
     []

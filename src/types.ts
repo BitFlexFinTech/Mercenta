@@ -205,6 +205,11 @@ export interface Lead {
   segment: string;
   fitScore: number;
   region: 'us' | 'eu' | 'africa' | 'canada';
+  /** §Phase A — canonical Brand Intelligence prospect link. Identity + evidence
+   *  survive every stage: BI prospect → ICP lead → outreach → opportunity.
+   *  Absent for leads with no canonical BI counterpart (seeded demo fixtures,
+   *  CSVs for unknown brands). */
+  prospectId?: string;
 }
 
 export interface Campaign {
