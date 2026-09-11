@@ -2,6 +2,19 @@
 > Source of truth for current project state. Updated after every session.
 > Last updated: 2026-09-11 (Phase C — BI → ICP → OUTREACH → CRM FOUNDATION: canonical BI prospects are now the ACTIVE acquisition universe, `INITIAL_LEADS` retired from the live path, new acquisition store + lifecycle engine (`src/data/acquisitionStore.ts`, `src/lib/acquisition/outreachLifecycle.ts`, `outreachSender.ts`), BI-evidence outreach prep, human approve/reject/modify, simulated send + response + Opportunity + CRM relationship context; new validator 64/64 + E2E 4/4; full E2E 160/0/4; typecheck 0 · lint 0 · build PASS)
 >
+> **PHASE D3 (2026-09-11) — OUTREACH / PROVIDER HARDENING.** Transport mode is now
+> DERIVED from the canonical integration mode model (`resolveOutreachTransport` —
+> never caller booleans) and `sendOutreach()` **fails closed**: a transport claiming
+> `live` without verified credentials is refused (`PROVIDER_NOT_LIVE`) and audited.
+> `UNKNOWN ≠ LIVE` enforced (disconnected/available/configuring → simulation;
+> degraded/error/disabled → unavailable simulation). Simulation proven zero-network;
+> missing credentials never break simulation; human approval needs no Rakazo/Postiz.
+> REAL DEFECT FIXED: `Date.now()`-based outreach record ids collided within a
+> millisecond and the store's upsert silently destroyed a revision — ids are now
+> workflow-owned (`outreach-<prospectId>-r<n>`). New validator **44/44 PASS** +
+> new E2E spec **3/3**; full E2E **172/0/4**; typecheck 0 · lint 0 · build PASS.
+> Report: `docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md`.
+>
 > **PHASE D2 (2026-09-11) — BI INTELLIGENCE PRESERVATION.** New canonical
 > accessor `src/lib/intelligence/prospectIntelligence.ts` (11 sections, digest,
 > provenance, lifecycle; read **by reference**, never copied). `AcquisitionProspectRow`
@@ -99,6 +112,66 @@ browser click-through (Playwright only). No deploy, no push.
 
 **NEXT:** **D2 — BI intelligence preservation through acquisition** (see §21 of
 the Phase D mandate). D2 does not start until this gate is accepted.
+
+## Phase D3 — outreach / provider hardening (2026-09-11)
+
+> Status: **DONE (verified this session)**. Full report:
+> `docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md`.
+> Pre-D3 HEAD: `8bbb694`. Protected baseline untouched: `959b4d2`.
+
+**BUILT (D3)**
+- **`src/lib/acquisition/outreachSender.ts` (+141)** — `OutreachTransport` now
+  declares `providerState` (`live | sandbox | not_configured | unavailable`) and an
+  optional `isVerifiedLive()`; `isVerifiedLiveTransport()` is the fail-closed
+  predicate; **`resolveOutreachTransport(emailState, client)`** derives the mode
+  from `modeForState` + the registry default and returns
+  `{ transport, providerState, resolvedMode, live }`; `describeOutreachProvider()`.
+  The existing `createEmailClient` is reused — no second provider abstraction.
+- **`src/lib/acquisition/outreachLifecycle.ts` (+49)** — `sendOutreach()` refuses a
+  `live` claim it cannot verify (`PROVIDER_NOT_LIVE`, audited as
+  `acquisition_outreach_send_refused`, revision untouched, no message logged) and
+  only records `transport: 'live'` from the verified predicate.
+  **REAL DEFECT FIXED:** `outreachRecordId(prospectId, revision)` — workflow-owned
+  ids; the generator's `Date.now()` ids collided within a millisecond and
+  `saveOutreach` upserted by id, silently destroying a revision (proven:
+  `stored 2`, `1:pending_approval 3:pending_approval`).
+- **`AcquisitionWorkflow.tsx` (+31/−25)** — uses the resolver; the operator label
+  and send notice now report the honest provider state.
+- **`scripts/validate-outreach-provider-hardening.mjs`** (NEW, 44 assertions) +
+  **`e2e/outreach-provider-hardening.spec.ts`** (NEW, 3 tests).
+
+**TESTED (D3) — real output**
+- `npm run typecheck` → **TYPECHECK_EXIT=0** · `npm run lint` → **LINT_EXIT=0**
+- `npm run build` → **PASS**, `✓ built in 3.31s`
+- `node scripts/validate-outreach-provider-hardening.mjs` →
+  **OUTREACH_PROVIDER_HARDENING_VALIDATION_PASS (44 ✓ / 0 ✗)**
+- `npx playwright test e2e/outreach-provider-hardening.spec.ts` → **3 passed (15.3s)**
+- relevant specs (outreach-hardening · acquisition-pipeline ·
+  bi-intelligence-preservation · domain-acceptance · crm · rakazo ·
+  simulation-control · multi-tenant) → **50 passed (44.5s)**
+- `npx playwright test` (full) → **172 passed / 4 skipped / 0 failed, EXIT=0**
+  (D2 baseline 169/4/0 → **+3 tests, 0 new failures**)
+- existing validators (acquisition-pipeline · bi-intelligence-preservation 42 ·
+  bi-lifecycle · prospect-pipeline · rocketchat-removal · demo-completeness 27 ·
+  mock-providers · mock-seam · provider-workflows · design-tokens · whatsapp)
+  → **ALL PASS**
+
+**RESULT:** DONE. Only a positively-resolved `live` mode with verified credentials
+can perform — or be recorded as — a live send; every other state resolves to the
+deterministic simulation transport with zero network calls; refusal is audited and
+non-mutating; the full human-approval workflow is Rakazo/Postiz-free; RBAC and
+prospect-scoped isolation hold; outreach revision history is no longer destroyable.
+
+**KNOWN GAPS / NOT DONE:** no live provider send against a real provider (the live
+path is proven via an injected provider transport); `/functions/v1/send-email`
+remains deploy-time infrastructure that is absent; acquisition artefacts stay
+session-only in-memory (D4); no manual browser pass (Playwright only); the D2
+`BrandComm.brandInboxAddress` duplication finding still stands (untouched). No
+deploy, no push.
+
+**NEXT:** **D4 — persistence / domain hardening** (existing Supabase repository
+pattern, no second database, simulation preserved). D4 does not start until this
+gate is accepted.
 
 ## Phase D2 — BI intelligence preservation through acquisition (2026-09-11)
 

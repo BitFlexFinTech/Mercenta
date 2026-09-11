@@ -321,7 +321,7 @@ onboarding. **Not started yet.**
 | A | Core data / domain / workflow consolidation | ✅ DONE (`dbbf567`) |
 | B | Brand Intelligence real-data lifecycle | ✅ DONE (`9f935f4`) |
 | C | ICP consumption of canonical BI data | ✅ DONE (`b7cd0d4`; BI→ICP→outreach→approve/reject→send→response→Opportunity→CRM) |
-| D | Partner acquisition / production hardening | 🔄 IN PROGRESS — **D1 Rocket.Chat removal DONE** · **D2 BI-intelligence preservation DONE**; D3 outreach/provider hardening · D4 persistence/domain · D5 Opportunity→CRM→onboarding · D6 Postiz full-platform exposure |
+| D | Partner acquisition / production hardening | 🔄 IN PROGRESS — **D1 Rocket.Chat removal DONE** · **D2 BI-intelligence preservation DONE** · **D3 outreach/provider hardening DONE**; D4 persistence/domain · D5 Opportunity→CRM→onboarding · D6 Postiz full-platform exposure |
 | E | CRM + communication + helpdesk consolidation | |
 | F | Executive analytics + operations separation | |
 | G | Screen-level UI/UX redesign | |
@@ -384,6 +384,13 @@ onboarding. **Not started yet.**
     the seven score factors and lifecycle/history are resolved live from the
     canonical BI record. Nothing copies them into a second store, so nothing can
     drift. An unknown id returns `null` — never a fabricated prospect.
+12. Outreach transport mode is RESOLVED, never caller-supplied (Phase D3):
+    `resolveOutreachTransport()` derives it from the canonical integration mode
+    model, and `sendOutreach()` fails closed — a `live` claim without verified
+    credentials is refused and audited. Simulation is the deterministic default
+    (zero network) for every non-live state; `UNKNOWN ≠ LIVE`; a live send is
+    never fabricated, and the record id is workflow-owned so no revision can be
+    silently overwritten.
 
 ## AE. Known Limitations / Caveats
 

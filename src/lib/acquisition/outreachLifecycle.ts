@@ -57,7 +57,11 @@ import {
 import * as store from '@/data/acquisitionStore';
 import { getProspect, getProspects } from '@/data/prospectStore';
 import { logMessage } from '@/data/api';
-import { simulationOutreachTransport, type OutreachTransport } from './outreachSender';
+import {
+  isVerifiedLiveTransport,
+  simulationOutreachTransport,
+  type OutreachTransport,
+} from './outreachSender';
 
 /** The operator performing an acquisition action, with its RBAC verdict. */
 export interface AcquisitionActor {
@@ -203,6 +207,19 @@ export function getAcquisitionSummary(): AcquisitionPipelineSummary {
 }
 
 /**
+ * §Phase D3 — collision-proof outreach record id: ONE record per prospect per
+ * revision.
+ *
+ * The BI content generator mints ids from `Date.now()`, so two preparations
+ * within the same millisecond produced the SAME id — and `saveOutreach`
+ * upserts by id, so the earlier revision was silently overwritten and lost.
+ * Revision history must never be discarded, so the WORKFLOW owns the id.
+ */
+export function outreachRecordId(prospectId: string, revision: number): string {
+  return `outreach-${prospectId}-r${revision}`;
+}
+
+/**
  * Reconcile an ICP lead row with its canonical BI prospect, so the ICP list
  * always DISPLAYS the canonical state (the BI prospect owns the outreach
  * status; the lead row is a projection of it). Leads without a `prospectId`
@@ -307,21 +324,26 @@ export function prepareOutreach(
 
   const fresh = getProspect(prospectId) ?? prospect;
   const previous = store.getOutreachForProspect(prospectId);
+  const revision = previous.length + 1;
   const generated =
     channel === 'linkedin' ? generateLinkedInMessage(fresh) : generateEmail(fresh);
   const whyContact = generateOutreachSummary(fresh);
 
   const record: ProspectOutreachRecord = {
     ...generated,
+    // §Phase D3 — the workflow owns the record id (`outreachRecordId`). The
+    // generator's Date.now()-based id collided within a millisecond and the
+    // store's upsert-by-id silently overwrote, i.e. destroyed, a revision.
+    id: outreachRecordId(prospectId, revision),
     status: 'pending_approval',
-    revision: previous.length + 1,
+    revision,
     leadId: acquisitionLeadId(prospectId),
     evidenceSummary: whyContact,
     // §Phase D2 — traceability REFERENCE (ids + counts + score snapshot) to the
     // BI intelligence the operator saw when preparing this revision. The
     // intelligence itself stays in Brand Intelligence and is re-read from the
     // canonical prospect by `prospectId` — it is never copied into this record.
-    intelligenceRef: buildIntelligenceRef(fresh, previous.length + 1),
+    intelligenceRef: buildIntelligenceRef(fresh, revision),
   };
   store.saveOutreach(record);
   pushEvent(
@@ -464,12 +486,31 @@ export async function sendOutreach(
   const prospect = getProspect(current.prospectId);
   if (!prospect) return { ok: false, error: NO_PROSPECT };
 
+  // §Phase D3 — FAIL-CLOSED LIVE GATE. A transport that claims `live` must PROVE
+  // its provider credentials are verified. An unavailable provider is never
+  // silently treated as live, and no send is attempted in that case.
+  if (transport.mode === 'live' && !isVerifiedLiveTransport(transport)) {
+    store.recordAcquisitionAudit(
+      'acquisition_outreach_send_refused',
+      prospect.id,
+      'Refused a send from a transport claiming live without verified provider credentials',
+      actor.staffId
+    );
+    return {
+      ok: false,
+      error:
+        'PROVIDER_NOT_LIVE — the transport claims a live provider but its credentials are not verified. Refusing to treat an unavailable provider as live.',
+    };
+  }
+
   const destination = outreachDestination(prospect);
   const subject = current.subject ?? `Mercenta × ${prospect.brand}`;
   const outcome = await transport.send({ to: destination, subject, body: current.body });
 
+  // A live send is only ever recorded when it was VERIFIED live AND the
+  // transport did not report a sandbox outcome (defence in depth).
   const effectiveTransport: 'simulation' | 'live' =
-    transport.mode === 'simulation' || outcome.sandbox ? 'simulation' : 'live';
+    isVerifiedLiveTransport(transport) && !outcome.sandbox ? 'live' : 'simulation';
   const simulated = effectiveTransport === 'simulation';
 
   // ALWAYS-LOG RULE — the message lands in the canonical store either way.

@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 11, 2026 (Phase D2 — BI intelligence preservation through acquisition)
+Last updated: September 11, 2026 (Phase D3 — outreach/provider hardening)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -52,6 +52,16 @@ Cline's output back. AI confirms, gives next prompt.
   conversation also appears in Messages (one canonical thread). No live
   credentials needed, no Rakazo, no Postiz, no Rocket.Chat, no external network
   calls in simulation.
+- Outreach/provider hardened (Phase D3, 2026-09-11): the transport mode is now
+  derived from the canonical integration mode model (`resolveOutreachTransport`)
+  instead of UI booleans, and the domain FAILS CLOSED — a transport claiming `live`
+  without verified credentials is refused (`PROVIDER_NOT_LIVE`) and audited, so an
+  unavailable provider can never be silently treated as live. `UNKNOWN ≠ LIVE`;
+  simulation is proven zero-network; missing credentials never break it; human
+  approval needs neither Rakazo nor Postiz. Also fixed a real defect: `Date.now()`
+  outreach record ids collided within a millisecond and destroyed a revision — ids
+  are now workflow-owned. Gates: validator 44/44 + E2E 3/3; full E2E 172/0/4.
+  Report: docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md.
 - BI intelligence preserved through acquisition (Phase D2, 2026-09-11; commit
   `fe0c893`): the acquisition layer now reads a prospect's FULL Brand Intelligence
   by REFERENCE
@@ -81,12 +91,13 @@ the FINAL phase. The older list below is superseded by that roadmap.
 2. Namecheap FTP deploy script — DONE (scripts/deploy-demo.sh; demo live).
 3. Companies House + HMRC compliance dashboard — DONE (simulation-complete).
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
-NEXT in roadmap: PHASE D — IN PROGRESS. **D1 (Rocket.Chat removal) DONE** and
-**D2 (BI intelligence preservation through acquisition) DONE** (2026-09-11).
-Next: **D3 — outreach/provider hardening**, then D4 persistence/domain (persist
-acquisition records in Supabase instead of session memory), D5 Opportunity → CRM
-→ brand application → onboarding hand-off, D6 Postiz full-platform exposure in
-Admin + Brand dashboards. Rakazo stays LAST (Phase M).
+NEXT in roadmap: PHASE D — IN PROGRESS. **D1 (Rocket.Chat removal) DONE**,
+**D2 (BI intelligence preservation) DONE** and **D3 (outreach/provider hardening)
+DONE** (2026-09-11). Next: **D4 — persistence/domain hardening** (persist
+acquisition records through the existing Supabase repository pattern instead of
+session memory), then D5 Opportunity → CRM → brand application → onboarding
+hand-off, D6 Postiz full-platform exposure in Admin + Brand dashboards. Rakazo
+stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

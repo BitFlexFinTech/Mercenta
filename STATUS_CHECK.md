@@ -12,6 +12,7 @@ fixed. Never cite the log as current status.
 - `npm run build` — PASS (vite, ~2.5s)
 - `node scripts/validate-rocketchat-removal.mjs` — ROCKETCHAT_REMOVAL_VALIDATION_PASS (15/15; Phase D1)
 - `node scripts/validate-bi-intelligence-preservation.mjs` — BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (42/42; Phase D2)
+- `node scripts/validate-outreach-provider-hardening.mjs` — OUTREACH_PROVIDER_HARDENING_VALIDATION_PASS (44/44; Phase D3)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -22,10 +23,32 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **169 PASS / 4 skip / 0 fail** across 27 spec files.
-  (Phase D2 added `e2e/bi-intelligence-preservation.spec.ts`, +4 tests, 0 new failures.)
+  **Playwright E2E** — **172 PASS / 4 skip / 0 fail** across 28 spec files.
+  (Phase D3 added `e2e/outreach-provider-hardening.spec.ts`, +3 tests, 0 new failures.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Outreach / provider hardening (Phase D3 — 2026-09-11)
+
+- Transport mode is DERIVED from the canonical integration mode model via
+  `resolveOutreachTransport()` — never from caller-supplied booleans — so the
+  outreach decision cannot drift from the Integrations Hub.
+- `sendOutreach()` **fails closed**: a transport claiming `live` without verified
+  credentials is refused (`PROVIDER_NOT_LIVE`), audited, and leaves the revision
+  untouched. `transport: 'live'` is only ever recorded from the verified predicate.
+- `UNKNOWN ≠ LIVE`: disconnected / available / configuring resolve to the
+  deterministic simulation transport; degraded / error / disabled resolve to
+  `unavailable` + simulation; a live state with no client or unverified
+  credentials is downgraded. Simulation performs ZERO network calls and missing
+  credentials never break it.
+- FIXED a real defect: `Date.now()`-based outreach record ids collided within a
+  millisecond and the store's upsert silently destroyed a revision. Ids are now
+  workflow-owned (`outreach-<prospectId>-r<n>`), so revision history is preserved.
+- Human approval is Rakazo-free and Postiz-free — verified at the source level and
+  in the browser.
+- Gates: `node scripts/validate-outreach-provider-hardening.mjs` (44/44) and
+  `npx playwright test e2e/outreach-provider-hardening.spec.ts` (3/3).
+- Report: `docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md`.
 
 ## BI intelligence preservation (Phase D2 — 2026-09-11) — commit `fe0c893`
 

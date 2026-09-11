@@ -19,6 +19,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import { useBrandComms } from '@/components/shared/BrandComm';
+import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { Badge, Button, Card, Input, EmptyState } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { AcquisitionRelationship, OpportunityStage, ProspectIntelligenceDigest } from '@/types';
@@ -35,8 +36,8 @@ import {
   simulateResponse,
 } from '@/lib/acquisition/outreachLifecycle';
 import {
-  simulationOutreachTransport,
-  transportFromEmailClient,
+  describeOutreachProvider,
+  resolveOutreachTransport,
 } from '@/lib/acquisition/outreachSender';
 import { Send, CheckCircle2, XCircle, Pencil, Sparkles, Mail, MessageSquareReply, Trophy } from 'lucide-react';
 
@@ -77,6 +78,7 @@ export function AcquisitionWorkflow({
 }) {
   const { actingStaffId, canCurrentUserMutate, refreshLeadsFromProspects } = useApp();
   const comms = useBrandComms();
+  const { integrations } = useIntegrations();
   const qc = useQueryClient();
   const version = useCanonicalStoreVersion();
   const [notice, setNotice] = useState<string | null>(null);
@@ -97,14 +99,17 @@ export function AcquisitionWorkflow({
   const relationship: AcquisitionRelationship | null = getRelationshipContext(prospectId);
   const row = listAcquisitionProspects().find((r) => r.prospect.id === prospectId) ?? null;
 
-  /** Connected provider → live transport; otherwise the simulation transport. */
-  const transport = useMemo(
-    () =>
-      comms.emailLive || comms.emailSandbox
-        ? transportFromEmailClient(comms.emailClient, comms.emailLive)
-        : simulationOutreachTransport,
-    [comms.emailClient, comms.emailLive, comms.emailSandbox]
+  /**
+   * §Phase D3 — the transport is resolved from the CANONICAL integration mode
+   * model (never from ad-hoc booleans) and reports its honest provider state.
+   * An unconfigured / unknown / unavailable provider yields the deterministic
+   * simulation transport (zero network calls).
+   */
+  const resolved = useMemo(
+    () => resolveOutreachTransport(integrations.email, comms.emailClient),
+    [integrations.email, comms.emailClient]
   );
+  const transport = resolved.transport;
 
   if (!relationship || !row) {
     return <EmptyState title="Prospect not found" description="This acquisition record has no canonical Brand Intelligence prospect." />;
@@ -170,9 +175,9 @@ export function AcquisitionWorkflow({
     const result = await sendOutreach(current.id, actor, transport);
     run(
       result,
-      transport.mode === 'simulation'
-        ? 'Sent through the deterministic simulation path (no external network).'
-        : 'Sent through the connected provider.'
+      resolved.live
+        ? 'Sent through the connected provider.'
+        : 'Sent through the deterministic simulation path (no external network).'
     );
   }
 
@@ -396,7 +401,7 @@ export function AcquisitionWorkflow({
         <div className="bg-ink-850 border border-white/[0.06] rounded-lg p-2.5">
           <p className="text-[10px] text-zinc-500 uppercase">Channel</p>
           <p className="text-xs text-zinc-200 mt-0.5">
-            {current?.channel ?? 'email'} · {transport.mode === 'live' ? 'connected provider' : 'simulation (no provider connected)'}
+            {current?.channel ?? 'email'} · {describeOutreachProvider(resolved.providerState)}
           </p>
           <p className="text-[10px] text-zinc-500 mt-0.5">Revisions: {relationship.outreach.length} · Messages logged: {messages.length}</p>
         </div>

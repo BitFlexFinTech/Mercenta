@@ -246,9 +246,13 @@ carries a `prospectId`.
   `getRelationshipContext`. Every mutator takes
   `AcquisitionActor { staffId, canMutate }` (RBAC in the domain) and returns
   `{ ok: true, value } | { ok: false, error }`.
-- **Transport seam (`outreachSender.ts`)** — `OutreachTransport` with
-  `simulationOutreachTransport` (zero network) and `transportFromEmailClient()`
-  (reuses the existing email provider client).
+- **Transport seam (`outreachSender.ts`)** — `OutreachTransport` (`mode`,
+  `providerState`, `isVerifiedLive?()`) with `simulationOutreachTransport` (zero
+  network), `transportFromEmailClient()` (reuses the existing email provider
+  client) and **`resolveOutreachTransport(emailState, client)`** (Phase D3) — THE
+  canonical resolution: mode derived from `modeForState` + the registry default,
+  fail-closed (a `live` claim without verified credentials is downgraded), honest
+  `providerState`. `sendOutreach()` refuses an unverifiable live claim.
 
 ## 13. Future Extension Points
 
@@ -258,11 +262,12 @@ carries a `prospectId`.
   intake (`runBrandIntelligence({ candidates })`) is the wire for real
   discovery sources (firecrawl/keepa) once wired to BI.
 - **Phase D — acquisition hardening:** ✅ D1 Rocket.Chat removal (2026-09-11) ·
-  ✅ D2 BI intelligence preserved through acquisition by reference (2026-09-11).
-  Remaining: activate a live provider through `OutreachTransport`; persist
-  acquisition artefacts (outreach/response/opportunity) through the Supabase
-  repository pattern instead of session memory; wire `Opportunity.brandId` into
-  application → onboarding; expose the full Postiz platform in Admin + Brand.
+  ✅ D2 BI intelligence preserved through acquisition by reference (2026-09-11) ·
+  ✅ D3 outreach/provider hardening — resolved transport, fail-closed live gate,
+  zero-network simulation (2026-09-11). Remaining: persist acquisition artefacts
+  (outreach/response/opportunity) through the Supabase repository pattern instead
+  of session memory; wire `Opportunity.brandId` into application → onboarding;
+  expose the full Postiz platform in Admin + Brand.
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep
