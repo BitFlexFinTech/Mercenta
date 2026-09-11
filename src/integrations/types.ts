@@ -13,7 +13,6 @@ export type IntegrationId =
   | 'keepa'
   | 'firecrawl'
   | 'usertour'
-  | 'rocketchat'
   | 'twilio_whatsapp'
   | 'postiz'
   // §Phase 4 — scenario-required providers registered so their mode is
@@ -194,7 +193,6 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   keepa: { status: 'disconnected', sandbox: false },
   firecrawl: { status: 'disconnected', sandbox: false },
   usertour: { status: 'connected', sandbox: true, connectedAt: '2026-09-05T00:00:00.000Z', lastVerifiedAt: '2026-09-05T00:00:00.000Z', metadata: { note: 'Self-hosted Docker service — provisioned via vps-bootstrap.sh on the Mercenta VPS.' } },
-  rocketchat: { status: 'disconnected', sandbox: false },
   twilio_whatsapp: { status: 'disconnected', sandbox: false },
   postiz: { status: 'disconnected', sandbox: false },
   // §Phase 4 — scenario-required providers with authoritative (docs-verified)

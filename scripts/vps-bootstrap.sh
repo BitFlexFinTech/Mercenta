@@ -3,7 +3,7 @@
 # Mercenta VPS Bootstrap Script
 #
 # One-time setup for a fresh Ubuntu/Debian VPS to run self-hosted
-# services (Usertour, Rocket.Chat, Postiz).
+# services (Usertour, Postiz).
 #
 # Usage:
 #   1. Provision a VPS (DigitalOcean $12/mo, Hetzner €4.09/mo, etc.)

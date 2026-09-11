@@ -2,6 +2,15 @@
 > Source of truth for current project state. Updated after every session.
 > Last updated: 2026-09-11 (Phase C — BI → ICP → OUTREACH → CRM FOUNDATION: canonical BI prospects are now the ACTIVE acquisition universe, `INITIAL_LEADS` retired from the live path, new acquisition store + lifecycle engine (`src/data/acquisitionStore.ts`, `src/lib/acquisition/outreachLifecycle.ts`, `outreachSender.ts`), BI-evidence outreach prep, human approve/reject/modify, simulated send + response + Opportunity + CRM relationship context; new validator 64/64 + E2E 4/4; full E2E 160/0/4; typecheck 0 · lint 0 · build PASS)
 >
+> **PHASE D1 (2026-09-11) — ROCKET.CHAT REMOVED.** Removed end-to-end: admin
+> panel + mock client/SSO factory (3 files deleted), nav entry + breadcrumb +
+> render route, `IntegrationId` member, registry card/order/meta (19 → 18
+> providers), simulation CASE provider requirement, docker-compose service +
+> Mongo volume, Caddy vhost, deploy-script references. New regression gate:
+> `scripts/validate-rocketchat-removal.mjs` (15/15 PASS) +
+> `e2e/rocketchat-removal.spec.ts` (5/5). Full E2E **165/0/4**; typecheck 0 ·
+> lint 0 · build PASS. Report: `docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md`.
+>
 > **Memory files (portable, AI-vendor-neutral):** `MERCENTA_MASTER_CONTEXT.md`
 > (project constitution §A–AF) · `MERCENTA_ARCHITECTURE.md` (technical
 > reference) · this file (operational handoff). Phase reports:
@@ -15,6 +24,125 @@
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic/generated artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`. (`docs/ARCHITECTURE.md` retained as history; superseded by `MERCENTA_ARCHITECTURE.md`.)
 > - Older sections below are historical/legacy, preserved verbatim; their old phase-number pointers (e.g. "Phase 3/4 targets", "Phase 2 — Rakazo") are superseded by the MASTER ROADMAP A–M (Rakazo = Phase M, LAST) — see MERCENTA_MASTER_CONTEXT.md §AB.
+## Phase D1 — Rocket.Chat removal (2026-09-11)
+
+> Status: **DONE (verified this session)**. Full report:
+> `docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md`.
+> Pre-D1 HEAD: `b7cd0d4`. Protected baseline untouched: `959b4d2`.
+
+**BUILT (D1)**
+- **Deleted (3 files):** `src/components/admin/RocketChatAdminPanel.tsx`,
+  `src/lib/rocketchat/rocketChatClient.ts` (`IRocketChatClient` +
+  `MockRocketChatClient` + `getRocketChatClient()` — the factory *always*
+  returned the mock; no RealClient ever existed), `src/lib/rocketchat/rocketChatSSO.ts`.
+  `src/lib/rocketchat/` directory gone.
+- **Source edits (6):** `AdminShell.tsx` (import, nav item, breadcrumb, render
+  route); `integrations/types.ts` (`IntegrationId` member +
+  `INITIAL_INTEGRATIONS` state); `integrations/registry.ts` (card +
+  `INTEGRATION_ORDER` + `INTEGRATION_META` → 18 providers);
+  `simulation/scenarioEngine.ts` (CASE gate `['rocketchat']` → `[]` — CASE drives
+  the internal helpdesk ticket store, no external provider);
+  `admin/integrations/SimulationControl.tsx` (`SCENARIO_META.CASE.requiredProviders`
+  → `[]`); `eslint.config.js` (stale file reference).
+- **Config/infra edits (4):** `docker-compose.services.yml` (rocketchat +
+  rocketchat-db + mongo volume deleted), `scripts/Caddyfile`
+  (`chat.mercenta.co.uk` vhost deleted), `scripts/deploy-docker.sh`,
+  `scripts/vps-bootstrap.sh`.
+- **Test/validator edits + additions:** `e2e/app-shell.spec.ts` (nav assertion),
+  `scripts/forensic-screenshots.mjs`; **NEW** `scripts/validate-rocketchat-removal.mjs`
+  (15 assertions) and **NEW** `e2e/rocketchat-removal.spec.ts` (5 tests).
+- **Registry/audit artefact:** `requirements-registry.json`
+  (`batchC-rocketchat-integration` → `regressed` with the removal recorded;
+  `batchF-honest-status-messages` evidence de-referenced the deleted panel).
+- **Docs:** `MERCENTA_MASTER_CONTEXT.md` (§F/§S/§AB/§AC/§AD),
+  `MERCENTA_ARCHITECTURE.md` (§3/§5/§13), `docs/INTEGRATIONS.md`, this file,
+  `STATUS_CHECK.md`, `HANDOFF.md`, new D1 phase report.
+
+**TESTED (D1) — real output**
+- `npm run typecheck` → **PASS** (0 errors; identical to pre-D1 baseline)
+- `npm run lint` → **PASS** (0 problems)
+- `npm run build` → **PASS**, `✓ built in 3.24s` (AdminShell chunk 472.45 → 467.10 kB)
+- `node scripts/validate-rocketchat-removal.mjs` → **ROCKETCHAT_REMOVAL_VALIDATION_PASS (15/15)**
+  (an earlier run legitimately FAILED on its own allowlist gap before the fix)
+- `npx playwright test e2e/rocketchat-removal.spec.ts` → **5 passed (7.3s)**
+- `npx playwright test` (6 relevant specs) → **63 passed (55.8s)**
+- `npx playwright test` (full) → **165 passed / 4 skipped / 0 failed, EXIT=0**
+  (pre-D1 baseline 160/4/0 → +5 tests, **0 new failures, 0 new skips**)
+- `validate-mock-providers` · `validate-mock-seam` · `validate-provider-workflows`
+  · `validate-demo-completeness` (27/27) · `validate-design-tokens` ·
+  `validate-bi-lifecycle` · `validate-prospect-pipeline` ·
+  `validate-acquisition-pipeline` → **ALL PASS**
+- `node scripts/verify-registry.mjs` → 104 pre-existing issues (105 before the
+  registry correction); `grep -i rocket` → 1 intentional "REMOVED" description
+
+**RESULT:** DONE. Rocket.Chat absent from every executable product path; core
+communications (CRM / Messages / Helpdesk) verified working; BI/ICP/acquisition
+untouched; the provider safety gate is provably NOT weakened (NORMAL_PO still
+fails closed when its providers are not positively `simulation`).
+
+**KNOWN GAPS / NOT DONE:** the self-hosted services VPS was **not** touched — any
+Rocket.Chat container on the droplet and the `chat.mercenta.co.uk` DNS/Caddy
+record must be removed server-side (deploy-time, outside this repo). No manual
+browser click-through (Playwright only). No deploy, no push.
+
+**NEXT:** **D2 — BI intelligence preservation through acquisition** (see §21 of
+the Phase D mandate). D2 does not start until this gate is accepted.
+
+## BI Forensic Implementation Audit (READ-ONLY, 2026-09-11)
+
+> Status: **DONE (audit only — no product change)**. Report:
+> `docs/BI_FORENSIC_IMPLEMENTATION_AUDIT_2026-09-11.md` (33 sections, 1630 lines).
+> Scope: establish, from code + executed runtime evidence, exactly what Brand
+> Intelligence does today. **No source, config, schema, test, prompt, provider,
+> UI, navigation, lifecycle, ICP, acquisition, CRM or outreach file was
+> modified; nothing was committed or deployed; no Phase D work started.**
+>
+> **Evidence executed in that session:** `npm run typecheck` → 0 errors ·
+> `npm run build` → ✓ 2.29s · `validate-bi-lifecycle.mjs` → **PASS (29
+> assertions, incl. "ZERO external network calls")** · `validate-prospect-pipeline.mjs`
+> → **PASS (26/26)** · `validate-acquisition-pipeline.mjs` → **PASS** ·
+> `npx playwright test e2e/brand-intelligence-lifecycle.spec.ts
+> e2e/acquisition-pipeline.spec.ts` → **6 passed (19.2s), EXIT=0** · temporary
+> Vite-SSR diagnostic (created, run, **deleted**) → `EXTERNAL FETCHES: 0`.
+>
+> **Headline findings (baseline facts, not recommendations):**
+> 1. BI has **no live data source of any kind** (0 network calls; 12 hand-written
+>    seed records; `createBrandIntelligenceClient()` always returns `MockClient`
+>    and ignores its `_forceMock` argument).
+> 2. No ASIN discovery, no product fetch, no sales estimation, no contact
+>    discovery, no company enrichment: `discoveryClient.ts` is **dead code (0
+>    callers)**; 14 ASINs are synthetic literals; 0 emails/phones/LinkedIn URLs
+>    exist in the dataset.
+> 3. The scoring engine **never applies `INTELLIGENCE_SCORE_WEIGHTS`** (dead
+>    constant), sums raw sub-scores (max reachable **92**, not 100),
+>    **double-counts the challenger bonus**, and derives `salesEstimateScore`
+>    from the average rating.
+> 4. The seed `score:` literals are **dead data**: the engine always recomputes
+>    different values (Tapatío 75/tier_3 → **68/tier_4**); 8 of 12 brands fall
+>    below the tier_4 floor, so `Lead.priority='High'` and the upper UI tiers are
+>    unreachable.
+> 5. Snapshots are written **per run** (not weekly as the type comment says),
+>    are **empty at boot**, and are **never rendered**; `nextCheck` is a display
+>    stamp with **no scheduler and no consumer**.
+> 6. Persistence is **session-only in-memory**: no BI table/migration/Supabase
+>    call/browser storage anywhere.
+> 7. `VIEW_ALLOWLIST` / `canAccessView` / `filterNavForTier` in `rbac.ts` have
+>    **zero call sites**, so the Brand Intelligence nav/render is reachable by any
+>    admin-staff session (domain-layer mutation guards do work).
+> 8. Phase C preserves canonical identity but **discards** ASINs, per-ASIN
+>    metrics, sales numbers as data, the 17 `ProspectEvidence` rows + provenance,
+>    BI runs/snapshots and 6 of 7 score dimensions.
+> 9. Documentation contradicts code in 4 places checked (BI called a "discovery
+>    engine"; a dead `Discovery Client` marked DONE; Hunter & Gather / E-Cloth /
+>    OceanSaver claimed as seeded brands but absent from `src/`; "weekly"
+>    snapshots).
+>
+> **Next action for a future session:** none from this task — the audit is the
+> deliverable. `PROJECT_STATUS.md`, `HANDOFF.md`, `STATUS_CHECK.md` and the
+> Phase B/C reports were intentionally **left uncorrected** (reporting-only
+> session); the contradictions are listed in the report §27 for a later,
+> explicitly-authorised documentation pass.
+
 ## Phase C — BI → ICP → Outreach → CRM Foundation (2026-09-11)
 
 > Status: **DONE** — phase gate passed. Report:

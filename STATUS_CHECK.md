@@ -10,6 +10,7 @@ fixed. Never cite the log as current status.
 - `npm run typecheck` — PASS (exit 0)
 - `npm run lint` — PASS (exit 0)
 - `npm run build` — PASS (vite, ~2.5s)
+- `node scripts/validate-rocketchat-removal.mjs` — ROCKETCHAT_REMOVAL_VALIDATION_PASS (15/15; Phase D1)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -20,9 +21,30 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **160 PASS / 4 skip / 0 fail** across 25 spec files.
+  **Playwright E2E** — **165 PASS / 4 skip / 0 fail** across 26 spec files.
+  (Phase D1 added `e2e/rocketchat-removal.spec.ts`, +5 tests, 0 new failures.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Rocket.Chat removal (Phase D1 — 2026-09-11)
+
+- Rocket.Chat is **REMOVED** from the platform. Deleted: the admin panel, the
+  mock client + factory (`getRocketChatClient()` always returned
+  `MockRocketChatClient`; no RealClient existed), the SSO bridge, the
+  `IntegrationId` member, the registry card/order/meta entry, the AdminShell nav
+  item + breadcrumb + render route, the docker-compose service + Mongo volume and
+  the Caddy vhost.
+- The registry is now **18 providers** (was 19).
+- The simulation **CASE** scenario requires **no external provider** — it drives
+  the internal helpdesk ticket store. The safety gate was NOT weakened:
+  `validate-rocketchat-removal.mjs` proves NORMAL_PO is still `safety_refused`
+  when its providers do not positively resolve `simulation`.
+- Regression gates: `node scripts/validate-rocketchat-removal.mjs` (15/15) and
+  `npx playwright test e2e/rocketchat-removal.spec.ts` (5/5).
+- Core communications verified intact: CRM relationship context, Messages inbox
+  and Helpdesk all render the SAME canonical conversation (`logMessage` →
+  `demoMessages`) — one model, no duplicated history.
+- Report: `docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md`.
 
 ## Acquisition pipeline (Phase C — 2026-09-11)
 

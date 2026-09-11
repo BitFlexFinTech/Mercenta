@@ -788,11 +788,11 @@
     },
     {
       "id": "batchC-rocketchat-integration",
-      "description": "Rocket.Chat CE messaging engine integrated: registry card, docker-compose, mock client adapter (IRocketChatClient), SSO bridge (provisionRocketChatUser/ensureBrandGroup), admin management panel",
+      "description": "Rocket.Chat CE messaging engine — REMOVED in Phase D1 (2026-09-11). The registry card, mock-only adapter (IRocketChatClient), SSO bridge (provisionRocketChatUser/ensureBrandGroup), admin panel, docker-compose service and Caddy vhost were all deleted: the factory returned a mock and no product workflow depended on it. Communications remain canonical (CRM / Messages / Helpdesk).",
       "source": "Batch C",
-      "status": "built",
-      "evidence": "src/lib/rocketchat/rocketChatClient.ts; src/components/admin/RocketChatAdminPanel.tsx; e2e/batch-abc-vc-deep-dive.spec.ts",
-      "last_verified": "2026-08-30",
+      "status": "regressed",
+      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md; e2e/rocketchat-removal.spec.ts; scripts/validate-rocketchat-removal.mjs",
+      "last_verified": "2026-09-11",
       "superseded_by": null
     },
     {
@@ -914,10 +914,10 @@
     },
     {
       "id": "batchF-honest-status-messages",
-      "description": "Self-hosted service panels show honest 'requires Docker VPS' message",
+      "description": "Self-hosted service panels show honest 'requires Docker VPS' message (Rocket.Chat panel deleted in Phase D1)",
       "source": "Batch F",
       "status": "built_and_tested",
-      "evidence": "PostizAdminPanel.tsx; RocketChatAdminPanel.tsx; UsertourAdminPanel.tsx; e2e/admin-views.spec.ts (still renders)",
+      "evidence": "PostizAdminPanel.tsx; UsertourAdminPanel.tsx; e2e/admin-views.spec.ts (still renders)",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },

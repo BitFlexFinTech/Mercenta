@@ -189,19 +189,6 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Fetch Usertour health endpoint to verify connectivity',
   },
-  rocketchat: {
-    id: 'rocketchat',
-    name: 'Rocket.Chat',
-    description:
-      'Self-hosted messaging engine behind the CRM Support Inbox. Community Edition — SSO-bridged with Mercenta auth; one private Group per brand. Mobile app white-label via Rocket.Chat.ReactNative.',
-    authMethod: 'api_key',
-    fields: [
-      { key: 'api_url', label: 'Rocket.Chat URL', placeholder: 'http://localhost:3000', secret: false },
-      { key: 'admin_username', label: 'Admin Username', placeholder: 'mercenta-admin', secret: false },
-      { key: 'admin_password', label: 'Admin Password', placeholder: 'Admin password', secret: true },
-    ],
-    testCallDescription: 'Fetch Rocket.Chat info endpoint to verify server is reachable',
-  },
   twilio_whatsapp: {
     id: 'twilio_whatsapp',
     name: 'Twilio WhatsApp',
@@ -296,7 +283,6 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   'keepa',
   'firecrawl',
   'usertour',
-  'rocketchat',
   'twilio_whatsapp',
   'postiz',
   // §Priority-1 — provider control-plane coverage: logistics + compliance +
@@ -337,7 +323,6 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   keepa: { category: 'data', defaultMode: 'available' },
   firecrawl: { category: 'data', defaultMode: 'available' },
   usertour: { category: 'communications', defaultMode: 'simulation' },
-  rocketchat: { category: 'communications', defaultMode: 'simulation' },
   twilio_whatsapp: { category: 'communications', defaultMode: 'available' },
   postiz: { category: 'marketing', defaultMode: 'available' },
   // §Phase 4 — scenario-required providers. Docs-verified simulation state:

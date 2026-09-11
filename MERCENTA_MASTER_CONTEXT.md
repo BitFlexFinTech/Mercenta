@@ -75,12 +75,12 @@ MERCENTA must keep working when any third party is unavailable.
   `GlobalStateContext`). Shells: `HomeShell` (marketing/auth), `BrandShell`,
   `AdminShell`, `CarrierShell`.
 - Domain libs under `src/lib/`: spapi, dhl, compliance, billing, crm, helpdesk,
-  intelligence, discovery, research, rocketchat, postiz, whatsapp, mail,
+  intelligence, discovery, research, postiz, whatsapp, mail,
   messaging, monitoring, automation, events, simulation, verification, shipping.
 - Canonical shared model in **`src/types.ts`** (single source of truth;
   `APPROVED_CATEGORIES`, `Lead`, `BrandProspect`, `Message`, `Ticket`, etc.).
 - Providers behind registry + mock/real seams (`src/integrations/registry.ts`,
-  19 registered providers).
+  18 registered providers — Rocket.Chat removed in Phase D1).
 
 ## G. Data Architecture
 
@@ -225,13 +225,20 @@ existing full Postiz application from Admin and Brand contexts. No simplified
 clone, no fake dashboard pretending to be Postiz. Core MERCENTA stays
 independent of Postiz.
 
-## S. Rocket.Chat Decision
+## S. Rocket.Chat Decision — EXECUTED (Phase D1, 2026-09-11)
 
-Rocket.Chat is **NOT part of the final architecture** and is **marked for
-removal**. Current code is mock-only and disconnected from the canonical
-message store; nothing in any product workflow requires it. Its removal later
-must cover routes, navigation, imports, factories, dead code and obsolete
-references. It is NOT replaced with another oversized internal-chat product.
+Rocket.Chat is **NOT part of the architecture and has been REMOVED** (Phase D1).
+The mock-only adapter (`getRocketChatClient()` always returned
+`MockRocketChatClient`, accepting credentials it never read), the SSO bridge
+(`rocketChatSSO.ts`), the admin panel (`RocketChatAdminPanel.tsx`), the registry
+card, the `IntegrationId` member + `INITIAL_INTEGRATIONS` state, the
+docker-compose service + Mongo volume, the Caddy vhost and the deploy-script
+references were all deleted. Nothing in any product workflow required it — the
+canonical message store is `logMessage` → `demoMessages`, surfaced by CRM /
+Messages / Helpdesk from ONE underlying conversation. It was NOT replaced with
+another internal-chat product. Reintroduction requires a new architectural
+decision; it is regression-guarded by `e2e/rocketchat-removal.spec.ts` and
+`scripts/validate-rocketchat-removal.mjs`.
 
 ## T. Rakazo Strategy
 
@@ -309,12 +316,12 @@ onboarding. **Not started yet.**
 
 ## AB. Current Roadmap (final order — Rakazo LAST)
 
-| Phase | Title | State (2026-09-10) |
+| Phase | Title | State (2026-09-11) |
 |---|---|---|
 | A | Core data / domain / workflow consolidation | ✅ DONE (`dbbf567`) |
-| B | Brand Intelligence real-data lifecycle | ✅ DONE (canonical store + lifecycle engine; see PROJECT_STATUS.md Phase B) |
-| C | ICP consumption of canonical BI data | **NEXT** |
-| D | Partner acquisition / outreach connectivity | |
+| B | Brand Intelligence real-data lifecycle | ✅ DONE (`9f935f4`) |
+| C | ICP consumption of canonical BI data | ✅ DONE (`b7cd0d4`; BI→ICP→outreach→approve/reject→send→response→Opportunity→CRM) |
+| D | Partner acquisition / production hardening | 🔄 IN PROGRESS — **D1 Rocket.Chat removal DONE**; D2 BI-intelligence preservation · D3 outreach/provider hardening · D4 persistence/domain · D5 Opportunity→CRM→onboarding · D6 Postiz full-platform exposure |
 | E | CRM + communication + helpdesk consolidation | |
 | F | Executive analytics + operations separation | |
 | G | Screen-level UI/UX redesign | |
@@ -329,7 +336,7 @@ onboarding. **Not started yet.**
 
 1. Rakazo is LAST and optional. Never make Rakazo a dependency of core MERCENTA.
 2. Postiz is never rebuilt; expose the existing mature app.
-3. Rocket.Chat is removed (mock-only today; no expansion).
+3. Rocket.Chat is REMOVED (Phase D1, 2026-09-11) — never reintroduce it; ONE canonical communication model only.
 4. Brand Intelligence is the intended authoritative discovery source.
 5. ICP consumes canonical BI records; no independent fictional universe.
 6. ONE canonical conversation/message model. No second message DB.
@@ -345,7 +352,8 @@ onboarding. **Not started yet.**
 ## AD. Major Architectural Decisions
 
 1. State-driven navigation (no client-side URL router).
-2. Provider registry (19) with per-card simulation controls + mock/real seams.
+2. Provider registry (18 — Rocket.Chat removed in Phase D1) with per-card
+   simulation controls + mock/real seams.
 3. Mock-first external adapters; real adapters activated by credentials only.
 4. Canonical `messages` store behind `logMessage`; helpdesk tickets reference
    message IDs.
@@ -363,6 +371,13 @@ onboarding. **Not started yet.**
    networkCalls===0 proofs.
 9. ONE runtime BI universe: Admin panel, Brand "Market Intel", and the
    MarketingHub identity bridge all read `getProspects()` — no second literal.
+10. Rocket.Chat removed end-to-end (Phase D1, 2026-09-11): 3 files deleted, the
+    registry card / `IntegrationId` member / nav entry / admin panel / breadcrumb
+    / docker-compose service + volume / Caddy vhost removed. The simulation CASE
+    scenario now requires NO external provider (it drives the internal helpdesk
+    ticket store), and the provider safety gate was NOT weakened — proven by
+    `scripts/validate-rocketchat-removal.mjs` (NORMAL_PO still refuses when its
+    providers are not positively `simulation`).
 
 ## AE. Known Limitations / Caveats
 

@@ -58,10 +58,11 @@ App.tsx
   intelligence (incl. `prospectPipeline.ts` identity bridge + origin-region
   derivation, `prospectLifecycle.ts` lifecycle engine), **acquisition
   (`outreachLifecycle.ts` state machine + `outreachSender.ts` transport seam)**,
-  discovery, research, marketing, rocketchat, postiz, whatsapp, mail, messaging,
+  discovery, research, marketing, postiz, whatsapp, mail, messaging,
   monitoring, automation, events, simulation, verification, shipping, warehouse,
   esign, grants, notifications.
-- `src/integrations/` — registry (19 providers) + IntegrationsContext (connect
+- `src/integrations/` — registry (18 providers — Rocket.Chat removed in Phase
+  D1) + IntegrationsContext (connect
   state, sandbox flag, per-card simulation controls).
 - `src/services/xero/` — real OAuth v2 client + sync engine (demo mode).
 - `src/context/GlobalStateContext.tsx` — session, role, tenant pin, domain arrays.
@@ -87,11 +88,12 @@ the provider adapter/mode changes.
 
 ## 5. Provider Boundaries + Mode Model
 
-- Registry (`src/integrations/registry.ts`) — 19 providers: `amazon_sp_api`,
+- Registry (`src/integrations/registry.ts`) — 18 providers: `amazon_sp_api`,
   `amazon_ads`, `stripe`, `esignature`, `email`, `lead_sourcing`, `openrouter`,
-  `hunter`, `instantly`, `keepa`, `firecrawl`, `usertour`, `rocketchat`,
+  `hunter`, `instantly`, `keepa`, `firecrawl`, `usertour`,
   `twilio_whatsapp`, `postiz`, `dhl`, `xero`, `companies_house`, `hmrc`.
-- Default modes: `simulation` (amazon_sp_api, stripe, usertour, rocketchat,
+  (`rocketchat` was removed in Phase D1 — 19 → 18.)
+- Default modes: `simulation` (amazon_sp_api, stripe, usertour,
   dhl, xero, companies_house, hmrc) · `available` (amazon_ads, esignature,
   email, lead_sourcing, openrouter, hunter, instantly, keepa, firecrawl,
   twilio_whatsapp, postiz). Rakazo is NOT in the registry.
@@ -242,4 +244,8 @@ canonical message store (`logMessage` → `demoMessages`), never a second one.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep
   independence; direct Admin controls retained.
-- **Rocket.Chat:** remove (no expansion).
+- **Rocket.Chat:** ✅ **REMOVED in Phase D1 (2026-09-11)** — files, registry
+  card, `IntegrationId` member, nav entry/breadcrumb, admin panel, docker-compose
+  service + Mongo volume and Caddy vhost deleted. Regression-guarded by
+  `e2e/rocketchat-removal.spec.ts` + `scripts/validate-rocketchat-removal.mjs`.
+  Not to be reintroduced.

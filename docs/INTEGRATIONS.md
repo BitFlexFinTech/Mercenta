@@ -6,7 +6,9 @@
 
 ## 1. Current registry (verified in `src/integrations/registry.ts`)
 
-15 integrations today. `authMethod` = `oauth | api_key`; connect flow in
+18 integrations today (Rocket.Chat removed in Phase D1, 2026-09-11 — the table
+below was 15 entries when first written and is now 18 after the Phase-4 and
+Priority-1 provider additions). `authMethod` = `oauth | api_key`; connect flow in
 `IntegrationsContext`; live test pings in `src/lib/integrations/testCalls.ts`.
 
 | id | Name | Auth | Live ping? | Notes |
@@ -23,9 +25,12 @@
 | keepa | Keepa API | api_key | no | product research |
 | firecrawl | Firecrawl | api_key | no | discovery web fetch |
 | usertour | Usertour | api_key | no | self-hosted |
-| rocketchat | Rocket.Chat | api_key | no | self-hosted SSO messaging |
 | twilio_whatsapp | Twilio WhatsApp | api_key | no | escalation |
 | postiz | Postiz | api_key | no | self-hosted social scheduler |
+
+**Change log:** Rocket.Chat was removed from the registry in Phase D1
+(2026-09-11) — the registry held 19 providers before, 18 now. See
+`docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md`.
 
 ## 2. Services with code today (beyond the registry)
 
@@ -40,7 +45,7 @@
   `AccountingPanel.tsx`.
 - **Rakazo** — `RakazoPanel` iframe into self-hosted bots; `VITE_RAKAZO_URL`.
 - **Supabase** — `src/lib/supabase.ts` + migrations (RLS).
-- **Postmark notifier**, **Rocket.Chat client/SSO**, **WhatsApp client +
+- **Postmark notifier**, **WhatsApp client +
   escalation**, **Postiz client**, **Firecrawl/discovery engine**,
   **Keepa client (research)**, **OpenRouter via discovery research**,
   **Hunter variants**, **PandaDoc/esign lib**.

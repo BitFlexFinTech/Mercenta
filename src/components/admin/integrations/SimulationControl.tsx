@@ -93,7 +93,7 @@ const SCENARIO_META: Record<ScenarioId, ScenarioMeta> = {
     name: 'Support Case',
     purpose: 'A helpdesk case opened, assigned, and resolved.',
     simulates: 'A logistics labelling case: ticket created, assigned to staff, resolved by the real ticket store.',
-    requiredProviders: ['rocketchat'],
+    requiredProviders: [],
   },
   PRODUCT_FAILURE: {
     name: 'Product Validation Failure',

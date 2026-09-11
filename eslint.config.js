@@ -69,7 +69,6 @@ export default tseslint.config(
       'src/components/admin/InvestorPitchSection.tsx',
       'src/components/admin/BankFinancingSection.tsx',
       'src/lib/helpdesk/ticketStore.ts',
-      'src/lib/rocketchat/rocketChatClient.ts',
       'src/lib/amazon/productImageValidator.ts',
       'src/lib/validation/schemas.ts',
       'src/lib/shipping/shippingCalculator.ts',

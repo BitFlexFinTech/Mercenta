@@ -36,7 +36,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
       'Billing', 'Contract Cycle', 'Logistics Control', 'Carrier Monitor',
       'Compliance Approvals', 'Messages', 'Helpdesk', 'Monitoring',
       'Super Admin', 'Audit Log', 'Onboarding Tours',
-      'Integration Settings', 'Rocket.Chat', 'Social Media', 'WhatsApp']) {
+      'Integration Settings', 'Social Media', 'WhatsApp']) {
       await expect(nav.locator(`text=${item}`).first()).toBeVisible();
     }
   });

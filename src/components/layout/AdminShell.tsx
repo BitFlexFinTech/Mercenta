@@ -16,7 +16,6 @@ import { ComplianceApprovals } from '@/components/admin/ComplianceApprovals';
 import { MarketingHub } from '@/components/admin/MarketingHub';
 import { IntegrationsPanel } from '@/components/admin/integrations/IntegrationsPanel';
 import { UsertourAdminPanel } from '@/components/admin/UsertourAdminPanel';
-import { RocketChatAdminPanel } from '@/components/admin/RocketChatAdminPanel';
 import { PostizAdminPanel } from '@/components/admin/PostizAdminPanel';
 import { WhatsAppAdminPanel } from '@/components/admin/WhatsAppAdminPanel';
 import { FulfillmentTrackPanel } from '@/components/admin/FulfillmentTrack';
@@ -107,7 +106,6 @@ const ADMIN_SECTIONS = [
     label: 'Integrations',
     items: [
       { id: 'integrations', label: 'Integration Settings', icon: <PlugZap className="w-4 h-4" /> },
-      { id: 'rocketchat', label: 'Rocket.Chat', icon: <MessageSquare className="w-4 h-4" /> },
       { id: 'postiz', label: 'Social Media', icon: <Target className="w-4 h-4" /> },
       { id: 'whatsapp', label: 'WhatsApp', icon: <Phone className="w-4 h-4" /> },
     ],
@@ -132,7 +130,7 @@ export default function AdminShell() {
     billing: 'Billing', messages: 'Messages', helpdesk: 'Helpdesk', returns_tracking: 'Returns Tracking', monitoring: 'Monitoring',
     contracts_admin: 'Contract Cycle', catalog: 'Global Catalog', logistics: 'Logistics Control', carriers: 'Carrier Monitor',
     compliance: 'Compliance Approvals', marketing: 'Marketing', brand_intelligence: 'Brand Intelligence', super_admin: 'Super Admin', audit_log: 'Audit Log',
-    integrations: 'Integration Settings', usertour: 'Onboarding Tours', rocketchat: 'Rocket.Chat', postiz: 'Social Media',
+    integrations: 'Integration Settings', usertour: 'Onboarding Tours', postiz: 'Social Media',
     whatsapp: 'WhatsApp Escalation',
   };
 
@@ -168,7 +166,6 @@ export default function AdminShell() {
           {adminView === 'audit_log' && (isSuper ? <AdminAuditLog /> : <AccessDenied />)}
           {adminView === 'integrations' && (isSuper ? <IntegrationsPanel /> : <AccessDenied />)}
           {adminView === 'usertour' && <UsertourAdminPanel />}
-          {adminView === 'rocketchat' && <RocketChatAdminPanel />}
           {adminView === 'postiz' && <PostizAdminPanel />}
           {adminView === 'whatsapp' && <WhatsAppAdminPanel />}
         </IntegrationsProvider>

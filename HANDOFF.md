@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 11, 2026 (Phase C — BI → ICP → Outreach → CRM foundation)
+Last updated: September 11, 2026 (Phase D1 — Rocket.Chat removed from Mercenta)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -24,7 +24,11 @@ Cline's output back. AI confirms, gives next prompt.
 - React/TS/Vite frontend (161 files)
 - Supabase (142.93.46.155) — 14 tables + RLS
 - 20 Rakazo bots (24.144.86.50) — all demo mode
-- Services (46.101.75.185) — Rocket.Chat, Usertour, Postiz
+- Services (46.101.75.185) — Usertour, Postiz. (Rocket.Chat removed from the
+  platform in Phase D1, 2026-09-11: its panel, mock client/SSO, registry card,
+  nav entry, docker-compose service and Caddy vhost are deleted. Any container /
+  `chat.mercenta.co.uk` record still running on the droplet must be removed
+  server-side.)
 - Playwright suite (156 passing tests, 24 spec files)
 - Homepage: "Your brand. The UK market." (NO Amazon mention)
 - Partner Login + application gate + link verification
@@ -48,6 +52,12 @@ Cline's output back. AI confirms, gives next prompt.
   conversation also appears in Messages (one canonical thread). No live
   credentials needed, no Rakazo, no Postiz, no Rocket.Chat, no external network
   calls in simulation.
+- Rocket.Chat REMOVED (Phase D1, 2026-09-11): 3 files deleted, registry 19 → 18
+  providers, nav/breadcrumb/route gone, docker-compose service + Caddy vhost
+  gone, simulation CASE scenario now provider-free. Regression gates:
+  `scripts/validate-rocketchat-removal.mjs` (15/15) + `e2e/rocketchat-removal.spec.ts`
+  (5/5). Full E2E 165/0/4 · typecheck 0 · lint 0 · build PASS. Report:
+  docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md.
 - Review zip script + protection rules + handoff rule
 
 ## WHAT'S LEFT (IN ORDER):
@@ -59,14 +69,13 @@ the FINAL phase. The older list below is superseded by that roadmap.
 2. Namecheap FTP deploy script — DONE (scripts/deploy-demo.sh; demo live).
 3. Companies House + HMRC compliance dashboard — DONE (simulation-complete).
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
-NEXT in roadmap: PHASE C — COMPLETE (2026-09-11). The ten real Brand
-Intelligence brands now flow through ICP → outreach preparation (from BI
-evidence) → human approval → simulated send → response → Opportunity → CRM
-relationship context. See docs/PRODUCT_CONSOLIDATION_PHASEC_2026-09-11.md.
-NEXT after that: PHASE D — outreach/provider/send/response hardening (activate a
-live email provider through the existing transport seam, persist acquisition
-records in Supabase instead of session memory, wire opportunity → brand
-application → onboarding).
+NEXT in roadmap: PHASE D — IN PROGRESS. **D1 (Rocket.Chat removal) is DONE**
+(2026-09-11). Next: **D2 — BI intelligence preservation through acquisition**,
+then D3 outreach/provider hardening (activate a live email provider through the
+existing transport seam), D4 persistence/domain (persist acquisition records in
+Supabase instead of session memory), D5 Opportunity → CRM → brand
+application → onboarding hand-off, D6 Postiz full-platform exposure in Admin +
+Brand dashboards. Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

@@ -464,7 +464,11 @@ async function scenarioFinancialException(ctx: ScenarioRunContext): Promise<Scen
 
 async function scenarioCase(ctx: ScenarioRunContext): Promise<ScenarioResult> {
   const brandId = resolveBrandId(ctx);
-  const refuse = assertSimulationOnly(ctx, 'CASE', ['rocketchat']);
+  // Phase D1 — Rocket.Chat removed from the platform. The CASE scenario
+  // requires NO external provider: it exercises the internal helpdesk ticket
+  // store end to end, so an empty provider list is the truthful requirement
+  // (never a weakened gate — there is no external execution to gate).
+  const refuse = assertSimulationOnly(ctx, 'CASE', []);
   if (refuse) {
     return { scenario: 'CASE', runId: deriveId(String(ctx.seed ?? 0), 'run'), status: 'safety_refused', safetyReason: refuse, steps: [], created: { deductions: [] }, auditIds: [] };
   }
