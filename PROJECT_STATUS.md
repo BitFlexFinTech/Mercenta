@@ -26,7 +26,8 @@
 > - Older sections below are historical/legacy, preserved verbatim; their old phase-number pointers (e.g. "Phase 3/4 targets", "Phase 2 — Rakazo") are superseded by the MASTER ROADMAP A–M (Rakazo = Phase M, LAST) — see MERCENTA_MASTER_CONTEXT.md §AB.
 ## Phase D1 — Rocket.Chat removal (2026-09-11)
 
-> Status: **DONE (verified this session)**. Full report:
+> Status: **DONE (verified this session)**. Commit **`bf31151`**
+> (`phaseD1: remove Rocket.Chat end-to-end`). Full report:
 > `docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md`.
 > Pre-D1 HEAD: `b7cd0d4`. Protected baseline untouched: `959b4d2`.
 

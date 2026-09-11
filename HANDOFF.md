@@ -52,7 +52,7 @@ Cline's output back. AI confirms, gives next prompt.
   conversation also appears in Messages (one canonical thread). No live
   credentials needed, no Rakazo, no Postiz, no Rocket.Chat, no external network
   calls in simulation.
-- Rocket.Chat REMOVED (Phase D1, 2026-09-11): 3 files deleted, registry 19 → 18
+- Rocket.Chat REMOVED (Phase D1, 2026-09-11; commit `bf31151`): 3 files deleted, registry 19 → 18
   providers, nav/breadcrumb/route gone, docker-compose service + Caddy vhost
   gone, simulation CASE scenario now provider-free. Regression gates:
   `scripts/validate-rocketchat-removal.mjs` (15/15) + `e2e/rocketchat-removal.spec.ts`

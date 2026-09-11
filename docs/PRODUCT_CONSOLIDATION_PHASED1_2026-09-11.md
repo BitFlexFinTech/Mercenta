@@ -151,8 +151,10 @@ second, lossy universe. Proceed to D2 only now that the D1 gate above has passed
 
 ## Commit record
 
-- **D1 implementation commit:** recorded in `PROJECT_STATUS.md` (Phase D1 section)
-  and by `git log` — see the two `phaseD1:` commits on `redesign/foundation`.
+- **D1 implementation commit: `bf31151`** — `phaseD1: remove Rocket.Chat
+  end-to-end` (24 files changed, 644 insertions, 429 deletions) on
+  `redesign/foundation`. Reviewed and verified in the same session (typecheck 0 ·
+  lint 0 · build PASS · validator 15/15 · D1 spec 5/5 · full E2E 165/0/4).
 - **Pre-D1 HEAD (baseline for this phase):** `b7cd0d4` (`phaseC: BI → ICP → outreach → approval → send → response → Opportunity → CRM`).
 - **Protected baseline (untouched):** `959b4d2` / tag `mercenta-baseline-before-redesign-20260907`.
 

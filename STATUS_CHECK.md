@@ -26,7 +26,7 @@ fixed. Never cite the log as current status.
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
 
-## Rocket.Chat removal (Phase D1 — 2026-09-11)
+## Rocket.Chat removal (Phase D1 — 2026-09-11) — commit `bf31151`
 
 - Rocket.Chat is **REMOVED** from the platform. Deleted: the admin panel, the
   mock client + factory (`getRocketChatClient()` always returned
