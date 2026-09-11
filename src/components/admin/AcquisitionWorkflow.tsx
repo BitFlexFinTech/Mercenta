@@ -22,7 +22,7 @@ import { useBrandComms } from '@/components/shared/BrandComm';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { Badge, Button, Card, Input, EmptyState } from '@/components/ui';
 import { cn } from '@/utils/cn';
-import type { AcquisitionRelationship, OpportunityStage, ProspectIntelligenceDigest } from '@/types';
+import type { AcquisitionRelationship, OnboardingStepId, OpportunityStage, ProspectIntelligenceDigest } from '@/types';
 import {
   approveOutreach,
   createOpportunityFromResponse,
@@ -39,7 +39,19 @@ import {
   describeOutreachProvider,
   resolveOutreachTransport,
 } from '@/lib/acquisition/outreachSender';
-import { Send, CheckCircle2, XCircle, Pencil, Sparkles, Mail, MessageSquareReply, Trophy } from 'lucide-react';
+/**
+ * §Phase E1 — the opportunity → brand onboarding hand-off. Reads the canonical
+ * onboarding record and mutates through the domain lifecycle (RBAC enforced
+ * there, not by hiding these buttons).
+ */
+import {
+  beginBrandOnboarding,
+  completeOnboardingStep,
+  finishBrandOnboarding,
+  getOnboardingForProspect,
+  isOnboardingEligible,
+} from '@/lib/onboarding/onboardingLifecycle';
+import { Send, CheckCircle2, XCircle, Pencil, Sparkles, Mail, MessageSquareReply, Trophy, Building2, BadgeCheck } from 'lucide-react';
 
 const STAGE_STYLES: Record<string, string> = {
   'awaiting approval': 'bg-amber-500/15 text-amber-300 border-amber-500/20',
@@ -52,6 +64,19 @@ const STAGE_STYLES: Record<string, string> = {
   lost: 'bg-zinc-500/15 text-zinc-400 border-white/[0.08]',
   enrolled: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
   'not enrolled': 'bg-white/[0.05] text-zinc-400 border-white/[0.08]',
+};
+
+/** §Phase E1 — onboarding status/step styling (existing palette only). */
+const ONBOARDING_STYLES: Record<string, string> = {
+  initiated: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
+  in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  completed: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+};
+
+const ONBOARDING_STEP_STYLES: Record<string, string> = {
+  pending: 'bg-white/[0.05] text-zinc-400 border-white/[0.08]',
+  in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  done: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
 };
 
 /**
@@ -118,6 +143,9 @@ export function AcquisitionWorkflow({
   const { prospect, current, responses, opportunity, events, messages } = relationship;
   const stage = row.stage;
   const contact = prospect.contacts[0];
+  /** §Phase E1 — canonical onboarding record for this prospect (null before the hand-off). */
+  const onboarding = getOnboardingForProspect(prospectId);
+  const onboardingReady = isOnboardingEligible(opportunity);
   const subjectValue = subjectDraft ?? current?.subject ?? '';
   const bodyValue = bodyDraft ?? current?.body ?? '';
   const whyContact = current?.evidenceSummary ?? '';
@@ -193,6 +221,25 @@ export function AcquisitionWorkflow({
   function handleStage(next: OpportunityStage) {
     if (!opportunity) return;
     run(setOpportunityStage(opportunity.id, next, actor), `Opportunity moved to ${next}.`);
+  }
+
+  /* §Phase E1 — the hand-off. Each action is a real domain mutation. */
+  function handleStartOnboarding() {
+    if (!opportunity) return;
+    run(
+      beginBrandOnboarding(opportunity.id, actor),
+      `Onboarding started for ${prospect.brand} — brand tenant identity created.`
+    );
+  }
+
+  function handleCompleteStep(stepId: OnboardingStepId) {
+    if (!onboarding) return;
+    run(completeOnboardingStep(onboarding.id, stepId, actor), `Onboarding step completed: ${stepId}.`);
+  }
+
+  function handleFinishOnboarding() {
+    if (!onboarding) return;
+    run(finishBrandOnboarding(onboarding.id, actor), `${prospect.brand} is now an operational brand.`);
   }
 
   const canApprove = current?.status === 'pending_approval';
@@ -545,6 +592,99 @@ export function AcquisitionWorkflow({
                 </Button>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* §Phase E1 — onboarding (opportunity → operational brand tenant) ---- */}
+      <div className="border border-white/[0.06] rounded-lg p-3" data-section="onboarding">
+        <p className="text-[10px] font-semibold text-zinc-400 uppercase mb-1">Brand onboarding</p>
+        {!opportunity ? (
+          <p className="text-[11px] text-zinc-600">Onboarding starts from a qualified opportunity.</p>
+        ) : !onboarding ? (
+          <div className="space-y-1.5">
+            <p className="text-[11px] text-zinc-500">
+              No onboarding record yet. Starting it derives the brand tenant identity from this
+              opportunity and links the two — the acquisition history is retained, not copied.
+            </p>
+            <Button
+              className="text-xs"
+              data-state="start-onboarding"
+              disabled={!canCurrentUserMutate || !onboardingReady}
+              onClick={handleStartOnboarding}
+            >
+              <Building2 className="w-3.5 h-3.5 mr-1.5" />Start onboarding
+            </Button>
+            {!onboardingReady && (
+              <p className="text-[10px] text-amber-300">
+                Only a qualified or won opportunity can be onboarded.
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span data-onboarding-status={onboarding.status}>
+                <Badge className={cn('text-[10px] border capitalize', ONBOARDING_STYLES[onboarding.status])}>
+                  {onboarding.status}
+                </Badge>
+              </span>
+              <span className="text-[10px] text-zinc-400 font-mono" data-onboarding-tenant>
+                {onboarding.brandId}
+              </span>
+              <span className="text-[10px] text-zinc-500 font-mono">{onboarding.id}</span>
+              <span className="text-[10px] text-zinc-500">
+                from {onboarding.opportunityId} · prospect {onboarding.prospectId}
+              </span>
+            </div>
+            <ol className="space-y-1">
+              {onboarding.steps.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex items-center justify-between gap-2 border-b border-white/[0.04] pb-1"
+                  data-onboarding-step={s.id}
+                >
+                  <span className="text-[11px] text-zinc-300">
+                    <span className="font-mono text-[9px] text-zinc-500 mr-1.5">{s.id}</span>
+                    {s.label}
+                  </span>
+                  <span className="flex items-center gap-2 flex-shrink-0">
+                    <Badge className={cn('text-[9px] capitalize', ONBOARDING_STEP_STYLES[s.status])}>
+                      {s.status.replace('_', ' ')}
+                    </Badge>
+                    {s.status !== 'done' && onboarding.status !== 'completed' && (
+                      <Button
+                        size="sm"
+                        variant="tertiary"
+                        className="text-[10px]"
+                        data-state="complete-step"
+                        data-step={s.id}
+                        disabled={!canCurrentUserMutate}
+                        onClick={() => handleCompleteStep(s.id)}
+                      >
+                        Complete
+                      </Button>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            {onboarding.status !== 'completed' && (
+              <Button
+                className="text-xs"
+                data-state="finish-onboarding"
+                disabled={!canCurrentUserMutate}
+                onClick={handleFinishOnboarding}
+              >
+                <BadgeCheck className="w-3.5 h-3.5 mr-1.5" />Complete onboarding
+              </Button>
+            )}
+            {onboarding.status === 'completed' && (
+              <p className="text-[10px] text-emerald-300">
+                Operational brand — tenant {onboarding.brandId}
+                {onboarding.completedAt ? ` (completed ${onboarding.completedAt.slice(0, 10)})` : ''}.
+              </p>
+            )}
           </div>
         )}
       </div>

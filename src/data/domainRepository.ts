@@ -35,6 +35,7 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type {
   AcquisitionEvent,
+  BrandOnboarding,
   BrandProspect,
   IntelligenceRun,
   IntelligenceSnapshot,
@@ -71,6 +72,8 @@ export const DOMAIN_TABLES = {
   runs: 'bi_intelligence_runs',
   changes: 'bi_prospect_changes',
   snapshots: 'bi_snapshots',
+  /** §Phase E1 — the opportunity → brand onboarding hand-off. */
+  brandOnboarding: 'brand_onboarding',
 } as const;
 
 export type DomainTable = (typeof DOMAIN_TABLES)[keyof typeof DOMAIN_TABLES];
@@ -106,6 +109,8 @@ export interface HydratedDomainState {
   runs: IntelligenceRun[];
   changes: ProspectChangeEvent[];
   snapshots: IntelligenceSnapshot[];
+  /** §Phase E1 — canonical onboarding records (opportunity → tenant). */
+  brandOnboarding: BrandOnboarding[];
 }
 
 export function emptyHydratedState(): HydratedDomainState {
@@ -118,6 +123,7 @@ export function emptyHydratedState(): HydratedDomainState {
     runs: [],
     changes: [],
     snapshots: [],
+    brandOnboarding: [],
   };
 }
 
@@ -141,6 +147,7 @@ export interface DomainRepository {
   persistRun(run: IntelligenceRun, tenantId: string): Promise<PersistResult>;
   persistChange(change: ProspectChangeEvent, tenantId: string): Promise<PersistResult>;
   persistSnapshot(snapshot: IntelligenceSnapshot, tenantId: string): Promise<PersistResult>;
+  persistBrandOnboarding(onboarding: BrandOnboarding, tenantId: string): Promise<PersistResult>;
   /** Load persisted state for a scope. A brand scope NEVER sees ops rows. */
   hydrate(scope: TenantScope): Promise<HydratedDomainState>;
   /** Await any in-flight writes (tests + the async send path). */
@@ -191,6 +198,9 @@ export class MemoryDomainRepository implements DomainRepository {
   }
   persistSnapshot(snapshot: IntelligenceSnapshot): Promise<PersistResult> {
     return Promise.resolve(this.ok(DOMAIN_TABLES.snapshots, snapshotId(snapshot)));
+  }
+  persistBrandOnboarding(onboarding: BrandOnboarding): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.brandOnboarding, onboarding.id));
   }
   hydrate(): Promise<HydratedDomainState> {
     // Nothing is durable here — an honest empty state, never a fabrication.
@@ -267,8 +277,13 @@ export class SupabaseDomainRepository implements DomainRepository {
     if (!supabase) return [];
     let q = supabase.from(table).select('payload, tenant_id, brand_id');
     if (scope.kind === 'brand') {
-      // A brand scope sees ONLY brand-linked rows owned by that tenant.
-      q = table === DOMAIN_TABLES.opportunities
+      // A brand scope sees ONLY rows linked to that tenant. Ops-owned rows that
+      // name the brand as their tenant (a handed-off opportunity, and the
+      // onboarding record that created the tenant) are visible to that brand —
+      // matching the brand-isolation RLS policy on those two tables.
+      const brandLinked =
+        table === DOMAIN_TABLES.opportunities || table === DOMAIN_TABLES.brandOnboarding;
+      q = brandLinked
         ? q.or(`tenant_id.eq.${scope.tenantId},brand_id.eq.${scope.tenantId}`)
         : q.eq('tenant_id', scope.tenantId);
     }
@@ -389,9 +404,25 @@ export class SupabaseDomainRepository implements DomainRepository {
     );
   }
 
+  /** §Phase E1 — the onboarding row is scoped to the brand tenant it creates. */
+  persistBrandOnboarding(onboarding: BrandOnboarding, tenantId: string): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.brandOnboarding,
+        rowFor(onboarding.id, tenantId, onboarding, {
+          prospect_id: onboarding.prospectId,
+          opportunity_id: onboarding.opportunityId,
+          brand_id: onboarding.brandId,
+          status: onboarding.status,
+          origin: onboarding.origin,
+        })
+      )
+    );
+  }
+
   async hydrate(scope: TenantScope): Promise<HydratedDomainState> {
     if (!supabase) return emptyHydratedState();
-    const [outreach, responses, opportunities, events, prospects, runs, changes, snapshots] =
+    const [outreach, responses, opportunities, events, prospects, runs, changes, snapshots, brandOnboarding] =
       await Promise.all([
         this.select(DOMAIN_TABLES.outreach, scope),
         this.select(DOMAIN_TABLES.responses, scope),
@@ -401,6 +432,7 @@ export class SupabaseDomainRepository implements DomainRepository {
         this.select(DOMAIN_TABLES.runs, scope),
         this.select(DOMAIN_TABLES.changes, scope),
         this.select(DOMAIN_TABLES.snapshots, scope),
+        this.select(DOMAIN_TABLES.brandOnboarding, scope),
       ]);
     const payloads = <T>(rows: Record<string, unknown>[]): T[] =>
       rows.map((r) => r.payload as T).filter(Boolean);
@@ -413,6 +445,7 @@ export class SupabaseDomainRepository implements DomainRepository {
       runs: payloads<IntelligenceRun>(runs),
       changes: payloads<ProspectChangeEvent>(changes),
       snapshots: payloads<IntelligenceSnapshot>(snapshots),
+      brandOnboarding: payloads<BrandOnboarding>(brandOnboarding),
     };
   }
 

@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 11, 2026 (Phase D4 — persistence / domain hardening)
+Last updated: September 11, 2026 (Phase E1 — opportunity → brand onboarding hand-off)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -62,6 +62,19 @@ Cline's output back. AI confirms, gives next prompt.
   outreach record ids collided within a millisecond and destroyed a revision — ids
   are now workflow-owned. Gates: validator 44/44 + E2E 3/3; full E2E 172/0/4.
   Report: docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md.
+- Opportunity → brand onboarding hand-off (Phase E1, 2026-09-11): the missing link
+  after an acquisition Opportunity. A qualified/won Opportunity can now BEGIN
+  onboarding, which creates the canonical `BrandOnboarding` record keyed by the
+  SAME prospect id (`onb-<prospectId>`), derives the brand TENANT id
+  (`brand-tapatio` for Tapatío), sets `Opportunity.brandId` (the D4 gap) and
+  audits the hand-off. Five strictly-ordered steps
+  (profile → legal agreements → banking → carriers → compliance) complete one at a
+  time and the brand then becomes OPERATIONAL. Admin sees the status in the
+  Acquisition Opportunity panel and in the Brand CRM pre-onboarding relationship
+  row. No second brand identity, no second store, no second database, no new
+  credentials needed; RBAC is enforced in the domain. Gates: validator 46/46 +
+  E2E 3/3; full E2E 178/0/4. Report:
+  docs/PRODUCT_CONSOLIDATION_PHASEE1_2026-09-11.md.
 - Persistence / domain hardening (Phase D4, 2026-09-11; commit `eb1e5e8`):
   Phase C/D3 acquisition artefacts (outreach revisions,
   responses, opportunities, events) and the BI lifecycle history (prospect
@@ -107,13 +120,14 @@ the FINAL phase. The older list below is superseded by that roadmap.
 2. Namecheap FTP deploy script — DONE (scripts/deploy-demo.sh; demo live).
 3. Companies House + HMRC compliance dashboard — DONE (simulation-complete).
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
-NEXT in roadmap: PHASE D — IN PROGRESS. **D1 (Rocket.Chat removal) DONE**,
-**D2 (BI intelligence preservation) DONE** and **D3 (outreach/provider hardening)
-DONE** (2026-09-11). Next: **D4 — persistence/domain hardening** (persist
-acquisition records through the existing Supabase repository pattern instead of
-session memory), then D5 Opportunity → CRM → brand application → onboarding
-hand-off, D6 Postiz full-platform exposure in Admin + Brand dashboards. Rakazo
-stays LAST (Phase M).
+NEXT in roadmap: PHASE D COMPLETE (D1–D4, 2026-09-11). **PHASE E — CORE PLATFORM
+COMPLETION is IN PROGRESS: E1 (opportunity → brand onboarding hand-off) DONE
+2026-09-11** (hash recorded in PROJECT_STATUS.md). Next: **E2 — Brand onboarding**
+(link the brand-side wizard step state, route the marketing application-approval
+path through the SAME canonical onboarding record, add an Admin onboarding
+pipeline view), then E3 catalog/products, E4 commerce/Amazon-style operational
+simulation, E5 admin operational surfaces, E6 brand operational surfaces, E7
+embedded Postiz. Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

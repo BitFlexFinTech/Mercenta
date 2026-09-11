@@ -17,6 +17,7 @@ import { useMemo, useState } from 'react';
 import { Badge, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { getAcquisitionSummary, listAcquisitionProspects } from '@/lib/acquisition/outreachLifecycle';
+import { getOnboardingForProspect } from '@/lib/onboarding/onboardingLifecycle';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import { getPersistenceStatus } from '@/data/acquisitionStore';
 import { AcquisitionWorkflow } from './AcquisitionWorkflow';
@@ -38,6 +39,10 @@ export function AcquisitionRelationships() {
   const summary = getAcquisitionSummary();
   const persistence = getPersistenceStatus();
   void version; // canonical store change signal → re-read the derived rows
+  /** §Phase E1 — each row with its canonical onboarding record (null before hand-off). */
+  const rowViews = rows.map((r) => ({ row: r, onboarding: getOnboardingForProspect(r.prospect.id) }));
+  const onboardedCount = rowViews.filter((v) => v.onboarding).length;
+  const operationalCount = rowViews.filter((v) => v.onboarding?.status === 'completed').length;
   const open = rows.find((r) => r.prospect.id === openId) ?? null;
 
   return (
@@ -52,6 +57,8 @@ export function AcquisitionRelationships() {
           <span>In acquisition: <span className="text-white font-mono">{summary.enrolled}</span></span>
           <span>Responses: <span className="text-white font-mono">{summary.responded}</span></span>
           <span>Opportunities: <span className="text-white font-mono">{summary.opportunities}</span></span>
+          <span>In onboarding: <span className="text-white font-mono">{onboardedCount}</span></span>
+          <span>Operational: <span className="text-white font-mono">{operationalCount}</span></span>
         </div>
 
         {/* §Phase D4 — honest persistence status (never claims storage it lacks). */}
@@ -81,7 +88,7 @@ export function AcquisitionRelationships() {
           </p>
         ) : (
           <div className="divide-y divide-white/[0.04]">
-            {rows.map((r) => (
+            {rowViews.map(({ row: r, onboarding }) => (
               <button
                 key={r.prospect.id}
                 onClick={() => setOpenId(openId === r.prospect.id ? null : r.prospect.id)}
@@ -95,6 +102,12 @@ export function AcquisitionRelationships() {
                   <span className="block text-[10px] text-zinc-500 font-mono">
                     {r.opportunity?.id} · BI {r.opportunity?.biScore}/100 · owner {r.opportunity?.ownerStaffId} · {r.responseCount} response(s)
                   </span>
+                  {/* §Phase E1 — the hand-off status once onboarding has begun. */}
+                  {onboarding && (
+                    <span className="block text-[10px] text-zinc-500" data-onboarding-row={onboarding.status}>
+                      Onboarding {onboarding.status.replace('_', ' ')} · tenant {onboarding.brandId}
+                    </span>
+                  )}
                 </span>
                 <span className="flex items-center gap-2 flex-shrink-0">
                   <Badge className={cn('text-[9px] border capitalize', STAGE_STYLES[r.opportunity?.stage ?? 'new'])}>

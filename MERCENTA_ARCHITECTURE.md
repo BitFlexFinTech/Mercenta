@@ -51,11 +51,13 @@ App.tsx
   hooks + `useCanonicalStoreVersion()`), `prospectStore.ts` (canonical BI
   prospect universe + run/change/snapshot history + the canonical change
   signal), `acquisitionStore.ts` (§Phase C outreach revisions / responses /
-  opportunities / acquisition events, keyed by the canonical prospect id),
+  opportunities / acquisition events, keyed by the canonical prospect id, plus
+  the §Phase E1 canonical onboarding records),
   `domainRepository.ts` (**§Phase D4 — the persistence port**: one interface,
   a memory adapter (deterministic, ZERO network, `durable:false`) and a Supabase
   adapter (idempotent upsert by canonical id, tenant-scoped, explicit failures),
-  plus `createPersistenceMirror()` — the shared honest persistence status),
+  plus `createPersistenceMirror()` — the shared honest persistence status; §Phase
+  E1 added the `brand_onboarding` artefact and `brand_onboarding` in hydrate),
   `demoData.ts` / `brandDossiers.ts` / `brandProspectSeed.ts` /
   `brandExtraSeed.ts` (canonical demo/prospect fixtures).
 - `src/lib/` — domain libs: spapi, dhl, compliance, billing, crm, helpdesk,
@@ -64,6 +66,8 @@ App.tsx
   `prospectIntelligence.ts` — the Phase D2 canonical BI-intelligence read layer
   used by acquisition**), **acquisition
   (`outreachLifecycle.ts` state machine + `outreachSender.ts` transport seam)**,
+  **onboarding (`onboardingLifecycle.ts` — §Phase E1 opportunity → tenant
+  hand-off)**,
   discovery, research, marketing, postiz, whatsapp, mail, messaging,
   monitoring, automation, events, simulation, verification, shipping, warehouse,
   esign, grants, notifications.
@@ -268,6 +272,18 @@ carries a `prospectId`.
   canonical resolution: mode derived from `modeForState` + the registry default,
   fail-closed (a `live` claim without verified credentials is downgraded), honest
   `providerState`. `sendOutreach()` refuses an unverifiable live claim.
+- **Onboarding hand-off (`src/lib/onboarding/onboardingLifecycle.ts`, Phase E1)** —
+  `beginBrandOnboarding(opportunityId, actor)` (qualified/won only; idempotent by
+  canonical id `onb-<prospectId>`; derives the tenant id
+  `brand-<normalizeBrandKey>`; refuses a tenant collision; SETS
+  `Opportunity.brandId`), `completeOnboardingStep(onboardingId, stepId, actor, note?)`
+  (strictly ordered `profile → legal_agreements → banking → carriers → compliance`),
+  `finishBrandOnboarding(onboardingId, actor)` (refused while any step is
+  outstanding), plus `onboardingIdFor`, `tenantIdForBrand`,
+  `isOnboardingEligible`, `getOnboardingForProspect`. Same
+  `AcquisitionActor`/`{ok,error}` contract as acquisition; RBAC and audit in the
+  domain; persistence through the SAME port (`DOMAIN_TABLES.brandOnboarding`,
+  migration `021_create_brand_onboarding.sql`).
 
 ## 13. Future Extension Points
 
@@ -284,9 +300,18 @@ carries a `prospectId`.
   honest memory adapter and a Supabase adapter (idempotent by canonical id,
   tenant-scoped, explicit failures); acquisition + BI lifecycle write-through;
   `supabase/migrations/020_create_acquisition_persistence.sql` (8 tables, RLS).
-  **Still remaining:** run the migration + exercise the durable path against a
-  credentialed Supabase project (never executed here); wire `Opportunity.brandId`
-  into application → onboarding; expose the full Postiz platform in Admin + Brand.
+- **Phase E1 — core-platform gap closure (2026-09-11):** ✅ the opportunity →
+  brand onboarding hand-off — canonical `BrandOnboarding` (keyed by the canonical
+  prospect id), DERIVED tenant id, `Opportunity.brandId` set, strictly ordered
+  steps with explicit completion, RBAC + audit in the domain, the EXISTING
+  persistence port extended with `brand_onboarding` and migration
+  `021_create_brand_onboarding.sql` (RLS + brand isolation). **Still remaining:**
+  link the brand-side wizard step state and route the marketing
+  application-approval entry point through the SAME canonical record (E2), then
+  E3–E7 (catalog, commerce simulation, admin/brand operational surfaces, embedded
+  Postiz).
+  Also still remaining from D4: run the migrations + exercise the durable path
+  against a credentialed Supabase project (never executed here).
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep

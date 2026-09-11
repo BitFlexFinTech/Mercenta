@@ -2225,7 +2225,11 @@ export type AcquisitionEventType =
   | 'outreach_sent'
   | 'response_received'
   | 'opportunity_created'
-  | 'opportunity_stage_changed';
+  | 'opportunity_stage_changed'
+  /* §Phase E1 — opportunity → brand onboarding hand-off */
+  | 'onboarding_started'
+  | 'onboarding_step_completed'
+  | 'onboarding_completed';
 
 /** A single audited acquisition transition for a canonical prospect. */
 export interface AcquisitionEvent {
@@ -2256,6 +2260,63 @@ export interface AcquisitionRelationship {
   events: AcquisitionEvent[];
   /** Canonical messages keyed by the prospect identity (no duplicate store). */
   messages: Message[];
+}
+
+/* ── §Phase E1 — brand onboarding (opportunity → operational tenant) ─────── */
+
+/**
+ * Onboarding lifecycle for an accepted/qualified acquisition opportunity.
+ *
+ * This record is the canonical bridge between the PRE-onboarding relationship
+ * (the BI prospect + its acquisition Opportunity) and the OPERATIONAL brand
+ * tenant. It carries the SAME `prospectId` and `opportunityId`, so the
+ * acquisition history is never lost, and the `brandId` it introduces is the
+ * tenant identity the opportunity onboards INTO — there is no second brand
+ * identity system.
+ */
+export type OnboardingStatus = 'initiated' | 'in_progress' | 'completed';
+
+/** The canonical onboarding steps, completed strictly in order. */
+export type OnboardingStepId =
+  | 'profile'
+  | 'legal_agreements'
+  | 'banking'
+  | 'carriers'
+  | 'compliance';
+
+export type OnboardingStepStatus = 'pending' | 'in_progress' | 'done';
+
+export interface OnboardingStep {
+  id: OnboardingStepId;
+  label: string;
+  status: OnboardingStepStatus;
+  completedAt?: string;
+  completedBy?: string;
+  note?: string;
+}
+
+export interface BrandOnboarding {
+  /** Deterministic: `onb-<prospectId>` — one onboarding per opportunity. */
+  id: string;
+  /** Canonical BI prospect id — identity survives BI → ICP → CRM → tenant. */
+  prospectId: string;
+  opportunityId: string;
+  /** The brand TENANT identity this opportunity onboards into. */
+  brandId: string;
+  businessName: string;
+  category: string;
+  track: FulfillmentTrack;
+  status: OnboardingStatus;
+  steps: OnboardingStep[];
+  /** Provenance — the single entry point this hand-off started from. */
+  origin: 'acquisition_opportunity';
+  /** BI score/tier snapshot carried from the opportunity (never re-derived). */
+  biScore: number;
+  biTier: ProspectTier;
+  initiatedAt: string;
+  initiatedBy: string;
+  completedAt?: string;
+  completedBy?: string;
 }
 
 /* ── §Phase D2 — canonical BI intelligence access (read-by-reference) ────── */

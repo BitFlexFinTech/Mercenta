@@ -184,6 +184,13 @@ opportunity + timeline + the same canonical conversation. `Opportunity.brandId`
 stays unset until the prospect actually onboards: the record never pretends a
 prospect is already a tenant.
 
+**Phase E1 addition:** the CRM also carries the ONBOARDING hand-off. When a
+qualified/won opportunity is onboarded, the tenant id is DERIVED
+(`brand-<normalizeBrandKey>`), the canonical `BrandOnboarding` record is created
+(keyed by the SAME prospect id, carrying the opportunity id), and
+`Opportunity.brandId` is set to that tenant. The record still never pretends a
+prospect is a tenant — it makes it one, with the acquisition history retained.
+
 ## N. Communication Model
 
 **ONE canonical conversation/message model.** Every message — staff, brand,
@@ -321,7 +328,7 @@ onboarding. **Not started yet.**
 | A | Core data / domain / workflow consolidation | ✅ DONE (`dbbf567`) |
 | B | Brand Intelligence real-data lifecycle | ✅ DONE (`9f935f4`) |
 | C | ICP consumption of canonical BI data | ✅ DONE (`b7cd0d4`; BI→ICP→outreach→approve/reject→send→response→Opportunity→CRM) |
-| D | Partner acquisition / production hardening | 🔄 IN PROGRESS — **D1 Rocket.Chat removal DONE** · **D2 BI-intelligence preservation DONE** · **D3 outreach/provider hardening DONE**; D4 persistence/domain · D5 Opportunity→CRM→onboarding · D6 Postiz full-platform exposure |
+| D | Partner acquisition / production hardening | ✅ **DONE** — D1 Rocket.Chat removal · D2 BI-intelligence preservation · D3 outreach/provider hardening · **D4 persistence/domain hardening (`eb1e5e8`)** |
 | E | CRM + communication + helpdesk consolidation | |
 | F | Executive analytics + operations separation | |
 | G | Screen-level UI/UX redesign | |
@@ -331,6 +338,16 @@ onboarding. **Not started yet.**
 | K | Accessibility / responsive / security / regression | |
 | L | Public deployment + live demo verification | |
 | M | Rakazo final integration layer **(LAST)** | |
+
+> **Note on phase lettering (2026-09-11).** The rows above are the ORIGINAL A–M
+> roadmap. The governing build instruction for the current programme uses
+> **"Phase E — Core Platform Completion"** with sub-phases **E1 core-platform gap
+> closure · E2 brand onboarding · E3 catalog/products · E4 commerce/Amazon-style
+> operational simulation · E5 admin operational surfaces · E6 brand operational
+> surfaces · E7 embedded Postiz**. That programme absorbs what this table called
+> D5/D6 (and overlaps row H for Postiz). Rows E–H above are therefore **NOT** the
+> same thing as Phase E1/E2/…/E7 — do not conflate them. Phase E1 is DONE
+> (2026-09-11); its state lives in **PROJECT_STATUS.md**.
 
 ## AC. Permanent Do-Not-Change Decisions
 
@@ -348,6 +365,13 @@ onboarding. **Not started yet.**
 11. Visual design freeze until the explicit UI/UX phase.
 12. Generated/forensic artifacts are never committed simply to clean Git.
 13. AI tools are interchangeable; project knowledge lives in these files.
+14. Brand onboarding identity is DERIVED, never invented (Phase E1): the
+    opportunity → onboarding hand-off derives the brand tenant id from the
+    canonical brand key (`brand-<normalizeBrandKey>`), keys the canonical
+    `BrandOnboarding` record by the canonical prospect id (`onb-<prospectId>`),
+    sets `Opportunity.brandId`, and REFUSES a tenant-id collision. No second
+    brand identity, no second onboarding store, no second database, and the
+    acquisition history is retained (never copied or re-keyed).
 
 ## AD. Major Architectural Decisions
 
@@ -391,6 +415,13 @@ onboarding. **Not started yet.**
     (zero network) for every non-live state; `UNKNOWN ≠ LIVE`; a live send is
     never fabricated, and the record id is workflow-owned so no revision can be
     silently overwritten.
+13. The opportunity → brand onboarding hand-off (Phase E1) is owned by
+    `src/lib/onboarding/onboardingLifecycle.ts`: `qualified`/`won` only, one
+    canonical onboarding record per opportunity (idempotent by canonical id),
+    strictly ordered steps, completion as a distinct explicit act, RBAC and audit
+    in the domain, and persistence through the SAME domain port
+    (`DOMAIN_TABLES.brandOnboarding`) — with a brand-isolation RLS policy in
+    `supabase/migrations/021_create_brand_onboarding.sql`.
 
 ## AE. Known Limitations / Caveats
 
@@ -428,10 +459,12 @@ onboarding. **Not started yet.**
   response → Opportunity → CRM relationship context, with RBAC + audit +
   `networkCalls === 0` proven by `validate-acquisition-pipeline.mjs`.
 - **Known gaps after Phase C:** no live provider send was exercised; acquisition
-  state is session-only; `Opportunity.brandId` is not yet wired into the
-  application/onboarding flow; BI discovery runs remain operator-triggered (no
-  scheduler exists and none is claimed); campaign performance stats and
-  monitoring health remain seeded (flagged).
+  state is session-only (partially addressed by D4); `Opportunity.brandId` is now
+  wired through the **opportunity → brand-onboarding hand-off (Phase E1)** — the
+  still-missing entry point is the marketing application-approval path (E2); BI
+  discovery runs remain operator-triggered (no scheduler exists and none is
+  claimed); campaign performance stats and monitoring health remain seeded
+  (flagged).
 - **Phase D2 (2026-09-11) closed the BI-information-loss gap**: acquisition now
   reads the canonical BI intelligence by reference (`prospectIntelligence.ts`) and
   the operator surface shows it. Still true: acquisition artefacts (outreach

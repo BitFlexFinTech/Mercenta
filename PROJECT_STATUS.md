@@ -1,7 +1,33 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-11 (**Phase D4 — PERSISTENCE + PLATFORM HARDENING**: a domain persistence port (`src/data/domainRepository.ts`) with a memory adapter (deterministic, zero-network, honest `durable:false`) and a Supabase adapter (idempotent upserts by canonical id, tenant-scoped, explicit failures); acquisition + BI lifecycle state now write-through the port; new migration `020_create_acquisition_persistence.sql` (8 tables, RLS, brand-isolation policy); deterministic idempotent response ids; honest persistence status surfaced in Brand CRM; new validator 64/64 + E2E 3/3; full E2E 175/0/4; typecheck 0 · lint 0 · build PASS. **Supabase is NOT configured in this env → nothing is durable; reported honestly, never claimed.**)
+> Last updated: 2026-09-11 (**Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; see the PHASE E1 block below. Previous session: **Phase D4 — PERSISTENCE + PLATFORM HARDENING**: a domain persistence port (`src/data/domainRepository.ts`) with a memory adapter (deterministic, zero-network, honest `durable:false`) and a Supabase adapter (idempotent upserts by canonical id, tenant-scoped, explicit failures); acquisition + BI lifecycle state now write-through the port; new migration `020_create_acquisition_persistence.sql` (8 tables, RLS, brand-isolation policy); deterministic idempotent response ids; honest persistence status surfaced in Brand CRM; new validator 64/64 + E2E 3/3; full E2E 175/0/4; typecheck 0 · lint 0 · build PASS. **Supabase is NOT configured in this env → nothing is durable; reported honestly, never claimed.**)
 >
+> **PHASE E1 (2026-09-11) — OPPORTUNITY → BRAND ONBOARDING HAND-OFF.** Closes the
+> documented D4 follow-up (`Opportunity.brandId` was never wired to onboarding).
+> NEW canonical entity `BrandOnboarding`, keyed by the SAME canonical prospect id
+> (`onb-<prospectId>`) with a DERIVED tenant id (`brand-<normalizeBrandKey>`,
+> diacritics folded; a collision is refused, never merged) — **no second brand
+> identity, no second store, no second database.** NEW domain lib
+> `src/lib/onboarding/onboardingLifecycle.ts`: `beginBrandOnboarding` (qualified/won
+> only, idempotent, sets `Opportunity.brandId`, audits), `completeOnboardingStep`
+> (strictly ordered, attributed), `finishBrandOnboarding` (refused while any step is
+> outstanding; completion is a distinct explicit act). RBAC is enforced IN THE
+> DOMAIN (a view-only actor is refused and changes nothing). The EXISTING
+> persistence port gained ONE artefact (`DOMAIN_TABLES.brandOnboarding` +
+> `persistBrandOnboarding` on both adapters, brand-scope read parity with
+> opportunities) and the EXISTING canonical acquisition store gained the onboarding
+> working set. NEW migration `021_create_brand_onboarding.sql` (1 table, RLS,
+> admin + brand-isolation policies). Minimal additive UI in the existing
+> Acquisition Opportunity panel + the pre-onboarding CRM relationship row (no
+> redesign, existing primitives/palette only). Gates: new validator **46/46 PASS**
+> + new E2E spec **3/3**; full E2E **178/0/4** (was 175/0/4 → +3, 0 new failures);
+> typecheck 0 · lint 0 · build PASS. Report:
+> `docs/PRODUCT_CONSOLIDATION_PHASEE1_2026-09-11.md`. **HONEST: browser Supabase
+> credentials are still NOT configured → the memory adapter is active, nothing is
+> durable, and migration 021 is unexecuted (like 020). The application-approval
+> entry point into the same canonical record is NOT done — it is E2.**
+>
+
 > **PHASE D4 (2026-09-11) — PERSISTENCE / DOMAIN HARDENING.** The Phase C
 > acquisition artefacts (outreach revisions, responses, opportunities, events)
 > and the BI lifecycle history (prospect updates, runs, change events, snapshots)

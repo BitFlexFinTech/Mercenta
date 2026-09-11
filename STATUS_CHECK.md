@@ -14,6 +14,7 @@ fixed. Never cite the log as current status.
 - `node scripts/validate-bi-intelligence-preservation.mjs` — BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (42/42; Phase D2)
 - `node scripts/validate-outreach-provider-hardening.mjs` — OUTREACH_PROVIDER_HARDENING_VALIDATION_PASS (44/44; Phase D3)
 - `node scripts/validate-d4-persistence.mjs` — D4_PERSISTENCE_VALIDATION_PASS (64/64; Phase D4)
+- `node scripts/validate-onboarding-handoff.mjs` — ONBOARDING_HANDOFF_VALIDATION_PASS (46/46; Phase E1)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -24,13 +25,36 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **175 PASS / 4 skip / 0 fail** across 29 spec files.
-  (Phase D4 added `e2e/domain-persistence.spec.ts`, +3 tests, 0 new failures.
+  **Playwright E2E** — **178 PASS / 4 skip / 0 fail** across 30 spec files.
+  (Phase E1 added `e2e/onboarding-handoff.spec.ts`, +3 tests, 0 new failures.
+  Phase D4 added `e2e/domain-persistence.spec.ts`, +3 tests, 0 new failures.
   One 8-worker run produced a load-induced screenshot flake in
   `app-shell.spec.ts`; it passes 23/23 in isolation and the 4-worker full run
   was 0-failure.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Opportunity → brand onboarding hand-off (Phase E1 — 2026-09-11)
+
+- Closes the D4 follow-up: `Opportunity.brandId` was documented but never set by
+  any code path; onboarding existed only as brand-portal React state with no
+  canonical record and no admin pipeline.
+- NEW `src/lib/onboarding/onboardingLifecycle.ts` — `beginBrandOnboarding`
+  (`qualified`/`won` only, idempotent, derives tenant `brand-<normalizeBrandKey>`,
+  sets `Opportunity.brandId`, audits on the relationship timeline AND the platform
+  audit log), `completeOnboardingStep` (strictly ordered, attributable, no
+  auto-completion), `finishBrandOnboarding` (refuses while steps are outstanding).
+- NEW canonical entity `BrandOnboarding` (`src/types.ts`) keyed by the canonical
+  prospect id; `onboarding` state lives in the EXISTING `acquisitionStore`
+  (no second store); persistence via the EXISTING port
+  (`DOMAIN_TABLES.brandOnboarding`, both adapters); NEW
+  `supabase/migrations/021_create_brand_onboarding.sql` (RLS + brand isolation).
+- Gates this session: **validator 46/46 · new spec 3/3 · full E2E 178/0/4 ·
+  typecheck 0 · lint 0 · build PASS**.
+- **HONEST LIMITATION:** no browser Supabase credentials here → memory adapter,
+  nothing durable, migration 021 unexecuted. The marketing application-approval
+  entry point is NOT yet routed into this canonical record (E2). The read-only UI
+  refusal is proven at domain level (validator), not by a browser account switch.
 
 ## Persistence / domain hardening (Phase D4 — 2026-09-11) — commit `eb1e5e8`
 

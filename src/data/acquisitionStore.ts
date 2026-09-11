@@ -37,6 +37,7 @@ import type {
   AcquisitionEvent,
   AcquisitionPipelineSummary,
   AcquisitionRelationship,
+  BrandOnboarding,
   Opportunity,
   OutreachResponse,
   ProspectOutreachRecord,
@@ -57,6 +58,8 @@ let outreach: ProspectOutreachRecord[] = [];
 let responses: OutreachResponse[] = [];
 let opportunities: Opportunity[] = [];
 let events: AcquisitionEvent[] = [];
+/** §Phase E1 — canonical onboarding records for handed-off opportunities. */
+let onboardings: BrandOnboarding[] = [];
 
 const uid = (p: string) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -95,6 +98,8 @@ export async function hydrateAcquisitionFromPersistence(
   responses = hydrated.responses;
   opportunities = hydrated.opportunities;
   events = hydrated.events;
+  // Defensive: a partial/older adapter contract yields an empty list, never undefined.
+  onboardings = hydrated.brandOnboarding ?? [];
   notifyCanonicalStoreChange();
   return hydrated;
 }
@@ -217,6 +222,60 @@ export function updateOpportunity(
   return opportunities[idx];
 }
 
+/* ── §Phase E1 — brand onboarding (opportunity → operational tenant) ────── */
+
+export function getOnboardings(): BrandOnboarding[] {
+  return onboardings;
+}
+
+/** The canonical onboarding record for a prospect, if the hand-off happened. */
+export function getOnboardingForProspect(prospectId: string): BrandOnboarding | null {
+  return onboardings.find((o) => o.prospectId === prospectId) ?? null;
+}
+
+export function getOnboardingForOpportunity(opportunityId: string): BrandOnboarding | null {
+  return onboardings.find((o) => o.opportunityId === opportunityId) ?? null;
+}
+
+export function getOnboardingById(onboardingId: string): BrandOnboarding | undefined {
+  return onboardings.find((o) => o.id === onboardingId);
+}
+
+/** A tenant id already claimed by another onboarding (tenant-collision guard). */
+export function isTenantIdClaimed(brandId: string, exceptProspectId?: string): boolean {
+  return onboardings.some((o) => o.brandId === brandId && o.prospectId !== exceptProspectId);
+}
+
+/**
+ * §Phase E1 — idempotent by CANONICAL id (`onb-<prospectId>`): replaying the
+ * hand-off upserts the same record, so it can never create a second onboarding
+ * for one opportunity (mirrors the persistence adapter's upsert semantics).
+ */
+export function saveOnboarding(record: BrandOnboarding): BrandOnboarding {
+  const existing = onboardings.findIndex((o) => o.id === record.id);
+  if (existing >= 0) onboardings[existing] = record;
+  else onboardings = [...onboardings, record];
+  mirror(DOMAIN_TABLES.brandOnboarding, record.id, () =>
+    getDomainRepository().persistBrandOnboarding(record, MERCENTA_OPS_TENANT)
+  );
+  notifyCanonicalStoreChange();
+  return record;
+}
+
+export function updateOnboarding(
+  onboardingId: string,
+  patch: Partial<BrandOnboarding>
+): BrandOnboarding | null {
+  const idx = onboardings.findIndex((o) => o.id === onboardingId);
+  if (idx < 0) return null;
+  onboardings[idx] = { ...onboardings[idx], ...patch };
+  mirror(DOMAIN_TABLES.brandOnboarding, onboardingId, () =>
+    getDomainRepository().persistBrandOnboarding(onboardings[idx], MERCENTA_OPS_TENANT)
+  );
+  notifyCanonicalStoreChange();
+  return onboardings[idx];
+}
+
 /* ── Events + platform audit ───────────────────────────────────────────── */
 
 export function getAcquisitionEvents(prospectId?: string): AcquisitionEvent[] {
@@ -306,6 +365,7 @@ export function resetAcquisitionStore(): void {
   responses = [];
   opportunities = [];
   events = [];
+  onboardings = [];
   persistenceMirror.reset();
   notifyCanonicalStoreChange();
 }
