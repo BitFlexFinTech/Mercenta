@@ -202,8 +202,11 @@ nor Postiz. D3 does not start until this gate is accepted.
 
 ## Commit record
 
-- **D2 implementation commit:** recorded in `PROJECT_STATUS.md` (Phase D2 section) —
-  one `phaseD2:` commit on `redesign/foundation`, followed by a hash-record commit.
+- **D2 implementation commit: `fe0c893`** — `phaseD2: preserve canonical BI
+  intelligence through acquisition (read by reference)` (12 files changed,
+  1336 insertions, 19 deletions) on `redesign/foundation`. Verified in the same
+  session (typecheck 0 · lint 0 · build PASS · D2 validator 44/44 · D2 E2E 4/4 ·
+  full E2E 169/0/4).
 - **Pre-D2 HEAD:** `4a3f761` (D1 gate). **D1 implementation:** `bf31151`.
 - **Protected baseline (untouched):** `959b4d2` / tag `mercenta-baseline-before-redesign-20260907`.
 

@@ -102,7 +102,8 @@ the Phase D mandate). D2 does not start until this gate is accepted.
 
 ## Phase D2 — BI intelligence preservation through acquisition (2026-09-11)
 
-> Status: **DONE (verified this session)**. Full report:
+> Status: **DONE (verified this session)**. Commit **`fe0c893`**
+> (`phaseD2: preserve canonical BI intelligence through acquisition`). Full report:
 > `docs/PRODUCT_CONSOLIDATION_PHASED2_2026-09-11.md`.
 > Pre-D2 HEAD: `4a3f761`. Protected baseline untouched: `959b4d2`.
 

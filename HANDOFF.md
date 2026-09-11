@@ -52,8 +52,9 @@ Cline's output back. AI confirms, gives next prompt.
   conversation also appears in Messages (one canonical thread). No live
   credentials needed, no Rakazo, no Postiz, no Rocket.Chat, no external network
   calls in simulation.
-- BI intelligence preserved through acquisition (Phase D2, 2026-09-11): the
-  acquisition layer now reads a prospect's FULL Brand Intelligence by REFERENCE
+- BI intelligence preserved through acquisition (Phase D2, 2026-09-11; commit
+  `fe0c893`): the acquisition layer now reads a prospect's FULL Brand Intelligence
+  by REFERENCE
   (`src/lib/intelligence/prospectIntelligence.ts` — ASINs with per-ASIN metrics,
   contacts, distributors, wholesale, restrictions, growth signals, evidence +
   provenance, the 7 score factors, lifecycle/history) instead of only a narrow

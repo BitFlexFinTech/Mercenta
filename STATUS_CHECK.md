@@ -27,7 +27,7 @@ fixed. Never cite the log as current status.
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
 
-## BI intelligence preservation (Phase D2 — 2026-09-11)
+## BI intelligence preservation (Phase D2 — 2026-09-11) — commit `fe0c893`
 
 - NEW canonical accessor `src/lib/intelligence/prospectIntelligence.ts`: the ONE
   way the acquisition layer reads a prospect's Brand Intelligence — by reference
