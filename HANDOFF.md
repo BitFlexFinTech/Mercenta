@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 11, 2026 (Phase D1 — Rocket.Chat removed from Mercenta)
+Last updated: September 11, 2026 (Phase D2 — BI intelligence preservation through acquisition)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -52,6 +52,17 @@ Cline's output back. AI confirms, gives next prompt.
   conversation also appears in Messages (one canonical thread). No live
   credentials needed, no Rakazo, no Postiz, no Rocket.Chat, no external network
   calls in simulation.
+- BI intelligence preserved through acquisition (Phase D2, 2026-09-11): the
+  acquisition layer now reads a prospect's FULL Brand Intelligence by REFERENCE
+  (`src/lib/intelligence/prospectIntelligence.ts` — ASINs with per-ASIN metrics,
+  contacts, distributors, wholesale, restrictions, growth signals, evidence +
+  provenance, the 7 score factors, lifecycle/history) instead of only a narrow
+  lead + a prose summary. Outreach revisions store an ids+counts
+  `intelligenceRef`; the operator surface shows the canonical intelligence. Also
+  fixed a real defect: placeholder outreach addresses now fold diacritics via the
+  canonical brand key (`Tapatío` → `hello@tapatio.example`). Gates: validator
+  44/44 + E2E 4/4; full E2E 169/0/4. Report:
+  docs/PRODUCT_CONSOLIDATION_PHASED2_2026-09-11.md.
 - Rocket.Chat REMOVED (Phase D1, 2026-09-11; commit `bf31151`): 3 files deleted, registry 19 → 18
   providers, nav/breadcrumb/route gone, docker-compose service + Caddy vhost
   gone, simulation CASE scenario now provider-free. Regression gates:
@@ -69,13 +80,12 @@ the FINAL phase. The older list below is superseded by that roadmap.
 2. Namecheap FTP deploy script — DONE (scripts/deploy-demo.sh; demo live).
 3. Companies House + HMRC compliance dashboard — DONE (simulation-complete).
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
-NEXT in roadmap: PHASE D — IN PROGRESS. **D1 (Rocket.Chat removal) is DONE**
-(2026-09-11). Next: **D2 — BI intelligence preservation through acquisition**,
-then D3 outreach/provider hardening (activate a live email provider through the
-existing transport seam), D4 persistence/domain (persist acquisition records in
-Supabase instead of session memory), D5 Opportunity → CRM → brand
-application → onboarding hand-off, D6 Postiz full-platform exposure in Admin +
-Brand dashboards. Rakazo stays LAST (Phase M).
+NEXT in roadmap: PHASE D — IN PROGRESS. **D1 (Rocket.Chat removal) DONE** and
+**D2 (BI intelligence preservation through acquisition) DONE** (2026-09-11).
+Next: **D3 — outreach/provider hardening**, then D4 persistence/domain (persist
+acquisition records in Supabase instead of session memory), D5 Opportunity → CRM
+→ brand application → onboarding hand-off, D6 Postiz full-platform exposure in
+Admin + Brand dashboards. Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

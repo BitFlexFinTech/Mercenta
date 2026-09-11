@@ -21,7 +21,7 @@ import { useCanonicalStoreVersion } from '@/data/queries';
 import { useBrandComms } from '@/components/shared/BrandComm';
 import { Badge, Button, Card, Input, EmptyState } from '@/components/ui';
 import { cn } from '@/utils/cn';
-import type { AcquisitionRelationship, OpportunityStage } from '@/types';
+import type { AcquisitionRelationship, OpportunityStage, ProspectIntelligenceDigest } from '@/types';
 import {
   approveOutreach,
   createOpportunityFromResponse,
@@ -52,6 +52,21 @@ const STAGE_STYLES: Record<string, string> = {
   enrolled: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
   'not enrolled': 'bg-white/[0.05] text-zinc-400 border-white/[0.08]',
 };
+
+/**
+ * §Phase D2 — the seven canonical BI score dimensions (see `ProspectScore` in
+ * types.ts). Rendered from the live canonical record so the operator sees the
+ * SAME factor breakdown Brand Intelligence holds — never a recomputation.
+ */
+const SCORE_FACTORS: { key: keyof ProspectIntelligenceDigest['scoreFactors']; label: string }[] = [
+  { key: 'amazonDemand', label: 'Amazon demand' },
+  { key: 'poPotential', label: 'PO potential' },
+  { key: 'growth', label: 'Growth' },
+  { key: 'distributionOpenness', label: 'Distribution openness' },
+  { key: 'acceptanceProbability', label: 'Acceptance' },
+  { key: 'mercentaFit', label: 'Mercenta fit' },
+  { key: 'logisticsSuitability', label: 'Logistics' },
+];
 
 export function AcquisitionWorkflow({
   prospectId,
@@ -101,6 +116,8 @@ export function AcquisitionWorkflow({
   const subjectValue = subjectDraft ?? current?.subject ?? '';
   const bodyValue = bodyDraft ?? current?.body ?? '';
   const whyContact = current?.evidenceSummary ?? '';
+  /** §Phase D2 — canonical BI intelligence, read live by reference. */
+  const intel = row.intelligence;
 
   function refresh(message?: string) {
     if (message) setNotice(message);
@@ -223,6 +240,146 @@ export function AcquisitionWorkflow({
             ({prospect.asins.length} ASINs · {prospect.contacts.length} contact(s) · score {prospect.score.total}/100).
           </p>
         )}
+      </div>
+
+      {/* Canonical BI intelligence — read live by reference (Phase D2) ------- */}
+      <div
+        className="border border-white/[0.06] rounded-lg p-3 space-y-2"
+        data-section="intelligence"
+        data-asin-count={intel.digest.asinCount}
+        data-contact-count={intel.digest.contactCount}
+        data-distributor-count={intel.digest.distributorCount}
+        data-restriction-count={intel.digest.restrictionCount}
+        data-growth-signal-count={intel.digest.growthSignalCount}
+        data-evidence-count={intel.digest.evidenceCount}
+        data-score-total={intel.digest.scoreTotal}
+        data-score-tier={intel.digest.scoreTier}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[10px] font-semibold text-zinc-400 uppercase">
+            Canonical BI intelligence — {intel.digest.asinCount} ASINs · {intel.digest.contactCount} contact(s) · {intel.digest.evidenceCount} evidence
+          </p>
+          <span className="text-[9px] text-zinc-600 font-mono">by reference · {intel.prospectId}</span>
+        </div>
+
+        {/* Score factors — the canonical seven dimensions, not recomputed */}
+        <div className="flex flex-wrap gap-1.5" data-section="intelligence-score">
+          {SCORE_FACTORS.map((f) => (
+            <span
+              key={f.key}
+              data-score-factor={f.key}
+              className="text-[9px] bg-white/[0.04] border border-white/[0.06] rounded px-1.5 py-0.5 text-zinc-400"
+            >
+              {f.label} <span className="text-zinc-200 font-mono">{intel.digest.scoreFactors[f.key]}</span>
+            </span>
+          ))}
+          <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            total {intel.digest.scoreTotal}/100 · {intel.digest.scoreTier}
+          </Badge>
+        </div>
+
+        {/* ASIN-level intelligence */}
+        {intel.prospect.asins.length > 0 && (
+          <div className="overflow-x-auto" data-section="intelligence-asins">
+            <table className="w-full text-[10px]">
+              <thead>
+                <tr className="text-zinc-500 text-left">
+                  <th className="font-medium py-0.5 pr-2">ASIN</th>
+                  <th className="font-medium py-0.5 pr-2">Title</th>
+                  <th className="font-medium py-0.5 pr-2">BSR</th>
+                  <th className="font-medium py-0.5 pr-2">Sellers</th>
+                  <th className="font-medium py-0.5 pr-2">Est/mo</th>
+                  <th className="font-medium py-0.5 pr-2">Evidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                {intel.prospect.asins.map((a) => (
+                  <tr key={a.asin} className="border-t border-white/[0.04]" data-asin={a.asin}>
+                    <td className="py-0.5 pr-2 font-mono text-zinc-400">{a.asin}</td>
+                    <td className="py-0.5 pr-2 text-zinc-300">{a.title}</td>
+                    <td className="py-0.5 pr-2 text-zinc-400">#{a.bsr}</td>
+                    <td className="py-0.5 pr-2 text-zinc-400">{a.sellerCount}</td>
+                    <td className="py-0.5 pr-2 text-zinc-400">
+                      {a.estimatedRevenue ? `£${(a.estimatedRevenue / 1000).toFixed(0)}k` : 'n/a'}
+                    </td>
+                    <td className="py-0.5 pr-2 text-zinc-500">{a.evidence.length}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Full contact set + distribution context */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div data-section="intelligence-contacts">
+            <p className="text-[9px] text-zinc-500 uppercase mb-0.5">Contacts held by BI ({intel.digest.contactCount})</p>
+            {intel.prospect.contacts.length === 0 ? (
+              <p className="text-[10px] text-zinc-600" data-empty="contacts">None held by BI — never fabricated.</p>
+            ) : (
+              intel.prospect.contacts.map((c) => (
+                <p key={`${c.name}-${c.jobTitle}`} className="text-[10px] text-zinc-300" data-contact={c.name}>
+                  {c.name}{c.jobTitle ? `, ${c.jobTitle}` : ''}
+                  <span className="text-zinc-500"> · {c.email ?? 'no email on record'} ({c.emailConfidence})</span>
+                </p>
+              ))
+            )}
+          </div>
+          <div className="space-y-0.5" data-section="intelligence-market">
+            <p className="text-[9px] text-zinc-500 uppercase">Distribution, restrictions & growth</p>
+            {intel.prospect.distributors.length === 0 ? (
+              <p className="text-[10px] text-zinc-600">No distributor identified by BI.</p>
+            ) : (
+              intel.prospect.distributors.map((d) => (
+                <p key={d.company} className="text-[10px] text-zinc-300">
+                  {d.company} — {d.territory}{d.exclusive ? ' (exclusive)' : ''}
+                  {d.suggestedApproach ? ` · ${d.suggestedApproach.replace(/_/g, ' ')}` : ''}
+                </p>
+              ))
+            )}
+            {intel.prospect.restrictions.map((r) => (
+              <p key={r.description} className="text-[10px] text-amber-300/90">
+                {r.severity} restriction — {r.description}
+              </p>
+            ))}
+            <p className="text-[10px] text-zinc-400">
+              Wholesale programme: {intel.digest.wholesaleProgramme ? 'yes' : 'no'}
+              {intel.prospect.wholesale.minimumOrderQuantity
+                ? ` · minimum order ${intel.prospect.wholesale.minimumOrderQuantity}`
+                : ' · minimum order not held'}
+            </p>
+            {intel.prospect.growthSignals.length > 0 && (
+              <p className="text-[10px] text-zinc-400">
+                Growth signals ({intel.prospect.growthSignals.length}):{' '}
+                {intel.prospect.growthSignals.map((g) => g.type.replace(/_/g, ' ')).join(', ')}
+              </p>
+            )}
+            <p className="text-[10px] text-zinc-400">
+              {intel.prospect.category}
+              {intel.prospect.countries?.length ? ` · ${intel.prospect.countries.join(', ')}` : ''}
+              {intel.prospect.incumbentChallenged?.length
+                ? ` · challenger to ${intel.prospect.incumbentChallenged.join(', ')}`
+                : ''}
+            </p>
+          </div>
+        </div>
+
+        {/* Provenance (canonical BI history) + lifecycle */}
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] text-zinc-500" data-section="intelligence-provenance">
+          <span data-provenance="runs">runs {intel.provenance.runIds.length}</span>
+          <span data-provenance="timeline">timeline events {intel.provenance.changeEventIds.length}</span>
+          <span data-provenance="snapshots">snapshots {intel.provenance.snapshotDates.length}</span>
+          <span data-provenance="sources">
+            evidence sources ({intel.provenance.evidenceSources.length}):{' '}
+            {intel.provenance.evidenceSources.map((s) => `${s.source} ×${s.count}`).join(', ') || 'none'}
+          </span>
+          <span>lastChecked {intel.lifecycle.lastChecked?.slice(0, 10) ?? 'not yet'}</span>
+          <span>nextCheck {intel.lifecycle.nextCheck?.slice(0, 10) ?? 'not scheduled'}</span>
+        </div>
+        <p className="text-[9px] text-zinc-600">
+          Read live from the canonical Brand Intelligence record {intel.prospectId} — the same record Brand
+          Intelligence and the CRM show. Nothing is copied into a second intelligence store.
+        </p>
       </div>
 
       {/* Contact / targeting ---------------------------------------------- */}

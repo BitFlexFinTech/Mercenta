@@ -11,6 +11,7 @@ fixed. Never cite the log as current status.
 - `npm run lint` — PASS (exit 0)
 - `npm run build` — PASS (vite, ~2.5s)
 - `node scripts/validate-rocketchat-removal.mjs` — ROCKETCHAT_REMOVAL_VALIDATION_PASS (15/15; Phase D1)
+- `node scripts/validate-bi-intelligence-preservation.mjs` — BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (44/44; Phase D2)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -21,10 +22,33 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **165 PASS / 4 skip / 0 fail** across 26 spec files.
-  (Phase D1 added `e2e/rocketchat-removal.spec.ts`, +5 tests, 0 new failures.)
+  **Playwright E2E** — **169 PASS / 4 skip / 0 fail** across 27 spec files.
+  (Phase D2 added `e2e/bi-intelligence-preservation.spec.ts`, +4 tests, 0 new failures.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## BI intelligence preservation (Phase D2 — 2026-09-11)
+
+- NEW canonical accessor `src/lib/intelligence/prospectIntelligence.ts`: the ONE
+  way the acquisition layer reads a prospect's Brand Intelligence — by reference
+  to the canonical BI record, never a copied subset and never a second store.
+  Exposes all 11 sections (identity, market, ASINs, contacts, distributors,
+  wholesale, restrictions, growth signals, evidence, score, lifecycle), what BI
+  actually holds (counts + the seven score factors), and traceable provenance
+  (run ids, timeline event ids, snapshot dates, evidence sources/URLs).
+- `AcquisitionProspectRow` carries `intelligence`; each outreach revision stores
+  `intelligenceRef` (ids + counts + BI score snapshot + populated sections) so an
+  approval decision is traceable to the intelligence available when it was made.
+- FIXED a real pre-existing defect: the unmistakable `.example` outreach
+  placeholder now folds diacritics through the canonical `normalizeBrandKey`
+  (`Tapatío` → `hello@tapatio.example`; previously the mangled `tapato`).
+- Minimal additive UI: `AcquisitionWorkflow` renders the canonical intelligence
+  (ASIN table, contacts, distribution/restrictions/growth, 7 score factors,
+  provenance) — reachable from Brand Intelligence → Outreach, Brand CRM →
+  Acquisition Relationships, and Marketing → Acquisition Pipeline.
+- Gates: `node scripts/validate-bi-intelligence-preservation.mjs` (44/44) and
+  `npx playwright test e2e/bi-intelligence-preservation.spec.ts` (4/4).
+- Report: `docs/PRODUCT_CONSOLIDATION_PHASED2_2026-09-11.md`.
 
 ## Rocket.Chat removal (Phase D1 — 2026-09-11) — commit `bf31151`
 

@@ -36,6 +36,7 @@ import type {
   OpportunityStage,
   OutreachResponse,
   OutreachStatus,
+  ProspectIntelligence,
   ProspectOutreachRecord,
 } from '@/types';
 import { generateEmail, generateLinkedInMessage, generateOutreachSummary } from '@/lib/intelligence/outreachGenerator';
@@ -45,9 +46,14 @@ import {
   buildAcquisitionLead,
   deriveIcpOriginRegion,
   leadStageForOutreachStatus,
+  normalizeBrandKey,
   outreachStatusForLeadStage,
 } from '@/lib/intelligence/prospectPipeline';
 import { setProspectOutreachStatus } from '@/lib/intelligence/prospectLifecycle';
+import {
+  buildIntelligenceRef,
+  buildProspectIntelligence,
+} from '@/lib/intelligence/prospectIntelligence';
 import * as store from '@/data/acquisitionStore';
 import { getProspect, getProspects } from '@/data/prospectStore';
 import { logMessage } from '@/data/api';
@@ -110,11 +116,17 @@ function transitionProspect(
  * record has one; otherwise a clearly-fake `.example` address (reserved TLD) is
  * derived from the brand — unmistakably a placeholder, never a plausible
  * real-world address.
+ *
+ * §Phase D2 — the slug is the CANONICAL `normalizeBrandKey` (diacritics are
+ * folded, not dropped). The previous local regex stripped accented characters,
+ * so `Tapatío` produced the mangled `hello@tapato.example`; it now yields
+ * `hello@tapatio.example`, identical to the canonical brand identity used
+ * everywhere else in BI/ICP.
  */
 export function outreachDestination(prospect: BrandProspect): string {
   const real = (prospect.contacts[0]?.email ?? '').trim();
   if (real) return real;
-  const slug = prospect.brand.toLowerCase().replace(/[^a-z0-9]/g, '') || 'brand';
+  const slug = normalizeBrandKey(prospect.brand) || 'brand';
   return `hello@${slug}.example`;
 }
 
@@ -129,6 +141,12 @@ export interface AcquisitionProspectRow {
   opportunity: Opportunity | null;
   responseCount: number;
   stage: string;
+  /**
+   * §Phase D2 — the canonical BI intelligence for this prospect, read live by
+   * reference (never a copied subset). `intelligence.prospect` and this row's
+   * `prospect` are the SAME canonical record.
+   */
+  intelligence: ProspectIntelligence;
 }
 
 /** Human-readable acquisition stage for a prospect (display + assertions). */
@@ -171,6 +189,7 @@ export function listAcquisitionProspects(): AcquisitionProspectRow[] {
       opportunity: store.getOpportunityForProspect(prospect.id),
       responseCount: store.getResponsesForProspect(prospect.id).length,
       stage: acquisitionStageLabel(prospect.id),
+      intelligence: buildProspectIntelligence(prospect),
     }));
 }
 
@@ -298,6 +317,11 @@ export function prepareOutreach(
     revision: previous.length + 1,
     leadId: acquisitionLeadId(prospectId),
     evidenceSummary: whyContact,
+    // §Phase D2 — traceability REFERENCE (ids + counts + score snapshot) to the
+    // BI intelligence the operator saw when preparing this revision. The
+    // intelligence itself stays in Brand Intelligence and is re-read from the
+    // canonical prospect by `prospectId` — it is never copied into this record.
+    intelligenceRef: buildIntelligenceRef(fresh, previous.length + 1),
   };
   store.saveOutreach(record);
   pushEvent(

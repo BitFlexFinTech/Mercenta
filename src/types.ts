@@ -2040,6 +2040,13 @@ export interface ProspectOutreachRecord {
   transport?: 'simulation' | 'live';
   /** §Phase C — the ICP lead this recommendation was prepared for. */
   leadId?: string;
+  /**
+   * §Phase D2 — traceability REFERENCE to the canonical BI intelligence that was
+   * available when this revision was prepared. Ids + counts only: the
+   * intelligence itself is NEVER copied into this record — it is always re-read
+   * from the canonical prospect by `prospectId`.
+   */
+  intelligenceRef?: ProspectIntelligenceRef;
 }
 
 /** Weekly snapshot of brand intelligence scores for trend tracking. */
@@ -2249,6 +2256,128 @@ export interface AcquisitionRelationship {
   events: AcquisitionEvent[];
   /** Canonical messages keyed by the prospect identity (no duplicate store). */
   messages: Message[];
+}
+
+/* ── §Phase D2 — canonical BI intelligence access (read-by-reference) ────── */
+
+/** A keyed part of the canonical BI record, with its actual populated state. */
+export type ProspectIntelligenceSectionKey =
+  | 'identity'
+  | 'market'
+  | 'asins'
+  | 'contacts'
+  | 'distributors'
+  | 'wholesale'
+  | 'restrictions'
+  | 'growthSignals'
+  | 'evidence'
+  | 'score'
+  | 'lifecycle';
+
+/**
+ * One section of the canonical BI intelligence. `count` is what BI actually
+ * holds — 0 is reported explicitly (a section is never silently dropped because
+ * it happens to be empty, and it is never fabricated when it is).
+ */
+export interface ProspectIntelligenceSection {
+  key: ProspectIntelligenceSectionKey;
+  label: string;
+  count: number;
+  populated: boolean;
+}
+
+/**
+ * Traceability of the intelligence back to its canonical BI provenance:
+ * run ids, timeline event ids, snapshot dates and the observed evidence sources.
+ * Every entry is an ID or an observation source recorded by BI — no new data.
+ */
+export interface ProspectIntelligenceProvenance {
+  prospectId: string;
+  /** Canonical discovery run ids that produced/updated this record. */
+  runIds: string[];
+  /** Canonical change-event ids on this prospect's BI timeline. */
+  changeEventIds: string[];
+  /** Canonical score snapshot dates recorded for this brand. */
+  snapshotDates: string[];
+  /** Distinct evidence sources and how many evidence items each contributed. */
+  evidenceSources: { source: string; count: number }[];
+  /** Distinct evidence source URLs (where BI observed it). */
+  evidenceSourceUrls: string[];
+  /** Amazon URLs observed on the record's ASINs. */
+  asinSourceUrls: string[];
+}
+
+/**
+ * What BI actually holds for this prospect, expressed as counts plus the exact
+ * score factors. Deliberately NOT a copy of any ASIN/contact/evidence record —
+ * values are read from the live canonical record through `ProspectIntelligence.prospect`.
+ */
+export interface ProspectIntelligenceDigest {
+  asinCount: number;
+  contactCount: number;
+  distributorCount: number;
+  restrictionCount: number;
+  growthSignalCount: number;
+  evidenceCount: number;
+  marketplaceSellerObserved: boolean;
+  wholesaleProgramme: boolean;
+  /** Exact seven-dimension score factors, read from the canonical record. */
+  scoreFactors: {
+    amazonDemand: number;
+    poPotential: number;
+    growth: number;
+    distributionOpenness: number;
+    acceptanceProbability: number;
+    mercentaFit: number;
+    logisticsSuitability: number;
+  };
+  scoreTotal: number;
+  scoreTier: ProspectTier;
+  scoreCalculatedAt: string;
+  /** Every canonical section with its populated state (all 11 always present). */
+  sections: ProspectIntelligenceSection[];
+}
+
+/**
+ * THE acquisition-facing view of a canonical Brand Intelligence prospect.
+ * `prospect` is the SAME object the canonical BI store holds — this view is a
+ * live projection, never a second intelligence record that can drift.
+ */
+export interface ProspectIntelligence {
+  prospectId: string;
+  prospect: BrandProspect;
+  digest: ProspectIntelligenceDigest;
+  provenance: ProspectIntelligenceProvenance;
+  lifecycle: {
+    outreachStatus: OutreachStatus;
+    disqualified: boolean;
+    disqualificationReason?: string;
+    createdAt: string;
+    lastResearched: string;
+    lastChecked?: string;
+    nextCheck?: string;
+  };
+}
+
+/**
+ * §Phase D2 — the reference stored on an outreach revision: what BI held when the
+ * operator prepared it. Ids + counts + the score snapshot only.
+ */
+export interface ProspectIntelligenceRef {
+  prospectId: string;
+  capturedAt: string;
+  /** Outreach revision this reference was captured for. */
+  revision: number;
+  asinCount: number;
+  contactCount: number;
+  distributorCount: number;
+  restrictionCount: number;
+  growthSignalCount: number;
+  evidenceCount: number;
+  scoreTotal: number;
+  scoreTier: ProspectTier;
+  /** Canonical sections that were populated at preparation time. */
+  populatedSections: ProspectIntelligenceSectionKey[];
 }
 
 /** Derived acquisition pipeline counts (admin overview). */

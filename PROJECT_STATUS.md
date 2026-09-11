@@ -2,6 +2,17 @@
 > Source of truth for current project state. Updated after every session.
 > Last updated: 2026-09-11 (Phase C — BI → ICP → OUTREACH → CRM FOUNDATION: canonical BI prospects are now the ACTIVE acquisition universe, `INITIAL_LEADS` retired from the live path, new acquisition store + lifecycle engine (`src/data/acquisitionStore.ts`, `src/lib/acquisition/outreachLifecycle.ts`, `outreachSender.ts`), BI-evidence outreach prep, human approve/reject/modify, simulated send + response + Opportunity + CRM relationship context; new validator 64/64 + E2E 4/4; full E2E 160/0/4; typecheck 0 · lint 0 · build PASS)
 >
+> **PHASE D2 (2026-09-11) — BI INTELLIGENCE PRESERVATION.** New canonical
+> accessor `src/lib/intelligence/prospectIntelligence.ts` (11 sections, digest,
+> provenance, lifecycle; read **by reference**, never copied). `AcquisitionProspectRow`
+> now carries `intelligence`; outreach revisions store `intelligenceRef`
+> (ids + counts + score snapshot). Minimal additive intelligence surface in
+> `AcquisitionWorkflow.tsx`. Real defect fixed: the placeholder outreach slug now
+> folds diacritics via the canonical `normalizeBrandKey` (`Tapatío` →
+> `hello@tapatio.example`, was the mangled `tapato`). New validator **44/44 PASS**
+> + new E2E spec **4/4**; full E2E **169/0/4**; typecheck 0 · lint 0 · build PASS.
+> Report: `docs/PRODUCT_CONSOLIDATION_PHASED2_2026-09-11.md`.
+>
 > **PHASE D1 (2026-09-11) — ROCKET.CHAT REMOVED.** Removed end-to-end: admin
 > panel + mock client/SSO factory (3 files deleted), nav entry + breadcrumb +
 > render route, `IntegrationId` member, registry card/order/meta (19 → 18
@@ -88,6 +99,64 @@ browser click-through (Playwright only). No deploy, no push.
 
 **NEXT:** **D2 — BI intelligence preservation through acquisition** (see §21 of
 the Phase D mandate). D2 does not start until this gate is accepted.
+
+## Phase D2 — BI intelligence preservation through acquisition (2026-09-11)
+
+> Status: **DONE (verified this session)**. Full report:
+> `docs/PRODUCT_CONSOLIDATION_PHASED2_2026-09-11.md`.
+> Pre-D2 HEAD: `4a3f761`. Protected baseline untouched: `959b4d2`.
+
+**BUILT (D2)**
+- **NEW `src/lib/intelligence/prospectIntelligence.ts` (248 lines)** — THE
+  canonical BI-intelligence read layer. `getProspectIntelligence(id)` (null for an
+  unknown id), `buildProspectIntelligence(p)`, `getIntelligenceForLead /
+  ForOutreach / ForResponse / ForOpportunity`, `intelligenceDigest`,
+  `intelligenceProvenance`, `intelligenceSections` (always all 11),
+  `collectEvidence` (incl. nested section evidence), `buildIntelligenceRef`.
+  Reads resolve against `prospectStore` and return the record BI holds — no
+  second store, no copied subset.
+- **`src/types.ts` (+129)** — `ProspectIntelligence`, `ProspectIntelligenceDigest`,
+  `ProspectIntelligenceSection(+Key)`, `ProspectIntelligenceProvenance`,
+  `ProspectIntelligenceRef`; `ProspectOutreachRecord.intelligenceRef?`.
+- **`outreachLifecycle.ts`** — `AcquisitionProspectRow.intelligence` (by
+  reference); `prepareOutreach()` records `intelligenceRef` (ids + counts + score
+  snapshot + populated sections). **REAL DEFECT FIXED:** `outreachDestination()`
+  now derives the `.example` slug from the canonical `normalizeBrandKey`
+  (diacritics folded) — previously `Tapatío` produced the mangled
+  `hello@tapato.example`.
+- **`AcquisitionWorkflow.tsx` (+159, additive)** — `data-section="intelligence"`:
+  ASIN table (real metrics), full contact set, distributors / restrictions /
+  wholesale / growth signals, the seven score factors, and the provenance line
+  (runs / timeline / snapshots / evidence sources). No styling or nav change.
+
+**TESTED (D2) — real output**
+- `npm run typecheck` → **PASS** (0 errors) · `npm run lint` → **PASS** (0 problems)
+- `npm run build` → **PASS**, `✓ built in 3.26s` (AdminShell 467.10 → 477.13 kB)
+- `node scripts/validate-bi-intelligence-preservation.mjs` →
+  **BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (44 assertions)**
+- `npx playwright test e2e/bi-intelligence-preservation.spec.ts` → **4 passed**
+- relevant specs (acquisition/bi-lifecycle/domain-acceptance/crm/dashboard/
+  multi-tenant/rocketchat-removal) → **41 passed**
+- `npx playwright test` (full) → **169 passed / 4 skipped / 0 failed, EXIT=0**
+  (D1 baseline 165/4/0 → **+4 tests, 0 new failures**)
+- existing validators (bi-lifecycle · acquisition-pipeline 64/64 · prospect-pipeline
+  · demo-completeness 27/27 · mock-providers · provider-workflows · design-tokens
+  · csv-import) → **ALL PASS**
+
+**RESULT:** DONE. Canonical BI identity, ASIN-level intelligence, contacts,
+evidence/provenance, scoring and lifecycle are all reachable through the
+acquisition layer **by reference**, proven by a mutation-visibility test and a
+no-second-store test. The ten real brands remain the active universe; no mock
+universe; zero external network calls; RBAC intact.
+
+**KNOWN GAPS / NOT DONE:** acquisition artefacts stay session-only in-memory (D4);
+no manual browser pass (Playwright only); tracked out-of-scope finding —
+`src/components/shared/BrandComm.tsx:20` duplicates the placeholder-slug logic
+with a weaker regex (deliberately not touched in D2). No deploy, no push.
+
+**NEXT:** **D3 — outreach/provider hardening** (transport seam only path to live;
+simulation proves zero network; missing credentials never read as live; human
+approval needs neither Rakazo nor Postiz). D3 does not start until this gate is accepted.
 
 ## BI Forensic Implementation Audit (READ-ONLY, 2026-09-11)
 

@@ -321,7 +321,7 @@ onboarding. **Not started yet.**
 | A | Core data / domain / workflow consolidation | ✅ DONE (`dbbf567`) |
 | B | Brand Intelligence real-data lifecycle | ✅ DONE (`9f935f4`) |
 | C | ICP consumption of canonical BI data | ✅ DONE (`b7cd0d4`; BI→ICP→outreach→approve/reject→send→response→Opportunity→CRM) |
-| D | Partner acquisition / production hardening | 🔄 IN PROGRESS — **D1 Rocket.Chat removal DONE**; D2 BI-intelligence preservation · D3 outreach/provider hardening · D4 persistence/domain · D5 Opportunity→CRM→onboarding · D6 Postiz full-platform exposure |
+| D | Partner acquisition / production hardening | 🔄 IN PROGRESS — **D1 Rocket.Chat removal DONE** · **D2 BI-intelligence preservation DONE**; D3 outreach/provider hardening · D4 persistence/domain · D5 Opportunity→CRM→onboarding · D6 Postiz full-platform exposure |
 | E | CRM + communication + helpdesk consolidation | |
 | F | Executive analytics + operations separation | |
 | G | Screen-level UI/UX redesign | |
@@ -378,6 +378,12 @@ onboarding. **Not started yet.**
     ticket store), and the provider safety gate was NOT weakened — proven by
     `scripts/validate-rocketchat-removal.mjs` (NORMAL_PO still refuses when its
     providers are not positively `simulation`).
+11. BI intelligence is read BY REFERENCE (`prospectIntelligence.ts`, Phase D2).
+    The acquisition layer holds only the canonical `prospectId`; ASINs, contacts,
+    distributors, wholesale, restrictions, growth signals, evidence/provenance,
+    the seven score factors and lifecycle/history are resolved live from the
+    canonical BI record. Nothing copies them into a second store, so nothing can
+    drift. An unknown id returns `null` — never a fabricated prospect.
 
 ## AE. Known Limitations / Caveats
 
@@ -407,6 +413,13 @@ onboarding. **Not started yet.**
   application/onboarding flow; BI discovery runs remain operator-triggered (no
   scheduler exists and none is claimed); campaign performance stats and
   monitoring health remain seeded (flagged).
+- **Phase D2 (2026-09-11) closed the BI-information-loss gap**: acquisition now
+  reads the canonical BI intelligence by reference (`prospectIntelligence.ts`) and
+  the operator surface shows it. Still true: acquisition artefacts (outreach
+  revisions, the `intelligenceRef`, responses, opportunities) are session-only —
+  D4. A tracked out-of-scope single-source-of-truth finding remains:
+  `src/components/shared/BrandComm.tsx` (`brandInboxAddress`) re-implements the
+  placeholder-slug derivation with a weaker regex; deliberately not changed in D2.
 - `validate-edge-functions.mjs` is stale (crashes: expects absent functions) —
   needs repair-or-retire evaluation.
 - No live credentials configured for real providers; demo/sandbox paths used.

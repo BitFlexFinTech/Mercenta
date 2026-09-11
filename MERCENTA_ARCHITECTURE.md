@@ -56,7 +56,9 @@ App.tsx
   `brandExtraSeed.ts` (canonical demo/prospect fixtures).
 - `src/lib/` — domain libs: spapi, dhl, compliance, billing, crm, helpdesk,
   intelligence (incl. `prospectPipeline.ts` identity bridge + origin-region
-  derivation, `prospectLifecycle.ts` lifecycle engine), **acquisition
+  derivation, `prospectLifecycle.ts` lifecycle engine, and **
+  `prospectIntelligence.ts` — the Phase D2 canonical BI-intelligence read layer
+  used by acquisition**), **acquisition
   (`outreachLifecycle.ts` state machine + `outreachSender.ts` transport seam)**,
   discovery, research, marketing, postiz, whatsapp, mail, messaging,
   monitoring, automation, events, simulation, verification, shipping, warehouse,
@@ -185,13 +187,20 @@ ICP lead (Lead.id = lead-<prospect.id>, Lead.prospectId = prospect.id)
    →  scoreLeadFit → threshold-70 → shouldAutoEnroll → 'Sequenced'
    ▼
 §Phase C acquisition (src/lib/acquisition/outreachLifecycle.ts + acquisitionStore.ts)
+   §Phase D2 intelligence access — src/lib/intelligence/prospectIntelligence.ts
+     · reads the canonical prospect BY REFERENCE (ASINs + per-ASIN metrics,
+       contacts, distributors, wholesale, restrictions, growth signals, full
+       evidence/provenance, the 7 score factors, lifecycle/history)
+     · NEVER copies the intelligence into a second record (a mutation in BI is
+       immediately visible downstream — proven by the D2 gate)
    prepareOutreach (BI evidence via outreachGenerator, stored on the record)
+     →  revision stores `intelligenceRef` (ids + counts + BI score snapshot)
    →  modify / approve / reject  (human approval, audited)
    →  sendOutreach(transport)    (simulation default; connected provider via the same seam)
    →  recordResponse             (classifyInboundReply → wantsHuman)
    →  Opportunity (opp-<prospect.id>, BI score/tier snapshot)
    →  CRM relationship context   (BrandCRM → Acquisition Relationships)
-   →  (Phase D) application → onboarding → Opportunity.brandId set
+   →  (Phase D5) application → onboarding → Opportunity.brandId set
 ```
 
 Wiring: the ACTIVE acquisition universe is `prospectStore.getAcquisitionLeads()`
@@ -201,6 +210,9 @@ artefact is keyed by the canonical prospect id, and every downstream transition
 is written back to the canonical prospect through `setProspectOutreachStatus()`,
 so BI remains the single source of truth. Acquisition communication uses the ONE
 canonical message store (`logMessage` → `demoMessages`), never a second one.
+Intelligence is never re-stored downstream: `prospectIntelligence.ts` (Phase D2)
+resolves it from the canonical record on every read, from any artefact that
+carries a `prospectId`.
 
 ## 12. Major Contracts
 
@@ -218,6 +230,15 @@ canonical message store (`logMessage` → `demoMessages`), never a second one.
   `prospectStore`) — canonical universe + run/change/snapshot history. All
   consumers (Admin panel, Brand Market Intel, MarketingHub bridge, acquisition
   pipeline, CRM) read ONE store.
+- **BI intelligence access (Phase D2 — `src/lib/intelligence/prospectIntelligence.ts`)** —
+  `getProspectIntelligence(prospectId)` → the canonical view (`null` when unknown),
+  `getIntelligenceForLead/ForOutreach/ForResponse/ForOpportunity`,
+  `intelligenceDigest` (counts + 7 score factors + 11 section states),
+  `intelligenceProvenance` (run ids, timeline event ids, snapshot dates, evidence
+  sources/URLs), `collectEvidence` (incl. nested section evidence),
+  `buildIntelligenceRef(prospect, revision)`. `intelligence.prospect` is the LIVE
+  canonical object; digest/provenance/lifecycle are point-in-time projections —
+  hold the id and re-read.
 - **Acquisition (`src/lib/acquisition/outreachLifecycle.ts`)** —
   `enrollProspect`, `prepareOutreach`, `modifyOutreach`, `approveOutreach`,
   `rejectOutreach`, `sendOutreach`, `recordResponse`, `simulateResponse`,
@@ -236,10 +257,12 @@ canonical message store (`logMessage` → `demoMessages`), never a second one.
   behind the seam activates live scoring without workflow changes. Candidate
   intake (`runBrandIntelligence({ candidates })`) is the wire for real
   discovery sources (firecrawl/keepa) once wired to BI.
-- **Phase D — acquisition hardening:** activate a live provider through
-  `OutreachTransport`; persist acquisition artefacts (outreach/response/
-  opportunity) through the Supabase repository pattern instead of session
-  memory; wire `Opportunity.brandId` into application → onboarding.
+- **Phase D — acquisition hardening:** ✅ D1 Rocket.Chat removal (2026-09-11) ·
+  ✅ D2 BI intelligence preserved through acquisition by reference (2026-09-11).
+  Remaining: activate a live provider through `OutreachTransport`; persist
+  acquisition artefacts (outreach/response/opportunity) through the Supabase
+  repository pattern instead of session memory; wire `Opportunity.brandId` into
+  application → onboarding; expose the full Postiz platform in Admin + Brand.
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep
