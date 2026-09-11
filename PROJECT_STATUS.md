@@ -22,7 +22,8 @@
 > redesign, existing primitives/palette only). Gates: new validator **46/46 PASS**
 > + new E2E spec **3/3**; full E2E **178/0/4** (was 175/0/4 → +3, 0 new failures);
 > typecheck 0 · lint 0 · build PASS. Report:
-> `docs/PRODUCT_CONSOLIDATION_PHASEE1_2026-09-11.md`. **HONEST: browser Supabase
+> `docs/PRODUCT_CONSOLIDATION_PHASEE1_2026-09-11.md`. **Committed `0568e2a`**
+> (15 files, +1589/−28). **HONEST: browser Supabase
 > credentials are still NOT configured → the memory adapter is active, nothing is
 > durable, and migration 021 is unexecuted (like 020). The application-approval
 > entry point into the same canonical record is NOT done — it is E2.**

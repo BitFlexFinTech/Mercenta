@@ -62,7 +62,7 @@ Cline's output back. AI confirms, gives next prompt.
   outreach record ids collided within a millisecond and destroyed a revision — ids
   are now workflow-owned. Gates: validator 44/44 + E2E 3/3; full E2E 172/0/4.
   Report: docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md.
-- Opportunity → brand onboarding hand-off (Phase E1, 2026-09-11): the missing link
+- Opportunity → brand onboarding hand-off (Phase E1, 2026-09-11; commit `0568e2a`): the missing link
   after an acquisition Opportunity. A qualified/won Opportunity can now BEGIN
   onboarding, which creates the canonical `BrandOnboarding` record keyed by the
   SAME prospect id (`onb-<prospectId>`), derives the brand TENANT id
@@ -122,7 +122,7 @@ the FINAL phase. The older list below is superseded by that roadmap.
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
 NEXT in roadmap: PHASE D COMPLETE (D1–D4, 2026-09-11). **PHASE E — CORE PLATFORM
 COMPLETION is IN PROGRESS: E1 (opportunity → brand onboarding hand-off) DONE
-2026-09-11** (hash recorded in PROJECT_STATUS.md). Next: **E2 — Brand onboarding**
+2026-09-11** (commit `0568e2a`). Next: **E2 — Brand onboarding**
 (link the brand-side wizard step state, route the marketing application-approval
 path through the SAME canonical onboarding record, add an Admin onboarding
 pipeline view), then E3 catalog/products, E4 commerce/Amazon-style operational

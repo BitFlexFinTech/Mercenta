@@ -300,7 +300,7 @@ carries a `prospectId`.
   honest memory adapter and a Supabase adapter (idempotent by canonical id,
   tenant-scoped, explicit failures); acquisition + BI lifecycle write-through;
   `supabase/migrations/020_create_acquisition_persistence.sql` (8 tables, RLS).
-- **Phase E1 — core-platform gap closure (2026-09-11):** ✅ the opportunity →
+- **Phase E1 — core-platform gap closure (2026-09-11, commit `0568e2a`):** ✅ the opportunity →
   brand onboarding hand-off — canonical `BrandOnboarding` (keyed by the canonical
   prospect id), DERIVED tenant id, `Opportunity.brandId` set, strictly ordered
   steps with explicit completion, RBAC + audit in the domain, the EXISTING

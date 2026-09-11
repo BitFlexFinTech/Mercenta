@@ -34,7 +34,7 @@ fixed. Never cite the log as current status.
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
 
-## Opportunity → brand onboarding hand-off (Phase E1 — 2026-09-11)
+## Opportunity → brand onboarding hand-off (Phase E1 — 2026-09-11) — commit `0568e2a`
 
 - Closes the D4 follow-up: `Opportunity.brandId` was documented but never set by
   any code path; onboarding existed only as brand-portal React state with no

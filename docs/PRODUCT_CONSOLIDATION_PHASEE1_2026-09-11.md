@@ -299,12 +299,37 @@ project.
 ## 14. GIT COMMIT HASHES
 
 - Pre-E1 HEAD: `f36884a` (D4 documentation checkpoint).
-- **E1 implementation commit:** `phaseE1: wire the opportunity → brand onboarding
-  hand-off (canonical tenant identity, ordered steps, RBAC in the domain, same
-  persistence port)`. The hash is recorded in the follow-up documentation
-  checkpoint commit (the established D1–D4 pattern, since this report ships inside
-  the implementation commit itself).
-- E1 documentation checkpoint: created in the same session immediately after.
+- **E1 implementation commit:** `0568e2a332dc4254c55212aae338a3e6101a9700`
+  (`0568e2a`), parent `f36884a`, message: `phaseE1: wire the opportunity → brand
+  onboarding hand-off (canonical tenant identity, ordered steps, RBAC in the
+  domain, same persistence port)` — **15 files changed, +1589/−28**.
+- E1 documentation checkpoint: created in the same session immediately after,
+  recording this verified hash.
+
+## 14b. COMMITTED CHANGE SET (`0568e2a`)
+
+```
+MERCENTA_ARCHITECTURE.md                        |  35 +-
+MERCENTA_MASTER_CONTEXT.md                      |  43 +-
+PROJECT_STATUS.md                               |  28 +-
+STATUS_CHECK.md                                 |  28 +-
+HANDOFF.md                                      |  30 +-
+docs/PRODUCT_CONSOLIDATION_PHASEE1_2026-09-11.md| 325 +++++++   (NEW)
+e2e/onboarding-handoff.spec.ts                  | 139 +++       (NEW)
+scripts/validate-onboarding-handoff.mjs         | 287 +++++     (NEW)
+src/components/admin/AcquisitionRelationships.tsx|  15 +-
+src/components/admin/AcquisitionWorkflow.tsx    | 144 ++-
+src/data/acquisitionStore.ts                    |  60 ++
+src/data/domainRepository.ts                    |  39 +-
+src/lib/onboarding/onboardingLifecycle.ts       | 321 +++++     (NEW)
+src/types.ts                                    |  63 +-
+supabase/migrations/021_create_brand_onboarding.sql | 60 ++   (NEW)
+```
+
+No generated/forensic artefact was staged (verified with `git diff --cached
+--stat` before the commit). No amend, rebase, reset or force-push; the protected
+baseline `959b4d2` was never touched; history remains linear
+(`f36884a` → `0568e2a`).
 
 ## 15. REVIEW ZIP STATUS
 

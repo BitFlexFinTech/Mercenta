@@ -347,7 +347,7 @@ onboarding. **Not started yet.**
 > surfaces · E7 embedded Postiz**. That programme absorbs what this table called
 > D5/D6 (and overlaps row H for Postiz). Rows E–H above are therefore **NOT** the
 > same thing as Phase E1/E2/…/E7 — do not conflate them. Phase E1 is DONE
-> (2026-09-11); its state lives in **PROJECT_STATUS.md**.
+> (2026-09-11, commit `0568e2a`); its state lives in **PROJECT_STATUS.md**.
 
 ## AC. Permanent Do-Not-Change Decisions
 
