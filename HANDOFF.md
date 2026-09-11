@@ -52,7 +52,7 @@ Cline's output back. AI confirms, gives next prompt.
   conversation also appears in Messages (one canonical thread). No live
   credentials needed, no Rakazo, no Postiz, no Rocket.Chat, no external network
   calls in simulation.
-- Outreach/provider hardened (Phase D3, 2026-09-11): the transport mode is now
+- Outreach/provider hardened (Phase D3, 2026-09-11; commit `d3cbbd4`): the transport mode is now
   derived from the canonical integration mode model (`resolveOutreachTransport`)
   instead of UI booleans, and the domain FAILS CLOSED — a transport claiming `live`
   without verified credentials is refused (`PROVIDER_NOT_LIVE`) and audited, so an

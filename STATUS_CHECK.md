@@ -28,7 +28,7 @@ fixed. Never cite the log as current status.
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
 
-## Outreach / provider hardening (Phase D3 — 2026-09-11)
+## Outreach / provider hardening (Phase D3 — 2026-09-11) — commit `d3cbbd4`
 
 - Transport mode is DERIVED from the canonical integration mode model via
   `resolveOutreachTransport()` — never from caller-supplied booleans — so the

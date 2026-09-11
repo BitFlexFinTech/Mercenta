@@ -115,7 +115,8 @@ the Phase D mandate). D2 does not start until this gate is accepted.
 
 ## Phase D3 — outreach / provider hardening (2026-09-11)
 
-> Status: **DONE (verified this session)**. Full report:
+> Status: **DONE (verified this session)**. Commit **`d3cbbd4`**
+> (`phaseD3: harden the outreach transport / provider seam`). Full report:
 > `docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md`.
 > Pre-D3 HEAD: `8bbb694`. Protected baseline untouched: `959b4d2`.
 

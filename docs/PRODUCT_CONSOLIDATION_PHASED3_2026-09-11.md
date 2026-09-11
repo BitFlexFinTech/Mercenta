@@ -204,8 +204,10 @@ until this gate is accepted.
 
 ## Commit record
 
-- **D3 implementation commit:** recorded in `PROJECT_STATUS.md` (Phase D3 section) —
-  one `phaseD3:` commit on `redesign/foundation`, followed by a hash-record commit.
+- **D3 implementation commit: `d3cbbd4`** — `phaseD3: harden the outreach transport
+  / provider seam (fail-closed, UNKNOWN != LIVE)` (11 files changed, 968 insertions,
+  38 deletions) on `redesign/foundation`. Verified in the same session (typecheck 0 ·
+  lint 0 · build PASS · D3 validator 44/44 · D3 E2E 3/3 · full E2E 172/0/4).
 - **Pre-D3 HEAD:** `8bbb694` (D2 gate). **D1:** `bf31151` · **D2:** `fe0c893`.
 - **Protected baseline (untouched):** `959b4d2` / tag `mercenta-baseline-before-redesign-20260907`.
 
