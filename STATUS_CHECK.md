@@ -11,7 +11,7 @@ fixed. Never cite the log as current status.
 - `npm run lint` — PASS (exit 0)
 - `npm run build` — PASS (vite, ~2.5s)
 - `node scripts/validate-rocketchat-removal.mjs` — ROCKETCHAT_REMOVAL_VALIDATION_PASS (15/15; Phase D1)
-- `node scripts/validate-bi-intelligence-preservation.mjs` — BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (44/44; Phase D2)
+- `node scripts/validate-bi-intelligence-preservation.mjs` — BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (42/42; Phase D2)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -46,7 +46,7 @@ fixed. Never cite the log as current status.
   (ASIN table, contacts, distribution/restrictions/growth, 7 score factors,
   provenance) — reachable from Brand Intelligence → Outreach, Brand CRM →
   Acquisition Relationships, and Marketing → Acquisition Pipeline.
-- Gates: `node scripts/validate-bi-intelligence-preservation.mjs` (44/44) and
+- Gates: `node scripts/validate-bi-intelligence-preservation.mjs` (42/42) and
   `npx playwright test e2e/bi-intelligence-preservation.spec.ts` (4/4).
 - Report: `docs/PRODUCT_CONSOLIDATION_PHASED2_2026-09-11.md`.
 

@@ -9,7 +9,7 @@
 > (ids + counts + score snapshot). Minimal additive intelligence surface in
 > `AcquisitionWorkflow.tsx`. Real defect fixed: the placeholder outreach slug now
 > folds diacritics via the canonical `normalizeBrandKey` (`Tapatío` →
-> `hello@tapatio.example`, was the mangled `tapato`). New validator **44/44 PASS**
+> `hello@tapatio.example`, was the mangled `tapato`). New validator **42/42 PASS**
 > + new E2E spec **4/4**; full E2E **169/0/4**; typecheck 0 · lint 0 · build PASS.
 > Report: `docs/PRODUCT_CONSOLIDATION_PHASED2_2026-09-11.md`.
 >
@@ -134,7 +134,7 @@ the Phase D mandate). D2 does not start until this gate is accepted.
 - `npm run typecheck` → **PASS** (0 errors) · `npm run lint` → **PASS** (0 problems)
 - `npm run build` → **PASS**, `✓ built in 3.26s` (AdminShell 467.10 → 477.13 kB)
 - `node scripts/validate-bi-intelligence-preservation.mjs` →
-  **BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (44 assertions)**
+  **BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (42 assertions)**
 - `npx playwright test e2e/bi-intelligence-preservation.spec.ts` → **4 passed**
 - relevant specs (acquisition/bi-lifecycle/domain-acceptance/crm/dashboard/
   multi-tenant/rocketchat-removal) → **41 passed**

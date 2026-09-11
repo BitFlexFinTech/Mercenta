@@ -62,7 +62,7 @@ Cline's output back. AI confirms, gives next prompt.
   `intelligenceRef`; the operator surface shows the canonical intelligence. Also
   fixed a real defect: placeholder outreach addresses now fold diacritics via the
   canonical brand key (`Tapatío` → `hello@tapatio.example`). Gates: validator
-  44/44 + E2E 4/4; full E2E 169/0/4. Report:
+  42/42 + E2E 4/4; full E2E 169/0/4. Report:
   docs/PRODUCT_CONSOLIDATION_PHASED2_2026-09-11.md.
 - Rocket.Chat REMOVED (Phase D1, 2026-09-11; commit `bf31151`): 3 files deleted, registry 19 → 18
   providers, nav/breadcrumb/route gone, docker-compose service + Caddy vhost

@@ -104,13 +104,13 @@ Intelligence → prospect → **Outreach** tab (`ProspectDetailPanel`); Brand CR
 | Typecheck | `npm run typecheck` | **PASS** (0 errors; identical to the D1 baseline) |
 | Lint | `npm run lint` | **PASS** (0 problems) |
 | Build | `npm run build` | **PASS** — `✓ built in 3.26s` (AdminShell chunk 467.10 → 477.13 kB: the added intelligence surface) |
-| **D2 validator** | `node scripts/validate-bi-intelligence-preservation.mjs` | **PASS** — `BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS` (**44 assertions**) |
+| **D2 validator** | `node scripts/validate-bi-intelligence-preservation.mjs` | **PASS** — `BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS` (**42 assertions**) |
 | D2 E2E | `npx playwright test e2e/bi-intelligence-preservation.spec.ts` | **4 passed (8.5s)** |
 | Relevant E2E | acquisition-pipeline · brand-intelligence-lifecycle · domain-acceptance · crm · dashboard · multi-tenant · rocketchat-removal | **41 passed (39.1s)** |
 | Full E2E | `npx playwright test` | **169 passed / 4 skipped / 0 failed, EXIT=0 (2.4m)** — D1 baseline 165/4/0 → **+4 tests, 0 new failures, 0 new skips** |
 | Existing validators | bi-lifecycle · acquisition-pipeline (64/64) · prospect-pipeline · demo-completeness (27/27) · mock-providers · provider-workflows · design-tokens · csv-import | **ALL PASS** |
 
-### 3.1 What the D2 validator asserts (44)
+### 3.1 What the D2 validator asserts (42)
 
 - **A. Identity continuity (10)** — the view returns the store's current object;
   the ICP lead keeps `lead-<prospectId>`; outreach/response/opportunity/
@@ -125,7 +125,7 @@ Intelligence → prospect → **Outreach** tab (`ProspectDetailPanel`); Brand CR
   International Sales) is reachable; confidence + source provenance retained
   (`unverified`/`LinkedIn`); counts match BI universe-wide; no email is invented
   (BI email or `.example` only); placeholder slugs use the canonical brand key.
-- **D. Evidence + provenance (7)** — nested evidence included and reconciled with
+- **D. Evidence + provenance (8)** — nested evidence included and reconciled with
   the digest (8 for Tapatío); every item fully sourced (field/value/source/
   sourceUrl/date/confidence/classification); source counts reconcile to the total;
   Amazon + LinkedIn source URLs survive; provenance traces to the canonical run
@@ -205,7 +205,7 @@ nor Postiz. D3 does not start until this gate is accepted.
 - **D2 implementation commit: `fe0c893`** — `phaseD2: preserve canonical BI
   intelligence through acquisition (read by reference)` (12 files changed,
   1336 insertions, 19 deletions) on `redesign/foundation`. Verified in the same
-  session (typecheck 0 · lint 0 · build PASS · D2 validator 44/44 · D2 E2E 4/4 ·
+  session (typecheck 0 · lint 0 · build PASS · D2 validator 42/42 · D2 E2E 4/4 ·
   full E2E 169/0/4).
 - **Pre-D2 HEAD:** `4a3f761` (D1 gate). **D1 implementation:** `bf31151`.
 - **Protected baseline (untouched):** `959b4d2` / tag `mercenta-baseline-before-redesign-20260907`.
