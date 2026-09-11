@@ -394,11 +394,23 @@ onboarding. **Not started yet.**
 
 ## AE. Known Limitations / Caveats
 
-- Demo persistence is in-memory (reload resets) unless Supabase is configured;
-  the domain tests document this contract. **This includes all Phase C
-  acquisition artefacts** (outreach revisions, approvals, responses,
-  opportunities): they are session-only, and the BI universe re-boots from seeds
-  on reload. No Supabase persistence for acquisition exists yet (Phase D).
+- **Persistence (Phase D4, 2026-09-11).** Domain state now mirrors through ONE
+  persistence port (`src/data/domainRepository.ts`): a **memory adapter**
+  (deterministic, ZERO network, honest `durable:false`) and a **Supabase
+  adapter** (the existing client; idempotent upsert on the artefact's canonical
+  id; tenant-scoped reads; explicit failures). It covers the Phase C acquisition
+  artefacts (outreach revisions, responses, opportunities, acquisition events)
+  and the BI lifecycle history (prospect updates, runs, change events,
+  snapshots), and the durable schema is
+  `supabase/migrations/020_create_acquisition_persistence.sql` (8 tables, RLS +
+  a brand-isolation policy). **Honest state in the demo/demo-deploy environment:
+  browser Supabase credentials are NOT configured, so the memory adapter is
+  active and NOTHING is durable there** — the store reports `memory-only` and the
+  Brand CRM surfaces that honestly; it never claims persistence it lacks. A full
+  browser reload therefore still resets acquisition state (the BI universe
+  re-boots from its deterministic real-brand seeds). The durable path is proven
+  with an injected conformance repository, not against a live project; the
+  migration is unexecuted.
 - Live Edge Functions for SP-API/DHL/Companies House/HMRC/email are absent from
   the repo (deploy-time infra) — the live switch would 404 until deployed;
   nothing claims otherwise.

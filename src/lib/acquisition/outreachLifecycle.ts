@@ -220,6 +220,14 @@ export function outreachRecordId(prospectId: string, revision: number): string {
 }
 
 /**
+ * §Phase D4 — deterministic response id: ONE response per outreach send, so a
+ * replayed inbound/response recording cannot create a duplicate (idempotence).
+ */
+export function responseIdFor(prospectId: string, outreachId?: string): string {
+  return `resp-${prospectId}-${outreachId ?? 'no-outreach'}`;
+}
+
+/**
  * Reconcile an ICP lead row with its canonical BI prospect, so the ICP list
  * always DISPLAYS the canonical state (the BI prospect owns the outreach
  * status; the lead row is a projection of it). Leads without a `prospectId`
@@ -553,6 +561,8 @@ export async function sendOutreach(
     `${simulated ? 'Simulated' : 'Live'} send to ${destination} — message ${message.id}`,
     actor.staffId
   );
+  // §Phase D4 — the persistence outcome is known before the caller sees success.
+  await store.flushAcquisitionPersistence();
   return { ok: true, value: { record, message, transport: effectiveTransport, destination } };
 }
 
@@ -590,8 +600,14 @@ export async function recordResponse(
   // Canonical intent detection — the previously uncalled contract, now wired.
   const classification = classifyInboundReply(body);
 
+  const responseId = responseIdFor(prospectId, input.outreachId ?? current?.id);
+  // §Phase D4 — idempotent: recording the same response again returns the
+  // existing record instead of duplicating it (no duplicate event/transition).
+  const existingResponse = store.getResponses().find((r) => r.id === responseId);
+  if (existingResponse) return { ok: true, value: existingResponse };
+
   const response: OutreachResponse = {
-    id: `resp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    id: responseId,
     prospectId,
     outreachId: input.outreachId ?? current?.id,
     receivedAt: nowIso(),
@@ -636,6 +652,8 @@ export async function recordResponse(
     classification.wantsHuman ? `Hot reply — ${classification.reason}` : 'Reply received',
     actor.staffId
   );
+  // §Phase D4 — persistence outcome known before the caller sees success.
+  await store.flushAcquisitionPersistence();
   return { ok: true, value: response };
 }
 

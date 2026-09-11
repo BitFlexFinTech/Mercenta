@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 11, 2026 (Phase D3 — outreach/provider hardening)
+Last updated: September 11, 2026 (Phase D4 — persistence / domain hardening)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -29,7 +29,7 @@ Cline's output back. AI confirms, gives next prompt.
   nav entry, docker-compose service and Caddy vhost are deleted. Any container /
   `chat.mercenta.co.uk` record still running on the droplet must be removed
   server-side.)
-- Playwright suite (156 passing tests, 24 spec files)
+- Playwright suite (175 passing tests, 29 spec files)
 - Homepage: "Your brand. The UK market." (NO Amazon mention)
 - Partner Login + application gate + link verification
 - Legal agreements 4.1 + 4.2 in onboarding
@@ -62,6 +62,22 @@ Cline's output back. AI confirms, gives next prompt.
   outreach record ids collided within a millisecond and destroyed a revision — ids
   are now workflow-owned. Gates: validator 44/44 + E2E 3/3; full E2E 172/0/4.
   Report: docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md.
+- Persistence / domain hardening (Phase D4, 2026-09-11; NOT COMMITTED — stopped at
+  the commit gate): Phase C/D3 acquisition artefacts (outreach revisions,
+  responses, opportunities, events) and the BI lifecycle history (prospect
+  updates, runs, change events, snapshots) now mirror through ONE domain
+  persistence port (`src/data/domainRepository.ts`) built on the EXISTING Supabase
+  repository pattern — no second database. It has a memory adapter (deterministic,
+  ZERO network, honest `durable:false`) and a Supabase adapter (idempotent upsert
+  on the canonical id, tenant-scoped reads, explicit failures). New migration
+  `020_create_acquisition_persistence.sql` (8 tables, RLS + brand-isolation).
+  Deterministic, idempotent response ids. Brand CRM now shows an honest
+  persistence status. Gates: validator 64/64 + E2E 3/3; full E2E 175/0/4;
+  typecheck/lint/build clean. Report:
+  docs/PRODUCT_CONSOLIDATION_PHASED4_2026-09-11.md.
+  HONEST: Supabase browser credentials are NOT configured in the demo env, so
+  nothing is durable there — the UI says `memory-only / not durable` and no
+  persistence is claimed.
 - BI intelligence preserved through acquisition (Phase D2, 2026-09-11; commit
   `fe0c893`): the acquisition layer now reads a prospect's FULL Brand Intelligence
   by REFERENCE

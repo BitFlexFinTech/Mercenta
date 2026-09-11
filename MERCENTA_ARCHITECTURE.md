@@ -52,6 +52,10 @@ App.tsx
   prospect universe + run/change/snapshot history + the canonical change
   signal), `acquisitionStore.ts` (§Phase C outreach revisions / responses /
   opportunities / acquisition events, keyed by the canonical prospect id),
+  `domainRepository.ts` (**§Phase D4 — the persistence port**: one interface,
+  a memory adapter (deterministic, ZERO network, `durable:false`) and a Supabase
+  adapter (idempotent upsert by canonical id, tenant-scoped, explicit failures),
+  plus `createPersistenceMirror()` — the shared honest persistence status),
   `demoData.ts` / `brandDossiers.ts` / `brandProspectSeed.ts` /
   `brandExtraSeed.ts` (canonical demo/prospect fixtures).
 - `src/lib/` — domain libs: spapi, dhl, compliance, billing, crm, helpdesk,
@@ -223,6 +227,17 @@ carries a `prospectId`.
   (BI-linked leads project the stage onto the canonical prospect) and
   `refreshLeadsFromProspects()`.
 - Provider factory seams (SP-API/DHL/CH/HMRC trio) — mock & real, same signatures.
+- **Domain persistence port (§Phase D4 — `src/data/domainRepository.ts`)** —
+  `DomainRepository` (`persistOutreach/Response/Opportunity/Event/Prospect/Run/`
+  `Change/Snapshot`, `hydrate(scope)`, `flush()`, `backend`, `durable`);
+  `createDomainRepository()` selects Supabase when `isSupabaseConfigured` else
+  the memory adapter; `getDomainRepository()`/`setDomainRepository()`.
+  `TenantScope = {kind:'ops'} | {kind:'brand', tenantId}` — a brand scope can
+  never see ops/another tenant's rows. `createPersistenceMirror()` gives the
+  honest status (`memory-only`/`pending`/`durable`/`failed`) shared by
+  `acquisitionStore` and `prospectStore`; `sendOutreach()`/`recordResponse()`
+  await the persistence outcome before returning. Reload =
+  `hydrateAcquisitionFromPersistence()` / `hydrateProspectStoreFromPersistence()`.
 - BI bridge (`matchLeadsToProspects`, `deriveLeadFromProspect`,
   `buildAcquisitionLead`, `deriveIcpOriginRegion`) — identity + region truth.
 - BI lifecycle (`runBrandIntelligence`, `disqualifyProspect`,
@@ -264,10 +279,14 @@ carries a `prospectId`.
 - **Phase D — acquisition hardening:** ✅ D1 Rocket.Chat removal (2026-09-11) ·
   ✅ D2 BI intelligence preserved through acquisition by reference (2026-09-11) ·
   ✅ D3 outreach/provider hardening — resolved transport, fail-closed live gate,
-  zero-network simulation (2026-09-11). Remaining: persist acquisition artefacts
-  (outreach/response/opportunity) through the Supabase repository pattern instead
-  of session memory; wire `Opportunity.brandId` into application → onboarding;
-  expose the full Postiz platform in Admin + Brand.
+  zero-network simulation (2026-09-11) · ✅ **D4 persistence / domain hardening**
+  (2026-09-11) — a domain persistence port (`src/data/domainRepository.ts`) with an
+  honest memory adapter and a Supabase adapter (idempotent by canonical id,
+  tenant-scoped, explicit failures); acquisition + BI lifecycle write-through;
+  `supabase/migrations/020_create_acquisition_persistence.sql` (8 tables, RLS).
+  **Still remaining:** run the migration + exercise the durable path against a
+  credentialed Supabase project (never executed here); wire `Opportunity.brandId`
+  into application → onboarding; expose the full Postiz platform in Admin + Brand.
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep

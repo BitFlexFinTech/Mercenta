@@ -17,10 +17,21 @@
  * - Every mutation appends an AcquisitionEvent (relationship timeline) AND a
  *   platform audit-log entry (the existing `demoAuditLog` registry).
  *
- * Persistence contract (documented, same as prospectStore/demoStore):
- * in-memory for the session; a full page reload re-boots empty (no acquisition
- * has happened yet in the new session) while the BI universe re-boots from its
- * authoritative seeds. Supabase dual-write remains the future live seam.
+ * Persistence contract (§Phase D4):
+ * the in-memory arrays remain the deterministic working set (simulation is
+ * unchanged and performs ZERO network calls), and EVERY mutation is mirrored
+ * through the domain persistence port (`src/data/domainRepository.ts`).
+ *
+ * - With no Supabase configured (the demo environment) the active adapter is
+ *   the memory adapter: writes are honest non-durable acknowledgements and the
+ *   status reported here is `memory-only` — nothing is claimed to be persisted.
+ * - With Supabase configured the durable adapter upserts each artefact by its
+ *   CANONICAL id (idempotent — a replayed operation cannot duplicate a row) and
+ *   the status becomes `durable` / `failed` (a failure is never a silent success).
+ *
+ * A full page reload re-boots the arrays from durable state via
+ * `hydrateAcquisitionFromPersistence()` (a no-op load when nothing is durable),
+ * while the BI universe re-boots from its authoritative seeds.
  */
 import type {
   AcquisitionEvent,
@@ -32,6 +43,15 @@ import type {
 } from '@/types';
 import { demoAuditLog, demoMessages } from './demoStore';
 import { getProspect, notifyCanonicalStoreChange } from './prospectStore';
+import {
+  getDomainRepository,
+  MERCENTA_OPS_TENANT,
+  createPersistenceMirror,
+  DOMAIN_TABLES,
+  type HydratedDomainState,
+  type TenantScope,
+  type PersistenceStatus,
+} from './domainRepository';
 
 let outreach: ProspectOutreachRecord[] = [];
 let responses: OutreachResponse[] = [];
@@ -39,6 +59,45 @@ let opportunities: Opportunity[] = [];
 let events: AcquisitionEvent[] = [];
 
 const uid = (p: string) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
+/* ── §Phase D4 — persistence boundary ──────────────────────────────────── */
+
+export type { PersistenceState, PersistenceStatus } from './domainRepository';
+
+/**
+ * Status-tracked mirror over the active port. Persistence semantics are defined
+ * ONCE (`createPersistenceMirror` in domainRepository.ts) and shared by the BI
+ * and acquisition stores.
+ */
+const persistenceMirror = createPersistenceMirror();
+const mirror = persistenceMirror.write;
+
+/** The current honest persistence status (UI + validators). */
+export function getPersistenceStatus(): PersistenceStatus {
+  return persistenceMirror.status();
+}
+
+/** Await every in-flight persistence write (tests + the async send path). */
+export async function flushAcquisitionPersistence(): Promise<void> {
+  await persistenceMirror.flush();
+}
+
+/**
+ * RELOAD SEMANTICS — rebuild the in-memory working set from durable state.
+ * Called only as the boot/hydrate step; with nothing durable it loads an empty
+ * state (an honest reload, never a fabrication).
+ */
+export async function hydrateAcquisitionFromPersistence(
+  scope: TenantScope
+): Promise<HydratedDomainState> {
+  const hydrated = await getDomainRepository().hydrate(scope);
+  outreach = hydrated.outreach;
+  responses = hydrated.responses;
+  opportunities = hydrated.opportunities;
+  events = hydrated.events;
+  notifyCanonicalStoreChange();
+  return hydrated;
+}
 
 /** Stable relationship id = the canonical prospect id (no second identity). */
 export function relationshipIdFor(prospectId: string): string {
@@ -70,6 +129,9 @@ export function saveOutreach(record: ProspectOutreachRecord): ProspectOutreachRe
   const existing = outreach.findIndex((o) => o.id === record.id);
   if (existing >= 0) outreach[existing] = record;
   else outreach = [...outreach, record];
+  mirror(DOMAIN_TABLES.outreach, record.id, () =>
+    getDomainRepository().persistOutreach(record, MERCENTA_OPS_TENANT)
+  );
   notifyCanonicalStoreChange();
   return record;
 }
@@ -81,6 +143,9 @@ export function updateOutreach(
   const idx = outreach.findIndex((o) => o.id === outreachId);
   if (idx < 0) return null;
   outreach[idx] = { ...outreach[idx], ...patch };
+  mirror(DOMAIN_TABLES.outreach, outreachId, () =>
+    getDomainRepository().persistOutreach(outreach[idx], MERCENTA_OPS_TENANT)
+  );
   notifyCanonicalStoreChange();
   return outreach[idx];
 }
@@ -96,7 +161,14 @@ export function getResponsesForProspect(prospectId: string): OutreachResponse[] 
 }
 
 export function addResponse(response: OutreachResponse): OutreachResponse {
-  responses = [...responses, response];
+  // §Phase D4 — idempotent by CANONICAL id: a replayed response is upserted,
+  // never duplicated (mirrors the persistence adapter's upsert semantics).
+  const existing = responses.findIndex((r) => r.id === response.id);
+  if (existing >= 0) responses[existing] = response;
+  else responses = [...responses, response];
+  mirror(DOMAIN_TABLES.responses, response.id, () =>
+    getDomainRepository().persistResponse(response, MERCENTA_OPS_TENANT)
+  );
   notifyCanonicalStoreChange();
   return response;
 }
@@ -112,7 +184,17 @@ export function getOpportunityForProspect(prospectId: string): Opportunity | nul
 }
 
 export function addOpportunity(opportunity: Opportunity): Opportunity {
-  opportunities = [...opportunities, opportunity];
+  // §Phase D4 — idempotent by CANONICAL id (one opportunity per prospect).
+  const existing = opportunities.findIndex((o) => o.id === opportunity.id);
+  if (existing >= 0) opportunities[existing] = opportunity;
+  else opportunities = [...opportunities, opportunity];
+  mirror(DOMAIN_TABLES.opportunities, opportunity.id, () =>
+    getDomainRepository().persistOpportunity(
+      opportunity,
+      MERCENTA_OPS_TENANT,
+      opportunity.brandId
+    )
+  );
   notifyCanonicalStoreChange();
   return opportunity;
 }
@@ -124,6 +206,13 @@ export function updateOpportunity(
   const idx = opportunities.findIndex((o) => o.id === opportunityId);
   if (idx < 0) return null;
   opportunities[idx] = { ...opportunities[idx], ...patch };
+  mirror(DOMAIN_TABLES.opportunities, opportunityId, () =>
+    getDomainRepository().persistOpportunity(
+      opportunities[idx],
+      MERCENTA_OPS_TENANT,
+      opportunities[idx].brandId
+    )
+  );
   notifyCanonicalStoreChange();
   return opportunities[idx];
 }
@@ -136,6 +225,9 @@ export function getAcquisitionEvents(prospectId?: string): AcquisitionEvent[] {
 
 export function recordAcquisitionEvent(event: AcquisitionEvent): AcquisitionEvent {
   events = [...events, event];
+  mirror(DOMAIN_TABLES.events, event.id, () =>
+    getDomainRepository().persistEvent(event, MERCENTA_OPS_TENANT)
+  );
   notifyCanonicalStoreChange();
   return event;
 }
@@ -214,5 +306,6 @@ export function resetAcquisitionStore(): void {
   responses = [];
   opportunities = [];
   events = [];
+  persistenceMirror.reset();
   notifyCanonicalStoreChange();
 }

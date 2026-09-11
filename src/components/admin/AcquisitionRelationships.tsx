@@ -18,6 +18,7 @@ import { Badge, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { getAcquisitionSummary, listAcquisitionProspects } from '@/lib/acquisition/outreachLifecycle';
 import { useCanonicalStoreVersion } from '@/data/queries';
+import { getPersistenceStatus } from '@/data/acquisitionStore';
 import { AcquisitionWorkflow } from './AcquisitionWorkflow';
 import { Trophy, ChevronRight } from 'lucide-react';
 
@@ -35,6 +36,7 @@ export function AcquisitionRelationships() {
   const version = useCanonicalStoreVersion();
   const rows = listAcquisitionProspects().filter((r) => r.opportunity);
   const summary = getAcquisitionSummary();
+  const persistence = getPersistenceStatus();
   void version; // canonical store change signal → re-read the derived rows
   const open = rows.find((r) => r.prospect.id === openId) ?? null;
 
@@ -50,6 +52,26 @@ export function AcquisitionRelationships() {
           <span>In acquisition: <span className="text-white font-mono">{summary.enrolled}</span></span>
           <span>Responses: <span className="text-white font-mono">{summary.responded}</span></span>
           <span>Opportunities: <span className="text-white font-mono">{summary.opportunities}</span></span>
+        </div>
+
+        {/* §Phase D4 — honest persistence status (never claims storage it lacks). */}
+        <div className="text-[10px] text-zinc-500" data-section="persistence-status">
+          Persistence:{' '}
+          <span
+            className={cn(
+              'font-mono',
+              persistence.state === 'failed'
+                ? 'text-red-400'
+                : persistence.state === 'durable'
+                  ? 'text-emerald-300'
+                  : 'text-zinc-400'
+            )}
+          >
+            {persistence.state}
+          </span>
+          {persistence.state === 'memory-only' &&
+            ' — no Supabase connection in this environment: acquisition state is session-only, not durable.'}
+          {persistence.state === 'failed' && ` — write failed: ${persistence.error ?? 'unknown error'}`}
         </div>
 
         {rows.length === 0 ? (

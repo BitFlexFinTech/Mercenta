@@ -22,6 +22,15 @@ import { SEED_PROSPECTS } from './brandProspectSeed';
 import { EXTRA_PROSPECTS } from './brandExtraSeed';
 import { createBrandIntelligenceClient } from '@/lib/intelligence/brandIntelligenceClient';
 import { buildAcquisitionLead, normalizeBrandKey } from '@/lib/intelligence/prospectPipeline';
+import {
+  createPersistenceMirror,
+  getDomainRepository,
+  DOMAIN_TABLES,
+  MERCENTA_OPS_TENANT,
+  type HydratedDomainState,
+  type PersistenceStatus,
+  type TenantScope,
+} from './domainRepository';
 import type {
   BrandProspect,
   IntelligenceRun,
@@ -37,6 +46,20 @@ let runs: IntelligenceRun[] = [];
 let changes: ProspectChangeEvent[] = [];
 let snapshots: IntelligenceSnapshot[] = [];
 let initialized = false;
+
+/* ── §Phase D4 — persistence boundary (BI lifecycle state) ─────────────── */
+const persistenceMirror = createPersistenceMirror();
+const mirror = persistenceMirror.write;
+
+/** The current honest persistence status of BI lifecycle state. */
+export function getProspectPersistenceStatus(): PersistenceStatus {
+  return persistenceMirror.status();
+}
+
+/** Await every in-flight BI persistence write. */
+export async function flushProspectPersistence(): Promise<void> {
+  await persistenceMirror.flush();
+}
 
 /**
  * Boot the canonical universe ONCE per session:
@@ -167,6 +190,9 @@ export function getAcquisitionLeads(): Lead[] {
 export function updateProspect(prospect: BrandProspect): void {
   boot();
   prospects = prospects.map((p) => (p.id === prospect.id ? prospect : p));
+  mirror(DOMAIN_TABLES.prospects, prospect.id, () =>
+    getDomainRepository().persistProspect(prospect, MERCENTA_OPS_TENANT)
+  );
   notifyCanonicalStoreChange();
 }
 
@@ -182,6 +208,19 @@ export function applyRunResult(
   runs = [...runs, run];
   changes = [...changes, ...events];
   snapshots = [...snapshots, ...snap];
+  mirror(DOMAIN_TABLES.runs, run.runId, () =>
+    getDomainRepository().persistRun(run, MERCENTA_OPS_TENANT)
+  );
+  for (const e of events) {
+    mirror(DOMAIN_TABLES.changes, e.id, () =>
+      getDomainRepository().persistChange(e, MERCENTA_OPS_TENANT)
+    );
+  }
+  for (const s of snap) {
+    mirror(DOMAIN_TABLES.snapshots, `${s.brandId}-${s.snapshotDate}`, () =>
+      getDomainRepository().persistSnapshot(s, MERCENTA_OPS_TENANT)
+    );
+  }
   notifyCanonicalStoreChange();
 }
 
@@ -189,7 +228,52 @@ export function applyRunResult(
 export function recordLifecycleEvent(event: ProspectChangeEvent): void {
   boot();
   changes = [...changes, event];
+  mirror(DOMAIN_TABLES.changes, event.id, () =>
+    getDomainRepository().persistChange(event, MERCENTA_OPS_TENANT)
+  );
   notifyCanonicalStoreChange();
+}
+
+/**
+ * RELOAD SEMANTICS — overlay durable BI lifecycle state onto the deterministic
+ * seed universe. Seeds remain the baseline; a persisted prospect record
+ * overrides by canonical id, and persisted runs/changes/snapshots are appended
+ * (deduped by id/snapshot key). With nothing durable this is an honest no-op.
+ */
+export async function hydrateProspectStoreFromPersistence(
+  scope: TenantScope
+): Promise<HydratedDomainState> {
+  boot();
+  const h = await getDomainRepository().hydrate(scope);
+  if (h.prospects.length) {
+    const byId = new Map(prospects.map((p) => [p.id, p] as const));
+    for (const p of h.prospects) byId.set(p.id, p);
+    prospects = [...byId.values()];
+  }
+  const runIds = new Set(runs.map((r) => r.runId));
+  for (const r of h.runs) {
+    if (!runIds.has(r.runId)) {
+      runs = [...runs, r];
+      runIds.add(r.runId);
+    }
+  }
+  const changeIds = new Set(changes.map((c) => c.id));
+  for (const c of h.changes) {
+    if (!changeIds.has(c.id)) {
+      changes = [...changes, c];
+      changeIds.add(c.id);
+    }
+  }
+  const snapKeys = new Set(snapshots.map((s) => `${s.brandId}-${s.snapshotDate}`));
+  for (const s of h.snapshots) {
+    const k = `${s.brandId}-${s.snapshotDate}`;
+    if (!snapKeys.has(k)) {
+      snapshots = [...snapshots, s];
+      snapKeys.add(k);
+    }
+  }
+  notifyCanonicalStoreChange();
+  return h;
 }
 
 /**
@@ -202,4 +286,5 @@ export function resetProspectStore(): void {
   changes = [];
   snapshots = [];
   initialized = false;
+  persistenceMirror.reset();
 }

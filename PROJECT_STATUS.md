@@ -1,6 +1,27 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-11 (Phase C — BI → ICP → OUTREACH → CRM FOUNDATION: canonical BI prospects are now the ACTIVE acquisition universe, `INITIAL_LEADS` retired from the live path, new acquisition store + lifecycle engine (`src/data/acquisitionStore.ts`, `src/lib/acquisition/outreachLifecycle.ts`, `outreachSender.ts`), BI-evidence outreach prep, human approve/reject/modify, simulated send + response + Opportunity + CRM relationship context; new validator 64/64 + E2E 4/4; full E2E 160/0/4; typecheck 0 · lint 0 · build PASS)
+> Last updated: 2026-09-11 (**Phase D4 — PERSISTENCE + PLATFORM HARDENING**: a domain persistence port (`src/data/domainRepository.ts`) with a memory adapter (deterministic, zero-network, honest `durable:false`) and a Supabase adapter (idempotent upserts by canonical id, tenant-scoped, explicit failures); acquisition + BI lifecycle state now write-through the port; new migration `020_create_acquisition_persistence.sql` (8 tables, RLS, brand-isolation policy); deterministic idempotent response ids; honest persistence status surfaced in Brand CRM; new validator 64/64 + E2E 3/3; full E2E 175/0/4; typecheck 0 · lint 0 · build PASS. **Supabase is NOT configured in this env → nothing is durable; reported honestly, never claimed.**)
+>
+> **PHASE D4 (2026-09-11) — PERSISTENCE / DOMAIN HARDENING.** The Phase C
+> acquisition artefacts (outreach revisions, responses, opportunities, events)
+> and the BI lifecycle history (prospect updates, runs, change events, snapshots)
+> now mirror through a single **domain persistence port** — one port, two
+> adapters, one factory, consistent with the existing `src/data/api.ts`
+> Supabase-repository pattern. **No second database, no SQLite/IndexedDB/
+> localStorage, no new ORM.** The **memory adapter** is the honest demo/
+> simulation default (`durable:false`, ZERO network); the **Supabase adapter**
+> upserts on the artefact's CANONICAL id (idempotent), scopes reads by tenant
+> (a brand scope can never see another tenant's prospect-derived data) and
+> returns **explicit failures** (never a silent success). `sendOutreach()` /
+> `recordResponse()` await the persistence outcome before returning. New
+> migration `supabase/migrations/020_create_acquisition_persistence.sql`
+> (8 tables, RLS on every table, admin policies + a brand-isolation policy on
+> opportunities). REAL DEFECTS FIXED: non-deterministic response ids
+> (`Date.now()`+random) + non-idempotent `addResponse`/`addOpportunity`.
+> New validator **64/64 PASS** + new E2E spec **3/3**; full E2E **175/0/4**;
+> typecheck 0 · lint 0 · build PASS. Report:
+> `docs/PRODUCT_CONSOLIDATION_PHASED4_2026-09-11.md`. **NOT committed** (no
+> `commit` instruction given — stopped at the commit gate).
 >
 > **PHASE D3 (2026-09-11) — OUTREACH / PROVIDER HARDENING.** Transport mode is now
 > DERIVED from the canonical integration mode model (`resolveOutreachTransport` —
@@ -112,6 +133,75 @@ browser click-through (Playwright only). No deploy, no push.
 
 **NEXT:** **D2 — BI intelligence preservation through acquisition** (see §21 of
 the Phase D mandate). D2 does not start until this gate is accepted.
+
+## Phase D4 — persistence / domain hardening (2026-09-11)
+
+> Status: **DONE (verified this session) — NOT COMMITTED** (stopped at the commit
+> gate; pre-D4 HEAD `b0d4c0b`). Full report:
+> `docs/PRODUCT_CONSOLIDATION_PHASED4_2026-09-11.md`.
+> Protected baseline untouched: `959b4d2`.
+
+**BUILT (D4)**
+- **NEW `src/data/domainRepository.ts` (~530 lines)** — the domain persistence
+  port. `DomainRepository` (persist×8 + `hydrate(scope)` + `flush()`);
+  `MemoryDomainRepository` (deterministic, ZERO network, `durable:false` — the
+  honest demo default); `SupabaseDomainRepository` (the EXISTING
+  `@supabase/supabase-js` client, idempotent `upsert` on the canonical id,
+  tenant-scoped `select`, explicit failures); `createDomainRepository()` +
+  injectable singleton; `MERCENTA_OPS_TENANT`/`TenantScope`/`DOMAIN_TABLES`;
+  `createPersistenceMirror()` (shared status: `memory-only`/`pending`/`durable`/
+  `failed`).
+- **`src/data/acquisitionStore.ts` (+105)** — write-through on every mutator;
+  `getPersistenceStatus()`, `flushAcquisitionPersistence()`,
+  `hydrateAcquisitionFromPersistence(scope)`; `addResponse`/`addOpportunity`
+  now upsert by canonical id (idempotent).
+- **`src/data/prospectStore.ts` (+85)** — BI lifecycle write-through
+  (prospect updates, runs, change events, snapshots) +
+  `getProspectPersistenceStatus()` / `flushProspectPersistence()` /
+  `hydrateProspectStoreFromPersistence(scope)` (seeds = deterministic baseline,
+  durable state = overlay).
+- **`src/lib/acquisition/outreachLifecycle.ts` (+20)** —
+  `responseIdFor(prospectId, outreachId)` (deterministic); `recordResponse()`
+  idempotent; `sendOutreach()`/`recordResponse()` await the persistence outcome.
+- **NEW `supabase/migrations/020_create_acquisition_persistence.sql`** — 8 tables
+  (`acquisition_outreach/responses/opportunities/events`,
+  `bi_prospects/intelligence_runs/prospect_changes/snapshots`), RLS on every
+  table, admin policies + a **brand-isolation** policy on opportunities, no
+  `using(true)`.
+- **`src/components/admin/AcquisitionRelationships.tsx` (+22)** — the only UI
+  change: an honest persistence-status line (`data-section="persistence-status"`).
+- **NEW `scripts/validate-d4-persistence.mjs`** (64 assertions) +
+  **NEW `e2e/domain-persistence.spec.ts`** (3 tests).
+
+**TESTED (D4) — real output**
+- `npm run typecheck` → **0 errors** · `npm run lint` → **0 problems**
+- `npm run build` → **PASS**, `✓ built in 3.89s`
+- `node scripts/validate-d4-persistence.mjs` →
+  **D4_PERSISTENCE_VALIDATION_PASS (64 ✓ / 0 ✗, exit 0)**
+- `npx playwright test e2e/domain-persistence.spec.ts` → **3 passed (14.9s)**
+- existing validators (acquisition-pipeline · bi-intelligence-preservation ·
+  bi-lifecycle · outreach-provider-hardening · prospect-pipeline ·
+  mock-providers · mock-seam · provider-workflows · demo-completeness 27/27 ·
+  rocketchat-removal · postiz · design-tokens · whatsapp) → **ALL PASS**
+- `npx playwright test --workers=4` (full) → **175 passed / 4 skipped / 0 failed,
+  EXIT=0** (D3 172/4/0 → **+3 tests, 0 new failures**). One 8-worker run produced
+  a load-induced screenshot flake in `app-shell.spec.ts` (overflow assertion had
+  already passed); it passes **23/23 in isolation**.
+
+**RESULT:** DONE. Production-relevant acquisition + BI lifecycle state now has a
+durable seam in the EXISTING Supabase architecture; writes are idempotent by
+canonical id; reads are tenant-scoped (brand scope cannot see ops/other-tenant
+data); failures are explicit and never reported as persisted; simulation is
+unchanged and proven zero-network; RBAC and canonical identity/traceability hold.
+**Honest limitation:** Supabase browser credentials are absent here, so the
+durable path is proven via an injected conformance repository and the migration is
+unexecuted — this is stated, not hidden.
+
+**NEXT:** per the canonical roadmap — remaining core-platform gap closure →
+onboarding/catalog/commerce completion → executive/admin operational surfaces →
+**Postiz embedded platform verification** → **UI/UX redesign** (dedicated phase)
+→ final full-platform regression → production deployment prep → **Rakazo LAST**.
+Confirm the exact order from this file at the time.
 
 ## Phase D3 — outreach / provider hardening (2026-09-11)
 

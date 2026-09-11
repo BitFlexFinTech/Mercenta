@@ -13,6 +13,7 @@ fixed. Never cite the log as current status.
 - `node scripts/validate-rocketchat-removal.mjs` — ROCKETCHAT_REMOVAL_VALIDATION_PASS (15/15; Phase D1)
 - `node scripts/validate-bi-intelligence-preservation.mjs` — BI_INTELLIGENCE_PRESERVATION_VALIDATION_PASS (42/42; Phase D2)
 - `node scripts/validate-outreach-provider-hardening.mjs` — OUTREACH_PROVIDER_HARDENING_VALIDATION_PASS (44/44; Phase D3)
+- `node scripts/validate-d4-persistence.mjs` — D4_PERSISTENCE_VALIDATION_PASS (64/64; Phase D4)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -23,8 +24,11 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **172 PASS / 4 skip / 0 fail** across 28 spec files.
-  (Phase D3 added `e2e/outreach-provider-hardening.spec.ts`, +3 tests, 0 new failures.)
+  **Playwright E2E** — **175 PASS / 4 skip / 0 fail** across 29 spec files.
+  (Phase D4 added `e2e/domain-persistence.spec.ts`, +3 tests, 0 new failures.
+  One 8-worker run produced a load-induced screenshot flake in
+  `app-shell.spec.ts`; it passes 23/23 in isolation and the 4-worker full run
+  was 0-failure.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
 
