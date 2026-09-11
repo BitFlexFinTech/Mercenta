@@ -48,15 +48,19 @@ App.tsx
 
 - `src/data/` — `api.ts` (contract layer), `demoStore.ts` (in-memory demo
   single source in demo mode), `bootstrap.ts` (seed), `queries.ts` (TanStack
-  hooks), `prospectStore.ts` (canonical BI prospect universe + run/change/
-  snapshot history), `demoData.ts` / `brandDossiers.ts` / `brandProspectSeed.ts` /
+  hooks + `useCanonicalStoreVersion()`), `prospectStore.ts` (canonical BI
+  prospect universe + run/change/snapshot history + the canonical change
+  signal), `acquisitionStore.ts` (§Phase C outreach revisions / responses /
+  opportunities / acquisition events, keyed by the canonical prospect id),
+  `demoData.ts` / `brandDossiers.ts` / `brandProspectSeed.ts` /
   `brandExtraSeed.ts` (canonical demo/prospect fixtures).
 - `src/lib/` — domain libs: spapi, dhl, compliance, billing, crm, helpdesk,
-  intelligence (incl. `prospectPipeline.ts` identity bridge +
-  `prospectLifecycle.ts` lifecycle engine), discovery, research, marketing,
-  rocketchat, postiz, whatsapp, mail, messaging, monitoring, automation,
-  events, simulation, verification, shipping, warehouse, esign, grants,
-  notifications.
+  intelligence (incl. `prospectPipeline.ts` identity bridge + origin-region
+  derivation, `prospectLifecycle.ts` lifecycle engine), **acquisition
+  (`outreachLifecycle.ts` state machine + `outreachSender.ts` transport seam)**,
+  discovery, research, marketing, rocketchat, postiz, whatsapp, mail, messaging,
+  monitoring, automation, events, simulation, verification, shipping, warehouse,
+  esign, grants, notifications.
 - `src/integrations/` — registry (19 providers) + IntegrationsContext (connect
   state, sandbox flag, per-card simulation controls).
 - `src/services/xero/` — real OAuth v2 client + sync engine (demo mode).
@@ -137,7 +141,8 @@ the provider adapter/mode changes.
 
 ## 10. Canonical Entities (single source: `src/types.ts`)
 
-- `Lead` (ICP pipeline) — now carries optional `prospectId` (canonical BI link).
+- `Lead` (ICP pipeline) — carries optional `prospectId` (canonical BI link);
+  `region` is `LeadRegion` = `us|eu|uk|africa|canada` (`uk` added in Phase C).
 - `BrandProspect` (BI) + `ProspectASIN/Contact/Distributor/Restriction/Evidence/
   Score` + `IntelligenceDashboard/PipelineConfig`.
 - `Message` (canonical conversation), `Ticket` (helpdesk, references messageIds),
@@ -148,11 +153,18 @@ the provider adapter/mode changes.
   `IntelligenceRun` (discovery-run history), `ProspectChangeEvent` (audited
   per-prospect changes), `IntelligenceSnapshot` (score-over-time),
   `IntelligencePipelineStatus`, `BrandProspect.lastChecked/nextCheck`.
+- **§Phase C acquisition** (`src/data/acquisitionStore.ts` +
+  `src/lib/acquisition/*`): `ProspectOutreachRecord` (approval + revision state,
+  `OutreachApprovalStatus`, `evidenceSummary`, `transport`), `OutreachResponse`,
+  `Opportunity` (`OpportunityStage`, BI score/tier snapshot), `AcquisitionEvent`,
+  `AcquisitionRelationship`, `AcquisitionPipelineSummary`.
 - `APPROVED_CATEGORIES` — single shared constant (mirrored as a DB CHECK).
 - Demo fixtures (`demoData.ts`, `brandProspectSeed.ts`, `brandExtraSeed.ts`,
-  `bootstrap.ts` INITIAL_LEADS) derive from the same schema so they cannot drift.
+  `bootstrap.ts` INITIAL_LEADS) derive from the same schema so they cannot
+  drift. **`INITIAL_LEADS` is a validation fixture only — the ACTIVE ICP
+  acquisition universe is derived from the BI store (Phase C).**
 
-## 11. BI → ICP Pipeline (Phase A/B)
+## 11. BI → ICP → Acquisition Pipeline (Phase A/B/C)
 
 ```
 Brand Intelligence — canonical prospect store (12 prospects, 10 active;
@@ -165,31 +177,55 @@ canonical prospect (BrandProspect)   provenance: IntelligenceRun /
    │    ProspectChangeEvent / IntelligenceSnapshot — "previous searches never disappear"
    │  src/lib/intelligence/prospectPipeline.ts  ← canonical identity bridge
    │    · matchLeadToProspect / matchLeadsToProspects (deterministic brand key)
-   │    · deriveLeadFromProspect(prospect, region) — never invents an origin
+   │    · buildAcquisitionLead + deriveIcpOriginRegion (ICP_REGION_BY_COUNTRY)
    ▼
-ICP lead (Lead.prospectId = prospect.id)   →   scoreLeadFit → threshold-70
-   →  shouldAutoEnroll → 'Sequenced' (fitScore persisted at transition)
-   →  (future) outreach → opportunity → CRM
+ICP lead (Lead.id = lead-<prospect.id>, Lead.prospectId = prospect.id)
+   →  scoreLeadFit → threshold-70 → shouldAutoEnroll → 'Sequenced'
+   ▼
+§Phase C acquisition (src/lib/acquisition/outreachLifecycle.ts + acquisitionStore.ts)
+   prepareOutreach (BI evidence via outreachGenerator, stored on the record)
+   →  modify / approve / reject  (human approval, audited)
+   →  sendOutreach(transport)    (simulation default; connected provider via the same seam)
+   →  recordResponse             (classifyInboundReply → wantsHuman)
+   →  Opportunity (opp-<prospect.id>, BI score/tier snapshot)
+   →  CRM relationship context   (BrandCRM → Acquisition Relationships)
+   →  (Phase D) application → onboarding → Opportunity.brandId set
 ```
 
-Wiring: MarketingHub CSV import + discovery enrollment link leads to the
-canonical BI universe via the store (single source — no second literal);
-the seeded `INITIAL_LEADS` (8) stay unlinked demo fixtures (verified no
-false-positive collisions). Phase C replaces the mock acquisition universe
-with BI-derived real prospects.
+Wiring: the ACTIVE acquisition universe is `prospectStore.getAcquisitionLeads()`
+(Phase C); the seeded `INITIAL_LEADS` (8) fixture stays for validation only
+(verified: no company overlap, no false-positive links). Every acquisition
+artefact is keyed by the canonical prospect id, and every downstream transition
+is written back to the canonical prospect through `setProspectOutreachStatus()`,
+so BI remains the single source of truth. Acquisition communication uses the ONE
+canonical message store (`logMessage` → `demoMessages`), never a second one.
 
 ## 12. Major Contracts
 
 - `logMessage(msg): Promise<Message>` — THE message write path.
 - `runDiscoveryPipeline(...)` — discovery→research→enrich→email→lint→enrol.
 - `scoreLeadFit(lead, icp)` / `shouldAutoEnroll(fit, stage)` — deterministic ICP.
-- `demoStore` arrays + `GlobalStateContext` `updateLeadStatus(id, status, fit?)`.
+- `demoStore` arrays + `GlobalStateContext` `updateLeadStatus(id, status, fit?)`
+  (BI-linked leads project the stage onto the canonical prospect) and
+  `refreshLeadsFromProspects()`.
 - Provider factory seams (SP-API/DHL/CH/HMRC trio) — mock & real, same signatures.
-- BI bridge (`matchLeadsToProspects`, `deriveLeadFromProspect`) — identity+fit truth.
+- BI bridge (`matchLeadsToProspects`, `deriveLeadFromProspect`,
+  `buildAcquisitionLead`, `deriveIcpOriginRegion`) — identity + region truth.
 - BI lifecycle (`runBrandIntelligence`, `disqualifyProspect`,
-  `requalifyProspect`, `getPipelineStatus` over `prospectStore`) — canonical
-  universe + run/change/snapshot history. All three consumers (Admin panel,
-  Brand Market Intel, MarketingHub bridge) read ONE store.
+  `requalifyProspect`, `setProspectOutreachStatus`, `getPipelineStatus` over
+  `prospectStore`) — canonical universe + run/change/snapshot history. All
+  consumers (Admin panel, Brand Market Intel, MarketingHub bridge, acquisition
+  pipeline, CRM) read ONE store.
+- **Acquisition (`src/lib/acquisition/outreachLifecycle.ts`)** —
+  `enrollProspect`, `prepareOutreach`, `modifyOutreach`, `approveOutreach`,
+  `rejectOutreach`, `sendOutreach`, `recordResponse`, `simulateResponse`,
+  `createOpportunityFromResponse`, `setOpportunityStage`,
+  `getRelationshipContext`. Every mutator takes
+  `AcquisitionActor { staffId, canMutate }` (RBAC in the domain) and returns
+  `{ ok: true, value } | { ok: false, error }`.
+- **Transport seam (`outreachSender.ts`)** — `OutreachTransport` with
+  `simulationOutreachTransport` (zero network) and `transportFromEmailClient()`
+  (reuses the existing email provider client).
 
 ## 13. Future Extension Points
 
@@ -198,10 +234,10 @@ with BI-derived real prospects.
   behind the seam activates live scoring without workflow changes. Candidate
   intake (`runBrandIntelligence({ candidates })`) is the wire for real
   discovery sources (firecrawl/keepa) once wired to BI.
-- **ICP → acquisition (Phase C/D):** replace the seeded `INITIAL_LEADS`
-  acquisition universe with BI-derived real prospects (store + bridge provide
-  the identity seam); add contact/enrichment, approval, outreach sender,
-  opportunity entity.
+- **Phase D — acquisition hardening:** activate a live provider through
+  `OutreachTransport`; persist acquisition artefacts (outreach/response/
+  opportunity) through the Supabase repository pattern instead of session
+  memory; wire `Opportunity.brandId` into application → onboarding.
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep

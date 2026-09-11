@@ -1,6 +1,6 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-10 (Phase B — BRAND INTELLIGENCE REAL-DATA LIFECYCLE: canonical prospect store (`src/data/prospectStore.ts`), lifecycle engine (`src/lib/intelligence/prospectLifecycle.ts`), manual Admin discovery runs + Run History, candidate dedupe, sticky operator disqualify/requalify, per-prospect History + provenance, `MarketingHub`/Brand "Market Intel" single-source, new validator 29/29 + E2E 2/2; full E2E 156/0/4; typecheck 0 · lint 0 · build PASS)
+> Last updated: 2026-09-11 (Phase C — BI → ICP → OUTREACH → CRM FOUNDATION: canonical BI prospects are now the ACTIVE acquisition universe, `INITIAL_LEADS` retired from the live path, new acquisition store + lifecycle engine (`src/data/acquisitionStore.ts`, `src/lib/acquisition/outreachLifecycle.ts`, `outreachSender.ts`), BI-evidence outreach prep, human approve/reject/modify, simulated send + response + Opportunity + CRM relationship context; new validator 64/64 + E2E 4/4; full E2E 160/0/4; typecheck 0 · lint 0 · build PASS)
 >
 > **Memory files (portable, AI-vendor-neutral):** `MERCENTA_MASTER_CONTEXT.md`
 > (project constitution §A–AF) · `MERCENTA_ARCHITECTURE.md` (technical
@@ -10,11 +10,69 @@
 >
 > ## 0. Project-Memory Reconciliation (2026-09-08)
 > - **Canonical project-state file: THIS FILE (`PROJECT_STATUS.md`).** HANDOFF.md and STATUS_CHECK.md remain separate for their distinct purposes (owner handoff / session history) — do not treat them as competing status sources.
-> - **Verified latest checkpoint: `dbbf567` (Phase A gate); Phase B completed on top — see the Phase B section below. Prior: `fe8c474` (Phase 1 gate) → `c3f676f` (Phase 0) → `9915656`.** Older chain: `5f13ac1` (Phase 7F part 1 — compliance test states) → `9ef93eb` (7E docs) → `ad97e9d` (7E brand dashboard) → `041de1a` (7E deferred/product repairs) → `e7fa882` (Phase 6 — application shell & navigation) → `774f6c4` (Phase 5) → `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
+> - **Verified latest checkpoint: `9f935f4` (Phase B gate); Phase C completed on top — see the Phase C section below.** Prior: `dbbf567` (Phase A gate) → `fe8c474` (Phase 1 gate) → `c3f676f` (Phase 0) → `9915656`. `5f13ac1` (Phase 7F part 1 — compliance test states) → `9ef93eb` (7E docs) → `ad97e9d` (7E brand dashboard) → `041de1a` (7E deferred/product repairs) → `e7fa882` (Phase 6 — application shell & navigation) → `774f6c4` (Phase 5) → `50b0420` (Phase 4) → `9d8d18d` (Phase 3) → `4eeef45` (Phase 2C engine) → `ba99266` (2B) → `a796f37` (2A). Baseline `959b4d2`.
 > - **Baseline:** tag `mercenta-baseline-before-redesign-20260907` / commit `959b4d2` — recoverable, immutable.
 > - **Branch:** `redesign/foundation` (working tree: clean except pre-existing untracked forensic/generated artifacts).
 > - **Specialized docs (separate, canonical for their domain):** `docs/MERCENTA_BASELINE.md`, `docs/MERCENTA_PRODUCT_CONTRACT.md`, `docs/INTEGRATIONS.md`, `docs/FUNCTIONAL_RISK_MAP.md`. (`docs/ARCHITECTURE.md` retained as history; superseded by `MERCENTA_ARCHITECTURE.md`.)
 > - Older sections below are historical/legacy, preserved verbatim; their old phase-number pointers (e.g. "Phase 3/4 targets", "Phase 2 — Rakazo") are superseded by the MASTER ROADMAP A–M (Rakazo = Phase M, LAST) — see MERCENTA_MASTER_CONTEXT.md §AB.
+## Phase C — BI → ICP → Outreach → CRM Foundation (2026-09-11)
+
+> Status: **DONE** — phase gate passed. Report:
+> `docs/PRODUCT_CONSOLIDATION_PHASEC_2026-09-11.md`.
+> Objective (master roadmap Phase C): make the canonical Brand Intelligence
+> prospects the ACTIVE acquisition universe and build the real downstream
+> domain workflow — ICP consumption → contact/targeting → outreach prepared
+> from BI evidence → human approval (modify/approve/reject) → simulated send →
+> response → Opportunity → CRM relationship context. **No UI redesign. No
+> Rakazo. No Postiz. No Rocket.Chat dependency. No live credentials.**
+>
+> **Gate evidence (executed this session):** typecheck **0** · lint **0** ·
+> build **✓ 2.46s** · `validate-acquisition-pipeline` **64/64 PASS** (incl.
+> **0 external fetches**, RBAC, tenant isolation) · `validate-prospect-pipeline`
+> **26/26 PASS** · `validate-bi-lifecycle` **29/29 PASS** · 9 further validators
+> **ALL PASS** · full Playwright **160 passed / 4 skipped / 0 failed** (2.3m;
+> +4 new suite, 0 regressions) · full browser walkthrough of the acceptance
+> workflow with **0 page errors**.
+>
+> **Implemented:**
+> 1. **Canonical BI → ICP universe** — the ICP list is now DERIVED from
+>    `prospectStore` (`getAcquisitionLeads()`); the seeded `INITIAL_LEADS`
+>    fixture is retired from the active path and kept only as a validation
+>    fixture. All ten real brands reach ICP with the SAME `prospectId`
+>    (deterministic lead id `lead-<prospectId>`).
+> 2. **Origin-region derivation** — `ICP_REGION_BY_COUNTRY` +
+>    `deriveIcpOriginRegion()`; `LeadRegion` gained `uk` (7 of 10 canonical
+>    brands are UK-origin); unknown origins return `null`, never guessed.
+> 3. **Phase B data-loss root-cause fix** —
+>    `brandIntelligenceClient.scoreProspect()` no longer drops fields it does
+>    not own (`countries`, `incumbentChallenged`, notes, owner, stamps).
+> 4. **Acquisition store + engine** — `src/data/acquisitionStore.ts` (outreach
+>    revisions, responses, opportunities, events; canonical prospect id; audit
+>    via `demoAuditLog`) and `src/lib/acquisition/outreachLifecycle.ts`
+>    (enrol → prepare → modify/approve/reject → send → respond → opportunity,
+>    with RBAC + state-machine guards in the domain layer).
+> 5. **Transport seam** — `outreachSender.ts`: deterministic simulation
+>    transport by default, `transportFromEmailClient()` to reuse the EXISTING
+>    email provider client when credentials exist.
+> 6. **Wired previously-dead canonical code** — `outreachGenerator.ts`
+>    (BI-evidence copy) and `classifyInboundReply()` (intent classification).
+> 7. **BI lifecycle stays canonical** — `setProspectOutreachStatus()` audits
+>    every downstream transition on the prospect timeline.
+> 8. **Minimum UI** — BI prospect **Outreach** tab (shared
+>    `AcquisitionWorkflow`), Marketing **Acquisition Pipeline (BI-derived)**
+>    card, CRM **Acquisition Relationships (pre-onboarding)** section, canonical
+>    prospect thread names in Messages. No navigation re-architecture, no
+>    styling pass.
+>
+> **Documented limitations (see report §18):** acquisition state is
+> session-only (in-memory, like `demoStore`); no live provider send was
+> exercised; opportunity → onboarding hand-off is Phase D; no automatic BI
+> scheduling was invented.
+>
+> **NEXT: Phase D — outreach/provider/send/response hardening** (activate live
+> providers through the existing seam, persist acquisition artefacts via the
+> Supabase repository pattern, wire prospect → application → onboarding).
+
 ## Phase B — Brand Intelligence Real-Data Lifecycle (2026-09-10)
 
 > Status: **DONE** — phase gate passed. Report:
@@ -75,6 +133,10 @@
 > mock acquisition universe with BI-derived real prospects; then outreach
 > preparation → human approval → send/track → response → Opportunity → CRM).
 > Do NOT begin UI redesign; do NOT begin Rakazo/Postiz.
+>
+> **[SUPERSEDED — Phase C (2026-09-11) DELIVERED this: see the Phase C section at
+> the top of this file. `INITIAL_LEADS` is no longer the active acquisition
+> universe.]**
 
 ## Phase A — Core Data / Domain / Workflow Consolidation (2026-09-10)
 
@@ -118,6 +180,11 @@
 > REAL INTERNAL DATA · campaign/monitoring-health = SEEDED (flagged) ·
 > Firecrawl/Keepa real clients + live Edge Functions = UNKNOWN/ABSENT (no live
 > credentials; never claimed working).
+>
+> **[Phase C update 2026-09-11: the `INITIAL_LEADS` fixture is no longer in the
+> active acquisition path — the acquisition universe is DERIVED from the
+> canonical BI prospect store, and acquisition artefacts are session-only
+> in-memory. See the Phase C section.]**
 >
 > **Files changed:** `src/types.ts` · `src/lib/intelligence/prospectPipeline.ts`
 > (NEW) · `src/context/GlobalStateContext.tsx` · `src/components/admin/MarketingHub.tsx`

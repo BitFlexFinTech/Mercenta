@@ -3,6 +3,9 @@
 //   demo lead universe · CSV-ingestion link with canonical segment inheritance
 //   · BI→ICP derivation that never invents an origin region · derived leads
 //   flow through the live fit-scoring + auto-enroll gates.
+// §Phase C additions — the ACTIVE acquisition universe is the canonical BI
+//   store (not the seeded INITIAL_LEADS fixture), regions are derived from BI
+//   evidence, and the canonical identity survives into ICP.
 import { createServer } from 'vite';
 
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
@@ -61,8 +64,32 @@ try {
     derived.persona === 'Sherry Zhang, VP International Sales');
   test('derived fitScore starts 0 — ICP live-scores, never stale-seeds',
     derived.fitScore === 0);
-  test('deriveLeadFromProspect(region=invalid) returns null — origin is never invented',
-    pp.deriveLeadFromProspect(tapatio, 'uk') === null);
+  test("deriveLeadFromProspect(region='mars') returns null — an unmappable origin is never invented",
+    pp.deriveLeadFromProspect(tapatio, 'mars') === null);
+  // §Phase C — 'uk' became a valid ICP origin region so the 7 UK-origin
+  // canonical brands can be consumed at all.
+  test("deriveLeadFromProspect(region='uk') is now a valid origin (Phase C)",
+    pp.deriveLeadFromProspect(tapatio, 'uk')?.prospectId === 'prospect-tapatio');
+
+  // ── §Phase C — the acquisition universe is BI-derived, not INITIAL_LEADS ──
+  const store = await server.ssrLoadModule('/src/data/prospectStore.ts');
+  test('the seeded INITIAL_LEADS fixture is retained but is NOT the acquisition source',
+    boot.INITIAL_LEADS.length === 8 && store.getAcquisitionLeads().length === 10);
+  const universeLeads = store.getAcquisitionLeads();
+  test('every acquisition lead carries a canonical prospectId (10/10 linked)',
+    universeLeads.length === 10 && universeLeads.every((l) => typeof l.prospectId === 'string' && l.prospectId.length > 0));
+  test('acquisition lead ids are deterministic derivations of the prospect id',
+    universeLeads.every((l) => l.id === `lead-${l.prospectId}`));
+  test('no acquisition lead is a seeded INITIAL_LEADS company',
+    universeLeads.every((l) => !boot.INITIAL_LEADS.some((s) => s.company === l.company)));
+  test('origin regions are derived from BI evidence (us×3 grocery trio, uk×7)',
+    universeLeads.filter((l) => l.region === 'us').length === 3 &&
+    universeLeads.filter((l) => l.region === 'uk').length === 7);
+  test('the ten real canonical brands all reach the ICP universe',
+    ['Tapatío', 'Seep', 'Astonish', 'Fly By Jing', 'LocknLock', "Mike's Hot Honey", 'Cholula', 'Valentina', 'Delphis Eco', 'Kit & Kin']
+      .every((b) => universeLeads.some((l) => l.company === b)));
+  test('disqualified canonical prospects never enter the acquisition universe',
+    !universeLeads.some((l) => l.company === 'Truthbrush' || l.company === 'UpCircle'));
 
   // ── Derived leads flow through the ICP gates ──
   const icp = {

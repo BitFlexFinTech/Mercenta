@@ -5,6 +5,7 @@ import { APPROVED_CATEGORIES } from '@/types';
 import { Badge, Button, Card } from '@/components/ui';
 import { BrandCommPanel } from '@/components/shared/BrandComm';
 import { BrandCrmDepth } from '@/components/admin/BrandCrmDepth';
+import { AcquisitionRelationships } from '@/components/admin/AcquisitionRelationships';
 import { cn } from '@/utils/cn';
 import { Users, Edit3, Route, Shield, MessageSquare, X, Download, FileText } from 'lucide-react';
 import { demoProfileChangeRequests, reviewProfileChangeRequest } from '@/data/api';
@@ -79,6 +80,8 @@ export function BrandCRM() {
           </Button>
         </div>
       </div>
+      {/* §Phase C — pre-onboarding acquisition relationships (same canonical context) */}
+      <AcquisitionRelationships />
       <div className="grid grid-cols-12 gap-4">
         <Card className="col-span-12 md:col-span-4 p-0 overflow-hidden">
           <div className="p-3 border-b border-white/[0.06] space-y-2">

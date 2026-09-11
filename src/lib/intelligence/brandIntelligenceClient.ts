@@ -29,6 +29,13 @@ class MockClient implements BrandIntelligenceClient {
     const score: ProspectScore = disq.dq ? zeroScore() : calculateScore(asins, signals, dist, restr, contacts, cat);
 
     return {
+      // §Phase C root-cause fix — preserve every caller-supplied field the
+      // scoring engine does NOT own (countries, incumbentChallenged, notes,
+      // owner, outreach history, check stamps). Phase B's literal dropped them,
+      // so the canonical store lost e.g. `countries` (needed to derive the ICP
+      // origin region) and `incumbentChallenged` (rendered in prospect detail)
+      // the moment the universe booted.
+      ...p,
       id: p.id ?? `p-${Date.now()}`, brand: p.brand ?? 'Unknown', category: cat,
       website: p.website, ukPresence: p.ukPresence, brandMaturity: p.brandMaturity ?? 'challenger',
       whyInteresting: p.whyInteresting, asins, distributors: dist,

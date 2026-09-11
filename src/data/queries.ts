@@ -31,6 +31,10 @@ import {
   subscribeHomepageLive,
 } from './api';
 import type { ListQueryOptions } from './api';
+import {
+  getCanonicalStoreVersion,
+  subscribeCanonicalStore,
+} from './prospectStore';
 
 const STALE_TIME = 30_000;
 
@@ -154,6 +158,20 @@ export function useBrandAgreements() {
 
 export function useAuditLogPaginated(opts: ListQueryOptions = {}, pagination?: PaginationParams) {
   return usePaginatedList('audit-log-paginated', fetchAuditLogPaginated, opts, pagination);
+}
+
+/* ── §Phase C — canonical BI/acquisition store subscription ─────────── */
+
+/**
+ * Subscribes a component to the canonical BI prospect store + acquisition
+ * store change signal, so BI/ICP/CRM panels all re-render from the same truth
+ * (the stores are synchronous in-memory singletons, so a version bump is the
+ * correct re-read trigger).
+ */
+export function useCanonicalStoreVersion(): number {
+  const [version, setVersion] = useState(getCanonicalStoreVersion);
+  useEffect(() => subscribeCanonicalStore(() => setVersion(getCanonicalStoreVersion())), []);
+  return version;
 }
 
 /* ── §Phase 7E — Homepage content ───────────────────────────────────── */

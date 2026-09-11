@@ -19,10 +19,14 @@ import { AlertTriangle, Info, Target, Upload, Compass, Loader2, CheckCircle2, XC
 import { runDiscoveryPipeline, createMockDiscoveryClients, type EnrichedLead } from '@/lib/discovery/engine';
 import { matchLeadsToProspects } from '@/lib/intelligence/prospectPipeline';
 import { getProspects } from '@/data/prospectStore';
+import { AcquisitionPipeline } from '@/components/admin/AcquisitionPipeline';
 
 const REGIONS: { value: Lead['region']; label: string }[] = [
   { value: 'us', label: 'US origin' },
   { value: 'eu', label: 'EU origin' },
+  // §Phase C — 7 of the 10 canonical BI prospects are UK-origin brands; without
+  // a UK origin option they could never match an ICP region filter.
+  { value: 'uk', label: 'UK origin' },
   { value: 'africa', label: 'Africa origin' },
 ];
 
@@ -42,7 +46,7 @@ export function MarketingHub() {
     'Premium organic and natural product brands already exporting, seeking UK retail placement'
   );
   const [icpCategories, setIcpCategories] = useState<string[]>(['Health & Personal Care']);
-  const [icpRegions, setIcpRegions] = useState<Lead['region'][]>(['us', 'eu', 'africa']);
+  const [icpRegions, setIcpRegions] = useState<Lead['region'][]>(['us', 'eu', 'uk', 'africa']);
 
   // §7 Discovery engine pipeline state
   const [discoveryRunning, setDiscoveryRunning] = useState(false);
@@ -235,6 +239,9 @@ export function MarketingHub() {
         </div>
       </Card>
 
+      {/* §Phase C — ICP consumption of the canonical BI prospects + outreach/approval */}
+      <AcquisitionPipeline />
+
       {/* §7 Discovery Engine — trade-body directories → OpenRouter → Companies House → Hunter → Instantly */}
       <Card title="Discovery Engine" subtitle="Find brand partners via trade-body directories and enrichment">
         <div className="space-y-3 p-1">
@@ -305,6 +312,8 @@ export function MarketingHub() {
                   <div className="text-xs font-medium text-white truncate">{lead.company}</div>
                   <div className="text-[10px] text-zinc-600 font-mono">
                     {lead.region.toUpperCase()} · {lead.segment}
+                    {/* §Phase C — canonical Brand Intelligence identity carried by the lead */}
+                    {lead.prospectId ? ` · BI ${lead.prospectId}` : ' · unlinked'}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">

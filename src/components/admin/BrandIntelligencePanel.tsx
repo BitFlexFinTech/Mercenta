@@ -5,6 +5,7 @@ import { cn } from '@/utils/cn';
 import { createBrandIntelligenceClient } from '@/lib/intelligence/brandIntelligenceClient';
 import { ProspectDetailPanel } from './ProspectDetailPanel';
 import { ensureProspectStore, getProspects, getRuns, getChanges } from '@/data/prospectStore';
+import { useCanonicalStoreVersion } from '@/data/queries';
 import { runBrandIntelligence, getPipelineStatus, requalifyProspect } from '@/lib/intelligence/prospectLifecycle';
 import type { IntelligenceRun, ProspectChangeEvent } from '@/types';
 import { Target, TrendingUp, Users, AlertTriangle, Search, Play, History, ShieldBan } from 'lucide-react';
@@ -21,6 +22,10 @@ export function BrandIntelligencePanel() {
   const[pros,sPros]=useState<any[]>([]);const[load,sLoad]=useState(true);
   const[runs,sRuns]=useState<IntelligenceRun[]>([]);const[stat,sStat]=useState<any>(null);const[running,sRunning]=useState(false);const[exp,sExp]=useState<string|null>(null);const[msg,sMsg]=useState('');
   useEffect(()=>{ensureProspectStore();sPros(getProspects());sRuns(getRuns());sStat(getPipelineStatus());sLoad(false);},[]);
+  // §Phase C — re-read the canonical universe whenever it changes (e.g. the
+  // acquisition workflow advanced a prospect's outreach status).
+  const storeVersion=useCanonicalStoreVersion();
+  useEffect(()=>{sPros(getProspects());sRuns(getRuns());sStat(getPipelineStatus());},[storeVersion]);
 const dash=useMemo(()=>cl.getDashboard(pros),[pros]);const cats=useMemo(()=>[...new Set(pros.map((p:any)=>p.category))].sort(),[pros]);
 const filtered=useMemo(()=>{let r=pros.filter((p:any)=>!p.disqualified);if(q){const lq=q.toLowerCase();r=r.filter((p:any)=>p.brand.toLowerCase().includes(lq)||p.category.toLowerCase().includes(lq));}if(cf)r=r.filter((p:any)=>p.category===cf);if(tf)r=r.filter((p:any)=>p.score.tier===tf);r.sort((a:any,b:any)=>sf==='score'?(sd==='desc'?b.score.total-a.score.total:a.score.total-b.score.total):a.brand.localeCompare(b.brand));return r;},[pros,q,cf,tf,sf,sd]);
 const ts=(f:'score'|'brand')=>{if(sf===f)sSd(d=>d==='desc'?'asc':'desc');else{sSf(f);sSd('desc');}};

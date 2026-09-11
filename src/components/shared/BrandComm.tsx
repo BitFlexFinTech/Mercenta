@@ -88,7 +88,7 @@ export function useBrandComms() {
     await qc.invalidateQueries({ queryKey: ['messages'] });
   }
 
-  return { sendToBrand, logCall, emailLive, emailSandbox };
+  return { sendToBrand, logCall, emailLive, emailSandbox, emailClient };
 }
 
 /**

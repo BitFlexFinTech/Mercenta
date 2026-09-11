@@ -1,0 +1,174 @@
+/**
+ * §Phase C — Acquisition pipeline (ICP consumption of canonical BI prospects).
+ *
+ * The acquisition universe is DERIVED from the canonical Brand Intelligence
+ * prospect store (the ten real brands), so every row carries its canonical
+ * `prospectId`. Nothing on this screen is a fabricated lead: preparing a
+ * recommendation here starts the same workflow the BI prospect's Outreach tab
+ * operates, and the review/approval/send/response steps are performed there.
+ */
+import { useMemo, useState } from 'react';
+import { Badge, Button, Card } from '@/components/ui';
+import { cn } from '@/utils/cn';
+import {
+  getAcquisitionSummary,
+  listAcquisitionProspects,
+  prepareOutreach,
+  type AcquisitionProspectRow,
+} from '@/lib/acquisition/outreachLifecycle';
+import { useApp } from '@/context/GlobalStateContext';
+import { useCanonicalStoreVersion } from '@/data/queries';
+import { Target, Sparkles } from 'lucide-react';
+
+const STAGE_STYLES: Record<string, string> = {
+  'awaiting approval': 'bg-amber-500/15 text-amber-300 border-amber-500/20',
+  approved: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+  rejected: 'bg-red-500/15 text-red-300 border-red-500/20',
+  sent: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
+  responded: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
+  qualified: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
+  won: 'bg-brass/15 text-brass border-brass/30',
+  lost: 'bg-zinc-500/15 text-zinc-400 border-white/[0.08]',
+  enrolled: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
+  'not enrolled': 'bg-white/[0.05] text-zinc-400 border-white/[0.08]',
+};
+
+export function AcquisitionPipeline() {
+  const { actingStaffId, canCurrentUserMutate, refreshLeadsFromProspects } = useApp();
+  const version = useCanonicalStoreVersion();
+  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  /** §Stage-18 interactivity — every metric tile drills the table down. */
+  const [metricFilter, setMetricFilter] = useState<string | null>(null);
+
+  const allRows: AcquisitionProspectRow[] = listAcquisitionProspects();
+  const summary = getAcquisitionSummary();
+  void version; // canonical store change signal → re-read the derived rows
+
+  /** Metric predicates — each tile opens the rows it counts. */
+  const METRICS: { key: string; label: string; value: number; match: (r: AcquisitionProspectRow) => boolean }[] = [
+    { key: 'all', label: 'Canonical prospects', value: allRows.length, match: () => true },
+    { key: 'enrolled', label: 'In acquisition', value: summary.enrolled, match: (r) => r.stage !== 'not enrolled' },
+    { key: 'awaiting', label: 'Awaiting approval', value: summary.awaitingApproval, match: (r) => r.stage === 'awaiting approval' },
+    { key: 'approved', label: 'Approved', value: summary.approved, match: (r) => r.stage === 'approved' },
+    { key: 'sent', label: 'Sent', value: summary.sent, match: (r) => r.stage === 'sent' },
+    { key: 'responded', label: 'Responses', value: summary.responded, match: (r) => r.responseCount > 0 },
+    { key: 'opportunities', label: 'Opportunities', value: summary.opportunities, match: (r) => !!r.opportunity },
+  ];
+
+  const active = METRICS.find((m) => m.key === metricFilter) ?? null;
+  const rows = active ? allRows.filter(active.match) : allRows;
+
+  const actor = useMemo(
+    () => ({ staffId: actingStaffId, canMutate: canCurrentUserMutate }),
+    [actingStaffId, canCurrentUserMutate]
+  );
+
+  function prepare(row: AcquisitionProspectRow) {
+    const result = prepareOutreach(row.prospect.id, actor, 'email');
+    if (!result.ok) {
+      setError(result.error);
+      setNotice(null);
+      return;
+    }
+    setError(null);
+    setNotice(`Recommendation prepared for ${row.prospect.brand} — review it in Brand Intelligence → ${row.prospect.brand} → Outreach.`);
+    void refreshLeadsFromProspects();
+  }
+
+  return (
+    <Card title="Acquisition Pipeline (BI-derived)">
+      <div className="px-1 pb-1 space-y-3">
+        <p className="text-[11px] text-zinc-500">
+          The acquisition universe IS the canonical Brand Intelligence prospect store — the real brands
+          below carry their existing prospect identity into ICP targeting. No separate mock acquisition
+          list exists.
+        </p>
+
+        {/* §Stage-18 interactivity — every metric tile drills the table down. */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+          {METRICS.map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setMetricFilter(metricFilter === m.key ? null : m.key)}
+              aria-pressed={metricFilter === m.key}
+              title={`Show the ${m.label.toLowerCase()}`}
+              className={cn(
+                'bg-ink-850 border rounded-lg px-2 py-1.5 text-left transition-colors',
+                metricFilter === m.key ? 'border-brass-500/50 bg-brass-500/10' : 'border-white/[0.06] hover:border-white/[0.16]'
+              )}
+            >
+              <p className="text-[9px] text-zinc-500 uppercase">{m.label}</p>
+              <p className="text-sm font-semibold text-white font-mono">{m.value}</p>
+            </button>
+          ))}
+        </div>
+        {active && (
+          <p className="text-[10px] text-brass-300">
+            Filtered: {active.label} ({rows.length} shown) ·{' '}
+            <button type="button" className="underline" onClick={() => setMetricFilter(null)}>clear</button>
+          </p>
+        )}
+
+        {notice && <p className="text-[11px] text-emerald-400">{notice}</p>}
+        {error && <p className="text-[11px] text-red-300">{error}</p>}
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs" data-table="acquisition-pipeline">
+            <thead>
+              <tr className="border-b border-white/[0.06] text-zinc-500">
+                <th className="text-left px-2 py-1.5 font-medium">Brand</th>
+                <th className="text-left px-2 py-1.5 font-medium">BI score</th>
+                <th className="text-left px-2 py-1.5 font-medium">ICP identity</th>
+                <th className="text-left px-2 py-1.5 font-medium">Region</th>
+                <th className="text-left px-2 py-1.5 font-medium">Stage</th>
+                <th className="text-right px-2 py-1.5 font-medium">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.prospect.id} className="border-b border-white/[0.04]">
+                  <td className="px-2 py-1.5 text-white font-medium">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Target className="w-3 h-3 text-brass-400" />
+                      {r.prospect.brand}
+                    </span>
+                    <span className="block text-[9px] text-zinc-500">{r.prospect.category}</span>
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <span className={cn('font-mono', r.prospect.score.total >= 80 ? 'text-emerald-400' : 'text-zinc-300')}>
+                      {r.prospect.score.total}
+                    </span>
+                    <span className="text-[9px] text-zinc-500"> {r.prospect.score.tier}</span>
+                  </td>
+                  <td className="px-2 py-1.5 font-mono text-[10px] text-zinc-400">{r.lead?.id ?? '(no region)'}</td>
+                  <td className="px-2 py-1.5 text-zinc-300">{r.region ?? '—'}</td>
+                  <td className="px-2 py-1.5">
+                    <Badge className={cn('text-[9px] border capitalize', STAGE_STYLES[r.stage] ?? 'text-zinc-400')}>{r.stage}</Badge>
+                  </td>
+                  <td className="px-2 py-1.5 text-right">
+                    <Button
+                      size="sm"
+                      variant="tertiary"
+                      className="text-[10px]"
+                      disabled={!canCurrentUserMutate || r.stage === 'sent' || r.stage === 'responded' || !!r.opportunity}
+                      onClick={() => prepare(r)}
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      {r.current ? 'New revision' : 'Prepare outreach'}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-[10px] text-zinc-600">
+          Review, modify, approve/reject, send and record the response on the prospect's own record:
+          Brand Intelligence → brand row → Outreach tab.
+        </p>
+      </div>
+    </Card>
+  );
+}

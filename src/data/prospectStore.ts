@@ -21,10 +21,11 @@
 import { SEED_PROSPECTS } from './brandProspectSeed';
 import { EXTRA_PROSPECTS } from './brandExtraSeed';
 import { createBrandIntelligenceClient } from '@/lib/intelligence/brandIntelligenceClient';
-import { normalizeBrandKey } from '@/lib/intelligence/prospectPipeline';
+import { buildAcquisitionLead, normalizeBrandKey } from '@/lib/intelligence/prospectPipeline';
 import type {
   BrandProspect,
   IntelligenceRun,
+  Lead,
   ProspectChangeEvent,
   IntelligenceSnapshot,
 } from '@/types';
@@ -84,6 +85,34 @@ export function ensureProspectStore(): void {
   boot();
 }
 
+/* ── §Phase C — canonical change signal ─────────────────────────────────────
+ * ONE signal for the canonical BI universe AND the downstream acquisition
+ * artefacts keyed to it, so every panel that reads them (BI panel, ICP
+ * acquisition pipeline, CRM acquisition relationships, the ICP lead list)
+ * re-renders from the SAME truth instead of holding duplicated copies.
+ * Same in-memory module-level listener pattern the homepage live-version uses.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+let canonicalTick = 0;
+const canonicalListeners = new Set<() => void>();
+
+export function getCanonicalStoreVersion(): number {
+  return canonicalTick;
+}
+
+export function subscribeCanonicalStore(listener: () => void): () => void {
+  canonicalListeners.add(listener);
+  return () => {
+    canonicalListeners.delete(listener);
+  };
+}
+
+/** Notify subscribers that canonical state changed (called by store mutators). */
+export function notifyCanonicalStoreChange(): void {
+  canonicalTick += 1;
+  for (const listener of canonicalListeners) listener();
+}
+
 /** All canonical prospects (including disqualified — history is preserved). */
 export function getProspects(): BrandProspect[] {
   boot();
@@ -119,10 +148,26 @@ export function getSnapshots(): IntelligenceSnapshot[] {
   return snapshots;
 }
 
+/**
+ * §Phase C — the ICP acquisition universe, DERIVED from the canonical BI
+ * prospects: every active (non-disqualified) prospect that has a derivable ICP
+ * origin region, projected into an ICP lead carrying its canonical
+ * `prospectId`. This replaced the seeded `INITIAL_LEADS` array as the ACTIVE
+ * acquisition source; the fixture itself is retained in bootstrap.ts (it is a
+ * validation fixture, not the pipeline's universe).
+ */
+export function getAcquisitionLeads(): Lead[] {
+  return getProspects()
+    .filter((p) => !p.disqualified)
+    .map((p) => buildAcquisitionLead(p))
+    .filter((l): l is Lead => l !== null);
+}
+
 /** Replace a prospect record (used by lifecycle mutations). */
 export function updateProspect(prospect: BrandProspect): void {
   boot();
   prospects = prospects.map((p) => (p.id === prospect.id ? prospect : p));
+  notifyCanonicalStoreChange();
 }
 
 /** Record a completed discovery run + its change events + snapshots. */
@@ -137,12 +182,14 @@ export function applyRunResult(
   runs = [...runs, run];
   changes = [...changes, ...events];
   snapshots = [...snapshots, ...snap];
+  notifyCanonicalStoreChange();
 }
 
 /** Record a lifecycle event outside a run (disqualify/requalify audit). */
 export function recordLifecycleEvent(event: ProspectChangeEvent): void {
   boot();
   changes = [...changes, event];
+  notifyCanonicalStoreChange();
 }
 
 /**

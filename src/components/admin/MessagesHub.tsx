@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { brandInboxAddress, useBrandComms } from '@/components/shared/BrandComm';
 import { useBrands, useMessages } from '@/data/queries';
+import { getProspect } from '@/data/prospectStore';
 import type { Message } from '@/types';
 import { Badge, Button, Card, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
@@ -105,10 +106,15 @@ export function MessagesHub() {
     for (const m of allMessages) {
       if (!map.has(m.brandId)) {
         const brand = brands.find((b) => b.id === m.brandId);
+        // §Phase C — a thread keyed by a CANONICAL BI prospect id (prospect-* /
+        // p-*) is an acquisition conversation, not a demo brand: resolve its
+        // display name from the same canonical store so the ONE message thread
+        // is intelligible here without a second conversation store.
+        const prospect = brand ? undefined : getProspect(m.brandId);
         map.set(m.brandId, {
           key: m.brandId,
           brandId: m.brandId,
-          brandName: brand?.profile.businessName ?? m.brandId,
+          brandName: brand?.profile.businessName ?? (prospect ? `${prospect.brand} (prospect)` : m.brandId),
           messages: [],
         });
       }

@@ -24,6 +24,7 @@ import type {
   IntelligenceRun,
   IntelligenceRunTrigger,
   IntelligenceSnapshot,
+  OutreachStatus,
   ProspectChangeEvent,
 } from '@/types';
 
@@ -366,6 +367,40 @@ export function requalifyProspect(prospectId: string, by?: string): ProspectChan
     before: 'disqualified',
     after: 'active',
     summary: `${by ? `${by} requalified` : 'Requalified'}: prospect restored to the active universe.`,
+  };
+  store.recordLifecycleEvent(event);
+  return event;
+}
+
+/**
+ * §Phase C — record a downstream acquisition/ICP-driven outreach-status
+ * transition on the canonical prospect, audited in the prospect timeline.
+ * This is the ONLY way downstream stages (ICP enrolment, outreach send,
+ * response) may move the BI record forward — the BI lifecycle stays canonical
+ * and auditable even when the later stages drive the change.
+ */
+export function setProspectOutreachStatus(
+  prospectId: string,
+  next: OutreachStatus,
+  note: string,
+  by?: string
+): ProspectChangeEvent | null {
+  const p = store.getProspect(prospectId);
+  if (!p || p.outreachStatus === next) return null;
+  const now = new Date().toISOString();
+  const before = p.outreachStatus;
+  store.updateProspect({ ...p, outreachStatus: next, lastResearched: now });
+  const event: ProspectChangeEvent = {
+    id: `evt-${Date.now()}-os`,
+    runId: 'acquisition',
+    prospectId,
+    brand: p.brand,
+    changeType: 'updated',
+    timestamp: now,
+    field: 'outreachStatus',
+    before,
+    after: next,
+    summary: `${by ? `${by}: ` : ''}${note} (${before} → ${next}).`,
   };
   store.recordLifecycleEvent(event);
   return event;

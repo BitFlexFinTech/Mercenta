@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 10, 2026 (Phase B — Brand Intelligence lifecycle)
+Last updated: September 11, 2026 (Phase C — BI → ICP → Outreach → CRM foundation)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -39,6 +39,15 @@ Cline's output back. AI confirms, gives next prompt.
   candidate de-duplication, disqualify/re-qualify with audit history,
   per-prospect History timeline. Tapatío, Seep, Astonish, Fly By Jing,
   LocknLock, Mike's Hot Honey, Cholula, Valentina, Delphis Eco, Kit & Kin.
+- Acquisition pipeline (Phase C, 2026-09-11): the ten REAL Brand Intelligence
+  brands are now the active ICP acquisition universe (same prospect identity
+  end-to-end, no mock lead list). Admin can: select a real prospect → see the BI
+  evidence → prepare an outreach recommendation → MODIFY / APPROVE / REJECT it →
+  run a deterministic simulated SEND → get a deterministic simulated RESPONSE →
+  create an Opportunity → open the relationship in Brand CRM, where the same
+  conversation also appears in Messages (one canonical thread). No live
+  credentials needed, no Rakazo, no Postiz, no Rocket.Chat, no external network
+  calls in simulation.
 - Review zip script + protection rules + handoff rule
 
 ## WHAT'S LEFT (IN ORDER):
@@ -50,9 +59,14 @@ the FINAL phase. The older list below is superseded by that roadmap.
 2. Namecheap FTP deploy script — DONE (scripts/deploy-demo.sh; demo live).
 3. Companies House + HMRC compliance dashboard — DONE (simulation-complete).
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
-NEXT in roadmap: Phase C — ICP consumes the canonical BI prospects (replaces
-the old mock lead universe with the real Tapatío-style prospects), then
-outreach preparation → human approval → send/track → opportunity → CRM.
+NEXT in roadmap: PHASE C — COMPLETE (2026-09-11). The ten real Brand
+Intelligence brands now flow through ICP → outreach preparation (from BI
+evidence) → human approval → simulated send → response → Opportunity → CRM
+relationship context. See docs/PRODUCT_CONSOLIDATION_PHASEC_2026-09-11.md.
+NEXT after that: PHASE D — outreach/provider/send/response hardening (activate a
+live email provider through the existing transport seam, persist acquisition
+records in Supabase instead of session memory, wire opportunity → brand
+application → onboarding).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

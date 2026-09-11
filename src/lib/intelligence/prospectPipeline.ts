@@ -20,9 +20,9 @@
  * (brandProspectSeed + brandExtraSeed); this module only LINKS/CONVERTS — it
  * never fabricates prospects or market data.
  */
-import type { BrandProspect, Lead } from '@/types';
+import type { BrandProspect, Lead, LeadRegion, OutreachStatus } from '@/types';
 
-const LEAD_REGIONS: readonly Lead['region'][] = ['us', 'eu', 'africa', 'canada'];
+const LEAD_REGIONS: readonly LeadRegion[] = ['us', 'eu', 'uk', 'africa', 'canada'];
 
 /** Deterministic brand key: lowercased, diacritics stripped, alphanumerics only. */
 export function normalizeBrandKey(name: string): string {
@@ -100,5 +100,104 @@ export function deriveLeadFromProspect(
     // never stale-seeded here.
     fitScore: 0,
     region,
+  };
+}
+
+/* ── §Phase C — BI → ICP origin region derivation ───────────────────────── */
+
+/**
+ * SINGLE SOURCE for country → ICP origin region. Deterministic, evidence-based
+ * mapping of a BI prospect's declared operating countries onto the ICP's brand
+ * ORIGIN model. Keys are upper-case ISO-ish forms exactly as the BI seeds write
+ * them. Countries outside this table have NO ICP region — never guessed.
+ */
+export const ICP_REGION_BY_COUNTRY: Readonly<Record<string, LeadRegion>> = {
+  US: 'us', USA: 'us', 'UNITED STATES': 'us', 'UNITED STATES OF AMERICA': 'us',
+  CA: 'canada', CANADA: 'canada',
+  UK: 'uk', GB: 'uk', 'UNITED KINGDOM': 'uk', 'GREAT BRITAIN': 'uk', ENGLAND: 'uk',
+  IE: 'eu', IRELAND: 'eu', DE: 'eu', GERMANY: 'eu', FR: 'eu', FRANCE: 'eu',
+  NL: 'eu', NETHERLANDS: 'eu', BE: 'eu', BELGIUM: 'eu', ES: 'eu', SPAIN: 'eu',
+  IT: 'eu', ITALY: 'eu', PT: 'eu', PORTUGAL: 'eu', PL: 'eu', POLAND: 'eu',
+  SE: 'eu', SWEDEN: 'eu', DK: 'eu', DENMARK: 'eu', FI: 'eu', FINLAND: 'eu',
+  AT: 'eu', AUSTRIA: 'eu', GR: 'eu', GREECE: 'eu', CZ: 'eu', 'CZECH REPUBLIC': 'eu',
+  ZW: 'africa', ZIMBABWE: 'africa', ZA: 'africa', 'SOUTH AFRICA': 'africa',
+  KE: 'africa', KENYA: 'africa', NG: 'africa', NIGERIA: 'africa',
+  GH: 'africa', GHANA: 'africa', TZ: 'africa', TANZANIA: 'africa',
+  UG: 'africa', UGANDA: 'africa', MA: 'africa', MOROCCO: 'africa',
+  EG: 'africa', EGYPT: 'africa', ZM: 'africa', ZAMBIA: 'africa',
+};
+
+/** Lead → canonical outreach status mapping (pure, documented in the phase report). */
+const LEAD_STAGE_BY_OUTREACH_STATUS: Readonly<Record<OutreachStatus, Lead['outreachStatus']>> = {
+  uncontacted: 'Scraped',
+  researching: 'Scraped',
+  ready_to_contact: 'Sequenced',
+  contacted: 'Email Sent',
+  opened: 'Email Sent',
+  replied: 'Replied',
+  interested: 'Replied',
+  negotiating: 'Replied',
+  pilot: 'Replied',
+  meeting_scheduled: 'Meeting Booked',
+  won: 'Meeting Booked',
+  // No Lead stage exists for a lost/nurture prospect; the closer of the two
+  // existing terminal stages is used and the acquisition record keeps the truth.
+  lost: 'Replied',
+  nurture: 'Replied',
+  disqualified: 'Scraped',
+};
+
+/** ICP pipeline stage for a canonical prospect's outreach status. */
+export function leadStageForOutreachStatus(status: OutreachStatus): Lead['outreachStatus'] {
+  return LEAD_STAGE_BY_OUTREACH_STATUS[status] ?? 'Scraped';
+}
+
+/** Reverse mapping used when the ICP list drives a canonical BI transition. */
+export function outreachStatusForLeadStage(stage: Lead['outreachStatus']): OutreachStatus {
+  switch (stage) {
+    case 'Sequenced': return 'ready_to_contact';
+    case 'Email Sent': return 'contacted';
+    case 'Replied': return 'replied';
+    case 'Meeting Booked': return 'meeting_scheduled';
+    default: return 'uncontacted';
+  }
+}
+
+/** Stable ICP lead id for a canonical prospect (deterministic across reloads). */
+export function acquisitionLeadId(prospectId: string): string {
+  return `lead-${prospectId}`;
+}
+
+/**
+ * Derive the ICP brand-ORIGIN region from the BI record's own evidence:
+ *  1. the FIRST declared `countries` entry that maps via ICP_REGION_BY_COUNTRY;
+ *  2. otherwise, an explicit `ukPresence: true` flag → 'uk' (7 of the 10
+ *     canonical brands declare UK presence and no country list);
+ *  3. otherwise null — an unknown origin is NEVER invented.
+ */
+export function deriveIcpOriginRegion(prospect: BrandProspect): LeadRegion | null {
+  for (const raw of prospect.countries ?? []) {
+    const mapped = ICP_REGION_BY_COUNTRY[(raw ?? '').trim().toUpperCase()];
+    if (mapped) return mapped;
+  }
+  if (prospect.ukPresence) return 'uk';
+  return null;
+}
+
+/**
+ * Build the ICP acquisition lead for a canonical prospect, preserving identity:
+ * the same `prospect.id` becomes `Lead.prospectId` and the lead id is derived
+ * deterministically from it. Returns null when no ICP origin region is derivable
+ * (documented, never fabricated).
+ */
+export function buildAcquisitionLead(prospect: BrandProspect): Lead | null {
+  const region = deriveIcpOriginRegion(prospect);
+  if (!region) return null;
+  const derived = deriveLeadFromProspect(prospect, region);
+  if (!derived) return null;
+  return {
+    ...derived,
+    id: acquisitionLeadId(prospect.id),
+    outreachStatus: leadStageForOutreachStatus(prospect.outreachStatus),
   };
 }

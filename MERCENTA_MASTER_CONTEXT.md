@@ -120,31 +120,53 @@ MERCENTA must keep working when any third party is unavailable.
 
 ## J. Brand Intelligence Role
 
-**Brand Intelligence (BI) is the intended authoritative real-data discovery and
-intelligence engine for real prospective partner brands.** Current
-implementation is a **seeded fixture universe** (12 prospects: 3
-`brandProspectSeed` + 9 `brandExtraSeed`; 2 hard-disqualified → 10 shown),
-re-scored at load by the deterministic 7-dimension scoring engine. The client
-factory always returns the MockClient; there are no live clients, no
-mutations, no persistence yet. BI does NOT fabricate real-world prospects.
+**Brand Intelligence (BI) is the authoritative real-data discovery and
+intelligence engine for real prospective partner brands, and the canonical
+source of truth for prospect discovery.** Current implementation is the
+authoritative **seeded prospect universe** (12 prospects: 3 `brandProspectSeed` +
+9 `brandExtraSeed`; 2 hard-disqualified → 10 active), scored by the deterministic
+7-dimension scoring engine at store boot. Since Phase B the universe also has a
+real lifecycle: discovery runs, change events, score snapshots, sticky operator
+disqualify/requalify. The client factory still returns the MockClient (a
+deterministic provider), which is why records carry `source: 'mock'` — that
+means "no live provider produced this record", **not** "this brand is
+fictional". BI does NOT fabricate real-world prospects.
 
 ## K. ICP Role
 
 ICP is **downstream targeting/execution** that consumes canonical BI prospect
-records. It must NOT own a parallel fictional universe. The seeded `INITIAL_LEADS`
-(8 demo companies) are SEEDED TEST FIXTURES for the pipeline mechanics, not a
-canonical prospect source. Since Phase A the identity bridge
-(`src/lib/intelligence/prospectPipeline.ts`) links every ingested lead to its
-canonical BI prospect (`Lead.prospectId`) so canonical identity survives
-ingestion → targeting → (future) outreach → opportunity.
+records. It must NOT own a parallel fictional universe. Since **Phase C
+(2026-09-11)** the ICP acquisition universe IS the canonical BI prospect store
+(`prospectStore.getAcquisitionLeads()`): every ICP row carries the canonical
+`prospectId` and the deterministic lead id `lead-<prospectId>`. The seeded
+`INITIAL_LEADS` (8 demo companies) are **retained ONLY as validation fixtures** —
+they are no longer the active acquisition source and must not be re-activated.
+Origin regions are derived from BI evidence (`deriveIcpOriginRegion` +
+`ICP_REGION_BY_COUNTRY`); the region model includes `uk` because 7 of the 10
+canonical brands are UK-origin, and an unmappable origin returns `null` (never
+guessed). ICP-side fit scoring (`scoreLeadFit`, threshold 70) is a DOWNSTREAM
+targeting score — it is not a second BI score and must not replace it.
 
 ## L. Partner Acquisition Pipeline
 
-BI → canonical prospect → ICP/targeting → contact/enrichment → approval →
-outreach → response → opportunity → CRM → application → onboarding. Identity
-and evidence must survive every stage. Phase A implemented the minimum
-connective tissue: BI→ICP identity link + deterministic fit persistence. The
-prospect→opportunity entity and the outreach sender remain future work (Phase D).
+BI → canonical prospect → ICP/targeting → contact/targeting → outreach
+preparation (BI evidence drives the copy) → human approval (MODIFY / APPROVE /
+REJECT) → send (deterministic simulation, or a connected provider through the
+same seam) → response (intent-classified by `classifyInboundReply`) →
+Opportunity → CRM relationship context → application → onboarding. Identity and
+evidence must survive every stage.
+
+**Phase C (2026-09-11) implemented this end-to-end in the domain layer:**
+`src/data/acquisitionStore.ts` (outreach revisions, responses, opportunities,
+acquisition events — all keyed by the canonical prospect id; audit via
+`demoAuditLog`) + `src/lib/acquisition/outreachLifecycle.ts` (the state machine,
+with RBAC + tenant guards in the domain, not the UI) +
+`src/lib/acquisition/outreachSender.ts` (transport seam: simulation by default).
+Every downstream transition is written back to the canonical prospect through
+`setProspectOutreachStatus()` and audited on the prospect timeline, so BI stays
+the single source of truth. **Remaining (Phase D):** activate live providers,
+persist acquisition artefacts beyond session memory, and wire
+`Opportunity.brandId` into the real application/onboarding flow.
 
 ## M. CRM Model
 
@@ -153,6 +175,14 @@ tasks, internal notes, lifecycle stage, tags, account owner, and a unified
 chronological timeline (messages, calls, notes, tasks, PO/contract/compliance/
 deduction events — all derived from real entity state, never fabricated).
 `src/lib/crm/crmStore.ts` + `BrandCrmDepth` UI.
+
+**Phase C addition:** the CRM also carries the **pre-onboarding acquisition
+relationships** (prospect-backed opportunities) via
+`AcquisitionRelationships`, rendering the canonical relationship context
+(`getRelationshipContext`) — BI record + outreach revisions + responses +
+opportunity + timeline + the same canonical conversation. `Opportunity.brandId`
+stays unset until the prospect actually onboards: the record never pretends a
+prospect is already a tenant.
 
 ## N. Communication Model
 
@@ -337,24 +367,35 @@ onboarding. **Not started yet.**
 ## AE. Known Limitations / Caveats
 
 - Demo persistence is in-memory (reload resets) unless Supabase is configured;
-  the domain tests document this contract.
+  the domain tests document this contract. **This includes all Phase C
+  acquisition artefacts** (outreach revisions, approvals, responses,
+  opportunities): they are session-only, and the BI universe re-boots from seeds
+  on reload. No Supabase persistence for acquisition exists yet (Phase D).
 - Live Edge Functions for SP-API/DHL/Companies House/HMRC/email are absent from
   the repo (deploy-time infra) — the live switch would 404 until deployed;
   nothing claims otherwise.
-- `outreachGenerator.ts` and `XeroConnection.tsx` are dead code (unimported,
-  typecheck-clean); candidates for later rationalisation.
+- `outreachGenerator.ts` is **no longer dead code** — Phase C wired it into
+  `prepareOutreach` (it is the canonical BI-evidence outreach copy source).
+  `XeroConnection.tsx` remains a dead-code candidate.
 - BI canonical universe is the authoritative seeded prospect set (12 tracked /
   10 active) with full run/change/snapshot history; `source:'mock'` only means
   "no live provider produced this" — real providers behind the same client seam
-  are a Phase-6/live seam concern, not a data-classification blocker.
-- ICP `INITIAL_LEADS` (8) remain SEEDED TEST FIXTURES — unlinked by design;
-  Phase C replaces them with BI-derived real prospects. Prospect `outreachStatus`
-  ladder beyond disqualify/requalify is still UI-inert (no outreach sender yet);
-  no Opportunity entity yet; campaign performance stats and monitoring health
-  are seeded (flagged).
+  are a live-seam concern, not a data-classification blocker. **The ten brands
+  are REAL BUSINESS ENTITIES: never reinterpret them as fake brands because the
+  provider is deterministic.**
+- Acquisition (Phase C) is real and operable: BI → ICP (same `prospectId`) →
+  outreach prepared from BI evidence → MODIFY/APPROVE/REJECT → simulated send →
+  response → Opportunity → CRM relationship context, with RBAC + audit +
+  `networkCalls === 0` proven by `validate-acquisition-pipeline.mjs`.
+- **Known gaps after Phase C:** no live provider send was exercised; acquisition
+  state is session-only; `Opportunity.brandId` is not yet wired into the
+  application/onboarding flow; BI discovery runs remain operator-triggered (no
+  scheduler exists and none is claimed); campaign performance stats and
+  monitoring health remain seeded (flagged).
 - `validate-edge-functions.mjs` is stale (crashes: expects absent functions) —
   needs repair-or-retire evaluation.
 - No live credentials configured for real providers; demo/sandbox paths used.
+  Simulation never requires credentials and never calls the network.
 
 ## AF. Current Project Status Pointer
 

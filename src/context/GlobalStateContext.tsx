@@ -53,7 +53,10 @@ interface AppState {
 
   leads: Lead[];
   /** §Phase A — status transition; `fitScore` persists the live-computed ICP
-   *  fit at the moment of the transition (was display-only before). */
+   *  fit at the moment of the transition (was display-only before).
+   *  §Phase C — for a BI-linked lead (id `lead-<prospectId>`) the canonical
+   *  Brand Intelligence prospect is moved with it, so the BI lifecycle records
+   *  the transition. */
   updateLeadStatus: (
     id: string,
     status: Lead['outreachStatus'],
@@ -61,6 +64,13 @@ interface AppState {
   ) => void;
   /** §7 — imported/sourced leads enter the pipeline here. */
   addLead: (lead: Lead) => void;
+  /**
+   * §Phase C — re-read the ICP acquisition universe from the canonical BI
+   * prospect store. ICP rows are a PROJECTION of the canonical prospects, so
+   * any acquisition transition re-syncs them (leads with no BI counterpart —
+   * e.g. CSV imports — are preserved untouched).
+   */
+  refreshLeadsFromProspects: () => Promise<void>;
 
   campaigns: Campaign[];
 
@@ -149,10 +159,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setShipments(m.INITIAL_SHIPMENTS);
       setProducts(m.INITIAL_PRODUCTS);
       setActivityLogs(m.INITIAL_ACTIVITY_LOGS);
-      setLeads(m.INITIAL_LEADS);
       setCampaigns(m.INITIAL_CAMPAIGNS);
       setApiLogs(m.INITIAL_API_LOGS);
       setStaff(m.INITIAL_STAFF);
+    });
+    // §Phase C — the ICP acquisition universe is DERIVED from the canonical
+    // Brand Intelligence prospect store. The seeded `INITIAL_LEADS` fixture is
+    // no longer the active acquisition source (it remains a validation fixture
+    // for the identity-bridge collision check).
+    import('@/data/prospectStore').then((store) => {
+      setLeads(store.getAcquisitionLeads());
     });
   }, []);
   /** §Stage-25 — which staff account is performing admin actions (RBAC tier). */
@@ -315,9 +331,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
             : l
         )
       );
+      // §Phase C — a BI-linked ICP lead (deterministic id `lead-<prospectId>`)
+      // is a PROJECTION of the canonical prospect: move the canonical record
+      // too so the BI lifecycle stays the single source of truth and the
+      // transition is audited on the prospect timeline. Leads with no canonical
+      // counterpart (CSV imports) are unaffected.
+      const prospectId = id.startsWith('lead-') ? id.slice('lead-'.length) : '';
+      if (!prospectId) return;
+      void Promise.all([
+        import('@/data/prospectStore'),
+        import('@/lib/intelligence/prospectLifecycle'),
+        import('@/lib/intelligence/prospectPipeline'),
+      ]).then(([store, lifecycle, pipeline]) => {
+        if (!store.getProspect(prospectId)) return;
+        lifecycle.setProspectOutreachStatus(
+          prospectId,
+          pipeline.outreachStatusForLeadStage(status),
+          `ICP stage set to ${status}`,
+          actingStaffId
+        );
+      });
     },
-    []
+    [actingStaffId]
   );
+
+  /**
+   * §Phase C — re-read the derived ICP universe from the canonical store,
+   * preserving leads that have no canonical BI counterpart (CSV imports) and
+   * the ICP fit score persisted at their last transition.
+   */
+  const refreshLeadsFromProspects = useCallback(async () => {
+    const store = await import('@/data/prospectStore');
+    const canonical = store.getAcquisitionLeads();
+    setLeads((prev) => {
+      const prior = new Map(prev.filter((l) => l.prospectId).map((l) => [l.id, l]));
+      const projected = canonical.map((l) => {
+        const before = prior.get(l.id);
+        return before && before.fitScore > 0 ? { ...l, fitScore: before.fitScore } : l;
+      });
+      return [...projected, ...prev.filter((l) => !l.prospectId)];
+    });
+  }, []);
+
+  // Subscribe once so the ICP list always projects the canonical store state
+  // (the BI prospect owns the outreach status; the lead row displays it).
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+    void import('@/data/prospectStore').then((store) => {
+      unsubscribe = store.subscribeCanonicalStore(() => void refreshLeadsFromProspects());
+    });
+    return () => unsubscribe?.();
+  }, [refreshLeadsFromProspects]);
 
   const completeOnboarding = useCallback(() => {
     setBrandProfile((prev) => {
@@ -412,6 +476,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     leads,
     updateLeadStatus,
     addLead,
+    refreshLeadsFromProspects,
     campaigns,
     apiLogs,
     addApiLog,

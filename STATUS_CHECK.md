@@ -9,19 +9,46 @@ fixed. Never cite the log as current status.
 
 - `npm run typecheck` — PASS (exit 0)
 - `npm run lint` — PASS (exit 0)
-- `npm run build` — PASS (vite, ~3.7s)
+- `npm run build` — PASS (vite, ~2.5s)
+- `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
-- `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (18/18)
+- `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
 - `node scripts/validate-mock-providers.mjs` / `validate-mock-seam.mjs` /
   `validate-provider-workflows.mjs` / `validate-discovery.mjs` /
   `validate-postiz.mjs` / `validate-automation.mjs` / `validate-csv-import.mjs` /
-  `validate-demo-completeness.mjs` / `validate-design-tokens.mjs` — ALL PASS
+  `validate-demo-completeness.mjs` (27/27) / `validate-design-tokens.mjs` — ALL PASS
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **156 PASS / 4 skip / 0 fail** across 24 spec files.
+  **Playwright E2E** — **160 PASS / 4 skip / 0 fail** across 25 spec files.
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Acquisition pipeline (Phase C — 2026-09-11)
+
+- The ACTIVE acquisition universe is now the canonical Brand Intelligence
+  prospect store (`prospectStore.getAcquisitionLeads()`); the seeded
+  `INITIAL_LEADS` fixture is retained only as a validation fixture. All ten real
+  brands reach ICP carrying their canonical `prospectId` (lead id
+  `lead-<prospectId>`).
+- New: `src/data/acquisitionStore.ts` + `src/lib/acquisition/outreachLifecycle.ts`
+  + `src/lib/acquisition/outreachSender.ts`. Workflow: ICP enrolment →
+  outreach prepared from BI evidence (`outreachGenerator`, evidence summary
+  stored on the record) → MODIFY / APPROVE / REJECT → simulated send (or the
+  connected email provider through the same seam) → deterministic response
+  (`classifyInboundReply`) → Opportunity (`opp-<prospectId>`, BI snapshot) →
+  CRM relationship context.
+- BI remains the source of truth: every downstream transition is written to the
+  canonical prospect via `setProspectOutreachStatus()` and audited on the
+  prospect timeline; acquisition mutations also append to `demoAuditLog`.
+- Communication stays canonical: outreach sends and replies are logged through
+  `logMessage` into `demoMessages` keyed by the canonical prospect id — the CRM
+  relationship panel and Admin → Messages show the SAME thread.
+- RBAC enforced in the domain layer (`FORBIDDEN` for view-only accounts) and
+  tenant-isolated (anti-brand-scoped); simulation performs ZERO external fetches
+  (validator H1/H2).
+- **Persistence:** acquisition artefacts are session-only in-memory (documented;
+  Supabase persistence is Phase D work). No live provider send was exercised.
 
 ## Brand Intelligence lifecycle (Phase B — 2026-09-10)
 
@@ -32,8 +59,11 @@ fixed. Never cite the log as current status.
 - Admin: Brand Intelligence panel "Run discovery" + Run History + Disqualified
   section; prospect detail: provenance + History tab + Disqualify.
 - MarketingHub + Brand "Market Intel" read the store (duplicate universe
-  literal removed). ICP `INITIAL_LEADS` (8) remain SEEDED TEST FIXTURES —
-  Phase C replaces them with BI-derived real prospects.
+  literal removed).
+- **[Phase C 2026-09-11 — SUPERSEDES the line that followed here]** ICP
+  `INITIAL_LEADS` (8) were SEEDED TEST FIXTURES; Phase C has now replaced them
+  as the ACTIVE acquisition source with BI-derived concrete prospects. The
+  fixture remains in `bootstrap.ts` for validation only.
 
 ## Registry health (Session 2026-09-01 — Batch F: fix confirmed gaps)
 

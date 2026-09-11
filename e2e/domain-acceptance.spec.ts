@@ -66,30 +66,54 @@ test.describe('Domain Acceptance Gate', () => {
     await expect(page.locator('text=/100').first()).toBeVisible({ timeout: 3000 });
   });
 
-  test('3. ICP pipeline — seeded universe + live fit scoring + deterministic auto-enroll', async ({ page }) => {
+  test('3. ICP pipeline — BI-derived universe (same canonical identity) + live fit scoring + deterministic auto-enroll', async ({ page }) => {
     await loginAs(page, 'Mercenta Admin Hub', 1200);
     await openNav(page, 'Marketing');
     await expect(page.locator('text=ICP Builder').first()).toBeVisible({ timeout: 6000 });
-    // The canonical seeded lead universe renders (8 INITIAL_LEADS).
-    await expect(page.locator('text=Sweet Pea Botanicals').first()).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('text=Lone Star Organics').first()).toBeVisible({ timeout: 3000 });
+
+    // §Phase C — the acquisition universe IS the canonical BI prospect store:
+    // all ten active canonical brands are listed, each carrying its existing
+    // prospect identity (no second/invented acquisition list).
+    await expect(page.locator('text=Acquisition Pipeline (BI-derived)').first()).toBeVisible({ timeout: 5000 });
+    const acqTable = page.locator('table[data-table="acquisition-pipeline"]');
+    await expect(acqTable.locator('tbody tr')).toHaveCount(10, { timeout: 5000 });
+    await expect(acqTable.locator('text=Tapatío').first()).toBeVisible();
+    await expect(acqTable.locator('text=lead-prospect-tapatio').first()).toBeVisible();
+    // The OLD seeded mock acquisition universe (INITIAL_LEADS) is no longer the
+    // active source: none of its companies are in the pipeline.
+    await expect(page.locator('text=Sweet Pea Botanicals')).toHaveCount(0);
+    await expect(page.locator('text=Lone Star Organics')).toHaveCount(0);
+
     await expect(page.locator('text=Lead Pipeline').first()).toBeVisible();
-    // Live ICP fit badges are present in the scored list.
+    // Live ICP fit badges are present in the scored list, and each BI-linked row
+    // shows its canonical BI identity.
     await expect(page.locator('text=/fit \\d+/').first()).toBeVisible({ timeout: 5000 });
-    // Drive the ICP description so the two Scraped leads that score
-    // >= FIT_THRESHOLD (70) are deterministic:
-    //   Mara Naturals (africa): 40 region + 30 keywords = 70
-    //   Bella Pelle Skincare (eu): 40 region + 30 category ('care' in
-    //   'skincare') + 15 keyword ('export' in 'exports') = 85
-    await page.locator('textarea').first().fill('zimbabwe africa agribusiness naturals farming export');
-    await expect(page.locator('button:has-text("Auto-enroll qualified (2)")').first()).toBeVisible({ timeout: 4000 });
+    await expect(page.locator('text=BI prospect-tapatio').first()).toBeVisible({ timeout: 4000 });
+
+    // §Stage-18 interactivity — a metric tile drills the table down (no static
+    // number without a drill-down).
+    await page.locator('button:has-text("Awaiting approval")').first().click();
+    await expect(page.locator('text=/Filtered: Awaiting approval/').first()).toBeVisible({ timeout: 4000 });
+    await expect(acqTable.locator('tbody tr')).toHaveCount(0);
+    await page.locator('button:has-text("clear")').first().click();
+    await expect(acqTable.locator('tbody tr')).toHaveCount(10, { timeout: 4000 });
+
+    // Drive the ICP so the qualifying set is deterministic (Grocery brands at
+    // 40 region + 30 category + 15 keyword = 85, threshold 70):
+    await page.locator('button:has-text("Health & Personal Care")').first().click();
+    await page.locator('button:has-text("Grocery")').first().click();
+    await page.locator('textarea').first().fill('grocery brands exporting uk retail hot sauce');
+    await expect(page.locator('button:has-text("Auto-enroll qualified (5)")').first()).toBeVisible({ timeout: 4000 });
+
     // Lead Pipeline buckets: Sequenced starts empty.
     const sequencedBucket = page.locator('div.bg-ink-900').filter({ hasText: 'Sequenced' }).first();
     await expect(sequencedBucket.locator('span.font-mono').first()).toHaveText('0', { timeout: 4000 });
-    // Run auto-enroll → real stage transition, visible in the pipeline board.
+    // Run auto-enroll → real stage transition, visible in the pipeline board,
+    // and projected onto the canonical BI prospect (single source of truth).
     await page.locator('button:has-text("Auto-enroll qualified")').first().click();
-    await expect(sequencedBucket.locator('span.font-mono').first()).toHaveText('2', { timeout: 5000 });
-    await expect(sequencedBucket.locator('text=Mara Naturals').first()).toBeVisible({ timeout: 4000 });
+    await expect(sequencedBucket.locator('span.font-mono').first()).toHaveText('5', { timeout: 5000 });
+    await expect(sequencedBucket.locator('text=Tapatío').first()).toBeVisible({ timeout: 4000 });
+    await expect(acqTable.locator('tr', { hasText: 'Tapatío' }).first()).toContainText('enrolled', { timeout: 5000 });
   });
 
   test('4. ONE canonical conversation — Helpdesk reply is the same Messages thread', async ({ page }) => {
