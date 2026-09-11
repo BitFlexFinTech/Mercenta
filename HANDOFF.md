@@ -62,8 +62,8 @@ Cline's output back. AI confirms, gives next prompt.
   outreach record ids collided within a millisecond and destroyed a revision — ids
   are now workflow-owned. Gates: validator 44/44 + E2E 3/3; full E2E 172/0/4.
   Report: docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md.
-- Persistence / domain hardening (Phase D4, 2026-09-11; NOT COMMITTED — stopped at
-  the commit gate): Phase C/D3 acquisition artefacts (outreach revisions,
+- Persistence / domain hardening (Phase D4, 2026-09-11; commit `eb1e5e8`):
+  Phase C/D3 acquisition artefacts (outreach revisions,
   responses, opportunities, events) and the BI lifecycle history (prospect
   updates, runs, change events, snapshots) now mirror through ONE domain
   persistence port (`src/data/domainRepository.ts`) built on the EXISTING Supabase

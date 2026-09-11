@@ -32,6 +32,26 @@ fixed. Never cite the log as current status.
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
 
+## Persistence / domain hardening (Phase D4 — 2026-09-11) — commit `eb1e5e8`
+
+- NEW `src/data/domainRepository.ts` — the persistence PORT. A
+  `MemoryDomainRepository` (deterministic, ZERO network, honest `durable:false`)
+  is the demo default; a `SupabaseDomainRepository` (the EXISTING Supabase client,
+  idempotent upsert on the artefact's canonical id, tenant-scoped reads, explicit
+  failures) is the durable adapter. No second database.
+- Acquisition + BI lifecycle state now **write-through** the port;
+  `sendOutreach()`/`recordResponse()` await the persistence outcome before
+  returning. Status is surfaced honestly (`memory-only`/`pending`/`durable`/
+  `failed`) and never falsely reports durable success.
+- Deterministic, idempotent identity (`responseIdFor`, upsert-by-id store
+  mutators). NEW `supabase/migrations/020_create_acquisition_persistence.sql`
+  (8 tables, RLS on every table, brand-isolation policy on opportunities).
+- Gates: validator 64/64 · E2E 3/3 · full E2E 175/0/4 · typecheck 0 · lint 0 ·
+  build PASS. Report: `docs/PRODUCT_CONSOLIDATION_PHASED4_2026-09-11.md`.
+- **HONEST LIMITATION:** browser Supabase credentials are NOT configured here, so
+  the memory adapter is active, nothing is durable, and migration 020 has **not**
+  been executed against a live project. Live Supabase persistence is NOT verified.
+
 ## Outreach / provider hardening (Phase D3 — 2026-09-11) — commit `d3cbbd4`
 
 - Transport mode is DERIVED from the canonical integration mode model via

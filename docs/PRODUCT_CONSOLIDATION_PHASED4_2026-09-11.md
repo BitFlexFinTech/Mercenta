@@ -319,9 +319,8 @@ created. The D4 report and the new modules are included.
 
 ## 13. Commit record
 
-**Not committed.** No `commit` instruction was given in this session, so D4 stops
-at the commit gate per the standing protection rules. The change set prepared for
-a single D4 implementation commit is:
+**Committed.** Authorised in the follow-up instruction and committed as
+**`eb1e5e8`** (14 files changed, +1993/−21). The committed change set is:
 
 ```
 src/data/domainRepository.ts                                   (NEW,  543 lines)
@@ -338,9 +337,10 @@ docs/PRODUCT_CONSOLIDATION_PHASED4_2026-09-11.md               (NEW,  357 lines,
 `git diff --stat` for the tracked changes: **9 files changed, 380 insertions(+),
 21 deletions(-)** (4 source + 5 canonical docs).
 
-**Pre-D4 HEAD:** `b0d4c0bc76e668c248ca333de83f0cfca5e30911`.
-**Final HEAD (before commit):** `b0d4c0bc76e668c248ca333de83f0cfca5e30911` (unchanged — no commit made).
-To land D4, say **commit**; the single commit message should be:
+**Pre-D4 HEAD:** `b0d4c0bc76e668c248ca333de83f0cfca5e30911` (D3 documentation checkpoint).
+**D4 implementation commit:** `eb1e5e84a5766dfe42d30f3f9cbf1b52e103b5c5` (`eb1e5e8`), parent `b0d4c0b`.
+**Final HEAD:** `eb1e5e8`.
+Commit message (exact):
 `phaseD4: add domain persistence port + acquisition/BI write-through (memory default, Supabase durable, idempotent, tenant-scoped)`.
 
 ## 14. Next phase
@@ -354,7 +354,7 @@ integration/regression, production deployment preparation, and Rakazo **LAST**.
 
 ## 15. Phase gate
 
-**COMPLETE (D4)** — implementation, tests, documentation and review export all
-done and verified in this session; **stopped at the commit gate** because no
-`commit` instruction was given.
+**COMPLETE (D4)** — implementation, tests, documentation, review export and the
+commit (`eb1e5e8`) all done and verified in this session. Hard stop at the D4
+boundary (no D5 or other phase started).
 

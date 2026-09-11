@@ -20,8 +20,8 @@
 > (`Date.now()`+random) + non-idempotent `addResponse`/`addOpportunity`.
 > New validator **64/64 PASS** + new E2E spec **3/3**; full E2E **175/0/4**;
 > typecheck 0 · lint 0 · build PASS. Report:
-> `docs/PRODUCT_CONSOLIDATION_PHASED4_2026-09-11.md`. **NOT committed** (no
-> `commit` instruction given — stopped at the commit gate).
+> `docs/PRODUCT_CONSOLIDATION_PHASED4_2026-09-11.md`. **Committed `eb1e5e8`**
+> (14 files, +1993/−21).
 >
 > **PHASE D3 (2026-09-11) — OUTREACH / PROVIDER HARDENING.** Transport mode is now
 > DERIVED from the canonical integration mode model (`resolveOutreachTransport` —
@@ -136,8 +136,9 @@ the Phase D mandate). D2 does not start until this gate is accepted.
 
 ## Phase D4 — persistence / domain hardening (2026-09-11)
 
-> Status: **DONE (verified this session) — NOT COMMITTED** (stopped at the commit
-> gate; pre-D4 HEAD `b0d4c0b`). Full report:
+> Status: **DONE (verified this session)**. Commit **`eb1e5e8`**
+> (`phaseD4: add domain persistence port + acquisition/BI write-through …`),
+> parent `b0d4c0b`. Full report:
 > `docs/PRODUCT_CONSOLIDATION_PHASED4_2026-09-11.md`.
 > Protected baseline untouched: `959b4d2`.
 
