@@ -44,6 +44,10 @@ import type {
   ProductSubmission,
   ProspectChangeEvent,
   ProspectOutreachRecord,
+  PurchaseOrder,
+  CommerceActivity,
+  CommerceInvoice,
+  CommercePayment,
 } from '@/types';
 
 /** Which persistence backend produced a result. */
@@ -84,6 +88,17 @@ export const DOMAIN_TABLES = {
    * reference real, through THIS port, rather than adding a second mechanism.
    */
   catalogSubmissions: 'catalog_submissions',
+  /**
+   * §Phase E4 — operational commerce. The existing `purchase_orders` table's
+   * `uuid` PK is incompatible with the canonical text ids the domain uses, so
+   * the operational-simulation records live in their OWN additive tables keyed
+   * by the canonical id — the same pattern migration 022 established for
+   * catalog submissions. Still ONE database, ONE port.
+   */
+  commercePurchaseOrders: 'commerce_purchase_orders',
+  commerceInvoices: 'commerce_invoices',
+  commercePayments: 'commerce_payments',
+  commerceActivities: 'commerce_activities',
 } as const;
 
 export type DomainTable = (typeof DOMAIN_TABLES)[keyof typeof DOMAIN_TABLES];
@@ -123,6 +138,11 @@ export interface HydratedDomainState {
   brandOnboarding: BrandOnboarding[];
   /** §Phase E3 — canonical catalog submission records. */
   catalogSubmissions: ProductSubmission[];
+  /** §Phase E4 — operational-simulation records. */
+  commercePurchaseOrders: PurchaseOrder[];
+  commerceInvoices: CommerceInvoice[];
+  commercePayments: CommercePayment[];
+  commerceActivities: CommerceActivity[];
 }
 
 export function emptyHydratedState(): HydratedDomainState {
@@ -137,6 +157,10 @@ export function emptyHydratedState(): HydratedDomainState {
     snapshots: [],
     brandOnboarding: [],
     catalogSubmissions: [],
+    commercePurchaseOrders: [],
+    commerceInvoices: [],
+    commercePayments: [],
+    commerceActivities: [],
   };
 }
 
@@ -167,6 +191,15 @@ export interface DomainRepository {
    * it) keeps ONE source of truth for that state.
    */
   persistCatalogSubmission(submission: ProductSubmission, tenantId: string): Promise<PersistResult>;
+  /**
+   * §Phase E4 — persist the operational-commerce records. The PO owns its own
+   * status; the invoice and payment own theirs; every step is recorded as ONE
+   * canonical activity so the trail is not duplicated across entities.
+   */
+  persistCommercePurchaseOrder(po: PurchaseOrder, tenantId: string): Promise<PersistResult>;
+  persistCommerceInvoice(invoice: CommerceInvoice, tenantId: string): Promise<PersistResult>;
+  persistCommercePayment(payment: CommercePayment, tenantId: string): Promise<PersistResult>;
+  persistCommerceActivity(activity: CommerceActivity, tenantId: string): Promise<PersistResult>;
   /** Load persisted state for a scope. A brand scope NEVER sees ops rows. */
   hydrate(scope: TenantScope): Promise<HydratedDomainState>;
   /** Await any in-flight writes (tests + the async send path). */
@@ -223,6 +256,18 @@ export class MemoryDomainRepository implements DomainRepository {
   }
   persistCatalogSubmission(submission: ProductSubmission): Promise<PersistResult> {
     return Promise.resolve(this.ok(DOMAIN_TABLES.catalogSubmissions, submission.id));
+  }
+  persistCommercePurchaseOrder(po: PurchaseOrder): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.commercePurchaseOrders, po.id));
+  }
+  persistCommerceInvoice(invoice: CommerceInvoice): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.commerceInvoices, invoice.id));
+  }
+  persistCommercePayment(payment: CommercePayment): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.commercePayments, payment.id));
+  }
+  persistCommerceActivity(activity: CommerceActivity): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.commerceActivities, activity.id));
   }
   hydrate(): Promise<HydratedDomainState> {
     // Nothing is durable here — an honest empty state, never a fabrication.
@@ -459,9 +504,70 @@ export class SupabaseDomainRepository implements DomainRepository {
     );
   }
 
+  /** §Phase E4 — the operational-simulation PO is scoped to its brand tenant. */
+  persistCommercePurchaseOrder(po: PurchaseOrder, tenantId: string): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.commercePurchaseOrders,
+        rowFor(po.id, tenantId, po, {
+          brand_id: po.brandId,
+          po_number: po.poNumber,
+          status: po.status,
+          mode: po.mode ?? null,
+          simulated: po.simulated ?? false,
+        })
+      )
+    );
+  }
+
+  /** §Phase E4 — a simulated invoice is scoped to its brand tenant. */
+  persistCommerceInvoice(invoice: CommerceInvoice, tenantId: string): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.commerceInvoices,
+        rowFor(invoice.id, tenantId, invoice, {
+          brand_id: invoice.brandId,
+          purchase_order_id: invoice.purchaseOrderId,
+          status: invoice.status,
+          simulated: invoice.simulated,
+        })
+      )
+    );
+  }
+
+  /** §Phase E4 — a simulated payment is scoped to its brand tenant. */
+  persistCommercePayment(payment: CommercePayment, tenantId: string): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.commercePayments,
+        rowFor(payment.id, tenantId, payment, {
+          brand_id: payment.brandId,
+          invoice_id: payment.invoiceId,
+          status: payment.status,
+          simulated: payment.simulated,
+        })
+      )
+    );
+  }
+
+  /** §Phase E4 — the canonical operational activity trail. */
+  persistCommerceActivity(activity: CommerceActivity, tenantId: string): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.commerceActivities,
+        rowFor(activity.id, tenantId, activity, {
+          brand_id: activity.brandId,
+          type: activity.type,
+          purchase_order_id: activity.purchaseOrderId ?? null,
+          simulated: activity.simulated,
+        })
+      )
+    );
+  }
+
   async hydrate(scope: TenantScope): Promise<HydratedDomainState> {
     if (!supabase) return emptyHydratedState();
-    const [outreach, responses, opportunities, events, prospects, runs, changes, snapshots, brandOnboarding, catalogSubmissions] =
+    const [outreach, responses, opportunities, events, prospects, runs, changes, snapshots, brandOnboarding, catalogSubmissions, commercePos, commerceInvoices, commercePayments, commerceActivities] =
       await Promise.all([
         this.select(DOMAIN_TABLES.outreach, scope),
         this.select(DOMAIN_TABLES.responses, scope),
@@ -473,6 +579,10 @@ export class SupabaseDomainRepository implements DomainRepository {
         this.select(DOMAIN_TABLES.snapshots, scope),
         this.select(DOMAIN_TABLES.brandOnboarding, scope),
         this.select(DOMAIN_TABLES.catalogSubmissions, scope),
+        this.select(DOMAIN_TABLES.commercePurchaseOrders, scope),
+        this.select(DOMAIN_TABLES.commerceInvoices, scope),
+        this.select(DOMAIN_TABLES.commercePayments, scope),
+        this.select(DOMAIN_TABLES.commerceActivities, scope),
       ]);
     const payloads = <T>(rows: Record<string, unknown>[]): T[] =>
       rows.map((r) => r.payload as T).filter(Boolean);
@@ -487,6 +597,10 @@ export class SupabaseDomainRepository implements DomainRepository {
       snapshots: payloads<IntelligenceSnapshot>(snapshots),
       brandOnboarding: payloads<BrandOnboarding>(brandOnboarding),
       catalogSubmissions: payloads<ProductSubmission>(catalogSubmissions),
+      commercePurchaseOrders: payloads<PurchaseOrder>(commercePos),
+      commerceInvoices: payloads<CommerceInvoice>(commerceInvoices),
+      commercePayments: payloads<CommercePayment>(commercePayments),
+      commerceActivities: payloads<CommerceActivity>(commerceActivities),
     };
   }
 

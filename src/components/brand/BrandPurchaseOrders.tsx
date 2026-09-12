@@ -11,6 +11,7 @@ import type { PurchaseOrder } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
 import { Badge, Button, Card } from '@/components/ui';
 import { BrandCommPanel } from '@/components/shared/BrandComm';
+import { CommerceSimulationPanel } from '@/components/shared/CommerceSimulationPanel';
 import { ShippingCostEstimate } from '@/components/shared/ShippingCostEstimate';
 import { RoutingRequestIndicator, RoutingRequestForm } from '@/components/shared/RoutingRequest';
 import { downloadCsv } from '@/lib/csv';
@@ -713,6 +714,12 @@ export function BrandPurchaseOrders() {
           </Card>
         )}
       </div>
+
+      {/* §Phase E4 — the operational commerce simulation console (brand-facing).
+          Deliberately rendered AFTER the PO list so the pre-existing PO/ASN
+          control order (and every existing browser assertion that selects by
+          control order) is unchanged. */}
+      <CommerceSimulationPanel />
     </div>
   );
 }

@@ -17,6 +17,11 @@ import type {
   Product,
   ProductSubmission,
   CatalogClientMode,
+  CommerceActivity,
+  CommerceActivityType,
+  CommerceInvoice,
+  CommercePayment,
+  CommerceMode,
 } from '@/types';
 import {
   ALL_DEMO_BRANDS,
@@ -321,6 +326,144 @@ export function recordCatalogAudit(
   demoAuditLog.push(entry);
   return entry;
 }
+
+
+/* ── §Phase E4 — Commerce / operational-simulation stores ──────────────────
+ *
+ * ONE canonical home for the operational commerce records that the D4
+ * persistence port mirrors. The PO and shipment STATE stays on the EXISTING
+ * `demoPurchaseOrders` / `demoShipments` arrays (never duplicated); these
+ * stores hold the canonical operational activity trail, the simulated invoice
+ * and the simulated payment.
+ */
+
+export const demoCommerceActivities: CommerceActivity[] = [];
+export const demoCommerceInvoices: CommerceInvoice[] = [];
+export const demoCommercePayments: CommercePayment[] = [];
+
+/** The number derived so far for one (brand, activity-type) pair. */
+export function nextCommerceSequence(brandId: string, type: CommerceActivityType): number {
+  return demoCommerceActivities.filter((a) => a.brandId === brandId && a.type === type).length + 1;
+}
+
+/** Deterministic id for one operational activity step. */
+export function commerceActivityId(
+  brandId: string,
+  type: CommerceActivityType,
+  sequence: number
+): string {
+  return `com-${brandId}-${type}-${sequence}`;
+}
+
+/**
+ * Append ONE operational activity. IDEMPOTENT by canonical id: a replayed step
+ * returns the existing record instead of duplicating the trail.
+ */
+export function recordCommerceActivity(
+  activity: Omit<CommerceActivity, 'at'> & { at?: string }
+): CommerceActivity {
+  const existing = demoCommerceActivities.find((a) => a.id === activity.id);
+  if (existing) return existing;
+  const record: CommerceActivity = {
+    ...activity,
+    at: activity.at ?? new Date().toISOString(),
+  };
+  demoCommerceActivities.push(record);
+  return record;
+}
+
+export function getCommerceActivity(id: string): CommerceActivity | undefined {
+  return demoCommerceActivities.find((a) => a.id === id);
+}
+
+export function getAllCommerceActivities(): CommerceActivity[] {
+  return demoCommerceActivities;
+}
+
+export function getCommerceActivitiesForBrand(brandId: string): CommerceActivity[] {
+  return demoCommerceActivities.filter((a) => a.brandId === brandId);
+}
+
+/** Upsert a simulated invoice — idempotent on the canonical id. */
+export function recordCommerceInvoice(invoice: CommerceInvoice): CommerceInvoice {
+  const existing = demoCommerceInvoices.find((i) => i.id === invoice.id);
+  if (existing) return existing;
+  demoCommerceInvoices.push(invoice);
+  return invoice;
+}
+
+export function updateCommerceInvoice(
+  id: string,
+  patch: Partial<CommerceInvoice>
+): CommerceInvoice | undefined {
+  const invoice = demoCommerceInvoices.find((i) => i.id === id);
+  if (!invoice) return undefined;
+  Object.assign(invoice, patch);
+  return invoice;
+}
+
+export function getCommerceInvoice(id: string): CommerceInvoice | undefined {
+  return demoCommerceInvoices.find((i) => i.id === id);
+}
+
+/** The canonical invoice for a PO — the invoice is keyed by the PO, never copied. */
+export function getCommerceInvoiceForPo(purchaseOrderId: string): CommerceInvoice | undefined {
+  return demoCommerceInvoices.find((i) => i.purchaseOrderId === purchaseOrderId);
+}
+
+export function getCommerceInvoicesForBrand(brandId: string): CommerceInvoice[] {
+  return demoCommerceInvoices.filter((i) => i.brandId === brandId);
+}
+
+/** Upsert a simulated payment — idempotent on the canonical id. */
+export function recordCommercePayment(payment: CommercePayment): CommercePayment {
+  const existing = demoCommercePayments.find((p) => p.id === payment.id);
+  if (existing) return existing;
+  demoCommercePayments.push(payment);
+  return payment;
+}
+
+export function getCommercePayment(id: string): CommercePayment | undefined {
+  return demoCommercePayments.find((p) => p.id === id);
+}
+
+export function getCommercePaymentsForInvoice(invoiceId: string): CommercePayment[] {
+  return demoCommercePayments.filter((p) => p.invoiceId === invoiceId);
+}
+
+export function getCommercePaymentsForBrand(brandId: string): CommercePayment[] {
+  return demoCommercePayments.filter((p) => p.brandId === brandId);
+}
+
+/**
+ * §Phase E4 — commerce operations are audited on the EXISTING platform log
+ * (`demoAuditLog`). No second audit system.
+ */
+export function recordCommerceAudit(
+  action: string,
+  entityId: string,
+  brandId: string,
+  reason: string,
+  actorId: string,
+  metadata: Record<string, unknown> = {}
+): AuditLogEntry {
+  const entry: AuditLogEntry = {
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+    actorId,
+    action,
+    entityType: 'commerce',
+    entityId,
+    brandId,
+    reason,
+    metadata,
+  };
+  demoAuditLog.push(entry);
+  return entry;
+}
+
+/** The truthful mode of the commerce simulation in this environment. */
+export const COMMERCE_SIMULATION_MODE: CommerceMode = 'simulation';
 
 
 

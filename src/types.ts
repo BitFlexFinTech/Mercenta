@@ -264,6 +264,113 @@ export interface CatalogReadiness {
 }
 
 
+/* ────────────────────────────────────────────────────────────────────
+ * §Phase E4 — Commerce / Amazon-style OPERATIONAL SIMULATION
+ *
+ * The lifecycle is built on the EXISTING operational vocabulary
+ * (`PurchaseOrder`, `PurchaseOrderStatus`, `Shipment`, `Deduction`, the
+ * helpdesk case) plus the ONE new canonical operational record and the
+ * invoice/payment artefacts the platform had no canonical home for. No second
+ * compliance system, no second PO vocabulary, no second store, no second DB.
+ * ──────────────────────────────────────────────────────────────── */
+
+/**
+ * §Phase E4 — truthful provenance for an operational commerce record.
+ * `simulation` is the only mode reachable while no live provider credentials
+ * exist; it is written explicitly and never inferred or silently upgraded.
+ */
+export type CommerceMode = 'simulation' | 'live';
+
+/**
+ * §Phase E4 — every operational step is recorded as ONE canonical activity, so
+ * the lifecycle is auditable and the simulation provenance lives on the record
+ * itself rather than being duplicated onto unrelated objects.
+ */
+export type CommerceActivityType =
+  | 'po_created'
+  | 'po_acknowledged'
+  | 'po_fulfilment_started'
+  | 'shipment_advanced'
+  | 'po_received'
+  | 'invoice_issued'
+  | 'payment_recorded'
+  | 'exception_raised'
+  | 'dispute_opened'
+  | 'dispute_resolved';
+
+export interface CommerceActivity {
+  /** Deterministic id: `com-<brandId>-<type>-<sequence>`. */
+  id: string;
+  brandId: string;
+  type: CommerceActivityType;
+  /** The resulting operational state (e.g. a `PurchaseOrderStatus`). */
+  status: string;
+  purchaseOrderId?: string;
+  shipmentId?: string;
+  invoiceId?: string;
+  deductionId?: string;
+  detail: string;
+  actorId: string;
+  mode: CommerceMode;
+  /** TRUE whenever the step could not have run against a live provider. */
+  simulated: boolean;
+  at: string;
+}
+
+/**
+ * §Phase E4 — whether a product may enter the commerce simulation.
+ *
+ * DERIVED from the E3 catalog lifecycle (product completeness + the EXISTING
+ * compliance gate + the latest submission state). Never a second compliance
+ * rule set, and never a weaker one.
+ */
+export interface CommerceEligibility {
+  eligible: boolean;
+  brandId: string;
+  sku: string;
+  productId?: string;
+  /** Human-readable reasons the product is not eligible (empty when eligible). */
+  reasons: string[];
+  /** The E3 readiness verdict this was derived from. */
+  readiness: CatalogReadiness;
+  /** The latest E3 submission state, when one exists. */
+  submissionStatus?: CatalogSubmissionStatus;
+}
+
+/** §Phase E4 — canonical SIMULATED invoice raised against a commerce PO. */
+export interface CommerceInvoice {
+  /** Deterministic id: `cinv-<brandId>-<poNumber>`. */
+  id: string;
+  brandId: string;
+  purchaseOrderId: string;
+  poNumber: string;
+  number: string;
+  lines: { description: string; amountGbp: number }[];
+  subtotalGbp: number;
+  status: 'issued' | 'paid';
+  currency: 'GBP';
+  mode: CommerceMode;
+  simulated: boolean;
+  issuedAt: string;
+  paidAt?: string;
+}
+
+/** §Phase E4 — canonical SIMULATED payment settled against an invoice. */
+export interface CommercePayment {
+  /** Deterministic id: `cpay-<brandId>-<invoiceId>`. */
+  id: string;
+  brandId: string;
+  invoiceId: string;
+  purchaseOrderId: string;
+  amountGbp: number;
+  status: 'settled';
+  method: 'simulated_bank_transfer';
+  mode: CommerceMode;
+  simulated: boolean;
+  at: string;
+}
+
+
 export interface ActivityLog {
   id: string;
   timestamp: string;
@@ -598,6 +705,9 @@ export interface Deduction {
     notes: string;
     outcome?: DisputeOutcome;
   };
+  /** §Phase E4 — provenance for exceptions raised by the commerce simulation. */
+  mode?: CommerceMode;
+  simulated?: boolean;
 }
 
 /* ── §PO workflow (brand-facing Purchase Orders tab) ──────────────── */
@@ -654,6 +764,14 @@ export interface PurchaseOrder {
   /** Latest delivery date — carrier must deliver to FC by this date. */
   deliveryWindowEnd?: string;
   lineItems: PurchaseOrderLineItem[];
+  /**
+   * §Phase E4 — provenance of an OPERATIONAL-SIMULATION PO. Absent on legacy
+   * seed rows (unknown provenance is never re-labelled as simulation).
+   */
+  mode?: CommerceMode;
+  simulated?: boolean;
+  /** §Phase E4 — the canonical catalog product the PO was raised against. */
+  originProductId?: string;
 }
 
 /** §Stage-24 — line-item level acknowledgment, not whole-PO toggle. */

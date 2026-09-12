@@ -12,6 +12,7 @@ import { SUBMISSION_STATUS_LABELS, UK_MARKETPLACE_ID } from '@/lib/spapi/transfo
 import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AdminPurchaseOrderDetail } from '@/components/admin/AdminPurchaseOrderDetail';
+import { CommerceOperationsPanel } from '@/components/admin/CommerceOperationsPanel';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -319,6 +320,12 @@ function UnlockedPipeline() {
       {detailPoId && (
         <AdminPurchaseOrderDetail poId={detailPoId} onClose={() => setDetailPoId(null)} />
       )}
+
+      {/* §Phase E4 — the operational commerce simulation overview (admin-facing).
+          Deliberately rendered AFTER the existing pipeline sections so the
+          pre-existing catalog/PO/deduction DOM order — and every existing
+          browser assertion that selects by order — is unchanged. */}
+      <CommerceOperationsPanel />
     </div>
   );
 }

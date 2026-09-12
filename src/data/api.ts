@@ -694,6 +694,78 @@ export function createPurchaseOrder(
 }
 
 /**
+ * §Phase E4 — SIMULATION-SAFE operational purchase-order creation.
+ *
+ * The operational commerce simulation must NEVER send an email and must never
+ * contact a live provider, so this is a SEPARATE path from
+ * `createPurchaseOrder` (whose real Postmark behaviour is deliberately left
+ * untouched). Everything else — the canonical `PurchaseOrder` shape, the
+ * deterministic id, the audit entry — is identical, and the record is
+ * EXPLICITLY marked `mode: 'simulation'`.
+ *
+ * IDEMPOTENT: replaying the same (brandId, product) returns the existing PO
+ * instead of creating a duplicate.
+ */
+export function createSimulatedPurchaseOrder(
+  brandId: string,
+  lineItems: { sku: string; productName: string; quantity: number; unitPrice: number; commodityCode: string }[],
+  originProductId?: string,
+  actorStaffId?: string
+): { ok: true; po: PurchaseOrder; created: boolean } | { ok: false; error: string } {
+  if (lineItems.length === 0) {
+    return { ok: false, error: 'A purchase order needs at least one line.' };
+  }
+
+  const brand = demoBrands.find((b) => b.id === brandId);
+  const brandName = brand?.profile.businessName ?? brandId;
+  const deterministicKey = originProductId ?? lineItems[0].sku;
+  const poNumber = `PO-SIM-${brandId}-${deterministicKey}`.toUpperCase();
+
+  const existing = demoPurchaseOrders.find((p) => p.poNumber === poNumber);
+  if (existing) return { ok: true, po: existing, created: false };
+
+  const now = new Date();
+  const totalValue = lineItems.reduce((a, l) => a + l.unitPrice * l.quantity, 0);
+  const po: PurchaseOrder = {
+    id: `po-sim-${brandId}-${deterministicKey}`,
+    brandId,
+    poNumber,
+    status: 'received',
+    poValue: Math.round(totalValue * 100) / 100,
+    commissionRate: 0.07,
+    commissionAmount: Math.round(totalValue * 0.07 * 100) / 100,
+    orderDate: now.toISOString(),
+    lineItems: lineItems.map((l) => ({
+      sku: l.sku,
+      productName: l.productName,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+      commodityCode: l.commodityCode,
+    })),
+    mode: 'simulation',
+    simulated: true,
+    originProductId,
+  };
+  demoPurchaseOrders.push(po);
+
+  const actorLabel = actorStaffId
+    ? `${actorStaffId} (admin on behalf of ${brandName})`
+    : `${brandName} (self)`;
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: now.toISOString(),
+    actorId: actorStaffId ?? brandId,
+    action: 'po_created',
+    entityType: 'purchase_order',
+    entityId: po.id,
+    brandId,
+    reason: `${actorLabel}: SIMULATED PO ${poNumber} created for ${brandName} — ${lineItems.length} line(s), GBP ${po.poValue.toFixed(2)}. No email sent; no live provider contacted.`,
+    metadata: { actorLabel, lineCount: lineItems.length, poValue: po.poValue, mode: 'simulation', simulated: true },
+  });
+  return { ok: true, po, created: true };
+}
+
+/**
  * §Stage-24 — ASN creation with real carton detail AND the concrete link to
  * the Deductions module: ASN totals are validated against ACKNOWLEDGED
  * quantities before submission, and any shortfall automatically opens a
