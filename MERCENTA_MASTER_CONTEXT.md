@@ -346,8 +346,9 @@ onboarding. **Not started yet.**
 > operational simulation · E5 admin operational surfaces · E6 brand operational
 > surfaces · E7 embedded Postiz**. That programme absorbs what this table called
 > D5/D6 (and overlaps row H for Postiz). Rows E–H above are therefore **NOT** the
-> same thing as Phase E1/E2/…/E7 — do not conflate them. Phase E1 is DONE
-> (2026-09-11, commit `0568e2a`); its state lives in **PROJECT_STATUS.md**.
+> same thing as Phase E1/E2/…/E7 — do not conflate them. **E1 (opportunity → brand
+> onboarding hand-off, commit `0568e2a`) and E2 (brand onboarding workflow) are
+> DONE 2026-09-11**; their state lives in **PROJECT_STATUS.md**.
 
 ## AC. Permanent Do-Not-Change Decisions
 
@@ -422,6 +423,16 @@ onboarding. **Not started yet.**
     in the domain, and persistence through the SAME domain port
     (`DOMAIN_TABLES.brandOnboarding`) — with a brand-isolation RLS policy in
     `supabase/migrations/021_create_brand_onboarding.sql`.
+14. There is ONE canonical onboarding record with THREE real entry points
+    (Phase E2): the acquisition opportunity, an approved partner application
+    (`beginOnboardingFromApplication`, id `onb-app-<applicationId>`) and an
+    operator-created brand (`beginOnboardingForManualBrand`, derived tenant id) —
+    all idempotent, all deterministic. BRAND ACCEPTANCE is a distinct audited
+    transition (`acceptOnboarding`, `initiated → accepted`, attributed to
+    `brand:<tenantId>`), and tenant isolation is enforced IN THE DOMAIN via
+    `OnboardingActor.tenantId` (a brand session is refused `CROSS_TENANT` on any
+    other tenant's record and can never initiate onboarding). No second store, no
+    second database, no parallel onboarding workflow.
 
 ## AE. Known Limitations / Caveats
 
@@ -459,9 +470,10 @@ onboarding. **Not started yet.**
   response → Opportunity → CRM relationship context, with RBAC + audit +
   `networkCalls === 0` proven by `validate-acquisition-pipeline.mjs`.
 - **Known gaps after Phase C:** no live provider send was exercised; acquisition
-  state is session-only (partially addressed by D4); `Opportunity.brandId` is now
-  wired through the **opportunity → brand-onboarding hand-off (Phase E1)** — the
-  still-missing entry point is the marketing application-approval path (E2); BI
+  state is session-only (partially addressed by D4); `Opportunity.brandId` is wired
+  through the **opportunity → brand-onboarding hand-off (Phase E1)** and the
+  **application-approval + manual-creation entry points (Phase E2)** — all three now
+  create the same canonical onboarding record; BI
   discovery runs remain operator-triggered (no scheduler exists and none is
   claimed); campaign performance stats and monitoring health remain seeded
   (flagged).

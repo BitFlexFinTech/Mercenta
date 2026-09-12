@@ -233,6 +233,16 @@ export function getOnboardingForProspect(prospectId: string): BrandOnboarding | 
   return onboardings.find((o) => o.prospectId === prospectId) ?? null;
 }
 
+/** §Phase E2 — the canonical onboarding record that owns a brand TENANT id. */
+export function getOnboardingForBrand(brandId: string): BrandOnboarding | null {
+  return onboardings.find((o) => o.brandId === brandId) ?? null;
+}
+
+/** §Phase E2 — every onboarding record (admin pipeline read model). */
+export function listOnboardings(): BrandOnboarding[] {
+  return onboardings;
+}
+
 export function getOnboardingForOpportunity(opportunityId: string): BrandOnboarding | null {
   return onboardings.find((o) => o.opportunityId === opportunityId) ?? null;
 }
@@ -306,6 +316,31 @@ export function recordAcquisitionAudit(
     entityType: 'acquisition',
     entityId: prospectId,
     brandId: prospectId,
+    reason,
+  });
+}
+
+/**
+ * §Phase E2 — onboarding audit entry. Separate entityType so an onboarding event
+ * is distinguishable from a prospect-timeline event, while still writing to the
+ * SAME platform audit registry (never a second audit log). `brandId` carries the
+ * real tenant id, so a brand scope can be filtered honestly.
+ */
+export function recordOnboardingAudit(
+  action: string,
+  onboardingId: string,
+  reason: string,
+  actorStaffId: string,
+  brandId?: string
+): void {
+  demoAuditLog.push({
+    id: uid('audit'),
+    createdAt: new Date().toISOString(),
+    actorId: actorStaffId,
+    action,
+    entityType: 'onboarding',
+    entityId: onboardingId,
+    brandId: brandId ?? onboardingId,
     reason,
   });
 }

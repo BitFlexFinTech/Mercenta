@@ -40,6 +40,12 @@ interface AppState {
   signIn: (env: Environment, role: SessionRole) => void;
   /** One-click brand login pinned to a specific demo tenant. */
   activateDemoBrand: (brandId: string) => void;
+  /**
+   * §Phase E2 — enter the portal as a brand whose tenant came from the CANONICAL
+   * onboarding record (acquisition hand-off, approved application, or manual
+   * creation). The profile is built only from what Mercenta actually holds.
+   */
+  activateOnboardingBrand: (brandId: string) => void;
   signOut: () => void;
 
   shipments: Shipment[];
@@ -245,6 +251,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setEnvironment('home');
   }, []);
 
+  /**
+   * §Phase E2 — enter the portal as a CANONICAL onboarding tenant.
+   *
+   * The profile is built ONLY from what Mercenta actually holds (the onboarding
+   * record's business name/category/track, and the brand's own declared origin
+   * derived through the canonical ICP mapping). A brand that has not yet supplied
+   * its details has EMPTY detail fields and NO products / POs / shipments — the
+   * opposite of the demo-brand dossiers, which are derived fixtures. Nothing here
+   * is fabricated; the brand supplies its information in the wizard.
+   */
+  const activateOnboardingBrand = useCallback((brandId: string) => {
+    void Promise.all([
+      import('@/data/acquisitionStore'),
+      import('@/lib/onboarding/onboardingLifecycle'),
+    ]).then(([store, onboarding]) => {
+      const record = store.getOnboardingForBrand(brandId);
+      if (!record) {
+        console.warn(`[rbac] unknown onboarding tenant "${brandId}" — refused`);
+        return;
+      }
+      setSession({ tier: 'brand', tenantId: brandId, role: 'Brand Partner' });
+      setRole('Brand Partner');
+      const region = onboarding.deriveBrandRegionForOnboarding(record);
+      setBrandProfile({
+        ...DEFAULT_PROFILE,
+        businessName: record.businessName,
+        category: record.category,
+        fulfillmentTrack: record.track,
+        ...(region ? { region } : {}),
+        onboarded: false,
+        complianceGateStatus: 'blocked',
+      });
+      // Honest empty operational state — this brand has supplied no data yet.
+      setProducts([]);
+      setShipments([]);
+      setFinancials([]);
+      setComplianceDocs([]);
+      setCarrierTokens({});
+      setGateDocs([]);
+      setEnvironment('brand');
+    });
+  }, []);
   const activateDemo = useCallback((region: DemoRegion) => {
     import('@/data/regionalDossiers').then((m) => {
       const dossier = m.REGIONAL_DOSSIERS[region];
@@ -407,7 +455,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setGeneratedAgreement(agreementText);
       return { ...prev, onboarded: true, complianceGateStatus: 'in_review' };
     });
-  }, []);
+
+    /**
+     * §Phase E2 — the brand's wizard submission is ALSO a real canonical
+     * onboarding transition: the brand ACCEPTS the onboarding it was invited into
+     * and the `profile` step completes, attributed to the brand session (not to a
+     * staff account). For demo tenants (which have no canonical record) this is a
+     * no-op, so their behaviour is unchanged.
+     */
+    const tenantId = session?.tenantId;
+    if (tenantId) {
+      void Promise.all([
+        import('@/data/acquisitionStore'),
+        import('@/lib/onboarding/onboardingLifecycle'),
+      ]).then(([store, onboarding]) => {
+        const record = store.getOnboardingForBrand(tenantId);
+        if (!record) return;
+        const actor = { staffId: `brand:${tenantId}`, canMutate: true, tenantId };
+        onboarding.acceptOnboarding(record.id, actor, 'Submitted by the brand through the onboarding wizard');
+        onboarding.completeOnboardingStep(record.id, 'profile', actor, 'Brand profile submitted in the wizard');
+      });
+    }
+  }, [session?.tenantId]);
 
   /** §3 — admin/staff action: move a gate document to a new status. */
   const reviewGateDocument = useCallback(
@@ -506,6 +575,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     activateDemo,
     session,
     activateDemoBrand,
+    activateOnboardingBrand,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

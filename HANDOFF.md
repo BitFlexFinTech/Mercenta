@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 11, 2026 (Phase E1 — opportunity → brand onboarding hand-off)
+Last updated: September 11, 2026 (Phase E2 — brand onboarding workflow)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -62,6 +62,19 @@ Cline's output back. AI confirms, gives next prompt.
   outreach record ids collided within a millisecond and destroyed a revision — ids
   are now workflow-owned. Gates: validator 44/44 + E2E 3/3; full E2E 172/0/4.
   Report: docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md.
+- Brand onboarding workflow (Phase E2, 2026-09-11): the onboarding record is now a
+  real stateful workflow with THREE entry points into ONE canonical record —
+  acquisition opportunity, approved partner application, and operator-created brand
+  (all idempotent, deterministic tenant ids). The brand ACCEPTS its onboarding
+  through the existing portal wizard (a distinct, attributed, audited transition),
+  and Admin has a new **Onboarding** screen that lists every brand in onboarding with
+  its real origin, derives all counts from live state (0 when empty) and operates it
+  inline: record acceptance → complete the 5 ordered steps → complete onboarding →
+  the brand is operational. Tenant isolation is enforced in the domain (a brand
+  session is refused any other tenant's record). FIXED: application-approved brands
+  could not enter the portal at all, and manually created brands used a random
+  tenant id. Gates: validator 45/45 + E2E 3/3; full E2E 181/0/4. Report:
+  docs/PRODUCT_CONSOLIDATION_PHASEE2_2026-09-11.md.
 - Opportunity → brand onboarding hand-off (Phase E1, 2026-09-11; commit `0568e2a`): the missing link
   after an acquisition Opportunity. A qualified/won Opportunity can now BEGIN
   onboarding, which creates the canonical `BrandOnboarding` record keyed by the
@@ -122,12 +135,13 @@ the FINAL phase. The older list below is superseded by that roadmap.
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
 NEXT in roadmap: PHASE D COMPLETE (D1–D4, 2026-09-11). **PHASE E — CORE PLATFORM
 COMPLETION is IN PROGRESS: E1 (opportunity → brand onboarding hand-off) DONE
-2026-09-11** (commit `0568e2a`). Next: **E2 — Brand onboarding**
-(link the brand-side wizard step state, route the marketing application-approval
-path through the SAME canonical onboarding record, add an Admin onboarding
-pipeline view), then E3 catalog/products, E4 commerce/Amazon-style operational
-simulation, E5 admin operational surfaces, E6 brand operational surfaces, E7
-embedded Postiz. Rakazo stays LAST (Phase M).
+2026-09-11** and **E2 (brand onboarding workflow) DONE 2026-09-11** — the
+onboarding record now has three entry points (opportunity / application / manual),
+brand acceptance, an Admin Onboarding Pipeline that operates it inline, and a brand
+tenant that can actually reach its portal. Next: **E3 — Catalog / product
+management**, then E4 commerce/Amazon-style operational simulation, E5 admin
+operational surfaces, E6 brand operational surfaces, E7 embedded Postiz. Rakazo
+stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

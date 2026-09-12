@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { BRAND_NAME } from '@/config/brand';
 import { ALL_DEMO_BRANDS } from '@/data/demoData';
@@ -76,14 +76,75 @@ const OPS_LOGINS: {
 ];
 
 export function Login() {
-  const { signIn, setEnvironment, activateDemoBrand } = useApp();
+  const { signIn, setEnvironment, activateDemoBrand, activateOnboardingBrand } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [appSubmitted, setAppSubmitted] = useState(false);
+
+  /**
+   * §Phase E2 — brands whose tenant came from the CANONICAL onboarding record.
+   * Loaded lazily (the canonical store is not part of the marketing bundle), and
+   * DERIVED from the store — never a hardcoded list. A brand that has been handed
+   * off into the platform can therefore actually reach its portal.
+   */
+  const [onboardingBrands, setOnboardingBrands] = useState<
+    { brandId: string; businessName: string; category: string; track: string; status: string }[]
+  >([]);
+  useEffect(() => {
+    void import('@/data/acquisitionStore').then((store) => {
+      setOnboardingBrands(
+        store.listOnboardings().map((o) => ({
+          brandId: o.brandId,
+          businessName: o.businessName,
+          category: o.category,
+          track: o.track,
+          status: o.status,
+        }))
+      );
+    });
+  }, []);
 
   // Combine demo brands + approved application brands for login cards
   const allBrands = [
     ...ALL_DEMO_BRANDS.map(b => ({ id: b.id, name: b.name, nation: b.nation, category: b.category, signatory: b.signatory, track: b.track, contractStatus: b.contractStatus, fromApp: false as const })),
     ...approvedApplicationBrands.map(b => ({ id: b.id, name: b.name, nation: b.country, category: b.category, signatory: b.signatory, track: b.track, contractStatus: 'active' as const, fromApp: true as const })),
+  ];
+
+  /** The canonical tenant for a card, when that brand came through onboarding. */
+  const canonicalFor = (id: string) => onboardingBrands.find((b) => b.brandId === id);
+
+  /**
+   * One card per portal tenant. Cards backed by a canonical onboarding record
+   * enter through the canonical activation path; the demo fixtures keep using the
+   * demo dossier path, so existing behaviour is unchanged.
+   */
+  const portalCards = [
+    ...allBrands.map((b) => {
+      const canonical = canonicalFor(b.id);
+      return {
+        id: b.id,
+        name: b.name,
+        nation: b.nation,
+        category: b.category,
+        signatory: b.signatory,
+        track: b.track,
+        contractStatus: b.contractStatus,
+        canonical: !!canonical,
+        onboardingStatus: canonical?.status,
+      };
+    }),
+    ...onboardingBrands
+      .filter((b) => !allBrands.some((a) => a.id === b.brandId))
+      .map((b) => ({
+        id: b.brandId,
+        name: b.businessName,
+        nation: '',
+        category: b.category,
+        signatory: '',
+        track: b.track,
+        contractStatus: 'pending',
+        canonical: true,
+        onboardingStatus: b.status,
+      })),
   ];
 
   if (appSubmitted) {
@@ -127,14 +188,16 @@ export function Login() {
           <div className="flex items-center gap-2 text-xs mb-3">
             <Building2 className="w-3.5 h-3.5 text-brass-400" />
             <span className="font-medium text-zinc-400 uppercase tracking-wider">
-              Brand Partner Portals — all {allBrands.length} brands
+              Brand Partner Portals — all {portalCards.length} brands
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {allBrands.map((brand, i) => (
+            {portalCards.map((brand, i) => (
               <button
                 key={brand.id}
-                onClick={() => activateDemoBrand(brand.id)}
+                onClick={() =>
+                  brand.canonical ? activateOnboardingBrand(brand.id) : activateDemoBrand(brand.id)
+                }
                 className={cn(
                   'bg-ink-900 border rounded-xl p-4 text-left transition-all group',
                   ACCENTS[i % ACCENTS.length]
@@ -145,11 +208,20 @@ export function Login() {
                   <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider truncate">
                     {brand.category}
                   </span>
+                  {brand.canonical && (
+                    <span className="ml-auto text-[9px] font-medium text-brass-400 uppercase tracking-wider">
+                      Onboarding
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-sm font-semibold text-white leading-snug">{brand.name}</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">{brand.nation} · {brand.signatory}</p>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  {[brand.nation, brand.signatory].filter(Boolean).join(' · ') || 'Details pending'}
+                </p>
                 <p className="text-[11px] text-zinc-400 mt-2 leading-relaxed capitalize">
-                  {brand.track.replace(/_/g, ' ')} · contract {brand.contractStatus.replace(/_/g, ' ')}
+                  {brand.canonical
+                    ? `${brand.onboardingStatus?.replace(/_/g, ' ')} · onboarding record`
+                    : `${brand.track.replace(/_/g, ' ')} · contract ${brand.contractStatus.replace(/_/g, ' ')}`}
                 </p>
                 <div className="flex items-center gap-1 mt-3 text-xs text-brass-400 font-medium">
                   Enter as brand

@@ -53,7 +53,7 @@ export const VIEW_ALLOWLIST: Record<SessionTier, '*' | string[]> = {
     'returns', 'reports', 'settings',
   ],
   admin_staff: [
-    'overview', 'crm', 'fulfillment_track', 'retail_pipeline',
+    'overview', 'crm', 'onboarding_pipeline', 'fulfillment_track', 'retail_pipeline',
     'purchase_orders_admin', 'logistics', 'carriers', 'catalog', 'compliance',
     'billing', 'contracts_admin', 'messages', 'marketing',
     // super_admin + integrations views require the super_admin tier

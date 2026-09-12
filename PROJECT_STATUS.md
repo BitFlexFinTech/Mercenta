@@ -1,7 +1,37 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-11 (**Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; see the PHASE E1 block below. Previous session: **Phase D4 — PERSISTENCE + PLATFORM HARDENING**: a domain persistence port (`src/data/domainRepository.ts`) with a memory adapter (deterministic, zero-network, honest `durable:false`) and a Supabase adapter (idempotent upserts by canonical id, tenant-scoped, explicit failures); acquisition + BI lifecycle state now write-through the port; new migration `020_create_acquisition_persistence.sql` (8 tables, RLS, brand-isolation policy); deterministic idempotent response ids; honest persistence status surfaced in Brand CRM; new validator 64/64 + E2E 3/3; full E2E 175/0/4; typecheck 0 · lint 0 · build PASS. **Supabase is NOT configured in this env → nothing is durable; reported honestly, never claimed.**)
+> Last updated: 2026-09-11 (**Phase E2 — BRAND ONBOARDING WORKFLOW**; see the PHASE E2 block below. Previous session: **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF** (see the PHASE E1 block below). Earlier: **Phase D4 — PERSISTENCE + PLATFORM HARDENING**: a domain persistence port (`src/data/domainRepository.ts`) with a memory adapter (deterministic, zero-network, honest `durable:false`) and a Supabase adapter (idempotent upserts by canonical id, tenant-scoped, explicit failures); acquisition + BI lifecycle state now write-through the port; new migration `020_create_acquisition_persistence.sql` (8 tables, RLS, brand-isolation policy); deterministic idempotent response ids; honest persistence status surfaced in Brand CRM; new validator 64/64 + E2E 3/3; full E2E 175/0/4; typecheck 0 · lint 0 · build PASS. **Supabase is NOT configured in this env → nothing is durable; reported honestly, never claimed.**)
 >
+> **PHASE E2 (2026-09-11) — BRAND ONBOARDING WORKFLOW.** The E1 record is now the
+> REAL stateful workflow, with three real entry points into ONE canonical record
+> (`acquisition_opportunity` · `partner_application` · `manual_creation`):
+> `beginOnboardingFromApplication` (approving a partner application) and
+> `beginOnboardingForManualBrand` (operator-created brand) join the E1 opportunity
+> hand-off, all idempotent with DETERMINISTIC tenant ids. NEW **brand acceptance**
+> (`acceptOnboarding`, status `initiated → accepted`, attributable to
+> `brand:<tenantId>` vs a staff id, audited) — driven by the brand's own EXISTING
+> wizard submission. **Tenant isolation enforced IN THE DOMAIN**: `OnboardingActor`
+> carries an optional tenant pin; a brand session is refused `CROSS_TENANT` on any
+> other tenant's record and can never initiate its own onboarding. NEW Admin
+> **Onboarding Pipeline** (`OnboardingPipeline.tsx`, nav "Onboarding" under Brands,
+> `admin_staff` allowlist) that lists records with their real origin, derives EVERY
+> count from live state (0 when empty) and OPERATES them inline (acceptance →
+> ordered steps → operational). REAL DEFECTS FIXED: application-approved brands
+> could not enter the portal at all (`activateDemoBrand` refuses non-demo tenants →
+> the login card was a dead end); the manual-brand path used a `Date.now()`+random
+> tenant id; approval created an identity no onboarding process could see. NEW
+> `activateOnboardingBrand` (honest minimal profile — no fabricated
+> products/POs/tax ids; region derived from the prospect's own declared countries
+> via the existing ICP mapping) + `Login.tsx` derives canonical tenant cards from
+> the store. Gates: new validator **45/45 PASS** + new E2E spec **3/3**; full E2E
+> **181/0/4** (was 178/0/4 → +3, 0 new failures); typecheck 0 · lint 0 · build PASS.
+> Report: `docs/PRODUCT_CONSOLIDATION_PHASEE2_2026-09-11.md`. **HONEST: browser
+> Supabase credentials are still NOT configured → memory adapter, nothing durable,
+> migrations 020 + 021 unexecuted; and the brand-portal `onboarded` flag remains a
+> separate representation of the canonical status (documented seam, deliberately not
+> force-merged to avoid regressing the tested wizard flow).**
+>
+
 > **PHASE E1 (2026-09-11) — OPPORTUNITY → BRAND ONBOARDING HAND-OFF.** Closes the
 > documented D4 follow-up (`Opportunity.brandId` was never wired to onboarding).
 > NEW canonical entity `BrandOnboarding`, keyed by the SAME canonical prospect id

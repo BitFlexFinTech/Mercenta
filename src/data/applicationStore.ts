@@ -80,13 +80,16 @@ export interface ApprovedBrandEntry {
 /** Brands created via application approval or manual creation. */
 export const approvedApplicationBrands: ApprovedBrandEntry[] = [];
 
-export function addApprovedBrand(entry: ApprovedBrandEntry): void {
+export function addApprovedBrand(entry: ApprovedBrandEntry): ApprovedBrandEntry {
   // Remove existing entry with same id if re-approving
   const existing = approvedApplicationBrands.findIndex((b) => b.id === entry.id);
   if (existing !== -1) {
     approvedApplicationBrands.splice(existing, 1);
   }
   approvedApplicationBrands.push(entry);
+  // §Phase E2 — return the created entry so the caller can create the canonical
+  // onboarding record against the SAME tenant id (one identity, no drift).
+  return entry;
 }
 
 export function getApprovedBrandById(brandId: string): ApprovedBrandEntry | undefined {

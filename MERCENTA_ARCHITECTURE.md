@@ -283,7 +283,14 @@ carries a `prospectId`.
   `isOnboardingEligible`, `getOnboardingForProspect`. Same
   `AcquisitionActor`/`{ok,error}` contract as acquisition; RBAC and audit in the
   domain; persistence through the SAME port (`DOMAIN_TABLES.brandOnboarding`,
-  migration `021_create_brand_onboarding.sql`).
+  migration `021_create_brand_onboarding.sql`). **Phase E2 adds** the two other
+  real entry points (`beginOnboardingFromApplication`,
+  `beginOnboardingForManualBrand`), brand acceptance (`acceptOnboarding`), the
+  tenant-pinned actor guard (`OnboardingActor.tenantId` → `CROSS_TENANT`), the
+  tenant lookup (`getOnboardingForTenant`) and the admin read model
+  (`listOnboardingPipeline`). UI: **`OnboardingPipeline.tsx`** (Admin → Brands →
+  Onboarding) operates it inline; the brand portal reaches a canonical tenant through
+  `GlobalStateContext.activateOnboardingBrand`.
 
 ## 13. Future Extension Points
 
@@ -300,16 +307,18 @@ carries a `prospectId`.
   honest memory adapter and a Supabase adapter (idempotent by canonical id,
   tenant-scoped, explicit failures); acquisition + BI lifecycle write-through;
   `supabase/migrations/020_create_acquisition_persistence.sql` (8 tables, RLS).
-- **Phase E1 — core-platform gap closure (2026-09-11, commit `0568e2a`):** ✅ the opportunity →
-  brand onboarding hand-off — canonical `BrandOnboarding` (keyed by the canonical
+- **Phase E1 + E2 — onboarding (2026-09-11):** ✅ E1 the opportunity → brand
+  onboarding hand-off — canonical `BrandOnboarding` (keyed by the canonical
   prospect id), DERIVED tenant id, `Opportunity.brandId` set, strictly ordered
   steps with explicit completion, RBAC + audit in the domain, the EXISTING
   persistence port extended with `brand_onboarding` and migration
-  `021_create_brand_onboarding.sql` (RLS + brand isolation). **Still remaining:**
-  link the brand-side wizard step state and route the marketing
-  application-approval entry point through the SAME canonical record (E2), then
-  E3–E7 (catalog, commerce simulation, admin/brand operational surfaces, embedded
-  Postiz).
+  `021_create_brand_onboarding.sql` (RLS + brand isolation) · ✅ E2 the onboarding
+  WORKFLOW — three real entry points (opportunity / approved application / manual
+  creation), brand acceptance, tenant-pinned actor guard, the Admin Onboarding
+  Pipeline (`OnboardingPipeline.tsx`) and portal reachability for a canonical
+  tenant (`activateOnboardingBrand`). **Still remaining:** E3–E7 (catalog,
+  commerce simulation, admin/brand operational surfaces, embedded Postiz), and
+  resolving the deliberate `brandProfile.onboarded` vs canonical-status seam.
   Also still remaining from D4: run the migrations + exercise the durable path
   against a credentialed Supabase project (never executed here).
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.

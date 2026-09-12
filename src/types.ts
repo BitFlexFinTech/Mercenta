@@ -2228,6 +2228,7 @@ export type AcquisitionEventType =
   | 'opportunity_stage_changed'
   /* §Phase E1 — opportunity → brand onboarding hand-off */
   | 'onboarding_started'
+  | 'onboarding_accepted'
   | 'onboarding_step_completed'
   | 'onboarding_completed';
 
@@ -2274,7 +2275,7 @@ export interface AcquisitionRelationship {
  * tenant identity the opportunity onboards INTO — there is no second brand
  * identity system.
  */
-export type OnboardingStatus = 'initiated' | 'in_progress' | 'completed';
+export type OnboardingStatus = 'initiated' | 'accepted' | 'in_progress' | 'completed';
 
 /** The canonical onboarding steps, completed strictly in order. */
 export type OnboardingStepId =
@@ -2296,25 +2297,34 @@ export interface OnboardingStep {
 }
 
 export interface BrandOnboarding {
-  /** Deterministic: `onb-<prospectId>` — one onboarding per opportunity. */
+  /**
+   * Deterministic per origin: `onb-<prospectId>` for an acquisition opportunity,
+   * `onb-app-<applicationId>` for an approved partner application.
+   */
   id: string;
-  /** Canonical BI prospect id — identity survives BI → ICP → CRM → tenant. */
-  prospectId: string;
-  opportunityId: string;
-  /** The brand TENANT identity this opportunity onboards into. */
+  /** Canonical BI prospect id (acquisition origin only) — identity survives BI → ICP → CRM → tenant. */
+  prospectId?: string;
+  /** The originating acquisition opportunity (acquisition origin only). */
+  opportunityId?: string;
+  /** The originating partner application (application origin only). */
+  applicationId?: string;
+  /** The brand TENANT identity this onboarding creates. */
   brandId: string;
   businessName: string;
   category: string;
   track: FulfillmentTrack;
   status: OnboardingStatus;
   steps: OnboardingStep[];
-  /** Provenance — the single entry point this hand-off started from. */
-  origin: 'acquisition_opportunity';
-  /** BI score/tier snapshot carried from the opportunity (never re-derived). */
-  biScore: number;
-  biTier: ProspectTier;
+  /** Provenance — which real entry point this onboarding started from. */
+  origin: 'acquisition_opportunity' | 'partner_application' | 'manual_creation';
+  /** BI score/tier snapshot carried from the opportunity (acquisition origin only). */
+  biScore?: number;
+  biTier?: ProspectTier;
   initiatedAt: string;
   initiatedBy: string;
+  /** Set when the BRAND accepts (wizard submission) — a distinct audited act. */
+  acceptedAt?: string;
+  acceptedBy?: string;
   completedAt?: string;
   completedBy?: string;
 }

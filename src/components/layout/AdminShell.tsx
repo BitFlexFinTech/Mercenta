@@ -30,12 +30,13 @@ import { AdminPurchaseOrderList } from '@/components/admin/AdminPurchaseOrderLis
 import { SuperAdminPanel } from '@/components/admin/SuperAdminPanel';
 import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
 import { BrandIntelligencePanel } from '@/components/admin/BrandIntelligencePanel';
+import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
 import type { AdminDepartment } from '@/types';
 import {
   LayoutDashboard, Users, Gauge, Boxes, Package, Truck, Plug,
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
-  Phone,
+  Phone, ClipboardList,
 } from 'lucide-react';
 
 const ADMIN_SECTIONS = [
@@ -47,6 +48,7 @@ const ADMIN_SECTIONS = [
     label: 'Brands',
     items: [
       { id: 'crm', label: 'Brand CRM', icon: <Users className="w-4 h-4" /> },
+      { id: 'onboarding_pipeline', label: 'Onboarding', icon: <ClipboardList className="w-4 h-4" /> },
       { id: 'marketing', label: 'Marketing', icon: <Target className="w-4 h-4" /> },
       { id: 'brand_intelligence', label: 'Brand Intelligence', icon: <Target className="w-4 h-4" /> },
     ],
@@ -147,6 +149,7 @@ export default function AdminShell() {
         <IntegrationsProvider>
           {adminView === 'overview' && <AdminDashboard department={deptMap[adminView]} onNavigate={setAdminView} />}
           {adminView === 'crm' && <BrandCRM />}
+          {adminView === 'onboarding_pipeline' && <OnboardingPipeline />}
           {adminView === 'fulfillment_track' && <FulfillmentTrackPanel />}
           {adminView === 'retail_pipeline' && <RetailPipelinePanel />}
           {adminView === 'purchase_orders_admin' && <AdminPurchaseOrderList />}

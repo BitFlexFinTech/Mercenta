@@ -15,6 +15,7 @@ fixed. Never cite the log as current status.
 - `node scripts/validate-outreach-provider-hardening.mjs` — OUTREACH_PROVIDER_HARDENING_VALIDATION_PASS (44/44; Phase D3)
 - `node scripts/validate-d4-persistence.mjs` — D4_PERSISTENCE_VALIDATION_PASS (64/64; Phase D4)
 - `node scripts/validate-onboarding-handoff.mjs` — ONBOARDING_HANDOFF_VALIDATION_PASS (46/46; Phase E1)
+- `node scripts/validate-onboarding-workflow.mjs` — ONBOARDING_WORKFLOW_VALIDATION_PASS (45/45; Phase E2)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -25,14 +26,41 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **178 PASS / 4 skip / 0 fail** across 30 spec files.
-  (Phase E1 added `e2e/onboarding-handoff.spec.ts`, +3 tests, 0 new failures.
+  **Playwright E2E** — **181 PASS / 4 skip / 0 fail** across 31 spec files.
+  (Phase E2 added `e2e/onboarding-workflow.spec.ts`, +3 tests, 0 new failures.
+  Phase E1 added `e2e/onboarding-handoff.spec.ts`, +3 tests, 0 new failures.
   Phase D4 added `e2e/domain-persistence.spec.ts`, +3 tests, 0 new failures.
   One 8-worker run produced a load-induced screenshot flake in
   `app-shell.spec.ts`; it passes 23/23 in isolation and the 4-worker full run
   was 0-failure.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Brand onboarding workflow (Phase E2 — 2026-09-11)
+
+- The E1 record is now a stateful workflow with THREE real entry points into one
+  canonical record: acquisition opportunity (E1), approved partner application
+  (`beginOnboardingFromApplication`), operator-created brand
+  (`beginOnboardingForManualBrand`) — all idempotent, all with deterministic tenant
+  ids (`brand-<normalizeBrandKey>` / `brand-app-<applicationId>`).
+- NEW brand acceptance (`acceptOnboarding`): `initiated → accepted`, attributable
+  (`acceptedBy`), audited (`entityType: 'onboarding'`), idempotent; driven by the
+  brand's own wizard submission through `GlobalStateContext.completeOnboarding()`.
+- Tenant isolation in the DOMAIN: `OnboardingActor { tenantId? }` — a brand session
+  is refused `CROSS_TENANT` on another tenant's record and cannot initiate
+  onboarding; a view-only staff account is refused too.
+- NEW Admin Onboarding Pipeline (`OnboardingPipeline.tsx`) — every count derived
+  from live state (0 when empty), inline operation (acceptance → ordered steps →
+  operational), drill-down filter chips, honest persistence status.
+- Brand tenant reachability: `activateOnboardingBrand` + store-derived login cards →
+  a handed-off brand can actually enter its portal (previously impossible).
+- Gates this session: **validator 45/45 · new spec 3/3 · full E2E 181/0/4 ·
+  typecheck 0 · lint 0 · build PASS**.
+- **HONEST LIMITATIONS:** no Supabase credentials → memory adapter, nothing durable,
+  migrations 020 + 021 unexecuted; the brand portal's `onboarded` flag is still a
+  separate representation of the canonical status (documented seam — force-merging
+  it would lock brands in the wizard); step evidence is captured as a note, not yet
+  as agreement/document foreign keys.
 
 ## Opportunity → brand onboarding hand-off (Phase E1 — 2026-09-11) — commit `0568e2a`
 

@@ -9,6 +9,7 @@ import {
   approvedApplicationBrands,
 } from '@/data/applicationStore';
 import { createMockMailClient } from '@/lib/mail/mail';
+import { beginOnboardingFromApplication, beginOnboardingForManualBrand, tenantIdForApplication } from '@/lib/onboarding/onboardingLifecycle';
 import type { BrandApplication, ApplicationStatus } from '@/types';
 import {
   Search, CheckCircle2, XCircle, MessageSquare,
@@ -35,7 +36,7 @@ function LinkStatus({status}: {status:string|null}) {
   return <span className={cn("text-xs",info.color)}>{info.icon} {info.label}</span>;
 }
 function ManualBrandForm({onDone}:{onDone:()=>void}) {
-  const {actingStaff} = useApp();
+  const {actingStaff,actingStaffId,canCurrentUserMutate} = useApp();
   const [cn,setCn]=useState('');const[ct,setCt]=useState('');const[em,setEm]=useState('');
   const[co,setCo]=useState('');const[cat,setCat]=useState(PRODUCT_CATS[0]);
   const[sk,setSk]=useState('');const[wu,setWu]=useState('');const[ig,setIg]=useState('');
@@ -47,7 +48,16 @@ function ManualBrandForm({onDone}:{onDone:()=>void}) {
     setErr('');
     if(!cn.trim()||!ct.trim()||!em.trim()||!co.trim()){setErr('Required fields missing.');return;}
     setBusy(true);
-    const bid=`brand-manual-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    // §Phase E2 — the manual path now uses the SAME canonical onboarding record as
+    // every other entry point, with a DETERMINISTIC tenant id. The previous
+    // Date.now()+random id could not be replayed or reconciled, and produced a
+    // brand that no onboarding process could see.
+    const onboarding = beginOnboardingForManualBrand(
+      { name: cn.trim(), category: cat, country: co.trim(), email: em.trim(), signatory: ct.trim(), track },
+      { staffId: actingStaffId, canMutate: canCurrentUserMutate }
+    );
+    if (!onboarding.ok) { setErr(onboarding.error); setBusy(false); return; }
+    const bid = onboarding.value.brandId;
     addApprovedBrand({id:bid,name:cn.trim(),category:cat,country:co.trim(),email:em.trim(),signatory:ct.trim(),track});
     await mailClient.sendEmail({to:em.trim(),subject:'Welcome to Mercenta Partners',text:`Hi ${ct.trim()},\\n\\nYour brand account is ready. Log in at: https://mercenta.co.uk`});
     const adm=actingStaff?.name??'Admin';
@@ -83,7 +93,7 @@ function ManualBrandForm({onDone}:{onDone:()=>void}) {
   </div>);
 }
 export function ApplicationsPanel() {
-  const {actingStaff,canCurrentUserMutate}=useApp();
+  const {actingStaff,actingStaffId,canCurrentUserMutate}=useApp();
   const [filter,setFilter]=useState<ApplicationStatus|'all'>('all');
   const [search,setSearch]=useState('');
   const [showManual,setShowManual]=useState(false);
@@ -104,12 +114,17 @@ export function ApplicationsPanel() {
     const adm=actingStaff?.name??'Super Admin';
     updateApplicationStatus(appId,action,adm,notes!==undefined?notes:undefined);
     if(action==='approved'){
-      addApprovedBrand({id:`brand-app-${app.id}`,name:app.companyName,category:app.category,country:app.country,
+      // §Phase E2 — approval also creates the CANONICAL onboarding record, with ONE
+      // deterministic tenant id shared by the login card and the record (the
+      // previous path created an identity no onboarding process could see).
+      const brandId = tenantIdForApplication(app.id);
+      beginOnboardingFromApplication(app.id, { staffId: actingStaffId, canMutate: canCurrentUserMutate });
+      addApprovedBrand({id:brandId,name:app.companyName,category:app.category,country:app.country,
         email:`${app.companyName.toLowerCase().replace(/\\s+/g,'.')}@example.com`,signatory:app.companyName,track:'direct_fulfillment'});
       await mailClient.sendEmail({to:`${app.companyName.toLowerCase().replace(/\\s+/g,'.')}@example.com`,
         subject:'Your Mercenta Partners application has been approved',
         text:`Dear ${app.companyName},\\n\\nYour application has been approved! Log in at: https://mercenta.co.uk`});
-      setMsg(`${app.companyName} approved`);
+      setMsg(`${app.companyName} approved and onboarding started`);
     }else if(action==='rejected'){
       await mailClient.sendEmail({to:`${app.companyName.toLowerCase().replace(/\\s+/g,'.')}@example.com`,
         subject:'Update on your Mercenta Partners application',

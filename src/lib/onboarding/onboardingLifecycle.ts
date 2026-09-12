@@ -29,19 +29,47 @@
 import type {
   AcquisitionEvent,
   BrandOnboarding,
+  BrandRegion,
+  FulfillmentTrack,
+  LeadRegion,
   OnboardingStep,
   OnboardingStepId,
   Opportunity,
   OpportunityStage,
 } from '@/types';
-import { normalizeBrandKey } from '@/lib/intelligence/prospectPipeline';
+import { deriveIcpOriginRegion, normalizeBrandKey } from '@/lib/intelligence/prospectPipeline';
 import { getProspect } from '@/data/prospectStore';
 import * as store from '@/data/acquisitionStore';
+import { getApplicationById } from '@/data/applicationStore';
 import type { AcquisitionActor } from '@/lib/acquisition/outreachLifecycle';
 
 export type OnboardingResult<T> =
   | { ok: true; value: T }
   | { ok: false; error: string };
+
+/**
+ * §Phase E2 — the actor performing an onboarding action. It extends the
+ * acquisition actor with an OPTIONAL tenant pin: a BRAND session carries its
+ * `tenantId`, and the domain then REFUSES any action on another tenant's
+ * onboarding record. Tenant isolation is enforced here, never by hiding UI.
+ */
+export interface OnboardingActor extends AcquisitionActor {
+  tenantId?: string;
+}
+
+/** Tenant isolation guard — a pinned actor may act ONLY on its own record. */
+function crossTenant(actor: OnboardingActor, brandId: string): boolean {
+  return !!actor.tenantId && actor.tenantId !== brandId;
+}
+
+/** Canonical ICP origin region → the brand-portal region model (one mapping). */
+const BRAND_REGION_BY_ICP: Readonly<Record<LeadRegion, BrandRegion>> = {
+  us: 'north_america',
+  canada: 'north_america',
+  eu: 'europe',
+  uk: 'europe',
+  africa: 'africa',
+};
 
 const FORBIDDEN = 'FORBIDDEN — the acting staff account is view-only.';
 const NO_OPPORTUNITY = 'NOT_FOUND — no such opportunity.';
@@ -98,7 +126,7 @@ function initialSteps(): OnboardingStep[] {
 }
 
 function pushEvent(
-  type: 'onboarding_started' | 'onboarding_step_completed' | 'onboarding_completed',
+  type: 'onboarding_started' | 'onboarding_accepted' | 'onboarding_step_completed' | 'onboarding_completed',
   prospectId: string,
   brand: string,
   actor: AcquisitionActor,
@@ -136,9 +164,13 @@ export function getOnboardingForProspect(prospectId: string): BrandOnboarding | 
  */
 export function beginBrandOnboarding(
   opportunityId: string,
-  actor: AcquisitionActor
+  actor: OnboardingActor
 ): OnboardingResult<BrandOnboarding> {
   if (!actor.canMutate) return forbidden();
+  // A brand can never initiate its own onboarding — that is an operator act.
+  if (actor.tenantId) {
+    return { ok: false, error: 'FORBIDDEN — onboarding is initiated by Mercenta operations, not by the brand.' };
+  }
 
   const opportunity = store.getOpportunities().find((o) => o.id === opportunityId);
   if (!opportunity) return { ok: false, error: NO_OPPORTUNITY };
@@ -197,11 +229,12 @@ export function beginBrandOnboarding(
     `Onboarding started for ${prospect.brand} → tenant ${brandId}`,
     `opportunity ${opportunity.id} · BI ${opportunity.biScore}/100 (${opportunity.biTier})`
   );
-  store.recordAcquisitionAudit(
+  store.recordOnboardingAudit(
     'acquisition_onboarding_started',
-    prospect.id,
+    onboarding.id,
     `Onboarding ${onboarding.id} started (tenant ${brandId}, opportunity ${opportunity.id})`,
-    actor.staffId
+    actor.staffId,
+    brandId
   );
 
   return { ok: true, value: onboarding };
@@ -215,13 +248,16 @@ export function beginBrandOnboarding(
 export function completeOnboardingStep(
   onboardingId: string,
   stepId: OnboardingStepId,
-  actor: AcquisitionActor,
+  actor: OnboardingActor,
   note?: string
 ): OnboardingResult<BrandOnboarding> {
   if (!actor.canMutate) return forbidden();
 
   const onboarding = store.getOnboardingById(onboardingId);
   if (!onboarding) return { ok: false, error: 'NOT_FOUND — no such onboarding record.' };
+  if (crossTenant(actor, onboarding.brandId)) {
+    return { ok: false, error: `CROSS_TENANT — this session is pinned to another brand tenant.` };
+  }
   if (onboarding.status === 'completed') {
     return { ok: false, error: 'ILLEGAL_TRANSITION — onboarding is already complete.' };
   }
@@ -250,19 +286,22 @@ export function completeOnboardingStep(
   const updated = store.updateOnboarding(onboardingId, { steps, status: 'in_progress' });
   if (!updated) return { ok: false, error: 'NOT_FOUND — no such onboarding record.' };
 
-  pushEvent(
-    'onboarding_step_completed',
-    updated.prospectId,
-    updated.businessName,
-    actor,
-    `Onboarding step completed: ${STEP_LABELS[stepId]}`,
-    `tenant ${updated.brandId}${note ? ` · ${note}` : ''}`
-  );
-  store.recordAcquisitionAudit(
+  if (updated.prospectId) {
+    pushEvent(
+      'onboarding_step_completed',
+      updated.prospectId,
+      updated.businessName,
+      actor,
+      `Onboarding step completed: ${STEP_LABELS[stepId]}`,
+      `tenant ${updated.brandId}${note ? ` · ${note}` : ''}`
+    );
+  }
+  store.recordOnboardingAudit(
     'acquisition_onboarding_step_completed',
-    updated.prospectId,
+    updated.id,
     `Step ${stepId} completed for ${updated.brandId}`,
-    actor.staffId
+    actor.staffId,
+    updated.brandId
   );
 
   return { ok: true, value: updated };
@@ -275,12 +314,15 @@ export function completeOnboardingStep(
  */
 export function finishBrandOnboarding(
   onboardingId: string,
-  actor: AcquisitionActor
+  actor: OnboardingActor
 ): OnboardingResult<BrandOnboarding> {
   if (!actor.canMutate) return forbidden();
 
   const onboarding = store.getOnboardingById(onboardingId);
   if (!onboarding) return { ok: false, error: 'NOT_FOUND — no such onboarding record.' };
+  if (crossTenant(actor, onboarding.brandId)) {
+    return { ok: false, error: `CROSS_TENANT — this session is pinned to another brand tenant.` };
+  }
   if (onboarding.status === 'completed') return { ok: true, value: onboarding };
 
   const outstanding = onboarding.steps.filter((s) => s.status !== 'done').map((s) => s.id);
@@ -300,22 +342,248 @@ export function finishBrandOnboarding(
   if (!updated) return { ok: false, error: 'NOT_FOUND — no such onboarding record.' };
 
   // Keep the opportunity ↔ tenant link authoritative for the operational view.
-  store.updateOpportunity(updated.opportunityId, { brandId: updated.brandId, updatedAt: now });
+  const linkedOpportunity = updated.opportunityId
+    ? store.getOpportunities().find((o) => o.id === updated.opportunityId) ?? null
+    : null;
+  if (linkedOpportunity) {
+    store.updateOpportunity(updated.opportunityId as string, { brandId: updated.brandId, updatedAt: now });
+  }
 
-  pushEvent(
-    'onboarding_completed',
-    updated.prospectId,
-    updated.businessName,
-    actor,
-    `${updated.businessName} onboarding completed — tenant ${updated.brandId} is operational`,
-    `acquisition history retained (prospect ${updated.prospectId}, opportunity ${updated.opportunityId})`
-  );
-  store.recordAcquisitionAudit(
+  if (updated.prospectId) {
+    pushEvent(
+      'onboarding_completed',
+      updated.prospectId,
+      updated.businessName,
+      actor,
+      `${updated.businessName} onboarding completed — tenant ${updated.brandId} is operational`,
+      `acquisition history retained (prospect ${updated.prospectId}, opportunity ${updated.opportunityId})`
+    );
+  }
+  store.recordOnboardingAudit(
     'acquisition_onboarding_completed',
-    updated.prospectId,
+    updated.id,
     `Onboarding ${updated.id} completed (tenant ${updated.brandId})`,
-    actor.staffId
+    actor.staffId,
+    updated.brandId
   );
 
   return { ok: true, value: updated };
+}
+
+/* ── §Phase E2 — brand acceptance, tenant lookup, pipeline read model ────── */
+
+/**
+ * §Phase E2 — BRAND ACCEPTANCE. The brand session accepts the onboarding it was
+ * invited into (the brand portal's wizard submission calls this). This is a
+ * distinct, audited act from Mercenta initiating the process, and it is
+ * idempotent: a repeated submission returns the existing record unchanged.
+ * Tenant-pinned: a brand session can only accept its OWN onboarding.
+ */
+export function acceptOnboarding(
+  onboardingId: string,
+  actor: OnboardingActor,
+  note?: string
+): OnboardingResult<BrandOnboarding> {
+  if (!actor.canMutate) return forbidden();
+
+  const onboarding = store.getOnboardingById(onboardingId);
+  if (!onboarding) return { ok: false, error: 'NOT_FOUND — no such onboarding record.' };
+  if (crossTenant(actor, onboarding.brandId)) {
+    return { ok: false, error: `CROSS_TENANT — this session is pinned to another brand tenant.` };
+  }
+  if (onboarding.status === 'completed') {
+    return { ok: false, error: 'ILLEGAL_TRANSITION — onboarding is already complete.' };
+  }
+  if (onboarding.acceptedAt) return { ok: true, value: onboarding };
+
+  const now = nowIso();
+  const updated = store.updateOnboarding(onboardingId, {
+    status: onboarding.status === 'initiated' ? 'accepted' : onboarding.status,
+    acceptedAt: now,
+    acceptedBy: actor.staffId,
+  });
+  if (!updated) return { ok: false, error: 'NOT_FOUND — no such onboarding record.' };
+
+  if (updated.prospectId) {
+    pushEvent(
+      'onboarding_accepted',
+      updated.prospectId,
+      updated.businessName,
+      actor,
+      `${updated.businessName} accepted onboarding (tenant ${updated.brandId})`,
+      note
+    );
+  }
+  store.recordOnboardingAudit(
+    'acquisition_onboarding_accepted',
+    updated.id,
+    `Onboarding ${updated.id} accepted${note ? ` · ${note}` : ''}`,
+    actor.staffId,
+    updated.brandId
+  );
+
+  return { ok: true, value: updated };
+}
+
+/** §Phase E2 — the canonical onboarding record owning a brand TENANT id. */
+export function getOnboardingForTenant(brandId: string): BrandOnboarding | null {
+  return store.getOnboardingForBrand(brandId);
+}
+
+/**
+ * §Phase E2 — the brand-portal region for an onboarding tenant, DERIVED from the
+ * canonical prospect's own declared countries via the EXISTING
+ * `deriveIcpOriginRegion` (no new country map, no invented region). Returns null
+ * when nothing can be honestly derived — the brand then picks it in the wizard.
+ */
+export function deriveBrandRegionForOnboarding(onboarding: BrandOnboarding): BrandRegion | null {
+  if (!onboarding.prospectId) return null;
+  const prospect = getProspect(onboarding.prospectId);
+  if (!prospect) return null;
+  const icp = deriveIcpOriginRegion(prospect);
+  return icp ? BRAND_REGION_BY_ICP[icp] ?? null : null;
+}
+
+/** One admin-pipeline row: the record plus its REAL originating entity. */
+export interface OnboardingPipelineRow {
+  onboarding: BrandOnboarding;
+  opportunity: Opportunity | null;
+  prospectBrand: string | null;
+  stepsDone: number;
+  stepsTotal: number;
+}
+
+/** §Phase E2 — the admin onboarding pipeline read model (derived, never seeded). */
+export function listOnboardingPipeline(): OnboardingPipelineRow[] {
+  const opportunities = store.getOpportunities();
+  return store.listOnboardings().map((onboarding) => ({
+    onboarding,
+    opportunity: onboarding.opportunityId
+      ? opportunities.find((o) => o.id === onboarding.opportunityId) ?? null
+      : null,
+    prospectBrand: onboarding.prospectId ? getProspect(onboarding.prospectId)?.brand ?? null : null,
+    stepsDone: onboarding.steps.filter((s) => s.status === 'done').length,
+    stepsTotal: onboarding.steps.length,
+  }));
+}
+
+/* ── §Phase E2 — the other real entry points into the same canonical record ─ */
+
+/** Deterministic TENANT id for an approved partner application. */
+export function tenantIdForApplication(applicationId: string): string {
+  return `brand-app-${applicationId}`;
+}
+
+/**
+ * §Phase E2 — APPLICATION ENTRY POINT. An approved partner application now
+ * creates the SAME canonical onboarding record the acquisition hand-off does,
+ * with its own deterministic identity (`onb-app-<applicationId>`) and the tenant
+ * id the login card uses (`tenantIdForApplication`) — one identity, so the card
+ * and the record can never disagree. Idempotent by application id.
+ */
+export function beginOnboardingFromApplication(
+  applicationId: string,
+  actor: OnboardingActor
+): OnboardingResult<BrandOnboarding> {
+  if (!actor.canMutate) return forbidden();
+  if (actor.tenantId) {
+    return { ok: false, error: 'FORBIDDEN — onboarding is initiated by Mercenta operations.' };
+  }
+
+  const application = getApplicationById(applicationId);
+  if (!application) return { ok: false, error: 'NOT_FOUND — no such brand application.' };
+
+  const existing = store.listOnboardings().find((o) => o.applicationId === applicationId);
+  if (existing) return { ok: true, value: existing };
+
+  const brandId = tenantIdForApplication(applicationId);
+  if (store.isTenantIdClaimed(brandId)) {
+    return { ok: false, error: `TENANT_CONFLICT — tenant id ${brandId} is already claimed.` };
+  }
+
+  const now = nowIso();
+  const onboarding: BrandOnboarding = {
+    id: `onb-app-${applicationId}`,
+    applicationId,
+    brandId,
+    businessName: application.companyName,
+    category: application.category,
+    track: 'unassigned',
+    status: 'initiated',
+    steps: initialSteps(),
+    origin: 'partner_application',
+    initiatedAt: now,
+    initiatedBy: actor.staffId,
+  };
+  store.saveOnboarding(onboarding);
+  store.recordOnboardingAudit(
+    'onboarding_started_from_application',
+    onboarding.id,
+    `Onboarding ${onboarding.id} started from application ${applicationId} (tenant ${brandId})`,
+    actor.staffId,
+    brandId
+  );
+
+  return { ok: true, value: onboarding };
+}
+
+/** §Phase E2 — the operator-supplied fields for a manually created brand. */
+export interface ManualBrandInput {
+  name: string;
+  category: string;
+  country: string;
+  email: string;
+  signatory: string;
+  track: FulfillmentTrack;
+}
+
+/**
+ * §Phase E2 — MANUAL ENTRY POINT. An operator-created brand gets the same
+ * canonical record, with a tenant id DERIVED from the brand name. The previous
+ * manual path generated a `Date.now()`+random id, which was non-deterministic and
+ * could not be replayed or reconciled; it is replaced by this deterministic id.
+ * Idempotent by tenant id; a collision is refused, never merged.
+ */
+export function beginOnboardingForManualBrand(
+  input: ManualBrandInput,
+  actor: OnboardingActor
+): OnboardingResult<BrandOnboarding> {
+  if (!actor.canMutate) return forbidden();
+  if (actor.tenantId) {
+    return { ok: false, error: 'FORBIDDEN — onboarding is initiated by Mercenta operations.' };
+  }
+  const name = (input.name ?? '').trim();
+  if (!name) return { ok: false, error: 'INVALID — a brand name is required.' };
+
+  const brandId = tenantIdForBrand(name);
+  const existing = store.getOnboardingForBrand(brandId);
+  if (existing) return { ok: true, value: existing };
+  if (store.isTenantIdClaimed(brandId)) {
+    return { ok: false, error: `TENANT_CONFLICT — tenant id ${brandId} is already claimed.` };
+  }
+
+  const now = nowIso();
+  const onboarding: BrandOnboarding = {
+    id: `onb-manual-${normalizeBrandKey(name) || 'brand'}`,
+    brandId,
+    businessName: name,
+    category: input.category,
+    // The operator explicitly chose the track in the creation form — real input.
+    track: input.track,
+    status: 'initiated',
+    steps: initialSteps(),
+    origin: 'manual_creation',
+    initiatedAt: now,
+    initiatedBy: actor.staffId,
+  };
+  store.saveOnboarding(onboarding);
+  store.recordOnboardingAudit(
+    'onboarding_started_manually',
+    onboarding.id,
+    `Onboarding ${onboarding.id} created manually for ${name} (tenant ${brandId}, ${input.country})`,
+    actor.staffId,
+    brandId
+  );
+
+  return { ok: true, value: onboarding };
 }
