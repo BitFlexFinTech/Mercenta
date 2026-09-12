@@ -93,12 +93,14 @@ try {
     ['QUEUE', 'PUBLISHED', 'ERROR', 'DRAFT'].every((s) => v.postStates.includes(s))
   );
   test('deployment is recorded as the verified container', v.container === 'root-postiz-1' && v.image.includes('postiz-app'));
-  test('verified instance usage is empty (clean slate)', v.instanceEmpty && Object.values(v.counts).every((n) => n === 0));
-  test('verified deployment defect recorded (backend 502 / Temporal)', v.backendApiStatus === 'down_502_temporal_missing');
+  test('verified instance usage reflects the provisioned brand organizations', !v.instanceEmpty && v.counts.organizations >= 2 && v.counts.users >= 2);
+  test('verified engine state is OPERATIONAL after the E8 deployment fix (Temporal + API up)', v.backendApiStatus === 'up');
+  test('engine runtime records the restored Temporal/Elasticsearch stack', /Temporal|temporal/i.test(v.runtime) || v.backendApiStatus === 'up');
   test(
-    'open self-registration recorded as a blocking finding',
-    v.registrationOpen &&
-      cfg.SOCIAL_DEPLOYMENT_FINDINGS.some((f) => f.id === 'registration-open' && f.severity === 'blocking')
+    'registration is NOT exposed and the remaining deployment caveats are recorded',
+    v.registrationOpen === false &&
+      cfg.SOCIAL_DEPLOYMENT_FINDINGS.some((f) => f.id === 'branded-hostname-no-dns') &&
+      cfg.SOCIAL_DEPLOYMENT_FINDINGS.some((f) => f.id === 'third-party-frame-cookies')
   );
   test(
     'commercial / self-signup engine paths are declared blocked',
@@ -109,14 +111,11 @@ try {
   /* ── 2. Configuration resolution is fail-closed and truthful ──────────── */
   section('2. Configuration truthfulness');
   const none = cfg.resolveSocialEngineConfig(undefined);
-  test('unconfigured engine → mode simulation', none.configured === false && none.mode === 'simulation');
-  test('unconfigured engine explains itself', none.blockedReasons.length >= 2);
+  test('the verified engine resolves as configured (real engine, not simulation)', none.configured === true && none.mode === 'configured');
+  test('configuration caveats are surfaced, never hidden', none.blockedReasons.length >= 2);
   const withUrl = cfg.resolveSocialEngineConfig({ api_url: 'https://postiz.example' });
-  test(
-    'an engine URL alone does NOT make it live while the API is down',
-    withUrl.configured === false && withUrl.appUrl === 'https://postiz.example'
-  );
-  test('registration warning is part of the blocked reasons', none.blockedReasons.some((r) => /self-registration/i.test(r)));
+  test('an explicit integration URL overrides the default host', withUrl.appUrl === 'https://postiz.example');
+  test('the branded-hostname caveat is reported while DNS is absent', none.blockedReasons.some((r) => /postiz\.mercenta\.co\.uk/.test(r)));
 
   /* ── 3. Deterministic + idempotent + isolated provisioning ────────────── */
   section('3. Automatic provisioning (deterministic, idempotent, isolated)');
@@ -252,12 +251,12 @@ try {
   );
 
   const status = pz.getSocialEngineStatus(undefined);
-  test('engine status is not configured and not live', status.configured === false && status.mode === 'simulation');
+  test('engine status resolves as configured against the verified host', status.configured === true && status.mode === 'configured');
   test('engine status exposes the verified developer API', status.developerApiPath === '/public/v1');
   test('legacy client endpoints are declared UNVERIFIED', status.legacyEndpointsVerified === false);
   test('engine status carries the verified deployment findings', status.findings.length === 6);
   const counts = pz.socialFindingCounts(status.findings);
-  test('finding severities are summarised correctly', counts.blocking === 2 && counts.warning === 3 && counts.info === 1);
+  test('finding severities are summarised correctly', counts.blocking === 0 && counts.warning === 4 && counts.info === 2);
 
   const originalFetch = globalThis.fetch;
   let networkCalls = 0;
@@ -325,6 +324,13 @@ try {
     'src/components/layout/BrandShell.tsx',
     'src/lib/postiz/postizClient.ts',
     'scripts/validate-e7-embedded-social.mjs',
+    // §Phase E8 — the operational Mercenta Social work (engine deployment fix,
+    // server-side SSO bridge and its configuration):
+    'scripts/social-sso/',
+    'supabase/functions/social-session/',
+    'docker-compose.services.yml',
+    'scripts/Caddyfile',
+    'docs/PRODUCT_CONSOLIDATION_PHASEE8_2026-09-12.md',
     // E7 extended E6's phase-scope guard so it still refuses anything outside
     // this scope (its F5/F5b/F6) while accepting the E7 change set:
     'scripts/validate-e6-brand-surfaces.mjs',
@@ -367,7 +373,7 @@ try {
   );
   test('brand surface takes its identity from the SSOT', /MERCENTA_SOCIAL\.productName/.test(socialSfc));
   test('brand surface renders the full brand module inventory', /SOCIAL_BRAND_MODULES/.test(socialSfc));
-  test('brand surface states its real engine state', /not configured/i.test(socialSfc) && /Simulation/.test(socialSfc));
+  test('brand surface states its real engine state and offers the real launch', /ms-engine-state/.test(socialSfc) && /ms-launch/.test(socialSfc) && /openWorkspace/.test(socialSfc));
   test('brand surface shows the workspace identity', /ms-workspace-id/.test(socialSfc));
   test('brand surface gates on the canonical access decision', /socialAccessForBrand/.test(socialSfc) && /ms-access-denied/.test(socialSfc));
   test(
@@ -413,6 +419,65 @@ try {
   );
 
   test('E7 phase documentation exists', existsSync(join(process.cwd(), 'docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md')));
+
+  /* ── 8. §Phase E8 — live engine link, SSO bridge and deployment config ── */
+  section('8. Engine link (E8) & deployment configuration');
+  social.resetSocialWorkspaces();
+  const unlinked = social.linkSocialWorkspaceToEngine('brand-zambezi', {
+    email: 'x@social.mercenta.co.uk',
+    organizationId: 'org-1',
+  });
+  test('linking refuses a tenant that has no workspace yet', unlinked.ok === false);
+  social.ensureSocialWorkspaceForBrand(
+    { tenantId: 'brand-zambezi', brandStatus: 'active', onboarded: true, brandName: 'Zambezi' },
+    { actorId: 'system:e8' }
+  );
+  const linked = social.linkSocialWorkspaceToEngine('brand-zambezi', {
+    email: 'brand-zambezi-9c8c82e3@social.mercenta.co.uk',
+    organizationId: 'a8ae0104-4447-4a13-afab-be0100f15f64',
+  });
+  test(
+    'the real engine organization is recorded truthfully (linked, not simulated)',
+    linked.ok && linked.value.engineLinked === true && linked.value.simulated === false &&
+      linked.value.engineOrganizationId === 'a8ae0104-4447-4a13-afab-be0100f15f64'
+  );
+  test('the brand engine identity is recorded', linked.ok && /@social\.mercenta\.co\.uk$/.test(String(linked.value.engineEmail)));
+  const relinked = social.linkSocialWorkspaceToEngine('brand-zambezi', {
+    email: 'brand-zambezi-9c8c82e3@social.mercenta.co.uk',
+    organizationId: 'a8ae0104-4447-4a13-afab-be0100f15f64',
+  });
+  test(
+    're-linking is idempotent (one workspace, same organization)',
+    relinked.ok && social.countSocialWorkspaces() === 1 &&
+      relinked.value.engineOrganizationId === 'a8ae0104-4447-4a13-afab-be0100f15f64'
+  );
+
+  const ssoSrc = read('scripts/social-sso/server.mjs');
+  test('the SSO service verifies an HMAC handoff token (timing-safe)', /timingSafeEqual/.test(ssoSrc) && /verifyToken/.test(ssoSrc));
+  test('the SSO service signs in server-side and sets the engine cookie first-party', /\/api\/auth\/login/.test(ssoSrc) && /'set-cookie'/.test(ssoSrc));
+  test('the SSO service derives a deterministic, per-tenant engine identity', /engineIdentity/.test(ssoSrc) && /createHmac/.test(ssoSrc));
+  test('the SSO service never returns a password to the caller', !/password:/i.test(ssoSrc.split('ensureSession')[1] || '') || !/return\s*{[^}]*password/.test(ssoSrc));
+  test('the SSO service is idempotent: it logs in before it registers', ssoSrc.indexOf('/api/auth/login') < ssoSrc.indexOf('/api/auth/register'));
+
+  const bridgeSrc = read('supabase/functions/social-session/index.ts');
+  test('the session bridge mints the handoff token server-side', /mintToken/.test(bridgeSrc) && /SOCIAL_SSO_SECRET/.test(bridgeSrc));
+  test('the bridge requires an explicit simulation allowance before minting', /SOCIAL_SSO_ALLOW_DEMO/.test(bridgeSrc));
+  test('no engine secret is exposed to the browser bundle', !/SOCIAL_SSO_SECRET/.test(socialSfc) && !/SSO_SECRET/.test(socialSfc));
+
+  const compose = read('docker-compose.services.yml');
+  test('the stack declares Temporal and its Elasticsearch visibility store', /^\s{2}temporal:/m.test(compose) && /temporal-elasticsearch/.test(compose));
+  test('the stack declares the Mercenta Social SSO service', /^\s{2}social-sso:/m.test(compose));
+  test('the engine runs with real public URLs (no localhost config)', !/MAIN_URL: "http:\/\/localhost/.test(compose) && /MAIN_URL: "https:\/\//.test(compose));
+  test('engine media is persisted on a volume', /postiz_uploads:\/uploads/.test(compose));
+  test('the engine host is served over TLS', cfg.SOCIAL_ENGINE_VERIFIED.host.startsWith('https://'));
+
+  const caddy = read('scripts/Caddyfile');
+  test('the edge routes /sso to the Mercenta Social SSO service', /handle \/sso\*/.test(caddy) && /reverse_proxy localhost:8110/.test(caddy));
+  test(
+    'the edge BLOCKS the engine\'s own signup/login surface from the internet',
+    /@engine_auth path \/auth\* \/api\/auth\/\*/.test(caddy) && /respond 403/.test(caddy)
+  );
+  test('the frame policy allows only the Mercenta origins', /frame-ancestors[^"]*demo\.mercenta\.co\.uk/.test(caddy));
 } catch (err) {
   console.error('E7_EMBEDDED_SOCIAL_VALIDATION_FAIL:', err.message);
   failures++;

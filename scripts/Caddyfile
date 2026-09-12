@@ -12,6 +12,49 @@
 # Deploy:  scp scripts/Caddyfile root@<vps-ip>:/etc/caddy/Caddyfile
 #          ssh root@<vps-ip> systemctl reload caddy
 
+# §Phase E8 — Mercenta Social engine (the full Postiz application).
+#
+# `frame-ancestors` replaces the previous `X-Frame-Options: DENY`, because
+# Mercenta Social renders the engine inside the Mercenta experience; only the
+# Mercenta origins may frame it. The engine's own signup is disabled
+# server-side (DISABLE_REGISTRATION=true), so framing it can never offer a brand
+# a way to create its own Postiz account.
+#
+# NOTE: this snippet MUST stay above its first use (Caddy resolves imports
+# top-down).
+(mercenta_social_engine) {
+    # §Phase E8 — Mercenta Social SSO handoff: our own small server-side service
+    # (scripts/social-sso/server.mjs) signs the brand into the engine and sets the
+    # engine session cookie first-party on THIS origin, then redirects into the
+    # application. The brand never sees a signup, a plan or a password.
+    handle /sso* {
+        reverse_proxy localhost:8110
+    }
+
+    # §Phase E8 — the engine's OWN signup/login surface is not a Mercenta path.
+    # Mercenta provisions brands and authenticates them server-side, so these are
+    # unreachable from the internet: no public engine signup, no password login,
+    # no commercial acquisition route. (The SSO service reaches them internally.)
+    @engine_auth path /auth* /api/auth/*
+    handle @engine_auth {
+        respond 403
+    }
+
+    handle {
+        reverse_proxy localhost:8100
+    }
+
+    header /* {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Content-Security-Policy "frame-ancestors 'self' https://demo.mercenta.co.uk https://mercenta.co.uk https://www.mercenta.co.uk http://localhost:5173 http://127.0.0.1:5173"
+        -X-Frame-Options
+    }
+    log {
+        output file /var/log/caddy/postiz.log
+    }
+}
+
 usertour.mercenta.co.uk {
     reverse_proxy localhost:8090
     header /* {
@@ -25,15 +68,7 @@ usertour.mercenta.co.uk {
 }
 
 postiz.mercenta.co.uk {
-    reverse_proxy localhost:8100
-    header /* {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-    }
-    log {
-        output file /var/log/caddy/postiz.log
-    }
+    import mercenta_social_engine
 }
 
 # Health-check endpoint for monitoring
@@ -44,4 +79,10 @@ services.mercenta.co.uk {
     header /* {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
     }
+}
+
+# Today's working TLS hostname: sslip.io resolves to this droplet with no DNS
+# record required, so the engine is reachable over https immediately.
+46-101-75-185.sslip.io {
+    import mercenta_social_engine
 }

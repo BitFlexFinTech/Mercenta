@@ -46,6 +46,17 @@
 
 ## Mercenta Social — engine deployment prerequisites (Phase E7, 12 Sep)
 
+> **STATUS UPDATE (Phase E8, 12 Sep):** items **1, 2, 3, 4, 5 and 6 below were FIXED**
+> and verified on the deployment (Temporal + its Elasticsearch visibility store
+> restored; engine URLs set to the real TLS origin; media on a named volume; 2 GB swap
+> added; frame policy replaced with a CSP `frame-ancestors` allow-list; the engine's own
+> signup/login is now **403** from the internet). **Item 7's note and the deferred
+> server-side bridge are handled elsewhere** — the bridge now EXISTS
+> (`supabase/functions/social-session` + `scripts/social-sso/server.mjs`). Still open and
+> requiring **user action**: a DNS `A` record for `postiz.mercenta.co.uk → 46.101.75.185`
+> (branded hostname + seamless inline embedding) and, optionally, a droplet resize to
+> 8 GB. Full record: `docs/PRODUCT_CONSOLIDATION_PHASEE8_2026-09-12.md`.
+
 These are **server-side / deployment operations** on `mercenta-services` (46.101.75.185), verified on 2026-09-12. Mercenta code does not work around any of them; the admin Mercenta Social control centre reports them live.
 
 | # | Item | Evidence | Required action |

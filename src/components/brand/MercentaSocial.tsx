@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
-import { Badge, Card } from '@/components/ui';
+import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   MERCENTA_SOCIAL,
@@ -33,11 +33,21 @@ import {
 } from '@/config/mercentaSocial';
 import {
   ensureSocialWorkspaceForBrand,
+  linkSocialWorkspaceToEngine,
   socialAccessForBrand,
   type SocialWorkspaceRecord,
 } from '@/lib/social/workspace';
 import { resolveBrandLifecycleStatus } from '@/lib/social/brandStatus';
-import { AlertTriangle, CheckCircle2, Globe, Layers, ShieldCheck, Sparkles } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ExternalLink,
+  Globe,
+  Layers,
+  Loader2,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 
 interface Brandish {
   id: string;
@@ -120,6 +130,46 @@ export function MercentaSocial() {
   const toggleModule = useCallback((m: SocialModule) => {
     setSelectedModule((cur) => (cur?.id === m.id ? null : m));
   }, []);
+
+  /* §Phase E8 — LAUNCH THE REAL APPLICATION.
+     The handoff URL is minted SERVER-SIDE (the social-session edge function holds
+     the engine's SSO secret; nothing privileged ever reaches the browser). Opening
+     the URL provisions the brand's engine organization on first use, signs the
+     brand in server-side, and lands in the full application. */
+  const [launchUrl, setLaunchUrl] = useState<string | null>(null);
+  const [launching, setLaunching] = useState(false);
+  const [launchError, setLaunchError] = useState<string | null>(null);
+
+  const openWorkspace = useCallback(async () => {
+    if (!tenantId || launching) return;
+    setLaunching(true);
+    setLaunchError(null);
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      if (!supabase) {
+        throw new Error(
+          'Mercenta Social could not reach its session service (Supabase is not configured in this environment).'
+        );
+      }
+      const { data, error } = await supabase.functions.invoke('social-session', {
+        body: { tenantId },
+      });
+      if (error) throw new Error(error.message);
+      if (!data?.ok || !data?.url) throw new Error(String(data?.error ?? 'session bridge unavailable'));
+
+      setLaunchUrl(String(data.url));
+      const linked = linkSocialWorkspaceToEngine(tenantId, {
+        email: String(data.email ?? ''),
+        organizationId: String(data.organizationId ?? ''),
+      });
+      if (linked.ok) setWorkspace(linked.value);
+      window.open(String(data.url), '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      setLaunchError(String((err as Error)?.message ?? err));
+    } finally {
+      setLaunching(false);
+    }
+  }, [tenantId, launching]);
 
   if (!tenantId) {
     return (
@@ -246,25 +296,55 @@ export function MercentaSocial() {
         </Card>
       </div>
 
-      {engine.configured && engine.appUrl && (
-        <Card className="p-3">
-          <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">
-            {MERCENTA_SOCIAL.productName} application
+      <Card className="p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3" data-testid="ms-launch">
+          <div>
+            <div className="text-sm font-medium text-white">Your {MERCENTA_SOCIAL.productName} workspace</div>
+            <p className="text-[11px] text-zinc-500 mt-1">
+              {workspace?.engineLinked
+                ? 'Provisioned and linked for this brand. Opening it signs you in — no separate account, no password, no plan.'
+                : 'Provisioned automatically for this brand. Opening it creates your workspace on first use — no separate account, no password, no plan.'}
+            </p>
           </div>
-          <iframe
-            title={`${MERCENTA_SOCIAL.productName} application`}
-            src={engine.appUrl}
-            className="w-full h-[720px] rounded-lg border border-white/[0.06] bg-ink-900"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-            referrerPolicy="no-referrer"
-            data-testid="ms-engine-frame"
-          />
-          <p className="text-[10px] text-zinc-500 mt-2">
-            Embedded in {MERCENTA_SOCIAL.productName}. If your browser blocks embedded content, open
-            your workspace directly in a new tab.
-          </p>
-        </Card>
-      )}
+          <Button onClick={openWorkspace} disabled={launching || !engine.configured} className="text-xs">
+            {launching ? (
+              <Loader2 className="w-3 h-3 animate-spin mr-1" />
+            ) : (
+              <ExternalLink className="w-3 h-3 mr-1" />
+            )}
+            {launching ? 'Opening…' : `Open ${MERCENTA_SOCIAL.productName}`}
+          </Button>
+        </div>
+
+        {launchError && (
+          <div
+            className="mt-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-[11px] text-amber-200"
+            data-testid="ms-launch-error"
+          >
+            {launchError}
+          </div>
+        )}
+
+        {launchUrl && (
+          <div className="mt-4">
+            <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">
+              {MERCENTA_SOCIAL.productName} application
+            </div>
+            <iframe
+              title={`${MERCENTA_SOCIAL.productName} application`}
+              src={launchUrl}
+              className="w-full h-[720px] rounded-lg border border-white/[0.06] bg-ink-900"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+              referrerPolicy="no-referrer"
+              data-testid="ms-engine-frame"
+            />
+            <p className="text-[10px] text-zinc-500 mt-2">
+              Browsers that block cookies inside third-party frames will not keep the session here —
+              use the button above, which opens your workspace where the session is first-party.
+            </p>
+          </div>
+        )}
+      </Card>
 
       <ModuleSurface
         selected={selectedModule}

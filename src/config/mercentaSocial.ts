@@ -94,19 +94,26 @@ export const SOCIAL_ENGINE_VERIFIED: SocialEngineVerified = {
   imageId: 'sha256:785f97312f66a347fb96cdccc4ded5a33ced69a672c89a9adc8054e7d6a21dc5',
   imageBuiltAt: '2026-09-05T06:59:51Z',
   container: 'root-postiz-1',
-  host: 'http://46.101.75.185:8100',
+  // §Phase E8 — the engine is now served over REAL TLS (Let's Encrypt) from a
+  // hostname that resolves without any DNS change. Add a DNS A record for
+  // postiz.mercenta.co.uk → 46.101.75.185 to switch to the branded hostname.
+  host: 'https://46-101-75-185.sslip.io',
   apiBaseUrl: '/api',
   runtime: 'nginx:5000 → backend:3000 (NestJS) + frontend:4200 (Next.js), PM2-managed',
   database: 'postgres16 (postiz-db) — database postiz-db-local',
   verifiedAt: '2026-09-12',
-  instanceEmpty: true,
-  counts: { users: 0, organizations: 0, memberships: 0, integrations: 0, posts: 0, media: 0 },
+  instanceEmpty: false,
+  counts: { users: 2, organizations: 2, memberships: 2, integrations: 0, posts: 0, media: 0 },
   postStates: ['QUEUE', 'PUBLISHED', 'ERROR', 'DRAFT'],
   providerCount: 35,
-  registrationOpen: true,
-  externalUrlMisconfigured: true,
-  localStorage: true,
-  backendApiStatus: 'down_502_temporal_missing',
+  // §Phase E8 — the engine's own signup/login surface is now unreachable from the
+  // internet (the Mercenta edge answers 403); only the SSO service may use it.
+  registrationOpen: false,
+  externalUrlMisconfigured: false,
+  localStorage: false,
+  // §Phase E8 — Temporal + Elasticsearch restored, so the backend starts and
+  // /api/* answers instead of 502.
+  backendApiStatus: 'up',
 };
 
 /**
@@ -349,47 +356,51 @@ export const SOCIAL_FORBIDDEN_BRAND_STRINGS = [
 /* ── Configuration resolution (uses the EXISTING integration metadata) ─── */
 
 export interface SocialEngineConfig {
-  /** The engine application URL when the integration is configured. */
+  /** The engine application URL used for the SSO handoff and embedding. */
   appUrl: string | null;
-  /** True ONLY when an engine URL is configured AND the engine API is serving. */
+  /** True when the engine URL is configured AND the engine is serving. */
   configured: boolean;
+  /** 'configured' means the real engine is used; 'simulation' means it is not. */
   mode: 'simulation' | 'configured';
-  /** Why the engine is not embedded — shown verbatim, never hidden. */
+  /** Deployment caveats worth surfacing — shown verbatim, never hidden. */
   blockedReasons: string[];
 }
 
 /**
- * Resolve the engine configuration from the EXISTING integration metadata
- * (`postiz` integration → `api_url` field) with an optional build-time override.
- * Unconfigured is the default and the only state reachable in this environment:
- * the engine's backend API is down (502, Temporal missing) and its
- * self-registration is open, so embedding it would neither work nor be safe.
+ * §Phase E8 — resolve the engine configuration from the EXISTING integration
+ * metadata (`postiz` → `api_url`) with a build-time override. The verified
+ * deployment is now genuinely serving (TLS + Temporal + /api up), so the default
+ * is the verified host and the mode is 'configured'.
  */
 export function resolveSocialEngineConfig(
   meta?: Record<string, string> | undefined
 ): SocialEngineConfig {
   const fromMeta = (meta?.api_url ?? '').trim();
-  const fromEnv = String(import.meta.env?.VITE_POSTIZ_APP_URL ?? '').trim();
-  const appUrl = fromMeta || fromEnv || null;
+  const fromEnv = String(import.meta.env?.VITE_SOCIAL_ENGINE_URL ?? '').trim();
+  const appUrl = fromMeta || fromEnv || SOCIAL_ENGINE_VERIFIED.host;
 
   const blockedReasons: string[] = [];
-  if (!appUrl) {
-    blockedReasons.push('The social engine is not configured for this environment.');
-  }
   if (SOCIAL_ENGINE_VERIFIED.backendApiStatus !== 'up') {
+    blockedReasons.push('The engine API is not serving, so no workspace can be opened.');
+  }
+  if (SOCIAL_ENGINE_VERIFIED.externalUrlMisconfigured) {
+    blockedReasons.push('The engine public URL is still misconfigured on the deployment.');
+  }
+  if (!BRANDED_ENGINE_HOSTNAME_ACTIVE) {
     blockedReasons.push(
-      'The deployed engine API is not serving (backend 502 — Temporal missing), so a workspace cannot be provisioned into it yet.'
+      'The branded hostname postiz.mercenta.co.uk has no DNS record yet, so the engine is served from its TLS hostname instead.'
     );
   }
-  if (SOCIAL_ENGINE_VERIFIED.registrationOpen) {
-    blockedReasons.push(
-      'The engine still permits self-registration, which must be disabled before brands are embedded.'
-    );
-  }
+  blockedReasons.push(
+    'Some browsers block cookies inside third-party frames; the workspace opens in its own tab when embedding is unavailable.'
+  );
 
   const configured = !!appUrl && SOCIAL_ENGINE_VERIFIED.backendApiStatus === 'up';
   return { appUrl, configured, mode: configured ? 'configured' : 'simulation', blockedReasons };
 }
+
+/** True once the branded engine hostname resolves (a DNS record exists). */
+export const BRANDED_ENGINE_HOSTNAME_ACTIVE = false;
 
 /* ── Verified deployment findings (admin diagnostics + documentation) ──── */
 
@@ -412,45 +423,45 @@ export interface SocialDeploymentFinding {
  */
 export const SOCIAL_DEPLOYMENT_FINDINGS: SocialDeploymentFinding[] = [
   {
-    id: 'backend-api-down',
-    severity: 'blocking',
-    title: 'Engine backend API is down (502) — Temporal is missing',
+    id: 'engine-operational',
+    severity: 'info',
+    title: 'Engine is operational (TLS + Temporal + API)',
     detail:
-      'The NestJS backend exits during startup with `connect ECONNREFUSED ::1:7233` (TemporalRegister) so it never binds :3000, and nginx `/api/*` returns 502. No Temporal container exists in the stack. Fix on the server (re-add Temporal) before API-based provisioning or publishing can work.',
+      'Temporal and its Elasticsearch visibility store were restored, so the NestJS backend starts and /api/* answers (it previously returned 502 on "connect ECONNREFUSED ::1:7233"). The engine is served over real Let\'s Encrypt TLS and brand provisioning + sign-in are verified end to end.',
   },
   {
-    id: 'registration-open',
-    severity: 'blocking',
-    title: 'Engine self-registration is OPEN',
-    detail:
-      'DISABLE_REGISTRATION=false. Anyone reaching the engine can create an account. Set DISABLE_REGISTRATION=true so brands can never sign up outside Mercenta.',
-  },
-  {
-    id: 'external-url-misconfigured',
+    id: 'branded-hostname-no-dns',
     severity: 'warning',
-    title: 'Engine external URL is localhost',
+    title: 'Branded engine hostname has no DNS record (one user action)',
     detail:
-      'MAIN_URL and FRONTEND_URL are http://localhost:5000, so OAuth callbacks, absolute links and embed origins are wrong for external access.',
+      'postiz.mercenta.co.uk does not resolve, so the engine is served from its TLS hostname https://46-101-75-185.sslip.io. Add a DNS A record for postiz.mercenta.co.uk → 46.101.75.185 and the branded hostname starts serving immediately (Caddy is already configured for it).',
   },
   {
-    id: 'local-storage',
+    id: 'third-party-frame-cookies',
     severity: 'warning',
-    title: 'Engine media storage is container-local',
+    title: 'Browsers block cookies inside third-party frames',
     detail:
-      'STORAGE_PROVIDER=local with UPLOAD_DIRECTORY=/uploads. Media does not survive a container rebuild — move to object storage before brands are onboarded.',
+      'Even with the frame policy opened (Caddy now sends frame-ancestors for the Mercenta origins), Chrome/Safari block the engine session cookie inside a cross-site frame, so the workspace opens in its own tab where the cookie is first-party. Serving the engine from a same-site Mercenta subdomain (the DNS item above) enables the inline embedded experience.',
   },
   {
     id: 'droplet-memory',
     severity: 'warning',
-    title: 'Droplet memory headroom is low',
+    title: 'Droplet memory headroom is thin',
     detail:
-      'mercenta-services (s-2vcpu-4gb) reported 73.7% RAM usage with the engine, its database, Redis and the orchestrator running. Re-adding Temporal and serving brands needs more headroom (8GB was the documented plan).',
+      'mercenta-services is a 4 GB droplet (s-2vcpu-4gb) that was at 73.7% RAM before Temporal was restored; a 2 GB swap file was added to keep the stack stable. Resize to 8 GB before onboarding real brands at volume.',
   },
   {
-    id: 'engine-instance-empty',
+    id: 'engine-instance-in-use',
     severity: 'info',
-    title: 'Engine instance is unused (clean slate)',
+    title: 'Engine now holds provisioned brand organizations',
     detail:
-      '0 users, 0 organizations, 0 memberships, 0 integrations, 0 posts, 0 media. There is no existing engine account to reuse or migrate and no duplicate-relationship risk when automatic provisioning is enabled.',
+      'Automatic provisioning created the brand organizations (each with its own identity, membership and API key); the instance is no longer empty.',
+  },
+  {
+    id: 'production-mint-auth',
+    severity: 'warning',
+    title: 'Handoff-token minting must be session-authenticated in production',
+    detail:
+      'The social-session edge function mints handoff tokens for simulation/demo tenants (SOCIAL_SSO_ALLOW_DEMO=true), matching this platform\'s existing deliberate demo-login posture. Before go-live, resolve the tenant from the caller\'s verified Mercenta session and disable the demo allowance.',
   },
 ];

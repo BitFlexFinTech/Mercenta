@@ -73,8 +73,8 @@ test.describe('Mercenta Social — brand access & automatic provisioning', () =>
     await expect(page.locator('[data-testid="ms-provision-state"]').first()).toContainText(
       /Provisioned automatically|Reused/
     );
-    await expect(page.locator('[data-testid="ms-engine-state"]').first()).toContainText('Simulation');
-    // The engine is not configured, so no embedded frame may be rendered.
+    await expect(page.locator('[data-testid="ms-engine-state"]').first()).toContainText(/Connected|Simulation/);
+    // The application frame only appears once a real handoff URL was obtained.
     expect(await page.locator('[data-testid="ms-engine-frame"]').count()).toBe(0);
     expect(errors).toEqual([]);
   });
@@ -187,7 +187,51 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
     await page.waitForTimeout(800);
 
     expect(external).toEqual([]);
-    await expect(page.locator('[data-testid="ms-engine-state"]').first()).toContainText('Simulation');
+    await expect(page.locator('[data-testid="ms-engine-state"]').first()).toContainText(/Connected|Simulation/);
+    expect(errors).toEqual([]);
+  });
+
+  test('10. opening the workspace either hands off to the real engine or reports the truth', async ({ page }) => {
+    const errors = trackPageErrors(page);
+    const launchUrl = process.env.SOCIAL_SSO_LAUNCH_URL || '';
+    // The brand surface asks the SERVER for a handoff URL (the browser never sees
+    // the engine secret). When a real handoff URL is provided for this run, the
+    // real application is loaded; otherwise the surface must report, not fake.
+    await page.route('**/functions/v1/social-session', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(
+          launchUrl
+            ? {
+                ok: true,
+                url: launchUrl,
+                email: 'brand-zambezi-9c8c82e3@social.mercenta.co.uk',
+                organizationId: 'a8ae0104-4447-4a13-afab-be0100f15f64',
+                reused: true,
+              }
+            : { ok: false, error: 'simulation deployment: no handoff URL configured for this run' }
+        ),
+      });
+    });
+
+    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    const launch = page.locator('[data-testid="ms-launch"]').first();
+    await expect(launch).toBeVisible();
+    await launch.getByRole('button').first().click();
+    await page.waitForTimeout(launchUrl ? 4000 : 1200);
+
+    if (launchUrl) {
+      // A real handoff URL was returned: the application frame is rendered and the
+      // workspace is recorded as linked to the real engine organization.
+      await expect(page.locator('[data-testid="ms-engine-frame"]').first()).toBeVisible();
+      await expect(page.locator('[data-testid="ms-engine-link"]').first()).toContainText('Linked');
+    } else {
+      // No handoff URL in this environment: the surface must say so truthfully and
+      // must NOT claim the workspace is linked.
+      await expect(page.locator('[data-testid="ms-launch-error"]').first()).toBeVisible();
+      await expect(page.locator('[data-testid="ms-engine-link"]').first()).toContainText('Not linked');
+    }
     expect(errors).toEqual([]);
   });
 
@@ -200,8 +244,8 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
     await expect(page.locator('[data-testid="admin-engine-identity"]').first()).toContainText('v1.47.0');
     await expect(page.locator('[data-testid="admin-engine-mode"]').first()).toContainText(/Simulation|Connected/);
     await expect(page.locator('[data-testid="admin-workspace-count"]').first()).toBeVisible();
-    await expect(page.locator('[data-testid="admin-finding-backend-api-down"]').first()).toBeVisible();
-    await expect(page.locator('[data-testid="admin-finding-registration-open"]').first()).toBeVisible();
+    await expect(page.locator('[data-testid="admin-finding-engine-operational"]').first()).toBeVisible();
+    await expect(page.locator('[data-testid="admin-finding-branded-hostname-no-dns"]').first()).toBeVisible();
     expect(errors).toEqual([]);
   });
 });

@@ -71,6 +71,8 @@ export interface SocialWorkspaceRecord {
   provisionInvocationCount: number;
   /** The engine-side organization id, once a real link exists. */
   engineOrganizationId: string | null;
+  /** The brand's deterministic engine identity (email), once known. */
+  engineEmail: string | null;
   /** True ONLY when the engine link was actually established. */
   engineLinked: boolean;
   /** True while the workspace exists only in Mercenta's own domain state. */
@@ -140,6 +142,7 @@ export function provisionSocialWorkspace(
     // missing) and the server-side provisioning call is not implemented. This is
     // reported truthfully rather than simulated as a success.
     engineOrganizationId: null,
+    engineEmail: null,
     engineLinked: false,
     simulated: true,
     engineVersion: null,
@@ -201,6 +204,39 @@ export function getSocialPersistenceStatus(): { backend: 'memory'; durable: fals
 /** The real engine version the domain would link to, once linking is possible. */
 export function socialEngineVersion(): string {
   return SOCIAL_ENGINE_VERIFIED.version;
+}
+
+/**
+ * §Phase E8 — RECORD THE ENGINE LINK for a provisioned workspace.
+ *
+ * The values come from the server-side bridge (the `social-session` edge
+ * function, which resolves them from the engine). Mercenta never invents an
+ * engine organization id here: an empty organization id leaves the workspace
+ * unlinked and reported as such.
+ *
+ * Idempotent: the same engine organization reported repeatedly is a no-op that
+ * only bumps the observed call count, so a refresh or a re-login cannot produce
+ * a second link or a second workspace.
+ */
+export function linkSocialWorkspaceToEngine(
+  tenantId: string,
+  link: { email: string; organizationId: string; engineVersion?: string }
+): SocialResult<SocialWorkspaceRecord> {
+  const tenant = String(tenantId ?? '').trim();
+  const existing = workspaces.get(tenant);
+  if (!existing) {
+    return { ok: false, error: 'NOT_FOUND — provision the Mercenta Social workspace before linking an engine organization.' };
+  }
+  existing.lastProvisionedAt = nowIso();
+  existing.provisionInvocationCount += 1;
+  if (link.email) existing.engineEmail = link.email;
+  if (link.organizationId) {
+    existing.engineOrganizationId = link.organizationId;
+    existing.engineLinked = true;
+    existing.simulated = false;
+    existing.engineVersion = link.engineVersion ?? SOCIAL_ENGINE_VERIFIED.version;
+  }
+  return { ok: true, value: { ...existing } };
 }
 
 /** Verification/test-only reset. Production code paths never call this. */

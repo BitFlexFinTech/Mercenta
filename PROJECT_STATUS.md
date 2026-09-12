@@ -1,6 +1,43 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-12 (**Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; see the PHASE E7 block below. Previous session: **Phase E6 — BRAND OPERATIONAL SURFACES**. Earlier: **Phase E5 — ADMIN OPERATIONAL SURFACES**; **Phase E4 — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION**; **Phase E3 — CATALOG / PRODUCT MANAGEMENT**; **Phase E2 — BRAND ONBOARDING WORKFLOW**; **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+> Last updated: 2026-09-12 (**Phase E8 — OPERATIONAL MERCENTA SOCIAL (LIVE ENGINE + SSO BRIDGE)**; see the PHASE E8 block below. Previous: **Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; before that E6 — BRAND OPERATIONAL SURFACES, E5 — ADMIN OPERATIONAL SURFACES, E4 — COMMERCE, E3 — CATALOG, E2 — BRAND ONBOARDING, E1 — ONBOARDING HAND-OFF, D4 — PERSISTENCE.)
+>
+> **PHASE E8 (2026-09-12) — THE REAL POSTIZ APPLICATION IS OPERATIONAL AND MERCENTA
+> BRANDS REACH IT AS MERCENTA SOCIAL.** E7 left the engine BLOCKED; E8 FIXED the
+> deployment and built the bridge. **[VERIFIED] Engine fixes on `mercenta-services`
+> (46.101.75.185):** Temporal **restored** (backend previously died on
+> `ECONNREFUSED ::1:7233` → nginx 502 for every `/api/*`); its **Elasticsearch
+> visibility store restored** (second real failure: SQL visibility caps custom Text
+> search attributes at 3, so the backend also refused to start); public URLs set to
+> the real TLS origin; **real Let's Encrypt TLS** live on
+> `https://46-101-75-185.sslip.io` after opening **80/443** in ufw (the branded
+> `postiz.mercenta.co.uk` vhost is configured but has **no DNS record yet** — one user
+> action); engine **media persisted** on a volume; **2 GB swap added** (droplet was at
+> 73.7 % RAM with no swap); frame policy replaced with a CSP `frame-ancestors`
+> allow-list. **[VERIFIED] Commercial/signup boundary:** the edge now answers **403**
+> for `/auth*` and `/api/auth/*`, so there is **no public engine signup or login path**
+> at all. **[VERIFIED] Automatic provisioning + seamless sign-in:** Mercenta mints a
+> one-time HMAC handoff token server-side (`supabase/functions/social-session`) and the
+> engine-side service (`scripts/social-sso/server.mjs`, `social-sso` in the canonical
+> compose) derives the brand's **deterministic** engine identity, **logs in first**
+> (idempotent), registers only on first use, signs in server-side and sets the engine
+> session cookie first-party. Live proof: brand A → org `a8ae0104-…` (`reused:false`
+> then **`reused:true` with the same org**), brand B → a **different** org
+> `903b067c-…`, and the cookie authenticates `/api/user/organizations` returning **only
+> that brand's own org**. **Mercenta client:** `MercentaSocial` now has a real **“Open
+> Mercenta Social”** launch + inline frame once a handoff URL exists; the workspace
+> records the **real** engine organization (`linkSocialWorkspaceToEngine`, idempotent);
+> the engine name still never appears in brand copy. **[BLOCKED, honest]** inline
+> embedded *session* inside a cross-site frame (browsers block third-party cookies) —
+> the workspace opens in its own tab (verified); seamless inline embedding needs the
+> branded same-site hostname (the DNS item). **[DEFERRED]** real channel OAuth
+> (external credentials), production-authenticated token minting, droplet resize.
+> **Gates:** validator **117/117 PASS** (96 E7 + 21 E8) · E7/E8 browser spec **10/10** ·
+> full E2E **208 passed / 4 skipped / 0 failed** (+1, 0 regressions) · typecheck 0 ·
+> lint 0 · build ✓ · validators **37 PASS / 15 FAIL** (identical to the pre-E7
+> baseline apart from our own validator). **NO migration, no Mercenta table duplicating
+> engine data, no public signup, no secret in the browser.** Report:
+> `docs/PRODUCT_CONSOLIDATION_PHASEE8_2026-09-12.md`.
 >
 > **PHASE E7 (2026-09-12) — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION).**
 > Makes the COMPLETE Postiz application available to every approved Mercenta brand

@@ -84,6 +84,13 @@ const E7_SCOPE = new Set([
   'src/components/layout/BrandShell.tsx',
   'src/lib/postiz/postizClient.ts',
   'scripts/validate-e7-embedded-social.mjs',
+  // §Phase E8 — the operational Mercenta Social work (live engine deployment fix,
+  // server-side SSO/provisioning bridge, and their canonical configuration):
+  'scripts/social-sso/',
+  'supabase/functions/social-session/',
+  'docker-compose.services.yml',
+  'scripts/Caddyfile',
+  'docs/PRODUCT_CONSOLIDATION_PHASEE8_2026-09-12.md',
   // E7 extended THIS guard (F5/F5b/F6) so it still refuses any path outside the
   // E6 + E7 change sets — the file itself is therefore part of the E7 scope:
   'scripts/validate-e6-brand-surfaces.mjs',

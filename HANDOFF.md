@@ -250,7 +250,13 @@ approved brand as Mercenta Social, with automatic deterministic + idempotent
 workspace provisioning, a fail-closed entitlement gate, domain-enforced tenant
 isolation, the full 8-module / 35-provider surface, truthful simulation (engine
 link NOT established — its API is down), no migration and no second social
-platform. Next: **Final UI/UX redesign**. Rakazo stays LAST (Phase M).
+platform. Next: **E8 — Mercenta Social is OPERATIONAL (2026-09-12)**: engine Temporal +
+its Elasticsearch visibility store + public TLS restored so /api serves instead of 502,
+the engine's own signup/login is 403 publicly, and Mercenta's server-side handoff
+provisions the brand's deterministic organization and signs it in (idempotent, isolated —
+verified live against the engine). Remaining user action: DNS
+`postiz.mercenta.co.uk → 46.101.75.185`. Next: **Final UI/UX redesign**. Rakazo stays
+LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,
