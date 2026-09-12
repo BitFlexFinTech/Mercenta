@@ -14,6 +14,7 @@ import {
 } from '@/lib/catalog/catalogLifecycle';
 import { SUBMISSION_STATUS_LABELS } from '@/lib/spapi/transform';
 import { useContracts, useBrandAgreements, useCatalogSubmissions } from '@/data/queries';
+import { latestSubmissionForProduct } from '@/data/demoStore';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { generateDefaultProductImages } from '@/lib/amazon/productImageValidator';
@@ -65,11 +66,25 @@ export function ProductCatalog() {
     [brandId]
   );
 
-  /** The tenant's submissions — the CANONICAL store, filtered by tenant. */
-  const submissions = (useCatalogSubmissions().data?.data ?? []).filter(
-    (s) => s.brandId === brandId
-  );
-  const submissionBySku = new Map(submissions.map((s) => [s.sku, s] as const));
+  /** §Phase E3 — the CANONICAL submission store (tenant-filtered at read time). */
+  const submissionsQuery = useCatalogSubmissions();
+  const submissionsData = submissionsQuery.data;
+
+  /**
+   * §Phase E6 (G3) — ONE canonical latest-submission derivation.
+   *
+   * This previously built a local map (`new Map(submissions.map(s => [s.sku, s]))`)
+   * in which the LAST array element won — not guaranteed to be the newest by
+   * `submittedAt` — so after a resubmission the brand could be shown a superseded
+   * record as its current catalog state. It now uses the canonical
+   * `demoStore.latestSubmissionForProduct` (the same helper the E3 domain and both
+   * admin surfaces use). The memo is keyed on the canonical query result, so React
+   * re-renders still propagate.
+   */
+  const latestSubmissionForSku = useMemo(() => {
+    void submissionsData; // reactivity anchor: the canonical submission query result
+    return (sku: string) => (brandId ? latestSubmissionForProduct(brandId, sku) : undefined);
+  }, [submissionsData, brandId]);
 
   /** Completeness is DERIVED from the canonical prerequisite list per product. */
   const completenessBySku = new Map(
@@ -338,7 +353,7 @@ export function ProductCatalog() {
                       from the canonical submission store (never duplicated). */}
                   <td className="px-4 py-3 text-center">
                     {(() => {
-                      const sub = submissionBySku.get(p.sku);
+                      const sub = latestSubmissionForSku(p.sku);
                       const complete = completenessBySku.get(p.sku)?.complete ?? false;
                       if (!sub) {
                         return complete ? (
@@ -377,7 +392,7 @@ export function ProductCatalog() {
                       {/* §Phase E3 — submit when genuinely ready; poll the
                           simulated processing when a submission exists. */}
                       {(() => {
-                        const sub = submissionBySku.get(p.sku);
+                        const sub = latestSubmissionForSku(p.sku);
                         if (sub && sub.status !== 'live' && sub.status !== 'rejected') {
                           return (
                             <button

@@ -39,6 +39,7 @@ import {
   useShipmentsAll,
 } from '@/data/queries';
 import { demoReturns } from '@/data/api';
+import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { Alert, Button, EmptyState, PageHeader, StatusBadge, Skeleton } from '@/components/ui';
@@ -228,7 +229,8 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
         tone: 'warning',
         statusLabel: 'OPEN DEDUCTION',
         title: d.reason || d.type.replace(/_/g, ' '),
-        meta: `£${d.amountGbp.toLocaleString()} · ${d.purchaseOrderId} · open since ${d.date}`,
+        // §Phase E6 (G2c) — truthful provenance from the canonical `Deduction` flag.
+        meta: `£${d.amountGbp.toLocaleString()} · ${d.purchaseOrderId} · open since ${d.date}${d.simulated ? ' · (sim)' : ''}`,
         onOpen: go('documents'),
       });
     });
@@ -276,8 +278,51 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
         onOpen: go('returns'),
       });
     });
+    /* §Phase E6 (G2a/G2b) — canonical E4 commerce awareness for THIS tenant.
+       Derived from the SAME canonical stores the E4 lifecycle writes
+       (`demoCommerceInvoices` / `demoCommercePayments` and the already
+       tenant-scoped PO list) — no new store, no duplicated state. APPENDED after
+       every existing group so the existing attention order (and the dashboard
+       tests' pinned FIRST row) is unchanged, and no `unacked-` id is reused. */
+    const brandCommerceInvoices = demoCommerceInvoices.filter((i) => i.brandId === tenantId);
+    const invoicedPoIds = new Set(brandCommerceInvoices.map((i) => i.purchaseOrderId));
+
+    brandCommerceInvoices
+      .filter(
+        (i) => i.status === 'issued' && !demoCommercePayments.some((p) => p.invoiceId === i.id)
+      )
+      .slice(0, 3)
+      .forEach((i) => {
+        items.push({
+          id: `commerce-inv-${i.id}`,
+          group: 'Commerce',
+          tone: 'warning',
+          statusLabel: 'SIM INVOICE DUE',
+          title: `Simulated invoice ${i.number} awaiting payment`,
+          meta: `£${i.subtotalGbp.toFixed(2)} · (sim) — no live payment provider contacted`,
+          onOpen: go('purchase_orders'),
+        });
+      });
+
+    pos
+      .filter(
+        (p) => p.simulated === true && p.status === 'delivered' && !invoicedPoIds.has(p.id)
+      )
+      .slice(0, 3)
+      .forEach((p) => {
+        items.push({
+          id: `commerce-po-inv-${p.id}`,
+          group: 'Commerce',
+          tone: 'warning',
+          statusLabel: 'INVOICE OUTSTANDING',
+          title: `${p.poNumber} delivered — simulated invoice outstanding`,
+          meta: `£${p.poValue.toLocaleString()} · (sim)`,
+          onOpen: go('purchase_orders'),
+        });
+      });
+
     return items;
-  }, [awaitingAck, openDeductions, outOfStock, brandShipments, brandTickets, brandReturns, go]);
+  }, [awaitingAck, openDeductions, outOfStock, brandShipments, brandTickets, brandReturns, pos, tenantId, go]);
 
 const complianceLabel =
     docs.length === 0

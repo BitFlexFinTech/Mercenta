@@ -190,7 +190,9 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           id: `ded-${d.id}`,
           kind: 'deduction' as const,
           title: `Deduction −£${d.amountGbp.toFixed(2)} ${d.status}`,
-          detail: `${brandName(d.brandId)} · ${d.purchaseOrderId} · ${d.reason}`,
+          // §Phase E6 (G4) — truthful provenance from the canonical `Deduction`
+          // flag (never inferred from text). Non-simulated rows are unchanged.
+          detail: `${brandName(d.brandId)} · ${d.purchaseOrderId} · ${d.reason}${d.simulated ? ' · (sim)' : ''}`,
           severity: d.status === 'open' ? ('high' as const) : ('medium' as const),
         }))
     )

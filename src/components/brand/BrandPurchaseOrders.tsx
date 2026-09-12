@@ -298,6 +298,13 @@ export function BrandPurchaseOrders() {
                     <Badge className={cn('text-[10px]', STATUS_BADGE[po.status])}>
                       {STATUS_LABEL[po.status]}
                     </Badge>
+                    {/* §Phase E6 (G1) — truthful simulation provenance, taken ONLY
+                        from the canonical PO flag. Additive: this adds no control
+                        and does not change the DOM order of any existing button or
+                        input (the E4 lesson). */}
+                    {po.simulated === true && (
+                      <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+                    )}
                   </div>
                   <div className="font-mono text-[10px] text-zinc-600 mt-1">
                     {po.orderDate} · {po.lineItems.length} line item(s)
