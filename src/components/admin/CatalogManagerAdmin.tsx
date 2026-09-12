@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useBrands, useProducts, useCatalogSubmissions } from '@/data/queries';
-import { updateProductAvailability, updateProductCost } from '@/data/demoStore';
+import { updateProductAvailability, updateProductCost, latestSubmissionForProduct } from '@/data/demoStore';
+import { useApp } from '@/context/GlobalStateContext';
 import { Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { DataTable } from '@/components/shared/DataTable';
@@ -13,8 +14,8 @@ import { X, Package, Filter } from 'lucide-react';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { APPROVED_CATEGORIES } from '@/types';
 
-function ProductDetailModal(props: { product: DemoProduct; submission?: ProductSubmission; onClose: () => void }) {
-  const { product, submission, onClose } = props;
+function ProductDetailModal(props: { product: DemoProduct; submission?: ProductSubmission; canMutate: boolean; onClose: () => void }) {
+  const { product, submission, canMutate, onClose } = props;
   const brands = useBrands().data?.data ?? [];
   const bn = brands.find(function(b) { return b.id === product.brandId; })?.profile.businessName ?? product.brandId;
   const bc = brands.find(function(b) { return b.id === product.brandId; })?.category ?? '';
@@ -23,8 +24,10 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
   const [lt, setLt] = useState(product.leadTimeDays ?? 14);
   const [ep, setEp] = useState(product.exWorksPrice);
   const [sv, setSv] = useState<string | null>(null);
-  function ha() { updateProductAvailability(product.sku, av, lt); setSv('Availability updated.'); setTimeout(function() { setSv(null); }, 3000); }
-  function hp() { updateProductCost(product.sku, ep); setSv('Price updated.'); setTimeout(function() { setSv(null); }, 3000); }
+  // §Phase E5 (G4) — RBAC: catalog MUTATIONS require a full-permission account.
+  // The disabled buttons are an affordance; these guards are the enforcement.
+  function ha() { if (!canMutate) return; updateProductAvailability(product.sku, av, lt); setSv('Availability updated.'); setTimeout(function() { setSv(null); }, 3000); }
+  function hp() { if (!canMutate) return; updateProductCost(product.sku, ep); setSv('Price updated.'); setTimeout(function() { setSv(null); }, 3000); }
   return (
     <div className='fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4'>
       <div className='bg-ink-850 border border-white/[0.08] rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'>
@@ -71,7 +74,8 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                     <input type='number' value={lt} min={1} max={90} onChange={function(e) { setLt(parseInt(e.target.value) || 1); }}
                       className='w-16 bg-ink-900 border border-white/[0.08] rounded px-1.5 py-1 text-xs text-white text-center' /> days
                   </div>
-                  <Button className='text-[10px]' onClick={ha}>Save Availability</Button>
+                  <Button className='text-[10px]' data-state="catalog-save-availability" disabled={!canMutate}
+                    title={canMutate ? undefined : 'View-only staff cannot change product availability'} onClick={ha}>Save Availability</Button>
                 </div>
               </div>
               {/* §Phase E3 — readiness + the resulting submission state. Both are
@@ -130,7 +134,8 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                 <p>UK Retail: <span className='font-mono text-zinc-300'>GBP {product.ukRetailPrice.toFixed(2)}</span></p>
                 <p>Implied margin: <span className='font-mono text-zinc-300'>{((product.ukRetailPrice - ep) / product.ukRetailPrice * 100).toFixed(1)}%</span></p>
               </div>
-              <Button className='text-xs' onClick={hp}>Update Price</Button>
+              <Button className='text-xs' data-state="catalog-update-price" disabled={!canMutate}
+                title={canMutate ? undefined : 'View-only staff cannot change product pricing'} onClick={hp}>Update Price</Button>
               {sv && <p className='text-[10px] text-emerald-400'>{sv}</p>}
             </div>
           )}
@@ -142,6 +147,8 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
 
 /* ── Main Catalog Manager ── */
 export function CatalogManagerAdmin() {
+  // §Phase E5 (G4) — the EXISTING staff permission tier gates catalog mutations.
+  const { canCurrentUserMutate } = useApp();
   const brandsQuery = useBrands();
   const productsQuery = useProducts();
   const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
@@ -155,16 +162,21 @@ export function CatalogManagerAdmin() {
   const [selectedProduct, setSelectedProduct] = useState<DemoProduct | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
-  /** Latest submission per (brandId, sku) — the product's derived catalog state. */
-  const submissionByProduct = useMemo(
+  /**
+   * §Phase E5 (G9) — ONE canonical latest-submission derivation.
+   *
+   * This previously re-implemented the "latest per (brand, sku)" reduce locally,
+   * duplicating logic the E3 domain already owns. It now reads the canonical
+   * `demoStore.latestSubmissionForProduct` (the same function the E3 lifecycle
+   * uses), so the admin projection can never drift from the domain. The memo is
+   * keyed on the canonical query result, so React re-renders still propagate.
+   */
+  const latestSubmission = useMemo(
     function() {
-      const m = new Map<string, ProductSubmission>();
-      for (const s of submissions) {
-        const key = s.brandId + '::' + s.sku;
-        const prev = m.get(key);
-        if (!prev || s.submittedAt > prev.submittedAt) m.set(key, s);
-      }
-      return m;
+      void submissions; // reactivity anchor: the canonical submission query result
+      return function(brandId: string, sku: string): ProductSubmission | undefined {
+        return latestSubmissionForProduct(brandId, sku);
+      };
     },
     [submissions]
   );
@@ -206,7 +218,7 @@ export function CatalogManagerAdmin() {
     { key: 'status', header: 'Status', value: function(p: DemoProduct) { return p.isAvailable !== false ? 'Active' : 'Inactive'; } },
     // §Phase E3 — the product's resulting catalog state (derived, tenant-keyed).
     { key: 'submission', header: 'Submission', value: function(p: DemoProduct) {
-        const sub = submissionByProduct.get(p.brandId + '::' + p.sku);
+        const sub = latestSubmission(p.brandId, p.sku);
         if (!sub) return 'Not submitted';
         return SUBMISSION_STATUS_LABELS[sub.status] + (sub.simulated ? ' (sim)' : '');
       } },
@@ -255,7 +267,8 @@ export function CatalogManagerAdmin() {
       {selectedProduct && (
         <ProductDetailModal
           product={selectedProduct}
-          submission={submissionByProduct.get(selectedProduct.brandId + '::' + selectedProduct.sku)}
+          submission={latestSubmission(selectedProduct.brandId, selectedProduct.sku)}
+          canMutate={canCurrentUserMutate}
           onClose={function() { setSelectedProduct(null); }}
         />
       )}

@@ -17,7 +17,11 @@ const STATUS_ORDER = ['received', 'under_review', 'accepted', 'ready_to_fulfil',
 
 export function AdminPurchaseOrderList() {
   const qc = useQueryClient();
-  const { actingStaff: _actingStaff } = useApp();
+  // §Phase E5 (G3) — the on-behalf create action is a MUTATION and must honour
+  // the EXISTING staff permission tier. `createPurchaseOrder`'s real
+  // notification behaviour is deliberately UNCHANGED — this adds the guard the
+  // surface was missing, it does not alter the email path.
+  const { canCurrentUserMutate } = useApp();
   const brandsQuery = useBrands();
   const productsQuery = useProducts();
   const posQuery = usePurchaseOrders();
@@ -56,6 +60,8 @@ export function AdminPurchaseOrderList() {
   function removeLine(idx: number) { setCreateLines(function(prev) { return prev.filter(function(_, i) { return i !== idx; }); }); }
   function updateQty(idx: number, qty: number) { setCreateLines(function(prev) { return prev.map(function(l, i) { return i === idx ? { ...l, quantity: Math.max(1, qty) } : l; }); }); }
   function handleCreate() {
+    // §Phase E5 (G3) — RBAC: a view-only account may not create purchase orders.
+    if (!canCurrentUserMutate) return;
     if (!createBrandId || createLines.length === 0) return;
     const brandProducts = products.filter(function(p) { return p.brandId === createBrandId; });
     const lineItems = createLines.map(function(l) { const p = brandProducts.find(function(pp) { return pp.id === l.productId; }); return { sku: p?.sku ?? 'UNKNOWN', productName: p?.name ?? 'Unknown', quantity: l.quantity, unitPrice: p?.exWorksPrice ?? 0, commodityCode: p?.commodityCode ?? '00000000' }; });
@@ -79,7 +85,9 @@ return (
         </div>
         <div className="ml-auto flex items-center gap-2">
           {createNote && <span className="text-[10px] text-emerald-400">{createNote}</span>}
-          <Button className="text-[10px]" onClick={function() { setShowCreate(true); }}>
+          <Button className="text-[10px]" data-state="admin-po-create" disabled={!canCurrentUserMutate}
+            title={canCurrentUserMutate ? undefined : 'View-only staff cannot create purchase orders'}
+            onClick={function() { setShowCreate(true); }}>
             <Plus className="w-3 h-3 mr-1" /> Create PO
           </Button>
         </div>
@@ -109,6 +117,10 @@ return (
                   <div key={po.id} className="flex items-center justify-between px-1 py-2.5 hover:bg-white/[0.02]">
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="font-mono text-xs text-white font-medium">{po.poNumber}</span>
+                      {/* §Phase E5 (G2) — truthful provenance on the admin PO list. */}
+                      {po.simulated === true && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                      )}
                       <span className={cn('text-[10px] px-1.5 py-0.5 rounded capitalize',
                         po.status === 'received' ? 'bg-blue-500/15 text-blue-300' :
                         po.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' :
@@ -182,10 +194,12 @@ return (
               )}
             </div>
             <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06]">
-              <p className="text-[8px] text-zinc-700">Admin action on behalf of brand</p>
+              <p className="text-[8px] text-zinc-700">
+                {canCurrentUserMutate ? 'Admin action on behalf of brand' : 'View-only staff — creating is refused'}
+              </p>
               <div className="flex gap-2">
                 <Button variant="ghost" className="text-[10px]" onClick={function() { setShowCreate(false); }}>Cancel</Button>
-                <Button className="text-[10px]" disabled={!createBrandId || createLines.length === 0} onClick={handleCreate}>
+                <Button className="text-[10px]" disabled={!canCurrentUserMutate || !createBrandId || createLines.length === 0} onClick={handleCreate}>
                   <Package className="w-3 h-3 mr-1" /> Create PO
                 </Button>
               </div>

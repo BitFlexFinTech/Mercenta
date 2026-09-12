@@ -1,30 +1,52 @@
 /**
- * §Phase E4 — operational commerce overview (admin-facing).
+ * §Phase E4 → §Phase E5 — operational commerce (admin-facing, OPERABLE).
  *
- * The admin surface required to OPERATE the commerce simulation: which brand,
- * which PO, fulfilment/shipment state, receiving, invoice/payment state,
- * exceptions — every row labelled with its truthful simulation provenance.
+ * E4 created the canonical operational lifecycle; E5 makes it **admin-operable**
+ * through the EXISTING domain (`commerceLifecycle`) behind the EXISTING
+ * `CommerceActor` (RBAC + tenant guard in the domain — never UI-only).
  *
- * Read-only by design: the mutations live in the domain (`commerceLifecycle`)
- * behind tenant + RBAC guards, and are driven from the brand console and the
- * domain API. This panel never re-derives or duplicates operational state; it
- * reads the SAME canonical activity trail the domain writes.
+ * The panel reads the SAME canonical stores the domain writes (no second store,
+ * no re-derived operational state) and shows:
+ *   - simulated POs with their legitimate next actions (G1)
+ *   - case opening on the existing helpdesk model via `openCommerceCase` (G8)
+ *   - the canonical activity trail, invoices, payments and exceptions (E4)
+ * All provenance remains truthful: every record is labelled `(sim)`.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useCanonicalStoreVersion } from '@/data/queries';
+import { demoPurchaseOrders, getCommerceInvoiceForPo } from '@/data/demoStore';
+import type { PurchaseOrder } from '@/types';
 import {
+  acknowledgeCommercePurchaseOrder,
+  fulfilCommercePurchaseOrder,
   getCommercePersistenceStatus,
+  issueCommerceInvoice,
   listAllCommerceActivity,
   listAllCommerceExceptions,
   listAllCommerceInvoices,
   listAllCommercePayments,
+  openCommerceCase,
+  receiveCommercePurchaseOrder,
+  recordCommercePayment,
   type CommerceActor,
+  type CommerceResult,
 } from '@/lib/commerce/commerceLifecycle';
-import { Badge, Card } from '@/components/ui';
+import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
 const MONO = 'font-mono text-[11px]';
+
+/** §Phase E5 — the legitimate next actions for a simulated PO, in order. */
+function nextActionsFor(po: { status: string }, hasInvoice: boolean, invoicePaid: boolean) {
+  return {
+    ack: po.status === 'received' || po.status === 'under_review',
+    fulfil: po.status === 'accepted' || po.status === 'ready_to_fulfil',
+    receive: po.status === 'shipped' || po.status === 'ready_to_fulfil',
+    invoice: po.status === 'delivered' && !hasInvoice,
+    pay: hasInvoice && !invoicePaid,
+  };
+}
 
 export function CommerceOperationsPanel() {
   const { actingStaffId, canCurrentUserMutate } = useApp();
@@ -44,6 +66,31 @@ export function CommerceOperationsPanel() {
 
   const activityRows = activities.ok ? [...activities.value].reverse() : [];
   const simulatedCount = activityRows.filter((a) => a.simulated).length;
+
+  /** §Phase E5 (G1) — only SIMULATED POs belong to the commerce simulation. */
+  const simulatedPos = demoPurchaseOrders.filter((p) => p.simulated === true);
+
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * ONE outcome handler for every domain call. The refusal text is whatever the
+   * DOMAIN returned (`CROSS_TENANT` / `FORBIDDEN` / `ILLEGAL_TRANSITION`), so a
+   * refused action is never silently swallowed.
+   */
+  function run<T>(poId: string, label: string, fn: () => CommerceResult<T>, describe: (v: T) => string) {
+    setBusyId(poId);
+    setError(null);
+    setNotice(null);
+    const res = fn();
+    setBusyId(null);
+    if (!res.ok) {
+      setError(`${label}: ${res.error}${res.reasons?.length ? ` — ${res.reasons.join('; ')}` : ''}`);
+      return;
+    }
+    setNotice(`${label}: ${describe(res.value)}`);
+  }
 
   return (
     <Card className="p-4 space-y-3">
@@ -69,6 +116,129 @@ export function CommerceOperationsPanel() {
           </Badge>
         </div>
       </div>
+
+      {/* ── §Phase E5 (G1/G8) — ADMIN OPERATION of the simulated lifecycle ──
+          Every action below calls the CANONICAL domain function with the
+          admin `CommerceActor`. RBAC and tenant scope are enforced INSIDE the
+          domain; the disabled state is an affordance, never the authorisation. */}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+            Operable simulated purchase orders ({simulatedPos.length})
+          </p>
+          {!canCurrentUserMutate && (
+            <span className="text-[10px] text-zinc-600">
+              view-only staff — the domain refuses every mutation
+            </span>
+          )}
+        </div>
+
+        {simulatedPos.length === 0 && (
+          <p className="text-[11px] text-zinc-600">
+            No simulated purchase orders yet. A brand raises one from Purchase Orders →
+            “Operational commerce simulation”.
+          </p>
+        )}
+
+        {simulatedPos.map((po) => {
+          const invoice = getCommerceInvoiceForPo(po.id);
+          const n = nextActionsFor(po, !!invoice, invoice?.status === 'paid');
+          const busy = busyId === po.id;
+          return (
+            <div key={po.id} className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={cn(MONO, 'text-brass')}>{po.poNumber}</span>
+                <span className="text-[10px] text-zinc-500">{po.brandId}</span>
+                <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                  {po.status}
+                </Badge>
+                <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+                <span className="text-[10px] text-zinc-500">£{po.poValue.toFixed(2)}</span>
+                {invoice && (
+                  <span className="text-[10px] text-zinc-500">
+                    · {invoice.number} ({invoice.status})
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  className="text-[11px]"
+                  data-state="admin-commerce-acknowledge"
+                  disabled={busy || !n.ack}
+                  onClick={() =>
+                    run(po.id, 'Acknowledge', () => acknowledgeCommercePurchaseOrder(po.id, actor), (p: PurchaseOrder) => `${p.poNumber} — ${p.status} (sim)`)
+                  }
+                >
+                  Acknowledge
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-[11px]"
+                  data-state="admin-commerce-fulfil"
+                  disabled={busy || !n.fulfil}
+                  onClick={() =>
+                    run(po.id, 'Fulfil', () => fulfilCommercePurchaseOrder(po.id, actor), (r: { po: PurchaseOrder; shipmentId: string }) => `${r.shipmentId} — PO ${r.po.status} (sim)`)
+                  }
+                >
+                  Fulfil / ship
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-[11px]"
+                  data-state="admin-commerce-receive"
+                  disabled={busy || !n.receive}
+                  onClick={() =>
+                    run(po.id, 'Receive', () => receiveCommercePurchaseOrder(po.id, actor), (r: { po: PurchaseOrder; shortfalls: unknown[] }) => `PO ${r.po.status}, ${r.shortfalls.length} shortfall(s) (sim)`)
+                  }
+                >
+                  Receive
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-[11px]"
+                  data-state="admin-commerce-issue-invoice"
+                  disabled={busy || !n.invoice}
+                  onClick={() =>
+                    run(po.id, 'Issue simulated invoice', () => issueCommerceInvoice(po.id, actor), (i: { number: string; subtotalGbp: number }) => `${i.number} — £${i.subtotalGbp.toFixed(2)} (sim)`)
+                  }
+                >
+                  Issue invoice
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-[11px]"
+                  data-state="admin-commerce-record-payment"
+                  disabled={busy || !n.pay || !invoice}
+                  onClick={() =>
+                    invoice &&
+                    run(po.id, 'Record simulated payment', () => recordCommercePayment(invoice.id, actor), (p: { amountGbp: number; invoiceId: string }) => `£${p.amountGbp.toFixed(2)} against ${p.invoiceId} (sim)`)
+                  }
+                >
+                  Record payment
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-[11px]"
+                  data-state="admin-commerce-open-case"
+                  disabled={busy}
+                  onClick={() =>
+                    run(po.id, 'Open case', () => openCommerceCase(po.id, 'Operational review requested (sim)', actor), (r: { ticketId: string }) => `case ${r.ticketId}`)
+                  }
+                >
+                  Open case
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-[11px] text-red-200">{error}</div>
+      )}
+      {notice && (
+        <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-[11px] text-sky-200">{notice}</div>
+      )}
 
       {activityRows.length === 0 ? (
         <p className="text-[11px] text-zinc-500">

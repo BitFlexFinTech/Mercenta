@@ -24,6 +24,7 @@
 import { useCallback, useMemo } from 'react';
 import {
   useBrands,
+  useCatalogSubmissions,
   useComplianceDocuments,
   useContracts,
   useDeductions,
@@ -31,6 +32,7 @@ import {
   usePurchaseOrders,
   useShipmentsAll,
 } from '@/data/queries';
+import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
 import { renewalUrgency } from '@/lib/contracts';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { Alert, Button, EmptyState, PageHeader, StatusBadge, Skeleton } from '@/components/ui';
@@ -84,6 +86,8 @@ export function AdminDashboard({
   const messagesQuery = useMessages();
   const shipmentsQuery = useShipmentsAll();
   const deductionsQuery = useDeductions();
+  // §Phase E5 (G5) — the canonical catalog-submission state (E3).
+  const submissionsQuery = useCatalogSubmissions();
 
   /**
    * Stable snapshot of the resolved query data. Arrays are memoised so derived
@@ -96,6 +100,7 @@ export function AdminDashboard({
   const messagesData = messagesQuery.data;
   const shipmentsData = shipmentsQuery.data;
   const deductionsData = deductionsQuery.data;
+  const submissionsData = submissionsQuery.data;
   const q = useMemo(() => ({
     brands: brandsData?.data ?? [] as NonNullable<typeof brandsData>['data'],
     posAll: posData?.data ?? [] as NonNullable<typeof posData>['data'],
@@ -104,6 +109,7 @@ export function AdminDashboard({
     messagesAll: messagesData?.data ?? [] as NonNullable<typeof messagesData>['data'],
     shipmentsAll: shipmentsData?.data ?? [] as NonNullable<typeof shipmentsData>['data'],
     deductionsAll: deductionsData?.data ?? [] as NonNullable<typeof deductionsData>['data'],
+    submissionsAll: submissionsData?.data ?? [] as NonNullable<typeof submissionsData>['data'],
   }), [
     brandsData,
     posData,
@@ -112,6 +118,7 @@ export function AdminDashboard({
     messagesData,
     shipmentsData,
     deductionsData,
+    submissionsData,
   ]);
   const {
     brands,
@@ -121,6 +128,7 @@ export function AdminDashboard({
     messagesAll,
     shipmentsAll,
     deductionsAll,
+    submissionsAll,
   } = q;
 
   const dataReady = posAll.length > 0 && brands.length > 0;
@@ -131,6 +139,7 @@ export function AdminDashboard({
     contractsQuery.isError ||
     messagesQuery.isError ||
     shipmentsQuery.isError ||
+    submissionsQuery.isError ||
     deductionsQuery.isError;
   const loading =
     !dataReady &&
@@ -191,6 +200,17 @@ export function AdminDashboard({
     (d) => d.status === 'open' || d.status === 'disputed'
   );
 
+  /**
+   * §Phase E5 (G5) — canonical catalogue + commerce measures.
+   *
+   * DERIVED from the E3 submission store and the E4 commerce stores (no invented
+   * metrics, no duplicate store). Empty state honestly produces no rows.
+   */
+  const rejectedSubmissions = submissionsAll.filter((s) => s.status === 'rejected');
+  const commerceInvoicesPending = demoCommerceInvoices.filter(
+    (i) => i.status === 'issued' && !demoCommercePayments.some((p) => p.invoiceId === i.id)
+  );
+
   const kpis: KpiCellData[] = [
     {
       id: 'pending-pos',
@@ -209,7 +229,10 @@ export function AdminDashboard({
       statusText: posInFulfilment.length > 0 ? 'Active' : 'No active POs',
       context:
         shipmentsAll.length > 0 ? `${shipmentsAll.length} live shipments` : 'No shipments created yet',
-      onOpen: go('fulfillment_track'),
+      // §Phase E5 (G5) — REAL DEFECT FIXED: this drilled to Fulfillment Track,
+      // which is the brand score/track-placement surface, not shipments. The
+      // fulfilment destination is Logistics Control.
+      onOpen: go('logistics'),
     },
     {
       id: 'docs-pending',
@@ -367,6 +390,44 @@ if (pendingBrandIds.length > 4) {
     });
   }
 
+  /* §Phase E5 (G5) — canonical catalogue + commerce attention rows. Additive:
+     existing row ids/prefixes (attention-po-*, attention-ded-*, …) are
+     deliberately unchanged so existing browser assertions stay valid. */
+  rejectedSubmissions.slice(0, 3).forEach((s) => {
+    attention.push({
+      id: `sub-${s.id}`,
+      group: 'Catalogue',
+      tone: 'danger',
+      statusLabel: 'REJECTED',
+      title: `${s.productName} — ${s.sku}`,
+      meta: `${brandName.get(s.brandId) ?? s.brandId} · ${s.rejectionReason ?? 'no reason recorded'}${s.simulated ? ' · (sim)' : ''}`,
+      onOpen: go('catalog'),
+    });
+  });
+  if (rejectedSubmissions.length > 3) {
+    attention.push({
+      id: 'sub-more',
+      group: 'Catalogue',
+      tone: 'info',
+      statusLabel: 'MORE',
+      title: `${rejectedSubmissions.length - 3} more rejected submission(s)`,
+      meta: 'Review the full catalogue in Global Catalog',
+      onOpen: go('catalog'),
+    });
+  }
+
+  commerceInvoicesPending.slice(0, 3).forEach((i) => {
+    attention.push({
+      id: `commerce-inv-${i.id}`,
+      group: 'Commerce',
+      tone: 'warning',
+      statusLabel: 'SIM',
+      title: `Simulated invoice ${i.number} awaiting payment`,
+      meta: `${brandName.get(i.brandId) ?? i.brandId} · £${i.subtotalGbp.toFixed(2)} · (sim) — no live payment provider contacted`,
+      onOpen: go('retail_pipeline'),
+    });
+  });
+
   /* ── Next actions — operator quick actions to existing destinations ───── */
   const actions: {
     id: string;
@@ -395,7 +456,7 @@ if (pendingBrandIds.length > 4) {
           s.status === 'live_amazon' || s.status === 'uk_customs_cleared'
             ? ('success' as StatusTone)
             : ('info' as StatusTone),
-        onOpen: go('fulfillment_track'),
+        onOpen: go('logistics'),
       }));
     }
     return posInFulfilment.map((p) => ({

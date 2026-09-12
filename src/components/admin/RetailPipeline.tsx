@@ -6,7 +6,7 @@ import { disputeDeduction, recordDisputeOutcome } from '@/data/api';
 import { COMMISSION_AUTO_APPROVE_THRESHOLD_PLACEHOLDER_GBP } from '@/config/commercial';
 import { DemoBanner } from "@/components/shared/DemoBanner";
 import type { SeedSubmission } from '@/data/demoData';
-import { reconcileDelivery, type DeliveryReconciliationResult } from '@/data/demoStore';
+import { latestSubmissionForProduct, reconcileDelivery, type DeliveryReconciliationResult } from '@/data/demoStore';
 import { useApp } from '@/context/GlobalStateContext';
 import { SUBMISSION_STATUS_LABELS, UK_MARKETPLACE_ID } from '@/lib/spapi/transform';
 import { Badge, Button, Card } from '@/components/ui';
@@ -150,7 +150,20 @@ function UnlockedPipeline() {
                   </div>
                 )}
               </div>
-              <StatusBadge status={sub.status} />
+              <div className="flex flex-col items-end gap-1">
+                <StatusBadge status={sub.status} />
+                {/* §Phase E5 (G2) — truthful provenance on the admin submission list. */}
+                {sub.simulated && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                )}
+                {/* §Phase E5 (G9) — ONE canonical latest-submission derivation: the
+                    SAME `demoStore.latestSubmissionForProduct` the E3 domain and the
+                    Global Catalog use, so a superseded record can never be mistaken
+                    for the product's current state. */}
+                {latestSubmissionForProduct(sub.brandId, sub.sku)?.id !== sub.id && (
+                  <span className="text-[9px] text-zinc-500">superseded</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -168,6 +181,10 @@ function UnlockedPipeline() {
               <div key={po.id} className="flex items-center justify-between px-1 py-3">
                 <div className="flex items-center gap-3">
                   <span className="font-mono text-xs text-white">{po.poNumber}</span>
+                  {/* §Phase E5 (G2) — simulated POs are identified, never implied real. */}
+                  {po.simulated === true && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                  )}
                   <span className="text-[10px] text-zinc-500">{brandNames.get(po.brandId) ?? po.brandId}</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -225,7 +242,12 @@ function UnlockedPipeline() {
                 <td className="px-4 py-2.5 text-xs font-mono">{d.date}</td>
                 <td className="px-4 py-2.5 text-xs">{brandNames.get(d.brandId) ?? d.brandId}</td>
                 <td className="px-4 py-2.5 text-xs font-mono">{d.purchaseOrderId}</td>
-                <td className="px-4 py-2.5 text-xs capitalize">{d.type.replace(/_/g, ' ')}</td>
+                <td className="px-4 py-2.5 text-xs capitalize">
+                  {d.type.replace(/_/g, ' ')}
+                  {/* §Phase E5 (G2) — in-cell marker only: column indices are
+                      deliberately unchanged for the existing dispute assertions. */}
+                  {d.simulated && <span className="ml-1 text-[9px] text-brass-400">(sim)</span>}
+                </td>
                 <td className="px-4 py-2.5 text-xs max-w-[240px]">
                   {d.reason}
                   {d.dispute && (

@@ -3,6 +3,7 @@ import { cn } from '@/utils/cn';
 import {
   AlertTriangle,
   Bell,
+  CreditCard,
   FileWarning,
   Gavel,
   Inbox,
@@ -10,6 +11,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { useApp } from '@/context/GlobalStateContext';
+import { demoCommerceInvoices, demoCommercePayments, demoPurchaseOrders } from '@/data/demoStore';
 import {
   useBrands,
   useCatalogSubmissions,
@@ -42,7 +44,7 @@ function useTenantScope(): string | null {
 
 export interface NotificationItem {
   id: string;
-  kind: 'po' | 'contract' | 'compliance' | 'deduction' | 'score' | 'submission' | 'shipment';
+  kind: 'po' | 'contract' | 'compliance' | 'deduction' | 'score' | 'submission' | 'shipment' | 'commerce';
   title: string;
   detail: string;
   severity: 'high' | 'medium';
@@ -140,6 +142,8 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
   const { session } = useApp();
   const isBrandSession = session?.tier === 'brand';
   const shipTarget = isBrandSession ? 'logistics' : 'logistics'; // both brand+admin use 'logistics' view
+  /** §Phase E5 (G7) — where the operational commerce surface lives per session. */
+  const commerceTarget = isBrandSession ? 'purchase_orders' : 'retail_pipeline';
   const inScope = <T extends { brandId: string }>(rows: T[]): T[] =>
     tenantId ? rows.filter((r) => r.brandId === tenantId) : rows;
 
@@ -147,6 +151,25 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
   const deductions = inScope(useDeductions().data?.data ?? []);
   const complianceDocs = inScope(useComplianceDocuments().data?.data ?? []);
   const shipments = inScope(useShipmentsAll().data?.data ?? []);
+
+  /**
+   * §Phase E5 (G7) — canonical operational-commerce items.
+   *
+   * Derived from the SAME canonical stores the E4 lifecycle writes
+   * (`demoCommerceInvoices` / `demoCommercePayments` / `demoPurchaseOrders`).
+   * No second notification store, nothing re-derived, and every item states its
+   * simulation provenance truthfully — nothing claims a live provider acted.
+   * Only states NOT already covered by the `po`/`deduction` kinds are surfaced,
+   * so nothing is double-counted.
+   */
+  const commerceInvoices = tenantId
+    ? demoCommerceInvoices.filter((i) => i.brandId === tenantId)
+    : demoCommerceInvoices;
+  const paidInvoiceIds = new Set(demoCommercePayments.map((p) => p.invoiceId));
+  const invoicedPoIds = new Set(demoCommerceInvoices.map((i) => i.purchaseOrderId));
+  const simulatedPos = tenantId
+    ? demoPurchaseOrders.filter((p) => p.brandId === tenantId && p.simulated === true)
+    : demoPurchaseOrders.filter((p) => p.simulated === true);
 
   return ([] as NotificationItem[])
     .concat(
@@ -197,6 +220,30 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
               navTarget: shipTarget,
             }))
         : []
+    )
+    .concat(
+      commerceInvoices
+        .filter((i) => i.status === 'issued' && !paidInvoiceIds.has(i.id))
+        .map((i) => ({
+          id: `commerce-pay-${i.id}`,
+          kind: 'commerce' as const,
+          title: `Simulated invoice ${i.number} awaiting payment`,
+          detail: `${brandName(i.brandId)} · £${i.subtotalGbp.toFixed(2)} · (sim) — no live payment provider contacted`,
+          severity: 'medium' as const,
+          navTarget: commerceTarget,
+        }))
+    )
+    .concat(
+      simulatedPos
+        .filter((p) => p.status === 'delivered' && !invoicedPoIds.has(p.id))
+        .map((p) => ({
+          id: `commerce-inv-${p.id}`,
+          kind: 'commerce' as const,
+          title: `Simulated PO ${p.poNumber} delivered — invoice outstanding`,
+          detail: `${brandName(p.brandId)} · £${p.poValue.toFixed(2)} · (sim)`,
+          severity: 'medium' as const,
+          navTarget: commerceTarget,
+        }))
     );
 }
 
@@ -208,6 +255,7 @@ const KIND_ICON = {
   score: AlertTriangle,
   submission: FileWarning,
   shipment: Truck,
+  commerce: CreditCard,
 } as const;
 
 export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string) => void }) {

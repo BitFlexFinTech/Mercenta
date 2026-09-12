@@ -5,6 +5,7 @@ import { Badge, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AlertTriangle, Container, Ship } from 'lucide-react';
 import type { DemoShipment } from '@/data/demoData';
+import type { PurchaseOrder } from '@/types';
 
 const IN_TRANSIT = ['sea_transit', 'air_transit', 'factory_intake'];
 
@@ -20,12 +21,28 @@ export function LogisticsControl() {
   const shipments = useMemo(() => shipmentsQuery.data?.data ?? [], [shipmentsQuery.data]);
   const brandsQuery = useBrands();
   const brands = brandsQuery.data?.data ?? [];
-  const pos = usePurchaseOrders().data?.data ?? [];
+  // §Phase E5 (G6) — stable identity (the PO list is a join input below), using
+  // the same pattern as the shipments query above.
+  const poQuery = usePurchaseOrders();
+  const pos = useMemo(() => poQuery.data?.data ?? [], [poQuery.data]);
 
   const brandName = (id: string) =>
     brands.find((b) => b.id === id)?.profile.businessName ?? id;
-  const poNumber = (id: string) =>
-    pos.find((p) => p.id === id)?.poNumber ?? '—';
+
+  /**
+   * §Phase E5 (G6) — REAL DEFECT FIXED.
+   *
+   * The PO column used `pos.find((p) => p.id === s.id)`, comparing a SHIPMENT id
+   * (`shipment-<poId>`) against PO ids, so it always rendered “—”. The canonical
+   * shipment→PO link is `DemoShipment.poNumber`. The same canonical join also
+   * yields the PO's truthful simulation provenance (G2).
+   */
+  const poByNumber = useMemo(() => {
+    const m = new Map<string, PurchaseOrder>();
+    for (const p of pos) m.set(p.poNumber, p);
+    return m;
+  }, [pos]);
+  const poFor = (poNumber: string) => poByNumber.get(poNumber);
 
   const groups = useMemo(() => {
     const map = new Map<string, DemoShipment[]>();
@@ -80,7 +97,12 @@ export function LogisticsControl() {
                 const transit = IN_TRANSIT.includes(s.status);
                 return (
                   <tr key={s.id} className={cn(transit && s.delayed && 'bg-amber-500/5')}>
-                    <td className="py-2 pl-1 font-mono text-brass">{poNumber(s.id)}</td>
+                    <td className="py-2 pl-1 font-mono text-brass">
+                      {s.poNumber}
+                      {poFor(s.poNumber)?.simulated === true && (
+                        <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                      )}
+                    </td>
                     <td className="py-2 capitalize">{s.carrier.replace('_', ' ')}</td>
                     <td className="py-2 font-mono text-zinc-400">{s.reference}</td>
                     <td className="py-2">
