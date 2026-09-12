@@ -18,6 +18,7 @@ fixed. Never cite the log as current status.
 - `node scripts/validate-onboarding-workflow.mjs` — ONBOARDING_WORKFLOW_VALIDATION_PASS (45/45; Phase E2)
 - `node scripts/validate-e3-catalog.mjs` — E3_CATALOG_VALIDATION_PASS (65/65; Phase E3)
 - `node scripts/validate-e4-commerce.mjs` — E4_COMMERCE_VALIDATION_PASS (108/108; Phase E4)
+- `node scripts/validate-e5-admin-surfaces.mjs` — E5_ADMIN_SURFACES_VALIDATION_PASS (48/48; Phase E5)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -28,8 +29,10 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **189 PASS / 4 skip / 0 fail** across 33 spec files.
-  (Phase E4 added `e2e/commerce-operational-simulation.spec.ts`, +4 tests, 0 new
+  **Playwright E2E** — **193 PASS / 4 skip / 0 fail** across 34 spec files.
+  (Phase E5 added `e2e/admin-operational-surfaces.spec.ts`, +4 tests, 0 new
+  failures — full run `193 passed / 4 skipped / 0 failed`.
+  Phase E4 added `e2e/commerce-operational-simulation.spec.ts`, +4 tests, 0 new
   failures — full run `189 passed / 4 skipped / 0 failed`.
   Phase E3 added `e2e/catalog-product-management.spec.ts`, +4 tests, 0 new
   failures — full run `185 passed / 4 skipped / 0 failed` in 2.7m.
@@ -41,6 +44,52 @@ fixed. Never cite the log as current status.
   was 0-failure.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Admin operational surfaces (Phase E5 — 2026-09-12)
+
+- Turns the canonical E1–E4 domain state into coherent ADMIN-facing operational
+  surfaces. **Operational completion, not a UI redesign and not a new admin app.**
+- **NO new store, dashboard, CRM, PO system, catalogue, ticketing system or
+  billing system, and NO migration** — every gap extended an EXISTING surface.
+- **G1 — admin operability.** `CommerceOperationsPanel` (hosted in Retail
+  Pipeline) now OPERATES the simulated lifecycle: acknowledge → fulfil → receive →
+  issue simulated invoice → record simulated payment (+ open case), all through the
+  EXISTING `commerceLifecycle` behind the EXISTING `CommerceActor`. RBAC and tenant
+  scope are enforced **IN THE DOMAIN**; refusals are surfaced verbatim
+  (`FORBIDDEN` / `CROSS_TENANT` / `ILLEGAL_TRANSITION`).
+- **G2 — provenance.** Truthful `(sim)` markers derived from the canonical flags on
+  `AdminPurchaseOrderList`, `RetailPipeline`, `LogisticsControl` and the commerce
+  panel. Deduction markers are in-cell only, so existing dispute column indices are
+  unchanged.
+- **G3/G4 — RBAC gaps closed.** The admin "Create PO on behalf of brand" action
+  (which sends a REAL email) and the catalog availability/price mutations now
+  honour the staff permission tier. **`createPurchaseOrder`'s email implementation
+  is UNTOUCHED.**
+- **G5 — REAL DEFECT FIXED.** The "POs in fulfilment" KPI and the "Fulfilment in
+  motion" rows drilled to Fulfillment Track — the brand **scoring** surface — not
+  shipments; they now route to Logistics Control. Two ADDITIVE canonical-derived
+  attention groups (rejected catalog submissions; issued-unpaid simulated invoices)
+  were added without touching existing row ids, KPI ids or section headings.
+- **G6 — REAL DEFECT FIXED.** Logistics Control's PO column rendered `—` for every
+  row (`pos.find(p => p.id === s.id)` compared a SHIPMENT id against PO ids). It now
+  renders the canonical `DemoShipment.poNumber`; the same canonical join supplies
+  the provenance.
+- **G7 — commerce notifications.** `NotificationCenter` gained ONE canonical
+  `commerce` kind derived from the E4 stores (no second notification store, no
+  double-counting), with truthful "(sim) — no live payment provider contacted" copy.
+- **G8 — case surfaced.** `openCommerceCase` (E4, previously unreachable) is now
+  reachable from the admin surface and opens on the EXISTING helpdesk model — no
+  parallel case system.
+- **G9 — one derivation.** Both surfaces now use the canonical
+  `demoStore.latestSubmissionForProduct` (Retail Pipeline also marks `superseded`
+  rows).
+- Gates: validator **48/48 PASS**; E2E spec **4/4 PASS**; full E2E **193/0/4**;
+  typecheck 0 · lint 0 · build PASS; all **49 legacy validators byte-identical**
+  (15 pre-existing failures proven in a worktree at pre-E5 commit `981332f`).
+- HONEST: still no live integration; memory adapter active (`durable:false`); no
+  migration added or executed (023 remains newest); BI untouched.
+- Report: `docs/PRODUCT_CONSOLIDATION_PHASEE5_2026-09-12.md`. **NEXT: E6 — Brand
+  Operational Surfaces (NOT started).**
 
 ## Commerce / operational simulation (Phase E4 — 2026-09-12)
 

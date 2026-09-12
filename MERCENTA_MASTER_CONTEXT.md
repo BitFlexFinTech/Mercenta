@@ -354,8 +354,11 @@ onboarding. **Not started yet.**
 > DONE 2026-09-12** — the operational commerce lifecycle (eligibility → simulated
 > PO → acknowledgement → fulfilment → receiving → simulated invoice → simulated
 > payment → exception → dispute) is now functional end-to-end in SIMULATION with
-> zero external network calls. **NEXT: E5 admin operational surfaces (NOT
-> started).** Their state lives in **PROJECT_STATUS.md**.
+> zero external network calls. **E5 (admin operational surfaces) is DONE
+> 2026-09-12** — the canonical E1–E4 state is now admin-operable from the EXISTING
+> surfaces (RBAC + tenant isolation enforced in the domain, truthful simulation
+> provenance everywhere, no new store/dashboard/migration). **NEXT: E6 — brand
+> operational surfaces (NOT started).** Their state lives in **PROJECT_STATUS.md**.
 
 ## AC. Permanent Do-Not-Change Decisions
 

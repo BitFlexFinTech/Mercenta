@@ -1,6 +1,43 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-12 (**Phase E4 — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION**; see the PHASE E4 block below. Previous session: **Phase E3 — CATALOG / PRODUCT MANAGEMENT** (see the PHASE E3 block below). Earlier: **Phase E2 — BRAND ONBOARDING WORKFLOW**; **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+> Last updated: 2026-09-12 (**Phase E5 — ADMIN OPERATIONAL SURFACES**; see the PHASE E5 block below. Previous session: **Phase E4 — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION** (see the PHASE E4 block below). Earlier: **Phase E3 — CATALOG / PRODUCT MANAGEMENT**; **Phase E2 — BRAND ONBOARDING WORKFLOW**; **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+>
+> **PHASE E5 (2026-09-12) — ADMIN OPERATIONAL SURFACES.** Turns the canonical
+> E1–E4 domain state into coherent ADMIN-facing operational surfaces. It is
+> operational completion, NOT a UI redesign and NOT a new admin application:
+> **no new store, dashboard, CRM, PO system, catalogue, ticketing system or
+> billing system, and NO migration** — every gap was closed by extending an
+> EXISTING surface. **G1** `CommerceOperationsPanel` is now OPERABLE: it drives
+> acknowledge → fulfil → receive → issue invoice → record payment (+ open case)
+> through the EXISTING `commerceLifecycle` behind the EXISTING `CommerceActor`
+> (RBAC + tenant enforced IN THE DOMAIN; refusals shown verbatim). **G2** truthful
+> `(sim)` provenance on `AdminPurchaseOrderList`, `RetailPipeline`,
+> `LogisticsControl` and the commerce panel, derived from the canonical flags.
+> **G3** the admin "Create PO on behalf of brand" action (which sends a REAL
+> email) now honours the staff permission tier — the email implementation is
+> UNTOUCHED. **G4** the catalog availability/price mutations now honour the same
+> tier. **G5 REAL DEFECT FIXED:** the "POs in fulfilment" KPI + "Fulfilment in
+> motion" rows drilled to Fulfillment Track (brand SCORING, not shipments) — they
+> now route to Logistics Control; two ADDITIVE canonical-derived attention groups
+> (rejected submissions, issued-unpaid simulated invoices) were added without
+> touching existing row ids or the pinned KPI contract. **G6 REAL DEFECT FIXED:**
+> Logistics Control's PO column rendered `—` for every row (`pos.find(p => p.id
+> === s.id)` compared a shipment id against PO ids) — it now renders the canonical
+> `DemoShipment.poNumber`. **G7** `NotificationCenter` gained ONE canonical
+> `commerce` kind derived from the E4 stores (no second notification store, no
+> double-counting). **G8** `openCommerceCase` (E4, previously unreachable) is now
+> surfaced and opens on the EXISTING helpdesk model. **G9** the duplicated
+> latest-submission derivation now uses the canonical
+> `demoStore.latestSubmissionForProduct` in BOTH surfaces (Retail Pipeline also
+> marks `superseded` rows). Gates: new validator **48/48 PASS** + new E2E spec
+> **4/4**; full E2E **193/0/4** (was 189/0/4 → +4, **0 regressions**); typecheck 0
+> · lint 0 · build PASS; all **49 legacy validators byte-identical** before/after
+> E5 (the same **15** pre-existing failures, proven in a clean `git worktree` at
+> the pre-E5 commit `981332f`, tag `mercenta-pre-e5-20260912`). Report:
+> `docs/PRODUCT_CONSOLIDATION_PHASEE5_2026-09-12.md`. **HONEST: still no live
+> integration; memory adapter active (`durable:false`); NO migration added or
+> executed (023 remains newest); BI untouched. NEXT: E6 — Brand Operational
+> Surfaces (NOT started).**
 >
 > **PHASE E4 (2026-09-12) — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION.**
 > The operational commerce lifecycle is now genuinely functional in SIMULATION

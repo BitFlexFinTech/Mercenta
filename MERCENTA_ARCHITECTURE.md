@@ -350,7 +350,24 @@ carries a `prospectId`.
   (additive, 4 tables, RLS + brand isolation, **NOT executed**). Every record is
   explicitly `mode:'simulation'`/`simulated:true`; UNKNOWN is never simulation-safe;
   zero external network calls. Validator 108/108 · E2E spec 4/4 · full E2E 189/0/4.
-  **NEXT: E5 — admin operational surfaces (NOT started).**
+  **NEXT: E6 — brand operational surfaces (NOT started).**
+- **Phase E5 — admin operational surfaces (2026-09-12):** ✅ the canonical E1–E4
+  domain state is now coherently ADMIN-facing, by EXTENDING existing surfaces only
+  (no new store/dashboard/CRM/PO/catalogue/ticketing/billing system, no migration).
+  `CommerceOperationsPanel` is OPERABLE through the EXISTING `commerceLifecycle` +
+  `CommerceActor` (RBAC/tenant in the domain); truthful `(sim)` provenance on the
+  admin PO list, Retail Pipeline, Logistics Control and the commerce panel; the
+  admin PO-create action (real email) and catalog availability/price mutations now
+  honour the staff permission tier (`createPurchaseOrder`'s email implementation
+  untouched); `NotificationCenter` gained ONE canonical `commerce` kind; the
+  previously unreachable `openCommerceCase` is surfaced on the existing helpdesk
+  model; the duplicated latest-submission derivation now uses the canonical
+  `demoStore.latestSubmissionForProduct`. TWO REAL DEFECTS FIXED: Logistics
+  Control's PO column always rendered `—` (shipment id compared against PO ids →
+  now the canonical `poNumber`), and the "POs in fulfilment"/"Fulfilment in motion"
+  drill-downs pointed at the brand SCORING surface (Fulfillment Track) instead of
+  shipments (now Logistics Control). Validator 48/48 · E2E spec 4/4 · full E2E
+  193/0/4 · all 49 legacy validators byte-identical.
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep

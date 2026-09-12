@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 12, 2026 (Phase E4 — commerce / Amazon-style operational simulation)
+Last updated: September 12, 2026 (Phase E5 — admin operational surfaces)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -171,6 +171,33 @@ Cline's output back. AI confirms, gives next prompt.
   validators byte-identical (15 legacy failures are PRE-EXISTING, proven in a
   worktree at the pre-E4 commit `657b6b2`). Report:
   docs/PRODUCT_CONSOLIDATION_PHASEE4_2026-09-12.md.
+- Admin operational surfaces (Phase E5, 2026-09-12): the canonical E1–E4 state is
+  now coherently ADMIN-facing. NO new surface, store, dashboard, CRM, PO system,
+  catalogue, ticketing or billing system was created, and **no migration** was
+  added — every gap extended an EXISTING surface. The admin commerce panel
+  (`CommerceOperationsPanel`, hosted in Retail Pipeline) is now OPERABLE: it drives
+  acknowledge → fulfil → receive → issue simulated invoice → record simulated
+  payment and opens an operational case, all through the EXISTING
+  `commerceLifecycle` behind the EXISTING `CommerceActor` (RBAC + tenant isolation
+  enforced IN THE DOMAIN, refusals surfaced verbatim). Truthful `(sim)` provenance
+  added to the admin PO list, Retail Pipeline, Logistics Control and the commerce
+  panel (derived from the canonical flags). The admin PO-create action (which
+  sends a REAL email) and the catalog availability/price mutations now honour the
+  existing staff permission tier — `createPurchaseOrder`'s email implementation is
+  UNTOUCHED. TWO REAL DEFECTS FIXED: Logistics Control's PO column always rendered
+  `—` (a shipment id was compared against PO ids — now uses the canonical
+  `poNumber`); and the "POs in fulfilment" KPI + "Fulfilment in motion" rows
+  drilled to Fulfillment Track, which is the brand SCORING surface — they now route
+  to Logistics Control. Two ADDITIVE canonical attention groups (rejected catalog
+  submissions; issued-unpaid simulated invoices) were added to the dashboard
+  without changing existing row ids, KPI ids or section headings. NotificationCenter
+  gained ONE canonical `commerce` kind (no second notification store). The
+  duplicated latest-submission derivation now uses the canonical
+  `demoStore.latestSubmissionForProduct`. Gates: new validator 48/48 + new E2E spec
+  4/4; full E2E 193/0/4 (was 189/0/4 → 0 new failures); typecheck 0 · lint 0 ·
+  build PASS; all 49 legacy validators byte-identical (15 pre-existing failures
+  proven in a worktree at the pre-E5 commit `981332f`). Report:
+  docs/PRODUCT_CONSOLIDATION_PHASEE5_2026-09-12.md.
 - Review zip script + protection rules + handoff rule
 
 ## WHAT'S LEFT (IN ORDER):
@@ -186,14 +213,16 @@ NEXT in roadmap: PHASE D COMPLETE (D1–D4, 2026-09-11). **PHASE E — CORE PLAT
 COMPLETION is IN PROGRESS: E1 (opportunity → brand onboarding hand-off) DONE
 2026-09-11**, **E2 (brand onboarding workflow) DONE 2026-09-11**,
 **E3 (catalog / product management) DONE 2026-09-12** and
-**E4 (commerce / Amazon-style operational simulation) DONE 2026-09-12** — a brand
-can now take a product from information → completeness → compliance → ready →
-simulated submission → simulated result → simulated purchase order →
-acknowledgement → fulfilment → receiving → simulated invoice → simulated payment →
-exception → dispute, with the resulting state observable in both the brand portal
-and the admin Retail Pipeline, tenant-isolated in the domain, with zero external
-network calls. Next: **E5 — admin operational surfaces (NOT started)**, then
-E6 brand operational surfaces, E7 embedded Postiz. Rakazo stays LAST (Phase M).
+**E4 (commerce / Amazon-style operational simulation) DONE 2026-09-12** and
+**E5 (admin operational surfaces) DONE 2026-09-12** — a brand can now take a
+product from information → completeness → compliance → ready → simulated
+submission → simulated result → simulated purchase order → acknowledgement →
+fulfilment → receiving → simulated invoice → simulated payment → exception →
+dispute, AND an authorised admin can operate that lifecycle from the existing
+admin surfaces (Retail Pipeline commerce panel), with tenant isolation, RBAC and
+audit enforced in the domain and truthful simulation provenance everywhere. Next:
+**E6 — brand operational surfaces (NOT started)**, then E7 embedded Postiz.
+Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,
