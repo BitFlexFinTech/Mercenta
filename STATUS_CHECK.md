@@ -39,7 +39,7 @@ fixed. Never cite the log as current status.
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
 
-## Catalog / product management (Phase E3 — 2026-09-12)
+## Catalog / product management (Phase E3 — 2026-09-12) — commit `f86d8c7`
 
 - The product lifecycle is complete and demonstrable in SIMULATION: product
   information → completeness → compliance gate → ready → submit → simulated

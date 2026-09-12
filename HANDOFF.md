@@ -122,7 +122,7 @@ Cline's output back. AI confirms, gives next prompt.
   `scripts/validate-rocketchat-removal.mjs` (15/15) + `e2e/rocketchat-removal.spec.ts`
   (5/5). Full E2E 165/0/4 · typecheck 0 · lint 0 · build PASS. Report:
   docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md.
-- Catalog / product management (Phase E3, 2026-09-12): the
+- Catalog / product management (Phase E3, 2026-09-12; commit `f86d8c7`): the
   product lifecycle is now complete and demonstrable end-to-end in SIMULATION —
   product information → COMPLETENESS → compliance gate → READY → SUBMIT (existing
   `api.submitCatalogItem` seam) → SIMULATED PROCESSING → SIMULATED RESULT →

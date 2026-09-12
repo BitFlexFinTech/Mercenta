@@ -301,9 +301,10 @@ Edge Function deployment, Amazon SP-API credentials.
 
 ## 20. GIT COMMIT HASHES
 - Pre-E3 HEAD (parent): `b1f1ee4`
-- E3 implementation commit: recorded by the follow-up documentation commit
-  (project convention: the phase commit lands first, then its verified hash is
-  written into the docs — see PROJECT_STATUS.md).
+- E3 implementation commit: **`f86d8c7`** (20 files: 9 modified source files,
+  5 created code/test/schema files, 1 created report, 4 updated docs).
+- E3 documentation checkpoint commit (records the verified hash above): the
+  commit that contains this line.
 - Protected baseline `959b4d2` verified still an ancestor of HEAD
   (`git merge-base --is-ancestor 959b4d2 HEAD` → OK).
 
