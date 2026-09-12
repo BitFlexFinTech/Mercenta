@@ -7,7 +7,29 @@
  *
  * Mock client always active when no Postiz credentials are configured.
  * Real client activates when the Postiz URL and API key are entered.
+ *
+ * ── §Phase E7 ADDITIONS ─────────────────────────────────────────────────────
+ * E7 makes the COMPLETE engine application available to approved Mercenta brands
+ * as MERCENTA SOCIAL. This module stays the low-level engine client; the
+ * customer-facing identity, the module inventory, the provider list and the
+ * verified deployment facts live in `src/config/mercentaSocial.ts`.
+ *
+ * HONESTY NOTE about the methods below: the endpoint paths used by
+ * `RealPostizClient` (`/api/health`, `/api/posts`) predate the E7 investigation
+ * and are NOT the engine's verified developer API. The engine's real
+ * programmatic surface was verified in v1.47.0 as `/public/v1` (see
+ * `getSocialEngineStatus()` and SOCIAL_ENGINE_API). Until that client is
+ * implemented server-side, `RealPostizClient` must not be described as verified,
+ * and no code path may treat an unconfigured engine as live.
  */
+import {
+  MERCENTA_SOCIAL,
+  SOCIAL_DEPLOYMENT_FINDINGS,
+  SOCIAL_ENGINE_API,
+  SOCIAL_ENGINE_VERIFIED,
+  resolveSocialEngineConfig,
+  type SocialDeploymentFinding,
+} from '@/config/mercentaSocial';
 
 export interface PostizPost {
   id: string;
@@ -155,4 +177,62 @@ export function getPostizClient(creds?: {
   }
   if (!_mockClient) _mockClient = new MockPostizClient();
   return _mockClient;
+}
+
+/* ── §Phase E7 — verified engine status (admin diagnostics + brand surface) ─ */
+
+export interface SocialEngineStatus {
+  /** Internal engine identity — admin/technical usage only. */
+  engineName: string;
+  engineVersion: string;
+  engineLicence: string;
+  /** Customer-facing product identity. */
+  productName: string;
+  /** The verified deployment this integration targets (evidence, not config). */
+  verified: typeof SOCIAL_ENGINE_VERIFIED;
+  /** Configured application URL, when the integration metadata provides one. */
+  appUrl: string | null;
+  configured: boolean;
+  mode: 'simulation' | 'configured';
+  blockedReasons: string[];
+  /** The engine's verified programmatic API path. */
+  developerApiPath: string;
+  /** The legacy client's endpoint shapes were never verified against the engine. */
+  legacyEndpointsVerified: false;
+  findings: SocialDeploymentFinding[];
+}
+
+/**
+ * The single truthful status object both the admin control centre and the brand
+ * surface read. Nothing here upgrades an unconfigured engine to "live".
+ */
+export function getSocialEngineStatus(meta?: Record<string, string>): SocialEngineStatus {
+  const config = resolveSocialEngineConfig(meta);
+  return {
+    engineName: MERCENTA_SOCIAL.engineName,
+    engineVersion: SOCIAL_ENGINE_VERIFIED.version,
+    engineLicence: MERCENTA_SOCIAL.engineLicence,
+    productName: MERCENTA_SOCIAL.productName,
+    verified: SOCIAL_ENGINE_VERIFIED,
+    appUrl: config.appUrl,
+    configured: config.configured,
+    mode: config.mode,
+    blockedReasons: config.blockedReasons,
+    developerApiPath: SOCIAL_ENGINE_API.versionedPublicApi,
+    legacyEndpointsVerified: false,
+    findings: SOCIAL_DEPLOYMENT_FINDINGS,
+  };
+}
+
+/** Finding counts by severity — used by the admin control centre summary. */
+export function socialFindingCounts(findings: SocialDeploymentFinding[]): {
+  blocking: number;
+  warning: number;
+  info: number;
+} {
+  return {
+    blocking: findings.filter((f) => f.severity === 'blocking').length,
+    warning: findings.filter((f) => f.severity === 'warning').length,
+    info: findings.filter((f) => f.severity === 'info').length,
+  };
 }

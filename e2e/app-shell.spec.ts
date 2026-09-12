@@ -57,10 +57,13 @@ test.describe('App Shell — role coverage & grouped IA', () => {
     for (const heading of ['Overview', 'Catalogue', 'Commerce', 'Logistics', 'Compliance', 'Insights', 'Account']) {
       await expect(nav.locator(`text=${heading}`).first()).toBeVisible();
     }
+    // §Phase E7 — the brand nav item is the customer-facing Mercenta Social
+    // identity (src/config/mercentaSocial.ts → MERCENTA_SOCIAL.navLabel). The
+    // assertion is unchanged in strength: the item must still be visible.
     for (const item of ['Dashboard', 'Product Catalog', 'Purchase Orders', 'Returns',
       'Inbound Shipments', 'Onboarding & Legal', 'UK Compliance', 'Contracts',
       'Analytics', 'Market Intel', 'Reports', 'Documents & Account',
-      'Support & Team', 'Social Accounts', 'Settings']) {
+      'Support & Team', 'Mercenta Social', 'Settings']) {
       await expect(nav.locator(`text=${item}`).first()).toBeVisible();
     }
   });

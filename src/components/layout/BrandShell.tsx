@@ -27,6 +27,7 @@ import { BrandTeamMessages } from '@/components/brand/BrandTeamMessages';
 import { BrandSocialConnect } from '@/components/brand/BrandSocialConnect';
 import { BrandIntelligence } from '@/components/brand/BrandIntelligence';
 import { SalesAnalytics } from '@/components/brand/SalesAnalytics';
+import { MERCENTA_SOCIAL } from '@/config/mercentaSocial';
 import {
   LayoutDashboard, FileCheck2, FileText, Package, Truck,
   ShieldCheck, BarChart3, RotateCcw, Target, Settings,
@@ -74,7 +75,7 @@ const BRAND_SECTIONS = [
     items: [
       { id: 'documents', label: 'Documents & Account', icon: <ScrollText className="w-4 h-4" /> },
       { id: 'team', label: 'Support & Team', icon: <MessageSquare className="w-4 h-4" /> },
-      { id: 'social', label: 'Social Accounts', icon: <Target className="w-4 h-4" /> },
+      { id: 'social', label: MERCENTA_SOCIAL.navLabel, icon: <Target className="w-4 h-4" /> },
       { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" />, tourAttr: 'nav-settings' },
     ],
   },
@@ -95,7 +96,7 @@ export default function BrandShell() {
     : brandView === 'returns' ? 'Returns'
     : brandView === 'reports' ? 'Reports'
     : brandView === 'team' ? 'Support & Team'
-    : brandView === 'social' ? 'Social Accounts'
+    : brandView === 'social' ? MERCENTA_SOCIAL.navLabel
     : brandView === 'market' ? 'Market Intelligence'
     : brandView === 'settings' ? 'Settings'
     : 'Analytics';

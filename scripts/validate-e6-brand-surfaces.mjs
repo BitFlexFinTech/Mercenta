@@ -7,6 +7,7 @@
 //          array element, which is only correct while exactly one row exists)
 //   D  G4 — NotificationCenter derives deduction provenance from the canonical flag
 //   E  scope — only the approved E6 files changed; no protected file touched
+//      (§Phase E7 later extended this set with its own phase scope — see E7_SCOPE)
 //   F  safety — no migration, no new store/dashboard/nav, no live provider path,
 //          createPurchaseOrder's email path untouched, UNKNOWN stays unsafe
 import { createServer } from 'vite';
@@ -60,6 +61,38 @@ const APPROVED = new Set([
   'MERCENTA_ARCHITECTURE.md',
 ]);
 const ALLOWED_NON_APPROVED = new Set(['Review Zip/mercenta-review.zip']);
+
+/**
+ * §Phase E7 — the Embedded Mercenta Social phase scope (2026-09-12).
+ *
+ * E6's source-scope guards below predate E7. They must now accept the E7 change
+ * set while STILL refusing anything outside it, and F5b additionally pins which
+ * protected-area file E7 was allowed to move (the engine client seam — the file
+ * E7 exists to extend). Nothing here widens what E7 may touch.
+ */
+const E7_SCOPE = new Set([
+  'src/config/mercentaSocial.ts',
+  // New E7 module directory (git reports a brand-new untracked directory as a
+  // single path, so the directory itself is part of the E7 scope):
+  'src/lib/social/',
+  'src/lib/social/workspace.ts',
+  'src/lib/social/brandStatus.ts',
+  'src/lib/social/index.ts',
+  'src/components/brand/MercentaSocial.tsx',
+  'src/components/brand/BrandSocialConnect.tsx',
+  'src/components/admin/PostizAdminPanel.tsx',
+  'src/components/layout/BrandShell.tsx',
+  'src/lib/postiz/postizClient.ts',
+  'scripts/validate-e7-embedded-social.mjs',
+  // E7 extended THIS guard (F5/F5b/F6) so it still refuses any path outside the
+  // E6 + E7 change sets — the file itself is therefore part of the E7 scope:
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'e2e/embedded-social.spec.ts',
+  'e2e/app-shell.spec.ts',
+  'docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md',
+  'requirements-registry.json',
+  'PRODUCTION_READINESS.md',
+]);
 
 /**
  * Reproducible OUTPUTS, not source. The Playwright run regenerates these on every
@@ -272,16 +305,35 @@ try {
   test('F5 no protected path appears in the working-tree change set',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
-      .every((p) => !PROTECTED_PREFIXES.some((pre) => p.startsWith(pre))));
+      .every((p) => !PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)) || E7_SCOPE.has(p)));
+  test('F5b the ONLY protected-area file E7 may move is the engine client seam',
+    changed
+      .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
+      .filter((p) => PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)))
+      .every((p) => p === 'src/lib/postiz/postizClient.ts'));
   test('F6 the E6 SOURCE change set is within the approved files (generated artefacts ignored)',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
-      .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p)));
+      .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) ||
+        [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F7 no new store/dashboard module was created by E6',
     readdirSync(new URL('../src/components/brand/', import.meta.url)).every((f) => !/e6/i.test(f)) &&
     readdirSync(new URL('../src/data/', import.meta.url)).every((f) => !/e6/i.test(f)));
-  test('F8 the brand navigation was not restructured (BrandShell untouched)',
-    !changed.includes('src/components/layout/BrandShell.tsx'));
+  test('F8 the brand navigation was not restructured (same 15 items in the same order)',
+    (() => {
+      // E7 (2026-09-12) changed ONE label to the customer-facing Mercenta Social
+      // identity, sourced from the SSOT — the file-touch proxy therefore had to
+      // become the structural assertion it always meant: the nav ITEMS and their
+      // ORDER are unchanged. Any real restructure still fails this test.
+      const brandShell = readSrc('src/components/layout/BrandShell.tsx');
+      const ids = [...brandShell.matchAll(/id: '([a-z_]+)', label:/g)].map((m) => m[1]);
+      const EXPECTED = [
+        'overview', 'catalog', 'purchase_orders', 'returns', 'logistics', 'onboarding',
+        'compliance', 'contracts', 'analytics', 'market', 'reports', 'documents', 'team',
+        'social', 'settings',
+      ];
+      return ids.join(',') === EXPECTED.join(',');
+    })());
 
   test('F9 ZERO external network calls across the whole suite', externalFetches === 0);
 
