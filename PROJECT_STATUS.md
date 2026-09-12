@@ -1,7 +1,51 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-11 (**Phase E2 — BRAND ONBOARDING WORKFLOW**; see the PHASE E2 block below. Previous session: **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF** (see the PHASE E1 block below). Earlier: **Phase D4 — PERSISTENCE + PLATFORM HARDENING**: a domain persistence port (`src/data/domainRepository.ts`) with a memory adapter (deterministic, zero-network, honest `durable:false`) and a Supabase adapter (idempotent upserts by canonical id, tenant-scoped, explicit failures); acquisition + BI lifecycle state now write-through the port; new migration `020_create_acquisition_persistence.sql` (8 tables, RLS, brand-isolation policy); deterministic idempotent response ids; honest persistence status surfaced in Brand CRM; new validator 64/64 + E2E 3/3; full E2E 175/0/4; typecheck 0 · lint 0 · build PASS. **Supabase is NOT configured in this env → nothing is durable; reported honestly, never claimed.**)
+> Last updated: 2026-09-12 (**Phase E3 — CATALOG / PRODUCT MANAGEMENT**; see the PHASE E3 block below. Previous session: **Phase E2 — BRAND ONBOARDING WORKFLOW** (see the PHASE E2 block below). Earlier: **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
 >
+> **PHASE E3 (2026-09-12) — CATALOG / PRODUCT MANAGEMENT.** The product/catalog
+> capability is now a COMPLETE, demonstrable lifecycle, built by EXTENDING the
+> existing architecture (no second product store, no second brand identity, no
+> second database, no UI redesign, no live integration). Lifecycle:
+> product information → COMPLETENESS → compliance gate → READY → SUBMIT
+> (existing `api.submitCatalogItem` seam) → SIMULATED PROCESSING → SIMULATED
+> RESULT → resulting product state. NEW canonical types
+> (`ProductSubmission`, `ProductCompleteness`, `CatalogReadiness`,
+> `CatalogSubmissionStatus`) with **one declaration each**: `DemoProduct` now
+> `extends Product` (its 20 duplicated fields removed) and `SeedSubmission` is an
+> alias of `ProductSubmission`. NEW `src/lib/catalog/productCompleteness.ts`
+> (the ONE prerequisite list — the exact 7 fields the seam always validated) and
+> `src/lib/catalog/catalogLifecycle.ts` (tenant-pinned `CatalogActor`, RBAC,
+> readiness, submit, poll, persistence mirror, audit). The submission seam now
+> RECORDS the resulting submission in the canonical store (`mode`, `simulated`,
+> tracking id) and resolves the compliance gate in ONE place
+> (`evaluateBrandCatalogGate`). `demoStore` owns a MUTABLE submission store
+> (previously six read-only seed rows nothing could write to). D4 port extended
+> with `persistCatalogSubmission` + migration **022** (additive, RLS,
+> brand-isolation policy, NOT executed). UI: brand readiness banner with exactly
+> which fields are missing, per-product Submit / Check result, derived Submission
+> column, honest `(sim)` labels; admin Submission column + inline readiness
+> detail. REAL DEFECTS FIXED: `submitCatalogItem` "persisted" to a
+> `catalog_submissions` table no migration creates (unrunnable write, and the
+> tracking id was thrown away); brand-added products existed only in React state
+> (never reached the admin catalogue or the SKU-keyed seam); the add-product form
+> silently wrote `0` for blank dimensions so an empty product looked COMPLETE;
+> three duplicated shape declarations; duplicated gate-input resolution.
+> Gates: new validator **65/65 PASS** + new E2E spec **4/4**; full E2E
+> **185/0/4** (was 181/0/4 → +4, **0 new failures**); typecheck 0 · lint 0 ·
+> build PASS; all 47 pre-existing validators produce BYTE-IDENTICAL results
+> before/after E3 (the only diff is the new E3 validator) — the 13 legacy
+> failures are PRE-EXISTING, proven via a clean `git worktree` at `b1f1ee4`.
+> Report: `docs/PRODUCT_CONSOLIDATION_PHASEE3_2026-09-12.md`. **E3 implementation
+> commit hash is recorded by the follow-up documentation commit** (project
+> convention: the phase commit lands first, then its verified hash is written
+> into the docs). **HONEST: browser Supabase credentials are still NOT configured →
+> memory adapter, nothing durable, migration 022 (and 020/021) unexecuted; the
+> legacy `products` table's `uuid` PK is incompatible with the canonical text ids,
+> so the submission record carries the E3 lifecycle state instead of a product
+> row; seeded fixture submissions return an honest `unknown submissionId (mock)`
+> when polled.**
+>
+
 > **PHASE E2 (2026-09-11) — BRAND ONBOARDING WORKFLOW.** The E1 record is now the
 > REAL stateful workflow, with three real entry points into ONE canonical record
 > (`acquisition_opportunity` · `partner_application` · `manual_creation`):

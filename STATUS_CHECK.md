@@ -16,6 +16,7 @@ fixed. Never cite the log as current status.
 - `node scripts/validate-d4-persistence.mjs` — D4_PERSISTENCE_VALIDATION_PASS (64/64; Phase D4)
 - `node scripts/validate-onboarding-handoff.mjs` — ONBOARDING_HANDOFF_VALIDATION_PASS (46/46; Phase E1)
 - `node scripts/validate-onboarding-workflow.mjs` — ONBOARDING_WORKFLOW_VALIDATION_PASS (45/45; Phase E2)
+- `node scripts/validate-e3-catalog.mjs` — E3_CATALOG_VALIDATION_PASS (65/65; Phase E3)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -26,8 +27,10 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **181 PASS / 4 skip / 0 fail** across 31 spec files.
-  (Phase E2 added `e2e/onboarding-workflow.spec.ts`, +3 tests, 0 new failures.
+  **Playwright E2E** — **185 PASS / 4 skip / 0 fail** across 32 spec files.
+  (Phase E3 added `e2e/catalog-product-management.spec.ts`, +4 tests, 0 new
+  failures — full run `185 passed / 4 skipped / 0 failed` in 2.7m.
+  Phase E2 added `e2e/onboarding-workflow.spec.ts`, +3 tests, 0 new failures.
   Phase E1 added `e2e/onboarding-handoff.spec.ts`, +3 tests, 0 new failures.
   Phase D4 added `e2e/domain-persistence.spec.ts`, +3 tests, 0 new failures.
   One 8-worker run produced a load-induced screenshot flake in
@@ -35,6 +38,39 @@ fixed. Never cite the log as current status.
   was 0-failure.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Catalog / product management (Phase E3 — 2026-09-12)
+
+- The product lifecycle is complete and demonstrable in SIMULATION: product
+  information → completeness → compliance gate → ready → submit → simulated
+  processing → simulated result → resulting product state.
+- Built by EXTENDING the existing architecture: `Product` is the ONE product
+  declaration (`DemoProduct extends Product`), `ProductSubmission` is the ONE
+  submission shape (`SeedSubmission` aliases it), and
+  `src/lib/catalog/productCompleteness.ts` holds the ONE prerequisite list — the
+  exact 7 fields `api.submitCatalogItem` always validated
+  (`commodityCode, vatStatus, hazmat, length, width, height, weight`).
+- `src/lib/catalog/catalogLifecycle.ts` enforces, in order: RBAC (a view-only
+  actor is refused `FORBIDDEN`) → tenant pin (a foreign tenant is refused
+  `CROSS_TENANT`) → completeness (`INCOMPLETE_PRODUCT`) → the EXISTING compliance
+  gate + provider seam → the resulting state recorded in the canonical store →
+  a durable mirror through the D4 port + a platform audit line.
+- The submission seam now RECORDS the submission (`mode`, `simulated`, tracking
+  id) — before E3 the tracking id was discarded and the "persist" branch wrote to
+  a `catalog_submissions` table that no migration creates (an unrunnable write).
+- `demoStore` owns a MUTABLE submission store (was six read-only seed rows), with
+  canonical ids `sub-<brandId>-<sku>` so a resubmission updates in place.
+- Migration `022_create_catalog_persistence.sql` (additive, RLS, brand-isolation
+  policy) — **NOT executed**; browser Supabase credentials are absent, so the
+  memory adapter is active and `durable:false` is reported honestly.
+- UI: brand readiness banner (which products are incomplete and exactly which
+  fields), per-product Submit / Check result, derived Submission column labelled
+  `(sim)`; admin Submission column + inline readiness/submission detail. The
+  add-product form no longer writes `0` for blank dimensions (which previously
+  made an empty product look complete).
+- Zero external network calls in the simulated flow (asserted by both the
+  validator and the browser test; `spApiConnectionCredentials()` is null so the
+  mock client is selected — UNKNOWN never becomes LIVE).
 
 ## Brand onboarding workflow (Phase E2 — 2026-09-11) — commit `08a575c`
 

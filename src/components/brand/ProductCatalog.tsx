@@ -1,11 +1,19 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge, Button, Input, Select } from '@/components/ui';
 import { cn } from '@/utils/cn';
-import { Plus, X, Flame, Lock, ShieldAlert, ImageUp, Upload } from 'lucide-react';
+import { Plus, X, Flame, Lock, ShieldAlert, ImageUp, Upload, Send, RefreshCw } from 'lucide-react';
 import type { Product } from '@/types';
 import { evaluateComplianceGate } from '@/lib/compliance';
-import { useContracts, useBrandAgreements } from '@/data/queries';
+import { evaluateProductCompleteness } from '@/lib/catalog/productCompleteness';
+import {
+  pollCatalogSubmission,
+  submitCatalogProduct,
+  type CatalogActor,
+} from '@/lib/catalog/catalogLifecycle';
+import { SUBMISSION_STATUS_LABELS } from '@/lib/spapi/transform';
+import { useContracts, useBrandAgreements, useCatalogSubmissions } from '@/data/queries';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { generateDefaultProductImages } from '@/lib/amazon/productImageValidator';
@@ -13,6 +21,7 @@ import { CsvCatalogImport } from '@/components/shared/CsvCatalogImport';
 
 export function ProductCatalog() {
   const { products, addProduct, gateDocs, brandProfile, session } = useApp();
+  const qc = useQueryClient();
   const contracts = useContracts().data?.data ?? [];
   const [showAdd, setShowAdd] = useState(false);
   const [showCsvImport, setShowCsvImport] = useState(false);
@@ -20,6 +29,9 @@ export function ProductCatalog() {
   const [gateError, setGateError] = useState<string | null>(null);
   const [editingSku, setEditingSku] = useState<string | null>(null);
   const [_costEdit, setCostEdit] = useState('');
+  /** §Phase E3 — the outcome of the last submit/poll, stated honestly. */
+  const [submissionNotice, setSubmissionNotice] = useState<string | null>(null);
+  const [busySku, setBusySku] = useState<string | null>(null);
 
   // §Batch-5 — distribution agreement is now derived from the Contract, not a second doc.
   const brandId = session?.tenantId;
@@ -40,6 +52,70 @@ export function ProductCatalog() {
   // This is the client-side check; the server-side trigger enforces it independently.
   const gate = evaluateComplianceGate(gateDocs, brandProfile?.category as import('@/types').ApprovedCategory | undefined, hasSignedAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted);
   const gateCleared = gate.cleared;
+
+  /* ── §Phase E3 — the submission lifecycle for THIS tenant ─────────── */
+
+  /**
+   * The brand acts as itself: `tenantId` pins the actor to this brand, so the
+   * domain refuses any action on another tenant's catalog record. `canMutate`
+   * is true because a brand may always manage its OWN products.
+   */
+  const actor = useMemo<CatalogActor>(
+    () => ({ staffId: `brand:${brandId ?? 'none'}`, canMutate: true, tenantId: brandId }),
+    [brandId]
+  );
+
+  /** The tenant's submissions — the CANONICAL store, filtered by tenant. */
+  const submissions = (useCatalogSubmissions().data?.data ?? []).filter(
+    (s) => s.brandId === brandId
+  );
+  const submissionBySku = new Map(submissions.map((s) => [s.sku, s] as const));
+
+  /** Completeness is DERIVED from the canonical prerequisite list per product. */
+  const completenessBySku = new Map(
+    products.map((p) => [
+      p.sku,
+      evaluateProductCompleteness(p as unknown as Record<string, unknown>),
+    ] as const)
+  );
+  const incompleteCount = [...completenessBySku.values()].filter((c) => !c.complete).length;
+
+  /** §Phase E3 — SUBMIT through the existing seam (completeness + gate inside). */
+  async function handleSubmitForSubmission(p: Product) {
+    if (!brandId) return;
+    setBusySku(p.sku);
+    setSubmissionNotice(null);
+    const result = await submitCatalogProduct(
+      brandId,
+      p as unknown as Record<string, unknown>,
+      actor
+    );
+    setBusySku(null);
+    if (!result.ok) {
+      setSubmissionNotice(`${p.sku}: ${result.error}`);
+      return;
+    }
+    setSubmissionNotice(
+      `${p.sku}: submitted — tracking ${result.value.submissionId} · ${SUBMISSION_STATUS_LABELS[result.value.status]}${result.value.simulated ? ' (SIMULATED — no live retail call)' : ''}`
+    );
+    await qc.invalidateQueries({ queryKey: ['catalog-submissions'] });
+  }
+
+  /** §Phase E3 — advance the SIMULATED processing to a result. */
+  async function handlePollSubmission(submissionId: string) {
+    setBusySku(submissionId);
+    setSubmissionNotice(null);
+    const result = await pollCatalogSubmission(submissionId, actor);
+    setBusySku(null);
+    if (!result.ok) {
+      setSubmissionNotice(result.error);
+      return;
+    }
+    setSubmissionNotice(
+      `${result.value.sku}: ${SUBMISSION_STATUS_LABELS[result.value.status]}${result.value.rejectionReason ? ` — ${result.value.rejectionReason}` : ''}${result.value.simulated ? ' (SIMULATED)' : ''}`
+    );
+    await qc.invalidateQueries({ queryKey: ['catalog-submissions'] });
+  }
 
   const handleAdd = (p: Product) => {
     if (!gateCleared) {
@@ -103,6 +179,47 @@ export function ProductCatalog() {
         </div>
       )}
 
+      {/* §Phase E3 — catalog readiness, derived from the existing rules only. */}
+      {gateCleared && (
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 text-xs">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-zinc-300">
+              <span className="font-medium text-white">Catalog readiness</span>{' '}
+              · {products.length} product{products.length === 1 ? '' : 's'} in your catalog ·{' '}
+              {incompleteCount === 0
+                ? 'all product information complete'
+                : `${incompleteCount} product(s) still missing required information`}
+            </div>
+            <Badge className={cn('text-[10px]', 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20')}>
+              Compliance gate cleared
+            </Badge>
+          </div>
+          {incompleteCount > 0 && (
+            <ul className="mt-2 space-y-1 text-amber-300">
+              {[...completenessBySku.entries()]
+                .filter(([, c]) => !c.complete)
+                .map(([sku, c]) => (
+                  <li key={sku}>
+                    • {sku}: missing {c.missingLabels.join(', ')}
+                  </li>
+                ))}
+            </ul>
+          )}
+          {incompleteCount === 0 && (
+            <p className="mt-2 text-zinc-500">
+              Products may be submitted. Submissions run through the retail-channel seam and are
+              processed in SIMULATION until live credentials are configured.
+            </p>
+          )}
+        </div>
+      )}
+
+      {submissionNotice && (
+        <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3 text-xs text-zinc-300">
+          {submissionNotice}
+        </div>
+      )}
+
       {showCsvImport && brandId && (
         <CsvCatalogImport brandId={brandId} onComplete={() => { setShowCsvImport(false); }} />
       )}
@@ -125,6 +242,7 @@ export function ProductCatalog() {
                 <th className="text-right font-medium px-4 py-3">Weight</th>
                 <th className="text-center font-medium px-4 py-3">Availability</th>
                 <th className="text-right font-medium px-4 py-3">Lead Time</th>
+                <th className="text-center font-medium px-4 py-3">Submission</th>
                 <th className="text-center font-medium px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -216,13 +334,76 @@ export function ProductCatalog() {
                   <td className="px-4 py-3 text-right text-xs text-zinc-400">
                     {p.leadTimeDays != null ? `${p.leadTimeDays}d` : '—'}
                   </td>
+                  {/* §Phase E3 — the product's resulting catalog state, DERIVED
+                      from the canonical submission store (never duplicated). */}
                   <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => setEditingSku(p.sku)}
-                      className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors"
-                    >
-                      Edit Cost
-                    </button>
+                    {(() => {
+                      const sub = submissionBySku.get(p.sku);
+                      const complete = completenessBySku.get(p.sku)?.complete ?? false;
+                      if (!sub) {
+                        return complete ? (
+                          <span className="text-[10px] text-zinc-500">Ready to submit</span>
+                        ) : (
+                          <span className="text-[10px] text-amber-300">Incomplete</span>
+                        );
+                      }
+                      return (
+                        <span
+                          className={cn(
+                            'text-[10px] px-2 py-0.5 rounded-full font-medium',
+                            sub.status === 'live'
+                              ? 'bg-emerald-500/15 text-emerald-300'
+                              : sub.status === 'rejected'
+                              ? 'bg-red-500/15 text-red-300'
+                              : sub.status === 'under_amazon_review'
+                              ? 'bg-blue-500/15 text-blue-300'
+                              : 'bg-zinc-500/15 text-zinc-300'
+                          )}
+                        >
+                          {SUBMISSION_STATUS_LABELS[sub.status]}
+                          {sub.simulated ? ' (sim)' : ''}
+                        </span>
+                      );
+                    })()}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => setEditingSku(p.sku)}
+                        className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors"
+                      >
+                        Edit Cost
+                      </button>
+                      {/* §Phase E3 — submit when genuinely ready; poll the
+                          simulated processing when a submission exists. */}
+                      {(() => {
+                        const sub = submissionBySku.get(p.sku);
+                        if (sub && sub.status !== 'live' && sub.status !== 'rejected') {
+                          return (
+                            <button
+                              onClick={() => void handlePollSubmission(sub.id)}
+                              disabled={busySku === sub.id}
+                              className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                              {busySku === sub.id ? 'Polling…' : 'Check result'}
+                            </button>
+                          );
+                        }
+                        const ready = completenessBySku.get(p.sku)?.complete ?? false;
+                        return (
+                          <button
+                            onClick={() => void handleSubmitForSubmission(p)}
+                            disabled={!gateCleared || !ready || busySku === p.sku}
+                            title={ready ? 'Submit through the retail-channel seam' : 'Product information is incomplete'}
+                            className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-40"
+                          >
+                            <Send className="w-3 h-3" />
+                            {busySku === p.sku ? 'Submitting…' : sub ? 'Resubmit' : 'Submit'}
+                          </button>
+                        );
+                      })()}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -278,7 +459,18 @@ function AddProductPanel({
   });
   const [productImages, setProductImages] = useState(generateDefaultProductImages('Home'));
 
+  /**
+   * §Phase E3 — completeness is evaluated on the RAW form values.
+   *
+   * Previously an empty dimension was silently converted to `0` by
+   * `parseFloat(...) || 0`, which made an empty product look complete to the
+   * submission prerequisites. Blank means blank: the product is saved only when
+   * the real prerequisites have been supplied, and the missing list is shown.
+   */
+  const completeness = evaluateProductCompleteness(form as unknown as Record<string, unknown>);
+
   const handleSubmit = () => {
+    if (!completeness.complete) return;
     onAdd({
       id: `prd-${Date.now()}`,
       name: form.name, sku: form.sku, barcode: form.barcode,
@@ -431,8 +623,28 @@ function AddProductPanel({
                 <Lock className="w-3.5 h-3.5" /> Submission disabled — compliance gate not cleared.
               </p>
             )}
-            <Button onClick={handleSubmit} className="w-full" disabled={gateBlocked}>
-              {gateBlocked ? 'Blocked — Compliance Gate' : 'Save Product'}
+            {!gateBlocked && !completeness.complete && (
+              <div className="mb-2 text-[11px] text-amber-300">
+                <p>Missing required information:</p>
+                <ul className="mt-1 space-y-0.5 text-amber-300/90">
+                  {completeness.missingLabels.map((l) => (
+                    <li key={l}>
+                      • {l}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <Button
+              onClick={handleSubmit}
+              className="w-full"
+              disabled={gateBlocked || !completeness.complete}
+            >
+              {gateBlocked
+                ? 'Blocked — Compliance Gate'
+                : completeness.complete
+                ? 'Save Product'
+                : `Complete ${completeness.missing.length} required field(s)`}
             </Button>
           </div>
         </div>

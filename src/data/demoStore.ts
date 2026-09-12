@@ -14,6 +14,9 @@ import type {
   AuditLogEntry,
   ShippingMargin,
   CarrierMarkupConfig,
+  Product,
+  ProductSubmission,
+  CatalogClientMode,
 } from '@/types';
 import {
   ALL_DEMO_BRANDS,
@@ -24,7 +27,9 @@ import {
   DEMO_PURCHASE_ORDERS,
   DEMO_SHIPMENTS,
   type DemoBrandRow,
+  type DemoProduct,
 } from './demoData';
+import { notifyCanonicalStoreChange } from './prospectStore';
 
 export type { DemoBrandRow } from './demoData';
 export { ALL_DEMO_BRANDS } from './demoData';
@@ -146,11 +151,23 @@ export const demoCommissions = demoPurchaseOrders
     createdAt: po.orderDate,
   }));
 
-/** §10 retail-pipeline submissions derived from demo products. */
-export const demoSubmissions: import('@/data/demoData').SeedSubmission[] =
-  DEMO_PRODUCTS.slice(0, 6).map((p, i) => ({
-  id: `sub-cat-${p.id}`,
+/**
+ * §Phase E3 — THE canonical catalog-submission store.
+ *
+ * Before E3 these were six read-only derived rows that NOTHING ever wrote to:
+ * `submitCatalogItem` returned a tracking id that was thrown away, so the admin
+ * retail pipeline could never reflect a real submission. They are now a mutable,
+ * tenant-keyed store with the canonical `ProductSubmission` shape, carrying
+ * their simulated provenance explicitly (derived fixtures, never real results).
+ *
+ * Ids are CANONICAL (`sub-<brandId>-<sku>`), so re-submitting the same product
+ * updates its record in place instead of duplicating it (D4 idempotence), and
+ * `simulated` is never absent.
+ */
+export const demoProductSubmissions: ProductSubmission[] = DEMO_PRODUCTS.slice(0, 6).map((p, i) => ({
+  id: `sub-${p.brandId}-${p.sku}`,
   brandId: p.brandId,
+  productId: p.id,
   productName: p.name,
   sku: p.sku,
   asin: i % 3 === 0 ? `B0${p.sku.replace(/-/g, '')}` : undefined,
@@ -158,7 +175,154 @@ export const demoSubmissions: import('@/data/demoData').SeedSubmission[] =
   rejectionReason:
     i % 3 === 2 ? 'GTIN barcode does not match declared listing attributes.' : undefined,
   submittedAt: new Date(Date.now() - (i + 1) * 864e5).toISOString(),
+  // Derived fixture, never a real provider result — labelled as simulated.
+  submissionId: `SEED-SIM-${String(i + 1).padStart(5, '0')}`,
+  mode: 'mock',
+  simulated: true,
+  polls: 0,
 }));
+
+/** Back-compat alias: the canonical store, under its previous export name. */
+export const demoSubmissions = demoProductSubmissions;
+
+/** Canonical id for a product's submission (idempotent by tenant + sku). */
+export function catalogSubmissionId(brandId: string, sku: string): string {
+  return `sub-${brandId}-${sku}`;
+}
+
+/**
+ * Record (or re-record) a submission for a product. Called by the submission
+ * seam on success, so the resulting state is observable everywhere at once.
+ * NEVER sets `live`/`asin` — a freshly submitted product is `submitted`; only a
+ * poll may advance it.
+ */
+export function recordCatalogSubmission(input: {
+  brandId: string;
+  productId: string;
+  productName: string;
+  sku: string;
+  submissionId: string;
+  mode: CatalogClientMode;
+  simulated: boolean;
+}): ProductSubmission {
+  const id = catalogSubmissionId(input.brandId, input.sku);
+  const record: ProductSubmission = {
+    id,
+    brandId: input.brandId,
+    productId: input.productId,
+    productName: input.productName,
+    sku: input.sku,
+    status: 'submitted',
+    submittedAt: new Date().toISOString(),
+    submissionId: input.submissionId,
+    mode: input.mode,
+    simulated: input.simulated,
+    polls: 0,
+  };
+  const existing = demoProductSubmissions.findIndex((s) => s.id === id);
+  if (existing >= 0) demoProductSubmissions[existing] = record;
+  else demoProductSubmissions.unshift(record);
+  notifyCanonicalStoreChange();
+  return record;
+}
+/** Update a submission's resulting state (status / rejection / polls). */
+export function updateCatalogSubmission(
+  id: string,
+  patch: Partial<Omit<ProductSubmission, 'id' | 'brandId'>>
+): ProductSubmission | null {
+  const idx = demoProductSubmissions.findIndex((s) => s.id === id);
+  if (idx < 0) return null;
+  const current = demoProductSubmissions[idx];
+  const next: ProductSubmission = { ...current, ...patch, id: current.id, brandId: current.brandId };
+  demoProductSubmissions[idx] = next;
+  notifyCanonicalStoreChange();
+  return next;
+}
+
+export function getCatalogSubmission(id: string): ProductSubmission | undefined {
+  return demoProductSubmissions.find((s) => s.id === id);
+}
+
+/** Every submission owned by a tenant (the only read a brand scope may make). */
+export function getSubmissionsForBrand(brandId: string): ProductSubmission[] {
+  return demoProductSubmissions.filter((s) => s.brandId === brandId);
+}
+
+/** The most recent submission for one product — the derived catalog state. */
+export function latestSubmissionForProduct(
+  brandId: string,
+  sku: string
+): ProductSubmission | undefined {
+  const mine = demoProductSubmissions.filter((s) => s.brandId === brandId && s.sku === sku);
+  if (!mine.length) return undefined;
+  return mine.reduce((a, b) => (b.submittedAt > a.submittedAt ? b : a));
+}
+
+/**
+ * §Phase E3 — create or update a product for a tenant.
+ *
+ * Idempotent by (brandId, sku) so a replayed creation cannot duplicate a SKU.
+ * The product is written into the SAME canonical catalog collection the admin
+ * catalog and `fetchProducts` already read — there is no second product store.
+ */
+export function addCatalogProduct(brandId: string, product: Product): DemoProduct {
+  const existing = DEMO_PRODUCTS.findIndex((p) => p.brandId === brandId && p.sku === product.sku);
+  if (existing >= 0) {
+    const merged: DemoProduct = {
+      ...DEMO_PRODUCTS[existing],
+      ...product,
+      brandId,
+      id: DEMO_PRODUCTS[existing].id,
+    };
+    DEMO_PRODUCTS[existing] = merged;
+    notifyCanonicalStoreChange();
+    return merged;
+  }
+  const created: DemoProduct = {
+    ...product,
+    id: product.id || `prd-${brandId}-${product.sku}`,
+    brandId,
+  };
+  DEMO_PRODUCTS.push(created);
+  notifyCanonicalStoreChange();
+  return created;
+}
+
+/** Find one tenant's product by SKU (tenant-scoped, never global). */
+export function findCatalogProduct(brandId: string, sku: string): DemoProduct | undefined {
+  return DEMO_PRODUCTS.find((p) => p.brandId === brandId && p.sku === sku);
+}
+
+/** Every product owned by a tenant. */
+export function productsForBrandFromStore(brandId: string): DemoProduct[] {
+  return DEMO_PRODUCTS.filter((p) => p.brandId === brandId);
+}
+
+/** §Phase E3 — catalog operations are audited on the existing platform log. */
+export function recordCatalogAudit(
+  action: string,
+  entityId: string,
+  brandId: string,
+  reason: string,
+  actorId: string,
+  metadata: Record<string, unknown> = {}
+): AuditLogEntry {
+  const entry: AuditLogEntry = {
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+    actorId,
+    action,
+    entityType: 'catalog_submission',
+    entityId,
+    brandId,
+    reason,
+    metadata,
+  };
+  demoAuditLog.push(entry);
+  return entry;
+}
+
+
 
 /** §19.1 deductions ledger — DERIVED from demoPurchaseOrders (never
  *  hand-maintained PO references), covering every lifecycle state:

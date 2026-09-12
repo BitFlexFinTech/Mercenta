@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 11, 2026 (Phase E2 — brand onboarding workflow)
+Last updated: September 12, 2026 (Phase E3 — catalog / product management)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -29,7 +29,7 @@ Cline's output back. AI confirms, gives next prompt.
   nav entry, docker-compose service and Caddy vhost are deleted. Any container /
   `chat.mercenta.co.uk` record still running on the droplet must be removed
   server-side.)
-- Playwright suite (175 passing tests, 29 spec files)
+- Playwright suite (185 passing tests, 30 spec files)
 - Homepage: "Your brand. The UK market." (NO Amazon mention)
 - Partner Login + application gate + link verification
 - Legal agreements 4.1 + 4.2 in onboarding
@@ -122,6 +122,31 @@ Cline's output back. AI confirms, gives next prompt.
   `scripts/validate-rocketchat-removal.mjs` (15/15) + `e2e/rocketchat-removal.spec.ts`
   (5/5). Full E2E 165/0/4 · typecheck 0 · lint 0 · build PASS. Report:
   docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md.
+- Catalog / product management (Phase E3, 2026-09-12): the
+  product lifecycle is now complete and demonstrable end-to-end in SIMULATION —
+  product information → COMPLETENESS → compliance gate → READY → SUBMIT (existing
+  `api.submitCatalogItem` seam) → SIMULATED PROCESSING → SIMULATED RESULT →
+  resulting product state. Built by EXTENDING the existing product/catalog
+  architecture: ONE product store, ONE product/submission shape each, ONE
+  prerequisite list, ONE submission vocabulary. Brand portal gets a derived
+  readiness banner (exactly which fields are missing), per-product
+  Submit / Check result, and a Submission column labelled `(sim)`; the admin
+  Global Catalog gets a Submission column and an inline readiness/submission
+  detail. Tenant isolation + RBAC are enforced IN THE DOMAIN (a foreign tenant is
+  refused CROSS_TENANT; a view-only account is refused FORBIDDEN), the compliance
+  gate is NOT weakened, and the whole simulated flow makes ZERO external network
+  calls (asserted in both the validator and the browser test). Real defects
+  fixed: the submission seam "persisted" to a `catalog_submissions` table that no
+  migration creates (an unrunnable write, with the tracking id thrown away);
+  brand-added products existed only in React state; the add-product form wrote
+  `0` for blank dimensions so an empty product looked complete. Gates: new
+  validator 65/65 + new E2E spec 4/4; full E2E 185/0/4 (was 181/0/4, 0 new
+  failures); typecheck 0 · lint 0 · build PASS; all 47 pre-existing validators
+  byte-identical before/after (13 legacy failures are PRE-EXISTING). Report:
+  docs/PRODUCT_CONSOLIDATION_PHASEE3_2026-09-12.md. HONEST: Supabase browser
+  credentials are NOT configured → memory adapter only, migration 022 (and
+  020/021) unexecuted, so nothing is durable in the demo env and no persistence is
+  claimed.
 - Review zip script + protection rules + handoff rule
 
 ## WHAT'S LEFT (IN ORDER):
@@ -135,13 +160,14 @@ the FINAL phase. The older list below is superseded by that roadmap.
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
 NEXT in roadmap: PHASE D COMPLETE (D1–D4, 2026-09-11). **PHASE E — CORE PLATFORM
 COMPLETION is IN PROGRESS: E1 (opportunity → brand onboarding hand-off) DONE
-2026-09-11** and **E2 (brand onboarding workflow) DONE 2026-09-11** — the
-onboarding record now has three entry points (opportunity / application / manual),
-brand acceptance, an Admin Onboarding Pipeline that operates it inline, and a brand
-tenant that can actually reach its portal. Next: **E3 — Catalog / product
-management**, then E4 commerce/Amazon-style operational simulation, E5 admin
-operational surfaces, E6 brand operational surfaces, E7 embedded Postiz. Rakazo
-stays LAST (Phase M).
+2026-09-11**, **E2 (brand onboarding workflow) DONE 2026-09-11** and
+**E3 (catalog / product management) DONE 2026-09-12** — a brand can now take a
+product from information → completeness → compliance → ready → simulated
+submission → simulated result, with the resulting state observable in both the
+brand portal and the admin Global Catalog, tenant-isolated in the domain, with
+zero external network calls. Next: **E4 — commerce / Amazon-style operational
+simulation**, then E5 admin operational surfaces, E6 brand operational surfaces,
+E7 embedded Postiz. Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

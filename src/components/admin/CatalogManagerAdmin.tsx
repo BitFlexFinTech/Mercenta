@@ -1,17 +1,20 @@
 import { useState, useMemo } from 'react';
-import { useBrands, useProducts } from '@/data/queries';
+import { useBrands, useProducts, useCatalogSubmissions } from '@/data/queries';
 import { updateProductAvailability, updateProductCost } from '@/data/demoStore';
 import { Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { DataTable } from '@/components/shared/DataTable';
 import type { DataTableColumn } from '@/components/shared/DataTable';
 import type { DemoProduct } from '@/data/demoData';
+import type { ProductSubmission } from '@/types';
+import { evaluateProductCompleteness } from '@/lib/catalog/productCompleteness';
+import { SUBMISSION_STATUS_LABELS } from '@/lib/spapi/transform';
 import { X, Package, Filter } from 'lucide-react';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { APPROVED_CATEGORIES } from '@/types';
 
-function ProductDetailModal(props: { product: DemoProduct; onClose: () => void }) {
-  const { product, onClose } = props;
+function ProductDetailModal(props: { product: DemoProduct; submission?: ProductSubmission; onClose: () => void }) {
+  const { product, submission, onClose } = props;
   const brands = useBrands().data?.data ?? [];
   const bn = brands.find(function(b) { return b.id === product.brandId; })?.profile.businessName ?? product.brandId;
   const bc = brands.find(function(b) { return b.id === product.brandId; })?.category ?? '';
@@ -71,6 +74,38 @@ function ProductDetailModal(props: { product: DemoProduct; onClose: () => void }
                   <Button className='text-[10px]' onClick={ha}>Save Availability</Button>
                 </div>
               </div>
+              {/* §Phase E3 — readiness + the resulting submission state. Both are
+                  DERIVED (canonical prerequisites + canonical submission store);
+                  simulated provenance is stated explicitly, never implied live. */}
+              <div className='col-span-2 border-t border-white/[0.06] pt-3 mt-2'>
+                <p className='text-zinc-400 mb-2 font-medium'>Catalog readiness &amp; submission</p>
+                <div className='grid grid-cols-2 gap-3'>
+                  <div>
+                    <span className='text-zinc-500'>Product information</span>
+                    {(() => {
+                      const c = evaluateProductCompleteness(product as unknown as Record<string, unknown>);
+                      return (
+                        <p className={c.complete ? 'text-emerald-400' : 'text-amber-300'}>
+                          {c.complete ? 'Complete' : `Missing: ${c.missingLabels.join(', ')}`}
+                        </p>
+                      );
+                    })()}
+                  </div>
+                  <div>
+                    <span className='text-zinc-500'>Submission</span>
+                    {submission ? (
+                      <p className='text-white'>
+                        {SUBMISSION_STATUS_LABELS[submission.status]}
+                        {submission.simulated ? ' (simulated)' : ''} · tracking{' '}
+                        <span className='font-mono'>{submission.submissionId || '—'}</span>
+                        {submission.rejectionReason ? ` — ${submission.rejectionReason}` : ''}
+                      </p>
+                    ) : (
+                      <p className='text-zinc-500'>Not yet submitted</p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 {/* ── Images Tab ── */}
@@ -111,8 +146,28 @@ export function CatalogManagerAdmin() {
   const productsQuery = useProducts();
   const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
   const products = useMemo(() => productsQuery.data?.data ?? [], [productsQuery.data]);
+  /** §Phase E3 — the CANONICAL submission store (all tenants; admin scope). */
+  const submissionsQuery = useCatalogSubmissions();
+  const submissions = useMemo(
+    function() { return submissionsQuery.data?.data ?? []; },
+    [submissionsQuery.data]
+  );
   const [selectedProduct, setSelectedProduct] = useState<DemoProduct | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  /** Latest submission per (brandId, sku) — the product's derived catalog state. */
+  const submissionByProduct = useMemo(
+    function() {
+      const m = new Map<string, ProductSubmission>();
+      for (const s of submissions) {
+        const key = s.brandId + '::' + s.sku;
+        const prev = m.get(key);
+        if (!prev || s.submittedAt > prev.submittedAt) m.set(key, s);
+      }
+      return m;
+    },
+    [submissions]
+  );
 
   const brandName = (id: string) => brands.find(function(b) { return b.id === id; })?.profile.businessName ?? id;
   const brandCategory = (id: string) => brands.find(function(b) { return b.id === id; })?.category ?? '';
@@ -149,6 +204,12 @@ export function CatalogManagerAdmin() {
     { key: 'category', header: 'Category', value: function(p: DemoProduct) { return brandCategory(p.brandId); } },
     { key: 'price', header: 'Price', value: function(p: DemoProduct) { return 'GBP ' + p.exWorksPrice.toFixed(2); } },
     { key: 'status', header: 'Status', value: function(p: DemoProduct) { return p.isAvailable !== false ? 'Active' : 'Inactive'; } },
+    // §Phase E3 — the product's resulting catalog state (derived, tenant-keyed).
+    { key: 'submission', header: 'Submission', value: function(p: DemoProduct) {
+        const sub = submissionByProduct.get(p.brandId + '::' + p.sku);
+        if (!sub) return 'Not submitted';
+        return SUBMISSION_STATUS_LABELS[sub.status] + (sub.simulated ? ' (sim)' : '');
+      } },
   ];
 
   return (
@@ -192,7 +253,11 @@ export function CatalogManagerAdmin() {
       />
 
       {selectedProduct && (
-        <ProductDetailModal product={selectedProduct} onClose={function() { setSelectedProduct(null); }} />
+        <ProductDetailModal
+          product={selectedProduct}
+          submission={submissionByProduct.get(selectedProduct.brandId + '::' + selectedProduct.sku)}
+          onClose={function() { setSelectedProduct(null); }}
+        />
       )}
     </div>
   );

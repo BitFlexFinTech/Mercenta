@@ -265,7 +265,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     void Promise.all([
       import('@/data/acquisitionStore'),
       import('@/lib/onboarding/onboardingLifecycle'),
-    ]).then(([store, onboarding]) => {
+      import('@/data/demoStore'),
+    ]).then(([store, onboarding, catalogStore]) => {
       const record = store.getOnboardingForBrand(brandId);
       if (!record) {
         console.warn(`[rbac] unknown onboarding tenant "${brandId}" — refused`);
@@ -283,8 +284,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         onboarded: false,
         complianceGateStatus: 'blocked',
       });
-      // Honest empty operational state — this brand has supplied no data yet.
-      setProducts([]);
+      // §Phase E3 — the tenant's products come from the CATALOG STORE (the
+      // single write path), not from a hand-kept session list. Honest empty
+      // state for a brand that has created nothing yet.
+      setProducts(catalogStore.productsForBrandFromStore(brandId));
       setShipments([]);
       setFinancials([]);
       setComplianceDocs([]);
@@ -362,9 +365,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [shipments, addActivityLog, addApiLog]
   );
 
-  const addProduct = useCallback((product: Product) => {
-    setProducts((prev) => [product, ...prev]);
-  }, []);
+  /**
+   * §Phase E3 — product creation is now ONE write path.
+   *
+   * The product is written to the canonical catalog store (tenant-scoped,
+   * idempotent by SKU — see `demoStore.addCatalogProduct`), and the session
+   * projection is then re-read from it. Previously this pushed the product
+   * straight into React state, so a product created by a brand existed only in
+   * that browser tab and never reached the catalog every other surface reads
+   * (nor the submission seam, which is keyed by SKU).
+   *
+   * No tenant session → no write: a product can never be created without an
+   * owner, so it can never leak across tenants.
+   */
+  const addProduct = useCallback(
+    (product: Product) => {
+      const tenantId = session?.tenantId;
+      if (!tenantId) {
+        console.warn('[rbac] product creation refused — no tenant session');
+        return;
+      }
+      void import('@/data/demoStore').then((store) => {
+        store.addCatalogProduct(tenantId, product);
+        setProducts(store.productsForBrandFromStore(tenantId));
+      });
+    },
+    [session?.tenantId]
+  );
 
   const updateLeadStatus = useCallback(
     (id: string, status: Lead['outreachStatus'], fitScore?: number) => {

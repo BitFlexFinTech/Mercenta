@@ -178,6 +178,91 @@ export interface Product {
 /** Default PTC per Stage-24 (general taxable — A_GEN_TAX in Amazon's taxonomy). */
 export const DEFAULT_PRODUCT_TAX_CODE = 'A_GEN_TAX';
 
+/* ────────────────────────────────────────────────────────────────────
+ * §Phase E3 — Catalog / product management (submission lifecycle)
+ * ──────────────────────────────────────────────────────────────── */
+
+/**
+ * §Phase E3 — the canonical catalog-submission state.
+ *
+ * This is the EXISTING vocabulary, not a new one: `src/lib/spapi/transform.ts`
+ * declares the same values (plus the local `pending` pseudo-state) and the
+ * seed submission rows in `src/data/demoData.ts` use the same four. Nothing
+ * new is introduced here — the states are lifted into the domain types file so
+ * the submission store, the seam and the UI cannot drift apart.
+ */
+export type CatalogSubmissionStatus =
+  | 'submitted'
+  | 'under_amazon_review'
+  | 'live'
+  | 'rejected';
+
+/** Which client handled a submission — 'mock' until real credentials exist. */
+export type CatalogClientMode = 'mock' | 'real';
+
+/**
+ * §Phase E3 — ONE canonical catalog-submission record.
+ *
+ * Replaces the four-field seed shape (`SeedSubmission`). `simulated` is
+ * REQUIRED and explicit: a submission that never reached a live provider must
+ * never be representable as a real retail result (rule: simulation is truthful).
+ */
+export interface ProductSubmission {
+  /** Canonical id: `sub-<brandId>-<sku>` — replaying a submission cannot duplicate. */
+  id: string;
+  brandId: string;
+  /** The canonical product this submission belongs to (by id, not by copy). */
+  productId: string;
+  productName: string;
+  sku: string;
+  asin?: string;
+  status: CatalogSubmissionStatus;
+  rejectionReason?: string;
+  submittedAt: string;
+  /** The provider tracking id returned by the seam (mock or real). */
+  submissionId: string;
+  mode: CatalogClientMode;
+  /** TRUE whenever the submission could not have reached a live provider. */
+  simulated: boolean;
+  /** Number of status polls recorded against this submission. */
+  polls: number;
+  lastPolledAt?: string;
+}
+
+/**
+ * §Phase E3 — product completeness.
+ *
+ * DERIVED from the submission prerequisites the existing `api.submitCatalogItem`
+ * already enforces (`REQUIRED_SUBMISSION_FIELDS`) — no invented checklist.
+ */
+export interface ProductCompleteness {
+  /** True when every prerequisite field carries a real value. */
+  complete: boolean;
+  /** The prerequisite fields still missing or empty. */
+  missing: string[];
+  /** Human labels for `missing`, in form order. */
+  missingLabels: string[];
+  /** 0–100: satisfied prerequisites / total prerequisites. */
+  percent: number;
+}
+
+/**
+ * §Phase E3 — whether a product may legitimately be submitted at all.
+ *
+ * `readyForSubmission` is the AND of product completeness and the EXISTING
+ * compliance gate. A product that is not compliant is never reported ready.
+ */
+export interface CatalogReadiness {
+  complete: boolean;
+  /** The existing `evaluateComplianceGate(...).cleared` verdict for the tenant. */
+  compliant: boolean;
+  readyForSubmission: boolean;
+  missing: string[];
+  missingLabels: string[];
+  /** Present-but-not-approved compliance documents (never weakened here). */
+  blocking: { type: string; status: string }[];
+}
+
 
 export interface ActivityLog {
   id: string;

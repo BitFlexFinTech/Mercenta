@@ -8,7 +8,7 @@
  * live; the shape here is deliberately centralised so only THIS file changes.
  */
 import { APPROVED_CATEGORIES } from '@/types';
-import type { Product } from '@/types';
+import type { Product, CatalogSubmissionStatus } from '@/types';
 
 export interface CatalogSubmissionPayload {
   marketplaceId: string;
@@ -80,12 +80,12 @@ export function transformProductForCatalog(
 
 /* ── Submission lifecycle ──────────────────────────────────────────── */
 
-export type SubmissionStatus =
-  | 'pending'
-  | 'submitted'
-  | 'under_amazon_review'
-  | 'live'
-  | 'rejected';
+/**
+ * §Phase E3 — `pending` is the LOCAL pre-provider pseudo-state; every recorded
+ * state is the canonical domain vocabulary (`CatalogSubmissionStatus`), so this
+ * union can no longer drift from the submission store or the UI labels.
+ */
+export type SubmissionStatus = 'pending' | CatalogSubmissionStatus;
 
 export const SUBMISSION_STATUS_LABELS: Record<SubmissionStatus, string> = {
   pending: 'Submitted',

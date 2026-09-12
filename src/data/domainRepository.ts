@@ -41,6 +41,7 @@ import type {
   IntelligenceSnapshot,
   Opportunity,
   OutreachResponse,
+  ProductSubmission,
   ProspectChangeEvent,
   ProspectOutreachRecord,
 } from '@/types';
@@ -74,6 +75,15 @@ export const DOMAIN_TABLES = {
   snapshots: 'bi_snapshots',
   /** §Phase E1 — the opportunity → brand onboarding hand-off. */
   brandOnboarding: 'brand_onboarding',
+  /**
+   * §Phase E3 — the catalog submission record.
+   *
+   * This is the artefact that carries the E3 lifecycle state (submitted →
+   * under review → live/rejected). `src/data/api.ts` already referenced a
+   * `catalog_submissions` table that no migration ever created; E3 makes the
+   * reference real, through THIS port, rather than adding a second mechanism.
+   */
+  catalogSubmissions: 'catalog_submissions',
 } as const;
 
 export type DomainTable = (typeof DOMAIN_TABLES)[keyof typeof DOMAIN_TABLES];
@@ -111,6 +121,8 @@ export interface HydratedDomainState {
   snapshots: IntelligenceSnapshot[];
   /** §Phase E1 — canonical onboarding records (opportunity → tenant). */
   brandOnboarding: BrandOnboarding[];
+  /** §Phase E3 — canonical catalog submission records. */
+  catalogSubmissions: ProductSubmission[];
 }
 
 export function emptyHydratedState(): HydratedDomainState {
@@ -124,6 +136,7 @@ export function emptyHydratedState(): HydratedDomainState {
     changes: [],
     snapshots: [],
     brandOnboarding: [],
+    catalogSubmissions: [],
   };
 }
 
@@ -148,6 +161,12 @@ export interface DomainRepository {
   persistChange(change: ProspectChangeEvent, tenantId: string): Promise<PersistResult>;
   persistSnapshot(snapshot: IntelligenceSnapshot, tenantId: string): Promise<PersistResult>;
   persistBrandOnboarding(onboarding: BrandOnboarding, tenantId: string): Promise<PersistResult>;
+  /**
+   * §Phase E3 — persist a catalog submission. The submission is the artefact
+   * that owns the product's resulting catalog state, so persisting it (and only
+   * it) keeps ONE source of truth for that state.
+   */
+  persistCatalogSubmission(submission: ProductSubmission, tenantId: string): Promise<PersistResult>;
   /** Load persisted state for a scope. A brand scope NEVER sees ops rows. */
   hydrate(scope: TenantScope): Promise<HydratedDomainState>;
   /** Await any in-flight writes (tests + the async send path). */
@@ -201,6 +220,9 @@ export class MemoryDomainRepository implements DomainRepository {
   }
   persistBrandOnboarding(onboarding: BrandOnboarding): Promise<PersistResult> {
     return Promise.resolve(this.ok(DOMAIN_TABLES.brandOnboarding, onboarding.id));
+  }
+  persistCatalogSubmission(submission: ProductSubmission): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.catalogSubmissions, submission.id));
   }
   hydrate(): Promise<HydratedDomainState> {
     // Nothing is durable here — an honest empty state, never a fabrication.
@@ -420,9 +442,26 @@ export class SupabaseDomainRepository implements DomainRepository {
     );
   }
 
+  /** §Phase E3 — a submission row is scoped to the brand tenant that owns it. */
+  persistCatalogSubmission(submission: ProductSubmission, tenantId: string): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.catalogSubmissions,
+        rowFor(submission.id, tenantId, submission, {
+          brand_id: submission.brandId,
+          sku: submission.sku,
+          product_id: submission.productId,
+          status: submission.status,
+          submission_id: submission.submissionId,
+          simulated: submission.simulated,
+        })
+      )
+    );
+  }
+
   async hydrate(scope: TenantScope): Promise<HydratedDomainState> {
     if (!supabase) return emptyHydratedState();
-    const [outreach, responses, opportunities, events, prospects, runs, changes, snapshots, brandOnboarding] =
+    const [outreach, responses, opportunities, events, prospects, runs, changes, snapshots, brandOnboarding, catalogSubmissions] =
       await Promise.all([
         this.select(DOMAIN_TABLES.outreach, scope),
         this.select(DOMAIN_TABLES.responses, scope),
@@ -433,6 +472,7 @@ export class SupabaseDomainRepository implements DomainRepository {
         this.select(DOMAIN_TABLES.changes, scope),
         this.select(DOMAIN_TABLES.snapshots, scope),
         this.select(DOMAIN_TABLES.brandOnboarding, scope),
+        this.select(DOMAIN_TABLES.catalogSubmissions, scope),
       ]);
     const payloads = <T>(rows: Record<string, unknown>[]): T[] =>
       rows.map((r) => r.payload as T).filter(Boolean);
@@ -446,6 +486,7 @@ export class SupabaseDomainRepository implements DomainRepository {
       changes: payloads<ProspectChangeEvent>(changes),
       snapshots: payloads<IntelligenceSnapshot>(snapshots),
       brandOnboarding: payloads<BrandOnboarding>(brandOnboarding),
+      catalogSubmissions: payloads<ProductSubmission>(catalogSubmissions),
     };
   }
 

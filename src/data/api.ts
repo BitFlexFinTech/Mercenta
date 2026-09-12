@@ -11,6 +11,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { evaluateComplianceGate } from '@/lib/compliance';
+import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
 import { createSPApiClientForConnection } from '@/lib/spapi';
 import { spApiConnectionCredentials } from '@/integrations/connections';
 import { DEFAULT_HOMEPAGE_CONTENT, type HomepageContent } from '@/config/homepageContent';
@@ -42,11 +43,13 @@ import {
 import { sendPostmarkEmail, buildPoNotificationHtml } from '@/lib/notifications/postmarkNotifier';
 import type {
   AdSpendBudget,
+  CatalogSubmissionStatus,
   ComplianceDocument,
   Contract,
   Message,
   FulfillmentScore,
   FulfillmentTrack,
+  ProductSubmission,
   PurchaseOrder,
   AuditLogEntry,
   ShippingMargin,
@@ -61,7 +64,8 @@ import {
   setComplianceDocStatus as storeSetComplianceDocStatus,
   amendShipment as storeAmendShipment,
   demoDeductions,
-  demoSubmissions,
+  demoProductSubmissions,
+  recordCatalogSubmission,
 } from './demoStore';
 
 export type DataSource = 'supabase' | 'seed';
@@ -191,17 +195,38 @@ export function hasSignedDistributionAgreement(brandId: string): boolean {
 }
 
 /**
+ * §Phase E3 — THE canonical resolution of the compliance-gate inputs.
+ *
+ * `isComplianceGateCleared` and `submitCatalogItem` previously repeated these
+ * same four resolutions independently (the exact duplication that caused the
+ * historical argument-shift defect). Both now read from this one function, and
+ * the E3 lifecycle uses it too, so the gate can never be evaluated with
+ * different inputs in different places.
+ */
+export async function evaluateBrandCatalogGate(brandId: string) {
+  const docs = await fetchComplianceForBrand(brandId);
+  const hasAgreement = hasSignedDistributionAgreement(brandId);
+  const logisticsSlaAccepted = storeHasAcceptedAgreement(brandId, 'logistics_sla');
+  const chargebackIndemnityAccepted = storeHasAcceptedAgreement(brandId, 'chargeback_indemnity');
+  // NOTE: category is deliberately `undefined` (base documents) — passing it
+  // would shift every following argument. Unchanged from the fixed version.
+  return evaluateComplianceGate(
+    docs,
+    undefined,
+    hasAgreement,
+    logisticsSlaAccepted,
+    chargebackIndemnityAccepted
+  );
+}
+
+/**
  * §3 compliance-gate check (client-side mirror).
  * Hard enforcement lives server-side: DB trigger in
  * supabase/migrations/0003_catalog_gate.sql + Edge Function
  * supabase/functions/compliance-gate-check.
  */
 export async function isComplianceGateCleared(brandId: string): Promise<boolean> {
-  const docs = await fetchComplianceForBrand(brandId);
-  const hasAgreement = hasSignedDistributionAgreement(brandId);
-  const logisticsSlaAccepted = storeHasAcceptedAgreement(brandId, 'logistics_sla');
-  const chargebackIndemnityAccepted = storeHasAcceptedAgreement(brandId, 'chargeback_indemnity');
-  return evaluateComplianceGate(docs, undefined, hasAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted).cleared;
+  return (await evaluateBrandCatalogGate(brandId)).cleared;
 }
 
 export interface CatalogSubmissionResult {
@@ -213,35 +238,44 @@ export interface CatalogSubmissionResult {
   submissionId?: string;
   /** Which client handled it — 'mock' until real credentials are configured. */
   mode?: 'mock' | 'real';
+  /** §Phase E3 — TRUE whenever no live provider could have been reached. */
+  simulated?: boolean;
+  /** §Phase E3 — the canonical submission record created by this call. */
+  submission?: ProductSubmission;
 }
 
 /**
  * §10 step 1 — brand submits a product. Validated against the compliance
  * gate BEFORE anything is transformed/submitted to retail channels.
+ *
+ * §Phase E3 — on success this now RECORDS the resulting submission in the
+ * canonical catalog store (idempotent by brand + sku), so the product's
+ * resulting state is observable by the brand, by the admin catalog and by every
+ * existing consumer of `fetchCatalogSubmissions()`. Before E3 the tracking id
+ * was discarded and the "persist" branch wrote to a `catalog_submissions` table
+ * that no migration ever created — a write that could never have run. Durable
+ * persistence is owned by the E3 lifecycle, through the D4 port.
  */
 export async function submitCatalogItem(
   brandId: string,
   product: Record<string, unknown>
 ): Promise<CatalogSubmissionResult> {
-  // Required-field validation (§10 pipeline prerequisites).
-  const requiredFields = ['commodityCode', 'vatStatus', 'hazmat', 'length', 'width', 'height', 'weight'];
-  const missingFields = requiredFields.filter(
+  // Required-field validation (§10 pipeline prerequisites). The prerequisite
+  // list is the ONE canonical definition, shared with the completeness that the
+  // brand is shown BEFORE submitting — the two can no longer disagree.
+  const missingFields = REQUIRED_SUBMISSION_FIELDS.filter(
     (f) => product[f] === undefined || product[f] === null || product[f] === ''
   );
   if (missingFields.length > 0) {
-    return { ok: false, reason: `Missing required fields: ${missingFields.join(', ')}` };
+    return {
+      ok: false,
+      reason: `Missing required fields: ${missingFields.join(', ')}`,
+      missing: [...missingFields],
+    };
   }
 
-  // §Phase 4 — minimal targeted fix: pass the SAME agreement inputs the
-  // authoritative compliance gate reads. The gate signature is
-  // (docs, category?, hasSignedAgreement, logisticsSlaAccepted,
-  // chargebackIndemnityAccepted) — category must be `undefined` here
-  // (base docs), otherwise the first boolean shifts every argument.
-  const docs = await fetchComplianceForBrand(brandId);
-  const hasAgreement = hasSignedDistributionAgreement(brandId);
-  const logisticsSlaAccepted = storeHasAcceptedAgreement(brandId, 'logistics_sla');
-  const chargebackIndemnityAccepted = storeHasAcceptedAgreement(brandId, 'chargeback_indemnity');
-  const evaluation = evaluateComplianceGate(docs, undefined, hasAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted);
+  // §Phase E3 — the gate inputs are resolved in exactly one place.
+  const evaluation = await evaluateBrandCatalogGate(brandId);
   if (!evaluation.cleared) {
     return {
       ok: false,
@@ -265,20 +299,22 @@ export async function submitCatalogItem(
     return { ok: false, reason: spResult.error ?? 'SP-API submission failed' };
   }
 
-  if (!supabase) {
-    // Local mode: accepted locally; production path inserts into
-    // catalog_submissions where the DB trigger enforces the same gate.
-    return { ok: true, submissionId: spResult.submissionId, mode };
-  }
+  // §Phase E3 — truthful provenance: 'mock' means NO live call occurred.
+  const simulated = mode === 'mock';
+  const sku = typeof product.sku === 'string' ? product.sku : '';
+  const submission = sku
+    ? recordCatalogSubmission({
+        brandId,
+        productId: typeof product.id === 'string' ? product.id : `prd-${brandId}-${sku}`,
+        productName: typeof product.name === 'string' ? product.name : sku,
+        sku,
+        submissionId: spResult.submissionId ?? '',
+        mode,
+        simulated,
+      })
+    : undefined;
 
-  const { error } = await supabase.from('catalog_submissions').insert({
-    brand_id: brandId,
-    product_payload: product,
-  });
-  if (error) {
-    return { ok: false, reason: error.message };
-  }
-  return { ok: true, submissionId: spResult.submissionId, mode };
+  return { ok: true, submissionId: spResult.submissionId, mode, simulated, submission };
 }
 
 /**
@@ -287,7 +323,7 @@ export async function submitCatalogItem(
  */
 export async function pollSubmissionStatus(submissionId: string): Promise<{
   ok: boolean;
-  status?: 'submitted' | 'under_amazon_review' | 'live' | 'rejected';
+  status?: CatalogSubmissionStatus;
   rejectionReason?: string;
   error?: string;
 }> {
@@ -1132,8 +1168,16 @@ export function recordDisputeOutcome(
   return result;
 }
 
+/**
+ * §Phase E3 — reads the CANONICAL catalog-submission store.
+ *
+ * The store is the live, mutable collection the submission seam writes to, so a
+ * brand's real submission is immediately visible on the admin surfaces. Before
+ * E3 this returned a snapshot of six read-only derived fixture rows that no
+ * code path could ever add to.
+ */
 export function fetchCatalogSubmissions() {
-  return queryOrSeed<(typeof demoSubmissions)[number]>('catalog_submissions', [...demoSubmissions]);
+  return queryOrSeed<ProductSubmission>('catalog_submissions', [...demoProductSubmissions]);
 }
 
 

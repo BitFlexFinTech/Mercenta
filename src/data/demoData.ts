@@ -14,9 +14,11 @@ import type {
   ComplianceDocument,
   Contract,
   Message,
+  Product,
+  ProductImage,
+  ProductSubmission,
   PurchaseOrder,
   PurchaseOrderStatus,
-  ProductImage,
 } from '@/types';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 
@@ -165,32 +167,16 @@ function productImageUrl(productId: string, slot: string = 'main'): string {
 
 const CATEGORY_EMOJI: Record<string, string> = {}; // kept for backward compat; image URLs used instead
 
-export interface DemoProduct {
-  id: string;
+/**
+ * §Phase E3 — a canonical `Product` PLUS its owning brand tenant.
+ *
+ * The product shape is declared ONCE (`Product` in src/types.ts). This
+ * interface previously re-declared all 20 of those fields verbatim, so the two
+ * declarations could silently drift; it now extends the canonical type instead.
+ */
+export interface DemoProduct extends Product {
+  /** The owning brand tenant — the canonical E1/E2 identity. */
   brandId: string;
-  name: string;
-  sku: string;
-  barcode: string;
-  image: string;
-  /** §Batch-21 — full image set with validation. */
-  productImages?: ProductImage[];
-  exWorksPrice: number;
-  ukRetailPrice: number;
-  commodityCode: string;
-  vatStatus: string;
-  hazmat: boolean;
-  length: number;
-  width: number;
-  height: number;
-  weight: number;
-  /** §Stage-24 item setup — case pack + product tax code. */
-  unitsPerCase?: number;
-  caseOrderable?: boolean;
-  productTaxCode?: string;
-  /** §Batch-2 — Manage Product Availability: in-stock/out-of-stock toggle. */
-  isAvailable?: boolean;
-  /** §Batch-2 — Lead time in days for replenishment. */
-  leadTimeDays?: number;
 }
 
 function skuFor(brand: DemoBrand, n: number): string {
@@ -498,15 +484,15 @@ export const DEMO_MESSAGES: Message[] = ALL_DEMO_BRANDS.flatMap((brand, bi) => {
   return thread;
 });
 
-/* ── §10 retail-pipeline submission records ─────────────────────────── */
+/* ── §10 / §Phase E3 retail-pipeline submission records ─────────────── */
 
-export interface SeedSubmission {
-  id: string;
-  brandId: string;
-  productName: string;
-  sku: string;
-  asin?: string;
-  status: 'submitted' | 'under_amazon_review' | 'live' | 'rejected';
-  rejectionReason?: string;
-  submittedAt: string;
-}
+/**
+ * §Phase E3 — submissions have ONE canonical shape (`ProductSubmission`).
+ *
+ * `SeedSubmission` is kept as an alias purely so existing consumers
+ * (`RetailPipeline`, `NotificationCenter`, `demoStore`, `api`) do not need to
+ * rename an import. There is deliberately no second, narrower shape any more:
+ * the previous four-field interface could not carry the simulated provenance or
+ * the provider tracking id, which is exactly what E3 must not lose.
+ */
+export type SeedSubmission = ProductSubmission;
