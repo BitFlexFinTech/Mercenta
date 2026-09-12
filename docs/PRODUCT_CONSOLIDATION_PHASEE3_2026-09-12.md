@@ -301,7 +301,7 @@ Edge Function deployment, Amazon SP-API credentials.
 
 ## 20. GIT COMMIT HASHES
 - Pre-E3 HEAD (parent): `b1f1ee4`
-- E3 implementation commit: **`f86d8c7`** (20 files: 9 modified source files,
+- E3 implementation commit: **`f86d8c7`** (19 files: 9 modified source files,
   5 created code/test/schema files, 1 created report, 4 updated docs).
 - E3 documentation checkpoint commit (records the verified hash above): the
   commit that contains this line.

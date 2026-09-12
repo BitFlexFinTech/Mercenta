@@ -36,7 +36,7 @@
 > before/after E3 (the only diff is the new E3 validator) — the 13 legacy
 > failures are PRE-EXISTING, proven via a clean `git worktree` at `b1f1ee4`.
 > Report: `docs/PRODUCT_CONSOLIDATION_PHASEE3_2026-09-12.md`. **Committed
-> `f86d8c7`** (20 files). **HONEST: browser Supabase credentials are still NOT configured →
+> `f86d8c7`** (19 files). **HONEST: browser Supabase credentials are still NOT configured →
 > memory adapter, nothing durable, migration 022 (and 020/021) unexecuted; the
 > legacy `products` table's `uuid` PK is incompatible with the canonical text ids,
 > so the submission record carries the E3 lifecycle state instead of a product
