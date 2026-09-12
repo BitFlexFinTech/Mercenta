@@ -2,14 +2,14 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-09-01",
+    "last_updated": "2026-09-12",
     "status_enum": [
       "not_started",
       "built",
       "built_and_tested",
       "regressed"
     ],
-    "total_entries": 125
+    "total_entries": 137
   },
   "entries": [
     {
@@ -842,12 +842,13 @@
     },
     {
       "id": "batchD-postiz-integration",
-      "description": "Postiz self-hosted social scheduler",
+      "description": "Postiz mock-first client + admin scheduler panel (NOT the full application)",
       "source": "Batch D",
-      "status": "built_and_tested",
-      "evidence": "docker-compose.services.yml; src/lib/postiz/; PostizAdminPanel.tsx; validate-postiz.mjs; e2e/admin-views.spec.ts (Social Media Manager renders); e2e/batch-d-integrations.spec.ts (Postiz card renders)",
-      "last_verified": "2026-09-01",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "docker-compose.services.yml (engine service, deployment only); src/lib/postiz/postizClient.ts (mock-first client); src/components/admin/PostizAdminPanel.tsx; validate-postiz.mjs; e2e/embedded-social.spec.ts",
+      "last_verified": "2026-09-12",
+      "superseded_by": "phaseE7-mercenta-social-identity",
+      "_audit_note": "Phase E7 audit 2026-09-12: the original entry described this as the 'Postiz self-hosted social scheduler' built_and_tested, citing e2e specs that no longer exist. In reality it was a mock-first client plus a 6-platform scheduler form; the engine's own REST shapes used by RealPostizClient (/api/posts, /api/health) were NEVER verified against the real application (the verified developer API is /public/v1). Downgraded to 'built' and superseded by the E7 Mercenta Social integration."
     },
     {
       "id": "batchD-event-feed",
@@ -1180,6 +1181,105 @@
       "area": "Stage 6",
       "status": "built_and_tested",
       "e2eRef": "e2e/brand-views.spec.ts"
+    },
+    {
+      "id": "phaseE7-mercenta-social-identity",
+      "description": "Mercenta Social is the customer-facing product identity for the full social application (single source of truth, not CSS hiding)",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/config/mercentaSocial.ts (MERCENTA_SOCIAL); src/components/brand/MercentaSocial.tsx; src/components/layout/BrandShell.tsx (nav label from the SSOT); e2e/embedded-social.spec.ts test 2; scripts/validate-e7-embedded-social.mjs",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-engine-inventory",
+      "description": "Complete engine feature inventory derived from the RUNNING deployed application (v1.47.0): 8 brand modules, 35 providers, 40+ tables, route/controller surface",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/config/mercentaSocial.ts (SOCIAL_MODULES / SOCIAL_PROVIDERS / SOCIAL_ENGINE_VERIFIED); docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md section 3; verified on droplet mercenta-services, container root-postiz-1",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-auto-provisioning",
+      "description": "Automatic Brand to Mercenta Social workspace provisioning: deterministic id and idempotent (no duplicate on refresh or re-login)",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/lib/social/workspace.ts (socialWorkspaceIdForTenant = msoc-hash, provisionSocialWorkspace, ensureSocialWorkspaceForBrand); validator sections 3-4; e2e/embedded-social.spec.ts tests 1/4/5",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-entitlement-gate",
+      "description": "Fail-closed entitlement gate: only approved/active brands may use Mercenta Social; pending/in_review/rejected/suspended/deactivated/terminated/unknown are refused",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/lib/social/workspace.ts (socialAccessForBrand); src/lib/social/brandStatus.ts; validator section 4 (full status matrix); e2e/embedded-social.spec.ts test 7",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-tenant-isolation",
+      "description": "Tenant isolation enforced in the DOMAIN (cross-tenant workspace read refused), not by UI filtering",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/lib/social/workspace.ts (readWorkspaceForTenant returns CROSS_TENANT; cross-tenant provisioning refusal); validator section 3; e2e/embedded-social.spec.ts test 6",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-commercial-boundary",
+      "description": "No separate commercial relationship: engine sign-up, billing, plan, checkout and affiliate paths are declared blocked and never rendered or linked for a brand",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/config/mercentaSocial.ts (SOCIAL_BLOCKED_ENGINE_PATHS, SOCIAL_FORBIDDEN_BRAND_STRINGS); validator section 7; e2e/embedded-social.spec.ts test 2; admin control centre commercial-boundary section",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-admin-control-centre",
+      "description": "Admin integration control centre on the EXISTING Integrations architecture: engine identity/mode, provisioning state, commercial boundary, deployment findings - no secrets",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/components/admin/PostizAdminPanel.tsx; src/lib/postiz/postizClient.ts (getSocialEngineStatus, socialFindingCounts); e2e/embedded-social.spec.ts test 9",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-no-fabricated-connection-state",
+      "description": "Fabricated in-browser connection state removed: the false 'Live' badge and the local connection Map are gone; providers are listed as available, never connected",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/components/brand/BrandSocialConnect.tsx (now a compatibility adapter); src/components/brand/MercentaSocial.tsx (ProviderSurface); validator section 7; e2e/embedded-social.spec.ts test 3",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-simulation-zero-network",
+      "description": "Simulation stays simulation: opening or provisioning Mercenta Social performs ZERO network calls and contacts no provider or engine host",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "validator section 6 (spied global fetch, 0 calls); e2e/embedded-social.spec.ts test 8 (request capture across a full session)",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-deployment-findings",
+      "description": "Verified engine deployment defects recorded: backend 502 (Temporal missing), self-registration OPEN, MAIN_URL/FRONTEND_URL localhost, container-local media storage, droplet RAM 73.7 percent",
+      "source": "Phase E7",
+      "status": "built_and_tested",
+      "evidence": "src/config/mercentaSocial.ts (SOCIAL_DEPLOYMENT_FINDINGS, 6 findings); admin findings panel; docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 2.5 and 8; PRODUCTION_READINESS.md",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseE7-engine-link-not-established",
+      "description": "Engine-side link, channel connect, publishing and the Mercenta to engine session bridge are NOT implemented: they require the deployment fix (Temporal/502) plus a server-side provisioning call",
+      "source": "Phase E7",
+      "status": "built",
+      "evidence": "src/lib/social/workspace.ts (engineLinked:false, engineOrganizationId null, simulated:true - reported truthfully); docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 5.4, 9.3, 9.4",
+      "last_verified": "2026-09-12",
+      "superseded_by": null
     }
   ]
 }

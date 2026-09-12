@@ -40,8 +40,8 @@ the brand navigation, does not create a migration, and does not deploy anything.
 |---|---|
 | Branch | `redesign/foundation` |
 | **Pre-E7 checkpoint (revert point)** | **`c5b92ba`** (E6 documentation checkpoint = HEAD at E7 start) |
-| **E7 implementation commit** | recorded in §12 |
-| **E7 documentation checkpoint** | recorded in §12 |
+| **E7 implementation commit** | **`44a8b83`** (recorded in §15) |
+| **E7 documentation checkpoint** | the HEAD commit containing this section (hash in the final checkpoint report) |
 | E6 implementation / docs | `5fa795f` / `c5b92ba` |
 | Pre-E6 checkpoint | `d517b17` (tag `mercenta-pre-e6-20260912`) |
 | Protected baseline | **`959b4d2`** (tag `mercenta-baseline-before-redesign-20260907`) |
@@ -587,6 +587,31 @@ production preparation → deployment → **Rakazo LAST**
 - **Rakazo remains LAST.** UI/UX redesign remains deferred. Production remains deferred.
 - **Deployment-side blockers are recorded, not hidden:** engine API 502 (Temporal missing),
   open engine registration, localhost engine URLs, container-local media, droplet RAM.
+
+---
+
+## 15. GIT CHECKPOINT
+
+| Item | Value |
+|---|---|
+| Branch | `redesign/foundation` |
+| **Pre-E7 checkpoint (revert point)** | **`c5b92ba`** (E6 documentation checkpoint) |
+| **E7 implementation commit** | **`44a8b83`** — “phaseE7: integrate the complete Postiz application as MERCENTA SOCIAL …” (22 files changed, 2821 insertions, 149 deletions) |
+| **E7 documentation checkpoint** | the HEAD commit containing this section (hash in the final checkpoint report) |
+| Protected baseline | **`959b4d2`** (tag `mercenta-baseline-before-redesign-20260907`) — **still an ancestor of HEAD** (`git merge-base --is-ancestor` → exit 0) |
+| Rebase / amend / reset / force-push | **NONE** |
+| Migrations | **23**, `023_create_commerce_persistence.sql` newest; **0 migration files changed by E7** |
+| Protected paths in the E7 change set | **none** (BI, SP-API, DHL, Xero, design system, deploy scripts, Rocket.Chat removal all untouched) |
+| `Review Zip/mercenta-review.zip` | regenerated with the canonical script only, **deliberately left unstaged** |
+
+**E7 source change set (exact):** `src/config/mercentaSocial.ts` ·
+`src/lib/social/{workspace,brandStatus,index}.ts` ·
+`src/components/brand/MercentaSocial.tsx` · `src/components/brand/BrandSocialConnect.tsx`
+· `src/components/admin/PostizAdminPanel.tsx` · `src/components/layout/BrandShell.tsx` ·
+`src/lib/postiz/postizClient.ts` · `scripts/validate-e7-embedded-social.mjs` ·
+`scripts/validate-e6-brand-surfaces.mjs` (scope guard extended, disclosed §12) ·
+`e2e/embedded-social.spec.ts` · `e2e/app-shell.spec.ts` (one assertion value) ·
+`docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md` + regenerated tracked test screenshots.
 
 
 

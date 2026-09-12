@@ -363,7 +363,14 @@ onboarding. **Not started yet.**
 > brand dashboard (issued-unpaid simulated invoices + delivered-awaiting-invoice),
 > one canonical latest-submission derivation, and deduction notification
 > provenance — all additive, with no new store/dashboard/nav/migration.
-> **NEXT: E7 — embedded Postiz (NOT started).** Their state lives in **PROJECT_STATUS.md**.
+> **E7 (embedded Mercenta Social / full Postiz application) is DONE 2026-09-12** —
+> the deployed engine (v1.47.0 on the `mercenta-services` droplet) is exposed to
+> every approved brand as Mercenta Social with automatic deterministic + idempotent
+> workspace provisioning, a fail-closed entitlement gate, domain-enforced tenant
+> isolation, the full 8-module / 35-provider surface and truthful simulation (the
+> engine's API is down, so the engine link is NOT established). No migration, no
+> second social platform, no deployment.
+> **NEXT: Final UI/UX redesign.** Their state lives in **PROJECT_STATUS.md**.
 
 ## AC. Permanent Do-Not-Change Decisions
 

@@ -79,8 +79,41 @@ fixed. Never cite the log as current status.
   commit `d517b17`).
 - HONEST: simulation only; memory adapter active (`durable:false`); no migration
   added or executed (023 remains newest); BI untouched.
-- Report: `docs/PRODUCT_CONSOLIDATION_PHASEE6_2026-09-12.md`. **NEXT: E7 — Embedded
-  Postiz (NOT started).**
+- Report: `docs/PRODUCT_CONSOLIDATION_PHASEE6_2026-09-12.md`.
+
+## Embedded Mercenta Social — full Postiz application (Phase E7 — 2026-09-12)
+
+- Makes the COMPLETE Postiz application available to every approved Mercenta brand as
+  **MERCENTA SOCIAL**. Postiz is the engine (AGPL-3.0) and is NOT rebuilt inside
+  Mercenta. **The already-deployed engine was investigated, not assumed:** droplet
+  `mercenta-services` (46.101.75.185), container `root-postiz-1`
+  (`ghcr.io/gitroomhq/postiz-app:latest`), engine version **v1.47.0**, database
+  `postiz-db-local`, instance **unused** (0 users / 0 orgs / 0 integrations /
+  0 posts / 0 media), tenancy `Organization ← UserOrganization → User` with
+  `organizationId` on every post/integration/media row, **35 verified provider
+  adapters**, post states `QUEUE · PUBLISHED · ERROR · DRAFT`.
+- **BLOCKING deployment defect found and reported (never faked around):** the NestJS
+  backend exits on `connect ECONNREFUSED ::1:7233` (Temporal missing) so nginx answers
+  **502** for `/api/*`; `DISABLE_REGISTRATION=false` (engine self-signup OPEN);
+  `MAIN_URL`/`FRONTEND_URL` = `http://localhost:5000`; storage container-local;
+  droplet RAM 73.7 %.
+- Shipped: identity SSOT `src/config/mercentaSocial.ts` (8 brand modules, 35
+  providers, blocked commercial paths, verified engine facts, 6 findings);
+  deterministic + idempotent provisioning (`msoc-<fnv1a32(tenant)>`); fail-closed
+  entitlement gate over every canonical brand status; tenant isolation refused in the
+  domain; the brand surface `MercentaSocial`; `BrandSocialConnect` reduced to a
+  compatibility adapter (its fabricated connection Map and false `Live` badge are
+  gone); the admin integration control centre; the brand nav label from the SSOT.
+- Gates: E7 validator **96/96 PASS**; E7 E2E spec **9/9**; full E2E **207/4/0**;
+  typecheck 0 · lint 0 · build PASS; validators **37 PASS / 15 FAIL** vs pre-E7
+  worktree `c5b92ba` **36 PASS / 15 FAIL** (only difference = the new E7 validator;
+  0 regressions).
+- HONEST: no migration (023 still newest of 23); workspace records in-memory
+  (`durable:false`); **engine link NOT established** (`engineLinked:false`) because the
+  engine API is down; connecting a channel and publishing remain blocked by the
+  deployment; no deployment performed; zero network calls.
+- Report: `docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md`. **NEXT: Final UI/UX
+  redesign.**
 
 ## Admin operational surfaces (Phase E5 — 2026-09-12)
 

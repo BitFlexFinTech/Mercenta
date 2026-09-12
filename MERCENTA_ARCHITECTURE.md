@@ -350,7 +350,23 @@ carries a `prospectId`.
   (additive, 4 tables, RLS + brand isolation, **NOT executed**). Every record is
   explicitly `mode:'simulation'`/`simulated:true`; UNKNOWN is never simulation-safe;
   zero external network calls. Validator 108/108 · E2E spec 4/4 · full E2E 189/0/4.
-  **NEXT: E7 — embedded Postiz (NOT started).**
+- **Phase E7 — embedded Mercenta Social / full Postiz application (2026-09-12):** ✅
+  the COMPLETE deployed engine (Postiz **v1.47.0**, container `root-postiz-1` on
+  `mercenta-services`) is exposed to every approved brand as **MERCENTA SOCIAL**.
+  New: `src/config/mercentaSocial.ts` (identity SSOT: 8 brand modules, 35 verified
+  providers, blocked commercial paths, verified engine facts, 6 findings),
+  `src/lib/social/workspace.ts` (deterministic `msoc-<fnv1a32(tenant)>` identity,
+  idempotent provisioning, fail-closed access gate, domain-enforced tenant
+  isolation), `src/lib/social/brandStatus.ts` (canonical status mapping),
+  `src/components/brand/MercentaSocial.tsx` (the brand surface), and the admin
+  integration control centre inside the EXISTING `PostizAdminPanel`. The brand nav
+  label comes from the SSOT. **No migration, no second social platform, no new store
+  duplicating an engine entity, no deployment.** HONEST: the engine's API is down
+  (502 — Temporal missing) so the engine link is NOT established
+  (`engineLinked:false`, simulated) and connecting/publishing remain blocked by the
+  deployment; workspace records are in-memory (`durable:false`). Validator 96/96 ·
+  E7 spec 9/9 · full E2E 207/0/4 · validators 37 PASS/15 FAIL vs pre-E7 36/15
+  (0 regressions). **NEXT: Final UI/UX redesign.**
 - **Phase E6 — brand operational surfaces (2026-09-12):** ✅ the BRAND side reached
   parity with the canonical domain, by EXTENDING existing files only (no new
   store/dashboard/CRM/catalog/PO/ticketing/billing system, no new lifecycle
@@ -386,7 +402,16 @@ carries a `prospectId`.
   drill-downs pointed at the brand SCORING surface (Fulfillment Track) instead of
   shipments (now Logistics Control). Validator 48/48 · E2E spec 4/4 · full E2E
   193/0/4 · all 49 legacy validators byte-identical.
-- **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
+- **Postiz / Mercenta Social (E7 — DONE 2026-09-12):** the existing deployed app IS
+  exposed, from Brand (`MercentaSocial`, the existing BrandShell 'social' entry) and
+  from Admin (the existing `PostizAdminPanel`). Postiz is the engine; **Mercenta
+  Social** is the customer-facing product. Mercenta owns identity, entitlement,
+  tenancy, provisioning, the commercial boundary and the integration layer; the
+  engine owns the application. Engine version **v1.47.0**; automatic deterministic
+  and idempotent Brand → workspace provisioning; tenant isolation enforced in the
+  domain. The engine's own API is currently down (502 — Temporal missing) so the
+  engine link is not yet established and channel connect / publishing remain blocked
+  by the deployment — reported, never faked.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep
   independence; direct Admin controls retained.

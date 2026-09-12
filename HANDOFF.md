@@ -244,7 +244,13 @@ audit enforced in the domain and truthful simulation provenance everywhere, AND
 **E6 (brand operational surfaces) DONE 2026-09-12** brings the brand side to parity
 (simulated-PO provenance, canonical commerce awareness on the brand dashboard,
 canonical latest-submission derivation, deduction notification provenance). Next:
-**E7 — embedded Postiz (NOT started)**. Rakazo stays LAST (Phase M).
+**E7 — embedded Mercenta Social (FULL Postiz application) DONE 2026-09-12** — the
+deployed engine (v1.47.0 on the `mercenta-services` droplet) is exposed to every
+approved brand as Mercenta Social, with automatic deterministic + idempotent
+workspace provisioning, a fail-closed entitlement gate, domain-enforced tenant
+isolation, the full 8-module / 35-provider surface, truthful simulation (engine
+link NOT established — its API is down), no migration and no second social
+platform. Next: **Final UI/UX redesign**. Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

@@ -1,6 +1,49 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-12 (**Phase E6 — BRAND OPERATIONAL SURFACES**; see the PHASE E6 block below. Previous session: **Phase E5 — ADMIN OPERATIONAL SURFACES** (see the PHASE E5 block below). Earlier: **Phase E4 — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION**; **Phase E3 — CATALOG / PRODUCT MANAGEMENT**; **Phase E2 — BRAND ONBOARDING WORKFLOW**; **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+> Last updated: 2026-09-12 (**Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; see the PHASE E7 block below. Previous session: **Phase E6 — BRAND OPERATIONAL SURFACES**. Earlier: **Phase E5 — ADMIN OPERATIONAL SURFACES**; **Phase E4 — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION**; **Phase E3 — CATALOG / PRODUCT MANAGEMENT**; **Phase E2 — BRAND ONBOARDING WORKFLOW**; **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+>
+> **PHASE E7 (2026-09-12) — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION).**
+> Makes the COMPLETE Postiz application available to every approved Mercenta brand
+> as **MERCENTA SOCIAL** — the customer-facing product identity (Postiz is the
+> engine, AGPL-3.0, and is NOT rebuilt inside Mercenta). **The already-deployed
+> engine was investigated, not assumed:** droplet `mercenta-services`
+> (46.101.75.185), container `root-postiz-1`
+> (`ghcr.io/gitroomhq/postiz-app:latest`, image built 2026-09-05), engine version
+> **v1.47.0**, database `postiz-db-local`, **instance unused (0 users / 0 orgs /
+> 0 integrations / 0 posts / 0 media)**, tenancy `Organization ← UserOrganization →
+> User` with `organizationId` on every post/integration/media row, **35 verified
+> provider adapters**, post states `QUEUE · PUBLISHED · ERROR · DRAFT`.
+> **BLOCKING deployment defect found and reported (not faked around):** the NestJS
+> backend exits on `connect ECONNREFUSED ::1:7233` (Temporal missing) so nginx
+> answers **502** for `/api/*`; `DISABLE_REGISTRATION=false` (self-signup OPEN);
+> `MAIN_URL`/`FRONTEND_URL` = `http://localhost:5000`; storage container-local;
+> droplet RAM 73.7 %. **E7 shipped:** the Mercenta Social identity as a single
+> source of truth (`src/config/mercentaSocial.ts` — 8 brand modules, 35 providers,
+> blocked commercial paths, verified engine facts, 6 deployment findings);
+> **deterministic + idempotent automatic provisioning**
+> (`socialWorkspaceIdForTenant` = `msoc-<fnv1a32(tenant)>`, no Date.now/random);
+> a **fail-closed entitlement gate** over every canonical brand status (approved/
+> active allowed; pending/in_review/rejected/suspended/deactivated/terminated/
+> unknown denied); **tenant isolation refused in the DOMAIN**
+> (`readWorkspaceForTenant` → `CROSS_TENANT`); the brand surface
+> `MercentaSocial` (workspace, module surface with drill-down, channels listed as
+> available-not-connected, entitlement statement, **no sign-up / no billing / no
+> engine name**); `BrandSocialConnect` reduced to a compatibility adapter
+> (its fabricated in-browser connection Map and **false `Live` badge are gone**);
+> the admin `PostizAdminPanel` extended into the integration control centre
+> (engine identity, provisioning, commercial boundary, findings — no secrets);
+> the brand nav label sourced from the SSOT. **NO migration (023 still newest of
+> 23), no new store duplicating an engine entity, no second social platform, no
+> deployment, no network calls.** Gates: new validator **96/96 PASS**; new E2E
+> spec **9/9**; full E2E **207 passed / 4 skipped / 0 failed** (was 198/0/4 → +9,
+> **0 regressions**); typecheck 0 · lint 0 · build PASS; validators
+> **37 PASS / 15 FAIL** vs the pre-E7 worktree at `c5b92ba` **36 PASS / 15 FAIL**
+> — the only difference is the new E7 validator (**0 regressions**; two legacy
+> guards were extended in an intent-preserving way and disclosed). Report:
+> `docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md`. **HONEST: the engine link is
+> NOT established (`engineLinked:false`, simulated) because the engine API is
+> down; connecting a channel and publishing remain blocked by the deployment;
+> workspace records are in-memory (`durable:false`).** NEXT: Final UI/UX redesign.
 >
 > **PHASE E6 (2026-09-12) — BRAND OPERATIONAL SURFACES.** Completes the BRAND-side
 > operational experience by closing four PARITY/CANONICALITY gaps — NOT a redesign,
