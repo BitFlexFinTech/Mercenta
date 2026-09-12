@@ -62,7 +62,7 @@ Cline's output back. AI confirms, gives next prompt.
   outreach record ids collided within a millisecond and destroyed a revision — ids
   are now workflow-owned. Gates: validator 44/44 + E2E 3/3; full E2E 172/0/4.
   Report: docs/PRODUCT_CONSOLIDATION_PHASED3_2026-09-11.md.
-- Brand onboarding workflow (Phase E2, 2026-09-11): the onboarding record is now a
+- Brand onboarding workflow (Phase E2, 2026-09-11; commit `08a575c`): the onboarding record is now a
   real stateful workflow with THREE entry points into ONE canonical record —
   acquisition opportunity, approved partner application, and operator-created brand
   (all idempotent, deterministic tenant ids). The brand ACCEPTS its onboarding

@@ -347,7 +347,8 @@ onboarding. **Not started yet.**
 > surfaces · E7 embedded Postiz**. That programme absorbs what this table called
 > D5/D6 (and overlaps row H for Postiz). Rows E–H above are therefore **NOT** the
 > same thing as Phase E1/E2/…/E7 — do not conflate them. **E1 (opportunity → brand
-> onboarding hand-off, commit `0568e2a`) and E2 (brand onboarding workflow) are
+> onboarding hand-off, commit `0568e2a`) and E2 (brand onboarding workflow,
+> commit `08a575c`) are
 > DONE 2026-09-11**; their state lives in **PROJECT_STATUS.md**.
 
 ## AC. Permanent Do-Not-Change Decisions

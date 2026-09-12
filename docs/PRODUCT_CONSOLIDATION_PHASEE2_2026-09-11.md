@@ -253,10 +253,40 @@ and verify durable persistence against a credentialed Supabase project.
 
 ## 14. GIT COMMIT HASHES
 - Pre-E2 HEAD: `d9bfc1c` (E1 documentation checkpoint); E1 implementation `0568e2a`.
-- **E2 implementation commit:** `phaseE2: build the brand onboarding workflow
-  (acceptance, ordered steps, application/manual entry points, admin pipeline,
-  tenant-scoped RBAC)` — hash recorded in the follow-up documentation checkpoint.
-- E2 documentation checkpoint: created in the same session immediately after.
+- **E2 implementation commit:** `08a575ccbf5d2e8f3c1cee7a9033a82b7ac91e32`
+  (`08a575c`), parent `d9bfc1c`, message: `phaseE2: build the brand onboarding
+  workflow (acceptance, ordered steps, application/manual entry points, admin
+  pipeline, tenant-scoped RBAC)` — **18 files changed, +1760/−81**.
+- E2 documentation checkpoint: created in the same session immediately after,
+  recording this verified hash.
+
+## 14b. COMMITTED CHANGE SET (`08a575c`)
+
+```
+MERCENTA_ARCHITECTURE.md                         |  25 +-
+MERCENTA_MASTER_CONTEXT.md                       |  22 +-
+PROJECT_STATUS.md                                |  32 +-
+STATUS_CHECK.md                                  |  32 +-
+HANDOFF.md                                       |  28 +-
+docs/PRODUCT_CONSOLIDATION_PHASEE2_2026-09-11.md | 275 +++++  (NEW)
+e2e/onboarding-workflow.spec.ts                  | 191 ++++   (NEW)
+scripts/validate-onboarding-workflow.mjs         | 313 +++++  (NEW)
+src/components/admin/ApplicationsPanel.tsx       |  25 +-
+src/components/admin/OnboardingPipeline.tsx      | 331 +++++  (NEW)
+src/components/auth/Login.tsx                    |  86 +-
+src/components/layout/AdminShell.tsx             |   5 +-
+src/context/GlobalStateContext.tsx               |  72 +-
+src/data/acquisitionStore.ts                     |  35 +
+src/data/applicationStore.ts                     |   5 +-
+src/lib/auth/rbac.ts                             |   2 +-
+src/lib/onboarding/onboardingLifecycle.ts        | 330 +-
+src/types.ts                                     |  32 +-
+```
+
+No generated/forensic artefact was staged (verified with `git diff --cached --stat`
+before the commit). No amend, rebase, reset or force-push; the protected baseline
+`959b4d2` was never touched; history remains linear
+(`f36884a` → `0568e2a` → `d9bfc1c` → `08a575c`).
 
 ## 15. REVIEW ZIP STATUS
 Exported at the end of this session via the mandatory script

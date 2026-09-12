@@ -25,8 +25,8 @@
 > via the existing ICP mapping) + `Login.tsx` derives canonical tenant cards from
 > the store. Gates: new validator **45/45 PASS** + new E2E spec **3/3**; full E2E
 > **181/0/4** (was 178/0/4 → +3, 0 new failures); typecheck 0 · lint 0 · build PASS.
-> Report: `docs/PRODUCT_CONSOLIDATION_PHASEE2_2026-09-11.md`. **HONEST: browser
-> Supabase credentials are still NOT configured → memory adapter, nothing durable,
+> Report: `docs/PRODUCT_CONSOLIDATION_PHASEE2_2026-09-11.md`. **Committed `08a575c`**
+> (18 files, +1760/−81). **HONEST: browser Supabase credentials are still NOT configured → memory adapter, nothing durable,
 > migrations 020 + 021 unexecuted; and the brand-portal `onboarded` flag remains a
 > separate representation of the canonical status (documented seam, deliberately not
 > force-merged to avoid regressing the tested wizard flow).**

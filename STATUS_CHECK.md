@@ -36,7 +36,7 @@ fixed. Never cite the log as current status.
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
 
-## Brand onboarding workflow (Phase E2 — 2026-09-11)
+## Brand onboarding workflow (Phase E2 — 2026-09-11) — commit `08a575c`
 
 - The E1 record is now a stateful workflow with THREE real entry points into one
   canonical record: acquisition opportunity (E1), approved partner application

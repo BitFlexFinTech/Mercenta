@@ -307,7 +307,7 @@ carries a `prospectId`.
   honest memory adapter and a Supabase adapter (idempotent by canonical id,
   tenant-scoped, explicit failures); acquisition + BI lifecycle write-through;
   `supabase/migrations/020_create_acquisition_persistence.sql` (8 tables, RLS).
-- **Phase E1 + E2 — onboarding (2026-09-11):** ✅ E1 the opportunity → brand
+- **Phase E1 + E2 — onboarding (2026-09-11; E1 `0568e2a`, E2 `08a575c`):** ✅ E1 the opportunity → brand
   onboarding hand-off — canonical `BrandOnboarding` (keyed by the canonical
   prospect id), DERIVED tenant id, `Opportunity.brandId` set, strictly ordered
   steps with explicit completion, RBAC + audit in the domain, the EXISTING
