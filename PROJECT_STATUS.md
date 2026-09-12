@@ -1,6 +1,44 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-12 (**Phase E3 — CATALOG / PRODUCT MANAGEMENT**; see the PHASE E3 block below. Previous session: **Phase E2 — BRAND ONBOARDING WORKFLOW** (see the PHASE E2 block below). Earlier: **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+> Last updated: 2026-09-12 (**Phase E4 — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION**; see the PHASE E4 block below. Previous session: **Phase E3 — CATALOG / PRODUCT MANAGEMENT** (see the PHASE E3 block below). Earlier: **Phase E2 — BRAND ONBOARDING WORKFLOW**; **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+>
+> **PHASE E4 (2026-09-12) — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION.**
+> The operational commerce lifecycle is now genuinely functional in SIMULATION
+> mode, end to end, with ZERO live credentials and ZERO external network calls:
+> `E3-ready product → OPERATIONAL ELIGIBILITY (derived from E3) → SIMULATED
+> PURCHASE ORDER → PO ACKNOWLEDGEMENT → FULFILMENT/SHIPMENT (existing ASN seam)
+> → RECEIVING (existing delivery reconciliation) → SIMULATED INVOICE →
+> SIMULATED PAYMENT → EXCEPTIONS/CHARGEBACKS (existing Deduction ledger) →
+> DISPUTE/RESOLUTION → resulting operational state`. NEW
+> `src/lib/commerce/commerceLifecycle.ts` (tenant-pinned `CommerceActor`, RBAC +
+> tenant isolation IN THE DOMAIN, eligibility, PO/ack/fulfil/shipment/receive/
+> invoice/payment/exception/dispute/case, tenant-scoped reads, persistence mirror,
+> audit on the ONE existing platform log). NEW canonical types
+> (`CommerceActivity`, `CommerceEligibility`, `CommerceInvoice`, `CommercePayment`,
+> `CommerceMode`, `CommerceActivityType`) plus OPTIONAL simulation provenance on
+> the EXISTING `PurchaseOrder`/`Deduction` — ONE declaration each, no duplicate
+> concepts. NEW `createSimulatedPurchaseOrder` in `src/data/api.ts`: a SEPARATE,
+> **email-free and provider-free** creation path, so `createPurchaseOrder`'s real
+> Postmark behaviour is untouched. NEW D4 port methods +
+> `supabase/migrations/023_create_commerce_persistence.sql` (additive, RLS,
+> brand-isolation policies, 4 tables, **NOT executed**). NEW UI:
+> `CommerceSimulationPanel` (brand console) + `CommerceOperationsPanel` (admin
+> overview), both rendered AFTER pre-existing content so no existing browser
+> assertion's control order changed. SIMULATION IS TRUTHFUL: every record is
+> `mode:'simulation'`, `simulated:true`, and says "No live provider contacted /
+> No email sent / No accounting provider contacted / No payment provider
+> contacted". Idempotent by deterministic ids (`po-sim-*`, `cinv-*`, `cpay-*`,
+> `com-*`). Gates: new validator **108/108 PASS** + new E2E spec **4/4**; full E2E
+> **189/0/4** (was 185/0/4 → +4, **0 regressions**); typecheck 0 · lint 0 · build
+> PASS; all 48 legacy validators **byte-identical** before/after E4 (only the new
+> E4 validator is added) — the **15** failing legacy validators (E3 recorded 13)
+> are PRE-EXISTING, proven via a clean `git worktree` at the pre-E4 commit
+> `657b6b2`. Report: `docs/PRODUCT_CONSOLIDATION_PHASEE4_2026-09-12.md`.
+> **HONEST: browser Supabase credentials are still NOT configured → memory
+> adapter, nothing durable, migration 023 (and 020/021/022) unexecuted; no live
+> Amazon/DHL/Xero/payment call is made or claimed.** Pre-E4 checkpoint commit
+> `657b6b2` (generated/forensic artefacts preserved verbatim). **NEXT: E5 — Admin
+> Operational Surfaces (NOT started).**
 >
 > **PHASE E3 (2026-09-12) — CATALOG / PRODUCT MANAGEMENT.** The product/catalog
 > capability is now a COMPLETE, demonstrable lifecycle, built by EXTENDING the

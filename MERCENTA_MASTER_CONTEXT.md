@@ -349,7 +349,13 @@ onboarding. **Not started yet.**
 > same thing as Phase E1/E2/…/E7 — do not conflate them. **E1 (opportunity → brand
 > onboarding hand-off, commit `0568e2a`) and E2 (brand onboarding workflow,
 > commit `08a575c`) are
-> DONE 2026-09-11**; their state lives in **PROJECT_STATUS.md**.
+> DONE 2026-09-11; E3 (catalog / product management, commit `f86d8c7`) is
+> DONE 2026-09-12; and E4 (commerce / Amazon-style operational simulation) is
+> DONE 2026-09-12** — the operational commerce lifecycle (eligibility → simulated
+> PO → acknowledgement → fulfilment → receiving → simulated invoice → simulated
+> payment → exception → dispute) is now functional end-to-end in SIMULATION with
+> zero external network calls. **NEXT: E5 admin operational surfaces (NOT
+> started).** Their state lives in **PROJECT_STATUS.md**.
 
 ## AC. Permanent Do-Not-Change Decisions
 

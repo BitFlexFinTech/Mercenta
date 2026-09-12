@@ -321,6 +321,36 @@ carries a `prospectId`.
   resolving the deliberate `brandProfile.onboarded` vs canonical-status seam.
   Also still remaining from D4: run the migrations + exercise the durable path
   against a credentialed Supabase project (never executed here).
+- **Phase E3 — catalog / product management (2026-09-12; commit `f86d8c7`):** ✅ the
+  canonical product lifecycle — `Product` is the ONE declaration, `ProductSubmission`
+  the ONE submission shape, `src/lib/catalog/productCompleteness.ts` the ONE
+  prerequisite list, `src/lib/catalog/catalogLifecycle.ts` the tenant-pinned
+  `CatalogActor` domain (RBAC + tenant isolation in the domain); the EXISTING
+  `api.submitCatalogItem` seam records the resulting submission with truthful
+  `mode`/`simulated` provenance; readiness derives from completeness + the EXISTING
+  compliance gate; D4 port extended with `catalog_submissions` and migration
+  `022_create_catalog_persistence.sql` (RLS + brand isolation).
+- **Phase E4 — commerce / Amazon-style operational simulation (2026-09-12):** ✅ the
+  OPERATIONAL commerce lifecycle —
+  `src/lib/commerce/commerceLifecycle.ts` is the ONE new domain module
+  (tenant-pinned `CommerceActor`, RBAC + tenant isolation in the domain,
+  deterministic idempotent ids, persistence mirror, audit on the existing log).
+  It REUSES the existing operational vocabulary: `PurchaseOrder`
+  (+`PurchaseOrderStatus`), `PurchaseOrderLineItem`, `Shipment` (existing 6-stage
+  freight track), `Deduction` (chargebacks/disputes), the ASN seam
+  (`createShipmentForPO`), delivery reconciliation (`reconcileDelivery`), the
+  helpdesk case model and the platform audit log. New canonical types
+  (`CommerceActivity`, `CommerceEligibility`, `CommerceInvoice`, `CommercePayment`,
+  `CommerceMode`, `CommerceActivityType`) are declared ONCE; PO/Deduction gain only
+  OPTIONAL provenance. **Eligibility is DERIVED from E3** (readiness + latest
+  submission) — no second compliance system. **Simulation-safe PO creation**
+  (`createSimulatedPurchaseOrder`) is a SEPARATE, email-free/provider-free path;
+  `createPurchaseOrder`'s real Postmark behaviour is untouched. Persistence: D4
+  port extended + `supabase/migrations/023_create_commerce_persistence.sql`
+  (additive, 4 tables, RLS + brand isolation, **NOT executed**). Every record is
+  explicitly `mode:'simulation'`/`simulated:true`; UNKNOWN is never simulation-safe;
+  zero external network calls. Validator 108/108 · E2E spec 4/4 · full E2E 189/0/4.
+  **NEXT: E5 — admin operational surfaces (NOT started).**
 - **Postiz (Phase H):** expose the existing deployed app from Admin + Brand.
 - **Rakazo (Phase M, LAST):** approved-contract read of MERCENTA state, permitted
   actions, human approval CTA, MERCENTA-authoritative mutation + audit. Keep

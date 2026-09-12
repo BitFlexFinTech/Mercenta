@@ -17,6 +17,7 @@ fixed. Never cite the log as current status.
 - `node scripts/validate-onboarding-handoff.mjs` — ONBOARDING_HANDOFF_VALIDATION_PASS (46/46; Phase E1)
 - `node scripts/validate-onboarding-workflow.mjs` — ONBOARDING_WORKFLOW_VALIDATION_PASS (45/45; Phase E2)
 - `node scripts/validate-e3-catalog.mjs` — E3_CATALOG_VALIDATION_PASS (65/65; Phase E3)
+- `node scripts/validate-e4-commerce.mjs` — E4_COMMERCE_VALIDATION_PASS (108/108; Phase E4)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -27,8 +28,10 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **185 PASS / 4 skip / 0 fail** across 32 spec files.
-  (Phase E3 added `e2e/catalog-product-management.spec.ts`, +4 tests, 0 new
+  **Playwright E2E** — **189 PASS / 4 skip / 0 fail** across 33 spec files.
+  (Phase E4 added `e2e/commerce-operational-simulation.spec.ts`, +4 tests, 0 new
+  failures — full run `189 passed / 4 skipped / 0 failed`.
+  Phase E3 added `e2e/catalog-product-management.spec.ts`, +4 tests, 0 new
   failures — full run `185 passed / 4 skipped / 0 failed` in 2.7m.
   Phase E2 added `e2e/onboarding-workflow.spec.ts`, +3 tests, 0 new failures.
   Phase E1 added `e2e/onboarding-handoff.spec.ts`, +3 tests, 0 new failures.
@@ -38,6 +41,53 @@ fixed. Never cite the log as current status.
   was 0-failure.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Commerce / operational simulation (Phase E4 — 2026-09-12)
+
+- The OPERATIONAL commerce lifecycle is now complete and demonstrable in
+  SIMULATION: E3-ready product → operational eligibility → simulated purchase
+  order → acknowledgement → fulfilment/shipment → receiving → simulated invoice →
+  simulated payment → exception/chargeback → dispute/resolution → resulting
+  operational state. **Zero live credentials, zero external network calls.**
+- Built by EXTENDING the existing architecture: the EXISTING `PurchaseOrder`
+  (+`PurchaseOrderStatus`), `Shipment` (freight track), `Deduction`
+  (chargebacks/disputes), ASN seam (`createShipmentForPO`), delivery
+  reconciliation (`reconcileDelivery`), helpdesk case model and audit log are all
+  REUSED — no duplicate concepts, no second store, no second database, no second
+  compliance system, no new shipment vocabulary.
+- ONE new canonical domain module: `src/lib/commerce/commerceLifecycle.ts`
+  (tenant-pinned `CommerceActor`, RBAC + tenant isolation IN THE DOMAIN,
+  deterministic idempotent ids `po-sim-*` / `cinv-*` / `cpay-*` / `com-*`,
+  persistence mirror, audit on the ONE existing `demoAuditLog`).
+- NEW canonical types: `CommerceMode`, `CommerceActivityType`, `CommerceActivity`,
+  `CommerceEligibility`, `CommerceInvoice`, `CommercePayment` (ONE declaration
+  each), plus OPTIONAL simulation provenance on `PurchaseOrder`/`Deduction`.
+- **Eligibility is DERIVED from E3** (`evaluateCatalogReadiness` + the latest
+  submission): no submission / incomplete product / compliance-blocked tenant /
+  rejected submission are refused with reasons. Refusal mutates nothing.
+- **Simulation-safe PO creation:** `createSimulatedPurchaseOrder` in
+  `src/data/api.ts` — a SEPARATE path with NO email and NO provider call.
+  `createPurchaseOrder`'s real Postmark behaviour is untouched.
+- **Truthful provenance:** every record is `mode:'simulation'`, `simulated:true`,
+  and says "No live provider contacted / No email sent / No accounting provider
+  contacted / No payment provider contacted". UNKNOWN is never simulation-safe.
+- Persistence: D4 port extended (`persistCommercePurchaseOrder/Invoice/Payment/Activity`)
+  + `supabase/migrations/023_create_commerce_persistence.sql` (additive, 4 tables,
+  RLS + brand-isolation policies, **NOT executed**).
+- UI (minimum, existing primitives, no redesign): brand console
+  (`CommerceSimulationPanel`) on Purchase Orders; admin overview
+  (`CommerceOperationsPanel`) on Retail Pipeline. Both rendered AFTER pre-existing
+  content so no existing browser assertion's control order changed.
+- Gates: validator **108/108 PASS**; E2E spec **4/4 PASS**; full E2E **189/0/4**;
+  typecheck 0 · lint 0 · build PASS; all 48 legacy validators byte-identical
+  (15 legacy failures PRE-EXISTING — proven in a worktree at pre-E4 commit
+  `657b6b2`). Real defects fixed: missing regulated-category ASN data; a
+  duplicate dispute resolution; and the E4 UI shifting pre-existing control order
+  (which broke 7 legacy specs) — fixed by rendering new panels last.
+- HONEST: no live Amazon/DHL/Xero/payment call is made or claimed; the memory
+  adapter is active (`durable:false`) and migration 023 is not executed.
+- Report: `docs/PRODUCT_CONSOLIDATION_PHASEE4_2026-09-12.md`. **NEXT: E5 — Admin
+  Operational Surfaces (NOT started).**
 
 ## Catalog / product management (Phase E3 — 2026-09-12) — commit `f86d8c7`
 

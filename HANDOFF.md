@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 12, 2026 (Phase E3 — catalog / product management)
+Last updated: September 12, 2026 (Phase E4 — commerce / Amazon-style operational simulation)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -147,6 +147,30 @@ Cline's output back. AI confirms, gives next prompt.
   credentials are NOT configured → memory adapter only, migration 022 (and
   020/021) unexecuted, so nothing is durable in the demo env and no persistence is
   claimed.
+- Commerce / Amazon-style operational simulation (Phase E4, 2026-09-12): the
+  operational commerce lifecycle is now genuinely functional end-to-end in
+  SIMULATION — E3-ready product → OPERATIONAL ELIGIBILITY (DERIVED from the E3
+  readiness + latest submission, never a second rule set) → SIMULATED PURCHASE
+  ORDER → ACKNOWLEDGEMENT → FULFILMENT/SHIPMENT (existing ASN seam, simulated
+  carrier) → RECEIVING (existing delivery reconciliation) → SIMULATED INVOICE →
+  SIMULATED PAYMENT → EXCEPTIONS/CHARGEBACKS (existing Deduction ledger) →
+  DISPUTE/RESOLUTION. ONE new domain module
+  (`src/lib/commerce/commerceLifecycle.ts`) with a tenant-pinned `CommerceActor`,
+  RBAC + tenant isolation IN THE DOMAIN (foreign tenant → CROSS_TENANT, view-only →
+  FORBIDDEN, refusal mutates nothing), deterministic idempotent ids, audit on the
+  ONE existing `demoAuditLog`, and the D4 persistence port extended (migration
+  `023_create_commerce_persistence.sql`, additive, RLS, brand-isolation, NOT
+  executed). A SEPARATE email-free `createSimulatedPurchaseOrder` path was added so
+  `createPurchaseOrder`'s real Postmark behaviour is untouched. Every record is
+  EXPLICITLY simulated (`mode:'simulation'`, `simulated:true`) and says so
+  ("No live provider contacted / No email sent"). Minimal UI: brand console on
+  Purchase Orders + admin overview on Retail Pipeline, both `(sim)`-labelled and
+  rendered AFTER existing content so no existing browser assertion changed. Gates:
+  new validator **108/108** + new E2E spec **4/4**; full E2E **189/0/4** (was
+  185/0/4 → 0 new failures); typecheck 0 · lint 0 · build PASS; all 48 legacy
+  validators byte-identical (15 legacy failures are PRE-EXISTING, proven in a
+  worktree at the pre-E4 commit `657b6b2`). Report:
+  docs/PRODUCT_CONSOLIDATION_PHASEE4_2026-09-12.md.
 - Review zip script + protection rules + handoff rule
 
 ## WHAT'S LEFT (IN ORDER):
@@ -160,14 +184,16 @@ the FINAL phase. The older list below is superseded by that roadmap.
 4. GO_LIVE.md playbook — pending (production go-live after roadmap).
 NEXT in roadmap: PHASE D COMPLETE (D1–D4, 2026-09-11). **PHASE E — CORE PLATFORM
 COMPLETION is IN PROGRESS: E1 (opportunity → brand onboarding hand-off) DONE
-2026-09-11**, **E2 (brand onboarding workflow) DONE 2026-09-11** and
-**E3 (catalog / product management) DONE 2026-09-12** — a brand can now take a
-product from information → completeness → compliance → ready → simulated
-submission → simulated result, with the resulting state observable in both the
-brand portal and the admin Global Catalog, tenant-isolated in the domain, with
-zero external network calls. Next: **E4 — commerce / Amazon-style operational
-simulation**, then E5 admin operational surfaces, E6 brand operational surfaces,
-E7 embedded Postiz. Rakazo stays LAST (Phase M).
+2026-09-11**, **E2 (brand onboarding workflow) DONE 2026-09-11**,
+**E3 (catalog / product management) DONE 2026-09-12** and
+**E4 (commerce / Amazon-style operational simulation) DONE 2026-09-12** — a brand
+can now take a product from information → completeness → compliance → ready →
+simulated submission → simulated result → simulated purchase order →
+acknowledgement → fulfilment → receiving → simulated invoice → simulated payment →
+exception → dispute, with the resulting state observable in both the brand portal
+and the admin Retail Pipeline, tenant-isolated in the domain, with zero external
+network calls. Next: **E5 — admin operational surfaces (NOT started)**, then
+E6 brand operational surfaces, E7 embedded Postiz. Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,
