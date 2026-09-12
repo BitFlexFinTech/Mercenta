@@ -1,6 +1,31 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-12 (**Phase E5 — ADMIN OPERATIONAL SURFACES**; see the PHASE E5 block below. Previous session: **Phase E4 — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION** (see the PHASE E4 block below). Earlier: **Phase E3 — CATALOG / PRODUCT MANAGEMENT**; **Phase E2 — BRAND ONBOARDING WORKFLOW**; **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+> Last updated: 2026-09-12 (**Phase E6 — BRAND OPERATIONAL SURFACES**; see the PHASE E6 block below. Previous session: **Phase E5 — ADMIN OPERATIONAL SURFACES** (see the PHASE E5 block below). Earlier: **Phase E4 — COMMERCE / AMAZON-STYLE OPERATIONAL SIMULATION**; **Phase E3 — CATALOG / PRODUCT MANAGEMENT**; **Phase E2 — BRAND ONBOARDING WORKFLOW**; **Phase E1 — OPPORTUNITY → BRAND ONBOARDING HAND-OFF**; **Phase D4 — PERSISTENCE + PLATFORM HARDENING** ...)
+>
+> **PHASE E6 (2026-09-12) — BRAND OPERATIONAL SURFACES.** Completes the BRAND-side
+> operational experience by closing four PARITY/CANONICALITY gaps — NOT a redesign,
+> NOT a new brand application. **No new store, dashboard, CRM, catalog/PO/ticketing/
+> billing system, no new lifecycle function, no new navigation, and NO migration** —
+> every change extends an EXISTING file. **E6-G1** the brand PO list now marks
+> simulated POs `(sim)` from the canonical `po.simulated` flag (E5-G2 parity), as a
+> Badge only so no control/DOM order changes and `CommerceSimulationPanel` stays
+> last. **E6-G2** the brand dashboard gained two APPENDED canonical attention groups
+> — issued-unpaid simulated invoices (`commerce-inv-*`) and simulated
+> delivered-awaiting-invoice POs (`commerce-po-inv-*`) — plus canonical `(sim)`
+> provenance on simulated deduction rows; existing row order, the pinned first
+> `unacked-*` row, all six KPI ids and `po-summary-*` are UNCHANGED. **E6-G3** the
+> brand catalog's duplicate local last-wins submission map was replaced by the
+> canonical `demoStore.latestSubmissionForProduct` (E5-G9 parity) — a canonicality +
+> robustness fix (the seam is idempotent per tenant+sku, so the demo keeps one row
+> per SKU). **E6-G4** simulated deduction NOTIFICATIONS now carry `(sim)` from the
+> canonical `Deduction.simulated` flag. Gates: new validator **41/41 PASS** + new E2E
+> spec **5/5**; full E2E **198/0/4** (was 193/0/4 → +5, **0 regressions**); typecheck
+> 0 · lint 0 · build PASS; the **same 15 pre-existing** validator failures and all
+> **50 legacy validators byte-identical** before/after E6 (proven in a clean
+> `git worktree` at the pre-E6 commit `d517b17`, tag `mercenta-pre-e6-20260912`).
+> Report: `docs/PRODUCT_CONSOLIDATION_PHASEE6_2026-09-12.md`. **HONEST: simulation
+> only; memory adapter active (`durable:false`); NO migration added or executed (023
+> remains newest); BI untouched. NEXT: E7 — Embedded Postiz (NOT started).**
 >
 > **PHASE E5 (2026-09-12) — ADMIN OPERATIONAL SURFACES.** Turns the canonical
 > E1–E4 domain state into coherent ADMIN-facing operational surfaces. It is

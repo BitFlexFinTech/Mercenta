@@ -350,7 +350,25 @@ carries a `prospectId`.
   (additive, 4 tables, RLS + brand isolation, **NOT executed**). Every record is
   explicitly `mode:'simulation'`/`simulated:true`; UNKNOWN is never simulation-safe;
   zero external network calls. Validator 108/108 · E2E spec 4/4 · full E2E 189/0/4.
-  **NEXT: E6 — brand operational surfaces (NOT started).**
+  **NEXT: E7 — embedded Postiz (NOT started).**
+- **Phase E6 — brand operational surfaces (2026-09-12):** ✅ the BRAND side reached
+  parity with the canonical domain, by EXTENDING existing files only (no new
+  store/dashboard/CRM/catalog/PO/ticketing/billing system, no new lifecycle
+  function, no navigation change, no migration). **G1** the brand PO list marks
+  simulated POs `(sim)` from the canonical `po.simulated` flag (Badge only; the E4
+  console stays last in `BrandPurchaseOrders`). **G2** the brand dashboard appended
+  two canonically-derived attention groups — issued-unpaid simulated invoices
+  (`commerce-inv-*`, from `demoCommerceInvoices` minus `demoCommercePayments`) and
+  simulated delivered-awaiting-invoice POs (`commerce-po-inv-*`) — plus canonical
+  `(sim)` on simulated deduction rows; existing row order, the pinned first
+  `unacked-*` row, the six KPI ids and `po-summary-*` are unchanged. **G3** the
+  brand catalog's duplicate last-wins submission map was replaced by the canonical
+  `demoStore.latestSubmissionForProduct` (the same helper both admin surfaces use
+  after E5 G9). **G4** the `deduction` notification kind appends `· (sim)` from
+  `Deduction.simulated`. The E6 validator additionally proves SOURCE scope — no
+  protected path (BI, Postiz, Rocket.Chat, Rakazo, real provider clients,
+  `createPurchaseOrder`'s email path, migrations) is in the change set. Validator
+  41/41 · E2E spec 5/5 · full E2E 198/0/4 · all 50 legacy validators byte-identical.
 - **Phase E5 — admin operational surfaces (2026-09-12):** ✅ the canonical E1–E4
   domain state is now coherently ADMIN-facing, by EXTENDING existing surfaces only
   (no new store/dashboard/CRM/PO/catalogue/ticketing/billing system, no migration).

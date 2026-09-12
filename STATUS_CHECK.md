@@ -19,6 +19,7 @@ fixed. Never cite the log as current status.
 - `node scripts/validate-e3-catalog.mjs` — E3_CATALOG_VALIDATION_PASS (65/65; Phase E3)
 - `node scripts/validate-e4-commerce.mjs` — E4_COMMERCE_VALIDATION_PASS (108/108; Phase E4)
 - `node scripts/validate-e5-admin-surfaces.mjs` — E5_ADMIN_SURFACES_VALIDATION_PASS (48/48; Phase E5)
+- `node scripts/validate-e6-brand-surfaces.mjs` — E6_BRAND_SURFACES_VALIDATION_PASS (41/41; Phase E6)
 - `node scripts/validate-acquisition-pipeline.mjs` — ACQUISITION_PIPELINE_VALIDATION_PASS (64/64; Phase C)
 - `node scripts/validate-bi-lifecycle.mjs` — BI_LIFECYCLE_VALIDATION_PASS (29/29)
 - `node scripts/validate-prospect-pipeline.mjs` — PROSPECT_PIPELINE_VALIDATION_PASS (26/26)
@@ -29,8 +30,10 @@ fixed. Never cite the log as current status.
 - `validate-edge-functions.mjs` — STALE/CRASHES by design (expects absent
   Edge Functions); repair-or-retire decision open (see Known open items).
   **Not a live-path claim.**
-  **Playwright E2E** — **193 PASS / 4 skip / 0 fail** across 34 spec files.
-  (Phase E5 added `e2e/admin-operational-surfaces.spec.ts`, +4 tests, 0 new
+  **Playwright E2E** — **198 PASS / 4 skip / 0 fail** across 35 spec files.
+  (Phase E6 added `e2e/brand-operational-surfaces.spec.ts`, +5 tests, 0 new
+  failures — full run `198 passed / 4 skipped / 0 failed`.
+  Phase E5 added `e2e/admin-operational-surfaces.spec.ts`, +4 tests, 0 new
   failures — full run `193 passed / 4 skipped / 0 failed`.
   Phase E4 added `e2e/commerce-operational-simulation.spec.ts`, +4 tests, 0 new
   failures — full run `189 passed / 4 skipped / 0 failed`.
@@ -44,6 +47,40 @@ fixed. Never cite the log as current status.
   was 0-failure.)
   The 4 skips are pre-existing/intentional: access-gate t6/t8/t9 + tours t5
   (deductions-surface product gap — documented, not fabricated away).
+
+## Brand operational surfaces (Phase E6 — 2026-09-12)
+
+- Completes the BRAND-side operational experience: four PARITY/CANONICALITY gaps,
+  **not** a redesign and **not** a new brand application.
+- **NO new store, dashboard, CRM, catalog/PO/ticketing/billing system, no new
+  lifecycle function, no new navigation, and NO migration** — every change extends
+  an EXISTING file.
+- **E6-G1 — brand PO provenance.** The brand PO list marks simulated POs `(sim)`
+  from the canonical `po.simulated` flag (E5-G2 parity). It is a **Badge only** —
+  no new control, no DOM-order change; `CommerceSimulationPanel` remains LAST.
+- **E6-G2 — brand dashboard commerce awareness.** Two canonically-derived attention
+  groups are **APPENDED** after every existing group: issued-unpaid simulated
+  invoices (`commerce-inv-*`) and simulated delivered-awaiting-invoice POs
+  (`commerce-po-inv-*`), tenant-filtered, with truthful "(sim) — no live payment
+  provider contacted" copy. Simulated **deduction** attention rows now carry `(sim)`
+  from the canonical flag. Existing row order, the pinned first `unacked-*` row,
+  all six KPI ids and `po-summary-*` are **unchanged**; no KPI was added.
+- **E6-G3 — one canonical latest-submission derivation.** The brand catalog's local
+  last-wins `Map` was replaced by the canonical
+  `demoStore.latestSubmissionForProduct` (E5-G9 parity), memoised on the canonical
+  query result. Canonicality + robustness fix; the seam is idempotent per (tenant,
+  sku), so the demo keeps one row per SKU.
+- **E6-G4 — deduction notification provenance.** The `deduction` notification kind
+  appends `· (sim)` only when the canonical `Deduction.simulated === true`;
+  non-simulated rows are unchanged. No second notification store.
+- Gates: validator **41/41 PASS**; E2E spec **5/5 PASS**; full E2E **198/0/4**;
+  typecheck 0 · lint 0 · build PASS; the **same 15 pre-existing** validator failures
+  and all **50 legacy validators byte-identical** (proven in a worktree at pre-E6
+  commit `d517b17`).
+- HONEST: simulation only; memory adapter active (`durable:false`); no migration
+  added or executed (023 remains newest); BI untouched.
+- Report: `docs/PRODUCT_CONSOLIDATION_PHASEE6_2026-09-12.md`. **NEXT: E7 — Embedded
+  Postiz (NOT started).**
 
 ## Admin operational surfaces (Phase E5 — 2026-09-12)
 

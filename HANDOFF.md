@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 12, 2026 (Phase E5 — admin operational surfaces)
+Last updated: September 12, 2026 (Phase E6 — brand operational surfaces)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -198,6 +198,26 @@ Cline's output back. AI confirms, gives next prompt.
   build PASS; all 49 legacy validators byte-identical (15 pre-existing failures
   proven in a worktree at the pre-E5 commit `981332f`). Report:
   docs/PRODUCT_CONSOLIDATION_PHASEE5_2026-09-12.md.
+- Brand operational surfaces (Phase E6, 2026-09-12): parity/canonicality completion
+  of the brand side — NOT a redesign and NOT a new brand app. NO new surface, store,
+  dashboard, CRM, catalog/PO/ticketing/billing system, lifecycle function or
+  navigation, and **no migration**: every change extends an existing file.
+  (G1) the brand PO list marks simulated POs `(sim)` from the canonical
+  `po.simulated` flag — a Badge only, so no control/DOM order changes and
+  `CommerceSimulationPanel` stays last. (G2) the brand dashboard gained two
+  APPENDED canonical attention groups — issued-unpaid simulated invoices and
+  simulated delivered-awaiting-invoice POs — plus `(sim)` on simulated deduction
+  rows; the existing row order, the pinned first `unacked-*` row, all six KPI ids
+  and `po-summary-*` are unchanged. (G3) the brand catalog's duplicate last-wins
+  submission map was replaced by the canonical
+  `demoStore.latestSubmissionForProduct` (canonicality + robustness; the seam is
+  idempotent per tenant+sku). (G4) simulated deduction notifications carry `(sim)`
+  from the canonical `Deduction.simulated` flag. Gates: new validator 41/41 + new
+  E2E spec 5/5; full E2E 198/0/4 (was 193/0/4 → 0 new failures); typecheck 0 ·
+  lint 0 · build PASS; the same 15 pre-existing validator failures and all 50
+  legacy validators byte-identical (proven in a worktree at the pre-E6 commit
+  `d517b17`, tag `mercenta-pre-e6-20260912`). Report:
+  docs/PRODUCT_CONSOLIDATION_PHASEE6_2026-09-12.md.
 - Review zip script + protection rules + handoff rule
 
 ## WHAT'S LEFT (IN ORDER):
@@ -220,9 +240,11 @@ submission → simulated result → simulated purchase order → acknowledgement
 fulfilment → receiving → simulated invoice → simulated payment → exception →
 dispute, AND an authorised admin can operate that lifecycle from the existing
 admin surfaces (Retail Pipeline commerce panel), with tenant isolation, RBAC and
-audit enforced in the domain and truthful simulation provenance everywhere. Next:
-**E6 — brand operational surfaces (NOT started)**, then E7 embedded Postiz.
-Rakazo stays LAST (Phase M).
+audit enforced in the domain and truthful simulation provenance everywhere, AND
+**E6 (brand operational surfaces) DONE 2026-09-12** brings the brand side to parity
+(simulated-PO provenance, canonical commerce awareness on the brand dashboard,
+canonical latest-submission derivation, deduction notification provenance). Next:
+**E7 — embedded Postiz (NOT started)**. Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

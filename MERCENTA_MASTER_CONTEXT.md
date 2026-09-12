@@ -357,8 +357,13 @@ onboarding. **Not started yet.**
 > zero external network calls. **E5 (admin operational surfaces) is DONE
 > 2026-09-12** — the canonical E1–E4 state is now admin-operable from the EXISTING
 > surfaces (RBAC + tenant isolation enforced in the domain, truthful simulation
-> provenance everywhere, no new store/dashboard/migration). **NEXT: E6 — brand
-> operational surfaces (NOT started).** Their state lives in **PROJECT_STATUS.md**.
+> provenance everywhere, no new store/dashboard/migration). **E6 (brand operational
+> surfaces) is DONE 2026-09-12** — the BRAND side now has parity: simulated-PO
+> `(sim)` provenance from the canonical flag, canonical commerce awareness on the
+> brand dashboard (issued-unpaid simulated invoices + delivered-awaiting-invoice),
+> one canonical latest-submission derivation, and deduction notification
+> provenance — all additive, with no new store/dashboard/nav/migration.
+> **NEXT: E7 — embedded Postiz (NOT started).** Their state lives in **PROJECT_STATUS.md**.
 
 ## AC. Permanent Do-Not-Change Decisions
 
