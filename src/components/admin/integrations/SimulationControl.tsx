@@ -42,6 +42,7 @@ import {
   type ScenarioRunContext,
 } from '@/lib/simulation/scenarioEngine';
 import { queryEvents, resetEvents } from '@/lib/events/eventFeed';
+import { InvestorDemoPanel } from './InvestorDemoPanel';
 import { resetMockAmazonState } from '@/lib/spapi/mockClient';
 import { resetMockDhlState } from '@/lib/dhl/mockClient';
 import { resetMockCompaniesHouseState, resetMockHmrcState } from '@/lib/compliance/index';
@@ -237,6 +238,10 @@ export function SimulationControl() {
           Simulation only
         </Badge>
       </div>
+
+      {/* §Phase E2E — the investor-demo orchestration (the SAME simulation
+          architecture; it drives the canonical domain end-to-end). */}
+      <InvestorDemoPanel />
 
       {/* Run controls */}
       <Card className="p-4">
