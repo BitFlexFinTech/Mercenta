@@ -3,6 +3,7 @@
 > Last updated: 2026-09-13 (**Phase G1 — BRAND DEDUCTIONS LEDGER (Tour 5 surface) + RETIRED ROCKET.CHAT SERVER CLEANUP COMPLETE**) · Previous: 2026-09-12 (**Phase E8 — OPERATIONAL MERCENTA SOCIAL (LIVE ENGINE + SSO BRIDGE)**; see the PHASE E8 block below. Previous: **Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; before that E6 — BRAND OPERATIONAL SURFACES, E5 — ADMIN OPERATIONAL SURFACES, E4 — COMMERCE, E3 — CATALOG, E2 — BRAND ONBOARDING, E1 — ONBOARDING HAND-OFF, D4 — PERSISTENCE.)
 >
 > **PHASE G1 (2026-09-13) — BRAND DEDUCTIONS LEDGER (Tour 5) + ROCKET.CHAT SERVER CLEANUP.**
+> Commit **`beb4721`** (previous checkpoint E9 `7a40503`; protected baseline `959b4d2` still an ancestor).
 > Two independent deliverables, executed build-forward.
 > **① ROCKET.CHAT CLEANUP COMPLETE** on `mercenta-services` (46.101.75.185): ownership was
 > verified before any deletion (only `root-rocketchat-1` / `root-rocketchat-db-1` touched any
