@@ -1,10 +1,10 @@
 import { useState, useMemo, type ComponentType } from 'react';
-import { Card, Badge, Button, Input } from '@/components/ui';
+import { Card, Badge, Button, Input, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
 import { usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { BRAND_NAME } from '@/config/brand';
-import { STATUS_COLORS, STATUS_LABELS } from '@/types';
+import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import type { Shipment, ShipmentStatus } from '@/types';
 import {
   Plane,
@@ -220,9 +220,12 @@ export function LogisticsHub() {
                   <div className="text-xs text-zinc-600">{s.cbm} CBM</div>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <Badge className={STATUS_COLORS[s.status]}>
-                    {STATUS_LABELS[s.status]}
-                  </Badge>
+                  <StatusBadge
+                    dataStatus={shipmentStatusPresentation(s.status).dataStatus}
+                    tone={shipmentStatusPresentation(s.status).tone}
+                  >
+                    {shipmentStatusPresentation(s.status).label}
+                  </StatusBadge>
                   <Button
                     size="sm"
                     variant="secondary"

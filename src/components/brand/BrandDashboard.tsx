@@ -43,7 +43,6 @@ import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { Alert, Button, EmptyState, PageHeader, StatusBadge, Skeleton } from '@/components/ui';
-import type { StatusTone } from '@/components/ui';
 import {
   AttentionPanel,
   DashboardSection,
@@ -51,8 +50,12 @@ import {
   type KpiCellData,
   type AttentionItemData,
 } from '@/components/shared/dashboard';
-import { STATUS_LABELS } from '@/types';
-import type { PurchaseOrder, PurchaseOrderStatus, ShipmentStatus } from '@/types';
+import type { PurchaseOrder, PurchaseOrderStatus } from '@/types';
+import {
+  complianceGatePresentation,
+  poStatusPresentation,
+  shipmentStatusPresentation,
+} from '@/lib/statusPresentation';
 import {
   ArrowRight,
   ClipboardList,
@@ -64,16 +67,6 @@ import {
   ShieldCheck,
   Truck,
 } from 'lucide-react';
-
-const PO_STATUS_LABELS: Record<PurchaseOrderStatus, string> = {
-  received: 'Received',
-  under_review: 'Under review',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
-  ready_to_fulfil: 'Ready to fulfil',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-};
 
 const PO_OPEN: ReadonlySet<PurchaseOrderStatus> = new Set([
   'received', 'under_review', 'accepted', 'ready_to_fulfil',
@@ -119,14 +112,7 @@ interface BrandShipmentRow {
 }
 
 function shipmentStatusLabel(status: string): string {
-  return STATUS_LABELS[status as unknown as ShipmentStatus] ?? status;
-}
-
-function poTone(status: PurchaseOrderStatus): StatusTone {
-  if (status === 'rejected') return 'danger';
-  if (status === 'received' || status === 'under_review') return 'warning';
-  if (status === 'delivered') return 'success';
-  return 'info';
+  return shipmentStatusPresentation(status).label;
 }
 
 /**
@@ -324,13 +310,10 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
     return items;
   }, [awaitingAck, openDeductions, outOfStock, brandShipments, brandTickets, brandReturns, pos, tenantId, go]);
 
-const complianceLabel =
+  const complianceLabel =
     docs.length === 0
       ? 'No compliance documents on file'
       : `${approvedDocs.length}/${docs.length} documents approved`;
-  const complianceTone: StatusTone =
-    docs.length === 0 ? 'warning'
-      : approvedDocs.length === docs.length ? 'success' : 'warning';
 
   const kpiCells: KpiCellData[] = [
     {
@@ -462,7 +445,12 @@ const complianceLabel =
                   </span>
                   <span className="block text-[11px] text-zinc-500 truncate leading-snug">ordered {p.orderDate}</span>
                 </span>
-                <StatusBadge tone={poTone(p.status)} dataStatus={p.status}>{PO_STATUS_LABELS[p.status]}</StatusBadge>
+                <StatusBadge
+                  tone={poStatusPresentation(p.status).tone}
+                  dataStatus={poStatusPresentation(p.status).dataStatus}
+                >
+                  {poStatusPresentation(p.status).label}
+                </StatusBadge>
                 <Button variant="tertiary" size="sm" onClick={go('purchase_orders')}>
                   Review <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
                 </Button>
@@ -497,8 +485,11 @@ const complianceLabel =
                     £{s.value.toLocaleString()} · {s.origin} → {s.destination} · {s.carrier}
                   </span>
                 </span>
-                <StatusBadge tone={s.status === 'live_amazon' ? 'success' : 'info'} dataStatus={s.status}>
-                  {shipmentStatusLabel(s.status)}
+                <StatusBadge
+                  tone={shipmentStatusPresentation(s.status).tone}
+                  dataStatus={shipmentStatusPresentation(s.status).dataStatus}
+                >
+                  {shipmentStatusPresentation(s.status).label}
                 </StatusBadge>
                 <Button variant="tertiary" size="sm" onClick={go('logistics')}>
                   Track <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -517,8 +508,11 @@ const complianceLabel =
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5" data-testid="compliance-summary">
             <ShieldCheck className="w-4 h-4 text-brass-400" aria-hidden="true" />
             <span className="text-xs text-zinc-300">{complianceLabel}</span>
-            <StatusBadge tone={complianceTone} dataStatus={complianceTone}>
-              {docs.length > 0 && approvedDocs.length === docs.length ? 'Gate open' : 'Action required'}
+            <StatusBadge
+              tone={complianceGatePresentation(docs.length > 0 && approvedDocs.length === docs.length, docs.length).tone}
+              dataStatus={complianceGatePresentation(docs.length > 0 && approvedDocs.length === docs.length, docs.length).dataStatus}
+            >
+              {complianceGatePresentation(docs.length > 0 && approvedDocs.length === docs.length, docs.length).label}
             </StatusBadge>
           </div>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">

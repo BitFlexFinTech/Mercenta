@@ -103,15 +103,11 @@ export const STATUS_LABELS: Record<ShipmentStatus, string> = {
   live_amazon: 'Live on retail-channel',
 };
 
-export const STATUS_COLORS: Record<ShipmentStatus, string> = {
-  factory_intake: 'bg-zinc-500/20 text-zinc-300 border-zinc-500/30',
-  bak_depot: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  sea_transit: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  air_transit: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  uk_customs_cleared: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  mercenta_hub: 'bg-brass-500/20 text-brass-400 border-brass-500/30',
-  live_amazon: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-};
+/* §Phase D2 — the per-status colour map that lived here (STATUS_COLORS) was
+   deleted: shipment status presentation now comes from the canonical layer
+   (src/lib/statusPresentation.ts → shipmentStatusPresentation), so the brand
+   logistics hub and the carrier dashboard can no longer render the same domain
+   status differently. */
 
 export interface Shipment {
   id: string;

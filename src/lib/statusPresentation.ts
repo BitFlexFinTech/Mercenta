@@ -19,7 +19,9 @@ import type {
   ComplianceDocument,
   DeductionStatus,
   PurchaseOrderStatus,
+  ShipmentStatus,
 } from '@/types';
+import { STATUS_LABELS } from '@/types';
 import { SUBMISSION_STATUS_LABELS, type SubmissionStatus } from '@/lib/spapi/transform';
 
 export interface StatusPresentation {
@@ -230,6 +232,60 @@ export function submissionStatusPresentation(status: SubmissionStatus | string):
     dataStatus: String(status),
     actionable: key !== 'live' && key !== 'rejected',
   };
+}
+
+/* ── §Phase D2 — shipment lifecycle (brand logistics + carrier) ───────────── */
+
+/**
+ * Shipment progression. Labels come from the canonical `STATUS_LABELS`
+ * (types.ts) so they are not re-typed here; only the semantic tone is decided
+ * in one place. This replaces the per-status COLOUR map the brand logistics hub
+ * and the carrier dashboard used to read, which was a third way of presenting
+ * the same domain statuses.
+ */
+const SHIPMENT_TONES: Record<ShipmentStatus, StatusTone> = {
+  factory_intake: 'neutral',
+  bak_depot: 'warning',
+  sea_transit: 'info',
+  air_transit: 'info',
+  uk_customs_cleared: 'success',
+  mercenta_hub: 'brass',
+  live_amazon: 'success',
+};
+
+export function shipmentStatusPresentation(status: string): StatusPresentation {
+  const key = status as ShipmentStatus;
+  return {
+    label: STATUS_LABELS[key] ?? String(status).replace(/_/g, ' '),
+    tone: SHIPMENT_TONES[key] ?? 'neutral',
+    dataStatus: String(status),
+    actionable: key !== 'live_amazon',
+  };
+}
+
+/* ── §Phase D2 — compliance gate state ────────────────────────────────────── */
+
+/**
+ * The brand's compliance GATE state (derived from the canonical gate rule, never
+ * a stored status). The visible labels are the ones the brand dashboard already
+ * showed; `data-status` distinguishes "nothing on file yet" from "documents
+ * reviewed but not all approved".
+ */
+export function complianceGatePresentation(
+  cleared: boolean,
+  documentCount: number
+): StatusPresentation {
+  if (documentCount === 0) {
+    return {
+      label: 'Action required',
+      tone: 'warning',
+      dataStatus: 'gate_no_documents',
+      actionable: true,
+    };
+  }
+  return cleared
+    ? { label: 'Gate open', tone: 'success', dataStatus: 'gate_open', actionable: false }
+    : { label: 'Action required', tone: 'warning', dataStatus: 'gate_action_required', actionable: true };
 }
 
 /* ── §Phase D2 — urgency presentations (computed, never a stored status) ──── */

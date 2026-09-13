@@ -204,4 +204,59 @@ test.describe('Phase D — status semantics & decision queue', () => {
       (await page.locator('[data-status="held_for_approval"]').count());
     expect(billingCount).toBeGreaterThan(0);
   });
+
+  /**
+   * §Phase D2 — the shipment progression is shared by the brand logistics hub,
+   * the carrier dashboard and the brand dashboard. It used to be rendered from a
+   * per-status colour map; it now renders through the canonical layer, so the
+   * same shipment state has ONE label and ONE tone everywhere.
+   */
+  test('6. shipment statuses are canonical on the brand and carrier logistics surfaces', async ({ page }) => {
+    // The canonical shipment vocabulary (labels owned by types.ts STATUS_LABELS).
+    const SHIPMENT_LABELS: Record<string, string> = {
+      factory_intake: 'Factory Intake',
+      bak_depot: 'In BAK Depot',
+      sea_transit: 'Sea Transit',
+      air_transit: 'Air Transit',
+      uk_customs_cleared: 'UK Customs Cleared',
+      mercenta_hub: 'Mercenta UK Hub',
+      live_amazon: 'Live on retail-channel',
+    };
+
+    async function assertShipmentBadges(required: boolean): Promise<number> {
+      const badges = page.locator(
+        '[data-status="factory_intake"],[data-status="bak_depot"],[data-status="sea_transit"],' +
+          '[data-status="air_transit"],[data-status="uk_customs_cleared"],[data-status="mercenta_hub"],' +
+          '[data-status="live_amazon"]'
+      );
+      const n = await badges.count();
+      if (required) expect(n).toBeGreaterThan(0);
+      // Each badge shows the canonical label for ITS OWN status (never a
+      // mismatched or colour-only state).
+      for (let i = 0; i < n; i++) {
+        const badge = badges.nth(i);
+        const status = String(await badge.getAttribute('data-status'));
+        await expect(badge).toHaveAttribute('role', 'status');
+        expect((await badge.innerText()).trim()).toBe(SHIPMENT_LABELS[status]);
+      }
+      return n;
+    }
+
+    // ── Brand surface: the dashboard's fulfilment list (canonical where present) ──
+    const pageErrors: string[] = [];
+    page.on('pageerror', (e) => pageErrors.push(String(e)));
+
+    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+    await openNav(page, 'Dashboard');
+    await expect(page.getByRole('heading', { name: /Fulfilment in motion/i }).first()).toBeVisible({
+      timeout: 8000,
+    });
+    await assertShipmentBadges(false);
+
+    // ── Carrier surface: the manifest table always carries shipment rows ──
+    await loginAs(page, '3PL Carrier Terminal', 1100);
+    await openNav(page, 'Manifest Management');
+    await assertShipmentBadges(true);
+    expect(pageErrors).toEqual([]);
+  });
 });

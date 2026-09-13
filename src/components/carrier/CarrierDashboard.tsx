@@ -4,7 +4,8 @@ import { advanceShipmentViaDhl, recordDhlWaybill } from '@/lib/dhl/domain';
 import { resolveProviderMode } from '@/integrations/types';
 import { Card, Badge, Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
-import { STATUS_COLORS, STATUS_LABELS } from '@/types';
+import { StatusBadge } from '@/components/ui';
+import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import type { ShipmentStatus, CarrierId } from '@/types';
 import { Terminal, Activity, Code2, Truck, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
@@ -213,10 +214,12 @@ export function CarrierDashboard() {
                       £{Math.round(s.value / 1000)}k
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <Badge className={STATUS_COLORS[s.status]}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                        {STATUS_LABELS[s.status]}
-                      </Badge>
+                      <StatusBadge
+                        dataStatus={shipmentStatusPresentation(s.status).dataStatus}
+                        tone={shipmentStatusPresentation(s.status).tone}
+                      >
+                        {shipmentStatusPresentation(s.status).label}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3">
                       <select
@@ -238,7 +241,7 @@ export function CarrierDashboard() {
                       >
                         {STATUS_OPTIONS.map((opt) => (
                           <option key={opt} value={opt} className="bg-ink-900">
-                            {STATUS_LABELS[opt]}
+                            {shipmentStatusPresentation(opt).label}
                           </option>
                         ))}
                       </select>
