@@ -5,7 +5,7 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands } from '@/data/queries';
-import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
 import { returnTrackingStatusPresentation } from '@/lib/statusPresentation';
 import { cn } from '@/utils/cn';
 import { demoReturns } from '@/data/demoStore';
@@ -111,65 +111,93 @@ return (
           className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40" />
       </div>
 <Card className="p-0 overflow-hidden">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-white/[0.06] text-zinc-500 text-left">
-              <th className="px-4 py-2.5 font-medium">Brand</th>
-              <th className="px-4 py-2.5 font-medium">Return</th>
-              <th className="px-4 py-2.5 font-medium">Inbound</th>
-              <th className="px-4 py-2.5 font-medium">Status</th>
-              <th className="px-4 py-2.5 font-medium">Forwarded</th>
-              <th className="px-4 py-2.5 font-medium text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/[0.04]">
-            {filtered.map(function(t) {
-              const info = returnInfo(t.returnId);
-              const idx = STATUS_INDEX[t.status];
-              return (
-                <tr key={t.id} className={cn('hover:bg-white/[0.02]', selectedId === t.id && 'bg-brass-500/5')}>
-                  <td className="px-4 py-2.5"><span className="text-zinc-200 font-medium">{brandName(t.brandId)}</span></td>
-                  <td className="px-4 py-2.5">
-                    <div className="text-zinc-300">{info?.productName ?? t.returnId}</div>
-                    <div className="text-[9px] text-zinc-600 font-mono">{t.returnId} · {info?.quantity ?? '?'} units</div>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <div className="font-mono text-zinc-400 text-[10px]">{t.inboundTrackingNumber}</div>
-                    <div className="text-[9px] text-zinc-600">{t.inboundCarrier}</div>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-1">
-                      {STATUS_STEPS.map(function(s, i) { return (
-                        <span key={s.status} className={cn('w-2 h-2 rounded-full', i <= idx ? 'bg-brass-500' : 'bg-zinc-700')} />
-                      );})}
-                      <StatusBadge
-                        className="text-[10px]"
-                        dataStatus={returnTrackingStatusPresentation(t.status).dataStatus}
-                        tone={returnTrackingStatusPresentation(t.status).tone}
-                      >
-                        {returnTrackingStatusPresentation(t.status).label}
-                      </StatusBadge>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {t.forwardedTrackingNumber ? (
-                      <div>
-                        <div className="font-mono text-[10px] text-zinc-400">{t.forwardedTrackingNumber}</div>
-                        <div className="text-[9px] text-zinc-600">{t.forwardedCarrier}</div>
-                      </div>
-                    ) : <span className="text-[9px] text-zinc-600">—</span>}
-                  </td>
-                  <td className="px-4 py-2.5 text-right">
-                    {t.status !== 'confirmed_by_brand' && (
-                      <Button className="text-[9px]" onClick={function() { handleNextStage(t.id); }}>Advance</Button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-            {filtered.length === 0 && <tr><td colSpan={6} className="text-center py-6 text-zinc-600 text-xs">No return tracking entries found.</td></tr>}
-          </tbody>
-        </table>
+        {/* §Phase D4 — canonical DataTable: cards below md, table at md+; the
+            Advance action stays reachable at every width. */}
+        <DataTable
+          caption="Return tracking"
+          rows={filtered}
+          rowKey={(t) => t.id}
+          emptyMessage="No return tracking entries found."
+          onRowClick={(t) => setSelectedId(t.id)}
+          rowActions={(t) =>
+            t.status !== 'confirmed_by_brand' ? (
+              <Button className="text-[10px]" onClick={() => handleNextStage(t.id)}>
+                Advance
+              </Button>
+            ) : null
+          }
+          columns={[
+            {
+              key: 'brand',
+              label: 'Brand',
+              hideBelow: 'lg',
+              render: (t) => <span className="font-medium text-zinc-200">{brandName(t.brandId)}</span>,
+            },
+            {
+              key: 'return',
+              label: 'Return',
+              primary: true,
+              render: (t) => {
+                const info = returnInfo(t.returnId);
+                return (
+                  <span className="block">
+                    <span className="block text-zinc-300">{info?.productName ?? t.returnId}</span>
+                    <span className="block font-mono text-[10px] text-zinc-600">
+                      {t.returnId} · {info?.quantity ?? '?'} units
+                    </span>
+                  </span>
+                );
+              },
+            },
+            {
+              key: 'inbound',
+              label: 'Inbound',
+              hideBelow: 'sm',
+              render: (t) => (
+                <span className="block">
+                  <span className="block font-mono text-[10px] text-zinc-400">{t.inboundTrackingNumber}</span>
+                  <span className="block text-[10px] text-zinc-600">{t.inboundCarrier}</span>
+                </span>
+              ),
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              render: (t) => {
+                const idx = STATUS_INDEX[t.status];
+                const p = returnTrackingStatusPresentation(t.status);
+                return (
+                  <span className="flex items-center gap-1">
+                    {STATUS_STEPS.map((s, i) => (
+                      <span
+                        key={s.status}
+                        aria-hidden="true"
+                        className={cn('h-2 w-2 rounded-full', i <= idx ? 'bg-brass-500' : 'bg-zinc-700')}
+                      />
+                    ))}
+                    <StatusBadge className="text-[10px]" dataStatus={p.dataStatus} tone={p.tone}>
+                      {p.label}
+                    </StatusBadge>
+                  </span>
+                );
+              },
+            },
+            {
+              key: 'forwarded',
+              label: 'Forwarded',
+              hideBelow: 'md',
+              render: (t) =>
+                t.forwardedTrackingNumber ? (
+                  <span className="block">
+                    <span className="block font-mono text-[10px] text-zinc-400">{t.forwardedTrackingNumber}</span>
+                    <span className="block text-[10px] text-zinc-600">{t.forwardedCarrier}</span>
+                  </span>
+                ) : (
+                  <span className="text-zinc-600">—</span>
+                ),
+            },
+          ]}
+        />
       </Card>
     </div>
   );
