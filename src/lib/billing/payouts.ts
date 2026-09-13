@@ -112,11 +112,54 @@ export function createPayoutClient(
   return new MockStripePayoutClient();
 }
 
+/**
+ * §Phase D6 — the payout contract recognises exactly two tracks, while the
+ * canonical `FulfillmentTrack` also has `'unassigned'` (a brand not yet assigned
+ * a model). The existing surfaces already default that case to `financed`
+ * (`fetchBrands` maps a missing track with `?? 'financed'`; the agreement builder
+ * does the same), so this normaliser keeps ONE convention instead of letting the
+ * fee clause silently differ between screens. It is deliberately total: no
+ * payout can be computed under an undefined clause.
+ */
+export function normalisePayoutTrack(track: string): 'direct_fulfillment' | 'financed' {
+  return track === 'direct_fulfillment' ? 'direct_fulfillment' : 'financed';
+}
+
 /* ── Fee math ────────────────────────────────────────────────────────── */
 
 /** Contract clause difference: financed track deducts a handling fee.
  *  PLACEHOLDER £0 — pending commercial sign-off (§0 money rule). */
 export const FINANCED_FULFILMENT_FEE_PLACEHOLDER_GBP = 0;
+
+/**
+ * §Phase D6 — make the payout path IMMUNE to the corpus's two `commissionRate`
+ * conventions.
+ *
+ * The canonical convention is PERCENT (`types.ts` "…% of net PO value",
+ * `COMMISSION_RATE_PLACEHOLDER = 12`, `spapi/transform` ÷100, the seeded
+ * POs/contracts). Two generation paths write a FRACTION instead
+ * (`api.ts` generated PO `0.07`, `scenarioEngine` `0.07`), so feeding a raw rate
+ * into percent-based maths can under-charge a commission by ~100×.
+ *
+ * The RECORDED `commissionAmount` is the canonical money value, so the effective
+ * percentage is derived from it whenever present; otherwise a value below 1 is
+ * normalised as a fraction. Deterministic and side-effect free — no data rewrite,
+ * no second rate stored anywhere.
+ */
+export function resolveCommissionRatePct(input: {
+  commissionRate: number;
+  commissionAmount?: number;
+  poValue: number;
+}): number {
+  const { commissionRate, commissionAmount, poValue } = input;
+  if (commissionAmount && commissionAmount > 0 && poValue > 0) {
+    return Math.round((commissionAmount / poValue) * 100 * 10000) / 10000;
+  }
+  if (commissionRate > 0 && commissionRate < 1) {
+    return Math.round(commissionRate * 100 * 10000) / 10000;
+  }
+  return commissionRate;
+}
 
 export function computeBrandNetShare(input: {
   poValue: number;

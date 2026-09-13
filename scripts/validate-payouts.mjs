@@ -61,6 +61,22 @@ try {
   });
   test('failed transfer → not marked paid, error surfaced', !r3.ok && !failMarked);
 
+  // §Phase D6 — rate-unit adapter: the corpus contains BOTH conventions, and the
+  // payout must derive the same percentage from either, never a 100× error.
+  test('percent convention (12, commission 1200/10000) → 12%',
+    p.resolveCommissionRatePct({ commissionRate: 12, commissionAmount: 1200, poValue: 10000 }) === 12);
+  test('fraction convention (0.12, commission 1200/10000) → 12%',
+    p.resolveCommissionRatePct({ commissionRate: 0.12, commissionAmount: 1200, poValue: 10000 }) === 12);
+  test('fraction without a recorded amount is normalised (0.07 → 7)',
+    p.resolveCommissionRatePct({ commissionRate: 0.07, poValue: 10000 }) === 7);
+  test('percent without a recorded amount passes through (12 → 12)',
+    p.resolveCommissionRatePct({ commissionRate: 12, poValue: 10000 }) === 12);
+  test('both conventions yield the SAME net share',
+    p.computeBrandNetShare({ poValue: 10000, commissionRatePct: p.resolveCommissionRatePct({ commissionRate: 0.12, commissionAmount: 1200, poValue: 10000 }), fulfillmentTrack: 'direct_fulfillment' }) ===
+    p.computeBrandNetShare({ poValue: 10000, commissionRatePct: p.resolveCommissionRatePct({ commissionRate: 12, commissionAmount: 1200, poValue: 10000 }), fulfillmentTrack: 'direct_fulfillment' }));
+  test('unassigned track normalises to the documented default (financed)',
+    p.normalisePayoutTrack('unassigned') === 'financed' && p.normalisePayoutTrack('direct_fulfillment') === 'direct_fulfillment');
+
   console.log(failures === 0 ? 'PAYOUT_VALIDATION_PASS' : `PAYOUT_VALIDATION_FAIL (${failures})`);
 } finally {
   await server.close();

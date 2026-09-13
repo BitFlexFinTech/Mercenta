@@ -3,7 +3,13 @@
  * brand payouts table, Penny Pincher integration.
  */
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Button, Badge } from '@/components/ui';
+import { useQueryClient } from '@tanstack/react-query';
+import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
+import { useBrands, useCommissions } from '@/data/queries';
+import { settleBrandPayout } from '@/data/api';
+import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
+import { commissionStatusPresentation } from '@/lib/statusPresentation';
+import { useApp } from '@/context/GlobalStateContext';
 import { supabase } from '@/lib/supabase';
 import { isXeroDemoMode } from '@/services/xero';
 import { getFinancialSummary } from '@/services/xero/xeroSync';
@@ -32,6 +38,82 @@ export function AccountingPanel() {
   const [credAccessToken, setCredAccessToken] = useState('');
   const [summary, setSummary] = useState<{ revenue: number; expenses: number; netProfit: number } | null>(null);
   const [seedMessage, setSeedMessage] = useState<string | null>(null);
+
+  /* ── §Phase D6 — brand payouts (canonical commission store + seam) ─────── */
+  const qc = useQueryClient();
+  const { actingStaffId } = useApp();
+  const commissionsQuery = useCommissions();
+  const brandsQuery = useBrands();
+  const [payoutBusyId, setPayoutBusyId] = useState<string | null>(null);
+  const [payoutNotice, setPayoutNotice] = useState<string | null>(null);
+  const [payoutError, setPayoutError] = useState<string | null>(null);
+
+  const brandName = useCallback(
+    (brandId: string) =>
+      brandsQuery.data?.data.find((b) => b.id === brandId)?.profile.businessName ?? brandId,
+    [brandsQuery.data]
+  );
+  const brandTrack = useCallback<(brandId: string) => 'direct_fulfillment' | 'financed'>(
+    (brandId) => normalisePayoutTrack(brandsQuery.data?.data.find((b) => b.id === brandId)?.track ?? 'financed'),
+    [brandsQuery.data]
+  );
+
+  /** Pending = money the brand is still owed. `paid` is terminal (never re-settled). */
+  const allCommissions = commissionsQuery.data?.data ?? [];
+  const pendingPayouts = allCommissions.filter((c) => c.status !== 'paid');
+  const settledCount = allCommissions.filter((c) => c.status === 'paid').length;
+
+  /** Net brand share, using the canonical fee maths + the brand's real track. */
+  const netShareOf = useCallback(
+    (c: { poValue: number; commissionRate: number; commissionAmount: number; brandId: string }) =>
+      computeBrandNetShare({
+        poValue: c.poValue,
+        commissionRatePct: resolveCommissionRatePct({
+          commissionRate: c.commissionRate,
+          commissionAmount: c.commissionAmount,
+          poValue: c.poValue,
+        }),
+        fulfillmentTrack: brandTrack(c.brandId),
+      }),
+    [brandTrack]
+  );
+
+  /* §Phase D6 — the payout tiles DRILL the table down (the canonical §Stage-18
+     interactivity contract): a KPI that cannot be inspected is incomplete. */
+  const [payoutFilter, setPayoutFilter] = useState<'pending' | 'settled' | 'all'>('pending');
+  const payoutRows = allCommissions.filter((c) =>
+    payoutFilter === 'pending' ? c.status !== 'paid' : payoutFilter === 'settled' ? c.status === 'paid' : true
+  );
+  const sumNet = (rows: typeof allCommissions) => rows.reduce((s, c) => s + netShareOf(c), 0);
+  const payoutMetrics = [
+    { key: 'pending' as const, label: 'Pending payouts', value: String(pendingPayouts.length), sub: `£${sumNet(pendingPayouts).toFixed(2)} owed` },
+    { key: 'settled' as const, label: 'Settled', value: String(settledCount), sub: `£${sumNet(allCommissions.filter((c) => c.status === 'paid')).toFixed(2)} paid (sim)` },
+    { key: 'all' as const, label: 'All commissions', value: String(allCommissions.length), sub: `£${sumNet(allCommissions).toFixed(2)} net total` },
+  ];
+
+  async function settle(commissionId: string) {
+    if (payoutBusyId) return;
+    setPayoutBusyId(commissionId);
+    setPayoutNotice(null);
+    setPayoutError(null);
+    const result = await settleBrandPayout(commissionId, actingStaffId);
+    setPayoutBusyId(null);
+    if (!result.ok) {
+      setPayoutError(result.error ?? 'Payout refused');
+      return;
+    }
+    setPayoutNotice(
+      `${result.mode === 'mock' ? 'Simulated' : 'Live'} payout ${result.transferId} — net £${(
+        result.netShareGbp ?? 0
+      ).toFixed(2)}. ${
+        result.mode === 'mock'
+          ? 'Mock transfer: no live Stripe call was made.'
+          : 'Recorded by the payout Edge Function.'
+      }`
+    );
+    await qc.invalidateQueries({ queryKey: ['commissions'] });
+    await qc.invalidateQueries({ queryKey: ['audit-log'] });
+  }
 
   const loadStatus = useCallback(async () => {
     const mode = isXeroDemoMode();
@@ -240,26 +322,180 @@ export function AccountingPanel() {
         </div>
       </Card>
 
-      <Card title="Brand Payouts (Pending)" className="p-5">
-        <p className="text-xs text-zinc-500 italic mb-3">
-          {connected ? 'Review and mark brand payouts as paid in Xero.' : 'Connect Xero to see brand payout data.'}
+      {/* §Phase D6 — REAL brand payouts. This card used to be a hardcoded
+          "No pending payouts" row while `settleCommission` sat with zero call
+          sites. It now reads the canonical commission store, computes the net
+          share with the canonical fee maths, and settles through the existing
+          mock-first transfer seam, so the action has a real consequence
+          (commission → paid + canonical audit row). */}
+      <Card title="Brand Payouts" className="p-5">
+        <p className="text-xs text-zinc-400">
+          Brand net share per settled commission (PO value − commission). Transfers run in
+          <span className="text-amber-300"> simulation</span> until Stripe Connect credentials are
+          configured.
         </p>
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-white/[0.06] text-zinc-500 uppercase tracking-wider">
-              <th className="text-left py-2 px-2 font-medium">Brand</th>
-              <th className="text-right py-2 px-2 font-medium">Amount</th>
-              <th className="text-center py-2 px-2 font-medium">Status</th>
-              <th className="text-right py-2 px-2 font-medium">Due Date</th>
-              <th className="text-center py-2 px-2 font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-white/[0.03] text-zinc-400">
-              <td className="py-2.5 px-2" colSpan={5}>No pending payouts</td>
-            </tr>
-          </tbody>
-        </table>
+
+        {/* §Stage-18 — every tile drills the table down (no static KPI). */}
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {payoutMetrics.map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setPayoutFilter(m.key)}
+              aria-pressed={payoutFilter === m.key}
+              className={cn(
+                'rounded-lg border p-2.5 text-left transition-colors',
+                payoutFilter === m.key
+                  ? 'border-brass-500/40 bg-brass-500/10'
+                  : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.14]'
+              )}
+            >
+              <p className="text-[10px] uppercase tracking-wider text-zinc-500">{m.label}</p>
+              <p className="font-mono text-base font-semibold text-white">{m.value}</p>
+              <p className="text-[10px] text-zinc-500">{m.sub}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            {pendingPayouts.length} pending
+          </Badge>
+          <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            {settledCount} settled
+          </Badge>
+          <span className="text-[10px] text-brass-300">
+            Filtered: {payoutFilter} ({payoutRows.length} shown) ·{' '}
+            <button type="button" className="underline" onClick={() => setPayoutFilter('pending')}>
+              clear
+            </button>
+          </span>
+        </div>
+        {payoutNotice && (
+          <div className="mb-3 mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-[11px] text-emerald-300">
+            {payoutNotice}
+          </div>
+        )}
+        {payoutError && (
+          <div className="mb-3 mt-3 rounded-lg border border-red-500/20 bg-red-500/10 p-2.5 text-[11px] text-red-300">
+            {payoutError}
+          </div>
+        )}
+        <div className="mt-2" />
+
+        <DataTable
+          dataTable="brand-payouts"
+          caption="Brand payouts"
+          loading={commissionsQuery.isLoading || brandsQuery.isLoading}
+          errorMessage={
+            commissionsQuery.isError
+              ? commissionsQuery.error instanceof Error
+                ? commissionsQuery.error.message
+                : 'Failed to load commissions'
+              : undefined
+          }
+          errorAction={
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                void commissionsQuery.refetch();
+                void brandsQuery.refetch();
+              }}
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Retry
+            </Button>
+          }
+          rows={payoutRows}
+          rowKey={(c) => c.id}
+          emptyMessage={
+            payoutFilter === 'pending'
+              ? connected
+                ? 'No pending payouts — every commission has been settled.'
+                : 'No pending payouts. Connect Xero to reconcile the settled ledger.'
+              : payoutFilter === 'settled'
+                ? 'No payouts have been settled yet.'
+                : 'No commissions recorded.'
+          }
+          columns={[
+            {
+              key: 'brand',
+              label: 'Brand',
+              primary: true,
+              render: (c) => (
+                <span>
+                  <span className="text-xs font-medium text-white">{brandName(c.brandId)}</span>
+                  <span className="block font-mono text-[10px] text-zinc-500">{c.id}</span>
+                </span>
+              ),
+            },
+            {
+              key: 'purchaseOrderId',
+              label: 'PO',
+              render: (c) => <span className="font-mono text-xs text-zinc-400">{c.purchaseOrderId}</span>,
+            },
+            {
+              key: 'poValue',
+              label: 'PO value',
+              align: 'right',
+              hideBelow: 'lg',
+              render: (c) => <span className="font-mono text-xs">£{c.poValue.toLocaleString()}</span>,
+            },
+            {
+              key: 'commissionAmount',
+              label: 'Commission',
+              align: 'right',
+              hideBelow: 'lg',
+              render: (c) => <span className="font-mono text-xs text-zinc-500">−£{c.commissionAmount.toFixed(2)}</span>,
+            },
+            {
+              key: 'netShare',
+              label: 'Net payout',
+              align: 'right',
+              render: (c) => (
+                <span className="font-mono text-xs font-semibold text-white">
+                  £{netShareOf(c).toFixed(2)}
+                </span>
+              ),
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              align: 'center',
+              render: (c) => {
+                const p = commissionStatusPresentation(c.status);
+                return (
+                  <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>
+                    {p.label}
+                  </StatusBadge>
+                );
+              },
+            },
+            {
+              key: 'createdAt',
+              label: 'Accrued',
+              align: 'right',
+              hideBelow: 'lg',
+              render: (c) => (
+                <span className="font-mono text-[11px] text-zinc-500">
+                  {new Date(c.createdAt).toLocaleDateString()}
+                </span>
+              ),
+            },
+          ]}
+          rowActions={(c) => (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="text-[11px]"
+              loading={payoutBusyId === c.id}
+              disabled={!!payoutBusyId || c.status === 'paid'}
+              onClick={() => void settle(c.id)}
+            >
+              Settle (simulated)
+            </Button>
+          )}
+        />
       </Card>
 
       <Card title="Penny Pincher Integration" className="p-5">

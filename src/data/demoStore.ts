@@ -8,6 +8,7 @@
  */
 import type {
   ComplianceDocument,
+  Commission,
   Contract,
   Message,
   PurchaseOrder,
@@ -143,7 +144,15 @@ export const demoSubscriptions = ALL_DEMO_BRANDS.filter((_, i) => i % 2 === 0).m
   })
 );
 
-export const demoCommissions = demoPurchaseOrders
+/**
+ * §Phase D6 — typed by the CANONICAL `Commission` interface.
+ *
+ * It previously had an inferred type whose `status` union excluded `'paid'`
+ * (the seed only emits accrued/invoiced), so TypeScript silently made a settled
+ * payout unrepresentable — the type-level signature of the same defect the
+ * Accounting surface had. One shape, one source of truth.
+ */
+export const demoCommissions: Commission[] = demoPurchaseOrders
   .filter((po) => po.status === 'accepted' || po.status === 'ready_to_fulfil' || po.status === 'shipped' || po.status === 'delivered')
   .map((po) => ({
     id: `comm-${po.id}`,
@@ -155,6 +164,36 @@ export const demoCommissions = demoPurchaseOrders
     status: (po.poValue >= 10_000 ? 'accrued' : 'invoiced') as 'accrued' | 'invoiced',
     createdAt: po.orderDate,
   }));
+
+/**
+ * §Phase D6 — the pending-payout read model + its ONE mutation.
+ *
+ * The Accounting surface previously hardcoded "No pending payouts": the payout
+ * seam (`settleCommission` + `PayoutClient`) existed with zero call sites, so
+ * commissions could never leave `accrued`/`invoiced`. These are the canonical
+ * accessors for that lifecycle — a read (`listCommissionsForPayout`) and the
+ * status mutation the settlement writes through (`markCommissionPaid`). No second
+ * store: they operate on the SAME `demoCommissions` array every other reader uses,
+ * and `queryOrSeed` returns a shallow copy of it, so the shared object identity
+ * means a settled commission is immediately gone from the pending set everywhere.
+ */
+export function listCommissionsForPayout(): Commission[] {
+  return demoCommissions;
+}
+
+export function getCommission(id: string): Commission | undefined {
+  return demoCommissions.find((c) => c.id === id);
+}
+
+/** Moves a commission to its terminal `paid` state. Idempotent by construction:
+ *  a commission that is already paid is returned unchanged (the double-payout
+ *  guard itself lives in `settleCommission`). */
+export function markCommissionPaid(id: string): Commission | null {
+  const commission = getCommission(id);
+  if (!commission) return null;
+  if (commission.status !== 'paid') commission.status = 'paid';
+  return commission;
+}
 
 /**
  * §Phase E3 — THE canonical catalog-submission store.

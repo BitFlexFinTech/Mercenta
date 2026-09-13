@@ -375,6 +375,33 @@ export function billingDecisionPresentation(
 }
 
 /**
+ * §Phase D6 — commission → brand payout lifecycle.
+ *
+ * `accrued`/`invoiced` are money the brand is OWED and are therefore actionable
+ * (a payout has to be settled); `paid` is terminal. Previously this lifecycle had
+ * NO canonical presentation, which is why the Accounting surface rendered the
+ * raw status with no semantic contract at all.
+ */
+export type CommissionStatus = 'accrued' | 'invoiced' | 'paid';
+
+const COMMISSION_STATUS: Record<CommissionStatus, StatusPresentation> = {
+  accrued: { label: 'accrued', tone: 'warning', dataStatus: 'accrued', actionable: true },
+  invoiced: { label: 'invoiced', tone: 'info', dataStatus: 'invoiced', actionable: true },
+  paid: { label: 'paid', tone: 'success', dataStatus: 'paid', actionable: false },
+};
+
+export function commissionStatusPresentation(status: CommissionStatus | string): StatusPresentation {
+  return (
+    COMMISSION_STATUS[status as CommissionStatus] ?? {
+      label: String(status ?? 'unknown'),
+      tone: 'neutral',
+      dataStatus: 'unknown',
+      actionable: true,
+    }
+  );
+}
+
+/**
  * The 24-hour acknowledgement window is a REAL Vendor Central rule, and its
  * urgency is computed from the order date at render time. It is presentation
  * only — the domain status is the PO's own status.

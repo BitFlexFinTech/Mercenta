@@ -39,7 +39,15 @@ import {
   reviewProfileChangeRequest as storeReviewProfileChangeRequest,
   acceptBrandAgreement as storeAcceptBrandAgreement,
   hasAcceptedAgreement as storeHasAcceptedAgreement,
+  getCommission,
+  markCommissionPaid as markCommissionPaidInStore,
 } from './demoStore';
+import {
+  createPayoutClient,
+  normalisePayoutTrack,
+  resolveCommissionRatePct,
+  settleCommission,
+} from '@/lib/billing/payouts';
 import { sendPostmarkEmail, buildPoNotificationHtml } from '@/lib/notifications/postmarkNotifier';
 import type {
   AdSpendBudget,
@@ -385,6 +393,126 @@ export function fetchSubscriptions() {
 /* ── §10/§11 Commissions ── */
 export function fetchCommissions() {
   return queryOrSeed('commissions', demoCommissions);
+}
+
+/* ── §Phase D6 — brand payout settlement (the seam's ONLY call site) ───── */
+
+/**
+ * Clearly-fake Stripe Connect destination (mock-first policy). A real
+ * `acct_…` value only ever appears when a verified non-mock secret is supplied,
+ * so a simulated transfer can never look like a live one.
+ */
+export const MOCK_CONNECT_DESTINATION = 'acct_mock_XX-PENDING-STRIPE-CONNECT';
+
+export interface SettlePayoutResult {
+  ok: boolean;
+  /** Which implementation actually ran — reported so no UI can claim "live". */
+  mode: 'mock' | 'real';
+  transferId?: string;
+  netShareGbp?: number;
+  error?: string;
+}
+
+/**
+ * Settle ONE pending brand payout through the EXISTING seam:
+ * `createPayoutClient` → `settleCommission` → canonical store write + audit.
+ *
+ * Before this, `settleCommission` had ZERO call sites and the Accounting screen
+ * hardcoded "No pending payouts", so a commission could never leave
+ * `accrued`/`invoiced`. Nothing new is invented here: the fee maths, the
+ * double-payout guard and the mock/real factory all live in
+ * `lib/billing/payouts.ts`; this wires them to the canonical commission store.
+ *
+ * Commissions have no Supabase table yet (documented in PRODUCTION_READINESS.md),
+ * so the canonical store + the canonical audit log are the persistence; the
+ * audit row is written only after the transfer client reports success.
+ */
+export async function settleBrandPayout(
+  commissionId: string,
+  actorId = 'admin',
+  credentials: { secretRef: string; verified: boolean } | null = null
+): Promise<SettlePayoutResult> {
+  const commission = getCommission(commissionId);
+  if (!commission) {
+    return { ok: false, mode: 'mock', error: `commission ${commissionId} not found` };
+  }
+
+  const { data: brands } = await fetchBrands();
+  const fulfillmentTrack = normalisePayoutTrack(
+    brands.find((b) => b.id === commission.brandId)?.track ?? 'financed'
+  );
+  const client = createPayoutClient(credentials);
+  const ratePct = resolveCommissionRatePct({
+    commissionRate: commission.commissionRate,
+    commissionAmount: commission.commissionAmount,
+    poValue: commission.poValue,
+  });
+
+  const result = await settleCommission(
+    {
+      id: commission.id,
+      brandId: commission.brandId,
+      poValue: commission.poValue,
+      commissionRate: ratePct,
+      status: commission.status,
+    },
+    {
+      fulfillmentTrack,
+      destinationAccountId: MOCK_CONNECT_DESTINATION,
+      client,
+      markPaid: async (id) => {
+        // Only the status mutation — the audit row is written after success.
+        markCommissionPaidInStore(id);
+      },
+    }
+  );
+
+  if (!result.ok) {
+    return { ok: false, mode: client.mode, error: result.error ?? 'payout refused' };
+  }
+
+  const reason = result.netShareGbp !== undefined
+    ? `simulated brand payout — net £${result.netShareGbp.toFixed(2)} via transfer ${result.transferId} (${client.mode})`
+    : `simulated brand payout via transfer ${result.transferId} (${client.mode})`;
+  const audit: AuditLogEntry = {
+    id: `audit-payout-${commission.id}`,
+    createdAt: new Date().toISOString(),
+    actorId,
+    action: 'commission_payout_settled',
+    entityType: 'commission',
+    entityId: commission.id,
+    brandId: commission.brandId,
+    reason,
+    metadata: {
+      transferId: result.transferId ?? null,
+      mode: client.mode,
+      netShareGbp: result.netShareGbp ?? null,
+      commissionRatePct: ratePct,
+    },
+  };
+  demoAuditLog.push(audit);
+
+  if (supabase) {
+    void (async () => {
+      try {
+        const brandUuid = await _toBrandUuid(commission.brandId);
+        const res = await supabase.from('audit_log').insert({
+          actor_id: actorId,
+          action: audit.action,
+          entity_type: audit.entityType,
+          entity_id: audit.entityId,
+          brand_id: brandUuid,
+          reason: audit.reason,
+          metadata: audit.metadata,
+        });
+        if (res.error) console.warn('[api] Supabase write failed for "audit_log" (payout):', res.error.message);
+      } catch (err) {
+        console.warn('[api] Supabase write failed for "audit_log" (payout):', err);
+      }
+    })();
+  }
+
+  return { ok: true, mode: client.mode, transferId: result.transferId, netShareGbp: result.netShareGbp };
 }
 
 /* ── §9 Messages ── */

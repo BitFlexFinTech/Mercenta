@@ -13,6 +13,7 @@ import { DEFAULT_PRODUCT_TAX_CODE } from '@/types';
 import type {
   ComplianceDocument,
   Contract,
+  FulfillmentTrack,
   Message,
   Product,
   ProductImage,
@@ -150,7 +151,9 @@ export const PORTAL_BRAND_IDS: string[] = [
 export interface DemoBrandRow {
   id: string;
   category: string;
-  track: string;
+  /** §Phase D6 — the CANONICAL track union (was `string`), so a payout can rely
+   *  on the financed-fee clause without a cast or a silent default. */
+  track: FulfillmentTrack;
   contractStatus: string;
   profile: { businessName: string };
 }
