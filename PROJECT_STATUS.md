@@ -2,8 +2,34 @@
 > Source of truth for current project state. Updated after every session.
 > Last updated: 2026-09-12 (**Phase E8 — OPERATIONAL MERCENTA SOCIAL (LIVE ENGINE + SSO BRIDGE)**; see the PHASE E8 block below. Previous: **Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; before that E6 — BRAND OPERATIONAL SURFACES, E5 — ADMIN OPERATIONAL SURFACES, E4 — COMMERCE, E3 — CATALOG, E2 — BRAND ONBOARDING, E1 — ONBOARDING HAND-OFF, D4 — PERSISTENCE.)
 >
-> **PHASE E8 (2026-09-12) — THE REAL POSTIZ APPLICATION IS OPERATIONAL AND MERCENTA
-> BRANDS REACH IT AS MERCENTA SOCIAL.** E7 left the engine BLOCKED; E8 FIXED the
+> **PHASE E9 (2026-09-13) — REAL CHANNEL CONNECT + PUBLISHING AGAINST THE LIVE ENGINE.**
+> Continuing E8 on the deployed engine, the **real** channel-connect and publishing
+> contracts were determined from v1.47.0 and exercised for real: the provider
+> catalogue (**34 providers**) was read live; a **genuine channel was connected**
+> (`POST /api/integrations/social-connect/nostr` → **201**, engine row carrying the
+> real derived Nostr public key, `organizationId` = brand A's org, `disabled:false`);
+> **brand B sees 0 channels** (tenant isolation verified); a **real publication was
+> accepted** by the developer API (`POST /api/public/v1/posts` → **201**, after
+> decoding the true DTO shape); and **Temporal really executed the job** (worker trace
+> on `taskQueue: 'nostr'`). That trace exposed a **genuine engine defect**, now fixed:
+> `NostrProvider.post()/comment()` pass a hex **string** where nostr-tools needs a
+> **Uint8Array** (`expected Uint8Array, got type=string`), so Nostr connections
+> succeeded but every publication failed — both runtime bundles are patched and the
+> fix is committed as the idempotent `scripts/social-sso/engine-patches.mjs`.
+> **[BLOCKED — paid resize required]** the final `PUBLISHED` + provider release id,
+> scheduled-post execution and everything after them: the droplet is a 2-vCPU/4 GB box
+> at **load 56–65 with 33–85 MB free**, and Postiz's orchestrator **webpack-bundles a
+> workflow per provider task queue (34 of them) at startup**, so it is OOM-**`Killed`**
+> in a loop (PM2 restarts 11→13 within minutes). Mitigations already applied
+> (reversible, no data destroyed): swap raised **2 GB → 4 GB**, the **legacy
+> Rocket.Chat + Mongo containers stopped** (Phase D1 leftover; freed ~400 MB), a
+> `NODE_OPTIONS=--max-old-space-size=768` heap cap on the engine, and the unrelated
+> `usertour` service stopped. The engine stack needs the **8 GB droplet already
+> documented in HANDOFF item 8** — a paid, irreversible infrastructure change, hence
+> the stop point. Verification posts remain safely in `QUEUE` inside brand A's org;
+> nothing was faked. Report: `docs/PRODUCT_CONSOLIDATION_PHASEE9_2026-09-13.md`.
+>
+> **PHASE E8 (2026-09-12) — THE REAL POSTIZ APPLICATION IS OPERATIONAL.** E7 left the engine BLOCKED; E8 FIXED the
 > deployment and built the bridge. **[VERIFIED] Engine fixes on `mercenta-services`
 > (46.101.75.185):** Temporal **restored** (backend previously died on
 > `ECONNREFUSED ::1:7233` → nginx 502 for every `/api/*`); its **Elasticsearch

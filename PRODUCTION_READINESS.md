@@ -44,6 +44,19 @@
 3. **RLS runtime test (Stage 7)** never executed against a live project.
 4. **Stages 8–16** per STATUS_CHECK.md remain open.
 
+> **STATUS UPDATE (Phase E9, 13 Sep):** the engine now needs the **8 GB resize**
+> documented in HANDOFF item 8. On the current 2-vCPU/4 GB droplet Postiz's Temporal
+> orchestrator **webpack-bundles a workflow per provider task queue (34)** at startup
+> and is OOM-`Killed` in a loop (load 56–65, 33–85 MB free), so queued/scheduled posts
+> do not execute. Already mitigated reversibly (swap 2 GB → 4 GB, legacy Rocket.Chat +
+> Mongo stopped, `NODE_OPTIONS` heap cap, usertour stopped). Resizing is a **paid,
+> irreversible** action → **user action required**:
+> `DigitalOcean → Droplets → mercenta-services → Resize → CPU/RAM only → 8 GB`.
+> Real channel connect, real publication acceptance and Temporal execution were all
+> verified live before this ceiling; a genuine engine defect (Nostr `finalizeEvent`
+> Uint8Array) was found and fixed — see `docs/PRODUCT_CONSOLIDATION_PHASEE9_2026-09-13.md`
+> and re-apply `scripts/social-sso/engine-patches.mjs` after any engine upgrade.
+
 ## Mercenta Social — engine deployment prerequisites (Phase E7, 12 Sep)
 
 > **STATUS UPDATE (Phase E8, 12 Sep):** items **1, 2, 3, 4, 5 and 6 below were FIXED**
