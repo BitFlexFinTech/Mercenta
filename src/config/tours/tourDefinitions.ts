@@ -45,7 +45,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
     {
       id: 'orientation-welcome',
       title: 'Welcome to Mercenta Partners',
-      description: 'Mercenta connects your brand to Amazon UK\'s 1P wholesale channel. Your role: manage products, acknowledge Purchase Orders, file shipments, and keep compliance documents current. This tour shows you what matters most.',
+      description: 'Mercenta connects your brand to the UK retail channel\'s wholesale channel. Your role: manage products, acknowledge Purchase Orders, file shipments, and keep compliance documents current. This tour shows you what matters most.',
       targetSelector: '[data-tour="brand-dashboard"]',
       position: 'bottom',
       action: 'next',
@@ -61,7 +61,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
     {
       id: 'orientation-purchase-orders',
       title: 'Purchase Orders — 24-Hour Rule',
-      description: 'You will receive Purchase Orders from Amazon. You must acknowledge each one within 24 hours or it will be flagged. A flagged PO may result in a vendor performance deduction. Visit this section daily.',
+      description: 'You will receive Purchase Orders from the retail channel. You must acknowledge each one within 24 hours or it will be flagged. A flagged PO may result in a vendor performance deduction. Visit this section daily.',
       targetSelector: '[data-tour="nav-purchase_orders"]',
       position: 'right',
       action: 'next',
@@ -77,7 +77,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
     {
       id: 'orientation-logistics',
       title: 'Inbound Shipments',
-      description: 'When a PO is accepted, you create a shipment from your factory to Amazon UK. You\'ll file carton-level details, choose a carrier, and submit an ASN (Advanced Shipment Notice).',
+      description: 'When a PO is accepted, you create a shipment from your factory to the UK retail channel. You\'ll file carton-level details, choose a carrier, and submit an ASN (Advanced Shipment Notice).',
       targetSelector: '[data-tour="nav-logistics"]',
       position: 'right',
       action: 'next',
@@ -129,7 +129,7 @@ export const CATALOG_TOUR: TourDefinition = {
     {
       id: 'catalog-image-requirements',
       title: 'Image Requirements',
-      description: 'Amazon requires: white background, minimum 1000×1000 px, at least 5 images per product. Include: 1× hero (front-facing), 2× lifestyle (in-use), 1× detail (close-up of features), 1× scale/size comparison. No text overlays on the main image.',
+      description: 'The retail channel requires: white background, minimum 1000×1000 px, at least 5 images per product. Include: 1× hero (front-facing), 2× lifestyle (in-use), 1× detail (close-up of features), 1× scale/size comparison. No text overlays on the main image.',
       targetSelector: '[data-tour="catalog-images"]',
       position: 'bottom',
       action: 'next',
@@ -137,7 +137,7 @@ export const CATALOG_TOUR: TourDefinition = {
     {
       id: 'catalog-cost-pricing',
       title: 'Set Your Price Correctly',
-      description: 'Amazon auto-rejects cost increases after submission. If you submit a product at £10.00 and later try to increase it to £12.00, Amazon will reject the change. Set your ex-works cost and margin correctly the first time.',
+      description: 'The retail channel auto-rejects cost increases after submission. If you submit a product at £10.00 and later try to increase it to £12.00, the retail channel will reject the change. Set your ex-works cost and margin correctly the first time.',
       targetSelector: '[data-tour="catalog-cost"]',
       position: 'bottom',
       action: 'next',
@@ -145,7 +145,7 @@ export const CATALOG_TOUR: TourDefinition = {
     {
       id: 'catalog-net-ppm',
       title: 'Net PPM Benchmarks',
-      description: 'Net PPM (Profit per Minute) measures your profitability in Amazon\'s system. A healthy Net PPM is 15+. Below 10, Amazon may delist your product. Check your Net PPM in the Operational Guidance section of Settings.',
+      description: 'Net PPM (Profit per Minute) measures your profitability in the retail channel\'s system. A healthy Net PPM is 15+. Below 10, the retail channel may delist your product. Check your Net PPM in the Operational Guidance section of Settings.',
       targetSelector: '[data-tour="nav-settings"]',
       position: 'right',
       action: 'next',
@@ -173,7 +173,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-new-arrival',
       title: 'New PO Arrived',
-      description: 'A new Purchase Order from Amazon has arrived. It shows the PO number, ship/delivery window, line items, quantities, and unit prices. Review everything carefully before acknowledging.',
+      description: 'A new Purchase Order from the retail channel has arrived. It shows the PO number, ship/delivery window, line items, quantities, and unit prices. Review everything carefully before acknowledging.',
       targetSelector: '[data-tour="po-list"]',
       position: 'bottom',
       action: 'next',
@@ -189,7 +189,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-24-hour-rule',
       title: '24-Hour Window',
-      description: 'You have 24 hours to acknowledge this PO. If you miss the window, the PO is flagged and may result in a deduction from Amazon. Always check your PO list at least once per day.',
+      description: 'You have 24 hours to acknowledge this PO. If you miss the window, the PO is flagged and may result in a deduction from the retail channel. Always check your PO list at least once per day.',
       targetSelector: '[data-tour="po-deadline"]',
       position: 'bottom',
       action: 'next',
@@ -205,7 +205,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-backorder-date',
       title: 'Backorder Requires Ship Date',
-      description: 'If you backorder a line item, you must provide a scheduled ship date. Amazon expects you to meet that date. Miss it and the PO is flagged.',
+      description: 'If you backorder a line item, you must provide a scheduled ship date. the retail channel expects you to meet that date. Miss it and the PO is flagged.',
       targetSelector: '[data-tour="po-backorder-date"]',
       position: 'bottom',
       action: 'next',
@@ -213,7 +213,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-asn-accuracy',
       title: 'ASN Accuracy Warning',
-      description: 'If you acknowledge a quantity and later file an ASN with different quantities, Amazon may apply a deduction for ASN inaccuracy. Acknowledge only what you can actually ship.',
+      description: 'If you acknowledge a quantity and later file an ASN with different quantities, the retail channel may apply a deduction for ASN inaccuracy. Acknowledge only what you can actually ship.',
       targetSelector: '[data-tour="po-asn-warning"]',
       position: 'bottom',
       action: 'finish',
@@ -241,7 +241,7 @@ export const SHIPPING_TOUR: TourDefinition = {
     {
       id: 'shipping-carton-matching',
       title: 'Carton Contents Must Match',
-      description: 'Your carton contents must match your acknowledged quantities exactly. If you acknowledged 100 units and ship 95, Amazon creates an automatic deduction. Count every carton before sealing.',
+      description: 'Your carton contents must match your acknowledged quantities exactly. If you acknowledged 100 units and ship 95, the retail channel creates an automatic deduction. Count every carton before sealing.',
       targetSelector: '[data-tour="shipment-carton-detail"]',
       position: 'bottom',
       action: 'next',
@@ -249,7 +249,7 @@ export const SHIPPING_TOUR: TourDefinition = {
     {
       id: 'shipping-ship-window-vs-delivery',
       title: 'Ship Window vs. Delivery Window',
-      description: 'If Amazon is paying freight (Freight Collect), you must submit a Routing Request and ship within the Ship Window. If you\'re paying freight (Freight Prepaid), you must deliver within the fixed Delivery Window. Check the PO for which applies.',
+      description: 'If the retail channel is paying freight (Freight Collect), you must submit a Routing Request and ship within the Ship Window. If you\'re paying freight (Freight Prepaid), you must deliver within the fixed Delivery Window. Check the PO for which applies.',
       targetSelector: '[data-tour="shipment-window-info"]',
       position: 'bottom',
       action: 'next',
@@ -257,7 +257,7 @@ export const SHIPPING_TOUR: TourDefinition = {
     {
       id: 'shipping-late-penalties',
       title: 'Late = Automatic Deduction',
-      description: 'Late shipment = automatic deduction. Mislabeled cartons (wrong contents, wrong SKU on box) = automatic deduction. Amazon\'s receiving system automatically flags any discrepancy. No exceptions.',
+      description: 'Late shipment = automatic deduction. Mislabeled cartons (wrong contents, wrong SKU on box) = automatic deduction. the retail channel\'s receiving system automatically flags any discrepancy. No exceptions.',
       targetSelector: '[data-tour="shipment-penalty-warning"]',
       position: 'bottom',
       action: 'finish',
@@ -277,7 +277,7 @@ export const DEDUCTIONS_TOUR: TourDefinition = {
     {
       id: 'deductions-ledger',
       title: 'Deductions Ledger',
-      description: 'This is your deductions ledger. Every deduction Amazon applies appears here — from late shipments, ASN inaccuracies, carton mismatches, compliance failures, and chargebacks.',
+      description: 'This is your deductions ledger. Every deduction the retail channel applies appears here — from late shipments, ASN inaccuracies, carton mismatches, compliance failures, and chargebacks.',
       targetSelector: '[data-tour="deductions-ledger"]',
       position: 'bottom',
       action: 'next',
@@ -337,7 +337,7 @@ export const COMPLIANCE_TOUR: TourDefinition = {
     {
       id: 'compliance-legal-agreements',
       title: '2 Legal Agreements',
-      description: '1) Mercenta Service Agreement (your commercial terms with Mercenta), 2) Amazon Vendor Agreement (Amazon\'s vendor terms). Both must be accepted before you can transact.',
+      description: '1) Mercenta Service Agreement (your commercial terms with Mercenta), 2) the retail channel Vendor Agreement (the retail channel\'s vendor terms). Both must be accepted before you can transact.',
       targetSelector: '[data-tour="compliance-legal-agreements"]',
       position: 'bottom',
       action: 'next',
@@ -390,7 +390,7 @@ export const BILLING_TOUR: TourDefinition = {
     {
       id: 'billing-remittance-statement',
       title: 'Remittance Statement',
-      description: 'Your remittance statement shows the full calculation: Gross PO Value − Mercenta Commission − Amazon Deductions = Net Amount Paid to You. Review each statement for accuracy and dispute any deductions you believe are wrong.',
+      description: 'Your remittance statement shows the full calculation: Gross PO Value − Mercenta Commission − the retail channel Deductions = Net Amount Paid to You. Review each statement for accuracy and dispute any deductions you believe are wrong.',
       targetSelector: '[data-tour="billing-remittance"]',
       position: 'bottom',
       action: 'finish',

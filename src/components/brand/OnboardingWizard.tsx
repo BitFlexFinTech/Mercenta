@@ -589,13 +589,13 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 <div className="bg-ink-900 border-white/[0.06] p-4 max-h-36 overflow-y-auto text-xs text-zinc-400 leading-relaxed">
                   <p className="mb-3">
                     The Supplier explicitly acknowledges that all logistical executions under
-                    this Agreement must strictly align with Amazon Vendor Central Core Metrics.
+                    this Agreement must strictly align with retail-channel vendor core metrics.
                     The Platform dictates the exclusive utilization of DHL Express / DHL Cargo
                     via integrated API label generation.
                   </p>
                   <p className="mb-3">
                     The Supplier guarantees a Minimum Purchase Order Acceptance Rate of 95% and
-                    an On-Time Shipment Rate of 98% within the designated Amazon shipping window.
+                    an On-Time Shipment Rate of 98% within the designated retail-channel shipping window.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2.5 border-t border-white/[0.06] bg-black/20">

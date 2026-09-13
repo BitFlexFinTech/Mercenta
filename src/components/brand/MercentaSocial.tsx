@@ -340,7 +340,7 @@ export function MercentaSocial() {
             />
             <p className="text-[10px] text-zinc-500 mt-2">
               Browsers that block cookies inside third-party frames will not keep the session here —
-              use the button above, which opens your workspace where the session is first-party.
+              use the button above, which opens your workspace where the session is established same-site.
             </p>
           </div>
         )}

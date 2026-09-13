@@ -27,11 +27,11 @@ export function BrandIntelligence() {
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center"><BarChart3 className="w-5 h-5 text-brass-400" /></div>
-        <div><h2 className="text-lg font-semibold text-white">Your Amazon Market</h2><p className="text-xs text-zinc-500 mt-0.5">Market intelligence for <span className="text-brass-400">{brandName}</span> in <span className="text-brass-400">{brandCategory}</span></p></div>
+        <div><h2 className="text-lg font-semibold text-white">Your UK Market</h2><p className="text-xs text-zinc-500 mt-0.5">Market intelligence for <span className="text-brass-400">{brandName}</span> in <span className="text-brass-400">{brandCategory}</span></p></div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-3"><div className="flex items-center gap-2 mb-1"><BarChart3 className="w-3.5 h-3.5 text-blue-400" /><span className="text-[10px] text-zinc-500 uppercase">Category Size</span></div><span className="text-2xl font-bold text-blue-400">£{(totalEst / 1000).toFixed(0)}k/mo</span><p className="text-[10px] text-zinc-600 mt-1">Estimated Amazon UK revenue</p></Card>
+        <Card className="p-3"><div className="flex items-center gap-2 mb-1"><BarChart3 className="w-3.5 h-3.5 text-blue-400" /><span className="text-[10px] text-zinc-500 uppercase">Category Size</span></div><span className="text-2xl font-bold text-blue-400">£{(totalEst / 1000).toFixed(0)}k/mo</span><p className="text-[10px] text-zinc-600 mt-1">Estimated UK retail revenue</p></Card>
         <Card className="p-3"><div className="flex items-center gap-2 mb-1"><TrendingUp className="w-3.5 h-3.5 text-emerald-400" /><span className="text-[10px] text-zinc-500 uppercase">Category Growth</span></div><span className="text-2xl font-bold text-emerald-400">+12%</span><p className="text-[10px] text-zinc-600 mt-1">Estimated YoY growth</p></Card>
         <Card className="p-3"><div className="flex items-center gap-2 mb-1"><ShoppingBag className="w-3.5 h-3.5 text-amber-400" /><span className="text-[10px] text-zinc-500 uppercase">Brands Tracked</span></div><span className="text-2xl font-bold text-amber-400">{catData.sameCat.length}</span><p className="text-[10px] text-zinc-600 mt-1">In your category</p></Card>
         <Card className="p-3"><div className="flex items-center gap-2 mb-1"><Users className="w-3.5 h-3.5 text-brass-400" /><span className="text-[10px] text-zinc-500 uppercase">Competitors</span></div><span className="text-2xl font-bold text-brass-400">{catData.sameCat.length}</span><p className="text-[10px] text-zinc-600 mt-1">Strong brands in category</p></Card>
@@ -54,7 +54,7 @@ export function BrandIntelligence() {
       <Card className="p-4">
         <h3 className="text-sm font-semibold text-white mb-2">Market Insights</h3>
         <div className="space-y-2 text-xs text-zinc-400">
-          <p>Your brand is in <span className="text-brass-400">{brandCategory}</span> on Amazon UK, one of {APPROVED_CATEGORIES.length} approved categories.</p>
+          <p>Your brand is in <span className="text-brass-400">{brandCategory}</span> in the UK market, one of {APPROVED_CATEGORIES.length} approved categories.</p>
           <p>We track <span className="text-white">{catData.scored.length}</span> brands total. Of those, <span className="text-white">{catData.sameCat.length}</span> are in {brandCategory}.</p>
           <p>This intelligence updates weekly. Use these insights to understand your competitive position and identify growth opportunities.</p>
         </div>

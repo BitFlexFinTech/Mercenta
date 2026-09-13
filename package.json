@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "validate:wording": "node scripts/lint-wording.mjs"
   },
   "dependencies": {
     "@sentry/react": "^10.73.0",

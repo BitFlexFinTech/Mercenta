@@ -441,7 +441,7 @@ export const SOCIAL_DEPLOYMENT_FINDINGS: SocialDeploymentFinding[] = [
     severity: 'warning',
     title: 'Browsers block cookies inside third-party frames',
     detail:
-      'Even with the frame policy opened (Caddy now sends frame-ancestors for the Mercenta origins), Chrome/Safari block the engine session cookie inside a cross-site frame, so the workspace opens in its own tab where the cookie is first-party. Serving the engine from a same-site Mercenta subdomain (the DNS item above) enables the inline embedded experience.',
+      'Even with the frame policy opened (Caddy now sends frame-ancestors for the Mercenta origins), Chrome/Safari block the engine session cookie inside a cross-site frame, so the workspace opens in its own tab where the session cookie is accepted as a same-site cookie. Serving the engine from a same-site Mercenta subdomain (the DNS item above) enables the inline embedded experience.',
   },
   {
     id: 'droplet-memory',

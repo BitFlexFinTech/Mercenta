@@ -898,7 +898,7 @@ export function createShipmentForPO(
     entityType: 'shipment',
     entityId: shipmentId,
     brandId: po.brandId,
-    reason: 'ASN auto-generated for PO ' + po.poNumber + ', shipment ' + shipmentId + '. Would be pushed to Amazon SP-API when integration is live.',
+    reason: 'ASN auto-generated for PO ' + po.poNumber + ', shipment ' + shipmentId + '. Would be pushed to the live retail-channel API once the integration is connected.',
     metadata: { poNumber: po.poNumber, shipmentId: shipmentId, carrier: asn.carrier },
   });
   return { ok: true, shipmentId, warnings, deductionId };

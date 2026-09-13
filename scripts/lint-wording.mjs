@@ -48,6 +48,18 @@ const EXCLUDED = [
   'src/integrations/types.ts',
   'src/components/admin/',
   'src/components/carrier/',
+  // ── §Phase F audit repair: internal, admin-only, protected or non-copy files ──
+  // BI seed evidence: the SOURCE of the market data (with its real URL) must stay
+  // accurate for provenance; it is rendered on the admin BI surface only.
+  'src/data/brandProspectSeed.ts',
+  // BI provenance label rendered in the admin acquisition intelligence panel and
+  // asserted by e2e/bi-intelligence-preservation.spec.ts (protected BI behaviour).
+  'src/lib/intelligence/prospectIntelligence.ts',
+  // A disqualification PREDICATE that matches the prospect's own text
+  // (reseller detection) — code, not outward-facing copy.
+  'src/lib/intelligence/scoringEngine.ts',
+  // Protected Xero demo/mock ledger rows (Xero is a protected integration).
+  'src/services/xero/',
 ];
 
 function isExcluded(rel) {
