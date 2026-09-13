@@ -35,7 +35,8 @@ import {
   openCommerceDispute,
   type CommerceActor,
 } from '@/lib/commerce/commerceLifecycle';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
+import { deductionStatusPresentation } from '@/lib/statusPresentation';
 import { cn } from '@/utils/cn';
 
 const MONO = 'font-mono text-[11px]';
@@ -140,67 +141,78 @@ export function DeductionsLedger() {
           </div>
         </div>
 
-        {/* ── Ledger rows ────────────────────────────────────────────── */}
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-              <th className="text-left font-medium px-4 py-2.5">Date</th>
-              <th className="text-left font-medium px-4 py-2.5">PO</th>
-              <th className="text-left font-medium px-4 py-2.5">Type</th>
-              <th className="text-left font-medium px-4 py-2.5">Reason</th>
-              <th className="text-left font-medium px-4 py-2.5">Status</th>
-              <th className="text-right font-medium px-4 py-2.5">Amount</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/[0.04]">
-            {rows.map((d) => (
-              <tr key={d.id} className="text-zinc-300 align-top">
-                <td className="px-4 py-2.5 text-xs font-mono">{d.date}</td>
-                <td className="px-4 py-2.5 text-xs font-mono">{d.purchaseOrderId}</td>
-                <td className="px-4 py-2.5 text-xs capitalize">
+        {/* ── Ledger rows — canonical DataTable: labelled cards below md (so no
+            action or amount is ever hidden behind a horizontal scroll) and the
+            semantic table at md+; statuses come from the canonical layer. ── */}
+        <DataTable
+          caption="Deductions ledger"
+          rows={rows}
+          rowKey={(d) => d.id}
+          emptyMessage="No deductions posted."
+          columns={[
+            {
+              key: 'date',
+              label: 'Date',
+              hideBelow: 'sm',
+              render: (d) => <span className={cn(MONO, 'text-zinc-400')}>{d.date}</span>,
+            },
+            {
+              key: 'po',
+              label: 'PO',
+              primary: true,
+              render: (d) => <span className={cn(MONO, 'text-zinc-200')}>{d.purchaseOrderId}</span>,
+            },
+            {
+              key: 'type',
+              label: 'Type',
+              render: (d) => (
+                <span className="text-xs capitalize">
                   {d.type.replace(/_/g, ' ')}
-                  {d.simulated && <span className="ml-1 text-[9px] text-brass-400">(sim)</span>}
-                </td>
-                <td className="px-4 py-2.5 text-xs max-w-[260px]">
+                  {d.simulated && <span className="ml-1 text-[10px] text-brass-400">(sim)</span>}
+                </span>
+              ),
+            },
+            {
+              key: 'reason',
+              label: 'Reason',
+              hideBelow: 'lg',
+              render: (d) => (
+                <span className="block max-w-[280px] text-xs">
                   {d.reason}
                   {d.dispute && (
-                    <div className="mt-1 text-[10px] text-zinc-500">
+                    <span className="mt-1 block text-[10px] text-zinc-500">
                       Disputed {d.dispute.openedAt}: {d.dispute.notes}
                       {d.dispute.outcome && (
                         <span className="ml-1 capitalize text-zinc-400">
                           → outcome: {d.dispute.outcome}
                         </span>
                       )}
-                    </div>
+                    </span>
                   )}
-                </td>
-                <td className="px-4 py-2.5">
-                  <Badge
-                    className={cn(
-                      'text-[10px] capitalize',
-                      d.status === 'open' && 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-                      d.status === 'disputed' && 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-                      d.status === 'accepted' && 'bg-red-500/15 text-red-300 border-red-500/20',
-                      d.status === 'resolved' && 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                    )}
-                  >
-                    {d.status}
-                  </Badge>
-                </td>
-                <td className="px-4 py-2.5 text-right text-xs font-mono">
-                  −£{d.amountGbp.toFixed(2)}
-                </td>
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center text-xs text-zinc-600 py-6">
-                  No deductions posted.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                </span>
+              ),
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              render: (d) => (
+                <StatusBadge
+                  className="text-[10px] capitalize"
+                  dataStatus={deductionStatusPresentation(d.status).dataStatus}
+                  tone={deductionStatusPresentation(d.status).tone}
+                >
+                  {deductionStatusPresentation(d.status).label}
+                </StatusBadge>
+              ),
+            },
+            {
+              key: 'amount',
+              label: 'Amount',
+              align: 'right',
+              render: (d) => <span className={cn(MONO, 'text-zinc-300')}>−£{d.amountGbp.toFixed(2)}</span>,
+            },
+          ]}
+        />
 
         {/* ── Dispute workflow ───────────────────────────────────────── */}
         <div

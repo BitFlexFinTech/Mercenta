@@ -58,9 +58,11 @@ test.describe('Design System Showcase — rendering', () => {
     // Statuses
     await expect(page.locator('text=On track').first()).toBeVisible();
     await expect(page.locator('text=Blocked').first()).toBeVisible();
-    // Data table row (toggle skeleton off first — the showcase opens loading)
+    // Data table row (toggle skeleton off first — the showcase opens loading).
+    // §Phase D3: DataTable now renders BOTH a desktop table and a mobile card list,
+    // so the assertion targets the instance visible at this viewport (the table).
     await page.getByRole('button', { name: 'Skeleton on' }).click();
-    await expect(page.locator('text=Zambezi Organics').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('table td', { hasText: 'Zambezi Organics' }).first()).toBeVisible({ timeout: 8000 });
   });
 
   test('focus-visible outline is visible on keyboard focus of a Button', async ({ page }) => {

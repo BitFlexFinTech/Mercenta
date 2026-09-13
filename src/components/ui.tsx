@@ -590,28 +590,70 @@ export function EntityHeader({
   );
 }
 
-/** DataTable foundation: semantic table + loading/empty/error states. */
-export function DataTable<T extends Record<string, unknown>>({
+/**
+ * DataTable — the canonical operational table.
+ *
+ * §Phase D3 extension (backwards-compatible): the original foundation only
+ * accepted string cells, had no row actions and had no deliberate mobile
+ * behaviour (it merely allowed horizontal overflow). Operational tables need all
+ * three, so the primitive now supports:
+ *   - `render` for arbitrary cells (status badges, links, money formatting);
+ *   - `align` for numeric columns and `hideBelow` for progressive disclosure;
+ *   - `primary` — the column that becomes the card TITLE on mobile;
+ *   - `rowActions` — kept on the row (desktop) and in the card footer (mobile);
+ *   - `mobile: 'cards' | 'scroll'` — an INTENTIONAL mobile strategy. 'cards'
+ *     (default) renders a labelled key/value card list below `md`, so no action
+ *     is ever clipped or hidden behind a horizontal scroll; 'scroll' keeps the
+ *     desktop table for genuinely columnar comparison data;
+ *   - `emptyAction` / `errorAction` — a recovery path out of the empty/error state.
+ * Existing string-only usage keeps working unchanged.
+ */
+export interface DataTableColumn<T> {
+  key: string;
+  label: string;
+  render?: (row: T) => ReactNode;
+  align?: 'left' | 'right' | 'center';
+  /** The column used as the mobile card title. Defaults to the first column. */
+  primary?: boolean;
+  /** Hide this column below the given breakpoint (keep it at/above it). */
+  hideBelow?: 'sm' | 'md' | 'lg';
+}
+
+export function DataTable<T>({
   columns,
   rows,
   rowKey,
   loading,
   emptyMessage,
+  emptyAction,
   errorMessage,
+  errorAction,
+  rowActions,
+  onRowClick,
+  mobile = 'cards',
+  caption = 'Data table',
+  className,
 }: {
-  columns: { key: string; label: string }[];
+  columns: DataTableColumn<T>[];
   rows: T[];
   rowKey: (r: T) => string;
   loading?: boolean;
   emptyMessage?: string;
+  emptyAction?: ReactNode;
   errorMessage?: string;
+  errorAction?: ReactNode;
+  rowActions?: (row: T) => ReactNode;
+  onRowClick?: (row: T) => void;
+  mobile?: 'cards' | 'scroll';
+  caption?: string;
+  className?: string;
 }) {
   if (errorMessage) {
-    return <EmptyState title="Error loading data" description={errorMessage} />;
+    return <EmptyState title="Error loading data" description={errorMessage} action={errorAction} />;
   }
   if (loading) {
     return (
-      <div className="space-y-2 p-4">
+      <div className="space-y-2 p-4" aria-busy="true">
         <Skeleton className="h-9 w-full" />
         <Skeleton className="h-9 w-full" />
         <Skeleton className="h-9 w-full" />
@@ -619,33 +661,102 @@ export function DataTable<T extends Record<string, unknown>>({
     );
   }
   if (rows.length === 0) {
-    return <EmptyState title={emptyMessage ?? 'No data to display'} />;
+    return <EmptyState title={emptyMessage ?? 'No data to display'} action={emptyAction} />;
   }
+
+  const cell = (c: DataTableColumn<T>, r: T): ReactNode =>
+    c.render ? c.render(r) : String((r as Record<string, unknown>)[c.key] ?? '');
+  const alignClass = (c: DataTableColumn<T>) =>
+    c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left';
+  const hideClass = (c: DataTableColumn<T>) =>
+    c.hideBelow === 'sm'
+      ? 'hidden sm:table-cell'
+      : c.hideBelow === 'md'
+        ? 'hidden md:table-cell'
+        : c.hideBelow === 'lg'
+          ? 'hidden lg:table-cell'
+          : '';
+  const primaryColumn = columns.find((c) => c.primary) ?? columns[0];
+  const detailColumns = columns.filter((c) => c !== primaryColumn);
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
-        <caption className="sr-only">Data table</caption>
-        <thead>
-          <tr className="border-b border-white/[0.08] text-left">
-            {columns.map((c) => (
-              <th key={c.key} scope="col" className="px-3 py-2 text-xs font-semibold text-zinc-400">
-                {c.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
+    <div className={className}>
+      {/* ── Mobile: labelled cards (no clipped actions, no horizontal scroll) ── */}
+      {mobile === 'cards' && (
+        <ul className="space-y-2 md:hidden" aria-label={caption}>
           {rows.map((r) => (
-            <tr key={rowKey(r)} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-              {columns.map((c) => (
-                <td key={c.key} className="px-3 py-2 text-zinc-300">
-                  {String(r[c.key] ?? '')}
-                </td>
-              ))}
-            </tr>
+            <li
+              key={rowKey(r)}
+              onClick={onRowClick ? () => onRowClick(r) : undefined}
+              className={cn(
+                'rounded-ds-md border border-white/[0.06] bg-ink-850 p-3',
+                onRowClick && 'cursor-pointer hover:border-white/[0.14] transition-ds'
+              )}
+            >
+              <div className="text-sm font-medium text-white">{cell(primaryColumn, r)}</div>
+              {detailColumns.length > 0 && (
+                <dl className="mt-2 space-y-1">
+                  {detailColumns.map((c) => (
+                    <div key={c.key} className="flex items-start justify-between gap-3">
+                      <dt className="text-[11px] text-zinc-500">{c.label}</dt>
+                      <dd className="min-w-0 text-right text-xs text-zinc-300">{cell(c, r)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              {rowActions && (
+                <div className="mt-3 flex flex-wrap items-center justify-end gap-2 border-t border-white/[0.06] pt-2">
+                  {rowActions(r)}
+                </div>
+              )}
+            </li>
           ))}
-        </tbody>
-      </table>
+        </ul>
+      )}
+      {/* ── Desktop (or mobile:'scroll'): the semantic table ── */}
+      <div className={cn('overflow-x-auto', mobile === 'cards' && 'hidden md:block')}>
+        <table className="w-full text-sm border-collapse">
+          <caption className="sr-only">{caption}</caption>
+          <thead>
+            <tr className="border-b border-white/[0.08]">
+              {columns.map((c) => (
+                <th
+                  key={c.key}
+                  scope="col"
+                  className={cn('px-3 py-2 text-xs font-semibold text-zinc-400', alignClass(c), hideClass(c))}
+                >
+                  {c.label}
+                </th>
+              ))}
+              {rowActions && (
+                <th scope="col" className="px-3 py-2 text-right text-xs font-semibold text-zinc-400">
+                  <span className="sr-only">Actions</span>
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr
+                key={rowKey(r)}
+                onClick={onRowClick ? () => onRowClick(r) : undefined}
+                className={cn('border-b border-white/[0.04] hover:bg-white/[0.02]', onRowClick && 'cursor-pointer')}
+              >
+                {columns.map((c) => (
+                  <td key={c.key} className={cn('px-3 py-2 text-zinc-300', alignClass(c), hideClass(c))}>
+                    {cell(c, r)}
+                  </td>
+                ))}
+                {rowActions && (
+                  <td className="px-3 py-2 text-right">
+                    <div className="flex flex-wrap items-center justify-end gap-1">{rowActions(r)}</div>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
