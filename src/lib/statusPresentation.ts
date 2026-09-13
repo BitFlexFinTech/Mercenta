@@ -14,7 +14,13 @@
  * already rendered: this is a presentation consolidation, not a copy change.
  */
 import type { StatusTone } from '@/components/ui';
-import type { ApplicationStatus, ComplianceDocument } from '@/types';
+import type {
+  ApplicationStatus,
+  ComplianceDocument,
+  DeductionStatus,
+  PurchaseOrderStatus,
+} from '@/types';
+import { SUBMISSION_STATUS_LABELS, type SubmissionStatus } from '@/lib/spapi/transform';
 
 export interface StatusPresentation {
   /** Visible label — unchanged from the strings these surfaces already showed. */
@@ -94,3 +100,182 @@ export const APPLICATION_STATUS_ORDER: ApplicationStatus[] = [
   'approved',
   'rejected',
 ];
+
+/* ── §Phase D2 — commerce lifecycles ──────────────────────────────────────── */
+
+/**
+ * Purchase-order lifecycle. The labels are the exact strings the brand PO list
+ * already rendered (`STATUS_LABEL` in BrandPurchaseOrders) — consolidated here so
+ * the brand list, the admin list and the admin detail can never disagree.
+ */
+const PO_STATUS: Record<PurchaseOrderStatus, StatusPresentation> = {
+  received: { label: 'Received', tone: 'info', dataStatus: 'received', actionable: true },
+  under_review: { label: 'Under Review', tone: 'warning', dataStatus: 'under_review', actionable: true },
+  accepted: { label: 'Accepted', tone: 'success', dataStatus: 'accepted', actionable: true },
+  rejected: { label: 'Rejected', tone: 'danger', dataStatus: 'rejected', actionable: false },
+  ready_to_fulfil: {
+    label: 'Ready to Fulfil',
+    tone: 'brass',
+    dataStatus: 'ready_to_fulfil',
+    actionable: true,
+  },
+  shipped: { label: 'Shipped', tone: 'info', dataStatus: 'shipped', actionable: false },
+  delivered: { label: 'Delivered', tone: 'success', dataStatus: 'delivered', actionable: false },
+};
+
+export function poStatusPresentation(status: PurchaseOrderStatus | string): StatusPresentation {
+  return (
+    PO_STATUS[status as PurchaseOrderStatus] ?? {
+      label: String(status).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(status),
+      actionable: true,
+    }
+  );
+}
+
+/** Canonical purchase-order workflow order (drives the PO status filter). */
+export const PO_STATUS_ORDER: PurchaseOrderStatus[] = [
+  'received',
+  'under_review',
+  'accepted',
+  'ready_to_fulfil',
+  'shipped',
+  'delivered',
+  'rejected',
+];
+
+/**
+ * The 24-hour acknowledgement WINDOW of one purchase order (admin detail).
+ * `acknowledged` is derived from the PO status, so this is presentation only.
+ */
+export function ackWindowPresentation(
+  acknowledged: boolean,
+  hoursLeft: number,
+  minutesLeft: number
+): StatusPresentation {
+  if (acknowledged) {
+    return { label: 'Acknowledged', tone: 'success', dataStatus: 'acknowledged', actionable: false };
+  }
+  if (hoursLeft <= 0 && minutesLeft <= 0) {
+    return { label: 'Deadline passed', tone: 'danger', dataStatus: 'ack_overdue', actionable: true };
+  }
+  return {
+    label: `${hoursLeft}h ${minutesLeft}m left`,
+    tone: 'warning',
+    dataStatus: 'ack_due',
+    actionable: true,
+  };
+}
+
+/** Per-line acknowledgement outcome (`unacknowledged` renders as `pending`). */
+export type AckStatusValue = 'accepted' | 'rejected' | 'backordered' | 'unacknowledged';
+
+const ACK_STATUS: Record<AckStatusValue, StatusPresentation> = {
+  accepted: { label: 'accepted', tone: 'success', dataStatus: 'accepted', actionable: false },
+  rejected: { label: 'rejected', tone: 'danger', dataStatus: 'rejected', actionable: false },
+  backordered: { label: 'backordered', tone: 'warning', dataStatus: 'backordered', actionable: true },
+  unacknowledged: { label: 'pending', tone: 'neutral', dataStatus: 'unacknowledged', actionable: true },
+};
+
+export function ackStatusPresentation(status: AckStatusValue | string | undefined): StatusPresentation {
+  return (
+    ACK_STATUS[(status ?? 'unacknowledged') as AckStatusValue] ?? {
+      label: String(status).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(status),
+      actionable: true,
+    }
+  );
+}
+
+/** Deduction lifecycle — `open` blocks the brand's money, so it is danger. */
+const DEDUCTION_STATUS: Record<DeductionStatus, StatusPresentation> = {
+  open: { label: 'open', tone: 'danger', dataStatus: 'open', actionable: true },
+  disputed: { label: 'disputed', tone: 'warning', dataStatus: 'disputed', actionable: true },
+  accepted: { label: 'accepted', tone: 'info', dataStatus: 'accepted', actionable: false },
+  resolved: { label: 'resolved', tone: 'success', dataStatus: 'resolved', actionable: false },
+};
+
+export function deductionStatusPresentation(status: DeductionStatus | string): StatusPresentation {
+  return (
+    DEDUCTION_STATUS[status as DeductionStatus] ?? {
+      label: String(status).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(status),
+      actionable: true,
+    }
+  );
+}
+
+/**
+ * Catalogue submission lifecycle. The LABELS come from the canonical
+ * `SUBMISSION_STATUS_LABELS` (the retail submission vocabulary owner) so no
+ * second copy of them exists; only the semantic tone is decided here.
+ */
+const SUBMISSION_TONES: Record<SubmissionStatus, StatusTone> = {
+  pending: 'neutral',
+  submitted: 'neutral',
+  under_amazon_review: 'info',
+  live: 'success',
+  rejected: 'danger',
+};
+
+export function submissionStatusPresentation(status: SubmissionStatus | string): StatusPresentation {
+  const key = status as SubmissionStatus;
+  const label = SUBMISSION_STATUS_LABELS[key] ?? String(status).replace(/_/g, ' ');
+  return {
+    label,
+    tone: SUBMISSION_TONES[key] ?? 'neutral',
+    dataStatus: String(status),
+    actionable: key !== 'live' && key !== 'rejected',
+  };
+}
+
+/* ── §Phase D2 — urgency presentations (computed, never a stored status) ──── */
+
+/**
+ * Commission-billing decision for a purchase order that has been accepted
+ * (Retail Pipeline). Derived from the auto-approve threshold, never stored.
+ */
+export function billingDecisionPresentation(
+  autoInvoice: boolean,
+  commissionGbp: number
+): StatusPresentation {
+  return autoInvoice
+    ? {
+        label: `Auto-invoice (£${commissionGbp.toLocaleString()} commission)`,
+        tone: 'success',
+        dataStatus: 'auto_invoice',
+        actionable: false,
+      }
+    : {
+        label: 'Held for approval',
+        tone: 'warning',
+        dataStatus: 'held_for_approval',
+        actionable: true,
+      };
+}
+
+/**
+ * The 24-hour acknowledgement window is a REAL Vendor Central rule, and its
+ * urgency is computed from the order date at render time. It is presentation
+ * only — the domain status is the PO's own status.
+ */
+export function ackDeadlinePresentation(hoursLeft: number): StatusPresentation {
+  if (hoursLeft <= 0) {
+    return {
+      label: 'Ack deadline PASSED — risk of forced cancellation',
+      tone: 'danger',
+      dataStatus: 'ack_overdue',
+      actionable: true,
+    };
+  }
+  return {
+    label: `Ack within ${hoursLeft}h`,
+    tone: hoursLeft <= 6 ? 'danger' : 'warning',
+    dataStatus: hoursLeft <= 6 ? 'ack_urgent' : 'ack_due',
+    actionable: true,
+  };
+}
+

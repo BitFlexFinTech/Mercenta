@@ -3,7 +3,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useDeductions, usePurchaseOrders } from '@/data/queries';
 import { acknowledgePurchaseOrder, createShipmentForPO } from '@/data/api';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import {
+  ackStatusPresentation,
+  ackWindowPresentation,
+  deductionStatusPresentation,
+} from '@/lib/statusPresentation';
 import { cn } from '@/utils/cn';
 import type { PurchaseOrderLineItem } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
@@ -142,14 +147,13 @@ function beginOnBehalfAsn() {
             <p className="text-[11px] text-zinc-400 mt-0.5">{brandName} £{po.poValue.toLocaleString()}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className={cn(
-              'text-[10px]',
-              isAcknowledged ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-              : isDeadlinePassed ? 'bg-red-500/15 text-red-300 border-red-500/20'
-              : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
-            )}>
-              {isAcknowledged ? 'Acknowledged' : isDeadlinePassed ? 'Deadline passed' : hoursLeft + 'h ' + minutesLeft + 'm left'}
-            </Badge>
+            <StatusBadge
+              className="text-[10px]"
+              dataStatus={ackWindowPresentation(isAcknowledged, hoursLeft, minutesLeft).dataStatus}
+              tone={ackWindowPresentation(isAcknowledged, hoursLeft, minutesLeft).tone}
+            >
+              {ackWindowPresentation(isAcknowledged, hoursLeft, minutesLeft).label}
+            </StatusBadge>
             <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
           </div>
         </div>
@@ -301,11 +305,13 @@ function beginOnBehalfAsn() {
                       <Gavel className="w-3 h-3 text-zinc-500" /> {d.type.replace(/_/g, ' ')}
                     </span>
                     <span className="text-zinc-400 font-mono">{String.fromCharCode(163)}{d.amountGbp.toFixed(2)}</span>
-                    <Badge className={cn('text-[9px]',
-                      d.status === 'open' ? 'bg-red-500/15 text-red-300' :
-                      d.status === 'disputed' ? 'bg-amber-500/15 text-amber-300' :
-                      d.status === 'accepted' ? 'bg-blue-500/15 text-blue-300' : 'bg-emerald-500/15 text-emerald-300'
-                    )}>{d.status}</Badge>
+                    <StatusBadge
+                      className="text-[10px]"
+                      dataStatus={deductionStatusPresentation(d.status).dataStatus}
+                      tone={deductionStatusPresentation(d.status).tone}
+                    >
+                      {deductionStatusPresentation(d.status).label}
+                    </StatusBadge>
                   </div>
                 ))}
               </div>
@@ -330,11 +336,12 @@ function AdminPoLineItemRow({
   onAckShipDateChange: (v: string) => void; onAckRejectionCodeChange: (v: string) => void;
 }) {
   const statusBadge = (status?: string) => {
-    if (!status || status === 'unacknowledged') return <Badge className="text-[9px] bg-zinc-500/15 text-zinc-400">pending</Badge>;
-    return (<Badge className={cn('text-[9px]',
-      status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' :
-      status === 'rejected' ? 'bg-red-500/15 text-red-300' : 'bg-amber-500/15 text-amber-300'
-    )}>{status}</Badge>);
+    const p = ackStatusPresentation(status);
+    return (
+      <StatusBadge className="text-[10px]" dataStatus={p.dataStatus} tone={p.tone}>
+        {p.label}
+      </StatusBadge>
+    );
   };
 
   return (<tr className="align-top">

@@ -143,4 +143,65 @@ test.describe('Phase D — status semantics & decision queue', () => {
     await expect(page.getByRole('group', { name: 'Integration state summary' })).toBeVisible();
     expect(await overflow()).toBeLessThanOrEqual(1);
   });
+
+  /**
+   * §Phase D2 — the commerce surfaces (brand PO list, admin Retail Pipeline) were
+   * migrated onto the canonical presentation layer. The invariant this asserts is
+   * the important one: EVERY machine-readable status on those screens belongs to
+   * the vocabulary `src/lib/statusPresentation.ts` owns — so a second, drifting
+   * status vocabulary cannot reappear without failing here.
+   */
+  test('5. commerce surfaces render only canonical statuses', async ({ page }) => {
+    const CANONICAL = new Set([
+      // purchase orders + line acknowledgements
+      'received', 'under_review', 'accepted', 'rejected', 'ready_to_fulfil', 'shipped', 'delivered',
+      'unacknowledged', 'backordered',
+      // deductions
+      'open', 'disputed', 'resolved',
+      // commission billing decision
+      'auto_invoice', 'held_for_approval',
+      // acknowledgement window (computed urgency)
+      'ack_due', 'ack_urgent', 'ack_overdue', 'acknowledged',
+      // catalogue submissions
+      'submitted', 'under_amazon_review', 'live',
+      // partner applications
+      'pending', 'flagged', 'info_requested', 'approved',
+      // compliance documents
+      'missing', 'uploaded', 'expiring', 'expired',
+    ]);
+
+    async function statusesOnSurface(): Promise<string[]> {
+      return page
+        .locator('[data-status]')
+        .evaluateAll((els) => els.map((e) => String(e.getAttribute('data-status'))));
+    }
+
+    // ── Brand surface: the purchase-order list ──
+    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+    await openNav(page, 'Purchase Orders');
+    const brandStatuses = await statusesOnSurface();
+    expect(brandStatuses.length).toBeGreaterThan(0);
+    for (const v of brandStatuses) expect(CANONICAL.has(v)).toBe(true);
+    // The PO lifecycle itself is represented on this screen.
+    const poVocabulary = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'];
+    expect(brandStatuses.some((s) => poVocabulary.includes(s))).toBe(true);
+
+    // ── Admin surface: the Retail Pipeline (deduction ledger + billing decisions) ──
+    await loginAs(page, 'Super Admin — Tadii', 1200);
+    await openNav(page, 'Retail Pipeline');
+    const adminStatuses = await statusesOnSurface();
+    expect(adminStatuses.length).toBeGreaterThan(0);
+    expect(adminStatuses.filter((v) => !CANONICAL.has(v))).toEqual([]);
+
+    // The deduction ledger and the commission decision are both present and canonical.
+    const deductionStates = ['open', 'disputed', 'accepted', 'resolved'];
+    let deductionCount = 0;
+    for (const s of deductionStates) deductionCount += await page.locator(`[data-status="${s}"]`).count();
+    expect(deductionCount).toBeGreaterThan(0);
+
+    const billingCount =
+      (await page.locator('[data-status="auto_invoice"]').count()) +
+      (await page.locator('[data-status="held_for_approval"]').count());
+    expect(billingCount).toBeGreaterThan(0);
+  });
 });

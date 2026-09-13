@@ -9,7 +9,13 @@ import {
 } from '@/data/api';
 import type { PurchaseOrder } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import {
+  ackDeadlinePresentation,
+  ackStatusPresentation,
+  poStatusPresentation,
+  PO_STATUS_ORDER,
+} from '@/lib/statusPresentation';
 import { BrandCommPanel } from '@/components/shared/BrandComm';
 import { CommerceSimulationPanel } from '@/components/shared/CommerceSimulationPanel';
 import { ShippingCostEstimate } from '@/components/shared/ShippingCostEstimate';
@@ -26,25 +32,9 @@ const SHIP_CARRIERS: { value: string; label: string }[] = [
   { value: 'amazon_partner', label: 'Partnered carrier' },
 ];
 
-const STATUS_BADGE: Record<PurchaseOrder['status'], string> = {
-  received: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-  under_review: 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-  accepted: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-  rejected: 'bg-red-500/15 text-red-300 border-red-500/20',
-  ready_to_fulfil: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
-  shipped: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
-  delivered: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-};
-
-const STATUS_LABEL: Record<PurchaseOrder['status'], string> = {
-  received: 'Received',
-  under_review: 'Under Review',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
-  ready_to_fulfil: 'Ready to Fulfil',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-};
+/* §Phase D2 — PO status labels/tones now come from the canonical presentation
+   layer (src/lib/statusPresentation.ts); the local STATUS_BADGE/STATUS_LABEL maps
+   were a second source of truth for the same domain states. */
 
 export function BrandPurchaseOrders() {
   const qc = useQueryClient();
@@ -200,25 +190,11 @@ export function BrandPurchaseOrders() {
     const received = new Date(orderDate).getTime();
     const deadline = received + 24 * 60 * 60 * 1000;
     const hoursLeft = Math.ceil((deadline - Date.now()) / (60 * 60 * 1000));
-    if (hoursLeft <= 0) {
-      return (
-        <Badge className="text-[10px] bg-red-500/15 text-red-300 border-red-500/20">
-          Ack deadline PASSED — risk of forced cancellation
-        </Badge>
-      );
-    }
-    const urgent = hoursLeft <= 6;
+    const ack = ackDeadlinePresentation(hoursLeft);
     return (
-      <Badge
-        className={cn(
-          'text-[10px]',
-          urgent
-            ? 'bg-red-500/15 text-red-300 border-red-500/20'
-            : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
-        )}
-      >
-        Ack within {hoursLeft}h
-      </Badge>
+      <StatusBadge className="text-[10px]" tone={ack.tone} dataStatus={ack.dataStatus}>
+        {ack.label}
+      </StatusBadge>
     );
   }
 
@@ -247,8 +223,8 @@ export function BrandPurchaseOrders() {
           className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300 cursor-pointer"
         >
           <option value="all">Status: all</option>
-          {Object.keys(STATUS_LABEL).map((s) => (
-            <option key={s} value={s}>{STATUS_LABEL[s as PurchaseOrder['status']]}</option>
+          {PO_STATUS_ORDER.map((s) => (
+            <option key={s} value={s}>{poStatusPresentation(s).label}</option>
           ))}
         </select>
         <Button
@@ -261,7 +237,7 @@ export function BrandPurchaseOrders() {
               filteredPos.map((p) => [
                 p.poNumber,
                 p.orderDate,
-                STATUS_LABEL[p.status],
+                poStatusPresentation(p.status).label,
                 p.lineItems.length,
                 p.poValue,
               ])
@@ -295,9 +271,13 @@ export function BrandPurchaseOrders() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs text-brass">{po.poNumber}</span>
-                    <Badge className={cn('text-[10px]', STATUS_BADGE[po.status])}>
-                      {STATUS_LABEL[po.status]}
-                    </Badge>
+                    <StatusBadge
+                      className="text-[10px]"
+                      dataStatus={poStatusPresentation(po.status).dataStatus}
+                      tone={poStatusPresentation(po.status).tone}
+                    >
+                      {poStatusPresentation(po.status).label}
+                    </StatusBadge>
                     {/* §Phase E6 (G1) — truthful simulation provenance, taken ONLY
                         from the canonical PO flag. Additive: this adds no control
                         and does not change the DOM order of any existing button or
@@ -672,13 +652,13 @@ export function BrandPurchaseOrders() {
                                   <td className="py-0.5 font-mono text-zinc-400">{l.sku}</td>
                                   <td className="py-0.5 text-center text-zinc-500">{h.acknowledgedAt.slice(0, 16).replace('T', ' ')}</td>
                                   <td className="py-0.5 text-center">
-                                    <Badge className={cn('text-[9px]',
-                                      h.ackStatus === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' :
-                                      h.ackStatus === 'backordered' ? 'bg-amber-500/15 text-amber-300' :
-                                      'bg-red-500/15 text-red-300'
-                                    )}>
-                                      {h.ackStatus}
-                                    </Badge>
+                                    <StatusBadge
+                                      className="text-[10px]"
+                                      dataStatus={ackStatusPresentation(h.ackStatus).dataStatus}
+                                      tone={ackStatusPresentation(h.ackStatus).tone}
+                                    >
+                                      {ackStatusPresentation(h.ackStatus).label}
+                                    </StatusBadge>
                                   </td>
                                   <td className="py-0.5 text-right font-mono text-zinc-400">{h.acknowledgedQty}</td>
                                   <td className="py-0.5 text-right font-mono text-zinc-400">£{h.unitPrice.toFixed(2)}</td>

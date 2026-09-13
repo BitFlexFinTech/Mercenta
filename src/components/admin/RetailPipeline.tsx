@@ -5,46 +5,29 @@ import { useBrands, useDeductions, usePurchaseOrders, useCatalogSubmissions } fr
 import { disputeDeduction, recordDisputeOutcome } from '@/data/api';
 import { COMMISSION_AUTO_APPROVE_THRESHOLD_PLACEHOLDER_GBP } from '@/config/commercial';
 import { DemoBanner } from "@/components/shared/DemoBanner";
-import type { SeedSubmission } from '@/data/demoData';
 import { latestSubmissionForProduct, reconcileDelivery, type DeliveryReconciliationResult } from '@/data/demoStore';
 import { useApp } from '@/context/GlobalStateContext';
-import { SUBMISSION_STATUS_LABELS, UK_MARKETPLACE_ID } from '@/lib/spapi/transform';
-import { Badge, Button, Card } from '@/components/ui';
+import { UK_MARKETPLACE_ID } from '@/lib/spapi/transform';
+import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import {
+  billingDecisionPresentation,
+  deductionStatusPresentation,
+  poStatusPresentation,
+  submissionStatusPresentation,
+} from '@/lib/statusPresentation';
 import { cn } from '@/utils/cn';
 import { AdminPurchaseOrderDetail } from '@/components/admin/AdminPurchaseOrderDetail';
 import { CommerceOperationsPanel } from '@/components/admin/CommerceOperationsPanel';
 import {
   AlertTriangle,
-  CheckCircle2,
-  Clock,
   Eye,
   Lock,
   PlugZap,
-  XCircle,
 } from 'lucide-react';
 
-function StatusBadge({ status }: { status: SeedSubmission['status'] }) {
-  const map: Record<SeedSubmission['status'], string> = {
-    live: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-    under_amazon_review: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-    submitted: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/20',
-    rejected: 'bg-red-500/15 text-red-300 border-red-500/20',
-  };
-  const icon =
-    status === 'live' ? (
-      <CheckCircle2 className="w-3 h-3 mr-1" />
-    ) : status === 'rejected' ? (
-      <XCircle className="w-3 h-3 mr-1" />
-    ) : status === 'under_amazon_review' ? (
-      <Clock className="w-3 h-3 mr-1" />
-    ) : null;
-  return (
-    <Badge className={cn('text-[10px]', map[status])}>
-      {icon}
-      {SUBMISSION_STATUS_LABELS[status]}
-    </Badge>
-  );
-}
+/* §Phase D2 — the local StatusBadge duplicated the canonical status
+   presentation (and collided with the kit's name); submissions now render
+   through the canonical StatusBadge with the shared submission tones. */
 
 function LockedPipeline({ onGoToIntegrations }: { onGoToIntegrations?: () => void }) {
   return (
@@ -151,7 +134,13 @@ function UnlockedPipeline() {
                 )}
               </div>
               <div className="flex flex-col items-end gap-1">
-                <StatusBadge status={sub.status} />
+                <StatusBadge
+                  className="text-[10px]"
+                  dataStatus={submissionStatusPresentation(sub.status).dataStatus}
+                  tone={submissionStatusPresentation(sub.status).tone}
+                >
+                  {submissionStatusPresentation(sub.status).label}
+                </StatusBadge>
                 {/* §Phase E5 (G2) — truthful provenance on the admin submission list. */}
                 {sub.simulated && (
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
@@ -188,22 +177,23 @@ function UnlockedPipeline() {
                   <span className="text-[10px] text-zinc-500">{brandNames.get(po.brandId) ?? po.brandId}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs text-zinc-400 capitalize">
-                    {po.status.replace(/_/g, ' ')}
-                  </span>
+                  <StatusBadge
+                    className="text-[10px]"
+                    dataStatus={poStatusPresentation(po.status).dataStatus}
+                    tone={poStatusPresentation(po.status).tone}
+                  >
+                    {poStatusPresentation(po.status).label}
+                  </StatusBadge>
                   <span className="font-mono text-xs text-zinc-400">
                     £{po.poValue.toLocaleString()}
                   </span>
-                  <Badge
-                    className={cn(
-                      'text-[10px]',
-                      auto
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                        : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
-                    )}
+                  <StatusBadge
+                    className="text-[10px]"
+                    dataStatus={billingDecisionPresentation(auto, po.commissionAmount).dataStatus}
+                    tone={billingDecisionPresentation(auto, po.commissionAmount).tone}
                   >
-                    {auto ? `Auto-invoice (£${po.commissionAmount.toLocaleString()} commission)` : 'Held for approval'}
-                  </Badge>
+                    {billingDecisionPresentation(auto, po.commissionAmount).label}
+                  </StatusBadge>
                   <button
                     onClick={() => setDetailPoId(po.id)}
                     className="p-1 text-zinc-500 hover:text-white transition-colors"
@@ -262,17 +252,13 @@ function UnlockedPipeline() {
                   )}
                 </td>
                 <td className="px-4 py-2.5">
-                  <Badge
-                    className={cn(
-                      'text-[10px] capitalize',
-                      d.status === 'open' && 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-                      d.status === 'disputed' && 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-                      d.status === 'accepted' && 'bg-red-500/15 text-red-300 border-red-500/20',
-                      d.status === 'resolved' && 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                    )}
-                  >
-                    {d.status}
-                  </Badge>
+                <StatusBadge
+                  className="text-[10px] capitalize"
+                  dataStatus={deductionStatusPresentation(d.status).dataStatus}
+                  tone={deductionStatusPresentation(d.status).tone}
+                >
+                  {deductionStatusPresentation(d.status).label}
+                </StatusBadge>
                 </td>
                 <td className="px-4 py-2.5 text-right text-xs font-mono">
                   −£{d.amountGbp.toFixed(2)}
