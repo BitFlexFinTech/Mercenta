@@ -691,7 +691,13 @@ export function raiseCommerceException(
   type: DeductionType,
   amountGbp: number,
   reason: string,
-  actor: CommerceActor
+  actor: CommerceActor,
+  /**
+   * §Phase E2E — optional deterministic id so a replayable demo run lands the
+   * SAME ledger identity. The operator/brand UI passes nothing and keeps the
+   * original generated id.
+   */
+  opts?: { id?: string }
 ): CommerceResult<Deduction> {
   if (!actor.canMutate) return forbidden();
   const po = fetchPurchaseOrder(poId);
@@ -700,6 +706,7 @@ export function raiseCommerceException(
   if (!reason.trim()) return { ok: false, error: 'A reason is required for an exception.' };
 
   const deduction = store.createDeductionInStore({
+    id: opts?.id,
     brandId: po.brandId,
     purchaseOrderId: po.poNumber,
     type,
@@ -757,6 +764,23 @@ export function resolveCommerceDispute(
   actor: CommerceActor
 ): CommerceResult<Deduction> {
   if (!actor.canMutate) return forbidden();
+  /**
+   * §Phase E2E — RESOLUTION IS AN OPERATOR DECISION.
+   *
+   * A brand may EVIDENCE and OPEN a dispute about its own deduction, but it must
+   * never declare the outcome of that dispute on its own behalf ("brand cannot
+   * falsely declare itself the winner"). Before this guard the brand portal's
+   * shared commerce panel exposed a "Resolve (won)" control and the domain
+   * accepted it, so a brand could award itself the money. The operator decision
+   * is a genuine domain authorisation, not a hidden button.
+   */
+  if (actor.tenantId) {
+    return {
+      ok: false,
+      error:
+        'FORBIDDEN — dispute resolution is a Mercenta operations decision; a brand-pinned account cannot declare its own outcome.',
+    };
+  }
   const existing = store.demoDeductions.find((d) => d.id === deductionId);
   if (!existing) return { ok: false, error: NOT_FOUND };
   if (crossTenant(actor, existing.brandId)) return { ok: false, error: CROSS_TENANT };

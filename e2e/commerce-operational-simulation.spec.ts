@@ -123,10 +123,113 @@ test.describe('E4 — operational commerce simulation', () => {
     await dispute.click();
     await expect(page.getByText(/Open dispute: ded-/).first()).toBeVisible({ timeout: 8000 });
 
-    const resolve = page.locator('button[data-state="commerce-resolve-dispute"]').first();
-    await expect(resolve).toBeVisible({ timeout: 6000 });
-    await resolve.click();
-    await expect(page.getByText(/Resolve dispute: ded-/).first()).toBeVisible({ timeout: 8000 });
+    // §Phase E2E — the brand may OPEN and evidence a dispute, but it must never
+    // declare its own outcome ("brand cannot falsely declare itself the winner").
+    // Resolution is a Mercenta operations decision, enforced IN THE DOMAIN.
+    await expect(page.locator('button[data-state="commerce-resolve-dispute"]')).toHaveCount(0);
+    await expect(
+      page.locator('[data-state="commerce-dispute-awaiting-operations"]').first()
+    ).toBeVisible();
+
+    const brandRefusal = await page.evaluate(async () => {
+      const mod = await import('/src/lib/commerce/commerceLifecycle.ts');
+      const store = await import('/src/data/demoStore.ts');
+      const d = store.demoDeductions.find(
+        (x) => x.brandId === 'brand-zambezi' && x.status === 'disputed'
+      );
+      if (!d) return { skipped: true } as const;
+      const brandActor = {
+        staffId: 'brand:brand-zambezi',
+        canMutate: true,
+        tenantId: 'brand-zambezi',
+      };
+      const res = mod.resolveCommerceDispute(d.id, 'won', brandActor);
+      const after = store.demoDeductions.find((x) => x.id === d.id);
+      return {
+        skipped: false as const,
+        ok: res.ok,
+        error: String(res.error ?? ''),
+        status: after?.status,
+        outcome: after?.dispute?.outcome ?? null,
+      };
+    });
+    expect(brandRefusal.skipped).toBe(false);
+    if (!brandRefusal.skipped) {
+      expect(brandRefusal.ok).toBe(false);
+      expect(brandRefusal.error).toContain('FORBIDDEN');
+      // A refusal MUST NOT mutate the recorded outcome.
+      expect(brandRefusal.status).toBe('disputed');
+      expect(brandRefusal.outcome).toBeNull();
+    }
+
+    expect(pageErrors).toEqual([]);
+    expect(externalCalls).toEqual([]);
+  });
+
+  test('2b. brand opens a dispute; the OPERATOR resolves it — the canonical outcome changes', async ({
+    page,
+  }) => {
+    const externalCalls = watchExternalCalls(page);
+    const pageErrors: string[] = [];
+    page.on('pageerror', (e) => pageErrors.push(String(e)));
+
+    // 1. The BRAND drives the operational lifecycle and disputes the exception.
+    await openBrandPurchaseOrders(page, 'Zambezi Organic Extracts Ltd');
+    await page.locator('button[data-state="commerce-raise-po"]').first().click();
+    await page.waitForTimeout(400);
+    await page.locator('button[data-state="commerce-acknowledge"]').first().click();
+    await page.waitForTimeout(400);
+    await page.locator('button[data-state="commerce-fulfil"]').first().click();
+    await page.waitForTimeout(500);
+    await page.locator('button[data-state="commerce-receive"]').first().click();
+    await page.waitForTimeout(600);
+    await page.locator('button[data-state="commerce-raise-exception"]').first().click();
+
+    const raised = page.getByText(/Raise exception: ded-/).first();
+    await expect(raised).toBeVisible({ timeout: 8000 });
+    const deductionId = ((await raised.innerText()).match(/ded-[a-z0-9-]+/i) ?? [])[0];
+    expect(deductionId).toBeTruthy();
+
+    await page.locator('button[data-state="commerce-open-dispute"]').first().click();
+    await expect(page.getByText(/Open dispute: ded-/).first()).toBeVisible({ timeout: 8000 });
+    // The brand may evidence the dispute but never resolve it.
+    await expect(page.locator('button[data-state="commerce-resolve-dispute"]')).toHaveCount(0);
+    await expect(
+      page.locator('[data-state="commerce-dispute-awaiting-operations"]').first()
+    ).toBeVisible();
+
+    // 2. Switch to the operator WITHOUT reloading the document — the in-memory
+    //    demo state must persist across the role change.
+    await page.click('[aria-controls="profile-menu"]');
+    await page.getByRole('menuitem', { name: 'Sign Out' }).click();
+    await page.waitForTimeout(700);
+    await page.getByRole('button', { name: 'Partner Login' }).first().click();
+    await page.waitForTimeout(700);
+    await page.click('text=Mercenta Admin Hub');
+    await page.waitForTimeout(1100);
+    await page.click('nav[aria-label="Primary"] >> text=Retail Pipeline');
+    await page.waitForTimeout(900);
+    await expect(page.getByRole('heading', { name: 'Retail Pipeline' })).toBeVisible({ timeout: 8000 });
+
+    // 3. The operator resolves THAT deduction (scoped to its own id).
+    const disputeScope = page.locator(`[data-deduction="${deductionId}"]`);
+    const resolveWon = disputeScope.locator('button[data-state="commerce-operator-resolve-won"]');
+    await expect(disputeScope).toBeVisible({ timeout: 8000 });
+    await expect(resolveWon).toBeEnabled();
+    await resolveWon.click();
+
+    // The operator decision is the recorded canonical outcome, and the surface
+    // reports it from the domain's own returned record (the panel's notice is
+    // built from the domain result: `<id> — <status> · outcome <outcome>`).
+    await expect(
+      page
+        .getByText(
+          new RegExp(`Resolve dispute \\(won\\): ${deductionId} — resolved · outcome won`)
+        )
+        .first()
+    ).toBeVisible({ timeout: 8000 });
+    // THAT deduction no longer offers an operator resolution control.
+    await expect(disputeScope).toHaveCount(0);
 
     expect(pageErrors).toEqual([]);
     expect(externalCalls).toEqual([]);

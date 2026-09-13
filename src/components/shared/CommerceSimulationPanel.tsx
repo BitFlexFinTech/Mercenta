@@ -30,7 +30,6 @@ import {
   raiseCommerceException,
   receiveCommercePurchaseOrder,
   recordCommercePayment,
-  resolveCommerceDispute,
   type CommerceActor,
   type CommerceResult,
 } from '@/lib/commerce/commerceLifecycle';
@@ -391,21 +390,18 @@ export function CommerceSimulationPanel() {
                 </Button>
               )}
               {d.dispute && d.status === 'disputed' && (
-                <Button
-                  variant="ghost"
-                  className="text-[10px] px-2 py-0.5"
-                  data-state="commerce-resolve-dispute"
-                  disabled={busy}
-                  onClick={() =>
-                    act(
-                      'Resolve dispute',
-                      () => Promise.resolve(resolveCommerceDispute(d.id, 'won', actor)),
-                      (x: { id: string; status: string }) => `${x.id} — ${x.status} (sim)`
-                    )
-                  }
+                /*
+                 * §Phase E2E — the brand EVIDENCES a dispute but never declares
+                 * its outcome. Resolution is a Mercenta operations decision (see
+                 * `resolveCommerceDispute`), so the brand surface states that
+                 * truthfully instead of offering a self-award control.
+                 */
+                <span
+                  className="text-[10px] text-amber-300/90"
+                  data-state="commerce-dispute-awaiting-operations"
                 >
-                  Resolve (won)
-                </Button>
+                  Awaiting Mercenta operations decision
+                </span>
               )}
             </div>
           ))}

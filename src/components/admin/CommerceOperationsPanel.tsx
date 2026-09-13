@@ -29,6 +29,9 @@ import {
   openCommerceCase,
   receiveCommercePurchaseOrder,
   recordCommercePayment,
+  // §Phase E2E — operator-only dispute resolution (a brand may not declare its
+  // own outcome; see commerceLifecycle.resolveCommerceDispute).
+  resolveCommerceDispute,
   type CommerceActor,
   type CommerceResult,
 } from '@/lib/commerce/commerceLifecycle';
@@ -354,6 +357,40 @@ export function CommerceOperationsPanel() {
                 </Badge>{' '}
                 £{d.amountGbp.toFixed(2)}
                 {d.simulated && <span className="text-[9px] text-brass-400"> (sim)</span>}
+                {/*
+                 * §Phase E2E — operator resolution. The outcome of a disputed
+                 * deduction is a Mercenta operations decision, so it is made
+                 * HERE (unpinned operator actor), never by the brand. Each
+                 * outcome writes the real canonical state via the domain.
+                 */}
+                {d.status === 'disputed' && (
+                  <span
+                    className="ml-2 inline-flex flex-wrap items-center gap-1"
+                    data-state="commerce-operator-dispute"
+                    data-deduction={d.id}
+                  >
+                    <span className="text-[10px] text-zinc-500">Resolve:</span>
+                    {(['won', 'partial', 'lost'] as const).map((outcome) => (
+                      <Button
+                        key={outcome}
+                        variant="ghost"
+                        className="text-[10px] px-2 py-0.5"
+                        data-state={`commerce-operator-resolve-${outcome}`}
+                        disabled={busyId === d.id || !canCurrentUserMutate}
+                        onClick={() =>
+                          run(
+                            d.id,
+                            `Resolve dispute (${outcome})`,
+                            () => resolveCommerceDispute(d.id, outcome, actor),
+                            (x) => `${x.id} — ${x.status} · outcome ${x.dispute?.outcome ?? 'n/a'}`
+                          )
+                        }
+                      >
+                        {outcome}
+                      </Button>
+                    ))}
+                  </span>
+                )}
               </div>
             ))}
         </div>
