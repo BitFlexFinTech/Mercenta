@@ -3,7 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useBrands, useComplianceDocuments, useProducts } from '@/data/queries';
 import { setComplianceDocStatus, uploadComplianceDoc } from '@/data/api';
 import { generateUkcaDeclaration } from '@/lib/customsDocs';
-import { Badge, Button, Card } from '@/components/ui';
+import { complianceDocStatusPresentation } from '@/lib/statusPresentation';
+import { Badge, Button, Card, EmptyState, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { CheckCircle2, ChevronDown, ChevronRight, Eye, Shield, XCircle } from 'lucide-react';
 import type { ComplianceDocument } from '@/types';
@@ -41,6 +42,16 @@ export function ComplianceApprovals() {
   return (
     <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
       <div className="flex items-center gap-3"><Shield className="w-5 h-5 text-brass-400" /><div><h2 className="text-lg font-semibold text-white">Compliance Approvals</h2><p className="text-xs text-zinc-500 mt-0.5">Per-brand cards</p></div></div>
+      {/* §Phase D — honest empty state: never a blank screen. */}
+      {brandMap.size === 0 && (
+        <Card className="p-2 bg-ink-850 border-white/[0.06]">
+          <EmptyState
+            title="No compliance documents on file"
+            description="A partner brand appears here with its per-document review state as soon as Mercenta holds a document record for it. Approving a document is what clears that brand's compliance gate."
+          />
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{Array.from(brandMap.entries()).map(function([brandId, brandDocs]) {
         const brand = brandsList.find(function(b) { return b.id === brandId; });
         const brandName = brand?.profile.businessName ?? brandId;
@@ -54,7 +65,7 @@ export function ComplianceApprovals() {
             <div className="flex items-center gap-2">{pending > 0 && <Badge className="text-[9px] bg-amber-500/15 text-amber-300">{pending}</Badge>}{isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />}</div>
           </button>
           {isExpanded && (<div className="border-t border-white/[0.06] divide-y divide-white/[0.04]">{brandDocs.map(function(d) { return (<div key={d.id} className="flex items-center justify-between px-4 py-2.5">
-            <div className="flex items-center gap-2"><span className="text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</span><Badge className={cn('text-[9px]', d.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : d.status === 'missing' ? 'bg-red-500/15 text-red-300' : 'bg-amber-500/15 text-amber-300')}>{d.status.replace(/_/g, ' ')}</Badge></div>
+            <div className="flex items-center gap-2"><span className="text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</span><StatusBadge className="text-[10px]" dataStatus={complianceDocStatusPresentation(d.status).dataStatus} tone={complianceDocStatusPresentation(d.status).tone}>{complianceDocStatusPresentation(d.status).label}</StatusBadge></div>
             <div className="flex items-center gap-1"><Button variant="ghost" className="text-[10px]" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-[10px] text-emerald-300" onClick={function() { act(d.id, 'approved'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-[10px] text-red-300" onClick={function() { act(d.id, 'missing'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-[10px] text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
           </div>);})}<p className="text-[8px] text-zinc-700 px-4 py-1 text-right">Actions attributed as admin on behalf of brand</p></div>)}
         </div>);

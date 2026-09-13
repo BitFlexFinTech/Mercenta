@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
-import { Card, Badge, Button } from '@/components/ui';
+import { Card, Button, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   demoApplications,
@@ -9,6 +9,7 @@ import {
   approvedApplicationBrands,
 } from '@/data/applicationStore';
 import { createMockMailClient } from '@/lib/mail/mail';
+import { applicationStatusPresentation, APPLICATION_STATUS_ORDER } from '@/lib/statusPresentation';
 import { beginOnboardingFromApplication, beginOnboardingForManualBrand, tenantIdForApplication } from '@/lib/onboarding/onboardingLifecycle';
 import type { BrandApplication, ApplicationStatus } from '@/types';
 import {
@@ -16,7 +17,6 @@ import {
   Flag, UserPlus, ExternalLink, Clock,
 } from 'lucide-react';
 
-const STATUS_FILTERS: (ApplicationStatus | 'all')[] = ['all','pending','flagged','info_requested','approved','rejected'];
 const STATUS_LABELS: Record<string, string> = { all:'All', pending:'Pending', flagged:'Flagged', info_requested:'Info Requested', approved:'Approved', rejected:'Rejected' };
 const LINK_ICONS: Record<string, {icon:string;color:string;label:string}> = {
   verified:{icon:'\u2705',color:'text-emerald-400',label:'Verified'},
@@ -152,13 +152,23 @@ return(<div className="space-y-4">
       <Button onClick={()=>setShowManual(true)}><UserPlus className="w-4 h-4"/> + Add Brand Manually</Button>
     </div>
     {msg&&<div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-sm text-emerald-400">{msg}</div>}
-    <div className="flex flex-wrap gap-1">
-      {STATUS_FILTERS.map(f=>(
-        <button key={f} onClick={()=>setFilter(f)}
-          className={cn('px-3 py-1.5 text-xs rounded-lg transition-colors',filter===f?'bg-brass-500/20 text-brass-400 border border-brass-500/30':'text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent')}>
-          {STATUS_LABELS[f]}
-        </button>
-      ))}
+    {/* §Phase D — decision queue. Counts are DERIVED from the store (never
+        hand-written) and every tile drills into the list below: a static number
+        with no drill-down is incomplete. */}
+    <div role="group" aria-label="Application decision queue" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+      {(['all', ...APPLICATION_STATUS_ORDER] as (ApplicationStatus | 'all')[]).map(f=>{
+        const count = f==='all' ? demoApplications.length : demoApplications.filter(a=>a.status===f).length;
+        const active = filter===f;
+        return (
+          <button key={f} type="button" aria-pressed={active} data-state={active?'active':'inactive'}
+            onClick={()=>setFilter(f)}
+            className={cn('text-left px-3 py-2.5 rounded-ds-md border transition-ds',
+              active?'bg-brass-500/15 border-brass-500/40':'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.14]')}>
+            <div className="text-lg font-semibold text-white tabular-nums">{count}</div>
+            <div className="text-[11px] text-zinc-400">{f==='all'?'All applications':STATUS_LABELS[f]}</div>
+          </button>
+        );
+      })}
     </div>
     <div className="relative">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600"/>
@@ -171,7 +181,12 @@ return(<div className="space-y-4">
           <div className="p-4">
             <div className="flex items-start justify-between mb-2">
               <div><h3 className="text-sm font-semibold text-white">{app.companyName}</h3><p className="text-xs text-zinc-500">{app.country} · {app.category}</p></div>
-              <Badge className={cn('text-[10px]',app.status==='pending'?'bg-blue-500/15 text-blue-300 border-blue-500/20':app.status==='flagged'?'bg-amber-500/15 text-amber-300 border-amber-500/20':app.status==='info_requested'?'bg-purple-500/15 text-purple-300 border-purple-500/20':app.status==='approved'?'bg-emerald-500/15 text-emerald-300 border-emerald-500/20':'bg-red-500/15 text-red-300 border-red-500/20')}>{STATUS_LABELS[app.status]}</Badge>
+              <StatusBadge
+                tone={applicationStatusPresentation(app.status).tone}
+                dataStatus={applicationStatusPresentation(app.status).dataStatus}
+              >
+                {applicationStatusPresentation(app.status).label}
+              </StatusBadge>
             </div>
             <div className="grid grid-cols-3 gap-4 text-xs mb-3">
               <div><span className="text-zinc-600">SKUs:</span><span className="text-zinc-300 ml-1">{app.skuCount??'N/A'}</span></div>

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
+import { complianceDocStatusPresentation } from '@/lib/statusPresentation';
 import {
   Eye,
   FileCheck2,
@@ -292,13 +293,13 @@ function ComplianceUploadCard({
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge className={cn('text-[9px]',
-                    status === 'approved' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' :
-                    status === 'under_review' || status === 'uploaded' ? 'bg-amber-500/15 text-amber-300 border-amber-500/20' :
-                    status === 'expiring' ? 'bg-blue-500/15 text-blue-300 border-blue-500/20' :
-                    status === 'expired' ? 'bg-red-500/15 text-red-300 border-red-500/20' :
-                    'bg-zinc-500/15 text-zinc-400 border-zinc-500/20'
-                  )}>{status.replace(/_/g, ' ')}</Badge>
+                  <StatusBadge
+                    className="text-[10px]"
+                    dataStatus={complianceDocStatusPresentation(status).dataStatus}
+                    tone={complianceDocStatusPresentation(status).tone}
+                  >
+                    {complianceDocStatusPresentation(status).label}
+                  </StatusBadge>
                   {status !== 'approved' && (
                     <Button className="text-[10px]" onClick={function() { handleUpload(type); }} disabled={isUploading}>
                       {isUploading ? 'Uploading...' : <><Upload className="w-3 h-3 mr-1" />Upload</>}
