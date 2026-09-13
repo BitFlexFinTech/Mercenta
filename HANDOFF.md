@@ -278,9 +278,28 @@ provisions the brand's deterministic organization and signs it in (idempotent, i
 verified live against the engine). Remaining user action: DNS
 `postiz.mercenta.co.uk → 46.101.75.185`. Then: **Final UI/UX redesign** — Phase G1 (2026-09-13)
 delivered the remaining HONEST product gap inside that phase (the brand deductions ledger behind
-Tour 5; full suite 209/0/3). Remaining screen-level work: ComplianceUploadCard re-verification and
-Integration Hub breadth (Phase 8 body of work), then final integration/regression, production
-preparation and deployment. Rakazo stays LAST (Phase M).
+Tour 5; full suite 209/0/3).
+**PHASE A+B+C+D1 (2026-09-13) — BUILD FORWARD, DONE.** A: ComplianceUploadCard re-verified and
+FIXED (both the brand card and the admin Compliance Approvals bumped a dead version counter and
+never re-read the docs, so the row badge stayed stale after Upload; the canonical
+`reviewGateDocument` gate sync was activated). B: Integration Hub breadth — the canonical
+`INTEGRATION_META.category` / `INTEGRATION_CATEGORY_LABELS` / `hasLiveCredentialHint` sources are now
+consumed: mode-derived state tiles that filter the list, an actionable attention alert, category
+grouping, search + real visible/total count, honest empty state, truthful demo-key note. C: the
+hard-skipped access-gate tests closed with real end-to-end coverage (approval → canonical onboarding
+record → the brand enters its portal), skips 3 → 2, and two tests that COULD NOT FAIL (`Approve`/
+`Reject` matching the status filter chips) repaired. D1: `src/lib/statusPresentation.ts` (single
+source of truth for domain status → label + semantic tone + `data-status`), the Applications
+decision queue (derived counts, each tile a filter), semantic statuses + honest empty state on
+Compliance Approvals, and the brand compliance card on the same statuses.
+Commits `0f3e84b` (A+B) · `6844182` (C) · `9f9c8ef` (D1). Full suite **216 passed / 0 failed / 2
+skipped** before D1; the touched-surface regression after D1 is 54 passed / 0 failed / 2 skipped.
+**NEXT (in order):** finish **Phase D** — the wider ad-hoc status-badge sweep (**292 occurrences
+across 74 files**), raw `<table>` → `DataTable` migration, PageHeader/IA consistency, and the
+per-screen redesign pass (dashboards, CRM, catalogue, PO, finance, logistics, marketing, carrier),
+each verified with Playwright — then Phase E full regression, Phase F production preparation
+(GO_LIVE.md playbook + the deploy-time items in PRODUCTION_READINESS.md), Phase G deployment to
+demo.mercenta.co.uk only, Rakazo LAST (Phase M). Social stays PARKED; Rocket.Chat stays removed.
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,

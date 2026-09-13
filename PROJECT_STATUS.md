@@ -1,6 +1,68 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-13 (**Phase G1 — BRAND DEDUCTIONS LEDGER (Tour 5 surface) + RETIRED ROCKET.CHAT SERVER CLEANUP COMPLETE**) · Previous: 2026-09-12 (**Phase E8 — OPERATIONAL MERCENTA SOCIAL (LIVE ENGINE + SSO BRIDGE)**; see the PHASE E8 block below. Previous: **Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; before that E6 — BRAND OPERATIONAL SURFACES, E5 — ADMIN OPERATIONAL SURFACES, E4 — COMMERCE, E3 — CATALOG, E2 — BRAND ONBOARDING, E1 — ONBOARDING HAND-OFF, D4 — PERSISTENCE.)
+> Last updated: 2026-09-13 (**Phase A+B — COMPLIANCE UPLOAD SURFACE COMPLETE + INTEGRATION HUB CONTROL CENTRE BUILT**; then **Phase C — access-gate real coverage** and **Phase D1 — canonical status layer + decision-queue drill-downs**)
+>
+> **PHASE A+B (2026-09-13) — BUILD FORWARD.** Commit **`0f3e84b`** (previous checkpoint G1 `68449af`;
+> E9 `7a40503`; protected baseline **`959b4d2` still an ancestor**, no reset/rebase/amend).
+> **① PHASE A — ComplianceUploadCard re-verification → COMPLETE (two real defects found and fixed).**
+> The card WAS mounted (`ComplianceHub.tsx:117` — the old "dead UI" note is historic) and its gate rule
+> already came from the canonical `evaluateComplianceGate`/`getRequiredDocumentsForCategory`, but its
+> Upload action only bumped a **dead** `docVersion` counter (declared, `void`-ed, never read) and never
+> re-read the docs, so the row's own status badge kept its pre-upload value; `ComplianceApprovals`
+> (admin) had the identical defect (`docsVersion`), and the canonical `reviewGateDocument` action had
+> **zero call sites** so the Product Catalog gate and this card's gate could drift. Fix: both surfaces
+> now invalidate `['compliance-documents']` (the pattern `ProductCatalog`/`BrandPurchaseOrders` use) and
+> the brand card syncs the in-session gate with the returned canonical doc id. **No second workflow, no
+> duplicate store, no migration (023 still newest).** New test `e2e/compliance-gate.spec.ts` t5 proves
+> missing → under review with no reload AND that an upload is not an approval (gate still blocks, 5 items).
+> **② PHASE B — Integration Hub breadth → BUILT (first increment).** Three canonical sources were
+> registered but **never consumed** (`INTEGRATION_META.category`, `INTEGRATION_CATEGORY_LABELS`,
+> `hasLiveCredentialHint`); the Hub is now a real control centre: mode-derived state tiles
+> (all / live / simulation / available / configuring / needs-attention / disabled) that each filter the
+> provider list, an actionable attention alert naming the providers actually in error/degraded/
+> needs_attention/failing-health, canonical category grouping, search with a real visible/total count,
+> an honest empty state, and a truthful "developer demo key present — not a verified connection" note.
+> Every existing card behaviour (wizard, health check, simulation enable/disable, disconnect,
+> mock/live separation, `h3` provider names) is unchanged.
+> **Gates:** typecheck **0** · lint **0** · build **✓ 3.77s** · `compliance-gate` **5/5** ·
+> `integration-hub` **5/5** (new) · `app-shell` + `rocketchat-removal` + `simulation-control` **45/45** ·
+> **no migration**. Next: Phase C (remaining genuinely incomplete core requirements), then the UI/UX
+> redesign, regression, production prep. Social stays PARKED, Rakazo stays LAST.
+>
+> **PHASE C (2026-09-13) — the last hard-skipped access-gate tests closed with REAL coverage.** Commit
+> **`6844182`**. The suite's only remaining skips were `access-gate` t6/t8/t9. t6's skip reason was
+> **stale**: `signOut()` only changes React state (no reload) and Phase E1/E2 already made approval a
+> canonical hand-off (`beginOnboardingFromApplication` + `addApprovedBrand` publish the SAME tenant id
+> `brand-app-<applicationId>` the login card uses), so t6 is now a genuine end-to-end test — public
+> application form → operator approval → canonical onboarding record in the Onboarding pipeline
+> (`Application` origin, derived tenant id) → the approved brand enters its portal wizard, with zero
+> page errors. Two further defects found while doing it: **t7 ("Admin rejects brand") could not fail**
+> (`button:has-text("Reject")` matched the *"Rejected" status filter chip*, so the click hit the chip and
+> the assertion then passed on the chip's own label) and t6 had the same class of bug (`Approve` matched
+> the *"Approved" chip*). Both now use exact accessible names and assert the real consequence. Skips
+> **3 → 2**; the two that remain are honest and not buildable from the repo (t8's manual-creation path is
+> already covered end-to-end by `onboarding-workflow` t3; t9 needs server-side route guards that do not
+> exist in a static SPA).
+>
+> **PHASE D1 (2026-09-13) — UI/UX redesign, increment 1: the canonical STATUS LAYER.** Commit
+> **`9f9c8ef`**. Executed against the design system's own migration guidance ("replace ad-hoc
+> `bg-{c}-500/15` status badges with `StatusBadge`"). **`src/lib/statusPresentation.ts` (NEW)** is now the
+> single source of truth for presenting a domain status (compliance-document lifecycle + partner-application
+> decision lifecycle + canonical workflow order) as `{ label, semantic tone, data-status, actionable }`;
+> visible labels are byte-identical to what the screens already rendered (consolidation, not a copy change).
+> **Applications** lost its one-line colour ternary (semantic `StatusBadge`, `role="status"`,
+> `data-status`, never colour-only) and its loose status chips became a **derived decision queue** — one
+> tile per decision state, count read from the store, each tile the filter for the list below (a metric with
+> no drill-down is incomplete). **Compliance Approvals** gained semantic row statuses + an honest empty
+> state. **The brand compliance card** uses the same canonical statuses, so brand and admin can no longer
+> disagree about what a state looks like. New spec `e2e/status-semantics.spec.ts` **4/4** (queue counts
+> derived; `data-status`/`role=status`; drill-down `aria-pressed`; canonical statuses on both surfaces;
+> never-approved renders `approved = 0`; 375px no-horizontal-overflow on both redesigned surfaces).
+> **STILL OPEN (recorded, not claimed):** the wider ad-hoc badge sweep (**292 occurrences across 74
+> files**), raw-`<table>` → `DataTable` migration, and the per-screen redesign pass (dashboards, CRM,
+> catalogue, PO, finance, logistics, marketing, carrier) — these are the remaining Phase D build items.
+>
+> · Previous: 2026-09-12 (**Phase E8 — OPERATIONAL MERCENTA SOCIAL (LIVE ENGINE + SSO BRIDGE)**; see the PHASE E8 block below. Previous: **Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; before that E6 — BRAND OPERATIONAL SURFACES, E5 — ADMIN OPERATIONAL SURFACES, E4 — COMMERCE, E3 — CATALOG, E2 — BRAND ONBOARDING, E1 — ONBOARDING HAND-OFF, D4 — PERSISTENCE.)
 >
 > **PHASE G1 (2026-09-13) — BRAND DEDUCTIONS LEDGER (Tour 5) + ROCKET.CHAT SERVER CLEANUP.**
 > Commit **`beb4721`** (previous checkpoint E9 `7a40503`; protected baseline `959b4d2` still an ancestor).

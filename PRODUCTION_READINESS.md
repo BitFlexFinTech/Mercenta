@@ -1,5 +1,17 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
+**Last updated:** Phase D1 (13 Sep) — **BUILD-FORWARD session A+B+C+D1; NO new mock, placeholder or
+credential requirement was introduced.** ComplianceUploadCard/ComplianceApprovals were re-verified and
+fixed (stale row status after an Upload; the canonical `reviewGateDocument` gate sync was activated).
+The **Integration Hub** now consumes its canonical sources (`INTEGRATION_META.category`,
+`INTEGRATION_CATEGORY_LABELS`, `hasLiveCredentialHint`): mode-derived state tiles that filter the list,
+an actionable attention alert, category grouping, search, honest empty state, and a truthful
+**"developer demo key present — not a verified connection"** note, so an env demo key can never be read
+as a live integration. `src/lib/statusPresentation.ts` is now the single source of truth for presenting
+a domain status (semantic tone + machine-readable `data-status`); a simulated/pending/error state can no
+longer be styled as a stronger one on the surfaces that adopt it. The whole go-live picture below is
+unchanged: **only credentials + deploy-time functions remain** for the live paths.
+
 **Last updated:** Phase G1 (13 Sep) — **the retired Rocket.Chat server infrastructure is fully
 removed from `mercenta-services` (46.101.75.185)**: containers, dedicated Mongo volume, anonymous
 volumes, images and the compose service/volume entries are gone; the stack re-validates and all 10

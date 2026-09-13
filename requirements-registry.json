@@ -2,14 +2,14 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-09-12",
+    "last_updated": "2026-09-13",
     "status_enum": [
       "not_started",
       "built",
       "built_and_tested",
       "regressed"
     ],
-    "total_entries": 137
+    "total_entries": 142
   },
   "entries": [
     {
@@ -1116,9 +1116,10 @@
       "description": "Added compliance document upload UI to brand ComplianceHub with drag-and-drop upload and expiry tracking badges",
       "source": "Stage 3",
       "status": "built_and_tested",
-      "evidence": "src/components/brand/ComplianceHub.tsx (ComplianceUploadCard component); e2e/admin-views.spec.ts (brand views render)",
-      "last_verified": "2026-09-01",
-      "superseded_by": null
+      "evidence": "src/components/brand/ComplianceHub.tsx (ComplianceUploadCard, mounted at line 117); src/components/admin/ComplianceApprovals.tsx; e2e/compliance-gate.spec.ts tests 4 and 5 (admin doc rows render; brand Upload moves the row to under review with no reload and does NOT approve it)",
+      "last_verified": "2026-09-13",
+      "superseded_by": null,
+      "_audit_note": "Phase A (2026-09-13): re-verified. The card is mounted (the historic \"dead UI\" note is stale). Two real defects fixed: the dead docVersion counter and the missing canonical refetch after upload. No file-picker/drag-drop exists and none was invented - compliance documents are a status transition through the canonical store, and the repo holds no storage-bucket mechanism to upload bytes to."
     },
     {
       "id": "stage3-compliance-gate-dashboard-card",
@@ -1288,6 +1289,42 @@
       "status": "built",
       "evidence": "src/lib/social/workspace.ts (engineLinked:false, engineOrganizationId null, simulated:true - reported truthfully); docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 5.4, 9.3, 9.4",
       "last_verified": "2026-09-12",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseA-compliance-upload-complete",
+      "description": "ComplianceUploadCard + admin ComplianceApprovals actually reflect a document write: the dead docVersion/docsVersion counters removed, the canonical [compliance-documents] query invalidated (the ProductCatalog/BrandPurchaseOrders pattern), and the in-session gate synced via the previously zero-call-site reviewGateDocument action",
+      "source": "Phase A (2026-09-13)",
+      "status": "built_and_tested",
+      "evidence": "src/components/brand/ComplianceHub.tsx (ComplianceUploadCard.handleUpload: uploadComplianceDoc -> reviewGateDocument -> qc.invalidateQueries); src/components/admin/ComplianceApprovals.tsx; e2e/compliance-gate.spec.ts test 5 (missing -> under review with no reload, and an upload is NOT an approval: the gate still blocks with the same 5 items)",
+      "last_verified": "2026-09-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseB-integration-hub-control-centre",
+      "description": "Integration Hub is a real provider control centre: mode-derived state tiles (all/live/simulation/available/configuring/needs-attention/disabled) that each filter the provider list, an actionable attention alert naming providers actually in error/degraded/needs_attention/failing-health, canonical category grouping, search with a real visible/total count, an honest empty state and a truthful developer-demo-key note",
+      "source": "Phase B (2026-09-13)",
+      "status": "built_and_tested",
+      "evidence": "src/components/admin/integrations/IntegrationsPanel.tsx (consumes INTEGRATION_META.category, INTEGRATION_CATEGORY_LABELS, hasLiveCredentialHint - all previously registered but never used); e2e/integration-hub.spec.ts (5 tests: tiles derived from the rendered modes and the mode partition sums to the card count, filtering is count-for-count, search reports the real count, canonical category headings only, zero page errors)",
+      "last_verified": "2026-09-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseC-access-gate-real-coverage",
+      "description": "The hard-skipped access-gate tests are closed with real coverage: public application -> operator approval -> canonical onboarding record (origin Application, derived tenant id brand-app-<applicationId>) -> the approved brand enters its portal; plus two tests that could not fail (Approve/Reject substring-matching the status filter chips) repaired",
+      "source": "Phase C (2026-09-13)",
+      "status": "built_and_tested",
+      "evidence": "e2e/access-gate.spec.ts test 6 (new end-to-end) and test 7 (exact accessible names + real consequence); suite skips 3 -> 2",
+      "last_verified": "2026-09-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseD1-status-presentation-ssot",
+      "description": "Single source of truth for presenting a domain status (compliance-document lifecycle + partner-application decision lifecycle + canonical workflow order) as { label, semantic tone, data-status, actionable }; adopted by ApplicationsPanel (derived decision queue with drill-down), ComplianceApprovals (semantic rows + honest empty state) and the brand ComplianceHub card",
+      "source": "Phase D1 (2026-09-13)",
+      "status": "built_and_tested",
+      "evidence": "src/lib/statusPresentation.ts (NEW); src/components/admin/ApplicationsPanel.tsx (decision queue, each tile filters the list); src/components/admin/ComplianceApprovals.tsx; src/components/brand/ComplianceHub.tsx; e2e/status-semantics.spec.ts (4 tests incl. data-status/role=status, derived queue counts, drill-down aria-pressed, never-approved renders approved=0, 375px no-overflow)",
+      "last_verified": "2026-09-13",
       "superseded_by": null
     }
   ]
