@@ -1,6 +1,60 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-13 (**Phase D5 — canonical DataTable consolidation: 12 operational tables migrated + primitive hardening**)
+> Last updated: 2026-09-13 (**Phase D6 — payout seam wired end-to-end · Finance/Brand/Admin dashboard pass · tenant-coherence defect FIXED**)
+>
+> **PHASE D6 (2026-09-13, fourth session) — FINANCE COMPLETED, DASHBOARDS DRILLABLE, REAL TENANT LEAK FIXED.**
+> Commits: **`f35ddc6`** (payouts wired + Finance KPI band) · **`<see below>`** (dashboards + coherence).
+>
+> **① Finance — the payout seam is now USED.** `settleCommission` /
+> `createPayoutClient` had **zero call sites** and the Accounting surface displayed a
+> hardcoded `<td>No pending payouts</td>`, so a commission could never leave
+> `accrued`/`invoiced`. Built: `settleBrandPayout` (api.ts) wiring
+> `createPayoutClient → settleCommission → canonical store write → canonical audit
+> row`; the brand payout ledger is a canonical `DataTable` with **drill-down KPI
+> tiles** (pending / settled / all), honest mock provenance
+> (`Simulated payout mock_tr_… — no live Stripe call was made`), loading / empty /
+> error+retry states. Rate-unit defect found and made impossible:
+> `commissionRate` is a PERCENT in the canonical convention but a FRACTION in two
+> generation paths → `resolveCommissionRatePct` derives the effective % from the
+> RECORDED `commissionAmount` (both conventions now produce identical money).
+> `normalisePayoutTrack` gives ONE documented rule for `unassigned`.
+> **Validator:** `validate-payouts.mjs` extended to 17 assertions (all green).
+>
+> **② Commissions now ACCRUE from the canonical PO store** (they were a frozen
+> module-load snapshot): a PO accepted at runtime now produces a payout, while the
+> only non-derivable fact (a settlement) is remembered in the settlement ledger.
+> `resetSettledCommissions()` gives deterministic replay.
+>
+> **③ Dashboards — real, actionable, cross-checked.** Admin: new `payouts-pending`
+> KPI (canonical fee maths) + Finance attention rows → drill to the real settlement
+> surface. Brand: the brand had **NO payout visibility at all** — it can now see
+> what it is OWED, tenant-scoped, with the canonical commission status layer and
+> the same fee maths the operator settles with.
+>
+> **④ REAL TENANT-ISOLATION DEFECT FOUND AND FIXED.** Writing the tenant test
+> surfaced that Zambezi's own dashboard displayed **DeskForge's PO-9003**: the
+> returns seed was hand-written against a parallel universe (a return pointing at
+> another tenant's PO, one at the non-existent PO-9005 for a brand owning no
+> products/POs, and `SPB-*`/`GSP-*` SKUs owned by no brand). Returns are now
+> **DERIVED** from the canonical PO + product stores, so a return can only
+> reference its own brand's PO and SKU.
+>
+> **New verification:** `e2e/brand-payouts.spec.ts` **2/2** (pending set derived;
+> settle → truthful mock mode + leaves pending + canonical audit row; **zero
+> external network calls**) · `e2e/multi-tenant.spec.ts` **7/7** (new payout-ledger
+> isolation test) · `scripts/validate-tenant-coherence.mjs` **9/9** (returns/PO/SKU,
+> return→deduction, deduction→PO, commission→PO, deterministic settle/reset).
+> **Gates:** typecheck **0** · eslint(src+e2e) **0** · build **✓** · full Playwright
+> **230 passed / 0 failed / 2 skipped** · integrity audit **61 / 0** · wording gate
+> **176 files / 0 violations** · registry validator exit 0 (pre-existing
+> informational flags) · migrations unchanged (**23**) · baseline `959b4d2` ancestor.
+> **Known stale (not a gate):** `scripts/validate-review-s6.mjs` still asserts
+> pre-redesign markup for BrandCRM/CatalogManager/ComplianceApprovals (7 failures,
+> untouched surfaces, pre-existing).
+> **NEXT:** finish the remaining Phase D surfaces (CRM, Catalogue, Marketing,
+> carrier/admin operational density) → **Phase S (Mercenta Social E2E)** → Phase E2E
+> (deterministic investor simulation) → F → G → Rakazo LAST.
+
 >
 > **PHASE D5 (2026-09-13, third session) — THE OPERATIONAL TABLES ARE MIGRATED.**
 > No migration, no new store, no new visual language: the extended canonical `DataTable`

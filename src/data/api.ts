@@ -19,7 +19,6 @@ import {
   ALL_DEMO_BRANDS,
   demoAdSpend,
   demoBrands,
-  demoCommissions,
   demoComplianceDocs,
   demoContracts,
   demoMessages,
@@ -40,6 +39,7 @@ import {
   acceptBrandAgreement as storeAcceptBrandAgreement,
   hasAcceptedAgreement as storeHasAcceptedAgreement,
   getCommission,
+  listCommissionsForPayout,
   markCommissionPaid as markCommissionPaidInStore,
 } from './demoStore';
 import {
@@ -52,6 +52,7 @@ import { sendPostmarkEmail, buildPoNotificationHtml } from '@/lib/notifications/
 import type {
   AdSpendBudget,
   CatalogSubmissionStatus,
+  Commission,
   ComplianceDocument,
   Contract,
   Message,
@@ -392,7 +393,10 @@ export function fetchSubscriptions() {
 
 /* ── §10/§11 Commissions ── */
 export function fetchCommissions() {
-  return queryOrSeed('commissions', demoCommissions);
+  // §Phase D6 — the LIVE projection (derives accrual from the canonical PO store),
+  // so a PO accepted at runtime accrues a payout instead of the ledger being a
+  // frozen module-load snapshot.
+  return queryOrSeed<Commission>('commissions', listCommissionsForPayout());
 }
 
 /* ── §Phase D6 — brand payout settlement (the seam's ONLY call site) ───── */

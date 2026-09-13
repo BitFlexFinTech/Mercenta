@@ -145,54 +145,71 @@ export const demoSubscriptions = ALL_DEMO_BRANDS.filter((_, i) => i % 2 === 0).m
 );
 
 /**
- * §Phase D6 — typed by the CANONICAL `Commission` interface.
+ * §Phase D6 — THE commission projection (single source of truth = the PO store).
  *
- * It previously had an inferred type whose `status` union excluded `'paid'`
- * (the seed only emits accrued/invoiced), so TypeScript silently made a settled
- * payout unrepresentable — the type-level signature of the same defect the
- * Accounting surface had. One shape, one source of truth.
+ * Commissions used to be computed ONCE at module load, so a purchase order
+ * accepted at runtime (the Vendor Central acknowledgement the demo drives)
+ * never accrued a commission and the payout ledger could never grow. The
+ * accrual is now DERIVED from the canonical `demoPurchaseOrders` store at read
+ * time — one source of truth, no second ledger — while the ONE piece of real
+ * state a projection cannot derive (that a payout was actually settled) is
+ * remembered in `SETTLED_COMMISSION_IDS`.
+ *
+ * Ids stay canonical (`comm-<poId>`), so a settled commission keeps its identity
+ * across reads and can never be paid twice.
  */
-export const demoCommissions: Commission[] = demoPurchaseOrders
-  .filter((po) => po.status === 'accepted' || po.status === 'ready_to_fulfil' || po.status === 'shipped' || po.status === 'delivered')
-  .map((po) => ({
-    id: `comm-${po.id}`,
-    brandId: po.brandId,
-    purchaseOrderId: po.poNumber,
-    poValue: po.poValue,
-    commissionRate: po.commissionRate,
-    commissionAmount: po.commissionAmount,
-    status: (po.poValue >= 10_000 ? 'accrued' : 'invoiced') as 'accrued' | 'invoiced',
-    createdAt: po.orderDate,
-  }));
+const SETTLEABLE_PO_STATUSES: ReadonlySet<string> = new Set([
+  'accepted',
+  'ready_to_fulfil',
+  'shipped',
+  'delivered',
+]);
+
+/** The settlement ledger — the only stored commission state (status `paid`). */
+const SETTLED_COMMISSION_IDS = new Set<string>();
+
+/** Deterministic reset for demo/test replay (the canonical reset hook). */
+export function resetSettledCommissions(): void {
+  SETTLED_COMMISSION_IDS.clear();
+}
+
+export function listCommissionsForPayout(): Commission[] {
+  return demoPurchaseOrders
+    .filter((po) => SETTLEABLE_PO_STATUSES.has(po.status))
+    .map((po) => {
+      const id = `comm-${po.id}`;
+      const settled = SETTLED_COMMISSION_IDS.has(id);
+      return {
+        id,
+        brandId: po.brandId,
+        purchaseOrderId: po.poNumber,
+        poValue: po.poValue,
+        commissionRate: po.commissionRate,
+        commissionAmount: po.commissionAmount,
+        status: (settled ? 'paid' : po.poValue >= 10_000 ? 'accrued' : 'invoiced') as Commission['status'],
+        createdAt: po.orderDate,
+      };
+    });
+}
 
 /**
- * §Phase D6 — the pending-payout read model + its ONE mutation.
- *
- * The Accounting surface previously hardcoded "No pending payouts": the payout
- * seam (`settleCommission` + `PayoutClient`) existed with zero call sites, so
- * commissions could never leave `accrued`/`invoiced`. These are the canonical
- * accessors for that lifecycle — a read (`listCommissionsForPayout`) and the
- * status mutation the settlement writes through (`markCommissionPaid`). No second
- * store: they operate on the SAME `demoCommissions` array every other reader uses,
- * and `queryOrSeed` returns a shallow copy of it, so the shared object identity
- * means a settled commission is immediately gone from the pending set everywhere.
+ * Snapshot of the SAME projection for the demo-seed generator and the seed
+ * validators (they need a build-time array, not a live read). It is produced by
+ * the function above, so the two can never drift structurally.
  */
-export function listCommissionsForPayout(): Commission[] {
-  return demoCommissions;
-}
+export const demoCommissions: Commission[] = listCommissionsForPayout();
 
 export function getCommission(id: string): Commission | undefined {
-  return demoCommissions.find((c) => c.id === id);
+  return listCommissionsForPayout().find((c) => c.id === id);
 }
 
-/** Moves a commission to its terminal `paid` state. Idempotent by construction:
- *  a commission that is already paid is returned unchanged (the double-payout
+/** Moves a commission to its terminal `paid` state (idempotent; the double-payout
  *  guard itself lives in `settleCommission`). */
 export function markCommissionPaid(id: string): Commission | null {
   const commission = getCommission(id);
   if (!commission) return null;
-  if (commission.status !== 'paid') commission.status = 'paid';
-  return commission;
+  SETTLED_COMMISSION_IDS.add(id);
+  return { ...commission, status: 'paid' };
 }
 
 /**
@@ -1037,30 +1054,63 @@ export function updateNotificationPref(
 }
 
 /* ── Brand Returns ────────────────────────────────────────────────── */
-export const demoReturns: BrandReturn[] = [
-  {
-    id: 'ret-1', brandId: 'brand-zambezi', poNumber: 'PO-9001',
-    productSku: 'SPB-MAR-050', productName: 'Marula Oil 50ml',
-    quantity: 24, reason: 'defective',
-    description: 'Bottle caps not sealed on 2 cases — product leaked during transit.',
-    returnDate: new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10),
-  },
-  {
-    id: 'ret-2', brandId: 'brand-zambezi', poNumber: 'PO-9003',
-    productSku: 'SPB-BAO-150', productName: 'Baobab Powder 150g',
-    quantity: 12, reason: 'quality_issue',
-    description: 'Moisture content exceeded spec per lab report from receiving QC.',
-    returnDate: new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10),
-    linkedDeductionId: 'ded-1',
-  },
-  {
-    id: 'ret-3', brandId: 'brand-harvestlane', poNumber: 'PO-9005',
-    productSku: 'GSP-WHITE-PEP', productName: 'White Pepper Ground 500g',
-    quantity: 6, reason: 'damaged_in_transit',
-    description: 'Carton crushed by pallet over-stacking. 6 units unsaleable.',
-    returnDate: new Date(Date.now() - 8 * 864e5).toISOString().slice(0, 10),
-  },
-];
+/**
+ * §Phase D6 — REAL DEFECT FIXED (tenant coherence).
+ *
+ * The returns seed was hand-written against a PARALLEL SKU/PO universe that does
+ * not exist in any store: a Zambezi return pointed at **DeskForge's PO-9003**,
+ * another at the non-existent **PO-9005** for a brand that owns no products or
+ * POs at all, and their SKUs (`SPB-*`/`GSP-*`) belong to no brand. The effect was
+ * visible: a brand's own dashboard showed ANOTHER TENANT'S purchase-order number
+ * in its returns attention row, and the Returns ledger referenced phantom
+ * products.
+ *
+ * Returns are now DERIVED from the canonical PO store + the canonical product
+ * store, so a return can only ever reference a PO number and a SKU that its own
+ * brand actually owns — the seed cannot drift from the data it describes.
+ * `linkedDeductionId` is resolved from the canonical deductions for the SAME PO,
+ * so a linked deduction can never belong to a different tenant either.
+ */
+export const demoReturns: BrandReturn[] = (() => {
+  const narratives: { reason: BrandReturn['reason']; description: string; quantity: number }[] = [
+    {
+      reason: 'defective',
+      description: 'Bottle caps not sealed on 2 cases — product leaked during transit.',
+      quantity: 24,
+    },
+    {
+      reason: 'quality_issue',
+      description: 'Moisture content exceeded spec per lab report from receiving QC.',
+      quantity: 12,
+    },
+    {
+      reason: 'damaged_in_transit',
+      description: 'Carton crushed by pallet over-stacking. 6 units unsaleable.',
+      quantity: 6,
+    },
+  ];
+  return narratives.flatMap((n, i) => {
+    const po = demoPurchaseOrders[i % Math.max(demoPurchaseOrders.length, 1)];
+    if (!po) return [];
+    const product = productsForBrandFromStore(po.brandId)[0];
+    if (!product) return [];
+    return [
+      {
+        id: `ret-${i + 1}`,
+        brandId: po.brandId,
+        poNumber: po.poNumber,
+        productSku: product.sku,
+        productName: product.name,
+        quantity: n.quantity,
+        reason: n.reason,
+        description: n.description,
+        returnDate: new Date(Date.now() - (i + 2) * 864e5).toISOString().slice(0, 10),
+        // Same tenant, same PO — or no link at all.
+        linkedDeductionId: demoDeductions.find((d) => d.purchaseOrderId === po.poNumber)?.id,
+      },
+    ];
+  });
+})();
 
 export function addReturn(ret: Omit<BrandReturn, 'id'>): BrandReturn {
   const full: BrandReturn = {

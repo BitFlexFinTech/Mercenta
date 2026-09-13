@@ -31,6 +31,7 @@
 import { useCallback, useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import {
+  useCommissions,
   useComplianceDocuments,
   useContracts,
   useDeductions,
@@ -38,11 +39,12 @@ import {
   usePurchaseOrders,
   useShipmentsAll,
 } from '@/data/queries';
+import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
 import { demoReturns } from '@/data/api';
 import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { assertBrandScope } from '@/lib/auth/rbac';
-import { Alert, Button, EmptyState, PageHeader, StatusBadge, Skeleton } from '@/components/ui';
+import { Alert, Button, DataTable, EmptyState, PageHeader, StatusBadge, Skeleton } from '@/components/ui';
 import {
   AttentionPanel,
   DashboardSection,
@@ -52,6 +54,7 @@ import {
 } from '@/components/shared/dashboard';
 import type { PurchaseOrder, PurchaseOrderStatus } from '@/types';
 import {
+  commissionStatusPresentation,
   complianceGatePresentation,
   poStatusPresentation,
   shipmentStatusPresentation,
@@ -138,6 +141,8 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
   const contractsQuery = useContracts();
   const messagesQuery = useMessages();
   const deductionsQuery = useDeductions();
+  // §Phase D6 — the brand's own payout state (canonical commission store).
+  const commissionsQuery = useCommissions();
 
   /** Navigate to an existing brand shell view — no-op when rendered without a shell. */
   const go = useCallback((view: string) => () => onNavigate?.(view), [onNavigate]);
@@ -171,6 +176,35 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
 
   const openDeductions = useMemo(() => deductions.filter((d) => d.status === 'open'), [deductions]);
   const brandReturns = useMemo(() => demoReturns.filter((r) => r.brandId === tenantId), [tenantId]);
+
+  /**
+   * §Phase D6 — the brand's PAYOUT visibility, tenant-scoped exactly like every
+   * other list on this dashboard (a brand only ever reads its own commissions).
+   * Net share uses the canonical fee maths and the canonical brand track, so the
+   * figure here and the figure the operator settles in Accounting are computed
+   * by the same function — they cannot drift.
+   */
+  const brandCommissions = useMemo(
+    () => (commissionsQuery.data?.data ?? []).filter((c) => c.brandId === tenantId),
+    [commissionsQuery.data, tenantId]
+  );
+  const pendingPayouts = brandCommissions.filter((c) => c.status !== 'paid');
+  const settledPayouts = brandCommissions.filter((c) => c.status === 'paid');
+  const netPayoutOf = useCallback(
+    (c: { poValue: number; commissionRate: number; commissionAmount: number }) =>
+      computeBrandNetShare({
+        poValue: c.poValue,
+        commissionRatePct: resolveCommissionRatePct({
+          commissionRate: c.commissionRate,
+          commissionAmount: c.commissionAmount,
+          poValue: c.poValue,
+        }),
+        fulfillmentTrack: normalisePayoutTrack(brandProfile?.fulfillmentTrack ?? 'financed'),
+      }),
+    [brandProfile?.fulfillmentTrack]
+  );
+  const pendingPayoutValue = pendingPayouts.reduce((s, c) => s + netPayoutOf(c), 0);
+  const settledPayoutValue = settledPayouts.reduce((s, c) => s + netPayoutOf(c), 0);
   const brandTickets = useMemo(
     () => tenantId ? demoTickets.filter((t) => t.brandId === tenantId && t.status !== 'resolved') : [],
     [tenantId]
@@ -356,6 +390,24 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       onOpen: go('catalog'),
     },
     {
+      id: 'payouts-due',
+      label: 'Payouts due',
+      value: String(pendingPayouts.length),
+      context: `£${pendingPayoutValue.toFixed(2)} net owed to you`,
+      tone: pendingPayouts.length > 0 ? 'info' : 'success',
+      statusText: pendingPayouts.length > 0 ? 'Awaiting settlement' : 'Nothing outstanding',
+      onOpen: go('documents'),
+    },
+    {
+      id: 'payouts-settled',
+      label: 'Payouts settled',
+      value: String(settledPayouts.length),
+      context: `£${settledPayoutValue.toFixed(2)} net paid`,
+      tone: 'success',
+      statusText: settledPayouts.length > 0 ? 'Paid' : 'None settled yet',
+      onOpen: go('documents'),
+    },
+    {
       id: 'contract-status',
       label: 'Contract status',
       value: activeContract ? 'Active' : '—',
@@ -497,6 +549,101 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
               </li>
             ))}
           </ul>
+        )}
+      </DashboardSection>
+
+      {/* §Phase D6 — the brand's own payout ledger. Until this existed a brand
+          could see an invoice and a deduction but never what it was actually
+          OWED; the figures come from the canonical commission store and the
+          canonical fee maths, so the brand's number and the operator's number
+          are the same number. */}
+      <DashboardSection
+        title="Payouts"
+        description="Your net share per settled commission — computed with the same fee maths the platform settles with."
+      >
+        {brandCommissions.length === 0 ? (
+          <EmptyState
+            title="No payouts yet"
+            description="A payout appears here as soon as one of your purchase orders is accepted and its commission accrues."
+          />
+        ) : (
+          <div className="space-y-2">
+            <DataTable
+              dataTable="brand-payouts"
+              caption="Brand payout ledger"
+              rows={brandCommissions}
+              rowKey={(c) => c.id}
+              emptyMessage="No payouts yet."
+              columns={[
+                {
+                  key: 'purchaseOrderId',
+                  label: 'Purchase order',
+                  primary: true,
+                  render: (c) => (
+                    <span>
+                      <span className="font-mono text-xs text-white">{c.purchaseOrderId}</span>
+                      <span className="block font-mono text-[10px] text-zinc-500">{c.id}</span>
+                    </span>
+                  ),
+                },
+                {
+                  key: 'poValue',
+                  label: 'PO value',
+                  align: 'right',
+                  hideBelow: 'lg',
+                  render: (c) => <span className="font-mono text-xs">£{c.poValue.toLocaleString()}</span>,
+                },
+                {
+                  key: 'commissionAmount',
+                  label: 'Commission',
+                  align: 'right',
+                  hideBelow: 'lg',
+                  render: (c) => (
+                    <span className="font-mono text-xs text-zinc-500">−£{c.commissionAmount.toFixed(2)}</span>
+                  ),
+                },
+                {
+                  key: 'netShare',
+                  label: 'Net payout',
+                  align: 'right',
+                  render: (c) => (
+                    <span className="font-mono text-xs font-semibold text-white">
+                      £{netPayoutOf(c).toFixed(2)}
+                    </span>
+                  ),
+                },
+                {
+                  key: 'status',
+                  label: 'Status',
+                  align: 'center',
+                  render: (c) => {
+                    const p = commissionStatusPresentation(c.status);
+                    return (
+                      <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>
+                        {p.label}
+                      </StatusBadge>
+                    );
+                  },
+                },
+                {
+                  key: 'createdAt',
+                  label: 'Accrued',
+                  align: 'right',
+                  hideBelow: 'lg',
+                  render: (c) => (
+                    <span className="font-mono text-[11px] text-zinc-500">
+                      {new Date(c.createdAt).toLocaleDateString()}
+                    </span>
+                  ),
+                },
+              ]}
+            />
+            <p className="text-[11px] text-zinc-500">
+              Payout transfers run through the platform's payout seam in simulation until live
+              payment credentials are configured — a settlement is labelled simulated wherever it is
+              shown.
+            </p>
+          </div>
         )}
       </DashboardSection>
 

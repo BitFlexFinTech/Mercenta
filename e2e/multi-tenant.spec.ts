@@ -53,6 +53,29 @@ test.describe('Multi-Tenant Isolation', () => {
     expect(deductionCount).toBeGreaterThanOrEqual(0);
   });
 
+  test('7. payout ledger is tenant-scoped (Brand A never sees Brand B records)', async ({ page }) => {
+    // §Phase D6 — the brand payout ledger is a FINANCIAL surface, so it must be
+    // tenant-scoped exactly like POs/deductions. DeskForge owns PO-9002/PO-9003
+    // (its accepted PO accrues a payout); Zambezi owns PO-9000/PO-9001 and has
+    // no accepted PO yet, so it must show an honest empty state — never another
+    // tenant's money.
+    await loginAs(page, 'DeskForge Supplies Inc', 1400);
+    const ledger = page.locator('table[data-table="brand-payouts"]');
+    await expect(ledger).toBeVisible({ timeout: 10000 });
+    await expect(ledger.locator('tbody tr').first()).toBeVisible();
+    // Its own PO is present; the other tenant's POs are nowhere on the page.
+    expect(await page.locator('text=PO-9002').count()).toBeGreaterThan(0);
+    expect(await page.locator('text=PO-9000').count()).toBe(0);
+    expect(await page.locator('text=PO-9001').count()).toBe(0);
+
+    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1400);
+    // No accepted PO → no payout rows at all, and no foreign finance record.
+    expect(await page.locator('table[data-table="brand-payouts"]').count()).toBe(0);
+    await expect(page.getByText('No payouts yet').first()).toBeVisible({ timeout: 8000 });
+    expect(await page.locator('text=PO-9003').count()).toBe(0);
+    expect(await page.locator('text=comm-po-brand-deskforge').count()).toBe(0);
+  });
+
   test('4. Brand A cannot modify Brand B data', async ({ page }) => {
     // Brand views have no cross-tenant mutation capability by design
     await loginAsBrand(page, 'Zambezi Organic Extracts Ltd');

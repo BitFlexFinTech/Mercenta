@@ -25,6 +25,7 @@ import { useCallback, useMemo } from 'react';
 import {
   useBrands,
   useCatalogSubmissions,
+  useCommissions,
   useComplianceDocuments,
   useContracts,
   useDeductions,
@@ -32,6 +33,7 @@ import {
   usePurchaseOrders,
   useShipmentsAll,
 } from '@/data/queries';
+import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
 import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
 import { renewalUrgency } from '@/lib/contracts';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
@@ -88,6 +90,8 @@ export function AdminDashboard({
   const deductionsQuery = useDeductions();
   // §Phase E5 (G5) — the canonical catalog-submission state (E3).
   const submissionsQuery = useCatalogSubmissions();
+  // §Phase D6 — the canonical commission/payout state (the payout tile below).
+  const commissionsQuery = useCommissions();
 
   /**
    * Stable snapshot of the resolved query data. Arrays are memoised so derived
@@ -101,6 +105,7 @@ export function AdminDashboard({
   const shipmentsData = shipmentsQuery.data;
   const deductionsData = deductionsQuery.data;
   const submissionsData = submissionsQuery.data;
+  const commissionsData = commissionsQuery.data;
   const q = useMemo(() => ({
     brands: brandsData?.data ?? [] as NonNullable<typeof brandsData>['data'],
     posAll: posData?.data ?? [] as NonNullable<typeof posData>['data'],
@@ -110,6 +115,7 @@ export function AdminDashboard({
     shipmentsAll: shipmentsData?.data ?? [] as NonNullable<typeof shipmentsData>['data'],
     deductionsAll: deductionsData?.data ?? [] as NonNullable<typeof deductionsData>['data'],
     submissionsAll: submissionsData?.data ?? [] as NonNullable<typeof submissionsData>['data'],
+    commissionsAll: commissionsData?.data ?? [] as NonNullable<typeof commissionsData>['data'],
   }), [
     brandsData,
     posData,
@@ -119,6 +125,7 @@ export function AdminDashboard({
     shipmentsData,
     deductionsData,
     submissionsData,
+    commissionsData,
   ]);
   const {
     brands,
@@ -129,6 +136,7 @@ export function AdminDashboard({
     shipmentsAll,
     deductionsAll,
     submissionsAll,
+    commissionsAll,
   } = q;
 
   const dataReady = posAll.length > 0 && brands.length > 0;
@@ -140,6 +148,7 @@ export function AdminDashboard({
     messagesQuery.isError ||
     shipmentsQuery.isError ||
     submissionsQuery.isError ||
+    commissionsQuery.isError ||
     deductionsQuery.isError;
   const loading =
     !dataReady &&
@@ -210,6 +219,32 @@ export function AdminDashboard({
   const commerceInvoicesPending = demoCommerceInvoices.filter(
     (i) => i.status === 'issued' && !demoCommercePayments.some((p) => p.invoiceId === i.id)
   );
+
+  /**
+   * §Phase D6 — pending brand payouts, DERIVED from the canonical commission
+   * store with the canonical fee maths (no invented money, no second store).
+   * The settlement destination is Super Admin → Accounting → Brand Payouts.
+   */
+  const brandTrackById = useMemo(() => {
+    const m = new Map<string, 'direct_fulfillment' | 'financed'>();
+    for (const b of brands) m.set(b.id, normalisePayoutTrack(b.track));
+    return m;
+  }, [brands]);
+  const netPayoutOf = useCallback(
+    (c: { poValue: number; commissionRate: number; commissionAmount: number; brandId: string }) =>
+      computeBrandNetShare({
+        poValue: c.poValue,
+        commissionRatePct: resolveCommissionRatePct({
+          commissionRate: c.commissionRate,
+          commissionAmount: c.commissionAmount,
+          poValue: c.poValue,
+        }),
+        fulfillmentTrack: brandTrackById.get(c.brandId) ?? 'financed',
+      }),
+    [brandTrackById]
+  );
+  const pendingPayouts = commissionsAll.filter((c) => c.status !== 'paid');
+  const pendingPayoutValue = pendingPayouts.reduce((s, c) => s + netPayoutOf(c), 0);
 
   const kpis: KpiCellData[] = [
     {
@@ -292,6 +327,15 @@ export function AdminDashboard({
             : 'Inbox clear',
       context: `${urgentTickets.length} urgent / high priority`,
       onOpen: go('helpdesk'),
+    },
+    {
+      id: 'payouts-pending',
+      label: 'Brand payouts pending',
+      value: String(pendingPayouts.length),
+      tone: pendingPayouts.length > 0 ? 'warning' : 'success',
+      statusText: pendingPayouts.length > 0 ? 'Settle in Accounting' : 'All settled',
+      context: `£${pendingPayoutValue.toFixed(2)} net owed to brands`,
+      onOpen: go('super_admin'),
     },
   ];
 
@@ -387,6 +431,32 @@ if (pendingBrandIds.length > 4) {
       title: `${openDeductions.length - 3} more deduction(s) unresolved`,
       meta: 'Review the full ledger in Billing',
       onOpen: go('billing'),
+    });
+  }
+
+  /* §Phase D6 — pending brand payouts are money the platform owes, so they belong
+     in the SAME Finance attention band as deductions. Destination is the real
+     settlement surface (Super Admin → Accounting → Brand Payouts). */
+  pendingPayouts.slice(0, 3).forEach((c) => {
+    attention.push({
+      id: `payout-${c.id}`,
+      group: 'Finance',
+      tone: 'warning',
+      statusLabel: 'PAYOUT PENDING',
+      title: `${brandName.get(c.brandId) ?? c.brandId} — £${netPayoutOf(c).toFixed(2)} net payout`,
+      meta: `${c.purchaseOrderId} · Super Admin → Accounting → Brand Payouts`,
+      onOpen: go('super_admin'),
+    });
+  });
+  if (pendingPayouts.length > 3) {
+    attention.push({
+      id: 'payout-more',
+      group: 'Finance',
+      tone: 'info',
+      statusLabel: 'MORE',
+      title: `${pendingPayouts.length - 3} more brand payout(s) pending`,
+      meta: 'Settle them in Super Admin → Accounting → Brand Payouts',
+      onOpen: go('super_admin'),
     });
   }
 
