@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useBrands, usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { DemoBanner } from '@/components/shared/DemoBanner';
-import { Badge, Card } from '@/components/ui';
-import { cn } from '@/utils/cn';
+import { Badge, Card, DataTable, StatusBadge } from '@/components/ui';
+import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import { AlertTriangle, Container, Ship } from 'lucide-react';
 import type { DemoShipment } from '@/data/demoData';
 import type { PurchaseOrder } from '@/types';
@@ -82,48 +82,79 @@ export function LogisticsControl() {
 
       {groups.map(([brandId, list]) => (
         <Card key={brandId} title={brandName(brandId)}>
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-600">
-                <th className="text-left py-2 pl-1">PO</th>
-                <th className="text-left py-2">Carrier</th>
-                <th className="text-left py-2">Reference</th>
-                <th className="text-left py-2">Status</th>
-                <th className="text-right py-2 pr-1">Value</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {list.map((s) => {
-                const transit = IN_TRANSIT.includes(s.status);
-                return (
-                  <tr key={s.id} className={cn(transit && s.delayed && 'bg-amber-500/5')}>
-                    <td className="py-2 pl-1 font-mono text-brass">
-                      {s.poNumber}
-                      {poFor(s.poNumber)?.simulated === true && (
-                        <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
-                      )}
-                    </td>
-                    <td className="py-2 capitalize">{s.carrier.replace('_', ' ')}</td>
-                    <td className="py-2 font-mono text-zinc-400">{s.reference}</td>
-                    <td className="py-2">
-                      <span className={cn('capitalize', transit ? 'text-zinc-200' : 'text-emerald-400')}>
-                        {s.status.replace(/_/g, ' ')}
+          {/* §Phase D — canonical DataTable + canonical shipment status layer:
+              the same state now reads identically here, on the brand logistics
+              hub and on the carrier manifest. The delayed-row highlight and the
+              PO → (sim) provenance link are preserved. */}
+          <DataTable
+            dataTable={`logistics-${brandId}`}
+            caption={`Shipments in transit for ${brandName(brandId)}`}
+            rows={list}
+            rowKey={(s) => s.id}
+            emptyMessage="No shipments for this brand."
+            rowClassName={(s) => (IN_TRANSIT.includes(s.status) && s.delayed ? 'bg-amber-500/5' : undefined)}
+            columns={[
+              {
+                key: 'poNumber',
+                label: 'PO',
+                primary: true,
+                render: (s) => (
+                  <span className="font-mono text-brass">
+                    {s.poNumber}
+                    {poFor(s.poNumber)?.simulated === true && (
+                      <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">
+                        (sim)
                       </span>
+                    )}
+                  </span>
+                ),
+              },
+              {
+                key: 'carrier',
+                label: 'Carrier',
+                render: (s) => <span className="capitalize">{s.carrier.replace('_', ' ')}</span>,
+              },
+              {
+                key: 'reference',
+                label: 'Reference',
+                hideBelow: 'lg',
+                render: (s) => <span className="font-mono text-zinc-400">{s.reference}</span>,
+              },
+              {
+                key: 'status',
+                label: 'Status',
+                render: (s) => {
+                  const transit = IN_TRANSIT.includes(s.status);
+                  const p = shipmentStatusPresentation(s.status);
+                  return (
+                    <span className="inline-flex flex-wrap items-center gap-2">
+                      <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>
+                        {p.label}
+                      </StatusBadge>
                       {transit && s.delayed && (
-                        <Badge className="ml-2 text-[9px] bg-amber-500/15 text-amber-300 border-amber-500/20">Delayed</Badge>
+                        <Badge className="text-[9px] bg-amber-500/15 text-amber-300 border-amber-500/20">
+                          Delayed
+                        </Badge>
                       )}
                       {s.exception && (
-                        <Badge className="ml-2 text-[9px] bg-red-500/15 text-red-300 border-red-500/20">Exception</Badge>
+                        <Badge className="text-[9px] bg-red-500/15 text-red-300 border-red-500/20">
+                          Exception
+                        </Badge>
                       )}
-                    </td>
-                    <td className="py-2 pr-1 text-right font-mono text-white">
-                      £{s.value.toLocaleString()}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </span>
+                  );
+                },
+              },
+              {
+                key: 'value',
+                label: 'Value',
+                align: 'right',
+                render: (s) => (
+                  <span className="font-mono text-white">£{s.value.toLocaleString()}</span>
+                ),
+              },
+            ]}
+          />
         </Card>
       ))}
     </div>

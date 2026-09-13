@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
-import { Card, Badge } from '@/components/ui';
+import { Card, Badge, DataTable } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { demoReturns } from '@/data/api';
 import type { ReturnReason } from '@/types';
@@ -128,55 +128,75 @@ export function BrandReturns() {
               className="w-full bg-ink-900 border border-white/[0.08] rounded-lg pl-9 pr-4 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 transition-all"
             />
           </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-                <th className="text-left font-medium px-3 py-2">Date</th>
-                <th className="text-left font-medium px-3 py-2">PO</th>
-                <th className="text-left font-medium px-3 py-2">Product</th>
-                <th className="text-right font-medium px-3 py-2">Qty</th>
-                <th className="text-left font-medium px-3 py-2">Reason</th>
-                <th className="text-left font-medium px-3 py-2">Deduction</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-center text-xs text-zinc-600 py-8">
-                    {searchQuery ? 'No returns match your search.' : 'No returns recorded for your brand.'}
-                  </td>
-                </tr>
-              )}
-              {filtered.map((r) => {
-                const Icon = REASON_ICONS[r.reason];
-                return (
-                  <tr key={r.id} className="align-top">
-                    <td className="px-3 py-2 font-mono text-xs text-zinc-400">{r.returnDate}</td>
-                    <td className="px-3 py-2 font-mono text-xs text-zinc-400">{r.poNumber}</td>
-                    <td className="px-3 py-2 text-xs text-zinc-300">
-                      <div className="font-medium">{r.productName}</div>
-                      <div className="text-[10px] text-zinc-500">{r.productSku}</div>
-                    </td>
-                    <td className="px-3 py-2 text-xs text-zinc-400 text-right">{r.quantity}</td>
-                    <td className="px-3 py-2">
+          {/* §Phase D — canonical DataTable: labelled cards below md (every
+              field + the reason are reachable), semantic table at md+. */}
+          <DataTable
+            dataTable="brand-returns"
+            caption="Brand returns"
+            rows={filtered}
+            rowKey={(r) => r.id}
+            emptyMessage={
+              searchQuery ? 'No returns match your search.' : 'No returns recorded for your brand.'
+            }
+            columns={[
+              {
+                key: 'returnDate',
+                label: 'Date',
+                hideBelow: 'lg',
+                render: (r) => <span className="font-mono text-xs text-zinc-400">{r.returnDate}</span>,
+              },
+              {
+                key: 'poNumber',
+                label: 'PO',
+                primary: true,
+                render: (r) => <span className="font-mono text-xs text-zinc-400">{r.poNumber}</span>,
+              },
+              {
+                key: 'productName',
+                label: 'Product',
+                render: (r) => (
+                  <div>
+                    <div className="font-medium text-zinc-300">{r.productName}</div>
+                    <div className="text-[10px] text-zinc-500">{r.productSku}</div>
+                  </div>
+                ),
+              },
+              {
+                key: 'quantity',
+                label: 'Qty',
+                align: 'right',
+                render: (r) => <span className="text-xs text-zinc-400">{r.quantity}</span>,
+              },
+              {
+                key: 'reason',
+                label: 'Reason',
+                render: (r) => {
+                  const Icon = REASON_ICONS[r.reason];
+                  return (
+                    <div>
                       <div className="flex items-center gap-1.5">
                         <Icon className="w-3 h-3 text-zinc-500" />
-                        <Badge className={cn('text-[9px]', REASON_BADGES[r.reason])}>{REASON_LABELS[r.reason]}</Badge>
+                        <Badge className={cn('text-[9px]', REASON_BADGES[r.reason])}>
+                          {REASON_LABELS[r.reason]}
+                        </Badge>
                       </div>
                       <p className="text-[10px] text-zinc-600 mt-0.5 max-w-[200px]">{r.description}</p>
-                    </td>
-                    <td className="px-3 py-2 text-xs">
-                      {r.linkedDeductionId ? (
-                        <Badge className="text-[9px] bg-red-500/15 text-red-300">{r.linkedDeductionId}</Badge>
-                      ) : (
-                        <span className="text-zinc-600">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  );
+                },
+              },
+              {
+                key: 'linkedDeductionId',
+                label: 'Deduction',
+                render: (r) =>
+                  r.linkedDeductionId ? (
+                    <Badge className="text-[9px] bg-red-500/15 text-red-300">{r.linkedDeductionId}</Badge>
+                  ) : (
+                    <span className="text-zinc-600">—</span>
+                  ),
+              },
+            ]}
+          />
           <div className="text-[10px] text-zinc-600 pt-2 border-t border-white/[0.04] mt-1">
             {filtered.length} of {returns.length} return record{returns.length === 1 ? '' : 's'}
           </div>

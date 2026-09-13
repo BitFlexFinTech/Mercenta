@@ -32,7 +32,7 @@ import {
   type CommerceActor,
   type CommerceResult,
 } from '@/lib/commerce/commerceLifecycle';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, DataTable } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
 const MONO = 'font-mono text-[11px]';
@@ -246,46 +246,59 @@ export function CommerceOperationsPanel() {
           Purchase Orders → “Operational commerce simulation”.
         </p>
       ) : (
-        <div className="overflow-auto">
-          <table className="w-full text-[11px]">
-            <thead>
-              <tr className="text-[10px] uppercase tracking-wide text-zinc-500 text-left">
-                <th className="py-1 pr-3">Time</th>
-                <th className="py-1 pr-3">Brand</th>
-                <th className="py-1 pr-3">Step</th>
-                <th className="py-1 pr-3">State</th>
-                <th className="py-1 pr-3">Detail</th>
-                <th className="py-1 pr-3">Mode</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {activityRows.map((a) => (
-                <tr key={a.id} className="text-zinc-400">
-                  <td className="py-1 pr-3 text-zinc-500 whitespace-nowrap">
-                    {a.at.slice(11, 19)}
-                  </td>
-                  <td className={cn(MONO, 'py-1 pr-3 text-zinc-300 whitespace-nowrap')}>
-                    {a.brandId}
-                  </td>
-                  <td className={cn(MONO, 'py-1 pr-3 text-zinc-300')}>{a.type}</td>
-                  <td className="py-1 pr-3">
-                    <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
-                      {a.status}
-                    </Badge>
-                  </td>
-                  <td className="py-1 pr-3">{a.detail}</td>
-                  <td className="py-1 pr-3">
-                    {a.simulated ? (
-                      <span className="text-[9px] text-brass-400">(sim)</span>
-                    ) : (
-                      <span className="text-[9px] text-zinc-500">live</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        /* §Phase D — canonical DataTable: the full activity trail is readable on
+           a phone as labelled cards (state, detail and mode never clipped). */
+        <DataTable
+          dataTable="commerce-activity"
+          caption="Operational commerce activity"
+          rows={activityRows}
+          rowKey={(a) => a.id}
+          columns={[
+            {
+              key: 'at',
+              label: 'Time',
+              hideBelow: 'lg',
+              render: (a) => (
+                <span className="font-mono text-zinc-500 whitespace-nowrap">{a.at.slice(11, 19)}</span>
+              ),
+            },
+            {
+              key: 'brandId',
+              label: 'Brand',
+              render: (a) => <span className={cn(MONO, 'text-zinc-300 whitespace-nowrap')}>{a.brandId}</span>,
+            },
+            {
+              key: 'type',
+              label: 'Step',
+              primary: true,
+              render: (a) => <span className={cn(MONO, 'text-zinc-300')}>{a.type}</span>,
+            },
+            {
+              key: 'status',
+              label: 'State',
+              render: (a) => (
+                <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                  {a.status}
+                </Badge>
+              ),
+            },
+            {
+              key: 'detail',
+              label: 'Detail',
+              render: (a) => <span>{a.detail}</span>,
+            },
+            {
+              key: 'simulated',
+              label: 'Mode',
+              render: (a) =>
+                a.simulated ? (
+                  <span className="text-[9px] text-brass-400">(sim)</span>
+                ) : (
+                  <span className="text-[9px] text-zinc-500">live</span>
+                ),
+            },
+          ]}
+        />
       )}
 
       <div className="grid gap-3 md:grid-cols-3">

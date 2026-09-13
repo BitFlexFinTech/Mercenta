@@ -14,7 +14,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { isProviderSimulationSafe, resolveProviderMode } from '@/integrations/types';
 import type { IntegrationId } from '@/integrations/types';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, DataTable } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { demoCompanyVerifications, demoHmrcFilings } from '@/data/demoStore';
 import { ALL_DEMO_BRANDS } from '@/data/demoData';
@@ -125,66 +125,79 @@ export function CompliancePanel() {
         title="Companies House — company verification"
         subtitle="Simulated registrar lookup: brand company → status → verified"
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr>
-                <th className="px-3 py-2 text-xs text-zinc-500">Brand</th>
-                <th className="px-3 py-2 text-xs text-zinc-500">Company no.</th>
-                <th className="px-3 py-2 text-xs text-zinc-500">Verification</th>
-                <th className="px-3 py-2 text-xs text-zinc-500">Source</th>
-                <th className="px-3 py-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {ALL_DEMO_BRANDS.map((b) => {
+        {/* §Phase D — canonical DataTable: the simulated registrar state and the
+            Verify action stay reachable at every width (cards below md). */}
+        <DataTable
+          dataTable="companies-house"
+          caption="Companies House verification"
+          rows={ALL_DEMO_BRANDS}
+          rowKey={(b) => b.id}
+          columns={[
+            {
+              key: 'name',
+              label: 'Brand',
+              primary: true,
+              render: (b) => <span className="text-xs text-white">{b.name}</span>,
+            },
+            {
+              key: 'companyNumber',
+              label: 'Company no.',
+              render: (b) => {
+                const v = verifications.find((x) => x.brandId === b.id);
+                return <span className="font-mono text-[11px] text-zinc-400">{v?.companyNumber ?? '—'}</span>;
+              },
+            },
+            {
+              key: 'verification',
+              label: 'Verification',
+              render: (b) => {
                 const v = verifications.find((x) => x.brandId === b.id);
                 return (
-                  <tr key={b.id} className="border-t border-white/[0.05]">
-                    <td className="px-3 py-2 text-xs text-white">{b.name}</td>
-                    <td className="px-3 py-2 font-mono text-[11px] text-zinc-400">
-                      {v?.companyNumber ?? '—'}
-                    </td>
-                    <td className="px-3 py-2">
-                      <Badge
-                        className={cn(
-                          'text-[10px]',
-                          !v
-                            ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20'
-                            : v.status === 'verified'
-                              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                              : 'bg-red-500/15 text-red-300 border-red-500/20'
-                        )}
-                      >
-                        {v ? v.status.replace(/_/g, ' ') : 'unverified'}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2 text-[10px] text-zinc-500">{v?.source ?? '—'}</td>
-                    <td className="px-3 py-2 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[10px]"
-                        loading={busy === `ch-${b.id}`}
-                        disabled={!chSafe}
-                        onClick={() =>
-                          void run(`ch-${b.id}`, () =>
-                            verifyBrandCompany(b.id, {
-                              getMode: (pid) => resolveProviderMode(modes, pid),
-                              actorId: session?.tier ?? 'system',
-                            })
-                          )
-                        }
-                      >
-                        <RefreshCw className="w-3 h-3 mr-1" /> Verify (simulated)
-                      </Button>
-                    </td>
-                  </tr>
+                  <Badge
+                    className={cn(
+                      'text-[10px]',
+                      !v
+                        ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20'
+                        : v.status === 'verified'
+                          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                          : 'bg-red-500/15 text-red-300 border-red-500/20'
+                    )}
+                  >
+                    {v ? v.status.replace(/_/g, ' ') : 'unverified'}
+                  </Badge>
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
+              },
+            },
+            {
+              key: 'source',
+              label: 'Source',
+              hideBelow: 'lg',
+              render: (b) => {
+                const v = verifications.find((x) => x.brandId === b.id);
+                return <span className="text-[10px] text-zinc-500">{v?.source ?? '—'}</span>;
+              },
+            },
+          ]}
+          rowActions={(b) => (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[10px]"
+              loading={busy === `ch-${b.id}`}
+              disabled={!chSafe}
+              onClick={() =>
+                void run(`ch-${b.id}`, () =>
+                  verifyBrandCompany(b.id, {
+                    getMode: (pid) => resolveProviderMode(modes, pid),
+                    actorId: session?.tier ?? 'system',
+                  })
+                )
+              }
+            >
+              <RefreshCw className="w-3 h-3 mr-1" /> Verify (simulated)
+            </Button>
+          )}
+        />
         <div className="mt-2 space-y-1">
           {Object.entries(outcome)
             .filter(([k]) => k.startsWith('ch-'))
@@ -199,57 +212,68 @@ export function CompliancePanel() {
         title="HMRC — VAT status &amp; filing (Making Tax Digital)"
         subtitle="Simulated VAT registration status, next-return deadline and return filing (accepted / rejected → retry)"
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr>
-                <th className="px-3 py-2 text-xs text-zinc-500">Brand</th>
-                <th className="px-3 py-2 text-xs text-zinc-500">VRN (sim)</th>
-                <th className="px-3 py-2 text-xs text-zinc-500">Last filing</th>
-                <th className="px-3 py-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {ALL_DEMO_BRANDS.slice(0, 4).map((b) => {
+        {/* §Phase D — canonical DataTable: VAT registration state + last filing,
+            with the Sync + File action reachable at every width. */}
+        <DataTable
+          dataTable="hmrc-vat"
+          caption="HMRC VAT status and filing"
+          rows={ALL_DEMO_BRANDS.slice(0, 4)}
+          rowKey={(b) => b.id}
+          columns={[
+            {
+              key: 'name',
+              label: 'Brand',
+              primary: true,
+              render: (b) => <span className="text-xs text-white">{b.name}</span>,
+            },
+            {
+              key: 'vrn',
+              label: 'VRN (sim)',
+              render: (b) => (
+                <span className="font-mono text-[11px] text-zinc-400">
+                  MOCK-VRN-{b.id.slice(-6)}
+                </span>
+              ),
+            },
+            {
+              key: 'lastFiling',
+              label: 'Last filing',
+              render: (b) => {
                 const latest = getLatestVatFiling(b.id);
                 return (
-                  <tr key={b.id} className="border-t border-white/[0.05]">
-                    <td className="px-3 py-2 text-xs text-white">{b.name}</td>
-                    <td className="px-3 py-2 font-mono text-[11px] text-zinc-400">MOCK-VRN-{b.id.slice(-6)}</td>
-                    <td className="px-3 py-2 text-[11px]">
-                      {latest ? `${latest.status} · ${latest.period}` : 'no filing yet'}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[10px]"
-                        loading={busy === `hmrc-${b.id}`}
-                        disabled={!hmrcSafe}
-                        onClick={() =>
-                          void run(`hmrc-${b.id}`, async () => {
-                            const status = await checkHmrcStatus(b.id, {
-                              getMode: (pid) => resolveProviderMode(modes, pid),
-                              actorId: session?.tier ?? 'system',
-                            });
-                            if (!status.ok) return status;
-                            return await fileHmrcReturn(
-                              b.id,
-                              { period: 'Q3 2026', totalSalesGbp: 48250, vatDueGbp: 9650 },
-                              { getMode: (pid) => resolveProviderMode(modes, pid), actorId: session?.tier ?? 'system' }
-                            );
-                          })
-                        }
-                      >
-                        <FileText className="w-3 h-3 mr-1" /> Sync + File VAT (simulated)
-                      </Button>
-                    </td>
-                  </tr>
+                  <span className="text-[11px]">
+                    {latest ? `${latest.status} · ${latest.period}` : 'no filing yet'}
+                  </span>
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
+              },
+            },
+          ]}
+          rowActions={(b) => (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[10px]"
+              loading={busy === `hmrc-${b.id}`}
+              disabled={!hmrcSafe}
+              onClick={() =>
+                void run(`hmrc-${b.id}`, async () => {
+                  const status = await checkHmrcStatus(b.id, {
+                    getMode: (pid) => resolveProviderMode(modes, pid),
+                    actorId: session?.tier ?? 'system',
+                  });
+                  if (!status.ok) return status;
+                  return await fileHmrcReturn(
+                    b.id,
+                    { period: 'Q3 2026', totalSalesGbp: 48250, vatDueGbp: 9650 },
+                    { getMode: (pid) => resolveProviderMode(modes, pid), actorId: session?.tier ?? 'system' }
+                  );
+                })
+              }
+            >
+              <FileText className="w-3 h-3 mr-1" /> Sync + File VAT (simulated)
+            </Button>
+          )}
+        />
 
         <div className="mt-3">
           <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wide">Filing history</div>

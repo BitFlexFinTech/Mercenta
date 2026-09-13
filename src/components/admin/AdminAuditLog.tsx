@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchAuditLog } from '@/data/api';
 import type { AuditLogEntry } from '@/types';
-import { Badge, Card, Input } from '@/components/ui';
+import { Badge, Card, DataTable, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { ScrollText } from 'lucide-react';
 
@@ -97,49 +97,63 @@ export function AdminAuditLog() {
           </select>
         </div>
 
-        {entries === null ? (
-          <p className="text-xs text-zinc-500 px-1 pb-1">Loading audit trail…</p>
-        ) : filtered.length === 0 ? (
-          <p className="text-xs text-zinc-600 px-1 pb-1">No matching audit entries.</p>
-        ) : (
-          <div className="px-1 pb-1">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-[10px] text-zinc-600 border-b border-white/[0.06]">
-                  <th className="py-1.5 pr-2 font-medium">When</th>
-                  <th className="py-1.5 pr-2 font-medium">Actor</th>
-                  <th className="py-1.5 pr-2 font-medium">Action</th>
-                  <th className="py-1.5 pr-2 font-medium">Entity</th>
-                  <th className="py-1.5 font-medium">Reason</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((e) => (
-                  <tr key={e.id} className="text-[11px] border-b border-white/[0.03] align-top">
-                    <td className="py-1.5 pr-2 font-mono text-zinc-500 whitespace-nowrap">
-                      {new Date(e.createdAt).toLocaleString()}
-                    </td>
-                    <td className="py-1.5 pr-2 text-zinc-300 whitespace-nowrap">{e.actorId}</td>
-                    <td className="py-1.5 pr-2">
-                      <Badge className="text-[9px] bg-brass-500/10 text-brass-300 border-brass-500/20 whitespace-nowrap">
-                        {e.action}
-                      </Badge>
-                    </td>
-                    <td className={cn('py-1.5 pr-2 text-zinc-400 font-mono')}>
-                      {e.entityType}/{e.entityId}
-                      {e.brandId && (
-                        <span className="block text-[9px] text-zinc-600">brand: {e.brandId}</span>
-                      )}
-                    </td>
-                    <td className="py-1.5 text-zinc-400">{e.reason}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="text-[10px] text-zinc-600 pt-2">
-              Showing {filtered.length} of {entries?.length ?? 0} entries.
-            </p>
-          </div>
+        {/* §Phase D — canonical DataTable: real loading skeletons, labelled
+            cards below md (actor/entity/reason all reachable), table at md+. */}
+        <DataTable
+          dataTable="admin-audit-log"
+          caption="Admin audit log"
+          loading={entries === null}
+          rows={filtered}
+          rowKey={(e) => e.id}
+          emptyMessage="No matching audit entries."
+          columns={[
+            {
+              key: 'createdAt',
+              label: 'When',
+              render: (e) => (
+                <span className="font-mono text-[11px] text-zinc-500 whitespace-nowrap">
+                  {new Date(e.createdAt).toLocaleString()}
+                </span>
+              ),
+            },
+            {
+              key: 'actorId',
+              label: 'Actor',
+              render: (e) => <span className="whitespace-nowrap text-zinc-300">{e.actorId}</span>,
+            },
+            {
+              key: 'action',
+              label: 'Action',
+              primary: true,
+              render: (e) => (
+                <Badge className="text-[9px] bg-brass-500/10 text-brass-300 border-brass-500/20 whitespace-nowrap">
+                  {e.action}
+                </Badge>
+              ),
+            },
+            {
+              key: 'entityId',
+              label: 'Entity',
+              render: (e) => (
+                <span className={cn('font-mono text-zinc-400')}>
+                  {e.entityType}/{e.entityId}
+                  {e.brandId && (
+                    <span className="block text-[9px] text-zinc-600">brand: {e.brandId}</span>
+                  )}
+                </span>
+              ),
+            },
+            {
+              key: 'reason',
+              label: 'Reason',
+              render: (e) => <span className="text-zinc-400">{e.reason}</span>,
+            },
+          ]}
+        />
+        {entries !== null && (
+          <p className="text-[10px] text-zinc-600 pt-2 px-1">
+            Showing {filtered.length} of {entries.length} entries.
+          </p>
         )}
       </Card>
     </div>

@@ -8,7 +8,7 @@
  * operates, and the review/approval/send/response steps are performed there.
  */
 import { useMemo, useState } from 'react';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, DataTable } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   getAcquisitionSummary,
@@ -114,56 +114,94 @@ export function AcquisitionPipeline() {
         {notice && <p className="text-[11px] text-emerald-400">{notice}</p>}
         {error && <p className="text-[11px] text-red-300">{error}</p>}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs" data-table="acquisition-pipeline">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-zinc-500">
-                <th className="text-left px-2 py-1.5 font-medium">Brand</th>
-                <th className="text-left px-2 py-1.5 font-medium">BI score</th>
-                <th className="text-left px-2 py-1.5 font-medium">ICP identity</th>
-                <th className="text-left px-2 py-1.5 font-medium">Region</th>
-                <th className="text-left px-2 py-1.5 font-medium">Stage</th>
-                <th className="text-right px-2 py-1.5 font-medium">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.prospect.id} className="border-b border-white/[0.04]">
-                  <td className="px-2 py-1.5 text-white font-medium">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Target className="w-3 h-3 text-brass-400" />
-                      {r.prospect.brand}
-                    </span>
-                    <span className="block text-[9px] text-zinc-500">{r.prospect.category}</span>
-                  </td>
-                  <td className="px-2 py-1.5">
-                    <span className={cn('font-mono', r.prospect.score.total >= 80 ? 'text-emerald-400' : 'text-zinc-300')}>
-                      {r.prospect.score.total}
-                    </span>
-                    <span className="text-[9px] text-zinc-500"> {r.prospect.score.tier}</span>
-                  </td>
-                  <td className="px-2 py-1.5 font-mono text-[10px] text-zinc-400">{r.lead?.id ?? '(no region)'}</td>
-                  <td className="px-2 py-1.5 text-zinc-300">{r.region ?? '—'}</td>
-                  <td className="px-2 py-1.5">
-                    <Badge className={cn('text-[9px] border capitalize', STAGE_STYLES[r.stage] ?? 'text-zinc-400')}>{r.stage}</Badge>
-                  </td>
-                  <td className="px-2 py-1.5 text-right">
-                    <Button
-                      size="sm"
-                      variant="tertiary"
-                      className="text-[10px]"
-                      disabled={!canCurrentUserMutate || r.stage === 'sent' || r.stage === 'responded' || !!r.opportunity}
-                      onClick={() => prepare(r)}
-                    >
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      {r.current ? 'New revision' : 'Prepare outreach'}
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* §Phase D — canonical DataTable (the `data-table` hook is preserved
+            for the acceptance test's real row-count assertions). */}
+        <DataTable
+          dataTable="acquisition-pipeline"
+          caption="Acquisition pipeline"
+          rows={rows}
+          rowKey={(r) => r.prospect.id}
+          emptyMessage="No prospects match this filter."
+          columns={[
+            {
+              key: 'brand',
+              label: 'Brand',
+              primary: true,
+              render: (r) => (
+                <span>
+                  <span className="inline-flex items-center gap-1.5 text-white font-medium">
+                    <Target className="w-3 h-3 text-brass-400" />
+                    {r.prospect.brand}
+                  </span>
+                  <span className="block text-[9px] text-zinc-500">{r.prospect.category}</span>
+                </span>
+              ),
+            },
+            {
+              key: 'score',
+              label: 'BI score',
+              render: (r) => (
+                <span>
+                  <span
+                    className={cn(
+                      'font-mono',
+                      r.prospect.score.total >= 80 ? 'text-emerald-400' : 'text-zinc-300'
+                    )}
+                  >
+                    {r.prospect.score.total}
+                  </span>
+                  <span className="text-[9px] text-zinc-500"> {r.prospect.score.tier}</span>
+                </span>
+              ),
+            },
+            {
+              key: 'leadId',
+              label: 'ICP identity',
+              hideBelow: 'lg',
+              render: (r) => (
+                <span className="font-mono text-[10px] text-zinc-400">
+                  {r.lead?.id ?? '(no region)'}
+                </span>
+              ),
+            },
+            {
+              key: 'region',
+              label: 'Region',
+              render: (r) => <span className="text-zinc-300">{r.region ?? '—'}</span>,
+            },
+            {
+              key: 'stage',
+              label: 'Stage',
+              render: (r) => (
+                <Badge className={cn('text-[9px] border capitalize', STAGE_STYLES[r.stage] ?? 'text-zinc-400')}>
+                  {r.stage}
+                </Badge>
+              ),
+            },
+            {
+              key: 'action',
+              label: 'Action',
+              align: 'right',
+              render: (r) => (
+                <Button
+                  size="sm"
+                  variant="tertiary"
+                  className="text-[10px]"
+                  disabled={
+                    !canCurrentUserMutate ||
+                    r.stage === 'sent' ||
+                    r.stage === 'responded' ||
+                    !!r.opportunity
+                  }
+                  onClick={() => prepare(r)}
+                >
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  {r.current ? 'New revision' : 'Prepare outreach'}
+                </Button>
+              ),
+            },
+          ]}
+        />
         <p className="text-[10px] text-zinc-600">
           Review, modify, approve/reject, send and record the response on the prospect's own record:
           Brand Intelligence → brand row → Outreach tab.

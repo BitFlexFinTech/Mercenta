@@ -1,6 +1,56 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-13 (**Phase D2 — canonical status sweep across all remaining surfaces · Phase F — GO_LIVE.md runbook + edge-validator crash fix**; previous this session: A+B compliance/Integration Hub, C access-gate real coverage, D1 status foundation)
+> Last updated: 2026-09-13 (**Phase D5 — canonical DataTable consolidation: 12 operational tables migrated + primitive hardening**)
+>
+> **PHASE D5 (2026-09-13, third session) — THE OPERATIONAL TABLES ARE MIGRATED.**
+> No migration, no new store, no new visual language: the extended canonical `DataTable`
+> (`src/components/ui.tsx`) now backs every remaining operational list.
+>
+> **Tables migrated to the canonical `DataTable` (12):**
+> brand deductions ledger (already done) · admin returns tracking (already done) ·
+> **carrier manifest** · **product catalogue (15 columns)** · **brand returns** ·
+> **admin audit log** · **campaign performance** · **acquisition pipeline** ·
+> **deductions & chargebacks (Retail Pipeline)** · **logistics control** ·
+> **commerce activity trail** · **fulfilment score list** · **staff & roles matrix** ·
+> **Companies House** · **HMRC VAT**.
+> Skipped ON PURPOSE (the primitive does not fit, per the directive's "do not
+> mechanically replace every table"): the Brand Intelligence 14-column analytical
+> matrix (it has its own header-click sorting contract), nested detail tables
+> (PO line items, ASN lines), and print/key-value tables (TamSam, guidance, CSV preview).
+>
+> **Primitive hardening shipped with it (3 real defects fixed at the root):**
+> 1. **Duplicate-DOM defect.** The cards + table were BOTH rendered and toggled with CSS,
+>    so every row existed twice: two copies for assistive tech, and `text=/X/`.first()
+>    could resolve to the HIDDEN copy. `DataTable` now renders exactly ONE representation
+>    (media query as state, sync on first render). This fixed two full-suite failures
+>    (`catalog-product-management` 1, `domain-acceptance` 7) with **no test edits**.
+> 2. **`data-table` passthrough + `rowClassName`** so E2E row-count selectors and the
+>    delayed-shipment row highlight survived migration.
+> 3. **Catalogue availability toggle had no visible consequence** (wrote the canonical
+>    store but nothing re-read the projection). Now gives immediate deterministic
+>    feedback (`aria-pressed`) while still writing the canonical store.
+> Also fixed: Logistics Control rendered a LOCAL status string; it now uses the
+> canonical `shipmentStatusPresentation` (one label/tone everywhere).
+>
+> **Preserved per-surface contracts:** deduction column indices 5/6 (deductions.spec.ts),
+> Logistics Control PO `td` + no bare `—` `td`, carrier manifest `<select>` ancestor depth
+> (shipment-asn.spec.ts), `table[data-table="acquisition-pipeline"]` row counts (domain-acceptance),
+> external search/filter state on returns/audit/acquisition surfaces, all inline controls.
+>
+> **New verification:** `e2e/table-migrations.spec.ts` **2/2** — the 15-column catalogue at
+> 375px shows labelled cards with EVERY field and action and the availability click has a
+> visible consequence; the carrier manifest keeps a working milestone `<select>` on a phone
+> and the SAME record's canonical `[data-status]` badge follows it; zero horizontal overflow.
+> **Gates:** typecheck **0** · eslint(src+e2e) **0** · build **✓** · full Playwright
+> **225 passed / 0 failed / 2 skipped** (227 collected incl. the 2 new) · integrity audit
+> **61 passed / 0 failed** · wording gate **176 files / 0 violations** · migrations unchanged
+> (**23**) · baseline `959b4d2` still an ancestor.
+> **STILL OPEN — Phase D remainder:** per-screen density/hierarchy pass on the remaining
+> major screens (dashboard KPI bands, CRM, finance incl. the AccountingPanel "Brand Payouts"
+> table which is still a hardcoded empty shell with no canonical payout read model), then
+> Phase S (Social E2E), Phase E2E (deterministic investor simulation), Phase F/G (production
+> prep), Rakazo LAST.
+
 >
 > **PHASE F2 + D3 + D4 (2026-09-13, second session) — TRUTHFUL AUDIT + THE TABLE PRIMITIVE.** Commits
 > **`76ff520`** (integrity audit repair + wording gate) · **`3f14c4a`** (DataTable extension + deductions

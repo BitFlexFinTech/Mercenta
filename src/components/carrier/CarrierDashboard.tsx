@@ -2,9 +2,8 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { advanceShipmentViaDhl, recordDhlWaybill } from '@/lib/dhl/domain';
 import { resolveProviderMode } from '@/integrations/types';
-import { Card, Badge, Button } from '@/components/ui';
+import { Card, Button, DataTable, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
-import { StatusBadge } from '@/components/ui';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import type { ShipmentStatus, CarrierId } from '@/types';
 import { Terminal, Activity, Code2, Truck, RefreshCw } from 'lucide-react';
@@ -183,93 +182,113 @@ export function CarrierDashboard() {
             <Terminal className={cn('w-4 h-4', theme.accent)} />
           }
         >
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-                  <th className="text-left font-medium px-4 py-3">Reference</th>
-                  <th className="text-left font-medium px-4 py-3">Shipment</th>
-                  <th className="text-right font-medium px-4 py-3">Value</th>
-                  <th className="text-center font-medium px-4 py-3">Current Status</th>
-                  <th className="text-left font-medium px-4 py-3">Update Milestone</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {carrierShipments.map((s) => (
-                  <tr
-                    key={s.id}
-                    className="hover:bg-white/[0.02] transition-colors"
+          {/* §Phase D — canonical DataTable: the milestone <select> and the DHL
+              simulation control stay fully interactive at every width (labelled
+              cards below md, table at md+), never reduced to a static label. */}
+          <DataTable
+            dataTable="carrier-manifest"
+            caption="Carrier manifest"
+            rows={carrierShipments}
+            rowKey={(s) => s.id}
+            emptyMessage="No manifests are assigned to this carrier terminal."
+            columns={[
+              {
+                key: 'reference',
+                label: 'Reference',
+                primary: true,
+                render: (s) => (
+                  <div>
+                    <div className="text-xs font-mono text-zinc-400">{s.reference}</div>
+                    <div className="text-[10px] font-mono text-zinc-600 mt-0.5">
+                      {s.trackingNumber}
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: 'shipment',
+                label: 'Shipment',
+                render: (s) => (
+                  <div>
+                    <div className="text-sm font-medium text-white">{s.title}</div>
+                    <div className="text-xs text-zinc-500 mt-0.5">{s.customer}</div>
+                  </div>
+                ),
+              },
+              {
+                key: 'value',
+                label: 'Value',
+                align: 'right',
+                hideBelow: 'lg',
+                render: (s) => (
+                  <span className="text-sm font-semibold text-white">
+                    £{Math.round(s.value / 1000)}k
+                  </span>
+                ),
+              },
+              {
+                key: 'status',
+                label: 'Current Status',
+                align: 'center',
+                render: (s) => (
+                  <StatusBadge
+                    dataStatus={shipmentStatusPresentation(s.status).dataStatus}
+                    tone={shipmentStatusPresentation(s.status).tone}
                   >
-                    <td className="px-4 py-3">
-                      <div className="text-xs font-mono text-zinc-400">{s.reference}</div>
-                      <div className="text-[10px] font-mono text-zinc-600 mt-0.5">
-                        {s.trackingNumber}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="text-sm font-medium text-white">{s.title}</div>
-                      <div className="text-xs text-zinc-500 mt-0.5">{s.customer}</div>
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm font-semibold text-white">
-                      £{Math.round(s.value / 1000)}k
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <StatusBadge
-                        dataStatus={shipmentStatusPresentation(s.status).dataStatus}
-                        tone={shipmentStatusPresentation(s.status).tone}
-                      >
-                        {shipmentStatusPresentation(s.status).label}
-                      </StatusBadge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={s.status}
-                        onChange={(e) =>
-                          updateShipmentStatus(
-                            s.id,
-                            e.target.value as ShipmentStatus
-                          )
-                        }
-                        className={cn(
-                          'bg-ink-900 border rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none cursor-pointer transition-colors',
-                          carrierContext === 'dhl'
-                            ? 'border-amber-500/30 focus:border-amber-500/60'
-                            : carrierContext === 'fedex'
-                            ? 'border-purple-500/30 focus:border-purple-500/60'
-                            : 'border-blue-500/30 focus:border-blue-500/60'
-                        )}
-                      >
-                        {STATUS_OPTIONS.map((opt) => (
-                          <option key={opt} value={opt} className="bg-ink-900">
-                            {shipmentStatusPresentation(opt).label}
-                          </option>
-                        ))}
-                      </select>
-                      {carrierContext === 'dhl' && (
-                        <div className="mt-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-[10px]"
-                            loading={busyShipmentId === s.id}
-                            onClick={() => void requestDhlUpdate(s.id)}
-                          >
-                            <RefreshCw className="w-3 h-3 mr-1" />
-                            DHL status → next milestone (sim)
-                          </Button>
-                          {lastDhlResult[s.id] && (
-                            <div className="text-[9px] font-mono text-zinc-500 mt-1 leading-tight">
-                              {lastDhlResult[s.id]}
-                            </div>
-                          )}
-                        </div>
+                    {shipmentStatusPresentation(s.status).label}
+                  </StatusBadge>
+                ),
+              },
+              {
+                key: 'milestone',
+                label: 'Update Milestone',
+                render: (s) => (
+                  <>
+                    <select
+                      value={s.status}
+                      aria-label={`Update milestone for ${s.reference}`}
+                      onChange={(e) =>
+                        updateShipmentStatus(s.id, e.target.value as ShipmentStatus)
+                      }
+                      className={cn(
+                        'w-full bg-ink-900 border rounded-md px-2.5 py-1.5 text-xs text-white focus:outline-none cursor-pointer transition-colors md:w-auto',
+                        carrierContext === 'dhl'
+                          ? 'border-amber-500/30 focus:border-amber-500/60'
+                          : carrierContext === 'fedex'
+                          ? 'border-purple-500/30 focus:border-purple-500/60'
+                          : 'border-blue-500/30 focus:border-blue-500/60'
                       )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    >
+                      {STATUS_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt} className="bg-ink-900">
+                          {shipmentStatusPresentation(opt).label}
+                        </option>
+                      ))}
+                    </select>
+                    {carrierContext === 'dhl' && (
+                      <div className="mt-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[10px]"
+                          loading={busyShipmentId === s.id}
+                          onClick={() => void requestDhlUpdate(s.id)}
+                        >
+                          <RefreshCw className="w-3 h-3 mr-1" />
+                          DHL status → next milestone (sim)
+                        </Button>
+                        {lastDhlResult[s.id] && (
+                          <div className="text-[9px] font-mono text-zinc-500 mt-1 leading-tight">
+                            {lastDhlResult[s.id]}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ),
+              },
+            ]}
+          />
         </Card>
 
         {/* API Request Auditor */}

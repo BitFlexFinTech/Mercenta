@@ -4,7 +4,7 @@ import { applyFulfillmentOverride, recalculateAllScores } from '@/data/api';
 import type { FulfillmentScore, FulfillmentTrack } from '@/types';
 import type { DemoBrandRow } from '@/data/demoData';
 import { isBorderline, scoreBrand, computeComponentScores, type ScoreInputs } from '@/lib/scoring';
-import { Badge, Card, Button, Input } from '@/components/ui';
+import { Badge, Card, Button, DataTable, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   ArrowLeft, Gauge, Info, BarChart3, Table2, Beaker, History, RotateCcw, RefreshCw,
@@ -209,73 +209,79 @@ export function FulfillmentTrackPanel() {
         </span>
       </div>
 
-      {/* List view */}
+      {/* List view — §Phase D: canonical DataTable (row click opens the score
+          detail; the borderline/manual-override state stays visible on mobile). */}
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-                <th className="text-left font-medium px-4 py-3">Brand</th>
-                <th className="text-left font-medium px-4 py-3">Category</th>
-                <th className="text-right font-medium px-4 py-3">Score</th>
-                <th className="text-left font-medium px-4 py-3">Track</th>
-                <th className="text-left font-medium px-4 py-3">Status</th>
-                <th className="text-right font-medium px-4 py-3">Last Calculated</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {filtered.map(({ score, brand }) => {
-                const borderline = isBorderline(score.totalScore) && !score.manualOverride;
-                return (
-                  <tr
-                    key={score.brandId}
-                    onClick={() => setSelectedId(score.brandId)}
-                    className="hover:bg-white/[0.02] transition-colors cursor-pointer"
-                  >
-                    <td className="px-4 py-3 text-sm font-medium text-white">
-                      {brand?.profile.businessName ?? score.brandId}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-zinc-400">{brand?.category ?? '—'}</td>
-                    <td className="px-4 py-3 text-right">
-                      <span
-                        className={cn(
-                          'font-mono font-semibold',
-                          borderline ? 'text-amber-300' : 'text-white'
-                        )}
-                      >
-                        {score.totalScore}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <TrackBadge track={score.track} />
-                    </td>
-                    <td className="px-4 py-3">
-                      {borderline ? (
-                        <NeedsReviewBadge />
-                      ) : score.manualOverride ? (
-                        <Badge className="text-[10px] bg-purple-500/15 text-purple-300 border-purple-500/20">
-                          Manual override
-                        </Badge>
-                      ) : (
-                        <span className="text-[11px] text-zinc-600">Auto</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right text-[11px] font-mono text-zinc-500">
-                      {new Date(score.lastCalculated).toLocaleDateString()}
-                    </td>
-                  </tr>
-                );
-              })}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-xs text-zinc-600">
-                    No brands match the current filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          dataTable="fulfillment-scores"
+          caption="Fulfilment score by brand"
+          rows={filtered}
+          rowKey={({ score }) => score.brandId}
+          onRowClick={({ score }) => setSelectedId(score.brandId)}
+          emptyMessage="No brands match the current filters."
+          columns={[
+            {
+              key: 'brand',
+              label: 'Brand',
+              primary: true,
+              render: ({ score, brand }) => (
+                <span className="text-sm font-medium text-white">
+                  {brand?.profile.businessName ?? score.brandId}
+                </span>
+              ),
+            },
+            {
+              key: 'category',
+              label: 'Category',
+              render: ({ brand }) => <span className="text-xs text-zinc-400">{brand?.category ?? '—'}</span>,
+            },
+            {
+              key: 'totalScore',
+              label: 'Score',
+              align: 'right',
+              render: ({ score }) => (
+                <span
+                  className={cn(
+                    'font-mono font-semibold',
+                    isBorderline(score.totalScore) && !score.manualOverride ? 'text-amber-300' : 'text-white'
+                  )}
+                >
+                  {score.totalScore}
+                </span>
+              ),
+            },
+            {
+              key: 'track',
+              label: 'Track',
+              render: ({ score }) => <TrackBadge track={score.track} />,
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              render: ({ score }) =>
+                isBorderline(score.totalScore) && !score.manualOverride ? (
+                  <NeedsReviewBadge />
+                ) : score.manualOverride ? (
+                  <Badge className="text-[10px] bg-purple-500/15 text-purple-300 border-purple-500/20">
+                    Manual override
+                  </Badge>
+                ) : (
+                  <span className="text-[11px] text-zinc-600">Auto</span>
+                ),
+            },
+            {
+              key: 'lastCalculated',
+              label: 'Last Calculated',
+              align: 'right',
+              hideBelow: 'lg',
+              render: ({ score }) => (
+                <span className="font-mono text-[11px] text-zinc-500">
+                  {new Date(score.lastCalculated).toLocaleDateString()}
+                </span>
+              ),
+            },
+          ]}
+        />
       </Card>
       </>
       )}

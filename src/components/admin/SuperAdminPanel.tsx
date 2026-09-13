@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
-import { Card, Badge, Button, Input, Select } from '@/components/ui';
+import { Card, Badge, Button, DataTable, Input, Select } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { StaffMember, StaffRole, CarrierMarkupConfig } from '@/types';
 import { demoCarrierMarkup, updateCarrierMarkup } from '@/data/demoStore';
@@ -356,105 +356,133 @@ export function SuperAdminPanel() {
 
       {/* Staff & Roles Matrix */}
       <Card title="Staff & Roles Matrix" subtitle="Manage access permissions and channel assignments">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-                <th className="text-left font-medium px-5 py-3">Name</th>
-                <th className="text-left font-medium px-4 py-3">Email</th>
-                <th className="text-left font-medium px-4 py-3">Role</th>
-                <th className="text-left font-medium px-4 py-3">Channel</th>
-                <th className="text-left font-medium px-4 py-3">Permission Tier</th>
-                <th className="text-center font-medium px-4 py-3">Status</th>
-                <th className="text-right font-medium px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {staff.map((member) => (
-                <tr key={member.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="text-sm font-medium text-white">{member.name}</div>
-                  </td>
-                  <td className="px-4 py-3.5 text-xs font-mono text-zinc-400">{member.email}</td>
-                  <td className="px-4 py-3.5">
-                    <select
-                      value={member.role}
-                      onChange={(e) => updateStaffRole(member.id, e.target.value as StaffRole)}
-                      className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
-                    >
-                      {ROLE_OPTIONS.map((r) => (
-                        <option key={r.value} value={r.value} className="bg-ink-900">
-                          {r.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <select
-                      value={member.channel}
-                      onChange={(e) => updateStaffChannel(member.id, e.target.value)}
-                      className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
-                    >
-                      {CHANNEL_OPTIONS.map((c) => (
-                        <option key={c} value={c} className="bg-ink-900">
-                          {c}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  {/* §Stage-25 — RBAC permission tier: full vs view-only ops. */}
-                  <td className="px-4 py-3.5">
-                    <select
-                      value={member.permissionTier}
-                      onChange={(e) =>
-                        updateStaffTier(member.id, e.target.value as StaffMember['permissionTier'])
-                      }
-                      className={cn(
-                        'bg-ink-900 border rounded-md px-2.5 py-1 text-xs focus:outline-none cursor-pointer',
-                        member.permissionTier === 'full'
-                          ? 'border-emerald-500/30 text-emerald-300'
-                          : 'border-amber-500/30 text-amber-300'
-                      )}
-                    >
-                      <option value="full">Full admin</option>
-                      <option value="view_only">View-only ops</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-3.5 text-center">
-                    <Badge
-                      className={cn(
-                        'text-[10px]',
-                        member.active
-                          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                          : 'bg-zinc-500/15 text-zinc-500 border-zinc-500/20'
-                      )}
-                    >
-                      {member.active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => toggleStaffActive(member.id)}
-                        className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-emerald-400 transition-colors"
-                        title={member.active ? 'Deactivate' : 'Activate'}
-                      >
-                        <Power className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => removeStaff(member.id)}
-                        className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-red-400 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* §Phase D — canonical DataTable: the three inline RBAC controls
+            (role / channel / permission tier) stay interactive and usable on a
+            phone (labelled cards below md), never clipped or read-only. */}
+        <DataTable
+          dataTable="staff-roles"
+          caption="Staff and roles matrix"
+          rows={staff}
+          rowKey={(member) => member.id}
+          emptyMessage="No staff members yet."
+          columns={[
+            {
+              key: 'name',
+              label: 'Name',
+              primary: true,
+              render: (member) => (
+                <span className="text-sm font-medium text-white">{member.name}</span>
+              ),
+            },
+            {
+              key: 'email',
+              label: 'Email',
+              render: (member) => (
+                <span className="font-mono text-xs text-zinc-400">{member.email}</span>
+              ),
+            },
+            {
+              key: 'role',
+              label: 'Role',
+              render: (member) => (
+                <select
+                  value={member.role}
+                  aria-label={`Role for ${member.name}`}
+                  onChange={(e) => updateStaffRole(member.id, e.target.value as StaffRole)}
+                  className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
+                >
+                  {ROLE_OPTIONS.map((r) => (
+                    <option key={r.value} value={r.value} className="bg-ink-900">
+                      {r.label}
+                    </option>
+                  ))}
+                </select>
+              ),
+            },
+            {
+              key: 'channel',
+              label: 'Channel',
+              render: (member) => (
+                <select
+                  value={member.channel}
+                  aria-label={`Channel for ${member.name}`}
+                  onChange={(e) => updateStaffChannel(member.id, e.target.value)}
+                  className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-1 text-xs text-white focus:outline-none focus:border-brass-500/40 cursor-pointer"
+                >
+                  {CHANNEL_OPTIONS.map((c) => (
+                    <option key={c} value={c} className="bg-ink-900">
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              ),
+            },
+            {
+              key: 'permissionTier',
+              label: 'Permission Tier',
+              render: (member) => (
+                <select
+                  value={member.permissionTier}
+                  aria-label={`Permission tier for ${member.name}`}
+                  onChange={(e) =>
+                    updateStaffTier(member.id, e.target.value as StaffMember['permissionTier'])
+                  }
+                  className={cn(
+                    'bg-ink-900 border rounded-md px-2.5 py-1 text-xs focus:outline-none cursor-pointer',
+                    member.permissionTier === 'full'
+                      ? 'border-emerald-500/30 text-emerald-300'
+                      : 'border-amber-500/30 text-amber-300'
+                  )}
+                >
+                  <option value="full">Full admin</option>
+                  <option value="view_only">View-only ops</option>
+                </select>
+              ),
+            },
+            {
+              key: 'active',
+              label: 'Status',
+              align: 'center',
+              render: (member) => (
+                <Badge
+                  className={cn(
+                    'text-[10px]',
+                    member.active
+                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                      : 'bg-zinc-500/15 text-zinc-500 border-zinc-500/20'
+                  )}
+                >
+                  {member.active ? 'Active' : 'Inactive'}
+                </Badge>
+              ),
+            },
+            {
+              key: 'actions',
+              label: 'Actions',
+              align: 'right',
+              render: (member) => (
+                <span className="flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => toggleStaffActive(member.id)}
+                    className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-emerald-400 transition-colors"
+                    title={member.active ? 'Deactivate' : 'Activate'}
+                    aria-label={member.active ? `Deactivate ${member.name}` : `Activate ${member.name}`}
+                  >
+                    <Power className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => removeStaff(member.id)}
+                    className="p-1.5 rounded-md hover:bg-white/[0.06] text-zinc-500 hover:text-red-400 transition-colors"
+                    title="Delete"
+                    aria-label={`Delete ${member.name}`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ),
+            },
+          ]}
+        />
       </Card>
 
         </>

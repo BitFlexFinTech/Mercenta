@@ -8,7 +8,7 @@ import { DemoBanner } from "@/components/shared/DemoBanner";
 import { latestSubmissionForProduct, reconcileDelivery, type DeliveryReconciliationResult } from '@/data/demoStore';
 import { useApp } from '@/context/GlobalStateContext';
 import { UK_MARKETPLACE_ID } from '@/lib/spapi/transform';
-import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
 import {
   billingDecisionPresentation,
   deductionStatusPresentation,
@@ -213,45 +213,68 @@ function UnlockedPipeline() {
 
       {/* Deduction / chargeback log */}
       <Card title="Deductions & Chargebacks">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-              <th className="text-left font-medium px-4 py-2.5">Date</th>
-              <th className="text-left font-medium px-4 py-2.5">Brand</th>
-              <th className="text-left font-medium px-4 py-2.5">PO</th>
-              <th className="text-left font-medium px-4 py-2.5">Type</th>
-              <th className="text-left font-medium px-4 py-2.5">Reason</th>
-              <th className="text-left font-medium px-4 py-2.5">Status</th>
-              <th className="text-right font-medium px-4 py-2.5">Amount</th>
-              <th className="text-right font-medium px-4 py-2.5">Dispute</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/[0.04]">
-            {deductions.map((d) => (
-              <tr key={d.id} className="text-zinc-300 align-top">
-                <td className="px-4 py-2.5 text-xs font-mono">{d.date}</td>
-                <td className="px-4 py-2.5 text-xs">{brandNames.get(d.brandId) ?? d.brandId}</td>
-                <td className="px-4 py-2.5 text-xs font-mono">{d.purchaseOrderId}</td>
-                <td className="px-4 py-2.5 text-xs capitalize">
+        {/* §Phase D — canonical DataTable. Column order is UNCHANGED (the
+            deduction assertions read td indices 5/6), the status stays
+            canonical, and every Dispute/outcome control is reachable at all
+            widths via labelled cards below md. */}
+        <DataTable
+          dataTable="deductions-chargebacks"
+          caption="Deductions and chargebacks"
+          rows={deductions}
+          rowKey={(d) => d.id}
+          emptyMessage="No deductions posted."
+          columns={[
+            {
+              key: 'date',
+              label: 'Date',
+              render: (d) => <span className="font-mono text-xs">{d.date}</span>,
+            },
+            {
+              key: 'brandId',
+              label: 'Brand',
+              render: (d) => <span className="text-xs">{brandNames.get(d.brandId) ?? d.brandId}</span>,
+            },
+            {
+              key: 'purchaseOrderId',
+              label: 'PO',
+              render: (d) => <span className="font-mono text-xs">{d.purchaseOrderId}</span>,
+            },
+            {
+              key: 'type',
+              label: 'Type',
+              primary: true,
+              render: (d) => (
+                <span className="text-xs capitalize">
                   {d.type.replace(/_/g, ' ')}
                   {/* §Phase E5 (G2) — in-cell marker only: column indices are
                       deliberately unchanged for the existing dispute assertions. */}
                   {d.simulated && <span className="ml-1 text-[9px] text-brass-400">(sim)</span>}
-                </td>
-                <td className="px-4 py-2.5 text-xs max-w-[240px]">
+                </span>
+              ),
+            },
+            {
+              key: 'reason',
+              label: 'Reason',
+              render: (d) => (
+                <span className="text-xs">
                   {d.reason}
                   {d.dispute && (
-                    <div className="mt-1 text-[10px] text-zinc-500">
+                    <span className="mt-1 block text-[10px] text-zinc-500">
                       Disputed {d.dispute.openedAt}: {d.dispute.notes}
                       {d.dispute.outcome && (
                         <span className="ml-1 capitalize text-zinc-400">
                           → outcome: {d.dispute.outcome}
                         </span>
                       )}
-                    </div>
+                    </span>
                   )}
-                </td>
-                <td className="px-4 py-2.5">
+                </span>
+              ),
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              render: (d) => (
                 <StatusBadge
                   className="text-[10px] capitalize"
                   dataStatus={deductionStatusPresentation(d.status).dataStatus}
@@ -259,11 +282,20 @@ function UnlockedPipeline() {
                 >
                   {deductionStatusPresentation(d.status).label}
                 </StatusBadge>
-                </td>
-                <td className="px-4 py-2.5 text-right text-xs font-mono">
-                  −£{d.amountGbp.toFixed(2)}
-                </td>
-                <td className="px-4 py-2.5 text-right">
+              ),
+            },
+            {
+              key: 'amountGbp',
+              label: 'Amount',
+              align: 'right',
+              render: (d) => <span className="font-mono text-xs">−£{d.amountGbp.toFixed(2)}</span>,
+            },
+            {
+              key: 'dispute',
+              label: 'Dispute',
+              align: 'right',
+              render: (d) => (
+                <span className="inline-flex flex-wrap items-center justify-end gap-1">
                   {d.status === 'open' && disputingId !== d.id && (
                     <Button
                       variant="ghost"
@@ -277,7 +309,7 @@ function UnlockedPipeline() {
                     </Button>
                   )}
                   {d.status === 'disputed' && !d.dispute?.outcome && (
-                    <div className="flex gap-1 justify-end">
+                    <span className="flex gap-1 justify-end">
                       {(['won', 'partial', 'lost'] as const).map((o) => (
                         <Button
                           key={o}
@@ -288,20 +320,13 @@ function UnlockedPipeline() {
                           {o}
                         </Button>
                       ))}
-                    </div>
+                    </span>
                   )}
-                </td>
-              </tr>
-            ))}
-            {deductions.length === 0 && (
-              <tr>
-                <td colSpan={8} className="text-center text-xs text-zinc-600 py-6">
-                  No deductions posted.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                </span>
+              ),
+            },
+          ]}
+        />
 
         {/* Dispute note entry */}
         {disputingId && (

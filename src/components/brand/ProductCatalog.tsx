@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
-import { Card, Badge, Button, Input, Select } from '@/components/ui';
+import { Card, Badge, Button, DataTable, Input, Select } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { Plus, X, Flame, Lock, ShieldAlert, ImageUp, Upload, Send, RefreshCw } from 'lucide-react';
 import type { Product } from '@/types';
@@ -30,6 +30,15 @@ export function ProductCatalog() {
   const [gateError, setGateError] = useState<string | null>(null);
   const [editingSku, setEditingSku] = useState<string | null>(null);
   const [_costEdit, setCostEdit] = useState('');
+  /**
+   * §Phase D — the availability toggle writes to the canonical catalog store but
+   * nothing re-read the session projection, so the control had NO visible
+   * consequence until an unrelated re-render. The local override gives the click
+   * immediate, deterministic feedback while the store write (the real state)
+   * still happens — the two cannot drift because every other read path uses the
+   * canonical store.
+   */
+  const [availabilityOverride, setAvailabilityOverride] = useState<Record<string, boolean>>({});
   /** §Phase E3 — the outcome of the last submit/poll, stated honestly. */
   const [submissionNotice, setSubmissionNotice] = useState<string | null>(null);
   const [busySku, setBusySku] = useState<string | null>(null);
@@ -239,192 +248,252 @@ export function ProductCatalog() {
         <CsvCatalogImport brandId={brandId} onComplete={() => { setShowCsvImport(false); }} />
       )}
 
+{/* §Phase D — canonical DataTable. Fifteen catalogue columns are NOT
+          squeezed into a phone viewport: below md every product renders as a
+          labelled card (all fields + all actions reachable, nothing clipped,
+          no horizontal page overflow). At md+ the semantic table progressively
+          discloses the secondary trade/logistics columns at lg. */}
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-                <th className="text-left font-medium px-4 py-3">Product</th>
-                <th className="text-left font-medium px-4 py-3">SKU / Barcode</th>
-                <th className="text-right font-medium px-4 py-3">Ex-Works (£)</th>
-                <th className="text-right font-medium px-4 py-3">UK MSRP (£)</th>
-                <th className="text-left font-medium px-4 py-3">Commodity Code</th>
-                <th className="text-left font-medium px-4 py-3">Case Pack</th>
-                <th className="text-left font-medium px-4 py-3">Tax Code</th>
-                <th className="text-left font-medium px-4 py-3">VAT</th>
-                <th className="text-center font-medium px-4 py-3">Hazmat</th>
-                <th className="text-left font-medium px-4 py-3">Dimensions (cm)</th>
-                <th className="text-right font-medium px-4 py-3">Weight</th>
-                <th className="text-center font-medium px-4 py-3">Availability</th>
-                <th className="text-right font-medium px-4 py-3">Lead Time</th>
-                <th className="text-center font-medium px-4 py-3">Submission</th>
-                <th className="text-center font-medium px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {products.map((p) => (
-                <tr
-                  key={p.id}
-                  className="hover:bg-white/[0.02] transition-colors text-zinc-300"
+        <DataTable
+          dataTable="product-catalogue"
+          caption="Product catalogue"
+          rows={products}
+          rowKey={(p) => p.id}
+          emptyMessage="No products in your catalogue yet."
+          columns={[
+            {
+              key: 'product',
+              label: 'Product',
+              primary: true,
+              render: (p) => (
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl w-8 h-8 flex items-center justify-center bg-ink-900 rounded-lg">
+                    {p.image}
+                  </span>
+                  <span className="text-sm font-medium text-white">{p.name}</span>
+                </div>
+              ),
+            },
+            {
+              key: 'sku',
+              label: 'SKU / Barcode',
+              render: (p) => (
+                <div>
+                  <div className="text-xs font-mono text-zinc-400">{p.sku}</div>
+                  <div className="text-[10px] font-mono text-zinc-600 mt-0.5">{p.barcode}</div>
+                </div>
+              ),
+            },
+            {
+              key: 'exWorks',
+              label: 'Ex-Works (£)',
+              align: 'right',
+              render: (p) => (
+                <span className="text-sm font-semibold text-white">£{p.exWorksPrice.toFixed(2)}</span>
+              ),
+            },
+            {
+              key: 'msrp',
+              label: 'UK MSRP (£)',
+              align: 'right',
+              render: (p) => (
+                <span className="text-sm text-zinc-300">£{p.ukRetailPrice.toFixed(2)}</span>
+              ),
+            },
+            {
+              key: 'commodity',
+              label: 'Commodity Code',
+              hideBelow: 'lg',
+              render: (p) => (
+                <span className="text-xs font-mono text-zinc-400">{p.commodityCode}</span>
+              ),
+            },
+            {
+              key: 'casePack',
+              label: 'Case Pack',
+              hideBelow: 'lg',
+              render: (p) => (
+                <span className="text-xs text-zinc-400">
+                  {p.unitsPerCase ?? '—'} units/case
+                  {p.caseOrderable && <span className="ml-1 text-brass-400">(case orderable)</span>}
+                </span>
+              ),
+            },
+            {
+              key: 'taxCode',
+              label: 'Tax Code',
+              hideBelow: 'lg',
+              render: (p) => (
+                <span className="text-xs font-mono text-zinc-400">
+                  {p.productTaxCode ?? 'A_GEN_TAX'}
+                </span>
+              ),
+            },
+            {
+              key: 'vat',
+              label: 'VAT',
+              hideBelow: 'lg',
+              render: (p) => (
+                <Badge
+                  className={
+                    p.vatStatus === 'Zero-rated'
+                      ? 'bg-blue-500/15 text-blue-300 border-blue-500/20'
+                      : 'bg-zinc-500/15 text-zinc-300 border-zinc-500/20'
+                  }
                 >
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xl w-8 h-8 flex items-center justify-center bg-ink-900 rounded-lg">
-                        {p.image}
-                      </span>
-                      <span className="text-sm font-medium text-white">
-                        {p.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="text-xs font-mono text-zinc-400">{p.sku}</div>
-                    <div className="text-[10px] font-mono text-zinc-600 mt-0.5">
-                      {p.barcode}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right text-sm font-semibold text-white">
-                    £{p.exWorksPrice.toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-sm text-zinc-300">
-                    £{p.ukRetailPrice.toFixed(2)}
-                  </td>
-                  <td className="px-4 py-3 text-xs font-mono text-zinc-400">
-                    {p.commodityCode}
-                  </td>
-                  {/* §Stage-24 item setup — case pack + product tax code */}
-                  <td className="px-4 py-3 text-xs text-zinc-400">
-                    {p.unitsPerCase ?? '—'} units/case
-                    {p.caseOrderable && (
-                      <span className="ml-1 text-brass-400">(case orderable)</span>
+                  {p.vatStatus}
+                </Badge>
+              ),
+            },
+            {
+              key: 'hazmat',
+              label: 'Hazmat',
+              align: 'center',
+              hideBelow: 'lg',
+              render: (p) =>
+                p.hazmat ? (
+                  <span className="inline-flex items-center gap-1 text-xs text-amber-400">
+                    <Flame className="w-3 h-3" />
+                    Yes
+                  </span>
+                ) : (
+                  <span className="text-xs text-zinc-600">No</span>
+                ),
+            },
+            {
+              key: 'dimensions',
+              label: 'Dimensions (cm)',
+              hideBelow: 'lg',
+              render: (p) => (
+                <span className="text-xs text-zinc-400">
+                  {p.length}×{p.width}×{p.height}
+                </span>
+              ),
+            },
+            {
+              key: 'weight',
+              label: 'Weight',
+              align: 'right',
+              hideBelow: 'lg',
+              render: (p) => <span className="text-xs text-zinc-400">{p.weight} kg</span>,
+            },
+            {
+              key: 'availability',
+              label: 'Availability',
+              align: 'center',
+              render: (p) => {
+                const isAvailable = availabilityOverride[p.sku] ?? p.isAvailable !== false;
+                return (
+                  <button
+                    onClick={() => {
+                      const next = !isAvailable;
+                      setAvailabilityOverride((prev) => ({ ...prev, [p.sku]: next }));
+                      void import('@/data/demoStore').then((m) => {
+                        m.updateProductAvailability(p.sku, next);
+                      });
+                    }}
+                    aria-label={`Toggle availability for ${p.sku}`}
+                    aria-pressed={!isAvailable}
+                    className={cn(
+                      'text-[10px] px-2 py-0.5 rounded-full font-medium transition-colors',
+                      isAvailable
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : 'bg-red-500/15 text-red-300'
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-xs font-mono text-zinc-400">
-                    {p.productTaxCode ?? 'A_GEN_TAX'}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      className={
-                        p.vatStatus === 'Zero-rated'
-                          ? 'bg-blue-500/15 text-blue-300 border-blue-500/20'
-                          : 'bg-zinc-500/15 text-zinc-300 border-zinc-500/20'
-                      }
-                    >
-                      {p.vatStatus}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {p.hazmat ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-amber-400">
-                        <Flame className="w-3 h-3" />
-                        Yes
-                      </span>
-                    ) : (
-                      <span className="text-xs text-zinc-600">No</span>
+                  >
+                    {isAvailable ? 'In Stock' : 'OOS'}
+                  </button>
+                );
+              },
+            },
+            {
+              key: 'leadTime',
+              label: 'Lead Time',
+              align: 'right',
+              hideBelow: 'lg',
+              render: (p) => (
+                <span className="text-xs text-zinc-400">
+                  {p.leadTimeDays != null ? `${p.leadTimeDays}d` : '—'}
+                </span>
+              ),
+            },
+{
+              key: 'submission',
+              label: 'Submission',
+              align: 'center',
+              render: (p) => {
+                const sub = latestSubmissionForSku(p.sku);
+                const complete = completenessBySku.get(p.sku)?.complete ?? false;
+                if (!sub) {
+                  return complete ? (
+                    <span className="text-[10px] text-zinc-500">Ready to submit</span>
+                  ) : (
+                    <span className="text-[10px] text-amber-300">Incomplete</span>
+                  );
+                }
+                return (
+                  <span
+                    className={cn(
+                      'text-[10px] px-2 py-0.5 rounded-full font-medium',
+                      sub.status === 'live'
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : sub.status === 'rejected'
+                        ? 'bg-red-500/15 text-red-300'
+                        : sub.status === 'under_amazon_review'
+                        ? 'bg-blue-500/15 text-blue-300'
+                        : 'bg-zinc-500/15 text-zinc-300'
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-zinc-400">
-                    {p.length}×{p.width}×{p.height}
-                  </td>
-                  <td className="px-4 py-3 text-right text-xs text-zinc-400">
-                    {p.weight} kg
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => {
-                        import('@/data/demoStore').then((m) => {
-                          m.updateProductAvailability(p.sku, !p.isAvailable);
-                        });
-                      }}
-                      className={cn(
-                        'text-[10px] px-2 py-0.5 rounded-full font-medium transition-colors',
-                        p.isAvailable !== false
-                          ? 'bg-emerald-500/15 text-emerald-300'
-                          : 'bg-red-500/15 text-red-300'
-                      )}
-                    >
-                      {p.isAvailable !== false ? 'In Stock' : 'OOS'}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 text-right text-xs text-zinc-400">
-                    {p.leadTimeDays != null ? `${p.leadTimeDays}d` : '—'}
-                  </td>
-                  {/* §Phase E3 — the product's resulting catalog state, DERIVED
-                      from the canonical submission store (never duplicated). */}
-                  <td className="px-4 py-3 text-center">
-                    {(() => {
-                      const sub = latestSubmissionForSku(p.sku);
-                      const complete = completenessBySku.get(p.sku)?.complete ?? false;
-                      if (!sub) {
-                        return complete ? (
-                          <span className="text-[10px] text-zinc-500">Ready to submit</span>
-                        ) : (
-                          <span className="text-[10px] text-amber-300">Incomplete</span>
-                        );
-                      }
+                  >
+                    {SUBMISSION_STATUS_LABELS[sub.status]}
+                    {sub.simulated ? ' (sim)' : ''}
+                  </span>
+                );
+              },
+            },
+            {
+              key: 'actions',
+              label: 'Actions',
+              align: 'center',
+              render: (p) => (
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => setEditingSku(p.sku)}
+                    className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors"
+                  >
+                    Edit Cost
+                  </button>
+                  {(() => {
+                    const sub = latestSubmissionForSku(p.sku);
+                    if (sub && sub.status !== 'live' && sub.status !== 'rejected') {
                       return (
-                        <span
-                          className={cn(
-                            'text-[10px] px-2 py-0.5 rounded-full font-medium',
-                            sub.status === 'live'
-                              ? 'bg-emerald-500/15 text-emerald-300'
-                              : sub.status === 'rejected'
-                              ? 'bg-red-500/15 text-red-300'
-                              : sub.status === 'under_amazon_review'
-                              ? 'bg-blue-500/15 text-blue-300'
-                              : 'bg-zinc-500/15 text-zinc-300'
-                          )}
+                        <button
+                          onClick={() => void handlePollSubmission(sub.id)}
+                          disabled={busySku === sub.id}
+                          className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
                         >
-                          {SUBMISSION_STATUS_LABELS[sub.status]}
-                          {sub.simulated ? ' (sim)' : ''}
-                        </span>
+                          <RefreshCw className="w-3 h-3" />
+                          {busySku === sub.id ? 'Polling…' : 'Check result'}
+                        </button>
                       );
-                    })()}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex flex-col items-center gap-1">
+                    }
+                    const ready = completenessBySku.get(p.sku)?.complete ?? false;
+                    return (
                       <button
-                        onClick={() => setEditingSku(p.sku)}
-                        className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors"
+                        onClick={() => void handleSubmitForSubmission(p)}
+                        disabled={!gateCleared || !ready || busySku === p.sku}
+                        title={ready ? 'Submit through the retail-channel seam' : 'Product information is incomplete'}
+                        className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-40"
                       >
-                        Edit Cost
+                        <Send className="w-3 h-3" />
+                        {busySku === p.sku ? 'Submitting…' : sub ? 'Resubmit' : 'Submit'}
                       </button>
-                      {/* §Phase E3 — submit when genuinely ready; poll the
-                          simulated processing when a submission exists. */}
-                      {(() => {
-                        const sub = latestSubmissionForSku(p.sku);
-                        if (sub && sub.status !== 'live' && sub.status !== 'rejected') {
-                          return (
-                            <button
-                              onClick={() => void handlePollSubmission(sub.id)}
-                              disabled={busySku === sub.id}
-                              className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
-                            >
-                              <RefreshCw className="w-3 h-3" />
-                              {busySku === sub.id ? 'Polling…' : 'Check result'}
-                            </button>
-                          );
-                        }
-                        const ready = completenessBySku.get(p.sku)?.complete ?? false;
-                        return (
-                          <button
-                            onClick={() => void handleSubmitForSubmission(p)}
-                            disabled={!gateCleared || !ready || busySku === p.sku}
-                            title={ready ? 'Submit through the retail-channel seam' : 'Product information is incomplete'}
-                            className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-40"
-                          >
-                            <Send className="w-3 h-3" />
-                            {busySku === p.sku ? 'Submitting…' : sub ? 'Resubmit' : 'Submit'}
-                          </button>
-                        );
-                      })()}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    );
+                  })()}
+                </div>
+              ),
+            },
+          ]}
+        />
       </Card>
 
       {showAdd && (

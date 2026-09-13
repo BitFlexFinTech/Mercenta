@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
 interface CardProps {
@@ -619,6 +619,27 @@ export interface DataTableColumn<T> {
   hideBelow?: 'sm' | 'md' | 'lg';
 }
 
+/**
+ * §Phase D5 — media query as state, so a DataTable renders ONE DOM instance:
+ * the labelled card list below `md`, the semantic table at `md`+. The previous
+ * CSS-toggled approach kept BOTH in the DOM, which duplicated every row for
+ * assistive tech and made text/role selectors able to resolve to the hidden
+ * copy. Resolved synchronously on first render (no flash).
+ */
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(query).matches
+  );
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const onChange = () => setMatches(mql.matches);
+    onChange();
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [query]);
+  return matches;
+}
+
 export function DataTable<T>({
   columns,
   rows,
@@ -630,8 +651,10 @@ export function DataTable<T>({
   errorAction,
   rowActions,
   onRowClick,
+  rowClassName,
   mobile = 'cards',
   caption = 'Data table',
+  dataTable,
   className,
 }: {
   columns: DataTableColumn<T>[];
@@ -644,10 +667,18 @@ export function DataTable<T>({
   errorAction?: ReactNode;
   rowActions?: (row: T) => ReactNode;
   onRowClick?: (row: T) => void;
+  /** Optional per-row styling hook (e.g. highlighting a delayed shipment). */
+  rowClassName?: (row: T) => string | undefined;
   mobile?: 'cards' | 'scroll';
   caption?: string;
+  /** Stable hook for the semantic `<table>` (`data-table="…"`), used by E2E
+   *  selectors that assert real row counts rather than incidental text. */
+  dataTable?: string;
   className?: string;
 }) {
+  // Called before any early return — Rules of Hooks require it, and the value
+  // decides WHICH single representation is rendered (never both).
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   if (errorMessage) {
     return <EmptyState title="Error loading data" description={errorMessage} action={errorAction} />;
   }
@@ -678,19 +709,22 @@ export function DataTable<T>({
           : '';
   const primaryColumn = columns.find((c) => c.primary) ?? columns[0];
   const detailColumns = columns.filter((c) => c !== primaryColumn);
+  const showCards = mobile === 'cards' && !isDesktop;
+  const showTable = mobile === 'scroll' || isDesktop;
 
   return (
     <div className={className}>
       {/* ── Mobile: labelled cards (no clipped actions, no horizontal scroll) ── */}
-      {mobile === 'cards' && (
-        <ul className="space-y-2 md:hidden" aria-label={caption}>
+      {showCards && (
+        <ul className="space-y-2" aria-label={caption}>
           {rows.map((r) => (
             <li
               key={rowKey(r)}
               onClick={onRowClick ? () => onRowClick(r) : undefined}
               className={cn(
                 'rounded-ds-md border border-white/[0.06] bg-ink-850 p-3',
-                onRowClick && 'cursor-pointer hover:border-white/[0.14] transition-ds'
+                onRowClick && 'cursor-pointer hover:border-white/[0.14] transition-ds',
+                rowClassName?.(r)
               )}
             >
               <div className="text-sm font-medium text-white">{cell(primaryColumn, r)}</div>
@@ -714,49 +748,51 @@ export function DataTable<T>({
         </ul>
       )}
       {/* ── Desktop (or mobile:'scroll'): the semantic table ── */}
-      <div className={cn('overflow-x-auto', mobile === 'cards' && 'hidden md:block')}>
-        <table className="w-full text-sm border-collapse">
-          <caption className="sr-only">{caption}</caption>
-          <thead>
-            <tr className="border-b border-white/[0.08]">
-              {columns.map((c) => (
-                <th
-                  key={c.key}
-                  scope="col"
-                  className={cn('px-3 py-2 text-xs font-semibold text-zinc-400', alignClass(c), hideClass(c))}
-                >
-                  {c.label}
-                </th>
-              ))}
-              {rowActions && (
-                <th scope="col" className="px-3 py-2 text-right text-xs font-semibold text-zinc-400">
-                  <span className="sr-only">Actions</span>
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr
-                key={rowKey(r)}
-                onClick={onRowClick ? () => onRowClick(r) : undefined}
-                className={cn('border-b border-white/[0.04] hover:bg-white/[0.02]', onRowClick && 'cursor-pointer')}
-              >
+      {showTable && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse" data-table={dataTable}>
+            <caption className="sr-only">{caption}</caption>
+            <thead>
+              <tr className="border-b border-white/[0.08]">
                 {columns.map((c) => (
-                  <td key={c.key} className={cn('px-3 py-2 text-zinc-300', alignClass(c), hideClass(c))}>
-                    {cell(c, r)}
-                  </td>
+                  <th
+                    key={c.key}
+                    scope="col"
+                    className={cn('px-3 py-2 text-xs font-semibold text-zinc-400', alignClass(c), hideClass(c))}
+                  >
+                    {c.label}
+                  </th>
                 ))}
                 {rowActions && (
-                  <td className="px-3 py-2 text-right">
-                    <div className="flex flex-wrap items-center justify-end gap-1">{rowActions(r)}</div>
-                  </td>
+                  <th scope="col" className="px-3 py-2 text-right text-xs font-semibold text-zinc-400">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 )}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr
+                  key={rowKey(r)}
+                  onClick={onRowClick ? () => onRowClick(r) : undefined}
+                  className={cn('border-b border-white/[0.04] hover:bg-white/[0.02]', onRowClick && 'cursor-pointer', rowClassName?.(r))}
+                >
+                  {columns.map((c) => (
+                    <td key={c.key} className={cn('px-3 py-2 text-zinc-300', alignClass(c), hideClass(c))}>
+                      {cell(c, r)}
+                    </td>
+                  ))}
+                  {rowActions && (
+                    <td className="px-3 py-2 text-right">
+                      <div className="flex flex-wrap items-center justify-end gap-1">{rowActions(r)}</div>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

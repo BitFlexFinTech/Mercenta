@@ -13,7 +13,7 @@ import {
   type PipelineStage,
 } from '@/lib/marketing';
 import { CsvImportAdapter } from '@/integrations/leadSourcing';
-import { Card, Badge, Button, Textarea } from '@/components/ui';
+import { Card, Badge, Button, DataTable, Textarea } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AlertTriangle, Info, Target, Upload, Compass, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { runDiscoveryPipeline, createMockDiscoveryClients, type EnrichedLead } from '@/lib/discovery/engine';
@@ -403,36 +403,58 @@ export function MarketingHub() {
         </div>
       </Card>
 
-      {/* Campaign performance */}
+      {/* Campaign performance — canonical DataTable (cards below md). */}
       <Card title="Campaign Performance">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
-              <th className="text-left font-medium px-4 py-2.5">Campaign</th>
-              <th className="text-left font-medium px-4 py-2.5">Status</th>
-              <th className="text-right font-medium px-4 py-2.5">Cost/Lead</th>
-              <th className="text-right font-medium px-4 py-2.5">Dispatched</th>
-              <th className="text-right font-medium px-4 py-2.5">Replies</th>
-              <th className="text-right font-medium px-4 py-2.5">Meetings</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/[0.04]">
-            {campaigns.map((camp) => (
-              <tr key={camp.id} className="text-zinc-300">
-                <td className="px-4 py-2.5 text-xs text-white">{camp.name}</td>
-                <td className="px-4 py-2.5">
-                  <Badge className="text-[10px] bg-blue-500/15 text-blue-300 border-blue-500/20">
-                    {camp.status}
-                  </Badge>
-                </td>
-                <td className="px-4 py-2.5 text-right font-mono text-xs">£{camp.costPerLead}</td>
-                <td className="px-4 py-2.5 text-right font-mono text-xs">{camp.dispatched}</td>
-                <td className="px-4 py-2.5 text-right font-mono text-xs">{camp.replies}</td>
-                <td className="px-4 py-2.5 text-right font-mono text-xs">{camp.meetings}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <DataTable
+          dataTable="campaign-performance"
+          caption="Campaign performance"
+          rows={campaigns}
+          rowKey={(camp) => camp.id}
+          emptyMessage="No campaigns have been dispatched yet."
+          columns={[
+            {
+              key: 'name',
+              label: 'Campaign',
+              primary: true,
+              render: (camp) => <span className="text-xs text-white">{camp.name}</span>,
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              render: (camp) => (
+                <Badge className="text-[10px] bg-blue-500/15 text-blue-300 border-blue-500/20">
+                  {camp.status}
+                </Badge>
+              ),
+            },
+            {
+              key: 'costPerLead',
+              label: 'Cost/Lead',
+              align: 'right',
+              hideBelow: 'lg',
+              render: (camp) => <span className="font-mono text-xs">£{camp.costPerLead}</span>,
+            },
+            {
+              key: 'dispatched',
+              label: 'Dispatched',
+              align: 'right',
+              render: (camp) => <span className="font-mono text-xs">{camp.dispatched}</span>,
+            },
+            {
+              key: 'replies',
+              label: 'Replies',
+              align: 'right',
+              render: (camp) => <span className="font-mono text-xs">{camp.replies}</span>,
+            },
+            {
+              key: 'meetings',
+              label: 'Meetings',
+              align: 'right',
+              hideBelow: 'lg',
+              render: (camp) => <span className="font-mono text-xs">{camp.meetings}</span>,
+            },
+          ]}
+        />
       </Card>
     </div>
   );
