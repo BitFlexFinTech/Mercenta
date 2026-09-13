@@ -1,5 +1,30 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
+**Last updated:** Phase D2 + F (13 Sep) — **the UI/UX status sweep and the first
+production-preparation work are DONE.** Phase D2 migrated the remaining
+domain-status surfaces onto the canonical presentation layer
+(`poStatusPresentation`, `ackStatusPresentation`, `ackWindowPresentation`,
+`deductionStatusPresentation`, `submissionStatusPresentation`,
+`shipmentStatusPresentation`, `onboardingStatusPresentation`,
+`returnTrackingStatusPresentation`, `poOutageStatusPresentation`,
+`complianceGatePresentation`, `billingDecisionPresentation`) and deleted two
+duplicated status sources outright: the brand PO list's local STATUS_BADGE/
+STATUS_LABEL maps and `STATUS_COLORS` in types.ts. **No new mock, placeholder or
+credential requirement was introduced.**
+**Phase F (production preparation):** the go-live runbook now EXISTS —
+**`GO_LIVE.md`** (preconditions, environment, migrations + Edge Functions, the
+credential-only provider swap, deploy, the 8-step post-deploy smoke test,
+rollback, and the explicit non-scope: Social parked, Rakazo last). A real tooling
+defect was also fixed: **`scripts/validate-edge-functions.mjs` used to CRASH
+(ENOENT) whenever an expected Edge Function was absent** — it now reports each
+absent artefact as an explicit deploy-time item, asserts only what is present,
+and exits 0 with `Assertions run: 37 · failures: 0 · skipped (absent artefact): 36`
+plus the list of the 8 artefacts to create at go-live.
+**Still open (buildable next):** `scripts/integrity-audit.mjs` carries 12 stale
+assertions (it expects the pre-Phase-6 shell routing, the pre-rename "Get
+Started" CTA, and the removed `validate:wording` script) — it reports 46/12; the
+assertions must be repointed at the current architecture.
+
 **Last updated:** Phase D1 (13 Sep) — **BUILD-FORWARD session A+B+C+D1; NO new mock, placeholder or
 credential requirement was introduced.** ComplianceUploadCard/ComplianceApprovals were re-verified and
 fixed (stale row status after an Upload; the canonical `reviewGateDocument` gate sync was activated).

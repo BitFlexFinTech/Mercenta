@@ -1,6 +1,41 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-13 (**Phase A+B — COMPLIANCE UPLOAD SURFACE COMPLETE + INTEGRATION HUB CONTROL CENTRE BUILT**; then **Phase C — access-gate real coverage** and **Phase D1 — canonical status layer + decision-queue drill-downs**)
+> Last updated: 2026-09-13 (**Phase D2 — canonical status sweep across all remaining surfaces · Phase F — GO_LIVE.md runbook + edge-validator crash fix**; previous this session: A+B compliance/Integration Hub, C access-gate real coverage, D1 status foundation)
+>
+> **PHASE D2 + F (2026-09-13) — STATUS SWEEP ACROSS THE REMAINING SURFACES + PRODUCTION PREPARATION.**
+> Commits **`619b98b`** (D2a commerce) · **`6c3d898`** (D2b dashboards + logistics/carrier) ·
+> **`c347e40`** (D2c onboarding/returns/settings) · Phase F in the same session.
+> **D2 — every remaining DOMAIN status now renders through one canonical layer.** Completed the sweep
+> surface-by-surface (not blanket substitution): the purchase-order lifecycle, per-line acknowledgement,
+> the computed 24-hour ack window, deductions, catalogue submissions, shipments, onboarding records,
+> returns tracking, PO outages, the compliance gate and the commission-billing decision all resolve
+> through `src/lib/statusPresentation.ts` (label + semantic tone + machine-readable `data-status`).
+> **Three duplicated status sources were deleted, not duplicated:** the brand PO list's local
+> `STATUS_BADGE`/`STATUS_LABEL` maps, `RetailPipeline`'s local component literally named `StatusBadge`,
+> `OnboardingPipeline`'s STATUS_STYLES/STATUS_LABEL, `ReturnsTrackingDashboard`'s STATUS_BADGE,
+> `BrandSettings`' outage map, `BrandDashboard`'s PO_STATUS_LABELS/poTone, and **`STATUS_COLORS` in
+> `types.ts`** (the per-status colour map the logistics hub and carrier dashboard both read — a third
+> way of presenting the same statuses, with no semantic attribute). Two genuine inconsistencies were
+> eliminated: the same `deduction.open` state rendered amber on the Retail Pipeline and red on the admin
+> PO detail, and the same PO status rendered "Under review"/"Ready to fulfil" on the dashboard vs
+> "Under Review"/"Ready to Fulfil" on the PO list. **No domain value, gate, workflow or tenant scope was
+> changed; no migration.** New/extended browser verification: `status-semantics.spec.ts` **6/6** —
+> including an invariant test that crawls `[data-status]` on the brand PO list, the admin Retail
+> Pipeline, the brand dashboard and the carrier manifest and fails if ANY status outside the canonical
+> vocabulary appears (it caught a missing `under_amazon_review` entry on first run).
+> **F — production preparation (buildable items built, not audited).** **`GO_LIVE.md` now EXISTS** —
+> the ordered go-live runbook (preconditions incl. the repo gate, environment, migrations + Edge
+> Functions, the credential-only provider swap, deploy via the single existing script, an 8-step
+> post-deploy smoke test, rollback, and the explicit non-scope: Social parked / Rakazo last). A real
+> tooling defect was FIXED: **`scripts/validate-edge-functions.mjs` crashed with ENOENT** on every
+> absent Edge Function; it now distinguishes PASS / FAIL / ABSENT, reports the **8 deploy-time
+> artefacts** explicitly, asserts only what exists, and exits 0
+> (`Assertions run: 37 · failures: 0 · skipped (absent artefact): 36`).
+> **Gates (final, this session):** typecheck **0** · lint **0** · build **✓ 3.48s** · **full Playwright
+> suite 222 passed / 0 failed / 2 skipped** · `verify-registry` 0 new violations · migrations unchanged
+> (23) · baseline `959b4d2` still an ancestor. **NEXT:** the `integrity-audit.mjs` stale-assertion
+> repair (12 known, listed in PRODUCTION_READINESS.md), the remaining per-screen redesign polish, then
+> Phase G deployment (demo.mercenta.co.uk first; mercenta.co.uk only via GO_LIVE.md).
 >
 > **PHASE A+B (2026-09-13) — BUILD FORWARD.** Commit **`0f3e84b`** (previous checkpoint G1 `68449af`;
 > E9 `7a40503`; protected baseline **`959b4d2` still an ancestor**, no reset/rebase/amend).

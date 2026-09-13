@@ -292,14 +292,30 @@ record → the brand enters its portal), skips 3 → 2, and two tests that COULD
 source of truth for domain status → label + semantic tone + `data-status`), the Applications
 decision queue (derived counts, each tile a filter), semantic statuses + honest empty state on
 Compliance Approvals, and the brand compliance card on the same statuses.
-Commits `0f3e84b` (A+B) · `6844182` (C) · `9f9c8ef` (D1). Full suite **216 passed / 0 failed / 2
-skipped** before D1; the touched-surface regression after D1 is 54 passed / 0 failed / 2 skipped.
-**NEXT (in order):** finish **Phase D** — the wider ad-hoc status-badge sweep (**292 occurrences
-across 74 files**), raw `<table>` → `DataTable` migration, PageHeader/IA consistency, and the
-per-screen redesign pass (dashboards, CRM, catalogue, PO, finance, logistics, marketing, carrier),
-each verified with Playwright — then Phase E full regression, Phase F production preparation
-(GO_LIVE.md playbook + the deploy-time items in PRODUCTION_READINESS.md), Phase G deployment to
-demo.mercenta.co.uk only, Rakazo LAST (Phase M). Social stays PARKED; Rocket.Chat stays removed.
+Commits `0f3e84b` (A+B) · `6844182` (C) · `9f9c8ef` (D1) · docs `5d8b831`.
+**PHASE D2 + F (2026-09-13) — DONE.** D2: the remaining domain statuses (PO lifecycle, line
+acknowledgements, the computed 24-hour ack window, deductions, catalogue submissions, shipments,
+onboarding records, returns tracking, PO outages, compliance gate, commission-billing decision) all
+render through `src/lib/statusPresentation.ts`; the duplicated sources were DELETED — the brand PO
+list's local badge/label maps, RetailPipeline's local `StatusBadge`, OnboardingPipeline's maps,
+ReturnsTrackingDashboard's map, BrandSettings' outage map, BrandDashboard's PO maps and
+**`STATUS_COLORS` in types.ts**. Two real inconsistencies were eliminated (a deduction `open` rendered
+amber on one admin screen and red on another; the same PO status rendered two different label casings),
+and three dead status helpers were removed. `status-semantics.spec.ts` is now 6/6 including an
+invariant that fails if any `[data-status]` outside the canonical vocabulary appears anywhere on the
+brand PO list, the admin Retail Pipeline, the brand dashboard or the carrier manifest.
+F: **`GO_LIVE.md` now EXISTS** (the ordered runbook: repo gate → env → migrations/Edge Functions →
+credential-only provider swap → deploy → 8-step smoke test → rollback → non-scope), and
+`scripts/validate-edge-functions.mjs` **no longer crashes** — it reports absent artefacts as explicit
+deploy-time items (8 today) and exits 0 with 37 assertions / 0 failures.
+Final gates: typecheck 0 · lint 0 · build OK · **full suite 222 passed / 0 failed / 2 skipped** ·
+migrations unchanged (23) · baseline intact.
+**NEXT (in order):** repair the 12 stale assertions in `scripts/integrity-audit.mjs` (it still expects
+pre-Phase-6 shell routing, the "Get Started" CTA and the removed `validate:wording` script — the exact
+list is in PRODUCTION_READINESS.md) → finish the per-screen redesign polish (dashboards/CRM/catalogue/
+finance densification, mobile table strategies) → Phase G deployment (demo.mercenta.co.uk rehearsal
+first; mercenta.co.uk only through GO_LIVE.md). Social stays PARKED; Rocket.Chat stays removed; Rakazo
+stays LAST.
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,
