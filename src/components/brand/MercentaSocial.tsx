@@ -21,7 +21,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
-import { Badge, Button, Card } from '@/components/ui';
+import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import { socialPostStatePresentation } from '@/lib/statusPresentation';
+import { createSocialEngineClient } from '@/lib/social/engineAdapter';
 import { cn } from '@/utils/cn';
 import {
   MERCENTA_SOCIAL,
@@ -346,6 +348,14 @@ export function MercentaSocial() {
         )}
       </Card>
 
+      {/* §Phase S — the deterministic simulation studio. Rendered ONLY when the
+          canonical engine mode is positively `simulation`: the engine's own
+          workflow (channel → compose → QUEUE → PUBLISHED/ERROR → retry →
+          analytics) exercised locally, with no live provider call and `(sim)`
+          provenance on every record. When the real engine is configured this is
+          absent by design — a live mode may never execute simulated operations. */}
+      {!engine.configured && <SocialSimulationStudio />}
+
       <ModuleSurface
         selected={selectedModule}
         onToggle={toggleModule}
@@ -354,6 +364,268 @@ export function MercentaSocial() {
       <ProviderSurface />
       <InclusionStatement />
     </div>
+  );
+}
+
+/* ── §Phase S — the deterministic simulation studio ───────────────────── */
+
+/**
+ * Exercises the engine's real workflow locally when (and only when) the engine
+ * is not configured. Every action goes through the SAME seam the live path will
+ * use (`createSocialEngineClient`), which is fail-closed: it refuses any mode
+ * that is not positively `simulation`. Nothing here can claim a live publish —
+ * release ids are `sim-rel-…` and every row is marked `(sim)`.
+ */
+function SocialSimulationStudio() {
+  const [client] = useState(() => {
+    const res = createSocialEngineClient('simulation');
+    return res.ok ? res.value : null;
+  });
+  const [version, setVersion] = useState(0);
+  const [channelId, setChannelId] = useState('');
+  const [providerId, setProviderId] = useState(SOCIAL_PROVIDERS[0]?.id ?? '');
+  const [body, setBody] = useState('');
+  const [scheduledFor, setScheduledFor] = useState('');
+  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  void version;
+
+  if (!client) {
+    return (
+      <Card className="p-5">
+        <p className="text-[11px] text-red-300" data-testid="ms-simulation-studio">
+          The simulation engine refused to start: its mode was not positively identified as
+          simulation. No simulated operation was executed.
+        </p>
+      </Card>
+    );
+  }
+
+  const channels = client.listChannels();
+  const posts = client.listPosts();
+  const analytics = client.analytics();
+
+  const run = (fn: () => void) => {
+    setError(null);
+    setNotice(null);
+    fn();
+    setVersion((v) => v + 1);
+  };
+
+  const connect = () =>
+    run(() => {
+      const res = client.connectChannel(providerId);
+      if (!res.ok) setError(res.error);
+      else {
+        setChannelId(res.value.id);
+        setNotice(`${res.value.label} channel connected (simulation).`);
+      }
+    });
+
+  const create = () =>
+    run(() => {
+      const res = client.createPost({
+        channelId,
+        body,
+        scheduledFor: scheduledFor ? new Date(scheduledFor).toISOString() : null,
+      });
+      if (!res.ok) setError(res.error);
+      else {
+        setBody('');
+        setScheduledFor('');
+        setNotice(`Post ${res.value.id} queued (simulation).`);
+      }
+    });
+
+  const publishQueue = () =>
+    run(() => {
+      const touched = client.runQueue(new Date().toISOString());
+      setNotice(
+        touched.length === 0
+          ? 'Nothing to publish yet — queue a post, or wait for a scheduled post’s time.'
+          : `${touched.length} post(s) processed (simulation): ${touched
+              .map((p) => `${p.id} → ${p.state}`)
+              .join(', ')}`
+      );
+    });
+
+  const retry = (id: string) =>
+    run(() => {
+      const res = client.retryPost(id);
+      if (!res.ok) setError(res.error);
+      else setNotice(`${id} published on retry (simulation) — release ${res.value.releaseId}.`);
+    });
+
+  const cancel = (id: string) =>
+    run(() => {
+      const res = client.cancelPost(id);
+      if (!res.ok) setError(res.error);
+      else setNotice(`${id} cancelled back to draft.`);
+    });
+
+  return (
+    <Card className="p-5">
+      <div data-testid="ms-simulation-studio">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-sm font-medium text-white">
+          Studio <span className="text-[11px] text-amber-300">(simulation)</span>
+        </div>
+        <span className="text-[11px] text-zinc-400" data-testid="ms-sim-analytics">
+          {analytics.channels} channel(s) · {analytics.posts} post(s) · {analytics.published} published ·{' '}
+          {analytics.queued} queued · {analytics.failed} failed
+        </span>
+      </div>
+      <p className="mt-2 text-[11px] text-zinc-500">
+        The deployed engine is capacity-limited on today's infrastructure, so this studio runs the
+        SAME workflow locally instead: connect a channel, compose, queue, publish, fail, retry and
+        cancel — deterministically and without any live provider call. Nothing here is presented as a
+        real publication.
+      </p>
+
+      <div className="mt-4 flex flex-wrap items-end gap-2">
+        <label className="text-[11px] text-zinc-500">
+          Channel
+          <select
+            value={providerId}
+            onChange={(e) => setProviderId(e.target.value)}
+            className="ml-2 rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-white"
+            data-testid="ms-sim-provider"
+          >
+            {client.listProviders().map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Button size="sm" variant="secondary" onClick={connect} className="text-[11px]">
+          Connect (simulated)
+        </Button>
+        {channels.length > 0 && (
+          <span className="text-[11px] text-zinc-400" data-testid="ms-sim-channels">
+            Connected: {channels.map((c) => c.label).join(', ')}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-4">
+        <label className="text-[11px] text-zinc-500">
+          Post to
+          <select
+            value={channelId}
+            onChange={(e) => setChannelId(e.target.value)}
+            className="mt-1 w-full rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-white"
+            data-testid="ms-sim-channel"
+          >
+            <option value="">Select a channel…</option>
+            {channels.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-[11px] text-zinc-500 md:col-span-2">
+          Content
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={2}
+            placeholder="What do you want to publish?"
+            className="mt-1 w-full rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-white"
+            data-testid="ms-sim-body"
+          />
+        </label>
+        <label className="text-[11px] text-zinc-500">
+          Schedule (optional)
+          <input
+            type="datetime-local"
+            value={scheduledFor}
+            onChange={(e) => setScheduledFor(e.target.value)}
+            className="mt-1 w-full rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-white"
+            data-testid="ms-sim-schedule"
+          />
+        </label>
+      </div>
+
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          onClick={create}
+          disabled={!channelId || !body.trim()}
+          className="text-[11px]"
+        >
+          Queue post
+        </Button>
+        <Button size="sm" variant="secondary" onClick={publishQueue} className="text-[11px]">
+          Run queue (publish now)
+        </Button>
+      </div>
+
+      {notice && (
+        <p className="mt-3 text-[11px] text-emerald-300" data-testid="ms-sim-notice">
+          {notice}
+        </p>
+      )}
+      {error && (
+        <p className="mt-3 text-[11px] text-red-300" data-testid="ms-sim-error">
+          {error}
+        </p>
+      )}
+
+      <div className="mt-4 space-y-1">
+        <div className="text-[10px] uppercase tracking-wider text-zinc-500">Queue</div>
+        {posts.length === 0 ? (
+          <p className="text-[11px] text-zinc-600">No posts yet.</p>
+        ) : (
+          posts.map((p) => {
+            const state = socialPostStatePresentation(p.state);
+            return (
+              <div
+                key={p.id}
+                className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.04] py-1.5"
+                data-testid={`ms-sim-post-${p.id}`}
+              >
+                <div className="min-w-0">
+                  <span className="font-mono text-[10px] text-zinc-500">{p.id}</span>{' '}
+                  <span className="text-xs text-zinc-300">{p.body}</span>
+                  <span className="ml-2 text-[10px] text-zinc-600">
+                    {p.providerId} · attempt {p.attempts}
+                    {p.releaseId ? ` · release ${p.releaseId}` : ''}
+                    {p.scheduledFor
+                      ? ` · scheduled ${p.scheduledFor.slice(0, 16).replace('T', ' ')}`
+                      : ''}
+                  </span>
+                  {p.error && <span className="ml-2 text-[10px] text-red-300">{p.error}</span>}
+                </div>
+                <div className="flex items-center gap-2">
+                  <StatusBadge dataStatus={state.dataStatus} tone={state.tone}>
+                    {state.label}
+                  </StatusBadge>
+                  {p.state === 'ERROR' && (
+                    <Button size="sm" variant="ghost" className="text-[10px]" onClick={() => retry(p.id)}>
+                      Retry
+                    </Button>
+                  )}
+                  {(p.state === 'QUEUE' || p.state === 'ERROR') && (
+                    <Button size="sm" variant="ghost" className="text-[10px]" onClick={() => cancel(p.id)}>
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {analytics.byProvider.length > 0 && (
+        <p className="mt-3 text-[10px] text-zinc-500" data-testid="ms-sim-by-provider">
+          {analytics.byProvider.map((r) => `${r.label}: ${r.published}/${r.posts} published`).join(' · ')}
+        </p>
+      )}
+      </div>
+    </Card>
   );
 }
 

@@ -1,6 +1,50 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-13 (**Phase D6 — payout seam wired end-to-end · Finance/Brand/Admin dashboard pass · tenant-coherence defect FIXED**)
+> Last updated: 2026-09-13 (**Phase S — Mercenta Social deterministic E2E path BUILT · truthful engine mode**)
+>
+> **PHASE S (2026-09-13, fifth session) — SOCIAL COMPLETED AS FAR AS THE INFRASTRUCTURE ALLOWS.**
+> Commit: **`<see below>`**. The verified blocker is unchanged and is EXTERNAL + PAID:
+> the engine droplet is 2 vCPU / 4 GB and its provider orchestrator is OOM-killed, so the
+> engine cannot complete a publish without an 8 GB resize. That was NOT faked, and it no
+> longer blocks the demo.
+>
+> **① The social engine now has a mock-first SEAM** (`src/lib/social/engineAdapter.ts`):
+> the engine's OWN contract — provider catalogue (the canonical `SOCIAL_PROVIDERS`),
+> channel connect/disconnect, post lifecycle (`DRAFT · QUEUE · PUBLISHED · ERROR`, the
+> engine's verified vocabulary), scheduling, deterministic queue execution, failure +
+> retry recovery, cancellation and analytics — with **no network call at all**.
+> **FAIL-CLOSED**: `createSocialEngineClient` refuses `configured`, `live`, `degraded`,
+> `error`, `disabled`, `unknown`, `null`, `undefined` and `''`; only a positively
+> identified `simulation` is accepted. Every record is `simulated: true` and every
+> release id is `sim-rel-…`, so a simulated publish can never be read as a real one.
+>
+> **② The engine mode is now TRUTHFUL.** `resolveSocialEngineConfig` used to fall back to
+> the verified host unconditionally, so the surface always reported **"Connected"** even
+> though that engine cannot finish a publish. `configured` now requires an EXPLICIT
+> engine URL (integration metadata or `VITE_SOCIAL_ENGINE_URL`) — an env var or a
+> hardcoded host is not a connection, and a capacity-limited engine is not "live".
+> With no explicit engine URL the mode is `simulation` and the deterministic
+> **Studio (simulation)** renders: connect a channel, compose, queue, publish, fail,
+> retry, cancel, and read analytics — all through the same seam.
+>
+> **Verification:** `scripts/validate-social-simulation.mjs` **29/29 PASS** (fail-closed
+> across 9 non-simulation modes, lifecycle, scheduling windows, degraded-provider
+> failure + retry recovery, cancel rules, analytics consistency, determinism across two
+> identical runs, reset) · `e2e/embedded-social.spec.ts` **11/11 PASS** — new test 11
+> drives the studio end-to-end in a real browser and asserts **zero** provider/engine
+> host contact; test 10 repointed to the current architecture (hands off when an engine
+> is explicitly configured, otherwise states the truth and offers the studio).
+> **Gates:** typecheck **0** · eslint(src+e2e) **0** · build **✓** · full Playwright
+> **231 passed / 0 failed / 2 skipped** · integrity audit **61 / 0** · wording gate
+> **177 files / 0 violations** · `validate-payouts` **17/17** · `validate-tenant-coherence`
+> **9/9** · `validate-postiz` **0 failures** · migrations unchanged (**23**) · baseline
+> `959b4d2` ancestor.
+> **STILL EXTERNAL (unchanged, not faked):** the engine's remaining live capability after
+> a publish request — final `PUBLISHED` + provider release id, scheduled-post execution —
+> needs the PAID 8 GB droplet resize, and real channel OAuth needs external credentials.
+> Both are isolated from the core platform.
+> **NEXT:** Phase E2E (deterministic investor-demo workflows across the whole platform) →
+> Phase F (production preparation) → Phase G (demo rehearsal) → Rakazo LAST.
 >
 > **PHASE D6 (2026-09-13, fourth session) — FINANCE COMPLETED, DASHBOARDS DRILLABLE, REAL TENANT LEAK FIXED.**
 > Commits: **`f35ddc6`** (payouts wired + Finance KPI band) · **`<see below>`** (dashboards + coherence).

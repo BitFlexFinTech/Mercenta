@@ -377,9 +377,30 @@ export function resolveSocialEngineConfig(
 ): SocialEngineConfig {
   const fromMeta = (meta?.api_url ?? '').trim();
   const fromEnv = String(import.meta.env?.VITE_SOCIAL_ENGINE_URL ?? '').trim();
-  const appUrl = fromMeta || fromEnv || SOCIAL_ENGINE_VERIFIED.host;
+  /**
+   * §Phase S — the mode is now decided by EXPLICIT configuration only.
+   *
+   * It previously fell back to the verified host unconditionally, so the surface
+   * always reported "Connected" even though the deployed engine is
+   * capacity-limited (2 vCPU / 4 GB — the provider orchestrator is OOM-killed, so
+   * a publish cannot complete without a PAID resize). Claiming a live engine that
+   * cannot finish the job is exactly the kind of untruthful "LIVE" this platform
+   * must never show: an env var or a hardcoded host is NOT a connection.
+   *
+   * No explicit engine URL → `simulation`, and the deterministic studio becomes
+   * available (fail-closed in the other direction too: a configured engine never
+   * runs simulated operations).
+   */
+  const explicitlyConfigured = Boolean(fromMeta || fromEnv);
+  const appUrl = fromMeta || fromEnv || null;
 
   const blockedReasons: string[] = [];
+  if (!explicitlyConfigured) {
+    blockedReasons.push(
+      'No engine URL is configured in this environment, so Mercenta Social runs its deterministic simulation studio. ' +
+        'The deployed engine is capacity-limited (2 vCPU / 4 GB — its provider orchestrator is OOM-killed), so a paid resize is required before it can complete a publish.'
+    );
+  }
   if (SOCIAL_ENGINE_VERIFIED.backendApiStatus !== 'up') {
     blockedReasons.push('The engine API is not serving, so no workspace can be opened.');
   }
@@ -395,7 +416,7 @@ export function resolveSocialEngineConfig(
     'Some browsers block cookies inside third-party frames; the workspace opens in its own tab when embedding is unavailable.'
   );
 
-  const configured = !!appUrl && SOCIAL_ENGINE_VERIFIED.backendApiStatus === 'up';
+  const configured = explicitlyConfigured && SOCIAL_ENGINE_VERIFIED.backendApiStatus === 'up';
   return { appUrl, configured, mode: configured ? 'configured' : 'simulation', blockedReasons };
 }
 

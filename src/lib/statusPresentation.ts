@@ -374,6 +374,30 @@ export function billingDecisionPresentation(
       };
 }
 
+/** §Phase S — the social engine's OWN post lifecycle vocabulary
+ *  (`DRAFT · QUEUE · PUBLISHED · ERROR`, verified in the deployed engine). This
+ *  is a presentation of MERGED engine state, not new business state: nothing here
+ *  can turn an unpublished post into "published". */
+export type SocialPostStateValue = 'DRAFT' | 'QUEUE' | 'PUBLISHED' | 'ERROR';
+
+const SOCIAL_POST_STATE: Record<SocialPostStateValue, StatusPresentation> = {
+  DRAFT: { label: 'Draft', tone: 'neutral', dataStatus: 'draft', actionable: false },
+  QUEUE: { label: 'Queued', tone: 'info', dataStatus: 'queued', actionable: true },
+  PUBLISHED: { label: 'Published', tone: 'success', dataStatus: 'published', actionable: false },
+  ERROR: { label: 'Failed', tone: 'danger', dataStatus: 'failed', actionable: true },
+};
+
+export function socialPostStatePresentation(state: SocialPostStateValue | string): StatusPresentation {
+  return (
+    SOCIAL_POST_STATE[state as SocialPostStateValue] ?? {
+      label: String(state ?? 'unknown'),
+      tone: 'neutral',
+      dataStatus: 'unknown',
+      actionable: true,
+    }
+  );
+}
+
 /** §Phase D6 — contract lifecycle. The CRM history previously printed the raw
  *  enum (`under_review`) while every other surface had settled on one label per
  *  state; this is that one label. */

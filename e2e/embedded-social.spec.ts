@@ -195,8 +195,10 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
     const errors = trackPageErrors(page);
     const launchUrl = process.env.SOCIAL_SSO_LAUNCH_URL || '';
     // The brand surface asks the SERVER for a handoff URL (the browser never sees
-    // the engine secret). When a real handoff URL is provided for this run, the
-    // real application is loaded; otherwise the surface must report, not fake.
+    // the engine secret). A run with an EXPLICITLY configured engine URL must hand
+    // off; a run without one must say so and offer the deterministic studio —
+    // never claim a live engine.
+    const engineConfigured = Boolean(process.env.VITE_SOCIAL_ENGINE_URL);
     await page.route('**/functions/v1/social-session', async (route) => {
       await route.fulfill({
         status: 200,
@@ -218,20 +220,59 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
     await openSocial(page, 'Zambezi Organic Extracts Ltd');
     const launch = page.locator('[data-testid="ms-launch"]').first();
     await expect(launch).toBeVisible();
-    await launch.getByRole('button').first().click();
-    await page.waitForTimeout(launchUrl ? 4000 : 1200);
 
-    if (launchUrl) {
+    if (engineConfigured && launchUrl) {
       // A real handoff URL was returned: the application frame is rendered and the
       // workspace is recorded as linked to the real engine organization.
+      await launch.getByRole('button').first().click();
+      await page.waitForTimeout(4000);
       await expect(page.locator('[data-testid="ms-engine-frame"]').first()).toBeVisible();
       await expect(page.locator('[data-testid="ms-engine-link"]').first()).toContainText('Linked');
     } else {
-      // No handoff URL in this environment: the surface must say so truthfully and
-      // must NOT claim the workspace is linked.
-      await expect(page.locator('[data-testid="ms-launch-error"]').first()).toBeVisible();
+      // No engine URL configured for this run: the surface must NOT claim a live
+      // engine, the launch control stays disabled with the reason stated, and the
+      // deterministic simulation studio is offered instead.
+      await expect(page.locator('[data-testid="ms-engine-state"]').first()).toContainText('Simulation');
+      await expect(launch.getByRole('button').first()).toBeDisabled();
+      await expect(
+        page.getByText(/No engine URL is configured in this environment/).first()
+      ).toBeVisible();
+      await expect(page.locator('[data-testid="ms-simulation-studio"]').first()).toBeVisible();
       await expect(page.locator('[data-testid="ms-engine-link"]').first()).toContainText('Not linked');
     }
+    expect(errors).toEqual([]);
+  });
+
+  test('11. the simulation studio runs the engine workflow deterministically, with no live call', async ({
+    page,
+  }) => {
+    const errors = trackPageErrors(page);
+    const external = trackExternalCalls(page);
+    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+
+    const studio = page.locator('[data-testid="ms-simulation-studio"]').first();
+    await expect(studio).toBeVisible({ timeout: 8000 });
+
+    // Connect a channel (simulated) — the real provider catalogue, no OAuth.
+    await studio.getByRole('button', { name: 'Connect (simulated)' }).click();
+    await expect(page.locator('[data-testid="ms-sim-channels"]').first()).toContainText('X');
+
+    // Compose and queue a post.
+    await page.locator('[data-testid="ms-sim-body"]').fill('Autumn range launch');
+    await studio.getByRole('button', { name: 'Queue post' }).click();
+    await expect(page.locator('[data-testid="ms-sim-notice"]').first()).toContainText('queued');
+
+    // Run the queue: QUEUE → PUBLISHED, with an unmistakably simulated release id.
+    await studio.getByRole('button', { name: 'Run queue (publish now)' }).click();
+    const post = page.locator('[data-testid^="ms-sim-post-"]').first();
+    await expect(post).toContainText('Published');
+    await expect(post).toContainText('sim-rel-');
+
+    // Analytics agree with the queue (one source, two surfaces).
+    await expect(page.locator('[data-testid="ms-sim-analytics"]').first()).toContainText('1 published');
+
+    // Simulation stays simulation: no provider or engine host was contacted.
+    expect(external).toEqual([]);
     expect(errors).toEqual([]);
   });
 
