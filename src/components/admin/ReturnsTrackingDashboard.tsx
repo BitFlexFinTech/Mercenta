@@ -5,7 +5,8 @@
 import { useState, useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands } from '@/data/queries';
-import { Badge, Card, Button } from '@/components/ui';
+import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import { returnTrackingStatusPresentation } from '@/lib/statusPresentation';
 import { cn } from '@/utils/cn';
 import { demoReturns } from '@/data/demoStore';
 import {
@@ -23,13 +24,6 @@ const STATUS_STEPS: { status: ReturnTrackingStatus; label: string; icon: typeof 
 
 const STATUS_INDEX: Record<ReturnTrackingStatus, number> = {
   received_at_warehouse: 0, quality_checked: 1, forwarded_to_brand: 2, confirmed_by_brand: 3,
-};
-
-const STATUS_BADGE: Record<ReturnTrackingStatus, string> = {
-  received_at_warehouse: 'bg-blue-500/15 text-blue-300',
-  quality_checked: 'bg-amber-500/15 text-amber-300',
-  forwarded_to_brand: 'bg-purple-500/15 text-purple-300',
-  confirmed_by_brand: 'bg-emerald-500/15 text-emerald-300',
 };
 
 export function ReturnsTrackingDashboard() {
@@ -148,7 +142,13 @@ return (
                       {STATUS_STEPS.map(function(s, i) { return (
                         <span key={s.status} className={cn('w-2 h-2 rounded-full', i <= idx ? 'bg-brass-500' : 'bg-zinc-700')} />
                       );})}
-                      <span className={cn('text-[8px] px-1.5 py-0.5 rounded ml-1', STATUS_BADGE[t.status])}>{t.status.replace(/_/g, ' ')}</span>
+                      <StatusBadge
+                        className="text-[10px]"
+                        dataStatus={returnTrackingStatusPresentation(t.status).dataStatus}
+                        tone={returnTrackingStatusPresentation(t.status).tone}
+                      >
+                        {returnTrackingStatusPresentation(t.status).label}
+                      </StatusBadge>
                     </div>
                   </td>
                   <td className="px-4 py-2.5">

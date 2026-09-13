@@ -14,9 +14,10 @@ import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import { getPersistenceStatus } from '@/data/acquisitionStore';
-import { Badge, Button, Card, EmptyState } from '@/components/ui';
+import { Badge, Button, Card, EmptyState, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { OnboardingStatus, OnboardingStepId } from '@/types';
+import { onboardingStatusPresentation } from '@/lib/statusPresentation';
 import {
   acceptOnboarding,
   completeOnboardingStep,
@@ -25,20 +26,6 @@ import {
   type OnboardingPipelineRow,
 } from '@/lib/onboarding/onboardingLifecycle';
 import { ClipboardList, BadgeCheck, CheckCircle2, ChevronRight } from 'lucide-react';
-
-const STATUS_STYLES: Record<OnboardingStatus, string> = {
-  initiated: 'bg-purple-500/15 text-purple-300 border-purple-500/20',
-  accepted: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/20',
-  in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-  completed: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-};
-
-const STATUS_LABEL: Record<OnboardingStatus, string> = {
-  initiated: 'Awaiting acceptance',
-  accepted: 'Accepted',
-  in_progress: 'In progress',
-  completed: 'Operational',
-};
 
 const ORIGIN_LABELS: Record<string, string> = {
   acquisition_opportunity: 'Acquisition',
@@ -204,9 +191,13 @@ export function OnboardingPipeline() {
                     </span>
                   </span>
                   <span className="flex items-center gap-2 flex-shrink-0">
-                    <Badge className={cn('text-[9px] border capitalize', STATUS_STYLES[row.onboarding.status])}>
-                      {STATUS_LABEL[row.onboarding.status]}
-                    </Badge>
+                    <StatusBadge
+                      className="text-[10px] capitalize"
+                      dataStatus={onboardingStatusPresentation(row.onboarding.status).dataStatus}
+                      tone={onboardingStatusPresentation(row.onboarding.status).tone}
+                    >
+                      {onboardingStatusPresentation(row.onboarding.status).label}
+                    </StatusBadge>
                     <ChevronRight
                       className={cn(
                         'w-3.5 h-3.5 text-zinc-500 transition-transform',

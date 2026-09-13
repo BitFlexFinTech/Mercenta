@@ -3,6 +3,10 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useComplianceDocuments } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { Badge, Button, Card, Input, StatusBadge } from '@/components/ui';
+import {
+  complianceDocStatusPresentation,
+  poOutageStatusPresentation,
+} from '@/lib/statusPresentation';
 import { BrandContractView } from '@/components/brand/BrandContractView';
 import { isTourCompleted, isTourSkipped, restartTour, useTourProgress } from '@/components/shared/TourEngine';
 import { ALL_TOUR_DEFINITIONS } from '@/config/tours/tourDefinitions';
@@ -230,12 +234,6 @@ function OutagesSection({ brandId }: { brandId: string }) {
     setVersion((v) => v + 1);
   };
 
-  const STATUS_BADGE: Record<string, string> = {
-    active: 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-    expired: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-    cancelled: 'bg-red-500/10 text-red-300 border-red-500/20',
-  };
-
   return (
     <Card title="Purchase Order Outages">
       <p className="text-[10px] text-zinc-600 mb-3">Declare periods when you cannot fulfil purchase orders. Outages feed Mercenta's PO-routing (flagged/suppressed during the window).</p>
@@ -246,7 +244,13 @@ function OutagesSection({ brandId }: { brandId: string }) {
             <p className="text-[10px] text-zinc-500">{o.reason}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className={cn('text-[9px]', STATUS_BADGE[o.status])}>{o.status}</Badge>
+            <StatusBadge
+              className="text-[10px]"
+              dataStatus={poOutageStatusPresentation(o.status).dataStatus}
+              tone={poOutageStatusPresentation(o.status).tone}
+            >
+              {poOutageStatusPresentation(o.status).label}
+            </StatusBadge>
             {o.status === 'active' && (
               <button onClick={() => { cancelPoOutage(o.id); setVersion((v) => v + 1); }} className="text-[10px] text-zinc-500 hover:text-red-400">Cancel</button>
             )}
@@ -364,7 +368,13 @@ function ComplianceRefSection({ brandId: _brandId }: { brandId: string }) {
             <tr key={d.id}>
               <td className="px-2 py-1.5 text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</td>
               <td className="px-2 py-1.5">
-                <Badge className={cn('text-[9px]', d.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{d.status.replace(/_/g, ' ')}</Badge>
+                <StatusBadge
+                  className="text-[10px]"
+                  dataStatus={complianceDocStatusPresentation(d.status).dataStatus}
+                  tone={complianceDocStatusPresentation(d.status).tone}
+                >
+                  {complianceDocStatusPresentation(d.status).label}
+                </StatusBadge>
               </td>
               <td className="px-2 py-1.5 text-xs text-zinc-600 text-right">{d.expiryDate?.slice(0, 10) || '—'}</td>
             </tr>

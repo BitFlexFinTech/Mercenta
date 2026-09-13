@@ -18,7 +18,9 @@ import type {
   ApplicationStatus,
   ComplianceDocument,
   DeductionStatus,
+  OnboardingStatus,
   PurchaseOrderStatus,
+  ReturnTrackingStatus,
   ShipmentStatus,
 } from '@/types';
 import { STATUS_LABELS } from '@/types';
@@ -286,6 +288,65 @@ export function complianceGatePresentation(
   return cleared
     ? { label: 'Gate open', tone: 'success', dataStatus: 'gate_open', actionable: false }
     : { label: 'Action required', tone: 'warning', dataStatus: 'gate_action_required', actionable: true };
+}
+
+/* ── §Phase D2 — onboarding, returns and outages ──────────────────────────── */
+
+/** Brand onboarding record lifecycle (Onboarding Pipeline). */
+const ONBOARDING_STATUS: Record<OnboardingStatus, StatusPresentation> = {
+  initiated: { label: 'Awaiting acceptance', tone: 'warning', dataStatus: 'initiated', actionable: true },
+  accepted: { label: 'Accepted', tone: 'info', dataStatus: 'accepted', actionable: true },
+  in_progress: { label: 'In progress', tone: 'info', dataStatus: 'in_progress', actionable: true },
+  completed: { label: 'Operational', tone: 'success', dataStatus: 'completed', actionable: false },
+};
+
+export function onboardingStatusPresentation(status: OnboardingStatus | string): StatusPresentation {
+  return (
+    ONBOARDING_STATUS[status as OnboardingStatus] ?? {
+      label: String(status).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(status),
+      actionable: true,
+    }
+  );
+}
+
+/** Physical returns tracking lifecycle (warehouse → brand confirmation). */
+const RETURN_TRACKING_STATUS: Record<ReturnTrackingStatus, StatusPresentation> = {
+  received_at_warehouse: { label: 'received at warehouse', tone: 'info', dataStatus: 'received_at_warehouse', actionable: true },
+  quality_checked: { label: 'quality checked', tone: 'warning', dataStatus: 'quality_checked', actionable: true },
+  forwarded_to_brand: { label: 'forwarded to brand', tone: 'info', dataStatus: 'forwarded_to_brand', actionable: true },
+  confirmed_by_brand: { label: 'confirmed by brand', tone: 'success', dataStatus: 'confirmed_by_brand', actionable: false },
+};
+
+export function returnTrackingStatusPresentation(
+  status: ReturnTrackingStatus | string
+): StatusPresentation {
+  return (
+    RETURN_TRACKING_STATUS[status as ReturnTrackingStatus] ?? {
+      label: String(status).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(status),
+      actionable: true,
+    }
+  );
+}
+
+/** Brand-declared PO outage window status (Settings → PO Outages). */
+export function poOutageStatusPresentation(status: string): StatusPresentation {
+  const map: Record<string, StatusPresentation> = {
+    active: { label: 'active', tone: 'warning', dataStatus: 'active', actionable: true },
+    expired: { label: 'expired', tone: 'neutral', dataStatus: 'expired', actionable: false },
+    cancelled: { label: 'cancelled', tone: 'danger', dataStatus: 'cancelled', actionable: false },
+  };
+  return (
+    map[status] ?? {
+      label: status.replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: status,
+      actionable: true,
+    }
+  );
 }
 
 /* ── §Phase D2 — urgency presentations (computed, never a stored status) ──── */
