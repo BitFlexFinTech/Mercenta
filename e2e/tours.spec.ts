@@ -104,30 +104,55 @@ test.describe('Brand Guided Tours', () => {
     } else test.fixme(true, 'Tour 3 not visible');
   });
 
-  test('5. Deductions tour on Analytics', async ({ page }) => {
+  /**
+   * §Phase G1 — Tour 5's target surface now EXISTS. The brand-facing
+   * deductions ledger is rendered on Analytics/Reports with all four canonical
+   * anchors, so this is a real assertion rather than a visibility-conditional
+   * skip. It checks: the surface renders; the ledger is TENANT-SCOPED (PO-9000
+   * / PO-9001 belong to Zambezi and must never appear in DeskForge's ledger);
+   * and opening a dispute really drives the canonical domain action.
+   */
+  test('5. Deductions ledger on Analytics (Tour 5 surface)', async ({ page }) => {
     await loginAsBrand(page, 'DeskForge Supplies Inc');
-    const a = page.locator('.animate-fade-in').first();
-    if (await a.isVisible({ timeout: 2000 }).catch(() => false)) {
-      const d = page.locator('button[aria-label="Dismiss tour"]');
-      if (await d.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await d.click();
-        await page.waitForTimeout(500);
-        const s = page.locator('button', { hasText: 'Skip Tour' });
-        if (await s.isVisible({ timeout: 1000 }).catch(() => false)) {
-          await s.click();
-          await page.waitForTimeout(500);
-        }
+
+    // Dismiss whatever per-view tour card auto-started for this brand.
+    const d = page.locator('button[aria-label="Dismiss tour"]');
+    if (await d.isVisible({ timeout: 1500 }).catch(() => false)) {
+      await d.click();
+      await page.waitForTimeout(300);
+      const s = page.locator('button', { hasText: 'Skip Tour' });
+      if (await s.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await s.click();
+        await page.waitForTimeout(300);
       }
     }
-    const an = page.locator('text=Analytics').or(page.locator('text=Reports')).first();
-    if (await an.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await an.click();
-      await page.waitForTimeout(800);
-      const d = page.locator('text=Deductions Ledger');
-      if (await d.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await expect(d).toBeVisible({ timeout: 2000 });
-      } else test.fixme(true, 'Deductions not visible');
-    } else test.fixme(true, 'Analytics not found');
+
+    await page.locator('nav[aria-label="Primary"]').getByText('Analytics').first().click();
+    await page.waitForTimeout(800);
+
+    const ledger = page.locator('[data-tour="deductions-ledger"]');
+    await expect(ledger).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-tour="deductions-categories"]')).toBeVisible();
+    await expect(page.locator('[data-tour="deductions-dispute-btn"]')).toBeVisible();
+    await expect(page.locator('[data-tour="deductions-outcome-info"]')).toBeVisible();
+
+    // Tenant isolation: another brand's deduction POs must not leak.
+    await expect(ledger).not.toContainText('PO-9000');
+    await expect(ledger).not.toContainText('PO-9001');
+    await expect(ledger).toContainText('PO-9002');
+    // Real recorded outcome data (won) is surfaced, not invented.
+    await expect(ledger).toContainText('outcome: won');
+
+    // The dispute control performs the CANONICAL domain action.
+    await page.locator('[data-state="brand-deduction-dispute"]').first().click();
+    await page
+      .locator('[data-tour="deductions-dispute-btn"] textarea')
+      .fill('Carrier POD shows the full carton count; weighing ticket requested.');
+    await page.locator('[data-state="brand-deduction-record-dispute"]').click();
+    await expect(page.locator('[data-tour="deductions-dispute-btn"]')).toContainText(
+      'marked disputed',
+      { timeout: 5000 }
+    );
   });
 
   test('6. Tour steps advance correctly', async ({ page }) => {

@@ -7,6 +7,7 @@ import { usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { downloadCsv } from '@/lib/csv';
 import { Badge, Button, Card } from '@/components/ui';
+import { DeductionsLedger } from '@/components/brand/DeductionsLedger';
 import { cn } from '@/utils/cn';
 import { TrendingUp, TrendingDown, Package, DollarSign, BarChart3, ShoppingCart, X, Download, Calendar } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -71,6 +72,10 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
         <Card title="Reports">
           <p className="text-xs text-zinc-600">No purchase orders yet for {brandProfile.businessName || 'your brand'} in the selected period.</p>
         </Card>
+        {/* §Phase G1 — the deductions ledger is independent of the reporting
+            period, so it renders (with its own honest empty state) on every
+            tenant. APPENDED after existing content. */}
+        <div className="mt-6"><DeductionsLedger /></div>
       </div>
     );
   }
@@ -236,6 +241,10 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
           </div>
         </div>
       )}
+
+      {/* §Phase G1 — brand deductions ledger (Tour 5 surface). APPENDED after
+          all existing content so no existing browser assertion changes. */}
+      <DeductionsLedger />
     </div>
   );
 }

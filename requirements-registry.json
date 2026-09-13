@@ -788,11 +788,20 @@
     },
     {
       "id": "batchC-rocketchat-integration",
-      "description": "Rocket.Chat CE messaging engine — REMOVED in Phase D1 (2026-09-11). The registry card, mock-only adapter (IRocketChatClient), SSO bridge (provisionRocketChatUser/ensureBrandGroup), admin panel, docker-compose service and Caddy vhost were all deleted: the factory returned a mock and no product workflow depended on it. Communications remain canonical (CRM / Messages / Helpdesk).",
+      "description": "Rocket.Chat CE messaging engine — REMOVED in Phase D1 (2026-09-11). The registry card, mock-only adapter (IRocketChatClient), SSO bridge (provisionRocketChatUser/ensureBrandGroup), admin panel, docker-compose service and Caddy vhost were all deleted: the factory returned a mock and no product workflow depended on it. Communications remain canonical (CRM / Messages / Helpdesk). Phase G1 (2026-09-13) completed the follow-up SERVER-SIDE cleanup on mercenta-services (46.101.75.185): the retired rocketchat + rocketchat-db (Mongo) containers, the dedicated root_rocketchat_mongodb volume, both anonymous volumes and both images were removed, and the two compose services + volume entry were deleted from /root/docker-compose.yml (docker compose config -q VALID). No rocket/chat/mongo container, volume or image remains; all 10 active services verified unaffected (engine /api/ 200, /auth 403 edge block intact, caddy validate valid). Backup: /root/rocketchat-removal-backup-20260913/.",
       "source": "Batch C",
       "status": "regressed",
-      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md; e2e/rocketchat-removal.spec.ts; scripts/validate-rocketchat-removal.mjs",
-      "last_verified": "2026-09-11",
+      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md; docs/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md (Part 1 — server cleanup VERIFIED); e2e/rocketchat-removal.spec.ts; scripts/validate-rocketchat-removal.mjs",
+      "last_verified": "2026-09-13",
+      "superseded_by": null
+    },
+    {
+      "id": "phaseG1-brand-deductions-ledger",
+      "description": "Brand-facing Deductions Ledger (Tour 5 surface) — BUILT 2026-09-13. Rendered on the brand Analytics AND Reports views (src/components/brand/DeductionsLedger.tsx), carrying the four canonical Tour-5 anchors (deductions-ledger, deductions-categories, deductions-dispute-btn, deductions-outcome-info) that previously existed in NO component, so e2e/tours.spec.ts t5 had only ever skipped. Reuses the canonical E4 tenant-scoped domain read model (listBrandCommerceExceptions — tenant check inside the domain) and the canonical openCommerceDispute with a brand-pinned CommerceActor (RBAC + tenant + audit in the domain, refusals verbatim); refreshes via useCanonicalStoreVersion; reports the REAL recorded dispute outcome (no self-declared wins); marks (sim) from the canonical flag; honest empty states. No new store, no second workflow, no new visual language, NO migration (023 remains newest).",
+      "source": "Phase G1",
+      "status": "built_and_tested",
+      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md (Part 2); e2e/tours.spec.ts t5 (genuine functional + tenant-isolation test, PASSES); full browser suite 209 passed / 0 failed / 3 skipped; typecheck 0; npm run lint 0; build PASS",
+      "last_verified": "2026-09-13",
       "superseded_by": null
     },
     {

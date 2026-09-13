@@ -1,6 +1,40 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-12 (**Phase E8 — OPERATIONAL MERCENTA SOCIAL (LIVE ENGINE + SSO BRIDGE)**; see the PHASE E8 block below. Previous: **Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; before that E6 — BRAND OPERATIONAL SURFACES, E5 — ADMIN OPERATIONAL SURFACES, E4 — COMMERCE, E3 — CATALOG, E2 — BRAND ONBOARDING, E1 — ONBOARDING HAND-OFF, D4 — PERSISTENCE.)
+> Last updated: 2026-09-13 (**Phase G1 — BRAND DEDUCTIONS LEDGER (Tour 5 surface) + RETIRED ROCKET.CHAT SERVER CLEANUP COMPLETE**) · Previous: 2026-09-12 (**Phase E8 — OPERATIONAL MERCENTA SOCIAL (LIVE ENGINE + SSO BRIDGE)**; see the PHASE E8 block below. Previous: **Phase E7 — EMBEDDED MERCENTA SOCIAL (FULL POSTIZ APPLICATION)**; before that E6 — BRAND OPERATIONAL SURFACES, E5 — ADMIN OPERATIONAL SURFACES, E4 — COMMERCE, E3 — CATALOG, E2 — BRAND ONBOARDING, E1 — ONBOARDING HAND-OFF, D4 — PERSISTENCE.)
+>
+> **PHASE G1 (2026-09-13) — BRAND DEDUCTIONS LEDGER (Tour 5) + ROCKET.CHAT SERVER CLEANUP.**
+> Two independent deliverables, executed build-forward.
+> **① ROCKET.CHAT CLEANUP COMPLETE** on `mercenta-services` (46.101.75.185): ownership was
+> verified before any deletion (only `root-rocketchat-1` / `root-rocketchat-db-1` touched any
+> rocketchat/Mongo volume; `mongo:7` used by no other container; no crontab/env/systemd/Caddy
+> reference; `chat.mercenta.co.uk` vhost already gone in D1). Removed: both containers (Exited),
+> the dedicated `root_rocketchat_mongodb` volume, both anonymous volumes, **both images**, and the
+> two compose services + volume entry in `/root/docker-compose.yml` (`docker compose config -q` →
+> VALID; a 4-line removal note remains). Verification: **no** rocket/chat/mongo container, volume
+> or image remains; all **10 active containers unaffected** (Postiz, Temporal, Elasticsearch,
+> both Postgres, both Redis, usertour, social-sso); engine `/api/` **200**; `/auth` **403** block
+> intact; `caddy validate` valid; disk 27 GB → **24 GB**; load 100 → **0.79**. Backup of the
+> pre-change compose file + container/volume inspect JSON is kept on the server at
+> `/root/rocketchat-removal-backup-20260913/`. Mercenta Social/Postiz was NOT touched, resized or
+> resumed — it stays **DEFERRED**.
+> **② PHASE G1 — the brand-facing DEDUCTIONS LEDGER now EXISTS** (`src/components/brand/
+> DeductionsLedger.tsx`, NEW), closing the documented product gap behind **Tour 5** whose four
+> declared anchors (`deductions-ledger`, `deductions-categories`, `deductions-dispute-btn`,
+> `deductions-outcome-info`) previously existed in **no component at all** — t5 in
+> `e2e/tours.spec.ts` had only ever skipped. It reuses the CANONICAL E4 domain read model
+> (`listBrandCommerceExceptions`, tenant check inside the domain) and the CANONICAL
+> `openCommerceDispute` with a brand-pinned `CommerceActor` (RBAC + tenant + audit in the domain,
+> refusals shown verbatim), refreshes via the existing `useCanonicalStoreVersion` signal, reports
+> the REAL recorded outcome (a brand cannot declare its own win — the outcome control stays on the
+> existing operator ledger/brand console), marks `(sim)` from the canonical flag, has honest empty
+> states, and adds **no new store, no second workflow, no new visual language and NO migration**
+> (023 remains newest). Mounted additively (APPENDED after existing content, populated + empty
+> returns) on **Analytics** and **Reports**. t5 is now a genuine functional + tenant-isolation
+> test (DeskForge's ledger must not contain Zambezi's `PO-9000`/`PO-9001`, must contain `PO-9002`,
+> and Dispute → evidence → Record dispute must move the row to `disputed`). Gates: typecheck **0**
+> · lint **0** (whole repo) · build **✓ 3.43s** · tours spec **9/9** · full browser suite
+> **209 passed / 0 failed / 3 skipped** (was 208/0/4 → +1 passing, −1 skip, **0 regressions**).
+> Report: `docs/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md`.
 >
 > **PHASE E9 (2026-09-13) — REAL CHANNEL CONNECT + PUBLISHING AGAINST THE LIVE ENGINE.**
 > Continuing E8 on the deployed engine, the **real** channel-connect and publishing
@@ -938,7 +972,7 @@ approval needs neither Rakazo nor Postiz). D3 does not start until this gate is 
 | **Phase 1 — ZERO-ERROR REPAIR** | ✅ **DONE** | `0fc1265` — repaired ALL 44 TypeScript + 18 ESLint errors to **0** via root-cause fixes (no @ts-ignore, no config weakening, no rule disabling, no file exclusion). scenarioEngine `audit()` signature reordered (matches 26 call sites), `error?: string` added to ScenarioResult, dead re-export removed; SimulationControl `running !== null` + result.error typing; IntegrationsPanel missing `IntegrationDefinition` import; Header toggleRef type aligned to AppShell; OnboardingWizard brandId now `session?.tenantId` (was never-working `brandProfile.id` fallback — agreements now keyed to the real tenant) + exhaustive-deps-correct prefill effect; BrandReports CSV export aligned to canonical `downloadCsv` contract + recharts formatter param types; api.ts draft-shipment row aligned to canonical `DemoShipment` (removed non-row fields); banksByCountry `BanksByCountry` type declared; xero tokenManager refreshLocks typed to the token promise; 10 lint files fixed (memoized query fallbacks, removed/referenced stale deps, prefer-const). **Bonus:** corrected TourEngine dep arrays now make 2 previously-skipped tour tests PASS. Gates: **TS 0 · ESLint 0 · Build PASS · Full 21-suite E2E 143 passed / 0 failed / 4 skipped** (2.5m). |
 | **Phase 2 — CORE RUNTIME STABILITY** | ✅ **DONE** | `85aa056` — real-browser sweep (`scripts/runtime-sweep.mjs`) of EVERY Primary-nav destination for all roles: Super Admin 24 / Admin 21 / Brand×2 15 each / Carrier 3 — **0 page errors, 0 console errors, 0 ErrorBoundary crashes on every screen**. All 7A–7F repairs hold. |
 | **Phase 10 — ACTUAL PUBLIC DEMO** | ✅ **DONE** | `58c341e` — demo.mercenta.co.uk was serving a 5-week-stale build; REDEPLOYED the current code via the existing `scripts/deploy-demo.sh` (Namecheap FTP). Diagnosis surfaced a **pre-existing PRODUCTION-ONLY mount crash** (`Cannot read properties of undefined (reading 'unstable_scheduleCallback')` — dev worked, prod crashed): `node_modules/scheduler` (React 18.3.1's extracted scheduler) was chunked into `vendor-other` while react/react-dom went to `vendor-react` → split scheduler singleton. Root-cause fix in `vite.config.ts`: co-locate `scheduler` (+ `use-sync-external-store`, `react-redux`, `@reduxjs/toolkit`, `recharts`) with the react chunk. Verified locally via `npm run preview` (pageErrors 0, full render), redeployed, live URL now serves the fixed build (`index-QtIJfAir.js` matches local dist; all assets 200 + gzip). Live browser verification across 5 runs: homepage/login/Super Admin dashboard/brand portal/carrier terminal all rendered in at least one clean run with **zero page errors on every flow**. Residual: Namecheap shared-hosting throughput from this location was severely throttled during the session (~180 B/s observed), causing intermittent cold-load timeouts — an environmental variable, not an app defect. |
-| **Phase 8 (role-by-role) — read: covered by Phases 1–2 sweeps** | ⏳ | Brand finisher surfaces + carrier parity pass the runtime sweep; Phase 8's remaining fuller role-by-role audit (Tour 5 deductions surface, ComplianceUploadCard re-verification, Integration Hub breadth) is recorded as the next body of work in section "Remaining skips / deferred". |
+| **Phase 8 (role-by-role) — read: covered by Phases 1–2 sweeps** | ⏳ | Brand finisher surfaces + carrier parity pass the runtime sweep; Phase 8's remaining fuller role-by-role audit **(Tour 5 deductions surface NOW BUILT — Phase G1, 2026-09-13)**; the rest (ComplianceUploadCard re-verification, Integration Hub breadth) is recorded as the next body of work in section "Remaining skips / deferred". |
 
 ## 1. Master Redesign — Phases 0–5 complete; Phase 6 DONE
 
@@ -1007,6 +1041,7 @@ approval needs neither Rakazo nor Postiz). D3 does not start until this gate is 
 **Documented product gaps (deferred — NOT implemented in 7D):**
 - Tour restart control from Brand Settings does not exist (tours t7 stays skipped with reason; small Settings feature → later phase).
 - Tour 5 (Deductions on Analytics) starts, but its tour target attributes (e.g. `data-tour="deductions-benefits"`) do not exist in the SalesAnalytics surface — card cannot render its highlight (tours t5 stays skipped; data-tour rotation belongs to the later data-tour sweep).
+  - **→ CLOSED in Phase G1 (2026-09-13):** the four Tour-5 targets now exist on the brand deductions ledger, mounted on Analytics **and** Reports; `tours` t5 is no longer skipped — it is a genuine passing functional + tenant-isolation test.
 - Demo-mode post-publish home view does not auto-refresh the already-mounted public homepage (persistence/refresh work → later phase).
 - Dispute resolution writes to the store + audit, but the live ledger row refresh relies on the React Query reference fix; the visual “→ outcome: partial” badge path is covered by the same mechanism and verified for won/lost seed rows.
 - Not-representable data states (portal tenants are all compliance-cleared; no pending profile-change requests seed): these remain conditional skips because inventing demo data/state to drive them would violate the no-fake-state rule.
@@ -1039,7 +1074,7 @@ approval needs neither Rakazo nor Postiz). D3 does not start until this gate is 
 
 **Gates:** TypeScript 43 (7D baseline exactly; 0 new) · ESLint 23 (below baseline 24; 0 new) · build PASS. Screenshots at all 7 viewports (admin + brand) captured (fresh 13:38). Actual pixel-level inspection NOT possible in this environment (model cannot accept image input) — strongest DOM/geometry verification performed instead (allOk=true for every viewport: 0 overflow, 0 overhang, 6/6 KPIs, 7/7 sections).
 1. **Brand Settings → Guided Tours tab (Restart Tour)** — DONE. `BrandSettings.tsx` gains a `Guided Tours` tab listing all 9 tours with state badges + a design-system `Restart Tour` Button per tour, plus `TourEngine.restartTour(brandId, tourId)` which clears only that tour's completion/skip + per-step progress and relaunches via the EXISTING engine (`setTourProgress` notification path). No duplicate tour architecture; brand-settings-only surface (no admin/super-admin controls). E2E `tours.spec.ts` t7 upgraded from conditional-skip to real assertion (tab visible → button present → clicking Restart relaunches orientation card). **PASS**.
-2. **Tour 5 / Deductions data-tour targets** — **documented product gap (NOT built)**. Inspection result: the four Tour-5 targets (`deductions-ledger`, `deductions-categories`, `deductions-dispute-btn`, `deductions-dispute-outcome`) have NO existing representation in the brand Analytics surface — SalesAnalytics has no deductions ledger; the only brand-visible deductions UI is per-statement lines in Documents & Account (BrandSelfService) and returns-linked deduction notes in Returns — no category breakdown, no dispute affordance. Building a ledger would be a new feature (materially larger than an attribute repair) → **not built per 7E scope**. `tours.spec.ts` t5 remains a **justified skip**: product gap + view/order sequencing.
+2. ~~**Tour 5 / Deductions data-tour targets** — **documented product gap (NOT built)**.~~ **→ BUILT in Phase G1 (2026-09-13)**: the brand deductions ledger now carries all four targets and `tours` t5 passes as a real test. The original inspection result follows as the historical record: Inspection result: the four Tour-5 targets (`deductions-ledger`, `deductions-categories`, `deductions-dispute-btn`, `deductions-dispute-outcome`) have NO existing representation in the brand Analytics surface — SalesAnalytics has no deductions ledger; the only brand-visible deductions UI is per-statement lines in Documents & Account (BrandSelfService) and returns-linked deduction notes in Returns — no category breakdown, no dispute affordance. Building a ledger would be a new feature (materially larger than an attribute repair) → **not built per 7E scope**. `tours.spec.ts` t5 remains a **justified skip**: product gap + view/order sequencing.
 3. **Demo-mode homepage publish → live refresh of mounted public Home** — DONE. `src/data/api.ts` adds module-level `homepageLiveVersion` + `subscribeHomepageLive()` (same listener pattern TourEngine uses); `publishHomepageContent` bumps + notifies. `src/data/queries.ts` adds `useHomepageContent()` keyed on the version (React Query refetch on publish). `HomeShell.tsx` now renders `<Home content={live}>` from the hook instead of the static default. No polling/websockets/backend/API-contract change. E2E `homepage-editor.spec.ts` test 2 proves: public home mounts → publish in-admin (in-place, no reload) → return via header Home → published hero eyebrow visible. **PASS 2/2**.
 
 **7E-B — Brand Dashboard redesign (complete rewrite of `src/components/brand/BrandDashboard.tsx`, 524 lines)**
@@ -1097,6 +1132,9 @@ The product already supports the workflow (`requestProfileChange` / `reviewProfi
 - Remaining skips t6/t8/t9 are the pre-existing intentional fixme branches (approve/manual-create/unapproved-route — documented in-file).
 
 ### Tour 5 decision
+**RESOLVED — Phase G1 (2026-09-13).** The brand deductions ledger is now built and t5 passes as a
+genuine functional test; the original deferral rationale is kept below as the historical record.
+
 `tours` t5 (Deductions on Analytics) stays an HONEST skip — documented product gap. The Tour-5 definition targets a deductions LEDGER + category breakdown + dispute button + outcome info on the Analytics/Reports views; SalesAnalytics is a revenue/volume page with NO deductions surface and no `[data-tour="deductions-*"]` targets exist anywhere in src. No meaningless attributes were added to unrelated UI. Building the ledger/dispute surface is a LARGER product feature deferred to a later phase (see deferred list).
 
 ### Regression verification
@@ -1114,13 +1152,13 @@ The product already supports the workflow (`requestProfileChange` / `reviewProfi
 | access-gate | t6 approve-login | requires in-app navigation preserving module state | pre-existing intentional fixme | no | no |
 | access-gate | t8 manual create | same | pre-existing intentional fixme | no | no |
 | access-gate | t9 unapproved route | requires server-side route guards | pre-existing intentional fixme | no | no |
-| tours | t5 deductions tour | SalesAnalytics has no deductions surface; tour targets don't exist | 4 - missing product feature | **yes** | no (recorded) |
+| tours | t5 deductions tour | SalesAnalytics has no deductions surface; tour targets don't exist | 4 - missing product feature | **yes** | **CLOSED — Phase G1 (2026-09-13) built the ledger; t5 now PASSES as a real test** |
 
 ### Remaining failures
 NONE in the 21-suite regression. The legacy `validate-review-s1.mjs` has 4 pre-existing failures (PO status diversity / carrier coverage / two demo banners) — outside the phase gates, unchanged by 7F.
 
 ### Deferred product features (NOT started)
-- Tour 5 Deductions & Disputes surface (brand deductions ledger + category breakdown + dispute workflow on Analytics/Reports).
+- ~~Tour 5 Deductions & Disputes surface (brand deductions ledger + category breakdown + dispute workflow on Analytics/Reports).~~ **DONE — Phase G1 (2026-09-13)**, mounted on Analytics + Reports; the operator-side outcome-recording control already existed.
 - Live provider credential activation, Amazon SP-API, Companies House, HMRC, Wise/Payoneer/Stripe/Xero production, Integration Hub breadth, Carrier Dashboard redesign, CRM/Compliance/Catalogue/PO/Finance/Logistics/Marketing redesigns.
 
 ### Phase 8 readiness — assessment

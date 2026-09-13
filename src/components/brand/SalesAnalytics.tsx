@@ -7,6 +7,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { Badge, Card } from '@/components/ui';
+import { DeductionsLedger } from '@/components/brand/DeductionsLedger';
 import { cn } from '@/utils/cn';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { TrendingUp, TrendingDown, Package, DollarSign, BarChart3, X, ArrowUpRight } from 'lucide-react';
@@ -68,6 +69,9 @@ export function SalesAnalytics({ onNavigate }: { onNavigate?: (view: string) => 
         <Card title="Sales Analytics">
           <p className="text-xs text-zinc-600">No POs yet for {brandProfile.businessName || 'your brand'}</p>
         </Card>
+        {/* §Phase G1 — the deductions ledger is independent of PO volume, so it
+            renders (with its own honest empty state) on every tenant. */}
+        <div className="mt-6"><DeductionsLedger /></div>
       </div>
     );
   }
@@ -125,6 +129,10 @@ return (
       </Card>
 
       {drillCard && <DrillModal card={drillCard} onClose={() => setDrillCard(null)} data={{ totalValue, totalUnits, avgOrder, skuCount, monthlyData, skuStats, accepted }} onNavigate={onNavigate} />}
+
+      {/* §Phase G1 — brand deductions ledger (Tour 5 surface). APPENDED after
+          all existing content so no existing browser assertion changes. */}
+      <DeductionsLedger />
     </div>
   );
 }

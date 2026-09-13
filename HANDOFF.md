@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 12, 2026 (Phase E6 — brand operational surfaces)
+Last updated: September 13, 2026 (Phase G1 — brand deductions ledger / Tour 5 built + retired Rocket.Chat server infrastructure removed)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -24,11 +24,17 @@ Cline's output back. AI confirms, gives next prompt.
 - React/TS/Vite frontend (161 files)
 - Supabase (142.93.46.155) — 14 tables + RLS
 - 20 Rakazo bots (24.144.86.50) — all demo mode
-- Services (46.101.75.185) — Usertour, Postiz. (Rocket.Chat removed from the
-  platform in Phase D1, 2026-09-11: its panel, mock client/SSO, registry card,
-  nav entry, docker-compose service and Caddy vhost are deleted. Any container /
-  `chat.mercenta.co.uk` record still running on the droplet must be removed
-  server-side.)
+- Services (46.101.75.185) — Usertour, Postiz. Rocket.Chat was removed from the
+  platform in Phase D1 (2026-09-11: panel, mock client/SSO, registry card, nav
+  entry, docker-compose service and Caddy vhost deleted). **Phase G1
+  (2026-09-13) COMPLETED the server-side cleanup: the retired `rocketchat` +
+  `rocketchat-db` (Mongo) containers, their dedicated Mongo volume, their two
+  anonymous volumes and both images were removed from `mercenta-services`, the
+  two services + volume entry were deleted from `/root/docker-compose.yml`, and
+  the stack was re-validated. No rocket/chat/mongo container, volume or image
+  remains; all 10 active services were verified unaffected (engine `/api/` 200).
+  Backup of the pre-change compose file + inspect JSON:
+  `/root/rocketchat-removal-backup-20260913/`. **Never reintroduce Rocket.Chat.**
 - Playwright suite (185 passing tests, 30 spec files)
 - Homepage: "Your brand. The UK market." (NO Amazon mention)
 - Partner Login + application gate + link verification
@@ -219,6 +225,21 @@ Cline's output back. AI confirms, gives next prompt.
   `d517b17`, tag `mercenta-pre-e6-20260912`). Report:
   docs/PRODUCT_CONSOLIDATION_PHASEE6_2026-09-12.md.
 - Review zip script + protection rules + handoff rule
+- **Mercenta Social (E7–E9, 2026-09-12/13):** the deployed Postiz engine (v1.47.0) is integrated
+  as Mercenta Social with deterministic idempotent per-brand organizations, a fail-closed
+  entitlement gate, domain-enforced tenant isolation, a server-side SSO handoff, real TLS, real
+  channel connect + a real publication accepted, and a genuine engine defect fixed (Nostr
+  `finalizeEvent` Uint8Array). **PARKED/DEFERRED** — the droplet is not resized and the Postiz
+  roadmap is not continued. Full record: `PROJECT_STATUS.md` + `docs/PRODUCT_CONSOLIDATION_PHASEE7/E8/E9_*`.
+- **Brand deductions ledger (Phase G1, 2026-09-13):** the brand-facing **Deductions Ledger** now
+  exists on **Analytics** and **Reports** (`src/components/brand/DeductionsLedger.tsx`), closing
+  the documented Tour 5 product gap whose four anchors previously existed in no component at all.
+  It reuses the canonical E4 tenant-scoped domain read model + canonical dispute action (brand
+  cannot see or mutate another tenant's deductions; refusals shown verbatim), refreshes via the
+  canonical store signal, reports real recorded outcomes (no self-declared wins), marks `(sim)`
+  honestly, and adds **no new store, workflow, styling or migration**. `tours` t5 is now a genuine
+  passing functional + tenant-isolation test. Gates: typecheck 0 · lint 0 · build ✓ · tours 9/9 ·
+  **full browser suite 209 passed / 0 failed / 3 skipped** (was 208/0/4).
 
 ## WHAT'S LEFT (IN ORDER):
 NOTE: Development follows the MASTER CONSOLIDATION ROADMAP in
@@ -255,8 +276,11 @@ its Elasticsearch visibility store + public TLS restored so /api serves instead 
 the engine's own signup/login is 403 publicly, and Mercenta's server-side handoff
 provisions the brand's deterministic organization and signs it in (idempotent, isolated —
 verified live against the engine). Remaining user action: DNS
-`postiz.mercenta.co.uk → 46.101.75.185`. Next: **Final UI/UX redesign**. Rakazo stays
-LAST (Phase M).
+`postiz.mercenta.co.uk → 46.101.75.185`. Then: **Final UI/UX redesign** — Phase G1 (2026-09-13)
+delivered the remaining HONEST product gap inside that phase (the brand deductions ledger behind
+Tour 5; full suite 209/0/3). Remaining screen-level work: ComplianceUploadCard re-verification and
+Integration Hub breadth (Phase 8 body of work), then final integration/regression, production
+preparation and deployment. Rakazo stays LAST (Phase M).
 
 ## API KEYS:
 HAVE: DO, Postmark, Hunter, Firecrawl, PandaDoc, OpenRouter,
