@@ -374,6 +374,39 @@ export function billingDecisionPresentation(
       };
 }
 
+/** §Phase D6 — contract lifecycle. The CRM history previously printed the raw
+ *  enum (`under_review`) while every other surface had settled on one label per
+ *  state; this is that one label. */
+export type ContractStatusValue =
+  | 'draft'
+  | 'sent'
+  | 'under_review'
+  | 'signed'
+  | 'active'
+  | 'expiring'
+  | 'terminated';
+
+const CONTRACT_STATUS: Record<ContractStatusValue, StatusPresentation> = {
+  draft: { label: 'Draft', tone: 'neutral', dataStatus: 'draft', actionable: false },
+  sent: { label: 'Sent', tone: 'info', dataStatus: 'sent', actionable: true },
+  under_review: { label: 'Under review', tone: 'warning', dataStatus: 'under_review', actionable: true },
+  signed: { label: 'Signed', tone: 'success', dataStatus: 'signed', actionable: false },
+  active: { label: 'Active', tone: 'success', dataStatus: 'active', actionable: false },
+  expiring: { label: 'Expiring', tone: 'warning', dataStatus: 'expiring', actionable: true },
+  terminated: { label: 'Terminated', tone: 'danger', dataStatus: 'terminated', actionable: false },
+};
+
+export function contractStatusPresentation(status: ContractStatusValue | string): StatusPresentation {
+  return (
+    CONTRACT_STATUS[status as ContractStatusValue] ?? {
+      label: String(status ?? 'unknown'),
+      tone: 'neutral',
+      dataStatus: 'unknown',
+      actionable: true,
+    }
+  );
+}
+
 /**
  * §Phase D6 — commission → brand payout lifecycle.
  *
