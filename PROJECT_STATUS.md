@@ -2,7 +2,49 @@
 > Source of truth for current project state. Updated after every session.
 > Last updated: 2026-09-13 (**Phase D2 — canonical status sweep across all remaining surfaces · Phase F — GO_LIVE.md runbook + edge-validator crash fix**; previous this session: A+B compliance/Integration Hub, C access-gate real coverage, D1 status foundation)
 >
+> **PHASE F2 + D3 + D4 (2026-09-13, second session) — TRUTHFUL AUDIT + THE TABLE PRIMITIVE.** Commits
+> **`76ff520`** (integrity audit repair + wording gate) · **`3f14c4a`** (DataTable extension + deductions
+> ledger) · **`8efc6b4`** (returns tracking table).
+> **F2 — the integrity audit is GREEN (61 passed / 0 failed; was 46/12) and now describes the CURRENT
+> architecture.** Every stale assertion was repointed rather than deleted: the homepage pitch/CTA checks
+> assert the live compliant copy and that the obsolete "Get Started" copy cannot return; the brand-mark
+> check follows the real render path (public shell + assets); the carrier wiring checks follow
+> `CarrierShell` (Phase 6 moved carrier nav there) plus a new App-lazy-render assertion; the six
+> account-menu assertions follow `BrandShell`/`AdminShell` with a new assertion that `AppShell` forwards
+> all three handlers into the Header. **`npm run validate:wording` was RESTORED** (the gate and script
+> still existed; only the wiring was lost) — and the gate then failed for REAL reasons: **53
+> outward-facing wording violations** naming the retail channel in brand-facing copy. Those were fixed,
+> not hidden: tour definitions (20), BrandIntelligence, the onboarding agreement text, Mercenta Social's
+> same-site note, and 13 outbound outreach strings now use the approved public vocabulary; two further
+> leaks (an ASN audit reason, a Social finding) were corrected; four genuinely internal/admin-only/
+> protected files were added to the tool's documented EXCLUDED list with reasons (BI seed evidence, the
+> BI provenance label asserted by `bi-intelligence-preservation.spec`, the reseller-detection predicate,
+> protected Xero mock data). Result: `WORDING_LINT_PASS — scanned 176 src files, 0 violations`.
+> **D3 — the canonical `DataTable` was extended properly** (not a one-off variant): `render` cells,
+> `align`, `primary` (mobile card title), `hideBelow` progressive disclosure, `rowActions` (desktop cell
+> + mobile card footer, so an action can never be clipped), `mobile: 'cards' | 'scroll'` — an INTENTIONAL
+> mobile strategy replacing bare horizontal overflow, `emptyAction`/`errorAction` recovery paths and an
+> `aria-busy` loading state. The generic constraint was relaxed from `Record<string, unknown>` to `T`
+> (domain interfaces have no index signature — the old signature made every real migration impossible).
+> Backwards compatible with all existing call sites. **First migration: the brand deductions ledger**
+> (Tour 5 surface), whose raw 6-column table also carried a FOURTH hand-rolled status colour map
+> (contradicting both admin surfaces) — now canonical + cards on mobile.
+> **D4:** the admin **returns-tracking** table migrated the same way (Advance action reachable at every
+> width, progressive disclosure at md/lg, canonical empty state).
+> **New verification:** `e2e/table-responsive.spec.ts` **3/3** — desktop shows the table and hides the
+> cards; 375px shows labelled cards (Status + Amount present, semantic `role=status`) and hides the table;
+> 768px keeps the table; **zero horizontal overflow at all three**. `design-system.spec.ts`'s DataTable
+> assertion retargeted to the instance visible at the test viewport (intent preserved).
+> **Gates:** typecheck **0** · lint **0** · integrity audit **61/0** · wording lint **PASS** · targeted
+> regression 29 + 25 + 66 passing across the touched surfaces · migrations unchanged (23) · baseline
+> `959b4d2` an ancestor. **STILL OPEN (exact next steps):** migrate the remaining operational tables onto
+> the extended `DataTable` (carrier manifest, product catalogue's 15-column table, BrandReturns, audit
+> log, marketing/prospect tables) and the per-screen density pass (CRM, catalogue, finance) — the
+> primitive is now ready, so each is mechanical.
+>
 > **PHASE D2 + F (2026-09-13) — STATUS SWEEP ACROSS THE REMAINING SURFACES + PRODUCTION PREPARATION.**
+
+
 > Commits **`619b98b`** (D2a commerce) · **`6c3d898`** (D2b dashboards + logistics/carrier) ·
 > **`c347e40`** (D2c onboarding/returns/settings) · Phase F in the same session.
 > **D2 — every remaining DOMAIN status now renders through one canonical layer.** Completed the sweep

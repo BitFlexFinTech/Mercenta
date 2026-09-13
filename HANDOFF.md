@@ -292,7 +292,33 @@ record → the brand enters its portal), skips 3 → 2, and two tests that COULD
 source of truth for domain status → label + semantic tone + `data-status`), the Applications
 decision queue (derived counts, each tile a filter), semantic statuses + honest empty state on
 Compliance Approvals, and the brand compliance card on the same statuses.
-Commits `0f3e84b` (A+B) · `6844182` (C) · `9f9c8ef` (D1) · docs `5d8b831`.
+**PHASE F2 + D3 + D4 (2026-09-13, second session) — DONE.** Commits `76ff520` · `3f14c4a` · `8efc6b4`.
+F2: the **integrity audit is GREEN — 61 passed / 0 failed** (was 46/12). Every stale assertion was
+repointed at the current architecture (homepage compliant copy + canonical CTA with a no-return guard;
+brand-mark check follows the public shell; carrier wiring follows `CarrierShell`; the six account-menu
+checks follow `BrandShell`/`AdminShell` plus a new AppShell forwarding assertion) — none were deleted to
+make it pass. **`npm run validate:wording` was restored**, and it then failed for real reasons: **53
+outward-facing violations** (brand tour copy, BrandIntelligence, the onboarding agreement, outreach
+emails) were FIXED to the approved public vocabulary, two further leaks corrected, and four genuinely
+internal/admin-only/protected files added to the tool's documented exclusion list with reasons →
+`WORDING_LINT_PASS — 176 src files, 0 violations`.
+D3/D4: the canonical **`DataTable` was extended properly** (render cells, align, `primary` mobile title,
+`hideBelow` progressive disclosure, `rowActions` reachable on desktop AND mobile cards,
+`mobile: 'cards' | 'scroll'` intentional mobile strategy, empty/error recovery actions, aria-busy
+loading; generic relaxed to `T` so domain types migrate). **Migrated: the brand deductions ledger**
+(also removed its fourth hand-rolled status colour map) **and the admin returns-tracking table**.
+New `e2e/table-responsive.spec.ts` (3/3) proves table-vs-cards behaviour and zero overflow at
+1440/768/375.
+Final gates: **full Playwright suite 225 passed / 0 failed / 2 skipped** · typecheck 0 · lint 0 ·
+integrity audit 61/0 · wording lint PASS · integrations 37 assertions / 0 failures · migrations
+unchanged (23) · baseline `959b4d2` an ancestor.
+**NEXT (mechanical now that the primitive exists):** migrate the remaining operational tables
+(carrier manifest, product catalogue's 15-column table, BrandReturns, admin audit log, marketing and
+prospect tables) onto the extended `DataTable`, then the per-screen density pass (CRM, catalogue,
+finance), then Phase G deployment rehearsal on demo.mercenta.co.uk (mercenta.co.uk only via
+`GO_LIVE.md`, and only when you say DEPLOY). Social stays PARKED; Rocket.Chat stays retired; Rakazo
+stays LAST.
+
 **PHASE D2 + F (2026-09-13) — DONE.** D2: the remaining domain statuses (PO lifecycle, line
 acknowledgements, the computed 24-hour ack window, deductions, catalogue submissions, shipments,
 onboarding records, returns tracking, PO outages, compliance gate, commission-billing decision) all
