@@ -3,10 +3,10 @@ import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { rememberApiKey } from '@/integrations/types';
 import { pingForService } from '@/lib/integrations/testCalls';
 import { runHealthCheck } from '@/lib/integrations/health';
-import { INTEGRATION_MODE_LABELS } from '@/integrations/types';
-import type { IntegrationDefinition, IntegrationHealth, IntegrationId, IntegrationMode, IntegrationState } from '@/integrations/types';
-import { INTEGRATION_ORDER, INTEGRATION_REGISTRY } from '@/integrations/registry';
-import { Badge, Button, Card, Input } from '@/components/ui';
+import { INTEGRATION_CATEGORY_LABELS, INTEGRATION_MODE_LABELS } from '@/integrations/types';
+import type { IntegrationCategory, IntegrationDefinition, IntegrationHealth, IntegrationId, IntegrationMode, IntegrationState } from '@/integrations/types';
+import { INTEGRATION_ORDER, INTEGRATION_REGISTRY, hasLiveCredentialHint, integrationMeta } from '@/integrations/registry';
+import { Badge, Button, Card, EmptyState, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   AlertTriangle,
@@ -14,12 +14,90 @@ import {
   Loader2,
   Plug,
   RefreshCw,
+  Search,
   ShieldCheck,
   Unlink,
   HeartPulse,
   FlaskConical,
   Power,
 } from 'lucide-react';
+
+/**
+ * §Phase B — Integration Hub breadth.
+ *
+ * The Hub is the provider control plane, so it must answer three operator
+ * questions without scrolling 18 cards: (1) what is the overall state of the
+ * platform's integrations, (2) what needs attention right now, (3) where is
+ * provider X. Everything below is DERIVED from the existing canonical data —
+ * `modes` (the authoritative mode model), `INTEGRATION_META.category` and
+ * `INTEGRATION_ORDER` — never hand-counted, never a second registry.
+ */
+type HubFilter = 'all' | IntegrationMode | 'attention';
+
+const HUB_CATEGORY_ORDER: IntegrationCategory[] = [
+  'core',
+  'commerce',
+  'finance',
+  'logistics',
+  'compliance',
+  'communications',
+  'marketing',
+  'ai',
+  'data',
+  'infrastructure',
+];
+
+const CATEGORY_DESCRIPTIONS: Partial<Record<IntegrationCategory, string>> = {
+  core: 'Platform services every workflow depends on.',
+  commerce: 'Marketplace, catalogue and contract-signature providers.',
+  finance: 'Billing, payouts and accounting providers.',
+  logistics: 'Carriers and shipment tracking providers.',
+  compliance: 'Registrar and tax-authority verification providers.',
+  communications: 'Email, messaging and in-product guidance providers.',
+  marketing: 'Outreach, prospecting, social publishing and advertising providers.',
+  ai: 'Model providers used by research and drafting workflows.',
+  data: 'Market-data and web-fetch providers used by research workflows.',
+  infrastructure: 'Hosted services operated by Mercenta itself.',
+};
+
+/** A row in the Hub body: a category heading, or one provider card. */
+type HubRow =
+  | { kind: 'heading'; category: IntegrationCategory; count: number }
+  | { kind: 'card'; id: IntegrationId };
+
+/**
+ * §Phase B — "needs attention" is derived from the real state, not a colour:
+ * a provider is flagged when the mode model says error/degraded, the
+ * connection reports needs_attention, or its own recorded health says the
+ * credential is invalid. Never a fabricated warning.
+ */
+function isAttention(state: IntegrationState, mode: IntegrationMode): boolean {
+  return (
+    mode === 'error' ||
+    mode === 'degraded' ||
+    state.status === 'needs_attention' ||
+    state.health?.authValid === false
+  );
+}
+
+const SUMMARY_TILES: { id: HubFilter; label: string; hint: string; tone: 'success' | 'warning' | 'info' | 'danger' | 'neutral' }[] = [
+  { id: 'all', label: 'All providers', hint: 'Every registered provider', tone: 'neutral' },
+  { id: 'live', label: 'Live', hint: 'Verified non-sandbox connection', tone: 'success' },
+  { id: 'simulation', label: 'Simulation', hint: 'Executable with mock adapters', tone: 'warning' },
+  { id: 'available', label: 'Available', hint: 'Registered, not configured yet', tone: 'neutral' },
+  { id: 'configuring', label: 'Configuring', hint: 'Connect flow in progress', tone: 'info' },
+  { id: 'attention', label: 'Needs attention', hint: 'Error, degraded or failing health', tone: 'danger' },
+  { id: 'disabled', label: 'Disabled', hint: 'Operator-disabled — no workflow uses it', tone: 'neutral' },
+];
+
+const TILE_TONE_CLASSES: Record<'success' | 'warning' | 'info' | 'danger' | 'neutral', string> = {
+  success: 'text-emerald-300',
+  warning: 'text-amber-300',
+  info: 'text-blue-300',
+  danger: 'text-red-300',
+  neutral: 'text-zinc-300',
+};
+
 
 /**
  * §Priority-1 — safe mock configuration labels for the provider control
@@ -538,9 +616,43 @@ function ConnectWizard({ id, onClose }: WizardProps) {
 export function IntegrationsPanel() {
   const { integrations, disconnect, modes, setMode } = useIntegrations();
   const [wizardFor, setWizardFor] = useState<IntegrationId | null>(null);
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<HubFilter>('all');
+
+  /** One predicate drives the tiles, the counts and the list — no drift. */
+  function matchesFilter(f: HubFilter, id: IntegrationId): boolean {
+    const mode = modes[id];
+    if (f === 'attention') return isAttention(integrations[id], mode);
+    if (f === 'all') return true;
+    return mode === f;
+  }
+
+  function matchesQuery(id: IntegrationId): boolean {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    const def = INTEGRATION_REGISTRY[id];
+    return (
+      def.name.toLowerCase().includes(q) ||
+      def.description.toLowerCase().includes(q) ||
+      INTEGRATION_CATEGORY_LABELS[integrationMeta(id).category].toLowerCase().includes(q)
+    );
+  }
+
+  const visibleIds = INTEGRATION_ORDER.filter((id) => matchesFilter(filter, id) && matchesQuery(id));
+  const attentionIds = INTEGRATION_ORDER.filter((id) => isAttention(integrations[id], modes[id]));
+
+  // Flat row list: category headings + cards, so ONE grid renders both and a
+  // heading spans the full width (no second grid, no duplicated card markup).
+  const rows: HubRow[] = [];
+  for (const category of HUB_CATEGORY_ORDER) {
+    const ids = visibleIds.filter((id) => integrationMeta(id).category === category);
+    if (ids.length === 0) continue;
+    rows.push({ kind: 'heading', category, count: ids.length });
+    for (const id of ids) rows.push({ kind: 'card', id });
+  }
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
+    <div data-testid="integration-hub" className="p-6 space-y-4 max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center">
@@ -565,16 +677,136 @@ export function IntegrationsPanel() {
         </span>
       </div>
 
-      {/* Cards */}
+      {/* §Phase B — platform integration state. Counts come from the mode model
+          (never hand-counted); every tile filters the provider list below. */}
+      <div
+        role="group"
+        aria-label="Integration state summary"
+        className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3"
+      >
+        {SUMMARY_TILES.map((tile) => {
+          const count = INTEGRATION_ORDER.filter((id) => matchesFilter(tile.id, id)).length;
+          const active = filter === tile.id;
+          return (
+            <button
+              key={tile.id}
+              type="button"
+              aria-pressed={active}
+              data-state={active ? 'active' : 'inactive'}
+              title={tile.hint}
+              onClick={() => setFilter(active ? 'all' : tile.id)}
+              className={cn(
+                'text-left bg-ink-850 border rounded-xl px-3.5 py-3 transition-colors',
+                active
+                  ? 'border-brass-500/50 ring-1 ring-brass-500/30'
+                  : 'border-white/[0.06] hover:border-white/[0.14]'
+              )}
+            >
+              <div className={cn('text-xl font-semibold tabular-nums', TILE_TONE_CLASSES[tile.tone])}>
+                {count}
+              </div>
+              <div className="text-[11px] font-medium text-zinc-300 mt-0.5">{tile.label}</div>
+              <div className="text-[10px] text-zinc-600 mt-0.5 leading-tight">{tile.hint}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* §Phase B — actionable attention list, only when something is wrong. */}
+      {attentionIds.length > 0 && (
+        <div
+          role="alert"
+          className="bg-red-500/10 border border-red-500/25 rounded-lg p-3 text-xs text-red-200 flex items-start gap-2"
+        >
+          <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>
+            <strong>
+              {attentionIds.length} integration{attentionIds.length === 1 ? '' : 's'} need
+              {attentionIds.length === 1 ? 's' : ''} attention:
+            </strong>{' '}
+            {attentionIds.map((id) => INTEGRATION_REGISTRY[id].name).join(', ')}. Select{' '}
+            <em>Needs attention</em> above to see the recorded cause, then run a health check
+            or retry the connection on each card.
+          </span>
+        </div>
+      )}
+
+      {/* §Phase B — find one provider in an 18-card control plane. */}
+      <div className="flex flex-wrap items-end gap-3">
+        <Input
+          label="Search integrations"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Name, capability or category"
+          className="w-full sm:w-80"
+        />
+        <div className="flex items-center gap-2 pb-2">
+          <Search className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
+          <span role="status" className="text-[11px] text-zinc-500">
+            {visibleIds.length} of {INTEGRATION_ORDER.length} providers shown
+            {filter !== 'all' &&
+              ` · ${filter === 'attention' ? 'needs attention' : INTEGRATION_MODE_LABELS[filter]}`}
+          </span>
+          {(filter !== 'all' || query.trim() !== '') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[11px]"
+              onClick={() => {
+                setFilter('all');
+                setQuery('');
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Provider list */}
+      {visibleIds.length === 0 ? (
+        <Card className="p-2 bg-ink-850 border-white/[0.06]">
+          <EmptyState
+            title="No integrations match this view"
+            description="Clear the filters to see every registered provider again. The Hub never hides an integration — a provider appears here as soon as it is registered."
+            action={
+              <Button
+                variant="ghost"
+                className="text-xs mt-2"
+                onClick={() => {
+                  setFilter('all');
+                  setQuery('');
+                }}
+              >
+                Clear filters
+              </Button>
+            }
+          />
+        </Card>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {INTEGRATION_ORDER.map((id) => {
+        {rows.map((row) => {
+          if (row.kind === 'heading') {
+            return (
+              <div key={`heading-${row.category}`} className="col-span-full mt-2 first:mt-0">
+                <h2 className="text-sm font-semibold text-white tracking-tight">
+                  {INTEGRATION_CATEGORY_LABELS[row.category]}
+                </h2>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  {CATEGORY_DESCRIPTIONS[row.category] ?? ''} · {row.count} provider
+                  {row.count === 1 ? '' : 's'}
+                </p>
+              </div>
+            );
+          }
+          const id = row.id;
           const def = INTEGRATION_REGISTRY[id];
           const state = integrations[id];
           const connected = state.status === 'connected';
           const mode = modes[id];
           return (
             <Card key={id} className="p-5 bg-ink-850 border-white/[0.06]">
-              <div className="flex items-start justify-between gap-3 mb-3">
+              <div data-mode={mode} data-connection={state.status} className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-start justify-between w-full">
                   <h3 className="text-sm font-semibold text-white">{def.name}</h3>
                   <div className="flex flex-col items-end gap-1.5">
@@ -615,6 +847,18 @@ export function IntegrationsPanel() {
               {state.error && (
                 <div className="mb-3 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 text-[11px] text-red-300">
                   {state.error}
+                </div>
+              )}
+
+              {/* §Phase B — truthful developer-key hint. An env demo key is a
+                  developer shortcut that lets the LIVE test call run; it is NOT
+                  a verified connection and is never presented as one. */}
+              {hasLiveCredentialHint(id) && mode !== 'live' && !connected && (
+                <div className="mb-3 bg-white/[0.02] border border-white/[0.06] rounded-lg p-2.5 text-[10px] text-zinc-400 leading-relaxed">
+                  <strong className="text-zinc-300">Developer demo key present.</strong>{' '}
+                  This environment holds a value for {integrationMeta(id).demoKeyHint}, so
+                  the live test call can run for {def.name}. That is a developer shortcut,
+                  not a verified connection — complete the connect flow for a real status.
                 </div>
               )}
 
@@ -688,6 +932,7 @@ export function IntegrationsPanel() {
           );
         })}
       </div>
+      )}
 
       {wizardFor && (
         <ConnectWizard id={wizardFor} onClose={() => setWizardFor(null)} />

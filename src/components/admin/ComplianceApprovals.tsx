@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useBrands, useComplianceDocuments, useProducts } from '@/data/queries';
 import { setComplianceDocStatus, uploadComplianceDoc } from '@/data/api';
 import { generateUkcaDeclaration } from '@/lib/customsDocs';
@@ -14,8 +15,7 @@ export function ComplianceApprovals() {
   const [docs, setDocs] = useState<ComplianceDocument[]>(docsQuery.data?.data ?? []);
   useEffect(function() { if (docsQuery.data) setDocs(docsQuery.data.data); }, [docsQuery.data]);
   const [expandedBrandId, setExpandedBrandId] = useState<string | null>(null);
-  const [docsVersion, setDocsVersion] = useState(0);
-  void docsVersion;
+  const qc = useQueryClient();
   const [previewId, setPreviewId] = useState<string | null>(null);
   const reviewer = 'Tadii';
   const preview = docs.find(function(d) { return d.id === previewId; }) ?? null;
@@ -30,6 +30,9 @@ export function ComplianceApprovals() {
   function act(id: string, status: ComplianceDocument['status']) {
     setComplianceDocStatus(id, status, reviewer);
     setDocs(function(prev) { return prev.map(function(d) { return d.id === id ? { ...d, status: status, reviewedBy: reviewer } : d; }); });
+    // §Phase A — keep the React Query cache truthful so a revisit inside the
+    // 30s stale window cannot show the pre-review status.
+    void qc.invalidateQueries({ queryKey: ['compliance-documents'] });
     setPreviewId(null);
   }
   const brandMap = new Map<string, ComplianceDocument[]>();
@@ -52,7 +55,7 @@ export function ComplianceApprovals() {
           </button>
           {isExpanded && (<div className="border-t border-white/[0.06] divide-y divide-white/[0.04]">{brandDocs.map(function(d) { return (<div key={d.id} className="flex items-center justify-between px-4 py-2.5">
             <div className="flex items-center gap-2"><span className="text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</span><Badge className={cn('text-[9px]', d.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : d.status === 'missing' ? 'bg-red-500/15 text-red-300' : 'bg-amber-500/15 text-amber-300')}>{d.status.replace(/_/g, ' ')}</Badge></div>
-            <div className="flex items-center gap-1"><Button variant="ghost" className="text-[10px]" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-[10px] text-emerald-300" onClick={function() { act(d.id, 'approved'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-[10px] text-red-300" onClick={function() { act(d.id, 'missing'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-[10px] text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); setDocsVersion(function(v) { return v + 1; }); }}>Upload</Button></div>
+            <div className="flex items-center gap-1"><Button variant="ghost" className="text-[10px]" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-[10px] text-emerald-300" onClick={function() { act(d.id, 'approved'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-[10px] text-red-300" onClick={function() { act(d.id, 'missing'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-[10px] text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
           </div>);})}<p className="text-[8px] text-zinc-700 px-4 py-1 text-right">Actions attributed as admin on behalf of brand</p></div>)}
         </div>);
       })}</div>

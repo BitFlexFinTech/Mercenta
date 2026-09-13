@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
@@ -232,14 +233,21 @@ function ComplianceUploadCard({
   const requiredTypes = category ? getRequiredDocumentsForCategory(category) : REQUIRED_DOCUMENT_TYPES;
   const gate = evaluateComplianceGate(brandDocs, category, hasSignedAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted);
   const [uploaded, setUploaded] = useState<string | null>(null);
-  const [docVersion, setDocVersion] = useState(0);
-  void docVersion;
+  const qc = useQueryClient();
+  const { reviewGateDocument } = useApp();
 
   function handleUpload(type: string) {
     if (!brandId) return;
-    uploadComplianceDoc(brandId, type, 'brand');
+    // §Phase A — the write is canonical (demoStore + optional Supabase row). The
+    // returned doc id also exists in the in-session gate list, so the Product
+    // Catalog gate is moved to the SAME state this card reports.
+    const { docId } = uploadComplianceDoc(brandId, type, 'brand');
+    reviewGateDocument(docId, 'under_review');
+    // §Phase A — re-read the canonical docs so this card's own status badge
+    // reflects the write immediately. Previously the row stayed on its old
+    // status until a reload (the removed `docVersion` state was never read).
+    void qc.invalidateQueries({ queryKey: ['compliance-documents'] });
     setUploaded(type);
-    setDocVersion(function(v) { return v + 1; });
     setTimeout(function() { setUploaded(null); }, 3000);
   }
 

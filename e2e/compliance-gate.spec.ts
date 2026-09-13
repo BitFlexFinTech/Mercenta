@@ -89,4 +89,41 @@ test.describe('Compliance Gate', () => {
     const statusCell = page.locator('text=approved').or(page.locator('text=missing'));
     await expect(statusCell.first()).toBeVisible({ timeout: 6000 });
   });
+
+  /**
+   * §Phase A — ComplianceUploadCard completion. The card's Upload action is a
+   * canonical write (demoStore + optional Supabase row). Before the fix the
+   * component bumped a dead `docVersion` counter and never re-read the docs, so
+   * the row's own status badge stayed on its pre-upload value (the user saw
+   * "Document uploaded and marked for review." next to a stale badge).
+   *
+   * Reed & Oak Kitchen Co (brand-reedkitchen) is the 0/5 scenario tenant; its
+   * brand_registry_confirmation document is present with status `missing`.
+   */
+  test('5. brand document Upload reflects immediately (no reload, no approval)', async ({ page }) => {
+    await loginAs(page, 'Reed & Oak Kitchen Co', 1100);
+    const nav = page.locator('nav[aria-label="Primary"]');
+    await nav.getByText('UK Compliance').first().click();
+    await page.waitForTimeout(900);
+
+    // Row = the span holding the doc label → its parent → the row container.
+    const row = page
+      .getByText('brand registry confirmation', { exact: true })
+      .first()
+      .locator('..')
+      .locator('..');
+    await expect(row.getByText('missing', { exact: true }).first()).toBeVisible({ timeout: 6000 });
+
+    await row.getByRole('button', { name: 'Upload' }).first().click();
+
+    // 1. The row's OWN badge must move to under_review without a reload.
+    await expect(row.getByText('under review', { exact: true }).first()).toBeVisible({ timeout: 6000 });
+    await expect(row.getByText('missing', { exact: true })).not.toBeVisible({ timeout: 2000 });
+    // 2. The confirmation is shown.
+    await expect(page.locator('text=Document uploaded and marked for review.').first()).toBeVisible({ timeout: 3000 });
+    // 3. Honest state: an upload is NOT an approval — the gate still blocks with
+    //    the same number of non-approved documents (missing → under_review).
+    await expect(page.locator('text=Compliance gate not yet cleared').first()).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=5 item(s) remain.').first()).toBeVisible({ timeout: 3000 });
+  });
 });
