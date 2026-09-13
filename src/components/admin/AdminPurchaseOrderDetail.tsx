@@ -10,9 +10,26 @@ import {
   deductionStatusPresentation,
 } from '@/lib/statusPresentation';
 import { cn } from '@/utils/cn';
-import type { PurchaseOrderLineItem } from '@/types';
+import type { PurchaseOrder, PurchaseOrderLineItem } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
 import { AlertTriangle, CheckCircle2, X, Truck, Gavel, History } from 'lucide-react';
+import { carrierOptionsForLane, selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
+
+/**
+ * §Canonical model §11 — the on-behalf ASN offers only Mercenta carrier
+ * accounts (rule-driven), plus Amazon-arranged freight on collect POs. The
+ * routing rule itself is centralised in `src/lib/shipping/carrierRouting.ts`.
+ */
+function carrierOptionsForPO(po: PurchaseOrder) {
+  const decision = selectCarrierForShipment({});
+  const options: { value: string; label: string }[] = carrierOptionsForLane(decision.lane).map(
+    (o) => ({ value: o.value, label: o.label })
+  );
+  if (po.freightTerm === 'collect') {
+    options.push({ value: 'amazon_partner', label: 'Partnered carrier (Amazon-arranged freight)' });
+  }
+  return options;
+}
 
 interface Props {
   poId: string;
@@ -251,9 +268,9 @@ function beginOnBehalfAsn() {
                   <div className="flex flex-wrap gap-2 mb-2">
                     <select value={asnCarrier} onChange={(e) => setAsnCarrier(e.target.value)}
                       className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white">
-                      <option value="dhl">DHL</option>
-                      <option value="fedex">FedEx</option>
-                      <option value="bak">BAK Logistics</option>
+                      {carrierOptionsForPO(po).map((c) => (
+                        <option key={c.value} value={c.value}>{c.label}</option>
+                      ))}
                     </select>
                     <input type="date" value={asnShipDate} onChange={(e) => setAsnShipDate(e.target.value)}
                       className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white" />

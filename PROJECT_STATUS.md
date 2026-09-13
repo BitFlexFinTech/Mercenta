@@ -1,6 +1,73 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-13 (**Phase E2E — deterministic investor-demo lifecycle BUILT + VERIFIED**)
+> Last updated: 2026-09-13 (**Canonical-model session — business model reconciled; §11 shipping routing + §12 shipping commercial model + §15 case review gate BUILT + VERIFIED**)
+>
+> **CANONICAL MODEL SESSION (2026-09-13, seventh session) — RECONCILIATION + M3/M5 BUILT.**
+>
+> **① CANONICAL DOC.** NEW `docs/MERCENTA_BUSINESS_MODEL.md` is now the single
+> authoritative statement of the operating business (proxy/distribution model,
+> hard compliance gate, PO routing, PO-gated shipping, cases, deductions,
+> money/VAT/Xero/payout, automation + admin override, providers, testing
+> intent). `README.md` rebuilt from a 3-line stub into a real index;
+> `docs/INTEGRATIONS.md` gained §10; `PRODUCTION_READINESS.md` records the new
+> prerequisites. Historical consolidation documents were left intact.
+>
+> **② §11 CARRIER ROUTING — CENTRALISED.** NEW `src/config/shipping.ts` +
+> `src/lib/shipping/carrierRouting.ts`: **international → DHL, UK domestic →
+> Palletline**, partnered carrier permitted **only** on Freight Collect. Removed
+> the arbitrary carrier lists from BOTH ASN surfaces (brand `BrandPurchaseOrders`,
+> admin `AdminPurchaseOrderDetail`) — they now read the rule from the module.
+> `createShipmentForPO(poId, asn, actorStaffId?, actingBrandId?)` gained a real
+> **tenant guard** (a brand can only derive a shipment from its OWN eligible PO)
+> and enforces the canonical carrier rule (fedex/bak are refused).
+>
+> **③ §12 SHIPPING COMMERCIAL MODEL — BUILT.** NEW
+> `computeShippingCommercials()` in `src/lib/shipping/shippingCalculator.ts`:
+> carrier list cost → negotiated discount → **carrier invoice cost** → mark-up +
+> surcharge + handling → brand charge → VAT (**charged / recoverable / payable**)
+> → gross shipping margin → net Mercenta revenue. Carrier cost and brand charge
+> are BOTH retained (the old code had a single markup and no carrier-invoice
+> side). All terms are `placeholder: true` in `src/config/shipping.ts`; **no
+> hardcoded 90%** — asserted by the validator.
+>
+> **④ §15 CASES — ADMIN REVIEW BEFORE CHANNEL ESCALATION.** Canonical case
+> workflow added to the EXISTING `ticketStore` (no second case system):
+> `createCase` → `beginCaseReview` → `reviewCase(approve|request_info|reject)` →
+> `escalateCaseToProvider` → `recordProviderCaseResponse` → `resolveCase` /
+> `closeCase`, plus brand-scoped and operator read models. NEW fail-closed seam
+> `src/lib/helpdesk/amazonCaseClient.ts` (`MockAmazonCaseClient` deterministic +
+> idempotent + zero network; `UnavailableAmazonCaseClient` for every other mode —
+> never simulated). Ticket type extended additively (escalation state, related
+> PO/shipment/deduction/payment/compliance, admin review, provider case +
+> response, resolution). UI: "Brand cases — Mercenta review queue" panel in
+> Admin → Helpdesk with Approve / Request info / Reject / Escalate.
+>
+> **⑤ REGISTRY.** `palletline` added to the canonical provider registry (19
+> entries) with `defaultMode: 'available'` — honest, because no Palletline
+> adapter exists yet (the fail-closed gate refuses a simulated Palletline
+> provider operation).
+>
+> **⑥ NEW VALIDATOR.** `scripts/validate-canonical-model.mjs` → **34/34 PASS**.
+>
+> **⑦ GATES.** typecheck **0** · eslint **0** · build **✓** · integrity audit
+> **61 / 0** · wording **181 files / 0 violations** · canonical-model **34/34** ·
+> investor-demo validator **PASS** · targeted Playwright **31 passed / 1 failed**
+> (the failure is the **pre-existing** `investor-demo` t4 — it fails identically
+> on the stashed pre-change tree, confirmed with `git stash`).
+>
+> **⑧ REMAINING (honest).** The full M-series is NOT complete: **M2** document
+> verification record/providers (expiry/versioning/superseded states, automated
+> vs manual interchangeable verification) is NOT built; **M6** finance
+> (payment→PO reconciliation, Xero posting identity, verified payout destination,
+> automated brand payout from a reconciled payment) is NOT built; **M7** the
+> investor demo was NOT extended with the new stages (still 22); **M8** full
+> repository-wide documentation sweep is partial; **M4** PO automation was
+> verified as already canonical (no change needed). Full Playwright suite was NOT
+> run end-to-end this session (targeted specs only).
+>
+> **NEXT:** M2 compliance verification engine → M6 finance/Xero/payout →
+> M7 investor-demo extension → M8 docs sweep → M9 full regression.
+
 >
 > **PHASE E2E (2026-09-13, sixth session) — DETERMINISTIC INVESTOR-DEMO PLATFORM COMPLETED.**
 >

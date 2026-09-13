@@ -913,6 +913,35 @@ export type TicketStatus = 'open' | 'pending' | 'resolved';
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TicketSource = 'live_chat' | 'email' | 'phone' | 'in_app';
 
+/**
+ * §Canonical model §15 — a brand case is NOT sent straight to Amazon. It is
+ * reviewed by Mercenta Admin first; only an approved, corrected case may be
+ * escalated to the provider.
+ */
+export type CaseEscalationState =
+  | 'brand_submitted'          // brand opened the case — awaiting Mercenta review
+  | 'under_mercenta_review'    // Mercenta Admin is reviewing / correcting it
+  | 'awaiting_brand_info'      // Admin requested more information from the brand
+  | 'approved_for_escalation'  // reviewed and correct — may be escalated
+  | 'escalated_to_provider'    // submitted to Amazon; awaiting its response
+  | 'provider_responded'       // Amazon has responded
+  | 'resolved'                 // Mercenta resolved it
+  | 'closed';                  // rejected / no further action
+
+export type CaseAdminDecision = 'approve_escalation' | 'request_info' | 'reject';
+
+/** What a case is about — drives linking + admin routing. */
+export type CaseCategory =
+  | 'po_question'
+  | 'shipment_issue'
+  | 'delivery_issue'
+  | 'deduction'
+  | 'payment_issue'
+  | 'compliance_question'
+  | 'catalogue_issue'
+  | 'amazon_related'
+  | 'general';
+
 export interface Ticket {
   id: string;
   brandId: string;
@@ -939,6 +968,53 @@ export interface Ticket {
   brandOnline?: boolean;
   /** Category/tag for routing. */
   category?: string;
+
+  /* ── §Canonical model §15 — canonical brand CASE fields (additive) ────── */
+
+  /** Human-readable case reference, e.g. "MC-0007". */
+  caseRef?: string;
+  /** Strongly-typed case category (falls back to the legacy `category`). */
+  caseCategory?: CaseCategory;
+  /** Where the case is in the Mercenta-review → escalation workflow. */
+  escalationState?: CaseEscalationState;
+  /** Related operational records — the case's real consequences. */
+  relatedPoNumber?: string;
+  relatedShipmentId?: string;
+  relatedDeductionId?: string;
+  relatedPaymentId?: string;
+  relatedComplianceDocId?: string;
+  /** Mercenta Admin owner (distinct from the general assigned staff). */
+  adminOwnerStaffId?: string;
+  /** Mercenta's review decision (recorded, never silently overwritten). */
+  adminReview?: {
+    reviewedByStaffId: string;
+    reviewedAt: string;
+    decision: CaseAdminDecision;
+    note?: string;
+  };
+  /** The provider (Amazon) case, once escalated. Idempotency key is retained. */
+  amazonCase?: {
+    referenceId: string;
+    openedAt: string;
+    mode: 'simulation' | 'live';
+    simulated: boolean;
+    /** The idempotency key used — a retry reuses the same provider case. */
+    requestKey: string;
+  };
+  /** The provider's response (recorded verbatim for the brand to see). */
+  providerResponse?: {
+    respondedAt: string;
+    outcome: 'accepted' | 'rejected' | 'info_required' | 'closed';
+    response: string;
+  };
+  /** Mercenta's resolution. */
+  resolution?: {
+    resolvedByStaffId: string;
+    resolvedAt: string;
+    note: string;
+  };
+  /** Last mutation timestamp. */
+  updatedAt?: string;
 }
 
 export interface HelpdeskMetrics {
@@ -1224,6 +1300,65 @@ export interface CarrierMarkupConfig {
   active: boolean;
   /** Label for admin UI. */
   label: string;
+}
+
+/* ── §Canonical model §11/§12 — shipping lane routing + commercial model ── */
+
+/** Whether a shipment moves internationally or within the UK. */
+export type ShippingLane = 'international' | 'uk_domestic';
+
+/** The canonical carrier decision for a shipment (rule-driven, auditable). */
+export interface CarrierRouteDecision {
+  lane: ShippingLane;
+  /** The Mercenta carrier account that operates this lane. */
+  carrier: CarrierId;
+  /** Why this carrier was chosen (human-readable, auditable). */
+  reason: string;
+}
+
+/**
+ * §12 — the full shipping commercial breakdown. Both sides of the transaction
+ * are preserved: what Mercenta pays the carrier AND what the brand is charged.
+ */
+export interface ShippingCommercialBreakdown {
+  carrier: CarrierId;
+  lane: ShippingLane;
+  /** Carrier list cost before Mercenta's negotiated discount. */
+  carrierListCost: number;
+  /** Negotiated discount fraction Mercenta has with the carrier. */
+  negotiatedDiscountPct: number;
+  /** The negotiated discount value. */
+  negotiatedDiscountAmount: number;
+  /** What Mercenta ACTUALLY pays the carrier (list − discount). */
+  carrierInvoiceCost: number;
+  /** Mercenta mark-up applied to the carrier invoice cost. */
+  markUpAmount: number;
+  /** Fuel/surcharge applied. */
+  surchargeAmount: number;
+  /** Fixed handling fee. */
+  handlingFee: number;
+  /** Amount charged to the brand, excluding VAT. */
+  brandAmountCharged: number;
+  /** VAT treatment actually applied (never silently assumed). */
+  vatTreatment: 'standard' | 'zero_rated' | 'exempt' | 'not_applicable';
+  vatRate: number;
+  /** VAT charged to the brand on the shipping sale (output VAT). */
+  vatAmount: number;
+  /** VAT Mercenta can reclaim on the carrier invoice (input VAT). */
+  inputVatRecoverable: number;
+  /** Net VAT Mercenta owes HMRC (output − input). */
+  vatPayableToHmrc: number;
+  /** Total the brand pays (brandAmountCharged + VAT). */
+  brandAmountChargedIncVat: number;
+  /** Gross shipping margin = brand charge (ex-VAT) − carrier invoice cost. */
+  grossShippingMargin: number;
+  /** Margin retained after VAT payable to HMRC. */
+  netMercentaRevenue: number;
+  currency: 'GBP';
+  /** True while the underlying carrier cost comes from the mock rate card. */
+  mockRate: boolean;
+  /** True while the commercial terms are placeholders pending sign-off. */
+  placeholderTerms: boolean;
 }
 
 /* ── §Stage-25 — Brand CRM depth (timeline / tasks / notes / segmentation) ── */

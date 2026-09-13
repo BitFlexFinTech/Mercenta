@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 13, 2026 (Phase E2E — deterministic investor-demo lifecycle built + verified; brand dispute-resolution defect fixed)
+Last updated: September 13, 2026 (Canonical-model session — business model reconciled; canonical shipping routing + commercial model, and Mercenta-reviewed case escalation BUILT + VERIFIED)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -21,6 +21,44 @@ Cline's output back. AI confirms, gives next prompt.
 8. If AI makes a mega-prompt, I say: "No. One task. Short prompt."
 
 ## WHAT'S BUILT:
+### Canonical-model session (13 Sep 2026) — business model reconciled + 2 gaps built
+- **`docs/MERCENTA_BUSINESS_MODEL.md` is now CANONICAL** — the single authoritative
+  statement of the proxy/distribution model (retail channel → Mercenta → brand and
+  back), the hard compliance gate, PO routing, PO-gated shipping, cases, deductions,
+  money/VAT/Xero/payout, automation + admin override, providers and testing intent.
+  `README.md` rebuilt into a real index; `docs/INTEGRATIONS.md` §10 and
+  `PRODUCTION_READINESS.md` updated for the new/changed provider facts.
+- **§11 carrier routing, centralised** — NEW `src/config/shipping.ts` +
+  `src/lib/shipping/carrierRouting.ts`: international → **DHL**, UK domestic →
+  **Palletline**, partnered carrier **only** on Freight Collect. The brand ASN form
+  and the admin on-behalf ASN form now BOTH read the rule from this module (their
+  local carrier lists are gone). `createShipmentForPO` now enforces the rule AND a
+  tenant guard (a brand can only derive a shipment from its OWN eligible PO).
+- **§12 shipping commercial model** — NEW `computeShippingCommercials()` in
+  `src/lib/shipping/shippingCalculator.ts`: carrier list cost → negotiated discount →
+  actual carrier invoice cost → mark-up + surcharge + handling → brand charge →
+  VAT (charged / recoverable / payable) → shipping margin → net Mercenta revenue.
+  Both sides of the transaction are preserved; all terms are clearly-marked
+  placeholders in `src/config/shipping.ts`; nothing hardcodes a 90% mark-up.
+- **§15 case review before escalation** — canonical case workflow in
+  `src/lib/helpdesk/ticketStore.ts` (`createCase` → `beginCaseReview` → `reviewCase`
+  → `escalateCaseToProvider` → `recordProviderCaseResponse` → `resolveCase`/`closeCase`)
+  with tenant-scoped read models. A brand case can NEVER reach the retail channel
+  without an explicit Mercenta review decision. NEW fail-closed seam
+  `src/lib/helpdesk/amazonCaseClient.ts` (Mock = deterministic, no network,
+  idempotent; Unknown/other = truthful refusal, never simulated). Exposed in Admin →
+  Helpdesk as a "Brand cases — Mercenta review queue" panel.
+- **Registry:** `palletline` added to the canonical provider registry
+  (`defaultMode: 'available'` — no adapter yet, so it is honestly NOT simulation).
+- **NEW validator:** `scripts/validate-canonical-model.mjs` → **34/34 PASS**
+  (routing, commercial maths, PO-gated/tenant-scoped shipment, case review gate,
+  idempotency, fail-closed provider, failure/recovery, tenant scoping, audit).
+- **Gates (this session):** typecheck 0 · eslint 0 · build ✓ · integrity **61/0** ·
+  wording **181 files / 0 violations** · canonical-model **34/34** · investor-demo
+  validator PASS · targeted Playwright **31 passed / 1 failed** where the single
+  failure (`investor-demo` t4) is **PRE-EXISTING** — it fails identically on the
+  stashed pre-change tree (verified with `git stash`).
+
 - React/TS/Vite frontend (161 files)
 - Supabase (142.93.46.155) — 14 tables + RLS
 - 20 Rakazo bots (24.144.86.50) — all demo mode
@@ -254,6 +292,35 @@ Cline's output back. AI confirms, gives next prompt.
   **full browser suite 209 passed / 0 failed / 3 skipped** (was 208/0/4).
 
 ## WHAT'S LEFT (IN ORDER):
+### Canonical-model session (13 Sep) — WHAT REMAINS (honest)
+The M-series is NOT complete. Done: **M1** (business-model reconciliation — the
+canonical doc + the code/doc contradictions in scope were fixed), **M3** (case
+review before channel escalation), **M5** (PO-gated shipping, centralised carrier
+routing, shipping commercial model). Verified-as-already-canonical: **M4** (PO
+routing/ack/idempotency needed no change).
+- **M2 — compliance verification engine (NOT built).** The compliance gate and
+  category-aware requirements already exist, but the **document verification
+  record** (source / method / timestamp / verifier / result / evidence / failure
+  reason), the **`rejected` + `superseded` document states**, versioning, and the
+  interchangeable **automated vs manual verification providers** are NOT built.
+- **M6 — finance / Xero / payout (NOT built).** Channel payment → PO
+  reconciliation, deterministic Xero accounting identity, verified brand payout
+  destination, and automated brand payout derived from a **reconciled** payment.
+- **M7 — investor demo NOT extended.** Still the 22 canonical stages; the new
+  shipping-routing, upfront-shipping-payment and case-escalation steps are not
+  yet demo stages.
+- **M8 — documentation sweep is PARTIAL.** Canonical doc + README + INTEGRATIONS
+  §10 + PRODUCTION_READINESS + PROJECT_STATUS/HANDOFF updated; the remaining
+  docs/*.md history and some E2E descriptions were not individually re-read.
+- **M9 — full Playwright suite NOT run** this session (targeted specs only: 31
+  passed / 1 pre-existing failure).
+- **Pre-existing failure to fix separately:** `e2e/investor-demo.spec.ts` t4
+  ("brand-pinned actors are refused cross-tenant … IN THE DOMAIN") fails on
+  `proof.allStagesOk` — the in-page second run of the demo in the same browser
+  session reports fewer than 22 ok stages. It fails identically **before** this
+  session's changes, so it is not a regression; it needs its own debugging pass.
+
+
 NOTE: Development follows the MASTER CONSOLIDATION ROADMAP in
 PROJECT_STATUS.md — CORE PRODUCT FIRST, RAKAZO LAST. Rakazo is deliberately
 the FINAL phase. The older list below is superseded by that roadmap.

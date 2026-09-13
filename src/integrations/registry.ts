@@ -228,6 +228,15 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     fields: [],
     testCallDescription: 'Shipment status query against the connected DHL account',
   },
+  palletline: {
+    id: 'palletline',
+    name: 'Palletline',
+    description:
+      'UK-domestic palletised-freight carrier — Mercenta\'s Palletline account, used for UK domestic shipments by the canonical routing rule. No live adapter is wired yet: shipping economics are computed by the domain commercial model and carrier booking awaits production credentials.',
+    authMethod: 'api_key',
+    fields: [],
+    testCallDescription: 'Palletline consignment query against the connected Mercenta account',
+  },
   xero: {
     id: 'xero',
     name: 'Xero',
@@ -288,6 +297,7 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   // §Priority-1 — provider control-plane coverage: logistics + compliance +
   // finance providers with authoritative simulation defaults.
   'dhl',
+  'palletline',
   'xero',
   'companies_house',
   'hmrc',
@@ -329,6 +339,10 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   // DHL waiting/simulation, Xero demo/simulation. Registered so every scenario
   // provider resolves authoritatively (never falls to UNKNOWN).
   dhl: { category: 'logistics', defaultMode: 'simulation' },
+  // §Canonical model §11 — no adapter wired yet, so this is honestly
+  // `available` (NOT simulation): the fail-closed gate will refuse a simulated
+  // Palletline provider operation until a mock/real adapter exists.
+  palletline: { category: 'logistics', defaultMode: 'available' },
   xero: { category: 'finance', defaultMode: 'simulation' },
   // §Priority-1 — compliance providers. No live credentials held today;
   // simulation is the authoritative documented state.

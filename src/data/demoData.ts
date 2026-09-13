@@ -156,6 +156,13 @@ export interface DemoBrandRow {
   track: FulfillmentTrack;
   contractStatus: string;
   profile: { businessName: string };
+  /**
+   * §Canonical model §11 — the brand's nation, used by the shipping-lane
+   * routing rule (UK domestic → Palletline, international → DHL). Optional so
+   * a legacy/Supabase row without the column still loads; an unknown nation is
+   * routed as international (the conservative default).
+   */
+  nation?: string;
 }
 
 /* ── Generated catalogs (2 SKUs per brand, realistic placeholder images) ── */

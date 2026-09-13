@@ -11,6 +11,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { evaluateComplianceGate } from '@/lib/compliance';
+import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
 import { createSPApiClientForConnection } from '@/lib/spapi';
 import { spApiConnectionCredentials } from '@/integrations/connections';
@@ -163,6 +164,7 @@ export async function fetchBrands(): Promise<{ data: DemoBrandRow[]; source: Dat
     track: (row.fulfillment_track as 'direct_fulfillment' | 'financed') ?? 'financed',
     contractStatus: (row.contract_status as string) ?? (row.lifecycle_stage as string) ?? 'draft',
     profile: { businessName: (row.business_name as string) ?? (row.name as string) ?? '' },
+    nation: (row.nation as string) ?? (row.country as string) ?? undefined,
   }));
   return { data: mapped, source: 'supabase' };
 }
@@ -953,14 +955,37 @@ export function createShipmentForPO(
   poId: string,
   asn: AsnDetail,
   /** §Batch-0.5 — when set, attributed as 'admin on behalf of brand'. Omit for brand self-action. */
-  actorStaffId?: string
+  actorStaffId?: string,
+  /**
+   * §Canonical model §10/§8 — the brand tenant the caller is acting for. When
+   * provided (brand self-service), the PO MUST belong to it: a brand can never
+   * create a shipment against another tenant's PO. Admin (omitting it) retains
+   * the documented cross-tenant override, which is still attribution-stamped.
+   */
+  actingBrandId?: string
 ): { ok: boolean; shipmentId?: string; warnings: string[]; deductionId?: string; error?: string } {
   const warnings: string[] = [];
   const po = demoPurchaseOrders.find((p) => p.id === poId);
   if (!po) return { ok: false, warnings, error: `Unknown purchase order: ${poId}` };
-  if (!['dhl', 'fedex', 'bak', 'palletline', 'amazon_partner'].includes(asn.carrier)) {
-    return { ok: false, warnings, error: `Unknown carrier: ${asn.carrier}` };
+  if (actingBrandId && po.brandId !== actingBrandId) {
+    return {
+      ok: false,
+      warnings,
+      error: `Purchase order ${po.poNumber} does not belong to this brand — a shipment can only be derived from your own eligible PO.`,
+    };
   }
+
+  // §11 — carrier is decided by the canonical routing rule, not by free choice.
+  const brand = demoBrands.find((b) => b.id === po.brandId);
+  const carrierCheck = validateCarrierForShipment({
+    carrier: asn.carrier,
+    brandNation: brand?.nation,
+    freightTerm: po.freightTerm,
+  });
+  if (!carrierCheck.ok) {
+    return { ok: false, warnings, error: carrierCheck.error };
+  }
+
   if (po.status !== 'accepted' && po.status !== 'ready_to_fulfil') {
     return { ok: false, warnings, error: `PO ${po.poNumber} is not in an accepted state.` };
   }
@@ -972,7 +997,6 @@ export function createShipmentForPO(
   }
 
   // Lot + expiry mandatory for perishable/regulated categories.
-  const brand = demoBrands.find((b) => b.id === po.brandId);
   if (brand && LOT_REQUIRED_CATEGORIES.includes(brand.category)) {
     if (!asn.lotNumber || !asn.expiryDate) {
       return {

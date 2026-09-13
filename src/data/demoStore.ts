@@ -46,6 +46,7 @@ export const demoBrands: DemoBrandRow[] = ALL_DEMO_BRANDS.map((b) => ({
   track: b.track,
   contractStatus: b.contractStatus,
   profile: { businessName: b.name },
+  nation: b.nation,
 }));
 
 /** Products joined to their owning brand (Global Catalog Manager uses this). */

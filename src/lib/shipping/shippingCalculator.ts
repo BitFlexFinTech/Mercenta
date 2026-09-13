@@ -10,8 +10,16 @@
  * parcel/pallet pricing. DHL is the primary parcel carrier; Palletline is
  * the dedicated palletised-freight option (Amazon IPCP).
  */
-import type { CarrierId, ShippingEstimate, ShippingEstimateInput, ShippingMargin } from '@/types';
+import type {
+  CarrierId,
+  ShippingCommercialBreakdown,
+  ShippingEstimate,
+  ShippingEstimateInput,
+  ShippingLane,
+  ShippingMargin,
+} from '@/types';
 import { demoCarrierMarkup } from '@/data/demoStore';
+import { SHIPPING_COMMERCIAL_TERMS } from '@/config/shipping';
 
 /* ── Mock carrier rate tables ─────────────────────────────────────── */
 
@@ -131,5 +139,83 @@ export function buildShippingMargin(
     carrierCostPrice,
     brandBilledPrice,
     createdAt: new Date().toISOString(),
+  };
+}
+
+/* ── §12 Canonical shipping commercial model ──────────────────────────── */
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * Compute the FULL shipping commercial breakdown for a lane/carrier and its
+ * carrier LIST cost.
+ *
+ * This is the canonical model: it keeps BOTH sides of the transaction — the
+ * carrier list cost, the negotiated discount, what Mercenta actually pays the
+ * carrier, the brand-facing charge, fees/surcharge and the VAT treatment —
+ * and derives the shipping margin. It NEVER overwrites the carrier cost with
+ * the customer price.
+ *
+ * The terms live in `src/config/shipping.ts` (per-carrier negotiated discount,
+ * mark-up, fees, VAT) and are all placeholder-configurable pending sign-off.
+ * Nothing here assumes a fixed mark-up such as "90%".
+ */
+export function computeShippingCommercials(input: {
+  lane: ShippingLane;
+  carrier: CarrierId;
+  /** Carrier list cost (pre-discount). Use computeShippingEstimate().baseCarrierCost. */
+  carrierListCost: number;
+  /** Whether the carrier cost is a mock rate (defaults to true in simulation). */
+  mockRate?: boolean;
+}): ShippingCommercialBreakdown {
+  const terms = SHIPPING_COMMERCIAL_TERMS;
+  const { lane, carrier } = input;
+
+  const carrierListCost = round2(Math.max(0, input.carrierListCost));
+  const negotiatedDiscountPct = terms.negotiatedDiscountPct[carrier] ?? 0;
+  const negotiatedDiscountAmount = round2(carrierListCost * negotiatedDiscountPct);
+  const carrierInvoiceCost = round2(carrierListCost - negotiatedDiscountAmount);
+
+  const markUpAmount = round2(carrierInvoiceCost * (terms.markUpPct[carrier] ?? 0));
+  const surchargeAmount = round2(carrierInvoiceCost * terms.surchargePct);
+  const handlingFee = round2(terms.handlingFeeGbp);
+
+  const brandAmountCharged = round2(
+    carrierInvoiceCost + markUpAmount + surchargeAmount + handlingFee
+  );
+
+  const vatTreatment = terms.vatTreatment;
+  const vatRate = vatTreatment === 'standard' ? terms.vatRate : 0;
+  const vatAmount = round2(brandAmountCharged * vatRate);
+  const brandAmountChargedIncVat = round2(brandAmountCharged + vatAmount);
+
+  const inputVatRecoverable = round2(carrierInvoiceCost * vatRate);
+  const vatPayableToHmrc = round2(vatAmount - inputVatRecoverable);
+
+  const grossShippingMargin = round2(brandAmountCharged - carrierInvoiceCost);
+  const netMercentaRevenue = round2(grossShippingMargin - vatPayableToHmrc);
+
+  return {
+    carrier,
+    lane,
+    carrierListCost,
+    negotiatedDiscountPct,
+    negotiatedDiscountAmount,
+    carrierInvoiceCost,
+    markUpAmount,
+    surchargeAmount,
+    handlingFee,
+    brandAmountCharged,
+    vatTreatment,
+    vatRate,
+    vatAmount,
+    inputVatRecoverable,
+    vatPayableToHmrc,
+    brandAmountChargedIncVat,
+    grossShippingMargin,
+    netMercentaRevenue,
+    currency: 'GBP',
+    mockRate: input.mockRate ?? true,
+    placeholderTerms: terms.placeholder,
   };
 }

@@ -23,14 +23,26 @@ import { RoutingRequestIndicator, RoutingRequestForm } from '@/components/shared
 import { downloadCsv } from '@/lib/csv';
 import { cn } from '@/utils/cn';
 import { CheckCircle2, MessageSquare, Phone, Truck } from 'lucide-react';
+import { MERCENTA_CARRIER_LABELS } from '@/config/shipping';
+import { carrierOptionsForLane, selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
 
-const SHIP_CARRIERS: { value: string; label: string }[] = [
-  { value: 'dhl', label: 'DHL Express (parcel/general)' },
-  { value: 'fedex', label: 'FedEx' },
-  { value: 'bak', label: 'BAK Logistics' },
-  { value: 'palletline', label: 'Palletline (palletised freight)' },
-  { value: 'amazon_partner', label: 'Partnered carrier' },
-];
+/**
+ * §Canonical model §11 — a brand does NOT choose an arbitrary carrier. The
+ * carrier is decided by the canonical routing rule; the select only ever
+ * offers Mercenta carrier accounts (plus the Amazon-arranged partnered carrier
+ * on Freight Collect POs). The rule itself lives in
+ * `src/lib/shipping/carrierRouting.ts`, never here.
+ */
+function carrierOptionsForPO(po: PurchaseOrder, brandNation?: string) {
+  const decision = selectCarrierForShipment({ brandNation });
+  const options: { value: string; label: string }[] = carrierOptionsForLane(decision.lane).map(
+    (o) => ({ value: o.value, label: o.label })
+  );
+  if (po.freightTerm === 'collect') {
+    options.push({ value: 'amazon_partner', label: 'Partnered carrier (retail-channel-arranged freight)' });
+  }
+  return options;
+}
 
 /* §Phase D2 — PO status labels/tones now come from the canonical presentation
    layer (src/lib/statusPresentation.ts); the local STATUS_BADGE/STATUS_LABEL maps
@@ -54,7 +66,8 @@ export function BrandPurchaseOrders() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   const shipCarrierLabel = (v: string) =>
-    SHIP_CARRIERS.find((c) => c.value === v)?.label ?? v;
+    MERCENTA_CARRIER_LABELS[v as keyof typeof MERCENTA_CARRIER_LABELS] ??
+    (v === 'amazon_partner' ? 'Partnered carrier' : v);
 
   /* ── §Stage-24 — line-item acknowledgment state ── */
   const [ackingPO, setAckingPO] = useState<string | null>(null);
@@ -112,7 +125,8 @@ export function BrandPurchaseOrders() {
 
   function beginAsn(po: PurchaseOrder) {
     setAsnPO(po.id);
-    setAsnCarrier('dhl');
+    const nation = brands.find((b) => b.id === po.brandId)?.nation;
+    setAsnCarrier(selectCarrierForShipment({ brandNation: nation }).carrier);
     setAsnShipDate(new Date().toISOString().slice(0, 10));
     setAsnPro(`PRO-${po.poNumber}`);
     setAsnBol(`BOL-${po.poNumber}`);
@@ -148,7 +162,7 @@ export function BrandPurchaseOrders() {
       trailerNumber: asnTrailer || undefined,
       lotNumber: asnLot || undefined,
       expiryDate: asnExpiry || undefined,
-    });
+    }, undefined, tenantId ?? undefined);
     if (!result.ok) {
       setNotice(result.error ?? 'ASN submission failed.');
       return;
@@ -538,7 +552,7 @@ export function BrandPurchaseOrders() {
                     <label className="text-zinc-500">Carrier
                       <select value={asnCarrier} onChange={(e) => setAsnCarrier(e.target.value)}
                         className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white">
-                        {SHIP_CARRIERS.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+                        {carrierOptionsForPO(po, brands.find((b) => b.id === po.brandId)?.nation).map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
                       </select>
                     </label>
                     <label className="text-zinc-500">Ship date

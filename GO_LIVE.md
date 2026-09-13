@@ -69,8 +69,9 @@ Steps 1–4 are the repository gate: **do not deploy if any is red.**
    self-contained go-live item, and `scripts/validate-edge-functions.mjs` lists
    the current set explicitly (payouts-transfer, catalog-import + migration 0010
    RPC, discovery-directory, esign-envelope, send-email, instantly-reply-webhook,
-   migration 0011 pg_cron). Until a function is deployed the matching feature
-   stays in its honest simulation state — it never silently fakes success.
+   migration 0011 pg_cron, retail-channel-cases). Until a function is deployed the
+   matching feature stays in its honest simulation state — it never silently
+   fakes success.
 4. Set the function secrets at deploy time (`supabase secrets set ...`) — the
    Vault-backed `resolveToken` lookups read them per request.
 5. DNS: the production domain must point at the hosting target. Current DNS
@@ -91,6 +92,8 @@ entering a real credential. Enter only what is needed today:
 | E-Signature (DocuSign/PandaDoc) | contract flow | Integrations → E-Signature | needs `esign-envelope` deployed |
 | Hunter.io / OpenRouter / Instantly.ai | discovery + outreach | Integrations → respective cards | live test call already implemented |
 | DHL / Xero / Companies House / HMRC | logistics / accounting / compliance verification | their dedicated surfaces + cards | currently authoritative SIMULATION; enter credentials when accounts exist |
+| Palletline | UK-domestic palletised freight (Mercenta's Palletline account) | Integrations → Palletline | registry entry exists (`defaultMode: available`); an adapter following the DHL pattern is required before this becomes a live carrier booking |
+| Retail-channel case escalation | brand case → channel case | Integrations → Amazon Selling Partner API | needs the `retail-channel/cases` Edge Function deployed (§3); until then the seam refuses truthfully and never claims a case was created |
 
 **Do not** present an unconfigured provider as live: the Hub derives its mode
 from the connection state, and a sandbox connection is never treated as verified.

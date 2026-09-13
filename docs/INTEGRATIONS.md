@@ -160,4 +160,59 @@ PRODUCT_FAILURE · INTEGRATION_FAILURE · **SHIPMENT_PROGRESSION** (new) ·
 | Companies House | free-tier API key | Integrations → Companies House | EF `/functions/v1/companies-house` |
 | HMRC | MTD OAuth client id/secret + fraud headers | Integrations → HMRC | EF `/functions/v1/hmrc` |
 | Xero | client id/secret + tenant | Accounting panel / XERO_MODE | none (existing) |
-| Stripe | publishable + secret keys | Integrations → Stripe | none (existing) |
+
+## 10. Canonical-model reconciliation (13 Sep)
+
+Canonical statement: **`docs/MERCENTA_BUSINESS_MODEL.md`**. This section records
+the provider-relevant changes made to match it.
+
+### 10.1 Registry change — `palletline`
+
+`palletline` is now a canonical registry entry
+(`src/integrations/types.ts`, `src/integrations/registry.ts`) because the
+shipping routing rule (§11) uses **Mercenta's Palletline account** for UK
+domestic shipments. Registry count is now **19** (DHL + Palletline + Xero +
+Companies House + HMRC + the original set with Rocket.Chat removed).
+
+- `defaultMode: 'available'` — **NOT `simulation`**. There is no live *or*
+  mock Palletline adapter yet, so the provider is honestly "not configured" and
+  the fail-closed gate refuses a simulated Palletline provider operation.
+- The **shipping economics** for a Palletline lane are computed by the domain
+  (`src/lib/shipping/shippingCalculator.ts` → `computeShippingCommercials`)
+  from configurable terms — that is arithmetic, **not** a provider call, and is
+  never presented as a live carrier booking.
+
+### 10.2 Carrier routing is centralised (no UI duplication)
+
+`src/lib/shipping/carrierRouting.ts` + `src/config/shipping.ts` are the single
+source of truth:
+
+| Lane | Carrier | Mercenta account |
+|---|---|---|
+| International | DHL | DHL UK |
+| UK domestic | Palletline | Palletline |
+| Retail-channel-arranged (Freight Collect only) | partnered carrier | n/a — channel books it |
+
+The brand ASN form and the admin on-behalf ASN form **both** read their carrier
+options from this module; neither holds its own list any more.
+
+### 10.3 Case escalation seam
+
+`src/lib/helpdesk/amazonCaseClient.ts` is the provider seam for case
+escalation, following the same mock-first/fail-closed pattern as SP-API/DHL:
+
+| Mode | Client | Result |
+|---|---|---|
+| `simulation` (positively resolved) | `MockAmazonCaseClient` | deterministic `AMZ-CASE-MOCK-<hash>`, **no network**, idempotent per key |
+| `live` + credentials | `RealAmazonCaseClient` | POST `${EDGE_BASE}/retail-channel/cases` with `X-Secret-Ref` + `Idempotency-Key` |
+| anything else | `UnavailableAmazonCaseClient` | truthful error, **no case created**, retry-safe |
+
+Live activation requires the `retail-channel/cases` Edge Function (holds the
+secret; forwards the idempotency key) — see `PRODUCTION_READINESS.md`.
+
+### 10.4 Live activation (unchanged additions)
+
+| Provider | Live credentials | Where entered | Extra code needed |
+|---|---|---|---|
+| Palletline | Palletline account creds (API/FTP per agreement) | Integrations → Palletline | adapter following the DHL pattern; switch `defaultMode` when an adapter exists |
+| Retail-channel cases | none beyond SP-API creds | Integrations → Amazon SP-API | Edge Function `/functions/v1/retail-channel/cases` |

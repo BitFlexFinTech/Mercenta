@@ -19,6 +19,10 @@ export type IntegrationId =
   // authoritative (docs-verified current state: DHL waiting/simulation,
   // Xero demo/simulation). No longer implicit/unknown.
   | 'dhl'
+  // §Canonical model §11 — the UK-domestic Mercenta carrier account. Registered
+  // so its mode is authoritative (no adapter yet → `available`, never
+  // simulation-by-accident).
+  | 'palletline'
   | 'xero'
   // §Priority-1 — compliance providers registered so their mode is
   // authoritative and the safety gate can resolve them (never UNKNOWN).
@@ -199,6 +203,9 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   // simulation default. They are simulation-capable ONLY because current
   // repository state confirms DHL = waiting/simulation, Xero = demo/simulation.
   dhl: { status: 'disconnected', sandbox: false },
+  // §Canonical model §11 — registered so the routing rule's carrier resolves
+  // authoritatively. No live adapter yet: defaultMode is `available`.
+  palletline: { status: 'disconnected', sandbox: false },
   xero: { status: 'disconnected', sandbox: false },
   // §Priority-1 — compliance providers simulation-capable by docs-verified
   // current state (no live credentials held). Registered so the safety gate

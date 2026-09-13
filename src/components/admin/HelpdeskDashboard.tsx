@@ -6,8 +6,9 @@ import { logMessage } from '@/data/api';
 import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { Ticket, TicketStatus, TicketPriority } from '@/types';
-import { demoTickets, updateTicketStatus, assignTicket, setTicketPriority, markTicketSeen, computeHelpdeskMetrics, getTicketById, appendMessageToTicket } from '@/lib/helpdesk/ticketStore';
-import { Inbox, AlertTriangle, Clock, User, Send, Filter, Search, Bot, ArrowUpRight } from 'lucide-react';
+import { demoTickets, updateTicketStatus, assignTicket, setTicketPriority, markTicketSeen, computeHelpdeskMetrics, getTicketById, appendMessageToTicket, CASE_ESCALATION_LABELS, listCasesAwaitingReview, listAllCases, reviewCase, escalateCaseToProvider } from '@/lib/helpdesk/ticketStore';
+import { INTEGRATION_META } from '@/integrations/registry';
+import { Inbox, AlertTriangle, Clock, User, Send, Filter, Search, Bot, ArrowUpRight, ShieldCheck, ExternalLink } from 'lucide-react';
 const PB: Record<TicketPriority, string> = { urgent: 'bg-red-500/15 text-red-300', high: 'bg-amber-500/15 text-amber-300', medium: 'bg-blue-500/15 text-blue-300', low: 'bg-zinc-500/15 text-zinc-400' };
 const PI: Record<TicketPriority, typeof AlertTriangle> = { urgent: AlertTriangle, high: AlertTriangle, medium: Clock, low: Inbox };
 const SC: Record<TicketStatus, string> = { open: 'bg-emerald-500/15 text-emerald-300', pending: 'bg-amber-500/15 text-amber-300', resolved: 'bg-zinc-500/15 text-zinc-400' };
@@ -74,6 +75,25 @@ export function HelpdeskDashboard() {
   const aiSuggestion = useAiSug(selectedTicket?.brandId ?? '', ticketMessages.map((m: any) => m.body).join('\n'));
   const brandName = (id: string) => brands.find((b: any) => b.id === id)?.profile.businessName ?? id;
 
+  /* §Canonical model §15 — Mercenta case review + Amazon escalation. */
+  function handleCaseReview(id: string, decision: 'approve_escalation' | 'request_info' | 'reject') {
+    const res = reviewCase(
+      id,
+      actingStaff?.id ?? 'staff-001',
+      decision,
+      decision === 'request_info' ? 'Please attach the corrected documentation for this case.' : undefined
+    );
+    setReplyNote(res.ok ? 'Case review recorded.' : res.error ?? 'Review failed.');
+    bumpStore();
+  }
+
+  async function handleCaseEscalate(id: string) {
+    // Fail-closed: the app's OWN documented default mode for Amazon SP-API.
+    const res = await escalateCaseToProvider(id, actingStaff?.id ?? 'staff-001', INTEGRATION_META.amazon_sp_api.defaultMode);
+    setReplyNote(res.ok ? `Escalated to Amazon (${res.caseReferenceId}).` : res.error ?? 'Escalation failed.');
+    bumpStore();
+  }
+
   function handleSendReply() {
     if (!replyDraft.trim() || !selectedTicket) return;
     logMessage({ brandId: selectedTicket.brandId, channel: 'in_app', direction: 'outbound',
@@ -97,6 +117,75 @@ return (
           <p className="text-xs text-zinc-500 mt-0.5">{metrics.openCount} open, {metrics.pendingCount} pending, {metrics.unassignedCount} unassigned</p>
         </div>
       </div>
+      {/* §Canonical model §15 — brand cases require Mercenta review BEFORE any
+          escalation to Amazon. Nothing here sends a raw brand report to Amazon. */}
+      <Card className="p-3 space-y-2" data-state="helpdesk-cases-panel">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-brass-400" />
+          <h3 className="text-sm font-semibold text-white">Brand cases — Mercenta review queue</h3>
+          <span className="text-[11px] text-zinc-500">
+            {listCasesAwaitingReview().length} awaiting review · {listAllCases().length} total
+          </span>
+        </div>
+        <p className="text-[11px] text-zinc-500">
+          A brand case is never sent straight to Amazon. Mercenta reviews and corrects it first; only an
+          approved case may be escalated, where the integration is in simulation it is labelled as such.
+        </p>
+        <div className="space-y-1.5">
+          {listCasesAwaitingReview().length === 0 && (
+            <p className="text-[11px] text-zinc-600">No cases awaiting review.</p>
+          )}
+          {listCasesAwaitingReview().map((c) => (
+            <div key={c.id} className="flex flex-wrap items-center gap-2 border-t border-white/[0.05] pt-1.5">
+              <span className="text-[11px] font-mono text-brass-300">{c.caseRef ?? c.id}</span>
+              <span className="text-[11px] text-zinc-300 flex-1 min-w-[180px]">{c.subject}</span>
+              <span className="text-[10px] text-zinc-500">{brandName(c.brandId)}</span>
+              <span className="text-[10px] text-amber-300" data-state="case-state">
+                {c.escalationState ? CASE_ESCALATION_LABELS[c.escalationState] : 'Unreviewed'}
+              </span>
+              <span className="flex gap-1">
+                <Button className="text-[10px] px-2 py-0.5" onClick={() => handleCaseReview(c.id, 'approve_escalation')}>
+                  Approve escalation
+                </Button>
+                <Button variant="ghost" className="text-[10px] px-2 py-0.5" onClick={() => handleCaseReview(c.id, 'request_info')}>
+                  Request info
+                </Button>
+                <Button variant="ghost" className="text-[10px] px-2 py-0.5 text-red-300" onClick={() => handleCaseReview(c.id, 'reject')}>
+                  Reject
+                </Button>
+              </span>
+            </div>
+          ))}
+        </div>
+        {listAllCases().filter((c) => c.escalationState === 'approved_for_escalation').length > 0 && (
+          <div className="space-y-1.5 border-t border-white/[0.06] pt-2">
+            <p className="text-[11px] text-zinc-400">Reviewed — ready to escalate to Amazon:</p>
+            {listAllCases().filter((c) => c.escalationState === 'approved_for_escalation').map((c) => (
+              <div key={c.id} className="flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-mono text-brass-300">{c.caseRef ?? c.id}</span>
+                <span className="text-[11px] text-zinc-300 flex-1 min-w-[160px]">{c.subject}</span>
+                <Button className="text-[10px] px-2 py-0.5" onClick={() => void handleCaseEscalate(c.id)}>
+                  <ExternalLink className="w-3 h-3 mr-1" /> Escalate to Amazon
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+        {listAllCases().some((c) => c.amazonCase) && (
+          <div className="space-y-1 border-t border-white/[0.06] pt-2">
+            <p className="text-[11px] text-zinc-400">Provider cases (truthful state):</p>
+            {listAllCases().filter((c) => c.amazonCase).map((c) => (
+              <div key={c.id} className="flex flex-wrap items-center gap-2 text-[11px]">
+                <span className="font-mono text-brass-300">{c.caseRef ?? c.id}</span>
+                <span className="font-mono text-zinc-400">{c.amazonCase?.referenceId}</span>
+                <span className="text-zinc-500">{c.amazonCase?.simulated ? 'Simulation — no live Amazon case' : 'Live Amazon case'}</span>
+                <span className="text-emerald-300">{c.escalationState ? CASE_ESCALATION_LABELS[c.escalationState] : ''}</span>
+                {c.providerResponse && <span className="text-zinc-400">Amazon: {c.providerResponse.response}</span>}
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
         <Card className="p-3"><p className="text-zinc-500">Open</p><p className="text-xl font-bold text-white mt-1">{metrics.openCount}</p></Card>
         <Card className="p-3"><p className="text-zinc-500">Pending</p><p className="text-xl font-bold text-amber-400 mt-1">{metrics.pendingCount}</p></Card>

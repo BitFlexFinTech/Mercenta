@@ -1,5 +1,29 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
+**Last updated:** Canonical-model session (13 Sep) — **the canonical Mercenta
+business model was reconciled and the two clearest gaps were BUILT**
+(`docs/MERCENTA_BUSINESS_MODEL.md` is now the canonical statement).
+No retired mock was silently re-labelled live; the only new prerequisites are
+listed here explicitly.
+- **NEW in the registry:** `palletline` (UK-domestic Mercenta carrier account,
+  §11). Its `defaultMode` is honestly **`available`** — there is **no live or
+  mock Palletline adapter yet**, so the fail-closed gate refuses a simulated
+  Palletline provider operation. Activation needs Palletline credentials + an
+  adapter following the DHL pattern.
+- **NEW mock/placeholder (clearly marked):** shipping commercial terms in
+  `src/config/shipping.ts` — negotiated discount per carrier, mark-up,
+  surcharge, handling fee and **VAT treatment** are all `placeholder: true`
+  pending commercial/accounting sign-off. Nothing hardcodes a mark-up such as
+  90%; the carrier cost and the brand charge are recorded separately.
+- **NEW non-credential go-live item:** the case-escalation seam
+  (`src/lib/helpdesk/amazonCaseClient.ts` → `RealAmazonCaseClient`) posts to
+  `${EDGE_BASE}/retail-channel/cases`. **That Edge Function does not exist yet** —
+  it must be written at deploy time (it holds the secret ref and forwards the
+  idempotency key), exactly like the SP-API functions in `GO_LIVE.md` §3.
+  Until then the seam resolves to the fail-closed `Unavailable` client and
+  **claims nothing**.
+- **Unchanged:** every existing mock, placeholder and credential requirement.
+
 **Last updated:** Phase E2E (13 Sep) — **the deterministic investor-demo lifecycle
 is DONE and introduces NO new mock, placeholder or credential requirement.**
 `src/lib/simulation/investorDemo.ts` runs the whole 22-stage lifecycle on the
