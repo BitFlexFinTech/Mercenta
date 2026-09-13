@@ -1,6 +1,76 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-13 (**Phase S — Mercenta Social deterministic E2E path BUILT · truthful engine mode**)
+> Last updated: 2026-09-13 (**Phase E2E — deterministic investor-demo lifecycle BUILT + VERIFIED**)
+>
+> **PHASE E2E (2026-09-13, sixth session) — DETERMINISTIC INVESTOR-DEMO PLATFORM COMPLETED.**
+>
+> **① NEW `src/lib/simulation/investorDemo.ts`** — ONE runnable, zero-network,
+> reset/replayable lifecycle across the whole platform, built ENTIRELY on the
+> existing canonical architecture (no parallel demo app, no second domain store).
+> 22 stages in order: application → approval → onboarding → compliance →
+> catalogue → purchase_order → acknowledgement → fulfilment → shipment →
+> delivery (incl. simulated invoice + payment) → returns → deductions → dispute
+> (operator resolution) → commission → payout → crm → marketing → integrations
+> → social → rbac → audit → error_recovery. Every stage calls the SAME seams the
+> product's own UI calls (`applicationStore`, `onboardingLifecycle` E1/E2,
+> `uploadComplianceDoc`/`setComplianceDocStatus`/`evaluateBrandCatalogGate`,
+> `catalogLifecycle` E3, `commerceLifecycle` E4, `settleBrandPayout` Stage-8,
+> `crmStore`/`returnsTracking`/`prospectStore`, the Integration-Hub mode resolver
+> and the Phase-S `social/engineAdapter`). Fail-closed: provider-backed stages
+> refuse unless the provider positively resolves `simulation`; unknown/live are
+> never simulation. `networkCalls` is 0 by construction and by inspection.
+>
+> **② REAL §14 DEFECT FIXED (found while building the lifecycle).** A brand could
+> declare its OWN dispute outcome: the brand portal's shared commerce panel
+> exposed "Resolve (won)" and `resolveCommerceDispute` accepted a tenant-pinned
+> actor, so a brand could award itself the money — while the OPERATOR had no
+> resolve surface at all. Fixed in the DOMAIN (`resolveCommerceDispute` refuses a
+> brand-pinned actor: "resolution is a Mercenta operations decision"), the brand
+> surface now states "Awaiting Mercenta operations decision", and the admin
+> `CommerceOperationsPanel` gained the real operator won/partial/lost resolution
+> (`data-state="commerce-operator-resolve-*"`, scoped by `data-deduction`).
+> The E4 spec was updated to the corrected business rule (brand refused → operator
+> resolves → canonical outcome), preserving its intent.
+>
+> **③ Canonical store additions (minimal, backwards-compatible, no duplicates):**
+> `applicationStore.submitApplication(..., { opts: { id } })` deterministic id;
+> `acquisitionStore.removeOnboarding(id)` scoped removal; `demoStore.addReturn`
+> optional deterministic id; `createDeductionInStore` / `raiseCommerceException`
+> optional deterministic id; NEW `demoStore.ensureDistributionAgreement` +
+> `api.issueDistributionAgreement` (the compliance gate has always required a
+> signed distribution agreement, but contracts were SEED-ONLY, so a brand created
+> through the real application → approval → onboarding path could never clear its
+> gate — that gap is now closed by a canonical operator action).
+>
+> **④ UI (extends the existing Simulation Control Centre — no second dashboard):**
+> NEW `src/components/admin/integrations/InvestorDemoPanel.tsx` mounted at the top
+> of `SimulationControl.tsx`. Badges state Simulation · Deterministic · No live
+> integration · Demo/test data; a Run control, a Reset control, per-stage OK /
+> BLOCKED / ERROR status words (never colour-only), stage consequences and record
+> ids, audit-row count, `network calls: 0`, and a replay-digest comparison that
+> survives a reset (`identical to the previous run — deterministic replay
+> confirmed`). Super-Admin only, with the same in-component tier refusal as the
+> rest of the surface.
+>
+> **VERIFICATION (real output, this session):**
+> `node scripts/validate-investor-demo.mjs` → **INVESTOR_DEMO_VALIDATION_PASS
+> (41/41 checks)**, including `fetch`/`XHR` instrumentation → **0 network calls**,
+> reset → run → **identical digest**, no duplicated PO/deduction/commission,
+> money assertions (£504.00 value, £35.28 commission at 7%, £468.72 net share),
+> and every failure drill. `e2e/investor-demo.spec.ts` → **10/10 PASS**
+> (lifecycle 22/22 OK in a real browser, external calls `[]`, reset→replay digest
+> equality, tenant-isolation + RBAC refusals in the domain, error/recovery
+> drills, accessibility names + status words, 375/768/1440 no horizontal
+> overflow). `e2e/commerce-operational-simulation.spec.ts` → **5/5 PASS**.
+> Full-suite gates recorded in the session report below.
+>
+> **REMAINING (honest):** the run is in-memory (no Supabase credentials in the
+> browser → nothing durable, migrations 020–023 still unexecuted);
+> Renderer/browser manual click-through beyond Playwright was not performed.
+> **NEXT: Phase F (production preparation, per GO_LIVE.md) → Phase G (demo
+> rehearsal against demo.mercenta.co.uk) — production deploy NOT authorised.**
+>
+
 >
 > **PHASE S (2026-09-13, fifth session) — SOCIAL COMPLETED AS FAR AS THE INFRASTRUCTURE ALLOWS.**
 > Commit: **`<see below>`**. The verified blocker is unchanged and is EXTERNAL + PAID:

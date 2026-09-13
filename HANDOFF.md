@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 13, 2026 (Phase G1 — brand deductions ledger / Tour 5 built + retired Rocket.Chat server infrastructure removed)
+Last updated: September 13, 2026 (Phase E2E — deterministic investor-demo lifecycle built + verified; brand dispute-resolution defect fixed)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd
@@ -36,6 +36,18 @@ Cline's output back. AI confirms, gives next prompt.
   Backup of the pre-change compose file + inspect JSON:
   `/root/rocketchat-removal-backup-20260913/`. **Never reintroduce Rocket.Chat.**
 - Playwright suite (185 passing tests, 30 spec files)
+- **Phase E2E — DETERMINISTIC INVESTOR DEMO (2026-09-13)**: ONE runnable,
+  zero-network, reset/replayable lifecycle across the whole platform
+  (`src/lib/simulation/investorDemo.ts`, 22 stages: application → … → social →
+  RBAC → audit → error/recovery), driven from the existing Simulation Control
+  Centre by a new "Investor demo" panel (Run / Reset / per-stage OK-BLOCKED-ERROR
+  / digest comparison / `network calls: 0`). Verified by
+  `node scripts/validate-investor-demo.mjs` (41/41, 0 network calls, identical
+  digest on reset→replay) and `e2e/investor-demo.spec.ts` (10/10). A REAL defect
+  was fixed: a brand could resolve its OWN dispute outcome ("won") — resolution
+  is now an operator-only decision in the domain, the brand sees
+  "Awaiting Mercenta operations decision", and the admin console has the real
+  won/partial/lost resolution.
 - Homepage: "Your brand. The UK market." (NO Amazon mention)
 - Partner Login + application gate + link verification
 - Legal agreements 4.1 + 4.2 in onboarding

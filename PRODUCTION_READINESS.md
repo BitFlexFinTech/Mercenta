@@ -1,5 +1,25 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
+**Last updated:** Phase E2E (13 Sep) — **the deterministic investor-demo lifecycle
+is DONE and introduces NO new mock, placeholder or credential requirement.**
+`src/lib/simulation/investorDemo.ts` runs the whole 22-stage lifecycle on the
+EXISTING canonical seams (application → approval → onboarding → compliance →
+catalogue → PO → acknowledgement → fulfilment → shipment → delivery/invoice/
+payment → returns → deductions → dispute → commission → payout → CRM →
+marketing → integrations → social → RBAC → audit → error/recovery) with ZERO
+network calls, and is reset/replay-deterministic (identical digest).
+**One real domain gap was closed, not faked:** the compliance gate has always
+required a signed distribution agreement, but contracts were seed-only, so a
+tenant created through the real application → approval → onboarding path could
+never clear its gate. A canonical operator action
+(`demoStore.ensureDistributionAgreement` / `api.issueDistributionAgreement`)
+now issues that agreement against the ONE `demoContracts` store. **Nothing here
+requires a credential; nothing here is a placeholder** — the only remaining
+go-live items are unchanged (real provider credentials + the deploy-time Edge
+Functions listed in `GO_LIVE.md`).
+`node scripts/validate-investor-demo.mjs` → 41/41 PASS · `e2e/investor-demo.spec.ts`
+→ 10/10 PASS.
+
 **Last updated:** Phase D2 + F (13 Sep) — **the UI/UX status sweep and the first
 production-preparation work are DONE.** Phase D2 migrated the remaining
 domain-status surfaces onto the canonical presentation layer
