@@ -107,6 +107,57 @@ export function renameBrand(brandId: string, businessName: string): boolean {
   return true;
 }
 
+/**
+ * §Phase E2E — issue (or re-affirm) the canonical DISTRIBUTION AGREEMENT
+ * contract for a brand tenant.
+ *
+ * The compliance gate has always required a signed/active distribution
+ * agreement (`hasSignedDistributionAgreement`), but contracts were SEED-ONLY:
+ * a brand created through the real application → approval → onboarding path
+ * could never obtain one, so its compliance gate could never clear and the
+ * catalog lifecycle could never start. This is the missing OPERATOR action,
+ * writing to the ONE canonical `demoContracts` store (no second contract
+ * system). Deterministic id (`contract-<brandId>`) matching the seeded
+ * convention, so replaying it updates the same agreement in place.
+ */
+export function ensureDistributionAgreement(input: {
+  brandId: string;
+  signatoryName: string;
+  signatoryEmail: string;
+  commissionRate: number;
+  monthlyFee: number;
+  fulfillmentTrack: Contract['fulfillmentTrack'];
+  effectiveDate: string;
+  renewalDate: string;
+}): Contract {
+  const existing = demoContracts.find(
+    (c) => c.brandId === input.brandId && c.type === 'distribution_agreement'
+  );
+  const signedAt = new Date().toISOString();
+  if (existing) {
+    existing.status = 'active';
+    existing.signatories = [
+      { name: input.signatoryName, email: input.signatoryEmail, signedAt },
+    ];
+    return existing;
+  }
+  const contract: Contract = {
+    id: `contract-${input.brandId}`,
+    brandId: input.brandId,
+    type: 'distribution_agreement',
+    status: 'active',
+    commissionRate: input.commissionRate,
+    monthlyFee: input.monthlyFee,
+    fulfillmentTrack: input.fulfillmentTrack,
+    effectiveDate: input.effectiveDate,
+    renewalDate: input.renewalDate,
+    documentUrl: '',
+    signatories: [{ name: input.signatoryName, email: input.signatoryEmail, signedAt }],
+    version: 1,
+  };
+  demoContracts.push(contract);
+  return contract;
+}
 /** §Stage-6 — Compliance Approvals mutations. */
 export function setComplianceDocStatus(
   docId: string,
@@ -618,11 +669,13 @@ export function recordDisputeOutcome(
 
 /** §Stage-24 — create a deduction from operational events (ASN shortfall). */
 export function createDeductionInStore(
-  input: Omit<import('@/types').Deduction, 'id'>
+  input: Omit<import('@/types').Deduction, 'id'> & { id?: string }
 ): import('@/types').Deduction {
   const ded: import('@/types').Deduction = {
     ...input,
-    id: `ded-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    // §Phase E2E — an optional deterministic id makes a replayable demo run
+    // produce the SAME ledger identity; the public path is unchanged.
+    id: input.id ?? `ded-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
   };
   demoDeductions.unshift(ded);
   return ded;
@@ -1112,10 +1165,12 @@ export const demoReturns: BrandReturn[] = (() => {
   });
 })();
 
-export function addReturn(ret: Omit<BrandReturn, 'id'>): BrandReturn {
+export function addReturn(ret: Omit<BrandReturn, 'id'> & { id?: string }): BrandReturn {
   const full: BrandReturn = {
     ...ret,
-    id: `ret-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    // §Phase E2E — a replayable demo run supplies its own deterministic id; the
+    // public path is unchanged (timestamp + random suffix).
+    id: ret.id ?? `ret-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
   };
   demoReturns.unshift(full);
   return full;

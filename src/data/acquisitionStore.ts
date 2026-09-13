@@ -251,6 +251,21 @@ export function getOnboardingById(onboardingId: string): BrandOnboarding | undef
   return onboardings.find((o) => o.id === onboardingId);
 }
 
+/**
+ * §Phase E2E — remove ONE onboarding record by its canonical id.
+ *
+ * Scoped removal (never a wipe) so the deterministic investor-demo reset can
+ * return the environment to its baseline without destroying unrelated
+ * acquisition work. Idempotent: removing an absent id is a no-op.
+ */
+export function removeOnboarding(onboardingId: string): boolean {
+  const before = onboardings.length;
+  onboardings = onboardings.filter((o) => o.id !== onboardingId);
+  if (onboardings.length === before) return false;
+  notifyCanonicalStoreChange();
+  return true;
+}
+
 /** A tenant id already claimed by another onboarding (tenant-collision guard). */
 export function isTenantIdClaimed(brandId: string, exceptProspectId?: string): boolean {
   return onboardings.some((o) => o.brandId === brandId && o.prospectId !== exceptProspectId);

@@ -41,7 +41,9 @@ import {
   getCommission,
   listCommissionsForPayout,
   markCommissionPaid as markCommissionPaidInStore,
+  ensureDistributionAgreement as storeEnsureDistributionAgreement,
 } from './demoStore';
+import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import {
   createPayoutClient,
   normalisePayoutTrack,
@@ -378,6 +380,50 @@ export async function acceptBrandAgreement(
     }, { onConflict: 'brand_id,agreement_type' });
   }
   return record;
+}
+
+/**
+ * §Phase E2E — ISSUE the canonical distribution agreement for a tenant.
+ *
+ * Operator action required by the compliance gate: `evaluateComplianceGate`
+ * counts a signed/active distribution agreement as a gate input, and a tenant
+ * created through the real onboarding path had no way to obtain one. This wraps
+ * the ONE canonical contract store — no second contract system, no second gate
+ * input. Idempotent by deterministic contract id.
+ */
+export function issueDistributionAgreement(input: {
+  brandId: string;
+  signatoryName: string;
+  signatoryEmail: string;
+  commissionRate?: number;
+  monthlyFee?: number;
+  fulfillmentTrack?: FulfillmentTrack;
+  effectiveDate?: string;
+  renewalDate?: string;
+}): Contract {
+  const effectiveDate = input.effectiveDate ?? '2026-09-01';
+  const renewalDate = input.renewalDate ?? '2027-09-01';
+  const contract = storeEnsureDistributionAgreement({
+    brandId: input.brandId,
+    signatoryName: input.signatoryName,
+    signatoryEmail: input.signatoryEmail,
+    commissionRate: input.commissionRate ?? COMMISSION_RATE_PLACEHOLDER,
+    monthlyFee: input.monthlyFee ?? MONTHLY_FEE_PLACEHOLDER_GBP,
+    fulfillmentTrack: input.fulfillmentTrack ?? 'direct_fulfillment',
+    effectiveDate,
+    renewalDate,
+  });
+  demoAuditLog.push({
+    id: `audit-contract-issued-${input.brandId}`,
+    createdAt: new Date().toISOString(),
+    actorId: 'staff-001',
+    action: 'distribution_agreement_issued',
+    entityType: 'contract',
+    entityId: contract.id,
+    brandId: input.brandId,
+    reason: `Distribution agreement ${contract.id} issued (${contract.status}) — commission ${contract.commissionRate}%, monthly fee £${contract.monthlyFee}.`,
+  });
+  return contract;
 }
 
 export async function isLogisticsSlaAccepted(brandId: string): Promise<boolean> {

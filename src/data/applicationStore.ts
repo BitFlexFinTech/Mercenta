@@ -25,11 +25,19 @@ phone: string | null;
   facebookStatus: LinkVerificationStatus | null;
   referralSource: string | null;
   description: string | null;
+  /**
+   * §Phase E2E — optional DETERMINISTIC id for replayable demo runs. The
+   * canonical tenant id is derived from the application id, so a demo run must
+   * be able to reproduce the SAME identity instead of consuming the counter.
+   * Omitting it preserves the original counter behaviour exactly.
+   */
+  opts?: { id?: string };
 }): BrandApplication {
   appIdCounter += 1;
+  const { opts, ...fields } = input;
   const app: BrandApplication = {
-    id: `app-${String(appIdCounter).padStart(4, '0')}`,
-    ...input,
+    id: opts?.id ?? `app-${String(appIdCounter).padStart(4, '0')}`,
+    ...fields,
     status: 'pending',
     adminNotes: null,
     createdAt: new Date().toISOString(),
