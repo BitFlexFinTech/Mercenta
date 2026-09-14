@@ -1,3 +1,10 @@
+/**
+ * §5/M12 — the brand's COMMERCIAL RELATIONSHIP with Mercenta, read from the
+ * canonical `src/config/commercialModel.ts`. Not a duplicate shape: the union is
+ * imported so it cannot drift from the single source of truth.
+ */
+import type { CommercialModelSelection } from '@/config/commercialModel';
+
 export type Environment = 'home' | 'login' | 'brand' | 'admin' | 'carrier';
 
 /**
@@ -604,6 +611,13 @@ export interface BrandProfile {
   workingCapitalAnswer?: 'yes' | 'partially' | 'no';
   /** §13 — product category selected during onboarding, one of APPROVED_CATEGORIES */
   category?: string;
+  /**
+   * §5/M12 — the brand's commercial relationship with Mercenta, chosen during
+   * onboarding and persisted per brand. Undefined = not yet selected, which the
+   * onboarding gate REFUSES (fail-closed). It is INTERNAL between Mercenta and the
+   * brand and can never change which retail-channel compliance documents apply.
+   */
+  commercialModel?: CommercialModelSelection;
 }
 export type DemoRegion = 'africa' | 'usa' | 'europe';
 

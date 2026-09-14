@@ -29,6 +29,7 @@ import type {
 import { buildDistributionAgreement } from '@/lib/agreement';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import { tierForRole, canAccessEnvironment, staffCanMutate, type DemoSession } from '@/lib/auth/rbac';
+import { isCommercialModel } from '@/config/commercialModel';
 
 interface AppState {
   environment: Environment;
@@ -136,6 +137,8 @@ const DEFAULT_PROFILE: BrandProfile = {
   complianceGateStatus: 'blocked',
   workingCapitalAnswer: undefined,
   category: undefined,
+  /** §5/M12 — fail-closed until the brand picks its commercial relationship. */
+  commercialModel: 'not_selected',
 };
 
 let logCounter = 100;
@@ -210,7 +213,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     Promise.all([
       import('@/data/demoData'),
       import('@/data/brandDossiers'),
-    ]).then(([demoData, brandDossiers]) => {
+      import('@/data/demoStore'),
+    ]).then(([demoData, brandDossiers, store]) => {
       const brand = demoData.ALL_DEMO_BRANDS.find((b: { id: string }) => b.id === brandId);
       if (!brand) {
         console.warn(`[rbac] unknown demo brand "${brandId}" — refused`);
@@ -219,7 +223,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const dossier = brandDossiers.buildBrandDossier(brand);
       setSession({ tier: 'brand', tenantId: brand.id, role: 'Brand Partner' });
       setRole('Brand Partner');
-      setBrandProfile(dossier.profile);
+      // §5/M12 — the brand's commercial relationship comes from the canonical
+      // store (seeded from the brand's own declaration), never from a guess.
+      setBrandProfile({
+        ...dossier.profile,
+        commercialModel: store.resolveBrandCommercialModel(brand.id).model,
+      });
       setProducts(dossier.products);
       setShipments(dossier.shipments);
       setFinancials(dossier.financials);
@@ -283,6 +292,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...(region ? { region } : {}),
         onboarded: false,
         complianceGateStatus: 'blocked',
+        // §5/M12 — whatever is actually recorded for this brand; an unrecorded
+        // model stays `not_selected` (fail-closed) rather than being assumed.
+        commercialModel: catalogStore.resolveBrandCommercialModel(brandId).model,
       });
       // §Phase E3 — the tenant's products come from the CATALOG STORE (the
       // single write path), not from a hand-kept session list. Honest empty
@@ -501,6 +513,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const actor = { staffId: `brand:${tenantId}`, canMutate: true, tenantId };
         onboarding.acceptOnboarding(record.id, actor, 'Submitted by the brand through the onboarding wizard');
         onboarding.completeOnboardingStep(record.id, 'profile', actor, 'Brand profile submitted in the wizard');
+      });
+
+      /**
+       * §5/M12 — the brand's chosen COMMERCIAL RELATIONSHIP is persisted against
+       * the brand record (one canonical store, audited). Fail-closed: an
+       * unselected/unknown model is refused and the (already-opened) onboarding
+       * completion is reported as not-selected rather than being invented. This
+       * write can never touch the compliance requirements.
+       */
+      setBrandProfile((prev) => {
+        const chosen = isCommercialModel(prev.commercialModel) ? prev.commercialModel : null;
+        void import('@/data/demoStore').then((store) => {
+          if (!chosen) {
+            console.warn(
+              '[commercial] onboarding completed with NO commercial relationship recorded — reported as not selected'
+            );
+            return;
+          }
+          const r = store.setBrandCommercialModel({
+            brandId: tenantId,
+            model: chosen,
+            actorId: `brand:${tenantId}`,
+            reason: 'Selected by the brand during onboarding (commercial relationship step)',
+            source: 'onboarding',
+          });
+          if (!r.ok) console.warn(`[commercial] ${r.error}`);
+        });
+        return prev;
       });
     }
   }, [session?.tenantId]);

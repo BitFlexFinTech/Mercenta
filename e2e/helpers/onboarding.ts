@@ -16,6 +16,21 @@ import type { Page } from '@playwright/test';
 
 export type TrackSteer = 'direct' | 'financed' | 'default';
 
+/**
+ * §5/M12 — the wizard's step 2 requires the brand to CHOOSE its commercial
+ * relationship with Mercenta before Continue enables (fail-closed). The helper
+ * therefore selects one exactly as a user would, via the canonical test id.
+ */
+export async function selectWizardCommercialModel(
+  page: Page,
+  model: 'commission_agent' | 'buy_resell' = 'commission_agent'
+): Promise<void> {
+  const option = page.locator(`[data-testid="commercial-model-${model}"]`).first();
+  await option.scrollIntoViewIfNeeded().catch(() => {});
+  await option.click({ timeout: 4000 }).catch(() => {});
+  await page.waitForTimeout(120);
+}
+
 /** Select a plain <select> that follows a label WITHOUT htmlFor (wizard Select primitive). */
 async function selectByLabel(page: Page, labelText: string, value: string): Promise<boolean> {
   try {
@@ -120,7 +135,7 @@ function stepOrdinal(id: string): number {
  * working-capital pill on the banking step toward the corresponding
  * fulfillment recommendation.
  */
-export async function wizardToStep(page: Page, targetStep: number, opts: { track?: 'direct' | 'financed' } = {}): Promise<void> {
+export async function wizardToStep(page: Page, targetStep: number, opts: { track?: 'direct' | 'financed'; model?: 'commission_agent' | 'buy_resell' } = {}): Promise<void> {
   const steer: TrackSteer = opts.track ?? 'default';
   const continueBtn = page.locator('button', { hasText: 'Continue' }).first();
   const settle = () => page.waitForTimeout(680);
@@ -134,9 +149,11 @@ export async function wizardToStep(page: Page, targetStep: number, opts: { track
   await settle();
   if (targetStep <= 2) return;
 
-  // Step 2 -> Step 3: signatory + the three master-agreement checkboxes.
+  // Step 2 -> Step 3: signatory + the three master-agreement checkboxes +
+  // the mandatory commercial relationship (§5/M12).
   await fillInput(page, /Authorized Signatory|Signatory/i, 'Demo Signatory');
   await checkAllWizardCheckboxes(page);
+  await selectWizardCommercialModel(page, opts.model ?? 'commission_agent');
   await continueBtn.click({ timeout: 10000 });
   await settle();
   if (targetStep <= 3) return;
@@ -171,6 +188,6 @@ export async function wizardToStep(page: Page, targetStep: number, opts: { track
  * the wizard finished (e.g. onboard a fresh brand). Uses the same mechanics as
  * `wizardToStep` but does not stop early.
  */
-export async function finishWizard(page: Page, opts: { track?: 'direct' | 'financed' } = {}): Promise<void> {
+export async function finishWizard(page: Page, opts: { track?: 'direct' | 'financed'; model?: 'commission_agent' | 'buy_resell' } = {}): Promise<void> {
   await wizardToStep(page, 6, opts);
 }

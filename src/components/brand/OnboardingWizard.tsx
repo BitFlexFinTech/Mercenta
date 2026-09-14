@@ -4,6 +4,11 @@ import { BRAND_NAME, BRAND_LEGAL_NAME } from '@/config/brand';
 import { APPROVED_CATEGORIES, AGREEMENT_VERSIONS, type BrandAgreementType } from '@/types';
 import { acceptBrandAgreement } from '@/data/api';
 import { BANKS_BY_COUNTRY, type BankEntry } from '@/data/banksByCountry';
+import {
+  COMMERCIAL_MODELS,
+  COMMERCIAL_MODEL_ORDER,
+  checkCommercialModelSelection,
+} from '@/config/commercialModel';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { Button, Input, Select, Checkbox } from '@/components/ui';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
@@ -132,7 +137,14 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
         brandProfile.email
       ) && !!brandProfile.category;
     if (step === 2)
-      return brandProfile.signatory && checks.exclusive && checks.compliance && checks.payment;
+      return (
+        !!brandProfile.signatory &&
+        checks.exclusive &&
+        checks.compliance &&
+        checks.payment &&
+        // §5/M12 — fail-closed: no commercial relationship, no continuation.
+        checkCommercialModelSelection(brandProfile.commercialModel).ok
+      );
     if (step === 3)
       return brandProfile.bic && brandProfile.iban && !!brandProfile.workingCapitalAnswer;
     if (step === 4) return !!brandProfile.fulfillmentTrack && brandProfile.fulfillmentTrack !== 'unassigned';
@@ -380,6 +392,65 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   onChange={(c) => setChecks({ ...checks, payment: c })}
                   required
                 />
+              </div>
+
+              {/* §5/M12 — THE COMMERCIAL RELATIONSHIP. Internal between Mercenta and
+                  the brand; it is a DIFFERENT concept from the retail-channel
+                  compliance documents the products need, and it can never change
+                  which documents are required. */}
+              <div className="border-t border-white/[0.06] pt-4 space-y-2.5">
+                <div>
+                  <h3 className="text-xs font-semibold text-white">
+                    Commercial Relationship with Mercenta
+                  </h3>
+                  <p className="text-[10px] text-zinc-500 mt-1">
+                    Choose how Mercenta and your brand trade. This is a private commercial
+                    agreement between us — it does <strong className="text-zinc-400">not</strong> change
+                    the retail-channel compliance documents your products require, and no
+                    commercial model removes a compliance requirement.
+                  </p>
+                </div>
+                <div className="grid gap-2" data-testid="commercial-model-options">
+                  {COMMERCIAL_MODEL_ORDER.map((id) => {
+                    const def = COMMERCIAL_MODELS[id];
+                    const selected = brandProfile.commercialModel === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        data-testid={`commercial-model-${id}`}
+                        onClick={() =>
+                          setBrandProfile({ ...brandProfile, commercialModel: id })
+                        }
+                        className={cn(
+                          'text-left rounded-lg border px-3 py-2.5 transition-colors',
+                          selected
+                            ? 'border-brass-500/50 bg-brass-500/10'
+                            : 'border-white/[0.08] hover:border-white/20'
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn(
+                              'w-3.5 h-3.5 rounded-full border flex-shrink-0',
+                              selected ? 'border-brass-400 bg-brass-400' : 'border-white/25'
+                            )}
+                          />
+                          <span className={cn('text-xs font-medium', selected ? 'text-white' : 'text-zinc-300')}>
+                            {def.label}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">{def.summary}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+                {!checkCommercialModelSelection(brandProfile.commercialModel).ok && (
+                  <p className="text-[10px] text-amber-300/90" data-testid="commercial-model-required">
+                    Commercial relationship required — onboarding cannot continue until you
+                    choose Model A or Model B.
+                  </p>
+                )}
               </div>
             </div>
           )}

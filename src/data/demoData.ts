@@ -22,6 +22,7 @@ import type {
   PurchaseOrderStatus,
 } from '@/types';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
+import type { CommercialModel } from '@/config/commercialModel';
 
 export interface DemoBrand {
   id: string;
@@ -33,20 +34,35 @@ export interface DemoBrand {
   signatory: string;
   track: 'direct_fulfillment' | 'financed';
   contractStatus: Contract['status'];
+  /**
+   * §5/M12 — this brand's commercial relationship with Mercenta. INTERNAL to
+   * Mercenta+brand, and completely separate from the retail-channel compliance
+   * documentation the brand's products need. Never assume every brand is the
+   * same model (the demo deliberately mixes both).
+   */
+  commercialModel: CommercialModel;
 }
+
+/**
+ * §19/M12 — the two brands the investor demo names "Brand A" and "Brand B".
+ * Declared ONCE here (not re-typed in the demo, the Founder Centre or a
+ * validator) so the demo story and its evidence cannot drift apart.
+ */
+export const DEMO_MODEL_A_BRAND_ID = 'brand-zambezi';
+export const DEMO_MODEL_B_BRAND_ID = 'brand-nordhaus';
 
 /** All ten approved categories are covered exactly once. */
 export const DEMO_BRANDS: DemoBrand[] = [
-  { id: 'brand-zambezi', name: 'Zambezi Organic Extracts Ltd', category: 'Health & Personal Care', region: 'africa', nation: 'Zimbabwe', email: 'trade@zambeziorganics.co.zw', signatory: 'Tendai Moyo', track: 'financed', contractStatus: 'active' },
-  { id: 'brand-nordhaus', name: 'Nordhaus Living ApS', category: 'Home', region: 'europe', nation: 'Denmark', email: 'sales@nordhaus.dk', signatory: 'Mette Sørensen', track: 'direct_fulfillment', contractStatus: 'signed' },
-  { id: 'brand-littlekiwi', name: 'Little Kiwi Baby Co', category: 'Baby', region: 'north_america', nation: 'United States', email: 'hello@littlekiwi.co', signatory: 'Dana Whitfield', track: 'financed', contractStatus: 'sent' },
-  { id: 'brand-deskforge', name: 'DeskForge Supplies Inc', category: 'Office Products', region: 'north_america', nation: 'United States', email: 'export@deskforge.com', signatory: 'Ray Coleman', track: 'direct_fulfillment', contractStatus: 'active' },
-  { id: 'brand-munich', name: 'Munich Clean-Care GmbH', category: 'Health & Personal Care', region: 'europe', nation: 'Germany', email: 'trade@muc-cleancare.de', signatory: 'Klaus Bauer', track: 'direct_fulfillment', contractStatus: 'draft' },
-  { id: 'brand-culinaryforge', name: 'Culinary Forge B.V.', category: 'Kitchen', region: 'europe', nation: 'Netherlands', email: 'orders@culinaryforge.nl', signatory: 'Anouk de Vries', track: 'financed', contractStatus: 'active' },
-  { id: 'brand-voltaic', name: 'Voltaic Audio LLC', category: 'Consumer Electronics', region: 'north_america', nation: 'United States', email: 'b2b@voltaicaudio.com', signatory: 'Marcus Reed', track: 'direct_fulfillment', contractStatus: 'sent' },
-  { id: 'brand-apexdrive', name: 'ApexDrive Auto Care Ltd', category: 'Automotive', region: 'north_america', nation: 'United States', email: 'sales@apexdrive.com', signatory: 'Priya Nair', track: 'financed', contractStatus: 'active' },
-  { id: 'brand-harvestlane', name: 'Harvest Lane Foods Pty', category: 'Grocery', region: 'africa', nation: 'South Africa', email: 'exports@harvestlane.co.za', signatory: 'Sipho Dlamini', track: 'financed', contractStatus: 'signed' },
-  { id: 'brand-saharathreads', name: 'Sahara Threads SARL', category: 'Apparel', region: 'africa', nation: 'Morocco', email: 'contact@saharathreads.ma', signatory: 'Yasmine El Fassi', track: 'direct_fulfillment', contractStatus: 'under_review' },
+  { id: 'brand-zambezi', name: 'Zambezi Organic Extracts Ltd', category: 'Health & Personal Care', region: 'africa', nation: 'Zimbabwe', email: 'trade@zambeziorganics.co.zw', signatory: 'Tendai Moyo', track: 'financed', contractStatus: 'active', commercialModel: 'commission_agent' },
+  { id: 'brand-nordhaus', name: 'Nordhaus Living ApS', category: 'Home', region: 'europe', nation: 'Denmark', email: 'sales@nordhaus.dk', signatory: 'Mette Sørensen', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell' },
+  { id: 'brand-littlekiwi', name: 'Little Kiwi Baby Co', category: 'Baby', region: 'north_america', nation: 'United States', email: 'hello@littlekiwi.co', signatory: 'Dana Whitfield', track: 'financed', contractStatus: 'sent', commercialModel: 'commission_agent' },
+  { id: 'brand-deskforge', name: 'DeskForge Supplies Inc', category: 'Office Products', region: 'north_america', nation: 'United States', email: 'export@deskforge.com', signatory: 'Ray Coleman', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell' },
+  { id: 'brand-munich', name: 'Munich Clean-Care GmbH', category: 'Health & Personal Care', region: 'europe', nation: 'Germany', email: 'trade@muc-cleancare.de', signatory: 'Klaus Bauer', track: 'direct_fulfillment', contractStatus: 'draft', commercialModel: 'commission_agent' },
+  { id: 'brand-culinaryforge', name: 'Culinary Forge B.V.', category: 'Kitchen', region: 'europe', nation: 'Netherlands', email: 'orders@culinaryforge.nl', signatory: 'Anouk de Vries', track: 'financed', contractStatus: 'active', commercialModel: 'buy_resell' },
+  { id: 'brand-voltaic', name: 'Voltaic Audio LLC', category: 'Consumer Electronics', region: 'north_america', nation: 'United States', email: 'b2b@voltaicaudio.com', signatory: 'Marcus Reed', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'commission_agent' },
+  { id: 'brand-apexdrive', name: 'ApexDrive Auto Care Ltd', category: 'Automotive', region: 'north_america', nation: 'United States', email: 'sales@apexdrive.com', signatory: 'Priya Nair', track: 'financed', contractStatus: 'active', commercialModel: 'buy_resell' },
+  { id: 'brand-harvestlane', name: 'Harvest Lane Foods Pty', category: 'Grocery', region: 'africa', nation: 'South Africa', email: 'exports@harvestlane.co.za', signatory: 'Sipho Dlamini', track: 'financed', contractStatus: 'signed', commercialModel: 'commission_agent' },
+  { id: 'brand-saharathreads', name: 'Sahara Threads SARL', category: 'Apparel', region: 'africa', nation: 'Morocco', email: 'contact@saharathreads.ma', signatory: 'Yasmine El Fassi', track: 'direct_fulfillment', contractStatus: 'under_review', commercialModel: 'buy_resell' },
 ];
 
 // Personal Computer category — one more brand so every category is covered.
@@ -60,6 +76,7 @@ export const DEMO_BRAND_PC: DemoBrand = {
   signatory: 'Elliot Shaw',
   track: 'direct_fulfillment',
   contractStatus: 'active',
+  commercialModel: 'commission_agent',
 };
 
 /**
@@ -88,6 +105,7 @@ export const DEMO_BRANDS_COMPLIANCE_SCENARIOS: DemoBrand[] = [
     signatory: 'Lotte Vermeer',
     track: 'direct_fulfillment',
     contractStatus: 'active',
+    commercialModel: 'commission_agent',
   },
   {
     id: 'brand-motorvista',
@@ -99,6 +117,7 @@ export const DEMO_BRANDS_COMPLIANCE_SCENARIOS: DemoBrand[] = [
     signatory: 'Daniel Reyes',
     track: 'financed',
     contractStatus: 'active',
+    commercialModel: 'buy_resell',
   },
 ];
 

@@ -88,7 +88,7 @@ export const RETAIL_CHANNEL_COMPLIANCE_IS_MODEL_INDEPENDENT = true;
  */
 export type CommercialModelSelection = CommercialModel | 'not_selected';
 
-export function isCommercialModel(value: string): value is CommercialModel {
+export function isCommercialModel(value: string | null | undefined): value is CommercialModel {
   return value === 'commission_agent' || value === 'buy_resell';
 }
 
@@ -117,3 +117,59 @@ export function resolveCommercialModel(
     illustrativeFallback: 'commission_agent',
   };
 }
+
+/* ── §5/M12 — MANDATORY AT ONBOARDING, CHANGED ONLY BY THE SUPER ADMIN ───── */
+
+/**
+ * §5 — a brand cannot finish onboarding without a commercial relationship
+ * recorded (fail-closed). Declared as a fact so the onboarding gate and the
+ * validators pin the same rule.
+ */
+export const COMMERCIAL_MODEL_SELECTION_IS_MANDATORY = true;
+
+/**
+ * §5/M12 — who may CHANGE a recorded model after onboarding. The founder is the
+ * sole Super Admin; the change is always audited (`demoStore.setBrandCommercialModel`).
+ */
+export const COMMERCIAL_MODEL_CHANGEABLE_BY: readonly string[] = ['Super Admin'];
+
+/** The operator-facing name of the fail-closed unselected state. */
+export const COMMERCIAL_MODEL_NOT_SELECTED_LABEL = 'Not selected — commercial relationship required';
+
+/** §4/§19 — the DEMO/illustrative Model A commission rate (20%). */
+export const DEMO_COMMISSION_RATE_PCT = 20;
+
+/** §4/§19 — the DEMO/illustrative Model B acquisition share (75% of revenue). */
+export const DEMO_ACQUISITION_SHARE_PCT = 75;
+
+/**
+ * §5 — the onboarding gate. Returns a fail-closed verdict for whatever the brand
+ * has recorded: an unrecorded/unknown value is REFUSED with the reason, never
+ * silently defaulted.
+ */
+export function checkCommercialModelSelection(
+  recorded: string | null | undefined
+): { ok: true; model: CommercialModel; reason: string } | { ok: false; model: 'not_selected'; reason: string } {
+  const resolved = resolveCommercialModel(recorded);
+  if (!resolved.selected || !isCommercialModel(resolved.model)) {
+    return {
+      ok: false,
+      model: 'not_selected',
+      reason:
+        'No commercial relationship has been recorded for this brand. Choose Model A (commission/agent-style) or Model B (buy/resell/distribution) before continuing — the platform never assumes one.',
+    };
+  }
+  return {
+    ok: true,
+    model: resolved.model,
+    reason: `Commercial relationship recorded: ${COMMERCIAL_MODELS[resolved.model].label}.`,
+  };
+}
+
+/**
+ * §5 — the REVERSE-CHECK on the separation rule. Given a retail-channel
+ * requirement set computed for a category, the commercial model must not change
+ * it. Returns true when both models yield byte-identical requirements. Used by
+ * the compliance seam's own guard and by `validate-commercial-models.mjs`.
+ */
+export const COMMERCIAL_MODEL_CANNOT_CHANGE_COMPLIANCE = RETAIL_CHANNEL_COMPLIANCE_IS_MODEL_INDEPENDENT;

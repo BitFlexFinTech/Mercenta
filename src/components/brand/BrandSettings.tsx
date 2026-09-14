@@ -9,6 +9,12 @@ import {
 } from '@/lib/statusPresentation';
 import { BrandContractView } from '@/components/brand/BrandContractView';
 import { isTourCompleted, isTourSkipped, restartTour, useTourProgress } from '@/components/shared/TourEngine';
+import {
+  COMMERCIAL_MODELS,
+  COMMERCIAL_MODEL_NOT_SELECTED_LABEL,
+  isCommercialModel,
+} from '@/config/commercialModel';
+import { getBrandCommercialModelRecord } from '@/data/demoStore';
 import { ALL_TOUR_DEFINITIONS } from '@/config/tours/tourDefinitions';
 import { cn } from '@/utils/cn';
 import {
@@ -42,10 +48,12 @@ import {
 
 type SettingsTab =
   | 'bank' | 'login' | 'permissions' | 'outages' | 'returns_addr'
-  | 'compliance' | 'notifications' | 'contacts' | 'agreements' | 'tours';
+  | 'compliance' | 'notifications' | 'contacts' | 'agreements' | 'tours'
+  | 'commercial';
 
 const SETTINGS_TABS: { id: SettingsTab; label: string; icon: typeof Landmark }[] = [
   { id: 'bank', label: 'Bank Information', icon: Landmark },
+  { id: 'commercial', label: 'Commercial Relationship', icon: FileText },
   { id: 'login', label: 'Login Settings', icon: Shield },
   { id: 'permissions', label: 'Manage Permissions', icon: Users },
   { id: 'outages', label: 'PO Outages', icon: AlertOctagon },
@@ -56,6 +64,61 @@ const SETTINGS_TABS: { id: SettingsTab; label: string; icon: typeof Landmark }[]
   { id: 'agreements', label: 'Agreements', icon: FileText },
   { id: 'tours', label: 'Guided Tours', icon: Map },
 ];
+
+/**
+ * §5/M12 — the brand's own view of its COMMERCIAL RELATIONSHIP with Mercenta.
+ *
+ * Read-only for the brand: the relationship is agreed with Mercenta and can only
+ * be changed by the Super Admin (audited). It is shown here, next to the
+ * compliance reference, precisely so the two are visibly DIFFERENT concepts —
+ * the model never changes which retail-channel documents are required.
+ */
+function CommercialRelationshipSection({ brandId }: { brandId: string }) {
+  const record = getBrandCommercialModelRecord(brandId);
+  const model = record && isCommercialModel(record.model) ? record.model : null;
+  return (
+    <Card title="Commercial Relationship">
+      {model ? (
+        <>
+          <div className="flex items-center gap-2 mb-2">
+            <Badge className={cn(
+              'text-[10px]',
+              model === 'commission_agent'
+                ? 'bg-emerald-500/15 text-emerald-300'
+                : 'bg-blue-500/15 text-blue-300'
+            )}>
+              {COMMERCIAL_MODELS[model].label}
+            </Badge>
+            {record && <span className="text-[10px] text-zinc-600">recorded {record.recordedAt.slice(0, 10)}</span>}
+          </div>
+          <p className="text-xs text-zinc-400 mb-3">{COMMERCIAL_MODELS[model].summary}</p>
+          <dl className="space-y-1 text-[11px] font-mono">
+            {model === 'commission_agent' ? (
+              <div className="flex justify-between">
+                <dt className="text-zinc-500">Mercenta commission</dt>
+                <dd className="text-zinc-300">{record?.commissionRatePct ?? 0}% of the retail-channel value</dd>
+              </div>
+            ) : (
+              <div className="flex justify-between">
+                <dt className="text-zinc-500">Brand share of retail-channel revenue</dt>
+                <dd className="text-zinc-300">{record?.brandAcquisitionSharePct ?? 0}%</dd>
+              </div>
+            )}
+          </dl>
+        </>
+      ) : (
+        <p className="text-xs text-amber-300" data-testid="brand-commercial-not-selected">
+          {COMMERCIAL_MODEL_NOT_SELECTED_LABEL} — contact your Mercenta account manager.
+        </p>
+      )}
+      <p className="text-[10px] text-zinc-600 mt-3">
+        This commercial agreement is private between your brand and Mercenta. It is separate from —
+        and can never change, waive or replace — the retail-channel compliance documentation your
+        products require. Changes are made by Mercenta and recorded in the audit trail.
+      </p>
+    </Card>
+  );
+}
 
 function BankSection({ brandId }: { brandId: string }) {
   const bankInfo = getBankInfo(brandId);
@@ -567,6 +630,7 @@ export function BrandSettings() {
 
       <div className="max-w-2xl">
         {activeTab === 'bank' && <BankSection brandId={brandId} />}
+        {activeTab === 'commercial' && <CommercialRelationshipSection brandId={brandId} />}
         {activeTab === 'login' && <LoginSection />}
         {activeTab === 'permissions' && <PermissionsSection brandId={brandId} />}
         {activeTab === 'outages' && <OutagesSection brandId={brandId} />}

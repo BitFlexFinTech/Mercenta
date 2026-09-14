@@ -38,6 +38,7 @@ const SUPER_ADMIN_TABS = [
   { id: 'manufacturer', label: 'Manufacturer Sourcing', icon: Factory },
   { id: 'grants', label: 'Grants & Investors', icon: Handshake },
   { id: 'pitch', label: 'Investor Pitch', icon: FileText },
+  { id: 'commercial', label: 'Commercial Models', icon: Handshake },
   { id: 'financing', label: 'Bank Financing', icon: PiggyBank },
   { id: 'brandintelligence', label: 'Brand Intelligence', icon: Target },
   { id: 'simulation', label: 'Simulation', icon: FlaskConical },
@@ -58,6 +59,7 @@ import { RakazoPanel } from './RakazoPanel';
 import { SimulationControl } from './integrations/SimulationControl';
 import { CompliancePanel } from './CompliancePanel';
 import { DesignSystemShowcase } from '../design/DesignSystemShowcase';
+import { CommercialModelsPanel } from './CommercialModelsPanel';
 
 const ROLE_OPTIONS: { value: StaffRole; label: string }[] = [
   { value: 'Super Admin', label: 'Super Admin' },
@@ -518,6 +520,11 @@ export function SuperAdminPanel() {
 
       {activeTab === 'pitch' && (
         <InvestorPitchSection />
+      )}
+
+      {/* §5/M12 — the commercial relationship is a first-class, brand-level concept. */}
+      {activeTab === 'commercial' && (
+        <CommercialModelsPanel />
       )}
 
       {activeTab === 'financing' && (

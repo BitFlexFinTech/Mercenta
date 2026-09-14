@@ -41,6 +41,16 @@ import {
   type DemoProduct,
 } from './demoData';
 import { notifyCanonicalStoreChange } from './prospectStore';
+import {
+  COMMERCIAL_MODEL_ORDER,
+  DEMO_ACQUISITION_SHARE_PCT,
+  DEMO_COMMISSION_RATE_PCT,
+  RETAIL_CHANNEL_COMPLIANCE_IS_MODEL_INDEPENDENT,
+  isCommercialModel,
+  resolveCommercialModel,
+  type CommercialModel,
+  type ResolvedCommercialModel,
+} from '@/config/commercialModel';
 
 export type { DemoBrandRow } from './demoData';
 export { ALL_DEMO_BRANDS } from './demoData';
@@ -1494,4 +1504,166 @@ export function latestHmrcFiling(brandId: string, type: 'vat_return' | 'ct_retur
     if (f.brandId === brandId && f.type === type && (!out || f.filedAt! > out.filedAt!)) out = f;
   }
   return out;
+}
+
+/* ── §5/M12 — THE BRAND'S COMMERCIAL RELATIONSHIP (canonical store) ─────────
+ *
+ * ONE record per brand: which of the two commercial models applies, and the
+ * agreed terms that go with it. This is INTERNAL between Mercenta and the brand.
+ *
+ * It is a COMPLETELY SEPARATE concept from the retail-channel COMPLIANCE
+ * documentation the brand's products require. Nothing in this module can add,
+ * remove, waive or weaken a compliance requirement — requirements come from
+ * `src/lib/compliance.ts` alone, and `RETAIL_CHANNEL_COMPLIANCE_IS_MODEL_INDEPENDENT`
+ * declares that fact so a validator can pin it.
+ *
+ * The demo assignment lives in exactly ONE place: each demo brand's own
+ * `commercialModel` field in `demoData.ts`. This store derives from it.
+ */
+
+export interface BrandCommercialModelRecord {
+  brandId: string;
+  model: CommercialModel;
+  /** Model A — the agreed Mercenta commission rate (% of retail-channel value). */
+  commissionRatePct: number;
+  /** Model B — the share of retail-channel revenue paid to the brand (%). */
+  brandAcquisitionSharePct: number;
+  /** Where the current value came from (seed, the brand's onboarding, or an override). */
+  source: 'demo_seed' | 'onboarding' | 'admin_override';
+  recordedAt: string;
+  recordedBy: string;
+  reason: string;
+}
+
+/** Deterministic seed timestamp — never `Date.now()` (replay-digest safety). */
+const COMMERCIAL_MODEL_SEED_AT = '2026-09-14T00:00:00.000Z';
+
+function seedBrandCommercialModels(): BrandCommercialModelRecord[] {
+  return ALL_DEMO_BRANDS.map((b) => ({
+    brandId: b.id,
+    model: b.commercialModel,
+    commissionRatePct: DEMO_COMMISSION_RATE_PCT,
+    brandAcquisitionSharePct: DEMO_ACQUISITION_SHARE_PCT,
+    source: 'demo_seed' as const,
+    recordedAt: COMMERCIAL_MODEL_SEED_AT,
+    recordedBy: 'demo-seed',
+    reason: 'Demo dataset assignment — Brand A runs Model A, Brand B runs Model B.',
+  }));
+}
+
+export const demoBrandCommercialModels: BrandCommercialModelRecord[] = seedBrandCommercialModels();
+
+export function getBrandCommercialModelRecord(brandId: string): BrandCommercialModelRecord | null {
+  return demoBrandCommercialModels.find((r) => r.brandId === brandId) ?? null;
+}
+
+/**
+ * What THIS brand's commercial relationship is. An unknown/absent brand resolves
+ * `not_selected` — fail-closed, never a guessed model.
+ */
+export function resolveBrandCommercialModel(brandId: string): ResolvedCommercialModel {
+  return resolveCommercialModel(getBrandCommercialModelRecord(brandId)?.model);
+}
+
+/**
+ * Record or CHANGE a brand's commercial relationship (§5).
+ *
+ * Fail-closed rules:
+ *   • an unknown model string is REFUSED (never a silent default);
+ *   • an `admin_override` requires BOTH an actor and a reason;
+ *   • every write appends a canonical audit row (history is never destroyed);
+ *   • the audit row records `complianceUnchanged: true`, because this write can
+ *     never touch the retail-channel compliance requirements.
+ */
+export function setBrandCommercialModel(input: {
+  brandId: string;
+  model: CommercialModel;
+  actorId: string;
+  reason: string;
+  source?: BrandCommercialModelRecord['source'];
+  commissionRatePct?: number;
+  brandAcquisitionSharePct?: number;
+}): { ok: true; record: BrandCommercialModelRecord } | { ok: false; error: string } {
+  const source = input.source ?? 'onboarding';
+  if (!input.brandId) {
+    return { ok: false, error: 'A brand id is required to record a commercial relationship.' };
+  }
+  if (!isCommercialModel(input.model)) {
+    return {
+      ok: false,
+      error: `"${String(input.model)}" is not a commercial model. Expected one of: ${COMMERCIAL_MODEL_ORDER.join(', ')}.`,
+    };
+  }
+  if (source === 'admin_override' && (!input.reason.trim() || !input.actorId.trim())) {
+    return {
+      ok: false,
+      error: 'An operator change to a commercial relationship requires both an actor and a reason (audited).',
+    };
+  }
+
+  const now = new Date().toISOString();
+  const existing = demoBrandCommercialModels.find((r) => r.brandId === input.brandId);
+
+  const appendAudit = (record: BrandCommercialModelRecord, action: string) => {
+    demoAuditLog.push({
+      id: `audit-commercial-${demoAuditLog.length + 1}-${input.brandId}`,
+      createdAt: now,
+      actorId: input.actorId,
+      action,
+      entityType: 'brand_commercial_relationship',
+      entityId: input.brandId,
+      brandId: input.brandId,
+      reason: input.reason,
+      metadata: {
+        model: record.model,
+        source,
+        commissionRatePct: record.commissionRatePct,
+        brandAcquisitionSharePct: record.brandAcquisitionSharePct,
+        complianceUnchanged: RETAIL_CHANNEL_COMPLIANCE_IS_MODEL_INDEPENDENT,
+      },
+    });
+  };
+
+  if (existing) {
+    existing.model = input.model;
+    if (input.commissionRatePct !== undefined) existing.commissionRatePct = input.commissionRatePct;
+    if (input.brandAcquisitionSharePct !== undefined) {
+      existing.brandAcquisitionSharePct = input.brandAcquisitionSharePct;
+    }
+    existing.source = source;
+    existing.recordedAt = now;
+    existing.recordedBy = input.actorId;
+    existing.reason = input.reason;
+    appendAudit(existing, source === 'admin_override' ? 'commercial_model_changed' : 'commercial_model_confirmed');
+    notifyCanonicalStoreChange();
+    return { ok: true, record: existing };
+  }
+
+  const record: BrandCommercialModelRecord = {
+    brandId: input.brandId,
+    model: input.model,
+    commissionRatePct: input.commissionRatePct ?? DEMO_COMMISSION_RATE_PCT,
+    brandAcquisitionSharePct: input.brandAcquisitionSharePct ?? DEMO_ACQUISITION_SHARE_PCT,
+    source,
+    recordedAt: now,
+    recordedBy: input.actorId,
+    reason: input.reason,
+  };
+  demoBrandCommercialModels.push(record);
+  appendAudit(record, 'commercial_model_selected');
+  notifyCanonicalStoreChange();
+  return { ok: true, record };
+}
+
+/** The canonical audit trail for a brand's commercial relationship. */
+export function commercialModelAuditFor(brandId: string): AuditLogEntry[] {
+  return demoAuditLog.filter(
+    (e) => e.entityType === 'brand_commercial_relationship' && e.brandId === brandId
+  );
+}
+
+/** Return the store to its seeded baseline (used by the deterministic demo reset). */
+export function resetBrandCommercialModels(): void {
+  demoBrandCommercialModels.length = 0;
+  demoBrandCommercialModels.push(...seedBrandCommercialModels());
 }
