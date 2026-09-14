@@ -43,6 +43,23 @@ commercial relationship, and is one of exactly two:
 
 Demo assignment: **Brand A runs Model A; Brand B runs Model B.**
 
+### The relationship is BRAND-LEVEL, explicit and audited (M12 §5/§19)
+
+- The choice is stored per brand (`demoStore` holds one commercial-relationship
+  record per brand; `DEMO_MODEL_A_BRAND_ID` / `DEMO_MODEL_B_BRAND_ID` in
+  `src/data/demoData.ts` are the single source of truth for the demo assignment).
+- Only a Super Admin can change it, and every change requires an actor **and a
+  reason** and produces an audit record (`setBrandCommercialModel`).
+- An unknown/undeclared model is REFUSED — never defaulted.
+- Onboarding **fails closed** without a selected model
+  (`checkCommercialModelSelection`): no brand can be onboarded with an undefined
+  commercial relationship.
+- The brand sees its own relationship read-only in *Settings → Commercial
+  Relationship*; it never sees another brand's terms.
+- **Model B's £2,500 gross commercial spread is NEVER called the net margin.**
+  The net Mercenta margin is the spread less carrier, payment fees, other agreed
+  fees, VAT and deductions, shown separately.
+
 Canonical code: `src/config/commercialModel.ts` (definitions, fail-closed
 selection) and `src/lib/finance/commercialModel.ts` (the arithmetic and the
 derived demo figures). Never re-derive a margin in a component.
@@ -178,6 +195,42 @@ case escalation, dispute resolution, compliance approval, admin overrides, audit
 access. Every important business event produces a canonical audit record with
 actor, role, tenant, action, object, timestamp, result and before/after where
 applicable.
+
+## Amazon product categories — ABSOLUTE LIMIT
+
+Mercenta may only prospect, evaluate, onboard, recommend or upload brands/products
+in the **ten approved Amazon UK Vendor Central categories**, declared ONCE in
+`src/types.ts` as `APPROVED_CATEGORIES` (consumed through `isApprovedCategory`):
+
+Health and Personal Care · Home · Baby · Office Products · Kitchen ·
+Consumer Electronics · Automotive · Grocery · Apparel · Personal Computer.
+
+Anything outside that list must be filtered out or explicitly marked ineligible —
+including in Brand Intelligence, Brand Discovery, opportunity discovery
+(sports/team, international, distributor/channel), sales estimation and
+fundraising opportunity records. Do not spend AI/provider calls analysing
+out-of-category products.
+
+## Amazon wording safeguards (M12)
+
+This is a compliance requirement, not a style preference. Mercenta NEVER uses
+wording intended to conceal, evade or bypass Amazon rules, and never claims
+rights, permissions, approvals, programmes or relationships it does not have.
+Canonical code: `src/lib/intelligence/amazonWording.ts`
+(`AMAZON_PROGRAMME_STATUS = 'not_confirmed_with_amazon'`), enforced outward by
+`npm run validate:wording`.
+
+- Banned in outward-facing copy: "we sell directly to Amazon", "we bypass
+  Amazon", "Amazon wholesale loophole", "Amazon guaranteed POs", "Amazon will buy
+  your products", "guaranteed purchase orders" — unless a specific verified
+  contractual fact supports the statement.
+- Prefer: channel distribution · marketplace/channel operations · distribution
+  support · managed retail-channel operations · purchase-order management ·
+  Mercenta-managed channel.
+- Every Amazon-related claim must be distinguishable as confirmed fact /
+  estimate / simulation / third-party research / pending confirmation.
+- Never call a channel PO "guaranteed" — use PO potential, estimated PO
+  opportunity, demand potential, projected opportunity.
 
 ## Never
 

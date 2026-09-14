@@ -35,7 +35,12 @@ node scripts/validate-document-verification.mjs  # §M2 compliance document veri
 node scripts/validate-financial-reconciliation.mjs # §M6 money flow + payout gates
 node scripts/validate-payouts.mjs                # §7 payout gates + §6 rails
 node scripts/validate-mock-providers.mjs         # §13 DHL + Palletline simulation
-node scripts/validate-investor-demo.mjs          # deterministic zero-network lifecycle
+node scripts/validate-investor-demo.mjs          # deterministic zero-network lifecycle (25 stages)
+# --- M12 (commercial relationship, strategy, estimator, founder centre) ---
+node scripts/validate-commercial-model-selection.mjs # §5/§19 brand-level commercial relationship (fail-closed)
+node scripts/validate-intelligence-strategy.mjs      # §12–§16 acquisition strategy, source markets, trade programmes
+node scripts/validate-sales-estimator.mjs            # §15/§16 estimator + New Product Launch Programme modelling
+node scripts/validate-founder-centre.mjs             # §21 investor centre + partnerships/fundraising centre
 npx playwright test                     # full E2E suite
 ```
 

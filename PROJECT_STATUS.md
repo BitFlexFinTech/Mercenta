@@ -2,7 +2,44 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
-> ## ⏸️ M12 CHECKPOINT (handoff to a NEW Cline conversation) — 2026-09-14
+> ## ✅ M12 CLOSED / M13 BUILD-FORWARD — 2026-09-14
+>
+> **Status: M12 checkpoint work is COMMITTED and the suite is GREEN.**
+>
+> - **Commit:** `fb56455` — "*chore(M12 closing): commit verified M12 checkpoint
+>   work; repair ENOENT path bug in validators (fileURLToPath), repoint
+>   export-review-zip/deploy-demo to the renamed project root, ignore owner
+>   company-document folders*". Branch `redesign/foundation`; protected baseline
+>   `959b4d2` still an ancestor.
+> - **Working tree:** CLEAN (`git status --porcelain` → 0 lines) at that commit.
+> - **Full validator sweep (real output):** every `scripts/validate-*.mjs`
+>   (64 scripts) exited **0** — run in `1. Mercenta` after the commit and captured
+>   to `/tmp/m12_validators.txt`. No non-zero exit.
+> - **Path bug fixed repo-wide:** `scripts/export-review-zip.sh` and
+>   `scripts/deploy-demo.sh` now derive the project root from
+>   `"$(dirname "${BASH_SOURCE[0]}")/.."` — no hardcoded
+>   `~/Desktop/Mercenta` remains in either script. `.clinerules` path references
+>   repointed. `node scripts/export-review-zip.sh` verified working → 36M at
+>   `/Users/tadii/Desktop/1. Mercenta/Review Zip/mercenta-review.zip`.
+> - **Owner folders** `0. Company Documents/` + `Parterships/` are kept on disk
+>   and added to `.gitignore` (personal/compliance PDFs are intentionally NOT
+>   tracked — no secrets in Git).
+> - **Documentation reconciliation (M12 closing):** `README.md` (4 new M12
+>   validators added to the gate list), `docs/INTEGRATIONS.md` (§2b sales-estimator
+>   data seam), `GO_LIVE.md` (estimator + outreach-email activation
+>   preconditions), `.clinerules/mercenta-business-model.md` (brand-level
+>   relationship rules, the ten-category limit, Amazon wording safeguards).
+>
+> **M13 build-forward queue** (from the master prompt, in order): Phase 3
+> Opportunity Discovery (UK / international / sports / channel verticals, sharing
+> the existing ASIN engine), Phase 4 estimator + New Product Launch Programme
+> naming, Phase 5 Ads Management, Phase 8 Google integration wizard, Phase 9
+> Companies House / company-government centre, Phase 10 operating-cost dashboard,
+> Phase 11 Super Admin command centre, Phase 13 MVP launch centre, Phase 12
+> filesystem organisation, Phase 15 full regression. Phases 2, 6, 7 are already
+> built and validator-pinned by M12 — verify, do not rebuild.
+> ---
+> ## ⏸️ M12 CHECKPOINT — RESOLVED ABOVE (kept for history) — 2026-09-14
 >
 > **CHECKPOINT ONLY.** The owner cancelled the M12 session mid-flight. No M12 work
 > was discarded, no reset/revert/rebase was performed, and nothing below was

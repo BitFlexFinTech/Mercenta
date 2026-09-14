@@ -50,6 +50,29 @@ Priority-1 provider additions). `authMethod` = `oauth | api_key`; connect flow i
   **Keepa client (research)**, **OpenRouter via discovery research**,
   **Hunter variants**, **PandaDoc/esign lib**.
 
+## 2b. Sales-estimator data seam (M12 §15/§16)
+
+The sales estimator (`src/lib/intelligence/salesEstimator.ts`) reads the retail
+channel through the **already-registered** providers only — it introduces no new
+integration:
+
+    SALES_DATA_PROVIDERS = ['keepa', 'amazon_sp_api']
+
+`salesDataProviderMode()` resolves each provider's mode through
+`resolveProviderMode` / `isProviderSimulationSafe`, so the estimator's truthfulness
+follows the provider registry automatically:
+
+| Provider state | What the estimate is labelled as |
+|---|---|
+| all providers simulation / unknown | `simulated_estimate` — never presented as measured marketplace data |
+| a provider positively resolves live | the estimate still returns an estimate band + `basis`, with the live provider named in `providerModes` |
+
+`estimateFromProspect()` is the async path that pulls the stored research data;
+the synchronous `estimateAmazonSales()` is the deterministic path used by the
+investor demo and the validators. Neither ever calls a network in simulation,
+and neither ever claims Amazon approval (`AMAZON_PROGRAMME_STATUS =
+'not_confirmed_with_amazon'`).
+
 ## 3. Environment keys (names only — values NEVER printed/logged/committed)
 
 `SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY, SUPABASE_JWKS_URL,
