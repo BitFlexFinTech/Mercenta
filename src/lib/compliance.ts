@@ -64,6 +64,125 @@ export const CATEGORY_DOC_LABELS: Record<ComplianceDocument['type'], string> = {
   textile_labelling_compliance: 'Textile Labelling Compliance',
 };
 
+/* ── §M2 — Requirements as explicit, conditional RULES ───────────────────────
+ *
+ * The category map above says WHICH document a category needs. M2 makes the
+ * REASON and the CONDITION explicit, so a conditional requirement can be
+ * represented as a rule rather than being blindly demanded for every product in
+ * the category.
+ *
+ * Interpretive decisions (reconciled against the existing architecture, not a
+ * generic internet checklist):
+ *
+ *  - The four BASE documents are UNIVERSAL: every brand, every category must
+ *    hold them, because Mercenta is the vendor of record and carries the
+ *    liability. They are never conditional.
+ *  - Category documents are CONDITIONAL ON THE PRODUCT, not on the category
+ *    name alone. A Kitchen brand that sells no food-contact item does not owe a
+ *    food-contact declaration; a Grocery brand selling only shelf-stable dry
+ *    goods does not owe an HACCP certificate for a perishable line.
+ *  - CONDITIONS DEFAULT TO REQUIRED. If no product context is supplied the
+ *    requirement stands — the platform can only NARROW a requirement when it
+ *    positively knows the condition does not apply. This keeps the hard gate
+ *    fail-closed and preserves every existing requirement count.
+ */
+
+export type ComplianceRequirementScope = 'universal' | 'category' | 'conditional';
+
+/**
+ * Product/context signals a conditional requirement keys off. Explicitly
+ * tri-state: `undefined` means "not known" and therefore the requirement
+ * applies (fail-closed).
+ */
+export interface ComplianceProductContext {
+  category?: ApprovedCategory;
+  /** Product is placed in contact with food → food-contact declaration. */
+  touchesFood?: boolean;
+  /** Product is an electrical/electronic item → WEEE. */
+  isElectrical?: boolean;
+  /** Product is a cosmetic → CPNP/SCNP notification. */
+  isCosmetic?: boolean;
+  /** Product is a textile/apparel item → textile labelling. */
+  isTextile?: boolean;
+  /** Product is a vehicle part → type approval. */
+  isAutomotive?: boolean;
+  /** Product is a child/baby item → EN 71 / EN 1888 safety. */
+  isBaby?: boolean;
+  /** Product is perishable/food → HACCP/BRC certificate. */
+  isPerishable?: boolean;
+}
+
+export interface ComplianceRequirement {
+  type: ComplianceDocument['type'];
+  scope: ComplianceRequirementScope;
+  /** Why Mercenta requires this document — shown to the brand, auditable. */
+  rationale: string;
+  /** For conditional requirements: the signal the rule keys off. */
+  condition?: keyof Omit<ComplianceProductContext, 'category'>;
+  /** Optional human description of the condition. */
+  conditionDescription?: string;
+}
+
+const BASE_REQUIREMENT_RATIONALE: Record<string, string> = {
+  letter_of_authorization:
+    'Mercenta acts as vendor of record on the retail channel and must hold explicit authority from the brand.',
+  product_safety_ukca:
+    'Products placed on the UK market must carry a valid UKCA conformity position.',
+  insurance_certificate:
+    'Mercenta carries product liability exposure for goods it distributes.',
+  brand_registry_confirmation:
+    'Confirms the applicant is the authorised owner of the brand it is listing.',
+};
+
+interface CategoryRequirementRule {
+  condition: keyof Omit<ComplianceProductContext, 'category'>;
+  conditionDescription: string;
+  rationale: string;
+}
+
+/** The category document rules, with the condition each one keys off. */
+const CATEGORY_REQUIREMENT_RULES: Record<ComplianceDocument['type'], CategoryRequirementRule | undefined> = {
+  letter_of_authorization: undefined,
+  product_safety_ukca: undefined,
+  insurance_certificate: undefined,
+  brand_registry_confirmation: undefined,
+  baby_product_safety: {
+    condition: 'isBaby',
+    conditionDescription: 'Requires a Baby-category product intended for children.',
+    rationale: 'Child-safety conformity (EN 71 / EN 1888) applies to every child-facing item.',
+  },
+  cosmetic_notification_cpnp: {
+    condition: 'isCosmetic',
+    conditionDescription: 'Requires a cosmetic/personal-care product.',
+    rationale: 'Cosmetic products must hold a valid CPNP/SCNP notification before UK supply.',
+  },
+  food_contact_material: {
+    condition: 'touchesFood',
+    conditionDescription: 'Requires a product that contacts food.',
+    rationale: 'Food-contact materials must be declared compliant under UK food-contact rules.',
+  },
+  weee_compliance: {
+    condition: 'isElectrical',
+    conditionDescription: 'Requires an electrical/electronic product.',
+    rationale: 'Producers of electrical equipment must be registered for WEEE take-back.',
+  },
+  type_approval: {
+    condition: 'isAutomotive',
+    conditionDescription: 'Requires a vehicle/automotive part.',
+    rationale: 'Automotive components require type-approval documentation for UK supply.',
+  },
+  food_safety_certificate: {
+    condition: 'isPerishable',
+    conditionDescription: 'Requires a perishable food product.',
+    rationale: 'Perishable food lines require a recognised food-safety certification (HACCP/BRC).',
+  },
+  textile_labelling_compliance: {
+    condition: 'isTextile',
+    conditionDescription: 'Requires a textile/apparel product.',
+    rationale: 'Textile goods must carry compliant fibre-composition labelling.',
+  },
+};
+
 /** Legacy flat list — kept for backward compat. Use getRequiredDocumentsForCategory() instead. */
 export const REQUIRED_DOCUMENT_TYPES: ComplianceDocument['type'][] = BASE_REQUIRED_DOCUMENTS;
 
@@ -117,8 +236,15 @@ export function evaluateComplianceGate(
     ? getRequiredDocumentsForCategory(category)
     : BASE_REQUIRED_DOCUMENTS;
 
+  // §M2 — evaluate against the LATEST version of each requirement. With one
+  // record per type (every pre-M2 record and every seeded document) this is
+  // identical to the previous `find()`; once a brand replaces a rejected
+  // document, the replacement — not the superseded version — is what the gate
+  // must judge.
+  const latest = latestDocumentsByType(docs);
+
   for (const type of requiredTypes) {
-    const record = docs.find((d) => d.type === type);
+    const record = latest.get(type);
     if (!record) {
       missing.push(type);
     } else if (record.status !== 'approved') {
@@ -148,3 +274,172 @@ export function evaluateComplianceGate(
     chargebackIndemnityAccepted,
   };
 }
+
+/* ── §M2 — Requirement resolution (rule-driven, fail-closed) ──────────────── */
+
+/**
+ * Every requirement applicable to a brand/category, as explicit rules.
+ * Universal rules first, then category rules — the same ORDER the gate has
+ * always evaluated, so no behaviour shifts.
+ */
+export function getComplianceRequirements(category?: ApprovedCategory): ComplianceRequirement[] {
+  const universal: ComplianceRequirement[] = BASE_REQUIRED_DOCUMENTS.map((type) => ({
+    type,
+    scope: 'universal' as const,
+    rationale:
+      BASE_REQUIREMENT_RATIONALE[type] ??
+      'Required for every brand operating through Mercenta.',
+  }));
+  const categoryDocs = category ? CATEGORY_SPECIFIC_DOCUMENTS[category] ?? [] : [];
+  const conditional: ComplianceRequirement[] = categoryDocs.map((type) => {
+    const rule = CATEGORY_REQUIREMENT_RULES[type];
+    return {
+      type,
+      scope: rule ? ('conditional' as const) : ('category' as const),
+      rationale: rule?.rationale ?? 'Required for this product category.',
+      ...(rule
+        ? { condition: rule.condition, conditionDescription: rule.conditionDescription }
+        : {}),
+    };
+  });
+  return [...universal, ...conditional];
+}
+
+/**
+ * The requirements that ACTUALLY apply, given whatever the platform positively
+ * knows about the product. A conditional requirement is dropped ONLY when its
+ * signal is explicitly `false`; unknown signals leave it required (fail-closed).
+ */
+export function getApplicableRequirements(
+  category?: ApprovedCategory,
+  context?: ComplianceProductContext
+): ComplianceRequirement[] {
+  return getComplianceRequirements(category).filter((req) => {
+    if (req.scope !== 'conditional' || !req.condition || !context) return true;
+    const signal = context[req.condition];
+    return signal !== false;
+  });
+}
+
+/**
+ * §M2 — context-aware required document types. With no context this returns
+ * exactly `getRequiredDocumentsForCategory(category)` (the existing canonical
+ * answer), so every existing caller and test is unchanged.
+ */
+export function getRequiredDocumentsForContext(
+  category: ApprovedCategory,
+  context?: ComplianceProductContext
+): ComplianceDocument['type'][] {
+  return getApplicableRequirements(category, context).map((r) => r.type);
+}
+
+/**
+ * §M2 — the requirement a single document type satisfies, including WHY it is
+ * required. Used by the brand-facing standing view and the audit trail.
+ */
+export function requirementForDocumentType(
+  type: ComplianceDocument['type'],
+  category?: ApprovedCategory
+): ComplianceRequirement | undefined {
+  return getComplianceRequirements(category).find((r) => r.type === type);
+}
+
+/** §M2 — document states that BLOCK the gate (everything except `approved`). */
+export const BLOCKING_COMPLIANCE_DOC_STATUSES: ComplianceDocument['status'][] = [
+  'missing',
+  'uploaded',
+  'under_review',
+  'rejected',
+  'superseded',
+  'expiring',
+  'expired',
+];
+
+/**
+ * §M2 — the canonical, brand-facing standing: exactly what is required, what is
+ * in each review state, what needs replacing, and what is blocking. Derived from
+ * the canonical gate rule — never a second hand-maintained list.
+ */
+export interface BrandComplianceStanding {
+  cleared: boolean;
+  required: ComplianceDocument['type'][];
+  approved: ComplianceDocument['type'][];
+  missing: ComplianceDocument['type'][];
+  underReview: ComplianceDocument['type'][];
+  failed: ComplianceDocument['type'][];
+  needsReplacement: ComplianceDocument['type'][];
+  superseded: ComplianceDocument['type'][];
+  blocking: { type: string; status: string; reason: string }[];
+  agreementSigned: boolean;
+  agreementsAccepted: boolean;
+}
+
+export function describeBrandComplianceStanding(
+  docs: ComplianceDocument[],
+  evaluation: GateEvaluation,
+  required: ComplianceDocument['type'][]
+): BrandComplianceStanding {
+  const byType = new Map(docs.map((d) => [d.type as string, d]));
+  const group = (statuses: ComplianceDocument['status'][]) =>
+    required.filter((t) => {
+      const d = byType.get(t);
+      return d ? statuses.includes(d.status) : false;
+    });
+  return {
+    cleared: evaluation.cleared,
+    required,
+    approved: group(['approved']),
+    missing: required.filter((t) => !byType.has(t)),
+    underReview: group(['uploaded', 'under_review', 'expiring']),
+    failed: group(['rejected']),
+    needsReplacement: group(['rejected', 'expired']),
+    superseded: group(['superseded']),
+    blocking: evaluation.blocking.map((b) => ({
+      type: b.type,
+      status: b.status,
+      reason:
+        b.status === 'rejected'
+          ? 'verification failed — replacement required'
+          : b.status === 'superseded'
+            ? 'superseded by a newer version'
+            : b.status === 'under_review' || b.status === 'uploaded'
+              ? 'under verification'
+              : b.status === 'expired'
+                ? 'the document has expired'
+                : 'not approved',
+    })),
+    agreementSigned: evaluation.agreementSigned,
+    agreementsAccepted: evaluation.logisticsSlaAccepted && evaluation.chargebackIndemnityAccepted,
+  };
+}
+
+
+/**
+ * §M2 — THE canonical per-requirement view: for each document type, the LATEST
+ * version on file. A brand may hold several versions of the same requirement
+ * (a rejected document and its replacement); every consumer that asks "what is
+ * the state of this requirement?" must read the latest, never an older record.
+ *
+ * Tie-break is deterministic: higher `version` wins, then later array position.
+ */
+export function latestDocumentsByType<T extends { type: string; version?: number }>(
+  docs: T[]
+): Map<string, T> {
+  const map = new Map<string, T>();
+  docs.forEach((doc, index) => {
+    const current = map.get(doc.type);
+    if (!current) {
+      map.set(doc.type, doc);
+      return;
+    }
+    const currentVersion = current.version ?? 1;
+    const docVersion = doc.version ?? 1;
+    if (docVersion > currentVersion) map.set(doc.type, doc);
+    else if (docVersion === currentVersion) {
+      const currentIndex = docs.indexOf(current);
+      if (currentIndex < index) map.set(doc.type, doc);
+    }
+  });
+  return map;
+}
+

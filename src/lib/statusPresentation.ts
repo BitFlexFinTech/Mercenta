@@ -18,6 +18,7 @@ import type {
   ApplicationStatus,
   ComplianceDocument,
   DeductionStatus,
+  DocumentVerificationStatus,
   OnboardingStatus,
   PurchaseOrderStatus,
   ReturnTrackingStatus,
@@ -49,6 +50,10 @@ const COMPLIANCE_DOC_STATUS: Record<ComplianceDocStatus, StatusPresentation> = {
   uploaded: { label: 'uploaded', tone: 'warning', dataStatus: 'uploaded', actionable: true },
   under_review: { label: 'under review', tone: 'warning', dataStatus: 'under_review', actionable: true },
   missing: { label: 'missing', tone: 'danger', dataStatus: 'missing', actionable: true },
+  /** §M2 — verification failed: the document must be REPLACED. */
+  rejected: { label: 'rejected', tone: 'danger', dataStatus: 'rejected', actionable: true },
+  /** §M2 — replaced by a newer version; retained for the audit trail. */
+  superseded: { label: 'superseded', tone: 'neutral', dataStatus: 'superseded', actionable: true },
   expiring: { label: 'expiring', tone: 'info', dataStatus: 'expiring', actionable: true },
   expired: { label: 'expired', tone: 'danger', dataStatus: 'expired', actionable: true },
 };
@@ -58,6 +63,47 @@ export function complianceDocStatusPresentation(
 ): StatusPresentation {
   return (
     COMPLIANCE_DOC_STATUS[status as ComplianceDocStatus] ?? {
+      label: String(status).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(status),
+      actionable: true,
+    }
+  );
+}
+
+/* ── §M2 — document verification verdict states ───────────────────────────── */
+
+export type DocumentVerificationStatusKey = DocumentVerificationStatus;
+
+/**
+ * Verification verdict states. `verified` is success; `failed` needs a
+ * replacement; `unavailable`/`manual_review_required` are honest non-verdicts
+ * (no provider ran, nothing was verified) and route to manual review.
+ */
+const DOCUMENT_VERIFICATION_STATUS: Record<DocumentVerificationStatusKey, StatusPresentation> = {
+  not_requested: { label: 'not requested', tone: 'neutral', dataStatus: 'not_requested', actionable: true },
+  pending: { label: 'verification pending', tone: 'warning', dataStatus: 'verification_pending', actionable: true },
+  verified: { label: 'verified', tone: 'success', dataStatus: 'verified', actionable: false },
+  failed: { label: 'verification failed', tone: 'danger', dataStatus: 'verification_failed', actionable: true },
+  unavailable: {
+    label: 'verification unavailable',
+    tone: 'warning',
+    dataStatus: 'verification_unavailable',
+    actionable: true,
+  },
+  manual_review_required: {
+    label: 'manual review required',
+    tone: 'warning',
+    dataStatus: 'manual_review_required',
+    actionable: true,
+  },
+};
+
+export function documentVerificationStatusPresentation(
+  status: DocumentVerificationStatusKey | string
+): StatusPresentation {
+  return (
+    DOCUMENT_VERIFICATION_STATUS[status as DocumentVerificationStatusKey] ?? {
       label: String(status).replace(/_/g, ' '),
       tone: 'neutral',
       dataStatus: String(status),

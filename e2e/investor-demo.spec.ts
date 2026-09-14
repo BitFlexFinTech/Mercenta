@@ -291,8 +291,16 @@ test.describe('Investor demo — error & recovery', () => {
     await expect(
       page.locator('li[data-state="investor-demo-stage-acknowledgement"]')
     ).toContainText('duplicate acknowledgement refused');
+    // §M2 — the compliance stage now narrates the verification lifecycle
+    // (submission → pending verification → failure → replacement → verified).
     await expect(page.locator('li[data-state="investor-demo-stage-compliance"]')).toContainText(
-      'uploaded → under_review'
+      'pending verification'
+    );
+    await expect(page.locator('li[data-state="investor-demo-stage-compliance"]')).toContainText(
+      'gate BLOCKED'
+    );
+    await expect(page.locator('li[data-state="investor-demo-stage-compliance"]')).toContainText(
+      'gate CLEARED'
     );
   });
 });

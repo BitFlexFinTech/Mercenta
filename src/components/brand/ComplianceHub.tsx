@@ -17,7 +17,12 @@ import { MERCENTA_EORI, MERCENTA_VAT } from '@/config/customs';
 import { generateCustomsDocBundle, type CustomsDocumentBundle } from '@/lib/customsDocs';
 import { useBrands, useProducts, usePurchaseOrders, useComplianceDocuments, useContracts, useBrandAgreements } from '@/data/queries';
 import { uploadComplianceDoc } from '@/data/api';
-import { evaluateComplianceGate, getRequiredDocumentsForCategory, CATEGORY_DOC_LABELS, REQUIRED_DOCUMENT_TYPES } from '@/lib/compliance';
+import { evaluateComplianceGate, getRequiredDocumentsForCategory, CATEGORY_DOC_LABELS, REQUIRED_DOCUMENT_TYPES, latestDocumentsByType } from '@/lib/compliance';
+import {
+  documentVerificationStanding,
+  replaceComplianceDocument,
+} from '@/lib/verification/documentVerification';
+import { defaultIntegrationMode } from '@/integrations/registry';
 import type { ApprovedCategory } from '@/types';
 
 /**
@@ -233,7 +238,15 @@ function ComplianceUploadCard({
   // previously fell through to an undefined-category 4-doc computation).
   const requiredTypes = category ? getRequiredDocumentsForCategory(category) : REQUIRED_DOCUMENT_TYPES;
   const gate = evaluateComplianceGate(brandDocs, category, hasSignedAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted);
+  // §M2 — the verification standing: required / submitted / under review /
+  // passed / failed / needs replacement, with the reason each is blocking.
+  // Computed from the SAME records the gate above used.
+  const standing = brandId
+    ? documentVerificationStanding(brandId, category, brandDocs, gate)
+    : null;
+  const latestDocs = latestDocumentsByType(brandDocs);
   const [uploaded, setUploaded] = useState<string | null>(null);
+  const [replacementNote, setReplacementNote] = useState<string | null>(null);
   const qc = useQueryClient();
   const { reviewGateDocument } = useApp();
 
@@ -242,11 +255,55 @@ function ComplianceUploadCard({
     // §Phase A — the write is canonical (demoStore + optional Supabase row). The
     // returned doc id also exists in the in-session gate list, so the Product
     // Catalog gate is moved to the SAME state this card reports.
-    const { docId } = uploadComplianceDoc(brandId, type, 'brand');
+    //
+    // §M2 — evidence is attached ONLY when the resolved provider mode is
+    // positively `simulation`; in every other mode nothing is claimed about the
+    // artefact, so an automated verification cannot pass a document that does
+    // not exist.
+    const simulated = defaultIntegrationMode('companies_house') === 'simulation';
+    const { docId } = uploadComplianceDoc(
+      brandId,
+      type,
+      'brand',
+      simulated
+        ? {
+            fileUrl: `simulated://compliance/${brandId}/${type}`,
+            reference: `SIM-${type.toUpperCase()}-${brandId.replace(/^brand-/, '').toUpperCase()}`,
+            issuer: 'Simulated issuing body (no external provider)',
+          }
+        : undefined
+    );
     reviewGateDocument(docId, 'under_review');
     // §Phase A — re-read the canonical docs so this card's own status badge
     // reflects the write immediately. Previously the row stayed on its old
     // status until a reload (the removed `docVersion` state was never read).
+    void qc.invalidateQueries({ queryKey: ['compliance-documents'] });
+    setUploaded(type);
+    setTimeout(function() { setUploaded(null); }, 3000);
+  }
+
+  /**
+   * §M2 — replace a rejected/expired document with a new version. The previous
+   * version is superseded (kept for audit) and the requirement stays BLOCKED
+   * until the replacement itself passes verification.
+   */
+  function handleReplace(type: string) {
+    if (!brandId) return;
+    const doc = latestDocs.get(type);
+    if (!doc) return;
+    const result = replaceComplianceDocument({
+      documentId: doc.id,
+      actor: { staffId: 'brand', canMutate: true, tenantId: brandId },
+      reason: 'Brand supplied a replacement after the previous version failed verification.',
+      fileUrl: `simulated://compliance/${brandId}/${type}`,
+      reference: `SIM-${type.toUpperCase()}-${brandId.replace(/^brand-/, '').toUpperCase()}-R`,
+      issuer: 'Simulated issuing body (no external provider)',
+    });
+    if (!result.ok) {
+      setReplacementNote(result.error);
+      return;
+    }
+    setReplacementNote(null);
     void qc.invalidateQueries({ queryKey: ['compliance-documents'] });
     setUploaded(type);
     setTimeout(function() { setUploaded(null); }, 3000);
@@ -278,18 +335,34 @@ function ComplianceUploadCard({
         </div>
         <div className="divide-y divide-white/[0.04]">
           {requiredTypes.map(function(type) {
-            const doc = brandDocs.find(function(d) { return d.type === type; });
+            // §M2 — read the LATEST version of the requirement.
+            const doc = latestDocs.get(type);
             const status = doc ? doc.status : 'missing';
             const isUploading = uploaded === type;
             const expiry = doc ? expiryStatus(doc) : null;
+            const row = standing?.rows.find(function(r) { return r.type === type; });
+            const verification = row && row.verification ? row.verification : null;
             return (
-              <div key={type} className="flex items-center justify-between py-2.5">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xs text-zinc-300 capitalize truncate">{type.replace(/_/g, ' ')}</span>
-                  {expiry && (
-                    <Badge className={cn('text-[9px]', expiry.color)}>
-                      <Clock className="w-2.5 h-2.5 mr-0.5" />{expiry.label}
-                    </Badge>
+              <div key={type} className="flex items-center justify-between py-2.5 gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs text-zinc-300 capitalize truncate">{type.replace(/_/g, ' ')}</span>
+                    {row && row.scope === 'conditional' && (
+                      <Badge className="text-[9px] bg-white/[0.06] text-zinc-400 border-white/[0.08]">conditional</Badge>
+                    )}
+                    {expiry && (
+                      <Badge className={cn('text-[9px]', expiry.color)}>
+                        <Clock className="w-2.5 h-2.5 mr-0.5" />{expiry.label}
+                      </Badge>
+                    )}
+                  </div>
+                  {row && row.blockingReason && (
+                    <p className="text-[10px] text-zinc-500 mt-0.5 truncate">{row.blockingReason}</p>
+                  )}
+                  {verification && (
+                    <p className="text-[10px] text-zinc-600 mt-0.5 truncate">
+                      {`${verification.simulated ? 'Simulated verification' : verification.external ? 'External verification' : 'Automated verification'} — ${verification.result} (${verification.providerId}${verification.simulated ? ', simulated' : ''})`}
+                    </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
@@ -300,6 +373,11 @@ function ComplianceUploadCard({
                   >
                     {complianceDocStatusPresentation(status).label}
                   </StatusBadge>
+                  {row && row.needsReplacement && (
+                    <Button variant="ghost" className="text-[10px]" onClick={function() { handleReplace(type); }}>
+                      Replace
+                    </Button>
+                  )}
                   {status !== 'approved' && (
                     <Button className="text-[10px]" onClick={function() { handleUpload(type); }} disabled={isUploading}>
                       {isUploading ? 'Uploading...' : <><Upload className="w-3 h-3 mr-1" />Upload</>}
@@ -311,6 +389,7 @@ function ComplianceUploadCard({
           })}
         </div>
         {uploaded && <p className="text-[10px] text-emerald-400">Document uploaded and marked for review.</p>}
+        {replacementNote && <p className="text-[10px] text-red-300">{replacementNote}</p>}
         <p className="text-[10px] text-zinc-600">Required: {requiredTypes.map((t) => CATEGORY_DOC_LABELS[t] ?? t.replace(/_/g, ' ')).join(', ')}. A signed distribution agreement is also required.</p>
       </div>
     </Card>

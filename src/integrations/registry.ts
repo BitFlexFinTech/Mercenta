@@ -1,8 +1,11 @@
-import type {
-  IntegrationDefinition,
-  IntegrationCategory,
-  IntegrationId,
-  IntegrationMode,
+import {
+  INITIAL_INTEGRATIONS,
+  modeForState,
+  type IntegrationDefinition,
+  type IntegrationCategory,
+  type IntegrationId,
+  type IntegrationMode,
+  type ProviderResolutionMode,
 } from './types';
 
 /**
@@ -352,6 +355,22 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
 
 export function integrationMeta(id: IntegrationId): IntegrationMeta {
   return INTEGRATION_META[id];
+}
+
+/**
+ * §M2 — THE canonical default provider-mode resolution for any provider id.
+ *
+ * Previously this logic existed only inside the investor-demo orchestration.
+ * M2's document-verification seam needs the same answer, so it lives here —
+ * with the rest of the provider metadata — and the demo delegates to it. One
+ * implementation, so a provider can never resolve differently in two places.
+ *
+ * `not_registered` for anything unknown: never silently simulated.
+ */
+export function defaultIntegrationMode(providerId: string): ProviderResolutionMode {
+  const id = INTEGRATION_ORDER.find((x) => x === providerId);
+  if (!id) return 'not_registered';
+  return modeForState(INITIAL_INTEGRATIONS[id], integrationMeta(id).defaultMode);
 }
 
 /**

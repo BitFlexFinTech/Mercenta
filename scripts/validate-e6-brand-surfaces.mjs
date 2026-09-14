@@ -60,6 +60,33 @@ const APPROVED = new Set([
   'MERCENTA_MASTER_CONTEXT.md',
   'MERCENTA_ARCHITECTURE.md',
 ]);
+
+/**
+ * §M2 — document verification phase scope.
+ *
+ * This is the same file-touch proxy as E7_SCOPE: the guard's REAL invariant is
+ * "no PROTECTED path was modified and the change set stayed inside the current
+ * phase's declared surface". The current phase is M2, whose declared surface is
+ * listed here. Widening PROTECTED_PREFIXES is still caught by F5/F5b.
+ */
+const M2_SCOPE = new Set([
+  'src/types.ts',
+  'src/lib/compliance.ts',
+  'src/lib/verification/documentVerification.ts',
+  'src/lib/statusPresentation.ts',
+  'src/lib/simulation/investorDemo.ts',
+  'src/integrations/registry.ts',
+  'src/data/demoStore.ts',
+  'src/data/demoData.ts',
+  'src/data/api.ts',
+  'src/components/admin/ComplianceApprovals.tsx',
+  'src/components/brand/ComplianceHub.tsx',
+  'scripts/validate-document-verification.mjs',
+  'scripts/validate-investor-demo.mjs',
+  'e2e/document-verification.spec.ts',
+  'e2e/compliance-gate.spec.ts',
+  'e2e/investor-demo.spec.ts',
+]);
 const ALLOWED_NON_APPROVED = new Set(['Review Zip/mercenta-review.zip']);
 
 /**
@@ -321,7 +348,7 @@ try {
   test('F6 the E6 SOURCE change set is within the approved files (generated artefacts ignored)',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
-      .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) ||
+      .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) || M2_SCOPE.has(p) ||
         [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F7 no new store/dashboard module was created by E6',
     readdirSync(new URL('../src/components/brand/', import.meta.url)).every((f) => !/e6/i.test(f)) &&

@@ -10,7 +10,8 @@
  * or demoStore fixtures directly.
  */
 import { supabase } from '@/lib/supabase';
-import { evaluateComplianceGate } from '@/lib/compliance';
+import { evaluateComplianceGate, latestDocumentsByType } from '@/lib/compliance';
+import { submitDocumentForVerification } from '@/lib/verification/documentVerification';
 import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
 import { createSPApiClientForConnection } from '@/lib/spapi';
@@ -1252,21 +1253,47 @@ export function uploadComplianceDoc(
   brandId: string,
   documentType: string,
   actingStaffId: string,
-): { docId: string } {
-  const doc = demoComplianceDocs.find(function(d) { return d.brandId === brandId && d.type === documentType; });
-  if (doc) {
-    storeSetComplianceDocStatus(doc.id, 'under_review', actingStaffId);
-    return { docId: doc.id };
+  evidence?: { fileUrl?: string; reference?: string; issuer?: string; expiryDate?: string },
+): { docId: string; verificationRecordId?: string } {
+  const type = documentType as ComplianceDocument['type'];
+  // §M2 — a submission acts on the LATEST version of the requirement, never on
+  // an older superseded record.
+  const latest = latestDocumentsByType(demoComplianceDocs.filter((d) => d.brandId === brandId));
+  let doc = latest.get(type);
+
+  if (!doc) {
+    const brandSlug = brandId.replace(/^brand-/, '');
+    doc = {
+      id: `doc-${brandSlug}-${type}-v1`,
+      brandId,
+      type,
+      status: 'uploaded',
+      version: 1,
+      verificationStatus: 'not_requested',
+    };
+    demoComplianceDocs.push(doc);
   }
-  const newDoc: ComplianceDocument = {
-    id: 'doc-' + Math.random().toString(36).slice(2, 8),
-    brandId: brandId,
-    type: documentType as ComplianceDocument['type'],
-    status: 'under_review',
-    reviewedBy: actingStaffId,
+
+  // §M2 — evidence attached to the submission. When no real artefact is
+  // supplied this records nothing structural, so an automated verification can
+  // only fail — it can never pass a document that does not exist.
+  if (evidence) {
+    if (evidence.fileUrl) doc.fileUrl = evidence.fileUrl;
+    if (evidence.reference) doc.reference = evidence.reference;
+    if (evidence.issuer) doc.issuer = evidence.issuer;
+    if (evidence.expiryDate) doc.expiryDate = evidence.expiryDate;
+  }
+
+  // §M2 — submission ≠ verdict: the document moves to under_review and a
+  // `pending` verification record is opened. The gate stays BLOCKED.
+  const submitted = submitDocumentForVerification(doc.id, {
+    staffId: actingStaffId,
+    canMutate: true,
+  });
+  return {
+    docId: doc.id,
+    ...(submitted.ok ? { verificationRecordId: submitted.value.id } : {}),
   };
-  demoComplianceDocs.push(newDoc);
-  return { docId: newDoc.id };
 }
 
 export function setComplianceDocStatus(

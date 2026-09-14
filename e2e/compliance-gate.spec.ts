@@ -106,10 +106,13 @@ test.describe('Compliance Gate', () => {
     await nav.getByText('UK Compliance').first().click();
     await page.waitForTimeout(900);
 
-    // Row = the span holding the doc label → its parent → the row container.
+    // Row = the span holding the doc label → its wrappers → the row container.
+    // (§M2 added one wrapper level inside the row for the requirement rationale
+    // and verification verdict, so the traversal depth grew by one.)
     const row = page
       .getByText('brand registry confirmation', { exact: true })
       .first()
+      .locator('..')
       .locator('..')
       .locator('..');
     await expect(row.getByText('missing', { exact: true }).first()).toBeVisible({ timeout: 6000 });

@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 13, 2026 (Canonical-model session — business model reconciled; canonical shipping routing + commercial model, and Mercenta-reviewed case escalation BUILT + VERIFIED)
+Last updated: September 14, 2026 (M2 — compliance document verification seam + hard-gate enforcement BUILT + VERIFIED; M6/M7/M8/M9 pending)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd

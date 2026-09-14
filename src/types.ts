@@ -591,7 +591,14 @@ export interface HmrcFiling {
   agency: 'simulation' | 'live';
 }
 
-/** §3 Compliance gate documents */
+/**
+ * §3 Compliance gate documents
+ *
+ * §M2 — the lifecycle now also carries `rejected` (submitted, verification
+ * failed — the document must be REPLACED) and `superseded` (a later version of
+ * the same document requirement replaced it; retained so the audit trail shows
+ * what was previously on file). Both block the gate, exactly like `missing`.
+ */
 export interface ComplianceDocument {
   id: string;
   brandId: string;
@@ -608,10 +615,94 @@ export interface ComplianceDocument {
     | 'type_approval'                // Automotive (Type Approval Docs)
     | 'food_safety_certificate'      // Grocery (HACCP/BRC)
     | 'textile_labelling_compliance';// Apparel
-  status: 'missing' | 'uploaded' | 'under_review' | 'approved' | 'expiring' | 'expired';
+  status:
+    | 'missing'
+    | 'uploaded'
+    | 'under_review'
+    | 'approved'
+    | 'rejected'
+    | 'superseded'
+    | 'expiring'
+    | 'expired';
   fileUrl?: string;
   expiryDate?: string;
   reviewedBy?: string;
+  /** §M2 — reference printed on the document (certificate/policy number). */
+  reference?: string;
+  /** §M2 — issuing body named on the document. */
+  issuer?: string;
+  /**
+   * §M2 — document version. Absent means version 1 (backwards compatible with
+   * every seeded record). A replacement after rejection/supersession increments
+   * this and sets `supersedesDocumentId`.
+   */
+  version?: number;
+  /** §M2 — the document record this version replaced (rejected/superseded one). */
+  supersedesDocumentId?: string;
+  /** §M2 — cached verification verdict; the RECORDS remain the audit source. */
+  verificationStatus?: DocumentVerificationStatus;
+  /** §M2 — the record currently authoritative for this document version. */
+  latestVerificationId?: string;
+}
+
+/* ── §M2 — Document verification ─────────────────────────────────────────── */
+
+/**
+ * The verification verdict for a document version. `verified` never means
+ * "an external authority approved it" unless the latest verification record has
+ * `external: true`; the record — not this summary — carries that evidence.
+ */
+export type DocumentVerificationStatus =
+  | 'not_requested'
+  | 'pending'
+  | 'verified'
+  | 'failed'
+  | 'unavailable'
+  | 'manual_review_required';
+
+/** How the decision was reached. Manual is a first-class operational path. */
+export type DocumentVerificationMethod = 'automated' | 'manual';
+
+/**
+ * Where a verdict came from. Only `external_provider` ever means a third party
+ * actually verified the document. `simulation` is the deterministic mock seam
+ * (unmistakably simulated, never presented as real verification).
+ */
+export type DocumentVerificationProviderSource =
+  | 'internal_rules'
+  | 'simulation'
+  | 'manual_operator'
+  | 'external_provider'
+  | 'unavailable';
+
+export interface DocumentVerificationRecord {
+  id: string;
+  documentId: string;
+  brandId: string;
+  documentType: ComplianceDocument['type'];
+  documentVersion: number;
+  status: DocumentVerificationStatus;
+  method: DocumentVerificationMethod;
+  source: DocumentVerificationProviderSource;
+  /** The seam that produced this verdict (e.g. `internal_structural_rules`). */
+  providerId: string;
+  /** Human/provider identity of who or what verified the document. */
+  verifierIdentity: string;
+  /** TRUE only when a real external provider returned this result. */
+  external: boolean;
+  /** TRUE when this verdict came from the deterministic simulation seam. */
+  simulated: boolean;
+  /** Provider resolution mode the seam saw (`simulation`, `live`, `unknown`…). */
+  providerMode: string;
+  verifiedAt: string;
+  result: 'pass' | 'fail' | 'refused';
+  evidenceReference?: string;
+  failureReason?: string;
+  notes?: string;
+  /** The earlier record this one replaces (version replacement). */
+  supersedesRecordId?: string;
+  /** TRUE once a later verification record for the same requirement supersedes it. */
+  superseded?: boolean;
 }
 
 /** §11 Billing — flat monthly Stripe subscription */

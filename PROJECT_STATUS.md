@@ -1,6 +1,63 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-13 (**Canonical-model session — business model reconciled; §11 shipping routing + §12 shipping commercial model + §15 case review gate BUILT + VERIFIED**)
+> Last updated: 2026-09-14 (**M2 — compliance document verification BUILT + VERIFIED**; M6/M7/M8/M9 pending)
+>
+> **M2 SESSION (2026-09-14) — DOCUMENT VERIFICATION SEAM + HARD-GATE ENFORCEMENT.**
+>
+> **① ADDITIVE MODEL.** `DocumentVerificationRecord` (+ `DocumentVerificationStatus`,
+> `DocumentVerificationMethod`, `DocumentVerificationProviderSource`) added to
+> `src/types.ts`; `ComplianceDocument` gained `rejected` + `superseded` lifecycle
+> states and the additive `version` / `supersedesDocumentId` / `verificationStatus`
+> / `latestVerificationId` / `reference` / `issuer` fields. Records live in ONE new
+> canonical store (`demoDocumentVerifications` in `src/data/demoStore.ts`), resettable
+> with the rest of the demo. **No migration** (still 23) — nothing here needs
+> persistence beyond the existing `compliance_documents` table.
+>
+> **② PROVIDER SEAM.** NEW `src/lib/verification/documentVerification.ts` with four
+> interchangeable providers behind one interface: `internal_structural_rules`
+> (automated, real, deterministic, `external: false`), `simulated_document_verification`
+> (`simulated: true`, unmistakably `SIM-DOC-VERIFY-…`, only reachable when the mode is
+> POSITIVELY `simulation`), `manual_mercenta_admin` (first-class operator path, records
+> identity + method + reason), and `unavailable_document_verification` (FAIL-CLOSED for
+> unknown / not_registered / available / configuring / disabled / degraded / error).
+> Full lifecycle: submit → pending → automated verdict → reject → **replace (next
+> version, previous superseded but retained)** → verify → gate clears. Manual approval
+> **cannot** bypass the document requirement (no artefact ⇒ fail).
+>
+> **③ REQUIREMENTS RECONCILED.** `src/lib/compliance.ts` now expresses requirements as
+> explicit rules: 4 UNIVERSAL documents (never conditional) + category rules whose
+> CONDITION is stated (`touchesFood`, `isElectrical`, `isCosmetic`, `isTextile`,
+> `isAutomotive`, `isBaby`, `isPerishable`). `getRequiredDocumentsForContext()` only
+> NARROWS when the condition is positively `false` — unknown stays required
+> (fail-closed). Counts are unchanged, so every existing gate test still holds.
+> The gate now evaluates the **latest version** of each requirement
+> (`latestDocumentsByType`), so a replacement is judged, not the superseded record.
+>
+> **④ UI (no redesign).** Brand `ComplianceHub`: per-requirement rationale, conditional
+> badge, blocking reason, verification verdict (`simulated` / `external` stated
+> truthfully) and a **Replace** action for rejected/expired documents.
+> Admin `ComplianceApprovals`: **Verify (automated)** / **Approve (manual)** /
+> **Reject**, per-row version + verification badge, and an honest outcome note.
+>
+> **⑤ REAL DEFECT FIXED (not pre-existing-and-ignored).** A second investor-demo run
+> without a manual reset corrupted the run (onboarding `ILLEGAL_TRANSITION`, 15 error
+> stages) because the reset baseline was a shallow snapshot of a possibly-dirty module
+> instance. Reset now deep-clones its baseline, PURGES the demo tenant's own records
+> from every canonical store, and `runInvestorDemo()` always starts from that baseline.
+> This repaired `e2e/investor-demo.spec.ts` test 4 (was failing before this session).
+>
+> **⑥ SEED.** Demo compliance documents now carry unmistakably simulated evidence
+> (`simulated://…`, `SIM-…`, "Simulated issuing body") so automated verification is
+> exercisable while `missing` documents still have NO artefact. Reed & Oak's
+> `food_contact_material` is seeded `rejected` to exercise the replacement path.
+>
+> **⑦ EVIDENCE.** NEW `scripts/validate-document-verification.mjs` → **ALL PASS**
+> (52 checks) · `validate-investor-demo.mjs` **PASS** (+11 §M2 checks) ·
+> `validate-canonical-model.mjs` **34/34** · `validate-e6-brand-surfaces` **PASS** ·
+> NEW `e2e/document-verification.spec.ts` + `compliance-gate.spec.ts` +
+> `compliance-sim.spec.ts` **13/13** · `e2e/investor-demo.spec.ts` **10/10** (was 8/10) ·
+> typecheck **0** · eslint **0** · `npm run build` **✓**.
+
 >
 > **CANONICAL MODEL SESSION (2026-09-13, seventh session) — RECONCILIATION + M3/M5 BUILT.**
 >

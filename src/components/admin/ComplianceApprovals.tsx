@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBrands, useComplianceDocuments, useProducts } from '@/data/queries';
-import { setComplianceDocStatus, uploadComplianceDoc } from '@/data/api';
+import { uploadComplianceDoc } from '@/data/api';
+import {
+  documentVerificationStanding,
+  recordManualDocumentVerification,
+  verifyDocumentVersion,
+} from '@/lib/verification/documentVerification';
+import { defaultIntegrationMode } from '@/integrations/registry';
 import { generateUkcaDeclaration } from '@/lib/customsDocs';
-import { complianceDocStatusPresentation } from '@/lib/statusPresentation';
+import {
+  complianceDocStatusPresentation,
+  documentVerificationStatusPresentation,
+} from '@/lib/statusPresentation';
 import { Badge, Button, Card, EmptyState, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { CheckCircle2, ChevronDown, ChevronRight, Eye, Shield, XCircle } from 'lucide-react';
@@ -18,6 +27,8 @@ export function ComplianceApprovals() {
   const [expandedBrandId, setExpandedBrandId] = useState<string | null>(null);
   const qc = useQueryClient();
   const [previewId, setPreviewId] = useState<string | null>(null);
+  /** §M2 — the honest outcome of the last verification action (refusal text included). */
+  const [note, setNote] = useState<string | null>(null);
   const reviewer = 'Tadii';
   const preview = docs.find(function(d) { return d.id === previewId; }) ?? null;
   const previewBundle = preview ? (function(doc) {
@@ -28,9 +39,49 @@ export function ComplianceApprovals() {
     return generateUkcaDeclaration({ po: po, brandName: brand.profile.businessName, products: prods });
   })(preview) : null;
 
-  function act(id: string, status: ComplianceDocument['status']) {
-    setComplianceDocStatus(id, status, reviewer);
-    setDocs(function(prev) { return prev.map(function(d) { return d.id === id ? { ...d, status: status, reviewedBy: reviewer } : d; }); });
+  /**
+   * §M2 — the operator actions now run the REAL verification seam:
+   *   - `runAutomated` executes the automated provider (fail-closed by mode);
+   *   - `manual` records an operator verdict with identity and reason.
+   * A manual approval can NEVER clear a requirement that has no document on
+   * file, and an unavailable provider records that nothing was verified.
+   */
+  async function runAutomated(id: string) {
+    const result = await verifyDocumentVersion(
+      id,
+      { staffId: reviewer, canMutate: true },
+      { getMode: defaultIntegrationMode, providerKey: 'companies_house' }
+    );
+    setNote(
+      result.ok
+        ? `Automated verification → ${result.value.status} via ${result.value.providerId} (${result.value.providerMode})${
+            result.value.failureReason ? `: ${result.value.failureReason}` : ''
+          }`
+        : result.error
+    );
+    refresh();
+  }
+
+  async function manual(id: string, decision: 'approve' | 'reject') {
+    const result = await recordManualDocumentVerification(
+      id,
+      { staffId: reviewer, canMutate: true },
+      decision,
+      decision === 'approve'
+        ? 'Document reviewed and accepted by the Mercenta operator.'
+        : 'Document rejected by the Mercenta operator — a replacement is required.'
+    );
+    setNote(
+      result.ok
+        ? `Manual verification → ${result.value.status} recorded by ${result.value.verifierIdentity}${
+            result.value.failureReason ? `: ${result.value.failureReason}` : ''
+          }`
+        : result.error
+    );
+    refresh();
+  }
+
+  function refresh() {
     // §Phase A — keep the React Query cache truthful so a revisit inside the
     // 30s stale window cannot show the pre-review status.
     void qc.invalidateQueries({ queryKey: ['compliance-documents'] });
@@ -41,7 +92,9 @@ export function ComplianceApprovals() {
   /* rows={docs} — all docs rendered with status filter per brand card */
   return (
     <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3"><Shield className="w-5 h-5 text-brass-400" /><div><h2 className="text-lg font-semibold text-white">Compliance Approvals</h2><p className="text-xs text-zinc-500 mt-0.5">Per-brand cards</p></div></div>
+      <div className="flex items-center gap-3"><Shield className="w-5 h-5 text-brass-400" /><div><h2 className="text-lg font-semibold text-white">Compliance Approvals</h2><p className="text-xs text-zinc-500 mt-0.5">Per-brand cards · automated verification, then Mercenta operator review</p></div></div>
+      {/* §M2 — the outcome of the last verification action, including refusals. */}
+      {note && <p className="text-[11px] text-zinc-400" data-testid="compliance-verification-note">{note}</p>}
       {/* §Phase D — honest empty state: never a blank screen. */}
       {brandMap.size === 0 && (
         <Card className="p-2 bg-ink-850 border-white/[0.06]">
@@ -65,8 +118,16 @@ export function ComplianceApprovals() {
             <div className="flex items-center gap-2">{pending > 0 && <Badge className="text-[9px] bg-amber-500/15 text-amber-300">{pending}</Badge>}{isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />}</div>
           </button>
           {isExpanded && (<div className="border-t border-white/[0.06] divide-y divide-white/[0.04]">{brandDocs.map(function(d) { return (<div key={d.id} className="flex items-center justify-between px-4 py-2.5">
-            <div className="flex items-center gap-2"><span className="text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</span><StatusBadge className="text-[10px]" dataStatus={complianceDocStatusPresentation(d.status).dataStatus} tone={complianceDocStatusPresentation(d.status).tone}>{complianceDocStatusPresentation(d.status).label}</StatusBadge></div>
-            <div className="flex items-center gap-1"><Button variant="ghost" className="text-[10px]" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-[10px] text-emerald-300" onClick={function() { act(d.id, 'approved'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-[10px] text-red-300" onClick={function() { act(d.id, 'missing'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-[10px] text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs text-zinc-300 capitalize truncate">{d.type.replace(/_/g, ' ')}</span>
+              <span className="text-[9px] text-zinc-600">v{d.version ?? 1}</span>
+              <StatusBadge className="text-[10px]" dataStatus={complianceDocStatusPresentation(d.status).dataStatus} tone={complianceDocStatusPresentation(d.status).tone}>{complianceDocStatusPresentation(d.status).label}</StatusBadge>
+              {d.verificationStatus && (
+                <StatusBadge className="text-[10px]" dataStatus={documentVerificationStatusPresentation(d.verificationStatus).dataStatus} tone={documentVerificationStatusPresentation(d.verificationStatus).tone}>{documentVerificationStatusPresentation(d.verificationStatus).label}</StatusBadge>
+              )}
+              {d.supersedesDocumentId && <span className="text-[9px] text-zinc-600">replaces v{(d.version ?? 2) - 1}</span>}
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0"><Button variant="ghost" className="text-[10px]" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-[10px] text-emerald-300" onClick={function() { void manual(d.id, 'approve'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve (manual)</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-[10px] text-red-300" onClick={function() { void manual(d.id, 'reject'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-[10px] text-brass" onClick={function() { void runAutomated(d.id); }}>Verify (automated)</Button><Button variant="ghost" className="text-[10px] text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
           </div>);})}<p className="text-[8px] text-zinc-700 px-4 py-1 text-right">Actions attributed as admin on behalf of brand</p></div>)}
         </div>);
       })}</div>
@@ -82,8 +143,9 @@ export function ComplianceApprovals() {
             <iframe title="doc-preview" srcDoc={bundle?.html ?? '<p>No preview.</p>'} className="w-full h-[60vh] bg-white" />
             <div className="flex justify-end gap-2 p-4 border-t border-white/[0.06]">
               <Button variant="ghost" onClick={function() { setPreviewId(null); }}>Close</Button>
-              <Button onClick={function() { act(preview.id, 'approved'); }} className="text-xs"><CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve</Button>
-              <Button variant="ghost" onClick={function() { act(preview.id, 'missing'); }} className="text-xs text-red-300"><XCircle className="w-3.5 h-3.5 mr-1" /> Reject</Button>
+              <Button onClick={function() { void manual(preview.id, 'approve'); }} className="text-xs"><CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Approve (manual)</Button>
+              <Button variant="ghost" onClick={function() { void manual(preview.id, 'reject'); }} className="text-xs text-red-300"><XCircle className="w-3.5 h-3.5 mr-1" /> Reject</Button>
+              <Button variant="ghost" onClick={function() { void runAutomated(preview.id); }} className="text-xs text-brass">Verify (automated)</Button>
             </div>
           </Card>
         </div>);

@@ -53,6 +53,9 @@ try {
   const mod = await server.ssrLoadModule('/src/lib/simulation/investorDemo.ts');
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
   const acq = await server.ssrLoadModule('/src/data/acquisitionStore.ts');
+  const compliance = await server.ssrLoadModule('/src/lib/compliance.ts');
+  const verification = await server.ssrLoadModule('/src/lib/verification/documentVerification.ts');
+  const api = await server.ssrLoadModule('/src/data/api.ts');
 
   const EXPECTED_STAGES = [
     'application', 'approval', 'onboarding', 'compliance', 'catalogue',
@@ -134,12 +137,78 @@ try {
     onboarding?.status === 'completed', onboarding?.status);
 
   const docs = store.demoComplianceDocs.filter((d) => d.brandId === tenantId);
-  test('every required compliance document is approved',
-    docs.length >= 4 && docs.every((d) => d.status === 'approved'),
-    docs.map((d) => `${d.type}:${d.status}`).join(','));
+  // §M2 — the invariant is "every REQUIRED document is approved", evaluated on
+  // the LATEST version of each requirement (a replaced version is superseded and
+  // retained for audit, and must not be mistaken for the current state).
+  const latestDocs = compliance.latestDocumentsByType(docs);
+  test('every required compliance document is approved (latest version per requirement)',
+    latestDocs.size >= 4 && [...latestDocs.values()].every((d) => d.status === 'approved'),
+    [...latestDocs.values()].map((d) => `${d.type}:${d.status}`).join(','));
+  test('the replaced document version is retained as superseded (audit)',
+    docs.some((d) => d.status === 'superseded' && d.supersedesDocumentId === undefined) ||
+      docs.some((d) => d.status === 'superseded'),
+    docs.map((d) => `${d.type}:v${d.version ?? 1}:${d.status}`).join(','));
 
   const contract = store.demoContracts.find((c) => c.brandId === tenantId);
   test('the distribution agreement is active', contract?.status === 'active');
+
+  /* ── §M2 — document verification ledger (the evidence trail) ───────────── */
+  const records = store.demoDocumentVerifications.filter((r) => r.brandId === tenantId);
+  const verdicts = records.filter((r) => r.result === 'pass' || r.result === 'fail');
+  test('§M2 submissions opened pending verification records',
+    records.filter((r) => r.status === 'pending').length >= 4,
+    `${records.filter((r) => r.status === 'pending').length}`);
+  test('§M2 one verification deliberately failed and the document was rejected',
+    verdicts.filter((r) => r.result === 'fail').length === 1);
+  test('§M2 no verification record claims an EXTERNAL provider',
+    verdicts.every((r) => r.external === false));
+  test('§M2 every demo verdict is unmistakably simulated',
+    verdicts.every((r) => r.simulated === true) &&
+      verdicts.every((r) => String(r.evidenceReference ?? '').startsWith('SIM-DOC-VERIFY') || r.result === 'fail'));
+  test('§M2 superseded verification records remain auditable',
+    records.some((r) => r.superseded === true));
+  test('§M2 every verdict records verifier identity, method and provider',
+    verdicts.every((r) => !!r.verifierIdentity && !!r.method && !!r.providerId));
+  const standing = verification.documentVerificationStanding(
+    tenantId,
+    'Grocery',
+    undefined,
+    await api.evaluateBrandCatalogGate(tenantId)
+  );
+  test('§M2 standing reports every requirement cleared with no replacement outstanding',
+    standing.cleared === true && standing.needsReplacement.length === 0 &&
+      standing.verifiedCount === standing.requiredCount && standing.requiredCount >= 4,
+    JSON.stringify({
+      cleared: standing.cleared,
+      required: standing.requiredCount,
+      verified: standing.verifiedCount,
+      blocking: standing.blocking,
+    }));
+  test('§M2 a manual approval cannot clear a requirement with no document artefact',
+    await (async () => {
+      const fresh = verification.replaceComplianceDocument({
+        documentId: store.demoComplianceDocs.find((d) => d.brandId === tenantId).id,
+        actor: { staffId: 'validator', canMutate: true, tenantId },
+        reason: 'validator drill',
+      });
+      if (!fresh.ok) return false;
+      const bare = verification.replaceComplianceDocument({
+        documentId: fresh.value.newDocument.id,
+        actor: { staffId: 'validator', canMutate: true, tenantId },
+        reason: 'validator drill 2',
+      });
+      if (!bare.ok) return false;
+      delete bare.value.newDocument.fileUrl;
+      delete bare.value.newDocument.reference;
+      const manual = await verification.recordManualDocumentVerification(
+        bare.value.newDocument.id,
+        { staffId: 'operator', canMutate: true },
+        'approve',
+        'validator manual approval attempt'
+      );
+      const doc = store.demoComplianceDocs.find((d) => d.id === bare.value.newDocument.id);
+      return manual.ok && manual.value.result === 'fail' && doc.status !== 'approved';
+    })());
 
   const submissions = store.getSubmissionsForBrand(tenantId);
   test('the catalog submission is recorded and simulated',

@@ -8,6 +8,7 @@
  */
 import type {
   ComplianceDocument,
+  DocumentVerificationRecord,
   Commission,
   Contract,
   Message,
@@ -170,6 +171,48 @@ export function setComplianceDocStatus(
   d.status = status;
   d.reviewedBy = reviewer;
   return true;
+}
+
+/* ── §M2 — Document verification (canonical store) ─────────────────────────
+ *
+ * ONE append-only ledger of verification records for every compliance document
+ * version. The document's own `status` remains the canonical requirement state;
+ * these records are the evidence trail (who/what verified it, how, when, the
+ * result and any failure reason). Nothing else stores verification verdicts.
+ */
+export const demoDocumentVerifications: DocumentVerificationRecord[] = [];
+
+/** Returns the doc to the store baseline (used by the deterministic demo reset). */
+export function resetDocumentVerifications(): void {
+  demoDocumentVerifications.length = 0;
+}
+
+export function findComplianceDoc(docId: string): ComplianceDocument | undefined {
+  return demoComplianceDocs.find((x) => x.id === docId);
+}
+
+/** §M2 — compliance/verification actions are audited on the platform log. */
+export function recordComplianceAudit(
+  action: string,
+  entityId: string,
+  brandId: string,
+  reason: string,
+  actorId: string,
+  metadata: Record<string, unknown> = {}
+): AuditLogEntry {
+  const entry: AuditLogEntry = {
+    id: `audit-compliance-${demoAuditLog.length + 1}-${action}`,
+    createdAt: new Date().toISOString(),
+    actorId,
+    action,
+    entityType: 'compliance_document',
+    entityId,
+    brandId,
+    reason,
+    metadata,
+  };
+  demoAuditLog.push(entry);
+  return entry;
 }
 
 /** §Stage-6 — amend an existing shipment's carrier/status. */

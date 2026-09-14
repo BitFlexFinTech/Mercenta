@@ -66,14 +66,18 @@ import {
   BASE_REQUIRED_DOCUMENTS,
   CATEGORY_DOC_LABELS,
   getRequiredDocumentsForCategory,
+  latestDocumentsByType,
   REQUIRED_BRAND_AGREEMENTS,
 } from '@/lib/compliance';
+import {
+  replaceComplianceDocument,
+  verifyDocumentVersion,
+} from '@/lib/verification/documentVerification';
 import {
   acceptBrandAgreement,
   evaluateBrandCatalogGate,
   fetchComplianceForBrand,
   issueDistributionAgreement,
-  setComplianceDocStatus,
   settleBrandPayout,
   uploadComplianceDoc,
 } from '@/data/api';
@@ -119,6 +123,7 @@ import {
   demoComplianceDocs,
   demoContracts,
   demoDeductions,
+  demoDocumentVerifications,
   demoProductSubmissions,
   demoProducts,
   demoPurchaseOrders,
@@ -157,7 +162,7 @@ import {
   resolveProviderMode,
   type ProviderResolutionMode,
 } from '@/integrations/types';
-import { INTEGRATION_ORDER, integrationMeta } from '@/integrations/registry';
+import { INTEGRATION_ORDER, defaultIntegrationMode, integrationMeta } from '@/integrations/registry';
 import {
   createIsolatedSimulatedSocialClient,
   createSocialEngineClient,
@@ -296,9 +301,7 @@ export function investorDemoViewOnlyActor(tenantId?: string) {
 
 /** Default mode lookup — the app's documented default per provider. */
 export function defaultDemoProviderMode(providerId: string): ProviderResolutionMode {
-  const id = INTEGRATION_ORDER.find((x) => x === providerId);
-  if (!id) return 'not_registered';
-  return modeForState(INITIAL_INTEGRATIONS[id], integrationMeta(id).defaultMode);
+  return defaultIntegrationMode(providerId);
 }
 
 /* ── Baseline / reset (deterministic replay) ─────────────────────────────── */
@@ -309,12 +312,15 @@ interface Restorable {
 }
 
 function restorable<T>(name: string, arr: T[]): Restorable {
-  const snapshot = [...arr];
+  // Deep snapshot: the platform mutates records IN PLACE (status, milestones),
+  // so a shallow copy would let a run poison the baseline it must return to.
+  const snapshot: T[] = structuredClone(arr);
   return {
     name,
     restore: () => {
+      const fresh: T[] = structuredClone(snapshot);
       arr.length = 0;
-      arr.push(...snapshot);
+      arr.push(...fresh);
     },
   };
 }
@@ -335,6 +341,7 @@ const RESTORABLE: Restorable[] = [
   restorable('catalog_products', demoProducts),
   restorable('catalog_submissions', demoProductSubmissions),
   restorable('compliance_documents', demoComplianceDocs),
+  restorable('document_verifications', demoDocumentVerifications),
   restorable('brand_agreements', demoBrandAgreements),
   restorable('contracts', demoContracts),
   restorable('commerce_activities', demoCommerceActivities),
@@ -347,18 +354,73 @@ export interface InvestorDemoResetResult {
   resetAt: string;
   restoredStores: string[];
   onboardingRemoved: boolean;
+  /** §M2 — demo-tenant records purged from every canonical store. */
+  purgedRecords: number;
+}
+
+/**
+ * §M2 — REAL DEFECT FIXED (run-again corruption).
+ *
+ * `RESTORABLE` restores the stores to the baseline captured when THIS module
+ * instance loaded. That is not sufficient: if the instance loads after a demo
+ * run already happened (a second module instance, an HMR reload, or the same
+ * app instance being re-run), the captured "baseline" already contains the
+ * previous run's records — so a reset could not undo it and a second run died
+ * on the first stage (`ILLEGAL_TRANSITION — onboarding is already complete`),
+ * cascading into 15 failed stages.
+ *
+ * The demo run OWNS its records. This purge removes exactly the demo tenant's
+ * records (and its application/onboarding identity) from every canonical store,
+ * so `reset → run` is reproducible regardless of how the module was loaded, and
+ * so clicking Run twice is safe.
+ */
+function purgeInvestorDemoRecords(): number {
+  const tenant = INVESTOR_DEMO_TENANT_ID;
+  let removed = 0;
+  const purge = <T extends { brandId?: string | null }>(arr: T[]) => {
+    for (let i = arr.length - 1; i >= 0; i -= 1) {
+      if (arr[i]?.brandId === tenant) {
+        arr.splice(i, 1);
+        removed += 1;
+      }
+    }
+  };
+  purge(demoBrandAgreements);
+  purge(demoCommerceActivities);
+  purge(demoCommerceInvoices);
+  purge(demoCommercePayments);
+  purge(demoComplianceDocs);
+  purge(demoContracts);
+  purge(demoDeductions);
+  purge(demoDocumentVerifications as { brandId?: string | null }[]);
+  purge(demoProductSubmissions);
+  purge(demoProducts);
+  purge(demoPurchaseOrders);
+  purge(demoReturnTracking);
+  purge(demoReturns);
+  purge(demoShipments);
+  purge(demoAuditLog);
+  // The application + onboarding identity of the demo tenant.
+  for (let i = demoApplications.length - 1; i >= 0; i -= 1) {
+    if (demoApplications[i]?.id === INVESTOR_DEMO_APPLICATION_ID) {
+      demoApplications.splice(i, 1);
+      removed += 1;
+    }
+  }
+  return removed;
 }
 
 /**
  * Return the demo environment to its baseline. Deliberately SCOPED:
  *   - restores only the stores above (seeded data intact),
- *   - removes only the demo tenant's onboarding record,
+ *   - purges only the demo tenant's own records + its onboarding record,
  *   - resets only the deterministic simulation seams (mocks, events, payouts,
  *     social client, settled-commission ledger).
  * Nothing else in the session is destroyed.
  */
 export function resetInvestorDemo(): InvestorDemoResetResult {
   for (const r of RESTORABLE) r.restore();
+  const purgedRecords = purgeInvestorDemoRecords();
   const onboardingRemoved = removeOnboarding(INVESTOR_DEMO_ONBOARDING_ID);
 
   resetMockAmazonState();
@@ -378,6 +440,7 @@ export function resetInvestorDemo(): InvestorDemoResetResult {
     resetAt: new Date().toISOString(),
     restoredStores: RESTORABLE.map((r) => r.name),
     onboardingRemoved,
+    purgedRecords,
   };
 }
 
@@ -434,6 +497,13 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export async function runInvestorDemo(
   opts: InvestorDemoOptions = {}
 ): Promise<InvestorDemoRun> {
+  // §M2 — A RUN ALWAYS STARTS FROM THE CANONICAL BASELINE. The orchestration
+  // owns its tenant's records, so re-running must never depend on a manual reset
+  // having happened first (clicking Run twice, an HMR reload, or a second module
+  // instance previously corrupted the run — see `purgeInvestorDemoRecords`).
+  // Reset-then-run and run-twice therefore produce the same deterministic digest.
+  resetInvestorDemo();
+
   const seed = opts.seed ?? 1;
   const runId = `investor-demo-${seed}`;
   const actorId = opts.actorId ?? OPS_ACTOR_ID;
@@ -615,15 +685,29 @@ export async function runInvestorDemo(
     const extraDocs = requiredDocs.filter((t) => !BASE_REQUIRED_DOCUMENTS.includes(t));
     if (requiredDocs.length === 0) throw new Error('no required compliance documents resolved');
 
-    // (a) SIMULATED UPLOAD — every required document moves to `under_review`.
-    for (const type of requiredDocs) uploadComplianceDoc(tenant, type, ops.staffId);
+    // (a) SIMULATED UPLOAD — every required document is SUBMITTED for
+    //     verification: `under_review` with a `pending` verification record.
+    //     The MV2 evidence is unmistakably simulated (no external provider).
+    const simulatedEvidence = (type: string) => ({
+      fileUrl: `simulated://compliance/${tenant}/${type}`,
+      reference: `SIM-${type.toUpperCase()}-${tenant.replace(/^brand-/, '').toUpperCase()}`,
+      issuer: 'Simulated issuing body (no external provider)',
+    });
+    for (const type of requiredDocs) uploadComplianceDoc(tenant, type, ops.staffId, simulatedEvidence(type));
     const uploaded = await fetchComplianceForBrand(tenant);
-    const underReview = requiredDocs.filter(
-      (t) => uploaded.find((d) => d.type === t)?.status === 'under_review'
-    );
+    const latestByType = latestDocumentsByType(uploaded);
+    const underReview = requiredDocs.filter((t) => latestByType.get(t)?.status === 'under_review');
     if (underReview.length !== requiredDocs.length) {
       throw new Error(
         `upload did not reach under_review for every document (${underReview.length}/${requiredDocs.length})`
+      );
+    }
+    const pendingRecords = demoDocumentVerifications.filter(
+      (r) => r.brandId === tenant && r.status === 'pending'
+    );
+    if (pendingRecords.length !== requiredDocs.length) {
+      throw new Error(
+        `every submission must open a pending verification record (${pendingRecords.length}/${requiredDocs.length})`
       );
     }
 
@@ -650,11 +734,73 @@ export async function runInvestorDemo(
       await acceptBrandAgreement(tenant, agreementType, '1.0');
     }
 
-    // (d) OPERATOR REVIEW/APPROVES each document (separate from the upload).
+    // (d) VERIFICATION — automated provider; then the FAILURE + REPLACEMENT
+    //     path for one requirement.
+    const failureType = requiredDocs[requiredDocs.length - 1];
+    const failureDoc = latestByType.get(failureType);
+    if (!failureDoc) throw new Error(`missing compliance record for ${failureType}`);
+
+    //     d1. one document deliberately FAILS automated verification.
+    const failedVerification = await verifyDocumentVersion(failureDoc.id, ops, {
+      getMode,
+      providerKey: 'companies_house',
+      simulateFailure: true,
+    });
+    if (!failedVerification.ok) throw new Error(`verification refused: ${failedVerification.error}`);
+    if (failedVerification.value.result !== 'fail' || failureDoc.status !== 'rejected') {
+      throw new Error(
+        `a failed verification must reject the document (result ${failedVerification.value.result}, status ${failureDoc.status})`
+      );
+    }
+    const gateWithRejection = await evaluateBrandCatalogGate(tenant);
+    if (gateWithRejection.cleared) throw new Error('the gate cleared with a rejected document');
+
+    //     d2. the brand REPLACES it (next version); the rejected version is
+    //         superseded + retained for audit, and the gate is STILL blocked.
+    const rejectedVersion = failureDoc.version ?? 1;
+    const replacement = replaceComplianceDocument({
+      documentId: failureDoc.id,
+      actor: commerceActor,
+      reason: 'Deterministic demo: replacement after a failed verification.',
+      ...simulatedEvidence(failureType),
+    });
+    if (!replacement.ok) throw new Error(`replacement refused: ${replacement.error}`);
+    // Re-read from the store: replacement mutates the record in place.
+    const supersededStatus = demoComplianceDocs.find((d) => d.id === failureDoc.id)?.status;
+    if (supersededStatus !== 'superseded') {
+      throw new Error(`the replaced document must be superseded (was ${supersededStatus})`);
+    }
+    if (replacement.value.version !== rejectedVersion + 1) {
+      throw new Error('the replacement did not create the next document version');
+    }
+    const gateWithReplacement = await evaluateBrandCatalogGate(tenant);
+    if (gateWithReplacement.cleared) throw new Error('the gate cleared on an unverified replacement');
+
+    //     d3. the replacement PASSES automated verification.
+    const replacementVerified = await verifyDocumentVersion(replacement.value.newDocument.id, ops, {
+      getMode,
+      providerKey: 'companies_house',
+    });
+    if (!replacementVerified.ok) {
+      throw new Error(`replacement verification refused: ${replacementVerified.error}`);
+    }
+    if (replacement.value.newDocument.status !== 'approved') {
+      throw new Error('the verified replacement did not clear its requirement');
+    }
+
+    // (e) AUTOMATED VERIFICATION for every remaining requirement.
     for (const type of requiredDocs) {
-      const doc = uploaded.find((d) => d.type === type);
+      if (type === failureType) continue;
+      const doc = latestByType.get(type);
       if (!doc) throw new Error(`missing compliance record for ${type}`);
-      setComplianceDocStatus(doc.id, 'approved', ops.staffId);
+      const verified = await verifyDocumentVersion(doc.id, ops, {
+        getMode,
+        providerKey: 'companies_house',
+      });
+      if (!verified.ok) throw new Error(`verification refused for ${type}: ${verified.error}`);
+      if (doc.status !== 'approved') {
+        throw new Error(`${type} did not clear after a passing automated verification`);
+      }
     }
 
     const clearedGate = await evaluateBrandCatalogGate(tenant);
@@ -665,15 +811,55 @@ export async function runInvestorDemo(
           .join(', ')}]`
       );
     }
+    const verificationRecords = demoDocumentVerifications.filter((r) => r.brandId === tenant);
+    // A `pending` record is a submission, not a verdict: only records that
+    // actually carry a verdict can be judged for provenance.
+    const verdictRecords = verificationRecords.filter(
+      (r) => r.result === 'pass' || r.result === 'fail'
+    );
+    const failedRecords = verdictRecords.filter((r) => r.result === 'fail');
+    const passRecords = verdictRecords.filter((r) => r.result === 'pass');
+    if (failedRecords.length !== 1 || passRecords.length !== requiredDocs.length) {
+      throw new Error(
+        `verification ledger is not the expected size (fail=${failedRecords.length}, pass=${passRecords.length})`
+      );
+    }
+    if (verdictRecords.some((r) => r.external)) {
+      throw new Error('a verification record claimed an EXTERNAL provider verified the document');
+    }
+    if (!verdictRecords.every((r) => r.simulated)) {
+      throw new Error('the demo verification verdicts are not marked simulated');
+    }
+    if (verdictRecords.some((r) => r.external === false && r.simulated === false)) {
+      throw new Error('a demo verdict claims neither simulation nor an external provider');
+    }
+    const supersededRecords = verificationRecords.filter((r) => r.superseded === true);
+    if (supersededRecords.length === 0) {
+      throw new Error('superseded verification records were not retained for audit');
+    }
     return {
-      detail: `${requiredDocs.length} required document(s) uploaded → under_review (gate BLOCKED) → operator approved → gate CLEARED. Agreement ${contract.id} active.`,
+      detail: `${requiredDocs.length} required document(s) submitted → pending verification (gate BLOCKED) → one deliberately failed → rejected → replaced as v${replacement.value.version} (v${rejectedVersion} superseded, audit retained) → replacement verified → all ${requiredDocs.length} requirements verified (simulated provider) → agreement ${contract.id} active → gate CLEARED.`,
       entityIds: [tenant, contract.id, ...requiredDocs],
       facts: {
         requiredDocs: requiredDocs.length,
         categoryExtraDocs: extraDocs.length,
         uploadedUnderReview: underReview.length,
+        pendingVerificationRecords: pendingRecords.length,
         gateBlockedBeforeApproval: !blockedGate.cleared,
         blockedSubmissionReason: gateBlockedSubmissionReason,
+        verificationFailureRejected: failedVerification.value.result === 'fail',
+        gateBlockedWithRejection: !gateWithRejection.cleared,
+        replacementVersion: replacement.value.version,
+        supersededRetained: supersededStatus === 'superseded',
+        gateBlockedWithReplacement: !gateWithReplacement.cleared,
+        replacementVerified: replacement.value.newDocument.status === 'approved',
+        verificationRecords: verificationRecords.length,
+        verificationVerdicts: verdictRecords.length,
+        failedVerificationRecords: failedRecords.length,
+        passedVerificationRecords: passRecords.length,
+        verificationSimulated: verdictRecords.every((r) => r.simulated === true),
+        verificationExternalClaims: verdictRecords.filter((r) => r.external).length,
+        supersededVerificationRecords: supersededRecords.length,
         gateClearedAfterApproval: clearedGate.cleared,
         agreementSigned: clearedGate.agreementSigned,
         logisticsSla: clearedGate.logisticsSlaAccepted,

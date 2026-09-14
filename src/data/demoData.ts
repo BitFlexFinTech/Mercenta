@@ -381,7 +381,7 @@ const COMPLIANCE_PATTERNS: ComplianceDocument['status'][][] = [
  *
  * | tenant (brandId)        | approved / total | present-but-not-approved                  | expected gate |
  * |-------------------------|------------------|------------------------------------------|----------------|
- * | brand-reedkitchen (0/5) | 0 / 5            | 5 (uploaded ×2, under_review ×1, missing ×2) | BLOCKED     |
+ * | brand-reedkitchen (0/5) | 0 / 5            | 5 (uploaded ×2, under_review ×1, missing ×1, rejected ×1) | BLOCKED     |
  * | brand-motorvista (4/5)  | 4 / 5            | 1 (type_approval missing)                   | BLOCKED     |
  *
  * Both tenants have an active contract + both §4.1/§4.2 agreements accepted,
@@ -396,7 +396,9 @@ export const COMPLIANCE_SCENARIO_DOC_STATES: Record<
     product_safety_ukca: 'under_review',
     insurance_certificate: 'uploaded',
     brand_registry_confirmation: 'missing',
-    food_contact_material: 'missing',
+    // §M2 — the rejected lifecycle state, exercised end-to-end (the brand sees
+    // the failure reason and the Replace action on this row).
+    food_contact_material: 'rejected',
   },
   'brand-motorvista': {
     letter_of_authorization: 'approved',
@@ -433,28 +435,49 @@ export const DEMO_COMPLIANCE_DOCS: ComplianceDocument[] = ALL_DEMO_BRANDS.flatMa
     // §Phase 7F — explicit scenario override (see COMPLIANCE_SCENARIO_DOC_STATES).
     const scenario = COMPLIANCE_SCENARIO_DOC_STATES[brand.id];
 
+    /**
+     * §M2 — a submitted document always carries an artefact. The demo dataset
+     * uses unmistakably SIMULATED evidence (no external provider is contacted),
+     * so the verification seam behaves realistically: a document that was never
+     * submitted (`missing`) has NO artefact and can never pass verification.
+     */
+    const evidence = (type: ComplianceDocument['type'], status: ComplianceDocument['status']) =>
+      status === 'missing'
+        ? {}
+        : {
+            fileUrl: `simulated://compliance/${brand.id}/${type}`,
+            reference: `SIM-${type.toUpperCase()}-${brand.id.replace(/^brand-/, '').toUpperCase()}`,
+            issuer: 'Simulated issuing body (no external provider)',
+          };
+
     // Base docs: cleared brands get all approved; scenario tenants use their
     // declared statuses; everyone else gets the rotating pattern.
-    const baseDocs = COMPLIANCE_TYPES.map((type, ti) => ({
-      id: `cd-${brand.id}-${ti}`,
-      brandId: brand.id,
-      type,
-      status:
-        scenario?.[type] ??
-        (isCleared ? ('approved' as const) : pattern[ti]),
-    }));
+    const baseDocs = COMPLIANCE_TYPES.map((type, ti) => {
+      const status = scenario?.[type] ?? (isCleared ? ('approved' as const) : pattern[ti]);
+      return {
+        id: `cd-${brand.id}-${ti}`,
+        brandId: brand.id,
+        type,
+        status,
+        version: 1,
+        ...evidence(type, status),
+      };
+    });
 
     // Category-specific docs: cleared brands get approved; scenario tenants use
     // the declared status (so a missing 5th doc is exactly representable);
     // everyone else gets missing.
-    const extraDocs = (CATEGORY_EXTRA_DOCS[brand.category] ?? []).map((extra, ei) => ({
-      id: `cd-${brand.id}-extra-${ei}`,
-      brandId: brand.id,
-      type: extra.type,
-      status:
-        scenario?.[extra.type] ??
-        (isCleared ? ('approved' as const) : ('missing' as const)),
-    }));
+    const extraDocs = (CATEGORY_EXTRA_DOCS[brand.category] ?? []).map((extra, ei) => {
+      const status = scenario?.[extra.type] ?? (isCleared ? ('approved' as const) : ('missing' as const));
+      return {
+        id: `cd-${brand.id}-extra-${ei}`,
+        brandId: brand.id,
+        type: extra.type,
+        status,
+        version: 1,
+        ...evidence(extra.type, status),
+      };
+    });
 
     return [...baseDocs, ...extraDocs];
   }
