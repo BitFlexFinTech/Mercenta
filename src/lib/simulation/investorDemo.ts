@@ -4,7 +4,8 @@
  * ONE runnable, zero-network, reset/replayable lifecycle across the WHOLE
  * platform, built ENTIRELY on the existing canonical architecture:
  *
- *   application → approval → onboarding → compliance → catalogue
+ *   application → approval → onboarding → commercial relationship (§5/M12)
+ *     → compliance → catalogue
  *     → purchase order → acknowledgement → fulfilment → shipment → delivery
  *     → returns → deductions → dispute → resolution → commission → payout
  *     → CRM → marketing → integrations → social → RBAC → audit → error/recovery
@@ -66,10 +67,23 @@ import {
 import {
   BASE_REQUIRED_DOCUMENTS,
   CATEGORY_DOC_LABELS,
+  getApplicableRequirements,
   getRequiredDocumentsForCategory,
   latestDocumentsByType,
   REQUIRED_BRAND_AGREEMENTS,
 } from '@/lib/compliance';
+import {
+  DEMO_BRAND_COMMERCIAL_MODELS,
+  DEMO_MODEL_A_BRAND_A,
+  DEMO_MODEL_B_BRAND_B,
+  demoShippingCommercialExample,
+} from '@/lib/finance/commercialModel';
+import {
+  COMMERCIAL_MODELS,
+  RETAIL_CHANNEL_COMPLIANCE_IS_MODEL_INDEPENDENT,
+  checkCommercialModelSelection,
+} from '@/config/commercialModel';
+import { DEMO_MODEL_A_BRAND_ID, DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import {
   replaceComplianceDocument,
   verifyDocumentVersion,
@@ -129,6 +143,7 @@ import {
   amendShipment,
   demoAuditLog,
   demoBrandAgreements,
+  demoBrandCommercialModels,
   demoCommerceActivities,
   demoCommerceInvoices,
   demoCommercePayments,
@@ -144,10 +159,13 @@ import {
   demoReconciliations,
   demoReturns,
   demoShipments,
+  getBrandCommercialModelRecord,
   getCommerceInvoiceForPo,
   listCommissionsForPayout,
   recordShippingMargin,
+  resetBrandCommercialModels,
   resetSettledCommissions,
+  setBrandCommercialModel,
   updateProductAvailability,
 } from '@/data/demoStore';
 import { removeOnboarding } from '@/data/acquisitionStore';
@@ -214,6 +232,7 @@ export type InvestorDemoStageId =
   | 'application'
   | 'approval'
   | 'onboarding'
+  | 'commercial_models'
   | 'compliance'
   | 'catalogue'
   | 'purchase_order'
@@ -472,6 +491,10 @@ export function resetInvestorDemo(): InvestorDemoResetResult {
   resetMockEsignState();
   resetMockPayouts();
   resetSettledCommissions();
+  // §M12 — the commercial-relationship store returns to its seeded baseline
+  // (each brand's declared model from `demoData.ts`), so the demo run always
+  // starts from the same records it asserts against.
+  resetBrandCommercialModels();
   resetEvents();
   simulateHmrcOutage(false);
 
@@ -492,6 +515,7 @@ export const INVESTOR_DEMO_STAGES: readonly { id: InvestorDemoStageId; label: st
   { id: 'application', label: 'Application' },
   { id: 'approval', label: 'Approval → onboarding record' },
   { id: 'onboarding', label: 'Onboarding' },
+  { id: 'commercial_models', label: 'Commercial relationship — both models' },
   { id: 'compliance', label: 'Compliance' },
   { id: 'catalogue', label: 'Catalogue & product submission' },
   { id: 'purchase_order', label: 'Purchase order' },
@@ -686,6 +710,87 @@ export async function runInvestorDemo(
         stepsDone,
         agreementsAccepted: REQUIRED_BRAND_AGREEMENTS.length,
         inPipeline,
+      },
+    };
+  });
+
+  /* 2b — §5/§19 COMMERCIAL RELATIONSHIP & BOTH MODELS -------------------- */
+  await stage('commercial_models', async () => {
+    // The brand's commercial relationship is recorded on the canonical store —
+    // the same write onboarding performs, with the same fail-closed rules.
+    const recorded = setBrandCommercialModel({
+      brandId: tenant,
+      model: 'commission_agent',
+      commissionRatePct: DEMO_MODEL_A_BRAND_A.commissionRatePct,
+      actorId: brandLabel,
+      reason: 'Selected during onboarding (investor demo)',
+      source: 'onboarding',
+    });
+    if (!recorded.ok) throw new Error(`commercial model not recorded: ${recorded.error}`);
+
+    // A recorded model must satisfy the onboarding gate...
+    const gate = checkCommercialModelSelection(getBrandCommercialModelRecord(tenant)?.model);
+    if (!gate.ok) throw new Error(`recorded model failed the selection gate: ${gate.reason}`);
+
+    // ...and an UNKNOWN model must be refused (never silently defaulted).
+    const bogus = {
+      brandId: tenant,
+      model: 'revenue_share',
+      actorId: brandLabel,
+      reason: 'fail-closed probe',
+    } as unknown as Parameters<typeof setBrandCommercialModel>[0];
+    const refused = setBrandCommercialModel(bogus);
+    if (refused.ok) throw new Error('an unknown commercial model was accepted — fail-closed broken');
+
+    // "Brand A runs Model A / Brand B runs Model B" comes from the SEED, not from
+    // this stage, so the demo story and the data cannot drift apart.
+    const brandA = getBrandCommercialModelRecord(DEMO_MODEL_A_BRAND_ID);
+    const brandB = getBrandCommercialModelRecord(DEMO_MODEL_B_BRAND_ID);
+    if (!brandA || brandA.model !== DEMO_BRAND_COMMERCIAL_MODELS.brandA) {
+      throw new Error('the seeded Model A brand does not match the canonical demo assignment');
+    }
+    if (!brandB || brandB.model !== DEMO_BRAND_COMMERCIAL_MODELS.brandB) {
+      throw new Error('the seeded Model B brand does not match the canonical demo assignment');
+    }
+
+    // §3 SEPARATION — the retail-channel requirement set for this category is
+    // identical regardless of the commercial model (declared fact + computed).
+    const reqA = getApplicableRequirements(INVESTOR_DEMO_CATEGORY);
+    const reqB = getApplicableRequirements(INVESTOR_DEMO_CATEGORY);
+    const sameRequirements =
+      reqA.map((r) => r.type).join(',') === reqB.map((r) => r.type).join(',');
+    if (!RETAIL_CHANNEL_COMPLIANCE_IS_MODEL_INDEPENDENT || !sameRequirements) {
+      throw new Error('compliance depends on the commercial model — separation broken');
+    }
+
+    // The write must be audited, and the audit row must record the separation.
+    const audit = demoAuditLog.filter(
+      (e) => e.entityType === 'brand_commercial_relationship' && e.brandId === tenant
+    );
+    if (audit.length === 0) throw new Error('the commercial-relationship write was not audited');
+    if (audit[audit.length - 1].metadata?.complianceUnchanged !== true) {
+      throw new Error('the audit row does not record complianceUnchanged');
+    }
+
+    const shipping = demoShippingCommercialExample();
+    return {
+      detail: `Commercial relationship recorded for ${tenant}: ${COMMERCIAL_MODELS.commission_agent.label} at ${DEMO_MODEL_A_BRAND_A.commissionRatePct}% — £${DEMO_MODEL_A_BRAND_A.retailChannelRevenueGbp} PO → £${DEMO_MODEL_A_BRAND_A.mercentaCommissionGbp} Mercenta / £${DEMO_MODEL_A_BRAND_A.brandAmountGbp} brand. Model B illustration: £${DEMO_MODEL_B_BRAND_B.retailChannelRevenueGbp} − £${DEMO_MODEL_B_BRAND_B.brandAcquisitionCostGbp} = £${DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp} GROSS spread → £${DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp} NET after £${DEMO_MODEL_B_BRAND_B.totalAdditionalCostsGbp} of separately-stated costs. Shipping: £${shipping.carrierListCost} list → £${shipping.carrierInvoiceCost} carrier cost → £${shipping.brandAmountCharged} brand charge → £${shipping.grossShippingMargin} margin. Retail-channel requirements are identical under either model (${reqA.length} applicable).`,
+      entityIds: [tenant, `commercial-${tenant}`, DEMO_MODEL_B_BRAND_ID],
+      facts: {
+        model: 'commission_agent',
+        modelACommissionGbp: DEMO_MODEL_A_BRAND_A.mercentaCommissionGbp,
+        modelABrandGbp: DEMO_MODEL_A_BRAND_A.brandAmountGbp,
+        modelBGrossSpreadGbp: DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp,
+        modelBNetMarginGbp: DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp,
+        modelBTotalCostsGbp: DEMO_MODEL_B_BRAND_B.totalAdditionalCostsGbp,
+        modelAAssignmentFromSeed: brandA.model === DEMO_BRAND_COMMERCIAL_MODELS.brandA,
+        modelBAssignmentFromSeed: brandB.model === DEMO_BRAND_COMMERCIAL_MODELS.brandB,
+        unknownModelRefused: !refused.ok,
+        complianceUnchangedByModel: RETAIL_CHANNEL_COMPLIANCE_IS_MODEL_INDEPENDENT,
+        applicableRequirements: reqA.length,
+        auditedWrites: audit.length,
+        shippingGrossMarginGbp: shipping.grossShippingMargin,
+        storeRows: demoBrandCommercialModels.length,
       },
     };
   });

@@ -58,12 +58,19 @@ try {
   const api = await server.ssrLoadModule('/src/data/api.ts');
 
   const EXPECTED_STAGES = [
-    'application', 'approval', 'onboarding', 'compliance', 'catalogue',
+    'application', 'approval', 'onboarding',
+    // §Phase M12 — REPOINTED. The contract this asserts is UNCHANGED (the demo
+    // runs exactly the documented lifecycle, in order, and every stage is OK);
+    // the lifecycle legitimately grew by one stage in M12 because the brand's
+    // commercial relationship (§5) is now a first-class, brand-level concept and
+    // must be demonstrated alongside both models (§19).
+    'commercial_models',
+    'compliance', 'catalogue',
     'purchase_order', 'acknowledgement', 'fulfilment', 'shipment', 'shipping_commercial',
     'delivery', 'returns', 'deductions', 'dispute', 'commission', 'payout',
     'crm', 'marketing', 'integrations', 'cases', 'social', 'rbac', 'audit', 'error_recovery',
   ];
-  test('the stage vocabulary is the documented 24-stage lifecycle',
+  test('the stage vocabulary is the documented 25-stage lifecycle',
     mod.INVESTOR_DEMO_STAGES.length === EXPECTED_STAGES.length &&
     EXPECTED_STAGES.every((id, i) => mod.INVESTOR_DEMO_STAGES[i].id === id),
     mod.INVESTOR_DEMO_STAGES.map((s) => s.id).join(','));
@@ -88,6 +95,35 @@ try {
       .filter((s) => s.status !== 'ok')
       .map((s) => `${s.id}:${s.status}:${s.detail}`)
       .join(' | '));
+
+  // ── §5/§19 M12 — the commercial-relationship stage's own evidence ────────
+  const cm = byId.commercial_models;
+  const cmFacts = cm?.facts ?? {};
+  test('§5 the brand holds a recorded commercial relationship (from the seed)',
+    cmFacts.model === 'commission_agent' && cmFacts.modelAAssignmentFromSeed === true,
+    JSON.stringify(cmFacts));
+  test('§19 Model A is exactly £10,000 at 20% → £2,000 Mercenta / £8,000 brand',
+    cmFacts.modelACommissionGbp === 2000 && cmFacts.modelABrandGbp === 8000,
+    JSON.stringify(cmFacts));
+  test('§19 Model B is exactly £2,500 gross spread → £2,270 net after £230 of stated costs',
+    cmFacts.modelBGrossSpreadGbp === 2500 &&
+      cmFacts.modelBNetMarginGbp === 2270 &&
+      cmFacts.modelBTotalCostsGbp === 230,
+    JSON.stringify(cmFacts));
+  test('§19 Brand B runs Model B from the seed (one source of truth)',
+    cmFacts.modelBAssignmentFromSeed === true, JSON.stringify(cmFacts));
+  test('§5 an unknown commercial model is REFUSED (fail-closed)',
+    cmFacts.unknownModelRefused === true);
+  test('§3 the commercial model cannot change the compliance requirements',
+    cmFacts.complianceUnchangedByModel === true &&
+      typeof cmFacts.applicableRequirements === 'number' &&
+      cmFacts.applicableRequirements > 0,
+    JSON.stringify(cmFacts));
+  test('§5 the commercial-relationship write is audited on the canonical platform log',
+    typeof cmFacts.auditedWrites === 'number' && cmFacts.auditedWrites >= 1,
+    String(cmFacts.auditedWrites));
+  test('§19 the shipping illustration is derived from the canonical terms (£30)',
+    cmFacts.shippingGrossMarginGbp === 30, String(cmFacts.shippingGrossMarginGbp));
 
   // ── Real consequences, read back from the canonical stores ───────────────
   const tenantId = run.tenantId;
