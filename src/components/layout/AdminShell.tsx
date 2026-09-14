@@ -31,13 +31,15 @@ import { SuperAdminPanel } from '@/components/admin/SuperAdminPanel';
 import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
 import { BrandIntelligencePanel } from '@/components/admin/BrandIntelligencePanel';
 import { BrandIntelligenceStrategyPanel } from '@/components/admin/BrandIntelligenceStrategyPanel';
+import { FounderInvestorCentre } from '@/components/admin/FounderInvestorCentre';
+import { PartnershipsCentre } from '@/components/admin/PartnershipsCentre';
 import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
 import type { AdminDepartment } from '@/types';
 import {
   LayoutDashboard, Users, Gauge, Boxes, Package, Truck, Plug,
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
-  Phone, ClipboardList,
+  Phone, ClipboardList, Handshake,
 } from 'lucide-react';
 
 const ADMIN_SECTIONS = [
@@ -113,6 +115,15 @@ const ADMIN_SECTIONS = [
       { id: 'whatsapp', label: 'WhatsApp', icon: <Phone className="w-4 h-4" /> },
     ],
   },
+  {
+    // §21/M12 — PRIVATE founder-only surfaces. Hidden from every non-Super-Admin
+    // tier here AND guarded again at render time (defense in depth).
+    label: 'Founder (private)',
+    items: [
+      { id: 'founder_centre', label: 'Founder Investor Centre', icon: <Crown className="w-4 h-4" /> },
+      { id: 'partnerships', label: 'Partnerships & Fundraising', icon: <Handshake className="w-4 h-4" /> },
+    ],
+  },
 ];
 export default function AdminShell() {
   const { role, actingStaff } = useApp();
@@ -120,7 +131,14 @@ export default function AdminShell() {
   const isSuper = role === 'Super Admin';
   // §Phase 6 — navigation visibility only. Views super-only in the render
   // guard remain guarded there for defense in depth.
-  const HIDDEN_FOR_NON_SUPER = new Set(['super_admin', 'audit_log', 'integrations']);
+  const HIDDEN_FOR_NON_SUPER = new Set([
+    'super_admin',
+    'audit_log',
+    'integrations',
+    // §21/M12 — the founder's private surfaces.
+    'founder_centre',
+    'partnerships',
+  ]);
   const navSections = isSuper
     ? ADMIN_SECTIONS
     : ADMIN_SECTIONS
@@ -134,7 +152,8 @@ export default function AdminShell() {
     contracts_admin: 'Contract Cycle', catalog: 'Global Catalog', logistics: 'Logistics Control', carriers: 'Carrier Monitor',
     compliance: 'Compliance Approvals', marketing: 'Marketing', brand_intelligence: 'Brand Intelligence', super_admin: 'Super Admin', audit_log: 'Audit Log',
     integrations: 'Integration Settings', usertour: 'Onboarding Tours', postiz: 'Social Media',
-    whatsapp: 'WhatsApp Escalation',
+    whatsapp: 'WhatsApp Escalation', founder_centre: 'Founder Investor Centre',
+    partnerships: 'Partnerships & Fundraising',
   };
 
   return (
@@ -172,6 +191,9 @@ export default function AdminShell() {
             </div>
           )}
           {adminView === 'super_admin' && (isSuper ? <SuperAdminPanel /> : <AccessDenied />)}
+          {/* §21/M12 — founder-only views, guarded a second time at render. */}
+          {adminView === 'founder_centre' && (isSuper ? <FounderInvestorCentre /> : <AccessDenied />)}
+          {adminView === 'partnerships' && (isSuper ? <PartnershipsCentre /> : <AccessDenied />)}
           {adminView === 'audit_log' && (isSuper ? <AdminAuditLog /> : <AccessDenied />)}
           {adminView === 'integrations' && (isSuper ? <IntegrationsPanel /> : <AccessDenied />)}
           {adminView === 'usertour' && <UsertourAdminPanel />}
