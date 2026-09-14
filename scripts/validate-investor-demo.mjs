@@ -59,9 +59,9 @@ try {
 
   const EXPECTED_STAGES = [
     'application', 'approval', 'onboarding', 'compliance', 'catalogue',
-    'purchase_order', 'acknowledgement', 'fulfilment', 'shipment', 'delivery',
-    'returns', 'deductions', 'dispute', 'commission', 'payout',
-    'crm', 'marketing', 'integrations', 'social', 'rbac', 'audit', 'error_recovery',
+    'purchase_order', 'acknowledgement', 'fulfilment', 'shipment', 'shipping_commercial',
+    'delivery', 'returns', 'deductions', 'dispute', 'commission', 'payout',
+    'crm', 'marketing', 'integrations', 'cases', 'social', 'rbac', 'audit', 'error_recovery',
   ];
   test('the stage vocabulary is the documented 22-stage lifecycle',
     mod.INVESTOR_DEMO_STAGES.length === EXPECTED_STAGES.length &&
@@ -247,6 +247,37 @@ try {
 
   /* ── §M6 — the money flow: reconciliation → accounting → payout gate ────── */
   const finance = await server.ssrLoadModule('/src/lib/finance/financialReconciliation.ts');
+  test('§M7 shipping: both lanes route correctly and the commercial model holds',
+    byId.shipping_commercial.status === 'ok' &&
+      byId.shipping_commercial.facts.ukLaneCarrier === 'palletline' &&
+      byId.shipping_commercial.facts.intlLaneCarrier === 'dhl' &&
+      byId.shipping_commercial.facts.arbitraryCarrierRefused === true,
+    JSON.stringify(byId.shipping_commercial.facts));
+  test('§M7 shipping: the shipment is PO-gated (foreign tenant + carrier refused)',
+    byId.shipping_commercial.facts.foreignTenantShipmentRefused === true &&
+      byId.shipping_commercial.facts.nonCanonicalCarrierShipmentRefused === true);
+  test('§M7 shipping: the carrier cost is preserved and the brand charge is upfront',
+    byId.shipping_commercial.facts.carrierCostRetained ===
+      byId.shipping_commercial.facts.carrierInvoiceCost &&
+      byId.shipping_commercial.facts.chargeRecordedUpfront === true &&
+      byId.shipping_commercial.facts.carrierInvoiceCost <
+        byId.shipping_commercial.facts.carrierListCost);
+  test('§M7 shipping: no hardcoded 90% and the terms are flagged placeholder',
+    byId.shipping_commercial.facts.marginFractionBelowRetiredRule === true &&
+      byId.shipping_commercial.facts.placeholderTerms === true);
+  test('§M7 cases: Mercenta review precedes channel escalation, then resolution',
+    byId.cases.status === 'ok' &&
+      byId.cases.facts.escalationBeforeReviewRefused === true &&
+      byId.cases.facts.reviewRecorded === true &&
+      byId.cases.facts.unknownModeRefused === true &&
+      byId.cases.facts.providerCaseOpened === true &&
+      byId.cases.facts.providerCaseSimulated === true &&
+      byId.cases.facts.escalationIdempotent === true &&
+      byId.cases.facts.providerResponseRecorded === true &&
+      byId.cases.facts.resolved === true,
+    JSON.stringify(byId.cases.facts));
+  test('§M7 cases: reads are tenant-scoped and the lifecycle is audited',
+    byId.cases.facts.foreignCases === 0 && Number(byId.cases.facts.auditRows) >= 3);
   test('§M6 the payout was BLOCKED before the payment was reconciled',
     byId.payout.facts.blockedBeforeReconciliation === true &&
       /no payment has been reconciled/.test(String(byId.payout.facts.blockedReasonAtReconciliation ?? '')),

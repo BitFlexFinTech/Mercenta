@@ -38,6 +38,7 @@
 
 import type {
   ApprovedCategory,
+  CarrierId,
   ComplianceDocument,
   Deduction,
   DisputeOutcome,
@@ -84,11 +85,13 @@ import {
 } from '@/lib/finance/financialReconciliation';
 import {
   acceptBrandAgreement,
+  createShipmentForPO,
   evaluateBrandCatalogGate,
   fetchComplianceForBrand,
   issueDistributionAgreement,
   settleBrandPayout,
   uploadComplianceDoc,
+  type AsnDetail,
 } from '@/data/api';
 import {
   evaluateCatalogReadiness,
@@ -143,6 +146,7 @@ import {
   demoShipments,
   getCommerceInvoiceForPo,
   listCommissionsForPayout,
+  recordShippingMargin,
   resetSettledCommissions,
   updateProductAvailability,
 } from '@/data/demoStore';
@@ -156,6 +160,22 @@ import {
 import { buildBrandTimeline, getCrmMeta } from '@/lib/crm/crmStore';
 import { getProspects, getAcquisitionLeads } from '@/data/prospectStore';
 import { resolveOutreachTransport } from '@/lib/acquisition/outreachSender';
+import * as routing from '@/lib/shipping/carrierRouting';
+import * as calc from '@/lib/shipping/shippingCalculator';
+import {
+  beginCaseReview,
+  createCase,
+  demoTickets,
+  escalateCaseToProvider,
+  getTicketById,
+  listAllCases,
+  listCasesForBrand,
+  recordProviderCaseResponse,
+  resetCaseSequence,
+  resolveCase,
+  reviewCase,
+} from '@/lib/helpdesk/ticketStore';
+import { resetMockAmazonCases } from '@/lib/helpdesk/amazonCaseClient';
 import { resetEvents } from '@/lib/events/eventFeed';
 import { resetMockAmazonState } from '@/lib/spapi/mockClient';
 import { resetMockDhlState } from '@/lib/dhl/mockClient';
@@ -200,6 +220,7 @@ export type InvestorDemoStageId =
   | 'acknowledgement'
   | 'fulfilment'
   | 'shipment'
+  | 'shipping_commercial'
   | 'delivery'
   | 'returns'
   | 'deductions'
@@ -209,6 +230,7 @@ export type InvestorDemoStageId =
   | 'crm'
   | 'marketing'
   | 'integrations'
+  | 'cases'
   | 'social'
   | 'rbac'
   | 'audit'
@@ -363,6 +385,7 @@ const RESTORABLE: Restorable[] = [
   restorable('commerce_invoices', demoCommerceInvoices),
   restorable('commerce_payments', demoCommercePayments),
   restorable('audit_log', demoAuditLog),
+  restorable('tickets', demoTickets),
 ];
 
 export interface InvestorDemoResetResult {
@@ -418,6 +441,7 @@ function purgeInvestorDemoRecords(): number {
   purge(demoReturns);
   purge(demoShipments);
   purge(demoAuditLog);
+  purge(demoTickets);
   // The application + onboarding identity of the demo tenant.
   for (let i = demoApplications.length - 1; i >= 0; i -= 1) {
     if (demoApplications[i]?.id === INVESTOR_DEMO_APPLICATION_ID) {
@@ -474,6 +498,7 @@ export const INVESTOR_DEMO_STAGES: readonly { id: InvestorDemoStageId; label: st
   { id: 'acknowledgement', label: 'PO acknowledgement' },
   { id: 'fulfilment', label: 'Fulfilment / ASN' },
   { id: 'shipment', label: 'Shipment milestones' },
+  { id: 'shipping_commercial', label: 'Shipping lane & commercial model' },
   { id: 'delivery', label: 'Delivery & receiving' },
   { id: 'returns', label: 'Returns' },
   { id: 'deductions', label: 'Deductions / chargebacks' },
@@ -483,6 +508,7 @@ export const INVESTOR_DEMO_STAGES: readonly { id: InvestorDemoStageId; label: st
   { id: 'crm', label: 'CRM lifecycle' },
   { id: 'marketing', label: 'Acquisition / marketing' },
   { id: 'integrations', label: 'Integration Hub (simulation)' },
+  { id: 'cases', label: 'Cases — Mercenta review before channel escalation' },
   { id: 'social', label: 'Mercenta Social' },
   { id: 'rbac', label: 'RBAC & tenant isolation' },
   { id: 'audit', label: 'Auditability' },
@@ -693,6 +719,7 @@ export async function runInvestorDemo(
   let gateBlockedSubmissionReason = '';
   let submissionId = '';
   let poId = '';
+  let poNumber = '';
   let shipId = '';
   let invoiceId = '';
   let commissionId = '';
@@ -958,6 +985,7 @@ export async function runInvestorDemo(
     if (!created.ok) throw new Error(`PO creation refused: ${created.error}`);
     const po = created.value;
     poId = po.id;
+    poNumber = po.poNumber;
 
     // CANONICAL MONEY MATHS — asserted numerically, never assumed.
     const expectedValue = round2(DEMO_EX_WORKS_PRICE * DEMO_QUANTITY);
@@ -1086,6 +1114,127 @@ export async function runInvestorDemo(
       },
     };
   });
+
+  /* 9b — SHIPPING LANE + COMMERCIAL MODEL -------------------------------- */
+  await stage('shipping_commercial', async () => {
+    // (a) THE CANONICAL ROUTING RULE — international → DHL, UK domestic →
+    //     Palletline. Both lanes are proven, and an arbitrary carrier is refused.
+    const ukLane = routing.resolveShippingLane({ brandNation: 'United Kingdom' });
+    const intlLane = routing.resolveShippingLane({ brandNation: 'Zimbabwe' });
+    const ukCarrier = routing.selectCarrierForShipment({ brandNation: 'United Kingdom' }).carrier;
+    const intlCarrier = routing.selectCarrierForShipment({ brandNation: 'Zimbabwe' }).carrier;
+    if (ukLane !== 'uk_domestic' || ukCarrier !== 'palletline') {
+      throw new Error(`UK domestic lane did not route to Palletline (${ukLane}/${ukCarrier})`);
+    }
+    if (intlLane !== 'international' || intlCarrier !== 'dhl') {
+      throw new Error(`international lane did not route to DHL (${intlLane}/${intlCarrier})`);
+    }
+    const badCarrier = routing.validateCarrierForShipment({ carrier: 'fedex', brandNation: 'Zimbabwe' });
+    if (badCarrier.ok) throw new Error('an arbitrary carrier was accepted');
+
+    // (b) PO-GATED SHIPMENT CREATION — the shipment in this run was derived from
+    //     the demo brand's own eligible PO, and no other tenant can derive one.
+    const shipment = demoShipments.find((s) => s.id === shipId);
+    if (!shipment) throw new Error('the demo shipment is missing');
+    // The seeded shipment rows carry their carrier as a string; the canonical
+    // rule works on the CarrierId union, so narrow it once, here.
+    const shipmentCarrier = shipment.carrier as CarrierId;
+    const asn: AsnDetail = {
+      cartons: [
+        {
+          sku: INVESTOR_DEMO_SKU,
+          quantity: DEMO_QUANTITY,
+          weightKg: 5,
+          lengthCm: 30,
+          widthCm: 20,
+          heightCm: 15,
+        },
+      ],
+      shipDate: '2026-10-01',
+      carrier: shipmentCarrier,
+    };
+    const foreign = createShipmentForPO(poId, asn, undefined, 'brand-not-this-one');
+    if (foreign.ok) throw new Error('another tenant created a shipment from this PO');
+    const nonCanonical = createShipmentForPO(
+      poId,
+      { ...asn, carrier: 'fedex' as CarrierId },
+      undefined,
+      tenant
+    );
+    if (nonCanonical.ok) throw new Error('a non-canonical carrier shipment was created');
+
+    // (c) THE COMMERCIAL BREAKDOWN — carrier list cost → negotiated discount →
+    //     carrier invoice cost → mark-up/surcharge/handling → brand charge →
+    //     VAT → shipping margin. Both sides of the deal are retained.
+    const estimate = calc.computeShippingEstimate({
+      carrier: shipmentCarrier,
+      totalWeightKg: 120,
+      totalCbm: 2,
+      cartonCount: 10,
+    });
+    const commercials = calc.computeShippingCommercials({
+      lane: intlLane,
+      carrier: shipmentCarrier,
+      carrierListCost: estimate.baseCarrierCost,
+    });
+    if (!(commercials.carrierInvoiceCost < commercials.carrierListCost)) {
+      throw new Error('the negotiated discount did not reduce the carrier invoice cost');
+    }
+    if (!(commercials.brandAmountCharged > commercials.carrierInvoiceCost)) {
+      throw new Error("the brand charge does not exceed Mercenta's carrier cost");
+    }
+    if (commercials.placeholderTerms !== true) {
+      throw new Error('the commercial terms are not flagged as placeholders');
+    }
+    if (commercials.grossShippingMargin / commercials.brandAmountCharged >= 0.9) {
+      throw new Error('the margin fraction looks like the retired hardcoded 90% rule');
+    }
+
+    // (d) THE UPFRONT BRAND CHARGE lands on the existing shipping-margin ledger.
+    const margin = recordShippingMargin(
+      calc.buildShippingMargin(
+        shipment.id,
+        tenant,
+        shipment.carrier,
+        commercials.carrierInvoiceCost,
+        commercials.brandAmountCharged
+      )
+    );
+    if (margin.brandBilledPrice !== commercials.brandAmountCharged) {
+      throw new Error('the recorded brand charge does not match the canonical commercial model');
+    }
+    if (margin.carrierCostPrice !== commercials.carrierInvoiceCost) {
+      throw new Error('the recorded carrier cost was overwritten by the brand price');
+    }
+    return {
+      detail: `Lane resolution: UK domestic → ${ukCarrier.toUpperCase()}, international → ${intlCarrier.toUpperCase()} (arbitrary carrier refused). Shipment ${shipment.id} is PO-gated (foreign tenant and non-canonical carrier both refused). Commercials: list £${commercials.carrierListCost.toFixed(2)} − negotiated discount £${commercials.negotiatedDiscountAmount.toFixed(2)} = carrier invoice £${commercials.carrierInvoiceCost.toFixed(2)} → brand charged £${commercials.brandAmountCharged.toFixed(2)} UPFRONT (mark-up £${commercials.markUpAmount.toFixed(2)}, surcharge £${commercials.surchargeAmount.toFixed(2)}, handling £${commercials.handlingFee.toFixed(2)}, VAT £${commercials.vatAmount.toFixed(2)}), gross shipping margin £${commercials.grossShippingMargin.toFixed(2)}, Mercenta net £${commercials.netMercentaRevenue.toFixed(2)}.`,
+      entityIds: [shipment.id, margin.id, poId],
+      facts: {
+        ukLaneCarrier: ukCarrier,
+        intlLaneCarrier: intlCarrier,
+        arbitraryCarrierRefused: !badCarrier.ok,
+        foreignTenantShipmentRefused: !foreign.ok,
+        nonCanonicalCarrierShipmentRefused: !nonCanonical.ok,
+        shipmentCarrier: shipment.carrier,
+        carrierListCost: commercials.carrierListCost,
+        negotiatedDiscount: commercials.negotiatedDiscountAmount,
+        carrierInvoiceCost: commercials.carrierInvoiceCost,
+        markUpAmount: commercials.markUpAmount,
+        surchargeAmount: commercials.surchargeAmount,
+        handlingFee: commercials.handlingFee,
+        brandAmountCharged: commercials.brandAmountCharged,
+        vatAmount: commercials.vatAmount,
+        grossShippingMargin: commercials.grossShippingMargin,
+        netMercentaRevenue: commercials.netMercentaRevenue,
+        placeholderTerms: commercials.placeholderTerms,
+        chargeRecordedUpfront: true,
+        carrierCostRetained: margin.carrierCostPrice,
+        marginFractionBelowRetiredRule:
+          commercials.grossShippingMargin / commercials.brandAmountCharged < 0.9,
+      },
+    };
+  });
+
 
   /* 10 — DELIVERY, RECEIVING, INVOICE & PAYMENT -------------------------- */
   await stage('delivery', async () => {
@@ -1590,6 +1739,121 @@ export async function runInvestorDemo(
         liveIsUnsafe: !isProviderSimulationSafe(liveMode),
         sandboxMode,
         disabledMode,
+      },
+    };
+  });
+
+
+  /* 18b — CASES: Mercenta review BEFORE channel escalation -------------- */
+  await stage('cases', async () => {
+    resetMockAmazonCases();
+    resetCaseSequence(0);
+
+    // (a) THE BRAND OPENS A CASE against its own tenant + related entities.
+    const kase = createCase({
+      brandId: tenant,
+      subject: `Deduction query on ${DEMO_DEDUCTION_ID}`,
+      description: 'Brand disputes the resolved shortage amount and asks Mercenta to review.',
+      caseCategory: 'deduction',
+      relatedDeductionId: DEMO_DEDUCTION_ID,
+      relatedPoNumber: poNumber,
+      id: `case-${tenant}-deduction`,
+      caseRef: 'MC-0001',
+    });
+    if (kase.escalationState !== 'brand_submitted' || !kase.caseRef) {
+      throw new Error(`a new brand case must await Mercenta review (${kase.escalationState})`);
+    }
+    // A fresh read for every later assertion (the store is the source of truth).
+    const live = () => getTicketById(kase.id);
+
+    // (b) NO CHANNEL ESCALATION BEFORE REVIEW — the provider path is refused.
+    const early = await escalateCaseToProvider(kase.id, ops.staffId, 'simulation');
+    if (early.ok || live()?.amazonCase) {
+      throw new Error('a case reached the retail channel before Mercenta review');
+    }
+
+    // (c) MERCENTA ADMIN REVIEWS IT.
+    const begun = beginCaseReview(kase.id, ops.staffId);
+    if (!begun.ok || live()?.escalationState !== 'under_mercenta_review') {
+      throw new Error(`review did not start: ${begun.error}`);
+    }
+    const reviewed = reviewCase(
+      kase.id,
+      ops.staffId,
+      'approve_escalation',
+      'Verified against the signed POD; escalating to the retail channel.'
+    );
+    if (!reviewed.ok || live()?.escalationState !== 'approved_for_escalation') {
+      throw new Error(`review decision not recorded: ${reviewed.error}`);
+    }
+
+    // (d) FAIL-CLOSED: an unknown provider mode never opens a provider case.
+    const unknownMode = await escalateCaseToProvider(kase.id, ops.staffId, 'unknown');
+    if (unknownMode.ok || live()?.amazonCase) {
+      throw new Error('an unknown provider mode simulated a channel case');
+    }
+
+    // (e) ESCALATION — only now, and idempotent.
+    const escalated = await escalateCaseToProvider(kase.id, ops.staffId, 'simulation');
+    if (!escalated.ok || !/^AMZ-CASE-MOCK-/.test(escalated.caseReferenceId ?? '')) {
+      throw new Error(`escalation did not open a clearly-fake provider case: ${escalated.error}`);
+    }
+    if (live()?.amazonCase?.simulated !== true) {
+      throw new Error('the provider case is not marked simulated');
+    }
+    const again = await escalateCaseToProvider(kase.id, ops.staffId, 'simulation');
+    if (!again.ok || again.caseReferenceId !== escalated.caseReferenceId) {
+      throw new Error('escalation was not idempotent');
+    }
+
+    // (f) THE PROVIDER RESPONDS, THEN MERCENTA RESOLVES.
+    const responded = recordProviderCaseResponse(kase.id, ops.staffId, {
+      outcome: 'accepted',
+      response: 'Retail channel confirmed the deduction adjustment; credit note to follow.',
+    });
+    if (!responded.ok || live()?.escalationState !== 'provider_responded') {
+      throw new Error(`provider response not recorded: ${responded.error}`);
+    }
+    const resolvedCase = resolveCase(
+      kase.id,
+      ops.staffId,
+      'Deduction adjusted with the retail channel; brand notified.'
+    );
+    if (!resolvedCase.ok || live()?.escalationState !== 'resolved') {
+      throw new Error(`case resolution not recorded: ${resolvedCase.error}`);
+    }
+    const finalCase = live();
+
+    // (g) TENANT-SCOPED READS.
+    const brandCases = listCasesForBrand(tenant);
+    const foreignCases = listCasesForBrand('brand-deskforge');
+    if (!brandCases.some((c) => c.id === kase.id) || foreignCases.length !== 0) {
+      throw new Error('case reads are not tenant-scoped');
+    }
+    if (!listAllCases().some((c) => c.id === kase.id)) {
+      throw new Error('the operator read model cannot see the case');
+    }
+    const caseAudit = demoAuditLog.filter((e) => e.brandId === tenant && /^case_/.test(e.action));
+    if (caseAudit.length < 3) {
+      throw new Error(`the case lifecycle is not fully audited (${caseAudit.length} rows)`);
+    }
+    return {
+      detail: `Brand case ${kase.caseRef} opened against ${DEMO_DEDUCTION_ID} → channel escalation REFUSED before review → Mercenta reviewed and approved escalation → provider case ${escalated.caseReferenceId} opened (simulated, idempotent) → provider response recorded → case resolved. Tenant-scoped reads verified; ${caseAudit.length} audit rows.`,
+      entityIds: [kase.id, escalated.caseReferenceId ?? '', DEMO_DEDUCTION_ID],
+      facts: {
+        caseRef: kase.caseRef ?? '',
+        escalationState: finalCase?.escalationState ?? '',
+        escalationBeforeReviewRefused: !early.ok,
+        reviewRecorded: finalCase?.adminReview?.decision === 'approve_escalation',
+        unknownModeRefused: !unknownMode.ok,
+        providerCaseOpened: /^AMZ-CASE-MOCK-/.test(escalated.caseReferenceId ?? ''),
+        providerCaseSimulated: finalCase?.amazonCase?.simulated === true,
+        escalationIdempotent: again.caseReferenceId === escalated.caseReferenceId,
+        providerResponseRecorded: !!finalCase?.providerResponse,
+        resolved: finalCase?.escalationState === 'resolved',
+        brandCases: brandCases.length,
+        foreignCases: foreignCases.length,
+        auditRows: caseAudit.length,
       },
     };
   });

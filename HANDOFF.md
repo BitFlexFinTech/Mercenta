@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 14, 2026 (M2 — compliance document verification seam + hard-gate enforcement BUILT + VERIFIED; M6/M7/M8/M9 pending)
+Last updated: September 14, 2026 (M2 document verification + M6 financial reconciliation + M7 investor demo extended to 24 stages — all BUILT + VERIFIED; M8 documentation sweep and M9 full regression pending)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd

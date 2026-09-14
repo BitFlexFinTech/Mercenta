@@ -75,6 +75,24 @@ export const demoShipments = DEMO_SHIPMENTS.map((s, i) => ({
 export const demoAuditLog: AuditLogEntry[] = [];
 export const demoShippingMargins: ShippingMargin[] = [];
 
+/**
+ * §M7 — record the UPFRONT brand shipping charge against the existing shipping
+ * margin ledger (idempotent by shipment: one margin row per shipment, ever).
+ */
+export function recordShippingMargin(margin: ShippingMargin): ShippingMargin {
+  const existing = demoShippingMargins.find((m) => m.id === margin.id);
+  if (existing) {
+    Object.assign(existing, margin);
+    return existing;
+  }
+  demoShippingMargins.push(margin);
+  return margin;
+}
+
+export function getShippingMargin(shipmentId: string): ShippingMargin | undefined {
+  return demoShippingMargins.find((m) => m.shipmentId === shipmentId);
+}
+
 // §6 — deterministic demo ledger rows: Mercenta's corporate-account cost vs the
 // marked-up label price collected from the brand upfront (placeholder rates
 // pending real carrier contracts — see config/commercial.ts).

@@ -1,6 +1,43 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-14 (**M2 document verification + M6 financial reconciliation BUILT + VERIFIED**; M7/M8/M9 pending)
+> Last updated: 2026-09-14 (**M2 + M6 + M7 BUILT + VERIFIED**; M8 documentation sweep and M9 full regression pending)
+>
+> **M7 SESSION (2026-09-14) — INVESTOR DEMO EXTENDED 22 → 24 STAGES.**
+>
+> The canonical 22-stage lifecycle is NOT replaced; two stages were added on the
+> SAME orchestration, using the existing seams, so the demo now proves the whole
+> business model end to end:
+>
+> **① `shipping_commercial` (inserted after `shipment`, before `delivery`)** —
+> canonical lane resolution proven BOTH ways (UK domestic → **Palletline**,
+> international → **DHL**); an arbitrary carrier (fedex) refused; the demo shipment
+> is **PO-gated** (a foreign tenant and a non-canonical carrier are both refused by
+> `createShipmentForPO`); `computeShippingCommercials()` preserves carrier list
+> cost, negotiated discount, carrier invoice cost, mark-up, surcharge, handling,
+> VAT and margin; the **upfront brand charge** is written to the existing
+> shipping-margin ledger WITH the carrier cost retained (never overwritten); and
+> the retired hardcoded 90% rule is asserted absent.
+>
+> **② `cases` (inserted after `integrations`)** — a brand opens a case against its
+> own tenant + related PO/deduction; channel escalation is **REFUSED before
+> Mercenta review**; Mercenta reviews (`under_mercenta_review`) and approves
+> escalation; an **unknown provider mode is refused** (fail-closed, no simulated
+> channel case); escalation is **idempotent** and opens a clearly-fake
+> `AMZ-CASE-MOCK-…` case; the provider response is recorded; the case is resolved;
+> reads are tenant-scoped and the whole lifecycle is audited.
+>
+> **③ REPLAY SAFETY.** The helpdesk ticket store is now part of the demo baseline
+> (`restorable('tickets')`) and the purge removes the demo tenant's cases, so
+> `reset → run` still reproduces the SAME digest and no run accumulates duplicate
+> cases.
+>
+> **④ EVIDENCE.** `validate-investor-demo.mjs` → **PASS** at 24 stages with new
+> §M7 assertions (shipping lanes, PO-gating, commercial breakdown, upfront charge,
+> case review → escalation → response → resolution, tenant scoping) ·
+> `e2e/investor-demo.spec.ts` **10/10** (stage-count assertions repointed to 24) ·
+> typecheck **0** · eslint **0** · build ✓ · **zero network calls**, digest replay
+> identical.
+
 >
 > **M6 SESSION (2026-09-14) — CANONICAL MONEY FLOW: payment → reconciliation →
 > accounting → payout eligibility → payout.**

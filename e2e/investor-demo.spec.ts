@@ -5,7 +5,7 @@
  * (Super Admin → Simulation Control Centre → Investor demo) and asserts, by
  * consequence rather than by layout:
  *
- *   1. the full 22-stage lifecycle runs in the browser and every stage reports OK;
+ *   1. the full 24-stage lifecycle runs in the browser and every stage reports OK;
  *   2. ZERO external network calls are made while it runs;
  *   3. reset → replay reproduces the SAME digest (deterministic, no duplicates);
  *   4. tenant isolation + RBAC hold in the DOMAIN (not merely hidden buttons);
@@ -61,7 +61,7 @@ async function runDemoAndWait(page: import('@playwright/test').Page) {
   await runButton(page).click();
   await expect(page.locator('[data-state="investor-demo-summary"]')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('[data-state="investor-demo-summary"]')).toHaveText(
-    '22/22 stages OK',
+    '24/24 stages OK',
     { timeout: 30000 }
   );
 }
@@ -73,7 +73,7 @@ async function digestOf(page: import('@playwright/test').Page): Promise<string> 
 }
 
 test.describe('Investor demo — lifecycle', () => {
-  test('1. the full 22-stage lifecycle runs in the browser and every stage reports OK', async ({
+  test('1. the full 24-stage lifecycle runs in the browser and every stage reports OK', async ({
     page,
   }) => {
     const externalCalls = watchExternalCalls(page);
@@ -93,7 +93,7 @@ test.describe('Investor demo — lifecycle', () => {
     await runDemoAndWait(page);
 
     // Every stage is present, individually, with an explicit status word.
-    await expect(stageRows(page)).toHaveCount(22);
+    await expect(stageRows(page)).toHaveCount(24);
     for (const id of [
       'application',
       'approval',
@@ -230,7 +230,7 @@ test.describe('Investor demo — tenant isolation & RBAC', () => {
       });
 
       return {
-        allStagesOk: run.summary.ok === 22 && run.summary.error === 0 && run.summary.blocked === 0,
+        allStagesOk: run.summary.ok === 24 && run.summary.error === 0 && run.summary.blocked === 0,
         networkCalls: run.networkCalls,
         // Canonical lifecycle evidence from the run's own facts.
         poDelivered: facts.delivery?.poStatus === 'delivered',
@@ -320,7 +320,7 @@ test.describe('Investor demo — responsive & accessible', () => {
 
     await runControl.click();
     await expect(page.locator('[data-state="investor-demo-summary"]')).toHaveText(
-      '22/22 stages OK',
+      '24/24 stages OK',
       { timeout: 30000 }
     );
 
@@ -328,8 +328,8 @@ test.describe('Investor demo — responsive & accessible', () => {
     const list = page.getByRole('list', { name: 'Investor demo lifecycle stages' });
     await expect(list).toBeVisible();
     const rows = list.getByRole('listitem');
-    await expect(rows).toHaveCount(22);
-    for (let i = 0; i < 22; i += 1) {
+    await expect(rows).toHaveCount(24);
+    for (let i = 0; i < 24; i += 1) {
       await expect(rows.nth(i)).toContainText(/(OK|BLOCKED|ERROR)/);
     }
   });
