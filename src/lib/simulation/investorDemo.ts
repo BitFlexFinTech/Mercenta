@@ -74,6 +74,15 @@ import {
   verifyDocumentVersion,
 } from '@/lib/verification/documentVerification';
 import {
+  ensurePayoutDestination,
+  evaluatePayoutEligibility,
+  financialStandingForBrand,
+  getReconciliationForPayment,
+  reconcilePayment,
+  setDestinationStatus,
+  vatAmountFor,
+} from '@/lib/finance/financialReconciliation';
+import {
   acceptBrandAgreement,
   evaluateBrandCatalogGate,
   fetchComplianceForBrand,
@@ -124,9 +133,12 @@ import {
   demoContracts,
   demoDeductions,
   demoDocumentVerifications,
+  demoPayoutDestinations,
+  demoPayouts,
   demoProductSubmissions,
   demoProducts,
   demoPurchaseOrders,
+  demoReconciliations,
   demoReturns,
   demoShipments,
   getCommerceInvoiceForPo,
@@ -342,6 +354,9 @@ const RESTORABLE: Restorable[] = [
   restorable('catalog_submissions', demoProductSubmissions),
   restorable('compliance_documents', demoComplianceDocs),
   restorable('document_verifications', demoDocumentVerifications),
+  restorable('payout_destinations', demoPayoutDestinations),
+  restorable('reconciliations', demoReconciliations),
+  restorable('payouts', demoPayouts),
   restorable('brand_agreements', demoBrandAgreements),
   restorable('contracts', demoContracts),
   restorable('commerce_activities', demoCommerceActivities),
@@ -393,9 +408,12 @@ function purgeInvestorDemoRecords(): number {
   purge(demoContracts);
   purge(demoDeductions);
   purge(demoDocumentVerifications as { brandId?: string | null }[]);
+  purge(demoPayoutDestinations);
+  purge(demoPayouts);
   purge(demoProductSubmissions);
   purge(demoProducts);
   purge(demoPurchaseOrders);
+  purge(demoReconciliations);
   purge(demoReturnTracking);
   purge(demoReturns);
   purge(demoShipments);
@@ -1312,13 +1330,73 @@ export async function runInvestorDemo(
     };
   });
 
-  /* 15 — BRAND PAYOUT SETTLEMENT ----------------------------------------- */
+  /* 15 — BRAND PAYOUT SETTLEMENT (reconciliation-gated) ------------------- */
   await stage('payout', async () => {
     const before = listCommissionsForPayout().filter(
       (c) => c.brandId === tenant && c.status !== 'paid'
     );
     if (before.length === 0) throw new Error('no pending payout for the brand');
 
+    // (a) A payout must NOT be possible before the payment is reconciled: the
+    //     eligibility gate is evaluated FIRST and must refuse.
+    const payment = demoCommercePayments.find((p) => p.brandId === tenant);
+    if (!payment) throw new Error('no simulated payment was recorded for the demo tenant');
+    const preReconciliation = evaluatePayoutEligibility(commissionId);
+    if (preReconciliation.eligible) {
+      throw new Error('a payout was eligible BEFORE the payment was reconciled');
+    }
+    const blockedBeforeReconciliation = await settleBrandPayout(commissionId, ops.staffId);
+    if (blockedBeforeReconciliation.ok) {
+      throw new Error('a payout was submitted before the payment was reconciled');
+    }
+    // Snapshot the refusal reason NOW: later attempts legitimately overwrite the
+    // live payout record's blockedReason.
+    const blockedPayoutRecord = demoPayouts.find((p) => p.commissionId === commissionId);
+    const blockedPayoutReasonAtReconciliation = blockedPayoutRecord?.blockedReason ?? '';
+
+    // (b) THE VERIFIED PAYOUT DESTINATION — a payout to an unverified account is
+    //     refused, then the operator verifies it through the audited action.
+    const destination = ensurePayoutDestination(tenant);
+    const unverifiedAttempt = await settleBrandPayout(commissionId, ops.staffId);
+    if (unverifiedAttempt.ok) {
+      throw new Error('a payout was sent to an unverified destination');
+    }
+    const verified = setDestinationStatus(destination.id, 'verified', ops, {
+      verificationMethod: 'Mercenta operator review (simulated)',
+      verificationRef: `SIM-DEST-VERIFY-${tenant}`,
+    });
+    if (!verified.ok) throw new Error(`destination verification refused: ${verified.error}`);
+
+    // (c) RECONCILE the received payment to its PO identity.
+    const reconciliation = await reconcilePayment(payment.id, ops, { getMode, providerKey: 'xero' });
+    if (!reconciliation.ok) throw new Error(`reconciliation refused: ${reconciliation.error}`);
+    const rec = reconciliation.value;
+    if (rec.state !== 'reconciled') {
+      throw new Error(`reconciliation is ${rec.state}: ${rec.exceptionReason}`);
+    }
+    if (rec.purchaseOrderId !== poId) throw new Error('the reconciliation matched the WRONG PO');
+    if (!rec.accounting.represented || rec.accounting.mode !== 'simulation') {
+      throw new Error('the accounting representation was not written by the simulation seam');
+    }
+    if (!rec.accounting.simulated) {
+      throw new Error('the accounting representation claims an EXTERNAL posting');
+    }
+
+    // (d) DUPLICATE-RECONCILIATION GUARD — the same payment reconciles once.
+    const replay = await reconcilePayment(payment.id, ops, { getMode, providerKey: 'xero' });
+    if (!replay.ok || replay.value.id !== rec.id) {
+      throw new Error('the same payment produced a second reconciliation identity');
+    }
+    if (demoReconciliations.filter((r) => r.paymentId === payment.id).length !== 1) {
+      throw new Error('duplicate reconciliation rows exist for one payment');
+    }
+
+    const eligible = evaluatePayoutEligibility(commissionId);
+    if (!eligible.eligible) {
+      throw new Error(`still not eligible after reconciliation: ${eligible.blockers.join('; ')}`);
+    }
+
+    // (e) SETTLE through the ONE canonical settlement path.
     const settled = await settleBrandPayout(commissionId, ops.staffId);
     if (!settled.ok) throw new Error(`settlement refused: ${settled.error}`);
     if (settled.mode !== 'mock') throw new Error(`payout mode is "${settled.mode}" — not a simulation`);
@@ -1342,9 +1420,24 @@ export async function runInvestorDemo(
       (c) => c.brandId === tenant && c.status !== 'paid'
     );
     if (pendingAfter.length !== 0) throw new Error('the settled payout is still pending');
+
+    const payoutRecord = demoPayouts.find((p) => p.commissionId === commissionId);
+    if (!payoutRecord || payoutRecord.state !== 'settled') {
+      throw new Error(`the payout identity did not reach settled (${payoutRecord?.state})`);
+    }
+    if (payoutRecord.reconciliationId !== rec.id) {
+      throw new Error('the payout is not linked to its reconciliation');
+    }
+    if (getReconciliationForPayment(payment.id)?.id !== rec.id) {
+      throw new Error('the reconciliation is not readable by its payment identity');
+    }
+    const standing = financialStandingForBrand(tenant);
+    if (standing.settledPayoutCount !== 1) {
+      throw new Error(`the brand standing reports ${standing.settledPayoutCount} settled payouts`);
+    }
     return {
-      detail: `Payout settled for ${commissionId} — simulated transfer ${settled.transferId}, net £${(settled.netShareGbp ?? 0).toFixed(2)}; audit row recorded, second settlement refused (double-payout guard).`,
-      entityIds: [commissionId, settled.transferId ?? ''],
+      detail: `Payment ${payment.id} reconciled to ${rec.purchaseOrderNumber} (accounting representation ${rec.accounting.representationId}, simulated) → destination ${destination.accountRefMasked} verified → payout settled as ${settled.transferId}, net £${(settled.netShareGbp ?? 0).toFixed(2)}. Blocked BEFORE reconciliation and BEFORE destination verification; second settlement refused (double-payout guard).`,
+      entityIds: [commissionId, settled.transferId ?? '', rec.id, destination.id],
       facts: {
         settled: true,
         payoutMode: settled.mode,
@@ -1353,6 +1446,26 @@ export async function runInvestorDemo(
         pendingBefore: before.length,
         pendingAfter: pendingAfter.length,
         doublePayoutRefused: !second.ok,
+        blockedBeforeReconciliation: !blockedBeforeReconciliation.ok,
+        blockedReason: blockedPayoutReasonAtReconciliation,
+        blockedReasonAtReconciliation: blockedPayoutReasonAtReconciliation,
+        blockedBeforeDestinationVerification: !unverifiedAttempt.ok,
+        destinationStatus: destination.status,
+        reconciliationId: rec.id,
+        reconciliationState: rec.state,
+        reconciliationsForPayment: demoReconciliations.filter((r) => r.paymentId === payment.id).length,
+        accountingRepresented: rec.accounting.represented,
+        accountingSimulated: rec.accounting.simulated,
+        accountingProvider: rec.accounting.provider,
+        commissionAmountGbp: rec.fact.commissionAmountGbp,
+        netToBrandGbp: rec.fact.netToBrandGbp,
+        deductionsAppliedGbp: rec.fact.deductionsAppliedGbp,
+        vatTreatment: rec.fact.vatTreatment,
+        vatConfigured: rec.fact.vatConfigured,
+        vatAmountGbp: vatAmountFor(rec.fact.netToBrandGbp) ?? 0,
+        payoutState: payoutRecord.state,
+        payoutAttempts: payoutRecord.attempts,
+        settledPayoutCount: standing.settledPayoutCount,
       },
     };
   });

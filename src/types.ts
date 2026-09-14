@@ -366,6 +366,140 @@ export interface CommercePayment {
   at: string;
 }
 
+/* ── §M6 — Payment reconciliation, payout eligibility, payout lifecycle ───── */
+
+/**
+ * The VAT treatment applied to the money flow.
+ *
+ * §ACCOUNTING RULE — this is an EXTERNAL business/accounting decision. The
+ * repository does not invent one: until the treatment is configured,
+ * `configuration_required` is carried through every financial record so nothing
+ * downstream can present a production tax result that was never decided.
+ */
+export type VatTreatment =
+  | 'configuration_required'
+  | 'standard_20'
+  | 'zero_rated'
+  | 'exempt'
+  | 'reverse_charge';
+
+/** The canonical state of a received payment's reconciliation. */
+export type PaymentReconciliationState = 'pending' | 'reconciled' | 'exception';
+
+/**
+ * §M6 — the DETERMINISTIC reconciliation of a retail-channel payment to the
+ * PO/invoice identity it actually belongs to. Nothing in the platform may treat
+ * a payment's PO as "assumed": this record is the evidence.
+ */
+export interface PaymentReconciliation {
+  /** Deterministic id: `rec-<paymentId>`. One per payment, ever. */
+  id: string;
+  paymentId: string;
+  invoiceId: string;
+  /** The canonical PO id. */
+  purchaseOrderId: string;
+  purchaseOrderNumber: string;
+  brandId: string;
+  amountGbp: number;
+  currency: 'GBP';
+  /** Where the money came from (payment method/source as recorded). */
+  paymentSource: string;
+  paymentDate: string;
+  state: PaymentReconciliationState;
+  reconciledAt?: string;
+  reconciledBy?: string;
+  exceptionReason?: string;
+  /**
+   * The canonical money breakdown, derived from the PO/payment facts — never
+   * from a UI display value.
+   */
+  fact: {
+    poValueGbp: number;
+    commissionRatePct: number;
+    commissionAmountGbp: number;
+    /** Deductions borne by the brand (accepted/resolved). */
+    deductionsAppliedGbp: number;
+    /** Deductions still open/disputed — these BLOCK payout eligibility. */
+    deductionsUnresolvedGbp: number;
+    deductionsUnresolvedCount: number;
+    fulfilmentFeesGbp: number;
+    netToBrandGbp: number;
+    vatTreatment: VatTreatment;
+    vatConfigured: boolean;
+    /** Only present when a VAT treatment has actually been configured. */
+    vatAmountGbp?: number;
+  };
+  /** The accounting representation written through the canonical Xero seam. */
+  accounting: {
+    provider: string;
+    mode: 'simulation' | 'live' | 'unavailable';
+    represented: boolean;
+    representationId?: string;
+    postedAt?: string;
+    error?: string;
+    simulated: boolean;
+  };
+  payoutEligible: boolean;
+  payoutBlockedReason?: string;
+  mode: CommerceMode;
+  simulated: boolean;
+}
+
+/** Brand payout destination review state. Unverified destinations can never be paid. */
+export type PayoutDestinationStatus = 'unverified' | 'verified' | 'rejected' | 'suspended';
+
+export interface BrandPayoutDestination {
+  id: string;
+  brandId: string;
+  accountName: string;
+  /** Masked reference only — a full account number is never held in the app. */
+  accountRefMasked: string;
+  bankName: string;
+  country: string;
+  currency: 'GBP';
+  status: PayoutDestinationStatus;
+  /** How the destination was checked (manual bank verification, provider call…). */
+  verificationMethod?: string;
+  verificationRef?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
+  failureReason?: string;
+  mode: CommerceMode;
+  simulated: boolean;
+}
+
+/**
+ * The canonical payout lifecycle for one commission. `Commission.status` stays
+ * the ACCOUNTING state (accrued/invoiced/paid); this record owns the operational
+ * payout state machine, so a payout can be pending → eligible → submitted →
+ * settled/failed and retried without inventing a second money ledger.
+ */
+export type PayoutState = 'pending' | 'eligible' | 'submitted' | 'settled' | 'failed';
+
+export interface CommissionPayout {
+  /** Deterministic id: `payout-<commissionId>`. One payout identity per commission. */
+  id: string;
+  commissionId: string;
+  brandId: string;
+  purchaseOrderId: string;
+  reconciliationId?: string;
+  destinationId?: string;
+  netAmountGbp: number;
+  currency: 'GBP';
+  state: PayoutState;
+  attempts: number;
+  transferId?: string;
+  mode: 'mock' | 'real';
+  submittedAt?: string;
+  settledAt?: string;
+  failedAt?: string;
+  failureReason?: string;
+  /** Why the payout is not eligible yet (present while state is pending). */
+  blockedReason?: string;
+  vatTreatment: VatTreatment;
+  simulated: boolean;
+}
+
 
 export interface ActivityLog {
   id: string;

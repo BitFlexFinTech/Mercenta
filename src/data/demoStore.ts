@@ -7,11 +7,15 @@
  * these arrays so all views see changes immediately (single source of truth).
  */
 import type {
+  BrandPayoutDestination,
+  CommissionPayout,
   ComplianceDocument,
   DocumentVerificationRecord,
   Commission,
   Contract,
+  Deduction,
   Message,
+  PaymentReconciliation,
   PurchaseOrder,
   AuditLogEntry,
   ShippingMargin,
@@ -1311,6 +1315,126 @@ export function updateCarrierMarkup(id: string, updates: Partial<Pick<CarrierMar
   if (!entry) return false;
   Object.assign(entry, updates);
   return true;
+}
+
+/* ── §M6 — canonical money-flow stores (reconciliation / payouts / destinations)
+ *
+ * ONE ledger each, appended to by the finance seam only. Nothing here duplicates
+ * the PO store (the value/commission source) or the commission projection (the
+ * payable source): these records add IDENTITY + STATE to that money.
+ */
+
+export const demoPayoutDestinations: BrandPayoutDestination[] = seedPayoutDestinations();
+export const demoReconciliations: PaymentReconciliation[] = seedReconciliations();
+export const demoPayouts: CommissionPayout[] = [];
+
+export function resetFinanceStores(): void {
+  demoPayoutDestinations.length = 0;
+  demoPayoutDestinations.push(...seedPayoutDestinations());
+  demoReconciliations.length = 0;
+  demoReconciliations.push(...seedReconciliations());
+  demoPayouts.length = 0;
+}
+
+/**
+ * Seeded payout destinations — DERIVED from the brand list (never hand-maintained).
+ * One brand is deliberately left UNVERIFIED so the "payout to an unverified
+ * destination is refused" rule is reachable in the demo dataset.
+ */
+export function seedPayoutDestinations(): BrandPayoutDestination[] {
+  return ALL_DEMO_BRANDS.map((brand) => {
+    const slug = brand.id.replace(/^brand-/, '').toUpperCase();
+    const unverified = brand.id === 'brand-motorvista';
+    return {
+      id: `dest-${brand.id}`,
+      brandId: brand.id,
+      accountName: brand.name,
+      accountRefMasked: `••••••${String(Math.abs(hashSlug(slug)) % 10000).padStart(4, '0')}`,
+      bankName: 'Seeded demo bank (no live bank connection)',
+      country: brand.nation ?? 'United Kingdom',
+      currency: 'GBP' as const,
+      status: unverified ? ('unverified' as const) : ('verified' as const),
+      ...(unverified
+        ? {}
+        : {
+            verificationMethod: 'Seeded demo verification (no bank provider contacted)',
+            verificationRef: `SIM-DEST-${slug}`,
+            verifiedAt: '2026-09-01T00:00:00.000Z',
+            verifiedBy: 'staff-001',
+          }),
+      mode: 'simulation' as const,
+      simulated: true,
+    };
+  });
+}
+
+function hashSlug(value: string): number {
+  let h = 0;
+  for (let i = 0; i < value.length; i += 1) h = (h * 31 + value.charCodeAt(i)) | 0;
+  return h;
+}
+
+/**
+ * Seeded reconciliations — DERIVED from the canonical PO + commission projection,
+ * so the demo's Accounting surface is money-coherent (a payable PO has a received
+ * remittance matched to it). Every seeded record is `simulated: true` and states
+ * that no retail channel was contacted.
+ */
+export function seedReconciliations(): PaymentReconciliation[] {
+  return demoCommissions.map((commission) => {
+    const po = demoPurchaseOrders.find((p) => p.poNumber === commission.purchaseOrderId);
+    const poId = po?.id ?? commission.purchaseOrderId;
+    const deductions = demoDeductions.filter((d) => d.purchaseOrderId === commission.purchaseOrderId);
+    return buildSeededReconciliation(commission, poId, deductions);
+  });
+}
+
+function buildSeededReconciliation(
+  commission: Commission,
+  poId: string,
+  deductions: Deduction[]
+): PaymentReconciliation {
+  return {
+    id: `rec-seed-${commission.id}`,
+    paymentId: `cpay-seed-${commission.id}`,
+    invoiceId: `cinv-seed-${commission.id}`,
+    purchaseOrderId: poId,
+    purchaseOrderNumber: commission.purchaseOrderId,
+    brandId: commission.brandId,
+    amountGbp: commission.poValue,
+    currency: 'GBP',
+    paymentSource: 'seeded_demo_remittance',
+    paymentDate: commission.createdAt,
+    state: 'reconciled',
+    reconciledAt: commission.createdAt,
+    reconciledBy: 'seeded-demo-remittance',
+    fact: {
+      poValueGbp: commission.poValue,
+      commissionRatePct: commission.commissionRate,
+      commissionAmountGbp: commission.commissionAmount,
+      deductionsAppliedGbp: 0,
+      deductionsUnresolvedGbp: 0,
+      deductionsUnresolvedCount: 0,
+      fulfilmentFeesGbp: 0,
+      netToBrandGbp: Math.round((commission.poValue - commission.commissionAmount) * 100) / 100,
+      vatTreatment: 'configuration_required',
+      vatConfigured: false,
+    },
+    accounting: {
+      provider: 'seeded_demo_representation',
+      mode: 'simulation',
+      represented: true,
+      representationId: `SIM-XERO-${commission.id}`,
+      postedAt: commission.createdAt,
+      simulated: true,
+    },
+    payoutEligible: deductions.length === 0,
+    ...(deductions.length === 0
+      ? {}
+      : { payoutBlockedReason: `${deductions.length} unresolved deduction(s) on ${commission.purchaseOrderId}` }),
+    mode: 'simulation',
+    simulated: true,
+  };
 }
 
 /* ── §Priority-1 — Compliance verification stores (Companies House / HMRC) ── */

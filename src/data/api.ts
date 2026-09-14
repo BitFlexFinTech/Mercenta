@@ -79,7 +79,15 @@ import {
   demoDeductions,
   demoProductSubmissions,
   recordCatalogSubmission,
+  recordCommerceAudit,
 } from './demoStore';
+import {
+  ensureCommissionPayout,
+  evaluatePayoutEligibility,
+  markPayoutFailed,
+  markPayoutSettled,
+  markPayoutSubmitted,
+} from '@/lib/finance/financialReconciliation';
 
 export type DataSource = 'supabase' | 'seed';
 
@@ -490,6 +498,34 @@ export async function settleBrandPayout(
     return { ok: false, mode: 'mock', error: `commission ${commissionId} not found` };
   }
 
+  // ── §M6 — THE CANONICAL ELIGIBILITY GATE ────────────────────────────────
+  // A payout may only be submitted when the payment has actually been RECEIVED
+  // and RECONCILED to this PO, no deduction on the PO is unresolved, and the
+  // destination account is VERIFIED. The payout identity is created here so a
+  // refusal is recorded as a blocked payout, not silence.
+  const eligibility = evaluatePayoutEligibility(commissionId);
+  const payoutRecord = eligibility.payout ?? ensureCommissionPayout(commission, eligibility.reconciliation);
+  if (!eligibility.eligible) {
+    const blockedReason = eligibility.blockers.join('; ');
+    // A refusal may only mark the payout as blocked while it is still in the
+    // pre-submission states. A settled/submitted payout is NEVER downgraded by a
+    // later refusal (that would corrupt the money record).
+    if (payoutRecord.state === 'pending' || payoutRecord.state === 'eligible' || payoutRecord.state === 'failed') {
+      payoutRecord.state = 'pending';
+    }
+    payoutRecord.blockedReason = blockedReason;
+    recordCommerceAudit(
+      'brand_payout_blocked',
+      commissionId,
+      commission.brandId,
+      `Payout refused for ${commissionId}: ${blockedReason}`,
+      actorId,
+      { commissionId, blockers: eligibility.blockers, payoutState: payoutRecord.state }
+    );
+    return { ok: false, mode: 'mock', error: `PAYOUT_BLOCKED — ${blockedReason}` };
+  }
+  markPayoutSubmitted(commissionId);
+
   const { data: brands } = await fetchBrands();
   const fulfillmentTrack = normalisePayoutTrack(
     brands.find((b) => b.id === commission.brandId)?.track ?? 'financed'
@@ -521,8 +557,22 @@ export async function settleBrandPayout(
   );
 
   if (!result.ok) {
-    return { ok: false, mode: client.mode, error: result.error ?? 'payout refused' };
+    // §M6 — a declined/failed payout is recorded as FAILED, stays unpaid, and is
+    // retryable. Nothing is marked paid.
+    const failureReason = result.error ?? 'payout refused';
+    markPayoutFailed(commissionId, failureReason);
+    recordCommerceAudit(
+      'brand_payout_failed',
+      commissionId,
+      commission.brandId,
+      `Payout failed for ${commissionId} (${client.mode}) — ${failureReason}; the commission remains unpaid and the payout is retryable`,
+      actorId,
+      { commissionId, mode: client.mode, failureReason }
+    );
+    return { ok: false, mode: client.mode, error: failureReason };
   }
+
+  markPayoutSettled(commissionId, result.transferId ?? '', client.mode);
 
   const reason = result.netShareGbp !== undefined
     ? `simulated brand payout — net £${result.netShareGbp.toFixed(2)} via transfer ${result.transferId} (${client.mode})`
@@ -541,6 +591,14 @@ export async function settleBrandPayout(
       mode: client.mode,
       netShareGbp: result.netShareGbp ?? null,
       commissionRatePct: ratePct,
+      // §M6 — every payout is traceable back to the money it pays out.
+      reconciliationId: eligibility.reconciliation?.id ?? null,
+      paymentId: eligibility.reconciliation?.paymentId ?? null,
+      purchaseOrderNumber: commission.purchaseOrderId,
+      destinationId: eligibility.destination?.id ?? null,
+      destinationVerified: eligibility.destination?.status === 'verified',
+      vatTreatment: eligibility.reconciliation?.fact.vatTreatment ?? 'configuration_required',
+      vatConfigured: eligibility.reconciliation?.fact.vatConfigured ?? false,
     },
   };
   demoAuditLog.push(audit);

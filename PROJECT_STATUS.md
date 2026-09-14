@@ -1,6 +1,56 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-14 (**M2 — compliance document verification BUILT + VERIFIED**; M6/M7/M8/M9 pending)
+> Last updated: 2026-09-14 (**M2 document verification + M6 financial reconciliation BUILT + VERIFIED**; M7/M8/M9 pending)
+>
+> **M6 SESSION (2026-09-14) — CANONICAL MONEY FLOW: payment → reconciliation →
+> accounting → payout eligibility → payout.**
+>
+> **① ADDITIVE MODEL (no parallel money store).** `PaymentReconciliation`,
+> `BrandPayoutDestination`, `CommissionPayout` + `PayoutState`/`VatTreatment`/
+> `PaymentReconciliationState` in `src/types.ts`. The PO store stays the source of
+> value/commission; `listCommissionsForPayout()` stays the payable projection and
+> `lib/billing/payouts.ts` stays the transfer seam + fee maths. The new records add
+> IDENTITY + STATE only. **No migration** (still 23).
+>
+> **② NEW SEAMS.** `src/lib/finance/accountingSeam.ts` — accounting provider seam:
+> `simulated_accounting_representation` (deterministic, zero network, `SIM-XERO-REC-…`,
+> only when the mode is POSITIVELY `simulation`), `xero` (the EXISTING
+> `src/services/xero` client via `reconcileAmazonRemittance`; without credentials it
+> reports "not connected" and NOTHING is claimed as represented) and a fail-closed
+> `unavailable_accounting_representation`. `src/lib/finance/financialReconciliation.ts`
+> — `reconcilePayment` (one deterministic `rec-<paymentId>` per payment; duplicate
+> refused; a mismatched PO assertion is an EXCEPTION), `evaluatePayoutEligibility`,
+> the payout state machine (`ensure/submitted/settled/failed/retry`) and
+> `setDestinationStatus` (verification requires a reference; every change audited).
+>
+> **③ PAYOUT GATES (all enforced in the ONE settlement path).** No payout without a
+> RECONCILED payment for the PO, no payout with an unresolved deduction, no payout to
+> an UNVERIFIED destination, no duplicate payout. A refusal writes a **blocked**
+> payout record + audit row; a declined transfer leaves the commission UNPAID and
+> retryable; **a settled payout is never downgraded** by a later refusal.
+>
+> **④ VAT — NOT INVENTED.** `src/config/commercial.ts` now carries
+> `VAT_TREATMENT = 'configuration_required'` + `VAT_TREATMENT_CONFIGURED = false`, so
+> every reconciliation records `vatConfigured: false` and computes NO tax amount while
+> the business/accounting decision is outstanding. Flip the config and the same money
+> flow expresses the agreed treatment.
+>
+> **⑤ UI (no redesign).** Accounting panel: a **Reconciliation** column (state +
+> payment id), a **Payout** column (canonical payout state + the blocked reason) and a
+> **Payout destinations** card with the audited Verify/Suspend operator actions.
+>
+> **⑥ DEMO DATA.** Payout destinations are DERIVED from the brand list (one brand left
+> `unverified`); seeded reconciliations are DERIVED from the canonical PO + commission
+> projection so the Accounting surface is money-coherent. The investor demo now
+> reconciles the received payment before paying out and proves the two refusals
+> (before reconciliation, before destination verification).
+>
+> **⑦ EVIDENCE.** NEW `scripts/validate-financial-reconciliation.mjs` → **ALL PASS**
+> (48 checks incl. zero-network) · `validate-investor-demo.mjs` **PASS** (+8 §M6
+> checks) · `validate-e6-brand-surfaces` **PASS** · `e2e/brand-payouts.spec.ts`
+> **4/4** (was 2/2; statuses assertion repointed to the closed canonical vocabulary)
+> · `e2e/investor-demo.spec.ts` **10/10** · typecheck **0** · eslint **0** · build ✓.
+
 >
 > **M2 SESSION (2026-09-14) — DOCUMENT VERIFICATION SEAM + HARD-GATE ENFORCEMENT.**
 >

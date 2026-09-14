@@ -20,6 +20,9 @@ import type {
   DeductionStatus,
   DocumentVerificationStatus,
   OnboardingStatus,
+  PaymentReconciliationState,
+  PayoutDestinationStatus,
+  PayoutState,
   PurchaseOrderStatus,
   ReturnTrackingStatus,
   ShipmentStatus,
@@ -309,6 +312,69 @@ export function shipmentStatusPresentation(status: string): StatusPresentation {
     dataStatus: String(status),
     actionable: key !== 'live_amazon',
   };
+}
+
+/* ── §M6 — payment reconciliation / payout lifecycle states ──────────────── */
+
+/** Reconciliation states. Only `reconciled` may make a payout eligible. */
+const RECONCILIATION_STATUS: Record<PaymentReconciliationState, StatusPresentation> = {
+  pending: { label: 'not reconciled', tone: 'warning', dataStatus: 'pending', actionable: true },
+  reconciled: { label: 'reconciled', tone: 'success', dataStatus: 'reconciled', actionable: false },
+  exception: { label: 'reconciliation exception', tone: 'danger', dataStatus: 'exception', actionable: true },
+};
+
+export function reconciliationStatePresentation(
+  state: PaymentReconciliationState | string
+): StatusPresentation {
+  return (
+    RECONCILIATION_STATUS[state as PaymentReconciliationState] ?? {
+      label: String(state).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(state),
+      actionable: true,
+    }
+  );
+}
+
+/** Brand payout operational states (the accounting status stays separate). */
+const PAYOUT_STATE: Record<PayoutState, StatusPresentation> = {
+  pending: { label: 'blocked', tone: 'warning', dataStatus: 'payout_pending', actionable: true },
+  eligible: { label: 'payout eligible', tone: 'info', dataStatus: 'payout_eligible', actionable: true },
+  submitted: { label: 'payout submitted', tone: 'info', dataStatus: 'payout_submitted', actionable: true },
+  settled: { label: 'payout settled', tone: 'success', dataStatus: 'payout_settled', actionable: false },
+  failed: { label: 'payout failed', tone: 'danger', dataStatus: 'payout_failed', actionable: true },
+};
+
+export function payoutStatePresentation(state: PayoutState | string): StatusPresentation {
+  return (
+    PAYOUT_STATE[state as PayoutState] ?? {
+      label: String(state).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(state),
+      actionable: true,
+    }
+  );
+}
+
+/** Payout destination verification states. An unverified account cannot be paid. */
+const PAYOUT_DESTINATION_STATUS: Record<PayoutDestinationStatus, StatusPresentation> = {
+  unverified: { label: 'unverified', tone: 'warning', dataStatus: 'unverified', actionable: true },
+  verified: { label: 'verified', tone: 'success', dataStatus: 'verified', actionable: false },
+  rejected: { label: 'rejected', tone: 'danger', dataStatus: 'rejected', actionable: true },
+  suspended: { label: 'suspended', tone: 'danger', dataStatus: 'suspended', actionable: true },
+};
+
+export function payoutDestinationStatusPresentation(
+  status: PayoutDestinationStatus | string
+): StatusPresentation {
+  return (
+    PAYOUT_DESTINATION_STATUS[status as PayoutDestinationStatus] ?? {
+      label: String(status).replace(/_/g, ' '),
+      tone: 'neutral',
+      dataStatus: String(status),
+      actionable: true,
+    }
+  );
 }
 
 /* ── §Phase D2 — compliance gate state ────────────────────────────────────── */

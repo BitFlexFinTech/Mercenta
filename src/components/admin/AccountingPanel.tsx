@@ -8,7 +8,15 @@ import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
 import { useBrands, useCommissions } from '@/data/queries';
 import { settleBrandPayout } from '@/data/api';
 import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
-import { commissionStatusPresentation } from '@/lib/statusPresentation';
+import { commissionStatusPresentation, payoutDestinationStatusPresentation, payoutStatePresentation, reconciliationStatePresentation } from '@/lib/statusPresentation';
+import {
+  evaluatePayoutEligibility,
+  getDestinations,
+  getPayoutForCommission,
+  getReconciliationForPo,
+  setDestinationStatus,
+} from '@/lib/finance/financialReconciliation';
+import { demoPurchaseOrders } from '@/data/demoStore';
 import { useApp } from '@/context/GlobalStateContext';
 import { supabase } from '@/lib/supabase';
 import { isXeroDemoMode } from '@/services/xero';
@@ -22,6 +30,15 @@ import {
 } from 'lucide-react';
 
 const PARTNER_ID = 'a0000000-0000-0000-0000-000000000001';
+
+/**
+ * §M6 — a commission records the PO NUMBER; the reconciliation is keyed by the
+ * canonical PO id. This resolves one to the other from the canonical PO store
+ * (no second list of POs anywhere).
+ */
+function poIdForCommission(poNumber: string): string {
+  return demoPurchaseOrders.find((p) => p.poNumber === poNumber)?.id ?? poNumber;
+}
 
 export function AccountingPanel() {
   const [connected, setConnected] = useState<boolean | null>(null);
@@ -47,6 +64,10 @@ export function AccountingPanel() {
   const [payoutBusyId, setPayoutBusyId] = useState<string | null>(null);
   const [payoutNotice, setPayoutNotice] = useState<string | null>(null);
   const [payoutError, setPayoutError] = useState<string | null>(null);
+  // §M6 — payout destination review state.
+  const [destinationBusyId, setDestinationBusyId] = useState<string | null>(null);
+  const [destinationNotice, setDestinationNotice] = useState<string | null>(null);
+  const [destinationVersion, setDestinationVersion] = useState(0);
 
   const brandName = useCallback(
     (brandId: string) =>
@@ -62,6 +83,11 @@ export function AccountingPanel() {
   const allCommissions = commissionsQuery.data?.data ?? [];
   const pendingPayouts = allCommissions.filter((c) => c.status !== 'paid');
   const settledCount = allCommissions.filter((c) => c.status === 'paid').length;
+
+  // §M6 — the destination rows are read live; `destinationVersion` forces this
+  // component to re-read after an operator review action.
+  void destinationVersion;
+  const destinationRows = getDestinations();
 
   /** Net brand share, using the canonical fee maths + the brand's real track. */
   const netShareOf = useCallback(
@@ -110,6 +136,40 @@ export function AccountingPanel() {
           ? 'Mock transfer: no live Stripe call was made.'
           : 'Recorded by the payout Edge Function.'
       }`
+    );
+    await qc.invalidateQueries({ queryKey: ['commissions'] });
+    await qc.invalidateQueries({ queryKey: ['audit-log'] });
+  }
+
+  /**
+   * §M6 — payout destination review. Verifying REQUIRES a verification
+   * reference; suspending records the reason. Either way the change is audited
+   * and immediately affects payout eligibility.
+   */
+  async function reviewDestination(
+    destinationId: string,
+    status: 'verified' | 'suspended' | 'unverified'
+  ) {
+    if (destinationBusyId) return;
+    setDestinationBusyId(destinationId);
+    setDestinationNotice(null);
+    const result = setDestinationStatus(
+      destinationId,
+      status,
+      { staffId: actingStaffId, canMutate: true },
+      status === 'verified'
+        ? {
+            verificationMethod: 'Mercenta operator review',
+            verificationRef: `SIM-VERIFY-${destinationId}-${destinationVersion + 1}`,
+          }
+        : { reason: 'Suspended pending account review by Mercenta.' }
+    );
+    setDestinationBusyId(null);
+    setDestinationVersion((v) => v + 1);
+    setDestinationNotice(
+      result.ok
+        ? `Destination ${destinationId} is now ${result.value.status}.`
+        : result.error
     );
     await qc.invalidateQueries({ queryKey: ['commissions'] });
     await qc.invalidateQueries({ queryKey: ['audit-log'] });
@@ -459,8 +519,50 @@ export function AccountingPanel() {
               ),
             },
             {
+              key: 'reconciliation',
+              label: 'Reconciliation',
+              hideBelow: 'md',
+              render: (c) => {
+                // §M6 — the payment identity actually reconciled to this PO.
+                const rec = getReconciliationForPo(poIdForCommission(c.purchaseOrderId));
+                if (!rec) {
+                  return <span className="text-[11px] text-amber-300">awaiting remittance</span>;
+                }
+                const p = reconciliationStatePresentation(rec.state);
+                return (
+                  <span className="flex flex-col gap-0.5">
+                    <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>{p.label}</StatusBadge>
+                    <span className="font-mono text-[10px] text-zinc-500">{rec.paymentId}</span>
+                  </span>
+                );
+              },
+            },
+            {
+              key: 'payoutState',
+              label: 'Payout',
+              align: 'center',
+              render: (c) => {
+                // §M6 — the operational payout state (the accounting status is
+                // the separate column beside it).
+                const payout = getPayoutForCommission(c.id);
+                const state = payout?.state ?? (evaluatePayoutEligibility(c.id).eligible ? 'eligible' : 'pending');
+                const p = payoutStatePresentation(state);
+                return (
+                  <span className="flex flex-col items-center gap-0.5">
+                    <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>{p.label}</StatusBadge>
+                    {payout?.state === 'failed' && payout.failureReason && (
+                      <span className="text-[10px] text-red-300">{payout.failureReason}</span>
+                    )}
+                    {payout?.state === 'pending' && payout.blockedReason && (
+                      <span className="text-[10px] text-amber-300">{payout.blockedReason}</span>
+                    )}
+                  </span>
+                );
+              },
+            },
+            {
               key: 'status',
-              label: 'Status',
+              label: 'Accounting',
               align: 'center',
               render: (c) => {
                 const p = commissionStatusPresentation(c.status);
@@ -496,6 +598,68 @@ export function AccountingPanel() {
             </Button>
           )}
         />
+      </Card>
+
+      {/* §M6 — PAYOUT DESTINATION REVIEW. A payout can never be sent to an
+          unverified account, so destination verification is an operator action
+          with a real consequence: it is what makes a payout eligible (or blocks
+          it when an account is suspended under review). */}
+      <Card title="Payout destinations" className="p-5">
+        <p className="text-xs text-zinc-400">
+          Brand accounts. A payout can only be submitted to a <span className="text-emerald-300">verified</span>{' '}
+          destination; suspending an account blocks it immediately.
+        </p>
+        <div className="mt-3 divide-y divide-white/[0.04]">
+          {destinationRows.map((d) => {
+            const p = payoutDestinationStatusPresentation(d.status);
+            return (
+              <div
+                key={d.id}
+                data-testid="payout-destination"
+                data-account={d.accountName}
+                className="flex items-center justify-between gap-3 py-2.5"
+              >
+                <div className="min-w-0">
+                  <div className="text-xs font-medium text-white truncate">{d.accountName}</div>
+                  <div className="font-mono text-[10px] text-zinc-500">
+                    {d.accountRefMasked} · {d.bankName}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>{p.label}</StatusBadge>
+                  {d.status !== 'verified' && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-[11px] text-emerald-300"
+                      disabled={!!destinationBusyId}
+                      onClick={() => void reviewDestination(d.id, 'verified')}
+                    >
+                      Verify
+                    </Button>
+                  )}
+                  {d.status !== 'suspended' && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-[11px] text-red-300"
+                      disabled={!!destinationBusyId}
+                      onClick={() => void reviewDestination(d.id, 'suspended')}
+                    >
+                      Suspend
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {destinationRows.length === 0 && (
+            <p className="py-3 text-xs text-zinc-500">No brand payout destinations on file.</p>
+          )}
+        </div>
+        {destinationNotice && (
+          <p className="mt-3 text-[11px] text-zinc-400" data-testid="destination-notice">{destinationNotice}</p>
+        )}
       </Card>
 
       <Card title="Penny Pincher Integration" className="p-5">

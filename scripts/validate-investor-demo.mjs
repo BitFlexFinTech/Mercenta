@@ -244,6 +244,46 @@ try {
     byId.payout.facts.auditRecorded === true &&
     byId.payout.facts.doublePayoutRefused === true &&
     byId.payout.facts.pendingAfter === 0);
+
+  /* ── §M6 — the money flow: reconciliation → accounting → payout gate ────── */
+  const finance = await server.ssrLoadModule('/src/lib/finance/financialReconciliation.ts');
+  test('§M6 the payout was BLOCKED before the payment was reconciled',
+    byId.payout.facts.blockedBeforeReconciliation === true &&
+      /no payment has been reconciled/.test(String(byId.payout.facts.blockedReasonAtReconciliation ?? '')),
+    String(byId.payout.facts.blockedReasonAtReconciliation));
+  test('§M6 the payout was BLOCKED before the destination was verified',
+    byId.payout.facts.blockedBeforeDestinationVerification === true &&
+      byId.payout.facts.destinationStatus === 'verified');
+  test('§M6 one payment produced exactly ONE reconciliation',
+    byId.payout.facts.reconciliationsForPayment === 1 &&
+      byId.payout.facts.reconciliationState === 'reconciled');
+  test('§M6 the accounting representation is simulated, never external',
+    byId.payout.facts.accountingRepresented === true &&
+      byId.payout.facts.accountingSimulated === true &&
+      byId.payout.facts.accountingProvider === 'simulated_accounting_representation');
+  test('§M6 the payout identity reached settled exactly once, linked to the reconciliation',
+    byId.payout.facts.payoutState === 'settled' &&
+      byId.payout.facts.payoutAttempts === 1 &&
+      byId.payout.facts.settledPayoutCount === 1);
+  test('§M6 VAT is NOT invented — the treatment stays configuration-required',
+    byId.payout.facts.vatTreatment === 'configuration_required' &&
+      byId.payout.facts.vatConfigured === false &&
+      byId.payout.facts.vatAmountGbp === 0);
+  test('§M6 the money maths come from the canonical PO facts',
+    byId.payout.facts.commissionAmountGbp === 35.28 &&
+      byId.payout.facts.netToBrandGbp ===
+        Math.round((504 - 35.28 - Number(byId.payout.facts.deductionsAppliedGbp) - 0) * 100) / 100,
+    JSON.stringify({
+      commission: byId.payout.facts.commissionAmountGbp,
+      deductions: byId.payout.facts.deductionsAppliedGbp,
+      net: byId.payout.facts.netToBrandGbp,
+    }));
+  const runReconciliation = finance.getReconciliationForPayment(
+    store.demoCommercePayments.find((p) => p.brandId === tenantId).id
+  );
+  test('§M6 the reconciliation is readable by its payment identity and audited',
+    !!runReconciliation &&
+      store.demoAuditLog.some((e) => e.action === 'payment_reconciled' && e.brandId === tenantId));
   test('integrations: unknown and live are NEVER simulation',
     byId.integrations.facts.unknownIsUnsafe === true &&
     byId.integrations.facts.liveIsUnsafe === true &&

@@ -67,11 +67,19 @@ test.describe('Brand payouts (Phase D6)', () => {
 
     // The money columns are present and the statuses are the canonical vocabulary.
     await expect(table.locator('th', { hasText: 'Net payout' })).toBeVisible();
+    // §M6 — the table now carries THREE canonical vocabularies: the accounting
+    // status, the reconciliation state and the operational payout state. The
+    // assertion is still closed (no free-form status may appear).
+    const CANONICAL_STATUSES = [
+      'accrued', 'invoiced', 'paid',
+      'pending', 'reconciled', 'exception',
+      'payout_pending', 'payout_eligible', 'payout_submitted', 'payout_settled', 'payout_failed',
+    ];
     const statuses = await table
       .locator('[data-status]')
       .evaluateAll((els) => els.map((e) => String(e.getAttribute('data-status'))));
     expect(statuses.length).toBeGreaterThan(0);
-    for (const s of statuses) expect(['accrued', 'invoiced', 'paid']).toContain(s);
+    for (const s of statuses) expect(CANONICAL_STATUSES).toContain(s);
 
     expect(pageErrors).toEqual([]);
     expect(externalCalls).toEqual([]);
@@ -91,7 +99,14 @@ test.describe('Brand payouts (Phase D6)', () => {
     const before = await pendingCount(page);
     expect(before).toBeGreaterThan(0);
 
-    const row = table.locator('tbody tr').first();
+    // §M6 — a payout is only settleable when its payment has been reconciled, no
+    // deduction is unresolved and the destination is VERIFIED. Pick such a row.
+    const eligibleRow = table
+      .locator('tbody tr')
+      .filter({ has: page.locator('[data-status="payout_eligible"]') })
+      .first();
+    await expect(eligibleRow).toBeVisible({ timeout: 8000 });
+    const row = eligibleRow;
     const cellText = await row.locator('td').first().innerText();
     const commissionId = (cellText.match(/comm-[^\s]+/) ?? [])[0];
     expect(commissionId).toBeTruthy();
@@ -116,6 +131,78 @@ test.describe('Brand payouts (Phase D6)', () => {
     });
 
     expect(pageErrors).toEqual([]);
+    expect(externalCalls).toEqual([]);
+  });
+
+  /**
+   * §M6 — the money flow is now gated. These two tests pin the consequences of
+   * that gate on the real surface: a reconciled payment identity is visible per
+   * PO, and a payout that does not meet EVERY condition is refused with its
+   * recorded reason instead of transferring money.
+   */
+  test('3. a reconciled PO shows the payment identity that reconciled it', async ({ page }) => {
+    const externalCalls = watchExternalCalls(page);
+    await openAccounting(page);
+    const table = payoutsTable(page);
+    await expect(table).toBeVisible({ timeout: 8000 });
+
+    // The Reconciliation column renders the canonical state + the payment id.
+    await expect(table.locator('[data-status="reconciled"]').first()).toBeVisible({ timeout: 8000 });
+    await expect(table.locator('text=/cpay-/').first()).toBeVisible({ timeout: 6000 });
+    // The operational payout state is rendered from the canonical vocabulary.
+    await expect(
+      table.locator('[data-status="payout_eligible"], [data-status="payout_pending"]').first()
+    ).toBeVisible({ timeout: 8000 });
+    expect(externalCalls).toEqual([]);
+  });
+
+  test('4. a payout that fails a condition is refused with its recorded reason', async ({ page }) => {
+    const externalCalls = watchExternalCalls(page);
+    await openAccounting(page);
+    const table = payoutsTable(page);
+    await expect(table).toBeVisible({ timeout: 8000 });
+
+    // The seeded demo dataset contains exactly one payable PO, and it satisfies
+    // every condition. To prove the GATE on the real surface we take the
+    // canonical OPERATOR ACTION that invalidates one condition — suspending the
+    // brand's payout destination in the Payout destinations card — and then try
+    // to pay.
+    //
+    // (The domain-level proof of every individual blocker — no reconciliation,
+    // unresolved deduction, unverified destination, already paid — is pinned by
+    // scripts/validate-financial-reconciliation.mjs D1–D7.)
+    const payoutRow = table.locator('tbody tr').first();
+    const brandName = (await payoutRow.locator('td').first().innerText())
+      .split('\n')[0]
+      .trim();
+    expect(brandName.length).toBeGreaterThan(0);
+
+    const destinationRow = page.locator(`[data-testid="payout-destination"][data-account="${brandName}"]`);
+    await expect(destinationRow).toBeVisible({ timeout: 8000 });
+    await destinationRow.getByRole('button', { name: 'Suspend' }).click();
+    await expect(page.getByTestId('destination-notice')).toBeVisible({ timeout: 8000 });
+    await expect(page.getByTestId('destination-notice')).toContainText(/suspended/);
+
+    const blockedRow = table
+      .locator('tbody tr')
+      .filter({ has: page.locator('[data-status="payout_pending"]') })
+      .first();
+    await expect(blockedRow).toBeVisible({ timeout: 8000 });
+    const commissionId = ((await blockedRow.locator('td').first().innerText()).match(/comm-[^\s]+/) ??
+      [])[0];
+    expect(commissionId).toBeTruthy();
+
+    await blockedRow.locator('button', { hasText: 'Settle (simulated)' }).click();
+
+    // The refusal is reported with the real blockers and NO transfer is claimed.
+    const error = page.locator('text=/PAYOUT_BLOCKED/').first();
+    await expect(error).toBeVisible({ timeout: 8000 });
+    await expect(error).toContainText(/must be verified/);
+    await expect(page.getByText(/Simulated payout mock_tr_/)).toHaveCount(0);
+    // The commission is still in the payable set (nothing was transferred).
+    await expect(
+      payoutsTable(page).getByText(commissionId!, { exact: false }).first()
+    ).toBeVisible();
     expect(externalCalls).toEqual([]);
   });
 });

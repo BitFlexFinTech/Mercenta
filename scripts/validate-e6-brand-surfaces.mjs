@@ -86,6 +86,14 @@ const M2_SCOPE = new Set([
   'e2e/document-verification.spec.ts',
   'e2e/compliance-gate.spec.ts',
   'e2e/investor-demo.spec.ts',
+  // §M6 — financial reconciliation phase surface.
+  'src/lib/finance/',
+  'src/lib/finance/accountingSeam.ts',
+  'src/lib/finance/financialReconciliation.ts',
+  'src/config/commercial.ts',
+  'src/components/admin/AccountingPanel.tsx',
+  'scripts/validate-financial-reconciliation.mjs',
+  'e2e/brand-payouts.spec.ts',
 ]);
 const ALLOWED_NON_APPROVED = new Set(['Review Zip/mercenta-review.zip']);
 
@@ -349,7 +357,8 @@ try {
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) || M2_SCOPE.has(p) ||
-        [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F7 no new store/dashboard module was created by E6',
     readdirSync(new URL('../src/components/brand/', import.meta.url)).every((f) => !/e6/i.test(f)) &&
     readdirSync(new URL('../src/data/', import.meta.url)).every((f) => !/e6/i.test(f)));
