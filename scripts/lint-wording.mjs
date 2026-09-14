@@ -60,6 +60,14 @@ const EXCLUDED = [
   'src/lib/intelligence/scoringEngine.ts',
   // Protected Xero demo/mock ledger rows (Xero is a protected integration).
   'src/services/xero/',
+  // -- §Phase M12 wording repair: pattern-definition source ----------------------
+  // The retail-channel PROGRAMME-CLAIM rule set is a definitions file, exactly the
+  // same class as banned-patterns.mjs / wordingSafety.ts above: its regex literals
+  // and reasons necessarily contain the channel name in order to MATCH claims.
+  // Excluding it does NOT weaken the gate — every string this module RENDERS is
+  // asserted channel-neutral by scripts/validate-sales-estimator.mjs
+  // ("rendered wording constants name no retail channel").
+  'src/lib/intelligence/amazonWording.ts',
 ];
 
 function isExcluded(rel) {

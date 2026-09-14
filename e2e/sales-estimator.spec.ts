@@ -14,14 +14,16 @@ async function openNav(page: import('@playwright/test').Page, label: string) {
   await page.waitForTimeout(700);
 }
 
-test.describe('Amazon sales estimator', () => {
+test.describe('Retail-channel sales estimator', () => {
   test('1. a brand can estimate a range, and it is always labelled an estimate', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
     await loginAs(page, 'Zambezi Organic Extracts Ltd', 1400);
     await openNav(page, 'Market Intel');
 
-    const card = page.locator('h2, h3').filter({ hasText: 'Amazon Sales Estimator' }).first();
+    // §M12 wording repair — the card title is channel-neutral to satisfy the
+    // static wording gate (brand-facing copy must not name the retail channel).
+    const card = page.locator('h2, h3').filter({ hasText: 'Retail-Channel Sales Estimator' }).first();
     await expect(card).toBeVisible({ timeout: 6000 });
     await expect(page.getByTestId('sales-estimate-result')).toBeVisible();
 
@@ -33,7 +35,7 @@ test.describe('Amazon sales estimator', () => {
     expect(after).not.toEqual(before);
 
     // The estimate is labelled, and no live data connection is claimed.
-    await expect(page.locator('text=/not measured Amazon sales data/i').first()).toBeVisible();
+    await expect(page.locator('text=/not measured retail-channel sales data/i').first()).toBeVisible();
     await expect(page.locator('text=/no live data connection is claimed or used/i').first()).toBeVisible();
     await expect(page.locator('text=/keepa →/').first()).toBeVisible();
     expect(pageErrors).toEqual([]);
@@ -48,7 +50,7 @@ test.describe('Amazon sales estimator', () => {
       'not_confirmed_with_amazon'
     );
     await expect(page.getByTestId('born-to-run-result')).toContainText(
-      'submits nothing to Amazon'
+      'submits nothing to the retail channel'
     );
     await expect(page.getByTestId('born-to-run-result')).toContainText('Simulation only');
   });

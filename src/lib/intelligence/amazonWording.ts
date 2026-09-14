@@ -56,10 +56,10 @@ export const AMAZON_PROGRAMME_STATUS = 'not_confirmed_with_amazon' as const;
 export const AMAZON_TOS_VERIFICATION_REQUIRED = true;
 
 export const AMAZON_TOS_VERIFICATION_NOTE =
-  'Verification required: this build has NOT checked the current Amazon Vendor terms / account agreement. Any statement about programme eligibility, submission requirements or legal terms must be verified against the live terms before it is relied on or shown to a brand.';
+  'Verification required: this build has NOT checked the current retail-channel vendor terms / account agreement. Any statement about programme eligibility, submission requirements or legal terms must be verified against the live terms before it is relied on or shown to a brand.';
 
 export const AMAZON_NO_APPROVAL_CLAIM =
-  'Mercenta does not claim Amazon approval, endorsement or a partnership, and does not control Amazon\'s decisions.';
+  'Mercenta does not claim retail-channel approval, endorsement or a partnership, and does not control the retail channel\'s decisions.';
 
 /** Combined verdict for generated copy: channel-naming gate + programme claims. */
 export interface AmazonWordingLintResult extends WordingLintResult {
@@ -95,13 +95,21 @@ export function lintAmazonWording(text: string): AmazonWordingLintResult {
  * reference) append the neutral statement + the verification note. Deterministic —
  * no network, no model call.
  */
+/** Retail-channel nouns, used only to decide whether the honest note is needed. */
+const RETAIL_CHANNEL_MENTION = /\bamazon\b|\bvendor\s+central\b|\bseller\s+central\b/i;
+
 export function sanitiseAmazonClaim(text: string): string {
   let out = text;
+  // Whether ANY unverifiable claim rule fired, or the source text named the
+  // channel at all. Tracked BEFORE replacement, because the replacement string is
+  // deliberately channel-neutral — testing the OUTPUT for "amazon" would let a
+  // repaired claim lose the mandatory honest note.
+  const claimFired = AMAZON_WORDING_RULES.some(({ pattern }) => pattern.test(text));
   for (const { pattern } of AMAZON_WORDING_RULES) {
     pattern.lastIndex = 0;
-    out = out.replace(pattern, '[removed: unverified Amazon claim]');
+    out = out.replace(pattern, '[removed: unverified retail-channel claim]');
   }
-  if (/amazon/i.test(out)) {
+  if (claimFired || RETAIL_CHANNEL_MENTION.test(text)) {
     const withClaim = `${out} ${AMAZON_NO_APPROVAL_CLAIM}`;
     return `${withClaim} ${AMAZON_TOS_VERIFICATION_NOTE}`;
   }
@@ -110,4 +118,4 @@ export function sanitiseAmazonClaim(text: string): string {
 
 /** The honest, brand-safe phrasing for the estimate disclaimer. */
 export const ESTIMATE_DISCLAIMER =
-  'Estimate only. These figures are modelled projections, not measured Amazon sales data or a promise of performance. Mercenta does not claim Amazon approval, endorsement or partnership, and does not control Amazon\'s decisions.';
+  'Estimate only. These figures are modelled projections, not measured retail-channel sales data or a promise of performance. Mercenta does not claim retail-channel approval, endorsement or partnership, and does not control the retail channel\'s decisions.';

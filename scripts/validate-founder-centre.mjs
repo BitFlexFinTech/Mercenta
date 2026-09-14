@@ -82,8 +82,13 @@ try {
     /PROSPECTIVE/i.test(
       content.FOUNDER_TALKING_POINTS.find((t) => t.id === 'government_trade_strategy').body
     ) && /no partnership is claimed|we claim no existing partnership/i.test(allContent));
+  // §M12 wording repair — REPOINTED: the honesty notice was reworded to be
+  // channel-neutral (the static wording gate forbids naming the retail channel in
+  // copy a brand/partner could see). The INVARIANT is unchanged: the notice must
+  // explicitly state that NO partnership or approval is claimed, and it must still
+  // name government/embassy/trade-body classes.
   test('the honesty notice is declared and says partnerships are not claimed',
-    /No government, embassy, trade-body or Amazon partnership/i.test(
+    /No government, embassy, trade-body or retail-channel partnership/i.test(
       content.FOUNDER_HONESTY_NOTICE
     ));
 

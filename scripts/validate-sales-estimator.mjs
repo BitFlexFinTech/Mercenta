@@ -112,9 +112,14 @@ try {
     btr.programmeStatus === 'not_confirmed_with_amazon' && btr.simulated === true);
   test('the TOS verification requirement is flagged',
     btr.tosVerificationRequired === true && /Verification required/i.test(btr.tosNote));
-  test('the disclaimers state that nothing is submitted to Amazon',
+  // §M12 wording repair — REPOINTED: the disclaimers were reworded to be
+  // channel-neutral (the static wording gate forbids naming the retail channel in
+  // brand-facing copy). The INVARIANT is unchanged: the copy must deny both an
+  // approval claim AND any submission. Only the channel noun changed
+  // ("Amazon" → "retail channel"), so both halves are still asserted.
+  test('the disclaimers state that nothing is submitted to the retail channel',
     btr.disclaimers.some((d) => /no application, submission or listing/i.test(d)) &&
-      btr.disclaimers.some((d) => /does not claim Amazon approval/i.test(d)));
+      btr.disclaimers.some((d) => /does not claim retail-channel approval/i.test(d)));
 
   const btrCommission = btr.economics;
   test('Model A launch economics use the canonical 20% commission',
@@ -152,9 +157,35 @@ try {
     safe.fullySafe === true && safe.safe === true);
   const repaired = wording.sanitiseAmazonClaim('We are an Amazon approved partner.');
   test('unsafe copy is repaired, not silently sent',
-    /\[removed: unverified Amazon claim\]/.test(repaired) &&
+    /\[removed: unverified retail-channel claim\]/.test(repaired) &&
       repaired.includes(wording.AMAZON_NO_APPROVAL_CLAIM) &&
       warningNoteIncluded(repaired));
+  // §M12 wording repair — the DEFINITIONS file is excluded from the static source
+  // gate (its regex literals must contain the channel name in order to match a
+  // claim), so this assertion carries the invariant instead: every string that
+  // module RENDERS to a brand/partner/public audience must be channel-neutral.
+  const renderedConstants = {
+    AMAZON_TOS_VERIFICATION_NOTE: wording.AMAZON_TOS_VERIFICATION_NOTE,
+    AMAZON_NO_APPROVAL_CLAIM: wording.AMAZON_NO_APPROVAL_CLAIM,
+    ESTIMATE_DISCLAIMER: wording.ESTIMATE_DISCLAIMER,
+  };
+  const channelNaming = Object.entries(renderedConstants).filter(([, v]) =>
+    /\bamazon\b|\bvendor\s+central\b|\bseller\s+central\b|\bfirst[- ]party\b/i.test(v)
+  );
+  test('every rendered wording constant names no retail channel',
+    channelNaming.length === 0,
+    channelNaming.map(([k]) => k).join(', '));
+  const renderedFromModel = [
+    est.estimateAmazonSales(input).estimateLabel,
+    ...est.estimateAmazonSales(input).disclaimers,
+    ...est.modelBornToRunOpportunity({ ...input, currentlyOnAmazon: false }).disclaimers,
+  ].filter((s) => typeof s === 'string');
+  const modelChannelNaming = renderedFromModel.filter((s) =>
+    /\bamazon\b|\bvendor\s+central\b|\bseller\s+central\b|\bfirst[- ]party\b/i.test(s)
+  );
+  test('every estimator/born-to-run string shown to a brand names no retail channel',
+    modelChannelNaming.length === 0,
+    modelChannelNaming.join(' | '));
   test('the estimator sources make no network call', networkCalls === 0, `observed ${networkCalls}`);
 
   console.log(
@@ -168,5 +199,8 @@ try {
 if (failures > 0) process.exit(1);
 
 function warningNoteIncluded(text) {
-  return /current Amazon Vendor terms/i.test(text);
+  // §M12 wording repair — REPOINTED to the channel-neutral verification note
+  // (same invariant: the repaired copy MUST carry the "terms not yet verified"
+  // warning). Only the channel noun changed.
+  return /current retail-channel vendor terms/i.test(text);
 }

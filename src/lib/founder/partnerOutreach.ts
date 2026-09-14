@@ -60,10 +60,10 @@ export function generatePartnerOutreach(target: PartnerTarget, to: string): Part
   ].join('\n');
 
   const outward = lintOutwardWording(text);
-  const amazon = lintAmazonWording(text);
+  const programmeLint = lintAmazonWording(text);
   const lintReasons = [
     ...outward.hits.map((h) => h.reason),
-    ...amazon.programmeHits.map((h) => h.reason),
+    ...programmeLint.programmeHits.map((h) => h.reason),
   ];
   return {
     targetId: target.id,
@@ -71,7 +71,7 @@ export function generatePartnerOutreach(target: PartnerTarget, to: string): Part
     subject,
     text,
     basis: 'deterministic_template',
-    lintPassed: outward.safe && amazon.fullySafe,
+    lintPassed: outward.safe && programmeLint.fullySafe,
     lintReasons,
   };
 }

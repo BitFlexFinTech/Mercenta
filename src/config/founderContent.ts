@@ -299,4 +299,4 @@ export const FOUNDER_MEETING_PRACTICE: readonly FounderPracticeSegment[] = [
  * founder-facing surface can drift into claiming a partnership or Amazon approval.
  */
 export const FOUNDER_HONESTY_NOTICE =
-  'Internal preparation material, not external marketing. Projections are labelled as projections. No government, embassy, trade-body or Amazon partnership, approval or endorsement is claimed or implied anywhere in this material.';
+  'Internal preparation material, not external marketing. Projections are labelled as projections. No government, embassy, trade-body or retail-channel partnership, approval or endorsement is claimed or implied anywhere in this material.';

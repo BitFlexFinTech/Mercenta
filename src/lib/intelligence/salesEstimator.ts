@@ -210,7 +210,7 @@ export function estimateAmazonSales(input: SalesEstimateInput): SalesEstimate {
     confidence,
     confidenceReason,
     basis: SALES_ESTIMATE_BASIS,
-    estimateLabel: 'Estimated sales range — modelled projection, not Amazon data',
+    estimateLabel: 'Estimated sales range — modelled projection, not measured marketplace data',
     disclaimers: [
       ESTIMATE_DISCLAIMER,
       `Data source: simulated planning dataset (${SALES_DATA_PROVIDERS.join(' / ')} providers are not connected in this build).`,
@@ -376,7 +376,7 @@ export function modelBornToRunOpportunity(input: BornToRunInput): BornToRunOppor
     tosNote: AMAZON_TOS_VERIFICATION_NOTE,
     simulated: true,
     disclaimers: [
-      'Simulation only: no application, submission or listing is created, and nothing is sent to Amazon by this model.',
+      'Simulation only: no application, submission or listing is created, and nothing is sent to the retail channel by this model.',
       AMAZON_NO_APPROVAL_CLAIM,
       AMAZON_TOS_VERIFICATION_NOTE,
       ESTIMATE_DISCLAIMER,

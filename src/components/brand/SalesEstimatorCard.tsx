@@ -77,7 +77,7 @@ export function SalesEstimatorCard() {
   const providerModes = useMemo(() => salesDataProviderModes(), []);
 
   return (
-    <Card title="Amazon Sales Estimator">
+    <Card title="Retail-Channel Sales Estimator">
       <p className="text-[11px] text-zinc-500 mb-3">
         Enter what you know about the product. You get an{' '}
         <strong className="text-zinc-400">estimated</strong> sales range and the Mercenta economics
@@ -176,8 +176,8 @@ export function SalesEstimatorCard() {
             </p>
             <p className="text-zinc-400 font-mono mt-1">{bornToRun.economics.formula}</p>
             <p className="text-[10px] text-amber-300/90 mt-1">
-              Programme status: {bornToRun.programmeStatus} — Mercenta does not claim Amazon approval
-              and this model submits nothing to Amazon.
+              Programme status: {bornToRun.programmeStatus} — Mercenta does not claim retail-channel
+              approval and this model submits nothing to the retail channel.
             </p>
             {bornToRun.disclaimers.map((d) => (
               <p key={d} className="text-[10px] text-zinc-600 mt-1">{d}</p>
