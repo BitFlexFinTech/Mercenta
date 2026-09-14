@@ -78,6 +78,51 @@
 >   (the poll counter had already advanced past the milestone). Fixed, and the
 >   recovery path is now asserted.
 >
+> **⑥ EVIDENCE (M11, re-run in this session).**
+> - `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**
+> - `npm run lint` → **0 errors**
+> - `npm run build` → **✓ built in 3.72s**
+> - **Validator sweep: 60/60 `validate-*.mjs` exit 0** (previously 58 scripts;
+>   +2 new: `validate-db-hardening.mjs` 15/15, `validate-commercial-models.mjs`
+>   36/36). One sweep run reported 2 failures in `validate-e5-admin-surfaces` /
+>   `validate-e6-brand-surfaces`; both were **stale `023 remains newest` pins**
+>   (M11 legitimately added 024–026) and were repointed with `§Phase M11 —
+>   REPOINTED` comments. Re-run: **62/62 PASS** (60 validators + integrity audit
+>   + wording gate).
+> - `scripts/integrity-audit.mjs` → **PASS** · `npm run validate:wording` → **PASS**
+> - **Full Playwright: 250 passed / 2 skipped / 0 failed** (3.9m) — identical to
+>   the M10 baseline, so M11 introduced **zero E2E regressions**. One earlier
+>   full-suite run reported 1 failure in `embedded-social.spec.ts` test 2; that
+>   spec passes **11/11 in isolation** and the immediately repeated full run was
+>   green, so it was a **test-isolation flake** (the assertion includes
+>   `expect(errors).toEqual([])`, which is sensitive to parallel-load chunk
+>   timing), not a defect. Reported rather than hidden.
+> - `scripts/validate-edge-functions.mjs` → **46 assertions / 0 failures /
+>   0 skipped** (was 36 run / 35 skipped).
+> - Baseline `959b4d2` remains an **ancestor** of HEAD. Working tree **clean**.
+> - Review zip: `Review Zip/mercenta-review.zip` (36M).
+>
+> **⑦ REMAINING (honest).**
+> - **The two commercial models are not yet a named investor-demo STAGE.** They
+>   are canonical modules with all §25 figures pinned by
+>   `validate-commercial-models.mjs`, but the demo's 24-stage list (pinned in
+>   `validate-investor-demo.mjs`, `e2e/investor-demo.spec.ts` and the demo UI)
+>   was deliberately left unchanged this session. Rendering them as a stage is
+>   the next mechanical step and requires updating those three pins together.
+> - **Brand-level model selection is not yet persisted on the brand record.**
+>   `resolveCommercialModel()` and `COMMERCIAL_MODELS` exist and fail closed, but
+>   no onboarding step or brand field writes a chosen model yet.
+> - **The 6 Edge Functions are present and validated, but NOT deployed** — that
+>   needs a Supabase project plus provider secrets. Deploy-time only.
+> - **Migrations 024–026 have NOT been executed** against any database (no
+>   browser Supabase credentials in the demo environment).
+> - `verify-registry.mjs` remains advisory and still flags **103 items** — the
+>   same historical count M10 recorded (requirements-registry data quality, not
+>   failures).
+> - `payouts-transfer`'s live Wise/Payoneer request shape is written to the
+>   documented endpoints and asserted structurally, but has **never been
+>   exercised against the real rails** (no credentials).
+>
 > **M10 SESSION (2026-09-14) — VALIDATOR-SUITE REPAIR: 45 → 60 GREEN, 15 → 0 RED.**
 >
 > **① What was actually wrong.** 15 validator scripts exited non-zero. Every one
