@@ -40,6 +40,16 @@ test('acknowledged qty ≤ ordered qty enforced in the domain over the ack colum
   api.includes('cannot exceed ordered quantity') &&
     migration.includes('ordered_qty') &&
     migration.includes('acknowledged_qty'));
+// §Phase M11 — the DB-level half of the same rule NOW EXISTS. §23 database
+// hardening added `purchase_order_lines_ack_within_ordered` (migration 026), so
+// the rule is no longer domain-only. Asserted here so the two layers cannot
+// silently diverge; the constraint is NOT VALID, so it binds new writes without
+// risking legacy rows.
+const hardening = read('supabase/migrations/026_harden_deductions_ack_and_messages.sql');
+test('acknowledged qty ≤ ordered qty is also a DATABASE constraint (026)',
+  hardening.includes('purchase_order_lines_ack_within_ordered') &&
+    hardening.includes('acknowledged_qty <= ordered_qty') &&
+    hardening.includes('not valid'));
 test('backordered requires scheduledShipDate', api.includes("is backordered \u2014 a scheduled ship date is required"));
 test('all-or-line-complete acknowledgment enforced',
   api.includes('all-or-line-item-complete'));

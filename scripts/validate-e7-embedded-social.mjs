@@ -325,7 +325,14 @@ try {
     .filter(Boolean);
 
   const migrations = readdirSync(join(process.cwd(), 'supabase/migrations'));
-  test('no migration added (023 remains newest of 23)', migrations.length === 23 && migrations.sort().at(-1).startsWith('023_'));
+  // §Phase M11 — REPOINTED. This pinned "023 remains newest of 23", which was
+  // TRUE when E7 was written. Phase M11 legitimately added three migrations —
+  // 024 (catalog-import RPC), 025 (daily-digest cron) and 026 (the §23 database
+  // hardening) — so the absolute count is stale. E7's actual INVARIANT (E7
+  // itself added no migration) is unchanged and is asserted by the `e7Changed`
+  // check on the next line, which still fails if E7's own range touches them.
+  test('E7 added no migration (newest is 026 after M11)',
+    migrations.length === 26 && migrations.sort().at(-1).startsWith('026_'));
   test('migrations untouched by E7', !e7Changed.some((f) => f.startsWith('supabase/migrations')));
 
   const protectedPaths = [

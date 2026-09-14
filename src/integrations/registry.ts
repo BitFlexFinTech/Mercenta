@@ -280,6 +280,41 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Read VAT registration status for the connected VRN',
   },
+  // §Canonical model §6 — payout rails. Mercenta pays the BRAND through Wise by
+  // default and Payoneer as the secondary rail. Both are simulated until real
+  // credentials are configured; the transfer NEVER auto-sends (human approval).
+  wise: {
+    id: 'wise',
+    name: 'Wise (default payout rail)',
+    description:
+      'Default rail Mercenta pays brand settlements through. Simulated until real Wise API credentials are configured; a payout is only ever submitted after Mercenta operator approval.',
+    authMethod: 'api_key',
+    fields: [
+      {
+        key: 'api_key',
+        label: 'API token (via Edge Function)',
+        placeholder: 'Wise API token',
+        secret: true,
+      },
+    ],
+    testCallDescription: 'Read the Mercenta Wise business profile (read-only)',
+  },
+  payoneer: {
+    id: 'payoneer',
+    name: 'Payoneer (secondary payout rail)',
+    description:
+      'Secondary payout rail, used only when deliberately selected. Simulated until real Payoneer program credentials are configured; never the default.',
+    authMethod: 'api_key',
+    fields: [
+      {
+        key: 'api_key',
+        label: 'Program credentials (via Edge Function)',
+        placeholder: 'Payoneer program credentials',
+        secret: true,
+      },
+    ],
+    testCallDescription: 'Read the Mercenta Payoneer program status (read-only)',
+  },
 };
 
 export const INTEGRATION_ORDER: IntegrationId[] = [
@@ -304,6 +339,9 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   'xero',
   'companies_house',
   'hmrc',
+  // §Canonical model §6 — payout rails, default first.
+  'wise',
+  'payoneer',
 ];
 
 /**
@@ -351,6 +389,10 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   // simulation is the authoritative documented state.
   companies_house: { category: 'compliance', defaultMode: 'simulation' },
   hmrc: { category: 'compliance', defaultMode: 'simulation' },
+  // §Canonical model §6 — payout rails. Simulation is authoritative until real
+  // rail credentials exist, and a simulated transfer is unmistakably labelled.
+  wise: { category: 'finance', defaultMode: 'simulation' },
+  payoneer: { category: 'finance', defaultMode: 'simulation' },
 };
 
 export function integrationMeta(id: IntegrationId): IntegrationMeta {

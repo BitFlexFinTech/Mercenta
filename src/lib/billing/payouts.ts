@@ -16,10 +16,28 @@
  *
  * Mock-first: MockStripePayoutClient runs until real Stripe Connect
  * credentials are configured; signatures/shapes match the real client.
+ *
+ * §Phase M11 — RAIL CORRECTION. The canonical business model (§6) fixes the
+ * payout rails as **Wise (DEFAULT)** and **Payoneer (secondary)**. Stripe is
+ * NOT a payout rail — it bills the flat monthly brand subscription only. The
+ * rail is therefore resolved through `src/config/payouts.ts` (the single source
+ * of truth) and `createPayoutClient` now returns the rail-appropriate client.
+ * The simulated transfer-id prefix stays `mock_tr_` (every pinned test layer
+ * asserts it) with the rail appended — `mock_tr_wise_000001` — so a simulated
+ * payout can never be mistaken for the other rail.
  */
+
+import {
+  DEFAULT_PAYOUT_RAIL,
+  assertPayoutRail,
+  PAYOUT_RAILS,
+  type PayoutRail,
+} from '@/config/payouts';
 
 export interface PayoutClient {
   readonly mode: 'mock' | 'real';
+  /** §6 — which rail this client pays through. Absent = pre-M11 Stripe ledger. */
+  readonly rail?: PayoutRail;
   /** Creates a transfer to the brand's Connect account. Idempotent by key. */
   createTransfer(input: {
     idempotencyKey: string;
@@ -65,27 +83,38 @@ export class MockStripePayoutClient implements PayoutClient {
   }
 }
 
-/** Real client — the payouts Edge Function holds the Stripe secret key and
- *  forwards the idempotency key to Stripe itself, so even a retry storm
- *  cannot double-pay. Selected by createPayoutClient() when verified
- *  non-mock credentials exist. */
-export class RealStripePayoutClient implements PayoutClient {
+/**
+ * §Phase M11 — the RAIL-AWARE real client.
+ *
+ * Posts to the flat `payouts-transfer` Edge Function, which holds the rail
+ * credentials (Wise / Payoneer) server-side and forwards the idempotency key to
+ * the rail itself, so even a retry storm cannot double-pay. The rail is part of
+ * the request, so one function serves both rails without the caller knowing
+ * which credential store is live.
+ *
+ * This SUPERSEDES the Stripe payout client: Stripe is not a payout rail (§6).
+ */
+export class RealPayoutRailClient implements PayoutClient {
   readonly mode = 'real' as const;
+  readonly rail: PayoutRail;
   constructor(
+    rail: PayoutRail,
     private readonly secretRef: string,
     private readonly edgeFunctionBase: string,
     private readonly transport: import('@/lib/spapi/client').FetchLike
-  ) {}
+  ) {
+    this.rail = rail;
+  }
 
   async createTransfer(input: {
     idempotencyKey: string;
     amountGbp: number;
     destinationAccountId: string;
   }): Promise<{ ok: boolean; transferId?: string; error?: string }> {
-    const res = await this.transport(`${this.edgeFunctionBase}/payouts/transfer`, {
+    const res = await this.transport(`${this.edgeFunctionBase}/payouts-transfer`, {
       method: 'POST',
       headers: { 'X-Secret-Ref': this.secretRef, 'Idempotency-Key': input.idempotencyKey },
-      body: input,
+      body: { ...input, rail: this.rail },
     });
     const body = (await res.json()) as { transferId?: string; error?: string };
     if (!res.ok) return { ok: false, error: body.error ?? `HTTP ${res.status}` };
@@ -93,23 +122,92 @@ export class RealStripePayoutClient implements PayoutClient {
   }
 }
 
-/** Mock-first seam: mock until verified, non-mock credentials exist. */
+/**
+ * §Phase M11 — the rail-aware MOCK client. Shares the SAME simulated ledger as
+ * `MockStripePayoutClient` (one ledger, not two), so a replayed idempotency key
+ * returns the same simulated transfer no matter which rail client is active.
+ *
+ * The id is unmistakably simulated AND names the rail: `mock_tr_wise_000001`.
+ * A `mock:`-prefixed secret reference can never reach a live transport.
+ */
+export class MockPayoutRailClient implements PayoutClient {
+  readonly mode = 'mock' as const;
+  readonly rail: PayoutRail;
+  constructor(rail: PayoutRail = DEFAULT_PAYOUT_RAIL) {
+    this.rail = rail;
+  }
+
+  async createTransfer(input: {
+    idempotencyKey: string;
+    amountGbp: number;
+    destinationAccountId: string;
+  }): Promise<{ ok: boolean; transferId?: string; error?: string }> {
+    await new Promise((r) => setTimeout(r, 50));
+    if (input.amountGbp <= 0) {
+      return { ok: false, error: 'transfer amount must be positive' };
+    }
+    const existing = mockTransfers.get(input.idempotencyKey);
+    if (existing) {
+      // Same key → same simulated transfer (idempotent replay), on ANY rail.
+      return { ok: true, transferId: existing.transferId };
+    }
+    transferCounter += 1;
+    const transferId = `${PAYOUT_RAILS[this.rail].simulationIdPrefix}${String(
+      transferCounter
+    ).padStart(6, '0')}`;
+    mockTransfers.set(input.idempotencyKey, { transferId, amountGbp: input.amountGbp });
+    return { ok: true, transferId };
+  }
+}
+
+/** Transport used by the real client; injectable for tests (mirrors DHL). */
+function defaultPayoutTransport(): import('@/lib/spapi/client').FetchLike {
+  return async (url, init) => {
+    const res = await fetch(url, {
+      method: init?.method ?? 'GET',
+      headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+      body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
+    });
+    return { ok: res.ok, status: res.status, json: () => res.json() };
+  };
+}
+
+/**
+ * §Phase M11 — the rail-first factory. Mock until VERIFIED non-mock credentials
+ * exist; otherwise the real rail client. An unknown rail is REFUSED
+ * (`assertPayoutRail`) rather than silently re-routed to another provider.
+ */
+export function createRailPayoutClient(
+  input: {
+    rail?: string | null;
+    secretRef?: string;
+    verified?: boolean;
+  } | null,
+  edgeFunctionBase = '/functions/v1',
+  transport: import('@/lib/spapi/client').FetchLike = defaultPayoutTransport()
+): PayoutClient {
+  const rail = assertPayoutRail(input?.rail ?? DEFAULT_PAYOUT_RAIL);
+  const creds = input ?? null;
+  if (creds && creds.verified && creds.secretRef && !creds.secretRef.startsWith('mock:')) {
+    return new RealPayoutRailClient(rail, creds.secretRef, edgeFunctionBase, transport);
+  }
+  return new MockPayoutRailClient(rail);
+}
+
+/**
+ * Mock-first seam (kept as the canonical entry point — every existing call site
+ * keeps working). §Phase M11: this now resolves through `createRailPayoutClient`
+ * with the canonical DEFAULT rail (Wise), so the Stripe-only contract is gone.
+ */
 export function createPayoutClient(
   creds: { secretRef: string; verified: boolean } | null,
-  edgeFunctionBase = '/functions/v1/billing'
+  edgeFunctionBase = '/functions/v1',
+  rail: string | null = DEFAULT_PAYOUT_RAIL
 ): PayoutClient {
-  if (creds && creds.verified && !creds.secretRef.startsWith('mock:')) {
-    const transport: import('@/lib/spapi/client').FetchLike = async (url, init) => {
-      const res = await fetch(url, {
-        method: init?.method ?? 'GET',
-        headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
-        body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
-      });
-      return { ok: res.ok, status: res.status, json: () => res.json() };
-    };
-    return new RealStripePayoutClient(creds.secretRef, edgeFunctionBase, transport);
-  }
-  return new MockStripePayoutClient();
+  return createRailPayoutClient(
+    creds ? { rail, secretRef: creds.secretRef, verified: creds.verified } : { rail },
+    edgeFunctionBase
+  );
 }
 
 /**

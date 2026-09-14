@@ -27,7 +27,14 @@ export type IntegrationId =
   // §Priority-1 — compliance providers registered so their mode is
   // authoritative and the safety gate can resolve them (never UNKNOWN).
   | 'companies_house'
-  | 'hmrc';
+  | 'hmrc'
+  // §Canonical model §6 — the payout rails. Wise is the DEFAULT rail Mercenta
+  // pays brands through; Payoneer is the SECONDARY rail. Registered so their
+  // mode is authoritative and an unregistered rail can never be treated as
+  // simulation by accident. Xero (accounting) and Stripe (subscriptions) are
+  // explicitly NOT payout rails — see `src/config/payouts.ts`.
+  | 'wise'
+  | 'payoneer';
 
 export type IntegrationStatus =
   | 'disconnected'
@@ -212,6 +219,11 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   // resolves them authoritatively — never UNKNOWN.
   companies_house: { status: 'disconnected', sandbox: false },
   hmrc: { status: 'disconnected', sandbox: false },
+  // §Canonical model §6 — payout rails. Simulation is authoritative until real
+  // rail credentials are configured; entering credentials activates the already
+  // built `payouts-transfer` Edge Function with no other code change.
+  wise: { status: 'disconnected', sandbox: false },
+  payoneer: { status: 'disconnected', sandbox: false },
 };
 
 /** API keys are held IN-MEMORY ONLY until Vault-backed storage is wired. */

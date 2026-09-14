@@ -41,6 +41,15 @@ test('deduction categories are modelled in the domain (late_shipment / shortage_
   types.includes('late_shipment') && types.includes('shortage_claim'));
 test('demo deductions DERIVED from demo POs (no hand-maintained refs)',
   store.includes('DERIVED from demoPurchaseOrders'));
+// §Phase M11 — the DB-level category constraint NOW EXISTS (§23 hardening, 026),
+// so the vocabulary is no longer domain-only. Asserted here so the constraint and
+// the typed model cannot silently diverge (validate-db-hardening.mjs proves the
+// two lists match element-for-element).
+const hardening19 = read('supabase/migrations/026_harden_deductions_ack_and_messages.sql');
+test('deductions.category is constrained at the DATABASE boundary (026)',
+  hardening19.includes('deductions_category_check') &&
+    hardening19.includes('shortage_claim') &&
+    hardening19.includes('not valid'));
 test('dispute mutations exist in data layer', api.includes('export function disputeDeduction'));
 
 const dt = read('src/components/shared/DataTable.tsx');
