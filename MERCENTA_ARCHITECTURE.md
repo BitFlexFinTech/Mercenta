@@ -419,4 +419,23 @@ carries a `prospectId`.
   card, `IntegrationId` member, nav entry/breadcrumb, admin panel, docker-compose
   service + Mongo volume and Caddy vhost deleted. Regression-guarded by
   `e2e/rocketchat-removal.spec.ts` + `scripts/validate-rocketchat-removal.mjs`.
+
+## 13. M2 / M6 / M7 additions (14 Sep 2026)
+
+| Area | Module | What it adds | Seam discipline |
+|---|---|---|---|
+| Compliance document verification (M2) | `src/lib/verification/documentVerification.ts` | `DocumentVerificationRecord` ledger, `rejected`/`superseded` states, versioning + replacement, submission → pending → verdict → gate | four interchangeable providers; `external: false` unless a third party actually answered; fail-closed for every other mode |
+| Requirement rules (M2) | `src/lib/compliance.ts` | universal + conditional requirement RULES with stated conditions; `latestDocumentsByType` so the gate judges the latest version | one canonical rule set; existing counts unchanged |
+| Money flow (M6) | `src/lib/finance/financialReconciliation.ts` | one deterministic reconciliation per payment, `evaluatePayoutEligibility`, payout state machine, audited destination review | PO store = value source; `listCommissionsForPayout` = payable projection; `lib/billing/payouts.ts` = transfer seam |
+| Accounting (M6) | `src/lib/finance/accountingSeam.ts` | reconciliation → accounting representation | simulation (zero network) / existing `src/services/xero` / fail-closed |
+| VAT (M6) | `src/config/commercial.ts` | `configuration_required` until the business decision is entered | one config source; no invented tax result |
+| Investor demo (M7) | `src/lib/simulation/investorDemo.ts` | 24 stages: the 22 canonical stages + `shipping_commercial` + `cases` | same orchestration; zero network; reset/replay digest identical |
+
+New canonical entities (all additive in `src/types.ts`):
+`DocumentVerificationRecord`, `PaymentReconciliation`, `BrandPayoutDestination`,
+`CommissionPayout`, plus the `VatTreatment` / `PayoutState` /
+`PaymentReconciliationState` / `DocumentVerificationStatus` unions and the
+`rejected` + `superseded` document lifecycle states. **No new migration**: the
+existing schema is unchanged (23 migrations).
+
   Not to be reintroduced.

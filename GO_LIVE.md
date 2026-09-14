@@ -41,6 +41,8 @@ The platform is live when, on the production domain:
 | 8 | Mercenta Partners Ltd EORI + UK VAT numbers issued | **external** | ⏳ (placeholders in `src/config/customs.ts`) |
 | 9 | Namecheap FTP credentials in `.env` (`NAMECHEAP_FTP_*`) | **user** | ✅ present |
 | 10 | Commercial figures signed off (commission rate, monthly fee, margins) | **user** | ⏳ (`src/config/commercial.ts`) |
+| 11 | **VAT treatment decided** (business/accounting decision) | **user** | ⏳ `VAT_TREATMENT`/`VAT_TREATMENT_CONFIGURED` in `src/config/commercial.ts` — until then no tax amount is computed (§M6) |
+| 12 | Brand payout destinations verified through the Accounting tab | **Mercenta ops** | ⏳ the Verify action records the reference; an unverified destination blocks payout (§M6) |
 
 Steps 1–4 are the repository gate: **do not deploy if any is red.**
 

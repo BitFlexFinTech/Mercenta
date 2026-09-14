@@ -216,3 +216,35 @@ secret; forwards the idempotency key) — see `PRODUCTION_READINESS.md`.
 |---|---|---|---|
 | Palletline | Palletline account creds (API/FTP per agreement) | Integrations → Palletline | adapter following the DHL pattern; switch `defaultMode` when an adapter exists |
 | Retail-channel cases | none beyond SP-API creds | Integrations → Amazon SP-API | Edge Function `/functions/v1/retail-channel/cases` |
+
+### 10.5 Document-verification seam (M2, 14 Sep)
+
+`src/lib/verification/documentVerification.ts` — four providers behind ONE
+interface, selected by provider mode:
+
+| Mode | Provider | Truthfulness |
+|---|---|---|
+| `simulation` | `simulated_document_verification` | deterministic, zero network, `simulated: true`, evidence `SIM-DOC-VERIFY-…` |
+| `live` | `internal_structural_rules` | automated check of the artefact/reference/issuer/expiry — **`external: false`**: Mercenta's own rules, not a third party |
+| explicit manual request | `manual_mercenta_admin` | operator identity + method + reason recorded; cannot clear a requirement with no artefact |
+| anything else | `unavailable_document_verification` | fail-closed: refuses, claims nothing, routes to manual review |
+
+**No external/free document-verification API is wired today, and no paid
+dependency was added for automation's sake.** A real external provider would be
+added as one more implementation of the same interface — the compliance workflow
+does not change.
+
+### 10.6 Accounting-representation seam (M6, 14 Sep)
+
+`src/lib/finance/accountingSeam.ts` — the reconciliation posting path:
+
+| Mode | Provider | Behaviour |
+|---|---|---|
+| `simulation` | `simulated_accounting_representation` | in-process, zero network, `SIM-XERO-REC-…`, `simulated: true` |
+| `live` | `xero` | the EXISTING `src/services/xero` client (`createXeroClient` → `reconcileAmazonRemittance`). Without credentials the existing factory returns its Mock client, which reports "not connected" — the posting is recorded as **NOT represented** with that real error |
+| anything else | `unavailable_accounting_representation` | fail-closed, nothing represented |
+
+Live activation needs `XERO_CLIENT_ID` / `XERO_ACCESS_TOKEN` / `XERO_TENANT_ID`
+(the same credentials the Accounting tab already accepts). Payout destinations are
+verified by a recorded Mercenta Admin review action — **there is no
+bank-verification provider wired**, and none is claimed.

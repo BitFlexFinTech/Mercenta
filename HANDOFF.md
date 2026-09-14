@@ -74,13 +74,14 @@ Cline's output back. AI confirms, gives next prompt.
   Backup of the pre-change compose file + inspect JSON:
   `/root/rocketchat-removal-backup-20260913/`. **Never reintroduce Rocket.Chat.**
 - Playwright suite (185 passing tests, 30 spec files)
-- **Phase E2E — DETERMINISTIC INVESTOR DEMO (2026-09-13)**: ONE runnable,
-  zero-network, reset/replayable lifecycle across the whole platform
-  (`src/lib/simulation/investorDemo.ts`, 22 stages: application → … → social →
-  RBAC → audit → error/recovery), driven from the existing Simulation Control
-  Centre by a new "Investor demo" panel (Run / Reset / per-stage OK-BLOCKED-ERROR
-  / digest comparison / `network calls: 0`). Verified by
-  `node scripts/validate-investor-demo.mjs` (41/41, 0 network calls, identical
+- **Phase E2E — DETERMINISTIC INVESTOR DEMO (2026-09-13, extended M7 2026-09-14)**:
+  ONE runnable, zero-network, reset/replayable lifecycle across the whole platform
+  (`src/lib/simulation/investorDemo.ts`, **24 stages**: application → … →
+  shipment → shipping lane & commercial model → delivery → … → integrations →
+  cases → social → RBAC → audit → error/recovery), driven from the existing
+  Simulation Control Centre by a new "Investor demo" panel (Run / Reset /
+  per-stage OK-BLOCKED-ERROR / digest comparison / `network calls: 0`). Verified by
+  `node scripts/validate-investor-demo.mjs` (0 network calls, identical
   digest on reset→replay) and `e2e/investor-demo.spec.ts` (10/10). A REAL defect
   was fixed: a brand could resolve its OWN dispute outcome ("won") — resolution
   is now an operator-only decision in the domain, the brand sees
@@ -298,26 +299,41 @@ canonical doc + the code/doc contradictions in scope were fixed), **M3** (case
 review before channel escalation), **M5** (PO-gated shipping, centralised carrier
 routing, shipping commercial model). Verified-as-already-canonical: **M4** (PO
 routing/ack/idempotency needed no change).
-- **M2 — compliance verification engine (NOT built).** The compliance gate and
-  category-aware requirements already exist, but the **document verification
-  record** (source / method / timestamp / verifier / result / evidence / failure
-  reason), the **`rejected` + `superseded` document states**, versioning, and the
-  interchangeable **automated vs manual verification providers** are NOT built.
-- **M6 — finance / Xero / payout (NOT built).** Channel payment → PO
-  reconciliation, deterministic Xero accounting identity, verified brand payout
-  destination, and automated brand payout derived from a **reconciled** payment.
-- **M7 — investor demo NOT extended.** Still the 22 canonical stages; the new
-  shipping-routing, upfront-shipping-payment and case-escalation steps are not
-  yet demo stages.
-- **M8 — documentation sweep is PARTIAL.** Canonical doc + README + INTEGRATIONS
-  §10 + PRODUCTION_READINESS + PROJECT_STATUS/HANDOFF updated; the remaining
-  docs/*.md history and some E2E descriptions were not individually re-read.
-- **M9 — full Playwright suite NOT run** this session (targeted specs only: 31
-  passed / 1 pre-existing failure).
-- **Pre-existing failure to fix separately:** `e2e/investor-demo.spec.ts` t4
-  ("brand-pinned actors are refused cross-tenant … IN THE DOMAIN") fails on
-  `proof.allStagesOk` — the in-page second run of the demo in the same browser
-  session reports fewer than 22 ok stages. It fails identically **before** this
+- ~~**M2 — compliance verification engine (NOT built).**~~ **BUILT (2026-09-14).**
+  `src/lib/verification/documentVerification.ts` + `DocumentVerificationRecord`
+  (status/source/method/verifier/result/evidence/failure reason/version/
+  supersede), the `rejected` + `superseded` document states, document versioning
+  with replacement, and an interchangeable automated (structural rules) /
+  simulation / manual Mercenta Admin provider seam with fail-closed selection.
+  Manual approval cannot bypass the document requirement.
+- ~~**M6 — finance / Xero / payout (NOT built).**~~ **BUILT (2026-09-14).**
+  `src/lib/finance/financialReconciliation.ts` + `src/lib/finance/accountingSeam.ts`:
+  deterministic payment → PO/invoice reconciliation (duplicate refused), the
+  canonical payout-eligibility rule (reconciled payment + resolved deductions +
+  VERIFIED destination + no duplicate), the payout state machine
+  (pending/eligible/submitted/settled/failed/retry) and the audited destination
+  review. VAT stays `configuration_required` — never invented.
+- ~~**M7 — investor demo NOT extended.**~~ **DONE (2026-09-14).** The demo is now
+  **24 stages**: `shipping_commercial` (lane resolution, DHL/Palletline, PO-gated
+  shipment creation, full commercial breakdown, upfront brand charge) and `cases`
+  (brand case → Mercenta review → idempotent channel escalation → provider
+  response → resolution). Zero network, identical replay digest.
+- **M8 — documentation sweep: DONE for the canonical set (2026-09-14).**
+  `README.md` (validation gates), `PRODUCTION_READINESS.md` (§M2/§M6/§M7
+  prerequisites + the 24-stage lifecycle), `docs/MERCENTA_BUSINESS_MODEL.md`
+  (§3/§8 implementation anchors), `docs/INTEGRATIONS.md` (new seams),
+  `PROJECT_STATUS.md` and `HANDOFF.md` are reconciled. The historical
+  `docs/PRODUCT_CONSOLIDATION_*` phase reports are deliberately left as
+  point-in-time records (they describe past sessions, not current rules).
+- **M9 — full Playwright suite:** run this session; see PROJECT_STATUS.md for the
+  result and any remaining pre-existing failures.
+- ~~**Pre-existing failure:** `e2e/investor-demo.spec.ts` t4~~ **FIXED
+  (2026-09-14).** Root cause was a REAL defect, not a test artefact: a second demo
+  run without a manual reset corrupted the run (onboarding
+  `ILLEGAL_TRANSITION`, 15 error stages) because the reset baseline was a shallow
+  snapshot of a possibly-dirty module instance. Reset now deep-clones its baseline,
+  purges the demo tenant's own records from every canonical store, and
+  `runInvestorDemo()` always starts from that baseline. The spec is 10/10.
   session's changes, so it is not a regression; it needs its own debugging pass.
 
 

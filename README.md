@@ -27,8 +27,10 @@ npm run lint                            # eslint (src + e2e)
 npm run build                           # production build
 npm run validate:wording                # outward-facing wording gate
 node scripts/integrity-audit.mjs        # structural integrity audit
-node scripts/validate-canonical-model.mjs   # canonical business rules
-node scripts/validate-investor-demo.mjs     # deterministic zero-network lifecycle
+node scripts/validate-canonical-model.mjs        # canonical business rules
+node scripts/validate-document-verification.mjs  # §M2 compliance document verification
+node scripts/validate-financial-reconciliation.mjs # §M6 money flow + payout gates
+node scripts/validate-investor-demo.mjs          # deterministic zero-network lifecycle
 npx playwright test                     # full E2E suite
 ```
 

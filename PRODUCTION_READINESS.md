@@ -1,10 +1,45 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated:** Canonical-model session (13 Sep) — **the canonical Mercenta
-business model was reconciled and the two clearest gaps were BUILT**
-(`docs/MERCENTA_BUSINESS_MODEL.md` is now the canonical statement).
-No retired mock was silently re-labelled live; the only new prerequisites are
-listed here explicitly.
+**Last updated:** M2/M6/M7 session (14 Sep) — **compliance-document verification,
+the canonical money flow (payment reconciliation → accounting representation →
+gated payout) and the 24-stage investor demo were BUILT.** Every new prerequisite
+is listed below; nothing was re-labelled live, and no external provider is claimed
+where none was contacted.
+- **NEW §M2 (no credentials required, no paid dependency added):** the
+  document-verification seam `src/lib/verification/documentVerification.ts` ships
+  FOUR providers. The AUTOMATED one is **Mercenta's own deterministic structural
+  rule engine** (`internal_structural_rules`) — it records `external: false`
+  because **no external document-verification API is used**. If a genuinely usable
+  external/free verification provider is later identified, it plugs in behind the
+  same interface with **zero** change to the compliance workflow. The
+  deterministic simulation seam (`simulated_document_verification`) is reachable
+  **only** when the provider mode is positively `simulation`; every other mode is
+  fail-closed to manual Mercenta Admin review. **Manual verification is a
+  first-class path and cannot bypass the document requirement.**
+- **NEW §M6 (credential/configuration required):**
+  - **VAT treatment is NOT configured.** `src/config/commercial.ts` →
+    `VAT_TREATMENT = 'configuration_required'`, `VAT_TREATMENT_CONFIGURED = false`.
+    Until the business/accounting decision is taken and entered there, every
+    reconciliation records `vatConfigured: false` and **no tax amount is computed
+    or presented**. This is deliberate — the platform does not invent a tax result.
+  - **Accounting representation:** `src/lib/finance/accountingSeam.ts` resolves to
+    `${EDGE_BASE}/...`-free **simulated representation** in simulation mode, and to
+    the **existing** `src/services/xero` client in live mode. Without Xero
+    credentials the existing factory returns its Mock client, which reports
+    "not connected": the posting is recorded as **NOT represented** with that real
+    error. Live activation needs `XERO_CLIENT_ID` / `XERO_ACCESS_TOKEN` /
+    `XERO_TENANT_ID` (see `docs/INTEGRATIONS.md`).
+  - **Payout destination verification:** a payout is refused unless the brand's
+    destination is `verified`. Verification is an **operator action with a recorded
+    reference** (`setDestinationStatus`) — there is **no bank-verification
+    provider** wired, so today it is a Mercenta Admin review, honestly labelled.
+  - **Payout transfer:** unchanged — `MockStripePayoutClient` until verified Stripe
+    Connect credentials exist. Payouts are additionally gated on a reconciled
+    payment, resolved deductions and a verified destination.
+- **NEW §M7 (no new prerequisite):** the investor demo now runs **24 stages**
+  (the 22 canonical stages + `shipping_commercial` + `cases`). Both new stages use
+  existing seams and remain zero-network, deterministic and reset/replayable.
+
 - **NEW in the registry:** `palletline` (UK-domestic Mercenta carrier account,
   §11). Its `defaultMode` is honestly **`available`** — there is **no live or
   mock Palletline adapter yet**, so the fail-closed gate refuses a simulated
@@ -26,11 +61,12 @@ listed here explicitly.
 
 **Last updated:** Phase E2E (13 Sep) — **the deterministic investor-demo lifecycle
 is DONE and introduces NO new mock, placeholder or credential requirement.**
-`src/lib/simulation/investorDemo.ts` runs the whole 22-stage lifecycle on the
+`src/lib/simulation/investorDemo.ts` runs the whole 24-stage lifecycle on the
 EXISTING canonical seams (application → approval → onboarding → compliance →
-catalogue → PO → acknowledgement → fulfilment → shipment → delivery/invoice/
-payment → returns → deductions → dispute → commission → payout → CRM →
-marketing → integrations → social → RBAC → audit → error/recovery) with ZERO
+catalogue → PO → acknowledgement → fulfilment → shipment → **shipping lane &
+commercial model** → delivery/invoice/payment → returns → deductions → dispute →
+commission → payout → CRM → marketing → integrations → **cases (Mercenta review
+before channel escalation)** → social → RBAC → audit → error/recovery) with ZERO
 network calls, and is reset/replay-deterministic (identical digest).
 **One real domain gap was closed, not faked:** the compliance gate has always
 required a signed distribution agreement, but contracts were seed-only, so a

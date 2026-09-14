@@ -58,6 +58,35 @@ simulated (`src/integrations/types.ts` → `isProviderSimulationSafe`).
   universal + category-specific + conditional, with expiry, versioning,
   verification state/source, reviewer, rejection reason, re-upload and audit.
 
+### 3.1 Implementation anchors (M2, 14 Sep 2026)
+
+- **Requirements are rules, not a checklist.** `src/lib/compliance.ts` exposes
+  `getComplianceRequirements()` / `getApplicableRequirements()`: four **universal**
+  documents (never conditional, because Mercenta is the vendor of record) plus
+  category rules whose **condition** is stated (`touchesFood`, `isElectrical`,
+  `isCosmetic`, `isTextile`, `isAutomotive`, `isBaby`, `isPerishable`). A
+  conditional requirement is dropped ONLY when the platform positively knows the
+  condition does not apply — unknown stays required (fail-closed).
+- **Verification is a provider seam, not a hardcoded service.**
+  `src/lib/verification/documentVerification.ts` selects between
+  `internal_structural_rules` (automated, deterministic, **`external: false`** —
+  this is Mercenta's own rule engine, not a third-party verification),
+  `simulated_document_verification` (reachable only in a positively identified
+  `simulation` mode; unmistakably `SIM-DOC-VERIFY-…`), `manual_mercenta_admin`
+  (a first-class operator path that records identity, method and reason) and
+  `unavailable_document_verification` (fail-closed for every other mode). No
+  external provider is claimed unless an external provider actually answered.
+- **A submission is not a verdict.** Submitting moves the document to
+  `under_review` and opens a **pending** verification record; the gate stays
+  blocked. A failed verification sets `rejected`, and the requirement can then
+  only be satisfied by a **replacement**; the replaced version becomes
+  `superseded` and is retained with its verification history (never deleted). The
+  gate always judges the **latest version** of a requirement. `missing`,
+  `uploaded`, `under_review`, `rejected`, `superseded`, `expiring` and `expired`
+  all block — only `approved` clears.
+- **Manual approval cannot bypass the requirement**: an operator approval with no
+  document artefact on file FAILS and changes no state.
+
 ## 4. Retail-channel PO flow (the core workflow)
 
 ```
@@ -153,6 +182,35 @@ reconciled → audited
   successful payout is never paid twice; every payout links brand → PO/payment
   → calculation → transaction → audit. A brand's payout destination must be
   **verified** before the account is payable.
+
+### 8.1 Implementation anchors (M6, 14 Sep 2026)
+
+- **One reconciliation per payment, ever.** `src/lib/finance/financialReconciliation.ts`
+  → `reconcilePayment()` writes `rec-<paymentId>` linking payment → invoice → PO
+  → brand, with amount, currency, payment source, payment date and reconciliation
+  state (`pending` / `reconciled` / `exception`). A payment is **never assumed**
+  to belong to a PO: an asserted PO that does not match the payment's recorded PO
+  produces an **exception**, and a duplicate reconciliation is refused.
+- **Money comes from canonical facts.** PO value and commission come from the PO
+  store (rate normalised through `resolveCommissionRatePct`); deductions are kept
+  as two separate numbers — **applied** (accepted/resolved) and **unresolved**
+  (open/disputed) — because only the first reduces the payable and only the
+  second blocks it.
+- **The accounting representation goes through one seam**
+  (`src/lib/finance/accountingSeam.ts`): simulated representation in positive
+  `simulation` mode (zero network), the existing `src/services/xero` client in
+  `live` mode, and a fail-closed provider otherwise. A posting that was not
+  written is recorded as **not represented**, with the real error.
+- **The payout gate is explicit.** `evaluatePayoutEligibility()` requires ALL of:
+  a reconciled payment for the PO; no unresolved deduction; a **verified**
+  destination; no already-paid commission; no payout already submitted/settled.
+  Every refusal records a **blocked** payout plus an audit row; the one
+  settlement path (`api.settleBrandPayout`) enforces it and never downgrades a
+  settled payout.
+- **VAT is configuration, not a conclusion.** `src/config/commercial.ts` ships
+  `VAT_TREATMENT = 'configuration_required'` with `VAT_TREATMENT_CONFIGURED =
+  false`; until that decision is taken no tax amount is computed and every
+  record says so.
 
 ## 9. Automation + admin override
 
