@@ -73,8 +73,13 @@ try {
   test("onboarding no longer labels a field 'VAT / EORI Number'", !wizSrc.includes('VAT / EORI Number'));
 
   // ── EU removed from brand nav; flagged module in Super Admin ──
-  const appSrc = readFileSync(resolve(root, 'src/App.tsx'), 'utf8');
-  test("brand nav says 'UK Compliance' not 'UK & EU Compliance'", appSrc.includes("label: 'UK Compliance'") && !appSrc.includes('UK & EU Compliance'));
+  // §Phase M10 — REPOINTED: routing moved out of App.tsx during the Phase D
+  // redesign (App.tsx is now a 31-line shell switcher); the brand nav lives in
+  // BrandShell. The invariant is unchanged — the brand-facing label is
+  // 'UK Compliance', never 'UK & EU Compliance'.
+  const navSrc = readFileSync(resolve(root, 'src/components/layout/BrandShell.tsx'), 'utf8');
+  test("brand nav says 'UK Compliance' not 'UK & EU Compliance'",
+    navSrc.includes("label: 'UK Compliance'") && !/UK & EU Compliance/.test(navSrc));
 
   const adminSrc = readFileSync(resolve(root, 'src/components/admin/SuperAdminPanel.tsx'), 'utf8');
   test('Super Admin has feature-flagged EU Market module', adminSrc.includes('EU Market Module') && adminSrc.includes('EU_MARKET_ENABLED'));

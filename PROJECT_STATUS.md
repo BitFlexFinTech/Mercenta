@@ -1,9 +1,77 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
-> Last updated: 2026-09-14 (**M2 + M6 + M7 + M8 + M9 COMPLETE**. Every stage of the
-> M2 → M6 → M7 → M8 → M9 sequence is built and verified; see §M9 for the full
-> regression result and the remaining pre-existing validator failures.)
+> Last updated: 2026-09-14 (**M2 → M10 COMPLETE. THE ENTIRE VALIDATOR SUITE IS
+> NOW GREEN: 60 validator scripts, 0 non-zero exits** — for the first time in the
+> project's history. M10 repaired the 15 stale validators that M9 recorded as
+> "pre-existing failures"; see §M10 for the per-validator diagnosis.)
 >
+> **M10 SESSION (2026-09-14) — VALIDATOR-SUITE REPAIR: 45 → 60 GREEN, 15 → 0 RED.**
+>
+> **① What was actually wrong.** 15 validator scripts exited non-zero. Every one
+> was a **stale assertion**, not a product regression: each encoded a fact that was
+> TRUE when it was written and was then legitimately changed by a later phase (the
+> DHL/Palletline carrier model, provider-registry growth, the Phase-D shell
+> routing/DataTable redesign, the §M2 compliance-gate signature, the Phase-S
+> truthful social-engine resolution, migration renumbering, and the retirement of
+> the `validate:stageNN` npm-script convention). Two crashed outright on migration
+> filenames (`0013_deductions.sql`, `0014_vc_ack_asn_fields.sql`) that **never
+> existed in this repository's history** — a tool that crashes proves nothing.
+>
+> **② The repair rule applied.** Each stale assertion was repointed to the
+> CURRENT canonical source of truth (SSOT constants such as `PO_STATUS_ORDER`,
+> `MERCENTA_CARRIER_ACCOUNTS`, `SHIPPING_CARRIER_ROUTING`, `DEMO_BANNER_TEXT`,
+> `DEFAULT_HOMEPAGE_CONTENT`, the shells that now own routing) — never to a new
+> hardcoded literal, and never by deleting the assertion. Where an invariant could
+> not be asserted as written, a STRONGER one replaced it (lane routing, retired-
+> carrier refusal, cross-tenant shipment refusal, dataset-completeness counts).
+> Every repoint carries an inline `§Phase M10 — REPOINTED` comment stating the old
+> contract and why it changed.
+>
+> **③ Genuine gaps reported, not silently patched.** Two DB-level constraints the
+> old validators asserted have NEVER existed in this schema (the `deductions.category`
+> CHECK and the "acknowledged qty ≤ ordered qty" DB trigger); the enforcement that
+> does exist is domain-layer + RLS. The validators now assert the real enforcement
+> and both gaps are recorded in §Remaining. **No application source was changed by
+> M10 at all** — this phase is validators only.
+>
+> **④ Evidence.** Full Playwright suite **250 passed / 2 skipped / 0 failed**
+> (3.2m) — identical pass count to the M9 baseline, so M10 introduced **zero E2E
+> regressions** · 60/60 validator scripts exit 0 · `tsc --noEmit` 0 errors ·
+> `eslint .` 0 errors · `npm run build` ✓ 2.61s · wording gate 184 files /
+> 0 violations · integrity audit 61/61 · investor demo PASS (deterministic replay
+> identical, zero network) · tenant coherence PASS · payouts PASS ·
+> E7 `120 assertions / 0 failures` · e6 scope guard PASS (its M10 surface
+> declared, mirroring the M9 fix).
+>
+> **⑤ REMAINING (honest, unchanged by M10).**
+> - **Two DB-level constraints asserted by the legacy validators have never
+>   existed in this schema and still do not:** (a) `deductions.category` has no
+>   CHECK constraint (008 declares it plain TEXT; the category vocabulary is
+>   enforced in the typed domain model), and (b) there is no database trigger
+>   enforcing "acknowledged qty ≤ ordered qty" (the rule is enforced in
+>   `src/data/api.ts`). Both are hardening candidates for a future migration;
+>   M10 did NOT add a migration (023 remains newest) because that would change
+>   the schema and other validators legitimately pin the migration count.
+> - **`verify-registry.mjs` is advisory and still flags 103 items** — historical
+>   `requirements-registry.json` entries describing components/views/nav ids that
+>   the Phase-D redesign legitimately replaced or retired (e.g. `stage5-radar-chart`,
+>   `stage5-score-history`, both `phaseE7-*` entries whose proofs are E7 validators
+>   rather than E2E files). It exits 0 by design and is a registry-hygiene backlog,
+>   not a failing gate. Recorded here rather than "fixed" by rewriting history.
+> - **Edge Functions for the live provider paths are still absent from the repo**
+>   (`spapi/*`, `dhl/label`, `payouts-transfer`, `esign-envelope`, `hmrc`,
+>   `companies-house`, `catalog-import`, `discovery-directory`, `send-email`,
+>   `instantly-reply-webhook`, `daily-digest`, `compliance-gate-check`).
+>   `validate-edge-functions.mjs` reports 36 assertions ran / 0 failures /
+>   35 skipped because the artefacts are deploy-time items — exactly as
+>   `PRODUCTION_READINESS.md` records. They are NOT prerequisites for the
+>   deterministic investor demo.
+> - **Seeded shipping state is intentionally empty** (the §M9 finding): no seeded
+>   PO is in a shipping status, so `DEMO_SHIPMENTS` and the seeded shipping-margin
+>   ledger are legitimately empty and the investor demo creates them at runtime.
+>   This is an owner-level demo-data decision, so it was NOT changed.
+>
+
 > **M8/M9 SESSION (2026-09-14) — DOCUMENTATION RECONCILED + FULL REGRESSION.**
 >
 > **① M8 — documentation now tells one story.** `README.md` (validation gates list

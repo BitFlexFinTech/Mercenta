@@ -23,19 +23,33 @@ try {
   console.log('agreement wording-safe:', safeWording);
   console.log('agreement merges brand/rate/fee:', merged);
 
-  const { evaluateComplianceGate, REQUIRED_DOCUMENT_TYPES } = compliance;
-  // §Batch-5 — distribution_agreement gate now checks the Contract, not a ComplianceDocument.
-  // Pass hasSignedAgreement=true to indicate a signed contract exists.
+  const { evaluateComplianceGate, getRequiredDocumentsForCategory } = compliance;
+  // §Phase M10 — REPOINTED to the current gate contract. The signature is now
+  //   (docs, category?, hasSignedAgreement, logisticsSlaAccepted,
+  //    chargebackIndemnityAccepted)
+  // and the previous `(docs, true)` call passed `true` as the CATEGORY, so the
+  // gate resolved the wrong requirement set and could never clear. The gate is
+  // now exercised the way the platform calls it — category-scoped, with the
+  // contract and the two legal agreements accepted.
+  const GATE_CATEGORY = 'Health & Personal Care';
   const cleared = evaluateComplianceGate(
-    REQUIRED_DOCUMENT_TYPES.map((t) => ({ type: t, status: 'approved' })),
-    true // hasSignedAgreement
+    getRequiredDocumentsForCategory(GATE_CATEGORY).map((t) => ({ type: t, status: 'approved' })),
+    GATE_CATEGORY,
+    true, // hasSignedAgreement
+    true, // logisticsSlaAccepted
+    true // chargebackIndemnityAccepted
   );
-  const blocked = evaluateComplianceGate([
-    { type: 'letter_of_authorization', status: 'approved' },
-    { type: 'product_safety_ukca', status: 'under_review' },
-    // insurance_certificate missing entirely
-    // distribution_agreement handled by contracts, so pass false for no signed contract
-  ], false /* no signed agreement */);
+  const blocked = evaluateComplianceGate(
+    [
+      { type: 'letter_of_authorization', status: 'approved' },
+      { type: 'product_safety_ukca', status: 'under_review' },
+      // insurance_certificate missing entirely
+    ],
+    GATE_CATEGORY,
+    false, // no signed agreement
+    false, // no logistics SLA
+    false // no chargeback indemnity
+  );
   console.log('gate clears when all approved:', cleared.cleared === true);
   console.log(
     'gate blocks with missing+blocking:',

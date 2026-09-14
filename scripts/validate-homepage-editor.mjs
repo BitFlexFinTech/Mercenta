@@ -24,9 +24,13 @@ try {
   );
 
   // Default render contains the default hero heading + brand name.
+  // §Phase M10 — REPOINTED. The hardcoded 'UK retail shelf.' literal was the
+  // marketing copy at the time; the copy has since changed. The invariant is
+  // unchanged and is now asserted against the canonical content model (SSOT):
+  // the default render must show the DEFAULT_HOMEPAGE_CONTENT hero heading.
   const htmlDefault = render();
-  test('default render shows default hero highlight',
-    htmlDefault.includes('UK retail shelf.'));
+  test('default render shows the canonical default hero heading',
+    htmlDefault.includes(cfg.DEFAULT_HOMEPAGE_CONTENT.hero.headingStart));
   test('default render is brand-name driven', htmlDefault.includes('Mercenta'));
 
   // Edited content renders through the same component.
@@ -36,7 +40,8 @@ try {
   const htmlEdited = render(edited);
   test('edited heading renders instead of hardcoded text', htmlEdited.includes('From our workshops to'));
   test('edited about heading renders', htmlEdited.includes('Partner with Mercenta'));
-  test('unedited sections still render from defaults', htmlEdited.includes('UK retail shelf.'));
+  test('unedited sections still render from defaults (services heading)',
+    htmlEdited.includes(cfg.DEFAULT_HOMEPAGE_CONTENT.services.heading));
 
   // Wording lint catches a banned-term edit before it can go live.
   const unsafeEdit = structuredClone(cfg.DEFAULT_HOMEPAGE_CONTENT);

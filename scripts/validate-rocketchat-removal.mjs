@@ -94,9 +94,16 @@ try {
   const adminShell = readFileSync(resolve(ROOT, 'src/components/layout/AdminShell.tsx'), 'utf-8');
 
   const ids = Object.keys(reg.INTEGRATION_REGISTRY);
-  test('provider registry is 18 providers (19 before removal)', ids.length === 18);
-  test('INTEGRATION_ORDER has 18 entries (order === registry keys)',
-    reg.INTEGRATION_ORDER.length === 18 && reg.INTEGRATION_ORDER.length === ids.length);
+  // §Phase M10 — REPOINTED. "18 providers" was a point-in-time count that went
+  // stale when later phases legitimately registered new providers (e.g.
+  // palletline, §11). The removal's REAL invariant is that the registry and its
+  // declared order agree with each other and that rocketchat is absent — both
+  // asserted here against the registry itself rather than a frozen number.
+  test('provider registry and INTEGRATION_ORDER are consistent',
+    ids.length >= 18 &&
+      reg.INTEGRATION_ORDER.length === ids.length &&
+      reg.INTEGRATION_ORDER.every((id) => ids.includes(id)) &&
+      ids.every((id) => reg.INTEGRATION_ORDER.includes(id)));
   test('no rocketchat id in INTEGRATION_REGISTRY', !ids.includes('rocketchat'));
   test('no rocketchat id in INTEGRATION_ORDER', !reg.INTEGRATION_ORDER.includes('rocketchat'));
   test('no rocketchat key in INTEGRATION_META', !('rocketchat' in reg.INTEGRATION_META));

@@ -51,12 +51,18 @@ try {
 
   // ── Accept + financed branch (no shipment action needed) ──
   const shipmentsBefore = (await api.fetchShipmentsAll()).data.length;
-  const financedPO = pos0.find(
+  // §Phase M10 — test-isolation fix. The reject above consumes the FIRST
+  // actionable PO, and in the canonical seed that PO belongs to the financed
+  // brand — so searching the ORIGINAL snapshot for a financed 'received' PO
+  // afterwards found nothing (the mutation had already moved it to 'rejected').
+  // Both branch POs are therefore selected from the POs the test has NOT mutated.
+  const untouched = pos0.filter((p) => p.id !== actionable.id);
+  const financedPO = untouched.find(
     (p) =>
-      p.status === 'received' &&
+      (p.status === 'received' || p.status === 'under_review') &&
       store.demoBrands.find((b) => b.id === p.brandId)?.track === 'financed'
   );
-  test('financed received PO exists for branch demo', Boolean(financedPO));
+  test('financed actionable PO exists for branch demo', Boolean(financedPO));
   if (financedPO) {
     await api.updatePurchaseOrderStatus(financedPO.id, 'accepted');
     const after = (await api.fetchShipmentsAll()).data.length;
@@ -65,7 +71,7 @@ try {
   }
 
   // ── Direct fulfillment branch: accept → create shipment → shipped state ──
-  const directPO = pos0.find(
+  const directPO = untouched.find(
     (p) =>
       ['received', 'under_review'].includes(p.status) &&
       store.demoBrands.find((b) => b.id === p.brandId)?.track === 'direct_fulfillment'

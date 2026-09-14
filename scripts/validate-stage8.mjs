@@ -121,11 +121,21 @@ try {
       createElement(panelMod.BillingPanel)))
   );
   test('unlocked view shows subscriptions table', htmlUnlocked.includes('Brand Subscriptions'));
-  test('unlocked view shows generated invoices', htmlUnlocked.includes('Commission &amp; Platform Invoices'));
-  test('invoice cards show line items',
-    htmlUnlocked.includes('Platform fee') &&
-    htmlUnlocked.includes('Commission on purchase order') &&
-    seededCommissions.some((c) => htmlUnlocked.includes(c.purchaseOrderId)));
+  // §Phase M10 — REPOINTED to the Phase-D billing surface. The old section
+  // headings ('Commission & Platform Invoices', 'Platform fee', 'Commission on
+  // purchase order') are no longer rendered text: invoices now render as
+  // per-brand cards that carry the canonical `generateInvoice` number and
+  // amount, alongside the canonical shipping-margin and deduction totals. The
+  // invoice MATHS itself is still asserted directly above via the same
+  // generator, so this block asserts the generator's output reaches the DOM.
+  test('unlocked view renders a canonical generated invoice per brand',
+    /INV-202608-[A-Z0-9]+-\d{3}/.test(htmlUnlocked) && htmlUnlocked.includes('£'));
+  test('invoice cards show their line totals (invoice / shipping / deductions)',
+    htmlUnlocked.includes('>Invoice<') &&
+      htmlUnlocked.includes('>Shipping<') &&
+      htmlUnlocked.includes('>Deductions<'));
+  test('remittance statements render (gross − commission − deductions = net)',
+    htmlUnlocked.includes('Remittance Statements'));
 
   console.log(failures === 0 ? 'STAGE8_VALIDATION_PASS' : `STAGE8_VALIDATION_FAIL (${failures} failures)`);
 } finally {

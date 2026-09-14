@@ -138,7 +138,7 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
 | Postmark/SendGrid | `MockMailClient` (simulated hard-bounce on malformed recipients) | Free Postmark/SendGrid trial account + server API token | Integrations wizard → **Transactional Email** card (live test-call already implemented); factory `createMailClient` flips to real | Deploy `send-email` Edge Function + wire its Vault lookup (`resolveToken`) |
 | Hunter.io | Not connected | Free Hunter plan (25 verified emails/mo) suffices for dev | Integrations wizard → **Hunter.io** card (live ping implemented) | None |
 | OpenRouter | Not connected | OpenRouter account + API key (pay-per-use, no approval process) | Integrations wizard → **OpenRouter** card (live ping implemented) | None |
-| Instantly.ai | Reply webhook BUILT (`instantly-reply-webhook`: classify → persist → hot-lead flag); outbound enrolment mocked in discovery engine | Instantly Outreach plan + dedicated cold domain (**not** a subdomain of mercanta.co.uk — deliverability isolation per Stage 10 spec) | Integrations wizard → **Instantly.ai** card; webhook URL configured per-campaign in Instantly | Deploy the webhook function + set `INSTANTLY_WEBHOOK_SECRET` |
+| Instantly.ai | Reply webhook **SPECIFIED, NOT PRESENT IN THIS REPO** (§M10 correction): `instantly-reply-webhook` (classify → persist → hot-lead flag) is pinned contractually by `scripts/validate-edge-functions.mjs` but the Edge Function does not exist on disk — the client-side classifier (`src/lib/marketing.ts`) and the mocked outbound enrolment are built | Instantly Outreach plan + dedicated cold domain (**not** a subdomain of mercanta.co.uk — deliverability isolation per Stage 10 spec) | Integrations wizard → **Instantly.ai** card; webhook URL configured per-campaign in Instantly | Create + deploy the webhook function + set `INSTANTLY_WEBHOOK_SECRET` |
 | **Postiz → Mercenta Social** (full social application, engine v1.47.0) | Engine deployed but **unusable**: API 502 (Temporal missing); `MockPostizClient` in-memory and nothing published; Mercenta side = workspace identity/provisioning/entitlement/isolation only, `engineLinked:false` | **Deployment fixes first:** re-add Temporal; `DISABLE_REGISTRATION=true`; `MAIN_URL`/`FRONTEND_URL` → public URL; move media off container-local storage; add RAM. **Then:** enter the engine URL + API key in the wizard, and deploy the server-side provisioning/session-bridge function | Integrations wizard → **Postiz** card (`api_url`, `api_key`); admin **Mercenta Social** control centre shows state + findings | **None for the Mercenta client seam** (mock → real is credential-only). The **server-side provisioning/session bridge is the one remaining build item** (E7 deferred it deliberately — see the E7 report §9.4) |
 
 **Summary:** only Amazon genuinely requires the admin's own account/approval process. Every other provider can become real today via a free sandbox/test-mode signup, entered through its existing wizard card.
@@ -156,7 +156,35 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
 
 ## Structural debt blocking production
 
-0. **Edge Functions (Stage 17 + 21 + 22):** `/payouts-transfer`, `/catalog-import` (+ `import_catalog_batch` RPC in migration 0010), `/discovery-directory`, `esign-envelope`, `send-email`, `instantly-reply-webhook` are BUILT with mock-mode support. `resolveToken` Vault lookups wired (service-role → `vault.decrypted_secrets`). To go live on each path: `supabase functions deploy <name>` and set provider secrets; daily-digest schedule ships as migration 0011 (`pg_cron` — replace `<PROJECT_REF>`/`<SERVICE_ROLE_KEY>` at deploy). Instantly: point the campaign's reply webhook at the deployed `instantly-reply-webhook` URL (+ shared secret).
+0. **Edge Functions (Stage 17 + 21 + 22) — SPECIFIED AND CONTRACT-VALIDATED, BUT NOT PRESENT IN THIS REPOSITORY.**
+   **§M10 correction (2026-09-14):** this item previously stated that
+   `/payouts-transfer`, `/catalog-import` (+ the `import_catalog_batch` RPC in
+   migration `0010`), `/discovery-directory`, `esign-envelope`, `send-email` and
+   `instantly-reply-webhook` "are BUILT". That was **not true of this
+   repository**: only three functions exist on disk
+   (`supabase/functions/xero-webhook`, `xero-token`, `social-session`), and
+   `scripts/validate-edge-functions.mjs` reports all six as absent artefacts
+   (36 assertions run / 0 failures / 35 skipped), as do migrations
+   `0010_rpc_catalog_import.sql` and `0011_cron_daily_digest.sql`.
+   The **client-side seams and mock clients ARE built and simulated**
+   (`src/lib/mail/mail.ts`, `src/lib/esign/esign.ts`, `src/lib/billing/payouts.ts`,
+   `src/lib/catalog/csvImport.ts`, `src/lib/discovery/*`), and the server-side
+   contracts are pinned by the validator, so each function is a
+   **deploy-time deliverable with its behaviour already specified** — creating
+   them is not prerequisites work for the deterministic investor demo and is
+   deliberately NOT done (it needs a Supabase project plus provider secrets).
+   To go live: create + `supabase functions deploy <name>` for each of
+   `payouts-transfer`, `catalog-import`, `discovery-directory`,
+   `esign-envelope`, `send-email`, `instantly-reply-webhook`; ship the
+   `import_catalog_batch` RPC and the `pg_cron` daily-digest schedule
+   (`daily-digest`, `'0 7 * * *'`, replacing `<PROJECT_REF>` /
+   `<SERVICE_ROLE_KEY>` at deploy); set provider secrets; wire the
+   `resolveToken` Vault lookups (service-role → `vault.decrypted_secrets`).
+   Instantly: point the campaign's reply webhook at the deployed
+   `instantly-reply-webhook` URL (+ `INSTANTLY_WEBHOOK_SECRET`).
+   **NOTE:** the two migrations are additionally blocked on a decision — several
+   validators and this document pin the migration count at 23 (newest `023_`);
+   adding them changes that pinned fact and must be done deliberately.
 
 1. **Demo store collapse (Stage 2):** RESOLVED — COMPLETE as of Stage 20, polish finished Stage 23 (zero direct demoStore imports in views/components; `DemoBrandRow` canonically defined in `src/data/demoData.ts`). Dossiers live in `src/data/regionalDossiers.ts`, context bootstrap state in `src/data/bootstrap.ts`, all entity fixtures in demoStore generated from the canonical `demoData.ts`. Validators consume the same api/demoStore fixture universe the app does; 0007 seed SQL is generated from that dataset.
 

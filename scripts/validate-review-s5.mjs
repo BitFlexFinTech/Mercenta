@@ -2,6 +2,8 @@
 // the real clause-block agreement; Messages threads open with a working
 // reply pipeline (sandbox + always-log).
 import { createServer } from 'vite';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { renderToString } from 'react-dom/server';
 import { createElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -59,8 +61,33 @@ try {
   } finally {
     await adminServer.close();
   }
+  // §Phase M10 — REPOINTED for the canonical DataTable (Phase D). The contracts
+  // table now paginates (pageSizeDefault = 10), so only the current page's rows
+  // exist in the SSR output; asserting "one View per contract in the dataset"
+  // was therefore impossible by construction. The invariants that actually
+  // matter are asserted instead:
+  //   1. every row on the rendered page carries a View action;
+  //   2. the table is backed by the FULL dataset (rows={allContracts}, drafts
+  //      included) — never a curated subset;
+  //   3. pagination is rendered, so the remaining rows are reachable.
+  const adminSrc = readFileSync(
+    resolve(process.cwd(), 'src/components/admin/ContractsAdminPanel.tsx'),
+    'utf8'
+  );
   const viewButtons = (adminHtml.match(/View</g) ?? []).length;
-  test(`admin rows have View actions (${viewButtons})`, viewButtons >= contracts.length);
+  // React SSR inserts `<!-- -->` separators between adjacent text/expression
+  // nodes, so strip them before matching the "1 / N" page indicator.
+  const plainAdmin = adminHtml.replace(/<!--[\s\S]*?-->/g, '');
+  const pageCount = Number((plainAdmin.match(/1 \/ (\d+)/) ?? [])[1] ?? 0);
+  test(
+    `admin rows have View actions (${viewButtons} on page 1 of ${pageCount || 1})`,
+    viewButtons > 0 && viewButtons <= 10 && (pageCount === 1 || viewButtons === 10)
+  );
+  test('admin table is backed by the full canonical dataset, drafts included',
+    adminSrc.includes('rows={allContracts}') &&
+      adminSrc.includes("[...extraDrafts, ...(contractsQuery.data?.data ?? [])]"));
+  test('admin table paginates so every contract is reachable',
+    pageCount >= 1 && plainAdmin.includes('aria-label="Next page"'));
 
   // ── Reply pipeline: sandbox send is logged; disconnected logs failure ──
   let calls = 0;

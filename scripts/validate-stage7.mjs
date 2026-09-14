@@ -2,6 +2,7 @@
 // £10k auto-approve boundary, SP-API client gating (mock transport), and
 // locked/unlocked Retail Pipeline renders.
 import { createServer } from 'vite';
+import { readFileSync } from 'node:fs';
 import { renderToString } from 'react-dom/server';
 import { createElement } from 'react';
 // Static import (not ssrLoadModule) so this is the SAME react-query instance
@@ -95,11 +96,28 @@ try {
   pipelineQc.setQueryData(['deductions'], { data: (await apiMod.fetchDeductions()).data, source: 'seed' });
   pipelineQc.setQueryData(['catalog-submissions'], { data: (await apiMod.fetchCatalogSubmissions()).data, source: 'seed' });
 
+  // §Phase M10 — REPOINTED. The disconnected "locked" gate was deliberately
+  // removed from the DEMO path (the comment in RetailPipelinePanel records why:
+  // it hid every feature from investors). The invariants that must still hold —
+  // and are asserted here — are:
+  //   1. the demo path is usable WITHOUT a live Amazon connection, and
+  //   2. it labels itself honestly as investor-demo/simulated data rather than
+  //      implying a real SP-API connection;
+  //   3. the refusal component that DOES gate production wiring still exists, so
+  //      the locked state was not deleted, only unwired in demo mode.
   const initialMap = structuredClone(typesMod.INITIAL_INTEGRATIONS);
+  const demoCfg = await server.ssrLoadModule('/src/config/demo.ts');
+  const pipelineSrc = readFileSync('src/components/admin/RetailPipeline.tsx', 'utf8');
   const htmlLocked = renderToString(
     AppProviderEl(createElement(panelMod.RetailPipelinePanel))
   );
-  test('locked view shown when disconnected', htmlLocked.includes('Connect Amazon SP-API to enable this'));
+  test('demo pipeline is usable without a live Amazon connection',
+    htmlLocked.includes('Catalog Submissions'));
+  test('demo pipeline states its data is simulated (no false live claim)',
+    htmlLocked.includes(demoCfg.DEMO_BANNER_TEXT));
+  test('the production locked-gate component still exists',
+    pipelineSrc.includes('function LockedPipeline') &&
+      pipelineSrc.includes('Connect Amazon SP-API to enable this'));
 
   // Unlocked view requires seeding connected state through the provider.
   const connectedState = {

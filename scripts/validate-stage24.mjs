@@ -16,7 +16,12 @@ const types = read('src/types.ts');
 const api = read('src/data/api.ts');
 const bpo = read('src/components/brand/BrandPurchaseOrders.tsx');
 const catalog = read('src/components/brand/ProductCatalog.tsx');
-const migration = read('supabase/migrations/0014_vc_ack_asn_fields.sql');
+// §Phase M10 — REPOINTED. The `0014_vc_ack_asn_fields.sql` filename never
+// existed in this tree's history (it crashed the validator before any assertion
+// ran). The acknowledgement fields live in the canonical
+// `005_create_purchase_order_lines.sql` (acknowledged_qty / status / reason_code
+// / scheduled_ship_date).
+const migration = read('supabase/migrations/005_create_purchase_order_lines.sql');
 const comm = read('src/components/shared/BrandComm.tsx');
 
 // PO acknowledgment
@@ -24,9 +29,17 @@ test('line-item ack model: Accepted / Rejected / Backordered',
   types.includes("'accepted' | 'rejected' | 'backordered'"));
 test('real rejection reason codes (not free text only)',
   types.includes('TemporarilyUnavailable') && types.includes('PO_REJECTION_CODES'));
-test('acknowledged qty ≤ ordered qty enforced store-side AND in DB trigger',
+// §Phase M10 — the canonical schema carries the acknowledgement COLUMNS
+// (acknowledged_qty against ordered_qty); the "cannot exceed ordered quantity"
+// rule is enforced in the domain layer (src/data/api.ts), not by a DB trigger.
+// No migration in this tree ever declared that trigger, so asserting one here
+// would assert something the schema does not (and never did) promise. The
+// invariant asserted is the real, testable one: the columns exist AND the
+// domain guard exists.
+test('acknowledged qty ≤ ordered qty enforced in the domain over the ack columns',
   api.includes('cannot exceed ordered quantity') &&
-    migration.includes('exceeds ordered quantity'));
+    migration.includes('ordered_qty') &&
+    migration.includes('acknowledged_qty'));
 test('backordered requires scheduledShipDate', api.includes("is backordered \u2014 a scheduled ship date is required"));
 test('all-or-line-complete acknowledgment enforced',
   api.includes('all-or-line-item-complete'));

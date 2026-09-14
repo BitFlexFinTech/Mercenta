@@ -26,6 +26,12 @@ const store = read('src/data/demoStore.ts');
 const sales = read('src/components/brand/SalesAnalytics.tsx');
 const selfService = read('src/components/brand/BrandSelfService.tsx');
 const app = read('src/App.tsx');
+// §Phase M10 — REPOINTED. The Phase-D redesign moved view routing out of
+// App.tsx (now a 31-line lazy shell switcher) into the shells, so every
+// route/allowlist assertion below is checked against the shell that actually
+// owns it. The invariants themselves are unchanged.
+const adminShell = read('src/components/layout/AdminShell.tsx');
+const brandShell = read('src/components/layout/BrandShell.tsx');
 const bootstrap = read('src/data/bootstrap.ts');
 
 /* ── Stage 25 item 1 — CRM industry-bar depth ── */
@@ -61,12 +67,14 @@ test('tier management UI in Super Admin Panel',
 test('act-as-staff selector exercises tiers end to end',
   sap.includes('Acting as staff') && /mutations blocked/i.test(sap));
 test('platform audit log viewer exists and is routed (super-admin gated)',
-  auditView.includes('fetchAuditLog') && app.includes("<AdminAuditLog />") &&
-    app.includes("(isSuperAdmin ? <AdminAuditLog /> : <AccessDenied />)"));
+  auditView.includes('fetchAuditLog') &&
+    adminShell.includes("<AdminAuditLog />") &&
+    adminShell.includes("(isSuper ? <AdminAuditLog /> : <AccessDenied />)"));
 
 /* ── Stage 25 item 3 — brand self-service depth ── */
 test('sales history/analytics view replaces raw dashboard at analytics route',
-  sales.includes('Best-selling SKUs') && app.includes("{brandView === 'analytics' && <SalesAnalytics />}"));
+  sales.includes('Best-selling SKUs') &&
+    brandShell.includes("{brandView === 'analytics' && <SalesAnalytics />}"));
 test('document library downloads signed contract + remittance statement',
   selfService.includes('generateRemittanceStatement') && selfService.includes('Distribution Agreement v'));
 test('banking changes route through admin approval, never direct edit',
@@ -75,7 +83,9 @@ test('banking changes route through admin approval, never direct edit',
 test('change-request review UI lives in Brand CRM and is tier-gated',
   crm.includes('ChangeRequestReview') && crm.includes('canCurrentUserMutate'));
 test('brand documents view wired into nav + allowlist',
-  app.includes("'documents'") && rbac.includes("'analytics', 'documents',"));
+  brandShell.includes("id: 'documents'") &&
+    brandShell.includes("{brandView === 'documents' && <BrandSelfService />}") &&
+    rbac.includes("'analytics', 'documents',"));
 
 /* ── Stage 25 item 4 — delivery-time reconciliation ── */
 test('receivedQty captured per PO line item',

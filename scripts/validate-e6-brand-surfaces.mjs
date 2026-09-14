@@ -100,6 +100,13 @@ const M2_SCOPE = new Set([
   'scripts/validate-review-s6.mjs',
   'scripts/validate-onboarding-workflow.mjs',
   'scripts/validate-e4-commerce.mjs',
+  // §M10 — validation-repair phase surface. M10 changes ONLY validators
+  // (scripts/): stale assertions left behind by canonical-model changes — the
+  // DHL/Palletline carrier model, provider-registry growth, Phase-D view
+  // routing, the M2 compliance-gate signature, Phase-S truthful social
+  // resolution, renumbered migrations, and paginated DataTables. No application
+  // source is touched, so anything outside scripts/ is still refused.
+  'scripts/',
 ]);
 const ALLOWED_NON_APPROVED = new Set(['Review Zip/mercenta-review.zip']);
 

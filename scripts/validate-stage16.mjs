@@ -191,8 +191,20 @@ try {
 
   // Compliance Approvals shows actual documents by type.
   const complianceHtml = await renderView('/src/components/admin/ComplianceApprovals.tsx');
-  test('Compliance Approvals shows uploaded document types',
-    /letter_of_authorization|UKCA|insurance/i.test(complianceHtml));
+  // §Phase M10 — REPOINTED. The Phase-D card groups documents per brand and
+  // COLLAPSES the rows by default, so document TYPE labels are not present in
+  // the SSR output (they render on expand, which SSR cannot perform). The
+  // invariant — every uploaded document reaches the admin surface, with no
+  // curated subset — is asserted through the per-brand summary the card does
+  // render, and through the number of brand groups matching the canonical
+  // dataset exactly (§06 dataset-completeness check).
+  const plainCompliance = complianceHtml.replace(/<!--[\s\S]*?-->/g, '');
+  const brandsWithDocs = new Set(store.demoComplianceDocs.map((d) => d.brandId));
+  const renderedGroups = (plainCompliance.match(/\d+ docs ·/g) ?? []).length;
+  test('Compliance Approvals lists EVERY brand holding documents (no subset)',
+    renderedGroups === brandsWithDocs.size);
+  test('Compliance Approvals shows each brand its document counts',
+    /\d+ docs · \d+ pending · \d+ approved/.test(plainCompliance));
 
 
   console.log(failures === 0 ? '\nSTAGE16_E2E_PASS' : `\nSTAGE16_E2E_FAIL (${failures})`);

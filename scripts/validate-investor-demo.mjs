@@ -63,7 +63,7 @@ try {
     'delivery', 'returns', 'deductions', 'dispute', 'commission', 'payout',
     'crm', 'marketing', 'integrations', 'cases', 'social', 'rbac', 'audit', 'error_recovery',
   ];
-  test('the stage vocabulary is the documented 22-stage lifecycle',
+  test('the stage vocabulary is the documented 24-stage lifecycle',
     mod.INVESTOR_DEMO_STAGES.length === EXPECTED_STAGES.length &&
     EXPECTED_STAGES.every((id, i) => mod.INVESTOR_DEMO_STAGES[i].id === id),
     mod.INVESTOR_DEMO_STAGES.map((s) => s.id).join(','));
