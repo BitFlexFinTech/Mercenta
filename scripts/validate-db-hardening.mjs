@@ -34,8 +34,16 @@ const typesSource = read('src/types.ts');
 /* ── The migration is the newest and is purely additive ────────────────── */
 
 const migrations = readdirSync(new URL('../supabase/migrations', import.meta.url)).sort();
-test('the hardening migration is the newest in the sequential history',
-  migrations.at(-1).startsWith('026_'), migrations.at(-1));
+// §Phase M13 — REPOINTED. This pinned "026 remains the newest", which was TRUE when
+// M11 wrote it. M13 legitimately added 027 (§39 RLS hardening for audit_log +
+// applications), so the newest file moved. The INVARIANT is unchanged: the §23
+// hardening migration (026) still exists and is still purely additive — asserted on
+// the next line and throughout this validator.
+test('the §23 hardening migration (026) is present in the sequential history',
+  migrations.some((f) => f.startsWith('026_')), migrations.at(-1));
+test('the newest migration is not an edit of the §23 hardening file',
+  !migrations.at(-1).startsWith('026_') || migrations.filter((f) => f.startsWith('026_')).length === 1,
+  migrations.at(-1));
 test('the migration is non-destructive (no drop table / no column type change)',
   !/drop\s+table/i.test(migration) && !/alter\s+column/i.test(migration));
 

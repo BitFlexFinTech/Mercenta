@@ -39,7 +39,51 @@
 > filesystem organisation, Phase 15 full regression. Phases 2, 6, 7 are already
 > built and validator-pinned by M12 — verify, do not rebuild.
 > ---
-> ## ⏸️ M12 CHECKPOINT — RESOLVED ABOVE (kept for history) — 2026-09-14
+> ## ✅ §39 RLS FINDING — RESOLVED (M13) — 2026-09-14
+>
+> The M12 checkpoint flagged "shipping_margins / audit_log / leads /
+> integration_connections have no ENABLE ROW LEVEL SECURITY" and said it needed an
+> owner decision. It was investigated properly instead of guessed at, and the
+> conclusion differs from the checkpoint's wording in two ways:
+>
+> **1. Most of it was a stale VALIDATOR, not a stale schema.** `rls-audit.mjs`
+> checked a hardcoded 13-table list and demanded `auth.uid()`. This schema's
+> canonical tenancy predicate is `(auth.jwt() ->> 'tenant_id')::uuid`, so that check
+> could NEVER pass — 23 "failures", almost all false negatives. It also named seven
+> tables that **do not exist anywhere in the migration history** (grep → 0 hits):
+> `shipping_margins`, `subscriptions`, `commissions`, `fulfillment_scores`,
+> `ad_spend_budgets`, `leads`, `integration_connections` (and `compliance_documents`
+> is really `compliance_docs`). There was no table, so there was no RLS gap.
+> The audit is now **derived from the migrations themselves** (single source of
+> truth) and audits **every** table: 33 tables, 33 RLS-enabled, 48 policies,
+> **94 checks, 0 failures** (`RLS_STATIC_AUDIT_PASS`).
+>
+> **2. Two REAL gaps were hiding in that noise — both now fixed** by migration
+> **027_harden_audit_log_rls.sql**:
+> - **`audit_log` had NO RLS at all** (015 was created with the comment *"no RLS -
+>   admin-only cross-tenant view"*). Admin-only in the UI is not a database control:
+>   any role with a table grant could read every tenant's audit rows **and could
+>   UPDATE or DELETE them**, destroying history. Now: RLS on, staff-only SELECT
+>   (`auth.jwt() ->> 'role'`), authenticated append-only INSERT, and **no
+>   update/delete policy at all** — the trail is immutable from the client;
+>   service-role operations are unaffected. Also repairs a real persistence bug
+>   found while reading the table: the three client insert paths write
+>   `brand_id` / `reason` / `metadata`, which 015 never created, so those audit rows
+>   were being silently dropped (`add column if not exists`).
+> - **`applications` had NO RLS at all** (018). It holds applicant PII plus
+>   `admin_notes` / `reviewed_by`, and with no policy a submitter could have
+>   approved itself. Now: public INSERT that can only create `status = 'pending'`,
+>   staff-only SELECT/UPDATE, no DELETE. This gap was invisible before because the
+>   old hardcoded list never contained `applications` at all.
+>
+> **Tested:** `scripts/validate-rls-hardening.mjs` (NEW, 16 checks, PASS) pins both
+> fixes so they cannot silently regress; `rls-audit.mjs` PASS (94 checks). Three
+> stale migration-count assertions (E5 J1, E6 F4, E7 latest, `validate-db-hardening`)
+> were repointed 026 → 027 with the invariant preserved and the repoint documented
+> inline, and E6/E7's working-tree scope guards now declare the M13 surface
+> explicitly instead of failing on an unexplained path.
+> ---
+> ## ⏸️ M12 CHECKPOINT (historical record — everything in it is now RESOLVED above) — 2026-09-14
 >
 > **CHECKPOINT ONLY.** The owner cancelled the M12 session mid-flight. No M12 work
 > was discarded, no reset/revert/rebase was performed, and nothing below was

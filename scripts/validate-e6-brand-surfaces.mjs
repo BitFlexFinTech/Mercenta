@@ -257,6 +257,26 @@ const M12_SCOPE = new Set([
 ]);
 
 /**
+ * §Phase M13 — the CURRENT documented phase's surface (2026-09-14).
+ *
+ * Same contract as M12_SCOPE above, for the §39 security-hardening phase: the
+ * working-tree change set must stay inside what the current phase declares, and
+ * nothing else. M13 adds migration 027 (RLS hardening for `audit_log` +
+ * `applications`) plus the validator that pins it, and repoints three stale
+ * validators whose migration-count/scope assertions moved when 027 was added.
+ * Nothing here widens what any EARLIER phase was allowed to touch.
+ */
+const M13_SCOPE = new Set([
+  'supabase/migrations/027_harden_audit_log_rls.sql',
+  'scripts/validate-rls-hardening.mjs',
+  'scripts/rls-audit.mjs',
+  'scripts/validate-db-hardening.mjs',
+  'scripts/validate-e5-admin-surfaces.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
+/**
  * §Phase E7 — the Embedded Mercenta Social phase scope (2026-09-12).
  *
  * E6's source-scope guards below predate E7. They must now accept the E7 change
@@ -486,14 +506,13 @@ try {
 
   const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
-  // §Phase M11 — REPOINTED. This pinned "023 remains the newest; 23 total",
-  // which was TRUE when E6 was written. M11 legitimately added 024 (the
-  // catalog-import RPC), 025 (the daily-digest cron) and 026 (§23 database
-  // hardening), so the absolute count is stale. E6's actual INVARIANT — that E6
-  // itself added no migration — is preserved by `F5`/`F6` below, which still
-  // refuse any unexplained change in the working tree.
-  test('F4 no migration was added by E6 (newest is 026 after M11)',
-    migFiles.length === 26 && migFiles.sort().at(-1).startsWith('026_'));
+  // §Phase M13 — REPOINTED. This pinned "026 remains the newest; 26 total", which
+  // was TRUE when E6 was written. Phase M13 legitimately added 027 (the §39 RLS
+  // hardening for audit_log + applications), so the absolute count is stale. E6's
+  // actual INVARIANT — that E6 itself added no migration — is preserved by
+  // `F5`/`F6` below, which still refuse any unexplained change in the working tree.
+  test('F4 no migration was added by E6 (newest is 027 after M13)',
+    migFiles.length === 27 && migFiles.sort().at(-1).startsWith('027_'));
 
   /** Working-tree scope proof (read-only `git status`). */
   let changed = [];
@@ -509,24 +528,29 @@ try {
   } catch {
     /* git unavailable — the source-level scope assertions below still run */
   }
+  // §Phase M13 — the protected-path check now also accepts files the CURRENT
+  // documented phase declares (M13_SCOPE), exactly as it already accepts E7_SCOPE.
+  // An UNEXPLAINED protected change still fails: only the named file is excused.
   test('F5 no protected path appears in the working-tree change set',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
-      .every((p) => !PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)) || E7_SCOPE.has(p)));
-  test('F5b the ONLY protected-area file E7 may move is the engine client seam',
+      .every((p) => !PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)) ||
+        E7_SCOPE.has(p) || M13_SCOPE.has(p)));
+  test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .filter((p) => PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)))
-      .every((p) => p === 'src/lib/postiz/postizClient.ts'));
+      .every((p) => p === 'src/lib/postiz/postizClient.ts' || M13_SCOPE.has(p)));
   test('F6 the E6 SOURCE change set is within the approved files (generated artefacts ignored)',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) || M2_SCOPE.has(p) ||
-        M11_SCOPE.has(p) || M12_SCOPE.has(p) ||
+        M11_SCOPE.has(p) || M12_SCOPE.has(p) || M13_SCOPE.has(p) ||
         [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...M12_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...M12_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        [...M13_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F7 no new store/dashboard module was created by E6',
     readdirSync(new URL('../src/components/brand/', import.meta.url)).every((f) => !/e6/i.test(f)) &&
     readdirSync(new URL('../src/data/', import.meta.url)).every((f) => !/e6/i.test(f)));

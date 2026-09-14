@@ -325,15 +325,29 @@ try {
     .filter(Boolean);
 
   const migrations = readdirSync(join(process.cwd(), 'supabase/migrations'));
-  // §Phase M11 — REPOINTED. This pinned "023 remains newest of 23", which was
-  // TRUE when E7 was written. Phase M11 legitimately added three migrations —
-  // 024 (catalog-import RPC), 025 (daily-digest cron) and 026 (the §23 database
-  // hardening) — so the absolute count is stale. E7's actual INVARIANT (E7
+  // §Phase M13 — REPOINTED. This pinned "026 remains newest of 26", which was TRUE
+  // after M11. Phase M13 legitimately added 027 (the §39 RLS hardening for audit_log
+  // + applications), so the absolute count is stale. E7's actual INVARIANT (E7
   // itself added no migration) is unchanged and is asserted by the `e7Changed`
   // check on the next line, which still fails if E7's own range touches them.
-  test('E7 added no migration (newest is 026 after M11)',
-    migrations.length === 26 && migrations.sort().at(-1).startsWith('026_'));
-  test('migrations untouched by E7', !e7Changed.some((f) => f.startsWith('supabase/migrations')));
+  test('E7 added no migration (newest is 027 after M13)',
+    migrations.length === 27 && migrations.sort().at(-1).startsWith('027_'));
+  // §Phase M13 — REPOINTED. E7's real invariant is that E7's OWN commit range
+  // touched no migration — a historical fact about E7 (M10 already repointed the
+  // phase RANGE for exactly this reason). Folding the whole working tree in meant
+  // every LATER phase's legitimate migration was attributed to E7: the same false
+  // positive M11 hit when it added 024–026 and M13 hits now with 027. The working
+  // tree is still guarded — only the CURRENT phase's DECLARED migration may appear.
+  const e7RangeChanged = git(['diff', '--name-only', PRE_E7, E7_HEAD])
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const M13_DECLARED_MIGRATION = 'supabase/migrations/027_harden_audit_log_rls.sql';
+  test('migrations untouched by E7', !e7RangeChanged.some((f) => f.startsWith('supabase/migrations')));
+  test('only the declared M13 migration appears in the working tree',
+    working
+      .filter((f) => f.startsWith('supabase/migrations'))
+      .every((f) => f === M13_DECLARED_MIGRATION));
 
   const protectedPaths = [
     'src/lib/intelligence/',
