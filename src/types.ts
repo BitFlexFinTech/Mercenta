@@ -2564,6 +2564,14 @@ export interface BrandProspect {
   owner?: string;
   /** Internal notes. */
   notes?: string;
+  /**
+   * §16/M12 — which market-access route surfaced this opportunity: source
+   * country, trade programme, referral/partner source, campaign. The TYPE lives
+   * in `src/lib/intelligence/acquisitionStrategy.ts` (single source of truth);
+   * it is referenced here as a type-only import so the domain model cannot drift
+   * from the strategy layer and no runtime cycle is created.
+   */
+  marketAccess?: import('@/lib/intelligence/acquisitionStrategy').MarketAccessTag;
 }
 
 /**

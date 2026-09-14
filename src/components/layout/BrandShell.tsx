@@ -26,6 +26,7 @@ import { BrandSettings } from '@/components/brand/BrandSettings';
 import { BrandTeamMessages } from '@/components/brand/BrandTeamMessages';
 import { BrandSocialConnect } from '@/components/brand/BrandSocialConnect';
 import { BrandIntelligence } from '@/components/brand/BrandIntelligence';
+import { SalesEstimatorCard } from '@/components/brand/SalesEstimatorCard';
 import { SalesAnalytics } from '@/components/brand/SalesAnalytics';
 import { MERCENTA_SOCIAL } from '@/config/mercentaSocial';
 import {
@@ -126,7 +127,12 @@ export default function BrandShell() {
           {brandView === 'settings' && <BrandSettings />}
           {brandView === 'team' && <BrandTeamMessages />}
           {brandView === 'social' && <BrandSocialConnect />}
-          {brandView === 'market' && <BrandIntelligence />}
+          {brandView === 'market' && (
+            <div className="space-y-4">
+              <BrandIntelligence />
+              <SalesEstimatorCard />
+            </div>
+          )}
           <LiveChatWidget />
           <TourLoader currentView={brandView} isBrandPortal={true} />
           <UsertourBrandBridge />

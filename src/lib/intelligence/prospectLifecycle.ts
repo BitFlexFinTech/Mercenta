@@ -16,6 +16,11 @@
 import { createBrandIntelligenceClient } from './brandIntelligenceClient';
 import { normalizeBrandKey } from './prospectPipeline';
 import { checkDisq } from './scoringEngine';
+import {
+  describeMarketAccessTag,
+  normaliseMarketAccessTag,
+  type MarketAccessTag,
+} from './acquisitionStrategy';
 import * as store from '@/data/prospectStore';
 import type {
   BrandProspect,
@@ -401,6 +406,43 @@ export function setProspectOutreachStatus(
     before,
     after: next,
     summary: `${by ? `${by}: ` : ''}${note} (${before} → ${next}).`,
+  };
+  store.recordLifecycleEvent(event);
+  return event;
+}
+
+/**
+ * §16/M12 — tag a prospect with the MARKET-ACCESS ROUTE it came through (source
+ * country, trade programme, referral source, campaign). This is how the founder
+ * measures brands discovered → contacted → qualified → onboarded → revenue per
+ * programme. It records a lifecycle event, so the tag is auditable, and it never
+ * implies a partnership exists — the programme registry declares every route
+ * PROSPECTIVE (see `acquisitionStrategy.ts`).
+ */
+export function setProspectMarketAccess(
+  prospectId: string,
+  tag: MarketAccessTag,
+  by?: string
+): ProspectChangeEvent | null {
+  const p = store.getProspect(prospectId);
+  if (!p) return null;
+  const next = normaliseMarketAccessTag(tag);
+  const before = describeMarketAccessTag(p.marketAccess);
+  const after = describeMarketAccessTag(next);
+  if (before === after) return null;
+  const now = new Date().toISOString();
+  store.updateProspect({ ...p, marketAccess: next, lastResearched: now });
+  const event: ProspectChangeEvent = {
+    id: `evt-${Date.now()}-ma`,
+    runId: 'acquisition',
+    prospectId,
+    brand: p.brand,
+    changeType: 'updated',
+    timestamp: now,
+    field: 'marketAccess',
+    before,
+    after,
+    summary: `${by ? `${by}: ` : ''}market-access route set (${before} → ${after}).`,
   };
   store.recordLifecycleEvent(event);
   return event;

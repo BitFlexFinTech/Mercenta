@@ -30,6 +30,7 @@ import { AdminPurchaseOrderList } from '@/components/admin/AdminPurchaseOrderLis
 import { SuperAdminPanel } from '@/components/admin/SuperAdminPanel';
 import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
 import { BrandIntelligencePanel } from '@/components/admin/BrandIntelligencePanel';
+import { BrandIntelligenceStrategyPanel } from '@/components/admin/BrandIntelligenceStrategyPanel';
 import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
 import type { AdminDepartment } from '@/types';
 import {
@@ -164,7 +165,12 @@ export default function AdminShell() {
           {adminView === 'carriers' && <CarrierIntegrationMonitor />}
           {adminView === 'compliance' && <ComplianceApprovals />}
           {adminView === 'marketing' && <MarketingHub />}
-          {adminView === 'brand_intelligence' && <BrandIntelligencePanel />}
+          {adminView === 'brand_intelligence' && (
+            <div className="space-y-4">
+              <BrandIntelligenceStrategyPanel />
+              <BrandIntelligencePanel />
+            </div>
+          )}
           {adminView === 'super_admin' && (isSuper ? <SuperAdminPanel /> : <AccessDenied />)}
           {adminView === 'audit_log' && (isSuper ? <AdminAuditLog /> : <AccessDenied />)}
           {adminView === 'integrations' && (isSuper ? <IntegrationsPanel /> : <AccessDenied />)}
