@@ -28,11 +28,36 @@ npm run build                           # production build
 npm run validate:wording                # outward-facing wording gate
 node scripts/integrity-audit.mjs        # structural integrity audit
 node scripts/validate-canonical-model.mjs        # canonical business rules
+node scripts/validate-commercial-models.mjs      # §3/§5/§9/§25 the two commercial models + VAT
+node scripts/validate-db-hardening.mjs           # §23 database-boundary invariants
+node scripts/validate-edge-functions.mjs         # §22 deploy-time Edge Functions
 node scripts/validate-document-verification.mjs  # §M2 compliance document verification
 node scripts/validate-financial-reconciliation.mjs # §M6 money flow + payout gates
+node scripts/validate-payouts.mjs                # §7 payout gates + §6 rails
+node scripts/validate-mock-providers.mjs         # §13 DHL + Palletline simulation
 node scripts/validate-investor-demo.mjs          # deterministic zero-network lifecycle
 npx playwright test                     # full E2E suite
 ```
+
+## The two commercial models (§3)
+
+Mercenta supports exactly two commercial relationships with a brand, chosen at
+onboarding: **Model A (commission/agent-style)** and **Model B (buy/resell/
+distribution)**. The canonical definitions live in `src/config/commercialModel.ts`
+and the arithmetic in `src/lib/finance/commercialModel.ts` — with the worked
+investor-demo figures (£10,000 @ 20% ⇒ £2,000/£8,000; £10,000 − £7,500 ⇒ £2,500
+gross spread) pinned by `validate-commercial-models.mjs`.
+
+The commercial relationship is **internal** to Mercenta and the brand. It is
+**separate from** the retail-channel compliance documentation a product needs,
+and changing the model can never change or bypass those requirements.
+
+## Payout rails (§6)
+
+**Wise is the default payout rail; Payoneer is the secondary rail**
+(`src/config/payouts.ts`). Xero is the accounting/reconciliation layer, not the
+bank; Stripe bills the flat monthly subscription only and is refused as a payout
+rail. No payout leaves Mercenta without explicit human approval (§7).
 
 Deployment is **only** `scripts/deploy-demo.sh` (demo.mercenta.co.uk), and only
 when explicitly authorised. See `GO_LIVE.md`.

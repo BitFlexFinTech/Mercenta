@@ -161,6 +161,38 @@ PRODUCT_FAILURE · INTEGRATION_FAILURE · **SHIPMENT_PROGRESSION** (new) ·
 | HMRC | MTD OAuth client id/secret + fraud headers | Integrations → HMRC | EF `/functions/v1/hmrc` |
 | Xero | client id/secret + tenant | Accounting panel / XERO_MODE | none (existing) |
 
+## 11. §Phase M11 — payout rails + the deploy-time functions now exist (14 Sep)
+
+**Payout rails (§6).** The payout path is no longer Stripe-mediated. Canonical
+source of truth: **`src/config/payouts.ts`**.
+
+| Rail | Priority | Status | Activates with |
+|---|---|---|---|
+| **Wise** | **DEFAULT** | simulation | `WISE_API_TOKEN` (+ `WISE_PROFILE_ID`) |
+| **Payoneer** | **SECONDARY** | simulation | `PAYONEER_CLIENT_ID` / `_CLIENT_SECRET` / `_PROGRAM_ID` |
+| Xero | *not a rail* | accounting layer | (as before) |
+| Stripe | *not a rail* | brand subscriptions only | (as before) |
+
+`assertPayoutRail()` REFUSES `stripe` and `xero` as payout rails rather than
+silently re-routing brand money. `payouts-transfer` requires `approved: true`
+(§7 human approval) and forwards the idempotency key to the rail.
+
+**Deploy-time functions — now PRESENT in the repository** (previously absent, so
+`validate-edge-functions.mjs` skipped them):
+
+`payouts-transfer` · `catalog-import` · `discovery-directory` ·
+`esign-envelope` · `send-email` · `instantly-reply-webhook`
+(plus the pre-existing `xero-token`, `xero-webhook`, `social-session`).
+
+Each derives identity from the **verified JWT** (never the request body),
+enforces role authorisation, validates input, is idempotent where a retry could
+duplicate money or mail, resolves credentials server-side from Vault, fails
+closed (401/403/503) rather than faking success, and writes an audit row. With
+no credentials each returns an unmistakably **simulated** result with ZERO
+network calls. The supporting migrations are
+`024_rpc_catalog_import.sql` and `025_cron_daily_digest.sql`; the §23 database
+hardening is `026_harden_deductions_ack_and_messages.sql`.
+
 ## 10. Canonical-model reconciliation (13 Sep)
 
 Canonical statement: **`docs/MERCENTA_BUSINESS_MODEL.md`**. This section records

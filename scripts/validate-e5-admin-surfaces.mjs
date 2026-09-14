@@ -216,8 +216,14 @@ try {
   /* ══ J. architecture + safety invariants ══ */
   const migDir = new URL('../supabase/migrations/', import.meta.url).pathname;
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
-  test('J1 no migration was added by E5 (023 remains the newest; 23 total)',
-    migFiles.length === 23 && !migFiles.some((f) => /^024/.test(f)));
+  // §Phase M11 — REPOINTED. This pinned "023 remains the newest; 23 total",
+  // which was TRUE when E5 was written. M11 legitimately added 024 (the
+  // catalog-import RPC), 025 (the daily-digest cron) and 026 (§23 database
+  // hardening), so the absolute count is stale. E5's actual INVARIANT — that E5
+  // itself added no migration — is unchanged and is still asserted by the
+  // E5-scope guard elsewhere in this file.
+  test('J1 no migration was added by E5 (newest is 026 after M11)',
+    migFiles.length === 26 && migFiles.sort().at(-1).startsWith('026_'));
   test('J2 createPurchaseOrder still performs its real notification (path UNTOUCHED)',
     /export function createPurchaseOrder\(/.test(API) && /sendPostmarkEmail/.test(API));
   test('J3 the E5 PO-create guard is on the SURFACE, not in the email implementation',

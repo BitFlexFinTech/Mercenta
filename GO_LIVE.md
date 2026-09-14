@@ -94,7 +94,7 @@ entering a real credential. Enter only what is needed today:
 | E-Signature (DocuSign/PandaDoc) | contract flow | Integrations → E-Signature | needs `esign-envelope` deployed |
 | Hunter.io / OpenRouter / Instantly.ai | discovery + outreach | Integrations → respective cards | live test call already implemented |
 | DHL / Xero / Companies House / HMRC | logistics / accounting / compliance verification | their dedicated surfaces + cards | currently authoritative SIMULATION; enter credentials when accounts exist |
-| Palletline | UK-domestic palletised freight (Mercenta's Palletline account) | Integrations → Palletline | registry entry exists (`defaultMode: available`); an adapter following the DHL pattern is required before this becomes a live carrier booking |
+| Palletline | UK-domestic palletised freight (Mercenta's Palletline account) | Integrations → Palletline | **§M11: the mock/real adapter now EXISTS** (`src/lib/palletline`, `defaultMode: simulation`) — booking, label, collection, depot milestones, exception + failed-delivery recovery, cancellation and carrier invoice are all simulated with zero network calls. Entering real credentials activates the live path with **no code change** |
 | Retail-channel case escalation | brand case → channel case | Integrations → Amazon Selling Partner API | needs the `retail-channel/cases` Edge Function deployed (§3); until then the seam refuses truthfully and never claims a case was created |
 
 **Do not** present an unconfigured provider as live: the Hub derives its mode

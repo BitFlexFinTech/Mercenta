@@ -111,6 +111,63 @@ const M2_SCOPE = new Set([
 const ALLOWED_NON_APPROVED = new Set(['Review Zip/mercenta-review.zip']);
 
 /**
+ * §Phase M11 — the build-forward phase scope (2026-09-14).
+ *
+ * M11 realised the deploy-time Edge Functions that had NO file in the repository
+ * (so `validate-edge-functions.mjs` was skipping them rather than checking them),
+ * corrected the payout rails to the canonical §6 model (Wise default, Payoneer
+ * secondary — Stripe is NOT a payout rail), added deterministic simulation for
+ * BOTH carriers (§13 Palletline), added the canonical two-commercial-model and
+ * VAT layers (§3/§5/§9), and hardened three database invariants (§23) — which
+ * required three new migrations (024–026).
+ *
+ * As with M2/M10 above, this set EXISTS so the E6 scope guard keeps refusing
+ * anything unexplained while accepting the current phase's declared surface.
+ */
+const M11_SCOPE = new Set([
+  // §33 — the persistent project rules now carry the canonical business model.
+  '.clinerules/mercenta-business-model.md',
+  // §6 — the canonical payout rails + the rail-aware payout seam.
+  'src/config/payouts.ts',
+  'src/lib/billing/payouts.ts',
+  'src/integrations/types.ts',
+  'supabase/functions/payouts-transfer/index.ts',
+  // §3/§5 — the two commercial models, and §9 the VAT calculation layer.
+  'src/config/commercialModel.ts',
+  'src/config/vat.ts',
+  'src/lib/finance/commercialModel.ts',
+  // §13 — the Palletline mock/real adapter (a NEW module directory).
+  'src/lib/palletline/',
+  'src/lib/palletline/client.ts',
+  'src/lib/palletline/mockClient.ts',
+  'src/lib/palletline/transform.ts',
+  'src/lib/palletline/index.ts',
+  // §22 — the remaining deploy-time Edge Functions, now present in the repo.
+  'supabase/functions/catalog-import/index.ts',
+  'supabase/functions/discovery-directory/index.ts',
+  'supabase/functions/esign-envelope/index.ts',
+  'supabase/functions/send-email/index.ts',
+  'supabase/functions/instantly-reply-webhook/index.ts',
+  // §22/§23 — the migrations the above require, at the CORRECT sequential
+  // numbers (the 0010/0011 filenames the old validator read never existed).
+  'supabase/migrations/024_rpc_catalog_import.sql',
+  'supabase/migrations/025_cron_daily_digest.sql',
+  'supabase/migrations/026_harden_deductions_ack_and_messages.sql',
+  // §34 — this phase's validators.
+  'scripts/validate-db-hardening.mjs',
+  'scripts/validate-commercial-models.mjs',
+  // §32 — documentation reconciliation.
+  'README.md',
+  'PRODUCTION_READINESS.md',
+  'GO_LIVE.md',
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+  'docs/MERCENTA_BUSINESS_MODEL.md',
+  'docs/INTEGRATIONS.md',
+]);
+
+
+/**
  * §Phase E7 — the Embedded Mercenta Social phase scope (2026-09-12).
  *
  * E6's source-scope guards below predate E7. They must now accept the E7 change
@@ -340,8 +397,14 @@ try {
 
   const migDir = new URL('../supabase/migrations/', import.meta.url).pathname;
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
-  test('F4 no migration was added (023 remains the newest; 23 total)',
-    migFiles.length === 23 && !migFiles.some((f) => /^024/.test(f)));
+  // §Phase M11 — REPOINTED. This pinned "023 remains the newest; 23 total",
+  // which was TRUE when E6 was written. M11 legitimately added 024 (the
+  // catalog-import RPC), 025 (the daily-digest cron) and 026 (§23 database
+  // hardening), so the absolute count is stale. E6's actual INVARIANT — that E6
+  // itself added no migration — is preserved by `F5`/`F6` below, which still
+  // refuse any unexplained change in the working tree.
+  test('F4 no migration was added by E6 (newest is 026 after M11)',
+    migFiles.length === 26 && migFiles.sort().at(-1).startsWith('026_'));
 
   /** Working-tree scope proof (read-only `git status`). */
   let changed = [];
@@ -370,8 +433,10 @@ try {
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) || M2_SCOPE.has(p) ||
+        M11_SCOPE.has(p) ||
         [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F7 no new store/dashboard module was created by E6',
     readdirSync(new URL('../src/components/brand/', import.meta.url)).every((f) => !/e6/i.test(f)) &&
     readdirSync(new URL('../src/data/', import.meta.url)).every((f) => !/e6/i.test(f)));

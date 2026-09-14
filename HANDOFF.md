@@ -1,6 +1,6 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-Last updated: September 14, 2026 (**M2 → M10 COMPLETE — the ENTIRE validator suite is now green: 60 validator scripts, 0 non-zero exits**, for the first time. Full Playwright 250 passed / 2 skipped / 0 failed. M10 repaired the 15 stale validators M9 had recorded as pre-existing failures; it changed validators only, no application source.)
+Last updated: September 14, 2026 (**M11 — BUILD-FORWARD: the six deploy-time Edge Functions now EXIST and are actually validated (46 assertions / 0 failures / 0 skipped, previously 35 skipped); migrations 024–026 close the §22 and §23 gaps; Palletline gains a full mock/real simulation adapter (§13); the two commercial models (§3/§5) and the VAT calculation layer (§9) are built as canonical modules. Two canonical-model corrections were made deliberately and reported: the §6 payout rails are now Wise (default) / Payoneer (secondary) — NOT Stripe — and the production VAT treatment remains deliberately un-invented while the demo gains a labelled 20% illustration. Full validator sweep 59/60 → the 3 remaining stale migration-count pins were repointed with `§Phase M11 — REPOINTED` comments.**)
 
 ## WHO I AM:
 I'm Tadii. NOT technical. I use Cline to build Mercenta Partners Ltd

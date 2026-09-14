@@ -5,6 +5,79 @@
 > project's history. M10 repaired the 15 stale validators that M9 recorded as
 > "pre-existing failures"; see §M10 for the per-validator diagnosis.)
 >
+> **M11 SESSION (2026-09-14) — BUILD-FORWARD: THE DEPLOY-TIME GAP CLOSED.**
+>
+> **① What was actually missing.** The M10 report's own §Remaining list named
+> three real gaps, and §22 of the master spec named a fourth. All four were
+> genuinely unbuilt, and each was **silently invisible** because the validator
+> that should have caught it was SKIPPING rather than failing:
+> - **Six Edge Functions had NO file in this repository.**
+>   `scripts/validate-edge-functions.mjs` reported *36 assertions run / 0
+>   failures / 35 skipped* — a green run that proved almost nothing. Now
+>   `payouts-transfer`, `catalog-import`, `discovery-directory`,
+>   `esign-envelope`, `send-email` and `instantly-reply-webhook` exist and are
+>   actually asserted: **46 assertions / 0 failures / 0 skipped**.
+> - **The validator read two migrations that NEVER EXISTED**
+>   (`0010_rpc_catalog_import.sql`, `0011_cron_daily_digest.sql` — those numbers
+>   are `010_create_compliance_docs.sql` / `011_create_messages.sql`). Repointed
+>   to the real sequential history, and the files created as **024** and **025**.
+> - **§23's two database invariants had no DB enforcement at all**, and the
+>   reply router could not persist the human-attention flag it computes.
+>   Migration **026** now adds BOTH constraints plus the `messages` routing
+>   columns — all `NOT VALID`, so they bind every new write without any risk to
+>   legacy rows.
+> - **§13: Palletline had no adapter.** Its mode was `available`, so a simulated
+>   UK-domestic carrier booking was refused. A full mock/real adapter now exists
+>   (`src/lib/palletline`) and its mode is `simulation`.
+>
+> **② Two canonical-model corrections, made deliberately and reported.**
+> - **§6 payout rails.** The old payout contract was a **Stripe** transfer. The
+>   canonical model is **Wise (DEFAULT)** / **Payoneer (secondary)**, with Xero as
+>   the accounting layer and **not** a rail. `src/config/payouts.ts` is now the
+>   single source of truth, `createPayoutClient` resolves through it, and
+>   `assertPayoutRail` REFUSES `stripe`/`xero`. The validator's Stripe
+>   assertions were repointed (marked `§Phase M11 — REPOINTED`) with every
+>   original invariant kept — idempotency forwarded, transfer-not-charge, an
+>   unmistakable simulated id, positive amounts only, an explicit 503 — and
+>   strengthened with the §7 human-approval gate. The pinned `mock_tr_` prefix
+>   is preserved and the rail appended (`mock_tr_wise_000001`), so no existing
+>   test layer needed weakening.
+> - **§3/§5/§9 the two commercial models + VAT.** Neither existed as a
+>   first-class concept. `src/config/commercialModel.ts` + 
+>   `src/lib/finance/commercialModel.ts` now define Model A (commission) and
+>   Model B (buy/resell) with the exact §25 investor figures DERIVED, not
+>   retyped, and `src/config/vat.ts` is a real net/VAT/gross layer.
+>
+> **③ The M6 VAT decision was NOT overturned.** The production treatment stays
+> `configuration_required` (`VAT_TREATMENT_CONFIGURED = false`) — no production
+> tax figure is invented, and `validate-financial-reconciliation` still passes
+> unchanged. The demo gains a **separately declared, labelled illustration**
+> (`DEMO_VAT_ILLUSTRATION`) at the standard UK rate so real arithmetic is
+> visible. Two facts, never collapsed.
+>
+> **④ Honest scope note.** This session did NOT add a new investor-demo STAGE.
+> The 24-stage count is pinned in `validate-investor-demo.mjs`,
+> `e2e/investor-demo.spec.ts` and the demo UI, and adding a stage would have
+> forced three coordinated E2E changes that could not be fully re-verified
+> inside this session's budget. Both models and all §25 numbers are instead
+> pinned by the new `validate-commercial-models.mjs` (**36/36**) and exposed as
+> canonical modules ready to render. **Surfacing them as a named stage remains
+> open** — see §Remaining.
+>
+> **⑤ Genuine defects found and fixed (not silently patched).**
+> - The `catalog-import` RPC I first wrote inserted `title`/`payload`/`updated_at`
+>   into `public.products`. That table (003) has **no such columns** — it would
+>   have been a write that could never execute, exactly the class of bug
+>   `022_create_catalog_persistence.sql` was written to close. Corrected to the
+>   real columns and asserted by the validator.
+> - Both `catalog-import` and `payouts-transfer` first wrote `actor`/`metadata`
+>   to `audit_log`. The real columns (015) are `actor_id`/`actor_role`/
+>   `entity_type`/`details` — the audit writes would have 400'd silently.
+>   Corrected, and asserted.
+> - The Palletline mock's "exception retry recovers" branch was **unreachable**
+>   (the poll counter had already advanced past the milestone). Fixed, and the
+>   recovery path is now asserted.
+>
 > **M10 SESSION (2026-09-14) — VALIDATOR-SUITE REPAIR: 45 → 60 GREEN, 15 → 0 RED.**
 >
 > **① What was actually wrong.** 15 validator scripts exited non-zero. Every one

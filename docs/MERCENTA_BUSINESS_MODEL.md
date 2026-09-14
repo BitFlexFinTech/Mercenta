@@ -212,7 +212,87 @@ reconciled → audited
   false`; until that decision is taken no tax amount is computed and every
   record says so.
 
-## 9. Automation + admin override
+## 3.2 The two commercial models (canonical §3)
+
+Mercenta supports **exactly two** commercial relationships with a brand, chosen
+during onboarding and stored on the brand's commercial relationship:
+
+- **Model A — commission / agent-style.** The retail channel pays Mercenta;
+  Mercenta retains an agreed commission and the remainder is the brand's
+  economic amount.
+  *Investor example: £10,000 PO at 20% ⇒ £2,000 Mercenta commission, £8,000 brand
+  economic amount.*
+- **Model B — buy / resell / distribution.** Mercenta acquires the goods from the
+  brand and resells them into the channel.
+  *Investor example: £10,000 retail-channel revenue − £7,500 brand acquisition
+  cost = £2,500 gross commercial spread; every additional cost (shipping,
+  payment fees, other agreed fees, deductions) is then shown SEPARATELY, giving a
+  net Mercenta margin.*
+
+The demo runs **Brand A on Model A and Brand B on Model B**, through the same
+platform, so both models are visibly operating.
+
+Canonical implementation: `src/config/commercialModel.ts` (definitions, internal
+documents, fail-closed selection) and `src/lib/finance/commercialModel.ts` (the
+arithmetic + the derived demo figures). No component re-derives a margin.
+
+**Separation that must never be broken.** The commercial relationship's
+documents are INTERNAL between Mercenta and the brand. They are completely
+separate from the retail-channel compliance documentation a product needs, and
+**changing Model A vs Model B must never change or bypass the regulatory/
+compliance documentation required for the products.** An unreported model
+resolves to `not_selected` (fail-closed) rather than being silently assumed.
+
+**Two linked identities, never collapsed.** The external retail-channel PO
+(issued to Mercenta) and the Mercenta → brand commercial PO/order (issued per the
+brand's model) are both retained and explicitly related, so accounting, VAT,
+audit and reporting stay unambiguous.
+
+## 8.1 VAT (canonical §9)
+
+`src/config/vat.ts` is the ONLY place a VAT amount is derived. It returns net,
+VAT and gross **together**, so a gross figure can never be shown without the
+arithmetic behind it, and it supports standard-rated, zero-rated, exempt,
+reverse-charge and explicitly-unconfigured treatments, plus configurable
+per-item treatment.
+
+Two facts that must never be collapsed:
+
+- **Production treatment is NOT invented.** `src/config/commercial.ts` ships
+  `VAT_TREATMENT_CONFIGURED = false`, so no production tax figure is computed
+  until the business takes the decision — every record says
+  `configuration_required`.
+- **The demo uses the standard UK rate (20%) as a labelled illustration**
+  (`DEMO_VAT_ILLUSTRATION`) so real arithmetic is visible. It is never presented
+  as a production tax determination, and no product/category is claimed to be
+  standard-rated.
+
+## 8.2 Payout rails (canonical §6/§7)
+
+- **Wise is the DEFAULT payout rail; Payoneer is the SECONDARY rail**
+  (`src/config/payouts.ts`).
+- **Xero is the accounting/reconciliation layer — not the bank.**
+- **Stripe is not a payout rail.** It bills the flat monthly brand subscription
+  only, and `assertPayoutRail` refuses both `stripe` and `xero` as rails rather
+  than silently re-routing brand money.
+- **No payout leaves Mercenta without explicit human approval** (§7): the
+  automated chain stops at a *proposed* payout; an authorised operator must
+  approve it. `payouts-transfer` refuses any request without `approved: true`.
+- A payout whose amount looks wrong is BLOCKED (`requires_review`/blocked) and
+  surfaced for reconciliation — never silently paid. Double payout is impossible
+  (idempotent, and a settled payout is never downgraded).
+
+## 8.3 Both carriers are simulated (§13)
+
+`src/lib/dhl` and `src/lib/palletline` each implement the same mock-first seam:
+a fully functional deterministic simulation (booking, consignment/waybill,
+label, tracking, pickup/collection, transit, delivery, **failed delivery**,
+**exception**, **retry recovery**, cancellation where the carrier supports it,
+and the carrier invoice/cost) alongside a real client activated purely by
+credentials. Simulation performs ZERO network calls and every identifier is
+unmistakably fake (`MOCK-DHL-…`, `MOCK-PLL-…`).
+
+
 
 - The **happy path is automatic**; Mercenta Admin intervention is reserved for
   exceptions: rejected documents, provider failures, incorrect brand data,

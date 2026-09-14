@@ -157,7 +157,34 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
 ## Structural debt blocking production
 
 0. **Edge Functions (Stage 17 + 21 + 22) — SPECIFIED AND CONTRACT-VALIDATED, BUT NOT PRESENT IN THIS REPOSITORY.**
-   **§M10 correction (2026-09-14):** this item previously stated that
+   **§M11 correction (2026-09-14) — SUPERSEDES the §M10 note below.** The six
+   deploy-time functions NOW EXIST IN THIS REPOSITORY:
+   `supabase/functions/payouts-transfer`, `catalog-import`,
+   `discovery-directory`, `esign-envelope`, `send-email` and
+   `instantly-reply-webhook` (alongside the pre-existing `xero-webhook`,
+   `xero-token` and `social-session`). `scripts/validate-edge-functions.mjs`
+   now runs **46 assertions / 0 failures / 0 skipped** — every function is
+   actually checked rather than skipped.
+   Each implements authentication from the VERIFIED JWT (never the request
+   body), role authorisation, input validation, idempotency where a retry could
+   duplicate money or mail, a provider seam that fails closed, unmistakable
+   simulation labelling (`mock:…` / `mock_tr_<rail>_…`) with ZERO network calls
+   when unconfigured, and an audit row. What remains for each is
+   **credentials + deployment only** — no further code.
+   The two migrations those functions need were created at the CORRECT
+   sequential numbers, **`024_rpc_catalog_import.sql`** and
+   **`025_cron_daily_digest.sql`** (the historical `0010_…`/`0011_…` filenames
+   referenced below never existed — those numbers are
+   `010_create_compliance_docs.sql` and `011_create_messages.sql`). A third
+   migration, **`026_harden_deductions_ack_and_messages.sql`**, closes the §23
+   database-hardening gaps.
+   **§6 payout-rail correction:** `payouts-transfer` pays through **Wise
+   (DEFAULT)** or **Payoneer (secondary)** — Stripe bills the flat monthly
+   subscription only and is REFUSED as a payout rail, as is Xero. The previous
+   Stripe-transfer contract recorded below is superseded.
+
+**§M10 note (historical — superseded by §M11 above).** This item previously
+   stated that
    `/payouts-transfer`, `/catalog-import` (+ the `import_catalog_batch` RPC in
    migration `0010`), `/discovery-directory`, `esign-envelope`, `send-email` and
    `instantly-reply-webhook` "are BUILT". That was **not true of this
@@ -170,9 +197,7 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
    (`src/lib/mail/mail.ts`, `src/lib/esign/esign.ts`, `src/lib/billing/payouts.ts`,
    `src/lib/catalog/csvImport.ts`, `src/lib/discovery/*`), and the server-side
    contracts are pinned by the validator, so each function is a
-   **deploy-time deliverable with its behaviour already specified** — creating
-   them is not prerequisites work for the deterministic investor demo and is
-   deliberately NOT done (it needs a Supabase project plus provider secrets).
+   **deploy-time deliverable with its behaviour already specified**.
    To go live: create + `supabase functions deploy <name>` for each of
    `payouts-transfer`, `catalog-import`, `discovery-directory`,
    `esign-envelope`, `send-email`, `instantly-reply-webhook`; ship the
