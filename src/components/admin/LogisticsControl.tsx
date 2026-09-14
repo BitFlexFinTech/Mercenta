@@ -80,6 +80,22 @@ export function LogisticsControl() {
         <Card className="p-4"><div className="text-xs text-zinc-500 mb-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-red-400" /> Exceptions</div><div className="text-2xl font-bold text-red-400">{exceptions.length}</div></Card>
       </div>
 
+      {groups.length === 0 && (
+        // §M9 — honest empty state: the surface previously rendered three zero
+        // metrics and nothing else, which reads like missing data rather than a
+        // real state. A shipment can only exist once a PO reaches a shipping
+        // status, so this is what "no operational shipments yet" looks like.
+        <Card className="p-6">
+          <p className="text-xs text-zinc-400">
+            No shipments are in transit. A shipment appears here only after one of
+            your purchase orders reaches <span className="text-zinc-200">ready to fulfil</span>,{' '}
+            <span className="text-zinc-200">shipped</span> or{' '}
+            <span className="text-zinc-200">delivered</span> — Mercenta never shows a
+            placeholder shipment.
+          </p>
+        </Card>
+      )}
+
       {groups.map(([brandId, list]) => (
         <Card key={brandId} title={brandName(brandId)}>
           {/* §Phase D — canonical DataTable + canonical shipment status layer:

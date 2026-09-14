@@ -404,9 +404,23 @@ try {
   const dispute = manual.ok ? commerce.openCommerceDispute(manual.value.id, 'Simulated dispute notes', zambeziActor) : { ok: false };
   test('L3 a dispute can be opened on the exception', dispute.ok === true && dispute.value.status === 'disputed');
   const resolved = manual.ok ? commerce.resolveCommerceDispute(manual.value.id, 'won', zambeziActor) : { ok: false };
-  test('L4 the dispute resolves with a real outcome',
-    resolved.ok === true && resolved.value.status === 'resolved' && resolved.value.dispute.outcome === 'won');
-  const resolveAgain = manual.ok ? commerce.resolveCommerceDispute(manual.value.id, 'lost', zambeziActor) : { ok: false };
+  /**
+   * §M9 repoint — Phase E2E made outcome resolution OPERATOR-ONLY (a brand can no
+   * longer declare its own dispute outcome; that was a real defect). The old form
+   * of L4/L5 used the brand actor and therefore asserted a rule the platform no
+   * longer — and should not — follow. The invariant is unchanged: the dispute
+   * resolves with a REAL recorded outcome, and resolving it again is refused.
+   * The brand-refusal half is now asserted explicitly too.
+   */
+  test('L4a a BRAND cannot declare its own dispute outcome',
+    resolved.ok === false && /operator|CROSS_TENANT|not authorised|forbidden/i.test(resolved.error ?? ''));
+  const operatorResolved = manual.ok
+    ? commerce.resolveCommerceDispute(manual.value.id, 'won', opsActor)
+    : { ok: false };
+  test('L4 the dispute resolves with a real outcome (operator decision)',
+    operatorResolved.ok === true && operatorResolved.value.status === 'resolved' &&
+    operatorResolved.value.dispute.outcome === 'won');
+  const resolveAgain = manual.ok ? commerce.resolveCommerceDispute(manual.value.id, 'lost', opsActor) : { ok: false };
   test('L5 resolving an already-resolved dispute is refused', resolveAgain.ok === false);
 
   /* ══ N. tenant isolation enforced IN THE DOMAIN ══ */

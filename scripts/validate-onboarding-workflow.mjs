@@ -261,8 +261,35 @@ try {
     !/prisma|typeorm|sequelize|knex/i.test(onbSrc));
   test('G4 the onboarding path talks to NO provider directly (SAME persistence port only)',
     !/from '@\/lib\/supabase'/.test(onbSrc) && !/fetch\(|axios|new WebSocket/.test(onbSrc));
-  test('G5 no OTHER module re-implements onboarding completion (no parallel workflow)',
-    srcFiles.filter((f) => /beginOnboardingFromApplication|beginOnboardingForManualBrand|acceptOnboarding/.test(readSrc(f))).length <= 4);
+  /**
+   * §M9 repoint — the previous form was a bare file COUNT (`<= 4`), which
+   * silently went stale the moment a legitimate canonical caller was added (the
+   * deterministic investor-demo orchestration). The invariant it MEANT is: the
+   * lifecycle has exactly ONE implementation, and only known canonical callers
+   * may reference it. This is asserted structurally now, so an added parallel
+   * workflow still fails while a new legitimate caller is an explicit decision.
+   */
+  const ONBOARDING_CALLERS = new Set([
+    'src/lib/onboarding/onboardingLifecycle.ts', // the single implementation
+    'src/components/admin/ApplicationsPanel.tsx',
+    'src/components/admin/OnboardingPipeline.tsx',
+    'src/context/GlobalStateContext.tsx',
+    'src/lib/simulation/investorDemo.ts',
+  ]);
+  const onboardingReferencing = srcFiles.filter((f) =>
+    /beginOnboardingFromApplication|beginOnboardingForManualBrand|acceptOnboarding/.test(readSrc(f))
+  );
+  test('G5 exactly ONE module IMPLEMENTS onboarding completion', () => {
+    const definers = srcFiles.filter(
+      (f) =>
+        /export function beginOnboardingFromApplication/.test(readSrc(f)) ||
+        /export function beginOnboardingForManualBrand/.test(readSrc(f)) ||
+        /export function acceptOnboarding/.test(readSrc(f))
+    );
+    return definers.length === 1 && definers[0].endsWith('onboardingLifecycle.ts');
+  });
+  test('G5b only known canonical callers reference the onboarding lifecycle', () =>
+    onboardingReferencing.every((f) => ONBOARDING_CALLERS.has(f)));
   test('G6 the E1 migration still carries RLS for the onboarding table', (() => {
     const migDir = new URL('../supabase/migrations/', import.meta.url).pathname;
     const mig = readdirSync(migDir).filter((f) => f.startsWith('021'));

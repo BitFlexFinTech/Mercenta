@@ -94,6 +94,12 @@ const M2_SCOPE = new Set([
   'src/components/admin/AccountingPanel.tsx',
   'scripts/validate-financial-reconciliation.mjs',
   'e2e/brand-payouts.spec.ts',
+  // §M9 — documentation sweep + regression repoints (stale phase-scope guards,
+  // pre-redesign markup assertions, and one honest empty state).
+  'src/components/admin/LogisticsControl.tsx',
+  'scripts/validate-review-s6.mjs',
+  'scripts/validate-onboarding-workflow.mjs',
+  'scripts/validate-e4-commerce.mjs',
 ]);
 const ALLOWED_NON_APPROVED = new Set(['Review Zip/mercenta-review.zip']);
 
