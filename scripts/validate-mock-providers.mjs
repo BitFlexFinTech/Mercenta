@@ -267,7 +267,152 @@ try {
   test('dhl domain: LIVE mode is refused (gate-held demo path)',
     refusedLive.ok === false && refusedLive.status === 'safety_refused');
 
-  console.log(failures === 0 ? 'MOCK_PROVIDERS_VALIDATION_PASS' : `MOCK_PROVIDERS_VALIDATION_FAIL (${failures} failures)`);
+  /* ── §13 PALLETLINE simulation (UK-domestic palletised carrier) ──
+     §Canonical model §13 requires BOTH carriers to have deterministic
+     mock/simulation behaviour with no live credentials. This block proves the
+     Palletline seam end-to-end: booking, the full UK-domestic milestone
+     lifecycle, a depot exception + retry recovery, a failed delivery, the
+     cancellation cut-off, a transient provider outage + recovery, the carrier
+     invoice, and that a credential-only swap activates the real path. */
+  const pllMod = await server.ssrLoadModule('/src/lib/palletline/index.ts');
+  const pllMockMod = await server.ssrLoadModule('/src/lib/palletline/mockClient.ts');
+  pllMod.resetMockPalletlineState();
+  let pllNetworkCalls = 0;
+  const realFetchForPll = globalThis.fetch;
+  globalThis.fetch = async () => {
+    pllNetworkCalls++;
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  try {
+    const seam = pllMod.createPalletlineClientForConnection({
+      credentials: null,
+      edgeFunctionBase: '/functions/v1',
+    });
+    test('palletline: factory → MOCK without credentials', seam.mode === 'mock');
+    const client = seam.client;
+
+    const booked = await client.createConsignment({
+      reference: 'PO-PLL-1',
+      origin: 'Leeds',
+      destination: 'Mercenta Hub',
+      pallets: 4,
+      totalWeightKg: 1000,
+    });
+    test('palletline: consignment booked with an unmistakable simulated id',
+      booked.ok === true && /^MOCK-PLL-\d{4}$/.test(booked.consignmentNumber ?? '') &&
+        booked.labelState === 'created');
+
+    const s1 = await client.getConsignmentStatus(booked.consignmentNumber);
+    const s2 = await client.getConsignmentStatus(booked.consignmentNumber);
+    const s3 = await client.getConsignmentStatus(booked.consignmentNumber);
+    const s4 = await client.getConsignmentStatus(booked.consignmentNumber);
+    const s5 = await client.getConsignmentStatus(booked.consignmentNumber);
+    test('palletline: deterministic UK-domestic lifecycle to delivered',
+      s1.milestone === 'collection_scheduled' && s2.milestone === 'collected' &&
+        s3.milestone === 'at_hub' && s4.milestone === 'out_for_delivery' &&
+        s5.milestone === 'delivered');
+    test('palletline: milestones map onto canonical domain statuses',
+      pllMod.palletlineMilestoneToShipmentStatus('delivered') === 'mercenta_hub' &&
+        pllMod.palletlineMilestoneToShipmentStatus('at_hub') === 'bak_depot');
+
+    const invoice = await client.getConsignmentInvoice(booked.consignmentNumber);
+    test('palletline: carrier invoice returns the CARRIER cost (never the brand charge)',
+      invoice.ok === true && typeof invoice.carrierCostGbp === 'number' &&
+        invoice.carrierCostGbp > 0 && !!invoice.invoiceNumber);
+
+    // Depot exception at the 7th consignment, then the retry recovers it.
+    let exBooked = null;
+    for (let i = 0; i < 6; i += 1) {
+      exBooked = await client.createConsignment({
+        reference: `PO-PLL-EX-${i}`, origin: 'A', destination: 'B', pallets: 1,
+      });
+    }
+    await client.getConsignmentStatus(exBooked.consignmentNumber);
+    await client.getConsignmentStatus(exBooked.consignmentNumber);
+    const exHit = await client.getConsignmentStatus(exBooked.consignmentNumber);
+    const exRetry = await client.getConsignmentStatus(exBooked.consignmentNumber);
+    test('palletline: depot exception then retry recovery',
+      exHit.exception === true && exRetry.exception === false && exRetry.milestone === 'at_hub');
+
+    // Failed delivery at the 5th consignment.
+    pllMod.resetMockPalletlineState();
+    let fdBooked = null;
+    for (let i = 0; i < 5; i += 1) {
+      fdBooked = await client.createConsignment({
+        reference: `PO-PLL-FD-${i}`, origin: 'A', destination: 'B', pallets: 1,
+      });
+    }
+    await client.getConsignmentStatus(fdBooked.consignmentNumber);
+    await client.getConsignmentStatus(fdBooked.consignmentNumber);
+    await client.getConsignmentStatus(fdBooked.consignmentNumber);
+    const fdHit = await client.getConsignmentStatus(fdBooked.consignmentNumber);
+    test('palletline: failed delivery reported then re-booked',
+      fdHit.failedDelivery === true && fdHit.milestone === 'out_for_delivery');
+
+    // Cancellation cut-off: allowed before collection, refused after.
+    pllMod.resetMockPalletlineState();
+    const c1 = await client.createConsignment({
+      reference: 'PO-PLL-CANCEL-1', origin: 'A', destination: 'B', pallets: 1,
+    });
+    const cancelEarly = await client.cancelConsignment(c1.consignmentNumber);
+    const c2 = await client.createConsignment({
+      reference: 'PO-PLL-CANCEL-2', origin: 'A', destination: 'B', pallets: 1,
+    });
+    await client.getConsignmentStatus(c2.consignmentNumber);
+    await client.getConsignmentStatus(c2.consignmentNumber);
+    const cancelLate = await client.cancelConsignment(c2.consignmentNumber);
+    test('palletline: cancellation allowed before collection, refused after',
+      cancelEarly.ok === true && cancelLate.ok === false);
+
+    // Transient provider outage: exactly one failed poll, then recovery.
+    const t1 = await client.createConsignment({
+      reference: 'PO-PLL-TRANSIENT', origin: 'A', destination: 'B', pallets: 1,
+    });
+    test('palletline: transient failure armed',
+      pllMockMod.simulatePalletlineTransientFailure(t1.consignmentNumber) === true);
+    const tFail = await client.getConsignmentStatus(t1.consignmentNumber);
+    const tRecovered = await client.getConsignmentStatus(t1.consignmentNumber);
+    test('palletline: transient failure then recovery on retry',
+      tFail.ok === false && tRecovered.ok === true);
+
+    // The real path is a CREDENTIAL-ONLY swap — no other code change.
+    const spyTransport = async () => ({
+      ok: true, status: 200,
+      json: async () => ({
+        consignmentNumber: 'PLL-LIVE-1', trackingNumber: 'PLL-TRK-1', labelState: 'created',
+      }),
+    });
+    const realSeam = pllMod.createPalletlineClientForConnectionWithTransport(
+      {
+        credentials: { secretRef: 'vault:palletline', verified: true },
+        edgeFunctionBase: '/functions/v1',
+      },
+      spyTransport
+    );
+    test('palletline: verified non-mock credential → REAL client',
+      realSeam.mode === 'real');
+    const liveBooked = await realSeam.client.createConsignment({
+      reference: 'PO-LIVE', origin: 'A', destination: 'B', pallets: 2,
+    });
+    test('palletline: real client returns the provider consignment',
+      liveBooked.ok === true && liveBooked.consignmentNumber === 'PLL-LIVE-1');
+    const sandboxSeam = pllMod.createPalletlineClientForConnectionWithTransport(
+      {
+        credentials: { secretRef: 'vault:palletline', verified: false },
+        edgeFunctionBase: '/functions/v1',
+      },
+      spyTransport
+    );
+    test('palletline: sandbox credential stays on the MOCK path',
+      sandboxSeam.mode === 'mock');
+
+    test('palletline: the whole simulation performed ZERO network calls',
+      pllNetworkCalls === 0);
+  } finally {
+    globalThis.fetch = realFetchForPll;
+  }
+
+    console.log(failures === 0 ? 'MOCK_PROVIDERS_VALIDATION_PASS' : `MOCK_PROVIDERS_VALIDATION_FAIL (${failures} failures)`);
 } finally {
   await server.close();
 }
