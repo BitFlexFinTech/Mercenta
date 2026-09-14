@@ -22,6 +22,10 @@
 // environment has no browser Supabase credentials — that limitation is
 // reported honestly and never papered over.
 import { createServer } from 'vite';
+// §M12 — resolve filesystem paths with fileURLToPath: a project folder whose name
+// contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
+// silently broke this walk (ENOENT on `1.%20Mercenta`).
+import { fileURLToPath } from 'node:url';
 import { readFileSync, readdirSync } from 'node:fs';
 
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
@@ -322,7 +326,7 @@ try {
       else if (/\.(ts|tsx)$/.test(e.name)) out.push(p);
     }
     return out;
-  })(new URL('../src', import.meta.url).pathname.replace(/^\//, '/'));
+  })(fileURLToPath(new URL('../src', import.meta.url)).replace(/^\//, '/'));
 
   // ══ N. The Phase D1 communications-provider removal holds at domain level ══
   // The dedicated D1 removal gate performs the whole-repo executable-source
@@ -340,7 +344,7 @@ try {
   test('O1 Postiz remains a registered platform capability',
     /postiz/i.test(readSrc('src/integrations/registry.ts')));
   test('O2 a Postiz implementation is still present in the repository',
-    readdirSync(new URL('../src/lib/postiz', import.meta.url).pathname).length > 0);
+    readdirSync(fileURLToPath(new URL('../src/lib/postiz', import.meta.url))).length > 0);
 
   // ══ P. No duplicate stores / no new database mechanism ══
   const drSrc = readSrc('src/data/domainRepository.ts');
@@ -358,7 +362,7 @@ try {
     !/from '@\/lib\/supabase'/.test(acqSrc));
 
   // ══ Q. The D4 migration defines the durable schema + RLS ══
-  const migDir = new URL('../supabase/migrations/', import.meta.url).pathname;
+  const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => f.startsWith('020'));
   test('Q1 the D4 persistence migration exists', migFiles.length === 1);
   const mig = migFiles.length ? readFileSync(`${migDir}${migFiles[0]}`, 'utf8') : '';

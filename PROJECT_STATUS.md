@@ -1,5 +1,138 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
+>
+> ---
+> ## ⏸️ M12 CHECKPOINT (handoff to a NEW Cline conversation) — 2026-09-14
+>
+> **CHECKPOINT ONLY.** The owner cancelled the M12 session mid-flight. No M12 work
+> was discarded, no reset/revert/rebase was performed, and nothing below was
+> "fixed" during this checkpoint.
+>
+> ### CURRENT STATE
+> - **Branch:** `redesign/foundation`
+> - **HEAD:** `a6fac561b50e8973fc6b8f71f77098a9442c5374` ("phase M12e: validators
+>   for brand-level commercial relationships, intelligence strategy, sales
+>   estimator/Born-to-Run/Amazon wording and the founder centre; browser specs for
+>   all four surfaces (8 tests pass)")
+> - **Protected baseline:** `959b4d2` — **verified ancestor** of HEAD.
+> - **Working tree:** DIRTY (11 modified, 2 untracked owner folders). Nothing reverted.
+> - **Project folder was RENAMED mid-session** by the owner:
+>   `/Users/tadii/Desktop/Mercenta` → **`/Users/tadii/Desktop/1. Mercenta`**. The
+>   real repository (`.git`, branch, HEAD, `src/`) is now under **`1. Mercenta`**.
+>   The old path is an empty stub containing only `.vite`, recreated by a stale
+>   `vite` process whose cwd was the renamed directory. **Two stale processes from
+>   the pre-rename session were terminated during M12** (a 3-day-old `vite` holding
+>   port 5173, and an abandoned Playwright run) because they would have made E2E
+>   results meaningless.
+> - **Phase status:** M12 is **substantially built and committed in 5 phases
+>   (d865c06, 88932cd, 15d9c2c, 4e7e1a4, a6fac56)**, but the *closing* steps
+>   (final documentation reconciliation, full-suite regression, review ZIP) are
+>   **NOT complete**.
+>
+> ### FILES MODIFIED / UNCOMMITTED AT CHECKPOINT
+> ```
+>  M PRODUCTION_READINESS.md                     (M12 credential/simulation section)
+>  M docs/MERCENTA_BUSINESS_MODEL.md             (§3.2.1 brand-level selection COMPLETE)
+>  M scripts/rls-audit.mjs                       (fileURLToPath + RLS regex repair)
+>  M scripts/validate-d4-persistence.mjs         (fileURLToPath)
+>  M scripts/validate-design-tokens.mjs          (fileURLToPath)
+>  M scripts/validate-e3-catalog.mjs             (fileURLToPath)
+>  M scripts/validate-e4-commerce.mjs            (fileURLToPath)
+>  M scripts/validate-e5-admin-surfaces.mjs      (fileURLToPath)
+>  M scripts/validate-e6-brand-surfaces.mjs      (fileURLToPath + M12_SCOPE)
+>  M scripts/validate-onboarding-handoff.mjs     (fileURLToPath)
+>  M scripts/validate-onboarding-workflow.mjs    (fileURLToPath)
+> ?? "0. Company Documents/"                     (owner's own folder — NOT mine)
+> ?? Parterships/                                (owner's own folder — NOT mine)
+> ```
+> ---
+>
+> ### COMPLETED & VERIFIED THIS SESSION (committed)
+> 1. **§5/§19 brand-level commercial relationship — COMPLETE.** `demoData.ts`
+>    declares each brand's model (`DEMO_MODEL_A_BRAND_ID` / `DEMO_MODEL_B_BRAND_ID`
+>    = one source of truth); `demoStore` holds one record per brand with
+>    `setBrandCommercialModel` (audited; actor+reason required for an override;
+>    unknown model refused); `checkCommercialModelSelection` gates onboarding
+>    (fail-closed); Super Admin gets a *Commercial Models* panel; the brand sees it
+>    read-only in *Settings → Commercial Relationship*.
+> 2. **§12–§16 Brand Intelligence strategy layer — BUILT.** `acquisitionStrategy.ts`
+>    (strategies A/B, **31 source markets**, 8 trade programmes all declared
+>    `prospective_partnership`, speed-to-revenue weighting, market-access tags),
+>    a real audited write path (`setProspectMarketAccess`) and an operator panel
+>    (`BrandIntelligenceStrategyPanel`) EXTENDING — not replacing — the BI panel.
+> 3. **§18/§17 sales estimator + new-to-channel modelling — BUILT.**
+>    `salesEstimator.ts` (deterministic banded estimate, ALWAYS labelled an
+>    estimate, truthful provider modes, reuses the existing Amazon data seam),
+>    `modelBornToRunOpportunity` (`programmeStatus: 'not_confirmed_with_amazon'`,
+>    `tosVerificationRequired`, `simulated: true`) and `amazonWording.ts`. Brand
+>    card in *Market Intel*.
+> 4. **§21/§41 Founder Investor Centre + Partnerships/Fundraising Centre — BUILT
+>    (Super Admin only).** 5 pitches, 8 model sections, 16 talking points, 21
+>    difficult questions, 6 practice segments, HTML brief/deck generation,
+>    prospective partner registry, recipient-specific outreach with an EXPLICIT
+>    send through the mock mail seam, fundraising plan claiming no commitments.
+> 5. **§20 investor demo — 25 stages** (added `commercial_models`), still
+>    deterministic and zero-network.
+>
+> ### VERIFIED EVIDENCE (actually run — nothing else was run)
+> | What | Result |
+> |---|---|
+> | `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** (last run after the Founder Centre landing) |
+> | `eslint` on every touched file | **0 errors** |
+> | `npm run build` | **✓ built** (last run after the Founder Centre landing) |
+> | `scripts/validate-investor-demo.mjs` | **PASS — 72 ✓** incl. the new §5/§19 assertions; "reset → run reproduces the SAME digest" |
+> | `scripts/validate-commercial-model-selection.mjs` | **PASS — 18 checks** |
+> | `scripts/validate-intelligence-strategy.mjs` | **PASS — 24 checks** |
+> | `scripts/validate-sales-estimator.mjs` | **PASS — 28 checks** |
+> | `scripts/validate-founder-centre.mjs` | **PASS — 29 checks** |
+> | Playwright: the 3 new specs | **8 passed / 0 failed** |
+> | Full `validate-*.mjs` sweep (64 scripts) BEFORE the path repair | 56 pass / **8 fail — all ONE cause: `ENOENT …/1.%20Mercenta/src`** (folder rename + space; `URL.pathname` percent-encoding) |
+> | Those 8 after the `fileURLToPath` repair | **7 pass**; `validate-e6-brand-surfaces.mjs` failed only on `F6` (change-set scope) → `M12_SCOPE` declared → **re-run: E6_BRAND_SURFACES_VALIDATION_PASS** |
+> | `scripts/rls-audit.mjs` (NOT in the `validate-*` gate suite) | now RUNS (previously crashed on the same path bug) → **RLS_STATIC_AUDIT_FAIL (23)** — PRE-EXISTING finding, see Remaining |
+> ---
+>
+> ### IN-PROGRESS WHEN CANCELLED
+> **Documentation reconciliation + the closing regression.** The very last edits
+> were to `scripts/validate-e6-brand-surfaces.mjs` (declaring the `M12_SCOPE` file
+> set and the owner-provided directories so `F6` reflects the CURRENT declared
+> phase while still refusing unexplained/protected paths). That edit is
+> **uncommitted but verified working** (`E6_BRAND_SURFACES_VALIDATION_PASS`). No
+> code change was half-written; the tree is coherent and type-clean.
+>
+> ### REMAINING M12 WORK (do NOT rebuild items 1–5 above)
+> 1. **Commit the 11 modified files** (2 docs + 9 scripts) — verified but uncommitted.
+> 2. **Documentation reconciliation still outstanding:** `README.md` (add the 4 new
+>    validators to the gate list), `.clinerules/mercenta-business-model.md` (record
+>    the M12 rules), `docs/INTEGRATIONS.md` (sales-estimator data seam: `keepa` /
+>    `amazon_sp_api`), `GO_LIVE.md` (estimator + email activation preconditions).
+> 3. **Full regression not re-run after the M12 UI additions:** the **complete
+>    Playwright suite** (M11 baseline: 250 passed / 2 skipped) and the **complete
+>    64-script validator sweep**, plus `npm run validate:wording` and
+>    `node scripts/integrity-audit.mjs`.
+> 4. **`e2e/investor-demo.spec.ts`** was repointed to 25 stages but has **not been
+>    re-run** (the headless validator proves the stage; the browser spec is unverified).
+> 5. **`rls-audit.mjs` genuine PRE-EXISTING finding (not M12):** `shipping_margins`,
+>    `audit_log`, `leads`, `integration_connections` have **no `ENABLE ROW LEVEL
+>    SECURITY` statement anywhere in `supabase/migrations`**, and the `using(true)`
+>    blanket-policy check fails. M12 added **no** migration and made **no** schema
+>    change — this needs an OWNER decision (a hardening migration), exactly as M10
+>    recorded its two DB constraints instead of inventing them.
+> 6. **Review ZIP not yet exported for this session**; also
+>    `scripts/export-review-zip.sh` still `cd`s to `~/Desktop/Mercenta` (the empty
+>    stub) and must become directory-relative before it can capture the real tree.
+> 7. Not attempted (unchanged from the M12 prompt, NOT required to declare M12
+>    complete): optional-infrastructure evaluation (Clerk/PostHog/Cloudflare/
+>    Sentry/RevenueCat — documented as optional, none introduced) and any `.pptx`
+>    export (explicitly NOT provided; HTML/print only).
+>
+> ### NEXT ACTION FOR THE NEW CLINE SESSION
+> Read this checkpoint, then run **only** `git status --porcelain` and
+> `git --no-pager log --oneline -6` in **`/Users/tadii/Desktop/1. Mercenta`** (NOT
+> `/Users/tadii/Desktop/Mercenta`, which is an empty stub), then continue from
+> item 1 of *Remaining M12 work*. Do **not** re-audit the repository and do **not**
+> rebuild anything listed under *Completed & verified*.
+> ---
+>
 > Last updated: 2026-09-14 (**M2 → M10 COMPLETE. THE ENTIRE VALIDATOR SUITE IS
 > NOW GREEN: 60 validator scripts, 0 non-zero exits** — for the first time in the
 > project's history. M10 repaired the 15 stale validators that M9 recorded as

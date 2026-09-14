@@ -1,6 +1,10 @@
 // §11 — validates the design system is applied app-wide:
 //   zero neon (purple) class refs · brass ramp defined · IBM Plex Sans is
 //   the sans/body font · hexagon mark present in Header, Sidebar, wizard
+// §M12 — resolve filesystem paths with fileURLToPath: a project folder whose name
+// contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
+// silently broke this walk (ENOENT on `1.%20Mercenta`).
+import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 
 let failures = 0;
@@ -33,7 +37,7 @@ function walk(dir) {
     }
   }
 }
-walk('src'.replace('src', new URL('../src/', import.meta.url).pathname.replace(/\/$/, '')));
+walk('src'.replace('src', fileURLToPath(new URL('../src/', import.meta.url)).replace(/\/$/, '')));
 test('zero neon-* class refs in src', neonRefs === 0);
 
 for (const f of [

@@ -11,6 +11,10 @@
 //   F  safety — no migration, no new store/dashboard/nav, no live provider path,
 //          createPurchaseOrder's email path untouched, UNKNOWN stays unsafe
 import { createServer } from 'vite';
+// §M12 — resolve filesystem paths with fileURLToPath: a project folder whose name
+// contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
+// silently broke this walk (ENOENT on `1.%20Mercenta`).
+import { fileURLToPath } from 'node:url';
 import { readFileSync, readdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
@@ -166,6 +170,91 @@ const M11_SCOPE = new Set([
   'docs/INTEGRATIONS.md',
 ]);
 
+
+/**
+ * §Phase M12 — the commercial-relationship, brand-intelligence, estimator and
+ * founder-centre phase scope (2026-09-14).
+ *
+ * §Phase M12 — REPOINTED. F6's contract is UNCHANGED: the working-tree change set
+ * must stay within the files the CURRENT documented phase declares, and no
+ * protected path may be touched (F5/F5b). M12 is a build-forward phase that
+ * legitimately adds the brand-level commercial relationship (§5), the Brand
+ * Intelligence strategy layer (§12–§16), the sales estimator + new-to-channel
+ * modelling (§17/§18), the Founder Investor Centre and Partnerships/Fundraising
+ * Centre (§21/§41) — so its surface is declared here rather than the guard being
+ * weakened or the phase's files being left unexplained.
+ */
+const M12_SCOPE = new Set([
+  // §5 — the brand-level commercial relationship (config, store, audit, gate).
+  'src/config/commercialModel.ts',
+  'src/data/demoData.ts',
+  'src/data/demoStore.ts',
+  'src/types.ts',
+  'src/components/admin/CommercialModelsPanel.tsx',
+  'src/components/admin/SuperAdminPanel.tsx',
+  'src/components/brand/BrandSettings.tsx',
+  'src/components/brand/OnboardingWizard.tsx',
+  'src/context/GlobalStateContext.tsx',
+  // §12–§16 — Brand Intelligence strategy, source markets, trade programmes,
+  // speed-to-revenue, market-access tagging.
+  'src/lib/intelligence/',
+  'src/lib/intelligence/acquisitionStrategy.ts',
+  'src/lib/intelligence/prospectLifecycle.ts',
+  'src/components/admin/BrandIntelligenceStrategyPanel.tsx',
+  // §17/§18 — the sales estimator, Born-to-Run modelling, Amazon wording rules.
+  'src/lib/intelligence/salesEstimator.ts',
+  'src/lib/intelligence/amazonWording.ts',
+  'src/components/brand/SalesEstimatorCard.tsx',
+  // §21/§41 — the founder's private operating centre + document generation.
+  'src/config/founderContent.ts',
+  'src/config/partnerships.ts',
+  'src/lib/founder/',
+  'src/lib/founder/documentExport.ts',
+  'src/lib/founder/partnerOutreach.ts',
+  'src/components/admin/FounderInvestorCentre.tsx',
+  'src/components/admin/PartnershipsCentre.tsx',
+  'src/components/layout/AdminShell.tsx',
+  // §20 — the investor demo's commercial-relationship stage (25 stages now).
+  'src/lib/simulation/investorDemo.ts',
+  // §29 — this phase's validators + browser specs.
+  'scripts/validate-commercial-model-selection.mjs',
+  'scripts/validate-intelligence-strategy.mjs',
+  'scripts/validate-sales-estimator.mjs',
+  'scripts/validate-founder-centre.mjs',
+  'scripts/validate-investor-demo.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'e2e/commercial-model.spec.ts',
+  'e2e/founder-investor-centre.spec.ts',
+  'e2e/sales-estimator.spec.ts',
+  'e2e/investor-demo.spec.ts',
+  'e2e/helpers/onboarding.ts',
+  // §28 — documentation reconciliation.
+  'README.md',
+  'PROJECT_STATUS.md',
+  'PRODUCTION_READINESS.md',
+  'HANDOFF.md',
+  'docs/MERCENTA_BUSINESS_MODEL.md',
+  'docs/INTEGRATIONS.md',
+  'GO_LIVE.md',
+  '.clinerules/mercenta-business-model.md',
+  // §M12 — the path-resolution repair applied to the pre-existing walkers: a
+  // project folder whose name contains a space is percent-encoded by
+  // `URL.pathname`, which made these scripts crash (ENOENT) rather than run. Each
+  // now uses `fileURLToPath`; no assertion was removed or weakened.
+  'scripts/rls-audit.mjs',
+  'scripts/validate-d4-persistence.mjs',
+  'scripts/validate-design-tokens.mjs',
+  'scripts/validate-e3-catalog.mjs',
+  'scripts/validate-e4-commerce.mjs',
+  'scripts/validate-e5-admin-surfaces.mjs',
+  'scripts/validate-onboarding-handoff.mjs',
+  'scripts/validate-onboarding-workflow.mjs',
+  // Owner-provided documents (not code): directories the founder added to the
+  // project folder. Declared here so the scope guard stays a guard rather than
+  // failing on files this phase neither reads nor writes.
+  'Parterships/',
+  '0. Company Documents/',
+]);
 
 /**
  * §Phase E7 — the Embedded Mercenta Social phase scope (2026-09-12).
@@ -395,7 +484,7 @@ try {
     !/fetch\s*\(/.test(PO + DASH + CATALOG + NOTIF) &&
     !/spapi\/client|dhl\/client|services\/xero|postmarkNotifier/.test(PO + DASH + CATALOG + NOTIF));
 
-  const migDir = new URL('../supabase/migrations/', import.meta.url).pathname;
+  const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
   // §Phase M11 — REPOINTED. This pinned "023 remains the newest; 23 total",
   // which was TRUE when E6 was written. M11 legitimately added 024 (the
@@ -410,7 +499,7 @@ try {
   let changed = [];
   try {
     changed = execSync('git status --porcelain', {
-      cwd: new URL('..', import.meta.url).pathname,
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
       encoding: 'utf8',
     })
       .split('\n')
@@ -433,10 +522,11 @@ try {
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) || M2_SCOPE.has(p) ||
-        M11_SCOPE.has(p) ||
+        M11_SCOPE.has(p) || M12_SCOPE.has(p) ||
         [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        [...M12_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F7 no new store/dashboard module was created by E6',
     readdirSync(new URL('../src/components/brand/', import.meta.url)).every((f) => !/e6/i.test(f)) &&
     readdirSync(new URL('../src/data/', import.meta.url)).every((f) => !/e6/i.test(f)));

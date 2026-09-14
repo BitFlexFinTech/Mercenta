@@ -22,3 +22,9 @@ dist-ssr
 *.sw?
 .env
 .env.deploy
+
+# Owner-provided company/organisation documents — personal & compliance PDFs.
+# Kept on disk and intentionally NOT tracked in Git (no secrets in the tree).
+0. Company Documents/
+Parterships/
+Partnerships/

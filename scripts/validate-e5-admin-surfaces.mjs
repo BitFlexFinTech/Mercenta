@@ -14,6 +14,10 @@
 //   I  G9 — ONE latest-submission derivation (the canonical helper), no local map
 //   J  architecture + safety invariants (no new store/db/migration, zero network)
 import { createServer } from 'vite';
+// §M12 — resolve filesystem paths with fileURLToPath: a project folder whose name
+// contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
+// silently broke this walk (ENOENT on `1.%20Mercenta`).
+import { fileURLToPath } from 'node:url';
 import { readFileSync, readdirSync } from 'node:fs';
 
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
@@ -214,7 +218,7 @@ try {
     (readSrc('src/data/demoStore.ts').match(/export function latestSubmissionForProduct/g) || []).length === 1);
 
   /* ══ J. architecture + safety invariants ══ */
-  const migDir = new URL('../supabase/migrations/', import.meta.url).pathname;
+  const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
   // §Phase M11 — REPOINTED. This pinned "023 remains the newest; 23 total",
   // which was TRUE when E5 was written. M11 legitimately added 024 (the

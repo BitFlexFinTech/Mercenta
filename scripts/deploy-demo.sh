@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 echo "Building..."
-cd ~/Desktop/Mercenta
+# Resolve the project root from this script's own location (the folder was
+# renamed from ~/Desktop/Mercenta to "/Users/tadii/Desktop/1. Mercenta").
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 npm run build
 
 echo "Deploying..."

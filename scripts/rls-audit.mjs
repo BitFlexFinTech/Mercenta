@@ -10,10 +10,14 @@
  * The RUNTIME cross-brand query test lives in rls-cross-brand-test.mjs and
  * executes against a live project once Supabase credentials are configured.
  */
+// §M12 — resolve filesystem paths with fileURLToPath: a project folder whose name
+// contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
+// silently broke this walk (ENOENT on `1.%20Mercenta`).
+import { fileURLToPath } from 'node:url';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const migrationsDir = new URL('../supabase/migrations/', import.meta.url).pathname;
+const migrationsDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
 const files = readdirSync(migrationsDir).filter((f) => f.endsWith('.sql')).sort();
 const sql = files.map((f) => readFileSync(join(migrationsDir, f), 'utf8')).join('\n');
 
@@ -34,22 +38,38 @@ function check(name, ok) {
 }
 
 for (const t of BRAND_SCOPED) {
-  const rlsOn = sql.match(new RegExp(`alter table public\\.${t} enable row level security`));
+  // §M12 — REPAIRED. The canonical migrations write `ALTER TABLE shipments ENABLE
+  // ROW LEVEL SECURITY` (uppercase, schema implicit), so the original
+  // case-sensitive `alter table public.<t>` pattern matched NOTHING and every
+  // check failed for a reason unrelated to the schema. The pattern is now
+  // case-insensitive and accepts an optional `public.` qualifier, so this audit
+  // verifies the real RLS state instead of reporting a false negative.
+  const rlsOn = sql.match(
+    new RegExp(`alter\\s+table\\s+(public\\.)?${t}\\s+enable\\s+row\\s+level\\s+security`, 'i')
+  );
   check(`${t}: RLS enabled`, !!rlsOn);
 
-  const policies = [...sql.matchAll(new RegExp(`create\\s+policy\\s+"[^"]+"\\s+on\\s+public\\.${t}\\b([\\s\\S]*?);`, 'g'))];
-  const ownerScoped = policies.some(([, body]) => body.includes('auth.uid()'));
+  const policies = [
+    ...sql.matchAll(
+      new RegExp(`create\\s+policy\\s+"[^"]+"\\s+on\\s+(public\\.)?${t}\\b([\\s\\S]*?);`, 'gi')
+    ),
+  ];
+  const ownerScoped = policies.some(([, , body]) => body.includes('auth.uid()'));
   check(`${t}: has owner-scoped policy`, ownerScoped);
 }
 
 for (const t of DENY_ALL_OK) {
-  const rlsOn = sql.match(new RegExp(`alter table public\\.${t} enable row level security`));
-  const policies = [...sql.matchAll(new RegExp(`create\\s+policy\\s+"[^"]+"\\s+on\\s+public\\.${t}\\b`, 'g'))];
+  const rlsOn = sql.match(
+    new RegExp(`alter\\s+table\\s+(public\\.)?${t}\\s+enable\\s+row\\s+level\\s+security`, 'i')
+  );
+  const policies = [
+    ...sql.matchAll(new RegExp(`create\\s+policy\\s+"[^"]+"\\s+on\\s+(public\\.)?${t}\\b`, 'gi')),
+  ];
   check(`${t}: RLS enabled, deny-all documented`, !!rlsOn && policies.length === 0);
 }
 
 // No policy may grant blanket access to all rows.
-const loose = /create policy "[^"]+"[\s\S]*?for (select|all)[\s\S]*?using \(\s*true\s*\)/.test(sql);
+const loose = /create policy "[^"]+"[\s\S]*?for (select|all)[\s\S]*?using \(\s*true\s*\)/i.test(sql);
 check('no using(true) blanket policies', !loose);
 
 console.log(failures === 0 ? 'RLS_STATIC_AUDIT_PASS' : `RLS_STATIC_AUDIT_FAIL (${failures})`);

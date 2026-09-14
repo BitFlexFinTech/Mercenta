@@ -1,10 +1,52 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated:** M2/M6/M7 session (14 Sep) — **compliance-document verification,
-the canonical money flow (payment reconciliation → accounting representation →
-gated payout) and the 24-stage investor demo were BUILT.** Every new prerequisite
-is listed below; nothing was re-labelled live, and no external provider is claimed
-where none was contacted.
+**Last updated:** M12 session (14 Sep) — **the brand-level commercial
+relationship (both models, chosen at onboarding), the Brand Intelligence strategy
+layer (UK + global→UK, source markets, trade programmes, speed-to-revenue,
+market-access tagging), the Amazon sales estimator + new-to-channel modelling, the
+founder's own Founder Investor Centre and Partnerships/Fundraising Centre, and
+candidate outreach generation/send are BUILT. Everything below is still simulated;
+nothing was re-labelled live.** New M12 items first, then the M2/M6/M7 items from
+the previous session.
+
+## M12 — new prerequisites and what is STILL simulated
+
+- **Sales estimator data = SIMULATED PLANNING DATASET, not Amazon data.**
+  `src/lib/intelligence/salesEstimator.ts` produces an ESTIMATED range from a
+  declared category-baseline model. `SALES_ESTIMATE_BASIS = 'simulated_estimate'`,
+  `dataSource: 'simulated_dataset'`, `liveDataUsed: false` always, and every result
+  carries `ESTIMATE_DISCLAIMER` + the TOS verification note. **Live activation:**
+  the registered `keepa` / `amazon_sp_api` integrations supply real signals behind
+  the SAME function once credentials exist; until then `salesDataProviderModes()`
+  reports each provider's truthful mode and **never claims live**.
+- **New-to-channel ("Born to Run"-style) modelling is SIMULATION ONLY.**
+  `modelBornToRunOpportunity` sets `programmeStatus: 'not_confirmed_with_amazon'`,
+  `tosVerificationRequired: true`, `simulated: true`, and submits **nothing** to
+  Amazon. `PRODUCTION_READINESS` does not claim any Amazon programme, approval or
+  account capability. **Remaining non-credential work:** verify the current Amazon
+  Vendor terms/account agreement before any wording is relied on
+  (`AMAZON_TOS_VERIFICATION_REQUIRED`).
+- **Partner/recruitment outreach send = MOCK until email credentials exist.**
+  `src/lib/founder/partnerOutreach.ts` sends through the EXISTING mail seam
+  (`src/lib/mail/mail.ts`). With no verified connection the mock client returns
+  `mock:msg-…` and the validator proves **zero network calls**. **Live
+  activation:** `POSTMARK_API_KEY` (or SendGrid) + the deployed `send-email`
+  function. A send always requires an EXPLICIT confirmation and refuses copy that
+  fails the wording gate.
+- **Founder documents + deck = HTML, printed by the browser.** No `.docx`/`.pptx`
+  writer and no new dependency: the brief is a self-contained HTML document and the
+  deck is a keyboard-navigable HTML presentation, both printable to PDF. A `.pptx`
+  export is explicitly NOT provided.
+- **Trade-programme / partner registry is PROSPECTIVE.** Every entry carries
+  `relationshipExists: false` and `status: 'prospective_partnership'`; the UI
+  prints the no-partnership disclaimer. Nothing claims a government, embassy,
+  chamber or Amazon relationship.
+- **Fundraising plan claims no commitments.** `committedGbp: 0`,
+  `commitmentsClaimed: false`; the instrument is flagged as unverified.
+- **The investor demo is now 25 stages** (24 + `commercial_models`), still
+  deterministic, still zero-network.
+- **Live-credential-required for M12: Keepa (or Amazon data access) for real
+  estimator signals, and a transactional email provider for real outreach.**
 - **NEW §M2 (no credentials required, no paid dependency added):** the
   document-verification seam `src/lib/verification/documentVerification.ts` ships
   FOUR providers. The AUTOMATED one is **Mercenta's own deterministic structural

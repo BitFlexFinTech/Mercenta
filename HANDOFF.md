@@ -1,5 +1,25 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
+**Last updated: September 14, 2026 — ⏸️ M12 CHECKPOINT (handoff to a NEW Cline chat).**
+The M12 session was **cancelled mid-flight by the owner** and is checkpointed in
+`PROJECT_STATUS.md` (top block "M12 CHECKPOINT"). **Branch `redesign/foundation`,
+HEAD `a6fac56`, protected baseline `959b4d2` (verified ancestor).**
+**THE PROJECT FOLDER WAS RENAMED: the real repository is now
+`/Users/tadii/Desktop/1. Mercenta` (NOT `/Users/tadii/Desktop/Mercenta`, which is an
+empty stub containing only `.vite`).**
+Working tree is DIRTY: 11 modified files (2 docs + 9 scripts) + 2 owner folders.
+**M12 BUILT & COMMITTED:** brand-level commercial relationship (§5/§19, both
+models, fail-closed, audited, Super-Admin-only change), Brand Intelligence strategy
+layer (§12–§16: strategies A/B, 31 source markets, trade programmes declared
+prospective, speed-to-revenue, market-access tagging), sales estimator +
+new-to-channel modelling + Amazon wording safeguards (§17/§18), Founder Investor
+Centre + Partnerships/Fundraising Centre (§21/§41, super-admin-only),
+investor demo extended to 25 stages. **M12 NOT finished:** README/.clinerules/
+INTEGRATIONS/GO_LIVE docs, the full Playwright + 64-validator regression, and the
+review ZIP export. **NEXT CHAT: read the PROJECT_STATUS M12 checkpoint first, then
+`git status` + `git log --oneline -6` in `1. Mercenta`, then continue from
+"Remaining M12 work" item 1 — do NOT rebuild what is already committed.**
+(Previous line preserved for history:)
 Last updated: September 14, 2026 (**M11 — BUILD-FORWARD: the six deploy-time Edge Functions now EXIST and are actually validated (46 assertions / 0 failures / 0 skipped, previously 35 skipped); migrations 024–026 close the §22 and §23 gaps; Palletline gains a full mock/real simulation adapter (§13); the two commercial models (§3/§5) and the VAT calculation layer (§9) are built as canonical modules. Two canonical-model corrections were made deliberately and reported: the §6 payout rails are now Wise (default) / Payoneer (secondary) — NOT Stripe — and the production VAT treatment remains deliberately un-invented while the demo gains a labelled 20% illustration. Full validator sweep 59/60 → the 3 remaining stale migration-count pins were repointed with `§Phase M11 — REPOINTED` comments.**)
 
 ## WHO I AM:
@@ -21,6 +41,31 @@ Cline's output back. AI confirms, gives next prompt.
 8. If AI makes a mega-prompt, I say: "No. One task. Short prompt."
 
 ## WHAT'S BUILT:
+### ⏸️ M12 session (14 Sep 2026) — CHECKPOINTED, NOT FINISHED (see PROJECT_STATUS top block)
+- **Committed (5 phases):** `d865c06` brand-level commercial relationship (§5/§19);
+  `88932cd` Brand Intelligence strategy layer (§12–§16) + sales estimator +
+  Born-to-Run + Amazon wording (§17/§18); `15d9c2c` Founder Investor Centre +
+  Partnerships/Fundraising Centre + docs/deck generation (§21/§41);
+  `4e7e1a4` investor demo extended to **25 stages** (new `commercial_models` stage
+  asserting the exact §19 figures, a fail-closed probe and compliance
+  independence); `a6fac56` four new validators + three browser specs (8 tests pass).
+- **Verified:** tsc 0 · eslint 0 · build ✓ · `validate-investor-demo` 72 ✓ (digest
+  replay identical) · new validators 18 + 24 + 28 + 29 checks PASS · Playwright
+  new specs 8 passed/0 failed · `validate-e6-brand-surfaces` PASS after its scope
+  guard was repointed to M12.
+- **Uncommitted at checkpoint:** `PRODUCTION_READINESS.md`,
+  `docs/MERCENTA_BUSINESS_MODEL.md` (§3.2.1), `scripts/rls-audit.mjs` and 8
+  validators (all `fileURLToPath` path repairs — the folder rename introduced a
+  space and `URL.pathname` percent-encoded it, which had made 8 validators CRASH
+  with `ENOENT …/1.%20Mercenta/src`; 7 pass, e6 passes after the M12_SCOPE repoint).
+- **Still outstanding:** README gate list, `.clinerules/mercenta-business-model.md`,
+  `docs/INTEGRATIONS.md`, `GO_LIVE.md`; the FULL Playwright suite + the full
+  64-validator sweep after the UI additions; re-run of `e2e/investor-demo.spec.ts`
+  (repointed to 25 stages, not yet re-run); review ZIP export (the export script
+  must first stop `cd`-ing to the old stub path); a PRE-EXISTING `rls-audit`
+  finding (4 tables with no RLS statement in the migrations) which needs an owner
+  decision, NOT a silent schema change.
+
 ### M10 session (14 Sep 2026) — validator suite repaired to 60/60 green (was 45 green / 15 red)
 - **All 15 red validators diagnosed and repaired. Every failure was a STALE
   ASSERTION, not a product regression** — each encoded a fact that was true when

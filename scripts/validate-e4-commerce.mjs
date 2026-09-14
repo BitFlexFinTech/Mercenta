@@ -21,6 +21,10 @@
 // this demo environment has NO browser Supabase credentials — the memory adapter
 // is active, nothing is durable, and that is reported honestly.
 import { createServer } from 'vite';
+// §M12 — resolve filesystem paths with fileURLToPath: a project folder whose name
+// contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
+// silently broke this walk (ENOENT on `1.%20Mercenta`).
+import { fileURLToPath } from 'node:url';
 import { readFileSync, readdirSync } from 'node:fs';
 
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
@@ -530,7 +534,7 @@ try {
     /from '@\/lib\/catalog\/catalogLifecycle'/.test(commerceSrc) &&
     !/REQUIRED_SUBMISSION_FIELDS|evaluateComplianceGate/.test(commerceSrc));
 
-  const migDir = new URL('../supabase/migrations/', import.meta.url).pathname;
+  const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => f.startsWith('023'));
   test('S4 the E4 persistence migration exists (additive, after 022)', migFiles.length === 1);
   const mig = migFiles.length ? readFileSync(`${migDir}${migFiles[0]}`, 'utf8') : '';

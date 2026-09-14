@@ -243,6 +243,36 @@ separate from the retail-channel compliance documentation a product needs, and
 compliance documentation required for the products.** An unreported model
 resolves to `not_selected` (fail-closed) rather than being silently assumed.
 
+### 3.2.1 Brand-level selection is COMPLETE (M12, 14 Sep)
+
+The M11 report recorded brand-level commercial-model selection as incomplete. It
+is now built and verified end to end:
+
+- **Chosen at onboarding, and mandatory.** The wizard's agreement step requires
+  the brand to pick Model A or Model B; `checkCommercialModelSelection` refuses to
+  continue without one (`COMMERCIAL_MODEL_SELECTION_IS_MANDATORY = true`), and the
+  UI states the requirement rather than defaulting.
+- **Stored per brand, in one place.** `demoStore.getBrandCommercialModelRecord` /
+  `setBrandCommercialModel` hold one record per brand (model, agreed terms, source,
+  actor, reason, timestamp). The demo assignment is DERIVED from each brand's own
+  declaration in `src/data/demoData.ts` (`DEMO_MODEL_A_BRAND_ID` = Brand A →
+  Model A; `DEMO_MODEL_B_BRAND_ID` = Brand B → Model B) — never retyped.
+- **Changeable only by the Super Admin, and always audited.**
+  `COMMERCIAL_MODEL_CHANGEABLE_BY = ['Super Admin']`; an operator change requires
+  BOTH an actor and a reason, appends a canonical audit row
+  (`entityType: 'brand_commercial_relationship'`) recording
+  `complianceUnchanged: true`, and history is never destroyed.
+- **Fail-closed everywhere.** An unknown or absent model is refused
+  (`not_selected`), never guessed. The investor demo proves this at runtime by
+  attempting an unknown model and requiring the store to reject it.
+- **Surfaces.** Super Admin → *Commercial Models* (both worked illustrations, the
+  per-brand table with the computed retail-channel requirement count beside each
+  model, and the audit trail); Brand → *Settings → Commercial Relationship*
+  (read-only, with the separation stated in the product).
+- **Evidence.** `scripts/validate-commercial-model-selection.mjs` (18 checks) plus
+  the investor-demo `commercial_models` stage (both £-figures, fail-closed probe,
+  audit row, computed compliance independence) and `e2e/commercial-model.spec.ts`.
+
 **Two linked identities, never collapsed.** The external retail-channel PO
 (issued to Mercenta) and the Mercenta → brand commercial PO/order (issued per the
 brand's model) are both retained and explicitly related, so accounting, VAT,

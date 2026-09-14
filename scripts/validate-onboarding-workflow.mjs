@@ -12,6 +12,10 @@
 // demo environment has NO browser Supabase credentials — the memory adapter is
 // active and that limitation is reported honestly, never papered over.
 import { createServer } from 'vite';
+// §M12 — resolve filesystem paths with fileURLToPath: a project folder whose name
+// contains a space (e.g. `1. Mercenta`) is percent-encoded by `URL.pathname`, which
+// silently broke this walk (ENOENT on `1.%20Mercenta`).
+import { fileURLToPath } from 'node:url';
 import { readFileSync, readdirSync } from 'node:fs';
 
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
@@ -291,7 +295,7 @@ try {
   test('G5b only known canonical callers reference the onboarding lifecycle', () =>
     onboardingReferencing.every((f) => ONBOARDING_CALLERS.has(f)));
   test('G6 the E1 migration still carries RLS for the onboarding table', (() => {
-    const migDir = new URL('../supabase/migrations/', import.meta.url).pathname;
+    const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
     const mig = readdirSync(migDir).filter((f) => f.startsWith('021'));
     if (mig.length !== 1) return false;
     const sql = stripComments(readFileSync(`${migDir}${mig[0]}`, 'utf8'));

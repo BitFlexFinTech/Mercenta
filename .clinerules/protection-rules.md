@@ -56,8 +56,11 @@ a critical failure.
 
 ---
 ## After Every Session (MANDATORY):
-- Run: bash ~/Desktop/Mercenta/scripts/export-review-zip.sh
-- If the zip is not at ~/Desktop/Mercenta/Review Zip/mercenta-review.zip,
+- Run the review-zip script in the Mercenta project root (currently
+  `/Users/tadii/Desktop/1. Mercenta`): `bash scripts/export-review-zip.sh`
+  (the script resolves the project root itself, so no hardcoded path is needed).
+  It may also be invoked as `bash "<project root>/scripts/export-review-zip.sh"`.
+- If the zip is not at `<project root>/Review Zip/mercenta-review.zip`,
   something went wrong. Report it.
 - Do NOT create any other zip files. Do NOT save zips to ~/Desktop/
   directly.
