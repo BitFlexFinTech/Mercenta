@@ -31,6 +31,10 @@ export const AMAZON_WORDING_RULES: readonly AmazonWordingRule[] = [
   { pattern: /\bamazon\s+(partner|partnership)\b/i, reason: 'Claims an Amazon partnership.' },
   { pattern: /\bofficial\s+amazon\b/i, reason: 'Implies official Amazon status.' },
   { pattern: /\bguaranteed?\s+(sales|revenue|acceptance|approval|launch|placement|listing)\b/i, reason: 'Promises a guaranteed outcome Amazon controls.' },
+  // The reverse word order is just as common in generated copy ("your sales are
+  // guaranteed"), so the rule covers both directions — a safeguard that only
+  // caught one phrasing would give false confidence.
+  { pattern: /\b(sales|revenue|acceptance|approval|placement|listing|launch)\b[^.\n]{0,24}\bguaranteed\b/i, reason: 'Promises a guaranteed outcome Amazon controls (reversed phrasing).' },
   { pattern: /\bwe\s+(control|decide|determine)\s+(amazon|the\s+retail\s+channel)\b/i, reason: 'Implies Mercenta controls a channel decision it does not control.' },
   { pattern: /\bborn\s+to\s+run\s+(place|place\s+guaranteed|guarantee)\b/i, reason: 'Claims a place in an Amazon programme.' },
   { pattern: /\bamazon\s+will\s+(definitely|certainly|guaranteed)\b/i, reason: 'Promises an Amazon decision.' },
