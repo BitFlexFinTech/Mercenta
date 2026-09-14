@@ -31,6 +31,7 @@ import { SuperAdminPanel } from '@/components/admin/SuperAdminPanel';
 import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
 import { BrandIntelligencePanel } from '@/components/admin/BrandIntelligencePanel';
 import { BrandIntelligenceStrategyPanel } from '@/components/admin/BrandIntelligenceStrategyPanel';
+import { OpportunityDiscoveryPanel } from '@/components/admin/OpportunityDiscoveryPanel';
 import { FounderInvestorCentre } from '@/components/admin/FounderInvestorCentre';
 import { PartnershipsCentre } from '@/components/admin/PartnershipsCentre';
 import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
@@ -187,6 +188,7 @@ export default function AdminShell() {
           {adminView === 'brand_intelligence' && (
             <div className="space-y-4">
               <BrandIntelligenceStrategyPanel />
+              <OpportunityDiscoveryPanel />
               <BrandIntelligencePanel />
             </div>
           )}

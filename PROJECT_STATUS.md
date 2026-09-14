@@ -83,6 +83,50 @@
 > inline, and E6/E7's working-tree scope guards now declare the M13 surface
 > explicitly instead of failing on an unexplained path.
 > ---
+> ## ✅ PHASE 3 — OPPORTUNITY DISCOVERY ENGINE (M13) — 2026-09-14
+>
+> **The ADDITIONAL discovery layer now exists. The ASIN-level engine is unchanged.**
+>
+> - **`src/lib/intelligence/opportunityDiscovery.ts`** (NEW, 813 lines): the eight
+>   §9 verticals (UK brand, international, sports/team/club, distributor/channel,
+>   trade programme, embassy/government, strategic partnership, new-to-channel);
+>   `deriveOpportunity()` EXTENDS the existing engine — it calls
+>   `acquisitionStrategy.assessOpportunity()` for every score (which itself derives
+>   from the canonical `BrandProspect.score`), takes observed demand from the
+>   prospect's OWN ASIN evidence, and money from the canonical commercial-model
+>   arithmetic. §6 eligibility is fail-closed via `isApprovedCategory`; §13 PO
+>   potential is ONE named formula (`poPotentialGbp`); ranking is by estimated PO
+>   potential with ineligible records SEPARATED (with a reason), never dropped.
+>   §5 claim classes (`confirmed_fact` / `estimate` / `simulation` /
+>   `third_party_research` / `pending_confirmation`) are declared on every record
+>   and `confirmedPartnership` is a required `false`.
+> - **§12 sports vertical seeded with Tottenham Hotspur FIRST** — modelled as a
+>   POTENTIAL DISTRIBUTION OPPORTUNITY. The club has NOT been approached. Hotspur
+>   Labs / Players Fund are carried as `pending_confirmation` **founder-supplied
+>   leads** (owner folder `Parterships/`), explicitly NOT verified. The opportunity
+>   carries ZERO ASIN evidence and SAYS SO ("ASIN-level evidence NOT captured yet")
+>   rather than inventing demand — an operator must run the existing BI discovery
+>   first.
+> - **`src/components/admin/OpportunityDiscoveryPanel.tsx`** (NEW) renders inside
+>   Brand Intelligence *between* the M12 strategy panel and the existing ASIN panel
+>   (extend, not replace): 8 clickable vertical rollup cards (count / PO potential /
+>   Mercenta estimate), the ranked list, the ineligible list with reasons, the sports
+>   block with the standing disclaimer, and a click-through drill-down carrying the
+>   ASIN table + a button that runs the EXISTING sales estimator.
+>
+> **VERIFIED EVIDENCE**
+> | What | Result |
+> |---|---|
+> | `node scripts/validate-opportunity-discovery.mjs` (NEW) | **PASS — 31 checks**, incl. "ranking is deterministic across replays", "observed demand is the sum of the prospect's OWN ASIN estimates (no invention)", "Tottenham carries NO fabricated ASIN evidence and says so", "the discovery engine makes ZERO network calls" |
+> | `npx playwright test e2e/opportunity-discovery.spec.ts` (NEW) | **3 passed / 0 failed** (renders all 8 verticals; row click opens the drill-down; vertical filter narrows; sports disclaimer + no fabricated evidence) |
+> | `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** |
+> | `npm run build` | **✓ built** |
+> | `node scripts/lint-wording.mjs` | **PASS** (0 violations; the new eligibility/claim strings are channel-neutral) |
+> | Full sweep after the phase | 68 scripts incl. the new validator + `rls-audit` + `integrity-audit` + wording → all exit 0 |
+>
+> **No new provider, no new store, no second scoring engine.** The only new
+> integration surface is *none*: the layer reads the canonical prospect store.
+> ---
 > ## ⏸️ M12 CHECKPOINT (historical record — everything in it is now RESOLVED above) — 2026-09-14
 >
 > **CHECKPOINT ONLY.** The owner cancelled the M12 session mid-flight. No M12 work

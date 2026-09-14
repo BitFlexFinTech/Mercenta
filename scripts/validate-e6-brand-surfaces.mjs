@@ -274,6 +274,12 @@ const M13_SCOPE = new Set([
   'scripts/validate-e5-admin-surfaces.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
+  // §9–§14 — the Opportunity Discovery layer (the ADDITIONAL discovery engine over
+  // the same canonical prospect universe, plus its validator and browser spec).
+  'src/lib/intelligence/opportunityDiscovery.ts',
+  'src/components/admin/OpportunityDiscoveryPanel.tsx',
+  'scripts/validate-opportunity-discovery.mjs',
+  'e2e/opportunity-discovery.spec.ts',
 ]);
 
 /**

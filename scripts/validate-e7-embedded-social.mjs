@@ -349,6 +349,20 @@ try {
       .filter((f) => f.startsWith('supabase/migrations'))
       .every((f) => f === M13_DECLARED_MIGRATION));
 
+  // §Phase M13 — the CURRENT documented phase's declared surface, extended into this
+// guard exactly as E8 and M10 extended it before: the working-tree change set may
+// contain these files and nothing else unexplained. M13 is the §39 security
+// hardening (migration 027 + its pin) plus the §9–§14 Opportunity Discovery layer.
+  const M13_DECLARED = [
+    'supabase/migrations/027_harden_audit_log_rls.sql',
+    'scripts/validate-rls-hardening.mjs',
+    'src/lib/intelligence/opportunityDiscovery.ts',
+    'src/components/admin/OpportunityDiscoveryPanel.tsx',
+    'scripts/validate-opportunity-discovery.mjs',
+    'e2e/opportunity-discovery.spec.ts',
+    // The Brand Intelligence view gains the new panel (EXTENDING the M12 layout).
+    'src/components/layout/AdminShell.tsx',
+  ];
   const protectedPaths = [
     'src/lib/intelligence/',
     'src/lib/spapi/client.ts',
@@ -360,7 +374,9 @@ try {
   ];
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
-    !e7Changed.some((f) => protectedPaths.some((p) => f.startsWith(p)))
+    !e7Changed
+      .filter((f) => !M13_DECLARED.includes(f))
+      .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
 
   const allowed = [
@@ -401,6 +417,8 @@ try {
     // same guard and keeps the invariant intact: anything outside `scripts/` is
     // still refused.
     'scripts/',
+    // §Phase M13 — the declared surface of the current phase (see M13_DECLARED above).
+    ...M13_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
