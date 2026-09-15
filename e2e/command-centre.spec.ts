@@ -64,4 +64,47 @@ test.describe('Super Admin command centre', () => {
     await expect(page.getByTestId('command-section-fundraising')).toContainText('no relationship is claimed');
     await expect(page.getByTestId('command-section-ai_cost')).toContainText('ceiling');
   });
+
+  /**
+   * §27/§28 (M13c Phase D) — the RANKED queue: every row must show its rank and
+   * an explicit WHY breakdown, the ranking basis must state that no AI is used,
+   * and the relationship/funding slots must be real items whose CTA actually
+   * lands on the screen that performs the action (no dead CTAs).
+   */
+  test('4. every ranked row shows its rank and WHY, and the funding slot routes', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (e) => pageErrors.push(String(e)));
+    await openOverview(page);
+
+    const centre = page.getByTestId('command-centre');
+    await expect(centre).toBeVisible({ timeout: 10000 });
+
+    const basis = page.getByTestId('command-queue-basis');
+    await expect(basis).toBeVisible();
+    await expect(basis).toContainText('No AI');
+
+    const actions = page.getByTestId('command-action');
+    const count = await actions.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i += 1) {
+      const row = actions.nth(i);
+      const why = row.locator('[data-testid="command-why"]');
+      await expect(why).toBeVisible();
+      await expect(why).toContainText('Why:');
+      await expect(why).toContainText('=');
+      await expect(row).toContainText(/#\d+/);
+    }
+
+    // The accelerator/funding slot is a real derived route with a working CTA.
+    const accelerator = page
+      .getByTestId('command-action')
+      .filter({ hasText: 'Solo Founders Program' })
+      .first();
+    await expect(accelerator).toBeVisible();
+    await expect(accelerator).toContainText('Funding relevance');
+    await accelerator.getByRole('button').first().click();
+    await page.waitForTimeout(900);
+    await expect(page.getByTestId('funding-pipeline')).toBeVisible({ timeout: 8000 });
+    expect(pageErrors).toEqual([]);
+  });
 });

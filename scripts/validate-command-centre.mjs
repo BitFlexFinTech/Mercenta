@@ -35,6 +35,9 @@ try {
   const demo = await server.ssrLoadModule('/src/data/demoStore.ts');
   const companyStore = await server.ssrLoadModule('/src/data/companyStore.ts');
   const costLog = await server.ssrLoadModule('/src/lib/costs/usageLog.ts');
+  const partnershipConfig = await server.ssrLoadModule('/src/config/partnerships.ts');
+  const acquisition = await server.ssrLoadModule('/src/lib/intelligence/acquisitionStrategy.ts');
+  const funding = await server.ssrLoadModule('/src/lib/founder/fundingPipeline.ts');
 
   /* ── the tab-aware navigation intent ─────────────────────────────────── */
   nav.resetAdminNav();
@@ -164,6 +167,69 @@ try {
     `${tabbedActions.length} tabbed actions · tabs: ${tabIds.join(',')}`);
 
   test('the command centre makes ZERO network calls', networkCalls === 0, `observed ${networkCalls}`);
+
+  /* ── §27/§28 — the RANKED founder queue with an explicit WHY ─────────── */
+  const allQueued = [...model.now, ...model.today, ...model.week];
+  test('every action in the queue carries a rank, and the ranks are 1..N exactly once',
+    model.queue.length === model.counts.total &&
+      model.queue.every((a, i) => a.rank === i + 1) &&
+      new Set(model.queue.map((a) => a.rank)).size === model.queue.length);
+  test('the queue is ordered by the WHY score (descending)',
+    model.queue.every((a, i) => i === 0 || model.queue[i - 1].why.score >= a.why.score),
+    model.queue.map((a) => `${a.id}:${a.why.score}`).join(' '));
+  test('every action carries an explicit WHY with an observed value per factor',
+    allQueued.every((a) => Boolean(a.why) && a.why.factors.length >= 2 &&
+      a.why.factors.every((f) => f.label.length > 3 && f.observed.length > 3 && f.points >= 0)));
+  test('the WHY score is exactly the sum of its factor points (auditable arithmetic)',
+    allQueued.every((a) => a.why.score === a.why.factors.reduce((n, f) => n + f.points, 0)));
+  test('no factor exceeds the max declared in COMMAND_FACTORS',
+    allQueued.every((a) => a.why.factors.every((f) => f.points <= cc.COMMAND_FACTORS[f.id].max)),
+    'a factor scoring above its declared max would mean the ranking disagrees with the stated basis');
+  test('the ranking is DECLARED deterministic and states that no AI is used',
+    cc.COMMAND_QUEUE_IS_DETERMINISTIC === true && /No AI/.test(cc.COMMAND_QUEUE_BASIS));
+  const secondBuild = cc.buildCommandCentre({ now });
+  test('rebuilding at the same time produces byte-identical ranks and scores (deterministic)',
+    JSON.stringify(secondBuild.queue.map((a) => [a.id, a.rank, a.why.score])) ===
+      JSON.stringify(model.queue.map((a) => [a.id, a.rank, a.why.score])));
+
+  /* the relationship slots are derived from the canonical partner targets */
+  const embassy = model.queue.find((a) => a.id === 'relationship-embassy');
+  const embassyTargets = partnershipConfig.FOUNDER_PARTNER_TARGETS.filter((t) => t.programme === 'british_embassy');
+  test('the best embassy route is derived from the canonical embassy targets, not invented',
+    Boolean(embassy) && embassyTargets.some((t) => t.market === embassy.region) &&
+      embassy.navView === 'partnerships' &&
+      /prospective route — no relationship exists/.test(embassy.detail));
+  test('the embassy WHY scores relationship readiness from the stored stage',
+    Boolean(embassy?.why.factors.find((f) => f.id === 'relationship_readiness' && f.observed.includes('route'))));
+  const programme = model.queue.find((a) => a.id === 'relationship-trade-programme');
+  const programmeLabels = Object.values(acquisition.TRADE_PROGRAMMES).map((p) => p.label);
+  test('the best trade programme slot names a programme from the canonical registry',
+    Boolean(programme) && programmeLabels.some((l) => programme.title.includes(l)) &&
+      programme.navView === 'partnerships');
+  const investor = model.queue.find((a) => a.id === 'founder-investor-route');
+  test('the investor slot states the plan figure and that ZERO is committed (no invented commitment)',
+    Boolean(investor) && investor.title.includes('£250,000') && investor.title.includes('0 committed') &&
+      /no investment has been committed/.test(investor.detail));
+  const fundingRoutes = model.queue.filter((a) => a.id.startsWith('funding-route-'));
+  test('every funding opportunity is on the queue exactly once at this stage',
+    fundingRoutes.length === funding.FOUNDER_FUNDING_OPPORTUNITIES.length &&
+      new Set(fundingRoutes.map((a) => a.id)).size === fundingRoutes.length,
+    `${fundingRoutes.length} items · ${funding.FOUNDER_FUNDING_OPPORTUNITIES.length} opportunities`);
+  const accelerator = fundingRoutes.find((a) => a.id === 'funding-route-fund-solo-founders');
+  test('the accelerator slot is the canonical Solo Founders Program route on the Grants tab',
+    Boolean(accelerator) && accelerator.title.includes('Solo Founders Program') &&
+      accelerator.navView === 'super_admin' && accelerator.navTab === 'grants' &&
+      /Mercenta submits nothing/.test(accelerator.detail));
+  test('a funding item at an early stage states the canonical next action, not a fabrication',
+    fundingRoutes.every((a) => /Next: /.test(a.detail) && a.why.factors.some((f) => f.id === 'funding_relevance')));
+
+  const panelSrc = read('src/components/admin/CommandCentre.tsx');
+  const moduleSrc2 = read('src/lib/commandCentre/commandCentre.ts');
+  test('the surface renders the rank and the WHY breakdown for every row',
+    /data-testid="command-why"/.test(panelSrc) && /a\.why\.factors/.test(panelSrc) &&
+      /#\{a\.rank\}/.test(panelSrc) && /data-testid="command-queue-basis"/.test(panelSrc));
+  test('the derivation makes no model call and no network call',
+    !/\bfetch\s*\(|XMLHttpRequest|openrouter|authoriseAiCall|selectModel/i.test(moduleSrc2));
 } catch (err) {
   console.error('[validate-command-centre] THREW:', err);
   failures++;

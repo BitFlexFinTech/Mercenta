@@ -1,9 +1,9 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
 **Last updated: September 15, 2026 — ✅ M13c session 3: PHASE C (legacy
-false-submission state) fixed at the root. NEXT: PHASE D (ranked command-centre
-queue with visible WHY) → final reconciliation → bounded final regression →
-deploy to demo.mercenta.co.uk → Rakazo LAST.**
+false-submission state) + PHASE D (§27/§28 ranked command-centre queue with
+visible WHY) both DONE. NEXT: final reconciliation → bounded final regression →
+deploy to demo.mercenta.co.uk → Rakazo LAST → security audit.**
 Branch `redesign/foundation`, verified HEAD before this session `f2a7434`, protected
 baseline `959b4d2` (verified ancestor). Real repository: `/Users/tadii/Desktop/1. Mercenta`.
 
@@ -64,15 +64,42 @@ forbidden by the standing rules; rotation is the fix). Same standing item as the
   (43 → **60 checks PASS**); `e2e/funding-pipeline.spec.ts` 3/3; tsc 0 errors;
   eslint clean; build ✓; wording gate PASS (218 files).
 
+## THIS SESSION (M13c — PHASE D: §27/§28 ranked queue + WHY) — DONE
+- Built INSIDE the existing command centre (`src/lib/commandCentre/commandCentre.ts`
+  + `src/components/admin/CommandCentre.tsx`). **No new dashboard framework, no
+  redesign, no CSS/layout/design-system change, no new feature beyond §27/§28.**
+- 8 declared ranking factors (`COMMAND_FACTORS`) with a max each; `commandWhy()`
+  records the value actually observed per factor and scores it; score = exact sum.
+- `rankQueue()` assigns 1..N deterministically (score → declared band order →
+  action id) and mutates the SAME objects, so bands and sections share rank/WHY.
+- Opportunities now use the canonical PO-potential ranking (`rankOpportunities`)
+  and carry estimated PO potential + opportunity score as labelled WHY factors.
+- New slots, all from existing stores: best embassy introduction route, best trade
+  programme route (deterministic best-of by canonical prospect coverage, tie-break
+  = canonical target order), the investor route (honest gap: no investor target
+  recorded yet, £250,000 plan, 0 committed), and one funding item per §10/§31
+  opportunity using `fundingPipelineSummary()` with the pipeline's own next action.
+- UI: rank badge + `Why: <factor> <points> · … = <score>` on each existing row and
+  the declared ranking basis line. Existing text sizes/colours only.
+- Validator 23 → **39 checks PASS**; e2e 3 → **4/4 PASS**; affected run 17/17;
+  tsc 0 errors; eslint clean; build ✓; wording gate PASS (218 files).
+
 ## STILL OPEN (next session, priority order)
-1. **§27/§28 unified ranked founder queue with visible WHY** — the NEXT phase
-   (PHASE D): extend `src/lib/commandCentre/commandCentre.ts` with the
-   relationship/funding slots (best embassy introduction, best trade programme,
-   best investor, best accelerator) and the explicit per-item WHY breakdown;
-   `fundingPipelineSummary()` is the ready-made input for the funding slots.
-   Then: bounded final reconciliation → bounded final regression
-   (`npx playwright test --workers=2`) → deploy to demo.mercenta.co.uk.
-   **Rakazo is deliberately LAST** (after deployment) — do NOT touch it earlier.
+1. **FINAL RECONCILIATION** (bounded, no new audit): confirm the existing major
+   workflows connect — brand PO → accept → shipment → pay → labels; admin PO and
+   shipment exceptions; opportunity → outreach; funding pipeline; company/Google
+   setup; cost protection; launch; command-centre CTAs. Then the **FINAL
+   REGRESSION**: tsc, eslint, build, wording, all validators, RLS audit, integrity
+   audit, `npx playwright test --workers=2`, investor demo.
+2. **DEPLOY** the verified build to `demo.mercenta.co.uk` (`scripts/deploy-demo.sh`
+   only; never the live domain) and verify the deployed site. **STOP AND REPORT.**
+3. **RAKAZO — LAST, only after the deploy is verified**: register the integration,
+   add `IntegrationId` + `INTEGRATION_META`, fail-closed mode resolution, URL-only
+   config, reconcile docs, validator + integration-hub test + scope guards, then
+   regression again. Do NOT do this before the deployment.
+4. **SECURITY AUDIT after build completion**: rotate the Namecheap FTP password
+   and the Twilio recovery code (values still exist in past commits; rotation is
+   the fix — history rewrite is forbidden), review secrets/history, harden.
 2. **§27/§28 unified ranked founder queue with visible WHY** — extend
    `src/lib/commandCentre/commandCentre.ts`; `fundingPipelineSummary()` is the
    ready-made input for the funding slots.

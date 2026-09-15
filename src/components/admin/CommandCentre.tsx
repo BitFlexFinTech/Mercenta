@@ -74,6 +74,9 @@ return (
           <p className="text-[11px] text-zinc-500 mt-1">
             What needs your attention now, and the exact next action for each item.
           </p>
+          <p className="text-[10px] text-zinc-600 mt-0.5" data-testid="command-queue-basis">
+            Ranked {model.counts.total > 0 ? `1–${model.counts.total}` : ''} by {model.queueBasis}
+          </p>
         </div>
         <div className="flex items-center gap-2 text-[10px]">
           <Badge className="bg-red-500/15 text-red-300 border-red-500/20">{model.counts.now} now</Badge>
@@ -105,8 +108,16 @@ return (
                       data-testid="command-action"
                     >
                       <div className="min-w-[240px] flex-1">
-                        <p className="text-xs text-white">{a.title}</p>
+                        <p className="text-xs text-white">
+                          {typeof a.rank === 'number' && <span className="text-zinc-500 mr-1">#{a.rank}</span>}
+                          {a.title}
+                        </p>
                         <p className="text-[10px] text-zinc-500">{a.detail}</p>
+                        {a.why && (
+                          <p className="text-[10px] text-zinc-600" data-testid="command-why">
+                            Why: {a.why.factors.map((f) => `${f.label} ${f.points}`).join(' · ')} = {a.why.score}
+                          </p>
+                        )}
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-[10px]">
                         {a.category && <span className="text-zinc-500">{a.category}</span>}
@@ -143,6 +154,7 @@ return (
               <ul className="mt-2 space-y-1">
                 {section.actions.slice(0, 4).map((a) => (
                   <li key={a.id} className="text-[10px] text-zinc-400">
+                    {typeof a.rank === 'number' && <span className="text-zinc-600">#{a.rank} </span>}
                     <span className="text-zinc-300">{a.title}</span>
                     <button type="button" className="ml-1 text-sky-300/90 hover:underline" onClick={() => run(a)}>
                       {a.cta}

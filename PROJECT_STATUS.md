@@ -2,6 +2,51 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
+> ## ✅ M13c PHASE D — RANKED FOUNDER COMMAND CENTRE QUEUE + VISIBLE WHY (2026-09-15, session 3)
+>
+> §27/§28 is now built **inside the existing command centre** — no second
+> dashboard, no redesign, no CSS/layout/design-system change. The bands
+> (NOW / TODAY / THIS WEEK) and the five category sections are the same surfaces
+> the founder already had; they are now driven by an explicit ranked queue.
+>
+> **What exists now (all derived from stores that already existed):**
+> | Piece | Where |
+> |---|---|
+> | 8 declared ranking factors with a max score each (`urgency`, `operational_risk`, `commercial_potential`, `po_potential`, `relationship_readiness`, `funding_relevance`, `founder_approval_required`, `next_action_available`) — declared ONCE so UI, validators and reports cannot disagree. | `src/lib/commandCentre/commandCentre.ts` (`COMMAND_FACTORS`) |
+> | `commandWhy()` — builds each item's WHY from the value actually observed, then scores it. A factor is only listed when the store supports it; score = exact sum of the factor points. | same |
+> | `rankQueue()` — ranks every action 1..N deterministically (score → declared band order → action id). Same objects are mutated, so bands and sections show the identical rank/WHY. | same |
+> | The founder QUEUE: `queue` + `queueBasis` on the model, headings ordered by rank. | same |
+> | Opportunities now come from the **canonical PO-potential ranking** (`rankOpportunities`), not a score sort, and carry their estimated PO potential + opportunity score as WHY factors (labelled estimates). | same |
+> | **Relationship slots**: best embassy introduction route and best trade programme route, chosen deterministically by how many canonical prospects sit in that market / are tagged to that programme (tie-break = canonical target order). Both keep the "prospective route — no relationship exists" wording. | same |
+> | **Investor slot**: honest — no investor target exists in the plan yet, so nothing is ranked; the item states the £250,000 plan figure, **0 committed**, and says to record the routes first. | same |
+> | **Funding slots**: one item per real opportunity from the §10/§31 pipeline, using `fundingPipelineSummary()` for the "awaiting your approval" / "approved — record your submission" states and the pipeline's own canonical next action. The accelerator slot is the real Solo Founders Program route. Mercenta-submits-nothing wording retained. | same |
+> | Rank + WHY rendered on each existing row (rank badge + `Why: <factor> <points> · … = <score>`), plus the declared ranking basis line. Existing text sizes/colours only. | `src/components/admin/CommandCentre.tsx` |
+> | +16 checks appended to the **existing** validator (23 → 39). | `scripts/validate-command-centre.mjs` |
+> | +1 browser test (3 → 4) proving every rendered row shows a rank and a WHY, that the basis says no AI is used, and that the funding-slots' CTA actually lands on the screen that performs it (no dead CTAs). | `e2e/command-centre.spec.ts` |
+>
+> **Honesty preserved:** no AI/model call anywhere in the ranking (pinned by the
+> validator), no invented investor/partner/funding data, every estimate labelled,
+> every CTA names a real destination (Super Admin tabs validated against the
+> actual tab list).
+>
+> **VERIFIED THIS SESSION (real output):** `npx tsc --noEmit -p tsconfig.app.json`
+> → 0 errors · eslint on both touched files → clean · `npm run build` → ✓ built in
+> 3.89s · `node scripts/lint-wording.mjs` → PASS (218 files) ·
+> `node scripts/validate-command-centre.mjs` → **PASS, 39 checks** ·
+> `npx playwright test e2e/command-centre.spec.ts --workers=2` → **4 passed / 0
+> failed** · `npx playwright test e2e/command-centre.spec.ts e2e/dashboard.spec.ts
+> e2e/funding-pipeline.spec.ts --workers=2` → **17 passed / 0 failed** ·
+> `node scripts/validate-funding-pipeline.mjs` → PASS (60 checks, unaffected).
+>
+> **NOT changed:** no new dashboard framework, no design-system change, Rakazo
+> untouched, no feature added beyond §27/§28.
+>
+> **NEXT (this directive):** FINAL RECONCILIATION (bounded end-to-end wiring
+> check) → FINAL REGRESSION (tsc / eslint / build / wording / validators / RLS /
+> integrity / Playwright `--workers=2` / investor demo) → deploy the verified
+> build to `demo.mercenta.co.uk` → then (and only then) Rakazo → security audit.
+> ---
+> ---
 > ## ✅ M13c PHASE C — LEGACY FALSE-SUBMISSION STATE FIXED AT THE ROOT (2026-09-15, session 3)
 >
 > **Checkpoint verified before any edit (read-only):** branch `redesign/foundation`,
@@ -147,13 +192,12 @@
 >    internal approval is now `approved_internally` with a required approver identity,
 >    and an external submission is representable only through the founder-gated
 >    `recordGrantSubmission` / `recordInvestorSubmission`.
-> 2. **§27/§28 unified ranked founder queue with visible WHY** — still not built.
->    The relationship/funding slots (best embassy introduction, best trade
->    programme, best investor, best accelerator) and the §28 factor breakdown are
->    missing; the existing per-engine rankings are already used by the command
->    centre, so this is an EXTENSION of `src/lib/commandCentre/commandCentre.ts`.
->    `fundingPipelineSummary()` is the ready-made input for the "application
->    awaiting approval / awaiting submission" slots.
+> 2. ~~**§27/§28 unified ranked founder queue with visible WHY**~~ — **RESOLVED in
+>    session 3 (M13c PHASE D, see the block at the top of this file):** the ranked
+>    queue with the declared 8-factor WHY breakdown, the relationship/funding slots
+>    (best embassy route, best trade programme, investor route, accelerator/residency/
+>    ecosystem routes) and the canonical PO-potential opportunity ranking are built
+>    inside the EXISTING command centre. Validator 23 → 39 checks; e2e 3 → 4.
 > 3. Credential/founder work unchanged (Google OAuth client id, Companies House +
 >    GOV.UK codes, HMRC, Google Edge Function deploy, real cost prices, Tottenham
 >    ASIN evidence capture, **Twilio recovery-code rotation**, and now the
