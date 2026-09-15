@@ -362,6 +362,15 @@ try {
     'e2e/opportunity-discovery.spec.ts',
     // The Brand Intelligence view gains the new panel (EXTENDING the M12 layout).
     'src/components/layout/AdminShell.tsx',
+    // §31 — the Mercenta Launch Centre files.
+    'src/config/launchPlatforms.ts',
+    'src/data/launchStore.ts',
+    'src/lib/founder/launchPackage.ts',
+    'src/components/admin/LaunchCentre.tsx',
+    'scripts/validate-launch-centre.mjs',
+    'e2e/launch-centre.spec.ts',
+    // Super Admin gains the Launch Centre tab.
+    'src/components/admin/SuperAdminPanel.tsx',
   ];
   const protectedPaths = [
     'src/lib/intelligence/',

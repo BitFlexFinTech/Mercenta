@@ -127,6 +127,40 @@
 > **No new provider, no new store, no second scoring engine.** The only new
 > integration surface is *none*: the layer reads the canonical prospect store.
 > ---
+> ## ✅ PHASE 13 — MERCENTA LAUNCH CENTRE (M13) — 2026-09-14
+>
+> **Mercenta's OWN startup/MVP launch profiles — not brand-partner discovery.**
+>
+> - **`src/config/launchPlatforms.ts`** (NEW): all **14** §31 platforms (Product Hunt,
+>   Indie Hackers, Hacker News, BetaList, SourceForge, Uneed, Peerlist, Microlaunch,
+>   AlternativeTo, Dev Hunt, SaaSHub, Launching Next, StartupBase, Tiny Startups),
+>   each with site / signup route / requirements page / submission channel /
+>   audience / known requirements. `apiAvailable: false` and
+>   `requirementsVerified: false` on **every** one — nothing claims an automated
+>   submission exists, and the current requirements are marked for verification
+>   against the platform's own page rather than assumed.
+> - **`src/lib/founder/launchPackage.ts`** (NEW): `buildSubmissionPackage()` (the
+>   complete copyable package), `buildSubmissionChecklist()` (the guided workflow),
+>   `launchPlatformIsComplete()` and `outstandingPlatforms()`.
+> - **`src/data/launchStore.ts`** (NEW): the real state machine
+>   (`not_started` → `account_created`/`blocked`; `not_prepared` → `prepared` →
+>   `submitted`), unknown platforms **refused**, and every transition appended to the
+>   **canonical audit trail** (`demoStore.demoAuditLog`,
+>   `entityType: 'mercenta_launch_platform'`) with the founder as actor.
+> - **`src/components/admin/LaunchCentre.tsx`** (NEW) + a **Launch Centre** tab in
+>   Super Admin: per-platform **[Prepare Profile] [Modify] [Copy] [Open]
+>   [Mark Submitted]**, the progress summary, the drill-down with the copyable
+>   package and the checklist that keeps "verify the requirements on the platform"
+>   outstanding until it is genuinely done.
+>
+> **VERIFIED EVIDENCE**
+> | What | Result |
+> |---|---|
+> | `node scripts/validate-launch-centre.mjs` (NEW) | **PASS — 27 checks**, incl. "NO platform claims an authorised submission API", "preparing is NOT the same as submitting", "an unknown platform is REFUSED (fail-closed)", "every launch mutation is attributable in the canonical audit trail", "zero network calls" |
+> | `npx playwright test e2e/launch-centre.spec.ts` (NEW) | **3 passed / 0 failed** (14 rows render + honest copy; Prepare ≠ Submitted as real state changes; drill-down shows the package + checklist) |
+> | `npx tsc --noEmit -p tsconfig.app.json` / `eslint` / `npm run build` | 0 errors / 0 problems / ✓ built |
+> | `node scripts/lint-wording.mjs` | PASS — 203 files, 0 violations |
+> ---
 > ## ⏸️ M12 CHECKPOINT (historical record — everything in it is now RESOLVED above) — 2026-09-14
 >
 > **CHECKPOINT ONLY.** The owner cancelled the M12 session mid-flight. No M12 work

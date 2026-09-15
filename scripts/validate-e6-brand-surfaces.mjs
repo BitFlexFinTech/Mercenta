@@ -280,6 +280,15 @@ const M13_SCOPE = new Set([
   'src/components/admin/OpportunityDiscoveryPanel.tsx',
   'scripts/validate-opportunity-discovery.mjs',
   'e2e/opportunity-discovery.spec.ts',
+  // §31 — the Mercenta Launch Centre (MERCENTA'S OWN launch profiles).
+  'src/config/launchPlatforms.ts',
+  'src/data/launchStore.ts',
+  'src/lib/founder/launchPackage.ts',
+  'src/components/admin/LaunchCentre.tsx',
+  'scripts/validate-launch-centre.mjs',
+  'e2e/launch-centre.spec.ts',
+  // Super Admin gains the Launch Centre tab.
+  'src/components/admin/SuperAdminPanel.tsx',
 ]);
 
 /**
