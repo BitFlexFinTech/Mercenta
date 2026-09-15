@@ -34,7 +34,12 @@ export type IntegrationId =
   // simulation by accident. Xero (accounting) and Stripe (subscriptions) are
   // explicitly NOT payout rails — see `src/config/payouts.ts`.
   | 'wise'
-  | 'payoneer';
+  | 'payoneer'
+  // §21 (M13 Phase 8) — Google Drive / Docs / Sheets / Slides / Calendar via the
+  // founder's personal Google account. Registered so its mode is authoritative
+  // (OAuth connect, no API-key form) and an unconfigured Google can never be
+  // treated as simulation by accident.
+  | 'google';
 
 export type IntegrationStatus =
   | 'disconnected'
@@ -224,6 +229,10 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   // built `payouts-transfer` Edge Function with no other code change.
   wise: { status: 'disconnected', sandbox: false },
   payoneer: { status: 'disconnected', sandbox: false },
+  // §21 (M13 Phase 8) — Google. Disconnected until the founder completes the
+  // OAuth flow; the wizard drives it and never claims 'connected' without a
+  // confirmed server-side token exchange.
+  google: { status: 'disconnected', sandbox: false },
 };
 
 /** API keys are held IN-MEMORY ONLY until Vault-backed storage is wired. */

@@ -20,6 +20,13 @@ import { isMockChSecret, isMockHmrcSecret } from './mockCredentials';
 export type {
   ChCompany,
   ChLookupResult,
+  ChCompanyRecord,
+  ChDataSource,
+  ChOfficer,
+  ChPersonWithSignificantControl,
+  ChFiling,
+  ChCharge,
+  ChRecordResult,
   ChCredentials,
   CompaniesHouseClient,
 } from './companiesHouseClient';
@@ -31,7 +38,7 @@ export type {
   HmrcFilingResult,
 } from './hmrcClient';
 export { CH_MOCK_CREDENTIALS, HMRC_MOCK_CREDENTIALS } from './mockCredentials';
-export { resetMockCompaniesHouseState, seedCompaniesHouse } from './companiesHouseMock';
+export { resetMockCompaniesHouseState, seedCompaniesHouse, isMercentaCompanyNumber } from './companiesHouseMock';
 export { resetMockHmrcState, simulateHmrcOutage } from './hmrcMock';
 
 export function createCompaniesHouseClientForConnection(

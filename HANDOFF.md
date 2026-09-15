@@ -1,6 +1,32 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-**Last updated: September 14, 2026 — ⏸️ M12 CHECKPOINT (handoff to a NEW Cline chat).**
+**Last updated: September 15, 2026 — ✅ M13 CONTINUATION, Phases 9 + 8 DONE.**
+Branch `redesign/foundation`, verified HEAD before this session `5978c13`, protected
+baseline `959b4d2` (verified ancestor). Real repository: `/Users/tadii/Desktop/1. Mercenta`.
+
+**Built + verified THIS session (nothing already verified was rebuilt):**
+- **Phase 9 — Company / Government Control Centre**: `src/config/company.ts` (single
+  source of truth for Mercenta's registration facts, number 17457777), extended
+  Companies House client pair (`getCompanyRecord/getOfficers/PSC/filingHistory/charges`,
+  mock-first, mock invents no Mercenta fact), `src/data/companyStore.ts` (registrar
+  snapshot with provenance, deadlines, confirmation-statement workflow with the
+  founder-approval gate, `fileViaOfficialApi` REFUSAL, register-only verification,
+  masked government-credential vault), `CompanyControlCentre.tsx` + Super Admin tab
+  **Company**. Validator 49 checks PASS; e2e 4/4.
+- **Phase 8 — Google integration + setup wizard**: `src/config/google.ts` (personal
+  `mercentapartners@gmail.com`, My Drive only, least-privilege scopes, 22-item
+  workspace plan), `src/lib/google/` client pair + factory + runner (dependency order,
+  retry, explicit skipped children), `src/data/googleStore.ts` (records
+  `exchange_pending`, NOT connected; no token stored), `GoogleSetupWizard.tsx` + Super
+  Admin tab **Google**, `google` registered in the integrations registry/order/meta.
+  Validator 42 checks PASS; e2e 3/3.
+
+**NEXT SESSION:** read the UPDATED "M13 REMAINING WORK" table in `PROJECT_STATUS.md`
+(Phase 10 operating-cost dashboard → Phase 11 command centre → Phase 14 docs →
+spec-selector repoint → full regression). Do NOT rebuild Phases 3, 8, 9, 12, 13.
+**Credentials the founder enters in Super Admin (never in code/docs/prompts/ZIP):**
+Google OAuth client id (Super Admin → Google), Companies House authentication code and
+GOV.UK One Login personal code (Super Admin → Company), HMRC when VAT setup completes.
 The M12 session was **cancelled mid-flight by the owner** and is checkpointed in
 `PROJECT_STATUS.md` (top block "M12 CHECKPOINT"). **Branch `redesign/foundation`,
 HEAD `a6fac56`, protected baseline `959b4d2` (verified ancestor).**

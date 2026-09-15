@@ -322,6 +322,25 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Read the Mercenta Payoneer program status (read-only)',
   },
+  /**
+   * §21 (M13 Phase 8) — Google. OAuth only (never an API-key form): the founder
+   * authorizes the personal account and the tokens stay server-side. The setup
+   * wizard in Super Admin drives the flow and creates the Drive structure.
+   */
+  google: {
+    id: 'google',
+    name: 'Google (Drive, Docs, Sheets, Slides, Calendar)',
+    description:
+      'The founder\'s personal Google account (mercentapartners@gmail.com). OAuth only — Mercenta never asks for or stores the Google password, and the refresh token is held by the server-side secret store, never the browser.',
+    authMethod: 'oauth',
+    fields: [],
+    testCallDescription: 'Create a test document and read it back through the Drive API',
+    oauth: {
+      authorizeUrlBase: 'https://accounts.google.com/o/oauth2/v2/auth',
+      clientIdParam: 'client_id',
+      clientIdLabel: 'Google OAuth Client ID (from Google Cloud Console)',
+    },
+  },
 };
 
 export const INTEGRATION_ORDER: IntegrationId[] = [
@@ -349,6 +368,9 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   // §Canonical model §6 — payout rails, default first.
   'wise',
   'payoneer',
+  // §21 (M13 Phase 8) — Google drives the Docs/Sheets/Slides/Drive integration,
+  // so its card belongs in the wizard order (OAuth connect).
+  'google',
 ];
 
 /**
@@ -397,6 +419,9 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   // simulation is the authoritative documented state.
   companies_house: { category: 'compliance', defaultMode: 'simulation' },
   hmrc: { category: 'compliance', defaultMode: 'simulation' },
+  // §21 (M13 Phase 8) — Google. No OAuth exchange has been completed, so the
+  // authoritative documented state is simulation (the setup wizard's mock client).
+  google: { category: 'infrastructure', defaultMode: 'simulation' },
   // §Canonical model §6 — payout rails. Simulation is authoritative until real
   // rail credentials exist, and a simulated transfer is unmistakably labelled.
   wise: { category: 'finance', defaultMode: 'simulation' },

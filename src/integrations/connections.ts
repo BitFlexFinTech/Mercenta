@@ -11,6 +11,8 @@
 
 import type { IntegrationsMap } from './types';
 import type { SpApiCredentials } from '@/lib/spapi/client';
+import type { ChCredentials } from '@/lib/compliance/companiesHouseClient';
+import type { GoogleCredentials } from '@/lib/google/googleClient';
 import { UK_MARKETPLACE_ID } from '@/lib/spapi/transform';
 
 let inMemory: IntegrationsMap | null = null;
@@ -50,6 +52,52 @@ export function spApiConnectionCredentials(): SpApiCredentials | null {
       marketplaceId: s.metadata.marketplaceId ?? UK_MARKETPLACE_ID,
       verified: true,
     };
+  }
+  return null;
+}
+
+/**
+ * §22–§25 (M13 Phase 9) — resolve Companies House credentials for the mock-first
+ * factory, exactly like `spApiConnectionCredentials`. Only a VERIFIED,
+ * non-sandbox connection holding a `vault:` secret reference yields credentials;
+ * anything else (including a `mock:` ref or no connection at all) returns null so
+ * the deterministic mock client runs. Swapping simulation → live is
+ * credentials-only: no domain workflow changes.
+ */
+export function companiesHouseConnectionCredentials(): ChCredentials | null {
+  const map = loadIntegrationsSync();
+  const s = map?.companies_house;
+  if (!s) return null;
+  if (
+    s.status === 'connected' &&
+    !s.sandbox &&
+    !s.disabled &&
+    s.metadata?.secretRef &&
+    s.metadata.secretRef.startsWith('vault:')
+  ) {
+    return { secretRef: s.metadata.secretRef, verified: true };
+  }
+  return null;
+}
+
+/**
+ * §21 (M13 Phase 8) — resolve Google credentials for the mock-first factory.
+ * Same rule as the other providers: only a VERIFIED, non-sandbox connection with
+ * a `vault:` secret reference yields credentials, so a `mock:` ref or an
+ * unexchanged OAuth code can never reach a live Google API call.
+ */
+export function googleConnectionCredentials(): GoogleCredentials | null {
+  const map = loadIntegrationsSync();
+  const s = map?.google;
+  if (!s) return null;
+  if (
+    s.status === 'connected' &&
+    !s.sandbox &&
+    !s.disabled &&
+    s.metadata?.secretRef &&
+    s.metadata.secretRef.startsWith('vault:')
+  ) {
+    return { secretRef: s.metadata.secretRef, verified: true };
   }
   return null;
 }

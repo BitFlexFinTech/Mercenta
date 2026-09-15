@@ -48,6 +48,72 @@ export type ChFetchLike = (
   init?: { method?: string; headers?: Record<string, string>; body?: unknown }
 ) => Promise<{ ok: boolean; status: number; json: () => Promise<unknown> }>;
 
+/* ── §22–§25 (M13 Phase 9) — company-record reads the Company Control Centre needs.
+ * Same contract for the mock and the live client; adding these did not change
+ * `lookupCompany`, which remains the brand-verification path used by
+ * complianceSync/scenarioEngine. */
+
+/** Where a returned value came from — the panel labels every figure with it. */
+export type ChDataSource = 'registrar' | 'simulated_registrar' | 'founder_supplied';
+
+export interface ChCompanyRecord {
+  companyNumber: string;
+  companyName: string;
+  status: ChCompany['status'];
+  companyType?: string;
+  incorporationDate?: string;
+  registeredOfficeAddress?: string;
+  sicCodes: string[];
+  /** Registrar-reported next filing dates, when the register supplies them. */
+  nextConfirmationStatementDue?: string;
+  nextAccountsDue?: string;
+  hasCharges: boolean;
+  hasInsolvencyHistory: boolean;
+  dataSource: ChDataSource;
+}
+
+export interface ChOfficer {
+  name: string;
+  role: string;
+  appointedOn?: string;
+  resignedOn?: string;
+  nationality?: string;
+  occupation?: string;
+}
+
+export interface ChPersonWithSignificantControl {
+  name: string;
+  kind: string;
+  naturesOfControl: string[];
+  notifiedOn?: string;
+  ceasedOn?: string;
+}
+
+export interface ChFiling {
+  transactionId: string;
+  date: string;
+  type: string;
+  description: string;
+  category?: string;
+}
+
+export interface ChCharge {
+  chargeId: string;
+  createdAt: string;
+  description?: string;
+  status?: string;
+  personsEntitled?: string[];
+}
+
+export interface ChRecordResult<T> {
+  ok: boolean;
+  data?: T;
+  notFound?: boolean;
+  error?: string;
+  /** Propagated so the UI can never present a simulated read as the real register. */
+  dataSource?: ChDataSource;
+}
+
 const defaultFetch: ChFetchLike = async (url, init) => {
   const res = await fetch(url, {
     method: init?.method ?? 'GET',
@@ -73,6 +139,29 @@ export function createCompaniesHouseClient(
       );
     }
     return creds;
+  }
+
+  /**
+   * §22–§25 — read one registrar resource through the Edge Function proxy (the
+   * API key never reaches the browser). Same envelope for every resource so the
+   * panel renders a uniform, source-labelled result.
+   */
+  async function read<T>(path: string): Promise<ChRecordResult<T>> {
+    const creds = requireCredentials();
+    const res = await transport(`${edgeFunctionBase}${path}`, {
+      method: 'GET',
+      headers: { 'X-Secret-Ref': creds.secretRef },
+    });
+    const body = (await res.json()) as { items?: T[]; error?: string } | T;
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: (body as { error?: string }).error ?? `HTTP ${res.status}`,
+        dataSource: 'registrar',
+      };
+    }
+    const items = (body as { items?: T[] }).items;
+    return { ok: true, data: (items ? items : body) as T, dataSource: 'registrar' };
   }
 
   return {
@@ -113,6 +202,150 @@ export function createCompaniesHouseClient(
         },
       };
     },
+
+    /** §22–§25 — the company record behind the Company Control Centre. */
+    async getCompanyRecord(companyNumber: string): Promise<ChRecordResult<ChCompanyRecord>> {
+      const res = await read<{
+        company_number?: string;
+        company_name?: string;
+        company_status?: ChCompany['status'];
+        type?: string;
+        date_of_creation?: string;
+        registered_office_address?: Record<string, string>;
+        sic_codes?: string[];
+        confirmation_statement?: { next_due?: string };
+        accounts?: { next_due?: string };
+        has_charges?: boolean;
+        has_insolvency_history?: boolean;
+        error?: string;
+      }>(`/company/${encodeURIComponent(companyNumber)}`);
+      if (!res.ok) return res as ChRecordResult<ChCompanyRecord>;
+      const d = res.data;
+      if (!d?.company_number) return { ok: true, notFound: true, dataSource: 'registrar' };
+      return {
+        ok: true,
+        dataSource: 'registrar',
+        data: {
+          companyNumber: d.company_number,
+          companyName: d.company_name ?? '',
+          status: d.company_status ?? 'active',
+          companyType: d.type,
+          incorporationDate: d.date_of_creation,
+          registeredOfficeAddress: d.registered_office_address
+            ? Object.values(d.registered_office_address).filter(Boolean).join(', ')
+            : undefined,
+          sicCodes: d.sic_codes ?? [],
+          nextConfirmationStatementDue: d.confirmation_statement?.next_due,
+          nextAccountsDue: d.accounts?.next_due,
+          hasCharges: Boolean(d.has_charges),
+          hasInsolvencyHistory: Boolean(d.has_insolvency_history),
+          dataSource: 'registrar',
+        },
+      };
+    },
+
+    async getOfficers(companyNumber: string): Promise<ChRecordResult<ChOfficer[]>> {
+      const res = await read<ChOfficer>(`/company/${encodeURIComponent(companyNumber)}/officers`);
+      if (!res.ok) return res as unknown as ChRecordResult<ChOfficer[]>;
+      const raw = (res.data ?? []) as unknown as {
+        name?: string;
+        officer_role?: string;
+        appointed_on?: string;
+        resigned_on?: string;
+        nationality?: string;
+        occupation?: string;
+      }[];
+      const list = Array.isArray(raw) ? raw : [];
+      return {
+        ok: true,
+        dataSource: 'registrar',
+        data: list.map((o) => ({
+          name: o.name ?? '',
+          role: o.officer_role ?? 'officer',
+          appointedOn: o.appointed_on,
+          resignedOn: o.resigned_on,
+          nationality: o.nationality,
+          occupation: o.occupation,
+        })),
+      };
+    },
+
+    async getPersonsWithSignificantControl(
+      companyNumber: string
+    ): Promise<ChRecordResult<ChPersonWithSignificantControl[]>> {
+      const res = await read<ChPersonWithSignificantControl>(
+        `/company/${encodeURIComponent(companyNumber)}/persons-with-significant-control`
+      );
+      if (!res.ok) return res as unknown as ChRecordResult<ChPersonWithSignificantControl[]>;
+      const raw = (res.data ?? []) as unknown as {
+        name?: string;
+        kind?: string;
+        natures_of_control?: string[];
+        notified_on?: string;
+        ceased_on?: string;
+      }[];
+      const list = Array.isArray(raw) ? raw : [];
+      return {
+        ok: true,
+        dataSource: 'registrar',
+        data: list.map((p) => ({
+          name: p.name ?? '',
+          kind: p.kind ?? 'person-with-significant-control',
+          naturesOfControl: p.natures_of_control ?? [],
+          notifiedOn: p.notified_on,
+          ceasedOn: p.ceased_on,
+        })),
+      };
+    },
+    async getFilingHistory(companyNumber: string): Promise<ChRecordResult<ChFiling[]>> {
+      const res = await read<ChFiling>(`/company/${encodeURIComponent(companyNumber)}/filing-history`);
+      if (!res.ok) return res as unknown as ChRecordResult<ChFiling[]>;
+      const raw = (res.data ?? []) as unknown as {
+        transaction_id?: string;
+        date?: string;
+        type?: string;
+        description?: string;
+        category?: string;
+      }[];
+      const list = Array.isArray(raw) ? raw : [];
+      return {
+        ok: true,
+        dataSource: 'registrar',
+        data: list.map((f) => ({
+          transactionId: f.transaction_id ?? '',
+          date: f.date ?? '',
+          type: f.type ?? '',
+          description: f.description ?? '',
+          category: f.category,
+        })),
+      };
+    },
+
+    async getCharges(companyNumber: string): Promise<ChRecordResult<ChCharge[]>> {
+      const res = await read<ChCharge>(`/company/${encodeURIComponent(companyNumber)}/charges`);
+      if (!res.ok) return res as unknown as ChRecordResult<ChCharge[]>;
+      const raw = (res.data ?? []) as unknown as {
+        id?: string;
+        created_on?: string;
+        particulars?: { description?: string };
+        status?: string;
+        persons_entitled?: { name?: string }[];
+      }[];
+      const list = Array.isArray(raw) ? raw : [];
+      return {
+        ok: true,
+        dataSource: 'registrar',
+        data: list.map((c) => ({
+          chargeId: c.id ?? '',
+          createdAt: c.created_on ?? '',
+          description: c.particulars?.description,
+          status: c.status,
+          personsEntitled: (c.persons_entitled ?? []).map((p) => p.name ?? '').filter(Boolean),
+        })),
+      };
+    },
+
+
   };
 }
 

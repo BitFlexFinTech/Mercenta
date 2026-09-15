@@ -18,7 +18,10 @@ export type EventType =
   | 'shipment_milestone'
   | 'provider_failure'
   | 'company_verified'
-  | 'hmrc_filing';
+  | 'hmrc_filing'
+  // §22–§25 (M13 Phase 9) — a statutory company-filing deadline (confirmation
+  // statement / accounts) detected from the register.
+  | 'company_filing_due';
 
 export interface PlatformEvent {
   id: string;
@@ -54,4 +57,5 @@ export const EVENT_SEVERITY_MAP: Record<EventType, EventSeverity> = {
   provider_failure: 'important',
   company_verified: 'informational',
   hmrc_filing: 'important',
+  company_filing_due: 'critical',
 };

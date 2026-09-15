@@ -2,7 +2,68 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
-> ## ✅ M12 CLOSED / M13 BUILD-FORWARD — 2026-09-14
+> ## ✅ PHASE 9 — COMPANY / GOVERNMENT CONTROL CENTRE (M13) — 2026-09-15
+>
+> **DONE and verified. Nothing already verified was rebuilt.**
+>
+> - `src/config/company.ts` (NEW) — the ONLY module holding Mercenta's registration
+>   facts (`COMPANY_REGISTRATION`, number `17457777`; legal name imported from
+>   `src/config/brand.ts`). Registrar fields are `null` until a real read; the
+>   confirmation-statement workflow, the 90/60/30/7/0 reminder thresholds, the two
+>   government credential descriptors, manual-action links and
+>   `OFFICIAL_CONFIRMATION_STATEMENT_FILING_CONFIGURED = false` live here.
+> - `src/lib/compliance/companiesHouseClient.ts` + `companiesHouseMock.ts` gained
+>   `getCompanyRecord / getOfficers / getPersonsWithSignificantControl /
+>   getFilingHistory / getCharges` behind the SAME contract (mock-first). The mock
+>   invents NO Mercenta fact (empty officers/PSC/filings, `SIMULATED REGISTRAR`
+>   address), and `lookupCompany`'s pinned every-4th-call rate limit is unchanged —
+>   the new reads use a SEPARATE counter.
+> - `src/integrations/connections.ts` gained `companiesHouseConnectionCredentials()`
+>   (verified non-sandbox `vault:` connection only → real client; anything else →
+>   mock).
+> - `src/data/companyStore.ts` (NEW): registrar snapshot with `dataSource`
+>   provenance, deadline arithmetic, the Detect→Prepare→Notify→Review→Approve→File→
+>   Verify workflow with the founder-approval gate, `fileViaOfficialApi` REFUSAL,
+>   manual-register recording, register-only verification, derived tasks, and the
+>   masked government-credential vault (`vault:` refs only — the value never enters
+>   a record, audit entry or metadata).
+> - `src/components/admin/CompanyControlCentre.tsx` (NEW) + Super Admin tab
+>   **Company**. `src/lib/events/types.ts` gained `company_filing_due`.
+>
+> **VERIFIED:** `scripts/validate-company-control-centre.mjs` (NEW) **PASS — 49
+> checks**; `e2e/company-control-centre.spec.ts` (NEW) **4 passed / 0 failed**;
+> `tsc` 0 errors; eslint 0; `npm run build` ✓; wording gate PASS (205 files);
+> `validate-mock-providers`, `validate-mock-seam`, `validate-event-feed`,
+> `integrity-audit`, `validate-investor-demo`, `validate-launch-centre`,
+> `validate-opportunity-discovery` all still PASS.
+> ---
+> ## ✅ PHASE 8 — GOOGLE INTEGRATION + SETUP WIZARD (M13) — 2026-09-15
+>
+> - `src/config/google.ts` (NEW) — personal account `mercentapartners@gmail.com`
+>   (My Drive only, `sharedDrives: false`, `workspaceTenant: false`), least-privilege
+>   scopes (`drive.file`, not full `drive`), the OAuth endpoint/params, and the
+>   **22-item workspace plan** (root + 12 owner folders, `Templates`, 2 master
+>   sheets with tabs, a Docs template, a Slides template, and four named capability
+>   tests covering Sheets/Docs/Slides/Calendar).
+> - `src/lib/google/googleClient.ts` (NEW, real via Edge-Function proxy —
+>   `X-Secret-Ref` only, never a token), `googleMock.ts` (NEW, identical contract,
+>   `MOCK-GD-…` ids, idempotent by name, every 5th write fails then retries),
+>   `index.ts` (NEW, `createGoogleClientForConnection` factory),
+>   `workspaceSetup.ts` (NEW runner: dependency order, one retry, explicit
+>   `skipped` children when a parent fails).
+> - `src/data/googleStore.ts` (NEW): setup run + per-item outcomes, OAuth state that
+>   records `exchange_pending` (NOT `connected`) after a code arrives, connection
+>   only after a confirmed server-side exchange, derived tasks, canonical audit
+>   (`entityType: 'google_workspace'`). **No token and no credential is stored.**
+> - `src/components/admin/GoogleSetupWizard.tsx` (NEW) + Super Admin tab **Google**;
+>   `google` registered in `types.ts` (id), `INITIAL_INTEGRATIONS`, `registry.ts`
+>   (OAuth, no API-key fields), `INTEGRATION_ORDER`, `INTEGRATION_META`
+>   (`simulation`), and `googleConnectionCredentials()` in `connections.ts`.
+>
+> **VERIFIED:** `scripts/validate-google-integration.mjs` (NEW) **PASS — 42
+> checks**; `e2e/google-setup.spec.ts` (NEW) **3 passed / 0 failed**; `tsc` 0
+> errors; eslint 0; `npm run build` ✓; wording gate PASS (211 files).
+> ---
 >
 > **Status: M12 checkpoint work is COMMITTED and the suite is GREEN.**
 >
@@ -197,7 +258,27 @@
 > formatter in `investorDemo.ts` now renders thousands separators; the canonical
 > arithmetic is untouched.
 > ---
-> ## 📋 M13 REMAINING WORK — EXACT STATE FOR THE NEXT SESSION (2026-09-14)
+> ## 📋 M13 REMAINING WORK — EXACT STATE (UPDATED 2026-09-15 after Phases 9 + 8)
+>
+> Phases **9** and **8** are DONE (see the two sections above). Genuinely NOT built:
+>
+> | # | Phase | State | What is actually missing |
+> |---|---|---|---|
+> | 10 | §27 **Operating-cost / AI-cost dashboard** | **NOT STARTED** | No Super Admin **Operating Costs** surface. Needs: monthly recurring/variable/third-party costs, AI/OpenRouter usage + budget + trend, per-integration provider/plan/status/fixed cost/usage/estimated total/budget/variance, live-manual-estimated-simulated labelling, and the derived inputs for minimum brand subscription / gross margin / CAC tolerance. Do not invent live costs — label every figure. |
+> | 11 | §32 **Super Admin Command Centre** | **PARTIAL** | `AdminDashboard` exists but is not the NOW / TODAY / THIS WEEK / OPPORTUNITIES action centre the spec describes: no URGENT band (filings, integration failures, PO/payment/shipment exceptions, partnership follow-ups), no per-item CTA routing, and it does not yet surface the new Opportunity Discovery / Launch Centre / Company / Google / investor actions. |
+> | 14 | §37 **Documentation reconciliation** | **MOSTLY DONE** | Add when Phases 10–11 land: the cost dashboard and the command centre; plus `PRODUCTION_READINESS.md` entries for the Google OAuth/tokens, the **Twilio recovery-code rotation**, and the Tottenham ASIN evidence still to be captured. |
+> | 15 | §38 **Full regression** | **RUN per phase; full suite to re-run** | Targeted validators + affected e2e are green after every phase. The full Playwright suite has 19 PRE-EXISTING failures caused by `BrandIntelligenceStrategyPanel`'s `<table>` colliding with the generic `table tbody tr` selectors (see the section below) — the fix is the **spec-selector repoint**, still pending. |
+>
+> **Non-credential work that must NOT be forgotten:**
+> 1. **Rotate the Twilio 2FA recovery code** (it is in past Git commits — see Phase 12 above).
+> 2. **Capture Tottenham merchandise ASIN evidence** through the existing BI discovery
+>    so the seeded sports opportunity stops reporting "NOT captured yet".
+> 3. Google OAuth client credentials (founder-created — enter in Super Admin → **Google**),
+>    Companies House authentication code / GOV.UK personal code (Super Admin → **Company**),
+>    and HMRC credentials are all entered by the founder — never in code, docs, prompts,
+>    Sheets or the review ZIP.
+> ---
+> ## ⏸️ M13 REMAINING WORK (superseded by the table above) — 2026-09-14
 >
 > Everything BELOW is genuinely NOT built. Nothing above may be rebuilt.
 >
