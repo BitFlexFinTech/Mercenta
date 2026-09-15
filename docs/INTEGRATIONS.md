@@ -303,3 +303,53 @@ Live activation needs `XERO_CLIENT_ID` / `XERO_ACCESS_TOKEN` / `XERO_TENANT_ID`
 (the same credentials the Accounting tab already accepts). Payout destinations are
 verified by a recorded Mercenta Admin review action — **there is no
 bank-verification provider wired**, and none is claimed.
+
+---
+
+## 12. M13 Phases 8–10 — Google, Companies House company records, runtime model + cost controls (15 Sep)
+
+### 12.1 Google (`google` provider, §21)
+
+| Piece | Where | What is true today |
+|---|---|---|
+| Registry entry | `src/integrations/registry.ts` → `INTEGRATION_REGISTRY.google` | `authMethod: 'oauth'`, **zero API-key fields**; `INTEGRATION_META.google.defaultMode = 'simulation'` |
+| Client contract | `src/lib/google/googleClient.ts` | Drive (folders/search), Sheets (with tabs), Docs, Slides, Calendar events. The real client speaks ONLY to the Mercenta Edge proxy and sends `X-Secret-Ref` — never a token |
+| Mock | `src/lib/google/googleMock.ts` | Identical signatures, `MOCK-GD-…` ids, `https://mock.google.local/…` URLs, idempotent by name, every 5th write fails once then retries, ZERO network calls |
+| Factory | `src/lib/google/index.ts` | `createGoogleClientForConnection` returns the REAL client only for a verified non-sandbox `vault:` connection; anything else returns the mock |
+| Setup runner | `src/lib/google/workspaceSetup.ts` | Executes the 22-item plan in dependency order with one retry; a failed parent reports its children as explicitly `skipped` |
+| Wizard + store | `src/components/admin/GoogleSetupWizard.tsx`, `src/data/googleStore.ts` | Super Admin → **Google**: enter the public OAuth client id → Google's real consent page → code captured as **`exchange_pending`** (NOT `connected`) → [Run workspace setup] → truthful per-item status |
+
+**Live activation:** deploy the Google Edge Function that performs the code→token
+exchange and stores the refresh token in Vault; then the connection becomes
+`connected` and the SAME runner creates the real Drive structure. No client code
+changes. The account is the founder's personal `mercentapartners@gmail.com` — My
+Drive only, **no Shared Drives, no Workspace features**. Mercenta never asks for
+or stores the Google password.
+
+### 12.2 Companies House company records + government identity (§22–§25)
+
+| Piece | Where | What is true today |
+|---|---|---|
+| Read methods | `companiesHouseClient.ts` / `companiesHouseMock.ts` | `getCompanyRecord` / `getOfficers` / `getPersonsWithSignificantControl` / `getFilingHistory` / `getCharges` behind ONE contract. The mock returns **no invented Mercenta facts** (empty officers/PSC/filings, `SIMULATED REGISTRAR` address) and marks every value `dataSource: 'simulated_registrar'` |
+| Credential resolver | `src/integrations/connections.ts` → `companiesHouseConnectionCredentials()` | real client only for a verified non-sandbox `vault:` connection |
+| Store | `src/data/companyStore.ts` | registrar snapshot with provenance, deadline arithmetic (90/60/30/7/0), the Detect→Prepare→Notify→Review→Approve→File→Verify workflow, the founder-approval gate, `fileViaOfficialApi` **REFUSAL** (no official channel is connected), manual-register recording, register-only verification, derived tasks, and the masked government-credential vault |
+| Credentials | `src/config/company.ts` → `GOVERNMENT_SECRET_KINDS` | Companies House authentication code + GOV.UK One Login personal code: stored as `vault:gov-…` references with a mask. **The value never enters a record, audit entry, metadata, report or the ZIP** |
+| HMRC | `HMRC_READINESS` | READY / **NOT CONNECTED** until VAT registration + MTD credentials exist |
+
+**There is NO electronic filing claim.** The public Companies House API provides
+reads; Mercenta holds no official filing channel, so the founder files on the
+official service and records the reference — verification requires a registrar
+read that happens AFTER the recording.
+
+### 12.3 Runtime model policy + AI cost controls (§27)
+
+| Rule | Where | Enforcement |
+|---|---|---|
+| **DeepSeek V4 Flash is the maximum paid runtime model** | `src/lib/costs/modelPolicy.ts` (`MAX_PAID_RUNTIME_MODEL`) | `isModelAllowed()` refuses anything costlier; unknown task ids are refused |
+| Cheapest suitable first | same | deterministic → cache → local → free model → paid max. A task above the per-operation budget is **refused**, never upgraded |
+| Usage logging + ceilings | `src/lib/costs/usageLog.ts` | every call records model/task/tokens/cost/entity/cache/status; daily + monthly ceilings; `exceeded` refuses non-essential calls |
+| Call sites | `src/lib/discovery/engine.ts`, `src/lib/monitoring/alertTriage.ts` | both select their model through the policy and authorise through the log (they previously hard-coded `openai/gpt-4o-mini` — a §27 violation, now fixed) |
+| Cost model + dashboard | `src/config/operatingCosts.ts`, `src/lib/costs/costSummary.ts`, Super Admin → **Operating Costs** | 13 provider lines each labelled MANUAL/ESTIMATED/SIMULATED/NOT CONNECTED; **no LIVE billing claim**; pricing inputs require founder approval |
+
+The OpenRouter key is a runtime secret only: it is never written into source,
+docs, prompts, sheets or the review ZIP.

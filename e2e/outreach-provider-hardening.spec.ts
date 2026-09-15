@@ -23,7 +23,7 @@ async function openOutreach(page: import('@playwright/test').Page) {
   await page.waitForTimeout(800);
   await page.fill('input[placeholder="Search..."]', 'Tapatío');
   await page.waitForTimeout(400);
-  await page.locator('table tbody tr').first().click();
+  await page.locator('[data-testid="bi-prospect-table"] tbody tr').first().click();
   await page.waitForTimeout(600);
   await page.locator('button:has-text("Outreach")').first().click();
   await page.waitForTimeout(600);

@@ -33,7 +33,7 @@ async function openOutreach(page: import('@playwright/test').Page, brand: string
   await page.waitForTimeout(800);
   await page.fill('input[placeholder="Search..."]', brand);
   await page.waitForTimeout(400);
-  await page.locator('table tbody tr').first().click();
+  await page.locator('[data-testid="bi-prospect-table"] tbody tr').first().click();
   await page.waitForTimeout(600);
   await page.locator('button:has-text("Outreach")').first().click();
   await page.waitForTimeout(600);
@@ -126,7 +126,7 @@ test.describe('Phase D2 — BI intelligence preservation through acquisition', (
     await page.waitForTimeout(800);
     await page.fill('input[placeholder="Search..."]', 'Tapatío');
     await page.waitForTimeout(400);
-    await page.locator('table tbody tr').first().click();
+    await page.locator('[data-testid="bi-prospect-table"] tbody tr').first().click();
     await page.waitForTimeout(600);
 
     // BI's own Amazon tab shows the canonical ASIN data (title + metrics; the

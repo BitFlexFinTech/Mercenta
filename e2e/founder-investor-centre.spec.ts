@@ -10,7 +10,20 @@
  *   3. a non-Super-Admin account NEVER sees the private navigation.
  */
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { loginAs } from './helpers/auth';
+
+/**
+ * The canonical honesty notice, read from its SINGLE SOURCE OF TRUTH
+ * (`src/config/founderContent.ts`) rather than hand-copied into this spec — so
+ * the spec can never drift from the wording guardrail, which deliberately says
+ * "retail-channel" and never a vendor name. Read as text (not imported) because
+ * an app-module import pulls `import.meta.env` into the Playwright runner.
+ */
+const FOUNDER_HONESTY_NOTICE = (() => {
+  const src = readFileSync(new URL('../src/config/founderContent.ts', import.meta.url), 'utf8');
+  return src.match(/export const FOUNDER_HONESTY_NOTICE =\s*'([^']+)'/)?.[1] ?? '';
+})();
 
 async function openNav(page: import('@playwright/test').Page, label: string) {
   await page.locator(`nav[aria-label="Primary"] button:has-text("${label}")`).first().click();
@@ -25,8 +38,10 @@ test.describe('Founder Investor Centre', () => {
     await openNav(page, 'Founder Investor Centre');
 
     await expect(page.getByTestId('founder-investor-centre')).toBeVisible({ timeout: 6000 });
-    // The honesty notice is shown above everything.
-    await expect(page.locator('text=/No government, embassy, trade-body or Amazon partnership/i').first())
+    // The honesty notice is shown above everything. It is asserted from the SINGLE
+    // SOURCE OF TRUTH so this spec can never drift from the wording guardrail
+    // (the guardrail deliberately uses "retail-channel", never a vendor name).
+    await expect(page.getByText(FOUNDER_HONESTY_NOTICE, { exact: false }).first())
       .toBeVisible({ timeout: 4000 });
 
     // All five pitch lengths are present.

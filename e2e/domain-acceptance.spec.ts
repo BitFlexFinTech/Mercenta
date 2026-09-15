@@ -48,17 +48,17 @@ test.describe('Domain Acceptance Gate', () => {
     // Dataset completeness: exactly 12 tracked (3 + 9 canonical seed)…
     await expect(page.locator('text=12 tracked.').first()).toBeVisible({ timeout: 5000 });
     // …10 shown after the documented disqualifications (Truthbrush, UpCircle).
-    await expect(page.locator('table tbody tr')).toHaveCount(10, { timeout: 5000 });
+    await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr')).toHaveCount(10, { timeout: 5000 });
     // Scoring KPIs render from the intelligence dashboard object.
     await expect(page.locator('text=T1').first()).toBeVisible({ timeout: 3000 });
     await expect(page.locator('text=Gaps').first()).toBeVisible();
     // Search narrows deterministically.
     await page.fill('input[placeholder="Search..."]', 'Tapatío');
-    await expect(page.locator('table tbody tr')).toHaveCount(1);
+    await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr')).toHaveCount(1);
     await page.fill('input[placeholder="Search..."]', '');
-    await expect(page.locator('table tbody tr')).toHaveCount(10);
+    await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr')).toHaveCount(10);
     // Row click opens the read-only detail with evidence tabs.
-    await page.locator('table tbody tr', { hasText: 'Tapatío' }).first().click();
+    await page.locator('[data-testid="bi-prospect-table"] tbody tr', { hasText: 'Tapatío' }).first().click();
     await page.waitForTimeout(400);
     await expect(page.locator('text=Overview').first()).toBeVisible({ timeout: 4000 });
     await expect(page.locator('text=Amazon').first()).toBeVisible();

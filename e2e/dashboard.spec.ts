@@ -116,7 +116,11 @@ test.describe('Admin Operations Overview — redesigned dashboard', () => {
     // Move keyboard focus: land on the body, then Tab to the first KPI cell button.
     await page.keyboard.press('Tab');
     let focused = false;
-    for (let i = 0; i < 30; i++) {
+    // The command centre (§32, M13 Phase 11) legitimately adds a CTA button per
+    // outstanding action ABOVE the KPI band, so the walk to the KPI cells is
+    // longer. The invariant is unchanged: focus MUST reach the drill-down cell
+    // and MUST show a visible outline.
+    for (let i = 0; i < 200; i++) {
       const id = await page.evaluate(() => {
         const el = document.activeElement;
         return el ? el.getAttribute('data-testid') : null;

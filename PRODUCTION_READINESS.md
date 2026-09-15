@@ -185,6 +185,23 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
 
 **Summary:** only Amazon genuinely requires the admin's own account/approval process. Every other provider can become real today via a free sandbox/test-mode signup, entered through its existing wizard card.
 
+## M13 — Google, company compliance and AI cost controls (15 Sep)
+
+| Item | Currently active | What's needed to go live | Where it's entered | Code changes needed |
+|---|---|---|---|---|
+| **Google (Drive/Docs/Sheets/Slides/Calendar)** | `MockGoogleClient` behind the same contract (`MOCK-GD-…`, `mock.google.local`, idempotent, every-5th-write failure/retry) + a 22-item workspace plan that runs fully in simulation | Create an OAuth client in Google Cloud Console for `mercentapartners@gmail.com`; enter its PUBLIC id; complete Google's consent flow; then deploy the Google Edge Function that performs the code→token exchange and Vault-stores the refresh token | Super Admin → **Google** wizard (`Connect Google` → the existing `/oauth/callback.html` contract) | **None client-side** — the factory (`createGoogleClientForConnection`) flips to the real client purely on a verified `vault:` connection. Only the server-side exchange function must exist |
+| **Companies House (Mercenta's own company records)** | `MockCompaniesHouseClient` read methods return NO invented Mercenta facts (empty officers/PSC/filings, `SIMULATED REGISTRAR` address, `dataSource: 'simulated_registrar'`) | The free-tier Companies House public API key (developer.company-information.service.gov.uk) → real READS of profile/officers/PSC/filing history/charges + real due dates | Integrations → **Companies House** card; Super Admin → **Company** to read the register | **None** — `companiesHouseConnectionCredentials()` resolves the connection; only the existing Edge proxy needs deploying |
+| **Companies House authentication code + GOV.UK One Login personal code** | Not stored (the vault shows "not stored") | The founder enters both in Super Admin → **Company**; they are kept as `vault:gov-…` references with a display mask ONLY | Super Admin → **Company** → Government credentials | None. **The value never enters a record, audit entry, metadata, report or the ZIP** |
+| **Confirmation statement filing** | `OFFICIAL_CONFIRMATION_STATEMENT_FILING_CONFIGURED = false`; `fileViaOfficialApi` REFUSES with a truthful reason | The founder files on the official Companies House service, then records the reference in Super Admin → **Company**; a registrar read AFTER the recording sets it to `verified` | Super Admin → **Company** (`src/config/company.ts` for the flag) | Only if an official, documented filing channel is ever connected — then flip the single config flag and add its adapter |
+| **HMRC** | READY / **NOT CONNECTED** (`HMRC_READINESS`) | Company VAT registration + Making Tax Digital credentials | Super Admin → **Company** shows the state + blocker | None until credentials exist |
+| **Runtime AI / OpenRouter** | Policy + usage log + ceilings active; **no LIVE billing API is connected**, so every cost figure is labelled MANUAL / ESTIMATED / SIMULATED / NOT CONNECTED | OpenRouter key (runtime secret only) — plus the founder's confirmation of the real subscription/hosting prices in `src/config/operatingCosts.ts` | Integrations → **OpenRouter**; Super Admin → **Operating Costs** | None. **DeepSeek V4 Flash is the maximum paid runtime model**; a costlier model cannot be selected |
+
+### Non-credential work that must NOT be forgotten
+
+1. **Rotate the Twilio 2FA recovery code** — it exists in past Git commits, so it must be treated as COMPROMISED (history rewrite is forbidden by the standing rules; rotation is the fix).
+2. **Capture Tottenham merchandise ASIN evidence** through the existing Brand Intelligence discovery, so the seeded sports opportunity stops reporting "ASIN-level evidence NOT captured yet".
+3. **Founder approval for pricing** — the subscription price, target contribution margin and CAC tolerance are planning inputs flagged `requiresFounderApproval`; they must not be treated as decisions.
+
 ## Placeholder business data
 
 | Value | Current placeholder | Real value needed | Lives in |

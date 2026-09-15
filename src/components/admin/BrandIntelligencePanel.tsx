@@ -83,7 +83,7 @@ return<div className="space-y-4">
     </div>)}</div>}
   </Card>
   <div className="flex items-center gap-2"><Input value={q} onChange={e=>sQ(e.target.value)} placeholder="Search..." className="text-xs py-1 w-40"/><select value={cf} onChange={e=>sCf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option>{cats.map(c=><option key={c} value={c}>{c}</option>)}</select><select value={tf} onChange={e=>sTf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option><option value="tier_1">T1</option><option value="tier_2">T2</option><option value="tier_3">T3</option><option value="tier_4">T4</option></select><span className="text-xs text-zinc-600">{filtered.length}</span></div>
-  <Card className="p-0 overflow-x-auto"><table className="w-full text-xs">
+  <Card className="p-0 overflow-x-auto"><table className="w-full text-xs" data-testid="bi-prospect-table">
     <thead><tr className="border-b bg-ink-850/50"><th className="px-2 py-1.5 text-left text-zinc-500">#</th><th className="px-2 py-1.5 text-left text-zinc-500 cursor-pointer" onClick={()=>ts('brand')}>Brand</th><th className="px-2 py-1.5 text-left text-zinc-500">Cat</th><th className="px-2 py-1.5 text-left text-zinc-500 cursor-pointer" onClick={()=>ts('score')}>Score</th><th className="px-2 py-1.5 text-left text-zinc-500">Tier</th>{['D','PO','G','Dist','Acc','Fit','Amz','Distrib','Ctc'].map(h=><th key={h} className="px-2 py-1.5 text-left text-zinc-500">{h}</th>)}</tr></thead>
     <tbody>{filtered.map((p:any,i:number)=><tr key={p.id} onClick={()=>sSel(p)} className="border-b cursor-pointer hover:bg-white/[0.03]">
       <td className="px-2 py-1 text-zinc-500">{i+1}</td>

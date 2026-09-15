@@ -28,7 +28,7 @@ test.describe('Brand Intelligence lifecycle', () => {
     // Canonical store-backed universe (dataset completeness preserved).
     await expect(page.locator('h2', { hasText: 'Brand Intelligence' }).first()).toBeVisible({ timeout: 6000 });
     await expect(page.locator('text=12 tracked.').first()).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('table tbody tr')).toHaveCount(10, { timeout: 5000 });
+    await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr')).toHaveCount(10, { timeout: 5000 });
 
     // Pipeline control with an explicit manual run trigger.
     await expect(page.locator('text=Pipeline Control').first()).toBeVisible({ timeout: 4000 });
@@ -64,7 +64,7 @@ test.describe('Brand Intelligence lifecycle', () => {
     await expect(page.locator('[data-run-status="1"]')).toBeVisible({ timeout: 6000 });
 
     // Detail: provenance badges (checked/next) + History timeline tab.
-    await page.locator('table tbody tr', { hasText: 'Tapatío' }).first().click();
+    await page.locator('[data-testid="bi-prospect-table"] tbody tr', { hasText: 'Tapatío' }).first().click();
     await page.waitForTimeout(400);
     await expect(page.locator('text=/^checked \\d{4}-/').first()).toBeVisible({ timeout: 4000 });
     await expect(page.locator('text=/^next \\d{4}-/').first()).toBeVisible({ timeout: 3000 });
@@ -77,7 +77,7 @@ test.describe('Brand Intelligence lifecycle', () => {
     await page.locator('button:has-text("Disqualify")').first().click();
     await page.waitForTimeout(600);
     // Row leaves the active table; the Disqualified section lists brand + reason.
-    await expect(page.locator('table tbody tr')).toHaveCount(9, { timeout: 5000 });
+    await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr')).toHaveCount(9, { timeout: 5000 });
     await expect(page.locator('text=E2E lifecycle probe').first()).toBeVisible({ timeout: 5000 });
 
     // Re-qualification restores the canonical row deterministically.
@@ -85,8 +85,8 @@ test.describe('Brand Intelligence lifecycle', () => {
     // <p> sits inside an inner text column; its row parent is two levels up.
     await reason.locator('..').locator('..').getByRole('button', { name: 'Requalify' }).click();
     await page.waitForTimeout(500);
-    await expect(page.locator('table tbody tr')).toHaveCount(10, { timeout: 5000 });
-    await expect(page.locator('table tbody tr', { hasText: 'Tapatío' }).first()).toBeVisible({ timeout: 4000 });
+    await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr')).toHaveCount(10, { timeout: 5000 });
+    await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr', { hasText: 'Tapatío' }).first()).toBeVisible({ timeout: 4000 });
     expect(pageErrors).toEqual([]);
   });
 });

@@ -125,8 +125,10 @@ test.describe('Phase B — Integration Hub control centre', () => {
     for (const category of ['Commerce', 'Finance', 'Logistics', 'Compliance', 'Communications', 'Marketing', 'AI & Research', 'Data']) {
       await expect(hub.locator('h2', { hasText: category }).first()).toBeVisible({ timeout: 4000 });
     }
-    // A category no provider uses must not be invented.
-    await expect(hub.locator('h2', { hasText: 'Infrastructure' })).toHaveCount(0);
+    // Google is the ONE Infrastructure provider (M13 Phase 8) — the heading exists
+    // because the registry genuinely uses the category, not because it was invented.
+    await expect(hub.locator('h2', { hasText: 'Infrastructure' }).first()).toBeVisible({ timeout: 4000 });
+    await expect(hub.locator('h3', { hasText: 'Google' }).first()).toBeVisible({ timeout: 4000 });
     // Provider cards remain h3 (the registry-removal contract depends on it).
     await expect(hub.locator('h3', { hasText: 'Twilio WhatsApp' }).first()).toBeVisible();
     await expect(hub.locator('h3', { hasText: 'Postiz' }).first()).toBeVisible();

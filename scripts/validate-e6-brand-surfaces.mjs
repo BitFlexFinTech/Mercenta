@@ -289,6 +289,65 @@ const M13_SCOPE = new Set([
   'e2e/launch-centre.spec.ts',
   // Super Admin gains the Launch Centre tab.
   'src/components/admin/SuperAdminPanel.tsx',
+  // §Phase M13 CONTINUATION (2026-09-15) — Phases 9, 8, 10, 11. Extends the
+  // declared surface EXACTLY as the M13 additions above did; anything outside
+  // this list is still refused.
+  // Phase 9 — Company / Government Control Centre.
+  'src/config/company.ts',
+  'src/lib/compliance/companiesHouseClient.ts',
+  'src/lib/compliance/companiesHouseMock.ts',
+  'src/lib/compliance/index.ts',
+  'src/data/companyStore.ts',
+  'src/components/admin/CompanyControlCentre.tsx',
+  'scripts/validate-company-control-centre.mjs',
+  'e2e/company-control-centre.spec.ts',
+  'src/lib/events/types.ts',
+  'src/integrations/connections.ts',
+  // Phase 8 — Google integration + setup wizard.
+  'src/config/google.ts',
+  'src/lib/google/googleClient.ts',
+  'src/lib/google/googleMock.ts',
+  'src/lib/google/index.ts',
+  'src/lib/google/workspaceSetup.ts',
+  'src/data/googleStore.ts',
+  'src/components/admin/GoogleSetupWizard.tsx',
+  'src/integrations/registry.ts',
+  'src/integrations/types.ts',
+  'scripts/validate-google-integration.mjs',
+  'e2e/google-setup.spec.ts',
+  // Phase 10 — operating-cost dashboard + runtime model policy.
+  'src/config/operatingCosts.ts',
+  'src/lib/costs/modelPolicy.ts',
+  'src/lib/costs/usageLog.ts',
+  'src/lib/costs/costSummary.ts',
+  'src/components/admin/OperatingCostsPanel.tsx',
+  'src/lib/discovery/engine.ts',
+  'src/lib/monitoring/alertTriage.ts',
+  'scripts/validate-operating-costs.mjs',
+  'e2e/operating-costs.spec.ts',
+  // Phase 11 — Super Admin command centre.
+  'src/lib/commandCentre/commandCentre.ts',
+  'src/data/adminNav.ts',
+  'src/components/admin/CommandCentre.tsx',
+  'src/components/admin/AdminDashboard.tsx',
+  'scripts/validate-command-centre.mjs',
+  'e2e/command-centre.spec.ts',
+  // Phase 14 — documentation reconciliation + the BI table test-id repoint.
+  'README.md',
+  'docs/INTEGRATIONS.md',
+  'GO_LIVE.md',
+  'PRODUCTION_READINESS.md',
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+  'src/components/admin/BrandIntelligencePanel.tsx',
+  'e2e/acquisition-pipeline.spec.ts',
+  'e2e/bi-intelligence-preservation.spec.ts',
+  'e2e/brand-intelligence-lifecycle.spec.ts',
+  'e2e/domain-acceptance.spec.ts',
+  'e2e/domain-persistence.spec.ts',
+  'e2e/onboarding-handoff.spec.ts',
+  'e2e/onboarding-workflow.spec.ts',
+  'e2e/outreach-provider-hardening.spec.ts',
 ]);
 
 /**

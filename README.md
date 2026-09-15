@@ -41,6 +41,10 @@ node scripts/validate-commercial-model-selection.mjs # §5/§19 brand-level comm
 node scripts/validate-intelligence-strategy.mjs      # §12–§16 acquisition strategy, source markets, trade programmes
 node scripts/validate-sales-estimator.mjs            # §15/§16 estimator + New Product Launch Programme modelling
 node scripts/validate-founder-centre.mjs             # §21 investor centre + partnerships/fundraising centre
+node scripts/validate-google-integration.mjs         # §21 M13 P8 Google mock/real seam + workspace setup wizard
+node scripts/validate-company-control-centre.mjs     # §22–§25 M13 P9 company/government compliance centre
+node scripts/validate-operating-costs.mjs            # §27 M13 P10 cost model + runtime model policy + AI ceilings
+node scripts/validate-command-centre.mjs             # §32/§34 M13 P11 command centre derivation + tab routing
 node scripts/rls-audit.mjs              # §39 static RLS audit (every schema table)
 node scripts/validate-rls-hardening.mjs # §39 audit_log + applications RLS hardening pin
 npx playwright test                     # full E2E suite

@@ -35,7 +35,7 @@ function navButtonExact(page: any, label: string) {
 }
 
 async function openOutreachTab(page: any, brand: string) {
-  await page.locator('table tbody tr', { hasText: brand }).first().click();
+  await page.locator('[data-testid="bi-prospect-table"] tbody tr', { hasText: brand }).first().click();
   await page.waitForTimeout(400);
   await page.locator('button:has-text("Outreach")').first().click();
   await page.waitForTimeout(400);

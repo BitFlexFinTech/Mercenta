@@ -2,7 +2,54 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
-> ## ✅ PHASE 11 — SUPER ADMIN COMMAND CENTRE (M13) — 2026-09-15
+> ## ✅ PHASE 14 + PHASE 15 — DOCS RECONCILIATION + SPEC REPOINT + FULL REGRESSION (M13) — 2026-09-15
+>
+> **Documentation reconciliation (Phase 14):** `README.md` (4 new validators in the
+> gate list), `docs/INTEGRATIONS.md` (§12 — Google, Companies House company records,
+> government identity, runtime model + cost controls), `GO_LIVE.md` (§4 — Google,
+> Companies House/company records, HMRC, AI ceilings), `PRODUCTION_READINESS.md`
+> (M13 credential table + the three non-credential items), `PROJECT_STATUS.md`,
+> `HANDOFF.md`.
+>
+> **Spec-selector repoint (the documented fix for the pre-existing failures):** the
+> canonical prospect table in `BrandIntelligencePanel.tsx` now carries
+> `data-testid="bi-prospect-table"`, and all **16** generic `table tbody tr`
+> selectors across **8** specs were repointed to
+> `[data-testid="bi-prospect-table"] tbody tr` — every spec's invariant (row counts,
+> click targets) preserved, nothing weakened or deleted.
+>
+> **Three further real failures were found and fixed at their true cause:**
+> 1. `e2e/founder-investor-centre.spec.ts` asserted the OLD honesty wording (a vendor
+>    name). The spec now reads `FOUNDER_HONESTY_NOTICE` from its single source of
+>    truth, so it can never drift from the wording guardrail again.
+> 2. `e2e/integration-hub.spec.ts` pinned "Infrastructure has no providers". Google
+>    (M13 Phase 8) is a legitimate Infrastructure provider, so the spec now asserts
+>    that heading WITH its provider instead of asserting its absence.
+> 3. `e2e/dashboard.spec.ts` tab-walk budget was 30 stops; the command centre
+>    legitimately adds a CTA per outstanding action above the KPI band. The budget
+>    was raised (200) while the INVARIANT is unchanged — focus must still reach the
+>    drill-down cell and must still show a visible outline.
+> 4. Scope guards `validate-e6-brand-surfaces.mjs` / `validate-e7-embedded-social.mjs`
+>    were extended to DECLARE the Phase 8–11 + Phase 14 surface (the same sanctioned
+>    pattern the earlier M13 additions used). They still refuse anything outside the
+>    declared set — this is a declaration, not a relaxation.
+>
+> **FINAL FULL REGRESSION (real output, this session):**
+> | Gate | Result |
+> |---|---|
+> | `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** |
+> | `npm run lint` (`eslint .`) | **clean — no output** |
+> | `npm run build` | **✓ built** |
+> | `node scripts/lint-wording.mjs` | **PASS — 217 files, 0 violations** |
+> | Validator/audit sweep (77 scripts incl. `rls-audit`, `integrity-audit`, mock seam/providers, discovery, stage10, e6, e7) | **77 run / 0 failures** |
+> | `node scripts/rls-audit.mjs` | **PASS — 33 tables, 33 RLS-enabled, 48 policies, 94 checks** |
+> | `node scripts/integrity-audit.mjs` | **PASSED — 61 passed / 0 failed / 100%** |
+> | `npx playwright test` (FULL SUITE) | **277 passed / 0 failed / 2 skipped (279) — exit 0** |
+>
+> The previously stated target was 264 passed / 2 skipped; the extra 13 are exactly
+> the new tests added by Phases 9, 8, 10 and 11 (4 + 3 + 3 + 3). **The 19
+> pre-existing failures are all resolved and no new regression remains.**
+> ---
 >
 > - `src/lib/commandCentre/commandCentre.ts` (NEW) — derives the command centre
 >   from REAL stores only: `companyStore` compliance tasks, `googleStore` tasks,
@@ -326,7 +373,35 @@
 > formatter in `investorDemo.ts` now renders thousands separators; the canonical
 > arithmetic is untouched.
 > ---
-> ## 📋 M13 REMAINING WORK — EXACT STATE (UPDATED 2026-09-15 after Phases 9 + 8)
+> ## 📋 M13 REMAINING WORK — ALL PHASES COMPLETE (2026-09-15)
+>
+> Phases **8, 9, 10, 11, 14 and 15** are DONE and verified (see the sections above).
+> The M13 queue is complete:
+>
+> | # | Phase | State |
+> |---|---|---|
+> | 8 | §21 Google integration + setup wizard | **DONE** — validator 42 checks PASS, e2e 3/3 |
+> | 9 | §22–§25 Company / Government Control Centre | **DONE** — validator 49 checks PASS, e2e 4/4 |
+> | 10 | §27 Operating-cost / AI-cost dashboard | **DONE** — validator 43 checks PASS, e2e 3/3 |
+> | 11 | §32/§34 Super Admin Command Centre | **DONE** — validator 23 checks PASS, e2e 3/3 |
+> | 14 | §37 Documentation reconciliation | **DONE** — README / INTEGRATIONS / GO_LIVE / PRODUCTION_READINESS / PROJECT_STATUS / HANDOFF |
+> | 15 | §38 Full regression + spec-selector repoint | **DONE** — 77/77 scripts, 277 passed / 0 failed / 2 skipped |
+>
+> **Still outstanding (credential / founder work, NOT build work):**
+> 1. **Rotate the Twilio 2FA recovery code** (it is in past Git commits — rotation is
+>    the fix; history rewrite is forbidden by the standing rules).
+> 2. **Capture Tottenham merchandise ASIN evidence** through the existing BI discovery
+>    so the seeded sports opportunity stops reporting "ASIN evidence NOT captured yet".
+> 3. Enter, in Super Admin: the **Google OAuth client id** (→ Google tab), the
+>    **Companies House API key** (→ Integrations), the **Companies House authentication
+>    code** and **GOV.UK One Login personal code** (→ Company tab; masked vault refs
+>    only), and HMRC credentials once VAT registration completes.
+> 4. Deploy the Google Edge Function (code→token exchange + Vault refresh token) to
+>    flip Google from `exchange_pending` to `connected`.
+> 5. Founder confirmation of the real subscription/hosting prices in
+>    `src/config/operatingCosts.ts` and approval of the pricing inputs.
+> ---
+> ## ⏸️ M13 REMAINING WORK (historical, superseded above) — 2026-09-14
 >
 > Phases **9** and **8** are DONE (see the two sections above). Genuinely NOT built:
 >
