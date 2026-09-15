@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
+import { consumeAdminNavRequest } from '@/data/adminNav';
 import { Card, Badge, Button, DataTable, Input, Select } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { StaffMember, StaffRole, CarrierMarkupConfig } from '@/types';
@@ -117,6 +118,16 @@ export function SuperAdminPanel() {
   const [newRole, setNewRole] = useState<StaffRole>('Business Development');
   const [newChannel, setNewChannel] = useState('Global Operations');
   const [markupVersion, setMarkupVersion] = useState(0);
+
+  /**
+   * §32 (M13 Phase 11) — consume a pending command-centre navigation intent so a
+   * CTA lands on the EXACT Super Admin tab (Company / Google / Operating Costs /
+   * Launch Centre / Applications) rather than the default one.
+   */
+  useEffect(() => {
+    const req = consumeAdminNavRequest('super_admin');
+    if (req?.tab && SUPER_ADMIN_TABS.some((t) => t.id === req.tab)) setActiveTab(req.tab);
+  }, []);
 
   const handleAddStaff = () => {
     if (!newName || !newEmail) return;

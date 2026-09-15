@@ -47,6 +47,7 @@ import {
 } from '@/components/shared/dashboard';
 import { STATUS_LABELS } from '@/types';
 import type { AdminDepartment, ShipmentStatus } from '@/types';
+import { CommandCentre } from './CommandCentre';
 import { ArrowRight, CreditCard, FileCheck2, FileText, LifeBuoy, Package } from 'lucide-react';
 
 const PO_AWAITING: ReadonlySet<string> = new Set(['received', 'under_review']);
@@ -583,6 +584,10 @@ if (loading) {
         title="Operations Overview"
         description={`${brands.length} brands on platform · ${posAll.length} purchase orders · ${docsAll.length} compliance documents · ${messagesAll.length} messages in thread history`}
       />
+
+      {/* §32 (M13 Phase 11) — the founder's command centre: what needs attention
+          now and the exact next action, with tab-aware CTA routing. */}
+      <CommandCentre onNavigate={onNavigate} />
 
       {anyError && (
         <Alert tone="error" title="Some dashboard data is unavailable">

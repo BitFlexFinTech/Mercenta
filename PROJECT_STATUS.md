@@ -2,7 +2,43 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
-> ## ✅ PHASE 10 — OPERATING COST / AI-COST DASHBOARD (M13) — 2026-09-15
+> ## ✅ PHASE 11 — SUPER ADMIN COMMAND CENTRE (M13) — 2026-09-15
+>
+> - `src/lib/commandCentre/commandCentre.ts` (NEW) — derives the command centre
+>   from REAL stores only: `companyStore` compliance tasks, `googleStore` tasks,
+>   the AI cost-protection state, integration errors handed in by the shell, the
+>   canonical PO store (computed 24-hour acknowledgment rule), shipment
+>   exception/delay flags, brand applications, launch records, the founder partner
+>   targets (declared prospective), the canonical prospect store (top 5 by score)
+>   and the cost summary. Bands: **NOW / TODAY / THIS WEEK** plus the
+>   **Opportunities / Fundraising / Operations / Finance / AI cost** sections.
+>   Every action carries a CTA + destination, and category/region/value where the
+>   record has them.
+> - `src/data/adminNav.ts` (NEW) — the tab-aware navigation intent that solves
+>   "Super Admin → Company tab": a single pending request, consumed ONCE and only
+>   by the view that owns it (a stale intent can never move the founder somewhere
+>   unexpected).
+> - `src/components/admin/CommandCentre.tsx` (NEW) — rendered at the TOP of the
+>   admin overview (before the KPI band); each row is one CTA button.
+> - `src/components/admin/AdminDashboard.tsx` (EXTENDED, existing content
+>   untouched below) and `SuperAdminPanel.tsx` (consumes the intent on mount and
+>   validates the tab id against `SUPER_ADMIN_TABS`).
+>
+> **VERIFIED:** `scripts/validate-command-centre.mjs` (NEW) **PASS — 23 checks**;
+> `e2e/command-centre.spec.ts` (NEW) **3 passed / 0 failed** — including the
+> end-to-end proof that a CTA lands on the **Company** tab, not the default Staff
+> tab; combined affected-spec run **56/56 passed**
+> (admin-operational-surfaces, app-shell, command-centre, company-control-centre,
+> google-setup, operating-costs, launch-centre, opportunity-discovery,
+> investor-demo); `tsc` 0 errors; eslint 0; `npm run build` ✓; wording gate PASS.
+>
+> **DEFECT FOUND AND FIXED BY THE BROWSER SPEC:** `Card` does not forward
+> `data-testid` (it destructures a fixed prop set), so a panel testid placed on
+> `<Card>` silently disappears from the DOM. The command centre now wraps its card
+> in a testid-bearing element. The browser spec also proved the RBAC boundary is
+> intact: the `Mercenta Admin Hub` (admin_staff) session is correctly REFUSED
+> access to Super Admin tabs.
+> ---
 >
 > - `src/config/operatingCosts.ts` (NEW) — single source of truth for every cost
 >   line (13 providers) with an explicit label (MANUAL / ESTIMATED / SIMULATED /
