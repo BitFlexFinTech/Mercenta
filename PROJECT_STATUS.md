@@ -197,6 +197,66 @@
 > formatter in `investorDemo.ts` now renders thousands separators; the canonical
 > arithmetic is untouched.
 > ---
+> ## 📋 M13 REMAINING WORK — EXACT STATE FOR THE NEXT SESSION (2026-09-14)
+>
+> Everything BELOW is genuinely NOT built. Nothing above may be rebuilt.
+>
+> | # | Phase | State | What is actually missing |
+> |---|---|---|---|
+> | 8 | §21 **Google integration + setup wizard** | **NOT STARTED** | No Google provider entry, no OAuth seam, no wizard. Needs: a `google` provider in `src/integrations/registry.ts` (`oauth`), a `src/lib/google/` client pair (Mock + Real) behind `createGoogleClient()`, and a Super Admin → Integrations → Google wizard that creates the My Drive folder structure, master Sheets, templates and document/presentation/partnership/investor/compliance folders, tests Docs/Sheets/Slides/Calendar creation, and reports connected/ready. Account is `mercentapartners@gmail.com` — the password is NEVER asked for or stored; OAuth tokens use the existing secure storage; normal My Drive only (no Shared Drives / Workspace features). |
+> | 9 | §22–§25 **Company / Government Control Centre** | **PARTIAL — clients exist, centre does not** | `src/lib/compliance/companiesHouseClient.ts`, `companiesHouseMock.ts`, `hmrcClient.ts`, `hmrcMock.ts`, `complianceSync.ts` already exist (M11). Missing: the Super Admin **Company → Companies House** surface (status, officers, PSC, filing history, charges, deadlines), confirmation-statement monitoring (90/60/30/7/due) with Detect→Prepare→Notify→Review→Approve→File→Verify and founder approval, annual-accounts tracking, and the **Government Identity** record (GOV.UK One Login status + Companies House personal code, encrypted/masked/Super-Admin-only, never logged or included in reports/ZIP/prompts). HMRC stays READY/NOT CONNECTED until VAT registration. |
+> | 10 | §27 **Operating-cost / AI-cost dashboard** | **NOT STARTED** | No Super Admin **Operating Costs** surface. Needs: monthly recurring/variable/third-party costs, AI/OpenRouter usage + budget + trend, per-integration provider/plan/status/fixed cost/usage/estimated total/budget/variance, live-manual-estimated-simulated labelling, and the derived inputs for minimum brand subscription / gross margin / CAC tolerance. Do not invent live costs — label every figure. |
+> | 11 | §32 **Super Admin Command Centre** | **PARTIAL** | `AdminDashboard` exists but is not the NOW / TODAY / THIS WEEK / OPPORTUNITIES action centre the spec describes: no URGENT band (filings, integration failures, PO/payment/shipment exceptions, partnership follow-ups), no per-item CTA routing, and it does not yet surface the new Opportunity Discovery / Launch Centre / investor actions. |
+> | 14 | §37 **Documentation reconciliation** | **MOSTLY DONE** | Done this session: `README.md`, `docs/INTEGRATIONS.md`, `GO_LIVE.md`, `.clinerules/mercenta-business-model.md`, `PROJECT_STATUS.md`. Still to add when Phases 8–11 land: the Google architecture, the Companies House/HMRC section, the cost dashboard and the command centre; plus `PRODUCTION_READINESS.md` entries for the Google OAuth/tokens, the **Twilio recovery-code rotation**, and the Tottenham ASIN evidence still to be captured. |
+> | 15 | §38 **Full regression** | **RUN, GREEN (this session)** | 70 validator/audit scripts exit 0; `tsc` 0 errors; `eslint` clean on every touched file; `npm run build` ✓; wording gate PASS (203 files); `e2e/investor-demo.spec.ts` 10/10; `e2e/opportunity-discovery.spec.ts` 3/3; `e2e/launch-centre.spec.ts` 3/3; full Playwright suite result recorded in the session log. Re-run after Phases 8–11. |
+>
+> **Non-credential work that must NOT be forgotten:**
+> 1. **Rotate the Twilio 2FA recovery code** (it is in past Git commits — see Phase 12 above).
+> 2. **Capture Tottenham merchandise ASIN evidence** through the existing BI discovery
+>    so the seeded sports opportunity stops reporting "NOT captured yet".
+> 3. Google OAuth client credentials (founder-created), Companies House auth code,
+>    GOV.UK personal code and HMRC credentials are all entered by the founder in
+>    Super Admin — never in code, docs, prompts, Sheets or the review ZIP.
+> ---
+> ## ⚠️ FULL PLAYWRIGHT SUITE — 19 PRE-EXISTING FAILURES (PROVEN, NOT M13) — 2026-09-14
+>
+> **Result: 245 passed / 19 failed / 2 skipped (266).** The M11 baseline was
+> 250 passed / 2 skipped, and the M12 checkpoint admitted the full suite had NOT
+> been re-run after the M12 UI additions. The failures were therefore investigated
+> rather than assumed.
+>
+> **PROOF they are not caused by M13 (controlled experiment, run this session):**
+> my OpportunityDiscoveryPanel was temporarily removed from `AdminShell` entirely
+> (render replaced with `{null}`, file restored afterwards) and
+> `e2e/brand-intelligence-lifecycle.spec.ts` **still failed identically** —
+> `locator('table tbody tr')` expected 10, received **20**. With my panel present it
+> was 30; without it, 20. Both numbers are wrong, so at least one pre-existing table
+> on that page was already breaking the spec.
+>
+> **ROOT CAUSE:** `BrandIntelligenceStrategyPanel.tsx` (added by **M12b**, i.e.
+> BEFORE M13) renders a `<table>` into the same `brand_intelligence` admin view as
+> the canonical prospect table. Every spec that uses the generic selectors
+> `page.locator('table tbody tr')` (count) or
+> `page.locator('table tbody tr', { hasText: brand })` (click) now resolves against
+> the wrong table — the click lands on a strategy row and the expected panel never
+> opens. Affected files: `acquisition-pipeline`, `bi-intelligence-preservation`,
+> `brand-intelligence-lifecycle`, `domain-acceptance`, `domain-persistence`,
+> `founder-investor-centre`, `onboarding-handoff`, `onboarding-workflow`,
+> `outreach-provider-hardening`.
+>
+> **MY OWN contribution to the noise was found and FIXED:** the Phase 3 panel's
+> ranked list was initially a `<table>`, which took the count from 20 → 30. It is now
+> a labelled `role="table"` grid (`data-testid="opportunity-row"`), so the
+> pre-existing DOM contract for other specs is unchanged. `e2e/opportunity-discovery.spec.ts`
+> still passes 3/3 with the new markup.
+>
+> **THE FIX FOR THE NEXT SESSION (do NOT weaken or delete the specs):** give the
+> canonical prospect table in `BrandIntelligencePanel.tsx` a stable test id
+> (e.g. `data-testid="bi-prospect-table"`) and repoint the nine specs' selectors from
+> the generic `table tbody tr` to `[data-testid="bi-prospect-table"] tbody tr`,
+> preserving each spec's invariant (row counts and click targets). Then re-run the
+> full suite and expect 264 passed / 2 skipped.
+> ---
 > ## ⏸️ M12 CHECKPOINT (historical record — everything in it is now RESOLVED above) — 2026-09-14
 > ## ⏸️ M12 CHECKPOINT (historical record — everything in it is now RESOLVED above) — 2026-09-14
 >

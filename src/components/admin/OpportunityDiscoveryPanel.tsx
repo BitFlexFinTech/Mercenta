@@ -138,52 +138,63 @@ export function OpportunityDiscoveryPanel() {
             {visible.length} ranked · {ineligible.length} ineligible
           </span>
         </div>
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b bg-ink-850/50">
-              {['#', 'Brand', 'Vertical', 'Cat', 'ASINs', 'Est. PO/mo', 'Mercenta est.', 'Weeks', 'Presence', 'CTA'].map(
-                (h) => (
-                  <th key={h} className="px-2 py-1.5 text-left text-zinc-500">{h}</th>
-                )
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((r) => (
-              <tr
-                key={r.id}
-                data-testid="opportunity-row"
-                onClick={() => setSelected(r.id)}
-                className={cn(
-                  'border-b cursor-pointer hover:bg-white/[0.03]',
-                  selected === r.id && 'bg-white/[0.04]'
-                )}
-              >
-                <td className="px-2 py-1 text-zinc-500">{r.rank}</td>
-                <td className="px-2 py-1 font-medium text-white">{r.brand}</td>
-                <td className="px-2 py-1 text-zinc-400 text-[10px]">
-                  {OPPORTUNITY_VERTICALS[r.vertical].label}
-                </td>
-                <td className="px-2 py-1 text-zinc-400 text-[10px]">{r.category}</td>
-                <td className="px-2 py-1 text-zinc-300">{r.asinCount}</td>
-                <td className="px-2 py-1 text-emerald-300 font-mono">{gbp(r.estimatedPoPotentialGbp)}</td>
-                <td className="px-2 py-1 text-zinc-200 font-mono">{gbp(r.estimatedMercentaRevenueGbp)}</td>
-                <td className="px-2 py-1 text-zinc-400">{r.timeToRevenueWeeks}</td>
-                <td className="px-2 py-1 text-zinc-400 text-[9px]">
-                  {AMAZON_PRESENCE_LABELS[r.amazonPresence]}
-                </td>
-                <td className="px-2 py-1 text-zinc-400 text-[9px]">{r.recommendedCta}</td>
-              </tr>
-            ))}
-            {visible.length === 0 && (
-              <tr>
-                <td colSpan={10} className="py-8 text-center text-zinc-600">
-                  No eligible opportunities match.
-                </td>
-              </tr>
+        {/* NOTE: this list is deliberately NOT a <table>. The canonical admin and
+            brand specs locate rows with the generic selector `table tbody tr`; a
+            second table on this page silently captured their clicks and broke 19
+            pre-existing specs. A labelled grid keeps the pre-existing DOM intact. */}
+        <div role="table" aria-label="Ranked opportunities" className="w-full text-xs">
+          <div role="row" className="flex border-b bg-ink-850/50 text-zinc-500">
+            {['#', 'Brand', 'Vertical', 'Cat', 'ASINs', 'Est. PO/mo', 'Mercenta est.', 'Weeks', 'Presence', 'CTA'].map(
+              (h) => (
+                <span key={h} role="columnheader" className="px-2 py-1.5 flex-1 min-w-0 truncate">
+                  {h}
+                </span>
+              )
             )}
-          </tbody>
-        </table>
+          </div>
+          {visible.map((r) => (
+            <div
+              key={r.id}
+              role="row"
+              data-testid="opportunity-row"
+              onClick={() => setSelected(r.id)}
+              className={cn(
+                'flex border-b cursor-pointer hover:bg-white/[0.03]',
+                selected === r.id && 'bg-white/[0.04]'
+              )}
+            >
+              <span className="px-2 py-1 text-zinc-500 flex-1 min-w-0 truncate">{r.rank}</span>
+              <span className="px-2 py-1 font-medium text-white flex-1 min-w-0 truncate">
+                {r.brand}
+              </span>
+              <span className="px-2 py-1 text-zinc-400 text-[10px] flex-1 min-w-0 truncate">
+                {OPPORTUNITY_VERTICALS[r.vertical].label}
+              </span>
+              <span className="px-2 py-1 text-zinc-400 text-[10px] flex-1 min-w-0 truncate">
+                {r.category}
+              </span>
+              <span className="px-2 py-1 text-zinc-300 flex-1 min-w-0 truncate">{r.asinCount}</span>
+              <span className="px-2 py-1 text-emerald-300 font-mono flex-1 min-w-0 truncate">
+                {gbp(r.estimatedPoPotentialGbp)}
+              </span>
+              <span className="px-2 py-1 text-zinc-200 font-mono flex-1 min-w-0 truncate">
+                {gbp(r.estimatedMercentaRevenueGbp)}
+              </span>
+              <span className="px-2 py-1 text-zinc-400 flex-1 min-w-0 truncate">
+                {r.timeToRevenueWeeks}
+              </span>
+              <span className="px-2 py-1 text-zinc-400 text-[9px] flex-1 min-w-0 truncate">
+                {AMAZON_PRESENCE_LABELS[r.amazonPresence]}
+              </span>
+              <span className="px-2 py-1 text-zinc-400 text-[9px] flex-1 min-w-0 truncate">
+                {r.recommendedCta}
+              </span>
+            </div>
+          ))}
+          {visible.length === 0 && (
+            <p className="py-8 text-center text-zinc-600">No eligible opportunities match.</p>
+          )}
+        </div>
       </Card>
 
       {/* §6 — ineligible records are SHOWN with the reason, never hidden. */}
