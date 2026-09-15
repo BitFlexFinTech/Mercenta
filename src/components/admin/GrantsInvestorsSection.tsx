@@ -25,15 +25,23 @@ import { CLAIM_LABELS } from '@/lib/intelligence/opportunityDiscovery';
 import { Download, BadgeDollarSign, X, CheckCircle, Send, Eye, ShieldAlert, FileText } from 'lucide-react';
 
 /**
- * §31 — the legacy grant/investor drafts use `submitted` / `sent` as INTERNAL
- * statuses. Mercenta submits nothing on the founder's behalf, so those are
- * labelled here as internal approval instead of being presented as an external
- * event the founder did not perform.
+ * §31/M13c — the legacy grant/investor drafts now use INTERNAL states only
+ * (`draft` / `approved_internally`). Mercenta submits and sends nothing on the
+ * founder's behalf, so an internal approval is labelled as exactly that and can
+ * never be presented as an external event the founder did not perform.
  */
 function internalStatusLabel(status: string): string {
-  if (status === 'submitted') return 'internally approved — NOT submitted externally';
-  if (status === 'sent') return 'internally approved — NOT sent externally';
+  if (status === 'approved_internally') return 'internally approved — NOT submitted externally';
   return 'draft — nothing submitted';
+}
+
+/**
+ * §31/M13c — the investor-outreach label variant. Same rule: an internal
+ * approval is never described as a send.
+ */
+function internalOutreachLabel(status: string): string {
+  if (status === 'approved_internally') return 'internally approved — NOT sent externally';
+  return 'draft — nothing sent';
 }
 
 export function GrantsInvestorsSection() {
@@ -198,7 +206,7 @@ function formatReport(r: GrantsInvestorsReport): string {
       <p className="text-[11px] text-zinc-500 mb-3">
         Discovers grants and investors from legitimate public sources (Innovate UK/UKRI, gov.uk).
         Applications and outreach are AI-drafted and staged for review — <strong>never sent
-        automatically</strong>. Requires explicit &quot;Approve &amp; Send&quot; action.
+        automatically</strong>. Requires an explicit internal approval — Mercenta never sends.
       </p>
 
       {error && <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-300 mb-3">{error}</div>}
@@ -341,12 +349,12 @@ function formatReport(r: GrantsInvestorsReport): string {
                       <Button className="text-[9px]" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
                       {d.status === 'draft' && (
                         <Button className="text-[9px]" onClick={() => { handleApproveGrant(d.grantId); setDraftContent(null); }}>
-                          <CheckCircle className="w-2.5 h-2.5 mr-1" /> Approve &amp; Send
+                          <CheckCircle className="w-2.5 h-2.5 mr-1" /> Approve internally
                         </Button>
                       )}
                     </div>
                   </div>
-                  {d.submittedAt && <p className="text-[9px] text-zinc-600 mt-1">Internally approved {d.submittedAt} by {d.submittedBy} — no external submission is recorded</p>}
+                  {d.approvedAt && <p className="text-[9px] text-zinc-600 mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external submission is recorded</p>}
                 </div>
               ))}
               {investorDrafts.map((d) => (
@@ -354,18 +362,18 @@ function formatReport(r: GrantsInvestorsReport): string {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-white">{d.investorName}</span>
-                      <Badge className={cn('text-[8px] ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalStatusLabel(d.status)}</Badge>
+                      <Badge className={cn('text-[8px] ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalOutreachLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
                       <Button className="text-[9px]" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
                       {d.status === 'draft' && (
                         <Button className="text-[9px]" onClick={() => { handleApproveInvestor(d.investorId); setDraftContent(null); }}>
-                          <Send className="w-2.5 h-2.5 mr-1" /> Approve &amp; Send
+                          <Send className="w-2.5 h-2.5 mr-1" /> Approve internally
                         </Button>
                       )}
                     </div>
                   </div>
-                  {d.sentAt && <p className="text-[9px] text-zinc-600 mt-1">Internally approved {d.sentAt} by {d.sentBy} — no external send is recorded</p>}
+                  {d.approvedAt && <p className="text-[9px] text-zinc-600 mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external send is recorded</p>}
                 </div>
               ))}
             </div>

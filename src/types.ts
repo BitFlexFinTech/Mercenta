@@ -2084,17 +2084,51 @@ export interface InvestorOpportunity {
   contacted: boolean;
 }
 
+/**
+ * §31/M13c — the FOUNDER's own record that an EXTERNAL submission really
+ * happened. Only ever created by the founder recording one themselves; Mercenta
+ * never submits to a grant provider on the founder's behalf.
+ */
+export interface GrantSubmissionRecord {
+  /** The reference/confirmation the founder supplies. Never generated here. */
+  reference: string;
+  submittedAt: string;
+  recordedBy: string;
+}
+
 export interface GrantApplicationDraft {
   grantId: string;
   grantTitle: string;
   /** The AI-generated application content. */
   content: string;
-  /** Status: draft = staged for review, submitted = approved and sent. */
-  status: 'draft' | 'submitted';
+  /**
+   * INTERNAL state ONLY. `approved_internally` means the founder approved this
+   * draft inside Mercenta — it never means an external submission happened. The
+   * legacy `submitted` value was removed because it could be read as an
+   * external event that never occurred.
+   */
+  status: 'draft' | 'approved_internally';
   createdAt: string;
-  submittedAt?: string;
-  /** Who submitted it. */
-  submittedBy?: string;
+  /** When the founder recorded the INTERNAL approval. Not a submission event. */
+  approvedAt?: string;
+  /** Who recorded the internal approval (an approval always names its owner). */
+  approvedBy?: string;
+  /**
+   * `null`/absent until the FOUNDER records a real external submission with
+   * their own reference. Never set by approval.
+   */
+  submission?: GrantSubmissionRecord | null;
+}
+
+/**
+ * §31/M13c — the founder's own record that an EXTERNAL outreach send really
+ * happened (see `GrantSubmissionRecord`).
+ */
+export interface InvestorSubmissionRecord {
+  /** The confirmation/reference the founder supplies. Never generated here. */
+  reference: string;
+  sentAt: string;
+  recordedBy: string;
 }
 
 export interface InvestorOutreachDraft {
@@ -2102,10 +2136,19 @@ export interface InvestorOutreachDraft {
   investorName: string;
   /** The AI-generated outreach email content. */
   content: string;
-  status: 'draft' | 'sent';
+  /**
+   * INTERNAL state ONLY — see `GrantApplicationDraft.status`. The legacy `sent`
+   * value was removed because it could be read as an external event that never
+   * occurred.
+   */
+  status: 'draft' | 'approved_internally';
   createdAt: string;
-  sentAt?: string;
-  sentBy?: string;
+  /** When the founder recorded the INTERNAL approval. Not a send event. */
+  approvedAt?: string;
+  /** Who recorded the internal approval (an approval always names its owner). */
+  approvedBy?: string;
+  /** `null`/absent until the FOUNDER records a real external send themselves. */
+  submission?: InvestorSubmissionRecord | null;
 }
 
 export interface GrantsInvestorsReport {

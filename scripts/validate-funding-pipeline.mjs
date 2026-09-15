@@ -59,6 +59,7 @@ const CLAIM_CLASSES = [
 try {
   const fp = await server.ssrLoadModule('/src/lib/founder/fundingPipeline.ts');
   const founderContent = await server.ssrLoadModule('/src/config/founderContent.ts');
+  const ge = await server.ssrLoadModule('/src/lib/grants/researchEngine.ts');
 
   /* ── §10 — the three REAL founder opportunities ────────────────────────── */
   const opportunities = fp.FOUNDER_FUNDING_OPPORTUNITIES;
@@ -215,6 +216,103 @@ try {
       !/password|api[_-]?key/.test(moduleSrc));
   test('the module never hardcodes a fabricated submission state',
     !/status:\s*'submitted'|submitted:\s*true/.test(moduleSrc));
+
+  /* ── §31/M13c — the LEGACY draft state can never imply an external event ─ */
+  const engineSrc = read('src/lib/grants/researchEngine.ts');
+  const typesSrc = read('src/types.ts');
+  test('the legacy draft states are INTERNAL only (no submitted / sent state exists)',
+    /status: 'draft' \| 'approved_internally'/.test(typesSrc) &&
+      !/status: 'draft' \| 'submitted'/.test(typesSrc) &&
+      !/status: 'draft' \| 'sent'/.test(typesSrc));
+  test('the engine no longer writes an external-sounding status',
+    !/status = 'submitted'/.test(engineSrc) && !/status = 'sent'/.test(engineSrc) &&
+      !/submittedAt: new Date\(\)\.toISOString\(\)/.test(engineSrc));
+  test('an external event is declared a FOUNDER action',
+    ge.DRAFT_SUBMISSION_IS_A_FOUNDER_ACTION === true &&
+      /INTERNAL approval only/.test(ge.DRAFT_INTERNAL_APPROVAL_DISCLAIMER));
+
+  const grantFixture = {
+    id: 'grant-validator-fixture', title: 'Validator fixture grant', provider: 'Validator',
+    category: 'innovation', amountRange: '£1', deadline: '2026-12-31', fitScore: 50,
+    fitReason: 'fixture', eligibility: 'fixture', status: 'open', url: 'https://example.invalid',
+  };
+  const investorFixture = {
+    id: 'investor-validator-fixture', name: 'Validator fixture investor', type: 'vc',
+    investmentRange: '£1', stage: 'seed', sectors: ['retail'], fitScore: 50,
+    fitReason: 'fixture', draftStarted: false, contacted: false,
+  };
+
+  test('a stored draft starts as draft with NO approval and NO submission',
+    (() => {
+      const d = ge.draftGrantApplication(grantFixture);
+      return d.status === 'draft' && !d.approvedAt && !d.approvedBy && !d.submission;
+    })());
+
+  test('an approval with NO approver identity is REFUSED (approver identity is required)',
+    ge.approveGrantDraft('grant-validator-fixture', '   ') === null &&
+      ge.getGrantsDrafts().find((d) => d.grantId === 'grant-validator-fixture').status === 'draft');
+
+  const approvedGrantDraft = ge.approveGrantDraft('grant-validator-fixture', 'Tadii');
+  test('approving records an INTERNAL approval with its owner, and no submission',
+    approvedGrantDraft?.status === 'approved_internally' && approvedGrantDraft?.approvedBy === 'Tadii' &&
+      Boolean(approvedGrantDraft?.approvedAt) && !approvedGrantDraft?.submission);
+
+  test('an unknown draft id is refused (fail-closed)',
+    ge.approveGrantDraft('grant-does-not-exist', 'Tadii') === null);
+
+  const noConfirm = ge.recordGrantSubmission({
+    grantId: 'grant-validator-fixture', actor: 'Tadii', reference: 'REF-1', confirmed: false,
+  });
+  test('recording a submission without explicit confirmation is REFUSED',
+    noConfirm.ok === false && /explicit founder confirmation/.test(noConfirm.error));
+  const noRef = ge.recordGrantSubmission({
+    grantId: 'grant-validator-fixture', actor: 'Tadii', reference: 'x', confirmed: true,
+  });
+  test('recording a submission without a reference is REFUSED',
+    noRef.ok === false && /reference is required/.test(noRef.error));
+  const recordedGrant = ge.recordGrantSubmission({
+    grantId: 'grant-validator-fixture', actor: 'Tadii', reference: 'UKRI-2026-0042', confirmed: true,
+    at: '2026-09-15T12:00:00.000Z',
+  });
+  test('with approval + confirmation + reference the founder submission is recorded',
+    recordedGrant.ok === true && recordedGrant.draft.submission?.reference === 'UKRI-2026-0042' &&
+      recordedGrant.draft.submission?.submittedAt === '2026-09-15T12:00:00.000Z',
+    recordedGrant.ok ? '' : recordedGrant.error);
+  test('a duplicate submission is REFUSED',
+    ge.recordGrantSubmission({
+      grantId: 'grant-validator-fixture', actor: 'Tadii', reference: 'UKRI-2026-0043', confirmed: true,
+    }).ok === false);
+
+  test('an investor draft starts as draft with NO approval and NO external send',
+    (() => {
+      const d = ge.draftInvestorOutreach(investorFixture);
+      return d.status === 'draft' && !d.approvedAt && !d.submission;
+    })());
+  const skipApproval = ge.recordInvestorSubmission({
+    investorId: 'investor-validator-fixture', actor: 'Tadii', reference: 'REF-2', confirmed: true,
+  });
+  test('recording a send BEFORE internal approval is REFUSED',
+    skipApproval.ok === false && /internal approval before/.test(skipApproval.error));
+  const approvedInvestor = ge.approveInvestorDraft('investor-validator-fixture', 'Tadii');
+  test('investor internal approval records its owner and no external send',
+    approvedInvestor?.status === 'approved_internally' && approvedInvestor?.approvedBy === 'Tadii' &&
+      !approvedInvestor?.submission);
+  const recordedInvestor = ge.recordInvestorSubmission({
+    investorId: 'investor-validator-fixture', actor: 'Tadii', reference: 'INV-REF-7', confirmed: true,
+    at: '2026-09-15T13:00:00.000Z',
+  });
+  test('with approval + confirmation + reference the founder-recorded send is stored',
+    recordedInvestor.ok === true && recordedInvestor.draft.submission?.reference === 'INV-REF-7',
+    recordedInvestor.ok ? '' : recordedInvestor.error);
+
+  test('the legacy surface reads the RENAMED fields and offers no false "Send" action',
+    /d\.approvedAt/.test(panel) && /d\.approvedBy/.test(panel) &&
+      /internalStatusLabel/.test(panel) && /internalOutreachLabel/.test(panel) &&
+      !/Approve &amp; Send|Approve & Send/.test(panel) &&
+      !/d\.submittedAt|d\.submittedBy|d\.sentAt|d\.sentBy/.test(panel));
+  test('the engine contains no fetch/XHR and no credential literal',
+    !/\bfetch\s*\(|XMLHttpRequest|localStorage|sessionStorage/.test(engineSrc) &&
+      !/password|api[_-]?key/.test(engineSrc));
 
   test('the funding pipeline makes ZERO network calls', networkCalls === 0, `observed ${networkCalls}`);
 } catch (err) {

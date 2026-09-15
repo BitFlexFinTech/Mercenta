@@ -2,6 +2,58 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
+> ## ✅ M13c PHASE C — LEGACY FALSE-SUBMISSION STATE FIXED AT THE ROOT (2026-09-15, session 3)
+>
+> **Checkpoint verified before any edit (read-only):** branch `redesign/foundation`,
+> HEAD `883652d` (one commit past the directive's stated `f2a7434` — the §10/§31
+> funding-pipeline commit), protected baseline `959b4d2` confirmed an ancestor,
+> `git status --short` → **clean**. No repository-wide audit was performed; work
+> started from this file and `HANDOFF.md`.
+>
+> **THE DEFECT:** `src/lib/grants/researchEngine.ts` wrote `status: 'submitted'`
+> (`approveGrantDraft`) and `status: 'sent'` (`approveInvestorDraft`) onto its
+> stored drafts with **no external submission occurring** and no approval gate —
+> state that any surface could read as an external event Mercenta performed.
+>
+> **THE FIX** (uses the §31 `fundingPipeline` approval model as the architectural
+> precedent — internal approval is a different thing from external submission):
+> | Change | File |
+> |---|---|
+> | `GrantApplicationDraft.status` / `InvestorOutreachDraft.status` are now `'draft' \| 'approved_internally'`. The `submitted` and `sent` values **no longer exist**, so nothing can compile against them. | `src/types.ts` |
+> | `submittedAt` / `submittedBy` / `sentAt` / `sentBy` renamed to `approvedAt` / `approvedBy` — an internal approval, not an external event. | `src/types.ts` |
+> | `approveGrantDraft` / `approveInvestorDraft` record **INTERNAL approval only**, with the approver's identity, and are fail-closed: an approval that names nobody is refused. | `src/lib/grants/researchEngine.ts` |
+> | A separate `submission` record plus `recordGrantSubmission` / `recordInvestorSubmission` is the **ONLY** path that can represent an external submission (the founder's own reference). Mirrors `recordFundingSubmission`: refused without explicit confirmation, without a prior internal approval, without a reference, or on a duplicate. | `src/lib/grants/researchEngine.ts` |
+> | Declared facts `DRAFT_SUBMISSION_IS_A_FOUNDER_ACTION` + `DRAFT_INTERNAL_APPROVAL_DISCLAIMER` for the UI/validators. | `src/lib/grants/researchEngine.ts` |
+> | 17 new deterministic checks appended to the **existing** validator (no duplicate validation infrastructure was created). | `scripts/validate-funding-pipeline.mjs` |
+>
+> **UI preserved (no redesign, no layout/styling change):** the drafts table
+> renders the same way; the labels now derive from the renamed states
+> (`internally approved — NOT submitted externally` / `— NOT sent externally`).
+> The only visible copy changes are the two `Approve & Send` buttons and the one
+> sentence naming that action — both stated "Send" for an action that sends
+> nothing, so they now read **`Approve internally`**. Reported here rather than
+> changed silently (the honesty rule this phase exists to enforce).
+>
+> **VERIFIED THIS SESSION (real output, run in this session):**
+> | Gate | Result |
+> |---|---|
+> | `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** |
+> | `eslint` on the 3 touched files | **clean** |
+> | `npm run build` | **✓ built in 4.22s** |
+> | `node scripts/lint-wording.mjs` | **PASS — 218 files, 0 violations** |
+> | `node scripts/validate-funding-pipeline.mjs` | **PASS — 60 checks** (was 43; +17 new) |
+> | `npx playwright test e2e/funding-pipeline.spec.ts --workers=2` | **3 passed / 0 failed** |
+> | `git grep` for the legacy fields in the touched surface | **0 remaining references** to `submittedAt`/`submittedBy`/`sentAt`/`sentBy`/`'Approve & Send'` in `GrantsInvestorsSection.tsx` |
+>
+> **NOT changed:** the funding pipeline, the partnerships/fundraising data, the
+> command centre, RBAC/RLS, the design system and every other completed phase.
+>
+> **NEXT (this directive):** PHASE D — ranked Founder Command Centre queue with an
+> explicit WHY breakdown (extend `src/lib/commandCentre/commandCentre.ts`), then
+> the final reconciliation, the bounded final regression and the demo deployment.
+
+---
+> ---
 > ## 🔖 CONTINUATION CHECKPOINT — VERIFIED + SECURITY FINDING (2026-09-15, session 2)
 >
 > **Checkpoint verified (read-only, this session):** HEAD `f2a7434` on
@@ -89,12 +141,12 @@
 > files — hence the rotation requirement below is not optional.
 >
 > ### REMAINING (next sessions, in priority order)
-> 1. **`src/lib/grants/researchEngine.ts` legacy state (flagged, NOT fixed — it was
->    outside the approved cohort):** `approveGrantDraft()` still flips the stored
->    draft `status` to `'submitted'` and `approveInvestorDraft()` to `'sent'` with
->    no founder-approval gate. The UI now labels those honestly, but the state
->    itself should be renamed to an internal-approval state so nothing can ever
->    read it as an external event.
+> 1. ~~**`src/lib/grants/researchEngine.ts` legacy state**~~ — **RESOLVED in session 3
+>    (M13c PHASE C, see the block at the top of this file):** the `submitted` / `sent`
+>    states and the `submittedAt`/`submittedBy`/`sentAt`/`sentBy` fields are gone;
+>    internal approval is now `approved_internally` with a required approver identity,
+>    and an external submission is representable only through the founder-gated
+>    `recordGrantSubmission` / `recordInvestorSubmission`.
 > 2. **§27/§28 unified ranked founder queue with visible WHY** — still not built.
 >    The relationship/funding slots (best embassy introduction, best trade
 >    programme, best investor, best accelerator) and the §28 factor breakdown are

@@ -1,4 +1,14 @@
-/** §Batch-9 — Grants & Investors research engine + application drafting. */
+/**
+ * §Batch-9 — Grants & Investors research engine + application drafting.
+ *
+ * §31/M13c honesty rule (root-cause fix): the stored draft state is INTERNAL
+ * only. `approveGrantDraft` / `approveInvestorDraft` record an internal approval
+ * WITH the approver's identity and can never represent an external submission —
+ * the legacy `submitted` / `sent` states were removed for that reason. An
+ * external event is representable ONLY through `recordGrantSubmission` /
+ * `recordInvestorSubmission`, which refuse without an explicit founder
+ * confirmation, a prior internal approval and the founder's own reference.
+ */
 import type { GrantOpportunity, InvestorOpportunity, GrantApplicationDraft, InvestorOutreachDraft, GrantsInvestorsReport } from '@/types';
 import { createGrantsDataSource } from './dataSources';
 
@@ -99,23 +109,119 @@ export function draftInvestorOutreach(investor: InvestorOpportunity): InvestorOu
   return draft;
 }
 
-export function approveGrantDraft(grantId: string, submittedBy: string): GrantApplicationDraft | null {
+/**
+ * §31/M13c — INTERNAL approval of a staged draft.
+ *
+ * Root-cause fix for the legacy false-submission state: this no longer writes a
+ * `submitted` status. It records an INTERNAL approval with the approver's
+ * identity, and nothing else. Internal approval is NOT an external event, and no
+ * surface can read it as one because the state is named for what it is.
+ *
+ * Fail-closed: an approval must name its approver, and only a `draft` can be
+ * approved.
+ */
+export function approveGrantDraft(grantId: string, approvedBy: string): GrantApplicationDraft | null {
+  if (!approvedBy.trim()) return null;
   const draft = draftsStore.find((d) => d.grantId === grantId && d.status === 'draft');
   if (!draft) return null;
-  draft.status = 'submitted';
-  draft.submittedAt = new Date().toISOString();
-  draft.submittedBy = submittedBy;
+  draft.status = 'approved_internally';
+  draft.approvedAt = new Date().toISOString();
+  draft.approvedBy = approvedBy.trim();
   return draft;
 }
 
-export function approveInvestorDraft(investorId: string, sentBy: string): InvestorOutreachDraft | null {
+/** §31/M13c — same rule for investor outreach: internal approval only. */
+export function approveInvestorDraft(investorId: string, approvedBy: string): InvestorOutreachDraft | null {
+  if (!approvedBy.trim()) return null;
   const draft = investorDraftsStore.find((d) => d.investorId === investorId && d.status === 'draft');
   if (!draft) return null;
-  draft.status = 'sent';
-  draft.sentAt = new Date().toISOString();
-  draft.sentBy = sentBy;
+  draft.status = 'approved_internally';
+  draft.approvedAt = new Date().toISOString();
+  draft.approvedBy = approvedBy.trim();
   return draft;
 }
+
+/* ── §31/M13c — founder-recorded EXTERNAL submission (never automatic) ───── */
+
+export type DraftSubmissionResult<T> = { ok: true; draft: T } | { ok: false; error: string };
+
+/**
+ * Records a submission THE FOUNDER has already made themselves, using the
+ * `fundingPipeline.recordFundingSubmission` gate as the precedent. Refused
+ * without an explicit confirmation, without a prior internal approval, without a
+ * reference, or on a duplicate. Mercenta never submits on the founder's behalf,
+ * so this is the ONLY path that can represent an external submission.
+ */
+export function recordGrantSubmission(input: {
+  grantId: string;
+  actor: string;
+  reference: string;
+  confirmed: boolean;
+  at?: string;
+}): DraftSubmissionResult<GrantApplicationDraft> {
+  const draft = draftsStore.find((d) => d.grantId === input.grantId);
+  if (!draft) return { ok: false, error: `Unknown grant draft: ${input.grantId}` };
+  if (!input.confirmed) {
+    return { ok: false, error: 'Refused: recording a submission requires an explicit founder confirmation.' };
+  }
+  if (draft.status !== 'approved_internally') {
+    return { ok: false, error: 'Refused: record the internal approval before recording a submission.' };
+  }
+  if (draft.submission) {
+    return { ok: false, error: 'A submission is already recorded for this grant.' };
+  }
+  if (input.reference.trim().length < 3) {
+    return {
+      ok: false,
+      error: 'Refused: a submission reference is required (the confirmation the provider gave you).',
+    };
+  }
+  draft.submission = {
+    reference: input.reference.trim(),
+    submittedAt: input.at ?? new Date().toISOString(),
+    recordedBy: input.actor.trim() || 'unattributed',
+  };
+  return { ok: true, draft };
+}
+
+/** §31/M13c — the investor-outreach equivalent of `recordGrantSubmission`. */
+export function recordInvestorSubmission(input: {
+  investorId: string;
+  actor: string;
+  reference: string;
+  confirmed: boolean;
+  at?: string;
+}): DraftSubmissionResult<InvestorOutreachDraft> {
+  const draft = investorDraftsStore.find((d) => d.investorId === input.investorId);
+  if (!draft) return { ok: false, error: `Unknown investor draft: ${input.investorId}` };
+  if (!input.confirmed) {
+    return { ok: false, error: 'Refused: recording a send requires an explicit founder confirmation.' };
+  }
+  if (draft.status !== 'approved_internally') {
+    return { ok: false, error: 'Refused: record the internal approval before recording a send.' };
+  }
+  if (draft.submission) {
+    return { ok: false, error: 'A send is already recorded for this investor.' };
+  }
+  if (input.reference.trim().length < 3) {
+    return {
+      ok: false,
+      error: 'Refused: a reference is required (the confirmation you received).',
+    };
+  }
+  draft.submission = {
+    reference: input.reference.trim(),
+    sentAt: input.at ?? new Date().toISOString(),
+    recordedBy: input.actor.trim() || 'unattributed',
+  };
+  return { ok: true, draft };
+}
+
+/** Declared facts the UI and the validators both read. */
+export const DRAFT_SUBMISSION_IS_A_FOUNDER_ACTION = true;
+
+export const DRAFT_INTERNAL_APPROVAL_DISCLAIMER =
+  'Approving a draft here records an INTERNAL approval only. Mercenta submits and sends nothing on the founder’s behalf: the founder submits or sends it personally, then records the reference.';
 
 export function getGrantsDrafts(): GrantApplicationDraft[] { return [...draftsStore]; }
 export function getInvestorDrafts(): InvestorOutreachDraft[] { return [...investorDraftsStore]; }

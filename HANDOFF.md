@@ -1,7 +1,9 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-**Last updated: September 15, 2026 — ✅ M13 CONTINUATION session 2: §10/§31 founder
-funding pipeline BUILT + the tracked-credential finding redacted.**
+**Last updated: September 15, 2026 — ✅ M13c session 3: PHASE C (legacy
+false-submission state) fixed at the root. NEXT: PHASE D (ranked command-centre
+queue with visible WHY) → final reconciliation → bounded final regression →
+deploy to demo.mercenta.co.uk → Rakazo LAST.**
 Branch `redesign/foundation`, verified HEAD before this session `f2a7434`, protected
 baseline `959b4d2` (verified ancestor). Real repository: `/Users/tadii/Desktop/1. Mercenta`.
 
@@ -38,11 +40,39 @@ forbidden by the standing rules; rotation is the fix). Same standing item as the
   validator/audit scripts 0 failures · rls-audit PASS · integrity-audit 61/61 ·
   affected-spec run 47/47.
 
+## THIS SESSION (M13c — PHASE C: legacy false-submission state) — DONE
+- **Checkpoint verified first (read-only):** branch `redesign/foundation`, HEAD
+  `883652d` (one commit past the directive's `f2a7434`), baseline `959b4d2`
+  ancestor-confirmed, tree clean. **No repository-wide audit was run** and no
+  completed phase was rebuilt.
+- **DEFECT FIXED AT THE ROOT:** `src/lib/grants/researchEngine.ts` used to write
+  `status: 'submitted'` / `'sent'` onto stored drafts with no external submission
+  and no approval gate.
+- **THE FIX (fundingPipeline approval model as precedent):** the legacy states are
+  gone from `src/types.ts` (`'draft' | 'approved_internally'`), `submittedAt` /
+  `submittedBy` / `sentAt` / `sentBy` became `approvedAt` / `approvedBy`,
+  `approveGrantDraft` / `approveInvestorDraft` now record an INTERNAL approval
+  with a **required approver identity** (fail-closed), and a new separate
+  `submission` record with `recordGrantSubmission` / `recordInvestorSubmission`
+  is the ONLY path that can represent an external submission — refused without an
+  explicit founder confirmation, a prior internal approval, the founder's own
+  reference, or on a duplicate.
+- UI preserved (no redesign). The only visible copy changed: the two
+  `Approve & Send` buttons + the sentence naming that action, which said "Send"
+  for an action that sends nothing — now `Approve internally`.
+- 17 new checks appended to the **existing** `scripts/validate-funding-pipeline.mjs`
+  (43 → **60 checks PASS**); `e2e/funding-pipeline.spec.ts` 3/3; tsc 0 errors;
+  eslint clean; build ✓; wording gate PASS (218 files).
+
 ## STILL OPEN (next session, priority order)
-1. **`src/lib/grants/researchEngine.ts`** still flips the legacy stored draft status to
-   `'submitted'` / `'sent'` with no gate (the UI now labels it honestly, but the state
-   should be renamed to an internal-approval state). Not fixed — it was outside the
-   approved file cohort.
+1. **§27/§28 unified ranked founder queue with visible WHY** — the NEXT phase
+   (PHASE D): extend `src/lib/commandCentre/commandCentre.ts` with the
+   relationship/funding slots (best embassy introduction, best trade programme,
+   best investor, best accelerator) and the explicit per-item WHY breakdown;
+   `fundingPipelineSummary()` is the ready-made input for the funding slots.
+   Then: bounded final reconciliation → bounded final regression
+   (`npx playwright test --workers=2`) → deploy to demo.mercenta.co.uk.
+   **Rakazo is deliberately LAST** (after deployment) — do NOT touch it earlier.
 2. **§27/§28 unified ranked founder queue with visible WHY** — extend
    `src/lib/commandCentre/commandCentre.ts`; `fundingPipelineSummary()` is the
    ready-made input for the funding slots.
