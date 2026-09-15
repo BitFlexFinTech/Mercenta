@@ -348,6 +348,16 @@ const M13_SCOPE = new Set([
   'e2e/onboarding-handoff.spec.ts',
   'e2e/onboarding-workflow.spec.ts',
   'e2e/outreach-provider-hardening.spec.ts',
+  // §Phase M13 CONTINUATION (session 2, 2026-09-15) — §10/§31: the founder
+  // funding / accelerator pipeline. The three REAL founder opportunities, the
+  // §31 approval-gated stage machine, its validator and its browser spec. The new
+  // module lives under the already-declared `src/lib/founder/` surface (M12_SCOPE);
+  // these entries declare the changed SURFACE + the two new artefacts, exactly as
+  // the earlier M13 additions did. Anything outside this list is still refused.
+  'src/lib/founder/fundingPipeline.ts',
+  'src/components/admin/GrantsInvestorsSection.tsx',
+  'scripts/validate-funding-pipeline.mjs',
+  'e2e/funding-pipeline.spec.ts',
 ]);
 
 /**

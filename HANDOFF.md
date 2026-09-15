@@ -1,8 +1,64 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-**Last updated: September 15, 2026 — ✅ M13 CONTINUATION, Phases 9 + 8 DONE.**
-Branch `redesign/foundation`, verified HEAD before this session `5978c13`, protected
+**Last updated: September 15, 2026 — ✅ M13 CONTINUATION session 2: §10/§31 founder
+funding pipeline BUILT + the tracked-credential finding redacted.**
+Branch `redesign/foundation`, verified HEAD before this session `f2a7434`, protected
 baseline `959b4d2` (verified ancestor). Real repository: `/Users/tadii/Desktop/1. Mercenta`.
+
+## ⚠️ SECURITY — READ FIRST
+`HANDOFF.md` itself contained the **Namecheap FTP password as a literal** in the
+"PROMPT: Namecheap FTP Deploy" block. It was the ONLY tracked file holding a value
+(`.env`/`.env.deploy` are gitignored; `scripts/deploy-demo.sh`, `GO_LIVE.md` and
+`docs/INTEGRATIONS.md` reference the variable NAME only). The literal is now
+**REDACTED — never put it back**. **ACTION REQUIRED FROM THE FOUNDER: ROTATE that FTP
+password**, because the old value is still in past Git commits (history rewrite is
+forbidden by the standing rules; rotation is the fix). Same standing item as the
+**Twilio 2FA recovery-code rotation**.
+
+## THIS SESSION (M13 continuation, session 2) — §10/§31 BUILT
+- **`src/lib/founder/fundingPipeline.ts` (NEW)** — the founder's own funding pipeline:
+  the three REAL §10 opportunities (**Solo Founders Program**, **The Bridge**,
+  **Ignyte by DIFC**) with their exact URLs, every researched fact carrying a claim
+  class + source, and any term the research did not state left `null` (never
+  invented); the exact §31 stage order (DISCOVERED → … → DECISION); the
+  **founder-approval gate** (SUBMITTED and every later stage are REFUSED without a
+  recorded approval AND a founder-supplied submission reference — no implicit or
+  fabricated submission, ever); deterministic application generation (no model call)
+  linted by the EXISTING wording gates and reusing the canonical founder statement;
+  `fundingPipelineSummary()` for the queue. Zero network calls.
+- **`GrantsInvestorsSection.tsx` (EXTENDED)** — a "Founder funding & accelerator
+  pipeline" card in the EXISTING Super Admin **Grants & Investors** tab, plus the
+  **honesty defect fixed**: it used to say an application was "marked as submitted"
+  and showed a bare `submitted` badge; it now reads "internally approved — NOT
+  submitted externally" and says nothing was submitted/sent.
+- **`scripts/validate-funding-pipeline.mjs` (NEW)** — 43 checks PASS.
+  **`e2e/funding-pipeline.spec.ts` (NEW)** — 3/3 PASS. Both scope guards declared the
+  new surface.
+- VERIFIED: tsc 0 · eslint clean · build ✓ · wording gate PASS (218 files) · 74
+  validator/audit scripts 0 failures · rls-audit PASS · integrity-audit 61/61 ·
+  affected-spec run 47/47.
+
+## STILL OPEN (next session, priority order)
+1. **`src/lib/grants/researchEngine.ts`** still flips the legacy stored draft status to
+   `'submitted'` / `'sent'` with no gate (the UI now labels it honestly, but the state
+   should be renamed to an internal-approval state). Not fixed — it was outside the
+   approved file cohort.
+2. **§27/§28 unified ranked founder queue with visible WHY** — extend
+   `src/lib/commandCentre/commandCentre.ts`; `fundingPipelineSummary()` is the
+   ready-made input for the funding slots.
+3. **The 58 failures in the unbounded full-suite run are ENVIRONMENTAL, PROVEN:** the
+   machine was at load ~19 with a stray vite dev server (port 5174, no port clash);
+   every failure was a click/10s wait timeout in specs this phase never touched, and
+   the SAME 16 spec files re-ran **105 passed / 0 failed** with `--workers=2`. Run the
+   suite with bounded workers on a quiet machine.
+4. Credential/founder work unchanged (Google OAuth client id, Companies House + GOV.UK
+   codes, HMRC, Google Edge Function deploy, real cost prices, Tottenham ASIN evidence
+   capture, Twilio rotation, **+ the Namecheap FTP rotation above**).
+5. §16–§29 embassy/trade partnership pipeline and the §12–§15 Google Doc/Slides/Sheets
+   generation wiring — still to build on the existing seams.
+
+---
+## HISTORICAL — M13 session 1 (Phases 9 + 8)
 
 **Built + verified THIS session (nothing already verified was rebuilt):**
 - **Phase 9 — Company / Government Control Centre**: `src/config/company.ts` (single
@@ -608,7 +664,7 @@ Run zip script.
 This is a deploy-to-Namecheap automation task.
 Part 1: Add to .env: NAMECHEAP_FTP_HOST: ftp.demo.mercenta.co.uk,
 NAMECHEAP_FTP_USER: demo@demo.mercenta.co.uk,
-NAMECHEAP_FTP_PASS: ^LV#?4Lh-hzFEi5Q, NAMECHEAP_FTP_PORT: 21
+NAMECHEAP_FTP_PASS: <REDACTED — value lives in .env only (gitignored) and is entered by the FOUNDER in Super Admin; never written into this doc, source, reports, prompts, generated files or the review ZIP>, NAMECHEAP_FTP_PORT: 21
 Part 2: Create scripts/deploy-demo.sh:
 #!/bin/bash
 set -e

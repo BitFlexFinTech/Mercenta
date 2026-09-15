@@ -8,7 +8,33 @@ import { runGrantsResearch, draftGrantApplication, draftInvestorOutreach, approv
 import { Card, Badge, Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { GrantOpportunity, InvestorOpportunity, GrantsInvestorsReport } from '@/types';
-import { Download, BadgeDollarSign, X, CheckCircle, Send, Eye } from 'lucide-react';
+import {
+  FOUNDER_FUNDING_OPPORTUNITIES,
+  FUNDING_OPPORTUNITY_TYPE_LABELS,
+  FUNDING_PIPELINE_DISCLAIMER,
+  FUNDING_STAGE_LABELS,
+  generateFundingApplication,
+  getFundingPipeline,
+  recordFounderApproval,
+  recordFundingSubmission,
+  type FounderFundingOpportunity,
+  type FundingApplicationDraft,
+} from '@/lib/founder/fundingPipeline';
+import { BRAND_LEGAL_NAME } from '@/config/brand';
+import { CLAIM_LABELS } from '@/lib/intelligence/opportunityDiscovery';
+import { Download, BadgeDollarSign, X, CheckCircle, Send, Eye, ShieldAlert, FileText } from 'lucide-react';
+
+/**
+ * §31 — the legacy grant/investor drafts use `submitted` / `sent` as INTERNAL
+ * statuses. Mercenta submits nothing on the founder's behalf, so those are
+ * labelled here as internal approval instead of being presented as an external
+ * event the founder did not perform.
+ */
+function internalStatusLabel(status: string): string {
+  if (status === 'submitted') return 'internally approved — NOT submitted externally';
+  if (status === 'sent') return 'internally approved — NOT sent externally';
+  return 'draft — nothing submitted';
+}
 
 export function GrantsInvestorsSection() {
   const [report, setReport] = useState<GrantsInvestorsReport | null>(null);
@@ -19,6 +45,59 @@ export function GrantsInvestorsSection() {
   const [selectedInvestor, setSelectedInvestor] = useState<string | null>(null);
   const [draftContent, setDraftContent] = useState<string | null>(null);
   const [draftNotice, setDraftNotice] = useState<string | null>(null);
+
+  /* §10/§31 — the founder's OWN funding/accelerator pipeline (real routes). */
+  const [pipelineVersion, setPipelineVersion] = useState(0);
+  const [fundingDraft, setFundingDraft] = useState<FundingApplicationDraft | null>(null);
+  const [fundingNotice, setFundingNotice] = useState<string | null>(null);
+  const [submissionRefs, setSubmissionRefs] = useState<Record<string, string>>({});
+  const [submissionConfirmed, setSubmissionConfirmed] = useState<string[]>([]);
+
+  const pipeline = getFundingPipeline();
+  void pipelineVersion;
+
+  function handleGenerateFunding(o: FounderFundingOpportunity) {
+    const draft = generateFundingApplication(o.id);
+    if (!draft) {
+      setFundingNotice('No draft was generated — that opportunity is not in the pipeline.');
+      return;
+    }
+    setFundingDraft(draft);
+    setFundingNotice(
+      draft.lintPassed
+        ? `Draft generated for ${o.organisation}. NOTHING has been submitted: review it, record your approval, then submit it yourself through the programme's own channel.`
+        : `Draft generated for ${o.organisation} but it FAILED the wording gate: ${draft.lintReasons.join('; ')}`
+    );
+  }
+
+  function handleApproveFunding(o: FounderFundingOpportunity) {
+    const r = recordFounderApproval({
+      opportunityId: o.id,
+      approvedBy: `${BRAND_LEGAL_NAME} — sole director (Super Admin)`,
+    });
+    setFundingNotice(
+      r.ok
+        ? `Approval recorded for ${o.organisation}. Mercenta submits nothing — submit it yourself and then record the reference.`
+        : `Refused: ${r.error}`
+    );
+    setPipelineVersion((v) => v + 1);
+  }
+
+  function handleRecordSubmission(o: FounderFundingOpportunity) {
+    const reference = submissionRefs[o.id] ?? '';
+    const r = recordFundingSubmission({
+      opportunityId: o.id,
+      actor: `${BRAND_LEGAL_NAME} — sole director (Super Admin)`,
+      reference,
+      confirmed: submissionConfirmed.includes(o.id),
+    });
+    setFundingNotice(
+      r.ok
+        ? `Submission recorded for ${o.organisation} with reference ${reference.trim()}.`
+        : `Refused: ${r.error}`
+    );
+    setPipelineVersion((v) => v + 1);
+  }
 
   async function handleRun() {
     setLoading(true);
@@ -58,7 +137,11 @@ export function GrantsInvestorsSection() {
   function handleApproveGrant(grantId: string) {
     const approved = approveGrantDraft(grantId, 'Tadii');
     if (approved) {
-      setDraftNotice('Application for ' + approved.grantTitle + ' approved and marked as submitted.');
+      setDraftNotice(
+        'Application for ' +
+          approved.grantTitle +
+          ' is APPROVED INTERNALLY. Nothing has been submitted to the provider — submit it yourself, then record the submission in the funding pipeline below.'
+      );
       setDraftContent(null);
     }
   }
@@ -66,7 +149,11 @@ export function GrantsInvestorsSection() {
   function handleApproveInvestor(investorId: string) {
     const approved = approveInvestorDraft(investorId, 'Tadii');
     if (approved) {
-      setDraftNotice('Outreach to ' + approved.investorName + ' approved and marked as sent.');
+      setDraftNotice(
+        'Outreach to ' +
+          approved.investorName +
+          ' is APPROVED INTERNALLY. Nothing has been sent — send it yourself through your own channel, or use the Recipient-specific outreach flow in the Partnerships Centre.'
+      );
       setDraftContent(null);
     }
   }
@@ -92,6 +179,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 }
 
   return (
+    <div className="space-y-4">
     <Card className="p-4 mt-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -247,7 +335,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-white">{d.grantTitle}</span>
-                      <Badge className={cn('text-[8px] ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{d.status}</Badge>
+                      <Badge className={cn('text-[8px] ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalStatusLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
                       <Button className="text-[9px]" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
@@ -258,7 +346,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                       )}
                     </div>
                   </div>
-                  {d.submittedAt && <p className="text-[9px] text-zinc-600 mt-1">Submitted {d.submittedAt} by {d.submittedBy}</p>}
+                  {d.submittedAt && <p className="text-[9px] text-zinc-600 mt-1">Internally approved {d.submittedAt} by {d.submittedBy} — no external submission is recorded</p>}
                 </div>
               ))}
               {investorDrafts.map((d) => (
@@ -266,7 +354,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-white">{d.investorName}</span>
-                      <Badge className={cn('text-[8px] ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{d.status}</Badge>
+                      <Badge className={cn('text-[8px] ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalStatusLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
                       <Button className="text-[9px]" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
@@ -277,7 +365,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                       )}
                     </div>
                   </div>
-                  {d.sentAt && <p className="text-[9px] text-zinc-600 mt-1">Sent {d.sentAt} by {d.sentBy}</p>}
+                  {d.sentAt && <p className="text-[9px] text-zinc-600 mt-1">Internally approved {d.sentAt} by {d.sentBy} — no external send is recorded</p>}
                 </div>
               ))}
             </div>
@@ -297,5 +385,155 @@ function formatReport(r: GrantsInvestorsReport): string {
         </>
       )}
     </Card>
+
+    <Card className="p-4" title="Founder funding & accelerator pipeline">
+      <div className="space-y-3" data-testid="funding-pipeline">
+        <p className="text-[10px] text-amber-300/90 flex items-start gap-1.5">
+          <ShieldAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
+          {FUNDING_PIPELINE_DISCLAIMER}
+        </p>
+
+        {fundingNotice && (
+          <div
+            className="bg-ink-900 border border-white/[0.06] rounded-lg p-2.5 text-[11px] text-zinc-300"
+            data-testid="funding-notice"
+          >
+            {fundingNotice}
+          </div>
+        )}
+
+        {FOUNDER_FUNDING_OPPORTUNITIES.map((o) => {
+          const entry = pipeline.find((e) => e.opportunityId === o.id);
+          const approved = Boolean(entry?.approval);
+          const submitted = Boolean(entry?.submission);
+          return (
+            <div
+              key={o.id}
+              className="bg-ink-900 rounded-lg border border-white/[0.06] p-3"
+              data-testid={`funding-opportunity-${o.id}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-white">
+                    {o.organisation}
+                    <Badge className="text-[8px] ml-2 bg-white/[0.06] text-zinc-300">
+                      {FUNDING_OPPORTUNITY_TYPE_LABELS[o.opportunityType]}
+                    </Badge>
+                  </p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">{o.geography}</p>
+                  <a
+                    href={o.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[10px] text-sky-300/90 hover:underline"
+                  >
+                    {o.url}
+                  </a>
+                </div>
+                <span data-testid={`funding-stage-${o.id}`}>
+                  <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">
+                    {FUNDING_STAGE_LABELS[entry?.stage ?? 'discovered']}
+                  </Badge>
+                </span>
+              </div>
+              <div className="mt-2 space-y-0.5 text-[10px] text-zinc-400">
+                <p>
+                  {o.fundingAmount
+                    ? `Amount: ${o.fundingAmount.value} [${CLAIM_LABELS[o.fundingAmount.claim]}]`
+                    : 'Amount: NOT STATED in the research — verify on the programme site.'}
+                </p>
+                <p>
+                  {o.equityTerms
+                    ? `Terms: ${o.equityTerms.value} [${CLAIM_LABELS[o.equityTerms.claim]}]`
+                    : 'Terms: NOT STATED in the research — verify on the programme site.'}
+                </p>
+                <p>
+                  Eligibility: {o.eligibility.value} [{CLAIM_LABELS[o.eligibility.claim]}]
+                </p>
+                <p>
+                  Deadline:{' '}
+                  {o.applicationDeadline ??
+                    'NOT STATED in the research — verify on the programme site'}
+                </p>
+                <p>Required documents: {o.requiredDocuments.join(' · ')}</p>
+                <p className="text-zinc-500">Next action: {entry?.nextAction ?? o.nextAction}</p>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Button className="text-[9px]" onClick={() => handleGenerateFunding(o)}>
+                  <FileText className="w-2.5 h-2.5 mr-1" /> Generate application
+                </Button>
+                <Button
+                  className="text-[9px]"
+                  onClick={() => handleApproveFunding(o)}
+                  disabled={approved}
+                  data-testid={`funding-approve-${o.id}`}
+                >
+                  <CheckCircle className="w-2.5 h-2.5 mr-1" />
+                  {approved ? 'Approval recorded' : 'Record founder approval'}
+                </Button>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <input
+                  className="bg-ink-850 border border-white/[0.08] rounded px-2 py-1 text-[10px] text-zinc-200 w-44"
+                  placeholder="Programme reference"
+                  value={submissionRefs[o.id] ?? ''}
+                  onChange={(e) =>
+                    setSubmissionRefs((prev) => ({ ...prev, [o.id]: e.target.value }))
+                  }
+                  data-testid={`funding-submission-ref-${o.id}`}
+                />
+                <label className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+                  <input
+                    type="checkbox"
+                    checked={submissionConfirmed.includes(o.id)}
+                    onChange={(e) =>
+                      setSubmissionConfirmed((prev) =>
+                        e.target.checked ? [...prev, o.id] : prev.filter((x) => x !== o.id)
+                      )
+                    }
+                    data-testid={`funding-submission-confirm-${o.id}`}
+                  />
+                  I submitted this myself (Mercenta does not submit)
+                </label>
+                <Button
+                  className="text-[9px]"
+                  onClick={() => handleRecordSubmission(o)}
+                  disabled={submitted}
+                  data-testid="funding-submit"
+                >
+                  {submitted ? 'Submission recorded' : 'Record my submission'}
+                </Button>
+              </div>
+
+              {entry?.submission && (
+                <p className="text-[10px] text-emerald-300/90 mt-1">
+                  Recorded: {entry.submission.reference} · {entry.submission.submittedAt} · by{' '}
+                  {entry.submission.recordedBy}
+                </p>
+              )}
+            </div>
+          );
+        })}
+
+        {fundingDraft && (
+          <div
+            className="bg-ink-900 border border-white/[0.06] rounded-lg p-3"
+            data-testid="funding-draft"
+          >
+            <p className="text-[11px] text-zinc-300">
+              {fundingDraft.submissionStatus} · wording gate:{' '}
+              {fundingDraft.lintPassed ? 'PASS' : `FAIL (${fundingDraft.lintReasons.join('; ')})`} ·
+              basis: {fundingDraft.basis}
+            </p>
+            <pre className="whitespace-pre-wrap text-[10px] text-zinc-300 bg-ink-850 border border-white/[0.06] rounded-lg p-2 mt-2 max-h-60 overflow-y-auto">
+              {fundingDraft.content}
+            </pre>
+          </div>
+        )}
+      </div>
+    </Card>
+    </div>
   );
 }

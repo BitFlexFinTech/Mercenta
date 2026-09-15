@@ -425,6 +425,14 @@ try {
     'e2e/onboarding-handoff.spec.ts',
     'e2e/onboarding-workflow.spec.ts',
     'e2e/outreach-provider-hardening.spec.ts',
+    // §Phase M13 CONTINUATION (session 2, 2026-09-15) — §10/§31: the founder
+    // funding / accelerator pipeline (three REAL founder opportunities, the
+    // approval-gated stage machine, its validator and its browser spec). Declared
+    // exactly as the M13 additions above were; anything else is still refused.
+    'src/lib/founder/fundingPipeline.ts',
+    'src/components/admin/GrantsInvestorsSection.tsx',
+    'scripts/validate-funding-pipeline.mjs',
+    'e2e/funding-pipeline.spec.ts',
   ];
   const protectedPaths = [
     'src/lib/intelligence/',

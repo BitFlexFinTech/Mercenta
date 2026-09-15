@@ -2,6 +2,115 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
+> ## 🔖 CONTINUATION CHECKPOINT — VERIFIED + SECURITY FINDING (2026-09-15, session 2)
+>
+> **Checkpoint verified (read-only, this session):** HEAD `f2a7434` on
+> `redesign/foundation`; protected baseline `959b4d2` confirmed an ancestor
+> (`git merge-base --is-ancestor` → YES); `git status --short` → **clean, no
+> untracked files**. Nothing was rebuilt and no verified invariant was disturbed.
+>
+> **M13 phases A–G status:** the M13 queue is COMPLETE (Phases 3, 8, 9, 10, 11, 12,
+> 13, 14, 15 — see the table below). The only M13 items still open are CREDENTIAL /
+> FOUNDER actions (Google OAuth client id, Companies House + GOV.UK codes, HMRC,
+> Google Edge Function deploy, real cost prices, Tottenham ASIN evidence capture,
+> Twilio recovery-code rotation) — no build work.
+>
+> ### ⚠️ SECURITY FINDING — TRACKED CREDENTIAL (FIXED IN THE WORKING TREE)
+> `HANDOFF.md` contained the **Namecheap FTP password as a LITERAL** in the
+> "PROMPT: Namecheap FTP Deploy" block. It was the ONLY tracked file holding a
+> literal (`.env` / `.env.deploy` are gitignored and keep the value; `scripts/deploy-demo.sh`,
+> `GO_LIVE.md` and `docs/INTEGRATIONS.md` reference the VARIABLE NAME only).
+> **Fixed:** the literal is replaced with a masked reference.
+> **STILL REQUIRED FROM THE FOUNDER (not a build task):** the value remains in past
+> Git commits, so **ROTATE the Namecheap FTP password** (rotation is the fix;
+> history rewrite is forbidden by the standing rules). The new value goes in `.env`
+> only — never in a doc, source file, report, prompt or generated artefact.
+>
+> ### ✅ PHASE §10/§31 — REAL FOUNDER OPPORTUNITIES + APPROVAL-GATED APPLICATION PIPELINE (DONE)
+> Identified from the checkpoint (not assumed) and then BUILT this session:
+> * §10's three REAL founder opportunities (**Solo Founders Program**, **The
+>   Bridge**, **Ignyte by DIFC**) existed **nowhere** in the repo (grep: 0 hits)
+>   → now carried as real records with their exact URLs and claim classes.
+> * §31's funding/accelerator pipeline (DISCOVERED → … → DECISION,
+>   founder-approval-gated) did **not** exist → now implemented with a real gate.
+> * **GENUINE DEFECT FOUND AND FIXED:** `GrantsInvestorsSection.tsx` told the
+>   founder an application was *"marked as submitted"* and rendered the legacy
+>   draft status as `submitted`, when no external submission had happened. The
+>   claim is now labelled **"internally approved — NOT submitted externally"**, and
+>   the notices say nothing was submitted/sent. (`researchEngine.ts` still sets the
+>   legacy internal `status: 'submitted'` field — see REMAINING.)
+>
+> **FILES CHANGED (5 code/test + 2 docs):**
+> | File | Change |
+> |---|---|
+> | `src/lib/founder/fundingPipeline.ts` | **NEW** — the 3 real §10 opportunities (claim-classed, terms the research did not state left `null`), the §31 stage machine, the founder-approval gate, deterministic application generation linted by the EXISTING wording gates, and the founder queue summary. Zero network, zero model calls. |
+> | `src/components/admin/GrantsInvestorsSection.tsx` | **EXTENDED** (existing content untouched) — new "Founder funding & accelerator pipeline" card in the existing Super Admin **Grants & Investors** tab; the false submission wording fixed. |
+> | `scripts/validate-funding-pipeline.mjs` | **NEW** — 43 deterministic checks. |
+> | `e2e/funding-pipeline.spec.ts` | **NEW** — 3 browser tests. |
+> | `scripts/validate-e6-brand-surfaces.mjs` / `scripts/validate-e7-embedded-social.mjs` | **DECLARED** the new surface (the sanctioned pattern; nothing outside the declared set is accepted). |
+> | `PROJECT_STATUS.md`, `HANDOFF.md` | checkpoint + the credential redaction. |
+>
+> **PRESERVED:** the M11/M12/M13 engines, the ASIN-level Brand Intelligence, the
+> Opportunity Discovery layer, the Partnerships/Fundraising Centre, the Founder
+> Investor Centre, the command centre, RBAC/RLS and the design system were not
+> touched. The new module REUSES the existing claim classes, the existing wording
+> gates, the canonical founder content and the canonical brand/domain config.
+>
+> **VERIFIED THIS SESSION (real output):**
+> | Gate | Result |
+> |---|---|
+> | `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** |
+> | `eslint` on every touched file | **clean** |
+> | `npm run build` | **✓ built** |
+> | `node scripts/validate-funding-pipeline.mjs` | **PASS — 43 checks** |
+> | `npx playwright test e2e/funding-pipeline.spec.ts` | **3 passed / 0 failed** |
+> | Affected-spec run (app-shell, dashboard, command-centre, company-control-centre, launch-centre, opportunity-discovery) | **47 passed / 0 failed** |
+> | Validator/audit sweep (74 scripts incl. `rls-audit`, `integrity-audit`) | **0 failures** |
+> | `node scripts/rls-audit.mjs` | **PASS** (33 tables, 94 checks) |
+> | `node scripts/integrity-audit.mjs` | **PASSED — 61/61, 100%** |
+> | `scripts/validate-e6-brand-surfaces.mjs` / `validate-e7-embedded-social.mjs` | **PASS / 121 assertions 0 failures** |
+> | `node scripts/lint-wording.mjs` | **PASS — 218 files, 0 violations** |
+> | Full Playwright suite, `fullyParallel` (default) | one run showed 222 passed / **58 failed** / 2 skipped — **ENVIRONMENTAL, PROVEN**: the machine was at load 19-20 with a stray vite server; every failure was a click/10s-wait timeout in specs untouched by this phase |
+> | Those SAME 16 spec files re-run with `--workers=2` | **105 passed / 0 failed — exit 0** (3.9 min) |
+> | **FULL Playwright suite re-run with `--workers=2` (FINAL)** | **280 passed / 0 failed / 2 skipped (282) — exit 0** (10.8 min). The 277→280 delta is exactly this phase's 3 new browser tests. |
+> | `git status` after the run | only the intended files + refreshed near-identical screenshots (byte-deltas of 1-90 bytes vs HEAD, i.e. normal capture variance) |
+>
+> ### ⚠️ SECOND SECURITY FINDING — CREDENTIALS INSIDE THE REVIEW ZIP (FIXED)
+> `scripts/export-review-zip.sh` used `zip -r .` with a hand-written exclude list and
+> **no `.env` exclusion** — `zip` does not read `.gitignore`, so the gitignored
+> `.env` and `.env.deploy` (which hold the live Namecheap FTP password) were being
+> packaged into `Review Zip/mercenta-review.zip`. **Fixed:** the script now excludes
+> `.env`, `.env.*` and key/certificate files, and **asserts** after zipping that no
+> `.env*` entry is present — if one reappears it DELETES the archive and exits 1
+> (a guard that genuinely fails, not a comment).
+> **Verified:** re-export → `unzip -Z1 … | grep '^\.env'` → **no output** (0 entries);
+> `unzip -p … HANDOFF.md | grep -c <literal>` → **0**; guard prints
+> `Credential guard: PASS`. Prior zips produced by the old script DID contain those
+> files — hence the rotation requirement below is not optional.
+>
+> ### REMAINING (next sessions, in priority order)
+> 1. **`src/lib/grants/researchEngine.ts` legacy state (flagged, NOT fixed — it was
+>    outside the approved cohort):** `approveGrantDraft()` still flips the stored
+>    draft `status` to `'submitted'` and `approveInvestorDraft()` to `'sent'` with
+>    no founder-approval gate. The UI now labels those honestly, but the state
+>    itself should be renamed to an internal-approval state so nothing can ever
+>    read it as an external event.
+> 2. **§27/§28 unified ranked founder queue with visible WHY** — still not built.
+>    The relationship/funding slots (best embassy introduction, best trade
+>    programme, best investor, best accelerator) and the §28 factor breakdown are
+>    missing; the existing per-engine rankings are already used by the command
+>    centre, so this is an EXTENSION of `src/lib/commandCentre/commandCentre.ts`.
+>    `fundingPipelineSummary()` is the ready-made input for the "application
+>    awaiting approval / awaiting submission" slots.
+> 3. Credential/founder work unchanged (Google OAuth client id, Companies House +
+>    GOV.UK codes, HMRC, Google Edge Function deploy, real cost prices, Tottenham
+>    ASIN evidence capture, **Twilio recovery-code rotation**, and now the
+>    **Namecheap FTP password rotation** — see the security finding above).
+> 4. §16–§29 embassy/trade partnership pipeline (§9 of the continuation brief) and
+>    the §12–§15 Google Doc/Slides/Sheets generation wiring remain to be built on
+>    top of the existing seams.
+>
+> ---
 > ## ✅ PHASE 14 + PHASE 15 — DOCS RECONCILIATION + SPEC REPOINT + FULL REGRESSION (M13) — 2026-09-15
 >
 > **Documentation reconciliation (Phase 14):** `README.md` (4 new validators in the
