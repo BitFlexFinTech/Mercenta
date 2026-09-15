@@ -2,7 +2,39 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
-> ## ✅ PHASE 9 — COMPANY / GOVERNMENT CONTROL CENTRE (M13) — 2026-09-15
+> ## ✅ PHASE 10 — OPERATING COST / AI-COST DASHBOARD (M13) — 2026-09-15
+>
+> - `src/config/operatingCosts.ts` (NEW) — single source of truth for every cost
+>   line (13 providers) with an explicit label (MANUAL / ESTIMATED / SIMULATED /
+>   NOT CONNECTED / LIVE), plus the §25 revenue streams, the pricing inputs (ALL
+>   `requiresFounderApproval`), and the daily/monthly AI ceilings. NO line claims
+>   LIVE and subscription pricing is deliberately UNSET.
+> - `src/lib/costs/modelPolicy.ts` (NEW) — §27 model policy: `MAX_PAID_RUNTIME_MODEL
+>   = deepseek/deepseek-v4-flash`, cheapest-tier ladder (deterministic → cache →
+>   local → free → paid max), unknown task REFUSED, `isModelAllowed()` guard.
+> - `src/lib/costs/usageLog.ts` (NEW) — real usage log (model, task, tokens, cost,
+>   entity, cache hit/miss, status) + per-operation budget, daily/monthly ceilings
+>   and the cost-protection state that REFUSES non-essential calls when exceeded.
+> - `src/lib/costs/costSummary.ts` (NEW) — derived figures only: fixed + AI totals,
+>   projection, per-provider variance, cost per brand / opportunity / lead / AI
+>   operation, revenue per §25 stream (commission + shipping margin from the
+>   canonical stores), contribution, and the DERIVED break-even subscription + CAC
+>   tolerance (provisional while pricing awaits founder approval).
+> - `src/components/admin/OperatingCostsPanel.tsx` (NEW) + Super Admin tab
+>   **Operating Costs**.
+> - **REAL DEFECTS FIXED (found while building this):** `src/lib/discovery/engine.ts`
+>   and `src/lib/monitoring/alertTriage.ts` both hard-coded `openai/gpt-4o-mini` —
+>   a §27 violation (more expensive than the permitted maximum). Both now select
+>   their model through the runtime policy and authorise through the usage log.
+>   A deterministic (no-model) outcome was also being logged as a budget refusal;
+>   it now has its own `handled_without_model` status.
+>
+> **VERIFIED:** `scripts/validate-operating-costs.mjs` (NEW) **PASS — 43 checks**;
+> `e2e/operating-costs.spec.ts` (NEW) **3 passed / 0 failed**; `tsc` 0 errors;
+> eslint 0; `npm run build` ✓; wording gate PASS (215 files, after renaming the
+> Keepa line that tripped the banned-word rule); `validate-discovery`,
+> `validate-mock-providers`, `validate-mock-seam`, `validate-stage10` still PASS.
+> ---
 >
 > **DONE and verified. Nothing already verified was rebuilt.**
 >

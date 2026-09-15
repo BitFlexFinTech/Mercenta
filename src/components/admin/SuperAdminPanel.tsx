@@ -29,6 +29,7 @@ import {
   Megaphone,
   Building2,
   Link2,
+  Wallet,
 } from 'lucide-react';
 
 const SUPER_ADMIN_TABS = [
@@ -45,6 +46,7 @@ const SUPER_ADMIN_TABS = [
   { id: 'launch', label: 'Launch Centre', icon: Megaphone },
   { id: 'company', label: 'Company', icon: Building2 },
   { id: 'google', label: 'Google', icon: Link2 },
+  { id: 'costs', label: 'Operating Costs', icon: Wallet },
   { id: 'financing', label: 'Bank Financing', icon: PiggyBank },
   { id: 'brandintelligence', label: 'Brand Intelligence', icon: Target },
   { id: 'simulation', label: 'Simulation', icon: FlaskConical },
@@ -69,6 +71,7 @@ import { CommercialModelsPanel } from './CommercialModelsPanel';
 import { LaunchCentre } from './LaunchCentre';
 import { CompanyControlCentre } from './CompanyControlCentre';
 import { GoogleSetupWizard } from './GoogleSetupWizard';
+import { OperatingCostsPanel } from './OperatingCostsPanel';
 
 const ROLE_OPTIONS: { value: StaffRole; label: string }[] = [
   { value: 'Super Admin', label: 'Super Admin' },
@@ -559,6 +562,9 @@ export function SuperAdminPanel() {
 
       {/* §21 (M13 Phase 8) — Google OAuth + workspace setup wizard. */}
       {activeTab === 'google' && <GoogleSetupWizard />}
+
+      {/* §27/§34 (M13 Phase 10) — operating costs + AI spend controls. */}
+      {activeTab === 'costs' && <OperatingCostsPanel />}
 
       {activeTab === 'designsystem' && (
         <DesignSystemShowcase />

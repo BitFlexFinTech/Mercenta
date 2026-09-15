@@ -1,4 +1,5 @@
 /** §Batch-10 — OpenRouter-powered alert triage. */
+import { authoriseAiCall } from '@/lib/costs/usageLog';
 const CRITICAL_KW = ['critical', 'remote code execution', 'sql injection', 'privilege escalation', 'auth bypass', 'data breach', 'zero-day', 'cve-', 'database unavailable'];
 const HIGH_KW = ['high', 'denial of service', 'cross-site', 'xss', 'csrf', 'information disclosure', 'service degraded'];
 
@@ -26,11 +27,17 @@ function mockTriage(alertTitle: string, description: string): import('@/types').
 }
 
 async function realTriage(apiKey: string, alertTitle: string, description: string): Promise<import('@/types').TriageResult> {
+  // §27 — the model comes from the runtime policy (DeepSeek V4 Flash maximum),
+  // and the call is authorised by the runtime usage log/ceilings first.
+  const decision = authoriseAiCall({ taskId: 'alert_triage_summary', entity: alertTitle });
+  if (!decision.allowed || !decision.decision.model) {
+    throw new Error('AI call not authorised: ' + decision.reason);
+  }
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'openai/gpt-4o-mini',
+      model: decision.decision.model,
       messages: [
         { role: 'system', content: 'You are a DevOps alert triage assistant for Mercenta Partners (UK wholesale distribution platform: Supabase, React/Vite, Stripe, Postmark/SendGrid, OpenRouter, Instantly). Respond with JSON: severity ("critical"|"high"|"info"), summary (1-2 sentences), fixSuggestion (string|null), actionable (boolean). Keep under 100 words.' },
         { role: 'user', content: 'Title: ' + alertTitle + '\nDescription: ' + description + '\n\nClassify. JSON only.' },

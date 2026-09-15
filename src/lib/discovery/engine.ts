@@ -13,6 +13,7 @@
  */
 
 import { chargeService, remainingBudget } from './budget';
+import { authoriseAiCall, recordAiCallOutcome } from '@/lib/costs/usageLog';
 import { lintOutwardWording } from './wordingSafety';
 
 export interface RawDiscoveryLead {
@@ -103,6 +104,12 @@ export class RealOpenRouterResearchClient implements ResearchClient {
     private readonly transport: FetchLike
   ) {}
   async scoreFit(lead: RawDiscoveryLead, icpDescription: string): Promise<{ fitScore: number; note: string }> {
+    // §27 — the model is chosen by the runtime policy, never hardcoded here, and
+    // the call is authorised (or refused) by the runtime usage log/ceilings.
+    const decision = authoriseAiCall({ taskId: 'discovery_fit_scoring', entity: lead.companyName });
+    if (!decision.allowed || !decision.decision.model) {
+      throw new Error(`AI call not authorised: ${decision.reason}`);
+    }
     if (!chargeService('openrouter', ESTIMATED_COST_PER_RESEARCH_CALL_GBP)) {
       throw new Error(`OpenRouter budget cap reached (£${remainingBudget('openrouter').toFixed(2)} left)`);
     }
@@ -110,15 +117,26 @@ export class RealOpenRouterResearchClient implements ResearchClient {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.apiKey}` },
       body: {
-        model: 'openai/gpt-4o-mini',
+        model: decision.decision.model,
         messages: [
           { role: 'system', content: 'You score B2B export-fit 0-100 with one-line evidence. Respond as JSON {"fitScore":n,"note":"…"}.' },
           { role: 'user', content: `ICP: ${icpDescription}\nCompany: ${lead.companyName} (${lead.country}, ${lead.segment})` },
         ],
       },
     });
-    if (!res.ok) throw new Error(`OpenRouter HTTP ${res.status}`);
-    const body = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    if (!res.ok) {
+      recordAiCallOutcome({ taskId: 'discovery_fit_scoring', tokens: 0, status: 'error', note: `OpenRouter HTTP ${res.status}` });
+      throw new Error(`OpenRouter HTTP ${res.status}`);
+    }
+    const body = (await res.json()) as {
+      choices?: { message?: { content?: string } }[];
+      usage?: { total_tokens?: number };
+    };
+    recordAiCallOutcome({
+      taskId: 'discovery_fit_scoring',
+      tokens: Number(body.usage?.total_tokens ?? 0),
+      status: 'ok',
+    });
     const parsed = JSON.parse(body.choices?.[0]?.message?.content ?? '{}') as { fitScore?: number; note?: string };
     return { fitScore: Math.max(0, Math.min(100, Number(parsed.fitScore ?? 0))), note: String(parsed.note ?? '') };
   }
