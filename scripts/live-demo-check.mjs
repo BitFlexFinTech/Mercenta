@@ -43,6 +43,27 @@ async function goHome() {
   await page.waitForTimeout(1200);
 }
 
+/**
+ * Wait for a lazily-loaded SHELL before asserting on it.
+ *
+ * EVIDENCE (2026-09-15, M13c): `waitRendered` alone cannot distinguish the LOGIN
+ * portal (already ~2,200 chars) from the shell that is still being downloaded, so
+ * reading the body straight after a role click read the page MID-LOAD on the slow
+ * shared host ("Loading..." = 10 chars) and produced a FALSE failure. The product
+ * is fine — the same session renders fully ~4-6s later, the deployed chunk is
+ * byte-identical to the verified local build, and the identical flow passes
+ * locally. These waits make the check assert the shell it is about to inspect
+ * (strictly stronger: a shell that never renders still fails, but later).
+ */
+async function waitForShell(marker, timeoutMs = 120000) {
+  await page
+    .locator(`nav >> text=${marker}`)
+    .first()
+    .waitFor({ state: 'visible', timeout: timeoutMs })
+    .catch(() => {});
+  await waitRendered(page);
+}
+
 // ── Flow 1: Homepage + Super Admin + Simulation Control (single cached context) ──
 try {
   await goHome();
@@ -82,10 +103,21 @@ if (await homeBtn.count()) { await homeBtn.click({ timeout: 30000 }); await page
 try {
   await openLogin(page);
   await page.locator('text=Zambezi Organic Extracts Ltd').first().click({ timeout: 30000 });
-  await waitRendered(page);
-  for (let i = 0; i < 4; i++) {
-    const skip = page.locator('text=Skip Tour').last();
-    if (await skip.count()) { try { await skip.click({ timeout: 5000 }); } catch { /* */ } const c2 = page.locator('text=Skip').last(); if (await c2.count()) { try { await c2.click({ timeout: 3000 }); } catch { /* */ } } await page.waitForTimeout(600); } else break;
+  await waitForShell('Purchase Orders');
+  /* Dismiss the brand tour overlay — its buttons say "Skip" and "Next", not
+     "Skip Tour". (Live evidence 2026-09-15: text=Skip Tour matched nothing and
+     the tour overlay stayed up, causing all subsequent nav clicks to time out
+     because the overlay intercepts pointer events.) */
+  for (let i = 0; i < 8; i += 1) {
+    const btn = page.locator('button:has-text("Skip")').first();
+    if (await btn.count()) {
+      try { await btn.click({ timeout: 4000 }); } catch { break; }
+      await page.waitForTimeout(400);
+    } else break;
+  }
+  for (let i = 0; i < 4; i += 1) {
+    const nxt = page.locator('button:has-text("Next"):visible').first();
+    if (await nxt.count()) { try { await nxt.click({ timeout: 3000 }); } catch { break; } await page.waitForTimeout(400); } else break;
   }
   const body = await page.locator('body').innerText();
   ck('brand portal renders live', !body.includes('something went wrong') && body.length > 300, 'brand');
@@ -108,7 +140,7 @@ if (await homeBtn2.count()) { await homeBtn2.click({ timeout: 30000 }); await pa
 try {
   await openLogin(page);
   await page.locator('text=3PL Carrier Terminal').first().click({ timeout: 30000 });
-  await waitRendered(page);
+  await waitForShell('Manifest Management');
   const body = await page.locator('body').innerText();
   ck('carrier terminal renders live', !body.includes('something went wrong') && body.length > 200, 'carrier');
   ck('no page errors (carrier flow)', perr.length === 0, perr.slice(0, 2).join(' | '));
