@@ -773,8 +773,13 @@ export async function runInvestorDemo(
     }
 
     const shipping = demoShippingCommercialExample();
+    // §29 — the investor-facing sentence must be readable at a glance, so every
+    // currency figure is rendered with thousands separators (£10,000 not £10000).
+    // The STRUCTURED `facts` below keep the raw numbers, so nothing about the
+    // canonical arithmetic changes — only how it is displayed to an investor.
+    const money = (n: number) => `£${n.toLocaleString('en-GB')}`;
     return {
-      detail: `Commercial relationship recorded for ${tenant}: ${COMMERCIAL_MODELS.commission_agent.label} at ${DEMO_MODEL_A_BRAND_A.commissionRatePct}% — £${DEMO_MODEL_A_BRAND_A.retailChannelRevenueGbp} PO → £${DEMO_MODEL_A_BRAND_A.mercentaCommissionGbp} Mercenta / £${DEMO_MODEL_A_BRAND_A.brandAmountGbp} brand. Model B illustration: £${DEMO_MODEL_B_BRAND_B.retailChannelRevenueGbp} − £${DEMO_MODEL_B_BRAND_B.brandAcquisitionCostGbp} = £${DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp} GROSS spread → £${DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp} NET after £${DEMO_MODEL_B_BRAND_B.totalAdditionalCostsGbp} of separately-stated costs. Shipping: £${shipping.carrierListCost} list → £${shipping.carrierInvoiceCost} carrier cost → £${shipping.brandAmountCharged} brand charge → £${shipping.grossShippingMargin} margin. Retail-channel requirements are identical under either model (${reqA.length} applicable).`,
+      detail: `Commercial relationship recorded for ${tenant}: ${COMMERCIAL_MODELS.commission_agent.label} at ${DEMO_MODEL_A_BRAND_A.commissionRatePct}% — ${money(DEMO_MODEL_A_BRAND_A.retailChannelRevenueGbp)} PO → ${money(DEMO_MODEL_A_BRAND_A.mercentaCommissionGbp)} Mercenta / ${money(DEMO_MODEL_A_BRAND_A.brandAmountGbp)} brand. Model B illustration: ${money(DEMO_MODEL_B_BRAND_B.retailChannelRevenueGbp)} − ${money(DEMO_MODEL_B_BRAND_B.brandAcquisitionCostGbp)} = ${money(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)} GROSS spread → ${money(DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp)} NET after ${money(DEMO_MODEL_B_BRAND_B.totalAdditionalCostsGbp)} of separately-stated costs. Shipping: ${money(shipping.carrierListCost)} list → ${money(shipping.carrierInvoiceCost)} carrier cost → ${money(shipping.brandAmountCharged)} brand charge → ${money(shipping.grossShippingMargin)} margin. Retail-channel requirements are identical under either model (${reqA.length} applicable).`,
       entityIds: [tenant, `commercial-${tenant}`, DEMO_MODEL_B_BRAND_ID],
       facts: {
         model: 'commission_agent',

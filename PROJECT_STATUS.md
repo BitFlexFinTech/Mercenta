@@ -161,6 +161,43 @@
 > | `npx tsc --noEmit -p tsconfig.app.json` / `eslint` / `npm run build` | 0 errors / 0 problems / ✓ built |
 > | `node scripts/lint-wording.mjs` | PASS — 203 files, 0 violations |
 > ---
+> ## ✅ PHASE 12 + INVESTOR-DEMO E2E (M13) — 2026-09-14
+>
+> **Filesystem organised (non-destructive — nothing deleted):**
+> - `Parterships/` → **`Partnerships/`** (the typo the prompt named; the Tottenham
+>   Hotspur Ventures image is inside it) and `0. Company Documents/` →
+>   **`Company Documents/`**.
+> - Created the founder-facing structure: `Accounting`, `Legal & Compliance`,
+>   `Integrations`, `Google`, `Investors`, `Research`, `Product & Platform`,
+>   `Marketing`, `Launch`, `Reports`, `Scripts`, `Random`. Repository-critical
+>   paths (`src`, `supabase`, `e2e`, `scripts`, `docs`, `deploy`, `public`,
+>   `design`) are UNTOUCHED — no tracked source path moved.
+> - 4 stray artefacts (`const` (0 bytes), `file-tree.txt`, `nohup.out`, and a
+>   0-byte shell-typo filename) moved into `Random/`. Owner folders holding real
+>   content (`Amazon Vendor Central`, `Distribution Prospects`, `Amz Unlimited`,
+>   `Mercenta Brand Intelligence`) were LEFT IN PLACE rather than relocated.
+> - **SECURITY (real finding):** `Admin Accounts/twilio_2FA_recovery_code (1).txt`
+>   — a **live Twilio 2FA recovery code — WAS TRACKED IN GIT.** Removed from the
+>   index (kept on disk), the folder is now gitignored, and the review-zip script
+>   excludes it. It still exists in PAST commits, so **the code must be treated as
+>   COMPROMISED and ROTATED in Twilio** (history rewrite is forbidden by the
+>   standing rules — this is flagged, not silently "fixed").
+>
+> **Investor-demo E2E — RUN (this was checkpoint item 4):**
+> | What | Result |
+> |---|---|
+> | `npx playwright test e2e/investor-demo.spec.ts` | **10 passed / 0 failed** — "the full 25-stage lifecycle runs in the browser and every stage reports OK", the Model A/B figures, tenant isolation, RBAC refusal, responsive overflow checks |
+> | `node scripts/validate-investor-demo.mjs` | PASS (unchanged) |
+>
+> **One real defect found AND fixed by running it:** the commercial-relationship
+> stage rendered its investor-facing sentence with **unformatted** currency
+> (`£10000 PO → £2000 … £8000 … £2500 … £2270`), while the M12 browser spec
+> expected `£2,000`-style figures. The STRUCTURED `facts` were correct all along
+> (the headless validator pins them), so the fix is display-only: a `money()`
+> formatter in `investorDemo.ts` now renders thousands separators; the canonical
+> arithmetic is untouched.
+> ---
+> ## ⏸️ M12 CHECKPOINT (historical record — everything in it is now RESOLVED above) — 2026-09-14
 > ## ⏸️ M12 CHECKPOINT (historical record — everything in it is now RESOLVED above) — 2026-09-14
 >
 > **CHECKPOINT ONLY.** The owner cancelled the M12 session mid-flight. No M12 work
