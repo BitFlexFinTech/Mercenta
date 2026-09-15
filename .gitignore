@@ -26,5 +26,12 @@ dist-ssr
 # Owner-provided company/organisation documents — personal & compliance PDFs.
 # Kept on disk and intentionally NOT tracked in Git (no secrets in the tree).
 0. Company Documents/
+Company Documents/
 Parterships/
 Partnerships/
+
+# §35 — CREDENTIALS. `Admin Accounts/` held a live Twilio 2FA recovery code that was
+# tracked in Git (removed from the index 2026-09-14; it still exists in PAST commits,
+# so the code must be treated as COMPROMISED and ROTATED). Never track this folder.
+Admin Accounts/
+Random/
