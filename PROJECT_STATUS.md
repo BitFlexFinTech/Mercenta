@@ -92,6 +92,83 @@
 > - **Founder credential/configuration work (not build):** (1) capture Tottenham merchandise ASIN evidence via existing Brand Intelligence; (2) enter in Super Admin — Google OAuth client id, Companies House API key + auth code, GOV.UK One Login personal code (HMRC once VAT registers); (3) deploy the Google Edge Function (code→token + Vault refresh) to flip Google `exchange_pending`→`connected`; (4) founder confirmation of real subscription/hosting prices in `src/config/operatingCosts.ts` + pricing-input approval.
 > ---
 
+> ## 🧭 FUNCTIONAL TRUTH MATRIX (authoritative per-area truth of what actually exists, established 2026-09-16)
+> All rows are classified from EXISTING verified evidence only (this session re-ran the full gate sweep → **74/75 PASS**, the one
+> red being a working-tree scope guard caused solely by the user-reserved untracked design banner PNGs; the tracked tree at the last
+> committed checkpoint was 75/75). No completed phase was rebuilt or re-audited. Tokens: **Y** yes · **PARTIAL** present but not
+> fully wired · **SIM** truthful simulated/mock path · **LIVE** real path exists behind a credential · **F-ACTION** a founder
+> Super-Admin action, not build work · **—** none/not applicable. Individual gate names and spec names for every row are in the
+> "Evidence per row" section directly below the table.
+>
+> | # | Area | Required | Implemented | Fully wired | Simulated | Tested | E2E verified | Credential-dependent | Deferred | Genuinely missing |
+> |---|---|---|---|---|---|---|---|---|---|---|
+> | 1 | Brand onboarding | Y | Y | Y | SIM | Y | Y | — | — | — |
+> | 2 | Product / catalog | Y | Y | Y | SIM import path | Y | Y | — | — | — |
+> | 3 | Amazon / Vendor simulation | Y | Y | Y | SIM (SP-API mock; never claims live) | Y | Y | Amazon SP-API / Ads creds (Super Admin entry path exists) | LIVE Amazon until credentials entered | — |
+> | 4 | Amazon / ASIN intelligence | Y | Y | PARTIAL | SIM (estimates labelled) | Y | Y | Keepa (price history) | LIVE Keepa | Tottenham ASIN evidence capture = F-ACTION (separate from fabricated data) |
+> | 5 | Purchase Orders | Y | Y | Y | SIM POs flagged `(sim)` | Y | Y | — | — | — |
+> | 6 | PO acknowledgement | Y | Y | Y | SIM | Y | Y | — | — | — |
+> | 7 | PO → fulfilment | Y | Y | Y | SIM via ASN seam | Y | Y | DHL/Palletline lanes only for LIVE labels | LIVE carriers | — |
+> | 8 | Shipment | Y | Y | Y | SIM (DHL/Palletline mock, PO-gated, commercial breakdown) | Y | Y | Carrier creds (founder, later) | LIVE carriers | — |
+> | 9 | Receiving | Y | Y | Y | SIM (delivery reconciliation; shortage deductions auto-raised) | Y | Y | — | — | — |
+> | 10 | Invoice | Y | Y | Y | SIM (issued-unpaid tracked honestly) | Y | Y | — | — | — |
+> | 11 | Payment | Y | Y | Y | SIM (deterministic payment ↔ PO ↔ invoice reconciliation) | Y | Y | Stripe LIVE later | LIVE Stripe | — |
+> | 12 | Chargebacks / exceptions / cases | Y | Y | Y | SIM (deductions ledger, disputes, brand case→escalation) | Y | Y | — | — | — |
+> | 13 | Finance / accounting | Y | Y | Y | SIM (Xero demo seam; VAT = `configuration_required`, never invented) | Y | Y | Xero connect for LIVE | LIVE Xero / real cost prices | Founder confirmation of real prices |
+> | 14 | Brand Intelligence | Y | Y | Y | SIM + real-data model (fact vs potential vs estimated vs verified vs confirmed) | Y | Y | — | — | — |
+> | 15 | Opportunity Discovery | Y | Y | Y | SIM (8 verticals; no fabricated evidence) | Y | Y | Firecrawl LIVE for live research | LIVE Firecrawl | — |
+> | 16 | ICP / acquisition | Y | Y | Y | SIM (ICP projection, deterministic re-boot) | Y | Y | — | — | — |
+> | 17 | Prospecting / leads | Y | Y | Y | SIM (CSV / verified lead sourcing) | Y | Y | Hunter LIVE enrichment | LIVE Hunter | — |
+> | 18 | CRM | Y | Y | Y | SIM (tenant-scoped, activity, pipeline) | Y | Y | — | — | — |
+> | 19 | Outreach | Y | Y | Y | SIM (never claims sent unless provider confirms) | Y | Y | Postmark / Hunter / Instantly creds for LIVE send | LIVE sending | — |
+> | 20 | Funding (founder pipeline) | Y | Y | Y | SIM approval-gated stage machine | Y | Y | — | — | — |
+> | 21 | Grants | Y | Y | Y | SIM (internal approval ≠ external submission; submission record founder-gated) | Y | Y | — | — | — |
+> | 22 | Investors | Y | Y | Y | SIM (honest "£250k plan, 0 committed"; no invented investors) | Y | Y | — | — | — |
+> | 23 | Company / Government Control Centre | Y | Y | Y | SIM (company profile, officers, PSC, filings, charges, deadlines; CS workflow Detect→Prepare→Notify→Review→Approve→File→Verify) | Y | Y | — | — | — |
+> | 24 | Companies House | Y | Y | Y | SIM mock first | Y | Y | CH API key + auth code (F-ACTION, vault-masked refs only) | LIVE reads; auto-file permanently REFUSED (founder-approval-gated); manual register path works | — |
+> | 25 | GOV.UK One Login | Y | Y | PARTIAL | SIM descriptor | Y | Y | personal code (F-ACTION, masked; never a password) | LIVE connect | — |
+> | 26 | HMRC | Y | PARTIAL (seam) | N (not connected) | SIM descriptors only | Y | Y | VAT registration first (F-ACTION) | **DEFERRED until VAT registers** — never pretends live | — |
+> | 27 | Google Workspace | Y | Y | PARTIAL (awaiting connect) | SIM (Mock-GD ids, idempotent) | Y | Y | OAuth client id + Edge Function deploy (F-ACTION) | LIVE connect; `exchange_pending` ≠ `connected` is enforced truthfully | — |
+> | 28 | Google Drive / Docs / Sheets / Slides | Y | Y | PARTIAL (awaiting Google connect) | SIM capability tests | Y | Y | same Google OAuth + Edge deploy (F-ACTION) | LIVE on connect | — |
+> | 29 | Super Admin | Y | Y | Y | SIM surfaces | Y | Y | — | — | — |
+> | 30 | Integrations (registry SSOT) | Y | Y | Y | SIM defaults per provider | Y | Y | per-provider creds | LIVE per provider | — |
+> | 31 | Command Centre | Y | Y | Y | Y (ranked queue + WHY, no AI/model call) | Y | Y | — | — | — |
+> | 32 | Operating costs / AI cost | Y | Y | Y | Y (usage log + dashboards) | Y | Y | — | real prices = F-ACTION | — |
+> | 33 | Platform AI (runtime AI) | Y | Y | Y | Y (deterministic-first; 2 gated call sites) | Y | Y | dedicated Mercenta OpenRouter key (Super Admin entry; in-memory; never hardcoded) | LIVE LLM | — |
+> | 34 | Launch Centre | Y | Y | Y | Y (Prepare ≠ Submitted enforced) | Y | Y | — | — | — |
+> | 35 | Investor / demo lifecycle | Y | Y | Y | Y (25 stages, deterministic, 0 network) | Y | Y | — | — | — |
+> | 36 | Rakazo | Y (final phase) | PARTIAL (iframe registration only) | N (fleet not integrated) | N/A | Y (registration spec only) | Y (registration spec only) | — | **DEFERRED — deliberately the LAST functional phase** | full 17-bot fleet integration (after build+deploy+UI redesign) |
+> | 37 | UI/UX | Y (eventual redesign) | Y (current frozen design) | Y | N/A | Y | Y | — | REDESIGN is phased AFTER core build is declared complete | redesign itself (Apple + Twenty/ERPNext direction, light/dark, no functionality loss) |
+> ### Evidence per row (gate → result; re-run/verified this session where not a live-credential item)
+> 1–2 Brand onboarding / catalog — `validate-onboarding-workflow` PASS · `validate-onboarding-handoff` PASS · `validate-e3-catalog` PASS · `validate-csv-import` PASS · e2e `onboarding`, `onboarding-workflow`, `onboarding-handoff`, `catalog-product-management` (inside the documented full suite **280 passed / 0 failed / 2 skipped**).
+> 3 Amazon/Vendor simulation — `validate-mock-providers` PASS · `validate-e4-commerce` PASS · e2e `commerce-operational-simulation`, `simulation-control`, `status-semantics` (full suite green). Simulated POs carry an honest `(sim)` marker; no live claim.
+> 4 Amazon/ASIN intelligence — `validate-sales-estimator` PASS · e2e `sales-estimator`, `brand-intelligence-lifecycle` (full suite green). Estimates are labelled; Tottenham ASINs are founder-captured evidence, not system data.
+> 5–10 PO → ack → fulfilment → shipment → receiving → invoice — `src/lib/commerce/commerceLifecycle.ts` (fulfil via ASN → receive via `reconcileDelivery`, shortage deductions auto-raised) · `validate-e4-commerce` PASS · `validate-provider-workflows` PASS · e2e `po-lifecycle`, `shipment-asn`, `fulfillment-tracks`, `billing`, `commercial-model` (full suite green).
+> 11–13 Payment / chargebacks / exceptions / finance — `validate-financial-reconciliation` PASS · `validate-payouts` PASS · `validate-commercial-models` PASS · e2e `deductions`, `disputes`, `xero`, `brand-payouts` (full suite green). VAT stays `configuration_required`.
+> 14–16 Brand Intelligence / Discovery / ICP — `validate-bi-lifecycle` PASS · `validate-bi-intelligence-preservation` PASS · `validate-intelligence-strategy` PASS · `validate-discovery` PASS · `validate-opportunity-discovery` PASS (8 verticals; no fabricated evidence) · e2e `brand-intelligence-lifecycle`, `bi-intelligence-preservation`, `opportunity-discovery` 3/3.
+> 17–19 Prospecting / CRM / Outreach — `validate-prospect-pipeline` PASS · `validate-acquisition-pipeline` PASS · `validate-outreach-provider-hardening` PASS · e2e `acquisition-pipeline`, `crm` 6/6, `outreach-provider-hardening` (full suite green). No "sent" claim without provider confirmation.
+> 20–22 Funding / Grants / Investors — `validate-funding-pipeline` PASS (60 checks) · e2e `funding-pipeline` 3/3 and combined founder-centre run 17/0 · `validate-founder-centre` PASS · the 3 real opportunities (Solo Founders / The Bridge / Ignyte) carry source + claim class; no fabricated external submission.
+> 23–26 Company / CH / GOV.UK / HMRC — `validate-company-control-centre` PASS (49 checks) · e2e `company-control-centre` 4/4 · CH mock invents nothing; auto-file REFUSED; HMRC deferred. Credentials are vault-masked refs only.
+> 27–28 Google — `validate-google-integration` PASS (42 checks) · e2e `google-setup` 3/3 · `exchange_pending` ≠ `connected` (Edge Function exchange/deploy is the founder step) · workspace runner covers Drive + Docs + Sheets + Slides dependency order.
+> 29–30 Super Admin / Integrations — `validate-mock-seam` PASS · `verify-registry` PASS · e2e `integration-hub`, `access-gate` 6/6, `multi-tenant` (full suite green) · RBAC refusal works; INTEGRATION_ORDER / INTEGRATION_META are the registry SSOT.
+> 31–32 Command Centre / costs — `validate-command-centre` PASS (39 checks) · e2e `command-centre` 4/4 (rank + WHY on every row; no AI used) · `validate-operating-costs` PASS (43 checks) · e2e `operating-costs` 3/3 → AI-cost protection + usage log live.
+> 33 Platform AI — `modelPolicy.ts` (MAX paid = DeepSeek V4 Flash; FREE tier; deterministic-first; unknown task ⇒ REFUSED) + `usageLog.ts` (ceilings; `handled_without_model` vs `refused_budget` vs `cache_hit`) + exactly two call sites (`engine.ts`, `alertTriage.ts`), both authorised first. Key entered ONLY via Super Admin Integrations hub (in-memory map, never persisted/hardcoded); demo auto-connect reads `VITE_OPENROUTER_API_KEY` env and never writes it anywhere. $0 dashboard usage is CONSISTENT with the policy (no demo task needs a model call).
+> 34–35 Launch / demo — `validate-launch-centre` PASS · e2e `launch-centre` 3/3 (Prepare ≠ Submitted) · `validate-investor-demo` **PASS** (25 stages: application→approval→onboarding→commercial_models→compliance→catalogue→purchase_order→acknowledgement→fulfilment→shipment→shipping_commercial→delivery→returns→deductions→dispute→commission→payout→crm→marketing→integrations→cases→social→rbac→audit→error_recovery; deterministic replay, 0 network) · e2e `investor-demo` 10/10.
+> 36 Rakazo — NOT invoked/modified this session; only the iframe registration exists (e2e `rakazo`); fleet = deferred final phase per the agreed order.
+> 37 UI/UX — current design is FROZEN (`.clinerules/protection-rules.md`) and passes responsive/design gates (e2e `design-system`, `table-responsive`, `app-shell`); the Apple-influenced / Twenty / ERPNext-quality redesign is phased strictly AFTER core build completion. The 3 untracked `design/*.png` banners are reserved for that later phase (uncommitted and untouched).
+> ### Aggregate verification THIS SESSION (2026-09-16)
+> - `git merge-base --is-ancestor 959b4d2 HEAD` → **YES** (protected baseline preserved).
+> - Validator/audit sweep: **74/75 PASS**; the 1 red = `validate-e6-brand-surfaces.mjs` F6 working-tree scope guard, red ONLY because of the 3 reserved untracked `design/*.png` files (documented, user-approved consequence of reserving redesign assets; the same sweep was 75/75 at the last clean-tree checkpoint). **No functional check fails.**
+> - Full-suite E2E record (already verified at the last committed checkpoint; the code tree is unchanged since): **280 passed / 0 failed / 2 skipped** (`--workers=2`).
+> - `tsc` / `eslint` / `build` and a bounded core E2E re-run are reported in the phase report below.
+>
+> ### Result of the reconciliation — genuinely incomplete vs deferred
+> - **Genuinely missing build work:** NONE found in the agreed core scope. Every required area is IMPLEMENTED + SIMULATED + TESTED. The queue that remains is the *closing* sequence only: (A) bounded end-to-end wiring reconciliation, (B) full regression, (C) deploy to demo.mercenta.co.uk.
+> - **Implemented but not fully wired:** Google LIVE connect (waits on OAuth client id + Edge Function deploy — founder), Companies House LIVE reads (waits on CH credentials — founder), GOV.UK personal-code connect (founder), HMRC (waits on VAT registration — founder).
+> - **Simulated by design (mock-first):** Amazon SP-API/Vendor, carriers (DHL/Palletline), Xero, Keepa, Hunter, Firecrawl, Postmark, outreach senders, e-sign, WhatsApp.
+> - **Intentionally deferred:** Rakazo (LAST), UI/UX redesign (after core complete), security/credential rotations + RLS hardening (after build + deploy + UI + Rakazo), real cost prices (founder).
+> - **Founder actions (not build):** Google OAuth client id + Edge Function deploy, CH API key + auth code, GOV.UK One Login personal code, HMRC once VAT registers, real hosting/subscription prices, Tottenham ASIN evidence capture, Twilio + Namecheap credential rotations.
+>
 > ## ✅ M13c PHASE C — LEGACY FALSE-SUBMISSION STATE FIXED AT THE ROOT (2026-09-15, session 3)
 >
 > **Checkpoint verified before any edit (read-only):** branch `redesign/foundation`,
