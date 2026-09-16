@@ -49,7 +49,14 @@
 > ---
 > ## 🧭 FINAL BUILD QUEUE (authoritative — the single list any continuation reads first)
 >
-> **Build status: COMPLETE.** All feature phases are verified and MUST NOT be rebuilt
+> **`<0B-CORRECTS>` (2026-09-16): the corrected NEXT BUILD QUEUE is PHASE 0B §0B.4
+> in this file. Amazon Ads dashboard is REQUIRED build item #1 (agreed §12,
+> missing surface). The "Build status: COMPLETE" line below is correct for all
+> previously-built feature rows EXCEPT the Amazon Ads dashboard surface, which
+> is genuinely missing and is Phase-1 #1. Read 0B before executing this queue.**
+>
+> **Build status: COMPLETE (all previously-built feature phases; EXCEPT the
+> Amazon Ads dashboard surface — see 0B.4 #1).** All feature phases are verified and MUST NOT be rebuilt
 > (see COMPLETED below). The platform runs end-to-end in simulation/demo mode without
 > credentials. What remains is the closing reconciliation + regression + deployment that
 > *declared* the build complete. Security hardening and Rakazo are deliberately EXCLUDED
@@ -93,6 +100,8 @@
 > ---
 
 > ## 🧭 FUNCTIONAL TRUTH MATRIX (authoritative per-area truth of what actually exists, established 2026-09-16)
+> **⛳ SUPERSEDED AT FEATURE LEVEL by the PHASE 0A EXHAUSTIVE INVENTORY directly below** (2026-09-16);
+> this 37-row matrix is preserved as the verified high-level summary and its evidence.
 > All rows are classified from EXISTING verified evidence only (this session re-ran the full gate sweep → **74/75 PASS**, the one
 > red being a working-tree scope guard caused solely by the user-reserved untracked design banner PNGs; the tracked tree at the last
 > committed checkpoint was 75/75). No completed phase was rebuilt or re-audited. Tokens: **Y** yes · **PARTIAL** present but not
@@ -163,7 +172,7 @@
 > - `tsc` / `eslint` / `build` and a bounded core E2E re-run are reported in the phase report below.
 >
 > ### Result of the reconciliation — genuinely incomplete vs deferred
-> - **Genuinely missing build work:** NONE found in the agreed core scope. Every required area is IMPLEMENTED + SIMULATED + TESTED. The queue that remains is the *closing* sequence only: (A) bounded end-to-end wiring reconciliation, (B) full regression, (C) deploy to demo.mercenta.co.uk.
+> - **Genuinely missing build work:** NONE found in the agreed core scope. `<0B-CORRECTS>` **CORRECTED BY PHASE 0B (0B.1/0B.4):** the **Amazon Ads dashboard surface** is genuinely missing (REQUIRED, agreed §12) and is now Phase-1 build item #1 — the "NONE found" claim was wrong for that one agreed surface. Remaining closing sequence: (A) bounded end-to-end wiring reconciliation, (B) full regression, (C) deploy to demo.mercenta.co.uk.
 > - **Implemented but not fully wired:** Google LIVE connect (waits on OAuth client id + Edge Function deploy — founder), Companies House LIVE reads (waits on CH credentials — founder), GOV.UK personal-code connect (founder), HMRC (waits on VAT registration — founder).
 > - **Simulated by design (mock-first):** Amazon SP-API/Vendor, carriers (DHL/Palletline), Xero, Keepa, Hunter, Firecrawl, Postmark, outreach senders, e-sign, WhatsApp.
 > - **Intentionally deferred:** Rakazo (LAST), UI/UX redesign (after core complete), security/credential rotations + RLS hardening (after build + deploy + UI + Rakazo), real cost prices (founder).
@@ -219,8 +228,1381 @@
 > explicit WHY breakdown (extend `src/lib/commandCentre/commandCentre.ts`), then
 > the final reconciliation, the bounded final regression and the demo deployment.
 
+> ## ⛳ PHASE 0A — EXHAUSTIVE FEATURE/FUNCTION TRUTH INVENTORY (2026-09-16)
+>
+> **`<0B-CORRECTS>` — corrected by PHASE 0B below: the Amazon Ads classification.
+> Phase 0A records the historical evidence; PHASE 0B (further below) is the
+> authoritative corrected scope record where they conflict. Read 0B first.**
+>
+> **Read-only reconciliation run.** HEAD `91bc291` (`redesign/foundation`),
+> protected baseline `959b4d2` verified as ancestor. **No source code changed.**
+> This inventory SUPERSEDES the 37-row matrix above as the authoritative
+> feature/function record while preserving the matrix's verified evidence. The
+> browser E2E suite was NOT re-run this session (no browser); live-session gate
+> evidence is deterministic and shown below.
+>
+> **Tokens** — **Y** yes · **PART** present, not fully wired · **NO** absent ·
+> **SIM** truthful simulated/mock path · **LIVE** real path behind a credential ·
+> **CRED** live requires a credential · **F-ACTION** founder Super-Admin action,
+> not build work · **DEF** intentionally deferred until after core · **MISSING**
+> genuinely absent · **BROKEN** verified defect.
+>
+> **Gate evidence re-run THIS session (real output):** `tsc --noEmit` **0 errors**
+> · `npm run build` **✓ 3.28s** · `lint-wording` **PASS (218 files)** · **72
+> `scripts/validate-*.mjs` → 71 PASS / 1 FAIL** (the red is
+> `validate-e6-brand-surfaces` **F6 working-tree scope guard**, caused solely by
+> the 3 user-reserved untracked `design/` PNGs — pre-existing, documented in the
+> matrix header, NOT a product defect) · `verify-registry.mjs` **EXIT 0** ·
+> `integrity-audit.mjs` **61/61 PASS** · `rls-audit.mjs` **PASS (33 tables, 94
+> checks)** · `validate-investor-demo.mjs` **PASS (deterministic, zero network)**
+> · Full Playwright evidence = documented **280 passed / 0 failed / 2 skipped**
+> at checkpoint `91bc291`.
+>
+> ### 0A.1 EXECUTIVE TRUTH SUMMARY
+> 1. Every one of the 37 broad matrix areas resolves to real code, validators and
+>    specs at feature level — none is matrix-only or merely a rendered screen.
+> 2. **Commerce chain — ONE connected lifecycle:** brand product/catalog →
+>    compliance gate → PO → acknowledgement → fulfilment/ASN → shipment → delivery/
+>    receiving → invoice → payment → deductions/chargebacks → exceptions → finance,
+>    all through `src/lib/commerce/commerceLifecycle.ts` +
+>    `src/lib/finance/financialReconciliation.ts` (+ catalog/onboarding/billing),
+>    proven by the 25-stage investor demo (zero network, replay-stable digest) and
+>    the E4 validator/specs.
+> 3. **Acquisition chain — ONE connected flow:** brand discovery → Brand
+>    Intelligence → Opportunity Discovery → ICP → prospect → contact → CRM →
+>    outreach → response → opportunity → brand onboarding (`src/lib/acquisition/*`,
+>    `src/lib/intelligence/*`, prospect/acquisition stores), proven by
+>    `validate-acquisition-pipeline.mjs` (`networkCalls === 0`) and 3 browser specs.
+> 4. **Founder chain — connected:** opportunities → funding/investors → founder
+>    approval gate → applications → Company/Google/Launch support → Command Centre
+>    ranked queue with WHY and tab-aware CTAs (no AI, no fabricated external action).
+> 5. **22 provider registrations** in `INTEGRATION_ORDER` — every external provider
+>    resolves authoritatively, all have a mock/live seam or an explicit state, and
+>    no simulated operation is ever presented as live.
+> 6. Feature-level **PART** items exist (not missing): Google await-connect, CH
+>    live reads (F-ACTION creds), GOV.UK One Login (descriptor only), HMRC seam
+>    (DEF till VAT), Amazon SP-API/Ads live (CRED), Keepa/Firecrawl/Hunter/
+>    Instantly/Postmark live (CRED), **Amazon Ads dashboard (card only)**, BI
+>    discovery scheduler (none, not claimed), campaign-health/performance stats
+>    (seeded). `<0B-CORRECTS>` → Amazon Ads dashboard is REQUIRED missing build work (0B.1); the rest of this list is accurate.
+> 7. Credential-free platform truth: **investor demo + brand simulated workflow
+>    both run end-to-end with ZERO credentials**; the demo REFUSES any
+>    non-simulation provider state.
+> 8. **No genuine BROKEN defect found this session** (read-only); the only red
+>    gate is the documented untracked-PNG guard.
+> ### 0A.2 EXHAUSTIVE FEATURE/FUNCTION MATRIX
+> Columns: **Req** required · **Impl** implemented · **Wired** fully wired ·
+> **Sim** simulated · **Live** real path · **Test** validated/regressed ·
+> **E2E** browser-verified (documented at 91bc291 unless noted) · **Evidence**.
+>
+> **A. BRAND / BRAND PORTAL**
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Public application / access gate (website+IG+FB link verify, operator decision) | Y | Y | Y | SIM | Y/Y | `applicationStore.ts`, `PartnerApplicationForm.tsx`, e2e `access-gate` |
+> | Brand onboarding wizard (profile→legal→banking→track→agreements→guidance; mandatory §4.1+§4.2 agreements; hand-off from approved application + manual brand) | Y | Y | Y | SIM | Y/Y | `onboardingLifecycle.ts`, `validate-onboarding-workflow/handoff`, e2e `onboarding*` |
+> | Commercial relationship chosen at onboarding (Model A commission / Model B buy-resell; fail-closed; per-brand SSOT) | Y | Y | Y | SIM | Y/Y | `commercialModel.ts`, `validate-commercial-model-selection`, e2e `commercial-model` |
+> | Brand account/profile + read-only Commercial Relationship (Settings) | Y | Y | Y | N/A | Y/Y | `BrandSettings.tsx` |
+> | Brand dashboard (clickable cards → drill-down) | Y | Y | Y | SIM data | Y/Y | `BrandDashboard.tsx`, e2e `brand-operational-surfaces` |
+> | Brand navigation (15 items, tenant-scoped) | Y | Y | Y | N/A | Y/Y | `BrandShell.tsx`, e2e `brand-operational-surfaces` F8 |
+> | Product catalog: create/edit, CSV import, images (white-bg), submission, status | Y | Y | Y | SIM import | Y/Y | `ProductCatalog.tsx`, `catalogLifecycle.ts`, `CsvCatalogImport.tsx`, `validate-csv-import`, e2e `catalog-product-management` |
+> | PO visibility + acknowledgement (line-level, 24h deadline countdown) | Y | Y | Y | SIM (sim PO marker) | Y/Y | `BrandPurchaseOrders.tsx`, `commerceLifecycle.ts`, e2e `po-lifecycle` |
+> | Fulfilment / ASN / shipment milestone visibility (brand) | Y | Y | Y | SIM | Y/Y | `LogisticsHub.tsx`, `shipment-asn.spec` |
+> | Receiving / delivery reconciliation visibility | Y | Y | Y | SIM | Y/Y | `delivery` stage of `commerceLifecycle`, `reconcileDelivery` |
+> | Returns (brand) | Y | Y | Y | SIM | Y/Y | `BrandReturns.tsx`, `returnsTracking.ts` |
+> | Deductions ledger (brand) | Y | Y | Y | SIM | Y/Y | `DeductionsLedger.tsx`, e2e `deductions` |
+> | Invoice / payment / payout visibility (brand) | Y | Y | Y | SIM | Y/Y | `brand-payouts.spec`, `BrandReports.tsx` |
+> | UK Compliance hub + document upload + expiry tracking | Y | Y | Y | SIM | Y/Y | `ComplianceHub.tsx`, `compliance-sim.spec` |
+> | Contracts view | Y | Y | Y | SIM | Y/Y | `BrandContractView.tsx`, `legal-agreements.spec` |
+> | Analytics / Market Intel / Reports | Y | Y | Y | SIM (labelled estimates) | Y/Y | `SalesAnalytics.tsx`, `sales-estimator.spec` |
+> | Documents & Account / Support & Team / chat / ticketing | Y | Y | Y | SIM | Y/Y | `BrandTeamMessages.tsx`, helpdesk |
+> | Brand notifications (cross-role, click→view) | Y | Y | Y | SIM | Y/Y | `NotificationCenter.tsx`, `notifications.spec` |
+> | Mercenta Social brand workspace (entitlement gate, tenant isolation) | Y | Y | Y | SIM zero-network | Y/Y | `src/lib/social/*`, e2e `embedded-social` |
+> | Onboarding tours (self-hosted; step anchoring; dismissal) | Y | Y | Y | N/A | Y/Y | `TourEngine.tsx`, `tourDefinitions.ts` |
+> | Tenant isolation (domain-enforced, cross-tenant refused) | Y | Y | Y | N/A | Y/Y | e2e `multi-tenant`, E-refusals in `validate-e6` |
+> **B. PRODUCT / CATALOGUE**
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Product creation/editing (canonical fields, ex-works price, commodity code) | Y | Y | Y | N/A | Y/Y | `catalogLifecycle.ts`, `ProductCatalog.tsx` |
+> | CSV / bulk import with per-line errors | Y | Y | Y | SIM import | Y/Y | `CsvCatalogImport.tsx`, `validate-csv-import` |
+> | Completeness validation (readiness rules) | Y | Y | Y | N/A | Y/Y | `productCompleteness.ts` |
+> | Compliance-gate gating (catalog blocked until docs approved) | Y | Y | Y | N/A | Y/Y | `evaluateCatalogReadiness`, `compliance-gate.spec` |
+> | Submission → poll (Vendor-style review status) | Y | Y | Y | SIM | Y/Y | `submitCatalogProduct`, `pollCatalogSubmission` |
+> | Product images + white-bg validation | Y | Y | Y | N/A | Y/Y | `productImageValidator.ts` |
+> | Product↔brand relationship (tenant-scoped) | Y | Y | Y | N/A | Y/Y | demoStore, `multi-tenant` |
+> | Product→ASIN relationship (candidate ASINs on product via BI) | Y | Y | PART | SIM | Y/Y | ASIN fields in BI, `amazonWording.ts` |
+> | Product→PO relationship (PO raised from eligible SKU; `originProductId`) | Y | Y | Y | SIM | Y/Y | `createCommercePurchaseOrder` |
+>
+> **C. AMAZON / VENDOR CENTRAL**
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Vendor-Central-style simulation (PO semantics: line ack, 24h, freight windows, rejection codes) | Y | Y | Y | SIM | Y/Y | `compliance.ts` PO logic, `status-semantics.spec` |
+> | PO generation (received→under_review; simulated `(sim)` marker) | Y | Y | Y | SIM | Y/Y | `createCommercePurchaseOrder`, `validate-mock-providers` |
+> | PO lifecycle transitions (accepted/rejected/ready_to_fulfil/shipped/delivered) | Y | Y | Y | SIM | Y/Y | `commerceLifecycle.ts`, `po-lifecycle.spec` |
+> | PO acknowledgement semantics (line-level, backordered, 24h, duplicates refused) | Y | Y | Y | SIM | Y/Y | `acknowledgeCommercePurchaseOrder` |
+> | Amazon-facing product workflow (submission/poll readiness) | Y | Y | Y | SIM | Y/Y | catalog submission seam |
+> | SP-API integration seam (client/mock/factory; non-mock secret gates live) | Y | Y | Y | SIM→LIVE(CRED) | Y/Y | `src/lib/spapi/*`, `connections.ts` |
+> | Amazon Ads seam | Y | Y | **PART (card only)** | N/A | N/N | `INTEGRATION_REGISTRY.amazon_ads`; **no ads dashboard surface exists** `<0B-CORRECTS>` → REQUIRED, dashboard missing (0B.1, AV-08) |
+> | ASIN relationships / Amazon product intelligence | Y | Y | PART | SIM (+CRED Keepa) | Y/Y | `keepaClient.ts`, `salesEstimator.ts` |
+> | Amazon demand/opportunity analysis | Y | Y | Y | SIM labelled | Y/Y | `opportunityDiscovery.ts`, `sales-estimator.spec` |
+> | Simulation-vs-live state handling (never claims live) | Y | Y | Y | SIM | Y/Y | `defaultIntegrationMode`, `status-semantics.spec` |
+> | Future live transition behaviour (credential swap only, zero code change) | Y | Y | Y | N/A | Y/Y | `PRODUCTION_READINESS.md`, `GO_LIVE.md` §4 |
+>
+> **D. OPPORTUNITY DISCOVERY / INTELLIGENCE SUMMARY** (full detail in 0A.5)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Discovery runs (operator-triggered; real-brand universe; claim classes) | Y | Y | Y | SIM providers | Y/Y | `prospectLifecycle.runBrandIntelligence`, `validate-bi-lifecycle` |
+> | Sales estimator (estimate from registered providers; simulated basis, labelled) | Y | Y | Y | SIM labelled | Y/Y | `salesEstimator.ts`, `validate-sales-estimator` |
+> | Opportunity Discovery engine (8 verticals, fail-closed category gate, PO-potential formula, ranked) | Y | Y | Y | SIM | Y/Y | `opportunityDiscovery.ts`, `validate-opportunity-discovery`, e2e `opportunity-discovery` |
+> | ICP projection + acquisition strategy (UK + global→UK; trade programmes) | Y | Y | Y | SIM (estimate basis) | Y/Y | `acquisitionStrategy.ts`, `validate-discovery` |
+>
+> **E. CRM / ACQUISITION SUMMARY** (full detail in 0A.7)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Prospect universe (canonical real-brand seeds; run/change/snapshot history) | Y | Y | Y | SIM providers | Y/Y | `prospectStore.ts`, `brandProspectSeed.ts`, `validate-bi-lifecycle` |
+> | Prospecting / leads (CSV verified sourcing; Hunter live seam; contact discovery) | Y | Y | Y | SIM + CRED | Y/Y | `prospectPipeline.ts`, `leadSourcing.ts`, `validate-prospect-pipeline` |
+> | CRM (companies/contacts/leads/opportunities, pipeline stages, activities, notes, tasks, timeline; tenant-scoped) | Y | Y | Y | SIM | Y/Y | `crmStore.ts`, `BrandCRM.tsx`, `BrandCrmDepth.tsx`, e2e `crm` 6/6 |
+> | Outreach (prepare→modify→approve→reject→send; response→opportunity; NEVER claims sent without provider confirm) | Y | Y | Y | SIM transport | Y/Y | `outreachLifecycle.ts`, `outreachSender.ts`, `validate-acquisition-pipeline`, e2e `acquisition-pipeline` |
+> | Acquisition pipeline (stage machine, ICP projection, speed-to-revenue estimate) | Y | Y | Y | SIM estimate | Y/Y | `acquisitionStrategy.ts`, `AcquisitionPipeline.tsx`, e2e `acquisition-pipeline` |
+>
+> **F. FUNDING / GRANTS / INVESTORS SUMMARY** (detail 0A.10)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Founders funding pipeline (3 REAL §10 opportunities: Solo Founders, The Bridge, Ignyte by DIFC; §31 stage machine; founder-approval gate; submission requires founder ref) | Y | Y | Y | SIM approval | Y/Y | `fundingPipeline.ts`, `validate-funding-pipeline` 60 checks, e2e `funding-pipeline` 3/3 |
+> | Grants/investor research + drafts (internal approval ≠ external submission; founder-gated submission records) | Y | Y | Y | SIM | Y/Y | `researchEngine.ts`, `dataSources.ts`, e2e `founder-investor-centre` |
+> | Investor registry honesty (£250k plan, 0 committed) | Y | Y | Y | SIM | Y/Y | `founderContent.ts`, validate-command-centre |
+>
+> **G. COMMERCE / PO / FULFILMENT SUMMARY** (detail 0A.8)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | PO → acknowledgement → fulfilment/ASN → shipment (DHL/Palletline lanes) → delivery/receiving → invoice → payment → exception/chargeback → dispute/case — ONE lifecycle | Y | Y | Y | SIM | Y/Y | `commerceLifecycle.ts`, `financialReconciliation.ts`, `validate-e4-commerce`, e2e `po-lifecycle`, `fulfillment-tracks`, `shipment-asn` |
+> | Carrier seams (DHL mock/real; Palletline mock/real; lane routing; commercial breakdown) | Y | Y | Y | SIM→LIVE(CRED) | Y/Y | `src/lib/dhl`, `src/lib/palletline`, `shipping/carrierRouting.ts` |
+> | Receiving/shortage deductions (auto-raised on reconciliation) | Y | Y | Y | SIM | Y/Y | `receiveCommercePurchaseOrder`, `deductions.spec` |
+>
+> **H. FINANCE SUMMARY** (detail 0A.9)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Payment↔PO↔invoice reconciliation; chargebacks/exceptions; VAT `configuration_required` (never invented) | Y | Y | Y | SIM | Y/Y | `financialReconciliation.ts`, `validate-financial-reconciliation`, e2e `xero` |
+> | Payouts (Wise default / Payoneer secondary rail; mock/real; authorisation + audit; destination verify gate) | Y | Y | Y | SIM→LIVE(CRED) | Y/Y | `billing/payouts.ts`, `validate-payouts`, e2e `brand-payouts` |
+> | Xero demo seam (real OAuth client; demo mode, 28-day resync) | Y | Y | Y | SIM demo→LIVE(CRED) | Y/Y | `src/services/xero/*`, e2e `xero` |
+> **I. COMPANY / GOVERNMENT / GOOGLE SUMMARY** (detail 0A.11)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Company Control Centre (registrar snapshot, deadlines 90/60/30/7/0, CS workflow Detect→Prepare→Notify→Review→Approve→File→Verify, founder-approval gate, manual-register path) | Y | Y | Y | SIM | Y/Y | `companyStore.ts`, `CompanyControlCentre.tsx`, `validate-company-control-centre` 49 checks, e2e 4/4 |
+> | Companies House seam (reads: company/officers/PSC/filings/charges; mock invents nothing; electronic auto-file REFUSED) | Y | Y | Y | SIM→LIVE(CRED) | Y/Y | `companiesHouseClient.ts`/`companiesHouseMock.ts`, e2e `company-control-centre` |
+> | GOV.UK One Login | Y | PART | PART | SIM descriptor | Y/Y | `src/config/company.ts`, Super Admin → Company |
+> | HMRC seam (VAT status reads mock; filings refused; DEF until VAT registration) | Y | PART | NO | SIM | Y/Y | `hmrcClient.ts`/`hmrcMock.ts`, `HMRC_READINESS` `ready_not_connected` |
+> | Google Workspace (setup wizard, Drive/Docs/Sheets/Slides plan runner, `exchange_pending` ≠ `connected`, OAuth client id + Edge function = F-ACTION) | Y | Y | PART | SIM→LIVE(CRED) | Y/Y | `google/*`, `GoogleSetupWizard.tsx`, `validate-google-integration` 42 checks, e2e `google-setup` 3/3 |
+>
+> **J. SUPER ADMIN / COMMAND CENTRE / LAUNCH CENTRE SUMMARY** (detail 0A.12)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Super Admin (19 tabs incl. Accounting, Grants & Investors, Investor Pitch, Commercial Models, Launch, Company, Google, Operating Costs) | Y | Y | Y | SIM | Y/Y | `SuperAdminPanel.tsx`, e2e `admin-operational-surfaces` |
+> | Command Centre (ranked queue, 8-factor WHY, bands NOW/TODAY/WEEK, tab-aware CTA routing, no AI) | Y | Y | Y | deterministic | Y/Y | `commandCentre.ts`, `CommandCentre.tsx`, `validate-command-centre` 39 checks, e2e 4/4 |
+> | Launch Centre (14 platforms, Prepare ≠ Submitted enforced, copy package, verify checklist, audit) | Y | Y | Y | SIM | Y/Y | `launchStore.ts`, `launchPlatforms.ts`, `LaunchCentre.tsx`, `validate-launch-centre`, e2e 3/3 |
+>
+> **K. PLATFORM AI** (detail 0A.13)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Runtime model policy (FREE models, deterministic→cache→local→free→paid-max, task-id gate, per-op budget) | Y | Y | Y | FREE only | Y/Y | `costs/modelPolicy.ts`, `costs/usageLog.ts`, `validate-operating-costs` |
+> | Authorised runtime call sites (discovery research + alert triage; both route via policy) | Y | Y | Y | LIVE behind key (in-memory, never hardcoded) | Y/Y | `discovery/engine.ts`, `monitoring/alertTriage.ts` |
+>
+> **L. INTEGRATIONS REGISTRY SUMMARY** (detail 0A.4)
+> | Function | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Registry SSOT (`INTEGRATION_ORDER`/`INTEGRATION_META`, 22 providers), connect wizard, mode tiles, health, credential resolver, simulation defaults | Y | Y | Y | per-provider SIM/LIVE | Y/Y | `integrations/registry.ts`, `connections.ts`, `IntegrationsPanel.tsx`, e2e `integration-hub` |
+> | Provider seams with mock/real adapters: SP-API, DHL, Palletline, Xero, CH, HMRC, Google, Stripe, Wise/Payoneer, Keepa, Firecrawl, Hunter, Instantly, Postmark(email), WhatsApp(Twilio), Postiz, esign(PandaDoc/DocuSign) | Y | Y | Y | SIM→LIVE(CRED) | Y/Y | `src/lib/*` client+mock pairs, `validate-mock-seam`, `validate-mock-providers` |
+>
+> **M. INVESTOR DEMO** (detail 0A.14) — 25 stages, deterministic, zero network, replay-stable digest, fail-closed to simulation — **Y/Y/Y/SIM/Y/Y** · `simulation/investorDemo.ts`, `validate-investor-demo`, e2e `investor-demo` 10/10.
+>
+> **N. OPERATING COSTS / AI SPEND** — 13 provider lines (MANUAL/ESTIMATED/SIMULATED/NOT CONNECTED labels; no live-billing claim; founder-approved price inputs) — **Y/Y/Y/SIM/Y/Y** · `config/operatingCosts.ts`, `costSummary.ts`, e2e `operating-costs`.
+> ### 0A.3 PLATFORM INTEGRATION / DATA-FLOW MATRIX
+> Edges judged: **exists?** (entities both exist) · **connected?** (data actually
+> propagates) · **state propagated?** (state transitions flow) · **simulated
+> correctly?** · **tested?** (validator/spec) · **E2E?** · **broken/missing?**
+>
+> **Flow 1 — Brand commercial chain (the core):**
+> Brand → Product → ASIN → Amazon opportunity → PO → PO acknowledgement →
+> Fulfilment → Shipment → Receiving → Invoice → Payment → Chargeback/Exception
+> | Edge | exists | connected | propagated | sim correct | tested | E2E | broken/missing |
+> |---|---|---|---|---|---|---|---|
+> | brand → product/catalog | Y | Y | Y | Y | Y | Y | — |
+> | product → ASIN | Y | Y | Y | Y | Y | Y | PART (ASIN is BI-captured evidence; SP-API live CRED) |
+> | ASIN → Amazon opportunity | Y | Y | Y | Y | Y | Y | — |
+> | Amazon opportunity → PO | Y | Y | Y | Y | Y | Y | — |
+> | PO → acknowledgement | Y | Y | Y | Y | Y | Y | — |
+> | ack → fulfilment | Y | Y | Y | Y | Y | Y | — |
+> | fulfilment → shipment/ASN | Y | Y | Y | Y | Y | Y | live labels CRED |
+> | shipment → receiving | Y | Y | Y | Y | Y | Y | — |
+> | receiving → invoice | Y | Y | Y | Y | Y | Y | — |
+> | invoice → payment | Y | Y | Y | Y | Y | Y | LIVE Stripe CRED |
+> | payment → chargeback/exception | Y | Y | Y | Y | Y | Y | — |
+> | exception → dispute → case | Y | Y | Y | Y | Y | Y | — |
+> **Verdict: the commercial chain is ONE connected deterministic lifecycle (proven by the 25-stage demo + E4 gates); no edge is missing; live lanes are CRED/F-ACTION only.**
+>
+> **Flow 2 — Acquisition chain:**
+> Brand discovery → Brand Intelligence → Opportunity → ICP → Prospect → Contact →
+> CRM → Outreach → Acquisition → Brand onboarding
+> | Edge | exists | connected | propagated | sim correct | tested | E2E | broken/missing |
+> |---|---|---|---|---|---|---|---|
+> | discovery → BI | Y | Y | Y | Y | Y | Y | — |
+> | BI → Opportunity Discovery | Y | Y | Y | Y | Y | Y | — |
+> | Opportunity → ICP | Y | Y | Y | Y | Y | Y | — |
+> | ICP → Prospect | Y | Y | Y | Y | Y | Y | — |
+> | Prospect → Contact | Y | Y | Y | Y | Y | Y | Hunter live CRED |
+> | Contact → CRM | Y | Y | Y | Y | Y | Y | — |
+> | CRM → Outreach | Y | Y | Y | Y | Y | Y | live send CRED |
+> | Outreach → Acquisition/response → Opportunity | Y | Y | Y | Y | Y | Y | — |
+> | Acquisition → brand onboarding | Y | Y | Y | Y | Y | Y | — (E1/E2 hand-off) |
+> **Verdict: acquisition is ONE connected flow (Phase C/D2/D4); durable persistence is memory-only in the demo (D4 schema unexecuted) — the only PART here.**
+>
+> **Flow 3 — Founder chain:**
+> Opportunity → Funding/Investor → Founder approval → Application →
+> Company/Government/Google support → Command Centre
+> | Edge | exists | connected | propagated | sim correct | tested | E2E | broken/missing |
+> |---|---|---|---|---|---|---|---|
+> | opportunity → funding/investor | Y | Y | Y | Y | Y | Y | — |
+> | funding → founder approval gate | Y | Y | Y | Y | Y | Y | — |
+> | approval → application record | Y | Y | Y | Y | Y | Y | — |
+> | application → company/gov/google support | Y | Y | Y | Y | Y | Y | Google live CRED |
+> | all → Command Centre rank+WHY+CTA | Y | Y | Y | Y | Y | Y | — (tab-aware routing) |
+> **Verdict: connected; no fabricated external submission anywhere (founder-gated).**
+>
+> **Flow 4 — Operational events → Command Centre → Launch Centre → Investor Demo**
+> | Edge | exists | connected | propagated | sim correct | tested | E2E | broken/missing |
+> |---|---|---|---|---|---|---|---|
+> | operational events → command centre | Y | Y | Y | Y | Y | Y | — |
+> | command centre → launch centre CTA | Y | Y | Y | Y | Y | Y | — |
+> | command centre → investor demo | Y | Y | Y | Y | Y | Y | — (integration stage) |
+> | launch centre submit ≠ external | Y | Y | Y | Y | Y | Y | — |
+>
+> **Cross-cutting finding:** every claimed relationship above is implemented in
+> shared stores / seams, not duplicated. The ONLY structural drift flagged:
+> `src/components/shared/BrandComm.tsx` re-implements the brand inbox placeholder
+> slug with a weaker regex than the canonical `demoStore` helper (pre-existing,
+> tracked, out-of-scope for the phase; candidate fix in Phase 1).
+> ### 0A.4 EVERY INTEGRATION RECONCILIATION
+> **Registry SSOT:** `src/integrations/types.ts` (`IntegrationId` + `INITIAL_INTEGRATIONS`)
+> + `src/integrations/registry.ts` (`INTEGRATION_REGISTRY`, `INTEGRATION_ORDER`,
+> `INTEGRATION_META`) + `src/integrations/connections.ts` (credential resolver).
+> **Verified count: 22 registrations.** `docs/INTEGRATIONS.md` §1 still says
+> "18 integrations today" with a 14-row table — **stale document, documented
+> discrepancy**: the source registry gained `dhl`, `palletline`, `xero`,
+> `companies_house`, `hmrc`, `wise`, `payoneer`, `google` (all present in
+> `INTEGRATION_ORDER`/`INTEGRATION_META`), and the doc's table lists 14 rows.
+> Mode = resolution via `defaultIntegrationMode()` (SIM unless creds make it live).
+>
+> | # | Provider (task list) | Registered id | Purpose | Mode today | Mock/real seam | UI surface | Downstream | Live requires | Status |
+> |---|---|---|---|---|---|---|---|---|---|
+> | 1 | HMRC | `hmrc` | VAT status reads, MTD filings | SIM | `hmrcClient.ts`/`hmrcMock.ts` | Super Admin → Company (HMRC card) | VAT state, future filing | VAT registered + MTD creds (F-ACTION) | **DEF until VAT registers**; auto-file refused |
+> | 2 | Companies House | `companies_house` | Company reads (officers/PSC/filings/charges) | SIM | `companiesHouseClient.ts`/`companiesHouseMock.ts` | Company Control Centre | CS deadlines/file workflow | CH API key + auth code (F-ACTION) | SIM working; LIVE reads CRED; auto-file permanently REFUSED |
+> | 3 | Wise Business | `wise` | **Default payout rail** | SIM | `billing/payouts.ts` (rail client) | Accounting/Payouts | brand payouts | rail API creds | SIM→LIVE CRED |
+> | 4 | Payoneer | `payoneer` | Secondary payout rail | SIM | `billing/payouts.ts` | Accounting/Payouts | brand payouts | rail API creds | SIM→LIVE CRED |
+> | 5 | Stripe | `stripe` | Flat monthly brand subscriptions (NOT commission billing) | SIM | `billing/stripe.ts` + `stripeMock.ts` | Integrations Hub / Billing | subscriptions | Stripe OAuth | SIM→LIVE CRED (later) |
+> | 6 | Xero | `xero` | Accounting sync | SIM demo | `src/services/xero/*` (real OAuth client, demo mode) | AccountingPanel (`XeroConnection.tsx` DEAD, unimported) | finance/accounting | Xero connect (F-ACTION) | SIM→LIVE CRED |
+> | 7 | NameCheap | *(not a registry provider)* | Deploy channel (FTP) | LIVE (deploy) | `.env` creds; `scripts/deploy-demo.sh` | n/a | demo.mercenta.co.uk deploy | FTP creds (PRESENT; **F-ACTION: rotate**) | deploy-only |
+> | 8 | DHL UK | `dhl` | International parcel carrier | SIM | `src/lib/dhl/*` (mock/real) | Inbound Shipments / Logistics | shipment labels | DHL account creds (F-ACTION, later) | SIM→LIVE CRED |
+> | 9 | OpenRouter | `openrouter` | Runtime AI model gateway | available | `discovery/engine.ts`, `monitoring/alertTriage.ts` via policy | Integrations Hub / Operating Costs | runtime AI (FREE models only) | dedicated Mercenta key (Super Admin, in-memory) | CRED; FREE models enforced |
+> | 10 | DigitalOcean | *(not a registry provider)* | Hosted infra (3 droplets) | LIVE (paid infra) | n/a (hosting) | Operating Costs line | hosting | droplet creds | infra, not an integration card |
+> | 11 | Rakazo | *(NOT registered)* | Bot fleet (17 bots) | DEFERRED | `RakazoPanel.tsx` iframe only (`VITE_RAKAZO_URL`) | Super Admin → Rakazo tab | none (fleet not integrated) | — | **DEF — final product phase** |
+> | 12 | Supabase | *(not a registry provider)* | Database/backend infra | memory-only in demo | `src/lib/supabase.ts` + `supabase/migrations` (RLS) | multi-tenant/RLS specs | persistence | browser Supabase creds (F-ACTION) | durable path proven by conformance, migration unexecuted in demo |
+> | 13 | Instantly.ai | `instantly` | Outreach sending / lead sourcing | available → SIM | `discovery/engine.ts` outreach client | Marketing / outreach | outreach send | `VITE_INSTANTLY_API_KEY` | CRED (never claims sent without confirm) |
+> | 14 | Explee | *(not registered, NOT agreed)* | — | — | — | — | — | — | candidate mention only in `docs/INTEGRATIONS.md` §4; **not a requirement** |
+> | 15 | Postmark | `email` option `postmark` | Transactional email | available | `mail/mail.ts`, `notifications/postmarkNotifier.ts`, `messaging/email.ts` | Messages/helpdesk/outreach | notifications, sends | `VITE_POSTMARK_API_KEY` | CRED |
+> | 16 | Hunter.io | `hunter` | Email verification / enrichment | available | `discovery/engine.ts` verify client + `research` | Prospect detail | contact discovery | `VITE_HUNTER_API_KEY` | CRED |
+> | 17 | PandaDoc | `esignature` option `pandadoc` | Contract E-sign | available | `src/lib/esign/esign.ts` | Contracts / esign | e-signed agreements | Pandadoc/DocuSign OAuth | CRED |
+> | 18 | Keepa | `keepa` | Amazon price history / research | available → SIM | `research/keepaClient.ts` (mock/real) | Brand Intelligence / sales estimator | ASIN intelligence | Keepa API key | CRED |
+> | 19 | Firecrawl | `firecrawl` | Web crawl for discovery | available → SIM | `discovery/firecrawlClient.ts` + `firecrawlResearch.ts` | Opportunity Discovery | discovery research | `VITE_FIRECRAWL_API_KEY` | CRED |
+> | 20 | LinkedIn | *(not a registry provider)* | Outreach channel + Postiz/MercentaSocial channel | channel-only | `outreachGenerator.ts`, `config/mercentaSocial.ts`, postiz registry | Outreach / Social | outreach, social | — | channel representation, not a registered API |
+> | 21 | Facebook | *(not a registry provider)* | Application link-verify + Postiz/MercentaSocial channel | channel-only | `PartnerApplicationForm.tsx`, mercentaSocial config | Application / Social | link verification | — | same |
+> | 22 | Instagram | *(not a registry provider)* | same as FB | channel-only | same | same | same | — | same |
+> | 23 | X.com | *(not a registry provider)* | Postiz/MercentaSocial channel | channel-only | mercentaSocial config | Social | social | — | same |
+> | 24 | WhatsApp Business | `twilio_whatsapp` | Escalation / WhatsApp messaging | available → SIM | `whatsapp/whatsAppClient.ts` + `whatsAppEscalation.ts`, `WhatsAppAdminPanel.tsx` | WhatsApp admin panel | case escalation | Twilio creds | CRED |
+>
+> Also registered (not in the 24 list): **`amazon_sp_api`** (core; SIM→LIVE
+> CRED), **`amazon_ads`** (card; **NO dashboard surface**), **`email`** provider
+> group, **`lead_sourcing`** (CSV zero-API + Apollo/Instantly), **`usertour`**
+> (self-hosted, connected/sandbox), **`postiz`** (self-hosted social scheduler),
+> **`google`** (OAuth; `exchange_pending` ≠ `connected`), **`palletline`**
+> (UK-domestic carrier, SIM→LIVE CRED).
+> **No providers were silently added or removed by this inventory.**
+> ### 0A.5 BRAND INTELLIGENCE DETAILED INVENTORY
+> Core: `src/lib/intelligence/*`, `src/data/prospectStore.ts`, `brandProspectSeed.ts`,
+> `brandDossiers.ts`; panels `BrandIntelligencePanel.tsx`,
+> `BrandIntelligenceStrategyPanel.tsx`; validators `validate-bi-lifecycle`,
+> `validate-bi-intelligence-preservation`, `validate-intelligence-strategy`,
+> `validate-discovery`, `validate-sales-estimator`; specs `brand-intelligence-lifecycle`,
+> `bi-intelligence-preservation`.
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Brand discovery (canonical 12 tracked/10 active real-brand universe, seeded, re-boot deterministic) | Y | Y | Y | SIM providers | Y/Y | `runBrandIntelligence`, `prospectStore.ts` |
+> | Company/brand/website/product research (dossier + evidence fields) | Y | Y | Y | SIM | Y/Y | `brandDossiers.ts`, BI lifecycle validator |
+> | Amazon presence research (ASIN-level evidence, presence indicator) | Y | Y | Y | SIM | Y/Y | `amazonPresenceFor`, `opportunityDiscovery.ts` |
+> | ASIN research (per-ASIN facts, source + claim class) | Y | Y | Y | SIM + CRED Keepa | Y/Y | ASIN evidence records, `keepaClient.ts` |
+> | Product opportunity analysis (category baseline, PO-potential formula) | Y | Y | Y | SIM labelled | Y/Y | `PO_POTENTIAL_FORMULA`, `poPotentialGbp` |
+> | Demand signals (growth signals; score weights; tiers) | Y | Y | Y | SIM | Y/Y | `scoringEngine.ts`, `intelligenceTypes.ts` |
+> | Competitive information (seller-count competition factor) | Y | Y | Y | SIM | Y/Y | `competitionFactorFor` |
+> | Category/vertical information (8 verticals, fail-closed category gate) | Y | Y | Y | SIM | Y/Y | `OPPORTUNITY_VERTICALS`, `categoryEligibility` |
+> | Evidence collection + provenance (source attribution on every fact) | Y | Y | Y | SIM | Y/Y | claim-class fields, `ev()` evidence helper |
+> | Confidence/state handling (fact vs potential vs estimated vs verified vs confirmed) | Y | Y | Y | SIM | Y/Y | `ClaimClass`, D2 validator |
+> | Estimated vs verified information (estimate labels; simulated_dataset) | Y | Y | Y | SIM | Y/Y | `salesEstimator.ts`, `ESTIMATE_LABEL` |
+> | Opportunity signals + brand fit + acquisition signals | Y | Y | Y | SIM | Y/Y | `deriveOpportunity`, `assessOpportunity` |
+> | Tottenham merchandise ASIN evidence workflow (founder-supplied evidence, NOT fabricated data) | Y | Y | **F-ACTION** | SIM | Y/Y | seeded POTENTIAL, no invented ASINs; evidence capture = founder task |
+> | Keepa seam (price history behind estimator) | Y | Y | Y | SIM→LIVE CRED | Y/Y | `keepaClient.ts` |
+> | Firecrawl seam (web fetch for discovery research) | Y | Y | Y | SIM→LIVE CRED | Y/Y | `firecrawlClient.ts`, `firecrawlResearch.ts` |
+> | BI → Opportunity Discovery relationship (same prospect; opportunity derived) | Y | Y | Y | Y | Y/Y | `deriveOpportunity`, `rankOpportunities` |
+> | BI → ICP relationship (same `prospectId`; ICP projection derived) | Y | Y | Y | Y | Y/Y | `buildAcquisitionLead`, `deriveLeadFromProspect` |
+> | BI → Prospecting relationship (lead derived from prospect) | Y | Y | Y | Y | Y/Y | `prospectPipeline.ts` |
+> | BI → CRM/acquisition relationship (intelligence preserved by reference into acquisition) | Y | Y | Y | Y | Y/Y | `prospectIntelligence.ts`, D2 validator |
+>
+> ### 0A.6 AMAZON / VENDOR DETAILED INVENTORY
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Amazon/Vendor Central simulation (PO/ack/fulfil semantics, no live claim) | Y | Y | Y | SIM | Y/Y | `status-semantics.spec`, PO status machine |
+> | PO generation + lifecycle (received→accepted/rejected→ready_to_fulfil→shipped→delivered) | Y | Y | Y | SIM | Y/Y | `commerceLifecycle.ts`, `po-lifecycle.spec` |
+> | PO acknowledgement (line-level ack, 24h, backorder, dup-refused) | Y | Y | Y | SIM | Y/Y | `acknowledgeCommercePurchaseOrder` |
+> | Amazon-facing product workflow (submit→poll, gate) | Y | Y | Y | SIM | Y/Y | catalog lifecycle |
+> | Vendor-style operational states (freight terms collect/prepaid, windows) | Y | Y | Y | SIM | Y/Y | `FreightTerm`, PO fields, batchA validators |
+> | SP-API seam (real client + deterministic mock, factory by connection) | Y | Y | Y | SIM→LIVE CRED | Y/Y | `src/lib/spapi/*`, `INTEGRATION_REGISTRY.amazon_sp_api` |
+> | Amazon Ads seam | Y | Y | **PART (registered card only; no dashboard)** | — | N/N | registry only `<0B-CORRECTS>` → REQUIRED per 0B.1 |
+> | ASIN relationships (product↔ASIN evidence, sales/opportunity linkage) | Y | Y | PART | SIM | Y/Y | BI ASIN evidence |
+> | Amazon product intelligence (sales estimate; new-to-channel model; never claims approval) | Y | Y | Y | SIM | Y/Y | `salesEstimator.ts`, `modelBornToRunOpportunity`, `AMAZON_PROGRAMME_STATUS` |
+> | Amazon demand/opportunity analysis (vertical demand, PO potential) | Y | Y | Y | SIM | Y/Y | opportunity engine |
+> | Future live transition behavior (credential swap; SP-API 404 until Edge functions deployed) | Y | Y | Y | N/A | docs | `GO_LIVE.md`, `PRODUCTION_READINESS.md` |
+> | Credential-dependent states (available/disconnected vs live; `isConnected` non-sandbox) | Y | Y | Y | Y | Y/Y | `connections.ts`, `integration-hub.spec` |
+> ### 0A.7 CRM / ACQUISITION DETAILED INVENTORY
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Companies/accounts (brand-centric CRM records) | Y | Y | Y | SIM | Y/Y | `crmStore.ts`, `BrandCRM.tsx` |
+> | Contacts (prospect contacts; confidence + source) | Y | Y | Y | SIM | Y/Y | prospect seed contacts, `ProspectDetailPanel.tsx` |
+> | Leads (derived from prospects; outreach status stage mapping) | Y | Y | Y | SIM | Y/Y | `prospectPipeline.ts`, `leadSourcing.ts` |
+> | Opportunities (created from responses; stage transitions declared) | Y | Y | Y | SIM | Y/Y | `setOpportunityStage`, `OPPORTUNITY_TRANSITIONS` |
+> | Pipeline stages (acquisition stage labels per prospect) | Y | Y | Y | SIM | Y/Y | `acquisitionStageLabel`, `AcquisitionPipeline.tsx` |
+> | Activities / tasks / actions (add, complete, actor) | Y | Y | Y | SIM | Y/Y | `addCrmTask`, `setCrmTaskStatus` |
+> | Notes | Y | Y | Y | SIM | Y/Y | `addCrmNote` |
+> | Relationships (relationship context between Mercenta and prospect) | Y | Y | Y | SIM | Y/Y | `getRelationshipContext` |
+> | Source/provenance (outreach revision history, intelligence ref) | Y | Y | Y | SIM | Y/Y | `modifyOutreach`, D2 |
+> | Status transitions (lead/outreach/opportunity; declared + audited) | Y | Y | Y | SIM | Y/Y | `applyLeadStageToProspect`, `recordResponse` |
+> | Acquisition workflow (enrol→prepare→modify→approve/reject→send→response) | Y | Y | Y | SIM transport | Y/Y | `outreachLifecycle.ts`, `validate-acquisition-pipeline` |
+> | Command Centre relationship (prospects feed ranking; CTA to BI/CRM) | Y | Y | Y | Y | Y/Y | `commandCentre.ts` |
+> | Data persistence/simulation behavior (memory-only in demo, D4 durable proven; honest status) | Y | Y | PART | SIM | Y/Y | `getCommercePersistenceStatus`, `domain-persistence` spec |
+> | Outreach preparation (BI-evidence copy; wording-gate safe) | Y | Y | Y | SIM | Y/Y | `prepareOutreach`, `outreachGenerator.ts` |
+> | Sequences (email + LinkedIn + follow-ups generated) | Y | Y | Y | SIM | Y/Y | `generateAllOutreach` |
+> | Simulated-send vs external-send distinction (transport refuses unless verified live) | Y | Y | Y | Y | Y/Y | `outreachSender.ts`, `outreach-provider-hardening.spec` |
+>
+> ### 0A.8 COMMERCE / PO / FULFILMENT DETAILED INVENTORY
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | PO generation (eligible SKU gate; idempotent; no email/provider on failure) | Y | Y | Y | SIM (sim marker) | Y/Y | `createCommercePurchaseOrder` |
+> | PO visibility (brand + admin lists/detail, line items, ack history) | Y | Y | Y | SIM | Y/Y | `AdminPurchaseOrderList/Detail`, `po-lifecycle.spec` |
+> | PO acknowledgement (line-level; brand or admin-on-behalf; audit attribution) | Y | Y | Y | SIM | Y/Y | `acknowledgeCommercePurchaseOrder`, batch0point5 validators |
+> | Acceptance/rejection (rejection reason logged; refusal paths no-mutation) | Y | Y | Y | SIM | Y/Y | PO status machine |
+> | Fulfilment (via ASN seam `createShipmentForPO`) | Y | Y | Y | SIM | Y/Y | `fulfilCommercePurchaseOrder` |
+> | Shipment preparation + milestones (advance; milestone→status) | Y | Y | Y | SIM | Y/Y | `advanceCommerceShipment`, `fulfillment-tracks.spec` |
+> | ASN | Y | Y | Y | SIM | Y/Y | `shipment-asn.spec` |
+> | Carrier flow (DHL + Palletline mock/real; lane select; commercial breakdown incl. shipping example) | Y | Y | Y | SIM→LIVE CRED | Y/Y | `shipping/carrierRouting.ts`, `demoShippingCommercialExample` |
+> | Receiving (delivery reconciliation; shortage deductions auto-raised) | Y | Y | Y | SIM | Y/Y | `receiveCommercePurchaseOrder`, `reconcileDelivery`, `deductions.spec` |
+> | Invoice (issued-unpaid tracked honestly) | Y | Y | Y | SIM | Y/Y | `issueCommerceInvoice` |
+> | Payment (record; deterministic payment↔PO↔invoice reconciliation) | Y | Y | Y | SIM→LIVE CRED Stripe | Y/Y | `recordCommercePayment`, `reconcilePayment`, `validate-financial-reconciliation` |
+> | Chargebacks / deductions (deduction ledger; simulation provenance marker) | Y | Y | Y | SIM | Y/Y | `raiseCommerceException`, D1 checks |
+> | Exceptions / disputes / cases (dispute→resolution; case escalation via helpdesk seam) | Y | Y | Y | SIM | Y/Y | `openCommerceDispute`, `resolveCommerceDispute`, `openCommerceCase`, `amazonCaseClient.ts` |
+> | Lifecycle state transitions (every transition enforced; illegal refused) | Y | Y | Y | SIM | Y/Y | `commerceLifecycle.ts` guard clauses |
+> | Relationships across entities (PO→invoice→payment→exception→case all reference canonical ids) | Y | Y | Y | Y | Y/Y | reconciliations, `entityIds` in stage records |
+>
+> **PO → ack → fulfilment → shipment → receiving → invoice → payment → exception
+> as ONE connected workflow: VERIFIED — `commerceLifecycle.ts` + E4 validator +
+> `po-lifecycle`/`shipment-asn`/`fulfillment-tracks`/`deductions`/`disputes` e2e +
+> the 25-stage demo stages `purchase_order`→`error_recovery`.**
+> ### 0A.9 FINANCE DETAILED INVENTORY
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Finance dashboard/accounting states (brand financial standing; admin accounting tiles) | Y | Y | Y | SIM | Y/Y | `financialStandingForBrand`, `AccountingPanel.tsx`, `AdminDashboard.tsx` |
+> | Invoice relationships (invoice generated from commission lines; paid marks invoice paid) | Y | Y | Y | SIM | Y/Y | `invoice.ts`, `recordCommercePayment` |
+> | Payment relationships (payment↔PO↔invoice reconciliation; statuses pending/reconciled/exception) | Y | Y | Y | SIM | Y/Y | `reconcilePayment`, `validate-financial-reconciliation` |
+> | Chargebacks / exceptions (deduction ledger; shortage auto-deduction) | Y | Y | Y | SIM | Y/Y | `raiseCommerceException`, `deductions.spec` |
+> | Cases (finance/helpdesk escalation seam; Mercenta review before channel) | Y | Y | Y | SIM | Y/Y | `openCommerceCase`, `amazonCaseClient.ts` |
+> | Xero seam (real OAuth client, demo mode, 28-day resync) | Y | Y | Y | SIM→LIVE CRED | Y/Y | `src/services/xero/*`, e2e `xero` |
+> | VAT/config state (`VAT_TREATMENT=configuration_required`, no amount until configured) | Y | Y | Y | config-gated | Y/Y | `src/config/commercial.ts`, `resolveVatTreatment` |
+> | Operating costs (13 lines; labels MANUAL/ESTIMATED/SIMULATED/NOT CONNECTED; founder-approved price inputs; no live billing claim) | Y | Y | Y | SIM | Y/Y | `config/operatingCosts.ts`, `validate-operating-costs`, e2e `operating-costs` |
+> | Cost data (provider cost lines × revenue streams) | Y | Y | Y | SIM | Y/Y | `costSummary.ts` |
+> | Financial reporting (reconciliations, payouts, standings per brand; brand Reports) | Y | Y | Y | SIM | Y/Y | `BrandReports.tsx`, `financialReconciliation.ts` |
+> | Simulation vs future live transition (credential swap; no code change) | Y | Y | Y | N/A | docs | `PRODUCTION_READINESS.md` |
+>
+> ### 0A.10 FUNDING / INVESTOR DETAILED INVENTORY
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Grants research (opportunity records with claim class + source) | Y | Y | Y | SIM | Y/Y | `researchEngine.ts`, `dataSources.ts` |
+> | Investors (honest plan: £250k, 0 committed; no invented investors) | Y | Y | Y | SIM | Y/Y | `founderContent.ts` |
+> | Opportunity research (grants/investors discovery) | Y | Y | Y | SIM | Y/Y | `runGrantsResearch` |
+> | Real founder opportunities (Solo Founders Program, The Bridge, Ignyte by DIFC — real URLs + claim classes) | Y | Y | Y | SIM | Y/Y | `FOUNDER_FUNDING_OPPORTUNITIES` |
+> | Opportunity evidence + source/provenance (claim class per fact; unknown terms null) | Y | Y | Y | SIM | Y/Y | `SourcedFundingClaim` |
+> | Funding stages (§31: DISCOVERED→…→DECISION; declared order; next actions) | Y | Y | Y | SIM | Y/Y | `FUNDING_APPLICATION_STAGES`, `advanceFundingStage` |
+> | Application pipeline (deterministic generation; linted by wording gates) | Y | Y | Y | SIM | Y/Y | `fundingPipeline.ts` |
+> | Founder approval gate (SUBMITTED and later refused without recorded approval + founder ref) | Y | Y | Y | SIM | Y/Y | `recordFounderApproval`, `recordFundingSubmission` |
+> | Internal approval vs external submission distinction (approval record ≠ submission; submission founder-gated) | Y | Y | Y | Y | Y/Y | `recordGrantSubmission`/`recordInvestorSubmission` |
+> | Ranked funding opportunities (rank + WHY in Command Centre; accelerator slot = Solo Founders route) | Y | Y | Y | Y | Y/Y | `fundingPipelineSummary`, `validate-command-centre` |
+> | Command Centre relationship (funding items in the ranked queue with next action) | Y | Y | Y | Y | Y/Y | `commandCentre.ts` |
+> | **NO internal approval is ever represented as an external submission** | Y | Y | Y | Y | Y/Y | Phase C validator + `funding-pipeline` e2e |
+> ### 0A.11 COMPANY / GOVERNMENT / GOOGLE DETAILED INVENTORY
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Company Control Centre (registrar snapshot; confirmation-statement workflow; deadlines 90/60/30/7/0; company profile, officers, PSC, filings, charges) | Y | Y | Y | SIM | Y/Y | `companyStore.ts`, `CompanyControlCentre.tsx`, `validate-company-control-centre` |
+> | Government Control Centre (HMRC + GOV.UK cards; truthful NOT-CONNECTED states) | Y | Y | PART | SIM | Y/Y | `CompanyControlCentre.tsx` (HMRC card), `GOV_UK_MANUAL_ACTIONS` |
+> | Companies House seam (mock/real; reads-only; explicit REFUSAL for `fileViaOfficialApi`; manual register path; verify-after-record) | Y | Y | Y | SIM→LIVE CRED | Y/Y | `companiesHouseClient/Mock.ts`, `fileViaOfficialApi` |
+> | Companies House credentials (vault-masked refs; `vault:gov-…`; value never in records/ZIP) | Y | Y | Y | N/A | Y/Y | `GOVERNMENT_SECRET_KINDS`, `storeGovernmentSecret` |
+> | GOV.UK (One Login personal code; connection descriptor only) | Y | PART | PART | SIM | Y/Y | `src/config/company.ts` |
+> | HMRC (readiness `ready_not_connected`; no filing until VAT + MTD) | Y | PART | NO | SIM | Y/Y | `HMRC_READINESS`, `hmrcClient/Mock.ts` |
+> | VAT configuration (treatment `configuration_required`; no computed amount) | Y | Y | Y | config-gated | Y/Y | `src/config/commercial.ts` |
+> | Credential states (masked PRESENT/absent; verified vs cleared) | Y | Y | Y | N/A | Y/Y | `markGovernmentSecretVerified`, `clearGovernmentSecret` |
+> | Simulated vs live transition (mock reads → live reads behind creds; business boundary: auto-file REFUSED) | Y | Y | Y | SIM→LIVE CRED | Y/Y | `connections.ts`, `PRODUCTION_READINESS.md` |
+> | Google integration (OAuth flow, client id entry, consent, code captured as `exchange_pending`, NEVER `connected` without server exchange) | Y | Y | PART | SIM→LIVE CRED | Y/Y | `google/*`, `GoogleSetupWizard.tsx`, `validate-google-integration` (42) |
+> | Google Drive/Docs/Sheets/Slides (workspace plan runner; deterministic Mock-GD ids; idempotent; real generation after connect) | Y | Y | PART | SIM→LIVE CRED | Y/Y | `workspaceSetup.ts`, `GOOGLE_WORKSPACE_PLAN`, e2e `google-setup` |
+> | Google Edge Function seam (code→token + Vault refresh; deploy = F-ACTION) | Y | Y | PART | — | docs | `docs/INTEGRATIONS.md` §12.1 |
+> | **`exchange_pending` is never treated as `connected`** | Y | Y | Y | Y | Y/Y | wizard + validator |
+>
+> ### 0A.12 SUPER ADMIN / COMMAND CENTRE / LAUNCH CENTRE INVENTORY
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Super Admin dashboard + 19 tabs (staff/applications/accounting/rakazo/homepage/research/manufacturer/grants/pitch/commercial/launch/company/google/costs/financing/brandintelligence/simulation/compliance/designsystem) | Y | Y | Y | SIM | Y/Y | `SuperAdminPanel.tsx`, e2e `admin-operational-surfaces` |
+> | Control Centre / Command Centre (ranked queue; bands NOW/TODAY/WEEK; sections; rank badge + WHY; deterministic; NO AI) | Y | Y | Y | N/A | Y/Y | `commandCentre.ts`, `validate-command-centre` 39, e2e 4/4 |
+> | Tab-aware CTA routing (`requestAdminNav` → Super Admin tab; dead-button prevention) | Y | Y | Y | N/A | Y/Y | `adminNav.ts`, `consumeAdminNavRequest`, e2e `command-centre` |
+> | Launch Centre (14 platforms; profile prepare ≠ submit; submission package copy; verify checklist; audit; no API claim) | Y | Y | Y | SIM | Y/Y | `launchStore.ts`, `launchPlatforms.ts`, `LaunchCentre.tsx`, `validate-launch-centre`, e2e 3/3 |
+> | Empty/error/state handling in admin surfaces | Y | Y | Y | SIM | Y/Y | operational-surfaces specs, ErrorBoundary |
+> | Operating-costs + AI-spend dashboard (11/13 provider lines; ceilings; disclaimer) | Y | Y | Y | SIM | Y/Y | `OperatingCostsPanel.tsx`, `validate-operating-costs`, e2e `operating-costs` |
+> | RBAC/permissions (role tiers, at-most-limited views, on-behalf audit attribution) | Y | Y | Y | N/A | Y/Y | `auth/rbac.ts`, `access-gate.spec`, `multi-tenant.spec` |
+> ### 0A.13 PLATFORM AI INVENTORY
+> | Capability | Req | Impl | Wired | Sim/Live | Test/E2E | Evidence |
+> |---|---|---|---|---|---|---|
+> | Platform AI runtime (deterministic-first: rule/business logic before any model) | Y | Y | Y | FREE models only | Y/Y | `modelPolicy.ts`, validators pin deterministic paths |
+> | Model policy (`MAX_PAID_RUNTIME_MODEL = deepseek/deepseek-v4-flash`; FREE list; `isModelAllowed`) | Y | Y | Y | FREE policy | Y/Y | `costs/modelPolicy.ts` |
+> | Task routing (`RUNTIME_TASKS` keyed by task id; unknown task id refused; tier chain) | Y | Y | Y | N/A | Y/Y | `selectRuntimeModelForTask`, `validate-operating-costs` |
+> | Authorized runtime call sites (exactly 2: discovery research + alert triage; both policy-routed) | Y | Y | Y | LIVE behind key | Y/Y | `discovery/engine.ts`, `monitoring/alertTriage.ts` |
+> | Usage tracking (per-call log: model/task/tokens/cost/entity/cache/status) | Y | Y | Y | N/A | Y/Y | `costs/usageLog.ts` |
+> | Budget/ceiling handling (daily + monthly ceilings; `exceeded` refuses non-essential) | Y | Y | Y | N/A | Y/Y | `authoriseAiCall`, `AI_SPEND_CEILINGS` |
+> | Cache/refusal behavior (cache hit counted; refusal before any call) | Y | Y | Y | N/A | Y/Y | `usageLog.ts` |
+> | OpenRouter integration (dedicated Mercenta config: Super Admin in-memory entry; NEVER hardcoded) | Y | Y | Y | CRED | Y/Y | `VITE_OPENROUTER_API_KEY` hint, `INTEGRATION_REGISTRY.openrouter` |
+> | FREE-model platform-runtime policy (Mercenta runtime AI = FREE models only) | Y | Y | Y | enforced | Y/Y | `FREE_RUNTIME_MODELS`; **Cline's dev model is separate and unchanged** |
+> | Simulation vs live AI behavior (mock research clients; zero network when unknown) | Y | Y | Y | SIM | Y/Y | `validate-review-s*`, `validate-mock-providers` |
+>
+> ### 0A.14 INVESTOR DEMO 25-STAGE INVENTORY
+> `src/lib/simulation/investorDemo.ts` (`INVESTOR_DEMO_STAGES`); `validate-investor-demo`
+> (deterministic, zero network, reset→run same digest); e2e `investor-demo` 10/10
+> documented. Fail-closed: provider-backed stages run only when the provider
+> positively resolves `simulation`; every simulated action is labelled; `networkCalls: 0`.
+> | # | Stage (id → label) | Exists | Runs over canonical seams | Honest SIM | Zero-network | Verified |
+> |---|---|---|---|---|---|---|
+> | 1 | application → Application | Y | `submitApplication` | Y | Y | validator+e2e |
+> | 2 | approval → Approval → onboarding record | Y | `updateApplicationStatus`, `beginOnboardingFromApplication` | Y | Y | Y |
+> | 3 | onboarding → Onboarding | Y | `onboardingLifecycle` full wizard + mandatory agreements | Y | Y | Y |
+> | 4 | commercial_models → Commercial relationship (both models) | Y | `commercialModel` + fail-closed selection | Y | Y | Y |
+> | 5 | compliance → Compliance | Y | doc upload/verify/replace failure path + gate | Y | Y | Y |
+> | 6 | catalogue → Catalogue & product submission | Y | `catalogLifecycle` submit→poll | Y | Y | Y |
+> | 7 | purchase_order → Purchase order | Y | `createCommercePurchaseOrder` | Y | Y | Y |
+> | 8 | acknowledgement → PO acknowledgement | Y | `acknowledgeCommercePurchaseOrder` | Y | Y | Y |
+> | 9 | fulfilment → Fulfilment / ASN | Y | `fulfilCommercePurchaseOrder` via `createShipmentForPO` | Y | Y | Y |
+> | 10 | shipment → Shipment milestones | Y | `advanceCommerceShipment` | Y | Y | Y |
+> | 11 | shipping_commercial → Shipping lane & commercial model | Y | lane/carrier + Model A/B breakdown | Y | Y | Y |
+> | 12 | delivery → Delivery & receiving | Y | `receiveCommercePurchaseOrder` reconciliation | Y | Y | Y |
+> | 13 | returns → Returns | Y | `returnsTracking` | Y | Y | Y |
+> | 14 | deductions → Deductions / chargebacks | Y | deduction auto-raise + ledger | Y | Y | Y |
+> | 15 | dispute → Dispute & operator resolution | Y | `resolveCommerceDispute` | Y | Y | Y |
+> | 16 | commission → Commission accrual | Y | commission computation | Y | Y | Y |
+> | 17 | payout → Brand payout settlement | Y | `settleCommission`/payouts | Y | Y | Y |
+> | 18 | crm → CRM lifecycle | Y | `crmStore` | Y | Y | Y |
+> | 19 | marketing → Acquisition / marketing | Y | `acquisitionStore`/outreach seams | Y | Y | Y |
+> | 20 | integrations → Integration Hub (simulation) | Y | mode resolution; unknown/live refused | Y | Y | Y |
+> | 21 | cases → Cases — Mercenta review before channel escalation | Y | `openCommerceCase`, `amazonCaseClient` | Y | Y | Y |
+> | 22 | social → Mercenta Social | Y | `social/engineAdapter` | Y | Y | Y |
+> | 23 | rbac → RBAC & tenant isolation | Y | RBAC + foreign-tenant refusal | Y | Y | Y |
+> | 24 | audit → Auditability | Y | platform audit rows for tenant | Y | Y | Y |
+> | 25 | error_recovery → Error & recovery | Y | deliberate failure → recorded error + run continues | Y | Y | Y |
+> ### 0A.15 RAKAZO — DEFERRED STATUS ONLY
+> - Rakazo is a **separate self-hosted bot-fleet project/infrastructure**; current
+>   fleet = **17 bots**; its Mercenta integration is **incomplete** (iframe
+>   registration only: `RakazoPanel.tsx` + `e2e/rakazo.spec.ts`, which asserts the
+>   panel header/controls, never the fleet).
+> - Its API configuration is **separate** from the Mercenta platform AI config;
+>   Rakazo previously consumed **its own** OpenRouter credits and has been
+>   **disabled by the founder**.
+> - It is **NOT in `INTEGRATION_ORDER`** (deliberately) and remains the **FINAL
+>   product phase** after core completion + UI redesign + UI regression.
+> - This session: **NOT modified, NOT activated, NO bots run, zero OpenRouter
+>   credits spent** on it.
+>
+> ### 0A.16 UI/UX — FUTURE REDESIGN REQUIREMENTS ONLY
+> - Current UI **frozen** (design freeze; matches demo.mercenta.co.uk). Functional
+>   state recorded throughout this inventory; no redesign performed.
+> - Agreed future direction (Phases 6–7, AFTER core completion): Apple-inspired
+>   premium styling; clean/sleek/smooth; premium typography + buttons; refined
+>   spacing; colourful but restrained; **light + dark mode**; Twenty-inspired
+>   usability; ERPNext-inspired information clarity; premium sidebar/navigation;
+>   elegant colour coding; thin/sleek charts (thin line charts, thin bars, refined
+>   doughnut); better information density; premium brand dashboard experience;
+>   **no loss of functionality, no broken workflows**.
+> - Twenty and ERPNext are design/UX references ONLY — not permission to add
+>   unrelated features.
+>
+> ### 0A.17 GENUINELY MISSING FUNCTIONALITY
+> **Absent at the source level (separate from credential items):**
+> 1. **Amazon Ads dashboard surface** — `amazon_ads` is a registered card only; no
+>    ad-spend dashboard/component exists. `<0B-CORRECTS>` → **REQUIRED build work (0B.1/0B.4 #1) — not optional, not deferrable.**
+> 2. **Live Edge Functions in the repo** for SP-API/DHL/CH/HMRC/email — deploy-time
+>    infra absent; live paths would 404 until deployed (documented, not claimed).
+> 3. **BI discovery scheduler** — discovery runs are operator-triggered; no
+>    scheduler exists and none is claimed.
+> 4. **§16–§29 embassy/trade partnership pipeline** beyond the prospective-route
+>    slots (per HANDOFF "STILL OPEN #5").
+> 5. **§12–§15 Google Doc/Slides/Sheets live generation wiring** — runner exists;
+>    real generation is blocked on connect (itself CRED/F-ACTION).
+> 6. **Explee** — appears only as a candidate in `docs/INTEGRATIONS.md` §4; no
+>    agreed requirement, no code. **Classified NOT REQUIRED** (never agreed).
+> 7. **Rakazo fleet integration** — inventory-only; DEF (final phase).
+> 8. **Campaign-performance stats + monitoring health** — remain seeded, flagged as
+>    such (M12); not production-derived.
+>
+> ### 0A.18 BROKEN FUNCTIONALITY
+> - **No genuine product defect found this session (read-only).** The only red
+>   gate is the pre-existing `validate-e6-brand-surfaces` **F6 working-tree scope
+>   guard** triggered by the 3 user-reserved untracked `design/` PNGs — fixed by
+>   nothing (those files must stay untracked); the tracked tree at HEAD was
+>   documented 75/75.
+> - **Documented stale/dead code, NOT live defects:** `XeroConnection.tsx`
+>   (syntax-broken, unimported — dead-code candidate; Xero lives in
+>   `AccountingPanel.tsx`); `src/components/shared/BrandComm.tsx` placeholder-slug
+>   regex drift vs `demoStore` (SSOT finding, tracked).
+> ### 0A.19 IMPLEMENTED BUT NOT FULLY WIRED
+> 1. Amazon/ASIN intelligence → Keepa/SP-API live signals (CRED).
+> 2. Amazon Ads card → no dashboard (see 0A.17.1). `<0B-CORRECTS>` → REQUIRED build (0B.1).
+> 3. GOV.UK One Login — descriptor only.
+> 4. HMRC — seam only, not connected (DEF until VAT).
+> 5. Google — awaiting OAuth client id + Edge Function deploy (F-ACTION).
+> 6. Acquisition durable persistence — memory-only in demo; D4 durable schema +
+>    conformance-proven repo exist, migration unexecuted (browser Supabase creds F-ACTION).
+> 7. Monitoring health + campaign stats — seeded.
+> 8. Live provider sends (outreach, transactional email, WhatsApp, Postiz) — seams
+>    ready; live requires credentials.
+>
+> ### 0A.20 CREDENTIAL-DEPENDENT FUNCTIONALITY (not build work)
+> Amazon SP-API/Ads · Stripe · Xero connect · Keepa · Firecrawl · Hunter ·
+> Instantly · Postmark/SendGrid · Twilio WhatsApp · DHL/Palletline live labels ·
+> Wise/Payoneer rails · Companies House reads · GOV.UK One Login · HMRC (VAT
+> registration BEFORE credentials) · Google OAuth + Edge deploy · Supabase browser
+> keys (durable path) · OpenRouter key (runtime AI; FREE models enforced).
+>
+> ### 0A.21 FOUNDER ACTIONS (Super Admin, not build code)
+> 1. Google OAuth client id entry + Google Edge Function deploy (`exchange_pending`→`connected`).
+> 2. Companies House API key + auth code; GOV.UK One Login personal code (vault-masked).
+> 3. HMRC: complete VAT registration first.
+> 4. Real operating-cost prices in `src/config/operatingCosts.ts` + pricing approval.
+> 5. Tottenham merchandise ASIN evidence capture via existing BI.
+> 6. Deploy verified build to demo.mercenta.co.uk (`scripts/deploy-demo.sh`).
+> 7. **Rotate Namecheap FTP password and Twilio 2FA recovery code** (both exist in
+>    past git history; rotation is the fix).
+> 8. Rakazo remains OFF (founder already disabled its OpenRouter usage).
+>
+> ### 0A.22 INTENTIONALLY DEFERRED ITEMS
+> Rakazo integration (LAST) · UI redesign (after core) · security/credential
+> remediation (after core declared complete) · HMRC live (after VAT registration) ·
+> Amazon SP-API/Ads live (credentials + Edge infra) · Stripe live subscriptions ·
+> real Google generation (after connect) · §16–§29 partnership pipeline + §12–§15
+> Google generation wiring (HANDOFF STILL OPEN).
+>
+> ### 0A.23 PLATFORM SYNCHRONIZATION GAPS
+> 1. Same provider listed with stale count in `docs/INTEGRATIONS.md` (18 vs 22) — **docs drift**, fixed-by-doc.
+> 2. `XeroConnection.tsx` dead file vs AccountingPanel ownership — candidate removal in Phase 1 (out of scope here).
+> 3. `BrandComm.tsx` slug derivation drift (SSOT) — candidate Phase 1 fix.
+> 4. Acquisition/BI durable persistence inactive in the demo (honest memory-only
+>    status shown); flips with browser Supabase keys.
+> 5. Full Playwright suite last run documented at checkpoint 91bc291 (280/0/2);
+>    FINAL regression belongs to Phase 3.
+>
+> ### 0A.24 RECOMMENDED NEXT BUILD ORDER (evidence-based; phases already agreed)
+> 1. **Phase 1 (fix only genuine gaps):** `<0B-CORRECTS>` **Amazon Ads dashboard surface — REQUIRED build work, no deferral option (see 0B.1/0B.4 #1)**; `XeroConnection.tsx` removal; `BrandComm.tsx` slug SSOT fix;
+>    `docs/INTEGRATIONS.md` registry-count update. **No scope expansion beyond the corrected 0B.4 queue.**
+> 2. **Phase 2:** end-to-end synchronization verification across the four flows in
+>    0A.3 (mostly existing gates; confirm no regression).
+> 3. **Phase 3:** full regression (tsc/eslint/build/wording/all validators/RLS/
+>    integrity/Playwright `--workers=2` + investor demo).
+> 4. **Phase 4:** declare CORE BUILD COMPLETE (founder confirms the 0A.21 actions
+>    are accepted as outside build scope).
+> 5. **Phase 5:** deploy + re-verify demo.mercenta.co.uk.
+> 6. **Phase 6–7:** UI redesign (0A.16) + regression.
+> 7. **Phase 8:** Rakazo (0A.15).
+> 8. **Phase 9:** security/credential audit + rotation.
+>
+> ### 0A.25 CRITICAL FINAL CLASSIFICATION (evidence-based)
+> 1. **Genuinely built:** the entire platform per 0A.2 — brand portal, admin control
+>    centre, carrier seams, commerce chain, intelligence/acquisition chain, finance,
+>    company/gov/google, command centre, launch centre, platform AI policy,
+>    investor demo, RBAC/RLS/audit, integration registry.
+> 2. **Genuinely works:** everything classified SIM above — the demoable platform in
+>    simulation mode (validators + e2e evidence; no browser re-run this session).
+> 3. **Only simulated:** SP-API, DHL/Palletline labels, Xero, CH, HMRC, Google
+>    generation, Wise/Payoneer transfers, Stripe, Keepa/Firecrawl/Hunter/Instantly/
+>    Postmark/WhatsApp/Postiz operations (mock adapters identical to the real ones).
+> 4. **Fully wired:** 0A.3 flows 1–4 — the four platform chains connect end-to-end.
+> 5. **Implemented but fragmented:** acquisition durability (memory-only demo),
+>    Google await-connect, GOV.UK descriptor, HMRC seam, Amazon Ads card, dead
+>    `XeroConnection.tsx`, BrandComm slug drift, seeded monitoring stats.
+> 6. **Tested:** 71/72 deterministic validators + tsc/build/wording/integrity/RLS
+>    green this session; full browser suite documented 280/0/2 at 91bc291.
+> 7. **Genuinely E2E verified (browser):** documented at checkpoint 91bc291 for all
+>    37 matrix areas; NOT re-run this session (no browser) — see 0A.23.5.
+> 8. **Requires credentials:** 0A.20 list.
+> 9. **Requires founder action:** 0A.21 list.
+> 10. **Intentionally deferred:** 0A.22 list.
+> 11. **Genuinely missing:** 0A.17 list (small; all candidate-Phase-1 or DEF).
+> 12. **Broken:** none found this session (0A.18).
+> 13. **What prevents declaring CORE PLATFORM COMPLETE?** Only the agreed
+>     sequencing, not missing functionality: final reconciliation (this doc), the
+>     bounded final regression (Phase 3), the founder's acceptance of the 0A.21
+>     F-ACTION list as out-of-scope, and the deploy/re-verify (Phase 5). The
+>     candidate Phase 1 items are small and deliberate (0A.17/0A.24).
+> 14. **Can the investor demo operate end-to-end with ZERO credentials?** **YES —
+>     proven.** The 25-stage run is deterministic, zero-network, fail-closed to
+>     simulation, and validated this session (`validate-investor-demo` PASS;
+>     browser 10/10 documented at 91bc291).
+> 15. **Can a brand operate the intended simulated workflow end-to-end?** **YES.**
+>     Onboarding → catalog → compliance → PO → ack → shipment → receiving →
+>     invoice/payment/exception is one lifecycle the brand surfaces drive; E4
+>     validators + brand specs green.
+> 16. **Are the major platform domains connected to one another?** **YES** —
+>     commerce↔finance↔case, intelligence↔ICP↔CRM↔outreach↔onboarding, funding↔
+>     company/gov↔command centre, and operational events↔command/launch/demo are
+>     all wired through shared stores/seams (0A.3).
+> 17. **Previously-agreed features absent from the 37-row matrix?** **NONE found.** `<0B-CORRECTS>` **CORRECTED BY 0B:** the Amazon Ads dashboard surface IS an agreed feature that was under-specified in the matrix (only the seam row had a PAR-mark) and is genuinely missing — **REQUIRED, dashboard build queued 0B.4 #1**.
+>     The matrix actually under-specifies granular capabilities; this inventory
+>     is the finer-grained truth. One not-matrix-level gap surfaced: **Amazon Ads
+>     dashboard surface** (registered card only) — previously implied by §12 → **now REQUIRED per 0B.1**.
+> 18. **Previously-agreed integrations absent from the registry?** **None that were
+>     agreed.** NameCheap/DigitalOcean/Rakazo/Supabase are infra/deferred, not
+>     registry cards (per §14 wizard design). Explee was never agreed. Social
+>     channels (LinkedIn/FB/IG/X) are Postiz/MercentaSocial channels. The only
+>     discrepancy found is doc-vs-source: `docs/INTEGRATIONS.md` says 18 providers
+>     with a 14-row table while the source registry has 22 (0A.4).
+> 19. **State transitions claiming external actions that did not occur?** **NONE.**
+>     Validators pin: grants/investor submission requires founder ref + prior
+>     internal approval (Phase C removed the legacy false-submission state);
+>     outreach send refuses unless a verified live transport exists; launch
+>     submission is an internal record, not an API call; Amazon/CH/HMRC never
+>     claim live filing; Google `exchange_pending` ≠ `connected`.
+> 20. **Places where a UI exists but the underlying workflow is not connected?**
+>     - **Amazon Ads card** (registry card, no dashboard at all). `<0B-CORRECTS>` → REQUIRED surface build (0B.1/0B.4 #1).
+>     - **GOV.UK One Login** descriptor (intentionally a descriptor; real connect
+>       is CRED/F-ACTION).
+>     - **HMRC card** (seam + readiness state; intentionally not connected until
+>       VAT registration).
+>     - **Google setup** (fully functional wizard + mock runner; real generation
+>       awaits connect).
+>     - **Monitoring health/campaign stats** (seeded values, flagged).
+>     - **Super Admin Rakazo tab** (iframe; fleet not integrated — DEF).
+>     No other UI-without-logic surfaces were found.
+>
+> **END OF PHASE 0A INVENTORY — authoritative until superseded by Phase 1
+> execution evidence.**
+
 ---
-> ---
+
+> ## ⛳ PHASE 0B — CORRECTIVE RECONCILIATION INVENTORY (2026-09-16, read-only)
+>
+> **WHY THIS SECTION EXISTS.** Phase 0A classified Amazon Ads as
+> `PART (registered card only; no dashboard)` and its Phase-1 queue allowed an
+> "OR explicit deferral record" escape (0A.24.1). That is NOT acceptable as a
+> classification. **The repository must NOT be allowed to redefine the agreed
+> Mercenta product scope merely because a feature is currently unconsumed,
+> partially implemented, seam-only, or credential-dependent.** Amazon Ads is
+> part of the AGREED Mercenta platform functionality (registered requirement
+> §12 "Ad spend dashboard", still visible in `src/types.ts`, the integration
+> registry and `docs/INTEGRATIONS.md`); the absence of a current dashboard
+> consumer does not remove it from scope.
+>
+> **0B is the corrected, authoritative feature/function inventory. It
+> SUPERSEDES the Phase 0A inventory (above) and the 37-row matrix wherever
+> they conflict on scope/classification. It is the single source of truth for
+> the NEXT BUILD QUEUE at the end.** Phase 0A's rows remain as the historical
+> verified evidence record; every conflict is flagged `<0B-CORRECTS>` inline
+> below where it appears.
+>
+> **Correction method:** every capability was re-checked against (A) the agreed
+> product contract + §12 registry requirement, (B) prior verified checkpoints,
+> (C) PROJECT_STATUS.md, (D) HANDOFF.md, (E) validators (72 scripts),
+> (F) E2E specs (53), (G) source implementation, (H) integration registry,
+> (I) simulation seams, (J) agreed sequencing. Where the repo cannot prove a
+> capability was agreed it is marked **REQUIRES SPECIFICATION RECONCILIATION**
+> rather than "NOT REQUIRED". Nothing was changed in source, tests, validators,
+> registry, or UI during this pass (verification command output at the foot of
+> this section). No Mercenta runtime AI was invoked. Rakazo untouched.
+>
+> **Value tokens:** **YES** fully true · **PARTIAL** partially true/components
+> present but incomplete · **NO** false/absent · **SIM** truthful simulated
+> path (works today) · **LIVE** real path behind a credential ·
+> **CRED** live requires external credential(s) · **F-ACTION** a founder
+> Super-Admin action, not build work · **DEFERRED** intentionally postponed ·
+> **N/A** not applicable.
+>
+> ### 0B.1 AMAZON ADS — CORRECTED CLASSIFICATION (authoritative)
+>
+> | Claim | Value |
+> |---|---|
+> | Required / agreed scope | **REQUIRED** — registered `INTEGRATION_REGISTRY.amazon_ads` ("Ad spend dashboard (§12)"), `src/types.ts` `AdSpendBudget` (`§12 Ad spend dashboard`), `docs/INTEGRATIONS.md` row `amazon_ads … Ad spend dashboard` |
+> | Implemented | **PARTIAL** — data layer exists: `AdSpendBudget`, `demoAdSpend`, `fetchAdSpendBudgets()` (`src/data/api.ts`), `useAdSpendBudgets()` (`src/data/queries.ts`), registry card + INTEGRATION_META `defaultMode: 'available'`, operating-costs revenue stream `advertising_commission` |
+> | Fully wired | **NO** — ZERO consumers of `useAdSpendBudgets()`/`fetchAdSpendBudgets()` in any component (verified by grep); no dashboard surface, no ad-metrics/budget/reporting UI, no brand or admin consumer |
+> | Simulated | **PARTIAL** — simulated seed data exists and is queryable; nothing renders it |
+> | Tested | **PARTIAL** — `validate-stage4` asserts the registry entry; `e2e/integration-hub.spec.ts` asserts the card renders; NO test exercises ad-spend data or a dashboard |
+> | E2E verified | **NO** — no ad-spend dashboard spec exists |
+> | Credential dependent (live) | **CRED** — live Amazon Ads connection requires Amazon credentials/approval (same pending path as SP-API) |
+> | Missing | **YES** — the dashboard/advertising-metrics/budgets/reporting surface (agreed §12) is genuinely missing build work |
+> | Broken | **NO** — nothing broken; the data/seam that exists is correct but unconsumed |
+> | Classification | **REQUIRED → PARTIALLY IMPLEMENTED / INCOMPLETE → SIMULATION-FIRST → DASHBOARD/SURFACE STILL REQUIRED → LIVE CONNECTION CREDENTIAL-DEPENDENT** |
+> | It is NOT | "DEFER — no build" · "NOT REQUIRED" · "OUT OF SCOPE" |
+>
+> **Historical-evidence check (explicit removal):** searched `docs/*`,
+> `MERCENTA_*CONTRACT*`, `requirements-registry.json`, HANDOFF, git log for any
+> record that Amazon Ads was deliberately removed from the agreed product.
+> **None found.** `requirements-registry.json` has no Amazon Ads entry at all
+> (0 hits for `ad_spend|amazon_ads|AdSpend`) — itself an inventory gap.
+> `MERCENTA_PRODUCT_ARCHITECTURE_AUDIT_2026-09-10.md` §19 lists it as
+> **UNUSED/UNCONNECTED** (i.e. "not yet wired", the opposite of removed).
+> → Amazon Ads remains **REQUIRED**. Recorded as `REQUIRES SPECIFICATION
+> RECONCILIATION` only for the SIZE/SCOPE of the advertising-metrics surface
+> (budgets? ROAS? campaign list? ad-object level? SP-API Ads endpoints are not
+> yet available to inspect), never for its existence.
+>
+> **Exact remaining work (Phase 1, see 0B.6):** build the Amazon Ads
+> dashboard surface as a simulation-first consumer of the EXISTING
+> `useAdSpendBudgets()` seam (budget vs spend-to-date, ACOS/TACOS, status per
+> brand, operating-costs linkage), render it behind the existing registry card
+> (admin + brand where appropriate), add deterministic validator + e2e spec,
+> keep live connection behind credentials. Do NOT start until Phase 1 begins.
+> ### 0B.2 EXHAUSTIVE FEATURE/FUNCTION MATRIX (corrected, feature-level)
+>
+> Column keys: **Req** Required · **Impl** Implemented · **Wired** Fully wired
+> end-to-end · **Sim** Simulated path · **Tested** deterministic validator(s) ·
+> **E2E** browser spec · **Cred** credential-dependent · **F-Act** founder
+> Super-Admin action · **Def** intentionally deferred · **Miss** genuinely
+> missing · **Broke** broken. Values: `YES|PARTIAL|NO|SIM|LIVE|CRED|F-ACTION|DEFERRED|N/A`.
+> A row is only fully green when every condition is true — a panel alone, a
+> passing validator alone, or a mock client alone is never a completed feature.
+>
+> **A. BRAND / BRAND PORTAL**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | BP-01 | Brand onboarding — 6-step wizard, mandatory §4.1/§4.2 agreements | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-02 | Brand profile / company information (BrandProfile, settings) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-03 | Brand dashboard — canonical commerce awareness | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-04 | Tasks / actions (self-service task lists, routing, CTA) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-05 | Notifications / status (NotificationCenter, status semantics) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-06 | Catalogue / product management (ProductCatalog CRUD) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-07 | Product submission (submit→poll Amazon-facing gate) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-08 | Compliance / document workflow (upload, verify, replace, gate) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-09 | Agreements (§4.1/§4.2, contract view, e-sign seam) | YES | YES | YES | SIM | YES | YES | CRED-live-esign | NO | NO | NO | NO |
+> | BP-10 | PO visibility (brand PO list + detail) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-11 | PO acknowledgement (line-level, 24h, brand GUI) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-12 | Fulfilment workflow (LogisticsHub, factory→live-amazon) | YES | YES | YES | SIM | YES | YES | CRED-live-labels | NO | NO | NO | NO |
+> | BP-13 | Shipment / ASN workflow (PO-gated, milestones, commercial breakdown) | YES | YES | YES | SIM | YES | YES | CRED-live-DHL/Palletline | NO | NO | NO | NO |
+> | BP-14 | Receiving / delivery reconciliation (shortage deduction auto-raise) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-15 | Invoices (visibility, issue-unpaid honesty) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-16 | Payments (payouts, commission settlement, rails sim) | YES | YES | YES | SIM | YES | YES | CRED-rails | NO | NO | NO | NO |
+> | BP-17 | Chargebacks (deductions ledger visibility, cause + evidence) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-18 | Cases / exceptions (brand case → Mercenta review → escalation seam) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-19 | Finance / accounting (brand financial standing, transaction history) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-20 | Brand-facing reporting (reconciliations, standings, reports) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BP-21 | Brand-facing operational status (live vs simulated shown honestly) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Brand row evidence: `OnboardingWizard.tsx`, `onboardingLifecycle.ts`,
+> `compliance.ts`, `BrandDashboard.tsx`, `NotificationCenter.tsx`,
+> `ProductCatalog.tsx`, `catalogLifecycle.ts`, `BrandPurchaseOrders.tsx`,
+> `acknowledgeCommercePurchaseOrder`, `LogisticsHub.tsx`,
+> `createShipmentForPO`, `receiveCommercePurchaseOrder`, `invoice.ts`,
+> `settleCommission`, `DeductionsLedger.tsx`, `openCommerceCase`,
+> `financialStandingForBrand`, `BrandReports.tsx`, `statusPresentation.ts`;
+> validators `validate-onboarding-workflow`, `validate-e3-catalog`,
+> `validate-e4-commerce`, `validate-e6-brand-surfaces`, `validate-document-verification`;
+> specs `onboarding-workflow`, `catalog-product-management`, `po-lifecycle`,
+> `fulfillment-tracks`, `shipment-asn`, `deductions`, `disputes`, `billing`,
+> `brand-payouts`, `notifications`, `status-semantics`, `legal-agreements`,
+> `compliance-gate`, `brand-operational-surfaces`.
+> **B. PRODUCT / CATALOGUE**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | PC-01 | Product creation (brand + admin; typed `Product`) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | PC-02 | Product editing (deterministic, audited) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | PC-03 | Catalogue upload / import (CSV + edge catalog-import) | YES | YES | YES | SIM | YES | YES | CRED-live-import | NO | NO | NO | NO |
+> | PC-04 | Product validation (completeness scoring) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | PC-05 | Compliance (catalog blocked until gate approved) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | PC-06 | Document handling (verify/replace) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | PC-07 | Product submission lifecycle (draft→ready→submitted→poll) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | PC-08 | Product lifecycle / state machine (declared transitions) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | PC-09 | Amazon-compatible product data (ASIN evidence, sales estimate) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Keepa | NO | NO | NO | NO |
+> | PC-10 | Downstream propagation (product → PO lines → shipment → invoice) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Product evidence: `catalogLifecycle.ts`, `productCompleteness.ts`,
+> `CsvCatalogImport.tsx`, `csvImport.ts`, `complianceGateStatus`,
+> `lib/verification/documentVerification.ts`, `salesEstimator.ts`,
+> `commerceLifecycle.ts`; validators `validate-e3-catalog`,
+> `validate-csv-import`, `validate-sales-estimator`, `validate-document-verification`;
+> specs `catalog-product-management`, `compliance-gate`, `po-lifecycle`.
+>
+> **C. AMAZON / VENDOR CENTRAL**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | AV-01 | Vendor Central simulation (PO/ack/fulfil semantics; never live claim) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | AV-02 | PO generation / simulation (state machine) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | AV-03 | PO acknowledgement (line-level, 24h, backorder, dup-refused) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | AV-04 | Amazon workflow states + freight terms (collect/prepaid, windows) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | AV-05 | Amazon ASIN intelligence (ASIN-level evidence, presence) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Keepa | NO | NO | NO | NO |
+> | AV-06 | Keepa intelligence (price history behind estimator) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Keepa | NO | NO | NO | NO |
+> | AV-07 | **Amazon Ads — data seam + registry card (agreed §12)** | **YES** | **PARTIAL** | **NO** | **PARTIAL** | **PARTIAL** | **NO** | **CRED-live** | NO | NO | **YES-surface-missing** | NO |
+> | AV-08 | **Amazon Ads dashboard / metrics / budgets / reporting surface** | **YES** | **NO** | **NO** | **NO** | **NO** | **NO** | **CRED-live** | NO | NO | **YES** | NO |
+> | AV-09 | SP-API seam (real + mock, factory by connection) | YES | YES | YES | SIM | YES | YES | CRED-SP-API | NO | NO | NO | NO |
+> | AV-10 | Amazon credentials / live path (Edge functions deploy-time) | YES | YES | YES | N/A | YES | YES | CRED | F-ACTION-deploy | NO | NO | NO |
+> | AV-11 | Explicit sim-vs-live honesty (no fabricated Amazon claim) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Amazon evidence: `commerceLifecycle.ts`, `acknowledgeCommercePurchaseOrder`,
+> `FreightTerm`, `opportunityDiscovery.ts`, `keepaClient.ts`,
+> **`AdSpendBudget`/`demoAdSpend`/`fetchAdSpendBudgets`/`useAdSpendBudgets`/
+> `INTEGRATION_REGISTRY.amazon_ads` — seam only, ZERO dashboard consumers (grep-verified)`,
+> `src/lib/spapi/*`, `GO_LIVE.md`, `PRODUCTION_READINESS.md`; validators
+> `validate-e4-commerce`, `validate-mock-providers`, `validate-stage4`,
+> `validate-edge-functions`; specs `po-lifecycle`, `status-semantics`,
+> `integration-hub`. **AV-07/AV-08 classification: see 0B.1 (CORRECTED).**
+> **D. BRAND INTELLIGENCE** (every capability individually — NOT reduced to one row)
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | BI-01 | Brand discovery (canonical 12 tracked / 10 active real-brand universe, seeded, deterministic re-boot, `runBrandIntelligence`) | YES | YES | YES | SIM-providers | YES | YES | NO | NO | NO | NO | NO |
+> | BI-02 | Company/brand/website/product research (dossier + evidence fields) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-03 | Amazon presence research (ASIN-level evidence, presence indicator) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-04 | ASIN research (per-ASIN facts, source + claim class) | YES | YES | YES | SIM+CRED-Keepa | YES | YES | CRED-Keepa | NO | NO | NO | NO |
+> | BI-05 | Product opportunity analysis (category baseline, PO-potential formula) | YES | YES | YES | SIM-labelled | YES | YES | NO | NO | NO | NO | NO |
+> | BI-06 | Demand signals (growth signals, weights, tiers) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-07 | Competitive information (seller-count competition factor) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-08 | Category/vertical information (8 verticals, fail-closed gate) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-09 | Evidence collection + provenance (source on every fact) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-10 | Confidence/state handling (fact/potential/estimated/verified/confirmed) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-11 | Estimated vs verified information (labels; simulated_dataset) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-12 | Opportunity signals + brand fit + acquisition signals | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | BI-13 | Tottenham merchandise ASIN evidence workflow (founder-supplied evidence, NOT fabricated) | YES | YES | N/A-gate | SIM | YES | YES | NO | **F-ACTION-evidence-capture** | NO | NO | NO |
+> | BI-14 | Keepa seam (price history behind estimator) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Keepa | NO | NO | NO | NO |
+> | BI-15 | Firecrawl seam (web fetch, discovery research) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Firecrawl | NO | NO | NO | NO |
+> | BI-16 | BI → Opportunity Discovery (same prospect; opportunity derived) | YES | YES | YES | YES | YES | YES | NO | NO | NO | NO | NO |
+> | BI-17 | BI → ICP (same `prospectId`; ICP projection derived) | YES | YES | YES | YES | YES | YES | NO | NO | NO | NO | NO |
+> | BI-18 | BI → Prospecting (lead derived from prospect) | YES | YES | YES | YES | YES | YES | NO | NO | NO | NO | NO |
+> | BI-19 | BI → CRM/acquisition preservation (intelligence preserved by reference) | YES | YES | YES | YES | YES | YES | NO | NO | NO | NO | NO |
+>
+> BI evidence: `src/lib/intelligence/*` (`opportunityDiscovery.ts`,
+> `scoringEngine.ts`, `prospectIntelligence.ts`, `prospectLifecycle.ts`,
+> `salesEstimator.ts`, `brandIntelligenceClient.ts`, `keepaClient.ts`,
+> `firecrawlClient.ts`), `brandDossiers.ts`, `brandProspectSeed.ts`;
+> panels `BrandIntelligencePanel.tsx`, `BrandIntelligenceStrategyPanel.tsx`;
+> validators `validate-bi-lifecycle`, `validate-bi-intelligence-preservation`,
+> `validate-intelligence-strategy`, `validate-discovery`,
+> `validate-sales-estimator`, `validate-mock-providers`; specs
+> `brand-intelligence-lifecycle`, `bi-intelligence-preservation`.
+> **Downstream: BI-16→19 feed Opportunity Discovery, ICP, acquisition, CRM,
+> Command Centre (relationship slots), Amazon opportunity (AV-05).**
+>
+> **E. OPPORTUNITY DISCOVERY**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | OD-01 | Discovery (runDiscoveryPipeline: directories → research → enrich → enrol) | YES | YES | YES | SIM | YES | YES | CRED-live-providers | NO | NO | NO | NO |
+> | OD-02 | Opportunity identification (`deriveOpportunity`/`assessOpportunity`) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OD-03 | Category/vertical discovery (8 verticals, fail-closed) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OD-04 | Product/brand opportunity signals (PO potential, scoring) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OD-05 | Web/firecrawl seam (`firecrawlClient`/`firecrawlResearch`) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Firecrawl | NO | NO | NO | NO |
+> | OD-06 | Evidence/provenance (claim class + source on every signal) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OD-07 | Scoring/ranking (`scoringEngine`, `rankOpportunities` — canonical PO-potential ranking used by Command Centre) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OD-08 | Downstream acquisition use (E1 opportunity → brand onboarding hand-off) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Opportunity evidence: `src/lib/discovery/*` (`engine.ts`, `budget.ts`,
+> `wordingSafety.ts`), `src/lib/intelligence/opportunityDiscovery.ts`,
+> `rankOpportunities`, `prospectPipeline.ts`; validators `validate-discovery`,
+> `validate-opportunity-discovery`, `validate-onboarding-handoff`; specs
+> `opportunity-discovery`, `onboarding-handoff`.
+> **F. ICP / ACQUISITION**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | IA-01 | ICP definition (deterministic ICP projection, `buildAcquisitionLead`) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | IA-02 | Acquisition criteria (fit scoring, thresholds, auto-enrol rule) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | IA-03 | Brand qualification (eligibility, category gate) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | IA-04 | Prospect discovery (canonical universe from BI) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | IA-05 | Lead generation (`deriveLeadFromProspect`, `leadSourcing`) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | IA-06 | Contact discovery (contacts, confidence + source; CSV zero-API) | YES | YES | YES | SIM | YES | YES | CRED-Hunter | NO | NO | NO | NO |
+> | IA-07 | Hunter seam (email verification) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Hunter | NO | NO | NO | NO |
+> | IA-08 | Acquisition pipeline (stages, D4) + enrolment workflow | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | IA-09 | Prioritisation (fit ranking → Command Centre queue feed) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | IA-10 | Downstream CRM flow (lead → `setOpportunityStage` → CRM) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> ICP evidence: `prospectPipeline.ts`, `prospectLifecycle.ts`,
+> `intelligence/acquisitionStrategy.ts`, `acquisitionStore.ts`,
+> `prospectStore.ts`; validators `validate-acquisition-pipeline`,
+> `validate-prospect-pipeline`, `validate-d4-persistence`, `validate-tenant-coherence`;
+> specs `acquisition-pipeline`, `multi-tenant`. **Persistence: memory-only in
+> demo; durable schema proven, unexecuted (Supabase creds = F-ACTION) — PART.**
+>
+> **G. CRM**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | CM-01 | Prospects (canonical list, tenant-scoped) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-02 | Leads (derived from prospects; stage mapping) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-03 | Contacts (confidence + source) | YES | YES | YES | SIM | YES | YES | CRED-Hunter | NO | NO | NO | NO |
+> | CM-04 | Companies / accounts (brand-centric CRM records) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-05 | Pipeline stages (acquisition stage labels per prospect) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-06 | Activities / tasks / actions (add, complete, actor) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-07 | Status (lead/outreach/opportunity; declared + audited transitions) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-08 | Relationship data (`getRelationshipContext`, Command Centre feed) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-09 | Tasks (CRM tasks, notes, tags) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-10 | Notes (add, provenance) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CM-11 | CRM → outreach (prepare modify approve send, response→opportunity) | YES | YES | YES | SIM | YES | YES | CRED-live-send | NO | NO | NO | NO |
+> | CM-12 | CRM → Command Centre (prospects feed ranking; CTA to BI/CRM) | YES | YES | YES | YES | YES | YES | NO | NO | NO | NO | NO |
+>
+> CRM evidence: `crmStore.ts`, `BrandCRM.tsx`, `ProspectDetailPanel.tsx`,
+> `acquisitionStageLabel`, `AcquisitionPipeline.tsx`, `addCrmTask`,
+> `setCrmTaskStatus`, `addCrmNote`, `getRelationshipContext`,
+> `applyLeadStageToProspect`, `recordResponse`, `outreachLifecycle.ts`;
+> specs `crm`, `acquisition-pipeline`, `command-centre`.
+> **H. OUTREACH**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | OR-01 | Campaign creation (sequence per prospect; campaign state) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OR-02 | Message generation (BI-evidence copy, `outreachGenerator`) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OR-03 | Templates (declared templates; reviewer-approved variation) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OR-04 | Personalisation (prospect-specific fields) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OR-05 | Email (content + send seam; never claims sent without confirm) | YES | YES | YES | SIM | YES | YES | CRED-Postmark | NO | NO | NO | NO |
+> | OR-06 | Instantly seam (outreach activation/send provider) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Instantly | NO | NO | NO | NO |
+> | OR-07 | Postmark seam (transactional/outreach email) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Postmark | NO | NO | NO | NO |
+> | OR-08 | Outreach approval (approve/reject; wording gate) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OR-09 | Send-state honesty (transport REFUSES without verified live transport) | YES | YES | YES | SIM | YES | YES | CRED-sender | NO | NO | NO | NO |
+> | OR-10 | Response tracking (`recordResponse`, opportunity creation) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OR-11 | Follow-up (generated sequences incl. LinkedIn + email follow-ups) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | OR-12 | Campaign status (per-prospect outreach state, honest labels) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Outreach evidence: `intelligence/outreachGenerator.ts`,
+> `acquisition/outreachLifecycle.ts`, `outreachSender.ts`,
+> `intelligence/prospectIntelligence.ts`, `messaging/email.ts`,
+> `notifications/postmarkNotifier.ts`, Instantly seam; validators
+> `validate-acquisition-pipeline`, `validate-outreach-provider-hardening`,
+> `validate-automation`, `lint-wording`; specs `acquisition-pipeline`,
+> `outreach-provider-hardening`. **No false send claims: pinned by validator.**
+>
+> **I. FUNDING / GRANTS / INVESTORS**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | FG-01 | Funding opportunities (3 REAL: Solo Founders Program, The Bridge, Ignyte by DIFC — real URLs, claim classes) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-02 | Grants (researchEngine; grant opportunity records; dataSources) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-03 | Investor research (investor datasets; honest: £250k plan, 0 committed; no invented investors) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-04 | Funding pipeline (§31 stages DISCOVERED→…→DECISION; declared order) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-05 | Approval states (founder-approval gate; later stages REFUSED without approval + ref) | YES | YES | YES | SIM | YES | YES | NO | **F-ACTION-approval** | NO | NO | NO |
+> | FG-06 | Internal approval vs external submission (approval record ≠ submission; submission founder-gated w/ reference) | YES | YES | YES | SIM | YES | YES | NO | **F-ACTION-submission-ref** | NO | NO | NO |
+> | FG-07 | Application preparation (deterministic `fundingPipeline`; linted by wording gates) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-08 | Investor/demo lifecycle (25-stage deterministic demo) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-09 | Status transitions (stage machine; audited) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-10 | Evidence (SourcedFundingClaim, claim class per fact, unknown → null) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-11 | CTA / action flows (funding items in Command Centre with canonical next action) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-12 | External-action honesty (nothing submitted/sent unless founder records it) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FG-13 | Google document generation dependency (investor pitch/demo materials via Google) | YES | PARTIAL | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+>
+> Funding evidence: `founder/fundingPipeline.ts`, `grants/researchEngine.ts`,
+> `grants/dataSources.ts`, `founderContent.ts`, `simulation/investorDemo.ts`,
+> `Google` seam; validators `validate-funding-pipeline`,
+> `validate-investor-demo`, `validate-google-integration`, `validate-command-centre`;
+> specs `funding-pipeline`, `investor-demo`, `google-setup`,
+> `founder-investor-centre`.
+> **J. COMPANY / GOVERNMENT**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | CG-01 | Companies House (mock/real seam; reads company/officers/PSC/filings/charges; electronic auto-file REFUSED; manual register path) | YES | YES | YES | SIM | YES | YES | CRED-CH-key | F-ACTION-auth-code | NO | NO | NO |
+> | CG-02 | Company data (registrar snapshot; profile, officers, PSC, filings, charges) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CG-03 | Company control centre (deadlines 90/60/30/7/0; CS workflow Detect→Prepare→Notify→Review→Approve→File→Verify; founder-approval gate) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CG-04 | GOV.UK One Login (descriptor surface; SIM descriptor only) | YES | PARTIAL | PARTIAL | SIM-descriptor | YES | YES | CRED-personal-code | F-ACTION | NO | NO | NO |
+> | CG-05 | HMRC seam (VAT status reads mock; filings REFUSED; readiness `ready_not_connected`) | YES | PARTIAL | NO | SIM | YES | YES | CRED-after-VAT | F-ACTION-VAT-reg | **DEFERRED-until-VAT** | NO | NO |
+> | CG-06 | VAT-related configuration (`VAT_TREATMENT=configuration_required`; no amount until configured) | YES | YES | YES | config-gated | YES | YES | NO | NO | NO | NO | NO |
+> | CG-07 | Government workflow states (CS workflow + HMRC/GOV.UK states; truthful NOT-CONNECTED) | YES | YES | PARTIAL | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CG-08 | Credential-dependent paths (CH key, GOV.UK code, VAT-registered MTD; vault-masked refs only) | YES | YES | YES | N/A | YES | YES | CRED | F-ACTION | NO | NO | NO |
+> | CG-09 | Founder actions (enter/verify/clear government secrets in Super Admin) | YES | YES | YES | N/A | YES | YES | NO | **F-ACTION** | NO | NO | NO |
+> | CG-10 | Live vs simulated behaviour (mock reads → live reads behind creds; business boundary: auto-file REFUSED) | YES | YES | YES | SIM→LIVE | YES | YES | CRED | NO | NO | NO | NO |
+> | CG-11 | Prohibited / unsupported filing claims (never claims e-filed when not; manual-register path works) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Company evidence: `compliance/companiesHouseClient.ts` + Mock,
+> `compliance/hmrcClient.ts` + Mock, `companyStore.ts`,
+> `CompanyControlCentre.tsx`, `config/company.ts`, `config/commercial.ts`,
+> `GOVERNMENT_SECRET_KINDS`, `storeGovernmentSecret`; validators
+> `validate-company-control-centre`, `validate-mock-seam`; specs
+> `company-control-centre`, `compliance-sim`.
+>
+> **K. GOOGLE WORKSPACE** (not reduced to one "Google integration" row)
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | GW-01 | OAuth setup (client id entry, consent, code captured as `exchange_pending`) | YES | YES | YES | SIM | YES | YES | CRED-Google | F-ACTION-client-id | NO | NO | NO |
+> | GW-02 | Connection state (exchange_pending ≠ connected enforced truthfully) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | GW-03 | Token exchange (code→token + Vault refresh Edge Function seam) | YES | YES | PARTIAL | — | YES | YES | CRED | F-ACTION-deploy-Edge | NO | NO | NO |
+> | GW-04 | Google Drive (workspace plan runner; Mock-GD ids, idempotent) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+> | GW-05 | Google Docs (document generation runner) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+> | GW-06 | Google Sheets (spreadsheet generation runner) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+> | GW-07 | Google Slides (presentation generation runner) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+> | GW-08 | Document generation (real generation blocked on connect) | YES | PARTIAL | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+> | GW-09 | Spreadsheet generation (real generation blocked on connect) | YES | PARTIAL | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+> | GW-10 | Presentation generation (real generation blocked on connect) | YES | PARTIAL | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+> | GW-11 | Downstream investor/funding/company workflows (Doc/Sheet/Slide output consumed where intended) | YES | PARTIAL | PARTIAL | SIM | YES | YES | CRED-Google | F-ACTION-connect | NO | NO | NO |
+> | GW-12 | Simulation equivalents (workspace plan runs mock; fail-closed) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | GW-13 | Live credential requirements (OAuth client id + Edge deploy; 2-step founder path) | YES | YES | PARTIAL | N/A | YES | YES | CRED | F-ACTION | NO | NO | NO |
+>
+> Google evidence: `google/googleClient.ts` + Mock, `google/workspaceSetup.ts`,
+> `google/index.ts`, `GoogleSetupWizard.tsx`, `GOOGLE_WORKSPACE_PLAN`,
+> `config/google.ts`, `src/lib/founder/documentExport.ts`; validators
+> `validate-google-integration` (42 checks); spec `google-setup` (3/3).
+> **L. COMMERCE / OPERATIONS** (chain edge-by-edge)
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | CO-01 | Product → PO (createCommercePurchaseOrder from catalog submission) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CO-02 | PO → acknowledgement (line-level, 24h, rejection codes) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CO-03 | Acknowledgement → shipment (fulfil via ASN seam, `createShipmentForPO`) | YES | YES | YES | SIM | YES | YES | CRED-live-labels | NO | NO | NO | NO |
+> | CO-04 | Shipment → receiving (delivery reconciliation; shortage deductions auto-raised) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CO-05 | Receiving → invoice (invoice from commission lines; issue-unpaid honest) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CO-06 | Invoice → payment (deterministic payment ↔ PO ↔ invoice reconciliation) | YES | YES | YES | SIM | YES | YES | CRED-Stripe-live | NO | NO | NO | NO |
+> | CO-07 | Payment → exception / chargeback / case (deduction ledger, dispute, brand case→escalation) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | CO-08 | Exception → dispute → resolution (`resolveCommerceDispute`, audited) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Commerce evidence: `commerce/commerceLifecycle.ts`,
+> `acknowledgeCommercePurchaseOrder`, `createShipmentForPO`,
+> `receiveCommercePurchaseOrder`, `invoice.ts`, `recordCommercePayment`,
+> `reconcilePayment`, `raiseCommerceException`, `resolveCommerceDispute`,
+> `warehouse/returnsTracking.ts`; validators `validate-e4-commerce`,
+> `validate-financial-reconciliation`; specs `po-lifecycle`, `shipment-asn`,
+> `deductions`, `disputes`.
+>
+> **M. FINANCE**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | FN-01 | Finance dashboard (brand financial standing; admin accounting tiles) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FN-02 | Xero (real OAuth client, demo mode; 28-day resync; `XeroConnection.tsx` is DEAD/broken code — replaced by AccountingPanel) | YES | YES | PARTIAL | SIM | YES | YES | CRED-Xero-connect | F-ACTION | NO | NO | **YES-dead-file** |
+> | FN-03 | Accounting (accounting seam, journal/trial model) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FN-04 | Invoices (generated from commission lines; paid marks invoice paid) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FN-05 | Payments (payment↔PO↔invoice reconciliation; statuses pending/reconciled/exception) | YES | YES | YES | SIM | YES | YES | CRED-Stripe-live | NO | NO | NO | NO |
+> | FN-06 | Margins (cost-price model, per-PO cost-price check, margin reporting) | YES | YES | YES | SIM | YES | YES | NO | F-ACTION-real-prices | NO | NO | NO |
+> | FN-07 | VAT (treatment config-gated; no amount until configured) | YES | YES | YES | config-gated | YES | YES | NO | NO | NO | NO | NO |
+> | FN-08 | Operating costs (13 lines; manual/estimated/simulated labels; cost + revenue streams incl. `advertising_commission`) | YES | YES | YES | SIM | YES | YES | NO | F-ACTION-real-prices | NO | NO | NO |
+> | FN-09 | Financial exceptions (deductions, disputes, reconciliation exceptions) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FN-10 | Stripe (flat monthly brand subscriptions; commission billing is event-driven, NOT Stripe) | YES | YES | YES | SIM | YES | YES | CRED-Stripe-OAuth | NO | NO | NO | NO |
+> | FN-11 | Live-vs-simulation state (honest) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | FN-12 | Credential requirements (Xero connect, Stripe OAuth, Wise/Payoneer rails) | YES | YES | YES | N/A | YES | YES | CRED | F-ACTION | NO | NO | NO |
+>
+> Finance evidence: `finance/accountingSeam.ts`, `finance/financialReconciliation.ts`,
+> `services/xero/*`, `config/operatingCosts.ts`, `config/commercial.ts`,
+> `costs/costSummary.ts`, `billing/stripe.ts` + Mock, `billing/payouts.ts`;
+> `AccountingPanel.tsx`; validators `validate-financial-reconciliation`,
+> `validate-operating-costs`, `validate-payouts`; specs `billing`,
+> `operating-costs`, `brand-payouts`, `xero`. **XeroConnection.tsx: DO NOT
+> DELETE during reconciliation (standing rule) — Phase 1 candidate.**
+> **N. SUPER ADMIN** (every agreed capability)
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | SA-01 | Control centre (Super Admin dashboard + 19 tabs) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | SA-02 | Integration management (Integrations Hub: connect wizard, mode tiles, health) | YES | YES | YES | SIM | YES | YES | CRED-live-per-provider | NO | NO | NO | NO |
+> | SA-03 | Integration modes (SIM/LIVE resolution via `defaultIntegrationMode`; `sandbox` flag) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | SA-04 | Health (integration health reporting; monitoring dashboard — **stats seeded**, not production-derived) | YES | PARTIAL | PARTIAL | SIM-seeded | YES | YES | NO | NO | NO | NO | NO |
+> | SA-05 | Simulation controls (SimulationControl panel; scenario engine) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | SA-06 | Credentials / configuration (Super Admin secret entry; in-memory; vault-masked refs; NEVER plaintext records) | YES | YES | YES | N/A | YES | YES | CRED | F-ACTION-rotate-2-items | NO | NO | NO |
+> | SA-07 | OpenRouter configuration (dedicated Mercenta key entry; in-memory; never hardcoded) | YES | YES | YES | CRED | YES | YES | CRED | NO | NO | NO | NO |
+> | SA-08 | Provider status (per-provider status via Integrations Hub) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | SA-09 | Operating costs (OperatingCosts panel; cost + AI usage; founder-approved price inputs) | YES | YES | YES | SIM | YES | YES | NO | F-ACTION-real-prices | NO | NO | NO |
+> | SA-10 | Access control (RBAC tiers, at-most-limited views, VIEW_ALLOWLIST, on-behalf audit attribution) | YES | YES | YES | N/A | YES | YES | NO | NO | NO | NO | NO |
+> | SA-11 | Platform configuration (homepage editor, demo banner, tours configuration) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | SA-12 | Live/simulation distinction (status semantics, honest labelling everywhere) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Super Admin evidence: `SuperAdminPanel.tsx`, `IntegrationsPanel.tsx`,
+> `SimulationControl.tsx`, `MonitoringDashboard.tsx`, `OperatingCostsPanel.tsx`,
+> `HomepageEditor.tsx`, `auth/rbac.ts`, `integrations/registry.ts`,
+> `integrations/IntegrationsContext.tsx`, `src/lib/monitoring/*`; validators
+> `validate-operating-costs`, `validate-mock-seam`, `validate-mock-providers`,
+> `validate-homepage-editor`; specs `admin-operational-surfaces`,
+> `integration-hub`, `simulation-control`, `operating-costs`.
+>
+> **O. COMMAND CENTRE**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | CC-01 | Ranked queue (deterministic score → band → id ranking; all items 1..N) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | CC-02 | WHY factor breakdown (8 declared factors; score = exact factor sum; no AI) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | CC-03 | Relationship items (embassy-intro + trade-programme routes via canonical prospects; "no relationship exists yet" honesty) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | CC-04 | Funding items (one item per real §10/§31 opportunity; canonical next action) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | CC-05 | Partnership items (prospective routes only; no invented partner) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | CC-06 | CTAs (every CTA lands on the screen that performs the action; validated) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | CC-07 | Routing (tab-aware `requestAdminNav`/`consumeAdminNavRequest`; dead-button prevention) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | CC-08 | Action states (band/status shown; actions actionable) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | CC-09 | Downstream workflow connections (BI→ICP→CRM→outreach→onboarding; funding→company/gov; operational events→launch/demo) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+>
+> Command Centre evidence: `lib/commandCentre/commandCentre.ts`
+> (`COMMAND_FACTORS`, `commandWhy`, `rankQueue`), `CommandCentre.tsx`,
+> `adminNav.ts`; validator `validate-command-centre` (39 checks); spec
+> `command-centre` (4/4): every rendered row shows rank + WHY; basis says NO AI.
+>
+> **P. LAUNCH CENTRE**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | LC-01 | Launch functionality (14 declared platforms; prepare package) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | LC-02 | State transitions (Prepare ≠ Submitted enforced; submission is internal record, not API call) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | LC-03 | Copy package (per-platform copy; prepared on request) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | LC-04 | Verify checklist (founder-completed verify list per platform) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+> | LC-05 | Audit (launch events in audit trail) | YES | YES | YES | SIM | YES | YES | NO | NO | NO | NO | NO |
+>
+> Launch evidence: `launchStore.ts`, `launchPlatforms.ts` (14 platforms),
+> `LaunchCentre.tsx`; validator `validate-launch-centre`; spec `launch-centre` (3/3).
+> **Q. PLATFORM AI (MERCENTA RUNTIME AI)** — verified against the agreed rule
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | PA-01 | Dedicated Mercenta OpenRouter key (Super Admin in-memory entry; NEVER hardcoded; `VITE_OPENROUTER_API_KEY` env-hint only) | YES | YES | YES | CRED | YES | YES | CRED | NO | NO | NO | NO |
+> | PA-02 | FREE models only — **BOTH runtime tasks have `freeModelSufficient: false` → resolve to paid `deepseek/deepseek-v4-flash` when a key is present** | YES | **PARTIAL** | **PARTIAL** | SIM-default | YES | YES | CRED | NO | NO | NO | **NO-code-defect-but-spec-conflict** |
+> | PA-03 | No paid runtime model usage — **`MAX_PAID_RUNTIME_MODEL` IS a paid model; `isModelAllowed` permits it; £0.02/call budget is a ceiling, not a prohibition → VIOLATES agreed "FREE ONLY / NO PAID"** | YES | PARTIAL | PARTIAL | N/A | YES | YES | CRED | NO | NO | NO | **SPEC-CONFLICT — REQUIRES SPECIFICATION RECONCILIATION** (do not modify in 0B) |
+> | PA-04 | No substitution of another/default OpenRouter key; no Cline model for runtime | YES | YES | YES | N/A | YES | YES | NO | NO | NO | NO | NO |
+> | PA-05 | Deterministic-first (rules/business logic before any model; `RUNTIME_TASKS` declared) | YES | YES | YES | deterministic | YES | YES | NO | NO | NO | NO | NO |
+> | PA-06 | Simulation/demo must not consume paid credits unnecessarily (call sites default to mock; real only behind key; usage log + ceilings) | YES | YES | YES | SIM | YES | YES | CRED | NO | NO | NO | NO |
+> | PA-07 | Super Admin configurability of the key | YES | YES | YES | CRED | YES | YES | CRED | NO | NO | NO | NO |
+>
+> **Platform AI verdict (RECORD — DO NOT MODIFY):** dedicated-key rule,
+> deterministic-first, config-safety and call-site gating all conform. But the
+> **"FREE models only, no paid" rule is NOT met**: both declared runtime tasks
+> resolve `paid_max` with a paid model when a key is supplied, `isModelAllowed`
+> permits the paid max, and the per-op budget is a ceiling, not an absolute
+> prohibition. Recorded as a **spec-vs-implementation conflict for Phase 1**
+> (candidate: force `free_model` only, or obtain an explicit founder written
+> exemption changing the agreed rule). Cline's own dev model was NOT changed.
+>
+> Evidence: `src/lib/costs/modelPolicy.ts`, `src/lib/costs/usageLog.ts`,
+> `src/lib/discovery/engine.ts`, `src/lib/monitoring/alertTriage.ts`,
+> `src/integrations/IntegrationsContext.tsx` (in-memory key, env-hint auto-connect),
+> `OperatingCostsPanel.tsx`; validator `validate-operating-costs`; spec `operating-costs`.
+> **R. INTEGRATIONS** (per-provider — registry `INTEGRATION_ORDER` = 22 entries)
+> | ID | Provider | Registered id | Mode today | Mock/real seam | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke | Downstream |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | IN-01 | Amazon SP-API | `amazon_sp_api` | SIM | `src/lib/spapi/*` | YES | YES | YES | CRED | NO | NO | NO | NO | Amazon ops, PO feeds |
+> | IN-02 | **Amazon Ads** | `amazon_ads` | available → **REQUIRED build** | registry card only | PARTIAL | PARTIAL | NO | CRED | NO | NO | **YES-dashboard** | NO | advertising dashboard (MISSING) |
+> | IN-03 | Stripe | `stripe` | SIM | `billing/stripe.ts` + Mock | YES | YES | YES | CRED-OAuth | NO | NO | NO | NO | brand subscriptions |
+> | IN-04 | eSignature | `esignature` | available | `lib/esign/esign.ts` | YES | YES | YES | CRED | NO | NO | NO | NO | agreements/contracts |
+> | IN-05 | Email | `email` | available | `messaging/email.ts`, `postmarkNotifier` | YES | YES | YES | CRED-Postmark | NO | NO | NO | NO | notifications, outreach |
+> | IN-06 | Lead sourcing | `lead_sourcing` | available | CSV zero-API + Apollo/Instantly | YES | YES | YES | CRED | NO | NO | NO | NO | acquisition pipeline |
+> | IN-07 | OpenRouter | `openrouter` | available | `modelPolicy`/`usageLog` | YES | YES | YES | CRED | NO | NO | NO | NO | runtime AI (see Q) |
+> | IN-08 | Hunter | `hunter` | available | `hunterClient` | YES | YES | YES | CRED | NO | NO | NO | NO | contact verification |
+> | IN-09 | Instantly | `instantly` | available | `instantly` seam | YES | YES | YES | CRED | NO | NO | NO | NO | outreach send |
+> | IN-10 | Keepa | `keepa` | available | `research/keepaClient.ts` | YES | YES | YES | CRED | NO | NO | NO | NO | ASIN/estimation |
+> | IN-11 | Firecrawl | `firecrawl` | available | `discovery/firecrawlClient.ts` | YES | YES | YES | CRED | NO | NO | NO | NO | discovery research |
+> | IN-12 | Usertour | `usertour` | SIM | `lib/usertour/*` | YES | YES | YES | NO | NO | NO | NO | NO | guided tours |
+> | IN-13 | Twilio WhatsApp | `twilio_whatsapp` | available | `whatsapp/whatsAppClient.ts` | YES | YES | YES | CRED | NO | NO | NO | NO | case escalation |
+> | IN-14 | Postiz | `postiz` | available | `postizClient.ts` + social engine | YES | YES | YES | CRED | NO | NO | NO | NO | Mercenta Social |
+> | IN-15 | DHL | `dhl` | SIM | `lib/dhl/*` | YES | YES | YES | CRED | NO | NO | NO | NO | shipment labels |
+> | IN-16 | Palletline | `palletline` | SIM | `lib/palletline/*` | YES | YES | YES | CRED | NO | NO | NO | NO | shipment labels |
+> | IN-17 | Xero | `xero` | SIM demo | `services/xero/*` | YES | YES | YES | CRED-connect | F-ACTION | NO | NO | NO | accounting |
+> | IN-18 | Companies House | `companies_house` | SIM | `compliance/companiesHouse*.ts` | YES | YES | YES | CRED | F-ACTION-auth | NO | NO | NO | company control centre |
+> | IN-19 | HMRC | `hmrc` | SIM | `compliance/hmrc*.ts` | YES | YES | YES | CRED-after-VAT | F-ACTION | **DEFERRED-until-VAT** | NO | NO | VAT/filings |
+> | IN-20 | Wise | `wise` | SIM | `billing/payouts.ts` | YES | YES | YES | CRED | NO | NO | NO | NO | brand payouts |
+> | IN-21 | Payoneer | `payoneer` | SIM | `billing/payouts.ts` | YES | YES | YES | CRED | NO | NO | NO | NO | brand payouts |
+> | IN-22 | Google | `google` | SIM | `google/*` | YES | YES | YES | CRED | F-ACTION-2-step | NO | NO | NO | Docs/Sheets/Slides workflows |
+> **R2 — providers NOT in the registry (documentation & infra truth):**
+> | ID | Provider | Status | Evidence |
+> |---|---|---|---|
+> | R2-01 | Namecheap (deploy FTP) | LIVE deploy channel, NOT a registry card; **F-ACTION: rotate FTP password** (old value in past commits) | `scripts/deploy-demo.sh`, `.env` |
+> | R2-02 | DigitalOcean (3 droplets) | LIVE paid infra, NOT a card | Operating Costs, HANDOFF |
+> | R2-03 | Supabase (browser keys / RLS) | Infra; demo memory-only; durable path proven, unexecuted (F-ACTION) | `src/lib/supabase.ts`, `supabase/migrations` |
+> | R2-04 | Facebook / Instagram / X | channel-only (Postiz/MercentaSocial + application link-verify) | `PartnerApplicationForm.tsx`, `mercentaSocial` config |
+> | R2-05 | Explee | **NOT agreed — never a REQ (0A.17.6); candidate only in INTEGRATIONS.md §4 → `REQUIRES SPECIFICATION RECONCILIATION` if founder wants it** | `docs/INTEGRATIONS.md` |
+> | R2-06 | LinkedIn Sales Nav | documented as a candidate/data provider in older docs; not registered → `REQUIRES SPECIFICATION RECONCILIATION` if agreed | docs |
+>
+> **Doc drift recorded:** `docs/INTEGRATIONS.md` says "18 integrations today"
+> with a 14-row table while the source registry has 22 (0A.4) — unchanged by
+> this pass; Phase 1 doc-fix candidate.
+>
+> **S. RAKAZO**
+> | ID | Feature / Function | Req | Impl | Wired | Sim | Tested | E2E | Cred | F-Act | Def | Miss | Broke |
+> |---|---|---|---|---|---|---|---|---|---|---|---|---|
+> | RZ-01 | Rakazo bot-fleet integration | YES (final phase) | PARTIAL (iframe only) | NO | N/A | YES-registration-spec-only | YES-registration-spec-only | NO | NO | **DEFERRED — FINAL PHASE** | YES-fleet | NO |
+>
+> Rakazo = **INTENTIONALLY DEFERRED / FINAL PHASE.** Separate bot
+> infrastructure + API key; NOT part of core build; core Mercenta product must
+> be completed first. NOT touched/modified/tested/wired/registered/consumed
+> this session (record only). `RakazoPanel.tsx` iframe + `e2e/rakazo.spec.ts`
+> (registration assertions only) unchanged.
+>
+> **T. UI/UX — FUTURE REDESIGN (preserved requirement, NOT implemented)**
+> After core build completion + regression + deployment: **UI REDESIGN PHASE**
+> — Apple-inspired premium visual language; clean/sleek/smooth; premium over
+> generic/bootstrapped; colourful but restrained; premium Apple-like palette;
+> light/dark mode; elegant buttons; refined typography; less excessive
+> rounding; premium spacing; polished navigation/sidebar; premium cards;
+> beautiful, **thin/sleek/refined** charts (not thick generic bars/lines);
+> premium doughnut charts; sophisticated status/category colour coding; brands
+> should enjoy the dashboard. Functionality preserved; **no regressions; no
+> feature changes merely for aesthetics; NO redesign before the core build is
+> declared complete.** Frozen design remains the demo baseline (0A.16).
+> ### 0B.3 CROSS-PLATFORM DATA-FLOW MATRIX (edge-by-edge, corrected)
+>
+> Per-edge columns: **Src** source exists · **Dst** destination exists ·
+> **Prop** data propagated/reference-linked · **Sim** simulation works ·
+> **Test** deterministic test exists · **E2E** browser spec exists ·
+> **Broke** broken · **Miss** missing · **Cred** credential-dependent.
+>
+> **CHAIN A — Brand onboarding → product → catalogue → compliance → submission
+> → Amazon/Vendor simulation → PO → acknowledgement → shipment → receiving →
+> invoice → payment → exception/chargeback**
+> | Edge | Src | Dst | Prop | Sim | Test | E2E | Broke | Miss | Cred |
+> |---|---|---|---|---|---|---|---|---|---|
+> | onboarding → product | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | product → catalogue | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | catalogue → compliance | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | compliance → submission | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | submission → Amazon/Vendor simulation | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | Amazon/Vendor sim → PO | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | PO → acknowledgement | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | acknowledgement → shipment | YES | YES | YES | YES | YES | YES | NO | NO | CRED-live-labels |
+> | shipment → receiving | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | receiving → invoice | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | invoice → payment | YES | YES | YES | YES | YES | YES | NO | NO | CRED-Stripe-live |
+> | payment → exception/chargeback | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | exception → dispute/case | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> **Chain A verdict: ONE connected deterministic lifecycle (25-stage demo proof);
+> no edge missing; live lanes (carriers/Stripe) are CRED/F-ACTION only.**
+>
+> **CHAIN B — Brand Intelligence → opportunity → ICP → prospect → CRM →
+> outreach → response → relationship → Command Centre**
+> | Edge | Src | Dst | Prop | Sim | Test | E2E | Broke | Miss | Cred |
+> |---|---|---|---|---|---|---|---|---|---|
+> | BI → opportunity | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | opportunity → ICP | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | ICP → prospect | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | prospect → CRM | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | CRM → outreach | YES | YES | YES | YES | YES | YES | NO | NO | CRED-live-send |
+> | outreach → response | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | response → relationship | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | relationship → Command Centre | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> **Chain B verdict: connected (Phase C/D2/D4); only PART = durable persistence
+> memory-only in demo (D4 schema unexecuted, Supabase creds F-ACTION).**
+>
+> **CHAIN C — Funding → grants/investors → approval → Google Docs/Sheets/Slides
+> → investor/demo lifecycle → Launch Centre**
+> | Edge | Src | Dst | Prop | Sim | Test | E2E | Broke | Miss | Cred |
+> |---|---|---|---|---|---|---|---|---|---|
+> | funding → grants/investors | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | grants/investors → approval | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | approval → application record | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | application → Google Docs/Sheets/Slides | YES | PARTIAL | PARTIAL | YES | YES | YES | NO | NO | CRED-Google + F-ACTION-connect |
+> | Google → investor/demo lifecycle | YES | Y-(runner)/NO-(real) | PARTIAL | YES | YES | YES | NO | NO | CRED-Google + F-ACTION |
+> | investor/demo lifecycle → Launch Centre | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> **Chain C verdict: internally wired + founder-gated; Google real generation is
+> the ONLY missing/live edge (2-step F-ACTION) — no fabricated external
+> submission anywhere.**
+>
+> **CHAIN D — Company/Government → Companies House → GOV.UK → HMRC → company
+> controls → Command Centre / Launch Centre where intended**
+> | Edge | Src | Dst | Prop | Sim | Test | E2E | Broke | Miss | Cred |
+> |---|---|---|---|---|---|---|---|---|---|
+> | company centre → Companies House | YES | YES | YES | YES | YES | YES | NO | NO | CRED-reads |
+> | Companies House → GOV.UK | YES | PARTIAL | PARTIAL | YES | YES | YES | NO | NO | CRED-personal-code |
+> | GOV.UK → HMRC | YES | PARTIAL | PARTIAL | YES | YES | YES | NO | NO | CRED-after-VAT |
+> | HMRC → company controls | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | company controls → Command Centre | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> | company controls → Launch Centre | YES | YES | YES | YES | YES | YES | NO | NO | NO |
+> **Chain D verdict: connected; GOV.UK descriptor + HMRC waits on founder
+> actions; auto-file permanently REFUSED (honesty preserved).**
+>
+> **Cross-cutting: `src/components/shared/BrandComm.tsx` slug drift vs
+> `demoStore` (SSOT finding) and `XeroConnection.tsx` dead syntax-broken file —
+> BROKEN (dead-code) records, NOT fixed this pass (Phase 1 candidates).**
+> ### 0B.4 NEXT BUILD QUEUE (generated from the corrected feature-level truth)
+>
+> Ordered by dependency. Distinguishes: **A** genuinely missing (agreed) ·
+> **B** partially implemented requiring completion · **C** broken requiring
+> repair · **D** simulation-first · **E** credential/founder actions ·
+> **F** intentionally deferred · **G** final UI redesign · **H** Rakazo LAST ·
+> **I** post-build security work.
+>
+> | # | Item | Category | Depends on | Exact remaining work | Evidence |
+> |---|---|---|---|---|---|
+> | 1 | Amazon Ads dashboard surface (agreed §12) | **A + D (simulation-first)** | none (seam already exists) | Build the dashboard as a simulation-first consumer of the EXISTING `useAdSpendBudgets()` seam (`AdSpendBudget`: monthly budget / spend-to-date / ACOS / TACOS / status per brand; operating-costs `advertising_commission` linkage; registry card already renders). Add validator + e2e spec. Live connection behind credentials. | 0B.1, AV-07/AV-08, IN-02 |
+> | 2 | `docs/INTEGRATIONS.md` registry-count truth (18/14-row vs source 22) | **C (doc)** | none | Update to 22 rows mirroring `INTEGRATION_ORDER`; add amazon_ads row detail; remove stale "18". | 0A.4, R2 |
+> | 3 | `BrandComm.tsx` slug drift vs `demoStore` (SSOT) | **C (code)** | none | Align the placeholder-slug regex/logic to the canonical `demoStore` helper (behaviour-preserving). | 0A.3, 0A.18, 0B.3 |
+> | 4 | `XeroConnection.tsx` dead syntax-broken unimported file | **C (code)** | none | Remove file + its imports/references (Xero lives in `AccountingPanel.tsx`). **Approval gate: standing rule says do NOT delete during reconciliation — this is a Phase 1 item requiring explicit session approval.** | 0A.18.2, FN-02 |
+> | 5 | Platform AI "FREE only / NO PAID" spec-vs-implementation conflict | **B + spec** | none (decision only) | Founder decision required: either force `free_model` only in `selectRuntimeModel`/`isModelAllowed`, or grant an explicit written exemption changing the agreed rule. No code change until founder decides. | 0B Q, PA-02/PA-03 |
+> | 6 | `requirements-registry.json` Amazon Ads entry (0 hits today) | **B (data)** | none | Add `amazon_ads` rows to the registry (AdSpendBudget seam + dashboard requirement) so the registry stops contradicting the agreed scope. | 0B.1 |
+> | 7 | Bi-discovery scheduler (0A.17.3) | **B** | #1 (dashboard pattern) | Add operator-visible scheduled discovery trigger OR declare it intentionally operator-triggered (founder decision). | 0A.17.3 |
+> | 8 | §16–§29 embassy/trade partnership pipeline beyond prospective slots (0A.17.4) | **B** | none | Decide scope; currently truthful prospective-route slots only. | 0A.17.4, HANDOFF STILL OPEN #5 |
+> | 9 | END-TO-END wiring reconciliation (Phase 1/2 merge) | **A** | #1-#8 | Bounded across-chain propagation verification using existing gates + investor demo. | 0A.24, FINAL BUILD QUEUE |
+> | 10 | FULL REGRESSION | **A** | #9 | tsc/eslint/build/wording/all validators/RLS/integrity/Playwright `--workers=2` + investor demo. | FINAL BUILD QUEUE §2 |
+> | 11 | DECLARE CORE BUILD COMPLETE | **F-ACTION** | #10 | Founder accepts F-ACTION list as out-of-scope. | 0A.24.4 |
+> | 12 | Deploy + re-verify demo.mercenta.co.uk | **E** | #11 | `scripts/deploy-demo.sh` (Namecheap FTP — **rotate password first**); HTTPS 200 + demo run. | 0A.21.6, FINAL BUILD QUEUE §3 |
+> | 13 | Credential / founder actions | **E** | parallel | Google OAuth client id + Edge deploy · CH key + auth code · GOV.UK personal code · HMRC post-VAT · real cost prices · Tottenham ASIN evidence · Twilio 2FA + Namecheap rotation · Supabase browser keys (durable persistence). | 0A.20/0A.21 |
+> | 14 | UI REDESIGN PHASE | **G** | #12 | Apple-inspired premium direction (0B T / 0A.16); functionality preserved; regression after. | 0B T |
+> | 15 | RAKAZO | **H — FINAL** | #14 | Fleet integration (17 bots); core product completed first. | RZ-01 |
+> | 16 | Post-build security audit + credential cleanup + RLS hardening migration | **I** | #15 | Rotations, ZIP/git-history review, `ENABLE ROW LEVEL SECURITY` migration for shipping_margins/audit_log/leads/integration_connections; verify disabled Rakazo cannot use platform OpenRouter credits. | FINAL BUILD QUEUE DEFERRED |
+>
+> **Dependency-short:** #1→#7→#9→#10→#11→#12→#14→#15→#16; #2–#6, #8, #13 are
+> independently schedulable. **Amazon Ads (#1) is REQUIRED build work and is
+> deliberately FIRST so the agreed scope is reconnected before any sync pass.**
+> Items #3/#4 need explicit Phase 1 approval (they touch code); #5 needs an
+> explicit founder decision; ALL other code on this queue is Phase-1-scoped.
+> ### 0B.5 CLASSIFICATION AGGREGATES (corrected truth)
+> - **Newly discovered missing functionality (agreed but absent/incomplete):**
+>   1. **Amazon Ads dashboard surface** — AV-08 / 0B.1 (the reason for this pass).
+>   2. `requirements-registry.json` has NO Amazon Ads entry (registry gap).
+>   3. BI discovery scheduler (0A.17.3 — retained).
+>   4. §16–§29 embassy/trade partnership pipeline (0A.17.4 — retained).
+>   5. Google real Docs/Sheets/Slides generation (runner exists; live blocked on
+>      connect — CRED/F-ACTION, not missing code).
+>   6. No other feature-level gaps: every other agreed row is IMPLEMENTED +
+>      SIM + TESTED with real evidence above.
+> - **Partially implemented / partially wired:** Amazon Ads (data seam, no
+>   surface) · Keepa/Firecrawl/Hunter/Instantly/Postmark live · Xero live
+>   connect · Google connect+tokens · GOV.UK descriptor · HMRC seam ·
+>   acquisition durable persistence (schema proven, unexecuted) · monitoring
+>   health/campaign stats (seeded) · live outreach/email/WhatsApp/Postiz sends
+>   · live carrier labels · live Stripe · live Wise/Payoneer rails.
+> - **Broken:** `XeroConnection.tsx` (dead, syntax-broken, unimported) ·
+>   `BrandComm.tsx` slug drift (SSOT deviation) · `docs/INTEGRATIONS.md`
+>   registry-count stale (18 vs 22) · `requirements-registry.json` missing
+>   Amazon Ads entry. **None were modified this pass.**
+> - **Credential-dependent (CRED; not missing):** Amazon SP-API/Ads · Stripe ·
+>   Xero connect · Keepa · Firecrawl · Hunter · Instantly · Postmark/SendGrid ·
+>   Twilio WhatsApp · DHL/Palletline live labels · Wise/Payoneer rails ·
+>   Companies House reads · GOV.UK One Login · HMRC (after VAT registration) ·
+>   Google OAuth + Edge deploy · Supabase browser keys (durable) · OpenRouter key.
+> - **Founder actions (F-ACTION):** full list at 0A.21 (Google 2-step, CH auth,
+>   GOV.UK code, VAT registration, real cost prices, Tottenham ASIN evidence,
+>   deploy, **Twilio 2FA + Namecheap FTP rotations**, Supabase keys), plus a NEW
+>   founder decision on the Platform AI paid-model policy (0B Q / PA-03).
+> - **Intentionally deferred:** Rakazo (FINAL) · UI redesign (post-core) ·
+>   HMRC live (post-VAT) · security/credential remediation (post-build) ·
+>   post-build RLS hardening migration (category I).
+> - **REQUIRES SPECIFICATION RECONCILIATION** (cannot be proven agreed from the
+>   repo — do NOT guess): Explee (0A.17.6) · LinkedIn Sales Nav (docs candidate
+>   only) · the advertising-metrics SURFACE SCOPE of Amazon Ads (existence is
+>   agreed; metric granularity is not) · Platform AI paid-model policy
+>   (conflict; founder decision needed) · BI discovery scheduler (operator-
+>   triggered vs scheduled).
+> - **Explicitly NOT reduced below feature level:** Brand Intelligence (19
+>   rows) · Google Workspace (13 rows) · Integrations (22 providers + 6
+>   infra/channel rows) · commerce chain edge-by-edge (Chains A–D) ·
+>   CRM/outreach/funding row-by-row.
+>
+> ### 0B.6 VERIFICATION PERFORMED (this pass, read-only)
+> - `git rev-parse HEAD` → `91bc2916f5e0359161a8c20f34862afac426b9aa`
+>   (branch `redesign/foundation`; protected baseline `959b4d2` = ancestor).
+> - `git status --short` → working tree carries only pre-existing state:
+>   3 user-reserved untracked `design/*.png` + modified `PROJECT_STATUS.md` /
+>   `HANDOFF.md` / `Review Zip/mercenta-review.zip` (Phase 0A content was
+>   uncommitted work-tree state; **nothing committed by this pass**).
+> - Grep evidence: `useAdSpendBudgets|fetchAdSpendBudgets` → **0 consumers**;
+>   `ad_spend|amazon_ads|AdSpend` in requirements-registry → **0 hits**;
+>   `INTEGRATION_ORDER` → 22; `launchPlatforms.ts` → 14; validators → 72;
+>   e2e specs → 53; `AdSpendBudget` document comment `§12` confirmed.
+> - Source inspected: `modelPolicy.ts`, `usageLog.ts`, `engine.ts`,
+>   `alertTriage.ts`, `IntegrationsContext.tsx`, `registry.ts`, `api.ts`,
+>   `queries.ts`, `demoStore.ts`, `types.ts`, `export-review-zip.sh`,
+>   `MERCENTA_PRODUCT_CONTRACT.md`, `MERCENTA_ARCHITECTURE.md` §12,
+>   `MERCENTA_PRODUCT_ARCHITECTURE_AUDIT_2026-09-10.md` §19.
+> - **No Mercenta runtime AI invoked · no Rakazo call · no source/test/
+>   validator/registry/UI change · no commit by this pass.**
+>
+> **END OF PHASE 0B — CORRECTIVE RECONCILIATION COMPLETE. 0B supersedes Phase 0A
+> and the 37-row matrix wherever they conflict (Amazon Ads = REQUIRED /
+> PARTIALLY IMPLEMENTED / INCOMPLETE / simulation-first / dashboard REQUIRED;
+> the "no genuinely missing build work" claim is corrected). Phase 1 must be
+> generated from 0B.4. STOP — Phase 1 NOT started.**
+
 > ## 🔖 CONTINUATION CHECKPOINT — VERIFIED + SECURITY FINDING (2026-09-15, session 2)
 >
 > **Checkpoint verified (read-only, this session):** HEAD `f2a7434` on

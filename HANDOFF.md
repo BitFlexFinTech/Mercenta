@@ -1,11 +1,36 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-**Last updated: September 15, 2026 — ✅ M13c session 3: PHASE C (legacy
-false-submission state) + PHASE D (§27/§28 ranked command-centre queue with
-visible WHY) both DONE. NEXT: final reconciliation → bounded final regression →
-deploy to demo.mercenta.co.uk → Rakazo LAST → security audit.**
-Branch `redesign/foundation`, verified HEAD before this session `f2a7434`, protected
-baseline `959b4d2` (verified ancestor). Real repository: `/Users/tadii/Desktop/1. Mercenta`.
+**Last updated: September 16, 2026 — ✅ PHASE 0B (CORRECTIVE RECONCILIATION) DONE
+(read-only): corrected the Phase 0A Amazon Ads misclassification → REQUIRED /
+PARTIALLY IMPLEMENTED / INCOMPLETE / simulation-first / dashboard REQUIRED, and
+re-derived the NEXT BUILD QUEUE (PROJECT_STATUS.md PHASE 0B §0B.1–§0B.6). NEXT:
+Phase 1 (build 0B.4 queue — Amazon Ads dashboard FIRST; do NOT start until this
+handoff is approved) → Phase 2 sync → Phase 3 full regression → Phase 4
+core-complete declaration → Phase 5 deploy.**
+Branch `redesign/foundation`, HEAD `91bc291`, protected baseline `959b4d2`
+(verified ancestor). Repository: `/Users/tadii/Desktop/1. Mercenta`.
+
+## ⛳ AUTHORITATIVE SCOPE TRUTH (READ FIRST IN ANY SESSION)
+**PHASE 0B — CORRECTIVE RECONCILIATION INVENTORY** inside `PROJECT_STATUS.md`
+(section `## ⛳ PHASE 0B …`) is the **authoritative corrected scope record** and
+SUPERSEDES Phase 0A + the 37-row matrix wherever they conflict. Key correction:
+**Amazon Ads is REQUIRED (agreed §12), PARTIALLY IMPLEMENTED (data seam exists
+in `useAdSpendBudgets()`/`AdSpendBudget`), INCOMPLETE — dashboard surface is
+missing build work (NEXT BUILD QUEUE 0B.4 item #1).** Also recorded there: the
+Platform AI "FREE models only / NO PAID" spec-vs-implementation conflict
+(0B Q, PA-02/PA-03 — founder decision required, no code change until decided),
+`requirements-registry.json` missing an Amazon Ads entry, and the corrected
+Chain A–D data-flow matrix. The **PHASE 0A EXHAUSTIVE FEATURE/FUNCTION TRUTH
+INVENTORY** (section `## ⛳ PHASE 0A …`) remains the verified historical evidence
+record. It contains: 0A.1 executive truth · 0A.2
+feature-level matrix across all domains · 0A.3 platform data-flow matrix (4 flows)
+· 0A.4 per-provider integration reconciliation (24 named providers vs the 22-entry
+source registry — incl. the `docs/INTEGRATIONS.md` 18-vs-22 doc drift) · 0A.5–0A.14
+domain inventories (BI, Amazon/Vendor, CRM/acquisition, commerce/PO/fulfilment,
+finance, funding, company/gov/google, super-admin/command/launch, platform AI,
+25-stage investor demo) · 0A.15 Rakazo (deferred) · 0A.16 UI future · 0A.17–0A.24
+classification sections · 0A.25 the 20 critical answers.
+No source code was changed by Phase 0A or Phase 0B.
 
 ## ⚠️ SECURITY — READ FIRST
 `HANDOFF.md` itself contained the **Namecheap FTP password as a literal** in the
@@ -16,6 +41,29 @@ baseline `959b4d2` (verified ancestor). Real repository: `/Users/tadii/Desktop/1
 password**, because the old value is still in past Git commits (history rewrite is
 forbidden by the standing rules; rotation is the fix). Same standing item as the
 **Twilio 2FA recovery-code rotation**.
+
+## THIS SESSION (PHASE 0B — CORRECTIVE RECONCILIATION, read-only · 2026-09-16)
+- **Purpose:** correct the authoritative functional inventory BEFORE any Phase 1
+  source-code work. The Phase 0A Amazon Ads classification
+  (`PART (registered card only)`, Phase-1 "OR explicit deferral record" escape)
+  was itself the reported defect: Amazon Ads is AGREED §12 functionality and
+  must not be dropped because the current dashboard consumer is absent.
+- **Produced (documentation only):** PROJECT_STATUS.md PHASE 0B §0B.1–§0B.6 —
+  corrected Amazon Ads classification (REQUIRED → PARTIALLY IMPLEMENTED /
+  INCOMPLETE → simulation-first → dashboard REQUIRED → live CRED-DEPENDENT) ·
+  exhaustive **216-row** feature/function matrix across 19 domains ·
+  corrected Chain A–D edge data-flow matrix (33 edges) · fresh NEXT BUILD
+  QUEUE (0B.4, 16 items, Amazon Ads dashboard = #1) · classification
+  aggregates (missing/partial/broken/cred/f-actions/deferred/
+  REQUIRES-SPEC-RECONCILIATION).
+- **New findings recorded:** ① Platform AI "FREE models only / NO PAID" rule is
+  NOT met by `modelPolicy.ts` (`paid_max` reachable for both runtime tasks when
+  a key is present) — founder decision required, NO code change yet. ②
+  `requirements-registry.json` has ZERO Amazon Ads entries (inventory gap). ③
+  `XeroConnection.tsx` (dead, syntax-broken) + `BrandComm.tsx` slug drift +
+  `docs/INTEGRATIONS.md` 18-vs-22 — all Phase-1 candidates, none touched now.
+- **NOT touched:** source, tests, validators, registry code, UI, Rakazo,
+  credentials, deploy. No Mercenta runtime AI invoked. No commit made.
 
 ## THIS SESSION (M13 continuation, session 2) — §10/§31 BUILT
 - **`src/lib/founder/fundingPipeline.ts` (NEW)** — the founder's own funding pipeline:
