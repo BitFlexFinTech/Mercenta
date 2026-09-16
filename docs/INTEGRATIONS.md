@@ -6,15 +6,17 @@
 
 ## 1. Current registry (verified in `src/integrations/registry.ts`)
 
-18 integrations today (Rocket.Chat removed in Phase D1, 2026-09-11 — the table
-below was 15 entries when first written and is now 18 after the Phase-4 and
-Priority-1 provider additions). `authMethod` = `oauth | api_key`; connect flow in
-`IntegrationsContext`; live test pings in `src/lib/integrations/testCalls.ts`.
+**22 integrations** today — the count below is derived from `INTEGRATION_ORDER`
+in `src/integrations/registry.ts` (the single source of truth), not hand-counted.
+Rocket.Chat was removed in Phase D1 (2026-09-11); the registry now carries the
+full 22-provider set including the Phase-4 logistics/compliance/finance and
+§6 payout-rail providers plus Google. `authMethod` = `oauth | api_key`; connect
+flow in `IntegrationsContext`; live test pings in `src/lib/integrations/testCalls.ts`.
 
 | id | Name | Auth | Live ping? | Notes |
 |---|---|---|---|---|
 | amazon_sp_api | Amazon Selling Partner API | oauth | no | Core PO/catalog/invoicing; OAuth consent popup configured; real calls need Edge Functions |
-| amazon_ads | Amazon Ads API | oauth | no | Ad spend dashboard |
+| amazon_ads | Amazon Ads API | oauth | no | Ad spend dashboard (§12) — **dashboard surface built in Phase 1** (`AmazonAdsDashboard.tsx`) |
 | stripe | Stripe | oauth | no | Flat monthly brand subscriptions; commission is event-driven, NOT Stripe |
 | esignature | E-Signature | oauth | no | DocuSign or PandaDoc |
 | email | Transactional Email | api_key | yes (Postmark/SendGrid) | `pingForService('email', 'postmark')` |
@@ -27,10 +29,20 @@ Priority-1 provider additions). `authMethod` = `oauth | api_key`; connect flow i
 | usertour | Usertour | api_key | no | self-hosted |
 | twilio_whatsapp | Twilio WhatsApp | api_key | no | escalation |
 | postiz | Postiz | api_key | no | self-hosted social scheduler |
+| dhl | DHL | api_key | no | EU/international carrier; simulation default (`mock:dhl-eu-demo-key`) |
+| palletline | Palletline | api_key | no | UK-domestic carrier; mock/real adapter (`src/lib/palletline`) |
+| xero | Xero | oauth | no | Real OAuth v2 client + sync engine; demo 28-day resync (`src/services/xero/*`) |
+| companies_house | Companies House | api_key | no | registrar reads (company/officers/PSC/filings/charges); electronic auto-file REFUSED |
+| hmrc | HMRC | api_key | no | VAT-status reads; filings refused until VAT registration |
+| wise | Wise | api_key | no | §6 default payout rail (mock/real factory) |
+| payoneer | Payoneer | api_key | no | §6 secondary payout rail (mock/real factory) |
+| google | Google Workspace | oauth | no | §21 Docs/Sheets/Slides/Drive setup runner + wizard |
 
 **Change log:** Rocket.Chat was removed from the registry in Phase D1
-(2026-09-11) — the registry held 19 providers before, 18 now. See
-`docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md`.
+(2026-09-11) — the registry held 19 providers before, then grew to the current
+**22** (`INTEGRATION_ORDER`). Phase 1 (2026-09-16) reconciled this document to
+the actual source registry and recorded the Amazon Ads dashboard surface.
+See `docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md`.
 
 ## 2. Services with code today (beyond the registry)
 
@@ -40,9 +52,9 @@ Priority-1 provider additions). `authMethod` = `oauth | api_key`; connect flow i
   non-sandbox connection with non-`mock:` secret ref). **This is the model for
   the whole provider system.**
 - **Xero** — `src/services/xero/`: real OAuth v2 client, token manager, sync
-  engine, 28-day demo resync, `XERO_MODE` env. The **component**
-  `XeroConnection.tsx` is DEAD (syntax-broken, unimported); Xero lives in
-  `AccountingPanel.tsx`.
+  engine, 28-day demo resync, `XERO_MODE` env. The **dead duplicate component**
+  `XeroConnection.tsx` was **REMOVED in Phase 1 (2026-09-16)** (0 importers);
+  Xero lives in `AccountingPanel.tsx`. The service seam is unchanged.
 - **Rakazo** — `RakazoPanel` iframe into self-hosted bots; `VITE_RAKAZO_URL`.
 - **Supabase** — `src/lib/supabase.ts` + migrations (RLS).
 - **Postmark notifier**, **WhatsApp client +

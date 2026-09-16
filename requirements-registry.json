@@ -2,14 +2,14 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-09-13",
+    "last_updated": "2026-09-16",
     "status_enum": [
       "not_started",
       "built",
       "built_and_tested",
       "regressed"
     ],
-    "total_entries": 142
+    "total_entries": 144
   },
   "entries": [
     {
@@ -1325,6 +1325,24 @@
       "status": "built_and_tested",
       "evidence": "src/lib/statusPresentation.ts (NEW); src/components/admin/ApplicationsPanel.tsx (decision queue, each tile filters the list); src/components/admin/ComplianceApprovals.tsx; src/components/brand/ComplianceHub.tsx; e2e/status-semantics.spec.ts (4 tests incl. data-status/role=status, derived queue counts, drill-down aria-pressed, never-approved renders approved=0, 375px no-overflow)",
       "last_verified": "2026-09-13",
+      "superseded_by": null
+    },
+    {
+      "id": "amazon-ads-ad-spend-seam",
+      "description": "Amazon Ads ad-spend data seam (agreed §12): AdSpendBudget type, demoAdSpend seed, fetchAdSpendBudgets() and useAdSpendBudgets() exist and are now CONSUMED by the Amazon Ads dashboard (previously orphaned with zero consumers)",
+      "source": "Phase 1 (2026-09-16) — 0B.4 #1",
+      "status": "built_and_tested",
+      "evidence": "src/types.ts AdSpendBudget; src/data/demoStore.ts demoAdSpend; src/data/api.ts fetchAdSpendBudgets; src/data/queries.ts useAdSpendBudgets; src/components/admin/AmazonAdsDashboard.tsx; e2e/amazon-ads-dashboard.spec.ts",
+      "last_verified": "2026-09-16",
+      "superseded_by": null
+    },
+    {
+      "id": "amazon-ads-dashboard-surface",
+      "description": "Amazon Ads dashboard surface (agreed §12, REQUIRED): per-brand monthly budget / spend-to-date / remaining / ACOS / TACOS / status, aggregate KPIs, honest simulated label, operating-costs advertising_commission linkage, reachable from Super Admin navigation as a real platform view",
+      "source": "Phase 1 (2026-09-16) — 0B.4 #1",
+      "status": "built_and_tested",
+      "evidence": "src/components/admin/AmazonAdsDashboard.tsx; src/components/layout/AdminShell.tsx (amazon_ads nav); scripts/validate-amazon-ads.mjs; e2e/amazon-ads-dashboard.spec.ts",
+      "last_verified": "2026-09-16",
       "superseded_by": null
     }
   ]

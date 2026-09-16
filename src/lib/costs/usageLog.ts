@@ -188,7 +188,7 @@ export function recordAiCallOutcome(input: {
     at: (input.now ?? new Date()).toISOString(),
     taskId: input.taskId,
     model: null,
-    tier: 'paid_max',
+    tier: 'free_model',
     tokens: input.tokens,
     estimatedCostGbp: 0,
     cache: 'miss',

@@ -32,6 +32,7 @@ import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
 import { BrandIntelligencePanel } from '@/components/admin/BrandIntelligencePanel';
 import { BrandIntelligenceStrategyPanel } from '@/components/admin/BrandIntelligenceStrategyPanel';
 import { OpportunityDiscoveryPanel } from '@/components/admin/OpportunityDiscoveryPanel';
+import { AmazonAdsDashboard } from '@/components/admin/AmazonAdsDashboard';
 import { FounderInvestorCentre } from '@/components/admin/FounderInvestorCentre';
 import { PartnershipsCentre } from '@/components/admin/PartnershipsCentre';
 import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
@@ -40,7 +41,7 @@ import {
   LayoutDashboard, Users, Gauge, Boxes, Package, Truck, Plug,
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
-  Phone, ClipboardList, Handshake,
+  Phone, ClipboardList, Handshake, Megaphone,
 } from 'lucide-react';
 
 const ADMIN_SECTIONS = [
@@ -54,6 +55,7 @@ const ADMIN_SECTIONS = [
       { id: 'crm', label: 'Brand CRM', icon: <Users className="w-4 h-4" /> },
       { id: 'onboarding_pipeline', label: 'Onboarding', icon: <ClipboardList className="w-4 h-4" /> },
       { id: 'marketing', label: 'Marketing', icon: <Target className="w-4 h-4" /> },
+      { id: 'amazon_ads', label: 'Ad Spend', icon: <Megaphone className="w-4 h-4" /> },
       { id: 'brand_intelligence', label: 'Brand Intelligence', icon: <Target className="w-4 h-4" /> },
     ],
   },
@@ -152,6 +154,7 @@ export default function AdminShell() {
     billing: 'Billing', messages: 'Messages', helpdesk: 'Helpdesk', returns_tracking: 'Returns Tracking', monitoring: 'Monitoring',
     contracts_admin: 'Contract Cycle', catalog: 'Global Catalog', logistics: 'Logistics Control', carriers: 'Carrier Monitor',
     compliance: 'Compliance Approvals', marketing: 'Marketing', brand_intelligence: 'Brand Intelligence', super_admin: 'Super Admin', audit_log: 'Audit Log',
+    amazon_ads: 'Ad Spend',
     integrations: 'Integration Settings', usertour: 'Onboarding Tours', postiz: 'Social Media',
     whatsapp: 'WhatsApp Escalation', founder_centre: 'Founder Investor Centre',
     partnerships: 'Partnerships & Fundraising',
@@ -185,6 +188,7 @@ export default function AdminShell() {
           {adminView === 'carriers' && <CarrierIntegrationMonitor />}
           {adminView === 'compliance' && <ComplianceApprovals />}
           {adminView === 'marketing' && <MarketingHub />}
+          {adminView === 'amazon_ads' && <AmazonAdsDashboard />}
           {adminView === 'brand_intelligence' && (
             <div className="space-y-4">
               <BrandIntelligenceStrategyPanel />

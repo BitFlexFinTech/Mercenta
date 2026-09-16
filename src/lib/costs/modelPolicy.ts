@@ -1,27 +1,28 @@
 /**
- * §27 (M13 Phase 10) — MERCENTA RUNTIME MODEL POLICY.
+ * §27 (M13 Phase 10) + PHASE 1 — MERCENTA RUNTIME MODEL POLICY (FREE-ONLY).
  *
- * Hard rule: the platform's MAXIMUM paid runtime model is DeepSeek V4 Flash.
+ * Hard rule (founder directive, Phase 1): the Mercenta PLATFORM RUNTIME may ONLY
+ * use FREE models. There is NO paid-model fallback and NO silent paid upgrade.
+ * This is the platform's runtime policy — it says nothing about the model used
+ * to BUILD the software.
+ *
  * This module is the only place a runtime model id is chosen, and it prefers the
  * cheapest thing that can do the job:
  *
  *   1. deterministic code / rules  (no model at all)
  *   2. a cached result             (no call)
  *   3. local / database computation
- *   4. a free model, when eligible
- *   5. DeepSeek V4 Flash — the most expensive model Mercenta may use
+ *   4. an approved FREE model, when eligible
+ *   5. otherwise REFUSED — a paid model is never an option
  *
- * A task that would REQUIRE something more capable than the maximum is REFUSED
- * (`refused: true`) rather than silently upgraded to a costlier model. This is
- * the PLATFORM's policy — it says nothing about the model used to BUILD the
+ * A task that needs something more capable than the approved free model is
+ * REFUSED (`refused: true`) rather than upgraded to a paid model. This is the
+ * PLATFORM's policy — it says nothing about the model used to BUILD the
  * software.
  */
 import { COST_MODEL_INPUTS } from '@/config/operatingCosts';
 
-/** The maximum paid runtime model. Nothing more expensive may ever be selected. */
-export const MAX_PAID_RUNTIME_MODEL = 'deepseek/deepseek-v4-flash' as const;
-
-/** Free models that are eligible for the cheap tier. */
+/** Free models eligible for the Mercenta runtime. Nothing else may ever be called. */
 export const FREE_RUNTIME_MODELS = [
   'deepseek/deepseek-v4-flash:free',
 ] as const;
@@ -117,7 +118,7 @@ export function selectRuntimeModel(spec: RuntimeTaskSpec): RuntimeModelDecision 
   if (spec.estimatedCostGbp > budget && !spec.freeModelSufficient) {
     return {
       taskId: spec.id,
-      tier: 'paid_max',
+      tier: 'free_model',
       model: null,
       estimatedCostGbp: spec.estimatedCostGbp,
       refused: true,
@@ -141,16 +142,16 @@ export function selectRuntimeModel(spec: RuntimeTaskSpec): RuntimeModelDecision 
       model: FREE_RUNTIME_MODELS[0],
       estimatedCostGbp: 0,
       refused: false,
-      reason: 'A free model is sufficient for this task.',
+      reason: 'An approved free model is sufficient for this task.',
     };
   }
   return {
     taskId: spec.id,
-    tier: 'paid_max',
-    model: MAX_PAID_RUNTIME_MODEL,
-    estimatedCostGbp: spec.estimatedCostGbp,
-    refused: false,
-    reason: 'DeepSeek V4 Flash — the maximum paid runtime model Mercenta may use.',
+    tier: 'free_model',
+    model: null,
+    estimatedCostGbp: 0,
+    refused: true,
+    reason: 'No approved free model is sufficient for this task and the Mercenta runtime policy permits ONLY free models — refused (no paid fallback).',
   };
 }
 
@@ -160,7 +161,7 @@ export function selectRuntimeModelForTask(taskId: string): RuntimeModelDecision 
   if (!spec) {
     return {
       taskId,
-      tier: 'paid_max',
+      tier: 'free_model',
       model: null,
       estimatedCostGbp: 0,
       refused: true,
@@ -170,8 +171,8 @@ export function selectRuntimeModelForTask(taskId: string): RuntimeModelDecision 
   return selectRuntimeModel(spec);
 }
 
-/** Guard used by every runtime call site: a costlier model can never be chosen. */
+/** Guard used by every runtime call site: only FREE models (or no model) are allowed. */
 export function isModelAllowed(model: string | null): boolean {
   if (model === null) return true;
-  return model === MAX_PAID_RUNTIME_MODEL || (FREE_RUNTIME_MODELS as readonly string[]).includes(model);
+  return (FREE_RUNTIME_MODELS as readonly string[]).includes(model);
 }

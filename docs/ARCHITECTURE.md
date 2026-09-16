@@ -112,16 +112,16 @@ localStorage-persisted).
 `filterNavForTier`; tenant pinning via `assertBrandScope` /
 `isCrossTenantAccess`; staff mutation via `staffCanMutate`.
 
-## 8. Known baseline defects (documented, NOT yet fixed)
+## 8. Known baseline defects (documented — RESOLVED)
 
-| File | Error count | Cause | Imported? |
-|---|---|---|---|
-| `src/lib/intelligence/outreachGenerator.ts` | 24 | unterminated string literal (lines 85–86) — unparseable | NO (dead code) |
-| `src/components/admin/XeroConnection.tsx` | 3 | unmatched `</div>` (line 104), stray tokens (213–214) | NO (dead component; only interface name `XeroConnection` is referenced in `services/xero/types.ts`) |
+Both former baseline typecheck failures are **RESOLVED** at HEAD (`npx tsc --noEmit` exits 0):
 
-Consequence: `npm run build` passes (2.38s) because these files are outside
-the Vite build graph; `npx tsc --noEmit` fails with 27 errors. Must be fixed
-before Phase 12 QA.
+| File | Status |
+|---|---|
+| `src/lib/intelligence/outreachGenerator.ts` | Fixed 2026-09-08 — typecheck green; dead file left in tree (not in the Vite build graph). |
+| `src/components/admin/XeroConnection.tsx` | **REMOVED in Phase 1 (2026-09-16)** — dead duplicate component (0 importers); Xero lives in `AccountingPanel.tsx`. |
+
+Consequence: `npm run build` passes and `npx tsc --noEmit` exits 0 at HEAD.
 
 ## 9. Performance invariants (must not regress)
 

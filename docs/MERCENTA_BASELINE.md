@@ -24,9 +24,9 @@
 ## Verification evidence (2026-09-07)
 
 1. **Build** — `npm run build` → `✓ built in 2.38s` (Vite 5.4.8). Main bundle split into vendor chunks (smallest 2 KB, largest vendor-sentry 493 KB gzip ~163 KB).
-2. **Typecheck** — `npx tsc --noEmit -p tsconfig.app.json` → **FAILS with 27 pre-existing errors** in 2 files:
+2. **Typecheck** — historical snapshot: **FAILS with 27 pre-existing errors** in 2 files. **RESOLVED at HEAD — `npx tsc --noEmit` now exits 0** (outreachGenerator fixed 2026-09-08; XeroConnection removed 2026-09-16).
    - `src/lib/intelligence/outreachGenerator.ts` — 24 errors (unterminated string literal / syntax errors, lines 85–86) → file does not parse.
-   - `src/components/admin/XeroConnection.tsx` — 3 errors (line 104 unmatched `</div>`, lines 213–214 declaration/expression expected).
+   - `src/components/admin/XeroConnection.tsx` — 3 errors (line 104 unmatched `</div>`, lines 213–214 declaration/expression expected). **REMOVED in Phase 1 (2026-09-16)** — dead duplicate component deleted (0 importers); Xero lives in `AccountingPanel.tsx`.
    - These files are outside the Vite build graph (tree-shaken/dead or lazily loaded), which is why the build passes while typecheck fails. **Known baseline warning — must be fixed before claiming full TS health.** This is a CRITICAL-class defect for Phase 4/12 QA.
 3. **Runtime boot** — `npm run dev -- --port 5198` → Vite ready in 72 ms, HTTP 200 on `/`.
 4. **Recovery restore test** — `git clone /Users/tadii/Desktop/mercenta-baseline-backup-20260907.bundle /tmp/mercenta-recovery-test/repo` → HEAD = `959b4d276b9f3d40603ad82e93365e53010dc6ae`, 201 source files in `src/`. Restore verified.

@@ -71,7 +71,7 @@ App.tsx
   discovery, research, marketing, postiz, whatsapp, mail, messaging,
   monitoring, automation, events, simulation, verification, shipping, warehouse,
   esign, grants, notifications.
-- `src/integrations/` — registry (18 providers — Rocket.Chat removed in Phase
+- `src/integrations/` — registry (22 providers — Rocket.Chat removed in Phase
   D1) + IntegrationsContext (connect
   state, sandbox flag, per-card simulation controls).
 - `src/services/xero/` — real OAuth v2 client + sync engine (demo mode).
@@ -98,11 +98,14 @@ the provider adapter/mode changes.
 
 ## 5. Provider Boundaries + Mode Model
 
-- Registry (`src/integrations/registry.ts`) — 18 providers: `amazon_sp_api`,
+- Registry (`src/integrations/registry.ts`) — 22 providers: `amazon_sp_api`,
   `amazon_ads`, `stripe`, `esignature`, `email`, `lead_sourcing`, `openrouter`,
   `hunter`, `instantly`, `keepa`, `firecrawl`, `usertour`,
-  `twilio_whatsapp`, `postiz`, `dhl`, `xero`, `companies_house`, `hmrc`.
-  (`rocketchat` was removed in Phase D1 — 19 → 18.)
+  `twilio_whatsapp`, `postiz`, `dhl`, `palletline`, `xero`,
+  `companies_house`, `hmrc`, `wise`, `payoneer`, `google`. This list mirrors
+  `INTEGRATION_ORDER` (single source of truth). Rocket.Chat was removed in
+  Phase D1 (19 → 18); Phase 1 (2026-09-16) reconciled this doc to the actual
+  `INTEGRATION_ORDER` (22) and added the Amazon Ads dashboard (§12).
 - Default modes: `simulation` (amazon_sp_api, stripe, usertour,
   dhl, xero, companies_house, hmrc) · `available` (amazon_ads, esignature,
   email, lead_sourcing, openrouter, hunter, instantly, keepa, firecrawl,

@@ -2,6 +2,46 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
+> ## ✅ PHASE 1 — CORE GAP CLOSURE (2026-09-16, session: 0B.4 build queue)
+>
+> **HEAD `117b8d3` → work-tree changes (not yet committed), branch
+> `redesign/foundation`, protected baseline `959b4d2` ancestor. Full approved
+> Option-A cohort executed. Phase 2/3/4 NOT started.**
+>
+> **Reconciliation of the 0B.4 queue:**
+> | 0B.4 # | Item | Status now |
+> |---|---|---|
+> | 1 | Amazon Ads dashboard surface (agreed §12) | **DONE** — `src/components/admin/AmazonAdsDashboard.tsx`, AdminShell `amazon_ads` nav + render, `scripts/validate-amazon-ads.mjs` (19 checks PASS), `e2e/amazon-ads-dashboard.spec.ts` (2 tests), requirements-registry 2 `amazon-ads` entries. Simulation-first consumer of the EXISTING `useAdSpendBudgets()` seam (0 consumers → consumed); per-brand budget/spend/remaining/ACOS/TACOS/status; honest simulated label; `advertising_commission` at £0 not invented; deterministic (no AI/network). Live path stays behind the `amazon_ads` credential seam. |
+> | 2 | `docs/INTEGRATIONS.md` registry-count truth | **DONE** — 22 rows mirroring `INTEGRATION_ORDER` (was 18/14); root `MERCENTA_ARCHITECTURE.md` reconcilied 18 → 22. |
+> | 3 | `BrandComm.tsx` slug SSOT drift | **DONE** — `brandInboxAddress` now delegates to canonical `normalizeBrandKey` (no second normalisation); Tapatío → `hello@tapatio.example`. Regression gate `scripts/validate-brandcomm-ssot.mjs` (9 checks PASS). |
+> | 4 | `XeroConnection.tsx` dead duplicate | **DONE** — file DELETED (explicit session approval). Xero seam `src/services/xero/*` + `AccountingPanel.tsx` untouched. |
+> | 5 | Platform AI FREE-only policy | **DONE** — `modelPolicy.ts` rewritten: no paid fallback, `isModelAllowed` free-only, non-free-sufficient tasks REFUSED; `validate-operating-costs.mjs` re-pinned (44 checks PASS); panel copy free-only. |
+> | 6 | `requirements-registry.json` Amazon Ads | **DONE** — 2 `amazon-ads` entries, `_meta.total_entries` 142 → 144. |
+> | 7 | BI discovery scheduler | **DECIDED (no code)** — declared **intentionally operator-triggered** per 0A.17.3 ("no scheduler exists and none is claimed"); the MarketingHub operator trigger already exists. No scheduler invented. |
+> | 8 | §16–§29 embassy/trade pipeline | **DECIDED (no code)** — classification preserved: truthful prospective-route slots only (`PartnershipsCentre.tsx`); the §12–§15 Google generation leg remains CRED/F-ACTION (blocked on Google OAuth + Edge deploy), not invented. |
+>
+> **Brand Overview Dashboard + Brand Operational Dashboard** (two DISTINCT brand
+> dashboards: Overview = UNDERSTAND / Operations = ACT) — preserved as explicit
+> UI-redesign-phase requirements (post-core, pre-Rakazo). Brand Intelligence
+> includes qualification — ICP/acquisition consumes the BI qualification output;
+> no second qualification engine was created. One connected platform preserved
+> (seams reused, no duplicate stores/CRM).
+>
+> **VERIFIED THIS SESSION:** `npx tsc --noEmit -p tsconfig.app.json` → 0 errors ·
+> eslint on all touched files → 0 · `node scripts/validate-amazon-ads.mjs` →
+> PASS 19 · `node scripts/validate-brandcomm-ssot.mjs` → PASS 9 ·
+> `node scripts/validate-operating-costs.mjs` → PASS 44 ·
+> `node scripts/verify-registry.mjs` → exits 0 (103 pre-existing informational
+> flags unchanged; new `amazon-ads` entries clean). E2E `amazon-ads-dashboard`
+> not yet run (pending the affected-spec run). Prod build not yet re-run.
+>
+> **NEXT (exact):** commit Phase 1 work → run affected E2E (amazon-ads-dashboard,
+> integration-hub, operating-costs, app-shell/marketing) → Phase 2 bounded
+> wiring reconciliation → Phase 3 FULL REGRESSION → Phase 4 checkpoint. Do NOT
+> start Phase 2 before the Phase 1 commit is on the branch and the affected E2E
+> are green. Do NOT touch Rakazo or the UI redesign.
+>
+> ---
 > ## ✅ M13c PHASE D — RANKED FOUNDER COMMAND CENTRE QUEUE + VISIBLE WHY (2026-09-15, session 3)
 >
 > §27/§28 is now built **inside the existing command centre** — no second

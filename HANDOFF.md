@@ -1,14 +1,20 @@
 ---
 # HANDOFF DOCUMENT — Mercenta Partners Platform Build
-**Last updated: September 16, 2026 — ✅ PHASE 0B (CORRECTIVE RECONCILIATION) DONE
-(read-only): corrected the Phase 0A Amazon Ads misclassification → REQUIRED /
-PARTIALLY IMPLEMENTED / INCOMPLETE / simulation-first / dashboard REQUIRED, and
-re-derived the NEXT BUILD QUEUE (PROJECT_STATUS.md PHASE 0B §0B.1–§0B.6). NEXT:
-Phase 1 (build 0B.4 queue — Amazon Ads dashboard FIRST; do NOT start until this
-handoff is approved) → Phase 2 sync → Phase 3 full regression → Phase 4
-core-complete declaration → Phase 5 deploy.**
-Branch `redesign/foundation`, HEAD `91bc291`, protected baseline `959b4d2`
-(verified ancestor). Repository: `/Users/tadii/Desktop/1. Mercenta`.
+**Last updated: September 16, 2026 — ✅ PHASE 1 (CORE GAP CLOSURE, 0B.4 queue)
+DONE: Amazon Ads dashboard BUILT (seam consumed, Super Admin nav surface,
+validator 19 checks PASS + e2e spec), BrandComm slug SSOT fix (normalizeBrandKey),
+dead `XeroConnection.tsx` REMOVED (approved), integration docs reconciled
+(INTEGRATION_ORDER 22), requirements-registry `amazon-ads` entries added,
+Platform AI policy is now FREE-ONLY (no paid fallback — validator re-pinned,
+44 checks PASS), BI discovery declared intentionally operator-triggered (no
+scheduler), §16–§29 partnership pipeline classification preserved (no invented
+build). NEXT: commit the Phase 1 work-tree → run affected E2E
+(`amazon-ads-dashboard`, `integration-hub`, `operating-costs`, `app-shell`)
+→ Phase 2 bounded wiring reconciliation → Phase 3 FULL REGRESSION → Phase 4
+core-complete checkpoint → Phase 5 deploy.
+Branch `redesign/foundation`, HEAD `117b8d3` (prior-state doc commit) + Phase 1
+work-tree, protected baseline `959b4d2` (verified ancestor). Repository:
+`/Users/tadii/Desktop/1. Mercenta`.
 
 ## ⛳ AUTHORITATIVE SCOPE TRUTH (READ FIRST IN ANY SESSION)
 **PHASE 0B — CORRECTIVE RECONCILIATION INVENTORY** inside `PROJECT_STATUS.md`

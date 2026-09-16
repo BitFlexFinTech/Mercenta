@@ -7,6 +7,7 @@ import { useMessages } from '@/data/queries';
 import { Button, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { MessageSquare, Phone, Send } from 'lucide-react';
+import { normalizeBrandKey } from '@/lib/intelligence/prospectPipeline';
 
 /**
  * §Stage-17 — THE brand communication layer.
@@ -15,9 +16,10 @@ import { MessageSquare, Phone, Send } from 'lucide-react';
  * of them duplicates transport or logging logic.
  */
 
-/** Deterministic demo inbox address per brand (same derivation as before). */
+/** Deterministic demo inbox address per brand — canonical `normalizeBrandKey` SSOT
+ *  (diacritics normalised, not stripped; ASCII behaviour unchanged). */
 export function brandInboxAddress(businessName: string | undefined): string {
-  const slug = businessName?.toLowerCase().replace(/[^a-z]/g, '') || 'brand';
+  const slug = normalizeBrandKey(businessName ?? '') || 'brand';
   return `hello@${slug}.example`;
 }
 

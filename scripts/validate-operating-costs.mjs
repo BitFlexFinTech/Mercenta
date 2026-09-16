@@ -3,8 +3,8 @@
 // Proves the cost surface is REAL and HONEST:
 //   • every cost line carries an explicit source label and NO line claims LIVE;
 //   • no final commercial pricing is hard-coded (pricing inputs require founder approval);
-//   • the runtime model policy can never select anything more expensive than
-//     DeepSeek V4 Flash, and a task outside the per-operation budget is REFUSED;
+//   • the runtime model policy is FREE-ONLY (no paid fallback, no silent paid
+//     upgrade) and a task outside the per-operation budget is REFUSED;
 //   • the usage log records model/task/tokens/cost/cache/status and REFUSES calls
 //     once a ceiling is exceeded (the cost-protection state);
 //   • derived figures come from the canonical stores and the log (no invention);
@@ -65,15 +65,17 @@ try {
     Object.keys(cfg.REVENUE_STREAM_LABELS).length === 7 &&
       cfg.REVENUE_STREAM_LABELS.advertising_commission.length > 10);
 
-  /* ── the runtime model policy ────────────────────────────────────────── */
-  test('the maximum paid runtime model is DeepSeek V4 Flash',
-    policy.MAX_PAID_RUNTIME_MODEL === 'deepseek/deepseek-v4-flash');
+  /* ── the runtime model policy (PHASE 1: FREE-only, no paid fallback) ─── */
+  test('the runtime policy is FREE-only (no maximum paid model constant)',
+    !('MAX_PAID_RUNTIME_MODEL' in policy) && policy.FREE_RUNTIME_MODELS.length >= 1);
   const deterministic = policy.selectRuntimeModelForTask('estimated_sales_narrative');
   test('a task deterministic code can answer makes NO model call',
     deterministic.tier === 'deterministic' && deterministic.model === null && deterministic.refused === false);
-  const paid = policy.selectRuntimeModelForTask('discovery_fit_scoring');
-  test('the remaining paid task selects DeepSeek V4 Flash (never a costlier model)',
-    paid.model === policy.MAX_PAID_RUNTIME_MODEL && paid.tier === 'paid_max' && paid.refused === false);
+  // discovery_fit_scoring is declared NOT free-sufficient in the task spec, so
+  // under the FREE-only policy it must be REFUSED — never silently upgraded.
+  const nonFree = policy.selectRuntimeModelForTask('discovery_fit_scoring');
+  test('a non-free-sufficient task is REFUSED, not upgraded to a paid model',
+    nonFree.refused === true && nonFree.model === null && nonFree.tier !== 'paid_max');
   const refused = policy.selectRuntimeModel({
     id: 'over_budget', description: 'too expensive', deterministic: false, cacheable: false,
     locallyComputable: false, freeModelSufficient: false, estimatedTokens: 100, estimatedCostGbp: 5,
@@ -82,9 +84,10 @@ try {
     refused.refused === true && refused.model === null && /exceeds the per-operation budget/.test(refused.reason));
   test('an unknown task id is refused (fail-closed)',
     policy.selectRuntimeModelForTask('not_a_task').refused === true);
-  test('only the maximum paid model and the free tier are allowed',
-    policy.isModelAllowed(policy.MAX_PAID_RUNTIME_MODEL) &&
-      policy.isModelAllowed(null) &&
+  test('only FREE models (or no model) are allowed — a paid model is refused',
+    policy.isModelAllowed(null) &&
+      policy.FREE_RUNTIME_MODELS.every((m) => policy.isModelAllowed(m)) &&
+      policy.isModelAllowed('deepseek/deepseek-v4-flash') === false &&
       policy.isModelAllowed('openai/gpt-4o') === false);
 
   /* ── the usage log + cost protection ─────────────────────────────────── */
@@ -95,15 +98,24 @@ try {
   test('a cached result is reused and costs nothing',
     cached.status === 'cache_hit' && cached.fallback === 'cached');
   test('the cache hit is recorded and adds no cost', log.spendThisMonth() === 0);
-  const ok = log.authoriseAiCall({ taskId: 'discovery_fit_scoring', entity: 'Zambezi Traders', tokens: 300 });
-  test('an authorised call selects the policy model and records its estimated cost',
-    ok.allowed === true && ok.decision.model === policy.MAX_PAID_RUNTIME_MODEL && log.spendThisMonth() > 0);
+  // FREE-only: discovery_fit_scoring is not free-sufficient → refused, zero cost.
+  const refusedAi = log.authoriseAiCall({ taskId: 'discovery_fit_scoring', entity: 'Zambezi Traders', tokens: 300 });
+  test('a non-free AI task is REFUSED under the FREE-only policy and costs nothing',
+    refusedAi.allowed === false && refusedAi.status === 'refused_budget' && log.spendThisMonth() === 0);
   const entry = log.aiUsageEntries()[log.aiUsageEntries().length - 1];
-  test('the entry records model, task, entity, cache and status',
-    entry.model === policy.MAX_PAID_RUNTIME_MODEL && entry.taskId === 'discovery_fit_scoring' &&
-      entry.entity === 'Zambezi Traders' && entry.cache === 'miss' && entry.status === 'ok');
+  test('the refused entry records the task and a zero-cost refusal (no paid model)',
+    entry.taskId === 'discovery_fit_scoring' && entry.status === 'refused_budget' &&
+      entry.estimatedCostGbp === 0 && entry.tier !== 'paid_max');
   test('a deterministic task cannot spend (fallback is deterministic)',
     log.authoriseAiCall({ taskId: 'estimated_sales_narrative' }).fallback === 'deterministic');
+  // Free tier: a task an approved FREE model CAN handle is authorised at zero cost.
+  const freeDecision = policy.selectRuntimeModel({
+    id: 'free_eligible', description: 'free task', deterministic: false, cacheable: true,
+    locallyComputable: false, freeModelSufficient: true, estimatedTokens: 100, estimatedCostGbp: 0.0001,
+  });
+  test('an approved free-model task selects the FREE model at zero cost',
+    freeDecision.tier === 'free_model' && freeDecision.model === policy.FREE_RUNTIME_MODELS[0] &&
+      freeDecision.estimatedCostGbp === 0 && freeDecision.refused === false);
 
   // Drive the monthly ceiling over the limit with recorded spend.
   const now = new Date('2026-09-15T10:00:00.000Z');
@@ -120,10 +132,11 @@ try {
   test('a non-essential call is REFUSED while the ceiling is exceeded',
     blocked.allowed === false && blocked.status === 'refused_budget' && blocked.fallback === 'none');
   const essential = log.authoriseAiCall({ taskId: 'alert_triage_summary', now, essential: true });
-  test('an essential call is still authorised (and recorded)', essential.allowed === true);
+  test('an essential call to a non-free task is still REFUSED by the FREE-only policy',
+    essential.allowed === false && essential.status === 'refused_budget');
   const usage = log.aiUsageSummary(now);
   test('the summary counts calls, cache hits, refusals and an estimated projection',
-    usage.calls > 0 && usage.cacheHits === 1 && usage.refused === 1 && usage.projectionMonthlyGbp > 0);
+    usage.calls > 0 && usage.cacheHits === 1 && usage.refused >= 1 && usage.projectionMonthlyGbp > 0);
   test('the summary lists per-task usage',
     usage.byTask.length >= 1 && usage.byTask.every((t) => typeof t.calls === 'number'));
 
@@ -167,8 +180,8 @@ const engine = read('src/lib/discovery/engine.ts');
     /\{activeTab === 'costs' && <OperatingCostsPanel \/>\}/.test(superPanel));
   test('the panel re-enforces the Super Admin tier at its own boundary',
     /isSuperAdmin/.test(panel) && /super_admin/.test(panel));
-  test('the panel labels the runtime maximum model and the ceilings',
-    /MAX_PAID_RUNTIME_MODEL/.test(panel) && /AI_SPEND_CEILINGS/.test(panel));
+  test('the panel labels the runtime FREE-only policy and the ceilings',
+    /FREE models only/.test(panel) && /AI_SPEND_CEILINGS/.test(panel));
   test('the panel reports the cost-protection state',
     /cost protection: \{summary\.ai\.protection\.state\}/.test(panel));
 

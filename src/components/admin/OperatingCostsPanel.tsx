@@ -25,7 +25,7 @@ import {
   type CostSourceLabel,
 } from '@/config/operatingCosts';
 import { operatingCostSummary, type OperatingCostSummary } from '@/lib/costs/costSummary';
-import { MAX_PAID_RUNTIME_MODEL, RUNTIME_TASKS, selectRuntimeModel } from '@/lib/costs/modelPolicy';
+import { FREE_RUNTIME_MODELS, RUNTIME_TASKS, selectRuntimeModel } from '@/lib/costs/modelPolicy';
 import { aiUsageEntries, resetAiUsageLog, type AiUsageEntry } from '@/lib/costs/usageLog';
 import { ShieldCheck, Wallet, RefreshCw } from 'lucide-react';
 
@@ -180,7 +180,7 @@ export function OperatingCostsPanel() {
       <Card
         className="p-5"
         title="AI / OpenRouter usage"
-        subtitle={`Runtime maximum paid model: ${MAX_PAID_RUNTIME_MODEL}. Ceilings £${AI_SPEND_CEILINGS.dailyGbp}/day, £${AI_SPEND_CEILINGS.monthlyGbp}/month.`}
+        subtitle={`Runtime policy: FREE models only (${FREE_RUNTIME_MODELS.join(', ')}). Ceilings £${AI_SPEND_CEILINGS.dailyGbp}/day, £${AI_SPEND_CEILINGS.monthlyGbp}/month.`}
       >
         <div className="grid gap-2 sm:grid-cols-4 text-[11px]">
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">

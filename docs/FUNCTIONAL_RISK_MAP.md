@@ -18,7 +18,7 @@
 
 | Area | Evidence | Finding |
 |---|---|---|
-| Typecheck red | 27 errors (outreachGenerator 24, XeroConnection 3) | Both DEAD code (unimported) → build passes but TS health is false. Fix before Phase 12. |
+| Typecheck red | RESOLVED — `npx tsc --noEmit` exits 0 at HEAD. `outreachGenerator.ts` fixed 2026-09-08; `XeroConnection.tsx` (dead duplicate) REMOVED in Phase 1 (2026-09-16). | No live typecheck defect remains. |
 | Brand CRM | Score 4/10 (forensic §9 Flow 4); cramped accordion, 7 sections | Worst UX. Needs structural redesign (spec §35). HIGH risk = don't lose CRM data model. |
 | Admin IA | 24 flat nav items; forensic §10 IA issues | Needs grouping (spec §36). |
 | Integrations OAuth | `code_received` state ends in limbo — "token exchange pending Edge Function deployment" | Real OAuth never completes end-to-end. Must not pretend it's connected. |
@@ -46,4 +46,6 @@
 - `usertour` registered `connected + sandbox:true` — correctly labelled Mock in
   UI; keep that truthfulness everywhere.
 - `XeroConnection.tsx` dead + broken — do not surface as working.
+- **REMOVED in Phase 1 (2026-09-16):** the dead duplicate `XeroConnection.tsx`
+  component is deleted (0 importers); Xero lives in `AccountingPanel.tsx`.
 - Ensure SIMULATION vs LIVE is visually distinct in Super Admin (spec §78).
