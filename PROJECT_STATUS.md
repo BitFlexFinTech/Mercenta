@@ -4,9 +4,10 @@
 > ---
 > ## ✅ PHASE 1 — CORE GAP CLOSURE (2026-09-16, session: 0B.4 build queue)
 >
-> **HEAD `117b8d3` → work-tree changes (not yet committed), branch
+> **HEAD `50668b9` (Phase 1 committed: `117b8d3` prior-state doc closeout →
+> `fe47bf2` Phase 1 feature → `50668b9` artefacts refresh), branch
 > `redesign/foundation`, protected baseline `959b4d2` ancestor. Full approved
-> Option-A cohort executed. Phase 2/3/4 NOT started.**
+> Option-A cohort executed and committed. Phase 2/3/4 NOT started.**
 >
 > **Reconciliation of the 0B.4 queue:**
 > | 0B.4 # | Item | Status now |
