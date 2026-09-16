@@ -47,6 +47,51 @@
 > build to `demo.mercenta.co.uk` → then (and only then) Rakazo → security audit.
 > ---
 > ---
+> ## 🧭 FINAL BUILD QUEUE (authoritative — the single list any continuation reads first)
+>
+> **Build status: COMPLETE.** All feature phases are verified and MUST NOT be rebuilt
+> (see COMPLETED below). The platform runs end-to-end in simulation/demo mode without
+> credentials. What remains is the closing reconciliation + regression + deployment that
+> *declared* the build complete. Security hardening and Rakazo are deliberately EXCLUDED
+> — they come AFTER the build is declared complete (see DEFERRED).
+>
+> ### 1. FINAL RECONCILIATION — bounded end-to-end wiring check
+> - **Objective:** confirm the full 25-stage investor/demo lifecycle + the §13 PO→shipment→invoice→payment→exception flow wire together with correct data flow and zero fabricated external actions.
+> - **Seams to reuse:** existing simulation/Mock*Client adapters in `src/lib/*` (no real credentials).
+> - **Components involved:** `e2e/investor-demo.spec.ts`, `scripts/validate-investor-demo.mjs`, Retail Pipeline commerce panel, brand onboarding/catalog surfaces, funding pipeline.
+> - **Dependencies:** checkpoint `11d0c09` on `redesign/foundation`.
+> - **Verification required:** `node scripts/validate-investor-demo.mjs` PASS (deterministic, zero-network — reset→run reproduces the SAME digest) + investor-demo e2e spec green.
+> - **Mode:** simulation-only, zero credentials.
+>
+> ### 2. FULL REGRESSION — close the build as verified
+> - **Objective:** confirm no regressions across the whole gate suite before deploy.
+> - **Seams to reuse:** existing gate scripts (`validate-*.mjs`, `lint-wording.mjs`, `rls-audit.mjs`, `integrity-audit.mjs`) + Playwright.
+> - **Components involved:** all 77 gate scripts; full Playwright suite; `tsc`/`eslint`/`npm run build`.
+> - **Dependencies:** step 1 complete; regression baseline = M11 (250 passed / 2 skipped); current target 277 passed / 0 failed / 2 skipped.
+> - **Verification required:** `tsc --noEmit` 0 errors · `eslint` 0 · `npm run build` ✓ · `lint-wording` PASS (218 files) · 77/77 gate scripts 0 failures · `integrity-audit` 61/61 · `rls-audit` PASS · full `npx playwright --workers=2` 0 failures; investor-demo spec green.
+> - **Mode:** simulation-only, zero credentials.
+>
+> ### 3. DEPLOY / RE-VERIFY demo.mercenta.co.uk
+> - **Objective:** deploy the verified build to the demo host and confirm the demo workflow is live without credentials.
+> - **Seams to reuse:** `scripts/deploy-demo.sh` (Namecheap FTP; creds in `.env`/vault, never in source).
+> - **Components involved:** `scripts/deploy-demo.sh`, `GO_LIVE.md`.
+> - **Dependencies:** step 2 (regression) green.
+> - **Verification required:** HTTPS `demo.mercenta.co.uk` → 200 · demo workflow exercises end-to-end in simulation.
+> - **Mode:** credential-dependent (FOUNDER runs deploy / enters FTP creds) — NO source change.
+>
+> ### COMPLETED — DO NOT REBUILD
+> Phases 8 (§21 Google), 9 (§22–25 Company/Gov), 10 (§27 cost dashboard),
+> 11 (§32/§34 Super Admin), 14 (§37 docs), 15 (§38 full regression),
+> M13c Phase C (false-submission fix), M13c Phase D (ranked command-centre queue + visible WHY)
+> — all DONE and verified (tsc/eslint/build/wording/validators/e2e green). Also complete:
+> M2→M10, Phase 12 investor-demo E2E, Phase E1–E8, Phase F, Phase G1.
+>
+> ### DEFERRED (NOT build work — comes after the build is declared complete)
+> - **Security audit + credential cleanup:** rotate Twilio 2FA recovery code (lives in past git history); rotate Namecheap FTP password (only ever existed redacted in this doc); final review of secrets / ZIP exclusions / Git history / deployment config / integration boundaries; Supabase RLS hardening migration for `shipping_margins`, `audit_log`, `leads`, `integration_connections` (no `ENABLE ROW LEVEL SECURITY`); verify disabled Rakazo credentials cannot consume platform OpenRouter credits.
+> - **Rakazo finalisation:** deliberately the FINAL phase (CORE PRODUCT FIRST, RAKAZO LAST). NOT invoked/modified/tested during build completion; handled after deploy.
+> - **Founder credential/configuration work (not build):** (1) capture Tottenham merchandise ASIN evidence via existing Brand Intelligence; (2) enter in Super Admin — Google OAuth client id, Companies House API key + auth code, GOV.UK One Login personal code (HMRC once VAT registers); (3) deploy the Google Edge Function (code→token + Vault refresh) to flip Google `exchange_pending`→`connected`; (4) founder confirmation of real subscription/hosting prices in `src/config/operatingCosts.ts` + pricing-input approval.
+> ---
+
 > ## ✅ M13c PHASE C — LEGACY FALSE-SUBMISSION STATE FIXED AT THE ROOT (2026-09-15, session 3)
 >
 > **Checkpoint verified before any edit (read-only):** branch `redesign/foundation`,
