@@ -2,13 +2,22 @@
  * §Brand Intelligence — Brand Partner mode.
  * Shows the brand's own Amazon market intelligence using the same engine.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card } from '@/components/ui';
 import { getProspects } from '@/data/prospectStore';
 import { APPROVED_CATEGORIES } from '@/types';
 import { analyzeProductListing } from '@/lib/intelligence/listingAnalyzer';
-import { BarChart3, TrendingUp, ShoppingBag, Users, Package, ArrowUpRight } from 'lucide-react';
+import { Package, ArrowUpRight } from 'lucide-react';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
 
 /**
  * §Workstream B (Decision 1, 2026-09-17) — brand-facing category positioning is
@@ -57,34 +66,148 @@ export function BrandIntelligence() {
 
   const totalEst = catData.sameCat.reduce((s, p) => s + p.asins.reduce((s2, a) => s2 + (a.estimatedRevenue ?? 0), 0), 0);
 
+  /* §Sprint 2 — metric drill-downs. A brand surface stays QUALITATIVE: the
+     tiles open the existing detail (competitor list / product table / insights)
+     and never expose an internal score or tier. */
+  const [showAllCompetitors, setShowAllCompetitors] = useState(false);
+  const [detail, setDetail] = useState<'none' | 'competitors' | 'products' | 'insights'>('none');
+  const competitorRows = showAllCompetitors ? catData.sameCat : catData.sameCat.slice(0, 9);
+
+  const metrics: MetricTileData[] = [
+    {
+      id: 'bi-category-size',
+      label: 'Category Size',
+      value: `£${(totalEst / 1000).toFixed(0)}k/mo`,
+      size: 'hero',
+      tone: 'info',
+      statusText: 'Estimated',
+      context: 'Estimated UK retail revenue across your category',
+      domain: 'finance',
+      onOpen: () => setDetail('insights'),
+      testId: 'bi-metric-category-size',
+      valueTestId: 'bi-metric-category-size-value',
+    },
+    {
+      id: 'bi-category-growth',
+      label: 'Category Growth',
+      value: '+12%',
+      tone: 'success',
+      statusText: 'Estimated YoY',
+      context: 'Planning estimate, not measured marketplace data',
+      domain: 'catalogue',
+      onOpen: () => setDetail('insights'),
+      testId: 'bi-metric-category-growth',
+      valueTestId: 'bi-metric-category-growth-value',
+    },
+    {
+      id: 'bi-brands-tracked',
+      label: 'Brands Tracked',
+      value: String(catData.sameCat.length),
+      tone: 'warning',
+      statusText: 'In your category',
+      context: 'Comparable brands Mercenta currently models in your category',
+      domain: 'logistics',
+      onOpen: () => { setDetail('competitors'); setShowAllCompetitors(true); },
+      testId: 'bi-metric-brands-tracked',
+      valueTestId: 'bi-metric-brands-tracked-value',
+    },
+    {
+      id: 'bi-products',
+      label: 'Your products analysed',
+      value: String(productPerformance.length),
+      tone: 'info',
+      statusText: 'Deterministic estimates',
+      context: 'Catalogue products with an estimated performance range',
+      domain: 'compliance',
+      onOpen: () => setDetail('products'),
+      testId: 'bi-metric-products',
+      valueTestId: 'bi-metric-products-value',
+    },
+  ];
+
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center"><BarChart3 className="w-5 h-5 text-brass-400" /></div>
-        <div><h2 className="text-lg font-semibold text-white">Your UK Market</h2><p className="text-xs text-zinc-500 mt-0.5">Market intelligence for <span className="text-brass-400">{brandName}</span> in <span className="text-brass-400">{brandCategory}</span></p></div>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Brand Portal · Market Intelligence"
+        title="Your UK Market"
+        description="Market intelligence for your brand in the UK market. Every figure is a planning estimate derived from the same deterministic model as the Listing Analyzer — no live marketplace data and no proprietary internal scoring is shown on a brand surface."
+        entity={
+          <span className="text-[11px] text-zinc-400">
+            {brandName} · {brandCategory}
+          </span>
+        }
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {catData.scored.length} brands modelled
+            </span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {catData.sameCat.length} in {brandCategory}
+            </span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              showing {competitorRows.length} competitor{competitorRows.length === 1 ? '' : 's'}
+            </span>
+          </>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-1.5">
+            {(['none', 'competitors', 'products', 'insights'] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setDetail(d)}
+                data-testid={`bi-detail-${d}`}
+                className={
+                  detail === d
+                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-[11px] font-medium text-white'
+                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                }
+              >
+                {d === 'none' ? 'Overview' : d === 'competitors' ? 'Competitors' : d === 'products' ? 'Your products' : 'Insights'}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-3"><div className="flex items-center gap-2 mb-1"><BarChart3 className="w-3.5 h-3.5 text-blue-400" /><span className="text-[10px] text-zinc-500 uppercase">Category Size</span></div><span className="text-2xl font-bold text-blue-400">£{(totalEst / 1000).toFixed(0)}k/mo</span><p className="text-[10px] text-zinc-600 mt-1">Estimated UK retail revenue</p></Card>
-        <Card className="p-3"><div className="flex items-center gap-2 mb-1"><TrendingUp className="w-3.5 h-3.5 text-emerald-400" /><span className="text-[10px] text-zinc-500 uppercase">Category Growth</span></div><span className="text-2xl font-bold text-emerald-400">+12%</span><p className="text-[10px] text-zinc-600 mt-1">Estimated YoY growth</p></Card>
-        <Card className="p-3"><div className="flex items-center gap-2 mb-1"><ShoppingBag className="w-3.5 h-3.5 text-amber-400" /><span className="text-[10px] text-zinc-500 uppercase">Brands Tracked</span></div><span className="text-2xl font-bold text-amber-400">{catData.sameCat.length}</span><p className="text-[10px] text-zinc-600 mt-1">In your category</p></Card>
-        <Card className="p-3"><div className="flex items-center gap-2 mb-1"><Users className="w-3.5 h-3.5 text-brass-400" /><span className="text-[10px] text-zinc-500 uppercase">Competitor Brands</span></div><span className="text-2xl font-bold text-brass-400">{catData.sameCat.length}</span><p className="text-[10px] text-zinc-600 mt-1">Brands tracked in your category</p></Card>
-      </div>
+      <MetricBand items={metrics} columns={4} />
 
-      <div>
-        <h3 className="text-sm font-semibold text-white mb-3">Brands in Your Category</h3>
+      {(detail === 'none' || detail === 'competitors') && (
+      <WorkspaceSection
+        title="Brands in Your Category"
+        description="Qualitative positioning only — external brands are described, never scored."
+        domain="logistics"
+        action={
+          catData.sameCat.length > 9 ? (
+            <button
+              type="button"
+              onClick={() => setShowAllCompetitors((v) => !v)}
+              data-testid="bi-toggle-competitors"
+              className="text-[11px] text-brass-400 hover:text-brass-300"
+            >
+              {showAllCompetitors ? 'Show fewer' : `Show all ${catData.sameCat.length}`}
+            </button>
+          ) : undefined
+        }
+      >
         {catData.sameCat.length === 0 ? <Card className="p-6 text-center"><p className="text-xs text-zinc-600">No competitor data available yet.</p></Card> : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {catData.sameCat.slice(0, 9).map(p => (
+            {competitorRows.map(p => (
               <Card key={p.id} className="p-3 flex items-center justify-between">
                 <div><span className="text-xs font-medium text-white">{p.brand}</span><div className="text-[10px] text-zinc-500 mt-0.5">{qualitativePosition(p, p.brand === brandName)}</div></div>
               </Card>
             ))}
           </div>
         )}
-      </div>
+      </WorkspaceSection>
+      )}
 
-      <Card className="p-4">
+      {(detail === 'none' || detail === 'products') && (
+      <WorkspaceSection
+        title="Your product performance"
+        description="Deterministic estimates, never live data."
+        domain="catalogue"
+      >
         <div data-testid="bi-product-performance">
           <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
             <Package className="w-4 h-4 text-brass-400" /> Your product performance
@@ -115,16 +238,38 @@ export function BrandIntelligence() {
             Estimates derived from the same deterministic model as the Listing Analyzer — planning ranges, not measured marketplace data.
           </p>
         </div>
-      </Card>
+      </WorkspaceSection>
+      )}
 
-      <Card className="p-4">
+      {(detail === 'none' || detail === 'insights') && (
+      <WorkspaceSection title="Market Insights" domain="finance">
+        <Card className="p-4">
         <h3 className="text-sm font-semibold text-white mb-2">Market Insights</h3>
         <div className="space-y-2 text-xs text-zinc-400">
           <p>Your brand is in <span className="text-brass-400">{brandCategory}</span> in the UK market, one of {APPROVED_CATEGORIES.length} approved categories.</p>
           <p>We track <span className="text-white">{catData.scored.length}</span> brands total. Of those, <span className="text-white">{catData.sameCat.length}</span> are in {brandCategory}.</p>
           <p>This intelligence updates weekly. Use these insights to understand your competitive position and identify growth opportunities.</p>
         </div>
-      </Card>
-    </div>
+        </Card>
+      </WorkspaceSection>
+      )}
+
+      <ContextPanel title="How to read this">
+        <RecordFieldList
+          fields={[
+            { label: 'Your brand', value: brandName },
+            { label: 'Your category', value: brandCategory },
+            { label: 'Comparable brands', value: String(catData.sameCat.length) },
+            { label: 'Products analysed', value: String(productPerformance.length) },
+            { label: 'Data source', value: 'Deterministic model (no live data)' },
+          ]}
+        />
+        <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+          Estimates are planning ranges produced by the same engine as the Listing Analyzer.
+          They are not measured marketplace results and this surface never displays Mercenta&apos;s
+          internal scoring.
+        </p>
+      </ContextPanel>
+    </WorkspaceFrame>
   );
 }

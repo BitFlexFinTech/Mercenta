@@ -42,7 +42,8 @@ export type WorkSource =
 /** The canonical record this work item is about. */
 export interface WorkEntityRef {
   type: 'purchase_order' | 'compliance_document' | 'invoice' | 'deduction'
-      | 'shipment' | 'return' | 'prospect' | 'contract' | 'application' | 'none';
+      | 'shipment' | 'return' | 'prospect' | 'contract' | 'application'
+      | 'onboarding' | 'none';
   id: string;
   /** Human reference (PO number, document type, brand name). */
   label: string;
@@ -101,4 +102,61 @@ export interface CalendarEntry {
   /** True once the underlying work item is resolved — the entry stays visible
    *  in history but no longer demands attention. */
   resolved: boolean;
+}
+
+/* ── §Sprint 2 — PROACTIVE REMINDER RUNNER shapes ───────────────────────────
+ *
+ * A reminder is the ESCALATION of an existing work item past a declared
+ * deadline boundary. It is never a second task system and never invents a
+ * record: it points at the work item (`workItemId`) which points at the
+ * canonical record.
+ *
+ * Reminders are raised by an EXPLICIT, deterministic sweep
+ * (`runReminderSweep`) — never by a timer — so the investor demo can invoke
+ * the exact same call the future scheduler will, and get the identical result.
+ */
+
+/**
+ * Which declared deadline boundary the reminder crossed. Derived from the work
+ * item's own `dueDate` compared against the pinned demo clock.
+ */
+export type ReminderBucket = 'overdue' | 'due_today' | 'due_soon';
+
+/** One raised reminder. Deterministic id: `rem-<workItemId>-<bucket>`. */
+export interface Reminder {
+  id: string;
+  /** The work item this reminder escalates (never disconnected state). */
+  workItemId: string;
+  bucket: ReminderBucket;
+  /** The deadline the reminder is about — the work item's own due date. */
+  dueDate: string;
+  priority: WorkPriority;
+  title: string;
+  detail: string;
+  tenantId: string | null;
+  source: WorkSource;
+  actionView: string;
+  /** Idempotency key — `"<workItemId>|<bucket>"`. A key already raised is never
+   *  raised a second time, however many times the sweep runs. */
+  key: string;
+  /** Deterministic: the demo clock date the sweep ran on. */
+  raisedAt: string;
+  /** 1-based order within the sweep that raised it (deterministic). */
+  sequence: number;
+}
+
+/** The result of ONE sweep. Pure report — no side effects beyond the ledger. */
+export interface ReminderSweepResult {
+  /** The demo-clock date the sweep was evaluated against. */
+  sweptAt: string;
+  /** Work items examined in scope. */
+  evaluated: number;
+  /** Reminders raised by THIS sweep (empty on a repeat sweep — idempotent). */
+  raised: Reminder[];
+  /** Boundaries already raised in an earlier sweep and therefore suppressed. */
+  duplicatesSuppressed: number;
+  /** Boundaries belonging to work items that are already resolved. */
+  suppressedResolved: number;
+  /** Total reminders currently active (raised, not dismissed, item not resolved). */
+  active: number;
 }

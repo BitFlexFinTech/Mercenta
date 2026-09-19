@@ -32,6 +32,19 @@ import {
   Link2,
   Wallet,
 } from 'lucide-react';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceGrid,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
+import { useBrands } from '@/data/queries';
+import { useWorkItems } from '@/lib/work/useWork';
+import { WORK_SOURCE_LABELS, demoToday } from '@/lib/work/workStore';
 
 const SUPER_ADMIN_TABS = [
   { id: 'staff', label: 'Staff & RBAC', icon: Users },
@@ -150,29 +163,206 @@ export function SuperAdminPanel() {
 
   const activeCount = staff.filter((s) => s.active).length;
 
+  /* §Sprint 2 — platform oversight read from the SAME canonical stores the rest
+     of the platform uses. Nothing here is a second data source. */
+  const brands = useBrands().data?.data ?? [];
+  const allWork = useWorkItems('admin');
+  const today = demoToday();
+  const overdueWork = allWork.filter((w) => w.dueDate !== null && w.dueDate < today);
+  const criticalWork = allWork.filter((w) => w.priority === 'critical');
+  const [oversight, setOversight] = useState<'none' | 'work' | 'overdue' | 'brands'>('none');
+
+  const oversightMetrics: MetricTileData[] = [
+    {
+      id: 'sa-staff',
+      label: 'Staff & RBAC',
+      value: String(staff.length),
+      size: 'hero',
+      tone: activeCount === staff.length ? 'success' : 'warning',
+      statusText: `${activeCount} active`,
+      context: 'Staff accounts, roles, channels and permission tiers',
+      domain: 'compliance',
+      onOpen: () => setActiveTab('staff'),
+      testId: 'sa-metric-staff',
+      valueTestId: 'sa-metric-staff-value',
+    },
+    {
+      id: 'sa-brands',
+      label: 'Brand tenants',
+      value: String(brands.length),
+      tone: 'info',
+      statusText: 'Canonical universe',
+      context: 'Operational brand tenants on the platform',
+      domain: 'catalogue',
+      onOpen: () => setOversight('brands'),
+      testId: 'sa-metric-brands',
+      valueTestId: 'sa-metric-brands-value',
+    },
+    {
+      id: 'sa-work',
+      label: 'Operational work',
+      value: String(allWork.length),
+      tone: criticalWork.length > 0 ? 'danger' : 'warning',
+      statusText: `${criticalWork.length} critical`,
+      context: 'Every unresolved work item across the platform',
+      domain: 'logistics',
+      onOpen: () => setOversight('work'),
+      testId: 'sa-metric-work',
+      valueTestId: 'sa-metric-work-value',
+    },
+    {
+      id: 'sa-overdue',
+      label: 'Overdue',
+      value: String(overdueWork.length),
+      tone: overdueWork.length > 0 ? 'danger' : 'success',
+      statusText: overdueWork.length > 0 ? 'Past deadline' : 'Nothing overdue',
+      context: 'Work items whose declared deadline has passed',
+      domain: 'finance',
+      onOpen: () => setOversight('overdue'),
+      testId: 'sa-metric-overdue',
+      valueTestId: 'sa-metric-overdue-value',
+    },
+  ];
+
+  const oversightRows =
+    oversight === 'overdue' ? overdueWork : oversight === 'work' ? allWork : [];
+
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      {/* Tab navigation */}
-      <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-white/[0.06] rounded-xl p-1">
-        {SUPER_ADMIN_TABS.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                'flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors',
-                activeTab === tab.id
-                  ? 'bg-brass-500 text-white shadow-sm'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Super Admin · Governance"
+        title="Super Admin Panel — Tadii"
+        description="Master control matrix — staff, roles & channel assignments, plus platform-wide oversight of brands, operational work, finance, compliance, integrations, provider state and audit. Nothing on this surface is exposed to a brand session."
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">{staff.length} staff</span>
+            <span className="font-mono text-[11px] text-zinc-500">{brands.length} brand tenants</span>
+            <span className="font-mono text-[11px] text-zinc-500">{allWork.length} work items</span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              acting as {canCurrentUserMutate ? 'full admin' : 'view-only ops'}
+            </span>
+          </>
+        }
+        toolbar={
+          <div className="flex items-center gap-1 flex-wrap" data-testid="super-admin-tabs">
+            {SUPER_ADMIN_TABS.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  data-testid={`super-admin-tab-${tab.id}`}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                    activeTab === tab.id
+                      ? 'bg-brass-500 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                  )}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        }
+      />
+
+      <MetricBand items={oversightMetrics} columns={4} />
+
+      <WorkspaceGrid
+        rail={
+          <>
+            <ContextPanel title="Platform oversight">
+              <RecordFieldList
+                fields={[
+                  { label: 'Staff', value: `${activeCount}/${staff.length} active` },
+                  { label: 'Brand tenants', value: String(brands.length) },
+                  { label: 'Open work', value: String(allWork.length) },
+                  { label: 'Critical work', value: String(criticalWork.length) },
+                  { label: 'Overdue', value: String(overdueWork.length) },
+                  { label: 'Simulation state', value: 'Simulated providers only' },
+                ]}
+              />
+            </ContextPanel>
+            <ContextPanel title="Work by source">
+              <ul className="space-y-1.5">
+                {Object.entries(
+                  allWork.reduce<Record<string, number>>((acc, w) => {
+                    acc[w.source] = (acc[w.source] ?? 0) + 1;
+                    return acc;
+                  }, {})
+                )
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 8)
+                  .map(([source, count]) => (
+                    <li key={source} className="flex items-center justify-between text-[11px] text-zinc-400">
+                      <span>{WORK_SOURCE_LABELS[source as keyof typeof WORK_SOURCE_LABELS]}</span>
+                      <span className="font-mono text-zinc-500">{count}</span>
+                    </li>
+                  ))}
+                {allWork.length === 0 && (
+                  <li className="text-[11px] text-zinc-500">No open operational work.</li>
+                )}
+              </ul>
+            </ContextPanel>
+            <ContextPanel title="Tenant isolation">
+              <p className="text-[11px] leading-snug text-zinc-400">
+                This surface is Super-Admin-only. Brand sessions never receive platform-wide work,
+                finance, compliance or audit data — the domain refuses it, not just the navigation.
+              </p>
+            </ContextPanel>
+          </>
+        }
+      >
+      {oversight !== 'none' && (
+        <WorkspaceSection
+          title={
+            oversight === 'brands'
+              ? 'Brand tenants'
+              : oversight === 'overdue'
+                ? 'Overdue operational work'
+                : 'All operational work'
+          }
+          description="Read from the canonical work layer / brand store — the same records every other workspace uses."
+          domain="compliance"
+          action={
+            <Button variant="ghost" className="text-[11px]" onClick={() => setOversight('none')} data-testid="sa-oversight-close">
+              Close
+            </Button>
+          }
+        >
+          {oversight === 'brands' ? (
+            <ul className="divide-y divide-white/[0.05] overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850">
+              {brands.map((b) => (
+                <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2" data-testid={`sa-brand-${b.id}`}>
+                  <span className="text-xs font-medium text-white">{b.profile.businessName}</span>
+                  <span className="font-mono text-[10px] text-zinc-500">
+                    {b.category} · {b.track} · {b.contractStatus}
+                  </span>
+                </li>
+              ))}
+              {brands.length === 0 && <li className="px-3.5 py-3 text-[11px] text-zinc-500">No brand tenants.</li>}
+            </ul>
+          ) : (
+            <ul className="divide-y divide-white/[0.05] overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850">
+              {oversightRows.map((w) => (
+                <li key={w.id} className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2" data-testid={`sa-work-${w.id}`}>
+                  <span className="text-xs font-medium text-white">{w.title}</span>
+                  <span className="font-mono text-[10px] text-zinc-500">
+                    {WORK_SOURCE_LABELS[w.source]} · {w.tenantId ?? 'platform'} · {w.dueDate ?? 'no deadline'}
+                  </span>
+                </li>
+              ))}
+              {oversightRows.length === 0 && (
+                <li className="px-3.5 py-3 text-[11px] text-zinc-500">Nothing matches this view.</li>
               )}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+            </ul>
+          )}
+        </WorkspaceSection>
+      )}
+
+      <div className="space-y-4">
 
       {activeTab === 'staff' && (
         <>
@@ -258,18 +448,8 @@ export function SuperAdminPanel() {
         </div>
       </Card>
 
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-crimson-accent/15 flex items-center justify-center">
-          <ShieldCheck className="w-5 h-5 text-red-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Super Admin Panel — Tadii</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Master control matrix — staff, roles & channel assignments
-          </p>
-        </div>
-      </div>
+      {/* §Sprint 2 — the page identity now lives in WorkspaceHeader (always
+          visible), so the tab no longer renders its own duplicate header. */}
 
       {/* §Stage-25 — act-as-staff selector: exercises the RBAC tiers end to
           end. Selecting a view-only staff member disables mutating actions
@@ -580,6 +760,8 @@ export function SuperAdminPanel() {
       {activeTab === 'designsystem' && (
         <DesignSystemShowcase />
       )}
-    </div>
+      </div>
+      </WorkspaceGrid>
+    </WorkspaceFrame>
   );
 }

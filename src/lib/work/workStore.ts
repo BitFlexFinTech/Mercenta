@@ -25,13 +25,17 @@ import type { WorkActivityEntry, WorkEntityRef, WorkItem, WorkPriority, WorkScop
 import {
   demoAuditLog,
   demoBrands,
+  demoCommerceInvoices,
   demoComplianceDocs,
   demoContracts,
   demoDeductions,
   demoPurchaseOrders,
   demoShipments,
+  getCommercePaymentsForInvoice,
 } from '@/data/demoStore';
 import { getProspects, ensureProspectStore } from '@/data/prospectStore';
+import { getOnboardings } from '@/data/acquisitionStore';
+import { ONBOARDING_STEP_ORDER } from '@/lib/onboarding/onboardingLifecycle';
 import { getAllReturnTracking } from '@/lib/warehouse/returnsTracking';
 import { emitEvent } from '@/lib/events/eventFeed';
 
@@ -49,6 +53,12 @@ export const RETURN_ACTION_WINDOW_DAYS = 3;
 export const OUTREACH_FOLLOW_UP_DAYS = 7;
 /** How many days ahead a document/renewal is surfaced as work. Declared. */
 export const EXPIRY_HORIZON_DAYS = 60;
+/**
+ * §Sprint 2 — declared SLA window for ONE onboarding step. The current step's
+ * deadline is `initiatedAt + (stepIndex + 1) × this`. Declared, never random, so
+ * the same onboarding always yields the same deadline.
+ */
+export const ONBOARDING_STEP_SLA_DAYS = 7;
 
 export const WORK_SOURCE_LABELS: Record<WorkSource, string> = {
   po_acknowledgement: 'PO acknowledgement',
@@ -384,6 +394,55 @@ export function deriveWorkItems(): WorkItem[] {
         actionView: 'crm',
         owner: p.owner ? `staff:${p.owner}` : 'staff:mercenta-ops',
         createdAt: p.lastResearched,
+      })
+    );
+  }
+
+  /* 9. §Sprint 2 — commerce INVOICE DUE. Derived from the canonical simulated
+        invoice/payment pair (E4): an issued invoice with no settled payment is
+        due `INVOICE_TERM_DAYS` after its own issue date. Settling the payment
+        removes the item from the attention set, so its reminder stops. */
+  for (const inv of demoCommerceInvoices) {
+    if (inv.status === 'paid') continue;
+    if (getCommercePaymentsForInvoice(inv.id).length > 0) continue;
+    const issued = inv.issuedAt.slice(0, 10);
+    const due = addDays(issued, INVOICE_TERM_DAYS);
+    const left = daysBetween(today, due);
+    out.push(
+      make('invoice_due', { type: 'invoice', id: inv.id, label: inv.number }, {
+        title: `Invoice ${inv.number} due`,
+        detail: `${brandLabel(inv.brandId)} · £${inv.subtotalGbp.toFixed(2)} · ${inv.mode} · ${INVOICE_TERM_DAYS}-day terms from issue ${issued}`,
+        priority: left < 0 ? 'critical' : left <= 7 ? 'high' : 'normal',
+        dueDate: due,
+        tenantId: inv.brandId,
+        actionView: 'accounting',
+        createdAt: issued,
+      })
+    );
+  }
+
+  /* 10. §Sprint 2 — ONBOARDING STEP. Derived from the real canonical onboarding
+         record: the FIRST incomplete step in the declared canonical order. The
+         deadline is the record's own `initiatedAt` plus the declared per-step
+         SLA, so it is deterministic and never invented. Completing the step
+         advances the derivation to the next step; completing the onboarding
+         removes the item entirely. */
+  for (const onb of getOnboardings()) {
+    if (onb.status === 'completed' || onb.completedAt) continue;
+    const step = onb.steps.find((s) => s.status !== 'done');
+    if (!step) continue;
+    const stepIndex = Math.max(0, ONBOARDING_STEP_ORDER.indexOf(step.id));
+    const initiated = onb.initiatedAt.slice(0, 10);
+    const due = addDays(initiated, (stepIndex + 1) * ONBOARDING_STEP_SLA_DAYS);
+    out.push(
+      make('onboarding_step', { type: 'onboarding', id: `${onb.id}-${step.id}`, label: onb.businessName }, {
+        title: `Onboarding — ${step.label}`,
+        detail: `${onb.businessName} · ${onb.origin.replace(/_/g, ' ')} · track ${onb.track} · step ${stepIndex + 1} of ${ONBOARDING_STEP_ORDER.length} (${step.status})`,
+        priority: step.id === 'legal_agreements' || step.id === 'banking' ? 'high' : 'normal',
+        dueDate: due,
+        tenantId: onb.brandId,
+        actionView: 'onboarding',
+        createdAt: initiated,
       })
     );
   }

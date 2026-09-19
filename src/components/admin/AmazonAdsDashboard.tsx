@@ -30,6 +30,16 @@ import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { INTEGRATION_MODE_LABELS } from '@/integrations/types';
 import type { AdSpendBudget, AdCampaign, AdSpendRecommendation } from '@/types';
 import { Megaphone, TrendingUp, Wallet, Gauge, Percent, CircleDollarSign, FlaskConical, Info, Save, Check, X, Pencil } from 'lucide-react';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceGrid,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
 
 interface AdsRow {
   brandId: string;
@@ -208,30 +218,161 @@ export function AmazonAdsDashboard() {
     { label: 'Avg TACOS (active)', value: pct(avgTacos), icon: <Percent className="w-4 h-4 text-sky-300" /> },
   ];
 
+  /* §Sprint 2 — the same seven figures as a workspace metric band, each tile
+     drilling down into the ONE brand table below (no second data source). */
+  const [focus, setFocus] = useState<'all' | 'active' | 'not_configured' | 'over_budget'>('all');
+  const [sortByUtil, setSortByUtil] = useState(false);
+  const focusedRows = useMemo(() => {
+    let out = rows;
+    if (focus === 'active') out = out.filter((r) => r.status === 'active');
+    if (focus === 'not_configured') out = out.filter((r) => r.status === 'not_configured');
+    if (focus === 'over_budget') out = out.filter((r) => r.utilPct >= 1);
+    return sortByUtil ? [...out].sort((a, b) => b.utilPct - a.utilPct) : out;
+  }, [rows, focus, sortByUtil]);
+
+  const metrics: MetricTileData[] = [
+    {
+      id: 'ads-active-campaigns',
+      label: 'Active campaigns',
+      value: String(active.length),
+      size: 'hero',
+      tone: active.length > 0 ? 'success' : 'neutral',
+      statusText: 'Running',
+      context: 'Campaigns the seam reports as active',
+      domain: 'catalogue',
+      onOpen: () => setFocus('active'),
+      testId: 'ads-metric-active',
+      valueTestId: 'ads-metric-active-value',
+    },
+    {
+      id: 'ads-configured',
+      label: 'Configured brands',
+      value: `${configured}/${rows.length}`,
+      tone: configured === rows.length ? 'success' : 'warning',
+      statusText: configured === rows.length ? 'All configured' : 'Some unconfigured',
+      context: 'Brands with an ad-spend budget row',
+      domain: 'compliance',
+      onOpen: () => setFocus('all'),
+      testId: 'ads-metric-configured',
+      valueTestId: 'ads-metric-configured-value',
+    },
+    {
+      id: 'ads-budget',
+      label: 'Monthly budget',
+      value: gbp(totalBudget),
+      tone: 'info',
+      statusText: 'Declared',
+      context: 'Total monthly ad budget across configured brands',
+      domain: 'finance',
+      onOpen: () => { setFocus('all'); setSortByUtil(false); },
+      testId: 'ads-metric-budget',
+      valueTestId: 'ads-metric-budget-value',
+    },
+    {
+      id: 'ads-spend',
+      label: 'Spend to date',
+      value: gbp(totalSpend),
+      tone: totalSpend > 0 ? 'warning' : 'neutral',
+      statusText: totalSpend > 0 ? 'Spending' : 'No spend yet',
+      context: 'Spend recorded against the monthly budget',
+      domain: 'logistics',
+      onOpen: () => { setFocus('all'); setSortByUtil(true); },
+      testId: 'ads-metric-spend',
+      valueTestId: 'ads-metric-spend-value',
+    },
+    {
+      id: 'ads-remaining',
+      label: 'Remaining budget',
+      value: gbp(totalRemaining),
+      tone: totalRemaining < 0 ? 'danger' : 'success',
+      statusText: totalRemaining < 0 ? 'Over budget' : 'Within budget',
+      context: 'Budget less spend to date',
+      domain: 'finance',
+      onOpen: () => setFocus('over_budget'),
+      testId: 'ads-metric-remaining',
+      valueTestId: 'ads-metric-remaining-value',
+    },
+    {
+      id: 'ads-acos',
+      label: 'Avg ACOS (active)',
+      value: pct(avgAcos),
+      tone: 'info',
+      statusText: 'Active campaigns only',
+      context: 'Average advertising cost of sale',
+      domain: 'catalogue',
+      onOpen: () => setFocus('active'),
+      testId: 'ads-metric-acos',
+      valueTestId: 'ads-metric-acos-value',
+    },
+    {
+      id: 'ads-tacos',
+      label: 'Avg TACOS (active)',
+      value: pct(avgTacos),
+      tone: 'info',
+      statusText: 'Active campaigns only',
+      context: 'Average total advertising cost of sale',
+      domain: 'compliance',
+      onOpen: () => setFocus('active'),
+      testId: 'ads-metric-tacos',
+      valueTestId: 'ads-metric-tacos-value',
+    },
+  ];
+
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto" data-testid="amazon-ads-dashboard">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center">
-          <Megaphone className="w-5 h-5 text-amber-300" />
-        </div>
-        <div className="flex-1 min-w-[220px]">
-          <h2 className="text-lg font-semibold text-white">Amazon Ads</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Ad spend, budget utilisation and ACOS/TACOS per brand (§12)
-          </p>
-        </div>
-        <Badge
-          className={cn(
-            'text-[10px]',
-            isLive
-              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-              : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
-          )}
-        >
-          <FlaskConical className="w-3 h-3 mr-1" />
-          {isLive ? 'Live connection' : `Simulated — mode: ${modeLabel}`}
-        </Badge>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+    <div className="space-y-4" data-testid="amazon-ads-dashboard">
+      <WorkspaceHeader
+        eyebrow="Admin Hub · Marketplace Intelligence"
+        title="Amazon Ads"
+        description="Ad spend, budget utilisation and ACOS/TACOS per brand (§12). Every figure comes from the existing ad-spend seam joined to the canonical brand store — nothing is fabricated, and brands with no seam row are shown honestly as not configured."
+        status={
+          <Badge
+            className={cn(
+              'text-[10px]',
+              isLive
+                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+            )}
+          >
+            <FlaskConical className="w-3 h-3 mr-1" />
+            {isLive ? 'Live connection' : `Simulated — mode: ${modeLabel}`}
+          </Badge>
+        }
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">{rows.length} brands</span>
+            <span className="font-mono text-[11px] text-zinc-500">{configured} configured</span>
+            <span className="font-mono text-[11px] text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
+          </>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-1.5" data-testid="ads-focus">
+            {(['all', 'active', 'not_configured', 'over_budget'] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFocus(f)}
+                data-testid={`ads-focus-${f}`}
+                className={
+                  focus === f
+                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-[11px] font-medium text-white'
+                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                }
+              >
+                {f.replace(/_/g, ' ')}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSortByUtil((v) => !v)}
+              data-testid="ads-sort-utilisation"
+              className="rounded-lg bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white"
+            >
+              {sortByUtil ? 'Sort: default' : 'Sort: utilisation'}
+            </button>
+          </div>
+        }
+      />
 
       <div className="flex items-start gap-2 rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2.5 text-[11px] text-zinc-400">
         <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-zinc-500" />
@@ -243,23 +384,40 @@ export function AmazonAdsDashboard() {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {tiles.map((t) => (
-          <Card key={t.label} className="p-4">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-zinc-500 mb-2">
-              {t.icon}
-              {t.label}
-            </div>
-            <div className="text-xl font-semibold text-white">{t.value}</div>
-          </Card>
-        ))}
-      </div>
+      <MetricBand items={metrics.slice(0, 4)} columns={4} />
+      <MetricBand items={metrics.slice(4)} columns={3} />
 
-      <Card
-        title="Ad spend by brand"
-        subtitle="Monthly budget vs spend-to-date, ACOS/TACOS and status — click a row for the detail."
-        className="p-0"
+      <WorkspaceGrid
+        rail={
+          <>
+            <ContextPanel title="Ad spend basis">
+              <RecordFieldList
+                fields={[
+                  { label: 'Brands', value: String(rows.length) },
+                  { label: 'Configured', value: `${configured} of ${rows.length} brands` },
+                  { label: 'Monthly budget', value: gbp(totalBudget) },
+                  { label: 'Spend to date', value: gbp(totalSpend) },
+                  { label: 'Remaining', value: gbp(totalRemaining) },
+                  { label: 'Data source', value: isLive ? 'Live connection' : 'Simulated (seed seam)' },
+                ]}
+              />
+            </ContextPanel>
+            <ContextPanel title="Live connection path">
+              <p className="text-[11px] leading-snug text-zinc-400">
+                The live path already exists behind the <code>amazon_ads</code> credential seam.
+                Entering a real credential in Integrations activates it with no change to this
+                screen — until then every figure here is deterministic simulation.
+              </p>
+            </ContextPanel>
+          </>
+        }
       >
+      <WorkspaceSection
+        title="Ad spend by brand"
+        description="Monthly budget vs spend-to-date, ACOS/TACOS and status — click a row for the detail."
+        domain="finance"
+      >
+      <Card className="p-0">
         <DataTable<AdsRow>
           columns={[
             { key: 'brandName', label: 'Brand', primary: true, render: (r) => <span className="font-medium text-white">{r.brandName}</span> },
@@ -271,7 +429,7 @@ export function AmazonAdsDashboard() {
             { key: 'acos', label: 'ACOS', align: 'right', render: (r) => <span className="font-mono text-xs text-zinc-300">{pct(r.acos)}</span> },
             { key: 'tacos', label: 'TACOS', align: 'right', render: (r) => <span className="font-mono text-xs text-zinc-300">{pct(r.tacos)}</span> },
           ]}
-          rows={rows}
+          rows={focusedRows}
           rowKey={(r) => r.brandId}
           loading={isLoading}
           emptyMessage="No brand ad-spend data available."
@@ -451,6 +609,9 @@ export function AmazonAdsDashboard() {
         </Card>
 
 )}
+      </WorkspaceSection>
+      </WorkspaceGrid>
     </div>
+    </WorkspaceFrame>
   );
 }

@@ -9,6 +9,15 @@ import { useCanonicalStoreVersion } from '@/data/queries';
 import { runBrandIntelligence, getPipelineStatus, requalifyProspect } from '@/lib/intelligence/prospectLifecycle';
 import type { IntelligenceRun, ProspectChangeEvent } from '@/types';
 import { Target, TrendingUp, Users, AlertTriangle, Search, Play, History, ShieldBan } from 'lucide-react';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
 
 const cl = createBrandIntelligenceClient();
 const TB: Record<string,string> = {tier_1:'bg-emerald-500/15 text-emerald-300',tier_2:'bg-blue-500/15 text-blue-300',tier_3:'bg-amber-500/15 text-amber-300',tier_4:'bg-zinc-500/15 text-zinc-400',unscored:'bg-zinc-500/5 text-zinc-600'};
@@ -34,11 +43,43 @@ const runDiscovery=async()=>{if(running)return;sRunning(true);sMsg('');try{const
 const changesByRun=(id:string)=>getChanges().filter((c:any)=>c.runId===id);
 const handleRequalify=(id:string,brand:string)=>{if(requalifyProspect(id,'Requalified by operator')){sMsg(`${brand} requalified.`);}refresh();};
 const dqPros=pros.filter((p:any)=>p.disqualified);
-if(load)return<div className="p-6 text-zinc-500 text-sm">Loading...</div>;
-const KP = [{l:'Tracked',v:dash.totalBrandsTracked,ic:Users,c:'text-blue-400'},{l:'T1',v:dash.tier1Count,ic:Target,c:'text-emerald-400'},{l:'T2',v:dash.tier2Count,ic:TrendingUp,c:'text-blue-400'},{l:'Gaps',v:dash.distributorGaps,ic:AlertTriangle,c:'text-amber-400'},{l:'Pri',v:dash.highPriorityCount,ic:Users,c:'text-brass-400'}];
-return<div className="space-y-4">
-  <div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center"><Target className="w-5 h-5 text-brass-400"/></div><div><h2 className="text-lg font-semibold text-white">Brand Intelligence</h2><p className="text-xs text-zinc-500">{dash.totalBrandsTracked} tracked.</p></div></div>
-  <div className="grid grid-cols-5 gap-2">{KP.map(k=>{const Ic=k.ic;return<Card key={k.l} className="p-2"><div className="flex items-center gap-1 mb-0.5"><Ic className={cn('w-3 h-3',k.c)}/><span className="text-[10px] uppercase text-zinc-500">{k.l}</span></div><span className={cn('text-xl font-bold',k.c)}>{k.v}</span></Card>;})}</div>
+if(load)return<WorkspaceFrame className="space-y-4"><p className="text-sm text-zinc-500">Loading...</p></WorkspaceFrame>;
+/* §Sprint 2 — the same five KPIs the panel already computed, now a workspace
+   metric band whose tiles DRILL DOWN into the existing table filters. */
+const metrics: MetricTileData[] = [
+  { id:'bi-tracked', label:'Tracked', value:String(dash.totalBrandsTracked), size:'hero', tone:'info',
+    statusText:`${filtered.length} in view`, context:'Canonical prospects in the BI universe',
+    domain:'catalogue', onOpen:()=>{sQ('');sCf('');sTf('');}, testId:'bi-kpi-tracked', valueTestId:'bi-kpi-tracked-value' },
+  { id:'bi-t1', label:'T1', value:String(dash.tier1Count), tone:'success',
+    statusText:'Attack now', context:'Highest-priority prospects',
+    domain:'compliance', onOpen:()=>sTf('tier_1'), testId:'bi-kpi-t1', valueTestId:'bi-kpi-t1-value' },
+  { id:'bi-t2', label:'T2', value:String(dash.tier2Count), tone:'info',
+    statusText:'High probability', context:'Strong secondary prospects',
+    domain:'logistics', onOpen:()=>sTf('tier_2'), testId:'bi-kpi-t2', valueTestId:'bi-kpi-t2-value' },
+  { id:'bi-gaps', label:'Gaps', value:String(dash.distributorGaps), tone:'warning',
+    statusText:'Distributor gap', context:'Prospects with no observed distributor coverage',
+    domain:'finance', onOpen:()=>{sTf('');sCf('');}, testId:'bi-kpi-gaps', valueTestId:'bi-kpi-gaps-value' },
+];
+return<WorkspaceFrame className="space-y-4">
+  <WorkspaceHeader
+    eyebrow="Admin Hub · Brand Intelligence"
+    title="Brand Intelligence"
+    description="The canonical prospect universe, its deterministic scores and the discovery pipeline. Run history and disqualifications stay visible so a re-run can never silently change the target set."
+    meta={<>
+      <span className="font-mono text-[11px] text-zinc-500">{dash.totalBrandsTracked} tracked</span>
+      <span className="font-mono text-[11px] text-zinc-500">{dash.highPriorityCount} high priority</span>
+      <span className="font-mono text-[11px] text-zinc-500">{runs.length} runs</span>
+      <span className="font-mono text-[11px] text-zinc-500">{dqPros.length} disqualified</span>
+    </>}
+    toolbar={<div className="flex flex-wrap items-center gap-2">
+      <Input value={q} onChange={e=>sQ(e.target.value)} placeholder="Search..." className="text-xs py-1 w-40" dataTestid="bi-search"/>
+      <select aria-label="Category filter" value={cf} onChange={e=>sCf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option>{cats.map(c=><option key={c} value={c}>{c}</option>)}</select>
+      <select aria-label="Tier filter" value={tf} onChange={e=>sTf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option><option value="tier_1">Tier 1</option><option value="tier_2">Tier 2</option><option value="tier_3">Tier 3</option><option value="tier_4">Tier 4</option></select>
+      <span className="text-xs text-zinc-600">{filtered.length} of {pros.length}</span>
+      <button type="button" onClick={()=>{sQ('');sCf('');sTf('');}} className="text-[11px] text-brass-400 hover:text-brass-300" data-testid="bi-clear-filters">Clear</button>
+    </div>}
+  />
+  <MetricBand items={metrics} columns={4} />
   <Card className="p-3">
     <div className="flex items-center justify-between flex-wrap gap-2">
       <div className="min-w-0">
@@ -82,7 +123,6 @@ return<div className="space-y-4">
       <Button variant="tertiary" className="text-[10px] px-2 py-1" onClick={()=>handleRequalify(p.id,p.brand)}>Requalify</Button>
     </div>)}</div>}
   </Card>
-  <div className="flex items-center gap-2"><Input value={q} onChange={e=>sQ(e.target.value)} placeholder="Search..." className="text-xs py-1 w-40"/><select value={cf} onChange={e=>sCf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option>{cats.map(c=><option key={c} value={c}>{c}</option>)}</select><select value={tf} onChange={e=>sTf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option><option value="tier_1">T1</option><option value="tier_2">T2</option><option value="tier_3">T3</option><option value="tier_4">T4</option></select><span className="text-xs text-zinc-600">{filtered.length}</span></div>
   <Card className="p-0 overflow-x-auto"><table className="w-full text-xs" data-testid="bi-prospect-table">
     <thead><tr className="border-b bg-ink-850/50"><th className="px-2 py-1.5 text-left text-zinc-500">#</th><th className="px-2 py-1.5 text-left text-zinc-500 cursor-pointer" onClick={()=>ts('brand')}>Brand</th><th className="px-2 py-1.5 text-left text-zinc-500">Cat</th><th className="px-2 py-1.5 text-left text-zinc-500 cursor-pointer" onClick={()=>ts('score')}>Score</th><th className="px-2 py-1.5 text-left text-zinc-500">Tier</th>{['D','PO','G','Dist','Acc','Fit','Amz','Distrib','Ctc'].map(h=><th key={h} className="px-2 py-1.5 text-left text-zinc-500">{h}</th>)}</tr></thead>
     <tbody>{filtered.map((p:any,i:number)=><tr key={p.id} onClick={()=>sSel(p)} className="border-b cursor-pointer hover:bg-white/[0.03]">
@@ -104,6 +144,20 @@ return<div className="space-y-4">
     {filtered.length===0&&<tr><td colSpan={14} className="py-8 text-center text-zinc-600">No matches</td></tr>}</tbody>
   </table></Card>
   {sel&&<ProspectDetailPanel prospect={sel} onClose={()=>sSel(null)} onMutated={refresh}/>}
-</div>;
+  <ContextPanel title="Intelligence basis">
+    <RecordFieldList fields={[
+      { label:'Tracked', value:String(dash.totalBrandsTracked) },
+      { label:'Tier 1 / Tier 2', value:`${dash.tier1Count} / ${dash.tier2Count}` },
+      { label:'Distributor gaps', value:String(dash.distributorGaps) },
+      { label:'High priority', value:String(dash.highPriorityCount) },
+      { label:'Disqualified', value:String(dqPros.length) },
+      { label:'Last run', value:runs.length>0?runs[runs.length-1].completedAt.slice(0,10):'None yet' },
+    ]}/>
+    <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+      Scores are deterministic and re-derived from the canonical prospect records — a re-run
+      records changes rather than rewriting the universe, and disqualifications survive it.
+    </p>
+  </ContextPanel>
+</WorkspaceFrame>;
 }
   

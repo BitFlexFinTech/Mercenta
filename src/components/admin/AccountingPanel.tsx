@@ -28,6 +28,22 @@ import {
   Clock, DollarSign, TrendingUp, TrendingDown,
   Banknote,
 } from 'lucide-react';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceGrid,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
+import { useWorkItems } from '@/lib/work/useWork';
+import { WORK_SOURCE_LABELS, demoToday } from '@/lib/work/workStore';
+import type { WorkSource } from '@/lib/work/types';
+
+/** §Sprint 2 — the finance side of the deterministic operating layer (§8). */
+const FINANCE_WORK_SOURCES: WorkSource[] = ['invoice_due', 'deduction_dispute', 'contract_renewal'];
 
 const PARTNER_ID = 'a0000000-0000-0000-0000-000000000001';
 
@@ -228,8 +244,180 @@ export function AccountingPanel() {
 
   const remainingDays = daysSinceReseed !== null ? Math.max(0, 28 - daysSinceReseed) : null;
 
+  /* §Sprint 2 — the SAME deterministic work layer, narrowed to the finance
+     sources: invoice → due → work item → reminder → payment → reconciliation
+     → audit. No second finance task system. */
+  const financeWork = useWorkItems('admin').filter((w) => FINANCE_WORK_SOURCES.includes(w.source));
+  const today = demoToday();
+  const overdueFinanceWork = financeWork.filter((w) => w.dueDate !== null && w.dueDate < today);
+
+  const [summaryDetail, setSummaryDetail] = useState(false);
+
+  const financeMetrics: MetricTileData[] = [
+    {
+      id: 'accounting-revenue',
+      label: 'Revenue',
+      value: summary ? `£${summary.revenue.toLocaleString()}` : '—',
+      size: 'hero',
+      tone: summary && summary.revenue > 0 ? 'success' : 'neutral',
+      statusText: connected ? 'Xero connected' : 'Xero not connected',
+      context: 'Revenue reported by the accounting layer',
+      domain: 'finance',
+      onOpen: () => setSummaryDetail((v) => !v),
+      testId: 'accounting-metric-revenue',
+      valueTestId: 'accounting-metric-revenue-value',
+    },
+    {
+      id: 'accounting-expenses',
+      label: 'Expenses',
+      value: summary ? `£${summary.expenses.toLocaleString()}` : '—',
+      tone: summary && summary.expenses > 0 ? 'warning' : 'neutral',
+      statusText: 'Recorded costs',
+      context: 'Expenses reported by the accounting layer',
+      domain: 'logistics',
+      onOpen: () => setSummaryDetail((v) => !v),
+      testId: 'accounting-metric-expenses',
+      valueTestId: 'accounting-metric-expenses-value',
+    },
+    {
+      id: 'accounting-net',
+      label: 'Net profit',
+      value: summary ? `£${summary.netProfit.toLocaleString()}` : '—',
+      tone: summary ? (summary.netProfit >= 0 ? 'success' : 'danger') : 'neutral',
+      statusText: summary ? (summary.netProfit >= 0 ? 'Positive' : 'Negative') : 'No data',
+      context: 'Revenue less expenses',
+      domain: 'catalogue',
+      onOpen: () => setSummaryDetail((v) => !v),
+      testId: 'accounting-metric-net',
+      valueTestId: 'accounting-metric-net-value',
+    },
+    {
+      id: 'accounting-work',
+      label: 'Open finance work',
+      value: String(financeWork.length),
+      tone: overdueFinanceWork.length > 0 ? 'danger' : financeWork.length > 0 ? 'warning' : 'success',
+      statusText: `${overdueFinanceWork.length} overdue`,
+      context: 'Invoices due, deduction disputes and contract renewals',
+      domain: 'compliance',
+      onOpen: () => setPayoutFilter('pending'),
+      testId: 'accounting-metric-work',
+      valueTestId: 'accounting-metric-work-value',
+    },
+  ];
+
   return (
-    <div className="space-y-6">
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Super Admin · Finance"
+        title="Accounting"
+        description="Xero is the accounting and reconciliation layer — it is NOT the bank. Connection state, the 28-day reseed tracker, the financial summary, brand payouts and the deterministic finance work items all read the same canonical records."
+        status={
+          connected === null ? (
+            <Badge className="bg-white/[0.06] text-zinc-400">
+              <Loader2 className="w-3 h-3 animate-spin" /> Checking Xero
+            </Badge>
+          ) : connected ? (
+            <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+              <CheckCircle2 className="w-3 h-3" /> Xero Connected{demoMode ? ' (Demo)' : ''}
+            </Badge>
+          ) : (
+            <Badge className="bg-amber-500/15 text-amber-300 border-amber-500/20">
+              <AlertTriangle className="w-3 h-3" /> Xero not connected
+            </Badge>
+          )
+        }
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {allCommissions.length} commissions
+            </span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {pendingPayouts.length} pending payouts
+            </span>
+            <span className="font-mono text-[11px] text-zinc-500">{financeWork.length} finance work items</span>
+          </>
+        }
+        actions={
+          <Button
+            variant="ghost"
+            className="text-[11px]"
+            onClick={() => setSummaryDetail((v) => !v)}
+            data-testid="accounting-toggle-summary"
+          >
+            {summaryDetail ? 'Hide breakdown' : 'Show breakdown'}
+          </Button>
+        }
+      />
+
+      <MetricBand items={financeMetrics} columns={4} />
+
+      {summaryDetail && (
+        <WorkspaceSection
+          title="Financial breakdown"
+          description="The same three figures, shown with their source so nothing is presented without provenance."
+          domain="finance"
+        >
+          <RecordFieldList
+            fields={[
+              { label: 'Revenue', value: summary ? `£${summary.revenue.toLocaleString()}` : 'Not available' },
+              { label: 'Expenses', value: summary ? `£${summary.expenses.toLocaleString()}` : 'Not available' },
+              { label: 'Net profit', value: summary ? `£${summary.netProfit.toLocaleString()}` : 'Not available' },
+              { label: 'Source', value: connected ? (demoMode ? 'Xero (Demo)' : 'Xero') : 'Xero not connected' },
+              { label: 'Payout rail', value: 'Wise (default) · Payoneer (secondary)' },
+              { label: 'Human approval', value: 'Required before any payout leaves Mercenta' },
+            ]}
+          />
+        </WorkspaceSection>
+      )}
+
+      <WorkspaceGrid
+        rail={
+          <>
+            <ContextPanel title="Finance work items">
+              <RecordFieldList
+                fields={[
+                  { label: 'Open items', value: String(financeWork.length) },
+                  { label: 'Overdue', value: String(overdueFinanceWork.length) },
+                  {
+                    label: 'Invoices due',
+                    value: String(financeWork.filter((w) => w.source === 'invoice_due').length),
+                  },
+                  {
+                    label: 'Deduction disputes',
+                    value: String(financeWork.filter((w) => w.source === 'deduction_dispute').length),
+                  },
+                ]}
+              />
+              <ul className="mt-2 space-y-1.5">
+                {financeWork.slice(0, 5).map((w) => (
+                  <li key={w.id} className="text-[11px] leading-snug text-zinc-400">
+                    <span className="font-medium text-zinc-200">{WORK_SOURCE_LABELS[w.source]}</span>
+                    {' · '}
+                    {w.title}
+                    {w.dueDate && <span className="font-mono text-zinc-600"> · due {w.dueDate}</span>}
+                  </li>
+                ))}
+                {financeWork.length === 0 && (
+                  <li className="text-[11px] text-zinc-500">No open finance work.</li>
+                )}
+              </ul>
+              <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+                An issued invoice with no settled payment becomes an <em>Invoice due</em> work item
+                with its declared payment-terms deadline; settling the payment resolves it and stops
+                its reminder.
+              </p>
+            </ContextPanel>
+            <ContextPanel title="Money chain">
+              <p className="text-[11px] leading-snug text-zinc-400">
+                PO → invoice → payment → reconciliation → Xero → payout proposal → human approval →
+                Wise → settlement. Xero is the accounting layer, never the bank; Stripe bills the
+                subscription only and is refused as a payout rail.
+              </p>
+            </ContextPanel>
+          </>
+        }
+      >
+      <div className="space-y-4">
       <Card title="Xero Connection Status" className="p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -677,6 +865,8 @@ export function AccountingPanel() {
           </Button>
         </div>
       </Card>
-    </div>
+      </div>
+      </WorkspaceGrid>
+    </WorkspaceFrame>
   );
 }

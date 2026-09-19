@@ -34,7 +34,7 @@ async function openOutreachTab(page: any, brand: string) {
 /** Run the full prepare → approve → send → response → opportunity workflow. */
 async function runAcquisitionFlow(page: any, brand: string) {
   await openNav(page, 'Brand Intelligence');
-  await expect(page.locator('h2', { hasText: 'Brand Intelligence' }).first()).toBeVisible({ timeout: 6000 });
+  await expect(page.getByRole('heading', { name: /Brand Intelligence/ }).first()).toBeVisible({ timeout: 6000 });
   await openOutreachTab(page, brand);
   await page.locator('button[data-state="prepare"]').first().click();
   await expect(page.locator('[data-revision]').first()).toContainText('pending_approval', { timeout: 6000 });

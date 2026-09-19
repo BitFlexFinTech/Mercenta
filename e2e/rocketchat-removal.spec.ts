@@ -90,7 +90,7 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
 
     // Messages inbox renders.
     await openNav(page, 'Messages');
-    await expect(page.locator('h2', { hasText: 'Messages' }).first()).toBeVisible({ timeout: 6000 });
+    await expect(page.getByRole('heading', { name: /Messages/ }).first()).toBeVisible({ timeout: 6000 });
 
     // Helpdesk renders the same canonical conversation (tkt-001 →
     // msg-brand-astonish-1/-2 from DEMO_MESSAGES).

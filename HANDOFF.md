@@ -1,11 +1,89 @@
 ---
-**Last updated: September 19, 2026 — ✅ DETERMINISTIC PLATFORM COMPLETION SPRINT (work/task + calendar operating layer) — CURRENT CHECKPOINT.**
+**Last updated: September 19, 2026 — ✅ FINAL DETERMINISTIC COMPLETION SPRINT — SPRINT 2 — CURRENT CHECKPOINT.**
+
+**Repository state:** repo `/Users/tadii/Desktop/1. Mercenta`, branch `redesign/foundation`, starting HEAD
+`7983a88` (sprint 1's checkpoint). Protected baseline `959b4d2` confirmed an **ancestor**. No
+reset/stash/clean/amend/branch-switch/force-push/rewrite. No deploy, no credential added or activated,
+**zero live provider calls**, no protected design asset modified, renamed or added to git. One
+checkpoint commit created at the end of this sprint (exact hash in the closing session report).
+
+**Canonical report: `docs/SPRINT_DETERMINISTIC_COMPLETION_2026-09-19.md`.** This sprint finishes the
+scope sprint 1 explicitly left PARTIAL. The sprint-1 handoff block below is retained as history.
+
+- **BUILT — the deterministic PROACTIVE REMINDER RUNNER (§16)** that sprint 1 left missing:
+  `src/lib/work/reminderRunner.ts` — an explicitly-invoked, idempotent sweep over the canonical work
+  items. **No `setInterval`/`setTimeout` anywhere**, no `Math.random()`, no `Date.now()` ids;
+  `sweptAt` is the pinned demo clock; boundary keys are `"<workItemId>|<bucket>"` so a repeat sweep
+  raises **0** and reports the boundaries as suppressed. Resolving the underlying work item removes
+  its reminder in the same tick (reopening restores it); dismissal is audited and cannot re-raise.
+  Emits canonical `reminder_raised` events + audit rows, and declares a scheduler seam
+  (`describeReminderSweep()` — cadence, entry point, idempotency key, networkCalls 0).
+  Surfaced in `WorkWorkspace`: a **REMINDERS** view, a **Run reminder sweep** control
+  (`work-run-reminders`) with a live sweep report (`work-sweep-report`), a "Reminders active" metric
+  tile and a context panel.
+- **BUILT — the two missing derivations.** `invoice_due` (§17): an issued invoice with no settled
+  payment → exactly one `work-invoice_due-<invoiceId>` item with the declared 30-day deadline; the
+  canonical payment resolves it. `onboarding_step` (§18): the FIRST incomplete step of a real
+  onboarding record → `work-onboarding_step-<onboardingId>-<stepId>` with the declared per-step SLA
+  deadline; completing the step advances it, completing the onboarding removes it.
+- **BUILT — ALL remaining core surfaces migrated (§6–§15).** `uiux-wave2-core-surfaces-remaining` is
+  now **`built_and_tested`**: admin Brand Intelligence, brand Market Intelligence, Ad Spend,
+  Accounting, Super Admin, Integrations, Onboarding Tours, and the admin CRM / Catalogue / Logistics
+  / Communications panels. Each composes `WorkspaceFrame` · `WorkspaceHeader` (sticky toolbar) ·
+  `MetricBand` with real drill-downs · `WorkspaceSection` · `ContextPanel`/rail, with real filtering
+  and honest empty states; **no bespoke `max-w-[1400px] mx-auto` composition remains** (asserted).
+  Logistics / Accounting / Communications / Super Admin consume the SAME work layer — no second task
+  system.
+- **BROWSER VERIFIED — the thing sprint 1 could NOT claim.** NEW `e2e/deterministic-journey.spec.ts`,
+  **5/5 passing in real Chromium**: the 13-step investor journey end to end (the `invoice_due` item
+  appears on invoice issue and disappears on payment; the reminder sweep raises then raises 0 on
+  repeat); the exception journey (occur → work item → notification → drawer → brand cannot resolve →
+  operator resolves → item gone → audit row); reset + repeatability (identical counts); tenant/RBAC
+  isolation (Brand B sees none of Brand A); and the `onboarding_step` derivation live. Every test
+  asserts **zero page errors and zero external calls**. Screenshots in
+  `test-screenshots/deterministic-journey/`.
+- **REAL DEFECTS FIXED:** metric-band raggedness (5 tiles in a 4-column band → composed 4 + 2); FOUR
+  text collisions the migrations introduced, caught by the FULL suite and fixed in the **product**
+  (Super Admin's description contained "simulation" and made `click('text=Simulation')` ambiguous —
+  **34 specs** broke → reworded to "provider state"; "Connecting Amazon Ads" created a second
+  matching heading; the Ads basis panel duplicated `7/20`; BI tier `<option>`s rendered `T1`…`T4`
+  ahead of the tiles); plus `layout-audit` empty-state coverage for `AdminAuditLog` and
+  `CatalogManagerAdmin`.
+- **TESTS REPOINTED, NOT WEAKENED:** `e2e/integration-hub.spec.ts` (tiles are now the canonical
+  MetricBand tiles — same read-back-and-compare invariant, `aria-pressed` preserved) and 6 specs whose
+  page identity moved from a bespoke `<h2>` to the canonical `WorkspaceHeader` `<h1>`
+  (`locator('h2', …)` → `getByRole('heading', …)`). All carry inline `§Sprint 2 REPOINT` comments.
+- **GATES:** tsc **0** · eslint **0** · build **PASS** · wording **PASS (242 files)** ·
+  `validate-work-layer` **PASS (108 assertions; was 49)** · `validate-uiux-redesign` **344/0** (was
+  306) · integrity-audit **61/0** · `validate-e7` **PASS (121)** · validator sweep **79 PASS / 1
+  FAIL** · registry **243 → 250 entries**, `verify-registry` **exit 0**, **issues 124 → 124 and
+  reachability flags 15 → 15 (ZERO new flagged entries)** · **FULL Playwright: 351 passed / 0 failed
+  / 2 skipped (13.8m; 353 collected — sprint 1 was 346/0/2)** · NEW journey spec **5/5**.
+- **Only failing gate:** `validate-e6-brand-surfaces` **F6**, failing ONLY on the **5 pre-existing
+  offenders** (`ave1-check.mjs` + the 4 protected `design/*.png`) — unchanged; this sprint's files are
+  declared via the new `SPRINT_DETERMINISTIC_COMPLETION_SCOPE` set (same guard mechanism, a file
+  outside every declared set is still refused). `validate-stage26.mjs` prints ✗ but exits 0, proven
+  pre-existing at `ea700a1`. `layout-audit.mjs`'s remaining failure is the pre-existing undefined
+  `text-brass-200` class in `AcquisitionWorkflow.tsx` (out of scope — fixing it would change styling).
+- **NOT done:** no deploy (not requested); Rakazo untouched; no Supabase/D1 migration; no Jev/Monid
+  work; Social Media workstream unchanged. Every external provider remains deterministic simulation —
+  activating one is a documented credential step, not missing functionality.
+
+---
+
+**Last updated: September 19, 2026 — ✅ DETERMINISTIC PLATFORM COMPLETION SPRINT (sprint 1, work/task + calendar operating layer) — SUPERSEDED, RETAINED AS HISTORY.** *(This block reported PARTIAL. Sprint 2 above closes the scope it left open: the reminder runner, `invoice_due`, `onboarding_step`, all remaining surfaces, and the browser-re-driven journey.)*
 
 **Repository state:** repo `/Users/tadii/Desktop/1. Mercenta`, branch `redesign/foundation`, starting HEAD
 `ea700a1`, protected baseline `959b4d2` confirmed an **ancestor**. No reset/stash/clean/amend/
 branch-switch/force-push. No deploy, no credentials, no live provider call, no protected design asset
 modified or added to git. One checkpoint commit created at the end of this sprint (hash recorded below
 and in `PROJECT_STATUS.md`).
+
+**Checkpoint commit:** `7983a88fce3e5d0425b4ac258e1532d485da2b17` (`7983a88`) — created at the end of this
+sprint on `redesign/foundation`. Parent: `ea700a1`. Protected baseline `959b4d2` verified still an
+ancestor. 252 files, +18694/−1585. Deliberately NOT committed: the four untracked protected
+`design/*.png` assets and the stray 0-byte `ave1-check.mjs` (so the e6 F6 offender set is unchanged).
+No `.env`, no generated `dist/`, no credential of any kind.
 
 **Canonical report: `docs/SPRINT_WORK_LAYER_2026-09-19.md`.** Headlines:
 

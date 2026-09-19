@@ -808,6 +808,43 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
   'e2e/work-layer.spec.ts',
 ]);
 
+  /**
+   * §Sprint 2 — DETERMINISTIC PLATFORM COMPLETION (2026-09-19) — REPOINTED.
+   *
+   * F6's contract is UNCHANGED: the working-tree change set must stay within the
+   * files the CURRENT documented sprint declares. This sprint completed the
+   * remaining `uiux-wave2-core-surfaces-remaining` surfaces (admin CRM,
+   * Catalogue, Communications and Onboarding Tours, and the Integration control
+   * plane), added the deterministic proactive reminder runner plus the two
+   * missing derivation paths (`invoice_due`, `onboarding_step`), and added its
+   * browser journey spec. Those files are named here; anything outside EVERY
+   * declared set is still refused, and the pre-existing offender set
+   * (`ave1-check.mjs` + the four protected `design/*.png`) is unchanged.
+   */
+  const SPRINT_DETERMINISTIC_COMPLETION_SCOPE = new Set([
+    'src/components/admin/BrandCRM.tsx',
+    'src/components/admin/CatalogManagerAdmin.tsx',
+    'src/components/admin/MessagesHub.tsx',
+    'src/components/admin/UsertourAdminPanel.tsx',
+    'src/components/admin/integrations/IntegrationsPanel.tsx',
+    'src/components/admin/BrandIntelligencePanel.tsx',
+    'src/components/admin/LogisticsControl.tsx',
+    'src/components/admin/AccountingPanel.tsx',
+    'src/components/admin/SuperAdminPanel.tsx',
+    'src/components/admin/AmazonAdsDashboard.tsx',
+    'src/components/admin/AdminAuditLog.tsx',
+    'src/components/brand/BrandIntelligence.tsx',
+    'src/components/shared/WorkWorkspace.tsx',
+    'src/lib/work/',
+    'src/lib/events/types.ts',
+    'scripts/validate-work-layer.mjs',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'e2e/deterministic-journey.spec.ts',
+    'docs/SPRINT_DETERMINISTIC_COMPLETION_2026-09-19.md',
+  ]);
+
 
   /**
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
@@ -821,7 +858,7 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) || M2_SCOPE.has(p) ||
           M11_SCOPE.has(p) || M12_SCOPE.has(p) || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
           FUNCTIONAL_COMPLETION_SCOPE.has(p) || UIUX_REDESIGN_SCOPE.has(p) ||
-          SPRINT_WORK_LAYER_SCOPE.has(p) ||
+          SPRINT_WORK_LAYER_SCOPE.has(p) || SPRINT_DETERMINISTIC_COMPLETION_SCOPE.has(p) ||
           [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -830,7 +867,8 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...PHASE4_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...FUNCTIONAL_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...UIUX_REDESIGN_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-          [...SPRINT_WORK_LAYER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...SPRINT_WORK_LAYER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...SPRINT_DETERMINISTIC_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

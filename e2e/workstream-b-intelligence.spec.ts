@@ -46,7 +46,7 @@ test.describe('Workstream B — Brand Intelligence boundaries & internal surface
     await loginAs(page, 'Astonish', 1400);
     await openNav(page, 'Market Intel');
 
-    await expect(page.locator('h2', { hasText: 'Your UK Market' }).first()).toBeVisible({ timeout: 7000 });
+    await expect(page.getByRole('heading', { name: /Your UK Market/ }).first()).toBeVisible({ timeout: 7000 });
     // Decision 1 — no proprietary score/tier on any brand surface.
     await expect(page.getByText(/Score:\s*\d+\/100/)).toHaveCount(0);
     await expect(page.locator('text=tier_1').first()).toHaveCount(0);

@@ -26,8 +26,11 @@ test.describe('Brand Intelligence lifecycle', () => {
     await openNav(page, 'Brand Intelligence');
 
     // Canonical store-backed universe (dataset completeness preserved).
-    await expect(page.locator('h2', { hasText: 'Brand Intelligence' }).first()).toBeVisible({ timeout: 6000 });
-    await expect(page.locator('text=12 tracked.').first()).toBeVisible({ timeout: 5000 });
+    // §Sprint 2 REPOINT — the page identity moved from a bespoke <h2> to the
+    // canonical WorkspaceHeader (an <h1>). The assertion is unchanged in
+    // substance: the page's own heading must be visible.
+    await expect(page.getByRole('heading', { name: /Brand Intelligence/ }).first()).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('text=12 tracked').first()).toBeVisible({ timeout: 5000 });
     await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr')).toHaveCount(10, { timeout: 5000 });
 
     // Pipeline control with an explicit manual run trigger.
@@ -57,7 +60,7 @@ test.describe('Brand Intelligence lifecycle', () => {
     page.on('pageerror', (e) => pageErrors.push(String(e)));
     await loginAs(page, 'Super Admin — Tadii', 1200);
     await openNav(page, 'Brand Intelligence');
-    await expect(page.locator('h2', { hasText: 'Brand Intelligence' }).first()).toBeVisible({ timeout: 6000 });
+    await expect(page.getByRole('heading', { name: /Brand Intelligence/ }).first()).toBeVisible({ timeout: 6000 });
 
     // Run first so lifecycle stamps exist.
     await page.locator('button:has-text("Run discovery")').first().click();

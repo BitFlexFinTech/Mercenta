@@ -44,9 +44,10 @@ test.describe('Domain Acceptance Gate', () => {
   test('2. Brand Intelligence — canonical dataset, scoring KPIs, search, drill-down', async ({ page }) => {
     await loginAs(page, 'Super Admin — Tadii', 1100);
     await openNav(page, 'Brand Intelligence');
-    await expect(page.locator('h2', { hasText: 'Brand Intelligence' }).first()).toBeVisible({ timeout: 6000 });
+    // §Sprint 2 REPOINT — page identity is the canonical WorkspaceHeader (<h1>).
+    await expect(page.getByRole('heading', { name: /Brand Intelligence/ }).first()).toBeVisible({ timeout: 6000 });
     // Dataset completeness: exactly 12 tracked (3 + 9 canonical seed)…
-    await expect(page.locator('text=12 tracked.').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=12 tracked').first()).toBeVisible({ timeout: 5000 });
     // …10 shown after the documented disqualifications (Truthbrush, UpCircle).
     await expect(page.locator('[data-testid="bi-prospect-table"] tbody tr')).toHaveCount(10, { timeout: 5000 });
     // Scoring KPIs render from the intelligence dashboard object.

@@ -22,21 +22,33 @@ async function openHub(page: import('@playwright/test').Page) {
   return hub;
 }
 
-/** Read a summary tile's number by its canonical hint (the tile's title). */
-async function tileCount(hub: import('@playwright/test').Locator, hint: string): Promise<number> {
-  const tile = hub.locator(`button[title="${hint}"]`).first();
-  await expect(tile).toBeVisible({ timeout: 4000 });
-  const raw = await tile.locator('div').first().innerText();
-  return Number(raw.trim());
+/**
+ * §Sprint 2 REPOINT — the Hub's state tiles are now the canonical workspace
+ * MetricBand tiles (`integrations-tile-<key>` / `kpi-open-integrations-<key>`)
+ * instead of bespoke `button[title]` cards. The invariant is UNCHANGED: the
+ * number a tile shows is read back and compared against the rendered provider
+ * cards, so a hardcoded or drifting tile still fails.
+ */
+type TileKey = 'all' | 'live' | 'simulation' | 'available' | 'configuring' | 'attention' | 'disabled';
+
+async function tileCount(hub: import('@playwright/test').Locator, key: TileKey): Promise<number> {
+  const value = hub.getByTestId(`integrations-tile-${key}-value`).first();
+  await expect(value).toBeVisible({ timeout: 4000 });
+  return Number((await value.innerText()).trim());
 }
 
-const HINT_ALL = 'Every registered provider';
-const HINT_LIVE = 'Verified non-sandbox connection';
-const HINT_SIM = 'Executable with mock adapters';
-const HINT_AVAILABLE = 'Registered, not configured yet';
-const HINT_CONFIGURING = 'Connect flow in progress';
-const HINT_ATTENTION = 'Error, degraded or failing health';
-const HINT_DISABLED = 'Operator-disabled — no workflow uses it';
+/** The tile's own drill-down control (the filter toggle). */
+function tileButton(hub: import('@playwright/test').Locator, key: TileKey) {
+  return hub.getByTestId(`kpi-open-integrations-${key}`).first();
+}
+
+const HINT_ALL: TileKey = 'all';
+const HINT_LIVE: TileKey = 'live';
+const HINT_SIM: TileKey = 'simulation';
+const HINT_AVAILABLE: TileKey = 'available';
+const HINT_CONFIGURING: TileKey = 'configuring';
+const HINT_ATTENTION: TileKey = 'attention';
+const HINT_DISABLED: TileKey = 'disabled';
 
 test.describe('Phase B — Integration Hub control centre', () => {
   test('1. overview tiles are derived from the rendered provider modes', async ({ page }) => {
@@ -69,7 +81,7 @@ test.describe('Phase B — Integration Hub control centre', () => {
     const hub = await openHub(page);
 
     const sim = await tileCount(hub, HINT_SIM);
-    await hub.locator(`button[title="${HINT_SIM}"]`).first().click();
+    await tileButton(hub, HINT_SIM).click();
     await page.waitForTimeout(300);
 
     if (sim === 0) {
@@ -80,7 +92,7 @@ test.describe('Phase B — Integration Hub control centre', () => {
       await expect(hub.locator('div[data-mode="simulation"]')).toHaveCount(sim);
       await expect(hub.getByText('Simulation mode.').first()).toBeVisible();
     }
-    await expect(hub.locator(`button[title="${HINT_SIM}"]`)).toHaveAttribute('aria-pressed', 'true');
+    await expect(tileButton(hub, HINT_SIM)).toHaveAttribute('aria-pressed', 'true');
 
     // Clearing restores the full list.
     await hub.getByRole('button', { name: 'Clear filters' }).first().click();
@@ -139,7 +151,7 @@ test.describe('Phase B — Integration Hub control centre', () => {
     page.on('pageerror', (e) => pageErrors.push(e.message));
     const hub = await openHub(page);
 
-    await hub.locator(`button[title="${HINT_ATTENTION}"]`).first().click();
+    await tileButton(hub, HINT_ATTENTION).click();
     await page.waitForTimeout(300);
     await hub.getByRole('button', { name: 'Clear filters' }).first().click();
     await page.waitForTimeout(300);

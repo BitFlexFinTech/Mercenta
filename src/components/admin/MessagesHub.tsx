@@ -7,10 +7,21 @@ import { Badge, Button, Card, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import {
   AlertTriangle,
-  Inbox,
   Lock,
   Send,
 } from 'lucide-react';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceGrid,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
+import { useWorkItems } from '@/lib/work/useWork';
+import { WORK_SOURCE_LABELS } from '@/lib/work/workStore';
 
 type Thread = {
   key: string;
@@ -126,6 +137,87 @@ export function MessagesHub() {
   const activeThread =
     threads.find((t) => t.key === selectedKey) ?? threads[0] ?? null;
 
+  /* §Sprint 2 — real thread filtering (search + needs-human), over the ONE
+     canonical message set. */
+  const [threadQuery, setThreadQuery] = useState('');
+  const [needsHumanOnly, setNeedsHumanOnly] = useState(false);
+  const visibleThreads = useMemo(() => {
+    const q = threadQuery.trim().toLowerCase();
+    return threads.filter((t) => {
+      if (needsHumanOnly && !t.messages.some((m) => m.requiresHuman)) return false;
+      if (!q) return true;
+      return (
+        t.brandName.toLowerCase().includes(q) ||
+        t.messages.some((m) => (m.subject ?? '').toLowerCase().includes(q) || m.body.toLowerCase().includes(q))
+      );
+    });
+  }, [threads, threadQuery, needsHumanOnly]);
+
+  const needsHumanThreads = threads.filter((t) => t.messages.some((m) => m.requiresHuman));
+  const acquisitionThreads = threads.filter((t) => !brandsQuery.data?.data.some((b) => b.id === t.brandId));
+
+  /* §Sprint 2 — the SAME work layer: outreach follow-ups are the CRM side of
+     this inbox, so the operator sees the chase list beside the thread. */
+  const outreachWork = useWorkItems('admin').filter((w) => w.source === 'outreach_followup');
+
+  const metrics: MetricTileData[] = [
+    {
+      id: 'messages-threads',
+      label: 'Threads',
+      value: String(threads.length),
+      size: 'hero',
+      tone: 'info',
+      statusText: `${visibleThreads.length} in view`,
+      context: 'One thread per brand or acquisition prospect',
+      domain: 'catalogue',
+      onOpen: () => {
+        setThreadQuery('');
+        setNeedsHumanOnly(false);
+      },
+      testId: 'messages-metric-threads',
+      valueTestId: 'messages-metric-threads-value',
+    },
+    {
+      id: 'messages-count',
+      label: 'Messages',
+      value: String(allMessages.length),
+      tone: 'info',
+      statusText: `${acquisitionThreads.length} acquisition`,
+      context: 'Full canonical history across automation and staff',
+      domain: 'compliance',
+      onOpen: () => setNeedsHumanOnly(false),
+      testId: 'messages-metric-count',
+      valueTestId: 'messages-metric-count-value',
+    },
+    {
+      id: 'messages-needs-human',
+      label: 'Needs human',
+      value: String(needsHumanThreads.length),
+      tone: needsHumanThreads.length > 0 ? 'danger' : 'success',
+      statusText: needsHumanThreads.length > 0 ? 'Hot leads' : 'Nothing waiting',
+      context: 'Threads the automation has flagged for a person',
+      domain: 'finance',
+      onOpen: () => setNeedsHumanOnly(true),
+      testId: 'messages-metric-needs-human',
+      valueTestId: 'messages-metric-needs-human-value',
+    },
+    {
+      id: 'messages-followups',
+      label: 'Open follow-ups',
+      value: String(outreachWork.length),
+      tone: outreachWork.length > 0 ? 'warning' : 'success',
+      statusText: 'Outreach work items',
+      context: 'CRM follow-ups raised into the canonical work layer',
+      domain: 'logistics',
+      onOpen: () => {
+        setThreadQuery('');
+        setNeedsHumanOnly(false);
+      },
+      testId: 'messages-metric-followups',
+      valueTestId: 'messages-metric-followups-value',
+    },
+  ];
+
   /** §9 send via THE shared brand communication layer — no local pipeline. */
   async function handleSend(threadKey: string, subject: string, body: string) {
     const brandName = threads.find((t) => t.key === threadKey)?.brandName;
@@ -145,19 +237,50 @@ export function MessagesHub() {
   }
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center">
-          <Inbox className="w-5 h-5 text-blue-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Messages</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Unified inbox — one thread per brand/lead, full history across
-            automation and staff
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Admin Hub · Communications"
+        title="Messages"
+        description="Unified inbox — one thread per brand/lead, full history across automation and staff. Sending goes through the shared brand-communication layer; when no live provider is connected every send is logged as a labelled sandbox send, never claimed as delivered."
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {visibleThreads.length} of {threads.length} threads
+            </span>
+            <span className="font-mono text-[11px] text-zinc-500">{allMessages.length} messages</span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {emailLive ? 'email live' : emailSandbox ? 'email sandbox' : 'sending disabled'}
+            </span>
+          </>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              label=""
+              value={threadQuery}
+              onChange={(e) => setThreadQuery(e.target.value)}
+              placeholder="Search threads…"
+              className="w-48"
+              dataTestid="messages-search"
+            />
+            <button
+              type="button"
+              onClick={() => setNeedsHumanOnly((v) => !v)}
+              data-testid="messages-needs-human-filter"
+              className={cn(
+                'rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors',
+                needsHumanOnly
+                  ? 'bg-red-500/20 text-red-200'
+                  : 'bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+              )}
+            >
+              Needs human only
+            </button>
+          </div>
+        }
+      />
+
+      <MetricBand items={metrics} columns={4} />
 
       {!emailLive && !emailSandbox && (
         <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 text-[11px] text-zinc-500 flex items-start gap-2">
@@ -167,10 +290,48 @@ export function MessagesHub() {
         </div>
       )}
 
+      <WorkspaceGrid
+        rail={
+          <>
+            <ContextPanel title="Open outreach follow-ups">
+              <RecordFieldList
+                fields={[
+                  { label: 'Open items', value: String(outreachWork.length) },
+                  { label: 'Threads', value: String(threads.length) },
+                  { label: 'Needs human', value: String(needsHumanThreads.length) },
+                ]}
+              />
+              <ul className="mt-2 space-y-1.5">
+                {outreachWork.slice(0, 5).map((w) => (
+                  <li key={w.id} className="text-[11px] leading-snug text-zinc-400">
+                    <span className="font-medium text-zinc-200">{WORK_SOURCE_LABELS[w.source]}</span>
+                    {' · '}
+                    {w.title}
+                    {w.dueDate && <span className="font-mono text-zinc-600"> · due {w.dueDate}</span>}
+                  </li>
+                ))}
+                {outreachWork.length === 0 && (
+                  <li className="text-[11px] text-zinc-500">No outreach follow-ups open.</li>
+                )}
+              </ul>
+              <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+                These are the same CRM follow-ups Work Management lists — resolving one there
+                clears it here.
+              </p>
+            </ContextPanel>
+            <ContextPanel title="Delivery truth">
+              <p className="text-[11px] leading-snug text-zinc-400">
+                Nothing on this screen claims a live delivery. Every send is attributed to its
+                actor, written to the brand thread and recorded in the platform audit log.
+              </p>
+            </ContextPanel>
+          </>
+        }
+      >
       <div className="grid grid-cols-12 gap-4">
         {/* Thread list */}
-        <Card className="col-span-12 md:col-span-4 overflow-hidden p-0">
-          {threads.map((t) => (
+        <Card className="col-span-12 md:col-span-4 overflow-hidden p-0" data-testid="messages-thread-list">
+          {visibleThreads.map((t) => (
             <ThreadListItem
               key={t.key}
               thread={t}
@@ -178,6 +339,9 @@ export function MessagesHub() {
               onClick={() => setSelectedKey(t.key)}
             />
           ))}
+          {visibleThreads.length === 0 && (
+            <p className="px-4 py-4 text-[11px] text-zinc-600">No threads match the current filters.</p>
+          )}
         </Card>
 
         {/* Thread view */}
@@ -209,7 +373,8 @@ export function MessagesHub() {
           )}
         </Card>
       </div>
-    </div>
+      </WorkspaceGrid>
+    </WorkspaceFrame>
   );
 }
 

@@ -25,7 +25,11 @@ export type EventType =
   // §Sprint — the canonical work/task layer. A work item raised from a real
   // record, and its resolution (which is what stops its reminders).
   | 'work_item_raised'
-  | 'work_item_resolved';
+  | 'work_item_resolved'
+  // §Sprint 2 — the deterministic proactive reminder runner escalated an
+  // existing work item past a declared deadline boundary. Never a timer, never
+  // a random trigger: the sweep is explicitly invoked and idempotent.
+  | 'reminder_raised';
 
 export interface PlatformEvent {
   id: string;
@@ -64,4 +68,5 @@ export const EVENT_SEVERITY_MAP: Record<EventType, EventSeverity> = {
   company_filing_due: 'critical',
   work_item_raised: 'important',
   work_item_resolved: 'informational',
+  reminder_raised: 'important',
 };

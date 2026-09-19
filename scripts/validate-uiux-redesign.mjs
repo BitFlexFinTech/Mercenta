@@ -594,6 +594,71 @@ check(
   read('src/lib/auth/rbac.ts').includes("'work', 'calendar'")
 );
 
+/* ── §Sprint 2 — the remaining core surfaces are now workspaces ─────────────
+ *
+ * The `uiux-wave2-core-surfaces-remaining` row is only completable if every one
+ * of those surfaces actually COMPOSES the shared workspace architecture rather
+ * than keeping its own page composition. These assertions pin that, so the row
+ * cannot drift back to "an old page with a new palette".
+ */
+const SPRINT2_SURFACES = [
+  ['admin Brand Intelligence', 'src/components/admin/BrandIntelligencePanel.tsx'],
+  ['brand Market Intelligence', 'src/components/brand/BrandIntelligence.tsx'],
+  ['Ad Spend', 'src/components/admin/AmazonAdsDashboard.tsx'],
+  ['Accounting', 'src/components/admin/AccountingPanel.tsx'],
+  ['Super Admin', 'src/components/admin/SuperAdminPanel.tsx'],
+  ['Integrations', 'src/components/admin/integrations/IntegrationsPanel.tsx'],
+  ['Onboarding Tours', 'src/components/admin/UsertourAdminPanel.tsx'],
+  ['admin CRM', 'src/components/admin/BrandCRM.tsx'],
+  ['admin Catalogue', 'src/components/admin/CatalogManagerAdmin.tsx'],
+  ['admin Logistics', 'src/components/admin/LogisticsControl.tsx'],
+  ['admin Communications', 'src/components/admin/MessagesHub.tsx'],
+];
+for (const [label, file] of SPRINT2_SURFACES) {
+  const src = read(file);
+  check(
+    `${label} composes the workspace frame`,
+    src.includes('WorkspaceFrame') && src.includes('WorkspaceHeader')
+  );
+  check(
+    `${label} has a real metric band (no static KPI tiles)`,
+    src.includes('MetricBand') && src.includes('onOpen:')
+  );
+  check(
+    `${label} has no leftover bespoke page composition`,
+    !src.includes('max-w-[1400px] mx-auto')
+  );
+}
+
+check(
+  'every migrated surface carries a real context panel or workspace section',
+  SPRINT2_SURFACES.every(([, file]) => {
+    const src = read(file);
+    return src.includes('ContextPanel') || src.includes('WorkspaceSection');
+  })
+);
+check(
+  'the surfaces that consume the operating layer reference the canonical work store',
+  ['src/components/admin/LogisticsControl.tsx', 'src/components/admin/AccountingPanel.tsx',
+   'src/components/admin/MessagesHub.tsx', 'src/components/admin/SuperAdminPanel.tsx']
+    .every((f) => read(f).includes("useWorkItems(") || read(f).includes("from '@/lib/work/"))
+);
+check(
+  'the proactive reminder runner exists and is explicitly invoked (never a timer)',
+  read('src/lib/work/reminderRunner.ts').includes('export function runReminderSweep(') &&
+    !/setInterval\s*\(/.test(read('src/lib/work/reminderRunner.ts'))
+);
+check(
+  'the work workspace exposes the reminder runner to the operator',
+  read('src/components/shared/WorkWorkspace.tsx').includes('runReminderSweep(') &&
+    read('src/components/shared/WorkWorkspace.tsx').includes('work-run-reminders')
+);
+check(
+  'both new derivation paths are declared and derived',
+  read('src/lib/work/workStore.ts').includes("make('invoice_due'") &&
+    read('src/lib/work/workStore.ts').includes("make('onboarding_step'")
+);
+
 console.log(`\nUIUX REDESIGN: ${pass} PASS / ${fail} FAIL`);
 if (fail > 0) {
   console.log(errors.map((e) => `  ✗ ${e}`).join('\n'));

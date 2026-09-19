@@ -49,10 +49,26 @@ import {
   monthLabel,
   WEEKDAY_LABELS,
 } from '@/lib/work/calendar';
-import { useWorkItems } from '@/lib/work/useWork';
-import type { WorkItem, WorkPriority, WorkSource, WorkStatus } from '@/lib/work/types';
+import { useWorkItems, useReminders } from '@/lib/work/useWork';
+import {
+  REMINDER_BUCKET_LABELS,
+  REMINDER_DUE_SOON_DAYS,
+  describeReminderSweep,
+  dismissReminder,
+  resetReminderStore,
+  runReminderSweep,
+} from '@/lib/work/reminderRunner';
+import type {
+  Reminder,
+  ReminderBucket,
+  ReminderSweepResult,
+  WorkItem,
+  WorkPriority,
+  WorkSource,
+  WorkStatus,
+} from '@/lib/work/types';
 import { DOMAIN_COLOURS, type PaletteDomain } from '@/config/themes';
-import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCcw, BellRing } from 'lucide-react';
 
 /* ── Presentation maps (one source for all three views) ────────────────────── */
 
@@ -84,6 +100,9 @@ const SOURCE_OPTIONS: WorkSource[] = [
   'shipment_exception',
   'return_action',
   'outreach_followup',
+  // §Sprint 2 — the two derivation paths completed this sprint.
+  'invoice_due',
+  'onboarding_step',
   'manual',
 ];
 
@@ -102,7 +121,7 @@ export interface WorkWorkspaceProps {
   /** Extra panel rendered in the context rail (scope-specific). */
   contextExtra?: React.ReactNode;
   /** Landing view. The dedicated Calendar destination opens on `calendar`. */
-  initialView?: 'list' | 'board' | 'calendar';
+  initialView?: 'list' | 'board' | 'calendar' | 'reminders';
 }
 
 export function WorkWorkspace({
@@ -117,16 +136,24 @@ export function WorkWorkspace({
   contextExtra,
   initialView = 'list',
 }: WorkWorkspaceProps) {
-  const [view, setView] = useState<'list' | 'board' | 'calendar'>(initialView);
+  const [view, setView] = useState<'list' | 'board' | 'calendar' | 'reminders'>(initialView);
   const [priority, setPriority] = useState<'all' | WorkPriority>('all');
   const [source, setSource] = useState<'all' | WorkSource>('all');
   const [query, setQuery] = useState('');
   const [month, setMonth] = useState(() => monthKey(demoToday()));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
+  /** §Sprint 2 — the last deterministic sweep's report (demo evidence). */
+  const [sweep, setSweep] = useState<ReminderSweepResult | null>(null);
 
   const all = useWorkItems(scope, tenantId);
   const everything = useWorkItems(scope, tenantId, { includeResolved: true });
+  const reminders = useReminders(scope, tenantId);
+  const reminderBuckets: Record<ReminderBucket, number> = {
+    overdue: reminders.filter((r) => r.bucket === 'overdue').length,
+    due_today: reminders.filter((r) => r.bucket === 'due_today').length,
+    due_soon: reminders.filter((r) => r.bucket === 'due_soon').length,
+  };
 
   const matches = (w: WorkItem, q: string) =>
     (priority === 'all' || w.priority === priority) &&
@@ -187,7 +214,7 @@ export function WorkWorkspace({
       statusText: overdue.length > 0 ? 'Past deadline' : 'Nothing overdue',
       context: 'Deadline already passed',
       domain: 'logistics',
-      onOpen: () => setView('calendar'),
+      onOpen: () => setView('reminders'),
       testId: 'work-metric-overdue',
       valueTestId: 'work-metric-overdue-value',
     },
@@ -204,6 +231,23 @@ export function WorkWorkspace({
       valueTestId: 'work-metric-due-week-value',
     },
     {
+      id: 'work-reminders',
+      label: 'Reminders active',
+      value: String(reminders.length),
+      tone: reminderBuckets.overdue > 0 ? 'danger' : reminders.length > 0 ? 'warning' : 'success',
+      statusText:
+        reminderBuckets.overdue > 0
+          ? `${reminderBuckets.overdue} overdue`
+          : reminders.length > 0
+            ? 'Inside reminder window'
+            : 'Nothing to chase',
+      context: `Raised by the deterministic sweep (due-soon window ${REMINDER_DUE_SOON_DAYS} days)`,
+      domain: 'finance',
+      onOpen: () => setView('reminders'),
+      testId: 'work-metric-reminders',
+      valueTestId: 'work-metric-reminders-value',
+    },
+    {
       id: 'work-open',
       label: 'Open work',
       value: String(all.length),
@@ -215,6 +259,7 @@ export function WorkWorkspace({
         setPriority('all');
         setSource('all');
         setQuery('');
+        setView('list');
       },
       testId: 'work-metric-open',
       valueTestId: 'work-metric-open-value',
@@ -265,6 +310,9 @@ export function WorkWorkspace({
             <span className="font-mono text-[11px] text-zinc-500">
               {all.length} open · {everything.length - all.length} resolved
             </span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {reminders.length} reminder{reminders.length === 1 ? '' : 's'} active
+            </span>
             <span className="font-mono text-[11px] text-zinc-500">As at {today}</span>
           </>
         }
@@ -274,6 +322,8 @@ export function WorkWorkspace({
             className="text-[11px]"
             onClick={() => {
               resetWorkStore();
+              resetReminderStore();
+              setSweep(null);
               setSelectedId(null);
             }}
             data-testid="work-reset"
@@ -289,13 +339,43 @@ export function WorkWorkspace({
             <SegmentedControl
               ariaLabel="Work view"
               active={view}
-              onSelect={(v) => setView(v as 'list' | 'board' | 'calendar')}
+              onSelect={(v) => setView(v as 'list' | 'board' | 'calendar' | 'reminders')}
               items={[
                 { id: 'list', label: 'List', count: filtered.length },
                 { id: 'board', label: 'Kanban' },
                 { id: 'calendar', label: 'Calendar', count: overdue.length },
+                { id: 'reminders', label: 'Reminders', count: reminders.length },
               ]}
             />
+            {/*
+              §Sprint 2 — the deterministic reminder runner is INVOKED here, not
+              scheduled. Running it twice with unchanged state raises nothing the
+              second time (idempotent), which is what the report below shows.
+            */}
+            <Button
+              variant="ghost"
+              className="text-[11px]"
+              onClick={() => setSweep(runReminderSweep(scope, tenantId, actor))}
+              data-testid="work-run-reminders"
+              title={describeReminderSweep().cadence}
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <BellRing className="h-3.5 w-3.5" aria-hidden="true" />
+                Run reminder sweep
+              </span>
+            </Button>
+            {sweep && (
+              <span
+                className="font-mono text-[10px] text-zinc-500"
+                data-testid="work-sweep-report"
+                data-sweep-raised={sweep.raised.length}
+                data-sweep-duplicates={sweep.duplicatesSuppressed}
+              >
+                sweep {sweep.sweptAt}: raised {sweep.raised.length} · suppressed{' '}
+                {sweep.duplicatesSuppressed} duplicate · {sweep.suppressedResolved} resolved ·{' '}
+                {sweep.active} active
+              </span>
+            )}
             <Input
               label=""
               value={query}
@@ -343,8 +423,10 @@ export function WorkWorkspace({
         }
       />
 
-      <MetricBand items={metrics} columns={4} />
-
+      {/* §Sprint 2 — 4 + 2 so the reminder tile sits beside "Open work" without
+          leaving a ragged row in the band. */}
+      <MetricBand items={metrics.slice(0, 4)} columns={4} />
+      <MetricBand items={metrics.slice(4)} columns={2} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0 space-y-3" data-testid="work-primary" data-density={density}>
           {view === 'list' && (
@@ -374,6 +456,15 @@ export function WorkWorkspace({
               onOpen={(id) => setSelectedId(id)}
             />
           )}
+
+          {view === 'reminders' && (
+            <ReminderList
+              reminders={reminders}
+              buckets={reminderBuckets}
+              actor={actor}
+              onOpen={(id) => setSelectedId(id)}
+            />
+          )}
         </div>
 
         <div className="space-y-3">
@@ -386,6 +477,22 @@ export function WorkWorkspace({
             </p>
           </ContextPanel>
           {contextExtra}
+          <ContextPanel title="Proactive reminders">
+            <RecordFieldList
+              fields={[
+                { label: 'Overdue', value: String(reminderBuckets.overdue) },
+                { label: 'Due today', value: String(reminderBuckets.due_today) },
+                { label: 'Due soon', value: String(reminderBuckets.due_soon) },
+                { label: 'Runner', value: 'On demand (deterministic)' },
+                { label: 'Due-soon window', value: `${REMINDER_DUE_SOON_DAYS} days` },
+                { label: 'Network calls', value: '0 (simulation only)' },
+              ]}
+            />
+            <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+              {describeReminderSweep().cadence} — resolving the underlying work item removes its
+              reminder immediately.
+            </p>
+          </ContextPanel>
           <ContextPanel title="Recent activity">
             <ActivityFeed entries={activity} />
           </ContextPanel>
@@ -502,6 +609,116 @@ function KanbanBoard({
           </section>
         );
       })}
+    </div>
+  );
+}
+
+/* ── REMINDERS (§Sprint 2 — the proactive reminder runner's output) ────────── */
+
+const BUCKET_ORDER: ReminderBucket[] = ['overdue', 'due_today', 'due_soon'];
+
+const BUCKET_TONE: Record<ReminderBucket, StatusTone> = {
+  overdue: 'danger',
+  due_today: 'warning',
+  due_soon: 'info',
+};
+
+/**
+ * The active reminder set. Every row is an escalation of a REAL work item — the
+ * "Open work item" action hands the operator to the record's own workspace, and
+ * dismissing is an audited decision (not a snooze).
+ */
+function ReminderList({
+  reminders,
+  buckets,
+  actor,
+  onOpen,
+}: {
+  reminders: Reminder[];
+  buckets: Record<ReminderBucket, number>;
+  actor: string;
+  onOpen: (workItemId: string) => void;
+}) {
+  return (
+    <div
+      className="overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850"
+      data-testid="work-reminders"
+      data-reminder-count={reminders.length}
+      data-reminder-overdue={buckets.overdue}
+    >
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] px-3.5 py-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          Proactive reminders
+        </span>
+        <span className="font-mono text-[11px] text-zinc-500">
+          {buckets.overdue} overdue · {buckets.due_today} due today · {buckets.due_soon} due soon
+        </span>
+      </header>
+      {reminders.length === 0 && (
+        <div className="flex items-center gap-2.5 px-3.5 py-3">
+          <StatusBadge tone="success" dataStatus="success">
+            No reminders raised
+          </StatusBadge>
+          <p className="text-xs text-zinc-400">
+            Nothing is inside the reminder window. Run the deterministic sweep to re-evaluate
+            every deadline.
+          </p>
+        </div>
+      )}
+      <ul className="divide-y divide-white/[0.05]">
+        {BUCKET_ORDER.flatMap((bucket) => {
+          const rows = reminders.filter((r) => r.bucket === bucket);
+          if (rows.length === 0) return [];
+          return [
+            <li key={`bucket-${bucket}`} className="bg-white/[0.02] px-3.5 py-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                {REMINDER_BUCKET_LABELS[bucket]} ({rows.length})
+              </p>
+            </li>,
+            ...rows.map((r) => (
+              <li
+                key={r.id}
+                className="flex flex-wrap items-start justify-between gap-3 px-3.5 py-2.5"
+                data-testid={`reminder-row-${r.id}`}
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge tone={BUCKET_TONE[r.bucket]} dataStatus={BUCKET_TONE[r.bucket]}>
+                      {REMINDER_BUCKET_LABELS[r.bucket]}
+                    </StatusBadge>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                      {WORK_SOURCE_LABELS[r.source]}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs font-medium text-white">{r.title}</p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-zinc-500">{r.detail}</p>
+                  <p className="mt-0.5 font-mono text-[10px] text-zinc-600">
+                    due {r.dueDate} · raised {r.raisedAt} · work {r.workItemId}
+                  </p>
+                </div>
+                <div className="flex flex-shrink-0 items-center gap-1.5">
+                  <Button
+                    variant="ghost"
+                    className="text-[10px]"
+                    onClick={() => onOpen(r.workItemId)}
+                    data-testid={`reminder-open-${r.id}`}
+                  >
+                    Open work item
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-[10px]"
+                    onClick={() => dismissReminder(r.id, actor, 'Dismissed from the reminder queue')}
+                    data-testid={`reminder-dismiss-${r.id}`}
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </li>
+            )),
+          ];
+        })}
+      </ul>
     </div>
   );
 }

@@ -292,6 +292,12 @@ export interface MetricTileData {
   domain?: PaletteDomain;
   /** Drill-down to the existing destination (KPI → filtered view). */
   onOpen?: () => void;
+  /**
+   * §Sprint 2 — when the tile is a TOGGLE (a filter that can be on or off),
+   * set `pressed` so the tile carries the real `aria-pressed` state instead of
+   * relying on colour alone. Left undefined for ordinary drill-down tiles.
+   */
+  pressed?: boolean;
   testId?: string;
   valueTestId?: string;
 }
@@ -321,6 +327,7 @@ export function MetricTile({ data }: { data: MetricTileData }) {
           type="button"
           onClick={data.onOpen}
           aria-label={`${data.label}: ${data.value}${data.statusText ? `, ${data.statusText}` : ''}`}
+          aria-pressed={data.pressed === undefined ? undefined : data.pressed}
           data-testid={`kpi-open-${data.id}`}
           className="w-full rounded-ds-sm pt-0.5 text-left transition-ds duration-ds-fast hover:bg-white/[0.03] focus-visible:bg-white/[0.03]"
         >

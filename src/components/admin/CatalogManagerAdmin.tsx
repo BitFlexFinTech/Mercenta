@@ -13,6 +13,16 @@ import { SUBMISSION_STATUS_LABELS } from '@/lib/spapi/transform';
 import { X, Package, Filter } from 'lucide-react';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { APPROVED_CATEGORIES } from '@/types';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceGrid,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
 
 function ProductDetailModal(props: { product: DemoProduct; submission?: ProductSubmission; canMutate: boolean; onClose: () => void }) {
   const { product, submission, canMutate, onClose } = props;
@@ -161,6 +171,8 @@ export function CatalogManagerAdmin() {
   );
   const [selectedProduct, setSelectedProduct] = useState<DemoProduct | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  /* §Sprint 2 — the metric band's drill-downs narrow the SAME list (one source). */
+  const [focus, setFocus] = useState<'all' | 'not_submitted' | 'inactive'>('all');
 
   /**
    * §Phase E5 (G9) — ONE canonical latest-submission derivation.
@@ -193,11 +205,75 @@ export function CatalogManagerAdmin() {
 
   // Filter products by brand category
   const filteredProducts = useMemo(function() {
-    if (categoryFilter === 'all') return products;
-    return products.filter(function(p) {
-      return brandCategoryMap.get(p.brandId) === categoryFilter;
-    });
-  }, [products, categoryFilter, brandCategoryMap]);
+    let rows = products;
+    if (categoryFilter !== 'all') {
+      rows = rows.filter(function(p) {
+        return brandCategoryMap.get(p.brandId) === categoryFilter;
+      });
+    }
+    if (focus === 'not_submitted') {
+      rows = rows.filter(function(p) { return !latestSubmissionForProduct(p.brandId, p.sku); });
+    }
+    if (focus === 'inactive') {
+      rows = rows.filter(function(p) { return p.isAvailable === false; });
+    }
+    return rows;
+  }, [products, categoryFilter, brandCategoryMap, focus]);
+
+  const notSubmitted = products.filter(function(p) { return !latestSubmissionForProduct(p.brandId, p.sku); });
+  const inactive = products.filter(function(p) { return p.isAvailable === false; });
+  const catalogueCategoryCount = new Set(products.map(function(p) { return brandCategoryMap.get(p.brandId) ?? 'Uncategorized'; })).size;
+  const metrics: MetricTileData[] = [
+    {
+      id: 'catalog-products',
+      label: 'Products',
+      value: String(products.length),
+      size: 'hero',
+      tone: 'info',
+      statusText: `${filteredProducts.length} in view`,
+      context: 'Catalogue records across every brand tenant',
+      domain: 'catalogue',
+      onOpen: function() { setFocus('all'); setCategoryFilter('all'); },
+      testId: 'catalog-metric-products',
+      valueTestId: 'catalog-metric-products-value',
+    },
+    {
+      id: 'catalog-brands',
+      label: 'Owning brands',
+      value: String(brands.length),
+      tone: 'info',
+      statusText: `${catalogueCategoryCount} categories`,
+      context: 'Brands with catalogue records',
+      domain: 'compliance',
+      onOpen: function() { setFocus('all'); setCategoryFilter('all'); },
+      testId: 'catalog-metric-brands',
+      valueTestId: 'catalog-metric-brands-value',
+    },
+    {
+      id: 'catalog-not-submitted',
+      label: 'Not submitted',
+      value: String(notSubmitted.length),
+      tone: notSubmitted.length > 0 ? 'warning' : 'success',
+      statusText: notSubmitted.length > 0 ? 'Awaiting channel submission' : 'All submitted',
+      context: 'Products with no catalogue submission record',
+      domain: 'logistics',
+      onOpen: function() { setFocus('not_submitted'); },
+      testId: 'catalog-metric-not-submitted',
+      valueTestId: 'catalog-metric-not-submitted-value',
+    },
+    {
+      id: 'catalog-inactive',
+      label: 'Inactive',
+      value: String(inactive.length),
+      tone: inactive.length > 0 ? 'danger' : 'success',
+      statusText: inactive.length > 0 ? 'Not sellable' : 'All active',
+      context: 'Products marked unavailable',
+      domain: 'finance',
+      onOpen: function() { setFocus('inactive'); },
+      testId: 'catalog-metric-inactive',
+      valueTestId: 'catalog-metric-inactive-value',
+    },
+  ];
 
   // Count products per category
   const categoryCounts = useMemo(function() {
@@ -225,44 +301,90 @@ export function CatalogManagerAdmin() {
   ];
 
   return (
-    <div className='p-6 space-y-6 max-w-[1400px] mx-auto'>
-      <div className='flex items-center justify-between'>
-        <div>
-          <h2 className='text-lg font-semibold text-white'>Global Catalog Manager</h2>
-          <p className='text-xs text-zinc-500 mt-0.5'>{filteredProducts.length} of {products.length} products across {brands.length} brands</p>
-        </div>
-      </div>
-
-      {/* Category filter bar */}
-      <div className='flex items-center gap-1.5 flex-wrap'>
-        <Filter className='w-3.5 h-3.5 text-zinc-500 mr-1' />
-        <button onClick={function() { setCategoryFilter('all'); }}
-          className={cn('px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors',
-            categoryFilter === 'all' ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
-          )}>
-          All ({products.length})
-        </button>
-        {APPROVED_CATEGORIES.map(function(cat) {
-          const count = categoryCounts.get(cat) ?? 0;
-          if (count === 0) return null;
-          return (
-            <button key={cat} onClick={function() { setCategoryFilter(cat); }}
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Admin Hub · Catalogue"
+        title="Global Catalog Manager"
+        description="Every catalogue record, its owning brand tenant and its channel-submission state. Product readiness is derived from the same canonical submission records the brand sees."
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {filteredProducts.length} of {products.length} products
+            </span>
+            <span className="font-mono text-[11px] text-zinc-500">{brands.length} brands</span>
+            <span className="font-mono text-[11px] text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
+          </>
+        }
+        toolbar={
+          <div className='flex items-center gap-1.5 flex-wrap'>
+            <Filter className='w-3.5 h-3.5 text-zinc-500 mr-1' />
+            <button onClick={function() { setCategoryFilter('all'); }}
+              data-testid="catalog-cat-all"
               className={cn('px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors',
-                categoryFilter === cat ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
+                categoryFilter === 'all' ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
               )}>
-              {cat} ({count})
+              All ({products.length})
             </button>
-          );
-        })}
-      </div>
-
-      <DataTable
-        rows={filteredProducts}
-        columns={columns}
-        searchText={function(p) { return p.name + ' ' + p.sku + ' ' + brandName(p.brandId) + ' ' + brandCategory(p.brandId); }}
-        onRowClick={function(p) { setSelectedProduct(p); }}
-        emptyMessage={categoryFilter !== 'all' ? 'No products in this category.' : 'No products found.'}
+            {APPROVED_CATEGORIES.map(function(cat) {
+              const count = categoryCounts.get(cat) ?? 0;
+              if (count === 0) return null;
+              return (
+                <button key={cat} onClick={function() { setCategoryFilter(cat); }}
+                  data-testid={`catalog-cat-${cat}`}
+                  className={cn('px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors',
+                    categoryFilter === cat ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
+                  )}>
+                  {cat} ({count})
+                </button>
+              );
+            })}
+          </div>
+        }
       />
+
+      <MetricBand items={metrics} columns={4} />
+
+      <WorkspaceGrid
+        rail={
+          <>
+            <ContextPanel title="Catalogue readiness">
+              <RecordFieldList
+                fields={[
+                  { label: 'Products', value: String(products.length) },
+                  { label: 'In view', value: String(filteredProducts.length) },
+                  { label: 'Not submitted', value: String(notSubmitted.length) },
+                  { label: 'Inactive', value: String(inactive.length) },
+                  { label: 'Category filter', value: categoryFilter === 'all' ? 'All approved categories' : categoryFilter },
+                ]}
+              />
+              <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+                A catalogue item becomes PO-eligible only once its compliance documents are
+                approved — the compliance gate is enforced in the domain, not on this screen.
+              </p>
+            </ContextPanel>
+            <ContextPanel title="Channel submission">
+              <p className="text-[11px] leading-snug text-zinc-400">
+                Submission state is the canonical record the brand also sees; entries marked
+                &ldquo;(sim)&rdquo; are deterministic simulation and no channel API was contacted.
+              </p>
+            </ContextPanel>
+          </>
+        }
+      >
+        <WorkspaceSection
+          title="Catalogue records"
+          description="Owning brand, price, availability and the latest channel submission."
+          domain="catalogue"
+        >
+          <DataTable
+            rows={filteredProducts}
+            columns={columns}
+            searchText={function(p) { return p.name + ' ' + p.sku + ' ' + brandName(p.brandId) + ' ' + brandCategory(p.brandId); }}
+            onRowClick={function(p) { setSelectedProduct(p); }}
+            emptyMessage={categoryFilter !== 'all' ? 'No products in this category.' : 'No products match the current filters.'}
+          />
+        </WorkspaceSection>
+      </WorkspaceGrid>
 
       {selectedProduct && (
         <ProductDetailModal
@@ -272,6 +394,6 @@ export function CatalogManagerAdmin() {
           onClose={function() { setSelectedProduct(null); }}
         />
       )}
-    </div>
+    </WorkspaceFrame>
   );
 }

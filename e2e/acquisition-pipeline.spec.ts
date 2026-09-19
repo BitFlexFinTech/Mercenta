@@ -36,7 +36,7 @@ test.describe('Acquisition pipeline (Phase C)', () => {
 
     await loginAs(page, 'Super Admin — Tadii', 1200);
     await openNav(page, 'Brand Intelligence');
-    await expect(page.locator('h2', { hasText: 'Brand Intelligence' }).first()).toBeVisible({ timeout: 6000 });
+    await expect(page.getByRole('heading', { name: /Brand Intelligence/ }).first()).toBeVisible({ timeout: 6000 });
 
     // ── BI prospect → ICP identity → BI evidence ──
     await openOutreachTab(page, 'Tapatío');

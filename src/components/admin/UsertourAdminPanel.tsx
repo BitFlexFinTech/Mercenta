@@ -4,11 +4,19 @@
  * Lists all 9 built-in brand tours with status info (auto-start, force-first,
  * step count, target roles/views) and a preview action. Internal tool.
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, Button, Badge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { Layers, Eye, ChevronDown, ChevronUp, X, HelpCircle, CheckCircle2, ChevronRight } from 'lucide-react';
 import { ALL_TOUR_DEFINITIONS, TOUR_REGISTRY, type TourDefinition, type TourStep } from '@/config/tours/tourDefinitions';
+import {
+  ContextPanel,
+  MetricBand,
+  WorkspaceFrame,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
 
 /* ── Step-list collapsible ──────────────────────────────────────── */
 
@@ -212,6 +220,76 @@ export function UsertourAdminPanel() {
   const publishedCount = ALL_TOUR_DEFINITIONS.filter((t) => t.autoStart).length;
   const requiredCount = ALL_TOUR_DEFINITIONS.filter((t) => t.forceFirst).length;
 
+  /* §Sprint 2 — real filtering over the ONE canonical tour registry. */
+  const [tourQuery, setTourQuery] = useState('');
+  const [tourStatus, setTourStatus] = useState<'all' | 'published' | 'draft' | 'required'>('all');
+  const visibleTours = useMemo(() => {
+    const q = tourQuery.trim().toLowerCase();
+    return ALL_TOUR_DEFINITIONS.filter((t) => {
+      if (tourStatus === 'published' && !t.autoStart) return false;
+      if (tourStatus === 'draft' && t.autoStart) return false;
+      if (tourStatus === 'required' && !t.forceFirst) return false;
+      if (!q) return true;
+      return (
+        t.name.toLowerCase().includes(q) ||
+        t.id.toLowerCase().includes(q) ||
+        (t.description ?? '').toLowerCase().includes(q)
+      );
+    });
+  }, [tourQuery, tourStatus]);
+
+  const tourMetrics: MetricTileData[] = [
+    {
+      id: 'tours-total',
+      label: 'Total Tours',
+      value: String(totalTours),
+      size: 'hero',
+      tone: 'info',
+      statusText: `${visibleTours.length} in view`,
+      context: 'Guided tours defined for the brand portal',
+      domain: 'catalogue',
+      onOpen: () => { setTourStatus('all'); setTourQuery(''); },
+      testId: 'tours-metric-total',
+      valueTestId: 'tours-metric-total-value',
+    },
+    {
+      id: 'tours-published',
+      label: 'Auto-start (Published)',
+      value: String(publishedCount),
+      tone: 'success',
+      statusText: 'Launch automatically',
+      context: 'Tours that start without an explicit request',
+      domain: 'compliance',
+      onOpen: () => setTourStatus('published'),
+      testId: 'tours-metric-published',
+      valueTestId: 'tours-metric-published-value',
+    },
+    {
+      id: 'tours-required',
+      label: 'Required (Force-first)',
+      value: String(requiredCount),
+      tone: requiredCount > 0 ? 'warning' : 'success',
+      statusText: 'Must be seen',
+      context: 'Tours the brand must complete before others',
+      domain: 'finance',
+      onOpen: () => setTourStatus('required'),
+      testId: 'tours-metric-required',
+      valueTestId: 'tours-metric-required-value',
+    },
+    {
+      id: 'tours-draft',
+      label: 'Draft',
+      value: String(totalTours - publishedCount),
+      tone: 'neutral',
+      statusText: 'Not auto-started',
+      context: 'Tours available on request only',
+      domain: 'logistics',
+      onOpen: () => setTourStatus('draft'),
+      testId: 'tours-metric-draft',
+      valueTestId: 'tours-metric-draft-value',
+    },
+  ];
+
   // Listen for tour:preview custom event from TourCard buttons
   useEffect(() => {
     const handler = (e: Event) => {
@@ -225,50 +303,79 @@ export function UsertourAdminPanel() {
   const previewTour = previewTourId ? (TOUR_REGISTRY[previewTourId] ?? null) : null;
 
   return (
-    <div className="space-y-4">
-      <Card className="p-5">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-sm font-semibold text-white">Onboarding Tours</h3>
-            <p className="text-[11px] text-zinc-500 mt-1">
-              Internal tour management — {totalTours} tours defined for the brand portal.
-              Tours are rendered by the built-in TourEngine at runtime.
-            </p>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Admin Hub · Governance"
+        title="Onboarding Tours"
+        description="Internal tour management — the guided onboarding tours defined for the brand portal. Tours are rendered by the built-in TourEngine at runtime; this surface manages and previews them, it does not replace them."
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">{totalTours} tours</span>
+            <span className="font-mono text-[11px] text-zinc-500">{publishedCount} published</span>
+            <span className="font-mono text-[11px] text-zinc-500">{requiredCount} required</span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {visibleTours.length} in view
+            </span>
+          </>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              value={tourQuery}
+              onChange={(e) => setTourQuery(e.target.value)}
+              placeholder="Search tours"
+              data-testid="tours-search"
+              className="w-48 bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-white"
+            />
+            <select
+              aria-label="Tour status filter"
+              value={tourStatus}
+              onChange={(e) => setTourStatus(e.target.value as 'all' | 'published' | 'draft' | 'required')}
+              data-testid="tours-status-filter"
+              className="cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+            >
+              <option value="all">Status: all</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="required">Required</option>
+            </select>
           </div>
-          <Badge className="text-[10px] bg-brass-500/15 text-brass-300 border-brass-500/20">
-            {totalTours} tours
-          </Badge>
-        </div>
+        }
+      />
 
-        {/* Summary bar */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-semibold text-white">{totalTours}</div>
-            <div className="text-[10px] text-zinc-500">Total Tours</div>
-          </div>
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-semibold text-emerald-300">{publishedCount}</div>
-            <div className="text-[10px] text-zinc-500">Auto-start (Published)</div>
-          </div>
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg px-3 py-2 text-center">
-            <div className="text-lg font-semibold text-amber-300">{requiredCount}</div>
-            <div className="text-[10px] text-zinc-500">Required (Force-first)</div>
-          </div>
-        </div>
+      <MetricBand items={tourMetrics} columns={4} />
 
+      <WorkspaceSection
+        title="Tour catalogue"
+        description="Each tour is a real definition rendered by the TourEngine — previewing here launches the same steps the brand sees."
+        domain="compliance"
+      >
         {/* Tour grid */}
         <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
-          {ALL_TOUR_DEFINITIONS.map((tour) => (
+          {visibleTours.map((tour) => (
             <TourCard key={tour.id} tour={tour} />
           ))}
         </div>
-      </Card>
+        {visibleTours.length === 0 && (
+          <Card className="p-6">
+            <p className="text-xs text-zinc-600">No tours match the current filters.</p>
+          </Card>
+        )}
+      </WorkspaceSection>
+
+      <ContextPanel title="Tour engine">
+        <p className="text-[11px] leading-snug text-zinc-400">
+          Tours are launched by the TourEngine in the brand shell. Dismissal, step completion and
+          force-first ordering are owned by that engine — this panel only lists and previews the
+          definitions, so a tour can never be duplicated into a second implementation here.
+        </p>
+      </ContextPanel>
 
       {/* Preview modal */}
       {previewTour && (
         <TourPreviewModal tour={previewTour} onClose={() => setPreviewTourId(null)} />
       )}
-    </div>
+    </WorkspaceFrame>
   );
 }

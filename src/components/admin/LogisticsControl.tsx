@@ -1,13 +1,29 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useBrands, usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { DemoBanner } from '@/components/shared/DemoBanner';
 import { Badge, Card, DataTable, StatusBadge } from '@/components/ui';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
-import { AlertTriangle, Container, Ship } from 'lucide-react';
+import { Container, Ship } from 'lucide-react';
 import type { DemoShipment } from '@/data/demoData';
 import type { PurchaseOrder } from '@/types';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceGrid,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+} from '@/components/shared/workspace';
+import { useWorkItems } from '@/lib/work/useWork';
+import { WORK_SOURCE_LABELS, demoToday, daysBetween } from '@/lib/work/workStore';
+import type { WorkSource } from '@/lib/work/types';
 
 const IN_TRANSIT = ['sea_transit', 'air_transit', 'factory_intake'];
+
+/** §Sprint 2 — the logistics side of the deterministic operating layer. */
+const LOGISTICS_WORK_SOURCES: WorkSource[] = ['shipment_exception', 'po_acknowledgement', 'po_window'];
 
 /**
  * §Stage-6 — LOGISTICS CONTROL (operational view).
@@ -57,28 +73,172 @@ export function LogisticsControl() {
   const delayed = inTransit.filter((s) => s.delayed);
   const exceptions = shipments.filter((s) => s.exception);
 
+  /* §Sprint 2 — the SAME deterministic work layer the Work Management surface
+     uses, narrowed to the logistics sources. No second task system. */
+  const logisticsWork = useWorkItems('admin').filter((w) => LOGISTICS_WORK_SOURCES.includes(w.source));
+  const today = demoToday();
+
+  /* §Sprint 2 — metric drill-downs narrow the SAME grouped shipment list. */
+  const [focus, setFocus] = useState<'all' | 'in_transit' | 'delayed' | 'exceptions'>('all');
+  const visibleGroups = useMemo(() => {
+    if (focus === 'all') return groups;
+    return groups
+      .map(([brandId, list]) => {
+        const rows =
+          focus === 'exceptions'
+            ? list.filter((s) => s.exception)
+            : focus === 'delayed'
+              ? list.filter((s) => IN_TRANSIT.includes(s.status) && s.delayed)
+              : list.filter((s) => IN_TRANSIT.includes(s.status));
+        return [brandId, rows] as [string, DemoShipment[]];
+      })
+      .filter(([, rows]) => rows.length > 0);
+  }, [groups, focus]);
+
+  const overdueWork = logisticsWork.filter((w) => w.dueDate !== null && w.dueDate < today);
+  const dueThisWeekWork = logisticsWork.filter((w) => {
+    if (!w.dueDate) return false;
+    const d = daysBetween(today, w.dueDate);
+    return d >= 0 && d <= 7;
+  });
+
+  const metrics: MetricTileData[] = [
+    {
+      id: 'logistics-in-transit',
+      label: 'In Transit',
+      value: String(inTransit.length),
+      size: 'hero',
+      tone: 'info',
+      statusText: `${shipments.length} shipments total`,
+      context: 'Shipments in a transit state across every brand',
+      domain: 'logistics',
+      onOpen: () => setFocus('in_transit'),
+      testId: 'logistics-metric-in-transit',
+      valueTestId: 'logistics-metric-in-transit-value',
+    },
+    {
+      id: 'logistics-delayed',
+      label: 'Delayed',
+      value: String(delayed.length),
+      tone: delayed.length > 0 ? 'warning' : 'success',
+      statusText: delayed.length > 0 ? 'Carrier delay flagged' : 'No delays',
+      context: 'In-transit shipments the carrier has flagged as late',
+      domain: 'finance',
+      onOpen: () => setFocus('delayed'),
+      testId: 'logistics-metric-delayed',
+      valueTestId: 'logistics-metric-delayed-value',
+    },
+    {
+      id: 'logistics-exceptions',
+      label: 'Exceptions',
+      value: String(exceptions.length),
+      tone: exceptions.length > 0 ? 'danger' : 'success',
+      statusText: exceptions.length > 0 ? 'Needs resolution' : 'No exceptions',
+      context: 'Shipments the carrier has raised an exception on',
+      domain: 'compliance',
+      onOpen: () => setFocus('exceptions'),
+      testId: 'logistics-metric-exceptions',
+      valueTestId: 'logistics-metric-exceptions-value',
+    },
+    {
+      id: 'logistics-work',
+      label: 'Open logistics work',
+      value: String(logisticsWork.length),
+      tone: logisticsWork.length > 0 ? 'warning' : 'success',
+      statusText: `${overdueWork.length} overdue`,
+      context: 'Acknowledgement, fulfilment-window and shipment-exception items',
+      domain: 'catalogue',
+      onOpen: () => setFocus('all'),
+      testId: 'logistics-metric-work',
+      valueTestId: 'logistics-metric-work-value',
+    },
+  ];
+
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center">
-          <Container className="w-5 h-5 text-cyan-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Logistics Control</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Operational view — shipments in transit, delays and exceptions by brand
-            and PO
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Admin Hub · Logistics"
+        title="Logistics Control"
+        description="Operational view — shipments in transit, delays and exceptions by brand and PO. Shipment state feeds the canonical work layer, so an exception becomes an actionable item rather than a passive row."
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">{shipments.length} shipments</span>
+            <span className="font-mono text-[11px] text-zinc-500">{groups.length} brands</span>
+            <span className="font-mono text-[11px] text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              deterministic simulation · no live carrier call
+            </span>
+          </>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-1.5" data-testid="logistics-focus">
+            {(['all', 'in_transit', 'delayed', 'exceptions'] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFocus(f)}
+                data-testid={`logistics-focus-${f}`}
+                className={
+                  focus === f
+                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-[11px] font-medium text-white'
+                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                }
+              >
+                {f.replace(/_/g, ' ')}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <DemoBanner />
 
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="p-4"><div className="text-xs text-zinc-500 mb-1">In Transit</div><div className="text-2xl font-bold text-white">{inTransit.length}</div></Card>
-        <Card className="p-4"><div className="text-xs text-zinc-500 mb-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-amber-400" /> Delayed</div><div className="text-2xl font-bold text-amber-400">{delayed.length}</div></Card>
-        <Card className="p-4"><div className="text-xs text-zinc-500 mb-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3 text-red-400" /> Exceptions</div><div className="text-2xl font-bold text-red-400">{exceptions.length}</div></Card>
-      </div>
+      <MetricBand items={metrics} columns={4} />
+
+      <WorkspaceGrid
+        rail={
+          <>
+            <ContextPanel title="Operational work">
+              <RecordFieldList
+                fields={[
+                  { label: 'Open items', value: String(logisticsWork.length) },
+                  { label: 'Overdue', value: String(overdueWork.length) },
+                  { label: 'Due this week', value: String(dueThisWeekWork.length) },
+                ]}
+              />
+              <ul className="mt-2 space-y-1.5">
+                {logisticsWork.slice(0, 5).map((w) => (
+                  <li key={w.id} className="text-[11px] leading-snug text-zinc-400">
+                    <span className="font-medium text-zinc-200">{WORK_SOURCE_LABELS[w.source]}</span>
+                    {' · '}
+                    {w.title}
+                    {w.dueDate && <span className="font-mono text-zinc-600"> · due {w.dueDate}</span>}
+                  </li>
+                ))}
+                {logisticsWork.length === 0 && (
+                  <li className="text-[11px] text-zinc-500">No open logistics work.</li>
+                )}
+              </ul>
+              <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+                These are the same items Work Management and the derived calendar show — resolving
+                one there stops its reminder here too.
+              </p>
+            </ContextPanel>
+            <ContextPanel title="Lifecycle">
+              <p className="text-[11px] leading-snug text-zinc-400">
+                PO → acknowledgement → fulfilment → shipment → delivery → exception → resolution →
+                return → close. Every stage is deterministic simulation; nothing here is a live
+                carrier response.
+              </p>
+            </ContextPanel>
+          </>
+        }
+      >
+      {focus !== 'all' && visibleGroups.length === 0 && (
+        <Card className="p-4">
+          <p className="text-xs text-zinc-500">No shipments match the current focus.</p>
+        </Card>
+      )}
 
       {groups.length === 0 && (
         // §M9 — honest empty state: the surface previously rendered three zero
@@ -96,8 +256,8 @@ export function LogisticsControl() {
         </Card>
       )}
 
-      {groups.map(([brandId, list]) => (
-        <Card key={brandId} title={brandName(brandId)}>
+      {visibleGroups.map(([brandId, list]) => (
+        <WorkspaceSection key={brandId} title={brandName(brandId)} domain="logistics">
           {/* §Phase D — canonical DataTable + canonical shipment status layer:
               the same state now reads identically here, on the brand logistics
               hub and on the carrier manifest. The delayed-row highlight and the
@@ -171,9 +331,10 @@ export function LogisticsControl() {
               },
             ]}
           />
-        </Card>
+        </WorkspaceSection>
       ))}
-    </div>
+      </WorkspaceGrid>
+    </WorkspaceFrame>
   );
 }
 

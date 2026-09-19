@@ -12,6 +12,14 @@ import { Users, Edit3, Route, Shield, MessageSquare, X, Download, FileText } fro
 import { demoProfileChangeRequests, reviewProfileChangeRequest } from '@/data/api';
 import { useApp } from '@/context/GlobalStateContext';
 import { downloadCsv } from '@/lib/csv';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceHeader,
+  type MetricTileData,
+} from '@/components/shared/workspace';
 
 function ChangeRequestReview({ brandId }: { brandId: string }) {
   const { actingStaffId, canCurrentUserMutate } = useApp();
@@ -62,7 +70,70 @@ export function BrandCRM() {
     setOverrideReason('');
   }
   const allCats = ['all', ...APPROVED_CATEGORIES];
-  const filtered = brands.filter(function(b) { return (categoryFilter === 'all' || b.category === categoryFilter) && (!brandQuery.trim() || b.profile.businessName.toLowerCase().includes(brandQuery.toLowerCase())); });
+  /* §Sprint 2 — the metric band's drill-downs narrow this ONE list (no second
+     data source). Default cohort shows every canonical brand. */
+  const [cohort, setCohort] = useState<'all' | 'with_po' | 'with_docs' | 'no_contract'>('all');
+  const inCohort = function(b: typeof brands[number]) {
+    if (cohort === 'all') return true;
+    if (cohort === 'with_po') return poQuery.data.some(function(p) { return p.brandId === b.id; });
+    if (cohort === 'with_docs') return complianceDocs.some(function(d) { return d.brandId === b.id; });
+    return b.contractStatus !== 'active';
+  };
+  const filtered = brands.filter(function(b) { return inCohort(b) && (categoryFilter === 'all' || b.category === categoryFilter) && (!brandQuery.trim() || b.profile.businessName.toLowerCase().includes(brandQuery.toLowerCase())); });
+  const brandsWithPos = brands.filter(function(b) { return poQuery.data.some(function(p) { return p.brandId === b.id; }); });
+  const brandsWithDocs = brands.filter(function(b) { return complianceDocs.some(function(d) { return d.brandId === b.id; }); });
+  const brandsWithoutContract = brands.filter(function(b) { return b.contractStatus !== 'active'; });
+  const metrics: MetricTileData[] = [
+    {
+      id: 'crm-brands',
+      label: 'Brands',
+      value: String(brands.length),
+      size: 'hero',
+      tone: 'info',
+      statusText: `${filtered.length} in view`,
+      context: 'Canonical brand tenants on the platform',
+      domain: 'catalogue',
+      onOpen: function() { setCohort('all'); setCategoryFilter('all'); setBrandQuery(''); },
+      testId: 'crm-metric-brands',
+      valueTestId: 'crm-metric-brands-value',
+    },
+    {
+      id: 'crm-with-po',
+      label: 'With POs',
+      value: String(brandsWithPos.length),
+      tone: 'success',
+      statusText: 'Trading',
+      context: 'Brands that have raised at least one PO',
+      domain: 'logistics',
+      onOpen: function() { setCohort('with_po'); },
+      testId: 'crm-metric-with-po',
+      valueTestId: 'crm-metric-with-po-value',
+    },
+    {
+      id: 'crm-with-docs',
+      label: 'With documents',
+      value: String(brandsWithDocs.length),
+      tone: 'info',
+      statusText: 'Compliance visible',
+      context: 'Brands with compliance documents on file',
+      domain: 'compliance',
+      onOpen: function() { setCohort('with_docs'); },
+      testId: 'crm-metric-with-docs',
+      valueTestId: 'crm-metric-with-docs-value',
+    },
+    {
+      id: 'crm-no-contract',
+      label: 'No active contract',
+      value: String(brandsWithoutContract.length),
+      tone: brandsWithoutContract.length > 0 ? 'warning' : 'success',
+      statusText: brandsWithoutContract.length > 0 ? 'Follow up' : 'All contracted',
+      context: 'Brands whose contract is not active — a follow-up candidate',
+      domain: 'finance',
+      onOpen: function() { setCohort('no_contract'); },
+      testId: 'crm-metric-no-contract',
+      valueTestId: 'crm-metric-no-contract-value',
+    },
+  ];
   const sections = selected ? [
     { id: 'detail', label: 'Brand Detail', icon: Edit3 },
     { id: 'fulfillment', label: 'Fulfillment Track', icon: Route },
@@ -73,24 +144,71 @@ export function BrandCRM() {
     { id: 'crm_depth', label: 'CRM Tools', icon: Users },
   ] : [];
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3"><Users className="w-5 h-5 text-brass-400" /><div><h2 className="text-lg font-semibold text-white">Brand CRM</h2><p className="text-xs text-zinc-500 mt-0.5">Card-based layout</p></div>
-        <div className="ml-auto">
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Admin Hub · CRM"
+        title="Brand CRM"
+        description="The canonical brand-tenant list with its contract, compliance and track state. Every admin action here is performed on behalf of the brand and attributed in the audit log."
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {filtered.length} of {brands.length} brands
+            </span>
+            <span className="font-mono text-[11px] text-zinc-500">cohort: {cohort.replace(/_/g, ' ')}</span>
+          </>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              value={brandQuery}
+              onChange={function(e) { setBrandQuery(e.target.value); }}
+              placeholder="Search brands"
+              data-testid="crm-search"
+              className="w-48 bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-white"
+            />
+            <div className="flex flex-wrap gap-1 text-[9px]">
+              {allCats.map(function(c) { return (<button key={c} onClick={function() { setCategoryFilter(c); }} data-testid={`crm-cat-${c}`} className={cn('px-1.5 py-0.5 rounded', categoryFilter === c ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>{c === 'all' ? 'All' : c}</button>);})}
+            </div>
+          </div>
+        }
+        actions={
           <Button className="text-[10px]" variant="ghost" onClick={function() { downloadCsv('brands.csv', ['Name', 'Category', 'Track', 'Contract'], filtered.map(function(b) { return [b.profile.businessName, b.category, b.track, b.contractStatus]; })); }}>
             <Download className="w-3 h-3 mr-1" /> Export CSV
           </Button>
-        </div>
-      </div>
+        }
+      />
+
+      <MetricBand items={metrics} columns={4} />
+
       {/* §Phase C — pre-onboarding acquisition relationships (same canonical context) */}
       <AcquisitionRelationships />
       <div className="grid grid-cols-12 gap-4">
-        <Card className="col-span-12 md:col-span-4 p-0 overflow-hidden">
-          <div className="p-3 border-b border-white/[0.06] space-y-2">
-            <input type="text" value={brandQuery} onChange={function(e) { setBrandQuery(e.target.value); }} placeholder="Search brands" className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-white" />
-            <div className="flex flex-wrap gap-1 text-[9px]">{allCats.map(function(c) { return (<button key={c} onClick={function() { setCategoryFilter(c); }} className={cn('px-1.5 py-0.5 rounded', categoryFilter === c ? 'bg-brass-500/20 text-brass-300' : 'text-zinc-500 hover:text-white')}>{c === 'all' ? 'All' : c}</button>);})}</div>
+        <div className="col-span-12 md:col-span-4 space-y-3">
+        <Card className="p-0 overflow-hidden">
+          <div className="p-3 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">Brands</span>
+            <span className="font-mono text-[11px] text-zinc-500">{filtered.length}</span>
           </div>
-          <div className="max-h-[500px] overflow-y-auto divide-y divide-white/[0.04]">{filtered.map(function(b) { return (<button key={b.id} onClick={function() { selectBrand(b.id); }} className={cn('w-full text-left px-3 py-2.5', selectedId === b.id ? 'bg-brass-500/10' : 'hover:bg-white/[0.02]')}><div className="text-xs font-medium text-white">{b.profile.businessName}</div><div className="text-[9px] text-zinc-500 mt-0.5">{b.category}</div></button>);})}</div>
+          <div className="max-h-[500px] overflow-y-auto divide-y divide-white/[0.04]">{filtered.map(function(b) { return (<button key={b.id} onClick={function() { selectBrand(b.id); }} data-testid={`crm-brand-${b.id}`} className={cn('w-full text-left px-3 py-2.5', selectedId === b.id ? 'bg-brass-500/10' : 'hover:bg-white/[0.02]')}><div className="text-xs font-medium text-white">{b.profile.businessName}</div><div className="text-[9px] text-zinc-500 mt-0.5">{b.category}</div></button>);})}
+            {filtered.length === 0 && <p className="px-3 py-4 text-[11px] text-zinc-600">No brands match the current filters.</p>}
+          </div>
         </Card>
+          <ContextPanel title="Portfolio context">
+            <RecordFieldList
+              fields={[
+                { label: 'Brands', value: String(brands.length) },
+                { label: 'In view', value: String(filtered.length) },
+                { label: 'Category', value: categoryFilter === 'all' ? 'All approved categories' : categoryFilter },
+                { label: 'Selected', value: selected ? selected.profile.businessName : 'None' },
+              ]}
+            />
+            <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+              The CRM lists the same canonical tenants the PO, compliance and finance workspaces
+              operate on — nothing is re-derived for this screen.
+            </p>
+          </ContextPanel>
+        </div>
         <div className="col-span-12 md:col-span-8 space-y-3">
           {!selected && <Card className="p-8 text-center"><p className="text-xs text-zinc-600">Select a brand.</p></Card>}
           {selected && !activeSection && (<><div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{sections.map(function(s) { const Icon = s.icon; return (<button key={s.id} onClick={function() { setActiveSection(s.id); }} className="bg-ink-850 border border-white/[0.06] hover:border-brass-500/40 rounded-xl p-3.5 text-left"><Icon className="w-4 h-4 text-brass-400 inline" /><span className="text-xs font-medium text-white ml-1.5">{s.label}</span></button>);})}</div><ChangeRequestReview brandId={selected.id} /></>)}
@@ -105,7 +223,7 @@ export function BrandCRM() {
           </Card>)}
         </div>
       </div>
-    </div>
+    </WorkspaceFrame>
   );
 }
 

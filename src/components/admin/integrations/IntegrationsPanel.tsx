@@ -4,6 +4,14 @@ import { rememberApiKey } from '@/integrations/types';
 import { pingForService } from '@/lib/integrations/testCalls';
 import { runHealthCheck } from '@/lib/integrations/health';
 import { INTEGRATION_CATEGORY_LABELS, INTEGRATION_MODE_LABELS } from '@/integrations/types';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  WorkspaceFrame,
+  WorkspaceHeader,
+  type MetricTileData,
+} from '@/components/shared/workspace';
 import type { IntegrationCategory, IntegrationDefinition, IntegrationHealth, IntegrationId, IntegrationMode, IntegrationState } from '@/integrations/types';
 import { INTEGRATION_ORDER, INTEGRATION_REGISTRY, hasLiveCredentialHint, integrationMeta } from '@/integrations/registry';
 import { Badge, Button, Card, EmptyState, Input } from '@/components/ui';
@@ -641,6 +649,24 @@ export function IntegrationsPanel() {
   const visibleIds = INTEGRATION_ORDER.filter((id) => matchesFilter(filter, id) && matchesQuery(id));
   const attentionIds = INTEGRATION_ORDER.filter((id) => isAttention(integrations[id], modes[id]));
 
+  /* §Sprint 2 — the same seven state tiles the panel already computed, as
+     canonical MetricBand tiles: the count comes from the SAME predicate and the
+     drill-down is the SAME filter, so a tile can never disagree with the list. */
+  const summaryMetrics: MetricTileData[] = SUMMARY_TILES.map((tile) => ({
+    id: `integrations-${tile.id}`,
+    label: tile.label,
+    value: String(INTEGRATION_ORDER.filter((id) => matchesFilter(tile.id, id)).length),
+    size: tile.id === 'all' ? 'hero' : 'default',
+    tone: tile.tone === 'danger' ? 'danger' : tile.tone === 'success' ? 'success' : tile.tone === 'warning' ? 'warning' : tile.tone === 'info' ? 'info' : 'neutral',
+    statusText: filter === tile.id ? 'Filtered' : undefined,
+    context: tile.hint,
+    domain: 'compliance',
+    onOpen: () => setFilter(filter === tile.id ? 'all' : tile.id),
+    pressed: filter === tile.id,
+    testId: `integrations-tile-${tile.id}`,
+    valueTestId: `integrations-tile-${tile.id}-value`,
+  }));
+
   // Flat row list: category headings + cards, so ONE grid renders both and a
   // heading spans the full width (no second grid, no duplicated card markup).
   const rows: HubRow[] = [];
@@ -652,22 +678,57 @@ export function IntegrationsPanel() {
   }
 
   return (
-    <div data-testid="integration-hub" className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center">
-          <Plug className="w-5 h-5 text-brass-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Integration Settings</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            One-click connect for every external service — no API keys in .env files.
-            Features stay locked until their card shows a verified Connected status.
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+    <div data-testid="integration-hub" className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Super Admin · Governance"
+        title="Integration Settings"
+        description="One-click connect for every external service — no API keys in .env files. Features stay locked until their card shows a verified Connected status. A provider is treated as simulation-safe ONLY when its mode positively resolves to simulation; UNKNOWN, unregistered, unconfigured, disabled, configuring, live, degraded and error are all treated as unsafe."
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">{INTEGRATION_ORDER.length} providers</span>
+            <span className="font-mono text-[11px] text-zinc-500">{visibleIds.length} shown</span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {filter === 'all' ? 'no filter' : filter === 'attention' ? 'needs attention' : INTEGRATION_MODE_LABELS[filter]}
+            </span>
+          </>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-3">
+            <Input
+              label="Search integrations"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Name, capability or category"
+              className="w-full sm:w-80"
+              dataTestid="integrations-search"
+            />
+            <div className="flex items-center gap-2">
+              <Search className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
+              <span role="status" className="text-[11px] text-zinc-500">
+                {visibleIds.length} of {INTEGRATION_ORDER.length} providers shown
+                {filter !== 'all' &&
+                  ` · ${filter === 'attention' ? 'needs attention' : INTEGRATION_MODE_LABELS[filter]}`}
+              </span>
+              {(filter !== 'all' || query.trim() !== '') && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[11px]"
+                  onClick={() => {
+                    setFilter('all');
+                    setQuery('');
+                  }}
+                >
+                  Clear filters
+                </Button>
+              )}
+            </div>
+          </div>
+        }
+      />
 
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200 flex items-start gap-2 max-w-[1400px]">
+      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200 flex items-start gap-2">
         <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
         <span>
           Live OAuth exchanges and test calls run as server-side Edge Functions with
@@ -678,39 +739,36 @@ export function IntegrationsPanel() {
       </div>
 
       {/* §Phase B — platform integration state. Counts come from the mode model
-          (never hand-counted); every tile filters the provider list below. */}
-      <div
-        role="group"
-        aria-label="Integration state summary"
-        className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3"
-      >
-        {SUMMARY_TILES.map((tile) => {
-          const count = INTEGRATION_ORDER.filter((id) => matchesFilter(tile.id, id)).length;
-          const active = filter === tile.id;
-          return (
-            <button
-              key={tile.id}
-              type="button"
-              aria-pressed={active}
-              data-state={active ? 'active' : 'inactive'}
-              title={tile.hint}
-              onClick={() => setFilter(active ? 'all' : tile.id)}
-              className={cn(
-                'text-left bg-ink-850 border rounded-xl px-3.5 py-3 transition-colors',
-                active
-                  ? 'border-brass-500/50 ring-1 ring-brass-500/30'
-                  : 'border-white/[0.06] hover:border-white/[0.14]'
-              )}
-            >
-              <div className={cn('text-xl font-semibold tabular-nums', TILE_TONE_CLASSES[tile.tone])}>
-                {count}
-              </div>
-              <div className="text-[11px] font-medium text-zinc-300 mt-0.5">{tile.label}</div>
-              <div className="text-[10px] text-zinc-600 mt-0.5 leading-tight">{tile.hint}</div>
-            </button>
-          );
-        })}
+          (never hand-counted); every tile filters the provider list below.
+          §Sprint 2 — the same tiles are now the canonical MetricBand, so the
+          drill-down contract is the shared one rather than a bespoke grid. The
+          `role="group"`/label contract is preserved for assistive tech. */}
+      <div role="group" aria-label="Integration state summary">
+        <MetricBand items={summaryMetrics.slice(0, 4)} columns={4} />
+        <MetricBand items={summaryMetrics.slice(4)} columns={3} />
       </div>
+
+      {/* §Sprint 2 — the provider-state safety contract, stated where an
+          operator actually reads it. This is a compliance rule, not styling:
+          a provider is simulation-safe ONLY when its mode POSITIVELY resolves
+          to `simulation`; every other state fails closed. */}
+      <ContextPanel title="Provider state — simulation safety">
+        <RecordFieldList
+          fields={[
+            { label: 'Registered providers', value: String(INTEGRATION_ORDER.length) },
+            { label: 'Simulation-safe rule', value: 'mode must positively resolve to simulation' },
+            { label: 'UNKNOWN / unregistered', value: 'NOT simulation-safe (fail closed)' },
+            { label: 'disabled / configuring', value: 'NOT simulation-safe (fail closed)' },
+            { label: 'live / degraded / error', value: 'NOT simulation-safe (fail closed)' },
+            { label: 'Live network calls from this screen', value: '0' },
+          ]}
+        />
+        <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+          Entering a real credential activates the already-built live path for that provider — no
+          code change is required. Until then every workflow continues to run against its
+          deterministic simulation, and no screen claims a live connection it does not have.
+        </p>
+      </ContextPanel>
 
       {/* §Phase B — actionable attention list, only when something is wrong. */}
       {attentionIds.length > 0 && (
@@ -730,38 +788,6 @@ export function IntegrationsPanel() {
           </span>
         </div>
       )}
-
-      {/* §Phase B — find one provider in an 18-card control plane. */}
-      <div className="flex flex-wrap items-end gap-3">
-        <Input
-          label="Search integrations"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Name, capability or category"
-          className="w-full sm:w-80"
-        />
-        <div className="flex items-center gap-2 pb-2">
-          <Search className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
-          <span role="status" className="text-[11px] text-zinc-500">
-            {visibleIds.length} of {INTEGRATION_ORDER.length} providers shown
-            {filter !== 'all' &&
-              ` · ${filter === 'attention' ? 'needs attention' : INTEGRATION_MODE_LABELS[filter]}`}
-          </span>
-          {(filter !== 'all' || query.trim() !== '') && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-[11px]"
-              onClick={() => {
-                setFilter('all');
-                setQuery('');
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
-        </div>
-      </div>
 
       {/* Provider list */}
       {visibleIds.length === 0 ? (
@@ -938,5 +964,6 @@ export function IntegrationsPanel() {
         <ConnectWizard id={wizardFor} onClose={() => setWizardFor(null)} />
       )}
     </div>
+    </WorkspaceFrame>
   );
 }

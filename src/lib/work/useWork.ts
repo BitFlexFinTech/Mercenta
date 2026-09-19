@@ -9,7 +9,12 @@
 import { useSyncExternalStore } from 'react';
 import { getWorkItems, workVersion, subscribeWork } from './workStore';
 import { deriveCalendarEntries, calendarEntriesForMonth } from './calendar';
-import type { CalendarEntry, WorkItem, WorkScope } from './types';
+import {
+  getActiveReminders,
+  reminderAndWorkVersion,
+  subscribeRemindersAndWork,
+} from './reminderRunner';
+import type { CalendarEntry, Reminder, WorkItem, WorkScope } from './types';
 
 export function useWorkItems(
   scope: WorkScope,
@@ -36,4 +41,19 @@ export function useCalendarMonth(
   const version = useSyncExternalStore(subscribeWork, workVersion, workVersion);
   void version;
   return calendarEntriesForMonth(scope, tenantId, month);
+}
+
+/**
+ * §Sprint 2 — the ACTIVE reminder set for the current scope. Subscribes to both
+ * the work store and the reminder ledger, so resolving the underlying work item
+ * removes its reminder without any further call.
+ */
+export function useReminders(scope: WorkScope, tenantId?: string | null): Reminder[] {
+  const version = useSyncExternalStore(
+    subscribeRemindersAndWork,
+    reminderAndWorkVersion,
+    reminderAndWorkVersion
+  );
+  void version;
+  return getActiveReminders(scope, tenantId);
 }

@@ -210,7 +210,7 @@ export function AdminAuditLog() {
           loading={entries === null}
           rows={filtered}
           rowKey={(e) => e.id}
-          emptyMessage="No matching audit entries."
+          emptyMessage="No audit entries match the current filters."
           columns={[
             {
               key: 'createdAt',

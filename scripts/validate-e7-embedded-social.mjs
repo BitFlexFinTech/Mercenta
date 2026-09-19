@@ -496,6 +496,38 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
   ];
 
+  /**
+   * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
+   *
+   * Same declaration mechanism as SPRINT_WORK_LAYER_DECLARED above: the files
+   * this sprint legitimately changed are named here so an UNEXPLAINED change
+   * still fails the scope guard. Nothing here widens what any earlier phase was
+   * allowed to touch.
+   */
+  const SPRINT_DETERMINISTIC_COMPLETION_DECLARED = [
+    'src/components/admin/BrandCRM.tsx',
+    'src/components/admin/CatalogManagerAdmin.tsx',
+    'src/components/admin/MessagesHub.tsx',
+    'src/components/admin/UsertourAdminPanel.tsx',
+    'src/components/admin/integrations/IntegrationsPanel.tsx',
+    'src/components/admin/BrandIntelligencePanel.tsx',
+    'src/components/admin/LogisticsControl.tsx',
+    'src/components/admin/AccountingPanel.tsx',
+    'src/components/admin/SuperAdminPanel.tsx',
+    'src/components/admin/AmazonAdsDashboard.tsx',
+    'src/components/admin/AdminAuditLog.tsx',
+    'src/components/brand/BrandIntelligence.tsx',
+    'src/components/shared/WorkWorkspace.tsx',
+    'src/lib/work/',
+    'src/lib/events/types.ts',
+    'scripts/validate-work-layer.mjs',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'e2e/deterministic-journey.spec.ts',
+    'docs/SPRINT_DETERMINISTIC_COMPLETION_2026-09-19.md',
+  ];
+
   const UIUX_REDESIGN_DECLARED = [
     // ── Wave 1 (theme/token foundation): declared retroactively so the
     //    working-tree state the wave produced is no longer "unexplained" ──
@@ -706,6 +738,14 @@ try {
     // canonical work/task + calendar operating layer added these files. The
     // mechanism is unchanged — a file outside EVERY declared set is still refused.
     ...SPRINT_WORK_LAYER_DECLARED,
+    // §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
+    // This sprint finished the remaining `uiux-wave2-core-surfaces-remaining`
+    // surfaces (admin CRM / Catalogue / Communications / Onboarding Tours and
+    // the Integration control plane), added the deterministic proactive reminder
+    // runner plus the `invoice_due` and `onboarding_step` derivations, and added
+    // its browser journey spec. Same mechanism, same guard: a file outside EVERY
+    // declared set is still refused.
+    ...SPRINT_DETERMINISTIC_COMPLETION_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
