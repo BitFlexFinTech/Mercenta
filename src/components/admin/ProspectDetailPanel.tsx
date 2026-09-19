@@ -6,16 +6,16 @@ import { useState } from 'react';
 import { Card, Badge, Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { BrandProspect } from '@/types';
-import { OverviewTab, AmazonTab, CommercialTab, PeopleTab, MercentaFitTab, HistoryTab } from './ProspectDetailTabs';
+import { OverviewTab, AmazonTab, CommercialTab, PeopleTab, MercentaFitTab, HistoryTab, NotesTab } from './ProspectDetailTabs';
 import { AcquisitionWorkflow } from './AcquisitionWorkflow';
 import { disqualifyProspect } from '@/lib/intelligence/prospectLifecycle';
-import { X, ShoppingCart, Building2, Users, Target, Globe, History, ShieldBan, RotateCcw, Send } from 'lucide-react';
+import { X, ShoppingCart, Building2, Users, Target, Globe, History, ShieldBan, RotateCcw, Send, StickyNote } from 'lucide-react';
 
 const TC: Record<string, string> = { tier_1: 'text-emerald-400', tier_2: 'text-blue-400', tier_3: 'text-amber-400', tier_4: 'text-zinc-400', unscored: 'text-zinc-600' };
 const TL: Record<string, string> = { tier_1: 'Attack', tier_2: 'High Prob', tier_3: 'Upside', tier_4: 'Reserve', unscored: 'Below' };
 
 export function ProspectDetailPanel({ prospect, onClose, onMutated }: { prospect: BrandProspect; onClose: () => void; onMutated?: () => void }) {
-  const [tab, setTab] = useState<'overview' | 'amazon' | 'commercial' | 'people' | 'mercenta' | 'history' | 'outreach'>('overview');
+  const [tab, setTab] = useState<'overview' | 'amazon' | 'commercial' | 'people' | 'mercenta' | 'history' | 'outreach' | 'notes'>('overview');
   const p = prospect;
   const tabs = [
     { id: 'overview' as const, label: 'Overview', icon: Target }, { id: 'amazon' as const, label: 'Amazon', icon: ShoppingCart },
@@ -23,6 +23,8 @@ export function ProspectDetailPanel({ prospect, onClose, onMutated }: { prospect
     { id: 'mercenta' as const, label: 'Mercenta Fit', icon: Globe },
     // §Phase C — ICP enrolment → outreach → approval → send → response → opportunity.
     { id: 'outreach' as const, label: 'Outreach', icon: Send },
+    // §Workstream B (Step C) — internal notes / acquisition rationale editor.
+    { id: 'notes' as const, label: 'Notes', icon: StickyNote },
     { id: 'history' as const, label: 'History', icon: History },
   ];
   const handleDisqualify = () => {
@@ -74,6 +76,7 @@ export function ProspectDetailPanel({ prospect, onClose, onMutated }: { prospect
           <AcquisitionWorkflow prospectId={p.id} onChanged={onMutated} />
         </div>
       )}
+      {tab === 'notes' && <NotesTab p={p} onChanged={onMutated} />}
       {tab === 'history' && <HistoryTab p={p} />}
     </Card>
   );

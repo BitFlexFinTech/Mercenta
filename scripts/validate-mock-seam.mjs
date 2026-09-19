@@ -39,7 +39,7 @@ try {
 
   // Submission lifecycle through api.submitCatalogItem (cleared brand).
   resetMockAmazonState();
-  const s1 = await apiMod.submitCatalogItem('brand-zambezi', {
+  const s1 = await apiMod.submitCatalogItem('brand-astonish', {
     commodityCode: '3304990090', vatStatus: 'Standard 20%', hazmat: false,
     length: 10, width: 10, height: 20, weight: 1,
   });
@@ -54,7 +54,7 @@ try {
 
   // Rejection path: submissions 1-3 were fine; #4 must reject on poll 3.
   for (let i = 0; i < 3; i++) {
-    await apiMod.submitCatalogItem('brand-zambezi', {
+    await apiMod.submitCatalogItem('brand-astonish', {
       commodityCode: '3304990090', vatStatus: 'Standard 20%', hazmat: false,
       length: 10, width: 10, height: 20, weight: 1,
     });

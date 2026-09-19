@@ -29,7 +29,7 @@ try {
   /* ── Stripe mock ── */
   stripeMockMod.resetMockStripeState();
   const mStripe = stripeMockMod.createMockStripeClient();
-  const sub1 = await mStripe.startSubscription('brand-zambezi', 'growth', 'a@b.c');
+  const sub1 = await mStripe.startSubscription('brand-astonish', 'growth', 'a@b.c');
   test('mock stripe start → ok with unmistakable mock id',
     sub1.ok === true && /^mock:sub-\d+$/.test(sub1.stripeSubscriptionId ?? ''));
   const st1 = await mStripe.getSubscriptionStatus(sub1.stripeSubscriptionId);
@@ -191,8 +191,8 @@ try {
   let chNetworkCalls = 0;
   const chCountingTransport = async () => { chNetworkCalls++; return { ok: true, status: 200, json: async () => ({}) }; };
   const mCh = chMockMod.createMockCompaniesHouseClient();
-  await chMockMod.seedCompaniesHouse([{ id: 'brand-zambezi', name: 'Zambezi Traders' }]);
-  const found = await mCh.lookupCompany({ companyName: 'zambezi' });
+  await chMockMod.seedCompaniesHouse([{ id: 'brand-astonish', name: 'Astonish Traders' }]);
+  const found = await mCh.lookupCompany({ companyName: 'astonish' });
   const missing = await mCh.lookupCompany({ companyNumber: 'ZZ000001' });
   test('mock CH finds seeded company with mock number',
     found.ok && found.match?.companyNumber?.startsWith('MOCK-CH-') && found.match?.status === 'active');
@@ -200,7 +200,7 @@ try {
   // Every 4th lookup is rate-limited; the retry succeeds.
   const rl = await mCh.lookupCompany({ companyNumber: 'X1' });
   test('mock CH deterministic rate-limit → retryable error', !rl.ok && rl.rateLimited === true);
-  const rlRetry = await mCh.lookupCompany({ companyName: 'zambezi' });
+  const rlRetry = await mCh.lookupCompany({ companyName: 'astonish' });
   test('mock CH retry after rate limit succeeds', rlRetry.ok);
   const realCh = chIndexMod.createCompaniesHouseClientForConnectionWithTransport(
     () => ({ secretRef: 'vault:ch', verified: true }), '/fn', chCountingTransport
@@ -208,11 +208,11 @@ try {
   await realCh.client.lookupCompany({ companyNumber: 'NC1' });
   test('CH factory: verified connection → REAL client through transport', chNetworkCalls === 1);
   const mockCh = chIndexMod.createCompaniesHouseClientForConnectionWithTransport(() => null, '/fn', chCountingTransport);
-  await mockCh.client.lookupCompany({ companyName: 'zambezi' });
+  await mockCh.client.lookupCompany({ companyName: 'astonish' });
   const mockSecretCh = chIndexMod.createCompaniesHouseClientForConnectionWithTransport(
     () => ({ secretRef: 'mock:ch-demo-key', verified: true }), '/fn', chCountingTransport
   );
-  await mockSecretCh.client.lookupCompany({ companyName: 'zambezi' });
+  await mockSecretCh.client.lookupCompany({ companyName: 'astonish' });
   test('CH factory: mock/mock: credentials → ZERO provider network calls', chNetworkCalls === 1);
 
   /* ── HMRC mock ── */
@@ -253,7 +253,7 @@ try {
   const storeMod = await server.ssrLoadModule('/src/data/demoStore.ts');
   const stamp = (Date.now() % 1000000) + '';
   storeMod.demoShipments.push({
-    id: `st-${stamp}`, brandId: 'brand-zambezi', poNumber: `ST-${stamp}`,
+    id: `st-${stamp}`, brandId: 'brand-astonish', poNumber: `ST-${stamp}`,
     carrier: 'dhl', reference: `ST-${stamp}`, title: 'Sim probe', value: 100,
     status: 'factory_intake', origin: 'Depot', destination: 'UK Hub', delayed: false, exception: false,
   });

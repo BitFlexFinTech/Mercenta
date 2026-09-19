@@ -12,7 +12,7 @@
  */
 import { DEMO_PRODUCTS, DEMO_SHIPMENTS, CLEARED_BRAND_IDS, PORTAL_BRAND_IDS } from './demoData'
 import type { DemoBrand, DemoShipment } from './demoData';
-import type { BrandProfile, RegionalComplianceDoc, RegionalDossier, Shipment, FinancialRecord, CarrierTokens, FinancialCurrency } from '@/types';
+import type { BrandProfile, RegionalComplianceDoc, RegionalDossier, Shipment, FinancialRecord, CarrierTokens, FinancialCurrency, DemoRegion } from '@/types';
 import { BANKS_BY_COUNTRY } from './banksByCountry';
 
 const CURRENCY_BY_REGION: Record<DemoBrand['region'], FinancialCurrency> = {
@@ -20,6 +20,17 @@ const CURRENCY_BY_REGION: Record<DemoBrand['region'], FinancialCurrency> = {
   europe: 'EUR',
   africa: 'USD',
 };
+
+/**
+ * §Phase 4 — nation-aware currency. The canonical 20 include UK brands; the
+ * UK's settlement currency is GBP (a real-world fact, not invented). Region
+ * alone cannot express this, so currency is resolved by nation first and the
+ * region map is the fallback for the rest of the world.
+ */
+export function currencyFor(brand: Pick<DemoBrand, 'nation' | 'region'>): FinancialCurrency {
+  if (brand.nation === 'United Kingdom') return 'GBP';
+  return CURRENCY_BY_REGION[brand.region];
+}
 
 const REGION_LABEL: Record<DemoBrand['region'], string> = {
   north_america: 'North America',
@@ -55,7 +66,7 @@ function buildProfile(brand: DemoBrand): BrandProfile {
     agreed: true,
     bic: defaultBank.swift,
     iban: bankAccount,
-    payoutCurrency: CURRENCY_BY_REGION[brand.region],
+    payoutCurrency: currencyFor(brand),
     dhlConnected: false,
     fedexConnected: false,
     bakConnected: false,
@@ -150,9 +161,23 @@ function randLetters(n: number): string {
 }
 
 /** §Stage-20 fix #1 — full dossier per brand, derived from canonical data. */
+/**
+ * §Phase 4 — map a canonical brand's origin to the demo dossier region key.
+ * UK origin is expressed by nation (a UK-brand dossier is never labelled the
+ * generic European market); North America maps to the 'usa' demo region. The
+ * legacy 'africa' BrandRegion has no canonical occupant in the 20-real-brand
+ * universe, so the dossier key falls back to 'europe' (unreachable today).
+ * The BrandProfile.region field (BrandRegion) is NOT changed by this helper.
+ */
+function dossierRegionFor(brand: Pick<DemoBrand, 'nation' | 'region'>): DemoRegion {
+  if (brand.nation === 'United Kingdom') return 'uk';
+  if (brand.region === 'north_america') return 'usa';
+  return 'europe';
+}
+
 export function buildBrandDossier(brand: DemoBrand): RegionalDossier {
   const slug = brand.id.replace('brand-', '');
-  const currency = CURRENCY_BY_REGION[brand.region];
+  const currency = currencyFor(brand);
 
   const products = DEMO_PRODUCTS.filter((p) => p.brandId === brand.id).map((p) => ({
     id: p.id,
@@ -249,7 +274,7 @@ export function buildBrandDossier(brand: DemoBrand): RegionalDossier {
   };
 
   return {
-    region: brand.region === 'north_america' ? 'usa' : brand.region,
+    region: dossierRegionFor(brand),
     profile: buildProfile(brand),
     products,
     shipments,

@@ -21,7 +21,11 @@ export type EventType =
   | 'hmrc_filing'
   // §22–§25 (M13 Phase 9) — a statutory company-filing deadline (confirmation
   // statement / accounts) detected from the register.
-  | 'company_filing_due';
+  | 'company_filing_due'
+  // §Sprint — the canonical work/task layer. A work item raised from a real
+  // record, and its resolution (which is what stops its reminders).
+  | 'work_item_raised'
+  | 'work_item_resolved';
 
 export interface PlatformEvent {
   id: string;
@@ -58,4 +62,6 @@ export const EVENT_SEVERITY_MAP: Record<EventType, EventSeverity> = {
   company_verified: 'informational',
   hmrc_filing: 'important',
   company_filing_due: 'critical',
+  work_item_raised: 'important',
+  work_item_resolved: 'informational',
 };

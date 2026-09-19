@@ -25,10 +25,10 @@ function useAiSug(brandId: string, _ctx: string): string | null {
   return useMemo(() => {
     if (!brandId) return null;
     const m: Record<string, string> = {
-      'brand-zambezi': 'Let me check dispatch for your Marula Oil PO - updating within 2h.',
-      'brand-nordhaus': 'Thank you for submitting HMRC docs. In review - 3-5 business days.',
-      'brand-apexdrive': 'I see the pricing discrepancy on PO-9045. Escalating, will reply within 24h.',
-      'brand-harvestlane': 'PO-9002 scheduled for next consolidation. Dispatch within 10 days.',
+      'brand-astonish': 'Let me check dispatch for your latest PO - updating within 2h.',
+      'brand-seep': 'Thank you for submitting HMRC docs. In review - 3-5 business days.',
+      'brand-clipper': 'I see the pricing discrepancy on PO-9045. Escalating, will reply within 24h.',
+      'brand-regatta': 'PO-9002 scheduled for next consolidation. Dispatch within 10 days.',
     };
     return m[brandId] ?? 'Thank you. Let me investigate and get back to you.';
   }, [brandId]);

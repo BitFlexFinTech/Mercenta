@@ -255,7 +255,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 label="Business Name"
                 value={brandProfile.businessName}
                 onChange={(e) => update('businessName', e.target.value)}
-                placeholder="e.g. Sweet Pea Botanicals"
+                placeholder="e.g. Astonish"
                 required
               />
               <div className="space-y-1.5">

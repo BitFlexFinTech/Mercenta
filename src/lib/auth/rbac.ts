@@ -51,11 +51,15 @@ export const VIEW_ALLOWLIST: Record<SessionTier, '*' | string[]> = {
     'overview', 'onboarding', 'contracts', 'purchase_orders', 'catalog',
     'logistics', 'compliance', 'analytics', 'documents',
     'returns', 'reports', 'settings',
+    // §Sprint — the canonical work layer (tasks/deadlines + calendar).
+    'work', 'calendar',
   ],
   admin_staff: [
     'overview', 'crm', 'onboarding_pipeline', 'fulfillment_track', 'retail_pipeline',
     'purchase_orders_admin', 'logistics', 'carriers', 'catalog', 'compliance',
     'billing', 'contracts_admin', 'messages', 'marketing',
+    // §Sprint — the canonical work layer (tasks/deadlines + calendar).
+    'work', 'calendar',
     // super_admin + integrations views require the super_admin tier
   ],
   super_admin: '*',

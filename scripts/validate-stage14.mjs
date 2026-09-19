@@ -28,11 +28,11 @@ try {
 
   // Generated customs docs embed Mercenta's values, never the brand's.
   const po = {
-    id: 'po-x', brandId: 'brand-zambezi', poNumber: 'PO-9999', status: 'accepted',
+    id: 'po-x', brandId: 'brand-astonish', poNumber: 'PO-9999', status: 'accepted',
     poValue: 5000, commissionRate: 12, commissionAmount: 600, orderDate: '2026-08-01',
     lineItems: [{ sku: 'S1', productName: 'P', quantity: 10, unitPrice: 100, commodityCode: '3924909990' }],
   };
-  const bundle = docs.generateCustomsDocBundle({ po, brandName: 'Zambezi Organic Extracts Ltd', products: [] });
+  const bundle = docs.generateCustomsDocBundle({ po, brandName: 'Astonish', products: [] });
   const allText = bundle.map((b) => JSON.stringify(b)).join('\n');
   test('every customs doc embeds Mercenta EORI placeholder', allText.includes('GB-EORI-PENDING-REGISTRATION'));
   test('every customs doc embeds Mercenta VAT placeholder', allText.includes('GB-VAT-PENDING-REGISTRATION'));

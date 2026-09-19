@@ -17,6 +17,12 @@ import {
   PO_STATUS_ORDER,
 } from '@/lib/statusPresentation';
 import { BrandCommPanel } from '@/components/shared/BrandComm';
+/**
+ * §UI/UX Wave 2 completion — the brand PO list gains the established
+ * QUEUE → PREVIEW (RecordDrawer) → ACT step. Only the record's own real fields
+ * are shown; the existing inline acknowledgment/ASN workflow is untouched.
+ */
+import { RecordDrawer, RecordFieldList, MetricBand, SegmentedControl, WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { CommerceSimulationPanel } from '@/components/shared/CommerceSimulationPanel';
 import { ShippingCostEstimate } from '@/components/shared/ShippingCostEstimate';
 import { RoutingRequestIndicator, RoutingRequestForm } from '@/components/shared/RoutingRequest';
@@ -86,6 +92,15 @@ export function BrandPurchaseOrders() {
   const [asnExpiry, setAsnExpiry] = useState('');
   /** §Routing Request — per-PO tracking for freight collect POs. */
   const [routingRequestFiledPOs, setRoutingRequestFiledPOs] = useState<Record<string, boolean>>({});
+  /**
+   * §UI/UX Wave 2 completion — the brand's PO list is a real record surface, so
+   * it gains the established QUEUE → PREVIEW → ACT step: the RecordDrawer previews
+   * the real PO record and hands off to the existing inline acknowledgment/ASN
+   * workflow (which is unchanged).
+   */
+  const [previewPO, setPreviewPO] = useState<string | null>(null);
+  /** REAL density control — it changes the rendered PO card padding. */
+  const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
 
   function beginAck(po: PurchaseOrder) {
     setAckingPO(po.id);
@@ -199,6 +214,9 @@ export function BrandPurchaseOrders() {
   const actionable = (po: PurchaseOrder) =>
     po.status === 'received' || po.status === 'under_review';
 
+  /** The PO record the preview drawer is showing (brand-scoped list only). */
+  const previewRecord = pos.find((p) => p.id === previewPO) ?? null;
+
   /** §Stage-24 — 24-hour acknowledgment deadline, a real Vendor Central rule. */
   function AckDeadline({ orderDate }: { orderDate: string }) {
     const received = new Date(orderDate).getTime();
@@ -213,71 +231,136 @@ export function BrandPurchaseOrders() {
   }
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-white">Purchase Orders</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Review, accept or reject purchase orders from the UK retail network
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame>
+      <WorkspaceHeader
+        eyebrow="Brand workspace · Commerce"
+        title="Purchase Orders"
+        description="Review, accept or reject purchase orders from the UK retail network"
+        meta={
+          <>
+            <span className="text-[11px] text-zinc-500">
+              Showing <span className="font-mono text-zinc-300">{filteredPos.length}</span> of{' '}
+              <span className="font-mono text-zinc-300">{pos.length}</span>
+            </span>
+            <span className="text-[11px] text-zinc-500">
+              Queue value{' '}
+              <span className="font-mono text-zinc-300">
+                £{pos.reduce((sum, p) => sum + p.poValue, 0).toLocaleString()}
+              </span>
+            </span>
+          </>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              value={poSearch}
+              onChange={(e) => setPoSearch(e.target.value)}
+              placeholder="Search PO number…"
+              aria-label="Search purchase orders"
+              className="bg-ink-900 border border-white/[0.08] rounded-md px-3 py-1.5 text-xs text-white w-52 focus:outline-none focus:border-brass-500/40"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label="Filter by status"
+              className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300 cursor-pointer"
+            >
+              <option value="all">Status: all</option>
+              {PO_STATUS_ORDER.map((s) => (
+                <option key={s} value={s}>{poStatusPresentation(s).label}</option>
+              ))}
+            </select>
+            <span className="ml-auto flex items-center gap-2">
+              <span className="hidden text-[10px] uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+                Density
+              </span>
+              <SegmentedControl
+                ariaLabel="Row density"
+                active={density}
+                onSelect={(id) => setDensity(id as 'compact' | 'comfortable')}
+                items={[
+                  { id: 'compact', label: 'Compact' },
+                  { id: 'comfortable', label: 'Comfortable' },
+                ]}
+              />
+              <Button
+                variant="ghost"
+                className="text-[11px] text-zinc-400 hover:text-white"
+                onClick={() =>
+                  downloadCsv(
+                    `mercenta-pos-${viewingBrandId_ ?? 'all'}.csv`,
+                    ['PO', 'Date', 'Status', 'Lines', 'Value GBP'],
+                    filteredPos.map((p) => [
+                      p.poNumber,
+                      p.orderDate,
+                      poStatusPresentation(p.status).label,
+                      p.lineItems.length,
+                      p.poValue,
+                    ])
+                  )
+                }
+              >
+                Export CSV
+              </Button>
+            </span>
+          </div>
+        }
+      />
 
-      {/* §Stage-19.2 + 19.8 — search, status filter, CSV export */}
-      <div className="flex flex-wrap items-center gap-2">
-        <input
-          value={poSearch}
-          onChange={(e) => setPoSearch(e.target.value)}
-          placeholder="Search PO number…"
-          className="bg-ink-900 border border-white/[0.08] rounded-md px-3 py-1.5 text-xs text-white w-52 focus:outline-none focus:border-brass-500/40"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300 cursor-pointer"
-        >
-          <option value="all">Status: all</option>
-          {PO_STATUS_ORDER.map((s) => (
-            <option key={s} value={s}>{poStatusPresentation(s).label}</option>
-          ))}
-        </select>
-        <Button
-          variant="ghost"
-          className="text-[11px] text-zinc-400 hover:text-white ml-auto"
-          onClick={() =>
-            downloadCsv(
-              `mercenta-pos-${viewingBrandId_ ?? 'all'}.csv`,
-              ['PO', 'Date', 'Status', 'Lines', 'Value GBP'],
-              filteredPos.map((p) => [
-                p.poNumber,
-                p.orderDate,
-                poStatusPresentation(p.status).label,
-                p.lineItems.length,
-                p.poValue,
-              ])
-            )
-          }
-        >
-          Export CSV
-        </Button>
-        <span className="text-[10px] text-zinc-600">{filteredPos.length} PO(s)</span>
-      </div>
+      {/* §UI/UX Wave 2 completion — interactive metric band. Deliberately carries
+          NO tone/statusText: this surface's machine-readable status vocabulary
+          must stay exactly the canonical PO/ack vocabulary the status-semantics
+          contract asserts. */}
+      <MetricBand
+        columns={4}
+        items={[
+          {
+            id: 'brand-po-total',
+            label: 'Purchase orders',
+            value: String(pos.length),
+            context: 'All orders',
+            onOpen: () => { setStatusFilter('all'); setPoSearch(''); },
+          },
+          {
+            id: 'brand-po-actionable',
+            label: 'Received',
+            value: String(pos.filter((p) => p.status === 'received').length),
+            context: 'Awaiting your decision',
+            onOpen: () => setStatusFilter('received'),
+          },
+          {
+            id: 'brand-po-review',
+            label: 'Under review',
+            value: String(pos.filter((p) => p.status === 'under_review').length),
+            context: 'Decision in progress',
+            onOpen: () => setStatusFilter('under_review'),
+          },
+          {
+            id: 'brand-po-value',
+            label: 'Queue value',
+            value: `£${pos.reduce((sum, p) => sum + p.poValue, 0).toLocaleString()}`,
+            context: 'Net order value',
+            onOpen: () => { setStatusFilter('all'); setPoSearch(''); },
+          },
+        ]}
+      />
 
       {notice && (
-        <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-xs text-sky-200">
+        <div role="status" className="mt-3 bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-xs text-sky-200">
           {notice}
         </div>
       )}
 
       {/* PO list */}
-      <div className="space-y-3">
+      <div className="mt-3 space-y-3">
         {filteredPos.map((po) => {
           const canAct = actionable(po);
           const expanded = expandedPO === po.id;
           const isFinanced =
             brands.find((b) => b.id === viewingBrandId_)?.track === 'financed';
           return (
-            <Card key={po.id} className="p-4">
+            <div key={po.id} data-density={density}>
+            <Card className={cn(density === 'compact' ? 'p-3' : 'p-4')}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <button
                   className="text-left min-w-0"
@@ -331,6 +414,14 @@ export function BrandPurchaseOrders() {
                   )}
                   {/* §Stage-24 — 24-hour acknowledgment deadline countdown */}
                   {canAct && <AckDeadline orderDate={po.orderDate} />}
+                  <Button
+                    variant="ghost"
+                    className="text-[11px]"
+                    data-state={`brand-po-preview-${po.id}`}
+                    onClick={() => setPreviewPO(po.id)}
+                  >
+                    Preview
+                  </Button>
                   <span className="font-mono text-sm font-semibold text-white">
                     £{po.poValue.toLocaleString()}
                   </span>
@@ -571,6 +662,15 @@ export function BrandPurchaseOrders() {
                       <input value={asnTrailer} onChange={(e) => setAsnTrailer(e.target.value)}
                         className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white font-mono" />
                     </label>
+                    <label className="text-zinc-500">Lot number
+                      <input value={asnLot} onChange={(e) => setAsnLot(e.target.value)}
+                        placeholder="Required for Grocery / H&PC"
+                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white font-mono" />
+                    </label>
+                    <label className="text-zinc-500">Expiry date
+                      <input type="date" value={asnExpiry} onChange={(e) => setAsnExpiry(e.target.value)}
+                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white" />
+                    </label>
                   </div>
                   {/* §Routing Request — collect POs require routing request before ASN */}
                   <RoutingRequestForm
@@ -707,6 +807,7 @@ export function BrandPurchaseOrders() {
                 </div>
               )}
             </Card>
+            </div>
           );
         })}
         {filteredPos.length === 0 && (
@@ -721,6 +822,164 @@ export function BrandPurchaseOrders() {
           control order (and every existing browser assertion that selects by
           control order) is unchanged. */}
       <CommerceSimulationPanel />
+
+      {/* ── QUEUE → PREVIEW → ACT ──────────────────────────────────────────
+          Previews the REAL brand-owned PO record. The inline acknowledgment /
+          ASN workflow is untouched; the drawer's action simply opens it. */}
+      <RecordDrawer
+        open={previewRecord !== null}
+        onClose={() => setPreviewPO(null)}
+        title={previewRecord ? previewRecord.poNumber : ''}
+        subtitle={previewRecord ? poStatusPresentation(previewRecord.status).label : undefined}
+        testId="brand-po-record-drawer"
+        footer={
+          previewRecord ? (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[10px] text-zinc-600">
+                {previewRecord.simulated === true
+                  ? 'Operational simulation record'
+                  : 'Recorded purchase order'}
+              </span>
+              <div className="flex items-center gap-2">
+                {actionable(previewRecord) && (
+                  <Button
+                    className="text-[10px]"
+                    data-state="brand-po-drawer-acknowledge"
+                    onClick={() => {
+                      beginAck(previewRecord);
+                      setExpandedPO(previewRecord.id);
+                      setPreviewPO(null);
+                    }}
+                  >
+                    Acknowledge
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  className="text-[10px]"
+                  data-state="brand-po-drawer-open-record"
+                  onClick={() => {
+                    setExpandedPO(previewRecord.id);
+                    setPreviewPO(null);
+                  }}
+                >
+                  Open full record
+                </Button>
+              </div>
+            </div>
+          ) : undefined
+        }
+      >
+        {previewRecord ? (
+          <BrandPoPreviewBody
+            po={previewRecord}
+            carrierLabel={shipCarrierLabel}
+          />
+        ) : null}
+      </RecordDrawer>
+    </WorkspaceFrame>
+  );
+}
+
+/* ── RECORD PREVIEW BODY ────────────────────────────────────────────────────
+ * Only the sections a brand-owned purchase order genuinely supports. No
+ * cross-tenant data and no admin-only fields are exposed here.
+ */
+function BrandPoPreviewBody({
+  po,
+  carrierLabel,
+}: {
+  po: PurchaseOrder;
+  carrierLabel: (v: string) => string;
+}) {
+  const status = poStatusPresentation(po.status);
+  const hoursLeft = Math.floor(
+    (new Date(po.orderDate).getTime() + 24 * 3600 * 1000 - Date.now()) / 3600000
+  );
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge dataStatus={status.dataStatus} tone={status.tone}>
+          {status.label}
+        </StatusBadge>
+        {po.simulated === true && (
+          <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+        )}
+        {po.status === 'received' || po.status === 'under_review' ? (
+          <StatusBadge dataStatus={hoursLeft <= 0 ? 'ack_overdue' : 'ack_due'} tone={hoursLeft <= 0 ? 'danger' : 'warning'}>
+            {hoursLeft <= 0 ? 'Acknowledgment deadline passed' : `Acknowledge within ${hoursLeft}h`}
+          </StatusBadge>
+        ) : null}
+      </div>
+
+      <RecordFieldList
+        fields={[
+          { label: 'Order date', value: po.orderDate },
+          { label: 'Order value', value: `£${po.poValue.toLocaleString()}` },
+          { label: 'Line items', value: String(po.lineItems.length) },
+          { label: 'Acknowledged', value: po.acknowledgedAt ? po.acknowledgedAt.slice(0, 16).replace('T', ' ') : 'Not yet' },
+          { label: 'Freight term', value: po.freightTerm === 'collect' ? 'Freight Collect' : po.freightTerm === 'prepaid' ? 'Freight Prepaid' : '—' },
+          {
+            label: 'Ship window',
+            value: po.freightTerm === 'collect'
+              ? [po.shipWindowStart, po.shipWindowEnd].filter(Boolean).join(' → ') || '—'
+              : '—',
+          },
+          {
+            label: 'Delivery window',
+            value: po.freightTerm === 'prepaid'
+              ? [po.deliveryWindowStart, po.deliveryWindowEnd].filter(Boolean).join(' → ') || '—'
+              : '—',
+          },
+          { label: 'Carrier route', value: carrierLabel(selectCarrierForShipment({}).carrier) },
+        ]}
+      />
+
+      {po.rejectionReason && (
+        <section aria-label="Rejection reason">
+          <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+            Rejection reason
+          </h3>
+          <p className="text-[11px] leading-snug text-zinc-400">{po.rejectionReason}</p>
+        </section>
+      )}
+
+      <section aria-label="Lines">
+        <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          Lines
+        </h3>
+        <div className="overflow-hidden rounded-ds-md border border-white/[0.06]">
+          <table className="w-full text-left text-[11px]">
+            <thead className="bg-white/[0.02] text-[9px] uppercase tracking-wider text-zinc-500">
+              <tr>
+                <th scope="col" className="px-2 py-1.5">SKU</th>
+                <th scope="col" className="px-2 py-1.5">Product</th>
+                <th scope="col" className="px-2 py-1.5 text-right">Qty</th>
+                <th scope="col" className="px-2 py-1.5 text-right">Unit</th>
+                <th scope="col" className="px-2 py-1.5">Ack</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04]">
+              {po.lineItems.map((line) => {
+                const ack = ackStatusPresentation(line.ackStatus);
+                return (
+                  <tr key={line.sku}>
+                    <td className="px-2 py-1.5 font-mono text-zinc-400">{line.sku}</td>
+                    <td className="px-2 py-1.5 text-zinc-200">{line.productName}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-zinc-300">{line.quantity}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-zinc-300">{line.unitPrice.toFixed(2)}</td>
+                    <td className="px-2 py-1.5">
+                      <StatusBadge className="text-[10px]" dataStatus={ack.dataStatus} tone={ack.tone}>
+                        {ack.label}
+                      </StatusBadge>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

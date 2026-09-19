@@ -13,6 +13,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
+import { useRechartsTokens } from '@/components/shared/charts/rechartsTokens';
 
 type Row = {
   score: FulfillmentScore;
@@ -306,6 +307,8 @@ function DetailView({
   const { score, brand } = row;
   const [overrideTrack, setOverrideTrack] = useState<FulfillmentTrack>(score.track);
   const [overrideReason, setOverrideReason] = useState(score.overrideReason ?? '');
+  // §UI/UX Wave 2 — canonical chart tokens for the score radar.
+  const CHART = useRechartsTokens();
 
   const borderline = isBorderline(score.totalScore) && !score.manualOverride;
 
@@ -360,10 +363,10 @@ function DetailView({
               <h4 className="text-xs font-medium text-zinc-400 mb-3">Score Radar</h4>
               <ResponsiveContainer width="100%" height={240}>
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="#ffffff20" />
-                  <PolarAngleAxis dataKey="component" tick={{ fill: '#a1a1aa', fontSize: 10 }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 20]} tick={{ fill: '#52525b', fontSize: 9 }} />
-                  <Radar name="Score" dataKey="value" stroke="#D4A853" fill="#D4A853" fillOpacity={0.3} />
+                  <PolarGrid stroke={CHART.grid} />
+                  <PolarAngleAxis dataKey="component" tick={{ fill: CHART.axis, fontSize: 10 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 20]} tick={{ fill: CHART.axis, fontSize: 9 }} />
+                  <Radar name="Score" dataKey="value" stroke={CHART.palette[0]} fill={CHART.palette[0]} fillOpacity={0.3} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>

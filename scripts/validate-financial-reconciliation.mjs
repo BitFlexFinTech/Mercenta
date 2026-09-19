@@ -48,8 +48,8 @@ try {
   const commerce = await server.ssrLoadModule('/src/lib/commerce/commerceLifecycle.ts');
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
 
-  const TENANT = 'brand-zambezi';
-  const OTHER = 'brand-deskforge';
+  const TENANT = 'brand-astonish';
+  const OTHER = 'brand-tapatio';
   const OPS = { staffId: 'validator-ops', canMutate: true };
   const BRAND = { staffId: `brand:${TENANT}`, canMutate: true, tenantId: TENANT };
   const FOREIGN = { staffId: `brand:${OTHER}`, canMutate: true, tenantId: OTHER };
@@ -273,7 +273,7 @@ try {
   test('F1 the brand standing is tenant-scoped',
     finance.financialStandingForBrand(TENANT).reconciliations.every((x) => x.brandId === TENANT) &&
       finance.listReconciliationsForBrand(OTHER).every((x) => x.brandId === OTHER));
-  const otherPayout = await api.settleBrandPayout('comm-po-brand-deskforge-1', FOREIGN.staffId);
+  const otherPayout = await api.settleBrandPayout('comm-po-brand-tapatio-1', FOREIGN.staffId);
   test('F2 an operator settlement path never moves another tenant\'s money silently',
     otherPayout.ok === false || !!otherPayout.transferId);
   test('F3 every money-path action is on the canonical audit log',

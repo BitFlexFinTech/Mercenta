@@ -13,6 +13,12 @@ import {
   EntityHeader, Input, Modal, PageHeader, Pagination, Select, Skeleton,
   StatusBadge, Tabs, Textarea, type StatusTone,
 } from '@/components/ui';
+import {
+  MercentaDoughnut,
+  MercentaLineChart,
+} from '@/components/shared/charts/MercentaCharts';
+import { Avatar } from '@/components/shared/Avatar';
+import { resolveBrandLogo } from '@/lib/brandIdentity/logoResolver';
 
 const STATUS_TONES: { tone: StatusTone; label: string }[] = [
   { tone: 'success', label: 'On track' },
@@ -24,9 +30,9 @@ const STATUS_TONES: { tone: StatusTone; label: string }[] = [
 ];
 
 const TABLE_ROWS = [
-  { id: 'PO-1001', brand: 'Zambezi Organics', value: '£12,480', status: 'Delivered' },
-  { id: 'PO-1002', brand: 'DeskForge', value: '£8,315', status: 'Shipped' },
-  { id: 'PO-1003', brand: 'Voltaic Audio', value: '£21,940', status: 'Received' },
+  { id: 'PO-1001', brand: 'Astonish', value: '£12,480', status: 'Delivered' },
+  { id: 'PO-1002', brand: 'Tapatío', value: '£8,315', status: 'Shipped' },
+  { id: 'PO-1003', brand: 'Sennheiser', value: '£21,940', status: 'Received' },
 ];
 
 export function DesignSystemShowcase() {
@@ -134,6 +140,83 @@ export function DesignSystemShowcase() {
         <p className="text-xs text-zinc-500">Active tab: {tab}</p>
       </section>
 
+      {/* §UI/UX Wave 1 — Charts (delicate signature) */}
+      <section className="space-y-3" aria-labelledby="ds-charts">
+        <h2 id="ds-charts" className="text-xs uppercase tracking-wider text-zinc-500">Charts</h2>
+        <Card>
+          <div className="space-y-4">
+            <MercentaLineChart
+              ariaLabel="Example line chart: estimated monthly channel revenue across the last six months, rising from £4,250 to £18,700."
+              series={[
+                {
+                  name: 'Estimated revenue',
+                  points: [
+                    { label: 'Mar', value: 4250 },
+                    { label: 'Apr', value: 6100 },
+                    { label: 'May', value: 7800 },
+                    { label: 'Jun', value: 9400 },
+                    { label: 'Jul', value: 13100 },
+                    { label: 'Aug', value: 18700 },
+                  ],
+                },
+                {
+                  name: 'Units',
+                  points: [
+                    { label: 'Mar', value: 820 },
+                    { label: 'Apr', value: 1210 },
+                    { label: 'May', value: 1460 },
+                    { label: 'Jun', value: 1900 },
+                    { label: 'Jul', value: 2440 },
+                    { label: 'Aug', value: 3120 },
+                  ],
+                },
+              ]}
+              yFormat={(v) => (v >= 1000 ? `£${Math.round(v / 1000)}k` : `£${v}`)}
+            />
+            <MercentaDoughnut
+              ariaLabel="Example doughnut: fulfilment split — delivered 68, awaiting invoice 22, exception 10."
+              segments={[
+                { label: 'Delivered', value: 68 },
+                { label: 'Awaiting invoice', value: 22 },
+                { label: 'Exception', value: 10 },
+              ]}
+              centerValue="68%"
+              centerLabel="delivered"
+            />
+          </div>
+        </Card>
+      </section>
+
+      {/* §UI/UX Wave 1 — Identity (avatar + brand logo seam) */}
+      <section className="space-y-3" aria-labelledby="ds-identity">
+        <h2 id="ds-identity" className="text-xs uppercase tracking-wider text-zinc-500">Identity seams</h2>
+        <Card>
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <Avatar name="Tadii Mercenta" email="tadii@mercenta.example" size="lg" />
+              <Avatar name="Brand Partner" size="md" />
+              <Avatar name="Tapatío" size="sm" />
+              <p className="text-xs text-zinc-500">Avatar — image seam, initials fallback, responsive sizes.</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <img
+                src={resolveBrandLogo({
+                  tenantId: null,
+                  brandId: 'showcase-manchester-united',
+                  brandName: 'Manchester United',
+                  dark: false,
+                }).url ?? undefined}
+                alt="Demo identity — Manchester United"
+                className="h-10 w-10 rounded-lg border border-white/[0.1]"
+              />
+              <p className="text-xs text-zinc-500">
+                Brand logo identity seam — deterministic demo resolution (Manchester United → monogram), tenant-scoped override ahead.
+              </p>
+            </div>
+          </div>
+        </Card>
+      </section>
+
       {/* Table */}
       <section className="space-y-3" aria-labelledby="ds-table">
         <h2 id="ds-table" className="text-xs uppercase tracking-wider text-zinc-500">DataTable foundation</h2>
@@ -173,9 +256,9 @@ export function DesignSystemShowcase() {
       {/* Entity header */}
       <EntityHeader
         eyebrow="Brand account"
-        title="Zambezi Organic Extracts Ltd"
+        title="Astonish"
         status={<StatusBadge tone="success" dataStatus="active">Active</StatusBadge>}
-        description="Health & Personal Care · UK distribution · Direct fulfilment"
+        description="Home · UK distribution · Direct fulfilment"
         actions={<Button variant="secondary">Manage</Button>}
       />
 

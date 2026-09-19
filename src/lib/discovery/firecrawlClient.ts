@@ -21,11 +21,11 @@ export interface FirecrawlClient {
 const ESTIMATED_COST_PER_CRAWL_GBP = 0.01;
 
 const MOCK_CONTENT: Record<string, { title: string; content: string }> = {
-  'harvestlane.co.zw': { title: 'Harvest Lane Organics', content: 'Family-owned organic farm in Zimbabwe since 2012. Specialises in organic fruits, vegetables, herbal teas. Soil Association certified. 200 employees, 50 tons monthly. Products: rooibos tea, dried mango, baobab powder, moringa.' },
-  'saharathreads.com': { title: 'Sahara Threads Ltd', content: 'Accra-based textile manufacturer, 15 years. Handwoven cotton fabrics for international markets. 300+ artisans. GOTS certified organic cotton. Exports to UK, US, EU. MOQ: 500 yards. Kente cloth, batik, organic cotton scarves.' },
-  'pixelperch.io': { title: 'PixelPerch Accessories Inc', content: 'US tech accessories designer/manufacturer since 2018. USB-C hubs, laptop stands, cable organisers. Contract manufacturing in Shenzhen. UK retailers. UKCA/CE certified. 12-person design team.' },
-  'voltaic.co.ke': { title: 'Voltaic Home Appliance Co', content: 'Nairobi home appliances and solar electronics since 2015. LED lighting, solar chargers, smart home devices. Exports to 15 countries including UK. ISO 9001. 50,000 units/month. KEPROBA registered.' },
-  'apexdrive.de': { title: 'ApexDrive Accessories GmbH', content: 'Munich automotive accessories since 2010. Dash cams, phone mounts, LED lighting. TUV certified. 80 employees, 12M EUR revenue. Expanding to UK market.' },
+  'clipper-teas.com': { title: 'Clipper Teas', content: 'UK organic tea and coffee brand. Organic and fairtrade ranges sold in supermarkets and online. Committed to organic farming and environmental responsibility.' },
+  'regatta.com': { title: 'Regatta', content: 'UK outdoor clothing and footwear brand. Range includes waterproofs, fleeces, baselayers and accessories for men, women and kids. Widely stocked across UK retail.' },
+  'logitech.com': { title: 'Logitech', content: 'Global computer peripherals and accessories brand. Keyboards, mice, webcams and headsets for work and gaming. Broad UK retail presence.' },
+  'seepuk.com': { title: 'Seep', content: 'UK microfibre cleaning cloths and accessories brand. Deeply folded premium microfibre made in the UK. Sold through UK retail and online marketplaces.' },
+  'autoglym.com': { title: 'Autoglym', content: 'UK car care and detailing products manufacturer. Wash, polish, clay and interior care ranges. Owned by a global energy group; strong UK retail presence.' },
 };
 
 const FALLBACK = { title: 'Company Website', content: 'Manufacturer of quality products for international markets. Exports to UK. Experienced with European distributors. Multiple relevant certifications.' };

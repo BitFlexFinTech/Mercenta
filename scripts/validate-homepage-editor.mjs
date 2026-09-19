@@ -4,7 +4,18 @@
 import { createServer } from 'vite';
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+/*
+ * §UI/UX Wave 2 — REPOINTED. This validator renders Home through SSR using only
+ * `AppProvider`. Since Wave 1, Home (and the chart/theme seams it renders)
+ * consumes `useTheme()`, which throws outside a ThemeProvider — so the harness
+ * no longer matched the current composition and the validator failed for a
+ * reason unrelated to the homepage content contract it exists to protect.
+ * The fix is to supply the SAME provider composition the real app uses
+ * (src/main.tsx: QueryClientProvider → ThemeProvider → App), not to weaken any
+ * assertion. Every original check below is unchanged.
+ */
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
 let failures = 0;
 const test = (name, ok) => {
@@ -13,15 +24,26 @@ const test = (name, ok) => {
 };
 
 try {
+  const theme = await server.ssrLoadModule('/src/context/ThemeContext.tsx');
   const g = await server.ssrLoadModule('/src/context/GlobalStateContext.tsx');
   const home = await server.ssrLoadModule('/src/components/marketing/Home.tsx');
   const cfg = await server.ssrLoadModule('/src/config/homepageContent.ts');
   const apiMod = await server.ssrLoadModule('/src/data/api.ts');
   const w = await server.ssrLoadModule('/src/lib/discovery/wordingSafety.ts');
 
-  const render = (content) => renderToString(
-    createElement(g.AppProvider, null, createElement(home.Home, content ? { content } : {}))
-  );
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const render = (content) =>
+    renderToString(
+      createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        createElement(
+          theme.ThemeProvider,
+          null,
+          createElement(g.AppProvider, null, createElement(home.Home, content ? { content } : {}))
+        )
+      )
+    );
 
   // Default render contains the default hero heading + brand name.
   // §Phase M10 — REPOINTED. The hardcoded 'UK retail shelf.' literal was the

@@ -136,8 +136,8 @@ try {
   const demo = await server.ssrLoadModule('/src/data/demoData.ts');
   social.resetSocialWorkspaces();
 
-  const t1 = 'brand-zambezi';
-  const t2 = 'brand-deskforge';
+  const t1 = 'brand-astonish';
+  const t2 = 'brand-tapatio';
   const idA = social.socialWorkspaceIdForTenant(t1);
   test(
     'workspace id is deterministic across calls',
@@ -152,11 +152,11 @@ try {
     new Set(allTenants.map((id) => social.socialWorkspaceIdForTenant(id))).size === allTenants.length
   );
 
-  const p1 = social.provisionSocialWorkspace(t1, { actorId: 'system:e7' }, 'Zambezi');
+  const p1 = social.provisionSocialWorkspace(t1, { actorId: 'system:e7' }, 'Astonish');
   test('first provisioning creates the workspace', p1.ok && p1.value.provisionInvocationCount === 1);
   const firstAt = p1.ok ? p1.value.firstProvisionedAt : '';
-  for (let i = 0; i < 4; i++) social.provisionSocialWorkspace(t1, { actorId: 'system:e7' }, 'Zambezi');
-  const again = social.provisionSocialWorkspace(t1, { actorId: 'system:e7' }, 'Zambezi');
+  for (let i = 0; i < 4; i++) social.provisionSocialWorkspace(t1, { actorId: 'system:e7' }, 'Astonish');
+  const again = social.provisionSocialWorkspace(t1, { actorId: 'system:e7' }, 'Astonish');
   test(
     'repeated provisioning (refresh / re-login) creates NO duplicate',
     social.countSocialWorkspaces() === 1 && again.ok && again.value.workspaceId === idA
@@ -171,7 +171,7 @@ try {
       again.value.engineOrganizationId === null
   );
 
-  const p2 = social.provisionSocialWorkspace(t2, { actorId: 'system:e7' }, 'DeskForge');
+  const p2 = social.provisionSocialWorkspace(t2, { actorId: 'system:e7' }, 'Tapatío');
   test(
     'a second brand receives a separate workspace',
     p2.ok && social.countSocialWorkspaces() === 2 && p2.value.workspaceId !== idA
@@ -210,7 +210,7 @@ try {
   );
   test('an unapproved brand is refused BEFORE any workspace exists', denied.ok === false && social.countSocialWorkspaces() === 0);
   const granted = social.ensureSocialWorkspaceForBrand(
-    { tenantId: t1, brandStatus: 'active', onboarded: true, brandName: 'Zambezi' },
+    { tenantId: t1, brandStatus: 'active', onboarded: true, brandName: 'Astonish' },
     { actorId: 'system:e7' }
   );
   test('an approved brand is provisioned automatically', granted.ok === true && social.countSocialWorkspaces() === 1);
@@ -289,7 +289,7 @@ try {
     pz.getSocialEngineStatus({ api_url: 'https://postiz.example' });
     cfg.resolveSocialEngineConfig({ api_url: 'https://postiz.example' });
     social.ensureSocialWorkspaceForBrand(
-      { tenantId: t1, brandStatus: 'active', onboarded: true, brandName: 'Zambezi' },
+      { tenantId: t1, brandStatus: 'active', onboarded: true, brandName: 'Astonish' },
       { actorId: 'system:e7' }
     );
     social.readWorkspaceForTenant(t1, t1);
@@ -343,11 +343,17 @@ try {
     .map((s) => s.trim())
     .filter(Boolean);
   const M13_DECLARED_MIGRATION = 'supabase/migrations/027_harden_audit_log_rls.sql';
+  const PHASE4_DECLARED_MIGRATIONS = [
+    M13_DECLARED_MIGRATION,
+    // §Phase 4 — canonical 20-real-brand universe: 016 carried the invented
+    // tenant set, so the migration is regenerated with the canonical brands.
+    'supabase/migrations/016_seed_demo_data.sql',
+  ];
   test('migrations untouched by E7', !e7RangeChanged.some((f) => f.startsWith('supabase/migrations')));
-  test('only the declared M13 migration appears in the working tree',
+  test('only the declared (M13 + Phase 4) migrations appear in the working tree',
     working
       .filter((f) => f.startsWith('supabase/migrations'))
-      .every((f) => f === M13_DECLARED_MIGRATION));
+      .every((f) => PHASE4_DECLARED_MIGRATIONS.includes(f)));
 
   // §Phase M13 — the CURRENT documented phase's declared surface, extended into this
 // guard exactly as E8 and M10 extended it before: the working-tree change set may
@@ -443,10 +449,178 @@ try {
     'src/components/design/',
     'src/components/margaret/',
   ];
+  // §Phase 4 — canonical 20-real-brand universe. The file-touch proxy needs the
+  // same extension M13/E8 gave it before: the working tree now legitimately
+  // contains the Phase-4 surface (canonical SSOT + every consumer repointed).
+  // Two entries land in E7's protected paths — src/services/xero/ (fake Xero
+  // contacts/payout rows repointed to real brands) and src/components/design/
+  // (design-system showcase repointed) — and are declared here exactly as M13
+  // declared its own protected-area files.
+  /**
+   * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave is PRESENTATION-ONLY:
+   * it changes how the already-built functionality is experienced (tokens,
+   * workspace composition, shell/navigation, charts, motion, homepage) and
+   * changes no business logic, data model, permission or integration. Like
+   * PHASE4_DECLARED / FUNCTIONAL_COMPLETION_DECLARED above, the files this
+   * declared phase is allowed to touch are named here so an UNEXPLAINED change
+   * still fails the scope guard.
+   */
+  /**
+   * §Sprint work layer (2026-09-19) — REPOINTED.
+   *
+   * The canonical operating layer the sprint required (EVENTS → WORKFLOWS →
+   * TASKS → NOTIFICATIONS → CALENDAR → ACTIVITY/AUDIT) added a new `src/lib/work/`
+   * module, two work surfaces, and a small number of additive seams
+   * (`EVENT_SEVERITY_MAP`, `Button`'s data-testid passthrough, the RBAC view
+   * allowlist, the notification centre's work projection). The scope-guard
+   * MECHANISM is unchanged and not weakened: a file outside EVERY declared set is
+   * still refused. The old contract (this sprint's files were unexplained) is
+   * recorded here deliberately.
+   */
+  const SPRINT_WORK_LAYER_DECLARED = [
+    'src/lib/work/',
+    'src/components/shared/WorkWorkspace.tsx',
+    'src/components/admin/WorkManagement.tsx',
+    'src/components/brand/WorkManagement.tsx',
+    'src/lib/events/types.ts',
+    'src/lib/auth/rbac.ts',
+    'src/components/ui.tsx',
+    'src/components/admin/BillingPanel.tsx',
+    'src/components/admin/AdminAuditLog.tsx',
+    'src/components/layout/AdminShell.tsx',
+    'src/components/layout/BrandShell.tsx',
+    'src/components/shared/NotificationCenter.tsx',
+    'scripts/validate-work-layer.mjs',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+  ];
+
+  const UIUX_REDESIGN_DECLARED = [
+    // ── Wave 1 (theme/token foundation): declared retroactively so the
+    //    working-tree state the wave produced is no longer "unexplained" ──
+    'src/config/themes.ts',
+    'src/context/ThemeContext.tsx',
+    'src/theme-alpha-shims.css',
+    'src/main.tsx',
+    'src/index.css',
+    'tailwind.config.js',
+    'src/components/shared/Avatar.tsx',
+    'src/components/shared/ThemeSelector.tsx',
+    'src/components/shared/UnlockGrowth.tsx',
+    'src/lib/profile/profileImage.ts',
+    // Wave-1 notification severity presentation (Wave-1 report §E/F).
+    'src/components/shared/NotificationCenter.tsx',
+    'src/lib/brandIdentity/logoResolver.ts',
+    'src/data/brandLogos.ts',
+    'scripts/gen-theme-alpha-shims.mjs',
+    'scripts/validate-theme-foundation.mjs',
+    // ── Wave 2 (implementation wave) ──
+    // Untracked NEW directories (git reports the directory, not each file).
+    'src/components/shared/charts/',
+    'src/lib/nav/',
+    'src/lib/brandIdentity/',
+    'src/lib/profile/',
+    'src/components/shared/workspace.tsx',
+    'src/components/shared/CommandPalette.tsx',
+    'src/components/shared/charts/rechartsTokens.ts',
+    'src/lib/nav/navBadges.ts',
+    'src/components/shared/dashboard.tsx',
+    'src/components/shared/charts/MercentaCharts.tsx',
+    'src/components/layout/AppShell.tsx',
+    'src/components/layout/Sidebar.tsx',
+    'src/components/layout/Header.tsx',
+    'src/components/layout/AdminShell.tsx',
+    'src/components/layout/BrandShell.tsx',
+    'src/components/admin/AdminDashboard.tsx',
+    'src/components/admin/HomepageEditor.tsx',
+    'src/components/admin/FulfillmentTrack.tsx',
+    'src/components/brand/BrandReports.tsx',
+    'src/components/brand/SalesAnalytics.tsx',
+    'src/components/marketing/Home.tsx',
+    'src/components/shared/TourEngine.tsx',
+    'src/components/ui.tsx',
+    'src/config/homepageContent.ts',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/reconcile-uiux-wave2-registry.py',
+    'docs/UIUX_REDESIGN_WAVE2_2026-09-18.md',
+    'docs/UIUX_FOUNDATION_PASS_2026-09-18.md',
+    // ── §UI/UX Wave 2 COMPLETION (2026-09-18, finish-and-fix pass) ──
+    // The remaining page-by-page migration + RecordDrawer wiring. Still
+    // PRESENTATION/COMPOSITION ONLY: no business rule, permission, data model or
+    // integration changed. The two non-presentation files are declared explicitly
+    // with their reason:
+    'src/components/admin/AdminPurchaseOrderList.tsx',
+    'src/components/admin/ComplianceApprovals.tsx',
+    'src/components/admin/ReturnsTrackingDashboard.tsx',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    // `src/data/api.ts` — the ONLY functional change in this pass:
+    // `fetchHomepageContent()` now normalises a persisted payload onto the
+    // canonical content model (migration 001 seeds the row as `{}` and `Home`
+    // reads the model unguarded, so a Supabase deployment rendered the public
+    // homepage from an empty object). No new endpoint, no new provider call.
+    'src/data/api.ts',
+    'docs/UIUX_REDESIGN_WAVE2_COMPLETION_2026-09-18.md',
+    'scripts/reconcile-uiux-wave2-completion-registry.py',
+    'e2e/record-drawer.spec.ts',
+  ];
+
+  const PHASE4_DECLARED = [
+    'src/services/xero/demoData.ts',
+    'src/services/xero/xeroClient.ts',
+    'src/components/design/DesignSystemShowcase.tsx',
+    // §Phase 4.1 — ASN regulated-category fix. Tapatío (Grocery) is now the
+    // cleared ASN tenant, so the brand ASN form must expose the lotNumber +
+    // expiryDate inputs the data contract already required. Legitimate Phase-4
+    // regression fix; declared here exactly like the Phase-4 consumer list.
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    // §Phase 4.2 — the SAME regulated-category contract on the ADMIN on-behalf
+    // ASN path (Grocery/H&PC lot + expiry inputs). Same additive pattern.
+    'src/components/admin/AdminPurchaseOrderDetail.tsx',
+    // §Phase 4.3 (Workstream B, 2026-09-17) — approved implementation files:
+    // de-exposed brand Market Intel + Super-Admin-only BI gating + product
+    // discovery / regional priority panels + internal notes editor.
+    'src/components/brand/BrandIntelligence.tsx',
+    'src/components/layout/AdminShell.tsx',
+    'src/components/admin/ProductDiscoveryPanel.tsx',
+    'src/components/admin/RegionalPriorityPanel.tsx',
+    'src/components/admin/ProspectDetailTabs.tsx',
+    'src/components/admin/ProspectDetailPanel.tsx',
+    'requirements-registry.json',
+  ];
+  // §Phase functional completion (2026-09-17) — REPOINTED. The functional-completion
+  // workstream (Amazon Ads depth §9 + Marketplace Intelligence / automated Listing
+  // Analyzer §8 + Knowledge Base ↔ UserTour §14) legitimately extended the working
+  // tree with new brand-facing and admin surfaces AFTER E7's scope was written. The
+  // guard's REAL invariant is unchanged — anything still outside the union of the
+  // declared phase scopes is refused — so each functional-completion source file is
+  // declared here exactly like PHASE4_DECLARED and M13_DECLARED did before it. Note
+  // that src/lib/intelligence/listingAnalyzer.ts sits under E7's protected
+  // `src/lib/intelligence/` prefix and is deliberately declared as the lone engine.
+  const FUNCTIONAL_COMPLETION_DECLARED = [
+    // ── Cluster A — Amazon Ads functional depth (§9) ──
+    'src/components/admin/AmazonAdsDashboard.tsx', // campaigns + drill-down + manual budget + recommended-spend approval
+    'src/components/brand/BrandAdvertising.tsx',   // NEW brand advertising surface (Market Intel)
+    // ── Cluster B — Marketplace Intelligence + automated Listing Analyzer (§8) ──
+    'src/components/brand/ListingAnalyzer.tsx',    // NEW Listing Analyzer surface (Market Intel)
+    'src/lib/intelligence/listingAnalyzer.ts',     // NEW deterministic engine (PROTECTED prefix — declared)
+    // ── shared wiring touched by both clusters ──
+    'src/components/ui.tsx',                       // Input numeric/aria/testid passthrough
+    'src/data/queries.ts',                         // ad-campaigns + ad-recommendations hooks
+    // ── Cluster C — Knowledge Base ↔ UserTour article linkage (§14) ──
+    'src/components/shared/TourEngine.tsx',        // tour tooltip "Learn more" + KB article panel
+    'src/data/knowledgeBase.ts',                   // NEW canonical article store
+    'src/config/tours/tourDefinitions.ts',         // TourStep.learnMore per orientation step
+  ];
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
-      .filter((f) => !M13_DECLARED.includes(f))
+      .filter(
+        (f) =>
+          !M13_DECLARED.includes(f) &&
+          !PHASE4_DECLARED.includes(f) &&
+          !FUNCTIONAL_COMPLETION_DECLARED.includes(f)
+      )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
 
@@ -490,6 +664,48 @@ try {
     'scripts/',
     // §Phase M13 — the declared surface of the current phase (see M13_DECLARED above).
     ...M13_DECLARED,
+    // §Phase 4 — canonical 20-real-brand universe (see PHASE4_DECLARED above):
+    // the canonical SSOT and every consumer/validator/spec repointed to it.
+    'src/data/demoData.ts',
+    'src/data/demoStore.ts',
+    'src/data/regionalDossiers.ts',
+    'src/data/brandDossiers.ts',
+    'src/data/bootstrap.ts',
+    'src/data/api.ts',
+    'src/types.ts',
+    'src/components/auth/Login.tsx',
+    'src/components/admin/HelpdeskDashboard.tsx',
+    'src/components/brand/OnboardingWizard.tsx',
+    'src/components/carrier/CarrierDashboard.tsx',
+    'src/components/design/DesignSystemShowcase.tsx',
+    'src/lib/compliance/companiesHouseMock.ts',
+    'src/lib/helpdesk/ticketStore.ts',
+    'src/lib/simulation/scenarioEngine.ts',
+    'src/lib/warehouse/returnsTracking.ts',
+    'src/lib/simulation/investorDemo.ts',
+    'src/lib/discovery/engine.ts',
+    'src/lib/discovery/firecrawlClient.ts',
+    'src/lib/research/keepaClient.ts',
+    'src/lib/research/productResearchEngine.ts',
+    'src/lib/research/resellerTracker.ts',
+    'src/lib/dhl/domain.ts',
+    'src/services/xero/demoData.ts',
+    'src/services/xero/xeroClient.ts',
+    'supabase/migrations/016_seed_demo_data.sql',
+    'scripts/gen-seed-migration.py',
+    'e2e/',
+    ...PHASE4_DECLARED,
+    // §Phase functional completion (2026-09-17) — REPOINTED (see declaration above):
+    // the same declaration extends the `allowed` set so the functional-completion
+    // source surface is accepted while anything else is still refused.
+    ...FUNCTIONAL_COMPLETION_DECLARED,
+    // §UI/UX Wave 2 (2026-09-18) — same mechanism: the redesign wave's declared
+    // presentation files are accepted; anything else still fails.
+    ...UIUX_REDESIGN_DECLARED,
+    // §Sprint work layer (2026-09-19) — REPOINTED (see declaration above): the
+    // canonical work/task + calendar operating layer added these files. The
+    // mechanism is unchanged — a file outside EVERY declared set is still refused.
+    ...SPRINT_WORK_LAYER_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
@@ -568,17 +784,17 @@ try {
   /* ── 8. §Phase E8 — live engine link, SSO bridge and deployment config ── */
   section('8. Engine link (E8) & deployment configuration');
   social.resetSocialWorkspaces();
-  const unlinked = social.linkSocialWorkspaceToEngine('brand-zambezi', {
+  const unlinked = social.linkSocialWorkspaceToEngine('brand-astonish', {
     email: 'x@social.mercenta.co.uk',
     organizationId: 'org-1',
   });
   test('linking refuses a tenant that has no workspace yet', unlinked.ok === false);
   social.ensureSocialWorkspaceForBrand(
-    { tenantId: 'brand-zambezi', brandStatus: 'active', onboarded: true, brandName: 'Zambezi' },
+    { tenantId: 'brand-astonish', brandStatus: 'active', onboarded: true, brandName: 'Astonish' },
     { actorId: 'system:e8' }
   );
-  const linked = social.linkSocialWorkspaceToEngine('brand-zambezi', {
-    email: 'brand-zambezi-9c8c82e3@social.mercenta.co.uk',
+  const linked = social.linkSocialWorkspaceToEngine('brand-astonish', {
+    email: 'brand-astonish-9c8c82e3@social.mercenta.co.uk',
     organizationId: 'a8ae0104-4447-4a13-afab-be0100f15f64',
   });
   test(
@@ -587,8 +803,8 @@ try {
       linked.value.engineOrganizationId === 'a8ae0104-4447-4a13-afab-be0100f15f64'
   );
   test('the brand engine identity is recorded', linked.ok && /@social\.mercenta\.co\.uk$/.test(String(linked.value.engineEmail)));
-  const relinked = social.linkSocialWorkspaceToEngine('brand-zambezi', {
-    email: 'brand-zambezi-9c8c82e3@social.mercenta.co.uk',
+  const relinked = social.linkSocialWorkspaceToEngine('brand-astonish', {
+    email: 'brand-astonish-9c8c82e3@social.mercenta.co.uk',
     organizationId: 'a8ae0104-4447-4a13-afab-be0100f15f64',
   });
   test(

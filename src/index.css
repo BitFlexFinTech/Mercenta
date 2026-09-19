@@ -6,12 +6,20 @@ html, body, #root {
   height: 100%;
 }
 
+/* §UI/UX Wave 1 — base surfaces are THEME tokens (defaults = Minimal Light).
+   ThemeContext applies the canonical variable set from src/config/themes.ts
+   on <html data-mercenta-theme="..."> at boot and on switch. */
 body {
   font-family: 'IBM Plex Sans', system-ui, sans-serif;
-  background-color: #000000;
-  color: #E5E5E5;
+  background-color: var(--mr-bg, #F6F7F9);
+  color: var(--mr-text, #232731);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--mr-accent-300, #E2C98F);
+  color: var(--mr-text-strong, #16181D);
 }
 
 * {
@@ -20,7 +28,7 @@ body {
 
 /* ── §Phase 5 — canonical focus-visible (accessibility foundation) ──────── */
 :focus-visible {
-  outline: 2px solid rgba(201, 161, 90, 0.7);
+  outline: 2px solid var(--mr-focus, rgba(201, 161, 90, 0.5));
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -38,7 +46,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid rgba(201, 161, 90, 0.7);
+  outline: 2px solid var(--mr-focus, rgba(201, 161, 90, 0.5));
   outline-offset: 2px;
 }
 
@@ -69,11 +77,11 @@ textarea:focus-visible {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2A2E;
+  background: var(--mr-scrollbar, #C9CFD9);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3A3A3E;
+  background: var(--mr-hairline-strong, #C9CFD9);
 }
 
 @keyframes pulse-neon {
@@ -163,3 +171,202 @@ textarea:focus-visible {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   §UI/UX WAVE 2 — MERCENTA MOTION LANGUAGE
+   ───────────────────────────────────────────────────────────────────────
+   One coherent, purposeful motion system. Motion communicates CHANGE,
+   PROGRESSION, ARRIVAL, STATUS, HIERARCHY and INTERACTION — never
+   decoration. Durations/easing come from the canonical theme tokens
+   (src/config/themes.ts) so all six themes share one motion language.
+   Every animation below is disabled for `prefers-reduced-motion` users
+   (global rule further down plus the explicit block after these).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Arrival — content rising into place (page/section/drawer entrance). */
+@keyframes mr-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise {
+  animation: mr-rise var(--mr-motion-base, 240ms) var(--mr-ease-standard, cubic-bezier(0.2, 0, 0, 1)) both;
+}
+
+/* Arrival — drawer / context panel sliding in from the right edge. */
+@keyframes mr-slide-in-right {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-drawer-in {
+  animation: mr-slide-in-right var(--mr-motion-base, 240ms) var(--mr-ease-emphasized, cubic-bezier(0.2, 0.9, 0.1, 1)) both;
+}
+
+/* Progression — chart line drawing itself in (stroke-dashoffset). */
+@keyframes mr-draw {
+  from { stroke-dashoffset: var(--mr-draw-length, 1200); }
+  to { stroke-dashoffset: 0; }
+}
+.animate-chart-draw {
+  animation: mr-draw 900ms var(--ease-chart, cubic-bezier(0.22, 0.61, 0.36, 1)) both;
+}
+
+/* Progression — doughnut arc sweeping from its start angle. */
+@keyframes mr-arc {
+  from { stroke-dashoffset: var(--mr-arc-from, 0); }
+  to { stroke-dashoffset: var(--mr-arc-to, 0); }
+}
+.animate-chart-arc {
+  animation: mr-arc 900ms var(--ease-chart, cubic-bezier(0.22, 0.61, 0.36, 1)) both;
+}
+
+/* Change — KPI value/delta transition (a short emphasis, not a bounce). */
+@keyframes mr-value-pop {
+  0% { opacity: 0.35; transform: translateY(3px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-value-change {
+  animation: mr-value-pop var(--mr-motion-fast, 140ms) var(--ease-chart, cubic-bezier(0.22, 0.61, 0.36, 1)) both;
+}
+
+/* Progression — pipeline stage fill growing to its share. */
+@keyframes mr-pipeline-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.animate-pipeline-grow {
+  transform-origin: left center;
+  animation: mr-pipeline-grow var(--mr-motion-base, 240ms) var(--ease-emphasized, cubic-bezier(0.2, 0.9, 0.1, 1)) both;
+}
+
+/* Status — arrival attention marker for new operational work. */
+@keyframes mr-work-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--mr-palette-red) 45%, transparent); }
+  55% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--mr-palette-red) 0%, transparent); }
+}
+.animate-work-pulse {
+  animation: mr-work-pulse 2.4s ease-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-drawer-in,
+  .animate-chart-draw,
+  .animate-chart-arc,
+  .animate-value-change,
+  .animate-pipeline-grow,
+  .animate-work-pulse {
+    animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §UI/UX WAVE 1 — LIGHT-SHELL TOKEN REMAP LAYER
+   ───────────────────────────────────────────────────────────────────────
+   The application was authored hard-dark (bg-ink-*, text-white/zinc-*,
+   border-white/…). Rather than rewriting every component, light themes
+   remap the legacy utility classes ONTO the canonical theme tokens below,
+   scoped to surfaces carrying `data-shell-theme="light"` (the app shell
+   and the public homepage). Dark themes and the Current Mercenta theme
+   need no remap — their tokens reproduce the original values.
+   New components must use tokens directly, not these shims.
+   ═══════════════════════════════════════════════════════════════════════ */
+[data-shell-theme='light'] .text-white {
+  color: var(--mr-text-strong);
+}
+[data-shell-theme='light'] .hover\:text-white:hover {
+  color: var(--mr-text-strong);
+}
+[data-shell-theme='light'] .group:hover .group-hover\:text-white {
+  color: var(--mr-text-strong);
+}
+[data-shell-theme='light'] .text-zinc-200 {
+  color: var(--mr-text-200);
+}
+[data-shell-theme='light'] .text-zinc-300 {
+  color: var(--mr-text-active);
+}
+[data-shell-theme='light'] .hover\:text-zinc-300:hover {
+  color: var(--mr-text-active);
+}
+[data-shell-theme='light'] .text-zinc-400,
+[data-shell-theme='light'] .text-zinc-500 {
+  color: var(--mr-text-muted);
+}
+[data-shell-theme='light'] .text-zinc-600 {
+  color: var(--mr-text-faint);
+}
+[data-shell-theme='light'] .disabled\:text-zinc-500:disabled {
+  color: var(--mr-text-faint);
+}
+[data-shell-theme='light'] .text-steel {
+  color: var(--mr-text-muted);
+}
+/* Gold accents must stay readable on light surfaces → use the darker
+   canonical accent tone for TEXT on light shells (2.24:1 → 3.23:1; large
+   display text passes, chips carry their own darker token). */
+[data-shell-theme='light'] .text-brass,
+[data-shell-theme='light'] .text-brass-300,
+[data-shell-theme='light'] .text-brass-400,
+[data-shell-theme='light'] .text-brass-500 {
+  color: var(--mr-accent-600);
+}
+/* Parchment is the Mercenta warm paper tone; on light surfaces it must stay
+   highly readable, so it maps to the strong text token there. */
+[data-shell-theme='light'] .text-parchment {
+  color: var(--mr-text-strong);
+}
+/* Ink-on-accent always means dark text on the brass surface, in light
+   themes the surface token is light so the reset is required. */
+[data-shell-theme='light'] .text-ink {
+  color: var(--mr-on-accent);
+}
+
+/* Hairline borders & dividers */
+[data-shell-theme='light'] .border-white\/\[0\.04\],
+[data-shell-theme='light'] .border-white\/\[0\.05\],
+[data-shell-theme='light'] .border-white\/\[0\.06\],
+[data-shell-theme='light'] .border-white\/\[0\.07\],
+[data-shell-theme='light'] .border-white\/\[0\.08\],
+[data-shell-theme='light'] .border-white\/\[0\.1\],
+[data-shell-theme='light'] .border-white\/\[0\.12\] {
+  border-color: var(--mr-hairline);
+}
+[data-shell-theme='light'] .border-white\/\[0\.14\],
+[data-shell-theme='light'] .border-white\/\[0\.15\],
+[data-shell-theme='light'] .border-white\/\[0\.16\],
+[data-shell-theme='light'] .border-white\/\[0\.2\],
+[data-shell-theme='light'] .border-white\/\[0\.3\] {
+  border-color: var(--mr-hairline-strong);
+}
+[data-shell-theme='light'] .group:hover .group-hover\:border-white\/\[0\.3\] {
+  border-color: var(--mr-hairline-strong);
+}
+[data-shell-theme='light'] .divide-white\/\[0\.04\],
+[data-shell-theme='light'] .divide-white\/\[0\.05\],
+[data-shell-theme='light'] .divide-white\/\[0\.06\],
+[data-shell-theme='light'] .divide-white\/\[0\.08\] {
+  border-color: var(--mr-hairline);
+}
+
+/* Subtle fills (rows, hovers, soft backgrounds) */
+[data-shell-theme='light'] .bg-white\/\[0\.02\],
+[data-shell-theme='light'] .bg-white\/\[0\.03\],
+[data-shell-theme='light'] .bg-white\/\[0\.04\],
+[data-shell-theme='light'] .bg-white\/\[0\.05\],
+[data-shell-theme='light'] .bg-white\/\[0\.06\],
+[data-shell-theme='light'] .bg-white\/\[0\.08\],
+[data-shell-theme='light'] .bg-white\/\[0\.1\] {
+  background-color: var(--mr-surface-tint);
+}
+[data-shell-theme='light'] .hover\:bg-white\/\[0\.04\]:hover,
+[data-shell-theme='light'] .hover\:bg-white\/\[0\.1\]:hover {
+  background-color: var(--mr-surface-hover);
+}
+
+/* Inverted solid buttons keep white text on their saturated surface. */
+[data-shell-theme='light'] .bg-state-danger.text-white,
+[data-shell-theme='light'] .bg-crimson-accent.text-white,
+[data-shell-theme='light'] .bg-red-500.text-white,
+[data-shell-theme='light'] .bg-red-600.text-white,
+[data-shell-theme='light'] .bg-red-700.text-white {
+  color: #FFFFFF;
+}

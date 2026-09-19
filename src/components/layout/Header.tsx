@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect, type RefObject } from 'react';
+import { useEffect, useState, useRef, type RefObject } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
-import { ChevronDown, Menu, Settings, CreditCard, Key } from 'lucide-react';
+import { ChevronDown, Menu, Settings, CreditCard, Key, Search } from 'lucide-react';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { Breadcrumb } from '@/components/ui';
 import { NotificationCenter } from '@/components/shared/NotificationCenter';
+import { ThemeSelector } from '@/components/shared/ThemeSelector';
+import { Avatar } from '@/components/shared/Avatar';
 
 interface HeaderProps {
   /** Canonical breadcrumb trail; the last item is the current page. */
@@ -22,6 +24,8 @@ interface HeaderProps {
   onNavApiKeys?: () => void;
   /** §Batch-10 — notification navigation callback */
   onNavNotification?: (view: string) => void;
+  /** §UI/UX Wave 2 — open the global command palette (⌘K). */
+  onOpenSearch?: () => void;
 }
 
 /**
@@ -88,6 +92,7 @@ export function Header({
   onNavBilling,
   onNavApiKeys,
   onNavNotification,
+  onOpenSearch,
 }: HeaderProps) {
   const { signOut } = useApp();
   const identity = useSessionIdentity();
@@ -105,29 +110,29 @@ export function Header({
   }, []);
 
   return (
-    <header className="h-14 flex-shrink-0 bg-ink-900 border-b border-white/[0.06] flex items-center justify-between px-4 sm:px-6">
-      <div className="flex items-center gap-3 min-w-0">
+    <header className="flex h-14 flex-shrink-0 items-center justify-between gap-3 border-b border-white/[0.06] bg-ink-900 px-3 sm:px-5">
+      <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"
           ref={toggleRef}
           onClick={onToggleNav}
           aria-expanded={navOpen}
           aria-controls="app-sidebar"
-          className="flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-300 hover:bg-white/[0.05] lg:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-ds-md text-zinc-300 transition-ds duration-ds-fast hover:bg-white/[0.05] lg:hidden"
           data-testid="app-menu-toggle"
           aria-label="Open navigation"
         >
           <Menu className="h-5 w-5" />
         </button>
-        <div className="flex items-center gap-2 text-sm min-w-0">
+        <div className="flex min-w-0 items-center gap-2 text-sm">
           <img
             src={brandMark}
             alt="Mercenta Partners hexagon mark"
-            className="w-6 h-6"
+            className="h-6 w-6"
           />
           <button
             onClick={signOut}
-            className="text-zinc-600 hover:text-white transition-colors flex-shrink-0"
+            className="flex-shrink-0 text-zinc-600 transition-colors hover:text-white"
             title="Back to homepage"
           >
             Home
@@ -136,9 +141,29 @@ export function Header({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-        {/* §Stage-19.3 — real notification center (was a static bell) — renders <NotificationCenter /> */}
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        {/* §UI/UX Wave 2 — the single findability entry point (⌘K / Ctrl-K).
+            Opens the real command palette built from this session's RBAC-scoped
+            navigation plus the real records its shell supplies. */}
+        <button
+          type="button"
+          onClick={onOpenSearch}
+          data-testid="app-search-trigger"
+          aria-label="Search records and destinations"
+          className="hidden items-center gap-2 rounded-ds-md border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-[11px] text-zinc-500 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-zinc-300 md:flex"
+        >
+          <Search className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>Search…</span>
+          <kbd className="ml-2 rounded border border-white/[0.12] px-1 py-0.5 font-mono text-[9px] text-zinc-500">
+            ⌘K
+          </kbd>
+        </button>
+
+        {/* §Stage-19.3 §UI/UX — severity-aware real notification center */}
         <NotificationCenter onNavigate={onNavNotification} />
+
+        {/* §UI/UX — presentation-only theme switcher (six themes). */}
+        <ThemeSelector compact />
 
         <div className="relative" ref={profileMenuRef}>
           <button
@@ -146,12 +171,10 @@ export function Header({
             aria-expanded={profileOpen}
             aria-controls="profile-menu"
             aria-haspopup="menu"
-            className="flex items-center gap-2 rounded-ds-md px-2 py-1 hover:bg-white/[0.04] transition-colors"
+            className="flex items-center gap-2 rounded-ds-md px-1.5 py-1 hover:bg-white/[0.04] transition-colors"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-brass-600 to-brass-700 text-xs font-semibold text-white">
-              {identity.initials}
-            </div>
-            <ChevronDown className="h-3 w-3 text-zinc-500" />
+            <Avatar name={identity.name} email={identity.email} size="sm" />
+            <ChevronDown className="h-3 w-3 text-zinc-500" aria-hidden="true" />
           </button>
 
           {profileOpen && (

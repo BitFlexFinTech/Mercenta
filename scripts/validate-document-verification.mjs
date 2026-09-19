@@ -37,7 +37,7 @@ try {
   const verification = await server.ssrLoadModule('/src/lib/verification/documentVerification.ts');
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
 
-  const TENANT = 'brand-reedkitchen';
+  const TENANT = 'brand-lecreuset';
   const OPS = { staffId: 'validator-operator', canMutate: true };
   const BRAND = { staffId: 'brand', canMutate: true, tenantId: TENANT };
   const VIEW_ONLY = { staffId: 'view', canMutate: false, tenantId: TENANT };
@@ -285,7 +285,7 @@ try {
 
   const foreign = verification.resolveComplianceDocument(
     latest().get(required[0]).id,
-    { staffId: 'brand', canMutate: true, tenantId: 'brand-deskforge' });
+    { staffId: 'brand', canMutate: true, tenantId: 'brand-tapatio' });
   test("a brand cannot reach another tenant's compliance document",
     foreign.ok === false && foreign.crossTenant === true, foreign.error);
   const viewOnlySubmit = verification.submitDocumentForVerification(
@@ -294,7 +294,7 @@ try {
     viewOnlySubmit.ok === false, viewOnlySubmit.error);
   const foreignReplace = verification.replaceComplianceDocument({
     documentId: latest().get(required[0]).id,
-    actor: { staffId: 'brand', canMutate: true, tenantId: 'brand-deskforge' },
+    actor: { staffId: 'brand', canMutate: true, tenantId: 'brand-tapatio' },
     reason: 'validator cross-tenant drill',
   });
   test("a brand cannot replace another tenant's document",
@@ -337,7 +337,7 @@ try {
     })());
   test('verification records are tenant-scoped read models',
     verification.listVerificationsForBrand(TENANT).every((r) => r.brandId === TENANT) &&
-      verification.listVerificationsForBrand('brand-deskforge').length === 0);
+      verification.listVerificationsForBrand('brand-tapatio').length === 0);
 
   const standing = verification.documentVerificationStanding(TENANT, 'Kitchen');
   test('the brand standing lists every requirement with its rationale and blocker',

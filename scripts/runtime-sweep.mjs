@@ -10,8 +10,8 @@ const BASE = process.env.BASE_URL || 'http://localhost:5173';
 const ROLES = [
   { card: 'Super Admin — Tadii', view: 'super admin' },
   { card: 'Mercenta Admin Hub', view: 'admin' },
-  { card: 'Zambezi Organic Extracts Ltd', view: 'brand' },
-  { card: 'DeskForge Supplies Inc', view: 'brand' },
+  { card: 'Astonish', view: 'brand' },
+  { card: 'Tapatío', view: 'brand' },
   { card: '3PL Carrier Terminal', view: 'carrier' },
 ];
 

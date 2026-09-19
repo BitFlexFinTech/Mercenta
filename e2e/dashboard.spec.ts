@@ -145,7 +145,7 @@ test.describe('Admin Operations Overview — redesigned dashboard', () => {
 
 test.describe('Brand dashboard — tenant-correct, no fabricated metrics', () => {
   test('6. loads for an onboarded brand, no 94.2, real derived compliance', async ({ page }) => {
-    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await loginAs(page, 'Tapatío', 1500);
     await expect(page.getByRole('heading', { name: 'Brand Overview' })).toBeVisible({ timeout: 8000 });
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
     // The fabricated hardcoded compliance score must be GONE.
@@ -163,7 +163,7 @@ test.describe('Brand dashboard — tenant-correct, no fabricated metrics', () =>
   });
 
   test('7. brand KPI band renders real tenant-scoped values that agree with the PO summary', async ({ page }) => {
-    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await loginAs(page, 'Tapatío', 1500);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
     // KPIs are numeric strings derived from the tenant's own rows.
     for (const id of ['active-pos', 'awaiting-ack', 'in-fulfilment', 'products-listed', 'out-of-stock']) {
@@ -180,7 +180,7 @@ test.describe('Brand dashboard — tenant-correct, no fabricated metrics', () =>
   });
 
   test('8. attention rows are real, actionable, and cross-consistent with KPIs', async ({ page }) => {
-    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await loginAs(page, 'Tapatío', 1500);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
     // Awaiting-acknowledgement KPI == attention rows == PO summary (same source).
     const awaitingKpi = Number((await page.getByTestId('kpi-value-awaiting-ack').textContent())!.trim());
@@ -195,7 +195,7 @@ test.describe('Brand dashboard — tenant-correct, no fabricated metrics', () =>
   });
 
   test('9. quick actions route to existing brand destinations', async ({ page }) => {
-    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await loginAs(page, 'Tapatío', 1500);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
     await expect(page.getByTestId('action-purchase_orders')).toBeVisible();
     // Every action row routes through a valid brand view id via its Open button.
@@ -205,7 +205,7 @@ test.describe('Brand dashboard — tenant-correct, no fabricated metrics', () =>
   });
 
   test('10. brand dashboard has no horizontal overflow at any viewport; drawer works on mobile', async ({ page }) => {
-    await loginAs(page, 'DeskForge Supplies Inc', 1500);
+    await loginAs(page, 'Tapatío', 1500);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
     for (const vp of VIEWPORTS) {
       await page.setViewportSize({ width: vp.w, height: vp.h });

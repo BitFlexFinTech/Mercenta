@@ -25,7 +25,7 @@ test.describe('Brand Guided Tours', () => {
   }
 
   test('1. Tour 1 auto-starts for new brand', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
     // §7E — scope to the tour card (`.animate-fade-in` is unique to the tour
     // engine) so dashboard comms with tour-named subjects can't false-positive.
     const c = page.locator('.animate-fade-in', { hasText: 'Welcome to Mercenta Partners' }).first();
@@ -35,7 +35,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('2. Completed Tour 1 does not re-trigger', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
     const wc = page.locator('text=Welcome to Mercenta Partners');
     if (await wc.isVisible({ timeout: 3000 }).catch(() => false)) {
       for (let i = 0; i < 8; i++) {
@@ -63,7 +63,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('3. Skip Tour 1 shows confirmation', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
     const wc = page.locator('text=Welcome to Mercenta Partners');
     if (await wc.isVisible({ timeout: 3000 }).catch(() => false)) {
       const d = page.locator('button[aria-label="Dismiss tour"]');
@@ -82,7 +82,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('4. PO page triggers Tour 3', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
     const a = page.locator('.animate-fade-in').first();
     if (await a.isVisible({ timeout: 2000 }).catch(() => false)) {
       const d = page.locator('button[aria-label="Dismiss tour"]');
@@ -109,11 +109,11 @@ test.describe('Brand Guided Tours', () => {
    * deductions ledger is rendered on Analytics/Reports with all four canonical
    * anchors, so this is a real assertion rather than a visibility-conditional
    * skip. It checks: the surface renders; the ledger is TENANT-SCOPED (PO-9000
-   * / PO-9001 belong to Zambezi and must never appear in DeskForge's ledger);
+   * / PO-9001 belong to Astonish and must never appear in Tapatío's ledger);
    * and opening a dispute really drives the canonical domain action.
    */
   test('5. Deductions ledger on Analytics (Tour 5 surface)', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
 
     // Dismiss whatever per-view tour card auto-started for this brand.
     const d = page.locator('button[aria-label="Dismiss tour"]');
@@ -156,7 +156,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('6. Tour steps advance correctly', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
     const wc = page.locator('text=Welcome to Mercenta Partners');
     if (await wc.isVisible({ timeout: 3000 }).catch(() => false)) {
       await page.locator('button', { hasText: 'Next' }).click();
@@ -171,7 +171,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('7. Settings has restart tour', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
     // Clear any auto-started orientation tour so Settings is reachable cleanly.
     const a = page.locator('.animate-fade-in').first();
     if (await a.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -207,7 +207,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('8. Tour selectors resolve', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
     const selectors = [
       '[data-tour="brand-dashboard"]',
       '[data-tour="nav-purchase_orders"]',
@@ -222,7 +222,7 @@ test.describe('Brand Guided Tours', () => {
   });
 
   test('9. Catalog page triggers Tour 2', async ({ page }) => {
-    await loginAsBrand(page, 'DeskForge Supplies Inc');
+    await loginAsBrand(page, 'Tapatío');
     const a = page.locator('.animate-fade-in').first();
     if (await a.isVisible({ timeout: 2000 }).catch(() => false)) {
       const d = page.locator('button[aria-label="Dismiss tour"]');
@@ -242,5 +242,21 @@ test.describe('Brand Guided Tours', () => {
     if (await st.isVisible({ timeout: 3000 }).catch(() => false)) {
       await expect(st).toBeVisible({ timeout: 2000 });
     } else test.fixme(true, 'Tour 2 not visible');
+  });
+
+  test('10. Tour step opens the contextual Knowledge Base article (§14)', async ({ page }) => {
+    await loginAsBrand(page, 'Tapatío');
+    const card = page.locator('.animate-fade-in', { hasText: 'Welcome to Mercenta Partners' }).first();
+    if (await card.isVisible({ timeout: 3000 }).catch(() => false)) {
+      // The first orientation step carries a contextual KB article link.
+      const learn = page.getByTestId('tour-learn-more-orientation-welcome');
+      await expect(learn).toBeVisible({ timeout: 2000 });
+      await learn.click();
+      const panel = page.getByTestId('kb-article-panel');
+      await expect(panel).toBeVisible({ timeout: 3000 });
+      await expect(panel.getByText(/how your brand works with Mercenta/i)).toBeVisible();
+      await panel.getByRole('button', { name: 'Close article' }).click();
+      await expect(panel).not.toBeVisible({ timeout: 2000 });
+    } else test.fixme(true, 'Tour 1 not visible');
   });
 });

@@ -34,16 +34,16 @@ function checkAlreadyListed(product: KeepaProduct, knownBrandNames: string[]): {
 interface CandidateBrand { name: string; country: string; fitScore: number; }
 
 const MOCK_CANDIDATES: Record<string, CandidateBrand[]> = {
-  Kitchen: [{ name: 'Harvest Lane Organics', country: 'Zimbabwe', fitScore: 85 }, { name: 'Culinary Forge', country: 'South Africa', fitScore: 72 }],
-  'Office Products': [{ name: 'DeskForge', country: 'Kenya', fitScore: 78 }, { name: 'Pixel Perch', country: 'United States', fitScore: 65 }],
-  Baby: [{ name: 'LittleKiwi Baby', country: 'New Zealand', fitScore: 82 }, { name: 'Sahara Threads', country: 'Ghana', fitScore: 55 }],
-  Home: [{ name: 'Voltaic Home', country: 'Kenya', fitScore: 80 }, { name: 'Sahara Threads', country: 'Ghana', fitScore: 70 }],
-  'Health & Personal Care': [{ name: 'Zambezi Organic Extracts', country: 'Zimbabwe', fitScore: 90 }, { name: 'Nordhaus Naturals', country: 'Germany', fitScore: 75 }],
-  'Consumer Electronics': [{ name: 'Voltaic Home', country: 'Kenya', fitScore: 85 }, { name: 'Pixel Perch', country: 'United States', fitScore: 80 }],
-  Automotive: [{ name: 'ApexDrive', country: 'Germany', fitScore: 82 }, { name: 'DeskForge', country: 'Kenya', fitScore: 45 }],
-  Grocery: [{ name: 'Harvest Lane Organics', country: 'Zimbabwe', fitScore: 88 }, { name: 'TeaBlossom', country: 'Kenya', fitScore: 76 }],
-  'Personal Computer': [{ name: 'Pixel Perch', country: 'United States', fitScore: 84 }, { name: 'DeskForge', country: 'Kenya', fitScore: 60 }],
-  Apparel: [{ name: 'Sahara Threads', country: 'Ghana', fitScore: 85 }, { name: 'Zambezi Organic Extracts', country: 'Zimbabwe', fitScore: 50 }],
+  Kitchen: [{ name: 'Joseph Joseph', country: 'United Kingdom', fitScore: 85 }, { name: 'Le Creuset', country: 'France', fitScore: 72 }],
+  'Office Products': [{ name: 'Moleskine', country: 'Italy', fitScore: 78 }, { name: 'Leitz', country: 'Germany', fitScore: 65 }],
+  Baby: [{ name: 'Kit & Kin', country: 'United Kingdom', fitScore: 82 }, { name: 'LocknLock', country: 'South Korea', fitScore: 55 }],
+  Home: [{ name: 'Seep', country: 'United Kingdom', fitScore: 80 }, { name: 'Delphis Eco', country: 'United Kingdom', fitScore: 70 }],
+  'Health & Personal Care': [{ name: 'Bulldog Skincare', country: 'United Kingdom', fitScore: 90 }, { name: 'UpCircle', country: 'United Kingdom', fitScore: 75 }],
+  'Consumer Electronics': [{ name: 'Roberts Radio', country: 'United Kingdom', fitScore: 85 }, { name: 'Sennheiser', country: 'Germany', fitScore: 80 }],
+  Automotive: [{ name: 'Autoglym', country: 'United Kingdom', fitScore: 82 }, { name: 'BatteryMinder', country: 'United States', fitScore: 45 }],
+  Grocery: [{ name: 'Clipper Teas', country: 'United Kingdom', fitScore: 88 }, { name: 'Tapatío', country: 'United States', fitScore: 76 }],
+  'Personal Computer': [{ name: 'Logitech', country: 'Switzerland', fitScore: 84 }, { name: 'Moleskine', country: 'Italy', fitScore: 60 }],
+  Apparel: [{ name: 'Regatta', country: 'United Kingdom', fitScore: 85 }, { name: 'Seep', country: 'United Kingdom', fitScore: 50 }],
 };
 
 function getCandidateBrands(category: string): CandidateBrand[] {

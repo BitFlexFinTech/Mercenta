@@ -27,7 +27,7 @@ for (const [name, file] of [
   try {
     const html = renderToString(wrap(createElement(m[key])));
     console.log(`== ${name} len=${html.length}`);
-    for (const probe of ['Nordhaus', 'Zambezi', 'PO-90', 'Distribution', 'Re:']) {
+    for (const probe of ['Seep', 'Astonish', 'PO-90', 'Distribution', 'Re:']) {
       if (html.includes(probe)) console.log('   has:', probe);
     }
     console.log('   tail:', html.slice(-200).replace(/</g, '<'));

@@ -32,22 +32,35 @@ import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
 import { BrandIntelligencePanel } from '@/components/admin/BrandIntelligencePanel';
 import { BrandIntelligenceStrategyPanel } from '@/components/admin/BrandIntelligenceStrategyPanel';
 import { OpportunityDiscoveryPanel } from '@/components/admin/OpportunityDiscoveryPanel';
+import { ProductDiscoveryPanel } from '@/components/admin/ProductDiscoveryPanel';
+import { RegionalPriorityPanel } from '@/components/admin/RegionalPriorityPanel';
 import { AmazonAdsDashboard } from '@/components/admin/AmazonAdsDashboard';
 import { FounderInvestorCentre } from '@/components/admin/FounderInvestorCentre';
 import { PartnershipsCentre } from '@/components/admin/PartnershipsCentre';
 import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
+import { AdminWorkCalendar, AdminWorkManagement } from '@/components/admin/WorkManagement';
+import { useAdminNavBadges } from '@/lib/nav/navBadges';
+import { usePurchaseOrders } from '@/data/queries';
+import type { CommandGroup } from '@/components/shared/CommandPalette';
 import type { AdminDepartment } from '@/types';
 import {
   LayoutDashboard, Users, Gauge, Boxes, Package, Truck, Plug,
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
-  Phone, ClipboardList, Handshake, Megaphone,
+  Phone, ClipboardList, Handshake, Megaphone, ListChecks, CalendarDays,
 } from 'lucide-react';
 
 const ADMIN_SECTIONS = [
   {
     label: 'Overview',
     items: [{ id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> }],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { id: 'work', label: 'Work Management', icon: <ListChecks className="w-4 h-4" /> },
+      { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    ],
   },
   {
     label: 'Brands',
@@ -131,6 +144,15 @@ const ADMIN_SECTIONS = [
 export default function AdminShell() {
   const { role, actingStaff } = useApp();
   const [adminView, setAdminView] = useState('overview');
+  /**
+   * §UI/UX Wave 2 — navigation attention counts + real records for the command
+   * palette, both derived from canonical admin-scoped stores (see
+   * src/lib/nav/navBadges.ts for the tenant-isolation note: AdminShell only ever
+   * renders in the admin environment, where full-portfolio access is by design).
+   */
+  const navBadges = useAdminNavBadges();
+  const posQuery = usePurchaseOrders();
+  const posAll = posQuery.data?.data ?? [];
   const isSuper = role === 'Super Admin';
   // §Phase 6 — navigation visibility only. Views super-only in the render
   // guard remain guarded there for defense in depth.
@@ -138,15 +160,40 @@ export default function AdminShell() {
     'super_admin',
     'audit_log',
     'integrations',
+    // §Workstream B (Decision 2, 2026-09-17) — Brand Intelligence is proprietary
+    // Mercenta IP: the discovery/opportunity/strategy/notes machinery is SUPER
+    // ADMIN ONLY. Hidden here AND guarded again at render (defense in depth).
+    'brand_intelligence',
     // §21/M12 — the founder's private surfaces.
     'founder_centre',
     'partnerships',
   ]);
-  const navSections = isSuper
+  const navSections = (isSuper
     ? ADMIN_SECTIONS
     : ADMIN_SECTIONS
         .map((s) => ({ ...s, items: s.items.filter((i) => !HIDDEN_FOR_NON_SUPER.has(i.id)) }))
-        .filter((s) => s.items.length > 0);
+        .filter((s) => s.items.length > 0)
+  ).map((s) => ({
+    ...s,
+    // §UI/UX Wave 2 — presentation-only badge from the canonical count map.
+    items: s.items.map((i) => (navBadges[i.id] ? { ...i, badge: navBadges[i.id] } : i)),
+  }));
+
+  /** §UI/UX Wave 2 — command palette: real purchase orders, newest first. */
+  const commandGroups: CommandGroup[] = [
+    {
+      label: 'Purchase orders',
+      items: [...posAll]
+        .sort((a, b) => b.poNumber.localeCompare(a.poNumber))
+        .slice(0, 40)
+        .map((p) => ({
+          id: `po-${p.id}`,
+          label: p.poNumber,
+          meta: `${p.status.replace(/_/g, ' ')} · £${p.poValue.toLocaleString()}`,
+          onSelect: () => setAdminView('purchase_orders_admin'),
+        })),
+    },
+  ];
 
   const deptMap: Record<string, AdminDepartment> = { overview: 'business_dev', crm: 'business_dev', logistics: 'logistics', carriers: 'logistics', compliance: 'compliance' };
   const breadcrumb: Record<string, string> = {
@@ -158,6 +205,7 @@ export default function AdminShell() {
     integrations: 'Integration Settings', usertour: 'Onboarding Tours', postiz: 'Social Media',
     whatsapp: 'WhatsApp Escalation', founder_centre: 'Founder Investor Centre',
     partnerships: 'Partnerships & Fundraising',
+    work: 'Work Management', calendar: 'Operations Calendar',
   };
 
   return (
@@ -168,10 +216,15 @@ export default function AdminShell() {
       onNavBilling={() => setAdminView('billing')}
       onNavApiKeys={() => setAdminView('integrations')}
       onNavNotification={(v) => setAdminView(v)}
+      commandGroups={commandGroups}
+      commandPlaceholder="Search purchase orders, destinations…"
     >
       <ErrorBoundary sectionLabel="Admin portal">
         <IntegrationsProvider>
           {adminView === 'overview' && <AdminDashboard department={deptMap[adminView]} onNavigate={setAdminView} />}
+          {/* §Sprint — canonical work layer: tasks/deadlines + derived calendar. */}
+          {adminView === 'work' && <AdminWorkManagement onNavigate={setAdminView} />}
+          {adminView === 'calendar' && <AdminWorkCalendar onNavigate={setAdminView} />}
           {adminView === 'crm' && <BrandCRM />}
           {adminView === 'onboarding_pipeline' && <OnboardingPipeline />}
           {adminView === 'fulfillment_track' && <FulfillmentTrackPanel />}
@@ -189,13 +242,20 @@ export default function AdminShell() {
           {adminView === 'compliance' && <ComplianceApprovals />}
           {adminView === 'marketing' && <MarketingHub />}
           {adminView === 'amazon_ads' && <AmazonAdsDashboard />}
-          {adminView === 'brand_intelligence' && (
+          {adminView === 'brand_intelligence' && (isSuper ? (
             <div className="space-y-4">
               <BrandIntelligenceStrategyPanel />
+              {/*
+                §Workstream B (Step B) — internal product discovery + regional
+                priority derivation panels, SUPER ADMIN ONLY, derived purely from
+                canonical prospect/ASIN/opportunity evidence (no new engines).
+              */}
+              <ProductDiscoveryPanel />
+              <RegionalPriorityPanel />
               <OpportunityDiscoveryPanel />
               <BrandIntelligencePanel />
             </div>
-          )}
+          ) : <AccessDenied />)}
           {adminView === 'super_admin' && (isSuper ? <SuperAdminPanel /> : <AccessDenied />)}
           {/* §21/M12 — founder-only views, guarded a second time at render. */}
           {adminView === 'founder_centre' && (isSuper ? <FounderInvestorCentre /> : <AccessDenied />)}

@@ -1,9 +1,10 @@
 /* Brand Intelligence detail sub-tabs: Overview, Amazon, Commercial, People, Mercenta Fit, History */
-import { Card, Badge } from '@/components/ui';
+import { useState } from 'react';
+import { Card, Badge, Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { BrandProspect } from '@/types';
-import { getProspectTimeline } from '@/data/prospectStore';
-import { ExternalLink } from 'lucide-react';
+import { getProspect, getProspectTimeline, updateProspect, recordLifecycleEvent } from '@/data/prospectStore';
+import { ExternalLink, StickyNote } from 'lucide-react';
 
 export function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return <div className="flex items-center justify-between"><span className="text-zinc-500 text-xs">{label}</span><span className="text-zinc-300 text-xs font-medium truncate ml-2">{value}</span></div>;
@@ -148,4 +149,66 @@ export function HistoryTab({ p }: { p: BrandProspect }) {
       </div>
     ))}
   </div>;
+}
+
+/**
+ * §Workstream B (Step C, 2026-09-17) — INTERNAL notes editor (authorised Super
+ * Admin only; the whole BI surface is role-gated). Writes through the existing
+ * canonical `updateProspect` seam (no second datastore) and records an audited
+ * 'updated → notes' lifecycle event on the prospect timeline. Internal notes are
+ * never rendered on brand-facing surfaces.
+ */
+export function NotesTab({ p, onChanged }: { p: BrandProspect; onChanged?: () => void }) {
+  // Boot the draft from the LIVE canonical store (never a stale prop) so a
+  // remount after a save reflects what is actually persisted in-session.
+  const live = getProspect(p.id) ?? p;
+  const [draft, setDraft] = useState(live.notes ?? '');
+  const [saved, setSaved] = useState<string | null>(null);
+
+  const save = () => {
+    const before = (p.notes ?? '').trim();
+    const after = (draft ?? '').trim();
+    const updated = { ...p, notes: after };
+    updateProspect(updated);
+    recordLifecycleEvent({
+      id: `evt-note-${p.id}-${Date.now()}`,
+      runId: 'manual',
+      prospectId: p.id,
+      brand: p.brand,
+      changeType: 'updated',
+      field: 'notes',
+      before: before.slice(0, 80) || '(none)',
+      after: after.slice(0, 80) || '(cleared)',
+      summary: 'Internal notes updated by operator',
+      timestamp: new Date().toISOString(),
+    });
+    setSaved('Internal notes saved — visible to authorised staff only.');
+    onChanged?.();
+  };
+
+  return (
+    <div className="space-y-2">
+      <h4 className="text-xs font-semibold text-zinc-400 uppercase flex items-center gap-1.5">
+        <StickyNote className="w-3 h-3 text-brass-400" /> Internal Notes / Acquisition Rationale
+      </h4>
+      {p.whyInteresting && (
+        <div className="bg-brass-500/5 border border-brass-500/15 rounded-lg p-2">
+          <p className="text-[9px] text-brass-300 uppercase">Why this prospect</p>
+          <p className="text-[11px] text-brass-300 leading-relaxed">{p.whyInteresting}</p>
+        </div>
+      )}
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        placeholder="Internal notes: evidence, acquisition rationale, next-step rationale… (never shown to the brand)"
+        rows={6}
+        className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white font-mono focus:outline-none focus:border-brass-500/40"
+        aria-label="Internal notes"
+      />
+      <div className="flex items-center gap-2">
+        <Button className="text-xs" onClick={save}>Save notes</Button>
+        {saved && <span className="text-[10px] text-emerald-400">{saved}</span>}
+      </div>
+    </div>
+  );
 }

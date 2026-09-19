@@ -90,7 +90,7 @@ try {
     'Acme Organics,Jane Doe,jane@acme.com,Austin TX,us,Organic Food',
     'EuroBotanicals,Klaus Meyer,klaus@eurobot.de,Munich,eu,Cosmetics',
     'BadRow,No Email,no-email@row.com,Somewhere,mars,Unknown',
-    'Zambezi Foods,Tendai Moyo,tendai@zf.co.zw,Harare,africa,Food',
+    'Astonish,Tendai Moyo,tendai@zf.co.zw,Harare,africa,Food',
   ].join('\n');
   const csvAdapter = new lsMod.CsvImportAdapter();
   await csvAdapter.submitICP(icp.description, {

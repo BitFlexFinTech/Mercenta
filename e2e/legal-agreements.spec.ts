@@ -13,7 +13,7 @@ import { wizardToStep } from './helpers/onboarding';
 
 test.describe('Legal Agreements', () => {
   test('1. Brand sees agreement sections and Continue disabled until both accepted', async ({ page }) => {
-    await loginAs(page, 'Little Kiwi Baby Co', 1400);
+    await loginAs(page, 'Kit & Kin', 1400);
     // Walk the wizard to step 5 (fills only the gated inputs).
     await wizardToStep(page, 5);
 
@@ -42,13 +42,13 @@ test.describe('Legal Agreements', () => {
     await loginAs(page, 'Mercenta Admin Hub', 1100);
     await page.click('nav[aria-label="Primary"] >> text=Brand CRM');
     await page.waitForTimeout(900);
-    await page.locator('text=Zambezi').first().click();
+    await page.locator('text=Astonish').first().click();
     await page.waitForTimeout(500);
     const agreementsTab = page.locator('button:has-text("Agreements")').first();
     await expect(agreementsTab).toBeVisible({ timeout: 5000 });
     await agreementsTab.click();
     await page.waitForTimeout(600);
-    // Zambezi's seed agreements are accepted; the tab renders both sections.
+    // Astonish's seed agreements are accepted; the tab renders both sections.
     await expect(page.locator('text=Logistics SLAs').first()).toBeVisible({ timeout: 4000 });
     await expect(page.locator('text=Chargeback Indemnity').first()).toBeVisible({ timeout: 3000 });
   });

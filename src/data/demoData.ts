@@ -1,10 +1,19 @@
 /**
- * §Stage-1 Demo dataset.
+ * §Stage-1 Demo dataset — CANONICAL 20 REAL BRANDS.
  *
- * 10 demo brands spanning ALL approved categories, each with catalog,
- * fulfillment track, contract (varied states), compliance docs (varied),
- * message history, purchase orders (every workflow state), and shipments
- * across every carrier (DHL / FedEx / BAK Logistics / Amazon-partnered).
+ * Phase 4: the demo tenant universe is exactly **20 REAL companies**
+ * (10 UK + 10 international). Every brand here is a real business/brand;
+ * all operational records attached to them (POs, shipments, invoices,
+ * compliance evidence) are SIMULATED and truthfully labelled (PO-SIM- ids,
+ * `simulated: true`, simulated:// evidence) — the company itself is real.
+ *
+ * The dataset preserves the legitimate real international brands that were
+ * already present in the Brand Intelligence universe (Tapatío, Cholula,
+ * Valentina, Fly By Jing, LocknLock) and the real UK brands already seeded
+ * as prospects (Astonish, Seep, Delphis Eco, Kit & Kin).
+ *
+ * Category coverage: all TEN approved Amazon UK Vendor Central categories
+ * (types.ts APPROVED_CATEGORIES) are represented across the 20.
  *
  * Shapes mirror the live integration payloads so src/data/api.ts can swap
  * seed → live without any UI change.
@@ -41,90 +50,135 @@ export interface DemoBrand {
    * same model (the demo deliberately mixes both).
    */
   commercialModel: CommercialModel;
+  /**
+   * §Phase 4 — UK versus International origin market. Both groups are
+   * first-class in the SAME acquisition/distribution architecture — there is
+   * deliberately no UK-only platform and no separate navigation.
+   */
+  market: 'uk' | 'international';
+  /** §Phase 4 — the real brand's public website (evidence for §12). */
+  website: string;
 }
 
-/**
- * §19/M12 — the two brands the investor demo names "Brand A" and "Brand B".
- * Declared ONCE here (not re-typed in the demo, the Founder Centre or a
- * validator) so the demo story and its evidence cannot drift apart.
- */
-export const DEMO_MODEL_A_BRAND_ID = 'brand-zambezi';
-export const DEMO_MODEL_B_BRAND_ID = 'brand-nordhaus';
-
-/** All ten approved categories are covered exactly once. */
-export const DEMO_BRANDS: DemoBrand[] = [
-  { id: 'brand-zambezi', name: 'Zambezi Organic Extracts Ltd', category: 'Health & Personal Care', region: 'africa', nation: 'Zimbabwe', email: 'trade@zambeziorganics.co.zw', signatory: 'Tendai Moyo', track: 'financed', contractStatus: 'active', commercialModel: 'commission_agent' },
-  { id: 'brand-nordhaus', name: 'Nordhaus Living ApS', category: 'Home', region: 'europe', nation: 'Denmark', email: 'sales@nordhaus.dk', signatory: 'Mette Sørensen', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell' },
-  { id: 'brand-littlekiwi', name: 'Little Kiwi Baby Co', category: 'Baby', region: 'north_america', nation: 'United States', email: 'hello@littlekiwi.co', signatory: 'Dana Whitfield', track: 'financed', contractStatus: 'sent', commercialModel: 'commission_agent' },
-  { id: 'brand-deskforge', name: 'DeskForge Supplies Inc', category: 'Office Products', region: 'north_america', nation: 'United States', email: 'export@deskforge.com', signatory: 'Ray Coleman', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell' },
-  { id: 'brand-munich', name: 'Munich Clean-Care GmbH', category: 'Health & Personal Care', region: 'europe', nation: 'Germany', email: 'trade@muc-cleancare.de', signatory: 'Klaus Bauer', track: 'direct_fulfillment', contractStatus: 'draft', commercialModel: 'commission_agent' },
-  { id: 'brand-culinaryforge', name: 'Culinary Forge B.V.', category: 'Kitchen', region: 'europe', nation: 'Netherlands', email: 'orders@culinaryforge.nl', signatory: 'Anouk de Vries', track: 'financed', contractStatus: 'active', commercialModel: 'buy_resell' },
-  { id: 'brand-voltaic', name: 'Voltaic Audio LLC', category: 'Consumer Electronics', region: 'north_america', nation: 'United States', email: 'b2b@voltaicaudio.com', signatory: 'Marcus Reed', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'commission_agent' },
-  { id: 'brand-apexdrive', name: 'ApexDrive Auto Care Ltd', category: 'Automotive', region: 'north_america', nation: 'United States', email: 'sales@apexdrive.com', signatory: 'Priya Nair', track: 'financed', contractStatus: 'active', commercialModel: 'buy_resell' },
-  { id: 'brand-harvestlane', name: 'Harvest Lane Foods Pty', category: 'Grocery', region: 'africa', nation: 'South Africa', email: 'exports@harvestlane.co.za', signatory: 'Sipho Dlamini', track: 'financed', contractStatus: 'signed', commercialModel: 'commission_agent' },
-  { id: 'brand-saharathreads', name: 'Sahara Threads SARL', category: 'Apparel', region: 'africa', nation: 'Morocco', email: 'contact@saharathreads.ma', signatory: 'Yasmine El Fassi', track: 'direct_fulfillment', contractStatus: 'under_review', commercialModel: 'buy_resell' },
-];
-
-// Personal Computer category — one more brand so every category is covered.
-export const DEMO_BRAND_PC: DemoBrand = {
-  id: 'brand-pixelperch',
-  name: 'PixelPerch Accessories Inc',
-  category: 'Personal Computer',
-  region: 'north_america',
-  nation: 'United States',
-  email: 'partners@pixelperch.com',
-  signatory: 'Elliot Shaw',
-  track: 'direct_fulfillment',
-  contractStatus: 'active',
-  commercialModel: 'commission_agent',
+/** §Phase 4 — real brand websites (public evidence, not invented facts). */
+const BRAND_SITE: Record<string, string> = {
+  'brand-astonish': 'https://astonishcleaning.com',
+  'brand-seep': 'https://seepuk.com',
+  'brand-delphis': 'https://delphiseco.com',
+  'brand-kitkin': 'https://kitandkin.com',
+  'brand-bulldog': 'https://bulldogskincare.com',
+  'brand-joseph': 'https://josephjoseph.com',
+  'brand-roberts': 'https://www.robertsradio.co.uk',
+  'brand-clipper': 'https://www.clipper-teas.com',
+  'brand-regatta': 'https://www.regatta.com',
+  'brand-autoglym': 'https://www.autoglym.com',
+  'brand-tapatio': 'https://tapatiohotsauce.com',
+  'brand-cholula': 'https://cholula.com',
+  'brand-valentina': 'https://valentina.mx',
+  'brand-flybyjing': 'https://flybyjing.com',
+  'brand-lecreuset': 'https://www.lecreuset.co.uk',
+  'brand-smeg': 'https://www.smeguk.com',
+  'brand-moleskine': 'https://www.moleskine.com/en',
+  'brand-sennheiser': 'https://www.sennheiser.com',
+  'brand-logitech': 'https://www.logitech.com/en-gb',
+  'brand-vileda': 'https://www.vileda.co.uk',
 };
 
 /**
- * §Phase 7F — Deterministic compliance-scenario tenants.
+ * §19/M12 / §Phase 4 — the two brands the investor demo names "Brand A" and
+ * "Brand B". Declared ONCE here (not re-typed in the demo, the Founder Centre
+ * or a validator) so the demo story and its evidence cannot drift apart.
+ * Model A (commission-style) runs on a real UK brand; Model B (buy/resell)
+ * runs on a real international brand — both models are exercised.
+ */
+export const DEMO_MODEL_A_BRAND_ID = 'brand-astonish';
+export const DEMO_MODEL_B_BRAND_ID = 'brand-tapatio';
+
+/**
+ * Phase 4 — canonical **20 REAL brands** (10 UK + 10 international). All ten
+ * approved categories are covered. UK list first, international second. The
+ * international group preserves the real brands already present in the BI
+ * prospect universe (Tapatío, Cholula, Valentina, Fly By Jing). Every row
+ * carries the real brand's public website as §12 evidence; nothing that is
+ * unverified (ASINs, sales, rankings, revenue, contracts, contact people) is
+ * asserted as fact on the canonical record.
+ */
+export const DEMO_BRANDS: DemoBrand[] = [
+  // ── UK (10) ──────────────────────────────────────────────────────
+  { id: 'brand-astonish', name: 'Astonish', category: 'Home', region: 'europe', nation: 'United Kingdom', email: 'trade@astonish.example', signatory: 'Trade team (contact TBC)', track: 'financed', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-astonish'] },
+  { id: 'brand-seep', name: 'Seep', category: 'Home', region: 'europe', nation: 'United Kingdom', email: 'trade@seep.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'uk', website: BRAND_SITE['brand-seep'] },
+  { id: 'brand-delphis', name: 'Delphis Eco', category: 'Home', region: 'europe', nation: 'United Kingdom', email: 'trade@delphis.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-delphis'] },
+  { id: 'brand-kitkin', name: 'Kit & Kin', category: 'Baby', region: 'europe', nation: 'United Kingdom', email: 'trade@kitandkin.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-kitkin'] },
+  { id: 'brand-bulldog', name: 'Bulldog Skincare', category: 'Health & Personal Care', region: 'europe', nation: 'United Kingdom', email: 'trade@bulldog.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'draft', commercialModel: 'buy_resell', market: 'uk', website: BRAND_SITE['brand-bulldog'] },
+  { id: 'brand-joseph', name: 'Joseph Joseph', category: 'Kitchen', region: 'europe', nation: 'United Kingdom', email: 'trade@joseph.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-joseph'] },
+  { id: 'brand-roberts', name: 'Roberts Radio', category: 'Consumer Electronics', region: 'europe', nation: 'United Kingdom', email: 'trade@roberts.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'uk', website: BRAND_SITE['brand-roberts'] },
+  { id: 'brand-clipper', name: 'Clipper Teas', category: 'Grocery', region: 'europe', nation: 'United Kingdom', email: 'trade@clipper.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-clipper'] },
+  { id: 'brand-regatta', name: 'Regatta', category: 'Apparel', region: 'europe', nation: 'United Kingdom', email: 'trade@regatta.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'uk', website: BRAND_SITE['brand-regatta'] },
+  { id: 'brand-autoglym', name: 'Autoglym', category: 'Automotive', region: 'europe', nation: 'United Kingdom', email: 'trade@autoglym.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-autoglym'] },
+  // ── International (10) — real brands already present as BI prospects ──
+  { id: 'brand-tapatio', name: 'Tapatío', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@tapatio.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-tapatio'] },
+  { id: 'brand-cholula', name: 'Cholula', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@cholula.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'international', website: BRAND_SITE['brand-cholula'] },
+  { id: 'brand-valentina', name: 'Valentina', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@valentina.example', signatory: 'Trade team (contact TBC)', track: 'financed', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-valentina'] },
+  { id: 'brand-flybyjing', name: 'Fly By Jing', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@flybyjing.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'international', website: BRAND_SITE['brand-flybyjing'] },
+  { id: 'brand-locknlock', name: 'LocknLock', category: 'Kitchen', region: 'europe', nation: 'South Korea', email: 'trade@locknlock.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-locknlock'] },
+  { id: 'brand-lecreuset', name: 'Le Creuset', category: 'Kitchen', region: 'europe', nation: 'France', email: 'trade@lecreuset.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-lecreuset'] },
+  { id: 'brand-moleskine', name: 'Moleskine', category: 'Office Products', region: 'europe', nation: 'Italy', email: 'trade@moleskine.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'international', website: BRAND_SITE['brand-moleskine'] },
+  { id: 'brand-sennheiser', name: 'Sennheiser', category: 'Consumer Electronics', region: 'europe', nation: 'Germany', email: 'trade@sennheiser.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-sennheiser'] },
+  { id: 'brand-vileda', name: 'Vileda', category: 'Home', region: 'europe', nation: 'Germany', email: 'trade@vileda.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'commission_agent', market: 'international', website: BRAND_SITE['brand-vileda'] },
+  { id: 'brand-logitech', name: 'Logitech', category: 'Personal Computer', region: 'europe', nation: 'Switzerland', email: 'trade@logitech.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-logitech'] },
+];
+
+// Personal Computer category — Logitech (real) is the Personal Computer
+// member of the canonical 20 above. Kept as a named re-export so existing
+// consumers of the old single-PC export keep compiling; the row itself is a
+// REFERENCE into DEMO_BRANDS (never a second brand source).
+export const DEMO_BRAND_PC: DemoBrand =
+  DEMO_BRANDS.find((b) => b.category === 'Personal Computer')!;
+
+/**
+ * §Phase 7F / §Phase 4 — Deterministic compliance-scenario tenants.
  *
  * These brands reached the PORTAL (onboarded = true) but are NOT gate-cleared,
  * so the compliance gate can be genuinely exercised in the meaningful states
  * the product claims to support (see `COMPLIANCE_SCENARIO_DOC_STATES` and the
- * compliance matrix in PROJECT_STATUS.md):
+ * compliance matrix in PROJECT_STATUS.md). Phase 4 repointed them onto REAL
+ * brands from the canonical 20 (the previous tenants were invented companies):
  *
- *   Reed & Oak Kitchen Co   — 0/5 required docs approved (Kitchen → 5 required)
- *   MotorVista Auto Supply — 4/5 required docs approved (Automotive → 5 required)
+ *   Le Creuset  — 0/5 required docs approved (Kitchen → 5 required)
+ *   Autoglym    — 4/5 required docs approved (Automotive → 5 required)
  *
  * Their contracts are 'active' and both mandatory §4.1/§4.2 agreements are
  * accepted (derived automatically), so the ONLY reason their gate blocks is
- * the document state — exactly what the compliance-gate E2E asserts.
+ * the document state — exactly what the compliance-gate E2E asserts. The
+ * entries are references into DEMO_BRANDS (single source of truth).
  */
 export const DEMO_BRANDS_COMPLIANCE_SCENARIOS: DemoBrand[] = [
-  {
-    id: 'brand-reedkitchen',
-    name: 'Reed & Oak Kitchen Co',
-    category: 'Kitchen',
-    region: 'europe',
-    nation: 'Netherlands',
-    email: 'trade@reedandoak.nl',
-    signatory: 'Lotte Vermeer',
-    track: 'direct_fulfillment',
-    contractStatus: 'active',
-    commercialModel: 'commission_agent',
-  },
-  {
-    id: 'brand-motorvista',
-    name: 'MotorVista Auto Supply Ltd',
-    category: 'Automotive',
-    region: 'north_america',
-    nation: 'United States',
-    email: 'parts@motorvista.com',
-    signatory: 'Daniel Reyes',
-    track: 'financed',
-    contractStatus: 'active',
-    commercialModel: 'buy_resell',
-  },
+  DEMO_BRANDS.find((b) => b.id === 'brand-lecreuset')!,
+  DEMO_BRANDS.find((b) => b.id === 'brand-autoglym')!,
 ];
 
-export const ALL_DEMO_BRANDS: DemoBrand[] = [
-  ...DEMO_BRANDS,
-  DEMO_BRAND_PC,
-  ...DEMO_BRANDS_COMPLIANCE_SCENARIOS,
+/**
+ * ALL_DEMO_BRANDS — THE canonical universe = the 20 real brands. Exactly one
+ * source of truth: there is deliberately no second (fake) brand list anywhere.
+ */
+export const ALL_DEMO_BRANDS: DemoBrand[] = [...DEMO_BRANDS];
+
+/**
+ * §Phase 4 / §16 — REPRESENTATIVE demo-login subset.
+ *
+ * The one-click login deliberately shows a *representative* set of cards, NOT
+ * one button per brand (20 buttons would overwhelm investors). The subset is
+ * declared here next to the canonical 20 and every ID is a reference into it —
+ * so the login UI can never become a second, hidden source of brands. All the
+ * operational demo accounts behind these cards are real canonical 20 tenants.
+ */
+export const DEMO_LOGIN_BRAND_IDS: string[] = [
+  'brand-astonish',
+  'brand-tapatio',
+  'brand-kitkin',
+  'brand-bulldog',
+  'brand-lecreuset',
+  'brand-autoglym',
 ];
 
 /**
@@ -132,14 +186,13 @@ export const ALL_DEMO_BRANDS: DemoBrand[] = [
  * data (products, POs, shipments). All other brands are still in onboarding
  * with only their profile, compliance docs, and contract visible.
  *
- * Zambezi: Health & Personal Care — all 4 base docs + cosmetic_notification_cpnp approved,
- *          contract active, both agreements accepted. ✅ CLEARED
- * DeskForge: Office Products — all 4 base docs approved (no category-specific extras),
- *            contract active, both agreements accepted. ✅ CLEARED
+ * Phase 4: the two cleared operational tenants are ONE UK brand (Astonish,
+ * Home) and ONE international brand (Tapatío, Grocery) — both real, and both
+ * demonstrate the Money Chain end-to-end in simulated mode.
  */
 export const CLEARED_BRAND_IDS: string[] = [
-  'brand-zambezi',
-  'brand-deskforge',
+  'brand-astonish',
+  'brand-tapatio',
 ];
 
 /**
@@ -148,8 +201,8 @@ export const CLEARED_BRAND_IDS: string[] = [
  * See `DEMO_BRANDS_COMPLIANCE_SCENARIOS` above and `COMPLIANCE_SCENARIO_DOC_STATES` below.
  */
 export const COMPLIANCE_SCENARIO_BRAND_IDS: string[] = [
-  'brand-reedkitchen',
-  'brand-motorvista',
+  'brand-lecreuset',
+  'brand-autoglym',
 ];
 
 /**
@@ -265,9 +318,9 @@ export const DEMO_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
       const items = productsForBrand(brand.id).map((p, idx) => ({
         sku: p.sku,
         productName: p.name,
-        // One bulk order (nordhaus #2 → PO-9003) is intentionally oversized so
-        // the §13 auto-approve HOLD path (PO value ≥ threshold) is exercised
-        // in demo data alongside the auto-invoice path.
+        // One bulk order (cleared brand #2 → PO-9003, Tapatío) is intentionally
+        // oversized so the §13 auto-approve HOLD path (PO value ≥ threshold)
+        // is exercised in demo data alongside the auto-invoice path.
         quantity:
           (40 + (bi + pi + idx) * 10) * (bi === 1 && pi === 1 ? 8 : 1),
         unitPrice: p.exWorksPrice,
@@ -398,10 +451,10 @@ const COMPLIANCE_PATTERNS: ComplianceDocument['status'][][] = [
  * present-but-not-approved, so the canonical gate classifies it as BLOCKING —
  * the same convention the pre-existing rotating patterns already used.
  *
- * | tenant (brandId)        | approved / total | present-but-not-approved                  | expected gate |
- * |-------------------------|------------------|------------------------------------------|----------------|
- * | brand-reedkitchen (0/5) | 0 / 5            | 5 (uploaded ×2, under_review ×1, missing ×1, rejected ×1) | BLOCKED     |
- * | brand-motorvista (4/5)  | 4 / 5            | 1 (type_approval missing)                   | BLOCKED     |
+ * | tenant (brandId)  | approved / total | present-but-not-approved                  | expected gate |
+ * |-------------------|------------------|------------------------------------------|----------------|
+ * | brand-lecreuset   | 0 / 5            | 5 (uploaded ×2, under_review ×1, missing ×1, rejected ×1) | BLOCKED     |
+ * | brand-autoglym    | 4 / 5            | 1 (type_approval missing)                   | BLOCKED     |
  *
  * Both tenants have an active contract + both §4.1/§4.2 agreements accepted,
  * so the document state is the sole reason the gate blocks.
@@ -410,7 +463,7 @@ export const COMPLIANCE_SCENARIO_DOC_STATES: Record<
   string,
   Partial<Record<ComplianceDocument['type'], ComplianceDocument['status']>>
 > = {
-  'brand-reedkitchen': {
+  'brand-lecreuset': {
     letter_of_authorization: 'uploaded',
     product_safety_ukca: 'under_review',
     insurance_certificate: 'uploaded',
@@ -419,7 +472,7 @@ export const COMPLIANCE_SCENARIO_DOC_STATES: Record<
     // the failure reason and the Replace action on this row).
     food_contact_material: 'rejected',
   },
-  'brand-motorvista': {
+  'brand-autoglym': {
     letter_of_authorization: 'approved',
     product_safety_ukca: 'approved',
     insurance_certificate: 'approved',

@@ -18,6 +18,9 @@ export interface TourStep {
   position: 'top' | 'bottom' | 'left' | 'right' | 'center';
   /** Action for the step button. */
   action: 'next' | 'finish';
+  /** §Functional-completion — Knowledge Base article id shown as a
+   *  contextual "Learn more" link on this step (UserTour → article). */
+  learnMore?: string;
 }
 
 export interface TourDefinition {
@@ -49,6 +52,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
       targetSelector: '[data-tour="brand-dashboard"]',
       position: 'bottom',
       action: 'next',
+      learnMore: 'kb-welcome',
     },
     {
       id: 'orientation-dashboard',
@@ -57,6 +61,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
       targetSelector: '[data-tour="brand-dashboard"]',
       position: 'bottom',
       action: 'next',
+      learnMore: 'kb-dashboard',
     },
     {
       id: 'orientation-purchase-orders',
@@ -65,6 +70,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
       targetSelector: '[data-tour="nav-purchase_orders"]',
       position: 'right',
       action: 'next',
+      learnMore: 'kb-purchase-orders',
     },
     {
       id: 'orientation-catalog',
@@ -73,6 +79,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
       targetSelector: '[data-tour="nav-catalog"]',
       position: 'right',
       action: 'next',
+      learnMore: 'kb-catalog',
     },
     {
       id: 'orientation-logistics',
@@ -81,6 +88,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
       targetSelector: '[data-tour="nav-logistics"]',
       position: 'right',
       action: 'next',
+      learnMore: 'kb-shipments',
     },
     {
       id: 'orientation-compliance',
@@ -89,6 +97,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
       targetSelector: '[data-tour="nav-compliance"]',
       position: 'right',
       action: 'next',
+      learnMore: 'kb-compliance',
     },
     {
       id: 'orientation-support',
@@ -105,6 +114,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
       targetSelector: '[data-tour="nav-settings"]',
       position: 'right',
       action: 'finish',
+      learnMore: 'kb-guidance',
     },
   ],
 };

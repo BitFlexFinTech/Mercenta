@@ -6,18 +6,21 @@ import { useState, useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
+import { useRechartsTokens } from '@/components/shared/charts/rechartsTokens';
 import { Badge, Card } from '@/components/ui';
 import { DeductionsLedger } from '@/components/brand/DeductionsLedger';
 import { cn } from '@/utils/cn';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
 import { TrendingUp, TrendingDown, Package, DollarSign, BarChart3, X, ArrowUpRight } from 'lucide-react';
 
-const BRASS = '#D4A853';
+// §UI/UX Wave 2 — series colours come from the canonical chart tokens
+// (`CHART.palette`); only the tooltip surface remains local.
 const INK_LIGHT = '#2A2A30';
-const EMERALD = '#10B981';
-const ZINC = '#52525B';
 export function SalesAnalytics({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const { session, brandProfile } = useApp();
+  // §UI/UX Wave 2 — one canonical chart language (grid/axis/stroke/palette from
+  // src/config/themes.ts), so this surface stops being a second visual system.
+  const CHART = useRechartsTokens();
   const poQuery = usePurchaseOrders();
   const pos = useMemo(() => assertBrandScope(session, poQuery.data?.data ?? []), [session, poQuery.data]);
   const [drillCard, setDrillCard] = useState<string | null>(null);
@@ -97,14 +100,14 @@ return (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="revG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={BRASS} stopOpacity={0.3} /><stop offset="100%" stopColor={BRASS} stopOpacity={0} /></linearGradient>
-                <linearGradient id="volG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={EMERALD} stopOpacity={0.3} /><stop offset="100%" stopColor={EMERALD} stopOpacity={0} /></linearGradient>
+                <linearGradient id="revG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={CHART.palette[0]} stopOpacity={0.3} /><stop offset="100%" stopColor={CHART.palette[0]} stopOpacity={0} /></linearGradient>
+                <linearGradient id="volG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={CHART.palette[2]} stopOpacity={0.3} /><stop offset="100%" stopColor={CHART.palette[2]} stopOpacity={0} /></linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-              <XAxis dataKey="month" stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v: any) => chartTab === "revenue" ? "\u00a3" + (v / 1000).toFixed(0) + "k" : String(v)} />
+              <CartesianGrid {...CHART.gridProps} />
+              <XAxis dataKey="month" {...CHART.axisProps} />
+              <YAxis {...CHART.axisProps} tickFormatter={(v: any) => chartTab === "revenue" ? "\u00a3" + (v / 1000).toFixed(0) + "k" : String(v)} />
               <Tooltip contentStyle={CHART_TT} formatter={(v: any) => [chartTab === "revenue" ? "\u00a3" + v.toLocaleString() : v.toLocaleString() + " units", chartTab === "revenue" ? "Revenue" : "Volume"]} />
-              <Area type="monotone" dataKey={chartTab === "revenue" ? "revenue" : "volume"} stroke={chartTab === "revenue" ? BRASS : EMERALD} strokeWidth={2.5} fill={"url(#" + (chartTab === "revenue" ? "revG" : "volG") + ")"} activeDot={{ r: 5 }} />
+              <Area type="monotone" dataKey={chartTab === "revenue" ? "revenue" : "volume"} stroke={chartTab === "revenue" ? CHART.palette[0] : CHART.palette[2]} strokeWidth={CHART.strokeWidth} fill={"url(#" + (chartTab === "revenue" ? "revG" : "volG") + ")"} activeDot={{ r: 4 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

@@ -47,9 +47,9 @@ try {
 
   /* ── §5 persistence + audit (the write path) ──────────────────────────── */
 
-  const before = store.commercialModelAuditFor('brand-voltaic').length;
+  const before = store.commercialModelAuditFor('brand-roberts').length;
   const changed = store.setBrandCommercialModel({
-    brandId: 'brand-voltaic',
+    brandId: 'brand-roberts',
     model: 'buy_resell',
     actorId: 'staff-001',
     reason: 'validator: agreed at review',
@@ -57,19 +57,19 @@ try {
   });
   test('a Super Admin change persists on the brand record',
     changed.ok === true &&
-      store.getBrandCommercialModelRecord('brand-voltaic').model === 'buy_resell');
+      store.getBrandCommercialModelRecord('brand-roberts').model === 'buy_resell');
   test('the change appends a canonical audit row (history preserved)',
-    store.commercialModelAuditFor('brand-voltaic').length === before + 1 &&
+    store.commercialModelAuditFor('brand-roberts').length === before + 1 &&
       store
-        .commercialModelAuditFor('brand-voltaic')
+        .commercialModelAuditFor('brand-roberts')
         .some((e) => e.action === 'commercial_model_changed'));
   test('the audit row records that compliance was NOT changed by the model',
     store
-      .commercialModelAuditFor('brand-voltaic')
+      .commercialModelAuditFor('brand-roberts')
       .every((e) => e.metadata?.complianceUnchanged === true));
 
   const noReason = store.setBrandCommercialModel({
-    brandId: 'brand-voltaic',
+    brandId: 'brand-roberts',
     model: 'commission_agent',
     actorId: 'staff-001',
     reason: '',
@@ -77,7 +77,7 @@ try {
   });
   test('an override with no reason is REFUSED (auditability is mandatory)', noReason.ok === false);
   const unknown = store.setBrandCommercialModel({
-    brandId: 'brand-voltaic',
+    brandId: 'brand-roberts',
     model: 'revenue_share',
     actorId: 'staff-001',
     reason: 'validator probe',

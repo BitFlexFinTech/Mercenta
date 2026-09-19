@@ -11,6 +11,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { Button, Skeleton, StatusBadge, type StatusTone } from '@/components/ui';
+import { DOMAIN_COLOURS, type PaletteDomain } from '@/config/themes';
 import { ArrowRight } from 'lucide-react';
 
 /**
@@ -54,6 +55,11 @@ export interface KpiCellData {
   /** Semantic tone + text — never colour-only (StatusBadge renders the text). */
   tone?: StatusTone;
   statusText?: string;
+  /**
+   * §UI/UX Wave 2 — optional domain accent strip (canonical palette binding in
+   * src/config/themes.ts). Colour is meaning, never decoration.
+   */
+  domain?: PaletteDomain;
   /** Optional drill-down to the existing destination view/page. */
   onOpen?: () => void;
 }
@@ -79,8 +85,15 @@ export function KpiGroup({
           <div
             key={k.id}
             data-testid={`kpi-${k.id}`}
-            className="bg-ink-900 p-3.5 min-h-[88px]"
+            className="relative bg-ink-900 p-3.5 min-h-[88px]"
           >
+            {k.domain && (
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 w-[3px]"
+                style={{ backgroundColor: DOMAIN_COLOURS[k.domain].solid }}
+              />
+            )}
             {loading ? (
               <div className="space-y-2.5">
                 <Skeleton className="h-3 w-16" />
@@ -111,10 +124,12 @@ export function KpiGroup({
 function KpiCellBody({ cell, valueTestId }: { cell: KpiCellData; valueTestId: string }) {
   return (
     <div className="flex flex-col gap-1.5 pt-3">
-      <span className="text-[11px] font-medium text-zinc-500 leading-none">{cell.label}</span>
+      <span className="text-[10px] font-semibold uppercase leading-none tracking-[0.14em] text-zinc-500">
+        {cell.label}
+      </span>
       <span
         data-testid={valueTestId}
-        className="font-mono text-2xl font-semibold text-white tracking-tight leading-none"
+        className="animate-value-change font-mono text-2xl font-semibold leading-none tracking-tight text-white"
       >
         {cell.value}
       </span>

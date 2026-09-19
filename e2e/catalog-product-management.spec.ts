@@ -41,8 +41,8 @@ test.describe('E3 — catalog submission lifecycle (simulated)', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
-    // Zambezi has a CLEARED compliance gate (the real gate, not a bypass).
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+    // Astonish has a CLEARED compliance gate (the real gate, not a bypass).
+    await loginAs(page, 'Astonish', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
@@ -103,8 +103,8 @@ test.describe('E3 — catalog submission lifecycle (simulated)', () => {
   });
 
   test('2. a non-compliant tenant cannot submit from the catalog at all', async ({ page }) => {
-    // MotorVista is 4/5 documents → the gate still blocks (unchanged rule).
-    await loginAs(page, 'MotorVista Auto Supply Ltd', 1100);
+    // Autoglym is 4/5 documents → the gate still blocks (unchanged rule).
+    await loginAs(page, 'Autoglym', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
@@ -119,15 +119,15 @@ test.describe('E3 — catalog submission lifecycle (simulated)', () => {
   });
 
   test('3. tenant isolation — a brand sees only its own catalog and submissions', async ({ page }) => {
-    // Reed & Oak is a different onboarded tenant that owns no catalog rows and
+    // Le Creuset is a different onboarded tenant that owns no catalog rows and
     // has not cleared the gate. It must see NONE of another tenant's state.
-    await loginAs(page, 'Reed & Oak Kitchen Co', 1100);
+    await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
 
     // No other tenant's product or submission state leaks into this session.
-    await expect(page.getByText('Zambezi').first()).toHaveCount(0);
+    await expect(page.getByText('Astonish').first()).toHaveCount(0);
     await expect(page.getByText('Live (sim)')).toHaveCount(0);
     await expect(page.getByText('Under Retail Review')).toHaveCount(0);
     await expect(page.locator('tbody tr')).toHaveCount(0);

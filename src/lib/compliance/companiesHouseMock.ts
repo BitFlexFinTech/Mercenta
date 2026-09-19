@@ -93,10 +93,10 @@ export function resetMockCompaniesHouseState(): void {
 export function ensureCompaniesHouseSeed(): void {
   if (registry.size > 0) return;
   seedCompaniesHouse([
-    { id: 'brand-zambezi', name: 'Zambezi Traders' },
-    { id: 'brand-deskforge', name: 'DeskForge' },
-    { id: 'brand-nordhaus', name: 'Nordhaus' },
-    { id: 'brand-kalahari', name: 'Kalahari Goods' },
+    { id: 'brand-astonish', name: 'Astonish' },
+    { id: 'brand-tapatio', name: 'Tapatío' },
+    { id: 'brand-seep', name: 'Seep' },
+    { id: 'brand-clipper', name: 'Clipper Teas' },
   ]);
 }
 

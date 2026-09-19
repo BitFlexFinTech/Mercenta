@@ -62,7 +62,7 @@ test.describe('Design System Showcase — rendering', () => {
     // §Phase D3: DataTable now renders BOTH a desktop table and a mobile card list,
     // so the assertion targets the instance visible at this viewport (the table).
     await page.getByRole('button', { name: 'Skeleton on' }).click();
-    await expect(page.locator('table td', { hasText: 'Zambezi Organics' }).first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('table td', { hasText: 'Astonish' }).first()).toBeVisible({ timeout: 8000 });
   });
 
   test('focus-visible outline is visible on keyboard focus of a Button', async ({ page }) => {

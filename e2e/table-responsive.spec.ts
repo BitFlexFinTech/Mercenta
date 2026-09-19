@@ -15,7 +15,7 @@ import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
 
 async function openLedger(page: import('@playwright/test').Page) {
-  await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+  await loginAs(page, 'Astonish', 1100);
   // Below lg the single nav tree is an off-canvas drawer — open it first.
   const toggle = page.getByTestId('app-menu-toggle');
   if (await toggle.isVisible().catch(() => false)) {

@@ -70,7 +70,7 @@ export function CarrierDashboard() {
     try {
       const res = await advanceShipmentViaDhl({
         shipmentId: id,
-        brandId: 'brand-zambezi',
+        brandId: 'brand-astonish',
         manifest: {
           reference: row.reference,
           customer: row.customer,

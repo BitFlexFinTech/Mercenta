@@ -110,9 +110,9 @@ try {
   const apps = await server.ssrLoadModule('/src/data/applicationStore.ts');
   const prospectStore = await server.ssrLoadModule('/src/data/prospectStore.ts');
 
-  const ZAMBEZI = 'brand-zambezi';     // cleared gate (Health & Personal Care)
-  const DESKFORGE = 'brand-deskforge'; // cleared gate (Office Products)
-  const NORDHAUS = 'brand-nordhaus';   // gate still blocked
+  const ZAMBEZI = 'brand-astonish';     // cleared gate (Health & Personal Care)
+  const DESKFORGE = 'brand-tapatio'; // cleared gate (Office Products)
+  const NORDHAUS = 'brand-seep';   // gate still blocked
 
   const zambeziActor = { staffId: `brand:${ZAMBEZI}`, canMutate: true, tenantId: ZAMBEZI };
   const deskforgeActor = { staffId: `brand:${DESKFORGE}`, canMutate: true, tenantId: DESKFORGE };

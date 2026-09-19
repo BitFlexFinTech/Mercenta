@@ -102,7 +102,7 @@ const homeBtn = page.getByRole('button', { name: 'Home' }).first();
 if (await homeBtn.count()) { await homeBtn.click({ timeout: 30000 }); await page.waitForTimeout(1000); }
 try {
   await openLogin(page);
-  await page.locator('text=Zambezi Organic Extracts Ltd').first().click({ timeout: 30000 });
+  await page.locator('text=Astonish').first().click({ timeout: 30000 });
   await waitForShell('Purchase Orders');
   /* Dismiss the brand tour overlay — its buttons say "Skip" and "Next", not
      "Skip Tour". (Live evidence 2026-09-15: text=Skip Tour matched nothing and
@@ -127,9 +127,9 @@ try {
     await poNav.click({ timeout: 30000 });
     await waitRendered(page);
     const poBody = await page.locator('body').innerText();
-    ck('brand sees own tenant data', poBody.includes('PO-9000') || poBody.includes('Zambezi'), 'po view');
+    ck('brand sees own tenant data', poBody.includes('PO-9000') || poBody.includes('Astonish'), 'po view');
   } else {
-    ck('brand sees own tenant data', body.includes('Zambezi'), 'po nav missing');
+    ck('brand sees own tenant data', body.includes('Astonish'), 'po nav missing');
   }
   ck('no page errors (brand flow)', perr.length === 0, perr.slice(0, 2).join(' | '));
 } catch (e) { ck('brand flow', false, String(e).slice(0, 140)); }

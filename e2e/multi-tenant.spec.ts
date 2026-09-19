@@ -11,11 +11,11 @@ async function loginAsBrand(page: any, name: string) {
 
 test.describe('Multi-Tenant Isolation', () => {
   test('1. Brand A cannot see Brand B POs', async ({ page }) => {
-    await loginAsBrand(page, 'Zambezi Organic Extracts Ltd');
+    await loginAsBrand(page, 'Astonish');
     await page.click('text=Purchase Orders');
     await page.waitForTimeout(1000);
 
-    // §7B — Zambezi's own seed POs are PO-9000/PO-9001; DeskForge's are
+    // §7B — Astonish's own seed POs are PO-9000/PO-9001; Tapatío's are
     // PO-9002/PO-9003. Before the portal crash was fixed this assertion was a
     // false green (the PO view errored out, so a zero count was vacuous).
     const ownPO = page.locator('text=PO-9000').or(page.locator('text=PO-9001')).first();
@@ -28,7 +28,7 @@ test.describe('Multi-Tenant Isolation', () => {
   });
 
   test('2. Brand A cannot see Brand B messages', async ({ page }) => {
-    await loginAsBrand(page, 'Zambezi Organic Extracts Ltd');
+    await loginAsBrand(page, 'Astonish');
     // §7D — the support/team threads are the brand's own communication surface.
     // Verify the view renders and contains no other-brand data at all.
     const support = page.locator('nav[aria-label="Primary"] >> text=Support & Team').first();
@@ -38,7 +38,7 @@ test.describe('Multi-Tenant Isolation', () => {
       const aThread = page.locator('text=Chat with Mercenta support and message your team').first();
       await expect(aThread).toBeVisible({ timeout: 4000 });
       // No other brand's name or messages leak into this tenant's support surface.
-      const foreign = page.locator('text=DeskForge').or(page.locator('text=Kwame'));
+      const foreign = page.locator('text=Tapatío').or(page.locator('text=Kwame'));
       expect(await foreign.count()).toBe(0);
     } else {
       test.fixme(true, 'Messages tab not accessible from brand view');
@@ -46,7 +46,7 @@ test.describe('Multi-Tenant Isolation', () => {
   });
 
   test('3. Brand A cannot see Brand B deductions', async ({ page }) => {
-    await loginAsBrand(page, 'Zambezi Organic Extracts Ltd');
+    await loginAsBrand(page, 'Astonish');
     const deductionsText = page.locator('text=deduction', { exact: false });
     const deductionCount = await deductionsText.count().catch(() => 0);
     // Cannot verify negative without cross-tenant data, but at minimum ensure no crash
@@ -55,11 +55,11 @@ test.describe('Multi-Tenant Isolation', () => {
 
   test('7. payout ledger is tenant-scoped (Brand A never sees Brand B records)', async ({ page }) => {
     // §Phase D6 — the brand payout ledger is a FINANCIAL surface, so it must be
-    // tenant-scoped exactly like POs/deductions. DeskForge owns PO-9002/PO-9003
-    // (its accepted PO accrues a payout); Zambezi owns PO-9000/PO-9001 and has
+    // tenant-scoped exactly like POs/deductions. Tapatío owns PO-9002/PO-9003
+    // (its accepted PO accrues a payout); Astonish owns PO-9000/PO-9001 and has
     // no accepted PO yet, so it must show an honest empty state — never another
     // tenant's money.
-    await loginAs(page, 'DeskForge Supplies Inc', 1400);
+    await loginAs(page, 'Tapatío', 1400);
     const ledger = page.locator('table[data-table="brand-payouts"]');
     await expect(ledger).toBeVisible({ timeout: 10000 });
     await expect(ledger.locator('tbody tr').first()).toBeVisible();
@@ -68,19 +68,19 @@ test.describe('Multi-Tenant Isolation', () => {
     expect(await page.locator('text=PO-9000').count()).toBe(0);
     expect(await page.locator('text=PO-9001').count()).toBe(0);
 
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1400);
+    await loginAs(page, 'Astonish', 1400);
     // No accepted PO → no payout rows at all, and no foreign finance record.
     expect(await page.locator('table[data-table="brand-payouts"]').count()).toBe(0);
     await expect(page.getByText('No payouts yet').first()).toBeVisible({ timeout: 8000 });
     expect(await page.locator('text=PO-9003').count()).toBe(0);
-    expect(await page.locator('text=comm-po-brand-deskforge').count()).toBe(0);
+    expect(await page.locator('text=comm-po-brand-tapatio').count()).toBe(0);
   });
 
   test('4. Brand A cannot modify Brand B data', async ({ page }) => {
     // Brand views have no cross-tenant mutation capability by design
-    await loginAsBrand(page, 'Zambezi Organic Extracts Ltd');
+    await loginAsBrand(page, 'Astonish');
     // Verify brand sees only its own data context
-    const brandName = page.locator('text=Zambezi');
+    const brandName = page.locator('text=Astonish');
     await expect(brandName.first()).toBeVisible({ timeout: 3000 });
     // Brand dashboard should not show admin-specific nav items
     const adminOnlyView = page.locator('text=Audit Log').or(page.locator('text=Global Catalog Manager'));
@@ -94,7 +94,7 @@ test.describe('Multi-Tenant Isolation', () => {
     await page.waitForTimeout(1000);
 
     // Admin should see multiple brands listed
-    const brandEntries = page.locator('text=DeskForge').or(page.locator('text=Nordhaus'));
+    const brandEntries = page.locator('text=Tapatío').or(page.locator('text=Seep'));
     const count = await brandEntries.count().catch(() => 0);
     if (count === 0) test.fixme(true, 'Brand entries not found in this UI iteration');
     else expect(count).toBeGreaterThanOrEqual(1);

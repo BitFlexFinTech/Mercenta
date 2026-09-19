@@ -92,7 +92,7 @@ test.describe('Domain persistence (Phase D4)', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1200);
+    await loginAs(page, 'Astonish', 1200);
     await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 6000 });
     // The ops-owned acquisition persistence surface is never exposed to a brand.
     await expect(page.locator('[data-section="persistence-status"]')).toHaveCount(0);

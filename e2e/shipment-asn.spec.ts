@@ -1,9 +1,9 @@
 /**
  * Phase 7D - Shipment & ASN tests.
  *
- * Covers the brand shipment flow on DeskForge (accepted PO-9002 -> Create
+ * Covers the brand shipment flow on Tapatío (accepted PO-9002 -> Create
  * Shipment -> ASN with carton detail), the shortfall-detection path that
- * auto-raises a deduction, the Routing Request indicator for Zambezi's
+ * auto-raises a deduction, the Routing Request indicator for Astonish's
  * freight-collect POs, the prepaid delivery-window label, and the carrier
  * milestone update (live on retail).
  */
@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
 
 async function deskForgePO(page: any) {
-  await loginAs(page, 'DeskForge Supplies Inc', 1100);
+  await loginAs(page, 'Tapatío', 1100);
   const ob = page.locator('text=Onboarding').first();
   if (await ob.isVisible({ timeout: 1500 }).catch(() => false)) {
     await ob.click();
@@ -19,6 +19,38 @@ async function deskForgePO(page: any) {
   }
   await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
   await page.waitForTimeout(1000);
+}
+
+/**
+ * §Phase 4.2 — admin on-behalf ASN. Opens the admin PO detail for a given PO,
+ * acknowledges ALL lines on behalf of the brand (seed POs arrive un-acknowledged,
+ * which is what unlocks the ASN / Shipment panel), then leaves the on-behalf ASN
+ * panel open ready for carton / lot / expiry inputs.
+ */
+async function adminOpenAsnPanel(page: any, brandName: string, poNumber: string) {
+  await loginAs(page, 'Mercenta Admin Hub', 1100);
+  await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
+  await page.waitForTimeout(1000);
+  const row = page
+    .locator('div.flex.items-center.justify-between', { hasText: poNumber })
+    .filter({ has: page.locator('button[title="View detail"]') })
+    .first();
+  await expect(row).toBeVisible({ timeout: 6000 });
+  await row.locator('button[title="View detail"]').click();
+  await expect(page.getByRole('heading', { name: poNumber }).first()).toBeVisible({ timeout: 5000 });
+  // Acknowledge on behalf of the brand so the ASN panel unlocks.
+  const ackBtn = page.locator('button', { hasText: `Acknowledge on behalf of ${brandName}` }).first();
+  await expect(ackBtn).toBeVisible({ timeout: 5000 });
+  await ackBtn.click();
+  await page.waitForTimeout(400);
+  await page.locator('button', { hasText: 'Submit On-Behalf Acknowledgment' }).click();
+  // The ack panel closes immediately on success, so its success notice never
+  // renders (pre-existing admin-panel quirk) — assert the structural outcome
+  // instead: the ASN / Shipment card unlocks once acknowledgedAt is set.
+  const fileBtn = page.locator('button', { hasText: `File / correct ASN on behalf of ${brandName}` }).first();
+  await expect(fileBtn).toBeVisible({ timeout: 7000 });
+  await fileBtn.click();
+  await expect(page.getByText(new RegExp(`Filing ASN on behalf of ${brandName}`)).first()).toBeVisible({ timeout: 5000 });
 }
 
 test.describe('Shipment & ASN', () => {
@@ -29,6 +61,10 @@ test.describe('Shipment & ASN', () => {
     await shipBtn.click();
     await page.waitForTimeout(500);
     // Carton qty is pre-filled from the acknowledged amounts; submit the ASN.
+    // Tapatío is Grocery (perishable/regulated) so lot number + expiry date are
+    // mandatory on the ASN — supply simulated values (never real stock data).
+    await page.getByLabel('Lot number').fill('SIM-LOT-PO-9002');
+    await page.getByLabel('Expiry date').fill('2027-10-01');
     await page.locator('button', { hasText: 'File ASN' }).click();
     await expect(page.getByText(/ASN filed via/i).first()).toBeVisible({ timeout: 7000 });
   });
@@ -39,12 +75,15 @@ test.describe('Shipment & ASN', () => {
     await page.waitForTimeout(500);
     // Zero out the first carton: clears a shortfall vs the acknowledged qty.
     await page.locator('input[type="number"]').first().fill('0');
+    // Grocery (regulated) — mandatory lot + expiry on the ASN.
+    await page.getByLabel('Lot number').fill('SIM-LOT-PO-9002');
+    await page.getByLabel('Expiry date').fill('2027-10-01');
     await page.locator('button', { hasText: 'File ASN' }).click();
     await expect(page.getByText(/Shortfall logged as deduction/i).first()).toBeVisible({ timeout: 7000 });
   });
 
   test('3. Amazon freight (collect) -> Routing Request required', async ({ page }) => {
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+    await loginAs(page, 'Astonish', 1100);
     await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
     await page.waitForTimeout(1000);
     await expect(page.getByText(/Routing Request required/i).first()).toBeVisible({ timeout: 5000 });
@@ -64,5 +103,28 @@ test.describe('Shipment & ASN', () => {
     await select.selectOption('live_amazon');
     await page.waitForTimeout(500);
     await expect(row.getByText(/Live on retail-channel/i).first()).toBeVisible({ timeout: 4000 });
+  });
+
+  test('6. Admin on-behalf ASN for a regulated Grocery brand -> lot + expiry required and submitted', async ({ page }) => {
+    await adminOpenAsnPanel(page, 'Tapatío', 'PO-9002');
+    // Regulated gate: the seam refuses the on-behalf ASN without lot + expiry
+    // (the panel stays open and renders the refusal notice).
+    await page.locator('button', { hasText: 'Submit On-Behalf ASN' }).click();
+    await expect(page.getByText(/Lot number and expiry date are required/).first()).toBeVisible({ timeout: 5000 });
+    // Deterministic SIMULATED values — never real inventory/stock data.
+    await page.getByLabel('Lot number').fill('SIM-LOT-ADMIN-PO-9002');
+    await page.getByLabel('Expiry date').fill('2027-10-01');
+    // A successful on-behalf ASN closes the filing panel (the admin notice is
+    // set on the same tick the panel closes, so it is not visible — assert the
+    // structural success signal: panel closes only on the success path).
+    await page.locator('button', { hasText: 'Submit On-Behalf ASN' }).click();
+    await expect(page.locator('button', { hasText: 'Submit On-Behalf ASN' })).toHaveCount(0, { timeout: 7000 });
+  });
+
+  test('7. Admin on-behalf ASN for a non-regulated brand -> submits without lot/expiry', async ({ page }) => {
+    await adminOpenAsnPanel(page, 'Astonish', 'PO-9001');
+    // Home is not regulated — the on-behalf ASN submits without lot/expiry.
+    await page.locator('button', { hasText: 'Submit On-Behalf ASN' }).click();
+    await expect(page.locator('button', { hasText: 'Submit On-Behalf ASN' })).toHaveCount(0, { timeout: 7000 });
   });
 });

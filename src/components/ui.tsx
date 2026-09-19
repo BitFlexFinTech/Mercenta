@@ -65,6 +65,10 @@ interface ButtonProps {
   loading?: boolean;
   type?: 'button' | 'submit';
   'data-state'?: string;
+  /** §Sprint — test hook passthrough. Hyphenated JSX attributes are dropped by
+   *  TypeScript's checker but NOT forwarded by this component, so an explicit
+   *  prop is required for a spec to select a button reliably. */
+  'data-testid'?: string;
   title?: string;
 }
 
@@ -78,6 +82,7 @@ export function Button({
   loading,
   type = 'button',
   'data-state': dataState,
+  'data-testid': dataTestId,
   title,
 }: ButtonProps) {
   const variants = {
@@ -105,6 +110,7 @@ export function Button({
       aria-disabled={isDisabled || undefined}
       aria-busy={loading || undefined}
       title={title}
+      data-testid={dataTestId}
       data-state={dataState ?? (loading ? 'loading' : disabled ? 'disabled' : undefined)}
       className={cn(
         'rounded-lg inline-flex items-center justify-center gap-2 font-medium',
@@ -140,6 +146,12 @@ interface InputProps {
   id?: string;
   error?: string;
   helper?: string;
+  /** §Functional-completion — numeric passthrough. */
+  min?: number;
+  step?: number | string;
+  /** §Functional-completion — testid + accessible name passthrough. */
+  dataTestid?: string;
+  ariaLabel?: string;
 }
 
 export function Input({
@@ -154,6 +166,10 @@ export function Input({
   id,
   error,
   helper,
+  min,
+  step,
+  dataTestid,
+  ariaLabel,
 }: InputProps) {
   const inputId = id || (label ? `input-${label.toLowerCase().replace(/\W+/g, '-')}` : undefined);
   const describedBy =
@@ -174,6 +190,10 @@ export function Input({
         placeholder={placeholder}
         readOnly={readOnly}
         required={required}
+        min={min}
+        step={step}
+        aria-label={ariaLabel}
+        data-testid={dataTestid}
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}

@@ -62,6 +62,10 @@ const [onBehalfAsn, setOnBehalfAsn] = useState(false);
   const [asnBol, setAsnBol] = useState('');
   const [asnCartons, setAsnCartons] = useState<Record<string, number>>({});
   const [asnNotice, setAsnNotice] = useState<string | null>(null);
+  // §Phase 4.2 — regulated Grocery / Health & Personal Care brands must supply
+  // lot number + expiry date on the on-behalf ASN (mirrors the brand ASN form).
+  const [asnLot, setAsnLot] = useState('');
+  const [asnExpiry, setAsnExpiry] = useState('');
 
   const poDeductions = po ? deductions.filter((d) => d.purchaseOrderId === poId) : [];
 
@@ -129,11 +133,21 @@ function beginOnBehalfAsn() {
     setAsnCartons(init);
     setAsnPro('PRO-' + thePo.poNumber);
     setAsnBol('BOL-' + thePo.poNumber);
+    setAsnLot('');
+    setAsnExpiry('');
     setAsnNotice(null);
   }
 
   function handleOnBehalfAsnSubmit() {
     const targetPo = po!;
+    // §Phase 4.2 — regulated/perishable categories REQUIRE lot + expiry on the
+    // ASN (same UX pre-check the brand form performs; the seam re-enforces it).
+    const asnBrand = brands.find((b) => b.id === targetPo.brandId);
+    const needsLot = asnBrand && ['Grocery', 'Health & Personal Care'].includes(asnBrand.category);
+    if (needsLot && (!asnLot.trim() || !asnExpiry)) {
+      setAsnNotice('Lot number and expiry date are required for perishable/regulated categories.');
+      return;
+    }
     const asn = {
       cartons: Object.entries(asnCartons)
         .filter(([, qty]) => qty > 0)
@@ -145,6 +159,8 @@ function beginOnBehalfAsn() {
       shipDate: asnShipDate, carrier: asnCarrier,
       proNumber: asnPro || 'PRO-' + targetPo.poNumber,
       bolNumber: asnBol || 'BOL-' + targetPo.poNumber,
+      lotNumber: asnLot || undefined,
+      expiryDate: asnExpiry || undefined,
     };
     const result = createShipmentForPO(targetPo.id, asn, actingStaff?.id ?? 'unknown-admin');
     if (!result.ok) { setAsnNotice(result.error ?? 'Failed.'); return; }
@@ -273,6 +289,12 @@ function beginOnBehalfAsn() {
                       ))}
                     </select>
                     <input type="date" value={asnShipDate} onChange={(e) => setAsnShipDate(e.target.value)}
+                      className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white" />
+                    <input value={asnLot} onChange={(e) => setAsnLot(e.target.value)}
+                      placeholder="Lot number (required for Grocery / H&PC)" aria-label="Lot number"
+                      className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white" />
+                    <input type="date" value={asnExpiry} onChange={(e) => setAsnExpiry(e.target.value)}
+                      placeholder="Expiry date" aria-label="Expiry date"
                       className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white" />
                   </div>
                   <Button className="text-xs" onClick={handleOnBehalfAsnSubmit}>Submit On-Behalf ASN</Button>

@@ -99,7 +99,7 @@ try {
     cached.status === 'cache_hit' && cached.fallback === 'cached');
   test('the cache hit is recorded and adds no cost', log.spendThisMonth() === 0);
   // FREE-only: discovery_fit_scoring is not free-sufficient → refused, zero cost.
-  const refusedAi = log.authoriseAiCall({ taskId: 'discovery_fit_scoring', entity: 'Zambezi Traders', tokens: 300 });
+  const refusedAi = log.authoriseAiCall({ taskId: 'discovery_fit_scoring', entity: 'Astonish Traders', tokens: 300 });
   test('a non-free AI task is REFUSED under the FREE-only policy and costs nothing',
     refusedAi.allowed === false && refusedAi.status === 'refused_budget' && log.spendThisMonth() === 0);
   const entry = log.aiUsageEntries()[log.aiUsageEntries().length - 1];

@@ -18,8 +18,8 @@ try {
   const contracts = await api.fetchContracts();
   console.log('contracts count:', contracts.data.length);
 
-  const gate = await api.isComplianceGateCleared('brand-zambezi');
-  const gateZa = await api.isComplianceGateCleared('brand-nordhaus');
+  const gate = await api.isComplianceGateCleared('brand-astonish');
+  const gateZa = await api.isComplianceGateCleared('brand-seep');
   console.log('compliance gate cleared (zambezi):', gate);
   console.log('compliance gate cleared (nordhaus):', gateZa);
 

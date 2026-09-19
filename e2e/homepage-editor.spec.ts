@@ -6,6 +6,10 @@
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
+// §UI/UX Wave 2 — the homepage eyebrow is copy, and copy lives in the canonical
+// content model. Asserting against the model (instead of a hardcoded literal)
+// means a legitimate copy change can never present as a product regression.
+import { DEFAULT_HOMEPAGE_CONTENT } from '../src/config/homepageContent';
 
 test.describe('Homepage Editor', () => {
   test('edit hero text in admin panel and verify it appears on homepage', async ({
@@ -48,7 +52,9 @@ test.describe('Homepage Editor', () => {
   }) => {
     // Load the public homepage first — it mounts with the DEFAULT live copy.
     await page.goto('/');
-    await expect(page.getByText('Wholesale Distribution — United Kingdom').first()).toBeVisible({ timeout: 6000 });
+    await expect(
+      page.getByText(DEFAULT_HOMEPAGE_CONTENT.hero.eyebrow).first()
+    ).toBeVisible({ timeout: 6000 });
 
     // Enter the portal in-place (no page reload) and publish an edit as Super Admin.
     await page.getByRole('button', { name: 'Partner Login' }).first().click();

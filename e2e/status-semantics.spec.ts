@@ -102,7 +102,7 @@ test.describe('Phase D — status semantics & decision queue', () => {
   });
 
   test('3. the brand compliance card exposes the same canonical statuses', async ({ page }) => {
-    await loginAs(page, 'Reed & Oak Kitchen Co', 1100);
+    await loginAs(page, 'Le Creuset', 1100);
     await openNav(page, 'UK Compliance');
 
     // The 0/5 scenario tenant holds a present-but-not-approved registry doc.
@@ -177,7 +177,7 @@ test.describe('Phase D — status semantics & decision queue', () => {
     }
 
     // ── Brand surface: the purchase-order list ──
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+    await loginAs(page, 'Astonish', 1100);
     await openNav(page, 'Purchase Orders');
     const brandStatuses = await statusesOnSurface();
     expect(brandStatuses.length).toBeGreaterThan(0);
@@ -246,7 +246,7 @@ test.describe('Phase D — status semantics & decision queue', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+    await loginAs(page, 'Astonish', 1100);
     await openNav(page, 'Dashboard');
     await expect(page.getByRole('heading', { name: /Fulfilment in motion/i }).first()).toBeVisible({
       timeout: 8000,

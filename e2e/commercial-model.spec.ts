@@ -20,7 +20,7 @@ async function openNav(page: import('@playwright/test').Page, label: string) {
 
 test.describe('Commercial relationship', () => {
   test('1. onboarding offers both models and honours the recorded selection', async ({ page }) => {
-    await loginAs(page, 'Little Kiwi Baby Co', 1400);
+    await loginAs(page, 'Kit & Kin', 1400);
     await expect(page.locator('h2').filter({ hasText: /Brand Profile/ }).first()).toBeVisible({
       timeout: 6000,
     });
@@ -75,7 +75,7 @@ test.describe('Commercial relationship', () => {
     await expect(page.getByTestId('model-b-illustration')).toContainText('£2,500');
     await expect(page.getByTestId('model-b-illustration')).toContainText('£2,270');
 
-    const row = page.getByTestId('commercial-model-row-brand-zambezi');
+    const row = page.getByTestId('commercial-model-row-brand-astonish');
     await expect(row).toContainText('Model A');
 
     // A change requires a reason and is refused without one.
@@ -97,7 +97,7 @@ test.describe('Commercial relationship', () => {
   });
 
   test('3. the brand sees its own relationship read-only, with the separation stated', async ({ page }) => {
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1400);
+    await loginAs(page, 'Astonish', 1400);
     await openNav(page, 'Settings');
     await page.locator('button:has-text("Commercial Relationship")').first().click();
     await page.waitForTimeout(500);

@@ -53,7 +53,7 @@ try {
 
   // ── Always-log rule ──
   const logged = await apiMod.logMessage({
-    brandId: 'brand-zambezi',
+    brandId: 'brand-astonish',
     channel: 'email',
     direction: 'outbound',
     subject: 'Test power-send',
@@ -75,7 +75,7 @@ try {
   );
   test('hub renders threads even when email disconnected',
     htmlLocked.includes('Unified inbox') &&
-      htmlLocked.includes('Zambezi Organic Extracts Ltd'));
+      htmlLocked.includes('Astonish'));
   test('power-send disabled notice shown', htmlLocked.includes('Power sending is disabled'));
   test('hot-lead flag visible on thread list', htmlLocked.includes('Hot lead'));
 

@@ -4,9 +4,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { cn } from '@/utils/cn';
-import { CHECKLIST_ITEMS, DEFAULT_TOUR_PROGRESS, type TourProgress } from '@/types';
+import { CHECKLIST_ITEMS, DEFAULT_TOUR_PROGRESS, type TourProgress, type KBArticle } from '@/types';
+import { getKnowledgeArticle } from '@/data/knowledgeBase';
 import { Button } from '@/components/ui';
-import { X, ChevronRight, CheckCircle2, Circle, HelpCircle, AlertTriangle } from 'lucide-react';
+import { X, ChevronRight, CheckCircle2, Circle, HelpCircle, AlertTriangle, BookOpen } from 'lucide-react';
 import {
   ALL_TOUR_DEFINITIONS,
   TOUR_REGISTRY,
@@ -187,24 +188,58 @@ function getTargetRect(targetSelector: string): { top: number; left: number; wid
 function TourStepCard(props: {
   step: TourStep; currentIndex: number; totalSteps: number;
   onNext: () => void; onFinish: () => void; onSkip: () => void;
+  onLearnMore?: (articleId: string) => void;
 }) {
-  const { step, currentIndex, totalSteps, onNext, onFinish, onSkip } = props;
+  const { step, currentIndex, totalSteps, onNext, onFinish, onSkip, onLearnMore } = props;
   const dots = Array.from({ length: totalSteps }, function(_, i) { return i; });
   const targetRect = useMemo(function() { return getTargetRect(step.targetSelector); }, [step.targetSelector]);
 
   // Compute tooltip position based on step.position and target element
   const tooltipStyle = useMemo(function(): React.CSSProperties {
-    if (!targetRect) {
-      // Fallback: center of viewport
-      return { position: 'fixed', top: '40%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 50 };
-    }
-
+    /**
+     * §UI/UX Wave 2 — the tour card must never cover the primary navigation.
+     * An overlay that blocks the very rail it is describing makes the product
+     * untestable and unusable (clicks on nav items hit the card instead), so:
+     *  - below lg (drawer navigation) the card DOCKs to the bottom of the
+     *    viewport, clear of the drawer's upper items;
+     *  - at lg+ the card is clamped to start to the right of the static rail.
+     */
     const gap = 12; // px gap between target and tooltip
     const tooltipWidth = 400;
+    const isNarrow = window.innerWidth < 1024;
+    if (isNarrow) {
+      return {
+        position: 'fixed',
+        left: '8px',
+        right: '8px',
+        bottom: '12px',
+        maxWidth: `${tooltipWidth}px`,
+        marginLeft: 'auto',
+        zIndex: 50,
+      };
+    }
+
+    const rail = document.getElementById('app-sidebar');
+    const railRight = rail ? Math.round(rail.getBoundingClientRect().right) : 0;
+    const minLeft = Math.max(8, railRight + gap);
+    const maxLeft = Math.max(minLeft, window.innerWidth - tooltipWidth - 16);
+    const clampLeft = function(raw: number) {
+      return Math.max(minLeft, Math.min(raw, maxLeft));
+    };
+
+    if (!targetRect) {
+      // Fallback: centred within the workspace area, never over the rail.
+      return {
+        position: 'fixed',
+        top: '40%',
+        left: `${clampLeft(window.innerWidth / 2 - tooltipWidth / 2)}px`,
+        zIndex: 50,
+      };
+    }
+
     // §7B — clamp vertically so the card (including its Next/Got it button) is
     // always reachable when the target sits near the bottom of the viewport
-    // (e.g. the last sidebar nav item). Without this the completion button
-    // rendered outside the viewport and the tour could not be finished.
+    // (e.g. the last sidebar nav item).
     const clampTop = function(raw: number) {
       return Math.max(8, Math.min(raw, Math.max(8, window.innerHeight - 200)));
     };
@@ -213,7 +248,7 @@ function TourStepCard(props: {
       return {
         position: 'fixed',
         top: `${clampTop(targetRect.top + targetRect.height / 2 - 80)}px`,
-        left: `${Math.min(targetRect.left + targetRect.width + gap, window.innerWidth - tooltipWidth - 16)}px`,
+        left: `${clampLeft(targetRect.left + targetRect.width + gap)}px`,
         zIndex: 50,
       };
     }
@@ -221,13 +256,23 @@ function TourStepCard(props: {
     return {
       position: 'fixed',
       top: `${clampTop(targetRect.top + targetRect.height + gap)}px`,
-      left: `${Math.max(8, Math.min(targetRect.left + targetRect.width / 2 - tooltipWidth / 2, window.innerWidth - tooltipWidth - 16))}px`,
+      left: `${clampLeft(targetRect.left + targetRect.width / 2 - tooltipWidth / 2)}px`,
       zIndex: 50,
     };
   }, [targetRect, step.position]);
 
   return (
-    <div style={tooltipStyle} className="w-[400px] bg-ink-900 border border-white/[0.08] rounded-xl shadow-2xl p-4 animate-fade-in">
+    <div
+      /*
+       * §UI/UX Wave 2 — a coach-mark must never BLOCK the product it is
+       * describing. The card itself is non-interactive (pointer-events: none) so
+       * clicks pass through to the app underneath; only the card's own controls
+       * re-enable pointer events. Before this, the card sat over real UI (nav
+       * items, settings tabs) and swallowed the click.
+       */
+      style={{ ...tooltipStyle, pointerEvents: 'none' }}
+      className="w-[400px] bg-ink-900 border border-white/[0.08] rounded-xl shadow-2xl p-4 animate-fade-in [&_button]:pointer-events-auto"
+    >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
           <HelpCircle className="w-4 h-4 text-brass-400" />
@@ -241,6 +286,16 @@ function TourStepCard(props: {
           {dots.map(function(i) {
             return <span key={i} className={cn('w-1.5 h-1.5 rounded-full', i === currentIndex ? 'bg-brass-500' : 'bg-zinc-700')} />;
           })}
+          {step.learnMore && onLearnMore && (
+            <button
+              type="button"
+              onClick={() => onLearnMore(String(step.learnMore))}
+              data-testid={`tour-learn-more-${step.id}`}
+              className="flex items-center gap-1 text-[10px] text-brass-400 hover:text-brass-300 transition-colors ml-1.5"
+            >
+              <BookOpen className="w-3 h-3" /> Learn more
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {step.action === 'finish' ? (
@@ -323,6 +378,8 @@ export function TourEngine(props: TourEngineProps) {
   const progress = useTourProgressReactive(brandId);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
+  /** §Functional-completion — contextual Knowledge Base article id. */
+  const [openArticleId, setOpenArticleId] = useState<string | null>(null);
 
   // Determine which tour to show
   const activeTour = useMemo<TourDefinition | null>(function() {
@@ -397,6 +454,7 @@ export function TourEngine(props: TourEngineProps) {
 
   function handleNext() {
     if (!activeTour) return;
+    setOpenArticleId(null);
     if (currentStepIndex < remainingSteps.length - 1) {
       setCurrentStepIndex(function(i) { return i + 1; });
     } else {
@@ -406,6 +464,7 @@ export function TourEngine(props: TourEngineProps) {
 
   function handleFinish() {
     if (!activeTour || !currentStep) return;
+    setOpenArticleId(null);
     markTourStepDone(brandId, activeTour.id, currentStep.id);
     markTourCompleted(brandId, activeTour.id);
     setCurrentStepIndex(0);
@@ -447,9 +506,35 @@ export function TourEngine(props: TourEngineProps) {
             );
           })()}
           <TourStepCard step={currentStep} currentIndex={currentStepIndex} totalSteps={remainingSteps.length}
-            onNext={handleNext} onFinish={handleFinish} onSkip={handleDismiss} />
+            onNext={handleNext} onFinish={handleFinish} onSkip={handleDismiss} onLearnMore={setOpenArticleId} />
         </>
       )}
+      {(() => {
+        const article: KBArticle | undefined = openArticleId ? getKnowledgeArticle(openArticleId) : undefined;
+        if (!article) return null;
+        return (
+          <div className="fixed z-50 inset-0 bg-black/40 flex items-center justify-center" data-testid="kb-article-panel">
+            <div className="bg-ink-900 border border-white/[0.08] rounded-xl shadow-2xl w-[560px] max-h-[70vh] overflow-y-auto p-5">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-brass-400" />
+                  <span className="text-sm font-semibold text-white">{article.title}</span>
+                </span>
+                <button type="button" onClick={() => setOpenArticleId(null)} className="text-zinc-500 hover:text-white" aria-label="Close article"><X className="w-4 h-4" /></button>
+              </div>
+              <p className="text-[11px] text-zinc-400 mb-3">{article.summary}</p>
+              <div className="space-y-2.5 text-[11px] text-zinc-300">
+                {article.sections.map((sec) => (
+                  <div key={sec.heading} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2">
+                    <div className="text-[10px] uppercase tracking-wide text-brass-400">{sec.heading}</div>
+                    <p className="mt-1">{sec.body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
       {showSkipConfirm && activeTour && (
         <SkipConfirmModal
           tourName={activeTour.name}

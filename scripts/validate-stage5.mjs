@@ -61,7 +61,7 @@ try {
 
   // Submission path: real demo-store brands — zambezi cleared (all-approved
   // pattern), nordhaus blocked (under_review + missing docs).
-  const okSubmit = await api.submitCatalogItem('brand-zambezi', {
+  const okSubmit = await api.submitCatalogItem('brand-astonish', {
     commodityCode: '3304990090',
     vatStatus: 'Standard 20%',
     hazmat: false,
@@ -70,7 +70,7 @@ try {
     height: 20,
     weight: 1,
   });
-  const blockedSubmit = await api.submitCatalogItem('brand-nordhaus', {
+  const blockedSubmit = await api.submitCatalogItem('brand-seep', {
     commodityCode: '1515906010',
     vatStatus: 'Zero-rated',
     hazmat: false,
@@ -79,7 +79,7 @@ try {
     height: 10,
     weight: 0.2,
   });
-  const missingFields = await api.submitCatalogItem('brand-zambezi', {
+  const missingFields = await api.submitCatalogItem('brand-astonish', {
     commodityCode: '',
     vatStatus: '',
     hazmat: false,

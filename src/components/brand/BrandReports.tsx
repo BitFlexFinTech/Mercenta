@@ -11,15 +11,18 @@ import { DeductionsLedger } from '@/components/brand/DeductionsLedger';
 import { cn } from '@/utils/cn';
 import { TrendingUp, TrendingDown, Package, DollarSign, BarChart3, ShoppingCart, X, Download, Calendar } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useRechartsTokens } from '@/components/shared/charts/rechartsTokens';
 
 type Period = 30 | 60 | 90;
-const BRASS = '#D4A853';
-const EMERALD = '#10B981';
-const ZINC = '#52525B';
-const CHART_TT = { backgroundColor: '#1A1A20', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '11px', color: '#E4E4E7' };
+// §UI/UX Wave 2 — series colours now come from the canonical chart tokens
+// (`CHART.palette`) rather than local hex literals.
+const CHART_TT = { background: '#1A1A20', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '11px', color: '#E4E4E7' };
 
 export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const { session, brandProfile, products } = useApp();
+  // §UI/UX Wave 2 — canonical chart language (grid/axis/palette from
+  // src/config/themes.ts) instead of this surface's own hardcoded colours.
+  const CHART = useRechartsTokens();
   const poQuery = usePurchaseOrders();
   const [drillCard, setDrillCard] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>(90);
@@ -141,11 +144,11 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={salesChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                  <XAxis dataKey="month" stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => '\\u00a3' + (v/1000).toFixed(0) + 'k'} />
+                  <CartesianGrid {...CHART.gridProps} />
+                  <XAxis dataKey="month" {...CHART.axisProps} />
+                  <YAxis {...CHART.axisProps} tickFormatter={(v) => '\\u00a3' + (v/1000).toFixed(0) + 'k'} />
                   <Tooltip contentStyle={CHART_TT} formatter={(v) => ['£' + Number(v ?? 0).toLocaleString(), 'Shipped Value']} />
-                  <Bar dataKey="value" fill={BRASS} radius={[4,4,0,0]} />
+                  <Bar dataKey="value" fill={CHART.palette[0]} radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -156,11 +159,11 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={dispatchChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                  <XAxis dataKey="month" stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke={ZINC} fontSize={11} tickLine={false} axisLine={false} />
+                  <CartesianGrid {...CHART.gridProps} />
+                  <XAxis dataKey="month" {...CHART.axisProps} />
+                  <YAxis {...CHART.axisProps} />
                   <Tooltip contentStyle={CHART_TT} formatter={(v) => [Number(v ?? 0).toLocaleString() + ' units', 'Dispatched']} />
-                  <Bar dataKey="units" fill={EMERALD} radius={[4,4,0,0]} />
+                  <Bar dataKey="units" fill={CHART.palette[2]} radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

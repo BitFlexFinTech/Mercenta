@@ -178,6 +178,72 @@ export interface Product {
   leadTimeDays?: number;
 }
 
+/* ── §Functional-completion (2026-09-17) — Listing Analyzer ─────────
+ * Brand-facing automated catalogue/listing analysis (§8). The engine is
+ * DETERMINISTIC: it derives marketplace estimates from the existing
+ * salesEstimator and productCompleteness logic (never a duplicated
+ * engine), and every figure is explicitly labelled estimated/simulated.
+ * The review statuses below back the workflow: Mercenta prepares the
+ * analysis → the brand approves/edits/rejects each suggested improvement.
+ * ─────────────────────────────────────────────────────────────────── */
+
+export type ListingReviewStatus = 'suggested' | 'approved' | 'edited' | 'rejected';
+
+export interface ListingRecommendation {
+  /** Stable per product+area, e.g. `${sku}__hero_image`. */
+  id: string;
+  sku: string;
+  area: string;
+  title: string;
+  detail: string;
+  impact: string;
+  status: ListingReviewStatus;
+  /** Mercenta's suggested wording/content improvement. */
+  suggestedCopy?: string;
+  /** The brand's edited version when it chose to edit. */
+  editedCopy?: string;
+  reviewedAt?: string;
+}
+
+export interface ListingDimensionScore {
+  key: string;
+  label: string;
+  /** 0 – 100. */
+  score: number;
+  note: string;
+}
+
+export interface ProductListingAnalysis {
+  sku: string;
+  brandId: string;
+  productName: string;
+  analyzedAt: string;
+  /** Overall listing health 0–100. */
+  healthScore: number;
+  healthLevel: 'poor' | 'fair' | 'good' | 'strong';
+  /** Prepared-by (always Mercenta in the workflow). */
+  preparedBy: string;
+  /** One score per dimension. */
+  dimensions: ListingDimensionScore[];
+  /** Simulated/estimated market position. Never live data. */
+  estimates: {
+    monthlyUnitsLow: number;
+    monthlyUnitsHigh: number;
+    monthlyRevenueMidGbp: number;
+    annualRevenueMidGbp: number;
+    priceGbp: number;
+    bsrBand: string;
+    velocityPerMonth: number;
+    demandSignal: 'low' | 'medium' | 'high';
+    categoryPosition: string;
+    competitivePosition: string;
+    opportunityIndicators: string[];
+  };
+  recommendations: ListingRecommendation[];
+  /** Honest data-source sentence rendered with the analysis. */
+  simulationLabel: string;
+}
+
 /** Default PTC per Stage-24 (general taxable — A_GEN_TAX in Amazon's taxonomy). */
 export const DEFAULT_PRODUCT_TAX_CODE = 'A_GEN_TAX';
 
@@ -619,7 +685,7 @@ export interface BrandProfile {
    */
   commercialModel?: CommercialModelSelection;
 }
-export type DemoRegion = 'africa' | 'usa' | 'europe';
+export type DemoRegion = 'uk' | 'usa' | 'europe';
 
 export interface CarrierTokens {
   dhl?: string;
@@ -904,6 +970,74 @@ export interface AdSpendBudget {
   acos: number;
   tacos: number;
   status: 'not_configured' | 'active' | 'paused';
+}
+
+/* ── §Functional-completion (2026-09-17) — Advertising depth ───────
+ * Campaign-level data + recommended-spend approvals + manual budget
+ * input. Real Amazon Ads activation stays deferred; every value here is
+ * deterministic simulation seed data, explicitly labelled as such on every
+ * surface that renders it. Adding these shapes does NOT change
+ * AdSpendBudget (the established §12 seam) — it extends what consumers
+ * can read and write through the seam.
+ * ───────────────────────────────────────────────────────────────── */
+
+export type AdCampaignStatus = 'active' | 'paused' | 'ended';
+
+/** One simulated advertising campaign belonging to a brand's tenant. */
+export interface AdCampaign {
+  id: string;
+  brandId: string;
+  name: string;
+  status: AdCampaignStatus;
+  /** Monthly budget allocated to this campaign (GBP). */
+  monthlyBudgetGbp: number;
+  /** Spend recorded to date this month (GBP). */
+  spendToDateGbp: number;
+  /** Impressions served to date. */
+  impressions: number;
+  /** Clicks recorded to date. */
+  clicks: number;
+  /** Sales attributed to the campaign to date (GBP). */
+  attributedSalesGbp: number;
+  /** ACOS: spend / attributed sales (0..1), null when no sales yet. */
+  acos: number | null;
+  /** Placement/device target, e.g. 'Sponsored Products'. */
+  placement: string;
+  /** Data source label — always simulation until live credentials exist. */
+  sourceLabel: string;
+}
+
+export type AdSpendRecommendationStatus =
+  | 'proposed'
+  | 'approved'
+  | 'amended'
+  | 'rejected';
+
+/**
+ * A deterministic recommended monthly budget for a brand's advertising,
+ * prepared by Mercenta and APPROVED/AMENDED/REJECTED by the brand. The
+ * automated chain stops at 'proposed' — no budget is treated as granted
+ * until the brand explicitly decides.
+ */
+export interface AdSpendRecommendation {
+  id: string;
+  brandId: string;
+  month: string; // YYYY-MM
+  /** Mercenta's proposed monthly budget (GBP) — derived, never live data. */
+  recommendedMonthlyBudgetGbp: number;
+  /** The basis for the recommendation, derived from the simulated seed. */
+  basis: string;
+  status: AdSpendRecommendationStatus;
+  /** Posted by Mercenta on preparation. */
+  createdAt: string;
+  /** Set when the brand (or admin on its behalf) decides. */
+  reviewedAt?: string;
+  /** Actor id (brand user or 'admin' + name) of the deciding party. */
+  actorDisplay?: string;
+  /** When amended, the budget the brand actually approved. */
+  amendedBudgetGbp?: number;
+  /** Optional brand note attached at decision time. */
+  note?: string;
 }
 
 /* ── §19.1 Deductions / chargebacks ledger ─────────────────────────── */
@@ -1413,6 +1547,13 @@ export function getFinancingPartnerById(id: string): FinancingPartner | undefine
   return DEMO_FINANCING_PARTNERS.find((p) => p.id === id);
 }
 /* ── §Batch-12 — Brand onboarding tour / checklist ─────────────────── */
+/** §Functional-completion — Knowledge Base article link shown on a tour step. */
+export interface KBArticle {
+  id: string;
+  title: string;
+  summary: string;
+  sections: { heading: string; body: string }[];
+}
 
 export const TOUR_STEPS = [
   {

@@ -320,7 +320,7 @@ export class RealXeroClient implements IXeroClient {
       await logSync(this.partnerId, 'full_resync', 3, true, null, 1);
       return [
         { bankTransactionID: 'x-bt-mock-001', type: 'SPEND', date: '2026-08-15', lineItems: [{ description: 'Amazon remittance settlement', quantity: 1, unitAmount: 15000 }], total: 15000, reference: 'MERC-AMZ-2026-08', status: 'AUTHORISED' },
-        { bankTransactionID: 'x-bt-mock-002', type: 'RECEIVE', date: '2026-08-20', lineItems: [{ description: 'Brand payout — Nordhaus', quantity: 1, unitAmount: 8750 }], total: 8750, reference: 'MERC-PO-2026-002', status: 'AUTHORISED' },
+        { bankTransactionID: 'x-bt-mock-002', type: 'RECEIVE', date: '2026-08-20', lineItems: [{ description: 'Brand payout — Tapatío', quantity: 1, unitAmount: 8750 }], total: 8750, reference: 'MERC-PO-2026-002', status: 'AUTHORISED' },
         { bankTransactionID: 'x-bt-mock-003', type: 'SPEND', date: '2026-08-25', lineItems: [{ description: 'Infrastructure costs (Penny Pincher)', quantity: 1, unitAmount: 3200 }], total: 3200, reference: 'PP-2026-08', status: 'AUTHORISED' },
       ];
     }

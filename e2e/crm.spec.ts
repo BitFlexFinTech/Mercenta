@@ -16,8 +16,8 @@ async function openCrm(page: any) {
   await page.waitForTimeout(1000);
 }
 
-async function selectZambezi(page: any) {
-  await page.locator('text=Zambezi').first().click();
+async function selectAstonish(page: any) {
+  await page.locator('text=Astonish').first().click();
   await page.waitForTimeout(500);
 }
 
@@ -25,7 +25,7 @@ async function selectZambezi(page: any) {
 test.describe('Brand CRM', () => {
   test('1. Timeline: brand detail + Recent POs / History', async ({ page }) => {
     await openCrm(page);
-    await selectZambezi(page);
+    await selectAstonish(page);
     // The "History" section shows Recent POs for the brand.
     await page.locator('button:has-text("History")').first().click();
     await page.waitForTimeout(500);
@@ -34,7 +34,7 @@ test.describe('Brand CRM', () => {
 
   test('2. CRM Tools opens the task queue', async ({ page }) => {
     await openCrm(page);
-    await selectZambezi(page);
+    await selectAstonish(page);
     await page.locator('button:has-text("CRM Tools")').first().click();
     await page.waitForTimeout(700);
     await expect(page.locator('text=Tasks').first()).toBeVisible({ timeout: 4000 });
@@ -42,13 +42,14 @@ test.describe('Brand CRM', () => {
 
   test('3. Profile change review UI approves and rejects pending requests', async ({ page }) => {
     await openCrm(page);
-    await selectZambezi(page);
-    // §Phase 7F — deterministic seeded pending requests for Zambezi
-    // (signatory + phone) make the review UI genuinely assertable.
+    await selectAstonish(page);
+    // §Phase 7F / §Phase 4 — deterministic seeded pending requests for Astonish
+    // (signatory + phone) make the review UI genuinely assertable. Values are
+    // the canonical placeholder ones from demoStore (no fabricated contact).
     const card = page.locator('text=Change Requests').first();
     await expect(card).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('text=Tendai A. Moyo').first()).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('text=+263 713 555 999').first()).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=Trade team — updated contact on file').first()).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=+44 0120 000 111').first()).toBeVisible({ timeout: 3000 });
 
     // Both review actions are available and enabled for a mutating admin tier.
     const approveBtn = page.locator('button:has-text("Approve")').first();
@@ -61,22 +62,22 @@ test.describe('Brand CRM', () => {
     // Approve the first request → it leaves the pending list via the real mutation.
     await approveBtn.click();
     await page.waitForTimeout(500);
-    await expect(page.locator('text=Tendai A. Moyo')).not.toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=Trade team — updated contact on file')).not.toBeVisible({ timeout: 3000 });
 
     // Reject the second request → nothing pending remains → card disappears.
     await page.locator('button:has-text("Reject")').first().click();
     await page.waitForTimeout(500);
     await expect(page.locator('text=Change Requests')).not.toBeVisible({ timeout: 3000 });
 
-    // Cross-tenant: another brand never sees Zambezi's requests.
-    await page.locator('text=DeskForge Supplies Inc').first().click();
+    // Cross-tenant: another brand never sees Astonish's requests.
+    await page.locator('text=Tapatío').first().click();
     await page.waitForTimeout(500);
     await expect(page.locator('text=Change Requests')).not.toBeVisible({ timeout: 2000 });
   });
 
   test('4. Fulfilment override logs the admin-on-behalf reason', async ({ page }) => {
     await openCrm(page);
-    await selectZambezi(page);
+    await selectAstonish(page);
     await page.locator('button.rounded-xl').filter({ hasText: 'Fulfillment Track' }).first().click();
     await page.waitForTimeout(500);
     await expect(page.locator('text=Admin action on behalf of brand').first()).toBeVisible({ timeout: 4000 });
@@ -107,7 +108,7 @@ test.describe('Brand CRM', () => {
     await loginAs(page, 'Super Admin — Tadii', 1100);
     await page.click('nav[aria-label="Primary"] >> text=Brand CRM');
     await page.waitForTimeout(900);
-    await selectZambezi(page);
+    await selectAstonish(page);
     await page.locator('button.rounded-xl').filter({ hasText: 'Fulfillment Track' }).first().click();
     await page.waitForTimeout(400);
     await page.locator('input[placeholder="Override reason"]').fill('Phase 7D on-behalf audit');

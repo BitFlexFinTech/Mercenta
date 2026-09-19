@@ -28,6 +28,12 @@ import type {
   CommerceInvoice,
   CommercePayment,
   CommerceMode,
+  AdCampaign,
+  AdCampaignStatus,
+  AdSpendRecommendation,
+  AdSpendBudget,
+  ListingRecommendation,
+  ListingReviewStatus,
 } from '@/types';
 import {
   ALL_DEMO_BRANDS,
@@ -768,6 +774,249 @@ export const demoAdSpend = ALL_DEMO_BRANDS.filter((_, i) => i % 3 === 0).map((b)
   status: 'active' as const,
 }));
 
+/* ── §Functional-completion (2026-09-17) — Advertising depth stores ──
+ * MUTABLE stores (same session-lifetime pattern as demoPurchaseOrders /
+ * demoShipments) so budget edits, campaign drill-down and recommendation
+ * approvals made in one surface are instantly visible in every other
+ * surface this session. All rows are DETERMINISTIC SIMULATION seed —
+ * every consumer must label them as such.
+ * ─────────────────────────────────────────────────────────────────── */
+
+export const demoAdCampaigns: AdCampaign[] = ALL_DEMO_BRANDS
+  .filter((_, i) => i % 3 === 0)
+  .flatMap((b, i) =>
+    ['Sponsored Products — Hero', 'Sponsored Products — Category', 'Sponsored Display — Remarketing'].map(
+      (name, ci) => ({
+        id: `adcamp-${b.id.replace('brand-', '')}-${ci + 1}`,
+        brandId: b.id,
+        name,
+        status: (ci === 2 && i % 2 === 1 ? 'paused' : 'active') as AdCampaignStatus,
+        monthlyBudgetGbp: [600, 400, 200][ci],
+        spendToDateGbp: [240, 160, 80][ci] + i * 5,
+        impressions: 42_000 + i * 3_100 + ci * 7_500,
+        clicks: 620 + i * 40 + ci * 190,
+        attributedSalesGbp: 980 + i * 90 + ci * 240,
+        acos: [0.21, 0.27, 0.33][ci] + i * 0.002,
+        placement: 'Sponsored Products',
+        sourceLabel: 'simulated_seed',
+      })
+    )
+  );
+
+/** Deterministic Mercenta-prepared monthly recommendations for active brands. */
+export const demoAdSpendRecommendations: AdSpendRecommendation[] = ALL_DEMO_BRANDS
+  .filter((_, i) => i % 3 === 0)
+  .map((b, i) => ({
+    id: `adrec-${b.id.replace('brand-', '')}-2026-09`,
+    brandId: b.id,
+    month: '2026-09',
+    recommendedMonthlyBudgetGbp: 1200 + (i % 4) * 150,
+    basis: 'Derived from trailing simulated spend and the category demand baseline — a deterministic estimate, never live data.',
+    status: 'proposed' as const,
+    createdAt: '2026-09-01T09:00:00.000Z',
+  }));
+
+export function getAdSpendBudgets(): AdSpendBudget[] {
+  return demoAdSpend as AdSpendBudget[];
+}
+
+export function getAdCampaigns(): AdCampaign[] {
+  return demoAdCampaigns;
+}
+
+export function getAdSpendRecommendations(): AdSpendRecommendation[] {
+  return demoAdSpendRecommendations;
+}
+
+export function campaignsForBrand(brandId: string): AdCampaign[] {
+  return demoAdCampaigns.filter((c) => c.brandId === brandId);
+}
+
+export function recommendationsForBrand(brandId: string): AdSpendRecommendation[] {
+  return demoAdSpendRecommendations.filter((r) => r.brandId === brandId);
+}
+
+/**
+ * Manual monthly-budget input. Attributed + audited. A brand with no seed
+ * row receives a real row (status flips to 'active') — the same store the
+ * read seam consumes, so nothing is ever edited in a shadow copy.
+ */
+export function setAdSpendBudgetForBrand(
+  brandId: string,
+  monthlyBudgetGbp: number,
+  actorId: string
+): { ok: boolean; budget?: AdSpendBudget; error?: string } {
+  if (!Number.isFinite(monthlyBudgetGbp) || monthlyBudgetGbp < 0) {
+    return { ok: false, error: 'A non-negative monthly budget is required.' };
+  }
+  const brand = ALL_DEMO_BRANDS.find((b) => b.id === brandId);
+  if (!brand) return { ok: false, error: `Unknown brand: ${brandId}` };
+
+  const rows = demoAdSpend as AdSpendBudget[];
+  const existing = rows.find((a) => a.brandId === brandId);
+  const prev = existing ? `${existing.monthlyBudgetGbp}` : 'none';
+  const row = existing ?? {
+    brandId,
+    monthlyBudgetGbp: 0,
+    spendToDateGbp: 0,
+    acos: 0 as number,
+    tacos: 0 as number,
+    status: 'active' as const,
+  };
+  row.monthlyBudgetGbp = monthlyBudgetGbp;
+  row.status = 'active';
+  if (!existing) rows.push(row);
+
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+    actorId,
+    action: 'ad_budget_updated',
+    entityType: 'ad_spend_budget',
+    entityId: brandId,
+    brandId,
+    reason: 'Manual monthly advertising budget input (simulation).',
+    metadata: { before: prev, after: `${monthlyBudgetGbp}` },
+  });
+  return { ok: true, budget: row };
+}
+
+/**
+ * Brand (or admin-on-behalf) decision on a Mercenta-prepared budget
+ * recommendation. State moves once: 'proposed' → 'approved' | 'amended'
+ * | 'rejected'. A settled recommendation is never re-opened, so a budget
+ * cannot be double-granted.
+ */
+export function reviewAdSpendRecommendation(
+  id: string,
+  decision: 'approved' | 'amended' | 'rejected',
+  opts: { amendedBudgetGbp?: number; note?: string; actorId?: string } = {}
+): { ok: boolean; recommendation?: AdSpendRecommendation; error?: string } {
+  const rec = demoAdSpendRecommendations.find((r) => r.id === id);
+  if (!rec) return { ok: false, error: `Unknown recommendation: ${id}` };
+  if (rec.status !== 'proposed') {
+    return { ok: false, error: `Recommendation already ${rec.status} — decisions are final.` };
+  }
+  if (decision === 'amended') {
+    if (!Number.isFinite(opts.amendedBudgetGbp) || (opts.amendedBudgetGbp ?? 0) < 0) {
+      return { ok: false, error: 'An amended non-negative budget is required.' };
+    }
+    rec.amendedBudgetGbp = opts.amendedBudgetGbp;
+  } else {
+    rec.amendedBudgetGbp = rec.recommendedMonthlyBudgetGbp;
+  }
+  rec.status = decision;
+  rec.reviewedAt = new Date().toISOString();
+  rec.actorDisplay = opts.actorId ?? 'unattributed';
+  rec.note = (opts.note ?? '').trim() || undefined;
+
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+    actorId: opts.actorId ?? 'unattributed',
+    action: `ad_recommendation_${decision}`,
+    entityType: 'ad_spend_recommendation',
+    entityId: id,
+    brandId: rec.brandId,
+    reason: `Recommended monthly advertising budget ${decision} (simulation).`,
+    metadata: { month: rec.month, budget: `${rec.amendedBudgetGbp}` },
+  });
+  return { ok: true, recommendation: rec };
+}
+/* ── §Functional-completion (2026-09-17) — Listing Analyzer reviews ──
+ * Brand decision layer on top of the deterministic analyzer. The engine
+ * computes the identical analysis for everyone; the STORE layers the
+ * brand's own per-recommendation decision (approved / edited / rejected)
+ * so the same product is analysed once and decisions persist in-session.
+ * Decisions are one-shot (append-only), attributed and audited.
+ * ─────────────────────────────────────────────────────────────────── */
+
+export interface ListingReviewDecision {
+  status: ListingReviewStatus;
+  editedCopy?: string;
+  reviewedAt: string;
+  actorDisplay: string;
+  note?: string;
+}
+
+/** Key: `${brandId}__${recommendationId}`. */
+export const demoListingReviews: Record<string, ListingReviewDecision> = {};
+
+export function listingReviewKey(brandId: string, recommendationId: string): string {
+  return `${brandId}__${recommendationId}`;
+}
+
+export function getListingReviewsForBrand(brandId: string): Record<string, ListingReviewDecision> {
+  const out: Record<string, ListingReviewDecision> = {};
+  for (const [key, val] of Object.entries(demoListingReviews)) {
+    if (key.startsWith(`${brandId}__`)) out[key] = val;
+  }
+  return out;
+}
+
+/**
+ * Brand decides on one Mercenta-suggested improvement. One shot: a
+ * settled recommendation is never re-opened (mirrors the ad-spend rule).
+ */
+export function setListingRecommendationReview(
+  brandId: string,
+  recommendationId: string,
+  action: 'approved' | 'edited' | 'rejected',
+  opts: { editedCopy?: string; note?: string; actorId?: string } = {}
+): { ok: boolean; error?: string; decision?: ListingReviewDecision } {
+  if (!recommendationId.trim()) return { ok: false, error: 'A recommendation id is required.' };
+  if (action === 'edited' && !(opts.editedCopy ?? '').trim()) {
+    return { ok: false, error: 'An edited improvement is required to approve an edit.' };
+  }
+  const key = listingReviewKey(brandId, recommendationId);
+  if (demoListingReviews[key] && demoListingReviews[key].status !== 'suggested') {
+    return { ok: false, error: `Recommendation already ${demoListingReviews[key].status} — decisions are final.` };
+  }
+  const decision: ListingReviewDecision = {
+    status: action,
+    editedCopy: action === 'edited' ? opts.editedCopy?.trim() : undefined,
+    reviewedAt: new Date().toISOString(),
+    actorDisplay: opts.actorId ?? 'unattributed',
+    note: (opts.note ?? '').trim() || undefined,
+  };
+  demoListingReviews[key] = decision;
+
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: new Date().toISOString(),
+    actorId: opts.actorId ?? 'unattributed',
+    action: `listing_recommendation_${action}`,
+    entityType: 'listing_recommendation',
+    entityId: recommendationId,
+    brandId,
+    reason: `Listing improvement ${action} by the brand (simulation).`,
+    metadata: { editedCopy: decision.editedCopy ?? null },
+  });
+  return { ok: true, decision };
+}
+
+/**
+ * Overlay the brand's decisions onto an engine-produced analysis. The
+ * engine stays pure; the combined result is what the UI renders.
+ */
+export function applyListingReviewOverrides(
+  analysis: import('@/types').ProductListingAnalysis,
+  brandId: string
+): import('@/types').ProductListingAnalysis {
+  const reviews = getListingReviewsForBrand(brandId);
+  const recommendations = analysis.recommendations.map((rec) => {
+    const decision = reviews[listingReviewKey(brandId, rec.id)];
+    if (!decision) return rec;
+    return {
+      ...rec,
+      status: decision.status,
+      editedCopy: decision.editedCopy,
+      reviewedAt: decision.reviewedAt,
+    } as ListingRecommendation;
+  });
+  return { ...analysis, recommendations };
+}
+
 /** §5 scores — deterministic spread incl. borderline band and low scores. */
 const SCORE_TOTALS = [88, 62, 45, 79, 71, 92, 38, 84, 58, 96, 73];
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -904,27 +1153,28 @@ export function reconcileDelivery(
 /**
  * §Phase 7F — deterministic seeded pending requests so the admin CRM's
  * profile-change review UI is genuinely exercisable (previously empty → the
- * E2E could only conditionally skip). Both belong to Zambezi (the CRM's
- * default test brand); them staying 'pending' is what makes the review card
- * render. Reviewing mutates this array exactly like runtime requests.
+ * E2E could only conditionally skip). Both belong to the canonical cleared
+ * UK tenant (Astonish — the CRM's default demo brand); them staying
+ * 'pending' is what makes the review card render. Reviewing mutates this
+ * array exactly like runtime requests.
  */
 export const demoProfileChangeRequests: import('@/types').ProfileChangeRequest[] = [
   {
-    id: 'pcr-seed-zambezi-signatory-001',
-    brandId: 'brand-zambezi',
+    id: 'pcr-seed-astonish-signatory-001',
+    brandId: 'brand-astonish',
     field: 'signatory',
-    currentValue: 'Tendai Moyo',
-    requestedValue: 'Tendai A. Moyo',
+    currentValue: 'Trade team (contact TBC)',
+    requestedValue: 'Trade team — updated contact on file',
     reason: 'Official signatory title update after registration change',
     status: 'pending',
     requestedAt: '2026-09-01T09:15:00.000Z',
   },
   {
-    id: 'pcr-seed-zambezi-phone-002',
-    brandId: 'brand-zambezi',
+    id: 'pcr-seed-astonish-phone-002',
+    brandId: 'brand-astonish',
     field: 'phone',
-    currentValue: '+263 712 345 678',
-    requestedValue: '+263 713 555 999',
+    currentValue: '+44 0120 000 000',
+    requestedValue: '+44 0120 000 111',
     reason: 'HQ phone line changed with new carrier',
     status: 'pending',
     requestedAt: '2026-09-03T14:40:00.000Z',
@@ -1047,11 +1297,11 @@ export function approveBankChange(brandId: string): BrandBankInfo | null {
 
 /* ── Team Members (brand-side multi-user) ─────────────────────────── */
 export const demoTeamMembers: BrandTeamMember[] = [
-  { id: 'tm-1', brandId: 'brand-1', name: 'Jane Moyo', email: 'jane@zambeziextracts.co.zw', role: 'Owner', active: true, invitedAt: new Date(Date.now() - 120 * 864e5).toISOString() },
-  { id: 'tm-2', brandId: 'brand-1', name: 'Tendai Banda', email: 'tendai@zambeziextracts.co.zw', role: 'Accounts', active: true, invitedAt: new Date(Date.now() - 90 * 864e5).toISOString() },
-  { id: 'tm-3', brandId: 'brand-1', name: 'Chipo Dube', email: 'chipo@zambeziextracts.co.zw', role: 'Shipping', active: false, invitedAt: new Date(Date.now() - 60 * 864e5).toISOString() },
-  { id: 'tm-4', brandId: 'brand-2', name: 'Kwame Asante', email: 'kwame@ghanaspices.com', role: 'Owner', active: true, invitedAt: new Date(Date.now() - 110 * 864e5).toISOString() },
-  { id: 'tm-5', brandId: 'brand-2', name: 'Ama Serwaa', email: 'ama@ghanaspices.com', role: 'Shipping', active: true, invitedAt: new Date(Date.now() - 80 * 864e5).toISOString() },
+  { id: 'tm-1', brandId: 'brand-astonish', name: 'Astonish — Owner (contact TBC)', email: 'trade@astonish.example', role: 'Owner', active: true, invitedAt: new Date(Date.now() - 120 * 864e5).toISOString() },
+  { id: 'tm-2', brandId: 'brand-astonish', name: 'Astonish — Accounts (contact TBC)', email: 'trade@astonish.example', role: 'Accounts', active: true, invitedAt: new Date(Date.now() - 90 * 864e5).toISOString() },
+  { id: 'tm-3', brandId: 'brand-astonish', name: 'Astonish — Shipping (contact TBC)', email: 'trade@astonish.example', role: 'Shipping', active: false, invitedAt: new Date(Date.now() - 60 * 864e5).toISOString() },
+  { id: 'tm-4', brandId: 'brand-tapatio', name: 'Tapatío — Owner (contact TBC)', email: 'trade@tapatio.example', role: 'Owner', active: true, invitedAt: new Date(Date.now() - 110 * 864e5).toISOString() },
+  { id: 'tm-5', brandId: 'brand-tapatio', name: 'Tapatío — Shipping (contact TBC)', email: 'trade@tapatio.example', role: 'Shipping', active: true, invitedAt: new Date(Date.now() - 80 * 864e5).toISOString() },
 ];
 
 export function addTeamMember(member: BrandTeamMember): BrandTeamMember {
@@ -1076,7 +1326,7 @@ export function removeTeamMember(id: string): boolean {
 /* ── PO Outages ───────────────────────────────────────────────────── */
 export const demoPoOutages: BrandPoOutage[] = [
   {
-    id: 'out-1', brandId: 'brand-1',
+    id: 'out-1', brandId: 'brand-astonish',
     startDate: new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10),
     endDate: new Date(Date.now() + 21 * 864e5).toISOString().slice(0, 10),
     reason: 'Annual factory maintenance shutdown',
@@ -1084,7 +1334,7 @@ export const demoPoOutages: BrandPoOutage[] = [
     createdAt: new Date(Date.now() - 7 * 864e5).toISOString(),
   },
   {
-    id: 'out-2', brandId: 'brand-2',
+    id: 'out-2', brandId: 'brand-tapatio',
     startDate: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10),
     endDate: new Date(Date.now() + 37 * 864e5).toISOString().slice(0, 10),
     reason: 'Raw material supply disruption',
@@ -1113,18 +1363,18 @@ export function cancelPoOutage(id: string): BrandPoOutage | null {
 /* ── Return Addresses ─────────────────────────────────────────────── */
 export const demoReturnAddresses: BrandReturnAddress[] = [
   {
-    id: 'ra-1', brandId: 'brand-1', label: 'UK Returns — Standard',
-    companyName: 'Zambezi Organic Extracts Ltd',
+    id: 'ra-1', brandId: 'brand-astonish', label: 'UK Returns — Standard',
+    companyName: 'Astonish',
     addressLine1: 'Unit 4, Mercenta Fulfilment Park', addressLine2: 'Magna Way',
     city: 'Northampton', postalCode: 'NN3 5FZ', country: 'United Kingdom',
-    contactName: 'Jane Moyo', contactPhone: '+44 7700 900123', isDefault: true,
+    contactName: 'Trade team (contact TBC)', contactPhone: '+44 7700 900123', isDefault: true,
   },
   {
-    id: 'ra-2', brandId: 'brand-2', label: 'UK Returns — Standard',
-    companyName: 'Ghana Spice Co. Ltd',
+    id: 'ra-2', brandId: 'brand-tapatio', label: 'UK Returns — Standard',
+    companyName: 'Tapatío',
     addressLine1: 'c/o Mercenta Hub', addressLine2: 'Unit 12, Phoenix Distribution Centre',
     city: 'Rugby', postalCode: 'CV23 0WE', country: 'United Kingdom',
-    contactName: 'Kwame Asante', contactPhone: '+44 7700 900456', isDefault: true,
+    contactName: 'Trade team (contact TBC)', contactPhone: '+44 7700 900456', isDefault: true,
   },
 ];
 
@@ -1187,12 +1437,12 @@ export function updateNotificationPref(
  * §Phase D6 — REAL DEFECT FIXED (tenant coherence).
  *
  * The returns seed was hand-written against a PARALLEL SKU/PO universe that does
- * not exist in any store: a Zambezi return pointed at **DeskForge's PO-9003**,
- * another at the non-existent **PO-9005** for a brand that owns no products or
- * POs at all, and their SKUs (`SPB-*`/`GSP-*`) belong to no brand. The effect was
- * visible: a brand's own dashboard showed ANOTHER TENANT'S purchase-order number
- * in its returns attention row, and the Returns ledger referenced phantom
- * products.
+ * not exist in any store: a fake-brand return pointed at another tenant's
+ * PO-9003, another at the non-existent **PO-9005** for a brand that owns no
+ * products or POs at all, and their SKUs (`SPB-*`/`GSP-*`) belong to no brand.
+ * The effect was visible: a brand's own dashboard showed ANOTHER TENANT'S
+ * purchase-order number in its returns attention row, and the Returns ledger
+ * referenced phantom products.
  *
  * Returns are now DERIVED from the canonical PO store + the canonical product
  * store, so a return can only ever reference a PO number and a SKU that its own
@@ -1372,7 +1622,7 @@ export function resetFinanceStores(): void {
 export function seedPayoutDestinations(): BrandPayoutDestination[] {
   return ALL_DEMO_BRANDS.map((brand) => {
     const slug = brand.id.replace(/^brand-/, '').toUpperCase();
-    const unverified = brand.id === 'brand-motorvista';
+    const unverified = brand.id === 'brand-sennheiser';
     return {
       id: `dest-${brand.id}`,
       brandId: brand.id,

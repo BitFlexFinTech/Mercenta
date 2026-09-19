@@ -6,7 +6,7 @@ const uid = (p: string) => p + '-' + Date.now() + '-' + Math.random().toString(3
 
 export const demoReturnTracking: ReturnTrackingEntry[] = [
   {
-    id: 'rt-001', returnId: 'ret-1', brandId: 'brand-zambezi',
+    id: 'rt-001', returnId: 'ret-1', brandId: 'brand-astonish',
     receivedAtWarehouse: new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10),
     inboundCarrier: 'DHL', inboundTrackingNumber: 'DHL-UK-RET-77123',
     conditionOnReceipt: '2 cases with unsealed bottle caps. Product leaked in transit. Remaining 4 cases intact.',
@@ -19,7 +19,7 @@ export const demoReturnTracking: ReturnTrackingEntry[] = [
     linkedDeductionId: 'ded-1',
   },
   {
-    id: 'rt-002', returnId: 'ret-2', brandId: 'brand-zambezi',
+    id: 'rt-002', returnId: 'ret-2', brandId: 'brand-astonish',
     receivedAtWarehouse: new Date(Date.now() - 4 * 864e5).toISOString().slice(0, 10),
     inboundCarrier: 'FedEx', inboundTrackingNumber: 'FDX-UK-RET-45112',
     conditionOnReceipt: 'Moisture content exceeded spec per lab report. 12 units segregated for QC review.',
@@ -29,7 +29,7 @@ export const demoReturnTracking: ReturnTrackingEntry[] = [
     linkedDeductionId: 'ded-1',
   },
   {
-    id: 'rt-003', returnId: 'ret-3', brandId: 'brand-harvestlane',
+    id: 'rt-003', returnId: 'ret-3', brandId: 'brand-regatta',
     receivedAtWarehouse: new Date(Date.now() - 10 * 864e5).toISOString().slice(0, 10),
     inboundCarrier: 'Palletline', inboundTrackingNumber: 'PLL-UK-RET-30987',
     conditionOnReceipt: 'Carton crushed by pallet over-stacking. 6 units damaged, rest intact.',

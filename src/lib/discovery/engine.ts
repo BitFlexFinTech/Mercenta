@@ -45,11 +45,11 @@ export interface DirectoryClient {
 }
 
 const MOCK_DIRECTORY_POOL: RawDiscoveryLead[] = [
-  { companyName: 'Harvest Lane Organics', country: 'Zimbabwe', segment: 'Grocery', sourceDirectory: 'ZimTrade exporter directory', website: 'harvestlane.co.zw' },
-  { companyName: 'Sahara Threads Ltd', country: 'Ghana', segment: 'Apparel', sourceDirectory: 'GEPA directory', website: 'saharathreads.com' },
-  { companyName: 'Pixel Perch Electronics', country: 'United States', segment: 'Consumer Electronics', sourceDirectory: 'US CS trade leads', website: 'pixelperch.io' },
-  { companyName: 'Voltaic Home Appliance Co', country: 'Kenya', segment: 'Home', sourceDirectory: 'KEPROBA exporter register', website: 'voltaic.co.ke' },
-  { companyName: 'ApexDrive Accessories GmbH', country: 'Germany', segment: 'Automotive', sourceDirectory: 'US CS trade leads', website: 'apexdrive.de' },
+  { companyName: 'Clipper Teas', country: 'United Kingdom', segment: 'Grocery', sourceDirectory: 'UK retailer supplier directory', website: 'clipper-teas.com' },
+  { companyName: 'Regatta', country: 'United Kingdom', segment: 'Apparel', sourceDirectory: 'UK apparel exporter directory', website: 'regatta.com' },
+  { companyName: 'Logitech', country: 'Switzerland', segment: 'Personal Computer', sourceDirectory: 'EU electronics directory', website: 'logitech.com' },
+  { companyName: 'Seep', country: 'United Kingdom', segment: 'Home', sourceDirectory: 'UK consumer goods directory', website: 'seepuk.com' },
+  { companyName: 'Autoglym', country: 'United Kingdom', segment: 'Automotive', sourceDirectory: 'UK automotive care directory', website: 'autoglym.com' },
 ];
 
 export class MockDirectoryClient implements DirectoryClient {

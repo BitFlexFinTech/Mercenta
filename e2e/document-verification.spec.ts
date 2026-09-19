@@ -21,7 +21,14 @@ test.describe('Document verification — Mercenta Admin review', () => {
     await page.waitForTimeout(1000);
 
     // Expand the first brand card, then run automated verification on a row.
-    await page.locator('div.grid button').first().click();
+    // §UI/UX Wave 2 completion — REPOINTED. The previous selector
+    // (`div.grid button`) was an implicit "the first grid on the page happens to
+    // be the brand-card grid" assumption. The surface now composes a workspace
+    // metric band (also a `div.grid`, with genuinely clickable drill-down tiles)
+    // above the queue, so the selector is repointed to the EXPLICIT brand-card
+    // contract instead of depending on document order. The invariant asserted is
+    // unchanged and now stronger.
+    await page.locator('[data-testid="compliance-brand-card"] button').first().click();
     await page.waitForTimeout(400);
     const verify = page.locator('button', { hasText: 'Verify (automated)' }).first();
     await expect(verify).toBeVisible({ timeout: 6000 });
@@ -39,7 +46,7 @@ test.describe('Document verification — Mercenta Admin review', () => {
     await loginAs(page, 'Mercenta Admin Hub', 1100);
     await page.click('nav[aria-label="Primary"] >> text=Compliance Approvals');
     await page.waitForTimeout(1000);
-    await page.locator('div.grid button').first().click();
+    await page.locator('[data-testid="compliance-brand-card"] button').first().click();
     await page.waitForTimeout(400);
 
     const reject = page.locator('button', { hasText: 'Reject' }).first();
@@ -58,9 +65,11 @@ test.describe('Document verification — Mercenta Admin review', () => {
     await page.click('nav[aria-label="Primary"] >> text=Compliance Approvals');
     await page.waitForTimeout(1000);
 
-    // Expand the Reed & Oak card (all of its documents are non-approved, so the
+    // Expand the Le Creuset card (all of its documents are non-approved, so the
     // manual approval action is present).
-    const card = page.locator('div.grid > div').filter({ hasText: 'Reed & Oak Kitchen Co' }).first();
+    // §UI/UX Wave 2 completion — REPOINTED to the explicit brand-card contract
+    // (see test 1). The card is still resolved by its real brand name.
+    const card = page.locator('[data-testid="compliance-brand-card"]').filter({ hasText: 'Le Creuset' }).first();
     await card.locator('button').first().click();
     await page.waitForTimeout(400);
 
@@ -77,8 +86,8 @@ test.describe('Document verification — Mercenta Admin review', () => {
 
 test.describe('Document verification — brand surface', () => {
   test('4. a submission becomes "under review" and is never auto-approved', async ({ page }) => {
-    // MotorVista's type_approval document is `missing` with NO artefact.
-    await loginAs(page, 'MotorVista Auto Supply Ltd', 1100);
+    // Autoglym's type_approval document is `missing` with NO artefact.
+    await loginAs(page, 'Autoglym', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('UK Compliance').first().click();
     await page.waitForTimeout(900);
@@ -97,8 +106,8 @@ test.describe('Document verification — brand surface', () => {
   });
 
   test('5. a rejected document shows its failure reason and a Replace action', async ({ page }) => {
-    // Reed & Oak's food_contact_material is the seeded REJECTED document.
-    await loginAs(page, 'Reed & Oak Kitchen Co', 1100);
+    // Le Creuset's food_contact_material is the seeded REJECTED document.
+    await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('UK Compliance').first().click();
     await page.waitForTimeout(900);
@@ -121,7 +130,7 @@ test.describe('Document verification — brand surface', () => {
   });
 
   test('6. the conditional category requirement is labelled as conditional', async ({ page }) => {
-    await loginAs(page, 'Reed & Oak Kitchen Co', 1100);
+    await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('UK Compliance').first().click();
     await page.waitForTimeout(900);

@@ -91,11 +91,11 @@ try {
 
   /* ── the pinned brand-verification behaviour is untouched ─────────────── */
   mockMod.resetMockCompaniesHouseState();
-  mockMod.seedCompaniesHouse([{ id: 'brand-zambezi', name: 'Zambezi Traders' }]);
-  const l1 = await mock.lookupCompany({ companyName: 'zambezi' });
+  mockMod.seedCompaniesHouse([{ id: 'brand-astonish', name: 'Astonish Traders' }]);
+  const l1 = await mock.lookupCompany({ companyName: 'astonish' });
   const l2 = await mock.lookupCompany({ companyNumber: 'ZZ1' });
   const l3 = await mock.lookupCompany({ companyNumber: 'X1' });
-  const l4 = await mock.lookupCompany({ companyName: 'zambezi' });
+  const l4 = await mock.lookupCompany({ companyName: 'astonish' });
   test('lookupCompany still finds, not-founds, rate-limits on the 4th-call rule and recovers',
     l1.ok && (l1.match?.companyNumber ?? '').startsWith('MOCK-CH-') &&
       l2.ok && l2.notFound === true &&

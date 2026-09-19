@@ -46,7 +46,7 @@ try {
   const daysFromNow = (n) => new Date(now.getTime() + n * 86400000).toISOString().slice(0, 10);
   const digest = dg.buildDailyDigest({
     date: now,
-    newLeads: [{ id: 'l1', company: 'Harvest Lane Organics' }, { id: 'l2', company: 'Sahara Threads Ltd' }],
+    newLeads: [{ id: 'l1', company: 'Regatta' }, { id: 'l2', company: 'Cholula Ltd' }],
     nonUrgentReplies: [{ id: 'r1', subject: 'Thanks, reviewing internally' }],
     scores: [
       { brandId: 'brand-a', totalScore: 58, manualOverride: false },

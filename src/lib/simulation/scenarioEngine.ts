@@ -140,9 +140,9 @@ function atDays(base: Date, daysOffset: number): string {
 /** Resolve the brand the scenario operates in. Prefers an explicitly-cleared demo brand. */
 function resolveBrandId(ctx: ScenarioRunContext): string {
   if (ctx.brandId) return ctx.brandId;
-  // The first cleared brand (brand-zambezi) has a full catalog + contracts +
+  // The first cleared brand (brand-astonish) has a full catalog + contracts +
   // agreements, so it is a coherent tenant for any scenario.
-  return 'brand-zambezi';
+  return 'brand-astonish';
 }
 
 /** Coherent audit-entry builder. Deterministic id from runId. */
@@ -250,10 +250,13 @@ function buildScenarioPo(
 }
 
 function chooseLineItemsFor(brandId: string): { sku: string; productName: string; quantity: number; unitPrice: number; commodityCode: string }[] {
-  // Deterministic canonical two-line PO for any cleared brand.
+  // Deterministic canonical two-line PO for any cleared brand. Line items are
+  // generic simulated SKUs (no fake brand or product claim); the SKU prefix is
+  // derived from the brand id so scenario POs are tenant-distinct.
+  const slug = brandId.replace(/^brand-/, '').slice(0, 4).toUpperCase();
   return [
-    { sku: 'ZMBE-001', productName: 'Zambezi Organic Extract 001', quantity: 120, unitPrice: 12.5, commodityCode: '3304990090' },
-    { sku: 'ZMBE-002', productName: 'Zambezi Organic Extract 002', quantity: 80, unitPrice: 15, commodityCode: '3304990090' },
+    { sku: `${slug}-001`, productName: `${slug} simulated line 001`, quantity: 120, unitPrice: 12.5, commodityCode: '3304990090' },
+    { sku: `${slug}-002`, productName: `${slug} simulated line 002`, quantity: 80, unitPrice: 15, commodityCode: '3304990090' },
   ];
 }
 
@@ -288,7 +291,7 @@ async function scenarioNormalPo(ctx: ScenarioRunContext): Promise<ScenarioResult
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_po_acknowledged', 'purchase_order', po.id, brandId, `${actorId}: PO ${po.poNumber} fully acknowledged`, { runId, scenario: 'NORMAL_PO' }));
 
   // Shipment via the real ASN path (safe, mock-only; no email).
-  // brand-zambezi is Health & Personal Care → real rule requires lot + expiry.
+  // Food/health categories → real rule requires lot + expiry (kept harmless).
   const ship = createShipmentForPO(po.id, {
     cartons: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, weightKg: 1.5, lengthCm: 20, widthCm: 15, heightCm: 10 })),
     shipDate: new Date().toISOString().slice(0, 10),

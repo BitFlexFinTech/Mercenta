@@ -16,6 +16,10 @@ function fullAsn(po) {
     carrier: 'dhl',
     proNumber: `PRO-${po.poNumber}`,
     bolNumber: `BOL-${po.poNumber}`,
+    // The seed accepted PO belongs to a canonical Grocery tenant (Tapatío),
+    // which is a perishable/regulated category — lot + expiry are required.
+    lotNumber: `SIM-LOT-${po.poNumber}`,
+    expiryDate: '2027-10-01',
   };
 }
 

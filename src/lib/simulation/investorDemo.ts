@@ -1425,7 +1425,7 @@ export async function runInvestorDemo(
     }
     // Another tenant's ledger never contains this return.
     const foreignLedger = demoReturns.filter(
-      (r) => r.brandId === 'brand-deskforge' && r.id === created.id
+      (r) => r.brandId === 'brand-tapatio' && r.id === created.id
     );
     if (foreignLedger.length > 0) throw new Error('return leaked into another tenant ledger');
     return {
@@ -1469,9 +1469,9 @@ export async function runInvestorDemo(
 
     // A foreign tenant can never read this ledger.
     const foreignActor: CommerceActor = {
-      staffId: 'brand:brand-deskforge',
+      staffId: 'brand:brand-tapatio',
       canMutate: true,
-      tenantId: 'brand-deskforge',
+      tenantId: 'brand-tapatio',
     };
     const foreignRead = listBrandCommerceExceptions(tenant, foreignActor);
 
@@ -1744,7 +1744,7 @@ export async function runInvestorDemo(
       throw new Error('the CRM timeline did not reflect the real domain state');
     }
     // Tenant boundary: another tenant's timeline has none of this.
-    const otherTimeline = buildBrandTimeline('brand-deskforge');
+    const otherTimeline = buildBrandTimeline('brand-tapatio');
     const leak = otherTimeline.some(
       (e) => e.kind === 'system_po' && e.ref === po?.poNumber
     );
@@ -1936,7 +1936,7 @@ export async function runInvestorDemo(
 
     // (g) TENANT-SCOPED READS.
     const brandCases = listCasesForBrand(tenant);
-    const foreignCases = listCasesForBrand('brand-deskforge');
+    const foreignCases = listCasesForBrand('brand-tapatio');
     if (!brandCases.some((c) => c.id === kase.id) || foreignCases.length !== 0) {
       throw new Error('case reads are not tenant-scoped');
     }
@@ -2076,7 +2076,7 @@ export async function runInvestorDemo(
     );
     if (brandInitiates.ok) throw new Error('a brand-pinned account initiated onboarding');
     // (b) A brand cannot read another tenant's operational records.
-    const crossRead = listBrandCommerceActivity('brand-deskforge', commerceActor);
+    const crossRead = listBrandCommerceActivity('brand-tapatio', commerceActor);
     if (crossRead.ok) throw new Error('a brand read another tenant activity trail');
     // (c) A view-only account cannot mutate.
     const viewOnly = acknowledgeCommercePurchaseOrder(poId, investorDemoViewOnlyActor(tenant));
@@ -2107,7 +2107,7 @@ export async function runInvestorDemo(
 
     return {
       detail: `RBAC: brand onboarding-initiation, cross-tenant read and view-only mutation all REFUSED in the domain; operator allowed. Tier matrix verified (${Object.keys(matrix).length} checks).`,
-      entityIds: [tenant, 'brand-deskforge'],
+      entityIds: [tenant, 'brand-tapatio'],
       facts: {
         brandOnboardingInitiationRefused: !brandInitiates.ok,
         crossTenantReadRefused: !crossRead.ok,

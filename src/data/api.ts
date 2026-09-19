@@ -16,7 +16,7 @@ import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
 import { createSPApiClientForConnection } from '@/lib/spapi';
 import { spApiConnectionCredentials } from '@/integrations/connections';
-import { DEFAULT_HOMEPAGE_CONTENT, type HomepageContent } from '@/config/homepageContent';
+import { DEFAULT_HOMEPAGE_CONTENT, normaliseHomepageContent, type HomepageContent } from '@/config/homepageContent';
 import {
   ALL_DEMO_BRANDS,
   demoAdSpend,
@@ -44,6 +44,12 @@ import {
   listCommissionsForPayout,
   markCommissionPaid as markCommissionPaidInStore,
   ensureDistributionAgreement as storeEnsureDistributionAgreement,
+  demoAdCampaigns,
+  demoAdSpendRecommendations,
+  setAdSpendBudgetForBrand as storeSetAdSpendBudgetForBrand,
+  reviewAdSpendRecommendation as storeReviewAdSpendRecommendation,
+  setListingRecommendationReview as storeSetListingRecommendationReview,
+  applyListingReviewOverrides as storeApplyListingReviewOverrides,
 } from './demoStore';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import {
@@ -55,6 +61,8 @@ import {
 import { sendPostmarkEmail, buildPoNotificationHtml } from '@/lib/notifications/postmarkNotifier';
 import type {
   AdSpendBudget,
+  AdCampaign,
+  AdSpendRecommendation,
   CatalogSubmissionStatus,
   Commission,
   ComplianceDocument,
@@ -92,7 +100,7 @@ import {
 export type DataSource = 'supabase' | 'seed';
 
 /* ── ID translation layer ──────────────────────────────────────────── */
-/* Frontend uses string IDs (e.g. "brand-zambezi") while Supabase uses
+/* Frontend uses string IDs (e.g. "brand-astonish") while Supabase uses
  * UUIDs. The brands table maps via legacy_demo_id. Loaded lazily. */
 let _brandIdByUuid: Map<string, string> | null = null;
 
@@ -109,7 +117,7 @@ async function _ensureBrandIdMap(): Promise<void> {
   }
 }
 
-/** Convert Supabase brand UUID → frontend string ID (e.g. "brand-zambezi"). */
+/** Convert Supabase brand UUID → frontend string ID (e.g. "brand-astonish"). */
 function _fromBrandUuid(uuid: string): string {
   return _brandIdByUuid?.get(uuid) ?? uuid;
 }
@@ -634,6 +642,98 @@ export function fetchMessages() {
 /* ── §12 Ad spend ── */
 export function fetchAdSpendBudgets() {
   return queryOrSeed<AdSpendBudget>('ad_spend_budgets', demoAdSpend);
+}
+
+/* ── §Functional-completion — Advertising depth (simulation) ──────── */
+
+export function fetchAdCampaigns() {
+  return queryOrSeed<AdCampaign>('ad_campaigns', demoAdCampaigns);
+}
+
+export function fetchAdSpendRecommendations() {
+  return queryOrSeed<AdSpendRecommendation>('ad_spend_recommendations', demoAdSpendRecommendations);
+}
+
+/**
+ * Manual monthly-budget input (admin, Super-only surface). Mutates the
+ * shared store so every surface reflects it immediately; Supabase write
+ * happens only when configured. Attributed + audited in the store.
+ */
+export async function setAdSpendBudget(
+  brandId: string,
+  monthlyBudgetGbp: number,
+  actorId: string
+): Promise<{ ok: boolean; budget?: AdSpendBudget; error?: string }> {
+  const result = storeSetAdSpendBudgetForBrand(brandId, monthlyBudgetGbp, actorId);
+  if (!result.ok || !result.budget) return result;
+  if (supabase) {
+    const { error } = await supabase
+      .from('ad_spend_budgets')
+      .upsert({ brand_id: brandId, monthly_budget_gbp: monthlyBudgetGbp, status: 'active' })
+      .eq('brand_id', brandId);
+    if (error) console.warn('[api] Supabase write failed for "ad_spend_budgets", using demo fallback:', error.message);
+  }
+  return result;
+}
+
+/**
+ * Brand (or admin-on-behalf) decision on a Mercenta-prepared budget
+ * recommendation. One-shot state transition; Supabase write when configured.
+ */
+export async function reviewAdSpendRecommendation(
+  id: string,
+  decision: 'approved' | 'amended' | 'rejected',
+  opts: { amendedBudgetGbp?: number; note?: string; actorId?: string } = {}
+): Promise<{ ok: boolean; recommendation?: AdSpendRecommendation; error?: string }> {
+  const result = storeReviewAdSpendRecommendation(id, decision, opts);
+  if (!result.ok || !result.recommendation) return result;
+  if (supabase) {
+    const { error } = await supabase
+      .from('ad_spend_recommendations')
+      .update({
+        status: result.recommendation.status,
+        reviewed_at: result.recommendation.reviewedAt,
+        amended_budget_gbp: result.recommendation.amendedBudgetGbp,
+      })
+      .eq('id', id);
+    if (error) console.warn('[api] Supabase write failed for "ad_spend_recommendations", using demo fallback:', error.message);
+  }
+  return result;
+}
+
+/* ── §Functional-completion — Listing Analyzer reviews (simulation) ── */
+
+/**
+ * Brand decision on a Mercenta-suggested listing improvement. One shot;
+ * audited. Supabase write only when configured (RLS-scoped by brand).
+ */
+export async function reviewListingRecommendation(
+  brandId: string,
+  recommendationId: string,
+  action: 'approved' | 'edited' | 'rejected',
+  opts: { editedCopy?: string; note?: string; actorId?: string } = {}
+): Promise<{ ok: boolean; error?: string }> {
+  const result = storeSetListingRecommendationReview(brandId, recommendationId, action, opts);
+  if (result.ok && supabase) {
+    const { error } = await supabase
+      .from('listing_recommendation_reviews')
+      .upsert({
+        brand_id: brandId,
+        recommendation_id: recommendationId,
+        status: action,
+        edited_copy: opts.editedCopy,
+      });
+    if (error) console.warn('[api] Supabase write failed for "listing_recommendation_reviews", using demo fallback:', error.message);
+  }
+  return { ok: result.ok, error: result.error };
+}
+
+/** Overlay the brand's stored decisions onto an engine analysis. */
+export function applyListingReviewOverrides(
+  analysis: import('@/types').ProductListingAnalysis,
+  brandId: string
+): import('@/types').ProductListingAnalysis {
+  return storeApplyListingReviewOverrides(analysis, brandId);
 }
 
 /* ── §PO workflow (Stage-4) — single source of truth via demoStore ── */
@@ -1583,9 +1683,18 @@ export async function fetchHomepageContent(): Promise<{
     if (error) {
       console.warn('[api] Supabase query failed for "homepage_content", using demo fallback:', error.message);
     } else if (data?.content) {
+      /**
+       * §UI/UX Wave 2 completion — REAL DEFECT FIXED. This used to return the raw
+       * persisted payload. Migration 001 seeds `homepage_content` as
+       * `'{}'::jsonb`, and `Home` reads the content model UNGUARDED, so a
+       * Supabase-configured deployment rendered the public homepage from `{}`
+       * and threw. The persisted payload is now normalised onto the canonical
+       * model at this single seam, so a partial/legacy row can never produce a
+       * partial render (see `normaliseHomepageContent`).
+       */
       return {
-        live: structuredClone(data.content as unknown as HomepageContent),
-        draft: homepageState.draft ? structuredClone(homepageState.draft) : null,
+        live: normaliseHomepageContent(data.content),
+        draft: homepageState.draft ? normaliseHomepageContent(homepageState.draft) : null,
       };
     }
   }

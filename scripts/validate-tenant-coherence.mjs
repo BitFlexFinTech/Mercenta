@@ -3,7 +3,7 @@
  * §Phase D6 — TENANT COHERENCE validator (the canonical guard for demo data).
  *
  * A real defect motivated this gate: the returns seed referenced ANOTHER
- * tenant's purchase order (a Zambezi return pointing at DeskForge's PO-9003) and
+ * tenant's purchase order (a Astonish return pointing at Tapatío's PO-9003) and
  * a non-existent PO-9005 owned by a brand with no products at all, so a brand's
  * own dashboard displayed a foreign PO number. Type-checks, lint and the build
  * all pass with that class of defect present — only an explicit coherence check

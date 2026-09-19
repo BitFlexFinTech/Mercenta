@@ -36,7 +36,7 @@ try {
   const storeMod = await server.ssrLoadModule('/src/data/demoStore.ts');
   const eventsMod = await server.ssrLoadModule('/src/lib/events/eventFeed.ts');
 
-  const brandId = 'brand-zambezi';
+  const brandId = 'brand-astonish';
   const simulationForAll = Object.freeze(
     new Proxy({}, { get: () => 'simulation' })
   );

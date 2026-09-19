@@ -86,17 +86,18 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
 
     // CRM relationship context.
     await openNav(page, 'Brand CRM');
-    await expect(page.locator('text=Zambezi Organic Extracts Ltd').first()).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('text=Astonish').first()).toBeVisible({ timeout: 6000 });
 
     // Messages inbox renders.
     await openNav(page, 'Messages');
     await expect(page.locator('h2', { hasText: 'Messages' }).first()).toBeVisible({ timeout: 6000 });
 
-    // Helpdesk renders the same canonical conversation (tkt-001 / msg-015…017).
+    // Helpdesk renders the same canonical conversation (tkt-001 →
+    // msg-brand-astonish-1/-2 from DEMO_MESSAGES).
     await openNav(page, 'Helpdesk');
     await expect(page.locator('h2', { hasText: 'Helpdesk' }).first()).toBeVisible({ timeout: 6000 });
-    await expect(page.locator('text=Zambezi — PO dispatch query').first()).toBeVisible({ timeout: 6000 });
-    await expect(page.locator('text=When will my Marula Oil PO be dispatched?').first()).toBeVisible({ timeout: 4000 });
+    await expect(page.locator('text=Astonish — PO dispatch query').first()).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('text=Thanks — can we talk about pricing and the first purchase order this week?').first()).toBeVisible({ timeout: 4000 });
 
     // No dangling Rocket.Chat import/call crashed any of these surfaces.
     await expect(page.locator(`text=${REMOVED_LABEL}`)).toHaveCount(0);

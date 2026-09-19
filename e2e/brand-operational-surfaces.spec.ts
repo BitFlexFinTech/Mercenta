@@ -50,10 +50,10 @@ async function seedBrandCommerce(
   return page.evaluate(async (o) => {
     const mod = await import('/src/lib/commerce/commerceLifecycle.ts');
     const store = await import('/src/data/demoStore.ts');
-    const brandActor = { staffId: 'brand:brand-zambezi', canMutate: true, tenantId: 'brand-zambezi' };
-    const product = store.productsForBrandFromStore('brand-zambezi')[0];
+    const brandActor = { staffId: 'brand:brand-astonish', canMutate: true, tenantId: 'brand-astonish' };
+    const product = store.productsForBrandFromStore('brand-astonish')[0];
     if (!product) return { ok: false, reason: 'no product' };
-    const created = await mod.createCommercePurchaseOrder('brand-zambezi', product.sku, 40, brandActor);
+    const created = await mod.createCommercePurchaseOrder('brand-astonish', product.sku, 40, brandActor);
     if (!created.ok) return { ok: false, reason: String(created.error) };
     const poId = created.value.id;
     if (o.advance) {
@@ -69,7 +69,7 @@ async function seedBrandCommerce(
   }, opts);
 }
 
-const ZAMBEZI = 'Zambezi Organic Extracts Ltd';
+const ZAMBEZI = 'Astonish';
 
 test.describe('E6 — brand operational surfaces', () => {
   test('1. A+B — the brand PO list shows canonical (sim) provenance without breaking existing controls', async ({ page }) => {
@@ -172,7 +172,8 @@ test.describe('E6 — brand operational surfaces', () => {
     await expect(page.getByText('all product information complete').first()).toBeVisible({ timeout: 6000 });
 
     // G — resubmit the seeded, already-submitted product through the REAL seam.
-    const row = page.locator('tr', { hasText: 'ZAMB-001' }).first();
+    // §Phase 4 — the canonical seed SKU for Astonish is ASTO-001 (skuFor()).
+    const row = page.locator('tr', { hasText: 'ASTO-001' }).first();
     await expect(row).toBeVisible({ timeout: 6000 });
     await expect(row.getByText('Live (sim)').first()).toBeVisible({ timeout: 6000 });
 
@@ -194,10 +195,10 @@ test.describe('E6 — brand operational surfaces', () => {
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
     // H — another tenant's brand session sees no commerce attention state at all.
-    await loginAs(page, 'DeskForge Supplies Inc', 1200);
+    await loginAs(page, 'Tapatío', 1200);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
     await expect(page.locator('[data-testid^="attention-commerce-inv-"]')).toHaveCount(0);
-    await expect(page.getByText('PO-SIM-BRAND-ZAMBEZI')).toHaveCount(0);
+    await expect(page.getByText('PO-SIM-BRAND-ASTONISH')).toHaveCount(0);
 
     // I+J — the REAL domain refuses foreign/unauthorised actors without mutating.
     const proof = await page.evaluate(async () => {
@@ -205,21 +206,21 @@ test.describe('E6 — brand operational surfaces', () => {
       const store = await import('/src/data/demoStore.ts');
       const api = await import('/src/data/api.ts');
 
-      const brandActor = { staffId: 'brand:brand-zambezi', canMutate: true, tenantId: 'brand-zambezi' };
-      const product = store.productsForBrandFromStore('brand-zambezi')[0];
+      const brandActor = { staffId: 'brand:brand-astonish', canMutate: true, tenantId: 'brand-astonish' };
+      const product = store.productsForBrandFromStore('brand-astonish')[0];
       if (!product) return { skipped: true };
-      const created = await mod.createCommercePurchaseOrder('brand-zambezi', product.sku, 5, brandActor);
+      const created = await mod.createCommercePurchaseOrder('brand-astonish', product.sku, 5, brandActor);
       if (!created.ok) return { skipped: true };
       const poId = created.value.id;
 
-      const foreign = { staffId: 'brand:brand-deskforge', canMutate: true, tenantId: 'brand-deskforge' };
-      const viewOnly = { staffId: 'staff-005', canMutate: false, tenantId: 'brand-zambezi' };
-      const actsBefore = store.getCommerceActivitiesForBrand('brand-zambezi').length;
+      const foreign = { staffId: 'brand:brand-tapatio', canMutate: true, tenantId: 'brand-tapatio' };
+      const viewOnly = { staffId: 'staff-005', canMutate: false, tenantId: 'brand-astonish' };
+      const actsBefore = store.getCommerceActivitiesForBrand('brand-astonish').length;
       const statusBefore = api.fetchPurchaseOrder(poId).status;
 
       const foreignAck = mod.acknowledgeCommercePurchaseOrder(poId, foreign);
       const viewOnlyAck = mod.acknowledgeCommercePurchaseOrder(poId, viewOnly);
-      const foreignRead = mod.listBrandCommerceActivity('brand-zambezi', foreign);
+      const foreignRead = mod.listBrandCommerceActivity('brand-astonish', foreign);
 
       return {
         skipped: false,
@@ -228,7 +229,7 @@ test.describe('E6 — brand operational surfaces', () => {
         viewOnlyAckOk: viewOnlyAck.ok,
         viewOnlyAckError: String(viewOnlyAck.error ?? ''),
         foreignReadOk: foreignRead.ok,
-        actsUnchanged: store.getCommerceActivitiesForBrand('brand-zambezi').length === actsBefore,
+        actsUnchanged: store.getCommerceActivitiesForBrand('brand-astonish').length === actsBefore,
         statusUnchanged: api.fetchPurchaseOrder(poId).status === statusBefore,
       };
     });

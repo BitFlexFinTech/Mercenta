@@ -26,13 +26,17 @@ import { BrandSettings } from '@/components/brand/BrandSettings';
 import { BrandTeamMessages } from '@/components/brand/BrandTeamMessages';
 import { BrandSocialConnect } from '@/components/brand/BrandSocialConnect';
 import { BrandIntelligence } from '@/components/brand/BrandIntelligence';
+import { BrandAdvertising } from '@/components/brand/BrandAdvertising';
+import { ListingAnalyzer } from '@/components/brand/ListingAnalyzer';
 import { SalesEstimatorCard } from '@/components/brand/SalesEstimatorCard';
 import { SalesAnalytics } from '@/components/brand/SalesAnalytics';
+import { BrandWorkCalendar, BrandWorkManagement } from '@/components/brand/WorkManagement';
 import { MERCENTA_SOCIAL } from '@/config/mercentaSocial';
+import { useBrandNavBadges } from '@/lib/nav/navBadges';
 import {
   LayoutDashboard, FileCheck2, FileText, Package, Truck,
   ShieldCheck, BarChart3, RotateCcw, Target, Settings,
-  MessageSquare, ScrollText,
+  MessageSquare, ScrollText, ListChecks, CalendarDays,
 } from 'lucide-react';
 
 const BRAND_SECTIONS = [
@@ -64,6 +68,13 @@ const BRAND_SECTIONS = [
     ],
   },
   {
+    label: 'Operations',
+    items: [
+      { id: 'work', label: 'Tasks & Deadlines', icon: <ListChecks className="w-4 h-4" /> },
+      { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    ],
+  },
+  {
     label: 'Insights',
     items: [
       { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" /> },
@@ -84,6 +95,17 @@ const BRAND_SECTIONS = [
 export default function BrandShell() {
   const { brandProfile } = useApp();
   const [brandView, setBrandView] = useState('overview');
+  /**
+   * §UI/UX Wave 2 — brand-scoped attention counts. Called BEFORE the
+   * onboarding early-return (Rules of Hooks); `enabled` stops the fetch for a
+   * brand that has not finished onboarding. Tenant isolation is enforced inside
+   * the hook via assertBrandScope + the session's own tenantId.
+   */
+  const navBadges = useBrandNavBadges(brandProfile.onboarded);
+  const navSections = BRAND_SECTIONS.map((s) => ({
+    ...s,
+    items: s.items.map((i) => (navBadges[i.id] ? { ...i, badge: navBadges[i.id] } : i)),
+  }));
 
   if (!brandProfile.onboarded) return <OnboardingWizard />;
 
@@ -100,10 +122,12 @@ export default function BrandShell() {
     : brandView === 'social' ? MERCENTA_SOCIAL.navLabel
     : brandView === 'market' ? 'Market Intelligence'
     : brandView === 'settings' ? 'Settings'
+    : brandView === 'work' ? 'Tasks & Deadlines'
+    : brandView === 'calendar' ? 'Your Calendar'
     : 'Analytics';
 
   return (
-    <AppShell navSections={BRAND_SECTIONS} activeView={brandView} setActiveView={setBrandView}
+    <AppShell navSections={navSections} activeView={brandView} setActiveView={setBrandView}
       breadcrumb={bc}
       userName={brandProfile.signatory || brandProfile.businessName || 'Brand Partner'}
       onNavSettings={() => setBrandView('settings')}
@@ -125,11 +149,16 @@ export default function BrandShell() {
           {brandView === 'returns' && <BrandReturns />}
           {brandView === 'reports' && <BrandReports onNavigate={setBrandView} />}
           {brandView === 'settings' && <BrandSettings />}
+          {/* §Sprint — canonical work layer: the brand's own tasks/deadlines + calendar. */}
+          {brandView === 'work' && <BrandWorkManagement onNavigate={setBrandView} />}
+          {brandView === 'calendar' && <BrandWorkCalendar onNavigate={setBrandView} />}
           {brandView === 'team' && <BrandTeamMessages />}
           {brandView === 'social' && <BrandSocialConnect />}
           {brandView === 'market' && (
             <div className="space-y-4">
               <BrandIntelligence />
+              <BrandAdvertising />
+              <ListingAnalyzer />
               <SalesEstimatorCard />
             </div>
           )}

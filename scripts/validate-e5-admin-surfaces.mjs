@@ -53,8 +53,8 @@ try {
   const catalog = await server.ssrLoadModule('/src/lib/catalog/catalogLifecycle.ts');
   const mockAmazon = await server.ssrLoadModule('/src/lib/spapi/mockClient.ts');
 
-  const ZAMBEZI = 'brand-zambezi';
-  const DESKFORGE = 'brand-deskforge';
+  const ZAMBEZI = 'brand-astonish';
+  const DESKFORGE = 'brand-tapatio';
   const brandActor = { staffId: `brand:${ZAMBEZI}`, canMutate: true, tenantId: ZAMBEZI };
   /** §Phase E5 — an ADMIN actor: full permission, no tenant pin (global scope). */
   const adminActor = { staffId: 'staff-001', canMutate: true };

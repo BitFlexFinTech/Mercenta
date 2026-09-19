@@ -65,7 +65,7 @@ async function workspaceId(page: Page): Promise<string> {
 test.describe('Mercenta Social — brand access & automatic provisioning', () => {
   test('1. approved brand reaches Mercenta Social and is provisioned automatically', async ({ page }) => {
     const errors = trackPageErrors(page);
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
 
     await expect(page.locator('text=Mercenta Social').first()).toBeVisible();
     const id = await workspaceId(page);
@@ -81,7 +81,7 @@ test.describe('Mercenta Social — brand access & automatic provisioning', () =>
 
   test('2. customer-facing identity is Mercenta Social — no engine name, no sign-up', async ({ page }) => {
     const errors = trackPageErrors(page);
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
 
     const surface = page.locator('[data-testid="mercenta-social"]').first();
     const body = await surface.innerText();
@@ -95,7 +95,7 @@ test.describe('Mercenta Social — brand access & automatic provisioning', () =>
 
   test('3. the FULL module surface is present and each module drills down', async ({ page }) => {
     const errors = trackPageErrors(page);
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
 
     const modules = ['calendar', 'agents', 'analytics', 'media', 'plugs', 'third-party', 'settings', 'launches'];
     // The module cards are the interactive <button> elements (the summary and the
@@ -117,7 +117,7 @@ test.describe('Mercenta Social — brand access & automatic provisioning', () =>
 
   test('4. a browser reload cannot duplicate the workspace (identity is derived, not stored)', async ({ page }) => {
     const errors = trackPageErrors(page);
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
     const before = await workspaceId(page);
 
     // A hard reload drops the in-page session (pre-existing SPA behaviour) and
@@ -128,18 +128,18 @@ test.describe('Mercenta Social — brand access & automatic provisioning', () =>
 
     // Re-entering resolves the SAME workspace id even though the in-memory store
     // was wiped — because the id is derived deterministically from the tenant.
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
     expect(await workspaceId(page)).toBe(before);
     expect(errors).toEqual([]);
   });
 
   test('5. logout + re-login does NOT provision a second workspace', async ({ page }) => {
     const errors = trackPageErrors(page);
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
     const before = await workspaceId(page);
 
-    await openSocial(page, 'DeskForge Supplies Inc');
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Tapatío');
+    await openSocial(page, 'Astonish');
     expect(await workspaceId(page)).toBe(before);
     expect(errors).toEqual([]);
   });
@@ -148,10 +148,10 @@ test.describe('Mercenta Social — brand access & automatic provisioning', () =>
 test.describe('Mercenta Social — tenant isolation, entitlement & safety', () => {
   test('6. two brands receive SEPARATE workspaces and cannot see each other', async ({ page }) => {
     const errors = trackPageErrors(page);
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
     const zambezi = await workspaceId(page);
 
-    await openSocial(page, 'DeskForge Supplies Inc');
+    await openSocial(page, 'Tapatío');
     const deskforge = await workspaceId(page);
 
     expect(zambezi).not.toBe(deskforge);
@@ -159,7 +159,7 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
     const deskSurface = await page.locator('[data-testid="mercenta-social"]').first().innerText();
     expect(deskSurface).not.toContain(zambezi);
 
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
     expect(await workspaceId(page)).toBe(zambezi);
     const zamSurface = await page.locator('[data-testid="mercenta-social"]').first().innerText();
     expect(zamSurface).not.toContain(deskforge);
@@ -168,9 +168,9 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
 
   test('7. an unapproved brand cannot reach Mercenta Social', async ({ page }) => {
     const errors = trackPageErrors(page);
-    // Munich Clean-Care's canonical contract is 'draft' — not an approved
+    // Bulldog Skincare-Care's canonical contract is 'draft' — not an approved
     // partnership — so the brand never receives the portal Social surface.
-    await loginAs(page, 'Munich Clean-Care GmbH', 1000);
+    await loginAs(page, 'Bulldog Skincare', 1000);
     await page.waitForTimeout(600);
 
     expect(await page.locator(SOCIAL_NAV).count()).toBe(0);
@@ -182,7 +182,7 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
   test('8. simulation stays simulation — zero external provider/engine calls', async ({ page }) => {
     const errors = trackPageErrors(page);
     const external = trackExternalCalls(page);
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
     await page.locator('[data-testid="ms-module-calendar"]').first().click();
     await page.waitForTimeout(800);
 
@@ -208,7 +208,7 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
             ? {
                 ok: true,
                 url: launchUrl,
-                email: 'brand-zambezi-9c8c82e3@social.mercenta.co.uk',
+                email: 'brand-astonish-9c8c82e3@social.mercenta.co.uk',
                 organizationId: 'a8ae0104-4447-4a13-afab-be0100f15f64',
                 reused: true,
               }
@@ -217,7 +217,7 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
       });
     });
 
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
     const launch = page.locator('[data-testid="ms-launch"]').first();
     await expect(launch).toBeVisible();
 
@@ -248,7 +248,7 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
   }) => {
     const errors = trackPageErrors(page);
     const external = trackExternalCalls(page);
-    await openSocial(page, 'Zambezi Organic Extracts Ltd');
+    await openSocial(page, 'Astonish');
 
     const studio = page.locator('[data-testid="ms-simulation-studio"]').first();
     await expect(studio).toBeVisible({ timeout: 8000 });

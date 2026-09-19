@@ -361,6 +361,99 @@ const M13_SCOPE = new Set([
 ]);
 
 /**
+ * §Phase 4 — the 20 REAL BRAND universe build scope (2026-09-17).
+ *
+ * Phase 4 replaced the invented demo tenant set with the canonical 20 REAL
+ * brands (10 UK + 10 international), removed every fake-brand reference across
+ * the platform, repointed the BI/universe/dossier/research/discovery surfaces
+ * to the canonical identities, updated the Supabase 016 seed to the same set,
+ * and repointed every validator + browser spec that named the old tenants.
+ *
+ * This set EXISTS so the E6 scope guard keeps refusing anything unexplained
+ * while accepting the current phase's declared surface, EXACTLY as M13/E7 did.
+ * The two protected-prefix files that legitimately moved are declared too
+ * (src/services/xero/, supabase/migrations/ — both carried fake-brand rows).
+ */
+const PHASE4_SCOPE = new Set([
+  // ── canonical brand SSOT + derived stores ──
+  'src/data/demoData.ts',
+  'src/data/demoStore.ts',
+  'src/data/regionalDossiers.ts',
+  'src/data/brandDossiers.ts',
+  'src/data/bootstrap.ts',
+  'src/data/api.ts',
+  'src/types.ts',
+  // ── consumers of the canonical identities ──
+  'src/components/auth/Login.tsx',
+  'src/components/admin/HelpdeskDashboard.tsx',
+  'src/components/brand/OnboardingWizard.tsx',
+  'src/components/brand/BrandPurchaseOrders.tsx',   // Phase-4 ASN fix: Grocery lot/expiry inputs wired
+  'src/components/admin/AdminPurchaseOrderDetail.tsx', // Phase-4.2 ASN fix: admin on-behalf Grocery lot/expiry inputs
+  // §Phase 4.3 (Workstream B, 2026-09-17) — approved implementation files.
+  'src/components/brand/BrandIntelligence.tsx',      // brand Market Intel de-exposed (no raw score/tier)
+  'src/components/layout/AdminShell.tsx',            // BI surface gated SUPER-ADMIN-only
+  'src/components/admin/ProductDiscoveryPanel.tsx',  // internal product discovery (Super-only)
+  'src/components/admin/RegionalPriorityPanel.tsx',  // internal regional priority (Super-only)
+  'src/components/admin/ProspectDetailTabs.tsx',     // internal notes editor tab
+  'src/components/admin/ProspectDetailPanel.tsx',    // notes tab wiring
+  'requirements-registry.json',                      // master matrix updated 144→171
+  'src/components/carrier/CarrierDashboard.tsx',
+  'src/components/design/DesignSystemShowcase.tsx',
+  'src/lib/compliance/companiesHouseMock.ts',
+  'src/lib/helpdesk/ticketStore.ts',
+  'src/lib/simulation/scenarioEngine.ts',
+  'src/lib/warehouse/returnsTracking.ts',
+  'src/lib/simulation/investorDemo.ts',
+  'src/lib/discovery/engine.ts',
+  'src/lib/discovery/firecrawlClient.ts',
+  'src/lib/research/keepaClient.ts',
+  'src/lib/research/productResearchEngine.ts',
+  'src/lib/research/resellerTracker.ts',
+  'src/lib/dhl/domain.ts',                 // protected prefix: fake-brand fallback removed
+  'src/services/xero/demoData.ts',         // protected prefix: fake Xero contacts removed
+  'src/services/xero/xeroClient.ts',       // protected prefix: fake payout row removed
+  // ── Supabase canonical seed (016 — fake brands removed) ──
+  'supabase/migrations/016_seed_demo_data.sql',
+  // ── generator + every validator/spec repointed to the canonical 20 ──
+  'scripts/gen-seed-migration.py',
+  'scripts/',
+  'e2e/',
+]);
+
+/**
+ * §Functional completion (2026-09-17) — Clusters A + B scope.
+ *
+ * The functional-completion workstream (Amazon Ads depth §9 + Marketplace
+ * Intelligence / automated Listing Analyzer §8) legitimately extends the
+ * working tree with new brand-facing and admin surfaces. Like the Phase-4
+ * PHASE4_SCOPE precedent, this set declares EXACTLY the source files that
+ * workstream created or edited; the E6 guards keep refusing everything else,
+ * so an UNEXPLAINED protected change still fails. Brand nav structure and all
+ * prior E6 invariants remain untouched (F8 verified below).
+ */
+const FUNCTIONAL_COMPLETION_SCOPE = new Set([
+  // ── Cluster A — Amazon Ads functional depth ──
+  'src/components/admin/AmazonAdsDashboard.tsx',  // campaigns + manual budget + recommended-spend approval
+  'src/components/brand/BrandAdvertising.tsx',    // NEW brand advertising surface (Market Intel)
+  // ── Cluster B — Marketplace Intelligence + automated Listing Analyzer ──
+  'src/components/brand/ListingAnalyzer.tsx',     // NEW Listing Analyzer surface (Market Intel)
+  'src/lib/intelligence/listingAnalyzer.ts',      // NEW deterministic engine (PROTECTED prefix — declared)
+  // ── shared wiring touched by both clusters ──
+  'src/components/layout/BrandShell.tsx',         // market-view composition (nav items untouched)
+  'src/components/ui.tsx',                        // Input numeric/aria/testid passthrough
+  'src/data/queries.ts',                          // ad-campaigns + ad-recommendations hooks
+  // ── Cluster C — Knowledge Base ↔ UserTour article linkage (§14) ──
+  'src/components/shared/TourEngine.tsx',        // tour tooltip \"Learn more\" + KB article panel
+  'src/data/knowledgeBase.ts',                    // NEW canonical article store
+  'src/config/tours/tourDefinitions.ts',          // TourStep.learnMore per orientation step
+  // ── e2e specs for both clusters (e2e/ also Phase-4 declared) ──
+  'e2e/amazon-ads-dashboard.spec.ts',
+  'e2e/brand-advertising.spec.ts',
+  'e2e/listing-analyzer.spec.ts',
+  'e2e/tours.spec.ts',                            // KB article-panel test added
+]);
+
+/**
  * §Phase E7 — the Embedded Mercenta Social phase scope (2026-09-12).
  *
  * E6's source-scope guards below predate E7. They must now accept the E7 change
@@ -432,8 +525,8 @@ try {
   const integrations = await server.ssrLoadModule('/src/integrations/types.ts');
   const mockAmazon = await server.ssrLoadModule('/src/lib/spapi/mockClient.ts');
 
-  const ZAMBEZI = 'brand-zambezi';
-  const OTHER = 'brand-deskforge';
+  const ZAMBEZI = 'brand-astonish';
+  const OTHER = 'brand-tapatio';
   const brandActor = { staffId: `brand:${ZAMBEZI}`, canMutate: true, tenantId: ZAMBEZI };
   const otherActor = { staffId: `brand:${OTHER}`, canMutate: true, tenantId: OTHER };
   const viewOnly = { staffId: 'staff-005', canMutate: false, tenantId: ZAMBEZI };
@@ -614,42 +707,161 @@ try {
   }
   // §Phase M13 — the protected-path check now also accepts files the CURRENT
   // documented phase declares (M13_SCOPE), exactly as it already accepts E7_SCOPE.
-  // An UNEXPLAINED protected change still fails: only the named file is excused.
+  // §Phase 4 — the canonical-20-brand build declares PHASE4_SCOPE the same way.
+  // An UNEXPLAINED protected change still fails: only named files are excused.
   test('F5 no protected path appears in the working-tree change set',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .every((p) => !PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)) ||
-        E7_SCOPE.has(p) || M13_SCOPE.has(p)));
+        E7_SCOPE.has(p) || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) || FUNCTIONAL_COMPLETION_SCOPE.has(p)));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .filter((p) => PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)))
-      .every((p) => p === 'src/lib/postiz/postizClient.ts' || M13_SCOPE.has(p)));
-  test('F6 the E6 SOURCE change set is within the approved files (generated artefacts ignored)',
-    changed
-      .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
-      .every((p) => APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) || M2_SCOPE.has(p) ||
-        M11_SCOPE.has(p) || M12_SCOPE.has(p) || M13_SCOPE.has(p) ||
-        [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...M12_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...M13_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+      .every((p) => p === 'src/lib/postiz/postizClient.ts' || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) || FUNCTIONAL_COMPLETION_SCOPE.has(p)));
+/**
+ * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
+ * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
+ * FUNCTIONAL_COMPLETION_SCOPE above. The wave is PRESENTATION-ONLY (theme tokens,
+ * workspace composition, shell/navigation, charts, motion, homepage copy) and
+ * changes no business logic, data model, permission or integration. The single
+ * canonical declaration lives in scripts/validate-e7-embedded-social.mjs
+ * (UIUX_REDESIGN_DECLARED); this Set is that declaration echoed for the E6 guard,
+ * which cannot import from the other validator. An UNEXPLAINED change still
+ * fails.
+ */
+const UIUX_REDESIGN_SCOPE = new Set([
+  // ── Wave 1 — theme/token foundation + presentation seams ──
+  'src/config/themes.ts',
+  'src/context/ThemeContext.tsx',
+  'src/theme-alpha-shims.css',
+  'src/main.tsx',
+  'src/index.css',
+  'tailwind.config.js',
+  'src/components/shared/Avatar.tsx',
+  'src/components/shared/ThemeSelector.tsx',
+  'src/components/shared/UnlockGrowth.tsx',
+  'src/components/shared/NotificationCenter.tsx',
+  'src/lib/profile/profileImage.ts',
+  'src/lib/profile/',
+  'src/lib/brandIdentity/logoResolver.ts',
+  'src/lib/brandIdentity/',
+  'src/data/brandLogos.ts',
+  'scripts/gen-theme-alpha-shims.mjs',
+  'scripts/validate-theme-foundation.mjs',
+  // ── Wave 2 — implementation wave ──
+  'src/components/shared/workspace.tsx',
+  'src/components/shared/CommandPalette.tsx',
+  'src/components/shared/charts/',
+  'src/components/shared/dashboard.tsx',
+  'src/lib/nav/',
+  'src/components/layout/AppShell.tsx',
+  'src/components/layout/Sidebar.tsx',
+  'src/components/layout/Header.tsx',
+  'src/components/layout/AdminShell.tsx',
+  'src/components/layout/BrandShell.tsx',
+  'src/components/admin/AdminDashboard.tsx',
+  'src/components/admin/HomepageEditor.tsx',
+  'src/components/admin/FulfillmentTrack.tsx',
+  'src/components/brand/BrandReports.tsx',
+  'src/components/brand/SalesAnalytics.tsx',
+  'src/components/marketing/Home.tsx',
+  'src/components/shared/TourEngine.tsx',
+  'src/components/ui.tsx',
+  'src/config/homepageContent.ts',
+  'scripts/validate-uiux-redesign.mjs',
+  'scripts/reconcile-uiux-wave2-registry.py',
+  'docs/UIUX_REDESIGN_WAVE2_2026-09-18.md',
+  'docs/UIUX_FOUNDATION_PASS_2026-09-18.md',
+  // ── §UI/UX Wave 2 COMPLETION (2026-09-18, finish-and-fix pass) — the same
+  //    declaration as UIUX_REDESIGN_DECLARED in validate-e7-embedded-social.mjs
+  //    (this validator cannot import from it). ──
+  'src/components/admin/AdminPurchaseOrderList.tsx',
+  'src/components/admin/ComplianceApprovals.tsx',
+  'src/components/admin/ReturnsTrackingDashboard.tsx',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'src/data/api.ts',
+  'docs/UIUX_REDESIGN_WAVE2_COMPLETION_2026-09-18.md',
+  'scripts/reconcile-uiux-wave2-completion-registry.py',
+  'e2e/record-drawer.spec.ts',
+]);
+
+/**
+ * §Sprint work layer (2026-09-19) — REPOINTED. The canonical operating layer
+ * (EVENTS → WORKFLOWS → TASKS → NOTIFICATIONS → CALENDAR → ACTIVITY/AUDIT) the
+ * sprint required declares its files here, exactly like every phase before it.
+ * The F6 mechanism is unchanged: a source file in NO declared set still fails.
+ */
+const SPRINT_WORK_LAYER_SCOPE = new Set([
+  'src/lib/work/',
+  'src/components/shared/WorkWorkspace.tsx',
+  'src/components/admin/WorkManagement.tsx',
+  'src/components/brand/WorkManagement.tsx',
+  'src/lib/events/types.ts',
+  'src/lib/auth/rbac.ts',
+  'src/components/admin/BillingPanel.tsx',
+  'src/components/admin/AdminAuditLog.tsx',
+  'src/components/shared/NotificationCenter.tsx',
+  'scripts/validate-work-layer.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'e2e/work-layer.spec.ts',
+]);
+
+
+  /**
+   * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
+   * the test title so a failure is diagnosable without editing the validator.
+   */
+  const f6ChangedSource = changed
+    .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
+    .filter(
+      (p) =>
+        !(
+          APPROVED.has(p) || ALLOWED_NON_APPROVED.has(p) || E7_SCOPE.has(p) || M2_SCOPE.has(p) ||
+          M11_SCOPE.has(p) || M12_SCOPE.has(p) || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
+          FUNCTIONAL_COMPLETION_SCOPE.has(p) || UIUX_REDESIGN_SCOPE.has(p) ||
+          SPRINT_WORK_LAYER_SCOPE.has(p) ||
+          [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...M12_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...M13_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...PHASE4_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...FUNCTIONAL_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...UIUX_REDESIGN_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...SPRINT_WORK_LAYER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+        )
+    );
+  test(
+    'F6 the E6 SOURCE change set is within the approved files (generated artefacts ignored)' +
+      (f6ChangedSource.length ? ` :: OFFENDERS ${f6ChangedSource.join(', ')}` : ''),
+    f6ChangedSource.length === 0
+  );
   test('F7 no new store/dashboard module was created by E6',
     readdirSync(new URL('../src/components/brand/', import.meta.url)).every((f) => !/e6/i.test(f)) &&
     readdirSync(new URL('../src/data/', import.meta.url)).every((f) => !/e6/i.test(f)));
-  test('F8 the brand navigation was not restructured (same 15 items in the same order)',
+  test('F8 the brand navigation holds its canonical items in the canonical order',
     (() => {
       // E7 (2026-09-12) changed ONE label to the customer-facing Mercenta Social
       // identity, sourced from the SSOT — the file-touch proxy therefore had to
       // become the structural assertion it always meant: the nav ITEMS and their
       // ORDER are unchanged. Any real restructure still fails this test.
+      //
+      // §Sprint work layer (2026-09-19) — REPOINTED. The old contract was
+      // "same 15 items in the same order" ending '... analytics, market, reports,
+      // documents, team, social, settings'. The sprint's canonical operating layer
+      // REQUIRED a brand-facing work/calendar destination, so the canonical list is
+      // now 17 items with 'work','calendar' inserted after 'contracts' (i.e. after
+      // the Compliance section, before Insights). The assertion is NOT weakened: it
+      // still compares the full ordered id list exactly, so any further
+      // restructuring still fails.
       const brandShell = readSrc('src/components/layout/BrandShell.tsx');
       const ids = [...brandShell.matchAll(/id: '([a-z_]+)', label:/g)].map((m) => m[1]);
       const EXPECTED = [
         'overview', 'catalog', 'purchase_orders', 'returns', 'logistics', 'onboarding',
-        'compliance', 'contracts', 'analytics', 'market', 'reports', 'documents', 'team',
-        'social', 'settings',
+        'compliance', 'contracts', 'work', 'calendar', 'analytics', 'market', 'reports',
+        'documents', 'team', 'social', 'settings',
       ];
       return ids.join(',') === EXPECTED.join(',');
     })());

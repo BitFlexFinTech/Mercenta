@@ -47,8 +47,8 @@ test.describe('E4 — operational commerce simulation', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
-    // Zambezi is CLEARED and already owns E3-completed catalog products.
-    await openBrandPurchaseOrders(page, 'Zambezi Organic Extracts Ltd');
+    // Astonish is CLEARED and already owns E3-completed catalog products.
+    await openBrandPurchaseOrders(page, 'Astonish');
 
     // Eligibility is DERIVED from the E3 catalog lifecycle, not assumed.
     await expect(page.getByText('Eligible for the commerce simulation').first()).toBeVisible({ timeout: 8000 });
@@ -57,12 +57,12 @@ test.describe('E4 — operational commerce simulation', () => {
     const raise = page.locator('button[data-state="commerce-raise-po"]').first();
     await expect(raise).toBeEnabled({ timeout: 6000 });
     await raise.click();
-    await expect(page.getByText(/Raise simulated PO: PO-SIM-BRAND-ZAMBEZI/).first()).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/Raise simulated PO: PO-SIM-BRAND-ASTONISH/).first()).toBeVisible({ timeout: 8000 });
 
     const ack = page.locator('button[data-state="commerce-acknowledge"]').first();
     await expect(ack).toBeEnabled({ timeout: 6000 });
     await ack.click();
-    await expect(page.getByText(/Acknowledge: PO-SIM-BRAND-ZAMBEZI/).first()).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/Acknowledge: PO-SIM-BRAND-ASTONISH/).first()).toBeVisible({ timeout: 8000 });
 
     const fulfil = page.locator('button[data-state="commerce-fulfil"]').first();
     await expect(fulfil).toBeEnabled({ timeout: 6000 });
@@ -86,7 +86,7 @@ test.describe('E4 — operational commerce simulation', () => {
 
     // The operational trail is visible and labelled as simulation.
     await expect(page.getByText('Operational activity trail').first()).toBeVisible({ timeout: 6000 });
-    await expect(page.getByText('SIM-INV-PO-SIM-BRAND-ZAMBEZI').first()).toBeVisible({ timeout: 6000 });
+    await expect(page.getByText('SIM-INV-PO-SIM-BRAND-ASTONISH').first()).toBeVisible({ timeout: 6000 });
 
     // No page error and no external provider was contacted at any point.
     expect(pageErrors).toEqual([]);
@@ -98,7 +98,7 @@ test.describe('E4 — operational commerce simulation', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
-    await openBrandPurchaseOrders(page, 'Zambezi Organic Extracts Ltd');
+    await openBrandPurchaseOrders(page, 'Astonish');
 
     // Drive the simulated lifecycle to DELIVERED so the exception control unlocks.
     await page.locator('button[data-state="commerce-raise-po"]').first().click();
@@ -135,13 +135,13 @@ test.describe('E4 — operational commerce simulation', () => {
       const mod = await import('/src/lib/commerce/commerceLifecycle.ts');
       const store = await import('/src/data/demoStore.ts');
       const d = store.demoDeductions.find(
-        (x) => x.brandId === 'brand-zambezi' && x.status === 'disputed'
+        (x) => x.brandId === 'brand-astonish' && x.status === 'disputed'
       );
       if (!d) return { skipped: true } as const;
       const brandActor = {
-        staffId: 'brand:brand-zambezi',
+        staffId: 'brand:brand-astonish',
         canMutate: true,
-        tenantId: 'brand-zambezi',
+        tenantId: 'brand-astonish',
       };
       const res = mod.resolveCommerceDispute(d.id, 'won', brandActor);
       const after = store.demoDeductions.find((x) => x.id === d.id);
@@ -174,7 +174,7 @@ test.describe('E4 — operational commerce simulation', () => {
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
     // 1. The BRAND drives the operational lifecycle and disputes the exception.
-    await openBrandPurchaseOrders(page, 'Zambezi Organic Extracts Ltd');
+    await openBrandPurchaseOrders(page, 'Astonish');
     await page.locator('button[data-state="commerce-raise-po"]').first().click();
     await page.waitForTimeout(400);
     await page.locator('button[data-state="commerce-acknowledge"]').first().click();
@@ -240,11 +240,11 @@ test.describe('E4 — operational commerce simulation', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
-    // Reed & Oak is NOT cleared and owns no operational data.
-    await openBrandPurchaseOrders(page, 'Reed & Oak Kitchen Co');
+    // Le Creuset is NOT cleared and owns no operational data.
+    await openBrandPurchaseOrders(page, 'Le Creuset');
 
     // No other tenant's PO, shipment, invoice, payment or exception leaks in.
-    await expect(page.getByText('PO-SIM-BRAND-ZAMBEZI').first()).toHaveCount(0);
+    await expect(page.getByText('PO-SIM-BRAND-ASTONISH').first()).toHaveCount(0);
     await expect(page.getByText('Operational activity trail')).toHaveCount(0);
     await expect(page.getByText('No catalog products')).toHaveCount(1);
     // …and it cannot enter the simulation (no eligible product ⇒ control disabled).
@@ -281,23 +281,23 @@ test.describe('E4 — operational commerce simulation', () => {
       const store = await import('/src/data/demoStore.ts');
       const api = await import('/src/data/api.ts');
 
-      const zambeziActor = { staffId: 'brand:brand-zambezi', canMutate: true, tenantId: 'brand-zambezi' };
-      let po = store.demoPurchaseOrders.find((p) => p.brandId === 'brand-zambezi' && p.simulated === true);
+      const zambeziActor = { staffId: 'brand:brand-astonish', canMutate: true, tenantId: 'brand-astonish' };
+      let po = store.demoPurchaseOrders.find((p) => p.brandId === 'brand-astonish' && p.simulated === true);
       if (!po) {
-        const seed = store.productsForBrandFromStore('brand-zambezi')[0];
+        const seed = store.productsForBrandFromStore('brand-astonish')[0];
         if (!seed) return { skipped: true };
-        const created = await mod.createCommercePurchaseOrder('brand-zambezi', seed.sku, 5, zambeziActor);
+        const created = await mod.createCommercePurchaseOrder('brand-astonish', seed.sku, 5, zambeziActor);
         po = created.ok ? created.value : undefined;
       }
       if (!po) return { skipped: true };
 
-      const foreignActor = { staffId: 'brand:brand-deskforge', canMutate: true, tenantId: 'brand-deskforge' };
-      const viewOnlyActor = { staffId: 'staff-005', canMutate: false, tenantId: 'brand-zambezi' };
+      const foreignActor = { staffId: 'brand:brand-tapatio', canMutate: true, tenantId: 'brand-tapatio' };
+      const viewOnlyActor = { staffId: 'staff-005', canMutate: false, tenantId: 'brand-astonish' };
 
       const statusBefore = api.fetchPurchaseOrder(po.id).status;
       const foreignAck = mod.acknowledgeCommercePurchaseOrder(po.id, foreignActor);
       const viewOnlyAck = mod.acknowledgeCommercePurchaseOrder(po.id, viewOnlyActor);
-      const foreignRead = mod.listBrandCommerceActivity('brand-zambezi', foreignActor);
+      const foreignRead = mod.listBrandCommerceActivity('brand-astonish', foreignActor);
       const statusAfter = api.fetchPurchaseOrder(po.id).status;
 
       return {

@@ -77,7 +77,7 @@ function findShipment(ctx: DhlDomainInput) {
   // all operate on real shared state.
   const record = {
     id: ctx.shipmentId,
-    brandId: ctx.brandId ?? 'brand-zambezi',
+    brandId: ctx.brandId ?? 'brand-astonish',
     poNumber: (ctx.manifest.reference ?? ctx.shipmentId).toUpperCase(),
     carrier: 'dhl' as const,
     reference: ctx.manifest.reference,

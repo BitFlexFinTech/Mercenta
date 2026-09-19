@@ -21,7 +21,7 @@
  * `department` is retained for AdminShell call-site compatibility (the old
  * department-tab silo was removed in this redesign; the prop is unused).
  */
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   useBrands,
   useCatalogSubmissions,
@@ -37,16 +37,32 @@ import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } 
 import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
 import { renewalUrgency } from '@/lib/contracts';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
-import { Alert, Button, EmptyState, PageHeader, StatusBadge, Skeleton } from '@/components/ui';
+import { Alert, Button, EmptyState, StatusBadge, Skeleton } from '@/components/ui';
 import type { StatusTone } from '@/components/ui';
+import { type KpiCellData } from '@/components/shared/dashboard';
 import {
-  AttentionPanel,
-  DashboardSection,
-  KpiGroup,
-  type KpiCellData,
-} from '@/components/shared/dashboard';
+  ActivityFeed,
+  ContextPanel,
+  MetricBand,
+  PipelineTrack,
+  Queue,
+  SegmentedControl,
+  WorkspaceFrame,
+  WorkspaceGrid,
+  WorkspaceHeader,
+  WorkspaceSection,
+  type MetricTileData,
+  type PipelineStageData,
+  type QueueRowData,
+} from '@/components/shared/workspace';
+import {
+  MercentaBars,
+  MercentaDoughnut,
+  MercentaLineChart,
+} from '@/components/shared/charts/MercentaCharts';
 import { STATUS_LABELS } from '@/types';
 import type { AdminDepartment, ShipmentStatus } from '@/types';
+import type { PaletteDomain } from '@/config/themes';
 import { CommandCentre } from './CommandCentre';
 import { ArrowRight, CreditCard, FileCheck2, FileText, LifeBuoy, Package } from 'lucide-react';
 
@@ -79,6 +95,9 @@ export function AdminDashboard({
   onNavigate?: (view: string) => void;
 }) {
   void department;
+  /** §UI/UX Wave 2 — operator display preferences (presentation only). */
+  const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
+  const [groupAttention, setGroupAttention] = useState(true);
   /** Navigate to an existing shell view — no-op when rendered without a shell. */
   const go = useCallback((view: string) => () => onNavigate?.(view), [onNavigate]);
 
@@ -340,6 +359,106 @@ export function AdminDashboard({
     },
   ];
 
+  /* ── §UI/UX Wave 2 — domain binding, pipeline and REAL chart series ──────
+   * Every value below is DERIVED from the same canonical stores the sections
+   * above use. No invented metric, no decorative chart: if the store is empty
+   * the chart is honestly empty. Hue → domain comes from
+   * src/config/themes.ts (`DOMAIN_COLOURS`), never a local hex.
+   */
+  const KPI_DOMAIN: Record<string, PaletteDomain> = {
+    'pending-pos': 'orders',
+    'in-fulfilment': 'logistics',
+    'docs-pending': 'compliance',
+    gate: 'compliance',
+    renewals: 'compliance',
+    tickets: 'communications',
+    'payouts-pending': 'finance',
+  };
+  const kpiTiles: MetricTileData[] = kpis.map((k) => ({
+    ...k,
+    domain: KPI_DOMAIN[k.id] ?? 'orders',
+    size: k.id === 'pending-pos' ? 'hero' : 'default',
+  }));
+
+  /** PO pipeline: the real status families this platform moves work through. */
+  const pipelineStages: PipelineStageData[] = useMemo(() => {
+    const buckets: { id: string; label: string; domain: PaletteDomain; statuses: string[] }[] = [
+      { id: 'awaiting', label: 'Awaiting action', domain: 'orders', statuses: ['received', 'under_review'] },
+      { id: 'committed', label: 'Committed', domain: 'catalogue', statuses: ['accepted', 'ready_to_fulfil'] },
+      { id: 'in-transit', label: 'In transit', domain: 'logistics', statuses: ['shipped'] },
+      { id: 'delivered', label: 'Delivered', domain: 'finance', statuses: ['delivered'] },
+      { id: 'closed', label: 'Closed / other', domain: 'intelligence', statuses: [] },
+    ];
+    const classified = new Set(buckets.flatMap((b) => b.statuses));
+    const total = Math.max(1, posAll.length);
+    return buckets.map((b) => {
+      const rows =
+        b.statuses.length === 0
+          ? posAll.filter((p) => !classified.has(p.status))
+          : posAll.filter((p) => b.statuses.includes(p.status));
+      return {
+        id: b.id,
+        label: b.label,
+        count: rows.length,
+        share: rows.length / total,
+        domain: b.domain,
+        attention: b.id === 'awaiting' && rows.length > 0,
+      };
+    });
+  }, [posAll]);
+
+  /** Real order-value time series (PO `orderDate`), newest 6 months. */
+  const orderValueSeries = useMemo(() => {
+    const byMonth = new Map<string, number>();
+    for (const p of posAll) {
+      const month = (p.orderDate ?? '').slice(0, 7);
+      if (!month) continue;
+      byMonth.set(month, (byMonth.get(month) ?? 0) + p.poValue);
+    }
+    const months = [...byMonth.keys()].sort().slice(-6);
+    const points = months.map((m) => ({
+      label: m.slice(5) + '/' + m.slice(2, 4),
+      value: Math.round(byMonth.get(m) ?? 0),
+    }));
+    const orderCount = months.map(
+      (m) => posAll.filter((p) => (p.orderDate ?? '').slice(0, 7) === m).length
+    );
+    return [
+      { name: 'Order value (£)', points },
+      ...(points.length > 0
+        ? [
+            {
+              name: 'Orders (#)',
+              points: points.map((p, i) => ({ label: p.label, value: orderCount[i] ?? 0 })),
+            },
+          ]
+        : []),
+    ];
+  }, [posAll]);
+
+  /** Real value by brand (top 6 by purchase-order value). */
+  const valueByBrand = useMemo(() => {
+    const byBrand = new Map<string, number>();
+    for (const p of posAll) byBrand.set(p.brandId, (byBrand.get(p.brandId) ?? 0) + p.poValue);
+    return [...byBrand.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([id, value]) => ({
+        label: (brandName.get(id) ?? id).split(' ')[0] ?? id,
+        value: Math.round(value),
+      }));
+  }, [posAll, brandName]);
+
+  /** Real compliance-document posture (documents by status). */
+  const docStatusSegments = useMemo(() => {
+    const order = ['approved', 'under_review', 'uploaded', 'missing', 'expired', 'rejected'];
+    const counts = new Map<string, number>();
+    for (const d of docsAll) counts.set(d.status, (counts.get(d.status) ?? 0) + 1);
+    return [...counts.entries()]
+      .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
+      .map(([status, value]) => ({ label: status.replace(/_/g, ' '), value }));
+  }, [docsAll]);
+
   /* ── Exceptions / attention — severity ordered, actionable ────────────── */
   const attention: {
     id: string;
@@ -549,182 +668,368 @@ if (pendingBrandIds.length > 4) {
         .slice(0, 6),
     [messagesAll]
   );
-if (loading) {
+  if (loading) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto space-y-6" data-testid="dashboard-loading" aria-busy="true">
-        <PageHeader title="Operations Overview" description="Loading operational state…" />
-        <KpiGroup items={kpis} loading />
-        <DashboardSection title="Needs your attention">
-          <div className="space-y-2.5">
+      <div data-testid="dashboard-loading" aria-busy="true">
+        <WorkspaceFrame>
+          <WorkspaceHeader title="Operations Overview" description="Loading operational state…" />
+          <MetricBand items={kpiTiles} columns={4} loading />
+          <div className="mt-4 space-y-2.5">
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-12 w-full" />
           </div>
-        </DashboardSection>
+        </WorkspaceFrame>
       </div>
     );
   }
 
   if (!dataReady && (anyError || (posAll.length === 0 && docsAll.length === 0))) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto space-y-6" data-testid="dashboard-error">
-        <PageHeader title="Operations Overview" description="Operational state could not be loaded." />
-        <Alert tone="error" title="Dashboard data unavailable">
-          The overview could not load purchase orders, brands or compliance documents. Check the
-          Monitoring view for integration health, then return to the overview.
-        </Alert>
-        <Button variant="secondary" onClick={go('monitoring')}>Open Monitoring</Button>
+      <div data-testid="dashboard-error">
+        <WorkspaceFrame>
+          <WorkspaceHeader
+            title="Operations Overview"
+            description="Operational state could not be loaded."
+          />
+          <Alert tone="error" title="Dashboard data unavailable">
+            The overview could not load purchase orders, brands or compliance documents. Check the
+            Monitoring view for integration health, then return to the overview.
+          </Alert>
+          <Button variant="secondary" className="mt-3" onClick={go('monitoring')}>
+            Open Monitoring
+          </Button>
+        </WorkspaceFrame>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-6" data-testid="dashboard-loaded">
-      <PageHeader
-        title="Operations Overview"
-        description={`${brands.length} brands on platform · ${posAll.length} purchase orders · ${docsAll.length} compliance documents · ${messagesAll.length} messages in thread history`}
-      />
-
-      {/* §32 (M13 Phase 11) — the founder's command centre: what needs attention
-          now and the exact next action, with tab-aware CTA routing. */}
-      <CommandCentre onNavigate={onNavigate} />
-
-      {anyError && (
-        <Alert tone="error" title="Some dashboard data is unavailable">
-          A datasource reported an error; seed data is shown where available. Check Monitoring for
-          integration health.
-        </Alert>
-      )}
-
-      <DashboardSection
-        title="Portfolio at a glance"
-        description="Derived live from purchase orders, compliance, contracts, support and billing data."
-      >
-        <KpiGroup items={kpis} />
-      </DashboardSection>
-
-      <DashboardSection
-        title="Needs your attention"
-        description="Priority-ordered exceptions across the portfolio. Each row routes to the existing destination view."
-        action={
-          activeTickets.length > 0 ? (
-            <Button variant="secondary" size="sm" onClick={go('helpdesk')}>
-              Open Helpdesk <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+    <div data-testid="dashboard-loaded">
+      <WorkspaceFrame>
+        <WorkspaceHeader
+          eyebrow="Admin Hub · Portfolio"
+          title="Operations Overview"
+          description={`${brands.length} brands on platform · ${posAll.length} purchase orders · ${docsAll.length} compliance documents · ${messagesAll.length} messages in thread history`}
+          status={
+            posAwaitingAction.length > 0 ? (
+              <StatusBadge tone="warning" dataStatus="warning">
+                {posAwaitingAction.length} awaiting action
+              </StatusBadge>
+            ) : (
+              <StatusBadge tone="success" dataStatus="success">
+                Queue clear
+              </StatusBadge>
+            )
+          }
+          meta={
+            <>
+              <span className="font-mono text-[11px] text-zinc-500">
+                £{awaitingValue.toLocaleString()} open PO value
+              </span>
+              <span className="font-mono text-[11px] text-zinc-500">
+                {shipmentsAll.length} shipments in motion
+              </span>
+              <span className="font-mono text-[11px] text-zinc-500">
+                {renewalsDue.length} renewals in window
+              </span>
+            </>
+          }
+          actions={
+            <Button onClick={go('purchase_orders_admin')}>
+              Review purchase orders <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
             </Button>
-          ) : undefined
-        }
-      >
-        <AttentionPanel items={attention} />
-      </DashboardSection>
-
-      <DashboardSection
-        title="Next actions"
-        description="Highest-value operator moves, pre-counted from current data."
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {actions.map((a) => {
-            const Icon = a.icon;
-            return (
+          }
+          toolbar={
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                Density
+              </span>
+              <SegmentedControl
+                ariaLabel="Row density"
+                active={density}
+                onSelect={(v) => setDensity(v as 'compact' | 'comfortable')}
+                items={[
+                  { id: 'compact', label: 'Compact' },
+                  { id: 'comfortable', label: 'Comfortable' },
+                ]}
+              />
               <button
-                key={a.id}
                 type="button"
-                onClick={go(a.id)}
-                data-testid={`action-${a.id}`}
-                className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-ink-850 px-3.5 py-3 text-left hover:border-brass-500/40 hover:bg-white/[0.02] transition-colors min-h-[36px]"
+                onClick={() => setGroupAttention((g) => !g)}
+                aria-pressed={groupAttention}
+                data-testid="toggle-group-attention"
+                className="rounded-ds-sm border border-white/[0.08] bg-white/[0.02] px-2.5 py-1 text-[11px] font-medium text-zinc-400 transition-ds duration-ds-fast hover:text-zinc-200"
               >
-                <Icon className="w-4 h-4 text-brass-400 flex-shrink-0" />
-                <span className="flex-1 min-w-0">
-                  <span className="block text-xs font-medium text-white">{a.label}</span>
-                  <span className="block text-[11px] text-zinc-500">{a.count} {a.desc}</span>
-                </span>
-                <ArrowRight
-                  aria-hidden="true"
-                  className={
-                    a.count === 0
-                      ? 'w-3.5 h-3.5 flex-shrink-0 text-zinc-600'
-                      : 'w-3.5 h-3.5 flex-shrink-0 text-brass-400'
-                  }
-                />
+                {groupAttention ? 'Group rows' : 'Flat rows'}
               </button>
-            );
-          })}
-        </div>
-      </DashboardSection>
-<DashboardSection
-        title="Fulfilment in motion"
-        description={
-          shipmentsAll.length > 0
-            ? 'Aggregated live shipments across all carriers.'
-            : 'Accepted and ready-to-fulfil POs awaiting dispatch.'
-        }
-      >
-        {fulfilmentRows.length === 0 ? (
-          <EmptyState
-            title="Nothing in fulfilment right now"
-            description="Accepted and ready-to-fulfil purchase orders will appear here, and shipments once a PO moves into dispatch."
-          />
-        ) : (
-          <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
-            {fulfilmentRows.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
-                <span className="font-mono text-[11px] text-zinc-400 flex-shrink-0">{r.ref}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-medium text-white truncate">{r.title}</span>
-                  <span className="block text-[11px] text-zinc-500 truncate leading-snug">{r.meta}</span>
-                </span>
-                <StatusBadge tone={r.tone} dataStatus={r.tone}>{r.status}</StatusBadge>
-                <Button variant="tertiary" size="sm" onClick={r.onOpen}>
-                  Review <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </DashboardSection>
+              <span className="hidden font-mono text-[10px] text-zinc-600 sm:inline">
+                ⌘K for records and destinations
+              </span>
+            </div>
+          }
+        />
 
-      <DashboardSection
-        title="Recent communications"
-        description="Latest message threads from the shared inbox, newest first."
-        action={
-          recentMessages.length > 0 ? (
-            <Button variant="secondary" size="sm" onClick={go('messages')}>
-              Open Messages <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-            </Button>
-          ) : undefined
-        }
-      >
+        {/* §32 (M13 Phase 11) — the founder's command centre: what needs attention
+            now and the exact next action, with tab-aware CTA routing. */}
+        <CommandCentre onNavigate={onNavigate} />
+
+        {anyError && (
+          <Alert tone="error" title="Some dashboard data is unavailable" className="mt-3">
+            A datasource reported an error; seed data is shown where available. Check Monitoring for
+            integration health.
+          </Alert>
+        )}
+
+        <WorkspaceGrid
+          rail={
+            <>
+              <ContextPanel
+                title="Compliance posture"
+                action={
+                  <Button variant="ghost" size="sm" onClick={go('compliance')}>
+                    Open
+                  </Button>
+                }
+              >
+                {docStatusSegments.length === 0 ? (
+                  <p className="text-xs text-zinc-500">No compliance documents recorded yet.</p>
+                ) : (
+                  <MercentaDoughnut
+                    segments={docStatusSegments}
+                    centerValue={String(docsAll.length)}
+                    centerLabel="documents"
+                    legend
+                    ariaLabel={`Compliance documents by status: ${docStatusSegments
+                      .map((s) => `${s.label} ${s.value}`)
+                      .join(', ')}`}
+                  />
+                )}
+              </ContextPanel>
+
+              <ContextPanel
+                title="Activity"
+                action={
+                  <Button variant="ghost" size="sm" onClick={go('messages')}>
+                    All
+                  </Button>
+                }
+              >
+                <ActivityFeed
+                  entries={recentMessages.slice(0, 5).map((m) => ({
+                    id: m.id,
+                    title: m.subject ?? m.body,
+                    meta: `${brandName.get(m.brandId) ?? m.brandId} · ${m.channel.toUpperCase()}`,
+                    at: m.createdAt,
+                    tone: m.requiresHuman ? 'warning' : 'info',
+                    onOpen: go('messages'),
+                  }))}
+                  empty={<p className="text-xs text-zinc-500">No messages recorded yet.</p>}
+                />
+              </ContextPanel>
+            </>
+          }
+        >
+          <WorkspaceSection
+            title="Portfolio at a glance"
+            description="Derived live from purchase orders, compliance, contracts, support and billing data."
+            domain="orders"
+          >
+            <MetricBand items={kpiTiles} columns={4} />
+          </WorkspaceSection>
+
+          <WorkspaceSection
+            title="Order pipeline"
+            description="Where every purchase order currently sits. Select a stage to open its queue."
+            domain="orders"
+          >
+            <PipelineTrack stages={pipelineStages} onSelect={() => go('purchase_orders_admin')()} />
+          </WorkspaceSection>
+
+          <WorkspaceSection
+            title="Needs your attention"
+            description="Priority-ordered exceptions across the portfolio. Each row routes to the existing destination view."
+            domain="risk"
+            action={
+              activeTickets.length > 0 ? (
+                <Button variant="secondary" size="sm" onClick={go('helpdesk')}>
+                  Open Helpdesk <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              ) : undefined
+            }
+          >
+            {attention.length === 0 ? (
+              <EmptyState
+                title="No open exceptions"
+                description="Purchase orders, compliance documents, contracts, deductions and support tickets are all clear."
+              />
+            ) : (
+              <Queue
+                rows={attention.map((a, i) => ({
+                  id: a.id,
+                  testId: `attention-${a.id}`,
+                  group: groupAttention && a.group !== attention[i - 1]?.group ? a.group : undefined,
+                  status: { tone: a.tone, label: a.statusLabel },
+                  title: a.title,
+                  meta: a.meta,
+                  domain: 'risk',
+                  onOpen: a.onOpen,
+                }))}
+                density={density}
+              />
+            )}
+          </WorkspaceSection>
+
+          <WorkspaceSection
+            title="Next actions"
+            description="Highest-value operator moves, pre-counted from current data."
+            domain="intelligence"
+          >
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {actions.map((a) => {
+                const Icon = a.icon;
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={go(a.id)}
+                    data-testid={`action-${a.id}`}
+                    className="flex min-h-[36px] items-center gap-2.5 rounded-ds-md border border-white/[0.06] bg-ink-850 px-3.5 py-2.5 text-left transition-ds duration-ds-fast hover:border-palette-indigo/50 hover:bg-white/[0.02]"
+                  >
+                    <Icon className="h-4 w-4 flex-shrink-0 text-feature-intel" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-xs font-medium text-white">{a.label}</span>
+                      <span className="block text-[11px] text-zinc-500">
+                        {a.count} {a.desc}
+                      </span>
+                    </span>
+                    <ArrowRight
+                      aria-hidden="true"
+                      className="h-3.5 w-3.5 flex-shrink-0 text-zinc-500"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </WorkspaceSection>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <WorkspaceSection
+              title="Order value by month"
+              description="Real purchase-order value and order count by order date (latest six months)."
+              domain="finance"
+            >
+              {orderValueSeries[0]?.points.length === 0 ? (
+                <EmptyState
+                  title="No dated purchase orders yet"
+                  description="Once purchase orders carry an order date this chart plots real value and volume."
+                />
+              ) : (
+                <div className="px-2 pb-2 pt-3">
+                  <MercentaLineChart
+                    series={orderValueSeries}
+                    height={180}
+                    yFormat={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : String(v))}
+                    ariaLabel={`Purchase order value by month: ${orderValueSeries[0].points
+                      .map((p) => `${p.label} £${p.value}`)
+                      .join(', ')}`}
+                  />
+                </div>
+              )}
+            </WorkspaceSection>
+
+            <WorkspaceSection
+              title="Value by brand"
+              description="Top six brands by purchase-order value — click through to Purchase Orders."
+              domain="catalogue"
+            >
+              {valueByBrand.length === 0 ? (
+                <EmptyState
+                  title="No purchase-order value yet"
+                  description="Brand-level order value appears here as soon as purchase orders exist."
+                />
+              ) : (
+                <div className="px-2 pb-2 pt-3">
+                  <MercentaBars
+                    bars={valueByBrand}
+                    height={180}
+                    paletteIndex={0}
+                    valueFormat={(v) => (v >= 1000 ? `£${Math.round(v / 1000)}k` : `£${v}`)}
+                    ariaLabel={`Purchase order value by brand: ${valueByBrand
+                      .map((b) => `${b.label} £${b.value}`)
+                      .join(', ')}`}
+                  />
+                </div>
+              )}
+            </WorkspaceSection>
+          </div>
+
+          <WorkspaceSection
+            title="Fulfilment in motion"
+            description={
+              shipmentsAll.length > 0
+                ? 'Aggregated live shipments across all carriers.'
+                : 'Accepted and ready-to-fulfil POs awaiting dispatch.'
+            }
+            domain="logistics"
+          >
+            {fulfilmentRows.length === 0 ? (
+              <EmptyState
+                title="Nothing in fulfilment right now"
+                description="Accepted and ready-to-fulfil purchase orders will appear here, and shipments once a PO moves into dispatch."
+              />
+            ) : (
+              <Queue
+                rows={fulfilmentRows.map((r) => ({
+                  id: r.id,
+                  ref: r.ref,
+                  title: r.title,
+                  meta: r.meta,
+                  status: { tone: r.tone, label: r.status },
+                  domain: 'logistics',
+                  onOpen: r.onOpen,
+                }))}
+              />
+            )}
+          </WorkspaceSection>
+
+          <WorkspaceSection
+            title="Recent communications"
+            description="Latest message threads from the shared inbox, newest first."
+            domain="communications"
+            action={
+              recentMessages.length > 0 ? (
+                <Button variant="secondary" size="sm" onClick={go('messages')}>
+                  Open Messages <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              ) : undefined
+            }
+          >
         {recentMessages.length === 0 ? (
           <EmptyState
             title="No recent communications"
             description="New inbound and outbound message threads will appear here as they are logged."
           />
         ) : (
-          <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
-            {recentMessages.map((m) => (
-              <li key={m.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
-                <StatusBadge
-                  tone={m.direction === 'inbound' ? 'info' : 'neutral'}
-                  dataStatus={m.direction}
-                >
-                  {m.channel.toUpperCase()}
-                </StatusBadge>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-medium text-white truncate">{m.subject ?? m.body}</span>
-                  <span className="block text-[11px] text-zinc-500 truncate leading-snug">
-                    {brandName.get(m.brandId) ?? m.brandId} · {m.direction} · {m.createdAt.slice(0, 16).replace('T', ' ')}
-                  </span>
-                </span>
-                {m.requiresHuman && (
-                  <StatusBadge tone="warning" dataStatus="human">Human reply needed</StatusBadge>
-                )}
-                <Button variant="tertiary" size="sm" onClick={go('messages')}>
-                  Open <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </Button>
-              </li>
-            ))}
-          </ul>
+          <Queue
+            rows={recentMessages.map((m) => ({
+              id: m.id,
+              status: {
+                tone: m.requiresHuman ? 'warning' : m.direction === 'inbound' ? 'info' : 'neutral',
+                label: m.requiresHuman ? 'HUMAN REPLY' : m.channel.toUpperCase(),
+              },
+              title: m.subject ?? m.body,
+              meta: `${brandName.get(m.brandId) ?? m.brandId} · ${m.direction} · ${m.createdAt
+                .slice(0, 16)
+                .replace('T', ' ')}`,
+              domain: 'communications',
+              actionLabel: 'Open',
+              onOpen: go('messages'),
+            }))}
+          />
         )}
-      </DashboardSection>
+          </WorkspaceSection>
+        </WorkspaceGrid>
+      </WorkspaceFrame>
     </div>
   );
 }

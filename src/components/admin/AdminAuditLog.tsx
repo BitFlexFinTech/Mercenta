@@ -2,6 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { fetchAuditLog } from '@/data/api';
 import type { AuditLogEntry } from '@/types';
 import { Badge, Card, DataTable, Input } from '@/components/ui';
+import {
+  ContextPanel,
+  MetricBand,
+  RecordFieldList,
+  SegmentedControl,
+  WorkspaceFrame,
+  WorkspaceHeader,
+  type MetricTileData,
+} from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { ScrollText } from 'lucide-react';
 
@@ -17,6 +26,7 @@ export function AdminAuditLog() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
+  const [range, setRange] = useState<'all' | '24h' | '7d'>('all');
 
   useEffect(() => {
     let cancelled = false;
@@ -41,9 +51,14 @@ export function AdminAuditLog() {
   const filtered = useMemo(() => {
     const rows = entries ?? [];
     const q = query.trim().toLowerCase();
+    const cutoff =
+      range === 'all'
+        ? null
+        : Date.now() - (range === '24h' ? 86_400_000 : 7 * 86_400_000);
     return rows.filter(
       (e) =>
         (actionFilter === 'all' || e.action === actionFilter) &&
+        (cutoff === null || new Date(e.createdAt).getTime() >= cutoff) &&
         (q === '' ||
           e.actorId.toLowerCase().includes(q) ||
           e.action.toLowerCase().includes(q) ||
@@ -51,7 +66,72 @@ export function AdminAuditLog() {
           e.entityId.toLowerCase().includes(q) ||
           e.reason.toLowerCase().includes(q))
     );
-  }, [entries, query, actionFilter]);
+  }, [entries, query, actionFilter, range]);
+
+  /* §Sprint — real drill-down metrics over the SAME fetched entries. */
+  const metrics: MetricTileData[] = useMemo(() => {
+    const rows = entries ?? [];
+    const day = Date.now() - 86_400_000;
+    const recent = rows.filter((e) => new Date(e.createdAt).getTime() >= day).length;
+    const brandsTouched = new Set(rows.map((e) => e.brandId).filter(Boolean)).size;
+    const topAction = Object.entries(
+      rows.reduce<Record<string, number>>((acc, e) => {
+        acc[e.action] = (acc[e.action] ?? 0) + 1;
+        return acc;
+      }, {})
+    ).sort((a, b) => b[1] - a[1])[0];
+    return [
+      {
+        id: 'audit-total',
+        label: 'Audit entries',
+        value: String(rows.length),
+        size: 'hero',
+        tone: 'info',
+        statusText: `${actions.length} distinct actions`,
+        context: 'Every significant action, one immutable record',
+        domain: 'catalogue',
+        onOpen: () => {
+          setRange('all');
+          setActionFilter('all');
+          setQuery('');
+        },
+        testId: 'audit-metric-total',
+      },
+      {
+        id: 'audit-recent',
+        label: 'Last 24 hours',
+        value: String(recent),
+        tone: recent > 0 ? 'warning' : 'success',
+        statusText: recent > 0 ? 'Recent activity' : 'Quiet',
+        context: 'Entries recorded in the last day',
+        domain: 'finance',
+        onOpen: () => setRange('24h'),
+        testId: 'audit-metric-recent',
+      },
+      {
+        id: 'audit-brands',
+        label: 'Brands touched',
+        value: String(brandsTouched),
+        tone: 'neutral',
+        statusText: 'Tenant-scoped records',
+        context: 'Distinct brands referenced by these entries',
+        domain: 'compliance',
+        onOpen: () => setRange('all'),
+        testId: 'audit-metric-brands',
+      },
+      {
+        id: 'audit-top-action',
+        label: 'Most frequent action',
+        value: topAction ? String(topAction[1]) : '0',
+        tone: 'neutral',
+        statusText: topAction ? topAction[0] : 'No entries',
+        context: 'Drill down to that action',
+        domain: 'logistics',
+        onOpen: () => topAction && setActionFilter(topAction[0]),
+        testId: 'audit-metric-top-action',
+      },
+    ];
+  }, [entries, actions]);
 
   if (loadError) {
     return (
@@ -64,39 +144,64 @@ export function AdminAuditLog() {
   }
 
   return (
-    <div className="p-6 space-y-4 max-w-[1100px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center">
-          <ScrollText className="w-5 h-5 text-brass-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Admin Audit Log</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Who did what, when — every significant admin action, one immutable record
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="Admin Hub · Governance"
+        title="Admin Audit Log"
+        description="Who did what, when — every significant admin action in one immutable record, searchable by actor, action, brand, entity and reason."
+        meta={
+          <>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {entries === null ? 'Loading…' : `${entries.length} entries`}
+            </span>
+            <span className="font-mono text-[11px] text-zinc-500">
+              {actions.length} distinct actions
+            </span>
+          </>
+        }
+        actions={
+          <div className="flex items-center gap-2">
+            <ScrollText className="h-4 w-4 text-brass-400" aria-hidden="true" />
+          </div>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              label=""
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search actor, action, brand, entity, reason…"
+            />
+            <select
+              value={actionFilter}
+              onChange={(e) => setActionFilter(e.target.value)}
+              aria-label="Action filter"
+              data-testid="audit-action-filter"
+              className="cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
+            >
+              <option value="all">Action: all</option>
+              {actions.map((a) => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
+            <SegmentedControl
+              ariaLabel="Audit range"
+              active={range}
+              onSelect={(v) => setRange(v as 'all' | '24h' | '7d')}
+              items={[
+                { id: 'all', label: 'All time' },
+                { id: '24h', label: '24h' },
+                { id: '7d', label: '7 days' },
+              ]}
+            />
+          </div>
+        }
+      />
 
-      <Card>
-        <div className="flex flex-col sm:flex-row gap-2 px-1 pb-1">
-          <Input
-            label=""
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search actor, action, brand, entity, reason…"
-          />
-          <select
-            value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value)}
-            className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-zinc-300 cursor-pointer"
-          >
-            <option value="all">Action: all</option>
-            {actions.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
-        </div>
+      <MetricBand items={metrics} columns={4} loading={entries === null} />
 
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <Card>
         {/* §Phase D — canonical DataTable: real loading skeletons, labelled
             cards below md (actor/entity/reason all reachable), table at md+. */}
         <DataTable
@@ -155,7 +260,27 @@ export function AdminAuditLog() {
             Showing {filtered.length} of {entries.length} entries.
           </p>
         )}
-      </Card>
-    </div>
+        </Card>
+        <div className="space-y-3">
+          <ContextPanel title="What this log is">
+            <p className="text-[11px] leading-snug text-zinc-400">
+              Every significant action — admin overrides, CRM activity, compliance review, payout
+              approval, work-layer resolution — lands here with actor, action, entity, tenant and
+              reason. History is never destroyed: an override adds a record, it never edits one.
+            </p>
+          </ContextPanel>
+          <ContextPanel title="Current view">
+            <RecordFieldList
+              fields={[
+                { label: 'Action filter', value: actionFilter },
+                { label: 'Range', value: range === 'all' ? 'All time' : range },
+                { label: 'Search', value: query.trim() === '' ? '(none)' : query.trim() },
+                { label: 'Rows shown', value: `${filtered.length} of ${entries?.length ?? 0}` },
+              ]}
+            />
+          </ContextPanel>
+        </div>
+      </div>
+    </WorkspaceFrame>
   );
 }

@@ -31,13 +31,13 @@ export interface ResellerTrackerReport {
 }
 
 const MOCK_DATA: Record<string, ResellerListing[]> = {
-  'Zambezi Organic Extracts': [
-    { asin: 'B0EXAMPLE01', productTitle: 'Marula Oil 100ml', brandPrice: 24.99, lowestResellerPrice: 18.50, priceGap: 6.49, estimatedMonthlySales: 500, resellerCount: 4, riskLevel: 'high' },
-    { asin: 'B0EXAMPLE02', productTitle: 'Baobab Serum 50ml', brandPrice: 34.99, lowestResellerPrice: 32.00, priceGap: 2.99, estimatedMonthlySales: 300, resellerCount: 2, riskLevel: 'medium' },
-    { asin: 'B0EXAMPLE03', productTitle: 'Shea Butter 200g', brandPrice: 14.99, lowestResellerPrice: 14.50, priceGap: 0.49, estimatedMonthlySales: 800, resellerCount: 1, riskLevel: 'low' },
+  'Astonish': [
+    { asin: 'B0EXAMPLE01', productTitle: 'Daily Moisturiser 100ml', brandPrice: 24.99, lowestResellerPrice: 18.50, priceGap: 6.49, estimatedMonthlySales: 500, resellerCount: 4, riskLevel: 'high' },
+    { asin: 'B0EXAMPLE02', productTitle: 'Facial Serum 50ml', brandPrice: 34.99, lowestResellerPrice: 32.00, priceGap: 2.99, estimatedMonthlySales: 300, resellerCount: 2, riskLevel: 'medium' },
+    { asin: 'B0EXAMPLE03', productTitle: 'Beard Balm 200g', brandPrice: 14.99, lowestResellerPrice: 14.50, priceGap: 0.49, estimatedMonthlySales: 800, resellerCount: 1, riskLevel: 'low' },
   ],
-  'Harvest Lane Organics': [
-    { asin: 'B0EXAMPLE04', productTitle: 'Organic Honey 500g', brandPrice: 12.99, lowestResellerPrice: 9.99, priceGap: 3.00, estimatedMonthlySales: 1200, resellerCount: 6, riskLevel: 'high' },
+  'Regatta': [
+    { asin: 'B0EXAMPLE04', productTitle: 'Outdoor jacket line', brandPrice: 12.99, lowestResellerPrice: 9.99, priceGap: 3.00, estimatedMonthlySales: 1200, resellerCount: 6, riskLevel: 'high' },
   ],
 };
 

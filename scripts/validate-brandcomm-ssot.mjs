@@ -43,10 +43,13 @@ try {
   // Diacritics are normalised, NOT silently dropped (the old [^a-z] strip).
   test('diacritics are normalised not dropped', normalizeBrandKey('Tapatío') !== 'tapato');
 
-  // ASCII behaviour is unchanged (regression).
-  test('ASCII brand behaviour unchanged',
-    normalizeBrandKey('Zambezi Organic Extracts Ltd') === 'zambeziorganicextractsltd' &&
-    brandInboxAddress('Zambezi Organic Extracts Ltd') === 'hello@zambeziorganicextractsltd.example');
+  // §Phase 4 — the canonical 20-brand universe means keys derive from the
+  // real brand names. ASCII behaviour is unchanged (pure key derivation);
+  // 'Astonish' now resolves canonically to itself (previously the invented
+  // 'Zambezi Organic Extracts Ltd' tenant).
+  test('ASCII brand behaviour unchanged (canonical derivations)',
+    normalizeBrandKey('Astonish') === 'astonish' &&
+    brandInboxAddress('Astonish') === 'hello@astonish.example');
 
   // No second normalisation function in the comm layer.
   const brandCommSrc = read('src/components/shared/BrandComm.tsx');

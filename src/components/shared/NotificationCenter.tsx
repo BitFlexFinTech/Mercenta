@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
 import {
   AlertTriangle,
@@ -7,6 +7,7 @@ import {
   FileWarning,
   Gavel,
   Inbox,
+  ListChecks,
   RefreshCcw,
   Truck,
 } from 'lucide-react';
@@ -24,6 +25,8 @@ import {
 } from '@/data/queries';
 import { isBorderline } from '@/lib/automation/scoringBridge';
 import { renewalUrgency } from '@/lib/contracts';
+import { useWorkItems } from '@/lib/work/useWork';
+import { WORK_SOURCE_LABELS } from '@/lib/work/workStore';
 
 /**
  * §Stage-19.3 — In-app notification center.
@@ -44,7 +47,7 @@ function useTenantScope(): string | null {
 
 export interface NotificationItem {
   id: string;
-  kind: 'po' | 'contract' | 'compliance' | 'deduction' | 'score' | 'submission' | 'shipment' | 'commerce';
+  kind: 'po' | 'contract' | 'compliance' | 'deduction' | 'score' | 'submission' | 'shipment' | 'commerce' | 'work';
   title: string;
   detail: string;
   severity: 'high' | 'medium';
@@ -152,6 +155,10 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
   const complianceDocs = inScope(useComplianceDocuments().data?.data ?? []);
   const shipments = inScope(useShipmentsAll().data?.data ?? []);
 
+  /* §Sprint — the canonical work layer, scoped by the session's own tier. */
+  const workScope: 'admin' | 'brand' = isBrandSession ? 'brand' : 'admin';
+  const workItems = useWorkItems(workScope, tenantId);
+
   /**
    * §Phase E5 (G7) — canonical operational-commerce items.
    *
@@ -246,8 +253,36 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           severity: 'medium' as const,
           navTarget: commerceTarget,
         }))
+    )
+    .concat(
+      /**
+       * §Sprint — the canonical WORK layer. Only the sources NOT already surfaced
+       * by another kind are included, so nothing is double-counted. Because the
+       * list comes from `getWorkItems` (which excludes resolved items), completing
+       * the action — or resolving the item — REMOVES the notification. That is the
+       * reminder-stops-on-resolution rule, enforced by the store rather than by a
+       * second, drifting list here.
+       */
+      workItems
+        .filter((w) => WORK_NOTIFY_SOURCES.has(w.source))
+        .map((w) => ({
+          id: `work-${w.id}`,
+          kind: 'work' as const,
+          title: w.title,
+          detail: `${w.detail} · ${WORK_SOURCE_LABELS[w.source]}${w.dueDate ? ` · due ${w.dueDate}` : ''}`,
+          severity: w.priority === 'critical' ? ('high' as const) : ('medium' as const),
+          navTarget: workScope === 'brand' ? 'work' : 'work',
+        }))
     );
 }
+
+/** Work sources that no other notification kind already covers. */
+const WORK_NOTIFY_SOURCES = new Set<string>([
+  'shipment_exception',
+  'return_action',
+  'outreach_followup',
+  'manual',
+]);
 
 const KIND_ICON = {
   po: Inbox,
@@ -258,6 +293,19 @@ const KIND_ICON = {
   submission: FileWarning,
   shipment: Truck,
   commerce: CreditCard,
+  work: ListChecks,
+} as const;
+
+/**
+ * §UI/UX Wave 1 — severity presentation. The underlying event data is
+ * unchanged; only the visual expression is severity-driven:
+ *   high   → critical (red)
+ *   medium → warning  (yellow)
+ *   none   → success  (green "all clear")
+ */
+const SEVERITY_TONE = {
+  high: 'critical',
+  medium: 'warning',
 } as const;
 
 export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string) => void }) {
@@ -268,6 +316,17 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
   // Both halves read the same event stream the daily digest batches.
   const items = [...useNotifications(), ...useNotificationsRest(brandName)];
   const highCount = items.filter((i) => i.severity === 'high').length;
+  const mediumCount = items.length - highCount;
+
+  // §UI/UX — Escape closes the popover (parity with the shell drawer).
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
 
   function handleClick(n: NotificationItem) {
     setOpen(false);
@@ -276,19 +335,33 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
     }
   }
 
+  const ariaSummary = items.length === 0
+    ? 'Notifications — all clear'
+    : `Notifications — ${highCount} critical, ${mediumCount} follow-up`;
+
   return (
-    <div className="relative">
+    <div className="relative" data-testid="notification-center">
       <button
-        className="relative p-1.5 text-zinc-500 hover:text-white transition-colors"
+        type="button"
+        className={cn(
+          'relative p-1.5 rounded-ds-md transition-colors',
+          items.length === 0
+            ? 'text-zinc-500 hover:text-zinc-300'
+            : highCount > 0
+              ? 'text-state-critical'
+              : 'text-state-warning'
+        )}
         onClick={() => setOpen((o) => !o)}
-        aria-label={`Notifications — ${items.length} items need attention`}
+        aria-expanded={open}
+        aria-controls="notification-panel"
+        aria-label={ariaSummary}
       >
-        <Bell className="w-4 h-4" />
+        <Bell className="w-4 h-4" aria-hidden="true" />
         {items.length > 0 && (
           <span
             className={cn(
               'absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] rounded-full text-[8px] font-bold flex items-center justify-center px-0.5',
-              highCount > 0 ? 'bg-red-500 text-white' : 'bg-brass-500 text-black'
+              highCount > 0 ? 'bg-state-critical text-white' : 'bg-state-warning text-white'
             )}
           >
             {items.length}
@@ -298,34 +371,60 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-9 z-50 w-[380px] bg-ink-900 border border-white/[0.08] rounded-xl shadow-xl overflow-hidden">
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
+          <div
+            id="notification-panel"
+            role="dialog"
+            aria-label={ariaSummary}
+            className="absolute right-0 top-9 z-50 w-[380px] bg-ink-900 border border-white/[0.08] rounded-xl shadow-xl overflow-hidden"
+          >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
               <span className="text-xs font-semibold text-white">Needs attention</span>
-              <span className="text-[10px] text-zinc-500">
-                {items.length} item{items.length === 1 ? '' : 's'} · {highCount} high priority
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border',
+                  items.length === 0
+                    ? 'bg-state-success/10 border-state-success/20 text-state-success'
+                    : highCount > 0
+                      ? 'bg-state-critical/10 border-state-critical/20 text-state-critical'
+                      : 'bg-state-warning/10 border-state-warning/20 text-state-warning'
+                )}
+              >
+                {items.length === 0
+                  ? 'All clear'
+                  : `${highCount} critical · ${mediumCount} follow-up`}
               </span>
             </div>
-            <div className="max-h-[420px] overflow-y-auto divide-y divide-white/[0.04]">
+            <div className="max-h-[420px] overflow-y-auto divide-y divide-white/[0.04]" data-testid="notification-list">
               {items.length === 0 && (
                 <p className="text-xs text-zinc-600 text-center py-8">
-                  Nothing needs attention right now.
+                  No open exceptions across the portfolio. Everything is being tracked.
                 </p>
               )}
               {items.map((n) => {
                 const Icon = KIND_ICON[n.kind];
+                const tone = SEVERITY_TONE[n.severity];
                 return (
-                  <button key={n.id} onClick={() => handleClick(n)} className="w-full flex items-start gap-2.5 px-4 py-2.5 hover:bg-white/[0.04] text-left transition-colors">
-                    <Icon
+                  <button
+                    key={n.id}
+                    onClick={() => handleClick(n)}
+                    data-severity={tone}
+                    data-notification={n.kind}
+                    className="w-full flex items-start gap-2.5 px-4 py-2.5 hover:bg-white/[0.05] text-left transition-colors"
+                  >
+                    <span
+                      aria-hidden="true"
                       className={cn(
-                        'w-3.5 h-3.5 mt-0.5 flex-shrink-0',
-                        n.severity === 'high' ? 'text-red-400' : 'text-amber-400'
+                        'mt-0.5 w-4 h-4 rounded-full flex items-center justify-center',
+                        tone === 'critical' ? 'bg-state-critical/10 text-state-critical' : 'bg-state-warning/10 text-state-warning'
                       )}
-                    />
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-medium text-white leading-snug">{n.title}</div>
-                      <div className="text-[10px] text-zinc-500 truncate">{n.detail}</div>
-                    </div>
+                    >
+                      <Icon className="w-3 h-3" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[11px] font-medium text-white leading-snug">{n.title}</span>
+                      <span className="block text-[10px] text-zinc-500 truncate">{n.detail}</span>
+                    </span>
                   </button>
                 );
               })}

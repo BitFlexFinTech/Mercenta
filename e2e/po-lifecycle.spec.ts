@@ -1,7 +1,7 @@
 /**
  * Phase 7D - PO Lifecycle tests.
  *
- * DeskForge (onboarded) owns PO-9002 (received) and PO-9003 (accepted), so the
+ * Tapatío (onboarded) owns PO-9002 (received) and PO-9003 (accepted), so the
  * acknowledgment workflow is exercised with the real per-line panel:
  * Acknowledge -> set per-line state (accept / reject + code / backorder +
  * ship date) -> Submit acknowledgment -> the store validates quantities.
@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
 
 async function deskForgePO(page: any) {
-  await loginAs(page, 'DeskForge Supplies Inc', 1100);
+  await loginAs(page, 'Tapatío', 1100);
   const ob = page.locator('text=Onboarding').first();
   if (await ob.isVisible({ timeout: 1500 }).catch(() => false)) {
     await ob.click();

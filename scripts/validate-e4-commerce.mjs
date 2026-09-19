@@ -113,9 +113,9 @@ try {
   const integrations = await server.ssrLoadModule('/src/integrations/types.ts');
   const tickets = await server.ssrLoadModule('/src/lib/helpdesk/ticketStore.ts');
 
-  const ZAMBEZI = 'brand-zambezi';     // cleared compliance gate
-  const DESKFORGE = 'brand-deskforge'; // cleared compliance gate
-  const NORDHAUS = 'brand-nordhaus';   // gate still blocked
+  const ZAMBEZI = 'brand-astonish';     // cleared compliance gate
+  const DESKFORGE = 'brand-tapatio'; // cleared compliance gate
+  const NORDHAUS = 'brand-seep';   // gate still blocked
 
   const zambeziActor = { staffId: `brand:${ZAMBEZI}`, canMutate: true, tenantId: ZAMBEZI };
   const deskforgeActor = { staffId: `brand:${DESKFORGE}`, canMutate: true, tenantId: DESKFORGE };
@@ -249,11 +249,11 @@ try {
   const created = await commerce.createCommercePurchaseOrder(ZAMBEZI, ELIGIBLE_SKU, 250, zambeziActor);
   const poId = created.ok ? created.value.id : '';
   test('D1 an ELIGIBLE product raises a SIMULATED purchase order', created.ok === true && created.value.status === 'received');
-  test('D2 the PO id is DETERMINISTIC (po-sim-<tenant>-<productId>)', /^po-sim-brand-zambezi-/.test(poId));
+  test('D2 the PO id is DETERMINISTIC (po-sim-<tenant>-<productId>)', /^po-sim-brand-astonish-/.test(poId));
   test('D3 the PO carries EXPLICIT simulation provenance', created.ok === true && created.value.mode === 'simulation' && created.value.simulated === true);
   test('D4 the PO is linked to the canonical brand AND the canonical product',
     created.ok === true && created.value.brandId === ZAMBEZI && !!created.value.originProductId);
-  test('D5 the PO number is deterministic from the canonical keys', created.ok === true && /^PO-SIM-BRAND-ZAMBEZI-/.test(created.value.poNumber));
+  test('D5 the PO number is deterministic from the canonical keys', created.ok === true && /^PO-SIM-BRAND-ASTONISH-/.test(created.value.poNumber));
   test('D6 the PO is tenant-scoped and auditable (an activity + an audit entry exist)',
     store.getCommerceActivitiesForBrand(ZAMBEZI).some((a) => a.type === 'po_created' && a.purchaseOrderId === poId) &&
     store.demoAuditLog.some((e) => e.entityType === 'commerce' && e.action === 'commerce_po_created'));

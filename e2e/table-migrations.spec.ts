@@ -35,7 +35,7 @@ test.describe('Phase D — migrated operational tables', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+    await loginAs(page, 'Astonish', 1100);
     await openNav(page, 'Product Catalog');
 
     const cards = page.locator('ul[aria-label="Product catalogue"]');

@@ -38,7 +38,7 @@ test.describe('Domain Acceptance Gate', () => {
     await openNav(page, 'Overview');
     await expect(page.locator('text=POs awaiting action').first()).toBeVisible({ timeout: 6000 });
     await openNav(page, 'Brand CRM');
-    await expect(page.locator('text=Zambezi Organic Extracts Ltd').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Astonish').first()).toBeVisible({ timeout: 5000 });
   });
 
   test('2. Brand Intelligence — canonical dataset, scoring KPIs, search, drill-down', async ({ page }) => {
@@ -119,10 +119,10 @@ test.describe('Domain Acceptance Gate', () => {
   test('4. ONE canonical conversation — Helpdesk reply is the same Messages thread', async ({ page }) => {
     await loginAs(page, 'Mercenta Admin Hub', 1200);
     await openNav(page, 'Helpdesk');
-    // tkt-001 (Zambezi live-chat) is selected by default; its thread pulls the
-    // canonical message bodies for msg-015/016/017.
-    await expect(page.locator('text=Zambezi — PO dispatch query').first()).toBeVisible({ timeout: 6000 });
-    await expect(page.locator('text=When will my Marula Oil PO be dispatched?').first()).toBeVisible();
+    // tkt-001 (Astonish live-chat) is selected by default; its thread pulls the
+    // canonical message bodies (msg-brand-astonish-1/-2 from DEMO_MESSAGES).
+    await expect(page.locator('text=Astonish — PO dispatch query').first()).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('text=Thanks — can we talk about pricing and the first purchase order this week?').first()).toBeVisible();
     // Log a staff reply through the canonical logMessage pipeline.
     const probe = `Phase1 canonical-store probe ${Date.now()}`;
     await page.locator('textarea[placeholder="Type a reply…"]').fill(probe);
@@ -130,7 +130,7 @@ test.describe('Domain Acceptance Gate', () => {
     await expect(page.locator('text=Reply sent.').first()).toBeVisible({ timeout: 4000 });
     // The SAME conversation is visible under Messages (admin) — no duplication.
     await openNav(page, 'Messages');
-    await page.locator('button:has-text("Zambezi Organic Extracts Ltd")').first().click();
+    await page.locator('button:has-text("Astonish")').first().click();
     await page.waitForTimeout(500);
     await expect(page.locator('text=' + probe).first()).toBeVisible({ timeout: 5000 });
   });
@@ -138,20 +138,20 @@ test.describe('Domain Acceptance Gate', () => {
   test('5. Helpdesk lifecycle — real status transition is audited', async ({ page }) => {
     await loginAs(page, 'Super Admin — Tadii', 1200);
     await openNav(page, 'Helpdesk');
-    // Open the Nordhaus ticket and resolve it via the real store mutation.
-    await page.locator('button:has-text("Nordhaus Living ApS")').first().click();
+    // Open the Seep ticket and resolve it via the real store mutation.
+    await page.locator('button:has-text("Seep")').first().click();
     await page.waitForTimeout(400);
     const statusSelect = page.locator('select').filter({ has: page.locator('option', { hasText: 'Open' }) }).first();
     await statusSelect.selectOption('resolved');
     // The ticket row reflects the new status.
-    await expect(page.locator('button:has-text("Nordhaus Living ApS")').first()).toContainText('resolved', { timeout: 5000 });
+    await expect(page.locator('button:has-text("Seep")').first()).toContainText('resolved', { timeout: 5000 });
     // The transition was audited (ticket_status_changed exists in the registry).
     await openNav(page, 'Audit Log');
     await expect(page.locator('option', { hasText: 'ticket_status_changed' })).toHaveCount(1, { timeout: 6000 });
   });
 
   test('6. Reload semantics — deterministic re-bootstrap; session resets per in-memory contract', async ({ page }) => {
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1200);
+    await loginAs(page, 'Astonish', 1200);
     await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 6000 });
     await expect(page.locator('text=Active purchase orders').first()).toBeVisible({ timeout: 5000 });
     const productsHint = page.locator('text=/products listed/').first();
@@ -164,7 +164,7 @@ test.describe('Domain Acceptance Gate', () => {
     await page.waitForTimeout(1000);
     await expect(page.locator('text=Partner Login').first()).toBeVisible({ timeout: 6000 });
     // Logging in again re-bootstraps the deterministic canonical dataset.
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1200);
+    await loginAs(page, 'Astonish', 1200);
     await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 6000 });
     const after = (await page.locator('text=/products listed/').first().textContent()) ?? '';
     expect(after).toBe(before);

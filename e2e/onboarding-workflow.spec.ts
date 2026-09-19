@@ -141,7 +141,7 @@ test.describe('Onboarding workflow (Phase E2)', () => {
 
     // A brand session has no onboarding-pipeline surface at all.
     await backHomeAndOpenLogin(page);
-    await page.click('text=Little Kiwi Baby Co');
+    await page.click('text=Kit & Kin');
     await page.waitForTimeout(1200);
     await expect(navButtonExact(page, 'Onboarding')).toHaveCount(0);
     await expect(page.locator('[data-section="onboarding-pipeline"]')).toHaveCount(0);

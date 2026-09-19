@@ -89,7 +89,7 @@ async function run(){
 
   // 3. BRAND PORTAL
   console.log('\n=== BRAND PORTAL ===');
-  const fb=page.locator('text=Zambezi Organic').first();
+  const fb=page.locator('text=Astonish Organic').first();
   if(await fb.isVisible({timeout:2000}).catch(()=>false)){
     await fb.click();await page.waitForTimeout(2000);
     await shot(page,'03-brand','brand-dashboard-desktop-lg',false);
@@ -174,7 +174,7 @@ async function run(){
   console.log('\n=== NOTIFICATIONS ===');
   const bl2=page.locator('text=Back to Login').first();
   if(await bl2.isVisible({timeout:1500}).catch(()=>false)){await bl2.click();await page.waitForTimeout(1000);}
-  const zb=page.locator('text=Zambezi Organic').first();
+  const zb=page.locator('text=Astonish Organic').first();
   if(await zb.isVisible({timeout:2000}).catch(()=>false)){
     await zb.click();await page.waitForTimeout(2000);
     const nb=page.locator('[class*="bell"],[class*="notification"],[class*="Notif"]').first();

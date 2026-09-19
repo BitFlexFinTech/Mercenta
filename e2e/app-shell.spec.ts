@@ -52,7 +52,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
   });
 
   test('Brand — grouped IA renders with brand sections', async ({ page }) => {
-    await loginAs(page, 'DeskForge Supplies Inc');
+    await loginAs(page, 'Tapatío');
     const nav = page.locator('nav[aria-label="Primary"]');
     for (const heading of ['Overview', 'Catalogue', 'Commerce', 'Logistics', 'Compliance', 'Insights', 'Account']) {
       await expect(nav.locator(`text=${heading}`).first()).toBeVisible();
@@ -115,7 +115,7 @@ test.describe('App Shell — active state, breadcrumbs, grouping', () => {
   });
 
   test('Brand — Dashboard active by default with Overview breadcrumb', async ({ page }) => {
-    await loginAs(page, 'DeskForge Supplies Inc');
+    await loginAs(page, 'Tapatío');
     const nav = page.locator('nav[aria-label="Primary"]');
     const active = nav.locator('[aria-current="page"]');
     await expect(active).toHaveCount(1);
@@ -137,7 +137,7 @@ test.describe('App Shell — RBAC navigation', () => {
   });
 
   test('Brand — admin-only views hidden; render-side auth intact', async ({ page }) => {
-    await loginAs(page, 'DeskForge Supplies Inc');
+    await loginAs(page, 'Tapatío');
     const nav = page.locator('nav[aria-label="Primary"]');
     await expect(nav.locator('text=Audit Log')).toHaveCount(0);
     await expect(nav.locator('text=Super Admin')).toHaveCount(0);

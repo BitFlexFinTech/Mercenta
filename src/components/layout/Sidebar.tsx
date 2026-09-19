@@ -1,19 +1,36 @@
-import { type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
+import { Avatar } from '@/components/shared/Avatar';
+import { DOMAIN_COLOURS, sectionDomain } from '@/config/themes';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
+import { ChevronDown, Pin, PanelLeftClose, PanelLeft } from 'lucide-react';
 
 /**
- * §Phase 6 — grouped navigation model.
- * A flat nav list has been replaced with explicit sections. Section items
- * keep the exact same view ids/targets as before; sections are pure
- * presentation grouping so navigation behavior and RBAC are unchanged.
+ * §Phase 6 §UI/UX Wave 2 — grouped navigation model with SATURATED feature
+ * identity. Section items keep the exact same view ids/targets as before;
+ * sections are pure presentation grouping so navigation behaviour and RBAC are
+ * unchanged.
+ *
+ * Wave 2 adds, all presentation-only:
+ *  - solid saturated section identity resolved once from `sectionDomain`
+ *    (src/config/themes.ts) instead of a per-label string heuristic;
+ *  - optional per-item attention counts (`badge`) supplied by the shell from
+ *    data that shell's role is already entitled to see;
+ *  - collapsible sections (expanded by default) and pinning, both stored as
+ *    user preferences in localStorage;
+ *  - an opt-in compact rail (`compact`). Compact mode is an explicit user
+ *    preference, never breakpoint-forced, so navigation labels stay available
+ *    to assistive technology and to the role-specific navigation contract at
+ *    every desktop width.
  */
 export interface NavItem {
   id: string;
   label: string;
   icon: ReactNode;
   tourAttr?: string;
+  /** Optional outstanding-work count (numeric pill + accessible label). */
+  badge?: number;
 }
 
 export interface NavSection {
@@ -27,107 +44,286 @@ interface SidebarProps {
   activeView: string;
   setActiveView: (v: string) => void;
   userName: string;
+  userEmail?: string;
   themeAccent?: string;
+  /** Icon-only rail. Opt-in user preference (never breakpoint-forced). */
+  compact?: boolean;
+  onToggleCompact?: () => void;
+  /** Optional footer slot (kept for shell-level affordances). */
+  footer?: ReactNode;
 }
+
+/** §UI/UX Wave 2 — solid saturated section colour, resolved from one source. */
+function sectionAccentVar(label: string): string {
+  return DOMAIN_COLOURS[sectionDomain(label)].solid;
+}
+
+const PIN_KEY = 'mercenta.nav.pinned';
+const COLLAPSED_KEY = 'mercenta.nav.collapsed';
+
+function readList(key: string): string[] {
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (raw) return JSON.parse(raw) as string[];
+  } catch {
+    /* storage unavailable (private mode) — fall back to empty preference */
+  }
+  return [];
+}
+
 
 export function Sidebar({
   sections,
   activeView,
   setActiveView,
   userName,
-  themeAccent = '#A855F7',
+  userEmail,
+  compact = false,
+  onToggleCompact,
+  footer,
 }: SidebarProps) {
-  const { environment } = useApp();
+  const { environment, session, brandProfile, actingStaff } = useApp();
+  /** §UI/UX Wave 2 — user preferences (presentation only). */
+  const [pinned, setPinned] = useState<string[]>(() => readList(PIN_KEY));
+  const [collapsed, setCollapsed] = useState<string[]>(() => readList(COLLAPSED_KEY));
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(PIN_KEY, JSON.stringify(pinned));
+    } catch {
+      /* non-fatal */
+    }
+  }, [pinned]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsed));
+    } catch {
+      /* non-fatal */
+    }
+  }, [collapsed]);
+
+  const togglePin = (id: string) =>
+    setPinned((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.concat([id])));
+
+  const toggleSection = (label: string) =>
+    setCollapsed((c) => (c.includes(label) ? c.filter((x) => x !== label) : c.concat([label])));
 
   const envLabel =
     environment === 'brand'
       ? 'Brand Portal'
       : environment === 'admin'
-      ? 'Admin Hub'
-      : 'Carrier View';
+        ? 'Admin Hub'
+        : 'Carrier View';
+
+  /** Avatar identity derived exactly like Header's session identity. */
+  const avatarEmail =
+    environment === 'brand'
+      ? brandProfile.email || undefined
+      : environment === 'admin'
+        ? actingStaff?.email || userEmail
+        : userEmail;
 
   return (
     <aside
       id="app-sidebar"
       aria-label="Primary"
-      className="flex h-full w-full flex-col bg-ink-900"
+      data-nav-compact={compact ? 'true' : 'false'}
+      className="flex h-full w-full flex-col border-r border-white/[0.06] bg-ink-900"
     >
-      <div className="border-b border-white/[0.06] px-5 pb-5 pt-5">
+      {/* Brand block + rail controls */}
+      <div className="border-b border-white/[0.06] px-3 py-3">
         <div className="flex items-center gap-2.5">
           <img
             src={brandMark}
             alt="Mercenta Partners hexagon mark"
-            className="w-8 h-8"
+            className="h-8 w-8 flex-shrink-0"
           />
-          <div>
-            <div className="text-sm font-semibold text-white tracking-tight">
-              Mercenta
+          {!compact && (
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold tracking-tight text-white">Mercenta</div>
+              <div className="truncate text-[10px] uppercase tracking-wider text-zinc-500">
+                {envLabel}
+              </div>
             </div>
-            <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
-              {envLabel}
-            </div>
-          </div>
+          )}
+          {onToggleCompact && (
+            <button
+              type="button"
+              onClick={onToggleCompact}
+              aria-label={compact ? 'Expand navigation' : 'Collapse navigation'}
+              aria-pressed={compact}
+              data-testid="nav-compact-toggle"
+              className="flex-shrink-0 rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-zinc-200"
+            >
+              {compact ? (
+                <PanelLeft className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Primary navigation */}
       <nav aria-label="Primary" className="flex-1 overflow-y-auto px-2 py-2">
-        {sections.map((section) => (
-          <div key={section.label}>
-            {section.label && (
-              <p className="mb-1 mt-1 px-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                {section.label}
-              </p>
-            )}
-            <ul className="flex flex-col gap-1">
-              {section.items.map((item) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    onClick={() => setActiveView(item.id)}
-                    data-tour={item.tourAttr}
-                    data-state={activeView === item.id ? 'active' : 'idle'}
-                    aria-current={activeView === item.id ? 'page' : undefined}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-ds-md px-3 py-2 text-sm transition-ds',
-                      activeView === item.id
-                        ? 'bg-white/[0.08] text-white'
-                        : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-300'
-                    )}
-                  >
+        {sections.map((section) => {
+          const accent = sectionAccentVar(section.label);
+          const isCollapsed = section.label ? collapsed.includes(section.label) : false;
+          /**
+           * §UI/UX Wave 2 — pinned destinations sort FIRST inside their own
+           * section, so a destination is never duplicated (no second
+           * aria-current, no ambiguous nav target).
+           */
+          const ordered = [...section.items].sort((a, b) => {
+            const pa = pinned.includes(a.id) ? 0 : 1;
+            const pb = pinned.includes(b.id) ? 0 : 1;
+            return pa - pb;
+          });
+          const sectionBadge = section.items.reduce((a, i) => a + (i.badge ?? 0), 0);
+          return (
+            <div key={section.label} className="mb-0.5">
+              {section.label && (
+                <div className="flex items-center gap-1">
+                  <p className="mb-1 mt-1 min-w-0 flex-1 truncate px-2 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+                    {section.label}
+                  </p>
+                  {!compact && sectionBadge > 0 && (
                     <span
-                      className={cn(
-                        'flex-shrink-0 h-4 w-4',
-                        activeView === item.id ? 'text-white' : 'text-zinc-600'
-                      )}
-                      style={activeView === item.id ? { color: themeAccent } : {}}
+                      aria-hidden="true"
+                      className="mb-0.5 mt-1 font-mono text-[10px] text-zinc-500"
                     >
-                      {item.icon}
+                      {sectionBadge}
                     </span>
-                    <span className="font-medium">{item.label}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+                  )}
+                  {!compact && (
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(section.label)}
+                      aria-expanded={!isCollapsed}
+                      aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${section.label}`}
+                      data-testid={`nav-collapse-${section.label}`}
+                      className="mb-0.5 mt-1 rounded p-0.5 text-zinc-600 transition-ds duration-ds-fast hover:text-zinc-300"
+                    >
+                      <ChevronDown
+                        className={cn(
+                          'h-3 w-3 transition-transform duration-ds-fast',
+                          isCollapsed && '-rotate-90'
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+                  )}
+                </div>
+              )}
+              {!isCollapsed && (
+              <ul className="flex flex-col gap-0.5">
+                {ordered.map((item) => {
+                  const active = activeView === item.id;
+                  const itemPinned = pinned.includes(item.id);
+                  return (
+                    <li key={item.id} className="group/navitem relative">
+                      <button
+                        type="button"
+                        onClick={() => setActiveView(item.id)}
+                        data-tour={item.tourAttr}
+                        data-state={active ? 'active' : 'idle'}
+                        data-compact={compact ? 'true' : 'false'}
+                        aria-current={active ? 'page' : undefined}
+                        title={compact ? item.label : undefined}
+                        className={cn(
+                          'flex w-full items-center gap-2.5 rounded-ds-md text-sm transition-ds duration-ds-fast',
+                          compact ? 'justify-center px-0 py-2' : 'px-2.5 py-1.5',
+                          active
+                            ? 'text-white'
+                            : 'text-zinc-500 hover:bg-white/[0.04] hover:text-zinc-200'
+                        )}
+                        style={
+                          active
+                            ? {
+                                backgroundColor: `color-mix(in srgb, ${accent} 18%, transparent)`,
+                              }
+                            : undefined
+                        }
+                      >
+                        <span
+                          className="h-4 w-4 flex-shrink-0"
+                          style={{ color: active ? accent : undefined }}
+                        >
+                          {item.icon}
+                        </span>
+                        {!compact && (
+                          <span className="min-w-0 flex-1 truncate text-left font-medium">
+                            {item.label}
+                          </span>
+                        )}
+                        {!compact && typeof item.badge === 'number' && item.badge > 0 && (
+                          <span
+                            data-testid={`nav-badge-${item.id}`}
+                            className="flex-shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold leading-none"
+                            style={{ backgroundColor: accent, color: 'var(--mr-on-palette)' }}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
+                        {active && (
+                          <span
+                            aria-hidden="true"
+                            className="h-3.5 w-[3px] flex-shrink-0 rounded-full"
+                            style={{ backgroundColor: accent }}
+                          />
+                        )}
+                      </button>
+                      {!compact && (
+                        <button
+                          type="button"
+                          onClick={() => togglePin(item.id)}
+                          aria-label={
+                            itemPinned ? `Unpin ${item.label}` : `Pin ${item.label} to the top`
+                          }
+                          data-testid={`nav-pin-${item.id}`}
+                          className={cn(
+                            'absolute right-1 top-1/2 -translate-y-1/2 rounded p-0.5 transition-ds duration-ds-fast',
+                            itemPinned
+                              ? 'text-zinc-300 hover:text-white'
+                              : 'text-transparent hover:text-zinc-200 group-hover/navitem:text-zinc-500'
+                          )}
+                        >
+                          <Pin className="h-3 w-3" aria-hidden="true" />
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
+      {footer}
+
+      {/* Session footer — Avatar + identity */}
       <div className="border-t border-white/[0.06] px-3 py-3">
-        <div className="flex items-center gap-2.5 rounded-ds-md px-2 py-1.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 text-xs font-semibold text-white">
-            {userName
-              .split(' ')
-              .map((n) => n[0])
-              .join('')}
-          </div>
-          <div className="min-w-0">
-            <div className="truncate text-xs font-medium text-white">
-              {userName}
+        <div
+          className={cn(
+            'flex items-center gap-2.5 rounded-ds-md px-2 py-1.5 hover:bg-white/[0.03]',
+            compact && 'justify-center px-0'
+          )}
+        >
+          <Avatar name={userName} email={avatarEmail} size="sm" />
+          {!compact && (
+            <div className="min-w-0">
+              <div className="truncate text-xs font-medium text-white">{userName}</div>
+              <div className="truncate text-[10px] text-zinc-500">
+                {session?.tier === 'brand'
+                  ? envLabel
+                  : `${envLabel} · ${actingStaff?.role ?? ''}`.trim()}
+              </div>
             </div>
-            <div className="truncate text-[10px] text-zinc-500">
-              {envLabel} User
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </aside>

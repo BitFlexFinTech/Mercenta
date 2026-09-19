@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import type { PaginationParams } from '@/types';
 import {
   fetchAdSpendBudgets,
+  fetchAdCampaigns,
+  fetchAdSpendRecommendations,
   fetchBrands,
   fetchCommissions,
   fetchComplianceDocuments,
@@ -107,6 +109,22 @@ export function useAdSpendBudgets() {
   return useQuery({
     queryKey: ['ad-spend'],
     queryFn: fetchAdSpendBudgets,
+    staleTime: STALE_TIME,
+  });
+}
+
+export function useAdCampaigns() {
+  return useQuery({
+    queryKey: ['ad-campaigns'],
+    queryFn: fetchAdCampaigns,
+    staleTime: STALE_TIME,
+  });
+}
+
+export function useAdSpendRecommendations() {
+  return useQuery({
+    queryKey: ['ad-recommendations'],
+    queryFn: fetchAdSpendRecommendations,
     staleTime: STALE_TIME,
   });
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { BRAND_NAME } from '@/config/brand';
-import { ALL_DEMO_BRANDS } from '@/data/demoData';
+import { ALL_DEMO_BRANDS, DEMO_LOGIN_BRAND_IDS } from '@/data/demoData';
 import { approvedApplicationBrands } from '@/data/applicationStore';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { cn } from '@/utils/cn';
@@ -18,18 +18,25 @@ import {
   UserPlus,
 } from 'lucide-react';
 
-/** §Stage-17 fix — flag per nation of every seeded demo brand. */
+/**
+ * §Stage-17 fix + §Phase 4 — flag per nation of every seeded demo brand.
+ * Nations of the canonical 20 real brands are listed; the fallback (a globe
+ * emoji) keeps the login rendering safe if a new real brand is added whose
+ * nation is not listed yet. Only real companies are ever rendered here.
+ */
 const NATION_FLAGS: Record<string, string> = {
-  Zimbabwe: '🇿🇼',
-  Denmark: '🇩🇰',
+  'United Kingdom': '🇬🇧',
   'United States': '🇺🇸',
+  Mexico: '🇲🇽',
+  France: '🇫🇷',
+  Italy: '🇮🇹',
   Germany: '🇩🇪',
-  Netherlands: '🇳🇱',
-  'South Africa': '🇿🇦',
-  Morocco: '🇲🇦',
+  Switzerland: '🇨🇭',
+  'South Korea': '🇰🇷',
 };
+const nationFlag = (nation: string): string => NATION_FLAGS[nation] ?? '🌐';
 
-/** Rotating accents so 11 cards don't render as one monochrome wall. */
+/** Rotating accents so the demo cards don't render as one monochrome wall. */
 const ACCENTS = [
   'border-amber-500/30 hover:bg-amber-500/10',
   'border-blue-500/30 hover:bg-blue-500/10',
@@ -103,9 +110,13 @@ export function Login() {
     });
   }, []);
 
-  // Combine demo brands + approved application brands for login cards
+  // Combine demo brands + approved application brands for login cards.
+  // §Phase 4 / §16: demo cards are a REPRESENTATIVE subset declared next to
+  // the canonical 20 (DEMO_LOGIN_BRAND_IDS) — never 20 buttons, and never a
+  // second hidden brand source. Real onboarding records always render.
+  const demoSubset = DEMO_LOGIN_BRAND_IDS;
   const allBrands = [
-    ...ALL_DEMO_BRANDS.map(b => ({ id: b.id, name: b.name, nation: b.nation, category: b.category, signatory: b.signatory, track: b.track, contractStatus: b.contractStatus, fromApp: false as const })),
+    ...ALL_DEMO_BRANDS.filter(b => demoSubset.includes(b.id)).map(b => ({ id: b.id, name: b.name, nation: b.nation, category: b.category, signatory: b.signatory, track: b.track, contractStatus: b.contractStatus, fromApp: false as const })),
     ...approvedApplicationBrands.map(b => ({ id: b.id, name: b.name, nation: b.country, category: b.category, signatory: b.signatory, track: b.track, contractStatus: 'active' as const, fromApp: true as const })),
   ];
 
@@ -204,7 +215,7 @@ export function Login() {
                 )}
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">{NATION_FLAGS[brand.nation] ?? '🌍'}</span>
+                  <span className="text-2xl">{nationFlag(brand.nation)}</span>
                   <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider truncate">
                     {brand.category}
                   </span>

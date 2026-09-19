@@ -146,7 +146,7 @@ test.describe('Acquisition pipeline (Phase C)', () => {
   test('3. Tenant isolation — a brand session has no acquisition surface and no prospect thread', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1200);
+    await loginAs(page, 'Astonish', 1200);
     await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 6000 });
     // No acquisition/ICP surface exists inside the brand environment.
     await expect(page.locator('text=Acquisition Pipeline')).toHaveCount(0);

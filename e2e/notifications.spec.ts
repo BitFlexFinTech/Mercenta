@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
 
 async function deskForgePO(page: any) {
-  await loginAs(page, 'DeskForge Supplies Inc', 1100);
+  await loginAs(page, 'Tapatío', 1100);
   const ob = page.locator('text=Onboarding').first();
   if (await ob.isVisible({ timeout: 1500 }).catch(() => false)) {
     await ob.click();
@@ -41,7 +41,7 @@ test.describe('PO Notifications & Auto-Fulfilment', () => {
     await page.waitForTimeout(1000);
     // The auto-created draft appears in the feed (its card title carries the
     // PO number).
-    await expect(page.getByText(/DeskForge — PO-9002/).first()).toBeVisible({ timeout: 7000 });
+    await expect(page.getByText(/Tapatío — PO-9002/).first()).toBeVisible({ timeout: 7000 });
   });
 
   test('3. ASN filing pushes the shipment', async ({ page }) => {
@@ -50,6 +50,9 @@ test.describe('PO Notifications & Auto-Fulfilment', () => {
     await expect(createShipment).toBeVisible({ timeout: 5000 });
     await createShipment.click();
     await page.waitForTimeout(500);
+    // Tapatío is Grocery (perishable/regulated) — lot + expiry are mandatory.
+    await page.getByLabel('Lot number').fill('SIM-LOT-PO-9002');
+    await page.getByLabel('Expiry date').fill('2027-10-01');
     await page.locator('button', { hasText: 'File ASN' }).click();
     await expect(page.getByText(/ASN filed via/i).first()).toBeVisible({ timeout: 6000 });
   });
@@ -60,6 +63,9 @@ test.describe('PO Notifications & Auto-Fulfilment', () => {
     await deskForgePO(page);
     await page.locator('button', { hasText: 'Create Shipment' }).first().click();
     await page.waitForTimeout(500);
+    // Grocery (regulated) — mandatory lot + expiry on the ASN.
+    await page.getByLabel('Lot number').fill('SIM-LOT-PO-9002');
+    await page.getByLabel('Expiry date').fill('2027-10-01');
     await page.locator('button', { hasText: 'File ASN' }).click();
     await page.waitForTimeout(800);
     await page.click('nav[aria-label="Primary"] >> text=Inbound Shipments');

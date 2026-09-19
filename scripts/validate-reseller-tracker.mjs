@@ -17,7 +17,7 @@ try {
 
   /* ── Mock data path ── */
   const zambeziReport = await rt.checkUnauthorizedResellers({
-    keepaApiKey: null, brandName: 'Zambezi Organic Extracts', asins: ['B0EXAMPLE01', 'B0EXAMPLE02', 'B0EXAMPLE03'],
+    keepaApiKey: null, brandName: 'Astonish', asins: ['B0EXAMPLE01', 'B0EXAMPLE02', 'B0EXAMPLE03'],
   });
   test('mock report returns data', zambeziReport.totalListings === 3);
   test('mock report has high risk', zambeziReport.highRisk.length > 0);
@@ -40,11 +40,11 @@ try {
   test('high risk items have correct type', zambeziReport.highRisk.every((l) => l.riskLevel === 'high'));
   test('low risk items have correct type', zambeziReport.lowRisk.every((l) => l.riskLevel === 'low'));
 
-  /* ── Harvest Lane has high risk ── */
+  /* ── Regatta has high risk ── */
   const hlReport = await rt.checkUnauthorizedResellers({
-    keepaApiKey: null, brandName: 'Harvest Lane Organics', asins: ['B0EXAMPLE04'],
+    keepaApiKey: null, brandName: 'Regatta', asins: ['B0EXAMPLE04'],
   });
-  test('Harvest Lane has high risk', hlReport.highRisk.length === 1);
+  test('Regatta has high risk', hlReport.highRisk.length === 1);
 
   console.log(`\nRESELLER_TRACKER_VALIDATION_PASS (${failures} failures)`);
 } catch (err) {

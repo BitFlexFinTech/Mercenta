@@ -18,7 +18,7 @@ test.describe('Retail-channel sales estimator', () => {
   test('1. a brand can estimate a range, and it is always labelled an estimate', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1400);
+    await loginAs(page, 'Astonish', 1400);
     await openNav(page, 'Market Intel');
 
     // §M12 wording repair — the card title is channel-neutral to satisfy the
@@ -42,7 +42,7 @@ test.describe('Retail-channel sales estimator', () => {
   });
 
   test('2. the new-to-channel model claims no programme place (simulation only)', async ({ page }) => {
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1400);
+    await loginAs(page, 'Astonish', 1400);
     await openNav(page, 'Market Intel');
     await page.getByRole('button', { name: /Model a new-to-channel launch/ }).click();
     await expect(page.getByTestId('born-to-run-result')).toBeVisible({ timeout: 5000 });

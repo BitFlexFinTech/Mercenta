@@ -69,7 +69,16 @@ const nc = read('src/components/shared/NotificationCenter.tsx');
 const header = read('src/components/layout/Header.tsx');
 test('Notification center reads digest event stream (scores borderline, renewals)',
   nc.includes('isBorderline') && nc.includes('renewalUrgency') && nc.includes('renewal window'.slice(0, 7)));
-test('Header bell replaced by NotificationCenter', header.includes('<NotificationCenter />'));
+test(
+  'Header bell replaced by NotificationCenter',
+  // §UI/UX Wave 2 — REPOINTED. The stale literal `<NotificationCenter />` was
+  // already broken BEFORE this wave: the component has accepted an
+  // `onNavigate` callback since the Wave-1 notification work, so the header
+  // renders `<NotificationCenter onNavigate={…} />`. The intent is unchanged —
+  // the canonical NotificationCenter component is used and no bespoke bell
+  // remains.
+  /<NotificationCenter[\s/>]/.test(header) && !/Bell\b/.test(header)
+);
 
 const dash = read('src/components/admin/AdminDashboard.tsx');
 // §Phase M10 — REPOINTED to the Phase-D redesign, where the overview's

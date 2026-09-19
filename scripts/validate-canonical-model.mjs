@@ -50,11 +50,11 @@ try {
   test('unknown origin defaults to international/DHL (conservative)',
     routing.resolveShippingLane({}) === 'international');
   test('arbitrary carrier (fedex) refused',
-    routing.validateCarrierForShipment({ carrier: 'fedex', brandNation: 'Zimbabwe' }).ok === false);
+    routing.validateCarrierForShipment({ carrier: 'fedex', brandNation: 'United States' }).ok === false);
   test('arbitrary carrier (bak) refused',
     routing.validateCarrierForShipment({ carrier: 'bak', brandNation: 'United Kingdom' }).ok === false);
   test('canonical carrier accepted',
-    routing.validateCarrierForShipment({ carrier: 'dhl', brandNation: 'Zimbabwe' }).ok === true);
+    routing.validateCarrierForShipment({ carrier: 'dhl', brandNation: 'United States' }).ok === true);
   test('partnered carrier refused on a prepaid (non-collect) PO',
     routing.validateCarrierForShipment({ carrier: 'amazon_partner', freightTerm: 'prepaid' }).ok === false);
   test('partnered carrier allowed on an Amazon collect PO',
@@ -94,6 +94,10 @@ try {
       cartons: accepted.lineItems.map((l) => ({ sku: l.sku, quantity: l.quantity, weightKg: 5, lengthCm: 30, widthCm: 20, heightCm: 15 })),
       shipDate: '2026-10-01',
       carrier: 'dhl',
+      // The seed accepted PO belongs to a canonical Grocery tenant (Tapatío),
+      // which is a perishable/regulated category — lot + expiry are required.
+      lotNumber: `SIM-LOT-${accepted.poNumber}`,
+      expiryDate: '2027-10-01',
     };
     const wrongTenant = api.createShipmentForPO(accepted.id, asn, undefined, 'brand-not-this-one');
     test('another tenant cannot create a shipment from this PO',
@@ -116,7 +120,7 @@ try {
   ticketStore.resetCaseSequence(0);
 
   const c = ticketStore.createCase({
-    brandId: 'brand-zambezi',
+    brandId: 'brand-astonish',
     subject: 'PO-9001 pricing discrepancy',
     description: 'Amazon shows a lower unit price than our agreed ex-works price.',
     caseCategory: 'po_question',
@@ -155,7 +159,7 @@ try {
   test('Mercenta resolves the case', resolved.ok === true && c.escalationState === 'resolved');
 
   const cf = ticketStore.createCase({
-    brandId: 'brand-zambezi',
+    brandId: 'brand-astonish',
     subject: 'Provider failure path',
     description: `${caseClient.SIMULATED_PROVIDER_FAILURE_MARKER} retail-channel case API unavailable`,
     caseCategory: 'amazon_related',
@@ -171,8 +175,8 @@ try {
     retried.ok === false && !cf.amazonCase);
 
   test("brand-scoped case read model returns ONLY the brand's own cases",
-    ticketStore.listCasesForBrand('brand-zambezi').every((t) => t.brandId === 'brand-zambezi') &&
-    ticketStore.listCasesForBrand('brand-nordhaus').length === 0);
+    ticketStore.listCasesForBrand('brand-astonish').every((t) => t.brandId === 'brand-astonish') &&
+    ticketStore.listCasesForBrand('brand-seep').length === 0);
   test('operator read model sees cases across tenants',
     ticketStore.listAllCases().length >= 2);
 

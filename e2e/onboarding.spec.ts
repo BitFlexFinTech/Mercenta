@@ -5,7 +5,7 @@
  * labels that have since moved, and its named-tenant assumptions pointed at
  * brands whose sheets are already onboarded (no wizard). These tests drive the
  * wizard through its real UI for a genuinely not-yet-onboarded tenant
- * (Little Kiwi Baby Co), assert the working-capital steering that produces the
+ * (Kit & Kin), assert the working-capital steering that produces the
  * Fulfillment Track recommendation, and verify the admin override path.
  */
 import { test, expect } from '@playwright/test';
@@ -13,7 +13,7 @@ import { loginAs } from './helpers/auth';
 import { wizardToStep } from './helpers/onboarding';
 
 async function freshBrand(page: any) {
-  await loginAs(page, 'Little Kiwi Baby Co', 1400);
+  await loginAs(page, 'Kit & Kin', 1400);
 }
 
 test.describe('Onboarding Wizard', () => {
@@ -59,7 +59,7 @@ test.describe('Onboarding Wizard', () => {
     await loginAs(page, 'Mercenta Admin Hub', 1100);
     await page.click('nav[aria-label="Primary"] >> text=Brand CRM');
     await page.waitForTimeout(900);
-    await page.locator('text=Zambezi').first().click();
+    await page.locator('text=Astonish').first().click();
     await page.waitForTimeout(400);
     await page.locator('button.rounded-xl').filter({ hasText: 'Fulfillment Track' }).first().click();
     await page.waitForTimeout(500);

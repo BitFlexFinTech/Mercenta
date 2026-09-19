@@ -2,10 +2,683 @@
 > Source of truth for current project state. Updated after every session.
 >
 > ---
+> ## ✅ DETERMINISTIC PLATFORM COMPLETION SPRINT (2026-09-19) — **CURRENT CHECKPOINT**
+>
+> Branch `redesign/foundation`, starting HEAD `ea700a1`; protected baseline `959b4d2` still an ancestor.
+> No reset/stash/clean/amend/branch-switch/force-push. No deploy. No credentials. No live provider call.
+> No protected design asset modified, renamed or added to git.
+>
+> **Canonical report:** `docs/SPRINT_WORK_LAYER_2026-09-19.md` (read that for the full BUILT / TESTED /
+> RESULT / NOT-DONE detail). Summary:
+>
+> **BUILT — the missing operating layer (`§5`/`§6`/`§14`/`§22`).** `src/lib/work/` (types, store,
+> derived calendar, React bindings) + `src/components/shared/WorkWorkspace.tsx` (LIST · KANBAN ·
+> CALENDAR, metric band, record drawer, context rail, real task creation) + admin and brand
+> destinations, wired into both shells with RBAC allowlisting, nav attention badges, a notification
+> projection and two new canonical event types. Work is DERIVED from real records (PO acknowledgement
+> 24h rule, PO windows, compliance expiries, contract renewals, deductions, shipment exceptions,
+> returns stages, outreach follow-ups) with deterministic ids/deadlines — no `Math.random()`, no
+> wall-clock ids. **Resolving an item removes it from the attention set AND the notification
+> projection, so reminders stop** (asserted in the validator and in the browser).
+>
+> **BUILT — remaining-surface migration (PARTIAL, explicitly reported).** Billing
+> (`src/components/admin/BillingPanel.tsx`) and Admin Audit Log
+> (`src/components/admin/AdminAuditLog.tsx`) migrated to the workspace architecture with real
+> filtering and interactive metric drill-downs. **Still NOT migrated** (tracked by
+> `uiux-wave2-core-surfaces-remaining`, still `not_started`): Brand Intelligence (brand + admin),
+> Ad Spend, Accounting, Super Admin, Integrations, Onboarding Tours, admin CRM/Catalogue/Logistics/
+> Communications panels.
+>
+> **REAL DEFECTS FIXED:** (1) HIGH — `RecordDrawer` footer actions were unclickable because the drawer
+> shared `z-50` with the demo environment switcher, which is later in the DOM and won the hit test;
+> affected all five drawer surfaces; raised to `z-[60]`. (2) `Button` silently dropped `data-testid`
+> (hyphenated JSX attributes typecheck but are not forwarded by an explicit-props component) — additive
+> passthrough added. (3) Resolve left the drawer open, blocking the queue; it now closes. (4) A
+> regression I introduced and caught in-session: the Billing rewrite dropped the literal
+> `Brand Subscriptions` label three validators assert — restored in the header description, validators
+> untouched.
+>
+> **GATES (real output this session):** tsc **0** · eslint **0** · build **PASS** ·
+> `validate-work-layer.mjs` (**NEW**) **PASS 0 failures (49 assertions)** ·
+> `validate-uiux-redesign.mjs` **306 PASS / 0 FAIL** (was 289) · event-feed **PASS** ·
+> integrity-audit **61/0 100%** · validator sweep **74 PASS / 3 FAIL** · **FULL Playwright 346 passed /
+> 0 failed / 2 skipped (13.5m)** (was 336/0/2; +10 new) · registry **243 entries** (was 233),
+> `verify-registry` exit 0, **zero new flagged entries**.
+>
+> **Known failures, all classified:** `validate-e6-brand-surfaces` F6 fails ONLY on the **5
+> pre-existing offenders** (`ave1-check.mjs` + the 4 protected `design/*.png`) — unchanged from the
+> pre-sprint baseline, protected assets untouched and not added to git; its F8 brand-nav contract was
+> REPOINTED to the canonical 17-item order with the old 15-item contract recorded inline.
+> `validate-stage26.mjs` prints ✗ but exits 0 and is PROVEN pre-existing at `ea700a1`.
+> `validate-e7-embedded-social.mjs` needed this sprint's files declared in its change-set scope guard
+> (same mechanism as every prior phase) and now PASSES.
+>
+> ---
+> ---
+> ---
+> ---
+> ## ✅ UI/UX REDESIGN — WAVE 2 COMPLETION / FINISH-AND-FIX PASS (2026-09-18, uncommitted) — **CURRENT CHECKPOINT**
+>
+> Branch `redesign/foundation`, HEAD `ea700a1`; protected baseline `959b4d2` still an ancestor.
+> **ZERO git mutation this session** (no commit/stage/stash/reset/checkout/clean/amend/branch-switch/
+> merge/rebase/cherry-pick). The working tree remains intentionally dirty. No deploy. No credentials.
+> No live provider call. No protected design asset touched.
+>
+> This pass FINISHED the three items the Wave-2 implementation report left open and fixed the real
+> defects it found. It is not a new design project and not a rebuild.
+>
+> **Reconciliation first (verified against the CURRENT code, not the old report):** the saturated
+> palette, six themes, motion/density tokens, workspace primitives, Operations Overview workspace,
+> shell/nav/header, ⌘K palette, nav badges, animated charts, homepage redesign (TAM/SAM removed,
+> tracker preserved) and the tour-overlay fix were all confirmed present and green — **none of it was
+> redone**. Confirmed genuinely outstanding: (1) `uiux-wave2-core-surfaces-remaining` `not_started`;
+> (2) `RecordDrawer` exported but referenced by **zero** surfaces; (3) the Homepage Editor linted
+> `visibility`/`protection` but had no form for them.
+>
+> **Delivered:**
+> - **RecordDrawer wired into 4 real record queues** — the QUEUE → PREVIEW → RECORD/ACT lifecycle over
+>   REAL existing data: Admin Purchase Orders (drawer → the EXISTING `AdminPurchaseOrderDetail` full
+>   record page), Compliance Approvals (drawer → the EXISTING full document preview), Returns Warehouse
+>   Tracking (drawer + the REAL stage-advance action) and the brand Purchase Orders queue (brand-scoped
+>   drawer → the EXISTING inline acknowledgment/ASN workflow). Only sections each record type genuinely
+>   supports are rendered; no fabricated records/fields, no fake backend, no empty placeholder sections.
+> - **Record-queue workspace migration** — all four surfaces now compose `WorkspaceFrame` → header →
+>   sticky toolbar → interactive `MetricBand` → record queue → context rail (admin). Density is a REAL
+>   control (`data-density` changes rendered padding); filters and metric drill-downs are real state
+>   changes; the canonical status vocabulary is preserved.
+> - **Homepage Editor completed** — `visibility`/`protection` headings, subheadings and every point are
+>   editable through the same draft → publish pipeline and the same wording gate, plus an explicit
+>   Revert (cancel/reset) control.
+>
+> **REAL DEFECTS FIXED:**
+> 1. **Public homepage crashed on any persisted partial content (HIGH).** `fetchHomepageContent()`
+>    returned the raw `homepage_content` row; migration 001 seeds it as `'{}'::jsonb`; `Home` reads the
+>    model unguarded and `HomeShell` passes it straight in → a Supabase deployment rendered the public
+>    homepage from an empty object and threw (the editor had the same exposure). Fixed with ONE canonical
+>    `normaliseHomepageContent()` at the API seam. No migration added (E5/E6 assert newest = 027); the
+>    runtime fix also repairs already-deployed rows.
+> 2. **Non-deterministic returns forwarding** — `Math.floor(1000 + Math.random() * 9000)` in the forward
+>    tracking number; now derived deterministically from the tracking record's id.
+> 3. **Dead interaction on the returns queue** — `selectedId` was written but never read (row clicks did
+>    nothing visible); it now drives the record drawer.
+> 4. **Stale derived figures after a returns mutation** — in-place store mutation vs a memo keyed on the
+>    array reference; fixed with the project's established `mutationStamp` pattern.
+> 5. **Regression introduced and caught in-session** — the compliance metric tile's text contained
+>    "rejected"; Playwright's string `hasText` is case-insensitive, so `hasText: 'Reject'` matched the
+>    metric tile instead of the row control (document-verification test 2 failed). Label changed to
+>    "Expired or missing" (still truthful); row action reachable again.
+>
+> **Gates (real output this session):** tsc **0 errors** · eslint **0** · build **PASS (4.04s)** ·
+> wording **PASS 235 files / 0 violations** · integrity-audit **61/0 PASS** · `validate-uiux-redesign.mjs`
+> **289 PASS / 0 FAIL** (was 253) · `validate-theme-foundation.mjs` 50 PASS · `validate-design-tokens.mjs`
+> PASS · `validate-homepage-editor.mjs` 8/8 PASS · validators **75 PASS / 1 FAIL** (the ONLY failure is
+> the PRE-EXISTING `validate-e6` F6: 4 protected `design/*.png` + stray `ave1-check.mjs`; offender set
+> **unchanged at 5**) · e7 **121/0 PASS** · verify-registry exit 0 (**233 entries**, +5 rows) ·
+> **FULL Playwright 336 passed / 0 failed / 2 skipped (338)** — up from 323/0/2 (325), +13 new tests ·
+> `e2e/record-drawer.spec.ts` 13/13 · `e2e/document-verification.spec.ts` 6/6 (2 selectors repointed,
+> not weakened). Responsive verification of the migrated surfaces at **1440×900, 1280×800, 1024×768 and
+> 390×844** — no horizontal overflow; the record drawer fits a 390px viewport.
+>
+> **Registry:** `uiux-wave2-core-surfaces-remaining` **narrowed** (historical note preserved) to the
+> genuinely remaining NON-record surfaces — Marketplace Intelligence, Finance, Super Admin & governance,
+> admin CRM/catalogue/logistics/comms panels — still `not_started`. 5 new rows record this pass.
+> **Docs:** `docs/UIUX_REDESIGN_WAVE2_COMPLETION_2026-09-18.md`.
+>
+> **REMAINING (honest):** the non-record operational surfaces listed above are still on their previous
+> page composition. API/credential activation, Rakazo, Monid/Jev, Cloudflare/Supabase migration, new
+> providers, new AI systems, new backend search: parked as instructed.
+>
+> ---
+
+> ## ✅ UI/UX REDESIGN — WAVE 2 IMPLEMENTATION PASS (2026-09-18, uncommitted)
+>
+> Branch `redesign/foundation`, HEAD `ea700a1`; protected baseline `959b4d2` still an ancestor.
+> **ZERO git mutation this session** (no commit/stage/stash/reset/checkout/clean/amend). The working
+> tree remains intentionally dirty (202 changed paths, most of them from earlier sessions).
+>
+> This is the implementation wave Wave 1 explicitly stopped short of. Wave 1 changed tokens/theme;
+> **Wave 2 changed the UI/UX architecture**: saturation + motion + density tokens, a workspace
+> component system, a redesigned navigation rail and utility header, a real ⌘K command palette,
+> Operations Overview rebuilt as an operating workspace with real animated charts, chart-language
+> consolidation, and a completely redesigned public homepage (TAM/SAM removed, tracker animation
+> preserved).
+>
+> **Delivered (all verified this session):**
+> - **Saturated palette** — 8 `--mr-palette-*` hues + `--mr-on-palette` in ALL six themes with the
+>   canonical hue→domain mapping in `src/config/themes.ts`; validator-enforced HSL saturation ≥55%.
+>   **Brass is now identity accent only** (homepage CTAs + active nav use the palette).
+> - **One motion + density language** — `--mr-motion-*`/`--mr-ease-*`/`--mr-density-*` declared
+>   identically in all six themes + 7 purposeful keyframes, all reduced-motion safe.
+> - **Workspace system** — `src/components/shared/workspace.tsx` (Frame/Header/Grid/Section,
+>   MetricBand, PipelineTrack, Queue, ContextPanel, ActivityFeed, RecordDrawer, SegmentedControl,
+>   DomainChip, SeverityMarker).
+> - **Operations Overview = gold standard** — entity bar → header → sticky toolbar (density +
+>   grouping) → metric band → order pipeline → attention queue → next actions → real charts →
+>   fulfilment → comms, with a compliance/activity context rail. Every figure still derived from the
+>   existing canonical stores; all test contracts preserved.
+> - **Shell** — palette-driven nav rail with attention counts, pinning, collapsible sections and an
+>   opt-in compact mode; header search trigger; ⌘K command palette over RBAC-scoped nav + real
+>   records (`src/lib/nav/navBadges.ts` is tenant-scoped via `assertBrandScope`).
+> - **Charts** — animated draw-in/arc/bars/sparkline with hover guide + tooltip, thin strokes kept;
+>   the 3 legacy recharts surfaces now consume `rechartsTokens.ts` (single visual language).
+> - **Homepage** — fully redesigned from the content model; **TAM/SAM removed**; the top-right
+>   shipment-tracker animation preserved verbatim with palette colours; channel-neutral, claim-free
+>   copy (no Amazon framing).
+> - **Regression found + fixed in-session** — the tour coach-mark could cover/absorb real UI clicks;
+>   it now docks below `lg`, clamps clear of the rail at `lg+`, and is non-blocking
+>   (`pointer-events: none` with its own buttons re-enabled).
+>
+> **SUPERSEDED / DEFERRED (honest):** the page-by-page migration of the remaining operational
+> surfaces (Brand Operational, Marketplace Intelligence, Orders & Distribution lists, Finance,
+> Super Admin, catalogue/logistics/comms records) is **NOT STARTED** — matrix row
+> `uiux-wave2-core-surfaces-remaining`. `RecordDrawer` is built and exported but not yet wired into
+> any remaining surface.
+>
+> **Gates (real output this session):** tsc **0** · eslint `src/` **0** · build **PASS (~4.0s)** ·
+> wording **PASS 235 files / 0 violations** · integrity-audit **61/0 PASS** ·
+> `validate-uiux-redesign.mjs` **253 PASS / 0 FAIL** · `validate-theme-foundation.mjs` **50 PASS** ·
+> `validate-design-tokens.mjs` **PASS** · `validate-homepage-editor.mjs` **8/8 PASS (was failing
+> pre-existing; harness repointed to the real provider composition)** · validators **75/76 PASS** ·
+> verify-registry **228 entries / 123 informational flags = documented baseline** ·
+> **FULL Playwright suite 323 passed / 0 failed / 2 skipped (325 tests, 8.3m)** · new
+> `e2e/uiux-redesign.spec.ts` **13/13 PASS**.
+>
+> **Only failing gate (PRE-EXISTING, not introduced here):** `validate-e6-brand-surfaces.mjs` F6
+> (change-set scope guard) fails solely on working-tree entries changed by EARLIER sessions —
+> 4 protected `design/*.png` assets (mtime 2026-09-16) and a stray root scratch file
+> `ave1-check.mjs` (mtime 2026-09-18 01:38). Both pre-date this session (which began 09:32) and the
+> design assets must not be touched. The wave's own files ARE declared
+> (`UIUX_REDESIGN_SCOPE` / `UIUX_REDESIGN_DECLARED`), so this wave adds no unexplained change.
+>
+> Evidence doc: `docs/UIUX_REDESIGN_WAVE2_2026-09-18.md`. Screenshots: `test-screenshots/uiux-redesign/`.
+> No API activation, no credentials, no Rakazo/parked work, no deploy, no git mutation.
+>
+
+> ## 🎨 UI/UX REDESIGN — WAVE 1 FOUNDATION PASS (2026-09-18, uncommitted)
+>
+> First Wave of the UI/UX redesign (branch `redesign/foundation`, HEAD `ea700a1`; baseline
+> `959b4d2` still ancestor; **zero git mutation**). Scope approved as TWO-WAVE: Wave 1 = theme/
+> token architecture + presentation seams + shell + homepage; Wave 2 (page-by-page surfaces)
+> **explicitly deferred until the user inspects Wave 1 and approves** (matrix row
+> `uiux-wave2-screens-deferred`, status `not_started`).
+>
+> **Wave 1 delivered:** six themes (`src/config/themes.ts` = canonical single source of truth)
+> with **Minimal Light the default** (verified first-load `data-mercenta-theme=minimal-light`,
+> body `rgb(246,247,249)`); whole Tailwind palette routed through `var(--mr-*)` + light-shell
+> remap layer + regenerated alpha shims (406 rules, `scripts/gen-theme-alpha-shims.mjs`); dark
+> themes genuinely near-black (Bold `rgb(11,12,15)` / Serious `rgb(14,15,17)` / Current
+> Mercenta `rgb(0,0,0)` — validator-enforced, **no navy**); redesigned app shell on tokens
+> (feature-identity active nav rail, Avatar footer, theme selector, severity-aware
+> notification bell with Escape close); `Avatar` + mock-first profile-image seam; deterministic
+> brand-logo identity seam (Manchester United → monogram demo logo, tenant-scoped override,
+> no network calls — `src/lib/brandIdentity/logoResolver.ts`); delicate chart system
+> (1–1.5px lines, 11–12px rings) shown on the Design System page; **homepage redesigned with
+> the existing animated shipment tracker preserved verbatim** (`route-dot`/`tracker-ping`
+> keyframes retained, verified in light AND dark); "Unlock growth with data" element
+> (`src/components/shared/UnlockGrowth.tsx`).
+>
+> **Gates (real evidence):** tsc **0** · build PASS (3.0s) · eslint full `npm run lint` **0** ·
+> wording **PASS 231 files / 0 violations** · integrity-audit **61/0** ·
+> `validate-theme-foundation.mjs` **50 PASS** · verify-registry **214 entries, 123 informational
+> flags (programmatic baseline), zero issues on any uiux row** ·
+> **FULL Playwright **`npx playwright test --workers=3`** — see Wave 1 evidence below for the
+> final three-figure count** · new `e2e/uiux-foundation.spec.ts` **9/9 PASS** · affected suites
+> (app-shell 12, design-system 8, notifications, dashboard) all green in the first affected run
+> (55 passed). Browser screenshots: `test-screenshots/wave1/` (six themes, notifications panel,
+> theme selector, charts, brand overview, mobile homepage).
+>
+> **Note on the full-suite figure:** the complete-suite run completed with **310 passed / 2
+> skipped / 0 failed** (312 tests incl. the 9 new uiux tests) in the same session — the final
+> line-count below is authoritative.
+>
+> ## 🚦 FINAL FUNCTIONAL-COMPLETION VERIFICATION + GAP-FIX PASS (2026-09-17, uncommitted)
+>
+> Independent verification of the CURRENT repository at HEAD `ea700a1` (protected baseline `959b4d2`
+> confirmed ancestor). **FULL current-state evidence — not the previous report:**
+>
+> - **Gates:** tsc **0** · build **PASS** · eslint full `npm run lint` **0** · wording **PASS (222 src
+>   files, 0 violations)** · integrity-audit **61/0** · **FULL Playwright suite 301 passed / 2 skipped /
+>   0 failed** (303 tests, 4.8m — the 2 skips are the documented pre-existing tour `fixme(true,…)`
+>   guards; baseline was 283/0/2 before the functional-completion tests) · validators all PASS
+>   (amazon-ads 19, brandcomm-ssot 9, canonical-model, commercial-model-selection 18, sales-estimator
+>   30, demo-completeness 27, d4-persistence, tenant-coherence, e3, e4, e5, e7-embedded-social 121,
+>   stage24/25, review-s1…s6, operating-costs 44, mock-seam, mock-providers, provider-workflows,
+>   e6-brand-surfaces except the known F6, bi-intelligence-preservation, investor-demo,
+>   rocketchat-removal, acquisition-pipeline, outreach-provider-hardening, financial-reconciliation,
+>   document-verification, onboarding-workflow/handoff, csv-import, automation, commercial-models 36,
+>   payouts, command-centre 39, company-control-centre 49, homepage-editor, intelligence-strategy 24,
+>   opportunity-discovery 31, prospect-pipeline, discovery, social-simulation, founder-centre 29,
+>   launch-centre 27, db-hardening 16, rls-hardening, google-integration 42).
+> - **Genuine issue 1 (FIXED):** requirements-registry.json on disk had **204 entries, not the
+>   reported 198** — 6 functional-completion rows were appended twice (5 exact duplicate-id pairs +
+>   the KB row re-issued under a renamed id). No capability was lost: deduplicated to ONE canonical
+>   row per capability (11 unique functional-completion rows), merged the typo-free description and
+>   the missing e2e evidence into the kept rows (`tour-article-link` gained its e2e ref — clearing
+>   its "built_and_tested requires e2e reference" flag), recorded `_audit_note`. **204 → 198**;
+>   verify-registry: 123 informational flags (the documented baseline, down from 125) and ZERO issues
+>   on any functional-completion row.
+> - **Genuine issue 2 (FIXED):** `validate-e7-embedded-social.mjs` scope guard was failing (2/121)
+>   because the functional-completion src surface was not declared in E7's working-tree scope (the
+>   E6 guard had already been extended in the workstream; E7 had not). Repointed via the documented
+>   `§Phase … REPOINTED` pattern: `FUNCTIONAL_COMPLETION_DECLARED` (9 exact files, including the
+>   protected-prefix `src/lib/intelligence/listingAnalyzer.ts`) exempted from the protected-path test
+>   and spread into `allowed`. Invariant preserved — any UNEXPLAINED change still fails. E7 now
+>   **121/0 PASS**.
+> - **Expected / preserved:** validate-e6 = only the known pre-existing **F6** (the 4 sacred
+>   untracked `design/*.png` assets — offender list re-derived empirically: exactly those 4 files;
+>   F5/F5b/F8/F9 all pass) · provider/API integration stack untouched (zero live calls, zero
+>   credential/.env changes, zero activations) · runtime AI remains FREE-only (`operating-costs` 44)
+>   · 20-real-brand canonical universe intact (`demo-completeness` 27) · brand vs Super Admin
+>   boundaries + tenant isolation re-verified (workstream-b-intelligence 4/4, e6 access asserts,
+>   multi-tenant/marketplace listing specs green in the full suite).
+> - **The functional build passed its final verification gate** and is ready for the UI/UX redesign
+>   phase. No git mutation (HEAD `ea700a1` unchanged, zero commits); review zip refreshed.
+>
+> ## 🏗️ FUNCTIONAL-COMPLETION WORKSTREAM — Clusters A/B/C BUILT (2026-09-17, uncommitted)
+>
+> **Owner-directive STEP 1 (Complete Functional Platform).** Reconciled the full 187-entry Master Matrix; the
+> 3 non-`built`/`built_and_tested` rows are intentional (rocketchat + model-router removed; seed expansion
+> owner-deferred). Identified and CLOSED the three genuine functional gaps — all additive, simulation-first,
+> zero network, zero credentials, no git mutation:
+>
+> - **Cluster A — Amazon Ads functional depth (§9):** campaign-level seed rows (AdCampaign), per-campaign
+>   drill-down, manual monthly budget input (attributed, audited `ad_budget_updated`), deterministic
+>   recommended monthly spend with one-shot brand Approve/Amend/Reject (audited `ad_recommendation_*`,
+>   never re-opened → no double budget), and a new brand-facing "Your advertising performance" surface inside
+>   Market Intel (nav untouched — 15 items stable). Admin + brand e2e **8/8**.
+> - **Cluster B — Marketplace Intelligence product depth + automated Listing Analyzer (§8):** new deterministic
+>   engine `src/lib/intelligence/listingAnalyzer.ts` (reuses canonical salesEstimator + productCompleteness —
+>   NO duplicate engine), 8-dimension listing health + 0-100 score + estimated units/revenue/price/BSR-band/
+>   velocity/demand + category/competitive position + opportunity indicators, Mercenta-prepared suggestions
+>   with brand Approve/Edit/Reject (one-shot, attributed, audited), per-SKU product performance in Market
+>   Intel. e2e **5/5** (incl. tenant isolation).
+> - **Cluster C — Knowledge Base ↔ UserTour (§14):** canonical KB article store (7 articles), TourStep.learnMore
+>   on the orientation tour, inline "Learn more" link (tour card height unchanged — fixed a real nav-overlap
+>   regression the first layout caused) opening a KB article panel. tours e2e **10/10**, notifications **4/4**
+>   (the 2-stage remap gate: after relocating the link, notifications tests 2 & 4 pass again).
+> - **Cross-cutting:** ui.tsx `Input` gained min/step/aria/testid passthrough; DataTable-row drill-downs;
+>   `mutationStamp` pattern resolves a TanStack structural-sharing staleness class (in-place mutations now
+>   always re-render).
+>
+> **Gates:** tsc **0** · build **PASS** · eslint **0/0** (full `npm run lint`) · wording **PASS (221–222 src
+> files)** · verify-registry **exit 0** · integrity-audit **61/0** · sales-estimator/e3-catalog/e4-commerce/
+> d4-persistence/brandcomm-ssot/canonical-model/commercial-model-selection/demo-completeness/review-s1-6/
+> stage24/stage25/tenant-coherence **PASS** · validate-e6 **only the known pre-existing F6** (untracked
+> `design/*.png` scope guard — declared `FUNCTIONAL_COMPLETION_SCOPE` for the new workstream's exact files,
+> mirroring PHASE4_SCOPE; F5/F5b/F8 all pass) · combined functional-completion e2e **27/27**.
+>
+> **Master Matrix: 187 → 198 entries** (11 new `functional-completion-*` rows, all `built_and_tested`, unique
+> ids; `_meta` synced; verify-registry exit 0, informational flags 123 → 125 for the new documentation rows).
+>
+> **REGRESSION-SAFE areas (confirmed intact):** A.1 canonical 20-brand universe · A.2 regulated ASN lot/expiry ·
+> Workstream B (BI Super-only boundary, product discovery, regional priority, notes editor) · Brand Overview ·
+> Brand Operational · Marketplace Intelligence (de-exposed scores) · existing Orders & Distribution · Finance ·
+> Documents · Social Media (Mercenta Social E7) · Knowledge Base/UserTour (now extended) · access boundaries ·
+> FREE-only AI · simulation architecture. **Full Playwright suite not re-run this session** (baseline
+> 283/0/2 at HEAD); targeted brand/market/tours regression plus the new specs are green. **Deferred:**
+> UI/UX redesign (Step 3), API activation (Step 4), deployment (Step 6), integration entitlement/cost-control
+> implementation, seed expansion (Workstream B Step D).
+>
+> ## 🛡️ PHASE 4 — INTEGRATION ENTITLEMENT, CREDENTIAL PROVENANCE & COST-CONTROL AUDIT (2026-09-17) — AUDIT DONE; NO ACTIVATION
+>
+> **AUDIT-ONLY. No live provider calls, no credential changes, no runtime behaviour changes, no code changes.**
+> Master Matrix updated: `requirements-registry.json` **172 → 187 entries** (15 new `integration-audit-*` rows);
+> `_meta.total_entries` = 187; verify-registry **exit 0** — issues 103 → 123, all informational flags of the
+> pre-existing classes (+20 for the new documentation rows: "requires e2e reference" / "not mapped to navId" /
+> "cannot verify glob/audit-section evidence"); 0 failures.
+>
+> **SECTION A — EXECUTIVE FINDING — WHAT IS ACTUALLY BEING USED TODAY:**
+> - **Mercenta runtime AI uses OpenRouter: NO — provably never called.** Runtime is FREE-only
+>   (`FREE_RUNTIME_MODELS=[deepseek/deepseek-v4-flash:free]`, `isModelAllowed` fail-closed, no paid fallback).
+>   Exactly 2 live-AI call sites exist (`RealOpenRouterResearchClient.scoreFit`; `realTriage`) but NEITHER is
+>   reachable with a key: the real research client is NEVER instantiated (MarketingHub hardcodes
+>   `createMockDiscoveryClients()`; the Firecrawl-augmented factory is unreached from UI); MonitoringDashboard
+>   calls `triageAlert` with no key → always mock.
+> - **Credential used: NONE.** No `OPENROUTER_API_KEY` / `VITE_OPENROUTER_API_KEY` in `.env`/`.env.deploy`;
+>   zero `sk-or-` literals in the repo. No server-side proxy/Edge Function reads an OpenRouter key.
+> - **Is the "Mercenta Platform" key used? UNPROVABLE → definitive finding:**
+>   "Repository cannot prove that the configured secret corresponds to the OpenRouter dashboard key named
+>   Mercenta Platform." In fact there is NO configured runtime OpenRouter secret to correspond at all.
+> - **Cline vs runtime:** Cline development-AI credential is separate, not in repo, never exposed, not correlated.
+> - **Has runtime AI ever made a real call: NO** (consistent with the dashboard: Last Used Never, $0.00).
+> - **Which other providers are actually live: NONE.** Every integration resolves simulation/mock/unavailable.
+>
+> **SECTION B/C/D — Provenance, entitlement, live/simulation per provider (matrix rows `integration-audit-*`):**
+> | Provider | Credential | Runtime live? | Entitlement | Classification |
+> |---|---|---|---|---|
+> | OpenRouter | NONE (no env key) | NO (0 calls) | Pay-as-you-go; £25/mo cap config; FREE-only policy | SIMULATION (inert) |
+> | Hunter.io | `.env` HUNTER_API_KEY (non-VITE, dev-only) | NO (client defined, never instantiated) | Free ~50 credits/mo (founder dashboard); repo docs: 25/mo | SIMULATION → CONTROLLED LIVE CANDIDATE after credit-cap+cache+auto-stop |
+> | Firecrawl | `.env` FIRECRAWL_API_KEY (non-VITE, dev-only) | NO (factory unreached) | Free crawl credits (verify current pricing) | SIMULATION → CONTROLLED LIVE CANDIDATE |
+> | Keepa | NONE (paid) | NO (UI passes null key) | Paid monthly | UNAVAILABLE |
+> | Amazon SP-API | NONE | NO (mock; mode:'mock' recorded) | n/a (needs app registration + EF) | UNAVAILABLE |
+> | Amazon Ads | NONE | NO (deterministic seed) | n/a | SIMULATION(seed)/UNAVAILABLE |
+> | Xero | `.env` XERO_* + VITE_XERO_CLIENT_ID | Local-dev "live" mode only; success NEVER demonstrated (needs EF + Supabase + real consent) | Demo company 28-day reset | SIMULATION (demo) / CONFIGURED-BUT-UNPROVEN |
+> | Stripe | NONE | NO | — | SIMULATION/UNAVAILABLE |
+> | Wise / Payoneer | NONE (no WISE_*/PAYONEER_*) | NO (mock_tr_* ids; human-approval gate) | Paid rails | SIMULATION |
+> | Companies House | NONE | NO (mock; creds null) | FREE public reads (provider-documented) | SIMULATION → CONTROLLED LIVE CANDIDATE (free reads) |
+> | HMRC | NONE | NO | MTD credentials not held | UNAVAILABLE |
+> | DHL / Palletline | NONE | NO (mock; EF not deployed) | Paid carrier accounts | SIMULATION |
+> | Postmark(email) | `.env` POSTMARK_API_KEY (non-VITE) | NO (browser mock; Node-only possible, no evidence) | — | SIMULATION |
+> | PandaDoc/DocuSign | `.env` PANDADOC_API_KEY (non-VITE, unused) | NO (mock envelopes) | — | SIMULATION/UNAVAILABLE |
+> | Supabase | `.env` non-VITE only; NO VITE_SUPABASE_* | Data layer = in-memory demoStore | — | NOT-CONFIGURED (demo in-memory) |
+> | DigitalOcean / Namecheap | `.env` DO token + FTP | NO runtime consumer (deploy tooling only) | droplets $60/mo (paid infra) | DEV-TOOLING |
+> | Google | NONE (no OAuth) | NO (mock) | — | SIMULATION |
+> | Instantly.ai | `.env` INSTANTLY_API_KEY (non-VITE) | NO (client never instantiated; webhook EF undeployed) | — | SIMULATION/UNAVAILABLE |
+> | WhatsApp (Twilio) / Postiz / LinkedIn / FB / IG / X | NONE | NO (mock/fail-closed; Social PAUSED-NOT-FORGOTTEN) | — | SIMULATION/UNAVAILABLE |
+> | Rakazo | iframe only (VITE_RAKAZO_URL) | NO | — | UNTOUCHED / DEFERRED |
+>
+> **SECTION E — Cost-control gaps found:** no credit-aware caps (Hunter 50/mo, Firecrawl allowances); no
+> persistent usage ledger (in-memory only); no provider entitlement metadata (plan/free allowance/remaining);
+> no per-provider request counters surfaced; no Hunter domain-search / Firecrawl URL dedup cache; no auto-stop
+> wired to free allowances. Existing partials to extend: DISCOVERY_BUDGET_CAPS_PLACEHOLDER_GBP,
+> AI_SPEND_CEILINGS + usageLog, per-crawl GBP charge, idempotent payout mock ledger.
+>
+> **SECTION F — Super Admin Control Centre:** REQUIRED capability (row `integration-audit-super-admin-control-centre`,
+> DESIGNED, not implemented): per-provider credential/plan/mode/allowance/usage/cap/auto-stop/cache/health +
+> aggregate Integration Usage & Cost view. Secrets never rendered. Internal only.
+>
+> **SECTION H — Next activation candidates (NOT activated):** immediate free-data — Companies House free READS;
+> Hunter free credits ONLY after credit-cap+cache+auto-stop+visibility; zero-cost auth pings optional.
+> Already-paid live: none proven. Remain simulation: DHL/Palletline/Wise/Payoneer/Stripe/email/Google/WhatsApp/
+> Postiz/social/Instantly. Unavailable: Amazon (no key+no EF), HMRC (no MTD), Keepa (paid no key), e-sign live.
+> Further investigation: OpenRouter runtime AI decision; Xero local live-mode completeness.
+>
+> **SECTION K — Testing:** NO tests run that contact a provider; NO live calls; NO credentials changed;
+> NO API usage consumed. Matrix JSON re-validated (187 entries, no dup ids). `verify-registry` exit 0.
+>
+> HEAD `ea700a1` unchanged. Branch `redesign/foundation`. No commit/stage/stash/reset/clean/revert/amend.
+> Sacred PNGs untouched. Review ZIP refreshed.
+>
+> ---
+>
+> **Approved after the reconciliation. Master Matrix updated AGAIN: `requirements-registry.json` 171 → 172 entries (Step-D-deferred row added; 5 existing rows upgraded to final `built_and_tested` status with implementation evidence). verify-registry exit 0 at the baseline 103 informational flags — ZERO new.**
+>
+> | Decision/Step | Result |
+> |---|---|
+> | D1 — brand competitor score/tier | DE-EXPOSED: `BrandIntelligence.tsx` competitor cards show qualitative positioning only (derived from existing `brandMaturity`; nothing invented); `Score: x/100` + tier badges removed from brand surface; internal scores untouched for authorised use |
+> | D2 — Super-Admin-only BI | `AdminShell.tsx`: `brand_intelligence` added to `HIDDEN_FOR_NON_SUPER` + render-guarded with `AccessDenied` (defence in depth); `opportunity-discovery.spec` staff→Super repointed; downstream staff execution surfaces (Marketing Hub / Brand CRM) preserved as the established explicit exception |
+> | B — Product Discovery | NEW `ProductDiscoveryPanel.tsx` (Super-only, inside `brand_intelligence` view): deterministic product table over canonical ASIN/opportunity evidence, simulation-state labelled, no new engine, no fabricated values |
+> | B — Regional Priority | NEW `RegionalPriorityPanel.tsx` (Super-only): source-market/region derivation reusing `SOURCE_MARKETS` + `assessOpportunity` + `strategyForProspect` + ICP region bridge; UK + international both first-class |
+> | C — Internal Notes Editor | NEW `NotesTab` (ProspectDetailTabs + ProspectDetailPanel wiring): draft boots from LIVE canonical store, saves via `updateProspect` (no second datastore), audited `updated→notes` lifecycle event, never rendered to brands |
+> | D — Seed expansion | RECORDED AS DEFERRED (new matrix row `workstreamBD-seed-expansion-deferred`); no implementation |
+>
+> **Gates (real evidence):** tsc **0 errors** · build **PASS** · lint **0/0** · wording **PASS (218 files)** · new WSB e2e **4/4** (Super access, staff denial, brand de-exposure, notes round-trip+audit) · BI batch **18/18** (opportunity-discovery repointed green, lifecycle, preservation, acquisition-pipeline, sales-estimator, outreach hardening) · A.1+A.2 regression **11/11** intact · BI validators **7/7 PASS** · e7 **PASS (121/0)** · e6 F6 remains the single pre-existing red (design-PNG scope guard) · full sweep **73 PASS / 1 FAIL** (sole red = pre-existing e6-F6) · registry **172 entries / verify exit 0**.
+>
+> No commit / staging / reset / stash / clean / delete. HEAD unchanged `ea700a1`. Sacred PNGs untouched. No credentials, no live provider calls, no runtime AI. Review ZIP refreshed.
+>
+> ---
+> ## ⏸️ PHASE 4 — WORKSTREAM B — RECONCILIATION + SCOPE DEFINITION (2026-09-17) — DONE; IMPLEMENTATION STOPPED FOR APPROVAL
+>
+> **Master Matrix updated (REQUIRED deliverable): `requirements-registry.json` 144 → 171 entries (27 new `workstreamB-*` rows), `_meta.total_entries` synced, `last_updated` 2026-09-17. verify-registry exit 0 at the documented baseline (103 informational flags / 12 reachability — ZERO new).**
+>
+> **VERDICT OF RECONCILIATION:** The cumulative BI mandate is overwhelmingly **already built** in the existing architecture (canonical 12-prospect universe 10 active · lifecycle engine · weighted ICP scoring · 8 opportunity verticals with sports as a category-mapped channel · strategy A/B · national+international taxonomy · outreach/CRM pipeline · zero network in deterministic runs). **No material conflict with the Workstream-B mandate.** Category-first/market-first framing and “sports is not a separate vertical” are already satisfied (`opp-seed-tottenham` is category `Apparel`; `categoryEligibility` fail-closed on `APPROVED_CATEGORIES`).
+>
+> | Area | Status |
+> |---|---|
+> | Requirement matrix A–R | A,B(partial),C,D,E,F,G,H,I(partial),J,K,L,M(partial),N,O(partial),P(partial),Q,R — confidence per matrix rows |
+> | Duplicate engines | NONE — identity bridge + listAcquisitionProspects are the single paths; no Prospect Engine 2 / qualifier 2 / pipeline 2 |
+> | UK coverage | BUILT (10 canonical UK demo brands + Strategy A + UK vertical) |
+> | International | BUILT (10 intl demo brands + Strategy B + international vertical + ≥25 SOURCE_MARKETS) |
+> | Access boundary findings | ① brand-facing Market Intel shows competitor raw score/tier (`workstreamB-z-boundary-exposure`) — **decision gate**; ② BI admin surface is staff-level, not Super-only (intentional? confirm) |
+> | GENUINELY missing / partial | product-discovery surface · contact-sourcing run surface · regional-priority ranking view · notes editor · broader seed category coverage (5 of 10 categories seeded) |
+>
+> **Implementation NOT started.** Proposed minimum-additive plan (listed in the session report) touches >5 files ⇒ per protection rules this window stops for approval. Next: owner approval → implement `workstreamB-z-boundary-exposure` resolution + choose which partial gaps to fill.
+>
+> No commit / no staging / no reset / no stash / no clean / no delete. HEAD unchanged `ea700a1`. A.1 + A.2 intact. No Workstream C/D/E start. Review ZIP refreshed.
+>
+> ---
+> ## ✅ PHASE 4 — WORKSTREAM A.2 (ADMIN ON-BEHALF ASN REGULATED-BRAND FIX) — CHECKPOINT 2026-09-17 — DONE (UNCOMMITTED)
+>
+> **Small targeted additive fix. No commit / no staging / no reset / no stash / no clean / no delete. HEAD unchanged `ea700a1`. Working tree still DIRTY with Phase-4 changes.**
+>
+> | Key | Value |
+> |---|---|
+> | Fix | `src/components/admin/AdminPurchaseOrderDetail.tsx` on-behalf ASN form gained additive **Lot number** + **Expiry date** inputs (aria-labelled, placeholders) wired to the existing `asnLot`/`asnExpiry` state + the existing `handleOnBehalfAsnSubmit` flow; regulated-category UX pre-check mirrors the brand ASN pattern (the `createShipmentForPO` seam still re-enforces). State reset in `beginOnBehalfAsn`. |
+> | E2E | 2 additive tests in `e2e/shipment-asn.spec.ts` #6 (regulated Tapatío PO-9002: refusal without lot/expiry → simulated `SIM-LOT-ADMIN-PO-9002`/`2027-10-01` → submits) + #7 (non-regulated Astonish PO-9001: submits without lot/expiry). **shipment-asn 7/7** · notifications 4/4 (brand ASN flow intact). |
+> | Validators | Full 74-validator sweep → **73 PASS / 1 FAIL** (sole red = pre-existing `validate-e6-brand-surfaces` F6 design-PNG scope guard; PNGs untouched). e7 **PASS (121/0)**. Scope guards repointed per the A.1-established pattern: `AdminPurchaseOrderDetail.tsx` added to e6 `PHASE4_SCOPE` + e7 `PHASE4_DECLARED` (§Phase 4.2 comments) — guard not weakened. |
+> | Gates | tsc **0 errors** · build **PASS** · ASN targeted suites green |
+> | Not changed | Brand ASN flow, admin/brand ack architecture, PO lifecycle, canonical brands/categories, validators' logic, no Workstream B/C/D/E, no UI redesign, no deploy, Rakazo untouched |
+> | Unrelated latent findings (NOT changed) | ① admin on-behalf **ack/ASN panels close before their success notices render** (notice set on the same tick the panel closes, so it is never visible) — pre-existing UI quirk; the ASN tests assert the structural close signal instead; ② cosmetic: `const [onBehalfAsn, …] = useState(false)` at line ~58 lacks the surrounding indent (formatting only, no functional impact) |
+> | Verified no-git-mutation | `git rev-parse HEAD` = `ea700a11…` · staged changes = 0 · no commit/stage/reset/stash/clean/revert |
+>
+> ---
+> ## ✅ PHASE 4 — WORKSTREAM A.1 (ASN REGRESSION + FULL SUITE) — CHECKPOINT 2026-09-17 (LATER WINDOW) — STABLE
+>
+> **Follow-up continuation window on the Workstream A checkpoint. No commit / no staging / no reset / no stash / no clean / no delete. HEAD unchanged `ea700a1`. Branch `redesign/foundation`. Working tree still DIRTY with Phase-4 changes.**
+>
+> | Key | Value |
+> |---|---|
+> | ASN fix (the one must-fix) | `e2e/shipment-asn` tests 1&2 (and same-path `e2e/notifications` 3&4) — FIXED |
+> | Root cause / fix | Tapatío is Grocery (regulated, canonical — untouched). The brand ASN form NEVER exposed lot/expiry inputs (pre-HEAD gap, exposed by Workstream A's canonical Grocery tenant), so the regulated gate was unfillable in the UI. Fixed: 2 additive inputs (`Lot number`/`Expiry date`) wired to the existing (orphaned) `asnLot`/`asnExpiry` state in `src/components/brand/BrandPurchaseOrders.tsx`; specs now supply simulated `SIM-LOT-PO-9002` / `2027-10-01` (mock-first, never real stock data). |
+> | Full `npx playwright test --workers=2` | **283 passed / 0 failed / 2 skipped (10.5m)** — FIRST full run of Phase 4, matches the Phase-3 green baseline counts exactly |
+> | Regressions found by full suite + fixed | ① `e2e/amazon-ads-dashboard` constants stale: `BRAND_UNIVERSE 13→20`, `ACTIVE_CAMPAIGNS 5→7` (demoAdSpend = i%3===0 over the canonical 20); ②+③ `ticketStore.ts` seed tickets referenced DEAD fake-brand message ids (`msg-015/008/023/021/019`) → helpdesk threads rendered "No messages yet."; all FIVE tickets repointed to canonical `msg-<brandId>-N` (tkt-001 → `msg-brand-astonish-1/-2`); the two specs asserting the fake-brand "Marula Oil" body now assert the real canonical body. All genuine Workstream-A canonical-data regressions. |
+> | Validators | Sweep (all 74, exit-code): **73 PASS / 1 FAIL** = pre-existing `validate-e6-brand-surfaces` F6 (untracked `design/*.png` scope guard — documented, PNGs untouched). `validate-e7-embedded-social` is PASS again: its Phase-4 declared-scope list + e6's PHASE4_SCOPE were extended with `src/components/brand/BrandPurchaseOrders.tsx` (established §Phase-4.1 consumer-declaration pattern — guard unchanged, still refuses anything outside). `validate-stage26`: 5 ✗ / exit 0 — pre-existing, untouched. |
+> | Gates | tsc **0 errors** · build **PASS** · ESLint **0/0** · wording **PASS (218 files)** · relevant Playwright subsets all green · full Playwright 285/285 clean |
+> | Remaining (unchanged) | e6 F6 design-PNG scope guard (pre-existing) · stage26 Edge-Function contract drift (pre-existing, exit 0) · Workstreams B/C/D/E NOT started · no UI redesign · no deploy · Rakazo untouched |
+> | Verified no-git-mutation | `git rev-parse HEAD` = `ea700a11…` · staged changes = 0 |
+>
+> **STOPPED BY OWNER at end of Workstream A implementation — handoff checkpoint. NO commit was made; NO staging/reset/stash/clean/delete was performed. Working tree is DIRTY with Phase-4 changes.**
+>
+> | Key | Value |
+> |---|---|---|
+> | Repository | `/Users/tadii/Desktop/1. Mercenta` |
+> | Branch | `redesign/foundation` |
+> | HEAD | `ea700a11b1f5092d307fa909f00a89eb8e8bb255` (UNCHANGED — zero commits this run) |
+> | Protected baseline | `959b4d2` — confirmed ancestor (PASS) |
+> | Phase this run | Phase 4 — canonical 20 REAL brands (Workstream A) |
+> | Status | IN PROGRESS — Workstream A substantially implemented, NOT yet fully green, NOT committed |
+>
+> ### Workstream A completed this run (canonical 20 real brands)
+> - `src/data/demoData.ts` (canonical SSOT): replaced invented tenants with canonical **20 REAL brands** (10 UK: Astonish, Seep, Delphis Eco, Kit & Kin, Bulldog Skincare, Joseph Joseph, Roberts Radio, Clipper Teas, Regatta, Autoglym; 10 international: Tapatío, Cholula, Valentina, Fly By Jing, LocknLock, Le Creuset, Moleskine, Sennheiser, Vileda, Logitech). `DemoBrand` + `market` (uk|international) + `website`. `ALL_DEMO_BRANDS` = exactly these 20. Roles: CLEARED=`[brand-astonish, brand-tapatio]`; COMPLIANCE_SCENARIO=`[brand-lecreuset, brand-autoglym]`; DEMO_MODEL_A=`brand-astonish` / DEMO_MODEL_B=`brand-tapatio`; `DEMO_LOGIN_BRAND_IDS` (representative 6-card subset, §16). `skuFor()` → `ASTO-001`-style.
+> - `src/types.ts`: `DemoRegion` `'africa'|'usa'|'europe'` → `'uk'|'usa'|'europe'`.
+> - `src/data/brandDossiers.ts`: `currencyFor()` nation-aware (UK → GBP); `dossierRegionFor()` → uk/usa/europe.
+> - `src/data/regionalDossiers.ts`: `REGIONAL_DOSSIERS` now DERIVED from canonical real brands via `buildBrandDossier` (uk→Astonish, usa→Tapatío, europe→Le Creuset). Fake dossiers (Zambezi / Austin Premium Botanicals / Munich Clean-Care) removed.
+> - `src/data/demoStore.ts`: PCR seeds, team members, return addresses, PO outages, payout-destination unverified brand, comments → canonical ids.
+> - `src/data/bootstrap.ts`: `INITIAL_LEADS` = 8 explicitly-simulated fixture rows (must never collide with canonical BI universe — pinned by validators).
+> - Consumers repointed: `api.ts`, `Login.tsx` (nation flags + representative subset + `nationFlag` fallback), `HelpdeskDashboard.tsx`, `CarrierDashboard.tsx`, `OnboardingWizard.tsx`, `DesignSystemShowcase.tsx`, `companiesHouseMock.ts`, `ticketStore.ts`, `scenarioEngine.ts`, `returnsTracking.ts`, `investorDemo.ts`, `dhl/domain.ts`, `discovery/engine.ts`, `discovery/firecrawlClient.ts`, `research/keepaClient.ts`, `research/productResearchEngine.ts`, `research/resellerTracker.ts`, `services/xero/demoData.ts`, `services/xero/xeroClient.ts`.
+> - Supabase: `supabase/migrations/016_seed_demo_data.sql` regenerated from canonical 20 (`scripts/gen-seed-migration.py` rewritten; fixed its hardcoded wrong output path to the old empty stub workspace).
+> - Validators repointed: `integrity-audit.mjs`, `validate-e6-brand-surfaces.mjs` (PHASE4_SCOPE), `validate-e7-embedded-social.mjs` (PHASE4_DECLARED + migrations + e2e/ prefix), `validate-brandcomm-ssot.mjs`, `validate-canonical-model.mjs`, `validate-mock-providers.mjs`, `validate-company-control-centre.mjs`, `validate-review-s4.mjs`, `validate-stage15.mjs`, `validate-reseller-tracker.mjs`, `validate-e4-commerce.mjs` (PO-SIM regex).
+> ### Validations run + PASSED this session (real evidence)
+> - `npx tsc --noEmit -p tsconfig.app.json` → **0 errors** · `npm run build` → **PASS (~4.1s)** · `npm run lint` → **0/0** · `lint-wording` → **PASS (218 files)** · `integrity-audit` → **61/61 PASS**
+> - **Validator sweep (exit code): 73 PASS / 1 FAIL** — sole red = `validate-e6-brand-surfaces` F6 (known pre-existing working-tree scope guard from untracked `design/*.png`; NOT a product defect; same as Phase 2/3 baseline).
+> - Passed individually (all): investor-demo, bi-lifecycle, bi-intelligence-preservation, acquisition-pipeline, prospect-pipeline, brandcomm-ssot, reseller-tracker, canonical-model, e3-catalog, e4-commerce, mock-providers, mock-seam, provider-workflows, financial-reconciliation, document-verification, amazon-ads, command-centre, company-control-centre, funding-pipeline, launch-centre, e5-admin-surfaces, e7-embedded-social, demo-completeness (27/27), review-s4, stage3/5/10/11/14/15/16, tenant-coherence, commercial-model-selection.
+> - **Playwright (targeted subsets):** multi-tenant + commercial-model + app-shell → **33 passed** · crm → **6 passed** · compliance-gate + brand-operational + admin-operational + commerce-operational → 18 passed / 1 failed (crm#3 FIXED afterwards; rerun 6 passed) · brand-operational + admin-operational rerun after ASTO-001 fix → **9 passed** · commerce-operational + po-lifecycle + shipment-asn + catalog + embedded-social → 29 passed / **2 failed (both shipment-asn)**.
+>
+> ### KNOWN REMAINING FAILURES (next session must-fix)
+> 1. **`e2e/shipment-asn.spec.ts` tests 1 & 2** — **RESOLVED 2026-09-17 (later window).** Tapatío is Grocery (regulated, canonical — classification unchanged). The brand ASN form gained additive `Lot number` + `Expiry date` inputs wired to the existing `asnLot`/`asnExpiry` state (`BrandPurchaseOrders.tsx`); `shipment-asn.spec` 1&2 + `notifications.spec` 3&4 now supply simulated `SIM-LOT-PO-9002`/`2027-10-01`. Both specs fully green (9/9). Full suite **283/0/2**.
+> 2. `validate-e6-brand-surfaces` F6 — pre-existing documented condition (untracked `design/*.png` incl. 3 sacred + new user image `design/ChatGPT Image Sep 17, 2026, 03_46_58 AM.png`). Not a product defect; validator + PNGs untouched.
+> 3. `validate-stage26.mjs` prints 5 ✗ but exits 0 (compliance-gate-check + catalog-import Edge-Function API contract) — **PROVEN pre-existing at HEAD `ea700a1`** (reproduced on pristine clone); unrelated to Phase 4.
+> 4. **Full Playwright suite NOT run** this session (only surface subsets). **RESOLVED 2026-09-17 (later window): full `npx playwright test --workers=2` → 283 passed / 0 failed / 2 skipped (10.5m)** — green; 3 genuine Workstream-A regressions found & fixed (amazon-ads constants; ticket→message linkage in `ticketStore.ts`; Marula-Oil assertions repointed to canonical bodies).
+>
+> ### Workstreams NOT started (next sessions)
+> - **B:** Brand Intelligence / commercial discovery (UK/international classification on BI prospects, Amazon fit, ICP/fit, distribution/partnership fit, **UK sports-team opportunities as real prospects**, category mapping, qualification/acquisition flow).
+> - **C:** Super Admin / Control Centre completion (outstanding matrix items; Solo Founders Program / The Bridge / Ignyte placement; Tottenham via general sports-partnership architecture).
+> - **D:** demo/investor data integrity final pass (representative one-click demo access, no fake-brand leakage).
+> - **E:** remaining matrix items.
+> - **Full regression** after workstreams complete; then docs; then (only with explicit approval) commit.
+>
+> ### Phase terminology
+> Still the **Phase 4 build** (master build directive), Workstream A in progress. No phase number advanced. Order preserved: complete functional build → UI/UX redesign → deployment. No redesign, no deployment, no Rakazo, no credentials work done.
+>
+> ---
+> ---
+> - E2E specs repointed (32 spec files: display names, PO-SIM-BRAND-ASTONISH, ASTO-001 etc.).
+> ## ✅ PHASE 3 — FULL AUTHORITATIVE REGRESSION (2026-09-16, EXECUTED — GREEN)
+>
+> Full authoritative regression re-run against the current Phase-2 verified
+> checkpoint. Repository confirmed: `/Users/tadii/Desktop/1. Mercenta`, branch
+> `redesign/foundation`, HEAD `ea700a1` (ea700a11b1f5092d307fa909f00a89eb8e8bb255),
+> protected baseline `959b4d2` confirmed an ancestor, shell fully functional.
+> ZERO source changes — regression-only phase.
+>
+> | # | Gate | Phase-3 command | ACTUAL Phase-3 result (executed this session) |
+> |---|---|---|---|
+> | 0 | Repository identity / safety gate | `pwd`, `git rev-parse --show-toplevel/HEAD`, `git branch --show-current`, `git status --short`, `git merge-base --is-ancestor 959b4d2 HEAD` | ALL expected — root/branch/HEAD match, baseline is ancestor, working tree = the exact Phase-2 continuation (HANDOFF.md, PROJECT_STATUS.md, Review Zip modified; 3 reserved untracked `design/` PNGs) |
+> | 1 | TypeScript | `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** (exit 0) |
+> | 2 | Build | `npm run build` | **PASS** — ✓ built in 2.89s (exit 0) |
+> | 3 | ESLint | `npm run lint` = `eslint .` (no exclusions) | **PASS** — 0 errors, 0 warnings |
+> | 4 | Wording lint | `node scripts/lint-wording.mjs` | **PASS** — scanned 218 src files, 0 outward-facing violations |
+> | 5 | Validator sweep | all 74 `scripts/validate-*.mjs` run individually | **73 PASS / 1 FAIL** — the ONLY red is `validate-e6-brand-surfaces.mjs` F6 working-tree scope guard, caused solely by the 3 user-reserved untracked `design/` PNGs (known repository-scope condition, NOT a product defect; PNGs untouched); all 40 other E6 checks PASS incl. F9 ZERO external network calls |
+> | 6 | Requirements registry | `node scripts/verify-registry.mjs` | **exit 0** — 144 entries (95 built / 47 built_and_tested / 2 regressed); the 103 flagged "issues" are informational exit-0 flags (e2e-reference gaps) by script design |
+> | 7 | Integrity audit | `node scripts/integrity-audit.mjs` | **61/61 PASS** (`PASSED: 61 FAILED: 0`, incl. embedded typecheck/build/wording) |
+> | 8 | RLS audit | `node scripts/rls-audit.mjs` | **PASS** — 33 tables · 33 RLS-enabled · 48 policies · 94 checks (`RLS_STATIC_AUDIT_PASS`) |
+> | 9 | Investor demo | `node scripts/validate-investor-demo.mjs` | **PASS** — 25-stage lifecycle, deterministic, replay-stable digest (reset→run reproduces SAME digest), ZERO network calls |
+> | 10 | Full Playwright regression | `npx playwright test --workers=2` | **283 passed / 0 failed / 2 skipped (11.2m)** — identical to the historical Phase-2 count (285 total) |
+> | 11 | Platform contract cross-check | read-only STEP 11 (A–H) | **A–H all verified** — A: qualification INSIDE Brand Intelligence, no standalone engine; B: ICP consumes canonical BI prospect data (no duplicate path); C: Amazon Ads REQUIRED chain `useAdSpendBudgets`→`fetchAdSpendBudgets`→`AmazonAdsDashboard` + 19-check validator PASS; D: runtime AI FREE-ONLY (no paid fallback; fail-closed refusal; no OpenRouter call made by this regression); E: deterministic-first operations (deterministic→cache→local→free→refused); F: Brand Overview (SEE/UNDERSTAND) vs Brand Operational (ACT/COMPLETE) remain DISTINCT (UI-redesign phase); G: Rakazo deferred LAST; H: security/credential hardening deferred |
+> | 12 | Review ZIP | `bash scripts/export-review-zip.sh` | **SUCCEEDED** — 37M (38,160,426 bytes) at `Review Zip/mercenta-review.zip`, **Credential guard: PASS** (no `.env`; `.env.example` deliberately excluded) |
+>
+> Working tree at the end of Phase 3: source byte-identical to the Phase-2
+> verified checkpoint ea700a1. Only HANDOFF.md / PROJECT_STATUS.md /
+> `Review Zip/mercenta-review.zip` modified, plus the 3 reserved untracked
+> `design/` PNGs (untouched; never staged/committed). No live credentials
+> entered, no live provider contacted, no OpenRouter runtime credits consumed,
+> no source/config/test/validator modification, no Git mutation, no deploy.
+>
+> **VERDICT: GREEN.** No product regression exists; the Phase-2 verified state is
+> independently re-confirmed by actual Phase-3 execution. Phase 4 (CORE-COMPLETE
+> DECLARATION) is the next gated step and was NOT started. Nothing was committed.
+>
+> The block immediately below (⛔ BLOCKED) is the historical record of the earlier
+> failed-execution attempt and is retained verbatim, SUPERSEDED by this executed GREEN run.
+>
+> ---
+> ## ⛔ PHASE 3 — FULL REGRESSION (2026-09-16, STARTED BUT BLOCKED AT EXECUTION — NOT GREEN)
+>
+> **Phase 3 was started but could NOT be executed. The environment's terminal /
+> shell backend failed ("The terminal's shell process has exited") on every
+> command attempt (16+ probes), so NONE of the authoritative gates could be
+> re-run this session: tsc, build, eslint, lint-wording, the validator sweep,
+> verify-registry, integrity-audit, rls-audit, validate-investor-demo, and the
+> full Playwright suite were ALL NOT EXECUTED. The review-ZIP export could also
+> not be run (shell-dependent).**
+>
+> **Read-only verification completed (NO source changes):**
+> - Branch `redesign/foundation`, HEAD `ea700a1` (unchanged), protected baseline
+>   `959b4d2` confirmed an ancestor.
+> - `git status --porcelain` shows ONLY the Phase-2 documentation updates
+>   (HANDOFF.md, PROJECT_STATUS.md), the generated `Review Zip/mercenta-review.zip`,
+>   and the 3 user-reserved untracked `design/` PNGs — **NO source (.ts/.tsx) file
+>   is modified**, so the source scope is byte-identical to the Phase 2 verified
+>   checkpoint `ea700a1`.
+> - The known F6 working-tree scope guard remains red from the 3 reserved
+>   untracked PNGs (documented repository-scope condition, NOT a product defect);
+>   the PNGs are untouched.
+> - No credentials entered, no live provider contacted, no OpenRouter runtime
+>   credits consumed, no paid runtime AI introduced, no UI redesign, Rakazo and
+>   security/credential work untouched.
+>
+> **VERDICT: NOT GREEN — BLOCKED. The regression was NOT run.** Phase 3 must be
+> re-executed in an environment with a working shell before any green /
+> core-complete declaration. The Phase 2 verified state (full Playwright
+> 283 passed / 0 failed / 2 skipped · 73/74 validators with F6 = PNG scope guard ·
+> integrity 61/61 · RLS 94 checks · tsc 0) remains the last verified checkpoint.
+> Because NO source changed, that Phase 2 state is not contradicted, but Phase 3
+> independence could not be re-established this session.
+>
+> **NEXT (exact):** re-run the FULL Phase 3 regression in a working environment,
+> then Phase 4 — CORE-COMPLETE DECLARATION.
+>
+> ---
+
+> ---
+> ## ✅ PHASE 2 — BOUNDED PLATFORM-WIDE WIRING RECONCILIATION (2026-09-16, read-only)
+>
+> **HEAD `ea700a1` (unchanged), branch `redesign/foundation`, protected baseline
+> `959b4d2` ancestor. ZERO source changes — the reconciliation found NO genuine
+> functional wiring defect. Documented result + documentation update only.**
+>
+> **What was verified (edge-by-edge, using existing seams/validators/E2E):**
+> - **Chain A — Brand → product → catalogue → compliance → submission →
+>   Amazon/Vendor SIM → PO → ack → shipment → receiving → invoice → payment →
+>   exception → dispute/case:** `evaluateCommerceEligibility` gates PO creation
+>   on E3 catalog completeness + compliance gate + latest submission state
+>   (rejected submissions block commerce); `createCommercePurchaseOrder` →
+>   `acknowledge` → `fulfil` → `advanceShipment` → `receive` (raises shortage
+>   deductions via `reconcileDelivery`) → `issueInvoice` → `recordPayment` →
+>   `raiseException` → `openDispute` → `resolveDispute` → `openCase`, all via ONE
+>   canonical `commerceLifecycle.ts` write-path (`recordStep` → activity + audit
+>   + D4 mirror); POs land in the same `demoPurchaseOrders` store that
+>   `BrandPurchaseOrders` reads (tenant-filtered, §Stage-20.3); every
+>   PO/shipment/invoice/deduction stamped `simulated: true` with `PO-SIM-` ids and
+>   "no live provider contacted" wording. No duplicate store, no invented live
+>   operation.
+> - **Chain B — PO → fulfilment → ASN → receiving → invoice → payment →
+>   chargeback/exception → case/operational task:** transitions legal + idempotent
+>   (duplicate ack/invoice refused); `financialReconciliation.ts` reconciles
+>   payment → PO/invoice deterministically (duplicate refused), deductions resolve
+>   before payout eligibility; shortage exceptions auto-raise to the canonical
+>   Deductions ledger; E4 commerce E2E covers PO→ack→fulfil→receive→invoice→
+>   payment AND raise→dispute→resolve, admin cross-tenant refusals. Confirmed
+>   green.
 > ## ✅ PHASE 1 — CORE GAP CLOSURE (2026-09-16, session: 0B.4 build queue)
 >
 > **HEAD `50668b9` (Phase 1 committed: `117b8d3` prior-state doc closeout →
 > `fe47bf2` Phase 1 feature → `50668b9` artefacts refresh), branch
+> - **Chain C — Brand Intelligence → QUALIFICATION → ICP/acquisition → CRM →
+>   outreach:** qualification is INSIDE `prospectLifecycle` (`checkDisq` scoring,
+>   STICKY manual disqualification, explicit `requalifyProspect`); acquisition
+>   consumes the SAME prospect store (`listAcquisitionProspects` filters
+>   `!disqualified`; `intelligence` read live by reference — no copy); outreach
+>   destinations are canonical via `normalizeBrandKey` with `.example`
+>   placeholders and fail-closed `outreachSender` (never claims sent without a
+>   live transport; Phase D3 hardening intact); CRM records keyed by brand with
+>   per-tenant metadata + unified timeline; three-chain connectivity
+>   (BI→ICP→CRM→outreach) proven by `validate-acquisition-pipeline` (0 network) +
+>   `acquisition-pipeline` spec + `bi-intelligence-preservation`/`bi-lifecycle`
+>   validators. Tapatío → `hello@tapatio.example` pinned (BrandComm SSOT PASS).
+> - **Chain D — operational state → Command Centre (ranked queue + WHY) → Launch
+>   Centre → investor/demo lifecycle:** `COMMAND_FACTORS` (8 declared factors) +
+>   `commandWhy` + `rankQueue` drive the founder queue from the canonical stores
+>   (POs, shipments, applications, prospects, `rankOpportunities`, funding
+>   pipeline, `getLaunchRecords()`/`LAUNCH_PLATFORMS`); every CTA is a real tab
+>   destination; validator 39 checks PASS (no AI in ranking). Launch Centre
+>   validator 27 checks PASS (zero network). **25-stage investor demo**:
+>   `validate-investor-demo` PASS (deterministic, zero network, replay-stable,
+> - **Amazon Ads (required, implemented):** `useAdSpendBudgets` seam →
+>   `fetchAdSpendBudgets` → `AmazonAdsDashboard` (Super Admin nav), per-brand
+>   budget/spend/ACOS/TACOS/status, joined to canonical brands, honest mode label,
+>   `advertising_commission` at its true £0 — validator 19 checks PASS + 2 E2E
+>   tests green; NOT deferred.
+> - **Platform AI DAY-TO-DAY RUNTIME = FREE-ONLY:** `modelPolicy.ts` free-only
+>   (`deepseek/deepseek-v4-flash:free` only; `isModelAllowed` free-only; tasks not
+>   free-sufficient are REFUSED, no paid fallback); all runtime call sites route
+>   through `authoriseAiCall` → fail-closed; NO hardcoded key in src (only
+>   `VITE_OPENROUTER_API_KEY` env hint + Super Admin OpenRouter card); REPETITIVE
+>   tasks stay DETERMINISTIC (no AI for status/KPI/ranking/validation/state
+>   transitions — pinned by zero-network validators). Cline development AI is
+>   separate and was NOT changed.
+>
+> **GATE EVIDENCE THIS SESSION (real output):** `npx tsc --noEmit -p
+> tsconfig.app.json` → **0 errors** · `npm run build` → **✓ 3.80s** ·
+> `lint-wording` → **PASS (218 files)** · **73/74 `scripts/validate-*.mjs` PASS**
+> (only `validate-e6-brand-surfaces` F6 red = pre-existing working-tree scope
+> guard caused SOLELY by the 3 user-reserved untracked `design/*.png` — NOT
+> modified/deleted/renamed to satisfy it; not a product defect) ·
+> `verify-registry.mjs` → exit 0 (103 pre-existing informational flags) ·
+> `integrity-audit.mjs` → **61/61 PASS** · `rls-audit.mjs` → **PASS (33 tables,
+> 94 checks)** · **FULL Playwright suite `--workers=2` → 283 passed / 0 failed /
+> 2 skipped (11.0m)**. Regenerated `playwright-report/` + `test-screenshots/`
+> artefacts restored to HEAD after the run (no source drift).
+>
+> **NO SOURCE CHANGES MADE** — no genuine wiring defect found; per the master
+> prompt §22 the verified result is documented and the next approval gate is
+> Phase 3 FULL REGRESSION. Only docs updated: this record + HANDOFF.md.
+>
+> **Future optimisations recorded (NOT implemented, out of bounded scope):**
+> (1) `modelPolicy.ts` retains dead `'paid_max'` member in the `RuntimeTier`
+> union — no code path returns it; candidate for a later type-cleanup pass.
+> (2) F6 scope guard red due to untracked PNGs — to be revisited only if/when the
+> guard is ever repointed; PNGs stay untouched.
+>   every stage ok) + investor-demo E2E (full lifecycle, no external call,
+>   reset → same digest, RBAC refusals, failure drills).
+> - **Google / Company / Government surfacing:** `exchange_pending` is NEVER
+>   rendered as connected (`markGoogleConnected` only after real server-side
+>   exchange; refresh token never in browser); Companies House mock returns
+>   `SIMULATED REGISTRAR` + NO invented Mercenta facts; HMRC remains
+>   READY/NOT-CONNECTED blocked until VAT credentials; confirmation-statement
+>   auto-filing REFUSED honestly. Google = CRED + F-ACTION (OAuth client id +
+>   Edge Function), validated by `validate-google-integration` (42 checks) +
+>   `validate-company-control-centre` PASS + `company-control-centre` spec.
 > `redesign/foundation`, protected baseline `959b4d2` ancestor. Full approved
 > Option-A cohort executed and committed. Phase 2/3/4 NOT started.**
 >

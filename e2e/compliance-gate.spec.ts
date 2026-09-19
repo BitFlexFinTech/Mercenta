@@ -3,15 +3,15 @@
  *
  * Phase 7F added deterministic compliance-scenario PORTAL tenants to the
  * canonical demo dataset (src/data/demoData.ts → COMPLIANCE_SCENARIO_DOC_STATES):
- *   - "Reed & Oak Kitchen Co"      — 0/5 required docs approved (Kitchen → 5
+ *   - "Le Creuset"      — 0/5 required docs approved (Kitchen → 5
  *     required; uploaded/under_review/missing). Contract active + both
  *     §4.1/§4.2 agreements accepted → gate blocked by the DOCUMENT state alone.
- *   - "MotorVista Auto Supply Ltd" — 4/5 approved (type_approval missing) →
+ *   - "Autoglym" — 4/5 approved (type_approval missing) →
  *     gate still blocked by the single remaining document.
  *
  * The fully-cleared path is covered by the existing cleared tenants:
- *   - "Zambezi Organic Extracts Ltd" — exactly 5/5 (Health & Personal Care).
- *   - "DeskForge Supplies Inc"       — 4/4 (Office Products, no category extra).
+ *   - "Astonish" — exactly 5/5 (Health & Personal Care).
+ *   - "Tapatío"       — 4/4 (Office Products, no category extra).
  *
  * The tests assert user-visible behavior (catalog CTA + gate banner + the
  * compliance page gate card) — never the data store alone.
@@ -21,7 +21,7 @@ import { loginAs } from './helpers/auth';
 
 test.describe('Compliance Gate', () => {
   test('1. 0/5 docs -> catalog blocked', async ({ page }) => {
-    await loginAs(page, 'Reed & Oak Kitchen Co', 1100);
+    await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
@@ -46,7 +46,7 @@ test.describe('Compliance Gate', () => {
   });
 
   test('2. 4/5 docs -> still blocked', async ({ page }) => {
-    await loginAs(page, 'MotorVista Auto Supply Ltd', 1100);
+    await loginAs(page, 'Autoglym', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
@@ -62,8 +62,8 @@ test.describe('Compliance Gate', () => {
   });
 
   test('3. 5/5 docs + signed/active contract -> catalog enabled', async ({ page }) => {
-    // Zambezi — Health & Personal Care: exactly 5/5 required docs approved.
-    await loginAs(page, 'Zambezi Organic Extracts Ltd', 1100);
+    // Astonish — Health & Personal Care: exactly 5/5 required docs approved.
+    await loginAs(page, 'Astonish', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
@@ -72,8 +72,8 @@ test.describe('Compliance Gate', () => {
     await expect(addBtn).toBeEnabled();
     await expect(page.locator('button', { hasText: 'Catalog Locked' })).not.toBeVisible({ timeout: 2000 });
 
-    // DeskForge — Office Products: 4/4 required docs approved (cleared).
-    await loginAs(page, 'DeskForge Supplies Inc', 1100);
+    // Tapatío — Office Products: 4/4 required docs approved (cleared).
+    await loginAs(page, 'Tapatío', 1100);
     const nav2 = page.locator('nav[aria-label="Primary"]');
     await nav2.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
@@ -97,11 +97,11 @@ test.describe('Compliance Gate', () => {
    * the row's own status badge stayed on its pre-upload value (the user saw
    * "Document uploaded and marked for review." next to a stale badge).
    *
-   * Reed & Oak Kitchen Co (brand-reedkitchen) is the 0/5 scenario tenant; its
+   * Le Creuset (brand-lecreuset) is the 0/5 scenario tenant; its
    * brand_registry_confirmation document is present with status `missing`.
    */
   test('5. brand document Upload reflects immediately (no reload, no approval)', async ({ page }) => {
-    await loginAs(page, 'Reed & Oak Kitchen Co', 1100);
+    await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('UK Compliance').first().click();
     await page.waitForTimeout(900);

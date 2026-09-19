@@ -1,10 +1,79 @@
 #!/usr/bin/env python3
-"""Write migration 016_seed_demo_data.sql"""
+"""Regenerate supabase/migrations/016_seed_demo_data.sql - CANONICAL 20 REAL BRANDS."""
 import os
 
-sql = r"""-- Seed demo data for Supabase persistent mode.
+ROOT = '/Users/tadii/Desktop/1. Mercenta'
+OUTPATH = os.path.join(ROOT, 'supabase', 'migrations', '016_seed_demo_data.sql')
+
+A = lambda h: f"a0000000-0000-0000-0000-0000000000{h}"
+B = lambda h: f"b0000000-0000-0000-0000-0000000000{h}"
+C = lambda h: f"c0000000-0000-0000-0000-0000000000{h}"
+D = lambda h: f"d0000000-0000-0000-0000-0000000000{h}"
+E = lambda h: f"e0000000-0000-0000-0000-0000000000{h}"
+
+BRANDS = [
+  ('01', 'Astonish',         'Home',                    'financed'),
+  ('02', 'Seep',             'Home',                    'direct_fulfillment'),
+  ('03', 'Delphis Eco',      'Home',                    'direct_fulfillment'),
+  ('04', 'Kit & Kin',        'Baby',                    'direct_fulfillment'),
+  ('05', 'Bulldog Skincare', 'Health & Personal Care',  'direct_fulfillment'),
+  ('06', 'Joseph Joseph',    'Kitchen',                 'direct_fulfillment'),
+  ('07', 'Roberts Radio',    'Consumer Electronics',    'direct_fulfillment'),
+  ('08', 'Clipper Teas',     'Grocery',                 'direct_fulfillment'),
+  ('09', 'Regatta',          'Apparel',                 'direct_fulfillment'),
+  ('0a', 'Autoglym',         'Automotive',              'direct_fulfillment'),
+  ('0b', 'Tapatio',          'Grocery',                 'direct_fulfillment'),
+  ('0c', 'Cholula',          'Grocery',                 'direct_fulfillment'),
+  ('0d', 'Valentina',        'Grocery',                 'financed'),
+  ('0e', 'Fly By Jing',      'Grocery',                 'direct_fulfillment'),
+  ('0f', 'LocknLock',        'Kitchen',                 'direct_fulfillment'),
+  ('10', 'Le Creuset',       'Kitchen',                 'direct_fulfillment'),
+  ('11', 'Moleskine',        'Office Products',         'direct_fulfillment'),
+  ('12', 'Sennheiser',       'Consumer Electronics',    'direct_fulfillment'),
+  ('13', 'Vileda',           'Home',                    'direct_fulfillment'),
+  ('14', 'Logitech',         'Personal Computer',       'direct_fulfillment'),
+]
+
+def brand_rows():
+    return [f"  ('{A(h)}', '{n}',            '{t}',            'Active')" for (h, n, _c, t) in BRANDS]
+
+def product_rows():
+    rows = []
+    for pi, (h, name, cat, _t) in enumerate(BRANDS, start=1):
+        prefix = ''.join(ch for ch in name if ch.isalnum())[:3].upper()
+        for n in (1, 2):
+            rows.append(f"  ('{B(f'{pi:02x}')}', '{A(h)}', '{prefix}-{n:02d}', 'P{pi:02d}{n:02d}01', '{name} {cat} Line {n}', {10 + pi}, {6 + pi}, '{cat}', 'active')")
+    return rows
+
+def po_rows():
+    rows = []
+    for bi, (h, _n, _c, _t) in enumerate(BRANDS[:10]):
+        for pi, st in enumerate(('received', 'under_review', 'accepted')):
+            idx = bi * 3 + pi
+            rows.append(f"  ('{C(f'{idx + 1:02x}')}', '{A(h)}', 'PO-{9000 + idx}', '{st}', now() - interval '{(bi + 1) * 5} days', now() + interval '{(bi + 1) * 2} days', current_date - 7, current_date + 9)")
+    return rows
+
+def shipments_rows():
+    rows = []
+    for si in range(1, 8):
+        carrier = 'dhl' if si % 3 else 'fedex'
+        rows.append(f"  ('{D(f'{si:02x}')}', '{C(f'{si:02x}')}', '{A(BRANDS[(si - 1) // 3][0])}', '{carrier}', 'DHL-PO-9{si:03d}', 'transit')")
+    return rows
+
+def contracts_rows():
+    return [f"  ('{E(f'{i:02x}')}', '{A(h)}', 'distribution_agreement', 'active', now() - interval '{i * 30} days')" for i, (h, _n, _c, _t) in enumerate(BRANDS, start=1)]
+def build():
+    q1 = ",\n".join(brand_rows())
+    q2 = ",\n".join(product_rows())
+    q3 = ",\n".join(po_rows())
+    q4 = ",\n".join(shipments_rows())
+    q5 = ",\n".join(contracts_rows())
+    return f"""-- Seed demo data for Supabase persistent mode.
 -- Deterministic UUIDs map each demo brand to a fixed identity so live-mode
 -- queries return the same data the demo mode returns from demoStore.ts.
+--
+-- Phase 4: canonical 20 REAL brands (10 UK + 10 international), mirroring
+-- src/data/demoData.ts. Operational rows are SIMULATED records.
 --
 -- Brand UUID prefix:   a0000000-0000-0000-0000-0000000000XX
 -- Product UUID prefix: b0000000-0000-0000-0000-0000000000XX
@@ -14,89 +83,24 @@ sql = r"""-- Seed demo data for Supabase persistent mode.
 --
 -- ON CONFLICT DO NOTHING so re-running is safe.
 
-/* ── Brands ──────────────────────────────────────────────────────────── */
+/* -- Brands (canonical 20 real brands) -- */
 
 INSERT INTO brands (id, name, fulfillment_track, lifecycle_stage) VALUES
-  ('a0000000-0000-0000-0000-000000000001', 'Zambezi Organic Extracts Ltd',    'financed',            'Lead'),
-  ('a0000000-0000-0000-0000-000000000002', 'Nordhaus Living ApS',             'direct_fulfillment',  'Active'),
-  ('a0000000-0000-0000-0000-000000000003', 'Little Kiwi Baby Co',             'financed',            'Lead'),
-  ('a0000000-0000-0000-0000-000000000004', 'DeskForge Supplies Inc',          'direct_fulfillment',  'Active'),
-  ('a0000000-0000-0000-0000-000000000005', 'Munich Clean-Care GmbH',          'direct_fulfillment',  'Lead'),
-  ('a0000000-0000-0000-0000-000000000006', 'Culinary Forge B.V.',             'financed',            'Active'),
-  ('a0000000-0000-0000-0000-000000000007', 'Voltaic Audio LLC',               'direct_fulfillment',  'Lead'),
-  ('a0000000-0000-0000-0000-000000000008', 'ApexDrive Auto Care Ltd',         'financed',            'Active'),
-  ('a0000000-0000-0000-0000-000000000009', 'Harvest Lane Foods Pty',          'financed',            'Lead'),
-  ('a0000000-0000-0000-0000-00000000000a', 'Sahara Threads SARL',             'direct_fulfillment',  'Lead'),
-  ('a0000000-0000-0000-0000-00000000000b', 'PixelPerch Accessories Inc',      'direct_fulfillment',  'Active')
+{q1}
 ON CONFLICT (id) DO NOTHING;
-/* ── Products (2 per brand) ──────────────────────────────────────────── */
+
+/* -- Products (2 per brand, simulated) -- */
 
 INSERT INTO products (id, brand_id, sku, ean, name, ex_works_cost, case_pack, category, status) VALUES
-  -- Zambezi Organic Extracts
-  ('b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'ZAMB-001', '600010001145', 'Zambezi Health & Personal Care Line 1', 12, 6, 'Health & Personal Care', 'active'),
-  ('b0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'ZAMB-002', '600010002245', 'Zambezi Health & Personal Care Line 2', 16, 10, 'Health & Personal Care', 'active'),
-  -- Nordhaus Living
-  ('b0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000002', 'NORD-001', '600020001145', 'Nordhaus Home Line 1', 13, 8, 'Home', 'active'),
-  ('b0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000002', 'NORD-002', '600020002245', 'Nordhaus Home Line 2', 17, 12, 'Home', 'active'),
-  -- Little Kiwi Baby
-  ('b0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000003', 'LITK-001', '600030001145', 'Little Kiwi Baby Line 1', 14, 10, 'Baby', 'active'),
-  ('b0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000003', 'LITK-002', '600030002245', 'Little Kiwi Baby Line 2', 18, 14, 'Baby', 'active'),
-  -- DeskForge Supplies
-  ('b0000000-0000-0000-0000-000000000007', 'a0000000-0000-0000-0000-000000000004', 'DESK-001', '600040001145', 'DeskForge Office Products Line 1', 15, 12, 'Office Products', 'active'),
-  ('b0000000-0000-0000-0000-000000000008', 'a0000000-0000-0000-0000-000000000004', 'DESK-002', '600040002245', 'DeskForge Office Products Line 2', 19, 16, 'Office Products', 'active'),
-  -- Munich Clean-Care
-  ('b0000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000005', 'MUNC-001', '600050001145', 'Munich Health & Personal Care Line 1', 16, 14, 'Health & Personal Care', 'active'),
-  ('b0000000-0000-0000-0000-00000000000a', 'a0000000-0000-0000-0000-000000000005', 'MUNC-002', '600050002245', 'Munich Health & Personal Care Line 2', 20, 18, 'Health & Personal Care', 'active'),
-  -- Culinary Forge
-  ('b0000000-0000-0000-0000-00000000000b', 'a0000000-0000-0000-0000-000000000006', 'CULI-001', '600060001145', 'Culinary Forge Kitchen Line 1', 17, 16, 'Kitchen', 'active'),
-  ('b0000000-0000-0000-0000-00000000000c', 'a0000000-0000-0000-0000-000000000006', 'CULI-002', '600060002245', 'Culinary Forge Kitchen Line 2', 21, 20, 'Kitchen', 'active'),
-  -- Voltaic Audio
-  ('b0000000-0000-0000-0000-00000000000d', 'a0000000-0000-0000-0000-000000000007', 'VOLT-001', '600070001145', 'Voltaic Audio Consumer Electronics Line 1', 18, 18, 'Consumer Electronics', 'active'),
-  ('b0000000-0000-0000-0000-00000000000e', 'a0000000-0000-0000-0000-000000000007', 'VOLT-002', '600070002245', 'Voltaic Audio Consumer Electronics Line 2', 22, 22, 'Consumer Electronics', 'active'),
-  -- ApexDrive Auto Care
-  ('b0000000-0000-0000-0000-00000000000f', 'a0000000-0000-0000-0000-000000000008', 'APEX-001', '600080001145', 'ApexDrive Automotive Line 1', 19, 20, 'Automotive', 'active'),
-  ('b0000000-0000-0000-0000-000000000010', 'a0000000-0000-0000-0000-000000000008', 'APEX-002', '600080002245', 'ApexDrive Automotive Line 2', 23, 24, 'Automotive', 'active'),
-  -- Harvest Lane Foods
-  ('b0000000-0000-0000-0000-000000000011', 'a0000000-0000-0000-0000-000000000009', 'HARV-001', '600090001145', 'Harvest Lane Grocery Line 1', 20, 22, 'Grocery', 'active'),
-  ('b0000000-0000-0000-0000-000000000012', 'a0000000-0000-0000-0000-000000000009', 'HARV-002', '600090002245', 'Harvest Lane Grocery Line 2', 24, 26, 'Grocery', 'active'),
-  -- Sahara Threads
-  ('b0000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-00000000000a', 'SAHA-001', '6000a0001145', 'Sahara Threads Apparel Line 1', 21, 24, 'Apparel', 'active'),
-  ('b0000000-0000-0000-0000-000000000014', 'a0000000-0000-0000-0000-00000000000a', 'SAHA-002', '6000a0002245', 'Sahara Threads Apparel Line 2', 25, 28, 'Apparel', 'active'),
-  -- PixelPerch Accessories
-  ('b0000000-0000-0000-0000-000000000015', 'a0000000-0000-0000-0000-00000000000b', 'PIXE-001', '6000b0001145', 'PixelPerch Personal Computer Line 1', 22, 26, 'Personal Computer', 'active'),
-  ('b0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-00000000000b', 'PIXE-002', '6000b0002245', 'PixelPerch Personal Computer Line 2', 26, 30, 'Personal Computer', 'active')
+{q2}
 ON CONFLICT (id) DO NOTHING;
-"""
 
-# ── Purchase Orders ─────────────────────────────────────────────────
-po_sql = r"""
+/* -- Purchase orders (simulated) -- */
+
 INSERT INTO purchase_orders (id, brand_id, po_number, status, ship_window_start, ship_window_end, delivery_window_start, delivery_window_end) VALUES
-  ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'PO-9000', 'received',     now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'PO-9001', 'under_review', now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000002', 'PO-9002', 'under_review', now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000002', 'PO-9003', 'accepted',     now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000003', 'PO-9004', 'accepted',     now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000003', 'PO-9005', 'rejected',     now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-000000000007', 'a0000000-0000-0000-0000-000000000004', 'PO-9006', 'rejected',         now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-000000000008', 'a0000000-0000-0000-0000-000000000004', 'PO-9007', 'ready_to_fulfil',   now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000005', 'PO-9008', 'ready_to_fulfil', now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-00000000000a', 'a0000000-0000-0000-0000-000000000005', 'PO-9009', 'shipped',        now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-00000000000b', 'a0000000-0000-0000-0000-000000000006', 'PO-9010', 'shipped',       now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-00000000000c', 'a0000000-0000-0000-0000-000000000006', 'PO-9011', 'delivered',     now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-00000000000d', 'a0000000-0000-0000-0000-000000000007', 'PO-9012', 'delivered',  now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-00000000000e', 'a0000000-0000-0000-0000-000000000007', 'PO-9013', 'received',   now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-00000000000f', 'a0000000-0000-0000-0000-000000000008', 'PO-9014', 'received',     now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-000000000010', 'a0000000-0000-0000-0000-000000000008', 'PO-9015', 'under_review', now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-000000000011', 'a0000000-0000-0000-0000-000000000009', 'PO-9016', 'under_review', now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-000000000012', 'a0000000-0000-0000-0000-000000000009', 'PO-9017', 'accepted',     now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-00000000000a', 'PO-9018', 'accepted',     now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-000000000014', 'a0000000-0000-0000-0000-00000000000a', 'PO-9019', 'rejected',     now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9),
-  ('c0000000-0000-0000-0000-000000000015', 'a0000000-0000-0000-0000-00000000000b', 'PO-9020', 'rejected',         now() - interval '14 days', now() - interval '7 days',  current_date - 7,  current_date),
-  ('c0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-00000000000b', 'PO-9021', 'ready_to_fulfil',   now() - interval '5 days',  now() + interval '2 days',  current_date + 2,  current_date + 9)
+{q3}
 ON CONFLICT (id) DO NOTHING;
-"""
-# ── Purchase Order Lines ──────────────────────────────────────────
-pol_sql = r"""
+
 DO $$
 DECLARE
   brand_rec RECORD;
@@ -114,7 +118,7 @@ BEGIN
       idx := 0;
       FOR prod_rec IN SELECT * FROM products WHERE brand_id = brand_rec.id ORDER BY id LOOP
         qty := (40 + (bi + pi + idx) * 10);
-        IF brand_rec.id = 'a0000000-0000-0000-0000-000000000002' AND pi = 1 THEN
+        IF brand_rec.id = '{A('02')}' AND pi = 1 THEN
           qty := qty * 8;
         END IF;
         INSERT INTO purchase_order_lines (id, po_id, product_id, ordered_qty, status)
@@ -127,39 +131,21 @@ BEGIN
     bi := bi + 1;
   END LOOP;
 END $$;
-"""
 
-# ── Shipments ──────────────────────────────────────────────────────
-ship_sql = r"""
+/* -- Shipments -- */
+
 INSERT INTO shipments (id, po_id, brand_id, carrier, tracking, status) VALUES
-  ('d0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000008', 'a0000000-0000-0000-0000-000000000004', 'dhl',   'DHL-PO-9007',  'factory_intake'),
-  ('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000005', 'fedex', 'FDX-PO-9008',  'factory_intake'),
-  ('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-00000000000a', 'a0000000-0000-0000-0000-000000000005', 'bak',   'BAK-PO-9009',  'sea_transit'),
-  ('d0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-00000000000b', 'a0000000-0000-0000-0000-000000000006', 'palletline', 'PAL-PO-9010', 'sea_transit'),
-  ('d0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-00000000000c', 'a0000000-0000-0000-0000-000000000006', 'amazon_partner', 'AMZ-PO-9011', 'live_amazon'),
-  ('d0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-00000000000d', 'a0000000-0000-0000-0000-000000000007', 'dhl',   'DHL-PO-9012',  'live_amazon'),
-  ('d0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-00000000000b', 'fedex', 'FDX-PO-9021',  'factory_intake')
+{q4}
 ON CONFLICT (id) DO NOTHING;
-"""
 
-# ── Contracts ──────────────────────────────────────────────────────
-contract_sql = r"""
+/* -- Contracts -- */
+
 INSERT INTO contracts (id, brand_id, type, status, signed_at) VALUES
-  ('e0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'distribution_agreement', 'active', now() - interval '180 days'),
-  ('e0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', 'distribution_agreement', 'signed', now() - interval '90 days'),
-  ('e0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003', 'distribution_agreement', 'sent',   NULL),
-  ('e0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000004', 'distribution_agreement', 'active', now() - interval '365 days'),
-  ('e0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000005', 'distribution_agreement', 'draft',  NULL),
-  ('e0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000006', 'distribution_agreement', 'active', now() - interval '120 days'),
-  ('e0000000-0000-0000-0000-000000000007', 'a0000000-0000-0000-0000-000000000007', 'distribution_agreement', 'sent',   NULL),
-  ('e0000000-0000-0000-0000-000000000008', 'a0000000-0000-0000-0000-000000000008', 'distribution_agreement', 'active', now() - interval '200 days'),
-  ('e0000000-0000-0000-0000-000000000009', 'a0000000-0000-0000-0000-000000000009', 'distribution_agreement', 'signed', now() - interval '60 days'),
-  ('e0000000-0000-0000-0000-00000000000a', 'a0000000-0000-0000-0000-00000000000a', 'distribution_agreement', 'under_review', NULL),
-  ('e0000000-0000-0000-0000-00000000000b', 'a0000000-0000-0000-0000-00000000000b', 'distribution_agreement', 'active', now() - interval '150 days')
+{q5}
 ON CONFLICT (id) DO NOTHING;
-"""
-# ── Compliance Docs ────────────────────────────────────────────────
-comp_sql = r"""
+
+/* -- Compliance docs (derived per brand) -- */
+
 INSERT INTO compliance_docs (id, brand_id, doc_type, status, submitted_at)
 SELECT
   gen_random_uuid(), b.id, t.doc_type,
@@ -172,10 +158,9 @@ SELECT
 FROM brands b
 CROSS JOIN (VALUES ('letter_of_authorization',0),('product_safety_ukca',1),('insurance_certificate',2),('brand_registry_confirmation',3)) AS t(doc_type,idx)
 ON CONFLICT (id) DO NOTHING;
-"""
 
-# ── Messages ───────────────────────────────────────────────────────
-msg_sql = r"""
+/* -- Messages (derived per brand) -- */
+
 INSERT INTO messages (id, brand_id, sender_id, sender_role, content, created_at)
 SELECT
   gen_random_uuid(), b.id, '00000000-0000-0000-0000-000000000000'::uuid, 'automation',
@@ -192,10 +177,9 @@ FROM (SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn FROM brands) seq
 JOIN brands b ON b.id = seq.id
 WHERE seq.rn % 3 = 0
 ON CONFLICT (id) DO NOTHING;
-"""
 
-# ── Deductions ────────────────────────────────────────────────────
-ded_sql = r"""
+/* -- Deductions (derived per brand) -- */
+
 INSERT INTO deductions (id, brand_id, po_id, category, amount_gbp, status)
 SELECT
   gen_random_uuid(), b.id,
@@ -211,10 +195,9 @@ FROM (SELECT id, row_number() OVER (ORDER BY id) - 1 AS rn FROM brands) seq
 JOIN brands b ON b.id = seq.id
 WHERE seq.rn % 3 = 0
 ON CONFLICT (id) DO NOTHING;
-"""
 
-# ── Billing Invoices ──────────────────────────────────────────────
-bill_sql = r"""
+/* -- Billing invoices (derived per brand) -- */
+
 INSERT INTO billing_invoices (id, brand_id, period_start, period_end, gross_po_value, commission, net_paid, status)
 SELECT
   gen_random_uuid(), b.id,
@@ -236,16 +219,10 @@ GROUP BY b.id
 ON CONFLICT (id) DO NOTHING;
 """
 
-# ── Write ──────────────────────────────────────────────────────────
-outpath = '/Users/tadii/Desktop/Mercenta/supabase/migrations/016_seed_demo_data.sql'
-with open(outpath, 'w') as f:
-    f.write(sql)
-    f.write(po_sql)
-    f.write(pol_sql)
-    f.write(ship_sql)
-    f.write(contract_sql)
-    f.write(comp_sql)
-    f.write(msg_sql)
-    f.write(ded_sql)
-    f.write(bill_sql)
-print(f'Wrote {outpath}')
+def main():
+    with open(OUTPATH, 'w') as f:
+        f.write(build())
+    print(f"WROTE {OUTPATH}")
+
+if __name__ == '__main__':
+    main()

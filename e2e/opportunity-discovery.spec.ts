@@ -25,7 +25,7 @@ test.describe('Opportunity discovery', () => {
   }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
-    await loginAs(page, 'Mercenta Admin Hub', 1400);
+    await loginAs(page, 'Super Admin — Tadii', 1400);
     await openNav(page, 'Brand Intelligence');
 
     const panel = page.getByTestId('opportunity-discovery');
@@ -52,7 +52,7 @@ test.describe('Opportunity discovery', () => {
   test('2. clicking an opportunity opens its drill-down, and filtering narrows the list', async ({
     page,
   }) => {
-    await loginAs(page, 'Mercenta Admin Hub', 1400);
+    await loginAs(page, 'Super Admin — Tadii', 1400);
     await openNav(page, 'Brand Intelligence');
     const panel = page.getByTestId('opportunity-discovery');
     await expect(panel).toBeVisible({ timeout: 8000 });
@@ -76,7 +76,7 @@ test.describe('Opportunity discovery', () => {
   });
 
   test('3. the sports opportunity is POTENTIAL only and claims no ASIN evidence', async ({ page }) => {
-    await loginAs(page, 'Mercenta Admin Hub', 1400);
+    await loginAs(page, 'Super Admin — Tadii', 1400);
     await openNav(page, 'Brand Intelligence');
 
     const sports = page.getByTestId('sports-opportunities');

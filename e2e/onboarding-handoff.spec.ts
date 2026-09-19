@@ -130,7 +130,7 @@ test.describe('Opportunity → brand onboarding hand-off (Phase E1)', () => {
   });
 
   test('3. A brand tenant session has no acquisition/onboarding surface', async ({ page }) => {
-    await loginAs(page, 'Little Kiwi Baby Co', 1400);
+    await loginAs(page, 'Kit & Kin', 1400);
     const nav = page.locator('nav[aria-label="Primary"]');
     await expect(nav.locator('button:has-text("Brand Intelligence")')).toHaveCount(0);
     await expect(page.locator('[data-section="onboarding"]')).toHaveCount(0);

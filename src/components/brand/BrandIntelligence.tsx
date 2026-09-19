@@ -4,22 +4,56 @@
  */
 import { useMemo } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
-import { Card, Badge } from '@/components/ui';
-import { cn } from '@/utils/cn';
+import { Card } from '@/components/ui';
 import { getProspects } from '@/data/prospectStore';
 import { APPROVED_CATEGORIES } from '@/types';
-import { BarChart3, TrendingUp, ShoppingBag, Users } from 'lucide-react';
+import { analyzeProductListing } from '@/lib/intelligence/listingAnalyzer';
+import { BarChart3, TrendingUp, ShoppingBag, Users, Package, ArrowUpRight } from 'lucide-react';
+
+/**
+ * §Workstream B (Decision 1, 2026-09-17) — brand-facing category positioning is
+ * QUALITATIVE ONLY. Proprietary internal scores, tiers and methodology are never
+ * rendered on a brand surface. The qualitative label is derived from the existing
+ * public data model (brandMaturity) — no new data, no internal scores leaked.
+ */
+const QUALITATIVE_POSITION: Record<string, string> = {
+  challenger: 'Growing challenger',
+  established: 'Established brand',
+  mega: 'Leading brand',
+  niche: 'Niche brand',
+};
+function qualitativePosition(p: { brandMaturity?: string }, selfBrand: boolean): string {
+  if (selfBrand) return 'Your brand';
+  const known = QUALITATIVE_POSITION[p.brandMaturity ?? ''];
+  return known ?? 'Comparable brand';
+}
 
 export function BrandIntelligence() {
-  const { brandProfile, session } = useApp();
+  const { brandProfile, session, products } = useApp();
   const brandName = brandProfile?.businessName ?? (session?.tenantId ?? 'Your Brand');
   const brandCategory = brandProfile?.category ?? 'Home';
+  const tenantId = session?.tenantId;
 
   const catData = useMemo(() => {
     const scored = getProspects().filter((p) => !p.disqualified);
     const sameCat = scored.filter((p) => p.category === brandCategory);
     return { scored, sameCat };
   }, [brandCategory]);
+
+  /** §Functional-completion — per-SKU estimated performance + opportunity,
+   *  derived from the SAME deterministic analyzer the Listing Analyzer uses
+   *  (no second engine). Products are already tenant-scoped by the session. */
+  const productPerformance = useMemo(() => {
+    const competitorBrandCount = catData.sameCat.length;
+    return products.map((p) => ({
+      product: p,
+      analysis: analyzeProductListing(p as unknown as Record<string, unknown>, {
+        category: brandCategory,
+        brandId: tenantId,
+        competitorBrandCount,
+      }),
+    }));
+  }, [products, brandCategory, tenantId, catData.sameCat.length]);
 
   const totalEst = catData.sameCat.reduce((s, p) => s + p.asins.reduce((s2, a) => s2 + (a.estimatedRevenue ?? 0), 0), 0);
 
@@ -34,7 +68,7 @@ export function BrandIntelligence() {
         <Card className="p-3"><div className="flex items-center gap-2 mb-1"><BarChart3 className="w-3.5 h-3.5 text-blue-400" /><span className="text-[10px] text-zinc-500 uppercase">Category Size</span></div><span className="text-2xl font-bold text-blue-400">£{(totalEst / 1000).toFixed(0)}k/mo</span><p className="text-[10px] text-zinc-600 mt-1">Estimated UK retail revenue</p></Card>
         <Card className="p-3"><div className="flex items-center gap-2 mb-1"><TrendingUp className="w-3.5 h-3.5 text-emerald-400" /><span className="text-[10px] text-zinc-500 uppercase">Category Growth</span></div><span className="text-2xl font-bold text-emerald-400">+12%</span><p className="text-[10px] text-zinc-600 mt-1">Estimated YoY growth</p></Card>
         <Card className="p-3"><div className="flex items-center gap-2 mb-1"><ShoppingBag className="w-3.5 h-3.5 text-amber-400" /><span className="text-[10px] text-zinc-500 uppercase">Brands Tracked</span></div><span className="text-2xl font-bold text-amber-400">{catData.sameCat.length}</span><p className="text-[10px] text-zinc-600 mt-1">In your category</p></Card>
-        <Card className="p-3"><div className="flex items-center gap-2 mb-1"><Users className="w-3.5 h-3.5 text-brass-400" /><span className="text-[10px] text-zinc-500 uppercase">Competitors</span></div><span className="text-2xl font-bold text-brass-400">{catData.sameCat.length}</span><p className="text-[10px] text-zinc-600 mt-1">Strong brands in category</p></Card>
+        <Card className="p-3"><div className="flex items-center gap-2 mb-1"><Users className="w-3.5 h-3.5 text-brass-400" /><span className="text-[10px] text-zinc-500 uppercase">Competitor Brands</span></div><span className="text-2xl font-bold text-brass-400">{catData.sameCat.length}</span><p className="text-[10px] text-zinc-600 mt-1">Brands tracked in your category</p></Card>
       </div>
 
       <div>
@@ -43,13 +77,45 @@ export function BrandIntelligence() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {catData.sameCat.slice(0, 9).map(p => (
               <Card key={p.id} className="p-3 flex items-center justify-between">
-                <div><span className="text-xs font-medium text-white">{p.brand}</span><div className="text-[10px] text-zinc-500 mt-0.5">Score: {p.score.total}/100</div></div>
-                <Badge className={cn('text-[9px]', p.score.tier === 'tier_1' ? 'bg-emerald-500/15 text-emerald-300' : p.score.tier === 'tier_2' ? 'bg-blue-500/15 text-blue-300' : 'bg-zinc-500/15 text-zinc-400')}>{p.score.tier.replace(/_/g, ' ')}</Badge>
+                <div><span className="text-xs font-medium text-white">{p.brand}</span><div className="text-[10px] text-zinc-500 mt-0.5">{qualitativePosition(p, p.brand === brandName)}</div></div>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      <Card className="p-4">
+        <div data-testid="bi-product-performance">
+          <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
+            <Package className="w-4 h-4 text-brass-400" /> Your product performance
+            <span className="text-[10px] text-zinc-600">— deterministic estimates, never live data</span>
+          </h3>
+          {productPerformance.length === 0 ? (
+            <p className="text-xs text-zinc-600">No catalogue products yet — add products to see estimated performance.</p>
+          ) : (
+            <ul className="divide-y divide-white/[0.05] rounded-lg border border-white/[0.06] bg-ink-850">
+              {productPerformance.map(({ product: p, analysis: a }) => (
+                <li key={p.sku} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2.5" data-testid={`bi-sku-${p.sku}`}>
+                  <div className="min-w-0 flex-1">
+                    <span className="block text-xs font-medium text-white truncate">{p.name}</span>
+                    <span className="block text-[10px] text-zinc-500 font-mono">{p.sku} · est. {a.estimates.monthlyUnitsLow}–{a.estimates.monthlyUnitsHigh} u/mo · £{a.estimates.priceGbp.toFixed(2)}</span>
+                  </div>
+                  <span className="text-[10px] uppercase text-zinc-600 hidden md:inline">Revenue</span>
+                  <span className="text-xs font-mono text-emerald-300">£{(a.estimates.monthlyRevenueMidGbp / 1000).toFixed(0)}k/mo</span>
+                  <span className="text-[10px] uppercase text-zinc-600 hidden md:inline">Demand</span>
+                  <span className={a.estimates.demandSignal === 'high' ? 'text-emerald-300' : a.estimates.demandSignal === 'medium' ? 'text-amber-300' : 'text-zinc-500'}>{a.estimates.demandSignal}</span>
+                  <span className="text-[10px] uppercase text-zinc-600 hidden md:inline">Opportunity</span>
+                  <span className="text-[10px] text-brass-400">{a.estimates.opportunityIndicators[0] ?? '—'}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-zinc-600" />
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="text-[10px] text-zinc-600 mt-2">
+            Estimates derived from the same deterministic model as the Listing Analyzer — planning ranges, not measured marketplace data.
+          </p>
+        </div>
+      </Card>
 
       <Card className="p-4">
         <h3 className="text-sm font-semibold text-white mb-2">Market Insights</h3>

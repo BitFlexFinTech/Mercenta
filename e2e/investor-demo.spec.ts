@@ -220,9 +220,9 @@ test.describe('Investor demo — tenant isolation & RBAC', () => {
 
       const brandActor = { staffId: `brand:${tenantId}`, canMutate: true, tenantId };
       const foreignActor = {
-        staffId: 'brand:brand-deskforge',
+        staffId: 'brand:brand-tapatio',
         canMutate: true,
-        tenantId: 'brand-deskforge',
+        tenantId: 'brand-tapatio',
       };
       const viewOnlyActor = { staffId: 'staff-view-only', canMutate: false };
 
