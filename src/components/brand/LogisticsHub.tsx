@@ -51,8 +51,9 @@ import {
   WorkspaceGrid,
   WorkspaceHeader,
   WorkspaceSection,
+  MetricBand,
+  type MetricTileData,
 } from '@/components/shared/workspace';
-import { KpiGroup, type KpiCellData } from '@/components/shared/dashboard';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import {
   STAGE_LABELS,
@@ -702,7 +703,7 @@ export function LogisticsHub() {
     [model.legs]
   );
 
-  const kpiItems: KpiCellData[] = [
+  const kpiItems: MetricTileData[] = [
     {
       id: 'consignments',
       label: 'Consignments in scope',
@@ -857,7 +858,7 @@ export function LogisticsHub() {
         }
       />
 
-      <KpiGroup items={kpiItems} loading={shipmentsQuery.isLoading} />
+      <MetricBand items={kpiItems} loading={shipmentsQuery.isLoading} />
 
       <WorkspaceGrid
         className="mt-4"

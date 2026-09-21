@@ -3,6 +3,7 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useComplianceDocuments } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { Badge, Button, Card, Input, StatusBadge } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import {
   complianceDocStatusPresentation,
   poOutageStatusPresentation,
@@ -82,17 +83,17 @@ function CommercialRelationshipSection({ brandId }: { brandId: string }) {
         <>
           <div className="flex items-center gap-2 mb-2">
             <Badge className={cn(
-              'text-[10px]',
+              'text-ds-micro',
               model === 'commission_agent'
                 ? 'bg-emerald-500/15 text-emerald-300'
                 : 'bg-blue-500/15 text-blue-300'
             )}>
               {COMMERCIAL_MODELS[model].label}
             </Badge>
-            {record && <span className="text-[10px] text-zinc-600">recorded {record.recordedAt.slice(0, 10)}</span>}
+            {record && <span className="text-ds-micro text-zinc-600">recorded {record.recordedAt.slice(0, 10)}</span>}
           </div>
           <p className="text-xs text-zinc-400 mb-3">{COMMERCIAL_MODELS[model].summary}</p>
-          <dl className="space-y-1 text-[11px] font-mono">
+          <dl className="space-y-1 text-ds-label font-mono">
             {model === 'commission_agent' ? (
               <div className="flex justify-between">
                 <dt className="text-zinc-500">Mercenta commission</dt>
@@ -111,7 +112,7 @@ function CommercialRelationshipSection({ brandId }: { brandId: string }) {
           {COMMERCIAL_MODEL_NOT_SELECTED_LABEL} — contact your Mercenta account manager.
         </p>
       )}
-      <p className="text-[10px] text-zinc-600 mt-3">
+      <p className="text-ds-micro text-zinc-600 mt-3">
         This commercial agreement is private between your brand and Mercenta. It is separate from —
         and can never change, waive or replace — the retail-channel compliance documentation your
         products require. Changes are made by Mercenta and recorded in the audit trail.
@@ -155,19 +156,19 @@ function BankSection({ brandId }: { brandId: string }) {
     <Card title={`Bank Information — ${bankInfo.currency}`}>
       <div className="space-y-2">
         {bankInfo.status === 'pending_approval' && bankInfo.requestedChange && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 text-[11px] text-amber-300 mb-2">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 text-ds-label text-amber-300 mb-2">
             Pending approval: {bankInfo.requestedChange.field} → {bankInfo.requestedChange.requestedValue}
           </div>
         )}
         {fields.map(({ key, label, value }) => (
           <div key={key} className="flex items-center gap-2 border-b border-white/[0.04] pb-2">
-            <span className="text-[11px] text-zinc-500 w-28 flex-shrink-0">{label}</span>
-            <span className="text-[11px] text-zinc-300 font-mono flex-1">{value || '—'}</span>
+            <span className="text-ds-label text-zinc-500 w-28 flex-shrink-0">{label}</span>
+            <span className="text-ds-label text-zinc-300 font-mono flex-1">{value || '—'}</span>
             <input
               value={requested[key] ?? ''}
               onChange={(e) => updateField(key, e.target.value)}
               placeholder="New value..."
-              className="w-28 bg-ink-900 border border-white/[0.08] rounded px-1.5 py-0.5 text-[10px] text-zinc-300"
+              className="w-28 bg-ink-900 border border-white/[0.08] rounded px-1.5 py-0.5 text-ds-micro text-zinc-300"
             />
           </div>
         ))}
@@ -176,16 +177,16 @@ function BankSection({ brandId }: { brandId: string }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason for change..."
-            className="flex-1 bg-ink-900 border border-white/[0.08] rounded px-2 py-1 text-[10px]"
+            className="flex-1 bg-ink-900 border border-white/[0.08] rounded px-2 py-1 text-ds-micro"
           />
-          <Button className="text-[10px]" onClick={() => {
+          <Button className="text-ds-micro" onClick={() => {
             const active = fields.find((f) => requested[f.key]?.trim());
             if (active) handleRequest(active.key as keyof BrandBankInfo, active.value);
           }}>
             Submit Change
           </Button>
         </div>
-        {note && <p className="text-[10px] text-zinc-500">{note}</p>}
+        {note && <p className="text-ds-micro text-zinc-500">{note}</p>}
       </div>
     </Card>
   );
@@ -197,15 +198,15 @@ function LoginSection() {
       <div className="space-y-3 text-xs text-zinc-300">
         <div className="flex items-center justify-between border-b border-white/[0.04] pb-2">
           <span>Password</span>
-          <Button className="text-[10px]">Change Password</Button>
+          <Button className="text-ds-micro">Change Password</Button>
         </div>
         <div className="flex items-center justify-between border-b border-white/[0.04] pb-2">
           <span>Two-factor authentication</span>
-          <Button className="text-[10px]">Enable 2FA</Button>
+          <Button className="text-ds-micro">Enable 2FA</Button>
         </div>
         <div className="flex items-center justify-between pb-2">
           <span>Active sessions</span>
-          <span className="text-[10px] text-zinc-500">1 active session</span>
+          <span className="text-ds-micro text-zinc-500">1 active session</span>
         </div>
       </div>
     </Card>
@@ -248,11 +249,11 @@ function PermissionsSection({ brandId }: { brandId: string }) {
           <div key={m.id} className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
             <div>
               <span className="text-xs text-zinc-300">{m.name}</span>
-              <span className="text-[10px] text-zinc-600 ml-2">{m.email}</span>
+              <span className="text-ds-micro text-zinc-600 ml-2">{m.email}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Badge className={cn('text-[9px]', ROLE_BADGE[m.role])}>{m.role}</Badge>
-              {!m.active && <Badge className="text-[9px] bg-zinc-500/10 text-zinc-400">Inactive</Badge>}
+              <Badge className={cn('text-ds-micro', ROLE_BADGE[m.role])}>{m.role}</Badge>
+              {!m.active && <Badge className="text-ds-micro bg-zinc-500/10 text-zinc-400">Inactive</Badge>}
               <button onClick={() => { removeTeamMember(m.id); setVersion((v) => v + 1); }} className="text-zinc-600 hover:text-red-400">
                 <Trash2 className="w-3 h-3" />
               </button>
@@ -270,8 +271,8 @@ function PermissionsSection({ brandId }: { brandId: string }) {
             <option value="Owner">Owner</option><option value="Shipping">Shipping</option><option value="Accounts">Accounts</option><option value="Compliance">Compliance</option>
           </select>
           <div className="flex gap-2">
-            <Button className="text-[10px]" onClick={handleInvite}>Send Invite</Button>
-            <Button className="text-[10px]" variant="secondary" onClick={() => setShowInvite(false)}>Cancel</Button>
+            <Button className="text-ds-micro" onClick={handleInvite}>Send Invite</Button>
+            <Button className="text-ds-micro" variant="secondary" onClick={() => setShowInvite(false)}>Cancel</Button>
           </div>
         </div>
       ) : (
@@ -299,23 +300,23 @@ function OutagesSection({ brandId }: { brandId: string }) {
 
   return (
     <Card title="Purchase Order Outages">
-      <p className="text-[10px] text-zinc-600 mb-3">Declare periods when you cannot fulfil purchase orders. Outages feed Mercenta's PO-routing (flagged/suppressed during the window).</p>
+      <p className="text-ds-micro text-zinc-600 mb-3">Declare periods when you cannot fulfil purchase orders. Outages feed Mercenta's PO-routing (flagged/suppressed during the window).</p>
       {outages.map((o) => (
         <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-white/[0.04]">
           <div>
-            <span className="text-[11px] text-zinc-300">{o.startDate} → {o.endDate}</span>
-            <p className="text-[10px] text-zinc-500">{o.reason}</p>
+            <span className="text-ds-label text-zinc-300">{o.startDate} → {o.endDate}</span>
+            <p className="text-ds-micro text-zinc-500">{o.reason}</p>
           </div>
           <div className="flex items-center gap-2">
             <StatusBadge
-              className="text-[10px]"
+              className="text-ds-micro"
               dataStatus={poOutageStatusPresentation(o.status).dataStatus}
               tone={poOutageStatusPresentation(o.status).tone}
             >
               {poOutageStatusPresentation(o.status).label}
             </StatusBadge>
             {o.status === 'active' && (
-              <button onClick={() => { cancelPoOutage(o.id); setVersion((v) => v + 1); }} className="text-[10px] text-zinc-500 hover:text-red-400">Cancel</button>
+              <button onClick={() => { cancelPoOutage(o.id); setVersion((v) => v + 1); }} className="text-ds-micro text-zinc-500 hover:text-red-400">Cancel</button>
             )}
           </div>
         </div>
@@ -329,8 +330,8 @@ function OutagesSection({ brandId }: { brandId: string }) {
           </div>
           <Input label="Reason" value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
           <div className="flex gap-2">
-            <Button className="text-[10px]" onClick={handleAdd}>Declare Outage</Button>
-            <Button className="text-[10px]" variant="secondary" onClick={() => setShowNew(false)}>Cancel</Button>
+            <Button className="text-ds-micro" onClick={handleAdd}>Declare Outage</Button>
+            <Button className="text-ds-micro" variant="secondary" onClick={() => setShowNew(false)}>Cancel</Button>
           </div>
         </div>
       ) : (
@@ -370,14 +371,14 @@ function ReturnAddrSection({ brandId }: { brandId: string }) {
         <div key={a.id} className="py-2 border-b border-white/[0.04]">
           <div className="flex items-center justify-between">
             <span className="text-xs text-zinc-300 font-medium">{a.label}</span>
-            {a.isDefault && <Badge className="text-[9px] bg-brass-500/15 text-brass-300">Default</Badge>}
+            {a.isDefault && <Badge className="text-ds-micro bg-brass-500/15 text-brass-300">Default</Badge>}
           </div>
-          <p className="text-[10px] text-zinc-500">{a.companyName}</p>
-          <p className="text-[10px] text-zinc-500">{a.addressLine1}{a.addressLine2 ? `, ${a.addressLine2}` : ''}</p>
-          <p className="text-[10px] text-zinc-500">{a.city}, {a.postalCode}, {a.country}</p>
+          <p className="text-ds-micro text-zinc-500">{a.companyName}</p>
+          <p className="text-ds-micro text-zinc-500">{a.addressLine1}{a.addressLine2 ? `, ${a.addressLine2}` : ''}</p>
+          <p className="text-ds-micro text-zinc-500">{a.city}, {a.postalCode}, {a.country}</p>
           <div className="flex items-center gap-2 mt-1">
-            {!a.isDefault && <button onClick={() => setDefault(a.id)} className="text-[10px] text-zinc-500 hover:text-brass-400">Set default</button>}
-            <button onClick={() => { removeReturnAddress(a.id); setVersion((v) => v + 1); }} className="text-[10px] text-zinc-500 hover:text-red-400">Remove</button>
+            {!a.isDefault && <button onClick={() => setDefault(a.id)} className="text-ds-micro text-zinc-500 hover:text-brass-400">Set default</button>}
+            <button onClick={() => { removeReturnAddress(a.id); setVersion((v) => v + 1); }} className="text-ds-micro text-zinc-500 hover:text-red-400">Remove</button>
           </div>
         </div>
       ))}
@@ -397,8 +398,8 @@ function ReturnAddrSection({ brandId }: { brandId: string }) {
             <Input label="Contact phone" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} />
           </div>
           <div className="flex gap-2">
-            <Button className="text-[10px]" onClick={handleAdd}>Add Address</Button>
-            <Button className="text-[10px]" variant="secondary" onClick={() => setShowNew(false)}>Cancel</Button>
+            <Button className="text-ds-micro" onClick={handleAdd}>Add Address</Button>
+            <Button className="text-ds-micro" variant="secondary" onClick={() => setShowNew(false)}>Cancel</Button>
           </div>
         </div>
       ) : (
@@ -417,7 +418,7 @@ function ComplianceRefSection({ brandId: _brandId }: { brandId: string }) {
 
   return (
     <Card title="Compliance Reference">
-      <p className="text-[10px] text-zinc-600 mb-3">View-only reference to your compliance documents. Manage documents through the Compliance hub.</p>
+      <p className="text-ds-micro text-zinc-600 mb-3">View-only reference to your compliance documents. Manage documents through the Compliance hub.</p>
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-white/[0.06] text-xs text-zinc-500">
@@ -432,7 +433,7 @@ function ComplianceRefSection({ brandId: _brandId }: { brandId: string }) {
               <td className="px-2 py-1.5 text-xs text-zinc-300 capitalize">{d.type.replace(/_/g, ' ')}</td>
               <td className="px-2 py-1.5">
                 <StatusBadge
-                  className="text-[10px]"
+                  className="text-ds-micro"
                   dataStatus={complianceDocStatusPresentation(d.status).dataStatus}
                   tone={complianceDocStatusPresentation(d.status).tone}
                 >
@@ -480,7 +481,7 @@ function NotificationsSection({ brandId }: { brandId: string }) {
 
   return (
     <Card title="Notification Preferences">
-      <p className="text-[10px] text-zinc-600 mb-3">Choose which events you want to be notified about and through which channels.</p>
+      <p className="text-ds-micro text-zinc-600 mb-3">Choose which events you want to be notified about and through which channels.</p>
       {prefs.map((p) => (
         <div key={p.id} className="flex items-center justify-between py-2 border-b border-white/[0.04]">
           <div className="flex-1">
@@ -518,23 +519,23 @@ function ContactsSection({ brandId: _brandId }: { brandId: string }) {
 
   return (
     <Card title="Contacts">
-      <p className="text-[10px] text-zinc-600 mb-3">Your primary contact information — shared with Mercenta for operational comms.</p>
+      <p className="text-ds-micro text-zinc-600 mb-3">Your primary contact information — shared with Mercenta for operational comms.</p>
       {!edit ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-xs"><span className="text-zinc-500 w-20">Signatory:</span><span className="text-zinc-300">{brandProfile.signatory || '—'}</span></div>
           <div className="flex items-center gap-2 text-xs"><span className="text-zinc-500 w-20">Email:</span><span className="text-zinc-300">{brandProfile.email || '—'}</span></div>
           <div className="flex items-center gap-2 text-xs"><span className="text-zinc-500 w-20">Phone:</span><span className="text-zinc-300">{brandProfile.phone || '—'}</span></div>
-          <Button className="text-[10px]" onClick={() => setEdit(true)}>Edit</Button>
+          <Button className="text-ds-micro" onClick={() => setEdit(true)}>Edit</Button>
         </div>
       ) : (
         <div className="space-y-2">
           <Input label="Signatory name" value={form.signatory} onChange={(e) => setForm({ ...form, signatory: e.target.value })} />
           <Input label="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           <Input label="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <p className="text-[10px] text-zinc-600">Changes require admin approval and route through the profile change request flow.</p>
+          <p className="text-ds-micro text-zinc-600">Changes require admin approval and route through the profile change request flow.</p>
           <div className="flex gap-2">
-            <Button className="text-[10px]" onClick={handleSave}>Request Change</Button>
-            <Button className="text-[10px]" variant="secondary" onClick={() => setEdit(false)}>Cancel</Button>
+            <Button className="text-ds-micro" onClick={handleSave}>Request Change</Button>
+            <Button className="text-ds-micro" variant="secondary" onClick={() => setEdit(false)}>Cancel</Button>
           </div>
         </div>
       )}
@@ -570,7 +571,7 @@ function ToursSection({ brandId }: { brandId: string }) {
             <li key={t.id} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3.5 py-2.5">
               <span className="min-w-0 flex-1">
                 <span className="block text-xs font-medium text-white truncate">{t.name}</span>
-                <span className="block text-[11px] text-zinc-500 truncate leading-snug">{t.description}</span>
+                <span className="block text-ds-label text-zinc-500 truncate leading-snug">{t.description}</span>
               </span>
               <StatusBadge tone={tone} dataStatus={state.toLowerCase().replace(' ', '-')}>{state}</StatusBadge>
               <Button
@@ -598,17 +599,13 @@ export function BrandSettings() {
   const brandId = session?.tenantId ?? '';
   const [activeTab, setActiveTab] = useState<SettingsTab>('bank');
 
-  const Icon = SETTINGS_TABS.find((t) => t.id === activeTab)?.icon ?? Landmark;
-
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <Icon className="w-5 h-5 text-brass-400" />
-        <div>
-          <h2 className="text-lg font-semibold text-white">Settings</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">Manage your brand account, preferences, and operational details</p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-6">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · SETTINGS"
+        title="Settings"
+        description="Manage your brand account, preferences, and operational details."
+      />
 
       <div className="flex flex-wrap gap-1 border-b border-white/[0.06] pb-px">
         {SETTINGS_TABS.map(({ id, label, icon: TabIcon }) => (
@@ -641,6 +638,6 @@ export function BrandSettings() {
         {activeTab === 'agreements' && <AgreementsSection />}
         {activeTab === 'tours' && <ToursSection brandId={brandId} />}
       </div>
-    </div>
+    </WorkspaceFrame>
   );
 }

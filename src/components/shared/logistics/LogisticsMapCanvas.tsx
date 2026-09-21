@@ -21,7 +21,9 @@
  * and the inspector's stated reason all carry the same information.
  *
  * ACCESSIBILITY MODEL (same deliberate shape as the Brain canvas):
- *  - The SVG is ONE `role="img"` with a text alternative giving the counts,
+ *  - The SVG is ONE `role="group"` carrying a text alternative giving the
+ *    counts (not `role="img"`, for the same reason as the Brain canvas: the map
+ *    contains keyboard-reachable marker roles),
  *    because dozens of focusable SVG groups would be a tab trap.
  *  - Every leg is ALSO a real <button> in the companion shipment list the caller
  *    renders; selection state is shared, so map and list are one control.
@@ -247,7 +249,7 @@ export function LogisticsMapCanvas({
       <svg
         ref={svgRef}
         viewBox={`0 0 ${MAP_FRAME.viewBoxWidth} ${MAP_FRAME.viewBoxHeight}`}
-        role="img"
+        role="group"
         aria-label={`Logistics operational map: ${drawn.length} consignments drawn — ${liveCount} live verified, ${simCount} simulated, ${ambientCount} ambient`}
         className="block h-full w-full cursor-grab touch-none select-none"
         data-testid={testId}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge, DataTable } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { demoReturns } from '@/data/api';
 import type { ReturnReason } from '@/types';
@@ -72,23 +73,26 @@ export function BrandReturns() {
 
   if (returns.length === 0) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto">
+      <WorkspaceFrame className="space-y-4">
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · RETURNS"
+          title="Returns"
+          description="Returned units per purchase order, sourced from the canonical returns record."
+        />
         <Card title="Returns">
           <p className="text-xs text-zinc-600">No returns recorded for your brand.</p>
         </Card>
-      </div>
+      </WorkspaceFrame>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <RotateCcw className="w-5 h-5 text-brass-400" />
-        <div>
-          <h2 className="text-lg font-semibold text-white">Returns</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">Returned units per PO — {totalUnits} total units returned</p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-6">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · RETURNS"
+        title="Returns"
+        description={`Returned units per PO — ${totalUnits} total units returned`}
+      />
 
       {/* Summary cards — §Batch-3 UX: every card opens drill-down detail */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -96,21 +100,21 @@ export function BrandReturns() {
           onClick={() => setDrillCard('Total returned units')}
           className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
         >
-          <p className="text-[10px] text-zinc-500">Total returned units</p>
+          <p className="text-ds-micro text-zinc-500">Total returned units</p>
           <p className="text-lg font-semibold text-white">{totalUnits}</p>
         </button>
         <button
           onClick={() => setDrillCard('Quality/compliance flags')}
           className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
         >
-          <p className="text-[10px] text-zinc-500">Quality/compliance flags</p>
+          <p className="text-ds-micro text-zinc-500">Quality/compliance flags</p>
           <p className="text-lg font-semibold text-white">{qualityIssues.length}</p>
         </button>
         <button
           onClick={() => setDrillCard('Deductions linked')}
           className="w-full text-left bg-ink-850 border border-white/[0.06] rounded-xl p-3 hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer"
         >
-          <p className="text-[10px] text-zinc-500">Deductions linked</p>
+          <p className="text-ds-micro text-zinc-500">Deductions linked</p>
           <p className="text-lg font-semibold text-white">{deductedReturns.length}</p>
         </button>
       </div>
@@ -157,7 +161,7 @@ export function BrandReturns() {
                 render: (r) => (
                   <div>
                     <div className="font-medium text-zinc-300">{r.productName}</div>
-                    <div className="text-[10px] text-zinc-500">{r.productSku}</div>
+                    <div className="text-ds-micro text-zinc-500">{r.productSku}</div>
                   </div>
                 ),
               },
@@ -176,11 +180,11 @@ export function BrandReturns() {
                     <div>
                       <div className="flex items-center gap-1.5">
                         <Icon className="w-3 h-3 text-zinc-500" />
-                        <Badge className={cn('text-[9px]', REASON_BADGES[r.reason])}>
+                        <Badge className={cn('text-ds-micro', REASON_BADGES[r.reason])}>
                           {REASON_LABELS[r.reason]}
                         </Badge>
                       </div>
-                      <p className="text-[10px] text-zinc-600 mt-0.5 max-w-[200px]">{r.description}</p>
+                      <p className="text-ds-micro text-zinc-600 mt-0.5 max-w-[200px]">{r.description}</p>
                     </div>
                   );
                 },
@@ -190,14 +194,14 @@ export function BrandReturns() {
                 label: 'Deduction',
                 render: (r) =>
                   r.linkedDeductionId ? (
-                    <Badge className="text-[9px] bg-red-500/15 text-red-300">{r.linkedDeductionId}</Badge>
+                    <Badge className="text-ds-micro bg-red-500/15 text-red-300">{r.linkedDeductionId}</Badge>
                   ) : (
                     <span className="text-zinc-600">—</span>
                   ),
               },
             ]}
           />
-          <div className="text-[10px] text-zinc-600 pt-2 border-t border-white/[0.04] mt-1">
+          <div className="text-ds-micro text-zinc-600 pt-2 border-t border-white/[0.04] mt-1">
             {filtered.length} of {returns.length} return record{returns.length === 1 ? '' : 's'}
           </div>
         </div>
@@ -277,6 +281,6 @@ export function BrandReturns() {
           </div>
         </div>
       )}
-    </div>
+    </WorkspaceFrame>
   );
 }

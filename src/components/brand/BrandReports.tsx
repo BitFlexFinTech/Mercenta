@@ -7,6 +7,7 @@ import { usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { downloadCsv } from '@/lib/csv';
 import { Badge, Button, Card } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { DeductionsLedger } from '@/components/brand/DeductionsLedger';
 import { cn } from '@/utils/cn';
 import { TrendingUp, TrendingDown, Package, DollarSign, BarChart3, ShoppingCart, X, Download, Calendar } from 'lucide-react';
@@ -71,7 +72,13 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
 
   if (pos.length === 0) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto">
+      <WorkspaceFrame className="space-y-4">
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · REPORTING"
+          title="Reports"
+          description={`Performance metrics for ${brandProfile.businessName || 'your brand'}.`}
+          meta={<span className="text-ds-label text-zinc-500">No accepted activity in the selected period yet.</span>}
+        />
         <Card title="Reports">
           <p className="text-xs text-zinc-600">No purchase orders yet for {brandProfile.businessName || 'your brand'} in the selected period.</p>
         </Card>
@@ -79,33 +86,34 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
             period, so it renders (with its own honest empty state) on every
             tenant. APPENDED after existing content. */}
         <div className="mt-6"><DeductionsLedger /></div>
-      </div>
+      </WorkspaceFrame>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <BarChart3 className="w-5 h-5 text-brass-400" />
-          <div>
-            <h2 className="text-lg font-semibold text-white">Reports</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Performance metrics for {brandProfile.businessName || 'your brand'}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex bg-ink-850 border border-white/[0.06] rounded-lg overflow-hidden">
-            {([30, 60, 90] as Period[]).map((p) => (
-              <button key={p} onClick={() => setPeriod(p)}
-                className={cn('px-3 py-1.5 text-[11px] font-medium transition-colors',
-                  period === p ? 'bg-brass-500/20 text-brass-400' : 'text-zinc-500 hover:text-zinc-300')}>
-                {p}d
-              </button>
-            ))}
-          </div>
-          <Button className="text-[10px]" onClick={() => {
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · REPORTING"
+        title="Reports"
+        description={`Performance metrics for ${brandProfile.businessName || 'your brand'}`}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              Reporting period
+            </span>
+            <div className="flex items-center gap-2">
+              <div className="flex overflow-hidden rounded-ds-md border border-white/[0.06] bg-ink-850" role="group" aria-label="Reporting period">
+                {([30, 60, 90] as Period[]).map((p) => (
+                  <button key={p} onClick={() => setPeriod(p)}
+                    aria-pressed={period === p}
+                    data-state={period === p ? 'active' : 'idle'}
+                    className={cn('px-3 py-1.5 text-ds-label font-medium transition-ds duration-ds-fast',
+                      period === p ? 'bg-ink-700 text-white' : 'text-zinc-500 hover:text-zinc-300')}>
+                    Last {p} days
+                  </button>
+                ))}
+              </div>
+              <Button className="text-ds-micro" onClick={() => {
             const csv = [['PO','Status','Value','Units','ASIN Rate']];
             for (const po of rp) {
               const units = po.lineItems.reduce((s,l) => s + l.quantity, 0);
@@ -115,8 +123,10 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
           }}>
             <Download className="w-3 h-3 mr-1" /> Export CSV
           </Button>
-        </div>
-      </div>
+            </div>
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {metrics.map((m) => {
@@ -126,11 +136,11 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
               className="bg-ink-850 border border-white/[0.06] hover:border-white/[0.12] rounded-xl p-4 text-left transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4 text-zinc-500" />
-                <span className="text-[10px] text-zinc-500 font-medium">{m.label}</span>
+                <span className="text-ds-micro text-zinc-500 font-medium">{m.label}</span>
               </div>
               <div className="text-xl font-bold text-white">{m.value}</div>
               <div className="flex items-center gap-1 mt-1">
-                <span className={cn('text-[10px]', m.trendUp ? 'text-emerald-400' : 'text-zinc-500')}>{m.trend}</span>
+                <span className={cn('text-ds-micro', m.trendUp ? 'text-emerald-400' : 'text-zinc-500')}>{m.trend}</span>
               </div>
             </button>
           );
@@ -181,8 +191,8 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
             return (
               <div key={s} className="bg-ink-850 border border-white/[0.06] rounded-lg px-3 py-2 text-center min-w-[80px]">
                 <div className="text-lg font-bold text-white">{count}</div>
-                <div className="text-[9px] text-zinc-500 capitalize">{s.replace(/_/g, ' ')}</div>
-                <div className="text-[9px] text-zinc-600">{pct}%</div>
+                <div className="text-ds-micro text-zinc-500 capitalize">{s.replace(/_/g, ' ')}</div>
+                <div className="text-ds-micro text-zinc-600">{pct}%</div>
               </div>
             );
           })}
@@ -237,7 +247,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
               {drillCard === 'On-Hand Inventory (est.)' && (
                 <div className="space-y-2">
                   <p className="text-xs text-zinc-400">Estimated {onHandInv} units on hand</p>
-                  <p className="text-[10px] text-zinc-600">Calculated from case-pack x 10 per SKU</p>
+                  <p className="text-ds-micro text-zinc-600">Calculated from case-pack x 10 per SKU</p>
                 </div>
               )}
             </div>
@@ -248,6 +258,6 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
       {/* §Phase G1 — brand deductions ledger (Tour 5 surface). APPENDED after
           all existing content so no existing browser assertion changes. */}
       <DeductionsLedger />
-    </div>
+    </WorkspaceFrame>
   );
 }

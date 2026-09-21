@@ -41,11 +41,24 @@ export function WorkspaceFrame({
   /** Constrain width only where a reading-width surface genuinely needs it. */
   width = 'full',
   density = 'comfortable',
+  /**
+   * §UI/UX REDESIGN (remaining surfaces) — the frame owns the surface identity
+   * and its loading semantics so every migrated page exposes exactly one
+   * `data-testid` root and a real `aria-busy` state rather than hand-rolling a
+   * bespoke outer `<div>` (the legacy `p-6 space-y-6 max-w-[1400px] mx-auto`
+   * container was the marker of the pre-workspace generation).
+   */
+  testId,
+  busy = false,
 }: {
   children: ReactNode;
   className?: string;
   width?: 'full' | 'reading';
   density?: 'comfortable' | 'compact';
+  /** Root `data-testid` for the surface (used by the browser suites). */
+  testId?: string;
+  /** Renders `aria-busy` while the surface's data is still resolving. */
+  busy?: boolean;
 }) {
   return (
     <div
@@ -56,6 +69,8 @@ export function WorkspaceFrame({
         className
       )}
       data-workspace-frame={width}
+      data-testid={testId}
+      aria-busy={busy || undefined}
     >
       {children}
     </div>
@@ -66,6 +81,26 @@ export function WorkspaceFrame({
  * Page header for a workspace: an optional ENTITY / CONTEXT bar (what record am
  * I looking at, which tenant, which environment), then a clear page purpose
  * (h1 + description), the primary actions, and an optional sticky toolbar slot.
+ *
+ * §UI/UX Wave 3 — HIERARCHY + DENSITY REVISION.
+ *
+ * This primitive is composed by every migrated surface, so it is the single
+ * highest-leverage place to fix "every block competes at the same visual
+ * weight". What changed and why:
+ *
+ *  - Title is `text-ds-page` (20px) on the display face, not `sm:text-2xl`
+ *    (24px). A 24px serif h1 reads as a marketing headline; 20px reads as an
+ *    enterprise entity title while keeping the Mercenta display identity.
+ *  - Description drops from `text-sm` (14px) to `text-ds-body` (13px). At 14px
+ *    the description competed with the title for the first glance; at 13px the
+ *    title clearly wins.
+ *  - Vertical rhythm tightened (mb-4→mb-3, entity mb-3→mb-2) so the first
+ *    actionable row is reachable sooner on a 900px viewport.
+ *  - STICKY TOOLBAR FIXED: the offset was `top-[52px]`, but the app bar is
+ *    `h-14` (56px) AND `main` is its own scroll container — so the toolbar stuck
+ *    52px down inside that scrollport and content visibly scrolled through the
+ *    band above it. `top-0` is correct because `main` already begins below the
+ *    app bar.
  */
 export function WorkspaceHeader({
   eyebrow,
@@ -94,35 +129,35 @@ export function WorkspaceHeader({
   className?: string;
 }) {
   return (
-    <header className={cn('mb-4', className)} data-workspace-header="true">
+    <header className={cn('mb-3', className)} data-workspace-header="true">
       {entity && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-1.5">
           {entity}
         </div>
       )}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           {eyebrow && (
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+            <p className="mb-0.5 text-ds-micro font-semibold uppercase tracking-[0.18em] text-zinc-500">
               {eyebrow}
             </p>
           )}
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
+            <h1 className="font-display text-ds-page font-semibold tracking-tight text-white">
               {title}
             </h1>
             {status}
           </div>
           {description && (
-            <p className="mt-1.5 max-w-3xl text-sm leading-snug text-zinc-500">{description}</p>
+            <p className="mt-1 max-w-3xl text-ds-body leading-snug text-zinc-500">{description}</p>
           )}
-          {meta && <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">{meta}</div>}
+          {meta && <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">{meta}</div>}
         </div>
         {actions && <div className="flex flex-shrink-0 items-center gap-2">{actions}</div>}
       </div>
       {toolbar && (
         <div
-          className="sticky top-[52px] z-20 mt-3 rounded-ds-md border border-white/[0.06] bg-ink-900/95 px-3 py-2 backdrop-blur"
+          className="sticky top-0 z-20 mt-2.5 rounded-ds-md border border-white/[0.06] bg-ink-900/95 px-3 py-2 backdrop-blur"
           data-workspace-toolbar="true"
         >
           {toolbar}
@@ -197,11 +232,11 @@ export function WorkspaceSection({
             />
           )}
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold tracking-tight text-white sm:text-[15px]">
+            <h2 className="text-sm font-semibold tracking-tight text-white sm:text-[15px]">
               {title}
-            </h3>
+            </h2>
             {description && (
-              <p className="mt-0.5 text-[11px] leading-snug text-zinc-500">{description}</p>
+              <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{description}</p>
             )}
           </div>
         </div>
@@ -229,7 +264,7 @@ export function DomainChip({
     <span
       data-domain={domain}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-ds-label font-semibold',
         className
       )}
       style={{ backgroundColor: c.solid, color: c.on }}
@@ -268,7 +303,7 @@ export function SeverityMarker({
         className="h-3.5 w-[3px] flex-shrink-0 rounded-full"
         style={{ backgroundColor: toneVar[tone] }}
       />
-      <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</span>
+      <span className="text-ds-label font-medium uppercase tracking-wide text-zinc-400">{label}</span>
     </span>
   );
 }
@@ -344,14 +379,22 @@ function MetricBody({ data }: { data: MetricTileData }) {
   const size = data.size ?? 'default';
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[10px] font-semibold uppercase leading-none tracking-[0.14em] text-zinc-500">
+      <span className="text-ds-micro font-semibold uppercase leading-none tracking-[0.14em] text-zinc-500">
         {data.label}
       </span>
       <span
         data-testid={data.valueTestId ?? `kpi-value-${data.id}`}
         className={cn(
           'animate-value-change font-mono font-semibold leading-none tracking-tight text-white',
-          size === 'hero' ? 'text-[26px] sm:text-[30px]' : 'text-xl'
+          /*
+           * §UI/UX Wave 3 — HIERARCHY. These were `text-[26px] sm:text-[30px]`
+           * (hero) and `text-xl` (default, 20px). 20px was exactly the new page
+           * title size, so a metric value and the h1 competed at the same weight.
+           * Hero is now 24px and default 18px, both BELOW the 20px h1 in the
+           * text hierarchy while still reading as the dominant number on the row
+           * (mono + semibold + white). The arbitrary 26/30px sizes are gone.
+           */
+          size === 'hero' ? 'text-2xl' : 'text-lg'
         )}
       >
         {data.value}
@@ -365,7 +408,7 @@ function MetricBody({ data }: { data: MetricTileData }) {
         {data.delta && (
           <span
             data-delta={data.delta.direction}
-            className="inline-flex items-center gap-1 font-mono text-[11px] font-medium text-zinc-400"
+            className="inline-flex items-center gap-1 font-mono text-ds-label font-medium text-zinc-400"
           >
             <span aria-hidden="true">
               {data.delta.direction === 'up' ? '↑' : data.delta.direction === 'down' ? '↓' : '·'}
@@ -375,7 +418,7 @@ function MetricBody({ data }: { data: MetricTileData }) {
         )}
       </div>
       {data.context && (
-        <span className="text-[11px] leading-snug text-zinc-500">{data.context}</span>
+        <span className="text-ds-label leading-snug text-zinc-500">{data.context}</span>
       )}
     </div>
   );
@@ -466,7 +509,7 @@ export function Queue({
     if (r.group && r.group !== lastGroup) {
       out.push(
         <li key={`group-${r.group}`} className="bg-white/[0.02] px-3.5 py-1">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
             {r.group}
           </p>
         </li>
@@ -496,20 +539,20 @@ export function Queue({
           </StatusBadge>
         )}
         {r.ref && (
-          <span className="flex-shrink-0 font-mono text-[11px] text-zinc-400">{r.ref}</span>
+          <span className="flex-shrink-0 font-mono text-ds-label text-zinc-400">{r.ref}</span>
         )}
         <span className="min-w-0 flex-1">
           <span className="block truncate text-xs font-medium text-white">{r.title}</span>
           {r.meta && (
-            <span className="block truncate text-[11px] leading-snug text-zinc-500">{r.meta}</span>
+            <span className="block truncate text-ds-label leading-snug text-zinc-500">{r.meta}</span>
           )}
         </span>
         {r.facts?.map((f) => (
           <span key={f.label} className="flex flex-shrink-0 flex-col items-end">
-            <span className="text-[9px] uppercase tracking-wider text-zinc-600">{f.label}</span>
+            <span className="text-ds-micro uppercase tracking-wider text-zinc-600">{f.label}</span>
             <span
               className={cn(
-                'font-mono text-[11px]',
+                'font-mono text-ds-label',
                 f.emphasis ? 'font-semibold text-white' : 'text-zinc-300'
               )}
             >
@@ -521,7 +564,7 @@ export function Queue({
           <button
             type="button"
             onClick={r.onOpen}
-            className="flex-shrink-0 rounded-ds-sm border border-white/[0.08] bg-ink-800 px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-ds duration-ds-fast hover:bg-ink-700 hover:text-white"
+            className="flex-shrink-0 rounded-ds-sm border border-white/[0.08] bg-ink-800 px-2.5 py-1 text-ds-label font-medium text-zinc-300 transition-ds duration-ds-fast hover:bg-ink-700 hover:text-white"
           >
             <span className="inline-flex items-center gap-1">
               {r.actionLabel ?? 'Review'}
@@ -609,7 +652,7 @@ export function PipelineTrack({
               className="flex items-center justify-between gap-2 px-2.5 py-1.5"
               style={{ backgroundColor: c.solid, color: c.on }}
             >
-              <span className="truncate text-[10px] font-semibold uppercase tracking-[0.12em]">
+              <span className="truncate text-ds-micro font-semibold uppercase tracking-[0.12em]">
                 {s.label}
               </span>
               {s.attention && (
@@ -633,7 +676,7 @@ export function PipelineTrack({
                   }}
                 />
               </span>
-              <span className="mt-1.5 block text-[10px] text-zinc-500">
+              <span className="mt-1.5 block text-ds-micro text-zinc-500">
                 {total > 0 ? `${Math.round(s.share * 100)}% of pipeline` : 'no active work'}
               </span>
             </span>
@@ -669,7 +712,7 @@ export function ContextPanel({
       )}
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-3 py-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           {title}
         </h3>
         {action}
@@ -737,13 +780,13 @@ export function ActivityFeed({
             )}
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[11px] font-medium leading-snug text-white">{e.title}</span>
+            <span className="block text-ds-label font-medium leading-snug text-white">{e.title}</span>
             {e.meta && (
-              <span className="block truncate text-[10px] leading-snug text-zinc-500">
+              <span className="block truncate text-ds-micro leading-snug text-zinc-500">
                 {e.meta}
               </span>
             )}
-            <span className="mt-0.5 block font-mono text-[10px] text-zinc-600">
+            <span className="mt-0.5 block font-mono text-ds-micro text-zinc-600">
               {e.at.slice(0, 16).replace('T', ' ')}
             </span>
           </span>
@@ -751,7 +794,7 @@ export function ActivityFeed({
             <button
               type="button"
               onClick={e.onOpen}
-              className="flex-shrink-0 self-start rounded-ds-sm px-1.5 py-0.5 text-[10px] font-medium text-zinc-400 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-white"
+              className="flex-shrink-0 self-start rounded-ds-sm px-1.5 py-0.5 text-ds-micro font-medium text-zinc-400 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-white"
             >
               Open
             </button>
@@ -826,7 +869,7 @@ export function RecordDrawer({
         <div className="flex items-start justify-between gap-3 border-b border-white/[0.06] px-4 py-3">
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold tracking-tight text-white">{title}</h2>
-            {subtitle && <p className="mt-0.5 truncate text-[11px] text-zinc-500">{subtitle}</p>}
+            {subtitle && <p className="mt-0.5 truncate text-ds-label text-zinc-500">{subtitle}</p>}
           </div>
           <button
             type="button"
@@ -856,7 +899,7 @@ export function RecordFieldList({
     <dl className={cn('grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2', className)}>
       {fields.map((f) => (
         <div key={f.label} className="min-w-0">
-          <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          <dt className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
             {f.label}
           </dt>
           <dd className="mt-0.5 break-words text-xs text-zinc-200">{f.value}</dd>
@@ -902,7 +945,7 @@ export function SegmentedControl({
             onClick={() => onSelect(it.id)}
             data-state={selected ? 'active' : 'inactive'}
             className={cn(
-              'rounded-ds-sm px-2.5 py-1 text-[11px] font-medium transition-ds duration-ds-fast',
+              'rounded-ds-sm px-2.5 py-1 text-ds-label font-medium transition-ds duration-ds-fast',
               selected
                 ? 'bg-ink-700 text-white'
                 : 'text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200'
@@ -910,7 +953,7 @@ export function SegmentedControl({
           >
             {it.label}
             {typeof it.count === 'number' && (
-              <span className="ml-1.5 font-mono text-[10px] text-zinc-500">{it.count}</span>
+              <span className="ml-1.5 font-mono text-ds-micro text-zinc-500">{it.count}</span>
             )}
           </button>
         );

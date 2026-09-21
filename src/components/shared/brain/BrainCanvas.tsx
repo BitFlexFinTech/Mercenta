@@ -6,7 +6,9 @@
  * list of real buttons rendered by the caller.
  *
  * ACCESSIBILITY MODEL (deliberate, not incidental):
- *  - The SVG is ONE `role="img"` with a text alternative describing the counts,
+ *  - The SVG is ONE `role="group"` carrying a text alternative describing the
+ *    counts (not `role="img"`: the canvas contains keyboard-reachable node
+ *    roles, and a widget role must never be nested inside an image role),
  *    because 300 focusable SVG nodes would be a tab trap.
  *  - Every entity is ALSO a real <button> in the companion entity list, which is
  *    what keyboard and screen-reader users actually drive. Selection state is
@@ -131,7 +133,7 @@ export function BrainCanvas({
       <svg
         ref={svgRef}
         viewBox={`0 0 ${layout.width} ${layout.height}`}
-        role="img"
+        role="group"
         aria-label={`Mercenta Brain graph: ${visibleIds.size} visible entities and ${edges.length} relationships`}
         className="block h-full w-full cursor-grab touch-none select-none"
         data-testid={testId}

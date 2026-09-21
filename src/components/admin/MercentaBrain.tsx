@@ -43,8 +43,9 @@ import {
   WorkspaceGrid,
   WorkspaceHeader,
   WorkspaceSection,
+  MetricBand,
+  type MetricTileData,
 } from '@/components/shared/workspace';
-import { KpiGroup, type KpiCellData } from '@/components/shared/dashboard';
 import { ArrowRight, Search } from 'lucide-react';
 
 /** Where the real work for each entity kind actually happens (existing views). */
@@ -140,7 +141,7 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
     ];
   }, [graph.nodes]);
 
-  const kpis: KpiCellData[] = [
+  const kpis: MetricTileData[] = [
     {
       id: 'entities',
       label: 'Entities',
@@ -271,7 +272,7 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
       />
 
       <div className="mb-4">
-        <KpiGroup items={kpis} />
+        <MetricBand items={kpis} />
       </div>
 
       <WorkspaceGrid

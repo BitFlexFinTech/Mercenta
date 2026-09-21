@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge, Button, DataTable, Input, Select } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { Plus, X, Flame, Lock, ShieldAlert, ImageUp, Upload, Send, RefreshCw } from 'lucide-react';
 import type { Product } from '@/types';
@@ -154,22 +155,23 @@ export function ProductCatalog() {
   };
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-white">Master Product Catalog</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Wholesale pricing schema and UK compliance metadata
-          </p>
-        </div>
-        <Button onClick={() => { setShowAdd(true); setShowCsvImport(false); }} disabled={!gateCleared}>
-          {gateCleared ? <Plus className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-          {gateCleared ? 'Add New Product' : 'Catalog Locked'}
-        </Button>
-        <Button variant="ghost" className="text-xs" onClick={() => { setShowCsvImport(!showCsvImport); setShowAdd(false); }} disabled={!gateCleared}>
-          <Upload className="w-3.5 h-3.5 mr-1" /> CSV Import
-        </Button>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · CATALOGUE"
+        title="Master Product Catalog"
+        description="Wholesale pricing schema, UK compliance metadata and the canonical submission gate."
+        actions={
+          <>
+            <Button onClick={() => { setShowAdd(true); setShowCsvImport(false); }} disabled={!gateCleared}>
+              {gateCleared ? <Plus className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+              {gateCleared ? 'Add New Product' : 'Catalog Locked'}
+            </Button>
+            <Button variant="ghost" className="text-xs" onClick={() => { setShowCsvImport(!showCsvImport); setShowAdd(false); }} disabled={!gateCleared}>
+              <Upload className="w-3.5 h-3.5 mr-1" /> CSV Import
+            </Button>
+          </>
+        }
+      />
 
       {!gateCleared && (
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-sm text-amber-200">
@@ -214,7 +216,7 @@ export function ProductCatalog() {
                 ? 'all product information complete'
                 : `${incompleteCount} product(s) still missing required information`}
             </div>
-            <Badge className={cn('text-[10px]', 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20')}>
+            <Badge className={cn('text-ds-micro', 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20')}>
               Compliance gate cleared
             </Badge>
           </div>
@@ -280,7 +282,7 @@ export function ProductCatalog() {
               render: (p) => (
                 <div>
                   <div className="text-xs font-mono text-zinc-400">{p.sku}</div>
-                  <div className="text-[10px] font-mono text-zinc-600 mt-0.5">{p.barcode}</div>
+                  <div className="text-ds-micro font-mono text-zinc-600 mt-0.5">{p.barcode}</div>
                 </div>
               ),
             },
@@ -395,7 +397,7 @@ export function ProductCatalog() {
                     aria-label={`Toggle availability for ${p.sku}`}
                     aria-pressed={!isAvailable}
                     className={cn(
-                      'text-[10px] px-2 py-0.5 rounded-full font-medium transition-colors',
+                      'text-ds-micro px-2 py-0.5 rounded-full font-medium transition-colors',
                       isAvailable
                         ? 'bg-emerald-500/15 text-emerald-300'
                         : 'bg-red-500/15 text-red-300'
@@ -426,15 +428,15 @@ export function ProductCatalog() {
                 const complete = completenessBySku.get(p.sku)?.complete ?? false;
                 if (!sub) {
                   return complete ? (
-                    <span className="text-[10px] text-zinc-500">Ready to submit</span>
+                    <span className="text-ds-micro text-zinc-500">Ready to submit</span>
                   ) : (
-                    <span className="text-[10px] text-amber-300">Incomplete</span>
+                    <span className="text-ds-micro text-amber-300">Incomplete</span>
                   );
                 }
                 return (
                   <span
                     className={cn(
-                      'text-[10px] px-2 py-0.5 rounded-full font-medium',
+                      'text-ds-micro px-2 py-0.5 rounded-full font-medium',
                       sub.status === 'live'
                         ? 'bg-emerald-500/15 text-emerald-300'
                         : sub.status === 'rejected'
@@ -458,7 +460,7 @@ export function ProductCatalog() {
                 <div className="flex flex-col items-center gap-1">
                   <button
                     onClick={() => setEditingSku(p.sku)}
-                    className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors"
+                    className="text-ds-micro text-brass-400 hover:text-brass-300 transition-colors"
                   >
                     Edit Cost
                   </button>
@@ -469,7 +471,7 @@ export function ProductCatalog() {
                         <button
                           onClick={() => void handlePollSubmission(sub.id)}
                           disabled={busySku === sub.id}
-                          className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
+                          className="text-ds-micro text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
                         >
                           <RefreshCw className="w-3 h-3" />
                           {busySku === sub.id ? 'Polling…' : 'Check result'}
@@ -482,7 +484,7 @@ export function ProductCatalog() {
                         onClick={() => void handleSubmitForSubmission(p)}
                         disabled={!gateCleared || !ready || busySku === p.sku}
                         title={ready ? 'Submit through the retail-channel seam' : 'Product information is incomplete'}
-                        className="text-[10px] text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-40"
+                        className="text-ds-micro text-brass-400 hover:text-brass-300 transition-colors inline-flex items-center gap-1 disabled:opacity-40"
                       >
                         <Send className="w-3 h-3" />
                         {busySku === p.sku ? 'Submitting…' : sub ? 'Resubmit' : 'Submit'}
@@ -518,7 +520,7 @@ export function ProductCatalog() {
           }}
         />
       )}
-    </div>
+    </WorkspaceFrame>
   );
 }
 
@@ -657,7 +659,7 @@ function AddProductPanel({
           />
           {/* §Batch-21 — Product image set with Amazon-standard validation */}
           <div className="border-t border-white/[0.06] pt-3 mt-2">
-            <p className="text-[10px] text-zinc-500 font-medium mb-2 flex items-center gap-1">
+            <p className="text-ds-micro text-zinc-500 font-medium mb-2 flex items-center gap-1">
               <ImageUp className="w-3 h-3" /> Product Images
             </p>
             <ImageSetEditor
@@ -703,12 +705,12 @@ function AddProductPanel({
           </label>
           <div className="pt-2">
             {gateBlocked && (
-              <p className="mb-2 text-[11px] text-amber-300 flex items-center gap-1.5">
+              <p className="mb-2 text-ds-label text-amber-300 flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" /> Submission disabled — compliance gate not cleared.
               </p>
             )}
             {!gateBlocked && !completeness.complete && (
-              <div className="mb-2 text-[11px] text-amber-300">
+              <div className="mb-2 text-ds-label text-amber-300">
                 <p>Missing required information:</p>
                 <ul className="mt-1 space-y-0.5 text-amber-300/90">
                   {completeness.missingLabels.map((l) => (
@@ -756,7 +758,7 @@ function CostEditPanel({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="bg-ink-850 border border-white/[0.08] rounded-xl p-5 w-80 shadow-2xl">
         <h3 className="text-sm font-semibold text-white mb-1">Edit Item Cost</h3>
-        <p className="text-[10px] text-zinc-500 mb-4">
+        <p className="text-ds-micro text-zinc-500 mb-4">
           {product.name} · {product.sku}
         </p>
         <div className="space-y-3">

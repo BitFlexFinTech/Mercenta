@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { complianceDocStatusPresentation } from '@/lib/statusPresentation';
 import {
@@ -82,14 +83,12 @@ export function ComplianceHub() {
   );
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div>
-        <h2 className="text-lg font-semibold text-white">Compliance &amp; Customs Hub</h2>
-        <p className="text-xs text-zinc-500 mt-0.5">
-          UK market compliance — customs documents are auto-generated and
-          pre-filled for your review
-        </p>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · COMPLIANCE"
+        title="Compliance & Customs"
+        description="UK market compliance — customs documents are auto-generated and pre-filled for your review. Mercenta is the Importer of Record; statutory documents remain your responsibility."
+      />
 
       {/* Importer of Record — handled by Mercenta, never the brand */}
       <Card title="Importer of Record — handled by Mercenta">
@@ -99,7 +98,7 @@ export function ComplianceHub() {
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span className="text-xs font-medium text-white">UK EORI Number</span>
             </div>
-            <p className="text-[11px] text-zinc-400">
+            <p className="text-ds-label text-zinc-400">
               Held by Mercenta as Importer of Record — <span className="font-mono">{MERCENTA_EORI}</span>.
               You never need to register.
             </p>
@@ -109,7 +108,7 @@ export function ComplianceHub() {
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span className="text-xs font-medium text-white">UK VAT Registration</span>
             </div>
-            <p className="text-[11px] text-zinc-400">
+            <p className="text-ds-label text-zinc-400">
               Mercenta's VAT number is used on all imports —{' '}
               <span className="font-mono">{MERCENTA_VAT}</span>. Auto-applied to every document.
             </p>
@@ -129,7 +128,7 @@ export function ComplianceHub() {
 
       {/* Auto-generated customs documentation */}
       <Card title="Customs Documentation — auto-generated, pre-filled">
-        <p className="text-[11px] text-zinc-500 px-1 pb-3">
+        <p className="text-ds-label text-zinc-500 px-1 pb-3">
           Generated from your purchase-order data and product master. Review each
           pre-filled document and confirm — no manual form-filling required.
         </p>
@@ -145,9 +144,9 @@ export function ComplianceHub() {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <span className="font-mono text-xs text-brass">{po.poNumber}</span>
-                  <span className="text-[11px] text-zinc-500 ml-2">{brandName}</span>
+                  <span className="text-ds-label text-zinc-500 ml-2">{brandName}</span>
                 </div>
-                <Badge className="text-[10px] bg-emerald-500/15 text-emerald-300 border-emerald-500/20 capitalize">
+                <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20 capitalize">
                   {po.status.replace(/_/g, ' ')}
                 </Badge>
               </div>
@@ -161,15 +160,15 @@ export function ComplianceHub() {
                     )}
                   >
                     <FileCheck2 className="w-4 h-4 text-brass mb-1.5" />
-                    <div className="text-[11px] font-medium text-white">{doc.title}</div>
+                    <div className="text-ds-label font-medium text-white">{doc.title}</div>
                     <ul className="mt-1 space-y-0.5">
                       {doc.preFilled.slice(0, 2).map((f) => (
-                        <li key={f.label} className="font-mono text-[9px] text-zinc-600 truncate">
+                        <li key={f.label} className="font-mono text-ds-micro text-zinc-600 truncate">
                           {f.label}: {f.value}
                         </li>
                       ))}
                     </ul>
-                    <span className="inline-flex items-center gap-1 text-[10px] text-brass mt-2 opacity-70 group-hover:opacity-100">
+                    <span className="inline-flex items-center gap-1 text-ds-micro text-brass mt-2 opacity-70 group-hover:opacity-100">
                       <Eye className="w-3 h-3" /> Review &amp; confirm
                     </span>
                   </button>
@@ -201,7 +200,7 @@ export function ComplianceHub() {
           </Card>
         </div>
       )}
-    </div>
+    </WorkspaceFrame>
   );
 }
 
@@ -348,38 +347,38 @@ function ComplianceUploadCard({
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-xs text-zinc-300 capitalize truncate">{type.replace(/_/g, ' ')}</span>
                     {row && row.scope === 'conditional' && (
-                      <Badge className="text-[9px] bg-white/[0.06] text-zinc-400 border-white/[0.08]">conditional</Badge>
+                      <Badge className="text-ds-micro bg-white/[0.06] text-zinc-400 border-white/[0.08]">conditional</Badge>
                     )}
                     {expiry && (
-                      <Badge className={cn('text-[9px]', expiry.color)}>
+                      <Badge className={cn('text-ds-micro', expiry.color)}>
                         <Clock className="w-2.5 h-2.5 mr-0.5" />{expiry.label}
                       </Badge>
                     )}
                   </div>
                   {row && row.blockingReason && (
-                    <p className="text-[10px] text-zinc-500 mt-0.5 truncate">{row.blockingReason}</p>
+                    <p className="text-ds-micro text-zinc-500 mt-0.5 truncate">{row.blockingReason}</p>
                   )}
                   {verification && (
-                    <p className="text-[10px] text-zinc-600 mt-0.5 truncate">
+                    <p className="text-ds-micro text-zinc-600 mt-0.5 truncate">
                       {`${verification.simulated ? 'Simulated verification' : verification.external ? 'External verification' : 'Automated verification'} — ${verification.result} (${verification.providerId}${verification.simulated ? ', simulated' : ''})`}
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <StatusBadge
-                    className="text-[10px]"
+                    className="text-ds-micro"
                     dataStatus={complianceDocStatusPresentation(status).dataStatus}
                     tone={complianceDocStatusPresentation(status).tone}
                   >
                     {complianceDocStatusPresentation(status).label}
                   </StatusBadge>
                   {row && row.needsReplacement && (
-                    <Button variant="ghost" className="text-[10px]" onClick={function() { handleReplace(type); }}>
+                    <Button variant="ghost" className="text-ds-micro" onClick={function() { handleReplace(type); }}>
                       Replace
                     </Button>
                   )}
                   {status !== 'approved' && (
-                    <Button className="text-[10px]" onClick={function() { handleUpload(type); }} disabled={isUploading}>
+                    <Button className="text-ds-micro" onClick={function() { handleUpload(type); }} disabled={isUploading}>
                       {isUploading ? 'Uploading...' : <><Upload className="w-3 h-3 mr-1" />Upload</>}
                     </Button>
                   )}
@@ -388,9 +387,9 @@ function ComplianceUploadCard({
             );
           })}
         </div>
-        {uploaded && <p className="text-[10px] text-emerald-400">Document uploaded and marked for review.</p>}
-        {replacementNote && <p className="text-[10px] text-red-300">{replacementNote}</p>}
-        <p className="text-[10px] text-zinc-600">Required: {requiredTypes.map((t) => CATEGORY_DOC_LABELS[t] ?? t.replace(/_/g, ' ')).join(', ')}. A signed distribution agreement is also required.</p>
+        {uploaded && <p className="text-ds-micro text-emerald-400">Document uploaded and marked for review.</p>}
+        {replacementNote && <p className="text-ds-micro text-red-300">{replacementNote}</p>}
+        <p className="text-ds-micro text-zinc-600">Required: {requiredTypes.map((t) => CATEGORY_DOC_LABELS[t] ?? t.replace(/_/g, ' ')).join(', ')}. A signed distribution agreement is also required.</p>
       </div>
     </Card>
   );

@@ -10,7 +10,9 @@
  *    metric, arcs that sweep in on mount.
  *  - SPARKLINE: axis-free micro trend for metric tiles and queue rows.
  *  - BARS: proportional bars that grow in, with an accessible summary.
- * All charts carry an accessible description (`role="img"` + aria-label),
+ * All charts carry an accessible description (`role="img"` + aria-label, or
+ * `role="group"` where the chart itself contains keyboard-reachable points so
+ * a widget role is never nested inside an image role),
  * never rely on colour alone, and are plain SVG (no chart-library chrome).
  * Everything is reduced-motion safe (src/index.css collapses the animations).
  */
@@ -27,8 +29,23 @@ function niceTicks(max: number, count = 4): number[] {
   return Array.from({ length: count + 1 }, (_, i) => Math.round(i * step));
 }
 
-function px(v: number): string {
-  return `${Math.round(v * 100) / 100}px`;
+/**
+ * §S1-a — SVG GEOMETRY NUMBER FORMATTER (defect fix).
+ *
+ * SVG *geometry* attributes — `<polyline points>` and `<path d>` — take plain
+ * NUMBERS. The SVG grammar has no unit syntax, so a value like `12.5px` is a
+ * parse error: the browser drops that geometry and logs a console error on
+ * every render. This helper previously appended `px` and was used ONLY in those
+ * two geometry attributes (the area `d`, the line `points` and the sparkline
+ * `points`), which is what produced the repeated console errors on the admin
+ * Overview.
+ *
+ * It therefore returns a unit-less number. Anything that genuinely needs a CSS
+ * length unit (stroke widths, inline styles) must append its own unit — as
+ * `data-chart-lines` already does with `${meta.strokeWidth}px`.
+ */
+function svgNum(v: number): string {
+  return `${Math.round(v * 100) / 100}`;
 }
 
 /* ── LINE CHART ──────────────────────────────────────────────────────── */
@@ -90,7 +107,7 @@ export function MercentaLineChart({
 
   return (
     <svg
-      role="img"
+      role="group"
       aria-label={summary}
       viewBox={`0 0 ${W} ${H}`}
       preserveAspectRatio="xMidYMid meet"
@@ -157,9 +174,9 @@ export function MercentaLineChart({
         const pts = s.points.map((p, i) => ({ x: toX(i), y: toY(p.value), p }));
         const areaPath =
           pts.length > 1
-            ? `M ${px(pts[0].x)} ${px(PAD.top + plotH)} ` +
-              pts.map((pt) => `L ${px(pt.x)} ${px(pt.y)}`).join(' ') +
-              ` L ${px(pts[pts.length - 1].x)} ${px(PAD.top + plotH)} Z`
+            ? `M ${svgNum(pts[0].x)} ${svgNum(PAD.top + plotH)} ` +
+              pts.map((pt) => `L ${svgNum(pt.x)} ${svgNum(pt.y)}`).join(' ') +
+              ` L ${svgNum(pts[pts.length - 1].x)} ${svgNum(PAD.top + plotH)} Z`
             : '';
         return (
           <g key={s.name} data-series={s.name}>
@@ -170,7 +187,7 @@ export function MercentaLineChart({
             {/* Draw-in progression: pathLength normalises the dash maths so the
                 line renders itself from left to right on mount. */}
             <polyline
-              points={pts.map((pt) => `${px(pt.x)},${px(pt.y)}`).join(' ')}
+              points={pts.map((pt) => `${svgNum(pt.x)},${svgNum(pt.y)}`).join(' ')}
               fill="none"
               stroke={color}
               strokeWidth={meta.strokeWidth}
@@ -369,7 +386,7 @@ export function MercentaDoughnut({
           {arcs.map(({ s }, i) => {
             const color = s.color ?? meta.palette[i % meta.palette.length];
             return (
-              <li key={s.label} className="flex items-center gap-2 text-[11px]">
+              <li key={s.label} className="flex items-center gap-2 text-ds-label">
                 <span
                   aria-hidden="true"
                   className="h-2 w-2 flex-shrink-0 rounded-sm"
@@ -437,7 +454,7 @@ export function MercentaSparkline({
     >
       <title>{ariaLabel}</title>
       <polyline
-        points={coords.map((c) => `${px(c.x)},${px(c.y)}`).join(' ')}
+        points={coords.map((c) => `${svgNum(c.x)},${svgNum(c.y)}`).join(' ')}
         fill="none"
         stroke={color}
         strokeWidth={meta.strokeWidth}

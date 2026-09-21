@@ -8,6 +8,7 @@ import { usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { useRechartsTokens } from '@/components/shared/charts/rechartsTokens';
 import { Badge, Card } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { DeductionsLedger } from '@/components/brand/DeductionsLedger';
 import { cn } from '@/utils/cn';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
@@ -68,22 +69,28 @@ export function SalesAnalytics({ onNavigate }: { onNavigate?: (view: string) => 
 
   if (pos.length === 0) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto">
+      <WorkspaceFrame className="space-y-4">
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · ANALYTICS"
+          title="Sales Analytics"
+          description={`Revenue & performance for ${brandProfile.businessName || 'your brand'}`}
+        />
         <Card title="Sales Analytics">
           <p className="text-xs text-zinc-600">No POs yet for {brandProfile.businessName || 'your brand'}</p>
         </Card>
         {/* §Phase G1 — the deductions ledger is independent of PO volume, so it
             renders (with its own honest empty state) on every tenant. */}
         <div className="mt-6"><DeductionsLedger /></div>
-      </div>
+      </WorkspaceFrame>
     );
   }
 return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-brass-500/15 flex items-center justify-center"><BarChart3 className="w-5 h-5 text-brass-400" /></div>
-        <div><h2 className="text-lg font-semibold text-white">Sales Analytics</h2><p className="text-xs text-zinc-500 mt-0.5">Revenue &amp; performance for {brandProfile.businessName || 'your brand'}</p></div>
-      </div>
+    <WorkspaceFrame className="space-y-6">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · ANALYTICS"
+        title="Sales Analytics"
+        description={`Revenue & performance for ${brandProfile.businessName || 'your brand'}`}
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <MetricCard label="Revenue" value={"\u00a3" + (totalValue / 1000).toFixed(0) + "k"} trend={accepted.length + " POs"} trendUp icon={<DollarSign className="w-4 h-4" />} onClick={() => setDrillCard("rev")} />
@@ -94,7 +101,7 @@ return (
 
       <Card title={chartTab === "revenue" ? "Monthly Revenue Trend" : "Monthly Volume Trend"}
         action={<div className="flex gap-1">{( ["revenue","volume"] as const).map((t) => (
-          <button key={t} onClick={() => setChartTab(t)} className={"px-2.5 py-1 rounded-md text-[10px] font-medium transition-colors " + (chartTab === t ? "bg-brass-500/20 text-brass-400" : "text-zinc-500 hover:text-zinc-300")}>{t === "revenue" ? "Revenue" : "Volume"}</button>
+          <button key={t} onClick={() => setChartTab(t)} className={"px-2.5 py-1 rounded-md text-ds-micro font-medium transition-colors " + (chartTab === t ? "bg-brass-500/20 text-brass-400" : "text-zinc-500 hover:text-zinc-300")}>{t === "revenue" ? "Revenue" : "Volume"}</button>
         ))}</div>}>
         <div className="h-[280px]" onClick={() => setDrillCard("monthly")}>
           <ResponsiveContainer width="100%" height="100%">
@@ -118,7 +125,7 @@ return (
         <div className="space-y-2">
           {skuStats.length === 0 && <p className="text-xs text-zinc-600">No data yet.</p>}
           {skuStats.map((s, i) => (
-            <div key={s.name} className="flex items-center justify-between text-[11px]">
+            <div key={s.name} className="flex items-center justify-between text-ds-label">
               <div className="flex items-center gap-2">
                 <span className="text-zinc-600 font-mono w-4">{i + 1}.</span>
                 <span className="text-zinc-300">{s.name}</span>
@@ -136,7 +143,7 @@ return (
       {/* §Phase G1 — brand deductions ledger (Tour 5 surface). APPENDED after
           all existing content so no existing browser assertion changes. */}
       <DeductionsLedger />
-    </div>
+    </WorkspaceFrame>
   );
 }
 function MetricCard({ label, value, trend, trendUp, icon, onClick }: {
@@ -146,15 +153,15 @@ function MetricCard({ label, value, trend, trendUp, icon, onClick }: {
     <button type="button" onClick={onClick} disabled={!onClick} className="w-full text-left disabled:cursor-default">
       <Card className={"p-4 " + (onClick ? "cursor-pointer hover:border-white/[0.14] transition-colors" : "")}>
         <div className="flex items-start justify-between mb-2">
-          <span className="text-[10px] text-zinc-500 font-medium">{label}</span>
+          <span className="text-ds-micro text-zinc-500 font-medium">{label}</span>
           <div className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-zinc-400">{icon}</div>
         </div>
         <div className="text-lg font-bold text-white tracking-tight">{value}</div>
-        <div className={"flex items-center gap-1 text-[10px] mt-0.5 " + (trendUp !== undefined ? (trendUp ? "text-emerald-400" : "text-zinc-500") : "")}>
+        <div className={"flex items-center gap-1 text-ds-micro mt-0.5 " + (trendUp !== undefined ? (trendUp ? "text-emerald-400" : "text-zinc-500") : "")}>
           {trendUp !== undefined && (trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />)}
           {trend}
         </div>
-        {onClick && <span className="mt-1 block text-[9px] text-zinc-600">Click for details \u2192</span>}
+        {onClick && <span className="mt-1 block text-ds-micro text-zinc-600">Click for details \u2192</span>}
       </Card>
     </button>
   );
@@ -178,12 +185,12 @@ function DrillModal({ card, onClose, data, onNavigate }: {
           <div className="space-y-3">
             <p className="text-xs text-zinc-400">Revenue across {data.accepted.length} fulfilled POs</p>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-ink-900 rounded-lg p-3"><p className="text-[10px] text-zinc-500">Total Revenue</p><p className="text-lg font-semibold text-white font-mono">\u00a3{data.totalValue.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-lg p-3"><p className="text-[10px] text-zinc-500">Avg per PO</p><p className="text-lg font-semibold text-white font-mono">\u00a3{data.avgOrder.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-lg p-3"><p className="text-[10px] text-zinc-500">Units</p><p className="text-lg font-semibold text-white font-mono">{data.totalUnits.toLocaleString()}</p></div>
-              <div className="bg-ink-900 rounded-lg p-3"><p className="text-[10px] text-zinc-500">SKUs</p><p className="text-lg font-semibold text-white font-mono">{data.skuCount}</p></div>
+              <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Total Revenue</p><p className="text-lg font-semibold text-white font-mono">\u00a3{data.totalValue.toLocaleString()}</p></div>
+              <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Avg per PO</p><p className="text-lg font-semibold text-white font-mono">\u00a3{data.avgOrder.toLocaleString()}</p></div>
+              <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Units</p><p className="text-lg font-semibold text-white font-mono">{data.totalUnits.toLocaleString()}</p></div>
+              <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">SKUs</p><p className="text-lg font-semibold text-white font-mono">{data.skuCount}</p></div>
             </div>
-            <button onClick={() => { onClose(); onNavigate?.("purchase_orders"); }} className="text-[10px] text-brass-400 hover:text-brass-300 flex items-center gap-1">View all POs <ArrowUpRight className="w-3 h-3" /></button>
+            <button onClick={() => { onClose(); onNavigate?.("purchase_orders"); }} className="text-ds-micro text-brass-400 hover:text-brass-300 flex items-center gap-1">View all POs <ArrowUpRight className="w-3 h-3" /></button>
           </div>
         )}
         {(card === "units" || card === "monthly") && (
@@ -203,11 +210,11 @@ function DrillModal({ card, onClose, data, onNavigate }: {
           const sku = data.skuStats.find((x: any) => x.name === card.slice(4));
           if (!sku) return <p className="text-xs text-zinc-600">SKU not found.</p>;
           return (<div className="grid grid-cols-2 gap-3">
-            <div className="bg-ink-900 rounded-lg p-3"><p className="text-[10px] text-zinc-500">Units</p><p className="text-lg font-semibold text-white font-mono">{sku.units.toLocaleString()}</p></div>
-            <div className="bg-ink-900 rounded-lg p-3"><p className="text-[10px] text-zinc-500">Revenue</p><p className="text-lg font-semibold text-white font-mono">\u00a3{sku.revenue.toLocaleString()}</p></div>
+            <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Units</p><p className="text-lg font-semibold text-white font-mono">{sku.units.toLocaleString()}</p></div>
+            <div className="bg-ink-900 rounded-lg p-3"><p className="text-ds-micro text-zinc-500">Revenue</p><p className="text-lg font-semibold text-white font-mono">\u00a3{sku.revenue.toLocaleString()}</p></div>
           </div>);
         })()}
-        {card === "avg" && <div className="bg-ink-900 rounded-lg p-4 text-center"><p className="text-[10px] text-zinc-500">Average Order Value</p><p className="text-3xl font-bold text-brass-400 font-mono mt-1">\u00a3{data.avgOrder.toLocaleString()}</p><p className="text-[10px] text-zinc-600 mt-2">Based on {data.accepted.length} fulfilled POs</p></div>}
+        {card === "avg" && <div className="bg-ink-900 rounded-lg p-4 text-center"><p className="text-ds-micro text-zinc-500">Average Order Value</p><p className="text-3xl font-bold text-brass-400 font-mono mt-1">\u00a3{data.avgOrder.toLocaleString()}</p><p className="text-ds-micro text-zinc-600 mt-2">Based on {data.accepted.length} fulfilled POs</p></div>}
       </div>
     </div>
   );

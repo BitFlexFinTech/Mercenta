@@ -39,7 +39,6 @@ import { renewalUrgency } from '@/lib/contracts';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { Alert, Button, EmptyState, StatusBadge, Skeleton } from '@/components/ui';
 import type { StatusTone } from '@/components/ui';
-import { type KpiCellData } from '@/components/shared/dashboard';
 import {
   ActivityFeed,
   ContextPanel,
@@ -266,7 +265,7 @@ export function AdminDashboard({
   const pendingPayouts = commissionsAll.filter((c) => c.status !== 'paid');
   const pendingPayoutValue = pendingPayouts.reduce((s, c) => s + netPayoutOf(c), 0);
 
-  const kpis: KpiCellData[] = [
+  const kpis: MetricTileData[] = [
     {
       id: 'pending-pos',
       label: 'POs awaiting action',
@@ -724,13 +723,13 @@ if (pendingBrandIds.length > 4) {
           }
           meta={
             <>
-              <span className="font-mono text-[11px] text-zinc-500">
+              <span className="font-mono text-ds-label text-zinc-500">
                 £{awaitingValue.toLocaleString()} open PO value
               </span>
-              <span className="font-mono text-[11px] text-zinc-500">
+              <span className="font-mono text-ds-label text-zinc-500">
                 {shipmentsAll.length} shipments in motion
               </span>
-              <span className="font-mono text-[11px] text-zinc-500">
+              <span className="font-mono text-ds-label text-zinc-500">
                 {renewalsDue.length} renewals in window
               </span>
             </>
@@ -742,7 +741,7 @@ if (pendingBrandIds.length > 4) {
           }
           toolbar={
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
                 Density
               </span>
               <SegmentedControl
@@ -759,11 +758,11 @@ if (pendingBrandIds.length > 4) {
                 onClick={() => setGroupAttention((g) => !g)}
                 aria-pressed={groupAttention}
                 data-testid="toggle-group-attention"
-                className="rounded-ds-sm border border-white/[0.08] bg-white/[0.02] px-2.5 py-1 text-[11px] font-medium text-zinc-400 transition-ds duration-ds-fast hover:text-zinc-200"
+                className="rounded-ds-sm border border-white/[0.08] bg-white/[0.02] px-2.5 py-1 text-ds-label font-medium text-zinc-400 transition-ds duration-ds-fast hover:text-zinc-200"
               >
                 {groupAttention ? 'Group rows' : 'Flat rows'}
               </button>
-              <span className="hidden font-mono text-[10px] text-zinc-600 sm:inline">
+              <span className="hidden font-mono text-ds-micro text-zinc-600 sm:inline">
                 ⌘K for records and destinations
               </span>
             </div>
@@ -899,7 +898,7 @@ if (pendingBrandIds.length > 4) {
                     <Icon className="h-4 w-4 flex-shrink-0 text-feature-intel" />
                     <span className="min-w-0 flex-1">
                       <span className="block text-xs font-medium text-white">{a.label}</span>
-                      <span className="block text-[11px] text-zinc-500">
+                      <span className="block text-ds-label text-zinc-500">
                         {a.count} {a.desc}
                       </span>
                     </span>

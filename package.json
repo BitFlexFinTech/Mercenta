@@ -9,7 +9,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "validate:wording": "node scripts/lint-wording.mjs"
+    "validate:wording": "node scripts/lint-wording.mjs",
+    "validate:typography": "node scripts/validate-typography-scale.mjs",
+    "migrate:typography": "node scripts/migrate-micro-typography.mjs",
+    "validate:commercial-readiness": "node scripts/validate-commercial-readiness.mjs",
+    "validate:brain": "node scripts/validate-mercenta-brain.mjs",
+    "validate:logistics-map": "node scripts/validate-logistics-map.mjs",
+    "validate:workspace-shell": "node scripts/validate-workspace-shell.mjs"
   },
   "dependencies": {
     "@sentry/react": "^10.73.0",
@@ -23,6 +29,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.9.1",
     "@playwright/test": "^1.62.1",
     "@types/react": "^18.3.5",
