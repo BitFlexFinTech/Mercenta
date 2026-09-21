@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { AppProvider, useApp } from '@/context/GlobalStateContext';
+import { useCanonicalQuerySync } from '@/data/queries';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { RouteMetadata } from '@/components/shared/RouteMetadata';
 
 const HomeShell = lazy(() => import('@/components/layout/HomeShell'));
 const BrandShell = lazy(() => import('@/components/layout/BrandShell'));
@@ -15,10 +17,29 @@ const FALLBACK = (
 
 function AppContent() {
   const { environment } = useApp();
-  if (environment === 'home' || environment === 'login') return <Suspense fallback={FALLBACK}><HomeShell /></Suspense>;
-  if (environment === 'brand') return <Suspense fallback={FALLBACK}><BrandShell /></Suspense>;
-  if (environment === 'admin') return <Suspense fallback={FALLBACK}><AdminShell /></Suspense>;
-  return <Suspense fallback={FALLBACK}><CarrierShell /></Suspense>;
+  /**
+   * §CANONICAL CHANGE PROPAGATION — the ONE subscriber that keeps every React
+   * Query read of canonical state in step with the domain, so projections built
+   * on it (the Logistics operational map and list, dashboards, queues, ledgers,
+   * Brain) reflect a domain change without a reload. Mounted here because the
+   * QueryClientProvider wraps the whole application (`main.tsx`).
+   */
+  useCanonicalQuerySync();
+  return (
+    <>
+      {/* §SEO FOUNDATION — the ONE writer of the document's route metadata. */}
+      <RouteMetadata />
+      {environment === 'home' || environment === 'login' ? (
+        <Suspense fallback={FALLBACK}><HomeShell /></Suspense>
+      ) : environment === 'brand' ? (
+        <Suspense fallback={FALLBACK}><BrandShell /></Suspense>
+      ) : environment === 'admin' ? (
+        <Suspense fallback={FALLBACK}><AdminShell /></Suspense>
+      ) : (
+        <Suspense fallback={FALLBACK}><CarrierShell /></Suspense>
+      )}
+    </>
+  );
 }
 
 function App() {

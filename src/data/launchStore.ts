@@ -16,6 +16,7 @@
 import { demoAuditLog } from './demoStore';
 import type { AuditLogEntry } from '@/types';
 import { LAUNCH_PLATFORMS } from '@/config/launchPlatforms';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 export type LaunchAccountStatus = 'not_started' | 'account_created' | 'blocked';
 export type LaunchProfileStatus = 'not_prepared' | 'prepared' | 'submitted';
@@ -87,6 +88,7 @@ function appendAudit(record: LaunchRecord, action: string, actorId: string, reas
       launchDate: record.launchDate,
     },
   });
+  notifyCanonicalStoreChange();
 }
 
 export type LaunchMutationResult =

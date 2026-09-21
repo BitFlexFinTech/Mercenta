@@ -20,6 +20,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { buildBrainGraph, brainStats } from '@/lib/intelligence/brain/buildGraph';
+import { useCanonicalStoreVersion } from '@/data/queries';
 import { layoutBrain } from '@/lib/intelligence/brain/layout';
 import {
   BRAIN_AUTHORITY_LABELS,
@@ -37,7 +38,19 @@ export function BrandRelationshipMap() {
   const { session } = useApp();
   const tenantId = session?.tenantId;
 
-  const graph = useMemo(() => (tenantId ? buildBrainGraph({ kind: 'brand', tenantId }) : null), [tenantId]);
+  const storeVersion = useCanonicalStoreVersion();
+  /*
+   * §CANONICAL PROPAGATION — rebuilt on every canonical domain change, so this
+   * tenant-scoped projection reflects the brand's own live records rather than a
+   * snapshot taken at mount. Tenant scope is unchanged: it is still the caller's
+   * session tenant id, and an unknown tenant still builds no graph at all.
+   */
+  const graph = useMemo(() => {
+    // `storeVersion` is the canonical change signal, not data: reading it is what
+    // ties this tenant-scoped projection to canonical state.
+    void storeVersion;
+    return tenantId ? buildBrainGraph({ kind: 'brand', tenantId }) : null;
+  }, [tenantId, storeVersion]);
   const layout = useMemo(() => (graph ? layoutBrain(graph) : null), [graph]);
   const stats = useMemo(() => (graph ? brainStats(graph) : null), [graph]);
   const [selectedId, setSelectedId] = useState<string | null>(null);

@@ -24,6 +24,7 @@ import { FOUNDER_HONESTY_NOTICE, FOUNDER_PITCHES } from '@/config/founderContent
 import { lintOutwardWording } from '@/lib/discovery/wordingSafety';
 import { lintAmazonWording } from '@/lib/intelligence/amazonWording';
 import { CLAIM_LABELS, type ClaimClass } from '@/lib/intelligence/opportunityDiscovery';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 /* ── §10 — the real founder opportunities (researched, NOT verified) ──────── */
 
@@ -333,6 +334,7 @@ function recordTransition(
   });
   entry.stage = to;
   entry.nextAction = nextActionForStage(to);
+  notifyCanonicalStoreChange();
 }
 
 /**

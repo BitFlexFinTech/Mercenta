@@ -51,6 +51,7 @@ import {
 } from './workStore';
 import { demoAuditLog } from '@/data/demoStore';
 import { emitEvent } from '@/lib/events/eventFeed';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 /** §Sprint 2 — declared boundary: how close a deadline must be to remind. */
 export const REMINDER_DUE_SOON_DAYS = 3;
@@ -120,6 +121,7 @@ function pushAudit(action: string, entityId: string, tenantId: string | null, re
     brandId: tenantId ?? undefined,
     reason,
   });
+  notifyCanonicalStoreChange();
 }
 
 /* ── The runner ────────────────────────────────────────────────────────────── */

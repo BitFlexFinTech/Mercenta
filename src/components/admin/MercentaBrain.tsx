@@ -20,6 +20,7 @@
  */
 import { useMemo, useState } from 'react';
 import { buildBrainGraph, brainNodeById, brainStats } from '@/lib/intelligence/brain/buildGraph';
+import { useCanonicalStoreVersion } from '@/data/queries';
 import { layoutBrain } from '@/lib/intelligence/brain/layout';
 import {
   BRAIN_AUTHORITY_LABELS,
@@ -97,7 +98,20 @@ const CLUSTER_FILTERS: { id: string; label: string }[] = [
 const LIST_LIMIT = 120;
 
 export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => void }) {
-  const graph = useMemo(() => buildBrainGraph({ kind: 'mercenta' }), []);
+  const storeVersion = useCanonicalStoreVersion();
+  /**
+   * §CANONICAL PROPAGATION — the graph is a PROJECTION of canonical state, so it
+   * is rebuilt whenever that state changes (`useCanonicalStoreVersion` is the
+   * canonical change signal). It was previously built once per mount with no
+   * dependency, which meant a domain change was invisible to the Brain until a
+   * remount even though nothing about the graph is hardcoded.
+   */
+  const graph = useMemo(() => {
+    // `storeVersion` is the canonical change signal, not data: reading it is what
+    // ties this projection to canonical state (see src/lib/domain/canonicalSignal.ts).
+    void storeVersion;
+    return buildBrainGraph({ kind: 'mercenta' });
+  }, [storeVersion]);
   const layout = useMemo(() => layoutBrain(graph), [graph]);
   const stats = useMemo(() => brainStats(graph), [graph]);
 

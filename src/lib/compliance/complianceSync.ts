@@ -30,6 +30,7 @@ import {
 import type { ChCompany } from './companiesHouseClient';
 import { isProviderSimulationSafe } from '@/integrations/types';
 import type { ProviderResolutionMode } from '@/integrations/types';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 export interface ComplianceInput {
   getMode?: (id: string) => ProviderResolutionMode;
@@ -93,6 +94,7 @@ function audit(
     reason,
     metadata,
   });
+  notifyCanonicalStoreChange();
   return id;
 }
 

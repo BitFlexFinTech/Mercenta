@@ -22,6 +22,7 @@ import { milestoneToShipmentStatus } from './transform';
 import { isProviderSimulationSafe } from '@/integrations/types';
 import type { ProviderResolutionMode } from '@/integrations/types';
 import type { ShipmentStatus } from '@/types';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 export interface DhlDomainInput {
   shipmentId: string;
@@ -92,6 +93,7 @@ function findShipment(ctx: DhlDomainInput) {
     trackingNumber: undefined,
   };
   demoShipments.push(record);
+  notifyCanonicalStoreChange();
   return record;
 }
 
@@ -114,6 +116,7 @@ function pushAudit(entry: {
     brandId: entry.brandId,
     reason: entry.reason,
   });
+  notifyCanonicalStoreChange();
   return id;
 }
 
@@ -153,6 +156,7 @@ export async function recordDhlWaybill(
   }
   shipment.waybill = booked.waybill;
   shipment.trackingNumber = booked.trackingNumber;
+  notifyCanonicalStoreChange();
   return { ok: true, waybill: booked.waybill, trackingNumber: booked.trackingNumber };
 }
 
@@ -271,4 +275,5 @@ export async function advanceShipmentViaDhl(ctx: DhlDomainInput): Promise<DhlAdv
     auditIds,
     eventsEmitted,
   };
+  notifyCanonicalStoreChange();
 }

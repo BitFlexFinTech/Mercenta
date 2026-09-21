@@ -13,6 +13,7 @@ import {
   demoDeductions,
   demoBrands,
 } from '@/data/demoStore';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 /**
  * §Stage-25 — Brand CRM depth store.
@@ -36,6 +37,7 @@ function pushAudit(action: string, brandId: string, reason: string, actorStaffId
     brandId,
     reason,
   });
+  notifyCanonicalStoreChange();
 }
 
 /* ── Relationship metadata ─────────────────────────────────────────────────── */
@@ -116,6 +118,7 @@ export function setCrmTaskStatus(
   if (!t) return null;
   t.status = status;
   pushAudit(`crm_task_${status}`, t.brandId, t.title, actorStaffId);
+  notifyCanonicalStoreChange();
   return t;
 }
 

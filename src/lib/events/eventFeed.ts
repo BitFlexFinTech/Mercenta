@@ -11,6 +11,7 @@
  */
 
 import type { PlatformEvent, EventFeedQuery, EventSeverity } from './types';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 export { EVENT_SEVERITY_MAP } from './types';
 export type { PlatformEvent, EventType, EventSeverity, EventFeedQuery } from './types';
 
@@ -36,6 +37,7 @@ export function emitEvent(evt: Omit<PlatformEvent, 'id' | 'createdAt' | 'acknowl
     acknowledged: false,
   };
   events.push(full);
+  notifyCanonicalStoreChange();
   return full;
 }
 

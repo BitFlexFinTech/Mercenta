@@ -2,7 +2,7 @@
  * React Query hooks over the src/data repositories.
  * UI components should consume entities through these hooks only.
  */
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import type { PaginationParams } from '@/types';
 import {
@@ -190,6 +190,42 @@ export function useCanonicalStoreVersion(): number {
   const [version, setVersion] = useState(getCanonicalStoreVersion);
   useEffect(() => subscribeCanonicalStore(() => setVersion(getCanonicalStoreVersion())), []);
   return version;
+}
+
+/* ── §CANONICAL PROPAGATION — every canonical read re-reads on change ── */
+
+/**
+ * §CANONICAL CHANGE PROPAGATION — THE ONE subscriber that keeps every
+ * React Query read of canonical state in step with the domain.
+ *
+ * WHY: the repositories in `src/data/api.ts` read canonical stores through the
+ * `queryOrSeed` seam (Supabase when configured, the seeded canonical fixtures
+ * otherwise). React Query caches each read. Before this hook those caches were
+ * never invalidated when the DOMAIN changed, so a projection built on them (the
+ * Logistics operational map and list, dashboards, queues, ledgers) showed the
+ * snapshot taken at mount even though it was derived from canonical data. A
+ * shipment created, a PO acknowledged, a deduction raised or a case opened in
+ * the same session did not appear until a reload or a manual refetch — which is
+ * exactly the "interactive but static presentation" the platform must not ship.
+ *
+ * HOW: one subscription to the canonical change signal, mounted once for the
+ * whole application (`App.tsx`). On each version bump it invalidates the query
+ * cache, so every ACTIVE canonical read refetches and every projection derived
+ * from it re-renders from the new canonical state. No query key is duplicated,
+ * no component needs its own subscription, and an invalidation that finds no
+ * change re-renders identically (the signal is a version bump, not an event).
+ */
+export function useCanonicalQuerySync(): void {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    let seen = getCanonicalStoreVersion();
+    return subscribeCanonicalStore(() => {
+      const now = getCanonicalStoreVersion();
+      if (now === seen) return;
+      seen = now;
+      void queryClient.invalidateQueries();
+    });
+  }, [queryClient]);
 }
 
 /* ── §Phase 7E — Homepage content ───────────────────────────────────── */

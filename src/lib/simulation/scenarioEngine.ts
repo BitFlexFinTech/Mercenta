@@ -63,6 +63,7 @@ import type {
 } from '@/types';
 import { isProviderSimulationSafe } from '@/integrations/types';
 import type { ProviderResolutionMode } from '@/integrations/types';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 export type ScenarioId =
   | 'NORMAL_PO'
@@ -170,6 +171,7 @@ function audit(
     reason,
     metadata,
   });
+  notifyCanonicalStoreChange();
   return id;
 }
 
@@ -246,6 +248,7 @@ function buildScenarioPo(
   po.deliveryWindowStart = atDays(base, 21).slice(0, 10);
   po.deliveryWindowEnd = atDays(base, 28).slice(0, 10);
   demoPurchaseOrders.push(po);
+  notifyCanonicalStoreChange();
   return po;
 }
 
@@ -419,6 +422,7 @@ async function scenarioDelayedDelivery(ctx: ScenarioRunContext): Promise<Scenari
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_delay', 'shipment', shipmentId, brandId, `${actorId}: shipment ${shipmentId} delayed`, { runId, scenario: 'DELAYED_DELIVERY' }));
   emitScenarioEvent(runId, 'compliance_doc_expiring', 'important', 'Shipment delayed', `SIM shipment ${shipmentId} delayed`, shipmentId, { scenario: 'DELAYED_DELIVERY' });
 
+  notifyCanonicalStoreChange();
   return { scenario: 'DELAYED_DELIVERY', runId, status: 'ok', steps, created: { purchaseOrder: po.id, shipmentId, deductions: [] }, auditIds };
 }
 async function scenarioFinancialException(ctx: ScenarioRunContext): Promise<ScenarioResult> {

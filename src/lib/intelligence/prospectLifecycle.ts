@@ -32,6 +32,7 @@ import type {
   OutreachStatus,
   ProspectChangeEvent,
 } from '@/types';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 /** How many days after a run the next automated re-check is due. */
 export const NEXT_CHECK_DAYS = 7;
@@ -289,6 +290,7 @@ export async function runBrandIntelligence(
   };
   store.applyRunResult(finalUniverse, run, events, snapshots);
   void reqlCount;
+  notifyCanonicalStoreChange();
   return { run, events };
 }
 

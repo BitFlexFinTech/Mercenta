@@ -11,6 +11,7 @@
  */
 import type { GrantOpportunity, InvestorOpportunity, GrantApplicationDraft, InvestorOutreachDraft, GrantsInvestorsReport } from '@/types';
 import { createGrantsDataSource } from './dataSources';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 export interface GrantsResearchOptions {
   category?: string;
@@ -127,6 +128,7 @@ export function approveGrantDraft(grantId: string, approvedBy: string): GrantApp
   draft.status = 'approved_internally';
   draft.approvedAt = new Date().toISOString();
   draft.approvedBy = approvedBy.trim();
+  notifyCanonicalStoreChange();
   return draft;
 }
 
@@ -138,6 +140,7 @@ export function approveInvestorDraft(investorId: string, approvedBy: string): In
   draft.status = 'approved_internally';
   draft.approvedAt = new Date().toISOString();
   draft.approvedBy = approvedBy.trim();
+  notifyCanonicalStoreChange();
   return draft;
 }
 

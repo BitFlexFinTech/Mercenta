@@ -43,7 +43,7 @@ import type {
   ProspectOutreachRecord,
 } from '@/types';
 import { demoAuditLog, demoMessages } from './demoStore';
-import { getProspect, notifyCanonicalStoreChange } from './prospectStore';
+import { getProspect } from './prospectStore';
 import {
   getDomainRepository,
   MERCENTA_OPS_TENANT,
@@ -53,6 +53,7 @@ import {
   type TenantScope,
   type PersistenceStatus,
 } from './domainRepository';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 let outreach: ProspectOutreachRecord[] = [];
 let responses: OutreachResponse[] = [];
@@ -100,7 +101,6 @@ export async function hydrateAcquisitionFromPersistence(
   events = hydrated.events;
   // Defensive: a partial/older adapter contract yields an empty list, never undefined.
   onboardings = hydrated.brandOnboarding ?? [];
-  notifyCanonicalStoreChange();
   return hydrated;
 }
 
@@ -262,7 +262,6 @@ export function removeOnboarding(onboardingId: string): boolean {
   const before = onboardings.length;
   onboardings = onboardings.filter((o) => o.id !== onboardingId);
   if (onboardings.length === before) return false;
-  notifyCanonicalStoreChange();
   return true;
 }
 
@@ -333,6 +332,7 @@ export function recordAcquisitionAudit(
     brandId: prospectId,
     reason,
   });
+  notifyCanonicalStoreChange();
 }
 
 /**
@@ -358,6 +358,7 @@ export function recordOnboardingAudit(
     brandId: brandId ?? onboardingId,
     reason,
   });
+  notifyCanonicalStoreChange();
 }
 
 /* ── Derived relationship context ──────────────────────────────────────── */

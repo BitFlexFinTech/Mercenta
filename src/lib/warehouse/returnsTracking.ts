@@ -1,6 +1,7 @@
 /** §Batch-16 — Returns warehouse tracking store. */
 import type { ReturnTrackingEntry, ReturnTrackingStatus } from '@/types';
 import { demoAuditLog, demoReturns, demoReturnAddresses } from '@/data/demoStore';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 const uid = (p: string) => p + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
 
@@ -70,6 +71,7 @@ export function recordWarehouseReceipt(input: {
     entityType: 'return_tracking', entityId: entry.id, brandId: input.brandId,
     reason: 'Return ' + input.returnId + ' received at warehouse via ' + input.inboundCarrier + ' (' + input.inboundTrackingNumber + ')',
   });
+  notifyCanonicalStoreChange();
   return entry;
 }
 
@@ -86,6 +88,7 @@ export function recordQualityCheck(trackingId: string, passed: boolean, notes: s
     entityType: 'return_tracking', entityId: trackingId, brandId: t.brandId,
     reason: 'Quality check: ' + (passed ? 'PASSED' : 'FAILED') + ' — ' + notes,
   });
+  notifyCanonicalStoreChange();
   return t;
 }
 
@@ -103,6 +106,7 @@ export function recordForwardToBrand(trackingId: string, carrier: string, tracki
     entityType: 'return_tracking', entityId: trackingId, brandId: t.brandId,
     reason: 'Forwarded to brand via ' + carrier + ' (' + trackingNumber + ')',
   });
+  notifyCanonicalStoreChange();
   return t;
 }
 
@@ -117,5 +121,6 @@ export function recordBrandConfirmation(trackingId: string): ReturnTrackingEntry
     entityType: 'return_tracking', entityId: trackingId, brandId: t.brandId,
     reason: 'Brand confirmed receipt of forwarded return.',
   });
+  notifyCanonicalStoreChange();
   return t;
 }

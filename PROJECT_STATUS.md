@@ -1,6 +1,2063 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
+
+## 🧭 CURRENT PLATFORM POSITION — CANONICAL PROPAGATION: BRAIN + LOGISTICS ARE NOW DYNAMIC PROJECTIONS (2026-09-21, session 6)
+
+Branch `redesign/foundation`. **Start HEAD `22b6b62`**. The dirty Founder worktree was carried forward and
+**preserved** (no reset, no clean, no stash, no `checkout -- .`, no force push). **No deploy. `.env` never read. No
+credential activated. No live provider call.**
+
+**Increment identity:** the FIRST implementation workstream of the current handoff — Priority 1–3 — merging what the
+brief framed as two separate UI projects (Brain, Logistics map) into ONE canonical-propagation architecture, because
+both are projections over the same domain objects.
+
+**The defect this closes (measured, not inferred).** Both surfaces were already projections of canonical stores — the
+Brain reads `demoStore`/`prospectStore`/registries/KB; the map reads shipments + POs through the canonical accessors —
+so neither was a static JSON fixture. What was missing was **propagation**, in two halves:
+
+1. **the mutations stayed silent.** 17 modules / **39 canonical array-write sites** and **30 in-place record mutations**
+   (PO status, shipment status/stage, compliance doc status, case/ticket status, deduction status, work items,
+   automation approvals, CRM tasks, filing stages, funding pipeline, grants, reconciliation) changed canonical state
+   without announcing it;
+2. **the projections never subscribed.** `MercentaBrain` built its graph with `useMemo(..., [])` — once per mount — and
+   the logistics queries cached their reads with a 30 s staleTime and no invalidation.
+
+Consequence: creating a PO, acknowledging it, filing an ASN, approving a document or resolving a case changed the
+domain but **not the screen** until a reload. That is exactly "interactive static/simulated presentation", and it is now
+fixed at the architecture level rather than in two screens.
+
+### 1. COMPLETED / VERIFIED
+
+- **ONE canonical change signal, owned once.** `src/lib/domain/canonicalSignal.ts` holds the counter, the listener list
+  and the notifier (a version bump carrying no payload); `src/data/prospectStore.ts` imports and re-exports it, so all
+  existing import paths work with exactly one implementation in the process.
+- **EVERY canonical mutation now announces itself** — array writes and in-place record mutations, across the data layer
+  and the domain modules (commerce lifecycle, helpdesk/cases, compliance verification, deductions, returns tracking,
+  DHL domain, work layer, automation approvals, CRM tasks, company filings, funding pipeline, grants, reconciliation,
+  event feed, acquisition/onboarding, BI lifecycle).
+- **ONE subscriber keeps every canonical read in step.** `useCanonicalQuerySync()` (mounted in `App.tsx`) invalidates
+  the query cache on each signal, so shipments, POs, deductions, products, compliance documents, contracts, cases,
+  invoices, payments and the audit log all re-read the domain after a mutation — no per-component subscription.
+- **The Brain is dynamic.** `MercentaBrain` and the brand relationship map re-project on the signal; a real domain
+  change grows the graph (nodes AND edges) and the new record is a findable entity — with its provenance — without a
+  reload. Drag/zoom/click were never the claim; this is.
+- **The Logistics map is dynamic.** Raising a PO → acknowledging it → filing the ASN makes the new consignment appear
+  on the map, in the list and in the inspector with its truth state, live, tenant-scoped. Simulation still runs through
+  the SAME domain contracts the live path will use; nothing is a separate fake presentation model, and no carrier is
+  invented (Freight Collect stays channel-arranged; Mercenta-arranged resolves through the canonical lane rule).
+- **A permanent gate, both halves.** `npm run validate:canonical-propagation` asserts from SOURCE that one signal
+  implementation exists and that **every** mutating function signals, that the app mounts the one sync subscriber, that
+  both Brain projections depend on the signal and that the logistics surfaces are fed only from canonical accessors —
+  and from RUNTIME that a real domain mutation MOVES both projections, that another tenant does not gain it, that an
+  unknown tenant still fails closed, and that with no mutation the projection is unchanged.
+
+
+## 🧭 CURRENT PLATFORM POSITION — RUNTIME PARITY: THE CURRENT PRODUCT IS THE RUNTIME REACHED BY `npm run dev` (2026-09-21, session 5)
+### 2. IN PROGRESS
+
+- Nothing. The workstream is complete and re-verified in this session (heading 8).
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. **Body-level visual/UX redesign** (the shells are canonical; the bodies are not) — the next major workstream, and the
+   brief is explicit that the CURRENT UI is the BEFORE state: functionality/security/domain logic preserved, visual
+   composition replaced. The design-research references listed in the handoff feed it; Mercenta needs its own language.
+2. Live-chat launcher collision at the root (heading 6).
+3. Orphan pass (`shared/FcSelector.tsx`, `shared/InfoTooltip.tsx`) and heading-order pass.
+4. Integration & credentials control centre on real server-side secret storage (release-critical gap, unchanged).
+5. Security/go-live hardening pass (rate limiting, headers, negative security tests, history secret scan).
+6. SP-API surface expansion (acknowledgement, PO status, invoices, shipments, transactions) — simulation-first.
+7. Usertour/Screenity KB wiring; whole-platform E2E expansion.
+
+### 4. DEFERRED / PARKED
+
+- Real scheduler process for automations (the declared cadence is the seam).
+- Live provider credentials (Amazon, Xero, Payoneer/Wise, DHL, Palletline, HMRC, Companies House, social OAuth) —
+  simulation-first is unchanged; nothing was activated.
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **Deployment needs an explicit Founder "deploy".** The repository's standing rules forbid deploying without that
+  instruction, and `scripts/deploy-demo.sh` needs the demo host credentials that live outside the repo. Until then the
+  verified work is **committed locally only** — it is NOT live on `demo.mercenta.co.uk`, and this document does not
+  claim it is.
+- Amazon SP-API approval remains the dependency for live channel data (unchanged).
+
+### 6. KNOWN EXCEPTIONS
+
+- **Live-chat launcher collision** (open, mitigated for Product Catalog only).
+- **`shared/InfoTooltip.tsx`** is a dead control in an unreachable component (hover-only, keyboard-unusable) — reported,
+  deliberately untouched; fix or delete in the orphan pass.
+- **Brand orientation tour** still auto-opens once on first visit (progress persists).
+- **Colour contrast + heading-order** findings measured, not changed (Founder-owned palette).
+- **The seed data layer is fixture-backed** until Supabase credentials exist (`queryOrSeed`): every canonical read is
+  the deterministic demo dataset in this environment. The projections are dynamic WITHIN that domain; they are not live
+  channel data, and no surface claims otherwise.
+- **A hard reload re-bootstraps the memory-only stores**, so a mutation made in one page load is not expected to
+  survive a reload (the session does). That is the documented persistence contract (`src/data/domainRepository.ts`),
+  not a regression — and it is why the propagation specs drive the change inside one page realm.
+
+### 7. CURRENT CHECKPOINT
+
+- **Start HEAD:** `22b6b62`. **Branch:** `redesign/foundation`.
+- **Committed this session (isolated, verified file lists):**
+  - `f474c11` **feat(runtime-parity)** — 28 files (session 5's address layer, session persistence, consignment seed,
+    T-1 payout reconciliation, carrier-auditor fix, gate + spec + repointed specs).
+  - `62336b7` **feat(canonical-propagation)** — 34 files (session 6: the one signal, every mutation signalling, the
+    query-sync subscriber, reactive Brain projections, the gate + browser spec, docs/registry).
+  - **Deliberately EXCLUDED from both commits (pre-existing Founder work, left untouched and uncommitted):**
+    `src/components/admin/AccountingPanel.tsx`, `src/components/admin/BillingPanel.tsx`,
+    `src/components/shared/TourEngine.tsx` (Founder typography edits alongside this workstream's edits);
+    the pre-existing **untracked** Founder files `src/data/commercialReadinessStore.ts`,
+    `src/data/preAuditStore.ts`, `src/data/routingStore.ts`, `src/lib/automation/registry.ts` (each received a
+    one-line signal addition) and `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` (which received the new §19 Section P).
+    Their content is preserved on disk exactly as the Founder left it, plus those additions.
+  - **Everything else in the dirty tree predates this workstream and remains uncommitted.**
+- **Note for a future session:** because four of those untracked Founder files are module dependencies, a fresh
+  checkout of the commits alone cannot build — that condition pre-dates this workstream and is the Founder's to resolve
+  (commit them, or re-add them) before the committed tree is independently runnable.
+- **This session's files:** new — `src/lib/domain/canonicalSignal.ts`, `scripts/validate-canonical-propagation.mjs`,
+  `scripts/reconcile-canonical-propagation-registry.cjs`, `e2e/canonical-propagation.spec.ts`; edited — `src/App.tsx`,
+  `src/data/queries.ts`, `src/data/prospectStore.ts`, `src/components/admin/MercentaBrain.tsx`,
+  `src/components/brand/BrandRelationshipMap.tsx`, the canonical mutation paths in heading 1 (data layer + 14 `src/lib`
+  domain modules), `package.json`, `requirements-registry.json`, this file, `HANDOFF.md`,
+  `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md`.
+
+### 8. VERIFICATION STATUS
+
+- **TypeScript:** `npx tsc --noEmit -p tsconfig.app.json` → **0 errors** (re-run after the last source edit).
+- **ESLint:** `npx eslint .` → **0 problems** (react-hooks/exhaustive-deps is an ERROR in this repo, so the reactive
+  projections use the documented `void storeVersion;` idiom the codebase already uses).
+- **Build:** `npm run build` → **PASS** (`✓ built in 4.59s`).
+- **New gate:** `npm run validate:canonical-propagation` → **25 PASS / 0 FAIL**, 0 network calls.
+- **Existing gates unchanged:** `validate-mercenta-brain` → **MERCENTA_BRAIN_VALIDATION_PASS (30 assertions)**;
+  `validate-logistics-map` → **LOGISTICS_MAP_VALIDATION_PASS (60 assertions)**; `validate-product-routes` →
+  **68 PASS / 0 FAIL**.
+- **New browser spec:** `e2e/canonical-propagation.spec.ts` → **3 passed** (both projections move without a reload;
+  tenant scope holds; provenance is shown).
+- **FULL SUITE:** **445 declarations → 443 passed / 0 failed / 2 skipped** (exit 0, 6.0m). No regressions from the 50+
+  signalled mutation paths, the query invalidation or the reactive Brain.
+- **Registry reconcile:** added 5, re-run added 0 (idempotent), `total_entries 436 → 441`.
+
+### 9. NEXT EXECUTION SCOPE
+
+1. **Body-level UI/UX redesign** (heading 3 item 1) — the largest remaining workstream.
+2. Integration & credentials control centre on server-side secret storage (heading 3 item 4).
+3. Security/go-live hardening (heading 3 item 5).
+4. Founder-authorised deployment to `demo.mercenta.co.uk` (heading 5).
+
+---
+
+
+
+Branch `redesign/foundation`. **Start HEAD `22b6b62`** (the legacy-shell retirement checkpoint — preserved, never reset).
+The dirty Founder worktree was carried forward and **preserved** (no `reset`, no `clean`, no `checkout -- .`, no stash,
+no force push). **No deploy. `.env` never read. No credential activated. No live provider call.**
+
+**Increment identity:** execution of `docs/RUNTIME_PARITY_PLAN_2026-09-21.md` (stages R1 → R5) **plus** the
+Founder-directive items the plan did not cover: the deterministic SIMULATED consignment seed that makes the Logistics
+Hub inspectable, the payout-rail reconciliation of Founder decision T-1, the nav-destination audit, and the
+control-determinism audit.
+
+**The defect this closes (all four causes were verified live, not inferred):** the product WAS reachable but had no
+address (`pushState` existed in exactly one marketing file), no memory (a refresh silently signed the user out —
+`environment`/`role`/`session` were plain `useState`), no Back/Forward, and a brand tour that re-opened over the
+portal after every load. The Founder's own testing concluded "`npm run dev` still shows the old Mercenta" because the
+first refresh made the product vanish. It no longer does.
+
+### 1. COMPLETED / VERIFIED
+
+- **The product has a real address (R1).** `src/lib/runtime/productRoutes.ts` declares ONCE what `/admin/*`, `/brand/*`
+  and `/carrier/*` mean — pure and **fail-closed** (an unknown segment returns `null`, never a guessed environment).
+  `setEnvironment` writes the address; `AdminShell`/`BrandShell`/`CarrierShell` derive their view FROM the address,
+  write it back on navigation and re-read it on Back/Forward. A segment the shell cannot render resolves to that
+  environment's declared default view instead of rendering an empty workspace.
+- **The session survives a refresh (R2).** `src/lib/runtime/sessionPersistence.ts` stores the demo session in
+  **`sessionStorage`** (tab-scoped — never `localStorage`) and RE-VALIDATES it on restore through the SAME canonical
+  RBAC allowlist `signIn` uses. Tampered, stale, mismatched-tier and malformed values fail closed; an unknown tenant
+  is refused outright; a restored brand session is re-hydrated through the SAME canonical activation path the login
+  used (so F5 returns to the brand's own workspace, not the onboarding wizard).
+- **The brand tour stops re-opening (R4).** `TourEngine` progress is seeded from and written through `sessionStorage`
+  per brand tenant. The auto-start rule is NOT weakened — a genuinely new brand still gets its tour.
+- **`/` is still the public marketing homepage**, with AND without a live session: the address decides the
+  environment and the session is merely retained. Verified in the browser by `e2e/runtime-entry.spec.ts` #1.
+- **The Logistics Hub is inspectable.** Each CLEARED demo tenant now owns ONE deterministic lifecycle PO per shipping
+  state (`PO-9200…` / `PO-9210…` — a separate block, so PO-9000…PO-9003 are byte-for-byte unchanged), from which the
+  consignment seed derives as before. Shipment creation stays **PO-GATED**; the records are **SIMULATED**, never
+  claimed live. Carriers now come from the canonical lane rule (Freight Collect → channel-arranged; UK domestic →
+  Palletline; international → DHL) instead of a carrier cycle that still contained retired carriers.
+- **Founder decision T-1 is APPLIED, not merely recorded.** Payoneer is the canonical DEFAULT payout rail and Wise the
+  SECONDARY rail, reconciled across all five sources (config, edge function, rule file, docs, validators/registry).
+  Payout arithmetic, the human-approval gate and the Stripe/Xero refusals are unchanged, and no live external account
+  was touched.
+- **The API Request Auditor nav item now does what its label says.** It previously rendered the manifest terminal
+  unchanged; `/carrier/auditor` opens the terminal AT the auditor section (`data-focus="auditor"`).
+- **Control-determinism audit (static + runtime).** Repo-wide scan: **0** empty handlers, **0** `onClick={undefined}`,
+  **0** dead `href="#"`, **0** alert-only actions, **0** console-only handlers, **0** anchors without `href`, and **0**
+  buttons without any handler (the single hit, `shared/InfoTooltip.tsx`, is one of the two known orphans and is
+  hover-only — recorded in heading 6). Runtime: no page errors on any inspected surface; the Logistics Hub truth
+  filters genuinely change the drawn set (3 → 2 simulated → 1 ambient → 0 live with a real empty state) and search
+  narrows then clears; the admin Logistics Control metric cards genuinely drill (exceptions 1 row, in-transit 4 rows,
+  work 6 rows).
+### 2. IN PROGRESS
+
+- Nothing. Every stage of this workstream was completed and re-verified in this session (see heading 8).
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. Body-level redesign of the surfaces migrated in the previous session (page shells are done; bodies are not).
+2. Fix the live-chat launcher collision at the root (heading 6).
+3. Founder decisions outstanding: (a) whether to accept the measured colour-contrast findings or change palette
+   values; (b) whether to suppress the brand orientation tour entirely on a demo login (progress is now persisted, so
+   it only appears once — the plan's default was kept).
+4. The two orphan components (`shared/FcSelector.tsx`, `shared/InfoTooltip.tsx`) — reachable by nothing. Decide
+   wire-in or delete.
+5. Admin nav destinations whose page body has no `h1` (Onboarding pipeline, Social Media, WhatsApp, Founder Investor
+   Centre, Partnerships & Fundraising; Contracts and Documents on the brand side). Not a route defect — the routes and
+   the render branches are correct — but a heading-order/accessibility gap worth one pass.
+
+### 4. DEFERRED / PARKED
+
+- No real scheduler process — automations run on demand; the declared cadence is the seam a scheduler needs.
+- Live credentials for every provider (Amazon SP-API, Xero, Wise/Payoneer, DHL, Palletline, HMRC, Companies House,
+  social OAuth). Simulation-first is unchanged: nothing was activated.
+
+### 5. BLOCKED / DEPENDENCIES
+
+- Nothing blocks the current scope. The Amazon SP-API approval process remains the dependency for live channel data
+  (unchanged), and it never gates the product being inspectable.
+
+### 6. KNOWN EXCEPTIONS
+
+- **Live-chat launcher collision (open defect, mitigated).** The fixed 48px launcher at `bottom-6 right-6 z-50`
+  permanently covers the bottom-right 48×48 region of the operational workspace. Mitigated for Product Catalog; NOT
+  fixed at the root.
+- **`shared/InfoTooltip.tsx` is a dead control in an unreachable component.** Its `<button>` has no handler; the
+  tooltip opens on the wrapper's hover only, so it is unusable by keyboard. It has no consumer anywhere in `src/`, so
+  it cannot be hit in the running product. Reported, deliberately NOT changed (touching an unreachable file would add
+  churn without making anything reachable) — fix or delete it in the orphan pass (heading 3 item 4).
+- **Brand tour on first visit** still auto-opens once (by design; progress now persists).
+- **Colour contrast + heading-order** — measured and reported by `e2e/accessibility.spec.ts`, deliberately NOT gated
+  and NOT changed (Founder-owned palette).
+- **Payout rail labels**: the DEFAULT constant and every doc/copy statement are reconciled to T-1; the per-rail
+  `accountLabel` strings in `src/config/payouts.ts` were left as-is because nothing in the product depends on their
+  order and changing them adds risk for no behavioural gain. Recorded, not hidden.
+
+
+
+
+### 7. CURRENT CHECKPOINT
+
+- **Start HEAD:** `22b6b62`. **Branch:** `redesign/foundation`. **Dirty tree at start:** carried Founder work,
+  preserved. **No commit was made** (the repository's protection rules require an explicit "commit" instruction; the
+  Founder's brief for this workstream authorised preserving everything and reporting what remains uncommitted).
+- **This session's files:** new — `src/lib/runtime/productRoutes.ts`, `src/lib/runtime/sessionPersistence.ts`,
+  `scripts/validate-product-routes.mjs`, `scripts/reconcile-runtime-parity-registry.cjs`, `e2e/runtime-entry.spec.ts`;
+  edited — `src/context/GlobalStateContext.tsx`, `src/components/layout/{AdminShell,BrandShell,CarrierShell}.tsx`,
+  `src/components/shared/TourEngine.tsx`, `src/components/carrier/CarrierDashboard.tsx`, `src/data/demoData.ts`,
+  `src/data/demoStore.ts`, `src/config/payouts.ts`, `supabase/functions/payouts-transfer/index.ts`,
+  `src/integrations/{registry,types}.ts`, `src/components/admin/{BillingPanel,AccountingPanel}.tsx`,
+  `e2e/helpers/auth.ts`,
+  `e2e/{logistics-hub-map,domain-acceptance,domain-persistence,embedded-social,multi-tenant}.spec.ts`,
+  `scripts/validate-edge-functions.mjs`, `package.json`, `.clinerules/mercenta-business-model.md`,
+  `docs/{MERCENTA_BUSINESS_MODEL,INTEGRATIONS,AMAZON_RECONCILIATION_STATUS,MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX}.md`,
+  `requirements-registry.json`, this file, `HANDOFF.md`, `docs/RUNTIME_PARITY_PLAN_2026-09-21.md`.
+
+### 8. VERIFICATION STATUS
+
+- **TypeScript:** `npx tsc --noEmit -p tsconfig.app.json` → **0 errors** (re-run after the last edit).
+- **ESLint:** `npx eslint .` → **0 problems**.
+- **Build:** `npm run build` → **PASS**.
+- **New runtime gate:** `npm run validate:product-routes` → **68 PASS / 0 FAIL**.
+- **Repointed validators:** `validate-edge-functions.mjs` → 46 assertions, **0 failures**;
+  `validate-payouts.mjs` → **PAYOUT_VALIDATION_PASS**.
+- **New browser spec:** `e2e/runtime-entry.spec.ts` → **7 passed** (deep link, requested destination, F5 in place,
+  Back/Forward, carrier destinations, AccessDenied, fail-closed sessions, `/` still public).
+- **Repointed browser specs:** `e2e/logistics-hub-map.spec.ts` **15 passed**; `e2e/tours.spec.ts` 10 passed;
+  `e2e/domain-acceptance.spec.ts`, `e2e/domain-persistence.spec.ts`, `e2e/embedded-social.spec.ts`,
+  `e2e/multi-tenant.spec.ts`, `e2e/compliance-gate.spec.ts`, `e2e/status-semantics.spec.ts`, `e2e/work-layer.spec.ts`
+  all passing.
+- **Full suite:** **442 declarations → 440 passed / 0 failed / 2 skipped** (exit 0). See §8.1.
+- **Registry reconcile:** added 6, re-run added 0 (idempotent), `total_entries 430 → 436`; the recorded T-1
+  contradiction row is **superseded** (not deleted).
+
+### 8.1 FULL-SUITE RESULT (this session)
+
+- **Run 1 (before the fixes):** 435 declarations → **11 failed / 422 passed / 2 skipped**. Every failure was traced
+  and classified: 8 were the login helper re-entering the app after the session now persists (test-infrastructure
+  adaptation), 3 were specs whose ASSERTIONS encoded the old "a reload signs you out" contract (repointed to the new,
+  stronger contract), and 1 was the deductions fixture silently re-pointing at different POs because it indexed the PO
+  array by modulo (fixed at the source, not in the test).
+- **Run 2 (after the fixes):** **442 declarations → 440 passed / 0 failed / 2 skipped** (`npx playwright test`,
+  `--reporter=line`, exit 0, 6.4m). The 442 = the 435 declarations of run 1 plus the 7 new
+  `e2e/runtime-entry.spec.ts` tests. The two skips are the pre-existing, deliberately-skipped declarations.
+
+### 9. NEXT EXECUTION SCOPE
+
+1. **Founder inspection:** `npm run dev` → homepage → Partner Login → one-click demo card → the complete navigable
+   product (see the session report for the exact command and demo entry points).
+2. Body-level redesign of the migrated surfaces (heading 3 item 1).
+3. Launcher collision root fix (heading 3 item 2).
+4. Orphan pass (heading 3 item 4) + heading-order pass (heading 3 item 5).
+5. Founder decisions listed in heading 3 item 3.
+
+---
+
+
+## 🧭 CURRENT PLATFORM POSITION — UI/UX REDESIGN: LEGACY PAGE SHELL FULLY RETIRED (2026-09-21, session 4)
+
+Branch `redesign/foundation`. **Start HEAD `9f12129`** (the verified remaining-surfaces checkpoint — preserved, not
+reset). The dirty Founder worktree was carried forward and **preserved**. **No deploy, `.env` never read, no credential
+activated, no live provider call, no Rakazo/Postiz/DigitalOcean work, no destructive Git operation.**
+
+**Increment identity:** continuation of the Founder-commissioned **COMPLETE PLATFORM REDESIGN**. The previous pass left
+an explicit 14-file backlog of surfaces still carrying the pre-workspace page shell. **This pass migrated all 14**, so
+the debt is retired and the gate's assertion has flipped to "no file in `src/` may declare it at all". The workstream is
+still **not** complete — heading 3 is the honest remaining scope.
+
+### 0. PLAN CHECKPOINT — RUNTIME PARITY (session 5, PLAN-ONLY — no product code changed)
+
+- **`docs/RUNTIME_PARITY_PLAN_2026-09-21.md`** is the written plan for the Founder brief *"make the new Mercenta product
+  (Brain, Logistics Hub, redesigned workspaces) the actual runtime reached by `npm run dev`, replacing the old
+  presentation layer."* **No file under `src/` was modified in that session.** Verified at the plan checkpoint:
+  `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**; `npm run build` → **PASS** (`✓ built in 3.42s`).
+- **Finding that corrects the brief's premise:** Brain, Logistics Hub and the redesigned workspaces **are** the runtime
+  once you reach them — they are simply (a) **not the dev entry** (`environment` initialises to the literal `'home'` at
+  `GlobalStateContext.tsx:148`, so `npm run dev` opens the public marketing homepage), (b) **not addressable** (the URL
+  is `/` in every environment; `pushState` exists in exactly ONE place in the whole app, `Home.tsx:147`, for public
+  marketing pages only), and (c) **not persisted** (F5 silently signs out — `environment`/`role`/`session` are plain
+  `useState`, and `GlobalStateContext.tsx` contains **0** `sessionStorage`/`localStorage` hits). Compounding: the brand
+  tour auto-opens on every load because `TourEngine`'s progress store is a module-level `Map` (`TourEngine.tsx:23`).
+- **Earlier assumptions corrected with evidence:** `AppShell` / `Sidebar` / `EnvironmentRouter` are **live chrome**
+  (`AdminShell:237`, `BrandShell:139`, `CarrierShell`), **not** dead competing implementations; and a repo-wide orphan
+  sweep found **only two** true orphans — `src/components/shared/FcSelector.tsx` and
+  `src/components/shared/InfoTooltip.tsx`. The previously "suspected orphans" are reachable as tabs inside
+  `SuperAdminPanel.tsx`.
+- **BLOCKED on Founder decisions D-0 … D-7** (plan §7). **D-0 is blocking:** 270 uncommitted files (203 modified,
+  +7559/-1503) of Founder work sit on this branch, and the repository's protection rule forbids editing on top of them
+  without an explicit instruction.
+- **Implementation: NOT STARTED.** Next session: read `docs/RUNTIME_PARITY_PLAN_2026-09-21.md` §7, get **D-0** answered,
+  then execute **R1 → R2 → R3 → R4 → R5** in that order.
+
+
+### 1. COMPLETED / VERIFIED
+
+- **THE LEGACY PAGE SHELL IS GONE FROM `src/`.** `grep -rn 'max-w-[1400px]' src/` returns **no code match anywhere**
+  (only the explanatory comments in `workspace.tsx` and `BrandDashboard.tsx`). All 14 backlog files now compose
+  `WorkspaceFrame` + `WorkspaceHeader`.
+- **Admin surfaces migrated (7):** `CarrierMonitor` (carrier-context switch re-expressed as a labelled `role="group"`
+  toolbar with `aria-pressed` + `data-state` on every button), `ContractsAdminPanel` ("New Contract" → header action
+  slot), `FulfillmentTrack` (four-view tab bar preserved), `MarketingHub` (live-sourcing caveat banner kept as real
+  content), `MonitoringDashboard` ("Run Health Check" → header action slot), `RetailPipeline` (**both** the locked and
+  unlocked branches).
+- **Brand surfaces migrated (5):** `BrandAdvertising` (no-tenant guard **and** main surface; the "Simulated — no live ad
+  connection" badge → header status slot), `BrandTeamMessages` (chat layout preserved via a `flex h-full flex-col`
+  frame), `ListingAnalyzer` (**both** guard branches, `listing-analyzer-empty` preserved), `MercentaSocial` (**all three**
+  branches — no-session, access-denied, main — with the engine-state badge → header status and `ms-engine-state` /
+  `ms-access-denied` preserved), `OnboardingSummary`.
+- **Carrier terminals migrated (2):** `CarrierDashboard` (carrier switch → aria-pressed toolbar group) and
+  `BakLogistics` (BAK token badge → header status).
+- **`AdminShell`'s `AccessDenied` guard migrated** — it previously rendered a lone `<h2>` with **no h1 at all**; it now
+  carries a real page header, an accessibility fix as well as a shell fix.
+- **The gate now proves the retirement:** `npm run validate:workspace-shell` → **92 PASS / 0 FAIL**, backlog
+  **0 file(s) remaining**. `LEGACY_SHELL_BACKLOG` is empty and the assertion reads "no file in `src/**` may declare the
+  pre-workspace container"; the backlog **mechanism is deliberately retained** so a reintroduction must be explicit and
+  visible in review rather than silent. A new `SHELL_MIGRATED_SURFACES` list asserts frame + header + no-legacy on all 14.
+- **Two real regression classes were caught and fixed, not hidden:**
+  1. **DOM-order defect (Fulfillment Track).** New header copy changed DOM text order, so an order-sensitive assertion
+     (`getByText(/Direct Fulfillment/i).first()`) began resolving to a hidden `<select>` `<option>`. Root cause was the
+     copy written during the migration, **not** the test. Fixed **on the surface** (the header now names both models,
+     better IA for a page whose purpose is to document them); the spec was left untouched.
+  2. **Heading-level defect (Helpdesk).** The migration moved the page title to the canonical `h1`, and
+     `rocketchat-removal.spec.ts` pinned `h2`. Fixed by **REPOINTING** the assertion to
+     `getByRole('heading', { name: 'Helpdesk' })` with an inline `§UI/UX REDESIGN — REPOINTED` comment recording the old
+     contract — the repo's documented pattern: repoint to the current canonical source of truth, never weaken.
+
+### 2. IN PROGRESS
+
+- The platform-wide redesign workstream continues. **Every page shell is now canonical**; what remains is body-level
+  composition, the measured accessibility findings, and the legacy-CSS debt (heading 3).
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. **Body-level redesign of the migrated surfaces** — page shells are canonical, but the Cards/charts/tables inside
+   Reports, Analytics, Compliance, Returns, Settings, Fulfillment Track, Retail Pipeline, Marketing and the carrier
+   terminals are still the older composition.
+2. **Colour-contrast pass (measured, not fixed)** — axe reports `serious · color-contrast` on every scanned surface
+   (9–22 nodes each) because the six themes are Founder-owned palette values. Quantified, not gated, not silently changed.
+3. **Heading-order on 8 surfaces** whose only headings come from the shared `Card` primitive (`h3`); fixing it needs
+   `Card` to take a heading level, which would break the Integration Hub's pinned `h3` provider-card contract.
+4. **`scrollable-region-focusable`** on the Audit Log / record-drawer scroll region.
+5. **`theme-alpha-shims.css` removal** (691 lines; needs the per-screen token migration first).
+6. **Live-chat launcher collision** (heading 6) — fix at the root.
+7. **Payoneer-primary payout reconciliation** (heading 5).
+8. **Amazon truth 52-item register** — untouched; APPLIED remains 0.
+9. Pre-existing S3–S13 (routing re-model · SP-API Vendor surface + three missing Edge Functions · catalogue fidelity ·
+   map engine · security/go-live gate · T-3 wording · carrier retirement).
+
+### 4. DEFERRED / PARKED
+
+- **Rakazo** untouched by instruction; **DigitalOcean** untouched; **Postiz** not deployed.
+- **OpenPost** evaluated only; licence **unverified**, no dependency added.
+- Screen-recording product education (Screenity-style) — evaluated, deliberately not added.
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **Payoneer-primary payout rail: BLOCKED BY FOUNDER DECISION.** T-1 (Payoneer primary, Wise secondary) is DECIDED BUT
+  NOT APPLIED, and `.clinerules/mercenta-business-model.md` still declares the *inverse* ("Wise is the DEFAULT payout
+  rail"). Flipping `DEFAULT_PAYOUT_RAIL` without correcting that rule file would create a NEW rules-vs-code
+  contradiction, so it was left unchanged and flagged. Owner: S11.
+- **No live carrier credentials** (DHL / Palletline) — every logistics leg is labelled SIMULATED/AMBIENT.
+- **No real scheduler process** — automations run on demand; the declared cadence is the seam a scheduler needs.
+
+### 6. KNOWN EXCEPTIONS
+
+- **Live-chat launcher collision (open defect, mitigated).** The fixed 48px launcher at `bottom-6 right-6 z-50`
+  permanently covers the bottom-right 48×48 region of the operational workspace — where table row actions and drawer
+  footers live. A real user can be blocked there. Mitigated for Product Catalog; NOT fixed at the root. Recommended
+  fix: move the launcher into the shell chrome or reserve the corner.
+- **Colour contrast + heading-order** — measured and reported by `e2e/accessibility.spec.ts`, deliberately NOT gated
+  and NOT changed (Founder-owned palette; `Card` heading-level contract).
+- **Demo has ZERO seed consignments** (unchanged): `DEMO_SHIPMENTS` only keeps POs in shipping statuses the
+  deterministic spread never produces for the cleared brands; the richer `INITIAL_SHIPMENTS` in
+  `src/data/bootstrap.ts` is orphaned. Demo-data/business decision — recorded, not taken.
+- **Page-header copy is a DOM-order change.** Two regressions across two passes came from exactly this: order-sensitive
+  `getByText(...).first()` selectors and heading-level-pinned selectors. Recorded here as a known hazard for future
+  surface work rather than rediscovered each time.
+- `eslint react-hooks/exhaustive-deps` and `rules-of-hooks` are **error** and pass on every file touched.
+
+### 7. CURRENT CHECKPOINT
+
+- **Start HEAD:** `9f12129`. **Branch:** `redesign/foundation`. **Dirty tree at start:** carried Founder work, preserved.
+- **This session's files:** the 14 retired-shell surfaces —
+  `src/components/layout/AdminShell.tsx`,
+  `src/components/admin/{CarrierMonitor,ContractsAdminPanel,FulfillmentTrack,MarketingHub,MonitoringDashboard,RetailPipeline}.tsx`,
+  `src/components/brand/{BrandAdvertising,BrandTeamMessages,ListingAnalyzer,MercentaSocial,OnboardingSummary}.tsx`,
+  `src/components/carrier/{BakLogistics,CarrierDashboard}.tsx`;
+  `scripts/validate-workspace-shell.mjs`, `scripts/reconcile-redesign-backlog-retirement-registry.cjs`;
+  `e2e/rocketchat-removal.spec.ts` (repointed assertion); `requirements-registry.json`; this file; `HANDOFF.md`.
+- **Checkpoint commit:** created ONLY for this session's files after all gates passed. No catch-all commit; unrelated
+  prior Founder work left uncommitted and untouched.
+
+### 8. VERIFICATION STATUS
+
+- **TypeScript:** `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**. **ESLint:** `npx eslint .` → **0 problems**.
+- **Build:** `npm run build` → **PASS**.
+- **Workspace shell gate:** `npm run validate:workspace-shell` → **92 PASS / 0 FAIL**, backlog **0**.
+- **Playwright — FULL SUITE (all 435 declarations, executed after the final edit): 433 passed / 0 failed / 2 skipped,
+  exit 0.** This is the first full-suite run in this workstream; the two previous checkpoints reported targeted suites only.
+- **Legacy shell:** `grep -rn 'max-w-[1400px]' src/` → **no code occurrence**.
+- **Registry reconcile:** added 4, re-run added 0 (idempotent), `total_entries 426 → 430`; the retired backlog row is
+  **superseded** (not deleted).
+
+### 9. NEXT EXECUTION SCOPE
+
+1. Body-level redesign of the migrated surfaces (heading 3 item 1) — the page shells are done; the bodies are not.
+2. Fix the launcher collision at the root (heading 6).
+3. Founder decisions outstanding: (a) payout-rail reconciliation; (b) demo consignment seed; (c) whether to accept the
+   measured colour-contrast findings or change palette values.
+
+---
+
+## 🧭 CURRENT PLATFORM POSITION — UI/UX REDESIGN: REMAINING SURFACES (ONE WORKSPACE SYSTEM) (2026-09-21, session 3)
+
+Branch `redesign/foundation`. **Start HEAD `4ebba1d`** (verified Logistics checkpoint — preserved, not reset). The
+281-path dirty Founder worktree was carried forward and **preserved**. **No deploy, `.env` never read, no credential
+activated, no live provider call, no Rakazo/Postiz/DigitalOcean work, no destructive Git operation.**
+
+**Increment identity:** continuation of the Founder-commissioned **COMPLETE PLATFORM REDESIGN**. This session retired
+the *second design generation*, migrated the highest-value remaining surfaces onto the one canonical workspace system,
+and built the enforceable taste/accessibility gates. It is **not** the whole workstream — 14 files still carry the
+pre-workspace page shell (heading 3).
+
+### 1. COMPLETED / VERIFIED
+
+- **ONE WORKSPACE SYSTEM — the competing dashboard generation was retired.** `src/components/shared/dashboard.tsx`
+  held its own `DashboardSection`/`KpiGroup`/`AttentionPanel` alongside the canonical workspace system, which is why
+  the brand portal and the admin workspace could both be called "the redesigned dashboard" while looking like
+  different products. It is now a thin **adapter** over `MetricBand`/`WorkspaceSection`/`Queue`, and every operational
+  consumer (`AdminDashboard`, `LogisticsHub`, `MercentaBrain`) was repointed to `@/components/shared/workspace`.
+- **`WorkspaceFrame` now owns surface identity** — new `testId` + `busy`/`aria-busy` seams, so a page never
+  hand-rolls its own outer container again (the legacy `p-6 … max-w-[1400px] mx-auto` container marked the old
+  generation).
+- **BRAND DASHBOARD fully migrated** — Frame + Header (eyebrow, contract status, PO-summary facts, primary actions) +
+  Grid with context rail (compliance & account health, next actions, recent comms) + MetricBand with domain accents +
+  three Queues + the canonical payout DataTable. All pinned contracts preserved (`brand-dashboard-loaded/loading`,
+  `kpi-value-*`, `attention-*` incl. the pinned first unacked row, `po-summary-*`, `action-*`, `compliance-summary`);
+  tenant scoping and honest empty states untouched.
+- **Six brand surfaces + admin Helpdesk migrated to the canonical page shell** — Reports (period selector moved into
+  the canonical sticky toolbar with `aria-pressed`), Sales Analytics, Compliance & Customs, Returns, Master Product
+  Catalog, Settings, Helpdesk. Only the PAGE SHELL changed there; their bodies already used the canonical kit.
+- **Real defects FIXED (found by running axe, not by reading code):** three unlabelled `<select>`s on Helpdesk
+  (`critical · select-name × 3`); a widget role nested inside an image role on the line chart, the Brain canvas and the
+  logistics map (`role="img"` → `role="group"`); the h1→h3 heading skip fixed at the primitive
+  (`WorkspaceSection` h3 → h2).
+- **A real regression was caught, root-caused and fixed, not hidden.** Migrating Product Catalog to the taller
+  canonical header shifted a catalogue row under the fixed live-chat launcher, making "Check result" unclickable
+  (`e2e/catalog-product-management.spec.ts` test 1 failed). Root cause proved by reverting the migration (4/4 passed
+  reverted) and fixed with a single-line header description (4/4 passed again). The underlying launcher collision is
+  recorded as an open defect (heading 6).
+- **Gates built and executed:** `npm run validate:workspace-shell` → **50 PASS / 0 FAIL** (declared shrinking backlog
+  = 14 files); `e2e/redesign-surfaces.spec.ts` → **11 passed** (11 surfaces × 1440/1280/1024/768/390, frame fills the
+  main region, zero horizontal overflow).
+- **Accessibility audit executed for real:** `e2e/accessibility.spec.ts` — axe-core in Chromium across 13 surfaces
+  plus 3 interaction-mechanics tests → **15/16 passed**; the full violation list is printed per surface in the output.
+- **Three required audits written from the repository:** `docs/AGENT_VS_AUTOMATION_AUDIT.md`,
+  `docs/USERTOUR_EVALUATION.md`, `docs/OPENPOST_EVALUATION.md`. No paid service deployed, no production activation.
+
+### 2. IN PROGRESS
+
+- The platform-wide redesign workstream continues: 7 brand surfaces + admin Helpdesk are on the canonical shell; the
+  remaining 14 legacy-shell files are listed and gated (heading 3 item 1).
+
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. **Legacy page-shell backlog — 14 files (NOT started).** AdminShell (fallback wrapper), admin CarrierMonitor,
+   ContractsAdminPanel, FulfillmentTrack, MarketingHub, MonitoringDashboard, RetailPipeline; brand BrandAdvertising,
+   BrandTeamMessages, ListingAnalyzer, MercentaSocial, OnboardingSummary; carrier BakLogistics, CarrierDashboard.
+   Named in `scripts/validate-workspace-shell.mjs` so the list can only shrink.
+2. **Body-level redesign of the migrated brand surfaces** — only their page shell changed; the Cards/charts/tables
+   inside Reports, Analytics, Compliance, Returns and Settings are still the older composition.
+3. **Colour-contrast pass (measured, not fixed)** — axe reports `serious · color-contrast` on every surface (9–22
+   nodes each) because the six themes are Founder-owned palette values. Quantified, not gated, not silently "fixed".
+4. **Heading-order on 8 surfaces** whose only headings come from the shared `Card` primitive (`h3`); fixing it needs
+   `Card` to take a heading level, which would break the Integration Hub's pinned `h3` provider-card contract.
+5. **`scrollable-region-focusable`** on the Audit Log / record-drawer scroll region.
+6. **`theme-alpha-shims.css` removal** (691 lines; needs the per-screen token migration first).
+7. **Payoneer-primary payout reconciliation** — `src/config/payouts.ts` still declares `DEFAULT_PAYOUT_RAIL = 'wise'`
+   (see heading 5).
+8. **Amazon truth 52-item register** — untouched; APPLIED remains 0.
+9. Pre-existing S3–S13 (routing re-model · SP-API Vendor surface + three missing Edge Functions · catalogue fidelity ·
+   map engine · full-platform suite · security/go-live gate · T-3 wording · carrier retirement).
+
+### 4. DEFERRED / PARKED
+
+- **Rakazo** untouched by instruction; **DigitalOcean** untouched; **Postiz** not deployed.
+- **OpenPost** evaluated only; licence **unverified**, no dependency added.
+- Screen-recording product education (Screenity-style) — evaluated, deliberately not added.
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **Payoneer-primary payout rail: BLOCKED BY FOUNDER DECISION.** T-1 (Payoneer primary, Wise secondary) is DECIDED
+  BUT NOT APPLIED, and `.clinerules/mercenta-business-model.md` still declares the *inverse* ("Wise is the DEFAULT
+  payout rail"). Flipping `DEFAULT_PAYOUT_RAIL` without correcting that rule file would create a NEW rules-vs-code
+  contradiction, so it was left unchanged and flagged. Owner: S11.
+- **No live carrier credentials** (DHL / Palletline) — the map labels every leg SIMULATED/AMBIENT.
+- **No real scheduler process** — automations run on demand; the declared cadence is the seam a scheduler needs.
+
+### 6. KNOWN EXCEPTIONS
+
+- **Live-chat launcher collision (open defect, mitigated).** The fixed 48px launcher at `bottom-6 right-6 z-50`
+  permanently covers the bottom-right 48×48 region of the operational workspace — where table row actions and drawer
+  footers live. A real user can be blocked there. Mitigated for Product Catalog; NOT fixed at the root. Recommended
+  fix: move the launcher into the shell chrome or reserve the corner.
+- **Colour contrast + heading-order** — measured and reported by `e2e/accessibility.spec.ts`, deliberately NOT gated
+  and NOT changed (Founder-owned palette; `Card` heading-level contract).
+- **Demo has ZERO seed consignments** (unchanged): `DEMO_SHIPMENTS` only keeps POs in shipping statuses the
+  deterministic spread never produces for the cleared brands; the richer `INITIAL_SHIPMENTS` in
+  `src/data/bootstrap.ts` is orphaned. Demo-data/business decision — recorded, not taken.
+- **Registry verifier issues 174 → 179** — the +4/+5 are verification flags from this session's new registry rows
+  (evidence needing manual confirmation), NOT new code defects.
+- `eslint react-hooks/exhaustive-deps` and `rules-of-hooks` are **error** and pass on every file touched.
+
+### 7. CURRENT CHECKPOINT
+
+- **Start HEAD:** `4ebba1d`. **Branch:** `redesign/foundation`. **Dirty tree at start:** 281 paths (preserved).
+- **This session's files:** `src/components/shared/{workspace,dashboard}.tsx`;
+  `src/components/brand/{BrandDashboard,BrandReports,SalesAnalytics,ComplianceHub,BrandReturns,ProductCatalog,BrandSettings,LogisticsHub}.tsx`;
+  `src/components/admin/{AdminDashboard,HelpdeskDashboard,MercentaBrain}.tsx`;
+  `src/components/shared/charts/MercentaCharts.tsx`, `src/components/shared/brain/BrainCanvas.tsx`,
+  `src/components/shared/logistics/LogisticsMapCanvas.tsx`; `e2e/{accessibility,redesign-surfaces}.spec.ts`;
+  `scripts/{validate-workspace-shell.mjs,reconcile-redesign-remaining-surfaces-registry.cjs}`; `package.json`;
+  `requirements-registry.json`; `docs/{AGENT_VS_AUTOMATION_AUDIT,USERTOUR_EVALUATION,OPENPOST_EVALUATION}.md`;
+  this file; `HANDOFF.md`.
+- **Checkpoint commit:** created ONLY for this session's files after all gates passed. No catch-all commit; unrelated
+  prior Founder work left uncommitted and untouched.
+
+### 8. VERIFICATION STATUS
+
+- **TypeScript:** `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**. **ESLint:** `npx eslint .` → **0 problems**.
+- **Build:** `npm run build` → **PASS** (`AdminShell` chunk 958.47 kB, was 1,010 kB).
+- **Workspace shell gate:** **50 PASS / 0 FAIL**, backlog 14. **Typography gate:** `TYPOGRAPHY_SCALE_VALIDATION_PASS
+  (17 assertions)`.
+- **Registry reconcile:** added 9, re-run added 0 (idempotent), `total_entries 417 → 426`.
+  **Registry verifier:** 179 issues (see heading 6).
+- **Playwright — broad regression (21 suites, executed after the final edit): 176 passed / 0 failed.**
+- **Playwright — accessibility:** 15/16. **Responsive/visual:** 11/11.
+- **Visual inspection:** 4 rendered PNGs inspected by eye (brand dashboard 1440/390, product catalog 1440, admin
+  overview 1440) — dense operational queues, one canonical header, hairline dividers, semantic badges, no decorative
+  KPI walls.
+
+### 9. NEXT EXECUTION SCOPE
+
+1. Burn down the 14-file legacy page-shell backlog (heading 3 item 1) — the gate proves each one.
+2. Body-level redesign of the migrated brand surfaces (heading 3 item 2).
+3. Fix the launcher collision at the root (heading 6).
+4. Founder decisions outstanding: (a) payout-rail reconciliation; (b) demo consignment seed; (c) whether to accept the
+   measured colour-contrast findings or change palette values.
+
+---
+
+## 🧭 CURRENT PLATFORM POSITION — LOGISTICS OPERATIONAL MAP + BRAND/ADMIN LOGISTICS HUB REDESIGN (2026-09-21, session 2)
+
+Branch `redesign/foundation`. **Session start HEAD `47db66c`** (the verified Brain checkpoint — preserved, not
+rebased, not reset). The 279-path dirty Founder worktree carried forward and **preserved**; this session's changes
+are additive/reconciliatory only. **No deploy, `.env` never read, no credential added/activated, no live provider
+call, no Rakazo/PostBot/Postiz/DigitalOcean work, no destructive Git operation.**
+
+**Increment identity:** continuation of the Founder-commissioned **COMPLETE PLATFORM REDESIGN**. This session
+delivered the explicitly-prioritised **Logistics Hub + operational map** (brand AND admin) plus the canonical
+geographic/truth layer behind it. It is **not** the whole workstream — heading 3 is the honest remaining scope.
+
+### 1. COMPLETED / VERIFIED
+
+- **Logistics Hub REDESIGNED (brand)** — `src/components/brand/LogisticsHub.tsx` rebuilt as an operations
+  workspace on the canonical primitives (`WorkspaceFrame/Header/Grid/Section`, `KpiGroup`, `ContextPanel`,
+  `RecordFieldList`, `SegmentedControl`). The old page was hardcoded light-mode `zinc-*` classes on a dark shell,
+  three carrier tabs, a **non-functional "New Booking" form** (inputs wired to nothing — a placeholder) and a flat
+  list. The fake form was **REMOVED, not restyled**: real booking is the canonical ASN flow on Purchase Orders.
+- **A REAL INTERACTIVE OPERATIONAL MAP** — `src/components/shared/logistics/LogisticsMapCanvas.tsx` + the new
+  `src/lib/logistics/operationsMap.ts` derivation. Pan (pointer drag), wheel zoom (non-passive listener) + zoom
+  in/out/reset/**Fit**, click-to-select, click-empty-to-clear, drawn lat/lon **graticule**, declared nodes
+  (origin / UK gateway / Mercenta hub / Amazon FC city), one indicative arc per consignment and one marker at its
+  canonical stage progress. Selecting a consignment on the map and in the list is ONE shared selection state.
+- **The map is wired to the records, and the filters genuinely drive it** — search, lane filter, status filter and
+  an evidence filter all change the drawn set AND the list together (asserted in the browser).
+- **LIVE VERIFIED / SIMULATED / AMBIENT is real, not decorative** — `classifyLegTruth` fails closed via the
+  canonical `resolveProviderMode` + `isProviderSimulationSafe`. An unregistered/disabled provider is **never**
+  simulated; a live provider with **no** provider-issued identifier is **ambient, never a live claim**. In this
+  environment the live count is **0** and the surface says so in words.
+- **Amazon freight semantics preserved and surfaced** — Freight Collect legs are labelled
+  **CHANNEL-ARRANGED** ("Mercenta does not select this carrier") and Freight Prepaid legs **MERCENTA-ARRANGED**,
+  both read from the canonical `FREIGHT_SEMANTICS` (PO window fields included). Carrier expectations come from the
+  canonical `validateCarrierForShipment` / `selectCarrierForShipment`; the map never assigns a carrier.
+- **The retired mandatory linear logistics chain was NOT reintroduced** — stage progress comes from the canonical
+  `STAGE_BY_STATUS` (newly exported from `src/data/brandDossiers.ts` instead of duplicated).
+- **Logistics Control REDESIGNED (admin)** — `src/components/admin/LogisticsControl.tsx` now carries the SAME map
+  above its per-brand tables, driven by the SAME focus filter plus its own evidence filter, with a consignment
+  inspector in the rail. It is cross-tenant **by design** (that is the Mercenta ops view) and says so.
+- **Ambient motion is meaningful and reduced-motion safe** — a genuinely in-transit consignment drifts a few pixels
+  along its own route (18 s, ≤3 px) with a breathing halo; `prefers-reduced-motion` disables both outright.
+- **Two real defects fixed (not cosmetic):**
+  1. domain-created shipments recorded the literal placeholders `'Brand warehouse'` / `'Origin depot'`, so a
+     workflow-created consignment could not be located at all. They now record the brand's **declared nation**
+     (`originForBrand`) — the honest precision available at that point in the lifecycle — and a brand with no
+     declared nation records an explicit "Origin not declared" rather than a plausible fake.
+  2. the brand hub defaulted every shipment to `stage: 'factory_intake'`, so stage progress was meaningless.
+- **Honest geography** — `src/config/logisticsGeo.ts` is the ONE declaration of the map's coordinates (country
+  centroids where only a country is declared, real city/port coordinates where a city is named, the Mercenta hub
+  from `src/config/customs.ts`, Amazon FC **cities** from `DEFAULT_UK_FC_LIST`). An unresolvable place returns
+  `null` and the leg is listed as **schematic** — never placed at an invented coordinate. The rendered notice says
+  exactly that.
+- **Brain preserved** — the verified Brain checkpoint is untouched apart from one consolidation: the duplicated
+  `usePrefersReducedMotion` hook now has a single implementation (`src/lib/hooks/usePrefersReducedMotion.ts`)
+  imported by `BrainCanvas`. All Brain browser tests pass.
+
+### 2. IN PROGRESS
+
+- Nothing in this session is half-finished: every item in heading 1 is implemented, executed and verified.
+- The **platform-wide redesign workstream** continues (heading 3). The following surfaces are untouched this
+  session and remain on the roadmap: BrandDashboard, BrandPurchaseOrders, ProductCatalog, ComplianceHub,
+  BrandSupport, BrandSettings, BrandReports, SalesAnalytics, HelpdeskDashboard, AccountingPanel, AdminAuditLog,
+  AdminDashboard composition, SuperAdminPanel internals, FounderControlCentre internals, and the remaining
+  page-level tables/forms/drawers/dialogs.
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. **Redesign the remaining brand surfaces** to the workspace standard now demonstrated by Logistics Hub:
+   BrandDashboard, BrandPurchaseOrders, ProductCatalog, ComplianceHub, BrandSupport, BrandSettings, BrandReports,
+   SalesAnalytics (+ their tables/forms/drawers/dialogs).
+2. **Redesign the remaining admin surfaces**: AdminDashboard composition, SuperAdminPanel internals,
+   FounderControlCentre internals, HelpdeskDashboard, AccountingPanel, AdminAuditLog.
+3. **Legacy micro-typography / `theme-alpha-shims.css` cleanup** — the shim layer (691 lines) and remaining legacy
+   `text-[Npx]` usage in NOT-yet-redesigned files (the redesigned files this session use the `text-ds-*` scale only).
+4. **Visual-regression / taste gate** — no such infrastructure exists in the repo. A practical low-dependency gate
+   was NOT built this session (honest status: not started).
+5. **Accessibility audit tooling** — no axe/accessibility-tree audit exists in the repo and none was run this
+   session (honest status: not started; the new surfaces DO carry the a11y properties asserted in the browser:
+   one `role="img"` map with a text alternative, real buttons for every control, Escape-closing dialogs, labelled
+   controls, reduced-motion compliance).
+6. **Agent vs Automation Architecture Audit** — repository-derived audit NOT performed this session.
+7. **Usertour / visual-knowledge system** — repository inspection NOT performed this session.
+8. **OpenPost / Postiz evaluation** — NOT performed this session.
+9. **Amazon truth 52-item reconciliation** — untouched; APPLIED remains 0 (do not claim otherwise).
+
+### 4. DEFERRED / PARKED
+
+- **Rakazo** — untouched, by instruction (no code, no deploy, no migration, no redesign, no infrastructure).
+- **DigitalOcean** — untouched; no resource inspected, modified or deleted.
+- **Postiz** — not deployed (unchanged).
+- **Payoneer-primary payout rail** — the known reconciliation defect stands: `DEFAULT_PAYOUT_RAIL` is still `'wise'`
+  in `src/config/payouts.ts`. **Not changed this session** — the logistics workstream did not reach payout
+  configuration, and changing an established Founder/business policy is a hard stop. Flagged for Founder decision.
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **No live carrier credentials** (DHL / Palletline). Not a blocker for the map — it is exactly why the surface
+  labels every leg SIMULATED/AMBIENT and reports **0 live verified** instead of pretending.
+- **No non-UK brand can currently raise a consignment through the demo lifecycle**: `createCommercePurchaseOrder`
+  requires a completed catalog submission, and only `brand-astonish` (UK) has one. So the browser suite exercises
+  an international-origin leg through the **executed module validator** (US / Germany / France / Italy / South
+  Korea / Switzerland / Africa origins, city and country precision, projection inside the frame) rather than
+  through a seeded non-UK brand. Honest status: covered at module level, NOT covered end-to-end in the browser.
+
+### 6. KNOWN EXCEPTIONS
+
+- **The demo has ZERO seed consignments.** `DEMO_SHIPMENTS` filters `DEMO_PURCHASE_ORDERS` down to POs whose status
+  is `ready_to_fulfil` / `shipped` / `delivered`, and the deterministic spread only ever produces
+  `received` / `under_review` / `accepted` for the two cleared brands (`brand-astonish`, `brand-tapatio`). The
+  logistics surfaces therefore render their (now genuinely good) empty state until a consignment is created through
+  the real PO → acknowledge → ASN path. **This is a demo-data gap, not a broken map** — it is also an SSOT
+  violation: the richer `INITIAL_SHIPMENTS` (10 rows with real cities) exists in `src/data/bootstrap.ts` but is
+  ORPHANED from the shipment feed the logistics surfaces read. Fixing it means editing demo data / unifying two
+  shipment representations — a business-data decision, so it is recorded here rather than taken unilaterally.
+- **Pre-existing failing browser test fixed (not hidden):** `e2e/mercenta-brain.spec.ts` test 10 failed at HEAD
+  `47db66c` too — proved by exporting HEAD read-only (`git archive HEAD | tar -x -C /tmp/mercenta-head`) and running
+  it against an unmodified copy. The cause was the spec's own fragile tour dismissal (clicking the coach-mark's X
+  opens a Skip-confirmation modal that then blocks the next click). The dismissal now uses the tour's own store API.
+- `eslint react-hooks/exhaustive-deps` and `rules-of-hooks` are set to **error** and pass on every file touched.
+
+### 7. CURRENT CHECKPOINT
+
+- **Start HEAD:** `47db66c` (verified Brain checkpoint).
+- **Branch:** `redesign/foundation`.
+- **Dirty tree at start:** 279 paths. **Dirty tree at end:** measured with `git status --porcelain | wc -l`
+  (see the final session report).
+- **Checkpoint commit:** created ONLY for this session's files after all gates passed (see heading 8). No
+  catch-all commit; unrelated prior Founder work was left uncommitted and untouched.
+
+### 8. VERIFICATION STATUS
+
+- **Playwright — Logistics (new):** `npx playwright test e2e/logistics-hub-map.spec.ts` → **15 passed / 0 failed**
+  (12 brand-hub tests + 3 admin-map tests), executed against the final code.
+- **Playwright — full suite:** `npx playwright test` → see the final session report for the exact counts (run
+  after the Logistics Control change).
+- **Playwright — Brain regression:** `e2e/mercenta-brain.spec.ts` → 10 passed (including the previously failing
+  test 10).
+- **Module validator (executes the real modules through esbuild):** `npm run validate:logistics-map` →
+  **LOGISTICS_MAP_VALIDATION_PASS (60 assertions, 0 network calls)**.
+- **TypeScript:** `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**.
+- **ESLint:** `npx eslint .` → see the final report (0 problems on every file touched).
+- **Build:** `npm run build` → PASS.
+- **Typography gate:** `npm run validate:typography` → `TYPOGRAPHY_SCALE_VALIDATION_PASS (17 assertions)`.
+- **Visual verification:** real Chromium screenshots taken and **inspected** at
+  `test-screenshots/logistics-hub/` (01 hub 1440, 01b map surface, 02 inspector 1440, 03 mobile 390,
+  04 admin map 1440). Two real visual defects were found **by looking at them** and fixed: an invisible graticule
+  and overlapping node labels, plus a world-scale frame that wasted the canvas (now auto-fitted with a `Fit`
+  control).
+
+### 9. NEXT EXECUTION SCOPE
+
+1. Redesign the next highest-value surfaces (heading 3 items 1–2) to the Logistics Hub standard.
+2. Build the visual-regression / taste gate (heading 3 item 4).
+3. Run an accessibility audit with real tooling (heading 3 item 5).
+4. Perform the Agent vs Automation audit, Usertour inspection and OpenPost evaluation (heading 3 items 6–8).
+5. **Founder decisions outstanding:** (a) seed/unify demo consignments so the logistics demo is populated;
+   (b) Payoneer-primary payout rail reconciliation.
+
+---
+
+## 🧭 CURRENT PLATFORM POSITION — MERCENTA BRAIN IMPLEMENTED AS A FIRST-CLASS INTERACTIVE SURFACE + TENANT-SCOPED BRAND INTELLIGENCE RELATIONSHIP MAP (2026-09-21)
+
+Branch `redesign/foundation`. **This session's start HEAD was `19be002`** with a 279-path dirty working tree carried
+from prior Founder work; that tree was **preserved and extended, never reset**. A **scoped checkpoint commit**
+containing only this session's files was created (see heading 7). **No deploy, no credential read/added/activated,
+`.env` never read, no live provider call, no Rakazo/Postiz/DigitalOcean work, no destructive Git operation.**
+
+**Increment identity:** the Founder-commissioned **COMPLETE PLATFORM REDESIGN + MERCENTA BRAIN** workstream. This
+session delivered the part of that workstream that did not exist at all — **Mercenta Brain** — plus the
+**tenant-scoped Brand Intelligence relationship experience**, and verified both in a real browser. It is **not** the
+whole workstream; heading 3 is the honest remaining scope.
+
+**1. COMPLETED / VERIFIED**
+
+- **Mercenta Brain — the product now exists.** Before this session `grep -ril 'brain' src e2e docs` returned
+  **exactly one hit — a sentence in a doc**. There was no entity model, no relationship model, no surface, no test.
+  It is now a **first-class Super Admin destination** answering the platform's third IA question ("how is everything
+  connected, what do we know, and why?") alongside Overview and the Operational Dashboard.
+- **Brain domain layer (projection, never a second truth system)** — `src/lib/intelligence/brain/types.ts`
+  (28 entity kinds, 20 relationship kinds, the four-state epistemic model, the code/automation/agent/mixed/human
+  authority model, node/edge contracts with mandatory provenance + evidence) and
+  `src/lib/intelligence/brain/buildGraph.ts` (a deterministic builder reading the canonical stores/registries/config
+  only: `demoStore`, `demoData`, `prospectStore`, `ticketStore`, `knowledgeBase`, `commercialReadinessStore`,
+  `AUTOMATION_REGISTRY`, `INTEGRATION_REGISTRY`, `getComplianceRequirements`, `config/payouts`, `config/shipping`,
+  `config/commercialReadiness`, `config/commercial`, `amazonWording`).
+- **Measured runtime graph (observed, not estimated):** Mercenta scope **299 entities / 401 relationships / 27 entity
+  types** — 206 VERIFIED · 25 SIMULATION · 0 INFERENCE · 68 UNKNOWN; authority split 193 code / 30 mixed / 9
+  automation / 66 human / 1 agent; **0 unprovenanced nodes**. Brand scope (`brand-astonish`) **39 entities /
+  42 relationships**.
+- **A real builder bug was caught by the harness, not by review.** The first runtime run reported missing `brand`
+  nodes and dropped `belongs_to`/`authorised_by` edges: the portfolio layer had never been written, so every tenant
+  edge was endpoint-less. The draft's "drop edges with a missing endpoint" rule surfaced it as a hard failure
+  instead of a silently thinner graph. Fixed by adding `addPortfolioLayer` for both scopes.
+- **The validator's first run also caught a broken gate:** `!/Math\.random/` failed on the builder's own doc comment
+  ("no `Math.random()`"). The validator now strips comments before pattern-testing — a gate that fails on
+  documentation proves nothing.
+- **Deterministic radial cluster layout** — `src/lib/intelligence/brain/layout.ts`: fixed 72° sectors per cluster,
+  nodes placed on rings in canonical order (sorted by kind then id), **no force simulation, no randomness**, node
+  radius declared once. The same domain state always produces the same picture.
+- **Interactive graph canvas** — `src/components/shared/brain/BrainCanvas.tsx`: SVG with pan (pointer drag), zoom
+  (wheel with a non-passive listener + explicit controls), reset, click-to-select, click-empty-to-clear,
+  selection focus rings, cluster labels, evidence-coloured edges (simulated edges dashed), and an honest
+  no-match overlay. **Accessibility is designed, not incidental:** the SVG is one `role="img"` with a text
+  alternative (300 focusable SVG nodes would be a tab trap) and every entity is also a real `<button>` in the
+  companion list — one shared selection state, two input paths. `prefers-reduced-motion` is honoured.
+- **Mercenta Brain surface** — `src/components/admin/MercentaBrain.tsx`: workspace header, a six-cell KPI band
+  (entities / relationships / verified / simulation / unknown / human authority), sticky toolbar with search +
+  cluster + status + entity-type filters, the graph, a 120-row capped entity list that always states the **true**
+  total, and an inspector showing canonical properties, the authority model **with its explanation**, every
+  relationship **with the evidence line that proves it**, the provenance pointer, and a drill-down button to the
+  real destination view for that entity kind. A "What the Brain does not contain" panel states the exclusions.
+
+- **Brand Intelligence relationship experience (tenant-scoped)** — `src/components/brand/BrandRelationshipMap.tsx`,
+  wired into `BrandIntelligence.tsx` as a first-class section. Built by the **same** builder with
+  `scope: { kind: 'brand', tenantId }`; the brand branch **never runs** the platform, policy, decision, automation,
+  agent or acquisition layers, so isolation is a structural property rather than a filter someone could forget.
+  An unknown tenant **fails closed** (empty graph + stated reason). The surface shows the brand's own products,
+  ASINs, SKUs, POs and lines, shipments, invoices, payments, cases, conversations, compliance documents, its LOA,
+  contracts and readiness records, plus the channel it is connected to *through* Mercenta.
+- **RBAC/tenant guard:** `brain` is Super-Admin only — hidden from the nav for every other tier **and** guarded
+  again at render in `AdminShell` (defense in depth), exactly like `control_centre`/`founder_centre`.
+- **Two new gates, both real:** `scripts/validate-mercenta-brain.mjs` (**30 source assertions + a bundled runtime
+  harness**) and `scripts/brain-runtime-check.ts` (the harness: entity coverage, **exact projection** of canonical
+  records to nodes, relationship coverage, epistemic honesty, the tenant boundary, the unknown-tenant refusal,
+  determinism, and "every edge kind is declared in the catalogue"). Registered as `npm run validate:brain`.
+- **Honest gap reporting instead of invented edges:** the harness prints
+  `DECLARED_RELATIONS_WITHOUT_INSTANCE` — currently `approved, changes, concerns, escalates_to, executes, fulfils,
+  settles, uses`. These are *supported by the model* but have **no instance in the current canonical demo data**
+  (every automation declares `externalProviders: []`; no seed ticket carries `relatedPoNumber`/`amazonCase`; the
+  commerce invoice/payment stores start empty). That is reported, never papered over with a plausible-looking edge.
+
+**2. IN PROGRESS**
+
+- **The complete platform redesign workstream is NOT finished.** This session delivered the Brain + the
+  tenant-scoped relationship experience on top of Wave 3 Part 1's shell. The page-by-page redesign of the
+  individual surfaces, the Amazon-truth semantic work and the payout-rail reconciliation remain — see heading 3.
+
+**3. REMAINING — CURRENT ROADMAP**
+
+Numbered, derived from the actual state (not a template):
+
+1. **Amazon Vendor truth (S2b, one disposition at a time).** `docs/AMAZON_RECONCILIATION_STATUS.md` still records
+   **52 findings, APPLIED = 0**. The unsupported semantics named by the Founder — the **30-day backorder restock
+   countdown**, the **"10am Pacific" routing deadline**, the mandatory universal linear logistics chain, the
+   unsupported chargeback taxonomy/window, the static FC assumptions and the image-validator claims — are **still
+   present in the code and types**. This session did **not** touch them: each needs its own verified pass with a
+   registry disposition, and inventing a replacement rule would be worse than leaving the recorded contradiction.
+2. **Payoneer-primary payout reconciliation.** `src/config/payouts.ts` still declares
+   `DEFAULT_PAYOUT_RAIL = 'wise'`, the inverse of the Founder-decided policy. The Brain reads that config rather
+   than hardcoding a rail, so it renders the **current, un-reconciled** truth. Flipping it touches payout logic,
+   specs and docs — deferred to its own verified pass rather than bundled into this one.
+3. **Wave 3 Part 2 — `AdminDashboard` (Operations Overview) composition** (unchanged from the previous block).
+4. **Wave 3 Part 3 — the Brand surface redesign** (unchanged; the Brand relationship map is now one section of it).
+5. **Wave 3 Part 4 — page-level tables / forms / filters / drawers** across the operational surfaces.
+6. **Wave 3 Part 5 — empty / loading / error state redesign** beyond what already existed.
+7. **Remove `src/theme-alpha-shims.css`** (691 legacy shim lines; needs a per-screen token migration).
+8. **Visual-regression gate** (baseline policy still undecided). The Brain now contributes real rendered baselines
+   (`test-screenshots/mercenta-brain/*.png`) but there is still no pixel-diff gate.
+9. **`AdminShell` chunk size** (the build warns; the Brain adds to that chunk because the shell imports it
+   statically — a real, recorded performance item).
+10. Pre-existing S3–S13: routing re-model · SP-API Vendor surface (+ the three missing Edge Functions) · catalogue
+    fidelity · map engine · full-platform suite · security/go-live gate · T-3 wording · carrier retirement.
+
+**4. DEFERRED / PARKED**
+
+- Multi-provider enrichment waterfall; probability/threshold decision layer; pre-rendering/SSR for the public
+  surface; Rare UI components.
+- **No dependency was added in this session.** The Brain canvas is hand-written SVG + pointer/wheel handlers —
+  deliberately no graph library, no new single point of failure.
+
+**5. BLOCKED / DEPENDENCIES**
+
+- **Live SP-API path remains UNIMPLEMENTED** (the three Edge Functions `spapi/client.ts` calls do not exist).
+  Simulation is the only working path — unchanged by this session.
+- **Catalogue fidelity** remains blocked on Vendor catalogue evidence (AV-035 / AV-034).
+- **S13 go-live verification** remains blocked on a live project/credentials.
+- Nothing blocks roadmap items 3–9.
+
+**6. KNOWN EXCEPTIONS**
+
+- `verify-registry.mjs` reports pre-existing findings it cannot resolve for `.md` evidence pointers. This session's
+  registry rows cite source files and specs, so they resolve; the pre-existing count is unaffected.
+- **2 Playwright skips** in the regression set are **pre-existing, deliberate `test.fixme` declarations** with
+  their own recorded reasons (`e2e/multi-tenant.spec.ts:44` "Messages tab not accessible from brand view";
+  `e2e/multi-tenant.spec.ts:99` conditional "Brand entries not found in this UI iteration"). Neither is caused by,
+  nor related to, this session's changes.
+
+**7. CURRENT CHECKPOINT**
+
+- Brain + Brand relationship map implemented and verified. A **scoped checkpoint commit** was created containing
+  only this session's files (Brain modules, canvas, surfaces, spec, harness, validator, reconcile script, Brain
+  doc, screenshots) — **commit `47db66c`**, 17 files, 3,898 insertions, parent `19be002`.
+- **Verified but UNCOMMITTED, deliberately:** the integration edits (`src/components/layout/AdminShell.tsx`,
+  `src/components/brand/BrandIntelligence.tsx`, `package.json` → `validate:brain`) and the project-state docs
+  (`PROJECT_STATUS.md`, `HANDOFF.md`, `requirements-registry.json`, the two matrices, `Review Zip/…`). Those files
+  already carried **prior uncommitted Founder work** (`PROJECT_STATUS.md` +1,304 lines, `requirements-registry.json`
+  +1,919, `HANDOFF.md` +608 — of which this session's additions are a small fraction), so committing them would
+  sweep unknown work into an unauthorised commit. **The 279-path dirty tree is preserved and unchanged in count.**
+- Review artefact: `Review Zip/mercenta-review.zip` via `scripts/export-review-zip.sh` (project-root convention —
+  no numbered zips, nothing written to `~/Desktop`).
+
+**8. VERIFICATION STATUS** (real output, this session)
+
+- `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**.
+- `npx eslint` on every touched file → **0 errors, 0 warnings**.
+- `npm run build` → **PASS** (`✓ built in 4.58s`).
+- `npm run validate:brain` → **MERCENTA_BRAIN_VALIDATION_PASS (30 assertions, runtime executed, 0 network calls)**,
+  `BRAIN_RUNTIME_STATUS: PASS`, `ASSERTIONS_FAILED: 0`.
+- **Playwright (Chromium, actually executed):** `npx playwright test e2e/mercenta-brain.spec.ts --reporter=line`
+  → **10 passed / 0 failed / 0 skipped (11.4s)** — the FINAL run after the last code change.
+- **Regression (actually executed):** `npx playwright test e2e/app-shell.spec.ts e2e/uiux-foundation.spec.ts
+  e2e/design-system.spec.ts e2e/command-centre.spec.ts e2e/multi-tenant.spec.ts
+  e2e/brand-intelligence-lifecycle.spec.ts e2e/bi-intelligence-preservation.spec.ts e2e/access-gate.spec.ts
+  e2e/record-drawer.spec.ts --reporter=line` → **80 passed / 2 skipped / 0 failed (1.3m)**.
+- **Visual verification:** actual rendered screenshots inspected at 1440 / 1280 / 1024 / 390 plus a selected-entity
+  state and the brand map (`test-screenshots/mercenta-brain/`). **The full 300+ declaration suite was NOT re-run**
+  (recorded as a coverage gap, owner S12).
+
+**9. NEXT EXECUTION SCOPE**
+
+- **S2b Amazon truth dispositions**, starting with the two named contradictions (30-day backorder countdown,
+  "10am Pacific" routing deadline) — one at a time, each with a registry disposition and evidence.
+- **Payoneer-primary payout reconciliation** across the canonical config + dependent specs/docs.
+- Then Wave 3 Parts 2–5 (page composition, brand surfaces, tables/forms/drawers, states).
+
+<!-- /BRAIN-BLOCK -->
+
+
+## 🧭 PREVIOUS POSITION (superseded) — INCREMENT UI/UX WAVE 3 PART 1 COMPLETE: ENTERPRISE SHELL + WORKSPACE HIERARCHY + OPERATIONAL TYPE SCALE (2026-09-20)
+
+Branch `redesign/foundation`, HEAD `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`) — **still the HEAD: no
+commit was created** (see heading 6). Protected baseline `959b4d2` confirmed an ancestor. **ZERO git mutation**
+(no stage/stash/reset/clean/checkout/amend/branch-switch/force-push/rewrite), **no deploy, no credential
+added/read/activated, `.env` never read, no live provider call**. The intentionally dirty working tree was
+preserved and extended, never reset.
+
+**Increment identity:** this session is the **UI/UX REDESIGN — WAVE 3 PART 1** the Founder commissioned
+("transform the platform into a coherent, practical, premium enterprise SaaS product"). It is **implementation,
+not another audit**. It is **PART 1 only** — see heading 3 for the honest remaining scope.
+
+**1. COMPLETED / VERIFIED**
+
+- **Canonical operational type scale — NEW, and it fixes the measured debt at the root.**
+  `tailwind.config.js` → `theme.extend.fontSize` now declares `text-ds-micro` (11px **floor**),
+  `text-ds-label` (12px), `text-ds-body` (13px), `text-ds-title` (15px), `text-ds-page` (20px).
+  The debt was 1,202 arbitrary sub-12px sizes across 113 files plus 644 `text-[11px]`; there was **no named
+  operational size to use instead**, which is why every author invented one. Migration is mechanical and
+  **idempotent**: `scripts/migrate-micro-typography.mjs` → **1,845 replacements across 116 files** (re-run = 0
+  changes, proven). Gate: `scripts/validate-typography-scale.mjs` (**17 assertions**).
+- **The typography gate was PROVEN TO FAIL**, not merely to pass: injecting `text-[10px]` into a probe file
+  produced `TYPOGRAPHY_SCALE_VALIDATION_FAIL … src/__typography_probe.tsx (1)` with exit 1.
+- **A validator blind spot was found and closed:** the first migration run missed
+  `src/components/marketing/PublicFooterTmp1.jsx` (the repo's only `.jsx`) **and so did the validator** — the
+  gate reported PASS while a micro size survived. Both scripts now scan `.ts/.tsx/.jsx/.js/.css`.
+- **Environment switcher no longer overlays product content — REAL DEFECT FIXED.**
+  `EnvironmentRouter.tsx` was a `fixed bottom-0` floating pill that sat **on top of the last rows of every
+  workspace**; the app compensated with a blanket `pb-16` on `<main>` that reserved space *under* content the
+  pill then covered anyway. It is now an **inline** control in the navigation footer, labelled
+  **"Environment · Demo"** (`role="group"`, `aria-pressed` per option, compact variant for the rail). The
+  `pb-16` hack was removed because its cause was removed. The one-click switch is **retained deliberately**
+  (§22) — it is how a reviewer moves between the four role shells.
+
+- **App bar redesigned.** The findability affordance is now a **real command bar occupying the centre of the app
+  bar** (enterprise pattern) instead of a small pill at the right edge — same ⌘K binding, same palette, same
+  RBAC-scoped groups, `app-search-trigger` preserved verbatim. The header control that rendered **"Home" while
+  calling `signOut()`** was relabelled to an honest **"Exit to site"** with a sign-out icon (see heading 6 — the
+  first attempt removed it and the browser suite caught the regression).
+- **Navigation rail: real findability.** New **navigation filter** (`data-testid="nav-filter"`) for the 30+
+  destination Super Admin rail, with a real empty state (`nav-filter-empty`). It filters what is *rendered* and
+  derives from the sections the shell already scoped — **RBAC untouched**, so no destination can be revealed by
+  searching for it. While filtering, matches are shown expanded (a collapsed section would hide the result the
+  user just searched for). Section rhythm fixed (`mt-2 first:mt-0`, single `mb-1`, header promoted to
+  `font-semibold tracking-[0.14em]`).
+- **Workspace hierarchy + density — platform-wide via the shared primitive.** `WorkspaceHeader` (composed by
+  every migrated surface): title `sm:text-2xl` (24px) → `text-ds-page` (20px); description `text-sm` (14px) →
+  `text-ds-body` (13px); rhythm tightened. **Sticky-toolbar defect fixed:** the offset was `top-[52px]` but the
+  app bar is `h-14` (56px) and `<main>` is its own scroll container, so content visibly scrolled through the
+  band above the toolbar — now `top-0`. **Metric hierarchy fixed:** values were `text-xl` (20px) — *exactly the
+  page-title size* — so a KPI number competed with the `h1`; now hero 24px / default 18px, both below the 20px
+  title, and the arbitrary `text-[26px] sm:text-[30px]` sizes are gone.
+- **Documentation:** `docs/UIUX_REDESIGN_WAVE3_2026-09-20.md` (full redesign record: measured defects, what was
+  built, contracts preserved, open-source evaluation, the caught regression, honest remaining scope) and
+  `docs/DESIGN_SYSTEM.md` (the scale documented, 11px floor stated).
+- **Evidence:** before/after screenshot pairs — pre-change renders preserved in
+  `test-screenshots/wave3-before/`, regenerated renders in `test-screenshots/dashboard/`.
+
+**2. IN PROGRESS**
+
+- **UI/UX Wave 3 — Parts 2+.** Part 1 delivered the **shared shell, navigation, app bar, demo-environment
+  mechanism, workspace-header primitive, metric primitives and the typography system**. The page-by-page
+  redesign of the individual surfaces has **not** been done — see heading 3.
+
+**3. REMAINING — CURRENT ROADMAP**
+
+Numbered, derived from the actual state (not a template):
+
+1. **Wave 3 Part 2 — `AdminDashboard` (Operations Overview) composition.** The *composition* was NOT
+   restructured in Part 1; only its header, metric hierarchy and the shell around it changed. The
+   "Command centre" block is still one long list of equally-weighted rows.
+2. **Wave 3 Part 3 — the Brand surface redesign** (`BrandDashboard`, `BrandPurchaseOrders`, `ProductCatalog`,
+   `LogisticsHub`, `ComplianceHub`, `BrandSupport`, `BrandSettings`, `BrandReports`, `SalesAnalytics`, …).
+3. **Wave 3 Part 4 — page-level tables / forms / filters / drawers** (`DataTable`, `workspace.tsx` `Queue`,
+   `RecordDrawer`) across the operational surfaces.
+4. **Wave 3 Part 5 — empty / loading / error state redesign** beyond what already existed.
+5. **Remove `src/theme-alpha-shims.css`** (691 lines of legacy shim alongside the token system, finding D-3).
+   Needs a per-screen token migration; deliberately not attempted in Part 1.
+6. **Visual-regression gate** (finding D-4). Playwright `toHaveScreenshot` is available and baseline PNGs are
+   already committed; the missing piece is a baseline-policy decision.
+7. **`AdminShell` chunk is 1,010 kB (263 kB gzip)** — the build warns; real performance work, owned separately.
+8. **Founder decision requested:** `src/components/marketing/PublicFooterTmp1.jsx` is an unreferenced orphan
+   (the repo's only `.jsx`, no imports anywhere, near-duplicate of `PublicFooter.tsx`). It was **migrated, not
+   deleted** — deleting files requires explicit instruction.
+9. Pre-existing: S2b (Amazon dispositions, one at a time, recorded APPLIED with evidence) · S3–S13 items
+   (routing re-model, backorder fail-closed gate, SP-API surface, catalogue fidelity, map engine, Payoneer
+   rework per T-1, full-platform suite, security gate, Miro, T-3 wording, carrier retirement).
+
+**4. DEFERRED / PARKED**
+
+- Multi-provider enrichment waterfall; probability/threshold decision layer; pre-rendering/SSR for the public
+  surface; Rare UI components (not present in the repository; component source only, never novelty).
+- Open-source adoption candidates recorded but **not** adopted in Part 1 (no dependency was added):
+  TanStack Table / AG Grid for data tables (**REFERENCE — the repo's canonical `DataTable` + `Queue` have
+  Playwright contracts; replacing them is a separate larger decision**).
+
+**5. BLOCKED / DEPENDENCIES**
+
+- The eight Amazon-side evidence-blocked items (unchanged, none invented).
+- Every live provider remains unactivated by design; simulation needs no credentials.
+- S7 SP-API transport routes still have no Edge Function.
+- **A verified checkpoint commit requires explicit Founder instruction** — see heading 6.
+
+**6. KNOWN EXCEPTIONS**
+
+- **A REGRESSION WAS CAUSED AND FIXED IN THIS SESSION (recorded, not hidden).** The first attempt at the
+  mislabelled "Home" header control **removed** it. The browser suite caught the consequence:
+  `record-drawer.spec.ts:219` timed out on `getByTitle('Back to homepage')`. **Four** specs drive the
+  exit-to-public-site path through that title (`access-gate:175`, `homepage-editor:77`,
+  `onboarding-workflow:68`, `record-drawer:219`) and it is the only in-shell route back to the public site.
+  **Process failure:** the pre-change grep searched `text=Home` / `'Home'` / `name: 'Home'` but not
+  `getByTitle('Back to homepage')`. **Fix:** the control is restored with an honest visible label
+  ("Exit to site") + `LogOut` icon, `title` retained (accurate + the specs' contract), no `aria-label` so the
+  accessible name matches the visible text (WCAG 2.5.3). Re-run of the four specs: **25 passed / 2 skipped /
+  0 failed**. Typecheck and build could not catch this; only the browser suite did.
+- **PAYOUT-RAIL CONTRADICTION (retained, unresolved):** Founder decision **T-1** (Payoneer primary) is
+  **DECIDED BUT NOT APPLIED**; `src/config/payouts.ts` still declares `DEFAULT_PAYOUT_RAIL = 'wise'`. Owned by
+  **S11**. Untouched this session.
+- **No commit was created** — the working tree carries earlier uncommitted Founder work (98 tracked files
+  changed / 4,677 insertions / 168 deletions at session start) which must not be swept into an unauthorised
+  commit. The review ZIP is the checkpoint artefact.
+- **Registry verifier:** entries **389 → 404** (15 added, **0 historical rows deleted**; re-run is idempotent at
+  404 → 404). Verified files/tests **232 → 237**; issues **175 → 176**; needsManual **54 → 64**; reachability
+  flags **17 (unchanged)**. The increase is the verifier's KNOWN limitation with `.md` pointers: the Wave 3 rows
+  cite `PROJECT_STATUS.md`, `docs/UIUX_REDESIGN_WAVE3_2026-09-20.md` and
+  `docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md`, which it cannot resolve. No functional entry was affected.
+
+**7. CURRENT CHECKPOINT**
+
+- Wave 3 Part 1 implemented and verified. Five project-state sources reconciled:
+  `requirements-registry.json` · `PROJECT_STATUS.md` (this block) · `HANDOFF.md` ·
+  `docs/UIUX_REDESIGN_WAVE3_2026-09-20.md` · the session report.
+- Review artefact: `Review Zip/mercenta-review.zip` via `scripts/export-review-zip.sh`.
+
+**8. VERIFICATION STATUS**
+
+- `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**.
+- `npx eslint src/` → **clean**.
+- `npm run build` → **PASS** (`✓ built in 5.11s`).
+- `node scripts/validate-typography-scale.mjs` → **TYPOGRAPHY_SCALE_VALIDATION_PASS (17 assertions)**;
+  **negative test proven** (injecting `text-[10px]` → FAIL, exit 1).
+- `node scripts/validate-uiux-redesign.mjs` → **369 PASS / 0 FAIL**.
+- `node scripts/validate-design-tokens.mjs` → **DESIGN_TOKEN_VALIDATION_PASS**.
+- `node scripts/validate-theme-foundation.mjs` → **50 PASS / 0 FAIL**.
+- `npm run validate:wording` → **WORDING_LINT_PASS — 273 src files, 0 violations**.
+- `node scripts/integrity-audit.mjs` → **PASSED — 100%**.
+- **Playwright (Chromium):** run 1 `app-shell + uiux-redesign + design-system + uiux-foundation` →
+  **56 passed / 0 failed** (incl. every responsive no-overflow check at 1440/1280/1024/768/390/375, which is
+  what proves the 1,846-place +1px migration caused no overflow). Run 2 `dashboard + table-responsive +
+  record-drawer` → **1 failed / 26 passed** (the regression above). Run 3 the four affected specs →
+  **25 passed / 2 skipped / 0 failed**. Run 4 broad regression `dashboard + admin-operational-surfaces +
+  brand-operational-surfaces + work-layer + notifications + status-semantics + command-centre + crm + billing +
+  multi-tenant + tours + table-migrations` → **73 passed / 0 failed**. **The full 358-declaration suite was
+  NOT re-run** (recorded as a coverage gap, owner S12).
+- **Visual regression:** before/after screenshot pairs produced (`test-screenshots/wave3-before/` vs
+  `test-screenshots/dashboard/`); the render is byte-different and structurally obvious. **No automated
+  pixel-diff gate exists yet** (roadmap item 6).
+
+**9. NEXT EXECUTION SCOPE**
+
+- **Wave 3 Part 2** — restructure the `AdminDashboard` (Operations Overview) *composition* so the "Command
+  centre" is a scannable, prioritised attention surface rather than a long list of equally-weighted rows,
+  preserving every existing domain service, tenant scope and audit requirement.
+- Then Part 3 (Brand surfaces), Part 4 (tables/forms/filters/drawers), Part 5 (states), then the
+  `theme-alpha-shims.css` removal and the visual-regression gate.
+- Founder decisions requested: (a) explicit instruction before any commit; (b) confirm deletion of the
+  orphaned `PublicFooterTmp1.jsx`; (c) baseline policy for the visual-regression gate.
+
+<!-- /WAVE3-BLOCK -->
+
+---
+
+## 🧭 PREVIOUS POSITION (superseded) — INCREMENT FOUNDATION-GAP COMPLETE: AUTOMATION KILL SWITCH + SEO ROUTE-METADATA FOUNDATION + BOUNDED-AI GATE (2026-09-20)
+
+Branch `redesign/foundation`, HEAD `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`) — **still the HEAD: no
+commit was created** (see heading 6). Protected baseline `959b4d2` confirmed an ancestor. **ZERO git mutation**
+(no stage/stash/reset/clean/checkout/amend/branch-switch/force-push/rewrite), **no deploy, no credential
+added/read/activated, `.env` never read, no live provider call**. The intentionally dirty working tree was
+preserved and extended, never reset.
+
+**Increment identity:** this session is the **unified platform gap-analysis + foundation workstream** (six
+investigations A–F plus G/H reconciliation). It is NOT S2b and does NOT apply any Amazon disposition.
+
+**1. COMPLETED / VERIFIED**
+
+- **Repository-grounded discovery report (the mandated "report first"):** `docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md`
+  (~440 lines) — the existing prospective-brand/outbound system identification (Brand Intelligence + the Brand
+  Acquisition / Outreach Engine + Marketing Hub/ICP + Explore UK Market Fit), the full agent/automation
+  inventory, the evaluation/regression/production-trace status, the visual audit with MEASURED taste findings,
+  the SEO re-verification, the Nimble status, the Brand Support + LOA verifications, and the complete
+  classification summary in the mandated vocabulary.
+- **Global automation halt (the kill switch) — NEW.** `src/lib/automation/registry.ts`: `automationHalt()` /
+  `isAutomationHalted()` / `setAutomationHalt(halted, actor, reason)`, a new `skipped_halted` run status, and a
+  halt check placed BEFORE any canonical read or fingerprint, so a halted run executes no implementation, raises
+  nothing, emits no event, creates no approval and writes no audit row beyond the halt decision. Reason required;
+  audited both ways; cleared by the deterministic reset. Surfaced as an **Emergency halt** panel in the
+  Super-Admin Control Centre (`data-testid="automation-halt-panel"`, `data-halted`).
+- **SEO route-metadata foundation — NEW.** `src/lib/seo/publicRoutes.ts` (the route SSOT: path ↔ view, title,
+  description, indexability, sitemap priority), `src/lib/seo/routeMetadata.ts` (pure builder + the ONE DOM
+  applier), `src/components/shared/RouteMetadata.tsx` (mounted once by `App.tsx`), `Home.tsx` (SSOT path
+  resolution + ONE `navigate()` that pushes the canonical URL), `index.html` (bootstrap canonical now marked
+  `id="route-canonical"`), `public/robots.txt` + `public/sitemap.xml` (reconciled and pinned).
+  **Confirmed defect fixed:** every route used to be served with the homepage title and canonicalised to `/`,
+  and `/explore-uk-market-fit` was missing from the sitemap. Now a public route carries its OWN canonical, and a
+  private path, an unknown path and an authenticated environment are all `noindex, nofollow` with NO canonical.
+- **Bounded intelligent-decision safety gate — NEW:** `scripts/validate-bounded-ai.mjs` (31 assertions) PROVES
+  free-only model selection, exactly ONE authorised model-call egress, no client-side credential, NO AI import in
+  any forbidden domain (compliance, finance, payouts, verification, retail-channel client, integration registry,
+  routing), fail-closed provider modes and zero network.
+- **Three stale validator contracts REPOINTED (never weakened)**, each with an inline `§… — REPOINTED` comment
+  naming the old contract: 8 → 9 declared automations, 9 → 10 Control Centre views, the attention-source
+  allow-list now includes `commercial_readiness` (`scripts/validate-founder-operating-system.mjs`), and the
+  integrity audit now asserts the canonical `navigate(...)` CTA call instead of the retired local view setter
+  (`scripts/integrity-audit.mjs`). **Integrity audit: 62 PASSED / 0 FAILED** (it was FAILING before the repoint).
+- **Master Matrix reconciled:** `scripts/reconcile-unified-gap-foundation-registry.cjs` → **374 → 389 entries**
+  (15 added, 0 historical rows deleted, idempotent on re-run: 389 → 389 with 15 replaced).
+
+**2. IN PROGRESS**
+
+- Nothing. The increment's scope is closed and verified (headings 7–8).
+
+**3. REMAINING — CURRENT ROADMAP**
+
+1. **S2b** — apply the 52 Amazon dispositions in `docs/AMAZON_RECONCILIATION_STATUS.md` (still **APPLIED 0 OF 52**).
+2. **Whole-platform object resolution** (pre-existing roadmap S2a).
+3. **Acquisition conversion measurement + segment reporting** (discovered this increment — reuses
+   `classifyInboundReply`; adds no new state).
+4. **Revenue floor + response SLA** — **Founder decision required** before anything is built.
+5. **Production-trace → regression pipeline** (architecture now / activation later).
+6. **Public content model for commercial-intent pages** (architecture now / activation later; mass generation forbidden).
+7. **Micro-typography system pass + `theme-alpha-shims.css` removal + a visual-regression gate** — the measured
+   taste debt (949 `text-[10px]` + 253 `text-[8px]`/`text-[9px]` occurrences across 134 component files).
+8. **Representation-authority record (LOA)** — Founder-agreed fields required.
+9. Pre-existing: S3–S13 items (routing re-model, backorder fail-closed gate, SP-API surface, catalogue fidelity,
+   map engine, Payoneer rework per T-1, full-platform suite, security gate, Miro, T-3 wording, carrier retirement).
+
+
+**4. DEFERRED / PARKED**
+
+- Multi-provider enrichment waterfall; probability/threshold decision layer; pre-rendering/SSR for the public
+  surface; Rare UI components (not present in the repository; component source only, never novelty).
+
+**5. BLOCKED / DEPENDENCIES**
+
+- The eight Amazon-side evidence-blocked items (unchanged, none invented).
+- Every live provider remains unactivated by design; simulation needs no credentials.
+- S7 SP-API transport routes still have no Edge Function.
+
+**6. KNOWN EXCEPTIONS**
+
+- **PAYOUT-RAIL CONTRADICTION (retained, unresolved):** Founder decision **T-1** (Payoneer primary) is
+  **DECIDED BUT NOT APPLIED**; `src/config/payouts.ts` still declares `DEFAULT_PAYOUT_RAIL = 'wise'`. Owned by
+  **S11**. This increment deliberately did **not** touch payout arithmetic.
+- **Registry verifier:** issues **174 → 175** (the +1 is the documentation-only `.md` evidence row
+  `foundation-gap-analysis-report`, the verifier's known inability to resolve `.md` pointers); needsManual 54
+  (unchanged); files/tests verified **221 → 232**; reachability flags **17 (unchanged)**.
+- **No commit was created** — the working tree carries the earlier uncommitted Founder work, which must not be
+  swept into an unauthorised commit. The review ZIP is the checkpoint artefact (heading 7).
+
+**7. CURRENT CHECKPOINT**
+
+- All five project-state sources reconciled: `requirements-registry.json` (389 entries) · `PROJECT_STATUS.md`
+  (this block) · `HANDOFF.md` · `docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md` · the session report.
+- Review artefact: `Review Zip/mercenta-review.zip` via `scripts/export-review-zip.sh`.
+
+**8. VERIFICATION STATUS**
+
+- `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**.
+- `npm run build` → **PASS** (`✓ built in 4.27s`).
+- `npm run lint` (eslint) → clean on every touched file; `npm run validate:wording` → **273 files / 0 violations**.
+- `node scripts/integrity-audit.mjs` → **62 PASSED / 0 FAILED**.
+- `node scripts/validate-seo-foundation.mjs` → **SEO_FOUNDATION_VALIDATION_PASS (33 assertions, 0 network calls)**.
+- `node scripts/validate-bounded-ai.mjs` → **BOUNDED_AI_VALIDATION_PASS (0 network calls)**.
+- `node scripts/validate-founder-operating-system.mjs` → **FOUNDER_OPERATING_SYSTEM_VALIDATION_PASS (0 network calls)**.
+- `node scripts/validate-provider-mode-safety.mjs` → **PASS**.
+- Playwright (Chromium): `e2e/seo-foundation.spec.ts` **6/6** · `e2e/founder-operating-system.spec.ts` **6/6**
+  (incl. the new halt test) · `e2e/uiux-redesign.spec.ts` **13/13** · broader regression set recorded in the
+  session report. **The full 358-declaration suite was NOT re-run** (recorded as a coverage gap, owner S12).
+
+**9. NEXT EXECUTION SCOPE**
+
+- S2b (Amazon dispositions, one at a time, recorded as APPLIED with evidence), OR the micro-typography system
+  pass if the Founder approves the visual workstream. Do not start either without the Founder's direction.
+
+---
+
+## 🧭 PREVIOUS POSITION — INCREMENT S2a COMPLETE: CANONICAL BRAND CASE WORKFLOW + KB SUFFICIENCY (2026-09-20)
+
+**3. REMAINING — CURRENT ROADMAP**
+
+1. **S2b** — apply the 52 Amazon dispositions in `docs/AMAZON_RECONCILIATION_STATUS.md` (still **APPLIED 0 OF 52**).
+2. **Whole-platform object resolution** (pre-existing roadmap S2a).
+3. **Acquisition conversion measurement + segment reporting** (discovered this increment — reuses
+   `classifyInboundReply`; adds no new state).
+4. **Revenue floor + response SLA** — **Founder decision required** before anything is built.
+5. **Production-trace → regression pipeline** (architecture now / activation later).
+6. **Public content model for commercial-intent pages** (architecture now / activation later; mass generation forbidden).
+7. **Micro-typography system pass + `theme-alpha-shims.css` removal + a visual-regression gate** — the measured
+   taste debt (949 `text-[10px]` + 253 `text-[8px]`/`text-[9px]` occurrences across 134 component files).
+8. **Representation-authority record (LOA)** — Founder-agreed fields required.
+9. Pre-existing: S3–S13 items (routing re-model, backorder fail-closed gate, SP-API surface, catalogue fidelity,
+   map engine, Payoneer rework per T-1, full-platform suite, security gate, Miro, T-3 wording, carrier retirement).
+
+
+Branch `redesign/foundation`, HEAD `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`) — **still the HEAD: no
+commit was created** (see heading 6). Protected baseline `959b4d2` confirmed an ancestor. **ZERO git mutation**
+(no stage/stash/reset/clean/checkout/amend/branch-switch/force-push/rewrite), **no deploy, no credential
+added/read/activated, `.env` never read, no live provider call** (every e2e spec in this increment asserts
+`externalCalls === []`). The intentionally dirty working tree was preserved and extended, never reset.
+
+**Increment numbering (explicit, to avoid ambiguity):** this session's increment is labelled **S2a — canonical
+brand case workflow**, and it **closes the pre-existing roadmap's item 10 (S9 — case management + KB sufficiency
+evaluator + Founder case queue)**. The pre-existing roadmap's own **S2a (whole-platform object resolution)** is
+**NOT** part of this increment and remains **not started**.
+
+**1. COMPLETED / VERIFIED**
+
+- **The Level-1 canonical document that was MISSING is now created:** `docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md`
+  (729 lines, 34 sections, **25 domains, 240 stable ids**) — repository-derived, covering the whole platform:
+  status vocabulary, the 26 mandated dimensions, per-domain feature tables + contract blocks, a retained
+  contradiction register, the evidence-blocked register and a **21-row numbered gap register with an owning
+  increment for every row**. Verified by `grep -c '^| \`D'` = 240 rows and a heading sweep (34 `##` sections).
+- **Brand case surface (NEW, was entirely absent):** `src/components/brand/BrandSupport.tsx` + brand nav view
+  `cases` (19th brand view). A brand can open a case, link one of its OWN records, read the Knowledge Base
+  guidance for the category, see the same sufficiency verdict the reviewer sees, and follow its own cases.
+- **KB sufficiency evaluator (NEW):** `src/lib/helpdesk/kbSufficiency.ts` — deterministic, fail-closed verdict
+  `internally_resolvable` / `requires_founder_review` / `not_applicable`; pure (no clock, randomness, network or
+  mutation). Verified by `scripts/validate-kb-sufficiency.mjs` — **37 assertions / 0 failures / 0 network calls,
+  exit 0**.
+- **Tenant-safe relevant-data lookup (NEW):** the case's related object is resolved inside the case's OWN tenant;
+  a reference belonging to ANOTHER tenant is refused, reported as cross-tenant and leaks no other-tenant
+  identifier (asserted).
+- **Case-completion controls wired (NEW):** the Mercenta review queue now shows the verdict + matched Knowledge
+  Base articles + verified/unverified context per case, and the operator can record the retail channel's response
+  **as received (human-entered — never generated)** and resolve the case with a note the brand can read.
+- **One confirmed defect FIXED at the primitive:** the shared `Card` component did not forward
+  `data-state`/`data-testid`, so every such attribute written on a Card was silently dropped — including the
+  pre-existing `data-state="helpdesk-cases-panel"`. Now declared explicitly and forwarded (the convention
+  `Button` already documents).
+- **E2E coverage matrix reconciled** against the real repository: stale S0 counts corrected (68 specs / 354
+  declarations → **66 specs / 358 declarations / 4 skipped**), brand views 18 → 19, **gap row 13 CLOSED**, two
+  new verified chains added, and the object-resolution gap re-owned to the roadmap's S2a.
+- **Master Matrix reconciled:** `scripts/reconcile-s2a-case-workflow-registry.cjs` → **359 → 374 entries**
+  (added 15 = 5 `built_and_tested` + 2 `built` + 8 `discovered`; re-run added 0 / replaced 15 / **historical rows
+  deleted 0**; idempotent, duplicate-id and unknown-status guards both active).
+
+**2. IN PROGRESS**
+
+- **None.** This increment is closed and verified. The next increment has **not** been started.
+
+**3. REMAINING — CURRENT ROADMAP** (numbered; derived from the Master Matrix §32 gap register + the roadmap)
+
+1. **S2a (roadmap)** — whole-platform **object resolution** (Amazon event/data → Amazon object → Mercenta object →
+   brand → tenant) with an unresolved-ownership Founder exception queue and duplicate/replay protection. **No
+   resolver exists** (grep: `resolveObject`/`resolveAmazonObject`/`ownershipResolution`/`exceptionQueue` = 0 hits;
+   no `externalObjectId`/`amazonObjectId` field). **NOT STARTED — deliberately not half-built.**
+2. **S2b** — apply the 52 Amazon dispositions (9 RELABEL, AV-042 wording-safeguard extension, AV-044
+   simulation-claim repair), recording each as applied in `docs/AMAZON_RECONCILIATION_STATUS.md`.
+3. **S2c** — Super Admin **Integration & Credential Control**: real entry, replacement, secure persistence, masked
+   readback, per-provider fields, validation, enable/disable (T-7). Credentials are an in-memory `Map` today.
+4. **S3** — freight responsibility + provider eligibility + **Logistics Hub foundation**: remove the hardcoded
+   `international → DHL` / `UK domestic → Palletline` rule (AV-017/AV-039/AV-045/AV-047).
+5. **S4** — routing orchestration + **remove** the Brand-facing Routing Request mechanic (AV-013/T-6) and the
+   mandatory `mercenta_hub` stage (AV-027/T-4); drop the unsupported 10am-Pacific claim.
+6. **S5** — full PO acknowledgement / **`isBackOrderAllowed` fail-closed** / `on_hold` / revisions / status
+   mapping (AV-006…AV-010b, AV-015, AV-023, AV-024, AV-043). `isBackOrderAllowed` does not exist anywhere today.
+7. **S6** — brand **Print / Documents** workspace (labels, customs, invoices, PO/logistics documents).
+8. **S7** — Amazon **SP-API Vendor surface** (`submitAcknowledgement`, `getPurchaseOrdersStatus`, `submitInvoices`,
+   `SubmitShipments`, `GetShipmentDetails`, `SubmitShipmentConfirmations`, `getTransaction`) **plus the three
+   missing Edge Functions** the real client already calls.
+9. **S8** — catalogue / Amazon catalogue fidelity + image & data fidelity — **EVIDENCE-BLOCKED** on AV-035/AV-033/AV-034.
+10. **S10** — **Logistics Map Engine** (live-verified / simulated / ambient; clickable markers). No provider
+    licensed or activated — no availability may be claimed.
+11. **S11** — **Payoneer-primary payout rework** across all five canonical sources (T-1). **DECIDED, NOT APPLIED**
+    — `src/config/payouts.ts` still declares `DEFAULT_PAYOUT_RAIL = 'wise'` (see heading 6).
+12. **S12** — whole-platform cross-module E2E completion, incl. the discovered pagination + error-boundary gaps and
+    the un-rerun full suite (the full 358-declaration suite was **NOT** run in this increment).
+13. **S13** — security / go-live gate (headers, CORS, rate limiting, server-side validation, secret-history scan,
+    RLS against a live project) **and Miro** (no provider/callback architecture exists — documented, not activated).
+14. **T-3 wording reconciliation** — replace "Mercenta operator" with Founder / Super Admin (9 source locations)
+    **without** deleting Staff/RBAC.
+15. **Logistics Hub increment** — carrier architecture dependency analysis + safe retirement (T-2); carrier views
+    stay INTENTIONALLY EXCLUDED from new E2E work.
+
+**4. DEFERRED / PARKED**
+
+- Phases 3–13 of the long-form roadmap remain as previously recorded in the Master Matrix (unchanged).
+- Super Admin `research` / `manufacturer` / `financing` tabs, `partnerships`, `monitoring`, `whatsapp` and brand
+  `documents`/`reports` remain render-or-partial coverage (Master Matrix §32 rows 12–14, owner S12).
+
+**5. BLOCKED / DEPENDENCIES**
+
+- **S8 catalogue fidelity** — EVIDENCE-BLOCKED on the Amazon-side items in `docs/AMAZON_RECONCILIATION_STATUS.md` §5.
+- **Deduction/chargeback taxonomy** (AV-019/AV-019b) — EVIDENCE-BLOCKED.
+- **S7 SP-API** — the real client calls three transport routes that have **no Edge Function** yet.
+- **S13 / Miro** — no Miro provider, OAuth endpoint or callback architecture exists in the repository; a callback
+  URL was therefore **not guessed**.
+- **Credentials** — every live provider remains unactivated by design; simulation needs no credentials at all.
+
+**6. KNOWN EXCEPTIONS**
+
+- **PAYOUT-RAIL CONTRADICTION (retained, unresolved):** Founder decision **T-1** states Payoneer is the canonical
+  PRIMARY/default account and Wise SECONDARY, but `src/config/payouts.ts` (`DEFAULT_PAYOUT_RAIL = 'wise'`) and
+  `.clinerules/mercenta-business-model.md` still declare the **inverse**. **T-1 is DECIDED BUT NOT APPLIED** and is
+  owned by **S11**. This increment deliberately did **not** change payout arithmetic. Recorded in the Master Matrix
+  §30 (7.1) and as registry row `discovered-payout-rail-default-contradiction`. **A Founder confirmation is
+  requested that S11 should apply T-1 as written.**
+- **Reachability flag:** `scripts/verify-registry.mjs` reports one additional reachability flag attributable to this
+  increment (16 → 17) because the `discovered-routing-request-removal` row names
+  `src/components/shared/RoutingRequest.tsx`, which the verifier's filename→navId heuristic cannot map. The
+  component **is** rendered (from `BrandPurchaseOrders`), so this is a verifier limitation, not a real defect.
+- **Registry verifier totals:** issues **174 → 174 (delta 0)**; needsManual 42 → 48 (documentation-only rows the
+  verifier cannot auto-verify); files/tests verified 209 → 221.
+- **No commit was created.** `.clinerules/protection-rules.md` requires an explicit instruction to commit, and the
+  working tree also carries the intentionally-dirty state from the earlier uncommitted sessions, which must not be
+  swept into an unauthorised commit. The review ZIP is the checkpoint artefact (see heading 7).
+
+**7. CURRENT CHECKPOINT**
+
+- HEAD `19be002` (unchanged). Working tree extended by this increment only: **6 new files**
+  (`src/lib/helpdesk/kbSufficiency.ts`, `src/components/brand/BrandSupport.tsx`,
+  `scripts/validate-kb-sufficiency.mjs`, `scripts/reconcile-s2a-case-workflow-registry.cjs`,
+  `e2e/brand-case-workflow.spec.ts`, `docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md`) and **7 modified files**
+  (`src/components/layout/BrandShell.tsx`, `src/components/admin/HelpdeskDashboard.tsx`, `src/components/ui.tsx`,
+  `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md`, `requirements-registry.json`, `PROJECT_STATUS.md`, `HANDOFF.md`).
+- Review ZIP exported by the repository's own script to `<project root>/Review Zip/mercenta-review.zip`:
+  **51,085,838 bytes (49 MB) · 955 entries · SHA-256 `47ed39911d5c7edde8c41f061ede27dd19c84cefb532359121541d02e676362b` ·
+  credential guard PASS** (0 `.env`/`.pem`/`.key`/`.p12`/`.pfx` entries). That SHA identifies the archive as exported
+  at 17:33 on 2026-09-20; because this document was updated after that export, the archive was **regenerated as the
+  session's final step**, so its SHA-256 (reported in the session report) differs by the hash of this file's own
+  bytes. Size/entry count are unchanged apart from this document.
+
+**8. VERIFICATION STATUS** (real output, this session)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | **exit 0** (0 errors) |
+| `npm run lint` (eslint incl. `react-hooks` rules-of-hooks + exhaustive-deps as errors) | **exit 0** — one real `exhaustive-deps` error was found and FIXED (not suppressed) |
+| `npm run build` | **PASS — built in 4.47s** |
+| `npm run validate:wording` | **PASS — 270 src files scanned, 0 outward-facing violations** |
+| `scripts/validate-provider-mode-safety.mjs` | **PROVIDER_MODE_SAFETY_VALIDATION_PASS** |
+| `scripts/validate-kb-sufficiency.mjs` (new) | **37/37 assertions, 0 failures, 0 network calls, exit 0** |
+| `e2e/brand-case-workflow.spec.ts` (new) | **3 passed / 0 failed** (real Chromium) |
+| Targeted regression — 6 suites (`brand-case-workflow`, `app-shell`, `dashboard`, `notifications`, `admin-operational-surfaces`, `brand-operational-surfaces`) | **50 passed / 0 failed** |
+| `scripts/reconcile-s2a-case-workflow-registry.cjs` | **359 → 374**, re-run **374 → 374** (idempotent), historical rows deleted **0** |
+| `scripts/verify-registry.mjs` | 374 entries · verified 221 · needsManual 48 · **issues 174 (delta 0 vs pre-S2a)** · reachability 17 (delta +1, verifier heuristic — see heading 6) |
+| **Full 358-declaration Playwright suite** | **NOT RUN** — explicitly recorded, not claimed |
+
+**9. NEXT EXECUTION SCOPE**
+
+- **Awaiting the Founder's choice.** The two candidate next increments are **S2a (object resolution)** — the largest
+  remaining architectural gap, fully specified in the Master Matrix §25 — or **S2b (apply the 52 Amazon
+  dispositions)**, which is lower-risk and needs no new architecture.
+- **One Founder decision is requested before S11 executes:** confirm that T-1 (Payoneer primary / Wise secondary)
+  should be applied as written, which will change the canonical payout default in `src/config/payouts.ts` and
+  `.clinerules/mercenta-business-model.md` together.
+
+---
+
+
+## 🧭 CURRENT PLATFORM POSITION — INCREMENT S0 + S1-a COMPLETE (2026-09-20)
+
+Branch `redesign/foundation`, HEAD `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`) — **still the HEAD: no commit
+was created** (`.clinerules/protection-rules.md` requires an explicit instruction to commit, and none was given).
+Protected baseline `959b4d2` confirmed an ancestor. **ZERO git mutation** (no stage/stash/reset/clean/checkout/amend/
+branch-switch/force-push/rewrite), **no deploy, no credential added/read/activated, `.env` never read, no live
+provider call.** The intentionally dirty working tree was preserved and extended. Two Founder-authorised increments
+were executed: **S0** (documentation truth) and **S1-a** (one confirmed defect + the consolidated provider-mode
+safety regression). No architecture was changed, nothing was deleted or renamed, no styling was touched.
+
+**1. COMPLETED / VERIFIED**
+
+- **S0 — whole-platform E2E coverage matrix** (`docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md`, 360 lines,
+  repository-derived): 4 shells · 5 environments · 4 canonical roles · **30 admin views · 18 brand views ·
+  3 carrier views · 19 Super Admin sub-tabs**, each with its real evidence spec and a coverage state
+  (VERIFIED / PARTIALLY VERIFIED / NOT VERIFIED / NOT AUTOMATED / BLOCKED / INTENTIONALLY EXCLUDED); interactive
+  control classes (tables, drawers, dialogs, tabs, filters, search, sorting, pagination, forms, charts,
+  notifications, palette, themes, accessibility, responsive, empty states); 20 domain operations with
+  positive/negative/recovery columns; 9 cross-module chains; permission/tenant/audit/persistence, integration and
+  simulation sections; and an 18-row honest gap register mapped to the owning increment.
+- **S0 — Amazon reconciliation status** (`docs/AMAZON_RECONCILIATION_STATUS.md`): all **52** findings
+  (AV-001…AV-048 incl. four lettered sub-items) now carry an explicit disposition — KEEP 16 · RELABEL 9 ·
+  BUILD 17 · REMOVE/re-model 3 · EVIDENCE-BLOCKED 7 = **52** — with the owning increment and an honest
+  **"APPLIED: 0 OF 52"** status. Eight outstanding evidence items listed. No inference promoted to fact.
+- **S0 — Founder decisions recorded as authoritative** (T-1…T-7, below).
+- **S1-a — MercentaCharts invalid-SVG-unit defect FIXED.** `src/components/shared/charts/MercentaCharts.tsx`:
+  the helper returned CSS lengths (`12.5px`) that were interpolated into SVG **geometry** (`<path d>` ×1,
+  `<polyline points>` ×2) where the SVG grammar permits no units, so the browser dropped the geometry and logged a
+  console error on every render. It is now a unit-less numeric formatter (`svgNum`); the CSS length
+  (`data-chart-lines`) keeps its own unit. Rounding unchanged ⇒ visually identical charts.
+- **S1-a — provider-mode safety consolidated** (`scripts/validate-provider-mode-safety.mjs`, **52 assertions /
+  0 failures / exit 0**): predicate (only a positively-resolved `simulation` is safe, incl. a missing mode),
+  resolution (`not_registered`), derivation (sandbox never live; `disabled` always wins; error vs degraded),
+  registry invariants (no provider defaults to `live`; nothing claims a live connection at boot), and
+  **behavioural refusal through the real scenario engine** for all 8 unsafe modes **and** for a missing mode
+  lookup (the gate defaults to `unknown`).
+- **Master Matrix reconciled** by `scripts/reconcile-master-build-reconciliation-registry.cjs`:
+  **349 → 359 entries** (added 10 = 2 `built_and_tested` + 3 `built` + 5 `discovered`; replaced 10 on re-run;
+  **historical rows deleted 0**; idempotent). Discovered work recorded, not dropped.
+
+**2. IN PROGRESS**
+
+- **None.** S0 + S1-a are closed and verified; the next increment has **not** been started. Awaiting approval
+  (see heading 9).
+
+**3. REMAINING — CURRENT ROADMAP** (numbered; derived from the Master Matrix + the brief's sequence §24)
+
+1. **S2a** — Amazon → Mercenta → Brand **object resolution** (ASIN/SKU/PO/line/transaction/shipment/invoice/deduction/case/notification/document/product) with unresolved ownership failing into a **Founder exception queue**; duplicate/replay protection. *(No resolver module exists today.)*
+2. **S2b** — apply the **52 Amazon dispositions**: the 9 RELABEL items, AV-042 wording-safeguard extension, AV-044 simulation-claim repair; record each as applied in `docs/AMAZON_RECONCILIATION_STATUS.md`.
+3. **S2c** — Super Admin **Integration & Credential Control**: real entry, replacement, secure persistence, masked readback, per-provider fields, setup guidance, validation, enable/disable (decision T-7).
+4. **S3** — **Freight responsibility + provider eligibility + Logistics Hub foundation** (remove the hardcoded international→DHL / UK→Palletline rule; Amazon Collect lanes must not inherit Mercenta shipping margin; AV-017/AV-039/AV-045/AV-047).
+5. **S4** — **Routing orchestration** + remove the Brand-facing Routing Request mechanic (AV-013, decision T-6) and the mandatory `mercenta_hub` stage (AV-027, decision T-4).
+6. **S5** — full **PO acknowledgement / `isBackOrderAllowed` fail-closed / revisions / status mapping / PO vocabulary** (AV-006…AV-010b, AV-015, AV-023, AV-024, AV-043).
+7. **S6** — Brand **Print / Documents** workspace (labels, customs, invoices, PO and logistics documents; tenant-safe, auditable).
+8. **S7** — Amazon **SP-API Vendor surface** (submitAcknowledgement, getPurchaseOrdersStatus, submitInvoices, SubmitShipments, GetShipmentDetails, SubmitShipmentConfirmations, getTransaction) **plus the three missing Edge Functions** the real client already calls.
+9. **S8** — **Catalogue / Amazon catalogue fidelity + image & data fidelity** — **evidence-blocked** on AV-035/AV-033/AV-034.
+10. **S9** — **Case management + KB sufficiency evaluator + Founder case queue**.
+11. **S10** — **Logistics Map Engine** (live-verified / simulated / ambient, illustrated vehicle markers).
+12. **S11** — **Payoneer-primary payout rework** across all five canonical sources (decision T-1).
+13. **S12** — whole-platform **cross-module E2E** completion, incl. the discovered pagination + error-boundary coverage gaps.
+14. **S13** — **security / go-live gate** (headers, CORS, rate limiting, server-side validation, secret-history scan, RLS verification against a live project).
+15. **T-3 wording reconciliation** — replace "Mercenta operator" with Founder / Super Admin (9 source locations) **without** deleting Staff/RBAC.
+16. **Logistics Hub increment** — carrier architecture dependency analysis + safe retirement (decision T-2), with the carrier views currently recorded as INTENTIONALLY EXCLUDED from new E2E work.
+
+**4. DEFERRED / PARKED**
+
+- Phase 3 (supply route / logistics intelligence) and Phases 4–13 of the long-form roadmap remain as previously recorded in the Master Matrix (unchanged by this increment).
+- AV-020 / AV-046 / AV-048 stay evidence-blocked rather than deferred: they need Vendor Central or Amazon-side evidence, not effort.
+
+**5. BLOCKED / DEPENDENCIES**
+
+- **Live SP-API path is UNIMPLEMENTED, not merely uncredentialed**: `src/lib/spapi/client.ts` targets
+  `/catalog-items`, `/purchase-orders` and `/shipments/confirm`, and **none of those Edge Functions exists**
+  (the present set is catalog-import, discovery-directory, esign-envelope, instantly-reply-webhook,
+  payouts-transfer, send-email, social-session, xero-token, xero-webhook). Simulation is the only working path.
+  Recorded as `s0-discovered-live-spapi-edge-functions-missing` (owner S7).
+- **Catalogue fidelity** is blocked on the Vendor catalogue route (AV-035 — no public Vendor catalogue/item API
+  was found) and the marketplace ID (AV-034); implementing before evidence would mean inventing Amazon behaviour.
+- **S13 go-live verification** is blocked on a live project/credentials; no live project was contacted.
+- No dependency blocks S2a, S2b, S2c, S4 or S12.
+
+**6. KNOWN EXCEPTIONS**
+
+- `verify-registry.mjs` reports **174** pre-existing findings — **identical before and after this increment**
+  (measured: 174 before the registry update, 174 after; verified entries rose 202 → 209; reachability flags
+  unchanged at 16). None of the 174 is attributable to this increment.
+- `verify-registry.mjs` cannot resolve a `.md` evidence pointer, so two new documentation rows print
+  "Cannot verify evidence". This is a **tooling limitation, not a finding**, and it does not increase the issue
+  count. Recorded rather than worked around by distorting the evidence.
+- The **full 371-test Playwright suite was NOT re-run** this increment (it was last executed at the Phase 2
+  checkpoint). The targeted regression listed in heading 8 was run instead, because S1-a touches one chart module
+  and adds one script.
+- Regenerating Playwright screenshots modifies tracked `test-screenshots/**` PNGs; that is the established
+  convention in this repository and is not a source change.
+- Supabase remains unconfigured, so persistence is honestly reported as memory-only.
+
+**7. CURRENT CHECKPOINT**
+
+Increment **S0 + S1-a complete and verified**. The platform's documentation now tells the truth about its own
+coverage and about the 52 Amazon findings, and the two confirmed defects named in the brief are closed (the
+invalid-SVG-unit defect fixed; the provider-safety contract consolidated into one regression validator). The
+Master Matrix, `PROJECT_STATUS.md`, `HANDOFF.md`, `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md`,
+`docs/AMAZON_RECONCILIATION_STATUS.md` and the session report describe this same state.
+
+**8. VERIFICATION STATUS** (all produced in this session)
+
+- `npx tsc --noEmit -p tsconfig.app.json` → **0 errors (exit 0)**.
+- `npm run build` → **✓ built in 4.50s**.
+- `node scripts/validate-provider-mode-safety.mjs` → **PROVIDER_MODE_SAFETY_VALIDATION_PASS, 52 assertions,
+  0 failures, exit 0**.
+- `node scripts/lint-wording.mjs` → `WORDING_LINT_PASS — scanned 268 src files, 0 outward-facing violations`.
+- `node scripts/reconcile-master-build-reconciliation-registry.cjs` → **349 → 359 entries** (added 10,
+  historical rows deleted 0); a second run is **identical** (added 0, replaced 10) ⇒ idempotent.
+- `node scripts/verify-registry.mjs` → **174 issues (unchanged), 209 verified, 16 reachability flags, exit 0**.
+- Targeted Playwright (`uiux-redesign`, `dashboard`, `app-shell`, `simulation-control`, `integration-hub`,
+  `design-system`) → **80 passed / 0 failed / 0 skipped (3.0m)**.
+- `git status --short` entry count and HEAD are reported in the session report; **no commit, no push, no deploy**.
+
+**9. NEXT EXECUTION SCOPE**
+
+**S2a — Amazon → Mercenta → Brand object resolution + unresolved-ownership Founder exception queue**, as scoped
+in the reconciliation report (new `src/lib/amazon/objectResolution.ts` seam, additive store, Founder queue section
+of the existing Control Centre, duplicate/replay protection, tenant isolation, and a browser spec covering both
+the resolved and the *unresolved* path). **Do not begin it before approving that scope**, because it introduces a
+new domain seam and will touch more than the protection threshold's file count.
+
+**FOUNDER DECISIONS RECORDED THIS SESSION (authoritative — do not re-ask)**
+
+| ID | Decision |
+|---|---|
+| **T-1** | **Payoneer is the canonical PRIMARY/default Mercenta business account and Amazon payment account. Wise is SECONDARY.** Amazon payments go to Payoneer. **Never silently substitute Wise** if Payoneer is unavailable. Full payout rework is a later increment (S11). |
+| **T-2** | **No external carrier users/logins**; do not create or preserve a carrier-login workflow. The **Logistics Hub is Brand/Admin-facing**. Do **not** blindly delete existing carrier code in this increment — reconcile/retire it in the later Logistics Hub increment after dependency analysis. |
+| **T-3** | **Do not use "Mercenta Operator" as the canonical human control role — Founder / Super Admin is.** Do not delete existing Staff/RBAC functionality merely to remove the terminology; relabelling happens in a later increment. |
+| **T-4** | **Do NOT make Mercenta Hub a mandatory universal route.** Direct Brand facility → applicable Amazon destination must remain supported where appropriate. |
+| **T-5** | **Retain existing Staff/RBAC functionality.** Do not delete tested functionality. Founder/Super Admin remains the canonical human control role. |
+| **T-6** | The Brand-facing **Routing Request mechanic is to be removed/reconciled** in the later routing increment — **not merely relabelled** as an Amazon mechanic. |
+| **T-7** | The final credential architecture must support real Founder/Super Admin **entry, replacement, secure persistence, masked readback, validation, enable/disable and provider-specific credential fields**, with credentials **never exposed in the frontend**. |
+
+**⚠️ This block supersedes every earlier checkpoint block in this file for state purposes. Those blocks are
+retained unchanged below as history.**
+
+> ## 🛑 STOPPED AT APPROVAL GATE — MASTER STABILIZATION + AMAZON VENDOR TRUTH RECONCILIATION — **SCOPING ONLY (2026-09-20)**
 >
+> **State: INSPECTION COMPLETE · ZERO SOURCE EDITS · AWAITING FOUNDER APPROVAL.**
+>
+> A scoping pass was run against the "Master Stabilization + Amazon Vendor Truth Reconciliation +
+> Business Model / UX / Orchestration Correction" brief. Nothing was implemented. The full report is
+> in the session transcript (20-section scoping report). What the pass established, with evidence:
+>
+> | Check | Result (evidence produced 2026-09-20, HEAD `19be002`) |
+> |---|---|
+> | Git state | branch `redesign/foundation`, HEAD `19be002c4b3d6a64020b4740879c56ef1550e628`, baseline `959b4d2` confirmed an ancestor. Working tree = the SAME 134 intentionally-dirty entries as before this pass. **No git mutation, no commit, no deploy, no credential touched.** |
+> | Super Admin one-click login (brief's P0) | **NOT REPRODUCIBLE.** Dev (5173) AND production build preview (4173): card → `Operations Overview`, **0 error boundaries, 0 page errors**. All 30 admin nav views, all 19 Super Admin tabs, and the Control Centre sections swept: **0 error boundaries**. Root cause cannot be confirmed from the repository; likely a stale deployment/build, not HEAD source. |
+> | Provider safety (UNKNOWN≠SIMULATION) | **ALREADY FIXED at HEAD.** `isProviderSimulationSafe` is strictly `mode === 'simulation'`; `resolveProviderMode` → `'not_registered'`; `scenarioEngine.assertSimulationOnly` defaults `'unknown'`; `SimulationControl` uses the shared resolver; `dhl`/`palletline`/`xero`/`companies_house`/`hmrc`/`wise`/`payoneer`/`google` all registered with authoritative modes. |
+> | `submitCatalogItem` compliance-gate arg defect | **ALREADY FIXED at HEAD** — one resolver `evaluateBrandCatalogGate(brandId)` feeds both call sites. |
+> | Genuine contradictions still present | AV-013 unverified "10am Pacific / day before" routing-request rule (`types.ts:1089,1129`, `RoutingRequest.tsx`, `tourDefinitions.ts`, `shipment-asn.spec` #3); AV-010 backorder offered unconditionally (no `isBackOrderAllowed` anywhere); AV-020b unverified 30-day backorder restock rule; AV-007 rejected line can be re-acknowledged; AV-027 mandatory `mercenta_hub` `STAGE_ORDER` chain + hardcoded `destination: 'Mercenta UK Hub'`; brand-visible "Submit Routing Request" task; hardcoded international→DHL / UK→Palletline rule (`src/config/shipping.ts`, `src/lib/shipping/carrierRouting.ts`); AV-031 "Amazon UK requirements" mis-attribution (`src/lib/compliance.ts:28`, `src/data/demoData.ts:491`); AV-017 FC list labelled "Amazon UK FCs"; AV-019 unverified deduction taxonomy; AV-040 four-operation SP-API surface. |
+> | Cosmetic defect found | `MercentaCharts.tsx:172,439` emit `<polyline points>` values containing `px` units → repeated browser console errors on the admin Overview. No design-token change needed to fix. |
+>
+> **NEXT (on approval):** produce the change map (KEEP/MODIFY/ADD/REMOVE/DEFER), then implement in the
+> approved order. **No source file has been touched.**
+>
+> ---
+>
+> ## 🧭 STAGE — PHASE 2 COMPLETE: COMMERCIAL READINESS + PRODUCT ECONOMICS (2026-09-20) — **CURRENT CHECKPOINT (superseded for state purposes by the scoping block above)**
+>
+> Branch `redesign/foundation`, HEAD `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`) — **still the HEAD: no
+> commit was created** (`.clinerules/protection-rules.md` requires an explicit instruction to commit, and none was
+> given). Protected baseline `959b4d2` confirmed an ancestor. **ZERO git mutation** (no stage/stash/reset/clean/
+> checkout/amend/branch-switch/force-push/rewrite). No deploy. No credential added, read or activated. **ZERO live
+> provider calls** (asserted by the validator's fetch trap: observed 0; and by the e2e spec's external-call watcher:
+> 0). No protected design asset modified, renamed or added to git. The intentionally dirty working tree was
+> preserved and extended, never reset.
+>
+> ### CURRENT PLATFORM POSITION
+>
+> **1. COMPLETED / VERIFIED (this session)**
+>
+> | What | Evidence produced THIS session |
+> |---|---|
+> | The canonical commercial readiness record store (`commercial_readiness_records` on the ONE domain port; deterministic id; reassessment REVISES the same row; a repeat is suppressed and reported; honest `memory-only` status) | `src/data/commercialReadinessStore.ts`; validator L1–L3 / D4 / H1–H3 |
+> | The recorder: gate → canonical routing decision → readiness record, in ONE place; reassessment rebuilt from the RECORD ITSELF (its retained basis) | `src/lib/commercial/commercialReadinessRecorder.ts`, `commercialAssessment.ts` |
+> | The founder/ops workspace as a **section of the EXISTING Control Centre** (4 routes as real counts, a queue of every canonical record with brand/owner/SLA/next step, a drawer showing WHY per condition + the missing inputs + the canonical work item) | `src/lib/commandCentre/controlCentre.ts`, `src/components/admin/FounderControlCentre.tsx`; validator R1–R8; e2e 1–2 |
+> | The brand-facing Commercial Readiness view: only the signed-in tenant, plain-language why + action + real Knowledge Base guide per field, and a REAL brand action that reassesses | `src/components/brand/CommercialReadiness.tsx`, `src/lib/commercial/brandGuidance.ts`; e2e 4–6 |
+> | Commercial readiness integrated into the EXISTING work layer (2 declared sources, declared SLAs, DERIVED so a repeat cannot duplicate work and a resolved issue removes the item) | `src/lib/work/workStore.ts §10`, `src/lib/work/types.ts`; validator O1–O6 |
+> | The `commercial_readiness_monitor` registered in the EXISTING automation registry (drift check only; never changes a route; idempotent) | `src/lib/automation/registry.ts`; validator P1–P4 |
+> | The four-route canonical demo cases built from REAL records (canonical brands + products + a real Phase 1 assessment via the real research seam) | `src/data/commercialReadinessSeed.ts`; validator B1–B8 |
+> | **78 assertions / 0 failures**; **6/6 Playwright journeys passing**; `tsc --noEmit` 0 errors; `npm run build` compiles | see VERIFICATION STATUS below |
+>
+> **2. IN PROGRESS**
+>
+> - `uiux-wave2-core-surfaces-remaining` (unchanged from the previous checkpoint): Brand Intelligence (brand + admin), Ad Spend, Accounting, Super Admin, Integrations, Onboarding Tours, admin CRM/Catalogue/Logistics/Communications panels. Not touched this stage.
+>
+> **3. REMAINING — CURRENT ROADMAP (numbered, derived from the Master Matrix and the actual state)**
+>
+> 1. **Phase 3 — Supply Route / Logistics Intelligence** (the next business phase; Phase 2 now hands it a READY product with a validated pack profile and supply basis).
+> 2. Phase 4 — Brand Education / Academy (the Academy seam already carries a real `academyStage` per commercial term/condition).
+> 3. Phase 5 — Tutorials / Contextual Education.
+> 4. Phase 6 — Capital & Financing Engine.
+> 5. Phase 7 — Real Financing Partner Network.
+> 6. Phase 8 — Financier Pitch / Capital Workspace.
+> 7. Phase 9 — Global Localization / Market Experience.
+> 8. Phase 10 — Acquisition Intelligence at Scale.
+> 9. Phase 11 — Founder Intelligence / BI Expansion.
+> 10. Phase 12 — Integrated Acquisition → Capital → Operations.
+> 11. Phase 13 — Amazon Relationship Governance.
+> 12. Phase 14 — Live Integrations / API Activation.
+> 13. Phase 15 — Production Readiness + Launch Gate.
+> 14. The `uiux-wave2-core-surfaces-remaining` surface migrations listed in (2).
+> 15. Phase 0 remaining extensions; Phase 1 live research activation; the known pre-existing validator defects (`validate-stage26.mjs` prints ✗ but exits 0; `layout-audit.mjs`'s undefined-class failure; the 174 pre-existing `verify-registry.mjs` findings, none of them in the Phase 2 rows).
+>
+> **4. DEFERRED / PARKED**
+>
+> - Live provider activation (Amazon SP-API, Xero, Wise, Payoneer, DHL, Palletline, HMRC, Companies House, social OAuth, research providers) — every one remains deterministic simulation; activation is a credential step, not missing functionality.
+> - Miro projection stays a SEPARATE downstream representation of the one canonical state; not a second source of truth.
+>
+> **5. BLOCKED / DEPENDENCIES**
+>
+> - None blocking Phase 2. The commercial gate's SIX thresholds remain deliberately UNSET pending a business decision — an unset threshold routes to `human_review` (fail-closed); it does not block delivery.
+>
+> **6. KNOWN EXCEPTIONS**
+>
+> - `verify-registry.mjs` reports 174 pre-existing findings elsewhere in the matrix. A targeted grep for the ten Phase 2 rows returns **nothing** — none of the findings are attributable to this stage.
+> - The commercial readiness demo seed creates FOUR Phase 1 assessments (two per demo brand) so each readiness record references a genuinely existing assessment + supply profile. This is declared demo data, deterministic, with zero network calls.
+> - Supabase remains unconfigured, so the reported persistence status is honestly `memory-only` and `hydrate` returns nothing durable (asserted: L3).
+>
+> **7. CURRENT CHECKPOINT**
+>
+> Phase 2 (Commercial Readiness + Product Economics) is **complete and verified**. A real brand can now be shown exactly what commercial information Mercenta needs, why, and what to do — and can supply it — with the product moving remediation → human review → **ready** through the same deterministic gate the founder sees. `PROJECT_STATUS.md`, `requirements-registry.json`, `HANDOFF.md`, `docs/SPRINT_PHASE2_COMMERCIAL_READINESS_2026-09-20.md` and the session report all describe this same state.
+>
+> **8. VERIFICATION STATUS**
+>
+> - `npx tsc --noEmit -p tsconfig.app.json` → 0 errors.
+> - `npm run build` → compiles (`✓ built in 3.33s`).
+> - `node scripts/validate-commercial-readiness.mjs` → **78 assertions, 0 failures** (includes the zero-network assertion).
+> - `npx playwright test e2e/commercial-readiness.spec.ts` → **6 passed**.
+> - Full Playwright regression → **371 passed / 0 failed / 2 skipped** (373 collected; the 2 skips are pre-existing
+>   conditional `test.fixme` guards elsewhere in the suite — no skip or fixme added or modified this session). The
+>   first full run found ONE genuine regression this stage caused (the automation-catalogue count of 8) and it was
+>   fixed by REPOINTING the assertion to the current canonical count, with the old contract recorded inline — not
+>   by weakening or deleting anything.
+> - `node scripts/reconcile-phase2-commercial-readiness-registry.cjs` → idempotent (349 → 349; 10 rows replaced; 0 historical rows deleted; an immediate re-run is identical).
+>
+> **9. NEXT EXECUTION SCOPE**
+>
+> Phase 3 — Supply Route / Logistics Intelligence, consuming the READY commercial record (pack profile, supply basis, next declared stage) as its input. Do not begin it before reviewing this Phase 2 delivery.
+>
+> **⚠️ This block supersedes the routing/gateway checkpoint designation. The block below is retained unchanged as the previous record.**
+>
+> ## 🧭 STAGE — EXPLICIT WORKFLOW ROUTING / GATEWAY ARCHITECTURE + PHASE 2 COMMERCIAL-READY SEAM (2026-09-19) — *PREVIOUS CHECKPOINT (superseded by the block above)*
+>
+> Branch `redesign/foundation`, HEAD `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`) — **still
+> the HEAD: no commit was created** (`.clinerules/protection-rules.md` requires an explicit instruction
+> to commit, and none was given). Protected baseline `959b4d2` confirmed an ancestor. **ZERO git
+> mutation** (no stage/stash/reset/clean/checkout/amend/branch-switch/force-push/rewrite). No deploy. No
+> credential added, read or activated. **ZERO live provider calls** (asserted by the validator's fetch
+> trap: observed 0). No protected design asset modified, renamed or added to git.
+>
+> **⚠️ This block supersedes the Phase 1 checkpoint designation. The Phase 1 block below is retained
+> unchanged as the previous record.**
+>
+> ### SCOPE (founder-approved, deliberately narrowed)
+>
+> The founder approved **only** the routing/gateway architecture and the Phase 2 commercial-ready seam,
+> and **explicitly deferred the Phase 2 delivery** (readiness store, surfaces, work/automation
+> integration, browser journey) until the seam is reviewed. This checkpoint reports exactly that split —
+> it does **not** claim Phase 2 is complete.
+>
+> ### BUILT (new files; nothing existing was rebuilt)
+>
+> | File | What it is |
+> |---|---|
+> | `src/config/routing.ts` | The routing SSOT: 3 gateway kinds (XOR/AND/OR) with declared selection semantics, 7 branch outcomes, **12 refusal reasons each mapped to a declared disposition**, 4 join policies, the **10 required routing semantics** catalogue (each naming where it is actually honoured), the 3 canonical worked examples, and the declared idempotency-key format. |
+> | `src/config/commercialReadiness.ts` | The Phase 2 vocabulary: 4 viability routes (exactly ONE proceeds), the declared term fields + units, the **6 value bases** (actual/observed/calculated/estimated/assumed/unknown), **7 first-class distinct pack concepts** (brand MOQ, production MOQ, case pack, master carton, PO quantity, shipment quantity, pallet profile), the declared pack-maths rule + the 6×4=24 worked example, the MOQ-honour disclaimer, **6 thresholds that all ship UNSET (fail-closed)**, the 7-condition catalogue, and the declared precedence ladder. |
+> | `src/lib/routing/gateways.ts` | The **entire** new primitive: `evaluateExclusiveGateway`, `evaluateParallelGateway`, `evaluateInclusiveGateway`, `evaluateJoin`, `analyseGatewayStructure`, `evaluateSequentialDependency`, `evaluateEventRouting`, `planCompensation`, `conditionDigest` / `routeDecisionId` / `routingIdempotencyKey`. Pure functions — zero network, zero wall-clock (the pinned demo clock), zero AI. |
+> | `src/lib/commercial/economics.ts` | The deterministic, explainable calculator: pack profile + carton-arithmetic validation, unit economics carrying the full formula, the missing inputs and the stated assumptions, and **no VAT computed**; plus the §20 commercial ↔ supply interaction observations. |
+> | `src/lib/commercial/commercialGate.ts` | The commercial viability gate: 7 declared conditions evaluated in declared order → the declared precedence ladder → the EXCLUSIVE gateway evaluator, so a commercial route is recorded, audited and idempotent like any other route. |
+> | `src/data/routingStore.ts` | The canonical decision store: deterministic ids/keys, **idempotent by construction** (a repeat is suppressed and reported), ownership scoping, canonical audit, canonical events, domain-port persistence, hydrate, reset. |
+> | `scripts/validate-routing-gateways.mjs` | The verification harness (see TESTS). |
+> | `scripts/reconcile-phase2-routing-registry.cjs` | The Master-Matrix reconciliation (idempotent, never deletes a row). |
+>
+> ### MODIFIED (additive only)
+>
+> `src/types.ts` (§PHASE 2 section: `WorkflowRoutingDecision`, `RouteConditionEvaluation`, `RouteBranchResult`,
+> `RouteJoinState`, `GatewayStructureFinding`, `RoutingOwner = PreAuditOwner`, `RoutingSubjectRef`,
+> `CommercialTermValue`, `PackProfile`, `CommercialReadinessRecord`) · `src/lib/events/types.ts` (6 new
+> canonical event types + severities, and optional `tenantId` / `idempotencyKey` / `routeId` /
+> `correlationId` / `branchOutcomes` on the canonical event shape — **still ONE event union**) ·
+> `src/data/domainRepository.ts` (ONE additive `routing_decisions` table, ONE additive
+> `persistRoutingDecision` method, `hydrate` extended) · `scripts/validate-e6-brand-surfaces.mjs` +
+> `scripts/validate-e7-embedded-social.mjs` (this stage's scope **declared** in both guards; the guard LOGIC
+> is unchanged and an unexplained change still fails) · `requirements-registry.json` · this file.
+>
+> ### PRESERVED (nothing rebuilt, nothing removed)
+>
+> Phase 1 remains intact and was re-verified this session (169/0). The work layer, automation registry,
+> event feed, audit registry, domain port, RBAC, tenant isolation, commercial-model SSOT and shipping/VAT
+> SSOT are **reused, not replaced**. `VAT_TREATMENT_CONFIGURED` stays `false` (no VAT was invented). No
+> parked work was touched. `ave1-check.mjs` and the four protected `design/*.png` were **not** touched.
+>
+> ### ROUTING ARCHITECTURE — what is now explicit
+>
+> - **EXCLUSIVE (XOR)** — exactly one route; REFUSES when none holds, when several hold (ambiguity), when a
+>   condition cannot be evaluated (fail-closed), or when the gateway definition is malformed (undeclared
+>   route / unrouted condition / duplicate route / contradictory condition). A refusal is **never** terminal.
+> - **PARALLEL (AND)** — every branch evaluated independently; **a failing branch never erases a sibling's
+>   success**; a branch whose sequential prerequisite is unmet does not run and says so.
+> - **INCLUSIVE (OR)** — the selected subset is exactly the conditions that held: **never exactly-one and
+>   never always-all**; a false condition marks its route `not_applicable` with the reason; nothing
+>   applicable refuses.
+> - **FAN-IN / JOIN** — declared completion (all / declared_subset / quorum / any), required vs optional
+>   branches, a quorum that is **never invented**, and states `waiting` / `satisfied` / `failed` /
+>   `blocked_human_review`. **Completion is never inferred from the initiating operation**, and timed-out or
+>   human-review branches never count.
+> - **SEQUENTIAL / EVENT-BASED / COMPENSATION** — a dependent route waits for a positively-satisfied
+>   prerequisite; an undeclared event is refused and surfaced; a route with no declared compensation is
+>   routed to human review rather than ignored.
+> - **RETRY / ESCALATION / EXCEPTION / APPROVAL / TERMINAL** — carried by declared outcomes (`retryable`,
+>   `timed_out`, `failed`, `human_review`) that map to declared dispositions (`retry`, `escalation`,
+>   `exception`, `human_review`), and by the terminal flag, which is **false whenever a refusal, an
+>   attention branch or an unsatisfied join exists**.
+> - **IDEMPOTENCE** — the decision id and the idempotency key are deterministic functions of the gateway
+>   inputs (`<workflowId>|<gatewayId>|<conditionDigest>`), so a repeated sweep, double-click, retry,
+>   replayed callback or scheduler re-run is SUPPRESSED and reported: no second decision, no second audit
+>   entry, no second event. `branchIsolationPreserved` and `completionInferredFromInitiator: false` are
+>   recorded on every decision.
+>
+> ### PHASE 2 SPLIT — built vs deferred (honest, item by item)
+>
+> **BUILT + VERIFIED this session:** the routing vocabulary and all three gateway evaluators, join/fan-in,
+> sequential/event/compensation, the idempotent decision store, the canonical events, the domain table and
+> port method, tenant-isolated audit/visibility, the commercial vocabulary (incl. the 7 distinct pack
+> concepts and validated pack maths), the deterministic calculator, and the four-route commercial viability
+> gate.
+>
+> **DEFERRED — NOT STARTED (the founder review gate; recorded in the Matrix as `not_started`):**
+> `phase2-commercial-readiness-store` · `phase2-commercial-readiness-surface` ·
+> `phase2-commercial-work-integration` · `phase2-commercial-automation` · `phase2-routing-gateways-e2e`.
+>
+> Because the browser journey is not written, the routing/commercial rows are recorded as **`built`**, not
+> `built_and_tested` — this repository's vocabulary reserves `built_and_tested` for rows whose evidence
+> names an e2e spec, and `verify-registry.mjs` enforces exactly that. The two Phase 2 roadmap rows
+> (`phase2-commercial-terms-model`, `phase2-product-economics`) are recorded as **`in_progress`** with the
+> PARTIAL boundary stated in the row itself.
+>
+> ### BUGS FOUND AND FIXED IN-SESSION (each with the regression test that now pins it)
+>
+> 1. **False-positive contradiction refusal (blocking).** The structural analyser treated "two conditions
+>    sharing one declared rule that disagree" as a contradiction. The commercial gate legitimately declares
+>    ONE precedence rule evaluated per-route, so **every** commercial gate evaluation was refused. Fix: a
+>    contradiction now means the SAME condition id declared twice with disagreeing outcomes, or two
+>    conditions owning the SAME route under the SAME rule. New regression test: *"one shared rule evaluated
+>    per-route is NOT a contradiction (no false positive)"*. This was caught by the validator, not by
+>    inspection — which is the point of the validator.
+> 2. **A refusal was reported as terminal completion.** `terminal` was derived from branch outcomes alone, so
+>    a refused gateway (whose branches are all `skipped`) read as terminal. Fix: `terminal` is forced
+>    `false` for every refusal. Pinned by the refusal assertion.
+> 3. **A fixable gap escalated to human review.** With the original ladder order, missing required terms made
+>    a downstream condition unevaluable, so a fixable gap routed to `human_review` instead of
+>    `remediation`. Fix: the declared precedence is now **blocked → remediation → human review → ready**, and
+>    the ladder distinguishes "unmet by the observed values" from "could not be evaluated" — which is what
+>    makes `remediation` (supply the information) beat `human_review` (needs a business decision). Pinned by
+>    the missing-terms, unevaluable-lead-time and pinned-ladder assertions.
+> 4. **Evidence-hygiene defect in my own Matrix rows.** 13 rows were first written as `built_and_tested`
+>    without an e2e reference, and several evidence strings put an annotation before the path, so
+>    `verify-registry.mjs` flagged them. Fix: honest status `built`, and a declared normaliser that moves
+>    annotations after the first real path (no word dropped). Result: **0 issues reference any Phase 2 row**.
+>
+> ### TESTS (all run this session, at this working tree)
+>
+> - `scripts/validate-routing-gateways.mjs` → **PASS — 101 assertions / 0 failures (exit 0)**. Covers:
+>   the vocabulary; XOR exactly-one + no-condition + ambiguous + unevaluable + undeclared + unrouted +
+>   duplicate + contradictory + observed-failure; AND branch isolation + prerequisite; OR one-or-more / all /
+>   none / unreachable; JOIN all / failed / optional / quorum-missing / quorum-met / timed-out /
+>   human-review; sequential; event; compensation; determinism; **idempotence (duplicate suppressed, no 2nd
+>   audit entry, no 2nd event)**; **tenant isolation (brand vs brand vs public vs ops)**; the audit reason +
+>   disposition; the commercial declarations; **pack maths 6×4=24**; PO-below-MOQ; the commercial gate's
+>   ready / remediation / blocked / human-review cases; and **ZERO network (observed: 0)**.
+> - `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**
+> - `npm run lint` (eslint .) → **0 problems**
+> - `npm run build` → **PASS (4.27s)**
+> - `npm run validate:wording` → **PASS — 261 src files, 0 outward-facing violations**
+> - `node scripts/validate-uk-market-fit.mjs` (Phase 1 regression) → **PASS — 169 assertions / 0 failures**
+> - `node scripts/integrity-audit.mjs` → **62 PASSED / 0 FAILED**
+> - `node scripts/validate-founder-operating-system.mjs` → **PASS**
+> - `node scripts/validate-e7-embedded-social.mjs` → **121 assertions / 0 failures** (baseline restored after
+>   declaring this stage's scope)
+> - `node scripts/verify-registry.mjs` → exits 0, **174 issues = the EXACT pre-existing baseline; 0 issues
+>   reference any Phase 2 row**
+> - `node scripts/reconcile-phase2-routing-registry.cjs` → **entries 331 → 349 (18 added, 2 replaced,
+>   historical rows deleted 0)**; re-run → **added 0** (idempotent)
+> - **ONLY remaining failing gate: `validate-e6-brand-surfaces.mjs` F6**, whose offenders are now exactly the
+>   pre-existing, user-reserved set — the 0-byte `ave1-check.mjs` and the four protected `design/*.png`. **No
+>   Phase 2 file is an offender.**
+> - **NOT RUN this session (stated, not implied): the full Playwright suite.** No UI surface was added, so no
+>   new browser journey exists to run. Therefore the **365 passed / 0 failed / 2 skipped baseline has NOT
+>   been re-established in this session**, and this checkpoint makes no claim about it.
+>
+> ### NEXT EXECUTION SCOPE
+>
+> 1. **Founder review of this seam** — the gate the founder set.
+> 2. On approval, the deferred Phase 2 delivery, in this order: `commercialReadinessStore` → Control Centre
+>    queue + brand read-only view → work-layer sources → automation-registry monitor → `e2e/` browser journey
+>    (at which point the rows may honestly become `built_and_tested`).
+> 3. Then continue the numbered roadmap from **Phase 3 — Supply route + logistics intelligence**.
+> 4. **`HANDOFF.md` and a `docs/SPRINT_*` report for this stage are NOT yet written.** The Matrix and this
+>    file ARE updated; the remaining two sources are the same delivery step, so the five project-state
+>    sources are **not yet fully reconciled for this stage** — stated here rather than implied.
+>
+> ## ✅ PHASE 1 — EXPLORE UK MARKET FIT / PRE-AUDIT ENGINE + FULL ROADMAP RECONCILIATION (2026-09-19) — **PRIOR CHECKPOINT** (retained as the previous record; superseded by the stage block at the top)
+>
+> Branch `redesign/foundation`, starting HEAD `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`) — **still
+> the HEAD: no commit was created this sprint** (`.clinerules/protection-rules.md` requires an explicit
+> instruction to commit, and the prompt forbade one). Protected baseline `959b4d2` confirmed an ancestor.
+> **ZERO git mutation** (no stage/stash/reset/clean/checkout/amend/branch-switch/force-push/rewrite). No
+> deploy. No credential added, read or activated. **Zero live provider calls.** No protected design asset
+> modified, renamed or added to git.
+>
+> **Canonical report: `docs/SPRINT_UK_MARKET_FIT_PHASE1_2026-09-19.md`.**
+> **Permanent contract: `.clinerules/project-state-contract.md`.**
+
+> ## 📍 CURRENT PLATFORM POSITION (mandatory block — see `.clinerules/project-state-contract.md`)
+>
+> ### 1. COMPLETED / VERIFIED
+>
+> **Phase 0 — Founder Operating System + FREE-FIRST autonomous operations (2026-09-19):** COMPLETE for its
+> declared scope. Deterministic automation registry + run ledger (8 automations, idempotency, observable
+> failure, safe retry, disable, human approval gate, declared next-run dates, optional-dependency degradation,
+> a recorded $0 free-first scheduler decision) · Founder/Super-Admin Control Centre (9 operating views) ·
+> brand acquisition engine (11 stages, dedup, **prospect ≠ brand**) · BI findings layer (7 domains, 4 declared
+> evidence bases, citations, thresholds with the observed value, brand-safe strip) · Founder Ops AI
+> (deterministic brief + Ask Mercenta; AI optional, labelled, free-only, server-side credential seam) ·
+> the permanent project-state contract.
+>
+> **Phase 1 — Explore UK Market Fit / pre-audit engine (2026-09-19):** COMPLETE and VERIFIED. See §8 for the
+> evidence. The public CTA is **`Explore UK Market Fit`**; Partner Login is a **separate header utility
+> action** and is no longer beside the hero CTA.
+>
+> Everything the previous sprints verified is intact: the work/task/calendar layer, the reminder runner, the
+> canonical 20-brand universe, RBAC + tenant isolation, the simulation architecture, the Wave-2 UI/UX
+> architecture, the Amazon Ads dashboard, the Listing Analyzer, the Knowledge Base ↔ UserTour link, and the
+> wording gate.
+>
+> ### 2. IN PROGRESS
+> - Nothing in Phase 1. The Phase 1 scope is finished and verified.
+> - **Phase 2 is IN PROGRESS and PARTIAL** — see the stage block at the top of this file. BUILT: the
+>   routing/gateway architecture and the commercial-ready seam (Matrix rows `phase2-routing-*`,
+>   `phase2-commercial-readiness-config`, `phase2-commercial-calculator`, `phase2-commercial-viability-gate`).
+>   NOT STARTED: `phase2-commercial-readiness-store`, `phase2-commercial-readiness-surface`,
+>   `phase2-commercial-work-integration`, `phase2-commercial-automation`, `phase2-routing-gateways-e2e`.
+> - `phase10-uk-opportunity-states` — the A–F classification EXISTS (Phase 1); scaling the EVIDENCE behind it
+>   at acquisition scale is Phase 10.
+> - `phase15-conversion` — the CTA/Partner-Login hierarchy part is DONE; spam protection and submission
+>   reliability remain (Phase 15).
+> - `discovered-validator-stage26-exit-code` — recorded, deliberately NOT fixed (outside the Phase 1 scope).
+>
+> ### 3. REMAINING — CURRENT ROADMAP (numbered; derived from the Master Matrix)
+> 1. **Phase 2 — Commercial readiness + product economics** (RRP, wholesale/cost, margin, MOQ, production MOQ, case pack, master carton, pallet profile, packaging/logistics economics, catalogue readiness, replenishment viability) — 2 Matrix rows, **`in_progress`**: the routing/gateway architecture and the commercial-ready seam are BUILT + VERIFIED (see the stage block at the top); the readiness store, the surfaces, the work/automation integration and the browser journey remain.
+> 2. **Phase 3 — Supply route + logistics intelligence** (Supply Route Profile; Logistics Escalation Engine; NO invented universal lead-time rule) — 2 rows, `not_started`.
+> 3. **Phase 4 — Brand education / onboarding academy** (5 stages + final readiness; LEARN→WATCH→DO→VALIDATE→COMPLETE) — 2 rows, `not_started`.
+> 4. **Phase 5 — Tutorial recording + contextual education** (Playwright-driven recordings, versioning, outdated-tutorial detection, shared workflows) — 3 rows, `not_started`.
+> 5. **Phase 6 — Capital & financing engine** (internal capital model; deterministic financing router; no AI for financial maths) — 2 rows, `not_started`.
+> 6. **Phase 7 — Real financing partner network** (REQUIRED: validated financier universe + lifecycle + founder outreach pipeline) — 3 rows, `not_started`.
+> 7. **Phase 8 — Financier pitch / capital workspace** — 1 row, `not_started`.
+> 8. **Phase 9 — Global market experience / localization** (country framework, locale/display/settlement currency separation, localization + SEO + hreflang) — 3 rows, `not_started`.
+> 9. **Phase 10 — Acquisition intelligence at scale** (product identity layer, UK opportunity states at scale, real research sources) — 3 rows (`in_progress` 1, `not_started` 2).
+> 10. **Phase 11 — Founder intelligence / BI expansion** — 1 row, `not_started`.
+> 11. **Phase 12 — Integrated acquisition → capital → operations loop** — 1 row, `not_started`.
+> 12. **Phase 13 — Amazon relationship governance** (authoritative sources + Claims Registry GREEN/AMBER/RED) — 2 rows, `not_started`.
+> 13. **Phase 14 — Live integrations / API activation** — 1 row, `blocked` (credentials + Amazon approval; simulation stays functional).
+> 14. **Phase 15 — Production readiness + launch gate** (legal/privacy · security · DB/infra · SEO · performance · accessibility · responsive · conversion · analytics · reliability · production data · website integrity · communications · deployment · final gate) — 15 rows (`in_progress` 1, `not_started` 14). MANDATORY before public production launch.
+> 15. **Phase 0 remaining extensions** — scheduler activation (`not_started`), external automation consumer (`deferred`).
+> 16. **Phase 1 follow-on** — `phase1-live-research-activation`, `blocked` on real provider credentials + a server-side research endpoint (the seam needs NO code change).
+> 17. **Discovered work** — `discovered-validator-stage26-exit-code` (`in_progress`; recorded, not fixed).
+
+> ### 4. DEFERRED / PARKED
+> - `phase0-extension-automation-provider` — an external automation consumer, only if ever justified. n8n is explicitly NOT a foundational dependency.
+> - Phase 1 research is SIMULATED by design. Turning on live research is an activation step (Phase 14), not a build task.
+>
+> ### 5. BLOCKED / DEPENDENCIES
+> - `phase14-live-integrations-activation` — every live provider needs credentials and/or an approval process (Amazon SP-API in particular).
+> - `phase1-live-research-activation` — the declared research providers resolve to `available`/`simulation` (Firecrawl, Keepa, marketplace API), so the seam correctly REFUSES. Requires credentials + a server-side research endpoint.
+> - Phase 15 security/DB/communications/deployment items depend on infrastructure decisions that are not part of any sprint yet.
+>
+> ### 6. KNOWN EXCEPTIONS
+> - **`scripts/validate-e6-brand-surfaces.mjs` F6** — the ONLY failing scope guard, and its offenders are the
+>   pre-existing, user-reserved set: the 0-byte `ave1-check.mjs` and the four protected untracked
+>   `design/*.png`. **F5, F5b and F8 now PASS** (F5/F5b were REPOINTED to read the SAME declared scope as F6,
+>   which fixed a real pre-existing disagreement between the three guards).
+> - **`scripts/validate-stage26.mjs`** — prints `STAGE26_VALIDATION_FAIL (8)` but ALWAYS exits 0, so its 8
+>   pre-existing failures are invisible to the gate: 5 pre-existing edge-function assertions
+>   (`compliance-gate-check` / `catalog-import`) and 3 render failures caused by the harness omitting
+>   `ThemeProvider`. **No Phase 1 file is involved.** Recorded in the Matrix as discovered work.
+> - **`verify-registry.mjs`** exits 0 but reports 174 informational flags — historical rows whose evidence
+>   path no longer exists (pre-existing; it was 123 → 125 flags at the Founder OS checkpoint).
+> - The demo environment has NO Supabase credentials, so every domain store reports `memory-only` honestly: a
+>   full page reload re-boots deterministically. The Phase 1 browser test therefore enters the Super Admin
+>   session through the IN-APP environment switch (no reload) so the record under test survives.
+>
+> ### 7. CURRENT CHECKPOINT
+> **The CURRENT CHECKPOINT is the stage block at the very top of this file** (explicit workflow routing /
+> gateway architecture + the Phase 2 commercial-ready seam). The Master Matrix is now at **349 entries**
+> (the Phase 1 checkpoint's 331 → 349: 18 added, 2 replaced, **0 historical rows deleted**).
+> This Phase-1 position block is retained as the previous record; its verification figures below are the
+> Phase 1 session's and are preserved verbatim.
+>
+> ### 8. VERIFICATION STATUS (all run this session, at this working tree)
+> - `npx tsc --noEmit -p tsconfig.app.json` → **0 errors**
+> - `npm run lint` (eslint .) → **0 problems**
+> - `npm run build` → **PASS** (`ExploreUkMarketFit` code-split at 47.23 kB / 13.52 kB gzip)
+> - `npm run validate:wording` → **PASS — scanned 255 src files, 0 outward-facing violations**
+> - `scripts/validate-uk-market-fit.mjs` → **169 assertions / 0 failures**
+> - `scripts/validate-uiux-redesign.mjs` → **369 PASS / 0 FAIL** (was 357)
+> - `scripts/integrity-audit.mjs` → **62 PASSED / 0 FAILED**
+> - `scripts/validate-e7-embedded-social.mjs` → **121 assertions / 0 failures**
+> - `scripts/validate-e6-brand-surfaces.mjs` → F1–F5b, F7, F8, F9 PASS; **F6 = the known pre-existing offender set only**
+> - `scripts/verify-registry.mjs` → **exit 0**
+> - **validator sweep: 78 PASS / 1 FAIL** (the single FAIL is the known pre-existing E6 F6 above)
+> - `npx playwright test e2e/uk-market-fit.spec.ts` → **9 passed / 0 failed** (zero page errors, zero external calls)
+> - **FULL Playwright regression (`--workers=2`) → 365 passed / 0 failed / 2 skipped (15.0m), exit 0** — the baseline at this HEAD was 356/0/2, and the +9 are exactly the new Phase 1 spec, so **NO existing verified journey regressed**
+> - **Zero live provider calls** across every gate (asserted by the Phase 1 validator and by the E6 F9 check).
+>
+> ### 9. NEXT EXECUTION SCOPE
+> Phase 2 — Commercial readiness + product economics, OR Phase 15 production-readiness work, per the founder's
+> priority. **Do NOT re-open Phase 1 unless a regression is found.** Phase 14 and the Phase 1 live-research
+> activation stay blocked on credentials.
+
+
+
+>
+> ## ✅ FOUNDER OPERATING SYSTEM + FREE-FIRST AUTONOMOUS OPERATIONS (2026-09-19) — **CURRENT CHECKPOINT**
+>
+> Branch `redesign/foundation`, starting HEAD `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`);
+> protected baseline `959b4d2` still an ancestor. **ZERO git mutation this sprint** (no commit/stage/
+> stash/reset/clean/checkout/amend/branch-switch/force-push/rewrite). No deploy. No credential. No live
+> provider call. No protected design asset modified, renamed or added to git.
+>
+> **Canonical report: `docs/SPRINT_FOUNDER_OPERATING_SYSTEM_2026-09-19.md`.**
+> **Permanent contract: `.clinerules/project-state-contract.md`.**
+>
+> ### BUILT (5 capabilities, one integrated layer — nothing was rebuilt)
+> 1. **Autonomous / scheduled operations** — `src/lib/automation/registry.ts`: a declared catalogue of
+>    **8 deterministic automations** (work projection · reminder sweep · overdue escalation ·
+>    compliance gate monitor · finance overdue monitor · acquisition follow-up monitor · commission
+>    review with a **human approval gate** · founder brief) with a real run ledger: deterministic ids
+>    (`run-<automationId>-<sequence>`), the pinned demo clock as the run date, an input fingerprint for
+>    idempotency, **observable failure** + safe retry, attributed+audited enable/disable, pending
+>    approvals, declared next-run dates, optional-dependency degradation, and a **recorded FREE-FIRST
+>    scheduler decision** ($0, no timer, no new dependency; n8n / Cloudflare cron / GitHub Actions /
+>    Supabase pg_cron evaluated and recorded).
+> 2. **Founder / Super Admin Control Centre** — `src/lib/commandCentre/controlCentre.ts` +
+>    `src/components/admin/FounderControlCentre.tsx`: nine derived operating views (Business · Brands ·
+>    Acquisition · Operations · Finance · Compliance · Automation · AI · Audit) composing the canonical
+>    workspace architecture, with real drill-downs, a real acquisition pipeline, the automation
+>    catalogue (run/retry/disable/simulate-failure/approvals), the founder brief, Ask Mercenta and the
+>    audit feed. **Super-Admin only** (hidden from the nav AND guarded at render).
+> 3. **Brand acquisition / outreach engine** — `src/lib/acquisition/acquisitionEngine.ts`: the canonical
+>    **eleven-stage** lifecycle derived from existing records (PROSPECT → RESEARCH → QUALIFICATION →
+>    OPPORTUNITY → OUTREACH → FOLLOW-UP → RESPONSE → MEETING → DUE DILIGENCE → ONBOARDING → ACTIVE
+>    BRAND) with owner, next action, declared follow-up dates, dedup on `normalizeBrandKey` and a
+>    **conversion guard: a prospect is NOT a brand**.
+> 4. **Brand Intelligence expansion** — `src/lib/intelligence/intelligenceLayer.ts`: findings across
+>    seven domains with a declared **evidence basis** (canonical · simulated · external_research ·
+>    ai_interpretation), citations, declared thresholds with the observed value, the approved-category
+>    gate, and a brand-safe projection that strips internal-only findings.
+> 5. **Founder Ops AI** — `src/lib/founder/briefFacts.ts` + `src/lib/ai/founderAiClient.ts` +
+>    `src/lib/ai/founderOpsAi.ts`: a **deterministic** daily brief and Ask Mercenta (7 declared
+>    intents, canonical answers with citations, an explicit refusal for anything it cannot answer),
+>    with AI as an **optional, labelled** narrative on top. **Free models only, no paid fallback, a
+>    server-side credential seam (never a VITE variable), and no model call at all when no credential
+>    is configured.**
+>
+> ### RECONCILED — a real five-source disagreement was found and FIXED
+> Sprint 2's `scripts/reconcile-sprint2-registry.cjs` had been committed but **never executed**, so
+> `requirements-registry.json` was still at **243** entries while PROJECT_STATUS/HANDOFF claimed
+> **250**. Running it (243 → 250) and adding this sprint's **7 new rows** brings the Master Matrix to
+> **257** entries and the five sources into agreement. `_meta.total_entries` synced.
+>
+> ### GATES (real output this session)
+> tsc **0** · eslint **0** · build **PASS (4.33s)** · wording **PASS (248 files, 0 violations)** ·
+> integrity-audit **61/0 (100%)** · `validate-founder-operating-system` **90 assertions / 0 failures /
+> 0 network calls** · `validate-uiux-redesign` **357/0** (was 344) · `validate-e7` **121/0** ·
+> validator sweep **77 PASS / 1 FAIL** (the only failure is the pre-existing e6 F5/F5b/F6 on the
+> **unchanged 5 offenders**) · `verify-registry` **exit 0 · 257 entries · issues 124 (baseline) ·
+> reachability 15 (baseline) — ZERO new** · targeted Playwright **26 passed / 0 failed** ·
+> **FULL Playwright 356 passed / 0 failed / 2 skipped (358 collected)** ·
+> NEW `e2e/founder-operating-system.spec.ts` **5/5 PASS in real Chromium**.
+>
+> ### NOT DONE (explicit, no silent deferral)
+> No deploy (not requested) · no git commit (the project's protection rules require an explicit
+> instruction) · no scheduler TRIGGER wired (the seam is declared, documented and tested) · no live
+> provider activation (credential steps only) · Rakazo untouched · no Supabase/D1/Cloudflare migration ·
+> no brand surface consumes the BI findings layer yet.
+>
+> ---
+> ## 📍 CURRENT PLATFORM POSITION (mandatory — see `.clinerules/project-state-contract.md`)
+>
+> ### 1. COMPLETED / VERIFIED
+> 1. Canonical work/task/calendar operating layer + the deterministic proactive reminder runner
+>    (`invoice_due`, `onboarding_step` derivations included) — verified in Chromium.
+> 2. UI/UX Wave 1 + Wave 2 (tokens, six themes, motion/density, workspace primitives, nav/header,
+>    ⌘K palette, animated charts, homepage redesign) — all surfaces migrated, no bespoke page
+>    composition remaining.
+> 3. The canonical 20-brand universe, RBAC + tenant isolation, the Amazon operational simulation, the
+>    compliance gate, the PO workflow, fulfilment/returns, finance, the integration registry +
+>    simulation safety.
+> 4. **Founder Operating System** (this sprint): automation registry · Control Centre · acquisition
+>    engine · BI findings layer · Founder Ops AI — each with runtime + browser verification.
+> 5. The permanent project-state contract (five synchronised sources + the numbered roadmap below).
+>
+> ### 2. IN PROGRESS
+> 1. Nothing. Every item in this sprint's scope is finished and verified.
+>
+> ### 3. REMAINING — CURRENT ROADMAP (numbered; the same list is in the sprint report §20)
+> 1. **Founder OS — automation scheduling trigger** (the seam is declared/tested; only the trigger is
+>    unwired). Deferred with the infrastructure migration.
+> 2. **Founder OS — brand-facing BI consumption** (the brand-safe projection exists and is tested; no
+>    brand surface consumes it yet).
+> 3. **Automation bulk retry control** (single-run retry is built and tested).
+> 4. **Live provider activation** — AI/OpenRouter, email, outreach, Companies House, carriers,
+>    payouts, Xero, Amazon SP-API/Ads (credential steps only).
+> 5. **Rakazo** — unchanged, out of scope.
+> 6. **Supabase / Cloudflare / D1 migration** — parked.
+> 7. **Deploy to demo.mercenta.co.uk** — only on an explicit instruction.
+> 8. **Google / HMRC / social OAuth live flows** — credential steps only.
+> 9. **Social Media workstream** — unchanged.
+> 10. **Jev / Monid work** — unchanged.
+>
+> ### 4. DEFERRED / PARKED
+> 1. The scheduler trigger (roadmap 1) · 2. brand-facing BI consumption (roadmap 2) · 3. bulk retry
+> (roadmap 3) · 4. every live provider activation (roadmap 4) · 5. the infrastructure migration
+> (roadmap 6) · 6. Jev/Monid and the Social Media workstream (roadmaps 9–10).
+> 7. **`workstreamBD-seed-expansion-deferred`** — the Matrix's only `not_started` row: SEED EXPANSION
+> (Step D) **deferred by owner decision (2026-09-17)** — do NOT invent brands/products to expand
+> category seed coverage. It remains correctly parked and is NOT current-scope work.
+> 8. **`batchC-rocketchat-integration` and `batchD-model-router`** — the Matrix's two `regressed` rows.
+> Both are **historical removals** (Rocket.Chat removed in Phase D1 2026-09-11; the model-routing proxy
+> removed 2026-08-31 by owner request), retained as history rather than deleted.
+>
+> ### 5. BLOCKED / DEPENDENCIES
+> 1. Nothing is blocked. Everything built this sprint runs against canonical/simulated state with no
+>    external dependency. Live activation depends only on credentials the founder supplies.
+>
+> ### 6. KNOWN EXCEPTIONS
+> 1. `validate-e6-brand-surfaces` F5/F5b/F6 fail on the **unchanged 5 pre-existing offenders**
+>    (`ave1-check.mjs` + the four protected `design/*.png`) — not a product defect.
+> 2. `layout-audit.mjs`'s pre-existing undefined `text-brass-200` class in `AcquisitionWorkflow.tsx`
+>    (fixing it would change styling, which is forbidden).
+> 3. `scripts/lint-wording.mjs` excludes ONE internal-only BI file with an in-file justification
+>    (existing `prospectIntelligence.ts` precedent); the gate itself is unchanged (248 files scanned,
+>    0 violations).
+>
+> ### 7. CURRENT CHECKPOINT
+> Branch `redesign/foundation`, **HEAD `19be002c4b3d6a64020b4740879c56ef1550e628`** (unchanged this
+> sprint — **no commit was created**, per the project's protection rules). Working tree carries this
+> sprint's 12 new + 10 modified files alongside the pre-existing dirty state.
+>
+> ### 8. VERIFICATION STATUS
+> tsc 0 · eslint 0 · build PASS · wording PASS · integrity 61/0 · `validate-founder-operating-system`
+> 90/0 · `validate-uiux-redesign` 357/0 · `validate-e7` 121/0 · validator sweep 77 PASS / 1 FAIL
+> (pre-existing e6 only) · `verify-registry` exit 0 with **zero new flagged entries** · targeted
+> Playwright 26/0 · **FULL Playwright 356 passed / 0 failed / 2 skipped (358)** · new browser spec 5/5.
+>
+> ### 9. NEXT EXECUTION SCOPE
+> Either (a) wire the declared scheduler trigger (roadmap 1 — a wiring change only), or (b) start the
+> live provider activation playbook (`PRODUCTION_READINESS.md` / `GO_LIVE.md`). No Founder Operating
+> System capability is incomplete.
+>
+> ---
+>
+
+>
+
 > ---
 > ## ✅ FINAL DETERMINISTIC COMPLETION SPRINT — SPRINT 2 (2026-09-19) — **CURRENT CHECKPOINT**
 >
@@ -9,10 +2066,11 @@
 > No credentials added or activated. **Zero live provider calls.** No protected design asset modified,
 > renamed or added to git.
 >
-> **Checkpoint commit:** created at the end of this sprint — the exact hash is recorded in the closing
-> session report and appended below. Deliberately NOT committed: the 4 untracked protected
-> `design/*.png` assets and the stray 0-byte `ave1-check.mjs` (so the e6 F6 offender set stays at 5).
-> No `.env`, no generated `dist/`, no credential.
+> **Checkpoint commit:** `19be002c4b3d6a64020b4740879c56ef1550e628` (`19be002`), parent `7983a88`.
+> 99 files, +3919/−354. Baseline `959b4d2` and sprint-1's checkpoint `7983a88` both verified ancestors.
+> Deliberately NOT committed: the 4 untracked protected `design/*.png` assets and the stray 0-byte
+> `ave1-check.mjs` (so the e6 F6 offender set stays at 5). No `.env`, no generated `dist/`, no
+> credential, no secret.
 >
 > **Canonical report: `docs/SPRINT_DETERMINISTIC_COMPLETION_2026-09-19.md`.** This sprint closes the
 > PARTIAL scope sprint 1 explicitly left open. Summary:

@@ -41,6 +41,7 @@ import type {
   ChOfficer,
   ChPersonWithSignificantControl,
 } from '@/lib/compliance/companiesHouseClient';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 export interface RegistrarSnapshot {
   readAt: string | null;
@@ -219,6 +220,7 @@ function audit(action: string, actorId: string, reason: string, metadata?: Recor
     reason,
     metadata: { companyNumber: COMPANY_REGISTRATION.companyNumber, ...metadata },
   });
+  notifyCanonicalStoreChange();
 }
 
 /** Mask a secret for display. The full value is never returned anywhere. */
@@ -317,6 +319,7 @@ export function recordRegistrarSnapshot(input: {
     status: input.record.status,
     confirmationStatementDue: due,
   });
+  notifyCanonicalStoreChange();
   return snapshot;
 }
 
@@ -347,6 +350,7 @@ export function advanceConfirmationStatement(input: {
   audit('company_confirmation_statement_stage', input.actorId, `Workflow stage → ${input.stage}`, {
     stage: input.stage,
   });
+  notifyCanonicalStoreChange();
   return { ok: true, value: confirmationStatement };
 }
 
@@ -369,6 +373,7 @@ export function approveConfirmationStatement(input: {
   audit('company_confirmation_statement_approved', input.actorId, 'Founder approved the confirmation statement', {
     dueDate: confirmationStatement.nextDueDate,
   });
+  notifyCanonicalStoreChange();
   return { ok: true, value: confirmationStatement };
 }
 
@@ -422,6 +427,7 @@ export function recordManualFiling(input: {
     'Founder recorded a confirmation statement filed on the official Companies House service (Mercenta did not submit it)',
     { reference, filedAt: input.filedAt, method: 'manual_register' }
   );
+  notifyCanonicalStoreChange();
   return { ok: true, value: confirmationStatement };
 }
 
@@ -455,6 +461,7 @@ export function confirmConfirmationStatementFromRegister(input: {
   audit('company_confirmation_statement_verified', input.actorId, 'Registrar re-read confirmed the recorded filing', {
     reference: confirmationStatement.recordedReference,
   });
+  notifyCanonicalStoreChange();
   return { ok: true, value: confirmationStatement };
 }
 

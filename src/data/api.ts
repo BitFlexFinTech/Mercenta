@@ -443,6 +443,7 @@ export function issueDistributionAgreement(input: {
     brandId: input.brandId,
     reason: `Distribution agreement ${contract.id} issued (${contract.status}) — commission ${contract.commissionRate}%, monthly fee £${contract.monthlyFee}.`,
   });
+  notifyCanonicalStoreChange();
   return contract;
 }
 
@@ -632,6 +633,7 @@ export async function settleBrandPayout(
     })();
   }
 
+  notifyCanonicalStoreChange();
   return { ok: true, mode: client.mode, transferId: result.transferId, netShareGbp: result.netShareGbp };
 }
 
@@ -958,6 +960,7 @@ export function acknowledgePurchaseOrder(
     metadata: { actorLabel, acceptedLines: acceptedLines.map((l) => l.sku), rejectedLines: rejectedLines.map((l) => l.sku) },
   });
 
+  notifyCanonicalStoreChange();
   return { ok: true, warnings: warnings.length > 0 ? warnings : undefined };
 }
 
@@ -1039,6 +1042,7 @@ export function createPurchaseOrder(
     reason: actorLabel + ': created PO ' + poNum + ' for ' + brandName + ' — ' + lineItems.length + ' lines, GBP ' + po.poValue.toFixed(2),
     metadata: { actorLabel: actorLabel, lineCount: lineItems.length, poValue: po.poValue },
   });
+  notifyCanonicalStoreChange();
   return po;
 }
 
@@ -1111,6 +1115,7 @@ export function createSimulatedPurchaseOrder(
     reason: `${actorLabel}: SIMULATED PO ${poNumber} created for ${brandName} — ${lineItems.length} line(s), GBP ${po.poValue.toFixed(2)}. No email sent; no live provider contacted.`,
     metadata: { actorLabel, lineCount: lineItems.length, poValue: po.poValue, mode: 'simulation', simulated: true },
   });
+  notifyCanonicalStoreChange();
   return { ok: true, po, created: true };
 }
 
@@ -1273,6 +1278,7 @@ export function createShipmentForPO(
     reason: 'ASN auto-generated for PO ' + po.poNumber + ', shipment ' + shipmentId + '. Would be pushed to the live retail-channel API once the integration is connected.',
     metadata: { poNumber: po.poNumber, shipmentId: shipmentId, carrier: asn.carrier },
   });
+  notifyCanonicalStoreChange();
   return { ok: true, shipmentId, warnings, deductionId };
 }
 
@@ -1357,6 +1363,7 @@ export async function applyFulfillmentOverride(
     reason,
     metadata: { track },
   });
+  notifyCanonicalStoreChange();
   return { ok: true, source: 'seed' };
 }
 
@@ -1463,6 +1470,7 @@ export function uploadComplianceDoc(
     docId: doc.id,
     ...(submitted.ok ? { verificationRecordId: submitted.value.id } : {}),
   };
+  notifyCanonicalStoreChange();
 }
 
 export function setComplianceDocStatus(
@@ -1782,6 +1790,7 @@ export async function logMessage(
     // same thread history immediately. Single source of truth.
     demoMessages.unshift(full);
   }
+  notifyCanonicalStoreChange();
   return full;
 }
 /* ── §Batch-2 — Brand Settings API ────────────────────────────────── */
@@ -1807,6 +1816,7 @@ export {
   demoNotificationPrefs,
   demoReturns,
 } from './demoStore';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 /* ── §Batch-4 — Pagination infrastructure ─────────────────────────── */
 
 const DEFAULT_PAGE_SIZE = 50;

@@ -43,10 +43,11 @@ import {
   DEMO_PRODUCTS,
   DEMO_PURCHASE_ORDERS,
   DEMO_SHIPMENTS,
+  DEMO_WORKFLOW_PURCHASE_ORDERS,
   type DemoBrandRow,
   type DemoProduct,
 } from './demoData';
-import { notifyCanonicalStoreChange } from './prospectStore';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 import {
   COMMERCIAL_MODEL_ORDER,
   DEMO_ACQUISITION_SHARE_PCT,
@@ -196,6 +197,7 @@ export function ensureDistributionAgreement(input: {
     version: 1,
   };
   demoContracts.push(contract);
+  notifyCanonicalStoreChange();
   return contract;
 }
 /** §Stage-6 — Compliance Approvals mutations. */
@@ -208,6 +210,7 @@ export function setComplianceDocStatus(
   if (!d) return false;
   d.status = status;
   d.reviewedBy = reviewer;
+  notifyCanonicalStoreChange();
   return true;
 }
 
@@ -250,6 +253,7 @@ export function recordComplianceAudit(
     metadata,
   };
   demoAuditLog.push(entry);
+  notifyCanonicalStoreChange();
   return entry;
 }
 
@@ -469,7 +473,6 @@ export function addCatalogProduct(brandId: string, product: Product): DemoProduc
       id: DEMO_PRODUCTS[existing].id,
     };
     DEMO_PRODUCTS[existing] = merged;
-    notifyCanonicalStoreChange();
     return merged;
   }
   const created: DemoProduct = {
@@ -478,7 +481,6 @@ export function addCatalogProduct(brandId: string, product: Product): DemoProduc
     brandId,
   };
   DEMO_PRODUCTS.push(created);
-  notifyCanonicalStoreChange();
   return created;
 }
 
@@ -513,6 +515,7 @@ export function recordCatalogAudit(
     metadata,
   };
   demoAuditLog.push(entry);
+  notifyCanonicalStoreChange();
   return entry;
 }
 
@@ -578,6 +581,7 @@ export function recordCommerceInvoice(invoice: CommerceInvoice): CommerceInvoice
   const existing = demoCommerceInvoices.find((i) => i.id === invoice.id);
   if (existing) return existing;
   demoCommerceInvoices.push(invoice);
+  notifyCanonicalStoreChange();
   return invoice;
 }
 
@@ -609,6 +613,7 @@ export function recordCommercePayment(payment: CommercePayment): CommercePayment
   const existing = demoCommercePayments.find((p) => p.id === payment.id);
   if (existing) return existing;
   demoCommercePayments.push(payment);
+  notifyCanonicalStoreChange();
   return payment;
 }
 
@@ -648,6 +653,7 @@ export function recordCommerceAudit(
     metadata,
   };
   demoAuditLog.push(entry);
+  notifyCanonicalStoreChange();
   return entry;
 }
 
@@ -658,10 +664,17 @@ export const COMMERCE_SIMULATION_MODE: CommerceMode = 'simulation';
 
 /** §19.1 deductions ledger — DERIVED from demoPurchaseOrders (never
  *  hand-maintained PO references), covering every lifecycle state:
- *  open, disputed (pending outcome), accepted, resolved (won/lost). */
+ *  open, disputed (pending outcome), accepted, resolved (won/lost).
+ *
+ *  §RUNTIME PARITY — the `poIdx` positions below address the ORIGINAL
+ *  workflow PO block, not the whole seeded PO array. They were authored
+ *  against a four-PO array, and indexing them into the (now larger) canonical
+ *  array would silently re-point every deduction at a different PO/tenant —
+ *  which is exactly what happened when the lifecycle POs were added. The
+ *  positional fixture therefore reads its declared source explicitly. */
 export const demoDeductions: import('@/types').Deduction[] = (() => {
   const byIndex = (i: number) =>
-    demoPurchaseOrders[i % Math.max(demoPurchaseOrders.length, 1)];
+    DEMO_WORKFLOW_PURCHASE_ORDERS[i % Math.max(DEMO_WORKFLOW_PURCHASE_ORDERS.length, 1)];
   const iso = (daysAgo: number) =>
     new Date(Date.now() - daysAgo * 864e5).toISOString().slice(0, 10);
   const rows: Array<
@@ -699,6 +712,7 @@ export function setDeductionStatus(
   const d = demoDeductions.find((x) => x.id === id);
   if (!d) return null;
   d.status = status;
+  notifyCanonicalStoreChange();
   return d;
 }
 
@@ -723,6 +737,7 @@ export function disputeDeduction(id: string, notes: string): import('@/types').D
     brandId: d.brandId,
     reason: `Dispute opened on ${d.type.replace(/_/g, ' ')} (${d.purchaseOrderId}): ${notes.trim()}`,
   });
+  notifyCanonicalStoreChange();
   return d;
 }
 
@@ -746,6 +761,7 @@ export function recordDisputeOutcome(
     brandId: d.brandId,
     reason: `Dispute resolved as ${outcome} on ${d.type.replace(/_/g, ' ')} (${d.purchaseOrderId})`,
   });
+  notifyCanonicalStoreChange();
   return d;
 }
 
@@ -760,6 +776,7 @@ export function createDeductionInStore(
     id: input.id ?? `ded-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
   };
   demoDeductions.unshift(ded);
+  notifyCanonicalStoreChange();
   return ded;
 }
 
@@ -878,6 +895,7 @@ export function setAdSpendBudgetForBrand(
     reason: 'Manual monthly advertising budget input (simulation).',
     metadata: { before: prev, after: `${monthlyBudgetGbp}` },
   });
+  notifyCanonicalStoreChange();
   return { ok: true, budget: row };
 }
 
@@ -921,6 +939,7 @@ export function reviewAdSpendRecommendation(
     reason: `Recommended monthly advertising budget ${decision} (simulation).`,
     metadata: { month: rec.month, budget: `${rec.amendedBudgetGbp}` },
   });
+  notifyCanonicalStoreChange();
   return { ok: true, recommendation: rec };
 }
 /* ── §Functional-completion (2026-09-17) — Listing Analyzer reviews ──
@@ -992,6 +1011,7 @@ export function setListingRecommendationReview(
     reason: `Listing improvement ${action} by the brand (simulation).`,
     metadata: { editedCopy: decision.editedCopy ?? null },
   });
+  notifyCanonicalStoreChange();
   return { ok: true, decision };
 }
 
@@ -1068,6 +1088,7 @@ export function setPurchaseOrderStatus(
   if (!po) return null;
   po.status = status;
   if (status === 'rejected') po.rejectionReason = rejectionReason;
+  notifyCanonicalStoreChange();
   return po;
 }
 
@@ -1145,6 +1166,7 @@ export function reconcileDelivery(
     metadata: { shortfalls },
   });
 
+  notifyCanonicalStoreChange();
   return { po, shortfalls, deductionsCreated };
 }
 
@@ -1231,6 +1253,7 @@ export function reviewProfileChangeRequest(
     brandId: req.brandId,
     reason: `${req.field}: ${req.currentValue || '(empty)'} → ${req.requestedValue}${reviewNote ? ` — ${reviewNote}` : ''}`,
   });
+  notifyCanonicalStoreChange();
   return req;
 }
 
@@ -1282,6 +1305,7 @@ export function requestBankChange(
     reason,
     requestedAt: new Date().toISOString(),
   };
+  notifyCanonicalStoreChange();
   return info;
 }
 
@@ -1292,6 +1316,7 @@ export function approveBankChange(brandId: string): BrandBankInfo | null {
   (info as unknown as Record<string, string>)[field] = requestedValue;
   info.status = 'current';
   info.requestedChange = undefined;
+  notifyCanonicalStoreChange();
   return info;
 }
 
@@ -1357,6 +1382,7 @@ export function cancelPoOutage(id: string): BrandPoOutage | null {
   const o = demoPoOutages.find((x) => x.id === id);
   if (!o) return null;
   o.status = 'cancelled';
+  notifyCanonicalStoreChange();
   return o;
 }
 
@@ -1499,6 +1525,7 @@ export function addReturn(ret: Omit<BrandReturn, 'id'> & { id?: string }): Brand
     id: ret.id ?? `ret-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
   };
   demoReturns.unshift(full);
+  notifyCanonicalStoreChange();
   return full;
 }
 
@@ -1885,7 +1912,6 @@ export function setBrandCommercialModel(input: {
     existing.recordedBy = input.actorId;
     existing.reason = input.reason;
     appendAudit(existing, source === 'admin_override' ? 'commercial_model_changed' : 'commercial_model_confirmed');
-    notifyCanonicalStoreChange();
     return { ok: true, record: existing };
   }
 
@@ -1916,4 +1942,5 @@ export function commercialModelAuditFor(brandId: string): AuditLogEntry[] {
 export function resetBrandCommercialModels(): void {
   demoBrandCommercialModels.length = 0;
   demoBrandCommercialModels.push(...seedBrandCommercialModels());
+  notifyCanonicalStoreChange();
 }

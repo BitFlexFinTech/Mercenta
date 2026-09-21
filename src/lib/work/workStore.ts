@@ -35,9 +35,12 @@ import {
 } from '@/data/demoStore';
 import { getProspects, ensureProspectStore } from '@/data/prospectStore';
 import { getOnboardings } from '@/data/acquisitionStore';
+import { allCommercialReadinessRecords } from '@/data/commercialReadinessStore';
+import { COMMERCIAL_WORK_BY_ROUTE } from '@/config/commercialReadiness';
 import { ONBOARDING_STEP_ORDER } from '@/lib/onboarding/onboardingLifecycle';
 import { getAllReturnTracking } from '@/lib/warehouse/returnsTracking';
 import { emitEvent } from '@/lib/events/eventFeed';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 /* ── DECLARED deterministic terms (single source of truth) ─────────────────── */
 
@@ -71,6 +74,8 @@ export const WORK_SOURCE_LABELS: Record<WorkSource, string> = {
   outreach_followup: 'Outreach follow-up',
   contract_renewal: 'Contract renewal',
   onboarding_step: 'Onboarding step',
+  commercial_remediation: 'Commercial information needed',
+  commercial_review: 'Commercial review',
   manual: 'Manual task',
 };
 
@@ -196,6 +201,7 @@ function pushAudit(
     brandId: tenantId ?? undefined,
     reason,
   });
+  notifyCanonicalStoreChange();
 }
 
 /* ── Derivation ────────────────────────────────────────────────────────────── */
@@ -447,6 +453,34 @@ export function deriveWorkItems(): WorkItem[] {
     );
   }
 
+  /* 10. §Phase 2 — COMMERCIAL READINESS. A product whose commercial route is
+        `remediation` needs the BRAND to supply information; `blocked` /
+        `human_review` need a MERCENTA decision. The item is DERIVED from the
+        canonical readiness record, so resolving the underlying commercial issue
+        (the brand supplies the information and the record is REASSESSED to a
+        different route) removes the item from the attention set automatically —
+        and a repeated assessment can never create duplicate work. */
+  for (const cr of allCommercialReadinessRecords()) {
+    const def = COMMERCIAL_WORK_BY_ROUTE[cr.route];
+    if (!def.source || def.slaDays === null) continue;
+    const tenantId = cr.owner.kind === 'brand' ? cr.owner.tenantId : null;
+    const due = addDays(cr.createdAt.slice(0, 10), def.slaDays);
+    out.push(
+      make(def.source, { type: 'commercial_readiness', id: cr.id, label: cr.productLabel ?? cr.id }, {
+        title: `${WORK_SOURCE_LABELS[def.source]} — ${cr.productLabel ?? cr.id}`,
+        detail: `Route ${cr.route.replace('_', ' ')} · ${cr.missingInputs.length} missing input(s), ${
+          cr.openQuestions.length
+        } open question(s) · ${def.actionLabel}`,
+        priority: def.priority,
+        dueDate: due,
+        tenantId,
+        owner: def.owner === 'brand' ? (tenantId ? `brand:${tenantId}` : 'staff:mercenta-ops') : 'staff:mercenta-ops',
+        actionView: 'control_centre',
+        createdAt: cr.createdAt.slice(0, 10),
+      })
+    );
+  }
+
   return out;
 }
 
@@ -538,6 +572,7 @@ export function resolveWorkItem(id: string, actor: string, reason = 'Action comp
     metadata: { workItemId: id, source: item.source },
   });
   notify();
+  notifyCanonicalStoreChange();
   return getWorkItem(id);
 }
 
@@ -559,6 +594,7 @@ export function reopenWorkItem(id: string, actor: string, reason = 'Reopened'): 
   }
   pushAudit('work_item_reopened', 'work_item', id, item.tenantId, `${item.title} — ${reason}`, actor);
   notify();
+  notifyCanonicalStoreChange();
   return getWorkItem(id);
 }
 
@@ -581,6 +617,7 @@ export function setWorkItemStatus(id: string, status: WorkStatus, actor: string)
   }
   pushAudit('work_item_status_changed', 'work_item', id, item.tenantId, `${item.title} — ${WORK_STATUS_LABELS[status]}`, actor);
   notify();
+  notifyCanonicalStoreChange();
   return getWorkItem(id);
 }
 

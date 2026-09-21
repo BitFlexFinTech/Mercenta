@@ -23,6 +23,7 @@ import {
   type CaseProviderClient,
 } from '@/lib/helpdesk/amazonCaseClient';
 import type { ProviderResolutionMode } from '@/integrations/types';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 const uid = (p: string) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -99,6 +100,7 @@ export function createTicket(brandId: string, subject: string, source: TicketSou
   };
   demoTickets.unshift(t);
   writeTicketAudit('ticket_created', t.id, brandId, `Ticket created via ${source}: ${subject}`);
+  notifyCanonicalStoreChange();
   return t;
 }
 
@@ -109,6 +111,7 @@ export function updateTicketStatus(ticketId: string, status: TicketStatus, actor
   t.status = status;
   if (status === 'resolved') t.seenByStaff = true;
   writeTicketAudit('ticket_status_changed', ticketId, t.brandId, `${prev} → ${status}`, actorStaffId);
+  notifyCanonicalStoreChange();
   return t;
 }
 
@@ -191,6 +194,7 @@ function writeTicketAudit(action: string, ticketId: string, brandId: string, rea
     id: uid('audit'), createdAt: new Date().toISOString(), actorId: actorStaffId ?? 'system',
     action, entityType: 'helpdesk_ticket', entityId: ticketId, brandId, reason,
   });
+  notifyCanonicalStoreChange();
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -284,6 +288,7 @@ export function createCase(input: CreateCaseInput): Ticket {
     t.brandId,
     `Case ${t.caseRef} opened (${input.caseCategory}) — awaiting Mercenta review. Not yet sent to the retail channel.`
   );
+  notifyCanonicalStoreChange();
   return t;
 }
 
@@ -347,6 +352,7 @@ export function reviewCase(
     `Mercenta review: ${decision}${note ? ` — ${note}` : ''} (→ ${CASE_ESCALATION_LABELS[t.escalationState]})`,
     actorStaffId
   );
+  notifyCanonicalStoreChange();
   return { ok: true, ticket: t };
 }
 
@@ -460,6 +466,7 @@ export function resolveCase(ticketId: string, actorStaffId: string, note: string
   t.seenByStaff = true;
   t.updatedAt = now;
   writeTicketAudit('case_resolved', t.id, t.brandId, `Resolved: ${note}`, actorStaffId);
+  notifyCanonicalStoreChange();
   return { ok: true, ticket: t };
 }
 
@@ -472,6 +479,7 @@ export function closeCase(ticketId: string, actorStaffId: string, note: string):
   t.seenByStaff = true;
   t.updatedAt = new Date().toISOString();
   writeTicketAudit('case_closed', t.id, t.brandId, note ? `Closed: ${note}` : 'Closed.', actorStaffId);
+  notifyCanonicalStoreChange();
   return { ok: true, ticket: t };
 }
 

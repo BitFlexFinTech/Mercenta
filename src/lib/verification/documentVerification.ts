@@ -61,6 +61,7 @@ import {
   demoDocumentVerifications,
   recordComplianceAudit,
 } from '@/data/demoStore';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 /* ── Inputs / outcomes ───────────────────────────────────────────────────── */
 
@@ -449,6 +450,7 @@ export function submitDocumentForVerification(
     actor.staffId,
     { recordId: record.id, version }
   );
+  notifyCanonicalStoreChange();
   return { ok: true, value: record };
 }
 
@@ -531,6 +533,7 @@ export function persistDocumentVerdict(
       failureReason: verdict.failureReason ?? null,
     }
   );
+  notifyCanonicalStoreChange();
   return record;
 }
 
@@ -696,6 +699,7 @@ export function replaceComplianceDocument(
     { supersededDocumentId: previous.id, version, reason: input.reason.trim() }
   );
 
+  notifyCanonicalStoreChange();
   return { ok: true, value: { newDocument, supersededDocumentId: previous.id, version } };
 }
 

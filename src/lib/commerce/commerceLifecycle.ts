@@ -54,6 +54,7 @@ import {
 import { createPersistenceMirror, getDomainRepository } from '@/data/domainRepository';
 import * as store from '@/data/demoStore';
 import { findOrCreateTicketForBrand } from '@/lib/helpdesk/ticketStore';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 /**
  * The actor performing an operational commerce action. Extends the acquisition
@@ -463,6 +464,7 @@ export function advanceCommerceShipment(
     purchaseOrderId: linkedPo,
     shipmentId,
   });
+  notifyCanonicalStoreChange();
   return { ok: true, value: { shipmentId, status: next } };
 }
 

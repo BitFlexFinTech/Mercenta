@@ -54,6 +54,7 @@ import {
 import { defaultIntegrationMode } from '@/integrations/registry';
 import type { ProviderResolutionMode } from '@/integrations/types';
 import { selectAccountingClient } from './accountingSeam';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -625,6 +626,7 @@ export function setDestinationStatus(
       verificationRef: destination.verificationRef ?? null,
     }
   );
+  notifyCanonicalStoreChange();
   return { ok: true, value: destination };
 }
 

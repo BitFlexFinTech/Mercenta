@@ -16,6 +16,7 @@ import { demoAuditLog } from './demoStore';
 import type { AuditLogEntry } from '@/types';
 import { GOOGLE_ACCOUNT, GOOGLE_WORKSPACE_PLAN } from '@/config/google';
 import { summariseGoogleRun, type GoogleSetupStepResult } from '@/lib/google/workspaceSetup';
+import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 
 export interface GoogleSetupRun {
   ranAt: string;
@@ -86,6 +87,7 @@ function audit(action: string, actorId: string, reason: string, metadata?: Recor
     reason,
     metadata: { account: GOOGLE_ACCOUNT.email, ...metadata },
   });
+  notifyCanonicalStoreChange();
 }
 
 /** Record the founder's public OAuth client id (never a secret, never a token). */

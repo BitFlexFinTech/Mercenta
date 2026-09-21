@@ -15,7 +15,9 @@
     "validate:commercial-readiness": "node scripts/validate-commercial-readiness.mjs",
     "validate:brain": "node scripts/validate-mercenta-brain.mjs",
     "validate:logistics-map": "node scripts/validate-logistics-map.mjs",
-    "validate:workspace-shell": "node scripts/validate-workspace-shell.mjs"
+    "validate:product-routes": "node scripts/validate-product-routes.mjs",
+    "validate:workspace-shell": "node scripts/validate-workspace-shell.mjs",
+    "validate:canonical-propagation": "node scripts/validate-canonical-propagation.mjs"
   },
   "dependencies": {
     "@sentry/react": "^10.73.0",

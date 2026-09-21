@@ -101,6 +101,7 @@ function boot(): void {
       summary: `Seed baseline — ${prospects.length} canonical prospects loaded (${prospects.filter((p) => !p.disqualified).length} active, ${prospects.filter((p) => p.disqualified).length} disqualified).`,
     },
   ];
+  notifyCanonicalStoreChange();
 }
 
 /** Ensure the canonical universe exists (idempotent). */
@@ -108,33 +109,28 @@ export function ensureProspectStore(): void {
   boot();
 }
 
-/* ── §Phase C — canonical change signal ─────────────────────────────────────
- * ONE signal for the canonical BI universe AND the downstream acquisition
- * artefacts keyed to it, so every panel that reads them (BI panel, ICP
- * acquisition pipeline, CRM acquisition relationships, the ICP lead list)
- * re-renders from the SAME truth instead of holding duplicated copies.
- * Same in-memory module-level listener pattern the homepage live-version uses.
+/* ── §Phase C / §CANONICAL SIGNAL — canonical change signal ─────────────────
+ * §CANONICAL CHANGE SIGNAL — REPOINTED (2026-09-21). The signal's IMPLEMENTATION
+ * now lives in `src/lib/domain/canonicalSignal.ts`, because it is consumed by
+ * every projection (Brain, logistics map, dashboards, work layer) and fired by
+ * every mutation path — not only by the Brand-Intelligence universe this module
+ * happens to own. These re-exports keep every existing import path working while
+ * there is exactly ONE counter and ONE notification list in the process.
  * ────────────────────────────────────────────────────────────────────────── */
 
-let canonicalTick = 0;
-const canonicalListeners = new Set<() => void>();
+import {
+  getCanonicalStoreVersion,
+  notifyCanonicalStoreChange,
+  subscribeCanonicalStore,
+} from '@/lib/domain/canonicalSignal';
 
-export function getCanonicalStoreVersion(): number {
-  return canonicalTick;
-}
-
-export function subscribeCanonicalStore(listener: () => void): () => void {
-  canonicalListeners.add(listener);
-  return () => {
-    canonicalListeners.delete(listener);
-  };
-}
-
-/** Notify subscribers that canonical state changed (called by store mutators). */
-export function notifyCanonicalStoreChange(): void {
-  canonicalTick += 1;
-  for (const listener of canonicalListeners) listener();
-}
+/**
+ * Re-exported so every existing import path keeps working. NOTE: these are
+ * imported (local bindings) as well as re-exported, because this module's own
+ * mutators call `notifyCanonicalStoreChange()` directly — an `export … from`
+ * would create no local binding and the call would fail at runtime.
+ */
+export { getCanonicalStoreVersion, notifyCanonicalStoreChange, subscribeCanonicalStore };
 
 /** All canonical prospects (including disqualified — history is preserved). */
 export function getProspects(): BrandProspect[] {
@@ -186,6 +182,29 @@ export function getAcquisitionLeads(): Lead[] {
     .filter((l): l is Lead => l !== null);
 }
 
+/**
+ * §Phase 1 — ADD a canonical prospect to the universe.
+ *
+ * Deliberately ADDITIVE and deliberately NOT called at boot: the seeded universe
+ * is unchanged unless a founder explicitly feeds a qualified pre-audit into
+ * acquisition. The caller (the pre-audit → acquisition bridge) is responsible
+ * for deduplication on `normalizeBrandKey`, so this function never decides
+ * whether a prospect is a duplicate — it only records what it is given.
+ *
+ * Persisted through the SAME domain port and emits the SAME canonical store
+ * change notification as every other BI mutation, so there is still exactly one
+ * universe at runtime.
+ */
+export function addProspect(prospect: BrandProspect): BrandProspect {
+  boot();
+  prospects = [...prospects, prospect];
+  mirror(DOMAIN_TABLES.prospects, prospect.id, () =>
+    getDomainRepository().persistProspect(prospect, MERCENTA_OPS_TENANT)
+  );
+  notifyCanonicalStoreChange();
+  return prospect;
+}
+
 /** Replace a prospect record (used by lifecycle mutations). */
 export function updateProspect(prospect: BrandProspect): void {
   boot();
@@ -193,7 +212,6 @@ export function updateProspect(prospect: BrandProspect): void {
   mirror(DOMAIN_TABLES.prospects, prospect.id, () =>
     getDomainRepository().persistProspect(prospect, MERCENTA_OPS_TENANT)
   );
-  notifyCanonicalStoreChange();
 }
 
 /** Record a completed discovery run + its change events + snapshots. */
@@ -220,8 +238,8 @@ export function applyRunResult(
     mirror(DOMAIN_TABLES.snapshots, `${s.brandId}-${s.snapshotDate}`, () =>
       getDomainRepository().persistSnapshot(s, MERCENTA_OPS_TENANT)
     );
-  }
   notifyCanonicalStoreChange();
+  }
 }
 
 /** Record a lifecycle event outside a run (disqualify/requalify audit). */
@@ -287,4 +305,5 @@ export function resetProspectStore(): void {
   snapshots = [];
   initialized = false;
   persistenceMirror.reset();
+  notifyCanonicalStoreChange();
 }
