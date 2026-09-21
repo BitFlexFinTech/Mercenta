@@ -9,12 +9,10 @@
  * competing design generations in the first place.
  *
  * What it locks in:
- *  1. THE LEGACY PAGE SHELL IS A SHRINKING BACKLOG. Every `src/**` file that
- *     still declares the pre-workspace container is named in
- *     `LEGACY_SHELL_BACKLOG`. A NEW file using it FAILS the gate, and a file
- *     that has been migrated but left in the backlog ALSO fails (the list can
- *     only ratchet down — the same pattern the repo uses for retired
- *     contracts, repointed rather than weakened).
+ *  1. THE LEGACY PAGE SHELL IS GONE. `LEGACY_SHELL_BACKLOG` is now EMPTY and no
+ *     file in `src/**` may declare the pre-workspace container in code. The
+ *     backlog mechanism is retained (not deleted) so a reintroduction must be
+ *     explicit and visible in review rather than silent.
  *  2. ONE DASHBOARD GENERATION. `src/components/shared/dashboard.tsx` is now a
  *     thin adapter over the canonical workspace primitives and must have NO
  *     operational consumer. A new import of `@/components/shared/dashboard`
@@ -75,29 +73,19 @@ function declaresLegacyShell(src) {
 }
 
 /**
- * THE SHRINKING BACKLOG — the surfaces still carrying the pre-workspace page
- * shell after this redesign pass.
+ * THE SHRINKING BACKLOG — EMPTY, and that is the point.
  *
- * REMOVING AN ENTRY IS THE POINT: migrate the file, delete the line here, and
- * the gate proves the migration. Discovering a new one must be added here
- * explicitly (never silently), which is what stops the debt from spreading.
+ * It listed the surfaces still carrying the pre-workspace page shell. All 14
+ * have now been migrated onto `WorkspaceFrame` / `WorkspaceHeader`, so the list
+ * is empty and the assertion below has flipped from "no new offender" to
+ * "**no file anywhere in `src/` may declare the legacy shell at all**".
+ *
+ * The mechanism is deliberately retained rather than deleted: a future edit that
+ * reintroduces `p-6 … max-w-[1400px] mx-auto` as a page container must now
+ * either fix the file or add it here explicitly, where the review will see it.
+ * Discovery is never silent.
  */
-const LEGACY_SHELL_BACKLOG = [
-  'src/components/layout/AdminShell.tsx',
-  'src/components/admin/CarrierMonitor.tsx',
-  'src/components/admin/ContractsAdminPanel.tsx',
-  'src/components/admin/FulfillmentTrack.tsx',
-  'src/components/admin/MarketingHub.tsx',
-  'src/components/admin/MonitoringDashboard.tsx',
-  'src/components/admin/RetailPipeline.tsx',
-  'src/components/brand/BrandAdvertising.tsx',
-  'src/components/brand/BrandTeamMessages.tsx',
-  'src/components/brand/ListingAnalyzer.tsx',
-  'src/components/brand/MercentaSocial.tsx',
-  'src/components/brand/OnboardingSummary.tsx',
-  'src/components/carrier/BakLogistics.tsx',
-  'src/components/carrier/CarrierDashboard.tsx',
-];
+const LEGACY_SHELL_BACKLOG = [];
 
 const ALL_SRC = walk('src');
 /* ── 1. The legacy page shell is a shrinking backlog ────────────────────── */
@@ -196,6 +184,37 @@ for (const f of MIGRATED_SURFACES) {
     `${f} renders a real workspace body primitive`,
     /<(WorkspaceSection|MetricBand|Queue|DataTable|WorkspaceGrid|Card)\b/.test(src)
   );
+  check(`${f} no longer declares the legacy page shell`, !declaresLegacyShell(src));
+}
+
+/**
+ * §UI/UX REDESIGN (backlog retirement pass) — the 14 files that carried the
+ * legacy shell are now on the canonical frame/header. Several are GUARD
+ * branches or terminal surfaces rather than full operational pages, so the
+ * contract asserted here is the shell contract (frame + header + no legacy
+ * container) rather than the full body contract above.
+ */
+const SHELL_MIGRATED_SURFACES = [
+  'src/components/layout/AdminShell.tsx',
+  'src/components/admin/CarrierMonitor.tsx',
+  'src/components/admin/ContractsAdminPanel.tsx',
+  'src/components/admin/FulfillmentTrack.tsx',
+  'src/components/admin/MarketingHub.tsx',
+  'src/components/admin/MonitoringDashboard.tsx',
+  'src/components/admin/RetailPipeline.tsx',
+  'src/components/brand/BrandAdvertising.tsx',
+  'src/components/brand/BrandTeamMessages.tsx',
+  'src/components/brand/ListingAnalyzer.tsx',
+  'src/components/brand/MercentaSocial.tsx',
+  'src/components/brand/OnboardingSummary.tsx',
+  'src/components/carrier/BakLogistics.tsx',
+  'src/components/carrier/CarrierDashboard.tsx',
+];
+
+for (const f of SHELL_MIGRATED_SURFACES) {
+  const src = read(f);
+  check(`${f} composes the workspace frame`, src.includes('<WorkspaceFrame'));
+  check(`${f} composes the workspace header`, src.includes('<WorkspaceHeader'));
   check(`${f} no longer declares the legacy page shell`, !declaresLegacyShell(src));
 }
 

@@ -95,7 +95,18 @@ test.describe('Phase D1 — Rocket.Chat removal', () => {
     // Helpdesk renders the same canonical conversation (tkt-001 →
     // msg-brand-astonish-1/-2 from DEMO_MESSAGES).
     await openNav(page, 'Helpdesk');
-    await expect(page.locator('h2', { hasText: 'Helpdesk' }).first()).toBeVisible({ timeout: 6000 });
+    /*
+     * §UI/UX REDESIGN (legacy page-shell retirement) — REPOINTED.
+     * OLD CONTRACT: `page.locator('h2', { hasText: 'Helpdesk' })`.
+     * The Helpdesk surface was migrated onto the canonical workspace shell, whose
+     * page title is an `h1` (WorkspaceHeader) — the same level every other
+     * migrated surface uses, and what makes the page carry a single top-level
+     * heading for assistive technology. The INTENT of this assertion — "the
+     * Helpdesk surface rendered, and it is the Helpdesk one" — is unchanged; the
+     * selector is now heading-LEVEL-agnostic so it cannot break again when a page
+     * title legitimately moves between h1/h2.
+     */
+    await expect(page.getByRole('heading', { name: 'Helpdesk' }).first()).toBeVisible({ timeout: 6000 });
     await expect(page.locator('text=Astonish — PO dispatch query').first()).toBeVisible({ timeout: 6000 });
     await expect(page.locator('text=Thanks — can we talk about pricing and the first purchase order this week?').first()).toBeVisible({ timeout: 4000 });
 

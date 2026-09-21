@@ -13,6 +13,7 @@ import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/conf
 import type { Contract, FulfillmentTrack } from '@/types';
 import type { DemoBrandRow } from '@/data/demoData';
 import { Badge, Button, Card, Input } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { DataTable } from '@/components/shared/DataTable';
 import { cn } from '@/utils/cn';
 import { FileText, Lock, Plus, Eye, X, History, RotateCcw, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
@@ -27,7 +28,7 @@ function UrgencyBadge({ renewalDate }: { renewalDate: string }) {
     '60d': 'bg-blue-500/15 text-blue-300 border-blue-500/20',
   };
   const label = urgency === 'expired' ? 'Expired' : `≤ ${urgency.replace('d', '')} days`;
-  return <Badge className={cn('text-[10px]', map[urgency])}>{label}</Badge>;
+  return <Badge className={cn('text-ds-micro', map[urgency])}>{label}</Badge>;
 }
 
 /** Pre-fill commercial terms from the brand's fulfillment-track data (§5). */
@@ -65,36 +66,30 @@ export function ContractsAdminPanel() {
   );
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brass/15 flex items-center justify-center">
-            <FileText className="w-5 h-5 text-brass" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-white">Contract Cycle</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Full CRM — generate from template, send for e-signature, track renewals
-            </p>
-          </div>
-        </div>
-        <Button
-          onClick={() => setGenerateFor(brands[0] ?? null)}
-          className="text-xs"
-          disabled={brands.length === 0}
-        >
-          <Plus className="w-3.5 h-3.5 mr-1" /> New Contract
-        </Button>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="ADMIN HUB · CONTRACTS"
+        title="Contract Cycle"
+        description="Full CRM — generate from template, send for e-signature, track renewals."
+        actions={
+          <Button
+            onClick={() => setGenerateFor(brands[0] ?? null)}
+            className="text-xs"
+            disabled={brands.length === 0}
+          >
+            <Plus className="w-3.5 h-3.5 mr-1" /> New Contract
+          </Button>
+        }
+      />
 
       {lastEnvelope && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2.5 text-[11px] text-emerald-200">
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2.5 text-ds-label text-emerald-200">
           Last e-sign envelope sent: <code className="font-mono">{lastEnvelope}</code>
         </div>
       )}
 
       {!esignLive && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-[11px] text-amber-200 flex items-start gap-2">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200 flex items-start gap-2">
           <Lock className="w-3.5 h-3.5 mt-0.5 text-amber-300 flex-shrink-0" />
           <span>
             E-signature runs in <strong>(Mock) mode</strong> — envelopes are
@@ -121,7 +116,7 @@ export function ContractsAdminPanel() {
               render: (c) => (
                 <Badge
                   className={cn(
-                    'text-[10px]',
+                    'text-ds-micro',
                     c.status === 'active' || c.status === 'signed'
                       ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                       : c.status === 'draft'
@@ -141,11 +136,11 @@ export function ContractsAdminPanel() {
                 <span className="whitespace-nowrap">
                   <button
                     onClick={() => setViewingContract(c)}
-                    className="text-[11px] text-brass hover:underline mr-3 inline-flex items-center gap-1"
+                    className="text-ds-label text-brass hover:underline mr-3 inline-flex items-center gap-1"
                   >
                     <Eye className="w-3 h-3" /> View
                   </button>
-                  <span className="font-mono text-[11px]">{c.renewalDate}</span>{' '}
+                  <span className="font-mono text-ds-label">{c.renewalDate}</span>{' '}
                   <UrgencyBadge renewalDate={c.renewalDate} />
                 </span>
               ),
@@ -188,7 +183,7 @@ export function ContractsAdminPanel() {
           onCreateDraft={(draft) => setExtraDrafts((prev) => [draft, ...prev])}
         />
       )}
-    </div>
+    </WorkspaceFrame>
   );
 }
 
@@ -289,12 +284,12 @@ function GenerateModal({
           </div>
         </div>
 
-        <pre className="bg-ink rounded-lg border border-white/[0.05] p-3 text-[10px] text-zinc-400 whitespace-pre-wrap max-h-48 overflow-y-auto mb-4">
+        <pre className="bg-ink rounded-lg border border-white/[0.05] p-3 text-ds-micro text-zinc-400 whitespace-pre-wrap max-h-48 overflow-y-auto mb-4">
           {previewText}
         </pre>
 
         {!esignLive && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-[11px] text-amber-200 mb-3 flex items-start gap-1.5">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-ds-label text-amber-200 mb-3 flex items-start gap-1.5">
             <Lock className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             No verified e-sign connection — the envelope will be SIMULATED
             (mock client, id like mock:env-…).
@@ -332,10 +327,10 @@ function ContractVersionHistory({ contracts, currentVersion }: { contracts: Cont
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs font-medium text-white">Version {c.version}{isCurrent && <span className="text-[10px] text-brass-400 ml-1.5">(Current)</span>}</span>
-                <Badge className={cn('text-[9px]', c.status === 'active' || c.status === 'signed' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' : c.status === 'draft' ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20' : 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>{CONTRACT_STATUS_LABELS[c.status]}</Badge>
+                <span className="text-xs font-medium text-white">Version {c.version}{isCurrent && <span className="text-ds-micro text-brass-400 ml-1.5">(Current)</span>}</span>
+                <Badge className={cn('text-ds-micro', c.status === 'active' || c.status === 'signed' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' : c.status === 'draft' ? 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20' : 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>{CONTRACT_STATUS_LABELS[c.status]}</Badge>
               </div>
-              <div className="text-[10px] text-zinc-500 space-y-0.5">
+              <div className="text-ds-micro text-zinc-500 space-y-0.5">
                 <span>{c.type.replace(/_/g, ' ')} - {c.commissionRate}% - {c.monthlyFee}/mo - {c.fulfillmentTrack.replace(/_/g, ' ')}</span>
                 <div className="flex items-center gap-3"><span>Effective: {c.effectiveDate}</span><span>Renewal: {c.renewalDate}</span></div>
                 {c.signatories.length > 0 && <div className="flex items-center gap-1 mt-0.5"><CheckCircle2 className="w-3 h-3 text-emerald-400" /><span className="text-emerald-400/80">{c.signatories.length} signator{c.signatories.length === 1 ? 'y' : 'ies'}</span></div>}
@@ -370,24 +365,24 @@ function ContractDetailModal({ contract, allContracts, brands, onClose, onCreate
       <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-white/[0.08]">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
-            <h3 className="text-sm font-semibold text-white">{contract.type.replace(/_/g, ' ')} - {brandName}<Badge className={cn('text-[10px] ml-2', 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>v{contract.version} - {CONTRACT_STATUS_LABELS[contract.status]}</Badge></h3>
-            <p className="text-[10px] text-zinc-500 mt-0.5">{contract.fulfillmentTrack.replace(/_/g, ' ')} track - {contract.commissionRate}% - {contract.monthlyFee}/mo</p>
+            <h3 className="text-sm font-semibold text-white">{contract.type.replace(/_/g, ' ')} - {brandName}<Badge className={cn('text-ds-micro ml-2', 'bg-blue-500/15 text-blue-300 border-blue-500/20')}>v{contract.version} - {CONTRACT_STATUS_LABELS[contract.status]}</Badge></h3>
+            <p className="text-ds-micro text-zinc-500 mt-0.5">{contract.fulfillmentTrack.replace(/_/g, ' ')} track - {contract.commissionRate}% - {contract.monthlyFee}/mo</p>
           </div>
           <button onClick={onClose} className="text-zinc-500 hover:text-white"><X className="w-4 h-4" /></button>
         </div>
         <div className="flex gap-1 px-5 pt-3 border-b border-white/[0.06]">
-          <button onClick={() => setTab('document')} className={cn('px-3 py-1.5 text-[11px] font-medium rounded-t transition-colors', tab === 'document' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><FileText className="w-3.5 h-3.5 inline mr-1" /> Document</button>
-          <button onClick={() => setTab('history')} className={cn('px-3 py-1.5 text-[11px] font-medium rounded-t transition-colors', tab === 'history' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><History className="w-3.5 h-3.5 inline mr-1" /> Version History ({brandVersions.length})</button>
+          <button onClick={() => setTab('document')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'document' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><FileText className="w-3.5 h-3.5 inline mr-1" /> Document</button>
+          <button onClick={() => setTab('history')} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t transition-colors', tab === 'history' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}><History className="w-3.5 h-3.5 inline mr-1" /> Version History ({brandVersions.length})</button>
         </div>
         {tab === 'document' && (
           <>
-            <pre className="flex-1 overflow-y-auto px-6 py-4 text-[11px] leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">
+            <pre className="flex-1 overflow-y-auto px-6 py-4 text-ds-label leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">
               {buildDistributionAgreement({ businessName: brandName, commissionRate: contract.commissionRate, monthlyFee: contract.monthlyFee, category: brandCategory, fulfillmentTrack: contract.fulfillmentTrack === 'unassigned' ? 'financed' : contract.fulfillmentTrack })}
             </pre>
             <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06]">
               <div className="flex items-center gap-2">
-                {contract.status !== 'draft' && <Button className="text-[10px]" variant="ghost" onClick={handleCreateRenewalDraft}><RotateCcw className="w-3 h-3 mr-1" /> Create Renewal Draft</Button>}
-                {contract.status === 'active' && <Button className="text-[10px]" variant="ghost" onClick={handleCreateAmendment}><AlertTriangle className="w-3 h-3 mr-1" /> Create Track Amendment</Button>}
+                {contract.status !== 'draft' && <Button className="text-ds-micro" variant="ghost" onClick={handleCreateRenewalDraft}><RotateCcw className="w-3 h-3 mr-1" /> Create Renewal Draft</Button>}
+                {contract.status === 'active' && <Button className="text-ds-micro" variant="ghost" onClick={handleCreateAmendment}><AlertTriangle className="w-3 h-3 mr-1" /> Create Track Amendment</Button>}
               </div>
               <Button variant="ghost" onClick={onClose}>Close</Button>
             </div>
@@ -395,7 +390,7 @@ function ContractDetailModal({ contract, allContracts, brands, onClose, onCreate
         )}
         {tab === 'history' && (
           <div className="flex-1 overflow-y-auto px-6 py-5">
-            <p className="text-[11px] text-zinc-500 mb-4">{brandVersions.length} version(s) of {brandName}'s distribution agreement.</p>
+            <p className="text-ds-label text-zinc-500 mb-4">{brandVersions.length} version(s) of {brandName}'s distribution agreement.</p>
             <ContractVersionHistory contracts={brandVersions} currentVersion={contract.version} />
           </div>
         )}

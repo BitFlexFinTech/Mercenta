@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { socialPostStatePresentation } from '@/lib/statusPresentation';
 import { createSocialEngineClient } from '@/lib/social/engineAdapter';
 import { cn } from '@/utils/cn';
@@ -44,7 +45,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   ExternalLink,
-  Globe,
   Layers,
   Loader2,
   ShieldCheck,
@@ -175,18 +175,28 @@ export function MercentaSocial() {
 
   if (!tenantId) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto">
+      <WorkspaceFrame className="space-y-4">
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · SOCIAL"
+          title={MERCENTA_SOCIAL.productName}
+          description="Included with your Mercenta partnership — no separate sign-up."
+        />
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 text-sm text-amber-200">
           <AlertTriangle className="w-4 h-4 inline mr-2" />
           No active brand session.
         </div>
-      </div>
+      </WorkspaceFrame>
     );
   }
 
   if (!access.allowed) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto space-y-4" data-testid="mercenta-social">
+      <WorkspaceFrame testId="mercenta-social" className="space-y-4">
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · SOCIAL"
+          title={MERCENTA_SOCIAL.productName}
+          description="Included with an approved Mercenta partnership."
+        />
         <Card className="p-6">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5" />
@@ -202,38 +212,34 @@ export function MercentaSocial() {
             </div>
           </div>
         </Card>
-      </div>
+      </WorkspaceFrame>
     );
   }
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto space-y-6" data-testid="mercenta-social">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Globe className="w-5 h-5 text-brass-400" />
-          <div>
-            <h2 className="text-lg font-semibold text-white">{MERCENTA_SOCIAL.productName}</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              {MERCENTA_SOCIAL.tagline} {MERCENTA_SOCIAL.noSeparateSignup}
-            </p>
-          </div>
-        </div>
-        <Badge
-          className={cn(
-            'text-[10px]',
-            engine.configured
-              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-              : 'bg-amber-500/15 text-amber-200 border-amber-500/20'
-          )}
-        >
-          <span data-testid="ms-engine-state">
-            {engine.configured ? 'Connected' : 'Simulation — not configured'}
-          </span>
-        </Badge>
-      </header>
+    <WorkspaceFrame testId="mercenta-social" className="space-y-6">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · SOCIAL"
+        title={MERCENTA_SOCIAL.productName}
+        description={`${MERCENTA_SOCIAL.tagline} ${MERCENTA_SOCIAL.noSeparateSignup}`}
+        status={
+          <Badge
+            className={cn(
+              'text-ds-micro',
+              engine.configured
+                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+                : 'bg-amber-500/15 text-amber-200 border-amber-500/20'
+            )}
+          >
+            <span data-testid="ms-engine-state">
+              {engine.configured ? 'Connected' : 'Simulation — not configured'}
+            </span>
+          </Badge>
+        }
+      />
 
       {!engine.configured && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-[11px] text-amber-200">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200">
           <ShieldCheck className="w-3 h-3 inline mr-1" />
           <strong>Simulation.</strong> {engine.blockedReasons.join(' ')}
         </div>
@@ -244,17 +250,17 @@ export function MercentaSocial() {
           <div className="text-xs font-medium text-zinc-400 mb-3">Your workspace</div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white">
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-zinc-500">Workspace</div>
+              <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Workspace</div>
               <div className="font-mono text-xs" data-testid="ms-workspace-id">
                 {workspace?.workspaceId ?? '—'}
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-zinc-500">Brand</div>
+              <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Brand</div>
               <div className="text-xs">{workspace?.brandName ?? brandName}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-zinc-500">Provisioning</div>
+              <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Provisioning</div>
               <div className="text-xs" data-testid="ms-provision-state">
                 {workspace
                   ? workspace.provisionInvocationCount > 1
@@ -264,11 +270,11 @@ export function MercentaSocial() {
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-zinc-500">Isolation</div>
+              <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Isolation</div>
               <div className="text-xs">Private to this brand tenant</div>
             </div>
           </div>
-          {provisionError && <div className="mt-3 text-[11px] text-red-300">{provisionError}</div>}
+          {provisionError && <div className="mt-3 text-ds-label text-red-300">{provisionError}</div>}
         </Card>
 
         <Card className="p-5">
@@ -302,7 +308,7 @@ export function MercentaSocial() {
         <div className="flex flex-wrap items-center justify-between gap-3" data-testid="ms-launch">
           <div>
             <div className="text-sm font-medium text-white">Your {MERCENTA_SOCIAL.productName} workspace</div>
-            <p className="text-[11px] text-zinc-500 mt-1">
+            <p className="text-ds-label text-zinc-500 mt-1">
               {workspace?.engineLinked
                 ? 'Provisioned and linked for this brand. Opening it signs you in — no separate account, no password, no plan.'
                 : 'Provisioned automatically for this brand. Opening it creates your workspace on first use — no separate account, no password, no plan.'}
@@ -320,7 +326,7 @@ export function MercentaSocial() {
 
         {launchError && (
           <div
-            className="mt-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-[11px] text-amber-200"
+            className="mt-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200"
             data-testid="ms-launch-error"
           >
             {launchError}
@@ -329,7 +335,7 @@ export function MercentaSocial() {
 
         {launchUrl && (
           <div className="mt-4">
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500 mb-2">
               {MERCENTA_SOCIAL.productName} application
             </div>
             <iframe
@@ -340,7 +346,7 @@ export function MercentaSocial() {
               referrerPolicy="no-referrer"
               data-testid="ms-engine-frame"
             />
-            <p className="text-[10px] text-zinc-500 mt-2">
+            <p className="text-ds-micro text-zinc-500 mt-2">
               Browsers that block cookies inside third-party frames will not keep the session here —
               use the button above, which opens your workspace where the session is established same-site.
             </p>
@@ -363,7 +369,7 @@ export function MercentaSocial() {
       />
       <ProviderSurface />
       <InclusionStatement />
-    </div>
+    </WorkspaceFrame>
   );
 }
 
@@ -393,7 +399,7 @@ function SocialSimulationStudio() {
   if (!client) {
     return (
       <Card className="p-5">
-        <p className="text-[11px] text-red-300" data-testid="ms-simulation-studio">
+        <p className="text-ds-label text-red-300" data-testid="ms-simulation-studio">
           The simulation engine refused to start: its mode was not positively identified as
           simulation. No simulated operation was executed.
         </p>
@@ -468,14 +474,14 @@ function SocialSimulationStudio() {
       <div data-testid="ms-simulation-studio">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-sm font-medium text-white">
-          Studio <span className="text-[11px] text-amber-300">(simulation)</span>
+          Studio <span className="text-ds-label text-amber-300">(simulation)</span>
         </div>
-        <span className="text-[11px] text-zinc-400" data-testid="ms-sim-analytics">
+        <span className="text-ds-label text-zinc-400" data-testid="ms-sim-analytics">
           {analytics.channels} channel(s) · {analytics.posts} post(s) · {analytics.published} published ·{' '}
           {analytics.queued} queued · {analytics.failed} failed
         </span>
       </div>
-      <p className="mt-2 text-[11px] text-zinc-500">
+      <p className="mt-2 text-ds-label text-zinc-500">
         The deployed engine is capacity-limited on today's infrastructure, so this studio runs the
         SAME workflow locally instead: connect a channel, compose, queue, publish, fail, retry and
         cancel — deterministically and without any live provider call. Nothing here is presented as a
@@ -483,7 +489,7 @@ function SocialSimulationStudio() {
       </p>
 
       <div className="mt-4 flex flex-wrap items-end gap-2">
-        <label className="text-[11px] text-zinc-500">
+        <label className="text-ds-label text-zinc-500">
           Channel
           <select
             value={providerId}
@@ -498,18 +504,18 @@ function SocialSimulationStudio() {
             ))}
           </select>
         </label>
-        <Button size="sm" variant="secondary" onClick={connect} className="text-[11px]">
+        <Button size="sm" variant="secondary" onClick={connect} className="text-ds-label">
           Connect (simulated)
         </Button>
         {channels.length > 0 && (
-          <span className="text-[11px] text-zinc-400" data-testid="ms-sim-channels">
+          <span className="text-ds-label text-zinc-400" data-testid="ms-sim-channels">
             Connected: {channels.map((c) => c.label).join(', ')}
           </span>
         )}
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-4">
-        <label className="text-[11px] text-zinc-500">
+        <label className="text-ds-label text-zinc-500">
           Post to
           <select
             value={channelId}
@@ -525,7 +531,7 @@ function SocialSimulationStudio() {
             ))}
           </select>
         </label>
-        <label className="text-[11px] text-zinc-500 md:col-span-2">
+        <label className="text-ds-label text-zinc-500 md:col-span-2">
           Content
           <textarea
             value={body}
@@ -536,7 +542,7 @@ function SocialSimulationStudio() {
             data-testid="ms-sim-body"
           />
         </label>
-        <label className="text-[11px] text-zinc-500">
+        <label className="text-ds-label text-zinc-500">
           Schedule (optional)
           <input
             type="datetime-local"
@@ -553,30 +559,30 @@ function SocialSimulationStudio() {
           size="sm"
           onClick={create}
           disabled={!channelId || !body.trim()}
-          className="text-[11px]"
+          className="text-ds-label"
         >
           Queue post
         </Button>
-        <Button size="sm" variant="secondary" onClick={publishQueue} className="text-[11px]">
+        <Button size="sm" variant="secondary" onClick={publishQueue} className="text-ds-label">
           Run queue (publish now)
         </Button>
       </div>
 
       {notice && (
-        <p className="mt-3 text-[11px] text-emerald-300" data-testid="ms-sim-notice">
+        <p className="mt-3 text-ds-label text-emerald-300" data-testid="ms-sim-notice">
           {notice}
         </p>
       )}
       {error && (
-        <p className="mt-3 text-[11px] text-red-300" data-testid="ms-sim-error">
+        <p className="mt-3 text-ds-label text-red-300" data-testid="ms-sim-error">
           {error}
         </p>
       )}
 
       <div className="mt-4 space-y-1">
-        <div className="text-[10px] uppercase tracking-wider text-zinc-500">Queue</div>
+        <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Queue</div>
         {posts.length === 0 ? (
-          <p className="text-[11px] text-zinc-600">No posts yet.</p>
+          <p className="text-ds-label text-zinc-600">No posts yet.</p>
         ) : (
           posts.map((p) => {
             const state = socialPostStatePresentation(p.state);
@@ -587,28 +593,28 @@ function SocialSimulationStudio() {
                 data-testid={`ms-sim-post-${p.id}`}
               >
                 <div className="min-w-0">
-                  <span className="font-mono text-[10px] text-zinc-500">{p.id}</span>{' '}
+                  <span className="font-mono text-ds-micro text-zinc-500">{p.id}</span>{' '}
                   <span className="text-xs text-zinc-300">{p.body}</span>
-                  <span className="ml-2 text-[10px] text-zinc-600">
+                  <span className="ml-2 text-ds-micro text-zinc-600">
                     {p.providerId} · attempt {p.attempts}
                     {p.releaseId ? ` · release ${p.releaseId}` : ''}
                     {p.scheduledFor
                       ? ` · scheduled ${p.scheduledFor.slice(0, 16).replace('T', ' ')}`
                       : ''}
                   </span>
-                  {p.error && <span className="ml-2 text-[10px] text-red-300">{p.error}</span>}
+                  {p.error && <span className="ml-2 text-ds-micro text-red-300">{p.error}</span>}
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge dataStatus={state.dataStatus} tone={state.tone}>
                     {state.label}
                   </StatusBadge>
                   {p.state === 'ERROR' && (
-                    <Button size="sm" variant="ghost" className="text-[10px]" onClick={() => retry(p.id)}>
+                    <Button size="sm" variant="ghost" className="text-ds-micro" onClick={() => retry(p.id)}>
                       Retry
                     </Button>
                   )}
                   {(p.state === 'QUEUE' || p.state === 'ERROR') && (
-                    <Button size="sm" variant="ghost" className="text-[10px]" onClick={() => cancel(p.id)}>
+                    <Button size="sm" variant="ghost" className="text-ds-micro" onClick={() => cancel(p.id)}>
                       Cancel
                     </Button>
                   )}
@@ -620,7 +626,7 @@ function SocialSimulationStudio() {
       </div>
 
       {analytics.byProvider.length > 0 && (
-        <p className="mt-3 text-[10px] text-zinc-500" data-testid="ms-sim-by-provider">
+        <p className="mt-3 text-ds-micro text-zinc-500" data-testid="ms-sim-by-provider">
           {analytics.byProvider.map((r) => `${r.label}: ${r.published}/${r.posts} published`).join(' · ')}
         </p>
       )}
@@ -661,8 +667,8 @@ function ModuleSurface({
             )}
           >
             <div className="text-sm font-medium text-white">{m.label}</div>
-            <div className="text-[11px] text-zinc-500 mt-1">{m.summary}</div>
-            <div className="text-[10px] text-zinc-600 mt-2">
+            <div className="text-ds-label text-zinc-500 mt-1">{m.summary}</div>
+            <div className="text-ds-micro text-zinc-600 mt-2">
               {engineConfigured ? 'Open in your workspace ›' : 'Available when connected ›'}
             </div>
           </button>
@@ -675,9 +681,9 @@ function ModuleSurface({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h4 className="text-sm font-semibold text-white">{selected.label}</h4>
-                <p className="text-[11px] text-zinc-500 mt-1">{selected.summary}</p>
+                <p className="text-ds-label text-zinc-500 mt-1">{selected.summary}</p>
               </div>
-              <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+              <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
                 Workspace route {selected.engineRoute}
               </Badge>
             </div>
@@ -703,7 +709,7 @@ function ProviderSurface() {
     <Card className="p-5">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-medium text-white">Channels</h3>
-        <span className="text-[10px] text-zinc-500">
+        <span className="text-ds-micro text-zinc-500">
           {SOCIAL_PROVIDERS.length} supported · connect from inside your workspace
         </span>
       </div>
@@ -711,13 +717,13 @@ function ProviderSurface() {
         {SOCIAL_PROVIDERS.map((p) => (
           <span
             key={p.id}
-            className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-zinc-400"
+            className="text-ds-micro px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-zinc-400"
           >
             {p.label}
           </span>
         ))}
       </div>
-      <p className="text-[10px] text-zinc-500 mt-3">
+      <p className="text-ds-micro text-zinc-500 mt-3">
         No channel is shown as connected until you connect it yourself. Mercenta never contacts a
         social network on your behalf while your workspace is in simulation.
       </p>

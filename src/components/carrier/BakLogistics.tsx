@@ -1,5 +1,6 @@
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import type { ShipmentStatus } from '@/types';
 import { Ship, Warehouse, CheckCircle2, Circle, MapPin } from 'lucide-react';
@@ -44,21 +45,18 @@ export function BakLogistics() {
   const cleared = bakShipments.filter((s) => s.status === 'uk_customs_cleared').length;
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-white">BAK Logistics Hub — Zimbabwe Corridor</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Cross-border container tracking from inland depots through the Beira & Durban freight
-            corridors into the UK.
-          </p>
-        </div>
-        <Badge className="bg-blue-500/15 text-blue-300 border-blue-500/20">
-          <Warehouse className="w-3 h-3" />
-          Active BAK Token: {carrierTokens.bak || 'BAK-ZW-UNPROVISIONED'}
-        </Badge>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="CARRIER TERMINAL"
+        title="BAK Logistics Hub — Zimbabwe Corridor"
+        description="Cross-border container tracking from inland depots through the Beira and Durban freight corridors into the UK."
+        status={
+          <Badge className="bg-blue-500/15 text-blue-300 border-blue-500/20">
+            <Warehouse className="w-3 h-3" />
+            Active BAK Token: {carrierTokens.bak || 'BAK-ZW-UNPROVISIONED'}
+          </Badge>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -76,7 +74,7 @@ export function BakLogistics() {
               key={m.label}
               className="flex items-center gap-2 bg-ink-900 border border-white/[0.06] rounded-lg px-3 py-2"
             >
-              <span className="text-[10px] font-bold text-blue-400">
+              <span className="text-ds-micro font-bold text-blue-400">
                 {String(i + 1).padStart(2, '0')}
               </span>
               <span className="text-xs text-zinc-300">{m.label}</span>
@@ -138,10 +136,10 @@ export function BakLogistics() {
                           >
                             {m.label}
                           </div>
-                          <div className="text-[10px] text-zinc-600 mt-0.5">{m.detail}</div>
+                          <div className="text-ds-micro text-zinc-600 mt-0.5">{m.detail}</div>
                         </div>
                         {current && (
-                          <Badge className="text-[9px] bg-blue-500/15 text-blue-300 border-blue-500/20 ml-auto h-fit">
+                          <Badge className="text-ds-micro bg-blue-500/15 text-blue-300 border-blue-500/20 ml-auto h-fit">
                             Current
                           </Badge>
                         )}
@@ -163,7 +161,7 @@ export function BakLogistics() {
           </Card>
         )}
       </div>
-    </div>
+    </WorkspaceFrame>
   );
 }
 

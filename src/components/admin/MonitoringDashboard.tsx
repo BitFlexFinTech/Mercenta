@@ -7,9 +7,10 @@
 import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge, Button } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { triageAlert } from '@/lib/monitoring/alertTriage';
-import { Activity, Shield, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 
 interface HealthCheckEntry {
   id: string;
@@ -69,30 +70,27 @@ export function MonitoringDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <Activity className="w-5 h-5 text-brass-400" />
-        <div>
-          <h2 className="text-lg font-semibold text-white">System Monitoring</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">Health checks, dependency alerts, and automated triage summaries</p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Button className="text-xs" onClick={handleRunCheck} disabled={running}>
-          <RefreshCw className={cn('w-3.5 h-3.5 mr-1.5', running && 'animate-spin')} />
-          {running ? 'Running...' : 'Run Health Check'}
-        </Button>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="ADMIN HUB · MONITORING"
+        title="System Monitoring"
+        description="Health checks, dependency alerts and automated triage summaries."
+        actions={
+          <Button className="text-xs" onClick={handleRunCheck} disabled={running}>
+            <RefreshCw className={cn('w-3.5 h-3.5 mr-1.5', running && 'animate-spin')} />
+            {running ? 'Running...' : 'Run Health Check'}
+          </Button>
+        }
+      />
 
       {/* Dependabot section */}
       <Card className="p-3">
         <div className="flex items-center gap-2 mb-2">
           <Shield className="w-4 h-4 text-brass-400" />
           <span className="text-xs font-medium text-white">Dependency Monitoring</span>
-          <Badge className="text-[8px] bg-emerald-500/15 text-emerald-300">Configured</Badge>
+          <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Configured</Badge>
         </div>
-        <p className="text-[10px] text-zinc-500 leading-relaxed">
+        <p className="text-ds-micro text-zinc-500 leading-relaxed">
           Dependabot is configured in <code className="text-brass-400">.github/dependabot.yml</code>.
           Scans npm and GitHub Actions dependencies weekly. Alerts appear as GitHub Security
           Advisories and are also triaged through the alert system below.
@@ -113,14 +111,14 @@ export function MonitoringDashboard() {
                     ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                     : <AlertTriangle className="w-4 h-4 text-amber-500" />}
                   <div>
-                    <p className="text-[11px] text-zinc-300">{e.summary}</p>
-                    <p className="text-[9px] text-zinc-600 font-mono">{new Date(e.timestamp).toLocaleString()}</p>
+                    <p className="text-ds-label text-zinc-300">{e.summary}</p>
+                    <p className="text-ds-micro text-zinc-600 font-mono">{new Date(e.timestamp).toLocaleString()}</p>
                     {triageResults[e.id] && (
-                      <p className="text-[9px] text-amber-400 mt-0.5">Triage: {triageResults[e.id]}</p>
+                      <p className="text-ds-micro text-amber-400 mt-0.5">Triage: {triageResults[e.id]}</p>
                     )}
                   </div>
                 </div>
-                <Badge className={cn('text-[8px]', e.healthy ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>
+                <Badge className={cn('text-ds-micro', e.healthy ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>
                   {e.healthy ? 'Healthy' : 'Degraded'}
                 </Badge>
               </div>
@@ -128,6 +126,6 @@ export function MonitoringDashboard() {
           })}
         </div>
       </Card>
-    </div>
+    </WorkspaceFrame>
   );
 }

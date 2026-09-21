@@ -1,6 +1,7 @@
 import { Badge, Card } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
-import { Activity, Wifi, WifiOff } from 'lucide-react';
+import { Wifi, WifiOff } from 'lucide-react';
 
 /**
  * §Stage-6 — CARRIER INTEGRATION MONITOR (technical connection-health view).
@@ -48,18 +49,12 @@ const HEALTH: CarrierHealth[] = [
 
 export function CarrierIntegrationMonitor() {
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-purple-500/15 flex items-center justify-center">
-          <Activity className="w-5 h-5 text-purple-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Carrier Integration Monitor</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Technical view — per-carrier API connection health, sync state and error logs
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="ADMIN HUB · LOGISTICS"
+        title="Carrier Integration Monitor"
+        description="Technical view — per-carrier API connection health, sync state and error logs."
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {HEALTH.map((c) => (
@@ -68,7 +63,7 @@ export function CarrierIntegrationMonitor() {
               <span className="text-sm font-semibold text-white">{c.name}</span>
               <Badge
                 className={cn(
-                  'text-[10px]',
+                  'text-ds-micro',
                   c.apiStatus === 'operational'
                     ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                     : c.apiStatus === 'degraded'
@@ -81,17 +76,17 @@ export function CarrierIntegrationMonitor() {
               </Badge>
             </div>
             <div className="grid grid-cols-3 gap-3 mb-3">
-              <div><div className="text-[10px] text-zinc-600">Uptime 30d</div><div className="font-mono text-xs text-white">{c.uptime30d}</div></div>
-              <div><div className="text-[10px] text-zinc-600">Last Sync</div><div className="font-mono text-xs text-white">{c.lastSync}</div></div>
-              <div><div className="text-[10px] text-zinc-600">Latency</div><div className="font-mono text-xs text-white">{c.latencyMs} ms</div></div>
+              <div><div className="text-ds-micro text-zinc-600">Uptime 30d</div><div className="font-mono text-xs text-white">{c.uptime30d}</div></div>
+              <div><div className="text-ds-micro text-zinc-600">Last Sync</div><div className="font-mono text-xs text-white">{c.lastSync}</div></div>
+              <div><div className="text-ds-micro text-zinc-600">Latency</div><div className="font-mono text-xs text-white">{c.latencyMs} ms</div></div>
             </div>
             <div className="border-t border-white/[0.05] pt-2">
-              <div className="text-[10px] text-zinc-600 font-medium mb-1">Errors (24h): {c.errors24h.length}</div>
+              <div className="text-ds-micro text-zinc-600 font-medium mb-1">Errors (24h): {c.errors24h.length}</div>
               {c.errors24h.length === 0 ? (
-                <p className="text-[11px] text-emerald-400">No errors in the last 24 hours.</p>
+                <p className="text-ds-label text-emerald-400">No errors in the last 24 hours.</p>
               ) : (
                 c.errors24h.map((e) => (
-                  <p key={e.time} className="text-[11px] text-red-300 font-mono">
+                  <p key={e.time} className="text-ds-label text-red-300 font-mono">
                     {e.time} — {e.message}
                   </p>
                 ))
@@ -100,6 +95,6 @@ export function CarrierIntegrationMonitor() {
           </Card>
         ))}
       </div>
-    </div>
+    </WorkspaceFrame>
   );
 }

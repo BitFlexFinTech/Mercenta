@@ -1,6 +1,7 @@
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrandAgreements } from '@/data/queries';
 import { Card, Badge } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { CheckCircle2, MessageSquare, ShieldCheck } from 'lucide-react';
 
@@ -14,14 +15,12 @@ export function OnboardingSummary({ onNavigate }: { onNavigate?: (view: string) 
   const gateCleared = allDocsApproved && logisticsSlaAccepted && chargebackIndemnityAccepted;
 
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-        <div>
-          <h2 className="text-lg font-semibold text-white">Onboarding Complete</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">{brandProfile.businessName || 'Your brand'} is fully onboarded</p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-6">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · ONBOARDING"
+        title="Onboarding Complete"
+        description={`${brandProfile.businessName || 'Your brand'} is fully onboarded.`}
+      />
       {gateCleared ? (
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 text-sm text-emerald-200 flex items-start gap-3">
           <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
@@ -87,11 +86,11 @@ export function OnboardingSummary({ onNavigate }: { onNavigate?: (view: string) 
           <div className="space-y-2 px-1 pb-1">
             <div className="flex items-center justify-between">
               <span className="text-xs text-zinc-300">Logistics SLAs (S.4.1)</span>
-              <Badge className={cn('text-[9px]', logisticsSlaAccepted ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{logisticsSlaAccepted ? 'Accepted' : 'Pending'}</Badge>
+              <Badge className={cn('text-ds-micro', logisticsSlaAccepted ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{logisticsSlaAccepted ? 'Accepted' : 'Pending'}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-zinc-300">Chargeback Indemnity (S.4.2)</span>
-              <Badge className={cn('text-[9px]', chargebackIndemnityAccepted ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{chargebackIndemnityAccepted ? 'Accepted' : 'Pending'}</Badge>
+              <Badge className={cn('text-ds-micro', chargebackIndemnityAccepted ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{chargebackIndemnityAccepted ? 'Accepted' : 'Pending'}</Badge>
             </div>
           </div>
         </Card>
@@ -125,15 +124,15 @@ export function OnboardingSummary({ onNavigate }: { onNavigate?: (view: string) 
           </div>
         </div>
       </div>
-    </div>
+    </WorkspaceFrame>
   );
 }
 
 function Row({ label, value }: { label: string; value?: string }) {
   return (
     <div className="flex items-center justify-between border-b border-white/[0.04] py-1">
-      <span className="text-[11px] text-zinc-500">{label}</span>
-      <span className="text-[11px] text-zinc-300 font-medium truncate ml-4 max-w-[200px]">{value || '\u2014'}</span>
+      <span className="text-ds-label text-zinc-500">{label}</span>
+      <span className="text-ds-label text-zinc-300 font-medium truncate ml-4 max-w-[200px]">{value || '\u2014'}</span>
     </div>
   );
 }

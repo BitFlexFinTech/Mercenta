@@ -5,9 +5,10 @@ import type { FulfillmentScore, FulfillmentTrack } from '@/types';
 import type { DemoBrandRow } from '@/data/demoData';
 import { isBorderline, scoreBrand, computeComponentScores, type ScoreInputs } from '@/lib/scoring';
 import { Badge, Card, Button, DataTable, Input } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import {
-  ArrowLeft, Gauge, Info, BarChart3, Table2, Beaker, History, RotateCcw, RefreshCw,
+  ArrowLeft, Info, BarChart3, Table2, Beaker, History, RotateCcw, RefreshCw,
 } from 'lucide-react';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer,
@@ -28,12 +29,12 @@ function TrackBadge({ track }: { track: FulfillmentTrack }) {
   };
   const label =
     track === 'direct_fulfillment' ? 'Direct fulfillment' : track === 'financed' ? 'Financed' : 'Unassigned';
-  return <Badge className={cn('text-[10px]', map[track])}>{label}</Badge>;
+  return <Badge className={cn('text-ds-micro', map[track])}>{label}</Badge>;
 }
 
 function NeedsReviewBadge() {
   return (
-    <Badge className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/20">
+    <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
       Needs review
     </Badge>
   );
@@ -42,7 +43,7 @@ function NeedsReviewBadge() {
 function ScoreBar({ label, value, max }: { label: string; value: number; max: number }) {
   return (
     <div>
-      <div className="flex justify-between text-[11px] mb-1">
+      <div className="flex justify-between text-ds-label mb-1">
         <span className="text-zinc-400">{label}</span>
         <span className="font-mono text-white">
           {value}/{max}
@@ -136,18 +137,12 @@ export function FulfillmentTrackPanel() {
   ];
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center">
-          <Gauge className="w-5 h-5 text-blue-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Fulfillment Track</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Auto-scored brand placement — direct fulfillment vs financed
-          </p>
-        </div>
-      </div>
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="ADMIN HUB · COMMERCE"
+        title="Fulfillment Track"
+        description="Auto-scored brand placement — Direct Fulfillment vs Financed, per brand."
+      />
 
       {/* Tab bar */}
       <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-white/[0.06] rounded-xl p-1">
@@ -162,7 +157,7 @@ export function FulfillmentTrackPanel() {
           );
         })}
         <div className="ml-auto flex items-center gap-2">
-          {recalcMsg && <span className="text-[11px] text-emerald-400">{recalcMsg}</span>}
+          {recalcMsg && <span className="text-ds-label text-emerald-400">{recalcMsg}</span>}
           <button onClick={handleRecalc}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 transition-colors">
             <RefreshCw className="w-3.5 h-3.5" /> Bulk Recalculate
@@ -205,7 +200,7 @@ export function FulfillmentTrackPanel() {
             className="w-16 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white"
           />
         </label>
-        <span className="text-[11px] text-zinc-600 ml-auto">
+        <span className="text-ds-label text-zinc-600 ml-auto">
           {filtered.length} of {rows.length} brands
         </span>
       </div>
@@ -263,11 +258,11 @@ export function FulfillmentTrackPanel() {
                 isBorderline(score.totalScore) && !score.manualOverride ? (
                   <NeedsReviewBadge />
                 ) : score.manualOverride ? (
-                  <Badge className="text-[10px] bg-purple-500/15 text-purple-300 border-purple-500/20">
+                  <Badge className="text-ds-micro bg-purple-500/15 text-purple-300 border-purple-500/20">
                     Manual override
                   </Badge>
                 ) : (
-                  <span className="text-[11px] text-zinc-600">Auto</span>
+                  <span className="text-ds-label text-zinc-600">Auto</span>
                 ),
             },
             {
@@ -276,7 +271,7 @@ export function FulfillmentTrackPanel() {
               align: 'right',
               hideBelow: 'lg',
               render: ({ score }) => (
-                <span className="font-mono text-[11px] text-zinc-500">
+                <span className="font-mono text-ds-label text-zinc-500">
                   {new Date(score.lastCalculated).toLocaleDateString()}
                 </span>
               ),
@@ -289,7 +284,7 @@ export function FulfillmentTrackPanel() {
       {activeTab === 'compare' && <ComparisonView rows={rows} onSelectBrand={function(id) { setSelectedId(id); }} />}
       {activeTab === 'simulator' && <WhatIfSimulator />}
       {activeTab === 'history' && <ScoreHistoryView rows={rows} />}
-    </div>
+    </WorkspaceFrame>
   );
 }
 
@@ -373,7 +368,7 @@ function DetailView({
           );
         })()}
         {borderline && (
-          <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-[11px] text-amber-200 flex items-start gap-2">
+          <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200 flex items-start gap-2">
             <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
             Score falls in the 55–74 borderline band — auto-assignment is held for
             manual review and batched into the daily digest rather than applied silently.
@@ -384,7 +379,7 @@ function DetailView({
       {/* Manual override */}
       <Card title="Manual Override">
         <div className="space-y-3">
-          <p className="text-[11px] text-zinc-600">
+          <p className="text-ds-label text-zinc-600">
             Overrides take precedence over the scoring engine and are logged to the
             audit trail.
           </p>
@@ -431,12 +426,12 @@ function DetailView({
               { label: 'Available Headroom', value: '£—' },
             ].map((f) => (
               <div key={f.label}>
-                <div className="text-[10px] text-zinc-600 font-medium mb-1">{f.label}</div>
+                <div className="text-ds-micro text-zinc-600 font-medium mb-1">{f.label}</div>
                 <div className="text-sm font-mono text-white">{f.value}</div>
               </div>
             ))}
           </div>
-          <p className="text-[10px] text-zinc-600 mt-3">
+          <p className="text-ds-micro text-zinc-600 mt-3">
             Placeholder fields — a real PO-finance provider is not wired yet.
           </p>
         </Card>
@@ -523,7 +518,7 @@ function WhatIfSimulator() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-1">
         <div className="space-y-3">
           <div>
-            <label className="text-[10px] text-zinc-500 font-medium block mb-1">Years Exporting</label>
+            <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Years Exporting</label>
             <input type="number" value={inputs.yearsExporting} onChange={function(e) { set('yearsExporting', Number(e.target.value)); }}
               className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white" />
           </div>
@@ -536,17 +531,17 @@ function WhatIfSimulator() {
             <span className="text-xs text-zinc-300">Has EORI number</span>
           </div>
           <div>
-            <label className="text-[10px] text-zinc-500 font-medium block mb-1">Annual Revenue (GBP)</label>
+            <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Annual Revenue (GBP)</label>
             <input type="number" value={inputs.annualRevenueGbp} onChange={function(e) { set('annualRevenueGbp', Number(e.target.value)); }}
               className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white" />
           </div>
           <div>
-            <label className="text-[10px] text-zinc-500 font-medium block mb-1">Catalog Size (SKUs)</label>
+            <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Catalog Size (SKUs)</label>
             <input type="number" value={inputs.catalogSize} onChange={function(e) { set('catalogSize', Number(e.target.value)); }}
               className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white" />
           </div>
           <div>
-            <label className="text-[10px] text-zinc-500 font-medium block mb-1">Working Capital</label>
+            <label className="text-ds-micro text-zinc-500 font-medium block mb-1">Working Capital</label>
             <select value={inputs.workingCapitalAnswer} onChange={function(e) { set('workingCapitalAnswer', e.target.value as any); }}
               className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white cursor-pointer">
               <option value="yes">Yes</option><option value="partially">Partially</option><option value="no">No</option>
@@ -562,13 +557,13 @@ function WhatIfSimulator() {
             <div className="text-5xl font-bold text-white">{result.components.totalScore}</div>
             <div className="text-xs text-zinc-500 mt-1">Total Score</div>
             <div className="mt-2"><TrackBadge track={result.proposedTrack} /></div>
-            {result.needsManualReview && <div className="mt-2 text-[10px] text-amber-400">Borderline score — needs manual review</div>}
+            {result.needsManualReview && <div className="mt-2 text-ds-micro text-amber-400">Borderline score — needs manual review</div>}
           </div>
           <div className="space-y-2">
             {COMPONENTS.map(function(c) {
               return (
                 <div key={c.label}>
-                  <div className="flex justify-between text-[10px] mb-0.5">
+                  <div className="flex justify-between text-ds-micro mb-0.5">
                     <span className="text-zinc-500">{c.label}</span>
                     <span className="text-zinc-300 font-mono">{c.value}/{c.max}</span>
                   </div>
@@ -610,10 +605,10 @@ function ScoreHistoryView({ rows }: { rows: Row[] }) {
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-white">{selected.score.totalScore}</div>
-                <div className="text-[10px] text-zinc-500">Last: {new Date(selected.score.lastCalculated).toLocaleDateString()}</div>
+                <div className="text-ds-micro text-zinc-500">Last: {new Date(selected.score.lastCalculated).toLocaleDateString()}</div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-[10px]">
+            <div className="grid grid-cols-2 gap-2 text-ds-micro">
               <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Track:</span> <span className="text-white">{selected.score.track.replace(/_/g, ' ')}</span></div>
               <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">Override:</span> <span className="text-white">{selected.score.manualOverride ? 'Yes' : 'No'}</span></div>
               <div className="bg-ink-900 rounded p-2"><span className="text-zinc-500">History:</span> <span className="text-white">{selected.score.tradingHistoryScore}/20</span></div>
@@ -625,7 +620,7 @@ function ScoreHistoryView({ rows }: { rows: Row[] }) {
             </div>
           </div>
         )}
-        <p className="text-[10px] text-zinc-600">Score history updates when "Bulk Recalculate" is run.</p>
+        <p className="text-ds-micro text-zinc-600">Score history updates when "Bulk Recalculate" is run.</p>
       </div>
     </Card>
   );

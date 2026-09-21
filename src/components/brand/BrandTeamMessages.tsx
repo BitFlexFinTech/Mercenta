@@ -14,6 +14,7 @@ import { logMessage } from '@/data/api';
 import { demoTeamMembers } from '@/data/demoStore';
 import { cn } from '@/utils/cn';
 import { Badge } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { MessageSquare, Send, Users, FileText, Bot } from 'lucide-react';
 
 export function BrandTeamMessages() {
@@ -62,14 +63,12 @@ export function BrandTeamMessages() {
   if (!brandId) return null;
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto h-full flex flex-col">
-      <div className="flex items-center gap-3 mb-4">
-        <MessageSquare className="w-5 h-5 text-brass-400" />
-        <div>
-          <h2 className="text-lg font-semibold text-white">Support & Team</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">Chat with Mercenta support and message your team</p>
-        </div>
-      </div>
+    <WorkspaceFrame className="flex h-full flex-col space-y-4">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · SUPPORT"
+        title="Support & Team"
+        description="Chat with Mercenta support and message your team."
+      />
       <div className="flex gap-4 mb-4 border-b border-white/[0.06]">
         <button onClick={() => setActiveTab('support')} className={cn('pb-2 text-xs font-medium', activeTab === 'support' ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500')}>
           <MessageSquare className="w-3.5 h-3.5 inline mr-1" /> Support Chat
@@ -94,10 +93,10 @@ export function BrandTeamMessages() {
                   <div key={m.id} className={cn('flex', m.direction === 'outbound' ? 'justify-start' : 'justify-end')}>
                     <div className={cn('max-w-[80%] rounded-xl px-3 py-2 text-xs', m.direction === 'outbound' ? 'bg-zinc-800 text-zinc-200' : 'bg-brass-500 text-white')}>
                       {m.subject !== 'Support message' && m.subject !== 'Live chat message' && (
-                        <p className="text-[9px] text-zinc-500 mb-1 font-medium">{m.subject}</p>
+                        <p className="text-ds-micro text-zinc-500 mb-1 font-medium">{m.subject}</p>
                       )}
                       <p className="whitespace-pre-wrap">{m.body}</p>
-                      <p className="mt-1 text-[9px] text-zinc-500 font-mono">{m.sentBy} &middot; {new Date(m.createdAt).toLocaleString()}</p>
+                      <p className="mt-1 text-ds-micro text-zinc-500 font-mono">{m.sentBy} &middot; {new Date(m.createdAt).toLocaleString()}</p>
                     </div>
                   </div>
                 ))}
@@ -126,8 +125,8 @@ export function BrandTeamMessages() {
                 {teamNotes.map((m) => (
                   <div key={m.id} className="bg-ink-850 border border-white/[0.04] rounded-lg px-3 py-2">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-medium text-zinc-300">{m.sentBy}</span>
-                      <span className="text-[9px] text-zinc-600 font-mono">{new Date(m.createdAt).toLocaleString()}</span>
+                      <span className="text-ds-micro font-medium text-zinc-300">{m.sentBy}</span>
+                      <span className="text-ds-micro text-zinc-600 font-mono">{new Date(m.createdAt).toLocaleString()}</span>
                     </div>
                     <p className="text-xs text-zinc-400 whitespace-pre-wrap">{m.body}</p>
                   </div>
@@ -148,29 +147,29 @@ export function BrandTeamMessages() {
         <div className="w-56 flex-shrink-0 bg-ink-900/50 border border-white/[0.06] rounded-xl p-3">
           <div className="flex items-center gap-2 mb-3">
             <Users className="w-3.5 h-3.5 text-zinc-500" />
-            <span className="text-[10px] font-medium text-zinc-400 uppercase">Team ({teamMembers.length})</span>
+            <span className="text-ds-micro font-medium text-zinc-400 uppercase">Team ({teamMembers.length})</span>
           </div>
           <div className="space-y-2">
             {teamMembers.map((m) => (
               <div key={m.id} className="flex items-center gap-2">
-                <div className={cn('w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-medium', m.active ? 'bg-brass-500/20 text-brass-300' : 'bg-zinc-800 text-zinc-600')}>
+                <div className={cn('w-6 h-6 rounded-full flex items-center justify-center text-ds-micro font-medium', m.active ? 'bg-brass-500/20 text-brass-300' : 'bg-zinc-800 text-zinc-600')}>
                   {m.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-zinc-300 truncate">{m.name}</p>
+                  <p className="text-ds-label text-zinc-300 truncate">{m.name}</p>
                   <div className="flex items-center gap-1">
-                    <Badge className="text-[8px] bg-ink-850 text-zinc-500 px-1">{m.role}</Badge>
-                    {!m.active && <span className="text-[8px] text-zinc-600">(invited)</span>}
+                    <Badge className="text-ds-micro bg-ink-850 text-zinc-500 px-1">{m.role}</Badge>
+                    {!m.active && <span className="text-ds-micro text-zinc-600">(invited)</span>}
                   </div>
                 </div>
               </div>
             ))}
             {teamMembers.length === 0 && (
-              <p className="text-[10px] text-zinc-600">No team members invited yet. Add them in Settings.</p>
+              <p className="text-ds-micro text-zinc-600">No team members invited yet. Add them in Settings.</p>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </WorkspaceFrame>
   );
 }

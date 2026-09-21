@@ -21,8 +21,9 @@ import { scopedBrandId } from '@/lib/auth/rbac';
 import { Badge, Button, Card, DataTable, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { AdCampaign, AdSpendRecommendation } from '@/types';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import {
-  Megaphone, Wallet, Gauge, Percent, CircleDollarSign,
+  Wallet, Gauge, Percent, CircleDollarSign,
   Save, Check, X, Pencil, TrendingUp, Info,
 } from 'lucide-react';
 
@@ -120,11 +121,16 @@ export function BrandAdvertising() {
 
   if (!tenantId) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto">
+      <WorkspaceFrame className="space-y-4">
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · ADVERTISING"
+          title="Advertising performance"
+          description="Budget, spend and campaign performance for your tenant only."
+        />
         <Card title="Advertising performance">
           <p className="text-xs text-zinc-600">No advertising surface without a tenant session.</p>
         </Card>
-      </div>
+      </WorkspaceFrame>
     );
   }
 
@@ -137,29 +143,25 @@ export function BrandAdvertising() {
     { label: 'TACOS', value: pct(budget?.tacos ?? null), icon: <Percent className="w-4 h-4 text-sky-300" /> },
 ];
 return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto" data-testid="brand-advertising">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center">
-          <Megaphone className="w-5 h-5 text-amber-300" />
-        </div>
-        <div className="flex-1 min-w-[220px]">
-          <h2 className="text-lg font-semibold text-white">Your advertising performance</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Budget, spend and campaign performance for {brandName} — your tenant only.
-          </p>
-        </div>
-        <Badge className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/20">
-          <Info className="w-3 h-3 mr-1" /> Simulated — no live ad connection
-        </Badge>
-      </div>
+    <WorkspaceFrame testId="brand-advertising" className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="BRAND PORTAL · ADVERTISING"
+        title="Your advertising performance"
+        description={`Budget, spend and campaign performance for ${brandName} — your tenant only.`}
+        status={
+          <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
+            <Info className="w-3 h-3 mr-1" /> Simulated — no live ad connection
+          </Badge>
+        }
+      />
 
-      {notice && <p className="text-[11px] text-emerald-400" data-testid="ba-notice">{notice}</p>}
-      {error && <p className="text-[11px] text-rose-400" data-testid="ba-error">{error}</p>}
+      {notice && <p className="text-ds-label text-emerald-400" data-testid="ba-notice">{notice}</p>}
+      {error && <p className="text-ds-label text-rose-400" data-testid="ba-error">{error}</p>}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {kpis.map((t) => (
           <Card key={t.label} className="p-4">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-wide text-zinc-500 mb-2">
+            <div className="flex items-center gap-2 text-ds-micro uppercase tracking-wide text-zinc-500 mb-2">
               {t.icon}
               {t.label}
             </div>
@@ -175,7 +177,7 @@ return (
           <DataTable<AdCampaign>
             columns={[
               { key: 'name', label: 'Campaign', primary: true, render: (c) => <span className="font-medium text-white">{c.name}</span> },
-              { key: 'status', label: 'Status', render: (c) => <Badge className={cn('text-[10px]', c.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{c.status}</Badge> },
+              { key: 'status', label: 'Status', render: (c) => <Badge className={cn('text-ds-micro', c.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{c.status}</Badge> },
               { key: 'monthlyBudgetGbp', label: 'Budget', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{gbp(c.monthlyBudgetGbp)}</span> },
               { key: 'spendToDateGbp', label: 'Spend', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{gbp(c.spendToDateGbp)}</span> },
               { key: 'clicks', label: 'Clicks', align: 'right', hideBelow: 'lg', render: (c) => <span className="font-mono text-xs text-zinc-300">{c.clicks.toLocaleString()}</span> },
@@ -195,7 +197,7 @@ return (
       {selectedCampaignRow && (
         <div data-testid="ba-campaign-detail">
           <Card title={selectedCampaignRow.name} className="p-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-ds-label">
               {[
                 ['Status', selectedCampaignRow.status],
                 ['Placement', selectedCampaignRow.placement],
@@ -207,7 +209,7 @@ return (
                 ['Budget', gbp(selectedCampaignRow.monthlyBudgetGbp)],
               ].map(([k, v]) => (
                 <div key={String(k)} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2">
-                  <div className="text-[10px] uppercase tracking-wide text-zinc-500">{k}</div>
+                  <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
                   <div className="mt-1 font-medium text-white">{v}</div>
                 </div>
               ))}
@@ -226,7 +228,7 @@ return (
           </Card>
         ) : (
           <Card className="p-4">
-            <p className="text-[11px] text-zinc-500 mb-3">
+            <p className="text-ds-label text-zinc-500 mb-3">
               Mercenta prepares a recommended monthly budget from deterministic estimates. Nothing is spent until you
               approve, amend or reject it — your decision is recorded and attributed.
             </p>
@@ -236,15 +238,15 @@ return (
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                       <span className="text-xs font-medium text-white">{rec.month}</span>
-                      <span className="text-[11px] text-zinc-400 font-mono"> · recommended £{rec.recommendedMonthlyBudgetGbp.toLocaleString('en-GB')}/mo</span>
+                      <span className="text-ds-label text-zinc-400 font-mono"> · recommended £{rec.recommendedMonthlyBudgetGbp.toLocaleString('en-GB')}/mo</span>
                     </div>
-                    <Badge className={cn('text-[10px]', rec.status === 'proposed' ? 'bg-blue-500/15 text-blue-300' : rec.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : rec.status === 'amended' ? 'bg-amber-500/15 text-amber-300' : 'bg-rose-500/15 text-rose-300')}>
+                    <Badge className={cn('text-ds-micro', rec.status === 'proposed' ? 'bg-blue-500/15 text-blue-300' : rec.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : rec.status === 'amended' ? 'bg-amber-500/15 text-amber-300' : 'bg-rose-500/15 text-rose-300')}>
                       {REC_STATUS_LABEL[rec.status]}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-zinc-500 mt-1.5">{rec.basis}</p>
+                  <p className="text-ds-label text-zinc-500 mt-1.5">{rec.basis}</p>
                   {rec.reviewedAt && (
-                    <p className="text-[10px] text-zinc-600 mt-1">
+                    <p className="text-ds-micro text-zinc-600 mt-1">
                       Decided {rec.reviewedAt.slice(0, 16).replace('T', ' ')} · final £{(rec.amendedBudgetGbp ?? 0).toLocaleString('en-GB')}/mo{rec.note ? ` · note: ${rec.note}` : ''}
                     </p>
                   )}
@@ -295,6 +297,6 @@ return (
           </Card>
         )}
       </div>
-    </div>
+    </WorkspaceFrame>
   );
 }

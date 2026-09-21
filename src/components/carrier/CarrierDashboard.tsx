@@ -3,6 +3,7 @@ import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { advanceShipmentViaDhl, recordDhlWaybill } from '@/lib/dhl/domain';
 import { resolveProviderMode } from '@/integrations/types';
 import { Card, Button, DataTable, StatusBadge } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import type { ShipmentStatus, CarrierId } from '@/types';
@@ -114,37 +115,46 @@ export function CarrierDashboard() {
   const carrierShipments = shipments.filter((s) => s.carrier === carrierContext);
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      {/* Header with carrier toggle */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-white">{theme.label}</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Operational control desk — carrier terminal simulation
-          </p>
-        </div>
-        <div className="flex gap-1.5 bg-ink-850 border border-white/[0.06] rounded-lg p-1">
-          {(Object.keys(CARRIER_THEMES) as CarrierId[]).map((c) => (
-            <button
-              key={c}
-              onClick={() => setCarrierContext(c)}
-              className={cn(
-                'px-3 py-1.5 rounded-md text-xs font-medium transition-all',
-                carrierContext === c
-                  ? 'text-white'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              )}
-              style={
-                carrierContext === c
-                  ? { backgroundColor: CARRIER_THEMES[c].color, color: '#000' }
-                  : {}
-              }
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="CARRIER TERMINAL"
+        title={theme.label}
+        description="Operational control desk — carrier terminal simulation."
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              Carrier
+            </span>
+            <div
+              className="flex gap-1.5 rounded-ds-md border border-white/[0.06] bg-ink-850 p-1"
+              role="group"
+              aria-label="Carrier context"
             >
-              {CARRIER_THEMES[c].label.split(' ')[0]}
-            </button>
-          ))}
-        </div>
-      </div>
+              {(Object.keys(CARRIER_THEMES) as CarrierId[]).map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCarrierContext(c)}
+                  aria-pressed={carrierContext === c}
+                  data-state={carrierContext === c ? 'active' : 'idle'}
+                  className={cn(
+                    'px-3 py-1.5 rounded-md text-xs font-medium transition-ds duration-ds-fast',
+                    carrierContext === c
+                      ? 'text-white'
+                      : 'text-zinc-500 hover:text-zinc-300'
+                  )}
+                  style={
+                    carrierContext === c
+                      ? { backgroundColor: CARRIER_THEMES[c].color, color: '#000' }
+                      : {}
+                  }
+                >
+                  {CARRIER_THEMES[c].label.split(' ')[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+        }
+      />
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -199,7 +209,7 @@ export function CarrierDashboard() {
                 render: (s) => (
                   <div>
                     <div className="text-xs font-mono text-zinc-400">{s.reference}</div>
-                    <div className="text-[10px] font-mono text-zinc-600 mt-0.5">
+                    <div className="text-ds-micro font-mono text-zinc-600 mt-0.5">
                       {s.trackingNumber}
                     </div>
                   </div>
@@ -270,7 +280,7 @@ export function CarrierDashboard() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-[10px]"
+                          className="text-ds-micro"
                           loading={busyShipmentId === s.id}
                           onClick={() => void requestDhlUpdate(s.id)}
                         >
@@ -278,7 +288,7 @@ export function CarrierDashboard() {
                           DHL status → next milestone (sim)
                         </Button>
                         {lastDhlResult[s.id] && (
-                          <div className="text-[9px] font-mono text-zinc-500 mt-1 leading-tight">
+                          <div className="text-ds-micro font-mono text-zinc-500 mt-1 leading-tight">
                             {lastDhlResult[s.id]}
                           </div>
                         )}
@@ -301,12 +311,12 @@ export function CarrierDashboard() {
             {apiLogs.map((log) => (
               <div
                 key={log.id}
-                className="bg-ink-900 border border-white/[0.04] rounded-lg p-2.5 font-mono text-[11px]"
+                className="bg-ink-900 border border-white/[0.04] rounded-lg p-2.5 font-mono text-ds-label"
               >
                 <div className="flex items-center gap-2 mb-1.5">
                   <span
                     className={cn(
-                      'px-1.5 py-0.5 rounded text-[9px] font-bold',
+                      'px-1.5 py-0.5 rounded text-ds-micro font-bold',
                       log.method === 'GET'
                         ? 'bg-blue-500/20 text-blue-300'
                         : log.method === 'POST'
@@ -319,8 +329,8 @@ export function CarrierDashboard() {
                   <span className="text-zinc-500 flex-1 truncate">{log.endpoint}</span>
                   <span className="text-emerald-400">{log.status}</span>
                 </div>
-                <div className="text-zinc-600 text-[10px] mb-1">{log.timestamp}</div>
-                <div className="text-zinc-400 text-[10px] overflow-x-auto">
+                <div className="text-zinc-600 text-ds-micro mb-1">{log.timestamp}</div>
+                <div className="text-zinc-400 text-ds-micro overflow-x-auto">
                   {JSON.stringify(log.payload)}
                 </div>
               </div>
@@ -344,6 +354,6 @@ export function CarrierDashboard() {
           </div>
         </div>
       </Card>
-    </div>
+    </WorkspaceFrame>
   );
 }

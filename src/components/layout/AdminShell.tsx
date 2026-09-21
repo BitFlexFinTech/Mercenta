@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
@@ -35,6 +36,8 @@ import { OpportunityDiscoveryPanel } from '@/components/admin/OpportunityDiscove
 import { ProductDiscoveryPanel } from '@/components/admin/ProductDiscoveryPanel';
 import { RegionalPriorityPanel } from '@/components/admin/RegionalPriorityPanel';
 import { AmazonAdsDashboard } from '@/components/admin/AmazonAdsDashboard';
+import { FounderControlCentre } from '@/components/admin/FounderControlCentre';
+import { MercentaBrain } from '@/components/admin/MercentaBrain';
 import { FounderInvestorCentre } from '@/components/admin/FounderInvestorCentre';
 import { PartnershipsCentre } from '@/components/admin/PartnershipsCentre';
 import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
@@ -48,12 +51,24 @@ import {
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
   Phone, ClipboardList, Handshake, Megaphone, ListChecks, CalendarDays,
+  Brain,
 } from 'lucide-react';
 
 const ADMIN_SECTIONS = [
   {
     label: 'Overview',
-    items: [{ id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> }],
+    items: [
+      { id: 'overview', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
+      /*
+        §Founder OS — the Founder/Super Admin operating centre. Super-Admin only:
+        hidden from the nav for every other tier here AND guarded again at render.
+      */
+      { id: 'control_centre', label: 'Control Centre', icon: <Gauge className="w-4 h-4" /> },
+      /* §MERCENTA BRAIN — the third question of the IA: how is everything
+         connected, what do we know, and why. Super-Admin only: hidden here for
+         every other tier AND guarded again at render. */
+      { id: 'brain', label: 'Mercenta Brain', icon: <Brain className="w-4 h-4" /> },
+    ],
   },
   {
     label: 'Operations',
@@ -167,6 +182,14 @@ export default function AdminShell() {
     // §21/M12 — the founder's private surfaces.
     'founder_centre',
     'partnerships',
+    // §Founder OS — the Control Centre is the founder/Super-Admin operating
+    // centre: internal acquisition pipeline, automation administration and AI
+    // governance must never be reachable from a non-Super-Admin session.
+    'control_centre',
+    // §MERCENTA BRAIN — internal relationship/intelligence surface: it exposes
+    // prospects, Mercenta-wide decisions, automations and provider machinery, so
+    // it must never be reachable from a non-Super-Admin session.
+    'brain',
   ]);
   const navSections = (isSuper
     ? ADMIN_SECTIONS
@@ -206,6 +229,8 @@ export default function AdminShell() {
     whatsapp: 'WhatsApp Escalation', founder_centre: 'Founder Investor Centre',
     partnerships: 'Partnerships & Fundraising',
     work: 'Work Management', calendar: 'Operations Calendar',
+    control_centre: 'Control Centre',
+    brain: 'Mercenta Brain',
   };
 
   return (
@@ -222,6 +247,14 @@ export default function AdminShell() {
       <ErrorBoundary sectionLabel="Admin portal">
         <IntegrationsProvider>
           {adminView === 'overview' && <AdminDashboard department={deptMap[adminView]} onNavigate={setAdminView} />}
+          {/* §Founder OS — the founder/Super-Admin operating centre. Guarded a
+              second time at render (defense in depth), like the other private
+              founder surfaces. */}
+          {adminView === 'control_centre' && (isSuper ? <FounderControlCentre onNavigate={setAdminView} /> : <AccessDenied />)}
+          {/* §MERCENTA BRAIN — the relationship/intelligence destination. Guarded
+              a second time at render (defense in depth), like the other
+              Super-Admin-only surfaces. */}
+          {adminView === 'brain' && (isSuper ? <MercentaBrain onNavigate={setAdminView} /> : <AccessDenied />)}
           {/* §Sprint — canonical work layer: tasks/deadlines + derived calendar. */}
           {adminView === 'work' && <AdminWorkManagement onNavigate={setAdminView} />}
           {adminView === 'calendar' && <AdminWorkCalendar onNavigate={setAdminView} />}
@@ -274,17 +307,26 @@ export default function AdminShell() {
 function AccessDenied() {
   const { setEnvironment } = useApp();
   return (
-    <div className="p-6 max-w-[1400px] mx-auto">
-      <div className="max-w-md mx-auto bg-ink-850 border border-red-500/20 rounded-xl p-8 text-center">
-        <div className="w-12 h-12 rounded-full bg-red-500/15 flex items-center justify-center mx-auto mb-4">
-          <ShieldCheck className="w-6 h-6 text-red-400" />
+    <WorkspaceFrame className="space-y-4">
+      <WorkspaceHeader
+        eyebrow="ADMIN HUB · ACCESS"
+        title="Super Admin Access Required"
+        description="This view is restricted to authenticated Super Admin sessions."
+      />
+      <div className="mx-auto max-w-md rounded-ds-lg border border-red-500/20 bg-ink-850 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/15">
+          <ShieldCheck className="h-6 w-6 text-red-400" />
         </div>
-        <h2 className="text-lg font-semibold text-white mb-2">Super Admin Access Required</h2>
-        <p className="text-sm text-zinc-400 mb-6">This view is restricted to authenticated Super Admin sessions.</p>
-        <button onClick={() => setEnvironment('login')} className="inline-flex items-center gap-2 bg-brass-500 hover:bg-brass-400 text-white font-medium px-4 py-2 rounded-lg transition-colors">
+        <p className="mb-6 text-sm text-zinc-400">
+          This view is restricted to authenticated Super Admin sessions.
+        </p>
+        <button
+          onClick={() => setEnvironment('login')}
+          className="inline-flex items-center gap-2 rounded-ds-md bg-brass-500 px-4 py-2 font-medium text-white transition-ds duration-ds-fast hover:bg-brass-400"
+        >
           Return to Login
         </button>
       </div>
-    </div>
+    </WorkspaceFrame>
   );
 }

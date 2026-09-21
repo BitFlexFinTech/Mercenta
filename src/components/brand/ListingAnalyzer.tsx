@@ -18,6 +18,7 @@ import { getProspects } from '@/data/prospectStore';
 import { analyzeProductListing } from '@/lib/intelligence/listingAnalyzer';
 import { applyListingReviewOverrides, reviewListingRecommendation } from '@/data/api';
 import { Badge, Button, Card, Select } from '@/components/ui';
+import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import type {
   ListingRecommendation,
@@ -102,21 +103,31 @@ export function ListingAnalyzer() {
 
   if (!tenantId) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto">
+      <WorkspaceFrame className="space-y-4">
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · CATALOGUE"
+          title="Listing Analyzer"
+          description="Automated listing health analysis for your catalogue products."
+        />
         <Card title="Listing Analyzer">
           <p className="text-xs text-zinc-600">No listing analyzer without a tenant session.</p>
         </Card>
-      </div>
+      </WorkspaceFrame>
     );
   }
 
   if (products.length === 0) {
     return (
-      <div className="p-6 max-w-[1400px] mx-auto" data-testid="listing-analyzer-empty">
+      <WorkspaceFrame testId="listing-analyzer-empty" className="space-y-4">
+        <WorkspaceHeader
+          eyebrow="BRAND PORTAL · CATALOGUE"
+          title="Listing Analyzer"
+          description="Automated listing health analysis for your catalogue products."
+        />
         <Card title="Listing Analyzer">
           <p className="text-xs text-zinc-600">Add products to your catalogue to analyse their listings.</p>
         </Card>
-      </div>
+      </WorkspaceFrame>
     );
   }
 return (
@@ -132,13 +143,13 @@ return (
             approve, edit or reject each suggested improvement.
           </p>
         </div>
-        <Badge className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/20">
+        <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
           <Info className="w-3 h-3 mr-1" /> Deterministic simulation
         </Badge>
       </div>
 
-      {notice && <p className="text-[11px] text-emerald-400" data-testid="la-notice">{notice}</p>}
-      {error && <p className="text-[11px] text-rose-400" data-testid="la-error">{error}</p>}
+      {notice && <p className="text-ds-label text-emerald-400" data-testid="la-notice">{notice}</p>}
+      {error && <p className="text-ds-label text-rose-400" data-testid="la-error">{error}</p>}
 
       <Card className="p-4">
         <Select
@@ -150,10 +161,10 @@ return (
         {analysis && (
           <div className="flex flex-wrap items-center gap-2 mt-3" data-testid="la-health">
             <span className="text-xs text-zinc-300">Listing health</span>
-            <Badge className={cn('text-[10px]', HEALTH_BADGE[analysis.healthLevel])}>
+            <Badge className={cn('text-ds-micro', HEALTH_BADGE[analysis.healthLevel])}>
               {analysis.healthLevel} · {analysis.healthScore}/100
             </Badge>
-            <span className="text-[10px] text-zinc-500">Prepared by {analysis.preparedBy} · {analysis.simulationLabel}</span>
+            <span className="text-ds-micro text-zinc-500">Prepared by {analysis.preparedBy} · {analysis.simulationLabel}</span>
           </div>
         )}
         {analysis && (
@@ -177,13 +188,13 @@ return (
             <div key={d.key} className="flex flex-wrap items-center justify-between gap-x-3 px-4 py-2.5 border-b border-white/[0.05] last:border-0" data-testid={`la-dim-${d.key}`}>
               <div className="min-w-0 flex-1">
                 <span className="text-xs font-medium text-white">{d.label}</span>
-                <span className="block text-[10px] text-zinc-500 truncate">{d.note}</span>
+                <span className="block text-ds-micro text-zinc-500 truncate">{d.note}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-24 h-1.5 rounded-full bg-ink-900 overflow-hidden">
                   <div className={cn('h-full', d.score >= 70 ? 'bg-emerald-400' : d.score >= 45 ? 'bg-amber-400' : 'bg-rose-400')} style={{ width: `${Math.max(2, d.score)}%` }} />
                 </div>
-                <span className="w-8 text-right text-[11px] font-mono text-zinc-300">{d.score}</span>
+                <span className="w-8 text-right text-ds-label font-mono text-zinc-300">{d.score}</span>
               </div>
             </div>
           ))}
@@ -204,12 +215,12 @@ return (
               ['Category position', analysis.estimates.categoryPosition],
             ].map(([k, v]) => (
               <div key={String(k)} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-zinc-500">{k}</div>
-                <div className="mt-1 text-[11px] font-medium text-white">{v}</div>
+                <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
+                <div className="mt-1 text-ds-label font-medium text-white">{v}</div>
               </div>
             ))}
           </div>
-          <div className="px-4 py-2 text-[10px] text-zinc-600">
+          <div className="px-4 py-2 text-ds-micro text-zinc-600">
             Competitive position: {analysis.estimates.competitivePosition} · Opportunities: {analysis.estimates.opportunityIndicators.join(' · ') || 'none flagged'}
           </div>
         </Card>
@@ -228,23 +239,23 @@ return (
                       <span className="text-xs font-medium text-white flex items-center gap-1.5">
                         <TrendingUp className="w-3.5 h-3.5 text-brass-400" /> {rec.title}
                       </span>
-                      <span className="text-[11px] text-zinc-500 mt-0.5 block">{rec.detail}</span>
-                      <span className="text-[10px] text-zinc-600 block mt-0.5">Impact: {rec.impact}</span>
+                      <span className="text-ds-label text-zinc-500 mt-0.5 block">{rec.detail}</span>
+                      <span className="text-ds-micro text-zinc-600 block mt-0.5">Impact: {rec.impact}</span>
                     </div>
-                    <Badge className={cn('text-[10px]', STATUS_BADGE[rec.status])}>{STATUS_LABEL[rec.status]}</Badge>
+                    <Badge className={cn('text-ds-micro', STATUS_BADGE[rec.status])}>{STATUS_LABEL[rec.status]}</Badge>
                   </div>
                   {rec.suggestedCopy && (
-                    <p className="text-[11px] text-zinc-300 mt-2 block" data-testid={`la-suggested-${rec.id}`}>
-                      <span className="text-[10px] text-zinc-500 uppercase">Mercenta suggestion: </span>{rec.suggestedCopy}
+                    <p className="text-ds-label text-zinc-300 mt-2 block" data-testid={`la-suggested-${rec.id}`}>
+                      <span className="text-ds-micro text-zinc-500 uppercase">Mercenta suggestion: </span>{rec.suggestedCopy}
                     </p>
                   )}
                   {rec.editedCopy && (
-                    <p className="text-[11px] text-zinc-300 mt-1 block">
-                      <span className="text-[10px] text-zinc-500 uppercase">Your edited version: </span>{rec.editedCopy}
+                    <p className="text-ds-label text-zinc-300 mt-1 block">
+                      <span className="text-ds-micro text-zinc-500 uppercase">Your edited version: </span>{rec.editedCopy}
                     </p>
                   )}
                   {rec.reviewedAt && (
-                    <p className="text-[10px] text-zinc-600 mt-1">Reviewed {rec.reviewedAt.slice(0, 16).replace('T', ' ')}</p>
+                    <p className="text-ds-micro text-zinc-600 mt-1">Reviewed {rec.reviewedAt.slice(0, 16).replace('T', ' ')}</p>
                   )}
                   {rec.status === 'suggested' && editingRec !== rec.id && (
                     <div className="flex flex-wrap gap-2 mt-2">
