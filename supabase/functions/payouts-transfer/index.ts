@@ -42,7 +42,12 @@ const RAIL_SIMULATION_PREFIX: Record<string, string> = {
 
 /** §6 — Stripe bills subscriptions; it is NOT a payout rail. Xero is accounting. */
 const NON_PAYOUT_RAILS = ['stripe', 'xero', 'amazon_sp_api'];
-const DEFAULT_RAIL = 'wise';
+/**
+ * §6 / Founder decision T-1 — RECONCILED 2026-09-21. Payoneer is the canonical
+ * PRIMARY/default Mercenta business + retail-channel payment account; Wise is
+ * the SECONDARY rail. This declaration previously read 'wise' and inverted T-1.
+ */
+const DEFAULT_RAIL = 'payoneer';
 const APPROVER_ROLES = ['super_admin', 'admin_staff'];
 
 interface TransferBody {

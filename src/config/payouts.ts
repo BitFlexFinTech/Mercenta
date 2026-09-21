@@ -6,8 +6,17 @@
  * payout rail. The canonical business model fixes which rails exist and in what
  * priority:
  *
- *   DEFAULT   → Wise      (the rail Mercenta pays brands through by default)
- *   SECONDARY → Payoneer  (the fallback rail, used only when deliberately chosen)
+ *   DEFAULT   → Payoneer  (Mercenta's primary business + retail-channel payment account)
+ *   SECONDARY → Wise      (the fallback rail, used only when deliberately chosen)
+ *
+ * §RUNTIME PARITY / Founder decision T-1 — RECONCILED 2026-09-21. This file and
+ * the edge function previously declared the INVERSE (Wise default, Payoneer
+ * secondary) while Founder decision T-1 (docs/AMAZON_RECONCILIATION_STATUS.md §4)
+ * had already fixed Payoneer as the canonical PRIMARY/default account. The
+ * inversion was recorded as an open contradiction owned by workstream S11 and is
+ * now reconciled across all five sources. No live external account was touched:
+ * rail ACTIVATION remains credential-only, and both rails still run their
+ * deterministic simulation without credentials.
  *
  * Xero is NOT a payout rail — it is the accounting/reconciliation layer (§6).
  * Stripe is NOT a payout rail either: it bills the flat monthly brand
@@ -57,11 +66,11 @@ export const PAYOUT_RAILS: Record<PayoutRail, PayoutRailDefinition> = {
   },
 } as const;
 
-/** §6 — Wise is the DEFAULT payout rail. Declared once, read everywhere. */
-export const DEFAULT_PAYOUT_RAIL: PayoutRail = 'wise';
+/** §6 / T-1 — Payoneer is the DEFAULT payout rail. Declared once, read everywhere. */
+export const DEFAULT_PAYOUT_RAIL: PayoutRail = 'payoneer';
 
-/** §6 — Payoneer is the SECONDARY payout rail. */
-export const SECONDARY_PAYOUT_RAIL: PayoutRail = 'payoneer';
+/** §6 / T-1 — Wise is the SECONDARY payout rail. */
+export const SECONDARY_PAYOUT_RAIL: PayoutRail = 'wise';
 
 /** Display/iteration order: default first, then secondary. */
 export const PAYOUT_RAIL_ORDER: readonly PayoutRail[] = [

@@ -22,6 +22,7 @@ import { DEFAULT_PRODUCT_TAX_CODE } from '@/types';
 import type {
   ComplianceDocument,
   Contract,
+  FreightTerm,
   FulfillmentTrack,
   Message,
   Product,
@@ -31,6 +32,8 @@ import type {
   PurchaseOrderStatus,
 } from '@/types';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
+import { AMAZON_PARTNERED_CARRIER } from '@/config/shipping';
+import { resolveShippingLane, selectCarrierForLane } from '@/lib/shipping/carrierRouting';
 import type { CommercialModel } from '@/config/commercialModel';
 
 export interface DemoBrand {
@@ -309,7 +312,7 @@ function poStatusFor(brandIndex: number, poIndex: number): PurchaseOrderStatus {
   return PO_STATUSES[(brandIndex + poIndex) % PO_STATUSES.length];
 }
 
-export const DEMO_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
+export const DEMO_WORKFLOW_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
   .filter((b) => CLEARED_BRAND_IDS.includes(b.id))
   .flatMap(
   (brand, bi) =>
@@ -359,10 +362,105 @@ export const DEMO_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
     })
 );
 
+/* ── §RUNTIME PARITY — deterministic SIMULATED consignment seed ─────────── */
+
+/**
+ * The Logistics Hub / Logistics Control map and list can only be INSPECTED with
+ * consignments, and shipment creation is PO-GATED: a consignment must derive
+ * from a purchase order the brand actually owns. The cleared demo tenants
+ * previously held POs only in received / under_review / accepted, so no PO ever
+ * carried a shipping status and the seeded consignment set was EMPTY — the map
+ * and the list rendered their honest empty states and nothing could be
+ * selected, filtered or tracked.
+ *
+ * This block adds, for the two CLEARED demo tenants only, ONE purchase order per
+ * shipping lifecycle state (ready_to_fulfil → shipped → delivered), numbered in
+ * their own deterministic block (PO-9200… / PO-9210…) so the four original PO
+ * numbers (PO-9000 … PO-9003) are byte-for-byte unchanged and the tenant-scoping
+ * assertions that name them keep exactly their original meaning.
+ *
+ * These are SIMULATED demo fixtures, not live channel purchase orders, and
+ * nothing here contacts a provider. Their carriers are derived from the
+ * canonical lane rule (`src/lib/shipping/carrierRouting.ts`) — international →
+ * DHL, UK domestic → Palletline, Freight Collect → the channel-arranged
+ * carrier — so the map's truth labels stay truthful.
+ */
+const LIFECYCLE_PO_STATUSES: PurchaseOrderStatus[] = [
+  'ready_to_fulfil',
+  'shipped',
+  'delivered',
+];
+
+export const DEMO_LIFECYCLE_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
+  .filter((b) => CLEARED_BRAND_IDS.includes(b.id))
+  .flatMap((brand, bi) =>
+    LIFECYCLE_PO_STATUSES.map((status, li): PurchaseOrder => {
+      const items = productsForBrand(brand.id).map((p, idx) => ({
+        sku: p.sku,
+        productName: p.name,
+        quantity: (60 + (bi + li + idx) * 12) * 8,
+        unitPrice: p.exWorksPrice,
+        commodityCode: p.commodityCode,
+      }));
+      const poValue =
+        Math.round(items.reduce((s, i) => s + i.quantity * i.unitPrice, 0) * 100) / 100;
+      const orderDate = new Date(Date.now() - (30 + li * 12) * 864e5)
+        .toISOString()
+        .slice(0, 10);
+      const base = new Date(orderDate);
+      /**
+       * The first lifecycle PO keeps the brand's own declared freight term; the
+       * rest are Mercenta-arranged (prepaid). Both terms therefore genuinely
+       * occur in the seeded consignment set, so the map's CHANNEL-ARRANGED and
+       * MERCENTA-ARRANGED labels are both exercised — never merely declared.
+       */
+      const freightTerm: FreightTerm =
+        li === 0 ? (bi % 2 === 0 ? 'collect' : 'prepaid') : 'prepaid';
+      return {
+        id: `po-lifecycle-${brand.id}-${li}`,
+        brandId: brand.id,
+        poNumber: `PO-${9200 + bi * 10 + li}`,
+        status,
+        poValue,
+        commissionRate: COMMISSION_RATE_PLACEHOLDER,
+        commissionAmount:
+          Math.round(((poValue * COMMISSION_RATE_PLACEHOLDER) / 100) * 100) / 100,
+        orderDate,
+        freightTerm,
+        ...(freightTerm === 'collect'
+          ? {
+              shipWindowStart: new Date(base.getTime() + 14 * 864e5).toISOString().slice(0, 10),
+              shipWindowEnd: new Date(base.getTime() + 21 * 864e5).toISOString().slice(0, 10),
+            }
+          : {
+              deliveryWindowStart: new Date(base.getTime() + 21 * 864e5).toISOString().slice(0, 10),
+              deliveryWindowEnd: new Date(base.getTime() + 28 * 864e5).toISOString().slice(0, 10),
+            }),
+        lineItems: items,
+      };
+    })
+  );
+
+/**
+ * §RUNTIME PARITY — the canonical seeded PO set is the UNION of the original
+ * workflow spread and the deterministic lifecycle block above, so every
+ * consumer (PO lists, brand dossiers, dashboards, the consignment seed) reads
+ * ONE array and the two can never drift.
+ */
+export const DEMO_PURCHASE_ORDERS: PurchaseOrder[] = [
+  ...DEMO_WORKFLOW_PURCHASE_ORDERS,
+  ...DEMO_LIFECYCLE_PURCHASE_ORDERS,
+];
+
 /* ── Shipments for accepted/shipped/delivered POs, across all carriers ── */
 
-const CARRIER_CYCLE = ['dhl', 'fedex', 'bak', 'palletline', 'amazon_partner'] as const;
-
+/**
+ * §RUNTIME PARITY — the consignment seed derives from the SAME two PO sets the
+ * rest of the demo derives from (the original block + the deterministic
+ * lifecycle block above), so consignments can never describe a PO that does not
+ * exist. Carriers come from the canonical lane rule, never from a cycle: the
+ * retired carrier set must not reappear now that consignments actually exist.
+ */
 const SHIPMENT_STATUS_BY_PO: Partial<Record<PurchaseOrderStatus, string>> = {
   ready_to_fulfil: 'factory_intake',
   shipped: 'sea_transit',
@@ -387,26 +485,35 @@ export interface DemoShipment {
   trackingNumber?: string;
 }
 
-export const DEMO_SHIPMENTS: DemoShipment[] = DEMO_PURCHASE_ORDERS.filter(
-  (po) => po.status in SHIPMENT_STATUS_BY_PO
-).map((po, i) => {
-  const brand = ALL_DEMO_BRANDS.find((b) => b.id === po.brandId)!;
-  const carrier = CARRIER_CYCLE[i % CARRIER_CYCLE.length];
-  return {
-    id: `shipment-${po.id}`,
-    brandId: po.brandId,
-    poNumber: po.poNumber,
-    carrier,
-    reference: `${carrier.slice(0, 2).toUpperCase()}-${po.poNumber}`,
-    title: `${brand.name.split(' ')[0]} — ${po.poNumber}`,
-    value: po.poValue,
-    status: SHIPMENT_STATUS_BY_PO[po.status]!,
-    origin: `${brand.nation} depot`,
-    destination: 'Mercenta UK Hub',
-    delayed: i % 4 === 1,
-    exception: i % 7 === 3,
-  };
-});
+export const DEMO_SHIPMENTS: DemoShipment[] = DEMO_PURCHASE_ORDERS
+  .filter((po) => po.status in SHIPMENT_STATUS_BY_PO)
+  .map((po, i) => {
+    const brand = ALL_DEMO_BRANDS.find((b) => b.id === po.brandId)!;
+    /**
+     * Freight Collect = the retail channel arranges carriage, so the
+     * channel-arranged carrier is used and Mercenta is never shown as choosing
+     * it. Otherwise the canonical lane rule decides: UK domestic → Palletline,
+     * international → DHL.
+     */
+    const carrier =
+      po.freightTerm === 'collect'
+        ? AMAZON_PARTNERED_CARRIER
+        : selectCarrierForLane(resolveShippingLane({ brandNation: brand.nation }));
+    return {
+      id: `shipment-${po.id}`,
+      brandId: po.brandId,
+      poNumber: po.poNumber,
+      carrier,
+      reference: `${carrier.slice(0, 2).toUpperCase()}-${po.poNumber}`,
+      title: `${brand.name.split(' ')[0]} — ${po.poNumber}`,
+      value: po.poValue,
+      status: SHIPMENT_STATUS_BY_PO[po.status]!,
+      origin: `${brand.nation} depot`,
+      destination: 'Mercenta UK Hub',
+      delayed: i % 4 === 1,
+      exception: i % 7 === 3,
+    };
+  });
 
 /* ── Contracts — varied states per brand ─────────────────────────────── */
 

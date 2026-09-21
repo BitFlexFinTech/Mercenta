@@ -151,22 +151,34 @@ test.describe('Domain Acceptance Gate', () => {
     await expect(page.locator('option', { hasText: 'ticket_status_changed' })).toHaveCount(1, { timeout: 6000 });
   });
 
-  test('6. Reload semantics — deterministic re-bootstrap; session resets per in-memory contract', async ({ page }) => {
+  /**
+   * §RUNTIME PARITY — REPOINTED (2026-09-21).
+   *
+   * OLD CONTRACT: "session resets per in-memory contract" — a reload dropped the
+   * user back on the public entry because NOTHING about the session was
+   * persisted (`environment`/`role`/`session` were plain `useState`). That was
+   * the defect the Founder briefed this workstream to fix.
+   *
+   * NEW CONTRACT: a reload RESTORES the demo session (tab-scoped
+   * `sessionStorage`, re-validated through the canonical RBAC allowlist on
+   * restore) and re-bootstraps the SAME deterministic canonical dataset for the
+   * SAME tenant. The assertions are therefore strictly stronger than before:
+   * the tenant is still pinned to its own portal, the figures are identical
+   * after re-bootstrap, and no other tenant's data appears.
+   */
+  test('6. Reload semantics — the session is restored, the dataset re-bootstraps deterministically', async ({ page }) => {
     await loginAs(page, 'Astonish', 1200);
     await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 6000 });
     await expect(page.locator('text=Active purchase orders').first()).toBeVisible({ timeout: 5000 });
     const productsHint = page.locator('text=/products listed/').first();
     await expect(productsHint).toBeVisible({ timeout: 5000 });
     const before = (await productsHint.textContent()) ?? '';
-    // Reload: the in-memory demo store + session reset by design (documented
-    // contract — Supabase-backed deployments persist the entity writes). The
-    // browser must return to the public entry, not crash or leak state.
+    // Reload: the session is restored (no silent sign-out) and the canonical
+    // demo dataset re-bootstraps from the same source of truth.
     await page.reload();
-    await page.waitForTimeout(1000);
-    await expect(page.locator('text=Partner Login').first()).toBeVisible({ timeout: 6000 });
-    // Logging in again re-bootstraps the deterministic canonical dataset.
-    await loginAs(page, 'Astonish', 1200);
-    await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 6000 });
+    await page.waitForTimeout(1200);
+    await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('text=Partner Login')).toHaveCount(0);
     const after = (await page.locator('text=/products listed/').first().textContent()) ?? '';
     expect(after).toBe(before);
     // Tenant pin preserved after re-bootstrap: own dashboard only.

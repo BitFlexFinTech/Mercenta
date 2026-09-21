@@ -287,14 +287,15 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Read VAT registration status for the connected VRN',
   },
-  // §Canonical model §6 — payout rails. Mercenta pays the BRAND through Wise by
-  // default and Payoneer as the secondary rail. Both are simulated until real
+  // §Canonical model §6 / T-1 — payout rails. Mercenta pays the BRAND through
+  // Payoneer (the canonical PRIMARY/default business + retail-channel payment
+  // account) and Wise as the secondary rail. Both are simulated until real
   // credentials are configured; the transfer NEVER auto-sends (human approval).
   wise: {
     id: 'wise',
-    name: 'Wise (default payout rail)',
+    name: 'Wise (secondary payout rail)',
     description:
-      'Default rail Mercenta pays brand settlements through. Simulated until real Wise API credentials are configured; a payout is only ever submitted after Mercenta operator approval.',
+      'Secondary rail, used only when deliberately selected. Simulated until real Wise API credentials are configured; a payout is only ever submitted after Mercenta operator approval.',
     authMethod: 'api_key',
     fields: [
       {
@@ -308,9 +309,9 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
   },
   payoneer: {
     id: 'payoneer',
-    name: 'Payoneer (secondary payout rail)',
+    name: 'Payoneer (default payout rail)',
     description:
-      'Secondary payout rail, used only when deliberately selected. Simulated until real Payoneer program credentials are configured; never the default.',
+      'Default rail Mercenta pays brand settlements through, and the canonical retail-channel payment account. Simulated until real Payoneer program credentials are configured; never auto-sent without Mercenta operator approval.',
     authMethod: 'api_key',
     fields: [
       {

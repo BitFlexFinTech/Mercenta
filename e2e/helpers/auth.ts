@@ -15,6 +15,30 @@
 import type { Page } from '@playwright/test';
 
 /**
+ * §RUNTIME PARITY — the runtime now RESTORES a demo session on load
+ * (`src/lib/runtime/sessionPersistence.ts`), which is what makes a refresh stay
+ * in the product. A spec that wants the login ENTRY therefore has to start from
+ * a clean tab; this clears the demo session ONLY when the entry is not already
+ * on screen, so specs that exercise the restored-session behaviour are
+ * unaffected (they never call this helper).
+ */
+async function ensureLoginEntry(page: Page): Promise<void> {
+  const heroLogin = page.getByRole('button', { name: 'Partner Login' }).first();
+  if (await heroLogin.isVisible({ timeout: 8000 }).catch(() => false)) return;
+  await page
+    .evaluate(() => {
+      try {
+        window.sessionStorage.clear();
+      } catch {
+        /* storage unavailable — nothing to clear */
+      }
+    })
+    .catch(() => {});
+  await page.goto('/');
+  await heroLogin.waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
+}
+
+/**
  * Open the marketing homepage and enter the login portal.
  *
  * Desktop: clicks the canonical "Partner Login" accessible button (hero/nav).
@@ -24,6 +48,7 @@ import type { Page } from '@playwright/test';
  */
 export async function openLogin(page: Page): Promise<void> {
   await page.goto('/');
+  await ensureLoginEntry(page);
   const heroLogin = page.getByRole('button', { name: 'Partner Login' }).first();
   try {
     await heroLogin.click({ timeout: 4000 });

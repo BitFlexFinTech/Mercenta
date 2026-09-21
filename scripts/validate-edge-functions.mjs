@@ -44,21 +44,26 @@ const read = (p) => {
 
 // §Phase M11 — REPOINTED. The old contract asserted a STRIPE payout rail
 // (`/v1/transfers`, `STRIPE_SECRET_KEY`, `startsWith('mock:')`). The canonical
-// business model §6 fixes the payout rails as **Wise (DEFAULT)** and
-// **Payoneer (SECONDARY)**; Stripe bills the flat monthly subscription only and
+// business model §6 fixes the payout rails as **Payoneer (DEFAULT)** and
+// **Wise (SECONDARY)**; Stripe bills the flat monthly subscription only and
 // is now explicitly REFUSED as a payout rail, as is the accounting layer Xero.
 // The invariants are UNCHANGED (idempotency forwarded to the rail, a transfer
 // and never a charge, an unmistakably simulated id, positive amounts only, an
 // explicit 503 instead of a false success) — now asserted for both rails, plus
 // the §7 human-approval gate that did not exist when this block was written.
+//
+// §RUNTIME PARITY / T-1 — REPOINTED AGAIN 2026-09-21. Founder decision T-1
+// (Payoneer primary/default, Wise secondary) had been DECIDED BUT NOT APPLIED:
+// both this edge function and `src/config/payouts.ts` declared the inverse. The
+// assertions below now pin the reconciled order. The invariants are untouched.
 const payouts = read('supabase/functions/payouts-transfer/index.ts');
 test('payouts: forwards Idempotency-Key to the rail',
   payouts.includes('Idempotency-Key') && /'Idempotency-Key': body\.idempotencyKey/.test(payouts));
 test('payouts: creates a transfer, never a charge',
   payouts.includes('/v3/transfers') && payouts.includes('/programs/payouts') &&
     !payouts.includes('/v1/charges'));
-test('payouts: Wise is the DEFAULT rail, Payoneer the SECONDARY rail (§6)',
-  payouts.includes("const DEFAULT_RAIL = 'wise'") && payouts.includes('payoneer'));
+test('payouts: Payoneer is the DEFAULT rail, Wise the SECONDARY rail (§6/T-1)',
+  payouts.includes("const DEFAULT_RAIL = 'payoneer'") && payouts.includes('wise'));
 test('payouts: Stripe and Xero are REFUSED as payout rails (§6)',
   payouts.includes('NON_PAYOUT_RAILS') && payouts.includes("'stripe'") &&
     payouts.includes("'xero'"));
@@ -89,8 +94,8 @@ test('payouts: rail vocabulary parity with src/config/payouts.ts (no drift)',
     configRails.every((r) => fnRails.includes(r)) &&
     fnRails.every((r) => configRails.includes(r)));
 test('payouts: the default/secondary declaration lives in the config SSOT',
-  payoutsConfig.includes("export const DEFAULT_PAYOUT_RAIL: PayoutRail = 'wise'") &&
-    payoutsConfig.includes("export const SECONDARY_PAYOUT_RAIL: PayoutRail = 'payoneer'") &&
+  payoutsConfig.includes("export const DEFAULT_PAYOUT_RAIL: PayoutRail = 'payoneer'") &&
+    payoutsConfig.includes("export const SECONDARY_PAYOUT_RAIL: PayoutRail = 'wise'") &&
     payoutsConfig.includes('PAYOUT_REQUIRES_HUMAN_APPROVAL = true'));
 
 

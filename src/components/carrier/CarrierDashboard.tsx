@@ -8,7 +8,7 @@ import { cn } from '@/utils/cn';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import type { ShipmentStatus, CarrierId } from '@/types';
 import { Terminal, Activity, Code2, Truck, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const CARRIER_THEMES: Record<
   CarrierId,
@@ -50,12 +50,28 @@ const STATUS_OPTIONS: ShipmentStatus[] = [
   'live_amazon',
 ];
 
-export function CarrierDashboard() {
+export function CarrierDashboard({
+  /**
+   * §RUNTIME PARITY — the carrier navigation declares THREE destinations
+   * (Manifest Management, BAK Logistics Hub, API Request Auditor) but the
+   * auditor had no render branch of its own: selecting it rendered the manifest
+   * terminal, i.e. a control whose outcome did not match its label. The auditor
+   * section lives inside this terminal, so the declared destination is honoured
+   * by opening the terminal AT the auditor instead of pretending to navigate.
+   */
+  focusSection,
+}: { focusSection?: 'auditor' } = {}) {
   const { shipments, updateShipmentStatus, addApiLog, apiLogs, carrierContext, setCarrierContext } =
     useApp();
   const { modes } = useIntegrations();
   const [busyShipmentId, setBusyShipmentId] = useState<string | null>(null);
   const [lastDhlResult, setLastDhlResult] = useState<Record<string, string>>({});
+  /** The declared destination the terminal must open on, when one was named. */
+  const auditorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (focusSection !== 'auditor') return;
+    auditorRef.current?.scrollIntoView({ block: 'start' });
+  }, [focusSection]);
 
   /**
    * USER ACTION → DOMAIN WORKFLOW → PROVIDER CONTRACT → SIMULATION ADAPTER →
@@ -302,6 +318,7 @@ export function CarrierDashboard() {
         </Card>
 
         {/* API Request Auditor */}
+        <div ref={auditorRef} data-testid="carrier-auditor-section" data-focus={focusSection === 'auditor' ? 'auditor' : undefined}>
         <Card
           title="API Request Auditor"
           subtitle="Live transaction logs"
@@ -337,6 +354,7 @@ export function CarrierDashboard() {
             ))}
           </div>
         </Card>
+        </div>
       </div>
 
       {/* Info banner */}

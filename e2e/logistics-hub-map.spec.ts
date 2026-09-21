@@ -318,23 +318,46 @@ test.describe('Logistics Hub — operational map', () => {
     const aIds = await pa
       .locator('[data-testid^="logistics-row-"]')
       .evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')));
+    const aText = await pa
+      .locator('[data-testid^="logistics-row-"]')
+      .evaluateAll((els) => els.map((e) => e.textContent ?? ''));
     await a.close();
 
     const b = await browser.newContext();
     const pb = await b.newPage();
-    // Brand B has no consignment of its own, and must see NONE of brand A's.
     await openLogistics(pb, 'Tapatío');
     const bIds = await pb
       .locator('[data-testid^="logistics-row-"]')
       .evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')));
     const bRows = await pb.locator('[data-testid^="logistics-row-"]').count();
+    const bText = await pb
+      .locator('[data-testid^="logistics-row-"]')
+      .evaluateAll((els) => els.map((e) => e.textContent ?? ''));
     await b.close();
 
     expect(aIds.length).toBeGreaterThan(0);
-    // Tenant isolation is structural: brand B's feed contains no brand A record.
-    expect(bRows).toBe(0);
-    const overlap = aIds.filter((id) => bIds.includes(id));
-    expect(overlap).toEqual([]);
+    /**
+     * §RUNTIME PARITY — REPOINTED (2026-09-21).
+     *
+     * OLD CONTRACT: `expect(bRows).toBe(0)` — brand B had NO seeded consignment
+     * of its own, so an empty feed was the only way to prove it saw none of
+     * brand A's. That was a property of the EMPTY seed, not of the isolation
+     * rule, and the seed is no longer empty: both cleared demo tenants now hold
+     * their own deterministic consignments (PO-9200… / PO-9210…).
+     *
+     * NEW CONTRACT (strictly stronger — it is asserted WITH data on both sides):
+     *   1. brand B DOES see its own consignments (so the feed is genuinely
+     *      tenant-scoped rather than empty for some other reason);
+     *   2. not one of brand A's consignment ids appears in brand B's feed;
+     *   3. no row of brand B's feed carries brand A's PO numbers, and every one
+     *      of its rows carries a PO number from its own block.
+     */
+    expect(bRows).toBeGreaterThan(0);
+    expect(aIds.filter((id) => bIds.includes(id))).toEqual([]);
+    const bJoined = bText.join(' \n ');
+    expect(bJoined).not.toMatch(/PO-9200|PO-9201|PO-9202/);
+    expect(bJoined).toMatch(/PO-9210|PO-9211|PO-9212/);
+    expect(aText.join(' \n ')).not.toMatch(/PO-9210|PO-9211|PO-9212/);
   });
 
   test('14/15. artefacts still open and close', async ({ page }) => {

@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
   type ReactNode,
 } from 'react';
 import type {
@@ -30,6 +31,18 @@ import { buildDistributionAgreement } from '@/lib/agreement';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import { tierForRole, canAccessEnvironment, staffCanMutate, type DemoSession } from '@/lib/auth/rbac';
 import { isCommercialModel } from '@/config/commercialModel';
+import {
+  parseProductPath,
+  pathDeclaresEnvironment,
+  pushProductPath,
+  type ProductEnvironment,
+} from '@/lib/runtime/productRoutes';
+import {
+  clearPersistedSession,
+  readPersistedSession,
+  toPersistedSession,
+  writePersistedSession,
+} from '@/lib/runtime/sessionPersistence';
 
 interface AppState {
   environment: Environment;
@@ -144,10 +157,129 @@ const DEFAULT_PROFILE: BrandProfile = {
 let logCounter = 100;
 let apiCounter = 100;
 
+/**
+ * §RUNTIME PARITY (R1/R2) — where a cold load lands.
+ *
+ * The ADDRESS and the SESSION must agree, and the address is read first:
+ *
+ * 1. A PRODUCT address (`/admin/…`, `/brand/…`, `/carrier/…`) restores the
+ *    persisted session for that environment (re-validated through the canonical
+ *    RBAC allowlist) — this is what makes F5 keep you in the product.
+ * 2. A PRODUCT address with no restorable session — or with a session whose tier
+ *    may not enter that environment — shows the LOGIN entry. The address is left
+ *    untouched, so the one-click demo login lands on the REQUESTED destination.
+ *    No session is fabricated, and an environment the tier may not enter is
+ *    never rendered (fail-closed).
+ * 3. A PUBLIC address (`/`, `/faq`, …) stays public — `/` IS the marketing
+ *    homepage, and a signed-in tab must never turn it into a portal. The session
+ *    is retained in memory, so Back/Forward (or any product link) re-enters it.
+ */
+interface InitialRuntime {
+  environment: Environment;
+  session: DemoSession | null;
+  role: SessionRole | null;
+}
+
+function resolveInitialRuntime(): InitialRuntime {
+  const declared = typeof window === 'undefined' ? null : parseProductPath(window.location.pathname);
+  const persisted = readPersistedSession();
+  const restored: InitialRuntime | null = persisted
+    ? {
+        environment: persisted.environment,
+        role: persisted.role,
+        session: {
+          tier: persisted.tier,
+          role: persisted.role,
+          ...(persisted.tenantId ? { tenantId: persisted.tenantId } : {}),
+        },
+      }
+    : null;
+
+  if (!declared) {
+    return restored
+      ? { environment: 'home', session: restored.session, role: restored.role }
+      : { environment: 'home', session: null, role: null };
+  }
+  if (restored && canAccessEnvironment(restored.session!.tier, declared.environment)) {
+    return { ...restored, environment: declared.environment };
+  }
+  return { environment: 'login', session: null, role: null };
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [environment, setEnvironment] = useState<Environment>('home');
-  const [role, setRole] = useState<SessionRole | null>(null);
-  const [session, setSession] = useState<DemoSession | null>(null);
+  /** Resolved ONCE per mount, so all three session states agree. */
+  const bootstrapRef = useRef<InitialRuntime | null>(null);
+  if (bootstrapRef.current === null) bootstrapRef.current = resolveInitialRuntime();
+  const bootstrap = bootstrapRef.current;
+
+  const [environment, setEnvironmentState] = useState<Environment>(bootstrap.environment);
+  const [role, setRole] = useState<SessionRole | null>(bootstrap.role);
+  const [session, setSession] = useState<DemoSession | null>(bootstrap.session);
+
+  /**
+   * §RUNTIME PARITY (R1) — the ONE writer of the address bar's product prefix.
+   *
+   * `setEnvironment` is a real navigation now: entering a product environment
+   * writes its address (`/admin/overview`, `/brand/overview`, `/carrier/…`),
+   * keeping the requested view when the address already declares that
+   * environment (a deep link / a refresh). Going home writes `/`, and the login
+   * entry deliberately leaves any product deep link in place so the requested
+   * destination renders after the one-click demo login.
+   */
+  const syncAddressForEnvironment = useCallback((env: Environment) => {
+    if (typeof window === 'undefined') return;
+    if (env === 'home') {
+      if (window.location.pathname !== '/') {
+        window.history.pushState({ environment: 'home' }, '', '/');
+      }
+      return;
+    }
+    if (env === 'login') return;
+    const product = env as ProductEnvironment;
+    const parsed = parseProductPath(window.location.pathname);
+    const keepView = pathDeclaresEnvironment(product, window.location.pathname);
+    pushProductPath(product, keepView ? parsed?.view ?? null : null);
+  }, []);
+
+  const setEnvironment = useCallback(
+    (env: Environment) => {
+      setEnvironmentState(env);
+      syncAddressForEnvironment(env);
+    },
+    [syncAddressForEnvironment]
+  );
+
+  /**
+   * §RUNTIME PARITY (R2) — remember the session so a refresh returns to the
+   * SAME product environment instead of silently signing the user out. The
+   * value is re-validated on restore (see `sessionPersistence`); a public
+   * entry state is never persisted.
+   */
+  useEffect(() => {
+    if (environment === 'home' || environment === 'login') return;
+    writePersistedSession(toPersistedSession(environment, session, role));
+  }, [environment, session, role]);
+
+  /**
+   * §RUNTIME PARITY (R1) — Back/Forward moves between product environments.
+   * Fail-closed: an environment the active session may not enter is never
+   * rendered; the login entry is shown instead.
+   */
+  useEffect(() => {
+    function onPopState() {
+      if (typeof window === 'undefined') return;
+      const declared = parseProductPath(window.location.pathname);
+      if (!declared) {
+        setEnvironmentState('home');
+        return;
+      }
+      const tier = session?.tier ?? null;
+      setEnvironmentState(tier && canAccessEnvironment(tier, declared.environment) ? declared.environment : 'login');
+    }
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [session]);
+
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
@@ -200,7 +332,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSession({ tier, role: nextRole });
     setRole(nextRole);
     setEnvironment(env);
-  }, []);
+  }, [setEnvironment]);
 
   /**
    * One-click demo login pinned to one specific brand tenant.
@@ -253,12 +385,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setDemoRegion(dossier.region);
       setEnvironment('brand');
     });
-  }, []);
+  }, [setEnvironment]);
 
   const signOut = useCallback(() => {
+    clearPersistedSession();
     setRole(null);
+    setSession(null);
     setEnvironment('home');
-  }, []);
+  }, [setEnvironment]);
 
   /**
    * §Phase E2 — enter the portal as a CANONICAL onboarding tenant.
@@ -307,7 +441,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setGateDocs([]);
       setEnvironment('brand');
     });
-  }, []);
+  }, [setEnvironment]);
   const activateDemo = useCallback((region: DemoRegion) => {
     import('@/data/regionalDossiers').then((m) => {
       const dossier = m.REGIONAL_DOSSIERS[region];
@@ -321,7 +455,56 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setRole('Brand Partner');
       setEnvironment('brand');
     });
-  }, []);
+  }, [setEnvironment]);
+
+  /**
+   * §RUNTIME PARITY (R2) — re-hydrate a RESTORED brand session.
+   *
+   * Restoring the session alone is not enough: the brand's workspace state
+   * (profile, products, shipments, financials, compliance, gate docs) is
+   * hydrated by the canonical activation path, so a refresh with only a
+   * restored tier/tenant would drop the user into the onboarding wizard instead
+   * of the page they were on. This re-runs the SAME canonical path the login
+   * used, chosen by the SAME rule (`Login.tsx:210`): a tenant with a canonical
+   * onboarding record enters through `activateOnboardingBrand`, otherwise the
+   * demo dossier path is used.
+   *
+   * FAIL-CLOSED: an unknown tenant is never rendered — the session is dropped
+   * and the public homepage is shown.
+   */
+  const restoreBrandState = useCallback(
+    (brandId: string) => {
+      void Promise.all([import('@/data/acquisitionStore'), import('@/data/demoData')]).then(
+        ([acquisitionStore, demoData]) => {
+          if (acquisitionStore.getOnboardingForBrand(brandId)) {
+            activateOnboardingBrand(brandId);
+            return;
+          }
+          if (demoData.ALL_DEMO_BRANDS.some((b: { id: string }) => b.id === brandId)) {
+            activateDemoBrand(brandId);
+            return;
+          }
+          console.warn(`[rbac] unknown restored tenant "${brandId}" — refused`);
+          clearPersistedSession();
+          setSession(null);
+          setRole(null);
+          setEnvironment('home');
+        }
+      );
+    },
+    [activateDemoBrand, activateOnboardingBrand, setEnvironment]
+  );
+
+  /** Only a session that came from persistence is re-hydrated, and only once. */
+  const restoredBrandAtBoot =
+    bootstrap.session?.tier === 'brand' ? bootstrap.session.tenantId ?? null : null;
+  const brandHydratedRef = useRef(false);
+  useEffect(() => {
+    if (brandHydratedRef.current) return;
+    if (environment !== 'brand' || !restoredBrandAtBoot) return;
+    brandHydratedRef.current = true;
+    restoreBrandState(restoredBrandAtBoot);
+  }, [environment, restoredBrandAtBoot, restoreBrandState]);
 
   const addApiLog = useCallback((log: ApiLogEntry) => {
     setApiLogs((prev) => [log, ...prev].slice(0, 50));

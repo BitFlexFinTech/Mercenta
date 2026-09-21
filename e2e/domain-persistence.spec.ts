@@ -68,7 +68,16 @@ test.describe('Domain persistence (Phase D4)', () => {
     expect(pageErrors).toEqual([]);
   });
 
-  test('2. A browser reload is honest — session state is not restored and never claimed as persisted', async ({ page }) => {
+  /**
+   * §RUNTIME PARITY — REPOINTED (2026-09-21). The OLD contract reloaded to the
+   * public entry because nothing about the session was persisted. The NEW
+   * contract restores the SESSION (tab-scoped, RBAC re-validated) while the
+   * acquisition WORKING SET remains honestly memory-only — so the assertions
+   * below are the same ones, now reached without a second sign-in: the
+   * persistence status still reports `memory-only` and the in-memory record is
+   * still gone. Nothing is fabricated back on re-entry.
+   */
+  test('2. A browser reload is honest — session restored, working set not persisted', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
@@ -79,9 +88,12 @@ test.describe('Domain persistence (Phase D4)', () => {
     await expect(page.locator('text=opp-prospect-tapatio').first()).toBeVisible({ timeout: 6000 });
 
     // RELOAD — the in-memory working set is gone. Because nothing is durable in
-    // this environment, nothing must be fabricated back on re-entry.
+    // this environment, nothing must be fabricated back on re-entry. The
+    // restored session must be the SAME Super Admin session (no silent
+    // sign-out, and no fresh sign-in needed).
     await page.reload();
-    await loginAs(page, 'Super Admin — Tadii', 1200);
+    await page.waitForTimeout(1200);
+    await expect(page.locator('text=Partner Login')).toHaveCount(0);
     await openNav(page, 'Brand CRM');
     await expect(page.locator('[data-section="persistence-status"]')).toContainText('memory-only');
     await expect(page.locator('text=opp-prospect-tapatio')).toHaveCount(0);

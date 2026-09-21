@@ -121,11 +121,13 @@ discount, actual cost, brand charge, VAT, fees, handling, surcharge, margin).
 
 ```
 PO → invoice → payment → reconciliation → Xero → payout proposal
-   → HUMAN APPROVAL → Wise (default) → settlement
+   → HUMAN APPROVAL → Payoneer (default) → settlement
 ```
 
 - **Xero is the accounting/reconciliation layer — it is NOT the bank.**
-- **Wise is the DEFAULT payout rail. Payoneer is the SECONDARY rail.**
+- **Payoneer is the DEFAULT payout rail (Mercenta's primary business and
+  retail-channel payment account). Wise is the SECONDARY rail.** (Founder
+  decision T-1 — reconciled in code on 2026-09-21.)
   Canonical: `src/config/payouts.ts`. Stripe bills the flat monthly subscription
   only and is **explicitly refused as a payout rail**, as is Xero.
 - **No payout leaves Mercenta without explicit human approval** (§7). The

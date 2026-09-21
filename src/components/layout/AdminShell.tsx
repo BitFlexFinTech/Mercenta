@@ -2,12 +2,13 @@
  * AdminShell — admin portal environment. Lazy-loaded from App.tsx.
  * Only loaded when environment === 'admin'.
  */
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
+import { currentPathname, pushProductPath, resolveProductView } from '@/lib/runtime/productRoutes';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { LogisticsControl } from '@/components/admin/LogisticsControl';
 import { CarrierIntegrationMonitor } from '@/components/admin/CarrierMonitor';
@@ -156,9 +157,40 @@ const ADMIN_SECTIONS = [
     ],
   },
 ];
+
+/**
+ * §RUNTIME PARITY — every view the admin shell can actually render, derived from
+ * the SAME nav declarations the rail renders. A URL segment outside this set
+ * resolves to the declared default view instead of rendering an empty workspace.
+ */
+const ADMIN_VIEW_IDS: readonly string[] = ADMIN_SECTIONS.flatMap((s) =>
+  s.items.map((i) => i.id)
+);
+
 export default function AdminShell() {
   const { role, actingStaff } = useApp();
-  const [adminView, setAdminView] = useState('overview');
+  /**
+   * §RUNTIME PARITY (R1) — the active admin view IS the address
+   * (`/admin/brain`, `/admin/logistics`, …). Initialised from the URL, written
+   * back on every navigation, and re-read on Back/Forward. No second store.
+   * An address naming a view this shell cannot render resolves to the declared
+   * default view instead of rendering an empty workspace.
+   */
+  const [adminView, setAdminViewState] = useState(() =>
+    resolveProductView('admin', currentPathname(), ADMIN_VIEW_IDS)
+  );
+  const setAdminView = useCallback((v: string) => {
+    setAdminViewState(v);
+    pushProductPath('admin', v);
+  }, []);
+
+  useEffect(() => {
+    function onPopState() {
+      setAdminViewState(resolveProductView('admin', currentPathname(), ADMIN_VIEW_IDS));
+    }
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
   /**
    * §UI/UX Wave 2 — navigation attention counts + real records for the command
    * palette, both derived from canonical admin-scoped stores (see

@@ -28,8 +28,9 @@ export type IntegrationId =
   // authoritative and the safety gate can resolve them (never UNKNOWN).
   | 'companies_house'
   | 'hmrc'
-  // §Canonical model §6 — the payout rails. Wise is the DEFAULT rail Mercenta
-  // pays brands through; Payoneer is the SECONDARY rail. Registered so their
+  // §Canonical model §6 / T-1 — the payout rails. Payoneer is the DEFAULT rail
+  // Mercenta pays brands through (and the retail-channel payment account); Wise
+  // is the SECONDARY rail. Registered so their
   // mode is authoritative and an unregistered rail can never be treated as
   // simulation by accident. Xero (accounting) and Stripe (subscriptions) are
   // explicitly NOT payout rails — see `src/config/payouts.ts`.

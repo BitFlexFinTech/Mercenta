@@ -299,7 +299,9 @@ Two facts that must never be collapsed:
 
 ## 8.2 Payout rails (canonical §6/§7)
 
-- **Wise is the DEFAULT payout rail; Payoneer is the SECONDARY rail**
+- **Payoneer is the DEFAULT payout rail and the canonical retail-channel payment
+  account; Wise is the SECONDARY rail** (Founder decision T-1, reconciled across
+  all sources on 2026-09-21)
   (`src/config/payouts.ts`).
 - **Xero is the accounting/reconciliation layer — not the bank.**
 - **Stripe is not a payout rail.** It bills the flat monthly brand subscription

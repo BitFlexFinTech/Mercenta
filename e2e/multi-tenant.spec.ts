@@ -54,11 +54,18 @@ test.describe('Multi-Tenant Isolation', () => {
   });
 
   test('7. payout ledger is tenant-scoped (Brand A never sees Brand B records)', async ({ page }) => {
-    // §Phase D6 — the brand payout ledger is a FINANCIAL surface, so it must be
-    // tenant-scoped exactly like POs/deductions. Tapatío owns PO-9002/PO-9003
-    // (its accepted PO accrues a payout); Astonish owns PO-9000/PO-9001 and has
-    // no accepted PO yet, so it must show an honest empty state — never another
-    // tenant's money.
+    /**
+     * §RUNTIME PARITY — REPOINTED (2026-09-21).
+     *
+     * The demo seed previously contained no PO in a shipping status, so Astonish
+     * (which owns no accepted PO) showed the honest empty state and that empty
+     * state was the proof. Astonish now owns its OWN deterministic lifecycle POs
+     * (PO-9200…, so the Logistics Hub is inspectable), which legitimately accrue
+     * its own payout rows — so the empty state is asserted on a brand that
+     * genuinely has no operational PO at all (Kit & Kin), and Astonish's ledger
+     * is asserted to contain its OWN records and none of Tapatío's. Every
+     * assertion of tenant scoping is therefore retained, and one is added.
+     */
     await loginAs(page, 'Tapatío', 1400);
     const ledger = page.locator('table[data-table="brand-payouts"]');
     await expect(ledger).toBeVisible({ timeout: 10000 });
@@ -67,12 +74,22 @@ test.describe('Multi-Tenant Isolation', () => {
     expect(await page.locator('text=PO-9002').count()).toBeGreaterThan(0);
     expect(await page.locator('text=PO-9000').count()).toBe(0);
     expect(await page.locator('text=PO-9001').count()).toBe(0);
+    expect(await page.locator('text=PO-9200').count()).toBe(0);
+    expect(await page.locator('text=PO-9201').count()).toBe(0);
 
-    await loginAs(page, 'Astonish', 1400);
-    // No accepted PO → no payout rows at all, and no foreign finance record.
+    // A portal brand with NO operational purchase order shows the honest empty
+    // state on its dashboard (Le Creuset is a portal tenant with no POs).
+    await loginAs(page, 'Le Creuset', 1400);
     expect(await page.locator('table[data-table="brand-payouts"]').count()).toBe(0);
     await expect(page.getByText('No payouts yet').first()).toBeVisible({ timeout: 8000 });
+    expect(await page.locator('text=PO-9002').count()).toBe(0);
     expect(await page.locator('text=PO-9003').count()).toBe(0);
+
+    // Astonish has its own payout rows — and never Tapatío's.
+    await loginAs(page, 'Astonish', 1400);
+    await expect(page.locator('table[data-table="brand-payouts"]')).toBeVisible({ timeout: 10000 });
+    expect(await page.locator('text=PO-9003').count()).toBe(0);
+    expect(await page.locator('text=PO-9210').count()).toBe(0);
     expect(await page.locator('text=comm-po-brand-tapatio').count()).toBe(0);
   });
 

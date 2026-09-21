@@ -34,8 +34,8 @@ flow in `IntegrationsContext`; live test pings in `src/lib/integrations/testCall
 | xero | Xero | oauth | no | Real OAuth v2 client + sync engine; demo 28-day resync (`src/services/xero/*`) |
 | companies_house | Companies House | api_key | no | registrar reads (company/officers/PSC/filings/charges); electronic auto-file REFUSED |
 | hmrc | HMRC | api_key | no | VAT-status reads; filings refused until VAT registration |
-| wise | Wise | api_key | no | §6 default payout rail (mock/real factory) |
-| payoneer | Payoneer | api_key | no | §6 secondary payout rail (mock/real factory) |
+| wise | Wise | api_key | no | §6 secondary payout rail (mock/real factory) |
+| payoneer | Payoneer | api_key | no | §6 default payout rail (mock/real factory) |
 | google | Google Workspace | oauth | no | §21 Docs/Sheets/Slides/Drive setup runner + wizard |
 
 **Change log:** Rocket.Chat was removed from the registry in Phase D1
@@ -203,8 +203,8 @@ source of truth: **`src/config/payouts.ts`**.
 
 | Rail | Priority | Status | Activates with |
 |---|---|---|---|
-| **Wise** | **DEFAULT** | simulation | `WISE_API_TOKEN` (+ `WISE_PROFILE_ID`) |
-| **Payoneer** | **SECONDARY** | simulation | `PAYONEER_CLIENT_ID` / `_CLIENT_SECRET` / `_PROGRAM_ID` |
+| **Payoneer** | **DEFAULT** | simulation | `PAYONEER_CLIENT_ID` / `_CLIENT_SECRET` / `_PROGRAM_ID` |
+| **Wise** | **SECONDARY** | simulation | `WISE_API_TOKEN` (+ `WISE_PROFILE_ID`) |
 | Xero | *not a rail* | accounting layer | (as before) |
 | Stripe | *not a rail* | brand subscriptions only | (as before) |
 
