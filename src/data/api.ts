@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase';
 import { evaluateComplianceGate, latestDocumentsByType } from '@/lib/compliance';
 import { submitDocumentForVerification } from '@/lib/verification/documentVerification';
 import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
+import { originForBrand } from '@/config/logisticsGeo';
 import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
 import { createSPApiClientForConnection } from '@/lib/spapi';
 import { spApiConnectionCredentials } from '@/integrations/connections';
@@ -912,7 +913,16 @@ export function acknowledgePurchaseOrder(
         title: (brandDraft?.profile.businessName ?? 'Brand').split(' ')[0] + ' — ' + po.poNumber,
         value: acceptedLines.reduce((s, l) => s + (l.acknowledgedQty ?? l.quantity) * l.unitPrice, 0),
         status: 'factory_intake',
-        origin: 'Brand warehouse',
+        /**
+         * §Logistics-map — PLACEHOLDER REMOVED.
+         *
+         * This was the literal string 'Brand warehouse', which is not a location
+         * the platform can resolve, so a workflow-created consignment could never
+         * be plotted and its origin could not be reported. The brand's DECLARED
+         * nation (already on the canonical brand record) is the honest precision
+         * actually available at this point in the lifecycle.
+         */
+        origin: originForBrand(brandDraft),
         destination: 'Mercenta UK Hub',
         delayed: false,
         exception: false,
@@ -1199,7 +1209,8 @@ export function createShipmentForPO(
       title: `${(brand?.profile.businessName ?? 'Brand').split(' ')[0]} — ${po.poNumber}`,
       value: po.poValue,
       status: 'factory_intake',
-      origin: 'Origin depot',
+      /** §Logistics-map — placeholder 'Origin depot' replaced by the brand's declared nation. */
+      origin: originForBrand(brand),
       destination: 'Mercenta UK Hub',
       delayed: false,
       exception: false,

@@ -16,6 +16,14 @@ import {
   WorkspaceSection,
   type MetricTileData,
 } from '@/components/shared/workspace';
+import { useIntegrations } from '@/integrations/IntegrationsContext';
+import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
+import { buildOperationalMap } from '@/lib/logistics/operationsMap';
+import {
+  MAP_TRUTH_NOTICE,
+  OPERATIONAL_TRUTH,
+  OPERATIONAL_TRUTH_ORDER,
+} from '@/config/logisticsGeo';
 import { useWorkItems } from '@/lib/work/useWork';
 import { WORK_SOURCE_LABELS, demoToday, daysBetween } from '@/lib/work/workStore';
 import type { WorkSource } from '@/lib/work/types';
@@ -59,7 +67,6 @@ export function LogisticsControl() {
     return m;
   }, [pos]);
   const poFor = (poNumber: string) => poByNumber.get(poNumber);
-
   const groups = useMemo(() => {
     const map = new Map<string, DemoShipment[]>();
     for (const s of shipments) {
@@ -80,6 +87,60 @@ export function LogisticsControl() {
 
   /* §Sprint 2 — metric drill-downs narrow the SAME grouped shipment list. */
   const [focus, setFocus] = useState<'all' | 'in_transit' | 'delayed' | 'exceptions'>('all');
+
+  /* ── §Logistics-map — the SAME operational map the brand hub uses ──────
+     This is the Mercenta-side counterpart, so it is deliberately cross-tenant:
+     the ops team's job is to see every brand's consignments. The map reads the
+     canonical shipment feed and the canonical provider modes, so its LIVE /
+     SIMULATED / AMBIENT labelling can never disagree with the brand surface. */
+  const { modes } = useIntegrations();
+  const [selectedShipmentId, setSelectedShipmentId] = useState<string | null>(null);
+  const [mapTruth, setMapTruth] = useState('all');
+
+  const mapModel = useMemo(
+    () =>
+      buildOperationalMap(
+        shipments.map((s) => ({
+          id: s.id,
+          reference: s.reference,
+          title: s.title,
+          poNumber: s.poNumber,
+          brandId: s.brandId,
+          carrier: s.carrier,
+          status: s.status,
+          origin: s.origin,
+          destination: s.destination,
+          value: s.value,
+          delayed: s.delayed,
+          exception: s.exception,
+          waybill: s.waybill ?? null,
+          trackingNumber: s.trackingNumber ?? null,
+          freightTerm: poByNumber.get(s.poNumber)?.freightTerm ?? null,
+          simulated: poByNumber.get(s.poNumber)?.simulated,
+          providerModes: modes,
+        }))
+      ),
+    [shipments, poByNumber, modes]
+  );
+
+  /**
+   * The map obeys the SAME focus filter as the tables below, plus an evidence
+   * filter. A filter that changed the tables but not the map would make the map
+   * decorative.
+   */
+  const mapVisibleIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const leg of mapModel.legs) {
+      if (mapTruth !== 'all' && leg.truth !== mapTruth) continue;
+      if (focus === 'in_transit' && !IN_TRANSIT.includes(leg.status)) continue;
+      if (focus === 'delayed' && !leg.delayed) continue;
+      if (focus === 'exceptions' && !leg.exception) continue;
+      ids.add(leg.id);
+    }
+    return ids;
+  }, [mapModel.legs, mapTruth, focus]);
+
+  const selectedLeg = mapModel.legs.find((l) => l.id === selectedShipmentId) ?? null;
   const visibleGroups = useMemo(() => {
     if (focus === 'all') return groups;
     return groups
@@ -162,10 +223,10 @@ export function LogisticsControl() {
         description="Operational view — shipments in transit, delays and exceptions by brand and PO. Shipment state feeds the canonical work layer, so an exception becomes an actionable item rather than a passive row."
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">{shipments.length} shipments</span>
-            <span className="font-mono text-[11px] text-zinc-500">{groups.length} brands</span>
-            <span className="font-mono text-[11px] text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">{shipments.length} shipments</span>
+            <span className="font-mono text-ds-label text-zinc-500">{groups.length} brands</span>
+            <span className="font-mono text-ds-label text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
+            <span className="font-mono text-ds-label text-zinc-500">
               deterministic simulation · no live carrier call
             </span>
           </>
@@ -180,8 +241,8 @@ export function LogisticsControl() {
                 data-testid={`logistics-focus-${f}`}
                 className={
                   focus === f
-                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-[11px] font-medium text-white'
-                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
+                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
                 }
               >
                 {f.replace(/_/g, ' ')}
@@ -208,7 +269,7 @@ export function LogisticsControl() {
               />
               <ul className="mt-2 space-y-1.5">
                 {logisticsWork.slice(0, 5).map((w) => (
-                  <li key={w.id} className="text-[11px] leading-snug text-zinc-400">
+                  <li key={w.id} className="text-ds-label leading-snug text-zinc-400">
                     <span className="font-medium text-zinc-200">{WORK_SOURCE_LABELS[w.source]}</span>
                     {' · '}
                     {w.title}
@@ -216,20 +277,56 @@ export function LogisticsControl() {
                   </li>
                 ))}
                 {logisticsWork.length === 0 && (
-                  <li className="text-[11px] text-zinc-500">No open logistics work.</li>
+                  <li className="text-ds-label text-zinc-500">No open logistics work.</li>
                 )}
               </ul>
-              <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+              <p className="mt-2 text-ds-label leading-snug text-zinc-400">
                 These are the same items Work Management and the derived calendar show — resolving
                 one there stops its reminder here too.
               </p>
             </ContextPanel>
             <ContextPanel title="Lifecycle">
-              <p className="text-[11px] leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-zinc-400">
                 PO → acknowledgement → fulfilment → shipment → delivery → exception → resolution →
                 return → close. Every stage is deterministic simulation; nothing here is a live
                 carrier response.
               </p>
+            </ContextPanel>
+
+            <ContextPanel title="Consignment inspector">
+              {selectedLeg ? (
+                <div className="space-y-2" data-testid="admin-logistics-inspector">
+                  <StatusBadge
+                    tone={OPERATIONAL_TRUTH[selectedLeg.truth].tone}
+                    dataStatus={selectedLeg.truth}
+                  >
+                    {OPERATIONAL_TRUTH[selectedLeg.truth].label}
+                  </StatusBadge>
+                  <RecordFieldList
+                    fields={[
+                      { label: 'Reference', value: selectedLeg.reference },
+                      { label: 'PO', value: selectedLeg.poNumber || '—' },
+                      { label: 'Brand', value: brandName(selectedLeg.brandId) },
+                      { label: 'Carrier', value: selectedLeg.carrier },
+                      { label: 'Origin', value: selectedLeg.origin.raw || '—' },
+                      { label: 'Destination', value: selectedLeg.destination.raw || '—' },
+                      { label: 'Value', value: `£${selectedLeg.value.toLocaleString()}` },
+                    ]}
+                  />
+                  <p className="text-ds-micro leading-relaxed text-zinc-500" data-testid="admin-logistics-truth-reason">
+                    {selectedLeg.truthReason}
+                  </p>
+                  {selectedLeg.channelArranged && (
+                    <p className="text-ds-micro text-palette-indigo">
+                      Channel-arranged carriage — Mercenta did not select this carrier.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-ds-label text-zinc-500" data-testid="admin-logistics-inspector-empty">
+                  Select a consignment on the map to see its route and evidence state.
+                </p>
+              )}
             </ContextPanel>
           </>
         }
@@ -239,6 +336,48 @@ export function LogisticsControl() {
           <p className="text-xs text-zinc-500">No shipments match the current focus.</p>
         </Card>
       )}
+
+      <WorkspaceSection
+        title="Operational map"
+        description="Every brand's consignments on one surface, positioned by the canonical stage. Cross-tenant by design — this is the Mercenta operations view."
+        domain="logistics"
+        action={
+          <div className="flex flex-wrap items-center gap-1.5" data-testid="logistics-map-evidence">
+            {(['all', ...OPERATIONAL_TRUTH_ORDER] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setMapTruth(t)}
+                data-testid={`logistics-map-evidence-${t}`}
+                className={
+                  mapTruth === t
+                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
+                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                }
+              >
+                {t === 'all' ? 'All evidence' : OPERATIONAL_TRUTH[t].label}
+              </button>
+            ))}
+          </div>
+        }
+      >
+        <LogisticsMapCanvas
+          model={mapModel}
+          visibleIds={mapVisibleIds}
+          selectedId={selectedShipmentId}
+          onSelect={setSelectedShipmentId}
+          testId="admin-logistics-map"
+          className="h-[280px] sm:h-[360px] lg:h-[420px]"
+        />
+        <p className="text-ds-micro text-zinc-600">{MAP_TRUTH_NOTICE}</p>
+        {mapModel.schematic.length > 0 && (
+          <p className="text-ds-micro text-zinc-600" data-testid="admin-logistics-schematic-notice">
+            {mapModel.schematic.length} consignment
+            {mapModel.schematic.length === 1 ? '' : 's'} declare an unresolvable location and are listed
+            below rather than plotted at an invented coordinate.
+          </p>
+        )}
+      </WorkspaceSection>
 
       {groups.length === 0 && (
         // §M9 — honest empty state: the surface previously rendered three zero
@@ -278,7 +417,7 @@ export function LogisticsControl() {
                   <span className="font-mono text-brass">
                     {s.poNumber}
                     {poFor(s.poNumber)?.simulated === true && (
-                      <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">
+                      <span className="ml-2 text-ds-micro px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">
                         (sim)
                       </span>
                     )}
@@ -308,12 +447,12 @@ export function LogisticsControl() {
                         {p.label}
                       </StatusBadge>
                       {transit && s.delayed && (
-                        <Badge className="text-[9px] bg-amber-500/15 text-amber-300 border-amber-500/20">
+                        <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
                           Delayed
                         </Badge>
                       )}
                       {s.exception && (
-                        <Badge className="text-[9px] bg-red-500/15 text-red-300 border-red-500/20">
+                        <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">
                           Exception
                         </Badge>
                       )}

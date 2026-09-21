@@ -39,7 +39,14 @@ const REGION_LABEL: Record<DemoBrand['region'], string> = {
 };
 
 /** Mirrors GlobalStateContext.statusToStage — kept in sync by validator. */
-const STAGE_BY_STATUS: Record<DemoShipment['status'], Shipment['stage']> = {
+/**
+ * §LOGISTICS HUB — canonical shipment STATUS → STAGE resolution.
+ *
+ * Exported (it was module-private) so the Logistics Hub's operational map can
+ * derive a shipment's real stage from its status instead of defaulting every
+ * row to 'factory_intake'. One declaration, no second copy.
+ */
+export const STAGE_BY_STATUS: Record<DemoShipment['status'], Shipment['stage']> = {
   factory_intake: 'factory_intake',
   bak_depot: 'bak_depot',
   sea_transit: 'international_forwarding',

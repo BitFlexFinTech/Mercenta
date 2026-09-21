@@ -246,6 +246,35 @@ textarea:focus-visible {
   animation: mr-work-pulse 2.4s ease-out 2;
 }
 
+/* ── §LOGISTICS OPERATIONAL MAP — ambient motion ──────────────────────────
+   A shipment that is genuinely IN TRANSIT drifts a few pixels along its own
+   route. This is MEANINGFUL motion, not decoration: a stationary marker means
+   the leg is not moving. It is slow (18s), low-amplitude (3px) and never
+   seizure-inducing, and it is disabled outright under prefers-reduced-motion
+   below — the marker then simply sits at its true progress position. */
+@keyframes mr-ambient-drift {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(1.5px, -2px); }
+  50%  { transform: translate(3px, 0px); }
+  75%  { transform: translate(1.5px, 2px); }
+  100% { transform: translate(0px, 0px); }
+}
+.animate-ambient-drift {
+  animation: mr-ambient-drift 18s ease-in-out infinite;
+}
+
+/* An in-transit leg's halo breathes once every 4s so the eye can find moving
+   consignments without the whole map flashing. */
+@keyframes mr-ambient-halo {
+  0%, 100% { opacity: 0.22; transform: scale(1); }
+  50%      { opacity: 0.06; transform: scale(1.9); }
+}
+.animate-ambient-halo {
+  animation: mr-ambient-halo 4s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-rise,
   .animate-drawer-in,
@@ -253,7 +282,9 @@ textarea:focus-visible {
   .animate-chart-arc,
   .animate-value-change,
   .animate-pipeline-grow,
-  .animate-work-pulse {
+  .animate-work-pulse,
+  .animate-ambient-drift,
+  .animate-ambient-halo {
     animation: none !important;
   }
 }

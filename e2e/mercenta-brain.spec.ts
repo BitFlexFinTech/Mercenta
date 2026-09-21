@@ -206,14 +206,24 @@ test.describe('Mercenta Brain — interactive product surface', () => {
     // The boundary statement is shown to the brand, not hidden from it.
     await expect(page.locator('section[aria-label="What this map never shows"]')).toBeVisible();
 
-    // The first-visit tour overlays the page; dismiss it so the screenshot shows
+    // The first-visit tour overlays the page; stop it so the screenshot shows
     // the actual surface (and so the assertions above are not made through a
-    // modal). Best-effort: the tour is not always present.
-    const tourClose = page.getByRole('button', { name: /close|dismiss/i }).first();
-    if (await tourClose.isVisible().catch(() => false)) {
-      await tourClose.click().catch(() => {});
-      await page.waitForTimeout(300);
-    }
+    // modal). Done through the tour's OWN store API: clicking the card's dismiss
+    // opens a Skip-confirmation modal, which then blocks the click below.
+    // (Pre-existing failure confirmed at HEAD 47db66c — see session report.)
+    await page
+      .evaluate(async () => {
+        const m = await import('/src/components/shared/TourEngine.tsx');
+        const defs = await import('/src/config/tours/tourDefinitions.ts');
+        for (const t of defs.ALL_TOUR_DEFINITIONS) {
+          m.markTourSkipped('brand-astonish', t.id);
+          m.markTourCompleted('brand-astonish', t.id);
+        }
+        m.stopTour('brand-astonish');
+        m.dismissTour('brand-astonish');
+      })
+      .catch(() => {});
+    await page.waitForTimeout(300);
 
     await page.locator('[data-testid^="brand-map-entity-"]').first().click();
     await expect(page.getByTestId('brand-map-inspector')).toBeVisible();

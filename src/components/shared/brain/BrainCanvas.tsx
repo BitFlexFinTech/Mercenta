@@ -22,6 +22,7 @@ import { cn } from '@/utils/cn';
 import { DOMAIN_COLOURS } from '@/config/themes';
 import { BRAIN_KIND_DEFINITIONS, type BrainGraph } from '@/lib/intelligence/brain/types';
 import { layoutIndex, type BrainLayout } from '@/lib/intelligence/brain/layout';
+import { usePrefersReducedMotion } from '@/lib/hooks/usePrefersReducedMotion';
 import { Maximize2, Minus, Plus } from 'lucide-react';
 
 export interface BrainCanvasProps {
@@ -43,19 +44,6 @@ interface View {
 
 const MIN_K = 0.35;
 const MAX_K = 4;
-
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(query.matches);
-    const handler = (event: MediaQueryListEvent) => setReduced(event.matches);
-    query.addEventListener?.('change', handler);
-    return () => query.removeEventListener?.('change', handler);
-  }, []);
-  return reduced;
-}
 
 export function BrainCanvas({
   graph,

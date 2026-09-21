@@ -1,15 +1,68 @@
-import { useState, useMemo, type ComponentType } from 'react';
-import { Card, Badge, Button, Input, StatusBadge } from '@/components/ui';
+/**
+ * §LOGISTICS HUB — BRAND INBOUND SHIPMENTS / FREIGHT WORKSPACE.
+ *
+ * PRESERVED (unchanged functional system):
+ *   - tenant-scoped shipment feed (`useShipmentsAll` + session tenant filter)
+ *   - the carrier/cargo split the brand books against
+ *   - Waybill, Labels and Track artefacts + the tracking milestone timeline
+ *   - the products-in-shipment listing joined from PO line items
+ *
+ * REPLACED (presentation):
+ *   - the old page was a pale card grid (hardcoded light-mode zinc classes on a
+ *     dark shell) with three carrier tabs, a non-functional "New Booking" form
+ *     whose inputs were never wired to anything, and a flat shipment list.
+ *   - it is now an OPERATIONS WORKSPACE built on the canonical workspace
+ *     primitives, centred on a real interactive operational MAP whose geometry
+ *     comes from `src/lib/logistics/operationsMap.ts`.
+ *
+ * TRUTH RULES ENFORCED HERE
+ *   - Every leg carries a LIVE VERIFIED / SIMULATED / AMBIENT label derived from
+ *     the authoritative provider modes (`isProviderSimulationSafe`). Unknown
+ *     providers are never presented as simulation (§Integration modes).
+ *   - Freight Collect legs are labelled CHANNEL-ARRANGED: Mercenta is never shown
+ *     as choosing the channel's carrier.
+ *   - The old non-functional booking form was REMOVED, not restyled: real booking
+ *     happens through the canonical ASN flow on Purchase Orders. Shipping a form
+ *     that looks like it books freight but does nothing would be a placeholder.
+ *   - The retired mandatory linear logistics chain is NOT reintroduced; stages
+ *     come from the canonical status → stage map.
+ */
+import { useEffect, useMemo, useState, type ComponentType } from 'react';
+import { Badge, Button, Input, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
 import { usePurchaseOrders, useShipmentsAll } from '@/data/queries';
+import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { BRAND_NAME } from '@/config/brand';
+import {
+  MAP_TRUTH_NOTICE,
+  MERCENTA_UK_HUB,
+  OPERATIONAL_TRUTH,
+  OPERATIONAL_TRUTH_ORDER,
+  freightSemantics,
+} from '@/config/logisticsGeo';
+import { buildOperationalMap } from '@/lib/logistics/operationsMap';
+import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
+import {
+  ContextPanel,
+  RecordFieldList,
+  SegmentedControl,
+  WorkspaceFrame,
+  WorkspaceGrid,
+  WorkspaceHeader,
+  WorkspaceSection,
+} from '@/components/shared/workspace';
+import { KpiGroup, type KpiCellData } from '@/components/shared/dashboard';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
-import type { Shipment, ShipmentStatus } from '@/types';
+import {
+  STAGE_LABELS,
+  STATUS_LABELS,
+  type Shipment,
+  type ShipmentStatus,
+} from '@/types';
 import {
   Plane,
   Ship,
-  Upload,
   FileText,
   Printer,
   Package,
@@ -20,398 +73,192 @@ import {
   Truck,
   Search,
   Barcode,
+  AlertTriangle,
+  Info,
+  Route,
+  ArrowRight,
 } from 'lucide-react';
 
-const BASE_DOCS = [
-  { id: 'invoice', label: 'Commercial Invoice', icon: FileText },
-  { id: 'packing', label: 'Detailed Packing List', icon: Package },
+const MILESTONES: {
+  status: ShipmentStatus;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+}[] = [
+  { status: 'factory_intake', label: 'Factory Intake', icon: Package },
+  { status: 'bak_depot', label: 'Regional Hub / Depot', icon: MapPin },
+  { status: 'sea_transit', label: 'Sea Transit', icon: Ship },
+  { status: 'air_transit', label: 'Air Transit', icon: Plane },
+  { status: 'uk_customs_cleared', label: 'UK Customs Cleared', icon: FileText },
+  { status: 'mercenta_hub', label: 'Mercenta UK Hub', icon: MapPin },
+  { status: 'live_amazon', label: 'Live on retail-channel', icon: Truck },
 ];
 
-const REGION_DOCS: Record<string, { id: string; label: string; icon: typeof FileText }[]> = {
-  us: [{ id: 'fcc_fda', label: 'US FCC / FDA Exemptions', icon: FileText }],
-  eu: [{ id: 'ce', label: 'CE Declarations', icon: FileText }],
-  africa: [{ id: 'cd1', label: 'Export CD1 Form', icon: FileText }],
+/** Brand-facing carrier labels. The lane rule decides which is applicable. */
+const CARRIER_LABELS: Record<string, string> = {
+  dhl: 'DHL Express',
+  palletline: 'Palletline',
+  fedex: 'FedEx',
+  bak: 'BAK Logistics',
+  amazon_partner: 'Channel-arranged carrier',
 };
 
-function getRegionFromOrigin(origin: string): 'us' | 'eu' | 'africa' {
-  if (origin.includes('USA') || origin.includes('Texas') || origin.includes('United States')) return 'us';
-  if (origin.includes('Germany') || origin.includes('Munich') || origin.includes('Milan') || origin.includes('France') || origin.includes('Netherlands') || origin.includes('Italy') || origin.includes('Spain')) return 'eu';
-  return 'africa';
+function carrierLabel(carrier: string): string {
+  return CARRIER_LABELS[carrier] ?? carrier;
 }
 
-export function LogisticsHub() {
-  const { session, products } = useApp();
-  const shipmentsQuery = useShipmentsAll();
-  const posQuery = usePurchaseOrders();
-  const [tab, setTab] = useState<'air' | 'sea' | 'pallet'>('air');
-  const [uploadedDocs, setUploadedDocs] = useState<Set<string>>(new Set());
-  const [waybillShipment, setWaybillShipment] = useState<string | null>(null);
-  const [trackingShipment, setTrackingShipment] = useState<string | null>(null);
-  const [labelsShipment, setLabelsShipment] = useState<string | null>(null);
-
-  const toggleDoc = (id: string) =>
-    setUploadedDocs((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-
-  // §7D — live shipment feed (single source of truth: demoShipments via
-  // useShipmentsAll) so shipments created in-session (auto-created drafts,
-  // filed ASNs) appear immediately. Tenant-scoped for brand sessions — a brand
-  // only ever sees its OWN shipments. Rows are normalised to the canonical
-  // Shipment shape (same enrichment brandDossiers applies) so every modal
-  // receives a well-formed shipment.
-  const liveShipments = ((shipmentsQuery.data?.data ?? []) as unknown as Shipment[])
-    .filter((s) => session?.tier !== 'brand' || (s as unknown as { brandId?: string }).brandId === session?.tenantId)
-    .map((s) => ({
-      id: s.id,
-      reference: s.reference,
-      title: s.title,
-      customer: (s as unknown as { customer?: string }).customer ?? '',
-      value: s.value,
-      status: s.status,
-      carrier: s.carrier,
-      stage: s.stage ?? 'factory_intake',
-      cbm: (s as unknown as { cbm?: number }).cbm ?? Math.max(6, Math.round(s.value / 9000)),
-      origin: s.origin,
-      destination: s.destination,
-      date: (s as unknown as { date?: string }).date ?? '',
-      trackingNumber: (s as unknown as { trackingNumber?: string }).trackingNumber ?? '',
-    }));
-
-  const filteredShipments = liveShipments.filter((s) =>
-    tab === 'air' ? s.carrier === 'dhl' || s.carrier === 'fedex' :
-    tab === 'pallet' ? s.carrier === 'palletline' : s.carrier === 'bak'
-  );
-
-  // Determine region-specific docs based on the first filtered shipment's origin
-  const regionSample = filteredShipments[0];
-  const regionKey = regionSample ? getRegionFromOrigin(regionSample.origin) : 'africa';
-  const regionDocs = REGION_DOCS[regionKey] || REGION_DOCS.africa;
-  const allDocs = [...BASE_DOCS, ...regionDocs];
+/**
+ * §Dialog chrome — one shape for every drawer on this surface.
+ * The design system owns the frame; the print sheet inside stays white on
+ * purpose, because a waybill/label is a printed artefact.
+ */
+function LogisticDialog({
+  title,
+  subtitle,
+  onClose,
+  children,
+  width = 'max-w-lg',
+  testId,
+}: {
+  title: string;
+  subtitle?: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  width?: string;
+  testId: string;
+}) {
+  /* Escape closes the dialog — the expected keyboard contract for a modal. */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
 
   return (
-    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
-      <div>
-        <h2 className="text-lg font-semibold text-white">Integrated Logistics Hub</h2>
-        <p className="text-xs text-zinc-500 mt-0.5">
-          Forward & export booking room — split by cargo rules
-        </p>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setTab('air')}
-          className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-            tab === 'air'
-              ? 'bg-brass-500 text-white'
-              : 'bg-ink-850 text-zinc-400 hover:text-white border border-white/[0.06]'
-          )}
-        >
-          <Plane className="w-4 h-4" />
-          DHL Express (parcel/general)
-        </button>
-        <button
-          onClick={() => setTab('sea')}
-          className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-            tab === 'sea'
-              ? 'bg-brass-500 text-white'
-              : 'bg-ink-850 text-zinc-400 hover:text-white border border-white/[0.06]'
-          )}
-        >
-          <Ship className="w-4 h-4" />
-          Sea Freight (BAK Logistics)
-        </button>
-        <button
-          onClick={() => setTab('pallet')}
-          className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-            tab === 'pallet'
-              ? 'bg-brass-500 text-white'
-              : 'bg-ink-850 text-zinc-400 hover:text-white border border-white/[0.06]'
-          )}
-        >
-          <Package className="w-4 h-4" />
-          Palletised (Palletline)
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Booking Form */}
-        <Card title="New Booking" className="lg:col-span-1">
-          <div className="p-5 space-y-3">
-            <Input label="Shipment Reference" placeholder="BOX-2026-XXX" />
-            <Input label="Origin" placeholder={tab === 'air' ? 'Austin, Texas, USA' : 'Durban, South Africa'} />
-            <Input label="Destination" placeholder="London, UK" />
-            <div className="grid grid-cols-2 gap-3">
-              <Input label="Weight (kg)" type="number" placeholder="0" />
-              <Input label="Volume (CBM)" type="number" placeholder="0" />
-            </div>
-
-            {/* Document Drop Zones */}
-            <div className="pt-2">
-              <label className="block text-xs font-medium text-zinc-400 mb-2">
-                Customs Documentation
-              </label>
-              <div className="space-y-2">
-                {allDocs.map((doc) => {
-                  const Icon = doc.icon;
-                  const uploaded = uploadedDocs.has(doc.id);
-                  return (
-                    <button
-                      key={doc.id}
-                      onClick={() => toggleDoc(doc.id)}
-                      className={cn(
-                        'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-xs transition-all',
-                        uploaded
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                          : 'border-dashed border-white/[0.1] text-zinc-500 hover:border-brass-500/30 hover:text-zinc-300'
-                      )}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                      <span className="flex-1 text-left">{doc.label}</span>
-                      {uploaded ? (
-                        <span className="text-[10px]">Uploaded ✓</span>
-                      ) : (
-                        <Upload className="w-3 h-3" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-[10px] text-zinc-600 mt-2">
-                Region-specific docs shown for: <span className="text-brass-400 font-medium">{regionKey === 'us' ? 'US origin' : regionKey === 'eu' ? 'European origin' : 'African origin'}</span>
-              </p>
-            </div>
-
-            <Button className="w-full mt-2">Create Booking</Button>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      data-testid={testId}
+    >
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className={cn(
+          'relative max-h-[92vh] w-full overflow-y-auto rounded-t-ds-lg border border-white/[0.08] bg-ink-850 shadow-ds-overlay sm:rounded-ds-lg',
+          width
+        )}
+      >
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-white/[0.06] bg-ink-850/95 px-4 py-3 backdrop-blur">
+          <div className="min-w-0">
+            <h2 className="text-ds-title font-semibold text-white">{title}</h2>
+            {subtitle && <p className="mt-0.5 text-ds-label text-zinc-500">{subtitle}</p>}
           </div>
-        </Card>
-
-        {/* Active Shipments */}
-        <Card title={`${tab === 'air' ? 'Air Courier' : 'Heavy Freight'} Manifest`} className="lg:col-span-2">
-          <div className="divide-y divide-white/[0.04]">
-            {filteredShipments.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between px-5 py-3.5 hover:bg-white/[0.02] transition-colors"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold text-white truncate">
-                    {s.title}
-                  </div>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-zinc-500">
-                    <MapPin className="w-3 h-3" />
-                    {s.origin} → {s.destination}
-                  </div>
-                </div>
-                <div className="text-right mx-4">
-                  <div className="text-sm font-semibold text-white">
-                    £{Math.round(s.value / 1000)}k
-                  </div>
-                  <div className="text-xs text-zinc-600">{s.cbm} CBM</div>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <StatusBadge
-                    dataStatus={shipmentStatusPresentation(s.status).dataStatus}
-                    tone={shipmentStatusPresentation(s.status).tone}
-                  >
-                    {shipmentStatusPresentation(s.status).label}
-                  </StatusBadge>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setWaybillShipment(s.id)}
-                  >
-                    <Printer className="w-3 h-3" />
-                    Waybill
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setLabelsShipment(s.id)}
-                  >
-                    <Barcode className="w-3 h-3" />
-                    Labels
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setTrackingShipment(s.id)}
-                  >
-                    <Truck className="w-3 h-3" />
-                    Track
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-ds-sm p-1.5 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-white"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="p-4">{children}</div>
       </div>
-
-      {trackingShipment && (
-        <ShipmentTrackingTimeline
-          shipment={liveShipments.find((s) => s.id === trackingShipment)!}
-          products={products}
-          poProducts={(() => {
-            const s = liveShipments.find((x) => x.id === trackingShipment);
-            if (!s) return [];
-            const pos = posQuery.data?.data ?? [];
-            // Match by removing 'shipment-' prefix from shipment ID to get PO ID
-            const poId = s.id.replace(/^shipment-/, '');
-            const po = pos.find((p) => p.id === poId);
-            return po?.lineItems?.map((li) => li.sku) ?? [];
-          })()}
-          onClose={() => setTrackingShipment(null)}
-        />
-      )}
-      {waybillShipment && (
-        <WaybillModal
-          shipment={liveShipments.find((s) => s.id === waybillShipment)!}
-          onClose={() => setWaybillShipment(null)}
-        />
-      )}
-      {labelsShipment && (
-        <LabelsModal
-          shipment={liveShipments.find((s) => s.id === labelsShipment)!}
-          onClose={() => setLabelsShipment(null)}
-        />
-      )}
     </div>
   );
 }
 
-function WaybillModal({
-  shipment,
-  onClose,
-}: {
-  shipment: Shipment;
-  onClose: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white text-black rounded-xl max-w-lg w-full p-8 shadow-2xl animate-fade-in">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-black"
-        >
-          <X className="w-4 h-4" />
-        </button>
+/* ── WAYBILL ──────────────────────────────────────────────────────────── */
 
-        <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-black">
+function WaybillModal({ shipment, onClose }: { shipment: Shipment; onClose: () => void }) {
+  return (
+    <LogisticDialog
+      title="Freight waybill"
+      subtitle="Printable consignment document — generated from the canonical shipment record."
+      onClose={onClose}
+      testId="logistics-waybill-dialog"
+    >
+      <div className="rounded-ds-md bg-white p-5 text-black" id="printable-waybill">
+        <div className="mb-4 flex items-center justify-between border-b-2 border-black pb-3">
           <div>
-            <div className="text-xl font-bold uppercase tracking-tight">{BRAND_NAME}</div>
-            <div className="text-xs text-zinc-500">Freight Waybill / Shipping Label</div>
+            <div className="text-base font-bold uppercase tracking-tight">{BRAND_NAME}</div>
+            <div className="text-ds-label text-zinc-600">Freight Waybill</div>
           </div>
           <div className="text-right">
-            <div className="text-xs text-zinc-500">Tracking No.</div>
-            <div className="text-sm font-mono font-bold">{shipment.trackingNumber}</div>
+            <div className="text-ds-label text-zinc-600">Tracking no.</div>
+            <div className="font-mono text-ds-body font-bold">{shipment.trackingNumber}</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-xs mb-6">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-ds-label">
           <div>
-            <div className="text-zinc-500 mb-1">Reference</div>
-            <div className="font-semibold">{shipment.reference}</div>
+            <dt className="text-zinc-500">Reference</dt>
+            <dd className="font-semibold">{shipment.reference}</dd>
           </div>
           <div>
-            <div className="text-zinc-500 mb-1">Date</div>
-            <div className="font-semibold">{shipment.date}</div>
+            <dt className="text-zinc-500">Date</dt>
+            <dd className="font-semibold">{shipment.date}</dd>
           </div>
           <div>
-            <div className="text-zinc-500 mb-1">Origin</div>
-            <div className="font-semibold">{shipment.origin}</div>
+            <dt className="text-zinc-500">Origin</dt>
+            <dd className="font-semibold">{shipment.origin}</dd>
           </div>
           <div>
-            <div className="text-zinc-500 mb-1">Destination</div>
-            <div className="font-semibold">{shipment.destination}</div>
+            <dt className="text-zinc-500">Destination</dt>
+            <dd className="font-semibold">{shipment.destination}</dd>
           </div>
           <div>
-            <div className="text-zinc-500 mb-1">Customer</div>
-            <div className="font-semibold">{shipment.customer}</div>
+            <dt className="text-zinc-500">Consignee</dt>
+            <dd className="font-semibold">{shipment.customer}</dd>
           </div>
           <div>
-            <div className="text-zinc-500 mb-1">Value</div>
-            <div className="font-semibold">£{shipment.value.toLocaleString()}</div>
+            <dt className="text-zinc-500">Value</dt>
+            <dd className="font-semibold">£{shipment.value.toLocaleString()}</dd>
           </div>
           <div>
-            <div className="text-zinc-500 mb-1">Volume</div>
-            <div className="font-semibold">{shipment.cbm} CBM</div>
+            <dt className="text-zinc-500">Volume</dt>
+            <dd className="font-semibold">{shipment.cbm} CBM</dd>
           </div>
           <div>
-            <div className="text-zinc-500 mb-1">Carrier</div>
-            <div className="font-semibold uppercase">{shipment.carrier}</div>
+            <dt className="text-zinc-500">Carrier</dt>
+            <dd className="font-semibold uppercase">{carrierLabel(shipment.carrier)}</dd>
           </div>
-        </div>
+        </dl>
 
-        <div className="border-2 border-dashed border-zinc-300 p-4 text-center mb-4">
-          <div className="text-xs text-zinc-500 mb-2">Barcode</div>
-          <div className="font-mono text-2xl tracking-widest">{shipment.trackingNumber}</div>
-          <div className="flex gap-0.5 mt-3 justify-center">
+        <div className="mt-4 border-2 border-dashed border-zinc-300 p-4 text-center">
+          <div className="mb-2 text-ds-label text-zinc-600">Barcode</div>
+          <div className="font-mono text-xl tracking-widest">{shipment.trackingNumber}</div>
+          <div className="mt-3 flex justify-center gap-0.5">
             {Array.from({ length: 40 }).map((_, i) => (
               <div
                 key={i}
                 className={cn(
-                  'w-0.5',
-                  (i + shipment.reference.length) % 3 === 0 ? 'h-8 bg-black' : 'h-6 bg-black'
+                  'w-0.5 bg-black',
+                  (i + shipment.reference.length) % 3 === 0 ? 'h-8' : 'h-6'
                 )}
-                style={{ opacity: (i % 4 === 0 ? 1 : 0.3) }}
+                style={{ opacity: i % 4 === 0 ? 1 : 0.3 }}
               />
             ))}
           </div>
         </div>
-
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => window.print()}>
-            <Printer className="w-3.5 h-3.5" />
-            Print
-          </Button>
-          <Button onClick={onClose}>Close</Button>
-        </div>
       </div>
-    </div>
+
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="secondary" onClick={onClose}>
+          Close
+        </Button>
+        <Button onClick={() => window.print()}>
+          <Printer className="h-3.5 w-3.5" />
+          Print
+        </Button>
+      </div>
+    </LogisticDialog>
   );
 }
 
-/**
- * §Stage-6 — Shipment Tracking Timeline (brand-facing).
- * Shows carrier milestones based on shipment status, plus SKU / EAN
- * detail for products in the shipment's purchase order.
- */
-const MILESTONES: { status: ShipmentStatus; label: string; icon: ComponentType<{ className?: string }> }[] = [
-  { status: 'factory_intake', label: 'Factory Intake', icon: Package },
-  { status: 'bak_depot', label: 'In BAK Depot', icon: WarehouseIcon },
-  { status: 'sea_transit', label: 'Sea Transit', icon: Ship },
-  { status: 'air_transit', label: 'Air Transit', icon: Plane },
-  { status: 'uk_customs_cleared', label: 'UK Customs Cleared', icon: CheckCircle2 },
-  { status: 'mercenta_hub', label: 'Mercenta UK Hub', icon: MapPin },
-  { status: 'live_amazon', label: 'Live on retail channel', icon: Truck },
-];
-
-function WarehouseIcon(props: { className?: string }) {
-  return <Package className={props.className} />;
-}
-
-function MilestoneIcon({ status }: { status: ShipmentStatus }) {
-  const m = MILESTONES.find((m) => m.status === status);
-  const Icon = m?.icon ?? Clock;
-  return <Icon className="w-5 h-5" />;
-}
-
-function getNextMilestones(current: ShipmentStatus): (typeof MILESTONES) {
-  const idx = MILESTONES.findIndex((m) => m.status === current);
-  if (idx === -1) return MILESTONES;
-  return MILESTONES.slice(0, idx + 2);
-}
+/* ── CARRIER LABELS ───────────────────────────────────────────────────── */
 
 function LabelsModal({
   shipment,
@@ -422,42 +269,53 @@ function LabelsModal({
   shipment: Shipment & { brandId?: string; poNumber?: string };
   onClose: () => void;
 }) {
-  /**
-   * TODO: Replace with DHL API call when enterprise account is live
-   * POST /shipments/v4  or  GET /labels/{shipmentId}
-   */
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white text-black rounded-xl max-w-3xl w-full p-8 shadow-2xl animate-fade-in" style={{ fontFamily: 'monospace' }}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-400 hover:text-black"><X className="w-4 h-4" /></button>
-        <div className="text-center mb-6">
-          <div className="text-xs text-zinc-500 mb-2">
-            Carrier labels will be generated automatically once the DHL integration is live.<br />
-            For now, please use the manual label template below.
-          </div>
+    <LogisticDialog
+      title="Shipping labels"
+      subtitle="Carrier labels are generated through the carrier seam; until that account is live this manual template is the printable artefact."
+      onClose={onClose}
+      width="max-w-3xl"
+      testId="logistics-labels-dialog"
+    >
+      <div className="rounded-ds-md bg-white p-6 font-mono text-black" id="printable-label">
+        <div className="mb-4 border-b-2 border-black pb-3 text-center">
+          <div className="text-ds-title font-bold uppercase">Shipping Label</div>
+          <div className="text-ds-label text-zinc-600">{BRAND_NAME}</div>
         </div>
-        <div className="border-2 border-black p-6 rounded-none mb-6 bg-white" id="printable-label">
-          <div className="text-center border-b-2 border-black pb-3 mb-4">
-            <div className="text-lg font-bold uppercase">Shipping Label</div>
-            <div className="text-xs text-zinc-500">{BRAND_NAME}</div>
-          </div>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs mb-4">
-            <div className="font-bold">Brand:</div><div>{shipment.customer || shipment.brandId}</div>
-            <div className="font-bold">PO Number:</div><div>{shipment.poNumber || '—'}</div>
-            <div className="font-bold">Destination FC:</div><div>{shipment.destination}</div>
-            <div className="font-bold">Carton Number:</div><div>_ / _</div>
-            <div className="font-bold">Reference:</div><div>{shipment.reference}</div>
-          </div>
-        </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose}>Close</Button>
-          <Button onClick={() => window.print()}><Printer className="w-3 h-3" /> Print Labels</Button>
-        </div>
+        <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-ds-label">
+          <dt className="font-bold">Brand:</dt>
+          <dd>{shipment.customer || shipment.brandId}</dd>
+          <dt className="font-bold">PO Number:</dt>
+          <dd>{shipment.poNumber || '—'}</dd>
+          <dt className="font-bold">Destination FC:</dt>
+          <dd>{shipment.destination}</dd>
+          <dt className="font-bold">Carton Number:</dt>
+          <dd>_ / _</dd>
+          <dt className="font-bold">Reference:</dt>
+          <dd>{shipment.reference}</dd>
+        </dl>
       </div>
-    </div>
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="secondary" onClick={onClose}>
+          Close
+        </Button>
+        <Button onClick={() => window.print()}>
+          <Printer className="h-3 w-3" />
+          Print labels
+        </Button>
+      </div>
+    </LogisticDialog>
   );
 }
+
+/* ── TRACKING TIMELINE ────────────────────────────────────────────────── */
+
+function MilestoneIcon({ status }: { status: ShipmentStatus }) {
+  const m = MILESTONES.find((x) => x.status === status);
+  const Icon = m?.icon ?? Clock;
+  return <Icon className="h-4 w-4" />;
+}
+
 function ShipmentTrackingTimeline({
   shipment,
   products,
@@ -465,89 +323,887 @@ function ShipmentTrackingTimeline({
   onClose,
 }: {
   shipment: Shipment;
-  products: { id: string; sku: string; barcode: string; name: string; image?: string; productImages?: { url: string }[] }[];
+  products: {
+    id: string;
+    sku: string;
+    barcode: string;
+    name: string;
+    image?: string;
+    productImages?: { url: string }[];
+  }[];
   poProducts: string[];
   onClose: () => void;
 }) {
   const currentIdx = MILESTONES.findIndex((m) => m.status === shipment.status);
-  const visibleMilestones = getNextMilestones(shipment.status);
   const pastCutoff = currentIdx >= 0;
-
   const shipmentProducts = products.filter((p) => poProducts.includes(p.id));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white text-black rounded-xl max-w-2xl w-full p-6 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
-        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-400 hover:text-black"><X className="w-4 h-4" /></button>
-        <div className="mb-6 pb-4 border-b border-zinc-200">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <div className="text-lg font-bold flex items-center gap-2"><Truck className="w-5 h-5" /> Shipment Tracking</div>
-              <div className="text-xs text-zinc-500 mt-1">{shipment.reference} &middot; {shipment.carrier.toUpperCase()}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-xs text-zinc-500">Tracking No.</div>
-              <div className="text-sm font-mono font-bold">{shipment.trackingNumber}</div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 text-xs mt-3">
-            <div><span className="text-zinc-500">Origin:</span> <span className="font-semibold">{shipment.origin}</span></div>
-            <div><span className="text-zinc-500">Destination:</span> <span className="font-semibold">{shipment.destination}</span></div>
-            <div><span className="text-zinc-500">Value:</span> <span className="font-semibold">&pound;{shipment.value.toLocaleString()}</span></div>
-            <div><span className="text-zinc-500">Ship date:</span> <span className="font-semibold">{shipment.date}</span></div>
-          </div>
-        </div>
-        <div className="mb-6">
-          <h3 className="text-sm font-semibold text-zinc-700 mb-3 flex items-center gap-2"><Clock className="w-4 h-4" /> Carrier Milestones</h3>
-          <div className="space-y-0">
-            {MILESTONES.map((m, i) => {
-              const isCompleted = pastCutoff && i <= currentIdx;
-              const isCurrent = i === currentIdx;
-              return (
-                <div key={m.status} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center ring-2", isCompleted ? "bg-emerald-500 text-white ring-emerald-500/30" : isCurrent ? "bg-amber-400 text-white ring-amber-400/30 animate-pulse" : "bg-zinc-100 text-zinc-400 ring-zinc-200/50")}>
-                      {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : <MilestoneIcon status={m.status} />}
-                    </div>
-                    {i < MILESTONES.length - 1 && <div className={cn("w-0.5 h-8", isCompleted ? "bg-emerald-400" : "bg-zinc-200")} />}
-                  </div>
-                  <div className="flex-1 pb-6">
-                    <div className="flex items-center gap-2">
-                      <span className={cn("text-sm font-medium", isCompleted ? "text-emerald-700" : isCurrent ? "text-amber-700" : "text-zinc-400")}>{m.label}</span>
-                      {isCurrent && <Badge className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0">CURRENT</Badge>}
-                      {isCompleted && !isCurrent && <Badge className="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0">DONE</Badge>}
-                    </div>
-                    {isCurrent && <p className="text-xs text-zinc-500 mt-1">{shipment.carrier.toUpperCase()} &mdash; last update: {shipment.date}</p>}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        {shipmentProducts.length > 0 && (
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-700 mb-3 flex items-center gap-2"><Barcode className="w-4 h-4" /> Products in this Shipment ({shipmentProducts.length})</h3>
-            <div className="space-y-2">
-              {shipmentProducts.map((p) => (
-                <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg bg-zinc-50 border border-zinc-200">
-                  {p.productImages?.[0]?.url || p.image ? <img src={p.productImages?.[0]?.url || p.image || ""} alt={p.name} className="w-10 h-10 rounded object-cover bg-zinc-200" />
-                    : <div className="w-10 h-10 rounded bg-zinc-200 flex items-center justify-center"><Package className="w-5 h-5 text-zinc-400" /></div>}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-zinc-700 truncate">{p.name}</div>
-                    <div className="text-xs text-zinc-500 flex items-center gap-3 mt-0.5">
-                      <span>SKU: <code className="font-mono bg-zinc-200 px-1 rounded">{p.sku}</code></span>
-                      <span>EAN: <code className="font-mono bg-zinc-200 px-1 rounded">{p.barcode || "\u2014"}</code></span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        <div className="flex justify-end mt-6 pt-4 border-t border-zinc-200"><Button onClick={onClose}>Close</Button></div>
+    <LogisticDialog
+      title={`Tracking — ${shipment.reference}`}
+      subtitle={`${shipment.origin} → ${shipment.destination} · ${carrierLabel(shipment.carrier)}`}
+      onClose={onClose}
+      width="max-w-2xl"
+      testId="logistics-tracking-dialog"
+    >
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+        <StatusBadge
+          dataStatus={shipmentStatusPresentation(shipment.status).dataStatus}
+          tone={shipmentStatusPresentation(shipment.status).tone}
+        >
+          {shipmentStatusPresentation(shipment.status).label}
+        </StatusBadge>
+        <span className="text-ds-micro text-zinc-500">
+          Stage: {STAGE_LABELS[shipment.stage] ?? shipment.stage}
+        </span>
+        <span className="text-ds-micro text-zinc-600">· Ship date {shipment.date}</span>
       </div>
-    </div>
+
+      <RecordFieldList
+        className="mb-5"
+        fields={[
+          { label: 'Reference', value: shipment.reference },
+          {
+            label: 'Tracking no.',
+            value: <span className="font-mono">{shipment.trackingNumber}</span>,
+          },
+          { label: 'Origin', value: shipment.origin },
+          { label: 'Destination', value: shipment.destination },
+          { label: 'Value', value: `£${shipment.value.toLocaleString()}` },
+          { label: 'Volume', value: `${shipment.cbm} CBM` },
+        ]}
+      />
+
+      <WorkspaceSection title="Carrier milestones">
+        <ol>
+          {MILESTONES.map((m, i) => {
+            const isCompleted = pastCutoff && i <= currentIdx;
+            const isCurrent = i === currentIdx;
+            return (
+              <li key={m.status} className="flex gap-3">
+                <div className="flex flex-col items-center">
+                  <span
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-full ring-2',
+                      isCompleted
+                        ? 'bg-state-success/15 text-state-success ring-state-success/25'
+                        : isCurrent
+                          ? 'bg-state-warning/15 text-state-warning ring-state-warning/25'
+                          : 'bg-white/[0.03] text-zinc-600 ring-white/[0.06]'
+                    )}
+                  >
+                    {isCompleted ? (
+                      <CheckCircle2 className="h-4 w-4" />
+                    ) : (
+                      <MilestoneIcon status={m.status} />
+                    )}
+                  </span>
+                  {i < MILESTONES.length - 1 && (
+                    <span
+                      className={cn('h-7 w-0.5', isCompleted ? 'bg-state-success/50' : 'bg-white/[0.08]')}
+                    />
+                  )}
+                </div>
+                <div className="flex-1 pb-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={cn(
+                        'text-ds-body font-medium',
+                        isCompleted
+                          ? 'text-state-success'
+                          : isCurrent
+                            ? 'text-state-warning'
+                            : 'text-zinc-500'
+                      )}
+                    >
+                      {m.label}
+                    </span>
+                    {isCurrent && (
+                      <Badge className="border-white/[0.08] bg-state-warning/15 text-ds-micro text-state-warning">
+                        CURRENT
+                      </Badge>
+                    )}
+                    {isCompleted && !isCurrent && (
+                      <Badge className="border-white/[0.08] bg-state-success/15 text-ds-micro text-state-success">
+                        DONE
+                      </Badge>
+                    )}
+                  </div>
+                  {isCurrent && (
+                    <p className="mt-1 text-ds-micro text-zinc-500">
+                      {carrierLabel(shipment.carrier).toUpperCase()} — last update: {shipment.date}
+                    </p>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </WorkspaceSection>
+
+      {shipmentProducts.length > 0 && (
+        <WorkspaceSection
+          title={`Products in this shipment (${shipmentProducts.length})`}
+          className="mt-4"
+        >
+          <ul className="space-y-2">
+            {shipmentProducts.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center gap-3 rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2"
+              >
+                {p.productImages?.[0]?.url || p.image ? (
+                  <img
+                    src={p.productImages?.[0]?.url || p.image || ''}
+                    alt={p.name}
+                    className="h-10 w-10 rounded-ds-sm bg-white/[0.06] object-cover"
+                  />
+                ) : (
+                  <span className="flex h-10 w-10 items-center justify-center rounded-ds-sm bg-white/[0.06]">
+                    <Package className="h-5 w-5 text-zinc-500" />
+                  </span>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-ds-body font-medium text-zinc-200">{p.name}</div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-3 text-ds-micro text-zinc-500">
+                    <span>
+                      SKU: <code className="rounded bg-white/[0.06] px-1 font-mono">{p.sku}</code>
+                    </span>
+                    <span>
+                      EAN:{' '}
+                      <code className="rounded bg-white/[0.06] px-1 font-mono">
+                        {p.barcode || '—'}
+                      </code>
+                    </span>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </WorkspaceSection>
+      )}
+
+      <div className="mt-5 flex justify-end border-t border-white/[0.06] pt-4">
+        <Button onClick={onClose}>Close</Button>
+      </div>
+    </LogisticDialog>
   );
 }
 
+/* ── TRUTH LEGEND ─────────────────────────────────────────────────────── */
+
+/**
+ * The map's truth legend. It states the CLAIM each state makes, so a reader can
+ * never mistake an ambient context arc for confirmed live tracking.
+ */
+function TruthLegend({ counts }: { counts: Record<string, number> }) {
+  const swatch: Record<string, string> = {
+    live_verified: 'bg-state-success',
+    simulated: 'bg-state-info',
+    ambient: 'bg-zinc-600',
+  };
+  return (
+    <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5" data-testid="logistics-map-legend">
+      {OPERATIONAL_TRUTH_ORDER.map((truth) => {
+        const p = OPERATIONAL_TRUTH[truth];
+        return (
+          <li
+            key={truth}
+            className="flex items-center gap-1.5"
+            data-testid={`logistics-legend-${truth}`}
+            title={p.claim}
+          >
+            <span
+              aria-hidden="true"
+              className={cn('h-2 w-2 flex-shrink-0 rounded-full', swatch[truth])}
+            />
+            <span className="text-ds-micro font-medium uppercase tracking-[0.12em] text-zinc-400">
+              {p.label}
+            </span>
+            <span className="font-mono text-ds-micro text-zinc-600">{counts[truth] ?? 0}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/* ── FREIGHT-TERM BADGE ───────────────────────────────────────────────── */
+
+function FreightTermChip({ term }: { term: 'collect' | 'prepaid' | null }) {
+  const semantics = freightSemantics(term);
+  if (!semantics) {
+    return (
+      <span className="rounded-ds-sm border border-white/[0.08] px-1.5 py-px text-ds-micro text-zinc-500">
+        Freight term not declared
+      </span>
+    );
+  }
+  return (
+    <span
+      className={cn(
+        'rounded-ds-sm border px-1.5 py-px text-ds-micro font-medium',
+        semantics.channelArranged
+          ? 'border-palette-indigo/40 bg-palette-indigo/10 text-palette-indigo'
+          : 'border-palette-orange/40 bg-palette-orange/10 text-palette-orange'
+      )}
+      data-testid={`freight-term-${semantics.term}`}
+      title={semantics.label}
+    >
+      {semantics.term === 'collect' ? 'FREIGHT COLLECT — CHANNEL-ARRANGED' : 'FREIGHT PREPAID — MERCENTA-ARRANGED'}
+    </span>
+  );
+}
+
+/* ── MAIN WORKSPACE ───────────────────────────────────────────────────── */
+
+export function LogisticsHub() {
+  const { session, products } = useApp();
+  const shipmentsQuery = useShipmentsAll();
+  const posQuery = usePurchaseOrders();
+  const { modes } = useIntegrations();
+
+  const [query, setQuery] = useState('');
+  const [truthFilter, setTruthFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [laneFilter, setLaneFilter] = useState('all');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [waybillShipment, setWaybillShipment] = useState<string | null>(null);
+  const [trackingShipment, setTrackingShipment] = useState<string | null>(null);
+  const [labelsShipment, setLabelsShipment] = useState<string | null>(null);
+
+  /**
+   * §Tenant isolation — a brand session only ever reads its OWN purchase orders.
+   * The freight term lives on the PO, never on the shipment, so this join is
+   * what lets the hub state Collect vs Prepaid truthfully.
+   */
+  const scopedPos = useMemo(
+    () =>
+      (posQuery.data?.data ?? []).filter(
+        (po) => session?.tier !== 'brand' || po.brandId === session?.tenantId
+      ),
+    [posQuery.data, session?.tier, session?.tenantId]
+  );
+  const poByNumber = useMemo(() => {
+    const map = new Map<string, (typeof scopedPos)[number]>();
+    for (const po of scopedPos) map.set(po.poNumber, po);
+    return map;
+  }, [scopedPos]);
+
+  /**
+   * §7D — live shipment feed (single source of truth: demoShipments via
+   * useShipmentsAll) so shipments created in-session (auto-created drafts,
+   * filed ASNs) appear immediately. Tenant-scoped for brand sessions — a brand
+   * only ever sees its OWN shipments. Rows are normalised to the canonical
+   * Shipment shape so every dialog receives a well-formed shipment.
+   *
+   * §Logistics-map — the real stage is derived from the canonical status → stage
+   * map (previously every row defaulted to 'factory_intake', which is why the
+   * old progress display was meaningless).
+   */
+  const liveShipments = useMemo(
+    () =>
+      ((shipmentsQuery.data?.data ?? []) as unknown as Shipment[])
+        .filter(
+          (s) =>
+            session?.tier !== 'brand' ||
+            (s as unknown as { brandId?: string }).brandId === session?.tenantId
+        )
+        .map((s) => {
+          const raw = s as unknown as {
+            brandId?: string;
+            poNumber?: string;
+            delayed?: boolean;
+            exception?: boolean;
+            waybill?: string;
+            title?: string;
+          };
+          const po = raw.poNumber ? poByNumber.get(raw.poNumber) : undefined;
+          return {
+            id: s.id,
+            reference: s.reference,
+            title: s.title || raw.title || s.reference,
+            poNumber: raw.poNumber ?? '',
+            brandId: raw.brandId ?? '',
+            customer: (s as unknown as { customer?: string }).customer ?? '',
+            value: s.value,
+            status: s.status,
+            carrier: s.carrier,
+            stage: s.stage,
+            cbm: (s as unknown as { cbm?: number }).cbm ?? Math.max(6, Math.round(s.value / 9000)),
+            origin: s.origin,
+            destination: s.destination,
+            date: (s as unknown as { date?: string }).date ?? '',
+            trackingNumber: (s as unknown as { trackingNumber?: string }).trackingNumber ?? '',
+            delayed: Boolean(raw.delayed),
+            exception: Boolean(raw.exception),
+            waybill: raw.waybill ?? null,
+            freightTerm: po?.freightTerm ?? null,
+            simulated: po?.simulated,
+          };
+        }),
+    [shipmentsQuery.data, session?.tier, session?.tenantId, poByNumber]
+  );
+
+  const model = useMemo(
+    () => buildOperationalMap(liveShipments.map((s) => ({ ...s, providerModes: modes }))),
+    [liveShipments, modes]
+  );
+
+  const visibleIds = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const ids = new Set<string>();
+    for (const leg of model.legs) {
+      if (truthFilter !== 'all' && leg.truth !== truthFilter) continue;
+      if (statusFilter !== 'all' && leg.status !== statusFilter) continue;
+      if (laneFilter === 'international' && leg.origin.place?.kind !== 'brand_facility') continue;
+      if (laneFilter === 'uk' && leg.origin.place?.kind !== 'uk_gateway') continue;
+      if (laneFilter === 'exceptions' && !(leg.exception || leg.delayed)) continue;
+      if (needle) {
+        const haystack = [
+          leg.reference,
+          leg.title,
+          leg.poNumber,
+          leg.origin.raw,
+          leg.destination.raw,
+          leg.carrier,
+          STATUS_LABELS[leg.status as ShipmentStatus] ?? leg.status,
+        ]
+          .join(' ')
+          .toLowerCase();
+        if (!haystack.includes(needle)) continue;
+      }
+      ids.add(leg.id);
+    }
+    return ids;
+  }, [model.legs, query, truthFilter, statusFilter, laneFilter]);
+
+  const visibleLegs = useMemo(
+    () => model.legs.filter((leg) => visibleIds.has(leg.id)),
+    [model.legs, visibleIds]
+  );
+  const visibleTruthCounts = useMemo(() => {
+    const out: Record<string, number> = { live_verified: 0, simulated: 0, ambient: 0 };
+    for (const leg of visibleLegs) out[leg.truth] += 1;
+    return out;
+  }, [visibleLegs]);
+
+  const selected = model.legs.find((l) => l.id === selectedId) ?? null;
+
+  const statusOptions = useMemo(
+    () => [
+      { id: 'all', label: 'All statuses', count: model.legs.length },
+      ...[...new Set(model.legs.map((l) => l.status))].map((s) => ({
+        id: s,
+        label: STATUS_LABELS[s as ShipmentStatus] ?? s,
+        count: model.legs.filter((l) => l.status === s).length,
+      })),
+    ],
+    [model.legs]
+  );
+
+  const kpiItems: KpiCellData[] = [
+    {
+      id: 'consignments',
+      label: 'Consignments in scope',
+      value: String(model.legs.length),
+      context: `${model.mapped.length} plotted · ${model.schematic.length} schematic`,
+      domain: 'logistics',
+    },
+    {
+      id: 'moving',
+      label: 'In transit',
+      value: String(
+        model.legs.filter(
+          (l) => l.status === 'sea_transit' || l.status === 'air_transit' || l.status === 'bak_depot'
+        ).length
+      ),
+      context: 'Sea, air and depot movement',
+      domain: 'logistics',
+    },
+    {
+      id: 'exceptions',
+      label: 'Exceptions / delayed',
+      value: String(model.exceptionCount),
+      context: model.exceptionCount > 0 ? 'Needs operational attention' : 'No exception flags',
+      tone: model.exceptionCount > 0 ? 'warning' : 'success',
+      statusText: model.exceptionCount > 0 ? 'attention' : 'clear',
+    },
+    {
+      id: 'simulated',
+      label: 'Simulated legs',
+      value: String(model.truthCounts.simulated),
+      context: 'Carrier provider positively simulates — zero network calls',
+      tone: 'info',
+      statusText: 'simulation',
+    },
+    {
+      id: 'live',
+      label: 'Live verified',
+      value: String(model.truthCounts.live_verified),
+      context:
+        model.truthCounts.live_verified === 0
+          ? 'No live carrier credentials held — nothing is claimed live'
+          : 'Provider live and provider reference present',
+      tone: model.truthCounts.live_verified === 0 ? 'neutral' : 'success',
+      statusText: model.truthCounts.live_verified === 0 ? 'not verified' : 'verified',
+    },
+    {
+      id: 'ambient',
+      label: 'Ambient / contextual',
+      value: String(model.truthCounts.ambient),
+      context: 'No positive provider resolution — context only',
+      tone: 'neutral',
+      statusText: 'context',
+    },
+  ];
+
+  const shipmentById = (id: string) => liveShipments.find((s) => s.id === id)!;
+
+  return (
+    <WorkspaceFrame>
+      <WorkspaceHeader
+        eyebrow="Brand portal · Logistics"
+        title="Inbound shipments & freight"
+        description="Every consignment Mercenta moves on your behalf, plotted on the operational map. Selecting a consignment exposes its route, its carrier position and who actually arranges carriage."
+        entity={
+          <>
+            <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              {session?.tier === 'brand' ? 'Tenant' : 'Environment'}
+            </span>
+            <span className="text-ds-label text-zinc-200">
+              {session?.tenantId ?? 'Mercenta operations'}
+            </span>
+            <span aria-hidden="true" className="text-zinc-700">
+              ·
+            </span>
+            <span className="text-ds-micro text-zinc-500">
+              Hub: {MERCENTA_UK_HUB.label} ({MERCENTA_UK_HUB.place})
+            </span>
+          </>
+        }
+        status={
+          <StatusBadge
+            tone={model.truthCounts.live_verified > 0 ? 'success' : 'info'}
+            dataStatus={model.truthCounts.live_verified > 0 ? 'live' : 'simulation'}
+          >
+            {model.truthCounts.live_verified > 0 ? 'Live carrier verified' : 'Simulated carrier legs'}
+          </StatusBadge>
+        }
+        meta={
+          <>
+            <span className="text-ds-micro text-zinc-500" data-testid="logistics-scope-count">
+              {model.legs.length} consignments in scope
+            </span>
+            <span className="text-ds-micro text-zinc-600">{MAP_TRUTH_NOTICE}</span>
+          </>
+        }
+        actions={
+          <Button variant="secondary" onClick={() => shipmentsQuery.refetch()}>
+            <Route className="h-3.5 w-3.5" />
+            Refresh feed
+          </Button>
+        }
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[200px] flex-1 [&>input]:pl-8">
+              <Search
+                className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-600"
+                aria-hidden="true"
+              />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search reference, PO, origin, destination…"
+                ariaLabel="Search consignments"
+                dataTestid="logistics-search"
+              />
+            </div>
+            <SegmentedControl
+              ariaLabel="Travel evidence"
+              active={truthFilter}
+              onSelect={setTruthFilter}
+              items={[
+                { id: 'all', label: 'All', count: visibleLegs.length },
+                {
+                  id: 'live_verified',
+                  label: OPERATIONAL_TRUTH.live_verified.label,
+                  count: model.truthCounts.live_verified,
+                },
+                {
+                  id: 'simulated',
+                  label: OPERATIONAL_TRUTH.simulated.label,
+                  count: model.truthCounts.simulated,
+                },
+                {
+                  id: 'ambient',
+                  label: OPERATIONAL_TRUTH.ambient.label,
+                  count: model.truthCounts.ambient,
+                },
+              ]}
+            />
+            <SegmentedControl
+              ariaLabel="Lane filter"
+              active={laneFilter}
+              onSelect={setLaneFilter}
+              items={[
+                { id: 'all', label: 'All lanes' },
+                { id: 'international', label: 'International origin' },
+                { id: 'uk', label: 'UK gateway origin' },
+                { id: 'exceptions', label: 'Exceptions' },
+              ]}
+            />
+          </div>
+        }
+      />
+
+      <KpiGroup items={kpiItems} loading={shipmentsQuery.isLoading} />
+
+      <WorkspaceGrid
+        className="mt-4"
+        rail={
+          <>
+            {selected ? (
+              <ContextPanel
+                title="Consignment inspector"
+                action={
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(null)}
+                    aria-label="Clear selection"
+                    className="rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-white"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                }
+              >
+                <div className="space-y-3 p-3" data-testid="logistics-inspector">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge
+                      dataStatus={shipmentStatusPresentation(selected.status).dataStatus}
+                      tone={shipmentStatusPresentation(selected.status).tone}
+                    >
+                      {shipmentStatusPresentation(selected.status).label}
+                    </StatusBadge>
+                    <StatusBadge
+                      tone={OPERATIONAL_TRUTH[selected.truth].tone}
+                      dataStatus={selected.truth}
+                    >
+                      {OPERATIONAL_TRUTH[selected.truth].label}
+                    </StatusBadge>
+                    {(selected.exception || selected.delayed) && (
+                      <StatusBadge tone="warning" dataStatus="exception">
+                        <AlertTriangle className="mr-1 inline h-3 w-3" aria-hidden="true" />
+                        Exception
+                      </StatusBadge>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-ds-title font-semibold text-white">{selected.reference}</p>
+                    <p className="mt-0.5 text-ds-label text-zinc-500">{selected.title}</p>
+                  </div>
+
+                  <RecordFieldList
+                    fields={[
+                      { label: 'Stage', value: STAGE_LABELS[selected.stage] ?? selected.stage },
+                      { label: 'PO', value: selected.poNumber || '—' },
+                      { label: 'Carrier', value: carrierLabel(selected.carrier) },
+                      { label: 'Value', value: `£${selected.value.toLocaleString()}` },
+                      { label: 'Volume', value: `${selected.cbm} CBM` },
+                      {
+                        label: 'Declared origin',
+                        value: (
+                          <span className="font-mono text-ds-micro">{selected.origin.raw || '—'}</span>
+                        ),
+                      },
+                      {
+                        label: 'Declared destination',
+                        value: (
+                          <span className="font-mono text-ds-micro">
+                            {selected.destination.raw || '—'}
+                          </span>
+                        ),
+                      },
+                    ]}
+                  />
+
+                  <div className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5">
+                    <p className="mb-1 flex items-center gap-1.5 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                      <Info className="h-3 w-3" aria-hidden="true" />
+                      Why this leg is {OPERATIONAL_TRUTH[selected.truth].short}
+                    </p>
+                    <p
+                      className="text-ds-micro leading-relaxed text-zinc-400"
+                      data-testid="logistics-truth-reason"
+                    >
+                      {selected.truthReason}
+                    </p>
+                    <p className="mt-1.5 text-ds-micro leading-relaxed text-zinc-600">
+                      {selected.origin.reason} {selected.destination.reason}
+                    </p>
+                  </div>
+
+                  <div className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5">
+                    <p className="mb-1 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                      Who arranges carriage
+                    </p>
+                    <FreightTermChip term={selected.freightTerm} />
+                    {freightSemantics(selected.freightTerm) ? (
+                      <p className="mt-1.5 text-ds-micro leading-relaxed text-zinc-400">
+                        {freightSemantics(selected.freightTerm)!.arranges}
+                      </p>
+                    ) : (
+                      <p className="mt-1.5 text-ds-micro leading-relaxed text-zinc-500">
+                        This consignment has no declared freight term on its purchase order, so Mercenta
+                        does not assert who arranges carriage.
+                      </p>
+                    )}
+                    {selected.expectedCarrier && (
+                      <p className="mt-1.5 text-ds-micro text-zinc-500">
+                        Lane rule expects{' '}
+                        <span className="font-mono">{carrierLabel(selected.expectedCarrier)}</span>.
+                      </p>
+                    )}
+                    {selected.channelArranged && (
+                      <p className="mt-1.5 text-ds-micro text-palette-indigo">
+                        Channel-arranged: Mercenta does not select this carrier.
+                      </p>
+                    )}
+                    {selected.carrierValidationError && (
+                      <p className="mt-1.5 text-ds-micro text-state-warning">
+                        {selected.carrierValidationError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => setWaybillShipment(selected.id)}>
+                      <Printer className="h-3 w-3" />
+                      Waybill
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => setLabelsShipment(selected.id)}>
+                      <Barcode className="h-3 w-3" />
+                      Labels
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => setTrackingShipment(selected.id)}>
+                      <Truck className="h-3 w-3" />
+                      Track
+                    </Button>
+                  </div>
+                </div>
+              </ContextPanel>
+            ) : (
+              <ContextPanel title="Consignment inspector">
+                <div className="p-3" data-testid="logistics-inspector-empty">
+                  <p className="text-ds-body text-zinc-500">
+                    Select a consignment on the map or in the list to see its route, evidence state and
+                    who arranges carriage.
+                  </p>
+                </div>
+              </ContextPanel>
+            )}
+
+            <ContextPanel title="How carriage is arranged">
+              <div className="space-y-2.5 p-3">
+                <div>
+                  <FreightTermChip term="collect" />
+                  <p className="mt-1 text-ds-micro leading-relaxed text-zinc-400">
+                    Retail-channel-arranged. The carrier is not Mercenta’s choice, and a Mercenta carrier
+                    account is refused on this PO.
+                  </p>
+                </div>
+                <div>
+                  <FreightTermChip term="prepaid" />
+                  <p className="mt-1 text-ds-micro leading-relaxed text-zinc-400">
+                    Mercenta arranges carriage. International → DHL, UK domestic → Palletline. No single
+                    carrier is universal; an admin override is attributed and audited.
+                  </p>
+                </div>
+              </div>
+            </ContextPanel>
+          </>
+        }
+      >
+        <WorkspaceSection
+          title="Operational map"
+          description="Consignments at their declared coordinates, positioned along their route by the canonical stage."
+          domain="logistics"
+          action={<TruthLegend counts={visibleTruthCounts} />}
+        >
+          <LogisticsMapCanvas
+            model={model}
+            visibleIds={visibleIds}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            className="h-[280px] sm:h-[360px] lg:h-[440px]"
+          />
+          {model.schematic.length > 0 && (
+            <p className="text-ds-micro text-zinc-600" data-testid="logistics-schematic-notice">
+              {model.schematic.length} consignment{model.schematic.length === 1 ? '' : 's'} declare a
+              location the platform cannot resolve (for example “Brand warehouse”) and are therefore NOT
+              plotted — they are listed below rather than placed at an invented coordinate.
+            </p>
+          )}
+        </WorkspaceSection>
+
+        <WorkspaceSection
+          title={`Consignments (${visibleLegs.length})`}
+          description="Every consignment in the current filter, with its declared route, evidence state and the artefacts you can produce for it."
+          domain="logistics"
+          action={
+            <SegmentedControl
+              ariaLabel="Status filter"
+              active={statusFilter}
+              onSelect={setStatusFilter}
+              items={statusOptions}
+            />
+          }
+        >
+          {visibleLegs.length === 0 ? (
+            <p
+              className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] px-3 py-6 text-center text-ds-body text-zinc-500"
+              data-testid="logistics-list-empty"
+            >
+              No consignment matches the current filters.
+            </p>
+          ) : (
+            <ul className="divide-y divide-white/[0.04] overflow-hidden rounded-ds-md border border-white/[0.06]">
+              {visibleLegs.map((leg) => {
+                const status = shipmentStatusPresentation(leg.status);
+                const active = leg.id === selectedId;
+                return (
+                  <li key={leg.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedId(leg.id)}
+                      aria-current={active ? 'true' : undefined}
+                      data-testid={`logistics-row-${leg.id}`}
+                      data-truth={leg.truth}
+                      className={cn(
+                        'flex w-full flex-col gap-2 px-3 py-2.5 text-left transition-ds duration-ds-fast sm:flex-row sm:items-center sm:gap-4',
+                        active ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
+                      )}
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="truncate text-ds-body font-semibold text-white">
+                            {leg.reference}
+                          </span>
+                          <span className="font-mono text-ds-micro text-zinc-600">{leg.poNumber}</span>
+                          <StatusBadge tone={OPERATIONAL_TRUTH[leg.truth].tone} dataStatus={leg.truth}>
+                            {OPERATIONAL_TRUTH[leg.truth].short}
+                          </StatusBadge>
+                        </span>
+                        {/* The canonical consignment title (e.g. "Tapatío — PO-9002"). */}
+                        <span className="mt-0.5 block truncate text-ds-micro text-zinc-400">
+                          {leg.title}
+                        </span>
+                        <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-ds-micro text-zinc-500">
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3 w-3" aria-hidden="true" />
+                            {leg.origin.raw || 'origin not declared'}
+                          </span>
+                          <ArrowRight className="h-3 w-3 text-zinc-700" aria-hidden="true" />
+                          <span>{leg.destination.raw || 'destination not declared'}</span>
+                          {!leg.geometry && (
+                            <span className="text-zinc-600">· not plotted (location undeclared)</span>
+                          )}
+                        </span>
+                      </span>
+
+                      <span className="flex flex-wrap items-center gap-2 sm:flex-shrink-0">
+                        <StatusBadge dataStatus={status.dataStatus} tone={status.tone}>
+                          {status.label}
+                        </StatusBadge>
+                        {(leg.exception || leg.delayed) && (
+                          <span className="inline-flex items-center gap-1 text-ds-micro text-state-warning">
+                            <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+                            Exception
+                          </span>
+                        )}
+                        <span className="font-mono text-ds-label text-zinc-300">
+                          £{Math.round(leg.value / 1000)}k
+                        </span>
+                        <span className="text-ds-micro text-zinc-600">{leg.cbm} CBM</span>
+                      </span>
+                    </button>
+
+                    <div className="flex flex-wrap gap-1.5 px-3 pb-2.5">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setWaybillShipment(leg.id)}
+                        data-testid={`logistics-waybill-${leg.id}`}
+                      >
+                        <Printer className="h-3 w-3" />
+                        Waybill
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setLabelsShipment(leg.id)}
+                        data-testid={`logistics-labels-${leg.id}`}
+                      >
+                        <Barcode className="h-3 w-3" />
+                        Labels
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setTrackingShipment(leg.id)}
+                        data-testid={`logistics-track-${leg.id}`}
+                      >
+                        <Truck className="h-3 w-3" />
+                        Track
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </WorkspaceSection>
+      </WorkspaceGrid>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button variant="secondary" onClick={() => setStatusFilter('all')}>
+          Clear status filter
+        </Button>
+        <Button variant="secondary" onClick={() => setTruthFilter('all')}>
+          Clear evidence filter
+        </Button>
+        <span className="text-ds-micro text-zinc-600">
+          Booking a consignment happens on Purchase Orders through the canonical ASN flow — Mercenta files
+          the ASN against the accepted PO, so freight cannot be booked without a valid PO.
+        </span>
+      </div>
+
+      {trackingShipment && (
+        <ShipmentTrackingTimeline
+          shipment={shipmentById(trackingShipment)}
+          products={products}
+          poProducts={(() => {
+            const s = shipmentById(trackingShipment);
+            const poId = s.id.replace(/^shipment-/, '');
+            const po = scopedPos.find((p) => p.id === poId);
+            return po?.lineItems?.map((li) => li.sku) ?? [];
+          })()}
+          onClose={() => setTrackingShipment(null)}
+        />
+      )}
+      {waybillShipment && (
+        <WaybillModal
+          shipment={shipmentById(waybillShipment)}
+          onClose={() => setWaybillShipment(null)}
+        />
+      )}
+      {labelsShipment && (
+        <LabelsModal
+          shipment={shipmentById(labelsShipment) as Shipment & { brandId?: string; poNumber?: string }}
+          onClose={() => setLabelsShipment(null)}
+        />
+      )}
+    </WorkspaceFrame>
+  );
+}
