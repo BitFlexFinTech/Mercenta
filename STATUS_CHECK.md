@@ -5,6 +5,19 @@ Historical session notes live in the **Session History Log** at the bottom —
 they are preserved verbatim and may describe problems that have since been
 fixed. Never cite the log as current status.
 
+## Operating rules — ACTIVE (2026-09-21 rule migration)
+
+The canonical operating model is **`.clinerules/operating-model.md`**: current Founder directive > that file >
+`.clinerules/protection-rules.md` (active safety rules only) > `project-state-contract.md` (the five synchronised
+state sources) > `mercenta-business-model.md` (business invariants) > historical documents (context only).
+
+**Retired 2026-09-21, no authority:** Design Freeze · "uncommitted changes → STOP" · ">3 files → STOP" ·
+">5 files → STOP" · "never change architecture/refactor" · "do not commit unless explicitly told".
+**Unchanged:** secrets never read/printed/bundled (or inside the review ZIP) · pre-existing Founder work never destroyed
+and never committed by the agent · deploy only when instructed, only to `demo.mercenta.co.uk`, only via
+`scripts/deploy-demo.sh`, never the live domain before `GO_LIVE.md` · never weaken a validator or test · evidence
+discipline · script-only review zip.
+
 ## Build & verification health
 
 - `npm run typecheck` — PASS (exit 0)

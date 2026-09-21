@@ -287,8 +287,13 @@ future domain contracts must not prevent it.
 
 ## X. UI/UX Principles
 
-The visual design is FROZEN and must match https://demo.mercenta.co.uk exactly
-until an explicit UI/UX phase. When that phase arrives: premium B2B product,
+> **[RETIRED 2026-09-21]** The Design Freeze stated below has NO authority: the existing UI is **not** the visual
+> baseline, and presentation change is authorised whenever the current directive requires it
+> (`.clinerules/operating-model.md` §2/§4). The quality principles that follow remain valid direction. This file is a
+> historical context document.
+
+~~The visual design is FROZEN and must match https://demo.mercenta.co.uk exactly
+until an explicit UI/UX phase.~~ When that phase arrives: premium B2B product,
 clear hierarchy, analytics-first executive views, operational workspaces, high
 density without clutter, excellent tables/forms, clear empty/loading/error
 states, responsive, keyboard accessible, ARIA where necessary, high-quality
@@ -385,7 +390,9 @@ onboarding. **Not started yet.**
 9. Simulation is real MERCENTA workflow execution with a simulated adapter;
    UNKNOWN is never simulation.
 10. No unsupported Amazon policy/TOS-exposure customer-facing claims.
-11. Visual design freeze until the explicit UI/UX phase.
+11. ~~Visual design freeze until the explicit UI/UX phase.~~ **[RETIRED 2026-09-21 — the Design Freeze has NO
+    authority and must not gate work; the existing UI is not the visual baseline. See
+    `.clinerules/operating-model.md` §2/§4. This file is a historical context document.]**
 12. Generated/forensic artifacts are never committed simply to clean Git.
 13. AI tools are interchangeable; project knowledge lives in these files.
 14. Brand onboarding identity is DERIVED, never invented (Phase E1): the

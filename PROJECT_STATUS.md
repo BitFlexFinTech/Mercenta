@@ -1,6 +1,34 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 
+## 🛠 OPERATING-RULES MIGRATION — STALE GATES RETIRED (2026-09-21, session 7)
+
+**Increment identity:** operating-rule/documentation migration **ONLY**. **No product, UI, domain, integration,
+security or deploy work in this increment.** **No pre-existing Founder work was committed or modified** — the 289
+dirty paths on `redesign/foundation` were left exactly as found (not staged, not committed, not reverted).
+
+- **Canonical operating model established:** `.clinerules/operating-model.md` (NEW, ACTIVE) — authority order, scope
+  authority, UI/UX authority, the canonical **COMMIT = verified runtime checkpoint** and
+  **DEPLOY = verified live runtime delivery** definitions, the mandatory delivery chain, the worktree policy and the
+  definitive list of genuine hard stops.
+- **RETIRED, no authority (must never gate work again):** the Design Freeze · "uncommitted changes → STOP" ·
+  ">3 files → STOP" · ">5 files → STOP" · "never change architecture / add new systems / refactor" ·
+  "do not commit unless explicitly told". Marked inline in `.clinerules/protection-rules.md`; listed in
+  `operating-model.md` §2.
+- **UNCHANGED (genuine safety, not workflow restrictions):** secrets never read/printed/logged/bundled/screenshotted
+  and never inside the review ZIP; pre-existing Founder work never destroyed and never committed by the agent; deploy
+  only when the Founder instructs it, only to `demo.mercenta.co.uk`, only via `scripts/deploy-demo.sh`, never to the
+  live domain before `GO_LIVE.md`; never weaken a validator/test; evidence discipline; script-only review zip.
+- **Business invariants untouched:** `.clinerules/mercenta-business-model.md` (Mercenta as intermediary, Model A/B,
+  compliance hard gate, freight-semantics carrier rules, Payoneer primary / Wise secondary / Xero-not-a-bank, human
+  approval before any payout, automation bounds, the ten approved Amazon UK categories, Amazon wording safeguards) —
+  a workflow-rule migration never alters them.
+- **Stale quoting documents marked historical/retired:** `MERCENTA_MASTER_CONTEXT.md` §11,
+  `docs/PRODUCT_CONSOLIDATION_PHASEB_2026-09-10.md` §3.4, `docs/RUNTIME_PARITY_PLAN_2026-09-21.md` D-0,
+  `MASTER_CHATGPT_HANDOFF.md` §25.3, and this file's own historical inventory line §0A.16 ("Current UI frozen").
+- **NOT a product checkpoint:** no product implementation was performed, so this increment is reported as
+  **OPERATING RULES MIGRATION COMMITTED** and must never be described as a verified runtime checkpoint.
+
 ## 🧭 CURRENT PLATFORM POSITION — CANONICAL PROPAGATION: BRAIN + LOGISTICS ARE NOW DYNAMIC PROJECTIONS (2026-09-21, session 6)
 
 Branch `redesign/foundation`. **Start HEAD `22b6b62`**. The dirty Founder worktree was carried forward and
@@ -3053,7 +3081,7 @@ retained unchanged below as history.**
 > 33 Platform AI — `modelPolicy.ts` (MAX paid = DeepSeek V4 Flash; FREE tier; deterministic-first; unknown task ⇒ REFUSED) + `usageLog.ts` (ceilings; `handled_without_model` vs `refused_budget` vs `cache_hit`) + exactly two call sites (`engine.ts`, `alertTriage.ts`), both authorised first. Key entered ONLY via Super Admin Integrations hub (in-memory map, never persisted/hardcoded); demo auto-connect reads `VITE_OPENROUTER_API_KEY` env and never writes it anywhere. $0 dashboard usage is CONSISTENT with the policy (no demo task needs a model call).
 > 34–35 Launch / demo — `validate-launch-centre` PASS · e2e `launch-centre` 3/3 (Prepare ≠ Submitted) · `validate-investor-demo` **PASS** (25 stages: application→approval→onboarding→commercial_models→compliance→catalogue→purchase_order→acknowledgement→fulfilment→shipment→shipping_commercial→delivery→returns→deductions→dispute→commission→payout→crm→marketing→integrations→cases→social→rbac→audit→error_recovery; deterministic replay, 0 network) · e2e `investor-demo` 10/10.
 > 36 Rakazo — NOT invoked/modified this session; only the iframe registration exists (e2e `rakazo`); fleet = deferred final phase per the agreed order.
-> 37 UI/UX — current design is FROZEN (`.clinerules/protection-rules.md`) and passes responsive/design gates (e2e `design-system`, `table-responsive`, `app-shell`); the Apple-influenced / Twenty / ERPNext-quality redesign is phased strictly AFTER core build completion. The 3 untracked `design/*.png` banners are reserved for that later phase (uncommitted and untouched).
+> 37 UI/UX — **[RETIRED FREEZE, 2026-09-21: the existing UI is NOT the visual baseline — see `.clinerules/operating-model.md` §2/§4]** the design passes the responsive/design gates (e2e `design-system`, `table-responsive`, `app-shell`); the Apple-influenced / Twenty / ERPNext-quality direction remains valid, and is **no longer** gated behind core build completion.
 > ### Aggregate verification THIS SESSION (2026-09-16)
 > - `git merge-base --is-ancestor 959b4d2 HEAD` → **YES** (protected baseline preserved).
 > - Validator/audit sweep: **74/75 PASS**; the 1 red = `validate-e6-brand-surfaces.mjs` F6 working-tree scope guard, red ONLY because of the 3 reserved untracked `design/*.png` files (documented, user-approved consequence of reserving redesign assets; the same sweep was 75/75 at the last clean-tree checkpoint). **No functional check fails.**
@@ -3618,8 +3646,10 @@ retained unchanged below as history.**
 >   credits spent** on it.
 >
 > ### 0A.16 UI/UX — FUTURE REDESIGN REQUIREMENTS ONLY
-> - Current UI **frozen** (design freeze; matches demo.mercenta.co.uk). Functional
->   state recorded throughout this inventory; no redesign performed.
+> - **[HISTORICAL — the Design Freeze was RETIRED 2026-09-21 and has NO authority; see
+>   `.clinerules/operating-model.md` §2 and §4. The existing UI is NOT the visual baseline.]**
+> - ~~Current UI **frozen** (design freeze; matches demo.mercenta.co.uk).~~ The functional
+>   state of this inventory was recorded under that now-retired freeze.
 > - Agreed future direction (Phases 6–7, AFTER core completion): Apple-inspired
 >   premium styling; clean/sleek/smooth; premium typography + buttons; refined
 >   spacing; colourful but restrained; **light + dark mode**; Twenty-inspired

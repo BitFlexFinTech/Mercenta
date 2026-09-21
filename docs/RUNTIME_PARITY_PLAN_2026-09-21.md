@@ -615,6 +615,11 @@ given. Each is a real fork in the design, not a formality.
 
 ### ⛔ D-0 (BLOCKING, must be answered first) — the dirty worktree
 
+> **[HISTORICAL — RETIRED GATE, 2026-09-21 rule migration.]** The "uncommitted changes → STOP and ask whether to
+> commit" rule quoted below has been **retired** and must not gate work again: a dirty worktree is not a stop.
+> See `.clinerules/operating-model.md` §2 and §6. The section is retained as a historical record of the session that
+> wrote this plan.
+
 ```
 $ git status --porcelain | wc -l
 270

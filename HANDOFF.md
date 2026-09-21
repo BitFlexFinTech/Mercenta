@@ -1,5 +1,31 @@
 ---
-**Last updated: September 21, 2026 — ✅ CANONICAL PROPAGATION: BRAIN + LOGISTICS ARE NOW DYNAMIC PROJECTIONS — CURRENT CHECKPOINT.**
+**Last updated: September 21, 2026 — ⚙️ OPERATING-RULES MIGRATION COMMITTED (session 7): the stale gates are retired; `.clinerules/operating-model.md` is the canonical operating model. Previous checkpoint below: ✅ CANONICAL PROPAGATION: BRAIN + LOGISTICS ARE NOW DYNAMIC PROJECTIONS.**
+
+## ⚙️ OPERATING-RULES MIGRATION (2026-09-21, session 7) — CURRENT RULE STATE
+
+**Increment identity:** rule/documentation migration **ONLY** — no product, UI, domain, integration or deploy work, and
+the 289 pre-existing dirty paths on `redesign/foundation` were left untouched and **uncommitted**.
+
+**Read these before acting in a future session:**
+
+1. **`.clinerules/operating-model.md` (NEW, ACTIVE, canonical)** — authority order (§1) · scope authority (§3: file
+   count, surface count and sprint size are **never** approval gates) · UI/UX authority (§4: the existing UI is **not**
+   the visual baseline) · **COMMIT = verified runtime checkpoint** and **DEPLOY = verified live runtime delivery** (§5)
+   · the mandatory delivery chain (`IMPLEMENT → TEST → FIX → VERIFY LOCALLY → COMMIT → VERIFY LOCAL COMMITTED VERSION →
+   DEPLOY → OPEN LIVE SITE → VERIFY LIVE VERSION → REPORT COMPLETE`) · worktree policy (§6) · the only genuine hard
+   stops (§7) · evidence discipline (§8) · review-zip and deploy artefacts (§9).
+2. **`.clinerules/protection-rules.md`** — ACTIVE SAFETY RULES only (secrets; no destruction of Founder work; deploy
+   safeguards; no fake passes; evidence). Its Design Freeze, dirty-tree STOP gate, >3/>5-file gates, "never refactor"
+   and "do not commit unless told" clauses are marked **RETIRED 2026-09-21** and have no authority.
+3. **`.clinerules/mercenta-business-model.md`** — business invariants, unchanged by this migration. A workflow-rule
+   migration never alters the business model.
+
+**Retired gates (must never block work again):** Design Freeze · "uncommitted changes → STOP" · ">3 files → STOP" ·
+">5 files → STOP" · "never change architecture / refactor / add new systems" · "do not commit unless explicitly told".
+
+**Still genuine hard stops:** missing protected credential or infrastructure access · irreversible production action ·
+destructive Git operation · legal/business policy not already defined · paid external service activation ·
+unsafe external dependency. **Not hard stops:** scope size, number of files, redesign size, test runtime, a dirty tree.
 
 ## §CANONICAL PROPAGATION — DYNAMIC PROJECTIONS OF THE DOMAIN (2026-09-21, session 6) — CURRENT CHECKPOINT
 

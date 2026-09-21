@@ -73,7 +73,7 @@ Added `IntelligenceRun` (+ `IntelligenceRunStatus` / `IntelligenceRunTrigger`),
 `ProspectChangeEvent` (+ `ProspectChangeType`), `IntelligencePipelineStatus`,
 and `BrandProspect.lastChecked? / nextCheck?`. Single source of truth.
 
-### 3.4 UI (minimal, within the no-redesign freeze)
+### 3.4 UI (minimal, within the no-redesign freeze) **[HISTORICAL — that freeze was RETIRED 2026-09-21; see `.clinerules/operating-model.md` §2/§4]**
 - **Admin Brand Intelligence panel** (`BrandIntelligencePanel.tsx`): now
   store-backed; adds Pipeline Control ("Run discovery" manual trigger +
   next-check stamp), Run History (every run: scan/new/updated/dq/unchanged
