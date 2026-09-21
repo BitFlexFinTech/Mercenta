@@ -27,6 +27,10 @@ the 289 pre-existing dirty paths on `redesign/foundation` were left untouched an
 destructive Git operation · legal/business policy not already defined · paid external service activation ·
 unsafe external dependency. **Not hard stops:** scope size, number of files, redesign size, test runtime, a dirty tree.
 
+**Every "NEXT PROMPT TO PASTE" block and every dated "PREVIOUS CHECKPOINT" section below is a QUOTE of a past
+session's directive — historical context only.** Any commit/push/deploy instruction inside such a quote is EXPIRED, and
+the retired gates above no longer apply to current work.
+
 ## §CANONICAL PROPAGATION — DYNAMIC PROJECTIONS OF THE DOMAIN (2026-09-21, session 6) — CURRENT CHECKPOINT
 
 **Start HEAD `22b6b62`.** Branch `redesign/foundation`. The dirty Founder tree was carried forward and **preserved**.
@@ -634,7 +638,7 @@ no per-module ad-hoc ownership logic; duplicate/replay aware; UNKNOWN ownership 
 Founder exception/review queue; cross-tenant references refused and reported; every resolution audited.
 Do NOT invent Amazon facts. Simulation-first, zero live calls. Add a validator + a browser chain, then
 reconcile the Master Matrix, the E2E matrix, requirements-registry.json, PROJECT_STATUS and HANDOFF.
-Do not commit or push unless I say so; finish with the review ZIP via scripts/export-review-zip.sh.
+Do not commit or push unless I say so; finish with the review ZIP via scripts/export-review-zip.sh. **[HISTORICAL QUOTE — this commit/push restriction is RETIRED; see `.clinerules/operating-model.md` §2/§5]**
 ```
 
 ```
@@ -643,7 +647,7 @@ Execute increment S2b: apply the 52 Amazon dispositions recorded in docs/AMAZON_
 (the 9 RELABEL items, AV-042 wording-safeguard extension, AV-044 simulation-claim repair), one finding at a
 time, recording each as APPLIED in that document with its evidence. Do NOT implement any EVIDENCE-BLOCKED
 finding. Run validate:wording plus the affected specs, reconcile the five canonical sources, and finish with
-the review ZIP via scripts/export-review-zip.sh. Do not commit or push unless I say so.
+the review ZIP via scripts/export-review-zip.sh. Do not commit or push unless I say so. **[HISTORICAL QUOTE — this commit/push restriction is RETIRED]**
 ```
 
 
@@ -800,7 +804,7 @@ retained as history.
   > at the top of `PROJECT_STATUS.md`. Preserve everything that works; do not rebuild the routing/gateway
   > architecture or the Phase 2 commercial surfaces. Now begin **Phase 3 — Supply Route / Logistics
   > Intelligence**, consuming the READY commercial record (validated pack profile, supply basis, declared next
-  > stage) as its input. Do not commit unless I say commit. Do not deploy. Keep zero live provider calls. Finish
+  > stage) as its input. Do not commit unless I say commit. Do not deploy. Keep zero live provider calls. Finish **[HISTORICAL QUOTE — the commit restriction is RETIRED; the Founder-only deploy gate remains]**
   > by reconciling the Master Matrix, `PROJECT_STATUS.md`, `HANDOFF.md` and a sprint report, and export the review
   > zip via `bash scripts/export-review-zip.sh`.
 
