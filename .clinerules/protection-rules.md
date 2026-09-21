@@ -67,10 +67,10 @@ safety rule is a critical failure. The retired clauses above and below have **no
   never use ambiguity as a reason to avoid authorised work.
 
 ## After work:
-- Show the user exactly which files were changed and what changed.
-- Run: git diff --stat
-- Do NOT commit unless the user explicitly says "commit."
-- Do NOT push unless the user explicitly says "push."
+- Show exactly which files were changed and what changed; run: `git diff --stat`.
+- ~~Do NOT commit unless the user explicitly says "commit."~~ **RETIRED 2026-09-21** — commit your own **verified** work
+  as the checkpoint (`operating-model.md` §5); never commit pre-existing Founder changes (§6).
+- ACTIVE: push only when the Founder instructs it.
 
 ## Absolute prohibitions:
 - Do NOT create numbered zip files.
