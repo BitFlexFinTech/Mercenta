@@ -244,7 +244,7 @@ export function BrainCanvas({
                       strokeOpacity={0.5}
                     />
                   )}
-                  {(node.kind === 'brand' || node.kind === 'founder' || node.kind === 'amazon') && (
+                  {(node.kind === 'brand' || node.kind === 'founder' || node.kind === 'retail_channel') && (
                     <text
                       x={placed.x}
                       y={placed.y + placed.radius + 11}

@@ -278,7 +278,7 @@ function addPortfolioLayer(draft: GraphDraft, brands: DemoBrand[], mercenta: boo
 /* ── Platform layer (MERCENTA SCOPE ONLY — never projected into a brand graph) ── */
 
 const FOUNDER_ID = brainNodeId('founder', 'founder');
-const AMAZON_ID = brainNodeId('amazon', 'amazon_uk_vendor');
+const AMAZON_ID = brainNodeId('retail_channel', 'amazon_uk_vendor');
 const AGENT_ID = brainNodeId('agent', 'founder_reasoning_seam');
 
 function addPlatformLayer(draft: GraphDraft): void {
@@ -511,9 +511,20 @@ function addPoliciesLayer(draft: GraphDraft): void {
 function addChannelLayer(draft: GraphDraft): void {
   draft.add(
     makeNode({
-      kind: 'amazon',
+      kind: 'retail_channel',
       ref: 'amazon_uk_vendor',
-      label: 'Retail channel (Amazon UK Vendor)',
+      /**
+       * §M12 WORDING SAFEGUARD — FIXED 2026-09-21. This layer is SHARED by both
+       * scopes (the brand scope calls it too), and this LABEL is RENDERED, so the
+       * brand must never see the channel named. It previously read
+       * "Retail channel (Amazon UK Vendor)", which the static wording gate
+       * (`npm run validate:wording`) flagged as an outward-facing violation — a
+       * real one, not a false positive, because the brand's relationship map draws
+       * this node. The label is now channel-neutral, matching the canonical
+       * KIND_META label in `types.ts`; the channel's identity is carried by the
+       * internal `ref` and by the admin-only surfaces, which are exempt by rule.
+       */
+      label: 'Retail channel',
       subtitle: 'Operated by Mercenta, not by the brand',
       tenantId: null,
       status: 'verified',

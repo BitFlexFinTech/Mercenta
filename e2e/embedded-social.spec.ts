@@ -62,6 +62,38 @@ async function workspaceId(page: Page): Promise<string> {
   return (await page.locator('[data-testid="ms-workspace-id"]').first().innerText()).trim();
 }
 
+/**
+ * Wait until the Social surface is bound to a DIFFERENT tenant than `previousId`.
+ *
+ * §Clean-slate reconciliation 2026-09-21 — the switch is ASYNCHRONOUS and the
+ * previous fixed sleep could sample the wrong state under load. Observed failure
+ * (full suite, 445 tests): `expect(await workspaceId(page)).toBe(zambezi)` after
+ * re-opening Astonish expected `msoc-0d3b0d4a` (= FNV-1a of `brand-astonish`) and
+ * received `msoc-50ff1f6b` (= FNV-1a of `brand-tapatio`) — i.e. the logout→login
+ * cycle had not taken effect yet, so the surface still showed the PREVIOUS
+ * tenant's workspace. The product was correct (it showed exactly the current
+ * session's own workspace, and the cross-tenant assertions never leaked); the test
+ * simply sampled a transition.
+ *
+ * This does NOT weaken the isolation contract: the workspace id is
+ * `msoc-${stableHash(tenantId)}`, i.e. a deterministic function of the tenant
+ * alone, so waiting for it to equal/!equal a value is only satisfiable by the app
+ * genuinely switching to that tenant. It removes an assumption about TIMING, not an
+ * assertion about behaviour.
+ */
+async function waitForWorkspaceIdChange(page: Page, previousId: string): Promise<string> {
+  await expect
+    .poll(() => workspaceId(page), { timeout: 10000, message: 'workspace id switches to the new tenant' })
+    .not.toBe(previousId);
+  return workspaceId(page);
+}
+
+async function waitForWorkspaceId(page: Page, expectedId: string): Promise<void> {
+  await expect
+    .poll(() => workspaceId(page), { timeout: 10000, message: `workspace id settles back to ${expectedId}` })
+    .toBe(expectedId);
+}
+
 test.describe('Mercenta Social — brand access & automatic provisioning', () => {
   test('1. approved brand reaches Mercenta Social and is provisioned automatically', async ({ page }) => {
     const errors = trackPageErrors(page);
@@ -164,7 +196,9 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
     const zambezi = await workspaceId(page);
 
     await openSocial(page, 'Tapatío');
-    const deskforge = await workspaceId(page);
+    // Wait for the session switch itself (see waitForWorkspaceIdChange), then read
+    // the new tenant's id. The cross-tenant assertions below stay exact.
+    const deskforge = await waitForWorkspaceIdChange(page, zambezi);
 
     expect(zambezi).not.toBe(deskforge);
     // Brand B's surface must not leak Brand A's workspace identity.
@@ -172,7 +206,9 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
     expect(deskSurface).not.toContain(zambezi);
 
     await openSocial(page, 'Astonish');
-    expect(await workspaceId(page)).toBe(zambezi);
+    // Re-opening brand A must return brand A's OWN workspace — the id is derived
+    // from the tenant, so the app can only settle here by genuinely switching back.
+    await waitForWorkspaceId(page, zambezi);
     const zamSurface = await page.locator('[data-testid="mercenta-social"]').first().innerText();
     expect(zamSurface).not.toContain(deskforge);
     expect(errors).toEqual([]);

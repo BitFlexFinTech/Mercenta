@@ -24,7 +24,7 @@ const RING_STEP = 54;
 const NODE_RADIUS: Partial<Record<BrainEntityKind, number>> = {
   founder: 14,
   brand: 11,
-  amazon: 12,
+  retail_channel: 12,
   prospect: 7,
   purchase_order: 8,
   product: 7,

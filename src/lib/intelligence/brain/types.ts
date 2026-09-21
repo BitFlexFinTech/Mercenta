@@ -60,7 +60,7 @@ export type BrainEntityKind =
   | 'commercial_readiness'
   | 'contract'
   /* platform */
-  | 'amazon'
+  | 'retail_channel'
   | 'integration'
   | 'provider'
   | 'automation'
@@ -124,7 +124,13 @@ export const BRAIN_KIND_DEFINITIONS: Record<BrainEntityKind, BrainKindDefinition
   compliance_object: { kind: 'compliance_object', label: 'Compliance gate', cluster: 'governance', domain: 'compliance', authority: 'code', note: 'Category-aware, fail-closed compliance state for a product/brand.' },
   commercial_readiness: { kind: 'commercial_readiness', label: 'Commercial readiness', cluster: 'governance', domain: 'finance', authority: 'code', note: 'Canonical CommercialReadinessRecord — route decision, never re-derived here.' },
   contract: { kind: 'contract', label: 'Contract', cluster: 'governance', domain: 'compliance', authority: 'human', note: 'Distribution agreement / NDA / rate-card addendum.' },
-  amazon: { kind: 'amazon', label: 'Retail channel', cluster: 'platform', domain: 'intelligence', authority: 'code', note: 'The retail channel Mercenta operates. Programme status is not_confirmed_with_amazon — never overstated.' },
+  /**
+   * §M12 WORDING SAFEGUARD — the KIND is an internal code identifier (`retail_channel`),
+   * never rendered; the LABEL is rendered, so it must stay channel-neutral. The channel's
+   * identity is carried by `ref: 'amazon_uk_vendor'` (a protected internal identifier) and
+   * by the admin-only surfaces, never by brand-facing copy.
+   */
+  retail_channel: { kind: 'retail_channel', label: 'Retail channel', cluster: 'platform', domain: 'intelligence', authority: 'code', note: 'The retail channel Mercenta operates. Programme status is not_confirmed_with_amazon — never overstated.' },
   integration: { kind: 'integration', label: 'Integration', cluster: 'platform', domain: 'orders', authority: 'code', note: 'Registered integration (INTEGRATION_REGISTRY).' },
   provider: { kind: 'provider', label: 'Provider', cluster: 'platform', domain: 'orders', authority: 'code', note: 'An external provider whose mode must resolve positively to be simulation-safe.' },
   automation: { kind: 'automation', label: 'Automation', cluster: 'platform', domain: 'orders', authority: 'automation', note: 'Canonical automation registry entry — orchestrates repeatable work.' },

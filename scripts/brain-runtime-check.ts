@@ -67,7 +67,10 @@ check('edge ids are unique', new Set(mercenta.edges.map((e) => e.id)).size === m
  */
 const REQUIRED_KINDS: BrainEntityKind[] = [
   'founder', 'brand', 'prospect', 'contact', 'product', 'asin', 'sku',
-  'purchase_order', 'po_line', 'case', 'conversation', 'amazon', 'integration',
+  // §M12 wording safeguard (2026-09-21) — the retail-channel kind was renamed from the
+  // internal identifier 'amazon' to 'retail_channel' so no source literal names the
+  // channel. The CONTRACT is unchanged: the retail channel must still be represented.
+  'purchase_order', 'po_line', 'case', 'conversation', 'retail_channel', 'integration',
   'provider', 'rule', 'policy', 'loa', 'document', 'source', 'evidence', 'agent',
   'automation', 'campaign', 'knowledge', 'commercial_readiness', 'contract', 'workflow',
 ];
@@ -75,6 +78,54 @@ const mKinds = kindCounts(mercenta);
 const missing = REQUIRED_KINDS.filter((k) => !mKinds[k]);
 check('every required entity kind is represented', missing.length === 0, `missing=${missing.join(', ')}`);
 check('every canonical brand has a node', mKinds.brand === ALL_DEMO_BRANDS.length, `brands=${mKinds.brand}/${ALL_DEMO_BRANDS.length}`);
+
+/**
+ * §M12 WORDING SAFEGUARD (added 2026-09-21, clean-slate reconciliation).
+ *
+ * The brand-scoped Brain is RENDERED to a brand (`BrandRelationshipMap` draws this
+ * graph), and the shared channel layer is added to BOTH scopes — so the copy the
+ * brand graph carries must name no retail channel. This is a REAL defect the static
+ * wording gate caught: the shared node's LABEL read "Retail channel (Amazon UK
+ * Vendor)". The static gate guards the SOURCE files; this assertion guards the
+ * PROJECTED graph, so the defect cannot return by another route (a label moved into
+ * a seed, a computed subtitle, an edge note).
+ *
+ * SCOPE OF THE ASSERTION — RENDERED COPY ONLY (labels, subtitles, edge labels and
+ * edge notes). Property VALUES are deliberately NOT asserted: several are
+ * PROVENANCE (an evidence URL such as an ASIN product page, which the repository's
+ * rules require to stay accurate and verifiable for exactly the reason
+ * `src/data/brandProspectSeed.ts` is exempt from the static wording lint). Stripping
+ * provenance to satisfy a wording rule would destroy evidence, which is a worse
+ * failure than the rule it would be appeasing. A CLAIM is copy; a source URL is
+ * data, and the two are treated differently by design.
+ *
+ * The Mercenta scope is deliberately NOT asserted either: admin-only labels are
+ * exempt by rule and MAY name the channel.
+ */
+const CHANNEL_TERMS = /\b(amazon|vendor central|seller central)\b/i;
+function brandRenderedCopy(): string[] {
+  const out: string[] = [];
+  for (const n of brand.nodes) {
+    out.push(n.label);
+    if (n.subtitle) out.push(n.subtitle);
+  }
+  for (const e of brand.edges) {
+    if (e.label) out.push(e.label);
+    if (e.note) out.push(e.note);
+  }
+  return out;
+}
+const brandLeaks = brandRenderedCopy().filter((s) => CHANNEL_TERMS.test(s));
+check(
+  'the BRAND-scoped Brain names no retail channel in any rendered copy string',
+  brandLeaks.length === 0,
+  `leaks=${brandLeaks.slice(0, 3).join(' | ')}`
+);
+// Negative control — the guard must be capable of failing if the defect returns.
+check(
+  'the channel-name guard actually detects the defect it exists to prevent',
+  CHANNEL_TERMS.test('Retail channel (Amazon UK Vendor)') && !CHANNEL_TERMS.test('Retail channel')
+);
 
 /* 2b. The projection is EXACT — a node exists for every canonical record, and
    the count matches. This is what stops the Brain from showing a curated subset
