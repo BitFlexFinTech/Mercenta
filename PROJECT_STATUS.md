@@ -68,7 +68,7 @@
 
 ### 7. CURRENT CHECKPOINT
 
-- **Branch:** `redesign/foundation`. **Checkpoint:** the clean-slate reconciliation commit (see heading 8 for the hash recorded at commit time). **`git status --porcelain`: EMPTY.**
+- **Branch:** `redesign/foundation`. **Checkpoint commit:** **`bd60e704f51209e53c8a0a0095c95cb8ff1af866`** (`bd60e70`) — *chore(clean-slate): reconcile the repository into ONE clean canonical HEAD*. `git ls-files` = **724 tracked files**. **`git status --porcelain`: EMPTY** (verified after the commit, and re-verified after the project-state documents were updated).
 - **Project-state sources agree:** `requirements-registry.json` (441 rows) · this file · `HANDOFF.md` · `docs/SPRINT_*` and the dated increment records · this session report. No source exists only as an untracked file.
 
 ### 8. VERIFICATION STATUS (all executed in this session)
@@ -79,7 +79,7 @@
 | `npx eslint .` | **0 problems** (exit 0) — rules-of-hooks + exhaustive-deps are errors |
 | `npm run build` | **PASS** (vite, 3.63 s; the pre-existing `AdminShell` ~956 kB chunk warning remains) |
 | `npx playwright test` (FULL SUITE, 445 declarations) | **443 passed / 2 skipped / 0 failed, exit 0, 6.0 m** |
-| Validator sweep — all 91 `scripts/validate-*.mjs` | **89 PASS / 2 FAIL** (the 2 dirty-tree scope guards above) |
+| Validator sweep — all 91 `scripts/validate-*.mjs` | **91 PASS / 0 FAIL on the clean committed tree** (while the tree was dirty, 89 passed and the only 2 failures were the dirty-tree scope guards — `validate-e6` F5/F5b/F6 and `validate-e7`'s scope assertion — which pass once the change set is empty, exactly as designed) |
 | `node scripts/verify-registry.mjs` | 272 verified · 62 needs manual check · 185 issues · 17 reachability flags |
 | `requirements-registry.json` | valid JSON · 441 rows — built_and_tested 242 · built 126 · not_started 58 · deferred 6 · blocked 4 · in_progress 3 · regressed 2 |
 
