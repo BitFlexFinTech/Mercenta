@@ -234,7 +234,7 @@ export function SimulationControl() {
             Deterministic, simulation-only execution of the MERCENTA scenario engine. Never touches a live provider.
           </p>
         </div>
-        <Badge className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/20 uppercase tracking-wide">
+        <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 uppercase tracking-wide">
           Simulation only
         </Badge>
       </div>
@@ -262,7 +262,7 @@ export function SimulationControl() {
             <RotateCcw className="w-3.5 h-3.5 mr-1" /> Reset shared simulation state
           </Button>
         </div>
-        <p className="text-[11px] text-zinc-600 mt-2 leading-relaxed">
+        <p className="text-ds-label text-zinc-600 mt-2 leading-relaxed">
           Same seed ⇒ same record IDs (runId, PO, shipment, audit rows) — deterministic and reproducible.
           Reset is <span className="text-zinc-400">partial</span>: clears the Mock SP-API submission state and event feed only;
           it does not remove scenario-created PO/shipment/deduction/ticket records from the demo store.
@@ -281,10 +281,10 @@ export function SimulationControl() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="text-sm font-semibold text-white">{meta.name}</h4>
-                    <Badge className="text-[10px] uppercase tracking-wide bg-zinc-500/15 text-zinc-400 border-zinc-500/20">{id}</Badge>
+                    <Badge className="text-ds-micro uppercase tracking-wide bg-zinc-500/15 text-zinc-400 border-zinc-500/20">{id}</Badge>
                   </div>
                   <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{meta.purpose}</p>
-                  <p className="text-[11px] text-zinc-600 mt-1 leading-relaxed max-w-2xl">
+                  <p className="text-ds-label text-zinc-600 mt-1 leading-relaxed max-w-2xl">
                     <span className="text-zinc-400">Simulates:</span> {meta.simulates}
                   </p>
                 </div>
@@ -300,11 +300,11 @@ export function SimulationControl() {
               {/* Safety status */}
               <div className="mt-3 flex items-center gap-2 flex-wrap">
                 {safe ? (
-                  <Badge className="text-[10px] bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+                  <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
                     <ShieldCheck className="w-3 h-3 mr-1" /> Simulation-safe
                   </Badge>
                 ) : (
-                  <Badge className="text-[10px] bg-red-500/15 text-red-300 border-red-500/20">
+                  <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">
                     <AlertTriangle className="w-3 h-3 mr-1" /> Refused — provider not simulation-safe: {unsafeProviders.join(', ')}
                   </Badge>
                 )}
@@ -335,25 +335,25 @@ function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitt
     <div className="mt-3 bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 space-y-2">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Badge className={cn('text-[10px] border', statusCls)}>
+          <Badge className={cn('text-ds-micro border', statusCls)}>
             {result.status === 'ok' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <AlertTriangle className="w-3 h-3 mr-1" />}
             {statusLabel}
           </Badge>
-          <span className="text-[11px] text-zinc-500">runId: <span className="font-mono text-zinc-400">{result.runId}</span></span>
+          <span className="text-ds-label text-zinc-500">runId: <span className="font-mono text-zinc-400">{result.runId}</span></span>
         </div>
-        <div className="text-[11px] text-zinc-500">
+        <div className="text-ds-label text-zinc-500">
           {result.auditIds.length} audit row{result.auditIds.length === 1 ? '' : 's'} · {result.eventsEmitted} event{result.eventsEmitted === 1 ? '' : 's'} · {result.steps.length} step{result.steps.length === 1 ? '' : 's'}
         </div>
       </div>
 
       {result.safetyReason && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-md px-2.5 py-1.5 text-[11px] text-red-300">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-md px-2.5 py-1.5 text-ds-label text-red-300">
           {result.safetyReason}
         </div>
       )}
 
       {result.error && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-md px-2.5 py-1.5 text-[11px] text-amber-200">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-md px-2.5 py-1.5 text-ds-label text-amber-200">
           {result.error}
         </div>
       )}
@@ -362,10 +362,10 @@ function ScenarioResultView({ result }: { result: ScenarioResult & { eventsEmitt
 
       {result.steps.length > 0 && (
         <div className="space-y-1">
-          <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wide">State transitions</div>
+          <div className="text-ds-micro font-semibold text-zinc-500 uppercase tracking-wide">State transitions</div>
           <ol className="space-y-1">
             {result.steps.map((s) => (
-              <li key={s.step} className="flex items-center gap-2 text-[11px]">
+              <li key={s.step} className="flex items-center gap-2 text-ds-label">
                 <span className="font-mono text-zinc-600 w-5 flex-shrink-0">{s.step}.</span>
                 <span className="text-zinc-300">{s.action}</span>
                 {s.from && s.to && (
@@ -397,7 +397,7 @@ function CreatedEntities({ result }: { result: ScenarioResult }) {
   return (
     <div className="flex flex-wrap gap-x-5 gap-y-1">
       {items.map((it) => (
-        <div key={it.label} className="text-[11px]">
+        <div key={it.label} className="text-ds-label">
           <span className="text-zinc-500">{it.label}: </span>
           <span className="font-mono text-zinc-300">{it.value}</span>
         </div>

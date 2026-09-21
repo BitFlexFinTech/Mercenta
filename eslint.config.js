@@ -70,7 +70,6 @@ export default tseslint.config(
       'src/components/admin/BankFinancingSection.tsx',
       'src/lib/helpdesk/ticketStore.ts',
       'src/lib/amazon/productImageValidator.ts',
-      'src/lib/validation/schemas.ts',
       'src/lib/shipping/shippingCalculator.ts',
       'src/lib/warehouse/returnsTracking.ts',
       'src/lib/monitoring/sentry.ts',

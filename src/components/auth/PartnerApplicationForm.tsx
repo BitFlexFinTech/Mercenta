@@ -157,7 +157,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
               </div>
             )}
             {selectedCountry && (
-              <p className="text-[10px] text-emerald-400 mt-1">Selected: {selectedCountry.name} ({selectedCountry.code})</p>
+              <p className="text-ds-micro text-emerald-400 mt-1">Selected: {selectedCountry.name} ({selectedCountry.code})</p>
             )}
           </div>
           {selectedCountry && (
@@ -171,7 +171,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
                   className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40"
                   placeholder="Your phone number after the country code" />
               </div>
-              <p className="text-[10px] text-zinc-600 mt-1">Your country code is auto-filled. Enter the rest of your number.</p>
+              <p className="text-ds-micro text-zinc-600 mt-1">Your country code is auto-filled. Enter the rest of your number.</p>
             </div>
           )}
           <div>
@@ -229,7 +229,7 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
               maxLength={200} rows={4}
               className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brass-500/40 resize-none"
               placeholder="Describe your product line, target customers, and why you're looking to enter the UK market..." />
-            <p className="text-[10px] text-zinc-600 text-right mt-1">{description.length}/200</p>
+            <p className="text-ds-micro text-zinc-600 text-right mt-1">{description.length}/200</p>
           </div>
           <button type="submit" disabled={submitting}
             className="w-full flex items-center justify-center gap-2 bg-brass-500 hover:bg-brass-600 text-white font-medium px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">

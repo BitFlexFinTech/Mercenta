@@ -36,7 +36,7 @@ import {
 import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
-const MONO = 'font-mono text-[11px]';
+const MONO = 'font-mono text-ds-label';
 
 export function CommerceSimulationPanel() {
   const { session } = useApp();
@@ -115,20 +115,20 @@ export function CommerceSimulationPanel() {
         <div>
           <h3 className="text-sm font-semibold text-white">
             Operational commerce simulation{' '}
-            <Badge className="ml-1 text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+            <Badge className="ml-1 text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
           </h3>
-          <p className="text-[11px] text-zinc-500 mt-0.5">
+          <p className="text-ds-label text-zinc-500 mt-0.5">
             Simulated purchase orders, fulfilment, receiving, invoicing, payments and
             exceptions. No live provider is contacted and no email is sent.
           </p>
         </div>
-        <Badge className="text-[9px] bg-white/[0.05] text-zinc-400 border-white/[0.08]">
+        <Badge className="text-ds-micro bg-white/[0.05] text-zinc-400 border-white/[0.08]">
           persistence: {persistence.state} · durable {String(persistence.durable)}
         </Badge>
       </div>
 
       <div className="flex flex-wrap items-end gap-2">
-        <label className="text-[11px] text-zinc-500">
+        <label className="text-ds-label text-zinc-500">
           Product
           <select
             value={effectiveSku}
@@ -143,7 +143,7 @@ export function CommerceSimulationPanel() {
             ))}
           </select>
         </label>
-        <label className="text-[11px] text-zinc-500">
+        <label className="text-ds-label text-zinc-500">
           Units
           <input
             type="number"
@@ -271,7 +271,7 @@ export function CommerceSimulationPanel() {
       {eligibility && (
         <div
           className={cn(
-            'rounded-lg p-3 text-[11px] border',
+            'rounded-lg p-3 text-ds-label border',
             eligibility.eligible
               ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
               : 'bg-amber-500/10 border-amber-500/20 text-amber-200'
@@ -292,12 +292,12 @@ export function CommerceSimulationPanel() {
       )}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-[11px] text-red-200">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-ds-label text-red-200">
           {error}
         </div>
       )}
       {notice && (
-        <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-[11px] text-sky-200">
+        <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-ds-label text-sky-200">
           {notice}
         </div>
       )}
@@ -306,13 +306,13 @@ export function CommerceSimulationPanel() {
         <div className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={cn(MONO, 'text-brass')}>{po.poNumber}</span>
-            <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">{po.status}</Badge>
-            <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
-            <span className="text-[10px] text-zinc-500">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">{po.status}</Badge>
+            <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+            <span className="text-ds-micro text-zinc-500">
               £{po.poValue.toFixed(2)} · {po.lineItems.length} line(s)
             </span>
           </div>
-          <div className="text-[10px] text-zinc-500">
+          <div className="text-ds-micro text-zinc-500">
             {po.lineItems
               .map(
                 (l) =>
@@ -326,17 +326,17 @@ export function CommerceSimulationPanel() {
       )}
 
       {commerceInvoice && (
-        <div className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 text-[11px] space-y-1">
+        <div className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 text-ds-label space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={cn(MONO, 'text-brass')}>{commerceInvoice.number}</span>
-            <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
               {commerceInvoice.status}
             </Badge>
-            <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+            <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
             <span className="text-zinc-400">£{commerceInvoice.subtotalGbp.toFixed(2)}</span>
           </div>
           {commerceInvoice.lines.map((l) => (
-            <div key={l.description} className="text-[10px] text-zinc-500">
+            <div key={l.description} className="text-ds-micro text-zinc-500">
               {l.description} — £{l.amountGbp.toFixed(2)}
             </div>
           ))}
@@ -344,7 +344,7 @@ export function CommerceSimulationPanel() {
             payments.value
               .filter((p) => p.invoiceId === commerceInvoice.id)
               .map((p) => (
-                <div key={p.id} className="text-[10px] text-emerald-300">
+                <div key={p.id} className="text-ds-micro text-emerald-300">
                   (sim) payment {p.id} — £{p.amountGbp.toFixed(2)} {p.status} via {p.method}
                 </div>
               ))}
@@ -353,22 +353,22 @@ export function CommerceSimulationPanel() {
 
       {exceptions?.ok && exceptions.value.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
             Exceptions (chargebacks)
           </p>
           {exceptions.value.slice(0, 6).map((d) => (
-            <div key={d.id} className="flex flex-wrap items-center gap-2 text-[11px]">
+            <div key={d.id} className="flex flex-wrap items-center gap-2 text-ds-label">
               <span className={cn(MONO, 'text-zinc-400')}>{d.id}</span>
-              <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">{d.type}</Badge>
-              <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">{d.status}</Badge>
+              <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">{d.type}</Badge>
+              <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">{d.status}</Badge>
               <span className="text-zinc-500">
                 £{d.amountGbp.toFixed(2)} · {d.purchaseOrderId}
               </span>
-              {d.simulated && <span className="text-[9px] text-brass-400">(sim)</span>}
+              {d.simulated && <span className="text-ds-micro text-brass-400">(sim)</span>}
               {!d.dispute && (
                 <Button
                   variant="ghost"
-                  className="text-[10px] px-2 py-0.5"
+                  className="text-ds-micro px-2 py-0.5"
                   data-state="commerce-open-dispute"
                   disabled={busy}
                   onClick={() =>
@@ -397,7 +397,7 @@ export function CommerceSimulationPanel() {
                  * truthfully instead of offering a self-award control.
                  */
                 <span
-                  className="text-[10px] text-amber-300/90"
+                  className="text-ds-micro text-amber-300/90"
                   data-state="commerce-dispute-awaiting-operations"
                 >
                   Awaiting Mercenta operations decision
@@ -410,16 +410,16 @@ export function CommerceSimulationPanel() {
 
       {activities?.ok && activities.value.length > 0 && (
         <div className="space-y-1">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
             Operational activity trail
           </p>
           <div className="max-h-56 overflow-auto divide-y divide-white/[0.04]">
             {[...activities.value].reverse().map((a) => (
-              <div key={a.id} className="py-1 text-[11px] text-zinc-400">
+              <div key={a.id} className="py-1 text-ds-label text-zinc-400">
                 <span className="text-zinc-500">{a.at.slice(11, 19)}</span>{' '}
                 <span className={cn(MONO, 'text-zinc-300')}>{a.type}</span>{' '}
                 <span className="text-zinc-500">[{a.status}]</span> {a.detail}
-                {a.simulated && <span className="text-[9px] text-brass-400"> (sim)</span>}
+                {a.simulated && <span className="text-ds-micro text-brass-400"> (sim)</span>}
               </div>
             ))}
           </div>

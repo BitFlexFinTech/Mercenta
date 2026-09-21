@@ -42,11 +42,11 @@ async function handleRun() {
         <div className="flex items-center gap-2">
           <Factory className="w-4 h-4 text-brass-400" />
           <span className="text-sm font-semibold text-white">Manufacturer Sourcing</span>
-          <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
+          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
         </div>
         <div className="flex items-center gap-2">
           {report && (
-            <Button className="text-[10px]" onClick={handleDownload}>
+            <Button className="text-ds-micro" onClick={handleDownload}>
               <Download className="w-3 h-3 mr-1" /> Download Report
             </Button>
           )}
@@ -56,7 +56,7 @@ async function handleRun() {
         </div>
       </div>
 
-      <p className="text-[11px] text-zinc-500 mb-3">
+      <p className="text-ds-label text-zinc-500 mb-3">
         Searches Alibaba public verified suppliers across all approved categories.
         Shows Trade Assurance badges, verified-supplier status, and UK export capability.
         Uses only public, non-authenticated page data.
@@ -81,19 +81,19 @@ async function handleRun() {
 <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
             <div className="bg-ink-900 rounded-lg p-2">
-              <p className="text-[9px] text-zinc-500">Scanned</p>
+              <p className="text-ds-micro text-zinc-500">Scanned</p>
               <p className="text-sm font-semibold text-white">{report.scannedCount}</p>
             </div>
             <div className="bg-ink-900 rounded-lg p-2">
-              <p className="text-[9px] text-zinc-500">Qualified</p>
+              <p className="text-ds-micro text-zinc-500">Qualified</p>
               <p className="text-sm font-semibold text-white">{report.suppliers.length}</p>
             </div>
             <div className="bg-ink-900 rounded-lg p-2">
-              <p className="text-[9px] text-zinc-500">Top Suppliers</p>
+              <p className="text-ds-micro text-zinc-500">Top Suppliers</p>
               <p className="text-sm font-semibold text-brass-400">{report.topSuppliers.length}</p>
             </div>
             <div className="bg-ink-900 rounded-lg p-2">
-              <p className="text-[9px] text-zinc-500">Source</p>
+              <p className="text-ds-micro text-zinc-500">Source</p>
               <p className="text-sm font-semibold text-white">{report.sourceLabel}</p>
             </div>
           </div>
@@ -116,26 +116,26 @@ async function handleRun() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-medium text-white truncate">{s.companyName}</span>
-                        <Badge className="text-[8px] bg-zinc-500/15 text-zinc-400">{s.country}</Badge>
-                        {s.tradeAssurance && <Badge className="text-[8px] bg-emerald-500/15 text-emerald-300">Trade Assurance</Badge>}
-                        {s.verifiedSupplier && <Badge className="text-[8px] bg-blue-500/15 text-blue-300">Verified</Badge>}
+                        <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400">{s.country}</Badge>
+                        {s.tradeAssurance && <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Trade Assurance</Badge>}
+                        {s.verifiedSupplier && <Badge className="text-ds-micro bg-blue-500/15 text-blue-300">Verified</Badge>}
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] text-zinc-500 mt-0.5">
+                      <div className="flex items-center gap-2 text-ds-micro text-zinc-500 mt-0.5">
                         <span>{s.category}</span>
                         <span>{s.yearsInBusiness}yrs</span>
                         <span>{s.productCount} products</span>
-                        {s.exportsToUk && <Badge className="text-[8px] bg-emerald-500/15 text-emerald-300">Exports to UK</Badge>}
+                        {s.exportsToUk && <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Exports to UK</Badge>}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <div className="text-sm font-bold font-mono text-emerald-400">{score}</div>
-                      <p className="text-[8px] text-zinc-600">/100</p>
+                      <p className="text-ds-micro text-zinc-600">/100</p>
                     </div>
                   </div>
 
                   {isSelected && (
                     <div className="mt-2 pt-2 border-t border-white/[0.06] space-y-1.5">
-                      <div className="grid grid-cols-2 gap-2 text-[10px]">
+                      <div className="grid grid-cols-2 gap-2 text-ds-micro">
                         <div className="bg-ink-800 rounded p-1.5">
                           <span className="text-zinc-500">Capacity: </span>
                           <span className="text-zinc-300">{s.capacity ?? 'N/A'}</span>
@@ -153,15 +153,15 @@ async function handleRun() {
                           <span className="text-zinc-300">{s.rating ?? 'N/A'}/5</span>
                         </div>
                       </div>
-                      <div className="text-[10px] text-zinc-500">
+                      <div className="text-ds-micro text-zinc-500">
                         <span className="text-zinc-400">Specializations: </span>
                         {s.specializations.join(', ')}
                       </div>
-                      <div className="text-[10px] text-zinc-500">
+                      <div className="text-ds-micro text-zinc-500">
                         <span className="text-zinc-400">Price range: </span>
                         {s.priceRange ?? 'N/A'}
                       </div>
-                      <div className="text-[9px] text-zinc-600 truncate">
+                      <div className="text-ds-micro text-zinc-600 truncate">
                         <span className="text-zinc-500">Source: </span>
                         {s.sourceUrl}
                       </div>

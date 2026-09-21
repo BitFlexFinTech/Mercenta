@@ -83,7 +83,7 @@ export function LiveChatWidget() {
               <div className="w-2 h-2 rounded-full bg-emerald-500" />
               <div>
                 <p className="text-xs font-medium text-white">Mercenta Support</p>
-                <p className="text-[9px] text-zinc-500">We typically reply within 2 hours</p>
+                <p className="text-ds-micro text-zinc-500">We typically reply within 2 hours</p>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
@@ -97,7 +97,7 @@ export function LiveChatWidget() {
               <div className="text-center py-8">
                 <Bot className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
                 <p className="text-xs text-zinc-500">Hi! How can we help you today?</p>
-                <p className="text-[10px] text-zinc-600 mt-1">
+                <p className="text-ds-micro text-zinc-600 mt-1">
                   Ask about your POs, shipments, compliance status, or anything else.
                 </p>
               </div>
@@ -108,14 +108,14 @@ export function LiveChatWidget() {
                   m.direction === 'outbound' ? 'bg-brass-500/15 text-zinc-200' : 'bg-brass-500 text-white'
                 )}>
                   <p className="whitespace-pre-wrap">{m.body}</p>
-                  <p className="mt-1 text-[9px] text-zinc-500 font-mono">
+                  <p className="mt-1 text-ds-micro text-zinc-500 font-mono">
                     {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
             ))}
             {sentCount > 0 && threadMessages.length === 0 && (
-              <p className="text-[10px] text-zinc-600 text-center py-4">Message sent — awaiting reply.</p>
+              <p className="text-ds-micro text-zinc-600 text-center py-4">Message sent — awaiting reply.</p>
             )}
             <div ref={bottomRef} />
           </div>

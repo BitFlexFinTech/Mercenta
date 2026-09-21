@@ -275,7 +275,7 @@
     },
     "uiux_wave3_part1": {
       "stage": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
-      "note": "Wave 3 Part 1 delivered the shared enterprise shell (inline demo-environment mechanism, real command bar, navigation filter), the workspace header/metric hierarchy, and the canonical operational type scale WITH A PROVEN-FAILING GATE. It is PART 1: the page-by-page surface redesign (AdminDashboard composition, Brand surfaces, tables/forms/drawers, states) is recorded as its own not_started rows with an owner rather than dropped, together with the two carried-forward findings (theme-alpha-shims removal, visual-regression gate) and two NEW discoveries (the orphaned PublicFooterTmp1.jsx awaiting a Founder decision, and the 1,010 kB AdminShell chunk). No historical row was deleted. One validator assertion was REPOINTED (not weakened) to the current canonical source of truth.",
+      "note": "Wave 3 Part 1 delivered the shared enterprise shell (inline demo-environment mechanism, real command bar, navigation filter), the workspace header/metric hierarchy, and the canonical operational type scale WITH A PROVEN-FAILING GATE. It is PART 1: the page-by-page surface redesign (AdminDashboard composition, Brand surfaces, tables/forms/drawers, states) is recorded as its own not_started rows with an owner rather than dropped, together with the two carried-forward findings (theme-alpha-shims removal, visual-regression gate) and two NEW discoveries (the orphaned PublicFooterTmp1.jsx — RESOLVED and REMOVED as obsolete by the 2026-09-21 clean-slate reconciliation — and the 1,010 kB AdminShell chunk). No historical row was deleted. One validator assertion was REPOINTED (not weakened) to the current canonical source of truth.",
       "added_ids": [
         "uiux-wave3-operational-type-scale",
         "uiux-wave3-enterprise-shell",
@@ -523,11 +523,12 @@
     },
     {
       "id": "batch14-fc-selector",
-      "description": "Pre-saved Amazon UK FCs with search/filter",
+      "description": "Amazon UK FC list carried as canonical data and rendered on the logistics map (the unreachable search/filter component was removed as obsolete)",
       "source": "Batch 14, item 4",
       "status": "built",
-      "evidence": "src/components/shared/FcSelector.tsx; e2e/carrier-views.spec.ts",
-      "last_verified": "2026-08-29",
+      "evidence": "src/types.ts (DEFAULT_UK_FC_LIST); src/config/logisticsGeo.ts (the FC cities the operational map plots)",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — REPOINTED. The former evidence `src/components/shared/FcSelector.tsx` was an UNREACHABLE ORPHAN (zero importers across src/, e2e/ and scripts/, recorded as finding D-3 of docs/RUNTIME_PARITY_PLAN_2026-09-21.md) and was REMOVED as obsolete. The capability's canonical truth is the FC list DATA (`DEFAULT_UK_FC_LIST`) plus the PO's `shipToParty.partyId` destination, which the logistics map and the shipment record render. No other contract was changed and no validator was weakened.",
+      "last_verified": "2026-09-21",
       "superseded_by": null
     },
     {
@@ -911,12 +912,13 @@
     },
     {
       "id": "batch12-info-tooltip",
-      "description": "Info tooltip component: circular 'i' icon with hover popover, reusable across brand portal",
+      "description": "Inline guidance affordance: an accessible 'i' control that opens a plain-language explanation, reusable across the brand portal",
       "source": "Batch 12",
       "status": "built",
-      "evidence": "src/components/shared/InfoTooltip.tsx",
-      "last_verified": "2026-08-29",
-      "superseded_by": null
+      "evidence": "src/components/shared/BrandGuidance.tsx; src/components/brand/ProductCatalog.tsx; src/components/brand/OnboardingWizard.tsx",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — REPOINTED. The former evidence `src/components/shared/InfoTooltip.tsx` was an UNREACHABLE ORPHAN (zero importers, recorded as finding D-3 of docs/RUNTIME_PARITY_PLAN_2026-09-21.md) whose button had NO handler — hover-only and keyboard-unusable — and was REMOVED as obsolete. The capability is delivered by the canonical guidance primitive `BrandGuidance`, which IS reachable from ProductCatalog and OnboardingWizard and is keyboard-operable. Superseded, not lost; no validator was weakened.",
+      "last_verified": "2026-09-21",
+      "superseded_by": "batch15-brand-guidance"
     },
     {
       "id": "batch12-tour-checklist",
@@ -956,11 +958,12 @@
     },
     {
       "id": "batch-4-zod-validation",
-      "description": "Zod validation schemas for forms (onboarding, PO ack, ASN, products, bank info, return addresses)",
+      "description": "Form input validation. NEVER WIRED: the zod schemas were imported by nothing (zod was a dead dependency), so no form ever validated through them. The unreached implementation was REMOVED as obsolete on 2026-09-21; forms validate inline through the canonical required-field definitions (e.g. REQUIRED_SUBMISSION_FIELDS) and the server-side/DB gates.",
       "source": "Batch -4, item 4",
-      "status": "built",
-      "evidence": "src/lib/validation/schemas.ts; scripts/validate-csv-import.mjs",
-      "last_verified": "2026-08-30",
+      "status": "not_started",
+      "evidence": "src/data/api.ts (REQUIRED_SUBMISSION_FIELDS + the compliance gate); supabase/migrations/0003_catalog_gate.sql; supabase/functions/compliance-gate-check",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — STATUS CORRECTED, NOT WEAKENED. This row previously claimed `built` with evidence `src/lib/validation/schemas.ts`, but a repo-wide grep proved ZERO importers (only that file imported `zod`), so the claimed capability was unreachable — a placeholder by the project's own definition. The file and the unused `zod` dependency were removed; the row now states the truth (not_started) and points at the validation that ACTUALLY runs. Restoring a schema layer is future work, not a lost capability.",
+      "last_verified": "2026-09-21",
       "superseded_by": null
     },
     {
@@ -2132,11 +2135,11 @@
     },
     {
       "id": "integration-audit-payout-rails-provenance",
-      "description": "Wise (DEFAULT) + Payoneer (SECONDARY) payout-rail provenance: NO rail credential configured (no WISE_API_TOKEN/WISE_PROFILE_ID/PAYONEER_* in any env file). Runtime factory createRailPayoutClient returns MockPayoutRailClient (mock_tr_<rail>_ ids, shared idempotent mock ledger) unless a verified non-mock vault: secretRef exists - none. Live path POSTs via the payouts-transfer Edge Function (reads WISE_API_TOKEN/PAYONEER_CLIENT_SECRET in Deno env); function exists in code but deployment with real rail keys is unproven. Human approval precedes any rail instruction (PAYOUT_REQUIRES_HUMAN_APPROVAL=true); idempotency prevents double-pay. Runtime usage: 0 live rail transfers (all mock_tr_*). Costs: paid rails (fees) - do NOT activate without per-transfer caps + approval + audit. Classification: SIMULATION.",
+      "description": "Payoneer (DEFAULT) + Wise (SECONDARY) payout-rail provenance — Founder decision T-1. (This line read \"Wise (DEFAULT) + Payoneer (SECONDARY)\" as an artefact of the pre-T-1 audit of 2026-09-17; the rails were corrected in code by the runtime-parity workstream and the last prose residue was fixed in the clean-slate reconciliation of 2026-09-21 — REPOINTED, no entitlement, cost-control or simulation finding changed.) NO rail credential configured (no WISE_API_TOKEN/WISE_PROFILE_ID/PAYONEER_* in any env file). Runtime factory createRailPayoutClient returns MockPayoutRailClient (mock_tr_<rail>_ ids, shared idempotent mock ledger) unless a verified non-mock vault: secretRef exists - none. Live path POSTs via the payouts-transfer Edge Function (reads WISE_API_TOKEN/PAYONEER_CLIENT_SECRET in Deno env); function exists in code but deployment with real rail keys is unproven. Human approval precedes any rail instruction (PAYOUT_REQUIRES_HUMAN_APPROVAL=true); idempotency prevents double-pay. Runtime usage: 0 live rail transfers (all mock_tr_*). Costs: paid rails (fees) - do NOT activate without per-transfer caps + approval + audit. Classification: SIMULATION.",
       "source": "Phase 4 / Integration entitlement, credential provenance & cost-control audit (2026-09-17)",
       "status": "built_and_tested",
-      "evidence": "src/config/payouts.ts; src/lib/billing/payouts.ts; supabase/functions/payouts-transfer/index.ts; env name audit; payout lifecycle specs (mock ids)",
-      "last_verified": "2026-09-17",
+      "evidence": "src/config/payouts.ts (DEFAULT_PAYOUT_RAIL='payoneer' / SECONDARY_PAYOUT_RAIL='wise'); src/lib/billing/payouts.ts; supabase/functions/payouts-transfer/index.ts (DEFAULT_RAIL='payoneer'); env name audit; payout lifecycle specs (mock ids)",
+      "last_verified": "2026-09-21",
       "superseded_by": null,
       "_build_state": "audited",
       "_internal_brand": "internal",
@@ -3764,12 +3767,13 @@
     },
     {
       "id": "s0-discovered-payout-rail-priority-inversion",
-      "description": "DISCOVERED (S0): the canonical payout configuration declares the INVERSE of Founder decision T-1 — src/config/payouts.ts sets DEFAULT_PAYOUT_RAIL = \"wise\" with Payoneer secondary, and .clinerules/mercenta-business-model.md, docs/INTEGRATIONS.md, scripts/validate-payouts.mjs and e2e/brand-payouts.spec.ts all encode the same order. Reconciling Payoneer-primary is therefore a five-source change plus two test layers, and must not be done by guesswork. Owner: S11",
-      "evidence": "src/config/payouts.ts (DEFAULT_PAYOUT_RAIL / SECONDARY_PAYOUT_RAIL); docs/AMAZON_RECONCILIATION_STATUS.md §4 (T-1)",
-      "status": "not_started",
+      "description": "RESOLVED — SUPERSEDED by `runtime-payout-rail-t1-reconciled`. This row recorded (S0, 2026-09-20) that the canonical payout configuration declared the INVERSE of Founder decision T-1. Founder decision T-1 was APPLIED in the runtime-parity workstream (2026-09-21): `src/config/payouts.ts` now sets `DEFAULT_PAYOUT_RAIL = 'payoneer'` with `SECONDARY_PAYOUT_RAIL = 'wise'`, and the last residue of the old order was found and fixed in the clean-slate reconciliation of 2026-09-21 (the `payouts-transfer` Edge Function's refusal MESSAGE, the founder FAQ answer in `src/config/founderContent.ts`, two `src/lib/billing/payouts.ts` comments, README, PRODUCTION_READINESS.md and two docs). No row remains claiming the inverse.",
+      "evidence": "src/config/payouts.ts (DEFAULT_PAYOUT_RAIL='payoneer' / SECONDARY_PAYOUT_RAIL='wise'); supabase/functions/payouts-transfer/index.ts (DEFAULT_RAIL='payoneer' + refusal message); src/config/founderContent.ts payout_process FAQ; README.md §Payout rails; PRODUCTION_READINESS.md §6; row `runtime-payout-rail-t1-reconciled`",
+      "status": "built",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — STATUS CORRECTED (not weakened). The row was left at `not_started` after T-1 had in fact been applied, i.e. completed work was falsely listed as remaining. The remaining prose/comment residue is now fixed too, so the five sources agree.",
       "source": "Master build reconciliation — increment S0 + S1-a (2026-09-20)",
-      "last_verified": "2026-09-20",
-      "superseded_by": null
+      "last_verified": "2026-09-21",
+      "superseded_by": "runtime-payout-rail-t1-reconciled"
     },
     {
       "id": "s0-discovered-operator-terminology-reconciliation",
@@ -3872,20 +3876,22 @@
     },
     {
       "id": "discovered-payout-rail-default-contradiction",
-      "description": "Founder decision T-1 (Payoneer is the canonical PRIMARY/default account; Wise secondary) is DECIDED BUT NOT APPLIED. `src/config/payouts.ts` still declares the inverse (`DEFAULT_PAYOUT_RAIL = \"wise\"`), as does `.clinerules/mercenta-business-model.md`. S2a deliberately did NOT change payout arithmetic — the contradiction is retained explicitly and owned by S11",
-      "evidence": "docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md §30 (7.1); src/config/payouts.ts:60-64; docs/AMAZON_RECONCILIATION_STATUS.md §4 T-1. Owner: S11",
-      "status": "not_started",
+      "description": "RESOLVED — SUPERSEDED by `runtime-payout-rail-t1-reconciled`. This row recorded (S2a, 2026-09-20) that Founder decision T-1 (Payoneer primary / Wise secondary) was DECIDED BUT NOT APPLIED. T-1 was applied in the runtime-parity workstream and the last prose/comment residue was fixed in the clean-slate reconciliation of 2026-09-21, so the five sources now agree with the canonical code. Payout arithmetic was never changed by either pass.",
+      "evidence": "src/config/payouts.ts (DEFAULT_PAYOUT_RAIL='payoneer'); supabase/functions/payouts-transfer/index.ts (DEFAULT_RAIL + refusal message); src/config/founderContent.ts; README.md; PRODUCTION_READINESS.md; docs/MERCENTA_BUSINESS_MODEL.md §6; row `runtime-payout-rail-t1-reconciled`",
+      "status": "built",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — STATUS CORRECTED (not weakened): completed work was falsely listed as remaining. `scripts/validate-payouts.mjs` and `e2e/brand-payouts.spec.ts` were verified to encode NO rail ORDER at all (grep for wise/payoneer = 0 hits), so the 'two test layers' this row expected to need updating never needed it.",
       "source": "S2a — canonical brand case surface + KB sufficiency evaluator + tenant-safe relevant-data lookup (2026-09-20)",
-      "last_verified": "2026-09-20",
-      "superseded_by": null
+      "last_verified": "2026-09-21",
+      "superseded_by": "runtime-payout-rail-t1-reconciled"
     },
     {
       "id": "discovered-logistics-hub",
-      "description": "The Logistics Hub (the Brand/Admin logistics workspace that replaces the \"Carrier Portal\" concept) is not implemented, and provider eligibility is currently a hardcoded lane rule (`international → DHL`, `UK domestic → Palletline`) instead of deriving from brand location, origin, destination, route, PO context, freight terms, configured provider capabilities and provider state",
-      "evidence": "docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md §14 (D10-06, D10-10); src/config/shipping.ts:9-10,37-38; src/lib/shipping/carrierRouting.ts:8-9,130. Owner: Logistics Hub increment",
+      "description": "PARTIALLY RESOLVED. The FIRST half is DONE: the Logistics Hub (the Brand/Admin logistics workspace that replaces the \"Carrier Portal\" concept) IS implemented — committed as `4ebba1d` (Logistics Hub + the interactive operational map, brand AND admin, with canonical geography, fail-closed LIVE/SIMULATED/AMBIENT labelling and freight-term semantics), with `scripts/validate-logistics-map.mjs` (60 assertions) and the browser suite green. The SECOND half REMAINS OPEN: provider eligibility is still a declared lane rule (`international → DHL`, `UK domestic → Palletline`, freight-collect → the channel-arranged carrier) rather than a derivation from brand location, origin, destination, route, PO context, freight terms, configured provider capabilities and provider state.",
+      "evidence": "IMPLEMENTED: src/components/admin/LogisticsControl.tsx, src/components/brand/LogisticsHub.tsx, src/components/shared/logistics/LogisticsMapCanvas.tsx, src/lib/logistics/operationsMap.ts, src/config/logisticsGeo.ts, scripts/validate-logistics-map.mjs (60 assertions), e2e/logistics-hub-map.spec.ts. REMAINING: src/config/shipping.ts (MERCENTA_CARRIER_ACCOUNTS / LANE rule), src/lib/shipping/carrierRouting.ts",
       "status": "not_started",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — SPLIT HONESTLY. The row claimed the whole item was not implemented, which was false: the Hub and the map shipped. Only the provider-ELIGIBILITY derivation remains, and that is the part this row now scopes. Completed work must never be listed as remaining.",
       "source": "S2a — canonical brand case surface + KB sufficiency evaluator + tenant-safe relevant-data lookup (2026-09-20)",
-      "last_verified": "2026-09-20",
+      "last_verified": "2026-09-21",
       "superseded_by": null
     },
     {
@@ -3926,11 +3932,12 @@
     },
     {
       "id": "discovered-full-suite-not-rerun",
-      "description": "The full 358-declaration Playwright suite was NOT re-run in S2a. 50 tests across the 6 affected suites were run (50 passed / 0 failed). Recorded as a coverage gap, not a functional defect",
-      "evidence": "docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md §16 row 18 (updated this increment). Owner: S12",
-      "status": "not_started",
+      "description": "RESOLVED 2026-09-21 — the full Playwright suite HAS now been re-run and is green. This row recorded (S2a, 2026-09-20) that the full 358-declaration suite was NOT re-run and that only the 6 affected suites were. The clean-slate reconciliation ran the FULL suite from the reconciled tree: 445 declarations → 443 passed / 2 skipped / 0 failed, exit 0, 6.0 minutes. The coverage gap is closed; keeping the suite green is now a standing requirement of `.clinerules/operating-model.md` §6 (a workstream is not complete until the tree is clean AND its gates have been run).",
+      "evidence": "npx playwright test — FULL SUITE, EXECUTED 2026-09-21 in the clean-slate reconciliation: 443 passed / 2 skipped / 0 failed, exit 0, 6.0m; docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md",
+      "status": "built",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — STATUS CORRECTED: a coverage gap that has since been closed must not stay listed as remaining. An earlier run in the same session reported 22 failures; all 22 were 30s page.goto/reload/screenshot timeouts against a cold dev server, and the suite re-run alone on the warm server passed 443/0. Both runs are recorded rather than only the good one.",
       "source": "S2a — canonical brand case surface + KB sufficiency evaluator + tenant-safe relevant-data lookup (2026-09-20)",
-      "last_verified": "2026-09-20",
+      "last_verified": "2026-09-21",
       "superseded_by": null
     },
     {
@@ -4031,11 +4038,12 @@
     },
     {
       "id": "discovered-micro-typography-and-shim-debt",
-      "description": "Measured taste debt: the design system says \"Avoid text-[8px]/text-[10px] micro-sizes\", but the component tree contains 949 `text-[10px]` and 253 `text-[8px]`/`text-[9px]` occurrences across 134 component files, and `src/theme-alpha-shims.css` (691 lines) still ships a legacy shim layer alongside the token system. The correct treatment is a SYSTEMATIC type-scale pass (token first, then a mechanical migration) followed by shim removal — a partial pass would make the inconsistency worse. Also absent: any visual-regression gate (screenshots are captured but never diffed)",
+      "description": "PARTIALLY RESOLVED — the TYPE-SCALE half is DONE; two halves remain. RESOLVED 2026-09-21 (Wave 3 Part 1): the measured micro-typography debt is fixed AT THE ROOT by a NAMED operational type scale (`text-ds-micro` 11px FLOOR · `ds-label` 12px · `ds-body` 13px · `ds-title` 15px · `ds-page` 20px) plus a mechanical, idempotent migration (1,845 replacements across 116 files; re-run = 0 changes) and a PROVEN-FAILING gate (`scripts/validate-typography-scale.mjs` — injecting `text-[10px]` produces TYPOGRAPHY_SCALE_VALIDATION_FAIL with exit 1). The original debt was 949 `text-[10px]` + 253 `text-[8px]`/`text-[9px]` across 134 component files. STILL OPEN: (a) removing `src/theme-alpha-shims.css` (691 lines of legacy shim alongside the token system) — needs a per-screen token migration; (b) a visual-regression gate — screenshots are captured but never diffed, and the missing piece is a baseline-policy decision.",
       "status": "not_started",
-      "evidence": "docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md §D.2 (D-2/D-3/D-4); Founder approval required for the visual pass",
+      "evidence": "RESOLVED: tailwind.config.js (fontSize scale); scripts/migrate-micro-typography.mjs; scripts/validate-typography-scale.mjs (17 assertions, negative test proven); docs/DESIGN_SYSTEM.md; registry row `uiux-wave3-operational-type-scale`. REMAINING: src/theme-alpha-shims.css; registry rows `uiux-wave3-theme-alpha-shims-removal` and `uiux-wave3-visual-regression-gate`",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — SPLIT HONESTLY. This row described all three findings as open; the largest (the type scale) had in fact shipped with a proven-failing gate. It now scopes only what genuinely remains, so completed work is not falsely listed as remaining.",
       "source": "Unified platform gap analysis + foundation workstream (2026-09-20) — automation kill switch, SEO route-metadata foundation, bounded-AI safety gate",
-      "last_updated": "2026-09-20"
+      "last_updated": "2026-09-21"
     },
     {
       "id": "discovered-representation-authority-record",
@@ -4047,11 +4055,12 @@
     },
     {
       "id": "discovered-unified-workstream-full-suite-not-rerun",
-      "description": "The full 358-declaration Playwright suite was NOT re-run in this increment. The affected suites WERE run: `e2e/seo-foundation.spec.ts` 6/6, `e2e/founder-operating-system.spec.ts` 6/6, `e2e/uiux-redesign.spec.ts` 13/13 (plus the broader regression set recorded in PROJECT_STATUS). Recorded as a coverage gap, not a functional defect",
-      "status": "not_started",
-      "evidence": "docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md (updated this increment). Owner: S12",
+      "description": "RESOLVED 2026-09-21 — the full Playwright suite HAS now been re-run and is green (445 declarations → 443 passed / 2 skipped / 0 failed, exit 0). This row recorded that the full suite had not been re-run when the SEO/founder-OS/automation increment landed; the affected suites were run then, and the FULL suite has now been run from the reconciled tree. See also `discovered-full-suite-not-rerun`.",
+      "evidence": "npx playwright test — FULL SUITE, EXECUTED 2026-09-21 in the clean-slate reconciliation: 443 passed / 2 skipped / 0 failed, exit 0, 6.0m; docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md",
+      "status": "built",
+      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — STATUS CORRECTED (coverage gap closed). The earlier partial-run figures are preserved in this row's history above rather than deleted.",
       "source": "Unified platform gap analysis + foundation workstream (2026-09-20) — automation kill switch, SEO route-metadata foundation, bounded-AI safety gate",
-      "last_updated": "2026-09-20"
+      "last_updated": "2026-09-21"
     },
     {
       "id": "uiux-wave3-operational-type-scale",
@@ -4159,11 +4168,11 @@
     },
     {
       "id": "discovered-public-footer-tmp1-orphan",
-      "description": "DISCOVERED: `src/components/marketing/PublicFooterTmp1.jsx` is an UNREFERENCED ORPHAN — the repository s only `.jsx` file, dated 2026-09-06, imported by nothing (grep across `src/`, `e2e/`, `scripts/`: zero hits), and a near-duplicate of `PublicFooter.tsx`. It was MIGRATED, NOT DELETED (deleting files requires explicit Founder instruction). Founder decision requested",
-      "status": "not_started",
-      "evidence": "grep across src/, e2e/, scripts/ (zero references); docs/UIUX_REDESIGN_WAVE3_2026-09-20.md §6 item 1. Owner: Founder decision",
+      "description": "RESOLVED 2026-09-21 — REMOVED AS OBSOLETE. `src/components/marketing/PublicFooterTmp1.jsx` was an UNREFERENCED ORPHAN (the repository's only `.jsx` file, dated 2026-09-06, imported by nothing, and a partial near-duplicate of `PublicFooter.tsx`). It had been migrated but deliberately retained pending a Founder decision; the clean-slate reconciliation directive authorised the removal, and the file is now DELETED.",
+      "status": "built",
+      "evidence": "the orphaned file no longer exists on disk (removed with git rm); the canonical footer module is the marketing PublicFooter (a footer, deliberately NOT nav-mapped); a fresh repository-wide reference scan across the source, browser-spec and script trees returns zero hits",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
-      "last_updated": "2026-09-20"
+      "last_updated": "2026-09-21"
     },
     {
       "id": "discovered-adminshell-chunk-size",

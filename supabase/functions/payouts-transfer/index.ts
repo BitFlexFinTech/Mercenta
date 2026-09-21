@@ -122,7 +122,7 @@ Deno.serve(async (req: Request) => {
   if (NON_PAYOUT_RAILS.includes(requestedRail)) {
     return json(
       {
-        error: `"${requestedRail}" is not a payout rail. Mercenta pays brands via Wise (default) or Payoneer (secondary) — see the canonical business model §6.`,
+        error: `"${requestedRail}" is not a payout rail. Mercenta pays brands via Payoneer (default) or Wise (secondary) — see the canonical business model §6.`,
       },
       400
     );

@@ -86,14 +86,14 @@ export function OpportunityDiscoveryPanel() {
             <h2 className="text-sm font-semibold text-white flex items-center gap-2">
               <Compass className="w-4 h-4" /> Opportunity Discovery
             </h2>
-            <p className="text-[11px] text-zinc-500 mt-1">
+            <p className="text-ds-label text-zinc-500 mt-1">
               The second discovery layer over the same ASIN-level universe: UK brands,
               international brands, sports organisations, distributor channels and network routes.
               Ranked by estimated PO potential.{' '}
               <span className="text-zinc-600">{PO_POTENTIAL_FORMULA}</span>
             </p>
           </div>
-          <span className="text-[10px] text-amber-300/90 border border-amber-400/20 rounded px-2 py-1 whitespace-nowrap">
+          <span className="text-ds-micro text-amber-300/90 border border-amber-400/20 rounded px-2 py-1 whitespace-nowrap">
             {CLAIM_LABELS.estimate}
           </span>
         </div>
@@ -114,9 +114,9 @@ export function OpportunityDiscoveryPanel() {
                     : 'border-white/[0.06] bg-ink-850 hover:bg-white/[0.03]'
                 )}
               >
-                <p className="text-[10px] text-zinc-500">{OPPORTUNITY_VERTICALS[v].label}</p>
+                <p className="text-ds-micro text-zinc-500">{OPPORTUNITY_VERTICALS[v].label}</p>
                 <p className="text-sm font-bold text-white">{r.count}</p>
-                <p className="text-[10px] text-zinc-400 font-mono">
+                <p className="text-ds-micro text-zinc-400 font-mono">
                   PO {gbp(r.poPotentialGbp)} · Mercenta {gbp(r.mercentaRevenueGbp)}
                 </p>
               </button>
@@ -167,10 +167,10 @@ export function OpportunityDiscoveryPanel() {
               <span className="px-2 py-1 font-medium text-white flex-1 min-w-0 truncate">
                 {r.brand}
               </span>
-              <span className="px-2 py-1 text-zinc-400 text-[10px] flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
                 {OPPORTUNITY_VERTICALS[r.vertical].label}
               </span>
-              <span className="px-2 py-1 text-zinc-400 text-[10px] flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
                 {r.category}
               </span>
               <span className="px-2 py-1 text-zinc-300 flex-1 min-w-0 truncate">{r.asinCount}</span>
@@ -183,10 +183,10 @@ export function OpportunityDiscoveryPanel() {
               <span className="px-2 py-1 text-zinc-400 flex-1 min-w-0 truncate">
                 {r.timeToRevenueWeeks}
               </span>
-              <span className="px-2 py-1 text-zinc-400 text-[9px] flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
                 {AMAZON_PRESENCE_LABELS[r.amazonPresence]}
               </span>
-              <span className="px-2 py-1 text-zinc-400 text-[9px] flex-1 min-w-0 truncate">
+              <span className="px-2 py-1 text-zinc-400 text-ds-micro flex-1 min-w-0 truncate">
                 {r.recommendedCta}
               </span>
             </div>
@@ -211,9 +211,9 @@ export function OpportunityDiscoveryPanel() {
               >
                 <div className="min-w-0 flex-1">
                   <span className="text-xs font-medium text-zinc-300">{r.brand}</span>
-                  <p className="text-[10px] text-amber-300/80 font-mono truncate">{r.eligibility.reason}</p>
+                  <p className="text-ds-micro text-amber-300/80 font-mono truncate">{r.eligibility.reason}</p>
                 </div>
-                <Button variant="tertiary" className="text-[10px] px-2 py-1" onClick={() => setSelected(r.id)}>
+                <Button variant="tertiary" className="text-ds-micro px-2 py-1" onClick={() => setSelected(r.id)}>
                   Details
                 </Button>
               </div>
@@ -231,27 +231,27 @@ export function OpportunityDiscoveryPanel() {
         <h3 className="text-xs font-semibold text-white flex items-center gap-2">
           <Trophy className="w-3.5 h-3.5" /> Sports / Team / Club opportunities
         </h3>
-        <p className="text-[10px] text-amber-300/90 mt-1">{SEEDED_OPPORTUNITY_DISCLAIMER}</p>
+        <p className="text-ds-micro text-amber-300/90 mt-1">{SEEDED_OPPORTUNITY_DISCLAIMER}</p>
         <div className="mt-2 space-y-2">
           {sports.map((s) => (
             <div
               key={s.id}
-              className="rounded-lg border border-white/[0.08] p-2.5 text-[11px] cursor-pointer hover:bg-white/[0.03]"
+              className="rounded-lg border border-white/[0.08] p-2.5 text-ds-label cursor-pointer hover:bg-white/[0.03]"
               onClick={() => setSelected(s.id)}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <span className="text-xs font-medium text-white">{s.brand}</span>
-                  <span className="ml-2 text-[10px] text-zinc-500">{s.category}</span>
+                  <span className="ml-2 text-ds-micro text-zinc-500">{s.category}</span>
                 </div>
-                <Badge className="text-[9px] bg-amber-500/15 text-amber-300">
+                <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">
                   {CLAIM_LABELS[s.claim]}
                 </Badge>
               </div>
               <p className="text-zinc-400 mt-1">{s.productSummary}</p>
-              <p className="text-[10px] text-zinc-500 mt-1">{s.sellerStatusEvidence}</p>
-              <p className="text-[10px] text-zinc-500 mt-1">{s.distributionOpportunity}</p>
-              <p className="text-[10px] text-emerald-300/90 mt-1">Next: {s.recommendedCta}</p>
+              <p className="text-ds-micro text-zinc-500 mt-1">{s.sellerStatusEvidence}</p>
+              <p className="text-ds-micro text-zinc-500 mt-1">{s.distributionOpportunity}</p>
+              <p className="text-ds-micro text-emerald-300/90 mt-1">Next: {s.recommendedCta}</p>
             </div>
           ))}
         </div>
@@ -265,20 +265,20 @@ export function OpportunityDiscoveryPanel() {
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-xs font-semibold text-white">
               {current.brand}
-              <span className="ml-2 text-[10px] font-normal text-zinc-500">
+              <span className="ml-2 text-ds-micro font-normal text-zinc-500">
                 {OPPORTUNITY_VERTICALS[current.vertical].label}
               </span>
             </h3>
             <button
               type="button"
-              className="text-[10px] text-zinc-500 hover:text-zinc-300 flex items-center gap-1"
+              className="text-ds-micro text-zinc-500 hover:text-zinc-300 flex items-center gap-1"
               onClick={() => setSelected(null)}
             >
               <ChevronDown className="w-3 h-3" /> Close
             </button>
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-3 mt-2 text-[11px]">
+          <div className="grid gap-2 sm:grid-cols-3 mt-2 text-ds-label">
             <p className="text-zinc-400">
               Eligibility: <span className="text-zinc-200">{current.eligibility.reason}</span>
             </p>
@@ -317,10 +317,10 @@ export function OpportunityDiscoveryPanel() {
 
 {current.topAsins.length > 0 && (
             <div className="mt-3">
-              <p className="text-[10px] text-zinc-500 mb-1">
+              <p className="text-ds-micro text-zinc-500 mb-1">
                 ASIN evidence (from the existing BI engine)
               </p>
-              <table className="w-full text-[10px]">
+              <table className="w-full text-ds-micro">
                 <thead>
                   <tr className="border-b border-white/[0.06] text-zinc-500">
                     {['ASIN', 'Title', 'Price', 'Sellers', 'BSR', 'Reviews', 'Est. units/mo', 'Est. rev/mo'].map(
@@ -361,7 +361,7 @@ export function OpportunityDiscoveryPanel() {
             </Button>
           </div>
           {estimate && (
-            <p className="text-[10px] text-zinc-500 mt-2 font-mono">
+            <p className="text-ds-micro text-zinc-500 mt-2 font-mono">
               {estimate.estimateLabel}: {estimate.estimatedMonthlyUnits.low}–
               {estimate.estimatedMonthlyUnits.high} units/mo · {estimate.confidence} confidence ·{' '}
               {estimate.dataSource}

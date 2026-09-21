@@ -1,3 +1,19 @@
+> ## ⚠ HISTORICAL DOCUMENT — NO AUTHORITY (marked 2026-09-21)
+>
+> This file is a **historical audit record** pinned to HEAD `9915656` (2026-09-10).
+> It is **NOT an active operating rule** and MUST NOT be used to gate, block, delay
+> or reverse current work.
+>
+> - Canonical operating model: **`.clinerules/operating-model.md`**
+> - Current project position: **`PROJECT_STATUS.md`** (+ `HANDOFF.md`)
+> - Business invariants: **`.clinerules/mercenta-business-model.md`**
+> - Granular capability matrix: **`requirements-registry.json`**
+>
+> Its evidence classes (CODE / UI / E2E / DOC / PARTIAL / UNKNOWN) remain a useful
+> convention, but every count, gap and status below describes HEAD `9915656` and
+> has since been superseded. Read it for history, never as current status.
+
+---
 # MERCENTA PRODUCT ARCHITECTURE AUDIT — 2026-09-10
 
 > AUDIT ONLY. No product changes were made. No source, config, schema, test, prompt, or provider files were modified.

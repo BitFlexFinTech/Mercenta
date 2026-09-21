@@ -224,7 +224,7 @@ export function BrandPurchaseOrders() {
     const hoursLeft = Math.ceil((deadline - Date.now()) / (60 * 60 * 1000));
     const ack = ackDeadlinePresentation(hoursLeft);
     return (
-      <StatusBadge className="text-[10px]" tone={ack.tone} dataStatus={ack.dataStatus}>
+      <StatusBadge className="text-ds-micro" tone={ack.tone} dataStatus={ack.dataStatus}>
         {ack.label}
       </StatusBadge>
     );
@@ -238,11 +238,11 @@ export function BrandPurchaseOrders() {
         description="Review, accept or reject purchase orders from the UK retail network"
         meta={
           <>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Showing <span className="font-mono text-zinc-300">{filteredPos.length}</span> of{' '}
               <span className="font-mono text-zinc-300">{pos.length}</span>
             </span>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Queue value{' '}
               <span className="font-mono text-zinc-300">
                 £{pos.reduce((sum, p) => sum + p.poValue, 0).toLocaleString()}
@@ -271,7 +271,7 @@ export function BrandPurchaseOrders() {
               ))}
             </select>
             <span className="ml-auto flex items-center gap-2">
-              <span className="hidden text-[10px] uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-zinc-600 sm:inline">
                 Density
               </span>
               <SegmentedControl
@@ -285,7 +285,7 @@ export function BrandPurchaseOrders() {
               />
               <Button
                 variant="ghost"
-                className="text-[11px] text-zinc-400 hover:text-white"
+                className="text-ds-label text-zinc-400 hover:text-white"
                 onClick={() =>
                   downloadCsv(
                     `mercenta-pos-${viewingBrandId_ ?? 'all'}.csv`,
@@ -369,7 +369,7 @@ export function BrandPurchaseOrders() {
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs text-brass">{po.poNumber}</span>
                     <StatusBadge
-                      className="text-[10px]"
+                      className="text-ds-micro"
                       dataStatus={poStatusPresentation(po.status).dataStatus}
                       tone={poStatusPresentation(po.status).tone}
                     >
@@ -380,10 +380,10 @@ export function BrandPurchaseOrders() {
                         and does not change the DOM order of any existing button or
                         input (the E4 lesson). */}
                     {po.simulated === true && (
-                      <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+                      <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
                     )}
                   </div>
-                  <div className="font-mono text-[10px] text-zinc-600 mt-1">
+                  <div className="font-mono text-ds-micro text-zinc-600 mt-1">
                     {po.orderDate} · {po.lineItems.length} line item(s)
                     {po.freightTerm && (
                       <span className="ml-2 text-zinc-500">
@@ -408,7 +408,7 @@ export function BrandPurchaseOrders() {
                 </button>
                 <div className="flex items-center gap-3">
                   {po.status === 'rejected' && (
-                    <Badge className="text-[10px] bg-red-500/15 text-red-300 border-red-500/20 max-w-[220px] truncate">
+                    <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20 max-w-[220px] truncate">
                       {po.rejectionReason}
                     </Badge>
                   )}
@@ -416,7 +416,7 @@ export function BrandPurchaseOrders() {
                   {canAct && <AckDeadline orderDate={po.orderDate} />}
                   <Button
                     variant="ghost"
-                    className="text-[11px]"
+                    className="text-ds-label"
                     data-state={`brand-po-preview-${po.id}`}
                     onClick={() => setPreviewPO(po.id)}
                   >
@@ -492,7 +492,7 @@ export function BrandPurchaseOrders() {
               {/* §Stage-24 — line-item acknowledgment panel */}
               {ackingPO === po.id && canAct && (
                 <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 space-y-3">
-                  <p className="text-[11px] text-emerald-200">
+                  <p className="text-ds-label text-emerald-200">
                     Acknowledge each line — Accepted, Rejected (reason code
                     required), or Backordered (scheduled ship date required).
                     Acknowledged quantity can never exceed the ordered quantity.
@@ -501,7 +501,7 @@ export function BrandPurchaseOrders() {
                     const a = lineAcks[li.sku];
                     if (!a) return null;
                     return (
-                      <div key={li.sku} className="flex flex-wrap items-center gap-2 text-[11px]">
+                      <div key={li.sku} className="flex flex-wrap items-center gap-2 text-ds-label">
                         <span className="font-mono text-zinc-300 w-20">{li.sku}</span>
                         <span className="text-zinc-500 w-40 truncate">{li.productName}</span>
                         <select
@@ -601,12 +601,12 @@ export function BrandPurchaseOrders() {
               {/* §Stage-24 — ASN filing form (carton detail + tracking) */}
               {asnPO === po.id && (
                 <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 space-y-2">
-                  <p className="text-[11px] text-blue-200">
+                  <p className="text-ds-label text-blue-200">
                     Advance Shipping Notice — carton quantities are validated
                     against your acknowledged amounts before submission; shortfalls
                     are logged automatically as potential shortage claims.
                   </p>
-                  <table className="w-full text-[11px]">
+                  <table className="w-full text-ds-label">
                     <thead>
                       <tr className="text-zinc-500">
                         <th className="text-left py-1">SKU</th>
@@ -639,7 +639,7 @@ export function BrandPurchaseOrders() {
                         ))}
                     </tbody>
                   </table>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-[11px]">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-ds-label">
                     <label className="text-zinc-500">Carrier
                       <select value={asnCarrier} onChange={(e) => setAsnCarrier(e.target.value)}
                         className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white">
@@ -721,13 +721,13 @@ export function BrandPurchaseOrders() {
                   {/* §30-day backorder restock deadline — visible countdown */}
                   {po.lineItems.some((l) => l.ackStatus === 'backordered' && l.backorderRestockDeadline) && (
                     <div className="border border-amber-500/20 bg-amber-500/5 rounded-lg p-2">
-                      <p className="text-[10px] font-medium text-amber-300 mb-1">Backorder Restock Deadlines</p>
+                      <p className="text-ds-micro font-medium text-amber-300 mb-1">Backorder Restock Deadlines</p>
                       <div className="space-y-1">
                         {po.lineItems.filter((l) => l.ackStatus === 'backordered' && l.backorderRestockDeadline).map((l) => {
                           const deadline = new Date(l.backorderRestockDeadline + 'T00:00:00Z');
                           const daysLeft = Math.ceil((deadline.getTime() - Date.now()) / 86400000);
                           return (
-                            <div key={l.sku} className="flex items-center justify-between text-[10px]">
+                            <div key={l.sku} className="flex items-center justify-between text-ds-micro">
                               <span className="font-mono text-zinc-400">{l.sku}</span>
                               <span className={daysLeft <= 0 ? 'text-red-400 font-medium' : daysLeft <= 7 ? 'text-amber-400' : 'text-zinc-500'}>
                                 {daysLeft <= 0
@@ -745,8 +745,8 @@ export function BrandPurchaseOrders() {
                   {/* §Batch-3 — Acknowledgment history per line */}
                   {po.lineItems.some((l) => l.ackHistory && l.ackHistory.length > 0) && (
                     <div className="border border-white/[0.06] rounded-lg p-2">
-                      <p className="text-[10px] font-medium text-zinc-500 mb-1">Acknowledgment History</p>
-                      <table className="w-full text-[10px]">
+                      <p className="text-ds-micro font-medium text-zinc-500 mb-1">Acknowledgment History</p>
+                      <table className="w-full text-ds-micro">
                         <thead>
                           <tr className="text-zinc-600">
                             <th className="text-left py-0.5">SKU</th>
@@ -767,7 +767,7 @@ export function BrandPurchaseOrders() {
                                   <td className="py-0.5 text-center text-zinc-500">{h.acknowledgedAt.slice(0, 16).replace('T', ' ')}</td>
                                   <td className="py-0.5 text-center">
                                     <StatusBadge
-                                      className="text-[10px]"
+                                      className="text-ds-micro"
                                       dataStatus={ackStatusPresentation(h.ackStatus).dataStatus}
                                       tone={ackStatusPresentation(h.ackStatus).tone}
                                     >
@@ -786,7 +786,7 @@ export function BrandPurchaseOrders() {
                   )}
 
                   {isFinanced && (po.status === 'accepted' || po.status === 'ready_to_fulfil') && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-[11px] text-emerald-200 flex items-start gap-2">
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-ds-label text-emerald-200 flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
                         Accepted — Mercenta is handling fulfilment and financing for this
@@ -796,7 +796,7 @@ export function BrandPurchaseOrders() {
                     </div>
                   )}
                   {!isFinanced && po.status === 'accepted' && (
-                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-[11px] text-blue-200 flex items-start gap-2">
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-ds-label text-blue-200 flex items-start gap-2">
                       <Truck className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
                         Direct fulfillment — create a shipment above to move this PO into
@@ -835,7 +835,7 @@ export function BrandPurchaseOrders() {
         footer={
           previewRecord ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[10px] text-zinc-600">
+              <span className="text-ds-micro text-zinc-600">
                 {previewRecord.simulated === true
                   ? 'Operational simulation record'
                   : 'Recorded purchase order'}
@@ -843,7 +843,7 @@ export function BrandPurchaseOrders() {
               <div className="flex items-center gap-2">
                 {actionable(previewRecord) && (
                   <Button
-                    className="text-[10px]"
+                    className="text-ds-micro"
                     data-state="brand-po-drawer-acknowledge"
                     onClick={() => {
                       beginAck(previewRecord);
@@ -856,7 +856,7 @@ export function BrandPurchaseOrders() {
                 )}
                 <Button
                   variant="ghost"
-                  className="text-[10px]"
+                  className="text-ds-micro"
                   data-state="brand-po-drawer-open-record"
                   onClick={() => {
                     setExpandedPO(previewRecord.id);
@@ -903,7 +903,7 @@ function BrandPoPreviewBody({
           {status.label}
         </StatusBadge>
         {po.simulated === true && (
-          <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
         )}
         {po.status === 'received' || po.status === 'under_review' ? (
           <StatusBadge dataStatus={hoursLeft <= 0 ? 'ack_overdue' : 'ack_due'} tone={hoursLeft <= 0 ? 'danger' : 'warning'}>
@@ -937,20 +937,20 @@ function BrandPoPreviewBody({
 
       {po.rejectionReason && (
         <section aria-label="Rejection reason">
-          <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
             Rejection reason
           </h3>
-          <p className="text-[11px] leading-snug text-zinc-400">{po.rejectionReason}</p>
+          <p className="text-ds-label leading-snug text-zinc-400">{po.rejectionReason}</p>
         </section>
       )}
 
       <section aria-label="Lines">
-        <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Lines
         </h3>
         <div className="overflow-hidden rounded-ds-md border border-white/[0.06]">
-          <table className="w-full text-left text-[11px]">
-            <thead className="bg-white/[0.02] text-[9px] uppercase tracking-wider text-zinc-500">
+          <table className="w-full text-left text-ds-label">
+            <thead className="bg-white/[0.02] text-ds-micro uppercase tracking-wider text-zinc-500">
               <tr>
                 <th scope="col" className="px-2 py-1.5">SKU</th>
                 <th scope="col" className="px-2 py-1.5">Product</th>
@@ -969,7 +969,7 @@ function BrandPoPreviewBody({
                     <td className="px-2 py-1.5 text-right font-mono text-zinc-300">{line.quantity}</td>
                     <td className="px-2 py-1.5 text-right font-mono text-zinc-300">{line.unitPrice.toFixed(2)}</td>
                     <td className="px-2 py-1.5">
-                      <StatusBadge className="text-[10px]" dataStatus={ack.dataStatus} tone={ack.tone}>
+                      <StatusBadge className="text-ds-micro" dataStatus={ack.dataStatus} tone={ack.tone}>
                         {ack.label}
                       </StatusBadge>
                     </td>

@@ -216,11 +216,11 @@ export function Login() {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">{nationFlag(brand.nation)}</span>
-                  <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider truncate">
+                  <span className="text-ds-micro font-medium text-zinc-400 uppercase tracking-wider truncate">
                     {brand.category}
                   </span>
                   {brand.canonical && (
-                    <span className="ml-auto text-[9px] font-medium text-brass-400 uppercase tracking-wider">
+                    <span className="ml-auto text-ds-micro font-medium text-brass-400 uppercase tracking-wider">
                       Onboarding
                     </span>
                   )}
@@ -229,7 +229,7 @@ export function Login() {
                 <p className="text-xs text-zinc-500 mt-0.5">
                   {[brand.nation, brand.signatory].filter(Boolean).join(' · ') || 'Details pending'}
                 </p>
-                <p className="text-[11px] text-zinc-400 mt-2 leading-relaxed capitalize">
+                <p className="text-ds-label text-zinc-400 mt-2 leading-relaxed capitalize">
                   {brand.canonical
                     ? `${brand.onboardingStatus?.replace(/_/g, ' ')} · onboarding record`
                     : `${brand.track.replace(/_/g, ' ')} · contract ${brand.contractStatus.replace(/_/g, ' ')}`}

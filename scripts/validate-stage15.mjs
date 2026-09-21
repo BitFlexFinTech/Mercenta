@@ -58,8 +58,34 @@ try {
   test('admin logistics surface renders', html.length > 0 && /Logistics/i.test(html));
   // §M9 — with no seeded shipping-status PO the surface must state that honestly
   // rather than render three zero metrics with no explanation.
+  /**
+   * §CLEAN-SLATE RECONCILIATION 2026-09-21 — REPOINTED (strengthened, not weakened).
+   * The canonical seed now DOES contain shipping-status POs (consignments are
+   * derived from the lifecycle POs), so the honest empty state is no longer what the
+   * surface should render for this seed — the assertion failed while the PRODUCT was
+   * correct. The intent is unchanged: the surface must state its REAL state honestly.
+   * It now asserts the outcome the seed requires, either way, and fails if neither
+   * the honest empty state nor the seeded per-tenant groups render.
+   */
+  const seededLogisticsNames = new Set(
+    [...new Set(store.demoShipments.map((s) => s.brandId))].map(
+      (id) => store.demoBrands.find((b) => b.id === id)?.profile.businessName ?? id
+    )
+  );
+  /**
+   * The canonical `DataTable` renders the labelled card list under SSR (no
+   * `window` ⇒ `useMediaQuery` false), so the SSR-visible per-tenant hook is the
+   * SHARED caption `Shipments in transit for <Brand Name>` on that list.
+   */
+  const logisticsDecoded = html.replace(/&amp;/g, '&').replace(/&#x27;/g, "'");
+  const renderedLogisticsGroups = new Set(
+    [...logisticsDecoded.matchAll(/aria-label="Shipments in transit for ([^"]+)"/g)].map((m) => m[1])
+  );
   test('admin logistics states the empty case honestly',
-    html.includes('No shipments are in transit') || html.includes('No shipments for this brand'));
+    seededLogisticsNames.size === 0
+      ? html.includes('No shipments are in transit') || html.includes('No shipments for this brand')
+      : renderedLogisticsGroups.size === seededLogisticsNames.size &&
+        [...seededLogisticsNames].every((n) => renderedLogisticsGroups.has(n)));
 
   // ── Create-on-behalf from an ELIGIBLE PO (lane-correct carrier) ──
   let target = store.demoPurchaseOrders.find(

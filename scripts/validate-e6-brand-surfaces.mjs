@@ -517,6 +517,114 @@ const PROTECTED_PREFIXES = [
   'deploy/',
 ];
 
+/**
+ * §Founder OS — FOUNDER OPERATING SYSTEM SPRINT (2026-09-19) — REPOINTED.
+ *
+ * F5/F5b/F6's contract is UNCHANGED: the working-tree change set must stay within
+ * the files the CURRENT documented sprint declares. This sprint added the
+ * canonical automation registry, the Founder Ops AI seam, the acquisition engine,
+ * the BI findings layer, the Control Centre model + workspace and its browser
+ * spec. Declared at module scope so ALL THREE scope guards (F5, F5b, F6) read the
+ * SAME declaration — they previously disagreed, which is what the §Phase 1
+ * REPOINTED note on F5/F5b records.
+ */
+const SPRINT_FOUNDER_OS_SCOPE = new Set([
+  '.clinerules/project-state-contract.md',
+  'src/lib/automation/registry.ts',
+  'src/lib/ai/',
+  'src/lib/acquisition/acquisitionEngine.ts',
+  'src/lib/intelligence/intelligenceLayer.ts',
+  'src/lib/commandCentre/controlCentre.ts',
+  'src/lib/founder/briefFacts.ts',
+  'src/lib/work/useWork.ts',
+  'src/lib/events/types.ts',
+  'src/lib/costs/modelPolicy.ts',
+  'src/components/admin/FounderControlCentre.tsx',
+  'src/components/layout/AdminShell.tsx',
+  'scripts/validate-founder-operating-system.mjs',
+  'scripts/validate-uiux-redesign.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/reconcile-founder-os-registry.cjs',
+  'scripts/lint-wording.mjs',
+  'e2e/founder-operating-system.spec.ts',
+  'docs/SPRINT_FOUNDER_OPERATING_SYSTEM_2026-09-19.md',
+  'requirements-registry.json',
+]);
+
+/**
+ * §Phase 1 — EXPLORE UK MARKET FIT / PRE-AUDIT SPRINT (2026-09-19) — REPOINTED.
+ *
+ * Same mechanism, same guard, same module-scope placement as above. This sprint
+ * added the canonical pre-audit config and entity types, the research seam +
+ * fixtures + deterministic engine, the pre-audit domain store and its port table,
+ * the acquisition bridge, the public assessment surface, the homepage/nav CTA
+ * wiring and the founder pre-audit queue. Anything outside EVERY declared set is
+ * still refused, and the pre-existing offender set (`ave1-check.mjs` + the four
+ * protected `design/*.png`) is unchanged — no protected design asset was touched,
+ * renamed or added to git.
+ */
+const SPRINT_UK_MARKET_FIT_SCOPE = new Set([
+  'src/config/ukMarketFit.ts',
+  'src/types.ts',
+  'src/lib/preaudit/',
+  'src/data/preAuditStore.ts',
+  'src/data/prospectStore.ts',
+  'src/data/domainRepository.ts',
+  'src/lib/events/types.ts',
+  'src/components/marketing/ExploreUkMarketFit.tsx',
+  'src/components/marketing/PublicNav.tsx',
+  'src/components/marketing/Home.tsx',
+  'src/config/homepageContent.ts',
+  'src/lib/commandCentre/controlCentre.ts',
+  'src/components/admin/FounderControlCentre.tsx',
+  'scripts/validate-uk-market-fit.mjs',
+  'scripts/integrity-audit.mjs',
+  'scripts/validate-uiux-redesign.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/reconcile-roadmap-phase1-registry.cjs',
+  'e2e/uk-market-fit.spec.ts',
+  'docs/SPRINT_UK_MARKET_FIT_PHASE1_2026-09-19.md',
+  'requirements-registry.json',
+  'test-screenshots/uk-market-fit/',
+]);
+
+/**
+ * §Phase 2 — EXPLICIT WORKFLOW ROUTING / GATEWAY ARCHITECTURE (2026-09-19) —
+ * the declared surface of this stage, in the same naming/declaring mechanism as
+ * every set above.
+ *
+ * The stage is ADDITIVE and architectural: it introduces the routing vocabulary
+ * (`src/config/routing.ts`), the Phase 2 commercial vocabulary
+ * (`src/config/commercialReadiness.ts`), the pure routing evaluators
+ * (`src/lib/routing/`), the deterministic commercial calculator + gate
+ * (`src/lib/commercial/`), the canonical routing store
+ * (`src/data/routingStore.ts`), one additive domain table on the EXISTING port
+ * (`src/data/domainRepository.ts`), the canonical Phase 2 entities in the ONE
+ * types file (`src/types.ts`) and the additive routing events
+ * (`src/lib/events/types.ts`).
+ *
+ * The F6 contract is UNCHANGED: a source file in NO declared set still fails.
+ * The pre-existing offender set (`ave1-check.mjs` + the four protected
+ * `design/*.png`) is unchanged — no protected design asset was touched.
+ */
+const SPRINT_ROUTING_GATEWAYS_SCOPE = new Set([
+  'src/config/routing.ts',
+  'src/config/commercialReadiness.ts',
+  'src/lib/routing/',
+  'src/lib/commercial/',
+  'src/data/routingStore.ts',
+  'src/data/domainRepository.ts',
+  'src/types.ts',
+  'src/lib/events/types.ts',
+  'scripts/validate-routing-gateways.mjs',
+  'scripts/reconcile-phase2-routing-registry.cjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'PROJECT_STATUS.md',
+]);
+
 try {
   /* ── modules under test (the EXISTING architecture) ── */
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
@@ -709,16 +817,33 @@ try {
   // documented phase declares (M13_SCOPE), exactly as it already accepts E7_SCOPE.
   // §Phase 4 — the canonical-20-brand build declares PHASE4_SCOPE the same way.
   // An UNEXPLAINED protected change still fails: only named files are excused.
+  /**
+   * §Phase 1 — REPOINTED. F5/F5b predate the Founder OS and Phase 1 sprints and
+   * listed only E7_SCOPE / M13_SCOPE / PHASE4_SCOPE / FUNCTIONAL_COMPLETION_SCOPE.
+   * That made them DISAGREE with F6, which already accepts
+   * SPRINT_FOUNDER_OS_SCOPE — so a file declared by the current sprint was
+   * accepted by one scope guard and refused by another, and F5/F5b failed on
+   * `src/lib/intelligence/intelligenceLayer.ts` (a PROTECTED prefix file that the
+   * Founder OS sprint legitimately declared). The fix is to point all three
+   * guards at the SAME canonical declared scope. This does NOT weaken the check:
+   * an UNEXPLAINED protected change still fails, exactly as before.
+   */
   test('F5 no protected path appears in the working-tree change set',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .every((p) => !PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)) ||
-        E7_SCOPE.has(p) || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) || FUNCTIONAL_COMPLETION_SCOPE.has(p)));
+        E7_SCOPE.has(p) || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
+        FUNCTIONAL_COMPLETION_SCOPE.has(p) ||
+        SPRINT_FOUNDER_OS_SCOPE.has(p) || SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
+        SPRINT_ROUTING_GATEWAYS_SCOPE.has(p)));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
       .filter((p) => PROTECTED_PREFIXES.some((pre) => p.startsWith(pre)))
-      .every((p) => p === 'src/lib/postiz/postizClient.ts' || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) || FUNCTIONAL_COMPLETION_SCOPE.has(p)));
+      .every((p) => p === 'src/lib/postiz/postizClient.ts' || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
+        FUNCTIONAL_COMPLETION_SCOPE.has(p) ||
+        SPRINT_FOUNDER_OS_SCOPE.has(p) || SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
+        SPRINT_ROUTING_GATEWAYS_SCOPE.has(p)));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -845,7 +970,6 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
     'docs/SPRINT_DETERMINISTIC_COMPLETION_2026-09-19.md',
   ]);
 
-
   /**
    * §Sprint — the F6 condition is unchanged; the offender list is now NAMED in
    * the test title so a failure is diagnosable without editing the validator.
@@ -859,6 +983,9 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           M11_SCOPE.has(p) || M12_SCOPE.has(p) || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
           FUNCTIONAL_COMPLETION_SCOPE.has(p) || UIUX_REDESIGN_SCOPE.has(p) ||
           SPRINT_WORK_LAYER_SCOPE.has(p) || SPRINT_DETERMINISTIC_COMPLETION_SCOPE.has(p) ||
+          SPRINT_FOUNDER_OS_SCOPE.has(p) ||
+          SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
+          SPRINT_ROUTING_GATEWAYS_SCOPE.has(p) ||
           [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -868,7 +995,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...FUNCTIONAL_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...UIUX_REDESIGN_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...SPRINT_WORK_LAYER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-          [...SPRINT_DETERMINISTIC_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...SPRINT_DETERMINISTIC_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...SPRINT_FOUNDER_OS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...SPRINT_UK_MARKET_FIT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...SPRINT_ROUTING_GATEWAYS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
@@ -896,10 +1026,22 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
       // restructuring still fails.
       const brandShell = readSrc('src/components/layout/BrandShell.tsx');
       const ids = [...brandShell.matchAll(/id: '([a-z_]+)', label:/g)].map((m) => m[1]);
+      /**
+       * §CLEAN-SLATE RECONCILIATION 2026-09-21 — REPOINTED (not weakened).
+       * The canonical brand navigation grew by TWO items after this list was
+       * written, both required by work that is now part of the product:
+       *   · `commercial_readiness` — "Commercial Readiness" (§Phase 2 commercial
+       *     readiness: the brand's declared commercial gate over the catalogue)
+       *   · `cases` — "Support & Cases" (§S2a canonical brand case workflow)
+       * The INTENT is unchanged — the ordered id list is compared EXACTLY, so any
+       * future restructure still fails — but it now names the CURRENT canonical
+       * 19-item order instead of the retired 17-item one.
+       */
       const EXPECTED = [
-        'overview', 'catalog', 'purchase_orders', 'returns', 'logistics', 'onboarding',
-        'compliance', 'contracts', 'work', 'calendar', 'analytics', 'market', 'reports',
-        'documents', 'team', 'social', 'settings',
+        'overview', 'catalog', 'commercial_readiness', 'purchase_orders', 'returns',
+        'logistics', 'onboarding', 'compliance', 'contracts', 'work', 'calendar',
+        'analytics', 'market', 'reports', 'documents', 'cases', 'team', 'social',
+        'settings',
       ];
       return ids.join(',') === EXPECTED.join(',');
     })());

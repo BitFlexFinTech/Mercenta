@@ -45,10 +45,42 @@ node scripts/validate-google-integration.mjs         # §21 M13 P8 Google mock/r
 node scripts/validate-company-control-centre.mjs     # §22–§25 M13 P9 company/government compliance centre
 node scripts/validate-operating-costs.mjs            # §27 M13 P10 cost model + runtime model policy + AI ceilings
 node scripts/validate-command-centre.mjs             # §32/§34 M13 P11 command centre derivation + tab routing
+node scripts/validate-typography-scale.mjs      # canonical operational type scale + the 11px floor (Wave 3)
+node scripts/validate-founder-operating-system.mjs # founder OS: automation registry, control centre, bounded AI
+node scripts/validate-kb-sufficiency.mjs        # helpdesk KB sufficiency gate
+node scripts/validate-provider-mode-safety.mjs  # UNKNOWN is NEVER simulation (fail-closed provider modes)
+node scripts/validate-routing-gateways.mjs      # Phase 2 routing gateways over the canonical records
+node scripts/validate-uk-market-fit.mjs         # Explore UK Market Fit / pre-audit engine (Phase 1)
+node scripts/validate-seo-foundation.mjs         # public route SSOT + fail-closed noindex + robots/sitemap pin
+node scripts/validate-bounded-ai.mjs             # bounded intelligent-decision seam (free-only, single egress, no AI in forbidden domains)
 node scripts/rls-audit.mjs              # §39 static RLS audit (every schema table)
 node scripts/validate-rls-hardening.mjs # §39 audit_log + applications RLS hardening pin
 npx playwright test                     # full E2E suite
 ```
+
+Every gate above is also reachable as an `npm run validate:*` alias
+(`npm run validate:seo`, `validate:bounded-ai`, `validate:typography`,
+`validate:uk-market-fit`, `validate:founder-os`, `validate:kb-sufficiency`,
+`validate:provider-safety`, `validate:routing`, `validate:commercial-readiness`,
+`validate:brain`, `validate:logistics-map`, `validate:product-routes`,
+`validate:workspace-shell`, `validate:canonical-propagation`).
+
+## Repository invariants — read before committing
+
+- **`git status --porcelain` MUST be empty** at every checkpoint, delivery and
+  handoff (`.clinerules/operating-model.md` §6). A dirty tree is permitted only
+  while work is actively in progress inside a session. Inherited dirtiness is
+  RECONCILED — required work committed, obsolete material removed — never carried
+  forward and never left "for later".
+- **Generated artefacts are never tracked** and are never included in the review
+  ZIP: `test-screenshots/`, `forensic-captures/`, `playwright-report/`,
+  `test-results/`, `e2e-report/`, `Review Zip/*.zip` (see `.gitignore`).
+- **Personal/compliance documents stay untracked**: `Company Documents/`,
+  `Partnerships/`, `Admin Accounts/`, `Random/`. Never read, print or bundle a
+  secret; `.env*` is never read and never inside the review ZIP.
+- Business invariants: `.clinerules/mercenta-business-model.md`. Operating model:
+  `.clinerules/operating-model.md`. Project-state sources:
+  `.clinerules/project-state-contract.md`.
 
 ## The two commercial models (§3)
 
@@ -65,8 +97,8 @@ and changing the model can never change or bypass those requirements.
 
 ## Payout rails (§6)
 
-**Wise is the default payout rail; Payoneer is the secondary rail**
-(`src/config/payouts.ts`). Xero is the accounting/reconciliation layer, not the
+**Payoneer is the default payout rail; Wise is the secondary rail**
+(`src/config/payouts.ts` — Founder decision T-1). Xero is the accounting/reconciliation layer, not the
 bank; Stripe bills the flat monthly subscription only and is refused as a payout
 rail. No payout leaves Mercenta without explicit human approval (§7).
 

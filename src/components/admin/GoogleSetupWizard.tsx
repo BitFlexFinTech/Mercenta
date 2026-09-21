@@ -179,12 +179,12 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
             <h2 className="text-sm font-semibold text-white flex items-center gap-2">
               <Link2 className="w-4 h-4" /> Google setup — {GOOGLE_ACCOUNT.email}
             </h2>
-            <p className="text-[11px] text-zinc-500 mt-1">{GOOGLE_SETUP_DISCLAIMER}</p>
-            <p className="text-[11px] text-zinc-500 mt-1">{GOOGLE_ACCOUNT.note}</p>
+            <p className="text-ds-label text-zinc-500 mt-1">{GOOGLE_SETUP_DISCLAIMER}</p>
+            <p className="text-ds-label text-zinc-500 mt-1">{GOOGLE_ACCOUNT.note}</p>
           </div>
           <Badge
             className={cn(
-              'text-[10px]',
+              'text-ds-micro',
               googleMode === 'live'
                 ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                 : googleSimulationSafe
@@ -195,29 +195,29 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
             Google: {String(googleMode)}
           </Badge>
         </div>
-        <div className="grid gap-2 sm:grid-cols-4 mt-4 text-[11px]">
+        <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Account type</p>
+            <p className="text-ds-micro text-zinc-500">Account type</p>
             <p className="text-sm font-bold text-white">Personal</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">OAuth client id</p>
+            <p className="text-ds-micro text-zinc-500">OAuth client id</p>
             <p className="text-sm font-bold text-white">{oauth.clientId ? 'recorded' : 'not entered'}</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Connection</p>
+            <p className="text-ds-micro text-zinc-500">Connection</p>
             <p className="text-sm font-bold text-white" data-testid="google-connection-state">{oauth.state}</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Audit entries</p>
+            <p className="text-ds-micro text-zinc-500">Audit entries</p>
             <p className="text-sm font-bold text-white">{auditCount}</p>
           </div>
         </div>
-        <p className="text-[10px] text-zinc-500 mt-2" data-testid="google-connection-note">
+        <p className="text-ds-micro text-zinc-500 mt-2" data-testid="google-connection-note">
           {oauth.note}
         </p>
         {message && (
-          <p className="text-[10px] text-emerald-300/90 mt-2" data-testid="google-setup-message">
+          <p className="text-ds-micro text-emerald-300/90 mt-2" data-testid="google-setup-message">
             {message}
           </p>
         )}
@@ -252,7 +252,7 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
               Confirm exchange complete
             </Button>
             <a
-              className="inline-flex items-center gap-1 text-[10px] text-sky-300/90"
+              className="inline-flex items-center gap-1 text-ds-micro text-sky-300/90"
               href={GOOGLE_OAUTH.consoleUrl}
               target="_blank"
               rel="noreferrer"
@@ -262,16 +262,16 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
           </div>
         </div>
         <div className="mt-3">
-          <p className="text-[10px] text-zinc-500">Scopes requested (least privilege, files Mercenta creates):</p>
+          <p className="text-ds-micro text-zinc-500">Scopes requested (least privilege, files Mercenta creates):</p>
           <ul className="mt-1 space-y-0.5">
             {GOOGLE_SCOPES.map((s) => (
-              <li key={s} className="text-[10px] font-mono text-zinc-400">
+              <li key={s} className="text-ds-micro font-mono text-zinc-400">
                 {s}
               </li>
             ))}
           </ul>
         </div>
-        <p className="text-[10px] text-amber-300/80 mt-2">
+        <p className="text-ds-micro text-amber-300/80 mt-2">
           Google is reported as <span className="font-mono">{oauth.state}</span> — an authorization code alone is NOT a
           connection. The refresh token lives in the server-side secret store only.
         </p>
@@ -295,7 +295,7 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
           <Button variant="tertiary" size="sm" className="text-xs" onClick={() => { resetGoogleStore(); setMessage('Setup state cleared.'); refresh(); }}>
             Clear setup state
           </Button>
-          <span className="text-[10px] text-zinc-500">
+          <span className="text-ds-micro text-zinc-500">
             {canRunSetup
               ? googleSimulationSafe
                 ? 'Runs against the SIMULATED Google client — nothing is created in Google.'
@@ -306,31 +306,31 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
 
         {run ? (
           <div className="mt-3">
-            <div className="grid gap-2 sm:grid-cols-4 text-[11px]">
+            <div className="grid gap-2 sm:grid-cols-4 text-ds-label">
               <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-                <p className="text-[10px] text-zinc-500">Created</p>
+                <p className="text-ds-micro text-zinc-500">Created</p>
                 <p className="text-sm font-bold text-white" data-testid="google-run-created">
                   {run.created}/{run.steps.length}
                 </p>
               </div>
               <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-                <p className="text-[10px] text-zinc-500">Failed</p>
+                <p className="text-ds-micro text-zinc-500">Failed</p>
                 <p className="text-sm font-bold text-white">{run.failed}</p>
               </div>
               <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-                <p className="text-[10px] text-zinc-500">Capability tests</p>
+                <p className="text-ds-micro text-zinc-500">Capability tests</p>
                 <p className="text-sm font-bold text-white">
                   {run.capabilityTestsPassed}/{run.capabilityTestsTotal}
                 </p>
               </div>
               <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-                <p className="text-[10px] text-zinc-500">Mode</p>
+                <p className="text-ds-micro text-zinc-500">Mode</p>
                 <p className="text-sm font-bold text-white" data-testid="google-run-mode">
                   {run.mode}
                 </p>
               </div>
             </div>
-            <p className="text-[10px] text-zinc-500 mt-2">
+            <p className="text-ds-micro text-zinc-500 mt-2">
               Last run {new Date(run.ranAt).toLocaleString()} · {run.skipped} skipped
               {run.mode === 'simulation' ? ' · SIMULATED — no Google file was created' : ''}
             </p>
@@ -341,14 +341,14 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
                   className="flex items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-1.5"
                   data-testid="google-setup-step"
                 >
-                  <span className="text-[11px] text-zinc-300">
+                  <span className="text-ds-label text-zinc-300">
                     {s.name} <span className="text-zinc-600">· {s.kind}{s.capabilityTest ? ' · capability test' : ''}</span>
                   </span>
                   <span className="flex items-center gap-2">
-                    {s.attempts > 1 && <span className="text-[10px] text-zinc-600">retried</span>}
+                    {s.attempts > 1 && <span className="text-ds-micro text-zinc-600">retried</span>}
                     <Badge
                       className={cn(
-                        'text-[10px]',
+                        'text-ds-micro',
                         s.status === 'created'
                           ? s.simulated
                             ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
@@ -365,25 +365,25 @@ const capabilitySteps = run?.steps.filter((s) => s.capabilityTest) ?? [];
               ))}
             </ul>
             {capabilitySteps.length > 0 && (
-              <p className="text-[10px] text-zinc-500 mt-2">
+              <p className="text-ds-micro text-zinc-500 mt-2">
                 Capability proof: {capabilitySteps.map((s) => s.kind).join(' · ')}
               </p>
             )}
           </div>
         ) : (
-          <p className="text-[11px] text-zinc-500 mt-3" data-testid="google-setup-not-run">
+          <p className="text-ds-label text-zinc-500 mt-3" data-testid="google-setup-not-run">
             The workspace has not been created yet. Folder structure, master sheets, templates and the four capability
             tests are all pending.
           </p>
         )}
 
         <details className="mt-3">
-          <summary className="text-[11px] text-zinc-400 cursor-pointer flex items-center gap-1">
+          <summary className="text-ds-label text-zinc-400 cursor-pointer flex items-center gap-1">
             <FolderPlus className="w-3 h-3" /> Planned structure ({GOOGLE_WORKSPACE_PLAN.length} items)
           </summary>
           <ul className="mt-2 space-y-0.5">
             {GOOGLE_WORKSPACE_PLAN.map((p) => (
-              <li key={p.id} className="text-[10px] text-zinc-500">
+              <li key={p.id} className="text-ds-micro text-zinc-500">
                 {p.kind === 'folder' ? '📁' : p.kind === 'sheet' ? '📊' : p.kind === 'doc' ? '📄' : p.kind === 'slides' ? '🖼' : '📅'}{' '}
                 {p.parent ? `${p.parent} / ` : ''}
                 {p.name} — {p.purpose}

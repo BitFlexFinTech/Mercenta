@@ -19,8 +19,40 @@ import {
 // Module-level Map persists progress across renders.
 // A version counter makes it reactive: every mutation increments the
 // version, and useTourStore subscribes to it via useState + useEffect.
+//
+// §RUNTIME PARITY (R4) — the Map dies with the page, so a tour the user had
+// already completed or skipped re-opened over the brand portal after EVERY
+// refresh. The progress is now seeded from, and written through to,
+// `sessionStorage` (tab-scoped, per brand tenant — the same scope the session
+// itself uses). The auto-start rule below is NOT weakened: a genuinely new
+// brand still gets its orientation tour.
 
 const tourProgressMap = new Map<string, TourProgress>();
+const TOUR_STORAGE_PREFIX = 'mercenta.tour.';
+
+/** The persisted record for a brand, or null. Fail-closed on anything malformed. */
+function readPersistedTour(brandId: string): TourProgress | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.sessionStorage.getItem(TOUR_STORAGE_PREFIX + brandId);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as TourProgress;
+    if (!parsed || typeof parsed !== 'object') return null;
+    return { ...DEFAULT_TOUR_PROGRESS, ...parsed, currentTourId: null };
+  } catch {
+    return null;
+  }
+}
+
+function writePersistedTour(brandId: string, progress: TourProgress): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(TOUR_STORAGE_PREFIX + brandId, JSON.stringify(progress));
+  } catch {
+    /* storage disabled — progress simply does not survive a refresh */
+  }
+}
+
 let _tourVersion = 0;
 const _versionListeners = new Set<() => void>();
 
@@ -30,11 +62,19 @@ function bumpVersion() {
 }
 
 export function getTourProgress(brandId: string): TourProgress {
-  return tourProgressMap.get(brandId) ?? { ...DEFAULT_TOUR_PROGRESS };
+  const existing = tourProgressMap.get(brandId);
+  if (existing) return existing;
+  const restored = readPersistedTour(brandId);
+  if (restored) {
+    tourProgressMap.set(brandId, restored);
+    return restored;
+  }
+  return { ...DEFAULT_TOUR_PROGRESS };
 }
 
 export function setTourProgress(brandId: string, p: TourProgress): void {
   tourProgressMap.set(brandId, p);
+  writePersistedTour(brandId, p);
   bumpVersion();
 }
 
@@ -280,7 +320,7 @@ function TourStepCard(props: {
         </div>
         <button onClick={onSkip} className="text-zinc-500 hover:text-white transition-colors" aria-label="Dismiss tour"><X className="w-3.5 h-3.5" /></button>
       </div>
-      <p className="text-[11px] text-zinc-400 leading-relaxed mb-3">{step.description}</p>
+      <p className="text-ds-label text-zinc-400 leading-relaxed mb-3">{step.description}</p>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           {dots.map(function(i) {
@@ -291,7 +331,7 @@ function TourStepCard(props: {
               type="button"
               onClick={() => onLearnMore(String(step.learnMore))}
               data-testid={`tour-learn-more-${step.id}`}
-              className="flex items-center gap-1 text-[10px] text-brass-400 hover:text-brass-300 transition-colors ml-1.5"
+              className="flex items-center gap-1 text-ds-micro text-brass-400 hover:text-brass-300 transition-colors ml-1.5"
             >
               <BookOpen className="w-3 h-3" /> Learn more
             </button>
@@ -299,9 +339,9 @@ function TourStepCard(props: {
         </div>
         <div className="flex items-center gap-2">
           {step.action === 'finish' ? (
-            <Button className="text-[10px]" onClick={onFinish}><CheckCircle2 className="w-3 h-3 mr-1" /> Got it</Button>
+            <Button className="text-ds-micro" onClick={onFinish}><CheckCircle2 className="w-3 h-3 mr-1" /> Got it</Button>
           ) : (
-            <Button className="text-[10px]" onClick={onNext}>Next <ChevronRight className="w-3 h-3 ml-1" /></Button>
+            <Button className="text-ds-micro" onClick={onNext}>Next <ChevronRight className="w-3 h-3 ml-1" /></Button>
           )}
         </div>
       </div>
@@ -328,8 +368,8 @@ function SkipConfirmModal(props: {
           Are you sure? You can restart tours anytime from Settings.
         </p>
         <div className="flex items-center justify-end gap-2">
-          <Button className="text-[10px]" variant="ghost" onClick={onCancel}>Continue Tour</Button>
-          <Button className="text-[10px] bg-zinc-700 hover:bg-zinc-600 text-white" onClick={onConfirm}>Skip Tour</Button>
+          <Button className="text-ds-micro" variant="ghost" onClick={onCancel}>Continue Tour</Button>
+          <Button className="text-ds-micro bg-zinc-700 hover:bg-zinc-600 text-white" onClick={onConfirm}>Skip Tour</Button>
         </div>
       </div>
     </div>
@@ -354,7 +394,7 @@ function ChecklistWidget(props: { brandId: string; compact?: boolean }) {
         {CHECKLIST_ITEMS.map(function(item) {
           const done = completed.includes(item.id);
           return (
-            <div key={item.id} className="flex items-center gap-2 text-[10px]">
+            <div key={item.id} className="flex items-center gap-2 text-ds-micro">
               {done
                 ? <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
                 : <Circle className="w-3 h-3 text-zinc-600 flex-shrink-0" />}
@@ -522,11 +562,11 @@ export function TourEngine(props: TourEngineProps) {
                 </span>
                 <button type="button" onClick={() => setOpenArticleId(null)} className="text-zinc-500 hover:text-white" aria-label="Close article"><X className="w-4 h-4" /></button>
               </div>
-              <p className="text-[11px] text-zinc-400 mb-3">{article.summary}</p>
-              <div className="space-y-2.5 text-[11px] text-zinc-300">
+              <p className="text-ds-label text-zinc-400 mb-3">{article.summary}</p>
+              <div className="space-y-2.5 text-ds-label text-zinc-300">
                 {article.sections.map((sec) => (
                   <div key={sec.heading} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2">
-                    <div className="text-[10px] uppercase tracking-wide text-brass-400">{sec.heading}</div>
+                    <div className="text-ds-micro uppercase tracking-wide text-brass-400">{sec.heading}</div>
                     <p className="mt-1">{sec.body}</p>
                   </div>
                 ))}

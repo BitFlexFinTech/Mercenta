@@ -51,7 +51,7 @@ function StatusWord({ status }: { status: InvestorDemoStage['status'] }) {
         ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
         : 'bg-red-500/15 text-red-300 border-red-500/20';
   return (
-    <Badge className={cn('text-[10px] border', cls)}>
+    <Badge className={cn('text-ds-micro border', cls)}>
       {icon}
       <span className="ml-1">{word}</span>
     </Badge>
@@ -145,16 +145,16 @@ export function InvestorDemoPanel() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/20 uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 uppercase tracking-wide">
               Simulation
             </Badge>
-            <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
               Deterministic
             </Badge>
-            <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
               <WifiOff className="w-3 h-3 mr-1" /> No live integration
             </Badge>
-            <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08] uppercase tracking-wide">
               Demo / test data
             </Badge>
           </div>
@@ -186,19 +186,19 @@ export function InvestorDemoPanel() {
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1" /> Reset demo environment
           </Button>
-          <span className="text-[11px] text-zinc-500">
+          <span className="text-ds-label text-zinc-500">
             Tenant: <span className="font-mono text-zinc-400">{INVESTOR_DEMO_TENANT_ID}</span>
           </span>
         </div>
 
         {lastResetAt && (
-          <p className="text-[11px] text-emerald-400 mt-2">
+          <p className="text-ds-label text-emerald-400 mt-2">
             Demo environment reset at {new Date(lastResetAt).toLocaleTimeString()} — seeded data
             restored, scenario-created records removed.
           </p>
         )}
         {error && (
-          <p className="text-[11px] text-red-300 mt-2" role="alert">
+          <p className="text-ds-label text-red-300 mt-2" role="alert">
             {error}
           </p>
         )}
@@ -207,27 +207,27 @@ export function InvestorDemoPanel() {
       {run && (
         <Card className="p-4 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge className="text-[10px] bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+            <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
               <CheckCircle2 className="w-3 h-3 mr-1" />{' '}
               <span data-state="investor-demo-summary">
                 {run.summary.ok}/{run.summary.total} stages OK
               </span>
             </Badge>
-            <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
               blocked: {run.summary.blocked}
             </Badge>
-            <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
               errors: {run.summary.error}
             </Badge>
-            <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
               <WifiOff className="w-3 h-3 mr-1" /> network calls: {run.networkCalls}
             </Badge>
-            <Badge className="text-[10px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+            <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
               audit rows: {run.auditRows}
             </Badge>
           </div>
 
-          <div className="text-[11px] text-zinc-500 space-y-0.5">
+          <div className="text-ds-label text-zinc-500 space-y-0.5">
             <div>
               Run <span className="font-mono text-zinc-400">{run.runId}</span> · brand{' '}
               <span className="text-zinc-300">{run.brandName}</span> · onboarding{' '}
@@ -260,18 +260,18 @@ export function InvestorDemoPanel() {
               >
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div className="min-w-0 flex items-start gap-2">
-                    <span className="font-mono text-[10px] text-zinc-600 mt-0.5">
+                    <span className="font-mono text-ds-micro text-zinc-600 mt-0.5">
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     <div className="min-w-0">
                       <span className="text-xs font-medium text-zinc-200">{stage.label}</span>
-                      <p className="text-[11px] text-zinc-500 mt-0.5 break-words">{stage.detail}</p>
+                      <p className="text-ds-label text-zinc-500 mt-0.5 break-words">{stage.detail}</p>
                     </div>
                   </div>
                   <StatusWord status={stage.status} />
                 </div>
                 {stage.entityIds.length > 0 && (
-                  <p className="text-[10px] text-zinc-600 mt-1 break-all">
+                  <p className="text-ds-micro text-zinc-600 mt-1 break-all">
                     <span className="text-zinc-500">records:</span>{' '}
                     <span className="font-mono">{stage.entityIds.join(', ')}</span>
                   </p>
@@ -280,7 +280,7 @@ export function InvestorDemoPanel() {
             ))}
           </ol>
 
-          <p className="text-[11px] text-zinc-600 leading-relaxed">
+          <p className="text-ds-label text-zinc-600 leading-relaxed">
             Every stage above wrote canonical state that the product's own screens read back — the
             brand portal, the operator console, the deductions ledger, the payout ledger, the CRM
             timeline and the audit log. No live provider, email, payment or accounting system was
@@ -291,7 +291,7 @@ export function InvestorDemoPanel() {
 
       {!run && (
         <Card className="p-4">
-          <p className="text-[11px] text-zinc-500 leading-relaxed">
+          <p className="text-ds-label text-zinc-500 leading-relaxed">
             {INVESTOR_DEMO_STAGES.length} stages will run in order:{' '}
             <span className="text-zinc-400">
               {INVESTOR_DEMO_STAGES.map((s) => s.label).join(' → ')}

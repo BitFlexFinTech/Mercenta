@@ -70,7 +70,7 @@ export function PostizAdminPanel() {
             <h3 className="text-sm font-semibold text-white">
               {engine.productName} — engine scheduling
             </h3>
-            <p className="text-[11px] text-zinc-500 mt-1">
+            <p className="text-ds-label text-zinc-500 mt-1">
               {engine.productName} is the customer-facing product; the underlying engine is{' '}
               {engine.engineName} {engine.engineVersion} ({engine.engineLicence}), self-hosted for
               Mercenta. Schedule posts across Instagram, TikTok, LinkedIn, X, Facebook, YouTube and {' '}
@@ -78,7 +78,7 @@ export function PostizAdminPanel() {
             </p>
           </div>
           <span
-            className={`text-[10px] px-2 py-1 rounded-full ${engine.configured ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-200'}`}
+            className={`text-ds-micro px-2 py-1 rounded-full ${engine.configured ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-200'}`}
             data-testid="admin-engine-mode"
           >
             {(engine.configured ? 'Connected' : 'Simulation') + (postizState?.sandbox ? ' (Sandbox)' : '')}
@@ -86,7 +86,7 @@ export function PostizAdminPanel() {
         </div>
 
         {!connected && (
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-[11px] text-amber-200 mb-3">
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-ds-label text-amber-200 mb-3">
             <strong>Self-hosted service unavailable.</strong> Postiz requires a Docker-capable VPS.
             See <span className="text-brass-300">scripts/deploy-docker.sh</span> to provision and deploy.
             Until deployed, mock mode is active — scheduled posts use simulated data.
@@ -95,7 +95,7 @@ export function PostizAdminPanel() {
 
         <div className="space-y-3">
           <div>
-            <label className="text-[10px] text-zinc-500 mb-1 block">Post Content</label>
+            <label className="text-ds-micro text-zinc-500 mb-1 block">Post Content</label>
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -105,7 +105,7 @@ export function PostizAdminPanel() {
           </div>
 
           <div>
-            <label className="text-[10px] text-zinc-500 mb-1 block">Platforms</label>
+            <label className="text-ds-micro text-zinc-500 mb-1 block">Platforms</label>
             <div className="flex flex-wrap gap-2">
               {PLATFORM_OPTIONS.map((p) => {
                 const active = selectedPlatforms.includes(p.id);
@@ -114,7 +114,7 @@ export function PostizAdminPanel() {
                   <button
                     key={p.id}
                     onClick={() => togglePlatform(p.id)}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] border transition-colors ${
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-ds-micro border transition-colors ${
                       active
                         ? 'bg-brass/20 text-brass border-brass/30'
                         : 'bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:border-white/[0.12]'
@@ -134,14 +134,14 @@ export function PostizAdminPanel() {
           </Button>
 
           {result && (
-            <div className={`text-[10px] ${result.startsWith('Scheduled') ? 'text-emerald-400' : 'text-red-400'}`}>
+            <div className={`text-ds-micro ${result.startsWith('Scheduled') ? 'text-emerald-400' : 'text-red-400'}`}>
               <CheckCircle2 className="w-3 h-3 inline mr-1" />
               {result}
             </div>
           )}
         </div>
 
-        <div className="mt-3 border border-white/[0.06] rounded-lg p-2 text-[10px] text-zinc-500 flex items-center gap-1">
+        <div className="mt-3 border border-white/[0.06] rounded-lg p-2 text-ds-micro text-zinc-500 flex items-center gap-1">
           <Calendar className="w-3 h-3" />
           Posts are scheduled through the engine API. Admin-only engine URL:{' '}
           <a href={apiUrl} target="_blank" rel="noopener noreferrer" className="text-brass underline">
@@ -158,36 +158,36 @@ export function PostizAdminPanel() {
       >
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">Engine</div>
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Engine</div>
             <div className="text-white" data-testid="admin-engine-identity">
               {engine.engineName} {engine.engineVersion}
             </div>
-            <div className="text-[10px] text-zinc-600">{engine.engineLicence}</div>
+            <div className="text-ds-micro text-zinc-600">{engine.engineLicence}</div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">Container</div>
-            <div className="text-white font-mono text-[11px]">{engine.verified.container}</div>
-            <div className="text-[10px] text-zinc-600">{engine.verified.image}</div>
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Container</div>
+            <div className="text-white font-mono text-ds-label">{engine.verified.container}</div>
+            <div className="text-ds-micro text-zinc-600">{engine.verified.image}</div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">Developer API</div>
-            <div className="text-white font-mono text-[11px]">{engine.developerApiPath}</div>
-            <div className="text-[10px] text-amber-300">
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Developer API</div>
+            <div className="text-white font-mono text-ds-label">{engine.developerApiPath}</div>
+            <div className="text-ds-micro text-amber-300">
               {engine.legacyEndpointsVerified ? 'verified' : 'legacy client endpoints unverified'}
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">Instance usage</div>
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Instance usage</div>
             <div className="text-white" data-testid="admin-engine-usage">
               {engine.verified.instanceEmpty ? 'Unused (clean slate)' : 'In use'}
             </div>
-            <div className="text-[10px] text-zinc-600">
+            <div className="text-ds-micro text-zinc-600">
               {engine.verified.counts.users} users · {engine.verified.counts.organizations} orgs ·{' '}
               {engine.verified.counts.posts} posts
             </div>
           </div>
         </div>
-        <p className="text-[10px] text-zinc-500 mt-3">
+        <p className="text-ds-micro text-zinc-500 mt-3">
           Runtime: {engine.verified.runtime}. Verified {engine.verified.verifiedAt}.
         </p>
       </Card>
@@ -200,7 +200,7 @@ export function PostizAdminPanel() {
       >
         <div className="flex flex-wrap gap-x-8 gap-y-3 text-xs">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500">
               Workspaces provisioned
             </div>
             <div className="text-white" data-testid="admin-workspace-count">
@@ -208,17 +208,17 @@ export function PostizAdminPanel() {
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">Brand modules</div>
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Brand modules</div>
             <div className="text-white">{SOCIAL_BRAND_MODULES.length}</div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500">
               Supported channels
             </div>
             <div className="text-white">{SOCIAL_PROVIDERS.length}</div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">Persistence</div>
+            <div className="text-ds-micro uppercase tracking-wider text-zinc-500">Persistence</div>
             <div className="text-white">
               {persistence.backend} · durable: {String(persistence.durable)}
             </div>
@@ -229,7 +229,7 @@ export function PostizAdminPanel() {
             {workspaces.map((w) => (
               <div
                 key={w.workspaceId}
-                className="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 text-[11px]"
+                className="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 text-ds-label"
               >
                 <span className="font-mono text-zinc-300">{w.workspaceId}</span>
                 <span className="text-zinc-500">{w.brandName}</span>
@@ -242,7 +242,7 @@ export function PostizAdminPanel() {
             ))}
           </div>
         )}
-        <p className="text-[10px] text-zinc-500 mt-3">
+        <p className="text-ds-micro text-zinc-500 mt-3">
           Automatic and idempotent: an approved brand is provisioned on first use and every later
           request reuses the same workspace. Unapproved brands are refused before any workspace is
           created.
@@ -255,7 +255,7 @@ export function PostizAdminPanel() {
         title="Commercial boundary"
         subtitle={`${engine.productName} is included with a Mercenta partnership.`}
       >
-        <ul className="text-[11px] text-zinc-400 space-y-1">
+        <ul className="text-ds-label text-zinc-400 space-y-1">
           <li>Brands are never sent to the engine's sign-up, plan, pricing or checkout.</li>
           <li>No subscription, upgrade or billing surface is exposed to a brand.</li>
           <li>
@@ -287,11 +287,11 @@ export function PostizAdminPanel() {
               <div>
                 <div className="text-xs text-white">
                   {f.title}{' '}
-                  <Badge className="text-[9px] bg-white/[0.05] text-zinc-400 border-white/[0.06] ml-1">
+                  <Badge className="text-ds-micro bg-white/[0.05] text-zinc-400 border-white/[0.06] ml-1">
                     {f.severity}
                   </Badge>
                 </div>
-                <p className="text-[11px] text-zinc-500 mt-0.5">{f.detail}</p>
+                <p className="text-ds-label text-zinc-500 mt-0.5">{f.detail}</p>
               </div>
             </div>
           ))}

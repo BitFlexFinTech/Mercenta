@@ -20,7 +20,7 @@ function UrgencyBadge({ renewalDate, now }: { renewalDate: string; now: string }
     '60d': 'bg-blue-500/15 text-blue-300 border-blue-500/20',
   };
   const label = urgency === 'expired' ? 'Expired' : `Renews in ≤ ${urgency.replace('d', '')} days`;
-  return <Badge className={cn('text-[10px]', map[urgency])}>{label}</Badge>;
+  return <Badge className={cn('text-ds-micro', map[urgency])}>{label}</Badge>;
 }
 
 export function BrandContractView() {
@@ -96,7 +96,7 @@ export function BrandContractView() {
               <h3 className="text-sm font-semibold text-white capitalize">
                 {c.type.replace(/_/g, ' ')} — v{c.version}
               </h3>
-              <p className="text-[11px] text-zinc-500 mt-0.5">
+              <p className="text-ds-label text-zinc-500 mt-0.5">
                 Effective {c.effectiveDate || '—'} · Renews {c.renewalDate || '—'}
               </p>
             </div>
@@ -104,7 +104,7 @@ export function BrandContractView() {
               <UrgencyBadge renewalDate={c.renewalDate} now={now} />
               <Badge
                 className={cn(
-                  'text-[10px]',
+                  'text-ds-micro',
                   c.status === 'active' || c.status === 'signed'
                     ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                     : 'bg-blue-500/15 text-blue-300 border-blue-500/20'
@@ -117,15 +117,15 @@ export function BrandContractView() {
 
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div>
-              <div className="text-[10px] text-zinc-600 font-medium mb-1">Commission</div>
+              <div className="text-ds-micro text-zinc-600 font-medium mb-1">Commission</div>
               <div className="font-mono text-sm text-white">{c.commissionRate}%</div>
             </div>
             <div>
-              <div className="text-[10px] text-zinc-600 font-medium mb-1">Monthly Fee</div>
+              <div className="text-ds-micro text-zinc-600 font-medium mb-1">Monthly Fee</div>
               <div className="font-mono text-sm text-white">£{c.monthlyFee}</div>
             </div>
             <div>
-              <div className="text-[10px] text-zinc-600 font-medium mb-1">Track</div>
+              <div className="text-ds-micro text-zinc-600 font-medium mb-1">Track</div>
               <div className="text-sm capitalize text-white">
                 {c.fulfillmentTrack.replace(/_/g, ' ')}
               </div>
@@ -134,7 +134,7 @@ export function BrandContractView() {
 
           <div className="flex items-center gap-2">
             <span
-              className="text-[11px] text-brass inline-flex items-center gap-1 cursor-pointer hover:underline"
+              className="text-ds-label text-brass inline-flex items-center gap-1 cursor-pointer hover:underline"
               onClick={() => setViewingId(c.id)}
             >
               <Eye className="w-3 h-3" /> Open document
@@ -152,7 +152,7 @@ export function BrandContractView() {
                 <h3 className="text-sm font-semibold text-white capitalize">
                   {viewing.type.replace(/_/g, ' ')} — v{viewing.version}
                 </h3>
-                <p className="text-[10px] text-zinc-500 mt-0.5">
+                <p className="text-ds-micro text-zinc-500 mt-0.5">
                   Generated from the {viewing.fulfillmentTrack.replace(/_/g, ' ')} clause set
                 </p>
               </div>
@@ -160,7 +160,7 @@ export function BrandContractView() {
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <pre className="flex-1 overflow-y-auto px-6 py-4 text-[11px] leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">
+            <pre className="flex-1 overflow-y-auto px-6 py-4 text-ds-label leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">
               {renderAgreement(viewing)}
             </pre>
             <div className="flex justify-end gap-2 px-5 py-3 border-t border-white/[0.06]">
@@ -173,7 +173,7 @@ export function BrandContractView() {
         </div>
       )}
 
-      <p className="text-[10px] text-zinc-600">
+      <p className="text-ds-micro text-zinc-600">
         Commercial rates shown are placeholders pending sign-off. Signed copies are
         also available through the e-signature provider once live-wired.
       </p>

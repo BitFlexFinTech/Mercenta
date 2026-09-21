@@ -149,19 +149,19 @@ export function BrandCommPanel({
       {/* Thread preview */}
       <div className={cn('space-y-1.5 overflow-y-auto', compact ? 'max-h-[120px]' : 'max-h-[180px]')}>
         {preview.length === 0 && (
-          <p className="text-[11px] text-zinc-600">No messages with this brand yet.</p>
+          <p className="text-ds-label text-zinc-600">No messages with this brand yet.</p>
         )}
         {preview.map((m) => (
           <div
             key={m.id}
             className={cn(
-              'rounded-lg px-3 py-2 text-[11px] leading-relaxed',
+              'rounded-lg px-3 py-2 text-ds-label leading-relaxed',
               m.direction === 'outbound'
                 ? 'bg-brass-500/10 text-zinc-300'
                 : 'bg-white/[0.04] text-zinc-400'
             )}
           >
-            <span className="font-mono text-[9px] text-zinc-500 mr-2">
+            <span className="font-mono text-ds-micro text-zinc-500 mr-2">
               {new Date(m.createdAt).toLocaleString()} · {m.channel}
             </span>
             <span className="whitespace-pre-wrap">{m.body}</span>
@@ -174,7 +174,7 @@ export function BrandCommPanel({
         <button
           onClick={() => setTab('message')}
           className={cn(
-            'flex items-center gap-1 px-2 py-1 rounded-md text-[11px]',
+            'flex items-center gap-1 px-2 py-1 rounded-md text-ds-label',
             tab === 'message' ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-white'
           )}
         >
@@ -183,7 +183,7 @@ export function BrandCommPanel({
         <button
           onClick={() => setTab('call')}
           className={cn(
-            'flex items-center gap-1 px-2 py-1 rounded-md text-[11px]',
+            'flex items-center gap-1 px-2 py-1 rounded-md text-ds-label',
             tab === 'call' ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-white'
           )}
         >
@@ -192,7 +192,7 @@ export function BrandCommPanel({
       </div>
 
       {!emailLive && !emailSandbox && tab === 'message' && (
-        <p className="text-[10px] text-zinc-600">
+        <p className="text-ds-micro text-zinc-600">
           Power sending disabled — connect Postmark/SendGrid in Integrations. Messages are still
           logged to the thread.
         </p>
@@ -238,7 +238,7 @@ export function BrandCommPanel({
         </div>
       )}
 
-      {note && <p className="text-[10px] text-zinc-400">{note}</p>}
+      {note && <p className="text-ds-micro text-zinc-400">{note}</p>}
     </div>
   );
 }

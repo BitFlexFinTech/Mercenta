@@ -42,12 +42,12 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
     <div className='fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4'>
       <div className='bg-ink-850 border border-white/[0.08] rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'>
         <div className='flex items-center justify-between px-5 py-4 border-b border-white/[0.06]'>
-          <div className='flex items-center gap-3'><Package className='w-5 h-5 text-brass-400' /><div><h2 className='text-sm font-semibold text-white'>{product.name}</h2><p className='text-[10px] text-zinc-500 font-mono'>{product.sku} · {product.barcode}</p></div></div>
+          <div className='flex items-center gap-3'><Package className='w-5 h-5 text-brass-400' /><div><h2 className='text-sm font-semibold text-white'>{product.name}</h2><p className='text-ds-micro text-zinc-500 font-mono'>{product.sku} · {product.barcode}</p></div></div>
           <button onClick={onClose} className='text-zinc-400 hover:text-white'><X className='w-4 h-4' /></button>
         </div>
         <div className='flex gap-1 px-5 pt-3 border-b border-white/[0.06]'>
           {['detail', 'images', 'pricing'].map(function(t) { return (
-            <button key={t} onClick={function() { setTab(t); }} className={cn('px-3 py-1.5 text-[11px] font-medium rounded-t', tab === t ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>{t === 'detail' ? 'Details' : t === 'images' ? 'Images (5)' : 'Pricing'}</button>
+            <button key={t} onClick={function() { setTab(t); }} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t', tab === t ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>{t === 'detail' ? 'Details' : t === 'images' ? 'Images (5)' : 'Pricing'}</button>
           );})}
         </div>
         <div className='flex-1 overflow-y-auto p-5 space-y-4'>
@@ -80,11 +80,11 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                     Available for new POs
                   </label>
                   <div className='flex items-center gap-2'>
-                    <span className='text-zinc-500 text-[10px]'>Lead time:</span>
+                    <span className='text-zinc-500 text-ds-micro'>Lead time:</span>
                     <input type='number' value={lt} min={1} max={90} onChange={function(e) { setLt(parseInt(e.target.value) || 1); }}
                       className='w-16 bg-ink-900 border border-white/[0.08] rounded px-1.5 py-1 text-xs text-white text-center' /> days
                   </div>
-                  <Button className='text-[10px]' data-state="catalog-save-availability" disabled={!canMutate}
+                  <Button className='text-ds-micro' data-state="catalog-save-availability" disabled={!canMutate}
                     title={canMutate ? undefined : 'View-only staff cannot change product availability'} onClick={ha}>Save Availability</Button>
                 </div>
               </div>
@@ -136,17 +136,17 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
           {tab === 'pricing' && (
             <div className='space-y-3 max-w-sm'>
               <div>
-                <label className='text-[10px] text-zinc-500 font-medium block mb-1'>Ex-Works Price (GBP)</label>
+                <label className='text-ds-micro text-zinc-500 font-medium block mb-1'>Ex-Works Price (GBP)</label>
                 <input type='number' step='0.01' value={ep} onChange={function(e) { setEp(Number(e.target.value)); }}
                   className='w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-sm text-white' />
               </div>
-              <div className='text-[10px] text-zinc-500 space-y-1'>
+              <div className='text-ds-micro text-zinc-500 space-y-1'>
                 <p>UK Retail: <span className='font-mono text-zinc-300'>GBP {product.ukRetailPrice.toFixed(2)}</span></p>
                 <p>Implied margin: <span className='font-mono text-zinc-300'>{((product.ukRetailPrice - ep) / product.ukRetailPrice * 100).toFixed(1)}%</span></p>
               </div>
               <Button className='text-xs' data-state="catalog-update-price" disabled={!canMutate}
                 title={canMutate ? undefined : 'View-only staff cannot change product pricing'} onClick={hp}>Update Price</Button>
-              {sv && <p className='text-[10px] text-emerald-400'>{sv}</p>}
+              {sv && <p className='text-ds-micro text-emerald-400'>{sv}</p>}
             </div>
           )}
         </div>
@@ -308,11 +308,11 @@ export function CatalogManagerAdmin() {
         description="Every catalogue record, its owning brand tenant and its channel-submission state. Product readiness is derived from the same canonical submission records the brand sees."
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">
               {filteredProducts.length} of {products.length} products
             </span>
-            <span className="font-mono text-[11px] text-zinc-500">{brands.length} brands</span>
-            <span className="font-mono text-[11px] text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
+            <span className="font-mono text-ds-label text-zinc-500">{brands.length} brands</span>
+            <span className="font-mono text-ds-label text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
           </>
         }
         toolbar={
@@ -320,7 +320,7 @@ export function CatalogManagerAdmin() {
             <Filter className='w-3.5 h-3.5 text-zinc-500 mr-1' />
             <button onClick={function() { setCategoryFilter('all'); }}
               data-testid="catalog-cat-all"
-              className={cn('px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors',
+              className={cn('px-2.5 py-1 rounded-lg text-ds-label font-medium transition-colors',
                 categoryFilter === 'all' ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
               )}>
               All ({products.length})
@@ -331,7 +331,7 @@ export function CatalogManagerAdmin() {
               return (
                 <button key={cat} onClick={function() { setCategoryFilter(cat); }}
                   data-testid={`catalog-cat-${cat}`}
-                  className={cn('px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors',
+                  className={cn('px-2.5 py-1 rounded-lg text-ds-label font-medium transition-colors',
                     categoryFilter === cat ? 'bg-brass-500 text-white' : 'bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]'
                   )}>
                   {cat} ({count})
@@ -357,13 +357,13 @@ export function CatalogManagerAdmin() {
                   { label: 'Category filter', value: categoryFilter === 'all' ? 'All approved categories' : categoryFilter },
                 ]}
               />
-              <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+              <p className="mt-2 text-ds-label leading-snug text-zinc-400">
                 A catalogue item becomes PO-eligible only once its compliance documents are
                 approved — the compliance gate is enforced in the domain, not on this screen.
               </p>
             </ContextPanel>
             <ContextPanel title="Channel submission">
-              <p className="text-[11px] leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-zinc-400">
                 Submission state is the canonical record the brand also sees; entries marked
                 &ldquo;(sim)&rdquo; are deterministic simulation and no channel API was contacted.
               </p>

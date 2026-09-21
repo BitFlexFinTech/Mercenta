@@ -7,15 +7,33 @@ interface CardProps {
   title?: string;
   subtitle?: string;
   action?: ReactNode;
+  /**
+   * §S2a — test/automation hook passthrough. Hyphenated JSX attributes are not
+   * forwarded automatically, so a `data-*` attribute written on `<Card>` was
+   * silently dropped before this. Declared explicitly (the same convention
+   * `Button` already documents) so the attribute actually reaches the DOM.
+   */
+  'data-state'?: string;
+  'data-testid'?: string;
 }
 
-export function Card({ children, className, title, subtitle, action }: CardProps) {
+export function Card({
+  children,
+  className,
+  title,
+  subtitle,
+  action,
+  'data-state': dataState,
+  'data-testid': dataTestId,
+}: CardProps) {
   return (
     <div
       className={cn(
         'bg-ink-850 border border-white/[0.06] rounded-xl',
         className
       )}
+      data-state={dataState}
+      data-testid={dataTestId}
     >
       {(title || action) && (
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
@@ -200,10 +218,10 @@ export function Input({
         className="w-full bg-ink-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:border-brass-500/50 focus:ring-1 focus:ring-brass-500/30 transition-colors"
       />
       {helper && !error && (
-        <p id={`${inputId}-helper`} className="text-[11px] text-zinc-500 mt-1">{helper}</p>
+        <p id={`${inputId}-helper`} className="text-ds-label text-zinc-500 mt-1">{helper}</p>
       )}
       {error && (
-        <p id={`${inputId}-error`} className="text-[11px] text-state-danger mt-1" role="alert">{error}</p>
+        <p id={`${inputId}-error`} className="text-ds-label text-state-danger mt-1" role="alert">{error}</p>
       )}
     </div>
   );
@@ -752,7 +770,7 @@ export function DataTable<T>({
                 <dl className="mt-2 space-y-1">
                   {detailColumns.map((c) => (
                     <div key={c.key} className="flex items-start justify-between gap-3">
-                      <dt className="text-[11px] text-zinc-500">{c.label}</dt>
+                      <dt className="text-ds-label text-zinc-500">{c.label}</dt>
                       <dd className="min-w-0 text-right text-xs text-zinc-300">{cell(c, r)}</dd>
                     </div>
                   ))}

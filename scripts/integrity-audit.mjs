@@ -75,20 +75,42 @@ check(
   'homepage contains compliant channel-neutral pitch',
   // §UI/UX Wave 2 — REPOINTED from the old 'Wholesale Distribution' /
   // 'gets independent brands into the UK market' literal contract.
+  // §Phase 1 — REPOINTED again: the primary prospect CTA is now the canonical
+  // pre-audit CTA ("Explore UK Market Fit") rather than the retired
+  // "See if your brand qualifies" label. The INTENT is unchanged — the homepage
+  // must carry the canonical, single-source CTA — so the check asserts the
+  // CURRENT canonical label, taken from the same content model the page renders.
   homeContentCopy.includes('operating layer between your brand and the retail channel') &&
-    homeContentCopy.includes('See if your brand qualifies')
+    homeContentCopy.includes('Explore UK Market Fit')
 );
 // §Phase F audit repair: the CTA was deliberately renamed from the obsolete
 // "Get Started" to "Partner Login" (single source: hero.secondaryCta). The check
 // now asserts the CANONICAL CTA exists and that the stale copy cannot return.
+// §Phase 1 — REPOINTED: the hero's primary CTA is "Explore UK Market Fit" and
+// Partner Login is now a HEADER utility action (PublicNav), deliberately NOT
+// beside the hero CTA. Both canonical labels must still exist in the model, and
+// the two retired labels must still be absent.
 check(
   'homepage CTA is the canonical single-source label (no stale "Get Started")',
   homeContent.includes('Partner Login') &&
-    homeContent.includes('See if your brand qualifies') &&
+    homeContent.includes('Explore UK Market Fit') &&
     !homeContent.includes('Get Started') &&
-    !home.includes('Get Started')
+    !home.includes('Get Started') &&
+    !/See (My|Your) UK Potential/.test(homeContentCopy)
 );
 check('homepage has "Partner Login" action', homeContent.includes('Partner Login'));
+check(
+  'homepage primary CTA opens the assessment and carries its declared test id',
+  // §SEO FOUNDATION increment — REPOINTED: the CTA previously called the local
+  // view setter directly (`setPublicView('explore-uk-market-fit')`). It now goes
+  // through the ONE in-app navigation function (`navigate(...)`), which sets the
+  // view, pushes the canonical URL and applies the route metadata. The INTENT is
+  // unchanged — the homepage primary CTA opens the assessment and carries its
+  // declared test id — so the check reads the CURRENT canonical call.
+  home.includes("navigate('explore-uk-market-fit')") &&
+    home.includes('PRE_AUDIT_TESTIDS.cta') &&
+    !/c\.hero\.secondaryCta/.test(homeCopy)
+);
 check(
   'homepage nav includes About/Services (no Global Network)',
   // §UI/UX Wave 2 — REPOINTED: the sections are still present and the stale

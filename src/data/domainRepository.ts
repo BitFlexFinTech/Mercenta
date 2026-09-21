@@ -37,6 +37,7 @@ import type {
   AcquisitionEvent,
   BrandOnboarding,
   BrandProspect,
+  CommercialReadinessRecord,
   IntelligenceRun,
   IntelligenceSnapshot,
   Opportunity,
@@ -48,6 +49,8 @@ import type {
   CommerceActivity,
   CommerceInvoice,
   CommercePayment,
+  PreAuditAssessment,
+  WorkflowRoutingDecision,
 } from '@/types';
 
 /** Which persistence backend produced a result. */
@@ -99,6 +102,28 @@ export const DOMAIN_TABLES = {
   commerceInvoices: 'commerce_invoices',
   commercePayments: 'commerce_payments',
   commerceActivities: 'commerce_activities',
+  /**
+   * §Phase 1 — pre-audit (Explore UK Market Fit) assessment records. Ops-owned
+   * by default; a record handed to a brand tenant carries that tenant's id. The
+   * same additive-table pattern migration 022 established — still ONE database,
+   * ONE port, no second store.
+   */
+  preAuditAssessments: 'preaudit_assessments',
+  /**
+   * §Phase 2 — routing decisions (the explicit gateway layer). One row per
+   * decision, keyed by the canonical deterministic decision id, so a repeated
+   * evaluation upserts the SAME row instead of creating a duplicate. Same
+   * additive-table pattern as migration 022 — still ONE database, ONE port.
+   */
+  routingDecisions: 'routing_decisions',
+  /**
+   * §Phase 2 — commercial readiness records (the product-level commercial
+   * assessment). Keyed by the CANONICAL deterministic record id
+   * (`commercial-readiness-<assessmentId>`), so a reassessment upserts the SAME
+   * row instead of appending a new one. Same additive-table pattern — still ONE
+   * database, ONE port, no second store.
+   */
+  commercialReadinessRecords: 'commercial_readiness_records',
 } as const;
 
 export type DomainTable = (typeof DOMAIN_TABLES)[keyof typeof DOMAIN_TABLES];
@@ -143,6 +168,12 @@ export interface HydratedDomainState {
   commerceInvoices: CommerceInvoice[];
   commercePayments: CommercePayment[];
   commerceActivities: CommerceActivity[];
+  /** §Phase 1 — pre-audit (Explore UK Market Fit) assessment records. */
+  preAuditAssessments: PreAuditAssessment[];
+  /** §Phase 2 — canonical routing decisions (the auditable gateway records). */
+  routingDecisions: WorkflowRoutingDecision[];
+  /** §Phase 2 — canonical commercial readiness records. */
+  commercialReadinessRecords: CommercialReadinessRecord[];
 }
 
 export function emptyHydratedState(): HydratedDomainState {
@@ -161,6 +192,9 @@ export function emptyHydratedState(): HydratedDomainState {
     commerceInvoices: [],
     commercePayments: [],
     commerceActivities: [],
+    preAuditAssessments: [],
+    routingDecisions: [],
+    commercialReadinessRecords: [],
   };
 }
 
@@ -200,6 +234,33 @@ export interface DomainRepository {
   persistCommerceInvoice(invoice: CommerceInvoice, tenantId: string): Promise<PersistResult>;
   persistCommercePayment(payment: CommercePayment, tenantId: string): Promise<PersistResult>;
   persistCommerceActivity(activity: CommerceActivity, tenantId: string): Promise<PersistResult>;
+  /**
+   * §Phase 1 — persist a pre-audit assessment. The assessment is the artefact
+   * that owns the opportunity it produced, so persisting it (and only it) keeps
+   * ONE source of truth for that state. The owning tenant is the ops tenant for
+   * a public/ops record and the brand tenant for a handed-off one.
+   */
+  persistPreAuditAssessment(assessment: PreAuditAssessment, tenantId: string): Promise<PersistResult>;
+  /**
+   * §Phase 2 — persist a routing decision. A decision is the artefact that
+   * OWNS the routing outcome it records, so persisting it (and only it) keeps
+   * ONE source of truth. The write upserts on the DETERMINISTIC decision id, so
+   * re-running an identical evaluation cannot create a duplicate row.
+   */
+  persistRoutingDecision(
+    decision: WorkflowRoutingDecision,
+    tenantId: string
+  ): Promise<PersistResult>;
+  /**
+   * §Phase 2 — persist a commercial readiness record. The record OWNS the
+   * commercial route, so persisting it (and only it) keeps ONE source of truth.
+   * The write upserts on the DETERMINISTIC record id, so a reassessment cannot
+   * create a duplicate row.
+   */
+  persistCommercialReadinessRecord(
+    record: CommercialReadinessRecord,
+    tenantId: string
+  ): Promise<PersistResult>;
   /** Load persisted state for a scope. A brand scope NEVER sees ops rows. */
   hydrate(scope: TenantScope): Promise<HydratedDomainState>;
   /** Await any in-flight writes (tests + the async send path). */
@@ -268,6 +329,15 @@ export class MemoryDomainRepository implements DomainRepository {
   }
   persistCommerceActivity(activity: CommerceActivity): Promise<PersistResult> {
     return Promise.resolve(this.ok(DOMAIN_TABLES.commerceActivities, activity.id));
+  }
+  persistPreAuditAssessment(assessment: PreAuditAssessment): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.preAuditAssessments, assessment.id));
+  }
+  persistRoutingDecision(decision: WorkflowRoutingDecision): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.routingDecisions, decision.id));
+  }
+  persistCommercialReadinessRecord(record: CommercialReadinessRecord): Promise<PersistResult> {
+    return Promise.resolve(this.ok(DOMAIN_TABLES.commercialReadinessRecords, record.id));
   }
   hydrate(): Promise<HydratedDomainState> {
     // Nothing is durable here — an honest empty state, never a fabrication.
@@ -565,9 +635,71 @@ export class SupabaseDomainRepository implements DomainRepository {
     );
   }
 
+  /**
+   * §Phase 1 — a pre-audit assessment is scoped to the tenant that owns it: the
+   * ops tenant for a public/ops record, the brand tenant once handed off.
+   */
+  persistPreAuditAssessment(assessment: PreAuditAssessment, tenantId: string): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.preAuditAssessments,
+        rowFor(assessment.id, tenantId, assessment, {
+          brand_id: assessment.fedProspectId ?? null,
+          status: assessment.status,
+          qualification: assessment.snapshot?.qualification ?? null,
+          simulated: assessment.snapshot?.researchMode === 'simulated',
+        })
+      )
+    );
+  }
+
+  /**
+   * §Phase 2 — a routing decision is scoped to the tenant that owns it (the ops
+   * tenant for a platform/public decision, the brand tenant once brand-owned).
+   * The canonical typed key columns are stored alongside the full payload so a
+   * query/RLS policy can filter on them.
+   */
+  persistRoutingDecision(decision: WorkflowRoutingDecision, tenantId: string): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.routingDecisions,
+        rowFor(decision.id, tenantId, decision, {
+          brand_id: decision.subject.id,
+          gateway_kind: decision.gatewayKind,
+          refused: decision.refused,
+          terminal: decision.terminal,
+          idempotency_key: decision.idempotencyKey,
+        })
+      )
+    );
+  }
+
+  /**
+   * §Phase 2 — a commercial readiness record is scoped to the tenant that owns
+   * it (the ops tenant for a platform/public record, the brand tenant once
+   * brand-owned). Canonical typed key columns are stored alongside the payload so
+   * a query/RLS policy can filter on them.
+   */
+  persistCommercialReadinessRecord(
+    record: CommercialReadinessRecord,
+    tenantId: string
+  ): Promise<PersistResult> {
+    return this.track(
+      this.upsert(
+        DOMAIN_TABLES.commercialReadinessRecords,
+        rowFor(record.id, tenantId, record, {
+          brand_id: record.productRef ?? record.assessmentId,
+          route: record.route,
+          refused: record.refused,
+          revision: record.routingDecisionId,
+        })
+      )
+    );
+  }
+
   async hydrate(scope: TenantScope): Promise<HydratedDomainState> {
     if (!supabase) return emptyHydratedState();
-    const [outreach, responses, opportunities, events, prospects, runs, changes, snapshots, brandOnboarding, catalogSubmissions, commercePos, commerceInvoices, commercePayments, commerceActivities] =
+    const [outreach, responses, opportunities, events, prospects, runs, changes, snapshots, brandOnboarding, catalogSubmissions, commercePos, commerceInvoices, commercePayments, commerceActivities, preAuditAssessments, routingDecisions, commercialReadiness] =
       await Promise.all([
         this.select(DOMAIN_TABLES.outreach, scope),
         this.select(DOMAIN_TABLES.responses, scope),
@@ -583,6 +715,9 @@ export class SupabaseDomainRepository implements DomainRepository {
         this.select(DOMAIN_TABLES.commerceInvoices, scope),
         this.select(DOMAIN_TABLES.commercePayments, scope),
         this.select(DOMAIN_TABLES.commerceActivities, scope),
+        this.select(DOMAIN_TABLES.preAuditAssessments, scope),
+        this.select(DOMAIN_TABLES.routingDecisions, scope),
+        this.select(DOMAIN_TABLES.commercialReadinessRecords, scope),
       ]);
     const payloads = <T>(rows: Record<string, unknown>[]): T[] =>
       rows.map((r) => r.payload as T).filter(Boolean);
@@ -601,6 +736,9 @@ export class SupabaseDomainRepository implements DomainRepository {
       commerceInvoices: payloads<CommerceInvoice>(commerceInvoices),
       commercePayments: payloads<CommercePayment>(commercePayments),
       commerceActivities: payloads<CommerceActivity>(commerceActivities),
+      preAuditAssessments: payloads<PreAuditAssessment>(preAuditAssessments),
+      routingDecisions: payloads<WorkflowRoutingDecision>(routingDecisions),
+      commercialReadinessRecords: payloads<CommercialReadinessRecord>(commercialReadiness),
     };
   }
 

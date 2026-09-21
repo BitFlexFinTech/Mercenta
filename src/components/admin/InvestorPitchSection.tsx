@@ -29,14 +29,14 @@ export function InvestorPitchSection() {
         <div className="flex items-center gap-2">
           <ChartPie className="w-4 h-4 text-brass-400" />
           <span className="text-sm font-semibold text-white">UK Import Market — Investor Data</span>
-          <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
+          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
         </div>
-        <Button className="text-[10px]" onClick={handleDownload}>
+        <Button className="text-ds-micro" onClick={handleDownload}>
           <Download className="w-3 h-3 mr-1" /> Export Report
         </Button>
       </div>
 
-      <p className="text-[11px] text-zinc-500 mb-4">
+      <p className="text-ds-label text-zinc-500 mb-4">
         Full TAM/SAM breakdown by category for investor pitch materials. Sources cited:
         ONS UK Trade in Goods (SITC/HS classification). Includes methodology so the figures
         hold up to investor scrutiny.
@@ -50,9 +50,9 @@ export function InvestorPitchSection() {
       <div className="mt-4 bg-ink-900 border border-white/[0.06] rounded-lg p-3">
         <div className="flex items-center gap-2 mb-1.5">
           <TrendingUp className="w-3.5 h-3.5 text-brass-400" />
-          <span className="text-[11px] font-medium text-white">Positioning Frame</span>
+          <span className="text-ds-label font-medium text-white">Positioning Frame</span>
         </div>
-        <p className="text-[10px] text-zinc-400 leading-relaxed">
+        <p className="text-ds-micro text-zinc-400 leading-relaxed">
           <em>&quot;We aren't a needle in a haystack — we are the haystack.&quot;</em> The UK imports over
           GBP {report.totalTamGbp.toFixed(0)}B annually in the {report.categories.length} wholesale categories
           Mercenta covers, of which GBP {report.totalSamGbp.toFixed(1)}B is addressable through its

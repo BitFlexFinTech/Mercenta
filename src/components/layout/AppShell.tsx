@@ -189,6 +189,12 @@ export function AppShell({
           themeAccent={themeAccent}
           compact={navCompact}
           onToggleCompact={() => setNavCompact((c) => !c)}
+          /**
+           * §UI/UX Wave 3 — the demo environment switcher is an INLINE footer
+           * control, not a floating overlay. It previously sat on top of the
+           * last rows of every workspace.
+           */
+          footer={<EnvironmentRouter compact={navCompact} />}
         />
       </div>
 
@@ -207,7 +213,7 @@ export function AppShell({
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 overflow-y-auto pb-16"
+          className="flex-1 overflow-y-auto"
           style={{ backgroundColor: 'var(--mr-bg)' }}
         >
           {/* §UI/UX Wave 2 — surfaces compose their own WorkspaceFrame so each
@@ -224,8 +230,6 @@ export function AppShell({
         groups={paletteGroups}
         placeholder={commandPlaceholder}
       />
-
-      <EnvironmentRouter />
     </div>
   );
 }

@@ -54,7 +54,7 @@ function CasePackSection() {
         {open ? <ChevronDown className="w-3 h-3 text-zinc-500" /> : <ChevronRight className="w-3 h-3 text-zinc-500" />}
       </button>
       {open && (
-        <div className="px-4 pb-3 space-y-2 text-[11px] text-zinc-400 leading-relaxed">
+        <div className="px-4 pb-3 space-y-2 text-ds-label text-zinc-400 leading-relaxed">
           <p>
             A <strong className="text-zinc-200">case pack</strong> is the smallest shippable
             carton the retail channel will accept. It must match your real minimum viable
@@ -68,7 +68,7 @@ function CasePackSection() {
             packed in multi-packs for wholesale, configure the inner pack correctly —
             otherwise the system may calculate incorrect landed costs.
           </p>
-          <div className="bg-ink-900 rounded p-2 text-[10px] font-mono text-zinc-500 space-y-1">
+          <div className="bg-ink-900 rounded p-2 text-ds-micro font-mono text-zinc-500 space-y-1">
             <p><span className="text-zinc-400">Example:</span> Marula Oil 50ml</p>
             <p className="pl-3">Inner pack: 6 units</p>
             <p className="pl-3">Case pack: 4 inners × 6 = <strong className="text-zinc-300">24 units per case</strong></p>
@@ -99,14 +99,14 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
         {open ? <ChevronDown className="w-3 h-3 text-zinc-500" /> : <ChevronRight className="w-3 h-3 text-zinc-500" />}
       </button>
       {open && (
-        <div className="px-4 pb-3 space-y-2 text-[11px] text-zinc-400 leading-relaxed">
+        <div className="px-4 pb-3 space-y-2 text-ds-label text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-200">Net PPM</strong> (Net Profit Per Mille) = the
             retail channel's profit per 1,000 units sold, expressed as a percentage of
             the selling price. It is the single most important metric for vendor performance.
           </p>
-          <div className="bg-ink-900 rounded p-2 text-[10px] font-mono text-zinc-500 space-y-1">
-            <p className="text-zinc-300 font-medium text-[11px]">Net PPM Formula</p>
+          <div className="bg-ink-900 rounded p-2 text-ds-micro font-mono text-zinc-500 space-y-1">
+            <p className="text-zinc-300 font-medium text-ds-label">Net PPM Formula</p>
             <p>Net PPM = ((ASP − COGS − Channel Fees) ÷ ASP) × 1000</p>
             <p className="text-zinc-600 mt-1.5">Where:</p>
             <p className="pl-3">ASP = Average Selling Price to consumers</p>
@@ -117,9 +117,9 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
           <div className="mt-2">
             <p className="text-xs text-zinc-300 font-medium mb-1">
               Your category benchmark:{' '}
-              <Badge className="text-[10px] bg-brass-500/15 text-brass-300">{category ?? 'N/A'} — {target}% minimum Net PPM</Badge>
+              <Badge className="text-ds-micro bg-brass-500/15 text-brass-300">{category ?? 'N/A'} — {target}% minimum Net PPM</Badge>
             </p>
-            <table className="w-full text-[10px] text-zinc-500 mt-1.5">
+            <table className="w-full text-ds-micro text-zinc-500 mt-1.5">
               <thead>
                 <tr className="border-b border-white/[0.06] text-zinc-600">
                   <th className="text-left font-medium py-1">Type</th>
@@ -140,7 +140,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
           </div>
 
           {/* ⚠ Cost-price lock-in warning — prominently flagged */}
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-[11px]">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-ds-label">
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
               <div>
@@ -157,7 +157,7 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
             </div>
           </div>
 
-          <p className="text-[10px] text-zinc-600 mt-1">
+          <p className="text-ds-micro text-zinc-600 mt-1">
             <strong className="text-zinc-500">Worked example:</strong> If your target ASP is £24.99
             and your category requires Net PPM ≥ 35%, your maximum Ex-Works + landed cost should
             be roughly £16.25 — about 65% of ASP. The system flags products where the implied Net PPM
@@ -184,11 +184,11 @@ function PackagingSection() {
         {open ? <ChevronDown className="w-3 h-3 text-zinc-500" /> : <ChevronRight className="w-3 h-3 text-zinc-500" />}
       </button>
       {open && (
-        <div className="px-4 pb-3 space-y-2 text-[11px] text-zinc-400 leading-relaxed">
+        <div className="px-4 pb-3 space-y-2 text-ds-label text-zinc-400 leading-relaxed">
           <div className="bg-ink-900 rounded p-2.5 space-y-2">
             <div>
               <p className="text-xs text-zinc-300 font-medium mb-1">Carton Marking</p>
-              <ul className="list-disc list-inside text-[10px] space-y-0.5">
+              <ul className="list-disc list-inside text-ds-micro space-y-0.5">
                 <li>SSCC-18 barcode (GS1-128) on every carton</li>
                 <li>PO number, SKU, total unit count on 2+ adjacent faces</li>
                 <li>"Made in [Country]" on shipping carton</li>
@@ -197,7 +197,7 @@ function PackagingSection() {
             </div>
             <div>
               <p className="text-xs text-zinc-300 font-medium mb-1">Barcode Placement</p>
-              <ul className="list-disc list-inside text-[10px] space-y-0.5">
+              <ul className="list-disc list-inside text-ds-micro space-y-0.5">
                 <li>GTIN-12 (UPC-A) or GTIN-13 (EAN-13) on product or outer</li>
                 <li>Must be scannable through polybag</li>
                 <li>Multi-pack must have its own barcode — never reuse single-unit</li>
@@ -205,7 +205,7 @@ function PackagingSection() {
             </div>
             <div>
               <p className="text-xs text-zinc-300 font-medium mb-1">Prep Requirements</p>
-              <ul className="list-disc list-inside text-[10px] space-y-0.5">
+              <ul className="list-disc list-inside text-ds-micro space-y-0.5">
                 <li>Liquids &gt; 120ml: leak-proof polybag, individually wrapped</li>
                 <li>Glass/fragile: "Fragile" marking + 2-inch corner padding min</li>
                 <li>Sharp items: secure-point packaging, puncture-proof</li>
@@ -213,7 +213,7 @@ function PackagingSection() {
               </ul>
             </div>
           </div>
-          <p className="text-[10px] text-zinc-600">
+          <p className="text-ds-micro text-zinc-600">
             Summary — full specs from Mercenta compliance team. Non-compliance
             may result in returned shipments, chargebacks, or penalties.
           </p>
@@ -237,7 +237,7 @@ function PORejectionSection() {
         {open ? <ChevronDown className="w-3 h-3 text-zinc-500" /> : <ChevronRight className="w-3 h-3 text-zinc-500" />}
       </button>
       {open && (
-        <div className="px-4 pb-3 space-y-2 text-[11px] text-zinc-400 leading-relaxed">
+        <div className="px-4 pb-3 space-y-2 text-ds-label text-zinc-400 leading-relaxed">
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -255,7 +255,7 @@ function PORejectionSection() {
               <span className="w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0 mt-1.5" />
               <div>
                 <strong className="text-zinc-300">ASIN Confirmation Rate</strong>
-                <p className="text-[10px] text-zinc-500">
+                <p className="text-ds-micro text-zinc-500">
                   % of ordered lines confirmed. Below 80% triggers review, may
                   reduce future PO volume. Repeat rejections can delist ASINs.
                 </p>
@@ -265,7 +265,7 @@ function PORejectionSection() {
               <span className="w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0 mt-1.5" />
               <div>
                 <strong className="text-zinc-300">Net PPM Impact</strong>
-                <p className="text-[10px] text-zinc-500">
+                <p className="text-ds-micro text-zinc-500">
                   Rejected POs reduce sell-through, lowering Net PPM as fixed costs
                   spread across fewer units. Damages category profitability.
                 </p>
@@ -275,7 +275,7 @@ function PORejectionSection() {
               <span className="w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0 mt-1.5" />
               <div>
                 <strong className="text-zinc-300">Mercenta Account Standing</strong>
-                <p className="text-[10px] text-zinc-500">
+                <p className="text-ds-micro text-zinc-500">
                   Mercenta is vendor of record — every rejection on your account
                   affects our standing with the retail buyer. Pattern of avoidable
                   rejections may restrict PO assignment or add oversight.
@@ -283,7 +283,7 @@ function PORejectionSection() {
               </div>
             </div>
           </div>
-          <div className="mt-2 text-[10px] text-zinc-500 border-t border-white/[0.06] pt-2">
+          <div className="mt-2 text-ds-micro text-zinc-500 border-t border-white/[0.06] pt-2">
             <p className="flex items-start gap-1">
               <Info className="w-3 h-3 text-zinc-600 flex-shrink-0 mt-0.5" />
               Valid rejection codes: TemporarilyUnavailable, InvalidProductIdentifier,
@@ -305,7 +305,7 @@ function RequiredReadingAck({ ack, setAck }: { ack: boolean; setAck: (v: boolean
         className="mt-0.5 accent-brass-500" />
       <div>
         <p className="text-xs text-white font-medium">I acknowledge the guidance above</p>
-        <p className="text-[10px] text-zinc-500 mt-0.5">
+        <p className="text-ds-micro text-zinc-500 mt-0.5">
           I understand how pricing, packaging, and PO rejections affect my vendor
           performance. I confirm my category's minimum Net PPM benchmark has been reviewed.
         </p>

@@ -29,7 +29,41 @@ export type EventType =
   // §Sprint 2 — the deterministic proactive reminder runner escalated an
   // existing work item past a declared deadline boundary. Never a timer, never
   // a random trigger: the sweep is explicitly invoked and idempotent.
-  | 'reminder_raised';
+  | 'reminder_raised'
+  // §Founder OS — the automation registry. A failed run must be OBSERVABLE
+  // (never a fake success), an escalation is a real operational act, and an
+  // automation that reaches a consequential decision stops at a human gate.
+  | 'automation_run_failed'
+  | 'automation_approval_required'
+  | 'work_escalated'
+  // §Phase 1 — the pre-audit (Explore UK Market Fit) lifecycle. These are the
+  // canonical events the assessment emits so a future automation can consume
+  // them; no external automation platform is a dependency and there is no
+  // second event system.
+  | 'assessment_started'
+  | 'assessment_completed'
+  | 'opportunity_created'
+  | 'opportunity_qualified'
+  | 'research_required'
+  | 'outreach_ready'
+  // §Phase 2 — the explicit routing/gateway layer. A routing decision is an
+  // auditable fact, so it is a canonical event like any other: `route_refused`
+  // makes a refusal OBSERVABLE rather than silent, `route_branch_failed` keeps a
+  // failed branch visible even when a sibling branch succeeded, and the join
+  // events make fan-in completion (or its absence) explicit. Still ONE event
+  // system — these are added to the existing union, not a second feed.
+  | 'routing_decision_recorded'
+  | 'route_refused'
+  | 'route_branch_failed'
+  | 'route_join_satisfied'
+  | 'route_join_incomplete'
+  | 'commercial_route_selected'
+  // §Phase 2 — the commercial readiness lifecycle. An assessment produced a
+  // route, a reassessment CHANGED it, and a brand supplied the missing
+  // commercial information. Added to the EXISTING union — no second feed.
+  | 'commercial_readiness_assessed'
+  | 'commercial_readiness_reassessed'
+  | 'commercial_readiness_terms_submitted';
 
 export interface PlatformEvent {
   id: string;
@@ -42,6 +76,26 @@ export interface PlatformEvent {
   metadata?: Record<string, unknown>;
   createdAt: string;
   acknowledged: boolean;
+  /**
+   * §Phase 2 — the owning tenant, when the event is tenant-scoped. Additive and
+   * optional, so every existing emitter is unaffected; `null` means the event is
+   * platform-wide (Super-Admin scope), which is the honest value for the many
+   * operational events that are not brand-specific.
+   */
+  tenantId?: string | null;
+  /**
+   * §Phase 2 — the idempotency key of the operation that produced the event, so a
+   * repeated operation can be recognised as a duplicate rather than emitting a
+   * second event. Optional: emitters that are not idempotent omitting it is
+   * honest, not a claim of idempotence.
+   */
+  idempotencyKey?: string;
+  /** §Phase 2 — the routing decision this event belongs to, when it belongs to one. */
+  routeId?: string;
+  /** §Phase 2 — correlates the branches of ONE fan-out. */
+  correlationId?: string;
+  /** §Phase 2 — the per-branch outcomes this event reports, when it reports branches. */
+  branchOutcomes?: { routeId: string; outcome: string }[];
 }
 
 export interface EventFeedQuery {
@@ -69,4 +123,26 @@ export const EVENT_SEVERITY_MAP: Record<EventType, EventSeverity> = {
   work_item_raised: 'important',
   work_item_resolved: 'informational',
   reminder_raised: 'important',
+  automation_run_failed: 'important',
+  automation_approval_required: 'important',
+  work_escalated: 'important',
+  // §Phase 1 — pre-audit events.
+  assessment_started: 'informational',
+  assessment_completed: 'important',
+  opportunity_created: 'important',
+  opportunity_qualified: 'important',
+  research_required: 'informational',
+  outreach_ready: 'important',
+  // §Phase 2 — routing events. A refusal and a failed branch are IMPORTANT: they
+  // must be visible to an operator, never buried as informational noise.
+  routing_decision_recorded: 'informational',
+  route_refused: 'important',
+  route_branch_failed: 'important',
+  route_join_satisfied: 'informational',
+  route_join_incomplete: 'important',
+  commercial_route_selected: 'important',
+  // §Phase 2 — commercial readiness lifecycle.
+  commercial_readiness_assessed: 'important',
+  commercial_readiness_reassessed: 'important',
+  commercial_readiness_terms_submitted: 'informational',
 };

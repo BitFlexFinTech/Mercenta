@@ -61,7 +61,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
           aria-label="Visual theme"
           className="absolute right-0 top-full mt-2 z-50 w-64 rounded-ds-lg bg-ink-900 border border-white/[0.08] shadow-ds-overlay animate-fade-in p-2"
         >
-          <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-zinc-500">
+          <p className="px-3 py-1.5 text-ds-micro uppercase tracking-wider text-zinc-500">
             Visual theme · {shellMode === 'light' ? 'light' : 'dark'} mode
           </p>
           {THEME_ORDER.map((id) => {
@@ -94,7 +94,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean } = {}) {
               </button>
             );
           })}
-          <p className="px-3 pb-2 pt-1 text-[9px] text-zinc-600 leading-snug">
+          <p className="px-3 pb-2 pt-1 text-ds-micro text-zinc-600 leading-snug">
             Presentation only — data, permissions and workflows never change.
           </p>
         </div>

@@ -1,3 +1,24 @@
+> ## ⚠ HISTORICAL DOCUMENT — NO AUTHORITY (marked 2026-09-21)
+>
+> Although this file describes itself below as a "portable long-term project
+> constitution", it is a **HISTORICAL CONTEXT DOCUMENT**. `.clinerules/operating-model.md`
+> §1 names it explicitly as a document the canonical operating model OVERRIDES.
+> It is **NOT an active operating rule** and MUST NOT be used to gate, block, delay
+> or reverse current work.
+>
+> - Canonical operating model: **`.clinerules/operating-model.md`**
+> - Current project position: **`PROJECT_STATUS.md`** (+ `HANDOFF.md`)
+> - Business invariants: **`.clinerules/mercenta-business-model.md`**
+> - Granular capability matrix: **`requirements-registry.json`**
+> - Presentation rules: **`docs/DESIGN_SYSTEM.md`** (the UI is **NOT** frozen)
+>
+> Its Design Freeze passages are already struck through inline below and have **no
+> authority**. Any other instruction here that conflicts with the canonical
+> operating model — a dirty-tree STOP gate, a file-count gate, a "do not commit"
+> rule, or a stale payout-rail / VAT / provider statement — is **EXPIRED**.
+> THE EXISTING UI IS NOT THE VISUAL BASELINE (`operating-model.md` §4).
+
+---
 # MERCENTA_MASTER_CONTEXT.md
 
 > **AI-VENDOR-NEUTRAL PROJECT CONTEXT.**

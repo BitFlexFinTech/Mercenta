@@ -68,7 +68,7 @@ function SourceBadge({ source }: { source: string | null }) {
   return (
     <Badge
       className={cn(
-        'text-[10px]',
+        'text-ds-micro',
         simulated
           ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
           : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
@@ -213,12 +213,12 @@ export function CompanyControlCentre() {
             <h2 className="text-sm font-semibold text-white flex items-center gap-2">
               <Building2 className="w-4 h-4" /> Company Control Centre — {COMPANY_REGISTRATION.legalName}
             </h2>
-            <p className="text-[11px] text-zinc-500 mt-1">{COMPANY_CENTRE_DISCLAIMER}</p>
+            <p className="text-ds-label text-zinc-500 mt-1">{COMPANY_CENTRE_DISCLAIMER}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             <Badge
               className={cn(
-                'text-[10px]',
+                'text-ds-micro',
                 chLive
                   ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                   : chSimulationSafe
@@ -234,67 +234,67 @@ export function CompanyControlCentre() {
           </div>
         </div>
         {!canReadRegister && (
-          <p className="text-[10px] text-amber-300/90 mt-2" data-testid="company-read-blocked">
+          <p className="text-ds-micro text-amber-300/90 mt-2" data-testid="company-read-blocked">
             Companies House resolves &lsquo;{String(chMode)}&rsquo; — not positively simulation and not live, so no read is
             attempted. Connect it in Integration Settings first.
           </p>
         )}
         {message && (
-          <p className="text-[10px] text-emerald-300/90 mt-2" data-testid="company-read-message">
+          <p className="text-ds-micro text-emerald-300/90 mt-2" data-testid="company-read-message">
             {message}
           </p>
         )}
         {readError && (
-          <p className="text-[10px] text-red-300/90 mt-2" data-testid="company-read-error">
+          <p className="text-ds-micro text-red-300/90 mt-2" data-testid="company-read-error">
             Last read error: {readError}
           </p>
         )}
-        <div className="grid gap-2 sm:grid-cols-4 mt-4 text-[11px]">
+        <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Company number</p>
+            <p className="text-ds-micro text-zinc-500">Company number</p>
             <p className="text-sm font-bold text-white font-mono">{COMPANY_REGISTRATION.companyNumber}</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Registrar status</p>
+            <p className="text-ds-micro text-zinc-500">Registrar status</p>
             <p className="text-sm font-bold text-white">{record?.status ?? COMPANY_REGISTRATION.registrarStatusLabel}</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Last read</p>
+            <p className="text-ds-micro text-zinc-500">Last read</p>
             <p className="text-sm font-bold text-white">
               {snapshot.readAt ? new Date(snapshot.readAt).toLocaleString() : 'never'}
             </p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Audit entries</p>
+            <p className="text-ds-micro text-zinc-500">Audit entries</p>
             <p className="text-sm font-bold text-white">{auditCount}</p>
           </div>
         </div>
       </Card>
 
       <Card className="p-5" title="Company record" subtitle="Every value is labelled with the source that produced it">
-        <div className="grid gap-2 sm:grid-cols-2 text-[11px]" data-testid="company-record">
+        <div className="grid gap-2 sm:grid-cols-2 text-ds-label" data-testid="company-record">
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Legal name</p>
+            <p className="text-ds-micro text-zinc-500">Legal name</p>
             <p className="text-xs text-white">{COMPANY_REGISTRATION.legalName}</p>
-            <p className="text-[10px] text-zinc-600">founder_supplied</p>
+            <p className="text-ds-micro text-zinc-600">founder_supplied</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Jurisdiction</p>
+            <p className="text-ds-micro text-zinc-500">Jurisdiction</p>
             <p className="text-xs text-white">{COMPANY_REGISTRATION.jurisdiction}</p>
-            <p className="text-[10px] text-zinc-600">founder_supplied</p>
+            <p className="text-ds-micro text-zinc-600">founder_supplied</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Incorporation date</p>
+            <p className="text-ds-micro text-zinc-500">Incorporation date</p>
             <p className="text-xs text-white">{record?.incorporationDate ?? 'not read from the register'}</p>
             <SourceBadge source={snapshot.dataSource} />
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Registered office</p>
+            <p className="text-ds-micro text-zinc-500">Registered office</p>
             <p className="text-xs text-white">{record?.registeredOfficeAddress ?? 'not read from the register'}</p>
             <SourceBadge source={snapshot.dataSource} />
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2 sm:col-span-2">
-            <p className="text-[10px] text-zinc-500">SIC codes</p>
+            <p className="text-ds-micro text-zinc-500">SIC codes</p>
             <p className="text-xs text-white font-mono">
               {record ? (record.sicCodes.length ? record.sicCodes.join(', ') : 'none returned') : 'not read from the register'}
             </p>
@@ -306,7 +306,7 @@ export function CompanyControlCentre() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="p-5" title="Officers" subtitle="From the registrar read — nothing is invented">
           {officers.length === 0 ? (
-            <p className="text-[11px] text-zinc-500" data-testid="company-officers-empty">
+            <p className="text-ds-label text-zinc-500" data-testid="company-officers-empty">
               {snapshot.readAt
                 ? 'The registrar returned no officers for this company. Mercenta does not fill this in.'
                 : 'Not read yet — read the company record.'}
@@ -314,7 +314,7 @@ export function CompanyControlCentre() {
           ) : (
             <ul className="space-y-1" data-testid="company-officers">
               {officers.map((o) => (
-                <li key={`${o.name}-${o.appointedOn ?? ''}`} className="text-[11px] text-zinc-300">
+                <li key={`${o.name}-${o.appointedOn ?? ''}`} className="text-ds-label text-zinc-300">
                   {o.name} · {o.role}
                   {o.appointedOn ? ` · appointed ${o.appointedOn}` : ''}
                 </li>
@@ -325,7 +325,7 @@ export function CompanyControlCentre() {
 
         <Card className="p-5" title="Persons with significant control" subtitle="Registrar data only">
           {psc.length === 0 ? (
-            <p className="text-[11px] text-zinc-500" data-testid="company-psc-empty">
+            <p className="text-ds-label text-zinc-500" data-testid="company-psc-empty">
               {snapshot.readAt
                 ? 'The registrar returned no PSC records. Mercenta does not fill this in.'
                 : 'Not read yet — read the company record.'}
@@ -333,7 +333,7 @@ export function CompanyControlCentre() {
           ) : (
             <ul className="space-y-1" data-testid="company-psc">
               {psc.map((p) => (
-                <li key={p.name} className="text-[11px] text-zinc-300">
+                <li key={p.name} className="text-ds-label text-zinc-300">
                   {p.name} — {p.naturesOfControl.join(', ') || p.kind}
                 </li>
               ))}
@@ -343,7 +343,7 @@ export function CompanyControlCentre() {
 
         <Card className="p-5" title="Filing history" subtitle="Registrar data only">
           {filings.length === 0 ? (
-            <p className="text-[11px] text-zinc-500" data-testid="company-filings-empty">
+            <p className="text-ds-label text-zinc-500" data-testid="company-filings-empty">
               {snapshot.readAt
                 ? 'The registrar returned no filings. Mercenta never invents a filing.'
                 : 'Not read yet — read the company record.'}
@@ -351,7 +351,7 @@ export function CompanyControlCentre() {
           ) : (
             <ul className="space-y-1" data-testid="company-filings">
               {filings.map((f) => (
-                <li key={f.transactionId} className="text-[11px] text-zinc-300">
+                <li key={f.transactionId} className="text-ds-label text-zinc-300">
                   {f.date} · {f.description}
                 </li>
               ))}
@@ -361,13 +361,13 @@ export function CompanyControlCentre() {
 
         <Card className="p-5" title="Charges" subtitle="Registrar data only">
           {charges.length === 0 ? (
-            <p className="text-[11px] text-zinc-500" data-testid="company-charges-empty">
+            <p className="text-ds-label text-zinc-500" data-testid="company-charges-empty">
               {record ? 'No charges on the register.' : 'Not read yet — read the company record.'}
             </p>
           ) : (
             <ul className="space-y-1" data-testid="company-charges">
               {charges.map((c) => (
-                <li key={c.chargeId} className="text-[11px] text-zinc-300">
+                <li key={c.chargeId} className="text-ds-label text-zinc-300">
                   {c.createdAt} · {c.description ?? c.chargeId}
                 </li>
               ))}
@@ -381,13 +381,13 @@ export function CompanyControlCentre() {
           <div className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2" data-testid="company-deadline">
             <div>
               <p className="text-xs text-white">Confirmation statement</p>
-              <p className="text-[10px] text-zinc-500">
+              <p className="text-ds-micro text-zinc-500">
                 {confirmation.nextDueDate ?? 'No due date read from the register yet'} · {csDue.label}
               </p>
             </div>
             <Badge
               className={cn(
-                'text-[10px]',
+                'text-ds-micro',
                 csDue.state === 'overdue'
                   ? 'bg-red-500/15 text-red-300 border-red-500/20'
                   : csDue.state === 'due_soon'
@@ -401,13 +401,13 @@ export function CompanyControlCentre() {
           <div className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2" data-testid="company-deadline-accounts">
             <div>
               <p className="text-xs text-white">Annual accounts</p>
-              <p className="text-[10px] text-zinc-500">
+              <p className="text-ds-micro text-zinc-500">
                 {record?.nextAccountsDue ?? 'No accounts due date read from the register yet'} · {accountsDue.label}
               </p>
             </div>
             <Badge
               className={cn(
-                'text-[10px]',
+                'text-ds-micro',
                 accountsDue.state === 'overdue'
                   ? 'bg-red-500/15 text-red-300 border-red-500/20'
                   : accountsDue.state === 'due_soon'
@@ -419,7 +419,7 @@ export function CompanyControlCentre() {
             </Badge>
           </div>
         </div>
-        <p className="text-[10px] text-zinc-600 mt-2">
+        <p className="text-ds-micro text-zinc-600 mt-2">
           Reminder windows: {[90, 60, 30, 7, 0].join(' / ')} days before the due date. Accounts are prepared outside
           Mercenta and filed on the official service.
         </p>
@@ -439,7 +439,7 @@ export function CompanyControlCentre() {
               <li
                 key={step.id}
                 className={cn(
-                  'rounded-full border px-2.5 py-0.5 text-[10px]',
+                  'rounded-full border px-2.5 py-0.5 text-ds-micro',
                   state === 'done'
                     ? 'border-emerald-500/20 bg-emerald-500/15 text-emerald-300'
                     : state === 'current'
@@ -455,7 +455,7 @@ export function CompanyControlCentre() {
             );
           })}
         </ol>
-        <div className="space-y-1 text-[11px] text-zinc-400">
+        <div className="space-y-1 text-ds-label text-zinc-400">
           <p>
             Stage: <span className="text-white">{confirmation.stage}</span> · Due date:{' '}
             <span className="text-white">{confirmation.nextDueDate ?? 'not read yet'}</span> · Source:{' '}
@@ -519,7 +519,7 @@ export function CompanyControlCentre() {
             File via connected service
           </Button>
         </div>
-        <p className="text-[10px] text-amber-300/80 mt-2" data-testid="company-filing-notice">
+        <p className="text-ds-micro text-amber-300/80 mt-2" data-testid="company-filing-notice">
           Mercenta holds no official electronic-filing channel for Companies House, so nothing is submitted from here.
           File on the official service, then record the reference below.
         </p>
@@ -565,7 +565,7 @@ export function CompanyControlCentre() {
           </div>
         </div>
         <a
-          className="inline-flex items-center gap-1 text-[10px] text-sky-300/90 mt-2"
+          className="inline-flex items-center gap-1 text-ds-micro text-sky-300/90 mt-2"
           href={COMPANIES_HOUSE_MANUAL_ACTIONS.filing}
           target="_blank"
           rel="noreferrer"
@@ -590,11 +590,11 @@ export function CompanyControlCentre() {
                     <p className="text-xs text-white flex items-center gap-1">
                       <KeyRound className="w-3 h-3" /> {spec.label}
                     </p>
-                    <p className="text-[10px] text-zinc-500">{spec.purpose}</p>
+                    <p className="text-ds-micro text-zinc-500">{spec.purpose}</p>
                   </div>
                   <Badge
                     className={cn(
-                      'text-[10px]',
+                      'text-ds-micro',
                       rec.secretRef
                         ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                         : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20'
@@ -656,7 +656,7 @@ export function CompanyControlCentre() {
                     Remove
                   </Button>
                   <a
-                    className="inline-flex items-center gap-1 text-[10px] text-sky-300/90"
+                    className="inline-flex items-center gap-1 text-ds-micro text-sky-300/90"
                     href={spec.manualActionUrl}
                     target="_blank"
                     rel="noreferrer"
@@ -664,12 +664,12 @@ export function CompanyControlCentre() {
                     <ExternalLink className="w-3 h-3" /> {spec.enterAt}
                   </a>
                 </div>
-                {rec.verifiedAt && <p className="text-[10px] text-emerald-300/80 mt-1">Confirmed {rec.verifiedAt}</p>}
+                {rec.verifiedAt && <p className="text-ds-micro text-emerald-300/80 mt-1">Confirmed {rec.verifiedAt}</p>}
               </div>
             );
           })}
         </div>
-        <p className="text-[10px] text-zinc-600 mt-2">
+        <p className="text-ds-micro text-zinc-600 mt-2">
           GOV.UK does not provide a supported API for the company actions Mercenta needs, so the GOV.UK item is a
           credential reference plus a manual-action link — there is no invented integration.
           <a className="text-sky-300/90 ml-1" href={GOV_UK_MANUAL_ACTIONS.oneLoginManage} target="_blank" rel="noreferrer">
@@ -682,10 +682,10 @@ export function CompanyControlCentre() {
         <div className="flex items-center justify-between gap-3" data-testid="company-hmrc">
           <div>
             <p className="text-xs text-white">HMRC — Making Tax Digital</p>
-            <p className="text-[10px] text-zinc-500">{HMRC_READINESS.reason}</p>
-            <p className="text-[10px] text-zinc-600">Blocker: {HMRC_READINESS.blocker}</p>
+            <p className="text-ds-micro text-zinc-500">{HMRC_READINESS.reason}</p>
+            <p className="text-ds-micro text-zinc-600">Blocker: {HMRC_READINESS.blocker}</p>
           </div>
-          <Badge className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/20">
+          <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
             {HMRC_READINESS.state === 'ready_not_connected' ? 'READY / NOT CONNECTED' : String(HMRC_READINESS.state)}
           </Badge>
         </div>

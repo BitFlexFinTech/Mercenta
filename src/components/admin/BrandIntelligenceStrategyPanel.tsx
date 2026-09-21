@@ -96,7 +96,7 @@ export function BrandIntelligenceStrategyPanel() {
   return (
     <div className="space-y-4">
       <Card title="Acquisition strategy — both engines, one destination market">
-        <p className="text-[11px] text-zinc-500 mb-3">
+        <p className="text-ds-label text-zinc-500 mb-3">
           Every projection below is an estimate derived from the stored prospect score —{' '}
           <span className="text-zinc-400">{ESTIMATE_LABEL}</span>. The destination market is the UK in
           both strategies.
@@ -116,8 +116,8 @@ export function BrandIntelligenceStrategyPanel() {
                   <Icon className="w-3.5 h-3.5 text-brass-400" />
                   <span className="text-xs font-medium text-white">{def.label}</span>
                 </div>
-                <p className="text-[10px] text-zinc-500 mb-2">{def.summary}</p>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                <p className="text-ds-micro text-zinc-500 mb-2">{def.summary}</p>
+                <div className="grid grid-cols-2 gap-2 text-ds-label font-mono">
                   <p className="text-zinc-400">
                     Tracked: <span className="text-zinc-200">{stats.count}</span>
                   </p>
@@ -134,7 +134,7 @@ export function BrandIntelligenceStrategyPanel() {
                     <span className="text-emerald-300">{gbp(stats.projectedMarginGbp)}</span>
                   </p>
                 </div>
-                <p className="text-[10px] text-zinc-600 mt-2">{def.rationale}</p>
+                <p className="text-ds-micro text-zinc-600 mt-2">{def.rationale}</p>
               </div>
             );
           })}
@@ -180,7 +180,7 @@ export function BrandIntelligenceStrategyPanel() {
                       {r.strategy === 'uk_brands' ? 'A · UK' : 'B · global→UK'}
                     </td>
                     <td className="px-2 py-1.5 text-zinc-400">{r.sourceMarketLabel}</td>
-                    <td className="px-2 py-1.5 text-zinc-500 text-[10px]">
+                    <td className="px-2 py-1.5 text-zinc-500 text-ds-micro">
                       {describeMarketAccessTag(p?.marketAccess)}
                     </td>
                     <td className="px-2 py-1.5">
@@ -229,7 +229,7 @@ export function BrandIntelligenceStrategyPanel() {
               <div className="flex items-center gap-2 mb-2">
                 <Tag className="w-3.5 h-3.5 text-brass-400" />
                 <span className="text-xs font-medium text-white">{selectedProspect.brand}</span>
-                <span className="text-[10px] text-zinc-500">
+                <span className="text-ds-micro text-zinc-500">
                   currently: {describeMarketAccessTag(selectedProspect.marketAccess)}
                 </span>
               </div>
@@ -282,16 +282,16 @@ export function BrandIntelligenceStrategyPanel() {
                 </Button>
               </div>
               {message && (
-                <p className="text-[11px] text-brass-300 mt-2" data-testid="market-access-message">
+                <p className="text-ds-label text-brass-300 mt-2" data-testid="market-access-message">
                   {message}
                 </p>
               )}
-              <p className="text-[10px] text-zinc-600 mt-2">{TRADE_PARTNERSHIP_DISCLAIMER}</p>
+              <p className="text-ds-micro text-zinc-600 mt-2">{TRADE_PARTNERSHIP_DISCLAIMER}</p>
             </div>
 
             {estimate && (
               <div
-                className="rounded-lg border border-white/[0.08] p-3 text-[11px]"
+                className="rounded-lg border border-white/[0.08] p-3 text-ds-label"
                 data-testid="admin-sales-estimate"
               >
                 <p className="text-xs font-medium text-white mb-1">
@@ -305,7 +305,7 @@ export function BrandIntelligenceStrategyPanel() {
                 </p>
                 <p className="text-zinc-500 mt-1">{estimate.confidenceReason}</p>
                 {estimate.disclaimers.map((d) => (
-                  <p key={d} className="text-[10px] text-zinc-600 mt-1">{d}</p>
+                  <p key={d} className="text-ds-micro text-zinc-600 mt-1">{d}</p>
                 ))}
               </div>
             )}

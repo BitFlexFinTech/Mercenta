@@ -124,14 +124,14 @@ const SIM_MOCK_LABELS: Record<string, string> = {
 function StatusBadge({ state }: { state: IntegrationState }) {
   if (state.status === 'connecting') {
     return (
-      <Badge className="text-[10px] bg-blue-500/15 text-blue-300 border-blue-500/20">
+      <Badge className="text-ds-micro bg-blue-500/15 text-blue-300 border-blue-500/20">
         <Loader2 className="w-3 h-3 animate-spin mr-1" /> Connecting…
       </Badge>
     );
   }
   if (state.status === 'connected') {
     return (
-      <Badge className="text-[10px] bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+      <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
         <CheckCircle2 className="w-3 h-3 mr-1" /> Connected
         {state.sandbox && <span className="ml-1 text-amber-300">(Mock)</span>}
       </Badge>
@@ -139,20 +139,20 @@ function StatusBadge({ state }: { state: IntegrationState }) {
   }
   if (state.status === 'needs_attention') {
     return (
-      <Badge className="text-[10px] bg-red-500/15 text-red-300 border-red-500/20">
+      <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">
         <AlertTriangle className="w-3 h-3 mr-1" /> Needs attention
       </Badge>
     );
   }
   if (state.status === 'code_received') {
     return (
-      <Badge className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/20">
+      <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">
         <CheckCircle2 className="w-3 h-3 mr-1" /> Code received
       </Badge>
     );
   }
   return (
-    <Badge className="text-[10px] bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
+    <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
       Not connected
     </Badge>
   );
@@ -172,7 +172,7 @@ function ModeBadge({ mode }: { mode: IntegrationMode }) {
       ? 'bg-orange-500/15 text-orange-300 border-orange-500/20'
       : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20';
   return (
-    <Badge className={cn('text-[10px] uppercase tracking-wide border', cls)}>
+    <Badge className={cn('text-ds-micro uppercase tracking-wide border', cls)}>
       {label}
     </Badge>
   );
@@ -230,7 +230,7 @@ function HealthPanel({
   }
 
   return (
-    <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 space-y-1 text-[11px]">
+    <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3 space-y-1 text-ds-label">
       <div className="flex items-center justify-between">
         <span className="text-zinc-500">Auth</span>
         <span className={health.authValid ? 'text-emerald-300' : 'text-red-300'}>
@@ -313,14 +313,14 @@ function WizardStepper({
         <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
           <div
             className={cn(
-              'text-[10px] font-medium px-2 py-0.5 rounded-full border flex items-center gap-1',
+              'text-ds-micro font-medium px-2 py-0.5 rounded-full border flex items-center gap-1',
               completed[s.id]
                 ? 'bg-brass-500/10 text-brass-300 border-brass-500/20'
                 : 'bg-white/[0.02] text-zinc-500 border-white/[0.06]'
             )}
             data-state={completed[s.id] ? 'complete' : 'pending'}
           >
-            <span className="text-[9px]">{i + 1}</span>
+            <span className="text-ds-micro">{i + 1}</span>
             <span className="hidden sm:inline">{s.label}</span>
           </div>
           {i < WIZARD_STEPS.length - 1 && (
@@ -558,7 +558,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
                 }
               />
             ))}
-            <p className="text-[11px] text-zinc-600">
+            <p className="text-ds-label text-zinc-600">
               The key is tested live against {def.name} before saving — no fake
               success. On success the key is held in memory only (Vault-backed
               storage once deployed); it is never persisted client-side.
@@ -686,9 +686,9 @@ export function IntegrationsPanel() {
         description="One-click connect for every external service — no API keys in .env files. Features stay locked until their card shows a verified Connected status. A provider is treated as simulation-safe ONLY when its mode positively resolves to simulation; UNKNOWN, unregistered, unconfigured, disabled, configuring, live, degraded and error are all treated as unsafe."
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">{INTEGRATION_ORDER.length} providers</span>
-            <span className="font-mono text-[11px] text-zinc-500">{visibleIds.length} shown</span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">{INTEGRATION_ORDER.length} providers</span>
+            <span className="font-mono text-ds-label text-zinc-500">{visibleIds.length} shown</span>
+            <span className="font-mono text-ds-label text-zinc-500">
               {filter === 'all' ? 'no filter' : filter === 'attention' ? 'needs attention' : INTEGRATION_MODE_LABELS[filter]}
             </span>
           </>
@@ -705,7 +705,7 @@ export function IntegrationsPanel() {
             />
             <div className="flex items-center gap-2">
               <Search className="w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
-              <span role="status" className="text-[11px] text-zinc-500">
+              <span role="status" className="text-ds-label text-zinc-500">
                 {visibleIds.length} of {INTEGRATION_ORDER.length} providers shown
                 {filter !== 'all' &&
                   ` · ${filter === 'attention' ? 'needs attention' : INTEGRATION_MODE_LABELS[filter]}`}
@@ -714,7 +714,7 @@ export function IntegrationsPanel() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-[11px]"
+                  className="text-ds-label"
                   onClick={() => {
                     setFilter('all');
                     setQuery('');
@@ -763,7 +763,7 @@ export function IntegrationsPanel() {
             { label: 'Live network calls from this screen', value: '0' },
           ]}
         />
-        <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+        <p className="mt-2 text-ds-label leading-snug text-zinc-400">
           Entering a real credential activates the already-built live path for that provider — no
           code change is required. Until then every workflow continues to run against its
           deterministic simulation, and no screen claims a live connection it does not have.
@@ -818,7 +818,7 @@ export function IntegrationsPanel() {
                 <h2 className="text-sm font-semibold text-white tracking-tight">
                   {INTEGRATION_CATEGORY_LABELS[row.category]}
                 </h2>
-                <p className="text-[11px] text-zinc-500 mt-0.5">
+                <p className="text-ds-label text-zinc-500 mt-0.5">
                   {CATEGORY_DESCRIPTIONS[row.category] ?? ''} · {row.count} provider
                   {row.count === 1 ? '' : 's'}
                 </p>
@@ -841,7 +841,7 @@ export function IntegrationsPanel() {
                   </div>
                 </div>
               </div>
-              <p className="text-[11px] text-zinc-500 mb-3 leading-relaxed max-w-md">
+              <p className="text-ds-label text-zinc-500 mb-3 leading-relaxed max-w-md">
                 {def.description}
               </p>
 
@@ -854,12 +854,12 @@ export function IntegrationsPanel() {
                   {Object.entries(state.metadata ?? {})
                     .filter(([k]) => k !== 'sandbox')
                     .map(([k, v]) => (
-                      <div key={k} className="flex justify-between text-[11px]">
+                      <div key={k} className="flex justify-between text-ds-label">
                         <span className="font-mono text-zinc-600">{k}</span>
                         <span className="font-mono text-zinc-300">{v}</span>
                       </div>
                     ))}
-                  <div className="flex justify-between text-[11px]">
+                  <div className="flex justify-between text-ds-label">
                     <span className="font-mono text-zinc-600">lastVerifiedAt</span>
                     <span className="font-mono text-zinc-300">
                       {state.lastVerifiedAt
@@ -871,7 +871,7 @@ export function IntegrationsPanel() {
               )}
 
               {state.error && (
-                <div className="mb-3 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 text-[11px] text-red-300">
+                <div className="mb-3 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5 text-ds-label text-red-300">
                   {state.error}
                 </div>
               )}
@@ -880,7 +880,7 @@ export function IntegrationsPanel() {
                   developer shortcut that lets the LIVE test call run; it is NOT
                   a verified connection and is never presented as one. */}
               {hasLiveCredentialHint(id) && mode !== 'live' && !connected && (
-                <div className="mb-3 bg-white/[0.02] border border-white/[0.06] rounded-lg p-2.5 text-[10px] text-zinc-400 leading-relaxed">
+                <div className="mb-3 bg-white/[0.02] border border-white/[0.06] rounded-lg p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
                   <strong className="text-zinc-300">Developer demo key present.</strong>{' '}
                   This environment holds a value for {integrationMeta(id).demoKeyHint}, so
                   the live test call can run for {def.name}. That is a developer shortcut,
@@ -890,19 +890,19 @@ export function IntegrationsPanel() {
 
               {/* §Priority-1 — provider control plane: simulation mode + safe mock config */}
               {mode === 'simulation' && (
-                <div className="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-[10px] text-amber-200 leading-relaxed">
+                <div className="mb-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-ds-micro text-amber-200 leading-relaxed">
                   <strong>Simulation mode.</strong> No live call is made and no real credential is
                   used or stored. Safe mock configuration: {SIM_MOCK_LABELS[`${id}:${state.provider ?? ''}`] ?? 'deterministic mock adapter (see workflow surfaces)'}. Enter real credentials below to switch to LIVE later — no code change.
                 </div>
               )}
               {state.disabled && (
-                <div className="mb-3 bg-zinc-500/10 border border-zinc-500/20 rounded-lg p-2.5 text-[10px] text-zinc-400 leading-relaxed">
+                <div className="mb-3 bg-zinc-500/10 border border-zinc-500/20 rounded-lg p-2.5 text-ds-micro text-zinc-400 leading-relaxed">
                   <strong>Disabled.</strong> Configuration kept; no workflow uses this provider.
                 </div>
               )}
 
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <span className="text-[10px] text-zinc-600">
+                <span className="text-ds-micro text-zinc-600">
                   {mode === 'simulation' ? 'Simulation is executable with no credentials' : 'Operator: enable simulation to demonstrate workflows without credentials'}
                 </span>
                 <div className="flex items-center gap-2">

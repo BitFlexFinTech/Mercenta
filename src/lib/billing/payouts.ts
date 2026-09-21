@@ -18,13 +18,14 @@
  * credentials are configured; signatures/shapes match the real client.
  *
  * §Phase M11 — RAIL CORRECTION. The canonical business model (§6) fixes the
- * payout rails as **Wise (DEFAULT)** and **Payoneer (secondary)**. Stripe is
+ * payout rails as **Payoneer (DEFAULT)** and **Wise (secondary)** — Founder
+ * decision T-1, reconciled in code on 2026-09-21. Stripe is
  * NOT a payout rail — it bills the flat monthly brand subscription only. The
  * rail is therefore resolved through `src/config/payouts.ts` (the single source
  * of truth) and `createPayoutClient` now returns the rail-appropriate client.
  * The simulated transfer-id prefix stays `mock_tr_` (every pinned test layer
- * asserts it) with the rail appended — `mock_tr_wise_000001` — so a simulated
- * payout can never be mistaken for the other rail.
+ * asserts it) with the rail appended — `mock_tr_payoneer_000001` — so a
+ * simulated payout can never be mistaken for the other rail.
  */
 
 import {
@@ -197,7 +198,7 @@ export function createRailPayoutClient(
 /**
  * Mock-first seam (kept as the canonical entry point — every existing call site
  * keeps working). §Phase M11: this now resolves through `createRailPayoutClient`
- * with the canonical DEFAULT rail (Wise), so the Stripe-only contract is gone.
+ * with the canonical DEFAULT rail (Payoneer), so the Stripe-only contract is gone.
  */
 export function createPayoutClient(
   creds: { secretRef: string; verified: boolean } | null,

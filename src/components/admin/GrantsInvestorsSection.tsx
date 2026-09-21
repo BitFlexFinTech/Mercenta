@@ -193,17 +193,17 @@ function formatReport(r: GrantsInvestorsReport): string {
         <div className="flex items-center gap-2">
           <BadgeDollarSign className="w-4 h-4 text-brass-400" />
           <span className="text-sm font-semibold text-white">Grants & Investors</span>
-          <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
+          <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">Super Admin</Badge>
         </div>
         <div className="flex items-center gap-2">
-          {report && <Button className="text-[10px]" onClick={handleDownload}><Download className="w-3 h-3 mr-1" /> Download</Button>}
+          {report && <Button className="text-ds-micro" onClick={handleDownload}><Download className="w-3 h-3 mr-1" /> Download</Button>}
           <Button className="text-xs" onClick={handleRun} disabled={loading}>
             {loading ? 'Researching...' : report ? 'Re-run' : 'Run Research'}
           </Button>
         </div>
       </div>
 
-      <p className="text-[11px] text-zinc-500 mb-3">
+      <p className="text-ds-label text-zinc-500 mb-3">
         Discovers grants and investors from legitimate public sources (Innovate UK/UKRI, gov.uk).
         Applications and outreach are AI-drafted and staged for review — <strong>never sent
         automatically</strong>. Requires an explicit internal approval — Mercenta never sends.
@@ -234,15 +234,15 @@ function formatReport(r: GrantsInvestorsReport): string {
         <>
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div className="bg-ink-900 rounded-lg p-2">
-              <p className="text-[9px] text-zinc-500">Grants</p>
+              <p className="text-ds-micro text-zinc-500">Grants</p>
               <p className="text-sm font-semibold text-white">{report.grants.length}</p>
             </div>
             <div className="bg-ink-900 rounded-lg p-2">
-              <p className="text-[9px] text-zinc-500">Investors</p>
+              <p className="text-ds-micro text-zinc-500">Investors</p>
               <p className="text-sm font-semibold text-white">{report.investors.length}</p>
             </div>
             <div className="bg-ink-900 rounded-lg p-2">
-              <p className="text-[9px] text-zinc-500">Drafts</p>
+              <p className="text-ds-micro text-zinc-500">Drafts</p>
               <p className="text-sm font-semibold text-brass-400">{grantsDrafts.length + investorDrafts.length}</p>
             </div>
           </div>
@@ -264,27 +264,27 @@ function formatReport(r: GrantsInvestorsReport): string {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-medium text-white truncate">{g.title}</span>
-                          <Badge className={cn('text-[8px]', g.status === 'open' ? 'bg-emerald-500/15 text-emerald-300' : g.status === 'closing_soon' ? 'bg-amber-500/15 text-amber-300' : 'bg-red-500/15 text-red-300')}>{g.status.replace(/_/g, ' ')}</Badge>
+                          <Badge className={cn('text-ds-micro', g.status === 'open' ? 'bg-emerald-500/15 text-emerald-300' : g.status === 'closing_soon' ? 'bg-amber-500/15 text-amber-300' : 'bg-red-500/15 text-red-300')}>{g.status.replace(/_/g, ' ')}</Badge>
                         </div>
-                        <div className="text-[10px] text-zinc-500 mt-0.5">{g.provider} — {g.amountRange} — Deadline: {g.deadline}</div>
+                        <div className="text-ds-micro text-zinc-500 mt-0.5">{g.provider} — {g.amountRange} — Deadline: {g.deadline}</div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-bold font-mono text-emerald-400">{g.fitScore}</div>
-                        <p className="text-[8px] text-zinc-600">/100</p>
+                        <p className="text-ds-micro text-zinc-600">/100</p>
                       </div>
                     </div>
                     {isSelected && (
                       <div className="mt-2 pt-2 border-t border-white/[0.06] space-y-1.5">
-                        <p className="text-[10px] text-zinc-400 leading-relaxed">{g.fitReason}</p>
-                        <p className="text-[10px] text-zinc-500"><span className="text-zinc-400">Eligibility:</span> {g.eligibility}</p>
+                        <p className="text-ds-micro text-zinc-400 leading-relaxed">{g.fitReason}</p>
+                        <p className="text-ds-micro text-zinc-500"><span className="text-zinc-400">Eligibility:</span> {g.eligibility}</p>
                         <div className="flex gap-2 pt-1">
                           {!g.draftStarted && !g.submitted && (
-                            <Button className="text-[10px]" onClick={() => { handleDraftGrant(g); setSelectedGrant(null); }}>
+                            <Button className="text-ds-micro" onClick={() => { handleDraftGrant(g); setSelectedGrant(null); }}>
                               Apply — Draft Application
                             </Button>
                           )}
-                          {g.submitted && <Badge className="text-[8px] bg-emerald-500/15 text-emerald-300">Submitted</Badge>}
-                          {g.draftStarted && !g.submitted && <Badge className="text-[8px] bg-amber-500/15 text-amber-300">Draft staged</Badge>}
+                          {g.submitted && <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Submitted</Badge>}
+                          {g.draftStarted && !g.submitted && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">Draft staged</Badge>}
                         </div>
                       </div>
                     )}
@@ -305,26 +305,26 @@ function formatReport(r: GrantsInvestorsReport): string {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-medium text-white truncate">{inv.name}</span>
-                          <Badge className="text-[8px] bg-zinc-500/15 text-zinc-400">{inv.type.replace(/_/g, ' ')}</Badge>
+                          <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400">{inv.type.replace(/_/g, ' ')}</Badge>
                         </div>
-                        <div className="text-[10px] text-zinc-500 mt-0.5">{inv.investmentRange} — {inv.stage.replace(/_/g, ' ')} — {inv.sectors.slice(0, 3).join(', ')}</div>
+                        <div className="text-ds-micro text-zinc-500 mt-0.5">{inv.investmentRange} — {inv.stage.replace(/_/g, ' ')} — {inv.sectors.slice(0, 3).join(', ')}</div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm font-bold font-mono text-emerald-400">{inv.fitScore}</div>
-                        <p className="text-[8px] text-zinc-600">/100</p>
+                        <p className="text-ds-micro text-zinc-600">/100</p>
                       </div>
                     </div>
                     {isSelected && (
                       <div className="mt-2 pt-2 border-t border-white/[0.06] space-y-1.5">
-                        <p className="text-[10px] text-zinc-400 leading-relaxed">{inv.fitReason}</p>
+                        <p className="text-ds-micro text-zinc-400 leading-relaxed">{inv.fitReason}</p>
                         <div className="flex gap-2 pt-1">
                           {!inv.draftStarted && !inv.contacted && (
-                            <Button className="text-[10px]" onClick={() => { handleDraftInvestor(inv); setSelectedInvestor(null); }}>
+                            <Button className="text-ds-micro" onClick={() => { handleDraftInvestor(inv); setSelectedInvestor(null); }}>
                               Reach Out — Draft Email
                             </Button>
                           )}
-                          {inv.contacted && <Badge className="text-[8px] bg-emerald-500/15 text-emerald-300">Contacted</Badge>}
-                          {inv.draftStarted && !inv.contacted && <Badge className="text-[8px] bg-amber-500/15 text-amber-300">Draft staged</Badge>}
+                          {inv.contacted && <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300">Contacted</Badge>}
+                          {inv.draftStarted && !inv.contacted && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">Draft staged</Badge>}
                         </div>
                       </div>
                     )}
@@ -343,18 +343,18 @@ function formatReport(r: GrantsInvestorsReport): string {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-white">{d.grantTitle}</span>
-                      <Badge className={cn('text-[8px] ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalStatusLabel(d.status)}</Badge>
+                      <Badge className={cn('text-ds-micro ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalStatusLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
-                      <Button className="text-[9px]" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
+                      <Button className="text-ds-micro" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
                       {d.status === 'draft' && (
-                        <Button className="text-[9px]" onClick={() => { handleApproveGrant(d.grantId); setDraftContent(null); }}>
+                        <Button className="text-ds-micro" onClick={() => { handleApproveGrant(d.grantId); setDraftContent(null); }}>
                           <CheckCircle className="w-2.5 h-2.5 mr-1" /> Approve internally
                         </Button>
                       )}
                     </div>
                   </div>
-                  {d.approvedAt && <p className="text-[9px] text-zinc-600 mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external submission is recorded</p>}
+                  {d.approvedAt && <p className="text-ds-micro text-zinc-600 mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external submission is recorded</p>}
                 </div>
               ))}
               {investorDrafts.map((d) => (
@@ -362,18 +362,18 @@ function formatReport(r: GrantsInvestorsReport): string {
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-medium text-white">{d.investorName}</span>
-                      <Badge className={cn('text-[8px] ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalOutreachLabel(d.status)}</Badge>
+                      <Badge className={cn('text-ds-micro ml-2', d.status === 'draft' ? 'bg-amber-500/15 text-amber-300' : 'bg-emerald-500/15 text-emerald-300')}>{internalOutreachLabel(d.status)}</Badge>
                     </div>
                     <div className="flex gap-1">
-                      <Button className="text-[9px]" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
+                      <Button className="text-ds-micro" onClick={() => setDraftContent(d.content)}><Eye className="w-2.5 h-2.5 mr-1" /> Review</Button>
                       {d.status === 'draft' && (
-                        <Button className="text-[9px]" onClick={() => { handleApproveInvestor(d.investorId); setDraftContent(null); }}>
+                        <Button className="text-ds-micro" onClick={() => { handleApproveInvestor(d.investorId); setDraftContent(null); }}>
                           <Send className="w-2.5 h-2.5 mr-1" /> Approve internally
                         </Button>
                       )}
                     </div>
                   </div>
-                  {d.approvedAt && <p className="text-[9px] text-zinc-600 mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external send is recorded</p>}
+                  {d.approvedAt && <p className="text-ds-micro text-zinc-600 mt-1">Internally approved {d.approvedAt} by {d.approvedBy} — no external send is recorded</p>}
                 </div>
               ))}
             </div>
@@ -396,14 +396,14 @@ function formatReport(r: GrantsInvestorsReport): string {
 
     <Card className="p-4" title="Founder funding & accelerator pipeline">
       <div className="space-y-3" data-testid="funding-pipeline">
-        <p className="text-[10px] text-amber-300/90 flex items-start gap-1.5">
+        <p className="text-ds-micro text-amber-300/90 flex items-start gap-1.5">
           <ShieldAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
           {FUNDING_PIPELINE_DISCLAIMER}
         </p>
 
         {fundingNotice && (
           <div
-            className="bg-ink-900 border border-white/[0.06] rounded-lg p-2.5 text-[11px] text-zinc-300"
+            className="bg-ink-900 border border-white/[0.06] rounded-lg p-2.5 text-ds-label text-zinc-300"
             data-testid="funding-notice"
           >
             {fundingNotice}
@@ -424,27 +424,27 @@ function formatReport(r: GrantsInvestorsReport): string {
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-white">
                     {o.organisation}
-                    <Badge className="text-[8px] ml-2 bg-white/[0.06] text-zinc-300">
+                    <Badge className="text-ds-micro ml-2 bg-white/[0.06] text-zinc-300">
                       {FUNDING_OPPORTUNITY_TYPE_LABELS[o.opportunityType]}
                     </Badge>
                   </p>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">{o.geography}</p>
+                  <p className="text-ds-micro text-zinc-500 mt-0.5">{o.geography}</p>
                   <a
                     href={o.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[10px] text-sky-300/90 hover:underline"
+                    className="text-ds-micro text-sky-300/90 hover:underline"
                   >
                     {o.url}
                   </a>
                 </div>
                 <span data-testid={`funding-stage-${o.id}`}>
-                  <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">
+                  <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
                     {FUNDING_STAGE_LABELS[entry?.stage ?? 'discovered']}
                   </Badge>
                 </span>
               </div>
-              <div className="mt-2 space-y-0.5 text-[10px] text-zinc-400">
+              <div className="mt-2 space-y-0.5 text-ds-micro text-zinc-400">
                 <p>
                   {o.fundingAmount
                     ? `Amount: ${o.fundingAmount.value} [${CLAIM_LABELS[o.fundingAmount.claim]}]`
@@ -468,11 +468,11 @@ function formatReport(r: GrantsInvestorsReport): string {
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <Button className="text-[9px]" onClick={() => handleGenerateFunding(o)}>
+                <Button className="text-ds-micro" onClick={() => handleGenerateFunding(o)}>
                   <FileText className="w-2.5 h-2.5 mr-1" /> Generate application
                 </Button>
                 <Button
-                  className="text-[9px]"
+                  className="text-ds-micro"
                   onClick={() => handleApproveFunding(o)}
                   disabled={approved}
                   data-testid={`funding-approve-${o.id}`}
@@ -484,7 +484,7 @@ function formatReport(r: GrantsInvestorsReport): string {
 
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input
-                  className="bg-ink-850 border border-white/[0.08] rounded px-2 py-1 text-[10px] text-zinc-200 w-44"
+                  className="bg-ink-850 border border-white/[0.08] rounded px-2 py-1 text-ds-micro text-zinc-200 w-44"
                   placeholder="Programme reference"
                   value={submissionRefs[o.id] ?? ''}
                   onChange={(e) =>
@@ -492,7 +492,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                   }
                   data-testid={`funding-submission-ref-${o.id}`}
                 />
-                <label className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+                <label className="flex items-center gap-1.5 text-ds-micro text-zinc-400">
                   <input
                     type="checkbox"
                     checked={submissionConfirmed.includes(o.id)}
@@ -506,7 +506,7 @@ function formatReport(r: GrantsInvestorsReport): string {
                   I submitted this myself (Mercenta does not submit)
                 </label>
                 <Button
-                  className="text-[9px]"
+                  className="text-ds-micro"
                   onClick={() => handleRecordSubmission(o)}
                   disabled={submitted}
                   data-testid="funding-submit"
@@ -516,7 +516,7 @@ function formatReport(r: GrantsInvestorsReport): string {
               </div>
 
               {entry?.submission && (
-                <p className="text-[10px] text-emerald-300/90 mt-1">
+                <p className="text-ds-micro text-emerald-300/90 mt-1">
                   Recorded: {entry.submission.reference} · {entry.submission.submittedAt} · by{' '}
                   {entry.submission.recordedBy}
                 </p>
@@ -530,12 +530,12 @@ function formatReport(r: GrantsInvestorsReport): string {
             className="bg-ink-900 border border-white/[0.06] rounded-lg p-3"
             data-testid="funding-draft"
           >
-            <p className="text-[11px] text-zinc-300">
+            <p className="text-ds-label text-zinc-300">
               {fundingDraft.submissionStatus} · wording gate:{' '}
               {fundingDraft.lintPassed ? 'PASS' : `FAIL (${fundingDraft.lintReasons.join('; ')})`} ·
               basis: {fundingDraft.basis}
             </p>
-            <pre className="whitespace-pre-wrap text-[10px] text-zinc-300 bg-ink-850 border border-white/[0.06] rounded-lg p-2 mt-2 max-h-60 overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-ds-micro text-zinc-300 bg-ink-850 border border-white/[0.06] rounded-lg p-2 mt-2 max-h-60 overflow-y-auto">
               {fundingDraft.content}
             </pre>
           </div>

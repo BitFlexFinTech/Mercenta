@@ -41,7 +41,7 @@ export function UnlockGrowth({
         className="hidden sm:inline-flex h-6 w-[1px] shrink-0"
         style={{ backgroundColor: 'var(--mr-hairline-strong)' }}
       />
-      <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium border bg-state-success/10 border-state-success/20 text-state-success">
+      <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-ds-micro font-medium border bg-state-success/10 border-state-success/20 text-state-success">
         Live platform data
       </span>
     </div>

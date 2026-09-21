@@ -138,17 +138,17 @@ return (
         description={`${pos.length} POs across ${brands.length} brands — create, manage, acknowledge, and file ASNs on behalf of brands`}
         meta={
           <>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Queue value{' '}
               <span className="font-mono text-zinc-300">
                 GBP {queueMetrics.value.toLocaleString()}
               </span>
             </span>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Awaiting action <span className="font-mono text-zinc-300">{queueMetrics.awaiting}</span>
             </span>
             {queueMetrics.simulated > 0 && (
-              <span className="text-[11px] text-zinc-500">
+              <span className="text-ds-label text-zinc-500">
                 Simulated <span className="font-mono text-zinc-300">{queueMetrics.simulated}</span>
               </span>
             )}
@@ -157,11 +157,11 @@ return (
         actions={
           <>
             {createNote && (
-              <span className="text-[10px] text-emerald-400" role="status">
+              <span className="text-ds-micro text-emerald-400" role="status">
                 {createNote}
               </span>
             )}
-            <Button className="text-[10px]" data-state="admin-po-create" disabled={!canCurrentUserMutate}
+            <Button className="text-ds-micro" data-state="admin-po-create" disabled={!canCurrentUserMutate}
               title={canCurrentUserMutate ? undefined : 'View-only staff cannot create purchase orders'}
               onClick={function() { setShowCreate(true); }}>
               <Plus className="w-3 h-3 mr-1" /> Create PO
@@ -189,7 +189,7 @@ return (
               aria-pressed={simOnly}
               onClick={function() { setSimOnly(function(v) { return !v; }); }}
               className={cn(
-                'rounded-ds-md border px-2.5 py-1.5 text-[11px] font-medium transition-ds duration-ds-fast',
+                'rounded-ds-md border px-2.5 py-1.5 text-ds-label font-medium transition-ds duration-ds-fast',
                 simOnly
                   ? 'border-brass-500/40 bg-brass-500/15 text-brass-300'
                   : 'border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:text-zinc-200'
@@ -198,7 +198,7 @@ return (
               Simulated only
             </button>
             <span className="ml-auto flex items-center gap-2">
-              <span className="hidden text-[10px] uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-zinc-600 sm:inline">
                 Density
               </span>
               <SegmentedControl
@@ -228,20 +228,20 @@ return (
                 ].map(function(row) {
                   return (
                     <div key={row.label} className="flex items-center justify-between gap-3">
-                      <dt className="text-[11px] text-zinc-500">{row.label}</dt>
-                      <dd className="font-mono text-[11px] text-zinc-200">{row.value}</dd>
+                      <dt className="text-ds-label text-zinc-500">{row.label}</dt>
+                      <dd className="font-mono text-ds-label text-zinc-200">{row.value}</dd>
                     </div>
                   );
                 })}
               </dl>
-              <p className="mt-2 border-t border-white/[0.06] pt-2 text-[10px] leading-snug text-zinc-600">
+              <p className="mt-2 border-t border-white/[0.06] pt-2 text-ds-micro leading-snug text-zinc-600">
                 Every figure is derived from the canonical purchase-order and deduction
                 stores — nothing is estimated.
               </p>
             </ContextPanel>
             <ContextPanel title="Status distribution">
               {queueMetrics.total === 0 ? (
-                <p className="text-[11px] text-zinc-500">No purchase orders to summarise.</p>
+                <p className="text-ds-label text-zinc-500">No purchase orders to summarise.</p>
               ) : (
                 <ul className="space-y-1.5" data-testid="po-status-distribution">
                   {STATUS_ORDER.map(function(s) {
@@ -249,10 +249,10 @@ return (
                     const p = poStatusPresentation(s);
                     return (
                       <li key={s} className="flex items-center justify-between gap-2">
-                        <StatusBadge className="text-[10px]" dataStatus={p.dataStatus} tone={p.tone}>
+                        <StatusBadge className="text-ds-micro" dataStatus={p.dataStatus} tone={p.tone}>
                           {p.label}
                         </StatusBadge>
-                        <span className="font-mono text-[11px] text-zinc-300">{n}</span>
+                        <span className="font-mono text-ds-label text-zinc-300">{n}</span>
                       </li>
                     );
                   })}
@@ -314,26 +314,26 @@ return (
                       <span className="font-mono text-xs text-white font-medium">{po.poNumber}</span>
                       {/* §Phase E5 (G2) — truthful provenance on the admin PO list. */}
                       {po.simulated === true && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
+                        <span className="text-ds-micro px-1.5 py-0.5 rounded bg-brass-500/15 text-brass-400 border border-brass-500/20">(sim)</span>
                       )}
-                      <span className={cn('text-[10px] px-1.5 py-0.5 rounded capitalize',
+                      <span className={cn('text-ds-micro px-1.5 py-0.5 rounded capitalize',
                         po.status === 'received' ? 'bg-blue-500/15 text-blue-300' :
                         po.status === 'accepted' ? 'bg-emerald-500/15 text-emerald-300' :
                         po.status === 'rejected' ? 'bg-red-500/15 text-red-300' :
                         po.status === 'shipped' || po.status === 'delivered' ? 'bg-purple-500/15 text-purple-300' :
                         'bg-amber-500/15 text-amber-300'
                       )}>{po.status.replace(/_/g, ' ')}</span>
-                      <span className="font-mono text-[10px] text-zinc-500">GBP {po.poValue.toLocaleString()}</span>
-                      <span className="text-[10px] text-zinc-600">{po.lineItems.length} items</span>
-                      {po.acknowledgedAt && <span className="text-[9px] text-emerald-500/70">Acknowledged</span>}
-                      {poDeductions.length > 0 && <span className="text-[9px] text-amber-500/70">{poDeductions.length} deduction(s)</span>}
+                      <span className="font-mono text-ds-micro text-zinc-500">GBP {po.poValue.toLocaleString()}</span>
+                      <span className="text-ds-micro text-zinc-600">{po.lineItems.length} items</span>
+                      {po.acknowledgedAt && <span className="text-ds-micro text-emerald-500/70">Acknowledged</span>}
+                      {poDeductions.length > 0 && <span className="text-ds-micro text-amber-500/70">{poDeductions.length} deduction(s)</span>}
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <button
                         type="button"
                         data-testid={`po-preview-${po.id}`}
                         onClick={function() { setPreviewPoId(po.id); }}
-                        className="rounded-ds-sm border border-white/[0.08] px-2 py-1 text-[10px] font-medium text-zinc-300 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-white"
+                        className="rounded-ds-sm border border-white/[0.08] px-2 py-1 text-ds-micro font-medium text-zinc-300 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-white"
                         title="Preview record"
                       >
                         Preview
@@ -369,13 +369,13 @@ return (
         footer={
           previewPo ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[10px] text-zinc-600">
+              <span className="text-ds-micro text-zinc-600">
                 {previewPo.simulated === true
                   ? 'Operational simulation record'
                   : 'Recorded purchase order'}
               </span>
               <Button
-                className="text-[10px]"
+                className="text-ds-micro"
                 data-state="po-drawer-open-record"
                 onClick={function() { setSelectedPoId(previewPo.id); setPreviewPoId(null); }}
               >
@@ -408,7 +408,7 @@ return (
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               <div>
-                <label className="text-[10px] text-zinc-500 font-medium mb-1 block">Brand</label>
+                <label className="text-ds-micro text-zinc-500 font-medium mb-1 block">Brand</label>
                 <select value={createBrandId} onChange={function(e) { setCreateBrandId(e.target.value); setCreateLines([]); }}
                   className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white">
                   <option value="">Select a brand…</option>
@@ -418,7 +418,7 @@ return (
               {createBrandId && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] text-zinc-500 font-medium">Products / Line Items</label>
+                    <label className="text-ds-micro text-zinc-500 font-medium">Products / Line Items</label>
                   </div>
                   <div className="space-y-2">
                     {createLines.map(function(l, i) {
@@ -426,7 +426,7 @@ return (
                       return (<div key={i} className="flex items-center gap-2 bg-white/[0.02] rounded-lg px-3 py-2">
                         <span className="text-xs text-zinc-300 flex-1">{p?.name ?? 'Unknown'}</span>
                         <input type="number" value={l.quantity} onChange={function(e) { updateQty(i, parseInt(e.target.value) || 1); }} className="w-16 bg-ink-900 border border-white/[0.08] rounded px-2 py-1 text-xs text-white text-center" min="1" />
-                        <span className="text-[10px] text-zinc-500 font-mono w-16 text-right">GBP {(p?.exWorksPrice ?? 0).toFixed(2)}</span>
+                        <span className="text-ds-micro text-zinc-500 font-mono w-16 text-right">GBP {(p?.exWorksPrice ?? 0).toFixed(2)}</span>
                         <button onClick={function() { removeLine(i); }} className="text-zinc-500 hover:text-red-400"><X className="w-3 h-3" /></button>
                       </div>);
                     })}
@@ -434,19 +434,19 @@ return (
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1">
                     {products.filter(function(p) { return p.brandId === createBrandId && !createLines.some(function(l) { return l.productId === p.id; }); }).slice(0, 10).map(function(p) { return (
-                      <button key={p.id} onClick={function() { addLine(p.id); }} className="bg-ink-900 border border-white/[0.06] rounded px-2 py-1 text-[9px] text-zinc-300 hover:border-brass-500/40">{p.name} <span className="text-zinc-500">+</span></button>
+                      <button key={p.id} onClick={function() { addLine(p.id); }} className="bg-ink-900 border border-white/[0.06] rounded px-2 py-1 text-ds-micro text-zinc-300 hover:border-brass-500/40">{p.name} <span className="text-zinc-500">+</span></button>
                     );})}
                   </div>
                 </div>
               )}
             </div>
             <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06]">
-              <p className="text-[8px] text-zinc-700">
+              <p className="text-ds-micro text-zinc-700">
                 {canCurrentUserMutate ? 'Admin action on behalf of brand' : 'View-only staff — creating is refused'}
               </p>
               <div className="flex gap-2">
-                <Button variant="ghost" className="text-[10px]" onClick={function() { setShowCreate(false); }}>Cancel</Button>
-                <Button className="text-[10px]" disabled={!canCurrentUserMutate || !createBrandId || createLines.length === 0} onClick={handleCreate}>
+                <Button variant="ghost" className="text-ds-micro" onClick={function() { setShowCreate(false); }}>Cancel</Button>
+                <Button className="text-ds-micro" disabled={!canCurrentUserMutate || !createBrandId || createLines.length === 0} onClick={handleCreate}>
                   <Package className="w-3 h-3 mr-1" /> Create PO
                 </Button>
               </div>
@@ -496,7 +496,7 @@ function PoPreviewBody({
           {ackWindow.label}
         </StatusBadge>
         {po.simulated === true && (
-          <span className="rounded border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-[9px] text-brass-400">
+          <span className="rounded border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
             (sim)
           </span>
         )}
@@ -522,12 +522,12 @@ function PoPreviewBody({
       />
 
       <section aria-label="Lines">
-        <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Lines
         </h3>
         <div className="overflow-hidden rounded-ds-md border border-white/[0.06]">
-          <table className="w-full text-left text-[11px]">
-            <thead className="bg-white/[0.02] text-[9px] uppercase tracking-wider text-zinc-500">
+          <table className="w-full text-left text-ds-label">
+            <thead className="bg-white/[0.02] text-ds-micro uppercase tracking-wider text-zinc-500">
               <tr>
                 <th scope="col" className="px-2 py-1.5">SKU</th>
                 <th scope="col" className="px-2 py-1.5">Product</th>
@@ -548,7 +548,7 @@ function PoPreviewBody({
                       {line.unitPrice.toFixed(2)}
                     </td>
                     <td className="px-2 py-1.5">
-                      <StatusBadge className="text-[10px]" dataStatus={ack.dataStatus} tone={ack.tone}>
+                      <StatusBadge className="text-ds-micro" dataStatus={ack.dataStatus} tone={ack.tone}>
                         {ack.label}
                       </StatusBadge>
                     </td>
@@ -562,7 +562,7 @@ function PoPreviewBody({
 
       {(deductions.length > 0 || shipments.length > 0) && (
         <section aria-label="Finance and logistics">
-          <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
             Finance &amp; logistics
           </h3>
           <RecordFieldList
@@ -575,7 +575,7 @@ function PoPreviewBody({
             <ul className="mt-2 space-y-1">
               {shipments.map(function(s) {
                 return (
-                  <li key={s.id} className="flex flex-wrap items-center gap-2 text-[11px]">
+                  <li key={s.id} className="flex flex-wrap items-center gap-2 text-ds-label">
                     <span className="font-mono text-zinc-400">{s.reference}</span>
                     <span className="text-zinc-300">{s.carrier}</span>
                     <span className="text-zinc-500">{s.status}</span>
@@ -590,7 +590,7 @@ function PoPreviewBody({
       )}
 
       <section aria-label="Activity">
-        <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Activity
         </h3>
         <ActivityFeed

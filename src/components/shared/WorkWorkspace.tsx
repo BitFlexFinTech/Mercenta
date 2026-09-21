@@ -103,6 +103,9 @@ const SOURCE_OPTIONS: WorkSource[] = [
   // §Sprint 2 — the two derivation paths completed this sprint.
   'invoice_due',
   'onboarding_step',
+  // §Phase 2 — the commercial readiness derivations.
+  'commercial_remediation',
+  'commercial_review',
   'manual',
 ];
 
@@ -307,19 +310,19 @@ export function WorkWorkspace({
         description={description}
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">
               {all.length} open · {everything.length - all.length} resolved
             </span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">
               {reminders.length} reminder{reminders.length === 1 ? '' : 's'} active
             </span>
-            <span className="font-mono text-[11px] text-zinc-500">As at {today}</span>
+            <span className="font-mono text-ds-label text-zinc-500">As at {today}</span>
           </>
         }
         actions={
           <Button
             variant="ghost"
-            className="text-[11px]"
+            className="text-ds-label"
             onClick={() => {
               resetWorkStore();
               resetReminderStore();
@@ -354,7 +357,7 @@ export function WorkWorkspace({
             */}
             <Button
               variant="ghost"
-              className="text-[11px]"
+              className="text-ds-label"
               onClick={() => setSweep(runReminderSweep(scope, tenantId, actor))}
               data-testid="work-run-reminders"
               title={describeReminderSweep().cadence}
@@ -366,7 +369,7 @@ export function WorkWorkspace({
             </Button>
             {sweep && (
               <span
-                className="font-mono text-[10px] text-zinc-500"
+                className="font-mono text-ds-micro text-zinc-500"
                 data-testid="work-sweep-report"
                 data-sweep-raised={sweep.raised.length}
                 data-sweep-duplicates={sweep.duplicatesSuppressed}
@@ -469,7 +472,7 @@ export function WorkWorkspace({
 
         <div className="space-y-3">
           <ContextPanel title="How this works">
-            <p className="text-[11px] leading-snug text-zinc-400">
+            <p className="text-ds-label leading-snug text-zinc-400">
               Every item is projected from an existing record — a retail-channel PO, a compliance
               document, a contract, a deduction, a shipment, a return, an outreach follow-up.
               Resolving an item stops its reminders; the underlying record is changed in its own
@@ -488,7 +491,7 @@ export function WorkWorkspace({
                 { label: 'Network calls', value: '0 (simulation only)' },
               ]}
             />
-            <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+            <p className="mt-2 text-ds-label leading-snug text-zinc-400">
               {describeReminderSweep().cadence} — resolving the underlying work item removes its
               reminder immediately.
             </p>
@@ -539,14 +542,14 @@ function KanbanBoard({
             className="flex min-h-[120px] flex-col overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850"
           >
             <header className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-3 py-2">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+              <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-400">
                 {WORK_STATUS_LABELS[status]}
               </span>
-              <span className="font-mono text-[11px] text-zinc-500">{column.length}</span>
+              <span className="font-mono text-ds-label text-zinc-500">{column.length}</span>
             </header>
             <ul className="flex-1 divide-y divide-white/[0.05]">
               {column.length === 0 && (
-                <li className="px-3 py-3 text-[11px] text-zinc-600">Nothing here.</li>
+                <li className="px-3 py-3 text-ds-label text-zinc-600">Nothing here.</li>
               )}
               {column.map((w) => (
                 <li key={w.id} className="relative px-3 py-2.5" data-testid={`work-card-${w.id}`}>
@@ -556,7 +559,7 @@ function KanbanBoard({
                     style={{ backgroundColor: DOMAIN_COLOURS[PRIORITY_DOMAIN[w.priority]].solid }}
                   />
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                    <span className="text-ds-micro font-semibold uppercase tracking-[0.12em] text-zinc-500">
                       {WORK_SOURCE_LABELS[w.source]}
                     </span>
                     <StatusBadge tone={PRIORITY_TONE[w.priority]} dataStatus={PRIORITY_TONE[w.priority]}>
@@ -569,13 +572,13 @@ function KanbanBoard({
                     className="mt-1.5 block w-full text-left"
                   >
                     <span className="block text-xs font-medium text-white">{w.title}</span>
-                    <span className="mt-0.5 block text-[11px] text-zinc-500">{dueLabel(w.dueDate)}</span>
+                    <span className="mt-0.5 block text-ds-label text-zinc-500">{dueLabel(w.dueDate)}</span>
                   </button>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {status !== 'done' && status !== 'in_progress' && (
                       <Button
                         variant="ghost"
-                        className="text-[10px]"
+                        className="text-ds-micro"
                         onClick={() => setWorkItemStatus(w.id, 'in_progress', actor)}
                         data-testid={`work-progress-${w.id}`}
                       >
@@ -585,7 +588,7 @@ function KanbanBoard({
                     {status !== 'done' && (
                       <Button
                         variant="ghost"
-                        className="text-[10px]"
+                        className="text-ds-micro"
                         onClick={() => resolveWorkItem(w.id, actor, 'Resolved from the kanban board')}
                         data-testid={`work-resolve-${w.id}`}
                       >
@@ -595,7 +598,7 @@ function KanbanBoard({
                     {status === 'done' && (
                       <Button
                         variant="ghost"
-                        className="text-[10px]"
+                        className="text-ds-micro"
                         onClick={() => reopenWorkItem(w.id, actor, 'Reopened from the kanban board')}
                         data-testid={`work-reopen-${w.id}`}
                       >
@@ -647,10 +650,10 @@ function ReminderList({
       data-reminder-overdue={buckets.overdue}
     >
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.06] px-3.5 py-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Proactive reminders
         </span>
-        <span className="font-mono text-[11px] text-zinc-500">
+        <span className="font-mono text-ds-label text-zinc-500">
           {buckets.overdue} overdue · {buckets.due_today} due today · {buckets.due_soon} due soon
         </span>
       </header>
@@ -671,7 +674,7 @@ function ReminderList({
           if (rows.length === 0) return [];
           return [
             <li key={`bucket-${bucket}`} className="bg-white/[0.02] px-3.5 py-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
                 {REMINDER_BUCKET_LABELS[bucket]} ({rows.length})
               </p>
             </li>,
@@ -686,20 +689,20 @@ function ReminderList({
                     <StatusBadge tone={BUCKET_TONE[r.bucket]} dataStatus={BUCKET_TONE[r.bucket]}>
                       {REMINDER_BUCKET_LABELS[r.bucket]}
                     </StatusBadge>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                    <span className="text-ds-micro font-semibold uppercase tracking-[0.12em] text-zinc-500">
                       {WORK_SOURCE_LABELS[r.source]}
                     </span>
                   </div>
                   <p className="mt-1 text-xs font-medium text-white">{r.title}</p>
-                  <p className="mt-0.5 text-[11px] leading-snug text-zinc-500">{r.detail}</p>
-                  <p className="mt-0.5 font-mono text-[10px] text-zinc-600">
+                  <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{r.detail}</p>
+                  <p className="mt-0.5 font-mono text-ds-micro text-zinc-600">
                     due {r.dueDate} · raised {r.raisedAt} · work {r.workItemId}
                   </p>
                 </div>
                 <div className="flex flex-shrink-0 items-center gap-1.5">
                   <Button
                     variant="ghost"
-                    className="text-[10px]"
+                    className="text-ds-micro"
                     onClick={() => onOpen(r.workItemId)}
                     data-testid={`reminder-open-${r.id}`}
                   >
@@ -707,7 +710,7 @@ function ReminderList({
                   </Button>
                   <Button
                     variant="ghost"
-                    className="text-[10px]"
+                    className="text-ds-micro"
                     onClick={() => dismissReminder(r.id, actor, 'Dismissed from the reminder queue')}
                     data-testid={`reminder-dismiss-${r.id}`}
                   >
@@ -780,8 +783,8 @@ function CalendarBoard({
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[11px] text-zinc-500">{monthTotal} deadline(s)</span>
-          <Button variant="ghost" className="text-[11px]" onClick={() => onMonth(monthKey(today))} data-testid="work-calendar-today">
+          <span className="font-mono text-ds-label text-zinc-500">{monthTotal} deadline(s)</span>
+          <Button variant="ghost" className="text-ds-label" onClick={() => onMonth(monthKey(today))} data-testid="work-calendar-today">
             Today
           </Button>
         </div>
@@ -789,7 +792,7 @@ function CalendarBoard({
 
       <div className="grid grid-cols-7 border-b border-white/[0.06] bg-white/[0.02]">
         {WEEKDAY_LABELS.map((d) => (
-          <span key={d} className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+          <span key={d} className="px-2 py-1 text-ds-micro font-semibold uppercase tracking-[0.12em] text-zinc-500">
             {d}
           </span>
         ))}
@@ -811,7 +814,7 @@ function CalendarBoard({
             >
               <span
                 className={
-                  'font-mono text-[10px] ' +
+                  'font-mono text-ds-micro ' +
                   (date === today ? 'rounded bg-brass-500/25 px-1 text-brass-200' : 'text-zinc-600')
                 }
               >
@@ -826,7 +829,7 @@ function CalendarBoard({
                       title={`${e.title} — ${WORK_PRIORITY_LABELS[e.priority]}`}
                       data-testid={`work-calendar-entry-${e.workItemId}`}
                       className={
-                        'block w-full truncate rounded-sm px-1 py-0.5 text-left text-[10px] ' +
+                        'block w-full truncate rounded-sm px-1 py-0.5 text-left text-ds-micro ' +
                         (e.resolved ? 'text-zinc-600 line-through' : 'text-zinc-200')
                       }
                       style={{
@@ -838,14 +841,14 @@ function CalendarBoard({
                   </li>
                 ))}
                 {day.length > 3 && (
-                  <li className="px-1 text-[10px] text-zinc-500">+{day.length - 3} more</li>
+                  <li className="px-1 text-ds-micro text-zinc-500">+{day.length - 3} more</li>
                 )}
               </ul>
             </div>
           );
         })}
       </div>
-      <p className="px-3 py-2 text-[10px] text-zinc-600">
+      <p className="px-3 py-2 text-ds-micro text-zinc-600">
         Every entry is a work item's deadline. Resolved items stay visible, struck through, and stop
         driving reminders.
       </p>
@@ -907,7 +910,7 @@ export function NewTaskPanel({
         </div>
         <Button
           variant="primary"
-          className="w-full text-[11px]"
+          className="w-full text-ds-label"
           data-testid="work-new-submit"
           onClick={() => {
             if (!title.trim()) return;
@@ -929,7 +932,7 @@ export function NewTaskPanel({
           Create task
         </Button>
         {created && (
-          <p className="text-[10px] text-emerald-300" data-testid="work-new-confirm">
+          <p className="text-ds-micro text-emerald-300" data-testid="work-new-confirm">
             Created “{created}” — it is now in the list, board and calendar.
           </p>
         )}
@@ -968,7 +971,7 @@ function WorkRecordDrawer({
               <>
                 <Button
                   variant="primary"
-                  className="text-[11px]"
+                  className="text-ds-label"
                   data-testid="work-drawer-resolve"
                   onClick={() => {
                     resolveWorkItem(item.id, actor, 'Resolved from the work record');
@@ -982,7 +985,7 @@ function WorkRecordDrawer({
                 {item.status !== 'in_progress' && (
                   <Button
                     variant="ghost"
-                    className="text-[11px]"
+                    className="text-ds-label"
                     data-testid="work-drawer-start"
                     onClick={() => setWorkItemStatus(item.id, 'in_progress', actor)}
                   >
@@ -994,7 +997,7 @@ function WorkRecordDrawer({
             {item.status === 'done' && (
               <Button
                 variant="ghost"
-                className="text-[11px]"
+                className="text-ds-label"
                 data-testid="work-drawer-reopen"
                 onClick={() => reopenWorkItem(item.id, actor, 'Reopened from the work record')}
               >
@@ -1004,7 +1007,7 @@ function WorkRecordDrawer({
             {item.entity.type !== 'none' && (
               <Button
                 variant="ghost"
-                className="text-[11px]"
+                className="text-ds-label"
                 data-testid="work-drawer-open-record"
                 onClick={() => onNavigate(item.actionView)}
               >
@@ -1026,12 +1029,12 @@ function WorkRecordDrawer({
               { label: 'Due', value: item.dueDate ? `${item.dueDate} · ${dueLabel(item.dueDate)}` : 'No deadline' },
               { label: 'Entity', value: `${item.entity.type.replace(/_/g, ' ')} · ${item.entity.label}` },
               { label: 'Tenant', value: item.tenantId ? brandLabel(item.tenantId) : 'Platform-wide' },
-              { label: 'Work id', value: <span className="font-mono text-[11px]">{item.id}</span> },
+              { label: 'Work id', value: <span className="font-mono text-ds-label">{item.id}</span> },
             ]}
           />
-          <p className="text-[11px] leading-snug text-zinc-400">{item.detail}</p>
+          <p className="text-ds-label leading-snug text-zinc-400">{item.detail}</p>
           <div>
-            <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+            <h3 className="mb-2 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
               Activity
             </h3>
             <ActivityFeed
@@ -1042,7 +1045,7 @@ function WorkRecordDrawer({
                 at: a.at,
                 tone: (a.action === 'resolved' ? 'success' : 'info') as StatusTone,
               }))}
-              empty={<p className="text-[11px] text-zinc-600">No activity recorded yet.</p>}
+              empty={<p className="text-ds-label text-zinc-600">No activity recorded yet.</p>}
             />
           </div>
         </div>

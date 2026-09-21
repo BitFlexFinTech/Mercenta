@@ -27,7 +27,7 @@ function StepList({ steps }: { steps: TourDefinition['steps'] }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
+        className="flex items-center gap-1 text-ds-micro text-zinc-500 hover:text-zinc-300 transition-colors"
       >
         {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
         {steps.length} step{steps.length !== 1 ? 's' : ''}
@@ -35,7 +35,7 @@ function StepList({ steps }: { steps: TourDefinition['steps'] }) {
       {open && (
         <ol className="mt-2 space-y-1.5 pl-4 list-decimal">
           {steps.map((s) => (
-            <li key={s.id} className="text-[10px] text-zinc-400 leading-relaxed">
+            <li key={s.id} className="text-ds-micro text-zinc-400 leading-relaxed">
               <span className="text-zinc-200">{s.title}</span>
               <span className="text-zinc-500"> — {s.description.slice(0, 60)}{s.description.length > 60 ? '…' : ''}</span>
             </li>
@@ -55,9 +55,9 @@ function TourCard({ tour }: { tour: TourDefinition }) {
       <div className="flex min-h-0 flex-1 items-center justify-center bg-white/[0.02] border-b border-white/[0.06] px-4 py-6">
         <div className="text-center">
           <Layers className="w-8 h-8 text-brass-400/60 mx-auto mb-2" />
-          <div className="text-[11px] text-zinc-500">{tour.steps.length} guided steps</div>
+          <div className="text-ds-label text-zinc-500">{tour.steps.length} guided steps</div>
           {tour.autoStartViews && tour.autoStartViews.length > 0 && (
-            <div className="text-[10px] text-zinc-600 mt-1">
+            <div className="text-ds-micro text-zinc-600 mt-1">
               Triggers on: {tour.autoStartViews.join(', ')}
             </div>
           )}
@@ -73,7 +73,7 @@ function TourCard({ tour }: { tour: TourDefinition }) {
           </span>
           <span className="flex shrink-0 items-center gap-1">
             <span className={cn('w-1.5 h-1.5 rounded-full', tour.autoStart ? 'bg-emerald-400' : 'bg-zinc-500/40')} />
-            <span className={cn('text-[10px] font-medium', tour.autoStart ? 'text-emerald-300' : 'text-zinc-500')}>
+            <span className={cn('text-ds-micro font-medium', tour.autoStart ? 'text-emerald-300' : 'text-zinc-500')}>
               {tour.autoStart ? 'Published' : 'Draft'}
             </span>
           </span>
@@ -82,28 +82,28 @@ function TourCard({ tour }: { tour: TourDefinition }) {
         {/* Row 2: badges */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {tour.forceFirst && (
-            <Badge className="text-[9px] bg-amber-500/15 text-amber-300 border-amber-500/20">Required</Badge>
+            <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">Required</Badge>
           )}
           {tour.autoStartViews && tour.autoStartViews.length > 0 && (
-            <Badge className="text-[9px] bg-blue-500/15 text-blue-300 border-blue-500/20">
+            <Badge className="text-ds-micro bg-blue-500/15 text-blue-300 border-blue-500/20">
               {tour.autoStartViews.length} trigger{tour.autoStartViews.length !== 1 ? 's' : ''}
             </Badge>
           )}
-          <Badge className="text-[9px] bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
+          <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
             {tour.steps.length} step{tour.steps.length !== 1 ? 's' : ''}
           </Badge>
         </div>
 
         {/* Row 3: description + actions */}
         <div className="flex items-start justify-between gap-2">
-          <p className="text-[10px] text-zinc-500 leading-relaxed flex-1 line-clamp-2">
+          <p className="text-ds-micro text-zinc-500 leading-relaxed flex-1 line-clamp-2">
             {tour.description}
           </p>
           <div className="flex items-center gap-1 shrink-0">
             <Button
               size="sm"
               variant="ghost"
-              className="text-[10px] px-2 py-1"
+              className="text-ds-micro px-2 py-1"
               onClick={() => window.dispatchEvent(new CustomEvent('tour:preview', { detail: { tourId: tour.id } }))}
             >
               <Eye className="w-3 h-3" />
@@ -162,7 +162,7 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
               <span key={i} className={cn('w-2 h-2 rounded-full', i === stepIndex ? 'bg-brass-500' : 'bg-zinc-700')} />
             ))}
           </div>
-          <p className="text-[10px] text-zinc-500 mb-3">
+          <p className="text-ds-micro text-zinc-500 mb-3">
             Step {stepIndex + 1} of {tour.steps.length} &middot; Position: {step.position}
           </p>
           <h4 className="text-sm font-semibold text-white mb-2">{step.title}</h4>
@@ -170,12 +170,12 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
 
           {/* Target selector info */}
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg px-3 py-2 mb-4">
-            <div className="text-[10px] text-zinc-500">Target element</div>
-            <code className="text-[10px] text-brass-300 font-mono">{step.targetSelector}</code>
+            <div className="text-ds-micro text-zinc-500">Target element</div>
+            <code className="text-ds-micro text-brass-300 font-mono">{step.targetSelector}</code>
           </div>
 
           {/* Debug: show all steps in compact list */}
-          <details className="text-[10px] text-zinc-500">
+          <details className="text-ds-micro text-zinc-500">
             <summary className="cursor-pointer hover:text-zinc-300 transition-colors">All steps</summary>
             <ol className="mt-2 space-y-1 pl-4 list-decimal">
               {tour.steps.map((s, i) => (
@@ -189,21 +189,21 @@ function TourPreviewModal({ tour, onClose }: { tour: TourDefinition; onClose: ()
 
         {/* Footer */}
         <div className="flex items-center justify-between px-5 py-4 border-t border-white/[0.06]">
-          <Button size="sm" variant="ghost" className="text-[10px]" onClick={onClose}>
+          <Button size="sm" variant="ghost" className="text-ds-micro" onClick={onClose}>
             Close
           </Button>
           <div className="flex items-center gap-2">
             {stepIndex > 0 && (
-              <Button size="sm" variant="secondary" className="text-[10px]" onClick={handlePrev}>
+              <Button size="sm" variant="secondary" className="text-ds-micro" onClick={handlePrev}>
                 Previous
               </Button>
             )}
             {isLast ? (
-              <Button size="sm" className="text-[10px]" onClick={handleNext}>
+              <Button size="sm" className="text-ds-micro" onClick={handleNext}>
                 <CheckCircle2 className="w-3 h-3 mr-1" /> Done
               </Button>
             ) : (
-              <Button size="sm" className="text-[10px]" onClick={handleNext}>
+              <Button size="sm" className="text-ds-micro" onClick={handleNext}>
                 Next <ChevronRight className="w-3 h-3 ml-1" />
               </Button>
             )}
@@ -310,10 +310,10 @@ export function UsertourAdminPanel() {
         description="Internal tour management — the guided onboarding tours defined for the brand portal. Tours are rendered by the built-in TourEngine at runtime; this surface manages and previews them, it does not replace them."
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">{totalTours} tours</span>
-            <span className="font-mono text-[11px] text-zinc-500">{publishedCount} published</span>
-            <span className="font-mono text-[11px] text-zinc-500">{requiredCount} required</span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">{totalTours} tours</span>
+            <span className="font-mono text-ds-label text-zinc-500">{publishedCount} published</span>
+            <span className="font-mono text-ds-label text-zinc-500">{requiredCount} required</span>
+            <span className="font-mono text-ds-label text-zinc-500">
               {visibleTours.length} in view
             </span>
           </>
@@ -365,7 +365,7 @@ export function UsertourAdminPanel() {
       </WorkspaceSection>
 
       <ContextPanel title="Tour engine">
-        <p className="text-[11px] leading-snug text-zinc-400">
+        <p className="text-ds-label leading-snug text-zinc-400">
           Tours are launched by the TourEngine in the brand shell. Dismissal, step completion and
           force-first ordering are owned by that engine — this panel only lists and previews the
           definitions, so a tour can never be duplicated into a second implementation here.

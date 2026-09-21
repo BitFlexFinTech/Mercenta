@@ -60,12 +60,12 @@ const pct = (n: number | null) => (n === null ? '—' : `${(n * 100).toFixed(1)}
 
 function StatusBadge({ status }: { status: AdSpendBudget['status'] }) {
   if (status === 'active') {
-    return <Badge className="text-[10px] bg-emerald-500/15 text-emerald-300 border-emerald-500/20">Active</Badge>;
+    return <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">Active</Badge>;
   }
   if (status === 'paused') {
-    return <Badge className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/20">Paused</Badge>;
+    return <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20">Paused</Badge>;
   }
-  return <Badge className="text-[10px] bg-zinc-500/15 text-zinc-400 border-zinc-500/20">Not configured</Badge>;
+  return <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400 border-zinc-500/20">Not configured</Badge>;
 }
 
 export function AmazonAdsDashboard() {
@@ -328,7 +328,7 @@ export function AmazonAdsDashboard() {
         status={
           <Badge
             className={cn(
-              'text-[10px]',
+              'text-ds-micro',
               isLive
                 ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                 : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
@@ -340,9 +340,9 @@ export function AmazonAdsDashboard() {
         }
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">{rows.length} brands</span>
-            <span className="font-mono text-[11px] text-zinc-500">{configured} configured</span>
-            <span className="font-mono text-[11px] text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
+            <span className="font-mono text-ds-label text-zinc-500">{rows.length} brands</span>
+            <span className="font-mono text-ds-label text-zinc-500">{configured} configured</span>
+            <span className="font-mono text-ds-label text-zinc-500">focus: {focus.replace(/_/g, ' ')}</span>
           </>
         }
         toolbar={
@@ -355,8 +355,8 @@ export function AmazonAdsDashboard() {
                 data-testid={`ads-focus-${f}`}
                 className={
                   focus === f
-                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-[11px] font-medium text-white'
-                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
+                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
                 }
               >
                 {f.replace(/_/g, ' ')}
@@ -366,7 +366,7 @@ export function AmazonAdsDashboard() {
               type="button"
               onClick={() => setSortByUtil((v) => !v)}
               data-testid="ads-sort-utilisation"
-              className="rounded-lg bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white"
+              className="rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white"
             >
               {sortByUtil ? 'Sort: default' : 'Sort: utilisation'}
             </button>
@@ -374,7 +374,7 @@ export function AmazonAdsDashboard() {
         }
       />
 
-      <div className="flex items-start gap-2 rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2.5 text-[11px] text-zinc-400">
+      <div className="flex items-start gap-2 rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2.5 text-ds-label text-zinc-400">
         <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-zinc-500" />
         <span>
           {isLive
@@ -403,7 +403,7 @@ export function AmazonAdsDashboard() {
               />
             </ContextPanel>
             <ContextPanel title="Live connection path">
-              <p className="text-[11px] leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-zinc-400">
                 The live path already exists behind the <code>amazon_ads</code> credential seam.
                 Entering a real credential in Integrations activates it with no change to this
                 screen — until then every figure here is deterministic simulation.
@@ -449,7 +449,7 @@ export function AmazonAdsDashboard() {
               platform honestly shows every brand's advertising state rather than hiding it.
             </p>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px]">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-ds-label">
               {[
                 ['Status', selectedRow.status],
                 ['Monthly budget', gbp(selectedRow.budget)],
@@ -460,7 +460,7 @@ export function AmazonAdsDashboard() {
                 ['TACOS', pct(selectedRow.tacos)],
               ].map(([k, v]) => (
                 <div key={String(k)} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-2">
-                  <div className="text-[10px] uppercase tracking-wide text-zinc-500">{k}</div>
+                  <div className="text-ds-micro uppercase tracking-wide text-zinc-500">{k}</div>
                   <div className="mt-1 font-medium text-white">{v}</div>
                 </div>
               ))}
@@ -495,14 +495,14 @@ export function AmazonAdsDashboard() {
                 <Pencil className="w-3.5 h-3.5" /> Set monthly budget
               </Button>
             )}
-            {budgetNotice && <p className="text-[11px] text-emerald-400 mt-1.5" data-testid="ad-budget-notice">{budgetNotice}</p>}
-            {budgetError && <p className="text-[11px] text-rose-400 mt-1.5" data-testid="ad-budget-error">{budgetError}</p>}
+            {budgetNotice && <p className="text-ds-label text-emerald-400 mt-1.5" data-testid="ad-budget-notice">{budgetNotice}</p>}
+            {budgetError && <p className="text-ds-label text-rose-400 mt-1.5" data-testid="ad-budget-error">{budgetError}</p>}
           </div>
 
           <div className="mt-4" data-testid="ad-campaigns-panel">
             <h4 className="text-xs font-semibold text-white uppercase tracking-wide mb-2 flex items-center gap-1.5">
               <Megaphone className="w-3.5 h-3.5 text-zinc-500" /> Campaigns
-              <span className="text-[10px] text-zinc-600">— deterministic simulation, never live</span>
+              <span className="text-ds-micro text-zinc-600">— deterministic simulation, never live</span>
             </h4>
             {(() => {
               const camps = (campaignsByBrand.get(selectedRow.brandId) ?? []).slice();
@@ -513,7 +513,7 @@ export function AmazonAdsDashboard() {
                 <DataTable<AdCampaign>
                   columns={[
                     { key: 'name', label: 'Campaign', primary: true, render: (c) => <span className="font-medium text-white">{c.name}</span> },
-                    { key: 'status', label: 'Status', render: (c) => <Badge className={cn('text-[10px]', c.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{c.status}</Badge> },
+                    { key: 'status', label: 'Status', render: (c) => <Badge className={cn('text-ds-micro', c.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300')}>{c.status}</Badge> },
                     { key: 'monthlyBudgetGbp', label: 'Budget', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{gbp(c.monthlyBudgetGbp)}</span> },
                     { key: 'spendToDateGbp', label: 'Spend', align: 'right', render: (c) => <span className="font-mono text-xs text-zinc-300">{gbp(c.spendToDateGbp)}</span> },
                     { key: 'clicks', label: 'Clicks', align: 'right', hideBelow: 'lg', render: (c) => <span className="font-mono text-xs text-zinc-300">{c.clicks.toLocaleString()}</span> },
@@ -540,22 +540,22 @@ export function AmazonAdsDashboard() {
               }
               return (
                 <div className="space-y-3">
-                  {recNotice && <p className="text-[11px] text-emerald-400" data-testid="ad-rec-notice">{recNotice}</p>}
-                  {recError && <p className="text-[11px] text-rose-400" data-testid="ad-rec-error">{recError}</p>}
+                  {recNotice && <p className="text-ds-label text-emerald-400" data-testid="ad-rec-notice">{recNotice}</p>}
+                  {recError && <p className="text-ds-label text-rose-400" data-testid="ad-rec-error">{recError}</p>}
                   {recs.map((rec) => (
                     <div key={rec.id} className="rounded-lg border border-white/[0.06] bg-ink-850 px-3 py-3" data-testid={`ad-recommendation-row-${rec.id}`}>
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
                           <span className="text-xs font-medium text-white">{rec.month}</span>
-                          <span className="text-[11px] text-zinc-400 font-mono"> · recommended £{rec.recommendedMonthlyBudgetGbp.toLocaleString('en-GB')}/mo</span>
+                          <span className="text-ds-label text-zinc-400 font-mono"> · recommended £{rec.recommendedMonthlyBudgetGbp.toLocaleString('en-GB')}/mo</span>
                         </div>
-                        <Badge className={cn('text-[10px]', rec.status === 'proposed' ? 'bg-blue-500/15 text-blue-300' : rec.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : rec.status === 'amended' ? 'bg-amber-500/15 text-amber-300' : 'bg-rose-500/15 text-rose-300')}>
+                        <Badge className={cn('text-ds-micro', rec.status === 'proposed' ? 'bg-blue-500/15 text-blue-300' : rec.status === 'approved' ? 'bg-emerald-500/15 text-emerald-300' : rec.status === 'amended' ? 'bg-amber-500/15 text-amber-300' : 'bg-rose-500/15 text-rose-300')}>
                           {recStatusLabel[rec.status]}
                         </Badge>
                       </div>
-                      <p className="text-[11px] text-zinc-500 mt-1.5">{rec.basis}</p>
+                      <p className="text-ds-label text-zinc-500 mt-1.5">{rec.basis}</p>
                       {rec.reviewedAt && (
-                        <p className="text-[10px] text-zinc-600 mt-1">
+                        <p className="text-ds-micro text-zinc-600 mt-1">
                           Decided {rec.reviewedAt.slice(0, 16).replace('T', ' ')} by {rec.actorDisplay} · final £{(rec.amendedBudgetGbp ?? 0).toLocaleString('en-GB')}/mo{rec.note ? ` · note: ${rec.note}` : ''}
                         </p>
                       )}

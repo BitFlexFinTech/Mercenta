@@ -17,7 +17,14 @@
     "validate:logistics-map": "node scripts/validate-logistics-map.mjs",
     "validate:product-routes": "node scripts/validate-product-routes.mjs",
     "validate:workspace-shell": "node scripts/validate-workspace-shell.mjs",
-    "validate:canonical-propagation": "node scripts/validate-canonical-propagation.mjs"
+    "validate:canonical-propagation": "node scripts/validate-canonical-propagation.mjs",
+    "validate:seo": "node scripts/validate-seo-foundation.mjs",
+    "validate:bounded-ai": "node scripts/validate-bounded-ai.mjs",
+    "validate:routing": "node scripts/validate-routing-gateways.mjs",
+    "validate:uk-market-fit": "node scripts/validate-uk-market-fit.mjs",
+    "validate:founder-os": "node scripts/validate-founder-operating-system.mjs",
+    "validate:kb-sufficiency": "node scripts/validate-kb-sufficiency.mjs",
+    "validate:provider-safety": "node scripts/validate-provider-mode-safety.mjs"
   },
   "dependencies": {
     "@sentry/react": "^10.73.0",
@@ -27,8 +34,7 @@
     "lucide-react": "^0.446.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "recharts": "^3.10.1",
-    "zod": "^4.5.4"
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

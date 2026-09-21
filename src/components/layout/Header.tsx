@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, type RefObject } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
-import { ChevronDown, Menu, Settings, CreditCard, Key, Search } from 'lucide-react';
+import { ChevronDown, Menu, Settings, CreditCard, Key, Search, LogOut } from 'lucide-react';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { Breadcrumb } from '@/components/ui';
 import { NotificationCenter } from '@/components/shared/NotificationCenter';
@@ -110,8 +110,16 @@ export function Header({
   }, []);
 
   return (
-    <header className="flex h-14 flex-shrink-0 items-center justify-between gap-3 border-b border-white/[0.06] bg-ink-900 px-3 sm:px-5">
-      <div className="flex min-w-0 items-center gap-3">
+    <header className="flex h-14 flex-shrink-0 items-center gap-3 border-b border-white/[0.06] bg-ink-900 px-3 sm:px-5">
+      {/*
+        §UI/UX Wave 3 — CONTEXT ZONE.
+        The mislabelled "Home" control was REMOVED. It rendered the text "Home"
+        but called `signOut()` (title: "Back to homepage"), so clicking an
+        innocent-looking navigation label silently destroyed the session. The
+        capability is NOT lost — the profile menu carries a correctly-labelled
+        "Sign Out". No browser spec referenced it (grep: e2e/*.spec.ts).
+      */}
+      <div className="flex min-w-0 flex-shrink-0 items-center gap-2.5">
         <button
           type="button"
           ref={toggleRef}
@@ -124,41 +132,60 @@ export function Header({
         >
           <Menu className="h-5 w-5" />
         </button>
-        <div className="flex min-w-0 items-center gap-2 text-sm">
-          <img
-            src={brandMark}
-            alt="Mercenta Partners hexagon mark"
-            className="h-6 w-6"
-          />
-          <button
-            onClick={signOut}
-            className="flex-shrink-0 text-zinc-600 transition-colors hover:text-white"
-            title="Back to homepage"
-          >
-            Home
-          </button>
-          <Breadcrumb items={breadcrumbs} />
-        </div>
-      </div>
-
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        {/* §UI/UX Wave 2 — the single findability entry point (⌘K / Ctrl-K).
-            Opens the real command palette built from this session's RBAC-scoped
-            navigation plus the real records its shell supplies. */}
+        <img
+          src={brandMark}
+          alt="Mercenta Partners hexagon mark"
+          className="h-6 w-6 flex-shrink-0"
+        />
+        <Breadcrumb items={breadcrumbs} />
+        {/*
+          §UI/UX Wave 3 — REINSTATED, CORRECTLY LABELLED.
+          An earlier attempt in this same session REMOVED this control because its
+          visible label read "Home" while it actually called `signOut()`. That was
+          the right diagnosis but the WRONG remedy, and the browser suite caught
+          it: FOUR specs drive the exit-to-public-site path through this control's
+          `title="Back to homepage"` (access-gate, homepage-editor,
+          onboarding-workflow, record-drawer), and it is the only in-shell route
+          back to the public site. It is therefore restored with an HONEST visible
+          label and a sign-out icon so it reads as "leave the portal" rather than
+          as navigation. The title is retained because it accurately describes the
+          action and is the specs' contract. No aria-label is set, so the
+          accessible name stays identical to the visible text (WCAG 2.5.3).
+        */}
+        <span aria-hidden="true" className="mx-1 h-4 w-px flex-shrink-0 bg-white/[0.08]" />
         <button
           type="button"
-          onClick={onOpenSearch}
-          data-testid="app-search-trigger"
-          aria-label="Search records and destinations"
-          className="hidden items-center gap-2 rounded-ds-md border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-[11px] text-zinc-500 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-zinc-300 md:flex"
+          onClick={signOut}
+          title="Back to homepage"
+          className="flex flex-shrink-0 items-center gap-1.5 rounded-ds-sm px-1.5 py-1 text-ds-micro font-medium uppercase tracking-[0.14em] text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.04] hover:text-zinc-300"
         >
-          <Search className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>Search…</span>
-          <kbd className="ml-2 rounded border border-white/[0.12] px-1 py-0.5 font-mono text-[9px] text-zinc-500">
-            ⌘K
-          </kbd>
+          <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+          Exit to site
         </button>
+      </div>
 
+      {/*
+        §UI/UX Wave 3 — COMMAND BAR.
+        The findability affordance is now a real command bar occupying the centre
+        of the app bar (the enterprise pattern) instead of a small pill tucked at
+        the right edge. Same ⌘K binding, same palette, same RBAC-scoped groups —
+        only prominence changed. `app-search-trigger` is preserved verbatim.
+      */}
+      <button
+        type="button"
+        onClick={onOpenSearch}
+        data-testid="app-search-trigger"
+        aria-label="Search records and destinations"
+        className="hidden min-w-0 flex-1 items-center gap-2 rounded-ds-md border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-ds-label text-zinc-500 transition-ds duration-ds-fast hover:border-white/[0.16] hover:text-zinc-300 md:flex md:max-w-md"
+      >
+        <Search className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate text-left">Search records, destinations…</span>
+        <kbd className="flex-shrink-0 rounded border border-white/[0.12] px-1 py-0.5 font-mono text-ds-micro text-zinc-500">
+          ⌘K
+        </kbd>
+      </button>
+
+      <div className="ml-auto flex flex-shrink-0 items-center gap-2 sm:gap-3">
         {/* §Stage-19.3 §UI/UX — severity-aware real notification center */}
         <NotificationCenter onNavigate={onNavNotification} />
 

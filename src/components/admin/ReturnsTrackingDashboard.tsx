@@ -137,10 +137,10 @@ return (
         description="Internal forwarding flow — received at warehouse to confirmed by brand"
         meta={
           <>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Records <span className="font-mono text-zinc-300">{allTracking.length}</span>
             </span>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Confirmed <span className="font-mono text-zinc-300">{stats.confirmed}</span>
             </span>
           </>
@@ -167,7 +167,7 @@ return (
               ]}
             />
             <span className="ml-auto flex items-center gap-2">
-              <span className="hidden text-[10px] uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-zinc-600 sm:inline">
                 Density
               </span>
               <SegmentedControl
@@ -224,7 +224,7 @@ return (
           onRowClick={(t) => setSelectedId(t.id)}
           rowActions={(t) =>
             t.status !== 'confirmed_by_brand' ? (
-              <Button className="text-[10px]" onClick={() => handleNextStage(t.id)}>
+              <Button className="text-ds-micro" onClick={() => handleNextStage(t.id)}>
                 Advance
               </Button>
             ) : null
@@ -245,7 +245,7 @@ return (
                 return (
                   <span className="block">
                     <span className="block text-zinc-300">{info?.productName ?? t.returnId}</span>
-                    <span className="block font-mono text-[10px] text-zinc-600">
+                    <span className="block font-mono text-ds-micro text-zinc-600">
                       {t.returnId} · {info?.quantity ?? '?'} units
                     </span>
                   </span>
@@ -258,8 +258,8 @@ return (
               hideBelow: 'sm',
               render: (t) => (
                 <span className="block">
-                  <span className="block font-mono text-[10px] text-zinc-400">{t.inboundTrackingNumber}</span>
-                  <span className="block text-[10px] text-zinc-600">{t.inboundCarrier}</span>
+                  <span className="block font-mono text-ds-micro text-zinc-400">{t.inboundTrackingNumber}</span>
+                  <span className="block text-ds-micro text-zinc-600">{t.inboundCarrier}</span>
                 </span>
               ),
             },
@@ -278,7 +278,7 @@ return (
                         className={cn('h-2 w-2 rounded-full', i <= idx ? 'bg-brass-500' : 'bg-zinc-700')}
                       />
                     ))}
-                    <StatusBadge className="text-[10px]" dataStatus={p.dataStatus} tone={p.tone}>
+                    <StatusBadge className="text-ds-micro" dataStatus={p.dataStatus} tone={p.tone}>
                       {p.label}
                     </StatusBadge>
                   </span>
@@ -292,8 +292,8 @@ return (
               render: (t) =>
                 t.forwardedTrackingNumber ? (
                   <span className="block">
-                    <span className="block font-mono text-[10px] text-zinc-400">{t.forwardedTrackingNumber}</span>
-                    <span className="block text-[10px] text-zinc-600">{t.forwardedCarrier}</span>
+                    <span className="block font-mono text-ds-micro text-zinc-400">{t.forwardedTrackingNumber}</span>
+                    <span className="block text-ds-micro text-zinc-600">{t.forwardedCarrier}</span>
                   </span>
                 ) : (
                   <span className="text-zinc-600">—</span>
@@ -308,16 +308,16 @@ return (
           <div className="flex items-center gap-2">
             <Boxes className="h-4 w-4 text-brass-400" aria-hidden="true" />
             <span className="text-xs font-medium text-white">{DEMO_WAREHOUSE_PARTNER.name}</span>
-            <Badge className="text-[8px] bg-amber-500/15 text-amber-300">(Mock)</Badge>
+            <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">(Mock)</Badge>
           </div>
-          <p className="mt-1.5 text-[10px] text-zinc-500">
+          <p className="mt-1.5 text-ds-micro text-zinc-500">
             {DEMO_WAREHOUSE_PARTNER.address}, {DEMO_WAREHOUSE_PARTNER.postcode}
           </p>
-          <p className="mt-1.5 text-[10px] leading-snug text-zinc-500">{DEMO_WAREHOUSE_PARTNER.notes}</p>
+          <p className="mt-1.5 text-ds-micro leading-snug text-zinc-500">{DEMO_WAREHOUSE_PARTNER.notes}</p>
         </ContextPanel>
         <ContextPanel title="Forwarding stages">
           {allTracking.length === 0 ? (
-            <p className="text-[11px] text-zinc-500">No returns in the flow.</p>
+            <p className="text-ds-label text-zinc-500">No returns in the flow.</p>
           ) : (
             <ol className="space-y-1.5">
               {STATUS_STEPS.map(function(s, i) {
@@ -325,10 +325,10 @@ return (
                 const p = returnTrackingStatusPresentation(s.status);
                 return (
                   <li key={s.status} className="flex items-center justify-between gap-2">
-                    <StatusBadge className="text-[10px]" dataStatus={p.dataStatus} tone={p.tone}>
+                    <StatusBadge className="text-ds-micro" dataStatus={p.dataStatus} tone={p.tone}>
                       {s.label}
                     </StatusBadge>
-                    <span className="font-mono text-[11px] text-zinc-300">{n}</span>
+                    <span className="font-mono text-ds-label text-zinc-300">{n}</span>
                   </li>
                 );
               })}
@@ -351,11 +351,11 @@ return (
         footer={
           selectedTracking ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[10px] text-zinc-600">
+              <span className="text-ds-micro text-zinc-600">
                 {selectedTracking.status === 'confirmed_by_brand' ? 'Flow complete' : 'Next stage available'}
               </span>
               {selectedTracking.status !== 'confirmed_by_brand' && (
-                <Button className="text-[10px]" data-state="return-drawer-advance" onClick={function() { handleNextStage(selectedTracking.id); }}>
+                <Button className="text-ds-micro" data-state="return-drawer-advance" onClick={function() { handleNextStage(selectedTracking.id); }}>
                   Advance stage
                 </Button>
               )}
@@ -411,15 +411,15 @@ function ReturnPreviewBody({
 
       {tracking.qualityCheckNotes && (
         <section aria-label="Quality check notes">
-          <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
             Quality check notes
           </h3>
-          <p className="text-[11px] leading-snug text-zinc-400">{tracking.qualityCheckNotes}</p>
+          <p className="text-ds-label leading-snug text-zinc-400">{tracking.qualityCheckNotes}</p>
         </section>
       )}
 
       <section aria-label="Forwarding">
-        <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Forwarding
         </h3>
         <RecordFieldList
@@ -433,7 +433,7 @@ function ReturnPreviewBody({
       </section>
 
       <section aria-label="Stage timeline">
-        <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Stage timeline
         </h3>
         <ol className="space-y-1.5">
@@ -445,10 +445,10 @@ function ReturnPreviewBody({
                   aria-hidden="true"
                   className={cn('h-2 w-2 rounded-full', reached ? 'bg-brass-500' : 'bg-zinc-700')}
                 />
-                <span className={cn('text-[11px]', reached ? 'text-zinc-200' : 'text-zinc-600')}>
+                <span className={cn('text-ds-label', reached ? 'text-zinc-200' : 'text-zinc-600')}>
                   {s.label}
                 </span>
-                <span className="ml-auto text-[10px] text-zinc-600">
+                <span className="ml-auto text-ds-micro text-zinc-600">
                   {reached ? 'reached' : 'pending'}
                 </span>
               </li>

@@ -112,7 +112,7 @@ export function PartnershipsCentre() {
   return (
     <div className="space-y-4" data-testid="partnerships-centre">
       <Card title="Trade-programme & partner routes (prospective)">
-        <p className="text-[10px] text-amber-300/90 flex items-start gap-1.5 mb-3">
+        <p className="text-ds-micro text-amber-300/90 flex items-start gap-1.5 mb-3">
           <ShieldAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
           {TRADE_PARTNERSHIP_DISCLAIMER}
         </p>
@@ -142,8 +142,8 @@ export function PartnershipsCentre() {
                   <td className="px-2 py-1.5 text-zinc-400">
                     {t.programme ? TRADE_PROGRAMMES[t.programme].label : '—'}
                   </td>
-                  <td className="px-2 py-1.5 text-zinc-500 text-[10px]">{t.objective}</td>
-                  <td className="px-2 py-1.5 text-[10px] text-amber-300/80">
+                  <td className="px-2 py-1.5 text-zinc-500 text-ds-micro">{t.objective}</td>
+                  <td className="px-2 py-1.5 text-ds-micro text-amber-300/80">
                     {partnerTargetStatusLabel(t)}
                   </td>
                 </tr>
@@ -154,7 +154,7 @@ export function PartnershipsCentre() {
       </Card>
 
       <Card title="Measured pipeline — brands discovered to onboarded">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 text-[11px] font-mono">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 text-ds-label font-mono">
           <p className="text-zinc-400">
             Discovered: <span className="text-zinc-200">{pipeline.stages.discovered}</span>
           </p>
@@ -192,7 +192,7 @@ export function PartnershipsCentre() {
             </tbody>
           </table>
         </div>
-        <p className="text-[10px] text-zinc-600 mt-2">
+        <p className="text-ds-micro text-zinc-600 mt-2">
           Counts come from the canonical prospect store and the market-access tags recorded in Brand
           Intelligence — the same records, not a separate CRM.
         </p>
@@ -202,7 +202,7 @@ export function PartnershipsCentre() {
         <div className="grid gap-2 sm:grid-cols-3">
           <div>
             <p className="text-xs font-medium text-white">{selected.name}</p>
-            <p className="text-[10px] text-zinc-500">{selected.objective}</p>
+            <p className="text-ds-micro text-zinc-500">{selected.objective}</p>
           </div>
           <Input
             label="Recipient address"
@@ -218,16 +218,16 @@ export function PartnershipsCentre() {
 
         {draft && (
           <div className="mt-3 space-y-2" data-testid="partner-outreach-draft">
-            <p className="text-[11px] text-zinc-400">
+            <p className="text-ds-label text-zinc-400">
               <span className="text-zinc-500">Subject:</span> {draft.subject}
             </p>
-            <pre className="whitespace-pre-wrap text-[11px] text-zinc-300 bg-ink-900 border border-white/[0.06] rounded-lg p-3">
+            <pre className="whitespace-pre-wrap text-ds-label text-zinc-300 bg-ink-900 border border-white/[0.06] rounded-lg p-3">
               {draft.text}
             </pre>
-            <p className="text-[10px] text-zinc-500">
+            <p className="text-ds-micro text-zinc-500">
               Basis: {draft.basis} · wording gate: {draft.lintPassed ? 'PASS' : `FAIL (${draft.lintReasons.join('; ')})`}
             </p>
-            <label className="flex items-center gap-2 text-[11px] text-zinc-400">
+            <label className="flex items-center gap-2 text-ds-label text-zinc-400">
               <input
                 type="checkbox"
                 checked={confirmed}
@@ -241,11 +241,11 @@ export function PartnershipsCentre() {
               {sending ? 'Sending…' : 'Send now'}
             </Button>
             {sendResult && (
-              <p className="text-[11px] text-brass-300" data-testid="partner-send-result">
+              <p className="text-ds-label text-brass-300" data-testid="partner-send-result">
                 {sendResult}
               </p>
             )}
-            <p className="text-[10px] text-zinc-600">
+            <p className="text-ds-micro text-zinc-600">
               With no verified email connection the canonical mail seam returns the mock client, so a
               send produces a <code>mock:msg-…</code> id and makes zero network calls.
             </p>
@@ -262,28 +262,28 @@ export function PartnershipsCentre() {
               <span className="text-amber-300">{gbp(FUNDRAISING_PLAN.committedGbp)}</span> ·
               commitments claimed: {String(FUNDRAISING_PLAN.commitmentsClaimed)}
             </p>
-            <p className="text-[10px] text-zinc-500 mt-0.5">{FUNDRAISING_PLAN.instrument}</p>
-            <p className="text-[10px] text-zinc-600 mt-1">{FUNDRAISING_PLAN.note}</p>
+            <p className="text-ds-micro text-zinc-500 mt-0.5">{FUNDRAISING_PLAN.instrument}</p>
+            <p className="text-ds-micro text-zinc-600 mt-1">{FUNDRAISING_PLAN.note}</p>
           </div>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">Use of funds</p>
+            <p className="text-ds-micro uppercase tracking-wider text-zinc-500 mb-1">Use of funds</p>
             {FUNDRAISING_PLAN.useOfFunds.map((u) => (
               <div key={u.label} className="border-b border-white/[0.04] py-1.5">
-                <p className="text-[11px] text-zinc-300">
+                <p className="text-ds-label text-zinc-300">
                   {u.label} — <span className="text-brass-300">{u.pct}%</span>
                 </p>
-                <p className="text-[10px] text-zinc-600">{u.note}</p>
+                <p className="text-ds-micro text-zinc-600">{u.note}</p>
               </div>
             ))}
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">Milestones</p>
+            <p className="text-ds-micro uppercase tracking-wider text-zinc-500 mb-1">Milestones</p>
             {FUNDRAISING_PLAN.milestones.map((m) => (
               <div key={m.label} className="border-b border-white/[0.04] py-1.5">
-                <p className="text-[11px] text-zinc-300">{m.label}</p>
-                <p className="text-[10px] text-zinc-600">{m.detail}</p>
+                <p className="text-ds-label text-zinc-300">{m.label}</p>
+                <p className="text-ds-micro text-zinc-600">{m.detail}</p>
               </div>
             ))}
           </div>

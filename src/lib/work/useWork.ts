@@ -27,6 +27,18 @@ export function useWorkItems(
   return getWorkItems(scope, tenantId, opts);
 }
 
+/**
+ * §Founder OS — the work-store mutation stamp.
+ *
+ * A surface that derives its OWN model from the canonical stores (the Control
+ * Centre) needs to re-derive when work changes, but does not itself render work
+ * items. This hook exposes exactly that, from the same store and the same
+ * subscription the work surfaces use — so there is still one source of truth.
+ */
+export function useWorkVersion(): number {
+  return useSyncExternalStore(subscribeWork, workVersion, workVersion);
+}
+
 export function useCalendarEntries(scope: WorkScope, tenantId?: string | null): CalendarEntry[] {
   const version = useSyncExternalStore(subscribeWork, workVersion, workVersion);
   void version;

@@ -151,10 +151,10 @@ export function AdminAuditLog() {
         description="Who did what, when — every significant admin action in one immutable record, searchable by actor, action, brand, entity and reason."
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">
               {entries === null ? 'Loading…' : `${entries.length} entries`}
             </span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">
               {actions.length} distinct actions
             </span>
           </>
@@ -216,7 +216,7 @@ export function AdminAuditLog() {
               key: 'createdAt',
               label: 'When',
               render: (e) => (
-                <span className="font-mono text-[11px] text-zinc-500 whitespace-nowrap">
+                <span className="font-mono text-ds-label text-zinc-500 whitespace-nowrap">
                   {new Date(e.createdAt).toLocaleString()}
                 </span>
               ),
@@ -231,7 +231,7 @@ export function AdminAuditLog() {
               label: 'Action',
               primary: true,
               render: (e) => (
-                <Badge className="text-[9px] bg-brass-500/10 text-brass-300 border-brass-500/20 whitespace-nowrap">
+                <Badge className="text-ds-micro bg-brass-500/10 text-brass-300 border-brass-500/20 whitespace-nowrap">
                   {e.action}
                 </Badge>
               ),
@@ -243,7 +243,7 @@ export function AdminAuditLog() {
                 <span className={cn('font-mono text-zinc-400')}>
                   {e.entityType}/{e.entityId}
                   {e.brandId && (
-                    <span className="block text-[9px] text-zinc-600">brand: {e.brandId}</span>
+                    <span className="block text-ds-micro text-zinc-600">brand: {e.brandId}</span>
                   )}
                 </span>
               ),
@@ -256,14 +256,14 @@ export function AdminAuditLog() {
           ]}
         />
         {entries !== null && (
-          <p className="text-[10px] text-zinc-600 pt-2 px-1">
+          <p className="text-ds-micro text-zinc-600 pt-2 px-1">
             Showing {filtered.length} of {entries.length} entries.
           </p>
         )}
         </Card>
         <div className="space-y-3">
           <ContextPanel title="What this log is">
-            <p className="text-[11px] leading-snug text-zinc-400">
+            <p className="text-ds-label leading-snug text-zinc-400">
               Every significant action — admin overrides, CRM activity, compliance review, payout
               approval, work-layer resolution — lands here with actor, action, entity, tenant and
               reason. History is never destroyed: an override adds a record, it never edits one.

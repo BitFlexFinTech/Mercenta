@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { BRAND_NAME } from '@/config/brand';
+import { EXPLORE_UK_MARKET_FIT_CTA, PRE_AUDIT_TESTIDS } from '@/config/ukMarketFit';
 import { cn } from '@/utils/cn';
 import logoMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
-export type PublicPage = 'home' | 'how-it-works' | 'uk-market-access' | 'for-brands' | 'faq' | 'privacy' | 'terms';
+export type PublicPage = 'home' | 'how-it-works' | 'uk-market-access' | 'for-brands' | 'faq' | 'privacy' | 'terms' | 'explore-uk-market-fit';
 
 interface PublicNavProps {
   currentPage: PublicPage;
@@ -17,6 +18,7 @@ const NAV_LINKS: { label: string; page: PublicPage; children?: { label: string; 
     label: 'Solutions & Services',
     page: 'how-it-works',
     children: [
+      { label: EXPLORE_UK_MARKET_FIT_CTA, page: 'explore-uk-market-fit' },
       { label: 'How It Works', page: 'how-it-works' },
       { label: 'UK Market Access', page: 'uk-market-access' },
       { label: 'For Brands', page: 'for-brands' },
@@ -125,6 +127,7 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
           ))}
           <button
             onClick={onOpenPortal}
+            data-testid={PRE_AUDIT_TESTIDS.headerUtility}
             className="text-xs font-medium bg-brass hover:bg-brass-600 text-ink px-4 py-1.5 rounded-lg transition-colors"
           >
             Partner Login

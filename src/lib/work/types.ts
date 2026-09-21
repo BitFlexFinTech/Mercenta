@@ -37,13 +37,19 @@ export type WorkSource =
   | 'outreach_followup'
   | 'contract_renewal'
   | 'onboarding_step'
+  // §Phase 2 — the two declared commercial-readiness sources. A product whose
+  // commercial route is `remediation` needs the BRAND to supply information; a
+  // route of `blocked`/`human_review` needs a MERCENTA decision. Both are
+  // DERIVED from the canonical readiness record, never invented.
+  | 'commercial_remediation'
+  | 'commercial_review'
   | 'manual';
 
 /** The canonical record this work item is about. */
 export interface WorkEntityRef {
   type: 'purchase_order' | 'compliance_document' | 'invoice' | 'deduction'
       | 'shipment' | 'return' | 'prospect' | 'contract' | 'application'
-      | 'onboarding' | 'none';
+      | 'onboarding' | 'commercial_readiness' | 'none';
   id: string;
   /** Human reference (PO number, document type, brand name). */
   label: string;

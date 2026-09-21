@@ -8,6 +8,7 @@ import { Card } from '@/components/ui';
 import { getProspects } from '@/data/prospectStore';
 import { APPROVED_CATEGORIES } from '@/types';
 import { analyzeProductListing } from '@/lib/intelligence/listingAnalyzer';
+import { BrandRelationshipMap } from '@/components/brand/BrandRelationshipMap';
 import { Package, ArrowUpRight } from 'lucide-react';
 import {
   ContextPanel,
@@ -132,19 +133,19 @@ export function BrandIntelligence() {
         title="Your UK Market"
         description="Market intelligence for your brand in the UK market. Every figure is a planning estimate derived from the same deterministic model as the Listing Analyzer — no live marketplace data and no proprietary internal scoring is shown on a brand surface."
         entity={
-          <span className="text-[11px] text-zinc-400">
+          <span className="text-ds-label text-zinc-400">
             {brandName} · {brandCategory}
           </span>
         }
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">
               {catData.scored.length} brands modelled
             </span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">
               {catData.sameCat.length} in {brandCategory}
             </span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">
               showing {competitorRows.length} competitor{competitorRows.length === 1 ? '' : 's'}
             </span>
           </>
@@ -159,8 +160,8 @@ export function BrandIntelligence() {
                 data-testid={`bi-detail-${d}`}
                 className={
                   detail === d
-                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-[11px] font-medium text-white'
-                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
+                    ? 'rounded-lg bg-brass-500 px-2.5 py-1 text-ds-label font-medium text-white'
+                    : 'rounded-lg bg-white/[0.04] px-2.5 py-1 text-ds-label font-medium text-zinc-400 hover:bg-white/[0.08] hover:text-white'
                 }
               >
                 {d === 'none' ? 'Overview' : d === 'competitors' ? 'Competitors' : d === 'products' ? 'Your products' : 'Insights'}
@@ -171,6 +172,12 @@ export function BrandIntelligence() {
       />
 
       <MetricBand items={metrics} columns={4} />
+
+      {/* §Brand Intelligence — the tenant-scoped relationship experience. It is
+          built by the SAME relationship builder as the Mercenta Brain, but with
+          a brand scope, so it can never expose another tenant, a prospect or
+          Mercenta-internal machinery. */}
+      <BrandRelationshipMap />
 
       {(detail === 'none' || detail === 'competitors') && (
       <WorkspaceSection
@@ -183,7 +190,7 @@ export function BrandIntelligence() {
               type="button"
               onClick={() => setShowAllCompetitors((v) => !v)}
               data-testid="bi-toggle-competitors"
-              className="text-[11px] text-brass-400 hover:text-brass-300"
+              className="text-ds-label text-brass-400 hover:text-brass-300"
             >
               {showAllCompetitors ? 'Show fewer' : `Show all ${catData.sameCat.length}`}
             </button>
@@ -194,7 +201,7 @@ export function BrandIntelligence() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {competitorRows.map(p => (
               <Card key={p.id} className="p-3 flex items-center justify-between">
-                <div><span className="text-xs font-medium text-white">{p.brand}</span><div className="text-[10px] text-zinc-500 mt-0.5">{qualitativePosition(p, p.brand === brandName)}</div></div>
+                <div><span className="text-xs font-medium text-white">{p.brand}</span><div className="text-ds-micro text-zinc-500 mt-0.5">{qualitativePosition(p, p.brand === brandName)}</div></div>
               </Card>
             ))}
           </div>
@@ -211,7 +218,7 @@ export function BrandIntelligence() {
         <div data-testid="bi-product-performance">
           <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-1.5">
             <Package className="w-4 h-4 text-brass-400" /> Your product performance
-            <span className="text-[10px] text-zinc-600">— deterministic estimates, never live data</span>
+            <span className="text-ds-micro text-zinc-600">— deterministic estimates, never live data</span>
           </h3>
           {productPerformance.length === 0 ? (
             <p className="text-xs text-zinc-600">No catalogue products yet — add products to see estimated performance.</p>
@@ -221,20 +228,20 @@ export function BrandIntelligence() {
                 <li key={p.sku} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2.5" data-testid={`bi-sku-${p.sku}`}>
                   <div className="min-w-0 flex-1">
                     <span className="block text-xs font-medium text-white truncate">{p.name}</span>
-                    <span className="block text-[10px] text-zinc-500 font-mono">{p.sku} · est. {a.estimates.monthlyUnitsLow}–{a.estimates.monthlyUnitsHigh} u/mo · £{a.estimates.priceGbp.toFixed(2)}</span>
+                    <span className="block text-ds-micro text-zinc-500 font-mono">{p.sku} · est. {a.estimates.monthlyUnitsLow}–{a.estimates.monthlyUnitsHigh} u/mo · £{a.estimates.priceGbp.toFixed(2)}</span>
                   </div>
-                  <span className="text-[10px] uppercase text-zinc-600 hidden md:inline">Revenue</span>
+                  <span className="text-ds-micro uppercase text-zinc-600 hidden md:inline">Revenue</span>
                   <span className="text-xs font-mono text-emerald-300">£{(a.estimates.monthlyRevenueMidGbp / 1000).toFixed(0)}k/mo</span>
-                  <span className="text-[10px] uppercase text-zinc-600 hidden md:inline">Demand</span>
+                  <span className="text-ds-micro uppercase text-zinc-600 hidden md:inline">Demand</span>
                   <span className={a.estimates.demandSignal === 'high' ? 'text-emerald-300' : a.estimates.demandSignal === 'medium' ? 'text-amber-300' : 'text-zinc-500'}>{a.estimates.demandSignal}</span>
-                  <span className="text-[10px] uppercase text-zinc-600 hidden md:inline">Opportunity</span>
-                  <span className="text-[10px] text-brass-400">{a.estimates.opportunityIndicators[0] ?? '—'}</span>
+                  <span className="text-ds-micro uppercase text-zinc-600 hidden md:inline">Opportunity</span>
+                  <span className="text-ds-micro text-brass-400">{a.estimates.opportunityIndicators[0] ?? '—'}</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-zinc-600" />
                 </li>
               ))}
             </ul>
           )}
-          <p className="text-[10px] text-zinc-600 mt-2">
+          <p className="text-ds-micro text-zinc-600 mt-2">
             Estimates derived from the same deterministic model as the Listing Analyzer — planning ranges, not measured marketplace data.
           </p>
         </div>
@@ -264,7 +271,7 @@ export function BrandIntelligence() {
             { label: 'Data source', value: 'Deterministic model (no live data)' },
           ]}
         />
-        <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+        <p className="mt-2 text-ds-label leading-snug text-zinc-400">
           Estimates are planning ranges produced by the same engine as the Listing Analyzer.
           They are not measured marketplace results and this surface never displays Mercenta&apos;s
           internal scoring.

@@ -1,3 +1,22 @@
+> ## ⚠ HISTORICAL DOCUMENT — NO AUTHORITY (marked 2026-09-21)
+>
+> This file is a **historical record** from an earlier point in the project (the
+> pre-Mercenta "BoxBee" era). It is **NOT an active operating rule** and MUST NOT
+> be used to gate, block, delay or reverse current work.
+>
+> - Canonical operating model: **`.clinerules/operating-model.md`**
+> - Current project position: **`PROJECT_STATUS.md`** (+ `HANDOFF.md`)
+> - Business invariants: **`.clinerules/mercenta-business-model.md`**
+> - Granular capability matrix: **`requirements-registry.json`**
+>
+> Every finding, count and status below describes the repository **as it was on
+> 24 August 2026** and has almost certainly been superseded. Any instruction in
+> this file that conflicts with the canonical operating model — a design freeze, a
+> "dirty tree means STOP" gate, a >3/>5-file approval gate, a "do not commit"
+> rule, or a stale payout-rail / VAT / provider statement — is **EXPIRED** and
+> has no effect.
+
+---
 # BoxBee — Architecture & Production-Readiness Audit
 
 **Date:** 24 August 2026 · **Scope:** full codebase read (`src/`, `supabase/`, `scripts/`, configs) · **Mode:** report-only, no code changed.

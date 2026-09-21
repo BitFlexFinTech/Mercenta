@@ -43,14 +43,14 @@ export function ProspectDetailPanel({ prospect, onClose, onMutated }: { prospect
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold text-white">{p.brand}</h3>
-              <Badge className={cn('text-[10px] border', TC[p.score.tier])}>{TL[p.score.tier]}</Badge>
+              <Badge className={cn('text-ds-micro border', TC[p.score.tier])}>{TL[p.score.tier]}</Badge>
               <span className={cn('text-xl font-bold', TC[p.score.tier])}>{p.score.total}<span className="text-xs text-zinc-600">/100</span></span>
             </div>
             <div className="flex items-center gap-1.5 flex-wrap">
-              {p.lastChecked?<Badge className="text-[9px] bg-ink-850 text-zinc-400">checked {p.lastChecked.slice(0,10)}</Badge>:null}
-              {p.nextCheck?<Badge className="text-[9px] bg-ink-850 text-zinc-400">next {p.nextCheck.slice(0,10)}</Badge>:null}
-              {!p.disqualified&&<Button variant="danger" className="text-[10px] px-2 py-1" onClick={handleDisqualify}><ShieldBan className="w-3 h-3 text-crimson-accent" />Disqualify</Button>}
-              {p.disqualified&&<Badge className="text-[9px] bg-amber-500/15 text-amber-300">disqualified</Badge>}
+              {p.lastChecked?<Badge className="text-ds-micro bg-ink-850 text-zinc-400">checked {p.lastChecked.slice(0,10)}</Badge>:null}
+              {p.nextCheck?<Badge className="text-ds-micro bg-ink-850 text-zinc-400">next {p.nextCheck.slice(0,10)}</Badge>:null}
+              {!p.disqualified&&<Button variant="danger" className="text-ds-micro px-2 py-1" onClick={handleDisqualify}><ShieldBan className="w-3 h-3 text-crimson-accent" />Disqualify</Button>}
+              {p.disqualified&&<Badge className="text-ds-micro bg-amber-500/15 text-amber-300">disqualified</Badge>}
             </div>
             <p className="text-xs text-zinc-500 mt-0.5">{p.category}{p.website ? <> · <a href={p.website} target="_blank" rel="noreferrer" className="text-brass-400 hover:underline">{p.website.replace('https://', '')}</a></> : null}</p>
           </div>
@@ -62,7 +62,7 @@ export function ProspectDetailPanel({ prospect, onClose, onMutated }: { prospect
 
       <div className="flex items-center gap-1 flex-wrap bg-ink-850 border border-white/[0.06] rounded-lg p-0.5">
         {tabs.map(t => { const Ic = t.icon; return (
-          <button key={t.id} onClick={() => setTab(t.id)} className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-medium transition-colors', tab === t.id ? 'bg-brass-500 text-white' : 'text-zinc-400 hover:text-white')}><Ic className="w-3 h-3" />{t.label}</button>
+          <button key={t.id} onClick={() => setTab(t.id)} className={cn('flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-ds-micro font-medium transition-colors', tab === t.id ? 'bg-brass-500 text-white' : 'text-zinc-400 hover:text-white')}><Ic className="w-3 h-3" />{t.label}</button>
         ); })}
       </div>
 

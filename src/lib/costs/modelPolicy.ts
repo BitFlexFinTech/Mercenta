@@ -92,6 +92,33 @@ export const RUNTIME_TASKS: Record<string, RuntimeTaskSpec> = {
     estimatedTokens: 150,
     estimatedCostGbp: 0.0003,
   },
+  /**
+   * §Founder OS — the OPTIONAL narrative on top of the deterministic founder
+   * brief. The facts are always computed locally; only the prose is a model
+   * call, it is cached, and a free model is sufficient. Without a credential the
+   * task is refused and the brief is still complete.
+   */
+  founder_brief_narrative: {
+    id: 'founder_brief_narrative',
+    description: 'Summarise the deterministic founder brief facts in a short narrative.',
+    deterministic: false,
+    cacheable: true,
+    locallyComputable: false,
+    freeModelSufficient: true,
+    estimatedTokens: 400,
+    estimatedCostGbp: 0.0008,
+  },
+  /** §Founder OS — rephrase an "Ask Mercenta" answer that is already computed. */
+  founder_ask_answer: {
+    id: 'founder_ask_answer',
+    description: 'Rephrase an already-computed canonical answer to a founder question.',
+    deterministic: false,
+    cacheable: true,
+    locallyComputable: false,
+    freeModelSufficient: true,
+    estimatedTokens: 300,
+    estimatedCostGbp: 0.0006,
+  },
 };
 
 /** Per-operation budget from the single source of truth. */

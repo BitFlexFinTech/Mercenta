@@ -659,6 +659,23 @@ safest), (b) wire them into the surfaces they were evidently built for,
 (c) delete them. **Recommendation: (a) leave them, and record them in
 PROJECT_STATUS.md as known-unreferenced.** Deleting is a Founder call.
 
+> **RESOLVED — 2026-09-21, clean-slate reconciliation (option c).** The Founder
+> directive that commissioned this reconciliation authorised ordinary removal of
+> obsolete material, so both orphans were **REMOVED** (`git rm`), together with the
+> `.jsx` orphan `PublicFooterTmp1.jsx`. Evidence for removal, not assumption:
+> a repo-wide grep (`src/`, `e2e/`, `scripts/`) returned **zero** importers for each;
+> `InfoTooltip`'s single `<button>` had **no handler** (hover-only and
+> keyboard-unusable, as the accessibility pass recorded); and the capability
+> `InfoTooltip` implied is delivered by the reachable, keyboard-operable
+> `src/components/shared/BrandGuidance.tsx`. `FcSelector`'s implied capability
+> (a searchable FC list) is delivered by the canonical FC DATA
+> (`src/types.ts → DEFAULT_UK_FC_LIST`) plus the PO's `shipToParty.partyId`
+> destination, which the logistics map renders. Three registry rows
+> (`batch14-fc-selector`, `batch12-info-tooltip`, `batch-4-zod-validation`) were
+> **REPOINTED** to the current canonical sources with `§CLEAN-SLATE RECONCILIATION`
+> notes, and `scripts/verify-registry.mjs`'s known-file list was updated — no
+> validator was weakened. See the completion report in `PROJECT_STATUS.md`.
+
 ### D-4 — What `npm run dev` should open
 
 Default in this plan: keep `"dev": "vite"` **unchanged** (so the E2E suite's

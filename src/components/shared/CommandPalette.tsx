@@ -143,7 +143,7 @@ export function CommandPalette({
             className="w-full bg-transparent text-sm text-white placeholder-zinc-600 outline-none"
             data-testid={`${testId}-input`}
           />
-          <kbd className="hidden flex-shrink-0 rounded border border-white/[0.12] px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 sm:block">
+          <kbd className="hidden flex-shrink-0 rounded border border-white/[0.12] px-1.5 py-0.5 font-mono text-ds-micro text-zinc-500 sm:block">
             ESC
           </kbd>
         </div>
@@ -156,7 +156,7 @@ export function CommandPalette({
           ) : (
             flat.map((g) => (
               <div key={g.label} className="mb-1">
-                <p className="px-3.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
+                <p className="px-3.5 py-1 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-600">
                   {g.label}
                 </p>
                 <ul>
@@ -184,7 +184,7 @@ export function CommandPalette({
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-xs text-white">{item.label}</span>
                             {item.meta && (
-                              <span className="block truncate text-[10px] text-zinc-500">
+                              <span className="block truncate text-ds-micro text-zinc-500">
                                 {item.meta}
                               </span>
                             )}
@@ -206,8 +206,8 @@ export function CommandPalette({
         </div>
 
         <div className="flex items-center justify-between border-t border-white/[0.06] px-3.5 py-1.5">
-          <span className="font-mono text-[10px] text-zinc-600">↑↓ navigate · ⏎ open</span>
-          <span className="font-mono text-[10px] text-zinc-600" data-testid={`${testId}-count`}>
+          <span className="font-mono text-ds-micro text-zinc-600">↑↓ navigate · ⏎ open</span>
+          <span className="font-mono text-ds-micro text-zinc-600" data-testid={`${testId}-count`}>
             {totalItems} result{totalItems === 1 ? '' : 's'}
           </span>
         </div>

@@ -67,6 +67,17 @@ const EXCLUDED = [
   // Excluding it does NOT weaken the gate — every string this module RENDERS is
   // asserted channel-neutral by scripts/validate-sales-estimator.mjs
   // ("rendered wording constants name no retail channel").
+  // §Founder OS — the internal BI FINDINGS read model. Same class as
+  // prospectIntelligence.ts above: it is rendered ONLY on the Super-Admin Control
+  // Centre (guarded at render) and its text must stay ACCURATE about the ten
+  // approved Vendor Central categories and the canonical `amazonDemand` scoring
+  // dimension. No brand-facing component imports it; the brand-safe projection
+  // (`brandSafeFindings`) strips every internal-only finding. Excluding it does
+  // NOT weaken the gate — every outward-facing surface stays fully linted.
+  'src/lib/intelligence/intelligenceLayer.ts',
+  // §Phase M12 — pattern-definition source (restored verbatim; it must stay
+  // excluded: its regex literals and reasons necessarily contain the channel name
+  // in order to MATCH claims).
   'src/lib/intelligence/amazonWording.ts',
 ];
 

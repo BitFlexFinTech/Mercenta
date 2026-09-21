@@ -528,6 +528,39 @@ try {
     'docs/SPRINT_DETERMINISTIC_COMPLETION_2026-09-19.md',
   ];
 
+  /**
+   * §Founder OS — FOUNDER OPERATING SYSTEM SPRINT (2026-09-19) — REPOINTED.
+   *
+   * Same mechanism, same guard: this sprint added the canonical automation
+   * registry, the Founder Ops AI seam, the acquisition engine, the BI findings
+   * layer (which sits under E7's PROTECTED `src/lib/intelligence/` prefix and is
+   * therefore declared here exactly as `listingAnalyzer.ts` was), the Control
+   * Centre model + workspace, the work-version hook and the two runtime AI task
+   * declarations. Anything outside EVERY declared set is still refused.
+   */
+  const SPRINT_FOUNDER_OS_DECLARED = [
+    'src/lib/automation/registry.ts',
+    'src/lib/ai/',
+    'src/lib/acquisition/acquisitionEngine.ts',
+    'src/lib/intelligence/intelligenceLayer.ts', // PROTECTED prefix — declared
+    'src/lib/commandCentre/controlCentre.ts',
+    'src/lib/founder/briefFacts.ts',
+    'src/lib/work/useWork.ts',
+    'src/lib/events/types.ts',
+    'src/lib/costs/modelPolicy.ts',
+    'src/components/admin/FounderControlCentre.tsx',
+    'src/components/layout/AdminShell.tsx',
+    'scripts/validate-founder-operating-system.mjs',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/reconcile-founder-os-registry.cjs',
+    'scripts/lint-wording.mjs',
+    'e2e/founder-operating-system.spec.ts',
+    'docs/SPRINT_FOUNDER_OPERATING_SYSTEM_2026-09-19.md',
+    'requirements-registry.json',
+  ];
+
   const UIUX_REDESIGN_DECLARED = [
     // ── Wave 1 (theme/token foundation): declared retroactively so the
     //    working-tree state the wave produced is no longer "unexplained" ──
@@ -644,6 +677,62 @@ try {
     'src/data/knowledgeBase.ts',                   // NEW canonical article store
     'src/config/tours/tourDefinitions.ts',         // TourStep.learnMore per orientation step
   ];
+  /**
+   * §Phase 1 — EXPLORE UK MARKET FIT / PRE-AUDIT SPRINT (2026-09-19) — REPOINTED.
+   *
+   * Same mechanism, same guard. This sprint added the canonical pre-audit config,
+   * the research seam + fixtures + deterministic engine, the pre-audit domain
+   * store + its port table, the acquisition bridge, the public assessment surface,
+   * the homepage/nav CTA wiring and the founder pre-audit queue. `src/types.ts`
+   * and `src/lib/events/types.ts` are PROTECTED by E7's scope guard and are
+   * therefore declared here exactly as the Founder OS sprint declared them.
+   * Anything outside EVERY declared set is still refused.
+   */
+  const SPRINT_UK_MARKET_FIT_DECLARED = [
+    'src/config/ukMarketFit.ts',
+    'src/types.ts',                       // PROTECTED prefix — declared
+    'src/lib/preaudit/',
+    'src/data/preAuditStore.ts',
+    'src/data/prospectStore.ts',
+    'src/data/domainRepository.ts',
+    'src/lib/events/types.ts',            // PROTECTED prefix — declared
+    'src/components/marketing/ExploreUkMarketFit.tsx',
+    'src/components/marketing/PublicNav.tsx',
+    'src/components/marketing/Home.tsx',
+    'src/config/homepageContent.ts',
+    'src/lib/commandCentre/controlCentre.ts',
+    'src/components/admin/FounderControlCentre.tsx',
+    'scripts/validate-uk-market-fit.mjs',
+    'scripts/integrity-audit.mjs',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/reconcile-roadmap-phase1-registry.cjs',
+    'e2e/uk-market-fit.spec.ts',
+    'docs/SPRINT_UK_MARKET_FIT_PHASE1_2026-09-19.md',
+    'requirements-registry.json',
+  ];
+  /**
+   * §Phase 2 — EXPLICIT WORKFLOW ROUTING / GATEWAY ARCHITECTURE (2026-09-19) —
+   * the files this stage declares, in the same declaration mechanism as
+   * SPRINT_UK_MARKET_FIT_DECLARED above. The E7 scope contract is unchanged: a
+   * changed source/test file in NO declared set still fails.
+   */
+  const SPRINT_ROUTING_GATEWAYS_DECLARED = [
+    'src/config/routing.ts',
+    'src/config/commercialReadiness.ts',
+    'src/lib/routing/',
+    'src/lib/commercial/',
+    'src/data/routingStore.ts',
+    'src/data/domainRepository.ts',
+    'src/types.ts',                        // PROTECTED prefix — declared
+    'src/lib/events/types.ts',             // PROTECTED prefix — declared
+    'scripts/validate-routing-gateways.mjs',
+    'scripts/reconcile-phase2-routing-registry.cjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'PROJECT_STATUS.md',
+  ];
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -651,7 +740,10 @@ try {
         (f) =>
           !M13_DECLARED.includes(f) &&
           !PHASE4_DECLARED.includes(f) &&
-          !FUNCTIONAL_COMPLETION_DECLARED.includes(f)
+          !FUNCTIONAL_COMPLETION_DECLARED.includes(f) &&
+          !SPRINT_FOUNDER_OS_DECLARED.includes(f) &&
+          !SPRINT_UK_MARKET_FIT_DECLARED.includes(f) &&
+          !SPRINT_ROUTING_GATEWAYS_DECLARED.includes(f)
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -746,6 +838,12 @@ try {
     // its browser journey spec. Same mechanism, same guard: a file outside EVERY
     // declared set is still refused.
     ...SPRINT_DETERMINISTIC_COMPLETION_DECLARED,
+    // §Founder OS — Founder Operating System sprint (2026-09-19) — REPOINTED.
+    ...SPRINT_FOUNDER_OS_DECLARED,
+    // §Phase 1 — Explore UK Market Fit / pre-audit sprint (2026-09-19) — REPOINTED.
+    ...SPRINT_UK_MARKET_FIT_DECLARED,
+    // §Phase 2 — explicit workflow routing / gateway architecture (2026-09-19).
+    ...SPRINT_ROUTING_GATEWAYS_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

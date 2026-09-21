@@ -54,29 +54,29 @@ export function ShippingCostEstimate(props: ShippingEstimateProps) {
     )}>
       <div className="flex items-center gap-1.5 mb-1.5">
         <DollarSign className="w-3.5 h-3.5 text-brass-400" />
-        <span className="text-[10px] font-medium text-zinc-300">Shipping cost estimate</span>
+        <span className="text-ds-micro font-medium text-zinc-300">Shipping cost estimate</span>
         {estimate.mockRate && (
-          <Badge className="text-[8px] bg-amber-500/15 text-amber-300 border-amber-500/20 ml-auto">
+          <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 ml-auto">
             Estimated
           </Badge>
         )}
       </div>
       <div className="space-y-0.5">
-        <div className="flex justify-between text-[10px]">
+        <div className="flex justify-between text-ds-micro">
           <span className="text-zinc-500">Base carrier cost</span>
           <span className="font-mono text-zinc-300">£{estimate.baseCarrierCost.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-[10px]">
+        <div className="flex justify-between text-ds-micro">
           <span className="text-zinc-500">Mercenta service fee</span>
           <span className="font-mono text-zinc-300">£{estimate.markupApplied.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between border-t border-white/[0.06] pt-0.5 mt-0.5 text-[11px] font-semibold">
+        <div className="flex justify-between border-t border-white/[0.06] pt-0.5 mt-0.5 text-ds-label font-semibold">
           <span className="text-white">Total (incl. fee)</span>
           <span className="font-mono text-brass-400">£{estimate.brandPrice.toFixed(2)}</span>
         </div>
       </div>
       {!props.compact && estimate.mockRate && (
-        <p className="flex items-start gap-1 mt-1.5 text-[9px] text-zinc-600">
+        <p className="flex items-start gap-1 mt-1.5 text-ds-micro text-zinc-600">
           <Info className="w-2.5 h-2.5 flex-shrink-0 mt-0.5" />
           Estimated rate — actual cost confirmed when carrier manifest is filed.
         </p>

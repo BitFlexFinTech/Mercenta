@@ -165,7 +165,7 @@ return(<div className="space-y-4">
             className={cn('text-left px-3 py-2.5 rounded-ds-md border transition-ds',
               active?'bg-brass-500/15 border-brass-500/40':'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.14]')}>
             <div className="text-lg font-semibold text-white tabular-nums">{count}</div>
-            <div className="text-[11px] text-zinc-400">{f==='all'?'All applications':STATUS_LABELS[f]}</div>
+            <div className="text-ds-label text-zinc-400">{f==='all'?'All applications':STATUS_LABELS[f]}</div>
           </button>
         );
       })}
@@ -199,19 +199,19 @@ return(<div className="space-y-4">
               {app.instagramUrl&&<span className="flex items-center gap-1 text-xs text-pink-400"><ExternalLink className="w-3 h-3"/> Instagram <LinkStatus status={app.instagramStatus}/></span>}
               {app.facebookUrl&&<span className="flex items-center gap-1 text-xs text-blue-400"><ExternalLink className="w-3 h-3"/> Facebook <LinkStatus status={app.facebookStatus}/></span>}
             </div>
-            {app.referralSource&&<p className="text-[10px] text-zinc-600 mb-3">Heard via: {app.referralSource}</p>}
+            {app.referralSource&&<p className="text-ds-micro text-zinc-600 mb-3">Heard via: {app.referralSource}</p>}
             {app.adminNotes&&(
               <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-2 mb-3">
-                <p className="text-[10px] text-amber-300/80 font-medium mb-0.5">Admin notes:</p>
+                <p className="text-ds-micro text-amber-300/80 font-medium mb-0.5">Admin notes:</p>
                 <p className="text-xs text-zinc-400">{app.adminNotes}</p>
               </div>
             )}
             {(app.status==='pending'||app.status==='flagged'||app.status==='info_requested')&&(
               <div className="flex flex-wrap gap-2 pt-3 border-t border-white/[0.06]">
-                <Button size="sm" className="text-[10px]" disabled={!canCurrentUserMutate} onClick={()=>handleAction(app.id,'approved')}><CheckCircle2 className="w-3 h-3"/> Approve</Button>
-                <Button size="sm" className="text-[10px]" variant="danger" disabled={!canCurrentUserMutate} onClick={()=>handleAction(app.id,'rejected')}><XCircle className="w-3 h-3"/> Reject</Button>
-                <Button size="sm" className="text-[10px]" variant="secondary" disabled={!canCurrentUserMutate} onClick={()=>{const n=prompt('What additional information do you need?');if(n)handleAction(app.id,'info_requested',n);}}><MessageSquare className="w-3 h-3"/> Request Info</Button>
-                <Button size="sm" className="text-[10px]" variant="ghost" disabled={!canCurrentUserMutate} onClick={()=>{const n=prompt('Add internal notes:');if(n)handleAction(app.id,'flagged',n);}}><Flag className="w-3 h-3"/> Flag for Review</Button>
+                <Button size="sm" className="text-ds-micro" disabled={!canCurrentUserMutate} onClick={()=>handleAction(app.id,'approved')}><CheckCircle2 className="w-3 h-3"/> Approve</Button>
+                <Button size="sm" className="text-ds-micro" variant="danger" disabled={!canCurrentUserMutate} onClick={()=>handleAction(app.id,'rejected')}><XCircle className="w-3 h-3"/> Reject</Button>
+                <Button size="sm" className="text-ds-micro" variant="secondary" disabled={!canCurrentUserMutate} onClick={()=>{const n=prompt('What additional information do you need?');if(n)handleAction(app.id,'info_requested',n);}}><MessageSquare className="w-3 h-3"/> Request Info</Button>
+                <Button size="sm" className="text-ds-micro" variant="ghost" disabled={!canCurrentUserMutate} onClick={()=>{const n=prompt('Add internal notes:');if(n)handleAction(app.id,'flagged',n);}}><Flag className="w-3 h-3"/> Flag for Review</Button>
               </div>
             )}
           </div>

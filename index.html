@@ -6,15 +6,21 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Bootstrap metadata: the SAME values the route SSOT declares for "/"
+         (`src/lib/seo/publicRoutes.ts`). The runtime layer overwrites title,
+         description, canonical, robots and og:url per route. -->
     <meta
       name="description"
-      content="Mercenta Partners — a self-service wholesale distribution platform connecting independent brands with UK retail channels. Manage catalogues, purchase orders, shipments, compliance, and retail relationships from a single portal."
+      content="A self-service wholesale distribution platform connecting independent brands with UK retail channels. Manage catalogues, purchase orders, shipments, compliance, and retail relationships from a single portal."
     />
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow" />
 
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://mercenta.co.uk/" />
+    <!-- Canonical URL — BOOTSTRAP ONLY. The runtime route-metadata layer
+         (`src/lib/seo/publicRoutes.ts` + `src/lib/seo/routeMetadata.ts`, mounted
+         by `RouteMetadata`) rewrites this element per route, and REMOVES it on a
+         private/unknown path. Never add a second canonical link. -->
+    <link rel="canonical" href="https://mercenta.co.uk/" id="route-canonical" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -22,7 +28,7 @@
     <meta property="og:title" content="Mercenta Partners — Self-Service Wholesale Distribution Platform" />
     <meta
       property="og:description"
-      content="Mercenta Partners is a self-service wholesale distribution platform that connects independent brands with UK retail channels. Brands manage their catalogues, purchase orders, shipments, compliance documents, and retail relationships through a single portal."
+      content="A self-service wholesale distribution platform connecting independent brands with UK retail channels. Manage catalogues, purchase orders, shipments, compliance, and retail relationships from a single portal."
     />
     <meta property="og:url" content="https://mercenta.co.uk/" />
     <meta property="og:locale" content="en_GB" />

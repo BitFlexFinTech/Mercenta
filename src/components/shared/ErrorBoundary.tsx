@@ -72,10 +72,10 @@ function ErrorFallback({ sectionLabel, error, onReset }: {
         </p>
         {error && (
           <details className="text-left mb-4 bg-black/30 rounded-lg p-3">
-            <summary className="text-[10px] text-zinc-600 cursor-pointer hover:text-zinc-400">
+            <summary className="text-ds-micro text-zinc-600 cursor-pointer hover:text-zinc-400">
               Technical details
             </summary>
-            <pre className="mt-2 text-[9px] text-zinc-500 font-mono whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">
+            <pre className="mt-2 text-ds-micro text-zinc-500 font-mono whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">
               {error.message}
               {'\n'}
               {error.stack}

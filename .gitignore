@@ -35,3 +35,16 @@ Partnerships/
 # so the code must be treated as COMPROMISED and ROTATED). Never track this folder.
 Admin Accounts/
 Random/
+
+# ── GENERATED ARTEFACTS — NEVER TRACKED (clean-slate reconciliation 2026-09-21) ──
+# These are REPRODUCIBLE OUTPUTS of a test/export run, not source. They were tracked
+# until 2026-09-21, which made `git status` dirty after EVERY Playwright run (117
+# screenshot binaries + the 61 MB review zip rewritten each session) and made a clean
+# checkpoint impossible. They stay on disk; they are simply not versioned.
+# `scripts/validate-e6-brand-surfaces.mjs` already ignores these as GENERATED_ARTEFACTS.
+test-screenshots/
+forensic-captures/
+playwright-report/
+test-results/
+e2e-report/
+Review Zip/*.zip

@@ -79,7 +79,7 @@ export function AcquisitionPipeline() {
   return (
     <Card title="Acquisition Pipeline (BI-derived)">
       <div className="px-1 pb-1 space-y-3">
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-ds-label text-zinc-500">
           The acquisition universe IS the canonical Brand Intelligence prospect store — the real brands
           below carry their existing prospect identity into ICP targeting. No separate mock acquisition
           list exists.
@@ -99,20 +99,20 @@ export function AcquisitionPipeline() {
                 metricFilter === m.key ? 'border-brass-500/50 bg-brass-500/10' : 'border-white/[0.06] hover:border-white/[0.16]'
               )}
             >
-              <p className="text-[9px] text-zinc-500 uppercase">{m.label}</p>
+              <p className="text-ds-micro text-zinc-500 uppercase">{m.label}</p>
               <p className="text-sm font-semibold text-white font-mono">{m.value}</p>
             </button>
           ))}
         </div>
         {active && (
-          <p className="text-[10px] text-brass-300">
+          <p className="text-ds-micro text-brass-300">
             Filtered: {active.label} ({rows.length} shown) ·{' '}
             <button type="button" className="underline" onClick={() => setMetricFilter(null)}>clear</button>
           </p>
         )}
 
-        {notice && <p className="text-[11px] text-emerald-400">{notice}</p>}
-        {error && <p className="text-[11px] text-red-300">{error}</p>}
+        {notice && <p className="text-ds-label text-emerald-400">{notice}</p>}
+        {error && <p className="text-ds-label text-red-300">{error}</p>}
 
         {/* §Phase D — canonical DataTable (the `data-table` hook is preserved
             for the acceptance test's real row-count assertions). */}
@@ -133,7 +133,7 @@ export function AcquisitionPipeline() {
                     <Target className="w-3 h-3 text-brass-400" />
                     {r.prospect.brand}
                   </span>
-                  <span className="block text-[9px] text-zinc-500">{r.prospect.category}</span>
+                  <span className="block text-ds-micro text-zinc-500">{r.prospect.category}</span>
                 </span>
               ),
             },
@@ -150,7 +150,7 @@ export function AcquisitionPipeline() {
                   >
                     {r.prospect.score.total}
                   </span>
-                  <span className="text-[9px] text-zinc-500"> {r.prospect.score.tier}</span>
+                  <span className="text-ds-micro text-zinc-500"> {r.prospect.score.tier}</span>
                 </span>
               ),
             },
@@ -159,7 +159,7 @@ export function AcquisitionPipeline() {
               label: 'ICP identity',
               hideBelow: 'lg',
               render: (r) => (
-                <span className="font-mono text-[10px] text-zinc-400">
+                <span className="font-mono text-ds-micro text-zinc-400">
                   {r.lead?.id ?? '(no region)'}
                 </span>
               ),
@@ -173,7 +173,7 @@ export function AcquisitionPipeline() {
               key: 'stage',
               label: 'Stage',
               render: (r) => (
-                <Badge className={cn('text-[9px] border capitalize', STAGE_STYLES[r.stage] ?? 'text-zinc-400')}>
+                <Badge className={cn('text-ds-micro border capitalize', STAGE_STYLES[r.stage] ?? 'text-zinc-400')}>
                   {r.stage}
                 </Badge>
               ),
@@ -186,7 +186,7 @@ export function AcquisitionPipeline() {
                 <Button
                   size="sm"
                   variant="tertiary"
-                  className="text-[10px]"
+                  className="text-ds-micro"
                   disabled={
                     !canCurrentUserMutate ||
                     r.stage === 'sent' ||
@@ -202,7 +202,7 @@ export function AcquisitionPipeline() {
             },
           ]}
         />
-        <p className="text-[10px] text-zinc-600">
+        <p className="text-ds-micro text-zinc-600">
           Review, modify, approve/reject, send and record the response on the prospect's own record:
           Brand Intelligence → brand row → Outreach tab.
         </p>

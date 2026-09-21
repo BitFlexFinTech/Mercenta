@@ -24,6 +24,11 @@
 - **">3 files → STOP and wait for approval"** and **">5 files → STOP and wait for approval"**.
 - **"never change architecture, add new systems, refactor or improve"**.
 - **"do not commit unless explicitly told"** — superseded by §5: you commit your own VERIFIED work.
+- **"a dirty worktree is not a stop — preserve Founder changes uncommitted and leave them for later"** — superseded by
+  §6: a dirty tree is a state to RECONCILE AND COMMIT, never an acceptable checkpoint. This clause (not the Design
+  Freeze) is what allowed 289 dirty paths to accumulate across five sessions.
+- **"completion may be reported with a dirty tree / untracked required source"** — superseded by §6: completion requires
+  `git status --porcelain` to be EMPTY.
 
 Retained unchanged, because they are genuine safety rules and not workflow restrictions: see §7.
 
@@ -72,15 +77,50 @@ presented as the new one.
 Never report "complete" at the commit stage when deployment was required; never report "deployed" before the live site
 has been verified.
 
-## 6. Worktree policy
+## 6. Worktree policy — **CLEAN CANONICAL REPOSITORY IS A NON-NEGOTIABLE PROJECT INVARIANT**
 
-- A dirty worktree during active implementation is normal and is **not** a stop.
-- Pre-existing Founder/worktree changes are **preserved**: no `git reset --hard`, no `git clean`, no `git stash`, no
-  `git checkout -- .`, no force push, no branch switch to escape them, no deletion, no renames.
-- Commit **only the work you authored and verified**, plus the rule/documentation files you updated in that increment.
-  Explicitly record which paths were left uncommitted and why.
-- Never present an uncommitted completed change as a finished checkpoint, and never describe someone else's
-  uncommitted work as your own delivery.
+> Added 2026-09-21 by Founder directive (clean-slate reconciliation), superseding the earlier "a dirty worktree is not
+> a stop, preserve Founder changes and leave them uncommitted" clause. That clause was the wrong behaviour: it let
+> FIVE sessions of completed, verified work (operational type scale, SEO route-metadata foundation, UK Market Fit /
+> pre-audit, Founder operating system, commercial readiness) sit uncommitted for days while **289 dirty paths**
+> accumulated, so no clean checkpoint ever existed.
+
+**`git status --porcelain` MUST BE EMPTY** at every checkpoint, delivery, handoff and end of session. Not "mostly
+clean", not "known dirty paths", not "we can clean it later".
+
+```
+DIRTY TREE
+→ RECONCILE → FIX → REMOVE OBSOLETE MATERIAL → TEST → VERIFY
+→ COMMIT → VERIFY THE COMMITTED HEAD → CLEAN TREE
+```
+
+- A dirty tree is permitted **only while work is actively in progress inside a session**. It is **never** an acceptable
+  checkpoint, baseline, completion state or handoff state.
+- **A workstream is NOT complete until `git status --porcelain` prints nothing.**
+- For EVERY workstream: 1. begin from the latest clean canonical HEAD; 2. make the changes; 3. test; 4. reconcile ALL
+  changes; 5. remove obsolete/unneeded material; 6. commit; 7. verify the committed HEAD independently; 8. confirm the
+  tree is empty; 9. only then call the workstream complete.
+- **If a task discovers PRE-EXISTING dirtiness, that is NOT acceptable.** It must be RECONCILED before the next
+  canonical checkpoint: inspect every path, classify it (KEEP + COMMIT · FIX + COMMIT · CONSOLIDATE + COMMIT · REMOVE ·
+  RECREATE CORRECTLY) and resolve it. **There is no sixth outcome called "leave dirty for later".**
+- Preserve work because **repository evidence** shows it is required, intentional, current and part of the canonical
+  product — **not merely because it is Founder work**. Unneeded material is removed whoever created it; required work
+  is reconciled into Git. The objective is preservation of valid product work inside ONE CLEAN CANONICAL REPOSITORY,
+  not preservation of dirtiness.
+- **Generated artefacts are NEVER tracked.** Screenshots (`test-screenshots/`, `forensic-captures/`), test reports
+  (`playwright-report/`, `test-results/`, `e2e-report/`) and the review ZIP (`Review Zip/*.zip`) are reproducible
+  outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty
+  after every Playwright run.
+- **Authorised at reconciliation (no separate approval step needed):** ordinary cleanup decisions — modifying required
+  source, deleting obsolete/abandoned files, consolidating duplicates, repairing imports/tests/config, removing unused
+  dependencies, updating docs/rules, and committing the reconciled state. File count is never a gate (§3).
+- **Safety, unchanged:** no `git reset --hard`, no `git clean -fd/-fdx`, no stash-and-forget, no force push, no blanket
+  wipe. Deletion must be evidence-based, never a shortcut to a clean tree, and never a way to remove working
+  functionality so a validator passes. Pre-existing Founder changes are never DESTROYED — they are either REQUIRED
+  (reconciled and committed) or UNNEEDED (removed, with the reason recorded in the report).
+- Commit your own VERIFIED work as the checkpoint; **push only when the Founder instructs it**.
+- The five synchronised project-state sources must be updated in the SAME commit
+  (`.clinerules/project-state-contract.md`); never declare completion while the tree is dirty.
 
 ## 7. Genuine hard stops (the ONLY ones)
 
@@ -110,5 +150,8 @@ pass; never destroy history or audit records.
 
 - After every session: `bash scripts/export-review-zip.sh` → `<project root>/Review Zip/mercenta-review.zip`.
   No other zips, ever; nothing written to `~/Desktop/` directly; no numbered zips.
+  The ZIP itself is a GENERATED ARTEFACT and is **gitignored** (`Review Zip/*.zip`) — never track it.
+- **Before reporting the session complete, assert the invariant:** `git status --porcelain` must print NOTHING.
+  If it prints anything, reconcile it — do not report completion.
 - Deployment only via `scripts/deploy-demo.sh`, only to `demo.mercenta.co.uk`, never to `mercenta.co.uk` before the
   `GO_LIVE.md` playbook is executed.

@@ -177,11 +177,11 @@ function beginOnBehalfAsn() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
             <h2 className="text-sm font-semibold text-white">{po.poNumber}</h2>
-            <p className="text-[11px] text-zinc-400 mt-0.5">{brandName} £{po.poValue.toLocaleString()}</p>
+            <p className="text-ds-label text-zinc-400 mt-0.5">{brandName} £{po.poValue.toLocaleString()}</p>
           </div>
           <div className="flex items-center gap-2">
             <StatusBadge
-              className="text-[10px]"
+              className="text-ds-micro"
               dataStatus={ackWindowPresentation(isAcknowledged, hoursLeft, minutesLeft).dataStatus}
               tone={ackWindowPresentation(isAcknowledged, hoursLeft, minutesLeft).tone}
             >
@@ -194,15 +194,15 @@ function beginOnBehalfAsn() {
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-ink-900 rounded-lg p-2.5">
-              <p className="text-[10px] text-zinc-500">Order date</p>
+              <p className="text-ds-micro text-zinc-500">Order date</p>
               <p className="text-xs text-white font-mono">{po.orderDate}</p>
             </div>
             <div className="bg-ink-900 rounded-lg p-2.5">
-              <p className="text-[10px] text-zinc-500">Status</p>
+              <p className="text-ds-micro text-zinc-500">Status</p>
               <p className="text-xs text-white capitalize">{po.status.replace(/_/g, ' ')}</p>
             </div>
             <div className="bg-ink-900 rounded-lg p-2.5">
-              <p className="text-[10px] text-zinc-500">Deadline</p>
+              <p className="text-ds-micro text-zinc-500">Deadline</p>
               <p className="text-xs text-white font-mono">
                 {isDeadlinePassed ? <span className="text-red-400">EXPIRED</span> : hoursLeft + 'h ' + minutesLeft + 'm'}
               </p>
@@ -250,11 +250,11 @@ function beginOnBehalfAsn() {
           )}
           {onBehalfAck && (
             <div className="bg-brass-500/10 border border-brass-500/20 rounded-lg p-3">
-              <p className="text-[11px] text-brass-300 mb-2">
+              <p className="text-ds-label text-brass-300 mb-2">
                 Acknowledging on behalf of {brandName} as <strong>{actingStaff?.name ?? 'Admin'}</strong>
               </p>
               <Button className="text-xs" onClick={handleOnBehalfAckSubmit}>Submit On-Behalf Acknowledgment</Button>
-              {ackNotice && <p className={cn('text-[10px] mt-2', ackNotice.startsWith('Acknowledgment') ? 'text-emerald-400' : 'text-red-400')}>{ackNotice}</p>}
+              {ackNotice && <p className={cn('text-ds-micro mt-2', ackNotice.startsWith('Acknowledgment') ? 'text-emerald-400' : 'text-red-400')}>{ackNotice}</p>}
             </div>
           )}
 
@@ -278,7 +278,7 @@ function beginOnBehalfAsn() {
               </Card>
               {onBehalfAsn && (
                 <div className="bg-brass-500/10 border border-brass-500/20 rounded-lg p-3">
-                  <p className="text-[11px] text-brass-300 mb-2">
+                  <p className="text-ds-label text-brass-300 mb-2">
                     Filing ASN on behalf of {brandName} as <strong>{actingStaff?.name ?? 'Admin'}</strong>
                   </p>
                   <div className="flex flex-wrap gap-2 mb-2">
@@ -298,7 +298,7 @@ function beginOnBehalfAsn() {
                       className="bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-xs text-white" />
                   </div>
                   <Button className="text-xs" onClick={handleOnBehalfAsnSubmit}>Submit On-Behalf ASN</Button>
-                  {asnNotice && <p className={cn('text-[10px] mt-2', asnNotice.startsWith('ASN') ? 'text-emerald-400' : 'text-red-400')}>{asnNotice}</p>}
+                  {asnNotice && <p className={cn('text-ds-micro mt-2', asnNotice.startsWith('ASN') ? 'text-emerald-400' : 'text-red-400')}>{asnNotice}</p>}
                 </div>
               )}
             </>
@@ -314,7 +314,7 @@ function beginOnBehalfAsn() {
                         <History className="w-3 h-3 text-zinc-500" />{li.sku}
                       </span>
                       <span className="text-zinc-400">{h.ackStatus} - {h.acknowledgedQty} u{h.rejectionCode && ' - ' + h.rejectionCode}</span>
-                      <span className="text-[10px] text-zinc-600 font-mono">{new Date(h.acknowledgedAt).toLocaleString()}</span>
+                      <span className="text-ds-micro text-zinc-600 font-mono">{new Date(h.acknowledgedAt).toLocaleString()}</span>
                     </div>
                   ))
                 )}
@@ -324,11 +324,11 @@ function beginOnBehalfAsn() {
 
           {po.lineItems.some((li) => li.acknowledgedUnitPrice && Math.abs(li.acknowledgedUnitPrice - li.unitPrice) > 0.001) && (
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
-              <p className="text-[11px] text-amber-300 flex items-center gap-1.5">
+              <p className="text-ds-label text-amber-300 flex items-center gap-1.5">
                 <AlertTriangle className="w-3.5 h-3.5" /> Cost-price discrepancies detected
               </p>
               {po.lineItems.filter((li) => li.acknowledgedUnitPrice && Math.abs(li.acknowledgedUnitPrice - li.unitPrice) > 0.001).map((li) => (
-                <p key={li.sku} className="text-[10px] text-amber-400/70 mt-1">
+                <p key={li.sku} className="text-ds-micro text-amber-400/70 mt-1">
                   {li.sku}: PO unit price {String.fromCharCode(163)}{li.unitPrice.toFixed(2)} to acknowledged {String.fromCharCode(163)}{li.acknowledgedUnitPrice!.toFixed(2)}
                 </p>
               ))}
@@ -345,7 +345,7 @@ function beginOnBehalfAsn() {
                     </span>
                     <span className="text-zinc-400 font-mono">{String.fromCharCode(163)}{d.amountGbp.toFixed(2)}</span>
                     <StatusBadge
-                      className="text-[10px]"
+                      className="text-ds-micro"
                       dataStatus={deductionStatusPresentation(d.status).dataStatus}
                       tone={deductionStatusPresentation(d.status).tone}
                     >
@@ -377,7 +377,7 @@ function AdminPoLineItemRow({
   const statusBadge = (status?: string) => {
     const p = ackStatusPresentation(status);
     return (
-      <StatusBadge className="text-[10px]" dataStatus={p.dataStatus} tone={p.tone}>
+      <StatusBadge className="text-ds-micro" dataStatus={p.dataStatus} tone={p.tone}>
         {p.label}
       </StatusBadge>
     );
@@ -399,7 +399,7 @@ function AdminPoLineItemRow({
         String.fromCharCode(163) + line.unitPrice.toFixed(2)
       )}
       {line.acknowledgedUnitPrice && Math.abs(line.acknowledgedUnitPrice - line.unitPrice) > 0.001 && (
-        <span className="text-[9px] text-amber-400 block">was {String.fromCharCode(163)}{line.acknowledgedUnitPrice.toFixed(2)}</span>
+        <span className="text-ds-micro text-amber-400 block">was {String.fromCharCode(163)}{line.acknowledgedUnitPrice.toFixed(2)}</span>
       )}
     </td>
     <td className="px-3 py-2 text-center">
@@ -415,7 +415,7 @@ function AdminPoLineItemRow({
       {isOnBehalf && ackStatus === 'rejected' && (
         <select value={ackRejectionCode ?? ''}
           onChange={(e) => onAckRejectionCodeChange(e.target.value)}
-          className="block mt-1 bg-ink-900 border border-white/[0.08] rounded px-1 py-0.5 text-[10px] text-white w-full">
+          className="block mt-1 bg-ink-900 border border-white/[0.08] rounded px-1 py-0.5 text-ds-micro text-white w-full">
           <option value="">Select reason...</option>
           {PO_REJECTION_CODES.map((c) => (
             <option key={c} value={c}>{c.replace(/([A-Z])/g, ' $1').trim()}</option>
@@ -425,7 +425,7 @@ function AdminPoLineItemRow({
       {isOnBehalf && ackStatus === 'backordered' && (
         <input type="date" value={ackShipDate ?? ''}
           onChange={(e) => onAckShipDateChange(e.target.value)}
-          className="block mt-1 bg-ink-900 border border-white/[0.08] rounded px-1 py-0.5 text-[10px] text-white w-full"
+          className="block mt-1 bg-ink-900 border border-white/[0.08] rounded px-1 py-0.5 text-ds-micro text-white w-full"
           placeholder="Ship by date" />
       )}
     </td>

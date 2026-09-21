@@ -98,14 +98,14 @@ return (
               {invalidCount > 0 && <span className="text-red-400">{invalidCount} invalid</span>}
             </div>
             {summary.abortedReason && (
-              <div className="flex items-center gap-1 text-[10px] text-amber-400">
+              <div className="flex items-center gap-1 text-ds-micro text-amber-400">
                 <AlertTriangle className="w-3 h-3" /> {summary.abortedReason}
               </div>
             )}
           </div>
 
           <div className="max-h-48 overflow-y-auto border border-white/[0.06] rounded-lg">
-            <table className="w-full text-[10px]">
+            <table className="w-full text-ds-micro">
               <thead className="sticky top-0 bg-ink-850">
                 <tr className="border-b border-white/[0.06] text-zinc-500">
                   <th className="px-2 py-1 text-left">#</th>
@@ -132,7 +132,7 @@ return (
           </div>
 
           {rows.filter((r) => !r.valid).length > 0 && (
-            <div className="text-[10px] text-red-300 space-y-0.5 max-h-20 overflow-y-auto">
+            <div className="text-ds-micro text-red-300 space-y-0.5 max-h-20 overflow-y-auto">
               {rows.filter((r) => !r.valid).slice(0, 5).map((r) => (
                 <p key={r.lineNumber}>Line {r.lineNumber}: {r.errors?.join('; ')}</p>
               ))}

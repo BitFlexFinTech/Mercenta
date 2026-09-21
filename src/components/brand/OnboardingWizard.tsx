@@ -223,7 +223,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   </div>
                   <span
                     className={cn(
-                      'text-[10px] font-medium transition-colors',
+                      'text-ds-micro font-medium transition-colors',
                       isActive ? 'text-white' : 'text-zinc-600'
                     )}
                   >
@@ -267,7 +267,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                       type="button"
                       onClick={() => update('category', cat)}
                       className={cn(
-                        'text-[10px] px-2.5 py-2 rounded-lg border transition-colors text-left',
+                        'text-ds-micro px-2.5 py-2 rounded-lg border transition-colors text-left',
                         brandProfile.category === cat
                           ? 'border-brass-500/50 bg-brass-500/10 text-white'
                           : 'border-white/[0.08] text-zinc-400 hover:border-white/20'
@@ -403,7 +403,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   <h3 className="text-xs font-semibold text-white">
                     Commercial Relationship with Mercenta
                   </h3>
-                  <p className="text-[10px] text-zinc-500 mt-1">
+                  <p className="text-ds-micro text-zinc-500 mt-1">
                     Choose how Mercenta and your brand trade. This is a private commercial
                     agreement between us — it does <strong className="text-zinc-400">not</strong> change
                     the retail-channel compliance documents your products require, and no
@@ -440,13 +440,13 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                             {def.label}
                           </span>
                         </div>
-                        <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">{def.summary}</p>
+                        <p className="text-ds-micro text-zinc-500 mt-1 leading-relaxed">{def.summary}</p>
                       </button>
                     );
                   })}
                 </div>
                 {!checkCommercialModelSelection(brandProfile.commercialModel).ok && (
-                  <p className="text-[10px] text-amber-300/90" data-testid="commercial-model-required">
+                  <p className="text-ds-micro text-amber-300/90" data-testid="commercial-model-required">
                     Commercial relationship required — onboarding cannot continue until you
                     choose Model A or Model B.
                   </p>
@@ -486,7 +486,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                         ))}
                       </select>
                       {selectedBank && (
-                        <div className="bg-brass-500/5 border border-brass-500/20 rounded-lg p-3 mt-2 text-[10px] text-zinc-400 space-y-1">
+                        <div className="bg-brass-500/5 border border-brass-500/20 rounded-lg p-3 mt-2 text-ds-micro text-zinc-400 space-y-1">
                           <p><span className="text-zinc-500">Account format:</span> {selectedBank.accountFormat}</p>
                           {selectedBank.routingLabel && <p><span className="text-zinc-500">{selectedBank.routingLabel}:</span> {selectedBank.routingExample}</p>}
                           <p><span className="text-zinc-500">SWIFT/BIC:</span> <span className="text-white font-mono">{selectedBank.swift}</span> (pre-filled)</p>
@@ -541,7 +541,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] text-zinc-600 mt-1.5">
+                <p className="text-ds-micro text-zinc-600 mt-1.5">
                   This directly affects your fulfillment track assessment.
                 </p>
               </div>
@@ -597,12 +597,12 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     )}
                   >
                     {recommendedTrack === opt.value && (
-                      <span className="absolute top-1.5 right-1.5 text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
+                      <span className="absolute top-1.5 right-1.5 text-ds-micro px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
                         Recommended
                       </span>
                     )}
                     <span className="block text-xs font-medium text-white">{opt.label}</span>
-                    <span className="block text-[10px] text-zinc-500 mt-0.5">{opt.hint}</span>
+                    <span className="block text-ds-micro text-zinc-500 mt-0.5">{opt.hint}</span>
                   </button>
                 ))}
               </div>
@@ -614,13 +614,13 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                 if (partners.length === 0) return null;
                 return (
                   <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3">
-                    <p className="text-[10px] font-medium text-emerald-300 mb-1.5">Your Region's Financing Partner</p>
+                    <p className="text-ds-micro font-medium text-emerald-300 mb-1.5">Your Region's Financing Partner</p>
                     {partners.map(function(p) {
                       return (
-                        <div key={p.id} className="text-[10px] text-zinc-400 space-y-0.5">
+                        <div key={p.id} className="text-ds-micro text-zinc-400 space-y-0.5">
                           <p className="text-white font-medium">{p.name}</p>
                           <p>{p.description}</p>
-                          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-1 text-[9px]">
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-1 text-ds-micro">
                             <span className="text-zinc-500">Advance rate:</span>
                             <span className="font-mono text-zinc-300">{(p.advanceRate * 100).toFixed(0)}%</span>
                             <span className="text-zinc-500">Fees:</span>
@@ -633,7 +633,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                         </div>
                       );
                     })}
-                    <p className="text-[9px] text-zinc-600 mt-1.5">
+                    <p className="text-ds-micro text-zinc-600 mt-1.5">
                       This financing option is available to qualifying brands on the financed track.
                     </p>
                   </div>
@@ -679,7 +679,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     }
                     className="w-3.5 h-3.5 accent-brass-500"
                   />
-                  <label htmlFor="agreement-logistics" className="text-[10px] text-zinc-400 cursor-pointer select-none">
+                  <label htmlFor="agreement-logistics" className="text-ds-micro text-zinc-400 cursor-pointer select-none">
                     I have read and agree to the Logistics SLAs &amp; Carrier Alignment terms
                   </label>
                 </div>
@@ -718,7 +718,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                     }
                     className="w-3.5 h-3.5 accent-brass-500"
                   />
-                  <label htmlFor="agreement-chargeback" className="text-[10px] text-zinc-400 cursor-pointer select-none">
+                  <label htmlFor="agreement-chargeback" className="text-ds-micro text-zinc-400 cursor-pointer select-none">
                     I have read and agree to the Chargeback Remediation &amp; Financial Indemnity terms
                   </label>
                 </div>

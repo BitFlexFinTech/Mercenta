@@ -116,13 +116,13 @@ export function CommercialModelsPanel() {
                 {COMMERCIAL_MODELS.commission_agent.label}
               </span>
             </div>
-            <dl className="space-y-1 text-[11px] font-mono">
+            <dl className="space-y-1 text-ds-label font-mono">
               <div className="flex justify-between"><dt className="text-zinc-500">Retail-channel PO</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_A_BRAND_A.retailChannelRevenueGbp)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Commission rate</dt><dd className="text-zinc-200">{DEMO_MODEL_A_BRAND_A.commissionRatePct}%</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Mercenta commission</dt><dd className="text-emerald-300">{gbp(DEMO_MODEL_A_BRAND_A.mercentaCommissionGbp)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Brand economic amount</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_A_BRAND_A.brandAmountGbp)}</dd></div>
             </dl>
-            <p className="text-[10px] text-zinc-500 mt-2">{DEMO_MODEL_A_BRAND_A.vat.basis}</p>
+            <p className="text-ds-micro text-zinc-500 mt-2">{DEMO_MODEL_A_BRAND_A.vat.basis}</p>
           </div>
 
           <div className="rounded-lg border border-white/[0.08] p-3" data-testid="model-b-illustration">
@@ -132,8 +132,8 @@ export function CommercialModelsPanel() {
                 {COMMERCIAL_MODELS.buy_resell.label}
               </span>
             </div>
-            <p className="text-[10px] text-zinc-500 mb-2">{COMMERCIAL_MODELS.buy_resell.summary}</p>
-            <dl className="space-y-1 text-[11px] font-mono">
+            <p className="text-ds-micro text-zinc-500 mb-2">{COMMERCIAL_MODELS.buy_resell.summary}</p>
+            <dl className="space-y-1 text-ds-label font-mono">
               <div className="flex justify-between"><dt className="text-zinc-500">Retail-channel revenue</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_B_BRAND_B.retailChannelRevenueGbp)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Brand acquisition cost</dt><dd className="text-zinc-200">{gbp(DEMO_MODEL_B_BRAND_B.brandAcquisitionCostGbp)}</dd></div>
               <div className="flex justify-between border-t border-white/[0.06] pt-1"><dt className="text-zinc-400">GROSS commercial spread</dt><dd className="text-amber-300">{gbp(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)}</dd></div>
@@ -143,7 +143,7 @@ export function CommercialModelsPanel() {
               <div className="flex justify-between"><dt className="text-zinc-500">Deductions</dt><dd className="text-zinc-300">{gbp(DEMO_MODEL_B_BRAND_B.costs.deductionsGbp)}</dd></div>
               <div className="flex justify-between border-t border-white/[0.06] pt-1"><dt className="text-zinc-400">NET Mercenta margin</dt><dd className="text-emerald-300">{gbp(DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp)}</dd></div>
             </dl>
-            <p className="text-[10px] text-zinc-500 mt-2">
+            <p className="text-ds-micro text-zinc-500 mt-2">
               {gbp(DEMO_MODEL_B_BRAND_B.grossCommercialSpreadGbp)} is the commercial{' '}
               <em>spread</em>; {gbp(DEMO_MODEL_B_BRAND_B.netMercentaMarginGbp)} is the net margin
               after the stated costs. {DEMO_MODEL_B_BRAND_B.vat.basis}
@@ -155,7 +155,7 @@ export function CommercialModelsPanel() {
           <p className="text-xs font-medium text-white mb-1">
             Shipping economics — canonical terms, derived (never hardcoded)
           </p>
-          <p className="text-[11px] font-mono text-zinc-400">
+          <p className="text-ds-label font-mono text-zinc-400">
             DHL list {gbp(shipping.carrierListCost)} − negotiated discount{' '}
             {gbp(shipping.negotiatedDiscountAmount)} = carrier invoice{' '}
             {gbp(shipping.carrierInvoiceCost)} → brand charged {gbp(shipping.brandAmountCharged)} →
@@ -197,7 +197,7 @@ export function CommercialModelsPanel() {
                     {resolution.ok ? (
                       <Badge
                         className={cn(
-                          'text-[9px]',
+                          'text-ds-micro',
                           resolution.model === 'commission_agent'
                             ? 'bg-emerald-500/15 text-emerald-300'
                             : 'bg-blue-500/15 text-blue-300'
@@ -206,12 +206,12 @@ export function CommercialModelsPanel() {
                         {COMMERCIAL_MODELS[resolution.model as CommercialModel].label}
                       </Badge>
                     ) : (
-                      <Badge className="text-[9px] bg-amber-500/15 text-amber-300">
+                      <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">
                         {COMMERCIAL_MODEL_NOT_SELECTED_LABEL}
                       </Badge>
                     )}
                   </td>
-                  <td className="px-2 py-1.5 text-zinc-400 font-mono text-[10px]">
+                  <td className="px-2 py-1.5 text-zinc-400 font-mono text-ds-micro">
                     {record
                       ? record.model === 'commission_agent'
                         ? `${record.commissionRatePct}% commission`
@@ -243,7 +243,7 @@ export function CommercialModelsPanel() {
                   <td className="px-2 py-1.5">
                     <Button
                       variant="tertiary"
-                      className="text-[10px] px-2 py-1"
+                      className="text-ds-micro px-2 py-1"
                       onClick={() => apply(brand.id, brand.profile.businessName)}
                     >
                       <Lock className="w-3 h-3" />
@@ -255,7 +255,7 @@ export function CommercialModelsPanel() {
             </tbody>
           </table>
         </div>
-        <p className="text-[10px] text-zinc-600 mt-2">
+        <p className="text-ds-micro text-zinc-600 mt-2">
           {demoBrandCommercialModels.length} brands hold a recorded commercial relationship. The
           compliance column is computed by <code>getApplicableRequirements</code> and is deliberately
           shown beside the model column so the separation is visible, not merely asserted.
@@ -271,7 +271,7 @@ export function CommercialModelsPanel() {
           <div className="space-y-1.5" data-testid="commercial-model-audit">
             {rows.flatMap((r) =>
               commercialModelAuditFor(r.brand.id).map((e) => (
-                <div key={e.id} className="flex items-start gap-2 text-[11px] border-b border-white/[0.04] pb-1.5">
+                <div key={e.id} className="flex items-start gap-2 text-ds-label border-b border-white/[0.04] pb-1.5">
                   <ArrowRight className="w-3 h-3 text-zinc-600 mt-0.5 flex-shrink-0" />
                   <div className="min-w-0">
                     <span className="text-zinc-300">{r.brand.profile.businessName}</span>
@@ -291,11 +291,11 @@ export function CommercialModelsPanel() {
       </Card>
 
       <Card title="Worked reverse-check — each brand's own agreed terms">
-        <p className="text-[10px] text-zinc-500 mb-2">
+        <p className="text-ds-micro text-zinc-500 mb-2">
           The same canonical functions the investor demo uses, driven by each brand's recorded terms,
           so a brand's own numbers can never disagree with the demo's.
         </p>
-        <div className="grid gap-2 md:grid-cols-2 text-[11px] font-mono">
+        <div className="grid gap-2 md:grid-cols-2 text-ds-label font-mono">
           {rows.slice(0, 4).map(({ brand, record }) => {
             const model = record?.model ?? 'commission_agent';
             if (model === 'commission_agent') {

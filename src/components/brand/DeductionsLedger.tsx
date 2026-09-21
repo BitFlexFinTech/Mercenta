@@ -39,7 +39,7 @@ import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
 import { deductionStatusPresentation } from '@/lib/statusPresentation';
 import { cn } from '@/utils/cn';
 
-const MONO = 'font-mono text-[11px]';
+const MONO = 'font-mono text-ds-label';
 
 export function DeductionsLedger() {
   const { session } = useApp();
@@ -119,12 +119,12 @@ export function DeductionsLedger() {
       >
         {/* ── Categories ─────────────────────────────────────────────── */}
         <div data-tour="deductions-categories" className="px-5 py-3 border-b border-white/[0.06]">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">Deduction Categories</p>
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Deduction Categories</p>
           <div className="flex flex-wrap gap-2 mt-2">
             {categories.map(([type, c]) => (
               <span
                 key={type}
-                className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[10px] text-zinc-300"
+                className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-ds-micro text-zinc-300"
               >
                 <span className="capitalize">{type.replace(/_/g, ' ')}</span>
                 <span className="text-zinc-500">·</span>
@@ -134,7 +134,7 @@ export function DeductionsLedger() {
               </span>
             ))}
             {categories.length === 0 && (
-              <span className="text-[11px] text-zinc-600">
+              <span className="text-ds-label text-zinc-600">
                 No deductions recorded for your account.
               </span>
             )}
@@ -168,7 +168,7 @@ export function DeductionsLedger() {
               render: (d) => (
                 <span className="text-xs capitalize">
                   {d.type.replace(/_/g, ' ')}
-                  {d.simulated && <span className="ml-1 text-[10px] text-brass-400">(sim)</span>}
+                  {d.simulated && <span className="ml-1 text-ds-micro text-brass-400">(sim)</span>}
                 </span>
               ),
             },
@@ -180,7 +180,7 @@ export function DeductionsLedger() {
                 <span className="block max-w-[280px] text-xs">
                   {d.reason}
                   {d.dispute && (
-                    <span className="mt-1 block text-[10px] text-zinc-500">
+                    <span className="mt-1 block text-ds-micro text-zinc-500">
                       Disputed {d.dispute.openedAt}: {d.dispute.notes}
                       {d.dispute.outcome && (
                         <span className="ml-1 capitalize text-zinc-400">
@@ -197,7 +197,7 @@ export function DeductionsLedger() {
               label: 'Status',
               render: (d) => (
                 <StatusBadge
-                  className="text-[10px] capitalize"
+                  className="text-ds-micro capitalize"
                   dataStatus={deductionStatusPresentation(d.status).dataStatus}
                   tone={deductionStatusPresentation(d.status).tone}
                 >
@@ -219,9 +219,9 @@ export function DeductionsLedger() {
           data-tour="deductions-dispute-btn"
           className="px-5 py-3 border-t border-white/[0.06] space-y-2"
         >
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">Dispute a deduction</p>
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Dispute a deduction</p>
           {disputable.length === 0 ? (
-            <p className="text-[11px] text-zinc-600">
+            <p className="text-ds-label text-zinc-600">
               {rows.length === 0
                 ? 'No deductions to dispute.'
                 : 'Every deduction on your account is already disputed or settled.'}
@@ -232,7 +232,7 @@ export function DeductionsLedger() {
                 <Button
                   key={d.id}
                   variant="ghost"
-                  className="text-[11px] text-blue-300"
+                  className="text-ds-label text-blue-300"
                   data-state="brand-deduction-dispute"
                   onClick={() => {
                     setDisputingId(d.id);
@@ -248,7 +248,7 @@ export function DeductionsLedger() {
           )}
           {disputingId && (
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 space-y-2">
-              <p className="text-[11px] text-blue-200">
+              <p className="text-ds-label text-blue-200">
                 Disputes must be raised within 14 days of the deduction date. Provide the evidence
                 that supports your claim — shipping documents, proof of delivery, or carton photos.
               </p>
@@ -281,8 +281,8 @@ export function DeductionsLedger() {
               </div>
             </div>
           )}
-          {notice && <p className="text-[11px] text-emerald-300">{notice}</p>}
-          {error && <p className="text-[11px] text-red-300">{error}</p>}
+          {notice && <p className="text-ds-label text-emerald-300">{notice}</p>}
+          {error && <p className="text-ds-label text-red-300">{error}</p>}
         </div>
 
         {/* ── Outcomes ───────────────────────────────────────────────── */}
@@ -290,8 +290,8 @@ export function DeductionsLedger() {
           data-tour="deductions-outcome-info"
           className="px-5 py-3 border-t border-white/[0.06] space-y-2"
         >
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">Dispute Outcomes</p>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Dispute Outcomes</p>
+          <p className="text-ds-label text-zinc-400">
             A dispute is decided by the retail channel, not by you. It can be{' '}
             <span className="text-emerald-300">Won</span> (the deduction is refunded),{' '}
             <span className="text-red-300">Lost</span> (the deduction stands) or{' '}
@@ -301,10 +301,10 @@ export function DeductionsLedger() {
           {recordedOutcomes.length > 0 ? (
             <div className="space-y-1">
               {recordedOutcomes.map((d) => (
-                <div key={d.id} className="flex flex-wrap items-center gap-2 text-[11px]">
+                <div key={d.id} className="flex flex-wrap items-center gap-2 text-ds-label">
                   <span className={cn(MONO, 'text-zinc-400')}>{d.purchaseOrderId}</span>
                   <span className="capitalize text-zinc-500">{d.type.replace(/_/g, ' ')}</span>
-                  <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                  <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
                     outcome: {d.dispute?.outcome}
                   </Badge>
                   <span className="text-zinc-500">£{d.amountGbp.toFixed(2)}</span>
@@ -312,7 +312,7 @@ export function DeductionsLedger() {
               ))}
             </div>
           ) : (
-            <p className="text-[11px] text-zinc-600">
+            <p className="text-ds-label text-zinc-600">
               No dispute outcomes have been recorded on your account yet.
             </p>
           )}

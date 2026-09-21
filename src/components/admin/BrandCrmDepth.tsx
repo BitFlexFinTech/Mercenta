@@ -77,13 +77,13 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               key={t}
               onClick={() => setTab(t)}
               className={cn(
-                'px-2 py-1 rounded-md text-[11px] capitalize',
+                'px-2 py-1 rounded-md text-ds-label capitalize',
                 tab === t ? 'bg-brass-500/15 text-brass-300' : 'text-zinc-500 hover:text-white'
               )}
             >
               {t}
               {t === 'tasks' && brandTasks.some((x) => x.status === 'open') && (
-                <span className="ml-1 text-[9px]">
+                <span className="ml-1 text-ds-micro">
                   {brandTasks.filter((x) => x.status === 'open').length}
                 </span>
               )}
@@ -92,29 +92,29 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
         </div>
 
         {error && (
-          <p className="text-[11px] text-red-300 bg-red-500/10 border border-red-500/20 rounded-md px-2 py-1 mb-2">
+          <p className="text-ds-label text-red-300 bg-red-500/10 border border-red-500/20 rounded-md px-2 py-1 mb-2">
             {error}
           </p>
         )}
 
         {tab === 'timeline' && (
           <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
-            <p className="text-[10px] text-zinc-600">
+            <p className="text-ds-micro text-zinc-600">
               {timeline.length} events — messages, calls, notes, tasks and system events in one feed.
             </p>
             {timeline.map((e) => (
               <div key={e.id} className="border-b border-white/[0.04] pb-1.5">
                 <div className="flex items-center gap-2">
-                  <Badge className={cn('text-[9px]', KIND_STYLES[e.kind])}>{e.label}</Badge>
-                  <span className="text-[9px] font-mono text-zinc-600">
+                  <Badge className={cn('text-ds-micro', KIND_STYLES[e.kind])}>{e.label}</Badge>
+                  <span className="text-ds-micro font-mono text-zinc-600">
                     {new Date(e.at).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-[11px] text-zinc-400 mt-0.5">{e.detail}</p>
+                <p className="text-ds-label text-zinc-400 mt-0.5">{e.detail}</p>
               </div>
             ))}
             {timeline.length === 0 && (
-              <p className="text-[11px] text-zinc-600">No activity yet.</p>
+              <p className="text-ds-label text-zinc-600">No activity yet.</p>
             )}
           </div>
         )}
@@ -127,7 +127,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
             </div>
             <div className="flex items-end gap-2">
               <div className="flex-1">
-                <label className="block text-[10px] text-zinc-500 mb-1">Assign to</label>
+                <label className="block text-ds-micro text-zinc-500 mb-1">Assign to</label>
                 <select
                   value={taskAssignee}
                   onChange={(e) => setTaskAssignee(e.target.value)}
@@ -166,7 +166,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               </Button>
             </div>
             {brandTasks.length === 0 && (
-              <p className="text-[11px] text-zinc-600">No tasks for this brand yet.</p>
+              <p className="text-ds-label text-zinc-600">No tasks for this brand yet.</p>
             )}
             {brandTasks.map((t) => {
               const assignee = staff.find((s) => s.id === t.assignedToStaffId);
@@ -174,16 +174,16 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               return (
                 <div key={t.id} className="flex items-center justify-between gap-2 border-b border-white/[0.04] py-1">
                   <div>
-                    <span className={cn('text-[11px]', t.status === 'done' ? 'text-zinc-600 line-through' : 'text-zinc-200')}>
+                    <span className={cn('text-ds-label', t.status === 'done' ? 'text-zinc-600 line-through' : 'text-zinc-200')}>
                       {t.title}
                     </span>
-                    <span className="text-[9px] text-zinc-600 ml-2">
+                    <span className="text-ds-micro text-zinc-600 ml-2">
                       due {t.dueDate} · {assignee?.name ?? 'unassigned'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     {overdue && (
-                      <Badge className="text-[9px] bg-red-500/15 text-red-300 border-red-500/20">overdue</Badge>
+                      <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">overdue</Badge>
                     )}
                     <button
                       onClick={() => {
@@ -193,7 +193,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                       }}
                       disabled={!canCurrentUserMutate}
                       className={cn(
-                        'text-[10px] px-2 py-0.5 rounded-md border',
+                        'text-ds-micro px-2 py-0.5 rounded-md border',
                         canCurrentUserMutate
                           ? 'border-white/[0.1] text-zinc-400 hover:text-white hover:border-brass-500/40'
                           : 'border-white/[0.05] text-zinc-700 cursor-not-allowed'
@@ -230,15 +230,15 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
               Add Note
             </Button>
             {brandNotes.length === 0 && (
-              <p className="text-[11px] text-zinc-600">No internal notes yet.</p>
+              <p className="text-ds-label text-zinc-600">No internal notes yet.</p>
             )}
             {brandNotes.map((n) => (
               <div key={n.id} className="border-b border-white/[0.04] pb-1.5">
-                <span className="text-[9px] font-mono text-zinc-600">
+                <span className="text-ds-micro font-mono text-zinc-600">
                   {new Date(n.createdAt).toLocaleString()} ·{' '}
                   {staff.find((s) => s.id === n.authorStaffId)?.name ?? n.authorStaffId}
                 </span>
-                <p className="text-[11px] text-zinc-300 mt-0.5">{n.body}</p>
+                <p className="text-ds-label text-zinc-300 mt-0.5">{n.body}</p>
               </div>
             ))}
           </div>
@@ -248,7 +248,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
         {tab === 'relationship' && (
           <div className="space-y-3">
             <div>
-              <label className="block text-[10px] text-zinc-500 mb-1">Lifecycle stage</label>
+              <label className="block text-ds-micro text-zinc-500 mb-1">Lifecycle stage</label>
               <div className="grid grid-cols-5 gap-1">
                 {CRM_LIFECYCLE_STAGES.map((stage: CrmLifecycleStage) => (
                   <button
@@ -260,7 +260,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
                       bump();
                     }}
                     className={cn(
-                      'text-[10px] px-1 py-1.5 rounded-lg border capitalize transition-colors',
+                      'text-ds-micro px-1 py-1.5 rounded-lg border capitalize transition-colors',
                       meta.lifecycleStage === stage
                         ? 'border-brass-500/50 bg-brass-500/10 text-white'
                         : 'border-white/[0.08] text-zinc-400',
@@ -274,11 +274,11 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
             </div>
 
             <div>
-              <label className="block text-[10px] text-zinc-500 mb-1">Segmentation tags</label>
+              <label className="block text-ds-micro text-zinc-500 mb-1">Segmentation tags</label>
               <div className="flex items-center gap-1 flex-wrap mb-1">
-                {meta.tags.length === 0 && <span className="text-[10px] text-zinc-600">none</span>}
+                {meta.tags.length === 0 && <span className="text-ds-micro text-zinc-600">none</span>}
                 {meta.tags.map((t) => (
-                  <Badge key={t} className="text-[9px] bg-violet-500/15 text-violet-300 border-violet-500/20">
+                  <Badge key={t} className="text-ds-micro bg-violet-500/15 text-violet-300 border-violet-500/20">
                     {t}
                   </Badge>
                 ))}
@@ -303,7 +303,7 @@ export function BrandCrmDepth({ brandId }: { brandId: string }) {
             </div>
 
             <div>
-              <label className="block text-[10px] text-zinc-500 mb-1">Account owner</label>
+              <label className="block text-ds-micro text-zinc-500 mb-1">Account owner</label>
               <select
                 value={meta.accountOwnerStaffId ?? ''}
                 disabled={!canCurrentUserMutate}

@@ -48,12 +48,12 @@ export function AcquisitionRelationships() {
   return (
     <Card title="Acquisition Relationships (pre-onboarding)">
       <div className="px-1 pb-1 space-y-3">
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-ds-label text-zinc-500">
           Prospect-backed opportunities created from the Brand Intelligence acquisition workflow. Each
           row opens the canonical relationship context — outreach history, responses, the opportunity and
           the ONE message thread also shown in Admin → Messages.
         </p>
-        <div className="flex flex-wrap gap-2 text-[10px] text-zinc-400">
+        <div className="flex flex-wrap gap-2 text-ds-micro text-zinc-400">
           <span>In acquisition: <span className="text-white font-mono">{summary.enrolled}</span></span>
           <span>Responses: <span className="text-white font-mono">{summary.responded}</span></span>
           <span>Opportunities: <span className="text-white font-mono">{summary.opportunities}</span></span>
@@ -62,7 +62,7 @@ export function AcquisitionRelationships() {
         </div>
 
         {/* §Phase D4 — honest persistence status (never claims storage it lacks). */}
-        <div className="text-[10px] text-zinc-500" data-section="persistence-status">
+        <div className="text-ds-micro text-zinc-500" data-section="persistence-status">
           Persistence:{' '}
           <span
             className={cn(
@@ -82,7 +82,7 @@ export function AcquisitionRelationships() {
         </div>
 
         {rows.length === 0 ? (
-          <p className="text-[11px] text-zinc-600">
+          <p className="text-ds-label text-zinc-600">
             No acquisition opportunities yet. Run the workflow on a Brand Intelligence prospect
             (Brand Intelligence → brand → Outreach) to create one.
           </p>
@@ -99,18 +99,18 @@ export function AcquisitionRelationships() {
                     <Trophy className="w-3 h-3 text-brass-400" />
                     {r.prospect.brand}
                   </span>
-                  <span className="block text-[10px] text-zinc-500 font-mono">
+                  <span className="block text-ds-micro text-zinc-500 font-mono">
                     {r.opportunity?.id} · BI {r.opportunity?.biScore}/100 · owner {r.opportunity?.ownerStaffId} · {r.responseCount} response(s)
                   </span>
                   {/* §Phase E1 — the hand-off status once onboarding has begun. */}
                   {onboarding && (
-                    <span className="block text-[10px] text-zinc-500" data-onboarding-row={onboarding.status}>
+                    <span className="block text-ds-micro text-zinc-500" data-onboarding-row={onboarding.status}>
                       Onboarding {onboarding.status.replace('_', ' ')} · tenant {onboarding.brandId}
                     </span>
                   )}
                 </span>
                 <span className="flex items-center gap-2 flex-shrink-0">
-                  <Badge className={cn('text-[9px] border capitalize', STAGE_STYLES[r.opportunity?.stage ?? 'new'])}>
+                  <Badge className={cn('text-ds-micro border capitalize', STAGE_STYLES[r.opportunity?.stage ?? 'new'])}>
                     {r.opportunity?.stage}
                   </Badge>
                   <ChevronRight className={cn('w-3.5 h-3.5 text-zinc-500 transition-transform', openId === r.prospect.id && 'rotate-90')} />
@@ -123,10 +123,10 @@ export function AcquisitionRelationships() {
         {open && (
           <div className="border border-white/[0.06] rounded-lg p-3" data-section="crm-acquisition-relationship">
             <div className="flex items-center justify-between pb-2">
-              <p className="text-[10px] font-semibold text-zinc-400 uppercase">
+              <p className="text-ds-micro font-semibold text-zinc-400 uppercase">
                 Relationship — {open.prospect.brand}
               </p>
-              <span className="text-[9px] text-zinc-600">live — reads the canonical store</span>
+              <span className="text-ds-micro text-zinc-600">live — reads the canonical store</span>
             </div>
             <AcquisitionWorkflow prospectId={open.prospect.id} />
           </div>

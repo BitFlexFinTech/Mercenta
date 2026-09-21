@@ -194,8 +194,8 @@ for (const entry of entries) {
         const knownFiles = [
           'BrandSettings.tsx','Header.tsx','AdminPurchaseOrderDetail.tsx',
           'types.ts','Home.tsx','DemoBanner.tsx','BrandGuidance.tsx',
-          'LiveChatWidget.tsx','TourEngine.tsx','InfoTooltip.tsx',
-          'ShippingCostEstimate.tsx','FcSelector.tsx','BrandReports.tsx',
+          'LiveChatWidget.tsx','TourEngine.tsx',
+          'ShippingCostEstimate.tsx','BrandReports.tsx',
           'BrandReturns.tsx','ProductCatalog.tsx','SalesAnalytics.tsx',
           'BrandSelfService.tsx','App.tsx','BrandCrmDepth.tsx',
           'crmStore.ts','shippingCalculator.ts','tamSamPipeline.ts',

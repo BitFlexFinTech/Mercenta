@@ -237,8 +237,9 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
    `010_create_compliance_docs.sql` and `011_create_messages.sql`). A third
    migration, **`026_harden_deductions_ack_and_messages.sql`**, closes the §23
    database-hardening gaps.
-   **§6 payout-rail correction:** `payouts-transfer` pays through **Wise
-   (DEFAULT)** or **Payoneer (secondary)** — Stripe bills the flat monthly
+   **§6 payout-rail correction:** `payouts-transfer` pays through **Payoneer
+   (DEFAULT)** or **Wise (secondary)** — Founder decision T-1, reconciled in
+   code 2026-09-21. Stripe bills the flat monthly
    subscription only and is REFUSED as a payout rail, as is Xero. The previous
    Stripe-transfer contract recorded below is superseded.
 

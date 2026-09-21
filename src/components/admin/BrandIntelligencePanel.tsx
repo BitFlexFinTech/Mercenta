@@ -66,32 +66,32 @@ return<WorkspaceFrame className="space-y-4">
     title="Brand Intelligence"
     description="The canonical prospect universe, its deterministic scores and the discovery pipeline. Run history and disqualifications stay visible so a re-run can never silently change the target set."
     meta={<>
-      <span className="font-mono text-[11px] text-zinc-500">{dash.totalBrandsTracked} tracked</span>
-      <span className="font-mono text-[11px] text-zinc-500">{dash.highPriorityCount} high priority</span>
-      <span className="font-mono text-[11px] text-zinc-500">{runs.length} runs</span>
-      <span className="font-mono text-[11px] text-zinc-500">{dqPros.length} disqualified</span>
+      <span className="font-mono text-ds-label text-zinc-500">{dash.totalBrandsTracked} tracked</span>
+      <span className="font-mono text-ds-label text-zinc-500">{dash.highPriorityCount} high priority</span>
+      <span className="font-mono text-ds-label text-zinc-500">{runs.length} runs</span>
+      <span className="font-mono text-ds-label text-zinc-500">{dqPros.length} disqualified</span>
     </>}
     toolbar={<div className="flex flex-wrap items-center gap-2">
       <Input value={q} onChange={e=>sQ(e.target.value)} placeholder="Search..." className="text-xs py-1 w-40" dataTestid="bi-search"/>
       <select aria-label="Category filter" value={cf} onChange={e=>sCf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option>{cats.map(c=><option key={c} value={c}>{c}</option>)}</select>
       <select aria-label="Tier filter" value={tf} onChange={e=>sTf(e.target.value)} className="bg-ink-850 border rounded px-2 py-1 text-xs"><option value="">All</option><option value="tier_1">Tier 1</option><option value="tier_2">Tier 2</option><option value="tier_3">Tier 3</option><option value="tier_4">Tier 4</option></select>
       <span className="text-xs text-zinc-600">{filtered.length} of {pros.length}</span>
-      <button type="button" onClick={()=>{sQ('');sCf('');sTf('');}} className="text-[11px] text-brass-400 hover:text-brass-300" data-testid="bi-clear-filters">Clear</button>
+      <button type="button" onClick={()=>{sQ('');sCf('');sTf('');}} className="text-ds-label text-brass-400 hover:text-brass-300" data-testid="bi-clear-filters">Clear</button>
     </div>}
   />
   <MetricBand items={metrics} columns={4} />
   <Card className="p-3">
     <div className="flex items-center justify-between flex-wrap gap-2">
       <div className="min-w-0">
-        <p className="text-[10px] uppercase text-zinc-500">Pipeline Control</p>
+        <p className="text-ds-micro uppercase text-zinc-500">Pipeline Control</p>
         <p className="text-xs text-zinc-400 mt-0.5">Runs the discovery engine over the canonical universe (empty candidate intake — deterministic re-check; new discoveries are recorded only when genuinely surfaced).{stat?.nextScheduledCheck?` Next check ${stat.nextScheduledCheck.slice(0,10)}.`:''}</p>
       </div>
       <Button onClick={runDiscovery} disabled={running} className="text-xs"><Play className={cn('w-3 h-3',running?'':'text-brass-400')} />{running?'Scanning…':'Run discovery'}</Button>
     </div>
-    {msg?<p className="text-[11px] text-brass-300 mt-1.5 font-mono truncate" data-run-status="1">{msg}</p>:null}
+    {msg?<p className="text-ds-label text-brass-300 mt-1.5 font-mono truncate" data-run-status="1">{msg}</p>:null}
   </Card>
   <Card className="p-0">
-    <h3 className="px-3 py-2 text-xs font-semibold text-white uppercase flex items-center gap-2"><History className="w-3.5 h-3.5 text-zinc-400" />Run History <Badge className="text-[9px] bg-ink-850 text-zinc-400">{runs.length}</Badge></h3>
+    <h3 className="px-3 py-2 text-xs font-semibold text-white uppercase flex items-center gap-2"><History className="w-3.5 h-3.5 text-zinc-400" />Run History <Badge className="text-ds-micro bg-ink-850 text-zinc-400">{runs.length}</Badge></h3>
     {runs.length===0?<p className="px-3 py-4 text-xs text-zinc-600">No runs recorded yet.</p>:(
     <div className="divide-y divide-white/[0.05]">
       {[...runs].reverse().slice(0,10).map(r=>{
@@ -99,28 +99,28 @@ return<WorkspaceFrame className="space-y-4">
         const chvs=changesByRun(r.runId) as ProspectChangeEvent[];
         return <div key={r.runId}>
           <button className="w-full flex items-center justify-between px-3 py-1.5 text-left" onClick={()=>sExp(open?null:r.runId)}>
-            <span className="text-[11px] font-mono text-zinc-300">{r.runId}</span>
-            <span className="text-[10px] text-zinc-500 uppercase">{r.trigger} · {r.completedAt.slice(0,16).replace('T',' ')}</span>
+            <span className="text-ds-label font-mono text-zinc-300">{r.runId}</span>
+            <span className="text-ds-micro text-zinc-500 uppercase">{r.trigger} · {r.completedAt.slice(0,16).replace('T',' ')}</span>
           </button>
           <div className="flex flex-wrap gap-2 px-3 pt-0.5">
-            <span className="text-[10px] text-zinc-500">scan {r.scannedCount}</span>
-            <span className="text-[10px] text-emerald-400">+{r.newCount} new</span>
-            <span className="text-[10px] text-blue-400">{r.updatedCount} upd</span>
-            <span className="text-[10px] text-amber-400">{r.disqualifiedCount} dq</span>
-            <span className="text-[10px] text-zinc-600">{r.unchangedCount} same</span>
+            <span className="text-ds-micro text-zinc-500">scan {r.scannedCount}</span>
+            <span className="text-ds-micro text-emerald-400">+{r.newCount} new</span>
+            <span className="text-ds-micro text-blue-400">{r.updatedCount} upd</span>
+            <span className="text-ds-micro text-amber-400">{r.disqualifiedCount} dq</span>
+            <span className="text-ds-micro text-zinc-600">{r.unchangedCount} same</span>
           </div>
-          {open&&<div className="px-3 pb-1.5 space-y-0.5">{chvs.map(c=><p key={c.id} className="text-[10px] font-mono text-zinc-400">· {c.brand} — {c.changeType}{c.field?` (${c.field})`:''}: {c.summary}</p>)}</div>}
+          {open&&<div className="px-3 pb-1.5 space-y-0.5">{chvs.map(c=><p key={c.id} className="text-ds-micro font-mono text-zinc-400">· {c.brand} — {c.changeType}{c.field?` (${c.field})`:''}: {c.summary}</p>)}</div>}
         </div>;
       })}
     </div>)}
   </Card>
   <Card className="p-3">
-    <h3 className="text-xs font-semibold text-white uppercase flex items-center gap-2"><ShieldBan className="w-3.5 h-3.5 text-amber-400" />Disqualified <Badge className="text-[9px] bg-amber-500/15 text-amber-300">{dqPros.length}</Badge></h3>
-    <p className="text-[10px] text-zinc-500 mt-1">Manually or engine-disqualified prospects remain tracked and can be re-qualified. Disqualifications survive re-runs.</p>
+    <h3 className="text-xs font-semibold text-white uppercase flex items-center gap-2"><ShieldBan className="w-3.5 h-3.5 text-amber-400" />Disqualified <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{dqPros.length}</Badge></h3>
+    <p className="text-ds-micro text-zinc-500 mt-1">Manually or engine-disqualified prospects remain tracked and can be re-qualified. Disqualifications survive re-runs.</p>
     {dqPros.length===0?<p className="text-xs text-zinc-600 mt-2">None.</p>:
     <div className="mt-1.5 space-y-1">{dqPros.map((p:any)=><div key={p.id} className="flex items-center justify-between gap-2 bg-ink-850 border border-white/[0.06] rounded-lg px-2 py-1.5">
-      <div className="min-w-0 flex-1"><span className="text-xs font-medium text-zinc-300">{p.brand}</span><p className="text-[10px] text-amber-300/80 font-mono truncate">{p.disqualificationReason||'Disqualified'}</p></div>
-      <Button variant="tertiary" className="text-[10px] px-2 py-1" onClick={()=>handleRequalify(p.id,p.brand)}>Requalify</Button>
+      <div className="min-w-0 flex-1"><span className="text-xs font-medium text-zinc-300">{p.brand}</span><p className="text-ds-micro text-amber-300/80 font-mono truncate">{p.disqualificationReason||'Disqualified'}</p></div>
+      <Button variant="tertiary" className="text-ds-micro px-2 py-1" onClick={()=>handleRequalify(p.id,p.brand)}>Requalify</Button>
     </div>)}</div>}
   </Card>
   <Card className="p-0 overflow-x-auto"><table className="w-full text-xs" data-testid="bi-prospect-table">
@@ -128,18 +128,18 @@ return<WorkspaceFrame className="space-y-4">
     <tbody>{filtered.map((p:any,i:number)=><tr key={p.id} onClick={()=>sSel(p)} className="border-b cursor-pointer hover:bg-white/[0.03]">
       <td className="px-2 py-1 text-zinc-500">{i+1}</td>
       <td className="px-2 py-1 font-medium text-white">{p.brand}</td>
-      <td className="px-2 py-1 text-zinc-400 text-[10px]">{p.category}</td>
+      <td className="px-2 py-1 text-zinc-400 text-ds-micro">{p.category}</td>
       <td className="px-2 py-1"><span className={cn('font-bold',p.score.total>=80?'text-emerald-400':p.score.total>=70?'text-blue-400':'text-zinc-500')}>{p.score.total}</span></td>
-      <td className="px-2 py-1"><Badge className={cn('text-[9px]',TB[p.score.tier])}>{TL[p.score.tier]}</Badge></td>
-      <td className="px-2 py-1 text-zinc-300 text-[10px]">{p.score.amazonDemand}</td>
-      <td className="px-2 py-1 text-zinc-300 text-[10px]">{p.score.poPotential}</td>
-      <td className="px-2 py-1 text-zinc-300 text-[10px]">{p.score.growth}</td>
-      <td className="px-2 py-1 text-zinc-300 text-[10px]">{p.score.distributionOpenness}</td>
-      <td className="px-2 py-1 text-zinc-300 text-[10px]">{p.score.acceptanceProbability}</td>
-      <td className="px-2 py-1 text-zinc-300 text-[10px]">{p.score.mercentaFit}</td>
-      <td className="px-2 py-1"><span className={cn('text-[9px] px-1 py-0.5 rounded',bs(p)==='DIRECT_AMAZON_RETAIL'?'bg-emerald-500/15 text-emerald-300':bs(p)==='AMAZON_PRESENT_BUT_UNCLEAR'?'bg-amber-500/15 text-amber-300':'bg-zinc-500/10 text-zinc-500')}>{bs(p).slice(0,10).replace(/_/g,' ')}</span></td>
-      <td className="px-2 py-1 text-zinc-400 text-[9px]">{p.distributors[0]?.company?.slice(0,12)||'\u2014'}</td>
-      <td className="px-2 py-1 text-zinc-400 text-[9px]">{p.contacts[0]?.name?.split(' ')[0]||'\u2014'}</td>
+      <td className="px-2 py-1"><Badge className={cn('text-ds-micro',TB[p.score.tier])}>{TL[p.score.tier]}</Badge></td>
+      <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.amazonDemand}</td>
+      <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.poPotential}</td>
+      <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.growth}</td>
+      <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.distributionOpenness}</td>
+      <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.acceptanceProbability}</td>
+      <td className="px-2 py-1 text-zinc-300 text-ds-micro">{p.score.mercentaFit}</td>
+      <td className="px-2 py-1"><span className={cn('text-ds-micro px-1 py-0.5 rounded',bs(p)==='DIRECT_AMAZON_RETAIL'?'bg-emerald-500/15 text-emerald-300':bs(p)==='AMAZON_PRESENT_BUT_UNCLEAR'?'bg-amber-500/15 text-amber-300':'bg-zinc-500/10 text-zinc-500')}>{bs(p).slice(0,10).replace(/_/g,' ')}</span></td>
+      <td className="px-2 py-1 text-zinc-400 text-ds-micro">{p.distributors[0]?.company?.slice(0,12)||'\u2014'}</td>
+      <td className="px-2 py-1 text-zinc-400 text-ds-micro">{p.contacts[0]?.name?.split(' ')[0]||'\u2014'}</td>
     </tr>)}
     {filtered.length===0&&<tr><td colSpan={14} className="py-8 text-center text-zinc-600">No matches</td></tr>}</tbody>
   </table></Card>
@@ -153,7 +153,7 @@ return<WorkspaceFrame className="space-y-4">
       { label:'Disqualified', value:String(dqPros.length) },
       { label:'Last run', value:runs.length>0?runs[runs.length-1].completedAt.slice(0,10):'None yet' },
     ]}/>
-    <p className="mt-2 text-[11px] leading-snug text-zinc-400">
+    <p className="mt-2 text-ds-label leading-snug text-zinc-400">
       Scores are deterministic and re-derived from the canonical prospect records — a re-run
       records changes rather than rewriting the universe, and disqualifications survive it.
     </p>

@@ -235,10 +235,10 @@ export function SuperAdminPanel() {
         description="Master control matrix — staff, roles & channel assignments, plus platform-wide oversight of brands, operational work, finance, compliance, integrations, provider state and audit. Nothing on this surface is exposed to a brand session."
         meta={
           <>
-            <span className="font-mono text-[11px] text-zinc-500">{staff.length} staff</span>
-            <span className="font-mono text-[11px] text-zinc-500">{brands.length} brand tenants</span>
-            <span className="font-mono text-[11px] text-zinc-500">{allWork.length} work items</span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-ds-label text-zinc-500">{staff.length} staff</span>
+            <span className="font-mono text-ds-label text-zinc-500">{brands.length} brand tenants</span>
+            <span className="font-mono text-ds-label text-zinc-500">{allWork.length} work items</span>
+            <span className="font-mono text-ds-label text-zinc-500">
               acting as {canCurrentUserMutate ? 'full admin' : 'view-only ops'}
             </span>
           </>
@@ -296,18 +296,18 @@ export function SuperAdminPanel() {
                   .sort((a, b) => b[1] - a[1])
                   .slice(0, 8)
                   .map(([source, count]) => (
-                    <li key={source} className="flex items-center justify-between text-[11px] text-zinc-400">
+                    <li key={source} className="flex items-center justify-between text-ds-label text-zinc-400">
                       <span>{WORK_SOURCE_LABELS[source as keyof typeof WORK_SOURCE_LABELS]}</span>
                       <span className="font-mono text-zinc-500">{count}</span>
                     </li>
                   ))}
                 {allWork.length === 0 && (
-                  <li className="text-[11px] text-zinc-500">No open operational work.</li>
+                  <li className="text-ds-label text-zinc-500">No open operational work.</li>
                 )}
               </ul>
             </ContextPanel>
             <ContextPanel title="Tenant isolation">
-              <p className="text-[11px] leading-snug text-zinc-400">
+              <p className="text-ds-label leading-snug text-zinc-400">
                 This surface is Super-Admin-only. Brand sessions never receive platform-wide work,
                 finance, compliance or audit data — the domain refuses it, not just the navigation.
               </p>
@@ -327,7 +327,7 @@ export function SuperAdminPanel() {
           description="Read from the canonical work layer / brand store — the same records every other workspace uses."
           domain="compliance"
           action={
-            <Button variant="ghost" className="text-[11px]" onClick={() => setOversight('none')} data-testid="sa-oversight-close">
+            <Button variant="ghost" className="text-ds-label" onClick={() => setOversight('none')} data-testid="sa-oversight-close">
               Close
             </Button>
           }
@@ -337,25 +337,25 @@ export function SuperAdminPanel() {
               {brands.map((b) => (
                 <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2" data-testid={`sa-brand-${b.id}`}>
                   <span className="text-xs font-medium text-white">{b.profile.businessName}</span>
-                  <span className="font-mono text-[10px] text-zinc-500">
+                  <span className="font-mono text-ds-micro text-zinc-500">
                     {b.category} · {b.track} · {b.contractStatus}
                   </span>
                 </li>
               ))}
-              {brands.length === 0 && <li className="px-3.5 py-3 text-[11px] text-zinc-500">No brand tenants.</li>}
+              {brands.length === 0 && <li className="px-3.5 py-3 text-ds-label text-zinc-500">No brand tenants.</li>}
             </ul>
           ) : (
             <ul className="divide-y divide-white/[0.05] overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-850">
               {oversightRows.map((w) => (
                 <li key={w.id} className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2" data-testid={`sa-work-${w.id}`}>
                   <span className="text-xs font-medium text-white">{w.title}</span>
-                  <span className="font-mono text-[10px] text-zinc-500">
+                  <span className="font-mono text-ds-micro text-zinc-500">
                     {WORK_SOURCE_LABELS[w.source]} · {w.tenantId ?? 'platform'} · {w.dueDate ?? 'no deadline'}
                   </span>
                 </li>
               ))}
               {oversightRows.length === 0 && (
-                <li className="px-3.5 py-3 text-[11px] text-zinc-500">Nothing matches this view.</li>
+                <li className="px-3.5 py-3 text-ds-label text-zinc-500">Nothing matches this view.</li>
               )}
             </ul>
           )}
@@ -375,14 +375,14 @@ export function SuperAdminPanel() {
             </div>
             <div>
               <div className="text-sm font-medium text-white">EU Market Module</div>
-              <p className="text-[11px] text-zinc-500 mt-0.5 max-w-md">
+              <p className="text-ds-label text-zinc-500 mt-0.5 max-w-md">
                 EU distribution capability (CE marking, EU EORI, REACH/GPSR).
                 Currently disabled — UK-only operations. Enable when strategy
                 expands; the module scaffolding is preserved.
               </p>
             </div>
           </div>
-          <Badge className="text-[10px] bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
+          <Badge className="text-ds-micro bg-zinc-500/15 text-zinc-400 border-zinc-500/20">
             {EU_MARKET_ENABLED ? 'Enabled' : 'Disabled — future capability'}
           </Badge>
         </div>
@@ -393,11 +393,11 @@ export function SuperAdminPanel() {
         <div className="flex items-center gap-2 mb-3">
           <DollarSign className="w-4 h-4 text-brass-400" />
           <span className="text-xs font-semibold text-white">Shipping Markup Configuration</span>
-          <Badge className="text-[9px] bg-amber-500/15 text-amber-300 border-amber-500/20 ml-auto">
+          <Badge className="text-ds-micro bg-amber-500/15 text-amber-300 border-amber-500/20 ml-auto">
             Integrated Logistics Revenue
           </Badge>
         </div>
-        <p className="text-[11px] text-zinc-500 mb-3">
+        <p className="text-ds-label text-zinc-500 mb-3">
           Set the markup percentage applied per carrier. The brand sees the marked-up price
           in the shipping cost estimate. Markup revenue is tracked in the shipping margin ledger.
         </p>
@@ -407,7 +407,7 @@ export function SuperAdminPanel() {
               <Truck className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <span className="text-xs font-medium text-white">{cfg.label}</span>
-                <span className="text-[10px] text-zinc-600 ml-2">
+                <span className="text-ds-micro text-zinc-600 ml-2">
                   ({cfg.carrier === 'global' ? 'fallback for all carriers' : cfg.carrier})
                 </span>
               </div>
@@ -426,14 +426,14 @@ export function SuperAdminPanel() {
                   }}
                   className="w-20 bg-ink-850 border border-white/[0.08] rounded px-2 py-1 text-xs text-white text-right font-mono focus:outline-none focus:border-brass-500/40"
                 />
-                <span className="text-[10px] text-zinc-500 w-4">%</span>
+                <span className="text-ds-micro text-zinc-500 w-4">%</span>
                 <button
                   onClick={() => {
                     updateCarrierMarkup(cfg.id, { active: !cfg.active });
                     setMarkupVersion((v) => v + 1);
                   }}
                   className={cn(
-                    'p-1 rounded text-[10px] border transition-colors',
+                    'p-1 rounded text-ds-micro border transition-colors',
                     cfg.active
                       ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
                       : 'bg-zinc-500/15 text-zinc-500 border-zinc-500/20'
@@ -472,7 +472,7 @@ export function SuperAdminPanel() {
           </select>
           <Badge
             className={cn(
-              'text-[10px]',
+              'text-ds-micro',
               canCurrentUserMutate
                 ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                 : 'bg-amber-500/15 text-amber-300 border-amber-500/20'
@@ -651,7 +651,7 @@ export function SuperAdminPanel() {
               render: (member) => (
                 <Badge
                   className={cn(
-                    'text-[10px]',
+                    'text-ds-micro',
                     member.active
                       ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                       : 'bg-zinc-500/15 text-zinc-500 border-zinc-500/20'

@@ -98,7 +98,14 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     headingHighlight: 'and paid — without the infrastructure.',
     subheading:
       'Mercenta is the operating layer between your brand and the retail channel. We manage the orders, fulfilment, logistics, finance and compliance that come with selling at retail scale, and you work inside one platform that shows you every order, shipment, document and payment as it happens.',
-    primaryCta: 'See if your brand qualifies',
+    primaryCta: 'Explore UK Market Fit',
+    /**
+     * §Phase 1 — this is the HEADER utility action label, not a hero button.
+     * Partner Login must not sit beside the primary hero CTA (the two actions
+     * serve different audiences and need distinct hierarchy), so it is rendered
+     * by PublicNav in the header and the field is retained here as the single
+     * source for its label (and for the Homepage Editor).
+     */
     secondaryCta: 'Partner Login',
     trustBadges: ['UK ESTABLISHED', 'COMPLIANCE-GATED ONBOARDING', 'EVERY ACTION AUDITED'],
   },
@@ -252,7 +259,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     heading: 'Ready to run your UK commercial operation properly?',
     subheading:
       'Join brands already operating through {{brand}} — the same platform, your own workspace.',
-    buttonLabel: 'See if your brand qualifies',
+    buttonLabel: 'Explore UK Market Fit',
     stampLine1: 'Onboarding',
     stampLine2: 'Compliance gated',
   },

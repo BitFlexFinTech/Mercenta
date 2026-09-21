@@ -91,16 +91,16 @@ export function ProductDiscoveryPanel() {
 
 return (
 <Card title="Product Discovery (internal)" className="mt-2">
-      <p className="text-[11px] text-zinc-400">
+      <p className="text-ds-label text-zinc-400">
         Top candidate products by stored marketplace evidence. Derived from the canonical BI ASIN seam —
         <span className="text-zinc-300">simulated/estimated</span> until Keepa/Amazon credentials are live
         (then the same evidence seam carries real values). No network calls are made by this view.
       </p>
-      <p className="text-[10px] text-zinc-600 mt-1 flex items-start gap-1.5">
+      <p className="text-ds-micro text-zinc-600 mt-1 flex items-start gap-1.5">
         <Info className="w-3.5 h-3.5 text-zinc-500 shrink-0" /> Demand: High (est sales ≥ 500/mo or ≥ 2000 reviews) · Medium (≥100/mo or ≥400 reviews) · Low (signal present) · Limited (no measurable signal). Qualitative derivation — not a Mercenta score.
       </p>
       <div className="overflow-x-auto mt-2">
-        <table className="w-full text-[11px]" data-table="product-discovery">
+        <table className="w-full text-ds-label" data-table="product-discovery">
           <thead>
             <tr className="text-left text-zinc-500 border-b border-white/[0.06]">
               <th className="py-1 px-2">Brand</th>
@@ -127,7 +127,7 @@ return (
                 <td className="py-1 px-2 text-right font-mono text-zinc-300">{r.estSales.toLocaleString()}</td>
                 <td className="py-1 px-2 text-right font-mono text-zinc-300">£{r.estRevenue.toLocaleString()}</td>
                 <td className="py-1 px-2 text-right font-mono text-zinc-300">{r.sellers}</td>
-                <td className="py-1 px-2"><Badge className={cn('text-[9px]', demandTone[r.demand] ?? demandTone.Limited)}>{r.demand}</Badge></td>
+                <td className="py-1 px-2"><Badge className={cn('text-ds-micro', demandTone[r.demand] ?? demandTone.Limited)}>{r.demand}</Badge></td>
               </tr>
             ))}
             {rows.length === 0 && (
@@ -136,7 +136,7 @@ return (
           </tbody>
         </table>
       </div>
-      <p className="text-[10px] text-zinc-600 mt-2 flex items-center gap-1.5">
+      <p className="text-ds-micro text-zinc-600 mt-2 flex items-center gap-1.5">
         <PackageSearch className="w-3.5 h-3.5 text-zinc-500" /> {rows.length} product records across {new Set(rows.map((r) => r.brand)).size} candidate brands (disqualified prospects excluded).
       </p>
     </Card>

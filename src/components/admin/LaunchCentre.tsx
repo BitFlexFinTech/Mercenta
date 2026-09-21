@@ -112,31 +112,31 @@ export function LaunchCentre() {
             <h2 className="text-sm font-semibold text-white flex items-center gap-2">
               <Megaphone className="w-4 h-4" /> Mercenta Launch Centre
             </h2>
-            <p className="text-[11px] text-zinc-500 mt-1">{LAUNCH_CENTRE_DISCLAIMER}</p>
+            <p className="text-ds-label text-zinc-500 mt-1">{LAUNCH_CENTRE_DISCLAIMER}</p>
           </div>
           <Button variant="tertiary" className="text-xs" onClick={() => setEditingProfile((v) => !v)}>
             {editingProfile ? 'Close profile editor' : 'Modify launch copy'}
           </Button>
         </div>
-        <div className="grid gap-2 sm:grid-cols-4 mt-4 text-[11px]">
+        <div className="grid gap-2 sm:grid-cols-4 mt-4 text-ds-label">
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Platforms</p>
+            <p className="text-ds-micro text-zinc-500">Platforms</p>
             <p className="text-sm font-bold text-white">{summary.total}</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Accounts created</p>
+            <p className="text-ds-micro text-zinc-500">Accounts created</p>
             <p className="text-sm font-bold text-white">{summary.accountsCreated}</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Profiles prepared</p>
+            <p className="text-ds-micro text-zinc-500">Profiles prepared</p>
             <p className="text-sm font-bold text-white">{summary.prepared}</p>
           </div>
           <div className="rounded-lg border border-white/[0.06] bg-ink-850 px-2.5 py-2">
-            <p className="text-[10px] text-zinc-500">Submitted</p>
+            <p className="text-ds-micro text-zinc-500">Submitted</p>
             <p className="text-sm font-bold text-white">{summary.submitted}</p>
           </div>
         </div>
-        {message && <p className="text-[10px] text-emerald-300/90 mt-2">{message}</p>}
+        {message && <p className="text-ds-micro text-emerald-300/90 mt-2">{message}</p>}
       </Card>
 
       {editingProfile && (
@@ -148,16 +148,16 @@ export function LaunchCentre() {
               value={profile.tagline}
               onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
             />
-            <label className="text-[10px] text-zinc-500">Short description</label>
+            <label className="text-ds-micro text-zinc-500">Short description</label>
             <textarea
-              className="w-full bg-ink-850 border border-white/[0.08] rounded-lg px-2 py-1.5 text-[11px] text-zinc-200"
+              className="w-full bg-ink-850 border border-white/[0.08] rounded-lg px-2 py-1.5 text-ds-label text-zinc-200"
               rows={2}
               value={profile.shortDescription}
               onChange={(e) => setProfile({ ...profile, shortDescription: e.target.value })}
             />
-            <label className="text-[10px] text-zinc-500">Long description</label>
+            <label className="text-ds-micro text-zinc-500">Long description</label>
             <textarea
-              className="w-full bg-ink-850 border border-white/[0.08] rounded-lg px-2 py-1.5 text-[11px] text-zinc-200"
+              className="w-full bg-ink-850 border border-white/[0.08] rounded-lg px-2 py-1.5 text-ds-label text-zinc-200"
               rows={5}
               value={profile.longDescription}
               onChange={(e) => setProfile({ ...profile, longDescription: e.target.value })}
@@ -208,23 +208,23 @@ export function LaunchCentre() {
                   className="border-b cursor-pointer hover:bg-white/[0.03]"
                 >
                   <td className="px-2 py-1.5 font-medium text-white">{p.name}</td>
-                  <td className="px-2 py-1.5 text-zinc-400 text-[10px]">
+                  <td className="px-2 py-1.5 text-zinc-400 text-ds-micro">
                     {CHANNEL_LABEL[p.submissionChannel]}
                   </td>
-                  <td className="px-2 py-1.5 text-zinc-300 text-[10px]">
+                  <td className="px-2 py-1.5 text-zinc-300 text-ds-micro">
                     {r?.accountStatus ?? 'not_started'}
                   </td>
-                  <td className="px-2 py-1.5 text-[10px]">
+                  <td className="px-2 py-1.5 text-ds-micro">
                     <span className={done ? 'text-emerald-300' : 'text-zinc-400'}>
                       {r?.profileStatus ?? 'not_prepared'}
                     </span>
                   </td>
-                  <td className="px-2 py-1.5 text-[10px] text-amber-300/80">verify on platform</td>
+                  <td className="px-2 py-1.5 text-ds-micro text-amber-300/80">verify on platform</td>
                   <td className="px-2 py-1.5">
                     <div className="flex items-center gap-1">
                       <Button
                         variant="tertiary"
-                        className="text-[10px] px-2 py-1"
+                        className="text-ds-micro px-2 py-1"
                         onClick={() => {
                           prepareProfile(p);
                         }}
@@ -233,7 +233,7 @@ export function LaunchCentre() {
                       </Button>
                       <Button
                         variant="tertiary"
-                        className="text-[10px] px-2 py-1"
+                        className="text-ds-micro px-2 py-1"
                         onClick={() => {
                           setSelectedId(p.id);
                           setEditingProfile(true);
@@ -243,7 +243,7 @@ export function LaunchCentre() {
                       </Button>
                       <Button
                         variant="tertiary"
-                        className="text-[10px] px-2 py-1"
+                        className="text-ds-micro px-2 py-1"
                         onClick={() => {
                           void copy(`${p.name} package`, buildSubmissionPackage(p, profile));
                         }}
@@ -259,14 +259,14 @@ export function LaunchCentre() {
                         href={p.requirementsUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[10px] text-zinc-400 hover:text-zinc-200 px-1 inline-flex items-center gap-1"
+                        className="text-ds-micro text-zinc-400 hover:text-zinc-200 px-1 inline-flex items-center gap-1"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ExternalLink className="w-3 h-3" /> Open
                       </a>
                       <Button
                         variant="tertiary"
-                        className="text-[10px] px-2 py-1"
+                        className="text-ds-micro px-2 py-1"
                         onClick={() => {
                           submit(p);
                         }}
@@ -286,16 +286,16 @@ export function LaunchCentre() {
         <Card>
           <h3 className="text-xs font-semibold text-white">
             {selected.name}
-            <span className="ml-2 text-[10px] font-normal text-zinc-500">
+            <span className="ml-2 text-ds-micro font-normal text-zinc-500">
               {CHANNEL_LABEL[selected.submissionChannel]} · requirements{' '}
               {selected.requirementsVerified ? 'verified' : 'NOT yet verified'}
             </span>
           </h3>
-          <p className="text-[10px] text-zinc-500 mt-1">{selected.audience}</p>
+          <p className="text-ds-micro text-zinc-500 mt-1">{selected.audience}</p>
 
           <div className="mt-2 space-y-1">
             {buildSubmissionChecklist(selected, selectedRecord).map((item) => (
-              <p key={item.label} className="text-[10px] text-zinc-400">
+              <p key={item.label} className="text-ds-micro text-zinc-400">
                 <span className={item.done ? 'text-emerald-300' : 'text-amber-300'}>
                   {item.done ? '✓' : '○'}
                 </span>{' '}
@@ -312,7 +312,7 @@ export function LaunchCentre() {
               href={selected.siteUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-[10px] text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1"
+              className="text-ds-micro text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1"
             >
               <ExternalLink className="w-3 h-3" /> Open {selected.name}
             </a>
@@ -320,14 +320,14 @@ export function LaunchCentre() {
               href={selected.signupUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-[10px] text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1"
+              className="text-ds-micro text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1"
             >
               <ExternalLink className="w-3 h-3" /> Sign up / submit
             </a>
           </div>
 
-          <p className="text-[10px] text-zinc-500 mt-2">Submission package (copyable)</p>
-          <pre className="mt-1 whitespace-pre-wrap bg-ink-900 border border-white/[0.06] rounded-lg p-2 text-[10px] text-zinc-300 max-h-64 overflow-y-auto">
+          <p className="text-ds-micro text-zinc-500 mt-2">Submission package (copyable)</p>
+          <pre className="mt-1 whitespace-pre-wrap bg-ink-900 border border-white/[0.06] rounded-lg p-2 text-ds-micro text-zinc-300 max-h-64 overflow-y-auto">
             {buildSubmissionPackage(selected, profile)}
           </pre>
         </Card>

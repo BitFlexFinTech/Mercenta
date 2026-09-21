@@ -36,11 +36,11 @@ function RemittanceRow({ statement }: { statement: ReturnType<typeof generateRem
   if (!statement) return null;
   return (
     <div className="flex items-center justify-between border-b border-white/[0.04] py-1.5">
-      <span className="flex items-center gap-2 text-[11px] text-zinc-300">
+      <span className="flex items-center gap-2 text-ds-label text-zinc-300">
         <FileText className="w-3.5 h-3.5 text-zinc-500" />
         Remittance statement {statement.statementNumber} · net £{statement.netPaid.toFixed(2)}
       </span>
-      <Button className="text-[10px]" onClick={() => download(`${statement.statementNumber}.html`, statement.html)}>
+      <Button className="text-ds-micro" onClick={() => download(`${statement.statementNumber}.html`, statement.html)}>
         <Download className="w-3 h-3 mr-1" /> Download
       </Button>
     </div>
@@ -127,16 +127,16 @@ export function BrandSelfService() {
       <Card title="Document Library">
         <div className="px-1 pb-2 space-y-1.5">
           {signed.length === 0 && (
-            <p className="text-[11px] text-zinc-600">No signed contract yet.</p>
+            <p className="text-ds-label text-zinc-600">No signed contract yet.</p>
           )}
           {signed.map((c) => (
             <div key={c.id} className="flex items-center justify-between border-b border-white/[0.04] py-1.5">
-              <span className="flex items-center gap-2 text-[11px] text-zinc-300">
+              <span className="flex items-center gap-2 text-ds-label text-zinc-300">
                 <FileText className="w-3.5 h-3.5 text-zinc-500" />
                 Distribution Agreement v{c.version} · {c.status}
               </span>
               <Button
-                className="text-[10px]"
+                className="text-ds-micro"
                 onClick={() =>
                   download(`mercenta-agreement-v${c.version}.html`, buildAgreementHtml(c.documentUrl))
                 }
@@ -151,14 +151,14 @@ export function BrandSelfService() {
 
       <Card title="Request an account change">
         <div className="px-1 pb-2 space-y-2">
-          <p className="text-[10px] text-zinc-600 flex items-center gap-1">
+          <p className="text-ds-micro text-zinc-600 flex items-center gap-1">
             <Landmark className="w-3 h-3" />
             Banking changes always require Mercenta verification before they apply —
             they are never directly self-service.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
-              <label className="block text-[10px] text-zinc-500 mb-1">Field</label>
+              <label className="block text-ds-micro text-zinc-500 mb-1">Field</label>
               <select
                 value={field}
                 onChange={(e) => setField(e.target.value as (typeof CHANGE_FIELDS)[number])}
@@ -214,19 +214,19 @@ export function BrandSelfService() {
           >
             Submit Request
           </Button>
-          {note && <p className="text-[10px] text-zinc-400">{note}</p>}
+          {note && <p className="text-ds-micro text-zinc-400">{note}</p>}
 
           {myRequests.length > 0 && (
             <div className="pt-1">
-              <p className="text-[10px] font-medium text-zinc-500 mb-1">Your requests</p>
+              <p className="text-ds-micro font-medium text-zinc-500 mb-1">Your requests</p>
               {myRequests.map((r) => (
                 <div key={r.id} className="flex items-center justify-between border-b border-white/[0.04] py-1">
-                  <span className="text-[11px] text-zinc-300 capitalize">
+                  <span className="text-ds-label text-zinc-300 capitalize">
                     {r.field}: {r.requestedValue}
                   </span>
                   <Badge
                     className={cn(
-                      'text-[9px]',
+                      'text-ds-micro',
                       r.status === 'pending'
                         ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
                         : r.status === 'approved'

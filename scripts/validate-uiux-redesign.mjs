@@ -659,6 +659,99 @@ check(
     read('src/lib/work/workStore.ts').includes("make('onboarding_step'")
 );
 
+/* ── §Founder OS — the Control Centre composes the workspace architecture ────
+ *
+ * The Founder Operating System's first surface must be a real operating
+ * workspace, not a collection of generic cards: frame + header + sticky toolbar,
+ * a metric band whose tiles all drill down, a pipeline, a queue, the shared
+ * record drawer and a context rail. These assertions pin that so a future edit
+ * cannot quietly revert it to a card stack.
+ */
+const CC_SRC = read('src/components/admin/FounderControlCentre.tsx');
+check('Control Centre composes the workspace frame', CC_SRC.includes('WorkspaceFrame') && CC_SRC.includes('WorkspaceHeader'));
+check('Control Centre has a sticky workspace toolbar', CC_SRC.includes('data-workspace-toolbar="true"'));
+check('Control Centre has a real metric band with drill-downs', CC_SRC.includes('MetricBand') && CC_SRC.includes('onOpen:'));
+check('Control Centre uses the canonical pipeline track', CC_SRC.includes('PipelineTrack'));
+check('Control Centre uses the canonical queue', CC_SRC.includes('<Queue'));
+check('Control Centre uses the shared record drawer', CC_SRC.includes('RecordDrawer'));
+check('Control Centre carries a context rail', CC_SRC.includes('ContextPanel'));
+check('Control Centre has no leftover bespoke page composition', !CC_SRC.includes('max-w-[1400px] mx-auto'));
+check(
+  'Control Centre surfaces the declared automation scheduler seam',
+  CC_SRC.includes('automation-scheduler') && read('src/lib/automation/registry.ts').includes('describeAutomationScheduler')
+);
+check(
+  'the automation registry never uses a timer as its source of truth',
+  !/setInterval\s*\(|setTimeout\s*\(/.test(
+    read('src/lib/automation/registry.ts').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+  )
+);
+check(
+  'the Founder Ops AI layer is optional and labelled',
+  read('src/lib/ai/founderAiClient.ts').includes('DeterministicFounderAiClient') &&
+    read('src/lib/ai/founderAiClient.ts').includes('paidFallbackAllowed: false')
+);
+check(
+  'the Control Centre is Super-Admin guarded in the shell',
+  read('src/components/layout/AdminShell.tsx').includes("adminView === 'control_centre' && (isSuper ?")
+);
+check(
+  'the Control Centre nav entry is hidden from non-Super-Admin tiers',
+  /HIDDEN_FOR_NON_SUPER = new Set\(\[[\s\S]*?'control_centre'/.test(read('src/components/layout/AdminShell.tsx'))
+);
+
+/* ── §Phase 1 — Explore UK Market Fit composes the existing design language ──
+ *
+ * The pre-audit surface must reuse the EXISTING public visual language, not
+ * introduce a second one: the same ink surfaces, the same saturated palette
+ * tokens, the same public nav/footer, and the same primary-CTA treatment as the
+ * homepage. These assertions pin that so a future edit cannot quietly fork the
+ * design system.
+ */
+const UKMF_SRC = read('src/components/marketing/ExploreUkMarketFit.tsx');
+const UKMF_NAV = read('src/components/marketing/PublicNav.tsx');
+const UKMF_CFG = read('src/config/ukMarketFit.ts');
+check('the pre-audit surface reuses the public nav', UKMF_SRC.includes('<PublicNav'));
+check('the pre-audit surface reuses the public footer', UKMF_SRC.includes('<PublicFooter'));
+check('the pre-audit surface uses the canonical ink surfaces', UKMF_SRC.includes('bg-ink-900') && UKMF_SRC.includes('bg-ink-850'));
+check('the pre-audit surface uses the display font for headings', UKMF_SRC.includes('font-display'));
+/*
+ * §UI/UX Wave 3 — REPOINTED.
+ * OLD CONTRACT: `font-mono text-[10px] uppercase tracking-[0.2em]`.
+ * The arbitrary 10px size was migrated to the canonical operational type token
+ * `text-ds-micro` (11px, the readable floor) by
+ * scripts/migrate-micro-typography.mjs. The INTENT of this assertion — the
+ * pre-audit surface uses the mono eyebrow treatment — is unchanged; only the
+ * size token it names moved to the current canonical source of truth
+ * (tailwind.config.js → theme.extend.fontSize).
+ */
+check('the pre-audit surface uses the mono eyebrow treatment', UKMF_SRC.includes('font-mono text-ds-micro uppercase tracking-[0.2em]'));
+check(
+  'the pre-audit primary CTA uses the saturated palette, not brass',
+  UKMF_SRC.includes('bg-palette-indigo') && UKMF_SRC.includes('text-on-palette')
+);
+check('the pre-audit surface contains no bespoke hex colour', !/#[0-9a-fA-F]{6}\b/.test(UKMF_SRC));
+check(
+  'the pre-audit indicator accents come from the shared palette tokens',
+  UKMF_SRC.includes('var(--mr-palette-green)') &&
+    UKMF_SRC.includes('var(--mr-palette-cyan)') &&
+    UKMF_SRC.includes('var(--mr-palette-red)') &&
+    UKMF_SRC.includes('var(--mr-palette-orange)')
+);
+check('the pre-audit surface is responsive (single column below md)', UKMF_SRC.includes('grid-cols-1 md:grid-cols-2'));
+check('the pre-audit surface has no leftover bespoke page container', !UKMF_SRC.includes('max-w-[1400px] mx-auto'));
+check(
+  'the pre-audit CTA label is declared ONCE and consumed by the nav and the hero',
+  UKMF_CFG.includes("EXPLORE_UK_MARKET_FIT_CTA = 'Explore UK Market Fit'") &&
+    UKMF_NAV.includes('EXPLORE_UK_MARKET_FIT_CTA') &&
+    read('src/components/marketing/Home.tsx').includes('c.hero.primaryCta')
+);
+check(
+  'Partner Login is a header utility action with its own declared test id',
+  UKMF_NAV.includes('data-testid={PRE_AUDIT_TESTIDS.headerUtility}') &&
+    UKMF_CFG.includes('PUBLIC_HEADER_UTILITY_ACTION')
+);
+
 console.log(`\nUIUX REDESIGN: ${pass} PASS / ${fail} FAIL`);
 if (fail > 0) {
   console.log(errors.map((e) => `  ✗ ${e}`).join('\n'));

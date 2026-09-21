@@ -1,7 +1,102 @@
 ---
-**Last updated: September 21, 2026 — ⚙️ OPERATING-RULES MIGRATION COMMITTED (session 7): the stale gates are retired; `.clinerules/operating-model.md` is the canonical operating model. Previous checkpoint below: ✅ CANONICAL PROPAGATION: BRAIN + LOGISTICS ARE NOW DYNAMIC PROJECTIONS.**
+**Last updated: September 21, 2026 — ✅ CLEAN-SLATE RECONCILIATION COMPLETE (session 8): the 289-path dirty tree is RECONCILED into Git, obsolete material is REMOVED, the six stale-validator failures are FIXED, the payout-rail prose contradiction is eliminated, generated artefacts are untracked, and `git status --porcelain` is EMPTY. ONE clean canonical HEAD. Previous: ⚙️ OPERATING-RULES MIGRATION COMMITTED (session 7); ✅ CANONICAL PROPAGATION (session 6).**
 
-## ⚙️ OPERATING-RULES MIGRATION (2026-09-21, session 7) — CURRENT RULE STATE
+## ✅ CLEAN-SLATE RECONCILIATION (2026-09-21, session 8) — CURRENT CHECKPOINT
+
+**Increment identity:** repository reconciliation — COMMIT the completed-but-uncommitted work, REMOVE what is obsolete, FIX what is broken, CORRECT the rules and documents, VERIFY, and leave ONE clean canonical HEAD.
+
+**Start state.** Branch `redesign/foundation`, start HEAD `c07dfbe`, `git status --porcelain` = **289 entries** (224 modified, 65 untracked): five sessions of completed work sitting uncommitted — Wave 3 Part 1 (operational type scale + enterprise shell + workspace hierarchy), the SEO route-metadata foundation + bounded-AI gate + automation kill switch, the S2a brand case workflow + KB sufficiency, Phase 2 commercial readiness, UK Market Fit / pre-audit Phase 1, the Founder operating system, and the routing gateways — **plus 160 tracked GENERATED artefact paths** (`test-screenshots/` 146, `forensic-captures/` 9, `e2e-report/` 2, `playwright-report/` 1, `test-results/` 1, and a **61 MB `Review Zip/mercenta-review.zip`**) that were rewritten by every test run and made a clean checkpoint impossible.
+
+**No destructive Git operation was used.** No `git reset --hard`, no `git clean -fd/-fdx`, no stash, no force push, no history rewrite. Every deletion is evidence-based and named below.
+
+---
+### 1. RETAINED + COMMITTED (the completed work is now a real checkpoint)
+
+Every untracked product file was traced to its consumers **before** committing — imports, route registration, stores, validators and browser specs — and each proved reachable:
+
+| Area | Committed evidence |
+|---|---|
+| Operational type scale (Wave 3) | `tailwind.config.js` `ds-micro/label/body/title/page` · `scripts/migrate-micro-typography.mjs` · `scripts/validate-typography-scale.mjs` (gate) · the migrated components |
+| Enterprise shell + workspace hierarchy | `src/components/layout/{AppShell,Sidebar,Header,EnvironmentRouter}.tsx` + their consumers |
+| SEO route-metadata foundation | `src/lib/seo/publicRoutes.ts`, `src/lib/seo/routeMetadata.ts`, `src/components/shared/RouteMetadata.tsx`, `scripts/validate-seo-foundation.mjs`, `public/robots.txt`, `public/sitemap.xml`, `index.html` |
+| UK Market Fit / pre-audit (Phase 1) | `src/config/ukMarketFit.ts`, `src/lib/preaudit/*`, `src/data/preAuditStore.ts`, `src/components/marketing/ExploreUkMarketFit.tsx`, `e2e/uk-market-fit.spec.ts` |
+| Commercial readiness (Phase 2) | `src/config/commercialReadiness.ts`, `src/lib/commercial/*`, `src/data/commercialReadinessStore.ts`, `e2e/commercial-readiness.spec.ts` |
+| Founder OS + bounded AI | `src/lib/automation/registry.ts`, `src/lib/ai/*`, `src/lib/founder/briefFacts.ts`, `src/lib/commandCentre/controlCentre.ts`, `src/components/admin/FounderControlCentre.tsx`, `e2e/founder-operating-system.spec.ts` |
+| Routing gateways + KB sufficiency | `src/config/routing.ts`, `src/data/routingStore.ts`, `src/lib/routing/*`, `src/lib/helpdesk/kbSufficiency.ts`, `src/components/brand/{BrandSupport,CommercialReadiness}.tsx` |
+| Documentation records | `docs/SPRINT_*` (3), `docs/UIUX_REDESIGN_WAVE3_*`, `docs/UNIFIED_PLATFORM_GAP_ANALYSIS_*`, `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md`, `docs/AMAZON_VENDOR_*` (2) |
+| Other newly tracked files | `MASTER_CHATGPT_HANDOFF.md`; `design/*.png` (4) + `design/README.md` (the repeatedly-cited "four protected untracked `design/*.png`" — now tracked source art); `.clinerules/project-state-contract.md` |
+
+### 2. FIXED
+
+1. **Payout-rail SSOT contradiction — ELIMINATED (8 source/doc locations).** `src/config/payouts.ts` has declared `DEFAULT_PAYOUT_RAIL = 'payoneer'` since T-1 was applied, but residual prose still said the inverse: the `payouts-transfer` Edge Function's **user-facing refusal message**, the **founder FAQ answer** in `src/config/founderContent.ts`, two comments in `src/lib/billing/payouts.ts`, `README.md`, `PRODUCTION_READINESS.md`, `docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md`, `docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` and `MASTER_CHATGPT_HANDOFF.md`. All now read **Payoneer (default) / Wise (secondary)**. Three registry rows and one historical `PROJECT_STATUS.md` quote were repointed too.
+2. **Six stale-validator failures FIXED (5 validator files) — each REPOINTED to the current canonical source, none weakened:**
+   - `validate-uk-market-fit.mjs` ×2 — the CTA assertion read the pre-SEO `setPublicView('explore-uk-market-fit')`; the SEO increment routes it through the ONE in-app `navigate(...)`. The direct-URL assertion now reads the route SSOT instead of an inline path chain.
+   - `validate-demo-completeness.mjs` ×1 — pinned the literal `'palletline'` inside `demoData.ts`; carriers are now derived from the canonical lane rule, so it asserts the canonical carrier config + the lane rule (stronger).
+   - `validate-review-s6.mjs` ×1 — `size >= 2 || empty` could never hold once the seed gained consignments; it now compares the RENDERED groups to the SEED the panel rendered with (stronger). **Root cause uncovered: the canonical `DataTable` renders the mobile CARD LIST under SSR, so `data-table` never appears in server-rendered markup** — the hook was corrected to the shared `aria-label="Shipments in transit for …"`.
+   - `validate-stage15.mjs` ×1 — same root cause, same strengthened repoint.
+   - `validate-e6-brand-surfaces.mjs` F8 — the canonical brand nav grew to **19 items** (`commercial_readiness`, `cases`); the exact ordered-list assertion was repointed.
+3. **A rule-failure found while fixing them:** `scripts/verify-registry.mjs`'s known-file list still named the two removed components (updated), and its flag count is unchanged by this session's registry edits.
+
+### 3. REMOVED AS OBSOLETE (8 removals, each with evidence)
+
+| Removed | Why (evidence, not assumption) |
+|---|---|
+| `ave1-check.mjs` | 0-byte stray at the root; no references anywhere |
+| `scripts/test_write.txt` | contained the literal `hello world` |
+| `scripts/views-swap-tmp.py` | one-shot stage-2 migration script, already applied; referenced by nothing |
+| `src/components/marketing/PublicFooterTmp1.jsx` | unreferenced partial `.jsx` fragment (near-duplicate of `PublicFooter.tsx`); zero importers |
+| `src/components/shared/FcSelector.tsx` | unreferenced orphan (finding D-3); its capability lives in `DEFAULT_UK_FC_LIST` + the PO's `shipToParty.partyId` |
+| `src/components/shared/InfoTooltip.tsx` | unreferenced orphan (finding D-3) whose button had **no handler** (hover-only, keyboard-unusable); superseded by `BrandGuidance` |
+| `src/data/demoCharts.ts` | unreferenced duplicate of the canonical series in `bootstrap.ts` |
+| `src/lib/validation/schemas.ts` + the **unused `zod` dependency** | **never wired**: zero importers repo-wide, so the registry row claiming it `built` was false — its status is corrected to `not_started`, naming the validation that actually runs |
+
+**Also removed from version control (files kept on disk):** the 160 generated artefact paths listed above, now gitignored; and the empty `design/legacy-boxbee-design/` folder (it contained only a `.DS_Store`).
+
+### 4. RULES + DOCUMENTS UPDATED
+
+- **`.clinerules/operating-model.md` §6 REWRITTEN** — "CLEAN CANONICAL REPOSITORY IS A NON-NEGOTIABLE PROJECT INVARIANT": `git status --porcelain` MUST be empty at every checkpoint/delivery/handoff; the `DIRTY → RECONCILE → FIX → REMOVE → TEST → VERIFY → COMMIT → VERIFY HEAD → CLEAN TREE` chain; the nine-step per-workstream contract; the five classification outcomes with **no "leave dirty for later"**; generated artefacts never tracked. §2 now also retires *"preserve Founder changes uncommitted and leave them for later"* and *"completion may be reported with a dirty tree"*. §9 requires the empty-tree assertion.
+- **`.clinerules/protection-rules.md`** — "before work" is now a RECONCILIATION input (not merely awareness); "after work" carries the clean-tree invariant; the standing-requirements list gained **step 7** (`git status --porcelain` must print nothing).
+- **`.clinerules/project-state-contract.md`** (now tracked) — added "The clean-tree invariant" section.
+- **`.gitignore`** — new "GENERATED ARTEFACTS — NEVER TRACKED" block.
+- **`scripts/export-review-zip.sh`** — the exclusion list now MIRRORS `.gitignore` (generated artefacts + the Founder's private document folders) and a **second failing guard** was added so a removed exclusion can never silently leak a private tree. The archive no longer carries hundreds of screenshots or private PDFs.
+- **`README.md`** — new "Repository invariants" section; the validation list and the `npm run validate:*` aliases now cover every new gate.
+- **`package.json`** — 7 new `validate:*` aliases; the unused `zod` dependency removed.
+- **`eslint.config.js`** — stale reference to the removed `schemas.ts` dropped (rules-of-hooks + exhaustive-deps remain **errors**).
+- **Historical-document banners added** so no historical instruction can be mistaken for current policy: `AUDIT_REPORT.md`, `MERCENTA_FORENSIC_AUDIT.md`, `MERCENTA_PRODUCT_ARCHITECTURE_AUDIT_2026-09-10.md`, `MERCENTA_MASTER_CONTEXT.md`, `MASTER_CHATGPT_HANDOFF.md`, and an RTF banner inside `Mercenta Build 1.rtf`.
+- **`STATUS_CHECK.md`** — rules block corrected (it claimed Founder work is "never committed by the agent").
+- **`requirements-registry.json`** — 6 rows reconciled (3 repointed, 2 status-corrected, 1 corrected description) + the Wave 3 wave-note.
+- **`docs/RUNTIME_PARITY_PLAN_2026-09-21.md` D-3, `docs/UIUX_REDESIGN_WAVE3_2026-09-20.md` §6, `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md`** — the orphan decisions are recorded as RESOLVED with their evidence.
+
+### 5. VERIFICATION (all figures produced in THIS session)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** (exit 0) |
+| `npx eslint .` | **0 problems** (exit 0) — rules-of-hooks + exhaustive-deps are errors |
+| `npm run build` | **PASS** (vite, 3.63 s; the pre-existing `AdminShell` 956 kB chunk-size warning remains) |
+| `npx playwright test` (FULL SUITE, 445 declarations) | **443 passed / 2 skipped / 0 failed, exit 0, 6.0 m** |
+| Validator sweep — all 91 `scripts/validate-*.mjs` | **89 PASS / 2 FAIL**, and the 2 are the dirty-tree scope guards by design (`validate-e6` F5/F5b/F6, `validate-e7` scope) which assert the working-tree change set stays inside a declared sprint scope — they pass on a clean tree |
+| `node scripts/verify-registry.mjs` | 271 verified · 63 needs manual check · 185 issues · 17 reachability flags (no row touched by this session contributes an issue) |
+| `requirements-registry.json` | valid JSON, **441 rows** — built_and_tested 242 · built 124 · not_started 60 · deferred 6 · blocked 4 · in_progress 3 · regressed 2 |
+
+**An earlier full-suite run in this session reported 22 failures; every one was a 30-second timeout on `page.goto`/`reload`/`screenshot`, and the suite re-run alone on the now-warm dev server passed 443/0.** That first run was environment-bound (cold Vite transform of ~50 newly added modules), not a product regression — recorded here because an honest report names it rather than hiding it.
+
+### 6. KNOWN EXCEPTIONS / WHAT THIS DOES NOT CLAIM
+
+- The domain data layer is still the deterministic demo/simulation dataset until Supabase/provider credentials exist. Providers simulate with **zero network calls** (the validators enforce this).
+- `validate-e6-brand-surfaces.mjs` F5/F5b/F6 and `validate-e7-embedded-social.mjs`'s scope guard are **dirty-tree guards**: they FAIL while the tree is dirty (including during this session) and PASS on a clean tree. That is their design.
+- The remaining registry gaps are recorded honestly: `not_started` (60), `deferred` (6), `blocked` (4 — all credential-dependent), `in_progress` (3), `regressed` (2 — both deliberate removals). See `PROJECT_STATUS.md` heading 3 for the numbered roadmap.
+- **Not verified in this session:** the two `blocked` credential workstreams (no credential exists), and the demo deployment (no deploy was performed).
+
+### 7. NEXT SESSION — HOW TO START
+
+1. `git status --porcelain` must be EMPTY. If it is not, RECONCILE before anything else (`.clinerules/operating-model.md` §6).
+2. Read `.clinerules/operating-model.md` → `PROJECT_STATUS.md` (top block) → this file.
+3. No credential was added, read or activated in this session; `.env` was never read; no deploy was performed; no live provider call was made.
+
+---
+
+## ⚙️ OPERATING-RULES MIGRATION (2026-09-21, session 7) — RULE STATE (historical record)
 
 **Increment identity:** rule/documentation migration **ONLY** — no product, UI, domain, integration or deploy work, and
 the 289 pre-existing dirty paths on `redesign/foundation` were left untouched and **uncommitted**.

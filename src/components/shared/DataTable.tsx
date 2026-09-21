@@ -144,7 +144,7 @@ export function DataTable<T extends { id: string }>(props: Props<T>) {
               </select>
             );
           })}
-          <span className="ml-auto text-[10px] text-zinc-600">
+          <span className="ml-auto text-ds-micro text-zinc-600">
             {t.sorted.length} record{t.sorted.length === 1 ? '' : 's'}
           </span>
         </div>
@@ -197,7 +197,7 @@ export function DataTable<T extends { id: string }>(props: Props<T>) {
 
       {/* Pagination */}
       <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+        <div className="flex items-center gap-2 text-ds-label text-zinc-500">
           <span>Rows</span>
           <select
             value={t.pageSize}
@@ -223,7 +223,7 @@ export function DataTable<T extends { id: string }>(props: Props<T>) {
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-[11px] text-zinc-400 font-mono">
+          <span className="text-ds-label text-zinc-400 font-mono">
             {t.safePage + 1} / {t.pageCount}
           </span>
           <button

@@ -12,11 +12,19 @@ The canonical operating model is **`.clinerules/operating-model.md`**: current F
 state sources) > `mercenta-business-model.md` (business invariants) > historical documents (context only).
 
 **Retired 2026-09-21, no authority:** Design Freeze · "uncommitted changes → STOP" · ">3 files → STOP" ·
-">5 files → STOP" · "never change architecture/refactor" · "do not commit unless explicitly told".
-**Unchanged:** secrets never read/printed/bundled (or inside the review ZIP) · pre-existing Founder work never destroyed
-and never committed by the agent · deploy only when instructed, only to `demo.mercenta.co.uk`, only via
+">5 files → STOP" · "never change architecture/refactor" · "do not commit unless explicitly told" · **"a dirty
+worktree may be preserved uncommitted for later"** (superseded by the clean-tree invariant below).
+**Unchanged:** secrets never read/printed/bundled (or inside the review ZIP) · pre-existing Founder work never
+DESTROYED (no reset/clean/stash/force-push) · deploy only when instructed, only to `demo.mercenta.co.uk`, only via
 `scripts/deploy-demo.sh`, never the live domain before `GO_LIVE.md` · never weaken a validator or test · evidence
 discipline · script-only review zip.
+
+**CLEAN-TREE INVARIANT (added 2026-09-21, `operating-model.md` §6):** **`git status --porcelain` MUST print
+NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tree is permitted only while work is
+actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
+RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
+Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
+`Review Zip/*.zip`) are gitignored and never tracked.
 
 ## Build & verification health
 

@@ -38,7 +38,7 @@ import {
 import { Badge, Button, Card, DataTable } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
-const MONO = 'font-mono text-[11px]';
+const MONO = 'font-mono text-ds-label';
 
 /** §Phase E5 — the legitimate next actions for a simulated PO, in order. */
 function nextActionsFor(po: { status: string }, hasInvoice: boolean, invoicePaid: boolean) {
@@ -101,20 +101,20 @@ export function CommerceOperationsPanel() {
         <div>
           <h3 className="text-sm font-semibold text-white">
             Operational commerce{' '}
-            <Badge className="ml-1 text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">
+            <Badge className="ml-1 text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
               (sim)
             </Badge>
           </h3>
-          <p className="text-[11px] text-zinc-500 mt-0.5">
+          <p className="text-ds-label text-zinc-500 mt-0.5">
             Simulated purchase orders, shipments, receiving, invoices, payments and
             exceptions across every tenant. No live provider is contacted.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+          <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
             {activityRows.length} activity step(s) · {simulatedCount} simulated
           </Badge>
-          <Badge className="text-[9px] bg-white/[0.05] text-zinc-400 border-white/[0.08]">
+          <Badge className="text-ds-micro bg-white/[0.05] text-zinc-400 border-white/[0.08]">
             persistence: {persistence.state} · durable {String(persistence.durable)}
           </Badge>
         </div>
@@ -126,18 +126,18 @@ export function CommerceOperationsPanel() {
           domain; the disabled state is an affordance, never the authorisation. */}
       <div className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
             Operable simulated purchase orders ({simulatedPos.length})
           </p>
           {!canCurrentUserMutate && (
-            <span className="text-[10px] text-zinc-600">
+            <span className="text-ds-micro text-zinc-600">
               view-only staff — the domain refuses every mutation
             </span>
           )}
         </div>
 
         {simulatedPos.length === 0 && (
-          <p className="text-[11px] text-zinc-600">
+          <p className="text-ds-label text-zinc-600">
             No simulated purchase orders yet. A brand raises one from Purchase Orders →
             “Operational commerce simulation”.
           </p>
@@ -151,21 +151,21 @@ export function CommerceOperationsPanel() {
             <div key={po.id} className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={cn(MONO, 'text-brass')}>{po.poNumber}</span>
-                <span className="text-[10px] text-zinc-500">{po.brandId}</span>
-                <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                <span className="text-ds-micro text-zinc-500">{po.brandId}</span>
+                <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
                   {po.status}
                 </Badge>
-                <Badge className="text-[9px] bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
-                <span className="text-[10px] text-zinc-500">£{po.poValue.toFixed(2)}</span>
+                <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
+                <span className="text-ds-micro text-zinc-500">£{po.poValue.toFixed(2)}</span>
                 {invoice && (
-                  <span className="text-[10px] text-zinc-500">
+                  <span className="text-ds-micro text-zinc-500">
                     · {invoice.number} ({invoice.status})
                   </span>
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
-                  className="text-[11px]"
+                  className="text-ds-label"
                   data-state="admin-commerce-acknowledge"
                   disabled={busy || !n.ack}
                   onClick={() =>
@@ -176,7 +176,7 @@ export function CommerceOperationsPanel() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-[11px]"
+                  className="text-ds-label"
                   data-state="admin-commerce-fulfil"
                   disabled={busy || !n.fulfil}
                   onClick={() =>
@@ -187,7 +187,7 @@ export function CommerceOperationsPanel() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-[11px]"
+                  className="text-ds-label"
                   data-state="admin-commerce-receive"
                   disabled={busy || !n.receive}
                   onClick={() =>
@@ -198,7 +198,7 @@ export function CommerceOperationsPanel() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-[11px]"
+                  className="text-ds-label"
                   data-state="admin-commerce-issue-invoice"
                   disabled={busy || !n.invoice}
                   onClick={() =>
@@ -209,7 +209,7 @@ export function CommerceOperationsPanel() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-[11px]"
+                  className="text-ds-label"
                   data-state="admin-commerce-record-payment"
                   disabled={busy || !n.pay || !invoice}
                   onClick={() =>
@@ -221,7 +221,7 @@ export function CommerceOperationsPanel() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-[11px]"
+                  className="text-ds-label"
                   data-state="admin-commerce-open-case"
                   disabled={busy}
                   onClick={() =>
@@ -237,14 +237,14 @@ export function CommerceOperationsPanel() {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-[11px] text-red-200">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-ds-label text-red-200">{error}</div>
       )}
       {notice && (
-        <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-[11px] text-sky-200">{notice}</div>
+        <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3 text-ds-label text-sky-200">{notice}</div>
       )}
 
       {activityRows.length === 0 ? (
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-ds-label text-zinc-500">
           No operational commerce activity yet. A brand drives the lifecycle from
           Purchase Orders → “Operational commerce simulation”.
         </p>
@@ -280,7 +280,7 @@ export function CommerceOperationsPanel() {
               key: 'status',
               label: 'State',
               render: (a) => (
-                <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
                   {a.status}
                 </Badge>
               ),
@@ -295,9 +295,9 @@ export function CommerceOperationsPanel() {
               label: 'Mode',
               render: (a) =>
                 a.simulated ? (
-                  <span className="text-[9px] text-brass-400">(sim)</span>
+                  <span className="text-ds-micro text-brass-400">(sim)</span>
                 ) : (
-                  <span className="text-[9px] text-zinc-500">live</span>
+                  <span className="text-ds-micro text-zinc-500">live</span>
                 ),
             },
           ]}
@@ -306,57 +306,57 @@ export function CommerceOperationsPanel() {
 
       <div className="grid gap-3 md:grid-cols-3">
         <div className="space-y-1">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
             Simulated invoices ({invoices.ok ? invoices.value.length : 0})
           </p>
           {invoices.ok && invoices.value.length === 0 && (
-            <p className="text-[11px] text-zinc-600">None issued yet.</p>
+            <p className="text-ds-label text-zinc-600">None issued yet.</p>
           )}
           {invoices.ok &&
             invoices.value.slice(0, 5).map((i) => (
-              <div key={i.id} className="text-[11px] text-zinc-400">
+              <div key={i.id} className="text-ds-label text-zinc-400">
                 <span className={cn(MONO, 'text-brass')}>{i.number}</span> · {i.brandId} ·{' '}
-                <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
                   {i.status}
                 </Badge>{' '}
-                £{i.subtotalGbp.toFixed(2)} <span className="text-[9px] text-brass-400">(sim)</span>
+                £{i.subtotalGbp.toFixed(2)} <span className="text-ds-micro text-brass-400">(sim)</span>
               </div>
             ))}
         </div>
 
         <div className="space-y-1">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
             Simulated payments ({payments.ok ? payments.value.length : 0})
           </p>
           {payments.ok && payments.value.length === 0 && (
-            <p className="text-[11px] text-zinc-600">None recorded yet.</p>
+            <p className="text-ds-label text-zinc-600">None recorded yet.</p>
           )}
           {payments.ok &&
             payments.value.slice(0, 5).map((p) => (
-              <div key={p.id} className="text-[11px] text-zinc-400">
+              <div key={p.id} className="text-ds-label text-zinc-400">
                 <span className={MONO}>{p.invoiceId}</span> · {p.brandId} · £
                 {p.amountGbp.toFixed(2)} · {p.method}{' '}
-                <span className="text-[9px] text-brass-400">(sim)</span>
+                <span className="text-ds-micro text-brass-400">(sim)</span>
               </div>
             ))}
         </div>
 
         <div className="space-y-1">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
             Exceptions / chargebacks ({exceptions.ok ? exceptions.value.length : 0})
           </p>
           {exceptions.ok && exceptions.value.length === 0 && (
-            <p className="text-[11px] text-zinc-600">None raised yet.</p>
+            <p className="text-ds-label text-zinc-600">None raised yet.</p>
           )}
           {exceptions.ok &&
             exceptions.value.slice(0, 5).map((d) => (
-              <div key={d.id} className="text-[11px] text-zinc-400">
+              <div key={d.id} className="text-ds-label text-zinc-400">
                 <span className={MONO}>{d.id}</span> · {d.brandId} · {d.type} ·{' '}
-                <Badge className="text-[9px] bg-white/[0.05] text-zinc-300 border-white/[0.08]">
+                <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
                   {d.status}
                 </Badge>{' '}
                 £{d.amountGbp.toFixed(2)}
-                {d.simulated && <span className="text-[9px] text-brass-400"> (sim)</span>}
+                {d.simulated && <span className="text-ds-micro text-brass-400"> (sim)</span>}
                 {/*
                  * §Phase E2E — operator resolution. The outcome of a disputed
                  * deduction is a Mercenta operations decision, so it is made
@@ -369,12 +369,12 @@ export function CommerceOperationsPanel() {
                     data-state="commerce-operator-dispute"
                     data-deduction={d.id}
                   >
-                    <span className="text-[10px] text-zinc-500">Resolve:</span>
+                    <span className="text-ds-micro text-zinc-500">Resolve:</span>
                     {(['won', 'partial', 'lost'] as const).map((outcome) => (
                       <Button
                         key={outcome}
                         variant="ghost"
-                        className="text-[10px] px-2 py-0.5"
+                        className="text-ds-micro px-2 py-0.5"
                         data-state={`commerce-operator-resolve-${outcome}`}
                         disabled={busyId === d.id || !canCurrentUserMutate}
                         onClick={() =>

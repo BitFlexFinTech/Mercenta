@@ -17,8 +17,8 @@ import {
 } from '@/lib/profile/profileImage';
 
 const SIZES = {
-  xs: 'h-6 w-6 text-[10px]',
-  sm: 'h-7 w-7 text-[11px]',
+  xs: 'h-6 w-6 text-ds-micro',
+  sm: 'h-7 w-7 text-ds-label',
   md: 'h-8 w-8 text-xs',
   lg: 'h-10 w-10 text-sm',
   xl: 'h-14 w-14 text-base',

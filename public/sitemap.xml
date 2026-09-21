@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- §SEO FOUNDATION — PINNED against `src/lib/seo/publicRoutes.ts` by
+     `scripts/validate-seo-foundation.mjs` (every declared public route must be
+     listed, and no private/unknown path may ever be listed). -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://mercenta.co.uk/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://mercenta.co.uk/privacy</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://mercenta.co.uk/terms</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://mercenta.co.uk/how-it-works</loc>
@@ -34,5 +27,20 @@
     <loc>https://mercenta.co.uk/faq</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mercenta.co.uk/explore-uk-market-fit</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mercenta.co.uk/privacy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mercenta.co.uk/terms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

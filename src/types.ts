@@ -3028,6 +3028,288 @@ export interface AcquisitionRelationship {
   messages: Message[];
 }
 
+/* ── §PHASE 1 — EXPLORE UK MARKET FIT / PRE-AUDIT (canonical entities) ─────
+ *
+ * The pre-audit layer answers ONE question before a brand commits to anything:
+ * does there appear to be a credible UK opportunity? Its canonical records are
+ * declared here, alongside every other canonical entity, because this is the
+ * ONE types file (see `.clinerules` — single source of truth).
+ *
+ * RELATIONSHIP TO WHAT ALREADY EXISTS (nothing is duplicated):
+ *   - The prospect remains `BrandProspect` in the canonical BI store. A
+ *     pre-audit that qualifies FEEDS that store; it does not create a parallel
+ *     universe and it never creates a brand tenant.
+ *   - `Opportunity` (above) remains the ACQUISITION opportunity. `ProductOpportunity`
+ *     here is a PRODUCT-level record inside the pre-audit and is deliberately a
+ *     different entity at a different granularity.
+ *   - The commercial relationship remains `src/config/commercialModel.ts`. The
+ *     `SupplyProfile` here is the pre-audit's supply view, not the commercial
+ *     relationship.
+ *
+ * All enums used below are declared in `src/config/ukMarketFit.ts` (single
+ * source of truth) and imported type-only, so a value can never drift.
+ */
+import type {
+  PreAuditEvidenceBasis,
+  PreAuditIndicatorId,
+  PreAuditIndicatorState,
+  PreAuditQualification,
+  PreAuditStatus,
+  PreAuditEducationalGapId,
+  UkMarketFitDimensionId,
+  UkOpportunitySnapshotSectionId,
+  UkPresenceOutcome,
+} from '@/config/ukMarketFit';
+
+/**
+ * WHO OWNS A PRE-AUDIT RECORD. Ownership is explicit and is the ONLY thing the
+ * read scoping is allowed to trust — a public visitor's assessment is never
+ * visible to another visitor, and a brand tenant can never read another
+ * tenant's (or Mercenta's internal) opportunity research.
+ */
+export type PreAuditOwner =
+  | { kind: 'public_session'; sessionId: string }
+  | { kind: 'ops'; tenantId: string }
+  | { kind: 'brand'; tenantId: string };
+
+/** One piece of evidence, always carrying where it came from and how solid it is. */
+export interface PreAuditEvidence {
+  /** The field/claim this evidence supports (e.g. 'uk_presence', 'review_volume'). */
+  field: string;
+  /** The observed value, exactly as observed — never rounded into a claim. */
+  value: string;
+  /** The declared source id (`src/config/ukMarketFit.ts → PRE_AUDIT_RESEARCH_SOURCES`). */
+  sourceId: string;
+  /** Human-readable source label. */
+  source: string;
+  /** URL when the source is a real public page; empty for a simulated seam. */
+  sourceUrl: string;
+  /** ISO date of observation. */
+  observedAt: string;
+  basis: PreAuditEvidenceBasis;
+  /** Never 'high' for simulated evidence — the engine enforces this. */
+  confidence: ConfidenceLevel;
+  /** FACT / ESTIMATE / INFERENCE / RECOMMENDATION / UNKNOWN (canonical vocabulary). */
+  classification: EvidenceClassification;
+  note?: string;
+}
+
+/** A declared deterministic rule with the value it actually observed. */
+export interface PreAuditRule {
+  id: string;
+  threshold: string;
+  observed: string;
+}
+
+/**
+ * ONE indicator. It is deliberately qualitative and it must expose its basis,
+ * its evidence, its observed values, the threshold/logic used, its confidence
+ * and its unknowns — an indicator that hides any of these is not allowed to be
+ * rendered (see `ukMarketFitEngine.ts`).
+ */
+export interface PreAuditIndicator {
+  id: PreAuditIndicatorId;
+  label: string;
+  question: string;
+  state: PreAuditIndicatorState;
+  /** Plain-language reason for the state, phrased with a declared hedge. */
+  rationale: string;
+  basis: PreAuditEvidenceBasis;
+  evidence: PreAuditEvidence[];
+  observed: string[];
+  rules: PreAuditRule[];
+  confidence: ConfidenceLevel;
+  unknowns: string[];
+  /** True when this indicator is about regulatory requirements, not commerce. */
+  regulatory: boolean;
+}
+
+/** The result of ONE of the seven assessment dimensions. */
+export interface UkMarketFitDimensionResult {
+  id: UkMarketFitDimensionId;
+  label: string;
+  /** What the evidence suggests — never a fact claim. */
+  finding: string;
+  basis: PreAuditEvidenceBasis;
+  evidence: PreAuditEvidence[];
+  confidence: ConfidenceLevel;
+  unknowns: string[];
+  /** True when nothing could be established and the dimension is honestly empty. */
+  indeterminate: boolean;
+}
+
+/** One section of the UK Opportunity Snapshot. */
+export interface UkOpportunitySnapshotSection {
+  id: UkOpportunitySnapshotSectionId;
+  title: string;
+  /** Hedged statements — the engine asserts a declared hedge is present. */
+  statements: string[];
+  basis: PreAuditEvidenceBasis;
+  confidence: ConfidenceLevel;
+  unknowns: string[];
+}
+
+/** The complete UK Opportunity Snapshot — the assessment's result. */
+export interface UkOpportunitySnapshot {
+  /** The honest one-line verdict. Never a score. */
+  headline: string;
+  /** §9 — DECLARED: there is no single success score, so this is always absent. */
+  successScore?: never;
+  presence: UkPresenceOutcome;
+  presenceLabel: string;
+  qualification: PreAuditQualification;
+  qualificationLabel: string;
+  indicators: PreAuditIndicator[];
+  dimensions: UkMarketFitDimensionResult[];
+  sections: UkOpportunitySnapshotSection[];
+  /** What still has to be confirmed, in the brand's own terms. */
+  openQuestions: string[];
+  /** Educational gaps captured for the future Academy (never taught here). */
+  educationalGaps: { id: PreAuditEducationalGapId; label: string; academyStage: number }[];
+  recommendedNextStep: string;
+  /** What the assessment was NOT able to establish — stated, never hidden. */
+  couldNotEstablish: string[];
+  disclaimer: string;
+  /** 'simulated' whenever the research came from the deterministic seam. */
+  researchMode: 'simulated' | 'live';
+  simulationLabel: string | null;
+}
+
+/** What the visitor supplied (or was discovered) to run the assessment. */
+export interface PreAuditInput {
+  brandName: string;
+  website: string;
+  country: string;
+  category: string;
+  productName?: string;
+  productIdentifiers?: string[];
+  existingUkPresence?: string;
+  sourceMarketplacePresence?: string;
+  wholesaleCost?: number;
+  retailPrice?: number;
+  moq?: number;
+  casePack?: number;
+  leadTimeDays?: number;
+  origin?: string;
+  knownDocumentation?: string[];
+  contactName?: string;
+  contactEmail?: string;
+}
+
+/** §7 — the product-level opportunity record inside a pre-audit. */
+export interface ProductOpportunity {
+  id: string;
+  /** The owning assessment (deterministic, never time-derived). */
+  assessmentId: string;
+  brand: string;
+  /** Where the product trades today. */
+  sourceMarket: string;
+  /** Product identity, when supplied or discovered. */
+  productName: string | null;
+  sourceAsin: string | null;
+  ukAsin: string | null;
+  gtin: string | null;
+  ean: string | null;
+  upc: string | null;
+  model: string | null;
+  /** How the UK identity relates to the source identity. */
+  matchRelationship: 'exact' | 'probable' | 'related' | 'none' | 'unknown';
+  category: string;
+  /** Evidence of demand in the source market. */
+  demandEvidence: string[];
+  ukPresence: UkPresenceOutcome;
+  ukOpportunity: string;
+  pricingEvidence: string[];
+  competitionEvidence: string[];
+  /** Compliance/readiness state — requirements, never a clearance. */
+  readinessState: 'documented' | 'partially_documented' | 'not_documented' | 'unknown';
+  supplyConsiderations: string[];
+  confidence: ConfidenceLevel;
+  evidence: PreAuditEvidence[];
+  createdAt: string;
+}
+
+/** §7 — the supply view for an opportunity (NOT the commercial relationship). */
+export interface SupplyProfile {
+  id: string;
+  assessmentId: string;
+  origin: string | null;
+  shipFrom: string | null;
+  productionLeadTimeDays: number | null;
+  exportLeadTimeDays: number | null;
+  freightMode: 'air' | 'sea' | 'road' | 'unknown';
+  transitEstimateDays: number | null;
+  customsRequired: boolean;
+  ukFinalMile: boolean;
+  /** Declared planning buffer — never presented as a carrier commitment. */
+  safetyBufferDays: number | null;
+  planningLeadTimeDays: number | null;
+  variability: 'low' | 'medium' | 'high' | 'unknown';
+  moq: number | null;
+  casePack: number | null;
+  /** What is still unknown about supply — stated, never guessed. */
+  unknowns: string[];
+  evidence: PreAuditEvidence[];
+}
+
+/** §7 — the brand-level opportunity record. */
+export interface BrandOpportunity {
+  id: string;
+  /** Canonical brand identity key (`normalizeBrandKey`) — the SAME key BI uses. */
+  dedupeKey: string;
+  brand: string;
+  website: string;
+  sourceMarket: string;
+  category: string;
+  researchStatus: 'not_started' | 'simulated' | 'live' | 'unavailable';
+  ukMarketStatus: UkPresenceOutcome;
+  opportunityEvidence: string[];
+  qualification: PreAuditQualification;
+  nextAction: string;
+  owner: string;
+  createdAt: string;
+  updatedAt: string;
+  /** Ids of the evidence records this opportunity rests on. */
+  evidenceRefs: string[];
+}
+
+/**
+ * THE canonical pre-audit assessment record. One per assessment run, owned by
+ * exactly one `PreAuditOwner`. Persisted through the SAME domain persistence
+ * port as every other domain artefact (no second store, no second database).
+ */
+export interface PreAuditAssessment {
+  id: string;
+  owner: PreAuditOwner;
+  status: PreAuditStatus;
+  input: PreAuditInput;
+  brandOpportunity: BrandOpportunity;
+  productOpportunities: ProductOpportunity[];
+  supplyProfile: SupplyProfile;
+  /** Present only once the assessment reached a result. */
+  snapshot: UkOpportunitySnapshot | null;
+  /** Present when research could not run — the honest degraded state. */
+  researchUnavailableReason: string | null;
+  /** The canonical prospect this fed, once fed. Null until then. */
+  fedProspectId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** The outcome of feeding a qualified pre-audit into the acquisition pipeline. */
+export interface PreAuditAcquisitionFeed {
+  ok: boolean;
+  reason: string;
+  assessmentId: string;
+  prospectId: string | null;
+  /** True when this created a NEW canonical prospect; false when it reused one. */
+  created: boolean;
+  /** The canonical acquisition stage the prospect now sits in. */
+  stage: string | null;
+  /** Always false — a pre-audit can never create a brand tenant. */
+  createdBrandTenant: false;
+}
+
 /* ── §Phase E1 — brand onboarding (opportunity → operational tenant) ─────── */
 
 /**
@@ -3245,3 +3527,284 @@ export interface BrandMarketIntelligence {
   sourceLabel: string;
 }
 export type BrandSource = (typeof BRAND_SOURCE_OPTIONS)[number];
+
+/* ── §PHASE 2 — EXPLICIT WORKFLOW ROUTING + COMMERCIAL READINESS ────────────
+ *
+ * The canonical records for explicit routing and for commercial readiness.
+ * Declared HERE, in the ONE types file, alongside every other canonical entity.
+ *
+ * RELATIONSHIP TO WHAT ALREADY EXISTS (nothing is duplicated):
+ *   - A routing decision POINTS AT the canonical record it is about
+ *     (`subject`), exactly like a work item does — it never re-identifies it.
+ *   - It does NOT replace the automation registry, the work layer, the event
+ *     feed or the audit log: those remain the mechanisms. This record is the
+ *     AUDITABLE EXPLANATION of a routing choice.
+ *   - Commercial readiness REFERENCES the Phase 1 entities by id
+ *     (`assessmentId`, `productOpportunityId`, `supplyProfileId`). It is not a
+ *     second opportunity model.
+ *
+ * Enums live in the two config SSOTs and are imported type-only so a value can
+ * never drift.
+ */
+import type {
+  GatewayKind,
+  GatewayStructureFindingKind,
+  JoinPolicy,
+  JoinState,
+  RouteBranchOutcome,
+  RouteRefusalReason,
+} from '@/config/routing';
+import type {
+  CommercialConditionId,
+  CommercialTermFieldId,
+  CommercialValueBasis,
+  CommercialViabilityRoute,
+  PackConceptId,
+} from '@/config/commercialReadiness';
+
+/**
+ * WHO OWNS A ROUTING DECISION. The same three-way ownership the pre-audit store
+ * established is reused verbatim rather than re-invented: a public visitor's
+ * decision is never visible to another visitor, a brand sees only its own, and
+ * ops sees everything. Aliased (not re-declared) so the two can never diverge.
+ */
+export type RoutingOwner = PreAuditOwner;
+
+/** The canonical record a routing decision/routing workflow is about. */
+export interface RoutingSubjectRef {
+  /** e.g. 'purchase_order', 'preaudit_assessment', 'product_opportunity'. */
+  type: string;
+  id: string;
+  label: string;
+}
+
+/** ONE evaluated condition, with the rule and the value it actually observed. */
+export interface RouteConditionEvaluation {
+  /** The declared condition id (never invented at evaluation time). */
+  id: string;
+  label: string;
+  /** The declared rule, stated in full — a condition is never a black box. */
+  rule: string;
+  /** The observed value, exactly as observed. */
+  observed: string;
+  /** What a satisfied condition required. */
+  expected: string;
+  /** True only when the condition positively held. */
+  met: boolean;
+  /** Set when the condition could not be evaluated — the fail-closed reason. */
+  notEvaluatedReason: string | null;
+  /** The route this condition selects. */
+  routeId: string;
+}
+
+/** ONE branch of a gateway, with its own independent outcome. */
+export interface RouteBranchResult {
+  routeId: string;
+  label: string;
+  outcome: RouteBranchOutcome;
+  /** What the branch does — and where it is acted on (never a new screen). */
+  action: string;
+  destination: string;
+  /** The observed reason for this outcome, in plain language. */
+  reason: string;
+  /** The declared next step when the outcome needs attention; null otherwise. */
+  nextStep: string | null;
+  /** 1-based attempt number — a retry is visible, not hidden. */
+  attempt: number;
+  /**
+   * True when this branch's outcome must remain visible even if another branch
+   * succeeded. Always true: branch isolation is structural, not a per-branch
+   * choice.
+   */
+  observable: true;
+  /** The declared compensation when this branch failed. Null ⇒ human review. */
+  compensation: string | null;
+}
+
+/** The fan-in state of a gateway (never inferred from the initiating operation). */
+export interface RouteJoinState {
+  policy: JoinPolicy;
+  state: JoinState;
+  requiredRouteIds: string[];
+  optionalRouteIds: string[];
+  satisfiedRouteIds: string[];
+  failedRouteIds: string[];
+  retryableRouteIds: string[];
+  timedOutRouteIds: string[];
+  humanReviewRouteIds: string[];
+  /** The declared quorum, when the policy is `quorum`. */
+  quorum: number | null;
+  /** True ONLY when the declared completion condition is genuinely met. */
+  complete: boolean;
+  reason: string;
+}
+
+/** A structural defect found in the gateway definition itself. */
+export interface GatewayStructureFinding {
+  kind: GatewayStructureFindingKind;
+  detail: string;
+  routeId: string | null;
+  conditionId: string | null;
+}
+
+/**
+ * THE canonical routing decision — the auditable explanation of ONE routing
+ * choice. It is written through the SAME domain persistence port and the SAME
+ * audit registry as every other domain artefact (no second store, no second
+ * database, no second event system).
+ */
+export interface WorkflowRoutingDecision {
+  /** Deterministic: `route-<workflowId>-<gatewayId>-<conditionDigest>`. */
+  id: string;
+  workflowId: string;
+  gatewayId: string;
+  gatewayKind: GatewayKind;
+  owner: RoutingOwner;
+  subject: RoutingSubjectRef;
+  conditions: RouteConditionEvaluation[];
+  branches: RouteBranchResult[];
+  selectedRouteIds: string[];
+  /** True when the gateway refused to select a route. A refusal is not an error. */
+  refused: boolean;
+  refusalReason: RouteRefusalReason | null;
+  refusalDetail: string | null;
+  /** Present when the gateway declares a fan-in; null otherwise. */
+  join: RouteJoinState | null;
+  /** True only when the workflow is genuinely complete. */
+  terminal: boolean;
+  /**
+   * DECLARED FALSE: completion is never inferred from the initiating operation
+   * having succeeded. Typed as the literal so it cannot be set true.
+   */
+  completionInferredFromInitiator: false;
+  /** Idempotency key — `<workflowId>|<gatewayId>|<conditionDigest>`. */
+  idempotencyKey: string;
+  conditionDigest: string;
+  /** DECLARED TRUE: a failing branch never erases a sibling branch's success. */
+  branchIsolationPreserved: true;
+  /** Structural analysis of the gateway definition (§8). */
+  structure: GatewayStructureFinding[];
+  actor: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* ── Phase 2 — commercial terms, pack profile and the readiness record ────── */
+
+/**
+ * ONE commercial value with its provenance. A number NEVER travels without its
+ * basis: `assumed`/`unknown` values are labelled wherever they are shown and can
+ * never by themselves justify a `ready` route.
+ */
+export interface CommercialTermValue {
+  field: CommercialTermFieldId;
+  label: string;
+  /** The value, or null when it is genuinely not established. */
+  value: number | string | null;
+  /** The unit the value is expressed in (never implicit). */
+  unit: string;
+  /** actual | observed | calculated | estimated | assumed | unknown. */
+  basis: CommercialValueBasis;
+  /** Where the value came from, when it came from anywhere. */
+  source: string | null;
+  /** ISO date of observation, when observed. */
+  observedAt: string | null;
+  confidence: ConfidenceLevel;
+  /** Plain-language note, e.g. why a value is only an estimate. */
+  note: string | null;
+}
+
+/**
+ * §17 — the first-class pack model. Seven DISTINCT concepts, plus the validated
+ * carton arithmetic. Deliberately not folded into `SupplyProfile.moq/casePack`.
+ */
+export interface PackProfile {
+  /** The brand's minimum order quantity (units). */
+  brandMoq: number | null;
+  /** The manufacturer's minimum production batch (units). */
+  productionMoq: number | null;
+  /** Units per case. */
+  casePack: number | null;
+  /** Cases per master carton. */
+  casesPerCarton: number | null;
+  /** Derived: casePack × casesPerCarton. Null unless both inputs exist. */
+  unitsPerMasterCarton: number | null;
+  /** The PO quantity — a commercial decision, never derived from an MOQ. */
+  poQuantity: number | null;
+  /** What was actually shipped — recorded separately from what was ordered. */
+  shipmentQuantity: number | null;
+  /** Cartons per pallet (freight costing, not unit economics). */
+  cartonsPerPallet: number | null;
+  /** True only when the declared pack arithmetic actually holds. */
+  valid: boolean;
+  /** The honest statement of what is wrong / missing, when it is. */
+  issue: string | null;
+  /** The declared rule this profile was validated against. */
+  rule: string;
+}
+
+/**
+ * §10 — the DECLARED commercial assessment inputs that are neither commercial
+ * terms nor the pack profile (per-unit costs, intended order quantity, projected
+ * demand, declared supply capacity/variability and lead times).
+ *
+ * Retained ON the readiness record so a RE-ASSESSMENT uses the SAME basis that
+ * produced the current route instead of inventing new inputs. This is what makes
+ * "brand supplies information → reassess" a real, reproducible business step.
+ */
+export interface CommercialReadinessAssessmentInput {
+  perUnitLogisticsCostGbp: number | null;
+  perUnitChannelCostGbp: number | null;
+  intendedOrderQuantity: number | null;
+  projectedDemandUnits: number | null;
+  declaredSupplyCapacityUnits: number | null;
+  supplyVariability: 'low' | 'medium' | 'high' | 'unknown';
+  planningLeadTimeDays: number | null;
+  agreedMaxLeadTimeDays: number | null;
+}
+
+/**
+ * THE canonical commercial readiness record. It REFERENCES the Phase 1 entities
+ * by id and never re-creates them; it carries the terms, the pack profile, the
+ * evaluated conditions and the route the gate selected.
+ */
+export interface CommercialReadinessRecord {
+  id: string;
+  owner: RoutingOwner;
+  /** The Phase 1 assessment this readiness belongs to (the ONE assessment identity). */
+  assessmentId: string;
+  /** The Phase 1 product opportunity, when readiness is product-level. */
+  productOpportunityId: string | null;
+  /** The canonical brand SKU / product reference this readiness is about. */
+  productRef: string | null;
+  /** The human label of the product (for the surface — never a second identity). */
+  productLabel: string | null;
+  /** The Phase 1 supply profile, by reference — never copied. */
+  supplyProfileId: string;
+  /** Canonical brand identity key (`normalizeBrandKey`) — the SAME key BI uses. */
+  dedupeKey: string;
+  terms: CommercialTermValue[];
+  pack: PackProfile;
+  /** The evaluated conditions, in declared order. */
+  conditions: RouteConditionEvaluation[];
+  /** The selected route. Exactly one (exclusive gateway). */
+  route: CommercialViabilityRoute;
+  /** True when the gateway refused — always accompanied by a refusal reason. */
+  refused: boolean;
+  refusalReason: RouteRefusalReason | null;
+  /** The routing decision that produced this record. */
+  routingDecisionId: string;
+  /** What is missing or unevaluable — stated, never hidden. */
+  missingInputs: string[];
+  /** The commercial field ids that are genuinely missing (for the brand's action). */
+  missingTermFieldIds: CommercialTermFieldId[];
+  /** What still has to be confirmed by a human. */
+  openQuestions: string[];
+  /** §10 — the retained assessment basis so a reassessment is reproducible. */
+  assessmentInput: CommercialReadinessAssessmentInput | null;
+  /** §17 — always shown wherever an MOQ is presented. */
+  moqDisclaimer: string;
+  nextStep: string;
+  createdAt: string;
+  updatedAt: string;
+}

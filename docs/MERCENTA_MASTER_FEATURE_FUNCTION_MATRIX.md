@@ -743,9 +743,11 @@ tenant-scoped (39 records / 42 relationships for `brand-astonish`; no leaked kin
 `e2e/mercenta-brain.spec.ts` test 10 — **executed**.
 
 **Deliberately NOT done by this increment:** the Amazon-truth semantics remain unchanged
-(`docs/AMAZON_RECONCILIATION_STATUS.md`: 52 findings, APPLIED = 0), and `src/config/payouts.ts` still declares
-Wise as the default payout rail — the Brain renders that **current, un-reconciled** truth rather than a preferred
-one. Both are recorded in `PROJECT_STATUS.md` heading 3.
+(`docs/AMAZON_RECONCILIATION_STATUS.md`: 52 findings, APPLIED = 0). `src/config/payouts.ts`
+declared Wise as the default payout rail at the time of this increment; Founder decision **T-1**
+(Payoneer default, Wise secondary) was reconciled in code and across the five sources on
+2026-09-21, so the Brain now renders Payoneer as the default rail. Both are recorded in
+`PROJECT_STATUS.md` heading 3.
 
 ---
 

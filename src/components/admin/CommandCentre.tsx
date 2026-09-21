@@ -71,14 +71,14 @@ return (
           <h2 className="text-sm font-semibold text-white flex items-center gap-2">
             <Sparkles className="w-4 h-4" /> Command centre
           </h2>
-          <p className="text-[11px] text-zinc-500 mt-1">
+          <p className="text-ds-label text-zinc-500 mt-1">
             What needs your attention now, and the exact next action for each item.
           </p>
-          <p className="text-[10px] text-zinc-600 mt-0.5" data-testid="command-queue-basis">
+          <p className="text-ds-micro text-zinc-600 mt-0.5" data-testid="command-queue-basis">
             Ranked {model.counts.total > 0 ? `1–${model.counts.total}` : ''} by {model.queueBasis}
           </p>
         </div>
-        <div className="flex items-center gap-2 text-[10px]">
+        <div className="flex items-center gap-2 text-ds-micro">
           <Badge className="bg-red-500/15 text-red-300 border-red-500/20">{model.counts.now} now</Badge>
           <Badge className="bg-amber-500/15 text-amber-300 border-amber-500/20">{model.counts.today} today</Badge>
           <Badge className="bg-white/[0.06] text-zinc-300 border-white/10">{model.counts.week} this week</Badge>
@@ -94,8 +94,8 @@ return (
             <section key={band} data-testid={`command-band-${band}`}>
               <div className="flex items-center gap-2">
                 <Icon className="w-3.5 h-3.5 text-zinc-400" />
-                <h3 className="text-[11px] font-semibold tracking-wide text-zinc-300">{meta.label}</h3>
-                <span className="text-[10px] text-zinc-600">{meta.hint}</span>
+                <h3 className="text-ds-label font-semibold tracking-wide text-zinc-300">{meta.label}</h3>
+                <span className="text-ds-micro text-zinc-600">{meta.hint}</span>
               </div>
               {items.length === 0 ? (
                 <EmptyState title="Nothing here" description={`No ${meta.label.toLowerCase()} actions are outstanding.`} />
@@ -112,20 +112,20 @@ return (
                           {typeof a.rank === 'number' && <span className="text-zinc-500 mr-1">#{a.rank}</span>}
                           {a.title}
                         </p>
-                        <p className="text-[10px] text-zinc-500">{a.detail}</p>
+                        <p className="text-ds-micro text-zinc-500">{a.detail}</p>
                         {a.why && (
-                          <p className="text-[10px] text-zinc-600" data-testid="command-why">
+                          <p className="text-ds-micro text-zinc-600" data-testid="command-why">
                             Why: {a.why.factors.map((f) => `${f.label} ${f.points}`).join(' · ')} = {a.why.score}
                           </p>
                         )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-[10px]">
+                      <div className="flex flex-wrap items-center gap-2 text-ds-micro">
                         {a.category && <span className="text-zinc-500">{a.category}</span>}
                         {a.region && <span className="text-zinc-500">· {a.region}</span>}
                         {typeof a.valueGbp === 'number' && (
                           <span className="text-zinc-400">£{a.valueGbp.toLocaleString('en-GB')}</span>
                         )}
-                        <Badge className={cn('text-[10px]', priorityBadge(a.priority))}>{a.priority}</Badge>
+                        <Badge className={cn('text-ds-micro', priorityBadge(a.priority))}>{a.priority}</Badge>
                         <Button variant="secondary" size="sm" className="text-xs" onClick={() => run(a)}>
                           {a.cta}
                         </Button>
@@ -146,14 +146,14 @@ return (
             className="rounded-lg border border-white/[0.06] bg-ink-850 p-3"
             data-testid={`command-section-${section.id}`}
           >
-            <p className="text-[11px] font-semibold text-white">{section.label}</p>
-            <p className="text-[10px] text-zinc-600 mt-0.5">{section.description}</p>
+            <p className="text-ds-label font-semibold text-white">{section.label}</p>
+            <p className="text-ds-micro text-zinc-600 mt-0.5">{section.description}</p>
             {section.actions.length === 0 ? (
-              <p className="text-[10px] text-zinc-500 mt-2">Nothing outstanding.</p>
+              <p className="text-ds-micro text-zinc-500 mt-2">Nothing outstanding.</p>
             ) : (
               <ul className="mt-2 space-y-1">
                 {section.actions.slice(0, 4).map((a) => (
-                  <li key={a.id} className="text-[10px] text-zinc-400">
+                  <li key={a.id} className="text-ds-micro text-zinc-400">
                     {typeof a.rank === 'number' && <span className="text-zinc-600">#{a.rank} </span>}
                     <span className="text-zinc-300">{a.title}</span>
                     <button type="button" className="ml-1 text-sky-300/90 hover:underline" onClick={() => run(a)}>

@@ -41,7 +41,7 @@ function LintableInput({
     <div>
       <Input label={label} value={value} onChange={(e) => onChange(e.target.value)} />
       {!lint.safe && (
-        <p className="text-[10px] text-stamp mt-1 flex items-center gap-1">
+        <p className="text-ds-micro text-stamp mt-1 flex items-center gap-1">
           <AlertTriangle className="w-3 h-3" />
           Unsafe wording ({lint.hits[0]?.reason}) — fix before saving
         </p>
@@ -65,7 +65,7 @@ function LintableTextarea({
   const lint = useMemo(() => lintOutwardWording(value), [value]);
   return (
     <div>
-      <label className="mb-1 block text-[10px] font-medium text-zinc-500">{label}</label>
+      <label className="mb-1 block text-ds-micro font-medium text-zinc-500">{label}</label>
       <textarea
         aria-label={label}
         value={value}
@@ -74,7 +74,7 @@ function LintableTextarea({
         className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white"
       />
       {!lint.safe && (
-        <p className="text-[10px] text-stamp mt-1 flex items-center gap-1">
+        <p className="text-ds-micro text-stamp mt-1 flex items-center gap-1">
           <AlertTriangle className="w-3 h-3" />
           Unsafe wording ({lint.hits[0]?.reason}) — fix before saving
         </p>
@@ -111,7 +111,7 @@ function PointsEditor({
         <LintableTextarea label="Section subheading" value={subheading} onChange={onChangeSubheading} />
       </div>
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+        <p className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
           Points ({points.length})
         </p>
         {points.map((p, i) => (
@@ -248,12 +248,12 @@ export function HomepageEditor() {
             <RotateCcw className="w-3.5 h-3.5 mr-1.5" /> Revert
           </Button>
           {anyUnsafe ? (
-            <Badge className="text-[10px] bg-red-500/15 text-red-300 border-red-500/20">
+            <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20">
               <AlertTriangle className="w-3 h-3 mr-1" /> Unsafe wording blocks saving
             </Badge>
           ) : (
             status && (
-              <Badge className="text-[10px] bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+              <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
                 <CheckCircle2 className="w-3 h-3 mr-1" /> {status}
               </Badge>
             )
@@ -281,7 +281,7 @@ export function HomepageEditor() {
             className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white"
           />
           {!lintOutwardWording(content.hero.subheading).safe && (
-            <p className="text-[10px] text-stamp mt-1">Unsafe wording in hero subheading</p>
+            <p className="text-ds-micro text-stamp mt-1">Unsafe wording in hero subheading</p>
           )}
         </div>
       </Card>

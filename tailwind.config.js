@@ -9,6 +9,35 @@ export default {
         plex: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
+      /**
+       * §UI/UX Wave 3 — CANONICAL OPERATIONAL TYPE SCALE.
+       *
+       * The measured taste debt was 1,202 arbitrary sub-12px sizes
+       * (`text-[8px]` 47 · `text-[9px]` 206 · `text-[10px]` 949) plus 644
+       * `text-[11px]` occurrences. Those sizes bypassed the hierarchy
+       * documented in docs/DESIGN_SYSTEM.md ("avoid text-[8px]/text-[10px]
+       * micro-sizes"), which is why dense operational surfaces read as an
+       * admin template rather than enterprise software: there was no NAMED
+       * operational size to reach for, so every author invented one.
+       *
+       * This scale names them, so the hierarchy is enforceable:
+       *
+       *   ds-micro  11px  readable FLOOR — eyebrows, nav section labels, dense meta
+       *   ds-label  12px  control labels, table headers, badges (= text-xs)
+       *   ds-body   13px  table cells, dense body copy
+       *   ds-title  15px  section / card titles
+       *   ds-page   20px  workspace page title (h1)
+       *
+       * Nothing below 11px may be introduced. `npm run validate:typography`
+       * fails if an arbitrary micro size reappears anywhere in src/.
+       */
+      fontSize: {
+        'ds-micro': ['11px', { lineHeight: '1.3' }],
+        'ds-label': ['12px', { lineHeight: '1.4' }],
+        'ds-body': ['13px', { lineHeight: '1.45' }],
+        'ds-title': ['15px', { lineHeight: '1.35' }],
+        'ds-page': ['20px', { lineHeight: '1.25' }],
+      },
       colors: {
         /**
          * §UI/UX Wave 1 — the ENTIRE palette is routed through the canonical

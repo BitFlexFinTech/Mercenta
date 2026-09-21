@@ -17,6 +17,9 @@ function test(name, cond) {
 }
 
 let lastSeed = null;
+/** §Clean-slate reconciliation 2026-09-21 — the seed PER panel, so an assertion
+ *  can never accidentally read the seed of a panel rendered later. */
+const seedsByPath = {};
 async function renderPanel(path) {
   const s2 = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
   try {
@@ -25,6 +28,7 @@ async function renderPanel(path) {
     // rendered markup against the canonical dataset (not against a hardcoded
     // pre-redesign string).
     lastSeed = seedMod;
+    seedsByPath[path] = seedMod;
     const ctxMod = await s2.ssrLoadModule('/src/integrations/IntegrationsContext.tsx');
     const gMod = await s2.ssrLoadModule('/src/context/GlobalStateContext.tsx');
     const panelMod = await s2.ssrLoadModule(path);
@@ -65,22 +69,54 @@ try {
   // Logistics Control: operational view
   test('logistics control shows In Transit/Delayed/Exceptions chips',
     logisticsHtml.includes('In Transit') && logisticsHtml.includes('Delayed') && logisticsHtml.includes('Exceptions'));
-  // §M9 repoint — the redesign renders ONE canonical table per brand tenant
-  // (`data-table="logistics-<brandId>"`) instead of a badge class, so grouping is
-  // asserted from that structural hook AND from the canonical seed.
+  // §M9 repoint — the redesign renders ONE canonical list per brand tenant, so
+  // grouping is asserted from that structural hook AND from the canonical seed.
+  //
+  // §CLEAN-SLATE RECONCILIATION 2026-09-21 — the hook had to be corrected.
+  // The canonical `DataTable` (`src/components/ui.tsx`) renders ONE representation
+  // chosen by a media query: the semantic `<table data-table="…">` at md+, and the
+  // labelled card `<ul aria-label={caption}>` below it. Under SSR there is no
+  // `window`, so `useMediaQuery` is false and the CARD LIST is what renders — the
+  // `data-table` attribute therefore NEVER appears in server-rendered markup, which
+  // is why this assertion could previously only ever pass through the empty state.
+  // The caption the table and the card list SHARE is
+  // `Shipments in transit for <Brand Name>`, so that is the SSR-visible per-tenant
+  // hook. The desktop hook is still asserted on the source below (unchanged).
+  const logisticsDecoded = logisticsHtml.replace(/&amp;/g, '&').replace(/&#x27;/g, "'");
   const logisticsGroups = new Set(
-    [...logisticsHtml.matchAll(/data-table="logistics-([^"]+)"/g)].map((m) => m[1])
+    [...logisticsDecoded.matchAll(/aria-label="Shipments in transit for ([^"]+)"/g)].map((m) => m[1])
   );
-  // NOTE (reported, not hidden): the canonical seed contains NO purchase order in
-  // a shipping status (`SHIPMENT_STATUS_BY_PO` keys ready_to_fulfil/shipped/
-  // delivered never occur in `PO_STATUSES[(brandIndex + poIndex) % 7]` for the
-  // cleared brands), so `DEMO_SHIPMENTS` is legitimately empty and the view shows
-  // its honest empty state. Grouping is therefore asserted from the component's
-  // structural per-tenant binding plus the rendered outcome.
+  /**
+   * §CLEAN-SLATE RECONCILIATION 2026-09-21 — REPOINTED (strengthened, not weakened).
+   *
+   * The old form was `logisticsGroups.size >= 2 || logisticsEmpty`, and BOTH halves
+   * are now wrong for the same reason: the canonical seed has evolved so that
+   * `DEMO_SHIPMENTS` is derived from the lifecycle POs and yields consignments for
+   * exactly ONE brand. A `>= 2` floor can therefore never hold, and because the
+   * surface is not empty the honest empty state does not render either — so the
+   * assertion failed while the PRODUCT was correct. The INTENT is unchanged (the
+   * surface must render the canonical seed, grouped per tenant), so the assertion
+   * now compares the RENDERED outcome to the SEED the panel actually rendered with:
+   * the rendered groups must name exactly the brands that have a consignment, and no
+   * other brand; when the seed has none, the honest empty state must render. This is
+   * strictly stronger than `>= 2 || empty` — it fails on an invented brand, a
+   * missing brand, or a phantom empty state.
+   */
+  const logisticsSeed = seedsByPath['/src/components/admin/LogisticsControl.tsx'] ?? lastSeed;
+  const seededLogisticsNames = new Set(
+    [...new Set(logisticsSeed.demoShipments.map((s) => s.brandId))].map(
+      (id) => logisticsSeed.demoBrands.find((b) => b.id === id)?.profile.businessName ?? id
+    )
+  );
   const logisticsEmpty = /No shipments are in transit/.test(logisticsHtml);
   test('logistics groups by brand (per-tenant table hook, or an honest empty state)',
-    logisticsGroups.size >= 2 || logisticsEmpty,
-    logisticsGroups.size ? `${logisticsGroups.size} group(s)` : 'empty state');
+    seededLogisticsNames.size === 0
+      ? logisticsEmpty
+      : logisticsEmpty === false &&
+        logisticsGroups.size === seededLogisticsNames.size &&
+        [...seededLogisticsNames].every((n) => logisticsGroups.has(n)),
+    `rendered ${logisticsGroups.size} group(s) vs ${seededLogisticsNames.size} seeded brand(s)` +
+      (logisticsEmpty ? ' + empty state' : ''));
   test('logistics grouping is implemented per brand tenant',
     readFileSync(resolve(root, 'src/components/admin/LogisticsControl.tsx'), 'utf8')
       .includes('dataTable={`logistics-${brandId}`}'));

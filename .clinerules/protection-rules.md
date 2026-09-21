@@ -44,11 +44,14 @@ SAFETY set (secrets · non-destruction of Founder work · deploy safeguards · n
 safety rule is a critical failure. The retired clauses above and below have **no** authority.
 
 ## Before any work:
-- Run: `git status` — **for awareness only**: know what is already on disk before you touch it.
+- Run: `git status --porcelain` — **this is a reconciliation input, not merely awareness.** Know exactly what is already
+  on disk before you touch it, because inherited dirtiness must be resolved (§6), not carried forward.
 - ~~If there are uncommitted changes, STOP and tell the user.~~ **RETIRED 2026-09-21** — a dirty worktree is NOT a stop.
 - ~~Ask: "Should I commit the current state before I start?" / Do NOT proceed until the user says yes.~~ **RETIRED 2026-09-21.**
-- ACTIVE instead: pre-existing Founder/worktree changes are **preserved — never destroyed, never committed by you**
-  (`operating-model.md` §6). You commit only the work you authored and verified.
+- ACTIVE instead: pre-existing worktree changes are **never DESTROYED** (no reset/clean/stash/force-push) and are
+  **RECONCILED**: a change that repository evidence shows is required, current and part of the product is FIXED and
+  COMMITTED; a change that evidence shows is obsolete, duplicated, generated or unnecessary is REMOVED with the reason
+  recorded (`operating-model.md` §6). "Founder work" is not itself a reason to keep something uncommitted.
 
 ## During work:
 - Prefer the smallest change that achieves the requirement — but when a Founder directive requires replacing a
@@ -69,8 +72,13 @@ safety rule is a critical failure. The retired clauses above and below have **no
 ## After work:
 - Show exactly which files were changed and what changed; run: `git diff --stat`.
 - ~~Do NOT commit unless the user explicitly says "commit."~~ **RETIRED 2026-09-21** — commit your own **verified** work
-  as the checkpoint (`operating-model.md` §5); never commit pre-existing Founder changes (§6).
+  as the checkpoint (`operating-model.md` §5). The reconciliation of inherited dirtiness described in §6 is part of that
+  same checkpoint: required inherited work is committed, unneeded inherited material is removed — never left behind.
 - ACTIVE: push only when the Founder instructs it.
+- **ACTIVE — THE CLEAN-TREE INVARIANT:** run `git status --porcelain` and confirm it prints NOTHING before reporting
+  completion. If it prints anything (modified, deleted-but-uncommitted, staged, untracked, generated artefacts, or
+  documentation/rule changes), RECONCILE IT and commit again. Do not report completion with a dirty tree
+  (`operating-model.md` §6/§9).
 
 ## Absolute prohibitions:
 - Do NOT create numbered zip files.
@@ -122,8 +130,11 @@ Before claiming a task is complete, you MUST:
 5. Show me the test results
 6. Run: `bash scripts/export-review-zip.sh` — run it from the project root; the script resolves its own root, so the
    old hardcoded `~/Desktop/Mercenta/...` path (stale since the folder was renamed) is NOT used.
+7. Run: `git status --porcelain` — it MUST print nothing. The commit that carries this task's work (including the
+   reconciliation of any inherited dirtiness) must already exist, because the review ZIP is a generated, gitignored
+   artefact and does not dirty the tree. A dirty tree after the zip step means the commit was incomplete.
 
-Do NOT say "DONE" or "complete" until all 6 steps above are shown.
+Do NOT say "DONE" or "complete" until all 7 steps above are shown.
 If a test fails, report it honestly. Do not mark tests as fixme
 to hide failures.
 
@@ -143,7 +154,8 @@ Additional standing rules:
   (`operating-model.md` §4).
 - ACTIVE: Do NOT remove or modify demo data or demo accounts (unchanged).
 - ~~Do NOT commit or push unless I explicitly say "commit" or "push".~~ **RETIRED 2026-09-21** — commit your own
-  VERIFIED work as the checkpoint; **push only when instructed**, and never commit pre-existing Founder changes.
+  VERIFIED work as the checkpoint; **push only when instructed**. The §6 reconciliation of inherited dirtiness is part of
+  that checkpoint (required work is committed, unneeded material is removed), and completion requires a clean tree.
 - ACTIVE: if a requirement is genuinely ambiguous and unresolvable from the repository, ask (`operating-model.md` §3).
 - ~~If a change would affect more than 5 files, STOP and list them first. Wait for my approval.~~ **RETIRED 2026-09-21**
   — there is no file-count gate.

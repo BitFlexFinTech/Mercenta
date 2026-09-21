@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useTheme } from '@/context/ThemeContext';
 import { BRAND_NAME, BRAND_LEGAL_NAME } from '@/config/brand';
@@ -9,6 +9,9 @@ import {
   type HomeIconName,
 } from '@/config/homepageContent';
 import { cn } from '@/utils/cn';
+import { PRE_AUDIT_TESTIDS } from '@/config/ukMarketFit';
+import { resolveRoute } from '@/lib/seo/publicRoutes';
+import { applyRouteMetadata, metadataForPublicPage } from '@/lib/seo/routeMetadata';
 import { PrivacyPolicy } from '@/components/marketing/PrivacyPolicy';
 import { TermsOfService } from '@/components/marketing/TermsOfService';
 import { PublicNav, type PublicPage } from '@/components/marketing/PublicNav';
@@ -19,6 +22,10 @@ const HowItWorks = lazy(() => import('@/components/marketing/HowItWorks').then(m
 const UKMarketAccess = lazy(() => import('@/components/marketing/UKMarketAccess').then(m => ({ default: m.UKMarketAccess })));
 const ForBrands = lazy(() => import('@/components/marketing/ForBrands').then(m => ({ default: m.ForBrands })));
 const FAQ = lazy(() => import('@/components/marketing/FAQ').then(m => ({ default: m.FAQ })));
+// §Phase 1 — the public pre-audit surface, code-split like the other public pages.
+const ExploreUkMarketFit = lazy(() =>
+  import('@/components/marketing/ExploreUkMarketFit').then(m => ({ default: m.ExploreUkMarketFit }))
+);
 
 import {
   ArrowRight,
@@ -99,6 +106,12 @@ function renderPublicPage(
       <FAQ onNavigate={onNavigate as any} onOpenPortal={openPortal} />
     </Suspense>
   );
+  // §Phase 1 — Explore UK Market Fit (the public pre-audit surface).
+  if (page === 'explore-uk-market-fit') return (
+    <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
+      <ExploreUkMarketFit onNavigate={onNavigate as any} onOpenPortal={openPortal} />
+    </Suspense>
+  );
   return null;
 }
 
@@ -107,16 +120,36 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
   const { shellMode } = useTheme();
   const [publicView, setPublicView] = useState<PublicPage | null>(null);
 
-  // §Crawlability — detect direct URL access so crawlers see the correct page.
+  // §Crawlability — resolve direct URL access from the SEO SSOT (was an inline
+  // path chain that had to be kept in sync with robots.txt/sitemap by hand).
   useEffect(() => {
-    const path = window.location.pathname.replace(/\/+$/, '');
-    if (path === '/privacy') setPublicView('privacy');
-    else if (path === '/terms') setPublicView('terms');
-    else if (path === '/how-it-works') setPublicView('how-it-works');
-    else if (path === '/uk-market-access') setPublicView('uk-market-access');
-    else if (path === '/for-brands') setPublicView('for-brands');
-    else if (path === '/faq') setPublicView('faq');
+    const resolved = resolveRoute(window.location.pathname);
+    if (resolved.kind === 'public' && resolved.route.page !== 'home') {
+      setPublicView(resolved.route.page as PublicPage);
+    }
   }, []);
+
+  /**
+   * §SEO FOUNDATION — the ONE in-app navigation function.
+   *
+   * Every public navigation (nav links, footer links, "back" actions, the CTA)
+   * goes through here, so the ADDRESS, the document metadata and the rendered
+   * view can never disagree: the URL is pushed, and the metadata for the target
+   * page is applied immediately (the `RouteMetadata` component handles
+   * back/forward via `popstate`).
+   */
+  const navigate = useCallback(
+    (page: PublicPage | null) => {
+      const target: PublicPage = page ?? 'home';
+      setPublicView(target === 'home' ? null : target);
+      const meta = metadataForPublicPage(target);
+      if (typeof window !== 'undefined' && window.location.pathname !== meta.path) {
+        window.history.pushState({ page: target }, '', meta.path);
+      }
+      applyRouteMetadata(meta);
+    },
+    []
+  );
 
   const openPortal = () => setEnvironment('login');
 
@@ -128,7 +161,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
 
   // Conditional pages rendered as early return AFTER all hooks.
   if (publicView && publicView !== 'home') {
-    return renderPublicPage(publicView, setPublicView, openPortal);
+    return renderPublicPage(publicView, navigate, openPortal);
   }
 
   const scrollTo = (sectionId: string) => {
@@ -145,13 +178,13 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       className="min-h-screen font-plex"
       style={{ backgroundColor: 'var(--mr-bg)' }}
     >
-      <PublicNav currentPage="home" onNavigate={setPublicView} onOpenPortal={openPortal} />
+      <PublicNav currentPage="home" onNavigate={navigate} onOpenPortal={openPortal} />
 
       {/* Hero — two columns: pitch left, live tracker right */}
       <section id="home" className="pt-24 pb-24 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className={cn(rv, 'is-revealed')}>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.04] px-3 py-1 text-[11px] font-mono uppercase tracking-[0.25em] text-[var(--mr-accent-700)]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.04] px-3 py-1 text-ds-label font-mono uppercase tracking-[0.25em] text-[var(--mr-accent-700)]">
               <span className="w-1.5 h-1.5 rounded-full bg-state-success" aria-hidden="true" />
               {c.hero.eyebrow}
             </span>
@@ -163,18 +196,20 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
               {fillBrand(c.hero.subheading)}
             </p>
             <div className="flex flex-wrap items-center gap-4 mt-8">
+              {/*
+                §Phase 1 — the PRIMARY prospect CTA is Explore UK Market Fit, and
+                it opens the assessment. Partner Login is deliberately NOT placed
+                beside it: the two actions serve different audiences, so Partner
+                Login lives in the header as a separate secondary utility action
+                (PublicNav). Its hero duplicate was removed rather than restyled.
+              */}
               <button
-                onClick={openPortal}
+                onClick={() => navigate('explore-uk-market-fit')}
+                data-testid={PRE_AUDIT_TESTIDS.cta}
                 className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette shadow-ds-subtle transition-colors hover:opacity-90"
               >
                 {c.hero.primaryCta}
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </button>
-              <button
-                onClick={openPortal}
-                className="inline-flex items-center gap-2 border border-white/[0.2] hover:border-brass/60 text-white px-6 py-3 rounded-lg transition-colors"
-              >
-                {c.hero.secondaryCta}
               </button>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs tracking-wider" style={{ color: 'var(--mr-text-muted)' }}>
@@ -190,10 +225,10 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
           <div className={cn('relative', rv, 'is-revealed')}>
             <div className="bg-ink-2 border border-white/[0.07] rounded-2xl p-6 shadow-ds-overlay">
               <div className="flex items-center justify-between mb-6">
-                <span className="font-mono text-[11px] tracking-[0.25em] text-steel uppercase">
+                <span className="font-mono text-ds-label tracking-[0.25em] text-steel uppercase">
                   Shipment Tracker
                 </span>
-                <span className="flex items-center gap-2 font-mono text-[11px]" style={{ color: 'var(--mr-palette-green)' }}>
+                <span className="flex items-center gap-2 font-mono text-ds-label" style={{ color: 'var(--mr-palette-green)' }}>
                   <span className="relative flex w-2 h-2">
                     <span
                       className="animate-tracker-ping absolute inline-flex h-full w-full rounded-full opacity-75"
@@ -229,7 +264,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                   style={{ borderColor: 'var(--mr-palette-cyan)' }}
                 />
               </div>
-              <div className="flex justify-between font-mono text-[10px] tracking-wider text-steel uppercase mb-6">
+              <div className="flex justify-between font-mono text-ds-micro tracking-wider text-steel uppercase mb-6">
                 <span>Origin</span>
                 <span>In Transit</span>
                 <span style={{ color: 'var(--mr-palette-cyan)' }}>UK Arrival</span>
@@ -240,7 +275,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                   <span className="font-mono text-xs text-steel">
                     {c.tracker.reference} · {c.tracker.cargoLabel}
                   </span>
-                  <span className="rounded-full border border-white/[0.12] bg-white/[0.06] px-2 py-0.5 font-mono text-[10px] text-zinc-300">
+                  <span className="rounded-full border border-white/[0.12] bg-white/[0.06] px-2 py-0.5 font-mono text-ds-micro text-zinc-300">
                     {c.tracker.freightMode}
                   </span>
                 </div>
@@ -254,7 +289,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                       />
                     ) : (
                       <span
-                        className="rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold"
+                        className="rounded-full px-2 py-0.5 font-mono text-ds-micro font-semibold"
                         style={{
                           backgroundColor: 'var(--mr-palette-indigo)',
                           color: 'var(--mr-on-palette)',
@@ -279,7 +314,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       {/* §UI/UX Wave 2 — what the platform is, in three numbered moves */}
       <section id="about" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
+          <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
             The operating model
           </p>
           <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
@@ -304,7 +339,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                     >
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </span>
-                    <span className="font-mono text-[11px] tracking-[0.2em] text-zinc-500">
+                    <span className="font-mono text-ds-label tracking-[0.2em] text-zinc-500">
                       0{i + 1}
                     </span>
                   </div>
@@ -322,7 +357,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       {/* §UI/UX Wave 2 — connected platform capabilities (each domain-coloured) */}
       <section id="services" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
+          <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
             The platform
           </p>
           <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
@@ -380,7 +415,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       {/* §UI/UX Wave 2 — the connected commercial-operations chain */}
       <section id="network" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
+          <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
             Connected end to end
           </p>
           <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
@@ -406,7 +441,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                   <span className="mb-2 flex items-center gap-2">
                     <span
                       aria-hidden="true"
-                      className="font-mono text-[10px] tracking-widest text-zinc-500"
+                      className="font-mono text-ds-micro tracking-widest text-zinc-500"
                     >
                       {String(i + 1).padStart(2, '0')}
                     </span>
@@ -415,7 +450,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                   <span className="block font-display text-sm font-semibold text-parchment">
                     {step.title}
                   </span>
-                  <span className="mt-1 block text-[11px] leading-snug text-steel">
+                  <span className="mt-1 block text-ds-label leading-snug text-steel">
                     {step.description}
                   </span>
                 </li>
@@ -429,7 +464,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       <section id="visibility" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
           <div>
-            <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-500">
+            <p className="mb-3 font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500">
               Visibility &amp; control
             </p>
             <h2 className={cn('font-display text-2xl md:text-3xl font-semibold mb-3', rv)}>
@@ -479,7 +514,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       {/* §UI/UX Wave 2 — proactive brand success protection */}
       <section id="protection" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
-          <p className="mb-3 text-center font-mono text-[11px] uppercase tracking-[0.25em] text-zinc-500">
+          <p className="mb-3 text-center font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500">
             Protection, built in
           </p>
           <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
@@ -532,7 +567,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
             aria-hidden="true"
             className="absolute -top-8 right-0 md:right-6 rotate-[8deg] select-none pointer-events-none"
           >
-            <div className="border-[3px] border-stamp text-stamp rounded-md px-4 py-2 font-mono text-[11px] tracking-[0.2em] uppercase opacity-80 shadow-[inset_0_0_12px_rgba(181,73,58,0.15)]">
+            <div className="border-[3px] border-stamp text-stamp rounded-md px-4 py-2 font-mono text-ds-label tracking-[0.2em] uppercase opacity-80 shadow-[inset_0_0_12px_rgba(181,73,58,0.15)]">
               <div className="border border-stamp/70 rounded-sm px-3 py-1.5 text-center leading-relaxed">
                 {c.finalCta.stampLine1}
                 <br />
@@ -547,7 +582,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
             {fillBrand(c.finalCta.subheading)}
           </p>
           <button
-            onClick={openPortal}
+            onClick={() => navigate('explore-uk-market-fit')}
             className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
           >
             {c.finalCta.buttonLabel}
@@ -556,7 +591,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
         </div>
       </section>
 
-      <PublicFooter onNavigate={setPublicView} onOpenPortal={openPortal} />
+      <PublicFooter onNavigate={navigate} onOpenPortal={openPortal} />
     </div>
   );
 }

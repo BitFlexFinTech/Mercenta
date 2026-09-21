@@ -35,7 +35,34 @@ The canonical kit SHOULD use `state.*` for semantics.
 - `font-display` (Fraunces) — display / entity titles.
 - `font-sans` (IBM Plex Sans) — body, subtitle.
 - `font-mono` (IBM Plex Mono) — numeric / KPI / ids.
-- Hierarchy: Display (3xl) → Page title (2xl) → Section (lg) → Body (sm) → Label/caption (xs). Avoid `text-[8px]`/`text-[10px]` micro-sizes.
+- Hierarchy: Display (3xl) → Page title (2xl) → Section (lg) → Body (sm) → Label/caption (xs).
+
+#### §UI/UX Wave 3 — the canonical operational type scale
+
+The scale below is declared in `tailwind.config.js` → `theme.extend.fontSize`.
+**It exists because there was no named operational size to reach for**, so
+authors invented one: the measured debt was 1,202 arbitrary sub-12px sizes
+(`text-[8px]` 47 · `text-[9px]` 206 · `text-[10px]` 949) across 113 component
+files, plus 644 `text-[11px]`. That is a design-system failure, not 1,202
+individual mistakes.
+
+| Token | Size | Used for |
+|---|---|---|
+| `text-ds-micro` | **11px** (floor) | eyebrows, nav section labels, dense meta, badges |
+| `text-ds-label` | 12px | control labels, table headers, form helpers (= `text-xs`) |
+| `text-ds-body` | 13px | table cells, dense body copy |
+| `text-ds-title` | 15px | section / card titles |
+| `text-ds-page` | 20px | workspace page title (`h1`) |
+
+Rules:
+- **11px is the floor.** Nothing below it may be introduced in `src/`.
+- `text-xs` (12px) and `text-sm` (14px) remain canonical for label/body and are
+  unchanged — the scale names the sizes *below* them, which previously had no name.
+- Migration is mechanical and idempotent:
+  `npm run migrate:typography` (re-running is a no-op).
+- The gate is `npm run validate:typography` — it fails if an arbitrary
+  `text-[8px]`/`[9px]`/`[10px]`/`[11px]` reappears, if a token is missing, if the
+  floor drops below 11px, or if the tokens are declared but never consumed.
 
 ### Spacing / Radius / Elevation
 - Spacing: default Tailwind scale is used intentionally (4/8/12/16/24/32).

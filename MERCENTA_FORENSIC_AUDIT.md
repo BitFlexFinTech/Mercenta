@@ -1,3 +1,21 @@
+> ## ⚠ HISTORICAL DOCUMENT — NO AUTHORITY (marked 2026-09-21)
+>
+> This file is a **historical record** (audit date 2026-09-07) of an earlier
+> version of the product. It is **NOT an active operating rule** and MUST NOT be
+> used to gate, block, delay or reverse current work.
+>
+> - Canonical operating model: **`.clinerules/operating-model.md`**
+> - Current project position: **`PROJECT_STATUS.md`** (+ `HANDOFF.md`)
+> - Business invariants: **`.clinerules/mercenta-business-model.md`**
+> - Granular capability matrix: **`requirements-registry.json`**
+>
+> Component counts, portal structure, screenshot and UX findings below describe the
+> product **as it was in September 2026** (and refer to the pre-rename source path
+> `~/Desktop/Mercenta/`). They have been superseded by the redesign, Brain,
+> Logistics Hub and workspace work. Any instruction in this file that conflicts
+> with the canonical operating model is **EXPIRED** and has no effect.
+
+---
 # MERCENTA — FRONTEND UX/UI FORENSIC AUDIT
 
 **Audit Date:** 2026-09-07

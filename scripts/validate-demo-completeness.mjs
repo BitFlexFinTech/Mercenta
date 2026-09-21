@@ -74,7 +74,23 @@ check('Product barcodes unique per brand via bi padding', demoData.includes('bi 
 
 // PO numbers are unique per brand (9000 + bi*2 + pi)
 check('PO numbers unique per brand', demoData.includes('String(9000 + bi * 2 + pi)'));
-check('Shipment cargo cycle covers carriers', demoData.includes("'palletline'"));
+/**
+ * §CLEAN-SLATE RECONCILIATION 2026-09-21 — REPOINTED (not weakened).
+ * The old assertion pinned the literal `'palletline'` INSIDE `src/data/demoData.ts`.
+ * The canonical carrier truth moved to `src/config/shipping.ts`, and consignments
+ * no longer cycle through carriers at all — a carrier is derived from the canonical
+ * LANE RULE (`selectCarrierForLane(resolveShippingLane(...))`), never from a cycle.
+ * The INTENT is unchanged: the shipment cargo model must genuinely cover BOTH of
+ * Mercenta's carrier accounts. It is now asserted against the single source of
+ * truth, so it cannot drift: both accounts must be declared in the config, the
+ * UK-domestic lane must resolve to Palletline, and demoData must derive its
+ * carriers from the canonical lane rule rather than a hardcoded cycle.
+ */
+const shippingCfg = read('src/config/shipping.ts');
+check('Shipment cargo cycle covers carriers',
+  shippingCfg.includes("MERCENTA_CARRIER_ACCOUNTS: readonly CarrierId[] = ['dhl', 'palletline']") &&
+    /uk_domestic:\s*'palletline'/.test(shippingCfg) &&
+    demoData.includes('selectCarrierForLane(resolveShippingLane('));
 
 // Verify rejection reasons are varied
 check('Rejection reasons vary by brand index', demoData.includes('bi % REJECTION_REASONS.length'));

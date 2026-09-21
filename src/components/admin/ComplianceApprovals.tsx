@@ -142,13 +142,13 @@ export function ComplianceApprovals() {
         description="Per-brand cards · automated verification, then Mercenta operator review"
         meta={
           <>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Documents on file <span className="font-mono text-zinc-300">{docMetrics.total}</span>
             </span>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Awaiting review <span className="font-mono text-zinc-300">{docMetrics.awaiting}</span>
             </span>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-ds-label text-zinc-500">
               Brands <span className="font-mono text-zinc-300">{docMetrics.brands}</span>
             </span>
           </>
@@ -167,7 +167,7 @@ export function ComplianceApprovals() {
               ]}
             />
             <span className="ml-auto flex items-center gap-2">
-              <span className="hidden text-[10px] uppercase tracking-[0.14em] text-zinc-600 sm:inline">
+              <span className="hidden text-ds-micro uppercase tracking-[0.14em] text-zinc-600 sm:inline">
                 Density
               </span>
               <SegmentedControl
@@ -184,7 +184,7 @@ export function ComplianceApprovals() {
         }
       />
       {/* §M2 — the outcome of the last verification action, including refusals. */}
-      {note && <p className="text-[11px] text-zinc-400" data-testid="compliance-verification-note">{note}</p>}
+      {note && <p className="text-ds-label text-zinc-400" data-testid="compliance-verification-note">{note}</p>}
 
       <MetricBand
         columns={4}
@@ -254,21 +254,21 @@ export function ComplianceApprovals() {
         const isExpanded = expandedBrandId === brandId;
         return (<div key={brandId} data-testid="compliance-brand-card" className={cn('bg-ink-850 border border-white/[0.06] rounded-xl overflow-hidden', isExpanded ? 'ring-1 ring-brass-500/30' : 'hover:border-white/[0.12]')}>
           <button onClick={function() { setExpandedBrandId(isExpanded ? null : brandId); }} className="w-full text-left p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2.5"><Shield className="w-4 h-4 text-brass-400 flex-shrink-0" /><div><div className="text-sm font-medium text-white">{brandName}</div><div className="text-[10px] text-zinc-500 mt-0.5">{total} docs · {pending} pending · {approved} approved</div></div></div>
-            <div className="flex items-center gap-2">{pending > 0 && <Badge className="text-[9px] bg-amber-500/15 text-amber-300">{pending}</Badge>}{isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />}</div>
+            <div className="flex items-center gap-2.5"><Shield className="w-4 h-4 text-brass-400 flex-shrink-0" /><div><div className="text-sm font-medium text-white">{brandName}</div><div className="text-ds-micro text-zinc-500 mt-0.5">{total} docs · {pending} pending · {approved} approved</div></div></div>
+            <div className="flex items-center gap-2">{pending > 0 && <Badge className="text-ds-micro bg-amber-500/15 text-amber-300">{pending}</Badge>}{isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /> : <ChevronRight className="w-3.5 h-3.5 text-zinc-500" />}</div>
           </button>
           {isExpanded && (<div className="border-t border-white/[0.06] divide-y divide-white/[0.04]">{brandDocs.map(function(d) { return (<div key={d.id} data-density={density} className={cn('flex items-center justify-between px-4', density === 'compact' ? 'py-2' : 'py-2.5')}>
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-xs text-zinc-300 capitalize truncate">{d.type.replace(/_/g, ' ')}</span>
-              <span className="text-[9px] text-zinc-600">v{d.version ?? 1}</span>
-              <StatusBadge className="text-[10px]" dataStatus={complianceDocStatusPresentation(d.status).dataStatus} tone={complianceDocStatusPresentation(d.status).tone}>{complianceDocStatusPresentation(d.status).label}</StatusBadge>
+              <span className="text-ds-micro text-zinc-600">v{d.version ?? 1}</span>
+              <StatusBadge className="text-ds-micro" dataStatus={complianceDocStatusPresentation(d.status).dataStatus} tone={complianceDocStatusPresentation(d.status).tone}>{complianceDocStatusPresentation(d.status).label}</StatusBadge>
               {d.verificationStatus && (
-                <StatusBadge className="text-[10px]" dataStatus={documentVerificationStatusPresentation(d.verificationStatus).dataStatus} tone={documentVerificationStatusPresentation(d.verificationStatus).tone}>{documentVerificationStatusPresentation(d.verificationStatus).label}</StatusBadge>
+                <StatusBadge className="text-ds-micro" dataStatus={documentVerificationStatusPresentation(d.verificationStatus).dataStatus} tone={documentVerificationStatusPresentation(d.verificationStatus).tone}>{documentVerificationStatusPresentation(d.verificationStatus).label}</StatusBadge>
               )}
-              {d.supersedesDocumentId && <span className="text-[9px] text-zinc-600">replaces v{(d.version ?? 2) - 1}</span>}
+              {d.supersedesDocumentId && <span className="text-ds-micro text-zinc-600">replaces v{(d.version ?? 2) - 1}</span>}
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0"><Button variant="ghost" className="text-[10px]" data-state={'doc-preview-' + d.id} onClick={function() { setDrawerId(d.id); }}>Preview</Button><Button variant="ghost" className="text-[10px]" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-[10px] text-emerald-300" onClick={function() { void manual(d.id, 'approve'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve (manual)</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-[10px] text-red-300" onClick={function() { void manual(d.id, 'reject'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-[10px] text-brass" onClick={function() { void runAutomated(d.id); }}>Verify (automated)</Button><Button variant="ghost" className="text-[10px] text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
-          </div>);})}<p className="text-[8px] text-zinc-700 px-4 py-1 text-right">Actions attributed as admin on behalf of brand</p></div>)}
+            <div className="flex items-center gap-1 flex-shrink-0"><Button variant="ghost" className="text-ds-micro" data-state={'doc-preview-' + d.id} onClick={function() { setDrawerId(d.id); }}>Preview</Button><Button variant="ghost" className="text-ds-micro" onClick={function() { setPreviewId(d.id); }}><Eye className="w-3 h-3 mr-0.5" />View</Button>{d.status !== 'approved' && <Button variant="ghost" className="text-ds-micro text-emerald-300" onClick={function() { void manual(d.id, 'approve'); }}><CheckCircle2 className="w-3 h-3 mr-0.5" />Approve (manual)</Button>}{d.status !== 'missing' && <Button variant="ghost" className="text-ds-micro text-red-300" onClick={function() { void manual(d.id, 'reject'); }}><XCircle className="w-3 h-3 mr-0.5" />Reject</Button>}<Button variant="ghost" className="text-ds-micro text-brass" onClick={function() { void runAutomated(d.id); }}>Verify (automated)</Button><Button variant="ghost" className="text-ds-micro text-brass" onClick={function() { uploadComplianceDoc(d.brandId, d.type, reviewer); void qc.invalidateQueries({ queryKey: ['compliance-documents'] }); }}>Upload</Button></div>
+          </div>);})}<p className="text-ds-micro text-zinc-700 px-4 py-1 text-right">Actions attributed as admin on behalf of brand</p></div>)}
         </div>);
       })}</div>
       </WorkspaceSection>
@@ -286,16 +286,16 @@ export function ComplianceApprovals() {
         footer={
           drawerDoc ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[10px] text-zinc-600">
+              <span className="text-ds-micro text-zinc-600">
                 Version {drawerDoc.version ?? 1} · actions attributed to the operator
               </span>
               <div className="flex items-center gap-2">
                 {drawerDoc.status !== 'approved' && (
-                  <Button className="text-[10px]" onClick={function() { void manual(drawerDoc.id, 'approve'); }} data-state="doc-drawer-approve">
+                  <Button className="text-ds-micro" onClick={function() { void manual(drawerDoc.id, 'approve'); }} data-state="doc-drawer-approve">
                     Approve (manual)
                   </Button>
                 )}
-                <Button variant="ghost" className="text-[10px]" onClick={function() { setPreviewId(drawerDoc.id); setDrawerId(null); }} data-state="doc-drawer-open-record">
+                <Button variant="ghost" className="text-ds-micro" onClick={function() { setPreviewId(drawerDoc.id); setDrawerId(null); }} data-state="doc-drawer-open-record">
                   Open full record
                 </Button>
               </div>
@@ -382,18 +382,18 @@ function ComplianceDocPreviewBody({
 
       {note && (
         <section aria-label="Last verification outcome">
-          <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+          <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
             Last verification outcome
           </h3>
-          <p className="text-[11px] leading-snug text-zinc-400">{note}</p>
+          <p className="text-ds-label leading-snug text-zinc-400">{note}</p>
         </section>
       )}
 
       <section aria-label="Gate effect">
-        <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
+        <h3 className="mb-1.5 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
           Gate effect
         </h3>
-        <p className="text-[11px] leading-snug text-zinc-500">
+        <p className="text-ds-label leading-snug text-zinc-500">
           {doc.status === 'approved'
             ? 'This document satisfies its requirement for the products in scope.'
             : 'This document does not yet satisfy its requirement — the affected products stay behind the compliance gate.'}
