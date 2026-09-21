@@ -16,6 +16,8 @@
 - **Eight obsolete items removed** (`ave1-check.mjs`, `scripts/test_write.txt`, `scripts/views-swap-tmp.py`, `PublicFooterTmp1.jsx`, `FcSelector.tsx`, `InfoTooltip.tsx`, `demoCharts.ts`, `validation/schemas.ts` + the unused `zod` dependency) — each with recorded evidence, each with its registry row repointed or corrected.
 - **The payout-rail SSOT contradiction is eliminated** across 8 source/doc locations plus 3 registry rows; `src/config/payouts.ts` (`DEFAULT_PAYOUT_RAIL = 'payoneer'`) is now the only thing anyone reads.
 - **Six stale-validator failures fixed** in 5 validator files, each REPOINTED to the current canonical source (never weakened) — including a genuine root cause: the canonical `DataTable` renders its mobile card list under SSR, so `data-table` never appears server-side.
+- **A REAL M12 wording violation fixed, and the wording gate now passes 100%.** `npm run validate:wording` had been **FAILING at the pre-reconciliation HEAD** with 8 violations (an inherited, unreported defect — `integrity-audit` reported 61 PASSED / 1 FAILED). The real one: `buildGraph.ts` rendered the label *"Retail channel (Amazon UK Vendor)"* on a node added by `addChannelLayer()`, which is **shared by BOTH scopes**, so the **brand's** relationship map named the retail channel to a brand. Fixed in the product (channel-neutral label), the internal kind renamed `amazon` → `retail_channel` so no file had to be excluded, and a **new permanent guard** added to `brain-runtime-check.ts` asserting the brand-scoped Brain's rendered copy names no retail channel — with a negative control. **The wording gate and the integrity audit are now 100% green.**
+- **A flaky gate fixed at its root, not hidden.** The full suite failed `e2e/embedded-social.spec.ts` test 6 once; the ids proved it was a TEST-side race (`msoc-0d3b0d4a` = `brand-astonish` expected vs `msoc-50ff1f6b` = `brand-tapatio` received — the session switch had not taken effect when the id was sampled). The workspace id is `msoc-${stableHash(tenantId)}`, so the test now waits for the switch to converge; the cross-tenant assertions stay exact. No test was skipped, marked fixme or relaxed.
 - **The permanent clean-tree contract is now in the rules:** `.clinerules/operating-model.md` §6, `.clinerules/protection-rules.md`, `.clinerules/project-state-contract.md`, `.gitignore`, `README.md` and `scripts/export-review-zip.sh` (with a second failing guard against private/generated trees).
 
 ### 2. IN PROGRESS
@@ -69,7 +71,7 @@
 ### 7. CURRENT CHECKPOINT
 
 - **Branch:** `redesign/foundation`. **Checkpoint commit:** **`bd60e704f51209e53c8a0a0095c95cb8ff1af866`** (`bd60e70`) — *chore(clean-slate): reconcile the repository into ONE clean canonical HEAD*. `git ls-files` = **724 tracked files**. **`git status --porcelain`: EMPTY** (verified after the commit, and re-verified after the project-state documents were updated).
-- **Project-state sources agree:** `requirements-registry.json` (441 rows) · this file · `HANDOFF.md` · `docs/SPRINT_*` and the dated increment records · this session report. No source exists only as an untracked file.
+- **Project-state sources agree:** `requirements-registry.json` (442 rows) · this file · `HANDOFF.md` · `docs/SPRINT_*` and the dated increment records · this session report. No source exists only as an untracked file.
 
 ### 8. VERIFICATION STATUS (all executed in this session)
 
@@ -77,11 +79,15 @@
 |---|---|
 | `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** (exit 0) |
 | `npx eslint .` | **0 problems** (exit 0) — rules-of-hooks + exhaustive-deps are errors |
-| `npm run build` | **PASS** (vite, 3.63 s; the pre-existing `AdminShell` ~956 kB chunk warning remains) |
-| `npx playwright test` (FULL SUITE, 445 declarations) | **443 passed / 2 skipped / 0 failed, exit 0, 6.0 m** |
+| `npm run build` | **PASS** (vite, ~3.7 s; the pre-existing `AdminShell` ~956 kB chunk warning remains) |
+| `npm run validate:wording` | **WORDING_LINT_PASS — 281 src files, 0 outward-facing violations** (was 8 violations before this session's M12 fix) |
+| `node scripts/integrity-audit.mjs` | **62 PASSED / 0 FAILED — 100%** (was 61 PASSED / 1 FAILED) |
+| `npx playwright test` (FULL SUITE, 445 declarations) | **443 passed / 2 skipped / 0 failed, exit 0, 6.5 m** |
 | Validator sweep — all 91 `scripts/validate-*.mjs` | **91 PASS / 0 FAIL on the clean committed tree** (while the tree was dirty, 89 passed and the only 2 failures were the dirty-tree scope guards — `validate-e6` F5/F5b/F6 and `validate-e7`'s scope assertion — which pass once the change set is empty, exactly as designed) |
+| `node scripts/validate-mercenta-brain.mjs` | **30 assertions PASS**, runtime harness executed, 0 network calls (now including the new brand-facing wording guard) |
 | `node scripts/verify-registry.mjs` | 272 verified · 62 needs manual check · 185 issues · 17 reachability flags |
-| `requirements-registry.json` | valid JSON · 441 rows — built_and_tested 242 · built 126 · not_started 58 · deferred 6 · blocked 4 · in_progress 3 · regressed 2 |
+| `requirements-registry.json` | valid JSON · **442 rows** — built_and_tested 243 · built 126 · not_started 58 · deferred 6 · blocked 4 · in_progress 3 · regressed 2 |
+| Isolated committed-HEAD checkout (`git worktree`, 724 tracked files, 0 untracked, no `.env`) | tsc 0 errors · build PASS · typography / SEO / provider-safety validators PASS — the committed repository is independently runnable |
 
 ### 9. NEXT EXECUTION SCOPE
 

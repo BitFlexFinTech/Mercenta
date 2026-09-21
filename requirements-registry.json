@@ -4514,6 +4514,15 @@
       "evidence": "scripts/validate-canonical-propagation.mjs — EXECUTED: 25 PASS / 0 FAIL, 0 network calls; package.json script validate:canonical-propagation",
       "last_verified": "2026-09-21",
       "superseded_by": null
-    }
+    },
+{
+      "id": "m12-wording-brand-brain-fix",
+      "description": "M12 WORDING SAFEGUARD — the BRAND-scoped Brain no longer names the retail channel, and the static wording gate passes 100%. FIXED: `src/lib/intelligence/brain/buildGraph.ts` rendered the label \"Retail channel (Amazon UK Vendor)\" on a node added by `addChannelLayer()`, which is SHARED by BOTH scopes — so the brand's relationship map (`BrandRelationshipMap` -> `BrainCanvas`) named the retail channel to a brand. The label is now channel-neutral. The internal Brain entity kind was ALSO renamed `amazon` -> `retail_channel` (a code identifier that is never rendered) so the wording matcher does not have to be blinded to the real copy in those files. NEW PERMANENT GUARD: `scripts/brain-runtime-check.ts` asserts the brand-scoped Brain's rendered COPY names no retail channel, with a negative control proving the matcher can fail; property VALUES are deliberately out of scope because several are PROVENANCE (an evidence URL) that the rules require to stay accurate. This gate had been FAILING at HEAD c07dfbe with 8 violations — an inherited, unreported defect; `scripts/integrity-audit.mjs` reported 61 PASSED / 1 FAILED and now reports 62 / 0.",
+      "source": "Clean-slate reconciliation (2026-09-21 session 8) — the wording-gate failure found while verifying the reconciled tree",
+      "status": "built_and_tested",
+      "evidence": "`npm run validate:wording` EXECUTED -> WORDING_LINT_PASS (281 src files, 0 outward-facing violations); `scripts/integrity-audit.mjs` EXECUTED -> 62 PASSED / 0 FAILED (100%); `scripts/validate-mercenta-brain.mjs` EXECUTED -> 30 assertions PASS, runtime harness executed, 0 network calls; src/lib/intelligence/brain/{buildGraph,types,layout}.ts + src/components/shared/brain/BrainCanvas.tsx; e2e/uiux-redesign.spec.ts:245",
+      "last_verified": "2026-09-21",
+      "superseded_by": null
+}
   ]
 }

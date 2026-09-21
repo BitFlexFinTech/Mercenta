@@ -36,6 +36,8 @@ Every untracked product file was traced to its consumers **before** committing �
    - `validate-stage15.mjs` ×1 — same root cause, same strengthened repoint.
    - `validate-e6-brand-surfaces.mjs` F8 — the canonical brand nav grew to **19 items** (`commercial_readiness`, `cases`); the exact ordered-list assertion was repointed.
 3. **A rule-failure found while fixing them:** `scripts/verify-registry.mjs`'s known-file list still named the two removed components (updated), and its flag count is unchanged by this session's registry edits.
+4. **A REAL M12 wording violation — FIXED, and the wording gate is now 100% green.** `npm run validate:wording` had been **FAILING at the pre-reconciliation HEAD `c07dfbe`** with 8 violations (an inherited, unreported defect: `integrity-audit` reported 61 PASSED / 1 FAILED). Seven were code identifiers the word-boundary matcher could not distinguish from copy; **one was a genuine brand-facing violation**: `src/lib/intelligence/brain/buildGraph.ts` rendered `label: 'Retail channel (Amazon UK Vendor)'` on the node added by `addChannelLayer()`, and that layer is **shared by BOTH scopes** — so a brand's relationship map (`BrandRelationshipMap` → `BrainCanvas`) named the retail channel to a brand. Fixed **in the product** (channel-neutral label), and the internal entity kind was renamed `amazon` → `retail_channel` (an identifier that is never rendered) across `types.ts`, `layout.ts`, `buildGraph.ts`, `BrainCanvas.tsx` and the harness's `REQUIRED_KINDS` — so **no file had to be excluded and the gate keeps full force over every one of them**. A **new permanent guard** (with a negative control) now asserts the brand-scoped Brain's rendered copy names no retail channel; property VALUES are deliberately out of scope because several are **provenance** (an evidence URL) that the rules require to stay accurate.
+5. **A flaky gate fixed at its ROOT, not hidden.** The full suite failed `e2e/embedded-social.spec.ts` test 6 in one run. The ids proved the cause: expected `msoc-0d3b0d4a` (**FNV-1a of `brand-astonish`**) and received `msoc-50ff1f6b` (**FNV-1a of `brand-tapatio`**) — the logout→login cycle had not taken effect when the id was sampled. The workspace id is `msoc-${stableHash(tenantId)}`, a pure function of the tenant, so the test now **waits for the switch to converge** instead of sampling after a fixed sleep. That removes a timing assumption without weakening the tenant-isolation contract (the id cannot take another tenant's value); the cross-tenant assertions stay exact. **No test was skipped, marked fixme or relaxed.**
 
 ### 3. REMOVED AS OBSOLETE (8 removals, each with evidence)
 
@@ -73,13 +75,17 @@ Every untracked product file was traced to its consumers **before** committing �
 |---|---|
 | `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** (exit 0) |
 | `npx eslint .` | **0 problems** (exit 0) — rules-of-hooks + exhaustive-deps are errors |
-| `npm run build` | **PASS** (vite, 3.63 s; the pre-existing `AdminShell` 956 kB chunk-size warning remains) |
-| `npx playwright test` (FULL SUITE, 445 declarations) | **443 passed / 2 skipped / 0 failed, exit 0, 6.0 m** |
-| Validator sweep — all 91 `scripts/validate-*.mjs` | **89 PASS / 2 FAIL**, and the 2 are the dirty-tree scope guards by design (`validate-e6` F5/F5b/F6, `validate-e7` scope) which assert the working-tree change set stays inside a declared sprint scope — they pass on a clean tree |
-| `node scripts/verify-registry.mjs` | 271 verified · 63 needs manual check · 185 issues · 17 reachability flags (no row touched by this session contributes an issue) |
-| `requirements-registry.json` | valid JSON, **441 rows** — built_and_tested 242 · built 124 · not_started 60 · deferred 6 · blocked 4 · in_progress 3 · regressed 2 |
+| `npm run build` | **PASS** (vite, ~3.7 s; the pre-existing `AdminShell` 956 kB chunk-size warning remains) |
+| `npm run validate:wording` | **WORDING_LINT_PASS — 281 src files, 0 violations** (8 before this session's M12 fix) |
+| `node scripts/integrity-audit.mjs` | **62 PASSED / 0 FAILED — 100%** (61 / 1 before) |
+| `npx playwright test` (FULL SUITE, 445 declarations) | **443 passed / 2 skipped / 0 failed, exit 0, 6.5 m** |
+| Validator sweep — all 91 `scripts/validate-*.mjs` | **91 PASS / 0 FAIL on the clean committed tree** (89/2 while dirty — the 2 dirty-tree scope guards, by design) |
+| `node scripts/validate-mercenta-brain.mjs` | **30 assertions PASS**, runtime harness executed, 0 network calls (includes the new brand-facing wording guard) |
+| `node scripts/verify-registry.mjs` | 272 verified · 62 needs manual check · 185 issues · 17 reachability flags (no row this session touched contributes an issue) |
+| `requirements-registry.json` | valid JSON, **442 rows** — built_and_tested 243 · built 126 · not_started 58 · deferred 6 · blocked 4 · in_progress 3 · regressed 2 |
+| Isolated committed-HEAD checkout (`git worktree`, 724 tracked files, 0 untracked, no `.env`) | tsc 0 errors · build PASS · typography / SEO / provider-safety validators PASS |
 
-**An earlier full-suite run in this session reported 22 failures; every one was a 30-second timeout on `page.goto`/`reload`/`screenshot`, and the suite re-run alone on the now-warm dev server passed 443/0.** That first run was environment-bound (cold Vite transform of ~50 newly added modules), not a product regression — recorded here because an honest report names it rather than hiding it.
+**An earlier full-suite run in this session reported 22 failures; every one was a 30-second timeout on `page.goto`/`reload`/`screenshot` against a cold dev server** (the first run had to transform ~50 newly added modules). A later run failed one test on a real assertion, and the ids proved it was a test-side timing race (item 5 above), now fixed. Both episodes are recorded here rather than only the green run.
 
 ### 6. KNOWN EXCEPTIONS / WHAT THIS DOES NOT CLAIM
 
