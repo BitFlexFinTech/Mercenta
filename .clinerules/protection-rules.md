@@ -1,7 +1,9 @@
-> ## ⚠ AUTHORITY ORDER (2026-09-21 rule migration)
+> ## ⚠ AUTHORITY ORDER (2026-09-21 rule migration · updated 2026-09-22)
 > 1. The CURRENT Founder execution directive for this session.
 > 2. **`.clinerules/operating-model.md`** — the canonical operating model (scope authority, COMMIT/DEPLOY
->    definitions, the mandatory delivery chain, the genuine hard stops).
+>    definitions, the mandatory delivery chain, the genuine hard stops) **and §10/§11 — the ONE completion
+>    contract (three-way synchronization: local runtime = GitHub committed state = `https://demo.mercenta.co.uk`)
+>    and the mandatory status vocabulary. Those sections are permanent and are NOT weakened by anything below.**
 > 3. This file — its **ACTIVE SAFETY RULES** only.
 > 4. Historical documents (sprint docs, handoffs, transcripts, `Mercenta Build 1.rtf`) — context only, NEVER active policy.
 >
@@ -134,9 +136,15 @@ Before claiming a task is complete, you MUST:
    reconciliation of any inherited dirtiness) must already exist, because the review ZIP is a generated, gitignored
    artefact and does not dirty the tree. A dirty tree after the zip step means the commit was incomplete.
 
-Do NOT say "DONE" or "complete" until all 7 steps above are shown.
-If a test fails, report it honestly. Do not mark tests as fixme
-to hide failures.
+These 7 steps prove a **VERIFIED LOCAL/COMMITTED CHECKPOINT** — they do NOT prove COMPLETE. For application/product
+work, COMPLETE additionally requires deployment of the verified commit and live verification on
+`https://demo.mercenta.co.uk` (`operating-model.md` §10). So:
+
+- Do NOT say "DONE" or "complete" until all 7 steps above are shown.
+- Do NOT say "COMPLETE" / "DONE" / "FINISHED" / "DEPLOYED" / "LIVE" / "PRODUCTION READY" at all unless the
+  three-way gate in `operating-model.md` §10 is satisfied; otherwise use the §11.1 phrase that matches reality
+  (normally **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE**).
+- If a test fails, report it honestly. Do not mark tests as fixme to hide failures.
 
 ## Deployment rules — CRITICAL
 
@@ -147,6 +155,21 @@ to hide failures.
 - A deployment is NOT complete until the live site has been opened and the deployed change verified
   (`operating-model.md` §5). Never invent or print a credential; if the demo-host credential is genuinely
   unavailable, that is a real hard stop — report it rather than implying a deploy happened.
+
+### Deployment authority vs COMPLETION — the two questions are separate (`operating-model.md` §10/§11)
+
+- **Authority to deploy** is the gate above: deployment happens only when the current Founder directive authorises
+  it, only via `scripts/deploy-demo.sh`, only to `demo.mercenta.co.uk`.
+- **Authority to call the work COMPLETE** is `operating-model.md` §10 and is NOT granted by the absence of a deploy
+  instruction. Product work is COMPLETE only when local runtime = GitHub committed state = `https://demo.mercenta.co.uk`
+  and the live implementation has been verified to match the recorded verified commit.
+- Therefore, if deployment has not been authorised/performed: report **VERIFIED LOCAL/COMMITTED CHECKPOINT —
+  NOT COMPLETE**, never "complete", never "deployed", never "live".
+- If a deploy command ran but the live site was not opened and the change not verified: report **DEPLOYMENT
+  EXECUTED — LIVE VERIFICATION PENDING — NOT COMPLETE**.
+- **NEVER** report COMPLETE / DONE / FINISHED / FULLY IMPLEMENTED / DEPLOYED / LIVE / PRODUCTION READY on the
+  strength of local work, passing tests, a Git commit, a pushed commit, a successful deploy command, uploaded files,
+  an HTTP 200 or a reachable URL alone (`operating-model.md` §11.2).
 
 Additional standing rules:
 - ~~Do NOT change any visual styling, layout, fonts, or colors unless explicitly told to in the current task.~~

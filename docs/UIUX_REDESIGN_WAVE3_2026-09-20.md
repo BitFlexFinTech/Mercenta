@@ -284,5 +284,8 @@ layout or behaviour class was touched.
   before this session (`98 tracked files changed / 4,677 insertions / 168 deletions` at
   session start, plus untracked work). Committing would sweep that unknown work into an
   unauthorised commit, which is a hard-stop condition (overwriting unknown Founder work).
-  **A verified checkpoint commit therefore requires explicit Founder instruction.**
+  **A verified checkpoint commit therefore requires explicit Founder instruction.** *(SUPERSEDED, marked 2026-09-22:
+  the commit gate was RETIRED on 2026-09-21 — Cline commits its own VERIFIED work; see
+  `.clinerules/operating-model.md` §2/§5/§6. This sentence is retained as the 2026-09-20 session record. Note also
+  that a verified commit is a CHECKPOINT, not COMPLETION: see §10/§11 of that file.)*
 

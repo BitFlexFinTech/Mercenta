@@ -2,6 +2,9 @@
 
 > **Status: ACTIVE — the canonical operating model for Mercenta development.**
 > Established 2026-09-21 by explicit Founder decision, replacing stale historical workflow gates.
+> **§10 is the ONE COMPLETION CONTRACT (three-way synchronization: local runtime = GitHub committed state =
+> `https://demo.mercenta.co.uk`) and §11 is the mandatory status vocabulary. Both were added 2026-09-22 by Founder
+> directive and are permanent; no session may reinterpret them, and no other file may weaken them.**
 > Where this file conflicts with any other rule file, sprint document, handoff, transcript or archive (including
 > `Mercenta Build 1.rtf`, `MASTER_CHATGPT_HANDOFF.md`, `MERCENTA_MASTER_CONTEXT.md`, the `STATUS_CHECK.md` history log
 > and any `docs/` sprint record), **the current Founder directive and this file win.**
@@ -10,7 +13,8 @@
 ## 1. Authority order
 
 1. The CURRENT Founder execution directive for this session.
-2. This file — the canonical operating model.
+2. This file — the canonical operating model. **Its §5 (COMMIT/DEPLOY), §10 (the completion contract) and §11 (the
+   status vocabulary) are the single authoritative completion semantics for this project.**
 3. `.clinerules/protection-rules.md` — its ACTIVE SAFETY RULES only (its retired clauses have no authority).
 4. `.clinerules/project-state-contract.md` — the five synchronised project-state sources.
 5. `.clinerules/mercenta-business-model.md` — business invariants; a workflow-rule migration NEVER alters these.
@@ -59,23 +63,41 @@ Retained unchanged, because they are genuine safety rules and not workflow restr
 
 ## 5. COMMIT and DEPLOY — the canonical definitions
 
-**COMMIT = VERIFIED RUNTIME CHECKPOINT.** Not merely a successful `git commit`. A commit counts only when:
-1. the implementation is complete; 2. it is integrated into the actual application; 3. relevant tests pass;
-4. browser/runtime verification passes where applicable; 5. the committed state contains the implemented change;
-6. `npm run dev` from the resulting state starts the version containing it; 7. the Founder can open the local
-application and see/use the change. A commit holding incomplete, unverified or disconnected code is NOT a delivery.
+**COMMIT = VERIFIED RUNTIME CHECKPOINT.** Not merely a successful `git commit`. A commit counts as a VERIFIED
+COMMITTED CHECKPOINT only when ALL of the following are true:
+1. the implementation is complete for the scoped increment (**implementation-complete ≠ COMPLETE — see §10**);
+2. it is integrated into the actual application (not a detached module, not a fixture, not a stub);
+3. relevant automated tests pass;
+4. relevant browser/runtime verification passes;
+5. the committed state CONTAINS the implemented change;
+6. the committed tree is re-run/re-verified locally after the commit;
+7. `npm run dev` from that committed state presents the completed implementation;
+8. the relevant user-facing functionality works from that committed state; and
+9. **the commit hash is recorded** in the project-state sources.
+A commit holding incomplete, unverified or disconnected code is NOT a delivery. Never call a plain Git commit
+"complete" — see §10 for what COMPLETE actually requires.
 
-**DEPLOY = VERIFIED LIVE RUNTIME DELIVERY.** Not merely a successful upload, script run, CI job or HTTP 200. A
-deployment counts only when: 1. the verified committed build was deployed; 2. the live application contains it;
-3. the live application was opened and tested after deployment; 4. the changed workflows were verified on the live
-host; 5. the live site reflects the same implementation that was verified locally; 6. no stale previous build is
-presented as the new one.
+**DEPLOY = VERIFIED LIVE RUNTIME DELIVERY.** Not merely a successful upload, script run, CI job, HTTP 200 or a
+reachable URL. A deployment counts only when:
+1. the VERIFIED COMMITTED implementation is what was deployed;
+2. the deployment corresponds to the recorded verified commit (no uncommitted edits shipped);
+3. `https://demo.mercenta.co.uk` is opened;
+4. the changed implementation is visibly/functionally verified ON the live site;
+5. relevant live browser/runtime checks are performed;
+6. the live implementation is confirmed to correspond to the verified committed implementation; and
+7. no stale build/version is being mistaken for the current implementation.
 
-**MANDATORY DELIVERY CHAIN** (for work the Founder has required to be delivered):
-`IMPLEMENT → TEST → FIX → VERIFY LOCALLY → COMMIT → VERIFY THE LOCAL COMMITTED VERSION → DEPLOY → OPEN THE LIVE SITE
-→ VERIFY THE LIVE VERSION → REPORT COMPLETE.`
-Never report "complete" at the commit stage when deployment was required; never report "deployed" before the live site
-has been verified.
+**MANDATORY DELIVERY CHAIN** (for product work — §10 governs when it may be called COMPLETE):
+
+```
+IMPLEMENT → INTEGRATE → TEST → FIX → VERIFY LOCAL → COMMIT
+→ VERIFY COMMITTED LOCAL VERSION → DEPLOY → OPEN LIVE DEMO
+→ VERIFY LIVE IMPLEMENTATION → CONFIRM LOCAL/GITHUB/DEMO SYNCHRONIZATION
+→ FINAL REGRESSION → COMPLETE
+```
+
+Never report "complete" at the commit stage when deployment was required; never report "deployed" before the live
+site has been verified; **never skip the live-verification stage when declaring product work complete** (§10).
 
 ## 6. Worktree policy — **CLEAN CANONICAL REPOSITORY IS A NON-NEGOTIABLE PROJECT INVARIANT**
 
@@ -151,7 +173,134 @@ pass; never destroy history or audit records.
 - After every session: `bash scripts/export-review-zip.sh` → `<project root>/Review Zip/mercenta-review.zip`.
   No other zips, ever; nothing written to `~/Desktop/` directly; no numbered zips.
   The ZIP itself is a GENERATED ARTEFACT and is **gitignored** (`Review Zip/*.zip`) — never track it.
-- **Before reporting the session complete, assert the invariant:** `git status --porcelain` must print NOTHING.
+- **Before reporting the session finished, assert the invariant:** `git status --porcelain` must print NOTHING.
+  A session may legitimately END at a **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** (§11.1) when
+  deployment is not authorised; what it may never do is call product work COMPLETE without the §10 demo leg.
   If it prints anything, reconcile it — do not report completion.
 - Deployment only via `scripts/deploy-demo.sh`, only to `demo.mercenta.co.uk`, never to `mercenta.co.uk` before the
   `GO_LIVE.md` playbook is executed.
+
+## 10. THE COMPLETION CONTRACT — THREE-WAY SYNCHRONIZATION (added 2026-09-22 by Founder directive)
+
+> **This section is the ONE completion contract for Mercenta product/application work. It is permanent and
+> non-negotiable, and a new session MUST NOT reinterpret it.** It is placed here, in the canonical rule file
+> (authority #2 in §1), deliberately — not in a handoff, a sprint document or a chat prompt.
+
+### 10.1 The primary rule
+
+**For Mercenta application/product work, COMPLETE means the verified implementation is synchronized across
+local runtime, the verified GitHub committed state, and `https://demo.mercenta.co.uk`; if any one is not verified,
+the work is NOT COMPLETE.**
+
+The required state is exactly:
+
+```
+LOCAL RUNTIME  =  GITHUB COMMITTED STATE  =  DEMO.MERCENTA.CO.UK
+```
+
+All three must represent the SAME verified implementation. This applies to every task, feature, phase, wave,
+workstream, redesign, bug fix, integration and milestone. If any one of the three is incomplete, stale, divergent,
+unavailable or unverified:
+
+**THE PRODUCT WORK IS NOT COMPLETE.**
+
+### 10.2 What COMPLETE requires — all three, verified
+
+**LOCAL**
+- the implementation works locally;
+- relevant automated tests pass;
+- browser/runtime verification passes;
+- the committed state itself has been re-verified locally (`npm run dev` from that state).
+
+**GITHUB (the verified committed repository)**
+- the implementation is committed;
+- **the commit hash is recorded** in the project-state sources;
+- the committed state is re-verified after the commit;
+- `git status --porcelain` is EMPTY.
+
+**DEMO (`https://demo.mercenta.co.uk`)**
+- the verified commit is deployed through `scripts/deploy-demo.sh` (the only deploy path);
+- the live site is OPENED;
+- the changed functionality is verified live;
+- the live implementation is confirmed to MATCH the verified commit.
+
+Only when all three hold may the work be reported as:
+
+**COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** (equivalently: **COMPLETE — THREE-WAY SYNCHRONIZATION VERIFIED**).
+
+### 10.3 Local-only, GitHub-only or live-only work is never complete
+
+- **Local-only** (code works, tests pass, nothing committed, nothing deployed) → NOT COMPLETE.
+- **GitHub-only** (committed and pushed, never deployed, never opened live) → NOT COMPLETE.
+- **Live-only** (something is live but the verified commit is unknown, divergent, or the local/committed state does
+  not contain it) → NOT COMPLETE.
+- **"Deployed" by command alone** (script ran, files uploaded, URL returns HTTP 200, site reachable) → NOT DEPLOYED
+  under §5, and therefore NOT COMPLETE.
+
+### 10.4 Scope of this gate
+
+This gate governs **application/product work** (anything that changes what a user can see or do, or that changes
+product behaviour, data, permissions, integrations, security or infrastructure).
+
+It does **not** require deploying internal Cline governance files (`.clinerules/**`) or project-state documentation
+(`PROJECT_STATUS.md`, `HANDOFF.md`, `requirements-registry.json`, `docs/**`) to the demo host — those are not
+application runtime artefacts. A governance-only or documentation-only increment may therefore be reported as a
+**VERIFIED COMMITTED CHECKPOINT** with the three-way status recorded as **NOT APPLICABLE (no application runtime
+change)**.
+
+**This distinction must never be used to weaken the three-way rule for actual product work.** If an increment
+changes application runtime behaviour, the three-way gate applies in full.
+
+## 11. COMPLETION STATUS VOCABULARY, FORBIDDEN CLAIMS, AND DEPLOYMENT AUTHORITY
+
+### 11.1 The standard status phrases (use these — never collapse them into "complete")
+
+| Situation | The ONLY permitted status phrase |
+|---|---|
+| Local + committed verification done, demo deployment NOT done | **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** |
+| Deploy command succeeded, live verification NOT done | **DEPLOYMENT EXECUTED — LIVE VERIFICATION PENDING — NOT COMPLETE** |
+| Live verification shows the deployed build differs from the verified commit | **DEPLOYMENT DIVERGENCE — NOT COMPLETE** |
+| All three environments match and are verified | **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** |
+| Governance/documentation-only increment (no application runtime change) | **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change)** |
+
+### 11.2 Forbidden claims
+
+Do NOT report a product task as **COMPLETE · DONE · FINISHED · FULLY IMPLEMENTED · DEPLOYED · LIVE · PRODUCTION
+READY** when any of these is the only thing that is true: local implementation exists; tests pass; a Git commit
+exists; GitHub contains the commit; a deploy command succeeded; files were uploaded; the live URL returns HTTP 200;
+the live site is merely reachable.
+
+If the changed functionality has not been verified live, the work is **NOT COMPLETE** and must be reported with the
+§11.1 phrase that matches reality.
+
+### 11.3 Deployment authority vs completion status — the reconciliation
+
+Two separate questions. Never conflate them:
+
+1. **May a deployment action be executed?** — governed by the project's protection rules: deploy only when the
+   current Founder directive authorises it, only via `scripts/deploy-demo.sh`, only to `demo.mercenta.co.uk`, never
+   to `mercenta.co.uk` before the `GO_LIVE.md` playbook is executed. This gate is unchanged and must not be bypassed.
+2. **May the work be called COMPLETE?** — governed by §10, independently of (1).
+
+Therefore:
+
+- **Deployment authorised** → execute the established deploy process, OPEN the live demo, VERIFY the changed
+  functionality live, CONFIRM local/GitHub/demo synchronization, then — and only then — report
+  **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**.
+- **Deployment NOT authorised (or no credential available)** → report
+  **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE**, state plainly that demo deployment and live verification
+  have not happened, and DO NOT claim completion or deployment.
+
+"Deployment requires Founder instruction" is **never** permission to call an implementation complete before
+deployment and live verification. It only means the completion contract's third leg is **pending**, and the status
+language in §11.1 must say so.
+
+### 11.4 Where this contract is mirrored (so it cannot be missed)
+
+- `.clinerules/protection-rules.md` — the deployment/authority rules carry the completion cross-reference.
+- `.clinerules/project-state-contract.md` — the five project-state sources must use the §11.1 vocabulary and must
+  record the three-way status.
+- `PROJECT_STATUS.md` / `HANDOFF.md` — every session's report must state the three-way status explicitly.
+
+Any of those files, or any sprint document, handoff, transcript or archive that states something weaker or
+different is **superseded by this section**.

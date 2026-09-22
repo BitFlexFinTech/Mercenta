@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 441,
+    "total_entries": 448,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -331,7 +331,20 @@
       ],
       "note": "The Logistics Hub had no operational map, no truth labelling and no canonical geography before this increment, and its booking form was non-functional. These rows record the map, the truth labelling, the freight-term semantics, the canonical geography, the shipment-origin placeholder fix, the executed contract gate and the workspace redesign. This script is idempotent: re-running adds nothing and duplicates nothing."
     },
-    "last_reconciled": "2026-09-21"
+    "last_reconciled": "2026-09-21",
+    "completion_contract": {
+      "canonical_location": ".clinerules/operating-model.md §10 (contract) + §11 (status vocabulary)",
+      "rule": "For Mercenta application/product work, COMPLETE means the verified implementation is synchronized across local runtime, the verified GitHub committed state, and https://demo.mercenta.co.uk; if any one is not verified, the work is NOT COMPLETE.",
+      "status_vocabulary": [
+        "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE",
+        "DEPLOYMENT EXECUTED — LIVE VERIFICATION PENDING — NOT COMPLETE",
+        "DEPLOYMENT DIVERGENCE — NOT COMPLETE",
+        "COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED",
+        "VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change)"
+      ],
+      "note": "A status of `built_and_tested` in this registry means the capability is implemented and verified LOCALLY (code + tests + browser where applicable). It is NOT a claim of three-way completion: no product row may be read as deployed or live-verified unless the demo leg has been verified per §10.",
+      "recorded": "2026-09-22"
+    }
   },
   "entries": [
     {

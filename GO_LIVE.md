@@ -120,6 +120,12 @@ from the connection state, and a sandbox connection is never treated as verified
 5. After the upload, hard-verify the served bundle is the one you built
    (compare the hashed asset name in `dist/index.html` with the deployed one).
 
+> **Completion gate (added 2026-09-22):** a successful upload is **not** completion. Product work is COMPLETE only
+> when the verified implementation is synchronized across local runtime, the verified committed state and
+> `https://demo.mercenta.co.uk`, with the live implementation verified to match the recorded commit — see
+> `.clinerules/operating-model.md` §10 (contract) and §11 (status vocabulary: a deploy that has not been live-verified
+> is reported as **DEPLOYMENT EXECUTED — LIVE VERIFICATION PENDING — NOT COMPLETE**).
+
 ## 6. Post-deploy smoke test (must pass, in this order)
 
 1. Marketing homepage, Partner Login, and the public pages render; console and

@@ -50,6 +50,7 @@
 ### 7. CURRENT CHECKPOINT
 
 - **Branch:** `redesign/foundation`. **Start HEAD:** `24b2b50` (Wave 4 Brain 3D) with `git status --porcelain` **EMPTY** at start. **Checkpoint commits:** **`0a8e863`** *wave3(logistics-hero): …* and **`88c1739`** *fix(theme-ssot): the WebGL palette hook derives its placeholder from themes.ts instead of duplicating hexes*. `git status --porcelain`: **EMPTY**.
+- **THREE-WAY STATUS for this checkpoint: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ (tsc/build/browser/validators, committed state re-verified) · GitHub committed ✅ (`0a8e863`, `88c1739`, tree clean) · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. Per `.clinerules/operating-model.md` §10, the Wave 3 hero work is **NOT COMPLETE**.
 - **Inherited defect fixed in this session (evidence, not assertion):** `scripts/validate-uiux-redesign.mjs` FAILED at the previous HEAD with *"no component hardcodes a palette hex"* (offenders `src/lib/hooks/useWebglPalette.ts:#F97316` / `#EF4444`). Confirmed pre-existing by running the validator in a `git worktree` at `24b2b50` (343 PASS / 1 FAIL, same offenders). Fixed by deriving the hook's placeholder AND every `readVar` fallback from `THEMES[DEFAULT_THEME].vars` — now **344 PASS / 0 FAIL**. The session-9 claim of "0 FAIL" for that gate was therefore inaccurate for the committed state; recorded rather than repeated.
 
 ### 8. VERIFICATION STATUS (all executed in this session — real output)
@@ -72,7 +73,26 @@
 1. Finish the Wave 3 items in heading 3 (backorder gate, routing-request reconciliation, carrier eligibility derivation, ETA) — smallest-risk first, each with its own validator/browser assertion.
 2. Then **Wave 5** (Super Admin Control Centre + credential vault, server-side authorisation, secret hygiene), then **Wave 6**.
 3. **No credential exists for anything in heading 5** — do not attempt those without one, and never claim a simulated provider is live.
-4. **Deployment only on Founder instruction**, only to `demo.mercenta.co.uk`, and only after opening the live site to verify the change.
+4. **Deployment only on Founder instruction**, only to `demo.mercenta.co.uk`, and only after opening the live site to verify the change. **The absence of a deploy instruction is NOT permission to call the work complete** — see heading 10 and `.clinerules/operating-model.md` §10/§11.
+
+### 10. COMPLETION CONTRACT STATUS (governance — added 2026-09-22)
+
+- **The ONE completion contract** is `.clinerules/operating-model.md` **§10** (three-way synchronization) with the
+  mandatory vocabulary in **§11**; it is mirrored in `.clinerules/protection-rules.md` (deployment/authority) and
+  `.clinerules/project-state-contract.md` (the five sources). It is permanent and must not be reinterpreted.
+- **Required state for product work:** `LOCAL RUNTIME = GITHUB COMMITTED STATE = https://demo.mercenta.co.uk`, all
+  three holding the SAME verified implementation.
+- **Current three-way status: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`.**
+  - **Local runtime:** ✅ verified (tsc 0 errors · eslint 0 problems · build PASS · hero validator 53 assertions ·
+    logistics map validator 60 assertions · Playwright 10 + 15 passed · committed state re-run from `88c1739`/`52da8bf`).
+  - **GitHub committed repository:** ✅ `0a8e863` (Wave 3 hero) · `88c1739` (inherited palette-SSOT fix) ·
+    `52da8bf` (status/handoff) — recorded, tree EMPTY.
+  - **`https://demo.mercenta.co.uk`:** ❌ **NOT DEPLOYED and NOT VERIFIED.** No live verification exists, so per §10
+    the Wave 3 hero work is **NOT COMPLETE** and must never be described as complete, deployed, live or production
+    ready.
+- **Deployment authority remains unchanged** (Founder instruction, `scripts/deploy-demo.sh`, demo host only). That
+  gate governs whether a deployment ACTION may run; it does not change the completion definition — it only means the
+  third leg is pending, and the status phrase above must say so.
 
 ## 🧭 PREVIOUS POSITION — WAVE 4: THE BRAIN IS A GENUINE 3D SPATIAL EXPERIENCE (2026-09-22, session 9)
 
@@ -104,7 +124,7 @@
 
 - **WAVE 3 — LOGISTICS HUB IS STILL THE OLD 2D SVG MAP** (`src/components/shared/logistics/LogisticsMapCanvas.tsx`) and still fails its acceptance test. It is the next work. `maplibre-gl@5.24.0` (BSD-3-Clause) is installed and licence-checked for it but **is not yet integrated**. No moving planes/ships/road vehicles exist yet.
 - **Waves 5 (Super Admin / Control Centre), 6 (product-wide completion) and 7 (final verification + deployment) remain open.**
-- **Deployment has NOT been performed** and must not be until the Founder directs it (`scripts/deploy-demo.sh`, demo host only).
+- **Deployment has NOT been performed** and must not be until the Founder directs it (`scripts/deploy-demo.sh`, demo host only). *(Authority gate only — not a completion statement; see the current position block heading 10 and `.clinerules/operating-model.md` §10/§11.)*
 - **Bundle accounting gap, recorded honestly:** three/R3F/drei land in the shared `vendor-other` chunk (1,039 kB raw / 286 kB gzip) whose size is essentially unchanged from the pre-Brain build — not explained, and not asserted away. Total bundle size did not regress.
 
 ## 🧭 CURRENT PLATFORM POSITION — WAVE 0: LEGACY THEME RETIRED + DESIGN-FOUNDATION RE-VERIFIED (2026-09-22, session 9)
@@ -142,7 +162,7 @@
 
 - **Wave 0 residual polish** (skill-derived shell/interaction polish: theme-switch transition suppression, press feedback, hit areas) — items above are the rules; applying them across the shell is Wave 0/1 work still open.
 - **Waves 1–7 remain open**: the 3D Brain (Wave 4), the living Logistics Hub (Wave 3), Super Admin/Control Centre (Wave 5), product-wide completion (Wave 6) and final verification + deployment (Wave 7). The current Brain is still a 2D SVG graph (`src/components/shared/brain/BrainCanvas.tsx`) and the current Logistics map is still a 2D SVG canvas (`src/components/shared/logistics/LogisticsMapCanvas.tsx`) — **both fail the redesign's acceptance tests** and are the next work.
-- **Deployment has NOT been performed** and must not be, until the Founder directs it (deploy gate unchanged; `scripts/deploy-demo.sh` only, demo host only).
+- **Deployment has NOT been performed** and must not be, until the Founder directs it (deploy gate unchanged; `scripts/deploy-demo.sh` only, demo host only). *(Governance note added 2026-09-22: this line states the deployment-authority gate only. It is NOT a statement that local/committed work may be called complete — product work is COMPLETE only when local runtime = GitHub committed state = `https://demo.mercenta.co.uk` and the live implementation is verified. See the current position block heading 10 and `.clinerules/operating-model.md` §10/§11.)*
 ## 🧭 CURRENT PLATFORM POSITION — CLEAN-SLATE RECONCILIATION: ONE CLEAN CANONICAL REPOSITORY (2026-09-21, session 8)
 
 **Increment identity:** repository reconciliation. The 289-path dirty tree is RECONCILED into Git, obsolete material is REMOVED, six stale-validator failures are FIXED, the payout-rail prose contradiction is ELIMINATED, generated artefacts are UNTRACKED, the rules and documents are CORRECTED, and `git status --porcelain` is **EMPTY**.
@@ -1303,7 +1323,7 @@ Numbered, derived from the actual state (not a template):
 - The eight Amazon-side evidence-blocked items (unchanged, none invented).
 - Every live provider remains unactivated by design; simulation needs no credentials.
 - S7 SP-API transport routes still have no Edge Function.
-- **A verified checkpoint commit requires explicit Founder instruction** — see heading 6.
+- **A verified checkpoint commit requires explicit Founder instruction** — see heading 6. *(SUPERSEDED, marked 2026-09-22: the commit gate was RETIRED on 2026-09-21 — Cline commits its own VERIFIED work (`.clinerules/operating-model.md` §2/§5/§6). This historical line is retained only as the session-8 record. Note also that a verified commit is a CHECKPOINT, not COMPLETION: product work is COMPLETE only when local runtime = GitHub committed state = `https://demo.mercenta.co.uk` and the live implementation is verified — §10/§11.)*
 
 **6. KNOWN EXCEPTIONS**
 

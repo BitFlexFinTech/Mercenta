@@ -56,6 +56,37 @@ Before declaring COMPLETE, verify the five sources agree (see the table above).
 If they disagree, reconcile them first. This is product infrastructure, not
 documentation polish.
 
+## Completion status vocabulary — MANDATORY in all five sources (added 2026-09-22)
+
+The authoritative completion semantics live in `.clinerules/operating-model.md`
+**§5** (COMMIT / DEPLOY definitions), **§10** (the three-way completion contract:
+local runtime = GitHub committed state = `https://demo.mercenta.co.uk`) and
+**§11** (the status vocabulary and forbidden claims). This section does not
+restate them — it makes them a PROJECT-STATE obligation:
+
+- Every one of the five sources must state the **three-way synchronization
+  status** for the current checkpoint, using ONLY these phrases:
+  **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** ·
+  **DEPLOYMENT EXECUTED — LIVE VERIFICATION PENDING — NOT COMPLETE** ·
+  **DEPLOYMENT DIVERGENCE — NOT COMPLETE** ·
+  **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** ·
+  **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application
+  runtime change)** (governance/documentation-only increments).
+- **The current checkpoint's commit hash must be recorded** (it is part of the
+  GITHUB leg of §10, not optional bookkeeping).
+- A source that says "complete", "deployed", "live" or "production ready" while
+  the demo leg is unverified is a **contract violation**, exactly like a source
+  that describes a dirty tree as a checkpoint.
+- The demo leg is **not** satisfied by a deploy command succeeding, files being
+  uploaded, an HTTP 200 or a reachable URL. It is satisfied only by opening
+  `https://demo.mercenta.co.uk`, exercising the changed functionality there, and
+  confirming the live implementation matches the recorded verified commit.
+- A governance-only or documentation-only increment (such as a rule correction)
+  may be recorded as a **VERIFIED COMMITTED CHECKPOINT** with three-way status
+  **NOT APPLICABLE (no application runtime change)** — this exception exists only
+  for increments that change no application runtime behaviour, and never for
+  product work.
+
 ## Evidence discipline (unchanged, restated here)
 
 A claim of "done" requires evidence produced in the SAME session: a validator

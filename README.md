@@ -105,3 +105,9 @@ rail. No payout leaves Mercenta without explicit human approval (§7).
 Deployment is **only** `scripts/deploy-demo.sh` (demo.mercenta.co.uk), and only
 when explicitly authorised. See `GO_LIVE.md`.
 
+**Completion is a separate question from deployment authorisation.** For application/product work, COMPLETE means
+the verified implementation is synchronized across local runtime, the verified committed state, and
+`https://demo.mercenta.co.uk` — all three verified, with the live implementation confirmed to match the recorded
+commit. If any one is not verified the work is NOT COMPLETE. Canonical rule: `.clinerules/operating-model.md` §10
+(the completion contract) and §11 (the status vocabulary).
+
