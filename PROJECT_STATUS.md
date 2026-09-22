@@ -59,7 +59,7 @@
 
 ### 7. CURRENT CHECKPOINT
 
-- **Branch:** `redesign/foundation`. **Code checkpoint:** **`92dd06b8f7a7d5903fb7443c172649bce610d574`** (P1), preceded by `b6bd046` (P0.4) and `ee6d5eb` (P0). **Record commit carrying this block:** `RECORD_COMMIT_SHA`. `git status --porcelain`: **EMPTY**.
+- **Branch:** `redesign/foundation`. **Code checkpoint:** **`92dd06b8f7a7d5903fb7443c172649bce610d574`** (P1), preceded by `b6bd046` (P0.4) and `ee6d5eb` (P0). **Record commit carrying this block:** `ca977fcee67990ac4648a187463a15f19cc98765`. `git status --porcelain`: **EMPTY**.
 - **THREE-WAY STATUS: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ (local repository; **not pushed**) · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. This docs-only record commit changes no application runtime behaviour.
 
 ### 8. VERIFICATION STATUS

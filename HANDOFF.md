@@ -70,7 +70,7 @@ invoice numbering has no uniqueness registry yet (P7) · the Overview header sti
 ### Checkpoint / three-way status
 
 - **Branch `redesign/foundation`. Code checkpoint `92dd06b8f7a7d5903fb7443c172649bce610d574`** (preceded by `b6bd046`,
-  `ee6d5eb`). **Record commit:** `RECORD_COMMIT_SHA`. `git status --porcelain` **EMPTY**.
+  `ee6d5eb`). **Record commit:** `ca977fcee67990ac4648a187463a15f19cc98765`. `git status --porcelain` **EMPTY**.
 - **THREE-WAY STATUS: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ (local
   repository, **not pushed**) · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. The programme is unfinished and deploying
   now would be a false completion claim.
