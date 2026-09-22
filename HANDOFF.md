@@ -1,5 +1,99 @@
 ---
-**Last updated: September 22, 2026 — 🧹 DASHBOARD CLEANUP (session 12). A cleanup pass ONLY, scoped to the Founder's reported problem: the **Overview** was showing the **Command Centre** and two further duplicated action surfaces, so it did not read as an overview. Removed from the Overview: the Command Centre (**MOVED**, unmodified, to the Control Centre), "Needs your attention", "Next actions", the rail "Activity" panel (same messages data twice on one screen) and the Density/Group-rows controls that only served the removed queue. **Portfolio at a glance is now first**, and the Overview carries the business figures from the EXISTING canonical cost model (recorded revenue by stream, gross contribution, contribution margin). No new dashboard architecture, no new features, no new workflows, no business-logic change, no replacement tables; every removed capability remains reachable from the screen that owns it (Work Management / Control Centre / Messages / Billing / Global Catalog / Retail Pipeline). Net diff 8 files, +373 / −409. Full suite **459 passed / 0 failed / 2 skipped**. Previous: Wave 3 Logistics Hub completion (session 11); Wave 3 cinematic hero (session 10).**
+**Last updated: September 22, 2026 — 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME (session 13) — P0 and P1 DONE AND COMMITTED; P2 NEXT.** The Founder set two governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT** (queues, exceptions, CTAs, sitting **directly under Overview** in both the admin and brand shells) — on top of a correction of the **proxy model** (Mercenta holds the Amazon Vendor account; a brand never talks to Amazon and its decision is an **instruction to Mercenta**; carriers connect **by API only, never a login**). **Done:** P0 (`ee6d5eb`) — brand payout tiles no longer dead-end, **AV-002/AV-003** unsupported Amazon claims corrected, **"Logistics Hub"** naming applied across 16 source files + 13 specs; P0.4 (`b6bd046`) — accepting a PO now leads straight to its shipping documents (`/brand/logistics?po=…`, PO preselected, via the existing address layer); P1 (`92dd06b`) — **Operations rebuilt as the action centre under Overview in both shells**, nav ids unchanged. Verified at P0: tsc/eslint/build clean, workspace-shell 92/0, logistics-map 60/0, hero 53, uiux-redesign 346/0, e5/e6/wording PASS, **full suite 459 passed / 0 failed / 2 skipped**. **P2–P12 NOT STARTED.** Full plan + all 11 Founder decisions + research evidence: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. **Not pushed; `demo.mercenta.co.uk` NOT deployed.** Previous: session 12 dashboard cleanup (Overview is an overview again); session 11 Wave 3 Logistics Hub completion; session 10 Wave 3 cinematic hero.
+
+## 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22, session 13) — CURRENT CHECKPOINT
+
+**Read this first, then `PROJECT_STATUS.md` headings 1–9 (the canonical current position) and
+`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (the full plan, the 11 Founder decisions and the research evidence).**
+
+### What this programme is
+
+Two governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT**
+(queues, exceptions, CTAs, **directly under Overview** in both shells). Underneath sits a correction of the **proxy
+model**: **Mercenta holds the Amazon Vendor account**; a brand **never** communicates with Amazon (its decision is an
+**instruction to Mercenta**); **carriers never log into Mercenta** — Mercenta connects DHL/Palletline **by API**. The
+brand's only jobs are **accept/reject/backorder → download & print its shipping documents → ship on time**.
+
+### The Founder's binding decisions (full text in the programme doc, §2)
+
+DHL + Palletline **only** (remove `fedex`, `bak`) · payment terms **14/30/60** chosen per invoice **after receipt** ·
+**one PO record only** (the PO from Amazon) with the Mercenta→brand position **derived** from Model A/B, **no "Create
+PO"** · **remove the 3PL carrier surface completely, including the demo environment** · **inventory linked to the
+catalogue, with an ASIN field** · the **Logistics Hub is where the brand downloads its labels and ALL PO documents** ·
+**Control Centre = founder-only controls, one action list (Work Management)** · **Overview cards are ADDITIVE ONLY —
+every existing card stays** · **ASN/shipment/documents are automatic on acceptance** · consolidation **deferred but not
+designed out** (the model supports 1..n POs).
+
+### What is BUILT and VERIFIED
+
+- **P0 — `ee6d5eb`.** ① brand payout tiles no longer dead-end (scroll to `#brand-payouts`; settlement stays Admin →
+  Accounting); ② **AV-002/AV-003** — the unsupported Amazon claim in the brand email and ack-deadline label replaced
+  with Mercenta's own attributed consequence; ③ **"Logistics Hub"** naming across **16 source files + 13 specs**.
+- **P0.4 — `b6bd046`.** An accepted / ready-to-fulfil PO shows **"Open shipping documents"** → `/brand/logistics?po=<PO>`
+  and the Hub selects that consignment. `navigateProductView()` / `currentQueryParam()` were added to the **existing**
+  address layer (`src/lib/runtime/productRoutes.ts`) — no second navigation mechanism. New browser test
+  (`e2e/logistics-wave3.spec.ts` test 7).
+- **P1 — `92dd06b`.** **Operations is the action centre, directly under Overview, in both shells.** Admin Operations =
+  Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Carrier Monitor · Calendar (Commerce keeps only
+  the commercial pipelines; the empty Logistics group is gone). Brand Operations moved 6th → **2nd** = Purchase Orders ·
+  Logistics Hub · Returns · Tasks & Deadlines · Calendar (Commerce + Logistics dissolved into it). **Nav ids unchanged**
+  → every address, deep link and RBAC guard untouched.
+- **Gates repointed, never weakened.** `e2e/app-shell.spec.ts`: the grouping test became the **stronger** "Operations
+  contains Work Management, Purchase Orders, Logistics Hub, Returns Tracking, Carrier Monitor and Calendar **AND
+  Commerce no longer contains Purchase Orders**", old contract recorded inline.
+
+### Verified in this session (real output)
+
+`tsc` app+root **0 errors** · `eslint` **0 problems** · `npm run build` **✓ built** · `validate-workspace-shell` **92/0** ·
+`validate-logistics-map` **60/0** · `validate-logistics-hero` **53** · `validate-uiux-redesign` **346/0** · `validate-e5`
+/ `e6` / `validate:wording` **PASS** · Playwright focused **49 + 60 + 7 + 23 + 42 passed** · **FULL suite 459 passed /
+0 failed / 2 skipped**. `git status --porcelain` **EMPTY**.
+
+### What is LEFT (do not re-discover — full table in the programme doc §4)
+
+**P2** Overview = Observe (ADDITIVE ONLY) → **P3** Operations = Act wiring + Control Centre loses its duplicated lists →
+**P4** proxy-model corrections (brand's 3 jobs; Mercenta files the ASN/routing; instruction record; `submitAcknowledgement`)
+→ **P5** remove the Mercenta Hub (destination = **the FC on the PO**) → **P6** the PO document pack (SSCC labels, carrier
+label + waybill, packing list, ASN sheet, customs for international) → **P7** admin invoicing (`receivingStatus` sync,
+invoice-number registry, **14/30/60**) → **P8** inventory + **ASIN** → **P9** remove the 3PL carrier surface incl. the demo
+environment → **P10** Logistics Hub completion (provider config; consolidation recorded as deferred) → **P11** remove
+"Create PO" → **P12** SP-API seam extension (mock-first). Then **push** (Founder instruction only) and finally
+**deploy + live-verify**.
+
+### Known-wrong behaviour the remaining phases will correct (do not mistake it for correct)
+
+The brand still "files the ASN" / "confirms routing" (P4) · the Mercenta Hub still exists as a destination (P5) · the
+auto-draft on acceptance still hardcodes `carrier:'dhl'` and `destination:'Mercenta UK Hub'` (`src/data/api.ts`, P5/P6) ·
+the 3PL carrier surface is still present (P9) · "Create PO" still exists (P11) · no PO document pack exists yet (P6) ·
+invoice numbering has no uniqueness registry yet (P7) · the Overview header still reads "Operations Overview" (P2/P3).
+
+### Checkpoint / three-way status
+
+- **Branch `redesign/foundation`. Code checkpoint `92dd06b8f7a7d5903fb7443c172649bce610d574`** (preceded by `b6bd046`,
+  `ee6d5eb`). **Record commit:** `RECORD_COMMIT_SHA`. `git status --porcelain` **EMPTY**.
+- **THREE-WAY STATUS: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ (local
+  repository, **not pushed**) · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. The programme is unfinished and deploying
+  now would be a false completion claim.
+
+### API key status
+
+Unchanged — see the "Current API key status" section further down this file. **Nothing in P0–P12 requires a credential**:
+every external integration in the programme is built **mock-first** behind a swappable seam, so missing credentials never
+block implementation. The only genuine external dependencies are **SP-API approval** (P12) and the **demo-host
+credential** (the final deploy step).
+
+### Next prompt to paste
+
+> Continue the Mercenta dashboard + logistics cleanup programme in `/Users/tadii/Desktop/1. Mercenta`. Read
+> `.clinerules/**`, `PROJECT_STATUS.md` headings 1–9, `HANDOFF.md`, `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`
+> and `git log` first. Current checkpoint: branch `redesign/foundation`, HEAD `92dd06b`, tree EMPTY. **P0 and P1 are DONE
+> and committed. Resume at P2 — Overview = Observe (ADDITIVE ONLY: every existing card stays; add the business-picture
+> cards).** Then P3 → P12 in the documented order, each phase verified (tsc · eslint · build · validators · browser specs
+> · FULL Playwright suite) and committed separately, gates repointed never weakened. Do not push and do not deploy until
+> the programme is finished and I instruct you.
+
+---
+
 
 ## 🧹 DASHBOARD CLEANUP — OVERVIEW (2026-09-22, session 12) — CURRENT CHECKPOINT
 

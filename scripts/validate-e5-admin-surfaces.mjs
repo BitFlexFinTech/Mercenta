@@ -166,21 +166,49 @@ try {
       ADMIN + RETAIL + DASH + LOGI + CATALOG + POLIST + NOTIF
     ));
 
-  /* ══ E. G5 — dashboard drill-down correction + additive attention rows ══ */
+  /* ══ E. G5 — dashboard drill-down correction + additive attention rows ══
+   *
+   * §Dashboard + logistics cleanup programme (2026-09-22, session 13) — E3/E4/E5
+   * REPOINTED, not weakened.
+   *
+   * These three assertions pinned the Overview's attention QUEUE (the `po-…`,
+   * `ded-…`, `ticket-…`, `renewal-…`, `docs-…` row ids and the
+   * `commerceInvoicesPending` / "Simulated invoice (sim)" derivation) and the
+   * KPI `action: { id, label, count }` shape. Session 12's Founder-directed
+   * cleanup REMOVED that queue from the Overview and MOVED each concern to its
+   * canonical owner (message threads → Messages/NotificationCenter, renewals →
+   * Contracts, docs → Compliance), and the KPI tiles were restructured to the
+   * current `onOpen` drill-down form. The three assertions were therefore left
+   * pinning REMOVED shapes and had been failing since that cleanup —
+   * **VERIFIED PRE-EXISTING, not caused by this session:** running this suite in
+   * a git worktree at `b3fcca9` (the session-12 checkpoint) reproduces the same
+   * 3 failures.
+   *
+   * The CURRENT canonical contract is pinned below, and each assertion is still
+   * genuinely failure-capable: the rows must exist in their canonical owner, the
+   * Overview must NOT re-derive them (so the duplication cannot come back), and
+   * the KPI tiles must keep their ids, their canonical count derivation and their
+   * drill-down targets. Comments are stripped before the absence checks so a
+   * historical REPOINTED comment cannot satisfy or break them.
+   */
+  const DASH_CODE = DASH.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
   test('E1 the fulfilment KPI drills to the SHIPMENT surface, not brand scoring',
     !/go\('fulfillment_track'\)/.test(DASH) && (DASH.match(/go\('logistics'\)/g) || []).length >= 2);
   test('E2 the dashboard reads the canonical E3 submission store (no invented metric)',
     /useCatalogSubmissions\(\)/.test(DASH) && /rejectedSubmissions/.test(DASH));
-  test('E3 the pre-existing attention-row ids are UNCHANGED (additive only)',
-    /id: `po-\$\{p\.id\}`/.test(DASH) && /id: `ded-\$\{d\.id\}`/.test(DASH) &&
-    /id: `ticket-\$\{t\.id\}`/.test(DASH) && /id: `renewal-\$\{c\.id\}`/.test(DASH) &&
-    /id: `docs-\$\{bid\}`/.test(DASH));
-  test('E4 the new attention rows are canonical-derived and labelled (sim)',
-    /demoCommerceInvoices/.test(DASH) && /commerceInvoicesPending/.test(DASH) &&
-    /Simulated invoice/.test(DASH) && /\(sim\)/.test(DASH));
+  test('E3 the attention rows live in their canonical owner and are NOT re-derived on the Overview',
+    /id: `po-\$\{p\.id\}`/.test(NOTIF) && /id: `ded-\$\{d\.id\}`/.test(NOTIF) &&
+    !/id: `po-\$\{p\.id\}`/.test(DASH_CODE) && !/id: `ded-\$\{d\.id\}`/.test(DASH_CODE) &&
+    !/id: `ticket-\$\{t\.id\}`/.test(DASH_CODE) && !/id: `renewal-\$\{c\.id\}`/.test(DASH_CODE) &&
+    !/id: `docs-\$\{bid\}`/.test(DASH_CODE));
+  test('E4 the simulated-invoice attention row is owned by its canonical surface, not the Overview',
+    /Simulated invoice/.test(NOTIF) && /demoCommerceInvoices/.test(NOTIF) &&
+    !/commerceInvoicesPending/.test(DASH_CODE) && !/Simulated invoice/.test(DASH_CODE));
   test('E5 the KPI contract the browser suite pins is preserved',
     /id: 'pending-pos'/.test(DASH) && /id: 'gate'/.test(DASH) &&
-    /id: 'purchase_orders_admin', label: 'Review purchase orders', count: posAwaitingAction\.length/.test(DASH));
+    /value: String\(posAwaitingAction\.length\)/.test(DASH) &&
+    /id: 'pending-pos',[\s\S]{0,600}?onOpen: go\('purchase_orders_admin'\)/.test(DASH) &&
+    /id: 'gate',[\s\S]{0,600}?onOpen: go\('compliance'\)/.test(DASH));
 
   /* ══ F. G6 — Logistics Control PO linkage ══ */
   test('F1 the shipment is linked to its PO by the canonical `poNumber`',

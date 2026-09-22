@@ -504,6 +504,35 @@ const GENERATED_ARTEFACTS = [
   'test-results/',
 ];
 
+/**
+ * §Dashboard + logistics cleanup programme (2026-09-22, session 13) — REPOINTED,
+ * not weakened.
+ *
+ * OLD CONTRACT (implicit): the F6 change-set scope check treated EVERY path that
+ * was not in a named sprint scope as an offender — including the project-state
+ * documentation. That contradicts the canonical project-state contract
+ * (`.clinerules/project-state-contract.md`), which REQUIRES `PROJECT_STATUS.md`,
+ * `HANDOFF.md`, `STATUS_CHECK.md`, `requirements-registry.json` and
+ * `PRODUCTION_READINESS.md` to be updated in the SAME session as the work, and
+ * `docs/` to carry the session's record. Any compliant session therefore failed
+ * F6 on its own documentation.
+ *
+ * NEW CONTRACT: the guard still scopes the change set EXACTLY as before for
+ * APPLICATION source (`src/**`, `scripts/**`, `e2e/**`, config, migrations, …) —
+ * an unapproved source file still fails it — but project-state DOCUMENTATION is
+ * not application source and is excluded by name. The intent (no unapproved
+ * SOURCE change) is unchanged and is now stated precisely.
+ */
+const PROJECT_STATE_DOCS = [
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+  'STATUS_CHECK.md',
+  'requirements-registry.json',
+  'PRODUCTION_READINESS.md',
+];
+const isProjectStateDoc = (p) => PROJECT_STATE_DOCS.includes(p) || p.startsWith('docs/');
+
+
 /** Paths that must never appear in the E6 change set. */
 const PROTECTED_PREFIXES = [
   'src/lib/intelligence/',
@@ -976,6 +1005,7 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
    */
   const f6ChangedSource = changed
     .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
+    .filter((p) => !isProjectStateDoc(p))
     .filter(
       (p) =>
         !(
@@ -1037,9 +1067,29 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
        * future restructure still fails — but it now names the CURRENT canonical
        * 19-item order instead of the retired 17-item one.
        */
+      /**
+       * §Dashboard + logistics cleanup programme (2026-09-22, session 13) —
+       * REPOINTED, not weakened.
+       *
+       * OLD CONTRACT (19 items): 'overview', 'catalog', 'commercial_readiness',
+       * 'purchase_orders', 'returns', 'logistics', 'onboarding', 'compliance',
+       * 'contracts', 'work', 'calendar', 'analytics', 'market', 'reports',
+       * 'documents', 'cases', 'team', 'social', 'settings' — the pre-cleanup IA
+       * where the brand's operational destinations were scattered (Commerce held
+       * purchase_orders/returns, Logistics held logistics, and work/calendar sat
+       * after Compliance).
+       *
+       * NEW CONTRACT: the Founder's governing principle is **Overview = OBSERVE,
+       * Operations = ACT**, and Operations must sit DIRECTLY UNDER OVERVIEW, so the
+       * brand's operational destinations are grouped there in the order the brand
+       * does the work. The item SET is unchanged (still exactly 19 ids — nothing was
+       * added or removed, which the exact comparison below proves), and the
+       * comparison remains an EXACT ordered id list, so any further restructuring
+       * still fails this test.
+       */
       const EXPECTED = [
-        'overview', 'catalog', 'commercial_readiness', 'purchase_orders', 'returns',
-        'logistics', 'onboarding', 'compliance', 'contracts', 'work', 'calendar',
+        'overview', 'purchase_orders', 'logistics', 'returns', 'work', 'calendar',
+        'catalog', 'commercial_readiness', 'onboarding', 'compliance', 'contracts',
         'analytics', 'market', 'reports', 'documents', 'cases', 'team', 'social',
         'settings',
       ];

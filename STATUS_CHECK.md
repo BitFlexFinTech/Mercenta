@@ -26,6 +26,58 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
+## CURRENT STATE — DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22, session 13)
+
+**Checkpoint:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`. Branch `redesign/foundation`, code checkpoint
+`92dd06b8f7a7d5903fb7443c172649bce610d574` (P1), preceded by `b6bd046` (P0.4) and `ee6d5eb` (P0). Tree EMPTY.
+**Not pushed; `demo.mercenta.co.uk` NOT deployed and NOT verified.**
+
+**Plan, the 11 binding Founder decisions and the research evidence:** `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`.
+
+**Two governing principles:** **Overview = OBSERVE** (business picture, no action queues, no CTAs) · **Operations = ACT**
+(queues, exceptions, CTAs, placed **directly under Overview** in both shells). Underneath: the **proxy model** — Mercenta
+holds the Amazon Vendor account, a brand never communicates with Amazon (its decision is an **instruction to Mercenta**),
+and carriers connect **by API only, never a login**.
+
+**DONE — P0 (`ee6d5eb`):** brand payout tiles no longer dead-end (scroll to `#brand-payouts`; settlement stays Admin →
+Accounting) · **AV-002/AV-003** unsupported Amazon claims removed from the brand email and ack-deadline label and
+replaced with Mercenta's own attributed consequence · **"Logistics Hub"** naming across 16 source files + 13 specs.
+
+**DONE — P0.4 (`b6bd046`):** an accepted / ready-to-fulfil PO shows **"Open shipping documents"** →
+`/brand/logistics?po=<PO>`, and the Hub selects that consignment. Implemented in the **existing** address layer
+(`navigateProductView` / `currentQueryParam`) — no second navigation mechanism. New test `e2e/logistics-wave3.spec.ts` #7.
+
+**DONE — P1 (`92dd06b`):** **Operations is the action centre, directly under Overview, in both shells.** Admin
+Operations = Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Carrier Monitor · Calendar (Commerce
+keeps only the commercial pipelines; the empty Logistics group removed). Brand Operations moved 6th → **2nd** =
+Purchase Orders · Logistics Hub · Returns · Tasks & Deadlines · Calendar (Commerce + Logistics groups dissolved into it).
+**Nav ids unchanged** → addresses, deep links and RBAC guards untouched.
+
+**Gates repointed, never weakened:** `e2e/app-shell.spec.ts` grouping test rewritten to the **stronger** "Operations
+contains Work Management, Purchase Orders, Logistics Hub, Returns Tracking, Carrier Monitor and Calendar **AND Commerce
+no longer contains Purchase Orders**", old contract recorded inline; section-heading lists now assert Operations.
+
+**Verified this session:** `tsc` app+root 0 errors · eslint 0 problems · build PASS · workspace-shell 92/0 ·
+logistics-map 60/0 · logistics-hero 53 · uiux-redesign 346/0 · e5/e6/wording PASS · Playwright focused **49 + 60 + 7 + 23 +
+42 passed** · **FULL suite 459 passed / 0 failed / 2 skipped** · `verify-registry` 467 entries (was 451), 186 pre-existing
+findings (unchanged — none from the 16 new rows).
+
+**NOT STARTED:** P2 (Overview = Observe, additive only) · P3 (Operations = Act wiring; Control Centre → founder-only) ·
+P4 (proxy-model corrections) · P5 (remove the Mercenta Hub; destination = the FC on the PO) · P6 (PO document pack) ·
+P7 (admin invoicing, `receivingStatus`, 14/30/60) · P8 (inventory + ASIN) · P9 (remove the 3PL carrier surface incl. the
+demo environment) · P10 (Logistics Hub completion) · P11 (remove "Create PO") · P12 (SP-API seam, mock-first). **Push and
+deployment NOT done.**
+
+**Known-wrong behaviour the remaining phases will correct (do not mistake it for correct):** the brand still "files the
+ASN" / "confirms routing" (P4) · the Mercenta Hub still exists as a destination (P5) · the auto-draft on acceptance still
+hardcodes `carrier:'dhl'` and `destination:'Mercenta UK Hub'` (`src/data/api.ts`, P5/P6) · the 3PL surface still exists
+(P9) · "Create PO" still exists (P11) · no PO document pack yet (P6) · no invoice-number registry yet (P7) · the Overview
+header still reads "Operations Overview" (P2/P3).
+
+**Three-way status:** Local ✅ · GitHub committed ✅ (local repository, **not pushed**) · **demo ❌ NOT DEPLOYED / NOT
+VERIFIED** → **NOT COMPLETE** (`.clinerules/operating-model.md` §10/§11).
+
+
 ## CURRENT STATE — WAVE 3 LOGISTICS HUB COMPLETION (2026-09-22, session 11)
 
 **Checkpoint:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`. Start HEAD `455d679`, tree EMPTY.

@@ -1,13 +1,45 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated:** M12 session (14 Sep) — **the brand-level commercial
-relationship (both models, chosen at onboarding), the Brand Intelligence strategy
-layer (UK + global→UK, source markets, trade programmes, speed-to-revenue,
-market-access tagging), the Amazon sales estimator + new-to-channel modelling, the
-founder's own Founder Investor Centre and Partnerships/Fundraising Centre, and
-candidate outreach generation/send are BUILT. Everything below is still simulated;
-nothing was re-labelled live.** New M12 items first, then the M2/M6/M7 items from
-the previous session.
+**Last updated: session 13 (22 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0 and P1 are DONE and committed
+(`ee6d5eb`, `b6bd046`, `92dd06b`); P2–P12 are NOT STARTED. Plan + the 11 binding Founder decisions:
+`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. The session-13 items are listed first, then the M12 items
+from the previous session. Everything below is still simulated; nothing was re-labelled live.**
+
+## SESSION 13 — dashboard + logistics cleanup programme: what is still simulated / placeholder
+
+- **The ASIN field (P8) will be a clearly-simulated placeholder in simulation.** Founder decision: a brand may add the
+  ASIN itself if the product already exists on Amazon; otherwise Mercenta populates it **when Amazon accepts the product
+  into the catalogue**. Until a live channel response exists, the value is a visibly fake placeholder of the form
+  `SIM-ASIN-…` (never a plausible-looking real ASIN — the code must never invent one). **Live activation:** the SP-API
+  seam (P12) returns the real identifier behind the same interface. **Remaining non-credential work:** the P8 model and
+  UI.
+- **Payment terms 14 / 30 / 60 are MERCENTA'S OWN CONFIGURATION, not channel data (P7).** The repo's truth register
+  records that **no public Vendor Payments API exists** (S14), so a payment date can only be **derived** from the
+  invoice date + the configured terms. Nothing may claim Amazon-published payment terms or a Vendor Payments feed.
+  **Live activation:** a real payment notice/receipt imported from accounting (Xero) behind the existing seam.
+- **Carriers are DHL + Palletline BY API ONLY (P9/P10).** Mercenta connects the carrier APIs itself; **a carrier never
+  logs into Mercenta**, so the 3PL carrier portal, its role, its environment and the "3PL Carrier Terminal" login card are
+  removed (P9), including the demo-environment entry. **Live activation:** DHL + Palletline API credentials behind the
+  existing provider seam (`src/lib/dhl`, `src/lib/palletline`); the simulated lanes stay truthful and make zero network
+  calls. **Remaining non-credential work:** provider configuration (P10).
+- **The PO document pack (P6) is GENERATED, not downloaded from the channel.** SSCC carton labels, the carrier
+  label/waybill, the packing list/delivery note and the ASN sheet are produced by Mercenta; customs documents apply to
+  international lanes. **Amazon-generated labels are NA-only** (`GetShipmentLabels` documents NA only), so no
+  downloadable Amazon label may ever be claimed for UK/EU. **Live activation:** carrier label APIs + the SP-API
+  shipment-confirmation call (P12).
+- **Consolidation is DEFERRED, not implemented (P10).** Amazon documents multi-PO grouping (`purchaseOrders[]` on the
+  shipment request, the PO referenced per carton in the ASN, the 100-confirmation truckload limit), but POs arrive
+  separately today: the implementation is **one PO = one shipment** while the model supports **1..n**.
+- **"Create PO" is removed (P11).** The PO record is the PO **from Amazon**; the Mercenta→brand commercial position is
+  **derived** from the brand's Model A/B. No second PO document exists.
+- **The Mercenta Hub is removed as a destination (P5).** The destination is **the FC on the PO** (`shipToPartyId`). No
+  universal Mercenta intermediate hub may be asserted.
+- **The proxy model itself is the truthfulness rule for this programme:** Mercenta holds the Amazon Vendor account; a
+  brand never communicates with Amazon (its decision is an **instruction to Mercenta**, which then acts through the
+  channel integration). Until P4 lands, the brand-side wording still says the brand "files the ASN" / "confirms routing"
+  — **known-wrong, scheduled to be corrected in P4**, and not to be treated as the intended model.
+- **Nothing in P0–P12 requires a credential:** every external integration is mock-first behind a swappable seam. The only
+  genuine external dependencies are **SP-API approval** (P12) and the **demo-host credential** (the final deploy step).
 
 ## M12 — new prerequisites and what is STILL simulated
 

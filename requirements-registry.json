@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 451,
+    "total_entries": 467,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -331,7 +331,7 @@
       ],
       "note": "The Logistics Hub had no operational map, no truth labelling and no canonical geography before this increment, and its booking form was non-functional. These rows record the map, the truth labelling, the freight-term semantics, the canonical geography, the shipment-origin placeholder fix, the executed contract gate and the workspace redesign. This script is idempotent: re-running adds nothing and duplicates nothing."
     },
-    "last_reconciled": "2026-09-21",
+    "last_reconciled": "2026-09-22",
     "completion_contract": {
       "canonical_location": ".clinerules/operating-model.md §10 (contract) + §11 (status vocabulary)",
       "rule": "For Mercenta application/product work, COMPLETE means the verified implementation is synchronized across local runtime, the verified GitHub committed state, and https://demo.mercenta.co.uk; if any one is not verified, the work is NOT COMPLETE.",
@@ -346,13 +346,59 @@
       "recorded": "2026-09-22"
     },
     "status_counts": {
-      "built_and_tested": 254,
+      "not_started": 66,
       "built": 126,
-      "not_started": 55,
+      "built_and_tested": 259,
       "regressed": 2,
-      "deferred": 7,
       "in_progress": 3,
+      "deferred": 7,
       "blocked": 4
+    },
+    "dashboard_logistics_cleanup_programme": {
+      "session": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "plan_document": "docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md",
+      "governing_principles": [
+        "Overview = OBSERVE (business picture, no action queues, no CTAs)",
+        "Operations = ACT (queues, exceptions, CTAs), placed directly under Overview in both shells"
+      ],
+      "founder_decisions": [
+        "Carriers: DHL + Palletline ONLY (remove fedex, bak)",
+        "Payment terms 14/30/60, selected per invoice AFTER the PO is received",
+        "PO identity: one PO record = the PO from Amazon; the Mercenta->brand position is derived from Model A/B; no \"Create PO\"",
+        "Remove the 3PL carrier surface completely, including the demo environment",
+        "Inventory linked to the catalogue, with an ASIN field",
+        "The Logistics Hub is where the brand downloads its labels and ALL PO documents",
+        "Control Centre = founder-only controls; Work Management is the single action list",
+        "Overview cards are ADDITIVE ONLY - every existing card stays",
+        "ASN/shipment/documents are AUTOMATIC on PO acceptance",
+        "Consolidation DEFERRED but not designed out - the model supports 1..n POs"
+      ],
+      "done": [
+        "cleanup-p0-payout-tiles-reachable",
+        "cleanup-p0-av002-av003-claims-corrected",
+        "cleanup-p0-logistics-hub-naming",
+        "cleanup-p0-4-acceptance-to-documents",
+        "cleanup-p1-operations-action-centre"
+      ],
+      "remaining": [
+        "cleanup-p2-overview-observe",
+        "cleanup-p3-operations-act",
+        "cleanup-p4-proxy-model-corrections",
+        "cleanup-p5-remove-mercenta-hub",
+        "cleanup-p6-po-document-pack",
+        "cleanup-p7-admin-invoicing-receiving",
+        "cleanup-p8-inventory-asin",
+        "cleanup-p9-remove-3pl-carrier-surface",
+        "cleanup-p10-logistics-hub-completion",
+        "cleanup-p11-remove-create-po",
+        "cleanup-p12-spapi-seam-extension"
+      ],
+      "checkpoint": "92dd06b8f7a7d5903fb7443c172649bce610d574",
+      "three_way_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT - NOT COMPLETE",
+      "note": "P0 + P1 are committed and verified. P2-P12 are recorded as not_started so discovered work is not silently dropped. Nothing is pushed and demo.mercenta.co.uk is NOT deployed."
+    },
+    "added_entries": {
+      "Dashboard + logistics cleanup programme (2026-09-22, session 13)": []
     }
   },
   "entries": [
@@ -4625,6 +4671,150 @@
       "evidence": "scripts/validate-wave3-logistics.mjs; package.json (validate:wave3-logistics); 56 PASS / 0 FAIL The same behaviours are exercised in a real browser by e2e/logistics-wave3.spec.ts (6 tests).",
       "status": "built_and_tested",
       "source": "Wave 3 Logistics Hub completion (2026-09-22, session 11)",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p0-payout-tiles-reachable",
+      "description": "The brand Overview payout tiles no longer dead-end: each tile scrolls to the brand's OWN payout ledger (`#brand-payouts` + pulse). Settlement remains Admin -> Accounting (no duplicate brand workflow invented).",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "built_and_tested",
+      "evidence": "src/components/brand/BrandDashboard.tsx (payout tile targets #brand-payouts); src/components/brand/BrandPayouts.tsx anchor; e2e/dashboard.spec.ts repointed; full suite 459 passed / 0 failed / 2 skipped.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p0-av002-av003-claims-corrected",
+      "description": "AV-002 / AV-003: the unsupported Amazon claim (\"at risk of cancellation\") was removed from the brand-facing notification and the ack-deadline label, replaced with Mercenta's OWN attributed operational consequence. No channel consequence is invented or attributed to Amazon.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "built_and_tested",
+      "evidence": "src/lib/notifications/postmarkNotifier.ts; src/lib/statusPresentation.ts; e2e/notifications.spec.ts; npm run validate:wording PASS.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p0-logistics-hub-naming",
+      "description": "The brand and admin operational shipment surfaces are named \"Logistics Hub\" everywhere they appear, matching the project's own canonical documentation (was \"Inbound Shipments\" / \"Logistics Control\" in places). 16 source files + 13 specs repointed.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "built_and_tested",
+      "evidence": "16 src files + 13 e2e specs renamed; e2e/app-shell.spec.ts and e2e/logistics-wave3.spec.ts assert the new label; npm run validate:workspace-shell 92 PASS / 0 FAIL; validate-uiux-redesign 346 PASS / 0 FAIL; full suite 459 passed / 0 failed / 2 skipped.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p0-4-acceptance-to-documents",
+      "description": "Accepting a PO now leads straight to its shipping documents: an accepted / ready-to-fulfil PO shows \"Open shipping documents\" -> /brand/logistics?po=<PO>, and the Hub selects that consignment once its rows load. Implemented in the EXISTING address layer (navigateProductView / currentQueryParam) - no second navigation mechanism.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "built_and_tested",
+      "evidence": "src/lib/runtime/productRoutes.ts; src/components/brand/BrandPurchaseOrders.tsx; src/components/brand/LogisticsHub.tsx; e2e/logistics-wave3.spec.ts test 7 (7 passed).",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p1-operations-action-centre",
+      "description": "P1: Operations is the action centre, placed DIRECTLY UNDER OVERVIEW in both shells. Admin Operations = Work Management - Purchase Orders - Logistics Hub - Returns Tracking - Carrier Monitor - Calendar (Commerce keeps only the commercial pipelines; the empty Logistics group removed). Brand Operations = Purchase Orders - Logistics Hub - Returns - Tasks & Deadlines - Calendar (Commerce + Logistics groups dissolved into it). Nav ids UNCHANGED, so addresses, deep links and RBAC guards are untouched.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "built_and_tested",
+      "evidence": "src/components/layout/AdminShell.tsx; src/components/layout/BrandShell.tsx; validate:workspace-shell 92/0; e2e/app-shell.spec.ts 23 passed (grouping test repointed and STRENGTHENED); tsc 0 / eslint 0 / build PASS.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p2-overview-observe",
+      "description": "P2 (NEXT): Overview = OBSERVE - ADDITIVE ONLY, every existing card stays. Hero row (open PO value, revenue, gross profit, margin %, receivables) + business row (brands, products, POs, orders, shipments, operational volume, upcoming payments, fulfilment status) + financial performance + logistics status + trends; brand: its own earnings + first chart. The brand's ACTION sections (Needs your attention, rail Next actions) MOVE to Operations.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p3-operations-act",
+      "description": "P3: Operations = ACT wiring - brand attention/next-actions land in Operations, badges; the Control Centre loses its duplicated work/attention lists and becomes founder-only controls; Work Management is the single action list.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p4-proxy-model-corrections",
+      "description": "P4: proxy-model corrections - the brand does its three jobs only (accept/reject/backorder, download/print, ship on time); MERCENTA raises the routing/shipment request and files the ASN (the brand sees status); the acknowledgement writes an instruction-to-Mercenta record; submitAcknowledgement behind the SP-API seam, Mercenta-side. Closes AV-040 and the wrong-direction routing.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p5-remove-mercenta-hub",
+      "description": "P5: remove the Mercenta Hub completely - the destination is the FC ON THE PO; Hero/map arrival node = that FC; copy, validators, specs and docs. Closes D09-13 / AV-026 / AV-027.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p6-po-document-pack",
+      "description": "P6: the PO document pack, automatic on acceptance - SSCC carton labels, carrier label + waybill, packing list/delivery note, ASN sheet, customs documents for international lanes; notification + nav badge; \"Documents for this PO\" in the Hub; the collect lane shows the documented status chain (request -> carrier assigned -> ARN -> pickup).",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p7-admin-invoicing-receiving",
+      "description": "P7: admin invoicing - invoice per PO AFTER receipt; receivingStatus sync; invoice-number registry (unique, never reused - AV-022); payment terms 14/30/60 selected per invoice; derived upcoming payments; receivables = issued-and-unpaid.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p8-inventory-asin",
+      "description": "P8: inventory linked to the brand's catalogue with an ASIN field - brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation; the code never invents a real-looking ASIN).",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p9-remove-3pl-carrier-surface",
+      "description": "P9: remove the 3PL carrier surface COMPLETELY, including the demo environment - environment, role, shell + its 3 views, CarrierDashboard, BakLogistics, the demo switcher entry, the \"3PL Carrier Terminal\" login card, the admin \"Carrier Monitor\" item, the public FAQ claim, and the affected documents. Matrix D01-07 / D04-18 / D10-13.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p10-logistics-hub-completion",
+      "description": "P10: Logistics Hub completion - provider configuration + the PO documents; consolidation recorded as documented-but-DEFERRED with the model supporting 1..n POs.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p11-remove-create-po",
+      "description": "P11: remove \"Create PO\" and the channel PO ingestion path (mock-first); repoint the three validators that assert its notification path. The PO record is the PO FROM AMAZON; the Mercenta->brand commercial position is derived from the brand's Model A/B.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p12-spapi-seam-extension",
+      "description": "P12: SP-API seam extension (mock-first) - submitAcknowledgement, getPurchaseOrdersStatus (receiving sync), submitShipmentRequest, getShipmentDetails, getShipmentLabels (honest UK/EU refusal - NA-only), submitShipmentConfirmations, submitInvoices, submitInventoryUpdate. Closes AV-040.",
+      "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
+      "status": "not_started",
+      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
       "last_verified": "2026-09-22",
       "superseded_by": null
     }
