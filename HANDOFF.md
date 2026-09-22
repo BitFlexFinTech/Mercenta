@@ -11,6 +11,7 @@
 - **NOT done (do not claim otherwise):** Wave 3's remaining items — `discovered-backorder-fail-closed-gate`, `discovered-routing-request-removal` (the unsupported "10am Pacific" claim is still in `src/types.ts` and `RoutingRequest.tsx`), the carrier provider-eligibility **derivation**, an **ETA** field on the shipment domain model, and delivery-performance aggregation in the Hub. **Wave 5 (Super Admin / Control Centre + credential vault) and Wave 6 (product-wide completion) are NOT STARTED.** **No deployment has been performed; deployment requires an explicit Founder instruction** (`scripts/deploy-demo.sh`, `demo.mercenta.co.uk` only, then open the live site and verify — `operating-model.md` §5).
 - **Known costs, recorded not hidden:** the BrandShell chunk is 600.30 kB / 180.83 kB gzip (hero geometry + three.js load with the brand shell); the admin Logistics Control does not show the hero; `.geo-cache/` holds the raw multi-megabyte datasets and is gitignored.
 - **Registry:** 448 entries (+4 Wave 3 hero rows; 248 `built_and_tested`). `verify-registry` reports 186 pre-existing findings (none of them from the four new rows).
+- **Checkpoint commits:** `0a8e863` (the hero) and `88c1739` (the inherited `useWebglPalette` colour-SSOT fix, which took `validate-uiux-redesign` from **343 PASS / 1 FAIL → 344 PASS / 0 FAIL**; verified pre-existing in a worktree at `24b2b50`).
 
 ---
 

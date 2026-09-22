@@ -49,7 +49,8 @@
 
 ### 7. CURRENT CHECKPOINT
 
-- **Branch:** `redesign/foundation`. **Start HEAD:** `24b2b50` (Wave 4 Brain 3D) with `git status --porcelain` **EMPTY** at start. **Checkpoint commit:** the `wave3(logistics-hero)` commit recorded in this session's report.
+- **Branch:** `redesign/foundation`. **Start HEAD:** `24b2b50` (Wave 4 Brain 3D) with `git status --porcelain` **EMPTY** at start. **Checkpoint commits:** **`0a8e863`** *wave3(logistics-hero): …* and **`88c1739`** *fix(theme-ssot): the WebGL palette hook derives its placeholder from themes.ts instead of duplicating hexes*. `git status --porcelain`: **EMPTY**.
+- **Inherited defect fixed in this session (evidence, not assertion):** `scripts/validate-uiux-redesign.mjs` FAILED at the previous HEAD with *"no component hardcodes a palette hex"* (offenders `src/lib/hooks/useWebglPalette.ts:#F97316` / `#EF4444`). Confirmed pre-existing by running the validator in a `git worktree` at `24b2b50` (343 PASS / 1 FAIL, same offenders). Fixed by deriving the hook's placeholder AND every `readVar` fallback from `THEMES[DEFAULT_THEME].vars` — now **344 PASS / 0 FAIL**. The session-9 claim of "0 FAIL" for that gate was therefore inaccurate for the committed state; recorded rather than repeated.
 
 ### 8. VERIFICATION STATUS (all executed in this session — real output)
 
@@ -62,6 +63,9 @@
 | `node scripts/validate-logistics-map.mjs` | **60 assertions PASS** (unchanged) |
 | `npx playwright test e2e/logistics-hero.spec.ts` | **10 passed** |
 | `npx playwright test e2e/logistics-hub-map.spec.ts` | **15 passed** (no regression) |
+| `node scripts/validate-uiux-redesign.mjs` | **FAILED at the start HEAD** (`no component hardcodes a palette hex` → `useWebglPalette.ts`) → **344 PASS / 0 FAIL after the inherited-defect fix** (confirmed pre-existing in a worktree at `24b2b50`) |
+| `node scripts/validate-mercenta-brain.mjs` · `e2e/mercenta-brain.spec.ts` | **30 assertions PASS** · **10 passed** (the palette-hook fix re-verified) |
+| `npm run validate:wording` · `validate-typography-scale` · `validate-theme-foundation` · `validate-workspace-shell` | **WORDING_LINT_PASS (291 files, 0 violations)** · **17 PASS** · **41 PASS / 0 FAIL** · **92 PASS / 0 FAIL** |
 
 ### 9. NEXT EXECUTION SCOPE
 
