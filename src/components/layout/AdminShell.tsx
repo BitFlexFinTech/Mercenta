@@ -72,9 +72,20 @@ const ADMIN_SECTIONS = [
     ],
   },
   {
+    /**
+     * §Dashboard-cleanup P1 — OPERATIONS IS THE ACTION CENTRE.
+     * Every queue an operator acts on sits here: the work layer, purchase-order
+     * processing, consignments and their documents, returns, carrier/provider
+     * state and the operational calendar. Observe-only surfaces live in Overview;
+     * commercial pipelines live in Commerce.
+     */
     label: 'Operations',
     items: [
       { id: 'work', label: 'Work Management', icon: <ListChecks className="w-4 h-4" /> },
+      { id: 'purchase_orders_admin', label: 'Purchase Orders', icon: <Package className="w-4 h-4" /> },
+      { id: 'logistics', label: 'Logistics Hub', icon: <Truck className="w-4 h-4" /> },
+      { id: 'returns_tracking', label: 'Returns Tracking', icon: <RotateCcw className="w-4 h-4" /> },
+      { id: 'carriers', label: 'Carrier Monitor', icon: <Plug className="w-4 h-4" /> },
       { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
     ],
   },
@@ -97,8 +108,6 @@ const ADMIN_SECTIONS = [
     items: [
       { id: 'fulfillment_track', label: 'Fulfillment Track', icon: <Gauge className="w-4 h-4" /> },
       { id: 'retail_pipeline', label: 'Retail Pipeline', icon: <Boxes className="w-4 h-4" /> },
-      { id: 'purchase_orders_admin', label: 'Purchase Orders', icon: <Package className="w-4 h-4" /> },
-      { id: 'returns_tracking', label: 'Returns Tracking', icon: <RotateCcw className="w-4 h-4" /> },
     ],
   },
   {
@@ -106,13 +115,6 @@ const ADMIN_SECTIONS = [
     items: [
       { id: 'billing', label: 'Billing', icon: <CreditCard className="w-4 h-4" /> },
       { id: 'contracts_admin', label: 'Contract Cycle', icon: <FileText className="w-4 h-4" /> },
-    ],
-  },
-  {
-    label: 'Logistics',
-    items: [
-      { id: 'logistics', label: 'Logistics Hub', icon: <Truck className="w-4 h-4" /> },
-      { id: 'carriers', label: 'Carrier Monitor', icon: <Plug className="w-4 h-4" /> },
     ],
   },
   {

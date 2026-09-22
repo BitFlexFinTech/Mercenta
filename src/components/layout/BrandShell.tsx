@@ -48,6 +48,22 @@ const BRAND_SECTIONS = [
     items: [{ id: 'overview', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, tourAttr: 'brand-dashboard' }],
   },
   {
+    /**
+     * §Dashboard-cleanup P1 — OPERATIONS IS THE ACTION CENTRE (brand side).
+     * The brand's own work sits here, in the order they do it: process the
+     * purchase orders, print the shipping documents, handle returns, work the
+     * task list and the calendar. The Dashboard stays observe-only.
+     */
+    label: 'Operations',
+    items: [
+      { id: 'purchase_orders', label: 'Purchase Orders', icon: <Truck className="w-4 h-4" />, tourAttr: 'nav-purchase_orders' },
+      { id: 'logistics', label: 'Logistics Hub', icon: <Truck className="w-4 h-4" />, tourAttr: 'nav-logistics' },
+      { id: 'returns', label: 'Returns', icon: <RotateCcw className="w-4 h-4" /> },
+      { id: 'work', label: 'Tasks & Deadlines', icon: <ListChecks className="w-4 h-4" /> },
+      { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+    ],
+  },
+  {
     label: 'Catalogue',
     items: [
       { id: 'catalog', label: 'Product Catalog', icon: <Package className="w-4 h-4" />, tourAttr: 'nav-catalog' },
@@ -56,29 +72,11 @@ const BRAND_SECTIONS = [
     ],
   },
   {
-    label: 'Commerce',
-    items: [
-      { id: 'purchase_orders', label: 'Purchase Orders', icon: <Truck className="w-4 h-4" />, tourAttr: 'nav-purchase_orders' },
-      { id: 'returns', label: 'Returns', icon: <RotateCcw className="w-4 h-4" /> },
-    ],
-  },
-  {
-    label: 'Logistics',
-    items: [{ id: 'logistics', label: 'Logistics Hub', icon: <Truck className="w-4 h-4" />, tourAttr: 'nav-logistics' }],
-  },
-  {
     label: 'Compliance',
     items: [
       { id: 'onboarding', label: 'Onboarding & Legal', icon: <FileCheck2 className="w-4 h-4" /> },
       { id: 'compliance', label: 'UK Compliance', icon: <ShieldCheck className="w-4 h-4" />, tourAttr: 'nav-compliance' },
       { id: 'contracts', label: 'Contracts', icon: <FileText className="w-4 h-4" /> },
-    ],
-  },
-  {
-    label: 'Operations',
-    items: [
-      { id: 'work', label: 'Tasks & Deadlines', icon: <ListChecks className="w-4 h-4" /> },
-      { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
     ],
   },
   {

@@ -26,7 +26,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
     await loginAs(page, 'Super Admin — Tadii');
     const nav = page.locator('nav[aria-label="Primary"]');
     for (const heading of [
-      'Overview', 'Brands', 'Catalogue', 'Commerce', 'Finance', 'Logistics',
+      'Overview', 'Operations', 'Brands', 'Catalogue', 'Commerce', 'Finance',
       'Compliance', 'Communications', 'Support', 'Monitoring', 'Administration', 'Integrations',
     ]) {
       await expect(nav.locator(`text=${heading}`).first()).toBeVisible();
@@ -44,7 +44,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
   test('Admin — grouped IA renders', async ({ page }) => {
     await loginAs(page, 'Mercenta Admin Hub');
     const nav = page.locator('nav[aria-label="Primary"]');
-    for (const heading of ['Overview', 'Brands', 'Catalogue', 'Commerce', 'Finance', 'Logistics', 'Compliance', 'Communications', 'Support', 'Monitoring', 'Administration', 'Integrations']) {
+    for (const heading of ['Overview', 'Operations', 'Brands', 'Catalogue', 'Commerce', 'Finance', 'Compliance', 'Communications', 'Support', 'Monitoring', 'Administration', 'Integrations']) {
       await expect(nav.locator(`text=${heading}`).first()).toBeVisible();
     }
     await expect(nav.locator('text=Brand CRM').first()).toBeVisible();
@@ -54,7 +54,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
   test('Brand — grouped IA renders with brand sections', async ({ page }) => {
     await loginAs(page, 'Tapatío');
     const nav = page.locator('nav[aria-label="Primary"]');
-    for (const heading of ['Overview', 'Catalogue', 'Commerce', 'Logistics', 'Compliance', 'Insights', 'Account']) {
+    for (const heading of ['Overview', 'Operations', 'Catalogue', 'Compliance', 'Insights', 'Account']) {
       await expect(nav.locator(`text=${heading}`).first()).toBeVisible();
     }
     // §Phase E7 — the brand nav item is the customer-facing Mercenta Social
@@ -103,15 +103,37 @@ test.describe('App Shell — active state, breadcrumbs, grouping', () => {
     await expect(breadcrumb).toContainText('Brand CRM');
   });
 
-  test('Admin — grouping is structural (Commerce contains its items)', async ({ page }) => {
+  test('Admin — grouping is structural (Operations is the action centre)', async ({ page }) => {
+    /**
+     * §Dashboard-cleanup P1 — REPOINTED, not weakened.
+     *
+     * OLD CONTRACT: this test asserted that the COMMERCE group contained
+     * "Purchase Orders" (and "Fulfillment Track" / "Returns Tracking") — the
+     * pre-cleanup IA, where operational queues were scattered across Commerce and
+     * Logistics.
+     *
+     * NEW CONTRACT: OPERATIONS is the single action centre, so the operational
+     * queues must be grouped THERE, and Commerce must no longer carry them. The
+     * assertion is stronger than before: it checks the new grouping AND the
+     * absence of the old one.
+     */
     await loginAs(page, 'Mercenta Admin Hub');
     const nav = page.locator('nav[aria-label="Primary"]');
-    const commerce = nav
-      .locator('div', { hasText: 'Commerce' })
+    const operations = nav
+      .locator('div', { hasText: 'Operations' })
       .filter({ has: page.locator('text=Purchase Orders') })
       .first();
+    await expect(operations).toContainText('Work Management');
+    await expect(operations).toContainText('Purchase Orders');
+    await expect(operations).toContainText('Logistics Hub');
+    await expect(operations).toContainText('Returns Tracking');
+    await expect(operations).toContainText('Carrier Monitor');
+    await expect(operations).toContainText('Calendar');
+    // The old home for these queues no longer holds them.
+    const commerce = nav.locator('div', { hasText: 'Commerce' }).first();
     await expect(commerce).toContainText('Fulfillment Track');
-    await expect(commerce).toContainText('Returns Tracking');
+    await expect(commerce).toContainText('Retail Pipeline');
+    await expect(commerce).not.toContainText('Purchase Orders');
   });
 
   test('Brand — Dashboard active by default with Overview breadcrumb', async ({ page }) => {
