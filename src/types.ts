@@ -1672,7 +1672,7 @@ export const TOUR_STEPS = [
   },
   {
     id: 'logistics',
-    title: 'Inbound Shipments',
+    title: 'Logistics Hub',
     description: 'Track shipments from your factory to the UK retail fulfilment network. Use DHL for parcel freight and Palletline for palletised loads.',
     targetSelector: '[data-tour="nav-logistics"]',
     position: 'right' as const,
@@ -1953,7 +1953,7 @@ export const BRAND_ROLE_PRESETS: BrandRolePreset[] = [
   {
     role: 'Shipping',
     label: 'Shipping',
-    description: 'Purchase Orders, Inbound Shipments, Returns only.',
+    description: 'Purchase Orders, Logistics Hub, Returns only.',
     allowedViews: ['overview', 'purchase_orders', 'logistics', 'returns', 'settings'],
   },
   {

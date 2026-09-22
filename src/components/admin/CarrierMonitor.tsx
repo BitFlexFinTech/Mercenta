@@ -6,7 +6,7 @@ import { Wifi, WifiOff } from 'lucide-react';
 /**
  * §Stage-6 — CARRIER INTEGRATION MONITOR (technical connection-health view).
  * Per-carrier API status, uptime, last successful sync, error log. This is
- * the integration team's view; shipment operations live in Logistics Control.
+ * the integration team's view; shipment operations live in the Logistics Hub.
  */
 interface CarrierHealth {
   id: string;

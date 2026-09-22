@@ -58,7 +58,7 @@ const DESTINATION: Partial<Record<BrainEntityKind, { view: string; label: string
   asin: { view: 'catalog', label: 'Global Catalog' },
   purchase_order: { view: 'purchase_orders_admin', label: 'Purchase Orders' },
   po_line: { view: 'purchase_orders_admin', label: 'Purchase Orders' },
-  shipment: { view: 'logistics', label: 'Logistics Control' },
+  shipment: { view: 'logistics', label: 'Logistics Hub' },
   invoice: { view: 'billing', label: 'Billing' },
   payment: { view: 'billing', label: 'Billing' },
   case: { view: 'helpdesk', label: 'Helpdesk' },

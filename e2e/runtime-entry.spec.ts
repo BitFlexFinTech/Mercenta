@@ -132,8 +132,8 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     await page.waitForTimeout(1500);
 
     const nav = page.locator('nav[aria-label="Primary"]');
-    await nav.getByRole('button', { name: 'Logistics Control', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Logistics Control' })).toBeVisible({
+    await nav.getByRole('button', { name: 'Logistics Hub', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Logistics Hub' })).toBeVisible({
       timeout: 10000,
     });
     expect(new URL(page.url()).pathname).toBe('/admin/logistics');
@@ -141,7 +141,7 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     await page.reload();
     await page.waitForTimeout(1500);
     expect(new URL(page.url()).pathname).toBe('/admin/logistics');
-    await expect(page.getByRole('heading', { name: 'Logistics Control' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'Logistics Hub' })).toBeVisible({
       timeout: 10000,
     });
     await expect(page.getByRole('button', { name: 'Partner Login' })).toHaveCount(0);
@@ -155,8 +155,8 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     await page.waitForTimeout(1500);
     const nav = page.locator('nav[aria-label="Primary"]');
 
-    await nav.getByRole('button', { name: 'Logistics Control', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Logistics Control' })).toBeVisible({
+    await nav.getByRole('button', { name: 'Logistics Hub', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Logistics Hub' })).toBeVisible({
       timeout: 10000,
     });
     await nav.getByRole('button', { name: 'Mercenta Brain', exact: true }).click();
@@ -166,7 +166,7 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     await page.goBack();
     await page.waitForTimeout(1000);
     expect(new URL(page.url()).pathname).toBe('/admin/logistics');
-    await expect(page.getByRole('heading', { name: 'Logistics Control' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'Logistics Hub' })).toBeVisible({
       timeout: 10000,
     });
 

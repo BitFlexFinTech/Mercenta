@@ -22,7 +22,7 @@ async function openPurchaseOrders(page: any, brand: 'Tapatío' | 'Astonish' = 'T
 
 async function openLogisticsHub(page: any) {
   await loginAs(page, 'Tapatío', 1100);
-  await page.click('nav[aria-label="Primary"] >> text=Inbound Shipments');
+  await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
   await page.waitForTimeout(1200);
 }
 

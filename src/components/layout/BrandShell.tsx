@@ -64,7 +64,7 @@ const BRAND_SECTIONS = [
   },
   {
     label: 'Logistics',
-    items: [{ id: 'logistics', label: 'Inbound Shipments', icon: <Truck className="w-4 h-4" />, tourAttr: 'nav-logistics' }],
+    items: [{ id: 'logistics', label: 'Logistics Hub', icon: <Truck className="w-4 h-4" />, tourAttr: 'nav-logistics' }],
   },
   {
     label: 'Compliance',
@@ -150,7 +150,7 @@ export default function BrandShell() {
     : brandView === 'onboarding' ? 'Onboarding & Legal'
     : brandView === 'catalog' ? 'Product Catalog'
     : brandView === 'commercial_readiness' ? 'Commercial Readiness'
-    : brandView === 'logistics' ? 'Inbound Shipments'
+    : brandView === 'logistics' ? 'Logistics Hub'
     : brandView === 'compliance' ? 'UK Compliance'
     : brandView === 'purchase_orders' ? 'Purchase Orders'
     : brandView === 'contracts' ? 'Contracts'

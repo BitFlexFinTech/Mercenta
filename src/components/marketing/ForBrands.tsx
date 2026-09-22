@@ -24,7 +24,7 @@ export function ForBrands({ onNavigate, onOpenPortal }: { onNavigate: (p: Public
                 { title: 'Contracts', desc: 'Commercial agreement viewing and management' },
                 { title: 'Purchase Orders', desc: 'View, acknowledge, and manage POs from the retail network' },
                 { title: 'Product Catalog', desc: 'Manage listings across 10 approved categories' },
-                { title: 'Inbound Shipments', desc: 'Track from factory intake to live on retail-channel' },
+                { title: 'Logistics Hub', desc: 'Your PO documents, labels and shipment tracking' },
                 { title: 'UK Compliance', desc: 'Upload and manage compliance documentation' },
                 { title: 'Returns', desc: 'Manage return requests and tracking' },
                 { title: 'Analytics', desc: 'Sales performance analytics' },

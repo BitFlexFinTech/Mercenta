@@ -48,7 +48,7 @@ export const KB_ARTICLES: KBArticle[] = [
   },
 {
     id: 'kb-shipments',
-    title: 'Inbound shipments & ASNs',
+    title: 'Logistics Hub & ASNs',
     summary: 'Ship to the UK through Mercenta’s carrier accounts — international via DHL, UK domestic via Palletline — and file exact shipment information.',
     sections: [
       { heading: 'Carriers', body: 'International shipments travel on Mercenta’s DHL account; UK domestic shipments use Mercenta’s Palletline account. Brands do not pick arbitrary carriers.' },

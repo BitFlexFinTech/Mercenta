@@ -913,7 +913,7 @@ export function LogisticsHub() {
     <WorkspaceFrame>
       <WorkspaceHeader
         eyebrow="Brand portal · Logistics"
-        title="Inbound shipments & freight"
+        title="Logistics Hub"
         description="Every consignment Mercenta moves on your behalf, plotted on the operational map. Selecting a consignment exposes its route, its carrier position and who actually arranges carriage."
         entity={
           <>

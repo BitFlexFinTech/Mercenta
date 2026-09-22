@@ -98,7 +98,7 @@ test.describe('§CANONICAL PROPAGATION — the projections move with the domain'
     const brainBefore = await brainCounts(page);
     expect(brainBefore.nodes).toBeGreaterThan(100);
 
-    await nav.getByRole('button', { name: 'Logistics Control', exact: true }).click();
+    await nav.getByRole('button', { name: 'Logistics Hub', exact: true }).click();
     await page.getByTestId('admin-logistics-map').waitFor({ timeout: 15000 });
     const legsBefore = await adminVisibleLegs(page);
     expect(legsBefore).toBeGreaterThan(0);
@@ -144,7 +144,7 @@ test.describe('§CANONICAL PROPAGATION — the projections move with the domain'
     const owner = await ownerCtx.newPage();
     await loginAs(owner, 'Astonish', 1400);
     await dismissTour(owner);
-    await owner.locator('nav[aria-label="Primary"]').getByText('Inbound Shipments').first().click();
+    await owner.locator('nav[aria-label="Primary"]').getByText('Logistics Hub').first().click();
     await owner.getByTestId('logistics-map').waitFor({ timeout: 15000 });
     await dismissTour(owner);
 

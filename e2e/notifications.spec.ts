@@ -3,7 +3,7 @@
  *
  * Exercises the real automation contracts: the admin PO-creation entry point,
  * the acknowledgement flow that AUTO-creates a shipment draft (surfaced in
- * the brand's Inbound Shipments feed), ASN filing that pushes the shipment,
+ * the brand's Logistics Hub feed), ASN filing that pushes the shipment,
  * and the Labels modal. Email sending itself goes through the Postmark (Mock)
  * adapter and is not observable in the demo browser, so it is not asserted.
  */
@@ -37,7 +37,7 @@ test.describe('PO Notifications & Auto-Fulfilment', () => {
     await page.waitForTimeout(400);
     await page.locator('button', { hasText: 'Submit acknowledgment' }).click();
     await expect(page.getByText(/Acknowledgment submitted/i).first()).toBeVisible({ timeout: 5000 });
-    await page.click('nav[aria-label="Primary"] >> text=Inbound Shipments');
+    await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
     await page.waitForTimeout(1000);
     // The auto-created draft appears in the feed (its card title carries the
     // PO number).
@@ -68,7 +68,7 @@ test.describe('PO Notifications & Auto-Fulfilment', () => {
     await page.getByLabel('Expiry date').fill('2027-10-01');
     await page.locator('button', { hasText: 'File ASN' }).click();
     await page.waitForTimeout(800);
-    await page.click('nav[aria-label="Primary"] >> text=Inbound Shipments');
+    await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
     await page.waitForTimeout(1000);
     const labelsBtn = page.locator('button', { hasText: 'Labels' }).first();
     await expect(labelsBtn).toBeVisible({ timeout: 7000 });

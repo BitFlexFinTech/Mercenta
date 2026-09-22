@@ -95,7 +95,7 @@ test.describe('Redesign surfaces — responsive verification (brand)', () => {
     ['brand-reports', 'Reports'],
     ['brand-analytics', 'Analytics'],
     ['brand-settings', 'Settings'],
-    ['brand-logistics', 'Inbound Shipments'],
+    ['brand-logistics', 'Logistics Hub'],
   ] as const) {
     test(`${label} holds at every target width`, async ({ page }) => {
       await loginAs(page, 'Tapatío', 1500);

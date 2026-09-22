@@ -33,7 +33,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
     }
     for (const item of ['Brand CRM', 'Marketing', 'Brand Intelligence', 'Global Catalog',
       'Fulfillment Track', 'Retail Pipeline', 'Purchase Orders', 'Returns Tracking',
-      'Billing', 'Contract Cycle', 'Logistics Control', 'Carrier Monitor',
+      'Billing', 'Contract Cycle', 'Logistics Hub', 'Carrier Monitor',
       'Compliance Approvals', 'Messages', 'Helpdesk', 'Monitoring',
       'Super Admin', 'Audit Log', 'Onboarding Tours',
       'Integration Settings', 'Social Media', 'WhatsApp']) {
@@ -61,7 +61,7 @@ test.describe('App Shell — role coverage & grouped IA', () => {
     // identity (src/config/mercentaSocial.ts → MERCENTA_SOCIAL.navLabel). The
     // assertion is unchanged in strength: the item must still be visible.
     for (const item of ['Dashboard', 'Product Catalog', 'Purchase Orders', 'Returns',
-      'Inbound Shipments', 'Onboarding & Legal', 'UK Compliance', 'Contracts',
+      'Logistics Hub', 'Onboarding & Legal', 'UK Compliance', 'Contracts',
       'Analytics', 'Market Intel', 'Reports', 'Documents & Account',
       'Support & Team', 'Mercenta Social', 'Settings']) {
       await expect(nav.locator(`text=${item}`).first()).toBeVisible();

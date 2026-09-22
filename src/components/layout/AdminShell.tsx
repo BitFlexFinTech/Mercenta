@@ -111,7 +111,7 @@ const ADMIN_SECTIONS = [
   {
     label: 'Logistics',
     items: [
-      { id: 'logistics', label: 'Logistics Control', icon: <Truck className="w-4 h-4" /> },
+      { id: 'logistics', label: 'Logistics Hub', icon: <Truck className="w-4 h-4" /> },
       { id: 'carriers', label: 'Carrier Monitor', icon: <Plug className="w-4 h-4" /> },
     ],
   },
@@ -254,7 +254,7 @@ export default function AdminShell() {
   const breadcrumb: Record<string, string> = {
     overview: 'Admin Overview', crm: 'Brand CRM', fulfillment_track: 'Fulfillment Track', retail_pipeline: 'Retail Pipeline', purchase_orders_admin: 'Purchase Orders',
     billing: 'Billing', messages: 'Messages', helpdesk: 'Helpdesk', returns_tracking: 'Returns Tracking', monitoring: 'Monitoring',
-    contracts_admin: 'Contract Cycle', catalog: 'Global Catalog', logistics: 'Logistics Control', carriers: 'Carrier Monitor',
+    contracts_admin: 'Contract Cycle', catalog: 'Global Catalog', logistics: 'Logistics Hub', carriers: 'Carrier Monitor',
     compliance: 'Compliance Approvals', marketing: 'Marketing', brand_intelligence: 'Brand Intelligence', super_admin: 'Super Admin', audit_log: 'Audit Log',
     amazon_ads: 'Ad Spend',
     integrations: 'Integration Settings', usertour: 'Onboarding Tours', postiz: 'Social Media',

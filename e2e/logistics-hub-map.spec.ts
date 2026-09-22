@@ -73,7 +73,7 @@ async function dismissTour(page: Page, brandId = 'brand-astonish') {
 async function openLogistics(page: Page, card = 'Astonish') {
   await loginAs(page, card, 1400);
   await dismissTour(page);
-  await page.click('nav[aria-label="Primary"] >> text=Inbound Shipments');
+  await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
   await page.getByTestId('logistics-map').waitFor({ timeout: 15000 });
   await dismissTour(page);
 }
@@ -121,7 +121,7 @@ async function openSeededLogistics(
   await page.click('text=' + card);
   await page.waitForTimeout(1600);
   await dismissTour(page);
-  await page.click('nav[aria-label="Primary"] >> text=Inbound Shipments');
+  await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
   await page.getByTestId('logistics-map').waitFor({ timeout: 15000 });
   await dismissTour(page);
   return seeded;
@@ -425,11 +425,11 @@ test.describe('Logistics Hub — operational map', () => {
  * filter genuinely drives the map, and that a consignment created through the
  * real PO lifecycle appears on it.
  */
-test.describe('Admin Logistics Control — operational map', () => {
+test.describe('Admin Logistics Hub — operational map', () => {
   async function openAdminLogistics(page: Page) {
     await loginAs(page, 'Mercenta Admin Hub', 1400);
     await dismissTour(page);
-    await page.click('nav[aria-label="Primary"] >> text=Logistics Control');
+    await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
     await page.getByTestId('admin-logistics-map').waitFor({ timeout: 15000 });
     await dismissTour(page);
   }
@@ -458,7 +458,7 @@ test.describe('Admin Logistics Control — operational map', () => {
     await page.click('text=Mercenta Admin Hub');
     await page.waitForTimeout(1600);
     await dismissTour(page);
-    await page.click('nav[aria-label="Primary"] >> text=Logistics Control');
+    await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
     await page.getByTestId('admin-logistics-map').waitFor({ timeout: 15000 });
     await dismissTour(page);
 

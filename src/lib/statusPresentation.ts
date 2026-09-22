@@ -578,7 +578,9 @@ export function commissionStatusPresentation(status: CommissionStatus | string):
 export function ackDeadlinePresentation(hoursLeft: number): StatusPresentation {
   if (hoursLeft <= 0) {
     return {
-      label: 'Ack deadline PASSED — risk of forced cancellation',
+      // §Dashboard-cleanup P0 — AV-002: state the RISK, never an unsupported
+      // certainty (the register records "forced cancellation" as an inference).
+      label: 'Ack deadline PASSED — at risk of cancellation',
       tone: 'danger',
       dataStatus: 'ack_overdue',
       actionable: true,

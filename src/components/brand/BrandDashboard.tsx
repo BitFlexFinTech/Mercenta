@@ -35,7 +35,7 @@
  * deductions. The previous global activity feed (ActivityLog has no brandId)
  * is gone for this reason.
  */
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import {
   useCommissions,
@@ -159,6 +159,8 @@ const overdue = (orderDate: string): boolean =>
 export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const { session, brandProfile, products } = useApp();
   const tenantId = session?.tenantId;
+  /** §Dashboard-cleanup P0 — brief highlight when a payout tile takes the operator to the ledger. */
+  const [payoutsPulse, setPayoutsPulse] = useState(false);
 
   const poQuery = usePurchaseOrders();
   const shipmentsQuery = useShipmentsAll();
@@ -395,6 +397,22 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       ? 'No compliance documents on file'
       : `${approvedDocs.length}/${docs.length} documents approved`;
 
+  /**
+   * §Dashboard-cleanup P0 (2026-09-22) — the payout tiles used to route to
+   * `documents` ("Documents & Account"), which contains NO payout content at all:
+   * a dead end the Founder hit directly. The brand's own payout ledger is the
+   * "Payouts" section ON THIS PAGE, so the tiles now take the operator to it —
+   * no new screen, no new navigation, no moved function (settlement stays an
+   * Admin → Accounting action).
+   */
+  const focusPayouts = () => {
+    const el = typeof document === 'undefined' ? null : document.getElementById('brand-payouts');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setPayoutsPulse(true);
+    window.setTimeout(() => setPayoutsPulse(false), 1600);
+  };
+
   const kpiCells: MetricTileData[] = [
     {
       id: 'active-pos',
@@ -448,7 +466,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       context: `£${pendingPayoutValue.toFixed(2)} net owed to you`,
       tone: pendingPayouts.length > 0 ? 'info' : 'success',
       statusText: pendingPayouts.length > 0 ? 'Awaiting settlement' : 'Nothing outstanding',
-      onOpen: go('documents'),
+      onOpen: focusPayouts,
     },
     {
       id: 'payouts-settled',
@@ -458,7 +476,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       context: `£${settledPayoutValue.toFixed(2)} net paid`,
       tone: 'success',
       statusText: settledPayouts.length > 0 ? 'Paid' : 'None settled yet',
-      onOpen: go('documents'),
+      onOpen: focusPayouts,
     },
     {
       id: 'contract-status',
@@ -487,7 +505,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
   }[] = [
     { id: 'purchase_orders', label: 'Review purchase orders', hint: `${awaitingAck.length} awaiting acknowledgement`, domain: 'orders' },
     { id: 'catalog', label: 'Manage catalogue', hint: `${products.length} products listed · ${outOfStock.length} out of stock`, domain: 'catalogue' },
-    { id: 'logistics', label: 'Inbound shipments', hint: `${brandShipments.length} shipment${brandShipments.length === 1 ? '' : 's'} in motion`, domain: 'logistics' },
+    { id: 'logistics', label: 'Logistics Hub', hint: `${brandShipments.length} shipment${brandShipments.length === 1 ? '' : 's'} in motion`, domain: 'logistics' },
     { id: 'compliance', label: 'Compliance & documents', hint: complianceLabel, domain: 'compliance' },
     { id: 'documents', label: 'Statements & account', hint: `${openDeductions.length} open deduction${openDeductions.length === 1 ? '' : 's'}`, domain: 'finance' },
     { id: 'team', label: 'Support & team', hint: `${brandTickets.length} open ticket${brandTickets.length === 1 ? '' : 's'}`, domain: 'communications' },
@@ -708,7 +726,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
           empty={
             <EmptyState
               title="Nothing in fulfilment right now"
-              description="Accepted and ready-to-fulfil POs appear in the purchase-order section above; file a shipment from Inbound Shipments once a PO moves into dispatch."
+              description="Accepted and ready-to-fulfil POs appear in the purchase-order section above; download its shipping documents from the Logistics Hub once a PO is accepted."
               action={<Button size="sm" onClick={go('logistics')}>Create a shipment</Button>}
             />
           }
@@ -719,7 +737,15 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
           could see an invoice and a deduction but never what it was actually
           OWED; the figures come from the canonical commission store and the
           canonical fee maths, so the brand's number and the operator's number
-          are the same number. */}
+          are the same number.
+
+          §Dashboard-cleanup P0 — anchored + pulse target for the payout tiles
+          above, so "Payouts due" lands HERE instead of on Documents & Account. */}
+      <div
+        id="brand-payouts"
+        data-payouts-pulse={payoutsPulse ? 'true' : undefined}
+        className={payoutsPulse ? 'rounded-ds-lg ring-1 ring-white/20' : undefined}
+      >
       <WorkspaceSection
         title="Payouts"
         description="Your net share per settled commission — computed with the same fee maths the platform settles with."
@@ -810,6 +836,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
           </div>
         )}
       </WorkspaceSection>
+      </div>
       </WorkspaceGrid>
     </WorkspaceFrame>
   );

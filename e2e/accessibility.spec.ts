@@ -147,7 +147,7 @@ test.describe('Accessibility — brand workspace', () => {
     ['BRAND · Reports', 'Reports'],
     ['BRAND · Analytics', 'Analytics'],
     ['BRAND · Settings', 'Settings'],
-    ['BRAND · Logistics Hub', 'Inbound Shipments'],
+    ['BRAND · Logistics Hub', 'Logistics Hub'],
   ] as const) {
     test(`7. ${label} is structurally sound and scan-clean`, async ({ page }) => {
       await loginAs(page, 'Tapatío', 1500);

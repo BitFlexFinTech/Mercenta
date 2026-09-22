@@ -65,7 +65,7 @@ const ONBOARDING_TOUR: UsertourDefinition = {
       targetSelector: '[data-tour="nav-catalog"]', position: 'right',
     },
     {
-      id: 'logistics', title: 'Inbound Shipments',
+      id: 'logistics', title: 'Logistics Hub',
       description: 'Track shipments from your factory to the UK retail fulfilment network.',
       targetSelector: '[data-tour="nav-logistics"]', position: 'right',
     },

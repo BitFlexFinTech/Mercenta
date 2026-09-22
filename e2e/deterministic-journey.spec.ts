@@ -192,7 +192,7 @@ test.describe('A. Deterministic investor journey — brand → channel → finan
     await expect(page.getByTestId('work-primary')).toContainText('PO-9001');
     await expect(page.getByTestId('work-primary')).toContainText('PO-9003');
 
-    await openAdminView(page, 'Logistics Control');
+    await openAdminView(page, 'Logistics Hub');
     await expect(page.getByTestId('logistics-metric-in-transit')).toBeVisible({ timeout: 8000 });
     /* The logistics surface is wired to the SAME operating layer (its context
        rail lists the acknowledgement / window / exception items), and its empty

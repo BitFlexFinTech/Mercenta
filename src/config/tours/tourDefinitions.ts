@@ -83,7 +83,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
     },
     {
       id: 'orientation-logistics',
-      title: 'Inbound Shipments',
+      title: 'Logistics Hub',
       description: 'When a PO is accepted, you create a shipment from your factory to the UK retail channel. You\'ll file carton-level details, choose a carrier, and submit an ASN (Advanced Shipment Notice).',
       targetSelector: '[data-tour="nav-logistics"]',
       position: 'right',

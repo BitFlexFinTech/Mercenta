@@ -58,7 +58,7 @@ async function dismissTour(page: Page, brandId = 'brand-astonish') {
 async function openLogistics(page: Page, card = 'Astonish') {
   await loginAs(page, card, 1400);
   await dismissTour(page);
-  await page.click('nav[aria-label="Primary"] >> text=Inbound Shipments');
+  await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
   await page.getByTestId('logistics-map').waitFor({ timeout: 15000 });
   await page.getByTestId('logistics-hero').waitFor({ timeout: 15000 });
   await dismissTour(page);

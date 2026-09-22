@@ -178,9 +178,9 @@ test.describe('E5 — admin operational surfaces', () => {
     await page.click('text=Mercenta Admin Hub');
     await page.waitForTimeout(1200);
 
-    await page.click('nav[aria-label="Primary"] >> text=Logistics Control');
+    await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
     await page.waitForTimeout(900);
-    await expect(page.getByRole('heading', { name: 'Logistics Control' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: 'Logistics Hub' })).toBeVisible({ timeout: 8000 });
 
     // REAL DEFECT FIXED: the PO column used to render “—” for every row because a
     // shipment id was looked up against PO ids. It now shows the canonical

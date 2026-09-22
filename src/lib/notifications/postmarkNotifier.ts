@@ -137,8 +137,19 @@ export function buildPoNotificationHtml(
     '',
     'Link to PO: ' + brandPoUrl,
     '',
-    'If you do not acknowledge this PO by the deadline, it may be subject to',
-    'forced cancellation and could affect your vendor performance rating.',
+    /**
+     * §Dashboard-cleanup P0 — AV-002 / AV-003 CORRECTED.
+     *
+     * OLD: "it may be subject to forced cancellation and could affect your
+     * vendor performance rating." The repo's own Amazon truth register records
+     * BOTH claims as unsupported: AV-002 ("unacknowledged ⇒ forced cancellation"
+     * is an INFERENCE, not an Amazon statement) and AV-003 ("vendor performance
+     * rating" has NO Amazon source reached). They are replaced by a statement of
+     * RISK, attributed to Mercenta — never a certainty, never an invented Amazon
+     * consequence.
+     */
+    'If you do not acknowledge this PO by the deadline it may be at risk of',
+    'cancellation. Mercenta will contact you before any order is affected.',
     '',
     '- Mercenta Partners',
   ].join('\n');
@@ -158,7 +169,7 @@ export function buildPoNotificationHtml(
     '<tr><td style="padding: 8px 12px; border-bottom: 1px solid #eee; color: #666;">Deadline</td><td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-weight: 600; color: #d93838;">' + deadlineFormatted + '</td></tr>',
     '</table>',
     '<a href="' + brandPoUrl + '" style="display: inline-block; background: #b8860b; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; margin: 8px 0;">View Purchase Order</a>',
-    '<p style="color: #888; font-size: 12px; line-height: 1.5; margin-top: 16px;">If you do not acknowledge this PO by the deadline, it may be subject to forced cancellation and could affect your vendor performance rating.</p>',
+    '<p style="color: #888; font-size: 12px; line-height: 1.5; margin-top: 16px;">If you do not acknowledge this PO by the deadline it may be at risk of cancellation. Mercenta will contact you before any order is affected.</p>',
     '<hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;">',
     '<p style="color: #888; font-size: 11px;">- Mercenta Partners</p>',
     '</div></body></html>',

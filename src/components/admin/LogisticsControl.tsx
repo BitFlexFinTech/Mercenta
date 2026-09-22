@@ -219,7 +219,7 @@ export function LogisticsControl() {
     <WorkspaceFrame className="space-y-4">
       <WorkspaceHeader
         eyebrow="Admin Hub · Logistics"
-        title="Logistics Control"
+        title="Logistics Hub"
         description="Operational view — shipments in transit, delays and exceptions by brand and PO. Shipment state feeds the canonical work layer, so an exception becomes an actionable item rather than a passive row."
         meta={
           <>
