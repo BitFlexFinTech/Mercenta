@@ -1,7 +1,76 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 
-## 🧭 CURRENT PLATFORM POSITION — WAVE 4: THE BRAIN IS NOW A GENUINE 3D SPATIAL EXPERIENCE (2026-09-22, session 9)
+## 🧭 CURRENT PLATFORM POSITION — WAVE 3: THE LOGISTICS HUB GETS A CINEMATIC HERO (2026-09-22, session 10)
+
+**Increment identity:** Wave 3 of the full UI/UX redesign — **the Logistics Hub: hero + operational Hub**. The hero is a section of the **same** Logistics Hub page (no second page) built on **authentic geography** (Natural Earth public domain + OpenStreetMap motorway/trunk under ODbL, generated and committed), with a **fixed, non-interactive camera** and a **deterministic** simulation. The canonical operational map, filters, inspector, artefacts and tenant scoping were **not** rewired or replaced.
+
+**Full record:** `docs/UIUX_REDESIGN_WAVE3_LOGISTICS_HERO_2026-09-22.md`.
+
+### 1. COMPLETED / VERIFIED
+
+- **Cinematic hero implemented and browser-verified** (`src/components/shared/logistics/LogisticsHero.tsx` + `LogisticsHeroScene.tsx`): real WebGL (three/R3F), one InstancedMesh per traffic type, `pointerEvents: 'none'` on the scene host, **no controls and no event handlers**.
+- **Authentic geography, generated not hand-drawn** (`scripts/build-logistics-hero-geo.mjs` → committed `src/data/logisticsHeroGeo.ts`): 46 world land rings, 16 UK coastline rings, 6,067 UK motorway/trunk road lines. Licences: Natural Earth **public domain**; OpenStreetMap **ODbL 1.0** — attributed **inside the hero** and asserted by the browser suite. Zero runtime network calls.
+- **Deterministic simulation** (`src/lib/logistics/heroNetwork.ts`): 22 air lanes from 22 international airports across 9 regions, 22 maritime lanes whose approach bearing is the **real** origin→UK-port bearing, 35 road vehicles spread across the UK strategic network **plus one approach lane per canonical FC city**. Phases/speeds derive from a stable hash — identical positions for identical time, no randomness. `HERO_SCENE.budget` caps are **enforced**.
+- **Truth semantics preserved**: brand lanes inherit the canonical leg classification; ambient lanes are **always ambient** and the hero states in words that ambient traffic is **NOT a Mercenta shipment**. The site-wide `UNKNOWN → SIMULATION` defect is **not** reintroduced (asserted for unknown / not_registered / disabled / configuring / degraded / error / available / live-without-reference).
+- **Accessibility + honest labelling**: plain-language text alternative with counts/origins/regions, visible legend, reduced-motion static composition that states it, and a "what this view does and does not claim" disclosure naming the UK tile's declared scale exaggeration.
+- **Three real defects found by looking at captured screenshots and fixed at the cause:** unreadable tile framing; light-on-light copy in the Minimal Light theme (theme tokens resolve to near-white — the cinematic panel now has its own declared dark palette); ships rendering across the land (the tile was lifted above the sea plane — the sea plane is now coplanar with the tile base and lanes stop offshore).
+
+### 2. IN PROGRESS
+
+- **Nothing.** This session's increment is complete; the Wave 3 items in heading 3 were **not** started.
+
+### 3. REMAINING — CURRENT ROADMAP (Wave 3 remainder, then 5 and 6)
+
+1. **PO acknowledgement backorder gate** — `isBackOrderAllowed` does not exist (grep = 0), so backorder is offered unconditionally (`discovered-backorder-fail-closed-gate`).
+2. **Brand-facing Routing Request + the unsupported "10am Pacific" claim** — must be removed/reconciled, not relabelled (`discovered-routing-request-removal`, T-6).
+3. **Carrier provider-eligibility derivation** from brand location / origin / destination / route / PO context / freight terms / provider capabilities / provider state (`discovered-logistics-hub`, second half).
+4. **ETA on the shipment record** — no such field exists in the domain model; a domain change, not a UI change.
+5. **Delivery-performance aggregation inside the Logistics Hub.**
+6. **WAVE 5 — Super Admin / Control Centre** (integration control architecture, credential vault T-7, server-side Super Admin enforcement). **NOT STARTED.**
+7. **WAVE 6 — product-wide completion / integration / regression pass.** **NOT STARTED.**
+8. The remainder of the pre-existing roadmap (Wave 3 parts 2–5, `theme-alpha-shims` removal, visual-regression gate, `AdminShell` chunk, legacy page shell backlog, Phases 3–15).
+9. **DEPLOYMENT** — not started; only on Founder instruction (`scripts/deploy-demo.sh`, demo host only; `operating-model.md` §5).
+
+### 4. DEFERRED / PARKED
+
+- Unchanged from the session-9 block below. No new deferrals were created by this increment.
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **Credentials only** for live integration activation (`phase14-live-integrations-activation`). This increment added **no** credential requirement: the hero is deterministic local simulation with zero network calls.
+
+### 6. KNOWN EXCEPTIONS
+
+- **Wave 3 is NOT fully closed** — the items in heading 3 are real remaining work, stated here rather than implied complete.
+- The **BrandShell chunk is 600.30 kB / 180.83 kB gzip** — the hero geometry + three.js load with the brand shell. A measured cost, not explained away; code-splitting the hero is a candidate optimisation.
+- The **admin** Logistics Control does not show the hero (the requirement was the Brand Logistics Hub). Recorded, not a regression.
+- The two dirty-tree scope-guard validator failures and the 185 pre-existing `verify-registry` findings from the session-9 block are unchanged.
+
+### 7. CURRENT CHECKPOINT
+
+- **Branch:** `redesign/foundation`. **Start HEAD:** `24b2b50` (Wave 4 Brain 3D) with `git status --porcelain` **EMPTY** at start. **Checkpoint commit:** the `wave3(logistics-hero)` commit recorded in this session's report.
+
+### 8. VERIFICATION STATUS (all executed in this session — real output)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** |
+| `npx eslint src/` | **0 problems** |
+| `npm run build` | **PASS** (5.69 s) |
+| `node scripts/validate-logistics-hero.mjs` | **53 assertions PASS**, runtime executed, 0 network calls |
+| `node scripts/validate-logistics-map.mjs` | **60 assertions PASS** (unchanged) |
+| `npx playwright test e2e/logistics-hero.spec.ts` | **10 passed** |
+| `npx playwright test e2e/logistics-hub-map.spec.ts` | **15 passed** (no regression) |
+
+### 9. NEXT EXECUTION SCOPE
+
+1. Finish the Wave 3 items in heading 3 (backorder gate, routing-request reconciliation, carrier eligibility derivation, ETA) — smallest-risk first, each with its own validator/browser assertion.
+2. Then **Wave 5** (Super Admin Control Centre + credential vault, server-side authorisation, secret hygiene), then **Wave 6**.
+3. **No credential exists for anything in heading 5** — do not attempt those without one, and never claim a simulated provider is live.
+4. **Deployment only on Founder instruction**, only to `demo.mercenta.co.uk`, and only after opening the live site to verify the change.
+
+## 🧭 PREVIOUS POSITION — WAVE 4: THE BRAIN IS A GENUINE 3D SPATIAL EXPERIENCE (2026-09-22, session 9)
 
 **Increment identity:** Wave 4 of the full UI/UX redesign. The Brain's flat 2D SVG graph is REPLACED by a real WebGL scene (perspective camera, orbit navigation, spatial cluster wheel, depth-stratified records, animated relationships, travelling signals). **The canonical Brain DATA was not touched** — `buildGraph.ts` is unchanged, the graph still owns no business state and still makes zero network calls.
 

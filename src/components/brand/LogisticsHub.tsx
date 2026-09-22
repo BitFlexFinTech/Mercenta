@@ -43,6 +43,7 @@ import {
 } from '@/config/logisticsGeo';
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
 import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
+import { LogisticsHero } from '@/components/shared/logistics/LogisticsHero';
 import {
   ContextPanel,
   RecordFieldList,
@@ -683,6 +684,28 @@ export function LogisticsHub() {
     () => model.legs.filter((leg) => visibleIds.has(leg.id)),
     [model.legs, visibleIds]
   );
+
+  /**
+   * §WAVE 3 — the Hero's brand lanes come from the SAME canonical legs the
+   * operational map plots, so the cinematic view and the operational view can
+   * never disagree about a consignment, its route or its truth state. Legs the
+   * user has filtered out are NOT dropped from the hero: the hero is a fixed
+   * network view, and the operational filters belong to the operational
+   * surfaces below it.
+   */
+  const heroLegs = useMemo(
+    () =>
+      model.legs.map((leg) => ({
+        id: leg.id,
+        reference: leg.reference,
+        title: leg.title,
+        origin: leg.origin.place,
+        destination: leg.destination.place,
+        truth: leg.truth,
+        exception: leg.exception || leg.delayed,
+      })),
+    [model.legs]
+  );
   const visibleTruthCounts = useMemo(() => {
     const out: Record<string, number> = { live_verified: 0, simulated: 0, ambient: 0 };
     for (const leg of visibleLegs) out[leg.truth] += 1;
@@ -859,6 +882,19 @@ export function LogisticsHub() {
       />
 
       <MetricBand items={kpiItems} loading={shipmentsQuery.isLoading} />
+
+      {/*
+        §WAVE 3 — THE CINEMATIC LOGISTICS HERO.
+        It is the HERO SECTION of this same page, not a second page: a fixed
+        camera, non-interactive global inbound network view built from authentic
+        geography, carrying the same LIVE VERIFIED / SIMULATED / AMBIENT truth
+        states as the operational surfaces below it. The operational controls
+        (search, evidence filters, consignment list, inspector, artefacts) stay
+        fully interactive underneath — exactly as required.
+      */}
+      <div className="mt-4">
+        <LogisticsHero legs={heroLegs} />
+      </div>
 
       <WorkspaceGrid
         className="mt-4"

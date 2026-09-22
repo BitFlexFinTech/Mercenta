@@ -49,6 +49,14 @@ test-results/
 e2e-report/
 Review Zip/*.zip
 
+# ── §Wave 3 — RAW GEOGRAPHY DATASET CACHE (NEVER TRACKED) ─────────────────────
+# `scripts/build-logistics-hero-geo.mjs` downloads the authoritative datasets
+# (Natural Earth, ~13 MB; OpenStreetMap UK roads via Overpass, ~14 MB) so they
+# can be simplified into the COMMITTED `src/data/logisticsHeroGeo.ts`. The raw
+# multi-megabyte downloads are build inputs, not source: they are reproducible
+# with `npm run build:hero-geo -- --fetch` and must never be versioned.
+.geo-cache/
+
 # ── §Phase WAVE-0/4 — FOUNDER-PROVIDED AGENT SKILLS (MIT) ─────────────────────
 # Cloned reference material for the redesign, not product source:
 #   jakubkrehel/skills  → better-interface/ui/typography/colors/layout/accessibility

@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-09-21",
+    "last_updated": "2026-09-22",
     "status_enum": [
       "not_started",
       "built",
@@ -3908,7 +3908,7 @@
       "description": "PARTIALLY RESOLVED. The FIRST half is DONE: the Logistics Hub (the Brand/Admin logistics workspace that replaces the \"Carrier Portal\" concept) IS implemented — committed as `4ebba1d` (Logistics Hub + the interactive operational map, brand AND admin, with canonical geography, fail-closed LIVE/SIMULATED/AMBIENT labelling and freight-term semantics), with `scripts/validate-logistics-map.mjs` (60 assertions) and the browser suite green. The SECOND half REMAINS OPEN: provider eligibility is still a declared lane rule (`international → DHL`, `UK domestic → Palletline`, freight-collect → the channel-arranged carrier) rather than a derivation from brand location, origin, destination, route, PO context, freight terms, configured provider capabilities and provider state.",
       "evidence": "IMPLEMENTED: src/components/admin/LogisticsControl.tsx, src/components/brand/LogisticsHub.tsx, src/components/shared/logistics/LogisticsMapCanvas.tsx, src/lib/logistics/operationsMap.ts, src/config/logisticsGeo.ts, scripts/validate-logistics-map.mjs (60 assertions), e2e/logistics-hub-map.spec.ts. REMAINING: src/config/shipping.ts (MERCENTA_CARRIER_ACCOUNTS / LANE rule), src/lib/shipping/carrierRouting.ts",
       "status": "not_started",
-      "_audit_note": "§CLEAN-SLATE RECONCILIATION 2026-09-21 — SPLIT HONESTLY. The row claimed the whole item was not implemented, which was false: the Hub and the map shipped. Only the provider-ELIGIBILITY derivation remains, and that is the part this row now scopes. Completed work must never be listed as remaining.",
+      "_audit_note": "§WAVE 3 (2026-09-22) — the cinematic HALF of this discovery is now built and browser-verified under four dedicated rows (uiux-wave3-logistics-hero and its three supporting rows). This row REMAINS not_started because its second half is untouched: the carrier provider-eligibility DERIVATION (brand location, origin, destination, route, PO context, freight terms, provider capabilities, provider state) replaces nothing — the declared lane rule + partnered-carrier rule remain the whole eligibility rule. Also NOT claimed done here: the backorder fail-closed gate (discovered-backorder-fail-closed-gate) and the brand-facing Routing Request / unsupported 10am Pacific claim (discovered-routing-request-removal).",
       "source": "S2a — canonical brand case surface + KB sufficiency evaluator + tenant-safe relevant-data lookup (2026-09-20)",
       "last_verified": "2026-09-21",
       "superseded_by": null
@@ -4314,8 +4314,8 @@
       "description": "LOGISTICS HUB — the brand Inbound Shipments surface rebuilt as an operations workspace on the canonical primitives (WorkspaceFrame/Header/Grid/Section, KpiGroup, ContextPanel, RecordFieldList, SegmentedControl): entity/context bar, KPI band, sticky toolbar with search + evidence + lane filters, the operational map, a filterable consignment list with per-row Waybill/Labels/Track artefacts, and an inspector rail stating stage, route, evidence reason and who arranges carriage. The old page (hardcoded light-mode zinc classes on a dark shell, three carrier tabs, a non-functional New Booking form) was replaced; the fake form was REMOVED rather than restyled because real booking is the canonical ASN flow on Purchase Orders. The admin Logistics Control carries the same map above its per-brand tables, driven by the same focus filter.",
       "source": "Complete Platform Redesign — Logistics Hub + operational map (2026-09-21 session 2)",
       "status": "built_and_tested",
-      "evidence": "src/components/brand/LogisticsHub.tsx; src/components/admin/LogisticsControl.tsx; e2e/logistics-hub-map.spec.ts (15 executed tests incl. artefacts open/close, Escape dismissal, responsive 1440/1280/1024/390 with no horizontal overflow, reduced motion disabling the ambient drift, tenant isolation, no page errors, no external calls)",
-      "last_verified": "2026-09-21",
+      "evidence": "src/components/brand/LogisticsHub.tsx; src/components/admin/LogisticsControl.tsx; e2e/logistics-hub-map.spec.ts (15 executed tests incl. artefacts open/close, Escape dismissal, responsive 1440/1280/1024/390 with no horizontal overflow, reduced motion disabling the ambient drift, tenant isolation, no page errors, no external calls); §WAVE 3 (2026-09-22) — the CINEMATIC HERO is now the hero SECTION of this same page (uiux-wave3-logistics-hero and its three supporting rows); e2e/logistics-hero.spec.ts 10 passed and e2e/logistics-hub-map.spec.ts 15 passed (no regression)",
+      "last_verified": "2026-09-22",
       "superseded_by": null
     },
     {
@@ -4534,7 +4534,7 @@
       "last_verified": "2026-09-21",
       "superseded_by": null
     },
-{
+    {
       "id": "m12-wording-brand-brain-fix",
       "description": "M12 WORDING SAFEGUARD — the BRAND-scoped Brain no longer names the retail channel, and the static wording gate passes 100%. FIXED: `src/lib/intelligence/brain/buildGraph.ts` rendered the label \"Retail channel (Amazon UK Vendor)\" on a node added by `addChannelLayer()`, which is SHARED by BOTH scopes — so the brand's relationship map (`BrandRelationshipMap` -> `BrainCanvas`) named the retail channel to a brand. The label is now channel-neutral. The internal Brain entity kind was ALSO renamed `amazon` -> `retail_channel` (a code identifier that is never rendered) so the wording matcher does not have to be blinded to the real copy in those files. NEW PERMANENT GUARD: `scripts/brain-runtime-check.ts` asserts the brand-scoped Brain's rendered COPY names no retail channel, with a negative control proving the matcher can fail; property VALUES are deliberately out of scope because several are PROVENANCE (an evidence URL) that the rules require to stay accurate. This gate had been FAILING at HEAD c07dfbe with 8 violations — an inherited, unreported defect; `scripts/integrity-audit.mjs` reported 61 PASSED / 1 FAILED and now reports 62 / 0.",
       "source": "Clean-slate reconciliation (2026-09-21 session 8) — the wording-gate failure found while verifying the reconciled tree",
@@ -4542,6 +4542,42 @@
       "evidence": "`npm run validate:wording` EXECUTED -> WORDING_LINT_PASS (281 src files, 0 outward-facing violations); `scripts/integrity-audit.mjs` EXECUTED -> 62 PASSED / 0 FAILED (100%); `scripts/validate-mercenta-brain.mjs` EXECUTED -> 30 assertions PASS, runtime harness executed, 0 network calls; src/lib/intelligence/brain/{buildGraph,types,layout}.ts + src/components/shared/brain/BrainCanvas.tsx; e2e/uiux-redesign.spec.ts:245",
       "last_verified": "2026-09-21",
       "superseded_by": null
-}
+    },
+    {
+      "id": "uiux-wave3-logistics-hero",
+      "description": "UI/UX Wave 3 — the CINEMATIC LOGISTICS HERO, as a SECTION of the SAME Brand Logistics Hub page (never a second page): a real WebGL scene (three/R3F) with a FIXED camera, no controls, no event handlers and `pointerEvents: none` on the scene host so page scrolling is never intercepted. Aircraft, container ships and articulated lorries are rendered from merged primitives, one InstancedMesh per type. An accessible text alternative (counts, origins, regions), a visible truth legend, a reduced-motion static composition and the required dataset attribution are rendered on the surface, and the panel states in words what the view does and does not claim. The operational map, filters, inspector, artefacts and tenant scoping of the Hub are unchanged.",
+      "source": "Wave 3 (2026-09-22 founder directive)",
+      "status": "built_and_tested",
+      "evidence": "src/components/shared/logistics/LogisticsHero.tsx; src/components/shared/logistics/LogisticsHeroScene.tsx; src/components/brand/LogisticsHub.tsx (hero section on the same route); e2e/logistics-hero.spec.ts 10 passed; docs/UIUX_REDESIGN_WAVE3_LOGISTICS_HERO_2026-09-22.md; screenshot review found and fixed three real defects (framing, light-on-light copy in the light theme, ships rendering across land)",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "logistics-hero-authentic-geography",
+      "description": "The hero draws AUTHENTIC geography and invents none: world landmass from Natural Earth ne_110m_land (public domain), the UK landmass/coastline from Natural Earth ne_10m_admin_0_countries (public domain) and the UK strategic road network (motorway + trunk) from OpenStreetMap via the Overpass API (ODbL 1.0, attributed). The datasets are fetched and simplified at BUILD time by scripts/build-logistics-hero-geo.mjs and committed as src/data/logisticsHeroGeo.ts, so the application makes ZERO network calls at runtime. UK fulfilment-centre destinations come from the canonical DEFAULT_UK_FC_LIST through the existing fcCityPoint() coordinate owner — no second FC dataset exists.",
+      "source": "Wave 3 (2026-09-22 founder directive)",
+      "status": "built_and_tested",
+      "evidence": "scripts/build-logistics-hero-geo.mjs (emits 46 world rings / 16 UK rings / 6,067 road lines with a provenance block); src/data/logisticsHeroGeo.ts; src/config/logisticsHero.ts (heroFcDestinations consumes DEFAULT_UK_FC_LIST + fcCityPoint); src/config/logisticsGeo.ts (fcCityPoint / fcCityKeys accessors); node scripts/validate-logistics-hero.mjs 53 assertions PASS incl. licence + source-URL presence; e2e/logistics-hero.spec.ts assertion 6 reads the committed geometry in the browser and checks the ODbL attribution is rendered",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "logistics-hero-deterministic-simulation",
+      "description": "The hero simulation is DETERMINISTIC and bounded: every lane phase and speed derives from a stable hash of its own id (never Math.random), so identical simulated time yields identical positions; HERO_SCENE.budget caps are enforced by buildHeroNetwork rather than documented; the declared network is global and varied (22 air lanes from 22 international airports across 9 regions, 22 maritime lanes whose approach bearing is the real origin→UK-port bearing, 35 road vehicles on the genuine strategic network plus one approach lane per canonical FC city). Brand lanes are derived from the canonical shipment legs and inherit their truth; a leg with no resolvable origin is NOT fabricated. Zero network calls.",
+      "source": "Wave 3 (2026-09-22 founder directive)",
+      "status": "built_and_tested",
+      "evidence": "src/lib/logistics/heroNetwork.ts; src/config/logisticsHero.ts (HERO_SCENE.budget enforced by slice + Math.max); node scripts/validate-logistics-hero.mjs 53 assertions PASS (two builds identical, positions identical for the same time, every lane has its own staggered phase, progress bounded for any time, origins/regions/motion variety); e2e/logistics-hero.spec.ts 4/5, 8 and 12",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "logistics-hero-fixed-camera-contract",
+      "description": "The hero camera is FIXED and the Hero is NON-INTERACTIVE by contract: the camera position/target/fov are declared once in HERO_SCENE, there are no camera controls in the scene, and the scene host is `pointer-events: none` with no event handlers, so wheel/touch scrolling passes through the Hero untouched. Accessibility is not traded for the visual: the visualisation has a plain-language text alternative, a visible legend, a reduced-motion static composition that states it is held still, keyboard-reachable content outside the canvas, and no hover-only information.",
+      "source": "Wave 3 (2026-09-22 founder directive)",
+      "status": "built_and_tested",
+      "evidence": "src/config/logisticsHero.ts (HERO_SCENE.camera); src/components/shared/logistics/LogisticsHeroScene.tsx (no OrbitControls, style pointerEvents none, onCreated sets lookAt once); e2e/logistics-hero.spec.ts 2/3 (pointer-events none asserted; the hero must MOVE when the wheel is used over it), 7/8/11 (labels and ambient disclosure), 10 (reduced motion)",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    }
   ]
 }

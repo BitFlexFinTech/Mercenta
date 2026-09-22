@@ -156,6 +156,28 @@ export interface GeoResolution {
   reason: string;
 }
 
+/**
+ * §WAVE 3 — the canonical FC-CITY coordinate accessor.
+ *
+ * `FC_CITY_POINTS` is the ONE owner of "where is the retail-channel UK
+ * fulfilment-centre city X". The operational map reads it through
+ * `resolveGeoPlace`; the cinematic Logistics Hero needs the raw coordinate for
+ * a city name from `DEFAULT_UK_FC_LIST`, so it reads it through THIS function
+ * rather than keeping a second coordinate table.
+ *
+ * Returns `[lat, lon]`, or `null` for a city the repository has not declared a
+ * coordinate for (fail closed — the caller must not guess).
+ */
+export function fcCityPoint(city: string): [number, number] | null {
+  const key = city.trim().toLowerCase();
+  return FC_CITY_POINTS[key] ?? null;
+}
+
+/** The FC city keys this repository can locate (for validators and diagnostics). */
+export function fcCityKeys(): string[] {
+  return Object.keys(FC_CITY_POINTS).sort();
+}
+
 function slug(value: string): string {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 }
