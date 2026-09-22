@@ -1,13 +1,19 @@
 /**
  * §Phase 7C — Dashboard / Overview redesign verification.
  *
- * Covers the redesigned Admin Operations Overview and the corrected Brand
- * dashboard: real-data KPI rendering, cross-consistency between independently
- * rendered surfaces (KPI band vs next-action counts), actionable attention
- * rows with real demo entities, drill-down routing to existing destinations,
- * RBAC preservation (admin ≠ super-admin nav), the removal of the fabricated
- * brand compliance score (94.2), responsive no-overflow checks at all seven
- * target viewports, mobile drawer behaviour, and keyboard focus visibility.
+ * Covers the Admin OVERVIEW (now a read-only business overview) and the corrected
+ * Brand dashboard: real-data KPI rendering including the business figures,
+ * drill-down routing to existing destinations, RBAC preservation (admin ≠
+ * super-admin nav), the removal of the fabricated brand compliance score (94.2),
+ * responsive no-overflow checks at all seven target viewports, mobile drawer
+ * behaviour, and keyboard focus visibility.
+ *
+ * §Dashboard-cleanup (2026-09-22) — REPOINTED, not weakened. The Overview no
+ * longer hosts the Command Centre, the "Needs your attention" queue or the
+ * "Next actions" tiles (they were consolidated onto the Control Centre and the
+ * work layer). The admin assertions below therefore verify the CLEANED surface:
+ * the sections that remain, the business figures now on it, and the POSITIVE
+ * absence of the removed surfaces — so the duplication cannot silently return.
  *
  * Dev server started by playwright.config.ts (`npm run dev`, :5173).
  */
@@ -31,47 +37,63 @@ async function openAdminDashboard(page: import('@playwright/test').Page, card = 
   await page.getByTestId('dashboard-loaded').waitFor({ timeout: 10000 });
 }
 
-test.describe('Admin Operations Overview — redesigned dashboard', () => {
-  test('1. loads with the new operational hierarchy', async ({ page }) => {
+test.describe('Admin Overview — business overview (dashboard cleanup)', () => {
+  test('1. loads with the business-overview hierarchy, Portfolio first', async ({ page }) => {
     await openAdminDashboard(page);
     // Page context — h1 + derived summary line.
     await expect(page.getByRole('heading', { name: 'Operations Overview' })).toBeVisible();
-    // Section hierarchy (h3s).
+    /**
+     * §Dashboard-cleanup — the sections that REMAIN, and Portfolio at a glance is
+     * FIRST in the workspace column (the business position before any activity
+     * detail). The context rail's panels are excluded: they are not sections of
+     * the overview's narrative.
+     */
     for (const section of [
       'Portfolio at a glance',
-      'Needs your attention',
-      'Next actions',
+      'Order pipeline',
       'Fulfilment in motion',
       'Recent communications',
     ]) {
-      await expect(page.locator(`section >> text=${section}`).first()).toBeVisible();
+      await expect(page.locator(`section[aria-label="${section}"]`).first()).toBeVisible();
     }
+    const workspaceSections = await page
+      .locator('[data-testid="dashboard-loaded"] section')
+      .evaluateAll((els) =>
+        els
+          .filter((e) => !e.closest('[role="complementary"]'))
+          .map((e) => e.getAttribute('aria-label'))
+      );
+    expect(workspaceSections[0], 'Portfolio at a glance must be the first section').toBe(
+      'Portfolio at a glance'
+    );
+
     // KPI band rendered from real data (values are numeric strings).
     const pendingKpi = page.getByTestId('kpi-value-pending-pos');
     await expect(pendingKpi).toBeVisible();
     await expect(pendingKpi).toHaveText(/\d/);
     await expect(page.getByTestId('kpi-value-gate')).toBeVisible();
-    // Next-action queue rendered.
-    await expect(page.getByTestId('action-purchase_orders_admin')).toBeVisible();
     // Loading path completed (loaded container exists, loading container gone).
     await expect(page.getByTestId('dashboard-loading')).toHaveCount(0);
   });
 
-  test('2. KPI band and next-action counts agree (same source, two surfaces)', async ({ page }) => {
+  test('2. the business figures are on the overview and agree with the canonical cost model', async ({ page }) => {
     await openAdminDashboard(page);
-    const kpiValue = await page.getByTestId('kpi-value-pending-pos').textContent();
-    const actionText = await page.getByTestId('action-purchase_orders_admin').textContent();
-    const kpiNumber = /(\d+)/.exec(kpiValue ?? '');
-    const actionNumber = /(\d+)\s+awaiting action/.exec(actionText ?? '');
-    expect(kpiNumber, 'KPI value must be an integer').not.toBeNull();
-    expect(actionNumber, 'next action must show a count').not.toBeNull();
-    expect(Number(kpiNumber![1])).toBe(Number(actionNumber![1]));
-    // Compliance gate KPI is expressed against the full current brand dataset
-    // (N cleared / M total). §Phase 7F: the previous contract pinned the
-    // historical M=11; the canonical dataset now also contains deterministic
-    // compliance-scenario tenants (13 brands), so assert the KPI's SHAPE and
-    // internal invariant instead of a stale pin. The precise gate semantics
-    // are asserted by e2e/compliance-gate.spec.ts.
+    /**
+     * §Dashboard-cleanup — the money row added from the EXISTING canonical model
+     * (`src/lib/costs/costSummary.ts → operatingCostSummary`). Nothing is
+     * recomputed here: the test asserts the figures render and are internally
+     * consistent (revenue and contribution are both currency-shaped, margin is a
+     * percentage), not a pinned value.
+     */
+    for (const id of ['revenue', 'contribution', 'margin']) {
+      await expect(page.getByTestId(`kpi-value-${id}`)).toBeVisible();
+    }
+    await expect(page.getByTestId('kpi-value-revenue')).toHaveText(/£[\d,]+/);
+    await expect(page.getByTestId('kpi-value-contribution')).toHaveText(/^-?£[\d,]+/);
+    await expect(page.getByTestId('kpi-value-margin')).toHaveText(/^-?\d+(\.\d+)?%$/);
+    // The provisional basis is stated, never implied audited.
+    await expect(page.getByTestId('kpi-contribution')).toContainText(/Provisional|Derived/);
+    // Compliance gate KPI keeps its canonical N / M shape.
     const gateValue = await page.getByTestId('kpi-value-gate').textContent();
     const gateMatch = /^\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(gateValue ?? '');
     expect(gateMatch, 'gate KPI must be N / M').not.toBeNull();
@@ -81,28 +103,41 @@ test.describe('Admin Operations Overview — redesigned dashboard', () => {
     expect(cleared).toBeLessThanOrEqual(total);
   });
 
-  test('3. attention area surfaces real demo entities and remains actionable', async ({ page }) => {
+  test('3. the removed action surfaces are GONE from the overview (consolidated elsewhere)', async ({ page }) => {
     await openAdminDashboard(page);
-    const panel = page.locator('[data-testid^="attention-"]');
-    await expect(panel.first()).toBeVisible();
-    // PO attention rows use real seed references.
-    const poRows = page.locator('[data-testid^="attention-po-"]');
-    const count = await poRows.count();
-    if (count > 0) {
-      await expect(poRows.first()).toContainText('PO-9');
-    }
-    // The panel only renders groups that have data; at minimum the section is present.
-    await expect(page.locator('section >> text="Needs your attention"').first()).toBeVisible();
+    /**
+     * §Dashboard-cleanup — POSITIVE absence assertions. These guard the cleanup:
+     * the Overview must not re-grow a second attention queue, a second
+     * next-action list, or a second messages summary, and the Command Centre must
+     * not return to the landing page. Each has ONE authoritative owner:
+     *   · work list          → Work Management / Operations Calendar
+     *   · founder attention  → Control Centre (incl. the Command Centre block)
+     *   · message threads    → Messages (+ the single Recent communications summary)
+     */
+    await expect(page.getByTestId('command-centre')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="attention-"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
+    await expect(page.locator('section >> text="Needs your attention"')).toHaveCount(0);
+    await expect(page.locator('section >> text="Next actions"')).toHaveCount(0);
+    await expect(page.locator('section >> text="Activity"')).toHaveCount(0);
+    await expect(page.getByTestId('toggle-group-attention')).toHaveCount(0);
+    // And the overview is still a real, populated surface.
+    await expect(page.getByTestId('kpi-value-pending-pos')).toBeVisible();
   });
 
-  test('4. drill-down routes to existing destinations with RBAC intact', async ({ page }) => {
+  test('4. KPI drill-down routes to existing destinations with RBAC intact', async ({ page }) => {
     await openAdminDashboard(page, 'Mercenta Admin Hub');
     // Non-super admin: super-only destinations stay hidden in the shell nav.
     const nav = page.locator('nav[aria-label="Primary"]');
     await expect(nav.locator('text=Super Admin')).toHaveCount(0);
     await expect(nav.locator('text=Audit Log')).toHaveCount(0);
-    // Drill down through the next-action queue: Purchase Orders.
-    await page.getByTestId('action-purchase_orders_admin').click();
+    /**
+     * §Dashboard-cleanup — drill-down is now asserted on the KPI cell itself
+     * (the next-action tiles it used to use were removed). The invariant is
+     * unchanged: a summary metric opens the owning destination, and the
+     * destination renders real records.
+     */
+    await page.getByTestId('kpi-open-pending-pos').click();
     await page.waitForTimeout(900);
     await expect(
       page.locator('nav[aria-label="Breadcrumb"]').getByText('Purchase Orders')
@@ -116,10 +151,12 @@ test.describe('Admin Operations Overview — redesigned dashboard', () => {
     // Move keyboard focus: land on the body, then Tab to the first KPI cell button.
     await page.keyboard.press('Tab');
     let focused = false;
-    // The command centre (§32, M13 Phase 11) legitimately adds a CTA button per
-    // outstanding action ABOVE the KPI band, so the walk to the KPI cells is
-    // longer. The invariant is unchanged: focus MUST reach the drill-down cell
-    // and MUST show a visible outline.
+    /**
+     * §Dashboard-cleanup (2026-09-22) — the command centre and the next-action
+     * tiles no longer sit above the KPI band, so the walk to the KPI cells is
+     * shorter. The invariant is unchanged: focus MUST reach the drill-down cell
+     * and MUST show a visible outline.
+     */
     for (let i = 0; i < 200; i++) {
       const id = await page.evaluate(() => {
         const el = document.activeElement;

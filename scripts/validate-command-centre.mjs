@@ -148,11 +148,28 @@ try {
       poModel.sections.some((s) => s.id === id)));
 
   /* ── the surface is wired to the real shell ──────────────────────────── */
+  /**
+   * §Dashboard-cleanup (2026-09-22) — REPOINTED to the current canonical source
+   * of truth, not weakened.
+   *
+   * OLD CONTRACT: `/<CommandCentre onNavigate={onNavigate} />/` in
+   * `AdminDashboard.tsx` — the command centre was rendered on the admin OVERVIEW.
+   *
+   * NEW CONTRACT: the command centre is an ACTION surface and is rendered on the
+   * CONTROL CENTRE (`FounderControlCentre.tsx`), not on the Overview. This
+   * assertion now checks BOTH halves of that contract, so the placement cannot
+   * silently drift back: it must be present in the Control Centre AND absent from
+   * the Overview.
+   */
   const dashboard = read('src/components/admin/AdminDashboard.tsx');
+  const controlCentre = read('src/components/admin/FounderControlCentre.tsx');
   const superPanel = read('src/components/admin/SuperAdminPanel.tsx');
   const panel = read('src/components/admin/CommandCentre.tsx');
-  test('the command centre is rendered on the admin overview',
-    /<CommandCentre onNavigate=\{onNavigate\} \/>/.test(dashboard));
+  test('the command centre is rendered on the Control Centre',
+    /<CommandCentre onNavigate=\{onNavigate\} \/>/.test(controlCentre));
+  test('the command centre is NOT rendered on the admin overview',
+    !/<CommandCentre onNavigate=\{onNavigate\} \/>/.test(dashboard) &&
+      !/from '\.\/CommandCentre'/.test(dashboard));
   test('the panel routes a CTA through the tab-aware navigation intent',
     /requestAdminNav\(\{ view: action\.navView, tab: action\.navTab/.test(panel) && /onNavigate\?\.\(action\.navView\)/.test(panel));
   test('Super Admin consumes the intent and validates the tab id before selecting it',

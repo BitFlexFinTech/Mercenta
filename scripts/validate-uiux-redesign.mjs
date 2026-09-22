@@ -210,10 +210,28 @@ for (const use of [
   'PipelineTrack',
   'Queue',
   'ContextPanel',
-  'ActivityFeed',
-  'SegmentedControl',
 ]) {
   check(`Operations Overview composes ${use}`, OVERVIEW_SRC.includes(`<${use}`));
+}
+/**
+ * §Dashboard-cleanup (2026-09-22) — REPOINTED to the current canonical source of
+ * truth, not weakened. The old contract asserted that the Overview composed
+ * `ActivityFeed` and `SegmentedControl`, carried an attention-row test contract
+ * (`attention-${a.id}`) and a next-action test contract (`action-${a.id}`), and
+ * offered density/grouping controls. Those belonged to the duplicated
+ * "Activity" rail panel, "Needs your attention" queue, "Next actions" tiles and
+ * their display controls — all REMOVED from the Overview so that each concern has
+ * ONE authoritative owner (work layer / Control Centre / Messages).
+ *
+ * The repointed checks assert the CLEANED contract POSITIVELY, so the duplication
+ * cannot silently return: the overview must NOT compose the removed primitives,
+ * must NOT emit those test ids, and must NOT reintroduce the display controls.
+ */
+for (const absent of ['ActivityFeed', 'SegmentedControl']) {
+  check(
+    `Operations Overview no longer composes ${absent} (removed with the duplicated surfaces)`,
+    !OVERVIEW_SRC.includes(`<${absent}`)
+  );
 }
 check(
   'Operations Overview no longer uses the stacked-card dashboard sections',
@@ -226,12 +244,12 @@ check(
     OVERVIEW_SRC.includes('data-testid="dashboard-error"')
 );
 check(
-  'Operations Overview keeps the attention-row test contract',
-  OVERVIEW_SRC.includes('attention-${a.id}')
+  'Operations Overview no longer emits an attention-row test contract (owned by the work layer / Control Centre)',
+  !OVERVIEW_SRC.includes('attention-${a.id}')
 );
 check(
-  'Operations Overview keeps the next-action test contract',
-  OVERVIEW_SRC.includes('action-${a.id}')
+  'Operations Overview no longer emits a next-action test contract (owned by the Control Centre / Command Centre)',
+  !OVERVIEW_SRC.includes('action-${a.id}')
 );
 check(
   'KPI value/drill-down testids are produced by the shared metric primitive',
@@ -244,8 +262,20 @@ check(
     OVERVIEW_SRC.includes('<MercentaDoughnut')
 );
 check(
-  'Operations Overview offers real density + grouping controls',
-  OVERVIEW_SRC.includes('setDensity') && OVERVIEW_SRC.includes('groupAttention')
+  'Operations Overview carries the business figures from the canonical cost model (revenue / contribution / margin)',
+  OVERVIEW_SRC.includes('operatingCostSummary') &&
+    OVERVIEW_SRC.includes("id: 'revenue'") &&
+    OVERVIEW_SRC.includes("id: 'contribution'") &&
+    OVERVIEW_SRC.includes("id: 'margin'")
+);
+check(
+  'Operations Overview no longer offers density/grouping controls (removed with the queue they served)',
+  !OVERVIEW_SRC.includes('setDensity') && !OVERVIEW_SRC.includes('groupAttention')
+);
+check(
+  'the Overview renders Portfolio at a glance before every other section',
+  OVERVIEW_SRC.indexOf('title="Portfolio at a glance"') > -1 &&
+    OVERVIEW_SRC.indexOf('title="Portfolio at a glance"') < OVERVIEW_SRC.indexOf('title="Order pipeline"')
 );
 
 

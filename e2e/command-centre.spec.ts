@@ -1,8 +1,22 @@
 /**
  * §32 / M13 Phase 11 — SUPER ADMIN COMMAND CENTRE (browser verification).
  *
+ * §Dashboard-cleanup (2026-09-22) — REPOINTED, not weakened.
+ *
+ * OLD CONTRACT (recorded, no longer valid): the command centre was rendered at
+ * the TOP of the ADMIN OVERVIEW, so these tests logged in and asserted it on the
+ * landing view.
+ *
+ * NEW CONTRACT: the command centre is an ACTION surface and now renders on the
+ * CONTROL CENTRE (the Super-Admin operating centre), NOT on the Overview. The
+ * helper therefore opens the founder session and navigates to the Control
+ * Centre. Every behavioural assertion below is unchanged: the NOW / TODAY / THIS
+ * WEEK bands, one CTA per derived action, the tab-aware CTA routing, the
+ * category/region sections, the ranked queue with its WHY breakdown and the
+ * "No AI" ranking basis.
+ *
  * Proves the founder's command centre is real in the UI:
- *   1. the admin overview opens with the NOW / TODAY / THIS WEEK bands and only
+ *   1. the Control Centre opens with the NOW / TODAY / THIS WEEK bands and only
  *      real, derived actions (each with a CTA);
  *   2. a CTA that targets a Super Admin TAB actually lands on that tab — the
  *      "no hunting through five screens" requirement, verified end to end;
@@ -12,17 +26,19 @@
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
 
-async function openOverview(page: import('@playwright/test').Page) {
-  // The founder's own session: the overview is the landing view, and only the
-  // Super Admin tier may be routed into Super Admin tabs.
+async function openControlCentre(page: import('@playwright/test').Page) {
+  // The founder's own session: only the Super Admin tier may be routed into
+  // Super Admin tabs, and the Control Centre is Super-Admin only.
   await loginAs(page, 'Super Admin — Tadii', 1600);
+  await page.click('nav[aria-label="Primary"] >> text=Control Centre');
+  await page.waitForTimeout(1200);
 }
 
 test.describe('Super Admin command centre', () => {
-  test('1. the overview renders the bands and real derived actions', async ({ page }) => {
+  test('1. the Control Centre renders the bands and real derived actions', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
-    await openOverview(page);
+    await openControlCentre(page);
 
     const centre = page.getByTestId('command-centre');
     await expect(centre).toBeVisible({ timeout: 10000 });
@@ -39,7 +55,7 @@ test.describe('Super Admin command centre', () => {
   });
 
   test('2. a CTA routes to the exact Super Admin tab (no hunting)', async ({ page }) => {
-    await openOverview(page);
+    await openControlCentre(page);
     const centre = page.getByTestId('command-centre');
     await expect(centre).toBeVisible({ timeout: 10000 });
 
@@ -56,7 +72,7 @@ test.describe('Super Admin command centre', () => {
   });
 
   test('3. the category/region-aware sections render', async ({ page }) => {
-    await openOverview(page);
+    await openControlCentre(page);
     await expect(page.getByTestId('command-centre')).toBeVisible({ timeout: 10000 });
     for (const section of ['opportunities', 'fundraising', 'operations', 'finance', 'ai_cost']) {
       await expect(page.getByTestId(`command-section-${section}`)).toBeVisible();
@@ -74,7 +90,7 @@ test.describe('Super Admin command centre', () => {
   test('4. every ranked row shows its rank and WHY, and the funding slot routes', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
-    await openOverview(page);
+    await openControlCentre(page);
 
     const centre = page.getByTestId('command-centre');
     await expect(centre).toBeVisible({ timeout: 10000 });

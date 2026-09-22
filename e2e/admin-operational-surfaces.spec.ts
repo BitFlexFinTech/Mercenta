@@ -112,7 +112,7 @@ test.describe('E5 — admin operational surfaces', () => {
     expect(externalCalls).toEqual([]);
   });
 
-  test('2. G5 + G7 — canonical dashboard attention rows and a commerce notification', async ({ page }) => {
+  test('2. G5 + G7 — canonical exception records and a commerce notification', async ({ page }) => {
     const externalCalls = watchExternalCalls(page);
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
@@ -120,15 +120,26 @@ test.describe('E5 — admin operational surfaces', () => {
     await loginAs(page, 'Mercenta Admin Hub', 1200);
     await expect(page.getByTestId('dashboard-loaded')).toBeVisible({ timeout: 10000 });
 
-    // G5 — the rejected catalog submission (canonical E3 state) surfaces as an
-    // ADDITIVE attention row: REJECTED, with truthful (sim) provenance.
-    const subRow = page.locator('[data-testid^="attention-sub-"]').first();
-    await expect(subRow).toBeVisible({ timeout: 8000 });
-    await expect(subRow).toContainText('REJECTED');
-    await expect(subRow).toContainText('(sim)');
+    /**
+     * §Dashboard-cleanup (2026-09-22) — REPOINTED to the canonical owning screen,
+     * not weakened.
+     *
+     * OLD CONTRACT: the G5 rejected-catalogue-submission row and the PO rows were
+     * asserted on the OVERVIEW's "Needs your attention" queue
+     * (`attention-sub-*`, `attention-po-*`). That queue was REMOVED from the
+     * Overview as a duplicated surface — the work list is owned by Work Management
+     * / Operations Calendar and founder attention by the Control Centre.
+     *
+     * NEW CONTRACT: the same canonical record must be visible on the screen that
+     * OWNS it. The rejected submission is asserted in Global Catalog (its owning
+     * screen), and the Overview must no longer carry a second attention queue.
+     */
+    await expect(page.locator('[data-testid^="attention-"]')).toHaveCount(0);
 
-    // Existing PO attention rows keep their ids (no regression).
-    await expect(page.locator('[data-testid^="attention-po-"]').first()).toBeVisible({ timeout: 6000 });
+    // The rejected submission is real and reachable at its owning screen.
+    await page.click('nav[aria-label="Primary"] >> text=Global Catalog');
+    await page.waitForTimeout(1200);
+    await expect(page.getByText('REJECTED', { exact: false }).first()).toBeVisible({ timeout: 8000 });
 
     // G7 — an issued, unpaid SIMULATED invoice must appear in the bell.
     const seeded = await seedSimulatedPo(page, true);

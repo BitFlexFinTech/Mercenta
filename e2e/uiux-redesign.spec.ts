@@ -71,21 +71,31 @@ test.describe('UI/UX Wave 2 — Operations Overview workspace', () => {
     await expect(page.locator('[data-chart="doughnut"]').first()).toBeVisible();
   });
 
-  test('3. the grouping control genuinely changes the queue', async ({ page }) => {
+  test('3. the overview is a read-only business view — the removed action surfaces stay removed', async ({ page }) => {
     await loginAs(page, 'Super Admin — Tadii', 1400);
     await page.getByTestId('dashboard-loaded').waitFor({ timeout: 12000 });
-    const rowsBefore = await page.locator('[data-testid^="attention-"]').count();
-    expect(rowsBefore).toBeGreaterThan(0);
-    const groupedBefore = await page.getByText('Purchase orders', { exact: true }).count();
-    expect(groupedBefore).toBeGreaterThan(0);
-    await page.getByTestId('toggle-group-attention').click();
-    await page.waitForTimeout(400);
-    await expect(page.getByTestId('toggle-group-attention')).toHaveAttribute(
-      'aria-pressed',
-      'false'
-    );
-    const rowsAfter = await page.locator('[data-testid^="attention-"]').count();
-    expect(rowsAfter).toBe(rowsBefore);
+    /**
+     * §Dashboard-cleanup (2026-09-22) — REPOINTED, not weakened.
+     *
+     * OLD CONTRACT (recorded, no longer valid): this test asserted that the
+     * Overview's attention queue existed and that its Group/Flat rows toggle
+     * changed the rendering while keeping the same row count. Both the queue and
+     * the toggle were REMOVED from the Overview as duplicated surfaces — the work
+     * list is owned by Work Management / Operations Calendar and founder
+     * attention by the Control Centre.
+     *
+     * NEW CONTRACT: the Overview is a read-only business overview. It must show
+     * the business sections and must NOT carry a second attention queue, a second
+     * next-action list, the Command Centre, or the removed toggle.
+     */
+    await expect(page.getByTestId('command-centre')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="attention-"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
+    await expect(page.getByTestId('toggle-group-attention')).toHaveCount(0);
+    // The business overview itself is intact: Portfolio first, charts present.
+    await expect(page.locator('section >> text=Portfolio at a glance').first()).toBeVisible();
+    await expect(page.locator('[data-chart="line"]').first()).toBeVisible();
+    await expect(page.locator('[data-chart="doughnut"]').first()).toBeVisible();
   });
 
   test('4. KPI drill-down still routes to the real destination', async ({ page }) => {

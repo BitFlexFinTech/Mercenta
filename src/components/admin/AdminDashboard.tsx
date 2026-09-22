@@ -1,18 +1,27 @@
 /**
- * §Phase 7C — Admin Operations Overview (dashboard redesign).
+ * §Phase 7C — Admin Overview (dashboard redesign).
  *
- * Operational command centre, not a wall of decorative cards. Every number is
- * derived from real application data at render time (React Query hooks over
- * the canonical demo store / Supabase repositories) — no fabricated trends,
- * no hardcoded counts, no invented business metrics.
+ * A READ-ONLY BUSINESS OVERVIEW of Mercenta, not an action surface. Every number
+ * is derived from real application data at render time (React Query hooks over
+ * the canonical demo store / Supabase repositories) — no fabricated trends, no
+ * hardcoded counts, no invented business metrics.
  *
  * Hierarchy (single page, no department-tab silos):
- *   1. Page context      — PageHeader (h1) + derived operational summary
- *   2. At a glance       — compact KPI band (one surface, hairline cells)
- *   3. Needs attention   — severity-sorted actionable exceptions
- *   4. Next actions      — operator quick actions to existing destinations
+ *   1. Page context      — WorkspaceHeader (h1) + derived operational summary
+ *   2. Portfolio at a glance — compact KPI band: portfolio, orders, compliance,
+ *      contracts, support, billing AND the business figures (recorded revenue,
+ *      gross contribution, contribution margin)
+ *   3. Order pipeline    — PO stage distribution
+ *   4. Trends            — order value by month, value by brand
  *   5. Fulfilment motion — live shipments / POs awaiting fulfilment
  *   6. Recent comms      — latest real message threads, human-reply flags
+ *
+ * §Dashboard-cleanup (2026-09-22) — REMOVED from this surface (consolidation, not
+ * relocation): the Command Centre (now rendered on the Control Centre), the
+ * "Needs your attention" queue, the "Next actions" tiles and the rail "Activity"
+ * panel. Those answered "what needs doing" or repeated the messages summary; the
+ * authoritative owners are the work layer (Work Management / Calendar), the
+ * Control Centre and the Messages destination. No replacement table was added.
  *
  * Tenant/RBAC: this is the ADMIN overview — it aggregates the whole portfolio
  * (admin tier has full access). All drill-downs use existing AdminShell view
@@ -34,25 +43,21 @@ import {
   useShipmentsAll,
 } from '@/data/queries';
 import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
-import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
 import { renewalUrgency } from '@/lib/contracts';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { Alert, Button, EmptyState, StatusBadge, Skeleton } from '@/components/ui';
 import type { StatusTone } from '@/components/ui';
 import {
-  ActivityFeed,
   ContextPanel,
   MetricBand,
   PipelineTrack,
   Queue,
-  SegmentedControl,
   WorkspaceFrame,
   WorkspaceGrid,
   WorkspaceHeader,
   WorkspaceSection,
   type MetricTileData,
   type PipelineStageData,
-  type QueueRowData,
 } from '@/components/shared/workspace';
 import {
   MercentaBars,
@@ -62,8 +67,8 @@ import {
 import { STATUS_LABELS } from '@/types';
 import type { AdminDepartment, ShipmentStatus } from '@/types';
 import type { PaletteDomain } from '@/config/themes';
-import { CommandCentre } from './CommandCentre';
-import { ArrowRight, CreditCard, FileCheck2, FileText, LifeBuoy, Package } from 'lucide-react';
+import { operatingCostSummary } from '@/lib/costs/costSummary';
+import { ArrowRight } from 'lucide-react';
 
 const PO_AWAITING: ReadonlySet<string> = new Set(['received', 'under_review']);
 const PO_IN_FLIGHT: ReadonlySet<string> = new Set([
@@ -94,9 +99,12 @@ export function AdminDashboard({
   onNavigate?: (view: string) => void;
 }) {
   void department;
-  /** §UI/UX Wave 2 — operator display preferences (presentation only). */
-  const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
-  const [groupAttention, setGroupAttention] = useState(true);
+  /**
+   * §Dashboard-cleanup (2026-09-22) — the operator display preferences that
+   * existed ONLY for the removed Overview attention queue (row density, row
+   * grouping) are gone with it. The queue itself lives on in Work Management and
+   * the Control Centre, which own the work list.
+   */
   /** Navigate to an existing shell view — no-op when rendered without a shell. */
   const go = useCallback((view: string) => () => onNavigate?.(view), [onNavigate]);
 
@@ -122,9 +130,14 @@ export function AdminDashboard({
   const contractsData = contractsQuery.data;
   const messagesData = messagesQuery.data;
   const shipmentsData = shipmentsQuery.data;
-  const deductionsData = deductionsQuery.data;
-  const submissionsData = submissionsQuery.data;
   const commissionsData = commissionsQuery.data;
+  /**
+   * §Dashboard-cleanup (2026-09-22) — the deductions and catalogue-submission
+   * query RESULTS are no longer read by the Overview (their only consumers were
+   * the removed attention/next-action surfaces). The queries themselves are kept
+   * because they still contribute to the shared `anyError` state; only the
+   * unused projections were removed.
+   */
   const q = useMemo(() => ({
     brands: brandsData?.data ?? [] as NonNullable<typeof brandsData>['data'],
     posAll: posData?.data ?? [] as NonNullable<typeof posData>['data'],
@@ -132,8 +145,6 @@ export function AdminDashboard({
     contractsAll: contractsData?.data ?? [] as NonNullable<typeof contractsData>['data'],
     messagesAll: messagesData?.data ?? [] as NonNullable<typeof messagesData>['data'],
     shipmentsAll: shipmentsData?.data ?? [] as NonNullable<typeof shipmentsData>['data'],
-    deductionsAll: deductionsData?.data ?? [] as NonNullable<typeof deductionsData>['data'],
-    submissionsAll: submissionsData?.data ?? [] as NonNullable<typeof submissionsData>['data'],
     commissionsAll: commissionsData?.data ?? [] as NonNullable<typeof commissionsData>['data'],
   }), [
     brandsData,
@@ -142,8 +153,6 @@ export function AdminDashboard({
     contractsData,
     messagesData,
     shipmentsData,
-    deductionsData,
-    submissionsData,
     commissionsData,
   ]);
   const {
@@ -153,8 +162,6 @@ export function AdminDashboard({
     contractsAll,
     messagesAll,
     shipmentsAll,
-    deductionsAll,
-    submissionsAll,
     commissionsAll,
   } = q;
 
@@ -224,20 +231,17 @@ export function AdminDashboard({
     (t) => t.priority === 'urgent' || t.priority === 'high'
   );
 
-  const openDeductions = deductionsAll.filter(
-    (d) => d.status === 'open' || d.status === 'disputed'
-  );
-
   /**
-   * §Phase E5 (G5) — canonical catalogue + commerce measures.
-   *
-   * DERIVED from the E3 submission store and the E4 commerce stores (no invented
-   * metrics, no duplicate store). Empty state honestly produces no rows.
+   * §Dashboard-cleanup (2026-09-22) — REMOVED with the Overview attention queue
+   * and next-action tiles, which were their only consumers:
+   *   · `openDeductions`        → the deductions ledger is owned by Billing;
+   *   · `rejectedSubmissions`   → rejected catalogue submissions are owned by
+   *                               Global Catalog;
+   *   · `commerceInvoicesPending` → simulated invoices awaiting payment are owned
+   *                               by Retail Pipeline.
+   * Their destinations are unchanged and still reachable from the shell nav.
+   * The underlying queries are untouched (they still feed the shared error state).
    */
-  const rejectedSubmissions = submissionsAll.filter((s) => s.status === 'rejected');
-  const commerceInvoicesPending = demoCommerceInvoices.filter(
-    (i) => i.status === 'issued' && !demoCommercePayments.some((p) => p.invoiceId === i.id)
-  );
 
   /**
    * §Phase D6 — pending brand payouts, DERIVED from the canonical commission
@@ -264,6 +268,18 @@ export function AdminDashboard({
   );
   const pendingPayouts = commissionsAll.filter((c) => c.status !== 'paid');
   const pendingPayoutValue = pendingPayouts.reduce((s, c) => s + netPayoutOf(c), 0);
+
+  /**
+   * §Dashboard-cleanup (2026-09-22) — the business figures the Overview was
+   * missing. These are NOT new: `operatingCostSummary()` is the canonical derived
+   * cost/revenue/contribution model (`src/lib/costs/costSummary.ts`), already
+   * rendered in the Control Centre. The Overview surfaces the same canonical
+   * numbers so it reads as a business overview rather than only an operations
+   * queue. Nothing is recomputed here and nothing is blended: the streams, their
+   * sources and the provisional flag all come from that one module.
+   */
+  const costs = useMemo(() => operatingCostSummary(), []);
+  const revenueStreams = costs.revenue.streams.filter((s) => s.gbp > 0);
 
   const kpis: MetricTileData[] = [
     {
@@ -356,6 +372,41 @@ export function AdminDashboard({
       context: `£${pendingPayoutValue.toFixed(2)} net owed to brands`,
       onOpen: go('super_admin'),
     },
+    /*
+      §Dashboard-cleanup — the business (money) row of the overview. Values come
+      from `operatingCostSummary()`; each tile states its own basis so a
+      provisional figure can never be read as audited. No new calculation.
+    */
+    {
+      id: 'revenue',
+      label: 'Recorded revenue',
+      value: `£${costs.revenue.totalGbp.toLocaleString('en-GB')}`,
+      tone: costs.revenue.totalGbp > 0 ? 'info' : 'neutral',
+      statusText: 'Canonical streams',
+      context:
+        revenueStreams.length > 0
+          ? revenueStreams.map((s) => `${s.label}: £${s.gbp.toLocaleString('en-GB')}`).join(' · ')
+          : 'No revenue recorded in the canonical streams yet.',
+      onOpen: go('super_admin'),
+    },
+    {
+      id: 'contribution',
+      label: 'Gross contribution',
+      value: `£${costs.contribution.grossGbp.toLocaleString('en-GB')}`,
+      tone: costs.contribution.grossGbp >= 0 ? 'success' : 'danger',
+      statusText: costs.contribution.provisional ? 'Provisional' : 'Derived',
+      context: `Recorded revenue less the monthly operating cost base (£${costs.monthlyTotalGbp.toLocaleString('en-GB')}).`,
+      onOpen: go('super_admin'),
+    },
+    {
+      id: 'margin',
+      label: 'Contribution margin',
+      value: `${costs.contribution.marginPct}%`,
+      tone: costs.revenue.totalGbp > 0 ? 'neutral' : 'neutral',
+      statusText: costs.contribution.provisional ? 'Provisional' : 'Derived',
+      context: 'Gross contribution as a share of recorded revenue — provisional until the cost model is founder-approved.',
+      onOpen: go('super_admin'),
+    },
   ];
 
   /* ── §UI/UX Wave 2 — domain binding, pipeline and REAL chart series ──────
@@ -372,6 +423,9 @@ export function AdminDashboard({
     renewals: 'compliance',
     tickets: 'communications',
     'payouts-pending': 'finance',
+    revenue: 'finance',
+    contribution: 'finance',
+    margin: 'finance',
   };
   const kpiTiles: MetricTileData[] = kpis.map((k) => ({
     ...k,
@@ -458,179 +512,20 @@ export function AdminDashboard({
       .map(([status, value]) => ({ label: status.replace(/_/g, ' '), value }));
   }, [docsAll]);
 
-  /* ── Exceptions / attention — severity ordered, actionable ────────────── */
-  const attention: {
-    id: string;
-    group: string;
-    tone: StatusTone;
-    statusLabel: string;
-    title: string;
-    meta?: string;
-    onOpen: () => void;
-  }[] = [];
-
-  urgentTickets.slice(0, 3).forEach((t) => {
-    attention.push({
-      id: `ticket-${t.id}`,
-      group: 'Support',
-      tone: t.priority === 'urgent' ? 'danger' : 'warning',
-      statusLabel: t.priority === 'urgent' ? 'URGENT' : 'HIGH',
-      title: t.subject,
-      meta: `${brandName.get(t.brandId) ?? t.brandId} · ${t.id} · ${t.lastMessagePreview}`,
-      onOpen: go('helpdesk'),
-    });
-  });
-
-  posAwaitingAction.forEach((p) => {
-    attention.push({
-      id: `po-${p.id}`,
-      group: 'Purchase orders',
-      tone: 'warning',
-      statusLabel: 'ACTION NEEDED',
-      title: `${p.poNumber} — ${brandName.get(p.brandId) ?? p.brandId}`,
-      meta: `£${p.poValue.toLocaleString()} · ${p.status.replace(/_/g, ' ')}`,
-      onOpen: go('purchase_orders_admin'),
-    });
-  });
-
-  const pendingBrandIds = [...new Set(docsPending.map((d) => d.brandId))];
-  pendingBrandIds.slice(0, 4).forEach((bid) => {
-    const pending = docsPending.filter((d) => d.brandId === bid);
-    attention.push({
-      id: `docs-${bid}`,
-      group: 'Compliance',
-      tone: 'warning',
-      statusLabel: 'REVIEW NEEDED',
-      title: `${brandName.get(bid) ?? bid} — ${pending.length} document${pending.length > 1 ? 's' : ''} pending`,
-      meta: pending.map((d) => d.type.replace(/_/g, ' ')).slice(0, 2).join(' · '),
-      onOpen: go('compliance'),
-    });
-  });
-if (pendingBrandIds.length > 4) {
-    attention.push({
-      id: 'docs-more',
-      group: 'Compliance',
-      tone: 'info',
-      statusLabel: 'MORE',
-      title: `${pendingBrandIds.length - 4} more brand(s) with pending documents`,
-      meta: 'View the full queue in Compliance Approvals',
-      onOpen: go('compliance'),
-    });
-  }
-
-  renewalsDue.forEach(({ c, urgency }) => {
-    attention.push({
-      id: `renewal-${c.id}`,
-      group: 'Contracts',
-      tone: urgency === 'expired' ? 'danger' : 'warning',
-      statusLabel: URGENCY_LABEL[urgency] ?? 'DUE',
-      title: `${brandName.get(c.brandId) ?? c.brandId} — distribution agreement`,
-      meta: `renews ${c.renewalDate}`,
-      onOpen: go('contracts_admin'),
-    });
-  });
-
-  openDeductions.slice(0, 3).forEach((d) => {
-    attention.push({
-      id: `ded-${d.id}`,
-      group: 'Finance',
-      tone: d.status === 'disputed' ? 'danger' : 'warning',
-      statusLabel: d.status === 'disputed' ? 'DISPUTED' : 'OPEN',
-      title: `${d.type.replace(/_/g, ' ')} — £${d.amountGbp.toFixed(2)}`,
-      meta: `${brandName.get(d.brandId) ?? d.brandId} · ${d.purchaseOrderId} · ${d.date}`,
-      onOpen: go('billing'),
-    });
-  });
-  if (openDeductions.length > 3) {
-    attention.push({
-      id: 'ded-more',
-      group: 'Finance',
-      tone: 'info',
-      statusLabel: 'MORE',
-      title: `${openDeductions.length - 3} more deduction(s) unresolved`,
-      meta: 'Review the full ledger in Billing',
-      onOpen: go('billing'),
-    });
-  }
-
-  /* §Phase D6 — pending brand payouts are money the platform owes, so they belong
-     in the SAME Finance attention band as deductions. Destination is the real
-     settlement surface (Super Admin → Accounting → Brand Payouts). */
-  pendingPayouts.slice(0, 3).forEach((c) => {
-    attention.push({
-      id: `payout-${c.id}`,
-      group: 'Finance',
-      tone: 'warning',
-      statusLabel: 'PAYOUT PENDING',
-      title: `${brandName.get(c.brandId) ?? c.brandId} — £${netPayoutOf(c).toFixed(2)} net payout`,
-      meta: `${c.purchaseOrderId} · Super Admin → Accounting → Brand Payouts`,
-      onOpen: go('super_admin'),
-    });
-  });
-  if (pendingPayouts.length > 3) {
-    attention.push({
-      id: 'payout-more',
-      group: 'Finance',
-      tone: 'info',
-      statusLabel: 'MORE',
-      title: `${pendingPayouts.length - 3} more brand payout(s) pending`,
-      meta: 'Settle them in Super Admin → Accounting → Brand Payouts',
-      onOpen: go('super_admin'),
-    });
-  }
-
-  /* §Phase E5 (G5) — canonical catalogue + commerce attention rows. Additive:
-     existing row ids/prefixes (attention-po-*, attention-ded-*, …) are
-     deliberately unchanged so existing browser assertions stay valid. */
-  rejectedSubmissions.slice(0, 3).forEach((s) => {
-    attention.push({
-      id: `sub-${s.id}`,
-      group: 'Catalogue',
-      tone: 'danger',
-      statusLabel: 'REJECTED',
-      title: `${s.productName} — ${s.sku}`,
-      meta: `${brandName.get(s.brandId) ?? s.brandId} · ${s.rejectionReason ?? 'no reason recorded'}${s.simulated ? ' · (sim)' : ''}`,
-      onOpen: go('catalog'),
-    });
-  });
-  if (rejectedSubmissions.length > 3) {
-    attention.push({
-      id: 'sub-more',
-      group: 'Catalogue',
-      tone: 'info',
-      statusLabel: 'MORE',
-      title: `${rejectedSubmissions.length - 3} more rejected submission(s)`,
-      meta: 'Review the full catalogue in Global Catalog',
-      onOpen: go('catalog'),
-    });
-  }
-
-  commerceInvoicesPending.slice(0, 3).forEach((i) => {
-    attention.push({
-      id: `commerce-inv-${i.id}`,
-      group: 'Commerce',
-      tone: 'warning',
-      statusLabel: 'SIM',
-      title: `Simulated invoice ${i.number} awaiting payment`,
-      meta: `${brandName.get(i.brandId) ?? i.brandId} · £${i.subtotalGbp.toFixed(2)} · (sim) — no live payment provider contacted`,
-      onOpen: go('retail_pipeline'),
-    });
-  });
-
-  /* ── Next actions — operator quick actions to existing destinations ───── */
-  const actions: {
-    id: string;
-    label: string;
-    count: number;
-    desc: string;
-    icon: typeof Package;
-  }[] = [
-    { id: 'purchase_orders_admin', label: 'Review purchase orders', count: posAwaitingAction.length, desc: 'awaiting action', icon: Package },
-    { id: 'compliance', label: 'Approve compliance documents', count: docsPending.length, desc: 'pending review', icon: FileCheck2 },
-    { id: 'contracts_admin', label: 'Run contract renewals', count: renewalsDue.length, desc: 'inside window', icon: FileText },
-    { id: 'helpdesk', label: 'Handle support tickets', count: activeTickets.length, desc: 'open tickets', icon: LifeBuoy },
-    { id: 'billing', label: 'Review deductions & billing', count: openDeductions.length, desc: 'unresolved', icon: CreditCard },
-  ];
+  /*
+   * §Dashboard-cleanup (2026-09-22) — REMOVED from the Overview:
+   *   · the local `attention[]` queue and its "Needs your attention" section;
+   *   · the local `actions[]` tiles and their "Next actions" section.
+   *
+   * Both answered "what needs doing", which other surfaces already own
+   * authoritatively — the work layer (Work Management / Calendar), the Control
+   * Centre, and the Command Centre (now rendered on the Control Centre).
+   * Nothing was replaced here and nothing was lost: every destination they
+   * linked to (Purchase Orders, Compliance, Contracts, Helpdesk, Billing,
+   * Logistics Control, Global Catalog, Retail Pipeline) is unchanged and still
+   * reachable from the shell nav, and the counts they showed still appear in
+   * the KPI band above and in the owning queues.
+   */
 
   /* ── Fulfilment in motion ────────────────────────────────────────────── */
   const fulfilmentRows = useMemo(() => {
@@ -741,27 +636,13 @@ if (pendingBrandIds.length > 4) {
           }
           toolbar={
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <span className="text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                Density
-              </span>
-              <SegmentedControl
-                ariaLabel="Row density"
-                active={density}
-                onSelect={(v) => setDensity(v as 'compact' | 'comfortable')}
-                items={[
-                  { id: 'compact', label: 'Compact' },
-                  { id: 'comfortable', label: 'Comfortable' },
-                ]}
-              />
-              <button
-                type="button"
-                onClick={() => setGroupAttention((g) => !g)}
-                aria-pressed={groupAttention}
-                data-testid="toggle-group-attention"
-                className="rounded-ds-sm border border-white/[0.08] bg-white/[0.02] px-2.5 py-1 text-ds-label font-medium text-zinc-400 transition-ds duration-ds-fast hover:text-zinc-200"
-              >
-                {groupAttention ? 'Group rows' : 'Flat rows'}
-              </button>
+              {/*
+                §Dashboard-cleanup (2026-09-22) — the Density and Group-rows
+                controls were removed with the attention queue they only served
+                (both were `Queue` presentation options). The overview is a
+                read-only business view; row-density controls belong to the
+                surfaces that own a table (Work Management, Control Centre).
+              */}
               <span className="hidden font-mono text-ds-micro text-zinc-600 sm:inline">
                 ⌘K for records and destinations
               </span>
@@ -769,9 +650,14 @@ if (pendingBrandIds.length > 4) {
           }
         />
 
-        {/* §32 (M13 Phase 11) — the founder's command centre: what needs attention
-            now and the exact next action, with tab-aware CTA routing. */}
-        <CommandCentre onNavigate={onNavigate} />
+        {/*
+          §Dashboard-cleanup (2026-09-22) — the Command Centre was REMOVED from
+          the Overview. It answers "what needs my attention, and what do I do
+          next" — an action surface, not overview content — and it now renders on
+          the Control Centre, its intended home. The component and its model are
+          UNCHANGED; reconciling it with the Control Centre's own attention list
+          is a separate pass.
+        */}
 
         {anyError && (
           <Alert tone="error" title="Some dashboard data is unavailable" className="mt-3">
@@ -806,32 +692,25 @@ if (pendingBrandIds.length > 4) {
                 )}
               </ContextPanel>
 
-              <ContextPanel
-                title="Activity"
-                action={
-                  <Button variant="ghost" size="sm" onClick={go('messages')}>
-                    All
-                  </Button>
-                }
-              >
-                <ActivityFeed
-                  entries={recentMessages.slice(0, 5).map((m) => ({
-                    id: m.id,
-                    title: m.subject ?? m.body,
-                    meta: `${brandName.get(m.brandId) ?? m.brandId} · ${m.channel.toUpperCase()}`,
-                    at: m.createdAt,
-                    tone: m.requiresHuman ? 'warning' : 'info',
-                    onOpen: go('messages'),
-                  }))}
-                  empty={<p className="text-xs text-zinc-500">No messages recorded yet.</p>}
-                />
-              </ContextPanel>
+              {/*
+                §Dashboard-cleanup (2026-09-22) — the rail "Activity" panel was
+                REMOVED: it rendered the same `recentMessages` data as the
+                "Recent communications" section below it, on the same screen, and
+                the Messages destination owns the full list. One summary remains.
+              */}
             </>
           }
         >
+          {/*
+            §Dashboard-cleanup (2026-09-22) — "Portfolio at a glance" is now the
+            FIRST section of the Overview: the business position before any
+            activity detail. It already contains the derived KPI band (portfolio,
+            orders, compliance, contracts, support, billing AND the business
+            figures: recorded revenue, gross contribution, contribution margin).
+          */}
           <WorkspaceSection
             title="Portfolio at a glance"
-            description="Derived live from purchase orders, compliance, contracts, support and billing data."
+            description="Derived live from purchase orders, compliance, contracts, support, billing and the canonical revenue/cost streams."
             domain="orders"
           >
             <MetricBand items={kpiTiles} columns={4} />
@@ -845,72 +724,17 @@ if (pendingBrandIds.length > 4) {
             <PipelineTrack stages={pipelineStages} onSelect={() => go('purchase_orders_admin')()} />
           </WorkspaceSection>
 
-          <WorkspaceSection
-            title="Needs your attention"
-            description="Priority-ordered exceptions across the portfolio. Each row routes to the existing destination view."
-            domain="risk"
-            action={
-              activeTickets.length > 0 ? (
-                <Button variant="secondary" size="sm" onClick={go('helpdesk')}>
-                  Open Helpdesk <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </Button>
-              ) : undefined
-            }
-          >
-            {attention.length === 0 ? (
-              <EmptyState
-                title="No open exceptions"
-                description="Purchase orders, compliance documents, contracts, deductions and support tickets are all clear."
-              />
-            ) : (
-              <Queue
-                rows={attention.map((a, i) => ({
-                  id: a.id,
-                  testId: `attention-${a.id}`,
-                  group: groupAttention && a.group !== attention[i - 1]?.group ? a.group : undefined,
-                  status: { tone: a.tone, label: a.statusLabel },
-                  title: a.title,
-                  meta: a.meta,
-                  domain: 'risk',
-                  onOpen: a.onOpen,
-                }))}
-                density={density}
-              />
-            )}
-          </WorkspaceSection>
+          {/*
+            §Dashboard-cleanup (2026-09-22) — "Needs your attention" and
+            "Next actions" were REMOVED here. Both duplicated surfaces that own
+            this purpose authoritatively:
+              · Work Management / Operations Calendar (the canonical work layer),
+              · the Control Centre (founder attention + approvals),
+              · the Command Centre (now on the Control Centre).
+            No replacement table was added, and every destination they linked to
+            remains reachable from the shell nav.
+          */}
 
-          <WorkspaceSection
-            title="Next actions"
-            description="Highest-value operator moves, pre-counted from current data."
-            domain="intelligence"
-          >
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-              {actions.map((a) => {
-                const Icon = a.icon;
-                return (
-                  <button
-                    key={a.id}
-                    type="button"
-                    onClick={go(a.id)}
-                    data-testid={`action-${a.id}`}
-                    className="flex min-h-[36px] items-center gap-2.5 rounded-ds-md border border-white/[0.06] bg-ink-850 px-3.5 py-2.5 text-left transition-ds duration-ds-fast hover:border-palette-indigo/50 hover:bg-white/[0.02]"
-                  >
-                    <Icon className="h-4 w-4 flex-shrink-0 text-feature-intel" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-xs font-medium text-white">{a.label}</span>
-                      <span className="block text-ds-label text-zinc-500">
-                        {a.count} {a.desc}
-                      </span>
-                    </span>
-                    <ArrowRight
-                      aria-hidden="true"
-                      className="h-3.5 w-3.5 flex-shrink-0 text-zinc-500"
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          </WorkspaceSection>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <WorkspaceSection
               title="Order value by month"

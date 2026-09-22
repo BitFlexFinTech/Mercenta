@@ -61,6 +61,7 @@ import { useWorkVersion } from '@/lib/work/useWork';
 import { useCommercialReadinessVersion } from '@/lib/commercial/useCommercialReadiness';
 import { feedAssessmentToAcquisition } from '@/lib/preaudit/preAuditAcquisitionBridge';
 import type { PreAuditQueueRow, CommercialReadinessQueueRow } from '@/lib/commandCentre/controlCentre';
+import { CommandCentre } from './CommandCentre';
 
 export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string) => void }) {
   const { session, actingStaffId, role } = useApp();
@@ -247,6 +248,24 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
         }
       >
         <MetricBand items={tiles} columns={4} />
+
+        {/*
+          §Dashboard-cleanup (2026-09-22) — the Command Centre was MOVED here from
+          the Overview, where it had been rendered at the top of the admin
+          landing page. It is an ACTION surface ("what needs my attention, and
+          what do I do next"), so it belongs on the operating centre rather than
+          on the business overview.
+
+          MOVE ONLY — the component and its model are UNCHANGED (`CommandCentre`
+          + `buildCommandCentre`). It is deliberately NOT merged with this
+          screen's own "Attention" list yet: reconciling the two is the next,
+          separate pass. Note the audience change: the Control Centre is
+          Super-Admin only, so the command queue is now founder-visible only —
+          the destinations its CTAs route to are themselves Super-Admin surfaces.
+        */}
+        <div className="mt-4">
+          <CommandCentre onNavigate={onNavigate} />
+        </div>
 
         {notice && (
           <p className="text-ds-label text-zinc-400" data-testid="control-notice">
