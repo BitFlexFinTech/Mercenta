@@ -26,6 +26,7 @@
 import { emitEvent } from '@/lib/events/eventFeed';
 import {
   demoAuditLog,
+  demoBrands,
   demoDeductions,
   demoPurchaseOrders,
   demoShipments,
@@ -35,6 +36,7 @@ import {
   reconcileDelivery,
   setPurchaseOrderStatus,
 } from '@/data/demoStore';
+import { selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import {
   acknowledgePurchaseOrder,
   createShipmentForPO,
@@ -241,6 +243,14 @@ function buildScenarioPo(
       quantity: l.quantity,
       unitPrice: l.unitPrice,
       commodityCode: l.commodityCode,
+      /**
+       * §WAVE 3 — the scenario's DECLARED channel permission, standing in for the
+       * field the retail channel supplies. The PARTIAL_PO scenario simulates a PO
+       * on which the channel allows a backorder, so it declares `true`; without
+       * this the fail-closed gate in `acknowledgePurchaseOrder` would (correctly)
+       * refuse the scenario's own backorder step.
+       */
+      isBackOrderAllowed: true,
     })),
   };
   po.shipWindowStart = atDays(base, 14).slice(0, 10);
@@ -355,20 +365,29 @@ async function scenarioPartialPo(ctx: ScenarioRunContext): Promise<ScenarioResul
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_po_acknowledged_partial', 'purchase_order', po.id, po.brandId, `${actorId}: PO ${po.poNumber} partially acknowledged (1 accepted, 1 backordered)`, { runId, scenario: 'PARTIAL_PO' }));
 
   // Ship only the accepted quantity; the shortfall auto-raises an open deduction via the real ASN validation.
+  /**
+   * §WAVE 3 — the carrier is DERIVED from the canonical lane rule for the PO's
+   * brand, not hardcoded. The previous `fedex` value was a RETIRED carrier that
+   * `validateCarrierForShipment` refuses, so this scenario silently produced no
+   * shipment at all. The derived value is the lane's declared Mercenta account,
+   * which is what the eligibility derivation permits.
+   */
+  const scenarioBrand = demoBrands.find((b) => b.id === brandId);
+  const scenarioCarrier = selectCarrierForShipment({ brandNation: scenarioBrand?.nation }).carrier;
   const ship = createShipmentForPO(po.id, {
     cartons: [
       { sku: lines[0].sku, quantity: lines[0].quantity, weightKg: 1.5, lengthCm: 20, widthCm: 15, heightCm: 10 },
       { sku: lines[1].sku, quantity: Math.floor(lines[1].quantity / 2), weightKg: 1.2, lengthCm: 18, widthCm: 14, heightCm: 9 },
     ],
     shipDate: atDays(base, 3).slice(0, 10),
-    carrier: 'fedex',
+    carrier: scenarioCarrier,
     proNumber: `SIM-${runId}`,
     lotNumber: `LOT-${runId.slice(-4)}`,
     expiryDate: atDays(base, 365).slice(0, 10),
   });
   const shipmentId = ship.shipmentId ?? '';
   if (ship.ok) {
-    steps.push({ step: 3, action: 'shipment_created', entityType: 'shipment', entityId: shipmentId, from: 'accepted', to: 'ready_to_fulfil', detail: `fedex shipment; backorder line short-shipped → ${ship.deductionId ?? 'no deduction'}`, at: new Date().toISOString() });
+    steps.push({ step: 3, action: 'shipment_created', entityType: 'shipment', entityId: shipmentId, from: 'accepted', to: 'ready_to_fulfil', detail: `${scenarioCarrier} shipment; backorder line short-shipped → ${ship.deductionId ?? 'no deduction'}`, at: new Date().toISOString() });
     auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_shipment_created', 'shipment', shipmentId, po.brandId, `${actorId}: shipment created for partial PO ${po.poNumber}`, { runId, scenario: 'PARTIAL_PO' }));
     if (ship.deductionId) steps.push({ step: 4, action: 'shortage_deduction', entityType: 'deduction', entityId: ship.deductionId, to: 'open', detail: 'short-ship auto-raised shortage_claim', at: new Date().toISOString() });
   }

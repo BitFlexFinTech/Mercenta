@@ -1,6 +1,88 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 
+## 🧭 CURRENT PLATFORM POSITION — WAVE 3: LOGISTICS HUB COMPLETION (2026-09-22, session 11)
+
+**Increment identity:** complete the remaining **Wave 3** Logistics Hub functionality. The Wave 3 **Hero was NOT rebuilt**; the Hub was **NOT replaced** and **NOT split into a second page**. Five recorded Wave 3 gaps were closed at the correct boundaries: the **backorder fail-closed gate** (domain boundary, not a UI hint), the **unsupported "10am Pacific" routing claim** (removed, not relabelled), **carrier eligibility as a derivation**, **ETA as a real domain capability**, and **delivery performance** aggregated from canonical data. Every change was authorised by the project's own recorded Wave 3 roadmap (matrix §D09-05/06/12, §D10-06/10, §32 #2/#5/#6; registry `discovered-*` entries).
+
+**Full record:** `docs/UIUX_REDESIGN_WAVE3_COMPLETION_2026-09-22.md`.
+
+**Start:** branch `redesign/foundation`, HEAD `455d67923fed004e46bbef66cc63d0db8ce8251a`, `git status --porcelain` **EMPTY**.
+
+### 1. COMPLETED / VERIFIED
+
+- **Backorder now fails closed at the DOMAIN BOUNDARY** — `PurchaseOrderLineItem.isBackOrderAllowed` exists (`src/types.ts`); the rule lives once in `src/lib/commerce/backorderGate.ts` and is enforced in `src/data/api.ts → acknowledgePurchaseOrder`: `true` permits, `false`/`undefined`/missing/unknown all REFUSE, a refused submission mutates **nothing**, a duplicate acknowledgement is refused, and a rejected line can never later become accepted/backordered (AV-007). Both the brand and admin ack surfaces offer the option only where the channel allows it. Fixtures declare the field deterministically so BOTH answers are visible in the running product.
+- **The unsupported "10am Pacific / Carrier Central" claim is REMOVED** — no channel deadline is asserted anywhere (asserted ABSENT by the browser suite); the deadline is re-declared ONCE as **Mercenta's own operational readiness target** (`src/lib/shipping/routingReadiness.ts`, owner Mercenta, Europe/London, AV-013 basis). No replacement channel deadline was invented.
+- **Carrier eligibility is a DERIVATION** (`src/lib/shipping/carrierEligibility.ts`) over freight term + lane + declared lane capability (`MERCENTA_CARRIER_LANE_CAPABILITY`) + the **authoritative provider state**: only `simulation`/`live` are operational; `disabled`/`error`/`degraded`/`configuring`/`available`/`not_registered`/`unknown` are REFUSED with the state named. Lane account permitted, other Mercenta account override-only (the pre-existing canonical contract, preserved), Collect = partnered carrier only. `validateCarrierForShipment` now consults the derivation; **all previously asserted behaviour is unchanged** (`validate:logistics-map` 60/0).
+- **ETA is a real domain capability** — `ShipmentEta` on the shipment domain, derived deterministically from the applicable PO window + recorded delay/exception state, with bases `channel_window` / `simulated_transit` / `delivered` / `unavailable`; a date is **never invented**, every ETA states its basis and `simulated`, and ONE derivation point (`attachShipmentEta`) serves every consignment read.
+- **Delivery performance** — aggregated in the Hub from the SAME tenant-scoped canonical legs the map plots; a rate with no sample renders **"No sample yet"** (never a fabricated 100%), provider-verified deliveries are counted separately from simulated ones, and both KPI tiles open real drill-downs.
+- **New gate:** `npm run validate:wave3-logistics` — bundles and EXECUTES the real modules (56 assertions, `fetch` sabotaged to prove zero network calls). **New browser suite:** `e2e/logistics-wave3.spec.ts` (6 tests).
+
+### 2. IN PROGRESS
+
+- **Nothing.** The scoped increment is implemented, tested and browser-verified. Deployment is **not** authorised in this session and is therefore not started.
+
+### 3. REMAINING — CURRENT ROADMAP (Wave 3 remainder, then 5 and 6)
+
+1. **Wave 3 ack remainder** — `on_hold` PO state, ack completeness at submission, ack ↔ invoice match rule (matrix §D09-07/08/09). **NOT STARTED.**
+2. **Wave 3 routing re-model remainder** — the routing **mechanic** itself and making `mercenta_hub` optional (matrix §D09-13, T-4/AV-027). **NOT STARTED.**
+3. **Wave 3 Logistics Hub remainder** — consolidation, customs documents, provider configuration; and the ETA/eligibility/performance panels are **brand-side only** (the admin Logistics Control does not show them). **NOT STARTED.**
+4. **WAVE 5 — Super Admin / Control Centre** (integration control architecture, credential vault T-7, server-side Super Admin enforcement). **NOT STARTED.**
+5. **WAVE 6 — product-wide completion / integration / regression pass.** **NOT STARTED.**
+6. The remainder of the pre-existing roadmap (`theme-alpha-shims` removal, visual-regression gate, `AdminShell` chunk, legacy page shell backlog, Phases 3–15).
+7. **DEPLOYMENT** — not started; only on Founder instruction (`scripts/deploy-demo.sh`, demo host only; `operating-model.md` §5).
+
+### 4. DEFERRED / PARKED
+
+- Unchanged from the session-9/10 blocks below. No new deferrals were created by this increment.
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **Credentials only** for live integration activation (`phase14-live-integrations-activation`). This increment added **no** credential requirement: every derivation is deterministic local computation with **zero network calls** (asserted with `fetch` sabotaged).
+
+### 6. KNOWN EXCEPTIONS
+
+- **Wave 3 is NOT fully closed** — heading 3 lists the real remaining work, stated here rather than implied complete.
+- **Two defects discovered and FIXED inside this increment** (reported, not quietly patched): the PARTIAL_PO simulation created its shipment with the **retired** carrier `fedex` (refused by the canonical rule), so that scenario silently produced no shipment/deduction — it now derives the carrier from the lane rule; and the `collect` freight `detail` copy in `src/config/logisticsGeo.ts` contradicted the canonical override contract asserted by `validate:logistics-map.mjs` — corrected.
+- **Full-suite run:** 453 passed / 6 failed / 2 skipped. All 6 failures were `page.goto` 30-second **timeouts under load** (not assertions); the 6 affected specs re-run **in isolation: 69/69 passed**. Reported as measured, not smoothed over.
+- The **BrandShell chunk remains large** (hero geometry + three.js) — a measured cost carried forward, not explained away.
+- The two dirty-tree scope-guard validator failures and the pre-existing `verify-registry` findings from the session-9 block are unchanged.
+
+### 7. CURRENT CHECKPOINT
+
+- **Branch:** `redesign/foundation`. **Start HEAD:** `455d679` with `git status --porcelain` **EMPTY**. **Checkpoint commit:** recorded in the follow-up documentation commit for this session (see `HANDOFF.md`); `git status --porcelain` **EMPTY**.
+- **THREE-WAY STATUS for this checkpoint: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ (tsc app+root, eslint, build, validators, browser suites, committed state re-verified) · GitHub committed ✅ · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. Per `.clinerules/operating-model.md` §10 the Wave 3 completion increment is **NOT COMPLETE** until the demo leg is verified.
+
+### 8. VERIFICATION STATUS (all executed in this session — real output)
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** |
+| `npx tsc --noEmit -p tsconfig.json` | **0 errors** |
+| `npx eslint` (15 changed source files) | **0 problems** |
+| `npm run build` | **✓ built in 5.94s** |
+| `npm run validate:wave3-logistics` | **PASS — 56 passed, 0 failed** |
+| `npm run validate:logistics-map` | **PASS — 60 assertions, 0 network calls** |
+| `npm run validate:logistics-hero` | **PASS — 53 assertions** |
+| `npm run validate:provider-safety` | **PASS** |
+| `npm run validate:wording` | **PASS — 296 files, 0 violations** |
+| `npm run validate:typography` | **PASS — 17 assertions** |
+| `npm run validate:workspace-shell` | **92 PASS / 0 FAIL** |
+| `npm run validate:canonical-propagation` | **25 PASS / 0 FAIL** |
+| `npm run validate:routing` | **PASS — 101 assertions** |
+| Playwright: wave3 + hero + hub-map + po-lifecycle | **37 passed** |
+| Playwright: brand/admin operational + multi-tenant + shipment-asn | **23 passed** |
+| Playwright: shipment-asn + commerce-sim + notifications + canonical-propagation | **19 passed** |
+| Playwright: full suite | **453 passed / 6 failed (timeouts) / 2 skipped**; the 6 specs in isolation **69/69 passed** |
+
+### 9. NEXT EXECUTION SCOPE
+
+1. Founder authorises deployment → `bash scripts/deploy-demo.sh` → **open** `https://demo.mercenta.co.uk` → verify the backorder gate, the ETA basis, the eligibility trail and the performance drill-down **live** → confirm the live build matches the recorded verified commit → only then may the status become **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**.
+2. Otherwise continue with heading 3 item 1 (Wave 3 ack remainder) from the same clean HEAD.
+
+---
+
+
 ## 🧭 CURRENT PLATFORM POSITION — WAVE 3: THE LOGISTICS HUB GETS A CINEMATIC HERO (2026-09-22, session 10)
 
 **Increment identity:** Wave 3 of the full UI/UX redesign — **the Logistics Hub: hero + operational Hub**. The hero is a section of the **same** Logistics Hub page (no second page) built on **authentic geography** (Natural Earth public domain + OpenStreetMap motorway/trunk under ODbL, generated and committed), with a **fixed, non-interactive camera** and a **deterministic** simulation. The canonical operational map, filters, inspector, artefacts and tenant scoping were **not** rewired or replaced.

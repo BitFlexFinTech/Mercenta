@@ -31,6 +31,7 @@ import { cn } from '@/utils/cn';
 import { CheckCircle2, MessageSquare, Phone, Truck } from 'lucide-react';
 import { MERCENTA_CARRIER_LABELS } from '@/config/shipping';
 import { carrierOptionsForLane, selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
+import { backOrderAvailabilityLabel, canBackOrderLine } from '@/lib/commerce/backorderGate';
 
 /**
  * §Canonical model §11 — a brand does NOT choose an arbitrary carrier. The
@@ -500,6 +501,13 @@ export function BrandPurchaseOrders() {
                   {po.lineItems.map((li) => {
                     const a = lineAcks[li.sku];
                     if (!a) return null;
+                    /**
+                     * §WAVE 3 — the backorder option is offered ONLY where the
+                     * retail channel positively allows it on this line. The
+                     * domain boundary enforces the same rule, so this is the
+                     * visible half of one gate, not the gate itself.
+                     */
+                    const backOrderAllowed = canBackOrderLine(li);
                     return (
                       <div key={li.sku} className="flex flex-wrap items-center gap-2 text-ds-label">
                         <span className="font-mono text-zinc-300 w-20">{li.sku}</span>
@@ -516,11 +524,21 @@ export function BrandPurchaseOrders() {
                             }))
                           }
                           className="bg-ink-900 border border-white/[0.08] rounded-md px-1.5 py-1 text-xs text-white"
+                          data-testid={`po-ack-status-${li.sku}`}
+                          data-backorder-allowed={backOrderAllowed ? 'true' : 'false'}
                         >
                           <option value="accepted">Accepted</option>
-                          <option value="backordered">Backordered</option>
+                          {backOrderAllowed && <option value="backordered">Backordered</option>}
                           <option value="rejected">Rejected</option>
                         </select>
+                        {!backOrderAllowed && (
+                          <span
+                            className="text-ds-micro text-zinc-500"
+                            data-testid={`po-backorder-blocked-${li.sku}`}
+                          >
+                            {backOrderAvailabilityLabel(li)}
+                          </span>
+                        )}
                         {a.ackStatus !== 'rejected' && (
                           <label className="text-zinc-500">
                             Qty

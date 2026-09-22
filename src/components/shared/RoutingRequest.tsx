@@ -1,15 +1,32 @@
 /**
- * §Vendor-Central deep-dive — Routing Request step for Freight Collect POs.
+ * §WAVE 3 — Routing readiness for Freight Collect POs.
  *
- * For POs where Amazon arranges/pays the carrier (freightTerm === 'collect'),
- * the vendor must submit a Routing Request by 10am Pacific time the day
- * before the ship window closes. For Freight Prepaid POs (freightTerm === 'prepaid'),
- * the vendor arranges the carrier — no Routing Request needed.
+ * For POs where the retail channel arranges/pays the carrier
+ * (`freightTerm === 'collect'`), Mercenta must have the routing step prepared
+ * BEFORE the ship window closes, so the consignment is never dispatched against
+ * a window that has already ended.
+ *
+ * ⚠ WHAT THIS DEADLINE IS — AND IS NOT
+ * ------------------------------------
+ * It is **Mercenta's own operational readiness target**, declared once in
+ * `src/lib/shipping/routingReadiness.ts`. It is **NOT** a retail-channel rule:
+ * the earlier "10am Pacific the day before the ship window closes" claim was
+ * unsupported (`docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` → `AV-013`)
+ * and has been removed rather than relabelled as fact. No replacement channel
+ * deadline is asserted anywhere in this component.
+ *
+ * For Freight Prepaid POs (`freightTerm === 'prepaid'`) Mercenta arranges the
+ * carrier, so no routing step is required.
  */
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { Truck, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import {
+  ROUTING_READINESS,
+  routingReadinessNotice,
+  routingReadinessStatus,
+} from '@/lib/shipping/routingReadiness';
 
 interface RoutingRequestProps {
   poFreightTerm: 'collect' | 'prepaid' | undefined;
@@ -18,11 +35,14 @@ interface RoutingRequestProps {
   routingRequestFiled?: boolean;
 }
 
+/**
+ * The readiness moment for a ship window end date.
+ *
+ * Kept as a named export because callers and tests already reference it; the
+ * implementation now delegates to the canonical Mercenta-owned declaration.
+ */
 export function getRoutingRequestDeadline(shipWindowEnd: string): Date {
-  const deadline = new Date(shipWindowEnd + 'T00:00:00Z');
-  deadline.setUTCDate(deadline.getUTCDate() - 1);
-  deadline.setUTCHours(17, 0, 0, 0);
-  return deadline;
+  return routingReadinessStatus(shipWindowEnd).deadline;
 }
 
 function formatCountdown(deadline: Date): { label: string; overdue: boolean } {
@@ -67,9 +87,12 @@ export function RoutingRequestIndicator({
       <Truck className={cn('w-4 h-4 flex-shrink-0', countdown.overdue ? 'text-red-400' : 'text-amber-400')} />
       <div className="flex-1 min-w-0">
         <p className={cn('text-ds-label font-medium', countdown.overdue ? 'text-red-200' : 'text-amber-200')}>
-          Routing Request required (Freight Collect)
+          Routing step required (Freight Collect)
         </p>
-        <p className="text-ds-micro text-zinc-500">Due by 10am PT day before ship window closes</p>
+        <p className="text-ds-micro text-zinc-500" data-testid="routing-readiness-notice">
+          {ROUTING_READINESS.label}: prepare by {ROUTING_READINESS.cutoffHour}:00 (Europe/London) the day before
+          the ship window closes. Not a retail-channel deadline.
+        </p>
       </div>
       <div className={cn(
         'text-ds-micro font-mono px-2 py-0.5 rounded',
@@ -121,7 +144,10 @@ export function RoutingRequestForm({
       </div>
       <p className="text-ds-micro text-zinc-400">
         This PO has <strong>Freight Collect</strong> terms — the retail channel arranges the carrier.
-        A Routing Request must be submitted via Carrier Central before shipping.
+        Mercenta prepares the routing step before the ship window closes, then ships within it.
+      </p>
+      <p className="text-ds-micro text-zinc-500" data-testid="routing-readiness-basis">
+        {routingReadinessNotice()}
       </p>
       {deadline && (
         <div className="flex items-center gap-2">
@@ -132,18 +158,18 @@ export function RoutingRequestForm({
           <span className={cn('text-ds-micro', isOverdue ? 'text-red-300' : 'text-amber-300')}>
             {isOverdue
               ? 'OVERDUE — ship window closed ' + new Date(shipWindowEnd as string).toLocaleDateString('en-GB') + '. Ship at risk of rejection.'
-              : 'Deadline: ' + deadline!.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' at 10am PT'
+              : 'Mercenta readiness target: ' + deadline!.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' at ' + ROUTING_READINESS.cutoffHour + ':00 (Europe/London)'
             }
           </span>
         </div>
       )}
       <label className="flex items-center gap-2 text-ds-label text-zinc-300 cursor-pointer">
         <input type="checkbox" checked={confirmChecked} onChange={(e) => setConfirmChecked(e.target.checked)} className="rounded border-white/[0.08] bg-ink-900" />
-        I confirm I have submitted the Routing Request via Carrier Central.
+        I confirm the routing step has been prepared for this consignment.
       </label>
       <div className="flex items-center gap-2">
         <Button className="text-xs" disabled={!confirmChecked || filing} onClick={handleFile}>
-          {filing ? 'Submitting...' : 'Confirm Routing Request'}
+          {filing ? 'Submitting...' : 'Confirm routing step'}
         </Button>
         <Button variant="ghost" className="text-xs text-zinc-500" onClick={onClose}>
           Skip (not recommended)

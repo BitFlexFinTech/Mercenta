@@ -13,6 +13,10 @@ import { supabase } from '@/lib/supabase';
 import { evaluateComplianceGate, latestDocumentsByType } from '@/lib/compliance';
 import { submitDocumentForVerification } from '@/lib/verification/documentVerification';
 import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
+import { ackStatusTransitionRefusal, backOrderBlockedReason } from '@/lib/commerce/backorderGate';
+import { deriveShipmentEta, etaWindowKindFor } from '@/lib/logistics/shipmentEta';
+import type { DemoShipment } from '@/data/demoData';
+import type { ShipmentEta } from '@/types';
 import { originForBrand } from '@/config/logisticsGeo';
 import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
 import { createSPApiClientForConnection } from '@/lib/spapi';
@@ -814,7 +818,41 @@ export function acknowledgePurchaseOrder(
   const po = demoPurchaseOrders.find((p) => p.id === poId);
   if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
 
+  /**
+   * §WAVE 3 — DUPLICATE ACKNOWLEDGEMENT REFUSED.
+   * Acknowledging twice would let a second submission rewrite a line that was
+   * already rejected, which is exactly the contradictory state
+   * `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md → AV-007` forbids.
+   */
+  if (po.acknowledgedAt) {
+    return {
+      ok: false,
+      error: `PO ${po.poNumber} has already been acknowledged — a duplicate acknowledgement is refused.`,
+    };
+  }
+
   const warnings: string[] = [];
+
+  /**
+   * §WAVE 3 — FAIL-CLOSED PRE-PASS.
+   *
+   * The channel's per-line backorder permission (`isBackOrderAllowed`) and the
+   * permanence of a rejection (AV-007) are checked BEFORE any line is mutated, so
+   * a refused submission leaves the purchase order byte-for-byte unchanged.
+   */
+  for (const line of po.lineItems) {
+    const ack = lineAcks.find((a) => a.sku === line.sku);
+    if (!ack || ack.ackStatus === 'unacknowledged') continue;
+
+    const backOrderReason = backOrderBlockedReason(line);
+    if (ack.ackStatus === 'backordered' && backOrderReason) {
+      return { ok: false, error: backOrderReason };
+    }
+    const transitionRefusal = ackStatusTransitionRefusal(line, ack.ackStatus);
+    if (transitionRefusal) {
+      return { ok: false, error: transitionRefusal };
+    }
+  }
 
   for (const line of po.lineItems) {
     const ack = lineAcks.find((a) => a.sku === line.sku);
@@ -1284,12 +1322,42 @@ export function createShipmentForPO(
 
 /* ── Shipments across every carrier (3PL terminal + logistics control) ── */
 
-export function fetchShipmentsAll() {
-  return queryOrSeed('shipments', demoShipments);
+/**
+ * §WAVE 3 — THE CANONICAL SHIPMENT ETA PROJECTION.
+ *
+ * ONE derivation point for every consignment read. The ETA is derived from the
+ * consignment's own canonical record — the applicable PO window (delivery window
+ * for prepaid, ship window for collect) plus the recorded delay/exception state
+ * — and it always carries its basis, so a derived estimate can never be read as
+ * a carrier confirmation. A consignment whose PO declares no window gets
+ * `unavailable`; a date is never invented.
+ */
+export function attachShipmentEta(shipment: DemoShipment): DemoShipment & { eta: ShipmentEta } {
+  const po = demoPurchaseOrders.find((p) => p.poNumber === shipment.poNumber);
+  const windowKind = etaWindowKindFor(po?.freightTerm ?? null);
+  const windowEnd =
+    windowKind === 'delivery' ? (po?.deliveryWindowEnd ?? null) : (po?.shipWindowEnd ?? null);
+  return {
+    ...shipment,
+    eta: deriveShipmentEta({
+      status: shipment.status,
+      stage: (po?.status ?? '') as string,
+      windowEnd,
+      windowKind,
+      delayed: shipment.delayed,
+      exception: shipment.exception,
+      simulated: true,
+    }),
+  };
+}
+
+export async function fetchShipmentsAll() {
+  const result = await queryOrSeed('shipments', demoShipments);
+  return { ...result, data: result.data.map(attachShipmentEta) };
 }
 
 export function fetchShipmentsForBrand(brandId: string) {
-  return demoShipments.filter((s) => s.brandId === brandId);
+  return demoShipments.filter((s) => s.brandId === brandId).map(attachShipmentEta);
 }
 
 /* ── Catalog with owning-brand join (Global Catalog Manager) ── */

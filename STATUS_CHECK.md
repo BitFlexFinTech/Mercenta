@@ -26,6 +26,43 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
+## CURRENT STATE — WAVE 3 LOGISTICS HUB COMPLETION (2026-09-22, session 11)
+
+**Checkpoint:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`. Start HEAD `455d679`, tree EMPTY.
+Branch `redesign/foundation`. **No deployment was performed and the live demo was NOT verified.**
+
+**Closed in this session (all authorised by the project's own recorded Wave 3 roadmap):**
+
+- **Backorder fail-closed** — `PurchaseOrderLineItem.isBackOrderAllowed` + `src/lib/commerce/backorderGate.ts`,
+  enforced at the DOMAIN BOUNDARY (`src/data/api.ts → acknowledgePurchaseOrder`): `true` permits,
+  `false`/`undefined`/missing/unknown refuse; a refused submission mutates nothing; duplicate ack refused;
+  `rejected` is forward-only (AV-007). UI surfaces gate the option; fixtures declare the field so both answers show.
+- **Unsupported "10am Pacific" claim REMOVED** — `src/lib/shipping/routingReadiness.ts` declares the deadline once as
+  **Mercenta's own** readiness target (AV-013). No channel deadline is asserted; no replacement was invented.
+- **Carrier eligibility DERIVED** — `src/lib/shipping/carrierEligibility.ts` over freight term + lane + declared lane
+  capability + authoritative provider state. Only `simulation`/`live` are operational; every other state is refused
+  with the state named. `validateCarrierForShipment` consults it; all previous behaviour preserved.
+- **ETA domain capability** — `src/lib/logistics/shipmentEta.ts` + `ShipmentEta`; one derivation point
+  (`attachShipmentEta`); `unavailable` instead of an invented date; basis always stated.
+- **Delivery performance** — `src/lib/logistics/deliveryPerformance.ts` over the same tenant-scoped canonical legs;
+  "No sample yet" instead of a fabricated rate; verified vs simulated deliveries separated; KPI drill-downs.
+
+**New gates:** `npm run validate:wave3-logistics` (56 assertions, executes the real modules, `fetch` sabotaged) and
+`e2e/logistics-wave3.spec.ts` (6 browser tests). `e2e/shipment-asn.spec.ts` #3 REPOINTED (asserts the claim ABSENT).
+
+**Verified this session:** `tsc` app+root 0 errors · eslint 0 problems (15 changed files) · build PASS ·
+wave3-logistics 56/0 · logistics-map 60/0 · logistics-hero 53 · provider-safety PASS · wording PASS · typography 17 ·
+workspace-shell 92/0 · canonical-propagation 25/0 · routing 101/0 · Playwright 37 + 23 + 19 passed ·
+FULL suite **453 passed / 6 failed / 2 skipped** where all 6 failures were `page.goto` timeouts under load and the
+6 specs **pass 69/69 in isolation**.
+
+**Still open (do not claim otherwise):** `on_hold` / ack completeness / ack↔invoice match (§D09-07/08/09) · the routing
+re-model remainder (§D09-13) · consolidation, customs documents, provider configuration · admin-side ETA/eligibility/
+performance panels · **Wave 5 and Wave 6 NOT STARTED**.
+
+**Three-way status:** Local ✅ · GitHub committed ✅ · **demo ❌ NOT DEPLOYED / NOT VERIFIED** → **NOT COMPLETE**
+(`.clinerules/operating-model.md` §10/§11).
+
 ## Build & verification health
 
 - `npm run typecheck` — PASS (exit 0)
@@ -723,5 +760,24 @@ Stages 1–16 are all open. The single biggest blocker for Stage 1 is external: 
 9. **Test resilience fixes:** Fixed 4 pre-existing E2E failures caused by brand name mismatch (`'Zambezi Organic Extracts'` → `'Zambezi Organic Extracts Ltd'`) and Supabase legacy-ID mismatch. Made all PO-dependent tests gracefully skip when Supabase returns data with UUID brand IDs instead of legacy tenant IDs. Final results: **10 PASS, 1 graceful skip** for previously-failing tests.
 
 10. **Registry updated:** 106 entries (+9 new), Postiz + WhatsApp upgraded to `built_and_tested`, counts updated.
+
+
+### Session 2026-09-22 (session 11) — Wave 3 Logistics Hub completion
+
+**Scope:** complete the remaining Wave 3 Logistics Hub functionality (the Hero was NOT rebuilt; the Hub was NOT replaced or split). Start HEAD `455d679`, tree EMPTY.
+
+**Completed:**
+1. **Backorder fail-closed (AV-010)** — `isBackOrderAllowed` added to `PurchaseOrderLineItem`; the rule implemented ONCE in `src/lib/commerce/backorderGate.ts` and enforced at the DOMAIN BOUNDARY in `src/data/api.ts → acknowledgePurchaseOrder` (fail-closed pre-pass before any mutation; duplicate ack refused; `rejected` forward-only per AV-007). Brand + admin ack surfaces gate the option; demo fixtures declare the field so both answers are visible.
+2. **Unsupported "10am Pacific" claim (AV-013)** — REMOVED from `src/types.ts`, `RoutingRequest.tsx` and the tours; the deadline is re-declared once as Mercenta's OWN readiness target (`src/lib/shipping/routingReadiness.ts`). No replacement channel deadline invented.
+3. **Carrier eligibility derivation (D10-06)** — `src/lib/shipping/carrierEligibility.ts` + `MERCENTA_CARRIER_LANE_CAPABILITY`; only `simulation`/`live` operational; disabled/error/degraded/configuring/available/unregistered/unknown refused with the state named. `validateCarrierForShipment` consults it; `validate:logistics-map` still 60/0.
+4. **ETA domain capability** — `ShipmentEta` + `src/lib/logistics/shipmentEta.ts`; ONE derivation point (`attachShipmentEta`); `unavailable` rather than an invented date; basis rendered.
+5. **Delivery performance** — `src/lib/logistics/deliveryPerformance.ts`; "No sample yet" rather than a fabricated rate; verified vs simulated separated; KPI drill-downs added.
+6. **New gates** — `scripts/validate-wave3-logistics.mjs` (`npm run validate:wave3-logistics`, 56 assertions executing the real modules with `fetch` sabotaged) and `e2e/logistics-wave3.spec.ts` (6 browser tests). `e2e/shipment-asn.spec.ts` #3 REPOINTED.
+7. **Two defects fixed inside the increment** — the PARTIAL_PO simulation used the retired carrier `fedex` (so it silently produced no shipment/deduction) and now derives the carrier from the lane rule; the `collect` `detail` copy in `src/config/logisticsGeo.ts` contradicted the canonical override contract and was corrected.
+8. **Registry** — 448 → **451 entries**; 3 `discovered-*` rows moved to `built_and_tested`, 3 new rows added.
+
+**Evidence:** tsc app+root 0 errors · eslint 0 problems · build PASS · wave3-logistics 56/0 · logistics-map 60/0 · logistics-hero 53 · provider-safety PASS · wording PASS · typography 17 · workspace-shell 92/0 · canonical-propagation 25/0 · routing 101/0 · Playwright 37 + 23 + 19 passed · FULL suite 453 passed / 6 failed / 2 skipped (the 6 were load timeouts; **69/69 pass in isolation**).
+
+**Status:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE` — demo NOT deployed, NOT verified.
 
 **Evidence:** `npm run typecheck` PASS, `npm run build` PASS, `scripts/verify-registry.mjs` 106 entries 100 verified, E2E: all test suites green (64 stable + 10 previously-failing = 74 PASS, 1 graceful skip).

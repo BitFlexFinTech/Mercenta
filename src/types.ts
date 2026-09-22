@@ -130,6 +130,48 @@ export interface Shipment {
   destination: string;
   date: string;
   trackingNumber: string;
+  /** §WAVE 3 — the canonical ETA projection (see `ShipmentEta`). */
+  eta?: ShipmentEta;
+}
+
+/**
+ * §WAVE 3 — SHIPMENT ETA (a REAL domain capability, not a display label).
+ *
+ * WHAT AN ETA HERE ACTUALLY IS
+ * ----------------------------
+ * No live carrier is connected, so Mercenta must never present a fabricated
+ * carrier ETA. The ETA is DERIVED, deterministically, from the consignment's own
+ * canonical record — and it always states its BASIS, so a derived estimate can
+ * never be mistaken for a provider-confirmed arrival:
+ *
+ *   `channel_window`   — the applicable PO window (delivery window for prepaid,
+ *                        ship window for collect) is the committed basis.
+ *   `simulated_transit`— the window basis adjusted deterministically for a
+ *                        recorded delay/exception (a SIMULATED slip).
+ *   `delivered`        — the consignment is already at the destination; no
+ *                        forward ETA applies.
+ *   `unavailable`      — no window was declared for the PO. The ETA is ABSENT
+ *                        rather than invented (fail closed).
+ *
+ * `simulated` is true for every derived basis, because no provider has confirmed
+ * the date. When a live carrier eventually reports an ETA, that value arrives
+ * with `simulated: false` and a provider `source` — the shape already supports
+ * it, so no component needs to change.
+ */
+export type ShipmentEtaBasis =
+  | 'channel_window'
+  | 'simulated_transit'
+  | 'delivered'
+  | 'unavailable';
+
+export interface ShipmentEta {
+  /** ISO date (YYYY-MM-DD), or null when the basis is `unavailable`/`delivered`. */
+  date: string | null;
+  basis: ShipmentEtaBasis;
+  /** True when the date is derived/simulated — never a provider confirmation. */
+  simulated: boolean;
+  /** Where the estimate comes from. Rendered verbatim; never hidden. */
+  source: string;
 }
 
 /** §Batch-21 — Product image slot with metadata. */
@@ -1084,12 +1126,31 @@ export interface Deduction {
 /* ── §Freight term for PO ship-window vs delivery-window distinction ── */
 
 /**
- * §Vendor-Central deep-dive — determines which window type applies:
- * - `collect` (Amazon arranges carrier → "WePay"): PO has a **Ship Window** 
- *   (earliest/latest ship date). Vendor must submit Routing Request by 10am 
- *   Pacific the day before the ship window closes.
- * - `prepaid` (vendor arranges carrier → "TheyPay"): PO has a **Delivery Window**
- *   (date range the carrier must actually deliver to the FC).
+ * §Freight term for PO ship-window vs delivery-window distinction.
+ *
+ * WHAT IS CONFIRMED (docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md S3/S7)
+ * --------------------------------------------------------------------------
+ * - `collect` (the retail channel arranges and pays the carrier — "WePay"):
+ *   the PO carries a **Ship Window** (earliest/latest ship date).
+ * - `prepaid` (the vendor arranges the carrier — "TheyPay"): the PO carries a
+ *   **Delivery Window** (the range the carrier must deliver to the destination
+ *   within).
+ *
+ * WHAT IS NOT CONFIRMED — AND IS THEREFORE NOT ASSERTED HERE
+ * ---------------------------------------------------------
+ * An earlier version of this comment asserted that "the vendor must submit a
+ * Routing Request by 10am Pacific the day before the ship window closes". That
+ * deadline is **NOT established by any Amazon source reached**
+ * (`docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` → discrepancy `AV-013`;
+ * register entry: "UNKNOWN — reclassify to a Mercenta operational target, or
+ * remove until Amazon confirms"). It is therefore NOT stated as a channel rule
+ * anywhere in this codebase.
+ *
+ * What the product DOES hold is Mercenta's OWN operational readiness target —
+ * prepare and file the routing/booking step before the ship window closes, so a
+ * consignment is never dispatched against a window that has already ended. That
+ * target is declared once in `src/lib/shipping/routingReadiness.ts`, is labelled
+ * as Mercenta-owned, and is never attributed to the retail channel.
  */
 export type FreightTerm = 'collect' | 'prepaid';
 export type PurchaseOrderStatus =
@@ -1126,7 +1187,12 @@ export interface PurchaseOrder {
   freightTerm?: FreightTerm;
   /** Earliest ship date (Freight Collect POs). */
   shipWindowStart?: string;
-  /** Latest ship date — Routing Request due by 10am Pacific day before this closes. */
+  /**
+   * Latest ship date. The consignment must be dispatched within the ship
+   * window; Mercenta's own readiness target is declared in
+   * `src/lib/shipping/routingReadiness.ts` (Mercenta-owned, never presented as a
+   * channel deadline — see `AV-013`).
+   */
   shipWindowEnd?: string;
   /** Earliest delivery date (Freight Prepaid POs). */
   deliveryWindowStart?: string;
@@ -1160,6 +1226,22 @@ export interface PurchaseOrderLineItem {
   quantity: number;
   unitPrice: number;
   commodityCode: string;
+  /**
+   * §WAVE 3 — THE RETAIL CHANNEL'S PER-LINE BACKORDER PERMISSION.
+   *
+   * This is the channel's own field (documented in
+   * `docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` S3/S4 and registered as
+   * `AV-010`): a line may be backordered ONLY when the channel positively allows
+   * it. It is set from the channel's order data — the demo fixtures declare it
+   * explicitly (see `src/data/demoData.ts`), and a real integration would map it
+   * from the channel's response.
+   *
+   * FAIL CLOSED: `true` permits a backorder; `false`, `undefined` and any
+   * unknown value do NOT. The gate lives in `src/lib/commerce/backorderGate.ts`
+   * and is enforced at the domain boundary
+   * (`src/data/api.ts → acknowledgePurchaseOrder`), not only in the UI.
+   */
+  isBackOrderAllowed?: boolean;
   /** §Stage-24 acknowledgment fields. */
   ackStatus?: LineAckStatus;
   /** Accepted or backordered units — NEVER greater than `quantity`. */

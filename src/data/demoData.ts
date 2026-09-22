@@ -30,6 +30,7 @@ import type {
   ProductSubmission,
   PurchaseOrder,
   PurchaseOrderStatus,
+  ShipmentEta,
 } from '@/types';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import { AMAZON_PARTNERED_CARRIER } from '@/config/shipping';
@@ -328,6 +329,28 @@ export const DEMO_WORKFLOW_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
           (40 + (bi + pi + idx) * 10) * (bi === 1 && pi === 1 ? 8 : 1),
         unitPrice: p.exWorksPrice,
         commodityCode: p.commodityCode,
+        /**
+         * §WAVE 3 — the retail channel's per-line backorder permission.
+         *
+         * DECLARED FIXTURE VALUE standing in for the field the channel supplies
+         * on its order data (see `src/types.ts → PurchaseOrderLineItem.isBackOrderAllowed`
+         * and `docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` S3/S4).
+         *
+         * The demo must demonstrate BOTH answers on purchase orders that can
+         * actually be acknowledged, so the split is declared deterministically:
+         *
+         *   · a PO still open for acknowledgement (received / under_review) of the
+         *     SECOND cleared tenant declares `true` — the accept / reject /
+         *     backorder workflow stays fully demonstrable; and
+         *   · the equivalent POs of the first cleared tenant declare `false` — the
+         *     fail-closed path is therefore visible in the running product, not
+         *     only in a unit test.
+         *
+         * Nothing here weakens the gate: absent/unknown still fails closed
+         * (`src/lib/commerce/backorderGate.ts`), and it is enforced at the domain
+         * boundary rather than in the UI.
+         */
+        isBackOrderAllowed: (status === 'received' || status === 'under_review') && bi === 1,
       }));
       const poValue =
         Math.round(items.reduce((s, i) => s + i.quantity * i.unitPrice, 0) * 100) / 100;
@@ -483,6 +506,13 @@ export interface DemoShipment {
   /** §Priority-1 — carrier waybill / tracking once booked through the DHL seam. */
   waybill?: string;
   trackingNumber?: string;
+  /**
+   * §WAVE 3 — the canonical ETA, attached on READ by
+   * `src/data/api.ts → attachShipmentEta` (derived from the linked PO's window +
+   * the recorded delay/exception state). It is a projection, not stored state, so
+   * it can never drift from the PO it is derived from.
+   */
+  eta?: ShipmentEta;
 }
 
 export const DEMO_SHIPMENTS: DemoShipment[] = DEMO_PURCHASE_ORDERS

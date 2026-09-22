@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 448,
+    "total_entries": 451,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -344,6 +344,15 @@
       ],
       "note": "A status of `built_and_tested` in this registry means the capability is implemented and verified LOCALLY (code + tests + browser where applicable). It is NOT a claim of three-way completion: no product row may be read as deployed or live-verified unless the demo leg has been verified per §10.",
       "recorded": "2026-09-22"
+    },
+    "status_counts": {
+      "built_and_tested": 254,
+      "built": 126,
+      "not_started": 55,
+      "regressed": 2,
+      "deferred": 7,
+      "in_progress": 3,
+      "blocked": 4
     }
   },
   "entries": [
@@ -3918,12 +3927,12 @@
     },
     {
       "id": "discovered-logistics-hub",
-      "description": "PARTIALLY RESOLVED. The FIRST half is DONE: the Logistics Hub (the Brand/Admin logistics workspace that replaces the \"Carrier Portal\" concept) IS implemented — committed as `4ebba1d` (Logistics Hub + the interactive operational map, brand AND admin, with canonical geography, fail-closed LIVE/SIMULATED/AMBIENT labelling and freight-term semantics), with `scripts/validate-logistics-map.mjs` (60 assertions) and the browser suite green. The SECOND half REMAINS OPEN: provider eligibility is still a declared lane rule (`international → DHL`, `UK domestic → Palletline`, freight-collect → the channel-arranged carrier) rather than a derivation from brand location, origin, destination, route, PO context, freight terms, configured provider capabilities and provider state.",
-      "evidence": "IMPLEMENTED: src/components/admin/LogisticsControl.tsx, src/components/brand/LogisticsHub.tsx, src/components/shared/logistics/LogisticsMapCanvas.tsx, src/lib/logistics/operationsMap.ts, src/config/logisticsGeo.ts, scripts/validate-logistics-map.mjs (60 assertions), e2e/logistics-hub-map.spec.ts. REMAINING: src/config/shipping.ts (MERCENTA_CARRIER_ACCOUNTS / LANE rule), src/lib/shipping/carrierRouting.ts",
-      "status": "not_started",
+      "description": "CLOSED. The second half is DONE: carrier provider-ELIGIBILITY is now a DERIVATION (`src/lib/shipping/carrierEligibility.ts`) over the freight term + the lane + the DECLARED lane capability of each Mercenta account (`MERCENTA_CARRIER_LANE_CAPABILITY`) + the AUTHORITATIVE provider state. A carrier is eligible ONLY when its mode positively resolves to `simulation` or `live`: disabled / error / degraded / configuring / available / unregistered / unknown are REFUSED with the state named (availability is not eligibility). The lane account is permitted, the other Mercenta account is override-only (attributed, audited - the pre-existing canonical contract, preserved), and Freight Collect permits only the partnered carrier value. The Hub renders the derivation trail.",
+      "evidence": "src/lib/shipping/carrierEligibility.ts; src/config/shipping.ts; src/lib/shipping/carrierRouting.ts; src/components/brand/LogisticsHub.tsx; scripts/validate-wave3-logistics.mjs (18 eligibility/provider-safety assertions PASS); npm run validate:logistics-map 60/0; npm run validate:provider-safety PASS; e2e/logistics-wave3.spec.ts test 4",
+      "status": "built_and_tested",
       "_audit_note": "§WAVE 3 (2026-09-22) — the cinematic HALF of this discovery is now built and browser-verified under four dedicated rows (uiux-wave3-logistics-hero and its three supporting rows). This row REMAINS not_started because its second half is untouched: the carrier provider-eligibility DERIVATION (brand location, origin, destination, route, PO context, freight terms, provider capabilities, provider state) replaces nothing — the declared lane rule + partnered-carrier rule remain the whole eligibility rule. Also NOT claimed done here: the backorder fail-closed gate (discovered-backorder-fail-closed-gate) and the brand-facing Routing Request / unsupported 10am Pacific claim (discovered-routing-request-removal).",
-      "source": "S2a — canonical brand case surface + KB sufficiency evaluator + tenant-safe relevant-data lookup (2026-09-20)",
-      "last_verified": "2026-09-21",
+      "source": "Wave 3 Logistics Hub completion (2026-09-22, session 11)",
+      "last_verified": "2026-09-22",
       "superseded_by": null
     },
     {
@@ -3946,20 +3955,20 @@
     },
     {
       "id": "discovered-backorder-fail-closed-gate",
-      "description": "`isBackOrderAllowed` does not exist anywhere in the repository (grep = 0 hits), so backorder is offered unconditionally — an unsupported claim against Amazon truth. The fail-closed gate (true = may offer; false/missing/unknown = do not offer), the `on_hold` state, ack completeness, the ack↔invoice match rule and the rejected-line re-acknowledgement guard are all outstanding",
-      "evidence": "docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md §13 (D09-05…D09-09); AV-006…AV-010b. Owner: S5",
-      "status": "not_started",
-      "source": "S2a — canonical brand case surface + KB sufficiency evaluator + tenant-safe relevant-data lookup (2026-09-20)",
-      "last_verified": "2026-09-20",
+      "description": "CLOSED. The retail channel's per-line `isBackOrderAllowed` now exists (`PurchaseOrderLineItem.isBackOrderAllowed`); the gate lives in `src/lib/commerce/backorderGate.ts` and is ENFORCED AT THE DOMAIN BOUNDARY (`src/data/api.ts -> acknowledgePurchaseOrder`): true permits; false / undefined / missing / unknown all REFUSE; a refused submission mutates nothing; a duplicate acknowledgement is refused; and a rejected line can never later become accepted/backordered (AV-007). Both the brand and admin acknowledgement surfaces offer the backorder option ONLY where the channel allows it. Demo fixtures declare the field deterministically on acknowledgement-eligible POs so BOTH answers are demonstrable in the running product.",
+      "evidence": "src/lib/commerce/backorderGate.ts; src/data/api.ts; src/types.ts; src/components/brand/BrandPurchaseOrders.tsx; src/components/admin/AdminPurchaseOrderDetail.tsx; src/data/demoData.ts; scripts/validate-wave3-logistics.mjs (13 domain-boundary assertions PASS); e2e/logistics-wave3.spec.ts (2 browser tests PASS); docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md section 13 (D09-05..D09-09); AV-006..AV-010b",
+      "status": "built_and_tested",
+      "source": "Wave 3 Logistics Hub completion (2026-09-22, session 11)",
+      "last_verified": "2026-09-22",
       "superseded_by": null
     },
     {
       "id": "discovered-routing-request-removal",
-      "description": "The Brand-facing Routing Request mechanic must be REMOVED/reconciled (T-6) — not relabelled — and the unsupported \"10am Pacific day before ship window closes\" claim must go, while `mercenta_hub` must become an optional route rather than a mandatory universal stage",
-      "evidence": "docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md §13 (D09-11…D09-13); src/types.ts:1129; src/components/shared/RoutingRequest.tsx; AV-013/AV-027. Owner: S4",
-      "status": "not_started",
-      "source": "S2a — canonical brand case surface + KB sufficiency evaluator + tenant-safe relevant-data lookup (2026-09-20)",
-      "last_verified": "2026-09-20",
+      "description": "CLOSED (reconciled branch). The unsupported 'submit a Routing Request by 10am Pacific the day before the ship window closes' claim is REMOVED from the product: no channel deadline is asserted anywhere (asserted absent by the browser suite), the mechanic itself is retained because the collect => routing-step direction IS confirmed, and the deadline is re-declared ONCE as Mercenta's OWN operational readiness target (`src/lib/shipping/routingReadiness.ts`, owner: Mercenta, Europe/London, AV-013 basis). No replacement channel deadline was invented.",
+      "evidence": "src/lib/shipping/routingReadiness.ts; src/components/shared/RoutingRequest.tsx; src/types.ts; src/config/tours/tourDefinitions.ts; src/config/logisticsGeo.ts; scripts/validate-wave3-logistics.mjs (ownership + day-before assertions PASS); e2e/logistics-wave3.spec.ts test 6; e2e/shipment-asn.spec.ts test 3 (repointed, asserts the claim ABSENT); AV-013",
+      "status": "built_and_tested",
+      "source": "Wave 3 Logistics Hub completion (2026-09-22, session 11)",
+      "last_verified": "2026-09-22",
       "superseded_by": null
     },
     {
@@ -4589,6 +4598,33 @@
       "source": "Wave 3 (2026-09-22 founder directive)",
       "status": "built_and_tested",
       "evidence": "src/config/logisticsHero.ts (HERO_SCENE.camera); src/components/shared/logistics/LogisticsHeroScene.tsx (no OrbitControls, style pointerEvents none, onCreated sets lookAt once); e2e/logistics-hero.spec.ts 2/3 (pointer-events none asserted; the hero must MOVE when the wheel is used over it), 7/8/11 (labels and ambient disclosure), 10 (reduced motion)",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "wave3-shipment-eta-domain",
+      "description": "NEW CAPABILITY. The shipment domain now carries a real ETA (`ShipmentEta` on `Shipment` / the consignment read model), DERIVED deterministically from the consignment's own canonical record: the applicable PO window (delivery window for prepaid, ship window for collect) plus the recorded delay/exception state. Bases: `channel_window`, `simulated_transit` (+5-day deterministic slip), `delivered` (no forward ETA), `unavailable` (no window declared - a date is NEVER invented). Every ETA states its basis and `simulated: true`; no live carrier ETA is fabricated, and the shape already accepts a provider-confirmed value. ONE derivation point: `src/data/api.ts -> attachShipmentEta`. Surfaced in the Hub inspector + an ETA-basis drill-down.",
+      "evidence": "src/lib/logistics/shipmentEta.ts; src/types.ts; src/data/api.ts; src/data/demoData.ts; src/components/brand/LogisticsHub.tsx; scripts/validate-wave3-logistics.mjs (7 ETA assertions PASS); e2e/logistics-wave3.spec.ts test 3",
+      "status": "built_and_tested",
+      "source": "Wave 3 Logistics Hub completion (2026-09-22, session 11)",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "wave3-delivery-performance",
+      "description": "NEW CAPABILITY. Delivery performance is aggregated in the Logistics Hub from the SAME tenant-scoped canonical consignment legs the operational map plots (`src/lib/logistics/deliveryPerformance.ts`) - no new analytics subsystem and no fabricated history. A rate is `null` (rendered 'No sample yet') when no sample exists, provider-VERIFIED deliveries are counted separately from simulated ones, and the provenance is rendered. Surfaced as a KPI tile with a real drill-down, tenant-scoped by the legs the session already holds.",
+      "evidence": "src/lib/logistics/deliveryPerformance.ts; src/components/brand/LogisticsHub.tsx; scripts/validate-wave3-logistics.mjs (5 performance assertions PASS); e2e/logistics-wave3.spec.ts test 5",
+      "status": "built_and_tested",
+      "source": "Wave 3 Logistics Hub completion (2026-09-22, session 11)",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
+    },
+    {
+      "id": "wave3-logistics-completion-validator",
+      "description": "NEW GATE. `npm run validate:wave3-logistics` bundles and EXECUTES the real modules (project esbuild, project `@` alias, CJS so the real `@/data/api` graph runs) and asserts 56 behaviours across the backorder gate, carrier eligibility, provider safety, ETA, delivery performance and routing-readiness ownership - with `fetch` sabotaged to prove zero network calls. It does not grep source text.",
+      "evidence": "scripts/validate-wave3-logistics.mjs; package.json (validate:wave3-logistics); 56 PASS / 0 FAIL The same behaviours are exercised in a real browser by e2e/logistics-wave3.spec.ts (6 tests).",
+      "status": "built_and_tested",
+      "source": "Wave 3 Logistics Hub completion (2026-09-22, session 11)",
       "last_verified": "2026-09-22",
       "superseded_by": null
     }

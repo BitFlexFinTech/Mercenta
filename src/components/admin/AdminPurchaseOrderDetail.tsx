@@ -14,6 +14,7 @@ import type { PurchaseOrder, PurchaseOrderLineItem } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
 import { AlertTriangle, CheckCircle2, X, Truck, Gavel, History } from 'lucide-react';
 import { carrierOptionsForLane, selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
+import { backOrderAvailabilityLabel, canBackOrderLine } from '@/lib/commerce/backorderGate';
 
 /**
  * §Canonical model §11 — the on-behalf ASN offers only Mercenta carrier
@@ -404,14 +405,27 @@ function AdminPoLineItemRow({
     </td>
     <td className="px-3 py-2 text-center">
       {isOnBehalf ? (
+        /**
+         * §WAVE 3 — the backorder option appears ONLY where the retail channel
+         * positively allows it on this line. The domain boundary
+         * (`src/data/api.ts → acknowledgePurchaseOrder`) enforces the same rule,
+         * so an admin cannot bypass it from this surface either.
+         */
         <select value={ackStatus ?? line.ackStatus ?? 'accepted'}
           onChange={(e) => onAckStatusChange(e.target.value as 'accepted' | 'rejected' | 'backordered')}
-          className="bg-ink-900 border border-white/[0.08] rounded px-1 py-0.5 text-xs text-white">
+          className="bg-ink-900 border border-white/[0.08] rounded px-1 py-0.5 text-xs text-white"
+          data-testid={`admin-po-ack-status-${line.sku}`}
+          data-backorder-allowed={canBackOrderLine(line) ? 'true' : 'false'}>
           <option value="accepted">Accept</option>
           <option value="rejected">Reject</option>
-          <option value="backordered">Backorder</option>
+          {canBackOrderLine(line) && <option value="backordered">Backorder</option>}
         </select>
       ) : statusBadge(line.ackStatus)}
+      {isOnBehalf && !canBackOrderLine(line) && (
+        <span className="block mt-1 text-ds-micro text-zinc-500" data-testid={`admin-po-backorder-blocked-${line.sku}`}>
+          {backOrderAvailabilityLabel(line)}
+        </span>
+      )}
       {isOnBehalf && ackStatus === 'rejected' && (
         <select value={ackRejectionCode ?? ''}
           onChange={(e) => onAckRejectionCodeChange(e.target.value)}

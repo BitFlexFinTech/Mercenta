@@ -215,7 +215,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-backorder-date',
       title: 'Backorder Requires Ship Date',
-      description: 'If you backorder a line item, you must provide a scheduled ship date. the retail channel expects you to meet that date. Miss it and the PO is flagged.',
+      description: 'A line may only be backordered where the retail channel allows it on that line — otherwise accept it or reject it with a reason code. Where a backorder is allowed, you must provide a scheduled ship date, and the retail channel expects you to meet it.',
       targetSelector: '[data-tour="po-backorder-date"]',
       position: 'bottom',
       action: 'next',

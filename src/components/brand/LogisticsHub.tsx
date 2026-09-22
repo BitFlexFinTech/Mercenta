@@ -42,6 +42,14 @@ import {
   freightSemantics,
 } from '@/config/logisticsGeo';
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
+import { etaPresentation, isEtaAtRisk } from '@/lib/logistics/shipmentEta';
+import { buildDeliveryPerformance, performanceLabel } from '@/lib/logistics/deliveryPerformance';
+import {
+  deriveCarrierEligibility,
+  isCarrierOperational,
+  providerModeFor,
+  type CarrierEligibility,
+} from '@/lib/shipping/carrierEligibility';
 import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
 import { LogisticsHero } from '@/components/shared/logistics/LogisticsHero';
 import {
@@ -573,6 +581,8 @@ export function LogisticsHub() {
   const [waybillShipment, setWaybillShipment] = useState<string | null>(null);
   const [trackingShipment, setTrackingShipment] = useState<string | null>(null);
   const [labelsShipment, setLabelsShipment] = useState<string | null>(null);
+  /** §WAVE 3 — which derived-insight drill-down is open (metric tiles open these). */
+  const [insight, setInsight] = useState<'performance' | 'eta' | null>(null);
 
   /**
    * §Tenant isolation — a brand session only ever reads its OWN purchase orders.
@@ -619,6 +629,8 @@ export function LogisticsHub() {
             exception?: boolean;
             waybill?: string;
             title?: string;
+            /** §WAVE 3 — the canonical ETA projection from the data layer. */
+            eta?: import('@/types').ShipmentEta | null;
           };
           const po = raw.poNumber ? poByNumber.get(raw.poNumber) : undefined;
           return {
@@ -642,6 +654,8 @@ export function LogisticsHub() {
             waybill: raw.waybill ?? null,
             freightTerm: po?.freightTerm ?? null,
             simulated: po?.simulated,
+            /** §WAVE 3 — the canonical ETA projection attached by the data layer. */
+            eta: raw.eta ?? undefined,
           };
         }),
     [shipmentsQuery.data, session?.tier, session?.tenantId, poByNumber]
@@ -651,6 +665,77 @@ export function LogisticsHub() {
     () => buildOperationalMap(liveShipments.map((s) => ({ ...s, providerModes: modes }))),
     [liveShipments, modes]
   );
+
+  /**
+   * §WAVE 3 — DELIVERY PERFORMANCE.
+   *
+   * A deterministic projection over the SAME tenant-scoped canonical legs the map
+   * plots. It introduces no analytics subsystem and no history: every figure is
+   * counted from the consignment records that actually exist here, provider-
+   * verified deliveries are counted separately from simulated ones, and a rate
+   * with no sample is reported as "No sample yet" rather than as a fabricated
+   * percentage.
+   */
+  const performance = useMemo(
+    () =>
+      buildDeliveryPerformance(
+        model.legs.map((leg) => ({
+          status: leg.status,
+          stage: leg.stage,
+          truth: leg.truth,
+          delayed: leg.delayed,
+          exception: leg.exception,
+        }))
+      ),
+    [model.legs]
+  );
+
+  /** §WAVE 3 — ETA coverage across the consignments in scope. */
+  const etaCoverage = useMemo(() => {
+    let dated = 0;
+    let simulated = 0;
+    let delivered = 0;
+    let unavailable = 0;
+    for (const shipment of liveShipments) {
+      const eta = shipment.eta;
+      if (!eta) {
+        unavailable += 1;
+        continue;
+      }
+      if (eta.basis === 'delivered') delivered += 1;
+      else if (eta.basis === 'unavailable') unavailable += 1;
+      else {
+        dated += 1;
+        if (eta.simulated) simulated += 1;
+      }
+    }
+    return { dated, simulated, delivered, unavailable, total: liveShipments.length };
+  }, [liveShipments]);
+
+  /**
+   * §WAVE 3 — CARRIER ELIGIBILITY for the consignment in scope.
+   *
+   * Derived from the freight term, the lane, the declared lane capability of each
+   * Mercenta account and the AUTHORITATIVE provider state — never from a
+   * hardcoded "DHL for international, Palletline for UK". A provider that is not
+   * positively operational is refused, with its actual state named.
+   */
+  const eligibility: CarrierEligibility = useMemo(() => {
+    /**
+     * The consignment the panel describes: the selected one, else the first leg in
+     * scope. The lane inputs come from that consignment's OWN resolved context
+     * (its declared origin and freight term) — never from the tenant id, which is
+     * not a nation.
+     */
+    const leg = model.legs.find((l) => l.id === selectedId) ?? model.legs[0];
+    return deriveCarrierEligibility({
+      brandNation: null,
+      originCountry: leg?.origin.raw ?? null,
+      destinationCountry: leg?.destination.raw ?? null,
+      freightTerm: leg?.freightTerm ?? undefined,
+      providerModes: modes,
+    });
+  }, [model.legs, selectedId, modes]);
 
   const visibleIds = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -780,9 +865,49 @@ export function LogisticsHub() {
       tone: 'neutral',
       statusText: 'context',
     },
+    {
+      id: 'delivery-performance',
+      label: 'On-time delivery',
+      value: performanceLabel(performance.onTimeRate),
+      context:
+        performance.delivered === 0
+          ? 'No delivered consignment yet — no rate is claimed'
+          : `${performance.onTime}/${performance.delivered} delivered without a recorded delay`,
+      tone: performance.onTimeRate === null ? 'neutral' : performance.onTimeRate >= 0.9 ? 'success' : 'warning',
+      statusText: performance.onTimeRate === null ? 'no sample' : 'derived',
+      domain: 'logistics',
+      testId: 'kpi-delivery-performance',
+      valueTestId: 'kpi-delivery-performance-value',
+      onOpen: () => setInsight('performance'),
+    },
+    {
+      id: 'eta-coverage',
+      label: 'ETA coverage',
+      value: `${etaCoverage.dated}/${etaCoverage.total}`,
+      context:
+        etaCoverage.total === 0
+          ? 'No consignments in scope'
+          : `${etaCoverage.simulated} simulated · ${etaCoverage.delivered} delivered · ${etaCoverage.unavailable} unavailable`,
+      tone: etaCoverage.unavailable > 0 ? 'warning' : 'neutral',
+      statusText: etaCoverage.simulated > 0 ? 'simulated' : 'derived',
+      domain: 'logistics',
+      testId: 'kpi-eta-coverage',
+      valueTestId: 'kpi-eta-coverage-value',
+      onOpen: () => setInsight('eta'),
+    },
   ];
 
   const shipmentById = (id: string) => liveShipments.find((s) => s.id === id)!;
+
+  /**
+   * §WAVE 3 — the canonical ETA of the SELECTED consignment (null when it has
+   * none). Read from the same tenant-scoped rows the map plots, so the inspector
+   * can never describe a consignment it was not given.
+   */
+  const selectedEta = useMemo(
+    () => liveShipments.find((s) => s.id === selectedId)?.eta ?? null,
+    [liveShipments, selectedId]
+  );
 
   return (
     <WorkspaceFrame>
@@ -884,6 +1009,91 @@ export function LogisticsHub() {
       <MetricBand items={kpiItems} loading={shipmentsQuery.isLoading} />
 
       {/*
+        §WAVE 3 — DERIVED-INSIGHT DRILL-DOWNS.
+        The delivery-performance and ETA tiles open the detail BEHIND the number
+        (never a static figure with no drill-down), and both state their basis
+        plainly: a rate with no delivered sample says so, and every ETA is
+        labelled derived/simulated rather than presented as carrier data.
+      */}
+      {insight && (
+        <div className="mt-3" data-testid={`logistics-insight-${insight}`}>
+          <ContextPanel
+            title={insight === 'performance' ? 'Delivery performance' : 'ETA basis'}
+            action={
+              <button
+                type="button"
+                onClick={() => setInsight(null)}
+                aria-label="Close insight detail"
+                className="rounded-ds-sm p-1 text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-white"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            }
+          >
+            {insight === 'performance' ? (
+              <div className="space-y-3 p-3" data-testid="delivery-performance-detail">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {[
+                    { label: 'Consignments', value: String(performance.total) },
+                    { label: 'Delivered', value: String(performance.delivered) },
+                    { label: 'In transit', value: String(performance.inTransit) },
+                    { label: 'Exceptions', value: String(performance.exceptions) },
+                    { label: 'On-time', value: String(performance.onTime) },
+                    { label: 'On-time rate', value: performanceLabel(performance.onTimeRate) },
+                    { label: 'Exception rate', value: performanceLabel(performance.exceptionRate) },
+                    {
+                      label: 'Provider-verified',
+                      value: `${performance.verifiedDelivered} of ${performance.delivered}`,
+                    },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-ds-sm border border-white/[0.06] bg-ink-900 px-2.5 py-2">
+                      <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">{item.label}</p>
+                      <p className="mt-0.5 font-mono text-ds-label text-white">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <ul className="space-y-1">
+                  {performance.sources.map((source) => (
+                    <li key={source} className="text-ds-micro leading-relaxed text-zinc-500">
+                      {source}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="space-y-3 p-3" data-testid="eta-basis-detail">
+                <ul className="space-y-1.5">
+                  {liveShipments.map((shipment) => {
+                    const eta = shipment.eta;
+                    const presentation = eta
+                      ? etaPresentation(eta)
+                      : { label: 'ETA unavailable', detail: 'No ETA projection is attached to this consignment.', tone: 'unavailable' as const };
+                    return (
+                      <li
+                        key={shipment.id}
+                        className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-white/[0.04] pb-1.5 last:border-0"
+                        data-testid={`eta-basis-${shipment.reference}`}
+                      >
+                        <span className="font-mono text-ds-micro text-zinc-300">{shipment.reference}</span>
+                        <span className="text-ds-label text-white">{presentation.label}</span>
+                        <span className="text-ds-micro text-zinc-500">{presentation.detail}</span>
+                        {isEtaAtRisk(eta ?? { date: null, basis: 'unavailable', simulated: false, source: '' }, shipment.delayed, shipment.exception) && (
+                          <span className="text-ds-micro text-state-warning">At risk against its declared window</span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+                {liveShipments.length === 0 && (
+                  <p className="text-ds-body text-zinc-500">No consignments in scope for this tenant.</p>
+                )}
+              </div>
+            )}
+          </ContextPanel>
+        </div>
+      )}
+
+      {/*
         §WAVE 3 — THE CINEMATIC LOGISTICS HERO.
         It is the HERO SECTION of this same page, not a second page: a fixed
         camera, non-interactive global inbound network view built from authentic
@@ -962,8 +1172,32 @@ export function LogisticsHub() {
                           </span>
                         ),
                       },
+                      /**
+                       * §WAVE 3 — the consignment's ETA, with its BASIS always
+                       * stated. A derived or simulated date is never presented as
+                       * carrier-confirmed data, and a consignment with no declared
+                       * window says "ETA unavailable" rather than inventing one.
+                       */
+                      {
+                        label: 'ETA',
+                        value: (
+                          <span
+                            className="text-ds-micro"
+                            data-testid="logistics-eta-value"
+                            data-eta-basis={selectedEta?.basis ?? 'none'}
+                          >
+                            {selectedEta ? etaPresentation(selectedEta).label : 'ETA unavailable'}
+                          </span>
+                        ),
+                      },
                     ]}
                   />
+
+                  {selectedEta && (
+                    <p className="text-ds-micro leading-relaxed text-zinc-500" data-testid="logistics-eta-basis">
+                      {etaPresentation(selectedEta).detail}
+                    </p>
+                  )}
 
                   <div className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5">
                     <p className="mb-1 flex items-center gap-1.5 text-ds-micro font-semibold uppercase tracking-[0.14em] text-zinc-500">
@@ -1056,6 +1290,58 @@ export function LogisticsHub() {
                     Mercenta arranges carriage. International → DHL, UK domestic → Palletline. No single
                     carrier is universal; an admin override is attributed and audited.
                   </p>
+                </div>
+
+                {/*
+                  §WAVE 3 — THE DERIVED ELIGIBILITY TRAIL.
+                  The rule above is the DECLARATION; this is the DERIVATION for the
+                  consignment in scope: which account is permitted right now, which
+                  is override-only, and which is refused — each with the real
+                  provider state that produced the decision. A carrier is never
+                  eligible merely because it is available.
+                */}
+                <div className="border-t border-white/[0.06] pt-2.5" data-testid="carrier-eligibility">
+                  <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
+                    Eligibility for the consignment in scope
+                  </p>
+                  <p className="mt-1 text-ds-micro leading-relaxed text-zinc-400" data-testid="carrier-eligibility-lane">
+                    Lane: {eligibility.lane === 'uk_domestic' ? 'UK domestic' : 'International'}
+                    {eligibility.channelArranged ? ' · carriage arranged by the retail channel' : ' · carriage arranged by Mercenta'}
+                  </p>
+                  {eligibility.permitted.length > 0 && (
+                    <p className="mt-1 text-ds-micro text-zinc-300" data-testid="carrier-eligibility-permitted">
+                      Permitted now:{' '}
+                      <span className="font-mono">
+                        {eligibility.permitted
+                          .map((c) => `${carrierLabel(c)} (${providerModeFor(modes, c)})`)
+                          .join(', ')}
+                      </span>
+                    </p>
+                  )}
+                  {eligibility.overrideCandidates.length > 0 && (
+                    <p className="mt-1 text-ds-micro text-zinc-400" data-testid="carrier-eligibility-override">
+                      Override only (attributed + audited):{' '}
+                      <span className="font-mono">{eligibility.overrideCandidates.map((c) => carrierLabel(c)).join(', ')}</span>
+                    </p>
+                  )}
+                  {eligibility.blocked.length > 0 && (
+                    <ul className="mt-1 space-y-0.5" data-testid="carrier-eligibility-blocked">
+                      {eligibility.blocked.map((entry) => (
+                        <li key={entry.carrier} className="text-ds-micro leading-relaxed text-zinc-500">
+                          <span className="font-mono">{entry.carrier}</span> refused — {entry.reason}
+                          {!isCarrierOperational(providerModeFor(modes, entry.carrier)) && (
+                            <span className="text-zinc-600"> (state: {providerModeFor(modes, entry.carrier)})</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {eligibility.permitted.length === 0 && !eligibility.channelArranged && (
+                    <p className="mt-1 text-ds-micro text-state-warning" data-testid="carrier-eligibility-none">
+                      No Mercenta account is operational on this lane right now — no carrier may be selected until a
+                      provider state positively resolves to simulation or live.
+                    </p>
+                  )}
                 </div>
               </div>
             </ContextPanel>

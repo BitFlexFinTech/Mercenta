@@ -95,4 +95,44 @@ export const SHIPPING_COMMERCIAL_TERMS = {
   vatRate: 0.2,
 } as const;
 
+/**
+ * §WAVE 3 — DECLARED LANE CAPABILITY PER MERCENTA CARRIER ACCOUNT.
+ *
+ * Eligibility is a DERIVATION (see `src/lib/shipping/carrierEligibility.ts`):
+ * declared capability × provider state × lane × freight term. Declaring the
+ * capability HERE, once, is what stops eligibility collapsing back into a
+ * hardcoded if/else inside a component.
+ *
+ * The values are NOT invented: they restate the canonical business model and the
+ * existing account labels in this file — international → DHL (parcel/general),
+ * UK domestic → Palletline (palletised freight). Nothing else is claimed, and a
+ * consignment whose declared service is not covered is refused rather than
+ * silently booked on an account that does not declare it.
+ */
+export const MERCENTA_CARRIER_LANE_CAPABILITY: Record<
+  CarrierId,
+  { lanes: readonly ShippingLane[]; services: readonly ('parcel' | 'palletised')[]; label: string }
+> = {
+  dhl: {
+    lanes: ['international'],
+    services: ['parcel'],
+    label: 'International parcel / general freight (Mercenta DHL UK account)',
+  },
+  palletline: {
+    lanes: ['uk_domestic'],
+    services: ['palletised'],
+    label: 'UK domestic palletised freight (Mercenta Palletline account)',
+  },
+  fedex: {
+    lanes: [],
+    services: [],
+    label: 'Retired carrier — no Mercenta account, never eligible',
+  },
+  bak: {
+    lanes: [],
+    services: [],
+    label: 'Retired carrier — no Mercenta account, never eligible',
+  },
+};
+
 export type ShippingCommercialTerms = typeof SHIPPING_COMMERCIAL_TERMS;

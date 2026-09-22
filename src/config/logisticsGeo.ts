@@ -400,7 +400,7 @@ export const FREIGHT_SEMANTICS: Record<FreightTerm, FreightSemantics> = {
     windowFields: 'shipWindowStart → shipWindowEnd',
     channelArranged: true,
     detail:
-      'Because the channel arranges carriage, the partnered-carrier path is the only permitted carrier value on this PO. Selecting a Mercenta account carrier here is refused by validateCarrierForShipment.',
+      'Because the channel arranges carriage, the partnered-carrier value is the permitted carrier value on this PO. A Mercenta account is NOT selected for this leg; if it is used at all it is an attributed, audited admin override — and a provider that is not positively operational is refused even then.',
   },
   prepaid: {
     term: 'prepaid',

@@ -15,6 +15,7 @@
     "validate:commercial-readiness": "node scripts/validate-commercial-readiness.mjs",
     "validate:brain": "node scripts/validate-mercenta-brain.mjs",
     "validate:logistics-map": "node scripts/validate-logistics-map.mjs",
+    "validate:wave3-logistics": "node scripts/validate-wave3-logistics.mjs",
     "validate:logistics-hero": "node scripts/validate-logistics-hero.mjs",
     "build:hero-geo": "node scripts/build-logistics-hero-geo.mjs",
     "validate:product-routes": "node scripts/validate-product-routes.mjs",

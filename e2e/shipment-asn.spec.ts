@@ -82,11 +82,21 @@ test.describe('Shipment & ASN', () => {
     await expect(page.getByText(/Shortfall logged as deduction/i).first()).toBeVisible({ timeout: 7000 });
   });
 
-  test('3. Amazon freight (collect) -> Routing Request required', async ({ page }) => {
+  test('3. Amazon freight (collect) -> routing step required, and NO unsupported channel deadline', async ({ page }) => {
     await loginAs(page, 'Astonish', 1100);
     await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
     await page.waitForTimeout(1000);
-    await expect(page.getByText(/Routing Request required/i).first()).toBeVisible({ timeout: 5000 });
+    /**
+     * §WAVE 3 — REPOINTED. The indicator previously read "Routing Request
+     * required" and attributed a deadline to the retail channel ("10am PT"). That
+     * deadline is unsupported (`docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md`
+     * → AV-013), so the copy is now Mercenta-owned and the claim is asserted
+     * ABSENT. The behaviour under test — a Freight Collect PO requires the
+     * routing step — is unchanged.
+     */
+    await expect(page.getByText(/Routing step required \(Freight Collect\)/i).first()).toBeVisible({ timeout: 5000 });
+    const body = await page.locator('body').innerText();
+    expect(body).not.toMatch(/10am PT|10am Pacific|10 am Pacific/i);
   });
 
   test('4. Vendor freight (prepaid) -> fixed delivery window respected', async ({ page }) => {

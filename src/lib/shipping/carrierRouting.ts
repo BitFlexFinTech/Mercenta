@@ -20,6 +20,30 @@ import {
   SHIPPING_LANE_LABELS,
   UK_DOMESTIC_NATION_ALIASES,
 } from '@/config/shipping';
+import {
+  isCarrierSelectable,
+  type CarrierService,
+} from '@/lib/shipping/carrierEligibility';
+import { integrationMeta } from '@/integrations/registry';
+import type { IntegrationId, IntegrationMode, ProviderResolutionMode } from '@/integrations/types';
+
+/**
+ * §WAVE 3 — the canonical provider-mode defaults for the NON-React path.
+ *
+ * `validateCarrierForShipment` is called from the store/domain layer, where the
+ * React integration context is unavailable. These are the registry's declared
+ * default modes (DHL and Palletline both declare `simulation`), so the rule stays
+ * deterministic and a provider that is NOT operational is still refused. A UI
+ * that holds the live context passes its own `providerModes` instead.
+ */
+export function defaultCarrierProviderModes(): Partial<Record<IntegrationId, IntegrationMode>> {
+  const out: Partial<Record<IntegrationId, IntegrationMode>> = {};
+  for (const carrier of MERCENTA_CARRIER_ACCOUNTS) {
+    const id = carrier as IntegrationId;
+    out[id] = integrationMeta(id).defaultMode;
+  }
+  return out;
+}
 
 /** Normalise a nation/country string for comparison. */
 export function normaliseNation(nation?: string | null): string {
@@ -88,6 +112,27 @@ export interface CarrierValidation {
   expected?: CarrierId;
   /** True when the shipment rides Amazon's arranged carrier (freight collect). */
   amazonArranged?: boolean;
+  /** §WAVE 3 — the provider state this decision rests on. */
+  mode?: ProviderResolutionMode;
+  /** §WAVE 3 — true when the carrier is the other Mercenta account (admin override). */
+  overridden?: boolean;
+}
+
+export interface CarrierValidationInput {
+  carrier: string;
+  brandNation?: string | null;
+  originCountry?: string | null;
+  destinationCountry?: string | null;
+  freightTerm?: FreightTerm;
+  /** §WAVE 3 — an optional declared service requirement. */
+  service?: CarrierService;
+  /**
+   * §WAVE 3 — the AUTHORITATIVE provider modes when they are available (the
+   * React integration context). When omitted — the non-React domain/store path —
+   * the canonical registry defaults are used, so the rule stays deterministic
+   * and a disabled provider still cannot be used.
+   */
+  providerModes?: Partial<Record<IntegrationId, IntegrationMode>>;
 }
 
 /**
@@ -96,13 +141,14 @@ export interface CarrierValidation {
  * Refuses any carrier that is neither (a) the lane's canonical Mercenta account,
  * (b) the OTHER Mercenta account (a permitted admin override within Mercenta's
  * own accounts), nor (c) the partnered carrier on an Amazon-arranged PO.
+ *
+ * §WAVE 3 — the decision is now DERIVED (`deriveCarrierEligibility`) rather than
+ * restated: the lane, the declared capability of each Mercenta account and the
+ * AUTHORITATIVE provider state are all inputs. A provider that is not positively
+ * operational (disabled / error / degraded / configuring / available /
+ * unregistered / unknown) is refused, with its actual state named.
  */
-export function validateCarrierForShipment(input: {
-  carrier: string;
-  brandNation?: string | null;
-  originCountry?: string | null;
-  freightTerm?: FreightTerm;
-}): CarrierValidation {
+export function validateCarrierForShipment(input: CarrierValidationInput): CarrierValidation {
   const decision = selectCarrierForShipment(input);
 
   if (input.carrier === AMAZON_PARTNERED_CARRIER) {
@@ -119,7 +165,24 @@ export function validateCarrierForShipment(input: {
   }
 
   if (isCanonicalMercentaCarrier(input.carrier)) {
-    return { ok: true, expected: decision.carrier };
+    const selectable = isCarrierSelectable({
+      carrier: input.carrier,
+      brandNation: input.brandNation,
+      originCountry: input.originCountry,
+      destinationCountry: input.destinationCountry,
+      freightTerm: input.freightTerm,
+      service: input.service,
+      providerModes: input.providerModes ?? defaultCarrierProviderModes(),
+    });
+    if (selectable.ok) {
+      return {
+        ok: true,
+        expected: decision.carrier,
+        mode: selectable.mode,
+        overridden: selectable.overridden,
+      };
+    }
+    return { ok: false, expected: decision.carrier, error: selectable.error };
   }
 
   return {
