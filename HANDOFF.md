@@ -18,7 +18,7 @@
 - **THREE-WAY COMPLETION STATUS: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`.** Local ✅ · GitHub committed ✅ · **`https://demo.mercenta.co.uk` ❌ NOT DEPLOYED and ❌ NOT VERIFIED**. Per the canonical completion contract (`.clinerules/operating-model.md` §10, vocabulary §11) this work is **NOT COMPLETE**. The permanent rule: **for Mercenta application/product work, COMPLETE means the verified implementation is synchronized across local runtime, the verified GitHub committed state, and `https://demo.mercenta.co.uk`; if any one is not verified, the work is NOT COMPLETE.**
 - **Two defects found and FIXED inside this increment (reported, not hidden):** the PARTIAL_PO simulation shipped with the RETIRED carrier `fedex`, so it silently produced no shipment or deduction — it now derives the carrier from the lane rule; and the `collect` `detail` copy in `src/config/logisticsGeo.ts` contradicted the override contract asserted by `validate-logistics-map.mjs` — corrected.
 - **Registry:** `requirements-registry.json` → **451 entries** (3 `discovered-*` rows moved to `built_and_tested`, 3 new Wave 3 rows added; `_meta.status_counts` refreshed).
-- **Checkpoint commit:** recorded in the follow-up documentation commit for this session.
+- **Checkpoint commit:** **`03675dcc78639a157b4c5dccd54527304feccfcb`** (*wave3(logistics): complete the Hub — backorder fail-closed at the domain boundary, carrier eligibility derived, ETA domain capability, delivery performance, and the unsupported "10am Pacific" claim removed*), re-verified from the committed tree (tsc 0 errors · wave3-logistics 56/0 · logistics-map 60/0 · provider-safety PASS · logistics-hero 53 · browser suite 6/6 passed) with `git status --porcelain` **EMPTY**.
 
 ---
 

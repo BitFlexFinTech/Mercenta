@@ -50,7 +50,7 @@
 
 ### 7. CURRENT CHECKPOINT
 
-- **Branch:** `redesign/foundation`. **Start HEAD:** `455d679` with `git status --porcelain` **EMPTY**. **Checkpoint commit:** recorded in the follow-up documentation commit for this session (see `HANDOFF.md`); `git status --porcelain` **EMPTY**.
+- **Branch:** `redesign/foundation`. **Start HEAD:** `455d679` with `git status --porcelain` **EMPTY**. **Checkpoint commit:** **`03675dcc78639a157b4c5dccd54527304feccfcb`** (*wave3(logistics): complete the Hub — backorder fail-closed at the domain boundary, carrier eligibility derived, ETA domain capability, delivery performance, and the unsupported "10am Pacific" claim removed*), re-verified from the committed tree (tsc 0 errors · wave3-logistics 56/0 · logistics-map 60/0 · provider-safety PASS · logistics-hero 53 · browser suite 6/6). `git status --porcelain`: **EMPTY**.
 - **THREE-WAY STATUS for this checkpoint: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ (tsc app+root, eslint, build, validators, browser suites, committed state re-verified) · GitHub committed ✅ · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. Per `.clinerules/operating-model.md` §10 the Wave 3 completion increment is **NOT COMPLETE** until the demo leg is verified.
 
 ### 8. VERIFICATION STATUS (all executed in this session — real output)

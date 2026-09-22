@@ -29,6 +29,8 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 ## CURRENT STATE — WAVE 3 LOGISTICS HUB COMPLETION (2026-09-22, session 11)
 
 **Checkpoint:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`. Start HEAD `455d679`, tree EMPTY.
+**Checkpoint commit `03675dcc78639a157b4c5dccd54527304feccfcb`** (re-verified from the committed tree: tsc 0 errors ·
+wave3-logistics 56/0 · logistics-map 60/0 · provider-safety PASS · logistics-hero 53 · browser suite 6/6).
 Branch `redesign/foundation`. **No deployment was performed and the live demo was NOT verified.**
 
 **Closed in this session (all authorised by the project's own recorded Wave 3 roadmap):**
@@ -779,5 +781,6 @@ Stages 1–16 are all open. The single biggest blocker for Stage 1 is external: 
 **Evidence:** tsc app+root 0 errors · eslint 0 problems · build PASS · wave3-logistics 56/0 · logistics-map 60/0 · logistics-hero 53 · provider-safety PASS · wording PASS · typography 17 · workspace-shell 92/0 · canonical-propagation 25/0 · routing 101/0 · Playwright 37 + 23 + 19 passed · FULL suite 453 passed / 6 failed / 2 skipped (the 6 were load timeouts; **69/69 pass in isolation**).
 
 **Status:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE` — demo NOT deployed, NOT verified.
+**Checkpoint commit:** `03675dcc78639a157b4c5dccd54527304feccfcb`, re-verified from the committed tree.
 
 **Evidence:** `npm run typecheck` PASS, `npm run build` PASS, `scripts/verify-registry.mjs` 106 entries 100 verified, E2E: all test suites green (64 stable + 10 previously-failing = 74 PASS, 1 graceful skip).
