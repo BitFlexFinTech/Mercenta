@@ -2351,6 +2351,16 @@
       "superseded_by": null
     },
     {
+      "id": "uiux-wave4-brain-3d",
+      "description": "Wave 4 — the Mercenta Brain is a GENUINE 3D spatial experience, not a restyled 2D graph: real WebGL rendering (three.js via react-three-fiber), perspective camera with orbit navigation (drei OrbitControls), a spatial wheel of five cluster sectors, depth-stratified records, animated relationships with travelling signals, interactive entity selection with contextual detail, and reduced-motion behaviour. Built by reusing three@0.186.0 (MIT), @react-three/fiber@8.18.0 (MIT) and @react-three/drei@9.122.0 (MIT) — R3F v8 pinned for React 18.3 compatibility. Canonical Brain DATA is unchanged: buildGraph.ts untouched, zero network calls, tenant scoping unchanged.",
+      "source": "Full UI/UX redesign — Wave 4 (Brain: genuine 3D). Decision record: docs/UIUX_WAVE4_BRAIN_3D_2026-09-22.md",
+      "status": "built_and_tested",
+      "evidence": "src/components/shared/brain/{BrainCanvas,BrainCanvas3D,BrainScene}.tsx; src/lib/intelligence/brain/{layout3d,project}.ts; src/lib/hooks/useWebglPalette.ts; docs/UIUX_WAVE4_BRAIN_3D_2026-09-22.md; validate-mercenta-brain.mjs PASS (30 assertions, runtime executed, 0 network calls); e2e/mercenta-brain.spec.ts 10 passed; e2e/accessibility.spec.ts 16 passed; e2e/redesign-surfaces.spec.ts 11 passed; e2e/canonical-propagation + runtime-entry 10 passed; tsc exit 0; build exit 0",
+      "last_verified": "2026-09-22",
+      "superseded_by": null,
+      "_audit_note": "Replaces the flat 2D SVG BrainCanvas. Three real defects were found by browser measurement (overlapping hit boxes; unreachable off-frustum records; zero positioned targets before the first animation frame) and fixed at the root. The entity layer remains real DOM with the same brain-node-<id> testids, so keyboard/screen-reader access and the acceptance suite survive the move to WebGL."
+    },
+    {
       "id": "uiux-theme-architecture-five-themes",
       "description": "FIVE-theme architecture (canonical, Wave-0 repointed contract; supersedes the earlier six-theme contract): Minimal Light (default), Professional, Bold, Fun, Serious — one canonical semantic colour language, presentation-only. The legacy \"Current Mercenta\" theme is REMOVED, not selectable, not a fallback and not recreated. Canonical tokens in src/config/themes.ts; applied by ThemeContext; validated by scripts/validate-theme-foundation.mjs (which now asserts the retired theme's absence) and e2e/uiux-foundation.spec.ts.",
       "source": "UI/UX redesign phase — Wave 1 (A theme/token + C shell), repointed Wave 0 (2026-09-22)",

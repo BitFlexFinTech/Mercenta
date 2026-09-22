@@ -50,6 +50,17 @@ export interface PlacedNode {
   radius: number;
   cluster: BrainCluster;
   kind: BrainEntityKind;
+  /**
+   * §Phase WAVE-4 — the placement AUTHORITY is this module. The 3D Brain does
+   * not re-derive positions: it reads `ring` + `angleDeg` + `cluster` from here
+   * and projects them into a genuinely spatial scene (`layout3d.ts`). Exposing
+   * the ring/angle the 2D projection already computed keeps ONE placement
+   * decision, so the 2D and 3D expressions of the same graph can never disagree
+   * about where a record sits in its cluster.
+   */
+  ring: number;
+  /** Angle in degrees around the canvas centre (same value the 2D layout used). */
+  angleDeg: number;
 }
 
 export interface PlacedCluster {
@@ -112,6 +123,8 @@ export function layoutBrain(graph: BrainGraph): BrainLayout {
           radius: NODE_RADIUS[node.kind] ?? 5,
           cluster,
           kind: node.kind,
+          ring,
+          angleDeg,
         });
       });
     }

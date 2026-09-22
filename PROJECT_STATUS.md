@@ -1,6 +1,39 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 
+## 🧭 CURRENT PLATFORM POSITION — WAVE 4: THE BRAIN IS NOW A GENUINE 3D SPATIAL EXPERIENCE (2026-09-22, session 9)
+
+**Increment identity:** Wave 4 of the full UI/UX redesign. The Brain's flat 2D SVG graph is REPLACED by a real WebGL scene (perspective camera, orbit navigation, spatial cluster wheel, depth-stratified records, animated relationships, travelling signals). **The canonical Brain DATA was not touched** — `buildGraph.ts` is unchanged, the graph still owns no business state and still makes zero network calls.
+
+**Full record:** `docs/UIUX_WAVE4_BRAIN_3D_2026-09-22.md` (reuse table with licences, the non-reuse justification, the three measured defects and their real root causes, the accessibility model, verification, and the honest gaps).
+
+### 1. COMPLETED / VERIFIED
+
+- **Open-source reuse, actually integrated (not cited):** `three@0.186.0` (MIT), `@react-three/fiber@8.18.0` (MIT), `@react-three/drei@9.122.0` (MIT) — R3F v8 pinned deliberately because v9 requires React 19 and this project is React 18.3. `@types/three@0.186.0` declared explicitly. **Justified non-reuse:** no open-source 3D graph library was adopted because each would have imposed a second node/edge schema over canonical contracts, replaced deterministic placement with a stochastic force simulation, and provided no accessible DOM entity layer.
+- **Founder-provided skills actually used:** `emilkowalski/skills` (`pick-ui-library`, `emil-design-eng`) and `jakubkrehel/skills` (`better-ui`, `better-accessibility`) — cloned (MIT, gitignored reference material) and their concrete rules applied: instant (not smooth) mount scroll, static cue alongside every motion, `scale(0)` never used as an entrance, reduced-motion suppression, hit areas.
+- **One new canonical module:** `src/lib/intelligence/brain/project.ts` — THE projection (camera definition + world→screen + DOM application), deliberately three.js-free so it can run before the first paint AND every frame. `layout3d.ts` adds the spatial projection of the existing `layout.ts` placement authority (which now also exposes `ring`/`angleDeg`), so placement still has exactly one owner.
+- **Three real defects found by browser measurement and fixed at the root** (not worked around): overlapping fixed-size hit boxes (measured node spacing ≈ 11 px vs 18–56 px boxes); records outside the frustum being unreachable because the layer is clipped by the canvas box; and `visibleNodes: 0` at the instant the surface became interactive (positions only arrived on the first animation frame, worsened by an initial `React.lazy` split, which was then removed because the async gap WAS the defect).
+- **Accessibility preserved and extended:** every entity is still a real, named DOM element with the same `brain-node-<id>` testid; the wrapper is `role="group"` with a counts + keyboard text alternative and now supports arrow-key record navigation, Enter/Space select and Escape clear.
+
+### 2. VERIFICATION STATUS (all run in this session, real output)
+
+- `npx tsc --noEmit -p tsconfig.app.json` → **exit 0**
+- `npm run build` → **exit 0** (6.71 s)
+- `node scripts/validate-mercenta-brain.mjs` → **PASS** (30 assertions, runtime executed, **0 network calls**)
+- `npx playwright test e2e/mercenta-brain.spec.ts` → **10 passed**
+- `npx playwright test e2e/canonical-propagation.spec.ts e2e/runtime-entry.spec.ts` → **10 passed**
+- `npx playwright test e2e/accessibility.spec.ts` → **16 passed**
+- `npx playwright test e2e/redesign-surfaces.spec.ts` → **11 passed** (incl. "Mercenta Brain holds at every target width")
+- Theme/redesign/shell validators → **41 / 344 / 92 PASS, 0 FAIL**
+- **No test was weakened, skipped or marked fixme.**
+
+### 3. NOT YET DONE (do not claim otherwise)
+
+- **WAVE 3 — LOGISTICS HUB IS STILL THE OLD 2D SVG MAP** (`src/components/shared/logistics/LogisticsMapCanvas.tsx`) and still fails its acceptance test. It is the next work. `maplibre-gl@5.24.0` (BSD-3-Clause) is installed and licence-checked for it but **is not yet integrated**. No moving planes/ships/road vehicles exist yet.
+- **Waves 5 (Super Admin / Control Centre), 6 (product-wide completion) and 7 (final verification + deployment) remain open.**
+- **Deployment has NOT been performed** and must not be until the Founder directs it (`scripts/deploy-demo.sh`, demo host only).
+- **Bundle accounting gap, recorded honestly:** three/R3F/drei land in the shared `vendor-other` chunk (1,039 kB raw / 286 kB gzip) whose size is essentially unchanged from the pre-Brain build — not explained, and not asserted away. Total bundle size did not regress.
+
 ## 🧭 CURRENT PLATFORM POSITION — WAVE 0: LEGACY THEME RETIRED + DESIGN-FOUNDATION RE-VERIFIED (2026-09-22, session 9)
 
 **Increment identity:** Wave 0 of the full UI/UX redesign. **The retired legacy "Current Mercenta" theme is REMOVED IN FULL and its removal is GUARDED by validators that fail if it returns.** The five-theme contract is now the only canonical theme contract. No business logic, data, permission, route, tenant-isolation, integration or simulation behaviour was touched — this is presentation-architecture only.

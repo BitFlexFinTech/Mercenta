@@ -338,7 +338,7 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
       >
         <WorkspaceSection
           title="Operating graph"
-          description="Radial clusters are the information architecture. Drag to pan, scroll or use the controls to zoom, click an entity to inspect it."
+          description="Radial clusters are the information architecture, drawn in space. Drag to orbit the model, use the controls to zoom, and click an entity to inspect it."
           domain="intelligence"
         >
           <BrainCanvas
