@@ -4,7 +4,7 @@
  * Locks the redesigned UI/UX architecture so it cannot silently drift back into
  * "an old dashboard with a new palette":
  *
- *  1. SATURATED PALETTE — all six themes declare the eight canonical palette
+ *  1. SATURATED PALETTE — all five themes declare the eight canonical palette
  *     hues + an on-palette text colour, and the palette is SATURATED (not a
  *     washed-out pastel set).
  *  2. ONE MOTION + DENSITY LANGUAGE — motion/density tokens are declared
@@ -58,7 +58,9 @@ function exists(p) {
 /* ── 1. Saturated palette in every theme ────────────────────────────────── */
 
 const THEMES_SRC = read('src/config/themes.ts');
-const THEME_IDS = ['minimal-light', 'professional', 'bold', 'fun', 'serious', 'current'];
+/* §Phase WAVE-0 — REPOINTED (was the six-theme list including the retired
+   legacy `current` theme). Five themes are canonical now. */
+const THEME_IDS = ['minimal-light', 'professional', 'bold', 'fun', 'serious'];
 const PALETTE = ['indigo', 'cyan', 'green', 'amber', 'orange', 'pink', 'violet', 'red'];
 
 /** Extract each theme block the same way the foundation validator does. */
@@ -70,7 +72,7 @@ const themeBlocks = THEME_IDS.map((id) => {
   return { id, body: THEMES_SRC.slice(start, end) };
 });
 
-check('six theme blocks parsed', themeBlocks.length === 6, `got ${themeBlocks.length}`);
+check('five theme blocks parsed', themeBlocks.length === 5, `got ${themeBlocks.length}`);
 
 for (const { id, body } of themeBlocks) {
   for (const hue of PALETTE) {
@@ -105,10 +107,13 @@ for (const { id, body } of themeBlocks) {
     );
   }
 }
+/* §Phase WAVE-0 — REPOINTED: the sample count is derived from the canonical
+   THEME_IDS list rather than a hardcoded theme count, so removing the retired
+   legacy `current` theme (6 → 5) cannot silently re-break this gate. */
 check(
   'palette samples found for every theme+hue',
-  paletteSamples === 6 * PALETTE.length,
-  `${paletteSamples}`
+  paletteSamples === THEME_IDS.length * PALETTE.length,
+  `${paletteSamples} expected ${THEME_IDS.length * PALETTE.length}`
 );
 
 /* ── 2. One motion + density language ───────────────────────────────────── */
@@ -134,7 +139,7 @@ for (const v of MOTION_VARS) {
     return m ? m[1] : null;
   });
   check(
-    `motion/density token ${v} is identical across all six themes`,
+    `motion/density token ${v} is identical across all five themes`,
     values.every((x) => x !== null && x === values[0]),
     JSON.stringify(values)
   );

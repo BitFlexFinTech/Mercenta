@@ -13,7 +13,7 @@
  *   - the density + grouping controls genuinely change the rendered queue
  *   - ⌘K opens the real command palette, filters it, and closes on Escape
  *   - the palette inherits RBAC from the shell's own navigation
- *   - all six themes express the same palette with distinct saturated values
+ *   - all five themes express the same palette with distinct saturated values
  *   - responsive: no horizontal overflow at 1440 / 1280 / 1024 / 390
  *   - homepage: redesigned, TAM/SAM gone, tracker animation preserved
  *
@@ -163,7 +163,7 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
     await expect(page.locator('#app-sidebar')).toHaveAttribute('data-nav-compact', 'false');
   });
 
-  test('8. all six themes expose a distinct, saturated palette + one motion language', async ({ page }) => {
+  test('8. all five themes expose a distinct, saturated palette + one motion language', async ({ page }) => {
     await loginAs(page, 'Super Admin — Tadii', 1400);
     await page.locator('[data-testid="theme-selector"]').click();
     await page.waitForTimeout(400);
@@ -173,7 +173,7 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
       )
     );
     expect(options).toEqual([
-      'minimal-light', 'professional', 'bold', 'fun', 'serious', 'current',
+      'minimal-light', 'professional', 'bold', 'fun', 'serious',
     ]);
 
     const seen: Record<string, string> = {};
@@ -195,8 +195,8 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
       seen[t] = HUES.map((h) => vals[h]).join('|') + vals.onPalette;
       await page.screenshot({ path: `${SHOTS}/theme-${t}.png` });
     }
-    // The six expressions are genuinely different (not a background swap only)
-    expect(new Set(Object.values(seen)).size).toBe(6);
+    // The five expressions are genuinely different (not a background swap only)
+    expect(new Set(Object.values(seen)).size).toBe(5);
 
     await page.locator('[data-theme-option="minimal-light"]').click();
     await page.waitForTimeout(350);

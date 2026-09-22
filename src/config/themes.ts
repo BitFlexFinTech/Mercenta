@@ -1,7 +1,7 @@
 /**
  * §UI/UX Wave 1 — CANONICAL THEME & DESIGN-TOKEN ARCHITECTURE.
  *
- * Single source of truth for the six Mercenta visual themes and every
+ * Single source of truth for the FIVE Mercenta visual themes and every
  * design token they express. Nothing else may define a theme or a theme
  * colour: components consume `useTheme()` / the CSS variables emitted by
  * ThemeContext, and validators read THIS file. Hard-coded per-page colours
@@ -16,7 +16,7 @@
  * plus expressive feature/context colours (violet, cyan, orange, pink,
  * indigo, emerald, slate). The same semantic colour keeps the same meaning
  * in every theme; only its EXPRESSION changes (indicator → tint → surface
- * → expressive → edge → current-preserved).
+ * → expressive → edge).
  *
  * §UI/UX Wave 2 — SATURATED FEATURE PALETTE. Colour must communicate state,
  * workflow, category, urgency, action, navigation and data meaning, so the
@@ -36,9 +36,19 @@
  * dominant interactive colour of the product.
  *
  * §UI/UX Wave 2 — MOTION + DENSITY. `--mr-motion-*`, `--mr-ease-*` and
- * `--mr-density-*` are declared identically in all six themes (the foundation
+ * `--mr-density-*` are declared identically in all five themes (the foundation
  * validator enforces it) so one coherent motion language and one controlled
  * density scale are guaranteed across every theme expression.
+ *
+ * §Phase WAVE-0 — REPOINTED CONTRACT (supersedes the Wave 1 six-theme contract).
+ * The selectable theme set is now EXACTLY FIVE: Minimal Light (default) ·
+ * Professional · Bold · Fun · Serious. The retired legacy "Current Mercenta"
+ * theme (id `current`, brass-on-ink identity) was REMOVED IN FULL: it is not
+ * selectable, not a sixth theme, not a fallback, not recreated, and it must
+ * never re-enter `THEME_ORDER`. `scripts/validate-theme-foundation.mjs`
+ * asserts the `current` theme is absent, and a persisted
+ * `mercenta.theme = "current"` from an earlier session is rejected by
+ * `isThemeId()` so a returning visitor falls back to DEFAULT_THEME.
  */
 
 export type ThemeId =
@@ -46,8 +56,7 @@ export type ThemeId =
   | 'professional'
   | 'bold'
   | 'fun'
-  | 'serious'
-  | 'current';
+  | 'serious';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -57,8 +66,7 @@ export type SeverityExpression =
   | 'tint' // subtle surface tint (professional)
   | 'surface' // strong flat semantic surface (bold)
   | 'expressive' // colourful, still professional (fun)
-  | 'edge' // restrained edge + icon (serious)
-  | 'current'; // preserved Mercenta treatment
+  | 'edge'; // restrained edge + icon (serious)
 
 export interface ThemeMeta {
   id: ThemeId;
@@ -90,7 +98,6 @@ export const THEME_ORDER: readonly ThemeId[] = [
   'bold',
   'fun',
   'serious',
-  'current',
 ];
 
 /** §UI/UX Wave 1 — the default first-load experience is MINIMAL LIGHT. */
@@ -181,7 +188,7 @@ export const THEMES: Record<ThemeId, ThemeMeta> = {
       '--mr-palette-red': '#B91C1C',
       '--mr-on-palette': '#FFFFFF',
       /* §UI/UX Wave 2 — motion + density language. Theme-invariant by contract
-         (the foundation validator enforces identical declaration in all six). */
+         (the foundation validator enforces identical declaration in all five). */
       '--mr-motion-fast': '140ms',
       '--mr-motion-base': '240ms',
       '--mr-motion-slow': '420ms',
@@ -542,93 +549,6 @@ bold: {
       palette: ['#4C8FD9', '#B89B5E', '#2BA164', '#7A6CB8', '#4CB9D9', '#C96A8C'],
       grid: 'rgba(234,236,239,0.06)',
       axis: '#6A7078',
-      strokeWidth: 1.5,
-      ring: 12,
-    },
-  },
-
-  current: {
-    id: 'current',
-    label: 'Current Mercenta',
-    description:
-      'The preserved Mercenta visual identity — near-black ink foundation, brass/gold accent, parchment + steel neutrals — re-expressed through the new UI/UX system.',
-    mode: 'dark',
-    severity: {
-      critical: 'current',
-      warning: 'current',
-      info: 'current',
-      success: 'current',
-    },
-    vars: {
-      '--mr-bg': '#000000',
-      '--mr-bg-deep': '#000000',
-      '--mr-surface': '#0A0A0B',
-      '--mr-surface-raised': '#121214',
-      '--mr-surface-overlay': '#161618',
-      '--mr-surface-hover': '#1C1C1E',
-      '--mr-surface-tint': '#222225',
-      '--mr-hairline': 'rgba(255,255,255,0.06)',
-      '--mr-hairline-strong': 'rgba(255,255,255,0.10)',
-      '--mr-text-strong': '#FFFFFF',
-      '--mr-text': '#E5E5E5',
-      '--mr-text-active': '#D4D4D8',
-      '--mr-text-200': '#E4E4E7',
-      '--mr-on-accent': '#0C1219',
-      '--mr-text-muted': '#71717A',
-      '--mr-text-faint': '#52525B',
-      '--mr-text-soft': '#F1ECE1',
-      '--mr-accent': '#C9A15A',
-      '--mr-accent-300': '#E2C98F',
-      '--mr-accent-400': '#D6B574',
-      '--mr-accent-600': '#A98443',
-      '--mr-accent-700': '#8A6C36',
-      '--mr-state-critical': '#E5533F',
-      '--mr-state-warning': '#F2A93B',
-      '--mr-state-info': '#6AA6FF',
-      '--mr-state-success': '#2FBF71',
-      '--mr-state-muted': '#8A93A0',
-      '--mr-feature-intel': '#6AA6FF',
-      '--mr-feature-orders': '#5B6BF5',
-      '--mr-feature-finance': '#2FBF71',
-      '--mr-feature-social': '#A855F7',
-      '--mr-feature-compliance': '#F2A93B',
-      '--mr-feature-ops': '#8A93A0',
-      '--mr-exp-cyan': '#22C7F0',
-      '--mr-exp-coral': '#F472A6',
-      '--mr-focus': 'rgba(201,161,90,0.7)',
-      '--mr-shadow-subtle': '0 1px 2px rgba(0,0,0,0.5)',
-      '--mr-shadow-raised': '0 4px 16px rgba(0,0,0,0.45)',
-      '--mr-shadow-overlay': '0 12px 40px rgba(0,0,0,0.6)',
-      '--mr-scrollbar': '#2A2A2E',
-      '--mr-overlay-tint': 'rgba(0,0,0,0.6)',
-      '--mr-tracker-route': '#5C6066',
-      '--mr-tracker-dot': '#C9A15A',
-      '--mr-tracker-live': '#2FBF71',
-      /* §UI/UX Wave 2 — saturated Mercenta feature palette (brass remains the
-         preserved identity accent, never the dominant interactive colour). */
-      '--mr-palette-indigo': '#5B6BF5',
-      '--mr-palette-cyan': '#22C7F0',
-      '--mr-palette-green': '#2FBF71',
-      '--mr-palette-amber': '#F2A93B',
-      '--mr-palette-orange': '#F97316',
-      '--mr-palette-pink': '#F472A6',
-      '--mr-palette-violet': '#A855F7',
-      '--mr-palette-red': '#EF4444',
-      '--mr-on-palette': '#0A0A0B',
-      /* §UI/UX Wave 2 — motion + density language (theme-invariant contract). */
-      '--mr-motion-fast': '140ms',
-      '--mr-motion-base': '240ms',
-      '--mr-motion-slow': '420ms',
-      '--mr-ease-standard': 'cubic-bezier(0.2, 0, 0, 1)',
-      '--mr-ease-emphasized': 'cubic-bezier(0.2, 0.9, 0.1, 1)',
-      '--mr-density-row': '40px',
-      '--mr-density-gap': '10px',
-      '--mr-density-pad': '14px',
-    },
-    chart: {
-      palette: ['#C9A15A', '#6AA6FF', '#2FBF71', '#F2A93B', '#A855F7', '#E5533F'],
-      grid: 'rgba(255,255,255,0.05)',
-      axis: '#71717A',
       strokeWidth: 1.5,
       ring: 12,
     },

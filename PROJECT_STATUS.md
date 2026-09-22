@@ -1,6 +1,42 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 
+## 🧭 CURRENT PLATFORM POSITION — WAVE 0: LEGACY THEME RETIRED + DESIGN-FOUNDATION RE-VERIFIED (2026-09-22, session 9)
+
+**Increment identity:** Wave 0 of the full UI/UX redesign. **The retired legacy "Current Mercenta" theme is REMOVED IN FULL and its removal is GUARDED by validators that fail if it returns.** The five-theme contract is now the only canonical theme contract. No business logic, data, permission, route, tenant-isolation, integration or simulation behaviour was touched — this is presentation-architecture only.
+
+**Start:** branch `redesign/foundation`, HEAD `eba8065`, `git status --porcelain` EMPTY, 724 tracked files — the documented canonical starting point, verified before any edit.
+
+### 1. COMPLETED / VERIFIED
+
+- **Legacy `current` theme REMOVED, not merely unasserted.** `src/config/themes.ts` now declares `ThemeId` with exactly five members (no `'current'`), `THEME_ORDER` with exactly five entries, no `current:` theme block, and no `'current'` member in `SeverityExpression`. Evidence: `grep -c "'current'" src/config/themes.ts` → **0**. A persisted `mercenta.theme = "current"` is rejected by `isThemeId()` and falls back to `DEFAULT_THEME` (`minimal-light`) — verified by reading the persistence path, not assumed.
+- **Removal is GUARDED (a validator that merely stopped checking would not prove removal).** `scripts/validate-theme-foundation.mjs` gained a positive absence assertion — *"RETIRED legacy theme \"current\" is absent (no id, no order entry, no block)"* — and now parses exactly five theme blocks. `scripts/validate-uiux-redesign.mjs` derives its palette-sample expectation from the canonical `THEME_IDS` list instead of a hardcoded `6`, so the retired theme cannot silently re-break it.
+- **All five themes remain genuinely distinct** (Bold/Serious still near-black; validator asserts avg<40 and rejects navy), and Minimal Light remains the default.
+- **`§24 theme-alpha-shims` INVESTIGATED and answered with evidence, not a guess.** `src/theme-alpha-shims.css` does **not** exist solely for the retired theme: it is the Tailwind 3.4 alpha-modifier compatibility layer for the SHARED token palette (`color-mix(in srgb, var(--mr-*), <alpha>, transparent)`), consumed by ~215 call sites across the NEW design system and required by the foundation validator's seam check. Deleting it would remove working alpha styling. **Retained**, with the finding and the reason recorded in `requirements-registry.json` (`uiux-wave3-theme-alpha-shims-removal`).
+- **Registry (Master Matrix) reconciled, not appended to silently.** `uiux-theme-architecture-six-themes` → `uiux-theme-architecture-five-themes`; `uiux-theme-current-mercenta-preserved` → WITHDRAWN with `superseded_by` set; `uiux-dark-foundation-near-black` and `uiux-theme-selector` repointed (six → five); and a NEW row `uiux-wave0-legacy-theme-removed` records the removal with its evidence.
+
+### 2. FOUNDER-PROVIDED RESOURCES — ACTUALLY INSTALLED AND USED
+
+- Both mandatory repositories were **cloned and read in-session** into `.skills/` (gitignored as reference material): `jakubkrehel/skills` (better-interface/ui/typography/colors/layout/accessibility) and `emilkowalski/skills` (emil-design-eng, apple-design, animate, pick-ui-library). Both MIT.
+- The concrete rules being applied to implementation (not cited — used): `better-ui` — **suppress transitions on theme switch** (inject `*,*::before,*::after{transition:none!important}`, force reflow, restore next frame), **scale(0.96) on press**, **transition only what changes**, concentric radius, one stroke weight per icon set; `emil-design-eng` + `apple-design` — **ease-out for enters, never animate from `scale(0)`**, popovers origin-aware, static cue alongside every motion; `pick-ui-library` — 3D globes → **Cobe**, animation → **motion**, charts → **recharts** (already present).
+- Open-source runtime dependencies **installed for the 3D Brain and the living Logistics Hub** (all licence-checked): `three@0.186.0` (MIT), `@react-three/fiber@8.18.0` (MIT), `@react-three/drei@9.122.0` (MIT), `maplibre-gl@5.24.0` (BSD-3-Clause). Version pins are deliberate: R3F v9 requires React 19; this project is React 18.3, so R3F v8 is the compatible line.
+
+### 3. VERIFICATION STATUS (all run in this session, real output)
+
+- `node scripts/validate-theme-foundation.mjs` → **41 PASS / 0 FAIL**
+- `node scripts/validate-uiux-redesign.mjs` → **344 PASS / 0 FAIL**
+- `node scripts/validate-workspace-shell.mjs` → **92 PASS / 0 FAIL**
+- `npx tsc --noEmit -p tsconfig.app.json` → **exit 0**
+- `npm run build` → **exit 0**, built in 4.66s
+- `npx playwright test e2e/uiux-foundation.spec.ts` → **9 passed** (incl. "all five themes render"; Minimal Light default; KPI equality across theme switches; permission invariance)
+- `npx playwright test e2e/uiux-redesign.spec.ts` → **13 passed** (incl. "all five themes expose a distinct, saturated palette + one motion language"; 4 responsive widths; homepage tracker preserved)
+- `requirements-registry.json` → valid JSON (443 entries)
+
+### 4. NOT YET DONE (do not claim otherwise)
+
+- **Wave 0 residual polish** (skill-derived shell/interaction polish: theme-switch transition suppression, press feedback, hit areas) — items above are the rules; applying them across the shell is Wave 0/1 work still open.
+- **Waves 1–7 remain open**: the 3D Brain (Wave 4), the living Logistics Hub (Wave 3), Super Admin/Control Centre (Wave 5), product-wide completion (Wave 6) and final verification + deployment (Wave 7). The current Brain is still a 2D SVG graph (`src/components/shared/brain/BrainCanvas.tsx`) and the current Logistics map is still a 2D SVG canvas (`src/components/shared/logistics/LogisticsMapCanvas.tsx`) — **both fail the redesign's acceptance tests** and are the next work.
+- **Deployment has NOT been performed** and must not be, until the Founder directs it (deploy gate unchanged; `scripts/deploy-demo.sh` only, demo host only).
 ## 🧭 CURRENT PLATFORM POSITION — CLEAN-SLATE RECONCILIATION: ONE CLEAN CANONICAL REPOSITORY (2026-09-21, session 8)
 
 **Increment identity:** repository reconciliation. The 289-path dirty tree is RECONCILED into Git, obsolete material is REMOVED, six stale-validator failures are FIXED, the payout-rail prose contradiction is ELIMINATED, generated artefacts are UNTRACKED, the rules and documents are CORRECTED, and `git status --porcelain` is **EMPTY**.

@@ -189,7 +189,7 @@ export function Header({
         {/* §Stage-19.3 §UI/UX — severity-aware real notification center */}
         <NotificationCenter onNavigate={onNavNotification} />
 
-        {/* §UI/UX — presentation-only theme switcher (six themes). */}
+        {/* §UI/UX — presentation-only theme switcher (five themes). */}
         <ThemeSelector compact />
 
         <div className="relative" ref={profileMenuRef}>

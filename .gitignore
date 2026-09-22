@@ -48,3 +48,11 @@ playwright-report/
 test-results/
 e2e-report/
 Review Zip/*.zip
+
+# ── §Phase WAVE-0/4 — FOUNDER-PROVIDED AGENT SKILLS (MIT) ─────────────────────
+# Cloned reference material for the redesign, not product source:
+#   jakubkrehel/skills  → better-interface/ui/typography/colors/layout/accessibility
+#   emilkowalski/skills → emil-design-eng, apple-design, animate, pick-ui-library
+# Sourced from the Founder-provided repositories named in the master prompt and
+# read/applied during implementation. Reference material, never bundled.
+.skills/

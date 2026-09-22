@@ -177,7 +177,7 @@ textarea:focus-visible {
    One coherent, purposeful motion system. Motion communicates CHANGE,
    PROGRESSION, ARRIVAL, STATUS, HIERARCHY and INTERACTION — never
    decoration. Durations/easing come from the canonical theme tokens
-   (src/config/themes.ts) so all six themes share one motion language.
+   (src/config/themes.ts) so all five themes share one motion language.
    Every animation below is disabled for `prefers-reduced-motion` users
    (global rule further down plus the explicit block after these).
    ═══════════════════════════════════════════════════════════════════════ */

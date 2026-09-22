@@ -1,7 +1,7 @@
 /**
  * §UI/UX Wave 1 — THEME FOUNDATION VALIDATOR.
  *
- * Verifies the canonical theme architecture contract so the six themes can
+ * Verifies the canonical theme architecture contract so the five themes can
  * never silently drift: theme set, default, CSS-variable completeness,
  * semantic colour consistency, near-black (non-navy) dark foundations,
  * delicate chart system, presentation-only guarantee (no data/business
@@ -31,18 +31,28 @@ function check(name, ok, detail = '') {
 }
 
 // 1. Theme set + order + default
-const required = ['minimal-light', 'professional', 'bold', 'fun', 'serious', 'current'];
-for (const id of required) {
-  check(`theme declared: ${id}`, new RegExp(`^\\s*'?${id}'?:\\s*\\{|'${id}':\\s*\\{`, 'm').test(THEMES_SRC));
-}
+/**
+ * §Phase WAVE-0 — REPOINTED CONTRACT (supersedes the Wave 1 "six themes"
+ * contract this validator previously asserted). The canonical theme set is
+ * EXACTLY FIVE: Minimal Light (default) · Professional · Bold · Fun · Serious.
+ * The retired legacy "Current Mercenta" (`current`) theme was REMOVED, and the
+ * guard below keeps it out — a validator that merely stopped checking for six
+ * would not prove removal.
+ */
+const required = ['minimal-light', 'professional', 'bold', 'fun', 'serious'];
+check(
+  'RETIRED legacy theme "current" is absent (no id, no order entry, no block)',
+  !/id:\s*'current'/.test(THEMES_SRC) &&
+    !/'current'/.test((THEMES_SRC.match(/THEME_ORDER:\s*readonly\s*ThemeId\[\]\s*=\s*\[([\s\S]*?)\]/) ?? ['', ''])[1])
+);
 check('default theme is minimal-light', /DEFAULT_THEME:\s*ThemeId\s*=\s*'minimal-light'/.test(THEMES_SRC));
-check('six-theme order array', THEME_ORDER_EXPECTED(THEMES_SRC));
+check('five-theme order array', THEME_ORDER_EXPECTED(THEMES_SRC));
 
 function THEME_ORDER_EXPECTED(src) {
   const m = src.match(/THEME_ORDER:\s*readonly\s*ThemeId\[\]\s*=\s*\[([\s\S]*?)\]/);
   if (!m) return false;
   const ids = [...m[1].matchAll(/'([a-z-]+)'/g)].map((x) => x[1]);
-  return ids.length === 6 && ids.every((x) => required.includes(x));
+  return ids.length === 5 && ids.every((x) => required.includes(x));
 }
 
 // 2. Every theme defines an identical CSS-variable NAME set.
@@ -55,7 +65,7 @@ for (const id of required) {
   const end = nextId === -1 ? THEMES_SRC.indexOf('};', start) : start + 12 + nextId;
   themeBlocks.push({ id, body: THEMES_SRC.slice(start, end) });
 }
-check('six theme objects parsed', themeBlocks.length === 6, `got ${themeBlocks.length}`);
+check('five theme objects parsed', themeBlocks.length === 5, `got ${themeBlocks.length}`);
 for (const { id, body } of themeBlocks) {
   const names = [...body.matchAll(/'--mr-[a-z0-9-]+'/g)].map((m) => m[0]).filter((v, i, a) => a.indexOf(v) === i);
   const missing = varNames.filter((n) => !names.includes(n));
@@ -88,8 +98,8 @@ for (const { id, body } of themeBlocks) {
 // 5. Chart system: delicate strokes only (stroke ∈ {1, 1.5}, ring ∈ {10,11,12}).
 const strokes = [...THEMES_SRC.matchAll(/strokeWidth:\s*(1|1\.5),/g)].map((m) => Number(m[1]));
 const rings = [...THEMES_SRC.matchAll(/ring:\s*(\d+),/g)].map((m) => Number(m[1]));
-check('chart stroke values are delicate (≤1.5)', strokes.length === 6 && strokes.every((s) => s === 1 || s === 1.5), JSON.stringify(strokes));
-check('doughnut ring values are thin (≤12)', rings.length === 6 && rings.every((r) => r >= 8 && r <= 12), JSON.stringify(rings));
+check('chart stroke values are delicate (≤1.5)', strokes.length === 5 && strokes.every((s) => s === 1 || s === 1.5), JSON.stringify(strokes));
+check('doughnut ring values are thin (≤12)', rings.length === 5 && rings.every((r) => r >= 8 && r <= 12), JSON.stringify(rings));
 
 // 6. Presentation-only guarantee: theme config must not import business libs.
 check('themes.ts imports only pure types', !/@\/data|@\/lib|@\/services|@\/integrations/.test(THEMES_SRC));

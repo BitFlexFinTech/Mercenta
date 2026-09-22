@@ -2351,14 +2351,23 @@
       "superseded_by": null
     },
     {
-      "id": "uiux-theme-architecture-six-themes",
-      "description": "SIX-theme architecture (UI/UX Wave 1 foundation): Minimal Light, Professional, Bold, Fun, Serious, Current Mercenta — one canonical semantic colour language, presentation-only. Canonical tokens in src/config/themes.ts; applied by ThemeContext; validated by scripts/validate-theme-foundation.mjs and e2e/uiux-foundation.spec.ts.",
-      "source": "UI/UX redesign phase — Wave 1 (A theme/token + C shell)",
+      "id": "uiux-theme-architecture-five-themes",
+      "description": "FIVE-theme architecture (canonical, Wave-0 repointed contract; supersedes the earlier six-theme contract): Minimal Light (default), Professional, Bold, Fun, Serious — one canonical semantic colour language, presentation-only. The legacy \"Current Mercenta\" theme is REMOVED, not selectable, not a fallback and not recreated. Canonical tokens in src/config/themes.ts; applied by ThemeContext; validated by scripts/validate-theme-foundation.mjs (which now asserts the retired theme's absence) and e2e/uiux-foundation.spec.ts.",
+      "source": "UI/UX redesign phase — Wave 1 (A theme/token + C shell), repointed Wave 0 (2026-09-22)",
       "status": "built_and_tested",
-      "evidence": "src/config/themes.ts; src/context/ThemeContext.tsx; scripts/validate-theme-foundation.mjs (50 PASS); e2e/uiux-foundation.spec.ts (9 PASS); browser check 6/6 themes at 1440x900",
-      "last_verified": "2026-09-18",
+      "evidence": "src/config/themes.ts (ThemeId union, THEME_ORDER, 5 theme blocks); src/context/ThemeContext.tsx; scripts/validate-theme-foundation.mjs; e2e/uiux-foundation.spec.ts",
+      "last_verified": "2026-09-22",
       "superseded_by": null,
-      "_audit_note": "Wave 1 foundation; Wave 2 applies the system page-by-page"
+      "_audit_note": "Wave 1 foundation (six themes incl. 'current'); Wave 0 (2026-09-22) removed the legacy 'current' theme per the full-redesign directive, repointing the validator and specs to the five-theme contract."
+    },
+    {
+      "id": "uiux-wave0-legacy-theme-removed",
+      "description": "The retired legacy \"Current Mercenta\" theme (id `current`, brass-on-ink) is REMOVED IN FULL: no ThemeId member, no THEME_ORDER entry, no theme block, no SeverityExpression member. Removal is GUARDED, not merely unasserted — scripts/validate-theme-foundation.mjs and validate-uiux-redesign.mjs assert the absence and parse exactly five theme blocks, and e2e/uiux-foundation.spec.ts + uiux-redesign.spec.ts assert the selector offers exactly the five canonical themes. A persisted `mercenta.theme = \"current\"` is rejected by isThemeId() and falls back to DEFAULT_THEME (minimal-light).",
+      "source": "Full UI/UX redesign — Wave 0 (legacy theme removal)",
+      "status": "built_and_tested",
+      "evidence": "src/config/themes.ts (no 'current'); scripts/validate-theme-foundation.mjs; scripts/validate-uiux-redesign.mjs; e2e/uiux-foundation.spec.ts; e2e/uiux-redesign.spec.ts",
+      "last_verified": "2026-09-22",
+      "superseded_by": null
     },
     {
       "id": "uiux-theme-minimal-light-default",
@@ -2371,12 +2380,12 @@
     },
     {
       "id": "uiux-theme-current-mercenta-preserved",
-      "description": "Current Mercenta visual identity preserved as a selectable theme through the NEW UI/UX system (near-black ink #000000 foundation, brass/gold accent, parchment+steel neutrals; redesigned shell/components/notifications/charts — no legacy component system).",
-      "source": "UI/UX redesign phase — Wave 1 (C: Current Mercenta theme)",
-      "status": "built_and_tested",
-      "evidence": "src/config/themes.ts current; e2e/uiux-foundation.spec.ts theme test (current bg rgb(0,0,0))",
-      "last_verified": "2026-09-18",
-      "superseded_by": null
+      "description": "WITHDRAWN — the legacy \"Current Mercenta\" visual identity is NOT preserved and NOT selectable. It was removed in full by the Wave-0 legacy-theme removal (Founder full-redesign directive: the old theme must not remain selectable, must not be a sixth theme, must not be recreated, must not be treated as fallback). Superseded by the five-theme architecture.",
+      "source": "UI/UX redesign phase — Wave 1 (C: Current Mercenta theme) — REVERSED by Wave 0 (2026-09-22)",
+      "status": "deferred",
+      "evidence": "REMOVAL verified: src/config/themes.ts contains no `id: 'current'` and a five-entry THEME_ORDER; scripts/validate-theme-foundation.mjs asserts the absence; e2e/uiux-foundation.spec.ts asserts exactly five selector options",
+      "last_verified": "2026-09-22",
+      "superseded_by": "uiux-theme-architecture-five-themes"
     },
     {
       "id": "uiux-theme-switch-presentation-only",
@@ -2389,11 +2398,11 @@
     },
     {
       "id": "uiux-dark-foundation-near-black",
-      "description": "Dark themes (Bold/Serious/Current Mercenta) use genuinely near-black charcoal foundations (rgb(11,12,15) / rgb(14,15,17) / rgb(0,0,0)); validator asserts avg<40 and rejects blue/navy-dominant backgrounds.",
-      "source": "UI/UX redesign phase — Wave 1 (D: dark foundation)",
+      "description": "Dark themes (Bold/Serious) use genuinely near-black charcoal foundations (rgb(11,12,15) / rgb(14,15,17)); validator asserts avg<40 and rejects blue/navy-dominant backgrounds.",
+      "source": "UI/UX redesign phase — Wave 1 (D: dark foundation), repointed Wave 0 (2026-09-22 — 'Current Mercenta' removed)",
       "status": "built_and_tested",
-      "evidence": "src/config/themes.ts bold/serious/current vars; scripts/validate-theme-foundation.mjs; e2e/uiux-foundation.spec.ts theme test",
-      "last_verified": "2026-09-18",
+      "evidence": "src/config/themes.ts bold/serious vars; scripts/validate-theme-foundation.mjs; e2e/uiux-foundation.spec.ts theme test",
+      "last_verified": "2026-09-22",
       "superseded_by": null
     },
     {
@@ -2416,11 +2425,11 @@
     },
     {
       "id": "uiux-theme-selector",
-      "description": "Accessible theme selector (six swatches + labels, aria-checked menuitemradio, Escape/outside-click close) in the header; persists choice (presentation only).",
-      "source": "UI/UX redesign phase — Wave 1 (F)",
+      "description": "Accessible theme selector (five swatches + labels, aria-checked menuitemradio, Escape/outside-click close) in the header; persists choice (presentation only).",
+      "source": "UI/UX redesign phase — Wave 1 (F), repointed Wave 0 (2026-09-22)",
       "status": "built_and_tested",
-      "evidence": "src/components/shared/ThemeSelector.tsx; e2e/uiux-foundation.spec.ts theme tests",
-      "last_verified": "2026-09-18",
+      "evidence": "src/components/shared/ThemeSelector.tsx; e2e/uiux-foundation.spec.ts theme tests (asserts exactly five options)",
+      "last_verified": "2026-09-22",
       "superseded_by": null
     },
     {
@@ -4152,11 +4161,11 @@
     },
     {
       "id": "uiux-wave3-theme-alpha-shims-removal",
-      "description": "CARRIED FORWARD, not attempted. `src/theme-alpha-shims.css` (691 lines) still ships a legacy shim layer alongside the token system (finding D-3). Removing it requires the per-screen token migration first; deleting it now would break un-migrated screens",
+      "description": "INVESTIGATED in Wave 0 (2026-09-22) against the full-redesign directive §24 ('remove only if it exists SOLELY to support the retired theme'). FINDING: it does NOT. `src/theme-alpha-shims.css` is the Tailwind 3.4 alpha-modifier compatibility layer for the SHARED token palette — Tailwind cannot compute `/opacity` on CSS-variable colours, so it emits explicit `color-mix(in srgb, var(--mr-*), <alpha>, transparent)` rules for the variable-based classes used across the whole product. Deleting it would remove alpha styling from ~215 call sites in the NEW design system, i.e. remove working functionality. Retained, with semantic purpose (motion/density/alpha tokens) intact; the retired theme is not what it supports.",
       "status": "deferred",
-      "evidence": "PROJECT_STATUS.md heading 3 item 5; docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md finding D-3. Owner: Wave 3 Part 6",
-      "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
-      "last_updated": "2026-09-20"
+      "evidence": "scripts/gen-theme-alpha-shims.mjs generator + src/theme-alpha-shims.css; required by scripts/validate-theme-foundation.mjs seam check; grep of `bg-ink-900/`, `bg-brass-500/`, `bg-state-*` call sites in src/ (not retired-theme-specific). Owner: Wave 6 token/alpha migration, not Wave 0.",
+      "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20); investigation recorded Wave 0 (2026-09-22)",
+      "last_updated": "2026-09-22"
     },
     {
       "id": "uiux-wave3-visual-regression-gate",

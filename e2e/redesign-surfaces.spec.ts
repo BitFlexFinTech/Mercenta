@@ -8,7 +8,7 @@
  * PNGs to `test-screenshots/redesign-surfaces/`.
  *
  * It is deliberately NOT a pixel-diff snapshot suite. A pixel gate on this
- * application would fire on every harmless token change across six themes and
+ * application would fire on every harmless token change across five themes and
  * would be turned off within a week — which is worse than no gate. What is
  * asserted instead is the contract that actually breaks:
  *

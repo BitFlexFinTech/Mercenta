@@ -1,10 +1,10 @@
 /**
  * §UI/UX Wave 1 — Theme foundation & presentation seams browser verification.
  *
- * Verifies the six-theme architecture and the Wave 1 presentation seams in a
+ * Verifies the five-theme architecture and the Wave 1 presentation seams in a
  * real Chromium against the actual dev server:
  *   - Minimal Light is the DEFAULT first-load theme
- *   - all six themes exist and apply (light themes → light surfaces; dark
+ *   - all five themes exist and apply (light themes → light surfaces; dark
  *     themes → genuinely near-black, never navy)
  *   - theme switching changes PRESENTATION ONLY (data + permissions unchanged)
  *   - homepage renders with the preserved shipment-tracker animation
@@ -40,7 +40,7 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
     expect(b).toBeGreaterThan(230);
   });
 
-  test('all six themes render with consistent semantic presence', async ({ page }) => {
+  test('all five themes render with consistent semantic presence', async ({ page }) => {
     await loginAs(page, 'Super Admin — Tadii', 1400);
     await page.locator('[data-testid="theme-selector"]').click();
     await page.waitForTimeout(400);
@@ -48,7 +48,7 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
       Array.from(document.querySelectorAll('[data-theme-option]')).map((e) => e.dataset.themeOption)
     );
     expect(options).toEqual([
-      'minimal-light', 'professional', 'bold', 'fun', 'serious', 'current',
+      'minimal-light', 'professional', 'bold', 'fun', 'serious',
     ]);
     for (const t of options) {
       await page.locator(`[data-theme-option="${t}"]`).click();
@@ -67,7 +67,7 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
       expect(vars.warning).toMatch(/^#/);
       expect(vars.info).toMatch(/^#/);
       expect(vars.success).toMatch(/^#/);
-      const isDark = t === 'bold' || t === 'serious' || t === 'current';
+      const isDark = t === 'bold' || t === 'serious';
       if (isDark) {
         const hex = vars.bg.replace('#', '');
         const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -95,7 +95,7 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
       }
       return out;
     }, kpiIds);
-    for (const t of ['professional', 'bold', 'fun', 'serious', 'current']) {
+    for (const t of ['professional', 'bold', 'fun', 'serious']) {
       await page.locator('[data-testid="theme-selector"]').click();
       await page.waitForTimeout(300);
       await page.locator(`[data-theme-option="${t}"]`).click();
