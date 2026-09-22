@@ -1,6 +1,74 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 
+## 🧭 CURRENT PLATFORM POSITION — DASHBOARD CLEANUP: THE OVERVIEW IS AN OVERVIEW AGAIN (2026-09-22, session 12)
+
+**Increment identity:** a **cleanup pass only** on the admin dashboards, scoped strictly to the Founder's reported problem — the Overview tab was showing the Command Centre and two other duplicated action surfaces, and was not reading as a business overview. No new dashboard architecture, no Command-Centre-vs-Control-Centre redesign, no new features, no new workflows, no business-logic change, no replacement tables for anything removed. Net diff: **8 files, +373 / −409 lines**.
+
+**Full record / inventory:** the item-by-item inventory (existing item · where it appears · what it does · duplicate of · decision REMOVE/MOVE/MERGE/KEEP) is delivered in this session's report.
+
+### 1. COMPLETED / VERIFIED
+
+- **Command Centre REMOVED from the Overview → MOVED (unmodified) to the Control Centre** (`FounderControlCentre.tsx`). The component and its model (`buildCommandCentre`) are unchanged; only its render location moved. Its audience is now Super-Admin only (the Control Centre is), which the report states explicitly.
+- **"Needs your attention" and "Next actions" REMOVED from the Overview**, with their local `attention[]` / `actions[]` derivations and the now-dead derived values (`openDeductions`, `rejectedSubmissions`, `commerceInvoicesPending`) and imports. One authoritative owner per concern instead: work list → **Work Management / Operations Calendar**; founder attention → **Control Centre**; message threads → **Messages**.
+- **Rail "Activity" panel REMOVED** — it rendered the same `recentMessages` data as the "Recent communications" section on the same screen; one summary remains.
+- **Density / Group-rows controls REMOVED** with the queue they only served (plus the dead `setDensity` / `groupAttention` state).
+- **"Portfolio at a glance" is now the FIRST section** of the Overview, and the Overview now carries **business figures from the existing canonical cost model** (`operatingCostSummary()`): recorded revenue by stream, gross contribution, contribution margin — each stating its basis and the provisional flag. No new calculation, no new component, no new table.
+- **Gates repointed, not weakened** (inline `§Dashboard-cleanup — REPOINTED` comments): `validate-command-centre` (40 checks) now asserts the Command Centre is on the Control Centre AND absent from the Overview; `validate-uiux-redesign` replaced 5 removed-surface contracts with positive cleaned-surface contracts (**339 PASS / 5 FAIL → 346 PASS / 0 FAIL**); the four affected Playwright specs were repointed with their old contracts recorded in comments.
+
+### 2. IN PROGRESS
+
+- **Nothing.** The scoped cleanup is implemented, tested and committed.
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. **Wave 3 ack remainder** — `on_hold`, ack completeness, ack↔invoice match (§D09-07/08/09).
+2. **Wave 3 routing re-model remainder** — the mechanic itself; optional `mercenta_hub` (§D09-13).
+3. **Wave 3 Logistics Hub remainder** — consolidation, customs documents, provider configuration; admin-side ETA/eligibility/performance panels.
+4. **Command Centre ↔ Control Centre reconciliation** — the next dashboard pass (deliberately NOT done here): merge the two attention lists, and decide the Finance `destination: 'accounting'` dead route.
+5. **Flagged duplication NOT removed in this pass (Founder decision needed):** the Overview's "Fulfilment in motion" queue vs Logistics Control's authoritative consignment table; the brand-side `BrandDashboard` mirrors of "Next actions" / "Needs your attention" / "Recent communications"; the Overview header is still titled "Operations Overview".
+6. **WAVE 5 — Super Admin / Control Centre.** **NOT STARTED.**
+7. **WAVE 6 — product-wide completion / integration / regression pass.** **NOT STARTED.**
+8. **DEPLOYMENT** — not started; only on Founder instruction.
+
+### 4. DEFERRED / PARKED
+
+- Unchanged. No new deferrals.
+
+### 5. BLOCKED / DEPENDENCIES
+
+- None. This increment needed no credential and made no network call.
+
+### 6. KNOWN EXCEPTIONS
+
+- **The Command Centre's audience narrowed** to Super Admin as a direct consequence of moving it to a Super-Admin-only screen. Stated in the report; the CTAs it routes to are themselves Super-Admin surfaces.
+- **The Overview header still reads "Operations Overview"** — a naming inconsistency the Founder reported but that was NOT in this pass's explicit list; reported, not silently changed.
+- Full-suite result improved to **459 passed / 0 failed / 2 skipped** (the previous session's 6 load timeouts did not recur).
+
+### 7. CURRENT CHECKPOINT
+
+- **Branch:** `redesign/foundation`. **Checkpoint commit:** **`b3fcca9baffc14c37f078365cd48919ae3d1ecd1`**, re-verified from the committed tree (tsc 0 errors · `validate-command-centre` 40 PASS · `validate-uiux-redesign` 346/0 · Playwright dashboard+command-centre 15 passed). `git status --porcelain`: **EMPTY**.
+- **THREE-WAY STATUS: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**.
+
+### 8. VERIFICATION STATUS
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit` (app + root) | **0 errors** |
+| `npx eslint` (8 changed files) | **0 problems** |
+| `npm run build` | **✓ built in 8.29s** |
+| `node scripts/validate-command-centre.mjs` | **PASS — 40 checks** |
+| `node scripts/validate-uiux-redesign.mjs` | **346 PASS / 0 FAIL** (was 339/5) |
+| `validate-e5` / `validate-e6` / `validate-e7` / `workspace-shell` / `typography` / `wording` | **all PASS** |
+| Playwright focused sets | **11 + 4 + 10 + 76 + 32 passed** |
+| Playwright **FULL suite** | **459 passed / 0 failed / 2 skipped (6.1m)** |
+
+### 9. NEXT EXECUTION SCOPE
+
+Continue with heading 3 item 4 (Command Centre ↔ Control Centre reconciliation) **only on Founder instruction**, together with decisions on the flagged items in heading 3 item 5.
+
+---
+
 ## 🧭 CURRENT PLATFORM POSITION — WAVE 3: LOGISTICS HUB COMPLETION (2026-09-22, session 11)
 
 **Increment identity:** complete the remaining **Wave 3** Logistics Hub functionality. The Wave 3 **Hero was NOT rebuilt**; the Hub was **NOT replaced** and **NOT split into a second page**. Five recorded Wave 3 gaps were closed at the correct boundaries: the **backorder fail-closed gate** (domain boundary, not a UI hint), the **unsupported "10am Pacific" routing claim** (removed, not relabelled), **carrier eligibility as a derivation**, **ETA as a real domain capability**, and **delivery performance** aggregated from canonical data. Every change was authorised by the project's own recorded Wave 3 roadmap (matrix §D09-05/06/12, §D10-06/10, §32 #2/#5/#6; registry `discovered-*` entries).

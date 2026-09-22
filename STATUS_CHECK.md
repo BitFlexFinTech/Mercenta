@@ -65,6 +65,45 @@ performance panels · **Wave 5 and Wave 6 NOT STARTED**.
 **Three-way status:** Local ✅ · GitHub committed ✅ · **demo ❌ NOT DEPLOYED / NOT VERIFIED** → **NOT COMPLETE**
 (`.clinerules/operating-model.md` §10/§11).
 
+## CURRENT STATE — DASHBOARD CLEANUP: OVERVIEW (2026-09-22, session 12)
+
+**Checkpoint:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`. Start HEAD `862936c`, tree EMPTY.
+**Checkpoint commit `b3fcca9baffc14c37f078365cd48919ae3d1ecd1`** (re-verified from the committed tree).
+Branch `redesign/foundation`. **No deployment was performed and the live demo was NOT verified.**
+
+**Cleanup pass only** — no new architecture, no new features, no new workflows, no business-logic change,
+no replacement tables. Net diff: 8 files, +373 / −409.
+
+**REMOVED from the Overview** (`src/components/admin/AdminDashboard.tsx`):
+Command Centre (moved) · "Needs your attention" + `attention[]` · "Next actions" + `actions[]` ·
+rail "Activity" panel (duplicated "Recent communications") · Density/Group-rows controls +
+`setDensity`/`groupAttention` · dead derivations `openDeductions` / `rejectedSubmissions` /
+`commerceInvoicesPending` and their imports.
+
+**MOVED:** `<CommandCentre onNavigate={onNavigate} />` → Control Centre (`FounderControlCentre.tsx`),
+component and model UNCHANGED. Audience is now Super-Admin only (the Control Centre is).
+
+**ADDED (existing canonical data only):** "Portfolio at a glance" is FIRST; three business tiles from
+`operatingCostSummary()` — recorded revenue by stream · gross contribution · contribution margin,
+each stating its basis and the provisional flag.
+
+**One authoritative owner per concern:** work list → Work Management / Operations Calendar ·
+founder attention + Command Centre → Control Centre · message threads → Messages ·
+deductions → Billing · rejected submissions → Global Catalog · simulated invoices → Retail Pipeline.
+
+**Gates repointed (never weakened, old contract recorded inline):** `validate-command-centre` 40 PASS
+(now asserts Control Centre presence AND Overview absence) · `validate-uiux-redesign` **346/0** (was
+339/5) · `e2e/dashboard.spec.ts` (incl. positive-absence assertions) · `e2e/command-centre.spec.ts` ·
+`e2e/uiux-redesign.spec.ts` · `e2e/admin-operational-surfaces.spec.ts`.
+
+**Verified:** tsc app+root 0 errors · eslint 0 problems · build PASS · validate-e5/e6/e7 PASS ·
+workspace-shell 92/0 · typography 17 · wording PASS · Playwright focused 11+4+10+76+32 passed ·
+**FULL suite 459 passed / 0 failed / 2 skipped**.
+
+**Flagged, NOT done (Founder decision):** Command Centre ↔ Control Centre reconciliation · the Finance
+`destination: 'accounting'` dead route · Overview "Fulfilment in motion" vs Logistics Control's
+authoritative table · brand-side `BrandDashboard` mirrors · the "Operations Overview" heading.
+
 ## Build & verification health
 
 - `npm run typecheck` — PASS (exit 0)
