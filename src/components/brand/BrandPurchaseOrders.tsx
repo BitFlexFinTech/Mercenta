@@ -28,7 +28,8 @@ import { ShippingCostEstimate } from '@/components/shared/ShippingCostEstimate';
 import { RoutingRequestIndicator, RoutingRequestForm } from '@/components/shared/RoutingRequest';
 import { downloadCsv } from '@/lib/csv';
 import { cn } from '@/utils/cn';
-import { CheckCircle2, MessageSquare, Phone, Truck } from 'lucide-react';
+import { CheckCircle2, FileText, MessageSquare, Phone, Truck } from 'lucide-react';
+import { navigateProductView } from '@/lib/runtime/productRoutes';
 import { MERCENTA_CARRIER_LABELS } from '@/config/shipping';
 import { carrierOptionsForLane, selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { backOrderAvailabilityLabel, canBackOrderLine } from '@/lib/commerce/backorderGate';
@@ -404,6 +405,27 @@ export function BrandPurchaseOrders() {
                         shipWindowEnd={po.shipWindowEnd}
                         routingRequestFiled={!!routingRequestFiledPOs[po.id]}
                       />
+                    </div>
+                  )}
+                  {/*
+                    §Dashboard-cleanup P0 — the brand's ACTUAL next step after
+                    accepting a PO: open its shipping documents in the Logistics
+                    Hub. The old post-acceptance experience ended on a deadline
+                    note, which told the brand nothing they could act on.
+                  */}
+                  {(po.status === 'accepted' || po.status === 'ready_to_fulfil') && (
+                    <div className="mt-2">
+                      <Button
+                        variant="secondary"
+                        className="text-xs"
+                        data-testid={`po-open-documents-${po.poNumber}`}
+                        onClick={() =>
+                          navigateProductView('brand', 'logistics', { po: po.poNumber })
+                        }
+                      >
+                        <FileText className="w-3.5 h-3.5 mr-1.5" />
+                        Open shipping documents
+                      </Button>
                     </div>
                   )}
                 </button>

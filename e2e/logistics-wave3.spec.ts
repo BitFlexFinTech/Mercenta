@@ -107,4 +107,36 @@ test.describe('Wave 3 — Logistics Hub surfaces', () => {
     expect(body).not.toMatch(/10am PT|10am Pacific|10 am Pacific/i);
     expect(body).not.toMatch(/Carrier Central/i);
   });
+
+test.describe('Wave 3 — acceptance leads to the shipping documents (P0)', () => {
+  test('7. after accepting a PO the brand is taken to that PO in the Logistics Hub', async ({ page }) => {
+    /**
+     * §Dashboard-cleanup P0 — the brand's job after accepting is to PRINT the
+     * shipping documents. The old experience ended on a deadline note; now the
+     * accepted PO offers "Open shipping documents", which lands on the Logistics
+     * Hub with that PO's consignment selected.
+     */
+    await loginAs(page, 'Tapatío', 1100);
+    await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
+    await page.waitForTimeout(900);
+
+    // Accept every line on the first acknowledgement-eligible PO.
+    await page.locator('button', { hasText: 'Acknowledge' }).first().click();
+    await page.waitForTimeout(400);
+    await page.locator('button', { hasText: 'Submit acknowledgment' }).click();
+    await expect(page.getByText(/Acknowledgment submitted/i).first()).toBeVisible({ timeout: 6000 });
+    await page.waitForTimeout(600);
+
+    const cta = page.locator('[data-testid^="po-open-documents-"]').first();
+    await expect(cta).toBeVisible({ timeout: 8000 });
+    const poNumber = (await cta.getAttribute('data-testid'))!.replace('po-open-documents-', '');
+    await cta.click();
+    await page.waitForTimeout(1400);
+
+    // The Logistics Hub is the destination, and that PO is the selected consignment.
+    await expect(page.getByRole('heading', { name: 'Logistics Hub' }).first()).toBeVisible({ timeout: 8000 });
+    await expect(page.getByTestId('logistics-inspector')).toContainText(poNumber, { timeout: 8000 });
+  });
+});
+
 });

@@ -27,7 +27,7 @@
  *   - The retired mandatory linear logistics chain is NOT reintroduced; stages
  *     come from the canonical status → stage map.
  */
-import { useEffect, useMemo, useState, type ComponentType } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { Badge, Button, Input, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
@@ -42,6 +42,7 @@ import {
   freightSemantics,
 } from '@/config/logisticsGeo';
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
+import { currentQueryParam } from '@/lib/runtime/productRoutes';
 import { etaPresentation, isEtaAtRisk } from '@/lib/logistics/shipmentEta';
 import { buildDeliveryPerformance, performanceLabel } from '@/lib/logistics/deliveryPerformance';
 import {
@@ -660,6 +661,25 @@ export function LogisticsHub() {
         }),
     [shipmentsQuery.data, session?.tier, session?.tenantId, poByNumber]
   );
+
+  /**
+   * §Dashboard-cleanup P0 — PO-scoped deep link.
+   *
+   * The accepted-PO action ("Open shipping documents") arrives here as
+   * `/brand/logistics?po=PO-9002`. The Hub selects that consignment as soon as its
+   * rows are available, so the operator lands on the PO's route, freight
+   * responsibility and document actions instead of an unselected list. Applied
+   * ONCE per PO value; it never overrides a selection the operator makes after.
+   */
+  const deepLinkPo = useMemo(() => currentQueryParam('po'), []);
+  const appliedDeepLink = useRef<string | null>(null);
+  useEffect(() => {
+    if (!deepLinkPo || appliedDeepLink.current === deepLinkPo) return;
+    const match = liveShipments.find((s) => (s as unknown as { poNumber?: string }).poNumber === deepLinkPo);
+    if (!match) return;
+    appliedDeepLink.current = deepLinkPo;
+    setSelectedId(match.id);
+  }, [deepLinkPo, liveShipments]);
 
   const model = useMemo(
     () => buildOperationalMap(liveShipments.map((s) => ({ ...s, providerModes: modes }))),

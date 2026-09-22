@@ -137,6 +137,38 @@ export function currentPathname(): string {
 }
 
 /**
+ * §Dashboard-cleanup P0 — drive navigation from a CHILD surface.
+ *
+ * `pushProductPath` writes the address but cannot change the shell's view: the
+ * shell owns that state and re-reads the address on `popstate` (Back/Forward).
+ * This helper performs the same write AND dispatches `popstate`, so a child (the
+ * accepted-PO "Open shipping documents" action) can move the operator to the
+ * Logistics Hub — with an optional query, e.g. `?po=PO-9002` — using the
+ * EXISTING address layer rather than a second navigation mechanism.
+ */
+export function navigateProductView(
+  environment: ProductEnvironment,
+  view?: string | null,
+  query?: Record<string, string>
+): void {
+  if (typeof window === 'undefined') return;
+  const target = buildProductPath(environment, view);
+  const qs = query && Object.keys(query).length > 0 ? `?${new URLSearchParams(query).toString()}` : '';
+  window.history.pushState({ environment, view: view ?? null }, '', target + qs);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}
+
+/**
+ * Read one query parameter from the CURRENT address (used for a PO-scoped deep
+ * link into the Logistics Hub). Returns null outside the browser or when absent.
+ */
+export function currentQueryParam(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  const value = new URLSearchParams(window.location.search).get(key);
+  return value && value.trim() ? value.trim() : null;
+}
+
+/**
  * Write a product address into the address bar. A no-op outside the browser
  * (validators/SSR import the pure functions above; only the app navigates).
  */
