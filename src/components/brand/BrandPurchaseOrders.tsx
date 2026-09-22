@@ -407,28 +407,7 @@ export function BrandPurchaseOrders() {
                       />
                     </div>
                   )}
-                  {/*
-                    §Dashboard-cleanup P0 — the brand's ACTUAL next step after
-                    accepting a PO: open its shipping documents in the Logistics
-                    Hub. The old post-acceptance experience ended on a deadline
-                    note, which told the brand nothing they could act on.
-                  */}
-                  {(po.status === 'accepted' || po.status === 'ready_to_fulfil') && (
-                    <div className="mt-2">
-                      <Button
-                        variant="secondary"
-                        className="text-xs"
-                        data-testid={`po-open-documents-${po.poNumber}`}
-                        onClick={() =>
-                          navigateProductView('brand', 'logistics', { po: po.poNumber })
-                        }
-                      >
-                        <FileText className="w-3.5 h-3.5 mr-1.5" />
-                        Open shipping documents
-                      </Button>
-                    </div>
-                  )}
-                </button>
+                  </button>
                 <div className="flex items-center gap-3">
                   {po.status === 'rejected' && (
                     <Badge className="text-ds-micro bg-red-500/15 text-red-300 border-red-500/20 max-w-[220px] truncate">
@@ -445,6 +424,35 @@ export function BrandPurchaseOrders() {
                   >
                     Preview
                   </Button>
+                  {/*
+                    §Dashboard-cleanup P0 — the brand's ACTUAL next step after
+                    accepting a PO: open its shipping documents in the Logistics
+                    Hub. The old post-acceptance experience ended on a deadline
+                    note, which told the brand nothing they could act on.
+
+                    §Dashboard + logistics cleanup programme (2026-09-22, session
+                    13) — DEFECT FIXED AT ITS CAUSE. This control was first placed
+                    INSIDE the row's expand `<button>`, which axe correctly reported
+                    as `nested-interactive` (serious) on BRAND · Purchase Orders:
+                    a button inside a button is invalid for keyboard and assistive
+                    technology, and clicking it also toggled the row. It now sits in
+                    the row's ACTION CLUSTER beside the other controls, as a sibling
+                    of the expand button — same behaviour, same data-testid, no
+                    nested interactive elements.
+                  */}
+                  {(po.status === 'accepted' || po.status === 'ready_to_fulfil') && (
+                    <Button
+                      variant="secondary"
+                      className="text-xs"
+                      data-testid={`po-open-documents-${po.poNumber}`}
+                      onClick={() =>
+                        navigateProductView('brand', 'logistics', { po: po.poNumber })
+                      }
+                    >
+                      <FileText className="w-3.5 h-3.5 mr-1.5" />
+                      Open shipping documents
+                    </Button>
+                  )}
                   <span className="font-mono text-sm font-semibold text-white">
                     £{po.poValue.toLocaleString()}
                   </span>
