@@ -9,7 +9,7 @@
 //   • the tab-aware navigation intent is consumed once and only by its owner;
 //   • the surface makes ZERO network calls.
 import { createServer } from 'vite';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 let networkCalls = 0;
 const realFetch = globalThis.fetch;
@@ -101,32 +101,42 @@ try {
     Boolean(aiAction) && aiAction?.priority === 'urgent' && aiAction?.navTab === 'costs');
   costLog.resetAiUsageLog();
 
-  /* ── the PO 24-hour rule is computed ─────────────────────────────────── */
+  /* ── the PO 24-hour rule is computed ──────────────────────────────────────
+   *
+   * §P3 — REPOINTED to the OWNER of that work. The console no longer emits PO
+   * actions (they duplicated the work list); the canonical work layer derives one
+   * `po_acknowledgement` item per unacknowledged PO from the same PO record. The
+   * assertion is now stronger: the console emits NONE, the work layer derives
+   * exactly ONE per PO, and it carries the 24-hour deadline and the PO value.
+   */
   const openPos = demo.demoPurchaseOrders.filter((po) => po.status === 'received' || po.status === 'under_review');
   const poModel = cc.buildCommandCentre({ now });
   const allActions = [...poModel.now, ...poModel.today, ...poModel.week];
-  test('every open PO produces exactly one action carrying its value',
+  const work = await server.ssrLoadModule('/src/lib/work/workStore.ts');
+  const workItems = work.getWorkItems('admin', null, { superAdmin: true });
+  test('the console emits NO purchase-order action (the work layer owns it)',
+    allActions.every((a) => !a.id.startsWith('po-')),
+    `${allActions.filter((a) => a.id.startsWith('po-')).length} console PO action(s)`);
+  test('every open PO produces exactly one work item carrying its value and deadline',
     openPos.length > 0 &&
-      openPos.every(
-        (po) =>
-          allActions.filter((a) => a.id === `po-${po.id}`).length === 1 &&
-          allActions.find((a) => a.id === `po-${po.id}`)?.valueGbp === po.poValue
-      ),
-    `${openPos.length} open POs`);
-  test('a PO older than 24 hours is urgent; a fresh one is high, not urgent',
-    openPos.every((po) => {
-      const action = allActions.find((a) => a.id === `po-${po.id}`);
-      const hours = (now.getTime() - new Date(po.orderDate).getTime()) / 3600000;
-      return hours >= 24 ? action?.priority === 'urgent' : action?.priority === 'high';
-    }));
+      openPos.every((po) => {
+        const items = workItems.filter((w) => w.source === 'po_acknowledgement' && w.entity.id === po.id);
+        return items.length === 1 && items[0].detail.includes(`£${po.poValue.toLocaleString('en-GB')}`);
+      }),
+    `${openPos.length} open POs · ${workItems.filter((w) => w.source === 'po_acknowledgement').length} work item(s)`);
+  test('the PO work item is CRITICAL and routed to the Purchase Orders destination',
+    workItems
+      .filter((w) => w.source === 'po_acknowledgement')
+      .every((w) => w.priority === 'critical' && w.actionView === 'purchase_orders_admin'));
 
   /* ── shipment exceptions ─────────────────────────────────────────────── */
   const exceptions = demo.demoShipments.filter((s) => s.exception || s.delayed);
-  test('every shipment exception/delay is an urgent action routed to logistics',
-    exceptions.every((s) => {
-      const a = allActions.find((x) => x.id === `shipment-${s.id}`);
-      return a?.priority === 'urgent' && a?.navView === 'logistics';
-    }),
+  test('the console emits NO shipment action, and every exception/delay is one work item routed to logistics',
+    allActions.every((a) => !a.id.startsWith('shipment-')) &&
+      exceptions.every(
+        (s) => workItems.filter((w) => w.source === 'shipment_exception' && w.entity.id === s.id).length === 1
+      ) &&
+      workItems.filter((w) => w.source === 'shipment_exception').every((w) => w.actionView === 'logistics'),
     `${exceptions.length} exceptions`);
 
   /* ── integration failures handed in by the shell ─────────────────────── */
@@ -146,36 +156,92 @@ try {
   test('all five command sections are present',
     ['opportunities', 'fundraising', 'operations', 'finance', 'ai_cost'].every((id) =>
       poModel.sections.some((s) => s.id === id)));
-
-  /* ── the surface is wired to the real shell ──────────────────────────── */
   /**
-   * §Dashboard-cleanup (2026-09-22) — REPOINTED to the current canonical source
-   * of truth, not weakened.
+   * §P3 — every console action that is projected into the single action list must
+   * map to a declared founder work source, and the mapping must be TOTAL over the
+   * console's own (non-operational) queue: an unmapped action would silently
+   * vanish from the founder's list, which is exactly the loss this phase must
+   * avoid.
+   */
+  const founderSource = work.FOUNDER_SOURCE_BY_ACTION_ID;
+  const unmapped = poModel.queue.filter((a) => founderSource(a.id) === null);
+  test('every console action maps to a declared founder work source (nothing vanishes)',
+    unmapped.length === 0,
+    unmapped.map((a) => a.id).join(', '));
+  test('the founder projection covers the console queue exactly once each',
+    workItems.filter((w) => w.source.startsWith('founder_')).length === poModel.queue.filter((a) => founderSource(a.id) !== null).length);
+
+  /* ── §P3 — every hand-off destination is a REAL view id for its shell ──── */
+  const adminShell = read('src/components/layout/AdminShell.tsx');
+  const brandShell = read('src/components/layout/BrandShell.tsx');
+  const adminIds = new Set([...adminShell.matchAll(/\{ id: '([a-z_]+)', label:/g)].map((m) => m[1]));
+  const brandIds = new Set([...brandShell.matchAll(/\{ id: '([a-z_]+)', label:/g)].map((m) => m[1]));
+  const neutralViews = Object.keys(work.WORK_ACTION_VIEWS);
+  test('the translation covers every action view the work layer derives',
+    workItems.every((w) => neutralViews.includes(w.actionView) || adminIds.has(w.actionView) || brandIds.has(w.actionView)),
+    workItems.map((w) => w.actionView).filter((v) => !neutralViews.includes(v) && !adminIds.has(v) && !brandIds.has(v)).join(', '));
+  test('every admin work item hands off to a real ADMIN view id (no dead ends)',
+    workItems.every((w) => adminIds.has(w.actionView)),
+    workItems.map((w) => w.actionView).filter((v) => !adminIds.has(v)).join(', '));
+  const brandWork = work.getWorkItems('brand', 'brand-astonish');
+  test('every brand work item hands off to a real BRAND view id (no dead ends)',
+    brandWork.length > 0 && brandWork.every((w) => brandIds.has(w.actionView)),
+    brandWork.map((w) => w.actionView).filter((v) => !brandIds.has(v)).join(', '));
+
+  /* ── the founder console is owned by the SINGLE ACTION LIST ─────────────
    *
-   * OLD CONTRACT: `/<CommandCentre onNavigate={onNavigate} />/` in
-   * `AdminDashboard.tsx` — the command centre was rendered on the admin OVERVIEW.
+   * §P3 (2026-09-22) — REPOINTED to the current canonical source of truth, not
+   * weakened. Founder decision: "Control Centre = ONE action list, founder-only
+   * controls; the work/attention lists leave it; Work Management is the single
+   * action list" (three action lists → one).
    *
-   * NEW CONTRACT: the command centre is an ACTION surface and is rendered on the
-   * CONTROL CENTRE (`FounderControlCentre.tsx`), not on the Overview. This
-   * assertion now checks BOTH halves of that contract, so the placement cannot
-   * silently drift back: it must be present in the Control Centre AND absent from
-   * the Overview.
+   * OLD CONTRACT: `/<CommandCentre onNavigate={onNavigate} \/>/` had to be present
+   * in `FounderControlCentre.tsx` (the panel was rendered on the Control Centre)
+   * and absent from `AdminDashboard.tsx`. The panel, its UI test ids and its own
+   * PO/shipment derivations were the THIRD action list.
+   *
+   * NEW CONTRACT, asserted where the behaviour now lives:
+   *   · the Control Centre renders NO action list of its own (no CommandCentre
+   *     import/render, no attention queue);
+   *   · the founder console's derivations are PROJECTED into the canonical work
+   *     layer (`workStore` → `buildCommandCentre().queue`), one item per action,
+   *     carrying the same rank and WHY;
+   *   · that projection is Super-Admin gated and FAILS CLOSED;
+   *   · the single list preserves the tab-aware navigation intent (no hunting
+   *     through five screens) and exposes the WHY breakdown;
+   *   · the retired panel is gone from the repository (no dead code);
+   *   · the console emits NO PO/shipment actions — the work layer owns those, so
+   *     an open PO can never appear twice (asserted below at its new owner).
    */
   const dashboard = read('src/components/admin/AdminDashboard.tsx');
   const controlCentre = read('src/components/admin/FounderControlCentre.tsx');
   const superPanel = read('src/components/admin/SuperAdminPanel.tsx');
-  const panel = read('src/components/admin/CommandCentre.tsx');
-  test('the command centre is rendered on the Control Centre',
-    /<CommandCentre onNavigate=\{onNavigate\} \/>/.test(controlCentre));
-  test('the command centre is NOT rendered on the admin overview',
-    !/<CommandCentre onNavigate=\{onNavigate\} \/>/.test(dashboard) &&
-      !/from '\.\/CommandCentre'/.test(dashboard));
-  test('the panel routes a CTA through the tab-aware navigation intent',
-    /requestAdminNav\(\{ view: action\.navView, tab: action\.navTab/.test(panel) && /onNavigate\?\.\(action\.navView\)/.test(panel));
+  const workStore = read('src/lib/work/workStore.ts');
+  const workWs = read('src/components/shared/WorkWorkspace.tsx');
+  test('the Control Centre renders no action list of its own (one action list)',
+    !/CommandCentre/.test(controlCentre) &&
+      !/attentionRows/.test(controlCentre) &&
+      !/control-attention-row-/.test(controlCentre));
+  test('the founder console is projected into the canonical work layer',
+    /buildCommandCentre\(\)\.queue/.test(workStore) &&
+      /FOUNDER_SOURCE_BY_ACTION_ID/.test(workStore) &&
+      /item\.rank = action\.rank/.test(workStore) &&
+      /item\.why = action\.why/.test(workStore));
+  test('the founder-console projection is Super-Admin gated and fails closed',
+    /item\.superAdminOnly = true/.test(workStore) &&
+      /opts\?\.superAdmin \? scoped : scoped\.filter\(\(r\) => r\.superAdminOnly !== true\)/.test(workStore));
+  test('the single action list routes a founder CTA through the tab-aware navigation intent',
+    /requestAdminNav\(\{ view: item\.actionView, tab: item\.navTab/.test(workWs));
   test('Super Admin consumes the intent and validates the tab id before selecting it',
     /consumeAdminNavRequest\('super_admin'\)/.test(superPanel) &&
       /SUPER_ADMIN_TABS\.some\(\(t\) => t\.id === req\.tab\)/.test(superPanel));
-  test('the panel exposes stable test ids', /data-testid="command-centre"/.test(panel) && /data-testid="command-action"/.test(panel));
+  test('the single action list exposes its stable test ids and the WHY breakdown',
+    /testId: `work-row-\$\{w\.id\}`/.test(workWs) &&
+      /data-testid="work-drawer-why"/.test(workWs));
+  test('the command centre is NOT rendered on the admin overview',
+    !/<CommandCentre/.test(dashboard) && !/from '\.\/CommandCentre'/.test(dashboard));
+  test('the retired command-centre panel is GONE from the repository (no dead code)',
+    !existsSync(new URL('../src/components/admin/CommandCentre.tsx', import.meta.url)));
 
   const tabIds = [...superPanel.matchAll(/\{ id: '([a-z_]+)', label:/g)].map((m) => m[1]);
   const tabbedActions = [...poModel.now, ...poModel.today, ...poModel.week].filter((a) => a.navView === 'super_admin');
@@ -240,11 +306,19 @@ try {
   test('a funding item at an early stage states the canonical next action, not a fabrication',
     fundingRoutes.every((a) => /Next: /.test(a.detail) && a.why.factors.some((f) => f.id === 'funding_relevance')));
 
-  const panelSrc = read('src/components/admin/CommandCentre.tsx');
+  /**
+   * §P3 — REPOINTED, not weakened. OLD CONTRACT: the retired panel file
+   * (`CommandCentre.tsx`) had to render the rank + WHY (`data-testid="command-why"`,
+   * `#{a.rank}`). The panel is gone; the SAME guarantee is now asserted on the
+   * single action list that carries those rows — the rank is rendered as a fact
+   * and the full auditable WHY breakdown is rendered in the record drawer.
+   */
   const moduleSrc2 = read('src/lib/commandCentre/commandCentre.ts');
-  test('the surface renders the rank and the WHY breakdown for every row',
-    /data-testid="command-why"/.test(panelSrc) && /a\.why\.factors/.test(panelSrc) &&
-      /#\{a\.rank\}/.test(panelSrc) && /data-testid="command-queue-basis"/.test(panelSrc));
+  test('the surface renders the rank and the WHY breakdown for every founder row',
+    /data-testid="work-drawer-why"/.test(workWs) &&
+      /f\.observed/.test(workWs) &&
+      /Rank', value: `#\$\{w\.rank\}`/.test(workWs) &&
+      /item\.why\.factors\.map/.test(workWs));
   test('the derivation makes no model call and no network call',
     !/\bfetch\s*\(|XMLHttpRequest|openrouter|authoriseAiCall|selectModel/i.test(moduleSrc2));
 } catch (err) {

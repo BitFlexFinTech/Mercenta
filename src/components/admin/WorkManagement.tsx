@@ -42,15 +42,27 @@ function WorkRailExtras({ actor }: { actor: string }) {
 }
 
 export function AdminWorkManagement({ onNavigate }: { onNavigate: (view: string) => void }) {
-  const { session } = useApp();
+  const { session, role } = useApp();
   const actor = workActor(session);
+  /**
+   * §P3 — Super Admin is the ONLY session that may see the founder-console items
+   * (company register, funding routes, applications, integrations, cost
+   * protection). It is a positive declaration, so an ordinary admin session gets
+   * the operational work only — the same list, without the founder records.
+   */
+  const isSuperAdmin = role === 'Super Admin';
   return (
     <WorkWorkspace
       scope="admin"
       actor={actor}
+      includeSuperAdminOnly={isSuperAdmin}
       eyebrow="Admin Hub · Operations"
       title="Work Management"
-      description="Every unit of outstanding work across the portfolio — PO acknowledgements, compliance gates, contract renewals, deductions, carrier exceptions, returns and outreach follow-ups — with owners, deadlines and a full activity trail."
+      description={
+        isSuperAdmin
+          ? 'THE single action list — every unit of outstanding work across the portfolio (PO acknowledgements, compliance gates, contract renewals, deductions, carrier exceptions, returns, outreach follow-ups) PLUS the founder console: company compliance, platform setup, brand applications, integration health, funding routes and cost protection, ranked with the declared WHY. Work is never listed anywhere else.'
+          : 'Every unit of outstanding work across the portfolio — PO acknowledgements, compliance gates, contract renewals, deductions, carrier exceptions, returns and outreach follow-ups — with owners, deadlines and a full activity trail.'
+      }
       onNavigate={onNavigate}
       contextExtra={<WorkRailExtras actor={actor} />}
     />

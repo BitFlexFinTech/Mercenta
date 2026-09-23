@@ -12,6 +12,14 @@
  * states the truth: when no provider is configured, it says so and shows the
  * deterministic brief instead of pretending a model answered.
  *
+ * §P3 (2026-09-22) — ONE ACTION LIST. The Founder's decision is that this screen
+ * holds **founder-only controls** and that **Work Management is the single action
+ * list**. The Command Centre panel and this screen's own "Attention" queue both
+ * LEFT it (three action lists → one): the founder console's derivations are
+ * projected into the work layer as Super-Admin-scoped work items, the operational
+ * duplicates (PO acknowledgements, shipment exceptions) have exactly one owner,
+ * and the founder's systems-status signal is kept here as a control/status panel.
+ *
  * RBAC: rendered ONLY behind the AdminShell's Super-Admin guard. Nothing here is
  * reachable from a brand session.
  */
@@ -61,7 +69,7 @@ import { useWorkVersion } from '@/lib/work/useWork';
 import { useCommercialReadinessVersion } from '@/lib/commercial/useCommercialReadiness';
 import { feedAssessmentToAcquisition } from '@/lib/preaudit/preAuditAcquisitionBridge';
 import type { PreAuditQueueRow, CommercialReadinessQueueRow } from '@/lib/commandCentre/controlCentre';
-import { CommandCentre } from './CommandCentre';
+import { useIntegrations } from '@/integrations/IntegrationsContext';
 
 export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string) => void }) {
   const { session, actingStaffId, role } = useApp();
@@ -117,6 +125,29 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
     [onNavigate]
   );
 
+  /**
+   * §P3 — INTEGRATIONS & SYSTEMS STATUS (founder-only control/status).
+   *
+   * The retired Command Centre surfaced a provider connection failure as an
+   * urgent action row. That LIST is gone (one action list), but the SIGNAL must
+   * not be: it is shown here as a control/status panel — one row per provider that
+   * is reporting an error, with the owning surface as its destination — and the
+   * same failure is derived as a Super-Admin work item
+   * (`founder_integration`) in the single action list.
+   */
+  const { integrations, modes } = useIntegrations();
+  const integrationIssues = useMemo(
+    () =>
+      Object.entries(integrations)
+        .filter(([, state]) => Boolean(state?.error) && !state?.disabled)
+        .map(([id, state]) => ({
+          id,
+          state,
+          mode: modes[id as keyof typeof modes],
+        })),
+    [integrations, modes]
+  );
+
   const tiles: MetricTileData[] = model.metrics[section].map((m) => ({
     id: m.id,
     label: m.label,
@@ -129,19 +160,13 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
     valueTestId: `control-metric-value-${m.id}`,
   }));
 
-  const attentionRows: QueueRowData[] = model.attention.map((a) => ({
-    id: a.id,
-    title: a.title,
-    meta: a.detail,
-    status: {
-      tone: a.priority === 'urgent' ? 'danger' : a.priority === 'high' ? 'warning' : 'neutral',
-      label: a.priority,
-    },
-    facts: [{ label: 'source', value: a.source }],
-    actionLabel: 'Open',
-    onOpen: () => go(a.destination),
-    testId: `control-attention-row-${a.id}`,
-  }));
+  /**
+   * §P3 — the model's `attention` list is no longer rendered: the work/attention
+   * lists left the Control Centre (three action lists → one), and the founder's
+   * ranked queue now lives in the single action list (Work Management). The
+   * model still derives the figures the founder CONTROLS here (open work,
+   * critical, overdue, approvals), which is what the summary above states.
+   */
 
   const runAll = () => {
     const runs = runAllAutomations(actor);
@@ -165,7 +190,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
       <WorkspaceHeader
         eyebrow="Founder · Super Admin"
         title="Control Centre"
-        description="The operating centre for the whole platform: business, brands, acquisition, operations, finance, compliance, automation, AI and audit — all derived from canonical records, with the exact next action for each."
+        description="The founder-only operating centre: business, brands, acquisition, operations, finance, compliance, automation, AI and audit — every figure derived from canonical records, with the exact next action for each. The ONE action list is Work Management (Operations), which now also carries the founder console; this screen keeps the founder's CONTROLS and DECISIONS."
         meta={
           <>
             <span className="text-ds-label text-zinc-500">As at {model.generatedFor}</span>
@@ -202,6 +227,38 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
       <WorkspaceGrid
         rail={
           <>
+            {/*
+              §P3 — the founder's systems status. A provider reporting an error is
+              a CONTROL signal, not a second action list: the row states the
+              provider, its derived mode and the error, and its destination is the
+              Integrations surface that owns it. The same failure also raises a
+              Super-Admin work item, so it is worked in the single list.
+            */}
+            <ContextPanel
+              title="Integrations & systems"
+              action={
+                <Button variant="tertiary" size="sm" onClick={() => go('integrations')} data-testid="control-open-integrations">
+                  Open
+                </Button>
+              }
+            >
+              {integrationIssues.length === 0 ? (
+                <p className="text-ds-label text-zinc-400" data-testid="control-integrations-clear">
+                  No provider is reporting an error. Modes are declared per provider in Integration Settings; an
+                  UNKNOWN mode is never treated as simulation.
+                </p>
+              ) : (
+                <ul className="space-y-1.5" data-testid="control-integration-issues">
+                  {integrationIssues.map((i) => (
+                    <li key={i.id} className="text-ds-label">
+                      <span className="text-zinc-200">{i.id.replace(/_/g, ' ')}</span>
+                      <span className="ml-1 text-ds-micro text-zinc-500">{String(i.mode)}</span>
+                      <span className="block text-ds-micro text-red-300">{String(i.state?.error)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </ContextPanel>
             <ContextPanel title="Data provenance" action={<span className="text-ds-micro text-zinc-500">canonical</span>}>
               <ul className="space-y-1.5">
                 {model.dataSources.map((d) => (
@@ -250,46 +307,51 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
         <MetricBand items={tiles} columns={4} />
 
         {/*
-          §Dashboard-cleanup (2026-09-22) — the Command Centre was MOVED here from
-          the Overview, where it had been rendered at the top of the admin
-          landing page. It is an ACTION surface ("what needs my attention, and
-          what do I do next"), so it belongs on the operating centre rather than
-          on the business overview.
+          §P3 (2026-09-22) — THE WORK/ATTENTION LISTS LEFT THIS SCREEN.
 
-          MOVE ONLY — the component and its model are UNCHANGED (`CommandCentre`
-          + `buildCommandCentre`). It is deliberately NOT merged with this
-          screen's own "Attention" list yet: reconciling the two is the next,
-          separate pass. Note the audience change: the Control Centre is
-          Super-Admin only, so the command queue is now founder-visible only —
-          the destinations its CTAs route to are themselves Super-Admin surfaces.
+          Founder decision: "Control Centre = ONE action list, founder-only
+          controls; the work/attention lists leave it; Work Management is the
+          single action list" (three action lists → one). Two things were removed
+          here:
+
+            1. the Command Centre panel (the retired THIRD list). Its founder-only
+               derivations are NOT lost — they are projected into the single action
+               list as Super-Admin-scoped work items (`src/lib/work/workStore.ts`
+               §11, `founder_*` sources), carrying the SAME rank and the SAME
+               auditable WHY, and its PO/shipment rows now have exactly one owner
+               (the work layer's own `po_acknowledgement` / `shipment_exception`
+               derivations).
+            2. this screen's own "Attention" queue, which duplicated the work layer
+               (critical/overdue work), the automation approvals controls and the
+               automation health table — all of which are still here, in their
+               proper form.
+
+          What remains on the Control Centre is exactly what the decision says:
+          founder-only CONTROLS (automation catalogue + approvals + halt, AI, audit,
+          data provenance), observe metrics with real drill-downs, and the founder
+          DECISION surfaces (commercial readiness with its evidence, the pre-audit →
+          acquisition bridge) whose rows open the record that is actually changed.
         */}
-        <div className="mt-4">
-          <CommandCentre onNavigate={onNavigate} />
-        </div>
+        <WorkspaceSection
+          title="The action list lives in Operations"
+          description="Work Management is the single action list — operational work AND the founder console (company compliance, platform setup, brand applications, integration health, funding routes, cost protection), ranked with the declared WHY."
+          domain="risk"
+          action={
+            <Button variant="secondary" size="sm" className="text-xs" onClick={() => go('work')} data-testid="control-open-work">
+              Open Work Management
+            </Button>
+          }
+        >
+          <p className="text-ds-label text-zinc-400">
+            {model.counts.openWork} open item(s) · {model.counts.criticalWork} critical ·{' '}
+            {model.counts.overdueWork} overdue · {model.counts.approvalsPending} approval(s) awaiting your decision.
+          </p>
+        </WorkspaceSection>
 
         {notice && (
           <p className="text-ds-label text-zinc-400" data-testid="control-notice">
             {notice}
           </p>
-        )}
-
-
-        {section === 'business' && (
-          <WorkspaceSection
-            title="Attention"
-            description="Critical work, pending approvals, failed automation and overdue items — each opens the record that needs the decision."
-            domain="risk"
-          >
-            <Queue
-              rows={attentionRows}
-              empty={
-                <EmptyState
-                  title="Nothing needs attention"
-                  description="No critical work, pending approval, failed automation or overdue item is recorded."
-                />
-              }
-            />
-          </WorkspaceSection>
         )}
 
         {section === 'brands' && (
@@ -504,13 +566,30 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
 
         {section === 'operations' && (
           <WorkspaceSection
-            title="Work"
-            description="The same operating layer the Work Management surface uses — no second task system."
+            title="Operations"
+            description="Purchase orders, fulfilment, shipments, returns and work — the operational metrics above are derived from the same canonical records the Operations group works."
             domain="logistics"
+            action={
+              <Button variant="secondary" size="sm" className="text-xs" onClick={() => go('work')} data-testid="control-operations-open-work">
+                Open Work Management
+              </Button>
+            }
           >
+            {/*
+              §P3 — the operational WORK list that used to be rendered here is
+              GONE (it duplicated the single action list). Operations is worked in
+              the Operations group: Work Management (the single action list),
+              Purchase Orders, Logistics Hub, Returns Tracking, Carrier Monitor.
+              The metrics above still observe the position.
+            */}
             <Queue
-              rows={attentionRows.filter((r) => r.id.startsWith('work-') || r.id.startsWith('overdue-'))}
-              empty={<EmptyState title="No operational work" description="No work item is outstanding." />}
+              rows={[]}
+              empty={
+                <EmptyState
+                  title="Operational work lives in the Operations group"
+                  description="Work Management is the single action list (it also carries the founder console). Purchase Orders, Logistics Hub, Returns Tracking and Carrier Monitor own their own records — the metrics above are derived from the same records."
+                />
+              }
             />
           </WorkspaceSection>
         )}
@@ -522,22 +601,19 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             description="Invoices, payments, deductions and escalations — the money chain still requires explicit human approval at the payout gate."
             domain="finance"
           >
+            {/*
+              §P3 — the approval-derived finance queue is GONE: approvals are
+              DECISIONS with real controls, and they are worked in the Automation
+              section below (approve / reject writes through the canonical
+              automation registry). The finance metrics above still observe the
+              position.
+            */}
             <Queue
-              rows={model.attention
-                .filter((a) => a.source === 'automation_approval')
-                .map((a) => ({
-                  id: a.id,
-                  title: a.title,
-                  meta: a.detail,
-                  status: { tone: 'warning' as const, label: a.priority },
-                  actionLabel: 'Open',
-                  onOpen: () => go(a.destination),
-                  testId: `control-finance-row-${a.id}`,
-                }))}
+              rows={[]}
               empty={
                 <EmptyState
-                  title="No finance decision is waiting"
-                  description="Unpaid invoices and open deductions are tracked as work items with declared deadlines — see the Finance metrics above and the Accounting surface."
+                  title="Finance decisions are worked in their owning surfaces"
+                  description="Pending automations that stopped at a human approval gate are approved or rejected in the Automation section below. Unpaid invoices and open deductions are work items with declared deadlines — see the Finance metrics above, the single action list and the Accounting surface."
                 />
               }
             />

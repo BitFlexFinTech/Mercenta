@@ -199,10 +199,15 @@ export default function AdminShell() {
    * src/lib/nav/navBadges.ts for the tenant-isolation note: AdminShell only ever
    * renders in the admin environment, where full-portfolio access is by design).
    */
-  const navBadges = useAdminNavBadges();
+  const isSuper = role === 'Super Admin';
+  /**
+   * §P3 — the Work Management badge counts the SAME item set the list renders, so
+   * a Super Admin's badge includes the founder-console items and every other
+   * session's does not (the work store fails closed on `superAdminOnly`).
+   */
+  const navBadges = useAdminNavBadges({ superAdmin: isSuper });
   const posQuery = usePurchaseOrders();
   const posAll = posQuery.data?.data ?? [];
-  const isSuper = role === 'Super Admin';
   // §Phase 6 — navigation visibility only. Views super-only in the render
   // guard remain guarded there for defense in depth.
   const HIDDEN_FOR_NON_SUPER = new Set([

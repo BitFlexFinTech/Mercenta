@@ -41,6 +41,8 @@ import { ONBOARDING_STEP_ORDER } from '@/lib/onboarding/onboardingLifecycle';
 import { getAllReturnTracking } from '@/lib/warehouse/returnsTracking';
 import { emitEvent } from '@/lib/events/eventFeed';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
+import { buildCommandCentre } from '@/lib/commandCentre/commandCentre';
+import { loadIntegrationsSync } from '@/integrations/connections';
 
 /* ── DECLARED deterministic terms (single source of truth) ─────────────────── */
 
@@ -63,6 +65,57 @@ export const EXPIRY_HORIZON_DAYS = 60;
  */
 export const ONBOARDING_STEP_SLA_DAYS = 7;
 
+/**
+ * §P3 — DECLARED CROSS-SCOPE ACTION-VIEW TRANSLATION.
+ *
+ * The work layer is ONE layer shared by the admin and brand shells, but the two
+ * shells address the same destination with different view ids (admin
+ * `purchase_orders_admin` vs brand `purchase_orders`). A derived item therefore
+ * stores a NEUTRAL key and `getWorkItems` resolves it for the scope that is
+ * reading — otherwise the hand-off button in the admin list would navigate to a
+ * brand view id that does not exist there (a dead end).
+ *
+ * `brand: null` means the destination is Super-Admin/Admin only; such items are
+ * only ever derived with `tenantId: null`, so a brand session never receives one.
+ * `scripts/validate-command-centre.mjs` asserts EVERY resolved id is a real view
+ * id of the shell it is resolved for, so this table cannot silently rot.
+ */
+export const WORK_ACTION_VIEWS: Record<string, { admin: string; brand: string | null }> = {
+  purchase_orders: { admin: 'purchase_orders_admin', brand: 'purchase_orders' },
+  returns_tracking: { admin: 'returns_tracking', brand: 'returns' },
+  onboarding: { admin: 'onboarding_pipeline', brand: 'onboarding' },
+  logistics: { admin: 'logistics', brand: 'logistics' },
+  compliance: { admin: 'compliance', brand: 'compliance' },
+  contracts: { admin: 'contracts_admin', brand: 'contracts' },
+  /**
+   * Deductions: the admin works them in Billing; a brand sees them in Statements
+   * & Account (`documents`). The retired `deductions` id existed in NEITHER shell
+   * — a dead hand-off this table now prevents.
+   */
+  deductions: { admin: 'billing', brand: 'documents' },
+  /**
+   * Invoices/receivables: Mercenta settles from Super Admin → Accounting; a brand
+   * sees its own position in Statements & Account. The retired `accounting` id is
+   * not a shell view id either.
+   */
+  accounting: { admin: 'super_admin', brand: 'documents' },
+  /**
+   * A commercial-readiness decision is Mercenta's (Control Centre); the brand's
+   * own remediation is worked on its Commercial Readiness surface.
+   */
+  control_centre: { admin: 'control_centre', brand: 'commercial_readiness' },
+  integrations: { admin: 'integrations', brand: null },
+  crm: { admin: 'crm', brand: null },
+};
+
+/** Resolve a neutral action view for the scope that is reading. */
+export function resolveWorkActionView(view: string, scope: WorkScope): string {
+  const entry = WORK_ACTION_VIEWS[view];
+  if (!entry) return view;
+  if (scope === 'admin') return entry.admin;
+  return entry.brand ?? entry.admin;
+}
+
 export const WORK_SOURCE_LABELS: Record<WorkSource, string> = {
   po_acknowledgement: 'PO acknowledgement',
   po_window: 'Fulfilment window',
@@ -76,8 +129,49 @@ export const WORK_SOURCE_LABELS: Record<WorkSource, string> = {
   onboarding_step: 'Onboarding step',
   commercial_remediation: 'Commercial information needed',
   commercial_review: 'Commercial review',
+  // §P3 — the founder-console categories (Super-Admin only).
+  founder_compliance: 'Founder · company compliance',
+  founder_setup: 'Founder · platform setup',
+  founder_application: 'Founder · brand application',
+  founder_integration: 'Founder · integration health',
+  founder_opportunity: 'Founder · opportunity',
+  founder_funding: 'Founder · funding route',
+  founder_finance: 'Founder · finance',
+  founder_ai_cost: 'Founder · AI cost',
   manual: 'Manual task',
 };
+
+/**
+ * §P3 — the declared action-id → work-source map for the founder console.
+ *
+ * Declared ONCE so the projection, the filters and the validators cannot drift,
+ * and deliberately explicit (never a fuzzy match): an action id that is not in
+ * this map is NOT projected, which is how the console's PO/shipment actions stay
+ * owned by the work layer's own derivations.
+ */
+export const FOUNDER_SOURCE_BY_ACTION_PREFIX: readonly { prefix: string; source: WorkSource }[] = [
+  { prefix: 'company-', source: 'founder_compliance' },
+  { prefix: 'google-', source: 'founder_setup' },
+  { prefix: 'launch-', source: 'founder_setup' },
+  { prefix: 'application-', source: 'founder_application' },
+  { prefix: 'prospect-', source: 'founder_opportunity' },
+  { prefix: 'partner-', source: 'founder_funding' },
+  { prefix: 'relationship-embassy', source: 'founder_funding' },
+  { prefix: 'relationship-trade-programme', source: 'founder_funding' },
+  { prefix: 'founder-investor-route', source: 'founder_funding' },
+  { prefix: 'funding-route-', source: 'founder_funding' },
+  { prefix: 'fundraising-summary', source: 'founder_funding' },
+  { prefix: 'finance-contribution', source: 'founder_finance' },
+  { prefix: 'ai-cost-protection', source: 'founder_ai_cost' },
+  { prefix: 'ai-cost-summary', source: 'founder_ai_cost' },
+];
+
+export function FOUNDER_SOURCE_BY_ACTION_ID(actionId: string): WorkSource | null {
+  for (const { prefix, source } of FOUNDER_SOURCE_BY_ACTION_PREFIX) {
+    if (actionId.startsWith(prefix)) return source;
+  }
+  return null;
+}
 
 export const WORK_PRIORITY_LABELS: Record<WorkPriority, string> = {
   critical: 'Critical',
@@ -487,6 +581,96 @@ export function deriveWorkItems(): WorkItem[] {
     );
   }
 
+  /**
+   * 11. §P3 — THE FOUNDER CONSOLE (the retired Command Centre), PROJECTED INTO
+   *     THIS SINGLE ACTION LIST.
+   *
+   * The Founder's decision: "Control Centre = ONE action list, founder-only
+   * controls; the work/attention lists leave it; Work Management is the single
+   * action list" (three action lists → one). The founder console's derivations
+   * are therefore projected here — one item per derived action, carrying the SAME
+   * rank and the SAME auditable WHY the console showed — instead of being
+   * rendered as a second list on the Control Centre.
+   *
+   * OWNERSHIP: the console no longer derives PO-at-risk or shipment-exception
+   * actions; those are the work layer's own items (1a/1b/6 above), so the two
+   * cannot drift and a PO never appears twice.
+   *
+   * SCOPE: every item here is `superAdminOnly` and `tenantId: null` (platform
+   * scope), and `getWorkItems` EXCLUDES them unless the caller positively
+   * declares a Super-Admin session — so an ordinary admin session can never see a
+   * founder-only record (company register, funding routes, applications).
+   */
+  for (const action of buildCommandCentre().queue) {
+    const source = FOUNDER_SOURCE_BY_ACTION_ID(action.id);
+    if (!source) continue;
+    const priority: WorkPriority =
+      action.priority === 'urgent' ? 'critical' : action.priority === 'high' ? 'high' : 'normal';
+    const item = make(
+      source,
+      { type: 'founder_action', id: action.id, label: action.title },
+      {
+        title: action.title,
+        detail: action.detail,
+        priority,
+        dueDate: action.dueDate ?? null,
+        tenantId: null,
+        owner: 'staff:founder',
+        actionView: action.navView,
+        createdAt: today,
+      }
+    );
+    /* The console's rank + WHY travel WITH the item (never recomputed here). */
+    item.rank = action.rank;
+    item.why = action.why
+      ? {
+          factors: action.why.factors.map((f) => ({
+            id: f.id,
+            label: f.label,
+            observed: f.observed,
+            points: f.points,
+          })),
+          score: action.why.score,
+        }
+      : undefined;
+    item.navTab = action.navTab;
+    item.superAdminOnly = true;
+    out.push(item);
+  }
+
+  /**
+   * 12. §P3 — INTEGRATION HEALTH (founder console, Super-Admin only).
+   *
+   * Derived from the CANONICAL connection mirror the domain factories read
+   * (`connections.ts → loadIntegrationsSync`), never from a React context — so this
+   * derivation is pure and deterministic like every other one. A provider that is
+   * reporting an error AND is not deliberately disabled raises ONE item; when no
+   * provider state exists yet (`null` mirror) nothing is invented.
+   */
+  const connectionMap = loadIntegrationsSync();
+  for (const [providerId, state] of Object.entries(connectionMap ?? {})) {
+    if (!state?.error || state.disabled) continue;
+    const label = providerId.replace(/_/g, ' ');
+    const item = make(
+      'founder_integration',
+      { type: 'founder_action', id: providerId, label },
+      {
+        title: `${label} reported an error`,
+        detail: `${String(state.error)} · connection ${String(state.status)}${
+          state.sandbox ? ' · sandbox' : ''
+        } · mode is declared per provider in Integration Settings (an UNKNOWN mode is never treated as simulation).`,
+        priority: 'critical',
+        dueDate: null,
+        tenantId: null,
+        owner: 'staff:founder',
+        actionView: 'integrations',
+        createdAt: today,
+      }
+    );
+    item.superAdminOnly = true;
+    out.push(item);
+  }
+
   return out;
 }
 
@@ -636,22 +820,38 @@ function allItems(): WorkItem[] {
 /**
  * Scope + tenant filter — the ONE place work is filtered, so a brand can never
  * see another tenant's work and admin sees the platform.
+ *
+ * §P3 — `opts.superAdmin` gates the founder-console items (`superAdminOnly`).
+ * It FAILS CLOSED: unless the caller positively declares a Super-Admin session,
+ * founder-only records (company register, funding routes, applications,
+ * integrations, cost protection) are excluded — including from the calendar,
+ * the badges and the reminder sweep, which all read through this function.
  */
 export function getWorkItems(
   scope: WorkScope,
   tenantId?: string | null,
-  opts?: { includeResolved?: boolean }
+  opts?: { includeResolved?: boolean; superAdmin?: boolean }
 ): WorkItem[] {
   const rows = allItems();
   const scoped = scope === 'brand' ? rows.filter((r) => r.tenantId === (tenantId ?? null)) : rows;
-  const visible = opts?.includeResolved ? scoped : scoped.filter((r) => r.status !== 'done');
+  const authorised = opts?.superAdmin ? scoped : scoped.filter((r) => r.superAdminOnly !== true);
+  const visible = opts?.includeResolved ? authorised : authorised.filter((r) => r.status !== 'done');
   const rank = { critical: 0, high: 1, normal: 2 } as const;
-  return visible.sort((a, b) => {
-    if (rank[a.priority] !== rank[b.priority]) return rank[a.priority] - rank[b.priority];
-    const ad = a.dueDate ?? '9999-12-31';
-    const bd = b.dueDate ?? '9999-12-31';
-    return ad.localeCompare(bd);
-  });
+  return (
+    visible
+      /**
+       * §P3 — every read resolves the hand-off destination for ITS shell, so the
+       * action list can never send an operator to a view id that does not exist
+       * there (the dead-end class of defect).
+       */
+      .map((r) => ({ ...r, actionView: resolveWorkActionView(r.actionView, scope) }))
+      .sort((a, b) => {
+        if (rank[a.priority] !== rank[b.priority]) return rank[a.priority] - rank[b.priority];
+        const ad = a.dueDate ?? '9999-12-31';
+        const bd = b.dueDate ?? '9999-12-31';
+        return ad.localeCompare(bd);
+      })
+  );
 }
 
 export function getWorkItem(id: string): WorkItem | null {
@@ -659,19 +859,32 @@ export function getWorkItem(id: string): WorkItem | null {
 }
 
 /** Attention count for nav badges / notification centre — resolved work excluded. */
-export function workAttentionCount(scope: WorkScope, tenantId?: string | null): number {
-  return getWorkItems(scope, tenantId).filter((w) => w.priority === 'critical' || w.priority === 'high').length;
+export function workAttentionCount(
+  scope: WorkScope,
+  tenantId?: string | null,
+  opts?: { superAdmin?: boolean }
+): number {
+  return getWorkItems(scope, tenantId, opts).filter((w) => w.priority === 'critical' || w.priority === 'high').length;
 }
 
 /** Overdue items only — used by the proactive reminder automation. */
-export function overdueWorkItems(scope: WorkScope, tenantId?: string | null): WorkItem[] {
+export function overdueWorkItems(
+  scope: WorkScope,
+  tenantId?: string | null,
+  opts?: { superAdmin?: boolean }
+): WorkItem[] {
   const today = demoToday();
-  return getWorkItems(scope, tenantId).filter((w) => w.dueDate !== null && w.dueDate < today);
+  return getWorkItems(scope, tenantId, opts).filter((w) => w.dueDate !== null && w.dueDate < today);
 }
 
-export function dueSoonWorkItems(scope: WorkScope, tenantId?: string | null, withinDays = 7): WorkItem[] {
+export function dueSoonWorkItems(
+  scope: WorkScope,
+  tenantId?: string | null,
+  withinDays = 7,
+  opts?: { superAdmin?: boolean }
+): WorkItem[] {
   const today = demoToday();
-  return getWorkItems(scope, tenantId).filter((w) => {
+  return getWorkItems(scope, tenantId, opts).filter((w) => {
     if (!w.dueDate) return false;
     const d = daysBetween(today, w.dueDate);
     return d >= 0 && d <= withinDays;
@@ -679,8 +892,12 @@ export function dueSoonWorkItems(scope: WorkScope, tenantId?: string | null, wit
 }
 
 /** Group counts for the kanban board — one source for both views. */
-export function workByStatus(scope: WorkScope, tenantId?: string | null): Record<WorkStatus, WorkItem[]> {
-  const rows = getWorkItems(scope, tenantId);
+export function workByStatus(
+  scope: WorkScope,
+  tenantId?: string | null,
+  opts?: { superAdmin?: boolean }
+): Record<WorkStatus, WorkItem[]> {
+  const rows = getWorkItems(scope, tenantId, opts);
   return {
     open: rows.filter((r) => r.status === 'open'),
     in_progress: rows.filter((r) => r.status === 'in_progress'),

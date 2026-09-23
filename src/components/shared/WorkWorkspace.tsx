@@ -50,6 +50,7 @@ import {
   WEEKDAY_LABELS,
 } from '@/lib/work/calendar';
 import { useWorkItems, useReminders } from '@/lib/work/useWork';
+import { requestAdminNav } from '@/data/adminNav';
 import {
   REMINDER_BUCKET_LABELS,
   REMINDER_DUE_SOON_DAYS,
@@ -106,6 +107,17 @@ const SOURCE_OPTIONS: WorkSource[] = [
   // §Phase 2 — the commercial readiness derivations.
   'commercial_remediation',
   'commercial_review',
+  // §P3 — the founder-console categories. They are only ever present for a
+  // Super-Admin session (`includeSuperAdminOnly`), so the filters cannot reveal
+  // a founder-only record to anybody else.
+  'founder_compliance',
+  'founder_setup',
+  'founder_application',
+  'founder_integration',
+  'founder_opportunity',
+  'founder_funding',
+  'founder_finance',
+  'founder_ai_cost',
   'manual',
 ];
 
@@ -125,6 +137,12 @@ export interface WorkWorkspaceProps {
   contextExtra?: React.ReactNode;
   /** Landing view. The dedicated Calendar destination opens on `calendar`. */
   initialView?: 'list' | 'board' | 'calendar' | 'reminders';
+  /**
+   * §P3 — positively declare a Super-Admin session so the founder-console items
+   * (Super-Admin-only Surfaces) are included. Defaults to FALSE and fails closed:
+   * an ordinary admin session must never be shown a founder-only record.
+   */
+  includeSuperAdminOnly?: boolean;
 }
 
 export function WorkWorkspace({
@@ -138,6 +156,7 @@ export function WorkWorkspace({
   openLabel = 'Open record',
   contextExtra,
   initialView = 'list',
+  includeSuperAdminOnly = false,
 }: WorkWorkspaceProps) {
   const [view, setView] = useState<'list' | 'board' | 'calendar' | 'reminders'>(initialView);
   const [priority, setPriority] = useState<'all' | WorkPriority>('all');
@@ -149,8 +168,14 @@ export function WorkWorkspace({
   /** §Sprint 2 — the last deterministic sweep's report (demo evidence). */
   const [sweep, setSweep] = useState<ReminderSweepResult | null>(null);
 
-  const all = useWorkItems(scope, tenantId);
-  const everything = useWorkItems(scope, tenantId, { includeResolved: true });
+  /**
+   * §P3 — the Super-Admin gate is passed to EVERY work read on this surface (list,
+   * board, calendar, metrics), so the view and its counts can never disagree, and
+   * it is a positive declaration: absent ⇒ founder items are excluded.
+   */
+  const workScopeOpts = { superAdmin: includeSuperAdminOnly };
+  const all = useWorkItems(scope, tenantId, workScopeOpts);
+  const everything = useWorkItems(scope, tenantId, { ...workScopeOpts, includeResolved: true });
   const reminders = useReminders(scope, tenantId);
   const reminderBuckets: Record<ReminderBucket, number> = {
     overdue: reminders.filter((r) => r.bucket === 'overdue').length,
@@ -274,10 +299,32 @@ export function WorkWorkspace({
     ref: WORK_SOURCE_LABELS[w.source],
     title: w.title,
     meta: w.detail,
-    status: { tone: PRIORITY_TONE[w.priority], label: WORK_PRIORITY_LABELS[w.priority] },
+    status: {
+      tone: PRIORITY_TONE[w.priority],
+      label:
+        w.superAdminOnly && typeof w.rank === 'number'
+          ? `#${w.rank} · ${WORK_PRIORITY_LABELS[w.priority]}`
+          : WORK_PRIORITY_LABELS[w.priority],
+    },
     facts: [
       { label: 'Due', value: w.dueDate ?? '—', emphasis: true },
       { label: 'Owner', value: w.owner.replace(/^(brand|staff):/, '') },
+      /* §P3 — the founder console's rank and WHY travel with the item so the
+         single action list shows the same declared arithmetic the retired
+         panel did (test id `work-why-<id>` for the browser contract). */
+      ...(w.superAdminOnly && typeof w.rank === 'number'
+        ? [{ label: 'Rank', value: `#${w.rank}`, emphasis: true }]
+        : []),
+      ...(w.why
+        ? [
+            {
+              label: 'Why',
+              value: `score ${w.why.score} · ${w.why.factors
+                .map((f) => `${f.label} ${f.points}`)
+                .join(' + ')}`,
+            },
+          ]
+        : []),
     ],
     domain: PRIORITY_DOMAIN[w.priority],
     onOpen: () => setSelectedId(w.id),
@@ -407,7 +454,15 @@ export function WorkWorkspace({
               className="cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2 py-1.5 text-xs text-zinc-300"
             >
               <option value="all">Source: all</option>
-              {SOURCE_OPTIONS.map((s) => (
+              {/*
+                §P3 — the founder-console categories are offered ONLY to a session
+                that may see them (`includeSuperAdminOnly`): a filter that can never
+                match would itself hint at records the session is not entitled to.
+              */}
+              {(includeSuperAdminOnly
+                ? SOURCE_OPTIONS
+                : SOURCE_OPTIONS.filter((s) => !s.startsWith('founder_'))
+              ).map((s) => (
                 <option key={s} value={s}>
                   {WORK_SOURCE_LABELS[s]}
                 </option>
@@ -1009,7 +1064,19 @@ function WorkRecordDrawer({
                 variant="ghost"
                 className="text-ds-label"
                 data-testid="work-drawer-open-record"
-                onClick={() => onNavigate(item.actionView)}
+                onClick={() => {
+                  /**
+                   * §P3 — the retired Command Centre's "no hunting through five
+                   * screens" guarantee is preserved: a founder-console item
+                   * records the Super-Admin TAB its destination must open, and the
+                   * tab-aware navigation intent is raised before the view changes.
+                   * The Super Admin panel validates the tab id before selecting it.
+                   */
+                  if (item.navTab) {
+                    requestAdminNav({ view: item.actionView, tab: item.navTab, source: `work:${item.id}` });
+                  }
+                  onNavigate(item.actionView);
+                }}
               >
                 {openLabel}
               </Button>
@@ -1024,15 +1091,46 @@ function WorkRecordDrawer({
             fields={[
               { label: 'Source', value: WORK_SOURCE_LABELS[item.source] },
               { label: 'Priority', value: WORK_PRIORITY_LABELS[item.priority] },
+              ...(typeof item.rank === 'number'
+                ? [{ label: 'Founder rank', value: `#${item.rank}` }]
+                : []),
               { label: 'Status', value: WORK_STATUS_LABELS[item.status] },
               { label: 'Owner', value: item.owner },
               { label: 'Due', value: item.dueDate ? `${item.dueDate} · ${dueLabel(item.dueDate)}` : 'No deadline' },
               { label: 'Entity', value: `${item.entity.type.replace(/_/g, ' ')} · ${item.entity.label}` },
               { label: 'Tenant', value: item.tenantId ? brandLabel(item.tenantId) : 'Platform-wide' },
+              ...(item.navTab ? [{ label: 'Opens tab', value: item.navTab }] : []),
               { label: 'Work id', value: <span className="font-mono text-ds-label">{item.id}</span> },
             ]}
           />
           <p className="text-ds-label leading-snug text-zinc-400">{item.detail}</p>
+          {/*
+            §P3 — the founder console's WHY, verbatim: every factor with the value
+            it was actually observed from, and the score as the sum of its points
+            (auditable arithmetic — never a model score).
+          */}
+          {item.why && (
+            <div data-testid="work-drawer-why">
+              <h3 className="mb-2 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
+                Why this rank
+              </h3>
+              <ul className="space-y-1">
+                {item.why.factors.map((f) => (
+                  <li key={f.id} className="flex items-start justify-between gap-3 text-ds-label">
+                    <span className="text-zinc-300">
+                      {f.label}
+                      <span className="block text-ds-micro text-zinc-500">{f.observed}</span>
+                    </span>
+                    <span className="font-mono text-zinc-200">{f.points}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 border-t border-white/[0.06] pt-2 text-ds-label text-zinc-400">
+                Score <span className="font-mono text-zinc-200">{item.why.score}</span> — the sum of the factor
+                points above. Ranked by declared factors over stored data only; no AI, nothing invented.
+              </p>
+            </div>
+          )}
           <div>
             <h3 className="mb-2 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-400">
               Activity

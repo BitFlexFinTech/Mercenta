@@ -19,7 +19,7 @@ import type { CalendarEntry, Reminder, WorkItem, WorkScope } from './types';
 export function useWorkItems(
   scope: WorkScope,
   tenantId?: string | null,
-  opts?: { includeResolved?: boolean }
+  opts?: { includeResolved?: boolean; superAdmin?: boolean }
 ): WorkItem[] {
   const version = useSyncExternalStore(subscribeWork, workVersion, workVersion);
   // `version` participates so the subscription result is recomputed on mutation.

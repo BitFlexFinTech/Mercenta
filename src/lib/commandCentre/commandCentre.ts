@@ -23,7 +23,6 @@
  * every action carries the exact CTA + destination so the founder never has to
  * hunt for the screen that performs it.
  */
-import { demoPurchaseOrders, demoShipments } from '@/data/demoStore';
 import { demoApplications } from '@/data/applicationStore';
 import { getLaunchRecords } from '@/data/launchStore';
 import { companyComplianceTasks } from '@/data/companyStore';
@@ -180,10 +179,6 @@ export const COMMAND_QUEUE_IS_DETERMINISTIC = true;
 
 export const COMMAND_QUEUE_BASIS =
   'Ranked by declared factors over stored data only — urgency (band + priority), operational risk, canonical opportunity/PO potential, relationship readiness, funding relevance, whether a founder approval blocks the next step, and whether a real CTA exists. No AI, no invented data.';
-
-function hoursSince(iso: string, now: Date): number {
-  return (now.getTime() - new Date(iso).getTime()) / (60 * 60 * 1000);
-}
 
 function byPriority(a: CommandAction, b: CommandAction): number {
   const rank = { urgent: 0, high: 1, normal: 2 } as const;
@@ -410,40 +405,24 @@ export function buildCommandCentre(input: CommandCentreInput = {}): CommandCentr
     });
   }
 
-  /* ── purchase orders at risk of the 24h rule ─────────────────────────── */
-  const openPos = demoPurchaseOrders.filter((po) => po.status === 'received' || po.status === 'under_review');
-  for (const po of openPos) {
-    const atRisk = hoursSince(po.orderDate, now) >= 24;
-    actions.push({
-      id: `po-${po.id}`,
-      band: atRisk ? 'now' : 'today',
-      priority: atRisk ? 'urgent' : 'high',
-      title: atRisk
-        ? `PO ${po.poNumber} is past the 24-hour acknowledgment window`
-        : `PO ${po.poNumber} awaits acknowledgment`,
-      detail: `Value £${po.poValue.toLocaleString('en-GB')} · status ${po.status} · received ${po.orderDate}.`,
-      cta: atRisk ? 'Review PO now' : 'Review PO',
-      navView: 'purchase_orders_admin',
-      valueGbp: po.poValue,
-      category: 'Purchase orders',
-    });
-  }
+  /* ── purchase orders at risk of the 24h rule ───────────────────────────────
+   *
+   * §P3 (2026-09-22) — REPOINTED, not weakened. The PO-at-risk action used to be
+   * derived HERE, which made it appear in two action lists at once (this console
+   * and Work Management). The Founder's decision is ONE action list, so the owner
+   * of a PO's acknowledgement work is now the canonical **work layer**
+   * (`src/lib/work/workStore.ts` → source `po_acknowledgement`, which derives the
+   * same 24-hour risk from the same PO record and carries the PO's value and the
+   * Purchase Orders destination). Nothing is lost: the item is still derived, it
+   * is still urgent, and it now appears exactly once.
+   */
 
-  /* ── shipment exceptions ─────────────────────────────────────────────── */
-  for (const s of demoShipments) {
-    if (!s.exception && !s.delayed) continue;
-    actions.push({
-      id: `shipment-${s.id}`,
-      band: 'now',
-      priority: 'urgent',
-      title: `${s.exception ? 'Shipment exception' : 'Shipment delayed'} — ${s.poNumber}`,
-      detail: `${s.carrier} · ${s.origin} → ${s.destination} · status ${s.status}.`,
-      cta: 'Review shipment',
-      navView: 'logistics',
-      valueGbp: s.value,
-      category: 'Shipments',
-    });
-  }
+  /* ── shipment exceptions ───────────────────────────────────────────────────
+   *
+   * §P3 — REPOINTED for the same reason: the owner of a shipment exception /
+   * delay is the canonical work layer (source `shipment_exception`), which
+   * derives one item per flagged consignment and routes it to Logistics. The
+   * console no longer emits a duplicate. */
 
   /* ── brand applications awaiting a decision ──────────────────────────── */
   for (const app of demoApplications.filter((a) => a.status === 'pending')) {

@@ -564,10 +564,22 @@ check(
   'the tenant filter lives in ONE place (getWorkItems)',
   /export function getWorkItems\(/.test(WORK_STORE) && WORK_STORE.includes("scope === 'brand'")
 );
+/**
+ * §P3 (2026-09-22) — REPOINTED, not weakened. OLD CONTRACT: the literal
+ * `scoped.filter((r) => r.status !== 'done')`. The §P3 Super-Admin gate renamed
+ * that local (`authorised` = the scope/tenant filter PLUS the fail-closed
+ * `superAdminOnly` gate), so the assertion follows the CURRENT canonical source.
+ * The invariant is unchanged — a resolved item leaves the attention set — and the
+ * new form additionally requires the gate to be present, so the check is stronger.
+ */
 check(
   'resolution removes the item from the attention set (reminders stop)',
   WORK_STORE.includes('resolvedDerived.set') &&
-    WORK_STORE.includes("scoped.filter((r) => r.status !== 'done')")
+    /authorised\.filter\(\(r\) => r\.status !== 'done'\)/.test(WORK_STORE)
+);
+check(
+  'the work list fails closed on Super-Admin-only items',
+  /opts\?\.superAdmin \? scoped : scoped\.filter\(\(r\) => r\.superAdminOnly !== true\)/.test(WORK_STORE)
 );
 check(
   'every work mutation is audited',

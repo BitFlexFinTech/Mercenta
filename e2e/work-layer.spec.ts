@@ -35,7 +35,34 @@ async function openBrandWork(page: import('@playwright/test').Page, card = 'Tapa
   await page.getByTestId('work-metric-open-value').waitFor({ timeout: 8000 });
 }
 
+const FOUNDER_ROWS = '[data-testid^="work-row-work-founder_"]';
+
 test.describe('Work layer — admin workspace', () => {
+  /**
+   * §P3 — RBAC: the founder console is projected into the SAME list, so the list
+   * must never leak it to an ordinary admin session. This is the shared-component
+   * scoping check the rules require: the gate is asserted directly (founder rows
+   * present for a Super Admin, ZERO for a Mercenta Admin), never assumed from the
+   * component merely rendering.
+   */
+  test('0a. a NON-Super-Admin admin session never sees the founder console', async ({ page }) => {
+    await loginAs(page, 'Mercenta Admin Hub', 1200);
+    await page.getByTestId('dashboard-loaded').waitFor({ timeout: 12000 });
+    await page.locator('nav[aria-label="Primary"]').locator('text=Work Management').first().click();
+    await page.getByTestId('work-metric-open-value').waitFor({ timeout: 8000 });
+    await expect(page.locator(FOUNDER_ROWS)).toHaveCount(0);
+    // …and the founder source filters are not offered either (a filter that can
+    // never match would be a hint about records the session may not see).
+    await expect(page.getByTestId('work-source-filter').locator('option[value="founder_funding"]')).toHaveCount(0);
+    // The operational work is still there — the same surface, scoped.
+    await expect(page.getByTestId('work-source-filter').locator('option[value="po_acknowledgement"]')).toHaveCount(1);
+  });
+
+  test('0b. a Super Admin session DOES see the founder console in the same list', async ({ page }) => {
+    await openAdminWork(page);
+    expect(await page.locator(FOUNDER_ROWS).count()).toBeGreaterThan(0);
+  });
+
   test('1. composes the workspace architecture and renders real work', async ({ page }) => {
     await openAdminWork(page);
 

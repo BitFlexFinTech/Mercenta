@@ -43,13 +43,22 @@ const STALE_TIME = 30_000;
  * §Sprint — the canonical work layer's attention counts. Subscribed (not
  * fetched) so resolving a task anywhere updates the rail immediately. Scoping is
  * enforced inside the store: `brand` scope filters by the session's tenantId.
+ *
+ * §P3 — `superAdmin` is threaded through so the Work Management badge counts
+ * EXACTLY what the list shows: for a Super Admin it includes the founder-console
+ * items, and for every other session those items are excluded (the store fails
+ * closed). A badge that disagreed with its list would be a defect.
  */
-function useWorkBadges(scope: 'admin' | 'brand', tenantId?: string | null): { work: number; calendar: number } {
+function useWorkBadges(
+  scope: 'admin' | 'brand',
+  tenantId?: string | null,
+  opts?: { superAdmin?: boolean }
+): { work: number; calendar: number } {
   const version = useSyncExternalStore(subscribeWork, workVersion, workVersion);
   void version;
   return {
-    work: workAttentionCount(scope, tenantId),
-    calendar: overdueWorkItems(scope, tenantId).length,
+    work: workAttentionCount(scope, tenantId, opts),
+    calendar: overdueWorkItems(scope, tenantId, opts).length,
   };
 }
 
@@ -57,11 +66,12 @@ function useWorkBadges(scope: 'admin' | 'brand', tenantId?: string | null): { wo
 export type NavBadgeMap = Record<string, number>;
 
 /** Admin / Super Admin — full-portfolio counts (admin tier has full access). */
-export function useAdminNavBadges(): NavBadgeMap {
+/** Admin / Super Admin — full-portfolio counts (admin tier has full access). */
+export function useAdminNavBadges(opts?: { superAdmin?: boolean }): NavBadgeMap {
   const pos = usePurchaseOrders();
   const docs = useComplianceDocuments();
   const contracts = useContracts();
-  const workBadges = useWorkBadges('admin');
+  const workBadges = useWorkBadges('admin', undefined, opts);
 
   const posAll = pos.data?.data ?? [];
   const docsAll = docs.data?.data ?? [];

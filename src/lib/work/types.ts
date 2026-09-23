@@ -43,16 +43,64 @@ export type WorkSource =
   // DERIVED from the canonical readiness record, never invented.
   | 'commercial_remediation'
   | 'commercial_review'
+  /**
+   * §P3 (2026-09-22) — THE FOUNDER CONSOLE, MOVED INTO THE SINGLE ACTION LIST.
+   *
+   * The Founder's decision is **"Control Centre = ONE action list, founder-only
+   * controls; the work/attention lists leave it; Work Management is the single
+   * action list"** (three action lists → one). The retired Command Centre panel
+   * was the third list: it is no longer rendered, and its founder-only
+   * derivations are projected into THIS list instead, one source per founder
+   * category, so nothing it showed is lost — it is now found in the place the
+   * Founder works.
+   *
+   * Every one of these is DERIVED from a canonical store (company compliance
+   * register, Google setup tasks, launch-platform records, brand applications,
+   * the integrations state, the funding pipeline, the opportunity ranking and the
+   * cost-protection state). None is invented, and each is **Super-Admin only** —
+   * `WorkItem.superAdminOnly` is enforced in `getWorkItems`, which fails CLOSED.
+   */
+  | 'founder_compliance'
+  | 'founder_setup'
+  | 'founder_application'
+  | 'founder_integration'
+  | 'founder_opportunity'
+  | 'founder_funding'
+  | 'founder_finance'
+  | 'founder_ai_cost'
   | 'manual';
 
 /** The canonical record this work item is about. */
 export interface WorkEntityRef {
   type: 'purchase_order' | 'compliance_document' | 'invoice' | 'deduction'
       | 'shipment' | 'return' | 'prospect' | 'contract' | 'application'
-      | 'onboarding' | 'commercial_readiness' | 'none';
+      | 'onboarding' | 'commercial_readiness'
+      /** §P3 — a founder-console action (company register, funding route, …). */
+      | 'founder_action'
+      | 'none';
   id: string;
   /** Human reference (PO number, document type, brand name). */
   label: string;
+}
+
+/**
+ * §P3 — the auditable WHY behind a founder-console item's rank.
+ *
+ * Ported unchanged from the retired Command Centre so the founder sees the SAME
+ * declared arithmetic in the single action list: each factor records the value
+ * it was actually observed from, and the score is the sum of those points. No
+ * model call, nothing invented.
+ */
+export interface WorkWhyFactor {
+  id: string;
+  label: string;
+  observed: string;
+  points: number;
+}
+
+export interface WorkWhy {
+  factors: WorkWhyFactor[];
+  score: number;
 }
 
 /** One immutable line of the item's own history. */
@@ -82,6 +130,26 @@ export interface WorkItem {
   entity: WorkEntityRef;
   /** Existing destination view the operator acts in (never a new screen). */
   actionView: string;
+  /**
+   * §P3 — the Super-Admin TAB the destination must open (the retired Command
+   * Centre's "no hunting through five screens" guarantee), carried on the item
+   * so the single action list keeps it.
+   */
+  navTab?: string;
+  /**
+   * §P3 — founder-console rank and WHY, ported from the retired Command Centre.
+   * Present only on founder-console items; absence means "not a ranked item".
+   */
+  rank?: number;
+  why?: WorkWhy;
+  /**
+   * §P3 — TRUE for founder-console items (company register, funding routes,
+   * applications, integrations, cost protection …). These describe Super-Admin
+   * surfaces, so `getWorkItems` EXCLUDES them unless the caller positively
+   * declares a Super-Admin session: the work list can never leak a founder-only
+   * record to an ordinary admin session.
+   */
+  superAdminOnly?: boolean;
   /** Derived items are resolved by override; manual items are edited directly. */
   derived: boolean;
   activity: WorkActivityEntry[];
