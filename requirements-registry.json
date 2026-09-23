@@ -12,7 +12,7 @@
    "deferred",
    "blocked"
   ],
-  "total_entries": 472,
+  "total_entries": 480,
   "founder_os_sprint": {
    "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
    "added": [
@@ -345,13 +345,36 @@
    "note": "A status of `built_and_tested` in this registry means the capability is implemented and verified LOCALLY (code + tests + browser where applicable). It is NOT a claim of three-way completion: no product row may be read as deployed or live-verified unless the demo leg has been verified per \u00a710.",
    "recorded": "2026-09-22"
   },
+  "cline_skill_system_increment": {
+  "increment": "ADDITIVE Cline skill system + task-triage router (2026-09-23, session 18)",
+  "added": [
+   "governance-cline-skill-system",
+   "governance-task-triage-router",
+   "governance-cline-skill-compat-layer",
+   "governance-cline-skill-validator",
+   "governance-cline-skill-upstream-provenance"
+  ],
+  "preserved_unchanged": [
+   ".clinerules/operating-model.md",
+   ".clinerules/protection-rules.md",
+   ".clinerules/project-state-contract.md",
+   ".clinerules/mercenta-business-model.md",
+   ".clinerules/always-export-review-zip.md",
+   "the CURRENT RESUME STATE mechanism and its five synchronised sources"
+  ],
+  "application_files_changed": "NONE",
+  "completion_status": "VERIFIED COMMITTED CHECKPOINT \u2014 THREE-WAY NOT APPLICABLE (no application runtime change)",
+  "commit": "2570761",
+  "documentation": "docs/CLINE_SKILL_SYSTEM.md",
+  "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) \u2014 loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
+ },
   "status_counts": {
-   "not_started": 66,
+   "built_and_tested": 276,
    "built": 126,
-   "built_and_tested": 259,
+   "not_started": 62,
    "regressed": 2,
-   "in_progress": 3,
-   "deferred": 7,
+   "deferred": 8,
+   "in_progress": 2,
    "blocked": 4
   },
   "dashboard_logistics_cleanup_programme": {
@@ -4866,6 +4889,51 @@
    "evidence": "src/lib/commerce/channelInstructions.ts (instructionLineFor) · src/lib/commerce/proxyProcessor.ts (ASN cartons follow the instruction's acknowledged volumes) · scripts/validate-proxy-model.mjs ('an absent ackStatus on a live PO derives ACCEPTED with the ordered quantity' + the synthetic rejected-PO rule) · e2e/proxy-model.spec.ts test 3 and e2e/shipment-asn.spec.ts tests 1-2 pass on seeded data",
    "last_verified": "2026-09-23",
    "superseded_by": null
-  }
+  },
+  {
+  "id": "governance-cline-skill-system",
+  "description": "ADDITIVE (2026-09-23, session 18): a specialist skill layer installed in `.agents/skills/` \u2014 a project directory the installed Cline 4.1.20 enumerates (verified in its own bundle: .clinerules/skills, .cline/skills, .claude/skills, .agents/skills) and the official `skills` CLI's `cline` agent target. 16 skills: 10 verbatim upstream UI skills (frontend-design \u00b7 apple-design \u00b7 emil-design-eng \u00b7 beautiful-shadows \u00b7 accessibility \u00b7 design-review \u00b7 shadcn \u00b7 impeccable, the upstream home of `adapt` \u00b7 better-interface \u00b7 interaction-design) and 6 first-party (business-analyst \u00b7 project-manager \u00b7 senior-software-architect \u00b7 senior-software-engineer \u00b7 ux-product-analyst \u00b7 skill-router). Installed with `npx skills add \u2026 --agent cline -y --copy`; skills-lock.json records the upstream repo + content hash per skill. No existing rule, resume mechanism or application file was modified.",
+  "status": "built_and_tested",
+  "source": "Additive Cline skill system installation (2026-09-23, session 18)",
+  "evidence": "node scripts/validate-cline-skills.mjs \u2192 CLINE_SKILLS_VALIDATION_PASS (152 assertions, 0 network calls) \u00b7 negative test: an unknown frontmatter field + an edited vendored upstream file \u2192 CLINE_SKILLS_VALIDATION_FAIL (2 of 152), restored \u2192 PASS \u00b7 npm run typecheck 0 \u00b7 npm run lint 0 \u00b7 npm run validate:wording PASS (299 src files, 0 violations) \u00b7 npm run build \u2713 (5.17s) \u00b7 commit 2570761 \u00b7 docs/CLINE_SKILL_SYSTEM.md \u00a71-\u00a75 \u00b7 skills-lock.json (10 upstream sources recorded, whose agreement the validator asserts)",
+  "last_verified": "2026-09-23",
+  "superseded_by": null
+ },
+  {
+  "id": "governance-task-triage-router",
+  "description": "ADDITIVE: the task-triage layer that runs before repository exploration. `.clinerules/task-triage-and-skill-router.md` is always active (a rule, so it survives context compaction) and classifies every request as QUESTION / ANALYZE / PLAN / IMPLEMENT, enforces the minimum-context rule (resume from PROJECT_STATUS.md \u2192 CURRENT RESUME STATE; targeted grep over directory sweeps), requires real skill invocation rather than impersonation, keeps broad-language protection (a wide request is a PLAN until its scope is approved), restates REMOVE \u2192 CONSOLIDATE \u2192 REUSE \u2192 SIMPLIFY before ADD \u2192 EXPAND \u2192 DUPLICATE, and inserts triage into the unchanged \"continue, where you left off\" resume flow. The routing procedure, routing tables and worked examples live in the on-demand skill `.agents/skills/skill-router/SKILL.md`.",
+  "status": "built_and_tested",
+  "source": "Additive Cline skill system installation (2026-09-23, session 18)",
+  "evidence": "node scripts/validate-cline-skills.mjs \u2192 CLINE_SKILLS_VALIDATION_PASS (152 assertions, 0 network calls) \u00b7 negative test: an unknown frontmatter field + an edited vendored upstream file \u2192 CLINE_SKILLS_VALIDATION_FAIL (2 of 152), restored \u2192 PASS \u00b7 npm run typecheck 0 \u00b7 npm run lint 0 \u00b7 npm run validate:wording PASS (299 src files, 0 violations) \u00b7 npm run build \u2713 (5.17s) \u00b7 commit 2570761 \u00b7 the validator asserts every routed skill exists and every installed skill is routed (no drift in either direction) \u00b7 docs/CLINE_SKILL_SYSTEM.md \u00a710",
+  "last_verified": "2026-09-23",
+  "superseded_by": null
+ },
+  {
+  "id": "governance-cline-skill-compat-layer",
+  "description": "ADDITIVE: the thin Cline/DeepSeek compatibility layer for upstream skills authored against other harnesses. Upstream bodies are never rewritten. `.agents/skills/CLINE-COMPAT.md` holds the global translation table (no TodoWrite; no subagent/Task tool; Claude-only tool names \u2192 this session's tools; plugin/slash installs \u2192 skill files; full-repo sweeps \u2192 minimum context; assumed browser feedback \u2192 stated as unverified). Two per-skill notes are genuinely required: `shadcn` (upstream declares `user-invocable: false` and `allowed-tools`, which Cline's loader rejects, so its body is preserved unchanged at `SKILL.upstream.md` behind a thin adapter SKILL.md) and `impeccable` (upstream branches on harness and ships its own degraded inline roles for harnesses without a sub-agent tool \u2014 Cline maps to that existing branch).",
+  "status": "built_and_tested",
+  "source": "Additive Cline skill system installation (2026-09-23, session 18)",
+  "evidence": "node scripts/validate-cline-skills.mjs \u2192 CLINE_SKILLS_VALIDATION_PASS (152 assertions, 0 network calls) \u00b7 negative test: an unknown frontmatter field + an edited vendored upstream file \u2192 CLINE_SKILLS_VALIDATION_FAIL (2 of 152), restored \u2192 PASS \u00b7 npm run typecheck 0 \u00b7 npm run lint 0 \u00b7 npm run validate:wording PASS (299 src files, 0 violations) \u00b7 npm run build \u2713 (5.17s) \u00b7 commit 2570761 \u00b7 .agents/skills/CLINE-COMPAT.md \u00b7 .agents/skills/shadcn/CLINE-COMPAT.md + SKILL.upstream.md \u00b7 .agents/skills/impeccable/CLINE-COMPAT.md \u00b7 the validator asserts an adapter's upstream body exists and that its SKILL.md declares itself an adapter",
+  "last_verified": "2026-09-23",
+  "superseded_by": null
+ },
+  {
+  "id": "governance-cline-skill-validator",
+  "description": "ADDITIVE: `scripts/validate-cline-skills.mjs` is the gate that makes the skill layer real rather than declared. It fails when a scanned directory holds a malformed member (a directory without SKILL.md, or a stray root file), when a SKILL.md lacks frontmatter or declares a field Cline rejects (allowed: name, description, license, compatibility, metadata, allowed-tools), when a skill's `name` does not match its directory, when a description is missing or over 1024 characters, when an adapter skill has lost its upstream body, when a vendored upstream file no longer matches `UPSTREAM-PROVENANCE.json`, when the router and the installed skills drift apart in either direction, or when `skills-lock.json` no longer records an upstream source.",
+  "status": "built_and_tested",
+  "source": "Additive Cline skill system installation (2026-09-23, session 18)",
+  "evidence": "node scripts/validate-cline-skills.mjs \u2192 CLINE_SKILLS_VALIDATION_PASS (152 assertions, 0 network calls) \u00b7 negative test: an unknown frontmatter field + an edited vendored upstream file \u2192 CLINE_SKILLS_VALIDATION_FAIL (2 of 152), restored \u2192 PASS \u00b7 npm run typecheck 0 \u00b7 npm run lint 0 \u00b7 npm run validate:wording PASS (299 src files, 0 violations) \u00b7 npm run build \u2713 (5.17s) \u00b7 commit 2570761 \u00b7 the negative test proves the gate fails on injected defects rather than passing vacuously (152 assertions on the clean tree)",
+  "last_verified": "2026-09-23",
+  "superseded_by": null
+ },
+  {
+  "id": "governance-cline-skill-upstream-provenance",
+  "description": "ADDITIVE: `.agents/skills/UPSTREAM-PROVENANCE.json` records a SHA-256 for every file of every vendored upstream skill (10 skills), so that \"the upstream skill was used, not a local imitation\" is a checkable fact rather than a claim. Two source-resolution notes are recorded so a future session cannot silently re-invent them: `adapt` \u2014 the ui-skills install line `--skill adapt` no longer resolves because pbakaus/impeccable consolidated it into the single `impeccable` skill (`reference/adapt.md`), so `adapt` is routed to the verbatim upstream `impeccable` skill; and `beautiful-shadows` \u2014 that repo nests its skills two levels deep (`agent-skills/web-design/beautiful-shadows`), so it was installed through the explicit tree URL.",
+  "status": "built_and_tested",
+  "source": "Additive Cline skill system installation (2026-09-23, session 18)",
+  "evidence": "node scripts/validate-cline-skills.mjs \u2192 CLINE_SKILLS_VALIDATION_PASS (152 assertions, 0 network calls) \u00b7 negative test: an unknown frontmatter field + an edited vendored upstream file \u2192 CLINE_SKILLS_VALIDATION_FAIL (2 of 152), restored \u2192 PASS \u00b7 npm run typecheck 0 \u00b7 npm run lint 0 \u00b7 npm run validate:wording PASS (299 src files, 0 violations) \u00b7 npm run build \u2713 (5.17s) \u00b7 commit 2570761 \u00b7 ROUTER_ALIASES in scripts/validate-cline-skills.mjs records the `adapt` \u2192 `impeccable` mapping and its reason \u00b7 docs/CLINE_SKILL_SYSTEM.md \u00a73",
+  "last_verified": "2026-09-23",
+  "superseded_by": null
+ }
  ]
 }

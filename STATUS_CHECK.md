@@ -26,10 +26,38 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P5 DONE (the Mercenta Hub removed; the destination is the FC on the purchase order)** (2026-09-23, session 17)
+## CURRENT STATE — **GOVERNANCE: the ADDITIVE CLINE SKILL SYSTEM + TASK-TRIAGE ROUTER** (2026-09-23, session 18) — **P5 remains the last PRODUCT work**
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
+
+**Checkpoint (this increment):** **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime
+change)** at **`2570761`** ("governance(skills): additive Cline skill system + task-triage router"): `node
+scripts/validate-cline-skills.mjs` → **PASS (152 assertions, 0 network calls)**; injected-defect negative test → **FAIL
+(2 of 152)**, restored → PASS; `npm run typecheck` **0 errors** · `npm run lint` **0** · `npm run validate:wording`
+**PASS (299 src files, 0 violations)** · `npm run build` **✓ (5.17s)**. **No application file was modified** — the
+increment adds 5 new paths (`.agents/`, `.clinerules/task-triage-and-skill-router.md`, `docs/CLINE_SKILL_SYSTEM.md`,
+`scripts/validate-cline-skills.mjs`, `skills-lock.json`) and touches nothing under `src/`, `e2e/` or `supabase/`.
+Deployment to `demo.mercenta.co.uk` is **NOT APPLICABLE** for a governance/docs-only increment; the demo still serves
+the verified P5 build at `f07a63f`. Reference: `docs/CLINE_SKILL_SYSTEM.md`.
+
+**What this increment added:** 10 verbatim upstream UI skills in `.agents/skills/` (a directory the installed Cline
+4.1.20 scans, and the official `skills` CLI's `cline` target) — frontend-design · apple-design · emil-design-eng ·
+beautiful-shadows · accessibility · design-review · shadcn · impeccable (the upstream home of `adapt`) ·
+better-interface · interaction-design — installed with `npx skills add … --agent cline -y --copy` and pinned by
+SHA-256 in `UPSTREAM-PROVENANCE.json`; 5 specialist skills (business-analyst · project-manager ·
+senior-software-architect · senior-software-engineer · ux-product-analyst) plus `skill-router`; the always-active
+triage rule `.clinerules/task-triage-and-skill-router.md` (QUESTION / ANALYZE / PLAN / IMPLEMENT + minimum-context +
+real-invocation + broad-language protection); a thin Cline/DeepSeek compatibility layer (global table, `shadcn`
+adapter with the upstream body preserved at `SKILL.upstream.md`, `impeccable` note); and the gate
+`scripts/validate-cline-skills.mjs`. **No existing rule, resume mechanism or project-state structure was changed.**
+Honest limitation: a live `use_skill` invocation could not be executed in this session (the tool is absent from this
+session's toolset and the Cline UI cannot be driven from here) — loadability is verified, invocation is to be
+confirmed in the next session via `/` in the chat input.
+
+---
+
+## PRODUCT CHECKPOINT — **P5 DONE (the Mercenta Hub removed; the destination is the FC on the purchase order)** (2026-09-23, session 17)
 
 **Checkpoint:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** for the P5 implementation at **`f07a63f`**: local runtime
 verified = `origin/redesign/foundation` at `f07a63f` (`36844ab..f07a63f`, exit 0) = the deployed build at
