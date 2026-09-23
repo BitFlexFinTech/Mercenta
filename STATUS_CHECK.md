@@ -26,36 +26,43 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **GOVERNANCE: the ADDITIVE CLINE SKILL SYSTEM + TASK-TRIAGE ROUTER** (2026-09-23, session 18) — **P5 remains the last PRODUCT work**
+## CURRENT STATE — **P6 DONE: THE PO DOCUMENT PACK (automatic on acceptance) + THE DOCUMENTED COLLECT CHAIN** (2026-09-23, session 19)
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
-**Checkpoint (this increment):** **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime
-change)** at **`2570761`** ("governance(skills): additive Cline skill system + task-triage router"), recorded by the state
-commit **`3b518d0`**, pushed to `origin/redesign/foundation` (`3585790..3b518d0`, exit 0; `git ls-remote` = `3b518d0…` =
-local HEAD): `node
-scripts/validate-cline-skills.mjs` → **PASS (152 assertions, 0 network calls)**; injected-defect negative test → **FAIL
-(2 of 152)**, restored → PASS; `npm run typecheck` **0 errors** · `npm run lint` **0** · `npm run validate:wording`
-**PASS (299 src files, 0 violations)** · `npm run build` **✓ (5.17s)**. **No application file was modified** — the
-increment adds 5 new paths (`.agents/`, `.clinerules/task-triage-and-skill-router.md`, `docs/CLINE_SKILL_SYSTEM.md`,
-`scripts/validate-cline-skills.mjs`, `skills-lock.json`) and touches nothing under `src/`, `e2e/` or `supabase/`.
-Deployment to `demo.mercenta.co.uk` is **NOT APPLICABLE** for a governance/docs-only increment; the demo still serves
-the verified P5 build at `f07a63f`. Reference: `docs/CLINE_SKILL_SYSTEM.md`.
+**Checkpoint (this increment):** **P6 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`** — application
+work, verified and committed; the three-way leg (deploy + live verification) is recorded in the resume block.
 
-**What this increment added:** 10 verbatim upstream UI skills in `.agents/skills/` (a directory the installed Cline
-4.1.20 scans, and the official `skills` CLI's `cline` target) — frontend-design · apple-design · emil-design-eng ·
-beautiful-shadows · accessibility · design-review · shadcn · impeccable (the upstream home of `adapt`) ·
-better-interface · interaction-design — installed with `npx skills add … --agent cline -y --copy` and pinned by
-SHA-256 in `UPSTREAM-PROVENANCE.json`; 5 specialist skills (business-analyst · project-manager ·
-senior-software-architect · senior-software-engineer · ux-product-analyst) plus `skill-router`; the always-active
-triage rule `.clinerules/task-triage-and-skill-router.md` (QUESTION / ANALYZE / PLAN / IMPLEMENT + minimum-context +
-real-invocation + broad-language protection); a thin Cline/DeepSeek compatibility layer (global table, `shadcn`
-adapter with the upstream body preserved at `SKILL.upstream.md`, `impeccable` note); and the gate
-`scripts/validate-cline-skills.mjs`. **No existing rule, resume mechanism or project-state structure was changed.**
-Honest limitation: a live `use_skill` invocation could not be executed in this session (the tool is absent from this
-session's toolset and the Cline UI cannot be driven from here) — loadability is verified, invocation is to be
-confirmed in the next session via `/` in the chat input.
+**What this increment added:** the **PO document pack**, produced **automatically when Mercenta accepts a PO**
+(programme decisions 6 and 9) and surfaced as **"Documents for this PO"** on the brand Logistics Hub.
+`src/lib/documents/poDocumentPack.ts` (NEW) is the ONE owner: eight documents — **SSCC carton labels · carrier label ·
+freight waybill · packing list/delivery note · ASN sheet · the three customs documents** — each with its applicability
+and readiness **and a stated reason** when either is negative, and the renderer that presents it.
+`src/lib/documents/sscc.ts` (NEW) is the ONE owner of the carton identifier: the published **GS1 mod-10 check digit**, a
+deterministic serial from PO number + carton index (a reprint is byte-identical) and an explicitly **UNASSIGNED
+placeholder GS1 prefix** (`0000000`, `XX-PENDING-GS1-LICENCE` on every label — `PRODUCTION_READINESS.md` records the
+credential that replaces it). Customs documents are **delegated** to the existing owner and apply to **international
+lanes only**; a UK lane still LISTS them with the reason. Every document names the FC **the purchase order declares**
+(P5) and an undeclared PO fails closed. The acceptance path generates the pack in the same action that files the ASN,
+records `documentsGeneratedAt`/`documentCount`/`documentsReady` as **evidence only** (the pack is derived on read — no
+second copy to drift) and emits the canonical **`po_documents_ready`** event. The brand's Logistics Hub **nav badge**
+and the **notification centre** carry the document-download queue from **one shared rule**
+(`documentsAwaitingDownload`); the admin rail deliberately has **no** logistics badge, because its destination renders
+`LogisticsControl`, which lists no document queue (§P3's badge rule).
+
+`src/lib/shipping/collectChain.ts` (NEW) adds the **documented collect chain** (request → carrier assigned → ARN →
+pickup) with the channel's **two-business-day** pickup rule (register `AV-014`, weekend-skipping) — and **refuses to
+invent an ARN**: the channel-produced steps are read from `ChannelInstructionOutcome.routingInstructions` and report
+`awaiting_channel` until that record genuinely carries them (populating it via `getShipmentDetails` is **P12's**
+declared scope).
+
+**Verification (this session):** `scripts/validate-po-documents.mjs` (**NEW**, `npm run validate:po-documents`) →
+**PASS (50 assertions, 0 network calls)**, and it was **proved able to fail** (check-digit arithmetic broken → FAIL 2 of
+50; restored → PASS); `e2e/po-documents.spec.ts` (**NEW**) → **6 passed**; focused browser run → **42 passed / 0
+failed**; **every validator in `scripts/validate-*.mjs` exits 0**; `tsc` app **0** + node **0**; `eslint .` **0**;
+`npm run build` **✓**; `validate:wording` **PASS (303 files, 0 violations)**. The E6/E7 change-scope guards gained the
+declared **P6 scope** (`P6_PO_DOCUMENT_PACK_SCOPE` / `P6_PO_DOCUMENT_PACK_DECLARED`) with their contracts **unchanged**.
 
 ---
 
@@ -1079,6 +1086,37 @@ Stages 1–16 are all open. The single biggest blocker for Stage 1 is external: 
 5. **Delivery performance** — `src/lib/logistics/deliveryPerformance.ts`; "No sample yet" rather than a fabricated rate; verified vs simulated separated; KPI drill-downs added.
 6. **New gates** — `scripts/validate-wave3-logistics.mjs` (`npm run validate:wave3-logistics`, 56 assertions executing the real modules with `fetch` sabotaged) and `e2e/logistics-wave3.spec.ts` (6 browser tests). `e2e/shipment-asn.spec.ts` #3 REPOINTED.
 7. **Two defects fixed inside the increment** — the PARTIAL_PO simulation used the retired carrier `fedex` (so it silently produced no shipment/deduction) and now derives the carrier from the lane rule; the `collect` `detail` copy in `src/config/logisticsGeo.ts` contradicted the canonical override contract and was corrected.
+
+### Session 2026-09-23 (session 19) — P6: the PO document pack (automatic on acceptance) + the documented collect chain
+
+**Scope:** P6 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (application work) — decisions 6 and 9;
+matrix `D10-10`.
+
+**Built:** `src/lib/documents/poDocumentPack.ts` (NEW — the ONE owner of the pack: eight documents, each with a stated
+reason when it is not applicable or not ready, plus the ONE `documentsAwaitingDownload` rule) · `src/lib/documents/sscc.ts`
+(NEW — the ONE SSCC-18 owner: published GS1 mod-10 check digit, deterministic serial from PO + carton index, explicitly
+UNASSIGNED placeholder prefix) · `src/lib/shipping/collectChain.ts` (NEW — the documented request → carrier assigned →
+ARN → pickup chain, the channel's two-business-day pickup rule (AV-014), and a hard refusal to fabricate an ARN) ·
+`src/components/shared/logistics/PoDocumentPackPanel.tsx` (NEW — "Documents for this PO" + the collect chain, printable
+previews, opening the EXISTING waybill/label dialogues) · the acceptance path generates the pack and emits the canonical
+`po_documents_ready` event (`proxyProcessor`, `events/types`, `events/eventFeed`) · the brand Logistics Hub badge and the
+notification centre carry the download queue from the shared rule (`navBadges`, `NotificationCenter`) · `src/types.ts`
+gains `routingInstructions`, `routingRequest.requestedPickUp` and the pack-generation evidence fields · `customsDocs`
+`DocContext.products` widened from the demo-only `DemoProduct` to the base `Product` (no behaviour change).
+
+**Gates:** `scripts/validate-po-documents.mjs` (NEW) → **PASS (50 assertions, 0 network calls)**; negative test (check
+digit mod 10 → mod 9) → **FAIL (2 of 50)**, restored → PASS · `e2e/po-documents.spec.ts` (NEW) → **6 passed** · E6/E7
+guards gained the declared P6 scope with their contracts unchanged · every validator in `scripts/validate-*.mjs` **exits
+0** · focused browser run **42 passed / 0 failed** · `tsc` 0 + 0 · `eslint .` 0 · `build` ✓ · wording PASS (303 files).
+
+**Honest limits:** the collect chain's channel steps cannot advance without a live channel connection (no ARN is
+invented; populating `routingInstructions` via `getShipmentDetails` is P12's declared scope) · the SSCC prefix is a
+declared placeholder (no GS1 licence) · the waybill/label stay the existing printable templates and are reported not
+ready until a carrier books the consignment.
+
+**Status / checkpoint / deploy / live verification:** recorded in the `CURRENT RESUME STATE` block at the top of
+`PROJECT_STATUS.md`.
+
 8. **Registry** — 448 → **451 entries**; 3 `discovered-*` rows moved to `built_and_tested`, 3 new rows added.
 
 **Evidence:** tsc app+root 0 errors · eslint 0 problems · build PASS · wave3-logistics 56/0 · logistics-map 60/0 · logistics-hero 53 · provider-safety PASS · wording PASS · typography 17 · workspace-shell 92/0 · canonical-propagation 25/0 · routing 101/0 · Playwright 37 + 23 + 19 passed · FULL suite 453 passed / 6 failed / 2 skipped (the 6 were load timeouts; **69/69 pass in isolation**).

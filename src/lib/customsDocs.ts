@@ -15,8 +15,7 @@ import {
   MERCENTA_REGISTERED_ADDRESS,
   DEFAULT_INCOTERMS,
 } from '@/config/customs';
-import type { PurchaseOrder } from '@/types';
-import type { DemoProduct } from '@/data/demoData';
+import type { Product, PurchaseOrder } from '@/types';
 
 export type CustomsDocType = 'commercial_invoice' | 'packing_list' | 'ukca_declaration';
 
@@ -33,7 +32,14 @@ export interface CustomsDocumentBundle {
 interface DocContext {
   po: PurchaseOrder;
   brandName: string;
-  products: DemoProduct[];
+  /**
+   * The catalogue products the PO's lines refer to. Typed as the BASE `Product`
+   * (§P6): this module reads only `sku`, `vatStatus`, dimensions and weight, so
+   * requiring the demo-only `DemoProduct` narrowed the contract without need and
+   * forced callers to hold a demo type. `DemoProduct` extends `Product`, so every
+   * existing caller is unaffected.
+   */
+  products: Product[];
 }
 
 function headerRows(ctx: DocContext) {

@@ -183,6 +183,115 @@ check('the deployed admin Overview h1 reads "Overview" (not "Operations Overview
   adminH1s.includes('Overview') && !adminH1s.includes('Operations Overview'),
   `h1s=${adminH1s.slice(0, 3).join(' | ')}`);
 
+/* ── 7. §P6 — THE DEPLOYED DOCUMENT PACK + THE COLLECT CHAIN ─────────────── */
+
+/**
+ * The P6 live leg: the changed functionality must be present ON the deployed
+ * build. The brand accepts a PO, follows the product's own "Open shipping
+ * documents" hand-off, and the pack must be there — with honest readiness (SSCC
+ * ready because Mercenta generated them from the ASN it filed; the waybill NOT
+ * ready because no carrier has booked one) and the SSCC labels printing complete
+ * 18-digit identifiers under the stated placeholder prefix.
+ */
+await page.goto(`${BASE}/brand/purchase-orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await page.waitForTimeout(3000);
+const liveAck = page.locator('button', { hasText: 'Acknowledge' }).first();
+const liveAckOpened = await liveAck.click().then(() => true).catch(() => false);
+if (liveAckOpened) {
+  await page.waitForTimeout(600);
+  await page.locator('button', { hasText: 'Submit acknowledgment' }).first().click().catch(() => {});
+  await page.waitForTimeout(2500);
+}
+const liveCta = page.locator('[data-testid^="po-open-documents-"]').first();
+const liveCtaOpened = await liveCta.click().then(() => true).catch(() => false);
+await page.waitForTimeout(3000);
+const livePack = page.locator('[data-testid="po-documents-panel"]').first();
+const livePackVisible = await livePack
+  .waitFor({ state: 'visible', timeout: 12000 })
+  .then(() => true)
+  .catch(() => false);
+check('§P6 the deployed build offers "Open shipping documents" after acceptance', liveCtaOpened);
+check('§P6 the deployed Logistics Hub renders "Documents for this PO"', livePackVisible);
+
+const livePackText = livePackVisible ? await livePack.innerText().catch(() => '') : '';
+check('§P6 every document the pack declares is listed on the deployed build',
+  ['SSCC carton labels', 'Carrier shipping label', 'Freight waybill', 'Packing list & delivery note', 'ASN sheet']
+    .every((title) => livePackText.includes(title)),
+  livePackText.replace(/\s+/g, ' ').slice(0, 200));
+check('§P6 the deployed pack names NO Mercenta site as the destination',
+  !/Mercenta\s+(UK\s+)?(Distribution\s+)?Hub/i.test(livePackText));
+const liveSsccStanding = await page
+  .locator('[data-testid="po-document-status-sscc_carton_labels"]')
+  .getAttribute('data-standing')
+  .catch(() => null);
+const liveWaybillStanding = await page
+  .locator('[data-testid="po-document-status-freight_waybill"]')
+  .getAttribute('data-standing')
+  .catch(() => null);
+check('§P6 the deployed SSCC labels are READY (generated from the filed ASN)',
+  liveSsccStanding === 'ready', String(liveSsccStanding));
+check('§P6 the deployed waybill is honestly NOT READY (no carrier booking exists)',
+  liveWaybillStanding === 'not_ready', String(liveWaybillStanding));
+
+const liveSsccOpened = await page
+  .locator('[data-testid="po-document-open-sscc_carton_labels"]')
+  .click()
+  .then(() => true)
+  .catch(() => false);
+let liveSsccText = '';
+if (liveSsccOpened) {
+  const liveFrame = page.locator('[data-testid="po-document-frame"]').first();
+  const liveFrameVisible = await liveFrame
+    .waitFor({ state: 'visible', timeout: 10000 })
+    .then(() => true)
+    .catch(() => false);
+  if (liveFrameVisible) {
+    const frame = page.frameLocator('[data-testid="po-document-frame"]').first();
+    liveSsccText = await frame.locator('body').innerText().catch(() => '');
+  }
+  const placeholderNotice = await page
+    .locator('[data-testid="po-document-placeholder-notice"]')
+    .innerText()
+    .catch(() => '');
+  check('§P6 the deployed SSCC label document states the unassigned GS1 placeholder prefix',
+    /XX-PENDING-GS1-LICENCE/.test(placeholderNotice), placeholderNotice.slice(0, 120));
+  await page.keyboard.press('Escape').catch(() => {});
+}
+const liveIdentifiers = liveSsccText.match(/\b0{8}\d{10}\b/g) ?? [];
+check('§P6 the deployed SSCC labels print complete 18-digit identifiers per carton',
+  liveIdentifiers.length > 0 && liveIdentifiers.every((i) => i.length === 18),
+  `${liveIdentifiers.length} identifier(s)`);
+check('§P6 the deployed brand rail carries the document-download badge',
+  (await page.locator('[data-testid="nav-badge-logistics"]').count().catch(() => 0)) > 0);
+check('no uncaught page error on the deployed P6 document-pack flow',
+  pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '));
+
+/**
+ * The collect chain on the deployed build: the seeded Freight Collect PO shows the
+ * documented order, and the channel steps say "awaiting the channel" — the
+ * deployed build must not present an ARN it does not have.
+ */
+await page.goto(`${BASE}/brand/logistics?po=PO-9200`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await page.waitForTimeout(3500);
+const liveChain = page.locator('[data-testid="collect-chain"]').first();
+const liveChainVisible = await liveChain
+  .waitFor({ state: 'visible', timeout: 12000 })
+  .then(() => true)
+  .catch(() => false);
+const liveChainText = liveChainVisible ? await liveChain.innerText().catch(() => '') : '';
+check('§P6 the deployed collect lane renders the documented chain', liveChainVisible);
+check('§P6 the deployed chain states the channel pickup lead time (two business days)',
+  /at least two business days/i.test(liveChainText));
+const liveArnState = await page
+  .locator('[data-testid="collect-step-arn"]')
+  .getAttribute('data-state')
+  .catch(() => null);
+check('§P6 the deployed ARN step awaits the channel — no fabricated ARN',
+  liveArnState === null || liveArnState === 'awaiting_channel' || liveArnState === 'not_applicable',
+  String(liveArnState));
+check('§P6 the deployed collect lane presents no ARN value',
+  !/ARN\s+[A-Z0-9-]{4,}/.test(liveChainText));
+
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
 console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length}`);

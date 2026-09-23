@@ -28,6 +28,7 @@ import { fetchComplianceDocuments, fetchPurchaseOrders } from '@/data/api';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { complianceDocStatusPresentation, poStatusPresentation } from '@/lib/statusPresentation';
 import { renewalUrgency } from '@/lib/contracts';
+import { documentsAwaitingDownload } from '@/lib/documents/poDocumentPack';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import {
   overdueWorkItems,
@@ -85,6 +86,16 @@ export function useAdminNavBadges(opts?: { superAdmin?: boolean }): NavBadgeMap 
     contracts_admin: contractsAll.filter((c) => renewalUrgency(c.renewalDate, nowIso) !== 'ok')
       .length,
     helpdesk: demoTickets.filter((t) => t.status === 'open' || t.status === 'pending').length,
+    /**
+     * §P6 — DELIBERATELY NO `logistics` badge in the ADMIN map.
+     *
+     * The brand's Logistics Hub IS the document-download destination (decision 6),
+     * so its badge counts the download queue. The admin rail's `logistics`
+     * destination renders the OPERATIONS control surface (`LogisticsControl`),
+     * which does not list a document queue — and §P3's rule is that a badge counts
+     * the SAME item set its destination renders. A badge here would therefore
+     * point at something the destination does not show, so it is not declared.
+     */
     work: workBadges.work,
     calendar: workBadges.calendar,
   };
@@ -119,6 +130,11 @@ export function useBrandNavBadges(enabled = true): NavBadgeMap {
   return {
     purchase_orders: ownPos.filter((p) => poStatusPresentation(p.status).actionable).length,
     compliance: ownDocs.filter((d) => complianceDocStatusPresentation(d.status).actionable).length,
+    /**
+     * §P6 — the brand's OWN document-download queue (same ONE rule as admin, but
+     * narrowed to this tenant by `assertBrandScope`, which fails closed).
+     */
+    logistics: ownPos.filter(documentsAwaitingDownload).length,
     work: workBadges.work,
     calendar: workBadges.calendar,
   };

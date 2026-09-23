@@ -29,6 +29,7 @@
     "validate:kb-sufficiency": "node scripts/validate-kb-sufficiency.mjs",
     "validate:provider-safety": "node scripts/validate-provider-mode-safety.mjs",
     "validate:proxy-model": "node scripts/validate-proxy-model.mjs",
+    "validate:po-documents": "node scripts/validate-po-documents.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs"
   },
   "dependencies": {

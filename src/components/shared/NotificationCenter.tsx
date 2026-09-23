@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Bell,
   CreditCard,
+  FileText,
   FileWarning,
   Gavel,
   Inbox,
@@ -25,6 +26,7 @@ import {
 } from '@/data/queries';
 import { isBorderline } from '@/lib/automation/scoringBridge';
 import { renewalUrgency } from '@/lib/contracts';
+import { documentsAwaitingDownload } from '@/lib/documents/poDocumentPack';
 import { useWorkItems } from '@/lib/work/useWork';
 import { WORK_SOURCE_LABELS } from '@/lib/work/workStore';
 
@@ -47,7 +49,7 @@ function useTenantScope(): string | null {
 
 export interface NotificationItem {
   id: string;
-  kind: 'po' | 'contract' | 'compliance' | 'deduction' | 'score' | 'submission' | 'shipment' | 'commerce' | 'work';
+  kind: 'po' | 'contract' | 'compliance' | 'deduction' | 'score' | 'submission' | 'shipment' | 'commerce' | 'work' | 'documents';
   title: string;
   detail: string;
   severity: 'high' | 'medium';
@@ -137,6 +139,35 @@ function useNotifications(): NotificationItem[] {
           detail: `${brandName(s.brandId)} · held for manual review`,
           severity: 'medium' as const,
         }))
+    )
+    .concat(
+      /**
+       * §P6 — THE DOCUMENT PACK IS READY AND NOT YET DOWNLOADED.
+       *
+       * Programme decisions 6/9: the pack is the Logistics Hub's core deliverable
+       * and it is produced automatically on acceptance, so the brand's remaining
+       * job is to download & print it before dispatch. Derived from the SAME ONE
+       * rule the Logistics Hub nav badge uses
+       * (`src/lib/documents/poDocumentPack.ts → documentsAwaitingDownload`), so a
+       * notification can never disagree with the badge or with the pack itself.
+       *
+       * BRAND SESSIONS ONLY (`tenantId !== null`): downloading and printing the
+       * documents is the BRAND's job, not Mercenta's — Mercenta has already filed
+       * the ASN and produced the pack, so surfacing it to admin as "attention"
+       * would be a false queue.
+       */
+      tenantId === null
+        ? []
+        : pos
+            .filter(documentsAwaitingDownload)
+            .map((p) => ({
+              id: `docs-${p.id}`,
+              kind: 'documents' as const,
+              title: `Shipping documents ready — ${p.poNumber}`,
+              detail: `${brandName(p.brandId)} · download & print before dispatch`,
+              severity: 'medium' as const,
+              navTarget: 'logistics',
+            }))
     );
 }
 
@@ -294,6 +325,7 @@ const KIND_ICON = {
   shipment: Truck,
   commerce: CreditCard,
   work: ListChecks,
+  documents: FileText,
 } as const;
 
 /**

@@ -1403,6 +1403,37 @@ export interface ChannelInstructionOutcome {
     /** TRUE when the channel books the carrier (Freight Collect). */
     channelArrangesCarrier: boolean;
     reference: string;
+    /**
+     * §P6 — the pickup date Mercenta requested when it raised the request.
+     *
+     * The channel documents that `requestedPickUp` must be "a date at least two
+     * business days after the current date" (register `AV-014`), so the date is
+     * computed by `src/lib/shipping/collectChain.ts → earliestRequestedPickUp`
+     * rather than typed in. It is the date the CHANNEL was asked for; it is not a
+     * confirmation that a pickup happened.
+     */
+    requestedPickUp?: string;
+  };
+  /**
+   * §P6 — the routing instructions the CHANNEL returned (Freight Collect only).
+   *
+   * Populated from the channel response (`GetShipmentDetails`), which carries the
+   * ARN and the pickup/carrier details and "only returns a response after carrier
+   * assignment". It is ABSENT until the channel genuinely returns one, and the
+   * collect chain reports `awaiting_channel` while it is — an ARN is never
+   * fabricated (`src/lib/shipping/collectChain.ts`).
+   */
+  routingInstructions?: {
+    /** The channel's Amazon Reference Number. */
+    arn?: string;
+    /** The carrier the channel assigned. */
+    carrier?: string;
+    /** When the channel assigned it (ISO). */
+    assignedAt?: string;
+    /** The pickup date the channel acknowledged, when it differs from the request. */
+    pickupDate?: string;
+    /** `mock` means NO live call occurred — recorded from the seam, never inferred. */
+    mode: 'mock' | 'real';
   };
   /** The ASN Mercenta filed (automatic on acceptance). */
   asn?: {
@@ -1417,6 +1448,21 @@ export interface ChannelInstructionOutcome {
      */
     deductionId?: string;
   };
+  /**
+   * §P6 — THE DOCUMENT PACK WAS GENERATED FOR THIS PO (programme decision 9:
+   * "on PO acceptance, the ASN/shipment/documents are AUTOMATIC").
+   *
+   * The pack itself is DERIVED on read from canonical state
+   * (`src/lib/documents/poDocumentPack.ts`) — it is deliberately not stored, so
+   * there can be no second copy to drift. These fields record only WHEN the
+   * automatic generation happened and how complete it was at that moment, which
+   * is the evidence the notification and the audit trail reference.
+   */
+  documentsGeneratedAt?: string;
+  /** Applicable documents at generation time. */
+  documentCount?: number;
+  /** How many of those were ready at generation time. */
+  documentsReady?: number;
   /** Present when Mercenta could not complete the action. */
   refusedReason?: string;
 }

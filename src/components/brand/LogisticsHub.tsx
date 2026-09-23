@@ -31,7 +31,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
 import { Badge, Button, Input, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useApp } from '@/context/GlobalStateContext';
-import { usePurchaseOrders, useShipmentsAll } from '@/data/queries';
+import { useBrands, useCanonicalStoreVersion, usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { BRAND_NAME } from '@/config/brand';
 import {
@@ -52,6 +52,13 @@ import {
 } from '@/lib/shipping/carrierEligibility';
 import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
 import { LogisticsHero } from '@/components/shared/logistics/LogisticsHero';
+/**
+ * §P6 — "Documents for this PO": the document pack surface. It renders the pack
+ * built by its ONE owner (`src/lib/documents/poDocumentPack.ts`) and opens the
+ * EXISTING waybill / label dialogues for the two artefacts they already render.
+ */
+import { PoDocumentPackPanel } from '@/components/shared/logistics/PoDocumentPackPanel';
+import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
 import {
   ContextPanel,
   RecordFieldList,
@@ -67,6 +74,7 @@ import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import {
   STAGE_LABELS,
   STATUS_LABELS,
+  type ChannelInstruction,
   type Shipment,
   type ShipmentStatus,
 } from '@/types';
@@ -584,6 +592,27 @@ export function LogisticsHub() {
   const [labelsShipment, setLabelsShipment] = useState<string | null>(null);
   /** §WAVE 3 — which derived-insight drill-down is open (metric tiles open these). */
   const [insight, setInsight] = useState<'performance' | 'eta' | null>(null);
+  /**
+   * §P6 — the canonical instruction store's change signal, plus the brand names
+   * the document pack prints. Mercenta's outcome (the ASN it filed, the routing
+   * request, the channel's routing instructions) lands on the instruction record,
+   * so the pack must re-read it the moment it changes — no reload.
+   */
+  const canonicalVersion = useCanonicalStoreVersion();
+  void canonicalVersion; // §P6 — canonical change signal → re-read Mercenta's outcome
+  const brandsQuery = useBrands();
+
+  /**
+   * The instruction Mercenta actioned for a PO. The ACKNOWLEDGEMENT is the PO's
+   * primary decision record (the same rule `BrandPurchaseOrders` uses), so the
+   * pack reads the ASN Mercenta actually filed rather than guessing one.
+   */
+  const instructionForPo = (poId: string): ChannelInstruction | undefined => {
+    const list = listChannelInstructions().filter((i) => i.purchaseOrderId === poId);
+    return list.find((i) => i.type === 'po_acknowledgement') ?? list[0];
+  };
+
+
 
   /**
    * §Tenant isolation — a brand session only ever reads its OWN purchase orders.
@@ -818,6 +847,25 @@ export function LogisticsHub() {
   }, [visibleLegs]);
 
   const selected = model.legs.find((l) => l.id === selectedId) ?? null;
+
+  /**
+   * §P6 — the purchase order behind the selected consignment, and the shipment
+   * row the carrier artefacts read from.
+   *
+   * A consignment is created FROM a purchase order (`shipment-${po.id}`), and the
+   * PO carries the destination the documents must name (P5). When no PO is in the
+   * tenant's scope, no pack applies — the surface says so rather than rendering a
+   * pack with an invented destination. The carrier reference comes from the same
+   * tenant-scoped row the map plotted, never from a second lookup.
+   */
+  const selectedPo = useMemo(
+    () => (selected?.poNumber ? poByNumber.get(selected.poNumber) ?? null : null),
+    [selected?.poNumber, poByNumber]
+  );
+  const selectedRow = useMemo(
+    () => (selected ? liveShipments.find((s) => s.id === selected.id) ?? null : null),
+    [selected, liveShipments]
+  );
 
   const statusOptions = useMemo(
     () => [
@@ -1288,6 +1336,53 @@ export function LogisticsHub() {
                 </div>
               </ContextPanel>
             )}
+            {/*
+              §P6 — "DOCUMENTS FOR THIS PO" (programme decisions 6 and 9).
+              The pack is the Logistics Hub's core deliverable: every document the
+              purchase order has, each with its own readiness, plus the documented
+              channel collect chain on a Freight Collect lane. It is built by its
+              ONE owner and opened through the EXISTING waybill/label dialogues.
+            */}
+            {selectedPo ? (
+              <ContextPanel title="Documents for this PO">
+                <div className="p-3">
+                  <PoDocumentPackPanel
+                    po={selectedPo}
+                    brandName={
+                      brandsQuery.data?.data.find((b) => b.id === selectedPo.brandId)?.profile
+                        .businessName ?? selectedPo.brandId
+                    }
+                    brandNation={
+                      brandsQuery.data?.data.find((b) => b.id === selectedPo.brandId)?.nation ?? null
+                    }
+                    products={products}
+                    carrier={{
+                      carrier: selected?.carrier ?? '',
+                      trackingNumber: selectedRow?.trackingNumber ?? null,
+                      waybill: selectedRow?.waybill ?? null,
+                    }}
+                    instruction={instructionForPo(selectedPo.id)}
+                    shipmentStatus={selected?.status ?? null}
+                    onOpenCarrierArtefact={(kind) =>
+                      kind === 'carrier_label'
+                        ? setLabelsShipment(selected?.id ?? '')
+                        : setWaybillShipment(selected?.id ?? '')
+                    }
+                  />
+                </div>
+              </ContextPanel>
+            ) : (
+              <ContextPanel title="Documents for this PO">
+                <div className="p-3" data-testid="po-documents-unavailable">
+                  <p className="text-ds-body text-zinc-500">
+                    This consignment is not linked to a purchase order in your scope, so no document
+                    pack applies. A document is only ever produced from a PO you own.
+                  </p>
+                </div>
+              </ContextPanel>
+            )}
+
+
 
             <ContextPanel title="How carriage is arranged">
               <div className="space-y-2.5 p-3">

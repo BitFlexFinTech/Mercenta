@@ -112,6 +112,45 @@ export function emitTestFailure(suite: string, failures: number): PlatformEvent 
   });
 }
 
+/**
+ * §P6 — THE PO DOCUMENT PACK IS READY.
+ *
+ * Emitted when Mercenta's automatic acceptance action has produced the purchase
+ * order's document pack (programme decisions 6 and 9). It is informational: it
+ * tells the brand there is something to DOWNLOAD AND PRINT, and it links straight
+ * to the PO on the Logistics Hub. It never claims a document is signed, filed
+ * with the channel, or accepted — the pack itself states each document's state.
+ */
+export function emitPoDocumentsReady(input: {
+  poId: string;
+  poNumber: string;
+  brandId: string;
+  brandName: string;
+  /** Applicable documents at generation time. */
+  documentCount: number;
+  /** How many of those were ready at generation time. */
+  documentsReady: number;
+  /** The FC the purchase order declares (P5) — never a Mercenta site. */
+  destinationLabel: string;
+}): PlatformEvent {
+  return emitEvent({
+    type: 'po_documents_ready',
+    severity: 'informational',
+    title: `Shipping documents ready — ${input.poNumber}`,
+    description: `${input.documentsReady} of ${input.documentCount} documents are ready for ${input.poNumber} (${input.brandName}), shipping to ${input.destinationLabel}. Download and print them from the Logistics Hub.`,
+    actionUrl: `/brand/logistics?po=${encodeURIComponent(input.poNumber)}`,
+    entityId: input.poId,
+    metadata: {
+      poNumber: input.poNumber,
+      brandId: input.brandId,
+      documentCount: input.documentCount,
+      documentsReady: input.documentsReady,
+      destinationLabel: input.destinationLabel,
+    },
+  });
+}
+
+/* ── Queries ─────────────────────────────────────────────────────────── */
 /* ── Queries ─────────────────────────────────────────────────────────── */
 
 export function queryEvents(query: EventFeedQuery = {}): PlatformEvent[] {

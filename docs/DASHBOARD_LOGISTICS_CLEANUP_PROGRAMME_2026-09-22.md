@@ -1,6 +1,6 @@
 # DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22) — AGREED PLAN, DECISIONS AND RESUME POINT
 
-**Status: IN PROGRESS — P0, P0.4, P1, **P2**, **P3**, **P4** and **P5** are DONE and committed; P6–P12 remain.**
+**Status: IN PROGRESS — P0, P0.4, P1, **P2**, **P3**, **P4**, **P5** and **P6** are DONE and committed; P7–P12 remain.**
 **Checkpoint: branch `redesign/foundation`; P2's checkpoint commit is recorded in
 `PROJECT_STATUS.md` heading 7 and `HANDOFF.md`; P3's and P4's are recorded in the `CURRENT RESUME STATE` block.
 `git status --porcelain` EMPTY.**
@@ -77,7 +77,7 @@ documents → ship on time. Everything else is Mercenta's.
 | **P3** | ✅ **DONE** (commit `21c6869`, plus the §P3 `validate-stage26` repair; checkpoint in the `CURRENT RESUME STATE` block) | **Operations = Act** wiring: **three action lists → ONE.** The Control Centre loses its duplicated work/attention lists (the retired `CommandCentre.tsx` panel **deleted**, its own "Attention" queue removed) and becomes founder-only **CONTROLS** (automation catalogue + approvals + halt, AI, audit, data provenance, the commercial-readiness/pre-audit decision surfaces, a new *Integrations & systems* status panel and a pointer to the single list); the founder console is **projected into the single action list** (Work Management) as Super-Admin-scoped work items carrying the same rank + auditable WHY, with the tab-aware hand-off and a declared cross-scope action-view translation (**no dead hand-off destination in either shell**); badges count the same item set the list renders; fail-closed RBAC. *(Brand attention/next-actions already landed in Operations in P2.)* **An inherited unhealthy gate was genuinely repaired on the way: `validate-stage26` (ThemeProvider harness + a gating bug + stale catalog-import assertions) now PASSES with an honest exit code.** | 3 action lists → 1 |
 | **P4** | ✅ **DONE** (2026-09-23, session 16 — see §8) | **Proxy-model corrections**: the brand does its 3 jobs only; **MERCENTA** raises the routing/shipment request and files the ASN (the brand sees status); ack writes an **instruction-to-Mercenta** record; `submitAcknowledgement` behind the SP-API seam (mock-first, Mercenta-side) | **AV-040** (partially), wrong direction, truthfulness |
 | **P5** | ✅ **DONE** (2026-09-23, session 17 — see §9) | **Remove the Mercenta Hub completely** → the destination is **the FC declared on each PO** (`PurchaseOrder.shipToParty`, the channel's `shipToPartyId`, resolved once by `src/config/destinationFc.ts`); the `mercenta_hub` stage/status, the hub coordinate, the hub node kind and the Hero's hub node are **deleted**; the Hero/map arrival node **is** that FC; copy, validators and specs repointed with the old contract recorded inline | **D09-13 / AV-026 / AV-027** |
-| **P6** | | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
+| **P6** | ✅ **DONE** (2026-09-23, session 19 — see §10) | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
 | **P7** | | **Admin invoicing**: invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60** terms per invoice; derived **upcoming payments**; receivables = issued-and-unpaid | decision 2; **AV-022** |
 | **P8** | | **Inventory** linked to the catalogue + **ASIN** field (rule = decision 10) | decision 5 |
 | **P9** | | **Remove the 3PL carrier surface** (decision 4) incl. the demo environment; repoint the affected specs/scripts | decision 4; matrix `D01-07`/`D04-18`/`D10-13` |
@@ -101,13 +101,11 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5** (committed; the P2 checkpoint hash is recorded in
-  `PROJECT_STATUS.md` §7, and P3/P4/P5's in the `CURRENT RESUME STATE` block).
-- **Next:** **P6 — the PO document pack** (auto on acceptance): SSCC carton labels · carrier label + waybill ·
-  packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge;
-  Hub "Documents for this PO"; the collect lane shows the documented status chain (request → carrier assigned →
-  ARN → pickup). **P5 removed the hub destination that P6's document pack must name — a document now names the FC
-  the PO declares, not a Mercenta site.**
+- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6** (committed; the P2 checkpoint hash is recorded in
+  `PROJECT_STATUS.md` §7, and P3/P4/P5/P6's in the `CURRENT RESUME STATE` block).
+- **Next:** **P7 — admin invoicing**: invoice per PO **after receipt**; `receivingStatus` sync; the
+  invoice-number registry; **14/30/60** terms per invoice; derived **upcoming payments**;
+  receivables = issued-and-unpaid (decision 2; **AV-022**).
 - **Then:** P7 → P12 in order.
 - **Deployment:** executed at the close of each product phase. P3, P4 and P5 were deployed and live-verified; the full
   three-way confirmation is re-run at the end of the programme.
@@ -382,3 +380,89 @@ the register records the authoritative destination as **the PO's `shipToParty`**
   "Mercenta Hub" hit in `src/` is an explicitly historical "was X" comment, or a fixture that is deliberately NOT a
   destination (the demo returns address in `demoStore.ts` and `src/config/customs.ts`'s registered address, both left
   untouched as demo/legal data).
+
+---
+
+## 10. P6 — WHAT WAS BUILT, VERIFIED AND HOW (so P7+ does not have to re-derive it)
+
+### What was missing
+
+Three things were asserted about the brand's own job — "**download & print its shipping documents**" — without the
+platform being able to produce a single one of them:
+
+1. **The pack did not exist.** `src/lib/customsDocs.ts` generated three customs documents for every accepted PO
+   (regardless of lane), and the Hub offered a waybill and a carrier label as two loose buttons. There was no notion
+   of "the documents for this PO", no readiness, and no lane scoping.
+2. **SSCC was a bullet in guidance copy.** The ASN the channel receives carries a container identifier per carton
+   (`cartons[].cartonIdentifiers[{ containerIdentificationType: "SSCC" }]` — programme §3; truth-validation §5.7),
+   and Mercenta is the vendor that must generate them. `SSCC` appeared exactly once in `src/` — in a help list — and
+   no identifier was ever produced.
+3. **The collect lane had no chain.** The documented sequence (shipment request → carrier assignment → routing
+   instructions/ARN → pickup) existed only as prose in the research table; the platform showed a single
+   "routing request raised" line and nothing about what the channel does next.
+
+### What was built
+
+- **`src/lib/documents/sscc.ts` (NEW) — the ONE owner of the carton identifier.** The published GS1 mod-10 check
+  digit, a deterministic 9-digit serial derived from `PO number + carton index` (no clock, no randomness — a reprint
+  is byte-identical), and an explicitly **UNASSIGNED placeholder GS1 prefix** (`0000000`, status
+  `placeholder_unassigned`, the words `XX-PENDING-GS1-LICENCE` on every label). Activating Mercenta's real GS1 prefix
+  is a CREDENTIAL step: replace one value, nothing else changes (`PRODUCTION_READINESS.md` records it).
+- **`src/lib/documents/poDocumentPack.ts` (NEW) — the ONE owner of "what documents a PO has".** It assembles eight
+  documents (SSCC labels · carrier label · freight waybill · packing list/delivery note · ASN sheet · the three
+  customs documents), each with `applicable` + a stated reason when it is not, `ready` + a stated reason when its
+  source is not on the record yet, the renderer that presents it, and its fields. It **delegates** customs documents
+  to the existing owner and **never re-derives the destination** (`src/config/destinationFc.ts`, P5). It also owns
+  the single rule `documentsAwaitingDownload` — the accepted→pre-ship window — so the nav badge and the notification
+  centre cannot disagree with the pack.
+- **`src/lib/shipping/collectChain.ts` (NEW) — the documented collect chain.** `PICKUP_LEAD_TIME` (the channel's
+  **two BUSINESS days**, register `AV-014`), `earliestRequestedPickUp` (weekend-skipping), and `buildCollectChain`
+  over the four documented steps, each carrying its own basis. **Steps 2–4 are read from the channel record**
+  (`ChannelInstructionOutcome.routingInstructions`) and report `awaiting_channel` until it genuinely carries them:
+  **an ARN that is not on the record cannot be produced by the module.**
+- **The acceptance path generates the pack** (`src/lib/commerce/proxyProcessor.ts`): in the same action that files
+  the ASN, it records `documentsGeneratedAt` / `documentCount` / `documentsReady` on the outcome (evidence only — the
+  pack is DERIVED on read, so there is no second copy to drift), computes and records the collect
+  `requestedPickUp`, and emits the canonical **`po_documents_ready`** event (added to the existing event union).
+- **The Logistics Hub surface** (`src/components/shared/logistics/PoDocumentPackPanel.tsx`, mounted in the
+  consignment inspector as **"Documents for this PO"**): every document with its readiness and reason, a printable
+  preview (the established `iframe srcDoc` pattern), the SSCC placeholder notice, the destination/lane notices, and
+  the collect chain on a Freight Collect lane. The two artefacts that already had renderers — the carrier label and
+  the waybill — are opened through the **EXISTING dialogues** (one renderer per artefact).
+- **Notification + nav badge**: the brand and admin Logistics Hub badges are the document-download queue, and the
+  notification centre carries a `documents` item — both from the same ONE rule.
+
+
+
+### Gates — added and repointed, never weakened
+
+| Gate | Result |
+|---|---|
+| `scripts/validate-po-documents.mjs` (**NEW**, `npm run validate:po-documents`) | **PASS — 50 assertions, 0 network calls.** It EXECUTES the real modules: the check digit is proved against the known EAN-13 anchor (`400638133393 → 1`) AND against an independent weighted-sum recomputation; determinism; collision-freedom; the placeholder prefix; all eight documents; the lane rule with its stated reason; destination = the PO's declared FC (and an undeclared PO failing closed); honest readiness (no ASN → no SSCC labels; no filed ASN → no ASN sheet; no waybill → no waybill); byte-identical determinism; the shared download rule; the documented chain order; the weekend-skipping lead time; and **no fabricated ARN**. |
+| `scripts/validate-e6-brand-surfaces.mjs` · `scripts/validate-e7-embedded-social.mjs` | the P6 declared scope added (`P6_PO_DOCUMENT_PACK_SCOPE` / `P6_PO_DOCUMENT_PACK_DECLARED`); **both guards' contracts UNCHANGED — an unexplained or protected change still fails.** |
+| `e2e/po-documents.spec.ts` (**NEW**, 6 tests) | **6 passed** — the pack on the Hub after acceptance (all eight rows, the PO's FC named, no Mercenta site); honest readiness (SSCC ready / waybill NOT ready with its reason and a disabled control); the SSCC labels opening with complete 18-digit identifiers under the placeholder prefix; the badge + notification queue; the collect chain in documented order with `awaiting_channel` on the channel steps and no ARN pattern anywhere; and the pack opening the EXISTING label dialogue. |
+| every other validator in `scripts/validate-*.mjs` | all **exit 0** (the whole set was executed this session). |
+| `validate-stage14` · `validate-review-s3` | still pass: P6 widened `DocContext.products` from the demo-only `DemoProduct` to the base `Product` (no behaviour change), so no customs output moved. |
+| `validate:wording` | **PASS — 303 src files, 0 outward-facing violations.** |
+
+### Verification performed for P6 (this session)
+
+- `npx tsc --noEmit -p tsconfig.app.json` → **0 errors** · `tsconfig.node.json` → **0 errors** · `npx eslint .` →
+  **0 problems** · `npm run build` → **✓ built**.
+- The new gate was **proved able to fail**: a deliberate break of the check-digit arithmetic (mod 10 → mod 9) made it
+  report **FAIL (2 of 50)**; restored byte-identical → **PASS (50)**.
+- **Focused browser run** (`po-documents` + `logistics-hub-map` + `notifications` + `shipment-asn` + `proxy-model` +
+  `compliance-gate`, `--workers=3`) → **42 passed / 0 failed**.
+- **FULL Playwright suite** + the demo deployment and live verification: see `PROJECT_STATUS.md` heading 8 and the
+  `CURRENT RESUME STATE` block.
+
+### Honest limits recorded (not hidden)
+
+- **The channel steps of the collect chain cannot advance in this environment**: no live Amazon connection exists, so
+  no carrier is assigned and no ARN is returned. The chain says exactly that (`awaiting_channel`) and the platform
+  refuses to invent one. Wiring `getShipmentDetails` to populate `outcome.routingInstructions` is **P12's** declared
+  scope (`SP-API seam extension (mock-first)`) — the contract, the derivation and the surface are in place now.
+- **The SSCC identifiers are placeholders** by definition (no GS1 licence): all-zero prefix, stated on every label and
+  in `PRODUCTION_READINESS.md`.
+- **The carrier label and waybill stay the existing printable templates** until a carrier account is live; the pack
+  reports them as not ready until the carrier booking exists rather than printing a fake.

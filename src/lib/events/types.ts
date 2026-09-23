@@ -63,7 +63,12 @@ export type EventType =
   // commercial information. Added to the EXISTING union — no second feed.
   | 'commercial_readiness_assessed'
   | 'commercial_readiness_reassessed'
-  | 'commercial_readiness_terms_submitted';
+  | 'commercial_readiness_terms_submitted'
+  // §P6 — the PO document pack was generated automatically on acceptance
+  // (programme decision 9). The pack is the Logistics Hub's core deliverable, so
+  // its availability is a canonical event like any other — added to the EXISTING
+  // union, never a second feed.
+  | 'po_documents_ready';
 
 export interface PlatformEvent {
   id: string;
@@ -145,4 +150,7 @@ export const EVENT_SEVERITY_MAP: Record<EventType, EventSeverity> = {
   commercial_readiness_assessed: 'important',
   commercial_readiness_reassessed: 'important',
   commercial_readiness_terms_submitted: 'informational',
+  // §P6 — the document pack exists and there is something to download and print.
+  // Informational: it is a readiness notice, not an exception.
+  po_documents_ready: 'informational',
 };

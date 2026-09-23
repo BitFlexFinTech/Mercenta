@@ -1,9 +1,9 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: session 17 (23 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0, P0.4, P1, P2, P3, P4 and P5 are
-DONE, committed and (for the product phases) verified live on the demo; P6–P12 are NOT STARTED. Plan + the 11 binding
-Founder decisions: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (each completed phase's evidence is in
-`PROJECT_STATUS.md` and in that document's per-phase sections). Everything below is still simulated; nothing was
+**Last updated: session 19 (23 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0, P0.4, P1, P2, P3, P4, P5 and P6
+are DONE, committed and (for the product phases) verified live on the demo; P7–P12 are NOT STARTED. Plan + the 11
+binding Founder decisions: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (each completed phase's evidence
+is in `PROJECT_STATUS.md` and in that document's per-phase sections). Everything below is still simulated; nothing was
 re-labelled live.**
 
 ## SESSION 13 — dashboard + logistics cleanup programme: what is still simulated / placeholder
@@ -23,11 +23,18 @@ re-labelled live.**
   removed (P9), including the demo-environment entry. **Live activation:** DHL + Palletline API credentials behind the
   existing provider seam (`src/lib/dhl`, `src/lib/palletline`); the simulated lanes stay truthful and make zero network
   calls. **Remaining non-credential work:** provider configuration (P10).
-- **The PO document pack (P6) is GENERATED, not downloaded from the channel.** SSCC carton labels, the carrier
-  label/waybill, the packing list/delivery note and the ASN sheet are produced by Mercenta; customs documents apply to
-  international lanes. **Amazon-generated labels are NA-only** (`GetShipmentLabels` documents NA only), so no
-  downloadable Amazon label may ever be claimed for UK/EU. **Live activation:** carrier label APIs + the SP-API
-  shipment-confirmation call (P12).
+- **The PO document pack (P6 — DONE 2026-09-23) is GENERATED, not downloaded from the channel.** SSCC carton labels,
+  the carrier label/waybill, the packing list/delivery note and the ASN sheet are produced by Mercenta
+  (`src/lib/documents/poDocumentPack.ts`, automatically on acceptance); customs documents apply to international lanes
+  only. **Amazon-generated labels are NA-only** (`GetShipmentLabels` documents NA only), so no downloadable Amazon
+  label may ever be claimed for UK/EU. **ACTIVE PLACEHOLDER — the GS1 company prefix:** Mercenta holds no GS1 licence
+  in this environment, so every SSCC-18 is generated under the declared, UNASSIGNED all-zero prefix
+  (`SSCC_GS1_PREFIX` in `src/lib/documents/sscc.ts`, status `placeholder_unassigned`) and **every printed carton label
+  states `XX-PENDING-GS1-LICENCE`**. **Credential that replaces it:** Mercenta's licensed GS1 company prefix, entered
+  by replacing `SSCC_GS1_PREFIX.value` — no other code change (the check digit, the serial derivation and every caller
+  are untouched). **Live activation of the rest:** carrier label APIs + the SP-API shipment-confirmation call (P12);
+  until a carrier books the consignment the waybill/label documents are reported **not ready** rather than printed as
+  a fake. **Remaining non-credential work:** none — the pack, the surface, the notification and the badge are built.
 - **Consolidation is DEFERRED, not implemented (P10).** Amazon documents multi-PO grouping (`purchaseOrders[]` on the
   shipment request, the PO referenced per carton in the ASN, the 100-confirmation truckload limit), but POs arrive
   separately today: the implementation is **one PO = one shipment** while the model supports **1..n**.
@@ -248,6 +255,7 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
 | UK VAT number | `GB-VAT-PENDING-REGISTRATION` | Real VAT registration number | `src/config/customs.ts` (`MERCENTA_VAT`) |
 | Registered address | "Distribution Hub, Northampton" wording | Real registered office address | `src/config/customs.ts` |
 | Commission rate / monthly fee | Placeholders flagged in `src/config/commercial.ts` | Commercial sign-off | same file |
+| **GS1 company prefix (P6 — ACTIVE)** | `0000000` — declared UNASSIGNED, status `placeholder_unassigned`; every SSCC-18 is generated under it and every printed carton label states `XX-PENDING-GS1-LICENCE` | Mercenta's licensed GS1 company prefix | `src/lib/documents/sscc.ts` (`SSCC_GS1_PREFIX.value`) |
 | Carrier markup rates | Demo ledger uses illustrative 5.5% cost / 7% billed | Real corporate FedEx/DHL/BAK rate cards | shipping-margin ledger rows |
 | Contract rate fields | Flagged placeholders in `lib/agreement.ts` output | Signed commercial terms | same file |
 

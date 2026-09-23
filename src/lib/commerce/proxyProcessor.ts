@@ -31,7 +31,7 @@
 import type { AsnDetail } from '@/data/api';
 import type { ChannelInstruction, ChannelInstructionOutcome, PurchaseOrder } from '@/types';
 import { createShipmentForPO } from '@/data/api';
-import { demoBrands, demoPurchaseOrders } from '@/data/demoStore';
+import { demoBrands, demoProducts, demoPurchaseOrders } from '@/data/demoStore';
 import { AMAZON_PARTNERED_CARRIER } from '@/config/shipping';
 import { selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { createSPApiClientForConnection } from '@/lib/spapi';
@@ -42,6 +42,9 @@ import {
   markChannelInstructionRefused,
   pendingChannelInstructions,
 } from './channelInstructions';
+import { buildPoDocumentPack } from '@/lib/documents/poDocumentPack';
+import { earliestRequestedPickUp } from '@/lib/shipping/collectChain';
+import { emitPoDocumentsReady } from '@/lib/events/eventFeed';
 
 /**
  * The attributed Mercenta-side actor for every automatic channel action. Using a
@@ -212,6 +215,7 @@ export async function processChannelInstruction(
         carrier: asnForInstruction(instruction, po).carrier,
         channelArrangesCarrier: po.freightTerm === 'collect',
         reference: `RR-${po.poNumber}`,
+        ...(po.freightTerm === 'collect' ? { requestedPickUp: earliestRequestedPickUp() } : {}),
       },
       asn: { filed: false, note: 'NOT_APPLICABLE — every line was rejected, so there is nothing to ship.' },
     });
@@ -223,6 +227,14 @@ export async function processChannelInstruction(
     carrier: asnForInstruction(instruction, po).carrier,
     channelArrangesCarrier: po.freightTerm === 'collect',
     reference: `RR-${po.poNumber}`,
+    /**
+     * §P6 — the pickup date Mercenta asks for on a Freight Collect lane, computed
+     * from the CHANNEL's own documented rule ("a date at least two business days
+     * after the current date" — register `AV-014`) rather than typed in. A
+     * prepaid PO has no channel pickup, so the field is absent there and the
+     * consignment follows Mercenta's own readiness target instead.
+     */
+    ...(po.freightTerm === 'collect' ? { requestedPickUp: earliestRequestedPickUp() } : {}),
   };
 
   /* ── 3. The ASN (automatic on acceptance — decision 9) ──────────────────── */
@@ -258,7 +270,54 @@ export async function processChannelInstruction(
     return getChannelInstruction(id);
   }
 
-  markChannelInstructionActioned(id, outcome);
+  /**
+   * §P6 — THE DOCUMENT PACK, AUTOMATIC ON ACCEPTANCE (programme decisions 6/9).
+   *
+   * The pack is generated HERE, in the same action that files the ASN, so the
+   * brand's "download & print its shipping documents" job is ready the moment the
+   * PO is accepted. Nothing is stored: the pack is derived on read from canonical
+   * state by `src/lib/documents/poDocumentPack.ts`, and the instruction records
+   * only WHEN it was generated and how complete it was — the evidence the event
+   * and the audit trail reference, with no second copy to drift.
+   */
+  const brand = demoBrands.find((b) => b.id === po.brandId);
+  const brandName = brand?.profile.businessName ?? po.brandId;
+  const pack = buildPoDocumentPack({
+    po,
+    brandName,
+    brandNation: brand?.nation,
+    products: demoProducts.filter((p) => p.brandId === po.brandId),
+    asn,
+    /** The carrier reference the label/waybill documents resolve against. */
+    carrier: { carrier: asn.carrier },
+    /** The outcome being written — the ASN sheet reports exactly what was filed. */
+    instruction: { ...instruction, outcome },
+  });
+
+  const outcomeWithDocuments: ChannelInstructionOutcome = {
+    ...outcome,
+    documentsGeneratedAt: new Date().toISOString(),
+    documentCount: pack.applicableCount,
+    documentsReady: pack.readyCount,
+  };
+
+  markChannelInstructionActioned(id, outcomeWithDocuments);
+
+  /**
+   * The notification that the pack exists. It says what is READY and links to the
+   * PO on the Logistics Hub — it never claims a document was filed, signed or
+   * accepted by anyone.
+   */
+  emitPoDocumentsReady({
+    poId: po.id,
+    poNumber: po.poNumber,
+    brandId: po.brandId,
+    brandName,
+    documentCount: pack.applicableCount,
+    documentsReady: pack.readyCount,
+    destinationLabel: pack.destinationLabel,
+  });
+
   return getChannelInstruction(id);
 }
 

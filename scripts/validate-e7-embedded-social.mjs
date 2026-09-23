@@ -822,6 +822,39 @@ try {
     'scripts/validate-e6-brand-surfaces.mjs',
     'scripts/validate-e7-embedded-social.mjs',
   ];
+
+  /**
+   * §P6 — PO DOCUMENT PACK PHASE DECLARED SURFACE (2026-09-23, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P6).
+   *
+   * The pack produced AUTOMATICALLY on acceptance (decisions 6/9): SSCC carton
+   * labels, the carrier label and waybill (existing dialogues), the packing
+   * list/delivery note, the ASN sheet and the international-lane customs
+   * documents, plus the Hub surface, the notification and the nav badge. It
+   * legitimately touches the canonical types (a PROTECTED prefix), the
+   * customs-document owner's INPUT TYPE (widened from `DemoProduct` to the base
+   * `Product`), the acceptance write-path, the event feed, the badge map and the
+   * notification centre. The E7 guard's contract is UNCHANGED — a changed
+   * source/test file in NO declared set still fails, and an undeclared protected
+   * path still fails.
+   */
+  const P6_PO_DOCUMENT_PACK_DECLARED = [
+    'src/lib/documents/',                   // NEW — the pack + SSCC owners
+    'src/lib/shipping/collectChain.ts',     // NEW — the documented collect chain
+    'src/components/shared/logistics/',     // the pack surface
+    'src/types.ts',                         // PROTECTED prefix — declared
+    'src/lib/customsDocs.ts',               // input type widened to Product
+    'src/lib/commerce/proxyProcessor.ts',   // generates the pack on acceptance
+    'src/lib/events/types.ts',
+    'src/lib/events/eventFeed.ts',
+    'src/lib/nav/navBadges.ts',
+    'src/components/shared/NotificationCenter.tsx',
+    'src/components/brand/LogisticsHub.tsx',
+    'e2e/po-documents.spec.ts',
+    'scripts/validate-po-documents.mjs',
+    'package.json',
+  ];
+
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -842,7 +875,10 @@ try {
           !P4_PROXY_MODEL_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §P5 — the destination-FC phase's declared surface (see above). */
           !P5_DESTINATION_FC_DECLARED.includes(f) &&
-          !P5_DESTINATION_FC_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P5_DESTINATION_FC_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §P6 — the PO-document-pack phase's declared surface (see above). */
+          !P6_PO_DOCUMENT_PACK_DECLARED.includes(f) &&
+          !P6_PO_DOCUMENT_PACK_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -955,6 +991,12 @@ try {
      * outside EVERY declared set is still refused.
      */
     ...P5_DESTINATION_FC_DECLARED,
+    /**
+     * §P6 — REPOINTED (not weakened). The PO-document-pack phase's declared surface
+     * is accepted here exactly as every earlier phase's is; a changed source/test
+     * file outside EVERY declared set is still refused.
+     */
+    ...P6_PO_DOCUMENT_PACK_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

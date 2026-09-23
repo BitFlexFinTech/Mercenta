@@ -747,6 +747,44 @@ const P5_DESTINATION_FC_SCOPE = new Set([
   'PRODUCTION_READINESS.md',
 ]);
 
+/**
+ * §P6 — PO DOCUMENT PACK PHASE SCOPE (2026-09-23, programme
+ * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P6).
+ *
+ * P6 builds the PO document pack that is produced AUTOMATICALLY on acceptance
+ * (programme decisions 6 and 9): SSCC carton labels, the carrier label and
+ * waybill (rendered by the EXISTING dialogues), the packing list/delivery note,
+ * the ASN sheet, and the customs documents on international lanes only. It adds
+ * the pack owner and the SSCC owner, the documented collect chain, the Hub's
+ * "Documents for this PO" surface, the notification and the nav badge — so it
+ * legitimately touches the canonical types (`src/types.ts` — a PROTECTED prefix,
+ * declared here exactly as P4 and P5 declared it), the customs-document owner's
+ * INPUT TYPE (widened from `DemoProduct` to the base `Product`; no behaviour
+ * change), the acceptance write-path, the event feed, the nav badge map and the
+ * notification centre. The guard's contract is UNCHANGED — a path outside EVERY
+ * declared set still fails, and an unexplained protected change still fails.
+ */
+const P6_PO_DOCUMENT_PACK_SCOPE = new Set([
+  'src/lib/documents/',                     // NEW — the pack + SSCC owners
+  'src/lib/shipping/collectChain.ts',       // NEW — the documented collect chain
+  'src/components/shared/logistics/',       // the pack surface (also declared by P5)
+  'src/types.ts',                           // PROTECTED prefix — declared
+  'src/lib/customsDocs.ts',                 // input type widened to Product
+  'src/lib/commerce/proxyProcessor.ts',     // generates the pack on acceptance
+  'src/lib/events/types.ts',                // the po_documents_ready event
+  'src/lib/events/eventFeed.ts',            // its canonical emitter
+  'src/lib/nav/navBadges.ts',               // the document-download badge
+  'src/components/shared/NotificationCenter.tsx',
+  'src/components/brand/LogisticsHub.tsx',  // the Hub mounts the pack surface
+  'e2e/po-documents.spec.ts',
+  'scripts/validate-po-documents.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'PRODUCTION_READINESS.md',
+]);
+
 try {
   /* ── modules under test (the EXISTING architecture) ── */
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
@@ -1172,7 +1210,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...SPRINT_FOUNDER_OS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...SPRINT_UK_MARKET_FIT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...SPRINT_ROUTING_GATEWAYS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-          [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P6 — the PO-document-pack phase's declared surface (see above). */
+          P6_PO_DOCUMENT_PACK_SCOPE.has(p) ||
+          [...P6_PO_DOCUMENT_PACK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
