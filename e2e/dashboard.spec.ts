@@ -125,6 +125,88 @@ test.describe('Admin Overview — business overview (dashboard cleanup)', () => 
     await expect(page.getByTestId('kpi-value-pending-pos')).toBeVisible();
   });
 
+  test('3b. §P2 — the business position, volume band and new sections are ADDITIVE and cross-consistent', async ({ page }) => {
+    await openAdminDashboard(page);
+    /**
+     * §P2 (Overview = observe, ADDITIVE ONLY) — the Founder's decision was that
+     * every existing card STAYS and the business picture is ADDED. This test
+     * therefore asserts both halves: the pre-P2 tiles are all still rendered, and
+     * the new money/volume content exists and agrees with the header summary and
+     * the canonical cost model on the SAME render (no pinned values, so it cannot
+     * rot when the demo data changes).
+     */
+    // (a) every pre-P2 KPI tile is still rendered (nothing was removed).
+    for (const id of [
+      'pending-pos',
+      'in-fulfilment',
+      'docs-pending',
+      'gate',
+      'renewals',
+      'tickets',
+      'payouts-pending',
+      'revenue',
+      'contribution',
+      'margin',
+    ]) {
+      await expect(page.getByTestId(`kpi-value-${id}`)).toBeVisible();
+    }
+
+    // (b) the new money row.
+    await expect(page.getByTestId('kpi-value-open-po-value')).toHaveText(/^£[\d,]+$/);
+    await expect(page.getByTestId('kpi-value-receivables')).toHaveText(/^£[\d,]+\.\d{2}$/);
+
+    // (c) the new business-volume band, with real (non-fabricated) shapes.
+    for (const id of [
+      'brands',
+      'products',
+      'pos-count',
+      'order-lines',
+      'shipments',
+      'volume',
+      'upcoming-payments',
+      'exceptions',
+    ]) {
+      await expect(page.getByTestId(`kpi-value-${id}`)).toBeVisible();
+    }
+    await expect(page.getByTestId('kpi-value-upcoming-payments')).toHaveText(/^£[\d,]+\.\d{2}$/);
+    await expect(page.getByTestId('kpi-value-order-lines')).toHaveText(/^\d+$/);
+
+    // (d) cross-consistency #1 — the PO tile equals the header's PO count.
+    const header = await page.getByTestId('dashboard-loaded').innerText();
+    const headerPos = /(\d+)\s+purchase orders/.exec(header);
+    expect(headerPos, 'header must state the purchase-order count').not.toBeNull();
+    expect(Number((await page.getByTestId('kpi-value-pos-count').textContent())!.trim())).toBe(
+      Number(headerPos![1])
+    );
+
+    // (e) cross-consistency #2 — the Financial performance total equals the
+    // revenue tile (both come from `operatingCostSummary()`), so a second
+    // calculation cannot drift from the canonical one.
+    const revenueTile = Number(
+      (await page.getByTestId('kpi-value-revenue').textContent())!.replace(/[^0-9.-]/g, '')
+    );
+    const financeSection = page.locator('section[aria-label="Financial performance"]');
+    await expect(financeSection).toBeVisible();
+    const totalRow = await financeSection.locator('tfoot tr').first().innerText();
+    expect(totalRow).toContain(`£${revenueTile.toLocaleString('en-GB')}`);
+
+    // (f) cross-consistency #3 — the Logistics status distribution counts the
+    // same consignments the shipments tile counts.
+    const logisticsSection = page.locator('section[aria-label="Logistics status"]');
+    await expect(logisticsSection).toBeVisible();
+    const shipmentsTile = Number(
+      (await page.getByTestId('kpi-value-shipments').textContent())!.trim()
+    );
+    const ringLabel = await logisticsSection
+      .locator('svg[data-chart="doughnut"]')
+      .getAttribute('aria-label');
+    const ringTotal = (ringLabel ?? '')
+      .replace(/^Shipments by status:/, '')
+      .split(',')
+      .reduce((sum, part) => sum + Number(part.trim().split(' ').pop() ?? 0), 0);
+    expect(ringTotal, 'the status ring must account for every consignment').toBe(shipmentsTile);
+  });
+
   test('4. KPI drill-down routes to existing destinations with RBAC intact', async ({ page }) => {
     await openAdminDashboard(page, 'Mercenta Admin Hub');
     // Non-super admin: super-only destinations stay hidden in the shell nav.
@@ -216,29 +298,132 @@ test.describe('Brand dashboard — tenant-correct, no fabricated metrics', () =>
     expect(Number(poActive!.match(/\d+/)![0])).toBe(kpiActive);
   });
 
-  test('8. attention rows are real, actionable, and cross-consistent with KPIs', async ({ page }) => {
+  test('8. the brand action list lives in OPERATIONS; the overview only observes', async ({ page }) => {
     await loginAs(page, 'Tapatío', 1500);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
-    // Awaiting-acknowledgement KPI == attention rows == PO summary (same source).
+
+    /**
+     * §P2 (2026-09-22) — REPOINTED, not weakened.
+     *
+     * OLD CONTRACT: `attention rows are real, actionable, and cross-consistent with
+     * KPIs` — the brand OVERVIEW had to carry the attention queue, and its
+     * `attention-unacked-*` rows had to equal the awaiting-ack KPI.
+     *
+     * WHY IT MOVED: Overview = OBSERVE, Operations = ACT (the Founder's governing
+     * principle). The Overview's queue was a SECOND action list beside the brand's
+     * work layer, so it was removed — exactly as the admin Overview's was. The new
+     * contract asserts the stronger, cross-surface invariant: the Overview carries
+     * no action rows, its awaiting-ack KPI still agrees with the PO summary, and
+     * the CANONICAL work derivation (Operations → Tasks & Deadlines) contains
+     * precisely the PO-acknowledgement items the rendered work list shows.
+     */
     const awaitingKpi = Number((await page.getByTestId('kpi-value-awaiting-ack').textContent())!.trim());
-    const unackedRows = page.locator('[data-testid^="attention-unacked-"]');
     const poAwaiting = Number((await page.getByTestId('po-summary-awaiting').textContent())!.match(/\d+/)![0]);
-    expect(await unackedRows.count()).toBe(awaitingKpi);
-    expect(poAwaiting).toBe(awaitingKpi);
-    // The first attention row's Review action drills to the real brand PO view.
-    await page.locator('[data-testid^="attention-"]').first().locator('button', { hasText: 'Review' }).click();
-    await page.waitForTimeout(900);
-    await expect(page.getByText('PO-900', { exact: false }).first()).toBeVisible({ timeout: 6000 });
+    expect(poAwaiting, 'KPI and PO summary derive from the same source').toBe(awaitingKpi);
+    expect(awaitingKpi, 'the seeded demo must carry POs awaiting acknowledgement').toBeGreaterThan(0);
+
+    // The overview no longer carries a second action list (positive absence).
+    await expect(page.locator('[data-testid^="attention-"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
+    await expect(page.locator('section[aria-label="Needs your attention"]')).toHaveCount(0);
+    await expect(page.locator('text=Next actions')).toHaveCount(0);
+
+    // The canonical derivation for THIS tenant (computed in-page from the same
+    // module the app uses) is the reference the rendered work list must match.
+    const canonicalAckItems = await page.evaluate(async () => {
+      const work = await import('/src/lib/work/workStore.ts');
+      const store = await import('/src/data/demoStore.ts');
+      const brand = store.demoBrands.find((b) =>
+        String(b.profile?.businessName ?? '').includes('Tapatío')
+      );
+      const items = work.getWorkItems('brand', brand?.id ?? null);
+      return items.filter((i) => i.source === 'po_acknowledgement').length;
+    });
+    expect(canonicalAckItems, 'the work layer derives the brand’s PO acknowledgements').toBeGreaterThan(0);
+
+    // Operations → Tasks & Deadlines is where the brand works them.
+    await page.locator('nav[aria-label="Primary"]').getByText('Tasks & Deadlines').first().click();
+    await page.waitForTimeout(1200);
+    const ackRows = page.locator('[data-testid^="work-row-work-po_acknowledgement-"]');
+    await expect(ackRows.first()).toBeVisible({ timeout: 8000 });
+    expect(await ackRows.count()).toBe(canonicalAckItems);
+    // …and the item hands the operator to the real PO surface.
+    await expect(ackRows.first()).toContainText(/Acknowledge PO-/);
   });
 
-  test('9. quick actions route to existing brand destinations', async ({ page }) => {
+  test('9. the overview duplicates no Operations destination; the destinations still route', async ({ page }) => {
     await loginAs(page, 'Tapatío', 1500);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
-    await expect(page.getByTestId('action-purchase_orders')).toBeVisible();
-    // Every action row routes through a valid brand view id via its Open button.
-    await page.getByTestId('action-catalog').locator('button', { hasText: 'Open' }).click();
+
+    /**
+     * §P2 — REPOINTED. OLD CONTRACT: `quick actions route to existing brand
+     * destinations` (the `action-*` rail rows). Those rows were a second copy of
+     * the Operations nav group, so they were removed. The routing invariant is
+     * asserted on the destinations themselves: the nav rail still reaches the
+     * Product Catalog, and the overview's own KPI drill-downs still reach their
+     * owners.
+     */
+    await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
+
+    await page.locator('nav[aria-label="Primary"]').getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
     await expect(page.getByRole('heading', { name: 'Master Product Catalog' })).toBeVisible({ timeout: 6000 });
+
+    // Back on the overview, a KPI drill-down still opens the owning surface.
+    await page.locator('nav[aria-label="Primary"]').getByText('Dashboard').first().click();
+    await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
+    await page.getByTestId('kpi-open-payouts-due').click();
+    await page.waitForTimeout(600);
+    await expect(page.locator('#brand-payouts')).toBeVisible();
+  });
+
+  test('11. §P2 — the brand overview observes its earnings, and charts them honestly', async ({ page }) => {
+    await loginAs(page, 'Tapatío', 1500);
+    await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
+
+    /**
+     * §P2 — the brand's own earnings are the money row, and the brand gets its
+     * first chart. Both are asserted against the SAME records the payout tiles
+     * show, so a second calculation cannot drift:
+     *   total earnings == payouts due (£ net owed) + payouts settled (£ net paid).
+     */
+    const earningsTotal = Number(
+      (await page.getByTestId('kpi-value-earnings-total').textContent())!.replace(/[^0-9.]/g, '')
+    );
+    const dueContext = (await page.getByTestId('kpi-payouts-due').innerText()).match(/£([\d.]+)/);
+    const settledContext = (await page.getByTestId('kpi-payouts-settled').innerText()).match(/£([\d.]+)/);
+    expect(dueContext, 'payouts due must state its net value').not.toBeNull();
+    expect(settledContext, 'payouts settled must state its net value').not.toBeNull();
+    expect(earningsTotal).toBeCloseTo(
+      Number(dueContext![1]) + Number(settledContext![1]),
+      2
+    );
+
+    // The money row reads first, and the account row keeps every pre-P2 tile.
+    await expect(page.getByTestId('kpi-value-open-po-value')).toHaveText(/^£[\d,]+$/);
+    for (const id of ['active-pos', 'awaiting-ack', 'in-fulfilment', 'products-listed', 'out-of-stock', 'contract-status']) {
+      await expect(page.getByTestId(`kpi-value-${id}`)).toBeVisible();
+    }
+    // The counts the removed action groups carried are still observed here.
+    for (const id of ['open-deductions', 'open-tickets', 'returns-recorded', 'invoices-outstanding']) {
+      await expect(page.getByTestId(`kpi-value-${id}`)).toBeVisible();
+    }
+
+    // The chart is either a REAL series summing to the total, or an honest empty
+    // state naming the reason — never a fabricated shape.
+    const chartSection = page.locator('section[aria-label="Earnings by month"]');
+    await expect(chartSection).toBeVisible();
+    const bars = chartSection.locator('svg[data-chart="bars"]');
+    if ((await bars.count()) > 0) {
+      const seriesLabel = await bars.first().getAttribute('aria-label');
+      const seriesTotal = ((seriesLabel ?? '').match(/£([\d.]+)/g) ?? []).reduce(
+        (sum, m) => sum + Number(m.replace(/[^0-9.]/g, '')),
+        0
+      );
+      expect(seriesTotal).toBeCloseTo(earningsTotal, 1);
+    } else {
+      await expect(chartSection).toContainText('Not enough history to chart yet');
+    }
   });
 
   test('10. brand dashboard has no horizontal overflow at any viewport; drawer works on mobile', async ({ page }) => {

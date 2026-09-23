@@ -90,10 +90,35 @@ test('Overview defines real operational content (POs awaiting, docs pending, ren
     dash.includes("'Compliance docs pending'") &&
     dash.includes("'Contract renewals due'") &&
     dash.includes("'Brand payouts pending'"));
-test('Overview tiles drill down into the owning surface',
+/**
+ * §P2 (2026-09-22) — REPOINTED, not weakened (this gate had been failing since the
+ * §Dashboard-cleanup session).
+ *
+ * OLD CONTRACT: `Overview tiles drill down into the owning surface` asserted the
+ * presence of the string `Needs your attention` plus `onClick={go(a.id)}` — the
+ * removed "Next actions" tiles. `Needs your attention` was still satisfied by a
+ * COMMENT in the file, so the gate passed for the wrong reason while
+ * `onClick={go(a.id)}` had genuinely gone: a gate that could no longer fail
+ * honestly. The current canonical contract is asserted instead:
+ *   · every KPI tile drills down through `onOpen: go(...)` (the interactivity
+ *     rule, measured on real code);
+ *   · the removed action surfaces are NOT re-introduced (one authoritative owner
+ *     each: work layer, Control Centre, Messages);
+ *   · the §P2 business picture is present (money + volume bands, and the two new
+ *     observe sections).
+ */
+test('Overview tiles drill down into the owning surface (interactivity on real code)',
   dash.includes('onNavigate?: (view: string) => void') &&
-    dash.includes('onClick={go(a.id)}') &&
-    dash.includes('Needs your attention'));
+    (dash.match(/onOpen: go\(/g) ?? []).length >= 8 &&
+    !dash.includes('onClick={go(a.id)}'));
+test('Overview does not re-grow the removed action surfaces (one owner each)',
+  !/attention-\$\{/.test(dash) && !/testId: `action-/.test(dash));
+test('Overview carries the §P2 business picture (money band, volume band, financial + logistics sections)',
+  dash.includes("id: 'open-po-value'") &&
+    dash.includes("id: 'receivables'") &&
+    dash.includes("id: 'upcoming-payments'") &&
+    dash.includes('title="Financial performance"') &&
+    dash.includes('title="Logistics status"'));
 
 const rem = read('src/lib/billing/remittance.ts');
 const billing = read('src/components/admin/BillingPanel.tsx');

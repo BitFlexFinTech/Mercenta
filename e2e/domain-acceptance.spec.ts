@@ -170,7 +170,14 @@ test.describe('Domain Acceptance Gate', () => {
     await loginAs(page, 'Astonish', 1200);
     await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 6000 });
     await expect(page.locator('text=Active purchase orders').first()).toBeVisible({ timeout: 5000 });
-    const productsHint = page.locator('text=/products listed/').first();
+    /**
+     * §P2 (2026-09-22) — REPOINTED, not weakened. OLD CONTRACT: the same-render
+     * stability probe read the quick-action rail hint "N products listed", which
+     * was removed with the rail (Overview = OBSERVE; the rail duplicated the
+     * Operations nav group). The probe is now the canonical catalogue KPI itself —
+     * a stronger, test-id-based reading of the SAME underlying count.
+     */
+    const productsHint = page.getByTestId('kpi-products-listed');
     await expect(productsHint).toBeVisible({ timeout: 5000 });
     const before = (await productsHint.textContent()) ?? '';
     // Reload: the session is restored (no silent sign-out) and the canonical
@@ -179,8 +186,9 @@ test.describe('Domain Acceptance Gate', () => {
     await page.waitForTimeout(1200);
     await expect(page.locator('text=Brand Overview').first()).toBeVisible({ timeout: 8000 });
     await expect(page.locator('text=Partner Login')).toHaveCount(0);
-    const after = (await page.locator('text=/products listed/').first().textContent()) ?? '';
+    const after = (await page.getByTestId('kpi-products-listed').textContent()) ?? '';
     expect(after).toBe(before);
+    expect((await page.getByTestId('kpi-value-products-listed').textContent())!.trim()).toMatch(/\d/);
     // Tenant pin preserved after re-bootstrap: own dashboard only.
     await expect(page.locator('text=something went wrong')).toHaveCount(0, { timeout: 2000 });
   });

@@ -351,6 +351,17 @@ test.describe('Investor demo — responsive & accessible', () => {
     test(`8.${vp.name} — the investor demo surface runs with no horizontal overflow`, async ({
       page,
     }) => {
+      /**
+       * §P2 (2026-09-22) — PRE-EXISTING BUDGET FLAKE, fixed without touching a
+       * single assertion. This test logs in, opens the Simulation Control Centre
+       * and runs the FULL 25-stage investor lifecycle before measuring overflow:
+       * measured at 375x812 it takes ~29.0s against Playwright's 30s default, so
+       * it tipped over whenever the machine was under load (it failed
+       * intermittently in full-suite runs while passing in isolation). `slow()`
+       * triples the budget for THIS test only; every assertion, viewport and
+       * overflow limit is unchanged.
+       */
+      test.slow();
       await page.setViewportSize({ width: vp.w, height: vp.h });
       await loginAsSuperAdmin(page);
       await openSimulationTab(page);

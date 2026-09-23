@@ -8,13 +8,28 @@
  *
  * Hierarchy (single page, no department-tab silos):
  *   1. Page context      — WorkspaceHeader (h1) + derived operational summary
- *   2. Portfolio at a glance — compact KPI band: portfolio, orders, compliance,
- *      contracts, support, billing AND the business figures (recorded revenue,
- *      gross contribution, contribution margin)
+ *   2. Portfolio at a glance — the BUSINESS POSITION: the money band (open PO
+ *      value, recorded revenue, gross profit, contribution margin, receivables),
+ *      the operational KPI band (portfolio, orders, compliance, contracts,
+ *      support, billing) and the business-volume band (brands, products, POs,
+ *      order lines, shipments, operational volume, upcoming payments, fulfilment
+ *      exceptions)
  *   3. Order pipeline    — PO stage distribution
- *   4. Trends            — order value by month, value by brand
- *   5. Fulfilment motion — live shipments / POs awaiting fulfilment
- *   6. Recent comms      — latest real message threads, human-reply flags
+ *   4. Financial performance — revenue composition by canonical stream + the
+ *      cost base / contribution the figures are derived from
+ *   5. Trends            — order value by month, value by brand
+ *   6. Logistics status  — shipments by status and carrier (real consignment state)
+ *   7. Fulfilment motion — live shipments / POs awaiting fulfilment
+ *   8. Recent comms      — latest real message threads, human-reply flags
+ *
+ * §P2 (2026-09-22) — OVERVIEW = OBSERVE, ADDITIVE ONLY. The Founder's dashboard
+ * programme adds the business picture to this surface WITHOUT removing any card:
+ * every band existing before P2 is still rendered. The new content is derived
+ * from the SAME canonical stores the rest of the platform reads (POs, brands,
+ * products, shipments, compliance documents, contracts, messages, commissions,
+ * the commerce invoice ledger and the canonical cost model) — no new store, no
+ * invented metric, no fabricated trend. Where the store is empty the band says
+ * so honestly instead of plotting or implying a shape.
  *
  * §Dashboard-cleanup (2026-09-22) — REMOVED from this surface (consolidation, not
  * relocation): the Command Centre (now rendered on the Control Centre), the
@@ -39,12 +54,18 @@ import {
   useContracts,
   useDeductions,
   useMessages,
+  useProducts,
   usePurchaseOrders,
   useShipmentsAll,
 } from '@/data/queries';
 import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
 import { renewalUrgency } from '@/lib/contracts';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
+import {
+  demoCommerceInvoices,
+  getCommercePaymentsForInvoice,
+} from '@/data/demoStore';
+import { INVOICE_TERM_DAYS, addDays } from '@/lib/work/workStore';
 import { Alert, Button, EmptyState, StatusBadge, Skeleton } from '@/components/ui';
 import type { StatusTone } from '@/components/ui';
 import {
@@ -68,6 +89,7 @@ import { STATUS_LABELS } from '@/types';
 import type { AdminDepartment, ShipmentStatus } from '@/types';
 import type { PaletteDomain } from '@/config/themes';
 import { operatingCostSummary } from '@/lib/costs/costSummary';
+import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import { ArrowRight } from 'lucide-react';
 
 const PO_AWAITING: ReadonlySet<string> = new Set(['received', 'under_review']);
@@ -119,6 +141,12 @@ export function AdminDashboard({
   const submissionsQuery = useCatalogSubmissions();
   // §Phase D6 — the canonical commission/payout state (the payout tile below).
   const commissionsQuery = useCommissions();
+  /**
+   * §P2 — the canonical catalog (products with their owning brandId). Read for
+   * the business-volume band only ("products listed", "order lines", "units");
+   * it is the same query Global Catalog and the brand's Product Catalog read.
+   */
+  const productsQuery = useProducts();
 
   /**
    * Stable snapshot of the resolved query data. Arrays are memoised so derived
@@ -131,6 +159,7 @@ export function AdminDashboard({
   const messagesData = messagesQuery.data;
   const shipmentsData = shipmentsQuery.data;
   const commissionsData = commissionsQuery.data;
+  const productsData = productsQuery.data;
   /**
    * §Dashboard-cleanup (2026-09-22) — the deductions and catalogue-submission
    * query RESULTS are no longer read by the Overview (their only consumers were
@@ -146,6 +175,8 @@ export function AdminDashboard({
     messagesAll: messagesData?.data ?? [] as NonNullable<typeof messagesData>['data'],
     shipmentsAll: shipmentsData?.data ?? [] as NonNullable<typeof shipmentsData>['data'],
     commissionsAll: commissionsData?.data ?? [] as NonNullable<typeof commissionsData>['data'],
+    /** §P2 — the canonical catalog rows (each carries its owning `brandId`). */
+    productsAll: productsData?.data ?? [] as NonNullable<typeof productsData>['data'],
   }), [
     brandsData,
     posData,
@@ -154,6 +185,7 @@ export function AdminDashboard({
     messagesData,
     shipmentsData,
     commissionsData,
+    productsData,
   ]);
   const {
     brands,
@@ -163,6 +195,7 @@ export function AdminDashboard({
     messagesAll,
     shipmentsAll,
     commissionsAll,
+    productsAll,
   } = q;
 
   const dataReady = posAll.length > 0 && brands.length > 0;
@@ -175,7 +208,9 @@ export function AdminDashboard({
     shipmentsQuery.isError ||
     submissionsQuery.isError ||
     commissionsQuery.isError ||
-    deductionsQuery.isError;
+    deductionsQuery.isError ||
+    // §P2 — the catalog query now feeds the business-volume band.
+    productsQuery.isError;
   const loading =
     !dataReady &&
     (brandsQuery.isPending ||
@@ -184,7 +219,8 @@ export function AdminDashboard({
       contractsQuery.isPending ||
       messagesQuery.isPending ||
       shipmentsQuery.isPending ||
-      deductionsQuery.isPending);
+      deductionsQuery.isPending ||
+      productsQuery.isPending);
 
   const brandName = useMemo(() => {
     const m = new Map<string, string>();
@@ -196,6 +232,47 @@ export function AdminDashboard({
   const posAwaitingAction = posAll.filter((p) => PO_AWAITING.has(p.status));
   const awaitingValue = posAwaitingAction.reduce((sum, p) => sum + p.poValue, 0);
   const posInFulfilment = posAll.filter((p) => PO_IN_FLIGHT.has(p.status));
+
+  /* ── §P2 — THE BUSINESS PICTURE (every figure derived, nothing invented) ──
+   * Each value below is read from a canonical store the platform already owns:
+   * the PO store, the catalog, the shipment rows, the commerce invoice ledger
+   * and the declared payment terms. No new store, no hardcoded count, no
+   * fabricated trend. An empty ledger produces 0 with an honest basis line.
+   */
+  const productsByBrand = new Set(productsAll.map((p) => p.brandId)).size;
+  const lifetimePoValue = posAll.reduce((s, p) => s + p.poValue, 0);
+  const orderLineCount = posAll.reduce((s, p) => s + p.lineItems.length, 0);
+  const orderedUnits = posAll.reduce(
+    (s, p) => s + p.lineItems.reduce((a, l) => a + l.quantity, 0),
+    0
+  );
+  const unitsInFulfilment = posInFulfilment.reduce(
+    (s, p) => s + p.lineItems.reduce((a, l) => a + l.quantity, 0),
+    0
+  );
+  const valueInMotion = shipmentsAll.reduce((s, x) => s + (x.value ?? 0), 0);
+  const delayedShipments = shipmentsAll.filter((s) => s.delayed).length;
+  const shipmentExceptions = shipmentsAll.filter((s) => s.exception).length;
+
+  /**
+   * RECEIVABLES / UPCOMING PAYMENTS — the P7 definition applied to the CURRENT
+   * canonical ledger: an issued invoice with no settled payment is outstanding;
+   * its due date is DERIVED from its own issue date plus the declared terms
+   * (`INVOICE_TERM_DAYS`, the same constant the work layer and the reminder
+   * sweep use). No Vendor Payments API exists (register S14), so a due date can
+   * only ever be derived — and it is labelled as derived wherever it is shown.
+   */
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const invoiceDueDate = (issuedAt: string) => addDays(issuedAt.slice(0, 10), INVOICE_TERM_DAYS);
+  const unpaidInvoices = demoCommerceInvoices.filter(
+    (i) => i.status !== 'paid' && getCommercePaymentsForInvoice(i.id).length === 0
+  );
+  const receivablesGbp = unpaidInvoices.reduce((s, i) => s + i.subtotalGbp, 0);
+  const overdueInvoices = unpaidInvoices.filter((i) => invoiceDueDate(i.issuedAt) < todayIso);
+  const dueWithinHorizon = unpaidInvoices.filter(
+    (i) => invoiceDueDate(i.issuedAt) <= addDays(todayIso, 30)
+  );
+  const upcomingPaymentsGbp = dueWithinHorizon.reduce((s, i) => s + i.subtotalGbp, 0);
 
   const docsPending = docsAll.filter(
     (d) => d.status === 'under_review' || d.status === 'uploaded'
@@ -373,10 +450,36 @@ export function AdminDashboard({
       onOpen: go('super_admin'),
     },
     /*
-      §Dashboard-cleanup — the business (money) row of the overview. Values come
-      from `operatingCostSummary()`; each tile states its own basis so a
-      provisional figure can never be read as audited. No new calculation.
+      §P2 — the money tiles moved into their OWN hero band (below) so the
+      business position reads first. Nothing was removed: the three
+      §Dashboard-cleanup figures (recorded revenue, gross contribution,
+      contribution margin) are unchanged, and two more are ADDED — open PO value
+      and receivables. Values come from `operatingCostSummary()` and the
+      canonical commerce invoice ledger; each tile states its own basis so a
+      provisional figure can never be read as audited.
     */
+  ];
+
+  /**
+   * §P2 — THE MONEY BAND (hero row). Every figure is derived from a canonical
+   * source: open PO value from the PO store, the three business figures from the
+   * canonical cost model, and receivables from the commerce invoice ledger using
+   * the P7 definition (issued and unpaid) with its due date derived from the
+   * declared terms.
+   */
+  const moneyKpis: MetricTileData[] = [
+    {
+      id: 'open-po-value',
+      label: 'Open PO value',
+      value: `£${awaitingValue.toLocaleString('en-GB')}`,
+      tone: awaitingValue > 0 ? 'warning' : 'success',
+      statusText:
+        posAwaitingAction.length > 0
+          ? `${posAwaitingAction.length} awaiting action`
+          : 'Nothing awaiting action',
+      context: `Purchase-order value on ${posAwaitingAction.length} PO(s) received but not yet actioned.`,
+      onOpen: go('purchase_orders_admin'),
+    },
     {
       id: 'revenue',
       label: 'Recorded revenue',
@@ -404,8 +507,117 @@ export function AdminDashboard({
       value: `${costs.contribution.marginPct}%`,
       tone: costs.revenue.totalGbp > 0 ? 'neutral' : 'neutral',
       statusText: costs.contribution.provisional ? 'Provisional' : 'Derived',
-      context: 'Gross contribution as a share of recorded revenue — provisional until the cost model is founder-approved.',
+      context: 'Gross profit as a share of recorded revenue — provisional until the cost model is founder-approved.',
       onOpen: go('super_admin'),
+    },
+    {
+      id: 'receivables',
+      label: 'Receivables',
+      value: `£${receivablesGbp.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      tone: overdueInvoices.length > 0 ? 'danger' : receivablesGbp > 0 ? 'info' : 'success',
+      statusText:
+        unpaidInvoices.length === 0
+          ? 'Nothing outstanding'
+          : overdueInvoices.length > 0
+            ? `${overdueInvoices.length} past terms`
+            : `${unpaidInvoices.length} unpaid`,
+      context:
+        unpaidInvoices.length === 0
+          ? 'No issued-and-unpaid invoices recorded in the canonical ledger.'
+          : `${unpaidInvoices.length} issued-and-unpaid invoice(s) · due ${INVOICE_TERM_DAYS} days from issue (derived — no Vendor Payments API exists).`,
+      // §P2 — Accounting lives inside Super Admin (Accounting → Brand Payouts /
+      // receivables); `super_admin` is the real shell view id (there is no
+      // `accounting` nav id, and a dead id would be a dead end).
+      onOpen: go('super_admin'),
+    },
+  ];
+
+  /**
+   * §P2 — THE BUSINESS-VOLUME BAND. The portfolio's real size: how many brands
+   * and products the platform carries, what has been ordered, what is moving and
+   * what is owed. Every number is a count or a sum over the canonical stores.
+   */
+  const businessKpis: MetricTileData[] = [
+    {
+      id: 'brands',
+      label: 'Brands on platform',
+      value: String(brands.length),
+      tone: 'neutral',
+      statusText: complianceBlocked === 0 ? 'All gate-cleared' : `${complianceBlocked} not cleared`,
+      context: `${complianceCleared} brand(s) clear the compliance gate (required docs + signed contract).`,
+      // §P2 — the brand relationship surface is Brand CRM (`crm`); there is no
+      // `brands` shell view id, and a dead id would be a dead end.
+      onOpen: go('crm'),
+    },
+    {
+      id: 'products',
+      label: 'Products listed',
+      value: String(productsAll.length),
+      tone: 'neutral',
+      statusText: 'Canonical catalog',
+      context: `${productsAll.length} SKU(s) across ${productsByBrand} brand(s) in the canonical catalog.`,
+      // §P2 — the catalog destination is Global Catalog (`catalog`); there is no
+      // `catalog_admin` shell view id, and a dead id would be a dead end.
+      onOpen: go('catalog'),
+    },
+    {
+      id: 'pos-count',
+      label: 'Purchase orders',
+      value: String(posAll.length),
+      tone: 'neutral',
+      statusText: posInFulfilment.length > 0 ? `${posInFulfilment.length} in fulfilment` : 'None in fulfilment',
+      context: `£${lifetimePoValue.toLocaleString('en-GB')} lifetime purchase-order value.`,
+      onOpen: go('purchase_orders_admin'),
+    },
+    {
+      id: 'order-lines',
+      label: 'Order lines',
+      value: String(orderLineCount),
+      tone: 'neutral',
+      statusText: 'All POs',
+      context: `${orderedUnits.toLocaleString('en-GB')} units ordered across ${posAll.length} purchase order(s).`,
+      onOpen: go('purchase_orders_admin'),
+    },
+    {
+      id: 'shipments',
+      label: 'Shipments',
+      value: String(shipmentsAll.length),
+      tone: 'neutral',
+      statusText: shipmentsAll.length > 0 ? 'In the logistics layer' : 'None created yet',
+      context: `£${valueInMotion.toLocaleString('en-GB')} consignment value recorded across all shipments.`,
+      onOpen: go('logistics'),
+    },
+    {
+      id: 'volume',
+      label: 'Operational volume',
+      value: unitsInFulfilment.toLocaleString('en-GB'),
+      tone: 'neutral',
+      statusText: posInFulfilment.length > 0 ? 'In fulfilment' : 'Nothing in fulfilment',
+      context: `Units on the ${posInFulfilment.length} purchase order(s) currently accepted, ready-to-fulfil or shipped.`,
+      onOpen: go('logistics'),
+    },
+    {
+      id: 'upcoming-payments',
+      label: 'Upcoming payments',
+      value: `£${upcomingPaymentsGbp.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      tone: 'info',
+      statusText: 'Derived',
+      context:
+        dueWithinHorizon.length === 0
+          ? `No invoice falls due within 30 days at the declared ${INVOICE_TERM_DAYS}-day terms.`
+          : `${dueWithinHorizon.length} invoice(s) fall due within 30 days at the declared ${INVOICE_TERM_DAYS}-day terms (derived from the invoice date — no Vendor Payments API exists).`,
+      // §P2 — receivables/payments drill into Super Admin → Accounting (the real
+      // shell view id); no dead `accounting` id.
+      onOpen: go('super_admin'),
+    },
+    {
+      id: 'exceptions',
+      label: 'Fulfilment exceptions',
+      value: String(shipmentExceptions),
+      tone: shipmentExceptions > 0 ? 'danger' : 'success',
+      statusText: shipmentExceptions > 0 ? 'Carrier action' : 'No exceptions',
+      context: `${delayedShipments} shipment(s) flagged delayed · ${shipmentsAll.length} consignment(s) tracked.`,
+      onOpen: go('logistics'),
     },
   ];
 
@@ -426,11 +638,36 @@ export function AdminDashboard({
     revenue: 'finance',
     contribution: 'finance',
     margin: 'finance',
+    /* §P2 — the money band and the business-volume band. */
+    'open-po-value': 'orders',
+    receivables: 'finance',
+    'upcoming-payments': 'finance',
+    brands: 'catalogue',
+    products: 'catalogue',
+    'pos-count': 'orders',
+    'order-lines': 'orders',
+    shipments: 'logistics',
+    volume: 'logistics',
+    exceptions: 'logistics',
   };
+  /**
+   * §P2 — three bands, one section: the money band is the hero row (the business
+   * position first), then the operational KPI band, then the business-volume
+   * band. `pending-pos` keeps its own tile but is no longer the single hero
+   * value — the hero row is the money.
+   */
+  const moneyTiles: MetricTileData[] = moneyKpis.map((k) => ({
+    ...k,
+    domain: KPI_DOMAIN[k.id] ?? 'finance',
+    size: 'hero' as const,
+  }));
   const kpiTiles: MetricTileData[] = kpis.map((k) => ({
     ...k,
     domain: KPI_DOMAIN[k.id] ?? 'orders',
-    size: k.id === 'pending-pos' ? 'hero' : 'default',
+  }));
+  const businessTiles: MetricTileData[] = businessKpis.map((k) => ({
+    ...k,
+    domain: KPI_DOMAIN[k.id] ?? 'catalogue',
   }));
 
   /** PO pipeline: the real status families this platform moves work through. */
@@ -512,6 +749,35 @@ export function AdminDashboard({
       .map(([status, value]) => ({ label: status.replace(/_/g, ' '), value }));
   }, [docsAll]);
 
+  /**
+   * §P2 — LOGISTICS STATUS. The real consignment distribution, grouped by the
+   * canonical shipment-status presentation (never a local label map) plus the
+   * carrier split (the lane rule decides DHL / Palletline; a freight-collect PO
+   * carries the channel-arranged partner). Both are counts over the same rows
+   * the Logistics Control surface reads.
+   */
+  const shipmentStatusSegments = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of shipmentsAll) {
+      const label = shipmentStatusPresentation(s.status).label;
+      counts.set(label, (counts.get(label) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, value]) => ({ label, value }));
+  }, [shipmentsAll]);
+
+  const carrierSegments = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of shipmentsAll) {
+      const label = s.carrier ? s.carrier.toUpperCase() : 'UNASSIGNED';
+      counts.set(label, (counts.get(label) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, value]) => ({ label, value }));
+  }, [shipmentsAll]);
+
   /*
    * §Dashboard-cleanup (2026-09-22) — REMOVED from the Overview:
    *   · the local `attention[]` queue and its "Needs your attention" section;
@@ -567,7 +833,7 @@ export function AdminDashboard({
       <div data-testid="dashboard-loading" aria-busy="true">
         <WorkspaceFrame>
           <WorkspaceHeader title="Operations Overview" description="Loading operational state…" />
-          <MetricBand items={kpiTiles} columns={4} loading />
+          <MetricBand items={moneyTiles} columns={4} loading />
           <div className="mt-4 space-y-2.5">
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-12 w-full" />
@@ -710,10 +976,30 @@ export function AdminDashboard({
           */}
           <WorkspaceSection
             title="Portfolio at a glance"
-            description="Derived live from purchase orders, compliance, contracts, support, billing and the canonical revenue/cost streams."
+            description="Derived live from purchase orders, the canonical catalog, shipments, compliance, contracts, support, billing and the canonical revenue/cost streams."
             domain="orders"
           >
+            {/*
+              §P2 — three bands, one section, ADDITIVE ONLY:
+                1. THE MONEY BAND (hero) — the business position first;
+                2. the operational KPI band (unchanged tiles);
+                3. the business-volume band (new: brands · products · POs · order
+                   lines · shipments · operational volume · upcoming payments ·
+                   fulfilment exceptions).
+              Every card that existed before P2 is still rendered.
+            */}
+            <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              Business position
+            </h3>
+            <MetricBand items={moneyTiles} columns={4} />
+            <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              Operations
+            </h3>
             <MetricBand items={kpiTiles} columns={4} />
+            <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              Portfolio volume
+            </h3>
+            <MetricBand items={businessTiles} columns={4} />
           </WorkspaceSection>
 
           <WorkspaceSection
@@ -722,6 +1008,82 @@ export function AdminDashboard({
             domain="orders"
           >
             <PipelineTrack stages={pipelineStages} onSelect={() => go('purchase_orders_admin')()} />
+          </WorkspaceSection>
+
+          {/*
+            §P2 — FINANCIAL PERFORMANCE (new, additive). The composition behind the
+            money band: every canonical revenue stream with its own value and its
+            own source label, then the cost base the contribution figure is derived
+            from. Streams with no recorded value are shown as £0 WITH their reason
+            rather than hidden — a zero that is stated is information; a zero that
+            is omitted looks like a missing number.
+          */}
+          <WorkspaceSection
+            title="Financial performance"
+            description="The canonical revenue streams and the monthly cost base behind the business position. Provisional until the cost model is founder-approved."
+            domain="finance"
+            action={
+              <Button variant="secondary" size="sm" onClick={go('super_admin')}>
+                Open Accounting <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </Button>
+            }
+          >
+            <div className="overflow-hidden rounded-ds-lg border border-white/[0.06] bg-ink-900">
+              <table className="w-full text-left">
+                <caption className="sr-only">
+                  Recorded revenue by canonical stream, with each stream's source
+                </caption>
+                <thead>
+                  <tr className="border-b border-white/[0.06] text-ds-micro uppercase tracking-[0.14em] text-zinc-500">
+                    <th scope="col" className="px-3 py-2 font-semibold">Revenue stream</th>
+                    <th scope="col" className="px-3 py-2 text-right font-semibold">Recorded</th>
+                    <th scope="col" className="hidden px-3 py-2 font-semibold sm:table-cell">Basis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {costs.revenue.streams.map((s) => (
+                    <tr key={s.id} className="border-b border-white/[0.04] last:border-b-0">
+                      <td className="px-3 py-2 text-xs text-zinc-200">{s.label}</td>
+                      <td className="px-3 py-2 text-right font-mono text-xs text-white">
+                        £{s.gbp.toLocaleString('en-GB')}
+                      </td>
+                      <td className="hidden px-3 py-2 text-ds-label text-zinc-500 sm:table-cell">{s.source}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t border-white/[0.06] text-xs">
+                    <td className="px-3 py-2 text-zinc-400">Total recorded revenue</td>
+                    <td className="px-3 py-2 text-right font-mono font-semibold text-white">
+                      £{costs.revenue.totalGbp.toLocaleString('en-GB')}
+                    </td>
+                    <td className="hidden px-3 py-2 text-ds-label text-zinc-500 sm:table-cell">
+                      canonical streams only
+                    </td>
+                  </tr>
+                  <tr className="border-t border-white/[0.06] text-xs">
+                    <td className="px-3 py-2 text-zinc-400">Monthly operating cost base</td>
+                    <td className="px-3 py-2 text-right font-mono font-semibold text-white">
+                      £{costs.monthlyTotalGbp.toLocaleString('en-GB')}
+                    </td>
+                    <td className="hidden px-3 py-2 text-ds-label text-zinc-500 sm:table-cell">
+                      {costs.providers.length} provider line(s) + recorded AI usage
+                    </td>
+                  </tr>
+                  <tr className="border-t border-white/[0.06] text-xs">
+                    <td className="px-3 py-2 text-zinc-400">
+                      Gross profit {costs.contribution.provisional ? '(provisional)' : ''}
+                    </td>
+                    <td className="px-3 py-2 text-right font-mono font-semibold text-white">
+                      £{costs.contribution.grossGbp.toLocaleString('en-GB')}
+                    </td>
+                    <td className="hidden px-3 py-2 text-ds-label text-zinc-500 sm:table-cell">
+                      margin {costs.contribution.marginPct}%
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </WorkspaceSection>
 
           {/*
@@ -785,6 +1147,67 @@ export function AdminDashboard({
               )}
             </WorkspaceSection>
           </div>
+
+          {/*
+            §P2 — LOGISTICS STATUS (new, additive). The real consignment state:
+            a distribution by canonical shipment status plus the carrier split.
+            Nothing is plotted when no consignment exists — the section says so.
+          */}
+          <WorkspaceSection
+            title="Logistics status"
+            description="Every consignment by canonical shipment status and carrier — the same rows Logistics Control reads."
+            domain="logistics"
+            action={
+              shipmentsAll.length > 0 ? (
+                <Button variant="secondary" size="sm" onClick={go('logistics')}>
+                  Open Logistics <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Button>
+              ) : undefined
+            }
+          >
+            {shipmentsAll.length === 0 ? (
+              <EmptyState
+                title="No consignments yet"
+                description="Shipment status and carrier distribution appear here once a purchase order moves into dispatch."
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="rounded-ds-lg border border-white/[0.06] bg-ink-900 px-3 py-3">
+                  <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    By status
+                  </h3>
+                  <div className="pt-2">
+                    <MercentaDoughnut
+                      segments={shipmentStatusSegments}
+                      centerValue={String(shipmentsAll.length)}
+                      centerLabel="consignments"
+                      legend
+                      ariaLabel={`Shipments by status: ${shipmentStatusSegments
+                        .map((s) => `${s.label} ${s.value}`)
+                        .join(', ')}`}
+                    />
+                  </div>
+                </div>
+                <div className="rounded-ds-lg border border-white/[0.06] bg-ink-900 px-3 py-3">
+                  <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                    By carrier
+                  </h3>
+                  <ul className="mt-2 space-y-1.5">
+                    {carrierSegments.map((c) => (
+                      <li key={c.label} className="flex items-center justify-between gap-2 text-xs">
+                        <span className="text-zinc-300">{c.label}</span>
+                        <span className="font-mono text-zinc-200">{c.value}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-2.5 border-t border-white/[0.06] pt-2 text-ds-label text-zinc-500">
+                    {shipmentExceptions} exception(s) · {delayedShipments} delayed · £
+                    {valueInMotion.toLocaleString('en-GB')} consignment value
+                  </p>
+                </div>
+              </div>
+            )}
+          </WorkspaceSection>
 
           <WorkspaceSection
             title="Fulfilment in motion"

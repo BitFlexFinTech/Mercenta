@@ -340,7 +340,13 @@ export function deriveWorkItems(): WorkItem[] {
     out.push(
       make('deduction_dispute', { type: 'deduction', id: d.id, label: d.purchaseOrderId }, {
         title: `Deduction ${d.status} — ${d.purchaseOrderId}`,
-        detail: `${brandLabel(d.brandId)} · £${d.amountGbp.toFixed(2)} · ${d.reason}`,
+        /**
+         * §P2 (2026-09-22) — provenance travels with the record. This item is the
+         * canonical owner of the deduction attention the brand overview used to
+         * carry, so it carries the SAME truthful marker that row did: the
+         * canonical `Deduction.simulated` flag decides it, never the wording.
+         */
+        detail: `${brandLabel(d.brandId)} · £${d.amountGbp.toFixed(2)} · ${d.reason}${d.simulated ? ' · (sim)' : ''}`,
         priority: d.status === 'disputed' ? 'high' : 'normal',
         dueDate: addDays(d.date, DEDUCTION_DISPUTE_WINDOW_DAYS),
         tenantId: d.brandId,

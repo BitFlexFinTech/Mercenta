@@ -9,26 +9,55 @@
  * Hierarchy (§UI/UX REDESIGN — remaining surfaces: ONE workspace system):
  *   FRAME/HEADER  WorkspaceFrame + WorkspaceHeader — eyebrow, contract status,
  *                 the PO summary facts and the primary actions (above the fold).
- *   WORKSPACE     At a glance (MetricBand) · Needs your attention (Queue) ·
- *                 Purchase orders (Queue) · Fulfilment (Queue) ·
+ *   WORKSPACE     At a glance (your earnings + your account) · Earnings by month
+ *                 (your chart) · Purchase orders (Queue) · Fulfilment (Queue) ·
  *                 Payouts (DataTable).
- *   CONTEXT RAIL  Compliance & account health · Next actions · Recent comms.
+ *   CONTEXT RAIL  Compliance & account health · Recent comms.
+ *
+ * §P2 (2026-09-22) — OVERVIEW = OBSERVE; THE ACTION LIST MOVES TO OPERATIONS.
+ * The Founder's dashboard programme separates what a surface is FOR: the
+ * Overview observes (earnings, the account's real numbers, what is moving), and
+ * the brand's OPERATIONS group executes. The two action sections that used to sit
+ * here — the "Needs your attention" queue and the rail's "Next actions" — are
+ * therefore GONE from this surface: the brand's single action list is
+ * Operations → **Tasks & Deadlines** (`BrandWorkManagement`), which already
+ * derives the same work from the same canonical records (PO acknowledgements and
+ * windows, document expiries, contract renewals, deduction disputes, shipment
+ * exceptions, returns actions, invoice-due items, commercial-readiness steps),
+ * with the rail badges showing the outstanding count. Nothing is lost: every
+ * attention GROUP has one authoritative owner —
+ *   · PO acknowledgements → Operations → Purchase Orders (and the work list)
+ *   · deductions          → Statements & Account (counted on this page)
+ *   · out-of-stock        → Product Catalog (counted on this page)
+ *   · shipment exceptions → Operations → Logistics Hub (counted on this page)
+ *   · support tickets     → Support & Team (counted on this page)
+ *   · returns             → Operations → Returns (counted on this page)
+ *   · simulated invoices  → the work list's `invoice_due` items + Notifications
+ * — and the counts they carried are now observe tiles, so the business picture is
+ * COMPLETE rather than removed. This mirrors the admin pass (§Dashboard-cleanup),
+ * where the same queue was consolidated onto the work layer and the Control
+ * Centre; a second action list on an observe surface is the duplication the
+ * programme exists to remove.
  *
  * This surface previously composed the Phase-7 dashboard generation
  * (`PageHeader` / `DashboardSection` / `KpiGroup` / `AttentionPanel`) inside its
  * own `p-6 space-y-6 max-w-[1400px] mx-auto` container, which made the brand
  * portal visibly a different product from the redesigned admin workspace. It is
  * now built from the same canonical workspace primitives as AdminDashboard and
- * the Logistics Hub. Every test id the browser suites pin is preserved
- * (`brand-dashboard-loaded`, `kpi-value-*`, `attention-*`, `po-summary-*`,
- * `action-*`, `compliance-summary`).
+ * the Logistics Hub. The test ids the browser suites pin are preserved
+ * (`brand-dashboard-loaded`, `kpi-value-*`, `po-summary-*`, `compliance-summary`)
+ * — the `attention-*` / `action-*` ids are deliberately GONE with the action
+ * sections they belonged to (§P2 below).
  *
  * Phase 7C's remaining legacy static chart (REVENUE_DATA) is REMOVED — the
  * tenant's real per-month PO series is intentionally thin (POs are created
  * only when a retail order lands), and plotting a sparse "trend" would be a
  * fabricated shape. Real time-series analysis lives in Analytics
  * (SalesAnalytics) and Reports (BrandReports) where the same PO data is
- * charted honestly.
+ * charted honestly. §P2 adds the brand's FIRST chart over a source that is
+ * genuinely a series — the canonical commission records, grouped by accrual
+ * month — and states the position instead of drawing when there is too little
+ * history.
  *
  * Tenant/RBAC: ALL lists are narrowed through assertBrandScope / tenantId so
  * a brand never sees another tenant's POs, shipments, docs, messages, or
@@ -51,7 +80,7 @@ import { demoReturns } from '@/data/api';
 import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { assertBrandScope } from '@/lib/auth/rbac';
-import { Alert, Button, DataTable, EmptyState, StatusBadge, type StatusTone } from '@/components/ui';
+import { Alert, Button, DataTable, EmptyState, StatusBadge } from '@/components/ui';
 import {
   ActivityFeed,
   ContextPanel,
@@ -65,8 +94,10 @@ import {
   type MetricTileData,
   type QueueRowData,
 } from '@/components/shared/workspace';
-import type { PurchaseOrder, PurchaseOrderStatus } from '@/types';
-import type { PaletteDomain } from '@/config/themes';
+import type { PurchaseOrderStatus } from '@/types';
+import {
+  MercentaBars,
+} from '@/components/shared/charts/MercentaCharts';
 import {
   commissionStatusPresentation,
   complianceGatePresentation,
@@ -74,27 +105,6 @@ import {
   shipmentStatusPresentation,
 } from '@/lib/statusPresentation';
 import { ArrowRight, FileText, ShieldCheck } from 'lucide-react';
-
-/**
- * §UI/UX REDESIGN (remaining surfaces) — internal attention-row shape.
- *
- * The brand overview previously consumed the Phase-7 `AttentionPanel`
- * primitive, which was the ONE remaining consumer of that legacy
- * presentation generation. The rows are now projected onto the canonical
- * `QueueRowData` (src/components/shared/workspace.tsx) that every migrated
- * operational surface uses, so the platform has a single workspace system.
- * The projection keeps the exact `attention-<id>` test ids the browser suites
- * pin (including the pinned FIRST row `attention-unacked-*`).
- */
-interface BrandAttentionItem {
-  id: string;
-  group: string;
-  tone: StatusTone;
-  statusLabel: string;
-  title: string;
-  meta: string;
-  onOpen: () => void;
-}
 
 const PO_OPEN: ReadonlySet<PurchaseOrderStatus> = new Set([
   'received', 'under_review', 'accepted', 'ready_to_fulfil',
@@ -143,19 +153,6 @@ function shipmentStatusLabel(status: string): string {
   return shipmentStatusPresentation(status).label;
 }
 
-/**
- * A brand-side line counts as unacknowledged until the brand explicitly
- * accepts/rejects/backorders every line (the same rule Vendor Central
- * applies; seed POs arrive with no ackStatus).
- */
-function isUnacknowledged(po: PurchaseOrder): boolean {
-  return po.lineItems.some((l) => !l.ackStatus || l.ackStatus === 'unacknowledged');
-}
-
-/** PO receipt older than the 24-hour acknowledgement window. */
-const overdue = (orderDate: string): boolean =>
-  new Date(orderDate).getTime() < Date.now() - 24 * 60 * 60 * 1000;
-
 export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const { session, brandProfile, products } = useApp();
   const tenantId = session?.tenantId;
@@ -203,6 +200,23 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
 
   const openDeductions = useMemo(() => deductions.filter((d) => d.status === 'open'), [deductions]);
   const brandReturns = useMemo(() => demoReturns.filter((r) => r.brandId === tenantId), [tenantId]);
+  /**
+   * §P2 — the brand's own issued-and-unpaid invoices (canonical commerce ledger,
+   * the same rows the work layer derives its `invoice_due` items from). The
+   * Overview OBSERVES the position; the action is owned by the work list.
+   */
+  const brandUnpaidInvoices = useMemo(
+    () =>
+      tenantId
+        ? demoCommerceInvoices.filter(
+            (i) =>
+              i.brandId === tenantId &&
+              i.status !== 'paid' &&
+              !demoCommercePayments.some((p) => p.invoiceId === i.id)
+          )
+        : [],
+    [tenantId]
+  );
 
   /**
    * §Phase D6 — the brand's PAYOUT visibility, tenant-scoped exactly like every
@@ -239,8 +253,20 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
 
   /* ── Derived brand KPIs (all real, all tenant-scoped) ─────────────── */
   const openPos = useMemo(() => pos.filter((p) => PO_OPEN.has(p.status)), [pos]);
+  /**
+   * A brand-side line counts as unacknowledged until the brand explicitly
+   * accepts/rejects/backorders every line (the same rule Vendor Central
+   * applies; seed POs arrive with no ackStatus). The rule lives HERE because the
+   * Overview still OBSERVES it as a KPI; the work it implies is owned by the
+   * work layer (Operations → Tasks & Deadlines).
+   */
   const awaitingAck = useMemo(
-    () => pos.filter((p) => PO_AWAITING_ACK.has(p.status) && isUnacknowledged(p)),
+    () =>
+      pos.filter(
+        (p) =>
+          PO_AWAITING_ACK.has(p.status) &&
+          p.lineItems.some((l) => !l.ackStatus || l.ackStatus === 'unacknowledged')
+      ),
     [pos]
   );
   const inFlightPos = useMemo(() => pos.filter((p) => PO_IN_FLIGHT.has(p.status)), [pos]);
@@ -255,142 +281,6 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
 
   const loading = poQuery.isLoading || shipmentsQuery.isLoading || docsQuery.isLoading;
 
-  /* ── Needs-attention items (brand-scoped, actionable) ─────────────── */
-  const attentionItems = useMemo(() => {
-    const items: BrandAttentionItem[] = [];
-    awaitingAck.forEach((p) => {
-      items.push({
-        id: `unacked-${p.poNumber}`,
-        group: 'Purchase orders',
-        tone: overdue(p.orderDate) ? 'danger' : 'warning',
-        statusLabel: overdue(p.orderDate) ? 'ACKNOWLEDGEMENT OVERDUE' : 'ACKNOWLEDGEMENT NEEDED',
-        title: `${p.poNumber} — ${p.lineItems.length} line${p.lineItems.length === 1 ? '' : 's'}`,
-        meta: `£${p.poValue.toLocaleString()} · ordered ${p.orderDate} · must be acknowledged within 24h of receipt`,
-        onOpen: go('purchase_orders'),
-      });
-    });
-    openDeductions.slice(0, 3).forEach((d) => {
-      items.push({
-        id: `deduction-${d.id}`,
-        group: 'Deductions',
-        tone: 'warning',
-        statusLabel: 'OPEN DEDUCTION',
-        title: d.reason || d.type.replace(/_/g, ' '),
-        // §Phase E6 (G2c) — truthful provenance from the canonical `Deduction` flag.
-        meta: `£${d.amountGbp.toLocaleString()} · ${d.purchaseOrderId} · open since ${d.date}${d.simulated ? ' · (sim)' : ''}`,
-        onOpen: go('documents'),
-      });
-    });
-    outOfStock.slice(0, 3).forEach((p) => {
-      items.push({
-        id: `oos-${p.sku}`,
-        group: 'Catalogue',
-        tone: 'warning',
-        statusLabel: 'OUT OF STOCK',
-        title: p.name,
-        meta: `${p.sku} — not currently available to orders`,
-        onOpen: go('catalog'),
-      });
-    });
-    brandShipments.filter((s) => s.exception).slice(0, 3).forEach((s) => {
-      items.push({
-        id: `shipment-exc-${s.id}`,
-        group: 'Fulfilment',
-        tone: 'danger',
-        statusLabel: 'EXCEPTION',
-        title: s.title,
-        meta: `${s.reference} · ${shipmentStatusLabel(s.status)} · flagged for review`,
-        onOpen: go('logistics'),
-      });
-    });
-    brandTickets.forEach((t) => {
-      items.push({
-        id: `ticket-${t.id}`,
-        group: 'Support',
-        tone: t.priority === 'urgent' ? 'danger' : 'warning',
-        statusLabel: 'OPEN TICKET',
-        title: t.subject,
-        meta: `${t.lastMessagePreview} — ${t.category ?? 'general'}`,
-        onOpen: go('team'),
-      });
-    });
-    brandReturns.slice(0, 3).forEach((r) => {
-      items.push({
-        id: `return-${r.id}`,
-        group: 'Returns',
-        tone: 'warning',
-        statusLabel: 'RETURN RECORDED',
-        title: `${r.productName} × ${r.quantity}`,
-        meta: `${r.poNumber} · ${r.returnDate} · ${r.reason.replace(/_/g, ' ')}`,
-        onOpen: go('returns'),
-      });
-    });
-    /* §Phase E6 (G2a/G2b) — canonical E4 commerce awareness for THIS tenant.
-       Derived from the SAME canonical stores the E4 lifecycle writes
-       (`demoCommerceInvoices` / `demoCommercePayments` and the already
-       tenant-scoped PO list) — no new store, no duplicated state. APPENDED after
-       every existing group so the existing attention order (and the dashboard
-       tests' pinned FIRST row) is unchanged, and no `unacked-` id is reused. */
-    const brandCommerceInvoices = demoCommerceInvoices.filter((i) => i.brandId === tenantId);
-    const invoicedPoIds = new Set(brandCommerceInvoices.map((i) => i.purchaseOrderId));
-
-    brandCommerceInvoices
-      .filter(
-        (i) => i.status === 'issued' && !demoCommercePayments.some((p) => p.invoiceId === i.id)
-      )
-      .slice(0, 3)
-      .forEach((i) => {
-        items.push({
-          id: `commerce-inv-${i.id}`,
-          group: 'Commerce',
-          tone: 'warning',
-          statusLabel: 'SIM INVOICE DUE',
-          title: `Simulated invoice ${i.number} awaiting payment`,
-          meta: `£${i.subtotalGbp.toFixed(2)} · (sim) — no live payment provider contacted`,
-          onOpen: go('purchase_orders'),
-        });
-      });
-
-    pos
-      .filter(
-        (p) => p.simulated === true && p.status === 'delivered' && !invoicedPoIds.has(p.id)
-      )
-      .slice(0, 3)
-      .forEach((p) => {
-        items.push({
-          id: `commerce-po-inv-${p.id}`,
-          group: 'Commerce',
-          tone: 'warning',
-          statusLabel: 'INVOICE OUTSTANDING',
-          title: `${p.poNumber} delivered — simulated invoice outstanding`,
-          meta: `£${p.poValue.toLocaleString()} · (sim)`,
-          onOpen: go('purchase_orders'),
-        });
-      });
-
-    return items;
-  }, [awaitingAck, openDeductions, outOfStock, brandShipments, brandTickets, brandReturns, pos, tenantId, go]);
-
-  /**
-   * §UI/UX REDESIGN — projected onto the canonical workspace Queue. The group
-   * order is unchanged (Purchase orders → Deductions → Catalogue → Fulfilment →
-   * Support → Returns → Commerce), so the pinned first row is still
-   * `attention-unacked-*`.
-   */
-  const attentionRows: QueueRowData[] = useMemo(
-    () =>
-      attentionItems.map((it) => ({
-        id: it.id,
-        group: it.group,
-        title: it.title,
-        meta: it.meta,
-        status: { tone: it.tone, label: it.statusLabel },
-        testId: `attention-${it.id}`,
-        onOpen: it.onOpen,
-        actionLabel: 'Review',
-      })),
-    [attentionItems]
-  );
 
   const complianceLabel =
     docs.length === 0
@@ -459,6 +349,113 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       onOpen: go('catalog'),
     },
     {
+      /*
+        §P2 — the two payout tiles MOVED into the earnings hero band above (they
+        are the brand's money, and the money reads first). They are not duplicated
+        here: one tile, one place. The §Dashboard-cleanup P0 behaviour (both tiles
+        land on the brand's own payout ledger, never on a dead end) is preserved
+        by `focusPayouts` in `earningsCells`.
+      */
+      id: 'open-deductions',
+      domain: 'finance',
+      label: 'Open deductions',
+      value: String(openDeductions.length),
+      context:
+        openDeductions.length === 0
+          ? 'No open deductions on your account.'
+          : `£${openDeductions.reduce((s, d) => s + d.amountGbp, 0).toFixed(2)} awaiting a decision — work them in Statements & Account.`,
+      tone: openDeductions.length > 0 ? 'warning' : 'success',
+      statusText: openDeductions.length > 0 ? 'Decision needed' : 'None open',
+      onOpen: go('documents'),
+    },
+    {
+      id: 'open-tickets',
+      domain: 'communications',
+      label: 'Open support tickets',
+      value: String(brandTickets.length),
+      context:
+        brandTickets.length === 0
+          ? 'No open tickets with Mercenta support.'
+          : 'Handled by Mercenta support in Support & Team.',
+      tone: brandTickets.length > 0 ? 'warning' : 'success',
+      statusText: brandTickets.length > 0 ? 'With support' : 'None open',
+      onOpen: go('team'),
+    },
+    {
+      id: 'returns-recorded',
+      domain: 'logistics',
+      label: 'Returns recorded',
+      value: String(brandReturns.length),
+      context: `${brandReturns.length} inbound return(s) on your account — track them in Returns.`,
+      onOpen: go('returns'),
+    },
+    {
+      id: 'invoices-outstanding',
+      domain: 'finance',
+      label: 'Invoices outstanding',
+      value: String(brandUnpaidInvoices.length),
+      context:
+        brandUnpaidInvoices.length === 0
+          ? 'No issued-and-unpaid invoice recorded for your account.'
+          : `£${brandUnpaidInvoices.reduce((s, i) => s + i.subtotalGbp, 0).toFixed(2)} · (sim) simulated invoice(s) — no live payment provider contacted.`,
+      tone: brandUnpaidInvoices.length > 0 ? 'warning' : 'success',
+      statusText: brandUnpaidInvoices.length > 0 ? 'Payment outstanding' : 'Nothing outstanding',
+      onOpen: go('documents'),
+    },
+    {
+      id: 'contract-status',
+      domain: 'compliance',
+      label: 'Contract status',
+      value: activeContract ? 'Active' : '—',
+      context: activeContract ? `Distribution agreement v${activeContract.version} signed` : 'No active contract on file',
+      tone: activeContract ? 'success' : 'warning',
+      statusText: activeContract ? 'Contract active' : 'Action required',
+      onOpen: go('contracts'),
+    },
+  ];
+
+  /**
+   * §P2 — THE BRAND'S EARNINGS BAND (hero row) + ITS FIRST CHART.
+   *
+   * `totalEarningsValue` is the brand's own money: the net share of every
+   * commission accrued on its account (pending + settled), computed with the
+   * canonical fee maths and the brand's canonical fulfilment track, so the number
+   * here and the number Accounting settles are the same number.
+   * `earningsSeries` groups those same records by accrual month — it is a REAL
+   * series over real records, never a fabricated trend.
+   */
+  const totalEarningsValue = pendingPayoutValue + settledPayoutValue;
+  const earningsSeries = useMemo(() => {
+    const byMonth = new Map<string, number>();
+    for (const c of brandCommissions) {
+      const month = c.createdAt.slice(0, 7);
+      byMonth.set(month, (byMonth.get(month) ?? 0) + netPayoutOf(c));
+    }
+    return [...byMonth.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, value]) => ({ label: month, value: Math.round(value * 100) / 100 }));
+  }, [brandCommissions, netPayoutOf]);
+
+  const earningsCells: MetricTileData[] = [
+    {
+      id: 'earnings-total',
+      domain: 'finance',
+      label: 'Total earnings',
+      value: `£${totalEarningsValue.toFixed(2)}`,
+      context: `Net of Mercenta's commission across ${brandCommissions.length} accrued payout(s) — pending and settled together.`,
+      tone: brandCommissions.length > 0 ? 'info' : 'neutral',
+      statusText: brandCommissions.length > 0 ? 'Net of commission' : 'No accrual yet',
+      onOpen: focusPayouts,
+    },
+    {
+      id: 'open-po-value',
+      domain: 'orders',
+      label: 'Open PO value',
+      value: `£${openPosValue.toLocaleString('en-GB')}`,
+      context: `Purchase-order value across your ${openPos.length} active PO(s) — received, under review, accepted or ready-to-fulfil.`,
+      onOpen: go('purchase_orders'),
+    },
+    {
       id: 'payouts-due',
       domain: 'finance',
       label: 'Payouts due',
@@ -478,49 +475,9 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       statusText: settledPayouts.length > 0 ? 'Paid' : 'None settled yet',
       onOpen: focusPayouts,
     },
-    {
-      id: 'contract-status',
-      domain: 'compliance',
-      label: 'Contract status',
-      value: activeContract ? 'Active' : '—',
-      context: activeContract ? `Distribution agreement v${activeContract.version} signed` : 'No active contract on file',
-      tone: activeContract ? 'success' : 'warning',
-      statusText: activeContract ? 'Contract active' : 'Action required',
-      onOpen: go('contracts'),
-    },
   ];
 
   const recentMessages = brandMessages.slice(0, 4);
-  /**
-   * §UI/UX REDESIGN — the quick actions are now canonical Queue rows in the
-   * context rail (domain-accented, keyboard-reachable, one clear action) rather
-   * than a bespoke list of icon rows. The `action-<view>` test ids and the
-   * "Open" action label are unchanged.
-   */
-  const quickActions: readonly {
-    id: string;
-    label: string;
-    hint: string;
-    domain: PaletteDomain;
-  }[] = [
-    { id: 'purchase_orders', label: 'Review purchase orders', hint: `${awaitingAck.length} awaiting acknowledgement`, domain: 'orders' },
-    { id: 'catalog', label: 'Manage catalogue', hint: `${products.length} products listed · ${outOfStock.length} out of stock`, domain: 'catalogue' },
-    { id: 'logistics', label: 'Logistics Hub', hint: `${brandShipments.length} shipment${brandShipments.length === 1 ? '' : 's'} in motion`, domain: 'logistics' },
-    { id: 'compliance', label: 'Compliance & documents', hint: complianceLabel, domain: 'compliance' },
-    { id: 'documents', label: 'Statements & account', hint: `${openDeductions.length} open deduction${openDeductions.length === 1 ? '' : 's'}`, domain: 'finance' },
-    { id: 'team', label: 'Support & team', hint: `${brandTickets.length} open ticket${brandTickets.length === 1 ? '' : 's'}`, domain: 'communications' },
-  ];
-
-  const actionRows: QueueRowData[] = quickActions.map((a) => ({
-    id: a.id,
-    title: a.label,
-    meta: a.hint,
-    domain: a.domain,
-    testId: `action-${a.id}`,
-    onOpen: go(a.id),
-    actionLabel: 'Open',
-  }));
-
   const messageEntries: ActivityEntry[] = recentMessages.map((m) => ({
     id: m.id,
     title: m.subject ?? m.body,
@@ -569,7 +526,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       <WorkspaceHeader
         eyebrow="BRAND PORTAL · OPERATIONS"
         title="Brand Overview"
-        description={`${brandProfile.businessName || 'Brand portal'}${brandProfile.category ? ` · ${brandProfile.category}` : ''} — what needs your attention, what is moving and what is blocked.`}
+        description={`${brandProfile.businessName || 'Brand portal'}${brandProfile.category ? ` · ${brandProfile.category}` : ''} — your earnings, what is moving and what is blocked. The work itself is in Operations.`}
         status={
           activeContract ? (
             <StatusBadge tone="success" dataStatus="success">
@@ -652,9 +609,12 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
               </div>
             </ContextPanel>
 
-            <ContextPanel title="Next actions">
-              <Queue rows={actionRows} density="comfortable" />
-            </ContextPanel>
+            {/*
+              §P2 — the "Next actions" rail panel is REMOVED (not relocated):
+              every destination it offered is in the Operations nav group, and the
+              outstanding-work counts are carried by the rail badges. The brand's
+              single action list is Operations → Tasks & Deadlines.
+            */}
 
             <ContextPanel title="Recent communications">
               <ActivityFeed
@@ -670,25 +630,46 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
           description="Live numbers from your real purchase orders, catalogue, contract and documents."
           domain="orders"
         >
+          <h3 className="text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            Your earnings
+          </h3>
+          <MetricBand items={earningsCells} loading={loading} columns={4} />
+          <h3 className="pt-1 text-ds-label font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            Your account
+          </h3>
           <MetricBand items={kpiCells} loading={loading} />
         </WorkspaceSection>
 
+        {/*
+          §P2 — the brand's FIRST CHART: its own earnings over time, derived from
+          the canonical commission records (the same store and the same fee maths
+          the operator settles with). It is plotted only when there is more than
+          one month of real accrual; otherwise the section states the position
+          instead of drawing a fabricated shape.
+        */}
         <WorkspaceSection
-          title="Needs your attention"
-          description="Exceptions that require a brand action — derived from real tenant data only."
-          domain="risk"
+          title="Earnings by month"
+          description="Your net payout accrued per month — derived from the canonical commission records behind your accepted purchase orders."
+          domain="finance"
         >
-          <Queue
-            rows={attentionRows}
-            empty={
-              <div className="flex items-center gap-2.5 px-3.5 py-3">
-                <StatusBadge tone="success" dataStatus="success">
-                  All clear
-                </StatusBadge>
-                <p className="text-xs text-zinc-400">No current issues need your attention.</p>
-              </div>
-            }
-          />
+          {earningsSeries.length < 2 ? (
+            <EmptyState
+              title="Not enough history to chart yet"
+              description={`Your net payout accrues as purchase orders are accepted. ${pendingPayouts.length} payout(s) totalling £${pendingPayoutValue.toFixed(2)} are outstanding; a monthly trend appears once more than one month carries accrual.`}
+            />
+          ) : (
+            <div className="rounded-ds-lg border border-white/[0.06] bg-ink-900 px-2 pb-2 pt-3">
+              <MercentaBars
+                bars={earningsSeries}
+                height={180}
+                paletteIndex={0}
+                valueFormat={(v) => `£${v.toFixed(2)}`}
+                ariaLabel={`Net payout accrued by month: ${earningsSeries
+                  .map((b) => `${b.label} £${b.value.toFixed(2)}`)
+                  .join(', ')}`}
+              />
+            </div>
+          )}
         </WorkspaceSection>
 
       <WorkspaceSection

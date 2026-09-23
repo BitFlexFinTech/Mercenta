@@ -1,15 +1,15 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 
-## 🧭 CURRENT PLATFORM POSITION — DASHBOARD + LOGISTICS CLEANUP: OBSERVE vs ACT, THE PROXY MODEL AND THE PO DOCUMENT PACK (2026-09-22, session 13)
+## 🧭 CURRENT PLATFORM POSITION — DASHBOARD + LOGISTICS CLEANUP: **P2 DONE — OVERVIEW = OBSERVE, ADDITIVE ONLY, IN BOTH SHELLS** (2026-09-22, session 14)
 
 **This is the CURRENT position.** The blocks below it are historical.
 
-**Increment identity:** the Founder's dashboard/logistics cleanup programme. Two governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT** (queues, exceptions, CTAs, sitting **directly under Overview** in both the admin and brand shells). Underneath it sits a correction of the **proxy model** — Mercenta holds the Amazon Vendor account, a brand never talks to Amazon, a brand's decision is an **instruction to Mercenta**, and carriers connect **by API only** (no carrier login).
+**Increment identity:** **P2 of the Founder's dashboard/logistics cleanup programme.** The Overview in BOTH shells is now an OBSERVE surface: the admin Overview gained the full business picture (money band · business-volume band · Financial performance · Logistics status) **without losing a single existing card**, and the brand Overview gained its own earnings (money band), its first chart (net payout accrued by month) and observe tiles for the counts its action queue used to carry — while the brand's **action sections moved out of the Overview into Operations** (the work layer is the single action list). Two governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT** (queues, exceptions, CTAs, sitting **directly under Overview** in both the admin and brand shells). Underneath it sits a correction of the **proxy model** — Mercenta holds the Amazon Vendor account, a brand never talks to Amazon, a brand's decision is an **instruction to Mercenta**, and carriers connect **by API only** (no carrier login).
 
 **Full plan, all 11 binding Founder decisions, the research evidence and the phase table:** `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. That document is the resume point — read it before touching this programme.
 
-**Start:** branch `redesign/foundation`, HEAD `92dd06b8f7a7d5903fb7443c172649bce610d574`, `git status --porcelain` **EMPTY**.
+**Start:** branch `redesign/foundation`, HEAD `d9e77f650df96a107849e396d0b630d8e06aec6b` (the programme-record commit), `git status --porcelain` **EMPTY**.
 
 ### 1. COMPLETED / VERIFIED
 
@@ -20,26 +20,33 @@
 - **Verified at P0:** `tsc` app + root **0 errors** · eslint **0 problems** · `npm run build` **✓** · `validate-workspace-shell` **92/0** · `validate-logistics-map` **60/0** · `validate-logistics-hero` **53** · `validate-uiux-redesign` **346/0** · `validate-e5`/`e6`/`wording` **PASS** · Playwright focused sets **49 + 60 + 7 passed** · **FULL suite 459 passed / 0 failed / 2 skipped**.
 - **Verified at P1:** `tsc` 0 · eslint 0 · build ✓ · `validate-workspace-shell` **92/0** · Playwright **app-shell 23 passed**; `runtime-entry` + `uiux-redesign` **42 passed** before the repoint.
 
+- **P2 (the checkpoint commit — see heading 7) — OVERVIEW = OBSERVE, ADDITIVE ONLY, in both shells.**
+  - **Admin Overview — the business picture, added (nothing removed).** Three bands inside the existing first section *Portfolio at a glance*: **Business position** (hero: **open PO value** · recorded revenue · gross profit · contribution margin · **receivables**), the **unchanged operational band** (pending POs · in fulfilment · docs pending · compliance gate · renewals · tickets · payouts pending) and **Portfolio volume** (**brands** · **products** · **purchase orders** · **order lines** · **shipments** · **operational volume** · **upcoming payments** · **fulfilment exceptions**). Two new sections: **Financial performance** (every canonical revenue stream with its own value AND source label, plus the cost base and the derived gross profit/margin) and **Logistics status** (consignments by canonical shipment status + carrier split + exceptions/delayed/value in motion). Every new figure is derived from an existing canonical store — no new store, no invented metric, no fabricated trend; receivables/upcoming payments use the **P7 definition on the current ledger** (issued-and-unpaid; due date DERIVED from the invoice date + the declared `INVOICE_TERM_DAYS`, labelled as derived because no Vendor Payments API exists).
+  - **Brand Overview — observe only.** New **Your earnings** hero band (**total earnings** = net of commission, pending + settled · **open PO value** · payouts due · payouts settled) and the brand's **first chart**, *Earnings by month* (real series from the canonical commission records; an honest empty state when there is less than one month of accrual). The **counts the removed action queue carried are still observed**: open deductions · open support tickets · returns recorded · invoices outstanding (with the `(sim)` provenance the row used to carry).
+  - **Brand action sections MOVED to Operations.** The **"Needs your attention"** queue and the rail's **"Next actions"** were removed from the brand Overview: the brand's single action list is **Operations → Tasks & Deadlines** (the work layer), which already derives the same work from the same canonical records, with rail badges showing the outstanding count. The removed derivations, dead imports and dead helpers were deleted (no dead code, no placeholder). This completes P3's brand clause ("brand attention/next-actions land in Operations"); P3 keeps the Control Centre de-duplication and the wiring.
+  - **Truthfulness carried across the move.** The work layer's deduction item now carries the same canonical `(sim)` marker the removed dashboard row carried (`Deduction.simulated`, never the wording) — so the provenance invariant survived the move instead of being lost with the surface.
+  - **Gates repointed, not weakened (4 gates, each with the old contract recorded inline).** `validate-workspace-shell` (brand-attention contract → **no second action list + the §P2 observe tiles + the canonical action centre exists**; **92 → 94 checks, 0 FAIL**); `validate-e6-brand-surfaces` **B1–B8** repointed to the canonical owners (work layer / NotificationCenter / observe tiles) with tenant scoping asserted at BOTH owners; `e2e/dashboard.spec.ts` tests 8/9 + `e2e/brand-operational-surfaces.spec.ts` tests 2/5 repointed to Operations → Tasks & Deadlines (with the cross-surface invariant "rendered work rows == the canonical `getWorkItems` derivation for that tenant"); and **`validate-stage19.mjs` — an INHERITED FAILING GATE — was genuinely repaired**: its old contract was satisfied by a *comment* while the code it asserted was gone, so it was repointed to the current canonical contract (interactivity measured on real code + the removed surfaces cannot return + the §P2 picture present). **Baseline `STAGE19_VALIDATION_FAIL (1)` → now `STAGE19_VALIDATION_PASS`.**
+  - **Additive-only proof.** A new browser test (`dashboard.spec.ts` test 3b) asserts EVERY pre-P2 admin KPI id is still rendered alongside the new ones, that the PO tile equals the header's PO count, that the Financial-performance total equals the revenue tile (one canonical calculation, not two), and that the Logistics-status ring accounts for every consignment. A new brand test (test 11) asserts total earnings == payouts due + payouts settled from the rendered tiles, and that the chart is either a real series summing to that total or an honest empty state.
+
 ### 2. IN PROGRESS
 
-- **Nothing mid-flight — the tree is clean at `92dd06b`.** The next phase (**P2**) has not been started.
+- **Nothing mid-flight — the tree is clean at the P2 commit (heading 7).** **P2 is DONE and committed; P3 has not been started.**
 
 ### 3. REMAINING — CURRENT ROADMAP (the cleanup programme, in order)
 
-1. **P2 — Overview = Observe, ADDITIVE ONLY.** **Every existing Overview card stays**; the business-picture cards are ADDED (hero row: open PO value · revenue · gross profit · margin % · receivables; business row: brands · products · POs · orders · shipments · operational volume · upcoming payments · fulfilment status; financial performance · logistics status · trends; brand: its own earnings + first chart). The brand's **action** sections ("Needs your attention", rail "Next actions") MOVE to Operations. **NOT STARTED — next.**
-2. **P3 — Operations = Act wiring.** Brand attention/next-actions land in Operations; badges; **the Control Centre loses its duplicated work/attention lists** and becomes founder-only controls; Work Management is the single action list. **NOT STARTED.**
-3. **P4 — Proxy-model corrections.** The brand does its three jobs only (accept/reject/backorder → download/print → ship on time); **Mercenta** raises the routing/shipment request and files the ASN (the brand sees status); the acknowledgement writes an **instruction-to-Mercenta** record; `submitAcknowledgement` sits behind the SP-API seam, Mercenta-side. Closes **AV-040** and the wrong-direction routing. **NOT STARTED.**
-4. **P5 — Remove the Mercenta Hub completely**; destination = **the FC on the PO**; Hero/map arrival node = that FC; copy, validators, specs and docs. Closes **D09-13 / AV-026/027**. **NOT STARTED.**
-5. **P6 — The PO document pack** (automatic on acceptance): SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge; "Documents for this PO" in the Hub; the collect lane shows the documented status chain (request → carrier assigned → ARN → pickup). **NOT STARTED.**
-6. **P7 — Admin invoicing.** Invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60 payment terms selected per invoice**; derived upcoming payments; receivables = issued-and-unpaid. Closes **AV-022**. **NOT STARTED.**
-7. **P8 — Inventory linked to the brand's catalogue, with ASIN.** Brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation — the code never invents a real-looking ASIN). **NOT STARTED.**
-8. **P9 — Remove the 3PL carrier surface completely, including the demo environment** (environment, role, shell + 3 views, `CarrierDashboard`, `BakLogistics`, the demo switcher entry, the "3PL Carrier Terminal" login card, the admin "Carrier Monitor" item, the public FAQ claim, and the affected documents). Matrix `D01-07` / `D04-18` / `D10-13`. **NOT STARTED.**
-9. **P10 — Logistics Hub completion.** Provider configuration + the PO documents; consolidation recorded as **documented-but-deferred** with the model supporting **1..n POs**. **NOT STARTED.**
-10. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED.**
-11. **P12 — SP-API seam extension (mock-first).** `submitAcknowledgement`, `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. Closes **AV-040**. **NOT STARTED.**
-12. **Push `redesign/foundation` to GitHub** — only when the Founder instructs it. **NOT DONE.**
-13. **DEPLOY + LIVE VERIFY** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Only at the end of the programme. **NOT DONE.**
-14. **The carried-over roadmap from session 12** (heading 3 items 4–5 of the block below: the Finance `destination: 'accounting'` dead route, the Overview header still titled "Operations Overview", the remaining Overview/Logistics-Control duplication) and **WAVE 5 / WAVE 6**. **NOT STARTED.**
+1. **P3 — Operations = Act wiring.** Badges; **the Control Centre loses its duplicated work/attention lists** and becomes founder-only controls; Work Management is the single action list. *(The brand half — "brand attention/next-actions land in Operations" — was completed in **P2**; only the Control Centre de-duplication and the remaining wiring are left.)* **NOT STARTED — next.**
+2. **P4 — Proxy-model corrections.** The brand does its three jobs only (accept/reject/backorder → download/print → ship on time); **Mercenta** raises the routing/shipment request and files the ASN (the brand sees status); the acknowledgement writes an **instruction-to-Mercenta** record; `submitAcknowledgement` sits behind the SP-API seam, Mercenta-side. Closes **AV-040** and the wrong-direction routing. **NOT STARTED.**
+3. **P5 — Remove the Mercenta Hub completely**; destination = **the FC on the PO**; Hero/map arrival node = that FC; copy, validators, specs and docs. Closes **D09-13 / AV-026/027**. **NOT STARTED.**
+4. **P6 — The PO document pack** (automatic on acceptance): SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge; "Documents for this PO" in the Hub; the collect lane shows the documented status chain (request → carrier assigned → ARN → pickup). **NOT STARTED.**
+5. **P7 — Admin invoicing.** Invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60 payment terms selected per invoice**; derived upcoming payments; receivables = issued-and-unpaid. Closes **AV-022**. *(P2 already derives receivables/upcoming payments from the current ledger with the declared terms; P7 adds the terms CHOICE, the number registry and the receiving sync.)* **NOT STARTED.**
+6. **P8 — Inventory linked to the brand's catalogue, with ASIN.** Brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation — the code never invents a real-looking ASIN). **NOT STARTED.**
+7. **P9 — Remove the 3PL carrier surface completely, including the demo environment** (environment, role, shell + 3 views, `CarrierDashboard`, `BakLogistics`, the demo switcher entry, the "3PL Carrier Terminal" login card, the admin "Carrier Monitor" item, the public FAQ claim, and the affected documents). Matrix `D01-07` / `D04-18` / `D10-13`. **NOT STARTED.**
+8. **P10 — Logistics Hub completion.** Provider configuration + the PO documents; consolidation recorded as **documented-but-deferred** with the model supporting **1..n POs**. **NOT STARTED.**
+9. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED.**
+10. **P12 — SP-API seam extension (mock-first).** `submitAcknowledgement`, `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. Closes **AV-040**. **NOT STARTED.**
+11. **Push `redesign/foundation` to GitHub** — only when the Founder instructs it. **NOT DONE.**
+12. **DEPLOY + LIVE VERIFY** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Only at the end of the programme. **NOT DONE.**
+13. **Carried over from session 12/13:** the Finance `destination: 'accounting'` dead route, the Overview header still titled **"Operations Overview"** (P2 deliberately did not rename it — the Founder's phase table puts copy changes in P4/P5), the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, the Command Centre ↔ Control Centre reconciliation (P3), and **WAVE 5 / WAVE 6**. **NOT STARTED.**
 
 ### 4. DEFERRED / PARKED
 
@@ -55,30 +62,35 @@
 
 - **Not pushed; `demo.mercenta.co.uk` not deployed.** This session made no deployment and no push; the programme is not finished and deploying now would be a false completion claim.
 - **Known-wrong behaviour the remaining phases will correct — listed so it is not mistaken for correct:** the brand still "files the ASN" / "confirms routing" (P4); the Mercenta Hub still exists as a destination (P5); the auto-draft on acceptance still hardcodes `carrier:'dhl'` and `destination:'Mercenta UK Hub'` (`src/data/api.ts`, P5/P6); the 3PL carrier surface is still present (P9); "Create PO" still exists (P11); no PO document pack exists yet (P6); invoice numbering has no uniqueness registry yet (P7).
-- The Overview header still reads **"Operations Overview"** (carried from session 12) — it will be resolved by P2/P3.
+- The Overview header still reads **"Operations Overview"** — deliberately unchanged in P2 (the phase is additive; the Founder's phase table puts the copy/route work in P4/P5).
+- **P2 data caveat, stated rather than hidden:** in the seeded demo the canonical commerce-invoice ledger is EMPTY until the E4 lifecycle runs, so the admin **Receivables** and **Upcoming payments** tiles render **£0.00** with an explicit "no unpaid invoices recorded / none falls due within 30 days at the declared 30-day terms" basis line — they are derived, not fabricated, and they populate as soon as invoices exist (proven by `e2e/brand-operational-surfaces.spec.ts`, which seeds one through the real lifecycle and then asserts the brand's `Invoices outstanding` tile and the work item).
 
 ### 7. CURRENT CHECKPOINT
 
-- **Branch:** `redesign/foundation`. **Code checkpoint:** **`92dd06b8f7a7d5903fb7443c172649bce610d574`** (P1), preceded by `b6bd046` (P0.4) and `ee6d5eb` (P0). **Record commit carrying this block:** `ca977fcee67990ac4648a187463a15f19cc98765`. `git status --porcelain`: **EMPTY**.
-- **THREE-WAY STATUS: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ (local repository; **not pushed**) · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. This docs-only record commit changes no application runtime behaviour.
+- **Branch:** `redesign/foundation`. **Start HEAD:** `d9e77f650df96a107849e396d0b630d8e06aec6b`. **P2 checkpoint commit:** the commit that carries this block (its exact hash is recorded in the immediately following state commit, exactly as the P0/P1 record did); preceded by the programme-record commit `ca977fcee67990ac4648a187463a15f19cc98765`. `git status --porcelain`: **EMPTY**.
+- **THREE-WAY STATUS: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ (local repository; **not pushed**) · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. This is application/product work, so the three-way gate applies in full and the work is explicitly NOT complete.
 
 ### 8. VERIFICATION STATUS
 
 | Gate | Result |
 |---|---|
-| `npx tsc --noEmit -p tsconfig.app.json` | **0 errors** |
-| `npx eslint` (changed files) | **0 problems** |
+| `npx tsc --noEmit -p tsconfig.app.json` · `npx tsc --noEmit` | **0 errors · 0 errors** |
+| `npx eslint .` | **0 problems** |
 | `npm run build` | **✓ built** |
-| `validate-workspace-shell` · `validate-logistics-map` · `validate-logistics-hero` · `validate-uiux-redesign` | **92/0 · 60/0 · 53 · 346/0** |
-| `validate-e5` · `validate-e6` · `validate:wording` | **PASS · PASS · PASS** |
-| Playwright focused sets (P0) | **49 + 60 + 7 passed** |
-| Playwright **FULL suite (P0)** | **459 passed / 0 failed / 2 skipped** |
-| Playwright `app-shell` (P1) | **23 passed** |
+| `validate-workspace-shell` | **94 PASS / 0 FAIL** (was 92/0; the brand contract was replaced by three stronger ones) |
+| `validate-e6-brand-surfaces` | **PASS** (B1–B8 repointed to the canonical owners) |
+| `validate-stage19` | **PASS** — an INHERITED FAILURE (`FAIL (1)` at session start) genuinely repaired |
+| `validate-uiux-redesign` · `validate-command-centre` · `validate-e5-admin-surfaces` | **346/0 · 40 checks PASS · PASS** |
+| `validate-logistics-map` · `validate-logistics-hero` | **60 assertions PASS · 53 assertions PASS** |
+| `validate-work-layer` · `validate-founder-operating-system` · `validate-payouts` · `validate-financial-reconciliation` · `validate-mock-providers` · `validate-mock-seam` · `validate-db-hardening` · `validate-canonical-model` · `validate-commercial-models` · `validate-document-verification` | **all PASS** |
+| `validate:wording` | **PASS** (296 files, 0 violations) |
+| Playwright focused: `dashboard` (13) · `brand-operational-surfaces` (5) · `admin-operational-surfaces` + `uiux-redesign` + `command-centre` (21) | **13 · 5 · 21 passed** |
+| Playwright **FULL suite** — `npx playwright test --workers=3 --reporter=line` | **462 passed / 0 failed / 2 skipped** (18.8m; generated log `test-results/full-suite-p2.log`, gitignored — a copy of the run's own output). **Parallelism note, reported rather than hidden:** the identical suite at Playwright's DEFAULT parallelism (8 workers on this machine) intermittently fails 1–4 tests in DIFFERENT unrelated specs on each run (observed across four runs: `domain-acceptance` #6, `uiux-redesign` 390x844, `access-gate` #7, `accessibility` skip-link, `embedded-social` #6, `simulation-control` 375x812, `investor-demo` 375x812, `multi-tenant` #5/#7). Every one of them passes in isolation and in the reduced-parallelism run, and one complete default-parallelism run also passed 462/0/2 — so they are machine-contention budget flakes, not P2 regressions. One GENUINE budget defect was found and fixed: `e2e/investor-demo.spec.ts` 375x812 measured **29.0s** against Playwright's 30s default (the test runs the full 25-stage lifecycle), so it now calls `test.slow()` — every assertion unchanged |
 | `git status --porcelain` | **EMPTY** |
 
 ### 9. NEXT EXECUTION SCOPE
 
-**P2 — Overview = Observe (ADDITIVE ONLY)**, then P3 → P12 in the order listed in heading 3, each phase verified and committed separately. Read `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` first.
+**P3 — Operations = Act wiring** (the Control Centre loses its duplicated work/attention lists and becomes founder-only controls; Work Management is the single action list; the brand half was completed in P2), then P4 → P12 in the order listed in heading 3, each phase verified and committed separately. Read `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` first.
 
 ---
 

@@ -700,28 +700,66 @@ try {
     !/po\.simulated === true[\s\S]{0,120}<Button/.test(code(PO)) &&
     !/po\.simulated === true[\s\S]{0,120}<input/.test(code(PO)));
 
-  /* ══ B. G2 — canonical commerce awareness, APPENDED ══ */
+  /* ══ B. G2 — canonical commerce awareness (REPOINTED, never weakened) ══
+   *
+   * §P2 (2026-09-22) — REPOINTED to the canonical owners, not relaxed.
+   *
+   * OLD CONTRACT (recorded here because it was the E6 G2 gate): the brand
+   * OVERVIEW itself carried the commerce attention rows — `commerce-inv-*`
+   * (issued-unpaid simulated invoice), `commerce-po-inv-*` (delivered PO awaiting
+   * invoice) and `deduction-*` (with `(sim)` provenance) — appended after the
+   * pre-existing attention groups.
+   *
+   * WHY IT MOVED: the Founder's dashboard programme makes the Overview an
+   * OBSERVE surface and the brand's Operations group the place where work is
+   * EXECUTED, with the work layer as the SINGLE action list. The Overview's
+   * attention queue was a second action list (the same duplication the admin
+   * Overview was cleaned of in §Dashboard-cleanup), so it was removed from the
+   * Dashboard and the invariants below are now asserted WHERE THE BEHAVIOUR
+   * LIVES:
+   *   · the canonical E4 stores are still read by the Overview (observe tiles);
+   *   · the issued-unpaid derivation is still canonical AND the actionable item is
+   *     derived by the work layer (`invoice_due`), which is what the brand works;
+   *   · the delivered-awaiting-invoice gap is still derived canonically from the
+   *     PO list — by the NotificationCenter, the surface that still shows it;
+   *   · the simulated-deduction provenance is still decided by the canonical
+   *     `Deduction.simulated` flag, now carried by the work item;
+   *   · tenant scoping is asserted on the Overview's observe tile AND on the work
+   *     layer's own tenant filter.
+   * Nothing in this block is satisfied by prose: every assertion is made against
+   * comment-stripped code (`code()`).
+   */
+  const WORK = readSrc('src/lib/work/workStore.ts');
+  const WORKWS = readSrc('src/components/shared/WorkWorkspace.tsx');
   test('B1 the brand dashboard reads the canonical E4 commerce stores',
     /from '@\/data\/demoStore'/.test(DASH) &&
     /demoCommerceInvoices/.test(DASH) && /demoCommercePayments/.test(DASH));
-  test('B2 it derives issued-unpaid simulated invoices canonically',
-    /i\.status === 'issued'/.test(DASH) && /invoiceId === i\.id/.test(DASH));
-  test('B3 it derives delivered-awaiting-invoice from the canonical PO list',
-    /p\.simulated === true && p\.status === 'delivered'/.test(DASH) && /invoicedPoIds\.has/.test(DASH));
-  test('B4 the new groups are APPENDED after every existing group',
-    DASH.indexOf('commerce-inv-') > DASH.indexOf('id: `return-') &&
-    DASH.indexOf('commerce-po-inv-') > DASH.indexOf('id: `return-'));
-  test('B5 no new attention id reuses the pinned `unacked-` prefix',
-    (DASH.match(/id: `unacked-/g) || []).length === 1 &&
-    (DASH.match(/commerce-inv-/g) || []).length === 1);
-  test('B6 the existing KPI ids are unchanged',
+  test('B2 it derives issued-unpaid simulated invoices canonically (observe), and the work layer owns the action',
+    /i\.status !== 'paid'/.test(code(DASH)) && /invoiceId === i\.id/.test(code(DASH)) &&
+    /demoCommerceInvoices/.test(WORK) && /getCommercePaymentsForInvoice/.test(WORK) &&
+    /'invoice_due'/.test(WORK));
+  test('B3 delivered-awaiting-invoice is still derived from the canonical PO list (NotificationCenter)',
+    /p\.status === 'delivered' && !invoicedPoIds\.has\(p\.id\)/.test(code(NOTIF)) &&
+    /invoicedPoIds/.test(NOTIF));
+  test('B4 the brand overview no longer carries a second action list (the work layer is the single one)',
+    !/attention-\$\{it\.id\}/.test(code(DASH)) &&
+    !/testId: `action-/.test(code(DASH)) &&
+    /work-row-\$\{w\.id\}/.test(code(WORKWS)));
+  test('B5 no attention id survives on the overview, and work ids stay deterministic',
+    !/id: `unacked-/.test(code(DASH)) &&
+    !/commerce-inv-/.test(code(DASH)) &&
+    /work-\$\{source\}-\$\{entityId\}/.test(code(WORK)));
+  test('B6 the existing KPI ids are unchanged, and the moved payout tiles still exist',
     ['active-pos', 'awaiting-ack', 'in-fulfilment', 'products-listed', 'out-of-stock', 'contract-status']
       .every((id) => DASH.includes(`id: '${id}'`)) &&
+    DASH.includes("id: 'payouts-due'") && DASH.includes("id: 'payouts-settled'") &&
     /data-testid="po-summary-active"/.test(DASH) && /data-testid="po-summary-awaiting"/.test(DASH));
-  test('B7 simulated deduction attention rows carry canonical provenance',
-    /open since \$\{d\.date\}\$\{d\.simulated \? ' · \(sim\)' : ''\}/.test(DASH));
-  test('B8 the brand commerce attention is tenant-scoped (brandId === tenantId)',
-    /demoCommerceInvoices\.filter\(\(i\) => i\.brandId === tenantId\)/.test(DASH));
+  test('B7 simulated deduction provenance is carried by the canonical work item (flag, never text)',
+    /d\.simulated \? ' · \(sim\)' : ''/.test(WORK) &&
+    /demoDeductions/.test(WORK));
+  test('B8 the brand commerce attention is tenant-scoped (brandId === tenantId) at BOTH owners',
+    /demoCommerceInvoices\.filter\(\s*\(i\) =>\s*i\.brandId === tenantId/.test(DASH) &&
+    /scope === 'brand' \? rows\.filter\(\(r\) => r\.tenantId === \(tenantId \?\? null\)\)/.test(WORK));
 
   /* ── runtime proof of the canonical derivation itself ── */
   const inv = commerce.issueCommerceInvoice;

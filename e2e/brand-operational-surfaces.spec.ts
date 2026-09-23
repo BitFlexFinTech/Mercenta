@@ -101,7 +101,7 @@ test.describe('E6 — brand operational surfaces', () => {
     expect(externalCalls).toEqual([]);
   });
 
-  test('2. C+D — the brand dashboard surfaces canonical commerce attention with (sim) provenance', async ({ page }) => {
+  test('2. C+D — the brand OPERATIONS work list surfaces canonical commerce items with (sim) provenance', async ({ page }) => {
     const externalCalls = watchExternalCalls(page);
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
@@ -112,22 +112,44 @@ test.describe('E6 — brand operational surfaces', () => {
     await page.click(`text=${ZAMBEZI}`);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
 
-    // C — the issued-unpaid simulated invoice is surfaced, canonically derived.
-    const invoiceRow = page.locator('[data-testid^="attention-commerce-inv-"]').first();
-    await expect(invoiceRow).toBeVisible({ timeout: 8000 });
-    await expect(invoiceRow).toContainText('SIM INVOICE DUE');
-    await expect(invoiceRow).toContainText('(sim)');
-    await expect(invoiceRow).toContainText('no live payment provider contacted');
+    /**
+     * §P2 (2026-09-22) — REPOINTED, not weakened.
+     *
+     * OLD CONTRACT (C+D): the brand DASHBOARD carried `attention-commerce-inv-*`
+     * (SIM INVOICE DUE) and `attention-deduction-*` rows, in a pinned order whose
+     * first row was `attention-unacked-*`.
+     *
+     * WHY IT MOVED: Overview = OBSERVE, Operations = ACT. The dashboard's queue
+     * was a second action list beside the brand's work layer, so it was removed
+     * (the admin Overview received the same consolidation in §Dashboard-cleanup).
+     * The provenance invariants are now asserted on the canonical OWNER —
+     * Operations → Tasks & Deadlines — and the removed queue is asserted ABSENT so
+     * it cannot silently return. The ordering guard is retired with the queue it
+     * guarded: the work list's own deterministic ordering is owned by the work
+     * layer's validator (`scripts/validate-work-layer.mjs`).
+     */
+    await expect(page.locator('[data-testid^="attention-"]')).toHaveCount(0);
 
-    // D — the simulated deduction attention row carries canonical provenance.
-    const dedRow = page.locator('[data-testid^="attention-deduction-"]').first();
+    await page.locator('nav[aria-label="Primary"]').getByText('Tasks & Deadlines').first().click();
+    await page.waitForTimeout(1200);
+
+    // C — the issued-unpaid simulated invoice is surfaced, canonically derived
+    // from the same ledger, with its simulated mode and declared terms.
+    const invoiceRow = page.locator('[data-testid^="work-row-work-invoice_due-"]').first();
+    await expect(invoiceRow).toBeVisible({ timeout: 8000 });
+    await expect(invoiceRow).toContainText('Invoice SIM-INV-');
+    await expect(invoiceRow).toContainText('simulation');
+    await expect(invoiceRow).toContainText('30-day terms');
+
+    // D — the simulated deduction item carries canonical provenance. (The work
+    // list is priority-ordered, so the simulated deduction is not necessarily the
+    // FIRST deduction row: assert the row that carries the canonical flag.)
+    const dedRow = page
+      .locator('[data-testid^="work-row-work-deduction_dispute-"]')
+      .filter({ hasText: '(sim)' })
+      .first();
     await expect(dedRow).toBeVisible({ timeout: 6000 });
     await expect(dedRow).toContainText('(sim)');
-
-    // Regression guard: the existing attention ordering (and its pinned FIRST
-    // row) is unchanged — the new groups were appended.
-    const firstId = await page.locator('[data-testid^="attention-"]').first().getAttribute('data-testid');
-    expect(firstId).toMatch(/^attention-unacked-/);
 
     expect(pageErrors).toEqual([]);
     expect(externalCalls).toEqual([]);
@@ -194,10 +216,19 @@ test.describe('E6 — brand operational surfaces', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', (e) => pageErrors.push(String(e)));
 
-    // H — another tenant's brand session sees no commerce attention state at all.
+    // H — another tenant's brand session sees none of that commerce state, on
+    // EITHER surface: the observe tiles on the Overview and the action list in
+    // Operations are both tenant-scoped (§P2 repoint — the dashboard queue moved
+    // to Operations → Tasks & Deadlines, the isolation invariant did not).
     await loginAs(page, 'Tapatío', 1200);
     await expect(page.getByTestId('brand-dashboard-loaded')).toHaveCount(1, { timeout: 10000 });
-    await expect(page.locator('[data-testid^="attention-commerce-inv-"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="attention-"]')).toHaveCount(0);
+    await expect(page.getByText('PO-SIM-BRAND-ASTONISH')).toHaveCount(0);
+    // The observe tile counts only THIS tenant's unpaid invoices (0 here).
+    await expect(page.getByTestId('kpi-value-invoices-outstanding')).toHaveText('0');
+    await page.locator('nav[aria-label="Primary"]').getByText('Tasks & Deadlines').first().click();
+    await page.waitForTimeout(1200);
+    await expect(page.locator('[data-testid^="work-row-work-invoice_due-"]')).toHaveCount(0);
     await expect(page.getByText('PO-SIM-BRAND-ASTONISH')).toHaveCount(0);
 
     // I+J — the REAL domain refuses foreign/unauthorised actors without mutating.

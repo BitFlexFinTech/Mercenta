@@ -1,7 +1,8 @@
 # DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22) — AGREED PLAN, DECISIONS AND RESUME POINT
 
-**Status: IN PROGRESS — P0 and P1 are DONE and committed; P2–P12 remain.**
-**Checkpoint: branch `redesign/foundation`, HEAD `92dd06b`, `git status --porcelain` EMPTY.**
+**Status: IN PROGRESS — P0, P0.4, P1 and **P2** are DONE and committed; P3–P12 remain.**
+**Checkpoint: branch `redesign/foundation`, start HEAD `d9e77f6`; the P2 checkpoint commit is recorded in
+`PROJECT_STATUS.md` heading 7 and `HANDOFF.md`. `git status --porcelain` EMPTY.**
 **Not pushed to GitHub; `demo.mercenta.co.uk` NOT deployed (deployment is the final step of the programme).**
 
 This document exists so a future session — with **no memory of the conversation** — can resume
@@ -37,7 +38,7 @@ documents → ship on time. Everything else is Mercenta's.
 | 5 | **Inventory, LINKED TO THE BRAND'S CATALOGUE** | Per catalogue product: image · SKU · **ASIN** · available · UoM (Eaches/Cases) · on-hand · committed · inbound · safety stock. Brand-entered **inside Mercenta** (never an Amazon login) |
 | 6 | **The Logistics Hub = where brands download shipping labels + ALL PO documents** | The document pack is the Hub's core deliverable, offered **at acceptance** |
 | 7 | **Control Centre = ONE action list, founder-only controls** | The work/attention lists leave it; **Work Management is the single action list**; it moves **under Operations** |
-| 8 | **Overview cards: ADDITIVE ONLY** | **Every existing Overview card stays.** The discussed cards are ADDED. (The brand's *action sections* "Needs your attention" + "Next actions" still MOVE to Operations, as decided.) |
+| 8 | **Overview cards: ADDITIVE ONLY** | **Every existing Overview card stays.** The discussed cards are ADDED. (The brand's *action sections* "Needs your attention" + "Next actions" MOVED to Operations, as decided — **done in P2**.) |
 | 9 | **On PO acceptance, the ASN/shipment/documents are AUTOMATIC** | No brand input by default; the brand corrects only if their packing differs |
 | 10 | **ASIN rule** | Brand may add it if the product already exists on Amazon; otherwise Mercenta populates it **when Amazon accepts the product in the catalogue** (in simulation: a clearly-simulated placeholder — the code never invents a real-looking ASIN) |
 | 11 | **Consolidation: DEFERRED, but not designed out** | Amazon DOES document multi-PO grouping (`purchaseOrders[]` in the shipment request; per-carton `purchaseOrderNumber` in the ASN; the FTL/LTL ≤100 rule). POs arrive separately today, so: **one PO = one shipment now**, model supports **1..n POs** |
@@ -70,8 +71,8 @@ documents → ship on time. Everything else is Mercenta's.
 |---|---|---|---|
 | **P0** | ✅ **DONE** (`ee6d5eb`, `b6bd046`) | payout tiles → the payout ledger · AV-002/003 brand claims corrected · "Logistics Hub" naming · accepted PO → **"Open shipping documents"** deep link with the PO selected | dead-end routing; unsupported Amazon claims; naming vs documentation |
 | **P1** | ✅ **DONE** (`92dd06b`) | **Operations = the action centre, directly under Overview** in both shells; admin Operations = Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Carrier Monitor · Calendar; brand Operations = Purchase Orders · Logistics Hub · Returns · Tasks & Deadlines · Calendar | Observe/Act |
-| **P2** | NEXT | **Overview = Observe (ADDITIVE ONLY)**: hero row (open PO value · revenue · gross profit · margin % · receivables) + business row (brands · products · POs · orders · shipments · operational volume · upcoming payments · fulfilment status) + financial performance + logistics status + trends; brand: its own earnings + first chart; brand action sections move to Operations | the business-picture gaps |
-| **P3** | | **Operations = Act** wiring: brand attention/next-actions land in Operations; badges; **Control Centre loses its duplicated work/attention lists** (founder-only controls) | 3 action lists → 1 |
+| **P2** | ✅ **DONE** (checkpoint recorded in `PROJECT_STATUS.md` §7) | **Overview = Observe, ADDITIVE ONLY, both shells.** Admin: money band (**open PO value** · revenue · gross profit · margin % · **receivables**) + the **unchanged** operational band + **Portfolio volume** (brands · products · POs · order lines · shipments · operational volume · upcoming payments · fulfilment exceptions) + **Financial performance** + **Logistics status**. Brand: **Your earnings** hero band (total earnings · open PO value · payouts due · payouts settled) + **Earnings by month** (its first chart) + observe tiles for the counts the removed queue carried (open deductions · open tickets · returns · invoices outstanding). **Brand action sections moved to Operations** (the work layer is the single action list) — this also completes P3's brand clause. 4 gates repointed with the old contract recorded inline; **`validate-stage19` (an inherited FAIL) genuinely repaired**. | the business-picture gaps |
+| **P3** | NEXT | **Operations = Act** wiring: badges; **Control Centre loses its duplicated work/attention lists** (founder-only controls). *(Brand attention/next-actions already land in Operations — done in P2.)* | 3 action lists → 1 |
 | **P4** | | **Proxy-model corrections**: brand does its 3 jobs only; **Mercenta** raises the routing/shipment request and files the ASN (brand sees status); ack writes an **instruction-to-Mercenta** record; `submitAcknowledgement` behind the SP-API seam (mock-first, Mercenta-side) | **AV-040**, wrong direction, truthfulness |
 | **P5** | | **Remove the Mercenta Hub completely** → destination = **the FC on the PO**; Hero/map arrival node = that FC; copy; validators/specs/docs | **D09-13 / AV-026/027** |
 | **P6** | | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
@@ -98,11 +99,31 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P1 (committed; full suite **459 passed / 0 failed / 2 skipped** at P0).
-- **Next:** **P2 — Overview = Observe, ADDITIVE ONLY** (keep every existing card).
-- **Then:** P3 → P12 in order.
+- **Done:** P0, P0.4, P1, **P2** (committed; the P2 checkpoint hash is recorded in `PROJECT_STATUS.md` §7).
+- **Next:** **P3 — Operations = Act wiring** (Control Centre de-duplication; Work Management as the single action list).
+- **Then:** P4 → P12 in order.
 - **Deployment:** only at the end, once the programme is verified: `bash scripts/deploy-demo.sh`, then
   **open** `https://demo.mercenta.co.uk`, verify the changed behaviour live, and confirm the live build
   matches the recorded verified commit. Until then the status is
   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE**.
+
+## 6. P2 — WHAT WAS BUILT (so P3+ does not have to re-derive it)
+
+- **Admin Overview** (`src/components/admin/AdminDashboard.tsx`): the first section *Portfolio at a glance* now
+  renders **three bands** — *Business position* (hero, `moneyTiles`), *Operations* (the pre-P2 `kpiTiles`,
+  unchanged) and *Portfolio volume* (`businessTiles`) — plus two new sections, **Financial performance**
+  (canonical revenue streams with their own source labels + cost base + derived gross profit/margin) and
+  **Logistics status** (status ring + carrier split + exception/delay/value summary). Receivables and
+  upcoming payments are derived from `demoCommerceInvoices` + the declared `INVOICE_TERM_DAYS` (P7's definition
+  on the current ledger); every drill-down uses a REAL admin shell view id.
+- **Brand Overview** (`src/components/brand/BrandDashboard.tsx`): new `earningsCells` hero band
+  (`earnings-total`, `open-po-value`, `payouts-due`, `payouts-settled`) and the *Earnings by month* section
+  (`MercentaBars` over the canonical commission records, honest empty state below two months of accrual).
+  New observe tiles `open-deductions`, `open-tickets`, `returns-recorded`, `invoices-outstanding`.
+  **Removed** (moved, not lost): the "Needs your attention" section, the rail "Next actions" panel, the
+  `attentionItems`/`attentionRows`/`quickActions`/`actionRows` derivations and their dead imports/helpers.
+- **Work layer** (`src/lib/work/workStore.ts`): the deduction item now carries the canonical `(sim)` marker.
+- **Gates**: `scripts/validate-workspace-shell.mjs`, `scripts/validate-e6-brand-surfaces.mjs` (B1–B8),
+  `scripts/validate-stage19.mjs`, `e2e/dashboard.spec.ts` (tests 8/9 + new 3b/11),
+  `e2e/brand-operational-surfaces.spec.ts` (tests 2/5), `e2e/domain-acceptance.spec.ts` (test 6).
 

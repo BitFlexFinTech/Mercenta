@@ -1,63 +1,97 @@
 ---
-**Last updated: September 22, 2026 — 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME (session 13) — P0 and P1 DONE AND COMMITTED; P2 NEXT.** The Founder set two governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT** (queues, exceptions, CTAs, sitting **directly under Overview** in both the admin and brand shells) — on top of a correction of the **proxy model** (Mercenta holds the Amazon Vendor account; a brand never talks to Amazon and its decision is an **instruction to Mercenta**; carriers connect **by API only, never a login**). **Done:** P0 (`ee6d5eb`) — brand payout tiles no longer dead-end, **AV-002/AV-003** unsupported Amazon claims corrected, **"Logistics Hub"** naming applied across 16 source files + 13 specs; P0.4 (`b6bd046`) — accepting a PO now leads straight to its shipping documents (`/brand/logistics?po=…`, PO preselected, via the existing address layer); P1 (`92dd06b`) — **Operations rebuilt as the action centre under Overview in both shells**, nav ids unchanged. Verified at P0: tsc/eslint/build clean, workspace-shell 92/0, logistics-map 60/0, hero 53, uiux-redesign 346/0, e5/e6/wording PASS, **full suite 459 passed / 0 failed / 2 skipped**. **P2–P12 NOT STARTED.** Full plan + all 11 Founder decisions + research evidence: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. **Not pushed; `demo.mercenta.co.uk` NOT deployed.** Previous: session 12 dashboard cleanup (Overview is an overview again); session 11 Wave 3 Logistics Hub completion; session 10 Wave 3 cinematic hero.
+**Last updated: September 22, 2026 — 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME (session 14) — **P2 DONE AND COMMITTED; P3 NEXT.** **P2 = Overview = OBSERVE, ADDITIVE ONLY, in BOTH shells.** The Founder's governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT** (queues, exceptions, CTAs, **directly under Overview** in both shells) — on top of the correction of the **proxy model** (Mercenta holds the Amazon Vendor account; a brand never talks to Amazon and its decision is an **instruction to Mercenta**; carriers connect **by API only, never a login**). **Done this session:** the admin Overview gained the business picture — **Business position** hero band (open PO value · revenue · gross profit · contribution margin · receivables), the **unchanged** operational band, **Portfolio volume** (brands · products · POs · order lines · shipments · operational volume · upcoming payments · fulfilment exceptions) and the new **Financial performance** + **Logistics status** sections — with **every pre-P2 card still rendered** (proven by a new browser test); the brand Overview gained **Your earnings** + its **first chart** (*Earnings by month*) + observe tiles for the counts its action queue used to carry (open deductions · open tickets · returns · invoices outstanding); and the brand's **action sections MOVED to Operations** (the work layer is the single action list — the old "Needs your attention" queue and rail "Next actions" are gone from the Overview, with the `(sim)` provenance carried into the work item). **4 gates repointed with their old contracts recorded inline; `validate-stage19` — an INHERITED FAILURE — was genuinely repaired (FAIL(1) → PASS).** Full plan + all 11 Founder decisions + the phase table: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. **Not pushed; `demo.mercenta.co.uk` NOT deployed → `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`.** Previous: session 13 P0/P0.4/P1; session 12 dashboard cleanup; session 11 Wave 3 Logistics Hub; session 10 Wave 3 hero.
 
-## 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22, session 13) — CURRENT CHECKPOINT
+## 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME — **P2 DONE** (2026-09-22, session 14) — CURRENT CHECKPOINT
 
 **Read this first, then `PROJECT_STATUS.md` headings 1–9 (the canonical current position) and
-`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (the full plan, the 11 Founder decisions and the research evidence).**
+`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (the full plan, the 11 Founder decisions, the phase table and
+§6 "P2 — what was built").**
 
-### What this programme is
+### What this session did (P2 — Overview = Observe, ADDITIVE ONLY, both shells)
 
-Two governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT**
-(queues, exceptions, CTAs, **directly under Overview** in both shells). Underneath sits a correction of the **proxy
-model**: **Mercenta holds the Amazon Vendor account**; a brand **never** communicates with Amazon (its decision is an
-**instruction to Mercenta**); **carriers never log into Mercenta** — Mercenta connects DHL/Palletline **by API**. The
-brand's only jobs are **accept/reject/backorder → download & print its shipping documents → ship on time**.
+**Admin Overview** — the business picture was ADDED without removing a single existing card. The first section
+*Portfolio at a glance* now renders three bands: **Business position** (hero: open PO value · recorded revenue · gross
+profit · contribution margin · receivables), the **unchanged** operational band (pending POs · in fulfilment · docs
+pending · compliance gate · renewals · tickets · payouts pending) and **Portfolio volume** (brands · products · purchase
+orders · order lines · shipments · operational volume · upcoming payments · fulfilment exceptions). Two new sections:
+**Financial performance** (every canonical revenue stream with its own value and source label + the cost base + the
+derived gross profit/margin) and **Logistics status** (consignments by canonical shipment status + carrier split +
+exceptions/delayed/value). Every figure is derived from an existing canonical store; receivables/upcoming payments use
+**P7's definition on the current ledger** with the due date DERIVED from the invoice date + the declared
+`INVOICE_TERM_DAYS` (no Vendor Payments API exists — register S14).
 
-### The Founder's binding decisions (full text in the programme doc, §2)
+**Brand Overview** — new **Your earnings** hero band (total earnings = net of commission, pending + settled · open PO
+value · payouts due · payouts settled) and the brand's **first chart**, *Earnings by month* (real series from the
+canonical commission records; honest empty state below two months of accrual). The counts the old action queue carried
+are still observed: open deductions · open support tickets · returns recorded · invoices outstanding (with the `(sim)`
+provenance).
 
-DHL + Palletline **only** (remove `fedex`, `bak`) · payment terms **14/30/60** chosen per invoice **after receipt** ·
-**one PO record only** (the PO from Amazon) with the Mercenta→brand position **derived** from Model A/B, **no "Create
-PO"** · **remove the 3PL carrier surface completely, including the demo environment** · **inventory linked to the
-catalogue, with an ASIN field** · the **Logistics Hub is where the brand downloads its labels and ALL PO documents** ·
-**Control Centre = founder-only controls, one action list (Work Management)** · **Overview cards are ADDITIVE ONLY —
-every existing card stays** · **ASN/shipment/documents are automatic on acceptance** · consolidation **deferred but not
-designed out** (the model supports 1..n POs).
+**Brand action sections MOVED to Operations** — the "Needs your attention" queue and the rail "Next actions" are gone
+from the Overview; the brand's single action list is **Operations → Tasks & Deadlines** (the work layer), which already
+derives the same work from the same canonical records and whose rail badge shows the outstanding count. This completes
+**P3's brand clause**; P3 keeps the Control Centre de-duplication. The work layer's deduction item now carries the same
+canonical `(sim)` marker the removed row carried, so the provenance invariant survived the move.
 
-### What is BUILT and VERIFIED
+### The governing principles and the Founder's binding decisions (full text: programme doc §1–§2)
 
-- **P0 — `ee6d5eb`.** ① brand payout tiles no longer dead-end (scroll to `#brand-payouts`; settlement stays Admin →
-  Accounting); ② **AV-002/AV-003** — the unsupported Amazon claim in the brand email and ack-deadline label replaced
-  with Mercenta's own attributed consequence; ③ **"Logistics Hub"** naming across **16 source files + 13 specs**.
-- **P0.4 — `b6bd046`.** An accepted / ready-to-fulfil PO shows **"Open shipping documents"** → `/brand/logistics?po=<PO>`
-  and the Hub selects that consignment. `navigateProductView()` / `currentQueryParam()` were added to the **existing**
-  address layer (`src/lib/runtime/productRoutes.ts`) — no second navigation mechanism. New browser test
-  (`e2e/logistics-wave3.spec.ts` test 7).
-- **P1 — `92dd06b`.** **Operations is the action centre, directly under Overview, in both shells.** Admin Operations =
-  Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Carrier Monitor · Calendar (Commerce keeps only
-  the commercial pipelines; the empty Logistics group is gone). Brand Operations moved 6th → **2nd** = Purchase Orders ·
-  Logistics Hub · Returns · Tasks & Deadlines · Calendar (Commerce + Logistics dissolved into it). **Nav ids unchanged**
-  → every address, deep link and RBAC guard untouched.
-- **Gates repointed, never weakened.** `e2e/app-shell.spec.ts`: the grouping test became the **stronger** "Operations
-  contains Work Management, Purchase Orders, Logistics Hub, Returns Tracking, Carrier Monitor and Calendar **AND
-  Commerce no longer contains Purchase Orders**", old contract recorded inline.
+**Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT** (queues, exceptions,
+CTAs, **directly under Overview** in both shells). Underneath sits a correction of the **proxy model**: **Mercenta holds
+the Amazon Vendor account**; a brand **never** communicates with Amazon (its decision is an **instruction to
+Mercenta**); **carriers never log into Mercenta** — Mercenta connects DHL/Palletline **by API**. The brand's only jobs
+are **accept/reject/backorder → download & print its shipping documents → ship on time**. Decisions: DHL + Palletline
+**only** · payment terms **14/30/60** per invoice **after receipt** · **one PO record only** (no "Create PO") · remove the
+**3PL carrier surface** incl. the demo environment · **inventory linked to the catalogue with an ASIN field** · the
+**Logistics Hub** is where the brand downloads its labels and ALL PO documents · **Control Centre = founder-only
+controls** · **Overview cards are ADDITIVE ONLY** · **ASN/shipment/documents automatic on acceptance** · consolidation
+**deferred but not designed out**.
+
+### Gates repointed, never weakened (old contract recorded inline in every case)
+
+- `scripts/validate-workspace-shell.mjs` — the brand-attention contract became three stronger ones (**no second action
+  list** + the §P2 observe tiles + the canonical action centre exists): **92 → 94 checks, 0 FAIL**.
+- `scripts/validate-e6-brand-surfaces.mjs` **B1–B8** — repointed to the canonical owners (work layer / NotificationCenter
+  / observe tiles), with tenant scoping asserted at BOTH owners.
+- `scripts/validate-stage19.mjs` — **an INHERITED FAILING GATE genuinely repaired**: its old contract was satisfied by a
+  *comment* while the code it asserted was gone (`FAIL (1)` at session start → **PASS**).
+- `e2e/dashboard.spec.ts` (tests 8/9 repointed; new **3b** additive-only proof and **11** brand-earnings proof),
+  `e2e/brand-operational-surfaces.spec.ts` (tests 2/5 → Operations → Tasks & Deadlines),
+  `e2e/domain-acceptance.spec.ts` (test 6's stability probe → the catalogue KPI).
 
 ### Verified in this session (real output)
 
-`tsc` app+root **0 errors** · `eslint` **0 problems** · `npm run build` **✓ built** · `validate-workspace-shell` **92/0** ·
-`validate-logistics-map` **60/0** · `validate-logistics-hero` **53** · `validate-uiux-redesign` **346/0** · `validate-e5`
-/ `e6` / `validate:wording` **PASS** · Playwright focused **49 + 60 + 7 + 23 + 42 passed** · **FULL suite 459 passed /
-0 failed / 2 skipped**. `git status --porcelain` **EMPTY**.
+`tsc` app + root **0 errors** · `npx eslint .` **0 problems** · `npm run build` **✓ built** ·
+`validate-workspace-shell` **94/0** · `validate-e6-brand-surfaces` **PASS** · `validate-stage19` **PASS** ·
+`validate-uiux-redesign` **346/0** · `validate-command-centre` **40 checks PASS** · `validate-e5`/`e6`/`wording` **PASS** ·
+`validate-logistics-map` **60** · `validate-logistics-hero` **53** · `validate-work-layer`, `validate-founder-operating-system`,
+`validate-payouts`, `validate-financial-reconciliation`, `validate-mock-providers`, `validate-mock-seam`,
+`validate-db-hardening`, `validate-canonical-model`, `validate-commercial-models`, `validate-document-verification`
+**all PASS** · Playwright focused: `dashboard` **13**, `brand-operational-surfaces` **5**, `admin-operational-surfaces` +
+`uiux-redesign` + `command-centre` **21**, `domain-acceptance` **7**, `investor-demo` **10** · **FULL suite
+`npx playwright test --workers=3 --reporter=line` → 462 passed / 0 failed / 2 skipped** (18.8m; log copied to the gitignored
+`test-results/full-suite-p2.log`). **Reported, not hidden:** at Playwright's DEFAULT parallelism (8 workers on this machine)
+the same suite intermittently fails 1–4 tests in DIFFERENT unrelated specs per run — all of which pass in isolation and at
+`--workers=3`, and one complete default-parallelism run also passed 462/0/2 — so they are machine-contention budget flakes,
+not P2 regressions. One genuine budget defect WAS found and fixed: `e2e/investor-demo.spec.ts` 375x812 measured **29.0s**
+against Playwright's 30s default (it runs the full 25-stage lifecycle), so it now calls `test.slow()` with every assertion
+unchanged · `git status --porcelain` **EMPTY**.
+
+### THREE-WAY COMPLETION STATUS
+
+**`VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ (local repository; **not pushed**)
+· **`https://demo.mercenta.co.uk` ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. This is application/product work, so the
+three-way gate applies in full. **Checkpoint commit: recorded in `PROJECT_STATUS.md` §7** (the commit that carries the
+state block; its exact hash is recorded in the immediately following state commit, exactly as the P0/P1 record did).
 
 ### What is LEFT (do not re-discover — full table in the programme doc §4)
 
-**P2** Overview = Observe (ADDITIVE ONLY) → **P3** Operations = Act wiring + Control Centre loses its duplicated lists →
-**P4** proxy-model corrections (brand's 3 jobs; Mercenta files the ASN/routing; instruction record; `submitAcknowledgement`)
-→ **P5** remove the Mercenta Hub (destination = **the FC on the PO**) → **P6** the PO document pack (SSCC labels, carrier
-label + waybill, packing list, ASN sheet, customs for international) → **P7** admin invoicing (`receivingStatus` sync,
-invoice-number registry, **14/30/60**) → **P8** inventory + **ASIN** → **P9** remove the 3PL carrier surface incl. the demo
-environment → **P10** Logistics Hub completion (provider config; consolidation recorded as deferred) → **P11** remove
-"Create PO" → **P12** SP-API seam extension (mock-first). Then **push** (Founder instruction only) and finally
+**P3** Operations = Act wiring (Control Centre loses its duplicated work/attention lists; Work Management is the single
+action list) → **P4** proxy-model corrections (brand's 3 jobs; Mercenta files the ASN/routing; instruction record;
+`submitAcknowledgement`) → **P5** remove the Mercenta Hub (destination = **the FC on the PO**) → **P6** the PO document
+pack (SSCC labels, carrier label + waybill, packing list, ASN sheet, customs for international) → **P7** admin invoicing
+(`receivingStatus` sync, invoice-number registry, **14/30/60**) → **P8** inventory + **ASIN** → **P9** remove the 3PL
+carrier surface incl. the demo environment → **P10** Logistics Hub completion (provider config; consolidation recorded as
+deferred) → **P11** remove "Create PO" → **P12** SP-API seam extension (mock-first). Then **push** (Founder instruction
+only) and finally
 **deploy + live-verify**.
 
 ### Known-wrong behaviour the remaining phases will correct (do not mistake it for correct)

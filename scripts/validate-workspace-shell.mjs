@@ -244,9 +244,36 @@ for (const contract of [
 ]) {
   check(`brand dashboard keeps the "${contract}" contract`, BRAND_DASH.includes(contract));
 }
+/**
+ * §P2 (2026-09-22) — REPOINTED, not weakened.
+ *
+ * OLD CONTRACT: `brand dashboard keeps every pinned attention row id`
+ * (`BRAND_DASH.includes('`attention-${it.id}`')`) — the brand OVERVIEW had to
+ * carry the attention queue.
+ *
+ * WHY IT MOVED: the Founder's dashboard programme makes the Overview an OBSERVE
+ * surface and the brand's Operations group the action centre, with the work layer
+ * (`BrandWorkManagement` → `WorkWorkspace`) as the SINGLE action list — the same
+ * consolidation the admin Overview received in §Dashboard-cleanup. The new
+ * contract is therefore STRONGER in both directions: the brand overview must keep
+ * its pinned observe contracts AND the new §P2 observe tiles, must NOT emit a
+ * second action list, and the canonical action surface must still exist.
+ */
 check(
-  'brand dashboard keeps every pinned attention row id',
-  BRAND_DASH.includes('`attention-${it.id}`')
+  'brand dashboard no longer emits a second action list (consolidated onto the work layer)',
+  !BRAND_DASH.includes('`attention-${it.id}`') &&
+    !BRAND_DASH.includes('testId: `action-')
+);
+check(
+  'brand dashboard carries the §P2 observe tiles (earnings, open PO value, outstanding invoices)',
+  ['earnings-total', 'open-po-value', 'invoices-outstanding', 'open-deductions', 'returns-recorded'].every(
+    (id) => BRAND_DASH.includes(`id: '${id}'`)
+  )
+);
+check(
+  'the brand action centre is the canonical work workspace',
+  read('src/components/brand/WorkManagement.tsx').includes('WorkWorkspace') &&
+    read('src/components/shared/WorkWorkspace.tsx').includes('work-row-${w.id}')
 );
 
 console.log(`\nWORKSPACE SHELL: ${pass} PASS / ${fail} FAIL`);
