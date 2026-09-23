@@ -150,8 +150,25 @@ check('the deployed map draws NO mercenta_hub node',
   !hubNodeKinds.includes('mercenta_hub'), `kinds=${[...new Set(hubNodeKinds)].join(',')}`);
 check('no deployed surface names a Mercenta hub as a destination',
   !/Mercenta\s+(UK\s+)?(Distribution\s+)?Hub/i.test(hubBody));
-check('the canonical pre-live state is offered under its own name',
-  /Delivered to Destination FC|Destination FC/i.test(hubBody));
+/**
+ * The canonical milestone strip renders INSIDE the consignment tracking timeline,
+ * so the live proof opens it (rather than hoping a whole-page regex matches a label
+ * that is only rendered on demand). Every milestone is listed there, so the
+ * pre-live state must appear under its own name — and the retired hub must not.
+ */
+const trackBtn = page.locator('button', { hasText: 'Track' }).first();
+const trackOpened = await trackBtn.click().then(() => true).catch(() => false);
+let timelineText = '';
+if (trackOpened) {
+  const dialog = page.locator('[data-testid="logistics-tracking-dialog"]').first();
+  const opened = await dialog.waitFor({ state: 'visible', timeout: 10000 }).then(() => true).catch(() => false);
+  if (opened) timelineText = await dialog.innerText().catch(() => '');
+}
+check('a consignment tracking timeline opens on the deployed build', timelineText.length > 0);
+check('the deployed milestone strip names the canonical pre-live state ("Delivered to Destination FC")',
+  /Delivered to Destination FC/i.test(timelineText), timelineText.replace(/\s+/g, ' ').slice(0, 160));
+check('the deployed milestone strip names NO Mercenta hub',
+  !/Mercenta\s+(UK\s+)?(Distribution\s+)?Hub/i.test(timelineText));
 check('no uncaught page error on the Logistics Hub live flow',
   pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '));
 

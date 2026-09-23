@@ -31,13 +31,16 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
-**Checkpoint:** **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** for the P5 implementation at **`<P5_COMMIT>`**
-(local runtime verified · FULL suite **469 passed / 0 failed / 2 skipped**). Branch `redesign/foundation`.
-**The demo leg (deployment + live verification) is the phase's closing step** and is recorded in the state commit that
-follows it, at which point this reads **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**. Previous verified commits:
-`36844ab` (P4 state), `fe20521` (P4), `8203a03` (P3 boot fix), `17a99eb` (P3), `0c05fe0` (P2).
+**Checkpoint:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** for the P5 implementation at **`f07a63f`**: local runtime
+verified = `origin/redesign/foundation` at `f07a63f` (`36844ab..f07a63f`, exit 0) = the deployed build at
+`https://demo.mercenta.co.uk` (**byte-identical: all 33 servable emitted files SHA-256-compared equal — 0 different,
+0 unreachable**; `.htaccess` excluded explicitly, served 403 by design · **live verification 28/28 checks, 0 page
+errors** · FULL suite **469 passed / 0 failed / 2 skipped**). Branch `redesign/foundation`; P5 commit `f07a63f`.
+`git status --porcelain` EMPTY. The state commit itself carries documentation + the live-verification script change, so
+its own three-way status is **NOT APPLICABLE (no application runtime change)**. Previous verified commits: `36844ab`
+(P4 state), `fe20521` (P4), `8203a03` (P3 boot fix), `17a99eb` (P3), `0c05fe0` (P2).
 Repointed-gate counts: `validate-logistics-map` **60 → 74** assertions · `e2e/logistics-hub-map.spec.ts` **15 → 16**
-executed tests.
+executed tests. Live script: **19 → 28** checks.
 
 **What changed this session (P5 — the Mercenta Hub is REMOVED as a destination; closes D09-13 / AV-026 / AV-027)**
 
