@@ -26,20 +26,46 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P4 DONE (proxy-model corrections)** (2026-09-23, session 16)
+## CURRENT STATE — **P5 DONE (the Mercenta Hub removed; the destination is the FC on the purchase order)** (2026-09-23, session 17)
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
-**Checkpoint:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** for the P4 implementation at **`fe20521`**: local runtime
-verified = `origin/redesign/foundation` at `fe20521` (`2646a34..fe20521`, exit 0) = the deployed build at
-`https://demo.mercenta.co.uk` (**byte-identical: all 33 emitted files SHA-256-compared equal; live verification 19/19
-checks with 0 page errors**). Branch `redesign/foundation`; P4 commit `fe20521`. `git status --porcelain` EMPTY. The
-state commit itself carries documentation + the live-verification script (`scripts/verify-demo-live.mjs`), so its own
-three-way status is **NOT APPLICABLE (no application runtime change)**. Previous verified commits: `8203a03` (P3
-production-boot fix), `17a99eb`/`21c6869` (P3), `0c05fe0` (P2).
+**Checkpoint:** **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** for the P5 implementation at **`<P5_COMMIT>`**
+(local runtime verified · FULL suite **469 passed / 0 failed / 2 skipped**). Branch `redesign/foundation`.
+**The demo leg (deployment + live verification) is the phase's closing step** and is recorded in the state commit that
+follows it, at which point this reads **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**. Previous verified commits:
+`36844ab` (P4 state), `fe20521` (P4), `8203a03` (P3 boot fix), `17a99eb` (P3), `0c05fe0` (P2).
+Repointed-gate counts: `validate-logistics-map` **60 → 74** assertions · `e2e/logistics-hub-map.spec.ts` **15 → 16**
+executed tests.
 
-**What changed this session (P4 — the direction of the proxy model was wrong; it is now right)**
+**What changed this session (P5 — the Mercenta Hub is REMOVED as a destination; closes D09-13 / AV-026 / AV-027)**
+
+1. **The destination is a DECLARED FACT on the purchase order.** `src/types.ts` gains `ShipToParty` +
+   `PurchaseOrder.shipToParty` (the channel's ship-to party; its id IS the FC code — `shipToPartyId`, register `S5`).
+   NEW `src/config/destinationFc.ts` is the ONE owner of the derivation: `resolveDestinationFc` (the PO's own
+   declaration WINS over the directory), `fcByCode`, `destinationLabelForPo`, `declaredShipToParty`,
+   `declaredDestinationLabel`.
+2. **An undeclared PO FAILS CLOSED.** It records `DESTINATION_NOT_DECLARED` (`logisticsGeo.ts`, also in the
+   unlocatable place strings) and the map draws a **schematic** leg — no Mercenta site is ever substituted.
+3. **The hub is DELETED, not hidden**: `mercenta_hub` removed from `ShipmentStage` / `ShipmentStatus` / `STAGE_LABELS` /
+   `STATUS_LABELS` / `STAGE_ORDER` / `GeoNodeKind` / the Hero's UK kinds; `MERCENTA_UK_HUB`, the `'northampton, uk'`
+   city point, the `resolveGeoPlace` hub branch and `MERCENTA_HUB_PLACE` deleted. The pre-live state is
+   **`destination_fc`** ("Delivered to Destination FC"), which is what a carrier `delivered` milestone means.
+4. **Every consumer re-pointed once**: `GlobalStateContext`, `brandDossiers`, `commerceLifecycle`, `operationsMap`,
+   `statusPresentation`, DHL + Palletline transforms, `bootstrap.ts`, `investorDemo.ts`, the two carrier surfaces, and
+   the public lifecycle copy (FAQ / How It Works). The Hero's UK arrival nodes ARE the destination FCs.
+5. **Gates repointed, never weakened** — `validate-logistics-map` 74 assertions (12 new §P5 checks, incl. *no seeded
+   consignment is destined for a Mercenta site*), `validate-logistics-hero` 54, `validate-mock-providers`,
+   `validate-investor-demo`, `e2e/status-semantics`, `e2e/table-migrations`, NEW browser test 17 in
+   `e2e/logistics-hub-map.spec.ts`; e6/e7 had the P5 scope declared (their contracts unchanged).
+6. **Copy pass (carried over from P4):** the admin Overview h1 now reads **"Overview"**; the two browser assertions
+   that named the old title were repointed with the old contract recorded inline (one had become unable to fail).
+7. **Honest record of the suite runs:** run 1 → 2 failures, both the Overview-title assertions (fixed); run 2 → 1
+   failure in `e2e/embedded-social.spec.ts` (an unrelated social poll timing out under load, **11/11 in isolation**);
+   run 3 (final tree) → **469 passed / 0 failed / 2 skipped, exit 0**.
+
+**What changed in the previous session (P4 — proxy-model corrections; historical record)**
 
 1. **The brand's decision is an INSTRUCTION to Mercenta** — NEW `src/lib/commerce/channelInstructions.ts`. A canonical
    `ChannelInstruction` records the decision **verbatim** with deterministic, idempotent ids (`instr-ack-<poId>` /

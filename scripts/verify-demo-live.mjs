@@ -1,9 +1,14 @@
 /**
- * §P4 — LIVE VERIFICATION against the DEPLOYED demo (https://demo.mercenta.co.uk).
+ * §P4 + §P5 — LIVE VERIFICATION against the DEPLOYED demo (https://demo.mercenta.co.uk).
  *
  * Not part of the local suite: it is the third leg of the completion contract and
  * exercises the REAL deployed bundle in a real browser. Every check prints its
  * own PASS/FAIL with evidence; the script exits non-zero if any check fails.
+ *
+ * The P4 checks (the proxy direction on the brand PO surface) are kept, and §P5
+ * adds the arrival-node checks: the deployed map draws destination-FC nodes and no
+ * `mercenta_hub` node, no surface names a Mercenta hub as a destination, and the
+ * admin Overview h1 reads "Overview".
  */
 import { chromium } from 'playwright';
 
@@ -128,6 +133,38 @@ await admin.waitForTimeout(3000);
 const adminBody = await admin.locator('body').innerText().catch(() => '');
 check('the admin Purchase Orders surface renders on the deployed build', /Purchase Orders/i.test(adminBody));
 check('no uncaught page error on the admin flow', adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
+
+/* ── 5. §P5 — THE DEPLOYED ARRIVAL NODE IS THE FC ON THE PO, NOT A HUB ───── */
+await page.click('nav[aria-label="Primary"] >> text=Logistics Hub').catch(() => {});
+await page.waitForTimeout(4000);
+const hubBody = await page.locator('body').innerText().catch(() => '');
+const hubNodeKinds = await page
+  .locator('[data-testid^="logistics-node-"]')
+  .evaluateAll((els) => els.map((e) => e.getAttribute('data-kind')))
+  .catch(() => []);
+check('the brand Logistics Hub renders on the deployed build',
+  /Logistics Hub/i.test(hubBody) || hubNodeKinds.length > 0);
+check('the deployed map draws DESTINATION-FC nodes',
+  hubNodeKinds.includes('amazon_fc'), `kinds=${[...new Set(hubNodeKinds)].join(',')}`);
+check('the deployed map draws NO mercenta_hub node',
+  !hubNodeKinds.includes('mercenta_hub'), `kinds=${[...new Set(hubNodeKinds)].join(',')}`);
+check('no deployed surface names a Mercenta hub as a destination',
+  !/Mercenta\s+(UK\s+)?(Distribution\s+)?Hub/i.test(hubBody));
+check('the canonical pre-live state is offered under its own name',
+  /Delivered to Destination FC|Destination FC/i.test(hubBody));
+check('no uncaught page error on the Logistics Hub live flow',
+  pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '));
+
+/* ── 6. §P5 copy pass — the admin Overview header is the deployed title ──── */
+await admin.goto(`${BASE}/admin/overview`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await admin.waitForTimeout(3500);
+const adminH1s = await admin
+  .locator('h1')
+  .evaluateAll((els) => els.map((e) => (e.textContent ?? '').trim()))
+  .catch(() => []);
+check('the deployed admin Overview h1 reads "Overview" (not "Operations Overview")',
+  adminH1s.includes('Overview') && !adminH1s.includes('Operations Overview'),
+  `h1s=${adminH1s.slice(0, 3).join(' | ')}`);
 
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;

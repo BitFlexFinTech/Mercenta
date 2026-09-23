@@ -768,6 +768,60 @@ try {
     'package.json',
     'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
   ];
+  /**
+   * §P5 — DESTINATION-FC PHASE DECLARED SURFACE (2026-09-23, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P5).
+   *
+   * P5 removes the Mercenta Hub as a destination: the destination is the FC declared
+   * on each purchase order (the NEW ONE owner `src/config/destinationFc.ts`), the
+   * `mercenta_hub` stage/status/node kind and the hub coordinate are deleted, and the
+   * Hero/map arrival node is that FC. It therefore legitimately touches the canonical
+   * types (a PROTECTED prefix), the domain creators and status/stage maps, the carrier
+   * transforms, the Hero/map modules, the copy surfaces the hub was asserted on, the
+   * gates/specs repointed with the old contract recorded inline, and the records. The
+   * E7 guard's contract is UNCHANGED — a changed source/test file in NO declared set
+   * still fails, and an undeclared protected path still fails.
+   */
+  const P5_DESTINATION_FC_DECLARED = [
+    'src/config/destinationFc.ts',          // NEW — the ONE destination owner
+    'src/config/logisticsGeo.ts',
+    'src/config/logisticsHero.ts',
+    'src/types.ts',                         // PROTECTED prefix — declared
+    'src/data/api.ts',
+    'src/data/demoData.ts',
+    'src/data/bootstrap.ts',
+    'src/data/brandDossiers.ts',
+    'src/context/GlobalStateContext.tsx',
+    'src/lib/commerce/commerceLifecycle.ts',
+    'src/lib/logistics/',
+    'src/lib/statusPresentation.ts',
+    'src/lib/dhl/transform.ts',
+    'src/lib/palletline/transform.ts',
+    'src/lib/simulation/investorDemo.ts',
+    'src/lib/simulation/scenarioEngine.ts',
+    'src/lib/grants/dataSources.ts',
+    'src/components/admin/AdminDashboard.tsx',
+    'src/components/brand/LogisticsHub.tsx',
+    'src/components/carrier/BakLogistics.tsx',
+    'src/components/carrier/CarrierDashboard.tsx',
+    'src/components/marketing/FAQ.tsx',
+    'src/components/marketing/HowItWorks.tsx',
+    'src/components/shared/logistics/',
+    'e2e/logistics-hub-map.spec.ts',
+    'e2e/status-semantics.spec.ts',
+    'e2e/table-migrations.spec.ts',
+    /** §P5 copy pass — the Overview h1 assertions repointed with the old text recorded inline. */
+    'e2e/dashboard.spec.ts',
+    'e2e/runtime-entry.spec.ts',
+    'scripts/validate-logistics-map.mjs',
+    'scripts/validate-logistics-hero.mjs',
+    'scripts/validate-mock-providers.mjs',
+    'scripts/validate-investor-demo.mjs',
+    'scripts/reconcile-logistics-map-registry.cjs',
+    'scripts/verify-demo-live.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+  ];
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -785,7 +839,10 @@ try {
            * protected change still fails.
            */
           !P4_PROXY_MODEL_DECLARED.includes(f) &&
-          !P4_PROXY_MODEL_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P4_PROXY_MODEL_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §P5 — the destination-FC phase's declared surface (see above). */
+          !P5_DESTINATION_FC_DECLARED.includes(f) &&
+          !P5_DESTINATION_FC_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -892,6 +949,12 @@ try {
      * outside EVERY declared set is still refused.
      */
     ...P4_PROXY_MODEL_DECLARED,
+    /**
+     * §P5 — REPOINTED (not weakened). The destination-FC phase's declared surface is
+     * accepted here exactly as every earlier phase's is; a changed source/test file
+     * outside EVERY declared set is still refused.
+     */
+    ...P5_DESTINATION_FC_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

@@ -1,6 +1,6 @@
 # DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22) — AGREED PLAN, DECISIONS AND RESUME POINT
 
-**Status: IN PROGRESS — P0, P0.4, P1, **P2**, **P3** and **P4** are DONE and committed; P5–P12 remain.**
+**Status: IN PROGRESS — P0, P0.4, P1, **P2**, **P3**, **P4** and **P5** are DONE and committed; P6–P12 remain.**
 **Checkpoint: branch `redesign/foundation`; P2's checkpoint commit is recorded in
 `PROJECT_STATUS.md` heading 7 and `HANDOFF.md`; P3's and P4's are recorded in the `CURRENT RESUME STATE` block.
 `git status --porcelain` EMPTY.**
@@ -76,7 +76,7 @@ documents → ship on time. Everything else is Mercenta's.
 | **P2** | ✅ **DONE** (checkpoint recorded in `PROJECT_STATUS.md` §7) | **Overview = Observe, ADDITIVE ONLY, both shells.** Admin: money band (**open PO value** · revenue · gross profit · margin % · **receivables**) + the **unchanged** operational band + **Portfolio volume** (brands · products · POs · order lines · shipments · operational volume · upcoming payments · fulfilment exceptions) + **Financial performance** + **Logistics status**. Brand: **Your earnings** hero band (total earnings · open PO value · payouts due · payouts settled) + **Earnings by month** (its first chart) + observe tiles for the counts the removed queue carried (open deductions · open tickets · returns · invoices outstanding). **Brand action sections moved to Operations** (the work layer is the single action list) — this also completes P3's brand clause. 4 gates repointed with the old contract recorded inline; **`validate-stage19` (an inherited FAIL) genuinely repaired**. | the business-picture gaps |
 | **P3** | ✅ **DONE** (commit `21c6869`, plus the §P3 `validate-stage26` repair; checkpoint in the `CURRENT RESUME STATE` block) | **Operations = Act** wiring: **three action lists → ONE.** The Control Centre loses its duplicated work/attention lists (the retired `CommandCentre.tsx` panel **deleted**, its own "Attention" queue removed) and becomes founder-only **CONTROLS** (automation catalogue + approvals + halt, AI, audit, data provenance, the commercial-readiness/pre-audit decision surfaces, a new *Integrations & systems* status panel and a pointer to the single list); the founder console is **projected into the single action list** (Work Management) as Super-Admin-scoped work items carrying the same rank + auditable WHY, with the tab-aware hand-off and a declared cross-scope action-view translation (**no dead hand-off destination in either shell**); badges count the same item set the list renders; fail-closed RBAC. *(Brand attention/next-actions already landed in Operations in P2.)* **An inherited unhealthy gate was genuinely repaired on the way: `validate-stage26` (ThemeProvider harness + a gating bug + stale catalog-import assertions) now PASSES with an honest exit code.** | 3 action lists → 1 |
 | **P4** | ✅ **DONE** (2026-09-23, session 16 — see §8) | **Proxy-model corrections**: the brand does its 3 jobs only; **MERCENTA** raises the routing/shipment request and files the ASN (the brand sees status); ack writes an **instruction-to-Mercenta** record; `submitAcknowledgement` behind the SP-API seam (mock-first, Mercenta-side) | **AV-040** (partially), wrong direction, truthfulness |
-| **P5** | | **Remove the Mercenta Hub completely** → destination = **the FC on the PO**; Hero/map arrival node = that FC; copy; validators/specs/docs | **D09-13 / AV-026/027** |
+| **P5** | ✅ **DONE** (2026-09-23, session 17 — see §9) | **Remove the Mercenta Hub completely** → the destination is **the FC declared on each PO** (`PurchaseOrder.shipToParty`, the channel's `shipToPartyId`, resolved once by `src/config/destinationFc.ts`); the `mercenta_hub` stage/status, the hub coordinate, the hub node kind and the Hero's hub node are **deleted**; the Hero/map arrival node **is** that FC; copy, validators and specs repointed with the old contract recorded inline | **D09-13 / AV-026 / AV-027** |
 | **P6** | | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
 | **P7** | | **Admin invoicing**: invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60** terms per invoice; derived **upcoming payments**; receivables = issued-and-unpaid | decision 2; **AV-022** |
 | **P8** | | **Inventory** linked to the catalogue + **ASIN** field (rule = decision 10) | decision 5 |
@@ -101,13 +101,15 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4** (committed; the P2 checkpoint hash is recorded in `PROJECT_STATUS.md` §7,
-  P3's and P4's in the `CURRENT RESUME STATE` block).
-- **Next:** **P5 — Remove the Mercenta Hub completely** (destination = **the FC on the PO**; Hero/map arrival node = that
-  FC; copy, validators, specs and docs). **Deferred out of P4 deliberately:** `src/data/api.ts → createShipmentForPO`
-  and `src/data/demoData.ts` still carry `destination: 'Mercenta UK Hub'`; P5 owns that change.
-- **Then:** P6 → P12 in order.
-- **Deployment:** executed at the close of each product phase. P3 and P4 were deployed and live-verified; the full
+- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5** (committed; the P2 checkpoint hash is recorded in
+  `PROJECT_STATUS.md` §7, and P3/P4/P5's in the `CURRENT RESUME STATE` block).
+- **Next:** **P6 — the PO document pack** (auto on acceptance): SSCC carton labels · carrier label + waybill ·
+  packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge;
+  Hub "Documents for this PO"; the collect lane shows the documented status chain (request → carrier assigned →
+  ARN → pickup). **P5 removed the hub destination that P6's document pack must name — a document now names the FC
+  the PO declares, not a Mercenta site.**
+- **Then:** P7 → P12 in order.
+- **Deployment:** executed at the close of each product phase. P3, P4 and P5 were deployed and live-verified; the full
   three-way confirmation is re-run at the end of the programme.
 
 ## 6. P2 — WHAT WAS BUILT (so P3+ does not have to re-derive it)
@@ -294,3 +296,89 @@ Under the proxy model a brand never communicates with the channel — its decisi
 - Every affected validator listed above was executed this session with its PASS/FAIL output shown.
 - **FULL Playwright suite** and the **demo deployment + live verification**: see `PROJECT_STATUS.md` heading 8 and the
   `CURRENT RESUME STATE` block.
+
+---
+
+## 9. P5 — WHAT WAS BUILT, VERIFIED AND HOW (so P6+ does not have to re-derive it)
+
+### What was wrong
+
+Three things asserted a **Mercenta-owned destination** that no channel source requires and the repository's own truth
+register contradicts:
+
+1. **The domain hardcoded it.** `src/data/api.ts → createShipmentForPO` and `src/data/demoData.ts` wrote the literal
+   `destination: 'Mercenta UK Hub'`, so every consignment Mercenta created arrived at Northampton — a Mercenta site.
+2. **The stage enum made it mandatory.** `ShipmentStage`/`ShipmentStatus`/`STAGE_ORDER` carried `mercenta_hub`
+   ('Mercenta UK Hub') as the step before "live on channel", and the carrier transforms advanced a `delivered`
+   milestone into it. Matrix `D09-13`, register `AV-027` (CONTRADICTED, HIGH/HIGH).
+3. **The geography declared it.** `MERCENTA_UK_HUB` (a coordinate), the `mercenta_hub` node kind, the Hero's hub
+   marker and the hub's UK-tile handling all plotted a Mercenta site as the arrival node.
+
+Meanwhile the same repository declares the direct route (brand facility → the channel's destination) the default, and
+the register records the authoritative destination as **the PO's `shipToParty`** (`shipToPartyId` = the FC code,
+`S5`; `AV-026`; `AV-017`) — Founder decision **`T-4`**: the Mercenta Hub is never a mandatory route.
+
+### What was built
+
+- **`src/config/destinationFc.ts` (NEW) — the ONE owner of "what is this PO's destination".**
+  `resolveDestinationFc(shipToParty)` resolves the channel's declared party (the PO's own declaration WINS over the
+  directory, because the channel is authoritative), `fcByCode()` looks a code up in the canonical
+  `DEFAULT_UK_FC_LIST`, `destinationLabelForPo(po)` is the ONE string the domain records, and
+  `declaredShipToParty(index)` / `declaredDestinationLabel(index)` let seeds and simulations declare a destination
+  deterministically without a second dataset.
+- **The PO carries its destination.** `src/types.ts` gains `ShipToParty` and `PurchaseOrder.shipToParty` — the
+  channel's ship-to party, optional on purpose so an undeclared PO fails closed rather than defaulting.
+- **Every PO creator declares one**: both seeded sets (`demoData.ts` workflow + lifecycle, deterministic indices, so
+  the demo genuinely spans several FCs), `createPurchaseOrder`, `createSimulatedPurchaseOrder` and the scenario
+  engine's `buildScenarioPo`.
+
+### The hub is deleted, not hidden
+
+- `src/types.ts`: `mercenta_hub` removed from `ShipmentStage`, `ShipmentStatus`, `STAGE_LABELS`, `STATUS_LABELS` and
+  `STAGE_ORDER`; `destination_fc` added (`STAGE_LABELS` = 'Destination Fulfilment Centre', `STATUS_LABELS` =
+  'Delivered to Destination FC').
+- `src/config/logisticsGeo.ts`: `MERCENTA_UK_HUB` and the `'northampton, uk'` city point deleted, `mercenta_hub`
+  removed from `GeoNodeKind`, the hub branch removed from `resolveGeoPlace` (a record still naming a hub now returns
+  `null` → a schematic leg), and `DESTINATION_NOT_DECLARED` added to the unlocatable place strings.
+- `src/config/logisticsHero.ts` / `LogisticsHeroScene.tsx`: `MERCENTA_HUB_PLACE` deleted together with the hub marker
+  and its colour prop — **the Hero's UK arrival nodes ARE the destination FCs**.
+- `src/lib/logistics/heroNetwork.ts`: `UK_KINDS` no longer contains `mercenta_hub`, so a place of that kind can no
+  longer be drawn on the UK tile.
+- `LogisticsMapCanvas.tsx`: the hub node branch removed. `LogisticsHub.tsx`: the retired hub status milestone and the
+  "Hub: Mercenta UK Distribution Hub (Northampton, UK)" header entity removed.
+- **Every status/stage map re-pointed**: `GlobalStateContext.statusToStage`, `brandDossiers.STAGE_BY_STATUS`,
+  `commerceLifecycle.FREIGHT_TRACK`, `operationsMap.STAGE_PROGRESS`, `statusPresentation.SHIPMENT_TONES`,
+  `dhl/transform.ts` + `palletline/transform.ts` (`delivered` → `destination_fc`), `bootstrap.ts`'s legacy row,
+  `investorDemo.ts`, `BakLogistics.tsx`, `CarrierDashboard.tsx`.
+- **Copy**: the public shipment lifecycle (FAQ + How It Works) now ends at the **Destination Fulfilment Centre**; the
+  grants data source says "Northampton premises" (the registered address in `src/config/customs.ts` is untouched — it
+  is the company's address on customs documents, not a shipment route); and the **admin Overview header** (carried
+  over from P4 as P5's copy pass) now reads **"Overview"** instead of the stale "Operations Overview", which had been
+  ambiguous since Operations became a separate destination.
+
+### Gates — repointed, never weakened (old contract recorded inline in every case)
+
+| Gate | Result |
+|---|---|
+| `scripts/validate-logistics-map.mjs` | **PASS — 60 → 74 assertions**: the retired hub destination and the hub's own city must now FAIL CLOSED, no `mercenta_hub` node kind can be produced, and the new §P5 checks execute the REAL resolver (the PO's declaration wins; an unknown code is named but never plotted; an undeclared PO yields the explicit not-declared string; every seeded PO resolves to a real FC city; every seeded consignment carries its PO's destination; **no seeded consignment is destined for a Mercenta site**). |
+| `scripts/validate-logistics-hero.mjs` | **PASS (54 assertions)** — the hub check became: every Hero UK destination is an FC node, and a place of the RETIRED hub kind is no longer drawn on the UK tile (the same coordinate resolves differently under the FC kind). |
+| `scripts/validate-mock-providers.mjs` | palletline `delivered` → `destination_fc` (was `mercenta_hub`). **PASS** |
+| `scripts/validate-investor-demo.mjs` | the delay-drill recovery status → `destination_fc`. **PASS** |
+| `e2e/logistics-hub-map.spec.ts` | **NEW test 17 — browser proof**: no `[data-kind="mercenta_hub"]` node exists, destination-FC nodes do, no surface text claims a Mercenta hub, and every consignment's destination equals its own PO's declared destination (read from the canonical store via `destinationFc`). |
+| `e2e/status-semantics.spec.ts` · `e2e/table-migrations.spec.ts` | the canonical label map and the carrier milestone target re-pointed to `destination_fc`. |
+| `scripts/validate-e6-brand-surfaces.mjs` · `scripts/validate-e7-embedded-social.mjs` | the P5 declared scope added (`P5_DESTINATION_FC_SCOPE` / `P5_DESTINATION_FC_DECLARED`); **both guards' contracts UNCHANGED — an unexplained or protected change still fails.** |
+| `validate-canonical-propagation` · `validate-command-centre` · `validate-workspace-shell` · `validate-uiux-redesign` · `validate-e4`/`e5` · `validate-stage15/16/19/26` · `validate-wave3-logistics` · `validate-proxy-model` · `validate:routing` · `validate:product-routes` · `validate:wording` · `validate:production-boot` | all **PASS** (see `PROJECT_STATUS.md` heading 8). |
+
+### Verification performed for P5 (this session)
+
+- `npx tsc --noEmit -p tsconfig.app.json` → **0 errors** · `tsconfig.node.json` → **0 errors** · `npx eslint .` →
+  **0 problems** · `npm run build` → **✓ built**.
+- **Focused browser run** (`logistics-hub-map` + `status-semantics` + `table-migrations` + `logistics-hero` +
+  `logistics-wave3`, `--workers=3`) → **41 passed / 0 failed**.
+- Every validator in the table above was executed this session with its PASS output shown.
+- **FULL Playwright suite** + the **demo deployment and live verification**: see `PROJECT_STATUS.md` heading 8 and the
+  `CURRENT RESUME STATE` block.
+- **Honest note:** the source-consistency grep is part of the evidence — every remaining `mercenta_hub` /
+  "Mercenta Hub" hit in `src/` is an explicitly historical "was X" comment, or a fixture that is deliberately NOT a
+  destination (the demo returns address in `demoStore.ts` and `src/config/customs.ts`'s registered address, both left
+  untouched as demo/legal data).

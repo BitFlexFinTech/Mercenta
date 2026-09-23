@@ -27,7 +27,6 @@ import {
   GLOBAL_LOGISTICS_GATEWAYS,
   UK_LOGISTICS_GATEWAYS,
   heroFcDestinations,
-  MERCENTA_HUB_PLACE,
   type HeroGateway,
   type UkGateway,
 } from '@/config/logisticsHero';
@@ -527,7 +526,12 @@ export interface HeroBrandLegInput {
   exception?: boolean;
 }
 
-const UK_KINDS = new Set(['mercenta_hub', 'uk_gateway', 'amazon_fc']);
+/**
+ * §P5 — `mercenta_hub` is removed from the UK kinds: the Mercenta Hub is no
+ * longer a destination, so nothing is drawn on the UK tile for it. The UK kinds
+ * are the declared gateways and the destination fulfilment centres.
+ */
+const UK_KINDS = new Set(['uk_gateway', 'amazon_fc']);
 
 /** Where a place sits in the scene: on the UK tile, or on the world backdrop. */
 export function sceneForPlace(place: { lat: number; lon: number; kind: string }): Vec3 {

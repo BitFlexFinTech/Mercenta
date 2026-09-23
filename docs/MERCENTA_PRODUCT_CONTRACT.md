@@ -49,7 +49,14 @@ staff may mutate admin state (`staffCanMutate`).
 2. **Product onboarding gate** — catalog sync blocked until all compliance
    gate documents approved (`complianceGateStatus`).
 3. **Fulfilment track** — stages: `factory_intake → bak_depot →
-   international_forwarding → uk_port_hmrc → mercenta_hub → live_amazon`.
+   international_forwarding → uk_port_hmrc → destination_fc → live_amazon`.
+   **§P5 (2026-09-23):** the `mercenta_hub` stage was REMOVED. No channel source
+   requires a Mercenta-owned hub and no Mercenta site is ever a destination — the
+   destination is the FC **declared on the purchase order**
+   (`PurchaseOrder.shipToParty`, the channel's `shipToPartyId`), resolved once by
+   `src/config/destinationFc.ts`. `destination_fc` means *arrival at that FC*; a
+   PO that declares no ship-to party records an explicit not-declared destination
+   and the map draws a schematic leg (never a Mercenta-chosen site).
 4. **Onboarding wizard** — 6 steps (Profile → Legal → Banking → Track →
    Agreements → Guidance), including mandatory agreements §4.1 Logistics SLA +
    §4.2 Chargeback Indemnity.

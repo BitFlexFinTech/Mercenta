@@ -11,7 +11,9 @@
  *   - UK fulfilment-centre destinations come from `DEFAULT_UK_FC_LIST`
  *     (`src/types.ts`) through `fcCityPoint()` in `logisticsGeo.ts` — the
  *     existing canonical FC coordinate owner. No second FC dataset exists.
- *   - The Mercenta UK hub comes from `MERCENTA_UK_HUB` (`logisticsGeo.ts`).
+ *   - §P5: there is NO Mercenta-hub node. The Hero's UK arrival nodes are the
+ *     destination fulfilment centres themselves, because the destination of a
+ *     consignment is the FC on its purchase order (`src/config/destinationFc.ts`).
  *   - Truth states come from `OPERATIONAL_TRUTH` (`logisticsGeo.ts`).
  *
  * WHAT IS DECLARED HERE (and why that is not "inventing geography")
@@ -29,7 +31,7 @@
  * OpenStreetMap roads, ODbL, attributed in the Hero).
  */
 import { DEFAULT_UK_FC_LIST, type AmazonFulfilmentCentre } from '@/types';
-import { MERCENTA_UK_HUB, fcCityPoint, type GeoPlace } from '@/config/logisticsGeo';
+import { fcCityPoint, type GeoPlace } from '@/config/logisticsGeo';
 
 /* ── Scene contract ───────────────────────────────────────────────────────── */
 
@@ -275,15 +277,12 @@ export function heroFcDestinations(
   return out;
 }
 
-export const MERCENTA_HUB_PLACE: GeoPlace = {
-  id: MERCENTA_UK_HUB.id,
-  label: MERCENTA_UK_HUB.label,
-  kind: 'mercenta_hub',
-  lat: MERCENTA_UK_HUB.lat,
-  lon: MERCENTA_UK_HUB.lon,
-  precision: 'city',
-  source: MERCENTA_UK_HUB.source,
-};
+/* §P5 — `MERCENTA_HUB_PLACE` DELETED.
+   It gave the Hero a Mercenta-owned arrival node at the hub's coordinate. The
+   Founder decision (matrix `D09-13`, register `AV-026`/`AV-027`, decision `T-4`)
+   removes the hub as a destination: the Hero's UK arrival nodes are the canonical
+   destination FCs (`heroFcDestinations()` above), which is what a consignment
+   actually arrives at. */
 
 /**
  * Honest labelling rendered under the Hero. It states what the animation IS

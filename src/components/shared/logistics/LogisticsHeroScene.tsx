@@ -5,8 +5,9 @@
  *
  *   sea plane      the stage the UK tile sits on
  *   UK tile        extruded landmass from the REAL UK coastline, the REAL UK
- *                  strategic road network (OSM/ODbL), the canonical
- *                  fulfilment-centre cities and Mercenta's declared hub
+ *                  strategic road network (OSM/ODbL) and the canonical
+ *                  fulfilment-centre DESTINATIONS (§P5 — there is no Mercenta-hub
+ *                  node: the arrival nodes are the destination FCs themselves)
  *   world backdrop the REAL world landmass silhouette behind and above the tile,
  *                  carrying the declared international gateways
  *
@@ -29,7 +30,7 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { HERO_SCENE, GLOBAL_LOGISTICS_GATEWAYS, UK_LOGISTICS_GATEWAYS, heroFcDestinations, MERCENTA_HUB_PLACE } from '@/config/logisticsHero';
+import { HERO_SCENE, GLOBAL_LOGISTICS_GATEWAYS, UK_LOGISTICS_GATEWAYS, heroFcDestinations } from '@/config/logisticsHero';
 import {
   HERO_STATIC_TIME_MS,
   laneProgress,
@@ -165,13 +166,11 @@ function UkTile({
   landTopColour,
   roadColour,
   fcColour,
-  hubColour,
 }: {
   landColour: string;
   landTopColour: string;
   roadColour: string;
   fcColour: string;
-  hubColour: string;
 }) {
   const tile = HERO_SCENE.ukTile;
   const rings = useMemo(() => ukLandRings(), []);
@@ -179,7 +178,6 @@ function UkTile({
   const roads = useMemo(() => roadSegments(ukStrategicRoadLines()), []);
   const shapes = useMemo(() => landMeshes(rings, tile.landDepth, 5), [rings, tile.landDepth]);
   const fcs = useMemo(() => heroFcDestinations().map((fc) => ukToScene(fc.place.lat, fc.place.lon, 0)), []);
-  const hub = useMemo(() => ukToScene(MERCENTA_HUB_PLACE.lat, MERCENTA_HUB_PLACE.lon, 0), []);
 
   return (
     <group name="uk-tile">
@@ -200,9 +198,9 @@ function UkTile({
         <lineBasicMaterial color={roadColour} transparent opacity={0.72} toneMapped={false} />
       </lineSegments>
 
-      {/* Canonical fulfilment-centre destinations, as low pillars + caps. */}
+      {/* Canonical fulfilment-centre destinations, as low pillars + caps.
+          §P5 — these ARE the arrival nodes: the hub marker is gone. */}
       <DestinationMarkers points={fcs} colour={fcColour} height={4.5} cap={0.55} />
-      <DestinationMarkers points={[hub]} colour={hubColour} height={8} cap={0.9} />
     </group>
   );
 }
@@ -530,7 +528,6 @@ export default function LogisticsHeroScene({ network, palette, reducedMotion }: 
         landTopColour="#3D6B8A"
         roadColour="#AED6F2"
         fcColour={palette.warning}
-        hubColour={logi}
       />
       <LaneLines network={network} colours={laneColours} />
       <Traffic lanes={network.lanes} reducedMotion={reducedMotion} colours={colours} />

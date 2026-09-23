@@ -66,6 +66,7 @@ import type {
 import { isProviderSimulationSafe } from '@/integrations/types';
 import type { ProviderResolutionMode } from '@/integrations/types';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
+import { declaredShipToParty } from '@/config/destinationFc';
 
 export type ScenarioId =
   | 'NORMAL_PO'
@@ -237,6 +238,12 @@ function buildScenarioPo(
     commissionAmount: Math.round(total * 0.07 * 100) / 100,
     orderDate: base.toISOString(),
     freightTerm,
+    /**
+     * §P5 — the simulated channel PO declares its destination FC exactly as a
+     * live channel PO does, taken from the canonical directory. Without this the
+     * scenario's consignment would have no declared destination at all.
+     */
+    shipToParty: declaredShipToParty(brandId.length + lineItems.length),
     lineItems: lineItems.map<PurchaseOrderLineItem>((l) => ({
       sku: l.sku,
       productName: l.productName,

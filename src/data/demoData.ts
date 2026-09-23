@@ -34,6 +34,7 @@ import type {
 } from '@/types';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import { AMAZON_PARTNERED_CARRIER } from '@/config/shipping';
+import { declaredShipToParty, destinationLabelForPo } from '@/config/destinationFc';
 import { resolveShippingLane, selectCarrierForLane } from '@/lib/shipping/carrierRouting';
 import type { CommercialModel } from '@/config/commercialModel';
 
@@ -368,6 +369,14 @@ export const DEMO_WORKFLOW_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
         brandId: brand.id,
         poNumber: `PO-${String(9000 + bi * 2 + pi)}`,
         status,
+        /**
+         * §P5 — the destination the channel declared on this PO (its ship-to
+         * party, whose id is the FC code). Every seeded PO declares one, taken
+         * deterministically from the canonical FC directory so different tenants
+         * genuinely arrive at different fulfilment centres — and so no seeded
+         * consignment can ever be routed to a Mercenta hub.
+         */
+        shipToParty: declaredShipToParty(bi * 2 + pi),
         poValue,
         commissionRate: COMMISSION_RATE_PLACEHOLDER,
         commissionAmount:
@@ -444,6 +453,8 @@ export const DEMO_LIFECYCLE_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
         brandId: brand.id,
         poNumber: `PO-${9200 + bi * 10 + li}`,
         status,
+        /** §P5 — the seeded lifecycle PO declares its destination FC (see above). */
+        shipToParty: declaredShipToParty(bi * 3 + li + 1),
         poValue,
         commissionRate: COMMISSION_RATE_PLACEHOLDER,
         commissionAmount:
@@ -539,7 +550,14 @@ export const DEMO_SHIPMENTS: DemoShipment[] = DEMO_PURCHASE_ORDERS
       value: po.poValue,
       status: SHIPMENT_STATUS_BY_PO[po.status]!,
       origin: `${brand.nation} depot`,
-      destination: 'Mercenta UK Hub',
+      /**
+       * §P5 REPOINTED THIS (old contract, for the record): every seeded
+       * consignment was given `destination: 'Mercenta UK Hub'`. The destination is
+       * now resolved from the PO's own ship-to party — the FC the channel put on
+       * the order — by the ONE owner (`src/config/destinationFc.ts`), so the seed
+       * and the runtime path cannot disagree.
+       */
+      destination: destinationLabelForPo(po),
       delayed: i % 4 === 1,
       exception: i % 7 === 3,
     };

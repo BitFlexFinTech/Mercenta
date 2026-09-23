@@ -12,7 +12,8 @@ const BAK_MILESTONES = [
   { label: 'Durban Corridor (ZA)', detail: 'South African sea port hand-off' },
   { label: 'Ocean / Surface Transit', detail: 'En route to the United Kingdom' },
   { label: 'UK Port / HMRC Clearance', detail: 'Customs entry & duty processing' },
-  { label: 'Mercenta UK Distribution Hub', detail: 'Received into the UK network' },
+  /** §P5 — was 'Mercenta UK Distribution Hub'; the destination is the PO's FC. */
+  { label: 'Delivered to Destination FC', detail: 'Received at the destination fulfilment centre' },
 ];
 
 function currentMilestone(status: ShipmentStatus): number {
@@ -27,7 +28,7 @@ function currentMilestone(status: ShipmentStatus): number {
       return 4;
     case 'uk_customs_cleared':
       return 5;
-    case 'mercenta_hub':
+    case 'destination_fc':
       return 6;
     case 'live_amazon':
       return 6;

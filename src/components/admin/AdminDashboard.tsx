@@ -832,7 +832,7 @@ export function AdminDashboard({
     return (
       <div data-testid="dashboard-loading" aria-busy="true">
         <WorkspaceFrame>
-          <WorkspaceHeader title="Operations Overview" description="Loading operational state…" />
+          <WorkspaceHeader title="Overview" description="Loading operational state…" />
           <MetricBand items={moneyTiles} columns={4} loading />
           <div className="mt-4 space-y-2.5">
             <Skeleton className="h-12 w-full" />
@@ -849,7 +849,7 @@ export function AdminDashboard({
       <div data-testid="dashboard-error">
         <WorkspaceFrame>
           <WorkspaceHeader
-            title="Operations Overview"
+            title="Overview"
             description="Operational state could not be loaded."
           />
           <Alert tone="error" title="Dashboard data unavailable">
@@ -869,7 +869,14 @@ export function AdminDashboard({
       <WorkspaceFrame>
         <WorkspaceHeader
           eyebrow="Admin Hub · Portfolio"
-          title="Operations Overview"
+          /**
+           * §P5 copy pass — the page is the OVERVIEW (observe), and Operations is
+           * now a separate destination directly beneath it in the shell. The old
+           * title "Operations Overview" named a composition that no longer exists
+           * and made the two nav items ambiguous. (Carried over from P4: the
+           * Overview header title was explicitly assigned to P5's copy pass.)
+           */
+          title="Overview"
           description={`${brands.length} brands on platform · ${posAll.length} purchase orders · ${docsAll.length} compliance documents · ${messagesAll.length} messages in thread history`}
           status={
             posAwaitingAction.length > 0 ? (

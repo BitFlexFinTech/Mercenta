@@ -46,7 +46,8 @@ const STATUS_OPTIONS: ShipmentStatus[] = [
   'sea_transit',
   'air_transit',
   'uk_customs_cleared',
-  'mercenta_hub',
+  /** §P5 — the pre-live arrival state (was `mercenta_hub`). */
+  'destination_fc',
   'live_amazon',
 ];
 
@@ -193,7 +194,7 @@ export function CarrierDashboard({
         <Card className="p-4">
           <div className="text-xs text-zinc-500 font-medium">Delivered</div>
           <div className="text-xl font-bold text-emerald-400 mt-1">
-            {carrierShipments.filter((s) => s.status === 'live_amazon' || s.status === 'mercenta_hub').length}
+            {carrierShipments.filter((s) => s.status === 'live_amazon' || s.status === 'destination_fc').length}
           </div>
         </Card>
       </div>

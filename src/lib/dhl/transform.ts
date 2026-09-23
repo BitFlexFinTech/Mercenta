@@ -20,7 +20,12 @@ export const MILESTONE_TO_STATUS: Record<DhlMilestone, ShipmentStatus> = {
   picked_up: 'bak_depot',
   in_transit: 'air_transit',
   customs_clearance: 'uk_customs_cleared',
-  delivered: 'mercenta_hub',
+  /**
+   * §P5 REPOINTED THIS (old contract, for the record): `delivered` mapped to
+   * `mercenta_hub`. A DHL `delivered` milestone means the goods reached the
+   * destination on the purchase order, so it maps to `destination_fc`.
+   */
+  delivered: 'destination_fc',
 };
 
 export function milestoneToShipmentStatus(milestone: DhlMilestone): ShipmentStatus {
@@ -34,7 +39,8 @@ export const STATUS_TO_MILESTONE_LABEL: Record<ShipmentStatus, string> = {
   sea_transit: 'In transit (sea)',
   air_transit: 'In transit (air)',
   uk_customs_cleared: 'Customs clearance',
-  mercenta_hub: 'Delivered to Mercenta hub',
+  /** §P5 — was 'Delivered to Mercenta hub'; the destination is the PO's FC. */
+  destination_fc: 'Delivered to the destination FC',
   live_amazon: 'Live on channel',
 };
 

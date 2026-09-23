@@ -6,16 +6,16 @@ historical context only. New permanent rule: `.clinerules/operating-model.md` **
 
 ## CURRENT RESUME STATE (mirror of PROJECT_STATUS.md — keep the VALUES identical)
 
-LAST COMPLETED TASK:      P4 — proxy-model corrections: the brand's decision is now an INSTRUCTION to Mercenta (`src/lib/commerce/channelInstructions.ts`); MERCENTA performs the channel action (`src/lib/commerce/proxyProcessor.ts`: submitAcknowledgement → routing/shipment request → ASN filed automatically on acceptance); the brand surface has no filing control left and sees status + the packing-correction exception; `submitAcknowledgement` added to the SP-API seam (real + mock, Mercenta-side; AV-040 partially closed).
-CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** for the P4 implementation at **`fe20521`**: local runtime verified (tsc 0 · eslint 0 · build ✓ · validate-proxy-model PASS (39) · validate-canonical-propagation 25/0 · validate-e6/e7/command-centre/workspace-shell/uiux-redesign/e4/e5/investor-demo/stage15/16/19/26 PASS · wording 0 violations · validate:production-boot PASS · focused Playwright 15/15 · **FULL suite 468 passed / 0 failed / 2 skipped (14.7m)**) = GitHub committed state (`origin/redesign/foundation` = `fe20521`) = `https://demo.mercenta.co.uk` (deployed build **byte-identical to the committed build: all 33 emitted files hash-compared equal**; **live verification 19/19 checks, 0 page errors**). The state commit itself carries only documentation + the live-verification script, so its own three-way status is **NOT APPLICABLE (no application runtime change)**.
+LAST COMPLETED TASK:      P5 — the Mercenta Hub is removed as a destination. The destination is now **the FC declared on each purchase order** (`PurchaseOrder.shipToParty` = the channel's `shipToPartyId`), resolved by the NEW ONE owner `src/config/destinationFc.ts`; the `mercenta_hub` stage/status, the hub coordinate (`MERCENTA_UK_HUB`), the hub node kind and the Hero's hub node (`MERCENTA_HUB_PLACE`) are DELETED (`destination_fc` replaces them); every PO creator and seed declares a destination FC; every status/stage map, carrier transform, gate and spec repointed with the old contract recorded inline. Closes **D09-13 / AV-026 / AV-027**; also clears the carried-over P4 copy item (the admin Overview h1 now reads "Overview").
+CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** for the P5 implementation at **`<P5_COMMIT>`**: local runtime verified (tsc app 0 · tsc node 0 · eslint 0 · build ✓ · validate-logistics-map **60 → 74 PASS** · validate-logistics-hero 54 PASS · validate-mock-providers / investor-demo / e6 / e7 (121 assertions) / proxy-model / production-boot PASS · canonical-propagation 25/0 · uiux-redesign 347/0 · command-centre 49 PASS · workspace-shell 0 remaining · e4 / e5 / stage15 / 16 / 19 / 26 / wave3-logistics (56) / routing (101) / product-routes (68) PASS · wording 0 violations · focused Playwright **41/41** · **FULL suite 469 passed / 0 failed / 2 skipped (18.2m)**). **The demo leg is the outstanding step for this phase** — the state commit that follows the deployment records the deploy output, the byte-identity proof and the live checks, and then this field reads **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**.
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`fe20521`** — "P4 complete: the brand instructs Mercenta — Mercenta performs the channel action (proxy model)". Preceded by `2646a34` (P3 state), `8203a03` (P3 production-boot fix), `17a99eb`/`21c6869` (P3), `0c05fe0` (P2).
-GITHUB PUSH:              **DONE — PUSHED.** `2646a34..fe20521  redesign/foundation -> redesign/foundation`, exit 0; `origin/redesign/foundation` = `fe20521303eef79f8dd6d31cc3f668de585ec29b` = local HEAD.
-DEMO DEPLOYMENT:          **DONE.** `bash scripts/deploy-demo.sh`: "New: 22 files, Modified: 12 files, 4800697 bytes transferred in 451 seconds (10.4 KiB/s), Removed: 0 directories, 22 files, 0 symlinks." The deployed build is **byte-identical to the committed build — all 33 emitted files SHA-256-compared equal (0 different, 0 unreachable)**.
-LIVE VERIFICATION:        **PASS — 19/19 checks, 0 page errors** on `https://demo.mercenta.co.uk` (`scripts/verify-demo-live.mjs`, real Chromium): app mounts (`#root` 46,748 chars) · no boot error · Partner Login renders · brand Purchase Orders renders · **NO filing control** ("Create Shipment" / "File ASN" / "Confirm routing step" all ABSENT) · packing-correction exception offered · a brand acceptance → "Decision issued to Mercenta." + "Mercenta filed the acknowledgement with the retail channel" + `(simulated, no live call)` + the `po-mercenta-ack-*` reference · the correction form offers no carrier choice · a packing correction → "Mercenta filed the ASN" + the `po-mercenta-asn-*` consignment panel · the admin Purchase Orders surface renders · 0 page errors on both flows.
-OUTSTANDING BLOCKER:      NONE.
-NEXT TASK:                P5 — remove the Mercenta Hub completely: destination = **the FC on the PO**; the Hero/map arrival node = that FC; `src/data/api.ts → createShipmentForPO` and `src/data/demoData.ts` (`destination: 'Mercenta UK Hub'`); copy, validators, specs and docs. Closes D09-13 / AV-026/027.
-EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P5 row) and §8 (what P4 built, so P5 does not re-derive it) → then `src/data/api.ts` (`createShipmentForPO`), `src/data/demoData.ts`, `src/config/logisticsGeo.ts` / `logisticsHero.ts` (the Mercenta-hub node) and `src/types.ts` (`mercenta_hub` status); then `npx playwright test --workers=3`.
+LAST VERIFIED COMMIT:     **`<P5_COMMIT>`** — "P5 complete: the Mercenta Hub is removed — the destination is the FC on the purchase order" (**48 modified + 1 new**: the new file is `src/config/destinationFc.ts`). Preceded by `36844ab` (P4 state), `fe20521` (P4), `2646a34` (P3 state), `8203a03` (P3 boot fix), `17a99eb` (P3), `0c05fe0` (P2).
+GITHUB PUSH:              **NOT PUSHED YET** — pushed as part of closing this task (`operating-model.md` §12); the push output is recorded in the state commit that follows the deployment.
+DEMO DEPLOYMENT:          **NOT DEPLOYED YET** — `bash scripts/deploy-demo.sh` runs at the close of this product phase; its output and the emitted-file hash comparison against a rebuild of the committed tree are recorded in the state commit.
+LIVE VERIFICATION:        **NOT VERIFIED YET** — `node scripts/verify-demo-live.mjs` (now extended with the **§P5 arrival-node checks**) runs against `https://demo.mercenta.co.uk` after the deployment; its PASS/FAIL output is recorded in the state commit.
+OUTSTANDING BLOCKER:      NONE (the demo deployment + live verification are the phase's closing steps, not a blocker).
+NEXT TASK:                P6 — the PO document pack, automatic on acceptance: SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge; **"Documents for this PO"** in the Logistics Hub; the collect lane shows the documented status chain (request → carrier assigned → ARN → pickup). **Every document names the destination FC the PO declares (P5), never a Mercenta site.**
+EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P6 row) and §9 (what P5 built, so P6 does not re-derive it) → then `src/config/destinationFc.ts` (the destination owner) and the existing document seams (`src/lib/customsDocs.ts`, `src/lib/dhl/domain.ts`, `src/data/api.ts`), then `npx playwright test --workers=3`.
 
 ### How a brand-new chat resumes (no transcript required)
 
@@ -26,7 +26,7 @@ EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.
 
 ---
 
-## 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME — **P2 DONE** (2026-09-22, session 14) — CURRENT CHECKPOINT
+## 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME — **P2 DONE** (2026-09-22, session 14) — HISTORICAL CHECKPOINT (superseded by the `CURRENT RESUME STATE` block above)
 
 **Read this first, then `PROJECT_STATUS.md` headings 1–9 (the canonical current position) and
 `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (the full plan, the 11 Founder decisions, the phase table and
@@ -122,10 +122,13 @@ only) and finally
 
 ### Known-wrong behaviour the remaining phases will correct (do not mistake it for correct)
 
-The brand still "files the ASN" / "confirms routing" (P4) · the Mercenta Hub still exists as a destination (P5) · the
-auto-draft on acceptance still hardcodes `carrier:'dhl'` and `destination:'Mercenta UK Hub'` (`src/data/api.ts`, P5/P6) ·
-the 3PL carrier surface is still present (P9) · "Create PO" still exists (P11) · no PO document pack exists yet (P6) ·
-invoice numbering has no uniqueness registry yet (P7) · the Overview header still reads "Operations Overview" (P2/P3).
+**Corrected after this list was written:** the brand no longer "files the ASN" / "confirms routing" — **P4 landed** ·
+the Mercenta Hub no longer exists as a destination and the auto-draft's hardcoded `destination:'Mercenta UK Hub'` is gone
+(the destination is the FC on the PO) — **P5 landed** · the admin Overview header reads "Overview", not "Operations
+Overview" — **P5 copy pass**.
+
+**Still open, owned by the phase named:** the 3PL carrier surface (P9) · "Create PO" (P11) · no PO document pack exists
+yet (P6) · invoice numbering has no uniqueness registry yet (P7).
 
 ### Checkpoint / three-way status
 

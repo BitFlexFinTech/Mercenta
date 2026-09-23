@@ -86,7 +86,12 @@ test.describe('Phase D — migrated operational tables', () => {
     await expect(select).toBeVisible();
     await expect(select).toBeEnabled();
 
-    const target = 'mercenta_hub';
+    /**
+     * §P5 — REPOINTED (old contract recorded inline): the target milestone was
+     * `mercenta_hub` ("Mercenta UK Hub"). The hub is removed as a shipment stage,
+     * so the canonical pre-live milestone offered here is `destination_fc`.
+     */
+    const target = 'destination_fc';
     const label = (await select.locator(`option[value="${target}"]`).innerText()).trim();
     await select.selectOption(target);
     await expect(select).toHaveValue(target);

@@ -19,7 +19,9 @@ import type { ShipmentStatus } from '@/types';
  * journey has no customs leg and no distinct "final delivery" state, so:
  *   - everything still inside the Palletline network maps to `bak_depot`
  *     (the truthful nearest state — the freight is with the carrier);
- *   - only `delivered` advances the domain to `mercenta_hub`.
+ *   - only `delivered` advances the domain to `destination_fc` (§P5 — the goods
+ *     reached the destination fulfilment centre ON THE PURCHASE ORDER; it was
+ *     `mercenta_hub`, which asserted a Mercenta-owned destination).
  * The exception / failed-delivery DETAIL is carried on the result's own flags,
  * so no information is lost by the coarse status — and no new domain status is
  * invented just to mirror a carrier's internal labels.
@@ -30,7 +32,8 @@ export const PALLETLINE_MILESTONE_TO_STATUS: Record<PalletlineMilestone, Shipmen
   collected: 'bak_depot',
   at_hub: 'bak_depot',
   out_for_delivery: 'bak_depot',
-  delivered: 'mercenta_hub',
+  /** §P5 — delivered means the PO's destination FC (was `mercenta_hub`). */
+  delivered: 'destination_fc',
   failed_delivery: 'bak_depot',
   exception: 'bak_depot',
 };
@@ -48,7 +51,8 @@ export const STATUS_TO_PALLETLINE_LABEL: Record<ShipmentStatus, string> = {
   sea_transit: 'In transit (sea)',
   air_transit: 'In transit (air)',
   uk_customs_cleared: 'Cleared',
-  mercenta_hub: 'Delivered to the Mercenta hub',
+  /** §P5 — was 'Delivered to the Mercenta hub'; the destination is the PO's FC. */
+  destination_fc: 'Delivered to the destination FC',
   live_amazon: 'Live on channel',
 };
 

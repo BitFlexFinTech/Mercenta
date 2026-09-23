@@ -472,7 +472,13 @@ const FREIGHT_TRACK = [
   'bak_depot',
   'sea_transit',
   'uk_customs_cleared',
-  'mercenta_hub',
+  /**
+   * §P5 REPOINTED THIS (old contract, for the record): the step after customs was
+   * `mercenta_hub`. No channel source requires a Mercenta-owned hub, so the step
+   * is now arrival at the PO's declared destination FC (`destination_fc`), which
+   * is what the carrier's `delivered` milestone actually means.
+   */
+  'destination_fc',
   'live_amazon',
 ];
 

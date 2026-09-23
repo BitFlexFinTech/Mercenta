@@ -41,7 +41,15 @@ test.describe('Admin Overview — business overview (dashboard cleanup)', () => 
   test('1. loads with the business-overview hierarchy, Portfolio first', async ({ page }) => {
     await openAdminDashboard(page);
     // Page context — h1 + derived summary line.
-    await expect(page.getByRole('heading', { name: 'Operations Overview' })).toBeVisible();
+    /**
+     * §P5 copy pass — REPOINTED (old contract recorded inline): this asserted the
+     * h1 text `'Operations Overview'`. The page IS the OVERVIEW (observe) and
+     * Operations is a separate destination directly beneath it in the shell, so the
+     * header now reads `'Overview'`. The assertion keeps exactly its strength: the
+     * page's own h1 must be rendered (exact text, so it cannot pass on a section
+     * heading that merely contains the word).
+     */
+    await expect(page.getByRole('heading', { name: 'Overview', exact: true })).toBeVisible();
     /**
      * §Dashboard-cleanup — the sections that REMAIN, and Portfolio at a glance is
      * FIRST in the workspace column (the business position before any activity

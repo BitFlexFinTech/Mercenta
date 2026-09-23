@@ -300,7 +300,8 @@ const SHIPMENT_TONES: Record<ShipmentStatus, StatusTone> = {
   sea_transit: 'info',
   air_transit: 'info',
   uk_customs_cleared: 'success',
-  mercenta_hub: 'brass',
+  /** §P5 — the pre-live arrival state, renamed from the retired hub status. */
+  destination_fc: 'brass',
   live_amazon: 'success',
 };
 

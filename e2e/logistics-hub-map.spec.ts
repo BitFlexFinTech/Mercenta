@@ -414,6 +414,57 @@ test.describe('Logistics Hub — operational map', () => {
     await expect.poll(async () => page.locator('[data-testid^="logistics-row-"]').count()).toBe(before);
     expect(pageErrors).toEqual([]);
   });
+
+  /**
+   * §P5 — THE ARRIVAL NODE IS THE DESTINATION FC ON THE PURCHASE ORDER.
+   *
+   * The platform used to route every consignment to a Mercenta UK hub. This test
+   * proves IN THE BROWSER, against the running product, that the removal is real:
+   *   1. no `mercenta_hub` node kind exists in the map's vocabulary, while
+   *      destination-FC nodes do;
+   *   2. no text on the surface claims a Mercenta hub, and the canonical pre-live
+   *      state is offered under its own name;
+   *   3. EVERY consignment's destination is the FC its OWN purchase order declares
+   *      — read from the canonical store, not from the rendered label.
+   */
+  test('17. §P5 — the arrival node is the destination FC on the PO, never a hub', async ({
+    page,
+  }) => {
+    const seed = await openSeededLogistics(page);
+    expect(seed.ok, JSON.stringify(seed)).toBe(true);
+
+    // 1. The map can draw destination-FC nodes and can NEVER draw a hub node.
+    expect(await page.locator('[data-kind="mercenta_hub"]').count()).toBe(0);
+    expect(await page.locator('[data-kind="amazon_fc"]').count()).toBeGreaterThan(0);
+
+    // 2. No surface copy claims a Mercenta-owned destination.
+    const body = await page.locator('[data-workspace-frame]').first().innerText();
+    expect(body).not.toMatch(/Mercenta\s+(UK\s+)?(Distribution\s+)?Hub/i);
+
+    // 3. Domain parity: a consignment's destination IS its PO's declared ship-to
+    //    party, resolved by the one canonical owner.
+    const mismatches = await page.evaluate(async () => {
+      const store = await import('/src/data/demoStore.ts');
+      const dest = await import('/src/config/destinationFc.ts');
+      const bad: string[] = [];
+      for (const s of store.demoShipments) {
+        const po = store.demoPurchaseOrders.find((p) => p.poNumber === s.poNumber);
+        const declared = po ? dest.destinationLabelForPo(po) : null;
+        if (!po || !declared) {
+          bad.push(`${s.id}: no purchase order declares a destination`);
+          continue;
+        }
+        if (declared !== s.destination) {
+          bad.push(`${s.id}: destination "${s.destination}" != PO's "${declared}"`);
+        }
+        if (/mercenta/i.test(s.destination)) {
+          bad.push(`${s.id}: Mercenta-owned destination "${s.destination}"`);
+        }
+      }
+      return bad;
+    });
+    expect(mismatches).toEqual([]);
+  });
 });
 
 /**

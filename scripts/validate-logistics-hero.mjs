@@ -57,7 +57,7 @@ import {
 } from '@/lib/logistics/heroNetwork';
 import {
   HERO_SCENE, HERO_TRUTH_NOTICE, GLOBAL_LOGISTICS_GATEWAYS, UK_LOGISTICS_GATEWAYS,
-  heroFcDestinations, MERCENTA_HUB_PLACE, gatewayById,
+  heroFcDestinations, gatewayById,
 } from '@/config/logisticsHero';
 import { WORLD_LAND_RINGS, UK_LAND_RINGS, UK_STRATEGIC_ROADS, HERO_GEO_PROVENANCE } from '@/data/logisticsHeroGeo';
 import { classifyLegTruth } from '@/lib/logistics/operationsMap';
@@ -106,13 +106,17 @@ const brandLegs = [
   {
     id: 'leg-1', reference: 'REF-1', title: 'Simulated leg',
     origin: { label: 'Munich, Germany', lat: 48.1351, lon: 11.582, kind: 'brand_facility' },
-    destination: { label: 'Mercenta UK Hub', lat: 52.2405, lon: -0.9027, kind: 'mercenta_hub' },
+    /**
+     * §P5 — the destination is a DESTINATION FC (the FC on the purchase order),
+     * not the retired Mercenta hub: the Hero's UK arrival node is the FC.
+     */
+    destination: { label: 'Doncaster (LBA1)', lat: 53.5228, lon: -1.1285, kind: 'amazon_fc' },
     truth: 'simulated',
   },
   {
     id: 'leg-2', reference: 'REF-2', title: 'Undeclared origin',
     origin: null,
-    destination: { label: 'Northampton, UK', lat: 52.2405, lon: -0.9027, kind: 'mercenta_hub' },
+    destination: { label: 'Doncaster (LBA1)', lat: 53.5228, lon: -1.1285, kind: 'amazon_fc' },
     truth: 'ambient',
   },
 ];
@@ -143,9 +147,15 @@ out.destinations = {
   cities: fcs.length,
   listCities: [...new Set(DEFAULT_UK_FC_LIST.map((fc) => fc.city))].length,
   allResolved: fcs.every((fc) => Number.isFinite(fc.place.lat) && Number.isFinite(fc.place.lon)),
+  allAmazonFc: fcs.every((fc) => fc.place.kind === 'amazon_fc'),
   sample: fcs.slice(0, 3).map((fc) => ({ city: fc.city, lat: fc.place.lat, lon: fc.place.lon, codes: fc.codes })),
-  hub: MERCENTA_HUB_PLACE,
-  hubScene: sceneForPlace(MERCENTA_HUB_PLACE),
+  /**
+   * §P5 — the SAME coordinate resolved with the canonical FC kind and with the
+   * RETIRED hub kind. If the hub kind were still a UK-tile kind these would be
+   * identical; they must NOT be, because the hub is no longer on the route.
+   */
+  hubKindScene: sceneForPlace({ lat: 52.2405, lon: -0.9027, kind: 'mercenta_hub' }),
+  destinationFcScene: sceneForPlace({ lat: 52.2405, lon: -0.9027, kind: 'amazon_fc' }),
 };
 out.gateways = {
   global: GLOBAL_LOGISTICS_GATEWAYS.length,
@@ -269,7 +279,19 @@ check('progress stays inside [0,1) at any simulated time', result.motion.progres
 const F = result.destinations;
 check('every canonical FC city resolves to a coordinate', F.cities === F.listCities, `${F.cities}/${F.listCities}`);
 check('every FC destination is a finite coordinate', F.allResolved);
-check('the Mercenta hub comes from the canonical declaration', F.hub.id === 'mercenta_uk_hub');
+/**
+ * §P5 — REPOINTED (old contract recorded inline): this check required the Hero to
+ * carry a Mercenta-hub node ("the Mercenta hub comes from the canonical
+ * declaration", `F.hub.id === 'mercenta_uk_hub'`). The hub is REMOVED as a
+ * destination, so the Hero's UK arrival nodes are the canonical destination FCs
+ * and a place of the retired hub kind is no longer drawn on the UK tile.
+ */
+check('§P5: every Hero UK destination is an FC node (no hub node exists)', F.allAmazonFc);
+check(
+  '§P5: a place of the retired hub kind is NOT drawn on the UK tile',
+  JSON.stringify(F.hubKindScene) !== JSON.stringify(F.destinationFcScene),
+  `${JSON.stringify(F.hubKindScene)} vs ${JSON.stringify(F.destinationFcScene)}`
+);
 const GW = result.gateways;
 check('every declared gateway resolves by id', GW.allResolve);
 check('gateway ids are unique across global + UK', GW.uniqueIds === GW.totalIds, `${GW.uniqueIds}/${GW.totalIds}`);

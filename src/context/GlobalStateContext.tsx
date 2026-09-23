@@ -838,7 +838,8 @@ function statusToStage(status: ShipmentStatus): Shipment['stage'] {
     sea_transit: 'international_forwarding',
     air_transit: 'international_forwarding',
     uk_customs_cleared: 'uk_port_hmrc',
-    mercenta_hub: 'mercenta_hub',
+    /** §P5 — the hub stage is gone; arrival at the PO's destination FC replaces it. */
+    destination_fc: 'destination_fc',
     live_amazon: 'live_amazon',
   };
   return map[status];

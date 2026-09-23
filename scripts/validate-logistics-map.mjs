@@ -17,14 +17,18 @@
  *        not_registered / unknown   → ambient  (NEVER simulated)
  *        live + provider reference  → live_verified
  *        live, no provider reference→ ambient  (never a live claim)
- *   5  a Freight Collect PO permits ONLY the partnered carrier, and a Mercenta
- *      carrier account is REFUSED on it
+ *   5  a Freight Collect PO permits ONLY the partnered carrier (a Mercenta
+ *      carrier account on it is an attributed override, not a universal choice)
  *   6  a Freight Prepaid PO follows the lane rule (international → DHL, UK
  *      domestic → Palletline) and is not hardcoded to one carrier
  *   7  buildOperationalMap draws geometry for resolvable legs, marks
  *      unresolvable ones schematic, and never invents a coordinate
  *   8  the retired mandatory linear logistics chain is not asserted anywhere
  *   9  zero network calls
+ *  10  §P5 — the Mercenta Hub is NOT a place on any route: the retired hub
+ *      destination fails closed, the map can produce no hub node, and the
+ *      destination of every seeded PO/shipment is the FC DECLARED ON THAT PO
+ *      (never a Mercenta-chosen site) with an undeclared PO failing closed
  *
  * Run: node scripts/validate-logistics-map.mjs
  */
@@ -55,11 +59,16 @@ function check(name, ok, detail = '') {
 
 const ENTRY = `
 import {
-  resolveGeoPlace, MAP_FRAME, MERCENTA_UK_HUB, FREIGHT_SEMANTICS,
-  OPERATIONAL_TRUTH, originForBrand,
+  resolveGeoPlace, MAP_FRAME, FREIGHT_SEMANTICS,
+  OPERATIONAL_TRUTH, originForBrand, DESTINATION_NOT_DECLARED,
 } from '@/config/logisticsGeo';
 import { projectGeo, buildOperationalMap, classifyLegTruth } from '@/lib/logistics/operationsMap';
 import { validateCarrierForShipment, selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
+import {
+  resolveDestinationFc, destinationLabelForPo, declaredShipToParty,
+  declaredDestinationLabel, fcByCode,
+} from '@/config/destinationFc';
+import { DEMO_PURCHASE_ORDERS, DEMO_SHIPMENTS } from '@/data/demoData';
 
 const out = {};
 const cases = [
@@ -67,8 +76,9 @@ const cases = [
   'South Korea', 'Switzerland', 'Harare, Zimbabwe', 'Durban, South Africa',
   'Nairobi, Kenya', 'Lagos, Nigeria', 'Cape Town, South Africa',
   'Austin, Texas, USA', 'Munich, Germany', 'Felixstowe, UK', 'Heathrow, UK',
-  'Coventry, UK', 'Northampton, UK', 'Mercenta UK Hub', 'Brand warehouse',
-  'Origin not declared', 'Doncaster (LBA1)', '',
+  'Coventry, UK', 'Doncaster (LBA1)', 'Doncaster (LBA1), DN4 5FB',
+  'Mercenta UK Hub', 'Northampton, UK', DESTINATION_NOT_DECLARED,
+  'Brand warehouse', 'Origin not declared', '',
 ];
 out.resolutions = {};
 for (const c of cases) {
@@ -85,8 +95,42 @@ for (const c of cases) {
     : null;
 }
 out.frame = MAP_FRAME;
-out.hub = MERCENTA_UK_HUB;
 out.freight = FREIGHT_SEMANTICS;
+out.notDeclared = DESTINATION_NOT_DECLARED;
+out.fc = {
+  known: fcByCode('LBA1') ? fcByCode('LBA1').code : null,
+  lowerCase: fcByCode('lba1') ? fcByCode('lba1').code : null,
+  trimmed: fcByCode('  LBA1  ') ? fcByCode('  LBA1  ').code : null,
+  unknown: fcByCode('ZZ99'),
+  blank: fcByCode('   '),
+};
+out.destination = {
+  full: resolveDestinationFc({ partyId: 'LBA1', name: 'Doncaster (LBA1)', city: 'Doncaster', postcode: 'DN4 5FB' }),
+  directoryOnly: resolveDestinationFc({ partyId: 'lba1' }),
+  unknownCode: resolveDestinationFc({ partyId: 'ZZ99' }),
+  emptyParty: resolveDestinationFc({ partyId: '   ' }),
+  noDeclaration: resolveDestinationFc(null),
+  declaredLabel: declaredDestinationLabel(0),
+  labelForDeclaredPo: destinationLabelForPo({ shipToParty: declaredShipToParty(0) }),
+  labelForUndeclaredPo: destinationLabelForPo({}),
+  labelForNullPo: destinationLabelForPo(null),
+};
+out.seed = {
+  poCount: DEMO_PURCHASE_ORDERS.length,
+  posDeclaringDestination: DEMO_PURCHASE_ORDERS.filter((p) => !!(p.shipToParty && p.shipToParty.partyId)).length,
+  allResolveToAFcCity: DEMO_PURCHASE_ORDERS.every((p) => {
+    const r = resolveDestinationFc(p.shipToParty);
+    return !!r && !!r.place && r.place.kind === 'amazon_fc';
+  }),
+  distinctFcs: [...new Set(DEMO_PURCHASE_ORDERS.map((p) => (p.shipToParty && p.shipToParty.partyId) || ''))].length,
+  shipmentCount: DEMO_SHIPMENTS.length,
+  shipmentsMatchTheirPo: DEMO_SHIPMENTS.every((s) => {
+    const po = DEMO_PURCHASE_ORDERS.find((p) => p.poNumber === s.poNumber);
+    return !!po && destinationLabelForPo(po) === s.destination;
+  }),
+  hubDestinations: DEMO_SHIPMENTS.filter((s) => /mercenta/i.test(s.destination)).length,
+  sample: DEMO_SHIPMENTS.slice(0, 3).map((s) => s.destination),
+};
 out.truth = OPERATIONAL_TRUTH;
 out.originForBrand = {
   uk: originForBrand({ nation: 'United Kingdom' }),
@@ -114,15 +158,16 @@ out.carrier = {
   laneUnknown: selectCarrierForShipment({}),
 };
 out.map = buildOperationalMap([
-  { id: 's1', reference: 'REF-1', title: 'US to UK', carrier: 'dhl', status: 'sea_transit', origin: 'United States', destination: 'Mercenta UK Hub', value: 1000, providerModes: modes },
-  { id: 's2', reference: 'REF-2', title: 'Undeclared', carrier: 'dhl', status: 'factory_intake', origin: 'Brand warehouse', destination: 'Mercenta UK Hub', providerModes: modes },
-  { id: 's3', reference: 'REF-3', title: 'UK domestic', carrier: 'palletline', status: 'live_amazon', origin: 'United Kingdom facility', destination: 'Northampton, UK', providerModes: modes },
+  { id: 's1', reference: 'REF-1', title: 'US to UK', carrier: 'dhl', status: 'sea_transit', origin: 'United States', destination: declaredDestinationLabel(0), value: 1000, providerModes: modes },
+  { id: 's2', reference: 'REF-2', title: 'Undeclared', carrier: 'dhl', status: 'factory_intake', origin: 'Brand warehouse', destination: declaredDestinationLabel(1), providerModes: modes },
+  { id: 's3', reference: 'REF-3', title: 'UK domestic', carrier: 'palletline', status: 'live_amazon', origin: 'United Kingdom facility', destination: declaredDestinationLabel(2), providerModes: modes },
 ]);
 out.mapSummary = {
   legs: out.map.legs.length,
   mapped: out.map.mapped.length,
   schematic: out.map.schematic.length,
   nodeCount: out.map.nodes.length,
+  kinds: [...new Set(out.map.nodes.map((n) => n.kind))].sort(),
   truthCounts: out.map.truthCounts,
   firstGeometry: out.map.legs[0].geometry,
   firstProgress: out.map.legs[0].progress,
@@ -183,9 +228,8 @@ const MUST_RESOLVE = [
   'Felixstowe, UK',
   'Heathrow, UK',
   'Coventry, UK',
-  'Northampton, UK',
-  'Mercenta UK Hub',
   'Doncaster (LBA1)',
+  'Doncaster (LBA1), DN4 5FB',
 ];
 for (const c of MUST_RESOLVE) {
   check(`resolve: "${c}" resolves to a coordinate`, Boolean(R[c]), R[c] ? '' : 'returned null');
@@ -199,9 +243,17 @@ check(
   R['United States']?.precision === 'country_centroid' &&
     R['Germany']?.precision === 'country_centroid'
 );
+/**
+ * §P5 — REPOINTED. This assertion previously required `'Mercenta UK Hub'` to
+ * resolve to a `mercenta_hub` node — the old contract, in which a Mercenta-owned
+ * site was the destination of every consignment. The Founder decision removes the
+ * hub as a destination (matrix `D09-13`, register `AV-026`/`AV-027`, decision
+ * `T-4`), so the destination a PO actually declares is what must resolve, and no
+ * hub node kind may exist.
+ */
 check(
-  'resolve: the Mercenta hub resolves to a mercenta_hub node (never an Amazon FC)',
-  R['Mercenta UK Hub']?.kind === 'mercenta_hub'
+  '§P5: the destination string a PO declares resolves to its FC city node',
+  R['Doncaster (LBA1), DN4 5FB']?.kind === 'amazon_fc'
 );
 check(
   'resolve: an Amazon FC city resolves to an amazon_fc node',
@@ -211,6 +263,16 @@ check(
 /* ── 2. Fail closed ─────────────────────────────────────────────────────── */
 for (const c of ['Brand warehouse', 'Origin not declared', '']) {
   check(`fail-closed: "${c}" does NOT resolve to an invented coordinate`, R[c] === null);
+}
+/**
+ * §P5 — REPOINTED (old contract recorded inline): this file used to assert that
+ * `'Mercenta UK Hub'` resolved to a hub node and that `'Northampton, UK'` — the
+ * hub's own city — was a plotable place. Both are now REMOVED as route places, so
+ * both must fail closed: nothing can put a Mercenta-owned site back onto a
+ * consignment's route, and an undeclared destination cannot be plotted either.
+ */
+for (const c of ['Mercenta UK Hub', 'Northampton, UK', result.notDeclared]) {
+  check(`§P5: "${c}" is NOT a place on any route (fails closed)`, R[c] === null);
 }
 check(
   'originForBrand: a declared nation produces a resolvable origin',
@@ -239,15 +301,15 @@ check(
 );
 check(
   'projection: a US origin sits WEST of a UK destination (real geography)',
-  R['United States'].point.x < R['Northampton, UK'].point.x
+  R['United States'].point.x < R['Doncaster (LBA1), DN4 5FB'].point.x
 );
 check(
   'projection: a South Korean origin sits EAST of a UK destination',
-  R['South Korea'].point.x > R['Northampton, UK'].point.x
+  R['South Korea'].point.x > R['Doncaster (LBA1), DN4 5FB'].point.x
 );
 check(
   'projection: a southern-hemisphere origin sits BELOW the equator',
-  R['Durban, South Africa'].point.y > R['Northampton, UK'].point.y
+  R['Durban, South Africa'].point.y > R['Doncaster (LBA1), DN4 5FB'].point.y
 );
 
 /* ── 4. Truth classification is fail-closed ─────────────────────────────── */
@@ -348,6 +410,16 @@ check(
   `${M.schematic}/${M.schematicId}`
 );
 check('map: nodes are derived from declared places only', M.nodeCount >= 3, String(M.nodeCount));
+/**
+ * §P5 — the map's node vocabulary contains NO hub kind: the destination node of
+ * a consignment is its destination FC (`amazon_fc`), because the destination is
+ * the FC on the PO. A hub node could only come back by re-declaring the hub.
+ */
+check(
+  '§P5: the map produces amazon_fc destination nodes and NO mercenta_hub node',
+  M.kinds.includes('amazon_fc') && !M.kinds.includes('mercenta_hub'),
+  M.kinds.join(', ')
+);
 check(
   'map: the plotted US→UK leg has real geometry with a marker on the arc',
   Boolean(M.firstGeometry) &&
@@ -376,6 +448,69 @@ check(
 check(
   'chain: stage progression comes from the canonical status → stage map',
   MAP_MODULE.includes('STAGE_BY_STATUS')
+);
+
+/* ── 10. §P5 — the destination FC on the PO (the hub is not a place) ─────── */
+const D = result.destination;
+const S = result.seed;
+check(
+  '§P5: an FC code resolves through the canonical directory (case/space tolerant)',
+  result.fc.known === 'LBA1' && result.fc.lowerCase === 'LBA1' && result.fc.trimmed === 'LBA1',
+  JSON.stringify(result.fc)
+);
+check(
+  '§P5: an UNKNOWN or blank FC code resolves to NOTHING (never a guessed centre)',
+  result.fc.unknown === null && result.fc.blank === null
+);
+check(
+  "§P5: the PO's OWN declaration wins (the channel is authoritative — AV-017)",
+  D.full.partyId === 'LBA1' &&
+    D.full.name === 'Doncaster (LBA1)' &&
+    D.full.city === 'Doncaster' &&
+    D.full.place?.kind === 'amazon_fc' &&
+    D.full.label === 'Doncaster (LBA1), DN4 5FB',
+  JSON.stringify(D.full)
+);
+check(
+  '§P5: a PO that names only the code is completed from the canonical directory',
+  D.directoryOnly.partyId === 'LBA1' &&
+    D.directoryOnly.city === 'Doncaster' &&
+    D.directoryOnly.place?.kind === 'amazon_fc'
+);
+check(
+  '§P5: an FC code this repository does not carry is still NAMED, but never plotted',
+  D.unknownCode.partyId === 'ZZ99' &&
+    D.unknownCode.place === null &&
+    D.unknownCode.label.includes('ZZ99'),
+  JSON.stringify(D.unknownCode)
+);
+check(
+  '§P5: a PO that declares NO destination resolves to the explicit not-declared string',
+  D.emptyParty === null &&
+    D.noDeclaration === null &&
+    D.labelForUndeclaredPo === result.notDeclared &&
+    D.labelForNullPo === result.notDeclared
+);
+check(
+  '§P5: a declared destination label is exactly what the domain records',
+  D.labelForDeclaredPo === D.declaredLabel && /LBA1/.test(D.declaredLabel),
+  D.labelForDeclaredPo
+);
+check(
+  '§P5: every seeded PO declares a destination that resolves to a real FC city',
+  S.poCount > 0 && S.posDeclaringDestination === S.poCount && S.allResolveToAFcCity,
+  `${S.posDeclaringDestination}/${S.poCount}`
+);
+check('§P5: the seed genuinely spans several destination FCs', S.distinctFcs > 1, String(S.distinctFcs));
+check(
+  "§P5: every seeded consignment carries ITS PO's declared destination",
+  S.shipmentCount > 0 && S.shipmentsMatchTheirPo,
+  `${S.shipmentCount} consignments`
+);
+check(
+  '§P5: NO seeded consignment is destined for a Mercenta site',
+  S.hubDestinations === 0,
+  S.sample.join(' | ')
 );
 
 /* ── Report ─────────────────────────────────────────────────────────────── */

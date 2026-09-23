@@ -20,7 +20,7 @@ const NEW = [
   {
     id: 'logistics-operational-map',
     description:
-      'LOGISTICS HUB — a real interactive operational map (brand AND admin). Declared lat/lon graticule, nodes for declared origins / UK gateways / the Mercenta hub / Amazon FC cities, one indicative arc per consignment and one marker at its canonical stage progress. Pan (pointer drag), wheel zoom via a non-passive listener plus zoom in/out/reset/Fit controls, click-to-select, click-empty-to-clear, and auto-fit-once to the drawn extents. Selecting a consignment on the map and in the list is ONE shared selection state. Filters (search, lane, status, evidence) drive the drawn set AND the list together.',
+      'LOGISTICS HUB — a real interactive operational map (brand AND admin). Declared lat/lon graticule, nodes for declared origins / UK gateways / the DESTINATION FC on each purchase order (never a Mercenta hub — §P5), one indicative arc per consignment and one marker at its canonical stage progress. Pan (pointer drag), wheel zoom via a non-passive listener plus zoom in/out/reset/Fit controls, click-to-select, click-empty-to-clear, and auto-fit-once to the drawn extents. Selecting a consignment on the map and in the list is ONE shared selection state. Filters (search, lane, status, evidence) drive the drawn set AND the list together.',
     source: 'Complete Platform Redesign — Logistics Hub + operational map (2026-09-21 session 2)',
     status: 'built_and_tested',
     evidence:
@@ -53,7 +53,7 @@ const NEW = [
   {
     id: 'logistics-map-canonical-geography',
     description:
-      'LOGISTICS HUB — ONE declaration of the geography the map may plot (src/config/logisticsGeo.ts): country centroids where only a country is declared, real city/port coordinates where a city is named, the Mercenta hub site from src/config/customs.ts, and Amazon FC CITIES from DEFAULT_UK_FC_LIST. An unresolvable place string returns null and the leg is listed as SCHEMATIC — never placed at an invented coordinate; the rendered notice states the precision actually used. A single MAP_FRAME bounds the projection so every origin the platform can produce fits, and the drawn graticule cannot disagree with it.',
+      'LOGISTICS HUB — ONE declaration of the geography the map may plot (src/config/logisticsGeo.ts): country centroids where only a country is declared, real city/port coordinates where a city is named, and the destination fulfilment centres from DEFAULT_UK_FC_LIST (the destination itself is the FC ON THE PURCHASE ORDER — src/config/destinationFc.ts, §P5). An unresolvable place string returns null and the leg is listed as SCHEMATIC — never placed at an invented coordinate; the rendered notice states the precision actually used. A single MAP_FRAME bounds the projection so every origin the platform can produce fits, and the drawn graticule cannot disagree with it.',
     source: 'Complete Platform Redesign — Logistics Hub + operational map (2026-09-21 session 2)',
     status: 'built_and_tested',
     evidence:

@@ -36,7 +36,6 @@ import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { BRAND_NAME } from '@/config/brand';
 import {
   MAP_TRUTH_NOTICE,
-  MERCENTA_UK_HUB,
   OPERATIONAL_TRUTH,
   OPERATIONAL_TRUTH_ORDER,
   freightSemantics,
@@ -100,7 +99,8 @@ const MILESTONES: {
   { status: 'sea_transit', label: 'Sea Transit', icon: Ship },
   { status: 'air_transit', label: 'Air Transit', icon: Plane },
   { status: 'uk_customs_cleared', label: 'UK Customs Cleared', icon: FileText },
-  { status: 'mercenta_hub', label: 'Mercenta UK Hub', icon: MapPin },
+  /** §P5 — was 'Mercenta UK Hub'; the destination is the FC on the PO. */
+  { status: 'destination_fc', label: 'Delivered to Destination FC', icon: MapPin },
   { status: 'live_amazon', label: 'Live on retail-channel', icon: Truck },
 ];
 
@@ -942,12 +942,6 @@ export function LogisticsHub() {
             </span>
             <span className="text-ds-label text-zinc-200">
               {session?.tenantId ?? 'Mercenta operations'}
-            </span>
-            <span aria-hidden="true" className="text-zinc-700">
-              ·
-            </span>
-            <span className="text-ds-micro text-zinc-500">
-              Hub: {MERCENTA_UK_HUB.label} ({MERCENTA_UK_HUB.place})
             </span>
           </>
         }

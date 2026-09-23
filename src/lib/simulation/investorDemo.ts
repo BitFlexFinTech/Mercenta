@@ -2198,11 +2198,11 @@ export async function runInvestorDemo(
     const delayed = demoShipments.find((s) => s.id === shipId);
     checks.delayedShipmentRecorded =
       delayed?.delayed === true && delayed.status === 'uk_customs_cleared';
-    amendShipment(shipId, { status: 'mercenta_hub' });
+    amendShipment(shipId, { status: 'destination_fc' });
     shipment.delayed = false;
     const recoveredShipment = demoShipments.find((s) => s.id === shipId);
     checks.delayedShipmentRecovered =
-      recoveredShipment?.delayed === false && recoveredShipment.status === 'mercenta_hub';
+      recoveredShipment?.delayed === false && recoveredShipment.status === 'destination_fc';
 
     // 4. Payout settlement failure → retry → success (the real payout seam,
     //    proven with a failing transfer client and then the mock client).

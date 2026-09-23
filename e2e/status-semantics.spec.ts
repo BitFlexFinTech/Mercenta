@@ -219,14 +219,21 @@ test.describe('Phase D — status semantics & decision queue', () => {
       sea_transit: 'Sea Transit',
       air_transit: 'Air Transit',
       uk_customs_cleared: 'UK Customs Cleared',
-      mercenta_hub: 'Mercenta UK Hub',
+      /**
+       * §P5 — REPOINTED (old contract recorded inline): this key was
+       * `mercenta_hub: 'Mercenta UK Hub'`. The Mercenta Hub is removed as a
+       * shipment stage/destination (matrix `D09-13`, register `AV-026`/`AV-027`,
+       * decision `T-4`); the pre-live arrival state is the destination FC on the
+       * purchase order.
+       */
+      destination_fc: 'Delivered to Destination FC',
       live_amazon: 'Live on retail-channel',
     };
 
     async function assertShipmentBadges(required: boolean): Promise<number> {
       const badges = page.locator(
         '[data-status="factory_intake"],[data-status="bak_depot"],[data-status="sea_transit"],' +
-          '[data-status="air_transit"],[data-status="uk_customs_cleared"],[data-status="mercenta_hub"],' +
+          '[data-status="air_transit"],[data-status="uk_customs_cleared"],[data-status="destination_fc"],' +
           '[data-status="live_amazon"]'
       );
       const n = await badges.count();

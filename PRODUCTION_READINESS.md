@@ -1,9 +1,10 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: session 13 (22 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0 and P1 are DONE and committed
-(`ee6d5eb`, `b6bd046`, `92dd06b`); P2–P12 are NOT STARTED. Plan + the 11 binding Founder decisions:
-`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. The session-13 items are listed first, then the M12 items
-from the previous session. Everything below is still simulated; nothing was re-labelled live.**
+**Last updated: session 17 (23 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0, P0.4, P1, P2, P3, P4 and P5 are
+DONE, committed and (for the product phases) verified live on the demo; P6–P12 are NOT STARTED. Plan + the 11 binding
+Founder decisions: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (each completed phase's evidence is in
+`PROJECT_STATUS.md` and in that document's per-phase sections). Everything below is still simulated; nothing was
+re-labelled live.**
 
 ## SESSION 13 — dashboard + logistics cleanup programme: what is still simulated / placeholder
 
@@ -32,12 +33,17 @@ from the previous session. Everything below is still simulated; nothing was re-l
   separately today: the implementation is **one PO = one shipment** while the model supports **1..n**.
 - **"Create PO" is removed (P11).** The PO record is the PO **from Amazon**; the Mercenta→brand commercial position is
   **derived** from the brand's Model A/B. No second PO document exists.
-- **The Mercenta Hub is removed as a destination (P5).** The destination is **the FC on the PO** (`shipToPartyId`). No
-  universal Mercenta intermediate hub may be asserted.
+- **The Mercenta Hub is REMOVED as a destination (P5 — DONE 2026-09-23).** The destination is **the FC declared on the
+  PO** (`PurchaseOrder.shipToParty` — the channel's `shipToPartyId`, resolved once in
+  `src/config/destinationFc.ts`). No universal Mercenta intermediate hub may be asserted, no hub coordinate is
+  declared, and a PO that declares no destination renders an explicit *not declared* schematic leg rather than a
+  Mercenta-chosen site. The retired `mercenta_hub` shipment stage/status is gone; the pre-live state is
+  `destination_fc` ("Delivered to Destination FC").
 - **The proxy model itself is the truthfulness rule for this programme:** Mercenta holds the Amazon Vendor account; a
   brand never communicates with Amazon (its decision is an **instruction to Mercenta**, which then acts through the
-  channel integration). Until P4 lands, the brand-side wording still says the brand "files the ASN" / "confirms routing"
-  — **known-wrong, scheduled to be corrected in P4**, and not to be treated as the intended model.
+  channel integration). **P4 landed (2026-09-23):** the brand surface carries **no filing control** — no "Create
+  Shipment", no "File ASN", no routing filing form — and shows Mercenta's channel status (acknowledgement reference,
+  routing reference, ASN + consignment); the brand's only packing action is the packing-correction instruction.
 - **Nothing in P0–P12 requires a credential:** every external integration is mock-first behind a swappable seam. The only
   genuine external dependencies are **SP-API approval** (P12) and the **demo-host credential** (the final deploy step).
 

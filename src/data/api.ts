@@ -19,6 +19,7 @@ import { deriveShipmentEta, etaWindowKindFor } from '@/lib/logistics/shipmentEta
 import type { DemoShipment } from '@/data/demoData';
 import type { ShipmentEta } from '@/types';
 import { originForBrand } from '@/config/logisticsGeo';
+import { declaredShipToParty, destinationLabelForPo } from '@/config/destinationFc';
 import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
 import { createSPApiClientForConnection } from '@/lib/spapi';
 import { spApiConnectionCredentials } from '@/integrations/connections';
@@ -951,6 +952,10 @@ export function acknowledgePurchaseOrder(
    * consignment is created by Mercenta's processing and a PO no longer ends up
    * with both a draft and a filed shipment.
    *
+   * §P5 CONTINUED THE SAME CORRECTION one layer down: the draft also hardcoded
+   * `destination: 'Mercenta UK Hub'`; the destination is now read from the PO's own
+   * ship-to party in `createShipmentForPO` (see the note there).
+   *
    * This writer is deliberately synchronous and touches nothing else: the
    * channel action is Mercenta's, and the caller (the brand surface or
    * `src/lib/commerce/commerceLifecycle.ts`) then begins Mercenta's processing.
@@ -1047,6 +1052,13 @@ export function createPurchaseOrder(
     commissionRate: 0.07,
     commissionAmount: Math.round(totalValue * 0.07 * 100) / 100,
     orderDate: now.toISOString(),
+    /**
+     * §P5 — the destination. A channel purchase order always declares its
+     * ship-to party, so every PO this platform creates declares one too, taken
+     * deterministically from the canonical FC directory; the shipment derived
+     * from it therefore has a real destination and never a Mercenta hub.
+     */
+    shipToParty: declaredShipToParty(brandId.length + lineItems.length),
     lineItems: lineItems.map(function(l) { return ({ sku: l.sku, productName: l.productName, quantity: l.quantity, unitPrice: l.unitPrice, commodityCode: l.commodityCode }); }),
   };
   demoPurchaseOrders.push(po);
@@ -1126,6 +1138,8 @@ export function createSimulatedPurchaseOrder(
     commissionRate: 0.07,
     commissionAmount: Math.round(totalValue * 0.07 * 100) / 100,
     orderDate: now.toISOString(),
+    /** §P5 — the simulated channel PO declares its destination FC (canonical directory). */
+    shipToParty: declaredShipToParty(brandId.length + deterministicKey.length),
     lineItems: lineItems.map((l) => ({
       sku: l.sku,
       productName: l.productName,
@@ -1254,7 +1268,20 @@ export function createShipmentForPO(
       status: 'factory_intake',
       /** §Logistics-map — placeholder 'Origin depot' replaced by the brand's declared nation. */
       origin: originForBrand(brand),
-      destination: 'Mercenta UK Hub',
+      /**
+       * §P5 — THE DESTINATION IS THE FC ON THE PO.
+       *
+       * §P5 REPOINTED THIS (old contract, for the record): it was the literal
+       * `'Mercenta UK Hub'`, which made a Mercenta-owned site the destination of
+       * every consignment even though no channel source requires one (matrix
+       * `D09-13`, register `AV-026`/`AV-027`, decision `T-4`). The destination now
+       * comes from the PO's own ship-to party — the channel's `shipToPartyId`,
+       * which IS the FC code (register `S5`) — through the ONE owner,
+       * `src/config/destinationFc.ts`. A PO that declares no ship-to party records
+       * the explicit not-declared string and the map draws a schematic leg; it is
+       * never defaulted to a Mercenta site.
+       */
+      destination: destinationLabelForPo(po),
       delayed: false,
       exception: false,
     });

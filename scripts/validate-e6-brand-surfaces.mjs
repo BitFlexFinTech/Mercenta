@@ -688,6 +688,65 @@ const P4_PROXY_MODEL_SCOPE = new Set([
   'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
 ]);
 
+/**
+ * §P5 — DESTINATION-FC PHASE SCOPE (2026-09-23, programme `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`
+ * §4 P5).
+ *
+ * P5 removes the Mercenta Hub as a destination: the destination becomes **the FC declared on each purchase
+ * order** (`PurchaseOrder.shipToParty`, resolved by the NEW ONE owner `src/config/destinationFc.ts`), the
+ * `mercenta_hub` stage/status/node kind and the hub coordinate are DELETED, and the Hero/map arrival node is
+ * that FC. That legitimately touches the canonical types (`src/types.ts` — a PROTECTED prefix, declared here
+ * exactly as P4 declared it), the domain creators and their status/stage maps, the carrier transforms, the
+ * Hero/map modules, the copy surfaces the hub was asserted on, the gates/specs repointed with the old contract
+ * recorded inline, and the programme/register records. The guard's contract is UNCHANGED — a path outside EVERY
+ * declared set still fails, and an unexplained protected change still fails.
+ */
+const P5_DESTINATION_FC_SCOPE = new Set([
+  'src/config/destinationFc.ts',            // NEW — the ONE destination owner
+  'src/config/logisticsGeo.ts',
+  'src/config/logisticsHero.ts',
+  'src/types.ts',                           // PROTECTED prefix — declared
+  'src/data/api.ts',
+  'src/data/demoData.ts',
+  'src/data/bootstrap.ts',
+  'src/data/brandDossiers.ts',
+  'src/context/GlobalStateContext.tsx',
+  'src/lib/commerce/commerceLifecycle.ts',
+  'src/lib/logistics/',
+  'src/lib/statusPresentation.ts',
+  'src/lib/dhl/transform.ts',
+  'src/lib/palletline/transform.ts',
+  'src/lib/simulation/investorDemo.ts',
+  'src/lib/simulation/scenarioEngine.ts',
+  'src/lib/grants/dataSources.ts',
+  'src/components/admin/AdminDashboard.tsx',
+  'src/components/brand/LogisticsHub.tsx',
+  'src/components/carrier/BakLogistics.tsx',
+  'src/components/carrier/CarrierDashboard.tsx',
+  'src/components/marketing/FAQ.tsx',
+  'src/components/marketing/HowItWorks.tsx',
+  'src/components/shared/logistics/',
+  'e2e/logistics-hub-map.spec.ts',
+  'e2e/status-semantics.spec.ts',
+  'e2e/table-migrations.spec.ts',
+  /** §P5 copy pass — the Overview h1 assertions repointed with the old text recorded inline. */
+  'e2e/dashboard.spec.ts',
+  'e2e/runtime-entry.spec.ts',
+  'scripts/validate-logistics-map.mjs',
+  'scripts/validate-logistics-hero.mjs',
+  'scripts/validate-mock-providers.mjs',
+  'scripts/validate-investor-demo.mjs',
+  'scripts/reconcile-logistics-map-registry.cjs',
+  'scripts/verify-demo-live.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md',
+  'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+  'docs/MERCENTA_PRODUCT_CONTRACT.md',
+  'PRODUCTION_READINESS.md',
+]);
+
 try {
   /* ── modules under test (the EXISTING architecture) ── */
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
@@ -937,6 +996,9 @@ try {
         FUNCTIONAL_COMPLETION_SCOPE.has(p) ||
         SPRINT_FOUNDER_OS_SCOPE.has(p) || SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
         SPRINT_ROUTING_GATEWAYS_SCOPE.has(p) || P4_PROXY_MODEL_SCOPE.has(p) ||
+        /** §P5 — REPOINTED (not weakened): the destination-FC phase's declared surface. */
+        P5_DESTINATION_FC_SCOPE.has(p) ||
+        [...P5_DESTINATION_FC_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
@@ -946,6 +1008,9 @@ try {
         FUNCTIONAL_COMPLETION_SCOPE.has(p) ||
         SPRINT_FOUNDER_OS_SCOPE.has(p) || SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
         SPRINT_ROUTING_GATEWAYS_SCOPE.has(p) || P4_PROXY_MODEL_SCOPE.has(p) ||
+        /** §P5 — same declaration, second protected-path check (F5b). */
+        P5_DESTINATION_FC_SCOPE.has(p) ||
+        [...P5_DESTINATION_FC_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
@@ -1091,6 +1156,9 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
           SPRINT_ROUTING_GATEWAYS_SCOPE.has(p) ||
           P4_PROXY_MODEL_SCOPE.has(p) ||
+          /** §P5 — the destination-FC phase's declared surface (see above). */
+          P5_DESTINATION_FC_SCOPE.has(p) ||
+          [...P5_DESTINATION_FC_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

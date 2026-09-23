@@ -88,7 +88,8 @@ const STAGE_PROGRESS: Record<ShipmentStage, number> = {
   bak_depot: 0.24,
   international_forwarding: 0.48,
   uk_port_hmrc: 0.7,
-  mercenta_hub: 0.86,
+  /** §P5 — arrival at the PO's destination FC, not a Mercenta hub. */
+  destination_fc: 0.86,
   live_amazon: 1,
 };
 

@@ -25,7 +25,7 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
               <li><strong className="text-parchment">4. Compliance Documents</strong> — Upload Certificate of Incorporation, VAT Registration, EORI Certificate, Bank Account Confirmation, Brand Registry.</li>
               <li><strong className="text-parchment">5. Get Approved</strong> — Mercenta Admin reviews and clears compliance. Catalogue becomes active.</li>
               <li><strong className="text-parchment">6. Receive Purchase Orders</strong> — POs from the retail network appear in your portal. Acknowledge within 24 hours.</li>
-              <li><strong className="text-parchment">7. Ship &amp; Track</strong> — Shipments tracked through every stage: Factory Intake → Regional Hub → International Forwarding → UK Port/HMRC → Mercenta UK Hub → Live on Retail Channel.</li>
+              <li><strong className="text-parchment">7. Ship &amp; Track</strong> — Shipments tracked through every stage: Factory Intake → Regional Hub → International Forwarding → UK Port/HMRC → Destination Fulfilment Centre → Live on Retail Channel.</li>
               <li><strong className="text-parchment">8. Ongoing Management</strong> — Manage orders, compliance, returns, analytics, and team communications from your dashboard.</li>
             </ol>
           </section>

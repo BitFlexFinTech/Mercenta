@@ -5,7 +5,9 @@
  * the geometry derived by `src/lib/logistics/operationsMap.ts`:
  *
  *   graticule      a real lat/lon grid so the reader can locate what they see
- *   nodes          declared origin / gateway / Mercenta hub / Amazon FC CITY
+ *   nodes          declared origin / gateway / DESTINATION FC CITY
+ *                  (§P5 — the Mercenta-hub node is gone; the destination of a
+ *                  consignment is the FC on its purchase order)
  *   legs           an indicative arc per shipment, from → to
  *   markers        one per shipment at its true stage progress, drifting ONLY
  *                  when the shipment is genuinely in transit
@@ -361,13 +363,11 @@ export function LogisticsMapCanvas({
             {drawnNodes.map((node) => {
               const r = 3.5 + Math.min(4, node.legCount * 0.6);
               const colour =
-                node.kind === 'mercenta_hub'
-                  ? 'var(--mr-accent)'
-                  : node.kind === 'amazon_fc'
-                    ? 'var(--mr-palette-indigo)'
-                    : node.kind === 'uk_gateway'
-                      ? 'var(--mr-palette-teal, var(--mr-state-info))'
-                      : 'var(--mr-palette-cyan)';
+                node.kind === 'amazon_fc'
+                  ? 'var(--mr-palette-indigo)'
+                  : node.kind === 'uk_gateway'
+                    ? 'var(--mr-palette-teal, var(--mr-state-info))'
+                    : 'var(--mr-palette-cyan)';
               return (
                 <g key={node.id} data-testid={`logistics-node-${node.id}`} data-kind={node.kind}>
                   <circle cx={node.point.x} cy={node.point.y} r={r + 4} fill={colour} fillOpacity={0.12} />
@@ -383,13 +383,13 @@ export function LogisticsMapCanvas({
                   {/*
                     §Visual-verification fix — labels must be READABLE.
                     Two declared places can sit within a few pixels of each other
-                    (a UK origin and the Mercenta hub are ~150 km apart on a
+                    (a UK origin and a UK destination FC are ~150 km apart on a
                     world-scale frame), so labels were overlapping. Destinations
                     are labelled BELOW their node and origins ABOVE, and every
                     label carries a plate so it stays legible over a route line.
                   */}
                   {(() => {
-                    const labelBelow = node.kind === 'mercenta_hub' || node.kind === 'amazon_fc';
+                    const labelBelow = node.kind === 'amazon_fc';
                     const text = node.label.length > 30 ? `${node.label.slice(0, 29)}…` : node.label;
                     const plateWidth = text.length * 5.6 + 8;
                     const labelY = labelBelow ? node.point.y + r + 13 : node.point.y - r - 7;

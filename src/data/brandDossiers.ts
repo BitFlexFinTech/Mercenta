@@ -52,7 +52,8 @@ export const STAGE_BY_STATUS: Record<DemoShipment['status'], Shipment['stage']> 
   sea_transit: 'international_forwarding',
   air_transit: 'international_forwarding',
   uk_customs_cleared: 'uk_port_hmrc',
-  mercenta_hub: 'mercenta_hub',
+  /** §P5 — mirrors GlobalStateContext.statusToStage after the hub stage was removed. */
+  destination_fc: 'destination_fc',
   live_amazon: 'live_amazon',
 };
 

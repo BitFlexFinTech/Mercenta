@@ -142,8 +142,15 @@ try {
   test('the fulfilment created a shipment owned by the demo tenant',
     !!shipment && shipment.brandId === tenantId);
   test('the shipment reached the terminal milestone, then recovered from the delay drill',
+    /**
+     * §P5 — REPOINTED (old contract recorded inline): the recovered status was
+     * `mercenta_hub`. The pre-live arrival state is now `destination_fc` — arrival
+     * at the FC declared on the purchase order — and nothing about the drill
+     * changed: it still ends at the canonical terminal milestone with the delay
+     * cleared.
+     */
     byId.shipment.facts.finalMilestone === 'live_amazon' &&
-    shipment?.delayed === false && shipment?.status === 'mercenta_hub',
+    shipment?.delayed === false && shipment?.status === 'destination_fc',
     `${shipment?.status}/${String(shipment?.delayed)}`);
 
   const invoice = po ? store.getCommerceInvoiceForPo(po.id) : undefined;

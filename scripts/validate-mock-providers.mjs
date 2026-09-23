@@ -312,7 +312,13 @@ try {
         s3.milestone === 'at_hub' && s4.milestone === 'out_for_delivery' &&
         s5.milestone === 'delivered');
     test('palletline: milestones map onto canonical domain statuses',
-      pllMod.palletlineMilestoneToShipmentStatus('delivered') === 'mercenta_hub' &&
+      /**
+       * §P5 — REPOINTED (old contract recorded inline): `delivered` mapped to
+       * `mercenta_hub`. A carrier `delivered` milestone means the goods reached the
+       * destination ON THE PURCHASE ORDER, so the canonical status is
+       * `destination_fc`; the map still refuses to invent a finer state.
+       */
+      pllMod.palletlineMilestoneToShipmentStatus('delivered') === 'destination_fc' &&
         pllMod.palletlineMilestoneToShipmentStatus('at_hub') === 'bak_depot');
 
     const invoice = await client.getConsignmentInvoice(booked.consignmentNumber);

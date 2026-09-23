@@ -175,3 +175,35 @@ finding was **partially applied** in code by P4, so its evidence pointer is anno
   **in progress, not complete**, and the register's HIGH/HIGH risk rating is unchanged.
 - No other row in this register is affected by P4. The wording safeguards (`AV-042`) are unchanged and
   `npm run validate:wording` still reports zero outward-facing violations.
+
+---
+
+## POST-REGISTER CHANGE — 2026-09-23 (P5, the Mercenta Hub removed as a destination)
+
+This register is a **record of the repository as audited on 2026-09-20**; its findings are unchanged. **Two findings
+were APPLIED in code by P5**, so their evidence pointers are annotated:
+
+- **`AV-026` — APPLIED, and the finding was already INFORMATIONAL.** The register records that a direct brand facility →
+  the required destination is the default launch route, that Amazon documents no requirement to route through a UK
+  facility, and that "the destination is the PO's `shipToParty`". The platform previously contradicted that in code by
+  hardcoding `destination: 'Mercenta UK Hub'`. P5 removed the hub: the destination is now **the FC declared on the
+  purchase order**, modelled as `PurchaseOrder.shipToParty` (the channel's `shipToPartyId`, register `S5`) and resolved
+  by the ONE owner `src/config/destinationFc.ts`. The wording is now as honest as the model: no Mercenta intermediate
+  hub is asserted anywhere.
+- **`AV-027` — APPLIED (the finding's own remediation, in the form the Founder decision specified).** The register
+  recorded the linear stage chain as **CONTRADICTED** — "the canonical stage enum reads as a mandatory hub mandate",
+  HIGH/HIGH — and recommended re-modelling it so a UK hub is not universal. P5 removed `mercenta_hub` from
+  `ShipmentStage`, `ShipmentStatus`, `STAGE_LABELS`, `STATUS_LABELS` and `STAGE_ORDER` (`src/types.ts`), replaced by
+  `destination_fc` — *arrival at the FC on the PO* — and removed the hub coordinate (`MERCENTA_UK_HUB`), the hub node
+  kind (`GeoNodeKind`), the Hero's hub node (`MERCENTA_HUB_PLACE`) and the hub's UK-tile handling
+  (`src/lib/logistics/heroNetwork.ts`). The carrier transforms that advanced a domain shipment to the hub
+  (`src/lib/dhl/transform.ts`, `src/lib/palletline/transform.ts` — `delivered`) now advance it to `destination_fc`,
+  which is what a carrier `delivered` milestone actually means.
+- **Fail-closed, not silently re-pointed.** A record that still names a Mercenta hub (or any undeclared place) now
+  returns `null` from `resolveGeoPlace` and is drawn as a schematic leg — it is never plotted at the hub's old
+  coordinate. A PO that declares no ship-to party records the explicit `DESTINATION_NOT_DECLARED` string
+  (`src/config/logisticsGeo.ts`) rather than any Mercenta-chosen site.
+- **The register's other 50 findings are untouched**, including `AV-017` (the FC directory is still Mercenta convenience
+  data, and the PO remains the authoritative destination — P5 makes the PO authoritative **in code** as well as in
+  wording) and `AV-040` (unchanged: one of eight operations implemented by P4; the rest stay with P12). The audit's
+  APPLIED count was 0 at audit time; two findings have since been applied by later, separately verified increments.

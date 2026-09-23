@@ -55,7 +55,7 @@ const MOCK_GRANTS: GrantOpportunity[] = [
     id: 'grant-006', title: 'UK Shared Prosperity Fund — Local Business Support',
     provider: 'UK Government — MHCLG', category: 'regional', status: 'closing_soon',
     amountRange: '£10,000 - £100,000',
-    eligibility: 'UK businesses based in or serving specific regions. Mercenta\'s Northampton hub may qualify.',
+    eligibility: 'UK businesses based in or serving specific regions. Mercenta\'s Northampton premises may qualify.',
     deadline: '2026-09-30', sourceUrl: 'https://www.gov.uk/government/publications/uk-shared-prosperity-fund-prospectus',
     fitReason: 'Mercenta\'s UK distribution hub creates jobs and economic activity in the region. Regional business support funds help businesses like Mercenta scale.',
     fitScore: 60, draftStarted: false, submitted: false,

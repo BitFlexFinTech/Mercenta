@@ -217,7 +217,15 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     // declared default view.
     await page.goto('/admin/not-a-declared-view');
     await page.waitForTimeout(1500);
-    await expect(page.getByRole('heading', { name: 'Operations Overview' })).toBeVisible({
+    /**
+     * §P5 copy pass — REPOINTED (old contract recorded inline): the default view's
+     * h1 used to read `'Operations Overview'`; it now reads `'Overview'` (the page
+     * is the Overview and Operations is a separate destination). The assertion's
+     * intent is unchanged and NOT weakened: an address naming a view this shell
+     * cannot render must resolve to the declared default view and render its real
+     * heading, never a blank workspace.
+     */
+    await expect(page.getByRole('heading', { name: 'Overview', exact: true })).toBeVisible({
       timeout: 10000,
     });
 
@@ -238,7 +246,15 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     await page.goto('/admin/overview');
     await page.waitForTimeout(1500);
     await expect(page.getByRole('heading', { name: 'Partner Login' })).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole('heading', { name: 'Operations Overview' })).toHaveCount(0);
+    /**
+     * §P5 copy pass — REPOINTED (old contract recorded inline): this asserted the
+     * absence of the admin Overview's old h1 `'Operations Overview'`. The h1 now
+     * reads `'Overview'`, and because the pre-fix string no longer exists anywhere
+     * the old assertion had become unable to fail; pointing it at the CURRENT title
+     * restores its real force — a refused session must never reach the admin
+     * Overview.
+     */
+    await expect(page.getByRole('heading', { name: 'Overview', exact: true })).toHaveCount(0);
 
     // (b) An UNKNOWN tenant is refused rather than rendered: the session is
     // dropped and the public entry is shown — never a portal for a tenant the

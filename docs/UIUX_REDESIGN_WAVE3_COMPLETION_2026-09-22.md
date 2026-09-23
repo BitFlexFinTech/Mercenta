@@ -156,6 +156,11 @@ project's own recorded Wave 3 roadmap.
 - **`on_hold`, ack completeness, ack↔invoice match** (§D09-07/08/09), **consolidation**, **customs
   documents** and the **optional-`mercenta_hub` re-model** (§D09-13) remain open and are recorded as
   such in the matrix — they were not in this increment's scope and were not silently claimed.
+  → **UPDATE 2026-09-23 (P5): `§D09-13` is now CLOSED.** The Mercenta Hub was removed as a destination
+  entirely (the destination is the FC declared on the purchase order, `src/config/destinationFc.ts`; the
+  `mercenta_hub` stage/status, hub coordinate, node kind and Hero node are deleted — matrix `D09-13`,
+  register `AV-026`/`AV-027`, decision `T-4`). Everything else in this bullet was still open at the time of
+  writing unless a later phase states otherwise.
 - **Wave 5 / Wave 6 were not started.**
 
 ## 5. Known follow-ups discovered in this increment (not silently expanded into)

@@ -11,11 +11,12 @@
  * WHAT PRECISION IS ACTUALLY AVAILABLE (measured, not assumed)
  * ------------------------------------------------------------
  * The repository's shipment records carry place STRINGS, not coordinates:
- *   - `DemoShipment.origin`      = `${brand.nation} depot`  → a COUNTRY
- *   - `DemoShipment.destination` = 'Mercenta UK Hub'        → a declared UK site
+ *   - `DemoShipment.origin`      = `${brand.nation} facility` → a COUNTRY
+ *   - `DemoShipment.destination` = the DESTINATION FC ON THE PURCHASE ORDER
+ *     (`src/config/destinationFc.ts` is the ONE owner of that string since P5)
  *   - `INITIAL_SHIPMENTS` (bootstrap.ts) additionally carry real CITIES
  *     (Harare, Durban, Nairobi, Lagos, Cape Town, Austin, Munich) and real UK
- *     gateways (London, Felixstowe, Heathrow, Coventry, Northampton).
+ *     gateways (London, Felixstowe, Heathrow, Coventry).
  *   - Amazon UK fulfilment centres are declared WITH postcodes in
  *     `src/types.ts → DEFAULT_UK_FC_LIST`.
  *
@@ -30,10 +31,14 @@
  * --------------------------------
  *  - No carrier rule. Carrier assignment is `src/lib/shipping/carrierRouting.ts`.
  *  - No route chain. The retired mandatory linear chain is NOT reintroduced.
- *  - The Mercenta hub site is taken from `src/config/customs.ts` (Northampton).
+ *  - **No Mercenta-owned node at all.** §P5 removed the Mercenta Hub as a
+ *    destination (matrix `D09-13`, register `AV-026`/`AV-027`, decision `T-4`),
+ *    so this module declares no hub coordinate and no `mercenta_hub` kind. A
+ *    record that still names a Mercenta hub fails closed (null) and is drawn as
+ *    a schematic leg — it is never plotted at the hub's old coordinate.
  */
 
-export type GeoNodeKind = 'brand_facility' | 'uk_gateway' | 'mercenta_hub' | 'amazon_fc';
+export type GeoNodeKind = 'brand_facility' | 'uk_gateway' | 'amazon_fc';
 
 /** How precise the plotted coordinate actually is. Never inflated. */
 export type GeoPrecision = 'city' | 'country_centroid';
@@ -91,24 +96,14 @@ const CITY_POINTS: Record<string, { lat: number; lon: number; kind: GeoNodeKind;
   'heathrow, uk': { lat: 51.47, lon: -0.4543, kind: 'uk_gateway', label: 'London Heathrow, UK' },
   'london, uk': { lat: 51.5074, lon: -0.1278, kind: 'uk_gateway', label: 'London, UK' },
   'coventry, uk': { lat: 52.4068, lon: -1.5197, kind: 'uk_gateway', label: 'Coventry, UK' },
-  // ── Mercenta's own site — declared in src/config/customs.ts ─────────────
-  'northampton, uk': { lat: 52.2405, lon: -0.9027, kind: 'mercenta_hub', label: 'Northampton, UK' },
 };
 
-/**
- * The Mercenta UK distribution hub. Its location is the one already declared by
- * `src/config/customs.ts → MERCENTA_REGISTERED_ADDRESS` (Northampton, UK) and by
- * the canonical returns address in `demoStore`. Nothing new is invented here.
- */
-export const MERCENTA_UK_HUB = {
-  id: 'mercenta_uk_hub',
-  label: 'Mercenta UK Distribution Hub',
-  place: 'Northampton, UK',
-  lat: 52.2405,
-  lon: -0.9027,
-  precision: 'city' as GeoPrecision,
-  source: 'src/config/customs.ts → MERCENTA_REGISTERED_ADDRESS (Northampton, UK)',
-};
+/* §P5 — `MERCENTA_UK_HUB` DELETED.
+   It declared Northampton as the destination hub and was read by the Hero, the
+   Logistics Hub header and the map. The destination is now the FC on the PO
+   (`src/config/destinationFc.ts`), so no Mercenta-owned node exists here at all.
+   `src/config/customs.ts → MERCENTA_REGISTERED_ADDRESS` is untouched: it is the
+   company's registered address on customs documents, not the shipment route. */
 
 /**
  * Amazon UK fulfilment-centre CITY coordinates, keyed by FC city. The CITY is
@@ -146,7 +141,17 @@ const FC_CITY_POINTS: Record<string, [number, number]> = {
 export const UNLOCATABLE_PLACE_STRINGS: readonly string[] = [
   'brand warehouse',
   'origin depot',
+  /** §P5 — a PO that declares no ship-to party records this (never a hub). */
+  'destination fc not declared on this po',
 ] as const;
+
+/**
+ * §P5 — the destination string a shipment records when its purchase order
+ * declares no ship-to party. The ONE declaration lives here (the geography
+ * module owns place strings); `src/config/destinationFc.ts` — the destination
+ * owner — imports and re-exports it, so the two can never drift.
+ */
+export const DESTINATION_NOT_DECLARED = 'Destination FC not declared on this PO';
 
 export interface GeoResolution {
   place: GeoPlace | null;
@@ -203,8 +208,13 @@ function lookupFcCity(text: string): GeoPlace | null {
 /**
  * Resolve a declared place string to a GeoPlace, or fail closed.
  *
- * Order: exact city → the Mercenta hub → an Amazon FC city → country centroid.
+ * Order: exact city/gateway → a retail-channel FC city → country centroid.
  * Anything else returns `null` — the caller MUST render it as schematic.
+ *
+ * §P5 — the Mercenta-hub branch is GONE. A record still naming a Mercenta hub
+ * (or any undeclared place) now fails closed here and is drawn as schematic,
+ * because the destination of a consignment is the FC on its PO
+ * (`src/config/destinationFc.ts`) and no Mercenta-owned site is on the route.
  */
 export function resolveGeoPlace(raw?: string | null): GeoResolution {
   const text = (raw ?? '').trim();
@@ -227,27 +237,6 @@ export function resolveGeoPlace(raw?: string | null): GeoResolution {
       },
       raw: text,
       reason: `Named city/port coordinate: ${city.label}.`,
-    };
-  }
-
-  // Mercenta's own hub — a declared UK site, never an Amazon facility.
-  if (
-    lower.includes('mercenta uk hub') ||
-    lower.includes('mercenta hub') ||
-    lower.includes('mercenta uk distribution')
-  ) {
-    return {
-      place: {
-        id: MERCENTA_UK_HUB.id,
-        label: MERCENTA_UK_HUB.label,
-        kind: 'mercenta_hub',
-        lat: MERCENTA_UK_HUB.lat,
-        lon: MERCENTA_UK_HUB.lon,
-        precision: MERCENTA_UK_HUB.precision,
-        source: MERCENTA_UK_HUB.source,
-      },
-      raw: text,
-      reason: 'Mercenta UK distribution hub — location declared in src/config/customs.ts.',
     };
   }
 

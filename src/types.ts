@@ -65,12 +65,26 @@ export interface StaffMember {
 
 export type CarrierId = 'dhl' | 'fedex' | 'bak' | 'palletline';
 
+/**
+ * §P5 — THE MERCENTA HUB IS REMOVED AS A SHIPMENT STAGE.
+ *
+ * The mandatory `mercenta_hub` stage (matrix `D09-13`, register `AV-027`, Founder
+ * decision T-4) forced every consignment through a Mercenta UK hub that Amazon
+ * nowhere requires — and the same repository declared direct-to-destination the
+ * default route (`AV-026`). The canonical destination is **the fulfilment centre
+ * on the purchase order** (`PurchaseOrder.shipToParty`, the channel's
+ * `shipToPartyId` — register `S5`), so the stage before "live on channel" is
+ * arrival at THAT destination, not at a Mercenta site.
+ *
+ * The ONE owner of "which FC is this PO's destination" is
+ * `src/config/destinationFc.ts`.
+ */
 export type ShipmentStage =
   | 'factory_intake'
   | 'bak_depot'
   | 'international_forwarding'
   | 'uk_port_hmrc'
-  | 'mercenta_hub'
+  | 'destination_fc'
   | 'live_amazon';
 
 export const STAGE_LABELS: Record<ShipmentStage, string> = {
@@ -78,7 +92,7 @@ export const STAGE_LABELS: Record<ShipmentStage, string> = {
   bak_depot: 'Regional Hub / Depot Processing',
   international_forwarding: 'International Forwarding',
   uk_port_hmrc: 'UK Port / HMRC Clearance',
-  mercenta_hub: 'Mercenta UK Distribution Hub',
+  destination_fc: 'Destination Fulfilment Centre',
   live_amazon: 'Live on retail-channel',
 };
 
@@ -87,7 +101,7 @@ export const STAGE_ORDER: ShipmentStage[] = [
   'bak_depot',
   'international_forwarding',
   'uk_port_hmrc',
-  'mercenta_hub',
+  'destination_fc',
   'live_amazon',
 ];
 
@@ -97,7 +111,7 @@ export type ShipmentStatus =
   | 'sea_transit'
   | 'air_transit'
   | 'uk_customs_cleared'
-  | 'mercenta_hub'
+  | 'destination_fc'
   | 'live_amazon';
 
 export const STATUS_LABELS: Record<ShipmentStatus, string> = {
@@ -106,7 +120,7 @@ export const STATUS_LABELS: Record<ShipmentStatus, string> = {
   sea_transit: 'Sea Transit',
   air_transit: 'Air Transit',
   uk_customs_cleared: 'UK Customs Cleared',
-  mercenta_hub: 'Mercenta UK Hub',
+  destination_fc: 'Delivered to Destination FC',
   live_amazon: 'Live on retail-channel',
 };
 
@@ -1162,11 +1176,43 @@ export type PurchaseOrderStatus =
   | 'shipped'
   | 'delivered';
 
+/**
+ * §P5 — THE DESTINATION CARRIED ON THE PURCHASE ORDER.
+ *
+ * The retail channel states the destination **on each purchase order** as its
+ * ship-to party, whose id is the fulfilment-centre code (`shipToPartyId` = FC
+ * code — Amazon developer docs, register `S5`; `AV-017` records that the PO
+ * itself, not any Mercenta list, is authoritative). This is the ONE place the
+ * destination is declared, so `src/config/destinationFc.ts` can resolve it and
+ * a shipment can never be given an invented destination.
+ *
+ * OPTIONAL ON PURPOSE: a PO that genuinely does not declare its ship-to party
+ * resolves to an EXPLICIT "not declared" destination
+ * (`DESTINATION_NOT_DECLARED`), which the map renders as a schematic leg. It is
+ * never defaulted to a hub or to any other Mercenta-chosen site.
+ */
+export interface ShipToParty {
+  /** The channel-assigned party id — the fulfilment-centre CODE (e.g. `LBA1`). */
+  partyId: string;
+  /** The FC name exactly as the PO/channel declares it, when given. */
+  name?: string;
+  /** The declared city, when given (this is what the map can locate). */
+  city?: string;
+  /** The declared postcode, when given. */
+  postcode?: string;
+}
+
 export interface PurchaseOrder {
   id: string;
   brandId: string;
   poNumber: string;
   status: PurchaseOrderStatus;
+  /**
+   * §P5 — the destination the CHANNEL declared on this PO. The shipment derived
+   * from this PO takes its destination from here (`src/config/destinationFc.ts`),
+   * so the Mercenta Hub is no longer a destination anywhere in the platform.
+   */
+  shipToParty?: ShipToParty;
   poValue: number; // net GBP
   commissionRate: number;
   commissionAmount: number;

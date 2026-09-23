@@ -15,6 +15,7 @@ import type {
   CarrierVolumePoint,
   StaffMember,
 } from '../types';
+import { declaredDestinationLabel } from '@/config/destinationFc';
 
 export const INITIAL_SHIPMENTS: Shipment[] = [
   {
@@ -113,12 +114,20 @@ export const INITIAL_SHIPMENTS: Shipment[] = [
     title: 'Dried Fruit Pallet',
     customer: 'Organic Wholesalers Ltd',
     value: 23000,
-    status: 'mercenta_hub',
+    /**
+     * §P5 REPOINTED THIS (old contract, for the record): this row sat at the
+     * retired mandatory hub stage with `destination: 'Northampton, UK'` — the
+     * Mercenta hub's own city. The hub is removed as a destination, so the row now
+     * sits at the canonical pre-live state and carries a DESTINATION FC resolved
+     * from the canonical directory (`src/config/destinationFc.ts`), never a
+     * Mercenta-owned site.
+     */
+    status: 'destination_fc',
     carrier: 'bak',
-    stage: 'mercenta_hub',
+    stage: 'destination_fc',
     cbm: 14,
     origin: 'Cape Town, South Africa',
-    destination: 'Northampton, UK',
+    destination: declaredDestinationLabel(0),
     date: 'Jan 18',
     trackingNumber: 'BAK-2245-SA',
   },
