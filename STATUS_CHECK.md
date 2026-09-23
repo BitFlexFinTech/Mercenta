@@ -32,7 +32,9 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
 **Checkpoint (this increment):** **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime
-change)** at **`2570761`** ("governance(skills): additive Cline skill system + task-triage router"): `node
+change)** at **`2570761`** ("governance(skills): additive Cline skill system + task-triage router"), recorded by the state
+commit **`3b518d0`**, pushed to `origin/redesign/foundation` (`3585790..3b518d0`, exit 0; `git ls-remote` = `3b518d0…` =
+local HEAD): `node
 scripts/validate-cline-skills.mjs` → **PASS (152 assertions, 0 network calls)**; injected-defect negative test → **FAIL
 (2 of 152)**, restored → PASS; `npm run typecheck` **0 errors** · `npm run lint` **0** · `npm run validate:wording`
 **PASS (299 src files, 0 violations)** · `npm run build` **✓ (5.17s)**. **No application file was modified** — the
