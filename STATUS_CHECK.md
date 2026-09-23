@@ -32,9 +32,13 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
 **Checkpoint:** governance increment = **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application
-runtime change)** (rules/docs only). **P3 (application work) = IN PROGRESS — NOT COMPLETE.** Branch
-`redesign/foundation`; last verified application commit `21c6869` (P3 WIP); the governance commit follows it and is
-pushed to `origin/redesign/foundation`. `git status --porcelain` EMPTY.
+runtime change)** (rules/docs only) at **`049f340`** — but its **GITHUB PUSH leg is BLOCKED by transport** (HTTPS
+`HTTP 408` after ~37 min on the 219.71 MiB first-push pack; SSH retry in flight at ~24–75 KiB/s, so
+`origin/redesign/foundation` is NOT created yet). **P3 (application work) = IN PROGRESS — NOT COMPLETE.** Branch
+`redesign/foundation`; last verified application commit `21c6869` (P3 WIP). `git status --porcelain` EMPTY.
+**Next action for the push:** `git ls-remote --heads origin redesign/foundation` (empty ⇒ `git push -u origin
+redesign/foundation`) and confirm it shows `049f340c356ab05e6d70856a31e8254ea4c758f0`. `origin`'s PUSH url is now
+SSH (`git@github.com:BitFlexFinTech/Mercenta.git`, fetch unchanged).
 
 **What changed this session**
 1. **Permanent rule (`.clinerules/operating-model.md` §12 — CHAT IS NOT PROJECT MEMORY):** the repository is the

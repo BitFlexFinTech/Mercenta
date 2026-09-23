@@ -7,15 +7,15 @@ historical context only. New permanent rule: `.clinerules/operating-model.md` **
 ## CURRENT RESUME STATE (mirror of PROJECT_STATUS.md — keep the VALUES identical)
 
 LAST COMPLETED TASK:      Governance — made "chat is not project memory" permanent (operating model §12 + the canonical resume block).
-CURRENT VERIFIED STATE:   VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change) for the governance commit; **P3 (application work) IN PROGRESS — NOT COMPLETE**.
+CURRENT VERIFIED STATE:   VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change); the GITHUB PUSH leg is **BLOCKED by transport** (see GITHUB PUSH). **P3 (application work) IN PROGRESS — NOT COMPLETE.**
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     21c6869 — "P3 (WIP): the Control Centre loses its work/attention lists — the founder console is projected into the single action list (Work Management)".
-GITHUB PUSH:              origin/redesign/foundation — pushed at the governance commit.
+LAST VERIFIED COMMIT:     049f340 — "docs(rules): make \"CHAT IS NOT PROJECT MEMORY\" the permanent operating model — mandatory task-close sequence (incl. push) + the canonical CURRENT RESUME STATE".
+GITHUB PUSH:              **BLOCKED — NOT CONFIRMED.** HTTPS push → `RPC failed; HTTP 408` after ~37 min (218.9 MB of the 219.71 MiB pack sent); SSH retry (authenticated; `origin` PUSH url now `git@github.com:BitFlexFinTech/Mercenta.git`) is in flight but the link only sustains ~24–75 KiB/s. NEXT ACTION: re-run `git push -u origin redesign/foundation`, then `git ls-remote --heads origin redesign/foundation` must show `049f340c356ab05e6d70856a31e8254ea4c758f0`.
 DEMO DEPLOYMENT:          NOT APPLICABLE (docs/rules-only governance increment) · P3 application work NOT DEPLOYED yet.
 LIVE VERIFICATION:        NOT VERIFIED — no demo deployment of the P3 work has happened.
-OUTSTANDING BLOCKER:      none (P3's remaining full-suite verification is planned work).
-NEXT TASK:                Finish P3 (full Playwright suite → P3 docs/registry/state → deploy + verify live; application work ⇒ three-way contract applies).
-EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P3 row) → src/lib/work/workStore.ts, src/components/admin/FounderControlCentre.tsx, scripts/validate-command-centre.mjs, e2e/command-centre.spec.ts; then `npx playwright test --workers=3`.
+OUTSTANDING BLOCKER:      GITHUB PUSH transport only (220 MB first-push pack on a slow link). Everything else is verified and committed.
+NEXT TASK:                (1) Complete/confirm the push of `049f340`; (2) finish P3 (full Playwright suite → P3 docs/registry/state → deploy + verify live).
+EXACT NEXT STARTING POINT:`git ls-remote --heads origin redesign/foundation` (empty ⇒ `git push -u origin redesign/foundation`); then `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 (P3 row) → src/lib/work/workStore.ts, src/components/admin/FounderControlCentre.tsx, scripts/validate-command-centre.mjs, e2e/command-centre.spec.ts; then `npx playwright test --workers=3`.
 
 ### How a brand-new chat resumes (no transcript required)
 
