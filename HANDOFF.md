@@ -79,8 +79,9 @@ unchanged · `git status --porcelain` **EMPTY**.
 
 **`VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ (local repository; **not pushed**)
 · **`https://demo.mercenta.co.uk` ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. This is application/product work, so the
-three-way gate applies in full. **Checkpoint commit: recorded in `PROJECT_STATUS.md` §7** (the commit that carries the
-state block; its exact hash is recorded in the immediately following state commit, exactly as the P0/P1 record did).
+three-way gate applies in full. **Checkpoint commit: `0c05fe0d6537ea1c46b1053282bab19d051e38ea`** — the committed state was
+re-verified after the commit (focused Playwright `dashboard` + `brand-operational-surfaces` **18 passed**), and its hash is
+recorded by the immediately following state commit.
 
 ### What is LEFT (do not re-discover — full table in the programme doc §4)
 

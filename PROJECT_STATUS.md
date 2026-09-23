@@ -67,7 +67,7 @@
 
 ### 7. CURRENT CHECKPOINT
 
-- **Branch:** `redesign/foundation`. **Start HEAD:** `d9e77f650df96a107849e396d0b630d8e06aec6b`. **P2 checkpoint commit:** the commit that carries this block (its exact hash is recorded in the immediately following state commit, exactly as the P0/P1 record did); preceded by the programme-record commit `ca977fcee67990ac4648a187463a15f19cc98765`. `git status --porcelain`: **EMPTY**.
+- **Branch:** `redesign/foundation`. **Start HEAD:** `d9e77f650df96a107849e396d0b630d8e06aec6b`. **P2 checkpoint commit:** **`0c05fe0d6537ea1c46b1053282bab19d051e38ea`** (`P2 cleanup(overview): Overview = OBSERVE, ADDITIVE ONLY …`), preceded by the programme-record commit `ca977fcee67990ac4648a187463a15f19cc98765`; its exact hash is recorded here by the immediately following state commit, exactly as the P0/P1 record did. The committed state was re-verified after the commit (focused Playwright `dashboard` + `brand-operational-surfaces` **18 passed**). `git status --porcelain`: **EMPTY**.
 - **THREE-WAY STATUS: `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`** — local ✅ · GitHub committed ✅ (local repository; **not pushed**) · **demo ❌ NOT DEPLOYED, live ❌ NOT VERIFIED**. This is application/product work, so the three-way gate applies in full and the work is explicitly NOT complete.
 
 ### 8. VERIFICATION STATUS

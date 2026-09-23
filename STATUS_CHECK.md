@@ -29,8 +29,8 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 ## CURRENT STATE — DASHBOARD + LOGISTICS CLEANUP PROGRAMME: **P2 DONE — OVERVIEW = OBSERVE, ADDITIVE ONLY** (2026-09-22, session 14)
 
 **Checkpoint:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`. Branch `redesign/foundation`, start HEAD
-`d9e77f650df96a107849e396d0b630d8e06aec6b`; the **P2 checkpoint commit** is the commit that carries this block (its exact
-hash is recorded in the immediately following state commit). Tree EMPTY.
+`d9e77f650df96a107849e396d0b630d8e06aec6b`; **P2 checkpoint commit `0c05fe0d6537ea1c46b1053282bab19d051e38ea`**
+(re-verified after the commit: focused Playwright `dashboard` + `brand-operational-surfaces` **18 passed**). Tree EMPTY.
 **Not pushed; `demo.mercenta.co.uk` NOT deployed and NOT verified.**
 
 **Plan, the 11 binding Founder decisions, the research evidence, the phase table and §6 "P2 — what was built":**
