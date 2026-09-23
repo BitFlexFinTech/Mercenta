@@ -31,13 +31,12 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
-**Checkpoint:** the governance increment (`operating-model.md` §12 — CHAT IS NOT PROJECT MEMORY) was
-**VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change)** at `049f340`, and **P3
-(application work) is now DONE and verified**. Branch `redesign/foundation`; the P3 code checkpoint is `21c6869`,
-followed this session by the `validate-stage26` repair, an `app-shell` test-budget fix and the docs/registry/state
-updates. **Two legs are executed in-session and reported in the resume block rather than assumed: the GitHub push (the
-repository's first ~220 MB pack on a slow link — `git ls-remote --heads origin redesign/foundation` was still EMPTY
-mid-push) and the demo deployment + live verification.** `git status --porcelain` EMPTY.
+**Checkpoint:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** for the P3 implementation at **`8203a03`**: local
+runtime verified = `origin/redesign/foundation` at `8203a03` (the repository's first push completed; delta push
+`049f340..8203a03`, exit 0) = the deployed build at `https://demo.mercenta.co.uk` (byte-identical assets,
+**live-verified 13/13 checks, 0 page errors**). Branch `redesign/foundation`; P3 commits this session: `21c6869`
+(code) → `17a99eb` → `8203a03`. `git status --porcelain` EMPTY. This state block itself is a docs-only increment
+(three-way NOT APPLICABLE). The governance increment (`operating-model.md` §12) remains as recorded at `049f340`.
 
 **What changed this session (P3 — Operations = ACT wiring)**
 1. **Three action lists → ONE.** The Control Centre loses its duplicated work/attention lists (the retired
