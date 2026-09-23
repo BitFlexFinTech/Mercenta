@@ -26,43 +26,64 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — GOVERNANCE: "CHAT IS NOT PROJECT MEMORY" + **P3 IN PROGRESS** (2026-09-23, session 15)
+## CURRENT STATE — **P3 DONE (three action lists → ONE)** (2026-09-23, session 15)
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
-**Checkpoint:** governance increment = **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application
-runtime change)** (rules/docs only) at **`049f340`** — but its **GITHUB PUSH leg is BLOCKED by transport** (HTTPS
-`HTTP 408` after ~37 min on the 219.71 MiB first-push pack; SSH retry in flight at ~24–75 KiB/s, so
-`origin/redesign/foundation` is NOT created yet). **P3 (application work) = IN PROGRESS — NOT COMPLETE.** Branch
-`redesign/foundation`; last verified application commit `21c6869` (P3 WIP). `git status --porcelain` EMPTY.
-**Next action for the push:** `git ls-remote --heads origin redesign/foundation` (empty ⇒ `git push -u origin
-redesign/foundation`) and confirm it shows `049f340c356ab05e6d70856a31e8254ea4c758f0`. `origin`'s PUSH url is now
-SSH (`git@github.com:BitFlexFinTech/Mercenta.git`, fetch unchanged).
+**Checkpoint:** the governance increment (`operating-model.md` §12 — CHAT IS NOT PROJECT MEMORY) was
+**VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change)** at `049f340`, and **P3
+(application work) is now DONE and verified**. Branch `redesign/foundation`; the P3 code checkpoint is `21c6869`,
+followed this session by the `validate-stage26` repair, an `app-shell` test-budget fix and the docs/registry/state
+updates. **Two legs are executed in-session and reported in the resume block rather than assumed: the GitHub push (the
+repository's first ~220 MB pack on a slow link — `git ls-remote --heads origin redesign/foundation` was still EMPTY
+mid-push) and the demo deployment + live verification.** `git status --porcelain` EMPTY.
 
-**What changed this session**
-1. **Permanent rule (`.clinerules/operating-model.md` §12 — CHAT IS NOT PROJECT MEMORY):** the repository is the
-   project's memory; a chat transcript is never required. Mandatory task-close sequence, executed automatically:
-   `IMPLEMENT → TEST → FIX → VERIFY LOCAL → UPDATE PROJECT STATE → COMMIT → PUSH → DEPLOY → OPEN LIVE → VERIFY LIVE →
-   LOCAL = GITHUB = DEMO → RECORD NEXT STARTING POINT → COMPLETE`. **Push is now part of closing a task**; push-`--force`
-   and pushing an unverified tree stay forbidden. `protection-rules.md` (After-work, Deployment rules, Standing
-   Requirements, Handoff) and `project-state-contract.md` (mandatory resume block) carry the matching obligations.
-2. **P3 (application work, WIP, NOT COMPLETE):** the Control Centre loses its duplicated work/attention lists — the
-   retired **Command Centre panel deleted**, its own "Attention" queue removed — and keeps founder-only CONTROLS
-   (automation + approvals + halt, AI, audit, provenance, integrations status panel). The founder console is now
-   **projected into the single action list** (Work Management) as Super-Admin-scoped work items with the same rank +
-   auditable WHY, tab-aware hand-off preserved, and a declared cross-scope action-view translation so no hand-off
-   targets a non-existent view id. Verified so far: `tsc` 0 · `eslint .` 0 · `build` ✓ · `validate-command-centre`
-   **49 checks PASS** (was 40) · `validate-uiux-redesign` **347/0** · `validate-workspace-shell` **94/0** · e5/e6/e7/
-   founder-os/work-layer **PASS** · focused Playwright `command-centre` **4**, `work-layer` **12**, plus 21
-   (work-layer + founder-os + deterministic-journey). **Remaining: full Playwright suite, P3 docs/registry/state, then
-   deploy + live verification (three-way contract applies to that application work).**
+**What changed this session (P3 — Operations = ACT wiring)**
+1. **Three action lists → ONE.** The Control Centre loses its duplicated work/attention lists (the retired
+   **`CommandCentre.tsx` panel DELETED**, its own "Attention" queue removed) and keeps founder-only **CONTROLS**:
+   automation catalogue + approvals + halt, AI, audit, data provenance, the commercial-readiness/pre-audit decision
+   surfaces, a new **"Integrations & systems"** status panel, observe metrics with **real drill-downs**, and an explicit
+   pointer to the single list (`control-open-work`).
+2. **The founder console is projected into the single action list.** `src/lib/work/workStore.ts` maps
+   `buildCommandCentre().queue` → `founder_*` work items carrying the SAME **rank** + **auditable WHY**, is
+   **Super-Admin gated and FAILS CLOSED** (`opts?.superAdmin ? scoped : scoped.filter(r => r.superAdminOnly !== true)`),
+   derives integration health from the canonical mirror, and declares a **cross-scope action-view translation** so no
+   hand-off targets a view id that does not exist in the reading shell. Work Management renders rank + WHY on the row and
+   in the drawer, keeps the tab-aware hand-off, offers the founder source filters only to a session that may see them,
+   and its **nav badge counts the same item set the list renders**.
 
-**NOT STARTED / REMAINING:** the P3 close-out above; then P4 → P12 of the cleanup programme
-(`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4), then push/deploy verification per the three-way
-contract.
+3. **An INHERITED unhealthy gate was genuinely repaired — `scripts/validate-stage26.mjs`.** It used to print
+   `STAGE26_VALIDATION_FAIL` while ALWAYS exiting 0 (registry `discovered-validator-stage26-exit-code`). Fixed with **no
+   assertion removed**: its ThemeProvider harness gap (AdminDashboard / LogisticsHub / SalesAnalytics), the `gated`-flag
+   bug that reported a documented SKIP as a FAIL, and `catalog-import` assertions repointed to the current canonical
+   token-derived tenant contract, plus an **honest exit code**. Now: **PASS — 32 ✓ / 3 skipped (absent artefact) / 0
+   failures / exit 0**.
+4. **Verification this session:** `tsc` app **0** · `tsc` node **0** · `eslint .` **0** (rules-of-hooks +
+   exhaustive-deps as ERROR) · `npm run build` **✓** · `validate-command-centre` **49 PASS** (was 40) ·
+   `validate-uiux-redesign` **347/0** · `validate-workspace-shell` **94/0** · `validate-e5`/`e6`/`e7`/`work-layer`/
+   `founder-operating-system` **PASS** · `validate-stage26` **PASS** · **FULL Playwright suite at `--workers=3`** → see
+   `PROJECT_STATUS.md` heading 8 for the exact counts, including the one contended timeout and the `test.slow()` budget
+   fix (assertions unchanged) that the P2 pass had already applied to `investor-demo` 375x812.
 
-### HISTORY — the previous increment (P2, 2026-09-22, session 14). Not current; kept for the reviewer.
+**NOT STARTED / REMAINING:** **P4 — proxy-model corrections** (then P5 → P12 of the cleanup programme,
+`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4), plus the two in-session legs (push ref, demo
+deployment + live verification) recorded in the resume block.
+
+**Governance note (still current):** `.clinerules/operating-model.md` **§12 — CHAT IS NOT PROJECT MEMORY** remains in
+force: the mandatory task-close sequence, the canonical `## CURRENT RESUME STATE` block, the minimum-context resume
+procedure and the blocked-task protocol. **Push is part of closing a task**; `--force` pushes and pushing an unverified
+tree stay forbidden.
+
+### HISTORY — the previous increment (P3 WIP + governance, 2026-09-23, session 15). Not current; kept for the reviewer.
+
+**Prior checkpoint (P3 WIP):** governance increment = **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application
+runtime change)** (rules/docs only) at **`049f340`** — its **GITHUB PUSH leg was BLOCKED by transport** (HTTPS
+`HTTP 408` after ~37 min on the 219.71 MiB first-push pack; SSH retry at ~24–75 KiB/s, so
+`origin/redesign/foundation` was NOT created yet at that point). **P3 was IN PROGRESS — NOT COMPLETE** at that
+checkpoint. Branch `redesign/foundation`; P3 WIP commit `21c6869`.
+
+**Previous increment (P2, 2026-09-22, session 14) — the P2 checkpoint and what P2 built.**
 
 **Checkpoint:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`. Branch `redesign/foundation`, start HEAD
 `d9e77f650df96a107849e396d0b630d8e06aec6b`; **P2 checkpoint commit `0c05fe0d6537ea1c46b1053282bab19d051e38ea`**

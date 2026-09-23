@@ -296,6 +296,19 @@ test.describe('App Shell — responsive viewports', () => {
 
   for (const vp of VIEWPORTS) {
     test(`shell ${vp.name} — no horizontal overflow${vp.w < 1024 ? ', drawer present' : ''}`, async ({ page }) => {
+      /*
+       * §P3 — a REAL budget defect, not a weakened assertion (the same class of
+       * fix the P2 pass applied to investor-demo 375x812). Each viewport variant
+       * performs a full login, and a narrow-viewport run costs ~23-27s, which sits
+       * within a hair of Playwright's 30s default and intermittently times out
+       * under parallel load: 390x844 exceeded its budget at --workers=3 in the P3
+       * full-suite run (the timeout landed inside `waitForTimeout` AFTER the drawer
+       * opened, before any assertion), while the identical test passed at 22.8s in
+       * isolation and its 430x932 / 375x812 siblings passed at 27.3s / 24.6s in the
+       * same loaded run. `test.slow()` triples the ceiling only — every assertion
+       * below, including the no-horizontal-overflow check, is unchanged.
+       */
+      test.slow();
       await page.setViewportSize({ width: vp.w, height: vp.h });
       await loginAs(page, 'Super Admin — Tadii');
       const toggle = page.getByTestId('app-menu-toggle');

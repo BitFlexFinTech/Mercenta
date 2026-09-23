@@ -6,16 +6,16 @@ historical context only. New permanent rule: `.clinerules/operating-model.md` **
 
 ## CURRENT RESUME STATE (mirror of PROJECT_STATUS.md — keep the VALUES identical)
 
-LAST COMPLETED TASK:      Governance — made "chat is not project memory" permanent (operating model §12 + the canonical resume block).
-CURRENT VERIFIED STATE:   VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change); the GITHUB PUSH leg is **BLOCKED by transport** (see GITHUB PUSH). **P3 (application work) IN PROGRESS — NOT COMPLETE.**
+LAST COMPLETED TASK:      P3 — Operations = ACT wiring (three action lists → ONE): the Control Centre keeps founder-only CONTROLS; the founder console is projected into the single action list (Work Management, Super-Admin gated, fail-closed); the inherited unhealthy gate `validate-stage26` was genuinely repaired.
+CURRENT VERIFIED STATE:   VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (application work: local + committed legs verified; the GitHub push and the demo leg are being executed in this session — see the fields below).
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     049f340 — "docs(rules): make \"CHAT IS NOT PROJECT MEMORY\" the permanent operating model — mandatory task-close sequence (incl. push) + the canonical CURRENT RESUME STATE".
-GITHUB PUSH:              **BLOCKED — NOT CONFIRMED.** HTTPS push → `RPC failed; HTTP 408` after ~37 min (218.9 MB of the 219.71 MiB pack sent); SSH retry (authenticated; `origin` PUSH url now `git@github.com:BitFlexFinTech/Mercenta.git`) is in flight but the link only sustains ~24–75 KiB/s. NEXT ACTION: re-run `git push -u origin redesign/foundation`, then `git ls-remote --heads origin redesign/foundation` must show `049f340c356ab05e6d70856a31e8254ea4c758f0`.
-DEMO DEPLOYMENT:          NOT APPLICABLE (docs/rules-only governance increment) · P3 application work NOT DEPLOYED yet.
-LIVE VERIFICATION:        NOT VERIFIED — no demo deployment of the P3 work has happened.
-OUTSTANDING BLOCKER:      GITHUB PUSH transport only (220 MB first-push pack on a slow link). Everything else is verified and committed.
-NEXT TASK:                (1) Complete/confirm the push of `049f340`; (2) finish P3 (full Playwright suite → P3 docs/registry/state → deploy + verify live).
-EXACT NEXT STARTING POINT:`git ls-remote --heads origin redesign/foundation` (empty ⇒ `git push -u origin redesign/foundation`); then `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 (P3 row) → src/lib/work/workStore.ts, src/components/admin/FounderControlCentre.tsx, scripts/validate-command-centre.mjs, e2e/command-centre.spec.ts; then `npx playwright test --workers=3`.
+LAST VERIFIED COMMIT:     this session's P3 commit — its exact hash is recorded in `PROJECT_STATUS.md` by the immediately following state commit (P3 code checkpoint `21c6869`).
+GITHUB PUSH:              IN PROGRESS THIS SESSION — the repository's first push (~220 MB pack) is transport-bound: the SSH push of `redesign/foundation` reached 67% of 3659 objects (70 MiB) at 62–65 KiB/s after ~53 min and `git ls-remote --heads origin redesign/foundation` was still EMPTY. NEXT ACTION: re-run `git push -u origin redesign/foundation`, then confirm the ref shows this session's commit.
+DEMO DEPLOYMENT:          IN PROGRESS THIS SESSION — `bash scripts/deploy-demo.sh` (all four `NAMECHEAP_FTP_*` keys present in `.env`, `lftp` installed), then OPEN `https://demo.mercenta.co.uk`.
+LIVE VERIFICATION:        IN PROGRESS THIS SESSION — the P3 behaviour must be verified live (Control Centre has no second action list; Work Management carries the founder console) before any completion claim.
+OUTSTANDING BLOCKER:      GitHub push transport (a slow link for the repository's first ~220 MB pack). Everything else is implemented and verified locally.
+NEXT TASK:                P4 — proxy-model corrections (brand does its 3 jobs only; MERCENTA raises the routing/shipment request and files the ASN — the brand sees status; the acknowledgement writes an instruction-to-Mercenta record; `submitAcknowledgement` behind the SP-API seam, mock-first, Mercenta-side). Closes AV-040 + the wrong-direction routing.
+EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P4 row) and §7 (what P3 built) → then `src/data/api.ts` (the auto-draft on acceptance hardcodes `carrier:'dhl'` / `destination:'Mercenta UK Hub'`), the SP-API seam (`submitAcknowledgement`) and the acknowledgement → instruction-to-Mercenta record; then `npx playwright test --workers=3`.
 
 ### How a brand-new chat resumes (no transcript required)
 

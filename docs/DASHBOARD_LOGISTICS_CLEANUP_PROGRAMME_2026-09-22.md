@@ -1,9 +1,11 @@
 # DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22) — AGREED PLAN, DECISIONS AND RESUME POINT
 
-**Status: IN PROGRESS — P0, P0.4, P1 and **P2** are DONE and committed; P3–P12 remain.**
-**Checkpoint: branch `redesign/foundation`, start HEAD `d9e77f6`; the P2 checkpoint commit is recorded in
-`PROJECT_STATUS.md` heading 7 and `HANDOFF.md`. `git status --porcelain` EMPTY.**
-**Not pushed to GitHub; `demo.mercenta.co.uk` NOT deployed (deployment is the final step of the programme).**
+**Status: IN PROGRESS — P0, P0.4, P1, **P2** and **P3** are DONE and committed; P4–P12 remain.**
+**Checkpoint: branch `redesign/foundation`; P2's checkpoint commit is recorded in
+`PROJECT_STATUS.md` heading 7 and `HANDOFF.md`; P3's is recorded in the `CURRENT RESUME STATE` block.
+`git status --porcelain` EMPTY.**
+**Not pushed to GitHub at the time of writing (the first push of this 928 MB repository is transport-bound);
+`demo.mercenta.co.uk` NOT deployed (deployment is the final step of the programme).**
 
 This document exists so a future session — with **no memory of the conversation** — can resume
 without the plan being re-explained. It records the Founder's decisions verbatim in effect, the
@@ -72,7 +74,7 @@ documents → ship on time. Everything else is Mercenta's.
 | **P0** | ✅ **DONE** (`ee6d5eb`, `b6bd046`) | payout tiles → the payout ledger · AV-002/003 brand claims corrected · "Logistics Hub" naming · accepted PO → **"Open shipping documents"** deep link with the PO selected | dead-end routing; unsupported Amazon claims; naming vs documentation |
 | **P1** | ✅ **DONE** (`92dd06b`) | **Operations = the action centre, directly under Overview** in both shells; admin Operations = Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Carrier Monitor · Calendar; brand Operations = Purchase Orders · Logistics Hub · Returns · Tasks & Deadlines · Calendar | Observe/Act |
 | **P2** | ✅ **DONE** (checkpoint recorded in `PROJECT_STATUS.md` §7) | **Overview = Observe, ADDITIVE ONLY, both shells.** Admin: money band (**open PO value** · revenue · gross profit · margin % · **receivables**) + the **unchanged** operational band + **Portfolio volume** (brands · products · POs · order lines · shipments · operational volume · upcoming payments · fulfilment exceptions) + **Financial performance** + **Logistics status**. Brand: **Your earnings** hero band (total earnings · open PO value · payouts due · payouts settled) + **Earnings by month** (its first chart) + observe tiles for the counts the removed queue carried (open deductions · open tickets · returns · invoices outstanding). **Brand action sections moved to Operations** (the work layer is the single action list) — this also completes P3's brand clause. 4 gates repointed with the old contract recorded inline; **`validate-stage19` (an inherited FAIL) genuinely repaired**. | the business-picture gaps |
-| **P3** | NEXT | **Operations = Act** wiring: badges; **Control Centre loses its duplicated work/attention lists** (founder-only controls). *(Brand attention/next-actions already land in Operations — done in P2.)* | 3 action lists → 1 |
+| **P3** | ✅ **DONE** (commit `21c6869`, plus the §P3 `validate-stage26` repair; checkpoint in the `CURRENT RESUME STATE` block) | **Operations = Act** wiring: **three action lists → ONE.** The Control Centre loses its duplicated work/attention lists (the retired `CommandCentre.tsx` panel **deleted**, its own "Attention" queue removed) and becomes founder-only **CONTROLS** (automation catalogue + approvals + halt, AI, audit, data provenance, the commercial-readiness/pre-audit decision surfaces, a new *Integrations & systems* status panel and a pointer to the single list); the founder console is **projected into the single action list** (Work Management) as Super-Admin-scoped work items carrying the same rank + auditable WHY, with the tab-aware hand-off and a declared cross-scope action-view translation (**no dead hand-off destination in either shell**); badges count the same item set the list renders; fail-closed RBAC. *(Brand attention/next-actions already landed in Operations in P2.)* **An inherited unhealthy gate was genuinely repaired on the way: `validate-stage26` (ThemeProvider harness + a gating bug + stale catalog-import assertions) now PASSES with an honest exit code.** | 3 action lists → 1 |
 | **P4** | | **Proxy-model corrections**: brand does its 3 jobs only; **Mercenta** raises the routing/shipment request and files the ASN (brand sees status); ack writes an **instruction-to-Mercenta** record; `submitAcknowledgement` behind the SP-API seam (mock-first, Mercenta-side) | **AV-040**, wrong direction, truthfulness |
 | **P5** | | **Remove the Mercenta Hub completely** → destination = **the FC on the PO**; Hero/map arrival node = that FC; copy; validators/specs/docs | **D09-13 / AV-026/027** |
 | **P6** | | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
@@ -99,9 +101,12 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P0.4, P1, **P2** (committed; the P2 checkpoint hash is recorded in `PROJECT_STATUS.md` §7).
-- **Next:** **P3 — Operations = Act wiring** (Control Centre de-duplication; Work Management as the single action list).
-- **Then:** P4 → P12 in order.
+- **Done:** P0, P0.4, P1, **P2**, **P3** (committed; the P2 checkpoint hash is recorded in `PROJECT_STATUS.md` §7, P3's in
+  the `CURRENT RESUME STATE` block).
+- **Next:** **P4 — Proxy-model corrections** (brand does its 3 jobs only; Mercenta raises the routing/shipment request
+  and files the ASN; the acknowledgement writes an instruction-to-Mercenta record; `submitAcknowledgement` behind the
+  SP-API seam, mock-first).
+- **Then:** P5 → P12 in order.
 - **Deployment:** only at the end, once the programme is verified: `bash scripts/deploy-demo.sh`, then
   **open** `https://demo.mercenta.co.uk`, verify the changed behaviour live, and confirm the live build
   matches the recorded verified commit. Until then the status is
@@ -126,4 +131,74 @@ Read `PROJECT_STATUS.md` (current platform position), this document, then `git l
 - **Gates**: `scripts/validate-workspace-shell.mjs`, `scripts/validate-e6-brand-surfaces.mjs` (B1–B8),
   `scripts/validate-stage19.mjs`, `e2e/dashboard.spec.ts` (tests 8/9 + new 3b/11),
   `e2e/brand-operational-surfaces.spec.ts` (tests 2/5), `e2e/domain-acceptance.spec.ts` (test 6).
+
+---
+
+## 7. P3 — WHAT WAS BUILT, VERIFIED AND HOW (so P4+ does not have to re-derive it)
+
+### What was built (three action lists → one)
+
+- **`src/components/admin/FounderControlCentre.tsx`** — the Command Centre panel and this screen's own "Attention"
+  queue LEFT. What remains is exactly what the Founder decision says: founder-only **CONTROLS** (automation catalogue +
+  approvals + halt banner, AI, audit, data provenance), **observe metrics with real drill-downs** (every tile's
+  `onOpen` → the existing destination that owns the record), the founder **decision** surfaces (commercial readiness
+  with its evidence, pre-audit → acquisition), a NEW **"Integrations & systems"** status panel that keeps the retired
+  panel's provider-failure signal, and an explicit **"The action list lives in Operations"** section whose
+  `control-open-work` button opens the single list and states the live counts (open · critical · overdue · approvals).
+- **`src/components/admin/CommandCentre.tsx` — DELETED** (the third list's UI).
+- **`src/lib/work/workStore.ts`** — the founder console is **projected** into the work layer
+  (`buildCommandCentre().queue` → `founder_*` sources) carrying the SAME rank and the SAME auditable WHY.
+  `FOUNDER_SOURCE_BY_ACTION_ID` is **total** over the console's own queue (an unmapped action would vanish, so the
+  mapping is asserted). Items are `superAdminOnly` + `tenantId: null`, and `getWorkItems` **FAILS CLOSED**
+  (`opts?.superAdmin ? scoped : scoped.filter(r => r.superAdminOnly !== true)`). Integration health is derived from the
+  canonical connection mirror. NEW **declared cross-scope action-view translation** (`WORK_ACTION_VIEWS` /
+  `resolveWorkActionView`, 12 neutral ids) so a hand-off can never target a view id that does not exist in the shell
+  doing the reading.
+- **`src/lib/commandCentre/commandCentre.ts`** — the console no longer derives PO/shipment actions: the work layer is
+  their single owner (behaviour otherwise unchanged).
+- **`src/components/shared/WorkWorkspace.tsx` / `WorkManagement.tsx` (admin + brand) / `AdminShell.tsx` /
+  `src/lib/nav/navBadges.ts`** — rank + WHY rendered on the row and in the record drawer (`work-drawer-why`), the
+  tab-aware hand-off preserved (`requestAdminNav({ view, tab: item.navTab })`), founder source filters offered ONLY to
+  a session that may see them, and the Work Management badge counts **the same item set the list renders**.
+
+### Gates — repointed, never weakened (old contract recorded inline)
+
+| Gate | Result |
+|---|---|
+| `scripts/validate-command-centre.mjs` | **40 → 49 checks PASS** (single action list, fail-closed gate, tab-aware hand-off, no dead hand-off destination for ANY work item in EITHER shell, total projection mapping) |
+| `scripts/validate-uiux-redesign.mjs` | **347 PASS / 0 FAIL** (its Super-Admin-gate assertion follows the current canonical local) |
+| `scripts/validate-workspace-shell.mjs` | **94 PASS / 0 FAIL** |
+| `e2e/command-centre.spec.ts` | repointed to Work Management — **4 pass** |
+| `e2e/work-layer.spec.ts` | gained the RBAC gate tests — **12 pass** |
+| `validate-e5` / `validate-e6` / `validate-e7` / `validate-work-layer` / `validate-founder-operating-system` | **PASS** |
+| `scripts/validate-stage26.mjs` | **inherited FAIL genuinely repaired** → see below |
+
+### The `validate-stage26` repair (an inherited unhealthy gate, not P3-caused)
+
+Registry row `discovered-validator-stage26-exit-code` recorded that it printed `STAGE26_VALIDATION_FAIL` while
+**ALWAYS exiting 0**, so its failures were invisible. Three genuine defects were fixed with **no assertion removed**:
+(1) a **gating bug** — one module-level `gated` flag was mutated by every `readOptional()` call, so reading the present
+`catalog-import` artefact cleared the flag set by the absent `compliance-gate-check` one, reporting a SKIP as a FAIL;
+each block now carries its own presence flag and an absent artefact (a deploy-time item) is skipped per the
+`validate-edge-functions.mjs` convention; (2) `catalog-import`'s assertions were **repointed to the current canonical
+source** (tenant derived from the VERIFIED token — `app_metadata.tenant_id ?? user_metadata.tenant_id` — passed as
+`p_brand_id: brandId`; a disagreeing body `brandId` refused 403; the 401 worded *"Invalid or expired session — import
+refused"*), the invariant (target brand from the verified JWT, never the body) unchanged; (3) Part C now supplies the
+real app's provider composition (`QueryClientProvider → ThemeProvider → App`), so `AdminDashboard`, `LogisticsHub` and
+`SalesAnalytics` render (the identical repair `validate-homepage-editor.mjs` documents). It now also exits **1 on
+failure**. **Result: `STAGE26_VALIDATION_PASS` — 32 ✓ · 3 skipped (absent artefact) · 0 failures · exit 0.**
+
+### Verification performed for P3 (this session)
+
+- `npx tsc --noEmit -p tsconfig.app.json` → **0 errors** · `-p tsconfig.node.json` → **0 errors**.
+- `npx eslint .` → **0 problems** (with `react-hooks/rules-of-hooks` + `exhaustive-deps` as **error**, per §Stage-18).
+- `npm run build` → **✓ built**.
+- **FULL Playwright suite** (`npx playwright test --workers=3`) → **463 passed · 1 failed · 2 skipped (19.0m)**. The one
+  failure is `app-shell.spec.ts` test 298 **390x844** — a **30 s TEST timeout** reached during `loginAs` + drawer toggle
+  *before any assertion ran* (the 430x932 and 375x812 variants of the same test passed at 27.3 s / 24.6 s under the same
+  load). Re-run **in isolation**: **23/23 pass, 390x844 green at 22.8 s with no horizontal overflow** — i.e. the
+  contract holds and the full-suite failure is load/budget contention, not an application defect (recorded as
+  `discovered-playwright-app-shell-390x844-timeout-under-load`).
+
+
 
