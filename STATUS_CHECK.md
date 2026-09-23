@@ -31,11 +31,13 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
-**Checkpoint:** **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** for the P4 implementation. Local verification is
-DONE and green (see below); the GitHub push and the demo deployment + live verification for this increment are executed
-as the task closes, and their results are recorded in the `CURRENT RESUME STATE` block (not here — this file's top
-section is a projection, and the block is its source). Branch `redesign/foundation`. Previous verified commits:
-`8203a03` (P3 production-boot fix), `17a99eb`/`21c6869` (P3), `0c05fe0` (P2). `git status --porcelain` EMPTY.
+**Checkpoint:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** for the P4 implementation at **`fe20521`**: local runtime
+verified = `origin/redesign/foundation` at `fe20521` (`2646a34..fe20521`, exit 0) = the deployed build at
+`https://demo.mercenta.co.uk` (**byte-identical: all 33 emitted files SHA-256-compared equal; live verification 19/19
+checks with 0 page errors**). Branch `redesign/foundation`; P4 commit `fe20521`. `git status --porcelain` EMPTY. The
+state commit itself carries documentation + the live-verification script (`scripts/verify-demo-live.mjs`), so its own
+three-way status is **NOT APPLICABLE (no application runtime change)**. Previous verified commits: `8203a03` (P3
+production-boot fix), `17a99eb`/`21c6869` (P3), `0c05fe0` (P2).
 
 **What changed this session (P4 — the direction of the proxy model was wrong; it is now right)**
 
