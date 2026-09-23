@@ -733,6 +733,41 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
     'PROJECT_STATUS.md',
   ];
+  /**
+   * §P4 — PROXY-MODEL PHASE DECLARED SURFACE (2026-09-23, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P4).
+   *
+   * P4 corrects the direction of the proxy model: a brand's decision is an
+   * INSTRUCTION to Mercenta, and MERCENTA raises the routing/shipment request and
+   * files the ASN. It therefore legitimately touches the SP-API seam (a PROTECTED
+   * prefix), the commerce lifecycle, the proxy modules, the brand/admin PO
+   * surfaces and the shared routing-status module. The E7 guard's contract is
+   * UNCHANGED — a changed source/test file in NO declared set still fails, and an
+   * undeclared protected path still fails.
+   */
+  const P4_PROXY_MODEL_DECLARED = [
+    'src/lib/spapi/',
+    'src/lib/commerce/',
+    'src/types.ts',                        // PROTECTED prefix — declared
+    'src/data/api.ts',
+    'src/data/knowledgeBase.ts',
+    'src/lib/shipping/carrierRouting.ts',
+    'src/lib/shipping/routingReadiness.ts',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'src/components/shared/RoutingRequest.tsx',
+    'src/components/admin/AdminPurchaseOrderDetail.tsx',
+    'src/config/tours/tourDefinitions.ts',
+    'e2e/proxy-model.spec.ts',
+    'e2e/shipment-asn.spec.ts',
+    'e2e/notifications.spec.ts',
+    'e2e/po-lifecycle.spec.ts',
+    'e2e/logistics-wave3.spec.ts',
+    'scripts/validate-proxy-model.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+    'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  ];
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -743,7 +778,14 @@ try {
           !FUNCTIONAL_COMPLETION_DECLARED.includes(f) &&
           !SPRINT_FOUNDER_OS_DECLARED.includes(f) &&
           !SPRINT_UK_MARKET_FIT_DECLARED.includes(f) &&
-          !SPRINT_ROUTING_GATEWAYS_DECLARED.includes(f)
+          !SPRINT_ROUTING_GATEWAYS_DECLARED.includes(f) &&
+          /**
+           * §P4 — REPOINTED (not weakened). The current phase's declared surface
+           * is accepted here exactly as every earlier phase's is; an UNEXPLAINED
+           * protected change still fails.
+           */
+          !P4_PROXY_MODEL_DECLARED.includes(f) &&
+          !P4_PROXY_MODEL_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -844,6 +886,12 @@ try {
     ...SPRINT_UK_MARKET_FIT_DECLARED,
     // §Phase 2 — explicit workflow routing / gateway architecture (2026-09-19).
     ...SPRINT_ROUTING_GATEWAYS_DECLARED,
+    /**
+     * §P4 — REPOINTED (not weakened). The proxy-model phase's declared surface is
+     * accepted here exactly as every earlier phase's is; a changed source/test file
+     * outside EVERY declared set is still refused.
+     */
+    ...P4_PROXY_MODEL_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

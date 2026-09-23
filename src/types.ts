@@ -1286,6 +1286,116 @@ export interface AckHistoryEntry {
   unitPrice: number;
 }
 
+/* ── §P4 — THE INSTRUCTION-TO-MERCENTA RECORD (the proxy model's write path) ── */
+
+/**
+ * §P4 — WHAT A BRAND MAY INSTRUCT MERCENTA TO DO.
+ *
+ * A brand NEVER communicates with the retail channel: its decision is an
+ * INSTRUCTION to Mercenta, which then performs the channel action through the
+ * integration (`.clinerules/mercenta-business-model.md`). The brand's only jobs
+ * are accept/reject/backorder → download & print its documents → ship on time;
+ * **Mercenta raises the routing/shipment request and files the ASN**.
+ *
+ * Declared ONCE here and consumed by the store, the Mercenta-side proxy
+ * processor and every surface — no component keeps its own copy.
+ */
+export type ChannelInstructionType =
+  /** The brand's per-line accept / reject / backorder decision. */
+  | 'po_acknowledgement'
+  /**
+   * Programme decision 9 — the ASN is AUTOMATIC on acceptance, so the brand
+   * intervenes only when its PHYSICAL packing differs from the acknowledged
+   * volumes. This is an instruction to Mercenta, never a filing by the brand.
+   */
+  | 'packing_correction';
+
+export type ChannelInstructionState =
+  /** Written by the brand's decision; awaiting Mercenta's channel action. */
+  | 'pending_mercenta_action'
+  /** Mercenta performed the channel action; the outcome is on the record. */
+  | 'actioned'
+  /** Mercenta could not complete it (the channel refused) — reason recorded. */
+  | 'refused';
+
+export interface ChannelInstructionLine {
+  sku: string;
+  ackStatus: 'accepted' | 'rejected' | 'backordered';
+  /** The channel's ordered quantity — the ceiling an acknowledgement cannot pass. */
+  orderedQty: number;
+  /** Accepted or backordered units; 0 for a rejected line. */
+  acknowledgedQty: number;
+  /** Required when `ackStatus === 'backordered'`. */
+  scheduledShipDate?: string;
+  rejectionCode?: PoRejectionCode;
+  unitPrice: number;
+}
+
+/** One carton the brand says it actually packed (packing correction only). */
+export interface ChannelInstructionCarton {
+  sku: string;
+  quantity: number;
+}
+
+/** How MERCENTA actioned an instruction — every step attributed and honest. */
+export interface ChannelInstructionOutcome {
+  actionedAt: string;
+  /** The channel-side acknowledgement, through the SP-API seam. */
+  channelAcknowledgement?: {
+    ok: boolean;
+    acknowledgementId?: string;
+    status?: 'accepted' | 'partially_accepted' | 'rejected';
+    /** `mock` means NO live call occurred — recorded, never inferred. */
+    mode: 'mock' | 'real';
+    error?: string;
+  };
+  /** The routing / shipment request Mercenta raised. */
+  routingRequest?: {
+    raised: boolean;
+    /** The carrier, or the channel-arranged carrier on a Freight Collect PO. */
+    carrier: string;
+    /** TRUE when the channel books the carrier (Freight Collect). */
+    channelArrangesCarrier: boolean;
+    reference: string;
+  };
+  /** The ASN Mercenta filed (automatic on acceptance). */
+  asn?: {
+    filed: boolean;
+    shipmentId?: string;
+    reference?: string;
+    note?: string;
+    /**
+     * §P4 — the shortage-claim deduction the ASN seam raised when the filed
+     * quantities were below the acknowledged ones. Recorded so the brand sees the
+     * consequence of its own stated packing rather than a silent ledger entry.
+     */
+    deductionId?: string;
+  };
+  /** Present when Mercenta could not complete the action. */
+  refusedReason?: string;
+}
+
+export interface ChannelInstruction {
+  /** Deterministic and idempotent — an instruction can never be duplicated. */
+  id: string;
+  type: ChannelInstructionType;
+  brandId: string;
+  purchaseOrderId: string;
+  poNumber: string;
+  /** Who issued the instruction (the brand's staff id, or an admin on its behalf). */
+  issuedBy: string;
+  issuedAt: string;
+  state: ChannelInstructionState;
+  /** The brand's decision, recorded VERBATIM and never re-derived. */
+  lines: ChannelInstructionLine[];
+  /** Packing correction only — the cartons the brand actually packed. */
+  cartons?: ChannelInstructionCarton[];
+  note?: string;
+  outcome?: ChannelInstructionOutcome;
+  mode: CommerceMode;
+  simulated: boolean;
+}
+
 /** §4 — persisted admin/automation actions. Written on every override. */
 export interface AuditLogEntry {
   id: string;
@@ -1726,7 +1836,7 @@ export const DEFAULT_TOUR_PROGRESS: TourProgress = {
 export const CHECKLIST_ITEMS = [
   { id: 'first_product', label: 'Add your first product', hint: 'Upload a product to the catalog' },
   { id: 'first_po', label: 'Acknowledge your first PO', hint: 'Accept or reject a purchase order' },
-  { id: 'first_shipment', label: 'Create your first shipment', hint: 'File an ASN for an accepted PO' },
+  { id: 'first_shipment', label: 'Ship your first accepted PO', hint: 'Mercenta files the ASN — your part is to ship on time' },
   { id: 'compliance_cleared', label: 'Clear compliance gate', hint: 'Submit all required documents' },
   { id: 'guidance_read', label: 'Review operational guidance', hint: 'Understand Net PPM, packaging, and PO rejection impact' },
 ];

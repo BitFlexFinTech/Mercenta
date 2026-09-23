@@ -14,6 +14,7 @@ import { evaluateComplianceGate, latestDocumentsByType } from '@/lib/compliance'
 import { submitDocumentForVerification } from '@/lib/verification/documentVerification';
 import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { ackStatusTransitionRefusal, backOrderBlockedReason } from '@/lib/commerce/backorderGate';
+import { issueChannelInstruction, instructionLineFor } from '@/lib/commerce/channelInstructions';
 import { deriveShipmentEta, etaWindowKindFor } from '@/lib/logistics/shipmentEta';
 import type { DemoShipment } from '@/data/demoData';
 import type { ShipmentEta } from '@/types';
@@ -814,7 +815,7 @@ export function acknowledgePurchaseOrder(
   }[],
   /** §Batch-0.5 — when set, the action is attributed to this admin/staff as 'on behalf of brand'. Omit for brand self-action. */
   actorStaffId?: string
-): { ok: boolean; error?: string; warnings?: string[] } {
+): { ok: boolean; error?: string; warnings?: string[]; instructionId?: string } {
   const po = demoPurchaseOrders.find((p) => p.id === poId);
   if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
 
@@ -937,49 +938,34 @@ export function acknowledgePurchaseOrder(
   );
   setPurchaseOrderStatus(poId, anyAccepted ? 'accepted' : 'rejected');
 
-// §Auto-shipment draft: when PO accepted, create a pre-filled draft
-  if (anyAccepted) {
-    const acceptedLines = po.lineItems.filter((l) => l.ackStatus === 'accepted' || l.ackStatus === 'backordered');
-    const totalAcceptedQty = acceptedLines.reduce((s, l) => s + (l.acknowledgedQty ?? l.quantity), 0);
-    const draftShipmentId = 'shipment-draft-' + po.id;
-    if (!demoShipments.some((s) => s.id === draftShipmentId)) {
-      const brandDraft = demoBrands.find((b) => b.id === po.brandId);
-      demoShipments.push({
-        id: draftShipmentId,
-        brandId: po.brandId,
-        poNumber: po.poNumber,
-        carrier: 'dhl',
-        reference: 'DRAFT-' + po.poNumber,
-        title: (brandDraft?.profile.businessName ?? 'Brand').split(' ')[0] + ' — ' + po.poNumber,
-        value: acceptedLines.reduce((s, l) => s + (l.acknowledgedQty ?? l.quantity) * l.unitPrice, 0),
-        status: 'factory_intake',
-        /**
-         * §Logistics-map — PLACEHOLDER REMOVED.
-         *
-         * This was the literal string 'Brand warehouse', which is not a location
-         * the platform can resolve, so a workflow-created consignment could never
-         * be plotted and its origin could not be reported. The brand's DECLARED
-         * nation (already on the canonical brand record) is the honest precision
-         * actually available at this point in the lifecycle.
-         */
-        origin: originForBrand(brandDraft),
-        destination: 'Mercenta UK Hub',
-        delayed: false,
-        exception: false,
-      });
-    }
-    demoAuditLog.push({
-      id: 'audit-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-      createdAt: new Date().toISOString(),
-      actorId: po.brandId,
-      action: 'shipment_draft_created',
-      entityType: 'po_shipment',
-      entityId: draftShipmentId,
-      brandId: po.brandId,
-      reason: 'Auto-generated shipment draft after PO ' + po.poNumber + ' acknowledgment — ' + totalAcceptedQty + ' units across ' + acceptedLines.length + ' lines. Brand must add carton details.',
-      metadata: { poNumber: po.poNumber, lineCount: acceptedLines.length, totalQty: totalAcceptedQty, draftLineItems: acceptedLines.map((l) => l.sku) },
-    });
-  }
+  /**
+   * §P4 — THE BRAND'S DECISION BECOMES AN INSTRUCTION TO MERCENTA.
+   *
+   * §P4 REPLACED THE AUTO-SHIPMENT DRAFT. That block created a shipment draft
+   * titled "... Brand must add carton details" and hardcoded `carrier: 'dhl'` /
+   * `destination: 'Mercenta UK Hub'`, which presented the channel steps as the
+   * BRAND's work and left the direction of the proxy model unrecorded
+   * (`.clinerules/mercenta-business-model.md`). Under the proxy model the brand
+   * issues an INSTRUCTION and **MERCENTA** raises the routing/shipment request
+   * and files the ASN (`src/lib/commerce/proxyProcessor.ts`) — so the real
+   * consignment is created by Mercenta's processing and a PO no longer ends up
+   * with both a draft and a filed shipment.
+   *
+   * This writer is deliberately synchronous and touches nothing else: the
+   * channel action is Mercenta's, and the caller (the brand surface or
+   * `src/lib/commerce/commerceLifecycle.ts`) then begins Mercenta's processing.
+   */
+  let instructionId: string | undefined;
+  const issued = issueChannelInstruction({
+    type: 'po_acknowledgement',
+    brandId: po.brandId,
+    purchaseOrderId: po.id,
+    poNumber: po.poNumber,
+    issuedBy: actorStaffId ?? po.brandId,
+    /** The decision is recorded VERBATIM from the PO's own acknowledged state. */
+    lines: po.lineItems.map((l) => instructionLineFor(po, l)),
+  });
+  if (issued.ok && issued.instruction) instructionId = issued.instruction.id;
   // §Batch-0.5 — audit log with clear attribution: brand self-action vs admin on behalf
   const brand = demoBrands.find((b) => b.id === po.brandId);
   const brandName = brand?.profile.businessName ?? po.brandId;
@@ -994,12 +980,26 @@ export function acknowledgePurchaseOrder(
     entityType: 'purchase_order',
     entityId: po.id,
     brandId: po.brandId,
-    reason: `${actorLabel}: ${acceptedLines.length}/${po.lineItems.length} lines accepted/backordered, ${rejectedLines.length} rejected`,
-    metadata: { actorLabel, acceptedLines: acceptedLines.map((l) => l.sku), rejectedLines: rejectedLines.map((l) => l.sku) },
+    /**
+     * §P4 — the wording states the corrected direction: the brand ISSUED an
+     * instruction; Mercenta performs the channel acknowledgement, the routing
+     * request and the ASN filing.
+     */
+    reason:
+      `${actorLabel}: ${acceptedLines.length}/${po.lineItems.length} lines accepted/backordered, ` +
+      `${rejectedLines.length} rejected — decision issued to Mercenta as an INSTRUCTION` +
+      `${instructionId ? ` (${instructionId})` : ''}. Mercenta performs the channel action.`,
+    metadata: {
+      actorLabel,
+      acceptedLines: acceptedLines.map((l) => l.sku),
+      rejectedLines: rejectedLines.map((l) => l.sku),
+      instructionId,
+      direction: 'brand → Mercenta → retail channel',
+    },
   });
 
   notifyCanonicalStoreChange();
-  return { ok: true, warnings: warnings.length > 0 ? warnings : undefined };
+  return { ok: true, warnings: warnings.length > 0 ? warnings : undefined, instructionId };
 }
 
 export interface AsnCarton {

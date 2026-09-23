@@ -585,7 +585,7 @@ Amazon event / data → Amazon object → Mercenta object → Brand → Tenant
 | `D22-02` | Findings actually applied in code | **0 of 52 applied** | the register is a plan, not a record of work |
 | `D22-03` | Evidence preserved, unmodified | **DONE** | `docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md`, `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` |
 | `D22-04` | No inference promoted to fact | **DONE** | the register states UNKNOWN / EVIDENCE-BLOCKED explicitly |
-| `D22-05` | SP-API modelled operations | **PARTIAL** | `src/lib/spapi/**` models a subset; `submitAcknowledgement`, `getPurchaseOrdersStatus`, `submitInvoices`, `SubmitShipments`, `GetShipmentDetails`, `SubmitShipmentConfirmations`, `getTransaction` are **desired but not implemented** (AV-040) — simulation-first only, never claimed live |
+| `D22-05` | SP-API modelled operations | **PARTIAL** | `src/lib/spapi/**` models a subset; `submitAcknowledgement` was **implemented by P4 (2026-09-23)** on the real and mock clients, Mercenta-side (`scripts/validate-proxy-model.mjs`); `getPurchaseOrdersStatus`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `SubmitShipments`, `SubmitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate` remain **desired but not implemented** (AV-040, P12) — simulation-first only, never claimed live |
 | `D22-06` | Wording safeguards | **VERIFIED** | `npm run validate:wording` — 270 src files scanned, 0 outward-facing violations |
 
 ---

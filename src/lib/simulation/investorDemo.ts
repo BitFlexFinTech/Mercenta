@@ -169,6 +169,8 @@ import {
   updateProductAvailability,
 } from '@/data/demoStore';
 import { removeOnboarding } from '@/data/acquisitionStore';
+/** §P4 — the channel-instruction store participates in the canonical reset. */
+import { resetChannelInstructions } from '@/lib/commerce/channelInstructions';
 import {
   demoReturnTracking,
   getReturnTracking,
@@ -484,6 +486,15 @@ export function resetInvestorDemo(): InvestorDemoResetResult {
   const purgedRecords = purgeInvestorDemoRecords();
   const onboardingRemoved = removeOnboarding(INVESTOR_DEMO_ONBOARDING_ID);
 
+  /**
+ * §P4 — the channel-instruction store is CANONICAL state too, so the deterministic
+ * reset must return it to baseline exactly like the commissions, the commercial
+ * models and the mock provider worlds. Without this, a replay after a reset would
+ * find the previous run's instruction already `actioned`, write no
+ * `channel_instruction_issued` / `channel_instruction_actioned` audit rows, and the
+ * replay digest would differ (measured: 66/44 → 64/42 audit facts).
+ */
+  resetChannelInstructions();
   resetMockAmazonState();
   resetMockDhlState();
   resetMockCompaniesHouseState();

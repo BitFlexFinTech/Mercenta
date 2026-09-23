@@ -1,8 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
-import { useBrands, useDeductions, usePurchaseOrders } from '@/data/queries';
+import { useBrands, useCanonicalStoreVersion, useDeductions, usePurchaseOrders } from '@/data/queries';
 import { acknowledgePurchaseOrder, createShipmentForPO } from '@/data/api';
+import {
+  listChannelInstructions,
+  requeueChannelInstruction,
+} from '@/lib/commerce/channelInstructions';
+import { beginProxyProcessing, processChannelInstruction } from '@/lib/commerce/proxyProcessor';
 import { Badge, Button, Card, StatusBadge } from '@/components/ui';
 import {
   ackStatusPresentation,
@@ -50,6 +55,17 @@ export function AdminPurchaseOrderDetail({ poId, onClose }: Props) {
     : '';
 
   const [onBehalfAck, setOnBehalfAck] = useState(false);
+  /**
+   * §P4 — the brand's INSTRUCTION to Mercenta for this PO, and Mercenta's
+   * outcome. The admin surface is where Mercenta's operational staff see and
+   * recover the automated channel action.
+   */
+  const canonicalVersion = useCanonicalStoreVersion();
+  void canonicalVersion; // §P4 — canonical change signal → re-read Mercenta's outcome
+  const instruction = poId
+    ? listChannelInstructions({ purchaseOrderId: poId }).find((i) => i.type === 'po_acknowledgement')
+    : undefined;
+  const [proxyNotice, setProxyNotice] = useState<string | null>(null);
   const [ackStatuses, setAckStatuses] = useState<Record<string, 'accepted' | 'rejected' | 'backordered'>>({});
   const [ackQtys, setAckQtys] = useState<Record<string, number>>({});
   const [ackPrices, setAckPrices] = useState<Record<string, number>>({});
@@ -117,11 +133,33 @@ const thePo = po;
     }));
     const result = acknowledgePurchaseOrder(thePo.id, lineAcks, actingStaff?.id ?? 'unknown-admin');
     if (!result.ok) { setAckNotice(result.error ?? 'Failed.'); return; }
+    /**
+     * §P4 — the brand's decision is an INSTRUCTION to Mercenta. The admin has
+     * recorded it on the brand's behalf; MERCENTA then performs the channel
+     * action automatically (acknowledgement → routing request → ASN).
+     */
+    if (result.instructionId) beginProxyProcessing(result.instructionId);
     const actor = actingStaff?.name ?? 'Unknown admin';
-    setAckNotice('Acknowledgment submitted on behalf of ' + brandName + ' by ' + actor + '.'
+    setAckNotice('Acknowledgment submitted on behalf of ' + brandName + ' by ' + actor + '. '
+      + 'The decision is recorded as an instruction to Mercenta, which files the channel acknowledgement and the ASN.'
       + (result.warnings?.length ? ' Warnings: ' + result.warnings.join('; ') : ''));
     void qc.invalidateQueries({ queryKey: ['purchase_orders'] });
     setOnBehalfAck(false);
+  }
+
+  /** §P4 — Mercenta retries a refused instruction (an attributed, audited action). */
+  async function retryInstruction() {
+    if (!instruction) return;
+    const actor = actingStaff?.name ?? 'Unknown admin';
+    requeueChannelInstruction(instruction.id, actor, 'Retry requested from the admin PO detail.');
+    const result = await processChannelInstruction(instruction.id);
+    setProxyNotice(
+      result?.state === 'actioned'
+        ? 'Channel action completed by Mercenta.'
+        : `Channel action still not completed: ${result?.outcome?.refusedReason ?? 'reason not recorded'}.`
+    );
+    void qc.invalidateQueries({ queryKey: ['purchase_orders'] });
+    void qc.invalidateQueries({ queryKey: ['shipments'] });
   }
 function beginOnBehalfAsn() {
     setOnBehalfAsn(true);
@@ -257,6 +295,71 @@ function beginOnBehalfAsn() {
               <Button className="text-xs" onClick={handleOnBehalfAckSubmit}>Submit On-Behalf Acknowledgment</Button>
               {ackNotice && <p className={cn('text-ds-micro mt-2', ackNotice.startsWith('Acknowledgment') ? 'text-emerald-400' : 'text-red-400')}>{ackNotice}</p>}
             </div>
+          )}
+
+          {/**
+            * §P4 — THE BRAND'S INSTRUCTION AND MERCENTA'S OUTCOME.
+            *
+            * Mercenta operates the retail-channel account, so this is the surface
+            * where Mercenta's operational staff can see what the brand instructed,
+            * what the automated chain achieved, and retry a refused action.
+            */}
+          {instruction && (
+            <Card title="Instruction to Mercenta (proxy model)" className="mt-3">
+              <div className="space-y-1 text-xs">
+                <p className="text-zinc-400">
+                  Issued by <span className="font-mono text-zinc-300">{instruction.issuedBy}</span> at{' '}
+                  {new Date(instruction.issuedAt).toLocaleString('en-GB')} · {instruction.type} ·{' '}
+                  <span className="font-mono text-zinc-300">{instruction.id}</span>
+                </p>
+                <p className="text-zinc-400">
+                  State: <span className="text-white">{instruction.state.replace(/_/g, ' ')}</span>
+                  {instruction.outcome?.channelAcknowledgement?.ok && (
+                    <>
+                      {' · '}channel acknowledgement{' '}
+                      <span className="font-mono text-zinc-300">
+                        {instruction.outcome.channelAcknowledgement.acknowledgementId}
+                      </span>{' '}
+                      ({instruction.outcome.channelAcknowledgement.status}
+                      {instruction.outcome.channelAcknowledgement.mode === 'mock' ? ', simulated — no live call' : ''})
+                    </>
+                  )}
+                  {instruction.outcome?.routingRequest && (
+                    <>
+                      {' · '}routing{' '}
+                      {instruction.outcome.routingRequest.raised
+                        ? `raised (${instruction.outcome.routingRequest.reference})`
+                        : 'not applicable'}
+                    </>
+                  )}
+                  {instruction.outcome?.asn?.filed && (
+                    <>
+                      {' · '}ASN filed ({instruction.outcome.asn.reference})
+                    </>
+                  )}
+                  {instruction.outcome?.asn?.deductionId && (
+                    <>
+                      {' · '}shortfall deduction {instruction.outcome.asn.deductionId}
+                    </>
+                  )}
+                </p>
+                {instruction.outcome?.asn?.note && (
+                  <p className="text-amber-300">{instruction.outcome.asn.note}</p>
+                )}
+                {instruction.outcome?.refusedReason && (
+                  <p className="text-red-400" data-testid="admin-instruction-refused">
+                    {instruction.outcome.refusedReason}
+                  </p>
+                )}
+                {proxyNotice && <p className="text-ds-micro text-brass-300">{proxyNotice}</p>}
+                {(instruction.state === 'refused' || instruction.state === 'pending_mercenta_action') && (
+                  <Button className="text-xs mt-1" data-testid="admin-instruction-retry" onClick={retryInstruction}>
+                    <Truck className="w-3.5 h-3.5 mr-1" />
+                    {instruction.state === 'refused' ? 'Retry channel action' : 'Run channel action now'}
+                  </Button>
+                )}
+              </div>
+            </Card>
           )}
 
           {po.acknowledgedAt && (

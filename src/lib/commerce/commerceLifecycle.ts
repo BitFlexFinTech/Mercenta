@@ -55,6 +55,8 @@ import { createPersistenceMirror, getDomainRepository } from '@/data/domainRepos
 import * as store from '@/data/demoStore';
 import { findOrCreateTicketForBrand } from '@/lib/helpdesk/ticketStore';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
+import { getChannelInstructionForPO, markChannelInstructionActioned } from './channelInstructions';
+import { beginProxyProcessing } from './proxyProcessor';
 
 /**
  * The actor performing an operational commerce action. Extends the acquisition
@@ -295,6 +297,13 @@ export async function createCommercePurchaseOrder(
  * §Phase E4 — acknowledge a simulated PO (all lines accepted).
  * Enforces the legal transition, refuses a duplicate acknowledgement, and
  * records the audit trail with simulation provenance.
+ *
+ * §P4 — DIRECTION CORRECTED. The brand's decision is an INSTRUCTION to Mercenta
+ * (`./channelInstructions`); the channel action is Mercenta's and runs through
+ * `./proxyProcessor`. The domain function no longer implies the brand performs
+ * the channel steps, and it stays SYNCHRONOUS (the browser specs and the commerce
+ * lifecycle call it synchronously) — writing the instruction is synchronous and
+ * Mercenta's side of the chain then runs and lands its outcome on the record.
  */
 export function acknowledgeCommercePurchaseOrder(
   poId: string,
@@ -336,6 +345,19 @@ export function acknowledgeCommercePurchaseOrder(
     actorId: actor.staffId,
     purchaseOrderId: updated.id,
   });
+
+  /** §P4 — the brand's part is done; MERCENTA now performs the channel action. */
+  if (res.instructionId) {
+    recordStep({
+      brandId: updated.brandId,
+      type: 'po_acknowledged',
+      status: updated.status,
+      detail: `SIMULATED INSTRUCTION ${res.instructionId} issued to Mercenta for PO ${updated.poNumber} — Mercenta performs the channel acknowledgement, the routing request and the ASN filing.`,
+      actorId: actor.staffId,
+      purchaseOrderId: updated.id,
+    });
+    beginProxyProcessing(res.instructionId);
+  }
   return { ok: true, value: updated };
 }
 
@@ -347,6 +369,14 @@ export function acknowledgeCommercePurchaseOrder(
  * The shipment is created by `createShipmentForPO` (the real seam used in
  * production); with no live carrier credentials its carrier path is the
  * simulated one, so nothing is booked externally.
+ *
+ * §P4 — THIS IS MERCENTA'S CHANNEL ACTION, NOT THE BRAND'S JOB. Under the proxy
+ * model the brand's only jobs are accept/reject/backorder → download & print its
+ * documents → ship on time; **Mercenta raises the shipment request and files the
+ * ASN**. This function is therefore the Mercenta-side path (the automated
+ * `./proxyProcessor` is the same action, derived from the brand's instruction),
+ * and it records its result on that instruction so the record shows WHO acted.
+ * A brand surface never calls it.
  */
 export function fulfilCommercePurchaseOrder(
   poId: string,
@@ -415,6 +445,24 @@ export function fulfilCommercePurchaseOrder(
     purchaseOrderId: shipped.id,
     shipmentId: res.shipmentId,
   });
+
+  /**
+   * §P4 — record Mercenta's action on the brand's instruction, so the canonical
+   * record shows the ASN was filed by MERCENTA (not by the brand).
+   */
+  const instruction = getChannelInstructionForPO(poId, 'po_acknowledgement');
+  if (instruction && instruction.state === 'pending_mercenta_action') {
+    markChannelInstructionActioned(instruction.id, {
+      actionedAt: new Date().toISOString(),
+      routingRequest: {
+        raised: true,
+        carrier,
+        channelArrangesCarrier: po.freightTerm === 'collect',
+        reference: `RR-${po.poNumber}`,
+      },
+      asn: { filed: true, shipmentId: res.shipmentId, reference: `${carrier.slice(0, 2).toUpperCase()}-${po.poNumber}` },
+    });
+  }
   return { ok: true, value: { po: shipped, shipmentId: res.shipmentId } };
 }
 

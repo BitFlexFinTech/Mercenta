@@ -1,11 +1,21 @@
 /**
  * Phase 7D - Shipment & ASN tests.
  *
- * Covers the brand shipment flow on Tapatío (accepted PO-9002 -> Create
- * Shipment -> ASN with carton detail), the shortfall-detection path that
- * auto-raises a deduction, the Routing Request indicator for Astonish's
- * freight-collect POs, the prepaid delivery-window label, and the carrier
- * milestone update (live on retail).
+ * §P4 — REPOINTED (old contract recorded). These tests previously drove a
+ * BRAND-SIDE filing flow: "Create Shipment" opened an ASN form where the brand
+ * supplied carton detail AND chose the carrier, then "File ASN" submitted it
+ * ("ASN filed via … — visible to your 3PL team"). That is the wrong direction of
+ * the proxy model: Mercenta holds the retail-channel account, so **Mercenta
+ * raises the routing/shipment request and files the ASN**, and the brand sees
+ * STATUS. The behaviour under test is preserved and strengthened:
+ *   1  a packing correction (the brand's ONLY packing job) reaches Mercenta and
+ *      Mercenta files the ASN (a real consignment appears);
+ *   2  the shortfall-vs-acknowledged rule still raises a shortage-claim deduction;
+ *   3  a Freight Collect PO still shows the routing step — now attributed to
+ *      MERCENTA, still with NO unsupported channel deadline (AV-013);
+ *   4  the prepaid delivery window is unchanged;
+ *   5  the carrier milestone update is unchanged;
+ *   6/7 the ADMIN on-behalf ASN path is unchanged (there, Mercenta IS the actor).
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
@@ -19,6 +29,14 @@ async function deskForgePO(page: any) {
   }
   await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
   await page.waitForTimeout(1000);
+}
+
+/** §P4 — open the brand's packing-correction panel for an accepted PO. */
+async function openPackingCorrection(page: any) {
+  const btn = page.locator('button', { hasText: 'Packing differs?' }).first();
+  await expect(btn).toBeVisible({ timeout: 6000 });
+  await btn.click();
+  await page.waitForTimeout(400);
 }
 
 /**
@@ -54,47 +72,39 @@ async function adminOpenAsnPanel(page: any, brandName: string, poNumber: string)
 }
 
 test.describe('Shipment & ASN', () => {
-  test('1. Create shipment with correct carton detail -> validates, submits', async ({ page }) => {
+  test('1. Packing correction reaches Mercenta, which files the ASN', async ({ page }) => {
     await deskForgePO(page);
-    const shipBtn = page.locator('button', { hasText: 'Create Shipment' }).first();
-    await expect(shipBtn).toBeVisible({ timeout: 5000 });
-    await shipBtn.click();
-    await page.waitForTimeout(500);
-    // Carton qty is pre-filled from the acknowledged amounts; submit the ASN.
-    // Tapatío is Grocery (perishable/regulated) so lot number + expiry date are
-    // mandatory on the ASN — supply simulated values (never real stock data).
-    await page.getByLabel('Lot number').fill('SIM-LOT-PO-9002');
-    await page.getByLabel('Expiry date').fill('2027-10-01');
-    await page.locator('button', { hasText: 'File ASN' }).click();
-    await expect(page.getByText(/ASN filed via/i).first()).toBeVisible({ timeout: 7000 });
+    await openPackingCorrection(page);
+    // The brand states its ACTUAL packing; Mercenta files the ASN from it.
+    await page.locator('button', { hasText: 'Send packing correction to Mercenta' }).click();
+    await expect(page.getByText(/Packing correction sent to Mercenta/i).first()).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/Mercenta filed the ASN/i).first()).toBeVisible({ timeout: 8000 });
   });
 
-  test('2. Carton qty mismatch vs acked qty -> shortfall logged as deduction', async ({ page }) => {
+  test('2. Packed qty below acknowledged qty -> shortfall logged as deduction', async ({ page }) => {
     await deskForgePO(page);
-    await page.locator('button', { hasText: 'Create Shipment' }).first().click();
-    await page.waitForTimeout(500);
-    // Zero out the first carton: clears a shortfall vs the acknowledged qty.
+    await openPackingCorrection(page);
+    // Zero out the first line's packed quantity: a shortfall vs the acked qty.
     await page.locator('input[type="number"]').first().fill('0');
-    // Grocery (regulated) — mandatory lot + expiry on the ASN.
-    await page.getByLabel('Lot number').fill('SIM-LOT-PO-9002');
-    await page.getByLabel('Expiry date').fill('2027-10-01');
-    await page.locator('button', { hasText: 'File ASN' }).click();
-    await expect(page.getByText(/Shortfall logged as deduction/i).first()).toBeVisible({ timeout: 7000 });
+    await page.locator('button', { hasText: 'Send packing correction to Mercenta' }).click();
+    await expect(page.getByText(/Shortfall logged as deduction/i).first()).toBeVisible({ timeout: 8000 });
   });
 
-  test('3. Amazon freight (collect) -> routing step required, and NO unsupported channel deadline', async ({ page }) => {
+  test('3. Amazon freight (collect) -> routing step raised by MERCENTA, and NO unsupported channel deadline', async ({ page }) => {
     await loginAs(page, 'Astonish', 1100);
     await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
     await page.waitForTimeout(1000);
     /**
-     * §WAVE 3 — REPOINTED. The indicator previously read "Routing Request
-     * required" and attributed a deadline to the retail channel ("10am PT"). That
+     * §WAVE 3 + §P4 — REPOINTED. The indicator once read "Routing Request
+     * required" and attributed a deadline to the retail channel ("10am PT"); that
      * deadline is unsupported (`docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md`
-     * → AV-013), so the copy is now Mercenta-owned and the claim is asserted
-     * ABSENT. The behaviour under test — a Freight Collect PO requires the
-     * routing step — is unchanged.
+     * → AV-013). It then became Mercenta-owned copy that still implied a
+     * BRAND-side filing. Under the proxy model MERCENTA raises the routing step,
+     * so the copy now says exactly that — and the unsupported channel deadline is
+     * still asserted ABSENT. The underlying behaviour (a Freight Collect PO
+     * requires the routing step before the ship window closes) is unchanged.
      */
-    await expect(page.getByText(/Routing step required \(Freight Collect\)/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Routing step — Mercenta raises it \(Freight Collect\)/i).first()).toBeVisible({ timeout: 5000 });
     const body = await page.locator('body').innerText();
     expect(body).not.toMatch(/10am PT|10am Pacific|10 am Pacific/i);
   });

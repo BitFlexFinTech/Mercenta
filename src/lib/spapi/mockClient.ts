@@ -17,7 +17,7 @@
  *  - shipment confirmation always succeeds.
  */
 
-import type { FetchLike } from './client';
+import type { AcknowledgementPayload, AcknowledgementResult, FetchLike } from './client';
 
 export interface SubmissionResult {
   ok: boolean;
@@ -39,13 +39,40 @@ const REJECTION_REASONS = [
   'browse_node mapping invalid for approved category',
 ];
 
+/**
+ * §P4 — the channel's refusals for an acknowledgement submission.
+ *
+ * Both restate a rule the platform ALREADY enforces at its own domain boundary
+ * (`src/data/api.ts → acknowledgePurchaseOrder`), so the mock adds no invented
+ * channel rule: an acknowledgement can never exceed the ordered quantity, and a
+ * backordered line always carries a scheduled ship date. They are reachable by
+ * calling the seam directly, which is how the failure path stays genuinely
+ * testable (a normal product flow cannot reach them).
+ *
+ * An acknowledgement in which EVERY line is rejected is NOT a refusal — it is a
+ * legitimate vendor outcome (the channel's own `itemConfirmationStatus` carries
+ * `REJECTED`), so the mock returns it as `status: 'rejected'`.
+ */
+const ACK_REFUSALS = {
+  empty:
+    'ACKNOWLEDGEMENT_EMPTY — a submission with no lines carries no decision.',
+  overQuantity:
+    'ACKNOWLEDGEMENT_EXCEEDS_ORDER — acknowledged quantity cannot exceed the ordered quantity on a line.',
+  backorderWithoutDate:
+    'ACKNOWLEDGEMENT_MISSING_DATE — a backordered line requires a scheduled ship date.',
+} as const;
+
 /** Module-level so the whole app shares one simulated Amazon world. */
 const submissions = new Map<string, MockSubmissionState>();
 let submissionCounter = 0;
 
+/** §P4 — deterministic acknowledgement references (`MOCK-ACK-00001`). */
+let acknowledgementCounter = 0;
+
 export function resetMockAmazonState(): void {
   submissions.clear();
   submissionCounter = 0;
+  acknowledgementCounter = 0;
 }
 
 const MOCK_PO_POOL = [
@@ -126,6 +153,39 @@ export function createMockSpApiClient(_transport?: FetchLike) {
     }> {
       await delay(120);
       return { ok: true };
+    },
+
+    /**
+     * §P4 — SIMULATED `submitAcknowledgement` (AV-040).
+     *
+     * Same signature and result shape as the real client, so the Mercenta-side
+     * proxy processor runs identically before and after real LWA credentials are
+     * configured. It refuses exactly what the platform's own domain boundary
+     * refuses (no accepted line / over-ordered quantity / backorder without a
+     * date), so the refusal path is genuinely reachable and testable.
+     *
+     * The reference is unmistakably simulated (`MOCK-ACK-00001`) — it is never a
+     * plausible-looking live identifier.
+     */
+    async submitAcknowledgement(payload: AcknowledgementPayload): Promise<AcknowledgementResult> {
+      await delay(140); // simulate network latency
+      const lines = payload.lines ?? [];
+      if (lines.length === 0) return { ok: false, error: ACK_REFUSALS.empty };
+      const overQty = lines.find((l) => l.ackStatus !== 'rejected' && l.acknowledgedQty > l.orderedQty);
+      if (overQty) {
+        return { ok: false, error: `${ACK_REFUSALS.overQuantity} (line ${overQty.sku})` };
+      }
+      const missingDate = lines.find((l) => l.ackStatus === 'backordered' && !l.scheduledShipDate);
+      if (missingDate) {
+        return { ok: false, error: `${ACK_REFUSALS.backorderWithoutDate} (line ${missingDate.sku})` };
+      }
+
+      acknowledgementCounter += 1;
+      const acknowledgementId = `MOCK-ACK-${String(acknowledgementCounter).padStart(5, '0')}`;
+      const accepted = lines.filter((l) => l.ackStatus !== 'rejected').length;
+      const status: AcknowledgementResult['status'] =
+        accepted === 0 ? 'rejected' : accepted === lines.length ? 'accepted' : 'partially_accepted';
+      return { ok: true, acknowledgementId, status };
     },
   };
 }

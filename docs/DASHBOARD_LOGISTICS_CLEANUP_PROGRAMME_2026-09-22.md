@@ -1,11 +1,11 @@
 # DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22) — AGREED PLAN, DECISIONS AND RESUME POINT
 
-**Status: IN PROGRESS — P0, P0.4, P1, **P2** and **P3** are DONE and committed; P4–P12 remain.**
+**Status: IN PROGRESS — P0, P0.4, P1, **P2**, **P3** and **P4** are DONE and committed; P5–P12 remain.**
 **Checkpoint: branch `redesign/foundation`; P2's checkpoint commit is recorded in
-`PROJECT_STATUS.md` heading 7 and `HANDOFF.md`; P3's is recorded in the `CURRENT RESUME STATE` block.
+`PROJECT_STATUS.md` heading 7 and `HANDOFF.md`; P3's and P4's are recorded in the `CURRENT RESUME STATE` block.
 `git status --porcelain` EMPTY.**
-**Not pushed to GitHub at the time of writing (the first push of this 928 MB repository is transport-bound);
-`demo.mercenta.co.uk` NOT deployed (deployment is the final step of the programme).**
+**Pushed to GitHub (`redesign/foundation` exists on `origin`; the first push of this repository completed after
+~2h13m). `demo.mercenta.co.uk` is deployed + live-verified for P3; P4's deployment is recorded in the resume block.**
 
 This document exists so a future session — with **no memory of the conversation** — can resume
 without the plan being re-explained. It records the Founder's decisions verbatim in effect, the
@@ -75,7 +75,7 @@ documents → ship on time. Everything else is Mercenta's.
 | **P1** | ✅ **DONE** (`92dd06b`) | **Operations = the action centre, directly under Overview** in both shells; admin Operations = Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Carrier Monitor · Calendar; brand Operations = Purchase Orders · Logistics Hub · Returns · Tasks & Deadlines · Calendar | Observe/Act |
 | **P2** | ✅ **DONE** (checkpoint recorded in `PROJECT_STATUS.md` §7) | **Overview = Observe, ADDITIVE ONLY, both shells.** Admin: money band (**open PO value** · revenue · gross profit · margin % · **receivables**) + the **unchanged** operational band + **Portfolio volume** (brands · products · POs · order lines · shipments · operational volume · upcoming payments · fulfilment exceptions) + **Financial performance** + **Logistics status**. Brand: **Your earnings** hero band (total earnings · open PO value · payouts due · payouts settled) + **Earnings by month** (its first chart) + observe tiles for the counts the removed queue carried (open deductions · open tickets · returns · invoices outstanding). **Brand action sections moved to Operations** (the work layer is the single action list) — this also completes P3's brand clause. 4 gates repointed with the old contract recorded inline; **`validate-stage19` (an inherited FAIL) genuinely repaired**. | the business-picture gaps |
 | **P3** | ✅ **DONE** (commit `21c6869`, plus the §P3 `validate-stage26` repair; checkpoint in the `CURRENT RESUME STATE` block) | **Operations = Act** wiring: **three action lists → ONE.** The Control Centre loses its duplicated work/attention lists (the retired `CommandCentre.tsx` panel **deleted**, its own "Attention" queue removed) and becomes founder-only **CONTROLS** (automation catalogue + approvals + halt, AI, audit, data provenance, the commercial-readiness/pre-audit decision surfaces, a new *Integrations & systems* status panel and a pointer to the single list); the founder console is **projected into the single action list** (Work Management) as Super-Admin-scoped work items carrying the same rank + auditable WHY, with the tab-aware hand-off and a declared cross-scope action-view translation (**no dead hand-off destination in either shell**); badges count the same item set the list renders; fail-closed RBAC. *(Brand attention/next-actions already landed in Operations in P2.)* **An inherited unhealthy gate was genuinely repaired on the way: `validate-stage26` (ThemeProvider harness + a gating bug + stale catalog-import assertions) now PASSES with an honest exit code.** | 3 action lists → 1 |
-| **P4** | | **Proxy-model corrections**: brand does its 3 jobs only; **Mercenta** raises the routing/shipment request and files the ASN (brand sees status); ack writes an **instruction-to-Mercenta** record; `submitAcknowledgement` behind the SP-API seam (mock-first, Mercenta-side) | **AV-040**, wrong direction, truthfulness |
+| **P4** | ✅ **DONE** (2026-09-23, session 16 — see §8) | **Proxy-model corrections**: the brand does its 3 jobs only; **MERCENTA** raises the routing/shipment request and files the ASN (the brand sees status); ack writes an **instruction-to-Mercenta** record; `submitAcknowledgement` behind the SP-API seam (mock-first, Mercenta-side) | **AV-040** (partially), wrong direction, truthfulness |
 | **P5** | | **Remove the Mercenta Hub completely** → destination = **the FC on the PO**; Hero/map arrival node = that FC; copy; validators/specs/docs | **D09-13 / AV-026/027** |
 | **P6** | | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
 | **P7** | | **Admin invoicing**: invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60** terms per invoice; derived **upcoming payments**; receivables = issued-and-unpaid | decision 2; **AV-022** |
@@ -101,16 +101,14 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P0.4, P1, **P2**, **P3** (committed; the P2 checkpoint hash is recorded in `PROJECT_STATUS.md` §7, P3's in
-  the `CURRENT RESUME STATE` block).
-- **Next:** **P4 — Proxy-model corrections** (brand does its 3 jobs only; Mercenta raises the routing/shipment request
-  and files the ASN; the acknowledgement writes an instruction-to-Mercenta record; `submitAcknowledgement` behind the
-  SP-API seam, mock-first).
-- **Then:** P5 → P12 in order.
-- **Deployment:** only at the end, once the programme is verified: `bash scripts/deploy-demo.sh`, then
-  **open** `https://demo.mercenta.co.uk`, verify the changed behaviour live, and confirm the live build
-  matches the recorded verified commit. Until then the status is
-  **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE**.
+- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4** (committed; the P2 checkpoint hash is recorded in `PROJECT_STATUS.md` §7,
+  P3's and P4's in the `CURRENT RESUME STATE` block).
+- **Next:** **P5 — Remove the Mercenta Hub completely** (destination = **the FC on the PO**; Hero/map arrival node = that
+  FC; copy, validators, specs and docs). **Deferred out of P4 deliberately:** `src/data/api.ts → createShipmentForPO`
+  and `src/data/demoData.ts` still carry `destination: 'Mercenta UK Hub'`; P5 owns that change.
+- **Then:** P6 → P12 in order.
+- **Deployment:** executed at the close of each product phase. P3 and P4 were deployed and live-verified; the full
+  three-way confirmation is re-run at the end of the programme.
 
 ## 6. P2 — WHAT WAS BUILT (so P3+ does not have to re-derive it)
 
@@ -227,3 +225,72 @@ browser suite were green, because the Playwright suite runs against the **Vite d
 
 
 
+---
+
+## 8. P4 — WHAT WAS BUILT, VERIFIED AND HOW (so P5+ does not have to re-derive it)
+
+### The direction that was corrected
+
+Before P4 the DIRECTION was wrong in three places: the acknowledgement created a shipment **draft** whose audit reason
+read *"Brand must add carton details"* and which hardcoded `carrier: 'dhl'` / `destination: 'Mercenta UK Hub'`; the
+brand chose its own carrier and filed the ASN (`Create Shipment` → `File ASN`); and the routing step was a brand-side
+control (`RoutingRequestForm`, which set local component state and wrote **nothing** to the domain — a placeholder).
+Under the proxy model a brand never communicates with the channel — its decision is an **instruction to Mercenta**.
+
+### What was built
+
+- **`src/lib/commerce/channelInstructions.ts` (NEW) — the instruction store.** `ChannelInstruction` records the brand's
+  decision **verbatim**, with deterministic, idempotent ids (`instr-ack-<poId>` / `instr-pack-<poId>`), simulation
+  provenance, and states `pending_mercenta_action → actioned | refused`. Every state change writes a canonical audit
+  entry and fires the canonical change signal (in ONE place, so `validate-canonical-propagation` S2 holds). A refused
+  instruction is never silently retried: `requeueChannelInstruction` is an attributed, audited admin action.
+  It also owns **`instructionLineFor(po, line)`** — the ONE derivation of an instruction line from a PO. An absent
+  per-line `ackStatus` (seeded/legacy acceptances) derives **accepted**, never rejected; only a PO whose status is
+  `rejected` derives rejected lines. (A real defect found by the browser run — registry row
+  `discovered-absent-ackstatus-treated-as-rejection`.)
+- **`src/lib/commerce/proxyProcessor.ts` (NEW) — MERCENTA'S channel action.** Processing an instruction performs, in
+  order: (1) `submitAcknowledgement` through the SP-API seam, Mercenta-side, recording the seam's honest mode;
+  (2) the routing / shipment request (channel-arranged carrier on a Freight Collect PO, Mercenta's own account on
+  prepaid, resolved by the canonical routing rule — never chosen by a component); (3) the ASN filing, **automatic on
+  acceptance** (decision 9), with clearly-simulated lot/expiry where the category requires them. A **channel refusal
+  stops the chain** — nothing is filed, the reason is recorded, and the retry is deliberate. An **all-rejected**
+  decision is `actioned` with the routing/ASN recorded as **NOT APPLICABLE**, never falsely reported as filed. The
+  ASN actor is `mercenta-proxy-automation`, so the audit shows WHO acted.
+- **The SP-API seam: `submitAcknowledgement`** added to `src/lib/spapi/client.ts` (real, `POST /acknowledgements`) and
+  `src/lib/spapi/mockClient.ts` (deterministic `MOCK-ACK-00001`-style references, exercising success **and** its own
+  refusal paths: over-ordered quantity, backorder without a date). *AV-040 is partially closed — the other seven
+  documented operations are P12.*
+- **`src/data/api.ts → acknowledgePurchaseOrder`** now writes the instruction instead of the brand-side draft, and its
+  audit wording states the corrected direction. `commerceLifecycle.acknowledgeCommercePurchaseOrder` stays synchronous
+  (the browser specs and the lifecycle call it synchronously) and then begins Mercenta's processing;
+  `fulfilCommercePurchaseOrder` is documented as **Mercenta's** channel action and records its result on the instruction.
+- **Surfaces.** `BrandPurchaseOrders.tsx`: no filing control of any kind (`Create Shipment` / `File ASN` / the routing
+  filing form are gone), the brand sees Mercenta's channel status (`po-mercenta-status-*`, acknowledgement reference,
+  routing reference, ASN + consignment), its only packing action is the **packing correction** instruction, and its
+  three jobs are stated. `RoutingRequest.tsx`: `RoutingRequestForm` → **`RoutingRequestStatus`** (read-only, canonical
+  outcome). `AdminPurchaseOrderDetail.tsx`: the instruction + Mercenta's outcome are shown with an attributed retry.
+- **Copy repointed:** tours (`orientation-logistics`, `po-asn-accuracy`, `shipping-create-shipment`,
+  `shipping-ship-window-vs-delivery`), `knowledgeBase.ts`, the `first_shipment` checklist hint, and the carrier-routing
+  refusal message.
+
+### Gates — repointed, never weakened (old contract recorded inline in every case)
+
+| Gate | Result |
+|---|---|
+| `scripts/validate-proxy-model.mjs` (**NEW**) | **PASS (38 checks)** — the seam (both clients + refusal paths), the instruction (verbatim + idempotent), Mercenta's action, the all-rejected case, the refusal + retry, the audit attribution, and the direction asserted in SOURCE |
+| `e2e/proxy-model.spec.ts` (**NEW**) | **4 pass** — browser proof of the corrected direction (including "no filing control exists") |
+| `e2e/shipment-asn.spec.ts` | repointed: the packing correction reaches Mercenta and Mercenta files the ASN; the shortfall rule still raises a deduction; the routing copy is Mercenta's; the admin on-behalf path unchanged — **7 pass** |
+| `e2e/notifications.spec.ts` | repointed: the acceptance produces Mercenta's channel acknowledgement + the real consignment — **4 pass** |
+| `e2e/po-lifecycle.spec.ts` / `e2e/logistics-wave3.spec.ts` | success notice repointed `Acknowledgment submitted.` → `Decision issued to Mercenta.` (behaviour unchanged) |
+| `scripts/validate-e6-brand-surfaces.mjs` · `scripts/validate-e7-embedded-social.mjs` | the P4 declared scope added; both guards' contracts UNCHANGED (an unexplained/protected change still fails) |
+| `validate-canonical-propagation` · `validate-command-centre` · `validate-workspace-shell` · `validate-uiux-redesign` · `validate-e4-commerce` · `validate-e5-admin-surfaces` · `validate-stage15/16/19/26` · `validate:wording` | all **PASS** (see `PROJECT_STATUS.md` heading 8) |
+
+### Verification performed for P4 (this session)
+
+- `npx tsc --noEmit` (app + node projects) → **0 errors** · `npx eslint .` → **0 problems** · `npm run build` → **✓ built**.
+- **Honest note:** the first implementation mapped an absent `ackStatus` to `rejected`. Every domain-level gate passed;
+  only the BROWSER run against seeded data showed the consequence (Mercenta filed nothing for a genuinely accepted PO).
+  Fixed at the cause with `instructionLineFor`, asserted at both levels, recorded in the registry.
+- Every affected validator listed above was executed this session with its PASS/FAIL output shown.
+- **FULL Playwright suite** and the **demo deployment + live verification**: see `PROJECT_STATUS.md` heading 8 and the
+  `CURRENT RESUME STATE` block.

@@ -7,6 +7,10 @@
  * functional MockAmazonSPAPIClient is returned with identical signatures and
  * shapes. Swapping mock → real later means entering real credentials in the
  * wizard — zero code changes anywhere else.
+ *
+ * §P4 — the seam covers `submitAcknowledgement` (the acknowledgement of a PO,
+ * MERCENTA-side only: a brand's decision is an instruction to Mercenta). The
+ * remaining documented Vendor operations are P12's scope (AV-040).
  */
 
 import { createSpApiClient, type SpApiCredentials } from './client';

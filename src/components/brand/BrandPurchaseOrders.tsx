@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApp } from '@/context/GlobalStateContext';
 import {
   acknowledgePurchaseOrder,
-  createShipmentForPO,
   fetchBrands,
   fetchPurchaseOrders,
 } from '@/data/api';
-import type { PurchaseOrder } from '@/types';
+import { useCanonicalStoreVersion } from '@/data/queries';
+import {
+  instructionLineFor,
+  issueChannelInstruction,
+  listChannelInstructions,
+} from '@/lib/commerce/channelInstructions';
+import { processPendingChannelInstructions } from '@/lib/commerce/proxyProcessor';
+import type { ChannelInstruction, PurchaseOrder } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
 import { Badge, Button, Card, StatusBadge } from '@/components/ui';
 import {
@@ -20,37 +26,32 @@ import { BrandCommPanel } from '@/components/shared/BrandComm';
 /**
  * §UI/UX Wave 2 completion — the brand PO list gains the established
  * QUEUE → PREVIEW (RecordDrawer) → ACT step. Only the record's own real fields
- * are shown; the existing inline acknowledgment/ASN workflow is untouched.
+ * are shown; the existing inline acknowledgment workflow is untouched.
+ *
+ * §P4 — DIRECTION CORRECTED. The brand's only jobs are accept/reject/backorder →
+ * download & print its documents → ship on time. The brand no longer "creates a
+ * shipment" or "files the ASN": its decision writes an INSTRUCTION to Mercenta
+ * (`src/lib/commerce/channelInstructions.ts`) and MERCENTA performs the channel
+ * acknowledgement, raises the routing request and files the ASN
+ * (`src/lib/commerce/proxyProcessor.ts`). The brand sees the resulting STATUS,
+ * and intervenes only when its physical packing differs (programme decision 9).
  */
 import { RecordDrawer, RecordFieldList, MetricBand, SegmentedControl, WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { CommerceSimulationPanel } from '@/components/shared/CommerceSimulationPanel';
 import { ShippingCostEstimate } from '@/components/shared/ShippingCostEstimate';
-import { RoutingRequestIndicator, RoutingRequestForm } from '@/components/shared/RoutingRequest';
+import { RoutingRequestIndicator, RoutingRequestStatus, routingCarrierLabel } from '@/components/shared/RoutingRequest';
 import { downloadCsv } from '@/lib/csv';
 import { cn } from '@/utils/cn';
 import { CheckCircle2, FileText, MessageSquare, Phone, Truck } from 'lucide-react';
 import { navigateProductView } from '@/lib/runtime/productRoutes';
 import { MERCENTA_CARRIER_LABELS } from '@/config/shipping';
-import { carrierOptionsForLane, selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
-import { backOrderAvailabilityLabel, canBackOrderLine } from '@/lib/commerce/backorderGate';
-
 /**
- * §Canonical model §11 — a brand does NOT choose an arbitrary carrier. The
- * carrier is decided by the canonical routing rule; the select only ever
- * offers Mercenta carrier accounts (plus the Amazon-arranged partnered carrier
- * on Freight Collect POs). The rule itself lives in
- * `src/lib/shipping/carrierRouting.ts`, never here.
+ * §P4 — the canonical routing RULE is read here for the preview's read-only
+ * "carrier route" field (international → DHL, UK domestic → Palletline). The
+ * brand no longer selects a carrier: it is Mercenta's routing decision.
  */
-function carrierOptionsForPO(po: PurchaseOrder, brandNation?: string) {
-  const decision = selectCarrierForShipment({ brandNation });
-  const options: { value: string; label: string }[] = carrierOptionsForLane(decision.lane).map(
-    (o) => ({ value: o.value, label: o.label })
-  );
-  if (po.freightTerm === 'collect') {
-    options.push({ value: 'amazon_partner', label: 'Partnered carrier (retail-channel-arranged freight)' });
-  }
-  return options;
-}
+import { selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
+import { backOrderAvailabilityLabel, canBackOrderLine } from '@/lib/commerce/backorderGate';
 
 /* §Phase D2 — PO status labels/tones now come from the canonical presentation
    layer (src/lib/statusPresentation.ts); the local STATUS_BADGE/STATUS_LABEL maps
@@ -73,32 +74,62 @@ export function BrandPurchaseOrders() {
   const [poSearch, setPoSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  /**
+   * §Canonical model §11 — the carrier label for a consignment comes from the
+   * canonical carrier config (never a local map). The brand does not CHOOSE the
+   * carrier (see §P4): this is presentation of Mercenta's routing only.
+   */
   const shipCarrierLabel = (v: string) =>
     MERCENTA_CARRIER_LABELS[v as keyof typeof MERCENTA_CARRIER_LABELS] ??
     (v === 'amazon_partner' ? 'Partnered carrier' : v);
+
+  /**
+   * §P4 — the canonical instruction store's change signal. The brand surface
+   * must re-read Mercenta's outcome (acknowledgement reference, routing request,
+   * ASN) as soon as it lands, without a reload.
+   */
+  const canonicalVersion = useCanonicalStoreVersion();
+  void canonicalVersion; // §P4 — canonical change signal → re-read Mercenta's outcome
+  /**
+   * §P4 — every instruction this PO has issued. The ACKNOWLEDGEMENT is the PO's
+   * primary decision record; a PACKING CORRECTION is the brand's later statement
+   * about its physical packing and carries its own channel action. Both are read
+   * so the brand sees Mercenta's most complete outcome, and a correction is never
+   * hidden just because an acknowledgement exists.
+   */
+  const instructionsByPO = new Map<string, ChannelInstruction[]>();
+  for (const current of listChannelInstructions()) {
+    const list = instructionsByPO.get(current.purchaseOrderId) ?? [];
+    list.push(current);
+    instructionsByPO.set(current.purchaseOrderId, list);
+  }
+  const instructionFor = (poId: string): ChannelInstruction | undefined => {
+    const list = instructionsByPO.get(poId) ?? [];
+    return list.find((i) => i.type === 'po_acknowledgement') ?? list[0];
+  };
 
   /* ── §Stage-24 — line-item acknowledgment state ── */
   const [ackingPO, setAckingPO] = useState<string | null>(null);
   const [lineAcks, setLineAcks] = useState<
     Record<string, { ackStatus: 'accepted' | 'rejected' | 'backordered'; acknowledgedQty: number; scheduledShipDate?: string; rejectionCode?: string; unitPrice?: number }>
   >({});
-  /** §Stage-24 — ASN filing state per PO. */
-  const [asnPO, setAsnPO] = useState<string | null>(null);
-  const [asnCartons, setAsnCartons] = useState<Record<string, number>>({});
-  const [asnCarrier, setAsnCarrier] = useState('dhl');
-  const [asnShipDate, setAsnShipDate] = useState(new Date().toISOString().slice(0, 10));
-  const [asnPro, setAsnPro] = useState('');
-  const [asnBol, setAsnBol] = useState('');
-  const [asnTrailer, setAsnTrailer] = useState('');
-  const [asnLot, setAsnLot] = useState('');
-  const [asnExpiry, setAsnExpiry] = useState('');
-  /** §Routing Request — per-PO tracking for freight collect POs. */
-  const [routingRequestFiledPOs, setRoutingRequestFiledPOs] = useState<Record<string, boolean>>({});
+  /**
+   * §P4 — PACKING CORRECTION state (replaced the brand-side ASN filing).
+   *
+   * The brand's only packing-related job is to say when its PHYSICAL packing
+   * differs from the acknowledged volumes (programme decision 9); the ASN itself
+   * is filed by Mercenta. So this state carries carton quantities and a note —
+   * no carrier, ship date, PRO/BOL, lot or expiry, because the brand neither
+   * routes the freight nor files the document.
+   */
+  const [correctionPO, setCorrectionPO] = useState<string | null>(null);
+  const [correctionCartons, setCorrectionCartons] = useState<Record<string, number>>({});
+  const [correctionNote, setCorrectionNote] = useState('');
   /**
    * §UI/UX Wave 2 completion — the brand's PO list is a real record surface, so
    * it gains the established QUEUE → PREVIEW → ACT step: the RecordDrawer previews
-   * the real PO record and hands off to the existing inline acknowledgment/ASN
-   * workflow (which is unchanged).
+   * the real PO record and hands off to the existing inline acknowledgment
+   * workflow.
    */
   const [previewPO, setPreviewPO] = useState<string | null>(null);
   /** REAL density control — it changes the rendered PO card padding. */
@@ -126,78 +157,98 @@ export function BrandPurchaseOrders() {
       setNotice(result.error ?? 'Acknowledgment failed.');
       return;
     }
-    const warnings = result.warnings;
+    /**
+     * §P4 — the brand's decision is now an INSTRUCTION to Mercenta. This surface
+     * reports the corrected direction and then runs MERCENTA's side of the chain
+     * (channel acknowledgement → routing request → ASN) so the brand sees what
+     * actually happened to its order.
+     */
+    const processed = await processPendingChannelInstructions();
+    const outcome = processed
+      .map((i) => i.outcome)
+      .find((o): o is NonNullable<typeof o> => !!o);
     setNotice(
       [
-        'Acknowledgment submitted.',
-        ...(warnings ?? []),
-      ].join(' • ')
+        'Decision issued to Mercenta.',
+        outcome?.channelAcknowledgement?.ok
+          ? `Mercenta filed the acknowledgement with the retail channel (${outcome.channelAcknowledgement.acknowledgementId}, ${outcome.channelAcknowledgement.status})${outcome.channelAcknowledgement.mode === 'mock' ? ' — simulated, no live call' : ''}.`
+          : '',
+        outcome?.routingRequest?.raised ? `Mercenta raised the routing request (${outcome.routingRequest.reference}).` : '',
+        outcome?.asn?.filed ? `Mercenta filed the ASN (${outcome.asn.reference}).` : outcome?.asn?.note ?? '',
+        outcome?.asn?.deductionId
+          ? `Shortfall logged as deduction ${outcome.asn.deductionId} — Mercenta will dispute or accept it.`
+          : '',
+        outcome?.refusedReason ? `Mercenta could not complete the channel action: ${outcome.refusedReason}` : '',
+        ...(result.warnings ?? []),
+      ]
+        .filter(Boolean)
+        .join(' • ')
     );
     setAckingPO(null);
     await qc.invalidateQueries({ queryKey: ['purchase_orders'] });
-    // §7D — acknowledgment auto-creates a shipment draft; invalidate the
-    // shipments feed so LogisticsHub reflects it immediately.
+    // §P4 — Mercenta's channel action creates the consignment; refresh the feed.
     await qc.invalidateQueries({ queryKey: ['shipments'] });
+    await qc.invalidateQueries({ queryKey: ['deductions'] });
   }
 
-  function beginAsn(po: PurchaseOrder) {
-    setAsnPO(po.id);
-    const nation = brands.find((b) => b.id === po.brandId)?.nation;
-    setAsnCarrier(selectCarrierForShipment({ brandNation: nation }).carrier);
-    setAsnShipDate(new Date().toISOString().slice(0, 10));
-    setAsnPro(`PRO-${po.poNumber}`);
-    setAsnBol(`BOL-${po.poNumber}`);
-    setAsnTrailer('');
-    setAsnLot('');
-    setAsnExpiry('');
+  /**
+   * §P4 — PACKING CORRECTION (replaced the brand-side ASN filing).
+   *
+   * The ASN is automatic on acceptance (decision 9); the brand intervenes ONLY
+   * when its physical packing differs from the acknowledged volumes. It therefore
+   * sends Mercenta an intended-packaging statement — Mercenta re-files the ASN.
+   */
+  function beginCorrection(po: PurchaseOrder) {
+    setCorrectionPO(po.id);
+    setCorrectionNote('');
     const qtyInit: Record<string, number> = {};
     for (const l of po.lineItems) {
       if (l.ackStatus !== 'rejected') {
         qtyInit[l.sku] = l.acknowledgedQty ?? l.quantity;
       }
     }
-    setAsnCartons(qtyInit);
+    setCorrectionCartons(qtyInit);
   }
 
-  function handleShip(poId: string) {
-    const po = pos.find((p) => p.id === poId);
-    if (!po) return;
-    const asnBrand = brands.find((b) => b.id === viewingBrandId_);
-    const needsLot = asnBrand && ['Grocery', 'Health & Personal Care'].includes(asnBrand.category);
-    if (needsLot && (!asnLot.trim() || !asnExpiry)) {
-      setNotice('Lot number and expiry date are required for perishable/regulated categories.');
+  async function submitCorrection(po: PurchaseOrder) {
+    const issued = issueChannelInstruction({
+      type: 'packing_correction',
+      brandId: po.brandId,
+      purchaseOrderId: po.id,
+      poNumber: po.poNumber,
+      issuedBy: tenantId ?? po.brandId,
+      /** The correction states the actual packing; the acknowledgement lines are restated. */
+      lines: po.lineItems.map((l) => instructionLineFor(po, l)),
+      cartons: Object.entries(correctionCartons).map(([sku, quantity]) => ({ sku, quantity })),
+      ...(correctionNote.trim() ? { note: correctionNote.trim() } : {}),
+    });
+    if (!issued.ok) {
+      setNotice(issued.error ?? 'Packing correction failed.');
       return;
     }
-    const result = createShipmentForPO(poId, {
-      cartons: Object.entries(asnCartons)
-        .filter(([, q]) => q > 0)
-        .map(([sku, quantity]) => ({ sku, quantity, weightKg: Math.max(1, Math.round(quantity * 0.4)), lengthCm: 40, widthCm: 30, heightCm: 25 })),
-      shipDate: asnShipDate,
-      carrier: asnCarrier,
-      proNumber: asnPro || undefined,
-      bolNumber: asnBol || undefined,
-      trailerNumber: asnTrailer || undefined,
-      lotNumber: asnLot || undefined,
-      expiryDate: asnExpiry || undefined,
-    }, undefined, tenantId ?? undefined);
-    if (!result.ok) {
-      setNotice(result.error ?? 'ASN submission failed.');
-      return;
-    }
+    const corrected = !issued.created;
+    const processed = corrected ? [] : await processPendingChannelInstructions();
+    const outcome = processed.map((i) => i.outcome).find((o): o is NonNullable<typeof o> => !!o);
     setNotice(
       [
-        `ASN filed via ${shipCarrierLabel(asnCarrier)} — visible to your 3PL team.`,
-        ...result.warnings,
-        result.deductionId ? `Shortfall logged as deduction ${result.deductionId} — Mercenta will dispute or accept it.` : '',
+        corrected
+          ? 'A packing correction is already recorded for this PO.'
+          : 'Packing correction sent to Mercenta.',
+        outcome?.asn?.filed
+          ? `Mercenta filed the ASN (${outcome.asn.reference}).`
+          : outcome?.asn?.note ?? '',
+        outcome?.asn?.deductionId
+          ? `Shortfall logged as deduction ${outcome.asn.deductionId} — Mercenta will dispute or accept it.`
+          : '',
+        outcome?.refusedReason ? `Mercenta could not complete the channel action: ${outcome.refusedReason}` : '',
       ]
         .filter(Boolean)
-        .join(' ')
+        .join(' • ')
     );
-    setAsnPO(null);
-    void qc.invalidateQueries({ queryKey: ['purchase_orders'] });
-    void qc.invalidateQueries({ queryKey: ['deductions'] });
-    // §7D — filed ASN creates a shipment; reflect it in the logistics feed.
-    void qc.invalidateQueries({ queryKey: ['shipments'] });
+    setCorrectionPO(null);
+    await qc.invalidateQueries({ queryKey: ['purchase_orders'] });
+    await qc.invalidateQueries({ queryKey: ['shipments'] });
+    await qc.invalidateQueries({ queryKey: ['deductions'] });
   }
 
   const brands = brandsQuery.data?.data ?? [];
@@ -403,7 +454,7 @@ export function BrandPurchaseOrders() {
                       <RoutingRequestIndicator
                         poFreightTerm={po.freightTerm}
                         shipWindowEnd={po.shipWindowEnd}
-                        routingRequestFiled={!!routingRequestFiledPOs[po.id]}
+                        routing={instructionFor(po.id)?.outcome?.routingRequest}
                       />
                     </div>
                   )}
@@ -469,12 +520,24 @@ export function BrandPurchaseOrders() {
                     po.status !== 'rejected' &&
                     (po.status === 'accepted' || po.status === 'ready_to_fulfil') &&
                     !isFinanced && (
+                      /**
+                       * §P4 — REPLACED "Create Shipment / File ASN".
+                       *
+                       * That control was the brand filing the channel document
+                       * (with its own carrier choice), which is the wrong
+                       * direction: Mercenta files the ASN automatically on
+                       * acceptance (programme decision 9). The brand's remaining
+                       * packing job is to tell Mercenta when the PHYSICAL packing
+                       * differs — an instruction, not a filing.
+                       */
                       <Button
-                        onClick={() => (asnPO === po.id ? handleShip(po.id) : beginAsn(po))}
-                        className="text-xs"
+                        variant="ghost"
+                        className="text-xs text-zinc-400 hover:text-white"
+                        data-testid={`po-packing-correction-${po.poNumber}`}
+                        onClick={() => (correctionPO === po.id ? setCorrectionPO(null) : beginCorrection(po))}
                       >
                         <Truck className="w-3.5 h-3.5 mr-1.5" />
-                        {asnPO === po.id ? 'File ASN' : 'Create Shipment'}
+                        Packing differs?
                       </Button>
                     )}
                   {/* §Stage-17 — contact the brand about THIS PO, inline. */}
@@ -646,20 +709,89 @@ export function BrandPurchaseOrders() {
                 </div>
               )}
 
-              {/* §Stage-24 — ASN filing form (carton detail + tracking) */}
-              {asnPO === po.id && (
+              {/* §P4 — MERCENTA'S CHANNEL ACTION FOR THIS PO (the brand sees status) */}
+              {(() => {
+                const list = instructionsByPO.get(po.id) ?? [];
+                const instruction = instructionFor(po.id);
+                if (!instruction) return null;
+                const o = instruction.outcome;
+                const correction = list.find((i) => i.type === 'packing_correction');
+                const correctionOutcome = correction?.outcome;
+                return (
+                  <div
+                    className="mt-3 bg-sky-500/5 border border-sky-500/20 rounded-lg p-3 space-y-1"
+                    data-testid={`po-mercenta-status-${po.poNumber}`}
+                  >
+                    <p className="text-ds-label text-sky-200 font-medium">
+                      Mercenta channel action — you are not required to file anything
+                    </p>
+                    <p className="text-ds-micro text-zinc-400">
+                      Your decision was issued to Mercenta as an instruction. Mercenta submits the
+                      acknowledgement, raises the routing request and files the ASN on your behalf.
+                    </p>
+                    {instruction.state === 'pending_mercenta_action' && (
+                      <p className="text-ds-micro text-amber-300" data-testid={`po-mercenta-pending-${po.poNumber}`}>
+                        Pending — Mercenta is submitting the acknowledgement to the retail channel.
+                      </p>
+                    )}
+                    {instruction.state === 'refused' && (
+                      <p className="text-ds-micro text-red-300" data-testid={`po-mercenta-refused-${po.poNumber}`}>
+                        Mercenta could not complete the channel action: {o?.refusedReason ?? 'reason not recorded'} —
+                        no channel step was completed. Mercenta retries it as an attributed action.
+                      </p>
+                    )}
+                    {o?.channelAcknowledgement?.ok && (
+                      <p className="text-ds-micro text-zinc-300" data-testid={`po-mercenta-ack-${po.poNumber}`}>
+                        Acknowledgement transmitted by Mercenta — {o.channelAcknowledgement.acknowledgementId} ·{' '}
+                        {o.channelAcknowledgement.status}
+                        {o.channelAcknowledgement.mode === 'mock' ? ' · simulated (no live channel call)' : ''}
+                      </p>
+                    )}
+                    {o?.routingRequest && (
+                      <p className="text-ds-micro text-zinc-300" data-testid={`po-mercenta-routing-${po.poNumber}`}>
+                        {o.routingRequest.raised
+                          ? `Routing request raised by Mercenta — ${o.routingRequest.reference} · ${routingCarrierLabel(o.routingRequest)}`
+                          : `Routing request not applicable — ${o.routingRequest.reference}`}
+                      </p>
+                    )}
+                    {o?.asn && (
+                      <p className="text-ds-micro text-zinc-300" data-testid={`po-mercenta-asn-${po.poNumber}`}>
+                        {o.asn.filed
+                          ? `ASN filed by Mercenta — ${o.asn.reference}${o.asn.shipmentId ? ` · consignment ${o.asn.shipmentId}` : ''}`
+                          : `ASN — ${o.asn.note ?? 'not filed'}`}
+                      </p>
+                    )}
+                    {/* The brand's packing correction is a separate instruction with its own action. */}
+                    {correction && correction !== instruction && (
+                      <p className="text-ds-micro text-zinc-300" data-testid={`po-mercenta-correction-${po.poNumber}`}>
+                        {correctionOutcome?.asn?.filed
+                          ? `Packing correction recorded — Mercenta filed the ASN from it (${correctionOutcome.asn.reference}).`
+                          : correctionOutcome?.refusedReason
+                            ? `Packing correction recorded — Mercenta could not complete it: ${correctionOutcome.refusedReason}`
+                            : 'Packing correction recorded — Mercenta is acting on it.'}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/*
+                §P4 — PACKING CORRECTION (replaced the brand-side ASN filing form).
+                The ASN is automatic on acceptance; the brand states only when its
+                PHYSICAL packing differs, and Mercenta re-files the document.
+              */}
+              {correctionPO === po.id && (
                 <div className="mt-3 bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 space-y-2">
                   <p className="text-ds-label text-blue-200">
-                    Advance Shipping Notice — carton quantities are validated
-                    against your acknowledged amounts before submission; shortfalls
-                    are logged automatically as potential shortage claims.
+                    Tell Mercenta how this consignment was actually packed. Mercenta re-files the ASN
+                    with these quantities — you do not file the document and you do not choose the carrier.
                   </p>
                   <table className="w-full text-ds-label">
                     <thead>
                       <tr className="text-zinc-500">
                         <th className="text-left py-1">SKU</th>
-                        <th className="text-right py-1">Ack.</th>
-                        <th className="text-right py-1">Carton qty</th>
+                        <th className="text-right py-1">Acknowledged</th>
+                        <th className="text-right py-1">Packed qty</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -676,9 +808,9 @@ export function BrandPurchaseOrders() {
                                 type="number"
                                 min={0}
                                 max={l.acknowledgedQty ?? l.quantity}
-                                value={asnCartons[l.sku] ?? 0}
+                                value={correctionCartons[l.sku] ?? 0}
                                 onChange={(e) =>
-                                  setAsnCartons((prev) => ({ ...prev, [l.sku]: Number(e.target.value) }))
+                                  setCorrectionCartons((prev) => ({ ...prev, [l.sku]: Number(e.target.value) }))
                                 }
                                 className="w-20 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white text-right"
                               />
@@ -687,54 +819,35 @@ export function BrandPurchaseOrders() {
                         ))}
                     </tbody>
                   </table>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-ds-label">
-                    <label className="text-zinc-500">Carrier
-                      <select value={asnCarrier} onChange={(e) => setAsnCarrier(e.target.value)}
-                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white">
-                        {carrierOptionsForPO(po, brands.find((b) => b.id === po.brandId)?.nation).map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
-                      </select>
-                    </label>
-                    <label className="text-zinc-500">Ship date
-                      <input type="date" value={asnShipDate} onChange={(e) => setAsnShipDate(e.target.value)}
-                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white" />
-                    </label>
-                    <label className="text-zinc-500">PRO number
-                      <input value={asnPro} onChange={(e) => setAsnPro(e.target.value)}
-                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white font-mono" />
-                    </label>
-                    <label className="text-zinc-500">BOL number
-                      <input value={asnBol} onChange={(e) => setAsnBol(e.target.value)}
-                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white font-mono" />
-                    </label>
-                    <label className="text-zinc-500">Trailer / container
-                      <input value={asnTrailer} onChange={(e) => setAsnTrailer(e.target.value)}
-                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white font-mono" />
-                    </label>
-                    <label className="text-zinc-500">Lot number
-                      <input value={asnLot} onChange={(e) => setAsnLot(e.target.value)}
-                        placeholder="Required for Grocery / H&PC"
-                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white font-mono" />
-                    </label>
-                    <label className="text-zinc-500">Expiry date
-                      <input type="date" value={asnExpiry} onChange={(e) => setAsnExpiry(e.target.value)}
-                        className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white" />
-                    </label>
-                  </div>
-                  {/* §Routing Request — collect POs require routing request before ASN */}
-                  <RoutingRequestForm
+                  <label className="block text-ds-label text-zinc-500">
+                    Note for Mercenta (optional)
+                    <input
+                      value={correctionNote}
+                      onChange={(e) => setCorrectionNote(e.target.value)}
+                      className="block w-full mt-0.5 bg-ink-900 border border-white/[0.08] rounded-md px-2 py-1 text-white"
+                    />
+                  </label>
+                  {/* §P4 — Mercenta's routing status (read-only; the brand files nothing). */}
+                  <RoutingRequestStatus
                     poFreightTerm={po.freightTerm}
                     shipWindowEnd={po.shipWindowEnd}
-                    routingRequestFiled={!!routingRequestFiledPOs[po.id]}
-                    onFile={() => setRoutingRequestFiledPOs((prev) => ({ ...prev, [po.id]: true }))}
-                    onClose={() => {}}
+                    routing={instructionFor(po.id)?.outcome?.routingRequest}
                   />
                   <ShippingCostEstimate
-                    carrier={asnCarrier as any}
+                    carrier={(po.freightTerm === 'collect' ? 'amazon_partner' : 'dhl') as 'dhl'}
                     totalWeightKg={po.lineItems.reduce((s, l) => s + ((l.acknowledgedQty ?? l.quantity) * 0.4), 0)}
                     totalCbm={po.lineItems.length * 0.05}
                     cartonCount={po.lineItems.filter((l) => l.ackStatus !== 'rejected').length}
                     compact
                   />
+                  <div className="flex items-center gap-2">
+                    <Button className="text-xs" onClick={() => submitCorrection(po)}>
+                      Send packing correction to Mercenta
+                    </Button>
+                    <Button variant="ghost" className="text-xs text-zinc-500" onClick={() => setCorrectionPO(null)}>
+                      Close
+                    </Button>
+                  </div>
                 </div>
               )}
 
@@ -847,8 +960,9 @@ export function BrandPurchaseOrders() {
                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-ds-label text-blue-200 flex items-start gap-2">
                       <Truck className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
-                        Direct fulfillment — create a shipment above to move this PO into
-                        transit.
+                        Direct fulfilment — Mercenta raises the shipment request and files the ASN
+                        for this PO. Your part is to ship on time and to say here if your physical
+                        packing differs from the acknowledged quantities.
                       </span>
                     </div>
                   )}

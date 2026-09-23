@@ -84,7 +84,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
     {
       id: 'orientation-logistics',
       title: 'Logistics Hub',
-      description: 'When a PO is accepted, you create a shipment from your factory to the UK retail channel. You\'ll file carton-level details, choose a carrier, and submit an ASN (Advanced Shipment Notice).',
+      description: 'When a PO is accepted, Mercenta raises the shipment request and files the ASN (Advanced Shipment Notice) on your behalf. Your part is to ship on time and to tell Mercenta here if your physical packing differs.',
       targetSelector: '[data-tour="nav-logistics"]',
       position: 'right',
       action: 'next',
@@ -223,7 +223,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-asn-accuracy',
       title: 'ASN Accuracy Warning',
-      description: 'If you acknowledge a quantity and later file an ASN with different quantities, the retail channel may apply a deduction for ASN inaccuracy. Acknowledge only what you can actually ship.',
+      description: 'If the quantities Mercenta files on the ASN differ from what you acknowledged, the retail channel may apply a deduction for ASN inaccuracy. Acknowledge only what you can actually ship.',
       targetSelector: '[data-tour="po-asn-warning"]',
       position: 'bottom',
       action: 'finish',
@@ -243,7 +243,7 @@ export const SHIPPING_TOUR: TourDefinition = {
     {
       id: 'shipping-create-shipment',
       title: 'Creating a Shipment',
-      description: 'Click "Create Shipment" to start. You\'ll provide carton-level details: weight per carton (kg), dimensions (cm), number of cartons, carrier selection, and tracking number or BOL.',
+      description: 'Mercenta raises the shipment and files the ASN. If your packing differs from the acknowledged quantities, use "Packing differs?" to send Mercenta the actual carton quantities — you do not choose the carrier or file the document.',
       targetSelector: '[data-tour="shipment-create-btn"]',
       position: 'bottom',
       action: 'next',
@@ -259,7 +259,7 @@ export const SHIPPING_TOUR: TourDefinition = {
     {
       id: 'shipping-ship-window-vs-delivery',
       title: 'Ship Window vs. Delivery Window',
-      description: 'If the retail channel is paying freight (Freight Collect), you must submit a Routing Request and ship within the Ship Window. If you\'re paying freight (Freight Prepaid), you must deliver within the fixed Delivery Window. Check the PO for which applies.',
+      description: 'If the retail channel is paying freight (Freight Collect), Mercenta raises the routing step and the consignment must ship within the Ship Window. If you are paying freight (Freight Prepaid), the carrier must deliver within the fixed Delivery Window. Check the PO for which applies.',
       targetSelector: '[data-tour="shipment-window-info"]',
       position: 'bottom',
       action: 'next',

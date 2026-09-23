@@ -28,6 +28,7 @@
     "validate:founder-os": "node scripts/validate-founder-operating-system.mjs",
     "validate:kb-sufficiency": "node scripts/validate-kb-sufficiency.mjs",
     "validate:provider-safety": "node scripts/validate-provider-mode-safety.mjs",
+    "validate:proxy-model": "node scripts/validate-proxy-model.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs"
   },
   "dependencies": {

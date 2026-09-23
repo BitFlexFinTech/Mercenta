@@ -26,17 +26,64 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P3 DONE (three action lists → ONE)** (2026-09-23, session 15)
+## CURRENT STATE — **P4 DONE (proxy-model corrections)** (2026-09-23, session 16)
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
 
-**Checkpoint:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** for the P3 implementation at **`8203a03`**: local
-runtime verified = `origin/redesign/foundation` at `8203a03` (the repository's first push completed; delta push
-`049f340..8203a03`, exit 0) = the deployed build at `https://demo.mercenta.co.uk` (byte-identical assets,
-**live-verified 13/13 checks, 0 page errors**). Branch `redesign/foundation`; P3 commits this session: `21c6869`
-(code) → `17a99eb` → `8203a03`. `git status --porcelain` EMPTY. This state block itself is a docs-only increment
-(three-way NOT APPLICABLE). The governance increment (`operating-model.md` §12) remains as recorded at `049f340`.
+**Checkpoint:** **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** for the P4 implementation. Local verification is
+DONE and green (see below); the GitHub push and the demo deployment + live verification for this increment are executed
+as the task closes, and their results are recorded in the `CURRENT RESUME STATE` block (not here — this file's top
+section is a projection, and the block is its source). Branch `redesign/foundation`. Previous verified commits:
+`8203a03` (P3 production-boot fix), `17a99eb`/`21c6869` (P3), `0c05fe0` (P2). `git status --porcelain` EMPTY.
+
+**What changed this session (P4 — the direction of the proxy model was wrong; it is now right)**
+
+1. **The brand's decision is an INSTRUCTION to Mercenta** — NEW `src/lib/commerce/channelInstructions.ts`. A canonical
+   `ChannelInstruction` records the decision **verbatim** with deterministic, idempotent ids (`instr-ack-<poId>` /
+   `instr-pack-<poId>`), simulation provenance, and the states `pending_mercenta_action → actioned | refused`. Every
+   state change writes a canonical audit entry and fires the canonical change signal (one place, so
+   `validate-canonical-propagation` S2 holds). A refusal is never retried silently: `requeueChannelInstruction` is an
+   attributed, audited action. It also owns **`instructionLineFor(po, line)`** — the ONE derivation of an instruction
+   line, which fixed a real defect (see 5).
+2. **MERCENTA performs the channel action** — NEW `src/lib/commerce/proxyProcessor.ts`. Processing an instruction does,
+   in order: `submitAcknowledgement` through the SP-API seam (Mercenta-side) → the routing/shipment request
+   (channel-arranged carrier on Freight Collect, Mercenta's own account on prepaid, from the canonical routing rule) →
+   the ASN, **automatic on acceptance** (decision 9). A channel refusal **stops the chain** (nothing filed, reason
+   recorded, deliberate retry); an all-rejected decision is `actioned` with routing/ASN **NOT APPLICABLE** — never
+   falsely filed. The ASN actor is `mercenta-proxy-automation`, so the audit shows WHO acted.
+3. **The SP-API seam gained `submitAcknowledgement`** on BOTH clients (`client.ts` real transport, `mockClient.ts`
+   deterministic mock with its own refusal paths). **AV-040 partially closed** — the other seven documented operations
+   stay P12. `src/data/api.ts → acknowledgePurchaseOrder` now writes the instruction instead of the old brand-side
+   draft that hardcoded `carrier: 'dhl'` / `destination: 'Mercenta UK Hub'` and told the brand to add carton details.
+4. **The surfaces follow the direction.** The brand PO surface has **no filing control** (`Create Shipment` / `File ASN`
+   / the routing filing form are gone) and shows Mercenta's channel status (acknowledgement reference, routing
+   reference, ASN + consignment); its only packing action is the **packing correction** instruction.
+   `RoutingRequestForm` — a placeholder that wrote **nothing** to the domain — became the read-only
+   `RoutingRequestStatus`. The admin PO detail shows the instruction + Mercenta's outcome with an attributed retry.
+5. **Two REAL defects were found and fixed at their cause (neither hidden).** (a) The BROWSER run showed that an absent
+   per-line `ackStatus` (seeded/legacy acceptances) was being derived as a rejection, so Mercenta filed nothing for a
+   genuinely accepted PO — fixed with `instructionLineFor`; registry row
+   `discovered-absent-ackstatus-treated-as-rejection`. (b) The FULL suite showed the investor demo's replay digest
+   diverging (66/44 → 64/42 audit facts) because `resetInvestorDemo()` did not clear the new canonical instruction
+   store — fixed there and asserted by `validate-proxy-model`.
+6. **Verification this session:** `tsc` app **0** · `tsc` node **0** · `eslint .` **0** (rules-of-hooks +
+   exhaustive-deps as ERROR) · `npm run build` **✓** · NEW `validate-proxy-model` **PASS (39 checks)** ·
+   `validate-canonical-propagation` **25/0** · `validate-e6` **PASS** · `validate-e7` **121/0** ·
+   `validate-command-centre` **49 PASS** · `validate-workspace-shell` **94/0** · `validate-uiux-redesign` **347/0** ·
+   `validate-e4`/`e5`/`investor-demo`/`stage15`/`16`/`19`/`26` **PASS** · `validate:wording` **0 violations** · NEW
+   `e2e/proxy-model.spec.ts` **4 pass** · focused specs (`proxy-model`+`shipment-asn`+`notifications`) **15/15** ·
+   `investor-demo` isolated **10/10** · **FULL Playwright suite** — result recorded in the resume block.
+
+**NOT STARTED / REMAINING:** **P5 — remove the Mercenta Hub** (destination = the FC on the PO), then P6 → P12 of the
+cleanup programme (`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4/§8).
+
+**Governance note (still current):** `.clinerules/operating-model.md` **§12 — CHAT IS NOT PROJECT MEMORY** remains in
+force: the mandatory task-close sequence, the canonical `## CURRENT RESUME STATE` block, the minimum-context resume
+procedure and the blocked-task protocol. **Push is part of closing a task**; `--force` pushes and pushing an unverified
+tree stay forbidden.
+
+### HISTORY — the previous increment (P3 + governance, 2026-09-23, session 15). Not current; kept for the reviewer.
 
 **What changed this session (P3 — Operations = ACT wiring)**
 1. **Three action lists → ONE.** The Control Centre loses its duplicated work/attention lists (the retired

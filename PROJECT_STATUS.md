@@ -5,16 +5,16 @@
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
 
-LAST COMPLETED TASK:      P3 — Operations = ACT wiring (three action lists → ONE): the Control Centre keeps founder-only CONTROLS; the founder console is projected into the single action list (Work Management, Super-Admin gated, fail-closed); the inherited unhealthy gate `validate-stage26` was genuinely repaired (ThemeProvider harness + gating bug + repointed catalog-import assertions + an honest exit code).
-CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** for the P3 implementation at **`8203a03`**: local runtime verified (tsc 0 · eslint 0 · build ✓ · full suite 464 passed/0 failed/2 skipped · the new production-boot gate PASS) = GitHub committed state (`origin/redesign/foundation` = `8203a03`) = `https://demo.mercenta.co.uk` (deployed build byte-identical to the committed build; **live verification 13/13 checks, 0 page errors**). This state commit itself is a docs-only increment (three-way NOT APPLICABLE).
+LAST COMPLETED TASK:      P4 — proxy-model corrections: the brand's decision is now an INSTRUCTION to Mercenta (`src/lib/commerce/channelInstructions.ts`); MERCENTA performs the channel action (`src/lib/commerce/proxyProcessor.ts`: submitAcknowledgement → routing/shipment request → ASN filed automatically on acceptance); the brand surface has no filing control left and sees status + the packing-correction exception; `submitAcknowledgement` added to the SP-API seam (real + mock, Mercenta-side; AV-040 partially closed).
+CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** for the P4 implementation. Local verification is DONE and green (tsc 0 · eslint 0 · build ✓ · validate-proxy-model PASS (39) · validate-e6/e7/canonical-propagation/command-centre/workspace-shell/uiux-redesign/e4/e5/stage15/16/19/26 PASS · wording 0 violations · focused Playwright 15/15 · investor-demo isolated 10/10). The GitHub push and the demo deployment + live verification for THIS increment are the legs still being executed as this block is written; the fields below state their true state at the moment of writing and are updated (with evidence) before the task is closed.
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`8203a03`** — "fix(build): the deployed bundle never mounted — one vendor chunk + a production boot gate" (8 files, +215/−49), preceded by **`17a99eb`** — "P3 complete: three action lists → one + a genuinely repaired inherited gate" (7 files, +373/−144) and the P3 code checkpoint **`21c6869`**.
-GITHUB PUSH:              **DONE — PUSHED.** `redesign/foundation` now exists on `origin` (SSH). The first push of the ~219.71 MiB repository pack completed after ~2h13m at an average of ~25–60 KiB/s (`* [new branch] redesign/foundation`, remote ref `049f340c356ab05e6d70856a31e8254ea4c758f0`), and the following delta push landed the verified commits: **`049f340..8203a03 redesign/foundation -> redesign/foundation`, exit 0**. `git ls-remote --heads origin redesign/foundation` = the local HEAD.
-DEMO DEPLOYMENT:          **DONE (this session).** `bash scripts/deploy-demo.sh` was executed twice: run 1 shipped the P3 build and the LIVE check found the bundle did not mount; run 2 shipped the fixed bundle (`DEPLOY2_EXIT=0`, 22 new + 12 modified files, 4.79 MB, 0 removed directories, ~321s at ~14.5 KiB/s). The deployed build was confirmed **byte-identical to the committed build**: every asset referenced by the live `index.html` matches `dist/` and all 39 emitted files were fetched and hash-compared equal (`.htaccess` returns 403 by host policy).
-LIVE VERIFICATION:        **PASS — 13/13 checks, 0 page errors, on `https://demo.mercenta.co.uk`** (real Chromium against the deployed build): Super Admin demo login · Control Centre renders **no second action list** and points at the single one · *Integrations & systems* panel present · drill-down metrics present · Work Management carries the founder console rows · every founder funding row shows its rank and its `WHY | score N` · the drawer renders the full WHY breakdown · the founder source filter is offered. **It also found and forced the fix of a production-only mount crash** (see OUTSTANDING BLOCKER / heading 6).
-OUTSTANDING BLOCKER:      **NONE.** The GitHub push transport blocker is CLEARED (`redesign/foundation` is on `origin` at `8203a03`), the demo deployment is DONE and the live implementation is VERIFIED. The production-only mount crash that the live leg found has been fixed and is now gated by `npm run validate:production-boot`.
-NEXT TASK:                P4 — proxy-model corrections (brand does its 3 jobs only; MERCENTA raises the routing/shipment request and files the ASN — the brand sees status; the acknowledgement writes an instruction-to-Mercenta record; `submitAcknowledgement` behind the SP-API seam, mock-first, Mercenta-side). Closes AV-040 + the wrong-direction routing.
-EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P4 row) and §7 (what P3 built, so P4 does not re-derive it) → then `src/data/api.ts` (the auto-draft on acceptance hardcodes `carrier:'dhl'` and `destination:'Mercenta UK Hub'`), the SP-API seam (`submitAcknowledgement`) and the acknowledgement → instruction-to-Mercenta record; then `npx playwright test --workers=3`.
+LAST VERIFIED COMMIT:     the P4 commit carrying this session's work (hash recorded in heading 7 and in the final state commit). Previous verified commits: `8203a03` (P3 production-boot fix), `17a99eb`/`21c6869` (P3), `0c05fe0` (P2 checkpoint).
+GITHUB PUSH:              PENDING at the moment of writing — the P4 commit is pushed as part of closing this task (`origin/redesign/foundation`; the P3 commits `049f340..8203a03` are already on `origin`). If the push cannot happen, the exact transport blocker is recorded here instead.
+DEMO DEPLOYMENT:          PENDING at the moment of writing — `bash scripts/deploy-demo.sh`, then the live verification below. P3's deployment is DONE and live-verified (13/13) and remains what `https://demo.mercenta.co.uk` serves until this increment's deploy completes.
+LIVE VERIFICATION:        NOT VERIFIED YET for P4 — the planned live checks are: Super Admin demo login · the demo site mounts (`#root` non-empty, no page/console error) · a brand PO shows the Mercenta channel-status panel (`po-mercenta-status-*`) with NO filing control · a brand acceptance produces "Decision issued to Mercenta." and Mercenta's channel acknowledgement reference · a packing correction produces "Mercenta filed the ASN". Results are recorded here before the task closes.
+OUTSTANDING BLOCKER:      **NONE.** (Historical note: the GitHub push transport issue of 2026-09-23 was CLEARED — `redesign/foundation` exists on `origin`; any earlier statement of it as an open blocker is superseded by this line.)
+NEXT TASK:                P5 — remove the Mercenta Hub completely: destination = **the FC on the PO**; the Hero/map arrival node = that FC; `src/data/api.ts → createShipmentForPO` and `src/data/demoData.ts` (`destination: 'Mercenta UK Hub'`); copy, validators, specs and docs. Closes D09-13 / AV-026/027.
+EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P5 row) and §8 (what P4 built, so P5 does not re-derive it) → then `src/data/api.ts` (`createShipmentForPO`), `src/data/demoData.ts`, `src/config/logisticsGeo.ts` / `logisticsHero.ts` (the Mercenta-hub node) and `src/types.ts` (`mercenta_hub` status); then `npx playwright test --workers=3`.
 
 ---
 
@@ -41,10 +41,28 @@ EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.
    `validate-stage26` **PASS (32 ✓ / 3 skipped / 0 fail — an inherited FAIL genuinely repaired)** · **FULL Playwright
    suite** re-run after the budget fix → see heading 8. Full detail: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §7.
 
+- **P4 (application work — DONE, verified this session): PROXY-MODEL CORRECTIONS — the direction of the whole platform is
+  now right.** The brand's decision is an **INSTRUCTION to Mercenta** (`src/lib/commerce/channelInstructions.ts`, new):
+  recorded verbatim, deterministic/idempotent, simulated-provenance, audited, never silently retried. **MERCENTA performs
+  the channel action** (`src/lib/commerce/proxyProcessor.ts`, new): `submitAcknowledgement` through the SP-API seam
+  (added to the real client AND the mock, mock-first, Mercenta-side) → the routing/shipment request → the **ASN filed
+  automatically on acceptance** (decision 9), with a channel refusal stopping the chain honestly and an all-rejected PO
+  recorded as routing/ASN **NOT APPLICABLE** rather than falsely filed. The brand surface has **no filing control left**
+  ("Create Shipment" / "File ASN" / the routing filing form are gone; `RoutingRequestForm` — a placeholder that wrote
+  nothing to the domain — became the read-only `RoutingRequestStatus`); it shows Mercenta's channel status (acknowledgement
+  reference, routing reference, ASN + consignment) and its only packing action is the **packing correction** instruction.
+  The old brand-side auto-draft (which hardcoded `carrier: 'dhl'` / `destination: 'Mercenta UK Hub'` and told the brand to
+  add carton details) is gone. **AV-040 partially closed** (`submitAcknowledgement`; the other seven operations stay P12).
+  **Verified this session:** `tsc` app **0** · `tsc` node **0** · `eslint .` **0** (hooks rules as ERROR) · `npm run build`
+  **✓** · `validate-proxy-model` (**NEW**) **PASS (38 checks)** · `validate-e6` **PASS** · `validate-e7` **121/0** ·
+  `validate-canonical-propagation` **25/0** · `validate-command-centre` **49 PASS** · `validate-workspace-shell` **94/0** ·
+  `validate-uiux-redesign` **347/0** · `validate-e4-commerce` / `validate-e5-admin-surfaces` / `validate-stage15/16/19/26`
+  **PASS** · `validate:wording` **0 violations** · new browser spec `e2e/proxy-model.spec.ts` **4 pass** · targeted specs
+  **15/15 pass** · **FULL Playwright suite** → heading 8. Full detail:
+  `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` **§8**.
+
 **Full plan, all 11 binding Founder decisions, the research evidence and the phase table:**
 `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. That document is the resume point — read it before touching this programme.
-
-**Start:** branch `redesign/foundation`, HEAD `d9e77f650df96a107849e396d0b630d8e06aec6b` (the programme-record commit), `git status --porcelain` **EMPTY**.
 
 ### 1. COMPLETED / VERIFIED
 
@@ -94,23 +112,22 @@ EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.
 
 ### 2. IN PROGRESS
 
-- **Nothing mid-flight.** The tree is clean at this session's P3 commit plus its state commit. **P3 is DONE and
-  committed; P4 has not been started.**
+- **Nothing mid-flight.** The tree is clean at this session's P4 commit plus its state commit. **P4 is DONE and
+  committed; P5 has not been started.**
 
 ### 3. REMAINING — CURRENT ROADMAP (the cleanup programme, in order)
 
-1. **P4 — Proxy-model corrections.** The brand does its three jobs only (accept/reject/backorder → download/print → ship on time); **Mercenta** raises the routing/shipment request and files the ASN (the brand sees status); the acknowledgement writes an **instruction-to-Mercenta** record; `submitAcknowledgement` sits behind the SP-API seam, Mercenta-side. Closes **AV-040** and the wrong-direction routing. **NOT STARTED — next.**
-2. **P5 — Remove the Mercenta Hub completely**; destination = **the FC on the PO**; Hero/map arrival node = that FC; copy, validators, specs and docs. Closes **D09-13 / AV-026/027**. **NOT STARTED.**
-3. **P6 — The PO document pack** (automatic on acceptance): SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge; "Documents for this PO" in the Hub; the collect lane shows the documented status chain (request → carrier assigned → ARN → pickup). **NOT STARTED.**
-4. **P7 — Admin invoicing.** Invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60 payment terms selected per invoice**; derived upcoming payments; receivables = issued-and-unpaid. Closes **AV-022**. *(P2 already derives receivables/upcoming payments from the current ledger with the declared terms; P7 adds the terms CHOICE, the number registry and the receiving sync.)* **NOT STARTED.**
-5. **P8 — Inventory linked to the brand's catalogue, with ASIN.** Brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation — the code never invents a real-looking ASIN). **NOT STARTED.**
-6. **P9 — Remove the 3PL carrier surface completely, including the demo environment** (environment, role, shell + 3 views, `CarrierDashboard`, `BakLogistics`, the demo switcher entry, the "3PL Carrier Terminal" login card, the admin "Carrier Monitor" item, the public FAQ claim, and the affected documents). Matrix `D01-07` / `D04-18` / `D10-13`. **NOT STARTED.**
-7. **P10 — Logistics Hub completion.** Provider configuration + the PO documents; consolidation recorded as **documented-but-deferred** with the model supporting **1..n POs**. **NOT STARTED.**
-8. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED.**
-9. **P12 — SP-API seam extension (mock-first).** `submitAcknowledgement`, `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. Closes **AV-040**. **NOT STARTED.**
-10. **Keep `redesign/foundation` pushed to GitHub** — the repository's first push (~220 MB pack) is transport-bound and was IN PROGRESS this session; the branch ref on `origin` is the remaining leg to confirm. **IN PROGRESS.**
-11. **DEPLOY + LIVE VERIFY** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Executed at the close of each product phase (this session for P3); the full three-way confirmation is re-run at the end of the programme. **IN PROGRESS THIS SESSION.**
-12. **Carried over from session 12/13:** the Finance `destination: 'accounting'` dead route, the Overview header still titled **"Operations Overview"** (P2 deliberately did not rename it — the Founder's phase table puts copy changes in P4/P5), the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, and **WAVE 5 / WAVE 6**. *(The "Command Centre ↔ Control Centre reconciliation" listed here in earlier sessions was the P3 work — now DONE.)* **NOT STARTED.**
+1. **P5 — Remove the Mercenta Hub completely.** Destination = **the FC on the PO**; Hero/map arrival node = that FC; `createShipmentForPO` + `demoData.ts`'s `destination: 'Mercenta UK Hub'`; copy, validators, specs and docs. Closes **D09-13 / AV-026/027**. **NOT STARTED — next.** (P4 deliberately left the destination string alone: it belongs to P5, and the programme forbids collapsing phases.)
+2. **P6 — The PO document pack** (automatic on acceptance): SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge; "Documents for this PO" in the Hub; the collect lane shows the documented status chain (request → carrier assigned → ARN → pickup). **NOT STARTED.**
+3. **P7 — Admin invoicing.** Invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60 payment terms selected per invoice**; derived upcoming payments; receivables = issued-and-unpaid. Closes **AV-022**. *(P2 already derives receivables/upcoming payments from the current ledger with the declared terms; P7 adds the terms CHOICE, the number registry and the receiving sync.)* **NOT STARTED.**
+4. **P8 — Inventory linked to the brand's catalogue, with ASIN.** Brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation — the code never invents a real-looking ASIN). **NOT STARTED.**
+5. **P9 — Remove the 3PL carrier surface completely, including the demo environment** (environment, role, shell + 3 views, `CarrierDashboard`, `BakLogistics`, the demo switcher entry, the "3PL Carrier Terminal" login card, the admin "Carrier Monitor" item, the public FAQ claim, and the affected documents). Matrix `D01-07` / `D04-18` / `D10-13`. **NOT STARTED.**
+6. **P10 — Logistics Hub completion.** Provider configuration + the PO documents; consolidation recorded as **documented-but-deferred** with the model supporting **1..n POs**. **NOT STARTED.**
+7. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED.**
+8. **P12 — SP-API seam extension (mock-first).** `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. *( `submitAcknowledgement` was implemented by **P4**, so it is no longer P12's work; the seven remaining operations still close **AV-040**.)* **NOT STARTED.**
+9. **`redesign/foundation` on GitHub — DONE.** The branch exists on `origin`; the push is part of every task close now (operating-model §12).
+10. **KEEP `demo.mercenta.co.uk` IN STEP** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Executed at the close of each product phase (P3 and P4); the full three-way confirmation is re-run at the end of the programme.
+11. **Carried over:** the Finance `destination: 'accounting'` dead route, the Overview header still titled **"Operations Overview"**, the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, and **WAVE 5 / WAVE 6**. *(The "Command Centre ↔ Control Centre reconciliation" was the P3 work — DONE. P4 left the Overview header title to P5, which owns the copy pass.)* **NOT STARTED.**
 
 ### 4. DEFERRED / PARKED
 
@@ -124,49 +141,85 @@ EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.
 
 ### 6. KNOWN EXCEPTIONS
 
-- **Push and demo deployment are the two legs still being executed in this session** (the push is transport-bound: a
-  ~220 MB first pack on a slow link). **The demo leg is DONE:** deployed twice (run 1 exposed the dead bundle, run 2
-  shipped the fix) and **live-verified 13/13 checks on `https://demo.mercenta.co.uk`** (heading 8).
-- **A production-only mount crash was found by the LIVE leg and fixed (not hidden).** The deployed bundle never
-  mounted (`#root` empty, `TypeError: createSelector is not a function`) — a `manualChunks` cycle between the
-  `vendor-react` and `vendor-other` chunks, invisible to tsc/eslint/build/the dev-mode browser suite. Fixed by keeping
-  all of `node_modules` in ONE `vendor` chunk, with a new permanent gate (`npm run validate:production-boot`) that
-  builds, serves `dist`, boots it in Chromium and fails (exit 1) if the app does not mount — proven both ways.
-- **`validate-stage26` — REPAIRED this session (was an inherited exception).** It previously printed `STAGE26_VALIDATION_FAIL` while **always exiting 0**, so its failures were invisible to any gate (registry `discovered-validator-stage26-exit-code`). Its three genuine defects were fixed with **no assertion removed** (ThemeProvider harness; the `gated`-flag bug that reported a documented SKIP as a FAIL; `catalog-import` assertions repointed to the current canonical token-derived tenant contract + an honest exit code). **It now reports PASS and exits 1 on failure.** Historical references to it in older sections below remain as history only.
-- **Playwright full-suite contention — reported rather than hidden.** At `--workers=3` the P3 run reported 1 failure: `app-shell.spec.ts` 390x844 hit the **30 s per-test budget** inside `waitForTimeout` *after* the drawer opened and before any assertion (its 430x932 / 375x812 siblings passed at 27.3 s / 24.6 s in the same loaded run; the same test passes at 22.8 s in isolation). This is the same class of budget defect P2 found in `investor-demo` 375x812, so the established fix (`test.slow()`, assertions unchanged) was applied and the suite re-run — see heading 8.
-- **Known-wrong behaviour the remaining phases will correct — listed so it is not mistaken for correct:** the brand still "files the ASN" / "confirms routing" (P4); the Mercenta Hub still exists as a destination (P5); the auto-draft on acceptance still hardcodes `carrier:'dhl'` and `destination:'Mercenta UK Hub'` (`src/data/api.ts`, P5/P6); the 3PL carrier surface is still present (P9); "Create PO" still exists (P11); no PO document pack exists yet (P6); invoice numbering has no uniqueness registry yet (P7).
-- The Overview header still reads **"Operations Overview"** — deliberately unchanged in P2 (the phase is additive; the Founder's phase table puts the copy/route work in P4/P5).
+- **The brand surface no longer files anything — that is the POINT, and it is verified.** No filing control remains
+  (`Create Shipment` / `File ASN` / the routing filing form), and `e2e/proxy-model.spec.ts` asserts their ABSENCE. The
+  brand's remaining packing action is the **packing correction** instruction, which reaches Mercenta and which Mercenta
+  acts on.
+- **A real defect was found by the P4 browser run and fixed at its cause (not hidden).** An absent per-line `ackStatus`
+  (seeded/legacy acceptances) was first derived as a rejection, which made Mercenta file nothing for a genuinely
+  accepted PO. One shared derivation, `instructionLineFor` (`src/lib/commerce/channelInstructions.ts`), now owns the
+  rule; it is asserted in `scripts/validate-proxy-model.mjs` against both the seeded regression PO and a synthetic
+  rejected PO, and recorded as registry row `discovered-absent-ackstatus-treated-as-rejection`.
+- **A second real defect was found by the FULL suite and fixed at its cause.** The instruction store is canonical state,
+  so `resetInvestorDemo()` must clear it; it did not, which changed the investor demo's replay digest
+  (66/44 → 64/42 audit facts) and failed `e2e/investor-demo.spec.ts` test 3. Fixed in `resetInvestorDemo()`, and the
+  determinism contract is now asserted by `validate-proxy-model`.
+- **`validate-stage26` — repaired in the previous session (P3), still PASS.** It previously printed
+  `STAGE26_VALIDATION_FAIL` while **always exiting 0**, so its failures were invisible to any gate (registry
+  `discovered-validator-stage26-exit-code`). Its three genuine defects were fixed with **no assertion removed**
+  (ThemeProvider harness; the `gated`-flag bug that reported a documented SKIP as a FAIL; `catalog-import` assertions
+  repointed to the current canonical token-derived tenant contract + an honest exit code). **It now reports PASS and
+  exits 1 on failure.** Historical references to it in older sections below remain as history only.
+- **Known-wrong behaviour the remaining phases will correct — listed so it is not mistaken for correct:**
+  the Mercenta Hub still exists as a destination (`destination: 'Mercenta UK Hub'` in `src/data/api.ts` +
+  `src/data/demoData.ts`) **(P5)**; the 3PL carrier surface is still present **(P9)**; "Create PO" still exists **(P11)**;
+  no PO document pack exists yet **(P6)**; invoice numbering has no uniqueness registry yet **(P7)**; and
+  `getPurchaseOrdersStatus` / `submitShipmentRequest` / `getShipmentDetails` / `getShipmentLabels` /
+  `submitShipmentConfirmations` / `submitInvoices` / `submitInventoryUpdate` are still not implemented **(P12)**.
+  *(P4 corrected the brand-files-the-ASN direction and the acknowledgement's routing; those are no longer on this list.)*
+- The Overview header still reads **"Operations Overview"** — deliberately unchanged (P2/P4 are additive; P5 owns the
+  copy pass).
 - **P2 data caveat, stated rather than hidden:** in the seeded demo the canonical commerce-invoice ledger is EMPTY until the E4 lifecycle runs, so the admin **Receivables** and **Upcoming payments** tiles render **£0.00** with an explicit "no unpaid invoices recorded / none falls due within 30 days at the declared 30-day terms" basis line — they are derived, not fabricated, and they populate as soon as invoices exist (proven by `e2e/brand-operational-surfaces.spec.ts`, which seeds one through the real lifecycle and then asserts the brand's `Invoices outstanding` tile and the work item).
 
 ### 7. CURRENT CHECKPOINT
 
-- **Branch:** `redesign/foundation` (tracking `origin/redesign/foundation`). **P2 checkpoint commit:** **`0c05fe0d6537ea1c46b1053282bab19d051e38ea`**. **P3 checkpoint commits (this session):** code checkpoint **`21c6869`**, then **`17a99eb`** (P3 completion: docs/registry/state + the repaired `validate-stage26` + the app-shell budget fix) and **`8203a03`** (the production-boot fix + gate + docs). `origin/redesign/foundation` = **`8203a0387af2e95cb75c0ddb3e608331349c11ba`** = local HEAD. `git status --porcelain`: **EMPTY**.
-- **THREE-WAY STATUS: `COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED`** — local ✅ (verified this session) · GitHub ✅ (`origin/redesign/foundation` at `8203a03`) · demo ✅ (deployed build byte-identical to the committed build, **live-verified 13/13 checks with 0 page errors**). The state commit that carries this very text is a **docs-only** increment, so its own three-way status is **NOT APPLICABLE (no application runtime change)** — it does not change what is deployed.
+- **Branch:** `redesign/foundation` (tracking `origin/redesign/foundation`). **P2 checkpoint commit:**
+  `0c05fe0d6537ea1c46b1053282bab19d051e38ea`. **P3 checkpoint commits:** `21c6869` (code) → `17a99eb` (completion) →
+  `8203a03` (production-boot fix + gate). **P4 checkpoint commit:** the commit carrying this session's work — its hash is
+  recorded in the `CURRENT RESUME STATE` block at the top of this file (and mirrored in `HANDOFF.md`), together with the
+  push/deploy/live-verification values. `git status --porcelain`: **EMPTY**.
+- **THREE-WAY STATUS:** see the `CURRENT RESUME STATE` block — it states the ONE phrase that is true for P4 (§11.1
+  vocabulary), with the demo leg's evidence.
 
-### 8. VERIFICATION STATUS — **P3 (2026-09-23, session 15): all runs below were executed in THIS session**
+### 8. VERIFICATION STATUS — **P4 (2026-09-23, session 16): every run below was executed in THIS session**
 
 | Gate | Result |
 |---|---|
 | `npx tsc --noEmit -p tsconfig.app.json` · `npx tsc --noEmit -p tsconfig.node.json` | **0 errors · 0 errors** |
 | `npx eslint .` | **0 problems** — with `react-hooks/rules-of-hooks` and `react-hooks/exhaustive-deps` set to **ERROR** (§Stage-18 functional-parity pipeline) |
-| `npm run build` | **✓ built** (8.0s) |
-| `validate-command-centre` | **49 checks PASS** (was 40) — single action list, fail-closed Super-Admin gate, tab-aware hand-off, **no dead hand-off destination for ANY work item in EITHER shell**, total projection mapping |
-| `validate-uiux-redesign` | **347 PASS / 0 FAIL** |
-| `validate-workspace-shell` | **94 PASS / 0 FAIL** · legacy page-shell backlog 0 |
-| `validate-stage26` | **PASS — 32 ✓ / 3 skipped (absent artefact) / 0 failures · exit 0** — an INHERITED failure genuinely repaired this session (see heading 6) |
-| `validate-e5-admin-surfaces` · `validate-e6-brand-surfaces` · `validate-e7-embedded-social` | **PASS · PASS · PASS** (each asserts **zero external network calls**) |
-| `validate-work-layer` · `validate-founder-operating-system` | **PASS (0 failures) · PASS** (0 network calls) |
-| `validate:production-boot` (**NEW gate**) | **PASS** — builds, serves `dist`, boots it in Chromium: `#root` mounts, no page/console error, Partner Login renders. **Proven to genuinely fail**: the pre-fix bundle gives `PRODUCTION_BOOT_VALIDATION_FAIL (3)` + **exit 1**; the fixed bundle gives `PRODUCTION_BOOT_VALIDATION_PASS` + **exit 0** |
-| **LIVE verification — `https://demo.mercenta.co.uk`** (real deployment, real browser) | **PASS — 13/13 checks, 0 page errors.** Super Admin demo login · Control Centre renders **no second action list** and points at the single one (`control-open-work`) · the *Integrations & systems* panel and the drill-down metrics are present · Work Management carries the founder console rows · every founder **funding** row shows its rank and its `WHY | score N` · the drawer renders the full WHY breakdown · the founder source filter is offered. Deployed build confirmed byte-identical to the committed build (identical asset hashes in the live `index.html` and all 39 emitted files fetched and hash-compared; `.htaccess` returns 403 by host policy) |
-| Playwright focused: `command-centre` (4) · `work-layer` (12) · `app-shell` isolated (23, **incl. 390x844 green with no overflow**) | **4 · 12 · 23 passed** |
-| Playwright **FULL suite** — `npx playwright test --workers=3` (P3 run 2, after the budget fix) | **464 passed / 0 failed / 2 skipped (15.2m), exit 0**. Run 1 (pre-fix) was **463 passed / 1 failed / 2 skipped (19.0m)**: the single failure was `app-shell.spec.ts` 390x844 hitting the 30 s in-test budget *before any assertion* (see heading 6). The `test.slow()` budget fix — the same class of fix P2 applied to `investor-demo` 375x812 — made run 2 **fully green with every assertion unchanged**. Generated logs live under `/tmp` and `test-results/` (gitignored) |
+| `npm run build` | **✓ built** (7.5s) |
+| `validate-proxy-model` (**NEW gate**) | **PASS (39 checks)** — `submitAcknowledgement` on BOTH clients; the real client refuses without a verified connection; the mock succeeds AND refuses (over-ordered quantity, backorder without a date); the instruction is written VERBATIM and idempotently; Mercenta's processing produces acknowledgement + routing + ASN; the all-rejected case is NOT APPLICABLE (never falsely filed); a channel refusal blocks the ASN and the retry is attributed + audited; the direction is asserted in SOURCE; the investor-demo reset clears the store |
+| `validate-canonical-propagation` | **25 PASS / 0 FAIL** — every canonical mutation signals (the instruction store signals through its single audited write path) |
+| `validate-e6-brand-surfaces` | **PASS** — the P4 declared scope added; F5/F5b/F6 contracts unchanged |
+| `validate-e7-embedded-social` | **PASS — 121 assertions, 0 failures** — the P4 declared scope added; the protected-area guard unchanged |
+| `validate-command-centre` · `validate-workspace-shell` · `validate-uiux-redesign` | **49 PASS · 94 PASS / 0 FAIL · 347 PASS / 0 FAIL** |
+| `validate-e4-commerce` · `validate-e5-admin-surfaces` · `validate-investor-demo` | **PASS · PASS · PASS** (zero external network calls each) |
+| `validate-stage15` · `validate-stage16` · `validate-stage19` · `validate-stage26` | **PASS · PASS · PASS · PASS (32 ✓ / 3 skipped / 0 failures, exit 0)** |
+| `validate-canonical-model` · `validate-work-layer` | **ALL CANONICAL-MODEL CHECKS PASSED · PASS (0 failures)** |
+| `npm run validate:wording` | **WORDING_LINT_PASS — 298 src files scanned, 0 outward-facing violations** |
+| Playwright focused: `proxy-model` (4) · `shipment-asn` (7) · `notifications` (4) | **15 passed / 0 failed (29.0s)** — the corrected direction proven in a browser |
+| `e2e/investor-demo.spec.ts` (isolated, `--workers=1`) | **10 passed** — after the reset fix below |
+| `npm run validate:production-boot` | **PRODUCTION_BOOT_VALIDATION_PASS** — the built bundle mounts (`#root` non-empty), no page/console error, the Partner Login entry renders |
+| Playwright **FULL suite** — `npx playwright test --workers=3` (P4 run 2, after the reset fix) | **468 passed / 0 failed / 2 skipped (14.7m), exit 0**. Run 1 was **467 passed / 1 failed / 2 skipped (14.4m)**, the single failure being `e2e/investor-demo.spec.ts` test 3 (replay digest) — a REAL defect the suite caught, fixed at its cause (see heading 6) and then green. Logs under `/tmp` (gitignored) |
 | `git status --porcelain` | **EMPTY** |
 
-**Earlier-increment figures (unchanged, historical):** at P2 the same suite was **462 passed / 0 failed / 2 skipped** (18.8m) and the gates read `validate-uiux-redesign` 346/0 · `validate-command-centre` 40 PASS · `validate-workspace-shell` 94/0. Those numbers are superseded by the rows above.
+**Two real defects were found and fixed at their cause this session (both recorded, neither hidden):**
+`discovered-absent-ackstatus-treated-as-rejection` (found by the BROWSER run; fixed with the single `instructionLineFor`
+derivation) and the investor-demo **replay-digest divergence** (found by the FULL suite; the instruction store was not
+part of `resetInvestorDemo()`, so the replay wrote two fewer audit rows — 66/44 → 64/42 — and the digest changed; fixed
+by resetting the store with the other canonical stores and now asserted by `validate-proxy-model`).
+
+**Earlier-increment figures (unchanged, historical):** P3's suite was **464 passed / 0 failed / 2 skipped** (15.2m) with
+`validate-command-centre` 49 · `validate-uiux-redesign` 347/0 · `validate-workspace-shell` 94/0; P2's was
+**462 passed / 0 failed / 2 skipped** with `validate-command-centre` 40. Those are superseded by the rows above.
 
 ### 9. NEXT EXECUTION SCOPE
 
-**P4 — Proxy-model corrections** (the brand does its three jobs only; MERCENTA raises the routing/shipment request and files the ASN; the acknowledgement writes an instruction-to-Mercenta record; `submitAcknowledgement` behind the SP-API seam, mock-first, Mercenta-side), then P5 → P12 in the order listed in heading 3, each phase verified and committed separately. **Read `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` first — §4 for the P4 row and §7 for what P3 built, so P4 does not re-derive it.**
+**P5 — Remove the Mercenta Hub completely** (destination = **the FC on the PO**; the Hero/map arrival node = that FC;
+`createShipmentForPO` + `demoData.ts`'s `destination: 'Mercenta UK Hub'`; copy, validators, specs and docs; closes
+**D09-13 / AV-026/027**), then P6 → P12 in the order listed in heading 3, each phase verified and committed separately.
+**Read `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` first — §4 for the P5 row and §8 for what P4 built,
+so P5 does not re-derive it.**
 
 ---
 

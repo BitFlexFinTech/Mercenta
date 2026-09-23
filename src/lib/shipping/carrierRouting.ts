@@ -160,7 +160,7 @@ export function validateCarrierForShipment(input: CarrierValidationInput): Carri
       expected: decision.carrier,
       error:
         'The partnered carrier may only be used on retail-channel-arranged (Freight Collect) purchase orders. ' +
-        `This PO is not Freight Collect — file the ASN with ${decision.carrier === 'dhl' ? 'DHL' : 'Palletline'}.`,
+        `This PO is not Freight Collect — Mercenta routes it by rule to ${decision.carrier === 'dhl' ? 'DHL' : 'Palletline'}.`,
     };
   }
 

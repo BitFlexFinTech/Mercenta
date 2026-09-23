@@ -4718,9 +4718,9 @@
    "id": "cleanup-p4-proxy-model-corrections",
    "description": "P4: proxy-model corrections - the brand does its three jobs only (accept/reject/backorder, download/print, ship on time); MERCENTA raises the routing/shipment request and files the ASN (the brand sees status); the acknowledgement writes an instruction-to-Mercenta record; submitAcknowledgement behind the SP-API seam, Mercenta-side. Closes AV-040 and the wrong-direction routing.",
    "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
-   "status": "not_started",
-   "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
-   "last_verified": "2026-09-22",
+   "status": "built_and_tested",
+   "evidence": "DONE 2026-09-23. NEW CANONICAL MODULES: src/lib/commerce/channelInstructions.ts (the instruction store: deterministic idempotent ids `instr-ack-<poId>` / `instr-pack-<poId>`, decision recorded verbatim, simulation provenance, attributed + audited state changes, deliberate requeue) and src/lib/commerce/proxyProcessor.ts (MERCENTA'S channel action: submitAcknowledgement -> routing/shipment request -> ASN filing, with an honest refusal path). SP-API SEAM: submitAcknowledgement added to src/lib/spapi/client.ts AND mockClient.ts (AV-040 partially closed; the remaining documented operations are P12); the mock exercises success AND its own refusal paths, and the real client still refuses without a verified connection. THE ACCEPTANCE PATH: src/data/api.ts -> acknowledgePurchaseOrder now writes the instruction instead of the old brand-side auto-draft that hardcoded carrier 'dhl' / destination 'Mercenta UK Hub' and told the brand to add carton details. SURFACES: BrandPurchaseOrders.tsx offers no filing control (no 'Create Shipment'/'File ASN', no routing filing form) and shows Mercenta's channel status (acknowledgement ref, routing reference, ASN + consignment); the only brand packing action is the packing-correction INSTRUCTION; src/components/shared/RoutingRequest.tsx replaced the placeholder RoutingRequestForm (which wrote nothing to the domain) with RoutingRequestStatus; AdminPurchaseOrderDetail.tsx shows the instruction + Mercenta's outcome and offers an attributed retry. GATES: NEW scripts/validate-proxy-model.mjs (38 checks, PROXY_MODEL_VALIDATION_PASS); e2e/proxy-model.spec.ts (browser proof); e2e/shipment-asn.spec.ts, e2e/notifications.spec.ts, e2e/po-lifecycle.spec.ts, e2e/logistics-wave3.spec.ts repointed to the corrected contract with the old contract recorded inline; validate-e6-brand-surfaces + validate-e7-embedded-social declared the P4 scope (guards unchanged, never weakened). VERIFIED: tsc 0 (both projects) - eslint 0 - build OK - validate-proxy-model PASS - validate-e6 PASS - validate-e7 PASS - validate-canonical-propagation 25/0 - validate-command-centre 49 PASS - validate-workspace-shell 94/0 - validate-uiux-redesign 347/0 - validate-e4/e5/stage15/16/19/26 PASS - validate:wording 0 violations - targeted specs 15/15 PASS - full suite result recorded in PROJECT_STATUS.",
+   "last_verified": "2026-09-23",
    "superseded_by": null
   },
   {
@@ -4791,8 +4791,8 @@
    "description": "P12: SP-API seam extension (mock-first) - submitAcknowledgement, getPurchaseOrdersStatus (receiving sync), submitShipmentRequest, getShipmentDetails, getShipmentLabels (honest UK/EU refusal - NA-only), submitShipmentConfirmations, submitInvoices, submitInventoryUpdate. Closes AV-040.",
    "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
    "status": "not_started",
-   "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
-   "last_verified": "2026-09-22",
+   "evidence": "PARTIAL - submitAcknowledgement was implemented by P4 on 2026-09-23 (both src/lib/spapi/client.ts and mockClient.ts, with the real client refusing without a verified connection and the mock exercising success + its refusal paths), because it is the operation the proxy model needs. The remaining seven documented operations are still P12's scope.",
+   "last_verified": "2026-09-23",
    "superseded_by": null
   },
   {
@@ -4855,6 +4855,15 @@
    "source": "P3 verification (Dashboard + logistics cleanup programme, 2026-09-23, session 15)",
    "status": "deferred",
    "evidence": "Full suite log: '1 failed ... 463 passed (19.0m)' + test-results/app-shell-App-Shell-.../error-context.md; isolated re-run: npx playwright test e2e/app-shell.spec.ts --workers=1 => 23 passed (3.2m)",
+   "last_verified": "2026-09-23",
+   "superseded_by": null
+  },
+  {
+   "id": "discovered-absent-ackstatus-treated-as-rejection",
+   "description": "DISCOVERED AND FIXED (2026-09-23, session 16, P4). Building the instruction-to-Mercenta record exposed a data-semantics defect that would have silently disabled fulfilment: `PurchaseOrderLineItem.ackStatus` is OPTIONAL, and seeded/legacy POs carry a terminal status (`accepted` / `ready_to_fulfil`) with NO per-line acknowledgement. The first P4 mapping treated an absent `ackStatus` as a REJECTION, so such a PO issued an all-rejected instruction, Mercenta correctly filed no shipment, and the brand saw 'nothing to ship' for an order it had genuinely accepted. It failed only in a real browser run against seeded data - typecheck, lint and every domain-level validator passed. FIX: ONE shared derivation, `instructionLineFor(po, line)` in src/lib/commerce/channelInstructions.ts - a line that positively says accepted/rejected/backordered keeps it; a PO whose status is `rejected` derives rejected; any other line of a live PO derives ACCEPTED with its ordered quantity. Used by the acknowledgement writer (src/data/api.ts), the brand and admin surfaces and the processor, and asserted in scripts/validate-proxy-model.mjs both against the seeded regression PO and against a synthetic rejected PO.",
+   "source": "P4 implementation + browser verification (Dashboard + logistics cleanup programme, 2026-09-23, session 16)",
+   "status": "built_and_tested",
+   "evidence": "src/lib/commerce/channelInstructions.ts (instructionLineFor) · src/lib/commerce/proxyProcessor.ts (ASN cartons follow the instruction's acknowledged volumes) · scripts/validate-proxy-model.mjs ('an absent ackStatus on a live PO derives ACCEPTED with the ordered quantity' + the synthetic rejected-PO rule) · e2e/proxy-model.spec.ts test 3 and e2e/shipment-asn.spec.ts tests 1-2 pass on seeded data",
    "last_verified": "2026-09-23",
    "superseded_by": null
   }

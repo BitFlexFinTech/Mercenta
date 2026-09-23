@@ -654,6 +654,40 @@ const SPRINT_ROUTING_GATEWAYS_SCOPE = new Set([
   'PROJECT_STATUS.md',
 ]);
 
+/**
+ * §P4 — PROXY-MODEL PHASE SCOPE (2026-09-23, programme `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P4).
+ *
+ * P4 corrects the DIRECTION of the proxy model: the brand's decision becomes an
+ * INSTRUCTION to Mercenta, and **MERCENTA** raises the routing/shipment request
+ * and files the ASN. That requires touching the SP-API seam (the ONE protected
+ * path in this set), the commerce lifecycle, the two proxy modules, the brand and
+ * admin PO surfaces, and the shared routing status module. The guard's contract
+ * is UNCHANGED — an unexplained path in any of these directories still fails —
+ * and this set declares only what P4 actually owns.
+ */
+const P4_PROXY_MODEL_SCOPE = new Set([
+  'src/lib/spapi/',
+  'src/lib/commerce/',
+  'src/types.ts',
+  'src/data/api.ts',
+  'src/data/knowledgeBase.ts',
+  'src/lib/shipping/carrierRouting.ts',
+  'src/lib/shipping/routingReadiness.ts',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'src/components/shared/RoutingRequest.tsx',
+  'src/components/admin/AdminPurchaseOrderDetail.tsx',
+  'src/config/tours/tourDefinitions.ts',
+  'e2e/proxy-model.spec.ts',
+  'e2e/shipment-asn.spec.ts',
+  'e2e/notifications.spec.ts',
+  'e2e/po-lifecycle.spec.ts',
+  'e2e/logistics-wave3.spec.ts',
+  'scripts/validate-proxy-model.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'package.json',
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+]);
+
 try {
   /* ── modules under test (the EXISTING architecture) ── */
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
@@ -902,7 +936,8 @@ try {
         E7_SCOPE.has(p) || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
         FUNCTIONAL_COMPLETION_SCOPE.has(p) ||
         SPRINT_FOUNDER_OS_SCOPE.has(p) || SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
-        SPRINT_ROUTING_GATEWAYS_SCOPE.has(p)));
+        SPRINT_ROUTING_GATEWAYS_SCOPE.has(p) || P4_PROXY_MODEL_SCOPE.has(p) ||
+        [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -910,7 +945,8 @@ try {
       .every((p) => p === 'src/lib/postiz/postizClient.ts' || M13_SCOPE.has(p) || PHASE4_SCOPE.has(p) ||
         FUNCTIONAL_COMPLETION_SCOPE.has(p) ||
         SPRINT_FOUNDER_OS_SCOPE.has(p) || SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
-        SPRINT_ROUTING_GATEWAYS_SCOPE.has(p)));
+        SPRINT_ROUTING_GATEWAYS_SCOPE.has(p) || P4_PROXY_MODEL_SCOPE.has(p) ||
+        [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -1054,6 +1090,7 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           SPRINT_FOUNDER_OS_SCOPE.has(p) ||
           SPRINT_UK_MARKET_FIT_SCOPE.has(p) ||
           SPRINT_ROUTING_GATEWAYS_SCOPE.has(p) ||
+          P4_PROXY_MODEL_SCOPE.has(p) ||
           [...E7_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M2_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...M11_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -1066,7 +1103,8 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...SPRINT_DETERMINISTIC_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...SPRINT_FOUNDER_OS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           [...SPRINT_UK_MARKET_FIT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-          [...SPRINT_ROUTING_GATEWAYS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...SPRINT_ROUTING_GATEWAYS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

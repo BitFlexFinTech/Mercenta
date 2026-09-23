@@ -5,6 +5,12 @@
  * acknowledgment workflow is exercised with the real per-line panel:
  * Acknowledge -> set per-line state (accept / reject + code / backorder +
  * ship date) -> Submit acknowledgment -> the store validates quantities.
+ *
+ * §P4 — the success assertion is REPOINTED (old contract recorded): the brand
+ * notice previously read "Acknowledgment submitted." It now reads "Decision
+ * issued to Mercenta." because the decision is an INSTRUCTION to Mercenta, which
+ * performs the channel action. The behaviour under test — the store validates
+ * the submission and reports the outcome — is unchanged.
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
@@ -34,7 +40,7 @@ test.describe('PO Lifecycle', () => {
     await deskForgePO(page);
     const panel = await openAckPanel(page);
     await page.locator('button', { hasText: 'Submit acknowledgment' }).click();
-    await expect(page.getByText(/Acknowledgment submitted/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Decision issued to Mercenta/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('2. Reject a line with a reason code', async ({ page }) => {
@@ -46,7 +52,7 @@ test.describe('PO Lifecycle', () => {
     // the rejection-code select appears inside the same line row.
     await selects.nth(1).selectOption({ index: 1 });
     await page.locator('button', { hasText: 'Submit acknowledgment' }).click();
-    await expect(page.getByText(/Acknowledgment submitted/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Decision issued to Mercenta/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('3. Backorder line -> scheduled ship date keeps the PO open', async ({ page }) => {
@@ -56,7 +62,7 @@ test.describe('PO Lifecycle', () => {
     await page.waitForTimeout(200);
     await panel.locator('input[type="date"]').first().fill('2026-12-01');
     await page.locator('button', { hasText: 'Submit acknowledgment' }).click();
-    await expect(page.getByText(/Acknowledgment submitted/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Decision issued to Mercenta/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('4. Partial ack: accept one line, reject the other', async ({ page }) => {
@@ -67,7 +73,7 @@ test.describe('PO Lifecycle', () => {
     await page.waitForTimeout(200);
     await selects.nth(2).selectOption({ index: 1 });
     await page.locator('button', { hasText: 'Submit acknowledgment' }).click();
-    await expect(page.getByText(/Acknowledgment submitted/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Decision issued to Mercenta/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('5. Ack qty exceeds ordered qty -> blocked', async ({ page }) => {

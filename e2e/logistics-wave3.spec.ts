@@ -10,6 +10,11 @@
  *   4  delivery performance surfaces with a real drill-down, and a rate with no
  *      sample is never shown as a percentage;
  *   5  no "10am Pacific" channel-deadline claim is presented anywhere.
+ *
+ * §P4 — the acknowledgement success assertion is REPOINTED (old contract
+ * recorded): "Acknowledgment submitted." → "Decision issued to Mercenta." The
+ * brand's decision is an instruction to Mercenta, which performs the channel
+ * action; the backorder gate and quantity validation under test are unchanged.
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
@@ -40,7 +45,7 @@ test.describe('Wave 3 — backorder fail-closed', () => {
     await page.waitForTimeout(200);
     await page.locator('input[type="date"]').first().fill('2026-12-01');
     await page.locator('button', { hasText: 'Submit acknowledgment' }).click();
-    await expect(page.getByText(/Acknowledgment submitted/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Decision issued to Mercenta/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('2. a line the channel does NOT allow offers no Backordered option and explains why', async ({ page }) => {
@@ -124,7 +129,7 @@ test.describe('Wave 3 — acceptance leads to the shipping documents (P0)', () =
     await page.locator('button', { hasText: 'Acknowledge' }).first().click();
     await page.waitForTimeout(400);
     await page.locator('button', { hasText: 'Submit acknowledgment' }).click();
-    await expect(page.getByText(/Acknowledgment submitted/i).first()).toBeVisible({ timeout: 6000 });
+    await expect(page.getByText(/Decision issued to Mercenta/i).first()).toBeVisible({ timeout: 6000 });
     await page.waitForTimeout(600);
 
     const cta = page.locator('[data-testid^="po-open-documents-"]').first();

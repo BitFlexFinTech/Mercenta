@@ -26,6 +26,39 @@ export interface SubmissionResult {
   error?: string;
 }
 
+/**
+ * §P4 — ONE line of a purchase-order acknowledgement, in the shape the retail
+ * channel's `submitAcknowledgement` operation consumes.
+ *
+ * `orderedQty` is carried because it is the channel's OWN field (the channel
+ * knows what it ordered); it lets the seam refuse an over-acknowledgement
+ * without the caller restating the rule.
+ */
+export interface AcknowledgementLine {
+  sku: string;
+  ackStatus: 'accepted' | 'rejected' | 'backordered';
+  orderedQty: number;
+  acknowledgedQty: number;
+  /** Required when `ackStatus === 'backordered'`. */
+  scheduledShipDate?: string;
+  unitPrice: number;
+}
+
+/** The channel's response to an acknowledgement submission. */
+export interface AcknowledgementResult {
+  ok: boolean;
+  /** The channel's own acknowledgement reference (present when ok). */
+  acknowledgementId?: string;
+  /** The channel's aggregate decision for the submitted lines. */
+  status?: 'accepted' | 'partially_accepted' | 'rejected';
+  error?: string;
+}
+
+export interface AcknowledgementPayload {
+  purchaseOrderNumber: string;
+  lines: AcknowledgementLine[];
+}
+
 export type FetchLike = (
   url: string,
   init?: { method?: string; headers?: Record<string, string>; body?: unknown }
@@ -129,6 +162,28 @@ export function createSpApiClient(
         return { ok: false, error: body.error ?? `HTTP ${res.status}` };
       }
       return { ok: true };
+    },
+
+    /**
+     * §P4 — `submitAcknowledgement` (AV-040): transmit the brand's per-line
+     * accept / reject / backorder decision to the retail channel.
+     *
+     * MERCENTA-SIDE ONLY. A brand never calls this: its decision is an
+     * INSTRUCTION to Mercenta (`src/lib/commerce/channelInstructions.ts`) and
+     * `src/lib/commerce/proxyProcessor.ts` — acting as Mercenta — is what
+     * performs the channel action. Calling it with no verified connection
+     * throws, exactly like every other method here.
+     */
+    async submitAcknowledgement(payload: AcknowledgementPayload): Promise<AcknowledgementResult> {
+      const creds = requireCredentials();
+      const res = await transport(`${edgeFunctionBase}/acknowledgements`, {
+        method: 'POST',
+        headers: { 'X-Secret-Ref': creds.secretRef },
+        body: payload,
+      });
+      const body = (await res.json()) as AcknowledgementResult;
+      if (!res.ok) return { ok: false, error: body.error ?? `HTTP ${res.status}` };
+      return { ok: true, acknowledgementId: body.acknowledgementId, status: body.status ?? 'accepted' };
     },
   };
 }

@@ -155,3 +155,23 @@ One component it references was subsequently removed, so that finding's evidence
   dismissed the finding; it removed a second, unreachable rendering of the same data.
 - No other row in this register is affected. No source file was modified by the audit itself, and the
   audit's APPLIED count remains **0**.
+
+---
+
+## POST-REGISTER CHANGE — 2026-09-23 (P4, proxy-model corrections)
+
+This register is a **record of the repository as audited on 2026-09-20**; its findings are unchanged. One
+finding was **partially applied** in code by P4, so its evidence pointer is annotated:
+
+- **`AV-040` — PARTIALLY APPLIED (one of the eight documented operations).** The register records four
+  modelled SP-API methods and seven missing Vendor operations. P4 implemented the one the proxy model
+  requires — **`submitAcknowledgement`** — on BOTH sides of the seam (`src/lib/spapi/client.ts` for the real
+  Edge-Function transport, `src/lib/spapi/mockClient.ts` for the deterministic simulation), Mercenta-side
+  only, with the mock exercising success **and** its refusal paths and the real client still refusing without
+  a verified connection. The finding is **NOT dismissed**: `getPurchaseOrdersStatus` (receiving sync),
+  `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal), `submitShipmentConfirmations`,
+  `submitInvoices` and `submitInventoryUpdate` remain **NOT IMPLEMENTED** and stay assigned to P12. The
+  remediation recommendation ("extend the seam, mock first, to the documented operations") is therefore
+  **in progress, not complete**, and the register's HIGH/HIGH risk rating is unchanged.
+- No other row in this register is affected by P4. The wording safeguards (`AV-042`) are unchanged and
+  `npm run validate:wording` still reports zero outward-facing violations.

@@ -14,7 +14,7 @@ export const KB_ARTICLES: KBArticle[] = [
     summary: 'The retail channel places orders with Mercenta; Mercenta routes them into your brand workspace for your decision.',
     sections: [
       { heading: 'The flow', body: 'A retail-channel purchase order is issued to Mercenta as the channel intermediary. Mercenta identifies your brand and routes the order into your workspace. Your approve / reject / modify decision is an instruction to Mercenta, which communicates the outcome through the channel integration.' },
-      { heading: 'Your part', body: 'Acknowledge purchase orders, keep your catalogue and compliance documents current, file accurate shipment information, and review the items Mercenta prepares for your approval.' },
+      { heading: 'Your part', body: 'Acknowledge purchase orders, keep your catalogue and compliance documents current, ship on time, and tell Mercenta when your physical packing differs from the acknowledged quantities. Mercenta files the shipment documents and communicates with the channel.' },
     ],
   },
   {
