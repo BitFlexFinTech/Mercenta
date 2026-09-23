@@ -72,11 +72,17 @@ safety rule is a critical failure. The retired clauses above and below have **no
   never use ambiguity as a reason to avoid authorised work.
 
 ## After work:
+- **CHAT IS NOT PROJECT MEMORY** (`.clinerules/operating-model.md` §12, added 2026-09-23): the repository is the
+  project's memory. Finish the task with the mandatory close-out — test, verify, **update the project state (write the
+  `CURRENT RESUME STATE` block in `PROJECT_STATUS.md`)**, commit, **push**, then (product work only) deploy + verify live
+  + record the next starting point. Never leave the next session dependent on this conversation.
 - Show exactly which files were changed and what changed; run: `git diff --stat`.
 - ~~Do NOT commit unless the user explicitly says "commit."~~ **RETIRED 2026-09-21** — commit your own **verified** work
   as the checkpoint (`operating-model.md` §5). The reconciliation of inherited dirtiness described in §6 is part of that
   same checkpoint: required inherited work is committed, unneeded inherited material is removed — never left behind.
-- ACTIVE: push only when the Founder instructs it.
+- ACTIVE: **PUSH IS PART OF CLOSING A TASK** (Founder directive 2026-09-23, `operating-model.md` §12). After the task's
+  verified commit, push it to `origin/<branch>`. Never `--force`; never push an unverified tree. If the push cannot
+  happen (no remote access / credential refusal), record it as a blocker in the resume state — never skip it silently.
 - **ACTIVE — THE CLEAN-TREE INVARIANT:** run `git status --porcelain` and confirm it prints NOTHING before reporting
   completion. If it prints anything (modified, deleted-but-uncommitted, staged, untracked, generated artefacts, or
   documentation/rule changes), RECONCILE IT and commit again. Do not report completion with a dirty tree
@@ -108,16 +114,14 @@ safety rule is a critical failure. The retired clauses above and below have **no
 ---
 
 ## Handoff:
-- If the user says "Provide Handoff" or "update handoff":
-  1. Read the current state of the project (git log, what's
-     built, what's pending)
-  2. Update `<project root>/HANDOFF.md` with:  (the repo root; the old `~/Desktop/Mercenta/` path is stale)
-     - Last updated date
-     - What's built (add new items)
-     - What's left (remove completed items, add new ones)
-     - Current API key status
-     - Next prompt to paste
-  3. Show me the updated file
+- The handoff is no longer a narrative the Founder must request: **every task close updates it automatically**
+  (`operating-model.md` §12.2 step 5). If the user says "Provide Handoff" or "update handoff", do the same thing
+  explicitly and show the result:
+  1. Read the current state of the project (`git log --oneline -5`, `git status --porcelain`, the resume state).
+  2. Update `<project root>/HANDOFF.md` so it MIRRORS the `CURRENT RESUME STATE` block values in `PROJECT_STATUS.md`
+     (last updated date, last completed task, verified state, branch, last verified commit, push status, demo
+     deployment, live verification, blocker, next task, exact next starting point). Keep it short — no history copies.
+  3. Show me the updated file.
 ---
 
 ## Standing Requirements (apply to EVERY task):
@@ -130,11 +134,21 @@ Before claiming a task is complete, you MUST:
    and report pass/fail/skip counts
 4. Show me: git diff --stat
 5. Show me the test results
-6. Run: `bash scripts/export-review-zip.sh` — run it from the project root; the script resolves its own root, so the
+6. **UPDATE THE PROJECT STATE** (Founder directive 2026-09-23, `operating-model.md` §12.2/§12.3): write the
+   `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md` (all ten fields, honest negatives where a step did
+   not happen), mirror its values in `HANDOFF.md`, update `STATUS_CHECK.md` and `requirements-registry.json`.
+7. Run: `bash scripts/export-review-zip.sh` — run it from the project root; the script resolves its own root, so the
    old hardcoded `~/Desktop/Mercenta/...` path (stale since the folder was renamed) is NOT used.
-7. Run: `git status --porcelain` — it MUST print nothing. The commit that carries this task's work (including the
+8. **COMMIT and PUSH** the verified work: `git commit` then `git push origin <branch>` (no `--force`). The push is part
+   of closing a task; it is not something the Founder must ask for. If the push fails, record it in the resume state.
+9. Run: `git status --porcelain` — it MUST print nothing. The commit that carries this task's work (including the
    reconciliation of any inherited dirtiness) must already exist, because the review ZIP is a generated, gitignored
    artefact and does not dirty the tree. A dirty tree after the zip step means the commit was incomplete.
+10. **FOR PRODUCT/APPLICATION WORK ONLY:** deploy the verified commit (`bash scripts/deploy-demo.sh`), OPEN
+    `https://demo.mercenta.co.uk`, verify the changed functionality live, confirm local = GitHub = demo, and only then
+    report **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**. A governance/documentation-only increment reports
+    **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change)** and states that
+    deployment does not apply.
 
 These 7 steps prove a **VERIFIED LOCAL/COMMITTED CHECKPOINT** — they do NOT prove COMPLETE. For application/product
 work, COMPLETE additionally requires deployment of the verified commit and live verification on
@@ -148,7 +162,12 @@ work, COMPLETE additionally requires deployment of the verified commit and live 
 
 ## Deployment rules — CRITICAL
 
-- Deploy ONLY when the current Founder directive instructs deployment (this deploy gate is unchanged).
+- **PRODUCT/APPLICATION work: deploy automatically at task close** (Founder directive 2026-09-23,
+  `operating-model.md` §12) — via `scripts/deploy-demo.sh`, to `demo.mercenta.co.uk` only, then OPEN the live site and
+  verify the changed functionality (`operating-model.md` §5). Do not wait to be told.
+- **GOVERNANCE / DOCUMENTATION-ONLY work: deployment is NOT APPLICABLE** (no application runtime change,
+  `operating-model.md` §10.4). Say so explicitly in the report; do not invent a deploy requirement for a rules/docs
+  change.
 - Only deploy to demo.mercenta.co.uk (Namecheap shared hosting).
 - The deploy script is scripts/deploy-demo.sh — do NOT create any other deploy script.
 - Never deploy to mercenta.co.uk (live domain) until the GO_LIVE.md playbook is executed.
@@ -158,8 +177,8 @@ work, COMPLETE additionally requires deployment of the verified commit and live 
 
 ### Deployment authority vs COMPLETION — the two questions are separate (`operating-model.md` §10/§11)
 
-- **Authority to deploy** is the gate above: deployment happens only when the current Founder directive authorises
-  it, only via `scripts/deploy-demo.sh`, only to `demo.mercenta.co.uk`.
+- **Authority to deploy** — product/application work deploys automatically at close (directive 2026-09-23); a
+  governance/docs-only increment is NOT APPLICABLE; only `scripts/deploy-demo.sh`, only to `demo.mercenta.co.uk`.
 - **Authority to call the work COMPLETE** is `operating-model.md` §10 and is NOT granted by the absence of a deploy
   instruction. Product work is COMPLETE only when local runtime = GitHub committed state = `https://demo.mercenta.co.uk`
   and the live implementation has been verified to match the recorded verified commit.
@@ -176,9 +195,10 @@ Additional standing rules:
   **RETIRED 2026-09-21** — presentation change is authorised whenever the current directive requires it
   (`operating-model.md` §4).
 - ACTIVE: Do NOT remove or modify demo data or demo accounts (unchanged).
-- ~~Do NOT commit or push unless I explicitly say "commit" or "push".~~ **RETIRED 2026-09-21** — commit your own
-  VERIFIED work as the checkpoint; **push only when instructed**. The §6 reconciliation of inherited dirtiness is part of
-  that checkpoint (required work is committed, unneeded material is removed), and completion requires a clean tree.
+- ~~Do NOT commit or push unless I explicitly say "commit" or "push".~~ **RETIRED 2026-09-21 / UPDATED 2026-09-23** —
+  commit your own VERIFIED work as the checkpoint AND **push it**: the push is now part of closing a task
+  (`operating-model.md` §5/§12), so the Founder no longer has to ask. The §6 reconciliation of inherited dirtiness is part
+  of that checkpoint (required work is committed, unneeded material is removed), and completion requires a clean tree.
 - ACTIVE: if a requirement is genuinely ambiguous and unresolvable from the repository, ask (`operating-model.md` §3).
 - ~~If a change would affect more than 5 files, STOP and list them first. Wait for my approval.~~ **RETIRED 2026-09-21**
   — there is no file-count gate.

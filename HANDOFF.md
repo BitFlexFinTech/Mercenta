@@ -1,5 +1,30 @@
 ---
-**Last updated: September 22, 2026 — 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME (session 14) — **P2 DONE AND COMMITTED; P3 NEXT.** **P2 = Overview = OBSERVE, ADDITIVE ONLY, in BOTH shells.** The Founder's governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT** (queues, exceptions, CTAs, **directly under Overview** in both shells) — on top of the correction of the **proxy model** (Mercenta holds the Amazon Vendor account; a brand never talks to Amazon and its decision is an **instruction to Mercenta**; carriers connect **by API only, never a login**). **Done this session:** the admin Overview gained the business picture — **Business position** hero band (open PO value · revenue · gross profit · contribution margin · receivables), the **unchanged** operational band, **Portfolio volume** (brands · products · POs · order lines · shipments · operational volume · upcoming payments · fulfilment exceptions) and the new **Financial performance** + **Logistics status** sections — with **every pre-P2 card still rendered** (proven by a new browser test); the brand Overview gained **Your earnings** + its **first chart** (*Earnings by month*) + observe tiles for the counts its action queue used to carry (open deductions · open tickets · returns · invoices outstanding); and the brand's **action sections MOVED to Operations** (the work layer is the single action list — the old "Needs your attention" queue and rail "Next actions" are gone from the Overview, with the `(sim)` provenance carried into the work item). **4 gates repointed with their old contracts recorded inline; `validate-stage19` — an INHERITED FAILURE — was genuinely repaired (FAIL(1) → PASS).** Full plan + all 11 Founder decisions + the phase table: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. **Not pushed; `demo.mercenta.co.uk` NOT deployed → `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`.** Previous: session 13 P0/P0.4/P1; session 12 dashboard cleanup; session 11 Wave 3 Logistics Hub; session 10 Wave 3 hero.
+**Last updated: September 23, 2026 — this file now MIRRORS the canonical `## CURRENT RESUME STATE` block at the top of
+`PROJECT_STATUS.md`. Read that block (it is all a new session needs) — the older narrative sections below it are
+historical context only. New permanent rule: `.clinerules/operating-model.md` **§12 — CHAT IS NOT PROJECT MEMORY**
+(mandatory task-close sequence incl. push; resume from the repository, never from the transcript).**
+
+## CURRENT RESUME STATE (mirror of PROJECT_STATUS.md — keep the VALUES identical)
+
+LAST COMPLETED TASK:      Governance — made "chat is not project memory" permanent (operating model §12 + the canonical resume block).
+CURRENT VERIFIED STATE:   VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change) for the governance commit; **P3 (application work) IN PROGRESS — NOT COMPLETE**.
+CURRENT BRANCH:           redesign/foundation
+LAST VERIFIED COMMIT:     21c6869 — "P3 (WIP): the Control Centre loses its work/attention lists — the founder console is projected into the single action list (Work Management)".
+GITHUB PUSH:              origin/redesign/foundation — pushed at the governance commit.
+DEMO DEPLOYMENT:          NOT APPLICABLE (docs/rules-only governance increment) · P3 application work NOT DEPLOYED yet.
+LIVE VERIFICATION:        NOT VERIFIED — no demo deployment of the P3 work has happened.
+OUTSTANDING BLOCKER:      none (P3's remaining full-suite verification is planned work).
+NEXT TASK:                Finish P3 (full Playwright suite → P3 docs/registry/state → deploy + verify live; application work ⇒ three-way contract applies).
+EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P3 row) → src/lib/work/workStore.ts, src/components/admin/FounderControlCentre.tsx, scripts/validate-command-centre.mjs, e2e/command-centre.spec.ts; then `npx playwright test --workers=3`.
+
+### How a brand-new chat resumes (no transcript required)
+
+1. Read `.clinerules/operating-model.md` (§12), `protection-rules.md`, `project-state-contract.md`, `mercenta-business-model.md`.
+2. Read the `CURRENT RESUME STATE` block in `PROJECT_STATUS.md` (top of the file only).
+3. `git --no-pager log --oneline -5`, `git status --porcelain`, `git remote -v`.
+4. Start the recorded `NEXT TASK` from `EXACT NEXT STARTING POINT`, opening only those files.
+
+---
 
 ## 🧭 DASHBOARD + LOGISTICS CLEANUP PROGRAMME — **P2 DONE** (2026-09-22, session 14) — CURRENT CHECKPOINT
 

@@ -2,7 +2,7 @@
  "_meta": {
   "project": "Mercenta Partners",
   "description": "Requirements registry",
-  "last_updated": "2026-09-22",
+  "last_updated": "2026-09-23",
   "status_enum": [
    "not_started",
    "built",
@@ -12,7 +12,7 @@
    "deferred",
    "blocked"
   ],
-  "total_entries": 471,
+  "total_entries": 472,
   "founder_os_sprint": {
    "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
    "added": [
@@ -368,6 +368,14 @@
   },
   "added_entries": {
    "Dashboard + logistics cleanup programme (2026-09-22, session 13)": []
+  },
+  "resume_contract": {
+   "rule": ".clinerules/operating-model.md \u00a712 \u2014 CHAT IS NOT PROJECT MEMORY",
+   "canonical_resume_state": "PROJECT_STATUS.md \u2192 ## CURRENT RESUME STATE (top of file)",
+   "mirror": "HANDOFF.md \u2192 ## CURRENT RESUME STATE (same values)",
+   "close_sequence": "IMPLEMENT \u2192 TEST \u2192 FIX \u2192 VERIFY LOCAL \u2192 UPDATE PROJECT STATE \u2192 COMMIT \u2192 PUSH \u2192 DEPLOY \u2192 OPEN LIVE \u2192 VERIFY LIVE \u2192 LOCAL=GITHUB=DEMO \u2192 RECORD NEXT STARTING POINT \u2192 COMPLETE",
+   "push": "part of closing a task since 2026-09-23 (no --force, verified commits only)",
+   "deploy": "product work only; NOT APPLICABLE for governance/documentation-only increments"
   }
  },
  "entries": [
@@ -4699,11 +4707,11 @@
   },
   {
    "id": "cleanup-p3-operations-act",
-   "description": "P3 (NEXT): Operations = ACT wiring - badges; the Control Centre loses its duplicated work/attention lists and becomes founder-only controls; Work Management is the single action list. The BRAND half (brand attention/next-actions land in Operations) was completed in P2 and is therefore no longer outstanding.",
-   "source": "Dashboard + logistics cleanup programme (2026-09-22, session 14)",
-   "status": "not_started",
-   "evidence": "Brand half DONE in P2 (see cleanup-p2-overview-observe: the brand Overview action sections were removed and the work layer is the single action list). Control Centre de-duplication NOT STARTED - no code change yet.",
-   "last_verified": "2026-09-22",
+   "description": "P3: Operations = ACT wiring - the Control Centre loses its duplicated work/attention lists (retired Command Centre panel deleted; its own 'Attention' queue removed) and becomes founder-only CONTROLS; the founder console is projected into the SINGLE action list (Work Management) as Super-Admin-scoped work items carrying the same rank + auditable WHY, with the tab-aware hand-off and a declared cross-scope action-view translation (no dead hand-offs). Brand half was completed in P2.",
+   "source": "Dashboard + logistics cleanup programme (2026-09-23, session 15)",
+   "status": "in_progress",
+   "evidence": "BUILT: src/lib/work/workStore.ts (founder_* projection, rank/why, fail-closed superAdminOnly gate, integration health from the canonical mirror, WORK_ACTION_VIEWS + resolveWorkActionView), src/components/shared/WorkWorkspace.tsx (rank + WHY on row/drawer, tab-aware hand-off, founder filters offered only to a Super Admin), src/components/admin/FounderControlCentre.tsx (lists removed, integrations status panel + single-list pointer), src/components/admin/CommandCentre.tsx DELETED, src/lib/commandCentre/commandCentre.ts (PO/shipment ownership repointed to the work layer), AdminShell/navBadges (badge counts the same set the list shows). VERIFIED SO FAR: tsc 0 \u00b7 eslint . 0 \u00b7 build OK \u00b7 validate-command-centre 49 PASS (was 40, incl. new no-dead-hand-off and fail-closed checks) \u00b7 validate-uiux-redesign 347/0 \u00b7 validate-workspace-shell 94/0 \u00b7 e5/e6/e7/founder-os/work-layer PASS \u00b7 Playwright command-centre 4, work-layer 12, plus 21 (work-layer + founder-os + deterministic-journey). REMAINING: full Playwright suite, programme-doc/state updates, then deploy + live verification (application work => three-way contract).",
+   "last_verified": "2026-09-23",
    "superseded_by": null
   },
   {
@@ -4821,6 +4829,15 @@
    "status": "built_and_tested",
    "evidence": "Baseline at session start: STAGE19_VALIDATION_FAIL (1) with the single failure 'Overview tiles drill down into the owning surface'. After the repoint: STAGE19_VALIDATION_PASS. No assertion was deleted - the one comment-satisfiable assertion was replaced by three real ones.",
    "last_verified": "2026-09-22",
+   "superseded_by": null
+  },
+  {
+   "id": "governance-chat-is-not-project-memory",
+   "description": "PERMANENT OPERATING-MODEL RULE (2026-09-23): CHAT IS NOT PROJECT MEMORY. The repository is the project's memory; a chat transcript is never required to continue. Mandatory task-close sequence executed automatically at the end of every task: IMPLEMENT -> TEST -> FIX -> VERIFY LOCAL -> UPDATE PROJECT STATE -> COMMIT -> PUSH -> DEPLOY -> OPEN LIVE -> VERIFY LIVE -> LOCAL = GITHUB = DEMO -> RECORD NEXT STARTING POINT -> COMPLETE. Push is now part of closing a task; deployment applies to product work only and is NOT APPLICABLE to governance/docs-only increments. The canonical resume data is the 'CURRENT RESUME STATE' block at the top of PROJECT_STATUS.md, mirrored in HANDOFF.md.",
+   "source": "Founder directive 2026-09-23 (session 15)",
+   "status": "built_and_tested",
+   "evidence": ".clinerules/operating-model.md \u00a712 (new, permanent) + \u00a72 retired-clause record + \u00a75 delivery chain (PUSH added) + \u00a76 push-at-close; .clinerules/protection-rules.md (After-work push rule, Deployment rules with the docs-only NOT APPLICABLE carve-out, Standing Requirements steps 6/8/10, Handoff section); .clinerules/project-state-contract.md (mandatory CURRENT RESUME STATE block, ten fields); PROJECT_STATUS.md now opens with the filled CURRENT RESUME STATE block; HANDOFF.md mirrors it. Validated: grep evidence of every field/step in the four rule/state files; requirements-registry.json still valid JSON; git status --porcelain EMPTY. Docs/rules-only increment => three-way status NOT APPLICABLE (no application runtime change).",
+   "last_verified": "2026-09-23",
    "superseded_by": null
   }
  ]

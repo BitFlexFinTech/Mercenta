@@ -5,6 +5,10 @@
 > **§10 is the ONE COMPLETION CONTRACT (three-way synchronization: local runtime = GitHub committed state =
 > `https://demo.mercenta.co.uk`) and §11 is the mandatory status vocabulary. Both were added 2026-09-22 by Founder
 > directive and are permanent; no session may reinterpret them, and no other file may weaken them.**
+> **§12 (added 2026-09-23 by Founder directive) is the CHAT-IS-NOT-PROJECT-MEMORY rule: the mandatory task-close
+> sequence (implement → test → fix → verify → update state → commit → push → deploy → verify live → record resume
+> point) and the canonical `CURRENT RESUME STATE` block in `PROJECT_STATUS.md` that lets a brand-new chat resume with
+> no transcript. It is permanent, and the push is now part of closing a task rather than a separate instruction.**
 > Where this file conflicts with any other rule file, sprint document, handoff, transcript or archive (including
 > `Mercenta Build 1.rtf`, `MASTER_CHATGPT_HANDOFF.md`, `MERCENTA_MASTER_CONTEXT.md`, the `STATUS_CHECK.md` history log
 > and any `docs/` sprint record), **the current Founder directive and this file win.**
@@ -33,6 +37,16 @@
   Freeze) is what allowed 289 dirty paths to accumulate across five sessions.
 - **"completion may be reported with a dirty tree / untracked required source"** — superseded by §6: completion requires
   `git status --porcelain` to be EMPTY.
+- **"push only when the Founder instructs it"** — RETIRED 2026-09-23 by Founder directive. Replaced by §12: the
+  mandatory task-close sequence PUSHES the verified checkpoint to GitHub as part of closing the task. The Founder no
+  longer has to ask for a push. Still forbidden: `git push --force`, and pushing an unverified tree (§5).
+- **"the previous chat is where the project's memory lives" / "ask the user what happened last time"** — RETIRED
+  2026-09-23 by Founder directive. Replaced by §12: **CHAT IS NOT PROJECT MEMORY.** The repository is the memory; a new
+  session resumes from `PROJECT_STATUS.md → CURRENT RESUME STATE` without the transcript.
+- **"deployment is only ever a separate, later, manual step"** — SUPERSEDED 2026-09-23 for PRODUCT work by §12: the
+  task-close sequence deploys to `https://demo.mercenta.co.uk` and verifies it live. Deployment remains NOT APPLICABLE
+  for governance/documentation-only increments (§10.4), and the live domain `mercenta.co.uk` remains forbidden until
+  the `GO_LIVE.md` playbook is executed.
 
 Retained unchanged, because they are genuine safety rules and not workflow restrictions: see §7.
 
@@ -91,10 +105,19 @@ reachable URL. A deployment counts only when:
 
 ```
 IMPLEMENT → INTEGRATE → TEST → FIX → VERIFY LOCAL → COMMIT
-→ VERIFY COMMITTED LOCAL VERSION → DEPLOY → OPEN LIVE DEMO
+→ PUSH TO GITHUB → VERIFY COMMITTED LOCAL VERSION → DEPLOY → OPEN LIVE DEMO
 → VERIFY LIVE IMPLEMENTATION → CONFIRM LOCAL/GITHUB/DEMO SYNCHRONIZATION
-→ FINAL REGRESSION → COMPLETE
+→ UPDATE PROJECT STATE → RECORD NEXT STARTING POINT → COMPLETE
 ```
+
+§12 defines this same chain as the **mandatory task-close procedure** and adds the
+project-state + resume-state steps; it is executed automatically at the end of every
+task without the Founder asking.
+
+**PUSH = THE GITHUB LEG, PART OF CLOSING A TASK.** Since 2026-09-23 a push is not a
+separate favour the Founder must request: closing a verified task means pushing its
+verified commit to the branch in `origin`. It does NOT relax §5's rule that only a
+VERIFIED commit is pushed, and it never means `--force`.
 
 Never report "complete" at the commit stage when deployment was required; never report "deployed" before the live
 site has been verified; **never skip the live-verification stage when declaring product work complete** (§10).
@@ -140,7 +163,9 @@ DIRTY TREE
   wipe. Deletion must be evidence-based, never a shortcut to a clean tree, and never a way to remove working
   functionality so a validator passes. Pre-existing Founder changes are never DESTROYED — they are either REQUIRED
   (reconciled and committed) or UNNEEDED (removed, with the reason recorded in the report).
-- Commit your own VERIFIED work as the checkpoint; **push only when the Founder instructs it**.
+- Commit your own VERIFIED work as the checkpoint, then **PUSH it** — since the 2026-09-23 directive the push is part of
+  closing a task, not a separate instruction the Founder must give (§5, §12). A push that cannot happen (no remote
+  access, credential refusal) is recorded as a blocker in the resume state; it is never silently skipped.
 - The five synchronised project-state sources must be updated in the SAME commit
   (`.clinerules/project-state-contract.md`); never declare completion while the tree is dirty.
 
@@ -303,4 +328,101 @@ language in §11.1 must say so.
 - `PROJECT_STATUS.md` / `HANDOFF.md` — every session's report must state the three-way status explicitly.
 
 Any of those files, or any sprint document, handoff, transcript or archive that states something weaker or
+
+---
+
+## 12. CHAT IS NOT PROJECT MEMORY — THE MANDATORY TASK-CLOSE SEQUENCE AND THE CANONICAL RESUME STATE (added 2026-09-23 by Founder directive)
+
+> **Status: ACTIVE, permanent, and binding on every session.** This section exists because Cline was
+> relying on long chat history as if it were the project's memory, which consumed context and
+> credits and made resumption depend on a transcript. **A conversation is disposable.**
+
+### 12.1 The rule
+
+**The repository is the project's memory. A chat transcript is never required to continue work.**
+
+- Cline MUST NEVER need the previous conversation to continue. Everything required to resume lives
+  in the repository (§12.3).
+- Cline MUST NOT ask the Founder to re-explain a previous conversation when the repository state
+  contains the information.
+- Cline MUST NOT read or reconstruct the full project history to answer "where were we" — it reads
+  the minimum (§12.5).
+
+### 12.2 The mandatory task-close procedure (automatic, every task, product or governance)
+
+At the end of EVERY task, without the Founder asking, Cline executes:
+
+```
+IMPLEMENT → TEST → FIX → VERIFY LOCAL → UPDATE PROJECT STATE → COMMIT
+→ PUSH TO GITHUB → DEPLOY TO DEMO → OPEN LIVE DEMO → VERIFY LIVE IMPLEMENTATION
+→ VERIFY LOCAL = GITHUB = DEMO → RECORD NEXT STARTING POINT → COMPLETE
+```
+
+- Steps 8–11 (deploy, open, verify live, confirm synchronisation) apply to **application/product
+  work** only. For a **governance/documentation-only increment** they are **NOT APPLICABLE
+  (no application runtime change)** (§10.4) — and the final report must say so explicitly. Do not
+  invent a deployment requirement for a docs-only change.
+- Steps 5 and 12 (`UPDATE PROJECT STATE`, `RECORD NEXT STARTING POINT`) are never optional: they are
+  what make the next chat possible (§12.3).
+- If any step genuinely cannot be completed (see §12.6), the task is **BLOCKED**, not complete: stop,
+  record the exact blocker and the exact next action, and leave a clean resumable tree.
+
+### 12.3 The canonical resume state (the ONLY thing a new session needs)
+
+The canonical project-state source is **`PROJECT_STATUS.md`**, whose **first section** must always be
+the machine-readable block below, kept CONCISE (values, not narrative). The five synchronised sources
+must agree with it (`.clinerules/project-state-contract.md`).
+
+```
+## CURRENT RESUME STATE
+LAST COMPLETED TASK:      <one line>
+CURRENT VERIFIED STATE:   <the §11.1 status phrase>
+CURRENT BRANCH:           <branch>
+LAST VERIFIED COMMIT:     <hash + subject>
+GITHUB PUSH:              <pushed to origin/<branch> at <hash> | NOT PUSHED — <reason>>
+DEMO DEPLOYMENT:          <deployed at <commit> | NOT APPLICABLE (docs-only) | NOT DEPLOYED — <reason>>
+LIVE VERIFICATION:        <verified what, where | NOT VERIFIED — <reason>>
+OUTSTANDING BLOCKER:      <none | exact blocker>
+NEXT TASK:                <one line>
+EXACT NEXT STARTING POINT:<file(s)/command to start from>
+```
+
+- `HANDOFF.md` mirrors the same block (same values, short) and must not contradict it.
+- A session may NOT close a task while this block is stale, missing a field, or describes a dirty
+  tree. `STATUS_CHECK.md` and `requirements-registry.json` follow the same state.
+- This block replaces the need for a narrative handoff. **Never create a second, competing
+  memory/resume system** (no new "CONTINUE_HERE.md", no copied transcripts, no duplicated history).
+
+### 12.4 Why this exists (the behaviour it forbids)
+
+- Do not use the chat transcript as the project's memory.
+- Do not duplicate project history across documents.
+- Do not copy previous reports into new documents to "preserve context".
+- Do not repeatedly rewrite unchanged documentation.
+- Do not perform broad repository audits when the current task is already known.
+
+### 12.5 Resume procedure — the Founder says "continue, where you left off"
+
+Cline MUST, in this order and with NO reference to the previous chat:
+
+1. Read the permanent rules (`.clinerules/operating-model.md`, `protection-rules.md`,
+   `project-state-contract.md`, `mercenta-business-model.md`).
+2. Read **`PROJECT_STATUS.md` → `CURRENT RESUME STATE`** only (the first screen of the file — do not
+   read the 8,000-line history).
+3. `git --no-pager log --oneline -5`, `git status --porcelain`, `git remote -v`.
+4. Take `NEXT TASK` + `EXACT NEXT STARTING POINT` as the task, and open ONLY the files that starting
+   point names.
+5. Continue from there. If the resume state and the repository disagree, the repository wins and the
+   resume state is corrected first (that discrepancy is itself the finding to report).
+
+### 12.6 Blocked tasks (the only way a close-out step may be skipped)
+
+If a step cannot be completed — missing authorisation, deployment restriction, failing test,
+environment problem, credential requirement, security restriction, or any other legitimate blocker —
+Cline MUST: (1) stop rather than claim completion; (2) record the exact blocker; (3) record what has
+already been verified; (4) record the exact next action; (5) leave the repository clean and resumable
+(tree empty, commit made, resume state updated).
+
+**No previous chat is ever required to continue from that blocker.**
+
 different is **superseded by this section**.

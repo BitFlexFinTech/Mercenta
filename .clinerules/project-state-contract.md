@@ -21,6 +21,42 @@ They must agree on: what is complete · what is incomplete · what is deferred �
 what is blocked · what is next · the current checkpoint · verification status ·
 known exceptions.
 
+## Mandatory CURRENT RESUME STATE block in PROJECT_STATUS.md (added 2026-09-23)
+
+**`PROJECT_STATUS.md` must ALWAYS begin with a `## CURRENT RESUME STATE` block** (immediately after
+the `# PROJECT_STATUS.md` title), and every one of the five sources must agree with it. It exists so
+that a brand-new Cline chat can resume with **no reference to any previous conversation** — see
+`.clinerules/operating-model.md` §12 (CHAT IS NOT PROJECT MEMORY).
+
+The block is a compact FIELD LIST, never prose. It must always contain exactly these fields:
+
+| Field | Content |
+|---|---|
+| `LAST COMPLETED TASK` | One line: what was finished last (product or governance) |
+| `CURRENT VERIFIED STATE` | The §11.1 status phrase that is TRUE right now |
+| `CURRENT BRANCH` | The branch the work is on |
+| `LAST VERIFIED COMMIT` | Hash + subject of the last verified commit |
+| `GITHUB PUSH` | Where it is pushed (`origin/<branch>` @ hash) or `NOT PUSHED — <reason>` |
+| `DEMO DEPLOYMENT` | `deployed @ <commit>` · `NOT APPLICABLE (docs-only)` · `NOT DEPLOYED — <reason>` |
+| `LIVE VERIFICATION` | What was verified on `https://demo.mercenta.co.uk`, or `NOT VERIFIED — <reason>` |
+| `OUTSTANDING BLOCKER` | `none`, or the exact blocker and the exact next action |
+| `NEXT TASK` | One line: the task the next session must start |
+| `EXACT NEXT STARTING POINT` | The file(s)/command to open first |
+
+Obligations:
+
+- The block is updated **before** a task is closed (it is step 5 + step 12 of the §12.2 close
+  sequence), in the SAME commit as the task's state updates where possible.
+- `HANDOFF.md` mirrors the same field VALUES in a shorter form; a contradiction between the two is a
+  contract violation, exactly like a dirty checkpoint.
+- A session that cannot fill a field must write the honest negative (`NOT PUSHED — …`,
+  `LIVE VERIFICATION: NOT VERIFIED — …`) rather than omit it.
+- **A new session reads this block and nothing else from this file** before starting the recorded
+  `NEXT TASK` (minimum-context rule, §12.5). The long history below it is for the external reviewer,
+  not for resuming work.
+- Never create a competing resume/memory document. This block, `HANDOFF.md` and
+  `requirements-registry.json` are the whole memory.
+
 ## Mandatory current-state block in PROJECT_STATUS.md
 
 `PROJECT_STATUS.md` must always contain a clearly identifiable **CURRENT PLATFORM

@@ -1,11 +1,48 @@
 # PROJECT_STATUS.md
 > Source of truth for current project state. Updated after every session.
 
-## 🧭 CURRENT PLATFORM POSITION — DASHBOARD + LOGISTICS CLEANUP: **P2 DONE — OVERVIEW = OBSERVE, ADDITIVE ONLY, IN BOTH SHELLS** (2026-09-22, session 14)
+## CURRENT RESUME STATE
+<!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
+     Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
 
-**This is the CURRENT position.** The blocks below it are historical.
+LAST COMPLETED TASK:      Governance — made "chat is not project memory" permanent (operating model §12: mandatory task-close sequence incl. push, and the canonical CURRENT RESUME STATE block).
+CURRENT VERIFIED STATE:   VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change) for the governance commit; P3 (application work) remains IN PROGRESS — NOT COMPLETE.
+CURRENT BRANCH:           redesign/foundation
+LAST VERIFIED COMMIT:     21c6869 — "P3 (WIP): the Control Centre loses its work/attention lists — the founder console is projected into the single action list (Work Management)" (this governance commit is the one after it; see GITHUB PUSH).
+GITHUB PUSH:              pushed to origin/redesign/foundation at the governance commit (recorded in the immediately following state commit if the push hash differs).
+DEMO DEPLOYMENT:          NOT APPLICABLE (docs/rules-only governance increment) · P3 application work NOT DEPLOYED yet.
+LIVE VERIFICATION:        NOT VERIFIED — no demo deployment of the P3 work has happened; the governance increment needs none.
+OUTSTANDING BLOCKER:      none (P3's remaining verification — full Playwright suite — is planned work, not a blocker).
+NEXT TASK:                Finish P3: run the FULL Playwright suite, update the programme doc/registry/state for P3, then deploy + verify live (application work ⇒ the three-way contract applies).
+EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P3 row) → src/lib/work/workStore.ts (§11/§12 founder projection), src/components/admin/FounderControlCentre.tsx, scripts/validate-command-centre.mjs, e2e/command-centre.spec.ts; then `npx playwright test --workers=3`.
 
-**Increment identity:** **P2 of the Founder's dashboard/logistics cleanup programme.** The Overview in BOTH shells is now an OBSERVE surface: the admin Overview gained the full business picture (money band · business-volume band · Financial performance · Logistics status) **without losing a single existing card**, and the brand Overview gained its own earnings (money band), its first chart (net payout accrued by month) and observe tiles for the counts its action queue used to carry — while the brand's **action sections moved out of the Overview into Operations** (the work layer is the single action list). Two governing principles: **Overview = OBSERVE** (business picture, no action queues, no CTAs) and **Operations = ACT** (queues, exceptions, CTAs, sitting **directly under Overview** in both the admin and brand shells). Underneath it sits a correction of the **proxy model** — Mercenta holds the Amazon Vendor account, a brand never talks to Amazon, a brand's decision is an **instruction to Mercenta**, and carriers connect **by API only** (no carrier login).
+---
+
+## CURRENT PLATFORM POSITION — **P3 IN PROGRESS (WIP committed) + GOVERNANCE: CHAT IS NOT PROJECT MEMORY** (2026-09-23, session 15)
+
+**This is the CURRENT position.** The blocks below it are historical. **The authoritative resume data is the
+`CURRENT RESUME STATE` block above — read that first; it is all a new session needs.**
+
+**Increment identity (this session):**
+1. **Governance (complete, docs/rules only):** `.clinerules/operating-model.md` **§12** is now the permanent
+   **CHAT IS NOT PROJECT MEMORY** rule — the mandatory task-close sequence
+   (`IMPLEMENT → TEST → FIX → VERIFY LOCAL → UPDATE PROJECT STATE → COMMIT → PUSH → DEPLOY → OPEN LIVE → VERIFY LIVE →
+   LOCAL = GITHUB = DEMO → RECORD NEXT STARTING POINT → COMPLETE`), the canonical `## CURRENT RESUME STATE` block, the
+   minimum-context resume procedure, and the blocked-task protocol. **Push is now part of closing a task** (the Founder
+   no longer has to ask); deployment applies to **product work only** and is **NOT APPLICABLE** to docs/rules increments.
+   `protection-rules.md` and `project-state-contract.md` carry the matching obligations.
+2. **P3 (application work, WIP — NOT COMPLETE):** the Control Centre loses its duplicated work/attention lists
+   (the retired Command Centre panel **deleted**; its own "Attention" queue removed) and becomes founder CONTROLS; the
+   founder console is **projected into the single action list** (Work Management) as Super-Admin-scoped work items
+   carrying the same rank + auditable WHY, with the tab-aware hand-off and a declared cross-scope action-view
+   translation (no dead hand-off destinations). Verified so far: `tsc` 0 · `eslint .` 0 · `build` ✓ ·
+   `validate-command-centre` **49 PASS** (was 40) · `validate-uiux-redesign` **347/0** · `validate-workspace-shell` 94/0 ·
+   e6/e7/e5/founder-os/work-layer PASS · focused Playwright `command-centre` 4 · `work-layer` 12 · plus 21 (work-layer +
+   founder-os + deterministic-journey). **Remaining: the full Playwright suite, the P3 docs/registry updates, then
+   deploy + live verification.**
+
+**Full plan, all 11 binding Founder decisions, the research evidence and the phase table:**
+`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`.
 
 **Full plan, all 11 binding Founder decisions, the research evidence and the phase table:** `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`. That document is the resume point — read it before touching this programme.
 

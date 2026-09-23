@@ -26,7 +26,39 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — DASHBOARD + LOGISTICS CLEANUP PROGRAMME: **P2 DONE — OVERVIEW = OBSERVE, ADDITIVE ONLY** (2026-09-22, session 14)
+## CURRENT STATE — GOVERNANCE: "CHAT IS NOT PROJECT MEMORY" + **P3 IN PROGRESS** (2026-09-23, session 15)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
+> first — a new session needs nothing else from this file. This section is a projection of it.
+
+**Checkpoint:** governance increment = **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application
+runtime change)** (rules/docs only). **P3 (application work) = IN PROGRESS — NOT COMPLETE.** Branch
+`redesign/foundation`; last verified application commit `21c6869` (P3 WIP); the governance commit follows it and is
+pushed to `origin/redesign/foundation`. `git status --porcelain` EMPTY.
+
+**What changed this session**
+1. **Permanent rule (`.clinerules/operating-model.md` §12 — CHAT IS NOT PROJECT MEMORY):** the repository is the
+   project's memory; a chat transcript is never required. Mandatory task-close sequence, executed automatically:
+   `IMPLEMENT → TEST → FIX → VERIFY LOCAL → UPDATE PROJECT STATE → COMMIT → PUSH → DEPLOY → OPEN LIVE → VERIFY LIVE →
+   LOCAL = GITHUB = DEMO → RECORD NEXT STARTING POINT → COMPLETE`. **Push is now part of closing a task**; push-`--force`
+   and pushing an unverified tree stay forbidden. `protection-rules.md` (After-work, Deployment rules, Standing
+   Requirements, Handoff) and `project-state-contract.md` (mandatory resume block) carry the matching obligations.
+2. **P3 (application work, WIP, NOT COMPLETE):** the Control Centre loses its duplicated work/attention lists — the
+   retired **Command Centre panel deleted**, its own "Attention" queue removed — and keeps founder-only CONTROLS
+   (automation + approvals + halt, AI, audit, provenance, integrations status panel). The founder console is now
+   **projected into the single action list** (Work Management) as Super-Admin-scoped work items with the same rank +
+   auditable WHY, tab-aware hand-off preserved, and a declared cross-scope action-view translation so no hand-off
+   targets a non-existent view id. Verified so far: `tsc` 0 · `eslint .` 0 · `build` ✓ · `validate-command-centre`
+   **49 checks PASS** (was 40) · `validate-uiux-redesign` **347/0** · `validate-workspace-shell` **94/0** · e5/e6/e7/
+   founder-os/work-layer **PASS** · focused Playwright `command-centre` **4**, `work-layer` **12**, plus 21
+   (work-layer + founder-os + deterministic-journey). **Remaining: full Playwright suite, P3 docs/registry/state, then
+   deploy + live verification (three-way contract applies to that application work).**
+
+**NOT STARTED / REMAINING:** the P3 close-out above; then P4 → P12 of the cleanup programme
+(`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4), then push/deploy verification per the three-way
+contract.
+
+### HISTORY — the previous increment (P2, 2026-09-22, session 14). Not current; kept for the reviewer.
 
 **Checkpoint:** `VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE`. Branch `redesign/foundation`, start HEAD
 `d9e77f650df96a107849e396d0b630d8e06aec6b`; **P2 checkpoint commit `0c05fe0d6537ea1c46b1053282bab19d051e38ea`**
