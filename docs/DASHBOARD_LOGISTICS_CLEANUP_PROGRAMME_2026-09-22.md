@@ -200,5 +200,30 @@ failure**. **Result: `STAGE26_VALIDATION_PASS` — 32 ✓ · 3 skipped (absent a
   contract holds and the full-suite failure is load/budget contention, not an application defect (recorded as
   `discovered-playwright-app-shell-390x844-timeout-under-load`).
 
+### The LIVE leg found and fixed a production-only mount crash (the step that justified the three-way contract)
+
+Deploying and opening `https://demo.mercenta.co.uk` showed the app **never mounted**: `#root` was EMPTY with
+`TypeError: E is not a function`. **Nothing local could have caught it** — tsc, eslint, the build and the entire
+browser suite were green, because the Playwright suite runs against the **Vite dev server (unbundled)**.
+
+- **Diagnosis:** reproduced locally by serving the built `dist` (`vite preview`) — same empty root, same error. An
+  unminified + sourcemapped build named it: `TypeError: createSelector is not a function` in `vendor-react`. The
+  `manualChunks` split had made `vendor-react` (recharts) and `vendor-other` (lodash/reselect) **import each other**,
+  so recharts' MODULE-LEVEL calls ran before their imports had initialised. Moving the recharts family into
+  `vendor-react` surfaced the same class again (`ReferenceError: Cannot access 'gO' before initialization`): the cycle
+  is inherent to splitting a cyclic graph.
+- **Fix (`vite.config.ts`, post-mortem inline):** **one `vendor` chunk for ALL of `node_modules`** — a single instance
+  of React, scheduler and every helper, and a cycle cannot span one module. App code still splits normally.
+- **New permanent gate:** `scripts/validate-production-boot.mjs` (`npm run validate:production-boot`) builds, serves
+  `dist` from a built-in static server, loads it in Chromium and asserts the app **actually mounts** (`#root`
+  non-empty, no page/console error, the Partner Login entry renders) — **exit 1** when it does not. Proven both ways:
+  against the pre-fix bundle → `PRODUCTION_BOOT_VALIDATION_FAIL (3)`, exit 1; against the fixed bundle →
+  `PRODUCTION_BOOT_VALIDATION_PASS`, exit 0.
+- **Result:** rebuilt, redeployed, and **live-verified on `https://demo.mercenta.co.uk`** — the Super Admin demo login
+  succeeds, the Control Centre renders **no second action list** and points at the single one, the Integrations &
+  systems panel and the drill-down metrics are present, Work Management carries the founder console rows with their
+  rank and their WHY (12 funding rows, each `RANK` + `WHY | score N`) and the drawer renders the full WHY breakdown —
+  **13/13 checks PASS, zero page errors**.
+
 
 

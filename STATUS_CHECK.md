@@ -67,8 +67,21 @@ mid-push) and the demo deployment + live verification.** `git status --porcelain
    fix (assertions unchanged) that the P2 pass had already applied to `investor-demo` 375x812.
 
 **NOT STARTED / REMAINING:** **P4 — proxy-model corrections** (then P5 → P12 of the cleanup programme,
-`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4), plus the two in-session legs (push ref, demo
-deployment + live verification) recorded in the resume block.
+`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4), plus the GitHub push ref (transport-bound; see the
+resume block).
+
+5. **The LIVE leg found and fixed a PRODUCTION-ONLY mount crash — and added a gate for it.** Deploying and opening
+   `https://demo.mercenta.co.uk` showed the app **never mounted** (`#root` empty, `TypeError: E is not a function`) —
+   invisible to tsc/eslint/build/the whole browser suite because that suite runs against the Vite **dev** server
+   (unbundled). Reproduced by serving the built `dist` locally; an unminified+sourcemapped build named it:
+   `TypeError: createSelector is not a function`, because the `manualChunks` split made `vendor-react` (recharts) and
+   `vendor-other` (lodash/reselect) import **each other**. **Fixed** by keeping ALL of `node_modules` in ONE `vendor`
+   chunk (`vite.config.ts`, post-mortem inline). **New permanent gate** `scripts/validate-production-boot.mjs`
+   (`npm run validate:production-boot`) builds, serves `dist`, boots it in Chromium and fails (exit 1) if the app does
+   not mount — proven both ways (pre-fix bundle: `FAIL (3)`, exit 1; fixed bundle: `PASS`, exit 0).
+6. **The demo leg completed and was LIVE-VERIFIED.** Two deployments (run 1 exposed the dead bundle, run 2 shipped the
+   fix); the deployed build is byte-identical to the committed build (every asset hash-compared equal); real-browser
+   live verification **13/13 checks PASS with 0 page errors** on `https://demo.mercenta.co.uk`.
 
 **Governance note (still current):** `.clinerules/operating-model.md` **§12 — CHAT IS NOT PROJECT MEMORY** remains in
 force: the mandatory task-close sequence, the canonical `## CURRENT RESUME STATE` block, the minimum-context resume
