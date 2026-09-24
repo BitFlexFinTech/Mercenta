@@ -9,8 +9,14 @@
  * wizard — zero code changes anywhere else.
  *
  * §P4 — the seam covers `submitAcknowledgement` (the acknowledgement of a PO,
- * MERCENTA-side only: a brand's decision is an instruction to Mercenta). The
- * remaining documented Vendor operations are P12's scope (AV-040).
+ * MERCENTA-side only: a brand's decision is an instruction to Mercenta).
+ *
+ * §P12 — the seam now covers the WHOLE documented Vendor surface (`AV-040`):
+ * `getPurchaseOrdersStatus` (the receiving sync), `submitShipmentRequest`,
+ * `getShipmentDetails`, `getShipmentLabels` (refused BY RULE outside NA — the
+ * channel generates labels in NA only), `submitShipmentConfirmations`,
+ * `submitInvoices` and `submitInventoryUpdate` are implemented by BOTH clients.
+ * Nothing outside this seam knows which client is active.
  */
 
 import { createSpApiClient, type SpApiCredentials } from './client';

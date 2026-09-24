@@ -123,7 +123,7 @@ export const INVENTORY_RULES: readonly string[] = [
 
 /** The honest basis of the whole model, shown wherever the figures are. */
 export const INVENTORY_DERIVATION_BASIS =
-  'Mercenta’s own model — no Vendor inventory-availability API exists (register AV-035 / truth validation §769), so these figures are entered inside Mercenta and are never a channel reading. Pushing stock to the channel is submitInventoryUpdate (P12).';
+  'Mercenta’s own model — no Vendor inventory-availability API exists (register AV-035 / truth validation §769), so these figures are entered inside Mercenta and are never a channel reading. §P12 — REPOINTED (old contract: “Pushing stock to the channel is submitInventoryUpdate (P12)”): the push is now implemented in src/lib/inventory/channelInventoryPush.ts, which derives the quantity it reports from THIS ledger.';
 
 /** The unit vocabulary's authority (so it is never presented as invented). */
 export const INVENTORY_UOM_SOURCE = 'AV-029 — the channel’s own payload vocabulary is Cases / Eaches';

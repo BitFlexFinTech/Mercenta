@@ -15,7 +15,7 @@ nothing was re-labelled live.**
   placeholder (`src/lib/catalog/asin.ts` — the ONE owner); **the code never invents a plausible-looking ASIN**, and
   the seed's previously INVENTED `B0<sku>` identifier was removed in P8. The identifier's SOURCE
   (`brand_declared` / `channel_assigned`) and whether it is simulated are recorded and shown, so a brand
-  declaration is never presented as channel-confirmed. **Live activation:** the SP-API seam (P12) returns the real
+  declaration is never presented as channel-confirmed. **Live activation:** the SP-API seam (**P12 — DONE 2026-09-24**) returns the real
   identifier behind the same interface — **zero code changes**. **Remaining non-credential work:** none — the model,
   the rules, the channel path and the surfaces are built. Note the register's finding (`AV-035`) that **no public
   Vendor catalogue/item API exists**, so there is no documented API an ASIN could be fetched from.
@@ -25,8 +25,10 @@ nothing was re-labelled live.**
   "Inventory assumptions — REQUIRES BUSINESS DECISION", `AV-035`), so these figures are **never a channel reading**
   and the platform never claims one. Stock is entered in **Eaches or Cases** (the channel's own vocabulary,
   `AV-029` CONFIRMED) and a case entry converts through the product's own case pack — **refused when no case pack
-  is declared**. **Live activation:** pushing stock TO the channel is `submitInventoryUpdate`, which is **P12's**
-  declared scope. **Remaining non-credential work:** none for the model/UI; the push operation is P12.
+  is declared**. **Live activation:** pushing stock TO the channel is `submitInventoryUpdate`, which
+  **P12 DELIVERED (DONE 2026-09-24)** — `src/lib/inventory/channelInventoryPush.ts` derives the quantity it
+  reports from THIS ledger (never a typed-in figure) and pushes it through the SP-API seam; the admin
+  inventory tab carries the attributed action. **Remaining non-credential work:** none.
 - **Payment terms 14 / 30 / 60 are MERCENTA'S OWN CONFIGURATION, not channel data (P7 — DONE 2026-09-23).** The terms
   are chosen **per invoice** and the due date is **DERIVED** from the invoice's own date plus its own terms
   (`src/lib/commerce/invoiceTerms.ts` — the ONE owner). The repo's truth register records that **no public Vendor
@@ -41,13 +43,22 @@ nothing was re-labelled live.**
   and cancelling contact **no** accounting provider and no channel API. **Documented activation precondition (register
   S11): API invoicing requires PARALLEL TESTING WITH THE CHANNEL'S ACCOUNTS-PAYABLE TEAM before payments process.** That
   is a business/activation step, not a code change; the four rules are stated on the admin surface
-  (`INVOICE_NUMBER_RULES`) so the precondition cannot be forgotten. **Remaining non-credential work:** the
-  `submitInvoices` operation itself is **P12's** scope (AV-040).
-- **The receiving status is derived from MERCENTA'S OWN receiving step (P7 — DONE 2026-09-23).** `receivingStatus`
+  (`INVOICE_NUMBER_RULES`) so the precondition cannot be forgotten. **Remaining non-credential work:**
+  **NONE — P12 DELIVERED `submitInvoices` (DONE 2026-09-24)** in
+  `src/lib/commerce/channelInvoiceSubmission.ts`: the invoice goes AS THE REGISTRY ISSUED IT, is idempotent,
+  and refuses a cancelled invoice, a zero-value invoice and a reused number. The admin channel-operations
+  console carries the action; the register's `S11` parallel-testing precondition above still applies before
+  payments process.
+- **The receiving status is derived from MERCENTA'S OWN receiving step (P7 — DONE 2026-09-23), AND the
+  CHANNEL'S OWN reading is now available (P12 — DONE 2026-09-24).** `receivingStatus`
   (not received / partially received / received) is derived from the per-line received quantities
   (`src/lib/commerce/receivingStatus.ts`, `AV-018`) and gates invoicing — an unreceived PO cannot be invoiced (fail
-  closed). **Honest limit:** reading the CHANNEL's own `receivingStatus` is `getPurchaseOrdersStatus`, which is
-  **P12's** declared scope; the platform never claims a live channel reading.
+  closed). **The channel's own reading is now built (P12 — DONE 2026-09-24):** reading the CHANNEL's own
+  `receivingStatus` is `getPurchaseOrdersStatus`, implemented in `src/lib/commerce/channelReceivingSync.ts`
+  and reached through the SP-API seam from the admin channel-operations console. It REPORTS the channel's
+  status per purchase order and **never writes a simulated reading as a canonical receipt**
+  (`CHANNEL_READ_SIMULATED`), so with live credentials the same reading applies through the existing
+  receiving step — a credentials change only.
 - **Carriers are DHL + Palletline BY API ONLY (P9 + P10 — DONE; provider configuration now BUILT).** Mercenta connects the
   carrier APIs itself; **a carrier never logs into Mercenta**, so the 3PL carrier portal, its role, its environment, its
   shell and its three views, the admin "Carrier Monitor", the "3PL Carrier Terminal" login card and the demo-environment
@@ -72,18 +83,27 @@ nothing was re-labelled live.**
   (`SSCC_GS1_PREFIX` in `src/lib/documents/sscc.ts`, status `placeholder_unassigned`) and **every printed carton label
   states `XX-PENDING-GS1-LICENCE`**. **Credential that replaces it:** Mercenta's licensed GS1 company prefix, entered
   by replacing `SSCC_GS1_PREFIX.value` — no other code change (the check digit, the serial derivation and every caller
-  are untouched). **Live activation of the rest:** carrier label APIs + the SP-API shipment-confirmation call (P12);
-  until a carrier books the consignment the waybill/label documents are reported **not ready** rather than printed as
-  a fake. **Remaining non-credential work:** none — the pack, the surface, the notification and the badge are built.
+  are untouched). **Live activation of the rest:** carrier label APIs + the SP-API shipment-confirmation call
+  — **the SP-API half is DELIVERED: P12 (DONE 2026-09-24) implements `submitShipmentRequest`,
+  `getShipmentDetails` and `submitShipmentConfirmations` in both clients, and the chain
+  (`src/lib/commerce/proxyProcessor.ts`) submits the shipment request, reads the routing instructions and
+  files the ASN through the seam with the channel's own references recorded**; the carrier label APIs
+  (DHL/Palletline) remain a credentials activation. **The CHANNEL's own label service is REFUSED by rule
+  for UK/EU** (`src/config/shipping.ts → channelShipmentLabelsAvailability`, NA-only) — Mercenta never claims
+  a channel-generated label here, and no such label is ever fabricated. Until a carrier books the consignment
+  the waybill/label documents are reported **not ready** rather than printed as a fake. **Remaining non-credential work:** none — the pack, the surface, the notification and the badge are built.
 - **Consolidation is DEFERRED, not implemented — and RECORDED IN CODE (P10 — DONE 2026-09-24).** The channel documents
   multi-PO grouping (`purchaseOrders[]` on the shipment request, the PO referenced per carton in the ASN, the
   "100 shipment confirmations for every truckload shipment" limit), but POs arrive separately today: the implementation
   is **one PO = one consignment** while the **model supports 1..n**. `src/lib/shipping/consolidation.ts` is the ONE
   owner: it holds the posture (`status: 'deferred'`, decision 11), the documented evidence, the declared activation
-  (the channel's shipment request — **P12's** scope) and the invariants a future grouping must honour (never across
+  (the channel's shipment request — **P12, DELIVERED 2026-09-24**: `shipmentRequestImplemented: true` and
+  `src/lib/shipping/channelShipmentOperations.ts` submits the declared 1..n set through the seam) and the
+  invariants a future grouping must honour (never across
   brands, no duplicates, at least one PO, inside the truckload limit) — and it is FUNCTIONAL: the 1..n declaration
   normalises/validates and the pre-conditions are enforced. **Remaining non-credential work:** the grouping INPUT
-  (nothing writes more than one PO per consignment until the channel's shipment request exists).
+  (nothing writes more than one PO per consignment — a PRODUCT decision, because purchase orders still arrive
+  separately; the seam operation the deferral named now exists).
 - **"Create PO" is removed (P11 — DONE 2026-09-24).** The PO record is the PO **from Amazon**; the Mercenta→brand commercial position is
   **derived** from the brand's Model A/B. No second PO document exists.
 - **The Mercenta Hub is REMOVED as a destination (P5 — DONE 2026-09-23).** The destination is **the FC declared on the

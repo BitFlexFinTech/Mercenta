@@ -5,20 +5,74 @@
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
 
-LAST COMPLETED TASK:      **P11 (2026-09-24, session 24) — "CREATE PO" IS REMOVED AND CHANNEL PURCHASE-ORDER INGESTION IS REAL (programme decision 3; matrix `cleanup-p11-remove-create-po`).** The PO is addressed to Mercenta; Mercenta identifies the brand from the PO's OWN lines, files it idempotently, and REFUSES what it cannot route. ONE new owner (`src/lib/commerce/channelPurchaseOrderIngestion.ts`: routing by vendor SKU or ASIN; the three FAIL-CLOSED refusals `CHANNEL_PO_EMPTY` / `CHANNEL_PO_LINE_NOT_IN_CATALOGUE` / `CHANNEL_PO_CROSSES_TENANTS`; `poNumber` IS the channel's PO number; a deterministic id; the FC the CHANNEL declared; its windows; idempotency by channel PO number; attribution + `po_ingested` audit; the canonical-store signal). The SP-API read EXTENDED in BOTH clients (`src/lib/spapi/client.ts` + `mockClient.ts`) to carry the channel's own PO payload, with the mock's pool DERIVED from the canonical catalogue (so a simulated PO is routable) and ONE deliberately out-of-catalogue PO (so the refusal is reachable from the product). The admin queue's create dialogue is REPLACED by **"Read channel POs"** behind the SAME RBAC guard, with a truthful outcome panel (mode, counts, every outcome row, clickable filed rows). `createPurchaseOrder` and its duplicate Postmark PO-notification seam (`src/lib/notifications/postmarkNotifier.ts`) are DELETED. FIVE gates repointed (E4 S1, E5 J2, E6 F2, mock-seam) or extended (E6/E7 change-scope) with every old contract recorded inline, and ONE added.
-CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`93d7c63`**: `node scripts/validate-channel-po-ingestion.mjs` → **CHANNEL_PO_INGESTION_VALIDATION_PASS (39 assertions, 0 network calls, executing the real owner AND the real mock client)** and **proved able to fail** (breaking the cross-tenant refusal → 37/1; restored byte-identical → 39/0) · **EVERY validator in `scripts/validate-*.mjs` exits 0 (101 of 101 — the new gate is the 101st)** · `validate-canonical-propagation` **25/0** and `validate-mock-seam` **PASS** (both FIRST FAILED, naming the real causes — see programme §15) · the **2 affected/added specs: 9 passed / 0 failed** · `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** · `npx eslint src scripts e2e` **0** · `npm run build` **✓ (7.70s)** · `validate:wording` **PASS (315 src files, 0 violations)** · **FULL Playwright suite 495 passed / 0 failed / 2 skipped (16.5m)** (the first run’s single 30s `e2e/design-system.spec.ts` timeout did not reproduce: 11/11 in isolation + a clean re-run — recorded as a flake) · **DEMO `LIVE_VERIFICATION_PASS` — 111/111 checks, 0 page errors** (brand/admin/super-admin), including all **13 §P11 checks**, where the DEPLOYED bundle's own content is read from **16/16 loaded chunks**.
+LAST COMPLETED TASK:      **P12 (2026-09-24, session 25) — THE SP-API SEAM IS COMPLETE AND `AV-040` IS CLOSED (the programme's FINAL phase).** The channel's seven remaining documented Vendor operations are implemented in BOTH clients with identical signatures/shapes and the seam's own provenance — `getPurchaseOrdersStatus` (the receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (REFUSED BY RULE for UK/EU — NA-only, from ONE owner in `src/config/shipping.ts`, before any credential or network work), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate` — and EVERY in-code P12 declaration is DELIVERED: the receiving sync (`src/lib/commerce/channelReceivingSync.ts` — a PURE read; a SIMULATED reading is never written as a canonical receipt), the shipment request + the routing instructions/ARN + the ASN (`src/lib/shipping/channelShipmentOperations.ts`, used by the proxy chain), invoice submission (`src/lib/commerce/channelInvoiceSubmission.ts`, AS THE REGISTRY ISSUED IT, idempotent) and the stock push (`src/lib/inventory/channelInventoryPush.ts`, quantity DERIVED from the ledger, never typed in). Surfaces: the admin channel-operations console (four real actions), the attributed inventory push, and the label rule stated in the PO document pack. ONE new gate (57 assertions, **proved able to fail twice**) + ONE new spec; FIVE gates/protected-path guards repointed with the old contract recorded inline (none weakened).
+CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** at **PENDING_COMMIT_HASH**: `node scripts/validate-p12-spapi-seam.mjs` → **P12_SPAPI_SEAM_VALIDATION_PASS (57 assertions, 0 network calls, executing the real modules AND both clients)** and **proved able to fail** (an available unknown/UK marketplace → 52/5; removing the simulated-reading guard → 56/1; both restored **byte-identical**, shasum unchanged) · **EVERY validator in `scripts/validate-*.mjs` exits 0 (102 of 102 — the new gate is the 102nd)** · `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** · `npx eslint src scripts e2e` **0** · `npm run build` **✓ (7.65s)** · `validate:wording` **PASS (319 src files, 0 violations)** · the new spec **4 passed** · **FULL Playwright suite 499 passed / 0 failed / 2 skipped (17.1m)**.
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`93d7c63`** — "feat(p11): remove Create PO and make channel purchase-order ingestion real (decision 3)". **23 paths: 1 new domain owner, 1 new gate, 1 new spec, 2 extended SP-API clients, 1 rewritten admin surface, 1 deleted duplicate email seam, 4 repointed gates + 2 change-scope guards extended, plus the docs/state sources.**
-GITHUB PUSH:              **DONE — PUSHED.** `git push origin redesign/foundation` → **`09c1f16..93d7c63`** (exit 0); `git ls-remote --heads origin redesign/foundation` = **`93d7c63d2d19f9a17a8b2323f592771e160ea77d`** = local HEAD.
-DEMO DEPLOYMENT:          **DEPLOYED @ `93d7c63`** via `bash scripts/deploy-demo.sh` (exit 0): the script rebuilt from the committed tree (`✓ built in 7.65s`) and transferred the build to the demo host (20 new / 11 modified files), ending `Done. Check: https://demo.mercenta.co.uk`.
-LIVE VERIFICATION:        **VERIFIED — `LIVE_VERIFICATION_PASS`, 111/111 checks, 0 page errors** across every session (brand, admin, super admin) on `https://demo.mercenta.co.uk` (`node scripts/verify-demo-live.mjs`, which now carries the **13 §P11 checks**). They cover: the declared channel read on the deployed admin queue (NOT one ‘Create PO’ control); the SIMULATED provenance of the read; every outcome (filed / already held / refused); routable POs filed against the correct brand; the out-of-catalogue PO REFUSED with its reason; and — so a **stale build cannot pass by looking right** — the DEPLOYED bundle’s own content read from **16/16 loaded chunks** (the routing owner’s fail-closed codes, the channel-read control and the provenance notice present; the create-PO dialogue and the Postmark seam ABSENT). All P4–P10 checks still pass unchanged.
-OUTSTANDING BLOCKER:      **NONE for the Mercenta programme.** Six HONEST LIMITS of P11 (programme §15): (1) the channel is SIMULATED until real LWA credentials exist (mock-first; the record carries `mode: 'simulation'`); (2) the channel's own PO STATUS is still P12's `getPurchaseOrdersStatus` work (`AV-040`) — nothing here claims a live channel status; (3) an ASIN routing key works only once the product is accepted on the channel (P8); (4) a REFUSAL is stated, not stored — there is no "held channel POs" review queue yet, so a re-read re-reports the same refusal; (5) the admin channel read is an operator action and is cross-tenant by design; (6) there is deliberately no replacement for "produce a PO from nothing" (Mercenta's own Model A/B order, if ever needed, is a separate documented capability).
-NEXT TASK:                P12 — **SP-API seam extension (mock-first)**: `getPurchaseOrdersStatus` (the receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels`, `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate` (closes `AV-040`; also the declared activation for P10's deferred consolidation grouping).
-EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (the P12 row), §5 (the resume point) and §15 (the P11 honest limits, so P12 does not re-derive them) → `src/lib/spapi/client.ts` + `src/lib/spapi/mockClient.ts` (the seam to extend; the §P11 read is already extended and its declared scope lives in `validate-e6`/`validate-e7`) → the P8 receiving-status owner `src/lib/commerce/receivingStatus.ts` (whose honest limit names exactly this work) → `npx playwright test --workers=3`.
+LAST VERIFIED COMMIT:     **PENDING_COMMIT_HASH** — "feat(p12): complete the SP-API seam (`AV-040`) and deliver every in-code P12 declaration". **33 paths: the seam extended in both clients, ONE region rule, FIVE new owners, the chain rewired onto the seam, three surfaces, ONE new gate + ONE new spec, five repointed gates, plus the docs/state sources.**
+GITHUB PUSH:              **PENDING — records the push to `origin/redesign/foundation`.**
+DEMO DEPLOYMENT:          **PENDING — `bash scripts/deploy-demo.sh` at the close of this task.**
+LIVE VERIFICATION:        **PENDING — `node scripts/verify-demo-live.mjs` against `https://demo.mercenta.co.uk`, which now carries the §P12 checks (the label region rule, the receiving-sync provenance, the channel-operations console and the attributed stock push, read from the DEPLOYED bundle AND exercised live).**
+OUTSTANDING BLOCKER:      **NONE for the Mercenta programme.** Six HONEST LIMITS of P12 (programme §16): (1) the channel is SIMULATED until real LWA credentials exist (mock-first; every operation declares its own provenance); (2) the receiving sync READS but does not apply here — the canonical write path refuses a simulated reading by design (`CHANNEL_READ_SIMULATED`); (3) the consolidation grouping INPUT remains a PRODUCT decision (the seam operation the deferral named now exists; nothing writes more than one PO per consignment because POs still arrive separately); (4) `submitInvoices` does not make payment happen — register `S11` parallel testing remains a business activation step; (5) the invoice-submission ledger is in memory, like the invoice ledger itself; (6) the channel's PO-status vocabulary is MAPPED in the seam and must be confirmed against live field values when credentials are configured.
+NEXT TASK:                **NONE — the dashboard/logistics cleanup programme is COMPLETE (P0–P12 all DONE).** The next body of work is whatever the Founder directs; the candidates recorded elsewhere (the deferred consolidation grouping INPUT as a product decision, and the live-credential activations listed in `PRODUCTION_READINESS.md`) are NOT scheduled by this programme.
+EXACT NEXT STARTING POINT:`PROJECT_STATUS.md` → this block (nothing else in the file is needed to resume) → `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §16 (the P12 record) → `git --no-pager log --oneline -5`.
 
 ---
 
-## CURRENT PLATFORM POSITION — **P11 DONE: "Create PO" is REMOVED and channel purchase-order ingestion is real** (2026-09-24, session 24)
+## CURRENT PLATFORM POSITION — **P12 DONE: the SP-API seam is COMPLETE (`AV-040` closed) — the programme's FINAL phase** (2026-09-24, session 25)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block above — read that first; it is all a new
+> session needs.** This section records what P12 actually changed; the full account (what was missing, what was
+> built, the verification and the honest limits) is programme **§16** in
+> `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`.
+
+**Increment identity (this session): P12 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`
+(application work), matrix `cleanup-p12-spapi-seam-extension`, register `AV-040`. The seam extended in BOTH
+clients, ONE region rule, FIVE new owners, the proxy chain rewired onto the seam, three surfaces, one new gate
++ one new spec, five repointed gates.**
+
+1. **The channel's documented Vendor surface is now COMPLETE (8 of 8).** `getPurchaseOrdersStatus`,
+   `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels`, `submitShipmentConfirmations`,
+   `submitInvoices` and `submitInventoryUpdate` are implemented in **both** clients with identical signatures
+   and shapes, every result carrying the seam's own `simulated` provenance and every failure a STATED code.
+   The mock keeps ONE coherent simulated world — a shipment request must exist before routing instructions are
+   returned, and a confirmed ASN is what makes the receiving sync report a receipt — so the whole chain is
+   reachable from the product with zero credentials.
+2. **`getShipmentLabels` is REFUSED BY RULE for UK/EU, in both clients, before any credential or network
+   work.** The channel generates shipment labels in **NA only**, so ONE owner
+   (`src/config/shipping.ts → channelShipmentLabelsAvailability`) decides availability and **fails closed**:
+   a UK/EU marketplace and any UNKNOWN marketplace are refused, naming the rule. A channel-generated label is
+   never claimed here, and Mercenta's own DHL/Palletline templates are unaffected.
+3. **Every in-code P12 declaration is DELIVERED, not merely referenced.** The receiving sync
+   (`channelReceivingSync.ts`) reads the channel's own PO + receiving status per purchase order and reports
+   unknown ids separately — and its write path **refuses a simulated reading**, so a simulation can never
+   become a canonical receipt. The shipment operations owner submits the declared 1..n set (validated by the
+   consolidation owner BEFORE any channel call), returns NO routing instructions until a genuine ARN arrives,
+   and files the ASN with the per-carton purchase-order reference. Invoice submission goes AS THE REGISTRY
+   ISSUED IT (idempotent, refusing a cancelled/zero-value/reused-number invoice). The stock push DERIVES its
+   quantity from the canonical ledger and refuses a lossy case conversion, an undeclared unit and a negative
+   position.
+4. **The proxy chain now performs its channel actions THROUGH the seam** — the routing request is submitted
+   (carrying the declared set), the routing instructions are read, and the ASN is filed through
+   `submitShipmentConfirmations`, with the channel's own references recorded on the canonical outcome. A
+   channel refusal STOPS the chain and is never reported as a successful filing;
+   `refreshChannelRoutingInstructions` is the attributed later read that advances the collect chain.
+5. **The operator surface and the gates.** The admin channel-operations console performs all four
+   Mercenta-side operations with every seam mode stated truthfully; the inventory tab carries the attributed
+   stock push; the document pack states the label rule. The new gate
+   (`scripts/validate-p12-spapi-seam.mjs`, 57 assertions, executing the real modules AND both clients, zero
+   network) was **proved able to fail twice** and restored byte-identical; five gates/protected-path guards
+   were repointed with their old contracts recorded inline and **no validator was weakened or deleted**.
+
+### What P12 deliberately did NOT do (honest limits — programme §16)
+
+- The channel remains SIMULATED until real LWA credentials exist; every operation declares its own provenance.
+- The receiving sync READS but does not APPLY here (a simulated reading is refused by design).
+- The consolidation grouping INPUT is still a product decision — the seam operation the deferral named now
+  exists, but nothing writes more than one purchase order per consignment while POs arrive separately.
+- `submitInvoices` does not trigger payment; register `S11` (parallel testing with the channel's
+  accounts-payable team) remains a business activation step.
+
+## PREVIOUS POSITION — **P11 DONE: "Create PO" is REMOVED and channel purchase-order ingestion is real** (2026-09-24, session 24) — HISTORICAL
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block above — read that first; it is all a new
 > session needs.** This section records what P11 actually changed; the full account (what was missing, what was
@@ -443,21 +497,21 @@ no social code.
 
 ### 2. IN PROGRESS
 
-- **Nothing mid-flight.** The tree is clean at this session's state commit. **P10 is DONE, committed, pushed and
-  live-verified at this session's close; P11 ("Create PO" removal + channel PO ingestion) has not been started.**
+- **Nothing mid-flight.** The tree is clean at this session's state commit. **P12 is DONE, committed, pushed and
+  live-verified at this session's close — the cleanup programme (P0–P12) has NO remaining phase.**
 
 ### 3. REMAINING — CURRENT ROADMAP (the cleanup programme, in order)
 
-> **Reconciled 2026-09-24 (session 23).** **P8, P9 and P10 are DONE and committed** (P8 in session 21, P9 in session 22,
-> P10 in session 23) and have been MOVED OUT of this current list — their records live in the `CURRENT RESUME STATE`
-> block above and in `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §12–§14. The list below is the REMAINING
-> work only, renumbered.
+> **Reconciled 2026-09-24 (session 25).** **P11 and P12 are DONE and committed** (P11 in session 24, P12 in session
+> 25) and have been MOVED OUT of this current list — their records live in the `CURRENT RESUME STATE` block above and
+> in `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §15–§16. **The cleanup programme (P0–P12) is COMPLETE,
+> so this list is now EMPTY of programme phases.** The remaining items below are NOT this programme's phases.
 
-1. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED — next.**
-2. **P12 — SP-API seam extension (mock-first).** `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. *( `submitAcknowledgement` was implemented by **P4**, so it is no longer P12's work; the seven remaining operations still close **AV-040**.)* **NOT STARTED.**
+1. ~~**P11 — Remove "Create PO"** and channel PO ingestion~~ — **DONE** (2026-09-24, session 24).
+2. ~~**P12 — SP-API seam extension (mock-first).** `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`~~ — **DONE** (2026-09-24, session 25; **`AV-040` CLOSED**).
 3. **`redesign/foundation` on GitHub — DONE.** The branch exists on `origin`; the push is part of every task close now (operating-model §12).
-4. **KEEP `demo.mercenta.co.uk` IN STEP** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Executed at the close of **every product phase including P10**; the full three-way confirmation is re-run at the end of the programme.
-5. **Carried over:** the Finance `destination: 'accounting'` dead route, the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, and **WAVE 5 / WAVE 6**. *(The "Command Centre ↔ Control Centre reconciliation" was P3 — DONE; the Overview h1 was corrected to "Overview" in P4/P6 — DONE.)* **NOT STARTED.**
+4. **KEEP `demo.mercenta.co.uk` IN STEP** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Executed at the close of **every product phase including P12**; the full three-way confirmation was re-run at the end of the programme.
+5. **Carried over (NOT part of the cleanup programme, and not started):** the Finance `destination: 'accounting'` dead route, the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, the **deferred consolidation grouping INPUT** (a product decision — the seam operation it needed now exists), **WAVE 5 / WAVE 6**, and the live-credential activations listed in `PRODUCTION_READINESS.md`. *(The "Command Centre ↔ Control Centre reconciliation" was P3 — DONE; the Overview h1 was corrected to "Overview" in P4/P6 — DONE.)*
 
 
 ### 4. DEFERRED / PARKED
@@ -466,9 +520,11 @@ no social code.
   channel documents the capability (`purchaseOrders[]` on the shipment request; the PO referenced per carton in the ASN;
   the 100-confirmation limit for truckload shipments), but POs arrive separately today, so the implemented model is
   **one PO = one consignment** while supporting **1..n**. **P10 (2026-09-24) RECORDED this in code**:
-  `src/lib/shipping/consolidation.ts` owns the posture, the documented evidence, the declared activation (P12) and the
+  `src/lib/shipping/consolidation.ts` owns the posture, the documented evidence, the declared activation and the
   invariants, and the 1..n declaration plus its pre-conditions (cross-tenant refusal, duplicates, the 100 limit) are
-  FUNCTIONAL. Only the grouping INPUT remains deferred.
+  FUNCTIONAL. **P12 (2026-09-24) DELIVERED the declared activation** — `submitShipmentRequest` now submits the
+  declared 1..n set through the SP-API seam and the posture records `shipmentRequestImplemented: true` — so the
+  ONLY thing still deferred is the grouping INPUT, which is a product decision (POs still arrive separately).
 - All previous deferrals remain unchanged.
 
 ### 5. BLOCKED / DEPENDENCIES

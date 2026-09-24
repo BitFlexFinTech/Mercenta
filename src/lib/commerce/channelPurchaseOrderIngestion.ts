@@ -39,9 +39,14 @@
  * `commissionAmount` carry the platform's declared `COMMISSION_RATE_PLACEHOLDER`
  * exactly like every other purchase-order record.
  *
- * HONEST LIMIT: reading the channel's own PO STATUS (`getPurchaseOrdersStatus`,
- * the receiving sync) is **P12's** seam work (`AV-040`). Nothing here claims a
- * live channel reading.
+ * §P12 — REPOINTED (old contract recorded). This module's honest limit used to
+ * read: *"reading the channel's own PO STATUS (`getPurchaseOrdersStatus`, the
+ * receiving sync) is P12's seam work (`AV-040`). Nothing here claims a live
+ * channel reading."*
+ *
+ * P12 built that read (`src/lib/commerce/channelReceivingSync.ts`). This module
+ * still makes NO channel-status claim of its own: ingestion routes the PO from its
+ * own lines, and the channel's status is read by that separate owner.
  */
 import type { PurchaseOrder, ShipToParty } from '@/types';
 import { demoAuditLog, demoPurchaseOrders } from '@/data/demoStore';

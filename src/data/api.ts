@@ -20,6 +20,19 @@ import {
   type ChannelIngestionResult,
 } from '@/lib/commerce/channelPurchaseOrderIngestion';
 import type { ChannelPurchaseOrderReadResult } from '@/lib/spapi/client';
+/** §P12 — the four owners the channel-operation entry points delegate to. */
+import {
+  readChannelReceivingStatus,
+  type ChannelReceivingSyncResult,
+} from '@/lib/commerce/channelReceivingSync';
+import {
+  submitInvoiceToChannel,
+  type ChannelInvoiceSubmissionRecord,
+} from '@/lib/commerce/channelInvoiceSubmission';
+import {
+  pushInventoryToChannel,
+  type ChannelInventoryPushRecord,
+} from '@/lib/inventory/channelInventoryPush';
 import { deriveShipmentEta, etaWindowKindFor } from '@/lib/logistics/shipmentEta';
 import type { DemoShipment } from '@/data/demoData';
 import type { ShipmentEta } from '@/types';
@@ -61,6 +74,9 @@ import {
   reviewAdSpendRecommendation as storeReviewAdSpendRecommendation,
   setListingRecommendationReview as storeSetListingRecommendationReview,
   applyListingReviewOverrides as storeApplyListingReviewOverrides,
+  /** §P12 — the canonical commerce invoice ledger and the stock movement ledger. */
+  demoCommerceInvoices,
+  getInventoryMovements,
 } from './demoStore';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import {
@@ -2118,4 +2134,123 @@ export async function fetchAuditLogPaginated(
       );
     }
   );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * §P12 — THE CHANNEL OPERATIONS BEYOND THE PO READ (`AV-040`).
+ *
+ * Register `AV-040` named the remaining documented Vendor operations. Each entry
+ * point below goes through the SAME SP-API seam as every other channel call
+ * (mock-first: the MockAmazon client until real LWA credentials are configured),
+ * and each DELEGATES the decision-making to its ONE owner — nothing here
+ * re-implements a rule, an arithmetic or a refusal.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * §P12 — READ the channel's own purchase-order + receiving state (the RECEIVING
+ * SYNC — `getPurchaseOrdersStatus`, source `S5` / register `AV-018`).
+ *
+ * §P7 recorded that the receiving status came only from Mercenta's own receiving
+ * step, and named this read as P12's work. The reading is reported per canonical
+ * purchase order, with the seam's provenance, and is never written into the store
+ * by a read (the write path is `applyChannelReceivingReadingToStore`, which
+ * refuses a simulated reading).
+ */
+export async function readChannelReceivingSync(
+  input: { purchaseOrderIds?: string[] } = {}
+): Promise<ChannelReceivingSyncResult> {
+  const { client } = createSPApiClientForConnection({
+    credentials: spApiConnectionCredentials(),
+    edgeFunctionBase: '/functions/v1/spapi',
+  });
+  return readChannelReceivingStatus({
+    reader: client,
+    ...(input.purchaseOrderIds ? { purchaseOrderIds: input.purchaseOrderIds } : {}),
+  });
+}
+
+/**
+ * §P12 — SUBMIT an issued invoice to the channel (`submitInvoices`).
+ *
+ * The invoice goes AS THE REGISTRY ISSUED IT: its number, date, currency and total
+ * are read from the canonical invoice record, and the per-line payload is derived
+ * from the PO's own lines at the quantities the invoice bills (`receivedQty` when
+ * the receipt established them, otherwise the acknowledged quantity — the SAME
+ * rule `commerceLifecycle` invoices by).
+ */
+export async function submitCommerceInvoiceToChannel(input: {
+  invoiceId: string;
+}): Promise<ChannelInvoiceSubmissionRecord> {
+  const invoice = demoCommerceInvoices.find((i) => i.id === input.invoiceId);
+  if (!invoice) {
+    return {
+      invoiceId: input.invoiceId,
+      invoiceNumber: '',
+      poNumber: '',
+      brandId: '',
+      submittedAt: new Date().toISOString(),
+      mode: 'mock',
+      simulated: true,
+      refusal: `INVOICE_NOT_FOUND — no canonical invoice with id ${input.invoiceId}.`,
+    };
+  }
+  const po = fetchPurchaseOrder(invoice.purchaseOrderId);
+  const { client } = createSPApiClientForConnection({
+    credentials: spApiConnectionCredentials(),
+    edgeFunctionBase: '/functions/v1/spapi',
+  });
+  return submitInvoiceToChannel({
+    reader: client,
+    invoice,
+    poNumber: po?.poNumber ?? invoice.poNumber,
+    invoiceDate: invoice.issuedAt.slice(0, 10),
+    lines: (po?.lineItems ?? []).map((line) => ({
+      vendorSku: line.sku,
+      quantity: line.receivedQty ?? line.acknowledgedQty ?? line.quantity,
+      unitPrice: line.unitPrice,
+    })),
+  });
+}
+
+/**
+ * §P12 — PUSH a product's stock to the channel (`submitInventoryUpdate`).
+ *
+ * The quantity is NEVER passed in: the owner derives it from the canonical
+ * append-only movement ledger (`getInventoryMovements`), so the figure the channel
+ * is told is the same figure Mercenta reports. §P8 recorded this push as P12's
+ * declared scope (`AV-035`: no vendor inventory-availability API exists, so there
+ * is no read).
+ */
+export async function pushProductInventoryToChannel(input: {
+  productId: string;
+  unitOfMeasure?: 'Eaches' | 'Cases';
+}): Promise<ChannelInventoryPushRecord> {
+  const product = demoProducts.find((p) => p.id === input.productId);
+  const { client } = createSPApiClientForConnection({
+    credentials: spApiConnectionCredentials(),
+    edgeFunctionBase: '/functions/v1/spapi',
+  });
+  if (!product) {
+    return {
+      sku: '',
+      brandId: '',
+      quantity: 0,
+      unitOfMeasure: input.unitOfMeasure ?? 'Eaches',
+      eaches: 0,
+      pushedAt: new Date().toISOString(),
+      mode: 'mock',
+      simulated: true,
+      refusal: `PRODUCT_NOT_FOUND — no catalogue product with id ${input.productId}.`,
+    };
+  }
+  return pushInventoryToChannel({
+    reader: client,
+    product: {
+      sku: product.sku,
+      brandId: product.brandId,
+      ...(product.unitsPerCase ? { unitsPerCase: product.unitsPerCase } : {}),
+    },
+    movements: getInventoryMovements(product.brandId, product.sku),
+    ...(input.unitOfMeasure ? { unitOfMeasure: input.unitOfMeasure } : {}),
+  });
 }

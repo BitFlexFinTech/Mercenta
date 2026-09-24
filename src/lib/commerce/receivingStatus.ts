@@ -19,10 +19,19 @@
  * attribute. It FAILS CLOSED: an absent or unrecognised quantity state is
  * `not_received`, and `not_received` can never be invoiced.
  *
- * HONEST LIMIT: in this environment the status is established by Mercenta's OWN
+ * §P12 — REPOINTED (old contract recorded). This module's honest limit used to
+ * read: *"in this environment the status is established by Mercenta's OWN
  * receiving step (the channel's receiving system is simulated). Reading the
- * channel's status directly — `getPurchaseOrdersStatus` — is **P12's** seam work
- * (`AV-040`); this module never claims a live channel reading.
+ * channel's status directly — `getPurchaseOrdersStatus` — is P12's seam work
+ * (`AV-040`); this module never claims a live channel reading."*
+ *
+ * P12 BUILT IT: `src/lib/commerce/channelReceivingSync.ts` reads the channel's own
+ * receiving status through the SP-API seam (mock-first), and its canonical write
+ * path — which REFUSES a simulated reading — goes through the receiving step this
+ * module describes. The derivation here remains the ONE derivation of MERCENTA'S
+ * OWN status: a channel reading is compared against it and never substituted for
+ * it, so `AV-018`'s rule still holds and a simulated channel quantity can never
+ * become a canonical receipt.
  */
 import type { PurchaseOrder, ReceivingStatus } from '@/types';
 

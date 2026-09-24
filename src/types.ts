@@ -1710,6 +1710,15 @@ export interface ChannelInstructionOutcome {
      * confirmation that a pickup happened.
      */
     requestedPickUp?: string;
+    /**
+     * §P12 — the channel's OWN reference for the shipment request
+     * (`SubmitShipments`). ABSENT when the request could not be submitted to the
+     * channel, and never invented: the local `reference` stays the platform's own
+     * label for the request.
+     */
+    channelShipmentRequestId?: string;
+    /** §P12 — the seam's provenance for the request (`mock` = no live call occurred). */
+    mode?: 'mock' | 'real';
   };
   /**
    * §P6 — the routing instructions the CHANNEL returned (Freight Collect only).
@@ -1744,6 +1753,15 @@ export interface ChannelInstructionOutcome {
      * consequence of its own stated packing rather than a silent ledger entry.
      */
     deductionId?: string;
+    /**
+     * §P12 — the CHANNEL's own reference for the filed ASN
+     * (`submitShipmentConfirmations`). Absent when the channel did not accept the
+     * confirmation, so "filed locally" and "accepted by the channel" are never
+     * conflated.
+     */
+    channelConfirmationId?: string;
+    /** §P12 — the seam's provenance for the channel confirmation. */
+    channelMode?: 'mock' | 'real';
   };
   /**
    * §P6 — THE DOCUMENT PACK WAS GENERATED FOR THIS PO (programme decision 9:

@@ -24,6 +24,8 @@ import {
   INVENTORY_UOM_LABELS,
 } from '@/lib/inventory/inventoryRecord';
 import { ASIN_RULES, ASIN_SOURCE_LABELS } from '@/lib/catalog/asin';
+/** §P12 — the channel stock push (`submitInventoryUpdate`) goes through the seam. */
+import { pushProductInventoryToChannel } from '@/data/api';
 import {
   ContextPanel,
   MetricBand,
@@ -66,6 +68,31 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
   const [overrideAsin, setOverrideAsin] = useState('');
   const [overrideReason, setOverrideReason] = useState('');
   const [invNotice, setInvNotice] = useState<string | null>(null);
+  /**
+   * §P12 — the CHANNEL stock push (`submitInventoryUpdate`). §P8 recorded this as
+   * P12's declared scope; it is MERCENTA's action (a brand never contacts the
+   * channel), and the quantity is derived by the owner from the ledger above —
+   * never typed in here.
+   */
+  const [pushNotice, setPushNotice] = useState<string | null>(null);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  async function handlePushStock() {
+    if (!canMutate) return;
+    setPushBusy(true);
+    try {
+      const record = await pushProductInventoryToChannel({ productId: product.id });
+      setPushNotice(
+        record.refusal
+          ? record.refusal
+          : `Reported ${record.quantity} ${record.unitOfMeasure} to the channel (${record.eaches} eaches)${
+              record.simulated ? ' — simulated submission, no live channel call was made' : ''
+            }. ${record.submissionId ?? ''}`.trim()
+      );
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   /** §P8 — the attributed admin override of the channel identifier. */
   function handleOverrideAsin() {
@@ -245,6 +272,19 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
                 <ul className='text-ds-micro text-zinc-500 space-y-0.5'>
                   {ASIN_RULES.map(function(r) { return <li key={r}>• {r}</li>; })}
                 </ul>
+              </div>
+
+              <div className='border-t border-white/[0.06] pt-3 space-y-2' data-testid="catalog-inventory-channel-push">
+                <p className='text-zinc-400 font-medium'>Push stock to the channel</p>
+                <p className='text-ds-micro text-zinc-500 leading-relaxed'>
+                  submitInventoryUpdate — Mercenta reports this position to the channel. The quantity
+                  is DERIVED from the movement ledger above, never typed in; only Eaches/Cases are
+                  pushed, and a case push needs the product's own case pack.
+                </p>
+                <Button className='text-xs' data-state="catalog-inventory-push" disabled={!canMutate || pushBusy}
+                  title={canMutate ? undefined : 'View-only staff cannot push stock to the channel'}
+                  onClick={handlePushStock}>Report stock to channel</Button>
+                {pushNotice && <p className='text-ds-micro text-amber-300' data-testid="catalog-inventory-push-notice">{pushNotice}</p>}
               </div>
 
               <div className='border-t border-white/[0.06] pt-3'>

@@ -19,8 +19,15 @@
  * -----------------
  * The 1..n shape is FUNCTIONAL, today, in this one owner: a consignment's declared
  * purchase orders are normalised and validated whether it declares one or many. What is
- * deferred is the INPUT — nothing writes more than one yet, because the grouping arrives
- * with the channel's shipment request, which is P12's declared SP-API scope.
+ * deferred is the INPUT — nothing writes more than one yet, because purchase orders
+ * arrive separately.
+ *
+ * §P12 — REPOINTED (old contract recorded): this comment used to say the grouping
+ * "arrives with the channel's shipment request, which is P12's declared SP-API scope".
+ * P12 DELIVERED that shipment request
+ * (`src/lib/shipping/channelShipmentOperations.ts` → `submitShipmentRequest`, carrying
+ * the declared set), so what remains deferred is the grouping INPUT only — the Founder's
+ * decision 11 stands, and `shipmentRequestImplemented` records the delivered half.
  *
  * THE INVARIANTS THAT MUST SURVIVE THE DEFERRAL
  * ---------------------------------------------
@@ -46,6 +53,13 @@ export interface ConsolidationPosture {
   evidence: readonly string[];
   /** What would activate grouping (declared scope, not implemented here). */
   activation: string;
+  /**
+   * §P12 — TRUE once the declared activation (the channel's shipment request)
+   * exists in the seam. The POSTURE stays `deferred`: the Founder's decision 11 is
+   * about the grouping INPUT arriving with separately-issued purchase orders, not
+   * about the seam operation.
+   */
+  shipmentRequestImplemented: boolean;
   /** The invariants a future grouping implementation must honour. */
   invariants: readonly string[];
 }
@@ -68,7 +82,9 @@ export const CONSOLIDATION_POSTURE: ConsolidationPosture = {
     '"a limit of 100 shipment confirmations for every truckload shipment".',
   ],
   activation:
-    "The grouping input arrives with the channel's shipment request (SubmitShipments + the per-carton PO reference), which is P12's declared scope.",
+    'The channel shipment request (SubmitShipments + the per-carton PO reference) — declared as P12’s scope and DELIVERED by P12: src/lib/shipping/channelShipmentOperations.ts submits the consignment’s declared 1..n purchase-order set through the SP-API seam. The grouping INPUT (choosing several purchase orders into one consignment) remains a product decision, because purchase orders still arrive separately.',
+  /** §P12 — the declared activation is IMPLEMENTED (the seam operation exists). */
+  shipmentRequestImplemented: true,
   invariants: [
     'A consignment never groups purchase orders belonging to different brands.',
     'A grouped consignment declares every purchase order it carries; an empty declaration is refused.',

@@ -1026,6 +1026,64 @@ const P11_CHANNEL_PO_INGESTION_SCOPE = new Set([
   'PRODUCTION_READINESS.md',
 ]);
 
+/**
+ * §P12 (2026-09-24, programme `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`
+ * §4 P12; register `AV-040`) — SP-API SEAM EXTENSION DECLARED SURFACE.
+ *
+ * P12 completes the channel's documented vendor surface on the EXISTING seam
+ * (`getPurchaseOrdersStatus`, `submitShipmentRequest`, `getShipmentDetails`,
+ * `getShipmentLabels`, `submitShipmentConfirmations`, `submitInvoices`,
+ * `submitInventoryUpdate`) and gives each in-code P12 declaration a real owner:
+ * the receiving sync, the shipment operations, invoice submission and the stock
+ * push. It touches the PROTECTED `src/lib/spapi/**` seam (declared, not widened),
+ * the instruction/workflow owners, one new admin surface and the gates/specs. The
+ * F5/F5b/F6 contract is UNCHANGED: a changed file in NO declared set still fails.
+ */
+const P12_SPAPI_SEAM_SCOPE = new Set([
+  /* The seam (PROTECTED prefix — declared, not widened) + its ONE region rule */
+  'src/lib/spapi/client.ts',
+  'src/lib/spapi/mockClient.ts',
+  'src/lib/spapi/index.ts',
+  'src/config/shipping.ts',
+  /* The four new owners the seam operations land in */
+  'src/lib/commerce/channelReceivingSync.ts',
+  'src/lib/commerce/channelInvoiceSubmission.ts',
+  'src/lib/shipping/channelShipmentOperations.ts',
+  'src/lib/inventory/channelInventoryPush.ts',
+  /* The owners whose honest limits named P12, and the chain that uses the seam */
+  'src/lib/commerce/receivingStatus.ts',
+  'src/lib/commerce/channelPurchaseOrderIngestion.ts',
+  'src/lib/commerce/channelInstructions.ts',
+  'src/lib/commerce/proxyProcessor.ts',
+  'src/lib/commerce/commerceLifecycle.ts',
+  'src/lib/shipping/consolidation.ts',
+  'src/lib/inventory/inventoryRecord.ts',
+  'src/lib/inventory/inventoryLifecycle.ts',
+  /* The surfaces: the new channel-operations console + its mount + the pack */
+  'src/components/admin/ChannelOperationsPanel.tsx',
+  'src/components/admin/RetailPipeline.tsx',
+  'src/components/admin/CatalogManagerAdmin.tsx',
+  'src/components/shared/logistics/PoDocumentPackPanel.tsx',
+  /* The canonical contract + the app seam */
+  'src/types.ts',
+  'src/data/api.ts',
+  /* The gates + the browser specs */
+  'scripts/validate-p12-spapi-seam.mjs',
+  'scripts/validate-proxy-model.mjs',
+  'scripts/validate-logistics-providers.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/verify-demo-live.mjs',
+  'e2e/p12-channel-operations.spec.ts',
+  /* Documentation + the state sources */
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+  'STATUS_CHECK.md',
+  'requirements-registry.json',
+  'PRODUCTION_READINESS.md',
+]);
+
 
 try {
   /* ── modules under test (the EXISTING architecture) ── */
@@ -1310,6 +1368,9 @@ try {
         /** §P11 — the channel-ingestion phase's declared surface (see above). */
         P11_CHANNEL_PO_INGESTION_SCOPE.has(p) ||
         [...P11_CHANNEL_PO_INGESTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P12 — the SP-API seam-extension phase's declared surface (see above). */
+        P12_SPAPI_SEAM_SCOPE.has(p) ||
+        [...P12_SPAPI_SEAM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
@@ -1328,6 +1389,9 @@ try {
         /** §P11 — same declaration, second protected-path check (F5b). */
         P11_CHANNEL_PO_INGESTION_SCOPE.has(p) ||
         [...P11_CHANNEL_PO_INGESTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P12 — same declaration, second protected-path check (F5b). */
+        P12_SPAPI_SEAM_SCOPE.has(p) ||
+        [...P12_SPAPI_SEAM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
@@ -1506,7 +1570,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...P10_LOGISTICS_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §P11 — the channel-ingestion phase's declared surface (see above). */
           P11_CHANNEL_PO_INGESTION_SCOPE.has(p) ||
-          [...P11_CHANNEL_PO_INGESTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...P11_CHANNEL_PO_INGESTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P12 — the SP-API seam-extension phase's declared surface (see above). */
+          P12_SPAPI_SEAM_SCOPE.has(p) ||
+          [...P12_SPAPI_SEAM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

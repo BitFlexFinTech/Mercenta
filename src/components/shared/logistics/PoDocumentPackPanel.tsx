@@ -42,6 +42,9 @@ import {
   type PoDocument,
 } from '@/lib/documents/poDocumentPack';
 import { buildCollectChain, type CollectChain } from '@/lib/shipping/collectChain';
+/** §P12 — the channel's label rule is read from its ONE canonical owner. */
+import { channelShipmentLabelsAvailability } from '@/config/shipping';
+import { UK_MARKETPLACE_ID } from '@/lib/spapi/transform';
 
 
 /* ── status presentation ──────────────────────────────────────────────────── */
@@ -401,6 +404,18 @@ export function PoDocumentPackPanel({
       </ul>
 
       {chain.applies && <CollectChainPanel chain={chain} />}
+
+      {/* §P12 — THE CHANNEL'S OWN LABEL SERVICE IS NA-ONLY. `GetShipmentLabels`
+          ("Generate shipping labels from Amazon") is offered in NA only, so the
+          pack states the rule here rather than letting a brand expect a
+          channel-generated label for a UK/EU consignment. The labels this pack
+          renders are MERCENTA'S OWN carrier templates (DHL / Palletline). */}
+      <p
+        className="border-t border-white/[0.06] pt-2.5 text-ds-micro leading-relaxed text-zinc-500"
+        data-testid="channel-labels-rule"
+      >
+        {channelShipmentLabelsAvailability(UK_MARKETPLACE_ID).reason}
+      </p>
 
       {openDoc && <DocumentDialog doc={openDoc} onClose={() => setOpenDoc(null)} />}
     </div>

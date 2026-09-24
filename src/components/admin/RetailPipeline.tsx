@@ -19,6 +19,7 @@ import {
 import { cn } from '@/utils/cn';
 import { AdminPurchaseOrderDetail } from '@/components/admin/AdminPurchaseOrderDetail';
 import { CommerceOperationsPanel } from '@/components/admin/CommerceOperationsPanel';
+import { ChannelOperationsPanel } from '@/components/admin/ChannelOperationsPanel';
 import {
   AlertTriangle,
   Eye,
@@ -350,6 +351,12 @@ function UnlockedPipeline() {
           pre-existing catalog/PO/deduction DOM order — and every existing
           browser assertion that selects by order — is unchanged. */}
       <CommerceOperationsPanel />
+
+      {/* §P12 — the CHANNEL OPERATIONS the seam now covers (`AV-040`): the
+          receiving sync, the routing instructions (the ARN), invoice submission
+          and the shipment-label rule. Rendered after the pre-existing sections,
+          for the same DOM-order reason. */}
+      <ChannelOperationsPanel />
     </WorkspaceFrame>
   );
 }

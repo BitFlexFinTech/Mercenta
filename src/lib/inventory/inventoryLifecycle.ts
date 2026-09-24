@@ -14,9 +14,12 @@
  * Honest limits (recorded, not hidden):
  * - the ledger is IN-MEMORY in this environment (the D4 persistence port has no
  *   inventory table; the P7 invoice ledger reports the same limit);
- * - nothing here contacts a channel — `submitInventoryUpdate` is P12's scope,
- *   and the identifier is only ever the brand's own declaration or the channel's
- *   response through the existing mock-first seam.
+ * - §P12 — REPOINTED (old contract recorded): this used to read "nothing here
+ *   contacts a channel — `submitInventoryUpdate` is P12's scope". P12 implemented
+ *   that push (`src/lib/inventory/channelInventoryPush.ts`, reached through the
+ *   app seam), and it derives the quantity it reports from THIS ledger. This module
+ *   still contacts no channel itself: the identifier is only ever the brand's own
+ *   declaration or the channel's response through the existing mock-first seam.
  */
 import type {
   InventoryMovement,

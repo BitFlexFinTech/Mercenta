@@ -73,6 +73,11 @@ import {
 } from './invoiceRegistry';
 import { invoiceReceiptGate, RECEIVING_STATUS_LABELS, summariseReceiving } from './receivingStatus';
 import type { ReceivingSummary } from './receivingStatus';
+import {
+  applyChannelReceivingReading as applyChannelReceivingReadingOwner,
+  type ChannelReceivingApplyResult,
+  type ChannelReceivingReading,
+} from './channelReceivingSync';
 
 /**
  * The actor performing an operational commerce action. Extends the acquisition
@@ -630,6 +635,50 @@ export function receiveCommercePurchaseOrder(
       receiving,
     },
   };
+}
+
+/* ── 4b. §P12 — THE CHANNEL'S OWN RECEIVING READING ─────────────────────── */
+
+/**
+ * §P12 — APPLY the CHANNEL'S OWN receiving reading to the canonical purchase
+ * order.
+ *
+ * §P7 recorded the honest limit that the receiving status was established by
+ * Mercenta's OWN receiving step because the channel's receiving system was
+ * simulated. §P12 reads the channel directly
+ * (`src/lib/commerce/channelReceivingSync.ts` → `getPurchaseOrdersStatus`), and
+ * this function is that reading's write path into the canonical store — through
+ * the SAME canonical receiving step, so the derived status, the reconciliation
+ * and the shortage deductions are all the existing ones.
+ *
+ * FAIL CLOSED (inherited from the owner, not re-implemented here): a SIMULATED
+ * reading is refused outright, so a simulated quantity can never appear as
+ * received stock. In this environment every reading is simulated, so this path
+ * refuses — and says exactly why.
+ */
+export function applyChannelReceivingReadingToStore(
+  reading: ChannelReceivingReading,
+  actor: CommerceActor
+): ChannelReceivingApplyResult {
+  return applyChannelReceivingReadingOwner({
+    reading,
+    actorId: actor.staffId,
+    writer: {
+      receive: ({ poId, receivedBySku, actorId }) => {
+        const result = receiveCommercePurchaseOrder(
+          poId,
+          {
+            staffId: actorId,
+            canMutate: actor.canMutate,
+            ...(actor.tenantId ? { tenantId: actor.tenantId } : {}),
+          },
+          receivedBySku
+        );
+        if (!result.ok) return { ok: false, error: result.error };
+        return { ok: true, receivingStatus: result.value.receivingStatus };
+      },
+    },
+  });
 }
 
 /* ── 5. SIMULATED INVOICE ────────────────────────────────────────────────── */

@@ -23,11 +23,25 @@ import type {
   ChannelPurchaseOrder,
   ChannelPurchaseOrderLine,
   ChannelPurchaseOrderReadResult,
+  ChannelPurchaseOrdersStatusResult,
   FetchLike,
+  InventoryUpdatePayload,
+  InventoryUpdateResult,
+  InvoiceSubmissionPayload,
+  InvoiceSubmissionResult,
+  ShipmentConfirmationPayload,
+  ShipmentConfirmationResult,
+  ShipmentDetailsResult,
+  ShipmentLabelsResult,
+  ShipmentRequestPayload,
+  ShipmentRequestResult,
 } from './client';
 import { simulatedAsinFor } from '@/lib/catalog/asin';
 import { DEMO_PRODUCTS } from '@/data/demoData';
 import { declaredShipToParty } from '@/config/destinationFc';
+import { channelShipmentLabelsAvailability } from '@/config/shipping';
+import { TRUCKLOAD_CONFIRMATION_LIMIT } from '@/lib/shipping/consolidation';
+import { UK_MARKETPLACE_ID } from './transform';
 
 export interface SubmissionResult {
   ok: boolean;
@@ -79,11 +93,90 @@ let submissionCounter = 0;
 /** §P4 — deterministic acknowledgement references (`MOCK-ACK-00001`). */
 let acknowledgementCounter = 0;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * §P12 — THE SIMULATED CHANNEL'S SHIPMENT / RECEIVING / INVOICE / STOCK WORLD.
+ *
+ * One in-memory world, so the operations are COHERENT with each other the way a
+ * real channel's are: a shipment request must exist before routing instructions
+ * can be returned, and a confirmed shipment is what makes the channel's own
+ * receiving sync report a receipt. Every identifier is unmistakably simulated
+ * (`MOCK-SHP-REQ-…`, `MOCK-ARN-…`, `MOCK-ASN-…`, `MOCK-INV-ACK-…`,
+ * `MOCK-INV-UPD-…`) and nothing here makes a network call.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** §P12 — the channel's refusals for the operations added in this phase. */
+const OPS_REFUSALS = {
+  statusIdsEmpty:
+    'PURCHASE_ORDER_IDS_EMPTY — a receiving sync must name at least one purchase order.',
+  shipmentRequestEmpty:
+    'SHIPMENT_REQUEST_EMPTY — a shipment request must name the purchase order(s) it covers.',
+  shipmentRequestDuplicate:
+    'SHIPMENT_REQUEST_DUPLICATE — a purchase order is declared twice in the same request.',
+  shipmentRequestTooLarge:
+    `SHIPMENT_REQUEST_TOO_LARGE — above the channel's limit of ${TRUCKLOAD_CONFIRMATION_LIMIT} shipment confirmations for a truckload shipment.`,
+  shipmentRequestUnknown:
+    'SHIPMENT_REQUEST_UNKNOWN — the channel has no such shipment request, so it returns no routing instructions.',
+  confirmationEmpty:
+    'SHIPMENT_CONFIRMATION_EMPTY — an ASN with no cartons declares nothing.',
+  confirmationNoPurchaseOrders:
+    'SHIPMENT_CONFIRMATION_NO_PURCHASE_ORDERS — an ASN must name the purchase order(s) it covers.',
+  confirmationCartonWithoutPo:
+    'SHIPMENT_CONFIRMATION_CARTON_WITHOUT_PO — every carton must reference the purchase order it carries.',
+  confirmationCartonPoNotDeclared:
+    'SHIPMENT_CONFIRMATION_CARTON_PO_NOT_DECLARED — a carton references a purchase order the confirmation does not declare.',
+  invoiceNumberMissing: 'INVOICE_NUMBER_MISSING — the channel requires an Invoice ID (AV-022).',
+  invoiceZeroValue: 'INVOICE_ZERO_VALUE — a zero-value invoice fails (AV-022).',
+  invoiceNumberReused:
+    'INVOICE_NUMBER_ALREADY_USED — invoice numbers are unique and are never reused (AV-022).',
+  inventorySkuMissing: 'INVENTORY_SKU_MISSING — an update must name the SKU it reports.',
+  inventoryQuantityInvalid:
+    'INVENTORY_QUANTITY_INVALID — a pushed quantity must be a number that is zero or greater.',
+  inventoryUnitUndeclared:
+    'INVENTORY_UNIT_UNDECLARED — a push must declare the unit of measure (Eaches/Cases).',
+} as const;
+
+interface MockShipmentRequest {
+  shipmentRequestId: string;
+  purchaseOrderNumbers: string[];
+  requestedPickUp?: string;
+  /** Reads so far — the channel answers with routing instructions only after assignment. */
+  detailReads: number;
+}
+
+const shipmentRequests = new Map<string, MockShipmentRequest>();
+let shipmentRequestCounter = 0;
+
+interface MockConfirmedShipment {
+  confirmationId: string;
+  receivedDate: string;
+  /** Received quantity per SKU, as the ASN declared it. */
+  receivedBySku: Record<string, number>;
+}
+
+const confirmedShipments = new Map<string, MockConfirmedShipment>();
+let confirmationCounter = 0;
+
+/** The channel's consumed invoice numbers — the documented never-reused rule. */
+const usedInvoiceNumbers = new Set<string>();
+let invoiceCounter = 0;
+
+let inventoryUpdateCounter = 0;
+
 export function resetMockAmazonState(): void {
   submissions.clear();
   submissionCounter = 0;
   acknowledgementCounter = 0;
+  shipmentRequests.clear();
+  shipmentRequestCounter = 0;
+  confirmedShipments.clear();
+  confirmationCounter = 0;
+  usedInvoiceNumbers.clear();
+  invoiceCounter = 0;
+  inventoryUpdateCounter = 0;
 }
+
+/** The padded simulated reference helper (one form, so ids cannot drift apart). */
+const mockRef = (prefix: string, counter: number) => `${prefix}${String(counter).padStart(5, '0')}`;
 
 /**
  * §P11 — THE SIMULATED CHANNEL'S PURCHASE-ORDER POOL.
@@ -302,6 +395,238 @@ export function createMockSpApiClient(_transport?: FetchLike) {
       const status: AcknowledgementResult['status'] =
         accepted === 0 ? 'rejected' : accepted === lines.length ? 'accepted' : 'partially_accepted';
       return { ok: true, acknowledgementId, status };
+    },
+
+    /**
+     * §P12 — SIMULATED `getPurchaseOrdersStatus` (the receiving sync, `AV-040`).
+     *
+     * Answers from the simulated channel's OWN world: a PO the channel has never
+     * been asked to confirm is `not_received` on every line, and a PO whose ASN
+     * this mock accepted is `received` with the quantities the ASN declared. Ids
+     * the channel does not know are reported as `unknownPurchaseOrderIds` — a
+     * caller must never read "absent" as "not received".
+     */
+    async getPurchaseOrdersStatus(
+      purchaseOrderIds: string[]
+    ): Promise<ChannelPurchaseOrdersStatusResult> {
+      await delay(140);
+      const ids = purchaseOrderIds.map((v) => v.trim()).filter(Boolean);
+      if (ids.length === 0) return { ok: false, error: OPS_REFUSALS.statusIdsEmpty };
+
+      const known = new Map(MOCK_PO_POOL.map((po) => [po.purchaseOrderId, po]));
+      const statuses: NonNullable<ChannelPurchaseOrdersStatusResult['statuses']> = [];
+      const unknownPurchaseOrderIds: string[] = [];
+
+      for (const id of ids) {
+        const po = known.get(id);
+        if (!po) {
+          unknownPurchaseOrderIds.push(id);
+          continue;
+        }
+        const confirmed = confirmedShipments.get(id);
+        statuses.push({
+          purchaseOrderId: id,
+          status: confirmed ? 'received' : 'acknowledged',
+          receivingStatus: confirmed ? 'received' : 'not_received',
+          lines: po.lines.map((line) => ({
+            vendorSku: line.vendorSku,
+            ...(line.asin ? { asin: line.asin } : {}),
+            orderedQty: line.quantity,
+            receivedQty: confirmed ? confirmed.receivedBySku[line.vendorSku] ?? 0 : 0,
+          })),
+          ...(confirmed ? { receivedDate: confirmed.receivedDate } : {}),
+          simulated: true,
+        });
+      }
+      return { ok: true, statuses, unknownPurchaseOrderIds };
+    },
+
+    /**
+     * §P12 — SIMULATED `submitShipmentRequest` (`SubmitShipments`, decision 11).
+     *
+     * Accepts the consignment's declared purchase-order set (1..n) and refuses
+     * exactly what the channel refuses: an empty declaration, a duplicate, and
+     * anything above the documented truckload-confirmation limit.
+     */
+    async submitShipmentRequest(payload: ShipmentRequestPayload): Promise<ShipmentRequestResult> {
+      await delay(150);
+      const poNumbers = (payload.purchaseOrderNumbers ?? []).map((v) => v.trim()).filter(Boolean);
+      if (poNumbers.length === 0) return { ok: false, error: OPS_REFUSALS.shipmentRequestEmpty };
+      const duplicate = poNumbers.find((value, i) => poNumbers.indexOf(value) !== i);
+      if (duplicate) {
+        return { ok: false, error: `${OPS_REFUSALS.shipmentRequestDuplicate} (${duplicate})` };
+      }
+      if (poNumbers.length > TRUCKLOAD_CONFIRMATION_LIMIT) {
+        return { ok: false, error: OPS_REFUSALS.shipmentRequestTooLarge };
+      }
+
+      shipmentRequestCounter += 1;
+      const shipmentRequestId = mockRef('MOCK-SHP-REQ-', shipmentRequestCounter);
+      const request: MockShipmentRequest = {
+        shipmentRequestId,
+        purchaseOrderNumbers: poNumbers,
+        ...(payload.requestedPickUp ? { requestedPickUp: payload.requestedPickUp } : {}),
+        detailReads: 0,
+      };
+      for (const poNumber of poNumbers) shipmentRequests.set(poNumber, request);
+
+      return {
+        ok: true,
+        shipmentRequestId,
+        status: 'carrier_assignment_pending',
+        simulated: true,
+      };
+    },
+
+    /**
+     * §P12 — SIMULATED `getShipmentDetails`.
+     *
+     * Mirrors the channel's documented behaviour: a response exists only AFTER
+     * carrier assignment, so the FIRST read after a request reports
+     * `carrier_assignment_pending` and the SECOND returns the routing
+     * instructions — a simulated assignment schedule, so the collect chain can
+     * genuinely advance rather than being permanently stuck. The ARN is
+     * unmistakably simulated (`MOCK-ARN-…`).
+     */
+    async getShipmentDetails(shipmentRequestId: string): Promise<ShipmentDetailsResult> {
+      await delay(120);
+      const request = [...shipmentRequests.values()].find(
+        (r) => r.shipmentRequestId === shipmentRequestId
+      );
+      if (!request) return { ok: false, error: OPS_REFUSALS.shipmentRequestUnknown };
+
+      request.detailReads += 1;
+      if (request.detailReads < 2) {
+        return { ok: true, status: 'carrier_assignment_pending', simulated: true };
+      }
+      const assignedAt = new Date().toISOString();
+      return {
+        ok: true,
+        status: 'carrier_assigned',
+        arn: `MOCK-ARN-${request.shipmentRequestId.replace('MOCK-SHP-REQ-', '')}`,
+        carrier: 'Simulated channel-appointed carrier',
+        assignedAt,
+        ...(request.requestedPickUp ? { pickupDate: request.requestedPickUp } : {}),
+        simulated: true,
+      };
+    },
+
+    /**
+     * §P12 — SIMULATED `getShipmentLabels`.
+     *
+     * The simulated channel reads the SAME region rule as the live client
+     * (`src/config/shipping.ts`) and refuses for the UK marketplace it stands in
+     * for. It never fabricates a label: a simulated "Amazon label" for a UK/EU
+     * consignment would be exactly the false claim the rule exists to prevent.
+     */
+    async getShipmentLabels(_shipmentId: string): Promise<ShipmentLabelsResult> {
+      await delay(90);
+      const availability = channelShipmentLabelsAvailability(UK_MARKETPLACE_ID);
+      return { ok: false, refused: true, refusedReason: availability.reason };
+    },
+
+    /**
+     * §P12 — SIMULATED `submitShipmentConfirmations` (the ASN, `AV-015`).
+     *
+     * Refuses what the channel refuses — an empty confirmation, no declared
+     * purchase orders, a carton with no purchase-order reference, a carton
+     * referencing a purchase order the confirmation does not declare — and then
+     * records the confirmation in the simulated channel's world, which is what
+     * makes the receiving sync report a receipt for those purchase orders.
+     */
+    async submitShipmentConfirmations(
+      payload: ShipmentConfirmationPayload
+    ): Promise<ShipmentConfirmationResult> {
+      await delay(160);
+      const cartons = payload.cartons ?? [];
+      if (cartons.length === 0) return { ok: false, error: OPS_REFUSALS.confirmationEmpty };
+
+      const declared = new Set(
+        (payload.purchaseOrderNumbers ?? []).map((v) => v.trim()).filter(Boolean)
+      );
+      if (declared.size === 0) {
+        return { ok: false, error: OPS_REFUSALS.confirmationNoPurchaseOrders };
+      }
+      const withoutPo = cartons.find((c) => !c.purchaseOrderNumber?.trim());
+      if (withoutPo) {
+        return {
+          ok: false,
+          error: `${OPS_REFUSALS.confirmationCartonWithoutPo} (carton ${withoutPo.cartonId})`,
+        };
+      }
+      const outside = cartons.find((c) => !declared.has(c.purchaseOrderNumber.trim()));
+      if (outside) {
+        return {
+          ok: false,
+          error: `${OPS_REFUSALS.confirmationCartonPoNotDeclared} (carton ${outside.cartonId} → ${outside.purchaseOrderNumber})`,
+        };
+      }
+
+      confirmationCounter += 1;
+      const confirmationId = mockRef('MOCK-ASN-', confirmationCounter);
+      const receivedDate = new Date().toISOString();
+      for (const poNumber of declared) {
+        const receivedBySku: Record<string, number> = {};
+        for (const carton of cartons) {
+          if (carton.purchaseOrderNumber.trim() !== poNumber) continue;
+          receivedBySku[carton.vendorSku] = (receivedBySku[carton.vendorSku] ?? 0) + carton.quantity;
+        }
+        confirmedShipments.set(poNumber, { confirmationId, receivedDate, receivedBySku });
+      }
+      return { ok: true, confirmationId, status: 'accepted', simulated: true };
+    },
+
+    /**
+     * §P12 — SIMULATED `submitInvoices`.
+     *
+     * The channel's own documented invoicing rules (`AV-022`) are what this
+     * refuses: a missing Invoice ID, a ZERO-VALUE invoice, and a REUSED number
+     * ("invoice numbers are unique and never reused"). It never re-numbers,
+     * re-dates or re-prices the invoice it is given — the platform's registry is
+     * the authority for all of those.
+     */
+    async submitInvoices(payload: InvoiceSubmissionPayload): Promise<InvoiceSubmissionResult> {
+      await delay(170);
+      const number = payload.invoiceNumber?.trim();
+      if (!number) return { ok: false, error: OPS_REFUSALS.invoiceNumberMissing };
+      if (!(payload.total > 0)) return { ok: false, error: OPS_REFUSALS.invoiceZeroValue };
+      if (usedInvoiceNumbers.has(number)) {
+        return { ok: false, error: `${OPS_REFUSALS.invoiceNumberReused} (${number})` };
+      }
+      usedInvoiceNumbers.add(number);
+      invoiceCounter += 1;
+      return {
+        ok: true,
+        submissionId: mockRef('MOCK-INV-ACK-', invoiceCounter),
+        status: 'submitted',
+        simulated: true,
+      };
+    },
+
+    /**
+     * §P12 — SIMULATED `submitInventoryUpdate`.
+     *
+     * The push direction of Mercenta's own inventory model (decision 5). It
+     * refuses an unnamed SKU, a quantity that is not a number at or above zero
+     * (a pushed stock figure cannot be negative) and an undeclared unit of
+     * measure — the same vocabulary the canonical inventory owner validates
+     * against (`Eaches` / `Cases`).
+     */
+    async submitInventoryUpdate(payload: InventoryUpdatePayload): Promise<InventoryUpdateResult> {
+      await delay(130);
+      if (!payload.sku?.trim()) return { ok: false, error: OPS_REFUSALS.inventorySkuMissing };
+      if (!Number.isFinite(payload.quantity) || payload.quantity < 0) {
+        return { ok: false, error: OPS_REFUSALS.inventoryQuantityInvalid };
+      }
+      if (payload.unitOfMeasure !== 'Eaches' && payload.unitOfMeasure !== 'Cases') {
+        return { ok: false, error: OPS_REFUSALS.inventoryUnitUndeclared };
+      }
+      inventoryUpdateCounter += 1;
+      return {
+        ok: true,
+        submissionId: mockRef('MOCK-INV-UPD-', inventoryUpdateCounter),
+        simulated: true,
+      };
     },
   };
 }

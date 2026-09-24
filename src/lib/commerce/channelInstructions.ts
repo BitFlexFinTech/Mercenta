@@ -263,6 +263,53 @@ export function markChannelInstructionRefused(
 }
 
 /**
+ * §P12 — RECORD the channel's routing instructions on an instruction Mercenta has
+ * already actioned (`GetShipmentDetails`).
+ *
+ * The channel returns routing instructions — the ARN and the assigned carrier —
+ * only AFTER carrier assignment, i.e. on a LATER read than the shipment request
+ * that triggered them (programme §3: *"only returns a response after carrier
+ * assignment, which occurs either on the same day as the scheduled pickup or one
+ * day prior"*). This function is that later read's write path.
+ *
+ * It RECORDS ONLY WHAT THE CHANNEL RETURNED, and it is idempotent:
+ *   · no actioned instruction, or no raised shipment request ⇒ nothing to record;
+ *   · an object carrying neither an ARN nor an assignment time is not routing
+ *     instructions at all, so the collect chain keeps reporting `awaiting_channel`;
+ *   · re-reading identical instructions changes nothing and audits nothing twice.
+ */
+export function recordChannelRoutingInstructions(
+  id: string,
+  instructions: NonNullable<ChannelInstructionOutcome['routingInstructions']>,
+  actorId: string
+): ChannelInstruction | undefined {
+  const instruction = getChannelInstruction(id);
+  if (!instruction) return undefined;
+  const outcome = instruction.outcome;
+  if (!outcome?.routingRequest?.raised) return instruction;
+  if (!instructions.arn && !instructions.assignedAt) return instruction;
+  const existing = outcome.routingInstructions;
+  if (
+    existing &&
+    existing.arn === instructions.arn &&
+    existing.assignedAt === instructions.assignedAt
+  ) {
+    return instruction;
+  }
+  instruction.outcome = { ...outcome, routingInstructions: instructions };
+  audit(
+    'channel_routing_instructions_recorded',
+    instruction,
+    `${actorId}: channel routing instructions recorded for PO ${instruction.poNumber} — ` +
+      `ARN ${instructions.arn ?? 'not returned'}${
+        instructions.mode === 'mock' ? '. Simulated channel read; no live channel call was made.' : '.'
+      }`,
+    { instructions }
+  );
+  return instruction;
+}
+
+/**
  * §P4 — return a refused instruction to the queue so Mercenta can retry it.
  *
  * A refusal is never silently retried (an infinite retry loop would hide a real

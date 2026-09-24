@@ -348,10 +348,24 @@ check(
   posture.evidence.some((e) => /100 shipment confirmations/.test(e)) && result.truckload === 100,
   String(result.truckload)
 );
+/**
+ * §P12 — REPOINTED (not weakened). OLD CONTRACT (recorded verbatim): *"activation is
+ * declared as the channel shipment request (P12), not implemented here"* — asserted
+ * only that the posture's `activation` string mentioned the shipment request and P12.
+ *
+ * P12 DELIVERED that activation (`src/lib/shipping/channelShipmentOperations.ts`
+ * submits the declared 1..n purchase-order set through the SP-API seam), so the check
+ * now asserts MORE: the activation names both the shipment request and P12 AND the
+ * posture records the implemented half (`shipmentRequestImplemented === true`) while
+ * the POSTURE ITSELF stays `deferred` (decision 11).
+ */
 check(
-  'activation is declared as the channel shipment request (P12), not implemented here',
-  /shipment request/i.test(posture.activation) && /P12/.test(posture.activation),
-  posture.activation
+  'activation records the channel shipment request (P12) AND that P12 delivered it, with the posture still deferred',
+  /shipment request/i.test(posture.activation) &&
+    /P12/.test(posture.activation) &&
+    posture.shipmentRequestImplemented === true &&
+    posture.status === 'deferred',
+  `${posture.activation} · shipmentRequestImplemented=${String(posture.shipmentRequestImplemented)} · status=${posture.status}`
 );
 check(
   'the tenant invariant is declared FIRST (never group across brands)',

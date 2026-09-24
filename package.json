@@ -34,6 +34,7 @@
     "validate:inventory": "node scripts/validate-p8-inventory.mjs",
     "validate:logistics-providers": "node scripts/validate-logistics-providers.mjs",
     "validate:channel-po-ingestion": "node scripts/validate-channel-po-ingestion.mjs",
+    "validate:p12-spapi-seam": "node scripts/validate-p12-spapi-seam.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs"
   },
   "dependencies": {

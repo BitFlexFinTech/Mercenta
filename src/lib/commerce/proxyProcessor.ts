@@ -41,10 +41,16 @@ import {
   markChannelInstructionActioned,
   markChannelInstructionRefused,
   pendingChannelInstructions,
+  recordChannelRoutingInstructions,
 } from './channelInstructions';
 import { buildPoDocumentPack } from '@/lib/documents/poDocumentPack';
 import { earliestRequestedPickUp } from '@/lib/shipping/collectChain';
 import { emitPoDocumentsReady } from '@/lib/events/eventFeed';
+import {
+  fileChannelShipmentConfirmation,
+  raiseChannelShipmentRequest,
+  readChannelRoutingInstructions,
+} from '@/lib/shipping/channelShipmentOperations';
 
 /**
  * The attributed Mercenta-side actor for every automatic channel action. Using a
@@ -222,11 +228,52 @@ export async function processChannelInstruction(
     return getChannelInstruction(id);
   }
 
+  const carrier = asnForInstruction(instruction, po).carrier;
+  /**
+   * §P12 — THE SHIPMENT REQUEST GOES THROUGH THE CHANNEL (`SubmitShipments`).
+   *
+   * §P10 recorded the deferred consolidation grouping and named the channel's
+   * shipment request as its declared activation; §P6 recorded that the routing
+   * chain could not advance without a live channel. This is both: the request is
+   * SUBMITTED through the SP-API seam (mock-first), carrying the consignment's
+   * declared purchase-order set (1..n — decision 11), and the channel's own
+   * reference and provenance are recorded on the outcome.
+   *
+   * A channel refusal STOPS the chain (nothing downstream is filed) — the same
+   * rule the acknowledgement already follows.
+   */
+  const requestedPickUp = po.freightTerm === 'collect' ? earliestRequestedPickUp() : undefined;
+  const shipmentRequest = await raiseChannelShipmentRequest({
+    reader: client,
+    purchaseOrders: [{ poNumber: po.poNumber, brandId: po.brandId }],
+    freightTerm: po.freightTerm === 'collect' ? 'collect' : 'prepaid',
+    shipToPartyId: po.shipToParty?.partyId ?? '',
+    ...(requestedPickUp ? { requestedPickUp } : {}),
+    ...(carrier ? { carrier } : {}),
+  });
+
+  if (!shipmentRequest.ok) {
+    markChannelInstructionRefused(
+      id,
+      `SHIPMENT_REQUEST_REFUSED — ${
+        shipmentRequest.refusal ??
+        'the retail channel did not accept the shipment request for this purchase order.'
+      }`,
+      { channelAcknowledgement }
+    );
+    return getChannelInstruction(id);
+  }
+
   const routingRequest: NonNullable<ChannelInstructionOutcome['routingRequest']> = {
     raised: true,
-    carrier: asnForInstruction(instruction, po).carrier,
+    carrier,
     channelArrangesCarrier: po.freightTerm === 'collect',
-    reference: `RR-${po.poNumber}`,
+    /**
+     * The platform's own label for the request — replaced by the CHANNEL's
+     * reference when the channel returned one, so the recorded reference is the
+     * one that can be quoted back to the channel.
+     */
+    reference: shipmentRequest.shipmentRequestId ?? `RR-${po.poNumber}`,
     /**
      * §P6 — the pickup date Mercenta asks for on a Freight Collect lane, computed
      * from the CHANNEL's own documented rule ("a date at least two business days
@@ -234,18 +281,97 @@ export async function processChannelInstruction(
      * prepaid PO has no channel pickup, so the field is absent there and the
      * consignment follows Mercenta's own readiness target instead.
      */
-    ...(po.freightTerm === 'collect' ? { requestedPickUp: earliestRequestedPickUp() } : {}),
+    ...(requestedPickUp ? { requestedPickUp } : {}),
+    ...(shipmentRequest.shipmentRequestId
+      ? { channelShipmentRequestId: shipmentRequest.shipmentRequestId }
+      : {}),
+    mode: shipmentRequest.mode,
   };
+
+  /**
+   * §P12 — THE ROUTING INSTRUCTIONS (`GetShipmentDetails`).
+   *
+   * The channel answers only AFTER carrier assignment, so this pass usually
+   * reports `pending` and NOTHING is recorded — the collect chain keeps reporting
+   * `awaiting_channel`, exactly as §P6 designed it. When the channel does return
+   * instructions, they are recorded now; otherwise Mercenta's later attributed
+   * read (`refreshChannelRoutingInstructions`) is what advances the chain.
+   */
+  const routingInstructions = shipmentRequest.shipmentRequestId
+    ? await readChannelRoutingInstructions({
+        reader: client,
+        shipmentRequestId: shipmentRequest.shipmentRequestId,
+      })
+    : undefined;
 
   /* ── 3. The ASN (automatic on acceptance — decision 9) ──────────────────── */
   const asn = asnForInstruction(instruction, po);
   const filed = createShipmentForPO(po.id, asn, PROXY_ACTOR_ID);
+
+  /**
+   * §P12 — THE ASN GOES TO THE CHANNEL (`submitShipmentConfirmations`, `AV-015`).
+   *
+   * The channel requires the confirmation BEFORE the goods reach its FC
+   * ("Missing or delayed shipment confirmations result in chargebacks"), and each
+   * carton names the purchase order it carries — the documented per-carton
+   * reference that makes a multi-PO consignment confirmable (decision 11).
+   *
+   * A channel refusal is NOT reported as a successful filing: the instruction is
+   * refused so Mercenta retries deliberately, while the outcome states that the
+   * consignment WAS recorded locally and the channel did not accept it.
+   */
+  const channelConfirmation = filed.ok
+    ? await fileChannelShipmentConfirmation({
+        reader: client,
+        shipmentId: filed.shipmentId ?? `shp-${po.id}`,
+        purchaseOrderNumbers: [po.poNumber],
+        carrier: asn.carrier,
+        cartons: asn.cartons.map((carton, index) => ({
+          cartonId: `${po.poNumber}-C${index + 1}`,
+          vendorSku: carton.sku,
+          quantity: carton.quantity,
+          purchaseOrderNumber: po.poNumber,
+          ...(asn.lotNumber ? { lotNumber: asn.lotNumber } : {}),
+          ...(asn.expiryDate ? { expiryDate: asn.expiryDate } : {}),
+        })),
+      })
+    : undefined;
+
+  const asnReference = `${asn.carrier.slice(0, 2).toUpperCase()}-${po.poNumber}`;
+
+  if (filed.ok && channelConfirmation && !channelConfirmation.ok) {
+    markChannelInstructionRefused(
+      id,
+      `CHANNEL_ASN_REFUSED — ${
+        channelConfirmation.refusal ?? 'the retail channel did not accept the shipment confirmation.'
+      }`,
+      {
+        channelAcknowledgement,
+        routingRequest,
+        asn: {
+          filed: true,
+          shipmentId: filed.shipmentId,
+          reference: asnReference,
+          ...(filed.deductionId ? { deductionId: filed.deductionId } : {}),
+          note: `CHANNEL_ASN_REFUSED — ${
+            channelConfirmation.refusal ?? 'the retail channel did not accept the shipment confirmation.'
+          } The consignment is recorded in Mercenta; the channel confirmation must be retried.`,
+        },
+      }
+    );
+    return getChannelInstruction(id);
+  }
+
   const asnOutcome: NonNullable<ChannelInstructionOutcome['asn']> = filed.ok
     ? {
         filed: true,
         shipmentId: filed.shipmentId,
-        reference: `${asn.carrier.slice(0, 2).toUpperCase()}-${po.poNumber}`,
+        reference: asnReference,
         ...(filed.deductionId ? { deductionId: filed.deductionId } : {}),
+        ...(channelConfirmation?.confirmationId
+          ? { channelConfirmationId: channelConfirmation.confirmationId }
+          : {}),
+        ...(channelConfirmation ? { channelMode: channelConfirmation.mode } : {}),
       }
     : { filed: false, note: filed.error ?? 'the ASN seam refused the filing.' };
 
@@ -254,6 +380,16 @@ export async function processChannelInstruction(
     channelAcknowledgement,
     routingRequest,
     asn: asnOutcome,
+    /**
+     * §P12 — routing instructions are recorded ONLY when the channel genuinely
+     * returned them (`readChannelRoutingInstructions` produces none while carrier
+     * assignment is pending), so an ARN is present on this record or absent.
+     */
+    ...(routingInstructions?.ok &&
+    !routingInstructions.pending &&
+    routingInstructions.instructions
+      ? { routingInstructions: routingInstructions.instructions }
+      : {}),
   };
 
   /**
@@ -319,6 +455,40 @@ export async function processChannelInstruction(
   });
 
   return getChannelInstruction(id);
+}
+
+/**
+ * §P12 — MERCENTA'S ATTRIBUTED FOLLOW-UP READ of the channel's routing
+ * instructions (`GetShipmentDetails`).
+ *
+ * WHY IT EXISTS: the channel returns routing instructions only AFTER carrier
+ * assignment — a later moment than the shipment request that triggered them. So
+ * the chain is: request (in `processChannelInstruction`) → assignment → ARN. This
+ * function is the "assignment" step, and it is an explicit, attributed action
+ * rather than a background loop, because Mercenta's operator asked for it.
+ *
+ * It RECORDS NOTHING WHEN NOTHING WAS RETURNED: while assignment is pending the
+ * instruction is returned untouched, so the collect chain keeps reporting
+ * `awaiting_channel` and no ARN is ever invented. A channel error is likewise not
+ * turned into a fabricated instruction — the record simply stays as it was.
+ */
+export async function refreshChannelRoutingInstructions(
+  instructionId: string,
+  actorId: string
+): Promise<ChannelInstruction | undefined> {
+  const instruction = getChannelInstruction(instructionId);
+  if (!instruction) return undefined;
+  const shipmentRequestId = instruction.outcome?.routingRequest?.channelShipmentRequestId;
+  /** No channel request ⇒ there is nothing the channel could return. */
+  if (!shipmentRequestId) return instruction;
+
+  const { client } = createSPApiClientForConnection({
+    credentials: spApiConnectionCredentials(),
+    edgeFunctionBase: '/functions/v1/spapi',
+  });
+  const result = await readChannelRoutingInstructions({ reader: client, shipmentRequestId });
+  if (!result.ok || result.pending || !result.instructions) return instruction;
+  return recordChannelRoutingInstructions(instructionId, result.instructions, actorId);
 }
 
 /** Drain every instruction waiting for Mercenta. Returns the processed set. */

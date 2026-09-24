@@ -170,7 +170,22 @@ if (po) {
       && outcome.channelAcknowledgement.mode === 'mock',
     JSON.stringify(outcome?.channelAcknowledgement));
   test('Mercenta raised the routing / shipment request',
-    outcome?.routingRequest?.raised === true && /^RR-/.test(outcome?.routingRequest?.reference ?? ''),
+    /**
+     * §P12 — REPOINTED (not weakened). OLD CONTRACT (recorded verbatim): the check
+     * asserted `routingRequest.raised === true` AND `/^RR-/.test(reference)` — the
+     * platform's OWN label for the request, because the request was minted locally.
+     *
+     * P12 submits it through the channel seam (`SubmitShipments`), so the recorded
+     * reference is now the CHANNEL's own reference and the assertion requires MORE:
+     * the request is raised, it carries a genuine channel reference
+     * (`MOCK-SHP-REQ-…` in simulation — unmistakably simulated), the seam's mode is
+     * recorded, and the local `RR-` label is NO LONGER the reference.
+     */
+    outcome?.routingRequest?.raised === true &&
+      /^MOCK-SHP-REQ-/.test(outcome?.routingRequest?.channelShipmentRequestId ?? '') &&
+      outcome.routingRequest.reference === outcome.routingRequest.channelShipmentRequestId &&
+      outcome.routingRequest.mode === 'mock' &&
+      !/^RR-/.test(outcome?.routingRequest?.reference ?? ''),
     JSON.stringify(outcome?.routingRequest));
   test('Mercenta filed the ASN automatically (decision 9)',
     outcome?.asn?.filed === true && !!outcome?.asn?.shipmentId, JSON.stringify(outcome?.asn));

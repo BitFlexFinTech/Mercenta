@@ -1086,6 +1086,55 @@ try {
 
 
 
+  /**
+   * §P12 — SP-API SEAM-EXTENSION DECLARED SURFACE (2026-09-24, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P12; `AV-040`).
+   *
+   * P12 completes the channel's documented vendor surface on the EXISTING seam and
+   * gives each in-code P12 declaration a real owner (the receiving sync, the
+   * shipment operations, invoice submission, the stock push). It touches the
+   * PROTECTED `src/lib/spapi/**` seam, so that prefix is declared here exactly as
+   * every earlier phase declared its own. The E7 guard's contract is UNCHANGED: a
+   * changed source/test file outside EVERY declared set is still refused.
+   */
+  const P12_SPAPI_SEAM_DECLARED = [
+    'src/lib/spapi/client.ts',
+    'src/lib/spapi/mockClient.ts',
+    'src/lib/spapi/index.ts',
+    'src/config/shipping.ts',
+    'src/lib/commerce/channelReceivingSync.ts',
+    'src/lib/commerce/channelInvoiceSubmission.ts',
+    'src/lib/shipping/channelShipmentOperations.ts',
+    'src/lib/inventory/channelInventoryPush.ts',
+    'src/lib/commerce/receivingStatus.ts',
+    'src/lib/commerce/channelPurchaseOrderIngestion.ts',
+    'src/lib/commerce/channelInstructions.ts',
+    'src/lib/commerce/proxyProcessor.ts',
+    'src/lib/commerce/commerceLifecycle.ts',
+    'src/lib/shipping/consolidation.ts',
+    'src/lib/inventory/inventoryRecord.ts',
+    'src/lib/inventory/inventoryLifecycle.ts',
+    'src/components/admin/ChannelOperationsPanel.tsx',
+    'src/components/admin/RetailPipeline.tsx',
+    'src/components/admin/CatalogManagerAdmin.tsx',
+    'src/components/shared/logistics/PoDocumentPackPanel.tsx',
+    'src/types.ts',
+    'src/data/api.ts',
+    'scripts/validate-p12-spapi-seam.mjs',
+    'scripts/validate-proxy-model.mjs',
+    'scripts/validate-logistics-providers.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/verify-demo-live.mjs',
+    'e2e/p12-channel-operations.spec.ts',
+    'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+    'requirements-registry.json',
+    'PRODUCTION_READINESS.md',
+  ];
+
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -1117,7 +1166,10 @@ try {
           !P8_INVENTORY_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §P11 — the channel-ingestion phase's declared surface (see above). */
           !P11_CHANNEL_PO_INGESTION_DECLARED.includes(f) &&
-          !P11_CHANNEL_PO_INGESTION_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P11_CHANNEL_PO_INGESTION_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §P12 — the SP-API seam-extension phase's declared surface (see above). */
+          !P12_SPAPI_SEAM_DECLARED.includes(f) &&
+          !P12_SPAPI_SEAM_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1266,6 +1318,12 @@ try {
      * outside EVERY declared set is still refused.
      */
     ...P11_CHANNEL_PO_INGESTION_DECLARED,
+    /**
+     * §P12 — the SP-API seam-extension phase's declared surface, accepted here
+     * exactly as every earlier phase's is; a changed source/test file outside EVERY
+     * declared set is still refused.
+     */
+    ...P12_SPAPI_SEAM_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

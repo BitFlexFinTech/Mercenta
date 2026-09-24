@@ -342,6 +342,19 @@ const bundleProbe = await superAdmin
       p11SimulatedNotice: all.includes('no live channel call was made'),
       p11CreatePoGone: !all.includes('Create Purchase Order on Behalf'),
       p11PostmarkSeamGone: !all.includes('mock:postmark:'),
+      /**
+       * §P12 — the seam-extension build, read from the DEPLOYED bundle itself: the
+       * region rule for channel-generated labels, the receiving-sync provenance, the
+       * channel-operations console and the stock-push control must be IN the shipped
+       * code — so a stale build cannot pass the live leg by rendering a page that
+       * merely looks right.
+       */
+      p12LabelRule: all.includes('LABELS_NOT_GENERATED_IN_REGION'),
+      p12LabelNeverClaimed: all.includes('never issues a channel-generated label for a UK/EU consignment'),
+      p12ReceivingOwner: all.includes('CHANNEL_READ_SIMULATED'),
+      p12Console: all.includes('channel-operations') && all.includes('channel-receiving-read'),
+      p12SimulatedReadNotice: all.includes('Simulation (mock) — simulated channel read'),
+      p12InventoryPush: all.includes('catalog-inventory-push'),
     };
   })
   .catch(() => ({ count: 0, read: 0 }));
@@ -374,6 +387,13 @@ check('§P11 the deployed bundle carries the channel-read control (the ONLY PO e
 check('§P11 the deployed bundle states the channel read’s simulated provenance', bundleProbe.p11SimulatedNotice === true, probeDetail);
 check('§P11 the deployed bundle carries NO create-PO dialogue (decision 3)', bundleProbe.p11CreatePoGone === true, probeDetail);
 check('§P11 the deployed bundle carries NO Postmark PO-notification seam', bundleProbe.p11PostmarkSeamGone === true, probeDetail);
+/* §P12 (`AV-040`) — the deployed bundle IS the SP-API seam-extension build. */
+check('§P12 the deployed bundle carries the label region rule (NA only — refused here)', bundleProbe.p12LabelRule === true, probeDetail);
+check('§P12 the deployed bundle states a channel label is NEVER claimed for UK/EU', bundleProbe.p12LabelNeverClaimed === true, probeDetail);
+check('§P12 the deployed bundle carries the simulated-reading refusal in the receiving sync', bundleProbe.p12ReceivingOwner === true, probeDetail);
+check('§P12 the deployed bundle carries the channel-operations console and its receiving read', bundleProbe.p12Console === true, probeDetail);
+check('§P12 the deployed bundle states the simulated channel-read provenance', bundleProbe.p12SimulatedReadNotice === true, probeDetail);
+check('§P12 the deployed bundle carries the attributed stock-push control', bundleProbe.p12InventoryPush === true, probeDetail);
 check('no uncaught page error on the deployed P7 invoicing flows',
   adminErrors.length === 0 && superAdminErrors.length === 0,
   [...adminErrors, ...superAdminErrors].slice(0, 2).join(' | '));
@@ -463,6 +483,41 @@ check('§P11 the deployed channel read REFUSES an out-of-catalogue PO with its r
   (await admin.locator('[data-outcome="refused"]').count()) > 0 &&
     /matches no product in the Mercenta catalogue/.test(adminPoBodyAfter));
 check('no uncaught page error on the deployed §P11 channel-ingestion flow',
+  adminErrors.length === 0,
+  adminErrors.slice(0, 2).join(' | '));
+
+/* ── §P12 — the CHANNEL OPERATIONS console, live (`AV-040`) ───────────────── */
+/* Same session as the §P11 read above, so the channel's POs are in the store and
+   the receiving sync has something real to report. */
+await admin.click('nav[aria-label="Primary"] >> text=Retail Pipeline').catch(() => {});
+await admin.waitForTimeout(2500);
+check('§P12 the deployed CHANNEL OPERATIONS console renders on the admin surface',
+  (await admin.locator('[data-testid="channel-operations"]').count()) > 0);
+check('§P12 the deployed console renders all four channel operations',
+  (await admin.locator('[data-testid="channel-receiving-sync"]').count()) > 0 &&
+    (await admin.locator('[data-testid="channel-routing-instructions"]').count()) > 0 &&
+    (await admin.locator('[data-testid="channel-invoice-submission"]').count()) > 0 &&
+    (await admin.locator('[data-testid="channel-shipment-labels"]').count()) > 0);
+const p12Labels = await admin.locator('[data-state="channel-labels-rule"]').innerText().catch(() => '');
+check('§P12 the deployed console states the channel label rule is REFUSED in this region',
+  /NA only/.test(p12Labels) &&
+    /never issues a channel-generated label for a UK\/EU consignment/.test(p12Labels),
+  p12Labels.slice(0, 140));
+await admin.locator('[data-state="channel-receiving-read"]').first().click().catch(() => {});
+await admin.waitForTimeout(3000);
+const p12Sync = await admin.locator('[data-testid="channel-receiving-sync"]').innerText().catch(() => '');
+const p12Notice = await admin.locator('[data-state="channel-ops-notice"]').innerText().catch(() => '');
+check('§P12 the deployed receiving read STATES its provenance and its outcome counts',
+  /Simulation \(mock\) — simulated channel read; no live channel call was made|Read complete/.test(p12Sync) &&
+    /purchase order\(s\) reported/.test(p12Notice),
+  `${p12Notice.slice(0, 90)}`);
+check('§P12 the deployed receiving read reports the channel’s own state per purchase order',
+  (await admin.locator('[data-testid="channel-receiving-readings"] li').count()) > 0 &&
+    /channel: /.test(p12Sync) &&
+    /Mercenta: /.test(p12Sync));
+check('§P12 the deployed console states the reading is REPORTED, never written as a receipt',
+  /never written/.test(p12Sync));
+check('no uncaught page error on the deployed §P12 channel-operations flow',
   adminErrors.length === 0,
   adminErrors.slice(0, 2).join(' | '));
 const hubNodeKinds = await page
