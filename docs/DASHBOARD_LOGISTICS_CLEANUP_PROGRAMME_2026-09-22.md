@@ -79,7 +79,7 @@ documents → ship on time. Everything else is Mercenta's.
 | **P5** | ✅ **DONE** (2026-09-23, session 17 — see §9) | **Remove the Mercenta Hub completely** → the destination is **the FC declared on each PO** (`PurchaseOrder.shipToParty`, the channel's `shipToPartyId`, resolved once by `src/config/destinationFc.ts`); the `mercenta_hub` stage/status, the hub coordinate, the hub node kind and the Hero's hub node are **deleted**; the Hero/map arrival node **is** that FC; copy, validators and specs repointed with the old contract recorded inline | **D09-13 / AV-026 / AV-027** |
 | **P6** | ✅ **DONE** (2026-09-23, session 19 — see §10) | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
 | **P7** | ✅ **DONE** (2026-09-23, session 20 — see §11) | **Admin invoicing**: an invoice per PO **after receipt** (the receipt gate, `AV-018`); the **invoice-number registry** (unique, never reused, zero-value fails, cancel + re-issue under a NEW Invoice ID — **`AV-022`**); **14/30/60 terms chosen PER INVOICE** with the due date DERIVED from them; **upcoming payments**; receivables = **issued-and-unpaid** | decision 2; **AV-022** |
-| **P8** | | **Inventory** linked to the catalogue + **ASIN** field (rule = decision 10) | decision 5 |
+| **P8** | ✅ **DONE** (2026-09-23, session 21 — see §12) | **Inventory** linked to the catalogue + the **ASIN** field (rule = decision 10): the append-only movement ledger (every figure DERIVED), the Eaches/Cases unit with the product's own case pack (fail-closed), the brand's declaration path (existing listing required) and the channel-assignment path (MERCENTA populates it on acceptance — `SIM-ASIN-…` while simulated), plus the admin override | decision 5; decision 10; **AV-029**, **AV-035** |
 | **P9** | | **Remove the 3PL carrier surface** (decision 4) incl. the demo environment; repoint the affected specs/scripts | decision 4; matrix `D01-07`/`D04-18`/`D10-13` |
 | **P10** | | **Logistics Hub completion**: provider configuration + the PO documents; **consolidation recorded as documented-but-deferred** (model supports 1..n POs) | decision 11; `D10-10` |
 | **P11** | | **Remove "Create PO"** + channel PO ingestion (mock-first); repoint the three validators that assert its notification path | decision 3 |
@@ -101,13 +101,13 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6**, **P7** (committed; the P2 checkpoint hash is recorded in
-  `PROJECT_STATUS.md` §7, and P3/P4/P5/P6/P7's in the `CURRENT RESUME STATE` block).
-- **Next:** **P8 — inventory linked to the brand's catalogue with an ASIN field** (brand-entered inside Mercenta,
-  never an Amazon login; a clearly-simulated `SIM-ASIN-…` placeholder until the channel returns a real identifier —
-  see `PRODUCTION_READINESS.md`).
-- **Then:** P8 → P12 in order.
-- **Deployment:** executed at the close of each product phase. P3, P4 and P5 were deployed and live-verified; the full
+- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6**, **P7**, **P8** (committed; the P2 checkpoint hash is
+  recorded in `PROJECT_STATUS.md` §7, and P3–P8's in the `CURRENT RESUME STATE` block).
+- **Next:** **P9 — remove the 3PL carrier surface** (decision 4), including the demo environment, and repoint the
+  affected specs/scripts (matrix `D01-07` / `D04-18` / `D10-13`). See §4's P9 row and the P8 honest limits above so
+  P9 does not re-derive them.
+- **Then:** P9 → P12 in order.
+- **Deployment:** executed at the close of each product phase. P3–P8 were deployed and live-verified; the full
   three-way confirmation is re-run at the end of the programme.
 
 ## 6. P2 — WHAT WAS BUILT (so P3+ does not have to re-derive it)
@@ -569,4 +569,106 @@ single global constant. The channel's documented invoicing rules were therefore 
   `PRODUCTION_READINESS.md`.
 - **The invoice ledger is in-memory in this environment** (the D4 persistence port is honest about it: memory by
   default, Supabase when credentials exist). Nothing is claimed as durable here.
+
+---
+
+## 12. P8 — WHAT WAS BUILT, VERIFIED AND HOW (so P9+ does not have to re-derive it)
+
+### What was missing
+
+1. **There was no inventory model at all.** Decision 5 asks for a per-catalogue-product record — image · SKU ·
+   ASIN · available · UoM (Eaches/Cases) · on-hand · committed · inbound · safety stock. Nothing held any of it,
+   and nothing linked a stock position to the catalogue product it describes.
+2. **The ASIN was FABRICATED.** The seed built one as `` `B0${sku}` `` — a plausible-looking identifier the
+   platform had no basis for. Decision 10 forbids exactly that ("the code never invents a real-looking ASIN").
+3. **Reported inventory was INVENTED.** The brand Reports surface showed an "On-Hand Inventory (est.)" computed as
+   `unitsPerCase × 10` per SKU — a fabricated number presented as an estimate, with no ledger behind it.
+4. **A brand's identifier had no model, source or authority.** `ProductSubmission.asin` existed but there was no
+   per-PRODUCT identity, no way for a brand to supply one, and no channel path to populate it on acceptance.
+
+### What was built
+
+- **`src/lib/catalog/asin.ts` (NEW) — the ONE owner of the channel identifier (decision 10).** The identifier is
+  10 alphanumeric characters (`ASIN_LENGTH`, `ASIN_PATTERN`); the GENERATED placeholder is the deliberately
+  unmistakable `SIM-ASIN-…` (`simulatedAsinFor`, deterministic from the SKU, and **never a valid shape**, so it can
+  never be misread as real). `validateBrandAsin` **fails closed** without the brand's existing-listing
+  confirmation (`ASIN_REQUIRES_EXISTING_LISTING`) and **refuses a placeholder** (`ASIN_PLACEHOLDER`);
+  `validateChannelAsin` accepts only a real shape or the seam's own placeholder; `canReplaceIdentifier` implements
+  the authority order (**a channel-assigned identifier is never downgraded by a brand declaration**);
+  `deriveAsinState` gives none / pending the channel / assigned; `ASIN_RULES` states the rule and
+  `ASIN_RULE_SOURCE` records where it comes from (decision 10 · **`AV-035`**, the register's finding that **no
+  public Vendor catalogue/item API exists**, so there is no API an ASIN could be fetched from).
+- **`src/lib/inventory/inventoryRecord.ts` (NEW) — the ONE owner of the stock figures (decision 5).** Every figure
+  is **DERIVED from an append-only movement ledger**: `bucketTotals` sums on-hand / committed / inbound and
+  `available = on-hand − committed` (it may be NEGATIVE — an oversold position is stated, never clamped);
+  `inventoryStatusOf` gives out of stock / below safety stock / in stock; `summariseInventory` is the ONE roll-up.
+  The unit vocabulary is the channel's own (`Eaches`/`Cases`, register **`AV-029` CONFIRMED**) and a CASE entry
+  converts through the product's OWN case pack — **refused when no case pack is declared**
+  (`INVENTORY_CASE_PACK_UNKNOWN`), so a case is never silently read as one each. `validateMovement` is the single
+  acceptance point: an undeclared unit, a zero/NaN quantity, an undeclared movement type, a counted correction
+  with no reason, and any movement that would take a bucket negative are all refused. `INVENTORY_DERIVATION_BASIS`
+  states the honest basis: **Mercenta's own model — no Vendor inventory-availability API exists** (truth validation
+  §769, "REQUIRES BUSINESS DECISION"), these figures are entered inside Mercenta and are **never a channel
+  reading**; pushing stock to the channel is `submitInventoryUpdate` (**P12**).
+
+- **`src/lib/inventory/inventoryLifecycle.ts` (NEW) — the domain write path.** RBAC (`canMutate`) and TENANT
+  ISOLATION are enforced in the DOMAIN, every write is attributed and audited, and the write paths are
+  `recordStockMovement`, `setInventorySettings`, `declareBrandAsin` (the brand half of decision 10) and
+  `populateAsinFromChannel` (the channel half). A separate, attributed `adminOverrideAsin` requires a **stated
+  reason** and is **refused for a brand-pinned actor** — a brand may never rewrite the channel's identity.
+- **`src/data/demoStore.ts`** gains the three canonical collections (`demoInventoryMovements` — the append-only
+  ledger, `demoInventorySettings`, `demoProductIdentifiers`) plus the accessors, and the **invented ASIN is
+  removed from the seed**: every identifier the fixture creates is the unmistakable `SIM-ASIN-…` placeholder
+  (recorded as an `§P8 — REPOINTED` comment). `recordCatalogAudit` gained an `entityType` parameter (defaulting to
+  the original `catalog_submission`) so inventory + identifier writes are audited on the SAME canonical log.
+- **The decision-10 channel path is real, through the existing mock-first seam.** `getSubmissionStatus` now returns
+  the channel's `asin` (real client: straight from the channel's response; mock: the unmistakable
+  `SIM-ASIN-…` placeholder), and `pollCatalogSubmission` **populates the canonical identifier when the channel
+  ACCEPTS the product** — so the platform records the channel's own value rather than making one up. The
+  submission's own `asin` and the canonical identifier both come from that ONE response, so they cannot drift.
+- **`src/components/brand/BrandInventory.tsx` (NEW) — the brand surface**, a new **Inventory destination in the
+  Catalogue section** (it describes the catalogue's products; it does not process a PO). It shows the decision-5
+  set per product with the derived position, the status, the identifier + its SOURCE, a Manage panel (movement /
+  safety stock + unit / the brand's ASIN declaration), the movement ledger as the provenance, and the rules +
+  the honest basis stated on the surface.
+- **`src/components/brand/ProductCatalog.tsx`** gains the per-catalogue-product **ASIN column** (value + source, or
+  the derived state); **`CatalogManagerAdmin`** gains an **Inventory tab** with the derived position, the
+  identifier and the attributed override; **`BrandReports.tsx`** has its fabricated on-hand estimate
+  **repointed** to the canonical owner (and no longer says "estimated").
+- **`src/lib/simulation/investorDemo.ts`** — the three new canonical stores participate in the deterministic reset
+  (purge + restore), so `reset → run` stays byte-stable.
+
+### What is verified (session 21)
+
+- **`scripts/validate-p8-inventory.mjs` (NEW)** → **PASS (79 assertions, 0 network calls)**, executing the REAL
+  modules through the project's own module graph. It covers the unit + conversion refusals (including the case
+  pack), the ledger derivation (on-hand/committed/inbound = the ledger's sums, `available`, append-only,
+  negative-bucket refusal, oversold allowed and stated), the derived status, every identifier rule (shape,
+  placeholder, existing-listing confirmation, authority order), **that the platform never invents a real-looking
+  identifier** (asserted on the fixture, on the generator and across `src/`), the FULL channel path (the seam
+  returns the identifier on acceptance; driving the real lifecycle records it, marked simulated; re-polling does
+  not re-audit), RBAC + tenant isolation + audit, ONE owner per value across `src/`, and zero network.
+- **Proved able to fail:** replacing the case-pack conversion with `1` (a plausible defect — a case silently read
+  as one each) → **FAIL (7 of 79)**; restored → **PASS**.
+- **`e2e/inventory.spec.ts` (NEW)** → **4 passed** in real Chromium: the surface + the stated rule; a movement
+  recorded through the UI moving the DERIVED on-hand by exactly what was recorded; decision 10 end-to-end
+  (refused without the confirmation, refused as a placeholder, recorded when valid, and the authority order
+  refusing a brand downgrade of a channel identifier); and the admin inventory tab + the attributed override
+  (refused without a reason). **This spec found two real things:** the canonical `Checkbox` keeps its input
+  `sr-only` behind its label (so the spec now exercises the user path), and a brand declaration against a product
+  that ALREADY has a channel identifier is refused by the authority order — the spec now asserts that rule
+  explicitly instead of assuming a free slot.
+
+### Honest limits
+
+- **The inventory model is MERCENTA'S OWN.** No Vendor inventory-availability API exists (truth validation §769 ·
+  `AV-035`), so these figures are entered inside Mercenta by the brand and are **never a channel reading**. The
+  push direction — `submitInventoryUpdate` — is **P12's** declared scope.
+- **The identifier is validated by SHAPE only.** The platform cannot verify that an ASIN exists, so it records the
+  SOURCE (`brand_declared` / `channel_assigned`) and whether the value is simulated — and never presents a brand
+  declaration as channel-confirmed.
+- **Nothing here contacts a channel.** The acceptance path runs through the existing mock-first SP-API seam; with
+  no credentials the identifier is the simulated placeholder, labelled as such everywhere it appears.
+- **The ledger is in-memory in this environment** (the D4 persistence port has no inventory table; the P7 invoice
+  ledger reports the same limit). Nothing is claimed as durable.
 

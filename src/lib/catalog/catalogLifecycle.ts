@@ -25,6 +25,7 @@
 import type { CatalogReadiness, ProductSubmission } from '@/types';
 import type { AcquisitionActor } from '@/lib/acquisition/outreachLifecycle';
 import { evaluateProductCompleteness } from './productCompleteness';
+import { populateAsinFromChannel } from '@/lib/inventory/inventoryLifecycle';
 import { evaluateBrandCatalogGate, pollSubmissionStatus, submitCatalogItem } from '@/data/api';
 import { createPersistenceMirror, getDomainRepository } from '@/data/domainRepository';
 import * as store from '@/data/demoStore';
@@ -179,10 +180,35 @@ export async function pollCatalogSubmission(
       poll.status === 'rejected'
         ? poll.rejectionReason ?? 'No rejection reason was provided by the provider.'
         : undefined,
+    /**
+     * §P8 — the submission's `asin` is only ever the CHANNEL'S OWN response
+     * (decision 10). The platform does not derive, default or invent it here.
+     */
+    asin: poll.asin ?? existing.asin,
     polls: existing.polls + 1,
     lastPolledAt: new Date().toISOString(),
   });
   if (!updated) return { ok: false, error: NOT_FOUND };
+
+  /**
+   * §P8 — DECISION 10, the channel half: once the channel ACCEPTS the product
+   * into the catalogue, MERCENTA populates the product's canonical identifier
+   * from that response. While the provider is mocked the response is the
+   * unmistakable `SIM-ASIN-…` placeholder and the record is marked simulated.
+   * A brand declaration is never overwritten later by a brand; this path is the
+   * channel's own.
+   */
+  if (updated.status === 'live' && poll.asin) {
+    populateAsinFromChannel(
+      {
+        brandId: updated.brandId,
+        sku: updated.sku,
+        asin: poll.asin,
+        simulated: updated.simulated,
+      },
+      { staffId: actor.staffId, canMutate: true, tenantId: updated.brandId }
+    );
+  }
 
   persistence.write('catalog_submissions', updated.id, () =>
     getDomainRepository().persistCatalogSubmission(updated, updated.brandId)

@@ -35,6 +35,9 @@ import type {
   AdSpendBudget,
   ListingRecommendation,
   ListingReviewStatus,
+  InventoryMovement,
+  InventorySettings,
+  ProductIdentifier,
 } from '@/types';
 import {
   ALL_DEMO_BRANDS,
@@ -49,6 +52,7 @@ import {
   type DemoProduct,
 } from './demoData';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
+import { simulatedAsinFor } from '@/lib/catalog/asin';
 import {
   COMMERCIAL_MODEL_ORDER,
   DEMO_ACQUISITION_SHARE_PCT,
@@ -362,6 +366,15 @@ export function markCommissionPaid(id: string): Commission | null {
  * Ids are CANONICAL (`sub-<brandId>-<sku>`), so re-submitting the same product
  * updates its record in place instead of duplicating it (D4 idempotence), and
  * `simulated` is never absent.
+ *
+ * §P8 — REPOINTED (not weakened). These rows used to carry an INVENTED ASIN
+ * (`B0<sku>`) for every third product — a plausible-looking identifier the
+ * platform had no basis for, which is exactly what programme decision 10
+ * forbids ("the code never invents a real-looking ASIN"). The CANONICAL home of
+ * a product's identifier is now `demoProductIdentifiers` (below), written either
+ * by the brand's own declaration or by Mercenta from the channel's acceptance,
+ * and a submission's `asin` is only ever set from the channel's OWN response —
+ * never fabricated by the seed.
  */
 export const demoProductSubmissions: ProductSubmission[] = DEMO_PRODUCTS.slice(0, 6).map((p, i) => ({
   id: `sub-${p.brandId}-${p.sku}`,
@@ -369,7 +382,6 @@ export const demoProductSubmissions: ProductSubmission[] = DEMO_PRODUCTS.slice(0
   productId: p.id,
   productName: p.name,
   sku: p.sku,
-  asin: i % 3 === 0 ? `B0${p.sku.replace(/-/g, '')}` : undefined,
   status: (['live', 'under_amazon_review', 'rejected'] as const)[i % 3],
   rejectionReason:
     i % 3 === 2 ? 'GTIN barcode does not match declared listing attributes.' : undefined,
@@ -495,21 +507,29 @@ export function productsForBrandFromStore(brandId: string): DemoProduct[] {
   return DEMO_PRODUCTS.filter((p) => p.brandId === brandId);
 }
 
-/** §Phase E3 — catalog operations are audited on the existing platform log. */
+/**
+ * §Phase E3 — catalog operations are audited on the existing platform log.
+ *
+ * §P8 — the `entityType` is now a parameter (defaulting to the original
+ * `catalog_submission`), so inventory and identifier writes are audited on the
+ * SAME canonical log rather than inventing a second audit store. Existing
+ * callers are unchanged.
+ */
 export function recordCatalogAudit(
   action: string,
   entityId: string,
   brandId: string,
   reason: string,
   actorId: string,
-  metadata: Record<string, unknown> = {}
+  metadata: Record<string, unknown> = {},
+  entityType: string = 'catalog_submission'
 ): AuditLogEntry {
   const entry: AuditLogEntry = {
     id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     createdAt: new Date().toISOString(),
     actorId,
     action,
-    entityType: 'catalog_submission',
+    entityType,
     entityId,
     brandId,
     reason,
@@ -518,6 +538,250 @@ export function recordCatalogAudit(
   demoAuditLog.push(entry);
   notifyCanonicalStoreChange();
   return entry;
+}
+
+
+/* ── §P8 — INVENTORY (decision 5) + THE CHANNEL IDENTIFIER (decision 10) ───
+ *
+ * Three canonical collections, each with ONE owner:
+ *   - `demoInventoryMovements` — the APPEND-ONLY stock ledger. Every on-hand /
+ *     committed / inbound figure in the platform is the SUM of these, so a stock
+ *     number cannot exist without a provenance (rule §03: one representation).
+ *   - `demoInventorySettings` — the brand's own uom + safety stock per product.
+ *   - `demoProductIdentifiers` — the product's channel identifier, written ONLY
+ *     by the brand's own declaration or by Mercenta from the channel's
+ *     acceptance. See `src/lib/catalog/asin.ts`.
+ *
+ * The seeded identifiers are ALL the unmistakable `SIM-ASIN-…` placeholder: the
+ * demo seed never fabricates a plausible real identifier (decision 10).
+ * ─────────────────────────────────────────────────────────────────────── */
+
+export const demoInventoryMovements: InventoryMovement[] = [];
+export const demoInventorySettings: InventorySettings[] = [];
+export const demoProductIdentifiers: ProductIdentifier[] = [];
+
+/**
+ * The deterministic demo baseline for inventory + identifiers.
+ *
+ * Derived from the canonical product list (never a second hand-maintained
+ * fixture), so a product added to `DEMO_PRODUCTS` cannot be missing from the
+ * baseline.
+ */
+(function seedInventoryBaseline() {
+  const seededAt = new Date(Date.now() - 45 * 864e5).toISOString();
+  DEMO_PRODUCTS.forEach((p, i) => {
+    const uom: InventoryMovement['enteredUom'] = i % 2 === 0 ? 'eaches' : 'cases';
+    const casePack = p.unitsPerCase && p.unitsPerCase > 0 ? p.unitsPerCase : 1;
+    demoInventorySettings.push({
+      brandId: p.brandId,
+      sku: p.sku,
+      productId: p.id,
+      uom,
+      safetyStock: 40 + i * 10,
+      updatedAt: seededAt,
+      updatedBy: 'seed:demo-baseline',
+    });
+
+    const at = (days: number) => new Date(Date.now() - days * 864e5).toISOString();
+    const openingEaches = 120 + i * 30;
+    // A receipt entered in the product's OWN unit — the case-based rows exercise
+    // the single conversion in `src/lib/inventory/inventoryRecord.ts`.
+    const receiptEntered = uom === 'cases' ? 3 : 24;
+    const receiptEaches = receiptEntered * (uom === 'cases' ? casePack : 1);
+    const commitEaches = 30 + i * 5;
+    const inboundEntered = uom === 'cases' ? 6 : 48;
+    const inboundEaches = inboundEntered * (uom === 'cases' ? casePack : 1);
+
+    const row = (
+      seq: number,
+      bucket: InventoryMovement['bucket'],
+      type: InventoryMovement['type'],
+      enteredQuantity: number,
+      eaches: number,
+      days: number
+    ): InventoryMovement => ({
+      id: `inv-mv-${p.brandId}-${p.sku}-${seq}`,
+      brandId: p.brandId,
+      sku: p.sku,
+      productId: p.id,
+      bucket,
+      quantityDelta: eaches,
+      enteredQuantity,
+      enteredUom: uom,
+      unitsPerCaseUsed: uom === 'cases' ? casePack : 1,
+      type,
+      actorId: 'seed:demo-baseline',
+      recordedAt: at(days),
+    });
+
+    demoInventoryMovements.push(
+      row(1, 'on_hand', 'opening', openingEaches, openingEaches, 45),
+      row(2, 'on_hand', 'receipt', receiptEntered, receiptEaches, 30),
+      row(3, 'committed', 'commitment', commitEaches, commitEaches, 20),
+      row(4, 'inbound', 'inbound_expected', inboundEntered, inboundEaches, 10)
+    );
+
+    // Every second product has an identifier — and it is ALWAYS the simulated
+    // placeholder, so the demo never shows an identifier Mercenta cannot justify.
+    if (i % 2 === 0) {
+      demoProductIdentifiers.push({
+        brandId: p.brandId,
+        sku: p.sku,
+        productId: p.id,
+        asin: simulatedAsinFor(p.sku),
+        source: 'channel_assigned',
+        simulated: true,
+        recordedAt: at(8),
+        recordedBy: 'seed:demo-baseline',
+        note: 'Simulated placeholder — no live channel response exists in this environment.',
+      });
+    }
+  });
+})();
+
+/** Canonical id for one movement (deterministic per product + ordinal). */
+export function inventoryMovementId(brandId: string, sku: string, seq: number): string {
+  return `inv-mv-${brandId}-${sku}-${seq}`;
+}
+
+/**
+ * Record ONE validated movement. Idempotent by id, so replaying a call cannot
+ * double-count stock.
+ */
+export function recordInventoryMovement(input: {
+  brandId: string;
+  sku: string;
+  productId: string;
+  bucket: InventoryMovement['bucket'];
+  type: InventoryMovement['type'];
+  quantityDelta: number;
+  enteredQuantity: number;
+  enteredUom: InventoryMovement['enteredUom'];
+  unitsPerCaseUsed: number;
+  reason?: string;
+  actorId: string;
+}): InventoryMovement {
+  const seq =
+    demoInventoryMovements.filter((m) => m.brandId === input.brandId && m.sku === input.sku).length + 1;
+  const id = inventoryMovementId(input.brandId, input.sku, seq);
+  const existing = demoInventoryMovements.find((m) => m.id === id);
+  if (existing) return existing;
+  const movement: InventoryMovement = {
+    id,
+    brandId: input.brandId,
+    sku: input.sku,
+    productId: input.productId,
+    bucket: input.bucket,
+    quantityDelta: input.quantityDelta,
+    enteredQuantity: input.enteredQuantity,
+    enteredUom: input.enteredUom,
+    unitsPerCaseUsed: input.unitsPerCaseUsed,
+    type: input.type,
+    reason: input.reason,
+    actorId: input.actorId,
+    recordedAt: new Date().toISOString(),
+  };
+  demoInventoryMovements.push(movement);
+  notifyCanonicalStoreChange();
+  return movement;
+}
+
+/** One product's ledger, oldest first (the derivation order). */
+export function getInventoryMovements(brandId: string, sku: string): InventoryMovement[] {
+  return demoInventoryMovements.filter((m) => m.brandId === brandId && m.sku === sku);
+}
+
+/** A tenant's whole ledger. */
+export function getInventoryMovementsForBrand(brandId: string): InventoryMovement[] {
+  return demoInventoryMovements.filter((m) => m.brandId === brandId);
+}
+
+/** Every movement in the platform (the admin/global read). */
+export function getAllInventoryMovements(): InventoryMovement[] {
+  return [...demoInventoryMovements];
+}
+
+/** Create or update a product's inventory settings (idempotent by tenant + sku). */
+export function upsertInventorySettings(input: {
+  brandId: string;
+  sku: string;
+  productId: string;
+  uom: InventorySettings['uom'];
+  safetyStock: number;
+  updatedBy: string;
+}): InventorySettings {
+  const idx = demoInventorySettings.findIndex(
+    (s) => s.brandId === input.brandId && s.sku === input.sku
+  );
+  const record: InventorySettings = {
+    brandId: input.brandId,
+    sku: input.sku,
+    productId: input.productId,
+    uom: input.uom,
+    safetyStock: input.safetyStock,
+    updatedAt: new Date().toISOString(),
+    updatedBy: input.updatedBy,
+  };
+  if (idx >= 0) demoInventorySettings[idx] = record;
+  else demoInventorySettings.push(record);
+  notifyCanonicalStoreChange();
+  return record;
+}
+
+/** One product's settings, or undefined when the brand has not set any. */
+export function getInventorySettings(brandId: string, sku: string): InventorySettings | undefined {
+  return demoInventorySettings.find((s) => s.brandId === brandId && s.sku === sku);
+}
+
+/** A tenant's settings rows. */
+export function getInventorySettingsForBrand(brandId: string): InventorySettings[] {
+  return demoInventorySettings.filter((s) => s.brandId === brandId);
+}
+
+/**
+ * Record a product's channel identifier. Idempotent by (brandId, sku) — a
+ * product has ONE identifier, so a re-record replaces it in place.
+ */
+export function recordProductIdentifier(input: {
+  brandId: string;
+  sku: string;
+  productId: string;
+  asin: string;
+  source: ProductIdentifier['source'];
+  simulated: boolean;
+  brandConfirmedExistingListing?: boolean;
+  recordedBy: string;
+  note?: string;
+}): ProductIdentifier {
+  const record: ProductIdentifier = {
+    brandId: input.brandId,
+    sku: input.sku,
+    productId: input.productId,
+    asin: input.asin,
+    source: input.source,
+    simulated: input.simulated,
+    brandConfirmedExistingListing: input.brandConfirmedExistingListing,
+    recordedAt: new Date().toISOString(),
+    recordedBy: input.recordedBy,
+    note: input.note,
+  };
+  const idx = demoProductIdentifiers.findIndex(
+    (i) => i.brandId === input.brandId && i.sku === input.sku
+  );
+  if (idx >= 0) demoProductIdentifiers[idx] = record;
+  else demoProductIdentifiers.push(record);
+  notifyCanonicalStoreChange();
+  return record;
+}
+
+/** One product's identifier, or undefined when none exists yet. */
+export function getProductIdentifier(brandId: string, sku: string): ProductIdentifier | undefined {
+  return demoProductIdentifiers.find((i) => i.brandId === brandId && i.sku === sku);
+}
+
+/** Every identifier in the platform (the admin/global read). */
+export function getAllProductIdentifiers(): ProductIdentifier[] {
+  return [...demoProductIdentifiers];
 }
 
 

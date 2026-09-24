@@ -115,6 +115,12 @@ export function createSpApiClient(
       ok: boolean;
       status?: 'submitted' | 'under_amazon_review' | 'live' | 'rejected';
       rejectionReason?: string;
+      /**
+       * §P8 — the identifier the channel returns once it ACCEPTS the product
+       * (decision 10). Read straight from the channel's own response; never
+       * derived, defaulted or invented by the platform.
+       */
+      asin?: string;
       error?: string;
     }> {
       const creds = requireCredentials();
@@ -125,10 +131,16 @@ export function createSpApiClient(
       const body = (await res.json()) as {
         status?: 'submitted' | 'under_amazon_review' | 'live' | 'rejected';
         rejectionReason?: string;
+        asin?: string;
         error?: string;
       };
       if (!res.ok) return { ok: false, error: body.error ?? `HTTP ${res.status}` };
-      return { ok: true, status: body.status, rejectionReason: body.rejectionReason };
+      return {
+        ok: true,
+        status: body.status,
+        rejectionReason: body.rejectionReason,
+        asin: body.asin,
+      };
     },
 
     /** §10 step 4 — fetch purchase orders received since a timestamp. */

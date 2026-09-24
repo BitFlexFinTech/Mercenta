@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useBrands, useProducts, useCatalogSubmissions } from '@/data/queries';
+import { useBrands, useProducts, useCatalogSubmissions, useCanonicalStoreVersion } from '@/data/queries';
 import { updateProductAvailability, updateProductCost, latestSubmissionForProduct } from '@/data/demoStore';
 import { useApp } from '@/context/GlobalStateContext';
 import { Button } from '@/components/ui';
@@ -13,6 +13,17 @@ import { SUBMISSION_STATUS_LABELS } from '@/lib/spapi/transform';
 import { X, Package, Filter } from 'lucide-react';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { APPROVED_CATEGORIES } from '@/types';
+import {
+  adminOverrideAsin,
+  inventoryForProduct,
+  listInventoryMovements,
+} from '@/lib/inventory/inventoryLifecycle';
+import {
+  INVENTORY_DERIVATION_BASIS,
+  INVENTORY_STATUS_LABELS,
+  INVENTORY_UOM_LABELS,
+} from '@/lib/inventory/inventoryRecord';
+import { ASIN_RULES, ASIN_SOURCE_LABELS } from '@/lib/catalog/asin';
 import {
   ContextPanel,
   MetricBand,
@@ -34,6 +45,41 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
   const [lt, setLt] = useState(product.leadTimeDays ?? 14);
   const [ep, setEp] = useState(product.exWorksPrice);
   const [sv, setSv] = useState<string | null>(null);
+  /**
+   * §P8 — the product's inventory + channel identifier (decision 5 / decision
+   * 10), read from the canonical owners. The ADMIN OVERRIDE is the attributed
+   * correction path; it requires a stated reason and is refused for a
+   * brand-pinned actor inside the domain.
+   */
+  const { actingStaffId } = useApp();
+  const canonicalVersion = useCanonicalStoreVersion();
+  void canonicalVersion;
+  /**
+   * A MERCENTA staff actor: no tenant pin, so the domain's brand-actor refusal
+   * on the override path does not apply (and the override is attributed).
+   */
+  const inventoryActor = { staffId: actingStaffId, canMutate };
+  const inventoryResult = inventoryForProduct(product.brandId, product.sku, inventoryActor);
+  const inventory = inventoryResult.ok ? inventoryResult.value : undefined;
+  const ledgerResult = listInventoryMovements(product.brandId, product.sku, inventoryActor);
+  const ledger = ledgerResult.ok ? ledgerResult.value : [];
+  const [overrideAsin, setOverrideAsin] = useState('');
+  const [overrideReason, setOverrideReason] = useState('');
+  const [invNotice, setInvNotice] = useState<string | null>(null);
+
+  /** §P8 — the attributed admin override of the channel identifier. */
+  function handleOverrideAsin() {
+    const res = adminOverrideAsin(
+      {
+        brandId: product.brandId,
+        sku: product.sku,
+        asin: overrideAsin,
+        reason: overrideReason,
+      },
+      inventoryActor
+    );
+    setInvNotice(res.ok ? `Identifier recorded: ${res.value.asin}` : res.error);
+  }
   // §Phase E5 (G4) — RBAC: catalog MUTATIONS require a full-permission account.
   // The disabled buttons are an affordance; these guards are the enforcement.
   function ha() { if (!canMutate) return; updateProductAvailability(product.sku, av, lt); setSv('Availability updated.'); setTimeout(function() { setSv(null); }, 3000); }
@@ -46,8 +92,8 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
           <button onClick={onClose} className='text-zinc-400 hover:text-white'><X className='w-4 h-4' /></button>
         </div>
         <div className='flex gap-1 px-5 pt-3 border-b border-white/[0.06]'>
-          {['detail', 'images', 'pricing'].map(function(t) { return (
-            <button key={t} onClick={function() { setTab(t); }} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t', tab === t ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>{t === 'detail' ? 'Details' : t === 'images' ? 'Images (5)' : 'Pricing'}</button>
+          {['detail', 'images', 'pricing', 'inventory'].map(function(t) { return (
+            <button key={t} onClick={function() { setTab(t); }} className={cn('px-3 py-1.5 text-ds-label font-medium rounded-t', tab === t ? 'text-white border-b-2 border-brass-500' : 'text-zinc-500 hover:text-zinc-300')}>{t === 'detail' ? 'Details' : t === 'images' ? 'Images (5)' : t === 'pricing' ? 'Pricing' : 'Inventory'}</button>
           );})}
         </div>
         <div className='flex-1 overflow-y-auto p-5 space-y-4'>
@@ -147,6 +193,73 @@ function ProductDetailModal(props: { product: DemoProduct; submission?: ProductS
               <Button className='text-xs' data-state="catalog-update-price" disabled={!canMutate}
                 title={canMutate ? undefined : 'View-only staff cannot change product pricing'} onClick={hp}>Update Price</Button>
               {sv && <p className='text-ds-micro text-emerald-400'>{sv}</p>}
+            </div>
+          )}
+          {/* ── §P8 Inventory Tab — decision 5 / decision 10 ── */}
+          {tab === 'inventory' && (
+            <div className='space-y-4' data-testid="catalog-inventory-tab">
+              <div className='grid grid-cols-2 gap-3 text-xs'>
+                <div>
+                  <span className='text-zinc-500 block mb-1'>Position (derived from the ledger)</span>
+                  {inventory ? (
+                    <div className='space-y-0.5 text-zinc-200'>
+                      <p>On hand: <span className='font-mono'>{inventory.onHand}</span> · committed: <span className='font-mono'>{inventory.committed}</span> · inbound: <span className='font-mono'>{inventory.inbound}</span></p>
+                      <p>Available: <span className={cn('font-mono', inventory.available < 0 ? 'text-red-300' : 'text-white')}>{inventory.available}</span> · safety stock: <span className='font-mono'>{inventory.safetyStock}</span> · unit: {INVENTORY_UOM_LABELS[inventory.uom]}</p>
+                      <p className={inventory.status === 'in_stock' ? 'text-emerald-400' : inventory.status === 'out_of_stock' ? 'text-red-300' : 'text-amber-300'}>{INVENTORY_STATUS_LABELS[inventory.status]}</p>
+                    </div>
+                  ) : (
+                    <p className='text-zinc-500'>No inventory record for this product.</p>
+                  )}
+                </div>
+                <div data-testid="catalog-inventory-identifier">
+                  <span className='text-zinc-500 block mb-1'>Channel identifier</span>
+                  {inventory?.asin ? (
+                    <div className='space-y-0.5 text-zinc-200'>
+                      <p className='font-mono'>{inventory.asin}</p>
+                      <p className='text-ds-micro text-zinc-500'>
+                        {inventory.asinSource ? ASIN_SOURCE_LABELS[inventory.asinSource] : ''}
+                        {inventory.asinSimulated ? ' (simulated placeholder)' : ''}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className='text-zinc-500'>No identifier recorded yet.</p>
+                  )}
+                </div>
+              </div>
+              <p className='text-ds-micro text-zinc-500 leading-relaxed'>{INVENTORY_DERIVATION_BASIS}</p>
+
+              <div className='border-t border-white/[0.06] pt-3 space-y-2'>
+                <p className='text-zinc-400 font-medium'>Override the channel identifier</p>
+                <div className='flex flex-wrap gap-2'>
+                  <input value={overrideAsin} onChange={function(e) { setOverrideAsin(e.target.value); }}
+                    placeholder='Identifier (10 alphanumeric)' disabled={!canMutate}
+                    className='bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white' />
+                  <input value={overrideReason} onChange={function(e) { setOverrideReason(e.target.value); }}
+                    placeholder='Reason (required)' disabled={!canMutate}
+                    className='bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white flex-1 min-w-[12rem]' />
+                  <Button className='text-xs' data-state="catalog-override-identifier" disabled={!canMutate}
+                    title={canMutate ? undefined : 'View-only staff cannot override the identifier'}
+                    onClick={handleOverrideAsin}>Record identifier</Button>
+                </div>
+                {invNotice && <p className='text-ds-micro text-amber-300' data-testid="catalog-inventory-notice">{invNotice}</p>}
+                <ul className='text-ds-micro text-zinc-500 space-y-0.5'>
+                  {ASIN_RULES.map(function(r) { return <li key={r}>• {r}</li>; })}
+                </ul>
+              </div>
+
+              <div className='border-t border-white/[0.06] pt-3'>
+                <p className='text-zinc-400 font-medium mb-1'>Movement ledger ({ledger.length})</p>
+                <ul className='max-h-40 overflow-y-auto space-y-0.5 text-ds-micro text-zinc-400' data-testid="catalog-inventory-ledger">
+                  {ledger.map(function(m) { return (
+                    <li key={m.id} className='flex flex-wrap gap-x-3'>
+                      <span className='font-mono'>{m.recordedAt.slice(0, 10)}</span>
+                      <span>{m.type}</span>
+                      <span className='font-mono'>{m.quantityDelta > 0 ? '+' : ''}{m.quantityDelta}</span>
+                      <span className='text-zinc-600'>{m.enteredQuantity} {m.enteredUom} · {m.bucket} · {m.actorId}</span>
+                    </li>
+                  ); })}
+                </ul>
+              </div>
             </div>
           )}
         </div>

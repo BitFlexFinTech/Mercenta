@@ -813,6 +813,46 @@ const P7_ADMIN_INVOICING_SCOPE = new Set([
   'PRODUCTION_READINESS.md',
 ]);
 
+/**
+ * §P8 — INVENTORY + CHANNEL IDENTIFIER PHASE DECLARED SURFACE (2026-09-23,
+ * programme `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P8).
+ *
+ * P8 adds decision 5 (inventory linked to the catalogue, kept inside Mercenta)
+ * and decision 10 (the channel identifier: brand-declared only for an existing
+ * listing, otherwise populated from the channel's acceptance, and never
+ * invented). It touches the canonical types and the canonical store (both
+ * PROTECTED prefixes, declared exactly as P4/P5/P6/P7 declared them) and the
+ * mock-first SP-API seam (the channel's acceptance response). The E6 guard's
+ * contract is UNCHANGED — a changed source/test file in NO declared set still
+ * fails, and an undeclared protected path still fails.
+ */
+const P8_INVENTORY_SCOPE = new Set([
+  'src/lib/catalog/asin.ts',                  // NEW — the ONE channel-identifier owner (decision 10)
+  'src/lib/inventory/inventoryRecord.ts',     // NEW — the ONE owner of the stock figures (decision 5)
+  'src/lib/inventory/inventoryLifecycle.ts',  // NEW — the domain write path (RBAC + tenant + audit)
+  'src/lib/inventory/',                       // NEW directory — git reports untracked dirs as one entry
+  'src/components/brand/BrandInventory.tsx',  // NEW — the brand surface (decision 5's ten fields)
+  'src/types.ts',                             // PROTECTED prefix — declared
+  'src/data/demoStore.ts',                    // the ledger + settings + identifiers, and the removed invented ASIN
+  'src/data/api.ts',                          // the seam's poll result now carries the channel identifier
+  'src/lib/spapi/client.ts',                  // the real client surfaces the channel's identifier
+  'src/lib/spapi/mockClient.ts',              // the mock returns the unmistakable SIM-ASIN-… placeholder
+  'src/lib/catalog/catalogLifecycle.ts',      // acceptance populates the identifier (decision 10, channel half)
+  'src/lib/simulation/investorDemo.ts',       // the new canonical stores join the deterministic reset
+  'src/components/brand/ProductCatalog.tsx',  // the per-catalogue-product ASIN column
+  'src/components/brand/BrandReports.tsx',    // the fabricated on-hand estimate is repointed to the owner
+  'src/components/layout/BrandShell.tsx',     // the Inventory destination, in the Catalogue section
+  'src/components/admin/CatalogManagerAdmin.tsx', // the admin position + the attributed override
+  'e2e/inventory.spec.ts',
+  'scripts/validate-p8-inventory.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/verify-demo-live.mjs',             // carries the §P8 live checks
+  'package.json',
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'PRODUCTION_READINESS.md',
+]);
+
 try {
   /* ── modules under test (the EXISTING architecture) ── */
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
@@ -1256,7 +1296,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           P6_PO_DOCUMENT_PACK_SCOPE.has(p) ||
           [...P6_PO_DOCUMENT_PACK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §P7 — the admin-invoicing phase's declared surface (see above). */
-          P7_ADMIN_INVOICING_SCOPE.has(p)
+          P7_ADMIN_INVOICING_SCOPE.has(p) ||
+          /** §P8 — the inventory + channel-identifier phase's declared surface. */
+          P8_INVENTORY_SCOPE.has(p) ||
+          [...P8_INVENTORY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

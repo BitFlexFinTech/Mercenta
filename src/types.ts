@@ -387,6 +387,164 @@ export interface CatalogReadiness {
   /** Present-but-not-approved compliance documents (never weakened here). */
   blocking: { type: string; status: string }[];
 }
+/* ────────────────────────────────────────────────────────────────────
+ * §P8 — INVENTORY LINKED TO THE BRAND'S CATALOGUE + THE CHANNEL IDENTIFIER
+ *
+ * Programme decision 5: per catalogue product the brand keeps an inventory
+ * record — image · SKU · ASIN · available · UoM (Eaches/Cases) · on-hand ·
+ * committed · inbound · safety stock — entered INSIDE Mercenta, never by
+ * logging into a retail channel.
+ *
+ * Programme decision 10: the brand may supply the ASIN itself ONLY when the
+ * product already exists on the channel; otherwise Mercenta populates it when
+ * the channel accepts the product. Until a real identifier exists the value is
+ * an unmistakably simulated `SIM-ASIN-…` placeholder — the code never invents a
+ * plausible-looking ASIN.
+ *
+ * Declared ONCE here (rule §03). The behaviour lives in
+ * `src/lib/catalog/asin.ts` (the identifier) and `src/lib/inventory/**` (the
+ * stock figures). No component re-declares any of these.
+ * ──────────────────────────────────────────────────────────────── */
+
+/**
+ * The unit a stock figure is ENTERED and SHOWN in (decision 5).
+ *
+ * This is the channel's own payload vocabulary — `Cases` / `Eaches`
+ * (discrepancy register **AV-029**, status CONFIRMED) — so the two cannot
+ * diverge. Quantities are always STORED in eaches; the unit is how the brand
+ * works, and the conversion uses the product's own case pack.
+ */
+export type InventoryUom = 'eaches' | 'cases';
+
+/** The three stock buckets an inventory movement can change. */
+export type InventoryBucket = 'on_hand' | 'committed' | 'inbound';
+
+/**
+ * The kinds of movement the ledger accepts. Every figure is DERIVED from the
+ * ledger, so stock can never be edited into existence without a provenance.
+ */
+export type InventoryMovementType =
+  | 'opening'
+  | 'receipt'
+  | 'dispatch'
+  | 'commitment'
+  | 'release'
+  | 'inbound_expected'
+  | 'inbound_cancelled'
+  | 'adjustment';
+
+/**
+ * §P8 — ONE append-only inventory movement (the canonical stock provenance).
+ *
+ * `quantityDelta` is ALWAYS in eaches; the entry the actor actually made is
+ * retained beside it (`enteredQuantity` / `enteredUom` / `unitsPerCaseUsed`) so
+ * a case-based entry is auditable and never silently reinterpreted.
+ */
+export interface InventoryMovement {
+  id: string;
+  brandId: string;
+  sku: string;
+  productId: string;
+  bucket: InventoryBucket;
+  /** Signed delta in EACHES — the canonical unit. */
+  quantityDelta: number;
+  /** What the actor typed, in the unit they typed it in. */
+  enteredQuantity: number;
+  enteredUom: InventoryUom;
+  /** The case pack used for the conversion (1 when the entry was in eaches). */
+  unitsPerCaseUsed: number;
+  type: InventoryMovementType;
+  /** REQUIRED for an `adjustment` (a counted correction must say why). */
+  reason?: string;
+  actorId: string;
+  recordedAt: string;
+}
+
+/** §P8 — the brand's own working settings for one catalogue product. */
+export interface InventorySettings {
+  brandId: string;
+  sku: string;
+  productId: string;
+  uom: InventoryUom;
+  /** The reorder trigger, in EACHES. */
+  safetyStock: number;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+/**
+ * §P8 — who supplied the channel identifier (decision 10).
+ *
+ * `brand_declared` requires the brand to confirm the product ALREADY exists on
+ * the channel; `channel_assigned` is Mercenta populating it from the channel's
+ * acceptance. Nothing else may write it.
+ */
+export type AsinSource = 'brand_declared' | 'channel_assigned';
+
+/** §P8 — the canonical per-product channel identifier record. */
+export interface ProductIdentifier {
+  brandId: string;
+  sku: string;
+  productId: string;
+  asin: string;
+  source: AsinSource;
+  /** TRUE whenever the value could not have come from a live channel response. */
+  simulated: boolean;
+  /** The brand's required confirmation that the listing already exists. */
+  brandConfirmedExistingListing?: boolean;
+  recordedAt: string;
+  recordedBy: string;
+  note?: string;
+}
+
+/** §P8 — the derived stock position of one product (never stored). */
+export type InventoryStatus = 'out_of_stock' | 'below_safety_stock' | 'in_stock';
+
+/** §P8 — how far the product has got towards having a channel identifier. */
+export type AsinState = 'none' | 'pending_channel' | 'assigned';
+
+/**
+ * §P8 — the DERIVED inventory view of one catalogue product.
+ *
+ * Every figure is derived on read from the movement ledger plus the settings, so
+ * there is no second copy to drift (the §P6/§P7 rule). `available` may be
+ * negative — an oversold position is STATED, never clamped.
+ */
+export interface InventoryRecord {
+  brandId: string;
+  sku: string;
+  productId: string;
+  uom: InventoryUom;
+  onHand: number;
+  committed: number;
+  inbound: number;
+  safetyStock: number;
+  /** on-hand − committed (in eaches). Negative means oversold. */
+  available: number;
+  status: InventoryStatus;
+  /** The channel identifier, when one exists (never invented). */
+  asin?: string;
+  asinSource?: AsinSource;
+  asinSimulated?: boolean;
+  identifierState: AsinState;
+  movementCount: number;
+  updatedAt?: string;
+}
+
+/** §P8 — the ONE derived roll-up of a tenant's inventory. */
+export interface InventorySummary {
+  products: number;
+  unitsOnHand: number;
+  unitsCommitted: number;
+  unitsInbound: number;
+  unitsAvailable: number;
+  belowSafetyStock: number;
+  outOfStock: number;
+  withIdentifier: number;
+  simulatedIdentifiers: number;
+}
+
+
 
 
 /* ────────────────────────────────────────────────────────────────────

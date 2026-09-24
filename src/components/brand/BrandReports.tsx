@@ -3,8 +3,9 @@
  */
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
-import { usePurchaseOrders } from '@/data/queries';
+import { useCanonicalStoreVersion, usePurchaseOrders } from '@/data/queries';
 import { assertBrandScope } from '@/lib/auth/rbac';
+import { inventorySummaryForBrand } from '@/lib/inventory/inventoryLifecycle';
 import { downloadCsv } from '@/lib/csv';
 import { Badge, Button, Card } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
@@ -21,6 +22,26 @@ const CHART_TT = { background: '#1A1A20', border: '1px solid rgba(255,255,255,0.
 
 export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const { session, brandProfile, products } = useApp();
+  /**
+   * §P8 — REPOINTED (not weakened). This surface used to FABRICATE the on-hand
+   * figure as `unitsPerCase × 10` per SKU — an invented number presented as an
+   * inventory estimate, with no ledger behind it. On-hand now comes from the
+   * CANONICAL inventory owner (the movement ledger's own sum), which is what the
+   * whole platform reads.
+   */
+  const canonicalVersion = useCanonicalStoreVersion();
+  void canonicalVersion; // canonical store change signal → re-read the derived figure
+  const inventoryBrandId = session?.tier === 'brand' ? session.tenantId ?? null : null;
+  const inventorySummary = useMemo(() => {
+    void canonicalVersion; // reactivity anchor (the canonical store change signal)
+    if (!inventoryBrandId) return undefined;
+    const res = inventorySummaryForBrand(inventoryBrandId, {
+      staffId: `brand:${inventoryBrandId}`,
+      canMutate: false,
+      tenantId: inventoryBrandId,
+    });
+    return res.ok ? res.value : undefined;
+  }, [inventoryBrandId, canonicalVersion]);
   // §UI/UX Wave 2 — canonical chart language (grid/axis/palette from
   // src/config/themes.ts) instead of this surface's own hardcoded colours.
   const CHART = useRechartsTokens();
@@ -41,7 +62,8 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
   const totalUnitsShipped = [...shippedPOs, ...deliveredPOs].reduce((s, p) => s + p.lineItems.reduce((sl, li) => sl + li.quantity, 0), 0);
   const netPPM = totalUnitsShipped > 0 ? Math.round((totalValueShipped / totalUnitsShipped) * 1000) : 0;
   const openPOQty = openPOs.reduce((s, p) => s + p.lineItems.reduce((sl, li) => sl + li.quantity, 0), 0);
-  const onHandInv = products.reduce((s, p) => s + (p.unitsPerCase ?? 1) * 10, 0);
+  /** §P8 — the CANONICAL on-hand figure (the ledger's own sum), never invented. */
+  const canonicalOnHand = inventorySummary?.unitsOnHand;
 
   const dispatchChart = useMemo(() => {
     const b = new Map<string, number>();
@@ -65,7 +87,7 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
     { label: 'ASIN Confirmation Rate', value: asinRate + '%', icon: BarChart3, trend: totalLines > 0 ? confirmedLines + '/' + totalLines + ' lines' : 'No data', trendUp: asinRate >= 80 },
     { label: 'Sourceable Products OOS', value: String(outOfStock), icon: Package, trend: 'of ' + products.length + ' total SKUs', trendUp: outOfStock === 0 },
     { label: 'Open PO Quantity', value: String(openPOQty), icon: ShoppingCart, trend: openPOs.length + ' open POs', trendUp: false },
-    { label: 'On-Hand Inventory (est.)', value: String(onHandInv), icon: Package, trend: 'Estimated units', trendUp: true },
+    { label: 'On-Hand Inventory', value: canonicalOnHand === undefined ? '—' : String(canonicalOnHand), icon: Package, trend: 'Recorded units on hand', trendUp: true },
     { label: 'Net PPM', value: '\u00a3' + netPPM.toLocaleString(), icon: DollarSign, trend: 'Per 1000 units shipped', trendUp: netPPM > 500 },
   ];
   const poStatuses = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'] as const;
@@ -244,10 +266,17 @@ export function BrandReports({ onNavigate }: { onNavigate?: (view: string) => vo
                   <p className="text-xs text-zinc-500 mt-2">Per 1000 units shipped</p>
                 </div>
               )}
-              {drillCard === 'On-Hand Inventory (est.)' && (
+              {drillCard === 'On-Hand Inventory' && (
                 <div className="space-y-2">
-                  <p className="text-xs text-zinc-400">Estimated {onHandInv} units on hand</p>
-                  <p className="text-ds-micro text-zinc-600">Calculated from case-pack x 10 per SKU</p>
+                  <p className="text-xs text-zinc-400">
+                    {canonicalOnHand === undefined
+                      ? 'No inventory recorded for this tenant yet.'
+                      : `${canonicalOnHand} units on hand, derived from the movement ledger`}
+                  </p>
+                  <p className="text-ds-micro text-zinc-600">
+                    Source: the canonical inventory ledger (§P8) — the same figures the Inventory
+                    surface shows. Nothing is estimated here.
+                  </p>
                 </div>
               )}
             </div>

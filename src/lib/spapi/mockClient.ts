@@ -18,6 +18,7 @@
  */
 
 import type { AcknowledgementPayload, AcknowledgementResult, FetchLike } from './client';
+import { simulatedAsinFor } from '@/lib/catalog/asin';
 
 export interface SubmissionResult {
   ok: boolean;
@@ -113,6 +114,13 @@ export function createMockSpApiClient(_transport?: FetchLike) {
       ok: boolean;
       status?: 'submitted' | 'under_amazon_review' | 'live' | 'rejected';
       rejectionReason?: string;
+      /**
+       * §P8 — the identifier the channel returns when it ACCEPTS the product
+       * (decision 10). While this client is the mock, the value is the
+       * unmistakable `SIM-ASIN-…` placeholder so the platform never fabricates a
+       * plausible-looking identifier.
+       */
+      asin?: string;
       error?: string;
     }> {
       await delay(120);
@@ -127,7 +135,9 @@ export function createMockSpApiClient(_transport?: FetchLike) {
             REJECTION_REASONS[submissionCounter % REJECTION_REASONS.length],
         };
       }
-      if (st.polls >= 3) return { ok: true, status: 'live' };
+      if (st.polls >= 3) {
+        return { ok: true, status: 'live', asin: simulatedAsinFor(submissionId) };
+      }
       if (st.polls === 2) return { ok: true, status: 'under_amazon_review' };
       return { ok: true, status: 'submitted' };
     },

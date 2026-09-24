@@ -362,6 +362,8 @@ export async function pollSubmissionStatus(submissionId: string): Promise<{
   ok: boolean;
   status?: CatalogSubmissionStatus;
   rejectionReason?: string;
+  /** §P8 — the channel's identifier once it accepts the product (decision 10). */
+  asin?: string;
   error?: string;
 }> {
   const { client } = createSPApiClientForConnection({

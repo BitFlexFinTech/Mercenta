@@ -894,6 +894,43 @@ try {
     'package.json',
   ];
 
+  /**
+   * §P8 — INVENTORY + CHANNEL IDENTIFIER DECLARED SURFACE (2026-09-23, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P8).
+   *
+   * Decision 5 (inventory linked to the catalogue, kept inside Mercenta) and
+   * decision 10 (the channel identifier — brand-declared only for an existing
+   * listing, otherwise populated from the channel's acceptance, and NEVER
+   * invented). It legitimately touches the canonical types (`src/types.ts`, a
+   * PROTECTED prefix, declared exactly as P4/P5/P6/P7 declared it) and the
+   * mock-first SP-API seam (`src/lib/spapi/**` — the channel's own response).
+   * The E7 guard's contract is UNCHANGED.
+   */
+  const P8_INVENTORY_DECLARED = [
+    'src/lib/catalog/asin.ts',                  // NEW — the ONE identifier owner (decision 10)
+    'src/lib/inventory/inventoryRecord.ts',     // NEW — the ONE owner of the stock figures
+    'src/lib/inventory/inventoryLifecycle.ts',  // NEW — the domain write path
+    'src/lib/inventory/',                       // NEW directory — git reports untracked dirs as one entry
+    'src/components/brand/BrandInventory.tsx',  // NEW — the brand surface
+    'src/types.ts',                             // PROTECTED prefix — declared
+    'src/data/demoStore.ts',
+    'src/data/api.ts',
+    'src/lib/spapi/client.ts',
+    'src/lib/spapi/mockClient.ts',
+    'src/lib/catalog/catalogLifecycle.ts',
+    'src/lib/simulation/investorDemo.ts',
+    'src/components/brand/ProductCatalog.tsx',
+    'src/components/brand/BrandReports.tsx',
+    'src/components/layout/BrandShell.tsx',
+    'src/components/admin/CatalogManagerAdmin.tsx',
+    'e2e/inventory.spec.ts',
+    'scripts/validate-p8-inventory.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/verify-demo-live.mjs',             // carries the §P8 live checks
+    'package.json',
+  ];
+
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -919,7 +956,10 @@ try {
           !P6_PO_DOCUMENT_PACK_DECLARED.includes(f) &&
           !P6_PO_DOCUMENT_PACK_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §P7 — the admin-invoicing phase's declared surface (see above). */
-          !P7_ADMIN_INVOICING_DECLARED.includes(f)
+          !P7_ADMIN_INVOICING_DECLARED.includes(f) &&
+          /** §P8 — the inventory + channel-identifier phase's declared surface. */
+          !P8_INVENTORY_DECLARED.includes(f) &&
+          !P8_INVENTORY_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1044,6 +1084,12 @@ try {
      * file outside EVERY declared set is still refused.
      */
     ...P7_ADMIN_INVOICING_DECLARED,
+    /**
+     * §P8 — REPOINTED (not weakened). The inventory + channel-identifier phase's
+     * declared surface is accepted here exactly as every earlier phase's is; a
+     * changed source/test file outside EVERY declared set is still refused.
+     */
+    ...P8_INVENTORY_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

@@ -152,6 +152,16 @@ import {
   demoContracts,
   demoDeductions,
   demoDocumentVerifications,
+  /*
+   * §P8 — the inventory ledger, the inventory settings and the channel
+   * identifiers are CANONICAL state, so the deterministic reset must return them
+   * to baseline exactly like the commissions, the commercial models and the mock
+   * provider worlds. Without this a replay after a reset would start from the
+   * previous run's stock and identifiers and the replay digest would differ.
+   */
+  demoInventoryMovements,
+  demoInventorySettings,
+  demoProductIdentifiers,
   demoPayoutDestinations,
   demoPayouts,
   demoProductSubmissions,
@@ -396,6 +406,10 @@ const RESTORABLE: Restorable[] = [
   restorable('return_tracking', demoReturnTracking),
   restorable('catalog_products', demoProducts),
   restorable('catalog_submissions', demoProductSubmissions),
+  // §P8 — inventory + the channel identifiers are restorable canonical state.
+  restorable('inventory_movements', demoInventoryMovements),
+  restorable('inventory_settings', demoInventorySettings),
+  restorable('product_identifiers', demoProductIdentifiers),
   restorable('compliance_documents', demoComplianceDocs),
   restorable('document_verifications', demoDocumentVerifications),
   restorable('payout_destinations', demoPayoutDestinations),
@@ -466,6 +480,11 @@ function purgeInvestorDemoRecords(): number {
   purge(demoPayoutDestinations);
   purge(demoPayouts);
   purge(demoProductSubmissions);
+  // §P8 — the append-only inventory ledger, the inventory settings and the
+  // channel identifiers are canonical state too (see the import comment).
+  purge(demoInventoryMovements);
+  purge(demoInventorySettings);
+  purge(demoProductIdentifiers);
   purge(demoProducts);
   purge(demoPurchaseOrders);
   purge(demoReconciliations);

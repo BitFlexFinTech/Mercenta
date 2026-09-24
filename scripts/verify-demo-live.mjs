@@ -114,6 +114,38 @@ if (hasPacking) {
 
 check('no uncaught page error during the brand flow', pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '));
 
+/* ── 3b. §P8 — THE DEPLOYED INVENTORY SURFACE (decision 5 / decision 10) ─── */
+await page.click('nav[aria-label="Primary"] >> text=Inventory').catch(() => {});
+await page.waitForTimeout(3000);
+const inventoryBody = await page.locator('body').innerText().catch(() => '');
+check('§P8 the deployed brand Inventory surface renders its derived position',
+  /Inventory position/i.test(inventoryBody) || /Units on hand/i.test(inventoryBody),
+  inventoryBody.replace(/\s+/g, ' ').slice(0, 160));
+const liveInvRules = await page
+  .locator('[data-testid="inventory-rules"]')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P8 the deployed surface states that every figure comes from the movement ledger',
+  /append-only movement ledger/i.test(liveInvRules),
+  liveInvRules.replace(/\s+/g, ' ').slice(0, 160));
+const liveAsinRules = await page
+  .locator('[data-testid="inventory-asin-rules"]')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P8 the deployed surface states the identifier rule (a brand may supply it only for an existing listing)',
+  /already exists on the channel/i.test(liveAsinRules),
+  liveAsinRules.replace(/\s+/g, ' ').slice(0, 160));
+const liveAsinCells = await page.locator('[data-testid^="inventory-asin-"]').count();
+check('§P8 the deployed Inventory table carries the per-catalogue-product identifier column',
+  liveAsinCells > 0, `${liveAsinCells} cell(s)`);
+check('§P8 the deployed surface states the figures are Mercenta\u2019s own, never a channel reading',
+  /never a channel reading/i.test(inventoryBody),
+  inventoryBody.replace(/\s+/g, ' ').slice(0, 120));
+check('no uncaught page error on the deployed §P8 brand surface',
+  pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '));
+
 /* ── 4. Mercenta's side is visible on the admin PO detail ────────────────── */
 const admin = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const adminErrors = [];
@@ -229,6 +261,16 @@ const bundleProbe = await superAdmin
       terms: all.includes('INVOICE_TERM_RULE'),
       numberShape: all.includes('SIM-INV'),
       cancel: all.includes('INVOICE_NOT_CANCELLABLE'),
+      /**
+       * §P8 — the inventory + channel-identifier refusals. Read from the DEPLOYED
+       * bundle so a stale build cannot pass by rendering a page that looks right.
+       */
+      p8CasePack: all.includes('INVENTORY_CASE_PACK_UNKNOWN'),
+      p8NegativeBucket: all.includes('INVENTORY_NEGATIVE_BUCKET'),
+      p8AdjustmentReason: all.includes('INVENTORY_ADJUSTMENT_REASON_REQUIRED'),
+      p8AsinPlaceholder: all.includes('ASIN_PLACEHOLDER'),
+      p8AsinListing: all.includes('ASIN_REQUIRES_EXISTING_LISTING'),
+      p8SimAsin: all.includes('SIM-ASIN-'),
     };
   })
   .catch(() => ({ count: 0, read: 0 }));
@@ -238,6 +280,12 @@ check('§P7 the deployed bundle carries the zero-value refusal (AV-022)', bundle
 check('§P7 the deployed bundle carries the declared-term refusal', bundleProbe.terms === true, probeDetail);
 check('§P7 the deployed bundle carries the unmistakably-simulated invoice-number prefix', bundleProbe.numberShape === true, probeDetail);
 check('§P7 the deployed bundle carries the cancellation rule (NEW Invoice ID)', bundleProbe.cancel === true, probeDetail);
+check('§P8 the deployed bundle carries the case-pack refusal (a case is never silently 1 each)', bundleProbe.p8CasePack === true, probeDetail);
+check('§P8 the deployed bundle carries the negative-bucket refusal', bundleProbe.p8NegativeBucket === true, probeDetail);
+check('§P8 the deployed bundle carries the counted-correction reason requirement', bundleProbe.p8AdjustmentReason === true, probeDetail);
+check('§P8 the deployed bundle carries the identifier-shape rule', bundleProbe.p8AsinListing === true, probeDetail);
+check('§P8 the deployed bundle refuses the simulated placeholder as a real identifier', bundleProbe.p8AsinPlaceholder === true, probeDetail);
+check('§P8 the deployed bundle carries the unmistakably-simulated identifier prefix', bundleProbe.p8SimAsin === true, probeDetail);
 check('no uncaught page error on the deployed P7 invoicing flows',
   adminErrors.length === 0 && superAdminErrors.length === 0,
   [...adminErrors, ...superAdminErrors].slice(0, 2).join(' | '));

@@ -14,8 +14,9 @@ import {
   type CatalogActor,
 } from '@/lib/catalog/catalogLifecycle';
 import { SUBMISSION_STATUS_LABELS } from '@/lib/spapi/transform';
-import { useContracts, useBrandAgreements, useCatalogSubmissions } from '@/data/queries';
-import { latestSubmissionForProduct } from '@/data/demoStore';
+import { useContracts, useBrandAgreements, useCatalogSubmissions, useCanonicalStoreVersion } from '@/data/queries';
+import { getProductIdentifier, latestSubmissionForProduct } from '@/data/demoStore';
+import { ASIN_STATE_LABELS, deriveAsinState } from '@/lib/catalog/asin';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
 import { ImageSetEditor } from '@/components/shared/ImageUploader';
 import { generateDefaultProductImages } from '@/lib/amazon/productImageValidator';
@@ -79,6 +80,13 @@ export function ProductCatalog() {
   /** §Phase E3 — the CANONICAL submission store (tenant-filtered at read time). */
   const submissionsQuery = useCatalogSubmissions();
   const submissionsData = submissionsQuery.data;
+
+  /**
+   * §P8 — the canonical store change signal, so a channel identifier recorded by
+   * the surface (or by the channel's acceptance) is visible here immediately.
+   */
+  const canonicalVersion = useCanonicalStoreVersion();
+  void canonicalVersion;
 
   /**
    * §Phase E6 (G3) — ONE canonical latest-submission derivation.
@@ -279,12 +287,44 @@ export function ProductCatalog() {
             {
               key: 'sku',
               label: 'SKU / Barcode',
-              render: (p) => (
-                <div>
-                  <div className="text-xs font-mono text-zinc-400">{p.sku}</div>
-                  <div className="text-ds-micro font-mono text-zinc-600 mt-0.5">{p.barcode}</div>
-                </div>
-              ),
+              render: (p) => {
+                /**
+                 * §P8 — DECISION 5/10: the product's channel identifier is shown
+                 * per catalogue product WITH ITS SOURCE, inside the identity cell
+                 * rather than as an extra column. Two reasons, both real: the
+                 * identifier belongs with the SKU/barcode it identifies, and the
+                 * catalogue table is already wide — an extra column pushed the
+                 * row's own controls under the floating chat control and broke an
+                 * existing browser contract (found by the E3 catalog spec).
+                 *
+                 * The value is never invented here: it is either the brand's own
+                 * declaration for an existing listing or what Mercenta recorded
+                 * from the channel's acceptance (a simulated placeholder until a
+                 * live response exists).
+                 */
+                const identifier = brandId ? getProductIdentifier(brandId, p.sku) : undefined;
+                const state = deriveAsinState(identifier, !!latestSubmissionForSku(p.sku));
+                return (
+                  <div data-testid={`catalog-asin-${p.sku}`}>
+                    <div className="text-xs font-mono text-zinc-400">{p.sku}</div>
+                    <div className="text-ds-micro font-mono text-zinc-600 mt-0.5">{p.barcode}</div>
+                    <div className="text-ds-micro mt-0.5">
+                      {identifier ? (
+                        <>
+                          <span className="font-mono text-zinc-300">{identifier.asin}</span>
+                          <span className="text-zinc-600">
+                            {' '}
+                            · {identifier.source === 'brand_declared' ? 'brand' : 'channel'}
+                            {identifier.simulated ? ' (simulated)' : ''}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-zinc-600">{ASIN_STATE_LABELS[state]}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              },
             },
             {
               key: 'exWorks',

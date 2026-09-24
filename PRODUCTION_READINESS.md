@@ -1,19 +1,32 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: session 20 (23 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0, P0.4, P1, P2, P3, P4, P5, P6 and
-P7 are DONE, committed and (for the product phases) verified live on the demo; P8–P12 are NOT STARTED. Plan + the 11
-binding Founder decisions: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (each completed phase's evidence
-is in `PROJECT_STATUS.md` and in that document's per-phase sections). Everything below is still simulated; nothing was
-re-labelled live.**
+**Last updated: session 21 (23 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0, P0.4, P1, P2, P3, P4, P5, P6, P7
+and P8 are DONE, committed and (for the product phases) verified live on the demo; P9–P12 are NOT STARTED. Plan + the
+11 binding Founder decisions: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (each completed phase's
+evidence is in `PROJECT_STATUS.md` and in that document's per-phase sections). Everything below is still simulated;
+nothing was re-labelled live.**
 
 ## SESSION 13 — dashboard + logistics cleanup programme: what is still simulated / placeholder
 
-- **The ASIN field (P8) will be a clearly-simulated placeholder in simulation.** Founder decision: a brand may add the
-  ASIN itself if the product already exists on Amazon; otherwise Mercenta populates it **when Amazon accepts the product
-  into the catalogue**. Until a live channel response exists, the value is a visibly fake placeholder of the form
-  `SIM-ASIN-…` (never a plausible-looking real ASIN — the code must never invent one). **Live activation:** the SP-API
-  seam (P12) returns the real identifier behind the same interface. **Remaining non-credential work:** the P8 model and
-  UI.
+- **The ASIN is a clearly-simulated placeholder UNTIL the channel returns a real identifier (P8 — DONE 2026-09-23).**
+  Founder decision 10: a brand may supply the identifier itself **only for a product that already exists on the
+  channel** (the confirmation is required and the declaration is refused without it), and otherwise **Mercenta
+  populates it when the channel accepts the product**. In simulation that value is the unmistakable `SIM-ASIN-…`
+  placeholder (`src/lib/catalog/asin.ts` — the ONE owner); **the code never invents a plausible-looking ASIN**, and
+  the seed's previously INVENTED `B0<sku>` identifier was removed in P8. The identifier's SOURCE
+  (`brand_declared` / `channel_assigned`) and whether it is simulated are recorded and shown, so a brand
+  declaration is never presented as channel-confirmed. **Live activation:** the SP-API seam (P12) returns the real
+  identifier behind the same interface — **zero code changes**. **Remaining non-credential work:** none — the model,
+  the rules, the channel path and the surfaces are built. Note the register's finding (`AV-035`) that **no public
+  Vendor catalogue/item API exists**, so there is no documented API an ASIN could be fetched from.
+- **THE INVENTORY MODEL IS MERCENTA'S OWN (P8 — DONE 2026-09-23).** On-hand, committed, inbound and available are
+  **DERIVED from an append-only movement ledger** (`src/lib/inventory/inventoryRecord.ts` — the ONE owner), entered
+  by the brand **inside Mercenta**. There is **no Vendor inventory-availability API** (truth validation §769:
+  "Inventory assumptions — REQUIRES BUSINESS DECISION", `AV-035`), so these figures are **never a channel reading**
+  and the platform never claims one. Stock is entered in **Eaches or Cases** (the channel's own vocabulary,
+  `AV-029` CONFIRMED) and a case entry converts through the product's own case pack — **refused when no case pack
+  is declared**. **Live activation:** pushing stock TO the channel is `submitInventoryUpdate`, which is **P12's**
+  declared scope. **Remaining non-credential work:** none for the model/UI; the push operation is P12.
 - **Payment terms 14 / 30 / 60 are MERCENTA'S OWN CONFIGURATION, not channel data (P7 — DONE 2026-09-23).** The terms
   are chosen **per invoice** and the due date is **DERIVED** from the invoice's own date plus its own terms
   (`src/lib/commerce/invoiceTerms.ts` — the ONE owner). The repo's truth register records that **no public Vendor

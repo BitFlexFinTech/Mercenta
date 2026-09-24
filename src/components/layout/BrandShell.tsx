@@ -16,6 +16,7 @@ import { BrandDashboard } from '@/components/brand/BrandDashboard';
 import { OnboardingWizard } from '@/components/brand/OnboardingWizard';
 import { OnboardingSummary } from '@/components/brand/OnboardingSummary';
 import { ProductCatalog } from '@/components/brand/ProductCatalog';
+import { BrandInventory } from '@/components/brand/BrandInventory';
 import { LogisticsHub } from '@/components/brand/LogisticsHub';
 import { ComplianceHub } from '@/components/brand/ComplianceHub';
 import { BrandContractView } from '@/components/brand/BrandContractView';
@@ -40,6 +41,7 @@ import {
   LayoutDashboard, FileCheck2, FileText, Package, Truck,
   ShieldCheck, BarChart3, RotateCcw, Target, Settings,
   MessageSquare, ScrollText, ListChecks, CalendarDays, ClipboardCheck,
+  Boxes,
 } from 'lucide-react';
 
 const BRAND_SECTIONS = [
@@ -67,6 +69,17 @@ const BRAND_SECTIONS = [
     label: 'Catalogue',
     items: [
       { id: 'catalog', label: 'Product Catalog', icon: <Package className="w-4 h-4" />, tourAttr: 'nav-catalog' },
+      {
+        /**
+         * §P8 — inventory is LINKED TO THE CATALOGUE (programme decision 5), so
+         * it sits in the Catalogue section rather than in Operations: it
+         * describes the catalogue's products, it does not process a PO.
+         */
+        id: 'inventory',
+        label: 'Inventory',
+        icon: <Boxes className="w-4 h-4" />,
+        tourAttr: 'nav-inventory',
+      },
       // §Phase 2 — what Mercenta needs to assess a product commercially, and why.
       { id: 'commercial_readiness', label: 'Commercial Readiness', icon: <ClipboardCheck className="w-4 h-4" /> },
     ],
@@ -147,6 +160,7 @@ export default function BrandShell() {
   const bc = brandView === 'overview' ? 'Dashboard'
     : brandView === 'onboarding' ? 'Onboarding & Legal'
     : brandView === 'catalog' ? 'Product Catalog'
+    : brandView === 'inventory' ? 'Inventory'
     : brandView === 'commercial_readiness' ? 'Commercial Readiness'
     : brandView === 'logistics' ? 'Logistics Hub'
     : brandView === 'compliance' ? 'UK Compliance'
@@ -177,6 +191,8 @@ export default function BrandShell() {
           {brandView === 'overview' && <BrandDashboard onNavigate={setBrandView} />}
           {brandView === 'onboarding' && (brandProfile.onboarded ? <OnboardingSummary onNavigate={setBrandView} /> : <OnboardingWizard />)}
           {brandView === 'catalog' && <ProductCatalog />}
+          {/* §P8 — inventory linked to the catalogue (programme decision 5). */}
+          {brandView === 'inventory' && <BrandInventory />}
           {brandView === 'commercial_readiness' && <CommercialReadiness />}
           {brandView === 'contracts' && <BrandContractView />}
           {brandView === 'purchase_orders' && <BrandPurchaseOrders />}
