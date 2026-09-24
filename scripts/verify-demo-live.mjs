@@ -193,21 +193,53 @@ check('the deployed admin Overview h1 reads "Overview" (not "Operations Overview
  * ready because no carrier has booked one) and the SSCC labels printing complete
  * 18-digit identifiers under the stated placeholder prefix.
  */
-await page.goto(`${BASE}/brand/purchase-orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
-await page.waitForTimeout(3000);
-const liveAck = page.locator('button', { hasText: 'Acknowledge' }).first();
-const liveAckOpened = await liveAck.click().then(() => true).catch(() => false);
-if (liveAckOpened) {
-  await page.waitForTimeout(600);
-  await page.locator('button', { hasText: 'Submit acknowledgment' }).first().click().catch(() => {});
-  await page.waitForTimeout(2500);
+/**
+ * Close any dialogue an earlier section left open FIRST: a modal overlay covers
+ * the page and swallows the navigation clicks below, which would make this whole
+ * section vacuous (it would "fail" on a page it never reached).
+ */
+await page.keyboard.press('Escape').catch(() => {});
+await page.waitForTimeout(500);
+await page.keyboard.press('Escape').catch(() => {});
+await page.waitForTimeout(500);
+await page.click('nav[aria-label="Primary"] >> text=Purchase Orders').catch(() => {});
+await page.waitForTimeout(2500);
+check('§P6 the deployed brand PO list is reachable for the document-pack leg',
+  /purchase/i.test(page.url()), page.url());
+/**
+ * This session has ALREADY accepted PO-9002 in section 2b, so the acknowledgement
+ * is only issued when it is still outstanding, and the row is only expanded when
+ * the hand-off is not already on screen — a blind second click would COLLAPSE the
+ * row and hide the very control under test.
+ */
+const liveCta = page.locator('[data-testid="po-open-documents-PO-9002"]').first();
+if (!(await liveCta.isVisible().catch(() => false))) {
+  const liveAck = page.locator('button', { hasText: 'Acknowledge' }).first();
+  if (await liveAck.isVisible({ timeout: 2500 }).catch(() => false)) {
+    await liveAck.click().catch(() => {});
+    await page.waitForTimeout(700);
+    await page.locator('button', { hasText: 'Submit acknowledgment' }).first().click().catch(() => {});
+    /**
+     * SEQUENCING MATTERS: the deep link selects a PO only once its CONSIGNMENT
+     * exists, and Mercenta's action creates it AFTER the acknowledgement is
+     * accepted — so the acceptance is awaited here rather than clicked blind.
+     */
+    await page
+      .getByText(/Decision issued to Mercenta/i)
+      .first()
+      .waitFor({ state: 'visible', timeout: 15000 })
+      .catch(() => {});
+    await page.waitForTimeout(1500);
+  } else {
+    await page.locator('text=PO-9002').first().click().catch(() => {});
+    await page.waitForTimeout(1200);
+  }
 }
-const liveCta = page.locator('[data-testid^="po-open-documents-"]').first();
 const liveCtaOpened = await liveCta.click().then(() => true).catch(() => false);
-await page.waitForTimeout(3000);
+await page.waitForTimeout(3500);
 const livePack = page.locator('[data-testid="po-documents-panel"]').first();
 const livePackVisible = await livePack
-  .waitFor({ state: 'visible', timeout: 12000 })
+  .waitFor({ state: 'visible', timeout: 15000 })
   .then(() => true)
   .catch(() => false);
 check('§P6 the deployed build offers "Open shipping documents" after acceptance', liveCtaOpened);
@@ -267,22 +299,33 @@ check('no uncaught page error on the deployed P6 document-pack flow',
   pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '));
 
 /**
- * The collect chain on the deployed build: the seeded Freight Collect PO shows the
- * documented order, and the channel steps say "awaiting the channel" — the
- * deployed build must not present an ARN it does not have.
+ * The collect chain on the deployed build — on the tenant that OWNS the seeded
+ * Freight Collect PO. Astonish is the first cleared tenant, so `PO-9200` (its
+ * first lifecycle PO) is the collect one; a different tenant's session must never
+ * be asked to render it, because the Hub is tenant-scoped by design.
  */
-await page.goto(`${BASE}/brand/logistics?po=PO-9200`, { waitUntil: 'domcontentloaded' }).catch(() => {});
-await page.waitForTimeout(3500);
-const liveChain = page.locator('[data-testid="collect-chain"]').first();
+const astonish = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const astonishErrors = [];
+astonish.on('pageerror', (e) => astonishErrors.push(String(e)));
+await astonish.goto(BASE, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await astonish.waitForTimeout(2500);
+await astonish.getByRole('button', { name: 'Partner Login' }).first().click().catch(() => {});
+await astonish.waitForTimeout(800);
+await astonish.click('text=Astonish').catch(() => {});
+await astonish.waitForTimeout(2500);
+await astonish.goto(`${BASE}/brand/logistics?po=PO-9200`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await astonish.waitForTimeout(4000);
+const liveChain = astonish.locator('[data-testid="collect-chain"]').first();
 const liveChainVisible = await liveChain
-  .waitFor({ state: 'visible', timeout: 12000 })
+  .waitFor({ state: 'visible', timeout: 15000 })
   .then(() => true)
   .catch(() => false);
 const liveChainText = liveChainVisible ? await liveChain.innerText().catch(() => '') : '';
-check('§P6 the deployed collect lane renders the documented chain', liveChainVisible);
+check('§P6 the deployed collect lane renders the documented chain', liveChainVisible,
+  liveChainText.replace(/\s+/g, ' ').slice(0, 160));
 check('§P6 the deployed chain states the channel pickup lead time (two business days)',
   /at least two business days/i.test(liveChainText));
-const liveArnState = await page
+const liveArnState = await astonish
   .locator('[data-testid="collect-step-arn"]')
   .getAttribute('data-state')
   .catch(() => null);
@@ -291,6 +334,8 @@ check('§P6 the deployed ARN step awaits the channel — no fabricated ARN',
   String(liveArnState));
 check('§P6 the deployed collect lane presents no ARN value',
   !/ARN\s+[A-Z0-9-]{4,}/.test(liveChainText));
+check('no uncaught page error on the deployed collect-lane flow',
+  astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
 
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;

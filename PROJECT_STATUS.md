@@ -5,23 +5,68 @@
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
 
-LAST COMPLETED TASK:      **GOVERNANCE ONLY (2026-09-23, session 18) — the ADDITIVE Cline skill system + task-triage router.** Installed 10 verbatim upstream UI skills into `.agents/skills/` (a directory the installed Cline 4.1.20 scans) with the official `skills` CLI — **frontend-design** (anthropics/skills) · **apple-design** + **emil-design-eng** (emilkowalski/skills) · **beautiful-shadows** (MengTo/Skills) · **accessibility** (addyosmani/web-quality-skills) · **design-review** (Superfuture/design-review) · **shadcn** (shadcn-ui/ui) · **impeccable** — the upstream home of `adapt` (pbakaus/impeccable) · **better-interface** (jakubkrehel/skills) · **interaction-design** (wshobson/agents) — plus 5 specialist skills (**business-analyst · project-manager · senior-software-architect · senior-software-engineer · ux-product-analyst**) and **skill-router**; the always-active triage rule `.clinerules/task-triage-and-skill-router.md`; the thin compatibility layer (`.agents/skills/CLINE-COMPAT.md`, the `shadcn` adapter + note, the `impeccable` note); the gate `scripts/validate-cline-skills.mjs` (+ `UPSTREAM-PROVENANCE.json`); documentation `docs/CLINE_SKILL_SYSTEM.md`. **No existing rule, resume mechanism, project-state structure or application file was changed — P5 remains the last verified PRODUCT work.**
-CURRENT VERIFIED STATE:   **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change)** for this governance increment at **`2570761`**: `node scripts/validate-cline-skills.mjs` → **PASS (152 assertions, 0 network calls)**; a deliberate negative test (an unknown frontmatter field + an edited vendored upstream file) → **FAIL (2 of 152)**, restored → PASS; `npm run typecheck` **0 errors** · `npm run lint` **0** · `npm run validate:wording` **PASS (299 src files, 0 violations)** · `npm run build` **✓ (5.17s)**; NOTHING under `src/`, `e2e/`, `supabase/` or any application path changed — only 5 new paths. The last verified PRODUCT state is unchanged: **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`f07a63f`** (deployed build byte-identical; live verification 28/28).
+LAST COMPLETED TASK:      **P6 (2026-09-23, session 19) — THE PO DOCUMENT PACK, AUTOMATIC ON ACCEPTANCE, + THE DOCUMENTED COLLECT CHAIN.** Built: `src/lib/documents/poDocumentPack.ts` (NEW — the ONE owner of the pack: **SSCC carton labels · carrier label · freight waybill · packing list/delivery note · ASN sheet · the three customs documents**, each with a STATED reason when not applicable/not ready, the renderer that presents it, and the ONE `documentsAwaitingDownload` rule) · `src/lib/documents/sscc.ts` (NEW — the ONE SSCC-18 owner: published GS1 mod-10 check digit, deterministic serial from PO + carton index, explicitly UNASSIGNED placeholder prefix `0000000` / `XX-PENDING-GS1-LICENCE`) · `src/lib/shipping/collectChain.ts` (NEW — the documented request → carrier assigned → ARN → pickup chain, the channel's two-BUSINESS-day pickup rule (register `AV-014`), and a hard refusal to fabricate an ARN) · `src/components/shared/logistics/PoDocumentPackPanel.tsx` (NEW — **"Documents for this PO"** + the collect chain on the Logistics Hub, printable previews, opening the EXISTING waybill/label dialogues) · the acceptance write-path generates the pack and emits the canonical `po_documents_ready` event (`proxyProcessor`, `events/types`, `events/feed`) · the brand Logistics Hub badge + the notification centre carry the download queue from that ONE rule (`navBadges`, `NotificationCenter`) · `src/types.ts` gains `routingInstructions`, `routingRequest.requestedPickUp` and the pack-generation evidence fields · `customsDocs` input widened `DemoProduct`→`Product` (no behaviour change). Customs documents apply to **international lanes only**; every document names the FC **the purchase order declares** (P5); an undeclared PO fails closed.
+CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`6f22d52`**: `node scripts/validate-po-documents.mjs` → **PASS (50 assertions, 0 network calls)**, and **proved able to fail** (check digit mod 10 → mod 9 → **FAIL 2 of 50**; restored → PASS) · `e2e/po-documents.spec.ts` (NEW) → **6 passed** · focused browser run → **42 passed / 0 failed** · **EVERY validator in `scripts/validate-*.mjs` exits 0** · `tsc` app **0** + node **0** · `eslint .` **0** · `npm run build` **✓** · `validate:wording` **PASS (303 src files, 0 violations)** · **FULL Playwright suite 475 passed / 0 failed / 2 skipped (16.1m)** · the E6/E7 change-scope guards gained the declared P6 scope with their contracts **unchanged**. **DEMO: `LIVE_VERIFICATION_PASS` — 44/44 checks, 0 page errors**, including the pack on the deployed Logistics Hub ("7/8 ready · International · Destination: Doncaster (LBA3), DN4 5HJ"), SSCC labels READY / waybill honestly NOT READY, the SSCC placeholder notice and 2 complete 18-digit identifiers on the live document, the brand rail badge, and the live collect chain with its ARN step `awaiting_channel` (no ARN presented).
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`2570761`** — "governance(skills): additive Cline skill system + task-triage router" (**5 new paths, 0 modified application files**; 105 new files under `.agents/skills/`), followed by the state commits **`3b518d0`** and **`1225138`**. Last PRODUCT commit remains **`f07a63f`** (P5).
-GITHUB PUSH:              **DONE — PUSHED.** `git push origin redesign/foundation` → **`3585790..3b518d0`**, then the push-evidence correction → **`3b518d0..1225138`**, both exit 0; `git ls-remote --heads origin redesign/foundation` = **`1225138e…`** = local HEAD at that moment. The increment is three commits — **`2570761`** (the skill system) · **`3b518d0`** (state) · **`1225138`** (state correction) — and the final state commit is pushed in the same session (the session report carries the closing `git ls-remote` output, exactly as the P5 session recorded `f07a63f` and pushed its state commit afterwards).
-DEMO DEPLOYMENT:          **NOT APPLICABLE (no application runtime change).** This increment changed no runtime artefact, so `scripts/deploy-demo.sh` was not run and none was required. The demo continues to serve the verified P5 build at **`f07a63f`**.
-LIVE VERIFICATION:        **NOT APPLICABLE for this increment (governance/docs-only).** Unchanged from P5: **28/28 checks, 0 page errors** on `https://demo.mercenta.co.uk`; no re-verification was performed or needed.
-OUTSTANDING BLOCKER:      **NONE for the Mercenta programme.** One honest limitation of this increment: a live `use_skill` invocation could **not** be executed in this session (the tool is not exposed in this session's toolset, built at session start, and the Cline UI cannot be driven from here) — skill **loadability** is verified against the installed extension + the validator, and invocation should be confirmed in the next session by typing `/` in the chat input.
-NEXT TASK:                P6 — the PO document pack, automatic on acceptance: SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge; **"Documents for this PO"** in the Logistics Hub; the collect lane shows the documented status chain (request → carrier assigned → ARN → pickup). **Every document names the destination FC the PO declares (P5), never a Mercenta site.**
-EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P6 row) and §9 (what P5 built, so P6 does not re-derive it) → then `src/config/destinationFc.ts` (the destination owner) and the existing document seams (`src/lib/customsDocs.ts`, `src/lib/dhl/domain.ts`, `src/data/api.ts`), then `npx playwright test --workers=3`.
+LAST VERIFIED COMMIT:     **`6f22d52`** — "feat(p6): the PO document pack, automatic on acceptance + the documented collect chain" (**22 files, 2854 insertions / 54 deletions**: 5 NEW source/script/spec paths + 17 modified). The state commit follows this increment (this block · `HANDOFF.md` · `STATUS_CHECK.md` · `requirements-registry.json` · `PRODUCTION_READINESS.md`).
+GITHUB PUSH:              **DONE — PUSHED.** `git push origin redesign/foundation` → **`bfebb63..6f22d52`**, exit 0; `git ls-remote --heads origin redesign/foundation` = **`6f22d52def244fc422cd31eb503a88ccd41dcac9`** = local HEAD. The state commit is pushed in the same session.
+DEMO DEPLOYMENT:          **DEPLOYED @ `6f22d52`** via `bash scripts/deploy-demo.sh` (exit 0; 24 new files + 10 modified transferred). **Byte-identity: 33 of 33 SERVABLE emitted files are SHA-256-identical to the local build**, and the deployed `index.html` is byte-identical to `dist/index.html`; the only file that cannot be compared over HTTP is `.htaccess`, which the host correctly refuses to serve (**403 by design** — not a divergence).
+LIVE VERIFICATION:        **VERIFIED — `LIVE_VERIFICATION_PASS`, 44/44 checks, 0 page errors** on `https://demo.mercenta.co.uk` (`node scripts/verify-demo-live.mjs`, which now carries the §P6 checks). The 28 P5/P4 checks still pass unchanged; the P6 checks cover the pack on the deployed Hub, its honest readiness (SSCC ready, waybill not ready with its reason), the SSCC placeholder artefact with 18-digit identifiers, the brand rail badge, and the collect chain with no fabricated ARN.
+OUTSTANDING BLOCKER:      **NONE for the Mercenta programme.** Two HONEST LIMITS of this increment, recorded in the programme doc §10 and `PRODUCTION_READINESS.md`: (1) the collect chain's channel steps cannot advance in this environment (no live Amazon connection), so no carrier is assigned and no ARN exists — the chain states `awaiting_channel` and the platform refuses to invent one; populating `ChannelInstructionOutcome.routingInstructions` from `getShipmentDetails` is **P12's declared scope**. (2) The SSCC identifiers are placeholders by definition (no GS1 licence): the unassigned all-zero prefix and the `XX-PENDING-GS1-LICENCE` label are printed on every carton label, and replacing `SSCC_GS1_PREFIX.value` with the licensed prefix is the whole activation.
+NEXT TASK:                P7 — **admin invoicing**: an invoice per PO **after receipt**; **`receivingStatus` sync**; the invoice-number registry (register `AV-022`: unique, never reused); **14/30/60** terms **per invoice**; derived **upcoming payments**; receivables = issued-and-unpaid.
+EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P7 row) and §10 (what P6 built, so P7 does not re-derive it) → then `src/lib/work/workStore.ts` (`INVOICE_TERM_DAYS`, the existing derived due date) and `src/components/admin/AdminDashboard.tsx` (the P2 receivables/upcoming-payments derivation) → then `npx playwright test --workers=3`.
 
 ---
 
-## CURRENT PLATFORM POSITION — **P5 DONE: the Mercenta Hub is removed; the destination is the FC on the purchase order** (2026-09-23, session 17)
+## CURRENT PLATFORM POSITION — **P6 DONE: the PO document pack (automatic on acceptance) + the documented collect chain** (2026-09-23, session 19)
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block above — read that first; it is all a new
-> session needs.** This section records what P5 actually changed and how it was verified.
+> session needs.** This section records what P6 actually changed and how it was verified; the blocks below it are
+> historical.
+
+**Increment identity (this session): P6 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (application
+work), programme decisions 6/9, matrix `D10-10`.** Full detail: that document's **§10 "P6 — what was built, verified
+and how"**.
+
+1. **A document is now a first-class thing, not a button.** `src/lib/documents/poDocumentPack.ts` (NEW) owns the pack:
+   **SSCC carton labels · carrier label · freight waybill · packing list/delivery note · ASN sheet · the three customs
+   documents**. Each document carries `applicable` + `notApplicableReason`, `ready` + `notReadyReason`, the renderer
+   that presents it and its fields — so a document that does not apply or is not yet producible is **stated**, never
+   silently missing and never faked.
+2. **SSCC-18 is generated, not mentioned.** `src/lib/documents/sscc.ts` (NEW) implements the published GS1 mod-10
+   check digit and a **deterministic** serial from `PO number + carton index` (a reprint is byte-identical), under a
+   declared **UNASSIGNED placeholder GS1 prefix** (`0000000`, `XX-PENDING-GS1-LICENCE` printed on every label).
+   Replacing that one value with Mercenta's licensed prefix is the entire activation.
+3. **It is automatic on acceptance.** The acceptance path (`src/lib/commerce/proxyProcessor.ts`) generates the pack in
+   the same action that files the ASN, records `documentsGeneratedAt` / `documentCount` / `documentsReady` as
+   **evidence only** (the pack is derived on read — no second copy to drift) and emits the canonical
+   **`po_documents_ready`** event.
+4. **The brand's job is now downloadable.** The Logistics Hub gains **"Documents for this PO"**
+   (`src/components/shared/logistics/PoDocumentPackPanel.tsx`, NEW) with printable previews; the carrier label and the
+   waybill open the **EXISTING** dialogues (one renderer per artefact, P6 did not re-implement them).
+5. **The queue is visible where the work is.** The **brand** Logistics Hub nav badge and the notification centre carry
+   the document-download queue from the ONE rule `documentsAwaitingDownload`. The **admin** rail deliberately has NO
+   logistics badge: its destination renders `LogisticsControl`, which lists no document queue (P3's badge rule).
+6. **Customs documents are lane-scoped.** They are **delegated** to the existing owner and apply to **international
+   lanes only** — on a UK domestic lane they are still LISTED, with the reason.
+7. **The destination is the PO's, always (P5 held).** Every document names the FC the purchase order declares; an
+   undeclared PO fails closed to the explicit not-declared string, and no document ever names a Mercenta site.
+8. **The collect lane shows the DOCUMENTED chain.** `src/lib/shipping/collectChain.ts` (NEW) models
+   request → carrier assigned → ARN → pickup with the channel's **two-BUSINESS-day** pickup rule (register `AV-014`,
+   weekend-skipping). The channel-produced steps are read **only** from
+   `ChannelInstructionOutcome.routingInstructions` and report `awaiting_channel` until that record carries them —
+   **an ARN cannot be fabricated by the platform** (populating it via `getShipmentDetails` is P12's scope).
+
+**Verification (this session):** `scripts/validate-po-documents.mjs` (NEW) → **PASS (50 assertions, 0 network calls)**
+and **proved able to fail** (check digit mod 10 → mod 9 → FAIL 2 of 50) · `e2e/po-documents.spec.ts` (NEW) → **6
+passed** · focused browser run → **42 passed / 0 failed** · **every validator in `scripts/validate-*.mjs` exits 0** ·
+`tsc` 0 + 0 · `eslint .` 0 · build ✓ · wording PASS (303 files, 0 violations) · **FULL Playwright suite 475 passed / 0
+failed / 2 skipped (16.1m)** · **demo deployed** (33/33 servable files byte-identical) and **live-verified: 44/44
+checks, 0 page errors**.
+
+---
+
+## CURRENT PLATFORM POSITION — **P5 DONE: the Mercenta Hub is removed; the destination is the FC on the purchase order** (2026-09-23, session 17) — HISTORICAL
 
 **Increment identity (this session): P5 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (application work),
 plus the P4-carried copy item. Closes matrix `D09-13` and register `AV-026` / `AV-027`.**
