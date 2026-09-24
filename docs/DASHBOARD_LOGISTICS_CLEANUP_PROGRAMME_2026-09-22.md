@@ -80,7 +80,7 @@ documents → ship on time. Everything else is Mercenta's.
 | **P6** | ✅ **DONE** (2026-09-23, session 19 — see §10) | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
 | **P7** | ✅ **DONE** (2026-09-23, session 20 — see §11) | **Admin invoicing**: an invoice per PO **after receipt** (the receipt gate, `AV-018`); the **invoice-number registry** (unique, never reused, zero-value fails, cancel + re-issue under a NEW Invoice ID — **`AV-022`**); **14/30/60 terms chosen PER INVOICE** with the due date DERIVED from them; **upcoming payments**; receivables = **issued-and-unpaid** | decision 2; **AV-022** |
 | **P8** | ✅ **DONE** (2026-09-23, session 21 — see §12) | **Inventory** linked to the catalogue + the **ASIN** field (rule = decision 10): the append-only movement ledger (every figure DERIVED), the Eaches/Cases unit with the product's own case pack (fail-closed), the brand's declaration path (existing listing required) and the channel-assignment path (MERCENTA populates it on acceptance — `SIM-ASIN-…` while simulated), plus the admin override | decision 5; decision 10; **AV-029**, **AV-035** |
-| **P9** | | **Remove the 3PL carrier surface** (decision 4) incl. the demo environment; repoint the affected specs/scripts | decision 4; matrix `D01-07`/`D04-18`/`D10-13` |
+| **P9** | ✅ **DONE** (2026-09-23, session 22 — see §13) | **The 3PL carrier surface is REMOVED COMPLETELY** (decision 4): the `carrier` environment, the `'3PL Carrier'` role and its `'3pl'` tier, `CarrierShell`, `CarrierDashboard`, `BakLogistics`, the admin `Carrier Monitor` (component + nav + `'carriers'` view), the demo environment-switcher entry, the "3PL Carrier Terminal" login card, the `/carrier` address and its SEO posture, and the public FAQ claim. Decision 1's carrier identity (`fedex`/`bak`) is removed from the type, the labels, the lane-capability table and the demo data, with the REFUSAL preserved by name (`RETIRED_CARRIER_IDS`). The capability the portal carried — a carrier event that advances a consignment, and its request log — is **REHOMED** on the Mercenta admin Logistics Hub (the operator of those accounts), attributed to the Mercenta operator rather than a carrier login. | decision 4; decision 1; matrix `D01-07`/`D04-18`/`D10-13` |
 | **P10** | | **Logistics Hub completion**: provider configuration + the PO documents; **consolidation recorded as documented-but-deferred** (model supports 1..n POs) | decision 11; `D10-10` |
 | **P11** | | **Remove "Create PO"** + channel PO ingestion (mock-first); repoint the three validators that assert its notification path | decision 3 |
 | **P12** | | **SP-API seam extension (mock-first)**: `submitAcknowledgement`, `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate` | **AV-040** |
@@ -101,13 +101,12 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6**, **P7**, **P8** (committed; the P2 checkpoint hash is
-  recorded in `PROJECT_STATUS.md` §7, and P3–P8's in the `CURRENT RESUME STATE` block).
-- **Next:** **P9 — remove the 3PL carrier surface** (decision 4), including the demo environment, and repoint the
-  affected specs/scripts (matrix `D01-07` / `D04-18` / `D10-13`). See §4's P9 row and the P8 honest limits above so
-  P9 does not re-derive them.
-- **Then:** P9 → P12 in order.
-- **Deployment:** executed at the close of each product phase. P3–P8 were deployed and live-verified; the full
+- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6**, **P7**, **P8**, **P9** (committed; the P2 checkpoint
+  hash is recorded in `PROJECT_STATUS.md` §7, and P3–P9's in the `CURRENT RESUME STATE` block).
+- **Next:** **P10 — Logistics Hub completion**: provider configuration + the PO documents; consolidation recorded
+  as documented-but-deferred (decision 11; matrix `D10-10`).
+- **Then:** P10 → P12 in order.
+- **Deployment:** executed at the close of each product phase. P3–P9 were deployed and live-verified; the full
   three-way confirmation is re-run at the end of the programme.
 
 ## 6. P2 — WHAT WAS BUILT (so P3+ does not have to re-derive it)
@@ -672,3 +671,88 @@ single global constant. The channel's documented invoicing rules were therefore 
 - **The ledger is in-memory in this environment** (the D4 persistence port has no inventory table; the P7 invoice
   ledger reports the same limit). Nothing is claimed as durable.
 
+---
+
+## 13. P9 — WHAT WAS BUILT, VERIFIED AND HOW (so P10+ does not have to re-derive it)
+
+**Increment identity:** P9 of this programme (application work), decisions **4** and **1**, matrix
+`D01-07` / `D04-18` / `D10-13`. Branch `redesign/foundation`.
+
+### What was removed (decision 4 — COMPLETE)
+
+| Removed | Detail |
+|---|---|
+| The `carrier` **environment** | `src/types.ts → Environment` is exactly `'home' \| 'login' \| 'brand' \| 'admin'`; the `/carrier` prefix is gone from `productRoutes`, so `/carrier/…` is not a product address and fails closed (public site, `noindex`). |
+| The `'3PL Carrier'` **role** + the `'3pl'` **tier** | `SessionRole` / `SessionTier` no longer carry them; `TIER_ENVIRONMENTS` and `VIEW_ALLOWLIST` lose their entries; a STALE persisted carrier session is refused on restore. |
+| **`CarrierShell`** and its three views | `layout/CarrierShell.tsx`, `carrier/CarrierDashboard.tsx`, `carrier/BakLogistics.tsx` — **deleted**; `App.tsx` no longer imports or renders a carrier shell (its branches are exhaustive). |
+| The admin **`Carrier Monitor`** | `admin/CarrierMonitor.tsx` — **deleted**, with its nav item, its `'carriers'` RBAC view, its department mapping, its breadcrumb and its render branch. It carried a hand-written per-carrier health feed (including FedEx/BAK, which are not Mercenta accounts); provider connection state is owned by the Integrations surface. |
+| The **demo environment** entry + the **login card** | `EnvironmentRouter` offers brand + admin only; `Login.tsx` has no "3PL Carrier Terminal" card. |
+| The **public FAQ claim** | FAQ no longer says "four roles … and 3PL Carriers": it states three roles and that carriers do not log in (Mercenta operates DHL/Palletline by API). `HowItWorks` and `UKMarketAccess` are repointed the same way. |
+| The carrier **identity** (decision 1) | `CarrierId` is `'dhl' \| 'palletline'`; the labels and the lane-capability table no longer list `fedex`/`bak`; the seed's `fedex`/`bak` shipments, tracking numbers, markup rows, rate-card functions, `CarrierTokens.fedex/bak` and the `fedexConnected/bakConnected` flags are gone; the retired staff vocabularies are repointed. The REFUSAL is preserved by name (`RETIRED_CARRIER_IDS`), so a retired carrier is still refused *and the reason says why*. |
+
+### What was REHOMED (the capability, not the portal)
+
+The removed window carried two real things: the ability to request a consignment's next **carrier
+milestone**, and the **request log** behind it. Deleting them would have removed working
+functionality (and four specs). They now live where the business model says they belong — the
+**Mercenta admin Logistics Hub**, the operator of those accounts:
+
+- a new *Carrier API console* section on `src/components/admin/LogisticsControl.tsx`, with the SAME
+  structural hooks the specs assert (`dataTable="carrier-manifest"`, caption "Carrier manifest", a
+  per-row `Update milestone for <reference>` select, the `DHL status → next milestone (sim)` button
+  and the mono result line) plus the request log;
+- the advance is attributed to **`mercenta-admin-logistics`** (the old terminal attributed it to a
+  fictional `carrier-terminal` and hardcoded `brand-astonish` for every row — both fixed);
+- the retired `fedex`/`bak` carrier contexts are gone (decision 1).
+### A REAL DEFECT THE REPOINT EXPOSED (and how it was fixed)
+
+The removed terminal applied a milestone with a **context** setter (`updateShipmentStatus`) while
+every query-backed surface reads the **canonical store** (`demoStore → demoShipments`). Moving the
+console onto the admin page therefore produced a control whose own value and row badge never
+changed — caught by `e2e/table-migrations.spec.ts` #2 and `e2e/shipment-asn.spec.ts` #5, not by
+typecheck or build. Fix: **one canonical writer**, `setShipmentMilestone` in
+`src/data/demoStore.ts` (writes the store; refuses an unknown consignment or an unrecognised status;
+notifies the canonical signal); the context's setter delegates to it; and the status→stage mapping
+moved to ONE owner (`src/types.ts → STATUS_TO_STAGE`). A second real defect was exposed by
+`status-semantics`: the admin page also renders the operational MAP, whose markers carry
+`data-status`, so the badge assertion is now scoped to the canonical badge (`role="status"`) —
+precision, not a weakening.
+
+### Verification (all evidence produced in the same session)
+
+- `scripts/validate-product-routes.mjs` → **81 PASS / 0 FAIL**, including 14 §P9 removal assertions
+  (`/carrier` and all three sub-addresses refused as product addresses; no carrier environment; no
+  carrier default view; the RBAC maps asserted PROGRAMMATICALLY — the 3pl tier gone, the `'carriers'`
+  view refused for admin staff, `tierForRole` mapping only the three real roles; and a STALE carrier
+  persisted session refused through the real `isPersistedSession` gate);
+- **every validator**: **99 of 99 exit 0** (two — `validate-e6-brand-surfaces`,
+  `validate-e7-embedded-social` — required the same **declared-phase scope** repoint P4–P8 used, and
+  now carry the §P9 lists);
+- `scripts/integrity-audit.mjs` → **63 PASSED / 0 FAILED**; `scripts/validate-workspace-shell.mjs` →
+  **92 / 0**; `scripts/validate-stage26.mjs` → **PASS** (render matrix without the removed view);
+  `scripts/validate-review-s6.mjs` → **PASS**; `scripts/validate-stage16.mjs` →
+  **STAGE16_E2E_PASS**, with a real removal assertion where a `test(…, true)` placeholder used to sit;
+- `npm run typecheck` → **0 errors**; `npx tsc --noEmit` (root — covers `e2e/` and `scripts/`) → **0**;
+  `npx eslint src scripts e2e` → **0**; `npm run build` → **✓**; `npm run validate:wording` →
+  **PASS (310 src files, 0 violations** — one file fewer because `CarrierMonitor.tsx` is gone**)**;
+- the **seven affected Playwright specs** re-run: **54 passed / 0 failed** (the first run found the
+  two real defects above plus two of this phase's own new assertions being written against the wrong
+  fail-closed outcome; all five were fixed and the spec set is green);
+- then the **FULL Playwright suite** and the live demo leg (counts in the session report).
+
+### Honest limits
+
+- **`bak_depot` remains a STAGE id.** It is the canonical mid-transit stage ("In the carrier
+  network"; Palletline maps its network states to it), not a carrier identity. Renaming the stage id
+  is a status/stage-map migration across `types.ts`, `commerceLifecycle`, the DHL/Palletline
+  transforms and the brand hub — **out of P9's scope**, recorded here rather than done silently.
+- **The onboarding step `'carriers'` ("Carrier connections") remains** in the canonical onboarding
+  order. Decision 4's list does not include it, and changing the step count has its own knock-on
+  (validators + e2e + stored records); it is recorded as remaining decision-1/4 vocabulary, not
+  dropped.
+- **The milestone control is a simulation surface.** It drives the DHL mock adapter (zero live
+  calls). The production direction — Mercenta polling the carrier by API — is **P12's** declared
+  scope (`getShipmentDetails`).
+- **`amendShipment` (a pre-existing store helper) still writes `status` without `stage`.** No P9
+  surface calls it; the canonical writer introduced here is the one the console uses. Left as-is to
+  keep this phase's change set honest and reviewable.

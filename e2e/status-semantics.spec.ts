@@ -231,10 +231,23 @@ test.describe('Phase D — status semantics & decision queue', () => {
     };
 
     async function assertShipmentBadges(required: boolean): Promise<number> {
+      /**
+       * §P9 (programme decision 4) — REPOINTED, and PRECISION-REPAIRED.
+       *
+       * The selector is now scoped to the canonical status BADGE
+       * (`role="status"`). The admin Logistics Hub — where this assertion now runs
+       * after the carrier terminal was removed — also renders the operational MAP,
+       * whose markers carry `data-status` too (with `role="button"`). Matching
+       * bare `[data-status=…]` therefore picked up map markers and failed on a
+       * correct product. The rule under test is UNCHANGED and unweakened: at least
+       * one badge where required, and EVERY badge shows the canonical label for
+       * its OWN status.
+       */
       const badges = page.locator(
-        '[data-status="factory_intake"],[data-status="bak_depot"],[data-status="sea_transit"],' +
-          '[data-status="air_transit"],[data-status="uk_customs_cleared"],[data-status="destination_fc"],' +
-          '[data-status="live_amazon"]'
+        '[role="status"][data-status="factory_intake"],[role="status"][data-status="bak_depot"],' +
+          '[role="status"][data-status="sea_transit"],[role="status"][data-status="air_transit"],' +
+          '[role="status"][data-status="uk_customs_cleared"],[role="status"][data-status="destination_fc"],' +
+          '[role="status"][data-status="live_amazon"]'
       );
       const n = await badges.count();
       if (required) expect(n).toBeGreaterThan(0);
@@ -260,9 +273,13 @@ test.describe('Phase D — status semantics & decision queue', () => {
     });
     await assertShipmentBadges(false);
 
-    // ── Carrier surface: the manifest table always carries shipment rows ──
-    await loginAs(page, '3PL Carrier Terminal', 1100);
-    await openNav(page, 'Manifest Management');
+    // ── Admin logistics surface: the rehomed carrier console always carries rows ──
+    // §P9 (programme decision 4) — REPOINTED from the removed carrier terminal
+    // ("Manifest Management" in the carrier shell). The carrier-event console now
+    // lives on the Mercenta Admin Logistics Hub, and its shipment rows carry the
+    // SAME canonical status badges, so the invariant is unchanged.
+    await loginAs(page, 'Mercenta Admin Hub', 1100);
+    await openNav(page, 'Logistics Hub');
     await assertShipmentBadges(true);
     expect(pageErrors).toEqual([]);
   });

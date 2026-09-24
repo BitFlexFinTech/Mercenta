@@ -249,7 +249,10 @@ try {
     ['ContractsAdminPanel', '/src/components/admin/ContractsAdminPanel.tsx', null],
     ['FulfillmentTrackPanel', '/src/components/admin/FulfillmentTrack.tsx', null],
     ['LogisticsControl', '/src/components/admin/LogisticsControl.tsx', null],
-    ['CarrierIntegrationMonitor', '/src/components/admin/CarrierMonitor.tsx', null],
+    /* §P9 (programme decision 4) — REPOINTED: ['CarrierIntegrationMonitor',
+       '/src/components/admin/CarrierMonitor.tsx', null] is REMOVED from the render
+       matrix with the destination itself. Its removal is asserted at the end of
+       this validator, so the row cannot simply come back. */
     ['MarketingHub', '/src/components/admin/MarketingHub.tsx', null],
     ['MessagesHub', '/src/components/admin/MessagesHub.tsx', null],
     ['RetailPipelinePanel', '/src/components/admin/RetailPipeline.tsx', null],

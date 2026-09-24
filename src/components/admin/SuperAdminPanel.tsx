@@ -93,19 +93,22 @@ const ROLE_OPTIONS: { value: StaffRole; label: string }[] = [
   { value: 'Logistics Coordinator', label: 'Logistics Coordinator' },
   { value: 'Cross-Border Logistics Lead', label: 'Cross-Border Logistics Lead' },
   { value: 'UK HMRC Compliance Specialist', label: 'UK HMRC Compliance Specialist' },
-  { value: 'Harare BAK Depot Lead', label: 'Harare BAK Depot Lead' },
   { value: 'Carrier Integration Manager', label: 'Carrier Integration Manager' },
 ];
 
+/**
+ * §P9 (programme decisions 1/4) — REPOINTED. The old list also offered
+ * `'Harare BAK Depot Lead'`, `'BAK Logistics Network'` and
+ * `'FedEx Carrier Integration'`: retired third parties that are not Mercenta
+ * carrier accounts. Only Mercenta's own channel vocabulary remains.
+ */
 const CHANNEL_OPTIONS = [
   'Global Operations',
   'US Brand Pipeline',
   'EU Brand Pipeline',
   'African Brand Pipeline',
   'UK HMRC Compliance',
-  'BAK Logistics Network',
   'DHL Carrier Integration',
-  'FedEx Carrier Integration',
 ];
 
 let staffIdCounter = 100;

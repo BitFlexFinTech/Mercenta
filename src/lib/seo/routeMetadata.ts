@@ -9,10 +9,12 @@
  *
  * FAIL-CLOSED RULES
  * -----------------
- * - An AUTHENTICATED app environment ('brand' | 'admin' | 'carrier') is private
+ * - An AUTHENTICATED app environment ('brand' | 'admin') is private
  *   regardless of the path: the session, not the URL, decides. A crawler can
  *   never reach that state, and a real user in it must not advertise an
  *   indexable page either.
+ *   §P9 (programme decision 4) — REPOINTED from `('brand' | 'admin' | 'carrier')`:
+ *   the carrier environment no longer exists.
  * - An unknown path is `noindex, nofollow` with NO canonical. We never point an
  *   arbitrary URL at the homepage.
  * - A private/unknown route REMOVES the canonical link rather than leaving the
@@ -48,7 +50,7 @@ export interface RouteMetadataInput {
   environment: Environment;
 }
 
-const PRIVATE_ENVIRONMENTS: readonly Environment[] = ['brand', 'admin', 'carrier'];
+const PRIVATE_ENVIRONMENTS: readonly Environment[] = ['brand', 'admin'];
 
 export function buildRouteMetadata(input: RouteMetadataInput): RouteMetadata {
   const resolved = resolveRoute(input.pathname);

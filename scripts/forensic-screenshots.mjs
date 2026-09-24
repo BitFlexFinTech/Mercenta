@@ -17,8 +17,10 @@ const VP = {
 };
 
 const BNAV = ['overview','onboarding','contracts','purchase_orders','catalog','logistics','compliance','returns','analytics','market','reports','documents','team','social','settings'];
-const ANAV = ['overview','crm','fulfillment_track','retail_pipeline','purchase_orders_admin','logistics','carriers','catalog','compliance','billing','contracts_admin','messages','helpdesk','returns_tracking','monitoring','marketing','brand_intelligence','super_admin','audit_log','integrations','usertour','postiz','whatsapp'];
-const CNAV = ['manifest','bak','auditor'];
+const ANAV = ['overview','crm','fulfillment_track','retail_pipeline','purchase_orders_admin','logistics','catalog','compliance','billing','contracts_admin','messages','helpdesk','returns_tracking','monitoring','marketing','brand_intelligence','super_admin','audit_log','integrations','usertour','postiz','whatsapp'];
+/* §P9 (programme decision 4) — REPOINTED: `const CNAV = ['manifest','bak','auditor']`
+   is REMOVED with the carrier portal it enumerated, and `'carriers'` is removed from
+   ANAV above because the admin Carrier Monitor destination no longer exists. */
 
 function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 
@@ -136,19 +138,12 @@ async function run(){
     }
   }
 
-  // 5. CARRIER PORTAL
-  console.log('\n=== CARRIER PORTAL ===');
-  await signOut(page);
-  await goLogin(page);
-  const ca=page.locator('text=3PL Carrier').first();
-  if(await ca.isVisible({timeout:3000}).catch(()=>false)){
-    await ca.click();await page.waitForTimeout(2000);
-    await shot(page,'05-carrier','carrier-dashboard-desktop-lg',false);
-    for(const item of CNAV){
-      if(!await clickNav(page,item.replace(/_/g,' ')))console.log('  [SKIP] '+item);
-      else await shot(page,'05-carrier','carrier-'+item+'-desktop-lg',false);
-    }
-  }
+  /* §P9 (programme decision 4) — THE CARRIER PORTAL SCREENSHOT PASS IS REMOVED.
+     The old block signed out, logged in as "3PL Carrier", shot
+     `carrier-dashboard-desktop-lg` and walked CNAV (`manifest`/`bak`/`auditor`).
+     There is no carrier login, no carrier shell and no carrier views, so the
+     capture set now ends at the admin surfaces — the carrier console is captured
+     as part of the ADMIN Logistics Hub (step 4) instead. */
 
   // 6. FORM STATES
   console.log('\n=== FORM STATES ===');

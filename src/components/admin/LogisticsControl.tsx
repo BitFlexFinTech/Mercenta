@@ -1,11 +1,19 @@
 import { useMemo, useState } from 'react';
+import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, usePurchaseOrders, useShipmentsAll } from '@/data/queries';
 import { DemoBanner } from '@/components/shared/DemoBanner';
-import { Badge, Card, DataTable, StatusBadge } from '@/components/ui';
+import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
-import { Container, Ship } from 'lucide-react';
+import { Container, RefreshCw, Ship } from 'lucide-react';
 import type { DemoShipment } from '@/data/demoData';
-import type { PurchaseOrder } from '@/types';
+import type { PurchaseOrder, ShipmentStatus } from '@/types';
+import { advanceShipmentViaDhl } from '@/lib/dhl/domain';
+import { resolveProviderMode } from '@/integrations/types';
+/* §P9 (programme decision 4) — the ONE canonical writer of a consignment's
+   milestone. The console reads its rows from the canonical store (React Query),
+   so it MUST write through the same owner; a context-only setter left the row's
+   own value and status badge unchanged. */
+import { setShipmentMilestone } from '@/data/demoStore';
 import {
   ContextPanel,
   MetricBand,
@@ -27,6 +35,44 @@ import {
 import { useWorkItems } from '@/lib/work/useWork';
 import { WORK_SOURCE_LABELS, demoToday, daysBetween } from '@/lib/work/workStore';
 import type { WorkSource } from '@/lib/work/types';
+
+/**
+ * §P9 (programme decision 4) — THE CARRIER-EVENT CONSOLE, REHOMED.
+ *
+ * WHAT MOVED AND WHY
+ * ------------------
+ * P9 removed the 3PL carrier surface completely (the carrier environment, role,
+ * shell + its three views, `CarrierDashboard`, `BakLogistics` and the admin
+ * `Carrier Monitor`). Carrier users do not exist: Mercenta operates its carrier
+ * accounts **by API**.
+ *
+ * Removing the portal must NOT remove the capability it carried — a carrier
+ * event that advances a consignment, and the request/response log behind it —
+ * so the capability moves to its canonical owner: the MERCENTA Admin Logistics
+ * Hub, which is the Mercenta-side operator of those accounts. Same domain call
+ * (`advanceShipmentViaDhl`), same canonical `ShipmentStatus` transitions, same
+ * `DataTable` structural hooks (`carrier-manifest`) the repointed specs assert.
+ *
+ * WHAT IS DIFFERENT (and better)
+ * ------------------------------
+ *   · The advance is attributed to the acting MERCENTA operator
+ *     (`mercenta-admin-logistics`), not to a fictional carrier login.
+ *   · The shipment's OWN `brandId` is passed (the old terminal hardcoded
+ *     `brand-astonish` for every row).
+ *   · The retired `fedex`/`bak` carrier contexts are gone (decision 1).
+ *   · Fail-closed is unchanged: a provider that does not positively resolve
+ *     simulation/live is REFUSED by the domain and nothing is advanced.
+ */
+const CARRIER_MILESTONES: ShipmentStatus[] = [
+  'factory_intake',
+  'bak_depot',
+  'sea_transit',
+  'air_transit',
+  'uk_customs_cleared',
+  /** §P5 — the pre-live arrival state (was `mercenta_hub`). */
+  'destination_fc',
+  'live_amazon',
+];
 
 const IN_TRANSIT = ['sea_transit', 'air_transit', 'factory_intake'];
 
@@ -97,6 +143,78 @@ export function LogisticsControl() {
   const [selectedShipmentId, setSelectedShipmentId] = useState<string | null>(null);
   const [mapTruth, setMapTruth] = useState('all');
 
+  /* §P9 — the rehomed carrier-event console: one busy row at a time, and the
+     provider's own answer per row (never a fabricated milestone). */
+  const { addApiLog, apiLogs } = useApp();
+  const [busyShipmentId, setBusyShipmentId] = useState<string | null>(null);
+  const [lastCarrierResult, setLastCarrierResult] = useState<Record<string, string>>({});
+
+  /**
+   * USER ACTION → DOMAIN WORKFLOW → PROVIDER CONTRACT → SIMULATION ADAPTER →
+   * SIMULATED MILESTONE → DOMAIN STATE → AUDIT → EVENT → UI UPDATE.
+   *
+   * The operator is asking Mercenta's DHL integration for the consignment's
+   * status; the provider body (mock today, live later) decides the next
+   * milestone. A provider that is not positively simulation-safe is refused and
+   * the shipment is left exactly as it was (fail-closed).
+   */
+  async function requestDhlUpdate(shipment: DemoShipment) {
+    if (busyShipmentId) return;
+    setBusyShipmentId(shipment.id);
+    try {
+      const res = await advanceShipmentViaDhl({
+        shipmentId: shipment.id,
+        brandId: shipment.brandId,
+        manifest: {
+          reference: shipment.reference,
+          customer: brandName(shipment.brandId),
+          origin: shipment.origin,
+          destination: shipment.destination,
+          value: shipment.value,
+        },
+        getMode: (pid) => resolveProviderMode(modes, pid),
+        actorId: 'mercenta-admin-logistics',
+      });
+      if (res.ok && res.to) {
+        /* §P9 — the milestone is applied through the CANONICAL writer (the store the
+           page itself reads), so the row's own value and status badge move. */
+        setShipmentMilestone(shipment.id, res.to);
+        if (res.waybill) {
+          addApiLog({
+            id: `api-${shipment.id}-${Date.now()}`,
+            timestamp: new Date().toLocaleTimeString('en-GB', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            }),
+            method: 'GET',
+            endpoint: `/v1/dhl/shipments/${res.waybill}`,
+            payload: { milestone: res.milestone, exception: res.exception, delayed: res.delayed },
+            status: 200,
+          });
+        }
+        setLastCarrierResult((prev) => ({
+          ...prev,
+          [shipment.id]: res.exception
+            ? `exception: ${res.milestone ?? 'hold'} (retry recovers)`
+            : `${res.from ?? ''} → ${res.to} · ${res.milestone ?? ''}`,
+        }));
+      } else if (res.status === 'safety_refused') {
+        setLastCarrierResult((prev) => ({
+          ...prev,
+          [shipment.id]: `refused: ${res.safetyReason ?? 'not simulation-safe'}`,
+        }));
+      } else {
+        setLastCarrierResult((prev) => ({
+          ...prev,
+          [shipment.id]: `${res.error ?? 'provider error'} — retry`,
+        }));
+      }
+    } finally {
+      setBusyShipmentId(null);
+    }
+  }
+
   const mapModel = useMemo(
     () =>
       buildOperationalMap(
@@ -162,6 +280,14 @@ export function LogisticsControl() {
     const d = daysBetween(today, w.dueDate);
     return d >= 0 && d <= 7;
   });
+
+  /* §P9 — the rehomed carrier console obeys the SAME focus filter as the tables
+     and the map above, so the three can never disagree about which consignments
+     are on screen. */
+  const carrierConsoleRows = useMemo(
+    () => visibleGroups.flatMap(([, list]) => list),
+    [visibleGroups]
+  );
 
   const metrics: MetricTileData[] = [
     {
@@ -472,6 +598,166 @@ export function LogisticsControl() {
           />
         </WorkspaceSection>
       ))}
+      {/*
+        §P9 (programme decision 4) — THE REHOMED CARRIER-EVENT CONSOLE.
+
+        The 3PL carrier surface is REMOVED (no carrier environment, role, shell,
+        login card or Carrier Monitor), because Mercenta operates its carrier
+        accounts by API. The capability the removed terminal carried — requesting
+        a consignment's next carrier milestone and reading the request/response
+        log behind it — belongs to MERCENTA, so it lives here, on the operator's
+        Logistics Hub. Same domain path (`advanceShipmentViaDhl`), attributed to
+        the acting Mercenta operator, fail-closed when a provider does not
+        positively resolve simulation/live, and zero live network calls.
+      */}
+      <WorkspaceSection
+        title="Carrier API console"
+        description="Mercenta operates its carrier accounts (DHL, Palletline) by API. In simulation the carrier adapter decides the consignment's next milestone; nothing here contacts a carrier."
+        domain="logistics"
+      >
+        <Card
+          title="Bi-Directional Manifest Management"
+          subtitle="Change the milestone to push the update across every environment"
+          action={<RefreshCw className="w-4 h-4 text-zinc-500" />}
+        >
+          <DataTable
+            dataTable="carrier-manifest"
+            caption="Carrier manifest"
+            rows={carrierConsoleRows}
+            rowKey={(s) => s.id}
+            emptyMessage="No consignments are on screen for the current focus."
+            columns={[
+              {
+                key: 'reference',
+                label: 'Reference',
+                primary: true,
+                render: (s) => (
+                  <div>
+                    <div className="font-mono text-xs text-zinc-400">{s.reference}</div>
+                    <div className="mt-0.5 font-mono text-ds-micro text-zinc-600">
+                      {s.trackingNumber ?? '—'}
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: 'shipment',
+                label: 'Shipment',
+                render: (s) => (
+                  <div>
+                    <div className="text-sm font-medium text-white">{s.title}</div>
+                    <div className="mt-0.5 text-xs text-zinc-500">{brandName(s.brandId)}</div>
+                  </div>
+                ),
+              },
+              {
+                key: 'carrier',
+                label: 'Carrier',
+                render: (s) => <span className="capitalize">{s.carrier.replace('_', ' ')}</span>,
+              },
+              {
+                key: 'status',
+                label: 'Current Status',
+                align: 'center',
+                render: (s) => {
+                  const p = shipmentStatusPresentation(s.status);
+                  return (
+                    <StatusBadge dataStatus={p.dataStatus} tone={p.tone}>
+                      {p.label}
+                    </StatusBadge>
+                  );
+                },
+              },
+              {
+                key: 'milestone',
+                label: 'Update Milestone',
+                render: (s) => (
+                  <>
+                    <select
+                      value={s.status}
+                      aria-label={`Update milestone for ${s.reference}`}
+                      onChange={(e) => {
+                        const next = e.target.value as ShipmentStatus;
+                        /**
+                         * §P9 — the milestone is applied through the CANONICAL writer,
+                         * and the request is recorded in the console's own log, so the
+                         * control's outcome matches its label (the old terminal wrote a
+                         * context copy no surface rendered).
+                         */
+                        if (setShipmentMilestone(s.id, next)) {
+                          addApiLog({
+                            id: `api-${s.id}-${Date.now()}`,
+                            timestamp: new Date().toLocaleTimeString('en-GB', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                            }),
+                            method: 'PUT',
+                            endpoint: `/v1/shipments/${s.reference}/status`,
+                            payload: { status: next, carrier: s.carrier },
+                            status: 200,
+                          });
+                        }
+                      }}
+                      className="w-full cursor-pointer rounded-md border border-white/[0.08] bg-ink-900 px-2.5 py-1.5 text-xs text-white transition-colors focus:border-brass-500/60 focus:outline-none md:w-auto"
+                    >
+                      {CARRIER_MILESTONES.map((opt) => (
+                        <option key={opt} value={opt} className="bg-ink-900">
+                          {shipmentStatusPresentation(opt).label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="mt-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-ds-micro"
+                        loading={busyShipmentId === s.id}
+                        onClick={() => void requestDhlUpdate(s)}
+                      >
+                        <RefreshCw className="mr-1 h-3 w-3" />
+                        DHL status → next milestone (sim)
+                      </Button>
+                      {lastCarrierResult[s.id] && (
+                        <div className="mt-1 font-mono text-ds-micro leading-tight text-zinc-500">
+                          {lastCarrierResult[s.id]}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ),
+              },
+            ]}
+          />
+        </Card>
+
+        <Card
+          title="Carrier API request log"
+          subtitle="The requests this console made to the carrier adapter"
+        >
+          {apiLogs.length === 0 ? (
+            <p className="text-ds-label text-zinc-500">
+              No carrier API requests yet. Advancing a milestone records its request here, with its
+              payload — proof of what was asked and what came back.
+            </p>
+          ) : (
+            <div className="max-h-72 space-y-1.5 overflow-y-auto" data-testid="carrier-api-log">
+              {apiLogs.map((log) => (
+                <div
+                  key={log.id}
+                  className="rounded-md border border-white/[0.06] p-2 font-mono text-ds-label text-zinc-400"
+                >
+                  <span className="text-zinc-600">{log.timestamp}</span>{' '}
+                  <span className="text-brass-400">{log.method}</span> {log.endpoint}
+                  <span className="ml-2 text-emerald-400">{log.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </WorkspaceSection>
+
+
       </WorkspaceGrid>
     </WorkspaceFrame>
   );

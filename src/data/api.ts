@@ -788,8 +788,9 @@ export async function updatePurchaseOrderStatus(
 
 /**
  * Stage-6 wiring — shipment creation for a direct-fulfillment PO acceptance.
- * Creates the shipment record in the shared store (visible instantly in
- * Logistics Control and the 3PL Carrier Terminal) and advances the PO.
+ * Creates the shipment record in the shared store (visible instantly in the
+ * admin Logistics Control workspace) and advances the PO.
+ * §P9 repoint: the old contract named the 3PL Carrier Terminal, which is removed.
  */
 /**
  * §Stage-24 — PO acknowledgment with Vendor Central semantics.
@@ -1349,7 +1350,7 @@ export function createShipmentForPO(
   return { ok: true, shipmentId, warnings, deductionId };
 }
 
-/* ── Shipments across every carrier (3PL terminal + logistics control) ── */
+/* ── Shipments across every carrier (admin logistics control) ── */
 
 /**
  * §WAVE 3 — THE CANONICAL SHIPMENT ETA PROJECTION.

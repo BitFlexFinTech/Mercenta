@@ -54,7 +54,7 @@ export function HowItWorks({ onNavigate, onOpenPortal }: { onNavigate: (p: Publi
               <div className="bg-ink-800 rounded-lg p-4">
                 <h3 className="text-brass font-semibold mb-2">Carriers</h3>
                 <ul className="text-xs text-steel space-y-1 list-disc list-inside">
-                  <li>DHL, FedEx, BAK Logistics</li>
+                  <li>DHL (international) and Palletline (UK domestic)</li>
                   <li>Physical shipment execution</li>
                   <li>Manifest and tracking</li>
                 </ul>

@@ -38,7 +38,13 @@ import type {
   InventoryMovement,
   InventorySettings,
   ProductIdentifier,
+  /* §P9 — the canonical milestone writer below types its argument with the
+     canonical shipment status, and derives `stage` from the ONE mapping. */
+  ShipmentStatus,
 } from '@/types';
+/* §P9 — the ONE shipment status → stage mapping (a VALUE, so imported separately
+   from the type-only block above; declared once in `src/types.ts`). */
+import { STATUS_TO_STAGE } from '@/types';
 import {
   ALL_DEMO_BRANDS,
   DEMO_COMPLIANCE_DOCS,
@@ -271,6 +277,49 @@ export function amendShipment(
   if (!s) return false;
   if (patch.carrier) s.carrier = patch.carrier;
   if (patch.status) s.status = patch.status;
+  return true;
+}
+
+/**
+ * §P9 (programme decision 4) — THE CANONICAL WRITER for a consignment's milestone.
+ *
+ * WHY THIS EXISTS
+ * ---------------
+ * The removed 3PL carrier terminal applied a milestone with a CONTEXT setter
+ * (`updateShipmentStatus`) that mutated a context-owned copy of the shipments
+ * while the canonical collection (`demoShipments`, which every query-backed
+ * surface reads) stayed untouched. Repointing the carrier-event console onto the
+ * admin Logistics Hub exposed exactly that: the select's own value and the row's
+ * status badge never moved, because the page read the store and the control wrote
+ * the context.
+ *
+ * This is now the ONE writer. It:
+ *   · refuses an UNKNOWN consignment (returns false — fail-closed, never a
+ *     silently-created record);
+ *   · writes `status` AND the derived `stage` from the ONE mapping in
+ *     `src/types.ts` (`STATUS_TO_STAGE`), so the two can never disagree;
+ *   · notifies the canonical signal, so every query-backed surface (the admin
+ *     Logistics Hub, the brand hub, reports, the Brain) reflects the change.
+ *
+ * It makes no network call and contacts no carrier.
+ */
+export function setShipmentMilestone(
+  shipmentId: string,
+  status: ShipmentStatus
+): boolean {
+  const s = demoShipments.find((x) => x.id === shipmentId);
+  if (!s) return false;
+  /**
+   * Fail-closed on an unrecognised status: the value can arrive from a `<select>`
+   * (a cast), so it is checked against the canonical mapping rather than trusted.
+   * An unknown value changes NOTHING and is refused, exactly like an unknown
+   * consignment.
+   */
+  if (!(status in STATUS_TO_STAGE)) return false;
+  s.status = status;
+  /* The canonical conformance collection carries `status` (its `stage` lives on
+     the legacy `Shipment` shape, which derives it from `STATUS_TO_STAGE`). */
+  notifyCanonicalStoreChange();
   return true;
 }
 
@@ -1965,12 +2014,17 @@ export function updateProductCost(sku: string, exWorksPrice: number): boolean {
 
 /* ── §Batch-14 — Admin-configurable carrier markup ────────────── */
 
-/** Default per-carrier markup rates. Admin can change these via Super Admin Panel. */
+/**
+ * Default per-carrier markup rates. Admin can change these via Super Admin Panel.
+ *
+ * §P9 (programme decision 1) — REPOINTED: the old seed also carried
+ * `markup-fedex` ('FedEx International') and `markup-bak` ('BAK Logistics (sea
+ * freight)'). Neither is a Mercenta account, so neither may appear as a
+ * configurable carrier markup.
+ */
 export const demoCarrierMarkup: CarrierMarkupConfig[] = [
   { id: 'markup-global', carrier: 'global', markupType: 'percentage', markupValue: 0.07, active: true, label: 'Default (all carriers)' },
   { id: 'markup-dhl', carrier: 'dhl', markupType: 'percentage', markupValue: 0.07, active: true, label: 'DHL Express' },
-  { id: 'markup-fedex', carrier: 'fedex', markupType: 'percentage', markupValue: 0.07, active: true, label: 'FedEx International' },
-  { id: 'markup-bak', carrier: 'bak', markupType: 'percentage', markupValue: 0.05, active: true, label: 'BAK Logistics (sea freight)' },
   { id: 'markup-palletline', carrier: 'palletline', markupType: 'percentage', markupValue: 0.08, active: true, label: 'Palletline (palletised)' },
 ];
 

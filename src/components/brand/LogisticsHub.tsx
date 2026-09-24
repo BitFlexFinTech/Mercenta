@@ -116,8 +116,9 @@ const MILESTONES: {
 const CARRIER_LABELS: Record<string, string> = {
   dhl: 'DHL Express',
   palletline: 'Palletline',
-  fedex: 'FedEx',
-  bak: 'BAK Logistics',
+  /* §P9 (programme decision 1) — `fedex: 'FedEx'` and `bak: 'BAK Logistics'` are
+     REMOVED: neither is a Mercenta account. An id with no label falls through to
+     the raw value below rather than being presented as a carrier. */
   amazon_partner: 'Channel-arranged carrier',
 };
 

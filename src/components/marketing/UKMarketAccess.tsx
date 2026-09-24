@@ -37,8 +37,8 @@ export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: P
               Every shipment is tracked through the platform from origin to retail fulfilment.
             </p>
             <p className="text-sm text-steel leading-relaxed">
-              Our carrier network includes DHL, FedEx, BAK Logistics, and Palletline,
-              providing flexible routing for international shipments across sea and air freight.
+              Mercenta operates its own carrier accounts — DHL for international freight and
+              Palletline for UK domestic — connected by API, providing routing for sea and air freight.
             </p>
           </section>
 

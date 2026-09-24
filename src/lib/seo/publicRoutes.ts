@@ -173,7 +173,10 @@ export const PRIVATE_ROUTE_PREFIXES: readonly string[] = [
   '/login',
   '/admin',
   '/brand',
-  '/carrier',
+  /* §P9 (programme decision 4) — '/carrier' is REMOVED: the carrier environment
+     no longer exists, so the prefix described a route Mercenta no longer
+     serves. `/carrier/…` now resolves as UNKNOWN (still `noindex, nofollow`,
+     never canonicalised) — the fail-closed outcome is unchanged. */
   '/account',
   '/dashboard',
   '/internal',

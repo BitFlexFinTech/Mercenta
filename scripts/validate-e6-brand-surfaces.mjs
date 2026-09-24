@@ -397,7 +397,8 @@ const PHASE4_SCOPE = new Set([
   'src/components/admin/ProspectDetailTabs.tsx',     // internal notes editor tab
   'src/components/admin/ProspectDetailPanel.tsx',    // notes tab wiring
   'requirements-registry.json',                      // master matrix updated 144→171
-  'src/components/carrier/CarrierDashboard.tsx',
+  /* §P9 (programme decision 4) — REPOINTED: 'src/components/carrier/CarrierDashboard.tsx'
+     was in this approved-implementation list; the file is DELETED with the carrier surface. */
   'src/components/design/DesignSystemShowcase.tsx',
   'src/lib/compliance/companiesHouseMock.ts',
   'src/lib/helpdesk/ticketStore.ts',
@@ -721,8 +722,9 @@ const P5_DESTINATION_FC_SCOPE = new Set([
   'src/lib/grants/dataSources.ts',
   'src/components/admin/AdminDashboard.tsx',
   'src/components/brand/LogisticsHub.tsx',
-  'src/components/carrier/BakLogistics.tsx',
-  'src/components/carrier/CarrierDashboard.tsx',
+  /* §P9 (programme decision 4) — REPOINTED: 'src/components/carrier/BakLogistics.tsx'
+     and 'src/components/carrier/CarrierDashboard.tsx' were in this list; both are
+     DELETED with the carrier surface. */
   'src/components/marketing/FAQ.tsx',
   'src/components/marketing/HowItWorks.tsx',
   'src/components/shared/logistics/',
@@ -850,6 +852,89 @@ const P8_INVENTORY_SCOPE = new Set([
   'scripts/verify-demo-live.mjs',             // carries the §P8 live checks
   'package.json',
   'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'PRODUCTION_READINESS.md',
+]);
+
+/**
+ * §P9 (2026-09-23, programme `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`
+ * §4 P9) — CARRIER-REMOVAL DECLARED SURFACE.
+ *
+ * Decision 4: remove the 3PL carrier surface COMPLETELY, including the demo
+ * environment (environment, role, shell + its three views, `CarrierDashboard`,
+ * `BakLogistics`, the demo switcher entry, the "3PL Carrier Terminal" login card,
+ * the admin "Carrier Monitor", the public FAQ claim and the affected documents),
+ * plus decision 1's carrier identity (`fedex`/`bak`) from the type, the labels
+ * and the capability table. Matrix `D01-07` / `D04-18` / `D10-13`.
+ *
+ * It touches the canonical types and the canonical shipping config (PROTECTED
+ * prefixes, declared exactly as P4–P8 declared them) and DELETES four components.
+ * The E6 guard's contract is UNCHANGED — a changed source/test file in NO
+ * declared set still fails, and an undeclared protected path still fails.
+ */
+const P9_CARRIER_REMOVAL_SCOPE = new Set([
+  /* Runtime / domain: the environment, role, tier, addresses and SEO posture */
+  'src/types.ts',                             // PROTECTED prefix — declared
+  'src/lib/auth/rbac.ts',                     // the 3pl tier + the carriers view are removed
+  'src/lib/runtime/productRoutes.ts',         // the /carrier prefix is no longer an address
+  'src/lib/runtime/sessionPersistence.ts',    // a stale carrier session fails closed
+  'src/lib/seo/routeMetadata.ts',
+  'src/lib/seo/publicRoutes.ts',
+  'src/App.tsx',
+  'src/context/GlobalStateContext.tsx',       // carrierContext / fedex+bak connection flags
+  /* The carrier surface itself — DELETED */
+  'src/components/layout/CarrierShell.tsx',
+  'src/components/carrier/CarrierDashboard.tsx',
+  'src/components/carrier/BakLogistics.tsx',
+  'src/components/admin/CarrierMonitor.tsx',
+  /* Surfaces repointed (incl. the REHOMED carrier-event console) */
+  'src/components/layout/AdminShell.tsx',
+  'src/components/layout/EnvironmentRouter.tsx',
+  'src/components/layout/Sidebar.tsx',
+  'src/components/auth/Login.tsx',
+  'src/components/admin/LogisticsControl.tsx', // the carrier-event console, rehomed to its owner
+  'src/components/admin/FounderControlCentre.tsx',
+  'src/components/admin/SuperAdminPanel.tsx',
+  'src/components/brand/LogisticsHub.tsx',
+  'src/components/brand/OnboardingWizard.tsx',
+  'src/components/marketing/FAQ.tsx',
+  'src/components/marketing/HowItWorks.tsx',
+  'src/components/marketing/UKMarketAccess.tsx',
+  /* Carrier identity (decision 1) + the affected demo data */
+  'src/config/shipping.ts',                   // RETIRED_CARRIER_IDS replaces the fedex/bak entries
+  'src/lib/shipping/carrierRouting.ts',
+  'src/lib/shipping/shippingCalculator.ts',
+  'src/data/bootstrap.ts',
+  'src/data/brandDossiers.ts',
+  'src/data/demoStore.ts',
+  'src/data/api.ts',
+  'src/lib/simulation/investorDemo.ts',
+  /* The gates + specs repointed to the removal contract / the new owner */
+  'e2e/app-shell.spec.ts',
+  'e2e/compliance-sim.spec.ts',
+  'e2e/multi-tenant.spec.ts',
+  'e2e/runtime-entry.spec.ts',
+  'e2e/shipment-asn.spec.ts',
+  'e2e/status-semantics.spec.ts',
+  'e2e/table-migrations.spec.ts',
+  'scripts/integrity-audit.mjs',
+  'scripts/runtime-sweep.mjs',
+  'scripts/live-demo-check.mjs',
+  'scripts/forensic-screenshots.mjs',
+  'scripts/validate-product-routes.mjs',
+  'scripts/validate-review-s6.mjs',
+  'scripts/validate-stage16.mjs',
+  'scripts/validate-stage26.mjs',
+  'scripts/validate-workspace-shell.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/verify-demo-live.mjs',
+  /* Documentation + the state sources */
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+  'STATUS_CHECK.md',
+  'requirements-registry.json',
   'PRODUCTION_READINESS.md',
 ]);
 
@@ -1299,7 +1384,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           P7_ADMIN_INVOICING_SCOPE.has(p) ||
           /** §P8 — the inventory + channel-identifier phase's declared surface. */
           P8_INVENTORY_SCOPE.has(p) ||
-          [...P8_INVENTORY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...P8_INVENTORY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P9 — the carrier-removal phase's declared surface (see above). */
+          P9_CARRIER_REMOVAL_SCOPE.has(p) ||
+          [...P9_CARRIER_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

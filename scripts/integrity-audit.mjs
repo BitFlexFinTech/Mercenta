@@ -44,8 +44,10 @@ const requiredFiles = [
   'src/components/admin/AdminDashboard.tsx',
   'src/components/admin/SuperAdminPanel.tsx',
   'src/components/admin/MarketingHub.tsx',
-  'src/components/carrier/CarrierDashboard.tsx',
-  'src/components/carrier/BakLogistics.tsx',
+  /* §P9 (programme decision 4) — REPOINTED: 'src/components/carrier/CarrierDashboard.tsx'
+     and 'src/components/carrier/BakLogistics.tsx' are REMOVED from the required-file
+     list because P9 DELETES them (the carrier surface is gone). Their removal is
+     itself asserted below, so this list can no longer be satisfied by their return. */
   'src/components/brand/OnboardingWizard.tsx',
 ];
 for (const f of requiredFiles) {
@@ -179,15 +181,31 @@ const ctx = read('src/context/GlobalStateContext.tsx');
 check('activateDemo in global state', ctx.includes('const activateDemo'));
 check('signOut clears to landing homepage', /setEnvironment\('home'\)/.test(ctx));
 
-// 6. BAK Logistics hub wiring
-// §Phase F audit repair: Phase 6 moved carrier navigation into CarrierShell
-// (the single nav owner per role), so the wiring checks follow it there while
-// asserting the same invariants: the component is imported and reachable.
-const carrierShell = read('src/components/layout/CarrierShell.tsx');
-check('CarrierShell imports BakLogistics', carrierShell.includes("from '@/components/carrier/BakLogistics'"));
-check('CarrierShell registers BAK Logistics Hub nav', carrierShell.includes("label: 'BAK Logistics Hub'"));
-check('CarrierShell renders BakLogistics for its view', carrierShell.includes('<BakLogistics />'));
-check('App lazy-renders CarrierShell', read('src/App.tsx').includes('layout/CarrierShell'));
+// 6. §P9 (programme decision 4) — THE CARRIER SURFACE IS GONE.
+// REPOINTED from the old contract, which asserted "CarrierShell imports
+// BakLogistics", "CarrierShell registers BAK Logistics Hub nav", "CarrierShell
+// renders BakLogistics" and "App lazy-renders CarrierShell". Those files no
+// longer exist, so the same invariant is now proven the other way round: the
+// carrier shell, its two carrier views, the admin Carrier Monitor and the App
+// import are all DELETED, and nothing may reintroduce them.
+for (const f of [
+  'src/components/layout/CarrierShell.tsx',
+  'src/components/carrier/CarrierDashboard.tsx',
+  'src/components/carrier/BakLogistics.tsx',
+  'src/components/admin/CarrierMonitor.tsx',
+]) {
+  check(`§P9 removed file is deleted: ${f}`, !fileExists(f));
+}
+const appCodeNoComments = read('src/App.tsx').replace(/\/\*[\s\S]*?\*\//g, '');
+check('§P9 App does not render a carrier shell',
+  !appCodeNoComments.includes("import('@/components/layout/CarrierShell')") &&
+  !appCodeNoComments.includes('<CarrierShell'));
+check('§P9 the carrier session role no longer exists',
+  !read('src/lib/auth/rbac.ts')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .includes("'3pl'"));
+check('§P9 the carrier login card is gone',
+  !read('src/components/auth/Login.tsx').includes('3PL Carrier Terminal'));
 
 // 7b. §Batch-0 Item 3 — Broadened layout/shell component audit:
 //      Session-derived identity, non-hardcoded values, click handlers present.
@@ -210,7 +228,12 @@ check('Sidebar has NO hardcoded identity literals', !sidebar.includes("'TA'") &&
 const envRouter = read('src/components/layout/EnvironmentRouter.tsx');
 check('EnvironmentRouter defines environments from types (not hardcoded labels with identity)',
   envRouter.includes('import type { Environment }') &&
-  envRouter.includes("'brand'") && envRouter.includes("'admin'") && envRouter.includes("'carrier'")
+  envRouter.includes("'brand'") && envRouter.includes("'admin'") &&
+  // §P9 (programme decision 4) — REPOINTED: the old contract also required
+  // `envRouter.includes("'carrier'")`. The carrier environment is REMOVED, so the
+  // invariant is now that the switcher CANNOT offer it (comment-stripped, so the
+  // §P9 repoint comment that quotes the old entry does not satisfy the check).
+  !/id: 'carrier'/.test(envRouter.replace(/\/\*[\s\S]*?\*\//g, ''))
 );
 
 const appContent = read('src/App.tsx');

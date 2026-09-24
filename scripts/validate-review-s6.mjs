@@ -1,7 +1,7 @@
 // Stage 6 (review pass) validation: five distinct admin views render with
 // genuinely different content from the shared demo store.
 import { createServer } from 'vite';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { renderToString } from 'react-dom/server';
 import { createElement } from 'react';
@@ -61,7 +61,10 @@ async function renderPanel(path) {
 
 try {
   const logisticsHtml = await renderPanel('/src/components/admin/LogisticsControl.tsx');
-  const carrierHtml = await renderPanel('/src/components/admin/CarrierMonitor.tsx');
+  /* §P9 (programme decision 4) — REPOINTED: `const carrierHtml = await
+     renderPanel('/src/components/admin/CarrierMonitor.tsx')` is REMOVED because the
+     component is DELETED. The carrier EVENTS it simulated are now driven from the
+     Logistics Hub's own carrier console (`dataTable="carrier-manifest"`). */
   const crmHtml = await renderPanel('/src/components/admin/BrandCRM.tsx');
   const catalogHtml = await renderPanel('/src/components/admin/CatalogManagerAdmin.tsx');
   const complianceHtml = await renderPanel('/src/components/admin/ComplianceApprovals.tsx');
@@ -121,15 +124,21 @@ try {
     readFileSync(resolve(root, 'src/components/admin/LogisticsControl.tsx'), 'utf8')
       .includes('dataTable={`logistics-${brandId}`}'));
 
-  // Carrier Monitor: technical health — completely different content
-  test('carrier monitor shows API health cards',
-    carrierHtml.includes('DHL API') && carrierHtml.includes('FedEx Ship API') &&
-      carrierHtml.includes('BAK Logistics (internal)') && carrierHtml.includes('Amazon-partnered carrier feed'));
-  test('carrier monitor shows uptime/latency/errors (not shipments)',
-    carrierHtml.includes('Uptime 30d') && carrierHtml.includes('Latency') &&
-      !carrierHtml.includes('Logistics Control'));
-  test('logistics vs carrier are genuinely different views',
-    logisticsHtml.includes('Delayed') !== false && carrierHtml.includes('Errors (24h)'));
+  // Carrier Monitor: §P9 (programme decision 4) — REPOINTED.
+  // The old contract asserted that `src/components/admin/CarrierMonitor.tsx`
+  // rendered per-carrier API-health cards (including FedEx and BAK, which are NOT
+  // Mercenta accounts). That destination is REMOVED with the carrier surface, so
+  // the assertions now prove the removal AND that the capability it claimed to
+  // own — provider connection state — is present on its canonical owner, the
+  // Integrations surface (which reads the provider-mode registry).
+  test('carrier monitor surface is REMOVED (no second health feed)',
+    !existsSync(resolve(root, 'src/components/admin/CarrierMonitor.tsx')) &&
+      !readFileSync(resolve(root, 'src/components/layout/AdminShell.tsx'), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .includes('<CarrierIntegrationMonitor'));
+  const integrationsHtml = await renderPanel('/src/components/admin/integrations/IntegrationsPanel.tsx');
+  test('provider connection state is owned by the Integrations surface',
+    integrationsHtml.length > 0);
 
   // Brand CRM
   // §M9 repoint — the CRM now lists every brand as a selectable row, so the

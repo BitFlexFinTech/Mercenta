@@ -134,17 +134,29 @@ try {
   ck('no page errors (brand flow)', perr.length === 0, perr.slice(0, 2).join(' | '));
 } catch (e) { ck('brand flow', false, String(e).slice(0, 140)); }
 
-// ── Flow 3: Carrier terminal (same context) ──
+// ── Flow 3: Admin logistics + the rehomed carrier console (same context) ──
+// §P9 (programme decision 4) — REPOINTED from the removed "Carrier terminal"
+// flow. There is no carrier login any more, so the third flow proves the surface
+// that now OWNS the capability: the Mercenta Admin Logistics Hub, including the
+// rehomed carrier-event console (`carrier-manifest`).
 const homeBtn2 = page.getByRole('button', { name: 'Home' }).first();
 if (await homeBtn2.count()) { await homeBtn2.click({ timeout: 30000 }); await page.waitForTimeout(1000); }
 try {
   await openLogin(page);
-  await page.locator('text=3PL Carrier Terminal').first().click({ timeout: 30000 });
-  await waitForShell('Manifest Management');
-  const body = await page.locator('body').innerText();
-  ck('carrier terminal renders live', !body.includes('something went wrong') && body.length > 200, 'carrier');
-  ck('no page errors (carrier flow)', perr.length === 0, perr.slice(0, 2).join(' | '));
-} catch (e) { ck('carrier flow', false, String(e).slice(0, 140)); }
+  await page.locator('text=Mercenta Admin Hub').first().click({ timeout: 30000 });
+  await waitForShell('Control Centre');
+  const adminNav = page.locator('nav >> text=Logistics Hub').first();
+  ck('admin shell renders live (Operations nav present)', (await adminNav.count()) > 0, 'admin nav');
+  if (await adminNav.count()) {
+    await adminNav.click({ timeout: 30000 });
+    await waitRendered(page);
+    const body = await page.locator('body').innerText();
+    ck('logistics hub renders live', !body.includes('something went wrong') && body.length > 200, 'logistics');
+    ck('the rehomed carrier console is on the live logistics hub',
+      body.includes('Carrier API console'), 'carrier console missing');
+  }
+  ck('no page errors (admin logistics flow)', perr.length === 0, perr.slice(0, 2).join(' | '));
+} catch (e) { ck('admin logistics flow', false, String(e).slice(0, 140)); }
 await ctx.close();
 
 console.log('=== PHASE 10 LIVE-DEMO VERIFICATION ===');

@@ -117,18 +117,36 @@ test.describe('Multi-Tenant Isolation', () => {
     else expect(count).toBeGreaterThanOrEqual(1);
   });
 
-  test('6. 3PL sees own shipments', async ({ page }) => {
-    await loginAs(page, '3PL Carrier Terminal');
-    // §7D — the `.or()`-chained strict Query is not addressable via `.isVisible()`
-    // (Playwright strict-mode violation). Use the canonical carrier shell: the
-    // default DHL operations desk renders its manifest table + the two other
-    // carrier-specific nav items (BAK Logistics Hub, API Request Auditor).
-    const desk = page.locator('text=Operational control desk — carrier terminal simulation').first();
-    if (await desk.isVisible({ timeout: 6000 }).catch(() => false)) {
-      await expect(desk).toBeVisible({ timeout: 3000 });
-      await expect(page.getByText('Bi-Directional Manifest Management').first()).toBeVisible({ timeout: 3000 });
-      await expect(page.locator('nav >> text=BAK Logistics Hub').first()).toBeVisible();
-      await expect(page.locator('nav >> text=API Request Auditor').first()).toBeVisible();
-    } else test.fixme(true, '3PL manifest page not visible');
+  /**
+   * §P9 (programme decision 4) — REPOINTED from '6. 3PL sees own shipments'.
+   * There is no carrier tenant any more (a carrier never logs into Mercenta), so
+   * the boundary asserted here is the one that REPLACES it: the carrier-event
+   * console now lives on the MERCENTA admin Logistics Hub, and a BRAND session
+   * must not be able to reach it. That is a stronger tenant assertion than the
+   * old one — it tests the CURRENT cross-tenant boundary rather than a tenant
+   * that no longer exists.
+   */
+  test('6. the carrier tenant is gone and the carrier console is admin-only', async ({ page }) => {
+    /**
+     * §P9 (programme decision 4) — the removed carrier address resolves to the
+     * PUBLIC site (fail-closed: it is not a product address), and no carrier login
+     * exists anywhere.
+     */
+    await page.goto('/carrier/manifest');
+    await expect(page.getByRole('button', { name: 'Partner Login' }).first()).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.locator('text=3PL Carrier Terminal')).toHaveCount(0);
+    await expect(page.locator('text=Manifest Management')).toHaveCount(0);
+    await expect(page.locator('nav[aria-label="Primary"]')).toHaveCount(0);
+
+    // A brand session reaches its OWN logistics hub, never the Mercenta-side
+    // carrier console (which is cross-tenant by design and admin-only).
+    await loginAsBrand(page, 'Astonish');
+    await page.click('nav[aria-label="Primary"] >> text=Logistics Hub');
+    await page.waitForTimeout(1200);
+    await expect(page.locator('text=Carrier API console')).toHaveCount(0);
+    await expect(page.locator('select[aria-label^="Update milestone for"]')).toHaveCount(0);
+    await expect(page.locator('text=Bi-Directional Manifest Management')).toHaveCount(0);
   });
 });

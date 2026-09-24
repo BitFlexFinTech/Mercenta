@@ -38,13 +38,38 @@ export const SHIPPING_LANE_LABELS: Record<ShippingLane, string> = {
   uk_domestic: 'UK domestic (Palletline)',
 };
 
-/** Mercenta carrier-account labels — one declaration, reused by every UI. */
+/**
+ * Mercenta carrier-account labels — one declaration, reused by every UI.
+ *
+ * §P9 (programme decision 1) — REPOINTED: the old contract also carried
+ * `fedex: 'FedEx'` and `bak: 'BAK Logistics'`. Carriers are DHL + Palletline
+ * ONLY, so no retired carrier is presentable as a carrier any more.
+ */
 export const MERCENTA_CARRIER_LABELS: Record<CarrierId, string> = {
   dhl: 'DHL Express (Mercenta account)',
   palletline: 'Palletline (Mercenta account)',
-  fedex: 'FedEx',
-  bak: 'BAK Logistics',
 };
+
+/**
+ * §P9 (programme decision 1) — RETIRED CARRIER IDS (recorded once, for REFUSAL).
+ *
+ * `fedex` and `bak` are no longer `CarrierId`s, no longer labelled, no longer
+ * capability-declared and no longer reachable from any UI. The business model
+ * still requires that a carrier which is NOT a Mercenta account is REFUSED, and
+ * that the refusal names the reason — so the two retired ids are declared here,
+ * in the same single source of truth, purely so
+ * `carrierEligibility`/`carrierRouting` can refuse them explicitly instead of
+ * falling back to a generic "unknown carrier".
+ *
+ * They confer nothing: they are never selectable, never capable and never
+ * operational.
+ */
+export const RETIRED_CARRIER_IDS: readonly string[] = ['fedex', 'bak'] as const;
+
+/** Is this a carrier id Mercenta has RETIRED (never an account, never usable)? */
+export function isRetiredCarrier(carrier: string | null | undefined): boolean {
+  return !!carrier && RETIRED_CARRIER_IDS.includes(carrier);
+}
 
 /**
  * Nation/region inputs that count as UK-domestic.
@@ -123,16 +148,11 @@ export const MERCENTA_CARRIER_LANE_CAPABILITY: Record<
     services: ['palletised'],
     label: 'UK domestic palletised freight (Mercenta Palletline account)',
   },
-  fedex: {
-    lanes: [],
-    services: [],
-    label: 'Retired carrier — no Mercenta account, never eligible',
-  },
-  bak: {
-    lanes: [],
-    services: [],
-    label: 'Retired carrier — no Mercenta account, never eligible',
-  },
+  /* §P9 (programme decision 1) — REPOINTED: the `fedex` and `bak` entries
+     ('Retired carrier — no Mercenta account, never eligible') are REMOVED from
+     the capability table. Retired carriers are refused through the declared
+     `RETIRED_CARRIER_IDS` refusal path instead, so the table describes ONLY the
+     accounts Mercenta actually holds. */
 };
 
 export type ShippingCommercialTerms = typeof SHIPPING_COMMERCIAL_TERMS;

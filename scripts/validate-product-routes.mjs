@@ -49,7 +49,10 @@ try {
     ['/admin/brain', 'admin', 'brain'],
     ['/brand/logistics', 'brand', 'logistics'],
     ['/brand/purchase-orders', 'brand', 'purchase-orders'],
-    ['/carrier/bak', 'carrier', 'bak'],
+    /* §P9 (programme decision 4) — REPOINTED: `['/carrier/bak','carrier','bak']`
+       is REMOVED. The carrier environment no longer exists, so the address it
+       used to declare is asserted as FAIL-CLOSED below instead (strictly
+       stronger: an address for a removed surface must not resolve at all). */
   ];
   for (const [p, env, view] of declared) {
     const parsed = routes.parseProductPath(p);
@@ -62,7 +65,7 @@ try {
   }
 
   /* An environment-only address resolves to its declared DEFAULT view. */
-  for (const [p, env] of [['/admin', 'admin'], ['/brand', 'brand'], ['/carrier', 'carrier']]) {
+  for (const [p, env] of [['/admin', 'admin'], ['/brand', 'brand']]) {
     const parsed = routes.parseProductPath(p);
     check(`${p} declares ${env} with no view`, parsed?.environment === env && parsed?.view === null,
       JSON.stringify(parsed));
@@ -72,6 +75,19 @@ try {
     check(`default view for ${env} is declared`,
       typeof routes.PRODUCT_DEFAULT_VIEW[env] === 'string' && routes.PRODUCT_DEFAULT_VIEW[env].length > 0);
   }
+
+  /* §P9 — THE REMOVED CARRIER ADDRESSES MUST NOT RESOLVE (fail-closed). */
+  for (const p of ['/carrier', '/carrier/manifest', '/carrier/bak', '/carrier/auditor']) {
+    const parsed = routes.parseProductPath(p);
+    check(`§P9 fail-closed: the removed carrier address ${p} is NOT a product address`,
+      parsed === null, JSON.stringify(parsed));
+  }
+  check('§P9: no carrier environment is declared',
+    !Object.keys(routes.PRODUCT_ENVIRONMENT_PREFIXES).includes('carrier'),
+    Object.keys(routes.PRODUCT_ENVIRONMENT_PREFIXES).join(','));
+  check('§P9: the removed carrier environment no longer has a default view',
+    !Object.keys(routes.PRODUCT_DEFAULT_VIEW).includes('carrier'),
+    Object.keys(routes.PRODUCT_DEFAULT_VIEW).join(','));
 
   /* FAIL-CLOSED: an unknown/ambiguous address is NEVER guessed into an env. */
   for (const p of ['/', '/faq', '/login', '/adminx', '/admin/brain/extra',
@@ -88,25 +104,34 @@ try {
     routes.parseProductPath('/brand/logistics?x=1')?.view === 'logistics',
     JSON.stringify(routes.parseProductPath('/brand/logistics?x=1')));
 
-  /* The three product prefixes are declared ONCE, and match the SEO private set. */
+  /* The product prefixes are declared ONCE, and match the SEO private set. */
   const publicRoutes = await server.ssrLoadModule('/src/lib/seo/publicRoutes.ts');
   for (const prefix of Object.values(routes.PRODUCT_ENVIRONMENT_PREFIXES)) {
     check(`SEO: ${prefix} is a declared PRIVATE route prefix`,
       publicRoutes.PRIVATE_ROUTE_PREFIXES.includes(prefix));
   }
-  check('exactly three product environments are declared',
-    Object.keys(routes.PRODUCT_ENVIRONMENT_PREFIXES).length === 3,
+  /* §P9 — REPOINTED from `length === 3`: two product environments remain. */
+  check('exactly two product environments are declared',
+    Object.keys(routes.PRODUCT_ENVIRONMENT_PREFIXES).length === 2,
     Object.keys(routes.PRODUCT_ENVIRONMENT_PREFIXES).join(','));
+  check('§P9: the removed carrier prefix is no longer a PRIVATE route prefix',
+    !publicRoutes.PRIVATE_ROUTE_PREFIXES.includes('/carrier'),
+    publicRoutes.PRIVATE_ROUTE_PREFIXES.join(','));
+  check('§P9: an address under the removed carrier prefix still resolves NOT-public (noindex)',
+    publicRoutes.resolveRoute('/carrier/manifest')?.kind !== 'public',
+    publicRoutes.resolveRoute('/carrier/manifest')?.kind);
 
   /* ── 2. Every nav id has a render branch (no nav item leads to a blank view) ── */
   const navIds = (src) => [...src.matchAll(/\{ id: '([a-z0-9_]+)'/g)].map((m) => m[1]);
   const renderViews = (src) =>
     new Set([...(src.matchAll(/[a-zA-Z]*[vV]iew === '([a-z0-9_]+)'/g))].map((m) => m[1]));
 
+  /* §P9 (programme decision 4) — REPOINTED: the `['CarrierShell', …]` row is
+     REMOVED with the shell it validated. The carrier surface must not merely be
+     unrouted — it must be gone — so this block asserts the removal directly. */
   for (const [label, file] of [
     ['AdminShell', 'src/components/layout/AdminShell.tsx'],
     ['BrandShell', 'src/components/layout/BrandShell.tsx'],
-    ['CarrierShell', 'src/components/layout/CarrierShell.tsx'],
   ]) {
     const src = read(file);
     const views = renderViews(src);
@@ -124,6 +149,78 @@ try {
     check(`${label}: Back/Forward re-reads the address`,
       /addEventListener\('popstate'/.test(src), 'no popstate listener');
   }
+
+  /* ── 2b. §P9 (programme decision 4) — THE CARRIER SURFACE IS GONE ────────
+     Not merely unrouted: deleted. These assertions are the ones the removed
+     `['CarrierShell', …]` row used to make, repointed to the removal contract
+     (and they are the proof that a future session cannot quietly reintroduce a
+     carrier login). */
+  for (const [label, file] of [
+    ['CarrierShell', 'src/components/layout/CarrierShell.tsx'],
+    ['CarrierDashboard', 'src/components/carrier/CarrierDashboard.tsx'],
+    ['BakLogistics', 'src/components/carrier/BakLogistics.tsx'],
+    ['CarrierMonitor', 'src/components/admin/CarrierMonitor.tsx'],
+  ]) {
+    check(`§P9: ${label} is DELETED`, !fs.existsSync(path.join(ROOT, file)), file);
+  }
+  /* NOTE — these assertions match CODE, not prose. The §P9 repoint comments
+     necessarily QUOTE what was removed (that is the rule), so the source is
+     comment-stripped first: otherwise the historical record itself would fail
+     the check. */
+  const codeOf = (p) =>
+    read(p)
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^[ \t]*\/\/.*$/gm, '');
+  const appSrc = codeOf('src/App.tsx');
+  check('§P9: App no longer imports or renders the carrier shell',
+    !appSrc.includes("import('@/components/layout/CarrierShell')") && !appSrc.includes('<CarrierShell'),
+    'CarrierShell is still imported or rendered');
+  const adminShellSrc = codeOf('src/components/layout/AdminShell.tsx');
+  check('§P9: the admin "Carrier Monitor" nav item and render branch are REMOVED',
+    !adminShellSrc.includes("id: 'carriers'") && !adminShellSrc.includes('<CarrierIntegrationMonitor'),
+    'the Carrier Monitor destination is still wired');
+  const envRouterSrc = codeOf('src/components/layout/EnvironmentRouter.tsx');
+  check('§P9: the demo environment switcher offers only brand + admin',
+    !/id: 'carrier'/.test(envRouterSrc), 'a carrier environment is still offered');
+  const loginSrc = read('src/components/auth/Login.tsx');
+  check('§P9: the "3PL Carrier Terminal" login card is REMOVED',
+    !loginSrc.includes('3PL Carrier Terminal') && !loginSrc.includes("'carrier'"),
+    'the carrier login card is still present');
+  const typesSrc = read('src/types.ts');
+  check('§P9: Environment no longer includes carrier',
+    /export type Environment = 'home' \| 'login' \| 'brand' \| 'admin';/.test(typesSrc));
+  check('§P9: the "3PL Carrier" session role is REMOVED',
+    !/SessionRole =[\s\S]{0,160}'3PL Carrier'/.test(typesSrc),
+    'the carrier session role is still declared');
+  check('§P9 (decision 1): CarrierId is DHL + Palletline ONLY',
+    /export type CarrierId = 'dhl' \| 'palletline';/.test(typesSrc));
+
+  /* The RBAC module is asserted PROGRAMMATICALLY — a source-text match would
+     trip over the §P9 repoint comments that necessarily name what was removed. */
+  const rbac = await server.ssrLoadModule('/src/lib/auth/rbac.ts');
+  check('§P9: no tier can enter a carrier environment',
+    Object.values(rbac.TIER_ENVIRONMENTS).every((envs) => !envs.includes('carrier')),
+    JSON.stringify(rbac.TIER_ENVIRONMENTS));
+  check('§P9: the 3pl tier is gone from both RBAC maps',
+    !('3pl' in rbac.TIER_ENVIRONMENTS) && !('3pl' in rbac.VIEW_ALLOWLIST));
+  check('§P9: the removed carrier nav view is refused for admin staff',
+    rbac.canAccessView('admin_staff', 'carriers') === false);
+  check('§P9: the carrier tier no longer exists as a session tier',
+    rbac.tierForRole('Brand Partner') === 'brand' &&
+      rbac.tierForRole('Mercenta Admin') === 'admin_staff' &&
+      rbac.tierForRole('Super Admin') === 'super_admin');
+
+  /* Session persistence must fail closed on a STALE carrier value. */
+  check('§P9: persistence re-validation refuses the removed carrier environment',
+    persistence.isPersistedSession({
+      environment: 'carrier', tier: '3pl', role: '3PL Carrier',
+    }) === false,
+    'a stale carrier session was accepted');
+  check('§P9: persistence still accepts a valid brand session',
+    persistence.isPersistedSession({
+      environment: 'brand', tier: 'brand', role: 'Brand Partner', tenantId: 'brand-astonish',
+    }) === true,
+    'a valid session was rejected');
 
   /* ── 3. The address bar has exactly the declared writers ── */
   const walk = (dir, out = []) => {

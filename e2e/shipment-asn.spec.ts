@@ -14,7 +14,8 @@
  *   3  a Freight Collect PO still shows the routing step — now attributed to
  *      MERCENTA, still with NO unsupported channel deadline (AV-013);
  *   4  the prepaid delivery window is unchanged;
- *   5  the carrier milestone update is unchanged;
+ *   5  the carrier milestone update is unchanged (now driven from the MERCENTA admin
+ *      Logistics Hub — §P9; carriers never log into Mercenta);
  *   6/7 the ADMIN on-behalf ASN path is unchanged (there, Mercenta IS the actor).
  */
 import { test, expect } from '@playwright/test';
@@ -115,10 +116,16 @@ test.describe('Shipment & ASN', () => {
   });
 
   test('5. Shipment marked delivered -> status updates to live on retail', async ({ page }) => {
-    await loginAs(page, '3PL Carrier Terminal', 1200);
-    // Advance the first manifest row to live_amazon in the carrier terminal.
+    /* §P9 (programme decision 4) — REPOINTED from the 3PL carrier terminal: carriers
+       never log into Mercenta, so the milestone is advanced on the Mercenta admin
+       Logistics Hub, where the carrier-event console was rehomed. The behaviour
+       under test (the row's own canonical status follows the milestone change) is
+       unchanged. */
+    await loginAs(page, 'Mercenta Admin Hub', 1200);
+    await page.click('nav >> text=Logistics Hub');
+    await page.waitForTimeout(1200);
     const select = page.locator('table select').first();
-    await expect(select).toBeVisible({ timeout: 5000 });
+    await expect(select).toBeVisible({ timeout: 8000 });
     const row = select.locator('..').locator('..');
     await select.selectOption('live_amazon');
     await page.waitForTimeout(500);

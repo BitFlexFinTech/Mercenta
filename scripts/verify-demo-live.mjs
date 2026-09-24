@@ -114,6 +114,44 @@ if (hasPacking) {
 
 check('no uncaught page error during the brand flow', pageErrors.length === 0, pageErrors.slice(0, 2).join(' | '));
 
+/* ── 3c. §P9 — THE CARRIER SURFACE IS GONE ON THE DEPLOYED BUILD ─────────── */
+{
+  const carrierPage = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const carrierErrors = [];
+  carrierPage.on('pageerror', (e) => carrierErrors.push(String(e)));
+
+  /* (i) The removed address is NOT a product address, so it resolves to the PUBLIC
+     site — never a guessed environment, never a resurrected carrier shell. */
+  await carrierPage.goto(`${BASE}/carrier/manifest`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await carrierPage.waitForTimeout(4000);
+  check('§P9 the removed carrier address does NOT render a carrier shell (fail-closed)',
+    await carrierPage.getByRole('button', { name: 'Partner Login' }).first()
+      .isVisible({ timeout: 15000 }).catch(() => false));
+  check('§P9 the deployed build exposes no carrier navigation at that address',
+    (await carrierPage.locator('nav[aria-label="Primary"]').count()) === 0);
+  const removedBody = await carrierPage.locator('body').innerText().catch(() => '');
+  check('§P9 the removed carrier surfaces are absent from the rendered page',
+    !/3PL Carrier Terminal/.test(removedBody) &&
+      !/BAK Logistics Hub/.test(removedBody) &&
+      !/API Request Auditor/.test(removedBody));
+
+  /* (ii) The LOGIN screen offers no carrier card of any kind. */
+  await carrierPage.getByRole('button', { name: 'Partner Login' }).first().click().catch(async () => {
+    await carrierPage.getByRole('button', { name: 'Open navigation' }).click();
+    await carrierPage.waitForTimeout(400);
+    await carrierPage.getByRole('button', { name: 'Partner Login' }).last().click();
+  });
+  await carrierPage.waitForTimeout(1500);
+  const loginBody = await carrierPage.locator('body').innerText().catch(() => '');
+  check('§P9 the "3PL Carrier Terminal" login card is absent from the deployed login screen',
+    !/3PL Carrier Terminal/.test(loginBody));
+  check('§P9 the deployed login screen still offers the operations logins it should',
+    /Mercenta Admin Hub/.test(loginBody) && /Super Admin/.test(loginBody));
+  check('§P9 no uncaught page error on the removed-carrier checks',
+    carrierErrors.length === 0, carrierErrors.slice(0, 2).join(' | '));
+  await carrierPage.close();
+}
+
 /* ── 3b. §P8 — THE DEPLOYED INVENTORY SURFACE (decision 5 / decision 10) ─── */
 await page.click('nav[aria-label="Primary"] >> text=Inventory').catch(() => {});
 await page.waitForTimeout(3000);
@@ -271,6 +309,15 @@ const bundleProbe = await superAdmin
       p8AsinPlaceholder: all.includes('ASIN_PLACEHOLDER'),
       p8AsinListing: all.includes('ASIN_REQUIRES_EXISTING_LISTING'),
       p8SimAsin: all.includes('SIM-ASIN-'),
+      /**
+       * §P9 — the carrier removal AND the rehomed console, read from the DEPLOYED
+       * bundle itself, so a stale build cannot pass the live leg by rendering a
+       * page that merely looks right.
+       */
+      p9ConsoleRehomed: all.includes('mercenta-admin-logistics'),
+      p9CarrierLoginGone: !all.includes('3PL Carrier Terminal'),
+      p9CarrierNavGone: !all.includes('BAK Logistics Hub') && !all.includes('API Request Auditor'),
+      p9CarrierMonitorGone: !all.includes('Carrier Integration Monitor'),
     };
   })
   .catch(() => ({ count: 0, read: 0 }));
@@ -286,6 +333,11 @@ check('§P8 the deployed bundle carries the counted-correction reason requiremen
 check('§P8 the deployed bundle carries the identifier-shape rule', bundleProbe.p8AsinListing === true, probeDetail);
 check('§P8 the deployed bundle refuses the simulated placeholder as a real identifier', bundleProbe.p8AsinPlaceholder === true, probeDetail);
 check('§P8 the deployed bundle carries the unmistakably-simulated identifier prefix', bundleProbe.p8SimAsin === true, probeDetail);
+/* §P9 (programme decision 4) — the deployed bundle IS the carrier-removal build. */
+check('§P9 the deployed bundle carries the REHOMED carrier console (attributed to the Mercenta operator)', bundleProbe.p9ConsoleRehomed === true, probeDetail);
+check('§P9 the deployed bundle carries NO carrier login card', bundleProbe.p9CarrierLoginGone === true, probeDetail);
+check('§P9 the deployed bundle carries NO carrier navigation (BAK Logistics Hub / API Request Auditor)', bundleProbe.p9CarrierNavGone === true, probeDetail);
+check('§P9 the deployed bundle carries NO admin Carrier Monitor', bundleProbe.p9CarrierMonitorGone === true, probeDetail);
 check('no uncaught page error on the deployed P7 invoicing flows',
   adminErrors.length === 0 && superAdminErrors.length === 0,
   [...adminErrors, ...superAdminErrors].slice(0, 2).join(' | '));
@@ -294,6 +346,18 @@ check('no uncaught page error on the deployed P7 invoicing flows',
 await page.click('nav[aria-label="Primary"] >> text=Logistics Hub').catch(() => {});
 await page.waitForTimeout(4000);
 const hubBody = await page.locator('body').innerText().catch(() => '');
+/**
+ * §P9 (programme decision 4) — THE REHOMED CARRIER CONSOLE IS ON THE DEPLOYED
+ * LOGISTICS HUB. The carrier portal is gone; the capability (a carrier event that
+ * advances a consignment, plus its request log) lives here, attributed to the
+ * Mercenta operator. This proves the move on the LIVE build, not just locally.
+ */
+check('§P9 the deployed Logistics Hub renders the rehomed Carrier API console',
+  /Carrier API console/i.test(hubBody));
+check('§P9 the deployed console exposes the interactive milestone control',
+  (await page.locator('select[aria-label^="Update milestone for"]').count()) > 0);
+check('§P9 the deployed console offers the simulated DHL advance',
+  /DHL status → next milestone/i.test(hubBody));
 const hubNodeKinds = await page
   .locator('[data-testid^="logistics-node-"]')
   .evaluateAll((els) => els.map((e) => e.getAttribute('data-kind')))

@@ -196,7 +196,6 @@ for (const f of MIGRATED_SURFACES) {
  */
 const SHELL_MIGRATED_SURFACES = [
   'src/components/layout/AdminShell.tsx',
-  'src/components/admin/CarrierMonitor.tsx',
   'src/components/admin/ContractsAdminPanel.tsx',
   'src/components/admin/FulfillmentTrack.tsx',
   'src/components/admin/MarketingHub.tsx',
@@ -206,10 +205,31 @@ const SHELL_MIGRATED_SURFACES = [
   'src/components/brand/BrandTeamMessages.tsx',
   'src/components/brand/ListingAnalyzer.tsx',
   'src/components/brand/MercentaSocial.tsx',
+  /* §P9 (programme decision 4) — REPOINTED: 'src/components/admin/CarrierMonitor.tsx',
+     'src/components/carrier/BakLogistics.tsx' and 'src/components/carrier/CarrierDashboard.tsx'
+     are REMOVED from SHELL_MIGRATED_SURFACES with the carrier surface. Their absence
+     is asserted below. */
   'src/components/brand/OnboardingSummary.tsx',
+];
+
+/* §P9 — the removed surfaces must be GONE, not merely unmigrated. */
+for (const f of [
+  'src/components/admin/CarrierMonitor.tsx',
   'src/components/carrier/BakLogistics.tsx',
   'src/components/carrier/CarrierDashboard.tsx',
-];
+  'src/components/layout/CarrierShell.tsx',
+]) {
+  check(`§P9 removed surface is deleted: ${f}`, !fs.existsSync(path.join(ROOT, f)));
+}
+const logisticsControlSrc = read('src/components/admin/LogisticsControl.tsx');
+check('§P9 the rehomed carrier console composes the canonical frame',
+  logisticsControlSrc.includes('<WorkspaceFrame'));
+check('§P9 the rehomed carrier console exposes the canonical manifest hooks',
+  logisticsControlSrc.includes('dataTable="carrier-manifest"') &&
+    logisticsControlSrc.includes('aria-label={`Update milestone for ${s.reference}`}'));
+check('§P9 the advance is attributed to the Mercenta operator (not a carrier login)',
+  logisticsControlSrc.includes("actorId: 'mercenta-admin-logistics'") &&
+    !logisticsControlSrc.includes("'carrier-terminal'"));
 
 for (const f of SHELL_MIGRATED_SURFACES) {
   const src = read(f);

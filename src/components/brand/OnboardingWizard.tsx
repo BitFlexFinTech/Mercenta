@@ -38,8 +38,10 @@ const STEPS = [
   { id: 6, label: 'Operational Guidance', icon: Scale },
 ];
 // §Stage-20.2 — the former "3PL Carrier Integration" step was REMOVED:
-// carrier relationships are admin-managed (Super Admin → 3PL Carrier
-// Terminal). Brands never configure DHL/FedEx/BAK connections themselves.
+// carrier relationships are admin-managed (Super Admin).
+// §P9 (programme decision 4) — the "3PL Carrier Terminal" it referenced is itself
+// REMOVED: a carrier never logs into Mercenta. Brands never configure
+// DHL/Palletline connections themselves.
 // §Batch-15 — step 5 added for required MOQ/pricing/packaging/PO-rejection guidance.
 
 const REGIONS: { value: BrandRegion; label: string }[] = [
@@ -165,7 +167,8 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
   }, [step, brandProfile, recommendedTrack, setBrandProfile]);
 
   // §Stage-20.2 — no brand-side carrier connection testing; completion no
-  // longer writes dhlConnected/fedexConnected/bakConnected from wizard state.
+  // longer writes dhlConnected from wizard state. (§P9 repoint: the old contract
+  // also named fedexConnected/bakConnected, which no longer exist.)
   const handleFinish = () => {
     // §Legal — persist mandatory brand agreement acceptances before finishing
     const brandId = session?.tenantId || `brand-${Date.now()}`;

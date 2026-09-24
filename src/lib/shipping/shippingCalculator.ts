@@ -31,22 +31,12 @@ function mockDhlRate(totalWeightKg: number, totalCbm: number): number {
   return base + perKg + volumeFactor;
 }
 
-/** FedEx International Economy rates (approximate). */
-function mockFedExRate(totalWeightKg: number, totalCbm: number): number {
-  const base = 18.00;
-  const perKg = totalWeightKg * 2.10;
-  const volWeight = totalCbm * 200;
-  const chargeable = Math.max(totalWeightKg, volWeight);
-  return base + chargeable * 2.10;
-}
-
-/** BAK Logistics consolidated sea-freight rates (long lead time, bulk). */
-function mockBakRate(totalWeightKg: number, totalCbm: number): number {
-  const base = 45.00;
-  const perCbm = totalCbm * 85;
-  const perKg = totalWeightKg * 0.35;
-  return base + perCbm + perKg;
-}
+/**
+ * §P9 (programme decision 1) — REPOINTED: `mockFedExRate` (FedEx International
+ * Economy) and `mockBakRate` (BAK consolidated sea freight) are REMOVED with the
+ * carriers they priced. Mercenta holds DHL and Palletline accounts only, so a
+ * rate card for a carrier Mercenta cannot book was a fabrication.
+ */
 
 /** Palletline IPCP palletised-freight rates (per pallet + per-kg above threshold). */
 function mockPalletlineRate(palletCount: number, totalWeightKg: number): number {
@@ -90,12 +80,10 @@ export function computeShippingEstimate(input: ShippingEstimateInput): ShippingE
     case 'dhl':
       baseCarrierCost = mockDhlRate(totalWeightKg, totalCbm);
       break;
-    case 'fedex':
-      baseCarrierCost = mockFedExRate(totalWeightKg, totalCbm);
-      break;
-    case 'bak':
-      baseCarrierCost = mockBakRate(totalWeightKg, totalCbm);
-      break;
+    /* §P9 (programme decision 1) — REPOINTED: the `case 'fedex'` and `case 'bak'`
+       branches are REMOVED. `CarrierId` is now exactly `'dhl' | 'palletline'`, so
+       a retired carrier cannot even reach this calculator; an unexpected value
+       falls through to the conservative DHL band below. */
     case 'palletline': {
       const pc = palletCount ?? Math.max(1, Math.ceil(cartonCount / 8));
       baseCarrierCost = mockPalletlineRate(pc, totalWeightKg);

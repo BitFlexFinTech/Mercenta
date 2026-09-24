@@ -10,6 +10,11 @@ import { createServer } from 'vite';
 import { renderToString } from 'react-dom/server';
 import { createElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+/* §P9 — the removal assertions below read the filesystem directly. */
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+const root = resolve(import.meta.dirname, '..');
 
 function fullAsn(po) {
   return {
@@ -175,8 +180,22 @@ try {
   test('Logistics Control shows the created shipment',
     logisticsHtml.includes('DHL-PO-E2E-0001') || logisticsHtml.includes('PO-E2E-0001'));
 
-  // 3PL Carrier Terminal view removed — component deleted.
-  test('Carrier Terminal placeholder', true);
+  // §P9 (programme decision 4) — REPOINTED. This used to be
+  // `test('Carrier Terminal placeholder', true)` — a test that COULD NOT FAIL,
+  // for a surface that was already gone. It is replaced by a real assertion on
+  // the removal contract: the carrier surface stays removed, and the capability
+  // it carried (advancing a consignment's carrier milestone) now lives in the
+  // canonical Mercenta owner, the admin Logistics Hub.
+  test('§P9 the carrier terminal files stay deleted',
+    !existsSync(resolve(root, 'src/components/carrier/CarrierDashboard.tsx')) &&
+      !existsSync(resolve(root, 'src/components/carrier/BakLogistics.tsx')) &&
+      !existsSync(resolve(root, 'src/components/layout/CarrierShell.tsx')) &&
+      !existsSync(resolve(root, 'src/components/admin/CarrierMonitor.tsx')));
+  test('§P9 the carrier-event console is rehomed on the admin Logistics Hub',
+    readFileSync(resolve(root, 'src/components/admin/LogisticsControl.tsx'), 'utf8')
+      .includes('dataTable="carrier-manifest"') &&
+      readFileSync(resolve(root, 'src/components/admin/LogisticsControl.tsx'), 'utf8')
+        .includes('DHL status → next milestone (sim)'));
 
   // Messages Hub renders threads incl. brand name + subjects.
   const messagesHtml = await renderView('/src/components/admin/MessagesHub.tsx');

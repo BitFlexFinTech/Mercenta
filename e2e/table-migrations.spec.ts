@@ -71,12 +71,20 @@ test.describe('Phase D — migrated operational tables', () => {
     expect(await overflow(page)).toBeLessThanOrEqual(1);
   });
 
-  test('2. the carrier manifest keeps its interactive milestone select on a phone and the canonical status follows it', async ({
+  /**
+   * §P9 (programme decision 4) — REPOINTED from the carrier terminal. The only
+   * migrated table whose control WRITES domain state is still the carrier
+   * manifest, but it now belongs to the Mercenta Admin Logistics Hub (a carrier
+   * never logs into Mercenta). Same structural hooks, same mobile contract: the
+   * labelled card list below md, a live milestone select, and the row's own
+   * canonical status following it.
+   */
+  test('2. the carrier console keeps its interactive milestone select on a phone and the canonical status follows it', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await loginAs(page, '3PL Carrier Terminal', 1100);
-    await openNav(page, 'Manifest Management');
+    await loginAs(page, 'Mercenta Admin Hub', 1100);
+    await openNav(page, 'Logistics Hub');
 
     const cards = page.locator('ul[aria-label="Carrier manifest"]');
     await expect(cards).toBeVisible({ timeout: 8000 });

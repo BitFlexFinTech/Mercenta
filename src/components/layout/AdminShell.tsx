@@ -11,7 +11,11 @@ import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
 import { currentPathname, pushProductPath, resolveProductView } from '@/lib/runtime/productRoutes';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { LogisticsControl } from '@/components/admin/LogisticsControl';
-import { CarrierIntegrationMonitor } from '@/components/admin/CarrierMonitor';
+/* §P9 (programme decision 4) — `import { CarrierIntegrationMonitor } from
+   '@/components/admin/CarrierMonitor'` is REMOVED: the admin "Carrier Monitor"
+   destination (matrix D04-18 / D10-13) is gone. Provider/connection health is
+   owned by the canonical Integrations surface (`IntegrationsPanel`), which reads
+   the provider-mode registry rather than a second, hand-written health feed. */
 import { BrandCRM } from '@/components/admin/BrandCRM';
 import { CatalogManagerAdmin } from '@/components/admin/CatalogManagerAdmin';
 import { ComplianceApprovals } from '@/components/admin/ComplianceApprovals';
@@ -48,7 +52,7 @@ import { usePurchaseOrders } from '@/data/queries';
 import type { CommandGroup } from '@/components/shared/CommandPalette';
 import type { AdminDepartment } from '@/types';
 import {
-  LayoutDashboard, Users, Gauge, Boxes, Package, Truck, Plug,
+  LayoutDashboard, Users, Gauge, Boxes, Package, Truck,
   ShieldCheck, CreditCard, FileText, Inbox, LifeBuoy, RotateCcw,
   Activity, Target, Crown, ScrollText, PlugZap, MessageSquare,
   Phone, ClipboardList, Handshake, Megaphone, ListChecks, CalendarDays,
@@ -75,9 +79,11 @@ const ADMIN_SECTIONS = [
     /**
      * §Dashboard-cleanup P1 — OPERATIONS IS THE ACTION CENTRE.
      * Every queue an operator acts on sits here: the work layer, purchase-order
-     * processing, consignments and their documents, returns, carrier/provider
-     * state and the operational calendar. Observe-only surfaces live in Overview;
-     * commercial pipelines live in Commerce.
+     * processing, consignments and their documents, returns and the operational
+     * calendar. Observe-only surfaces live in Overview; commercial pipelines live
+     * in Commerce.
+     * §P9 repoint: the old contract also declared "carrier/provider state" here
+     * as the `Carrier Monitor` destination — removed with the carrier surface.
      */
     label: 'Operations',
     items: [
@@ -85,7 +91,6 @@ const ADMIN_SECTIONS = [
       { id: 'purchase_orders_admin', label: 'Purchase Orders', icon: <Package className="w-4 h-4" /> },
       { id: 'logistics', label: 'Logistics Hub', icon: <Truck className="w-4 h-4" /> },
       { id: 'returns_tracking', label: 'Returns Tracking', icon: <RotateCcw className="w-4 h-4" /> },
-      { id: 'carriers', label: 'Carrier Monitor', icon: <Plug className="w-4 h-4" /> },
       { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
     ],
   },
@@ -257,11 +262,13 @@ export default function AdminShell() {
     },
   ];
 
-  const deptMap: Record<string, AdminDepartment> = { overview: 'business_dev', crm: 'business_dev', logistics: 'logistics', carriers: 'logistics', compliance: 'compliance' };
+  /* §P9 repoint — the `carriers: 'logistics'` department mapping and the
+     `carriers: 'Carrier Monitor'` breadcrumb are REMOVED with the destination. */
+  const deptMap: Record<string, AdminDepartment> = { overview: 'business_dev', crm: 'business_dev', logistics: 'logistics', compliance: 'compliance' };
   const breadcrumb: Record<string, string> = {
     overview: 'Admin Overview', crm: 'Brand CRM', fulfillment_track: 'Fulfillment Track', retail_pipeline: 'Retail Pipeline', purchase_orders_admin: 'Purchase Orders',
     billing: 'Billing', messages: 'Messages', helpdesk: 'Helpdesk', returns_tracking: 'Returns Tracking', monitoring: 'Monitoring',
-    contracts_admin: 'Contract Cycle', catalog: 'Global Catalog', logistics: 'Logistics Hub', carriers: 'Carrier Monitor',
+    contracts_admin: 'Contract Cycle', catalog: 'Global Catalog', logistics: 'Logistics Hub',
     compliance: 'Compliance Approvals', marketing: 'Marketing', brand_intelligence: 'Brand Intelligence', super_admin: 'Super Admin', audit_log: 'Audit Log',
     amazon_ads: 'Ad Spend',
     integrations: 'Integration Settings', usertour: 'Onboarding Tours', postiz: 'Social Media',
@@ -310,7 +317,10 @@ export default function AdminShell() {
           {adminView === 'monitoring' && <MonitoringDashboard />}
           {adminView === 'catalog' && <CatalogManagerAdmin />}
           {adminView === 'logistics' && <LogisticsControl />}
-          {adminView === 'carriers' && <CarrierIntegrationMonitor />}
+          {/* §P9 (programme decision 4) — `{adminView === 'carriers' && <CarrierIntegrationMonitor />}`
+              is REMOVED. The retired destination rendered a hand-written per-carrier
+              health feed (including FedEx/BAK, which are not Mercenta accounts).
+              Provider connection health lives on the Integrations surface. */}
           {adminView === 'compliance' && <ComplianceApprovals />}
           {adminView === 'marketing' && <MarketingHub />}
           {adminView === 'amazon_ads' && <AmazonAdsDashboard />}

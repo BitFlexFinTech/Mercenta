@@ -16,9 +16,11 @@ import type { CarrierId, CarrierRouteDecision, FreightTerm, ShippingLane } from 
 import {
   AMAZON_PARTNERED_CARRIER,
   MERCENTA_CARRIER_ACCOUNTS,
+  RETIRED_CARRIER_IDS,
   SHIPPING_CARRIER_ROUTING,
   SHIPPING_LANE_LABELS,
   UK_DOMESTIC_NATION_ALIASES,
+  isRetiredCarrier,
 } from '@/config/shipping';
 import {
   isCarrierSelectable,
@@ -185,12 +187,23 @@ export function validateCarrierForShipment(input: CarrierValidationInput): Carri
     return { ok: false, expected: decision.carrier, error: selectable.error };
   }
 
+  /**
+   * §P9 (programme decision 1) — a RETIRED carrier is refused FIRST and BY NAME.
+   * `fedex`/`bak` are no longer `CarrierId`s and no longer appear in the labels
+   * or the capability table, but the business model still requires that a carrier
+   * which is not a Mercenta account is refused — so the refusal names the
+   * register (`RETIRED_CARRIER_IDS`) rather than reading as a typo.
+   */
   return {
     ok: false,
     expected: decision.carrier,
-    error:
-      `Carrier "${input.carrier}" is not a Mercenta carrier account. ` +
-      `Shipping is routed by rule: international → DHL, UK domestic → Palletline ` +
-      `(this shipment resolves to ${decision.carrier}).`,
+    error: isRetiredCarrier(input.carrier)
+      ? `Carrier "${input.carrier}" is a RETIRED carrier — Mercenta holds no account with it ` +
+        `(register: ${RETIRED_CARRIER_IDS.join(', ')}). ` +
+        `Shipping is routed by rule: international → DHL, UK domestic → Palletline ` +
+        `(this shipment resolves to ${decision.carrier}).`
+      : `Carrier "${input.carrier}" is not a Mercenta carrier account. ` +
+        `Shipping is routed by rule: international → DHL, UK domestic → Palletline ` +
+        `(this shipment resolves to ${decision.carrier}).`,
   };
 }

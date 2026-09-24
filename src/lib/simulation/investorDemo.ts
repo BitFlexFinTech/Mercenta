@@ -193,6 +193,9 @@ import { getProspects, getAcquisitionLeads } from '@/data/prospectStore';
 import { resolveOutreachTransport } from '@/lib/acquisition/outreachSender';
 import * as routing from '@/lib/shipping/carrierRouting';
 import * as calc from '@/lib/shipping/shippingCalculator';
+/* §P9 (programme decision 1) — the declared RETIRED carrier ids, used to prove
+   that a carrier which is not a Mercenta account is still refused. */
+import { RETIRED_CARRIER_IDS } from '@/config/shipping';
 import {
   beginCaseReview,
   createCase,
@@ -1308,7 +1311,11 @@ export async function runInvestorDemo(
     if (foreign.ok) throw new Error('another tenant created a shipment from this PO');
     const nonCanonical = createShipmentForPO(
       poId,
-      { ...asn, carrier: 'fedex' as CarrierId },
+      /* §P9 repoint (decision 1 / matrix D04-18) — the non-canonical-carrier probe
+         uses the DECLARED retired id: `fedex`/`bak` are no longer `CarrierId`s and
+         no longer appear in the labels or the capability table, but a carrier that
+         is not a Mercenta account must still be REFUSED. */
+      { ...asn, carrier: RETIRED_CARRIER_IDS[0] ?? 'fedex' },
       undefined,
       tenant
     );
@@ -2132,14 +2139,22 @@ export async function runInvestorDemo(
     if (!operatorAllowed.ok) throw new Error('the operator account was blocked');
 
     // (e) Tier matrix — environments and nav views (the real RBAC module).
+    //
+    // §P9 repoint (programme decision 4) — the old contract asserted
+    // `brandCannotEnterCarrier` (`canAccessEnvironment('brand','carrier')`),
+    // `carrierHasNoCrm` and `carrierHasManifest` (tier `'3pl'`). The carrier
+    // environment, the carrier tier and the `'carriers'` nav view are ALL
+    // removed, so those three checks are replaced by the same KINDS of proof
+    // against what still exists: a brand may not enter an admin-only nav view,
+    // may not see the super-admin view, and MAY enter its own logistics view.
     const matrix: Record<string, boolean> = {
       brandCannotEnterAdmin: canAccessEnvironment('brand', 'admin') === false,
-      brandCannotEnterCarrier: canAccessEnvironment('brand', 'carrier') === false,
       brandCannotSeeSuperAdminView: canAccessView('brand', 'super_admin') === false,
       brandCannotSeeIntegrationsView: canAccessView('brand', 'integrations') === false,
+      brandCannotSeeCarrierMonitorView: canAccessView('brand', 'carriers') === false,
       adminStaffCannotSeeSuperAdminView: canAccessView('admin_staff', 'super_admin') === false,
-      carrierHasNoCrm: canAccessView('3pl', 'crm') === false,
-      carrierHasManifest: canAccessView('3pl', 'manifest') === true,
+      adminStaffHasNoSuperAdminEnv: canAccessEnvironment('admin_staff', 'brand') === false,
+      brandHasOwnLogistics: canAccessView('brand', 'logistics') === true,
       brandHasOwnOrders: canAccessView('brand', 'purchase_orders') === true,
       superAdminHasEverything: canAccessView('super_admin', 'integrations') === true,
     };

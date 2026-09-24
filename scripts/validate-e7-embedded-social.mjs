@@ -931,6 +931,85 @@ try {
     'package.json',
   ];
 
+  /**
+   * §P9 — CARRIER-REMOVAL DECLARED SURFACE (2026-09-23, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P9).
+   *
+   * Decision 4 removes the 3PL carrier surface COMPLETELY (environment, role,
+   * shell + its three views, `CarrierDashboard`, `BakLogistics`, the demo switcher
+   * entry, the "3PL Carrier Terminal" login card, the admin "Carrier Monitor", the
+   * public FAQ claim, the affected documents), and decision 1 removes the
+   * `fedex`/`bak` carrier identity from the type, the labels and the capability
+   * table. The carrier-event capability is REHOMED on the Mercenta admin Logistics
+   * Hub rather than deleted. The E7 guard's contract is UNCHANGED: a changed
+   * source/test file outside EVERY declared set is still refused.
+   */
+  const P9_CARRIER_REMOVAL_DECLARED = [
+    'src/types.ts',                             // PROTECTED prefix — declared
+    'src/lib/auth/rbac.ts',
+    'src/lib/runtime/productRoutes.ts',
+    'src/lib/runtime/sessionPersistence.ts',
+    'src/lib/seo/routeMetadata.ts',
+    'src/lib/seo/publicRoutes.ts',
+    'src/App.tsx',
+    'src/context/GlobalStateContext.tsx',
+    /* DELETED with the carrier surface */
+    'src/components/layout/CarrierShell.tsx',
+    'src/components/carrier/CarrierDashboard.tsx',
+    'src/components/carrier/BakLogistics.tsx',
+    'src/components/admin/CarrierMonitor.tsx',
+    /* Repointed (incl. the rehomed carrier console) */
+    'src/components/layout/AdminShell.tsx',
+    'src/components/layout/EnvironmentRouter.tsx',
+    'src/components/layout/Sidebar.tsx',
+    'src/components/auth/Login.tsx',
+    'src/components/admin/LogisticsControl.tsx',
+    'src/components/admin/FounderControlCentre.tsx',
+    'src/components/admin/SuperAdminPanel.tsx',
+    'src/components/brand/LogisticsHub.tsx',
+    'src/components/brand/OnboardingWizard.tsx',
+    'src/components/marketing/FAQ.tsx',
+    'src/components/marketing/HowItWorks.tsx',
+    'src/components/marketing/UKMarketAccess.tsx',
+    /* Carrier identity (decision 1) + affected demo data */
+    'src/config/shipping.ts',
+    'src/lib/shipping/carrierRouting.ts',
+    'src/lib/shipping/shippingCalculator.ts',
+    'src/data/bootstrap.ts',
+    'src/data/brandDossiers.ts',
+    'src/data/demoStore.ts',
+    'src/data/api.ts',
+    'src/lib/simulation/investorDemo.ts',
+    /* Gates + specs repointed */
+    'e2e/app-shell.spec.ts',
+    'e2e/compliance-sim.spec.ts',
+    'e2e/multi-tenant.spec.ts',
+    'e2e/runtime-entry.spec.ts',
+    'e2e/shipment-asn.spec.ts',
+    'e2e/status-semantics.spec.ts',
+    'e2e/table-migrations.spec.ts',
+    'scripts/integrity-audit.mjs',
+    'scripts/runtime-sweep.mjs',
+    'scripts/live-demo-check.mjs',
+    'scripts/forensic-screenshots.mjs',
+    'scripts/validate-product-routes.mjs',
+    'scripts/validate-review-s6.mjs',
+    'scripts/validate-stage16.mjs',
+    'scripts/validate-stage26.mjs',
+    'scripts/validate-workspace-shell.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/verify-demo-live.mjs',
+    /* Documentation + state sources */
+    'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+    'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+    'requirements-registry.json',
+    'PRODUCTION_READINESS.md',
+  ];
+
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -1090,6 +1169,12 @@ try {
      * changed source/test file outside EVERY declared set is still refused.
      */
     ...P8_INVENTORY_DECLARED,
+    /**
+     * §P9 — REPOINTED (not weakened). The carrier-removal phase's declared surface
+     * is accepted here exactly as every earlier phase's is; a changed source/test
+     * file outside EVERY declared set is still refused.
+     */
+    ...P9_CARRIER_REMOVAL_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

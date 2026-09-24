@@ -26,11 +26,16 @@
  * RBAC allowlist (`canAccessEnvironment`) remains the ONLY gate on a session.
  */
 
-/** The three product environments and their address prefixes. */
+/**
+ * §P9 (programme decision 4) — THE TWO PRODUCT ENVIRONMENTS AND THEIR ADDRESS
+ * PREFIXES. REPOINTED from the old contract, which declared a third,
+ * `carrier: '/carrier'`. A carrier never logs into Mercenta (DHL + Palletline are
+ * operated by API), so `/carrier/…` is no longer a product address and now fails
+ * closed to `null` like any other unknown path.
+ */
 export const PRODUCT_ENVIRONMENT_PREFIXES = {
   admin: '/admin',
   brand: '/brand',
-  carrier: '/carrier',
 } as const;
 
 export type ProductEnvironment = keyof typeof PRODUCT_ENVIRONMENT_PREFIXES;
@@ -39,7 +44,6 @@ export type ProductEnvironment = keyof typeof PRODUCT_ENVIRONMENT_PREFIXES;
 export const PRODUCT_DEFAULT_VIEW: Record<ProductEnvironment, string> = {
   admin: 'overview',
   brand: 'overview',
-  carrier: 'manifest',
 };
 
 export interface ParsedProductPath {

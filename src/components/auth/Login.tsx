@@ -11,7 +11,6 @@ import {
   ArrowLeft,
   Building2,
   ShieldCheck,
-  Truck,
   ArrowRight,
   Lock,
   Crown,
@@ -63,14 +62,6 @@ const OPS_LOGINS: {
     color: 'border-blue-500/30 hover:bg-blue-500/10 text-blue-400',
     environment: 'admin',
     role: 'Mercenta Admin',
-  },
-  {
-    label: '3PL Carrier Terminal',
-    description: 'DHL / FedEx / BAK manifest & tracking desk',
-    icon: Truck,
-    color: 'border-amber-500/30 hover:bg-amber-500/10 text-amber-400',
-    environment: 'carrier',
-    role: '3PL Carrier',
   },
   {
     label: 'Super Admin — Tadii',

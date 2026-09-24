@@ -4,8 +4,11 @@
  *  - Super Admin Compliance tab: Companies House verify + HMRC sync/file
  *    run through the simulation adapters and produce visible domain state;
  *    the run makes ZERO external network calls;
- *  - Carrier terminal DHL control: requesting a DHL status update advances
- *    the milestone through the simulation and reflects in the terminal DOM.
+ *  - Carrier console DHL control (on the MERCENTA admin Logistics Hub): requesting
+ *    a DHL status update advances the milestone through the simulation and
+ *    reflects in the console DOM. §P9 (programme decision 4) — REPOINTED from the
+ *    removed 3PL carrier terminal: a carrier never logs into Mercenta, so the
+ *    control now belongs to the surface that operates the carrier account.
  *
  * Uses the canonical login helper (e2e/helpers/auth.ts).
  */
@@ -62,15 +65,19 @@ test.describe('Compliance simulation — Super Admin panel', () => {
   });
 });
 
-test.describe('Carrier terminal — DHL simulated milestone', () => {
+test.describe('Carrier console — DHL simulated milestone (admin logistics)', () => {
   test('DHL status button advances the shipment milestone (simulated)', async ({ page }) => {
-    await loginAs(page, '3PL Carrier Terminal');
-    await page.waitForTimeout(500);
-    await expect(page.locator('text=Manifest Management').first()).toBeVisible({ timeout: 8000 });
+    /* §P9 (programme decision 4) — REPOINTED from the 3PL carrier terminal: log in
+       as the MERCENTA admin and open the Logistics Hub, where the rehomed carrier
+       console lives. The behaviour under test is unchanged. */
+    await loginAs(page, 'Mercenta Admin Hub');
+    await page.click('nav >> text=Logistics Hub');
+    await page.waitForTimeout(1200);
+    await expect(page.locator('text=Carrier API console').first()).toBeVisible({ timeout: 8000 });
     const btn = page.locator('button:has-text("DHL status → next milestone (sim)")').first();
     await expect(btn).toBeVisible({ timeout: 8000 });
     await btn.click();
-    // The terminal result line (mono font) shows the milestone transition.
+    // The console result line (mono font) shows the milestone transition.
     await expect(page.locator('div.font-mono', { hasText: '→' }).first()).toBeVisible({ timeout: 12000 });
   });
 });

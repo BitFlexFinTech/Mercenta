@@ -40,11 +40,27 @@ export interface PersistedSession {
   tenantId?: string;
 }
 
-const TIERS: readonly SessionTier[] = ['brand', 'admin_staff', 'super_admin', '3pl'];
-const ROLES: readonly SessionRole[] = ['Brand Partner', 'Mercenta Admin', 'Super Admin', '3PL Carrier'];
-const ENVIRONMENTS: readonly Environment[] = ['home', 'login', 'brand', 'admin', 'carrier'];
+/**
+ * §P9 (programme decision 4) — REPOINTED. The old contract was
+ * `TIERS: […, '3pl']`, `ROLES: […, '3PL Carrier']`,
+ * `ENVIRONMENTS: ['home','login','brand','admin','carrier']`.
+ * A carrier session, role and environment no longer exist, so a STALE persisted
+ * value carrying any of them is now REJECTED on restore (fail-closed) instead of
+ * being restored into a shell that is gone.
+ */
+const TIERS: readonly SessionTier[] = ['brand', 'admin_staff', 'super_admin'];
+const ROLES: readonly SessionRole[] = ['Brand Partner', 'Mercenta Admin', 'Super Admin'];
+const ENVIRONMENTS: readonly Environment[] = ['home', 'login', 'brand', 'admin'];
 
-function isPersistedSession(value: unknown): value is PersistedSession {
+/**
+ * Shape + allowlist check for a persisted session.
+ *
+ * Exported deliberately: it is PURE, and `scripts/validate-product-routes.mjs`
+ * asserts through it that a STALE value carrying a removed environment/role/tier
+ * (the §P9-removed carrier session) is refused, rather than trusting a source
+ * text match on this file.
+ */
+export function isPersistedSession(value: unknown): value is PersistedSession {
   if (!value || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
   return (

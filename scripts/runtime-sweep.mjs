@@ -12,12 +12,14 @@ const ROLES = [
   { card: 'Mercenta Admin Hub', view: 'admin' },
   { card: 'Astonish', view: 'brand' },
   { card: 'Tapatío', view: 'brand' },
-  { card: '3PL Carrier Terminal', view: 'carrier' },
+  /* §P9 (programme decision 4) — REPOINTED: `{ card: '3PL Carrier Terminal',
+     view: 'carrier' }` is REMOVED. There is no carrier login and no carrier
+     shell, so there is no carrier surface to sweep. */
 ];
 
 function labelOf(role) {
   const brand = role.view === 'brand' ? ' ✓brand' : '';
-  const tab = { 'super admin': 'SuperAdmin / Admin', admin: 'Admin', brand: 'Brand' + brand, carrier: 'Carrier' }[role.view];
+  const tab = { 'super admin': 'SuperAdmin / Admin', admin: 'Admin', brand: 'Brand' + brand }[role.view];
   return tab || role.view;
 }
 

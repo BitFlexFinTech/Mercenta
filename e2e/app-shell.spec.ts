@@ -12,7 +12,7 @@
  * Dev server started by playwright.config.ts (npm run dev, :5173).
  */
 import { test, expect } from '@playwright/test';
-import { loginAs as loginAsPortal } from './helpers/auth';
+import { loginAs as loginAsPortal, openLogin } from './helpers/auth';
 
 const SHOTS = 'test-screenshots/app-shell';
 
@@ -33,12 +33,15 @@ test.describe('App Shell — role coverage & grouped IA', () => {
     }
     for (const item of ['Brand CRM', 'Marketing', 'Brand Intelligence', 'Global Catalog',
       'Fulfillment Track', 'Retail Pipeline', 'Purchase Orders', 'Returns Tracking',
-      'Billing', 'Contract Cycle', 'Logistics Hub', 'Carrier Monitor',
+      'Billing', 'Contract Cycle', 'Logistics Hub',
       'Compliance Approvals', 'Messages', 'Helpdesk', 'Monitoring',
       'Super Admin', 'Audit Log', 'Onboarding Tours',
       'Integration Settings', 'Social Media', 'WhatsApp']) {
       await expect(nav.locator(`text=${item}`).first()).toBeVisible();
     }
+    /* §P9 (programme decision 4) — REPOINTED: 'Carrier Monitor' was in the list
+       above and is now asserted ABSENT (the destination is removed). */
+    await expect(nav.locator('text=Carrier Monitor')).toHaveCount(0);
   });
 
   test('Admin — grouped IA renders', async ({ page }) => {
@@ -68,18 +71,31 @@ test.describe('App Shell — role coverage & grouped IA', () => {
     }
   });
 
-  test('Carrier — three items, no section headings, correct default', async ({ page }) => {
-    await loginAs(page, '3PL Carrier Terminal');
+  /**
+   * §P9 (programme decision 4) — REPOINTED from 'Carrier — three items, no section
+   * headings, correct default'. That test drove the carrier shell's three nav
+   * items (Manifest Management / BAK Logistics Hub / API Request Auditor). The
+   * whole surface is REMOVED — a carrier never logs into Mercenta — so the
+   * assertion is now the REMOVAL contract: no carrier login card, no carrier nav
+   * and no carrier address (fail-closed at the address layer).
+   */
+  test('§P9 the carrier surface is gone: no login card, no nav, no address', async ({ page }) => {
+    await openLogin(page);
+    await expect(page.locator('text=3PL Carrier Terminal')).toHaveCount(0);
+    await expect(page.locator('text=Manifest Management')).toHaveCount(0);
+
+    await page.goto('/carrier/manifest');
+    /* A removed product address is NOT an address: it resolves to the public site
+       (fail-closed), so the assertion is that the PUBLIC entry renders and no
+       carrier surface exists — not a guessed shell. */
+    await expect(page.getByRole('button', { name: 'Partner Login' }).first()).toBeVisible({
+      timeout: 10000,
+    });
     const nav = page.locator('nav[aria-label="Primary"]');
-    await expect(nav.locator('text=Manifest Management').first()).toBeVisible();
-    await expect(nav.locator('text=BAK Logistics Hub').first()).toBeVisible();
-    await expect(nav.locator('text=API Request Auditor').first()).toBeVisible();
-    // No section headings for the three-item carrier nav.
-    await expect(nav.locator('p').first()).not.toBeVisible();
-    // Carrier-specific brand/admin items must not be present.
-    await expect(nav.locator('text=Brand CRM')).toHaveCount(0);
-    await expect(nav.locator('text=Billing')).toHaveCount(0);
-    await expect(nav.locator('text=Purchase Orders')).toHaveCount(0);
+    await expect(nav).toHaveCount(0);
+    await expect(page.locator('text=BAK Logistics Hub')).toHaveCount(0);
+    await expect(page.locator('text=API Request Auditor')).toHaveCount(0);
+    await expect(page.locator('text=Carrier Monitor')).toHaveCount(0);
   });
 test.describe('App Shell — active state, breadcrumbs, grouping', () => {
   test('Super Admin — active item has aria-current + data-state; breadcrumb updates', async ({ page }) => {
@@ -127,7 +143,9 @@ test.describe('App Shell — active state, breadcrumbs, grouping', () => {
     await expect(operations).toContainText('Purchase Orders');
     await expect(operations).toContainText('Logistics Hub');
     await expect(operations).toContainText('Returns Tracking');
-    await expect(operations).toContainText('Carrier Monitor');
+    /* §P9 — REPOINTED: 'Carrier Monitor' was asserted present here; the
+       destination is removed, so it is asserted absent instead. */
+    await expect(operations).not.toContainText('Carrier Monitor');
     await expect(operations).toContainText('Calendar');
     // The old home for these queues no longer holds them.
     const commerce = nav.locator('div', { hasText: 'Commerce' }).first();

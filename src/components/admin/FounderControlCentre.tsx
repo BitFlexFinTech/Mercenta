@@ -579,7 +579,9 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               §P3 — the operational WORK list that used to be rendered here is
               GONE (it duplicated the single action list). Operations is worked in
               the Operations group: Work Management (the single action list),
-              Purchase Orders, Logistics Hub, Returns Tracking, Carrier Monitor.
+              Purchase Orders, Logistics Hub, Returns Tracking.
+              §P9 repoint: the old contract also named Carrier Monitor, removed with
+              the carrier surface.
               The metrics above still observe the position.
             */}
             <Queue
@@ -587,7 +589,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               empty={
                 <EmptyState
                   title="Operational work lives in the Operations group"
-                  description="Work Management is the single action list (it also carries the founder console). Purchase Orders, Logistics Hub, Returns Tracking and Carrier Monitor own their own records — the metrics above are derived from the same records."
+                  description="Work Management is the single action list (it also carries the founder console). Purchase Orders, Logistics Hub and Returns Tracking own their own records — the metrics above are derived from the same records."
                 />
               }
             />

@@ -5,7 +5,14 @@
  */
 import type { CommercialModelSelection } from '@/config/commercialModel';
 
-export type Environment = 'home' | 'login' | 'brand' | 'admin' | 'carrier';
+/**
+ * §P9 (programme decision 4) — the `carrier` environment is REMOVED. A carrier
+ * never logs into Mercenta: Mercenta operates DHL + Palletline **by API**, so
+ * there is no carrier session, no carrier shell and no carrier login. REPOINTED
+ * from the old contract `'home' | 'login' | 'brand' | 'admin' | 'carrier'`
+ * (matrix `D01-07` / `D10-13`).
+ */
+export type Environment = 'home' | 'login' | 'brand' | 'admin';
 
 /**
  * §13 — The only valid product categories anywhere a category can be selected
@@ -35,11 +42,15 @@ export function isApprovedCategory(value: unknown): value is ApprovedCategory {
   );
 }
 
+/**
+ * §P9 (programme decision 4) — the `'3PL Carrier'` role is REMOVED with the
+ * carrier surface it belonged to. REPOINTED from the old contract
+ * `… | 'Super Admin' | '3PL Carrier'`.
+ */
 export type SessionRole =
   | 'Brand Partner'
   | 'Mercenta Admin'
-  | 'Super Admin'
-  | '3PL Carrier';
+  | 'Super Admin';
 
 export type AdminDepartment = 'business_dev' | 'logistics' | 'compliance' | 'super_admin';
 
@@ -49,7 +60,6 @@ export type StaffRole =
   | 'Logistics Coordinator'
   | 'Cross-Border Logistics Lead'
   | 'UK HMRC Compliance Specialist'
-  | 'Harare BAK Depot Lead'
   | 'Carrier Integration Manager';
 
 export interface StaffMember {
@@ -63,7 +73,14 @@ export interface StaffMember {
   permissionTier: import('./types').StaffPermissionTier;
 }
 
-export type CarrierId = 'dhl' | 'fedex' | 'bak' | 'palletline';
+/**
+ * §P9 (programme decision 1) — carriers are DHL + Palletline ONLY. `fedex` and
+ * `bak` are no longer carrier identities: they appear nowhere in the type, the
+ * labels, the lane-capability table or the UI. Their REFUSAL is still proven —
+ * see `src/config/shipping.ts → RETIRED_CARRIER_IDS`. REPOINTED from the old
+ * contract `'dhl' | 'fedex' | 'bak' | 'palletline'`.
+ */
+export type CarrierId = 'dhl' | 'palletline';
 
 /**
  * §P5 — THE MERCENTA HUB IS REMOVED AS A SHIPMENT STAGE.
@@ -105,6 +122,35 @@ export const STAGE_ORDER: ShipmentStage[] = [
   'live_amazon',
 ];
 
+/**
+ * §P9 — THE ONE owner of the shipment STATUS → STAGE mapping.
+ *
+ * WHY THIS MOVED HERE
+ * -------------------
+ * The mapping lived as a private function inside `GlobalStateContext`
+ * (`statusToStage`), while the canonical conformance collection
+ * (`src/data/demoStore.ts → demoShipments`) never had its `stage` updated at all.
+ * A milestone change therefore produced two different records for the same
+ * consignment: the context copy moved stage, the canonical copy did not — so a
+ * page reading one and writing the other could show a control whose value never
+ * changed. Declaring the mapping HERE (next to `STATUS_LABELS` / `STAGE_LABELS`,
+ * the canonical status vocabulary) gives the writer in `demoStore` and the
+ * context the SAME derivation, so they cannot drift.
+ *
+ * `bak_depot` remains a STAGE id (the mid-transit 'in the carrier network' state);
+ * it is not a carrier identity (decision 1 removed `bak` as a carrier).
+ */
+export const STATUS_TO_STAGE: Record<ShipmentStatus, ShipmentStage> = {
+  factory_intake: 'factory_intake',
+  bak_depot: 'bak_depot',
+  sea_transit: 'international_forwarding',
+  air_transit: 'international_forwarding',
+  uk_customs_cleared: 'uk_port_hmrc',
+  /** §P5 — the hub stage is gone; arrival at the PO's destination FC replaces it. */
+  destination_fc: 'destination_fc',
+  live_amazon: 'live_amazon',
+};
+
 export type ShipmentStatus =
   | 'factory_intake'
   | 'bak_depot'
@@ -116,7 +162,7 @@ export type ShipmentStatus =
 
 export const STATUS_LABELS: Record<ShipmentStatus, string> = {
   factory_intake: 'Factory Intake',
-  bak_depot: 'In BAK Depot',
+  bak_depot: 'In the carrier network',
   sea_transit: 'Sea Transit',
   air_transit: 'Air Transit',
   uk_customs_cleared: 'UK Customs Cleared',
@@ -127,8 +173,9 @@ export const STATUS_LABELS: Record<ShipmentStatus, string> = {
 /* §Phase D2 — the per-status colour map that lived here (STATUS_COLORS) was
    deleted: shipment status presentation now comes from the canonical layer
    (src/lib/statusPresentation.ts → shipmentStatusPresentation), so the brand
-   logistics hub and the carrier dashboard can no longer render the same domain
-   status differently. */
+   logistics hub and the admin logistics workspace can no longer render the same
+   domain status differently. (§P9 repoint: the old contract named the carrier
+   dashboard, which no longer exists.) */
 
 export interface Shipment {
   id: string;
@@ -926,8 +973,6 @@ export interface BrandProfile {
   iban: string;
   payoutCurrency: string;
   dhlConnected: boolean;
-  fedexConnected: boolean;
-  bakConnected: boolean;
   onboarded: boolean;
   /** §5 — fulfillment track assigned to this brand */
   fulfillmentTrack: FulfillmentTrack;
@@ -947,10 +992,12 @@ export interface BrandProfile {
 }
 export type DemoRegion = 'uk' | 'usa' | 'europe';
 
+/**
+ * §P9 (programme decision 1) — only Mercenta's two carrier accounts hold tokens.
+ * REPOINTED from the old contract `{ dhl?; fedex?; bak? }`.
+ */
 export interface CarrierTokens {
   dhl?: string;
-  fedex?: string;
-  bak?: string;
 }
 
 export type FinancialCurrency = 'USD' | 'EUR' | 'GBP' | 'ZWL';

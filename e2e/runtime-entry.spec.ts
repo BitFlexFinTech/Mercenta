@@ -13,7 +13,7 @@
  *   3  after the one-click demo login the REQUESTED destination renders
  *   4  F5 in place stays in place (the regression test for the silent sign-out)
  *   5  Back/Forward move between product views
- *   6  the declared destination of every carrier nav item is honoured
+ *   6  the removed carrier address is REFUSED (fail-closed at the address layer)
  *   7  a tier that may not enter an environment is refused (AccessDenied)
  *   8  a tampered/unknown persisted session fails CLOSED
  *   9  a public address stays public even with a live session
@@ -176,25 +176,30 @@ test.describe('§RUNTIME PARITY — entry, addressing and refresh', () => {
     await expect(page.getByTestId('brain-canvas')).toBeVisible({ timeout: 15000 });
   });
 
-  test('6. every carrier nav destination is honoured at its own address', async ({ page }) => {
-    await openLogin(page);
-    await page.click('text=3PL Carrier Terminal');
-    await page.waitForTimeout(1800);
-    expect(new URL(page.url()).pathname).toBe('/carrier/manifest');
-
-    const nav = page.locator('nav[aria-label="Primary"]');
-    await nav.getByRole('button', { name: 'BAK Logistics Hub', exact: true }).click();
-    await page.waitForTimeout(800);
-    expect(new URL(page.url()).pathname).toBe('/carrier/bak');
-
-    // §RUNTIME PARITY — the API Request Auditor used to render the manifest
-    // terminal unchanged (a control whose outcome did not match its label). The
-    // declared destination is now honoured: the terminal opens AT the auditor.
-    await nav.getByRole('button', { name: 'API Request Auditor', exact: true }).click();
-    await page.waitForTimeout(800);
-    expect(new URL(page.url()).pathname).toBe('/carrier/auditor');
-    await expect(page.getByTestId('carrier-auditor-section')).toHaveAttribute('data-focus', 'auditor');
-    await expect(page.getByText('API Request Auditor').first()).toBeVisible();
+  /**
+   * §P9 (programme decision 4) — REPOINTED from 'every carrier nav destination is
+   * honoured at its own address', which drove the removed carrier shell
+   * (`/carrier/manifest` → `/carrier/bak` → `/carrier/auditor`). There is no
+   * carrier environment any more, so the address-layer contract to prove is the
+   * opposite one: the removed prefix is NOT a product address and fails CLOSED to
+   * the login entry — never a guessed environment and never a resurrected shell.
+   */
+  test('6. the removed carrier address fails closed (no carrier shell exists)', async ({ page }) => {
+    /**
+     * §P9 (programme decision 4) — the removed prefix is NOT a product address, so
+     * the address layer resolves it the way it resolves any non-product path: the
+     * PUBLIC site. That is the fail-closed outcome — never a guessed environment,
+     * and never a resurrected carrier shell. (`/carrier/manifest` is additionally
+     * `noindex` at the SEO layer, asserted by `validate-product-routes`.)
+     */
+    await page.goto('/carrier/manifest');
+    await expect(page.getByRole('button', { name: 'Partner Login' }).first()).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.locator('nav[aria-label="Primary"]')).toHaveCount(0);
+    await expect(page.locator('text=Manifest Management')).toHaveCount(0);
+    await expect(page.locator('text=BAK Logistics Hub')).toHaveCount(0);
+    await expect(page.locator('text=3PL Carrier Terminal')).toHaveCount(0);
   });
 
   test('7. a tier that may not enter an environment is refused (AccessDenied, not the panel)', async ({ page }) => {

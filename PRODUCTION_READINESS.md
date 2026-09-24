@@ -48,11 +48,17 @@ nothing was re-labelled live.**
   (`src/lib/commerce/receivingStatus.ts`, `AV-018`) and gates invoicing — an unreceived PO cannot be invoiced (fail
   closed). **Honest limit:** reading the CHANNEL's own `receivingStatus` is `getPurchaseOrdersStatus`, which is
   **P12's** declared scope; the platform never claims a live channel reading.
-- **Carriers are DHL + Palletline BY API ONLY (P9/P10).** Mercenta connects the carrier APIs itself; **a carrier never
-  logs into Mercenta**, so the 3PL carrier portal, its role, its environment and the "3PL Carrier Terminal" login card are
-  removed (P9), including the demo-environment entry. **Live activation:** DHL + Palletline API credentials behind the
-  existing provider seam (`src/lib/dhl`, `src/lib/palletline`); the simulated lanes stay truthful and make zero network
-  calls. **Remaining non-credential work:** provider configuration (P10).
+- **Carriers are DHL + Palletline BY API ONLY (P9 — DONE 2026-09-23; P10 next).** Mercenta connects the carrier APIs
+  itself; **a carrier never logs into Mercenta**, so the 3PL carrier portal, its role, its environment, its shell and its
+  three views, the admin "Carrier Monitor", the "3PL Carrier Terminal" login card and the demo-environment entry are
+  **REMOVED** (P9 — matrix `D01-07`/`D04-18`/`D10-13`). `fedex` and `bak` are no longer carrier identities anywhere in
+  the type, the labels, the lane-capability table or the demo data (decision 1); their refusal is preserved by name
+  (`RETIRED_CARRIER_IDS`). **The carrier-EVENT capability was REHOMED, not deleted:** the milestone advance and its
+  request log now live on the Mercenta admin Logistics Hub, written through the ONE canonical store writer
+  (`setShipmentMilestone`), attributed to the Mercenta operator. **Live activation:** DHL + Palletline API credentials
+  behind the existing provider seam (`src/lib/dhl`, `src/lib/palletline`); the simulated lanes stay truthful and make
+  zero network calls. **Remaining non-credential work:** provider configuration (P10), and the carrier-polling
+  operations (`getShipmentDetails`) which are P12's declared scope.
 - **The PO document pack (P6 — DONE 2026-09-23) is GENERATED, not downloaded from the channel.** SSCC carton labels,
   the carrier label/waybill, the packing list/delivery note and the ASN sheet are produced by Mercenta
   (`src/lib/documents/poDocumentPack.ts`, automatically on acceptance); customs documents apply to international lanes
@@ -286,7 +292,7 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
 | Registered address | "Distribution Hub, Northampton" wording | Real registered office address | `src/config/customs.ts` |
 | Commission rate / monthly fee | Placeholders flagged in `src/config/commercial.ts` | Commercial sign-off | same file |
 | **GS1 company prefix (P6 — ACTIVE)** | `0000000` — declared UNASSIGNED, status `placeholder_unassigned`; every SSCC-18 is generated under it and every printed carton label states `XX-PENDING-GS1-LICENCE` | Mercenta's licensed GS1 company prefix | `src/lib/documents/sscc.ts` (`SSCC_GS1_PREFIX.value`) |
-| Carrier markup rates | Demo ledger uses illustrative 5.5% cost / 7% billed | Real corporate FedEx/DHL/BAK rate cards | shipping-margin ledger rows |
+| Carrier markup rates | Demo ledger uses illustrative 5.5% cost / 7% billed | Real corporate DHL / Palletline rate cards | shipping-margin ledger rows |
 | Contract rate fields | Flagged placeholders in `lib/agreement.ts` output | Signed commercial terms | same file |
 
 ## Structural debt blocking production

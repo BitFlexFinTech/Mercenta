@@ -9,7 +9,7 @@
  */
 import type { Environment, SessionRole } from '@/types';
 
-export type SessionTier = 'brand' | 'admin_staff' | 'super_admin' | '3pl';
+export type SessionTier = 'brand' | 'admin_staff' | 'super_admin';
 
 export interface DemoSession {
   tier: SessionTier;
@@ -18,22 +18,33 @@ export interface DemoSession {
   role: SessionRole;
 }
 
-/** Maps every login role to its security tier. */
+/**
+ * Maps every login role to its security tier.
+ *
+ * §P9 (programme decision 4) — REPOINTED: the `case '3PL Carrier': return '3pl'`
+ * branch is REMOVED with the carrier surface. There is no carrier session:
+ * a carrier never logs into Mercenta (DHL + Palletline are operated by API).
+ */
 export function tierForRole(role: SessionRole): SessionTier {
   switch (role) {
     case 'Super Admin': return 'super_admin';
     case 'Mercenta Admin': return 'admin_staff';
-    case '3PL Carrier': return '3pl';
     default: return 'brand';
   }
 }
 
-/** Which app environments each tier may enter. */
+/**
+ * Which app environments each tier may enter.
+ *
+ * §P9 (programme decision 4) — REPOINTED: the old contract also gave
+ * `super_admin` the `'carrier'` environment and declared a whole `'3pl'` tier
+ * (`['home', 'login', 'carrier']`). Both are removed because the carrier
+ * environment no longer exists.
+ */
 export const TIER_ENVIRONMENTS: Record<SessionTier, Environment[]> = {
   brand: ['home', 'login', 'brand'],
   admin_staff: ['home', 'login', 'admin'],
-  super_admin: ['home', 'login', 'brand', 'admin', 'carrier'],
-  '3pl': ['home', 'login', 'carrier'],
+  super_admin: ['home', 'login', 'brand', 'admin'],
 };
 
 export function canAccessEnvironment(tier: SessionTier, env: Environment): boolean {
@@ -43,8 +54,11 @@ export function canAccessEnvironment(tier: SessionTier, env: Environment): boole
 
 /**
  * Nav-view allowlist per tier. '*' = full access within that tier's
- * environment. The 3PL demo account is restricted strictly to logistics /
- * fulfillment scopes — never CRM, billing, compliance or marketing data.
+ * environment.
+ *
+ * §P9 (programme decision 4) — REPOINTED: the admin `'carriers'` view (the
+ * Carrier Monitor) is removed, and the `'3pl'` allowlist
+ * (`['manifest','bak','auditor']`) goes with the tier it belonged to.
  */
 export const VIEW_ALLOWLIST: Record<SessionTier, '*' | string[]> = {
   brand: [
@@ -56,14 +70,13 @@ export const VIEW_ALLOWLIST: Record<SessionTier, '*' | string[]> = {
   ],
   admin_staff: [
     'overview', 'crm', 'onboarding_pipeline', 'fulfillment_track', 'retail_pipeline',
-    'purchase_orders_admin', 'logistics', 'carriers', 'catalog', 'compliance',
+    'purchase_orders_admin', 'logistics', 'catalog', 'compliance',
     'billing', 'contracts_admin', 'messages', 'marketing',
     // §Sprint — the canonical work layer (tasks/deadlines + calendar).
     'work', 'calendar',
     // super_admin + integrations views require the super_admin tier
   ],
   super_admin: '*',
-  '3pl': ['manifest', 'bak', 'auditor'],
 };
 
 export function canAccessView(tier: SessionTier, viewId: string): boolean {

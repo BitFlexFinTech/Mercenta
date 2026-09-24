@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import type { Environment } from '@/types';
 import { cn } from '@/utils/cn';
-import { Boxes, ShieldCheck, Truck } from 'lucide-react';
+import { Boxes, ShieldCheck } from 'lucide-react';
 
 /**
  * §UI/UX Wave 3 — ENVIRONMENT SWITCHER (demo mechanism, NOT product chrome).
@@ -27,6 +27,13 @@ import { Boxes, ShieldCheck, Truck } from 'lucide-react';
  * them"): switching environment is how a reviewer moves between the four role
  * shells without re-authenticating.
  */
+/**
+ * §P9 (programme decision 4) — the `3PL Carrier View` entry is REMOVED, and the
+ * grid below is now TWO environments instead of three. REPOINTED from the old
+ * contract, which declared `{ id: 'carrier', label: '3PL Carrier View', … }`.
+ * A carrier never logs into Mercenta (DHL + Palletline are operated by API), so
+ * there is nothing for this demo switcher to switch to.
+ */
 const ENVIRONMENTS: {
   id: Environment;
   label: string;
@@ -35,7 +42,6 @@ const ENVIRONMENTS: {
 }[] = [
   { id: 'brand', label: 'Brand Portal', short: 'Brand', icon: <Boxes className="h-3.5 w-3.5" /> },
   { id: 'admin', label: 'Mercenta Admin Hub', short: 'Admin', icon: <ShieldCheck className="h-3.5 w-3.5" /> },
-  { id: 'carrier', label: '3PL Carrier View', short: 'Carrier', icon: <Truck className="h-3.5 w-3.5" /> },
 ];
 
 export function EnvironmentRouter({ compact = false }: { compact?: boolean }) {

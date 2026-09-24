@@ -25,11 +25,16 @@ import type {
   RegionalComplianceDoc,
   CarrierTokens,
   ComplianceDocument,
-  CarrierId,
 } from '../types';
+/* §P9 — the ONE status → stage mapping (a VALUE, declared once in `src/types.ts`). */
+import { STATUS_TO_STAGE } from '../types';
 import { buildDistributionAgreement } from '@/lib/agreement';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import { tierForRole, canAccessEnvironment, staffCanMutate, type DemoSession } from '@/lib/auth/rbac';
+/* §P9 (programme decision 4) — the ONE canonical writer of a consignment's
+   milestone. The context delegates to it below so its projection can never
+   diverge from the canonical store every query-backed surface reads. */
+import { setShipmentMilestone } from '@/data/demoStore';
 import { isCommercialModel } from '@/config/commercialModel';
 import {
   parseProductPath,
@@ -105,9 +110,6 @@ interface AppState {
   reviewGateDocument: (id: string, status: ComplianceDocument['status']) => void;
   generatedAgreement: string;
 
-  carrierContext: CarrierId;
-  setCarrierContext: (c: CarrierId) => void;
-
   staff: StaffMember[];
   addStaff: (member: StaffMember) => void;
   removeStaff: (id: string) => void;
@@ -143,8 +145,6 @@ const DEFAULT_PROFILE: BrandProfile = {
   iban: '',
   payoutCurrency: 'GBP',
   dhlConnected: false,
-  fedexConnected: false,
-  bakConnected: false,
   onboarded: false,
   fulfillmentTrack: 'unassigned',
   complianceGateStatus: 'blocked',
@@ -162,9 +162,12 @@ let apiCounter = 100;
  *
  * The ADDRESS and the SESSION must agree, and the address is read first:
  *
- * 1. A PRODUCT address (`/admin/…`, `/brand/…`, `/carrier/…`) restores the
+ * 1. A PRODUCT address (`/admin/…`, `/brand/…`) restores the
  *    persisted session for that environment (re-validated through the canonical
  *    RBAC allowlist) — this is what makes F5 keep you in the product.
+ *    §P9 repoint: the old contract also listed `/carrier/…`, which no longer
+ *    exists — such an address now resolves as unknown and lands on the login
+ *    entry, fail-closed.
  * 2. A PRODUCT address with no restorable session — or with a session whose tier
  *    may not enter that environment — shows the LOGIN entry. The address is left
  *    untouched, so the one-click demo login lands on the REQUESTED destination.
@@ -220,7 +223,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
    * §RUNTIME PARITY (R1) — the ONE writer of the address bar's product prefix.
    *
    * `setEnvironment` is a real navigation now: entering a product environment
-   * writes its address (`/admin/overview`, `/brand/overview`, `/carrier/…`),
+   * writes its address (`/admin/overview`, `/brand/overview`),
    * keeping the requested view when the address already declares that
    * environment (a deep link / a refresh). Going home writes `/`, and the login
    * entry deliberately leaves any product deep link in place so the requested
@@ -291,7 +294,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [apiLogs, setApiLogs] = useState<ApiLogEntry[]>([]);
   const [brandProfile, setBrandProfile] = useState<BrandProfile>(DEFAULT_PROFILE);
-  const [carrierContext, setCarrierContext] = useState<CarrierId>('dhl');
   const [staff, setStaff] = useState<StaffMember[]>([]);
 
   // ── Lazy bootstrap: seed data loads after first render, not before ──
@@ -516,13 +518,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateShipmentStatus = useCallback(
     (id: string, status: ShipmentStatus) => {
+      /**
+       * §P9 (programme decision 4) — REPOINTED to the CANONICAL writer.
+       *
+       * The context copy used to be the only record updated, while
+       * `src/data/demoStore.ts → demoShipments` (what every query-backed surface
+       * reads) kept the old status — two records for one consignment. The context
+       * now writes through `setShipmentMilestone`, so the store is authoritative
+       * and the in-memory projection is mirrored for the context-shaped surfaces.
+       */
+      setShipmentMilestone(id, status);
       setShipments((prev) =>
         prev.map((s) =>
           s.id === id
             ? {
                 ...s,
                 status,
-                stage: statusToStage(status),
+                stage: STATUS_TO_STAGE[status],
               }
             : s
         )
@@ -805,8 +817,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     gateDocs,
     reviewGateDocument,
     generatedAgreement,
-    carrierContext,
-    setCarrierContext,
     staff,
     addStaff,
     removeStaff,
@@ -832,17 +842,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 }
 
 function statusToStage(status: ShipmentStatus): Shipment['stage'] {
-  const map: Record<ShipmentStatus, Shipment['stage']> = {
-    factory_intake: 'factory_intake',
-    bak_depot: 'bak_depot',
-    sea_transit: 'international_forwarding',
-    air_transit: 'international_forwarding',
-    uk_customs_cleared: 'uk_port_hmrc',
-    /** §P5 — the hub stage is gone; arrival at the PO's destination FC replaces it. */
-    destination_fc: 'destination_fc',
-    live_amazon: 'live_amazon',
-  };
-  return map[status];
+  /* §P9 — REPOINTED: this private copy of the mapping was REPLACED by the ONE
+     owner in `src/types.ts` (`STATUS_TO_STAGE`), so the context and the canonical
+     store can no longer derive a shipment's stage differently. REPOINTED from the
+     inline record that used to live here. */
+  return STATUS_TO_STAGE[status];
 }
 
 export function useApp() {

@@ -76,8 +76,6 @@ function buildProfile(brand: DemoBrand): BrandProfile {
     iban: bankAccount,
     payoutCurrency: currencyFor(brand),
     dhlConnected: false,
-    fedexConnected: false,
-    bakConnected: false,
     // §Phase 7F — portal access is decoupled from gate clearance: cleared
     // brands AND deterministic compliance-scenario tenants reach the portal;
     // complianceGateStatus below still derives from the cleared state only.
@@ -273,12 +271,13 @@ export function buildBrandDossier(brand: DemoBrand): RegionalDossier {
     },
   ];
 
-  // §Stage-20.2 — carrier accounts are ADMIN-managed (3PL Carrier Terminal);
-  // tokens here are read-only demo context, never brand-configured.
+  // §Stage-20.2 — carrier accounts are ADMIN-managed; tokens here are read-only
+  // demo context, never brand-configured.
+  // §P9 (programme decision 1/4) — REPOINTED: carriers are DHL + Palletline only,
+  // the carrier terminal is removed, and the old `fedex`/`bak` demo tokens are
+  // gone with them.
   const tokens: CarrierTokens = {
     dhl: `DHL-${slug.toUpperCase()}-DEMO`,
-    fedex: `FDX-${slug.toUpperCase()}-DEMO`,
-    bak: `BAK-${slug.toUpperCase()}-DEMO`,
   };
 
   return {

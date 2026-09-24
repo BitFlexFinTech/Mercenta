@@ -136,12 +136,14 @@ export function Sidebar({
     : sections;
   const navFilterEmpty = navFilterActive && visibleSections.length === 0;
 
+  /**
+   * §P9 (programme decision 4) — REPOINTED. The old chain ended in a
+   * `'Carrier View'` fallback, but the carrier environment is gone and
+   * `Environment` is now exactly home | login | brand | admin, so the only
+   * non-brand value a SHELL can render is admin.
+   */
   const envLabel =
-    environment === 'brand'
-      ? 'Brand Portal'
-      : environment === 'admin'
-        ? 'Admin Hub'
-        : 'Carrier View';
+    environment === 'brand' ? 'Brand Portal' : 'Admin Hub';
 
   /** Avatar identity derived exactly like Header's session identity. */
   const avatarEmail =
