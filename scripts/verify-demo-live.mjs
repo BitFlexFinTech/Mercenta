@@ -347,17 +347,29 @@ await page.click('nav[aria-label="Primary"] >> text=Logistics Hub').catch(() => 
 await page.waitForTimeout(4000);
 const hubBody = await page.locator('body').innerText().catch(() => '');
 /**
- * §P9 (programme decision 4) — THE REHOMED CARRIER CONSOLE IS ON THE DEPLOYED
- * LOGISTICS HUB. The carrier portal is gone; the capability (a carrier event that
- * advances a consignment, plus its request log) lives here, attributed to the
- * Mercenta operator. This proves the move on the LIVE build, not just locally.
+ * §P9 (programme decision 4) — THE REHOMED CARRIER CONSOLE IS AN **ADMIN** SURFACE.
+ *
+ * Two things are proven live: (a) the brand Logistics Hub the section above just
+ * visited does NOT carry the Mercenta-side carrier console — that is the tenant
+ * boundary; (b) the ADMIN Logistics Hub does, with a live interactive control.
+ * (Reading the console out of the brand page was the first version of this check
+ * and it failed for the right reason: the surface is admin-only by design.)
  */
-check('§P9 the deployed Logistics Hub renders the rehomed Carrier API console',
-  /Carrier API console/i.test(hubBody));
+check('§P9 the deployed brand Logistics Hub does NOT carry the Mercenta-side carrier console',
+  !/Carrier API console/i.test(hubBody) &&
+    (await page.locator('select[aria-label^="Update milestone for"]').count()) === 0);
+/* Navigate the EXISTING admin session through the product's own nav (a reload
+   would land on the login entry: each Playwright page has its own tab-scoped
+   session, and the admin tab's session lives in that tab). */
+await admin.click('nav[aria-label="Primary"] >> text=Logistics Hub').catch(() => {});
+await admin.waitForTimeout(4000);
+const adminHubBody = await admin.locator('body').innerText().catch(() => '');
+check('§P9 the deployed ADMIN Logistics Hub renders the rehomed Carrier API console',
+  /Carrier API console/i.test(adminHubBody));
 check('§P9 the deployed console exposes the interactive milestone control',
-  (await page.locator('select[aria-label^="Update milestone for"]').count()) > 0);
+  (await admin.locator('select[aria-label^="Update milestone for"]').count()) > 0);
 check('§P9 the deployed console offers the simulated DHL advance',
-  /DHL status → next milestone/i.test(hubBody));
+  /DHL status → next milestone/i.test(adminHubBody));
 const hubNodeKinds = await page
   .locator('[data-testid^="logistics-node-"]')
   .evaluateAll((els) => els.map((e) => e.getAttribute('data-kind')))

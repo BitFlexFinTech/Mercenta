@@ -1301,10 +1301,10 @@
    "id": "batchE-carrier-views-e2e",
    "description": "Playwright E2E: every carrier view (3) smoke-renders via nav",
    "source": "Batch 11",
-   "status": "built_and_tested",
-   "evidence": "e2e/carrier-views.spec.ts (3 tests)",
-   "last_verified": "2026-08-30",
-   "superseded_by": null
+   "status": "removed",
+   "evidence": "§P9 (2026-09-23) — REMOVED, not superseded in place: the three carrier views no longer exist (`CarrierShell.tsx`, `carrier/CarrierDashboard.tsx`, `carrier/BakLogistics.tsx` are DELETED with the carrier surface, programme decision 4), so no carrier-view spec can exist. The `e2e/carrier-views.spec.ts` file this entry names was already absent (flagged by verify-registry as 'e2e test NOT FOUND' before P9). The equivalent coverage now lives where the capability was rehomed: `e2e/compliance-sim.spec.ts` (the DHL milestone advance), `e2e/table-migrations.spec.ts` #2 (the milestone control at 375px), `e2e/status-semantics.spec.ts` #6 (canonical status badges on the admin logistics surface) and `e2e/app-shell.spec.ts` (the removal contract).",
+   "last_verified": "2026-09-23",
+   "superseded_by": "cleanup-p9-remove-3pl-carrier-surface"
   },
   {
    "id": "batchF-deploy-docker",
@@ -1355,10 +1355,10 @@
    "id": "batchF-support-views-e2e",
    "description": "E2E tests for helpdesk/support role + carrier interactive views",
    "source": "Batch F",
-   "status": "built_and_tested",
-   "evidence": "e2e/support-views.spec.ts (3 tests: helpdesk render, helpdesk interaction, carrier interaction)",
-   "last_verified": "2026-09-01",
-   "superseded_by": null
+   "status": "removed",
+   "evidence": "§P9 (2026-09-23) — the CARRIER half of this entry is REMOVED with the carrier surface (programme decision 4): there is no carrier login and no carrier view, so no 'carrier interaction' test can exist. The helpdesk/support half is unaffected and remains covered by the helpdesk surfaces' own specs. The carrier capability (a carrier event advancing a consignment) is now asserted on its canonical owner: `e2e/compliance-sim.spec.ts`, `e2e/table-migrations.spec.ts` #2, `e2e/status-semantics.spec.ts` #6.",
+   "last_verified": "2026-09-23",
+   "superseded_by": "cleanup-p9-remove-3pl-carrier-surface"
   },
   {
    "id": "batchF-reachability-audit",
@@ -3836,7 +3836,7 @@
   },
   {
    "id": "s0-founder-decisions-recorded",
-   "description": "The Founder decisions that govern the remaining build recorded as authoritative rather than re-asked: T-1 Payoneer is the canonical PRIMARY/default Mercenta and Amazon payment account (Wise secondary, never a silent substitute); T-2 no external carrier users/logins, Logistics Hub is Brand/Admin-facing, existing carrier code reconciled later rather than deleted; T-3 Founder/Super Admin is the human control role, not \"Mercenta Operator\"; T-4 Mercenta Hub is never a mandatory universal route; T-5 Staff/RBAC retained; T-6 the Brand-facing Routing Request mechanic is removed/reconciled, never relabelled; T-7 the credential architecture must support real entry, replacement, secure persistence, masked readback, validation and enable/disable",
+   "description": "The Founder decisions that govern the remaining build recorded as authoritative rather than re-asked: T-1 Payoneer is the canonical PRIMARY/default Mercenta and Amazon payment account (Wise secondary, never a silent substitute); T-2 no external carrier users/logins, Logistics Hub is Brand/Admin-facing, existing carrier code reconciled later rather than deleted — §P9 (2026-09-23) REPOINTED: the reconciliation HAPPENED. Programme decision 4 (2026-09-22) superseded the \"rather than deleted\" clause and scheduled the removal; P9 then DELETED the carrier surface completely (environment, role, tier, shell, its three views, the admin Carrier Monitor, the demo entry, the login card, the FAQ claim) and REHOMED the carrier-event capability on the Mercenta admin Logistics Hub, attributed to the Mercenta operator — so T-2's invariant is now TRUE BY CONSTRUCTION rather than by reconciliation; T-3 Founder/Super Admin is the human control role, not \"Mercenta Operator\"; T-4 Mercenta Hub is never a mandatory universal route; T-5 Staff/RBAC retained; T-6 the Brand-facing Routing Request mechanic is removed/reconciled, never relabelled; T-7 the credential architecture must support real entry, replacement, secure persistence, masked readback, validation and enable/disable",
    "evidence": "docs/AMAZON_RECONCILIATION_STATUS.md \u00a74; docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md \u00a75/\u00a78; PROJECT_STATUS.md (CURRENT PLATFORM POSITION)",
    "status": "built",
    "source": "Master build reconciliation \u2014 increment S0 + S1-a (2026-09-20)",
@@ -4451,7 +4451,7 @@
   },
   {
    "id": "redesign-legacy-page-shell-backlog",
-   "description": "REMAINING \u2014 LEGACY PAGE SHELL BACKLOG (NOT started for these files). 14 files still declare the pre-workspace `p-6 ... max-w-[1400px] mx-auto` container and are named in the gate so the debt is explicit and can only shrink: AdminShell (a fallback wrapper), admin CarrierMonitor / ContractsAdminPanel / FulfillmentTrack / MarketingHub / MonitoringDashboard / RetailPipeline, brand BrandAdvertising / BrandTeamMessages / ListingAnalyzer / MercentaSocial / OnboardingSummary, carrier BakLogistics / CarrierDashboard. Honest status: NOT started \u2014 no UI claim is made for them.",
+   "description": "REMAINING \u2014 LEGACY PAGE SHELL BACKLOG (NOT started for these files). 14 files still declare the pre-workspace `p-6 ... max-w-[1400px] mx-auto` container and are named in the gate so the debt is explicit and can only shrink: AdminShell (a fallback wrapper), admin CarrierMonitor / ContractsAdminPanel / FulfillmentTrack / MarketingHub / MonitoringDashboard / RetailPipeline, brand BrandAdvertising / BrandTeamMessages / ListingAnalyzer / MercentaSocial / OnboardingSummary, carrier BakLogistics / CarrierDashboard. Honest status: NOT started \u2014 no UI claim is made for them. \u00a7P9 (2026-09-23) \u2014 THREE of the named files no longer exist at all (`admin/CarrierMonitor.tsx`, `carrier/BakLogistics.tsx`, `carrier/CarrierDashboard.tsx` are DELETED with the carrier surface, programme decision 4), so the remaining debt is the 11 non-carrier surfaces.",
    "source": "Complete Platform Redesign \u2014 remaining surfaces pass (2026-09-21 session 3)",
    "status": "not_started",
    "evidence": "scripts/validate-workspace-shell.mjs LEGACY_SHELL_BACKLOG (printed as \"Legacy page-shell backlog: 14 file(s) remaining\") \u2014 SUPERSEDED by 'redesign-legacy-shell-retired' (all 14 files migrated; gate backlog now 0). \u2014 SUPERSEDED by 'redesign-legacy-shell-retired' (all 14 files migrated; gate backlog now 0).",

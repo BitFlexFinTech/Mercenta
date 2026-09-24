@@ -26,7 +26,68 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P8 DONE: INVENTORY LINKED TO THE BRAND'S CATALOGUE + THE CHANNEL IDENTIFIER (ASIN)** (2026-09-23, session 21)
+## CURRENT STATE — **P9 DONE: THE 3PL CARRIER SURFACE IS REMOVED COMPLETELY + THE CARRIER-EVENT CONSOLE IS REHOMED** (2026-09-23, session 22)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
+> first — it is all a new session needs. Full account: programme **§13** in
+> `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`.
+
+**Checkpoint (this increment):** **P9 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`** — application
+work; programme decisions **4** and **1**; matrix `D01-07` / `D04-18` / `D10-13`. Commit **`c52599d`**, pushed, deployed
+to `demo.mercenta.co.uk` and **live-verified (81/81)**.
+
+**What changed**
+
+- **The carrier surface is DELETED, not hidden.** `CarrierShell.tsx`, `carrier/CarrierDashboard.tsx`,
+  `carrier/BakLogistics.tsx` and `admin/CarrierMonitor.tsx` no longer exist. The `carrier` `Environment`, the
+  `'3PL Carrier'` `SessionRole`, the `'3pl'` `SessionTier`, the `'carriers'` admin view, the `/carrier` address prefix,
+  the demo environment-switcher entry, the "3PL Carrier Terminal" login card and the public FAQ role claim all went with
+  them. A carrier never logs into Mercenta: Mercenta operates DHL + Palletline **by API**.
+- **Fail-closed, and proven.** `/carrier`, `/carrier/manifest`, `/carrier/bak` and `/carrier/auditor` are **not product
+  addresses** (they resolve to `null` and the app renders the public site, never a guessed environment); `/carrier/…`
+  stays `noindex`; and a **stale persisted carrier session is REFUSED** on restore — asserted through the real
+  `isPersistedSession` gate rather than by reading source text.
+- **Carriers are DHL + Palletline ONLY (decision 1).** `CarrierId = 'dhl' | 'palletline'`; `fedex`/`bak` are gone from
+  the labels, the lane-capability table, the demo seed (shipments, tracking numbers, markup rows), the mock rate cards,
+  `CarrierTokens` and the connection flags. The REFUSAL is preserved **by name** (`RETIRED_CARRIER_IDS`), so a retired
+  carrier is still refused and the reason names the register.
+- **The capability was REHOMED.** The carrier-event console (milestone advance + request log) now lives on the
+  **Mercenta admin Logistics Hub**, with the same structural hooks the specs assert, attributed to
+  `mercenta-admin-logistics` (the old terminal used a fictional `carrier-terminal` and hardcoded `brand-astonish`).
+- **TWO REAL DEFECTS were found by the repointed specs, not by typecheck/build, and fixed:** the console wrote a
+  context-only copy of the shipments while every query-backed surface reads the canonical store (so its own value and
+  the row's badge never moved) → fixed with ONE canonical writer `setShipmentMilestone`
+  (`src/data/demoStore.ts`) plus ONE owner for the status→stage mapping (`src/types.ts → STATUS_TO_STAGE`); and the
+  admin page's operational map markers carry `data-status`, so the badge assertion is now scoped to the canonical badge
+  (`role="status"`) — precision, not a weakened assertion.
+
+**Gates (none weakened, none deleted)**
+
+`scripts/validate-product-routes.mjs` gained **14 §P9 assertions** and is **proved able to fail** (restoring the carrier
+environment produces 7 FAILs; restored → 81 PASS / 0 FAIL). `scripts/integrity-audit.mjs` (the CarrierShell/BAK wiring
+checks are now removal assertions), `scripts/validate-stage16.mjs` (a `test(…, true)` placeholder replaced by a real
+removal assertion), `scripts/validate-stage26.mjs`, `scripts/validate-review-s6.mjs`,
+`scripts/validate-workspace-shell.mjs` and `scripts/verify-demo-live.mjs` (14 new §P9 live checks) were repointed. The
+E6/E7 change-scope guards received the **§P9 declared surface** exactly as P4–P8 declared theirs.
+
+**Evidence (same session)**
+
+validate-product-routes **81 PASS / 0 FAIL** · **all 99 `scripts/validate-*.mjs` exit 0** · integrity-audit **63/0** ·
+workspace-shell **92/0** · stage26 **PASS** · review-s6 **PASS** · stage16 **STAGE16_E2E_PASS** · `npm run typecheck`
+**0** · root `tsc` **0** · `eslint src scripts e2e` **0** · `build` **✓** · wording **PASS (310 src files, 0
+violations)** · the **7 affected specs: 54 passed / 0 failed** · **FULL Playwright 482 passed / 0 failed / 2 skipped
+(15.7m)** · **LIVE `LIVE_VERIFICATION_PASS` 81/81 checks, 0 page errors**, with the deployed bundle's own content read
+from **16/16 chunks**.
+
+**Honest notes:** four P9 limits are recorded (programme §13): `bak_depot` remains a STAGE id; the onboarding step
+`'carriers'` remains; the milestone control is a simulation surface (carrier polling is P12); the pre-existing
+`amendShipment` helper still writes `status` without `stage`. The first live run failed 3 §P9 checks for a real reason
+(the check ran on the brand page, where the console is correctly absent) and was fixed, then re-run green.
+
+**Status / checkpoint / deploy / live verification:** recorded in the `CURRENT RESUME STATE` block at the top of
+`PROJECT_STATUS.md`.
+
+## PREVIOUS STATE — **P8 DONE: INVENTORY LINKED TO THE BRAND'S CATALOGUE + THE CHANNEL IDENTIFIER (ASIN)** (2026-09-23, session 21) — HISTORICAL
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
