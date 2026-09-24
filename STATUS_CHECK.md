@@ -29,7 +29,7 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 ## CURRENT STATE — **P12 DONE: THE SP-API SEAM IS COMPLETE — `AV-040` IS CLOSED (the programme's FINAL phase)** (2026-09-24, session 25)
 
 **Branch:** `redesign/foundation`. **Checkpoint:** recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`
-(the canonical source) and mirrored in `HANDOFF.md`. **`git status --porcelain` EMPTY** after the state commit.
+(the canonical source) and mirrored in `HANDOFF.md`. **`git status --porcelain` EMPTY** after the state commit. **THREE-WAY STATUS: `COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED` at `3bb03eb`** — local ✅, GitHub ✅ (`c704182..3bb03eb` pushed; remote head = local HEAD), demo ✅ (**`LIVE_VERIFICATION_PASS` 127/127 checks, 0 page errors**, all 14 §P12 checks, bundle read from 16/16 chunks).
 
 **What changed.** The channel's **seven remaining documented Vendor operations** are implemented in BOTH SP-API
 clients with identical signatures/shapes and the seam's own provenance — `getPurchaseOrdersStatus` (the receiving
