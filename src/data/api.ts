@@ -15,6 +15,11 @@ import { submitDocumentForVerification } from '@/lib/verification/documentVerifi
 import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { ackStatusTransitionRefusal, backOrderBlockedReason } from '@/lib/commerce/backorderGate';
 import { issueChannelInstruction, instructionLineFor } from '@/lib/commerce/channelInstructions';
+import {
+  ingestChannelPurchaseOrders as ingestChannelPurchaseOrdersFromChannel,
+  type ChannelIngestionResult,
+} from '@/lib/commerce/channelPurchaseOrderIngestion';
+import type { ChannelPurchaseOrderReadResult } from '@/lib/spapi/client';
 import { deriveShipmentEta, etaWindowKindFor } from '@/lib/logistics/shipmentEta';
 import type { DemoShipment } from '@/data/demoData';
 import type { ShipmentEta } from '@/types';
@@ -25,7 +30,6 @@ import { createSPApiClientForConnection } from '@/lib/spapi';
 import { spApiConnectionCredentials } from '@/integrations/connections';
 import { DEFAULT_HOMEPAGE_CONTENT, normaliseHomepageContent, type HomepageContent } from '@/config/homepageContent';
 import {
-  ALL_DEMO_BRANDS,
   demoAdSpend,
   demoBrands,
   demoComplianceDocs,
@@ -65,7 +69,6 @@ import {
   resolveCommissionRatePct,
   settleCommission,
 } from '@/lib/billing/payouts';
-import { sendPostmarkEmail, buildPoNotificationHtml } from '@/lib/notifications/postmarkNotifier';
 import type {
   AdSpendBudget,
   AdCampaign,
@@ -373,17 +376,53 @@ export async function pollSubmissionStatus(submissionId: string): Promise<{
   return client.getSubmissionStatus(submissionId);
 }
 
-/** §10 step 4 — POs received from the retail channel (mock rotates a pool). */
-export async function fetchSpApiPurchaseOrders(sinceIso: string): Promise<{
-  ok: boolean;
-  purchaseOrders?: { purchaseOrderId: string; poValue: number }[];
-  error?: string;
-}> {
+/**
+ * §10 step 4 / §P11 — POs received from the retail channel.
+ *
+ * §P11 — REPOINTED (old contract recorded): this read previously returned only
+ * `{ purchaseOrderId, poValue }`, which nothing could be ROUTED by. It now
+ * returns the channel's own PO payload, which is what the ingestion owner needs
+ * (decision 3: the PO is addressed to Mercenta; the brand is identified from it).
+ * Mock-first: the MockAmazon client rotates a pool until real credentials exist.
+ */
+export async function fetchSpApiPurchaseOrders(
+  sinceIso: string
+): Promise<ChannelPurchaseOrderReadResult> {
   const { client } = createSPApiClientForConnection({
     credentials: spApiConnectionCredentials(),
     edgeFunctionBase: '/functions/v1/spapi',
   });
   return client.fetchPurchaseOrders(sinceIso);
+}
+
+/**
+ * §P11 — INGEST purchase orders from the retail channel into the canonical store.
+ *
+ * The ONLY way a purchase order enters Mercenta (decision 3): there is no
+ * "Create PO" anywhere. The channel's PO is addressed to Mercenta; the routing
+ * owner identifies the brand from the PO's own lines and files it in that
+ * brand's workspace, refusing anything it cannot route.
+ *
+ * The catalogue supplied for routing is the platform's OWN canonical catalogue
+ * (one source of truth for SKUs) — never a second list.
+ */
+export async function ingestChannelPurchaseOrders(input: {
+  /** The Mercenta operator performing the read (attribution + audit). */
+  actorId: string;
+  /** Only POs received since this instant are read. */
+  sinceIso?: string;
+}): Promise<ChannelIngestionResult> {
+  const { client, mode } = createSPApiClientForConnection({
+    credentials: spApiConnectionCredentials(),
+    edgeFunctionBase: '/functions/v1/spapi',
+  });
+  const since = input.sinceIso ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  return ingestChannelPurchaseOrdersFromChannel({
+    reader: client,
+    catalogue: demoProducts.map((p) => ({ sku: p.sku, brandId: p.brandId })),
+    sinceIso: since,
+    actorId: input.actorId,
+  }).then((result) => ({ ...result, mode }));
 }
 
 /* ── §Legal — Brand agreement acceptances ── */
@@ -1035,79 +1074,34 @@ export interface AsnDetail {
 /** Categories where lot + expiry data are mandatory on the ASN. */
 const LOT_REQUIRED_CATEGORIES = ['Grocery', 'Health & Personal Care'];
 
-/** §Batch-10 — Admin on-behalf PO creation. Generates a PO, attaches audit attribution. */
-export function createPurchaseOrder(
-  brandId: string,
-  lineItems: { sku: string; productName: string; quantity: number; unitPrice: number; commodityCode: string }[],
-  actorStaffId?: string
-): PurchaseOrder {
-  const brand = demoBrands.find(function(b) { return b.id === brandId; });
-  const brandName = brand?.profile.businessName ?? brandId;
-  const now = new Date();
-  const poNum = 'PO-ADM-' + now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-  const totalValue = lineItems.reduce(function(a, l) { return a + l.unitPrice * l.quantity; }, 0);
-  const po: PurchaseOrder = {
-    id: 'po-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-    brandId: brandId,
-    poNumber: poNum,
-    status: 'received',
-    poValue: Math.round(totalValue * 100) / 100,
-    commissionRate: 0.07,
-    commissionAmount: Math.round(totalValue * 0.07 * 100) / 100,
-    orderDate: now.toISOString(),
-    /**
-     * §P5 — the destination. A channel purchase order always declares its
-     * ship-to party, so every PO this platform creates declares one too, taken
-     * deterministically from the canonical FC directory; the shipment derived
-     * from it therefore has a real destination and never a Mercenta hub.
-     */
-    shipToParty: declaredShipToParty(brandId.length + lineItems.length),
-    lineItems: lineItems.map(function(l) { return ({ sku: l.sku, productName: l.productName, quantity: l.quantity, unitPrice: l.unitPrice, commodityCode: l.commodityCode }); }),
-  };
-  demoPurchaseOrders.push(po);
-  const actorLabel = actorStaffId ? actorStaffId + ' (admin on behalf of ' + brandName + ')' : brandName + ' (self)';
-  // §New PO notification — fire-and-forget email via Postmark
-  const demoBrand = ALL_DEMO_BRANDS.find(function(b) { return b.id === brandId; });
-  if (demoBrand && demoBrand.email) {
-    const deadline = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-    const brandUrl = (typeof location !== 'undefined' ? location.origin : 'https://mercenta.com') + '/brand/purchase-orders?po=' + po.id;
-    const content = buildPoNotificationHtml(poNum, brandName, lineItems.length, deadline, brandUrl);
-    sendPostmarkEmail({
-      to: demoBrand.email,
-      subject: 'New Purchase Order — Action Required',
-      textBody: content.textBody,
-      htmlBody: content.htmlBody,
-    }).then(function(result) {
-      if (!result.ok) console.warn('[notifications] Failed to send PO notification:', result.error);
-      else if (result.mock) console.log('[notifications] (Mock) PO notification sent to', demoBrand.email, '— id:', result.messageId);
-    });
-  } else {
-    console.warn('[notifications] No verified email on file for brand', brandId, '— PO notification skipped');
-  }
-  demoAuditLog.push({
-    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-    createdAt: now.toISOString(),
-    actorId: actorStaffId ?? brandId,
-    action: 'po_created',
-    entityType: 'purchase_order',
-    entityId: po.id,
-    brandId: brandId,
-    reason: actorLabel + ': created PO ' + poNum + ' for ' + brandName + ' — ' + lineItems.length + ' lines, GBP ' + po.poValue.toFixed(2),
-    metadata: { actorLabel: actorLabel, lineCount: lineItems.length, poValue: po.poValue },
-  });
-  notifyCanonicalStoreChange();
-  return po;
-}
+/*
+ * §P11 — REMOVED: "Create PO" (admin on-behalf purchase-order creation).
+ *
+ * Programme decision 3: ONE PO record = the PO from Amazon. Mercenta never
+ * creates a purchase order, so `createPurchaseOrder` and the Postmark
+ * notification it fired are gone. The ONLY way a PO enters the platform is now
+ * CHANNEL INGESTION (`ingestChannelPurchaseOrders` below, owning
+ * `src/lib/commerce/channelPurchaseOrderIngestion.ts`).
+ *
+ * Old contract recorded (was asserted by validate-e4 S1, validate-e5 J2 and
+ * validate-e6 F2, and deliberately REPOINTED rather than weakened):
+ * "createPurchaseOrder STILL performs its real notification — `export function
+ * createPurchaseOrder(` present in api.ts AND `sendPostmarkEmail` present in
+ * api.ts". Both are now required to be ABSENT.
+ */
 
 /**
  * §Phase E4 — SIMULATION-SAFE operational purchase-order creation.
  *
  * The operational commerce simulation must NEVER send an email and must never
- * contact a live provider, so this is a SEPARATE path from
- * `createPurchaseOrder` (whose real Postmark behaviour is deliberately left
- * untouched). Everything else — the canonical `PurchaseOrder` shape, the
- * deterministic id, the audit entry — is identical, and the record is
- * EXPLICITLY marked `mode: 'simulation'`.
+ * contact a live provider. §P11 — REPOINTED (old contract recorded): this used
+ * to be described as "a SEPARATE path from `createPurchaseOrder` (whose real
+ * Postmark behaviour is deliberately left untouched)". `createPurchaseOrder` no
+ * longer exists (decision 3), so this path is now simply the SIMULATION-ONLY
+ * way the scenario engine models a channel PO arriving; a real PO enters
+ * through `ingestChannelPurchaseOrders`. Everything else — the canonical
+ * `PurchaseOrder` shape, the deterministic id, the audit entry — is unchanged,
+ * and the record is EXPLICITLY marked `mode: 'simulation'`.
  *
  * IDEMPOTENT: replaying the same (brandId, product) returns the existing PO
  * instead of creating a duplicate.

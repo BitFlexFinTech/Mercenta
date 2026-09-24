@@ -255,9 +255,22 @@ try {
   // asserted by the E5-scope guard elsewhere in this file.
   test('J1 no migration was added by E5 (newest is 027 after M13)',
     migFiles.length === 27 && migFiles.sort().at(-1).startsWith('027_'));
-  test('J2 createPurchaseOrder still performs its real notification (path UNTOUCHED)',
-    /export function createPurchaseOrder\(/.test(API) && /sendPostmarkEmail/.test(API));
-  test('J3 the E5 PO-create guard is on the SURFACE, not in the email implementation',
+  /**
+   * §P11 — REPOINTED (not weakened). OLD CONTRACT (recorded verbatim):
+   *
+   *   J2 createPurchaseOrder still performs its real notification (path UNTOUCHED)
+   *      → `/export function createPurchaseOrder\(/.test(API) && /sendPostmarkEmail/.test(API)`
+   *
+   * Programme decision 3 removed "Create PO", so the admin surface's own action is
+   * now the CHANNEL READ. The invariant is unchanged — the admin PO list's entry
+   * point must be wired to the ONE canonical PO source, not to a local shortcut.
+   */
+  test('J2 the admin PO list reads the channel through the canonical ingestion owner (P11)',
+    /data-state="admin-po-ingest"/.test(POLIST) &&
+    /ingestChannelPurchaseOrders/.test(POLIST) &&
+    !/export function createPurchaseOrder\(/.test(API) &&
+    !/Create PO</.test(POLIST));
+  test('J3 the RBAC guard is on the SURFACE (now guarding the channel read, P11)',
     /canCurrentUserMutate/.test(POLIST) && /if \(!canCurrentUserMutate\) return;/.test(POLIST));
   test('J4 catalog mutations honour the existing permission tier',
     /canMutate: boolean/.test(CATALOG) && /if \(!canMutate\) return;/.test(CATALOG));

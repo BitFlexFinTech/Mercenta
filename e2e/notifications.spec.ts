@@ -1,7 +1,7 @@
 /**
  * Phase 7D - PO Notification & Auto-Fulfilment automations.
  *
- * Exercises the real automation contracts: the admin PO-creation entry point,
+ * Exercises the real automation contracts: the admin channel-read entry point,
  * the acknowledgement flow that AUTO-creates the consignment (surfaced in the
  * brand's Logistics Hub feed), Mercenta's channel action, and the Labels modal.
  * Email sending itself goes through the Postmark (Mock) adapter and is not
@@ -13,6 +13,11 @@
  * decision is an INSTRUCTION to Mercenta, which transmits the acknowledgement,
  * raises the routing request and files the ASN; the consignment that appears is
  * the real one, not a draft.
+ *
+ * §P11 — REPOINTED (old contract recorded). Test 1 previously asserted the
+ * admin "Create PO" button. Decision 3 removed it — Mercenta never creates a
+ * purchase order — so test 1 now asserts the CHANNEL READ entry point (and that
+ * the create action is gone). The remaining tests are unchanged.
  */
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
@@ -29,11 +34,18 @@ async function deskForgePO(page: any) {
 }
 
 test.describe('PO Notifications & Auto-Fulfilment', () => {
-  test('1. Admin PO-creation entry exists (new PO flow reachable)', async ({ page }) => {
+  test('1. Admin channel-read entry exists (the ONLY way a PO arrives)', async ({ page }) => {
     await loginAs(page, 'Mercenta Admin Hub', 1100);
     await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
     await page.waitForTimeout(900);
-    await expect(page.locator('button', { hasText: 'Create PO' }).first()).toBeVisible({ timeout: 5000 });
+    /**
+     * §P11 — REPOINTED (old contract recorded). This test previously asserted the
+     * "Create PO" button. Decision 3 removed that action: a purchase order is
+     * addressed to Mercenta BY the retail channel, so the admin entry point is the
+     * CHANNEL READ. The entry must exist — and the removed create action must NOT.
+     */
+    await expect(page.locator('[data-state="admin-po-ingest"]').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('button', { hasText: 'Create PO' })).toHaveCount(0);
   });
 
   test('2. Brand accepts all lines -> Mercenta acts and the consignment appears in logistics', async ({ page }) => {

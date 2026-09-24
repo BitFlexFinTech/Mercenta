@@ -84,7 +84,7 @@ nothing was re-labelled live.**
   brands, no duplicates, at least one PO, inside the truckload limit) — and it is FUNCTIONAL: the 1..n declaration
   normalises/validates and the pre-conditions are enforced. **Remaining non-credential work:** the grouping INPUT
   (nothing writes more than one PO per consignment until the channel's shipment request exists).
-- **"Create PO" is removed (P11).** The PO record is the PO **from Amazon**; the Mercenta→brand commercial position is
+- **"Create PO" is removed (P11 — DONE 2026-09-24).** The PO record is the PO **from Amazon**; the Mercenta→brand commercial position is
   **derived** from the brand's Model A/B. No second PO document exists.
 - **The Mercenta Hub is REMOVED as a destination (P5 — DONE 2026-09-23).** The destination is **the FC declared on the
   PO** (`PurchaseOrder.shipToParty` — the channel's `shipToPartyId`, resolved once in

@@ -17,8 +17,17 @@
  *  - shipment confirmation always succeeds.
  */
 
-import type { AcknowledgementPayload, AcknowledgementResult, FetchLike } from './client';
+import type {
+  AcknowledgementPayload,
+  AcknowledgementResult,
+  ChannelPurchaseOrder,
+  ChannelPurchaseOrderLine,
+  ChannelPurchaseOrderReadResult,
+  FetchLike,
+} from './client';
 import { simulatedAsinFor } from '@/lib/catalog/asin';
+import { DEMO_PRODUCTS } from '@/data/demoData';
+import { declaredShipToParty } from '@/config/destinationFc';
 
 export interface SubmissionResult {
   ok: boolean;
@@ -76,13 +85,108 @@ export function resetMockAmazonState(): void {
   acknowledgementCounter = 0;
 }
 
-const MOCK_PO_POOL = [
-  { purchaseOrderId: 'MOCK-PO-8841', poValue: 12480.0 },
-  { purchaseOrderId: 'MOCK-PO-8842', poValue: 8315.5 },
-  { purchaseOrderId: 'MOCK-PO-8843', poValue: 21940.75 },
-  { purchaseOrderId: 'MOCK-PO-8844', poValue: 5120.0 },
+/**
+ * §P11 — THE SIMULATED CHANNEL'S PURCHASE-ORDER POOL.
+ *
+ * A retail-channel PO is ADDRESSED TO MERCENTA and its lines carry the SKUs the
+ * channel ordered, which is what Mercenta routes by. The simulator therefore
+ * derives every line from the CANONICAL catalogue (`DEMO_PRODUCTS`) rather than
+ * retyping a second list of SKUs — the same single-source-of-truth rule the
+ * runtime routing obeys, so a simulated PO is routable exactly as a real one.
+ *
+ * The pool deliberately contains:
+ *   · routable POs for BOTH cleared tenants (so routing to the correct brand is
+ *     exercised, not merely declared), and
+ *   · ONE PO whose line matches no catalogue product, so the ingestion owner's
+ *     fail-closed refusal is genuinely reachable from the product rather than
+ *     only from a unit test.
+ *
+ * Every identity is unmistakably simulated (`MOCK-PO-…`), exactly as before.
+ */
+function simulatedLinesFor(brandId: string, baseQuantity: number): ChannelPurchaseOrderLine[] {
+  return DEMO_PRODUCTS.filter((p) => p.brandId === brandId).map((p, i) => ({
+    vendorSku: p.sku,
+    quantity: baseQuantity + i * 5,
+    unitPrice: p.exWorksPrice,
+    commodityCode: p.commodityCode,
+    productName: p.name,
+  }));
+}
+
+const OUT_OF_CATALOGUE_LINE: ChannelPurchaseOrderLine = {
+  vendorSku: 'MOCK-UNKNOWN-0001',
+  quantity: 24,
+  unitPrice: 9.5,
+  commodityCode: '00000000',
+  productName: 'Simulated channel line outside the Mercenta catalogue',
+};
+
+function simulatedChannelPo(input: {
+  purchaseOrderId: string;
+  brandId: string;
+  baseQuantity: number;
+  freightTerm: 'collect' | 'prepaid';
+  dayOffset: number;
+  fcIndex: number;
+}): ChannelPurchaseOrder {
+  const lines = simulatedLinesFor(input.brandId, input.baseQuantity);
+  const poValue =
+    Math.round(lines.reduce((s, l) => s + l.quantity * l.unitPrice, 0) * 100) / 100;
+  const orderDate = new Date(Date.now() - input.dayOffset * 864e5).toISOString().slice(0, 10);
+  const base = new Date(orderDate).getTime();
+  const iso = (days: number) => new Date(base + days * 864e5).toISOString().slice(0, 10);
+  return {
+    purchaseOrderId: input.purchaseOrderId,
+    poValue,
+    orderDate,
+    shipToPartyId: declaredShipToParty(input.fcIndex).partyId,
+    freightTerm: input.freightTerm,
+    ...(input.freightTerm === 'collect'
+      ? { shipWindowStart: iso(14), shipWindowEnd: iso(21) }
+      : { deliveryWindowStart: iso(21), deliveryWindowEnd: iso(28) }),
+    lines,
+    simulated: true,
+  };
+}
+
+const MOCK_PO_POOL: ChannelPurchaseOrder[] = [
+  simulatedChannelPo({
+    purchaseOrderId: 'MOCK-PO-8841',
+    brandId: 'brand-astonish',
+    baseQuantity: 120,
+    freightTerm: 'prepaid',
+    dayOffset: 3,
+    fcIndex: 1,
+  }),
+  simulatedChannelPo({
+    purchaseOrderId: 'MOCK-PO-8842',
+    brandId: 'brand-tapatio',
+    baseQuantity: 80,
+    freightTerm: 'collect',
+    dayOffset: 4,
+    fcIndex: 2,
+  }),
+  simulatedChannelPo({
+    purchaseOrderId: 'MOCK-PO-8843',
+    brandId: 'brand-astonish',
+    baseQuantity: 240,
+    freightTerm: 'collect',
+    dayOffset: 6,
+    fcIndex: 3,
+  }),
+  /** The fail-closed path: no catalogue product matches this PO's line. */
+  {
+    purchaseOrderId: 'MOCK-PO-8844',
+    poValue: 5120.0,
+    orderDate: new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10),
+    shipToPartyId: declaredShipToParty(4).partyId,
+    freightTerm: 'prepaid',
+    deliveryWindowStart: new Date(Date.now() + 16 * 864e5).toISOString().slice(0, 10),
+    deliveryWindowEnd: new Date(Date.now() + 23 * 864e5).toISOString().slice(0, 10),
+    lines: [OUT_OF_CATALOGUE_LINE],
+    simulated: true,
+  },
 ];
-let poRotation = 0;
 
 function delay(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
@@ -142,19 +246,21 @@ export function createMockSpApiClient(_transport?: FetchLike) {
       return { ok: true, status: 'submitted' };
     },
 
-    async fetchPurchaseOrders(_sinceIso: string): Promise<{
-      ok: boolean;
-      purchaseOrders?: { purchaseOrderId: string; poValue: number }[];
-      error?: string;
-    }> {
+    /**
+     * §P11 — SIMULATED `fetchPurchaseOrders`.
+     *
+     * Same signature and result shape as the real client, so the ingestion path
+     * runs identically before and after real LWA credentials are configured.
+     * Returns the channel's own PO set for the requested window, so a first read
+     * files the routable POs (and refuses the out-of-catalogue one), and a SECOND
+     * read over the same window reports them as already held — the idempotency
+     * guard and the fail-closed refusal are both reachable straight from the
+     * product. Zero live network calls: the pool is in-memory and every identity
+     * is unmistakably simulated (`MOCK-PO-…`).
+     */
+    async fetchPurchaseOrders(_sinceIso: string): Promise<ChannelPurchaseOrderReadResult> {
       await delay(150);
-      // Rotate: each poll surfaces the next 2 POs from the pool.
-      const start = poRotation % MOCK_PO_POOL.length;
-      poRotation += 1;
-      const pos = [0, 1].map(
-        (i) => MOCK_PO_POOL[(start + i) % MOCK_PO_POOL.length]
-      );
-      return { ok: true, purchaseOrders: pos };
+      return { ok: true, purchaseOrders: MOCK_PO_POOL.slice() };
     },
 
     async confirmShipment(_purchaseOrderId: string): Promise<{

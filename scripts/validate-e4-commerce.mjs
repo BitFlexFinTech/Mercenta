@@ -523,13 +523,46 @@ try {
 
   /* ══ S. architecture invariants ══ */
   const apiSrc = readSrc('src/data/api.ts');
-  test('S1 createPurchaseOrder STILL performs its real notification (behaviour untouched)',
-    /export function createPurchaseOrder\(/.test(apiSrc) && /sendPostmarkEmail/.test(apiSrc));
+  /**
+   * §P11 — comment-stripped source for the ABSENCE checks below. A removal
+   * assertion must not be satisfiable — or breakable — by the explanatory comment
+   * that RECORDS the old contract (the repo's standing rule for this pattern).
+   */
+  const apiCode = apiSrc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  /**
+   * §P11 — REPOINTED (not weakened). OLD CONTRACT (recorded verbatim):
+   *
+   *   S1 createPurchaseOrder STILL performs its real notification (behaviour untouched)
+   *      → `/export function createPurchaseOrder\(/.test(apiSrc) && /sendPostmarkEmail/.test(apiSrc)`
+   *
+   * That contract pinned the POSTMARK PO-notification path, which existed only to
+   * tell a brand about a purchase order an ADMIN had created. Programme decision 3
+   * removed "Create PO" entirely (one PO record = the PO from Amazon), so the
+   * pinned symbols are now required to be ABSENT and the ONE purchase-order entry
+   * point is the channel-ingestion owner. The INVARIANT this gate protects — "PO
+   * entry into the platform is single, explicit and truthfully sourced" — is
+   * unchanged; only its canonical source moved.
+   */
+  test('S1 the removed create-PO path is ABSENT — channel ingestion is the ONE PO entry (P11)',
+    !/export function createPurchaseOrder\(/.test(apiCode) &&
+    !/sendPostmarkEmail|postmarkNotifier/.test(apiCode) &&
+    /from '@\/lib\/commerce\/channelPurchaseOrderIngestion'/.test(apiCode) &&
+    /export async function ingestChannelPurchaseOrders\(/.test(apiCode));
+  test('S1b the channel-ingestion owner still FAILS CLOSED on what it cannot route',
+    ['CHANNEL_PO_EMPTY', 'CHANNEL_PO_LINE_NOT_IN_CATALOGUE', 'CHANNEL_PO_CROSSES_TENANTS'].every(
+      (code) => readSrc('src/lib/commerce/channelPurchaseOrderIngestion.ts').includes(code)));
   const simStart = apiSrc.indexOf('export function createSimulatedPurchaseOrder');
   const simEnd = apiSrc.indexOf('/**\n * §Stage-24', simStart);
   const simBody = simStart >= 0 && simEnd > simStart ? apiSrc.slice(simStart, simEnd) : '';
-  test('S2 the simulation-safe PO path sends NO email and touches NO provider',
-    simStart >= 0 && simEnd > simStart && !/sendPostmarkEmail|fetch\s*\(|supabase/i.test(simBody));
+  /**
+   * §P11 — REPOINTED (not weakened): the email clause is now structurally
+   * guaranteed (no `sendPostmarkEmail` exists anywhere), so the test also asserts
+   * that the simulation-only path still MARKS ITSELF simulated — a positive
+   * property that can genuinely fail if the provenance is dropped.
+   */
+  test('S2 the simulation-safe PO path sends NO email, touches NO provider and states its provenance',
+    simStart >= 0 && simEnd > simStart && !/sendPostmarkEmail|fetch\s*\(|supabase/i.test(simBody) &&
+    /mode: 'simulation'/.test(simBody) && /simulated: true/.test(simBody));
   test('S3 the eligibility verdict is derived from the E3 lifecycle, never re-implemented',
     /from '@\/lib\/catalog\/catalogLifecycle'/.test(commerceSrc) &&
     !/REQUIRED_SUBMISSION_FIELDS|evaluateComplianceGate/.test(commerceSrc));

@@ -442,3 +442,34 @@ New canonical entities (all additive in `src/types.ts`):
 existing schema is unchanged (23 migrations).
 
   Not to be reintroduced.
+
+---
+
+## §P11 SUPERSESSION NOTE (2026-09-24) — the purchase-order ENTRY POINT
+
+The phase records above (E4, E5) mention `createPurchaseOrder` and its Postmark
+PO-notification behaviour. Those sentences are **historical records of what was
+true then**; they are NOT the current architecture.
+
+Programme **decision 3** (`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`)
+removed "Create PO" entirely — **one PO record = the PO from Amazon** — and P11
+implemented it on 2026-09-24:
+
+- **`src/lib/commerce/channelPurchaseOrderIngestion.ts` is the ONE PO entry point.**
+  A channel PO is addressed to Mercenta; Mercenta routes it to the brand from the
+  PO's **own lines** (vendor SKU, or ASIN once the product is accepted on the
+  channel) and files it in that brand's workspace. It **fails closed**
+  (`CHANNEL_PO_EMPTY`, `CHANNEL_PO_LINE_NOT_IN_CATALOGUE`,
+  `CHANNEL_PO_CROSSES_TENANTS`) and is **idempotent** by channel PO number.
+- **`createPurchaseOrder` and `src/lib/notifications/postmarkNotifier.ts` are
+  DELETED.** The Postmark PO-notification seam existed only to announce an
+  ADMIN-created PO; the canonical mock-first transactional-email seam is
+  `src/lib/mail/**` (matrix `D14-04`).
+- The **SP-API read** (`fetchPurchaseOrders`) returns the channel's own PO payload
+  (identity, lines, declared FC, windows, `simulated`) in BOTH the real client and
+  the mock; `createSimulatedPurchaseOrder` remains the scenario engine's
+  simulation-only path.
+- Evidence: `scripts/validate-channel-po-ingestion.mjs` (39 assertions, executes
+  the real modules, zero network calls, proved able to fail),
+  `e2e/channel-po-ingestion.spec.ts`, and the repointed gates
+  `validate-e4` S1 / `validate-e5` J2 / `validate-e6` F2 / `validate-mock-seam`.

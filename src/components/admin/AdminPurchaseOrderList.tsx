@@ -10,10 +10,10 @@ import {
   useBrands,
   usePurchaseOrders,
   useDeductions,
-  useProducts,
   useShipmentsAll,
 } from '@/data/queries';
-import { createPurchaseOrder } from '@/data/api';
+import { ingestChannelPurchaseOrders } from '@/data/api';
+import type { ChannelIngestionResult } from '@/lib/commerce/channelPurchaseOrderIngestion';
 import { Button, Card, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AdminPurchaseOrderDetail } from '@/components/admin/AdminPurchaseOrderDetail';
@@ -44,32 +44,33 @@ import {
 } from '@/lib/statusPresentation';
 import type { Deduction, PurchaseOrder } from '@/types';
 import type { DemoShipment } from '@/data/demoData';
-import { Search, Eye, Plus, X, Package } from 'lucide-react';
+import { Search, Eye, RefreshCw } from 'lucide-react';
 
 const STATUS_ORDER = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'];
 
 export function AdminPurchaseOrderList() {
   const qc = useQueryClient();
-  // §Phase E5 (G3) — the on-behalf create action is a MUTATION and must honour
-  // the EXISTING staff permission tier. `createPurchaseOrder`'s real
-  // notification behaviour is deliberately UNCHANGED — this adds the guard the
-  // surface was missing, it does not alter the email path.
-  const { canCurrentUserMutate } = useApp();
+  /*
+   * §P11 — REPOINTED (old contract recorded). The Phase E5 G3 guard was written
+   * for the on-behalf "Create PO" action, which decision 3 REMOVED. The guard
+   * itself is unchanged and still necessary: reading the channel and filing its
+   * purchase orders is a MUTATION, so a view-only staff session must be refused
+   * by the SURFACE exactly as before (the domain refuses it too).
+   */
+  const { canCurrentUserMutate, session } = useApp();
   const brandsQuery = useBrands();
-  const productsQuery = useProducts();
   const posQuery = usePurchaseOrders();
   const deductionsQuery = useDeductions();
   const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
-  const products = productsQuery.data?.data ?? [];
   const pos = useMemo(() => posQuery.data?.data ?? [], [posQuery.data]);
   const deductions = useMemo(() => deductionsQuery.data?.data ?? [], [deductionsQuery.data]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedPoId, setSelectedPoId] = useState<string | null>(null);
-  const [showCreate, setShowCreate] = useState(false);
-  const [createBrandId, setCreateBrandId] = useState('');
-  const [createLines, setCreateLines] = useState<{ productId: string; quantity: number }[]>([]);
-  const [createNote, setCreateNote] = useState<string | null>(null);
+  /* §P11 — channel purchase-order ingestion state (the ONLY way a PO arrives). */
+  const [ingestBusy, setIngestBusy] = useState(false);
+  const [ingestResult, setIngestResult] = useState<ChannelIngestionResult | null>(null);
+  const [ingestError, setIngestError] = useState<string | null>(null);
   /* §UI/UX Wave 2 completion — workspace state: queue density (REAL — it changes
      the rendered row padding), the simulated-only filter, and the record preview. */
   const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
@@ -113,21 +114,33 @@ export function AdminPurchaseOrderList() {
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [pos, statusFilter, searchQuery, brands, simOnly]);
 
-  function addLine(productId: string) { setCreateLines(function(prev) { return [...prev, { productId: productId, quantity: 1 }]; }); }
-  function removeLine(idx: number) { setCreateLines(function(prev) { return prev.filter(function(_, i) { return i !== idx; }); }); }
-  function updateQty(idx: number, qty: number) { setCreateLines(function(prev) { return prev.map(function(l, i) { return i === idx ? { ...l, quantity: Math.max(1, qty) } : l; }); }); }
-  function handleCreate() {
-    // §Phase E5 (G3) — RBAC: a view-only account may not create purchase orders.
+  /**
+   * §P11 — READ THE RETAIL CHANNEL FOR PURCHASE ORDERS.
+   *
+   * This replaces the removed "Create PO" action. Mercenta never creates a PO
+   * (decision 3): it reads the channel through the SP-API seam (the Mock client
+   * until real credentials exist) and files every routable PO in the brand's
+   * workspace, refusing anything it cannot route.
+   */
+  async function handleReadChannelPos() {
+    // §Phase E5 (G3) guard, repointed to the P11 ingestion action — still a mutation.
     if (!canCurrentUserMutate) return;
-    if (!createBrandId || createLines.length === 0) return;
-    const brandProducts = products.filter(function(p) { return p.brandId === createBrandId; });
-    const lineItems = createLines.map(function(l) { const p = brandProducts.find(function(pp) { return pp.id === l.productId; }); return { sku: p?.sku ?? 'UNKNOWN', productName: p?.name ?? 'Unknown', quantity: l.quantity, unitPrice: p?.exWorksPrice ?? 0, commodityCode: p?.commodityCode ?? '00000000' }; });
-    const po = createPurchaseOrder(createBrandId, lineItems, 'admin');
-    setCreateNote('PO ' + po.poNumber + ' created for ' + (brands.find(function(b) { return b.id === createBrandId; })?.profile.businessName ?? createBrandId));
-    setCreateBrandId('');
-    setCreateLines([]);
-    setShowCreate(false);
-    setTimeout(function() { setCreateNote(null); qc.invalidateQueries(); }, 3000);
+    if (ingestBusy) return;
+    setIngestBusy(true);
+    setIngestError(null);
+    try {
+      const result = await ingestChannelPurchaseOrders({
+        actorId: session?.role ?? 'Mercenta Admin',
+      });
+      setIngestResult(result);
+      qc.invalidateQueries();
+    } catch (err) {
+      setIngestError(
+        err instanceof Error ? err.message : 'The retail channel read failed; nothing was ingested.'
+      );
+    } finally {
+      setIngestBusy(false);
+    }
   }
 
 return (
@@ -135,7 +148,7 @@ return (
       <WorkspaceHeader
         eyebrow="Admin Hub · Commerce operations"
         title="Purchase Orders"
-        description={`${pos.length} POs across ${brands.length} brands — create, manage, acknowledge, and file ASNs on behalf of brands`}
+        description={`${pos.length} POs across ${brands.length} brands — read from the retail channel, routed to the correct brand, acknowledged, and filed as ASNs on their behalf`}
         meta={
           <>
             <span className="text-ds-label text-zinc-500">
@@ -156,15 +169,30 @@ return (
         }
         actions={
           <>
-            {createNote && (
-              <span className="text-ds-micro text-emerald-400" role="status">
-                {createNote}
+            {ingestError && (
+              <span className="text-ds-micro text-red-400" role="alert">
+                {ingestError}
               </span>
             )}
-            <Button className="text-ds-micro" data-state="admin-po-create" disabled={!canCurrentUserMutate}
-              title={canCurrentUserMutate ? undefined : 'View-only staff cannot create purchase orders'}
-              onClick={function() { setShowCreate(true); }}>
-              <Plus className="w-3 h-3 mr-1" /> Create PO
+            {ingestResult && !ingestError && (
+              <span className="text-ds-micro text-emerald-400" role="status" data-state="po-ingest-summary">
+                {ingestResult.ok
+                  ? `${ingestResult.polled} read · ${ingestResult.ingested} filed · ${ingestResult.alreadyPresent} already held · ${ingestResult.refused} refused`
+                  : 'Channel read failed'}
+              </span>
+            )}
+            <Button
+              className="text-ds-micro"
+              data-state="admin-po-ingest"
+              disabled={!canCurrentUserMutate || ingestBusy}
+              title={
+                canCurrentUserMutate
+                  ? 'Read the retail channel for purchase orders addressed to Mercenta'
+                  : 'View-only staff cannot file purchase orders'
+              }
+              onClick={handleReadChannelPos}
+            >
+              <RefreshCw className="w-3 h-3 mr-1" /> Read channel POs
             </Button>
           </>
         }
@@ -296,6 +324,127 @@ return (
             },
           ]}
         />
+        {/* §P11 — THE CHANNEL READ: the ONLY way a purchase order arrives.
+            Mercenta never creates a PO (decision 3). It reads the retail channel,
+            identifies the brand from the PO's own lines, files it in that brand's
+            workspace — and REFUSES anything it cannot route. The panel states the
+            seam's mode truthfully and lists every outcome, refusals included. */}
+        <WorkspaceSection
+          title="Channel purchase orders"
+          domain="orders"
+          description="The retail channel issues purchase orders to Mercenta. Mercenta identifies the brand from the PO's own lines and files it in that brand's workspace; a PO that cannot be routed is refused and held for review."
+        >
+          <div className="space-y-2" data-testid="channel-po-ingestion">
+            <div className="flex flex-wrap items-center gap-2 text-ds-label">
+              <span className="text-zinc-500">
+                Channel read{' '}
+                <span className="font-mono text-zinc-300" data-state="channel-mode">
+                  {ingestResult
+                    ? ingestResult.mode === 'mock'
+                      ? 'Simulation (mock)'
+                      : 'Live'
+                    : ingestBusy
+                      ? 'Reading…'
+                      : 'Not yet read'}
+                </span>
+              </span>
+              {ingestResult?.mode === 'mock' && (
+                <span className="rounded border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
+                  Simulated read — no live channel call was made
+                </span>
+              )}
+            </div>
+
+            {ingestError ? (
+              <p className="text-ds-label text-red-400" role="alert">
+                {ingestError}
+              </p>
+            ) : !ingestResult ? (
+              <p className="text-ds-label text-zinc-500">
+                No channel read has been performed in this session. Nothing is created inside Mercenta —
+                purchase orders arrive from the retail channel.
+              </p>
+            ) : (
+              <>
+                <dl className="flex flex-wrap gap-x-5 gap-y-1 text-ds-label" data-testid="channel-po-outcomes">
+                  {[
+                    { label: 'Read', value: ingestResult.polled },
+                    { label: 'Filed', value: ingestResult.ingested },
+                    { label: 'Already held', value: ingestResult.alreadyPresent },
+                    { label: 'Refused', value: ingestResult.refused },
+                  ].map(function(row) {
+                    return (
+                      <div key={row.label} className="flex items-center gap-2">
+                        <dt className="text-zinc-500">{row.label}</dt>
+                        <dd className="font-mono text-zinc-200">{row.value}</dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+                {ingestResult.outcomes.length === 0 ? (
+                  <p className="text-ds-label text-zinc-500">
+                    The channel returned no purchase orders for this read.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-white/[0.04]" data-testid="channel-po-outcome-rows">
+                    {ingestResult.outcomes.map(function(o) {
+                      const filed = o.status === 'ingested' && o.po;
+                      return (
+                        <li
+                          key={o.channelPurchaseOrderId}
+                          data-outcome={o.status}
+                          className="flex flex-wrap items-center justify-between gap-2 py-1.5"
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            {filed ? (
+                              <button
+                                type="button"
+                                data-testid={`channel-po-open-${o.channelPurchaseOrderId}`}
+                                onClick={function() { setPreviewPoId(o.po!.id); }}
+                                className="font-mono text-ds-label text-zinc-200 underline-offset-2 hover:underline"
+                                title="Open the filed purchase order"
+                              >
+                                {o.channelPurchaseOrderId}
+                              </button>
+                            ) : (
+                              <span className="font-mono text-ds-label text-zinc-400">
+                                {o.channelPurchaseOrderId}
+                              </span>
+                            )}
+                            <span
+                              data-status={o.status}
+                              className={cn(
+                                'rounded px-1.5 py-0.5 text-ds-micro capitalize',
+                                o.status === 'ingested'
+                                  ? 'bg-emerald-500/15 text-emerald-300'
+                                  : o.status === 'already_present'
+                                    ? 'bg-white/[0.06] text-zinc-400'
+                                    : 'bg-red-500/15 text-red-300'
+                              )}
+                            >
+                              {o.status.replace(/_/g, ' ')}
+                            </span>
+                            <span className="text-ds-micro text-zinc-500">
+                              {o.brandId ? brandName(o.brandId) : 'Not routed'}
+                            </span>
+                          </span>
+                          {o.reason && (
+                            <span className="max-w-[56ch] text-ds-micro leading-snug text-zinc-500">
+                              {o.reason}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </>
+            )}
+          </div>
+        </WorkspaceSection>
+
+
+
 
         <WorkspaceSection
           title="Order queue"
@@ -399,61 +548,10 @@ return (
         <AdminPurchaseOrderDetail poId={selectedPoId} onClose={function() { setSelectedPoId(null); qc.invalidateQueries(); }} />
       )}
 
-      {showCreate && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-white/[0.08]">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-              <span className="text-sm font-semibold text-white">Create Purchase Order on Behalf of Brand</span>
-              <button onClick={function() { setShowCreate(false); }} className="text-zinc-400 hover:text-white"><X className="w-3.5 h-3.5" /></button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
-              <div>
-                <label className="text-ds-micro text-zinc-500 font-medium mb-1 block">Brand</label>
-                <select value={createBrandId} onChange={function(e) { setCreateBrandId(e.target.value); setCreateLines([]); }}
-                  className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white">
-                  <option value="">Select a brand…</option>
-                  {brands.map(function(b) { return (<option key={b.id} value={b.id}>{b.profile.businessName}</option>); })}
-                </select>
-              </div>
-              {createBrandId && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-ds-micro text-zinc-500 font-medium">Products / Line Items</label>
-                  </div>
-                  <div className="space-y-2">
-                    {createLines.map(function(l, i) {
-                      const p = products.find(function(pp) { return pp.id === l.productId; });
-                      return (<div key={i} className="flex items-center gap-2 bg-white/[0.02] rounded-lg px-3 py-2">
-                        <span className="text-xs text-zinc-300 flex-1">{p?.name ?? 'Unknown'}</span>
-                        <input type="number" value={l.quantity} onChange={function(e) { updateQty(i, parseInt(e.target.value) || 1); }} className="w-16 bg-ink-900 border border-white/[0.08] rounded px-2 py-1 text-xs text-white text-center" min="1" />
-                        <span className="text-ds-micro text-zinc-500 font-mono w-16 text-right">GBP {(p?.exWorksPrice ?? 0).toFixed(2)}</span>
-                        <button onClick={function() { removeLine(i); }} className="text-zinc-500 hover:text-red-400"><X className="w-3 h-3" /></button>
-                      </div>);
-                    })}
-                    {createLines.length === 0 && <p className="text-xs text-zinc-600">No line items yet. Add products below.</p>}
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-1">
-                    {products.filter(function(p) { return p.brandId === createBrandId && !createLines.some(function(l) { return l.productId === p.id; }); }).slice(0, 10).map(function(p) { return (
-                      <button key={p.id} onClick={function() { addLine(p.id); }} className="bg-ink-900 border border-white/[0.06] rounded px-2 py-1 text-ds-micro text-zinc-300 hover:border-brass-500/40">{p.name} <span className="text-zinc-500">+</span></button>
-                    );})}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06]">
-              <p className="text-ds-micro text-zinc-700">
-                {canCurrentUserMutate ? 'Admin action on behalf of brand' : 'View-only staff — creating is refused'}
-              </p>
-              <div className="flex gap-2">
-                <Button variant="ghost" className="text-ds-micro" onClick={function() { setShowCreate(false); }}>Cancel</Button>
-                <Button className="text-ds-micro" disabled={!canCurrentUserMutate || !createBrandId || createLines.length === 0} onClick={handleCreate}>
-                  <Package className="w-3 h-3 mr-1" /> Create PO
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
+      {/* §P11 — REMOVED (decision 3): the "Create Purchase Order on Behalf of
+          Brand" dialogue. Mercenta never creates a purchase order; POs arrive
+          from the retail channel and are filed by the channel-read action above
+          (`ingestChannelPurchaseOrders`). */}
     </WorkspaceFrame>
   );
 }

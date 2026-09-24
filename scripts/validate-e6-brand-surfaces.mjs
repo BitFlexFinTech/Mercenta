@@ -980,6 +980,52 @@ const P10_LOGISTICS_COMPLETION_SCOPE = new Set([
   'PRODUCTION_READINESS.md',
 ]);
 
+/**
+ * §P11 (2026-09-24, programme `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`
+ * §4 P11; matrix `cleanup-p11-remove-create-po`; programme decision 3) —
+ * CHANNEL-INGESTION DECLARED SURFACE.
+ *
+ * P11 REMOVES "Create PO" (the admin on-behalf creation action, `createPurchaseOrder`
+ * and its Postmark PO-notification seam) and replaces it with CHANNEL PURCHASE-ORDER
+ * INGESTION: the PO is addressed to Mercenta, Mercenta routes it to the brand from
+ * the PO's OWN lines, and anything unroutable is refused. It touches the SP-API
+ * read (a PROTECTED file → declared here), one domain owner, one surface, four
+ * gates and two specs. The F5/F5b/F6 contract is UNCHANGED: a changed source/test
+ * file in NO declared set still fails, and an undeclared protected path still fails.
+ */
+const P11_CHANNEL_PO_INGESTION_SCOPE = new Set([
+  /* The new domain owner (routing, idempotency, fail-closed refusals, audit) */
+  'src/lib/commerce/channelPurchaseOrderIngestion.ts',
+  /* The gate's own SP-API read (PROTECTED prefix — declared, not widened) */
+  'src/lib/spapi/client.ts',
+  'src/lib/spapi/mockClient.ts',
+  /* The app-facing seam + the admin surface whose action P11 replaces */
+  'src/data/api.ts',
+  'src/components/admin/AdminPurchaseOrderList.tsx',
+  /* The removed duplicate email seam (deleted by P11 — decision 3) */
+  'src/lib/notifications/postmarkNotifier.ts',
+  /* The gates + the browser specs */
+  'scripts/validate-channel-po-ingestion.mjs',
+  'scripts/validate-e4-commerce.mjs',
+  'scripts/validate-e5-admin-surfaces.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/validate-mock-seam.mjs',
+  'scripts/verify-demo-live.mjs',
+  'package.json',
+  'e2e/notifications.spec.ts',
+  'e2e/channel-po-ingestion.spec.ts',
+  /* Documentation + the state sources */
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+  'MERCENTA_ARCHITECTURE.md',
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+  'STATUS_CHECK.md',
+  'requirements-registry.json',
+  'PRODUCTION_READINESS.md',
+]);
+
 
 try {
   /* ── modules under test (the EXISTING architecture) ── */
@@ -1190,8 +1236,20 @@ try {
     integrations.isProviderSimulationSafe(undefined) === false &&
     integrations.isProviderSimulationSafe('not_registered') === false &&
     integrations.isProviderSimulationSafe('simulation') === true);
-  test('F2 createPurchaseOrder still performs its real notification (path UNTOUCHED)',
-    /export function createPurchaseOrder\(/.test(API) && /sendPostmarkEmail/.test(API));
+  /**
+   * §P11 — REPOINTED (not weakened). OLD CONTRACT (recorded verbatim):
+   *
+   *   F2 createPurchaseOrder still performs its real notification (path UNTOUCHED)
+   *      → `/export function createPurchaseOrder\(/.test(API) && /sendPostmarkEmail/.test(API)`
+   *        (API = src/data/api.ts)
+   *
+   * Decision 3 removed "Create PO"; the pinned symbols are now required to be
+   * ABSENT and the ONE purchase-order entry point is the channel-ingestion owner.
+   */
+  test('F2 the create-PO path is absent — PO entry is channel ingestion (P11)',
+    !/export function createPurchaseOrder\(/.test(code(API)) &&
+    !/sendPostmarkEmail/.test(code(API)) &&
+    /channelPurchaseOrderIngestion/.test(code(API)));
   test('F3 no live provider path or network call was introduced by E6',
     !/fetch\s*\(/.test(PO + DASH + CATALOG + NOTIF) &&
     !/spapi\/client|dhl\/client|services\/xero|postmarkNotifier/.test(PO + DASH + CATALOG + NOTIF));
@@ -1249,6 +1307,9 @@ try {
         /** §P10 — the logistics-completion phase's declared surface (see above). */
         P10_LOGISTICS_COMPLETION_SCOPE.has(p) ||
         [...P10_LOGISTICS_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P11 — the channel-ingestion phase's declared surface (see above). */
+        P11_CHANNEL_PO_INGESTION_SCOPE.has(p) ||
+        [...P11_CHANNEL_PO_INGESTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
@@ -1264,6 +1325,9 @@ try {
         /** §P10 — same declaration, second protected-path check (F5b). */
         P10_LOGISTICS_COMPLETION_SCOPE.has(p) ||
         [...P10_LOGISTICS_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P11 — same declaration, second protected-path check (F5b). */
+        P11_CHANNEL_PO_INGESTION_SCOPE.has(p) ||
+        [...P11_CHANNEL_PO_INGESTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
@@ -1439,7 +1503,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...P9_CARRIER_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §P10 — the logistics-completion phase's declared surface (see above). */
           P10_LOGISTICS_COMPLETION_SCOPE.has(p) ||
-          [...P10_LOGISTICS_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...P10_LOGISTICS_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P11 — the channel-ingestion phase's declared surface (see above). */
+          P11_CHANNEL_PO_INGESTION_SCOPE.has(p) ||
+          [...P11_CHANNEL_PO_INGESTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

@@ -156,7 +156,7 @@ is unreadable and would be maintained badly, so the dimensions are split:
 | `D03-01` | `overview` | Dashboard | **VERIFIED** | `e2e/dashboard.spec.ts` #6–#10 | tenant-derived KPIs only; no fabricated metrics |
 | `D03-02` | `catalog` | Product Catalog | **VERIFIED** | `e2e/catalog-product-management.spec.ts`, `e2e/brand-operational-surfaces.spec.ts` #4 | compliance-gated submission |
 | `D03-03` | `commercial_readiness` | Commercial Readiness | **VERIFIED** | `e2e/commercial-readiness.spec.ts` | Phase 2 |
-| `D03-04` | `purchase_orders` | Purchase Orders | **VERIFIED** | `e2e/po-lifecycle.spec.ts`, `e2e/notifications.spec.ts` #2–#4 | acknowledge/reject/modify, line-level |
+| `D03-04` | `purchase_orders` | Purchase Orders | **VERIFIED** | `e2e/po-lifecycle.spec.ts`, `e2e/notifications.spec.ts` #2–#4, `e2e/channel-po-ingestion.spec.ts`, `scripts/validate-channel-po-ingestion.mjs` (39 assertions) | acknowledge/reject/modify, line-level. **§P11 (2026-09-24) — the PO ENTRY POINT is CHANNEL INGESTION**: "Create PO" and its Postmark notification seam are REMOVED (programme decision 3), and a channel PO addressed to Mercenta is ROUTED to its brand from the PO's own lines (`src/lib/commerce/channelPurchaseOrderIngestion.ts`), filed idempotently, and REFUSED (fail-closed: no lines / a line outside the catalogue / lines spanning two brands) |
 | `D03-05` | `returns` | Returns | **VERIFIED** | `e2e/deductions.spec.ts`, `e2e/disputes.spec.ts` | |
 | `D03-06` | `logistics` | Inbound Shipments | **VERIFIED** | `e2e/shipment-asn.spec.ts`, `e2e/fulfillment-tracks.spec.ts` | PO-gated shipment creation |
 | `D03-07` | `onboarding` | Onboarding & Legal | **VERIFIED** | `e2e/onboarding-workflow.spec.ts`, `e2e/onboarding-handoff.spec.ts` | fail-closed without a commercial model |
@@ -455,7 +455,7 @@ Read a row together with its domain contract block. Together they carry all 26 d
 | `D14-01` | Brand CRM (depth + comms) | admin `crm` | **VERIFIED** | `e2e/crm.spec.ts` |
 | `D14-02` | Messages hub / log | admin `messages`, brand `team` | **VERIFIED** | `e2e/crm.spec.ts`, `e2e/admin-operational-surfaces.spec.ts` |
 | `D14-03` | Notification centre + derivation | all shells | **VERIFIED** | `e2e/notifications.spec.ts`, `e2e/dashboard.spec.ts` |
-| `D14-04` | Transactional email seam | `src/lib/notifications/postmarkNotifier.ts`, `src/lib/mail/**` | **PARTIALLY VERIFIED** | `e2e/outreach-provider-hardening.spec.ts` |
+| `D14-04` | Transactional email seam | `src/lib/mail/**` (the ONE seam) | **PARTIALLY VERIFIED** | `e2e/outreach-provider-hardening.spec.ts` |
 | `D14-05` | Social / Postiz / embedded social | brand `social`, admin `postiz` | **VERIFIED** | `e2e/embedded-social.spec.ts` |
 | `D14-06` | WhatsApp (Twilio) | admin `whatsapp` | **PARTIALLY VERIFIED** | render-only today (gap R4) |
 | `D14-07` | UserTour in-app tours + KB link | `usertour` + `TourEngine` | **VERIFIED** | `e2e/tours.spec.ts` |

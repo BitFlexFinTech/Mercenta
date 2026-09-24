@@ -82,7 +82,7 @@ documents → ship on time. Everything else is Mercenta's.
 | **P8** | ✅ **DONE** (2026-09-23, session 21 — see §12) | **Inventory** linked to the catalogue + the **ASIN** field (rule = decision 10): the append-only movement ledger (every figure DERIVED), the Eaches/Cases unit with the product's own case pack (fail-closed), the brand's declaration path (existing listing required) and the channel-assignment path (MERCENTA populates it on acceptance — `SIM-ASIN-…` while simulated), plus the admin override | decision 5; decision 10; **AV-029**, **AV-035** |
 | **P9** | ✅ **DONE** (2026-09-23, session 22 — see §13) | **The 3PL carrier surface is REMOVED COMPLETELY** (decision 4): the `carrier` environment, the `'3PL Carrier'` role and its `'3pl'` tier, `CarrierShell`, `CarrierDashboard`, `BakLogistics`, the admin `Carrier Monitor` (component + nav + `'carriers'` view), the demo environment-switcher entry, the "3PL Carrier Terminal" login card, the `/carrier` address and its SEO posture, and the public FAQ claim. Decision 1's carrier identity (`fedex`/`bak`) is removed from the type, the labels, the lane-capability table and the demo data, with the REFUSAL preserved by name (`RETIRED_CARRIER_IDS`). The capability the portal carried — a carrier event that advances a consignment, and its request log — is **REHOMED** on the Mercenta admin Logistics Hub (the operator of those accounts), attributed to the Mercenta operator rather than a carrier login. | decision 4; decision 1; matrix `D01-07`/`D04-18`/`D10-13` |
 | **P10** | ✅ **DONE** (2026-09-24, session 23 — see §14) | **Logistics Hub completion**: the carrier **PROVIDER CONFIGURATION** (`D10-10`) rendered by both workspaces from ONE owner, the **PO-document DOWNLOAD QUEUE** (the destination the nav badge already counted), and **consolidation recorded as DEFERRED, not designed out** (decision 11: the 1..n model is functional; the grouping input is P12's scope) | decision 11; `D10-10` |
-| **P11** | | **Remove "Create PO"** + channel PO ingestion (mock-first); repoint the three validators that assert its notification path | decision 3 |
+| **P11** | ✅ **DONE** (2026-09-24, session 24 — see §15) | **"Create PO" is REMOVED** (decision 3) and replaced by **CHANNEL PURCHASE-ORDER INGESTION (mock-first)**: the PO is addressed to Mercenta, routed to the brand from the PO's OWN lines, filed idempotently, and **refused** when it cannot be routed. `createPurchaseOrder` and its duplicate Postmark PO-notification seam are gone; the three gates that pinned that path (E4 S1, E5 J2, E6 F2) are repointed to the new canonical truth | decision 3; matrix `cleanup-p11-remove-create-po` |
 | **P12** | | **SP-API seam extension (mock-first)**: `submitAcknowledgement`, `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate` | **AV-040** |
 
 **Verification protocol for EVERY phase (no exceptions):** `tsc` (app + root) · eslint · `npm run build` ·
@@ -101,13 +101,14 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6**, **P7**, **P8**, **P9**, **P10** (committed; the P2 checkpoint
-  hash is recorded in `PROJECT_STATUS.md` §7, and P3–P10's in the `CURRENT RESUME STATE` block).
-- **Next:** **P11 — remove "Create PO" + channel PO ingestion (mock-first)**, repointing the three validators that
-  assert its notification path (decision 3).
-- **Then:** P11 → P12 in order.
-- **Deployment:** executed at the close of each product phase. P3–P10 were deployed and live-verified; the full
-  three-way confirmation is re-run at the end of the programme.
+- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6**, **P7**, **P8**, **P9**, **P10**, **P11** (committed; the P2 checkpoint
+  hash is recorded in `PROJECT_STATUS.md` §7, and P3–P11's in the `CURRENT RESUME STATE` block).
+- **Next:** **P12 — SP-API seam extension (mock-first)**: `getPurchaseOrdersStatus` (the receiving sync),
+  `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels`, `submitShipmentConfirmations`,
+  `submitInvoices`, `submitInventoryUpdate` (the last seven documented Vendor operations; `submitAcknowledgement`
+  was done in P4). Closes **AV-040**, and it is the declared activation for P10's deferred consolidation grouping.
+- **Then:** P12 completes the programme; the full three-way confirmation is re-run at the end.
+- **Deployment:** executed at the close of each product phase. P3–P11 were deployed and live-verified.
 
 ## 6. P2 — WHAT WAS BUILT (so P3+ does not have to re-derive it)
 
@@ -851,3 +852,120 @@ Integrations surface; test **4b** proves the staff session sees the same record 
   same rule. The brand's print dialogues live in the brand shell, so the admin queue's artefact callback
   performs no action, and the pack reports those artefacts not-ready until a booking exists.
 
+
+---
+
+## 15. P11 — WHAT WAS BUILT, VERIFIED AND HOW (so P12+ does not have to re-derive it)
+
+**Increment identity:** P11 of this programme (application work), matrix `cleanup-p11-remove-create-po`, programme
+decision 3. Branch `redesign/foundation`.
+
+### What was wrong
+
+Two things decision 3 named, and the repository confirmed both:
+
+1. **"Create PO" existed and contradicted the PO identity.** `src/components/admin/AdminPurchaseOrderList.tsx`
+   offered a *"Create Purchase Order on Behalf of Brand"* dialogue calling `api.createPurchaseOrder`, which minted a
+   PO (`PO-ADM-…`), invented a 7% commission, fired a **REAL Postmark email** to the brand and audited `po_created`.
+   Decision 3: **one PO record = the PO from Amazon. No second PO document. No "Create PO" anywhere.**
+2. **No way for a channel PO to enter the platform.** The SP-API read (`fetchPurchaseOrders`) returned only
+   `{ purchaseOrderId, poValue }` — nothing a PO could be **routed** by — and nothing turned a channel PO into a
+   canonical record. The mock's "PO pool" was four bare ids, so the data to route with did not exist either.
+
+### What was built
+
+- **`src/lib/commerce/channelPurchaseOrderIngestion.ts` (NEW) — the ONE PO entry point.** The PO is addressed to
+  Mercenta; Mercenta identifies the brand from the PO's **own lines** (`vendorSku`, or `asin` once the product is
+  accepted on the channel) and files it in that brand's workspace. It is:
+  · **fail-closed** — `CHANNEL_PO_EMPTY`, `CHANNEL_PO_LINE_NOT_IN_CATALOGUE` (out of scope, held for review),
+    `CHANNEL_PO_CROSSES_TENANTS` (one PO is one brand's order). An unmatched line refuses the WHOLE PO; nothing is
+    guessed and no partial PO is filed;
+  · **tenant-safe** — the brand is DERIVED from the PO, never supplied by a caller, so a PO can never be filed
+    against a tenant whose catalogue does not contain the ordered products;
+  · **idempotent** — the channel PO number IS the record's `poNumber` (decision 3) and the id is deterministic
+    (`po-channel-…`), so a re-read can never duplicate or reset a record;
+  · **truthful** — the record's value is recomputed from the channel's OWN lines, the destination is the FC the
+    CHANNEL declared (an unknown code keeps the channel's `partyId`; no site is invented), the channel's windows are
+    carried, and `mode: 'simulation'`/`simulated: true` is set **only** when the seam says the read was simulated;
+  · **attributed and audited** — each filing writes a canonical `po_ingested` audit record (actor, tenant, entity,
+    `channelSource`, the channel's declared total) and announces the canonical-store change.
+- **The SP-API read, extended in BOTH clients** (`src/lib/spapi/client.ts`, `src/lib/spapi/mockClient.ts`): the read
+  now returns the channel's own PO payload (identity, `poLines`, declared `shipToPartyId`, `freightTerm`, windows,
+  `simulated`). A live response is explicitly `simulated: false`; the mock's pool is **derived from the canonical
+  catalogue** (`DEMO_PRODUCTS`) so a simulated PO is genuinely routable, and it deliberately contains ONE
+  out-of-catalogue PO so the fail-closed refusal is reachable **from the product**, not only from a test.
+- **`src/components/admin/AdminPurchaseOrderList.tsx`** — the create dialogue is gone; the header action is
+  **"Read channel POs"** (`data-state="admin-po-ingest"`), behind the **same RBAC guard** the removed create action
+  had, and a "Channel purchase orders" section states the seam's mode before and after the read ("Simulated read — no
+  live channel call was made"), the outcome counts, and **every** outcome row — each filed row is clickable and opens
+  the SAME record drawer the queue uses, and each refusal states its reason.
+- **REMOVED (decision 3):** `createPurchaseOrder`, the admin create dialogue, and
+  `src/lib/notifications/postmarkNotifier.ts` — whose ONLY caller was `createPurchaseOrder`. The canonical
+  mock-first transactional-email seam is `src/lib/mail/**` (matrix `D14-04`); the retired one was a duplicate, and a
+  brand's new-PO signal is in-app (`NotificationCenter`, derived from the canonical store). `createSimulatedPurchaseOrder`
+  remains the scenario engine's simulation-only path (E4).
+
+
+### TWO REAL DEFECTS THIS PHASE'S OWN GATES FOUND (and how they were fixed)
+
+The first FULL validator run after the increment failed **exactly two gates**, neither of which typecheck, eslint or
+the build can see. Both were real, and both were fixed at the source rather than by relaxing the gate:
+
+1. **`validate-canonical-propagation` S2** — "every function that mutates canonical state signals the change". The
+   ingestion owner signalled conditionally (`if (outcomes.some(...)) notifyCanonicalStoreChange();`), which the gate's
+   contract (a signal must be a statement of its own) cannot express. **Fixed properly:** the signal is now emitted
+   immediately after the record is filed, so it is a standalone statement AND only fires when a PO actually entered
+   the store — the stronger of the two behaviours. (25 PASS / 0 FAIL after.)
+2. **`validate-mock-seam`** — its "PO poll returns simulated POs" assertion pinned the read's OLD contract
+   (`length === 2` and a rotating first id). P11 legitimately changed the read's contract: ingestion needs the PO's
+   own LINES and a STABLE window, or the idempotency guard is untestable and the same channel PO would reappear
+   forever. **Repointed, not weakened:** the gate now asserts MORE — the lines/FC fields ingestion routes by, the
+   seam-declared `simulated: true`, the same set on a re-read, and that an out-of-catalogue PO exists. (PASS after.)
+
+### Gates — added and repointed, never weakened
+
+| Gate | Result |
+|---|---|
+| `scripts/validate-channel-po-ingestion.mjs` (**NEW**, `npm run validate:channel-po-ingestion`) | **PASS — 39 assertions, 0 network calls.** It EXECUTES the real owner AND the real mock client: routing by SKU and by ASIN; all three fail-closed refusals; the canonical record (channel PO number as `poNumber`, deterministic id, the channel's declared FC, its windows, the value recomputed from its own lines); simulated provenance; the injected-clock timestamp; the declared commercial placeholder; a failed read ingesting nothing; idempotency; attribution + audit; the simulated pool's routability and its out-of-catalogue refusal; the seam's credential-only mock/real selection; the ABSENCE of the removed create-PO path and the Postmark seam; the surface wiring (channel read + RBAC guard); no placeholder and no network call. **PROVED ABLE TO FAIL:** breaking the cross-tenant refusal → **37 passed / 1 failed**, naming it; restored byte-identical (`shasum` unchanged) → **39 / 0**. |
+| `scripts/validate-e4-commerce.mjs` (S1, S2) | **PASS.** S1 **REPOINTED** (old contract recorded inline) — `createPurchaseOrder` + `sendPostmarkEmail` are now required to be **ABSENT** from the comment-stripped source, and the ONE entry point is the ingestion owner (+ new S1b pinning the three refusal codes). S2 gained the positive provenance assertions so it can still fail. |
+| `scripts/validate-e5-admin-surfaces.mjs` (J2, J3) | **PASS.** J2 **REPOINTED** — the admin list's entry point is the channel read through the canonical owner, and no create control is rendered. J3's guard is UNCHANGED in contract and now guards the ingestion action (it never stopped being necessary). |
+| `scripts/validate-e6-brand-surfaces.mjs` (F2, F5/F5b/F6) | **PASS.** F2 **REPOINTED** (comment-stripped). `P11_CHANNEL_PO_INGESTION_SCOPE` declares the phase's surface; **F6 first FAILED naming `src/lib/notifications/postmarkNotifier.ts` as an offender** — the change-scope mechanism working exactly as designed — and then accepted the declared §P11 surface. |
+| `scripts/validate-e7-embedded-social.mjs` | **PASS** with `P11_CHANNEL_PO_INGESTION_DECLARED` added to the protected-path check and the approved-scope list. |
+| `scripts/validate-mock-seam.mjs` | **PASS.** REPOINTED as described above (asserts MORE than it did). |
+| `scripts/verify-demo-live.mjs` | the **§P11 live checks** were added: the deployed bundle's own content (the routing code, the channel-read control, the simulated-provenance notice, and the ABSENCE of the create dialogue and the Postmark seam), plus a live channel read driven on the deployed admin surface. |
+| every other validator in `scripts/validate-*.mjs` | all **exit 0** (the whole set was executed this session: **101 of 101** — the new gate is the 101st). |
+
+
+
+### Verification performed for P11 (session 24) — all evidence produced in the same session
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` (app) | **0 errors** |
+| `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) | **0 errors** |
+| `npx eslint src scripts e2e` | **0 errors** |
+| `npm run build` | **✓ built in 7.70s** |
+| `npm run validate:wording` | **PASS — 315 src files, 0 outward-facing violations** |
+| every validator in `scripts/validate-*.mjs` | **101 of 101 exit 0** (the whole set was executed; the new gate is the 101st) |
+| the 2 affected/added browser specs (`e2e/channel-po-ingestion.spec.ts` 5 tests + `e2e/notifications.spec.ts` 4 tests) | **9 passed / 0 failed** |
+| **FULL Playwright suite** (`npx playwright test --workers=3`) | **495 passed / 0 failed / 2 skipped (16.5m)**. Reported honestly: the FIRST full run had **one non-reproducing failure** — `e2e/design-system.spec.ts` 390x844 timed out for 30s inside its own `openShowcase` helper (a parallel-load timeout, in a spec that renders the design-system showcase, which P11 does not touch; the test never reached its assertion). That spec re-ran **11/11 in isolation** and the full suite re-ran **clean**, so it is recorded as a flake, not a P11 regression. |
+| committed-state re-verification + demo deployment + live verification | recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (the three-way gate) |
+
+### Honest limits
+
+- **The channel is SIMULATED until real LWA credentials exist** (mock-first, standing policy). The read goes through
+  the ONE SP-API seam, the seam declares `simulated`, and the record carries `mode: 'simulation'`/`simulated: true`;
+  a simulated read is never presented as a live channel transaction. Swapping to real is a credentials change only.
+- **The channel's own PO STATUS is still P12's work.** Nothing here reads `getPurchaseOrdersStatus` (the receiving
+  sync — `AV-040`), so a PO's *status* still originates from Mercenta's own workflow, exactly as P7 documented.
+- **Routing keys are the PO's own identifiers.** A `vendorSku` match always works (the brand's catalogue SKU); an
+  `asin` match works only once the product has been accepted on the channel (P8's identifier). A channel PO whose
+  line is outside the Mercenta catalogue is **refused by design** (decision 3 + the approved-category limit).
+- **A refusal is stated, not stored.** There is no "held channel POs" queue yet, so a re-read re-reports the same
+  refusal with its reason (truthful, but not a workflow). A review queue for out-of-scope channel POs is a future
+  increment and is NOT silently implied here.
+- **The admin channel read is an operator action and is cross-tenant by design** (Mercenta routes; a brand never
+  calls it). A brand sees only the POs routed to it, through the existing tenant-scoped stores.
+- **There is deliberately no replacement for "produce a PO from nothing".** If Mercenta ever needs to raise its OWN
+  commercial order to a brand (Model A/B `issuesMercentaBrandOrder`), that is a separate, documented capability and
+  is NOT reintroduced by this phase.

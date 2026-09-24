@@ -59,6 +59,59 @@ export interface AcknowledgementPayload {
   lines: AcknowledgementLine[];
 }
 
+/**
+ * §P11 — ONE line of a retail-channel purchase order as the CHANNEL issues it.
+ *
+ * `vendorSku` is the channel's own order field and is what Mercenta routes by:
+ * the PO is addressed to Mercenta, and the brand is identified from the SKUs
+ * the channel ordered (`src/lib/commerce/channelPurchaseOrderIngestion.ts`).
+ */
+export interface ChannelPurchaseOrderLine {
+  /** The SKU the channel ordered (the brand's own vendor SKU). */
+  vendorSku: string;
+  /** The channel identifier, when the product is accepted on the channel. */
+  asin?: string;
+  quantity: number;
+  unitPrice: number;
+  commodityCode?: string;
+  productName?: string;
+}
+
+/**
+ * §P11 — a purchase order as the retail channel issues it, addressed to
+ * Mercenta. Programme decision 3: this IS the purchase-order record — there is
+ * no second, Mercenta-created PO — so the fields here are the fields the
+ * canonical `PurchaseOrder` is built from.
+ *
+ * `simulated` is declared BY THE SEAM (the boundary that actually knows), so the
+ * ingestion path never has to guess whether a channel response was live.
+ */
+export interface ChannelPurchaseOrder {
+  /** The channel's PO identity (addressed to Mercenta). */
+  purchaseOrderId: string;
+  poValue: number;
+  orderDate: string;
+  /** The FC on the PO (register `S5`) — the destination the channel declared. */
+  shipToPartyId: string;
+  freightTerm?: 'collect' | 'prepaid';
+  /** Present for Freight Collect POs (the channel's own ship window). */
+  shipWindowStart?: string;
+  shipWindowEnd?: string;
+  /** Present for Freight Prepaid POs (the channel's own delivery window). */
+  deliveryWindowStart?: string;
+  deliveryWindowEnd?: string;
+  lines: ChannelPurchaseOrderLine[];
+  /** TRUE whenever this response could not have come from a live channel call. */
+  simulated: boolean;
+}
+
+/** §P11 — the channel PO read's result shape (identical for mock and real). */
+export interface ChannelPurchaseOrderReadResult {
+  ok: boolean;
+  purchaseOrders?: ChannelPurchaseOrder[];
+  error?: string;
+}
+
 export type FetchLike = (
   url: string,
   init?: { method?: string; headers?: Record<string, string>; body?: unknown }
@@ -143,23 +196,36 @@ export function createSpApiClient(
       };
     },
 
-    /** §10 step 4 — fetch purchase orders received since a timestamp. */
-    async fetchPurchaseOrders(sinceIso: string): Promise<{
-      ok: boolean;
-      purchaseOrders?: { purchaseOrderId: string; poValue: number }[];
-      error?: string;
-    }> {
+    /**
+     * §10 step 4 / §P11 — fetch purchase orders received from the channel since
+     * a timestamp, WITH the fields the ingestion path routes by (the lines).
+     *
+     * §P11 — REPOINTED (old contract recorded): this read previously returned
+     * only `{ purchaseOrderId, poValue }`, which carried nothing a PO could be
+     * ROUTED by (decision 3: the PO is addressed to Mercenta and the brand is
+     * identified from it). The channel's own PO payload is now returned whole.
+     * A row the channel returns without lines is returned as-is — the ingestion
+     * owner refuses it, and this client never invents a line.
+     */
+    async fetchPurchaseOrders(sinceIso: string): Promise<ChannelPurchaseOrderReadResult> {
       const creds = requireCredentials();
       const res = await transport(
         `${edgeFunctionBase}/purchase-orders?since=${encodeURIComponent(sinceIso)}`,
         { method: 'GET', headers: { 'X-Secret-Ref': creds.secretRef } }
       );
       const body = (await res.json()) as {
-        purchaseOrders?: { purchaseOrderId: string; poValue: number }[];
+        purchaseOrders?: ChannelPurchaseOrder[];
         error?: string;
       };
       if (!res.ok) return { ok: false, error: body.error ?? `HTTP ${res.status}` };
-      return { ok: true, purchaseOrders: body.purchaseOrders ?? [] };
+      return {
+        ok: true,
+        /**
+         * A live channel response is never `simulated`; the flag is stated
+         * explicitly rather than left to a caller to infer from the mode.
+         */
+        purchaseOrders: (body.purchaseOrders ?? []).map((p) => ({ ...p, simulated: false })),
+      };
     },
 
     /** §10 step 5 — confirm shipment once goods are dispatched. */

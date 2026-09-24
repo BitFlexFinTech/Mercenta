@@ -329,6 +329,19 @@ const bundleProbe = await superAdmin
       p10Queue: all.includes('po-documents-queue'),
       p10Deferred: all.includes('One purchase order = one consignment'),
       p10Truckload: all.includes('100 shipment confirmations for every truckload shipment'),
+      /**
+       * §P11 — the channel-ingestion build, read from the DEPLOYED bundle itself:
+       * the routing owner's fail-closed code, the surface's channel-read control
+       * and its simulated-provenance notice must be IN the shipped code, and the
+       * REMOVED create-PO action and its Postmark notification seam must NOT be —
+       * so a stale build cannot pass the live leg by rendering a page that merely
+       * looks right.
+       */
+      p11IngestionOwner: all.includes('CHANNEL_PO_LINE_NOT_IN_CATALOGUE'),
+      p11ChannelRead: all.includes('Read channel POs'),
+      p11SimulatedNotice: all.includes('no live channel call was made'),
+      p11CreatePoGone: !all.includes('Create Purchase Order on Behalf'),
+      p11PostmarkSeamGone: !all.includes('mock:postmark:'),
     };
   })
   .catch(() => ({ count: 0, read: 0 }));
@@ -355,6 +368,12 @@ check('§P10 the deployed bundle carries the consolidation posture surface', bun
 check('§P10 the deployed bundle carries the PO-document download queue', bundleProbe.p10Queue === true, probeDetail);
 check('§P10 the deployed bundle records consolidation as DEFERRED (one PO = one consignment)', bundleProbe.p10Deferred === true, probeDetail);
 check('§P10 the deployed bundle carries the documented 100-confirmation truckload evidence', bundleProbe.p10Truckload === true, probeDetail);
+/* §P11 (programme decision 3) — the deployed bundle IS the channel-ingestion build. */
+check('§P11 the deployed bundle carries the channel-ingestion routing owner (fail-closed codes)', bundleProbe.p11IngestionOwner === true, probeDetail);
+check('§P11 the deployed bundle carries the channel-read control (the ONLY PO entry point)', bundleProbe.p11ChannelRead === true, probeDetail);
+check('§P11 the deployed bundle states the channel read’s simulated provenance', bundleProbe.p11SimulatedNotice === true, probeDetail);
+check('§P11 the deployed bundle carries NO create-PO dialogue (decision 3)', bundleProbe.p11CreatePoGone === true, probeDetail);
+check('§P11 the deployed bundle carries NO Postmark PO-notification seam', bundleProbe.p11PostmarkSeamGone === true, probeDetail);
 check('no uncaught page error on the deployed P7 invoicing flows',
   adminErrors.length === 0 && superAdminErrors.length === 0,
   [...adminErrors, ...superAdminErrors].slice(0, 2).join(' | '));
@@ -419,6 +438,33 @@ check('§P10 the deployed ADMIN Hub carries the cross-tenant PO-document queue',
     /PO documents awaiting the brand/i.test(adminHubBody));
 check('§P10 the deployed ADMIN Hub renders the consolidation posture',
   (await admin.locator('[data-testid="consolidation-posture"]').count()) > 0);
+
+/* ── §P11 — the ADMIN purchase-order queue, live (decision 3) ─────────────── */
+await admin.click('nav[aria-label="Primary"] >> text=Purchase Orders').catch(() => {});
+await admin.waitForTimeout(2500);
+const adminPoBody = await admin.locator('body').innerText().catch(() => '');
+check('§P11 the deployed ADMIN purchase-order queue has NO "Create PO" action',
+  (await admin.getByRole('button', { name: 'Create PO' }).count()) === 0);
+check('§P11 the deployed ADMIN purchase-order queue offers the CHANNEL READ',
+  (await admin.locator('[data-state="admin-po-ingest"]').count()) > 0 &&
+    /Read channel POs/.test(adminPoBody));
+check('§P11 the deployed ADMIN queue states the channel read has not happened yet',
+  /Not yet read/.test(adminPoBody) || /Simulation \(mock\)/.test(adminPoBody));
+await admin.locator('[data-state="admin-po-ingest"]').first().click().catch(() => {});
+await admin.waitForTimeout(3000);
+const adminPoBodyAfter = await admin.locator('body').innerText().catch(() => '');
+check('§P11 the deployed channel read reports its SIMULATED provenance',
+  /Simulated read — no live channel call was made/.test(adminPoBodyAfter));
+check('§P11 the deployed channel read states every outcome (filed / already held / refused)',
+  /Filed/.test(adminPoBodyAfter) && /Already held/.test(adminPoBodyAfter) && /Refused/.test(adminPoBodyAfter));
+check('§P11 the deployed channel read FILES routable POs against the correct brand',
+  (await admin.locator('[data-outcome="ingested"]').count()) > 0);
+check('§P11 the deployed channel read REFUSES an out-of-catalogue PO with its reason',
+  (await admin.locator('[data-outcome="refused"]').count()) > 0 &&
+    /matches no product in the Mercenta catalogue/.test(adminPoBodyAfter));
+check('no uncaught page error on the deployed §P11 channel-ingestion flow',
+  adminErrors.length === 0,
+  adminErrors.slice(0, 2).join(' | '));
 const hubNodeKinds = await page
   .locator('[data-testid^="logistics-node-"]')
   .evaluateAll((els) => els.map((e) => e.getAttribute('data-kind')))

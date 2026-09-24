@@ -1047,6 +1047,43 @@ try {
     'PRODUCTION_READINESS.md',
   ];
 
+  /**
+   * §P11 — CHANNEL-INGESTION DECLARED SURFACE (2026-09-24, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P11; decision 3).
+   *
+   * P11 removes "Create PO" and replaces it with channel purchase-order ingestion
+   * (routing by the PO's own lines, fail-closed refusals, idempotent). It touches
+   * the PROTECTED SP-API read and deletes the duplicate Postmark PO-notification
+   * seam, so both are declared here. The E7 guard's contract is UNCHANGED: a
+   * changed source/test file outside EVERY declared set is still refused.
+   */
+  const P11_CHANNEL_PO_INGESTION_DECLARED = [
+    'src/lib/commerce/channelPurchaseOrderIngestion.ts',
+    'src/lib/spapi/client.ts',
+    'src/lib/spapi/mockClient.ts',
+    'src/data/api.ts',
+    'src/components/admin/AdminPurchaseOrderList.tsx',
+    'src/lib/notifications/postmarkNotifier.ts',
+    'scripts/validate-channel-po-ingestion.mjs',
+    'scripts/validate-e4-commerce.mjs',
+    'scripts/validate-e5-admin-surfaces.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/validate-mock-seam.mjs',
+    'scripts/verify-demo-live.mjs',
+    'package.json',
+    'e2e/notifications.spec.ts',
+    'e2e/channel-po-ingestion.spec.ts',
+    'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+    'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+    'MERCENTA_ARCHITECTURE.md',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+    'requirements-registry.json',
+    'PRODUCTION_READINESS.md',
+  ];
+
 
 
   test(
@@ -1077,7 +1114,10 @@ try {
           !P7_ADMIN_INVOICING_DECLARED.includes(f) &&
           /** §P8 — the inventory + channel-identifier phase's declared surface. */
           !P8_INVENTORY_DECLARED.includes(f) &&
-          !P8_INVENTORY_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P8_INVENTORY_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §P11 — the channel-ingestion phase's declared surface (see above). */
+          !P11_CHANNEL_PO_INGESTION_DECLARED.includes(f) &&
+          !P11_CHANNEL_PO_INGESTION_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1220,6 +1260,12 @@ try {
      * outside EVERY declared set is still refused.
      */
     ...P10_LOGISTICS_COMPLETION_DECLARED,
+    /**
+     * §P11 — REPOINTED (not weakened). The channel-ingestion phase's declared surface
+     * is accepted here exactly as every earlier phase's is; a changed source/test file
+     * outside EVERY declared set is still refused.
+     */
+    ...P11_CHANNEL_PO_INGESTION_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

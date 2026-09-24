@@ -66,12 +66,38 @@ try {
   test('every 4th submission rejects with realistic reason',
     rej.status === 'rejected' && typeof rej.rejectionReason === 'string' && rej.rejectionReason.length > 10);
 
-  // PO polling rotates.
+  /**
+   * §P11 — REPOINTED (not weakened). OLD CONTRACT (recorded verbatim):
+   *
+   *   'PO poll returns simulated POs'
+   *     → `po1.ok && po1.purchaseOrders?.length === 2 &&
+   *        po1.purchaseOrders[0].purchaseOrderId !== po2.purchaseOrders[0].purchaseOrderId`
+   *
+   * i.e. the read ROTATED exactly 2 POs per poll. Programme decision 3 makes this
+   * read the SOURCE of channel purchase-order ingestion, so it must now carry the
+   * PO's own LINES (what Mercenta routes the PO to a brand by) and must be STABLE
+   * for a given window — a rotating window would make ingestion's idempotency
+   * guard untestable and would mean the same channel PO reappears forever. The
+   * invariant is unchanged and is now asserted MORE strongly: the mock returns the
+   * exact shape and depth the real client returns, unmistakably simulated, with
+   * the fields the caller actually needs.
+   */
   const po1 = await apiMod.fetchSpApiPurchaseOrders(new Date().toISOString());
   const po2 = await apiMod.fetchSpApiPurchaseOrders(new Date().toISOString());
-  test('PO poll returns simulated POs',
-    po1.ok && po1.purchaseOrders?.length === 2 &&
-    po1.purchaseOrders[0].purchaseOrderId !== po2.purchaseOrders[0].purchaseOrderId);
+  const pos = po1.purchaseOrders ?? [];
+  test('PO poll returns the channel’s POs with the fields ingestion ROUTES by',
+    po1.ok && pos.length > 0 &&
+    pos.every((p) => Array.isArray(p.lines) && p.lines.length > 0 &&
+      typeof p.lines[0].vendorSku === 'string' && p.lines[0].vendorSku.length > 0 &&
+      typeof p.lines[0].quantity === 'number' &&
+      typeof p.shipToPartyId === 'string' && p.shipToPartyId.length > 0));
+  test('every simulated PO is unmistakably simulated and DECLARED simulated by the seam',
+    pos.every((p) => /^MOCK-PO-/.test(p.purchaseOrderId) && p.simulated === true));
+  test('a re-read over the SAME window returns the same set (ingestion idempotency is exercisable)',
+    JSON.stringify((po2.purchaseOrders ?? []).map((p) => p.purchaseOrderId)) ===
+      JSON.stringify(pos.map((p) => p.purchaseOrderId)));
+  test('at least one simulated PO is OUTSIDE the catalogue (the refusal path is reachable)',
+    pos.some((p) => p.lines.some((l) => /^MOCK-UNKNOWN-/.test(l.vendorSku))));
 
   console.log(failures === 0 ? 'MOCK_SEAM_VALIDATION_PASS' : `MOCK_SEAM_VALIDATION_FAIL (${failures})`);
 } finally {
