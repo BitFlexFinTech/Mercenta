@@ -6,7 +6,7 @@ import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
 import { Container, RefreshCw, Ship } from 'lucide-react';
 import type { DemoShipment } from '@/data/demoData';
-import type { PurchaseOrder, ShipmentStatus } from '@/types';
+import type { ChannelInstruction, PurchaseOrder, ShipmentStatus } from '@/types';
 import { advanceShipmentViaDhl } from '@/lib/dhl/domain';
 import { resolveProviderMode } from '@/integrations/types';
 /* §P9 (programme decision 4) — the ONE canonical writer of a consignment's
@@ -27,6 +27,17 @@ import {
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { LogisticsMapCanvas } from '@/components/shared/logistics/LogisticsMapCanvas';
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
+/**
+ * §P10 (programme §4 P10) — the Logistics Hub's completion surfaces, each backed by its
+ * ONE owner: the cross-tenant document queue (the SAME rule the brand's badge counts),
+ * the carrier PROVIDER CONFIGURATION (`D10-10`) and the consolidation posture
+ * (programme decision 11).
+ */
+import { PoDocumentQueuePanel } from '@/components/shared/logistics/PoDocumentQueuePanel';
+import { CarrierProviderConfigurationPanel } from '@/components/shared/logistics/CarrierProviderConfigurationPanel';
+import { ConsolidationPosturePanel } from '@/components/shared/logistics/ConsolidationPosturePanel';
+import { carrierProviderConfigurations } from '@/lib/shipping/providerConfiguration';
+import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
 import {
   MAP_TRUTH_NOTICE,
   OPERATIONAL_TRUTH,
@@ -85,7 +96,16 @@ const LOGISTICS_WORK_SOURCES: WorkSource[] = ['shipment_exception', 'po_acknowle
  * brand and PO. This is the ops team's day view; carrier API health lives in
  * the separate Carrier Integration Monitor.
  */
-export function LogisticsControl() {
+export function LogisticsControl({
+  onOpenIntegrations,
+}: {
+  /**
+   * §P10 — the REAL hand-off to the canonical Integrations view, which owns the
+   * provider credentials. Mercenta administers the carrier accounts there; this Hub
+   * states the configuration and never becomes a second credential form.
+   */
+  onOpenIntegrations?: () => void;
+} = {}) {
   const shipmentsQuery = useShipmentsAll();
   // Stable identity so the downstream useMemo deps don't churn every render.
   const shipments = useMemo(() => shipmentsQuery.data?.data ?? [], [shipmentsQuery.data]);
@@ -139,15 +159,34 @@ export function LogisticsControl() {
      the ops team's job is to see every brand's consignments. The map reads the
      canonical shipment feed and the canonical provider modes, so its LIVE /
      SIMULATED / AMBIENT labelling can never disagree with the brand surface. */
-  const { modes } = useIntegrations();
+  const { modes, integrations } = useIntegrations();
   const [selectedShipmentId, setSelectedShipmentId] = useState<string | null>(null);
   const [mapTruth, setMapTruth] = useState('all');
 
   /* §P9 — the rehomed carrier-event console: one busy row at a time, and the
      provider's own answer per row (never a fabricated milestone). */
-  const { addApiLog, apiLogs } = useApp();
+  const { addApiLog, apiLogs, products } = useApp();
   const [busyShipmentId, setBusyShipmentId] = useState<string | null>(null);
   const [lastCarrierResult, setLastCarrierResult] = useState<Record<string, string>>({});
+
+  /**
+   * §P10 — THE CARRIER PROVIDER CONFIGURATION (matrix `D10-10`).
+   *
+   * Derived by its ONE owner from the canonical shipping config + the AUTHORITATIVE
+   * provider modes + the non-secret connection state. This Hub re-derives no mode, no
+   * lane and no account label, and it is not a credential form: the Integrations Hub
+   * owns the credentials (`onOpenIntegrations` is the hand-off).
+   */
+  const providerConfigurations = useMemo(
+    () => carrierProviderConfigurations({ modes, connections: integrations }),
+    [modes, integrations]
+  );
+
+  /** The instruction Mercenta actioned for a PO — the same rule the brand Hub uses. */
+  const instructionForPo = (poId: string): ChannelInstruction | undefined => {
+    const list = listChannelInstructions().filter((i) => i.purchaseOrderId === poId);
+    return list.find((i) => i.type === 'po_acknowledgement') ?? list[0];
+  };
 
   /**
    * USER ACTION → DOMAIN WORKFLOW → PROVIDER CONTRACT → SIMULATION ADAPTER →
@@ -598,6 +637,61 @@ export function LogisticsControl() {
           />
         </WorkspaceSection>
       ))}
+      {/* ── §P10 — CARRIER PROVIDER CONFIGURATION (matrix `D10-10`) ───────────
+          The operator's view of how each Mercenta carrier account is configured and what
+          state it is actually in — derived, fail-closed, and handed off to the ONE place
+          that owns credentials rather than duplicated here. */}
+      <WorkspaceSection
+        title="Carrier provider configuration"
+        description="How each Mercenta carrier account is configured, which lane it serves and what state it is in. Mercenta holds these accounts; a carrier never logs in, and a brand never configures one."
+        domain="logistics"
+      >
+        <CarrierProviderConfigurationPanel
+          configurations={providerConfigurations}
+          scope="admin"
+          onOpenIntegrations={onOpenIntegrations}
+        />
+      </WorkspaceSection>
+
+      {/* ── §P10 — PO DOCUMENTS AWAITING DOWNLOAD ────────────────────────────
+          The SAME derived queue the brand's nav badge counts, read cross-tenant so the
+          ops team can see whose pack is still outstanding. The pack itself lives on the
+          brand's Hub; this is the follow-up view, not a second document store. */}
+      <WorkspaceSection
+        title="PO documents awaiting the brand"
+        description="Every accepted purchase order whose document pack is ready and whose consignment has not been dispatched — the same derived queue the brand's Logistics Hub renders."
+        domain="logistics"
+      >
+        <PoDocumentQueuePanel
+          pos={pos}
+          brandNameFor={brandName}
+          brandNationFor={(brandId) => brands.find((b) => b.id === brandId)?.nation ?? null}
+          products={products}
+          instructionForPo={instructionForPo}
+          shipmentForPo={(poNumber) => {
+            const row = shipments.find((s) => s.poNumber === poNumber);
+            return row
+              ? {
+                  id: row.id,
+                  status: row.status,
+                  carrier: row.carrier,
+                  trackingNumber: row.trackingNumber ?? null,
+                  waybill: row.waybill ?? null,
+                }
+              : null;
+          }}
+          onOpenCarrierArtefact={() => {
+            /* The admin console does not own the brand's print dialogues, and the pack
+               reports those artefacts not-ready until a booking exists; nothing is
+               fabricated here. */
+          }}
+          scope="admin"
+        />
+        <div className="mt-3">
+          <ConsolidationPosturePanel />
+        </div>
+      </WorkspaceSection>
+
       {/*
         §P9 (programme decision 4) — THE REHOMED CARRIER-EVENT CONSOLE.
 

@@ -316,7 +316,16 @@ export default function AdminShell() {
           {adminView === 'returns_tracking' && <ReturnsTrackingDashboard />}
           {adminView === 'monitoring' && <MonitoringDashboard />}
           {adminView === 'catalog' && <CatalogManagerAdmin />}
-          {adminView === 'logistics' && <LogisticsControl />}
+          {adminView === 'logistics' && (
+            /* §P10 — the Logistics Hub states each carrier account's configuration and
+               hands off to the ONE surface that owns credentials. The hand-off is offered
+               ONLY where the canonical RBAC permits the destination (Integration Settings
+               is super-admin-only), so no session receives a control that lands on
+               AccessDenied; a non-super operator still reads the full configuration. */
+            <LogisticsControl
+              onOpenIntegrations={isSuper ? () => setAdminView('integrations') : undefined}
+            />
+          )}
           {/* §P9 (programme decision 4) — `{adminView === 'carriers' && <CarrierIntegrationMonitor />}`
               is REMOVED. The retired destination rendered a hand-written per-carrier
               health feed (including FedEx/BAK, which are not Mercenta accounts).

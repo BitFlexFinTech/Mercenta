@@ -26,7 +26,63 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P9 DONE: THE 3PL CARRIER SURFACE IS REMOVED COMPLETELY + THE CARRIER-EVENT CONSOLE IS REHOMED** (2026-09-23, session 22)
+## CURRENT STATE — **P10 DONE: THE LOGISTICS HUB IS COMPLETED — PROVIDER CONFIGURATION + THE PO-DOCUMENT DOWNLOAD QUEUE + CONSOLIDATION RECORDED AS DEFERRED** (2026-09-24, session 23)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
+> first — it is all a new session needs. Full account: programme **§14** in
+> `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`.
+
+**Checkpoint (this increment):** **P10 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`** — application
+work; programme decision **11**; matrix **`D10-10`**. The increment commit is pushed and deployed to
+`demo.mercenta.co.uk` and live-verified; the exact hashes and counts are in the `CURRENT RESUME STATE` block.
+
+**What changed**
+
+- **Provider configuration now exists as ONE projection, not a second source of truth.**
+  `src/lib/shipping/providerConfiguration.ts` derives each Mercenta account from the existing owners
+  (`src/config/shipping.ts`, the Integrations registry, the non-secret connection state): account label, declared
+  capability, lanes, the lane(s) the routing rule selects, service, the AUTHORITATIVE mode, whether it is operational, a
+  truthful state label, the BASIS the mode came from, the control plane and the credentials-only activation.
+  **Fail closed** — only `simulation`/`live` are operational and every other state is named; a **retired** carrier is
+  refused **by name** and has no configuration. **No cost leak** — the module does not import
+  `SHIPPING_COMMERCIAL_TERMS`, so no negotiated discount, mark-up, fee or VAT reaches a brand.
+- **The PO-document download queue finally has a destination — and it is the SAME rule.** P6 built the pack and
+  `documentsAwaitingDownload`, and the badge + notification centre counted it, but the pack was reachable only by
+  selecting a *consignment*. `PoDocumentQueuePanel` renders the queue from that ONE rule (badge and rows cannot
+  disagree), states readiness from the pack's owner, shows the recorded generation evidence, and opens the SAME pack
+  component and the SAME existing waybill/label dialogues. The brand mount is `pos={scopedPos}` (tenant-scoped); the
+  admin mount is cross-tenant by design and names the brand.
+- **Consolidation is recorded as DEFERRED but not designed out (decision 11) — in code, and functionally.**
+  `src/lib/shipping/consolidation.ts` owns `status: 'deferred'`, today's one-PO rule, the documented channel evidence
+  (`purchaseOrders` array, per-carton PO reference, the 100-confirmation truckload limit), the activation (P12) and the
+  invariants; the **1..n declaration is FUNCTIONAL** and `checkConsolidatable` refuses cross-tenant grouping,
+  duplicates, an empty set and anything over the limit.
+- **A REAL DEFECT was found by P10's own spec, not by typecheck/build:** the credential hand-off rendered for every
+  admin session, so an admin-**staff** click landed on `AccessDenied`. It is now gated on the destination being
+  reachable (`data-handoff="available" | "role_restricted"`), with tests 4 and 4b proving both paths.
+
+**Gates (none weakened, none deleted)**
+
+`scripts/validate-logistics-providers.mjs` (**NEW**, 96 assertions, executes the real modules, 0 network calls) owns the
+two new owners and is **proved able to fail**. `scripts/validate-po-documents.mjs` gained three §P10 assertions
+(**50 → 53**) instead of a second copy of the rule. The **E6/E7 change-scope guards FIRST FAILED, naming the two new
+owners as offenders**, then received the §P10 declared surface exactly as P4–P9 declared theirs.
+`scripts/verify-demo-live.mjs` carries the **§P10 live checks** (brand + admin surfaces, the RBAC-gated hand-off and the
+deployed-bundle content probe).
+
+**Evidence (same session)**
+
+validate-logistics-providers **96 PASS / 0 FAIL** (proved able to fail: 94/2 with `available` made operational) ·
+validate-po-documents **53 PASS** · **all 100 `scripts/validate-*.mjs` exit 0** · `validate-e6` + `validate-e7` **PASS** ·
+`npm run typecheck` **0** · root `tsc` **0** · `eslint src scripts e2e` **0** · `build` **✓ (5.84s)** · wording
+**PASS (315 src files, 0 violations)** · the **2 affected/added specs: 14 passed / 0 failed** · the **FULL Playwright
+suite** and the **LIVE** result are recorded in the `CURRENT RESUME STATE` block.
+
+**Honest notes:** four P10 limits are recorded (programme §14): the grouping INPUT stays deferred (P12 owns the channel
+shipment request); the admin document queue is a follow-up view, not a document store; P9's `bak_depot` stage id and the
+onboarding `'carriers'` step are unchanged; the milestone console remains a simulation surface.
+
+## PREVIOUS STATE — **P9 DONE: THE 3PL CARRIER SURFACE IS REMOVED COMPLETELY + THE CARRIER-EVENT CONSOLE IS REHOMED** (2026-09-23, session 22) — HISTORICAL
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — it is all a new session needs. Full account: programme **§13** in

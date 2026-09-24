@@ -48,17 +48,21 @@ nothing was re-labelled live.**
   (`src/lib/commerce/receivingStatus.ts`, `AV-018`) and gates invoicing — an unreceived PO cannot be invoiced (fail
   closed). **Honest limit:** reading the CHANNEL's own `receivingStatus` is `getPurchaseOrdersStatus`, which is
   **P12's** declared scope; the platform never claims a live channel reading.
-- **Carriers are DHL + Palletline BY API ONLY (P9 — DONE 2026-09-23; P10 next).** Mercenta connects the carrier APIs
-  itself; **a carrier never logs into Mercenta**, so the 3PL carrier portal, its role, its environment, its shell and its
-  three views, the admin "Carrier Monitor", the "3PL Carrier Terminal" login card and the demo-environment entry are
-  **REMOVED** (P9 — matrix `D01-07`/`D04-18`/`D10-13`). `fedex` and `bak` are no longer carrier identities anywhere in
-  the type, the labels, the lane-capability table or the demo data (decision 1); their refusal is preserved by name
-  (`RETIRED_CARRIER_IDS`). **The carrier-EVENT capability was REHOMED, not deleted:** the milestone advance and its
-  request log now live on the Mercenta admin Logistics Hub, written through the ONE canonical store writer
-  (`setShipmentMilestone`), attributed to the Mercenta operator. **Live activation:** DHL + Palletline API credentials
-  behind the existing provider seam (`src/lib/dhl`, `src/lib/palletline`); the simulated lanes stay truthful and make
-  zero network calls. **Remaining non-credential work:** provider configuration (P10), and the carrier-polling
-  operations (`getShipmentDetails`) which are P12's declared scope.
+- **Carriers are DHL + Palletline BY API ONLY (P9 + P10 — DONE; provider configuration now BUILT).** Mercenta connects the
+  carrier APIs itself; **a carrier never logs into Mercenta**, so the 3PL carrier portal, its role, its environment, its
+  shell and its three views, the admin "Carrier Monitor", the "3PL Carrier Terminal" login card and the demo-environment
+  entry are **REMOVED** (P9 — matrix `D01-07`/`D04-18`/`D10-13`). `fedex` and `bak` are no longer carrier identities
+  anywhere in the type, the labels, the lane-capability table or the demo data (decision 1); their refusal is preserved
+  by name (`RETIRED_CARRIER_IDS`). **The carrier-EVENT capability was REHOMED, not deleted:** the milestone advance and
+  its request log now live on the Mercenta admin Logistics Hub, written through the ONE canonical store writer
+  (`setShipmentMilestone`), attributed to the Mercenta operator. **Provider configuration is BUILT (P10, 2026-09-24):**
+  `src/lib/shipping/providerConfiguration.ts` projects the canonical owners (accounts/lane rule/labels/capability from
+  `src/config/shipping.ts`, the authoritative modes from the Integrations registry, the non-secret connection state) into
+  both logistics workspaces — fail-closed, so only `simulation`/`live` are operational and every other state is named;
+  it is read-only for a brand (no credential, no cost base) and carries an **RBAC-gated** hand-off to the Integrations
+  view for an operator. **Live activation:** DHL + Palletline API credentials behind the existing provider seam
+  (`src/lib/dhl`, `src/lib/palletline`); the simulated lanes stay truthful and make zero network calls. **Remaining
+  non-credential work:** the carrier-polling operations (`getShipmentDetails`), which are P12's declared scope.
 - **The PO document pack (P6 — DONE 2026-09-23) is GENERATED, not downloaded from the channel.** SSCC carton labels,
   the carrier label/waybill, the packing list/delivery note and the ASN sheet are produced by Mercenta
   (`src/lib/documents/poDocumentPack.ts`, automatically on acceptance); customs documents apply to international lanes
@@ -71,9 +75,15 @@ nothing was re-labelled live.**
   are untouched). **Live activation of the rest:** carrier label APIs + the SP-API shipment-confirmation call (P12);
   until a carrier books the consignment the waybill/label documents are reported **not ready** rather than printed as
   a fake. **Remaining non-credential work:** none — the pack, the surface, the notification and the badge are built.
-- **Consolidation is DEFERRED, not implemented (P10).** Amazon documents multi-PO grouping (`purchaseOrders[]` on the
-  shipment request, the PO referenced per carton in the ASN, the 100-confirmation truckload limit), but POs arrive
-  separately today: the implementation is **one PO = one shipment** while the model supports **1..n**.
+- **Consolidation is DEFERRED, not implemented — and RECORDED IN CODE (P10 — DONE 2026-09-24).** The channel documents
+  multi-PO grouping (`purchaseOrders[]` on the shipment request, the PO referenced per carton in the ASN, the
+  "100 shipment confirmations for every truckload shipment" limit), but POs arrive separately today: the implementation
+  is **one PO = one consignment** while the **model supports 1..n**. `src/lib/shipping/consolidation.ts` is the ONE
+  owner: it holds the posture (`status: 'deferred'`, decision 11), the documented evidence, the declared activation
+  (the channel's shipment request — **P12's** scope) and the invariants a future grouping must honour (never across
+  brands, no duplicates, at least one PO, inside the truckload limit) — and it is FUNCTIONAL: the 1..n declaration
+  normalises/validates and the pre-conditions are enforced. **Remaining non-credential work:** the grouping INPUT
+  (nothing writes more than one PO per consignment until the channel's shipment request exists).
 - **"Create PO" is removed (P11).** The PO record is the PO **from Amazon**; the Mercenta→brand commercial position is
   **derived** from the brand's Model A/B. No second PO document exists.
 - **The Mercenta Hub is REMOVED as a destination (P5 — DONE 2026-09-23).** The destination is **the FC declared on the

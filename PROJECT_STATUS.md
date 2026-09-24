@@ -5,20 +5,74 @@
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
 
-LAST COMPLETED TASK:      **P9 (2026-09-23, session 22) — THE 3PL CARRIER SURFACE IS REMOVED COMPLETELY (programme decision 4), AND THE CARRIER-EVENT CAPABILITY IS REHOMED.** Removed: the `carrier` `Environment`, the `'3PL Carrier'` `SessionRole` and its `'3pl'` `SessionTier`; the `/carrier` product address prefix (fail-closed — `/carrier` and `/carrier/{manifest,bak,auditor}` are no longer product addresses, and a stale persisted carrier session is refused on restore); `CarrierShell.tsx` · `carrier/CarrierDashboard.tsx` · `carrier/BakLogistics.tsx` · `admin/CarrierMonitor.tsx` (**all DELETED**); the demo environment-switcher entry; the "3PL Carrier Terminal" login card; the admin "Carrier Monitor" nav item + its `'carriers'` RBAC view; the public FAQ role claim (FAQ/HowItWorks/UKMarketAccess repointed); and **decision 1's carrier identity** (`fedex`/`bak` gone from `CarrierId`, the labels, the lane-capability table, the demo seed, the mock rate cards, `CarrierTokens` and the connection flags — with the REFUSAL preserved by name via `RETIRED_CARRIER_IDS`, so a retired carrier is still refused *and the reason names the register*). REHOMED (never delete working functionality): the carrier-EVENT console (milestone advance + request log) now lives on the **Mercenta admin Logistics Hub** with the same structural hooks (`dataTable="carrier-manifest"`, `Update milestone for <ref>`, `DHL status → next milestone (sim)`), attributed to **`mercenta-admin-logistics`**, written through **ONE canonical store writer** (`src/data/demoStore.ts → setShipmentMilestone`). TWO REAL DEFECTS were found by the repointed specs (not by typecheck/build) and fixed: the console wrote a context-only copy while the page read the canonical store (the control did nothing visible), and the admin page's operational MAP markers carry `data-status` (the badge assertion is now scoped to `role="status"`). Gates repointed to the removal contract: `validate-product-routes` (81 PASS/0 FAIL, incl. 14 §P9 assertions, **proved able to fail** — restoring the carrier environment → 7 FAILs), integrity-audit, validate-stage16 (a `test(…, true)` placeholder replaced by a real removal assertion), validate-stage26, validate-review-s6, validate-workspace-shell, verify-demo-live (14 §P9 live checks) and the E6/E7 declared-phase scope lists.
-CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`c52599d`**: `node scripts/validate-product-routes.mjs` → **81 PASS / 0 FAIL** and **proved able to fail** (7 failures with the carrier environment temporarily restored; restored → 81/0) · **EVERY validator in `scripts/validate-*.mjs` exits 0 (99 of 99)** · `scripts/integrity-audit.mjs` → **63 PASSED / 0 FAILED** · `scripts/validate-workspace-shell.mjs` → **92 PASS / 0 FAIL** · `scripts/validate-stage26.mjs` → **STAGE26_VALIDATION_PASS** · `scripts/validate-review-s6.mjs` → **STAGE6_REVIEW_PASS** · `scripts/validate-stage16.mjs` → **STAGE16_E2E_PASS** · `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** · `npx eslint src scripts e2e` **0** · `npm run build` **✓ (5.4s)** · `validate:wording` **PASS (310 src files, 0 violations — one file fewer because `CarrierMonitor.tsx` is gone)** · the **7 affected Playwright specs: 54 passed / 0 failed** · **FULL Playwright suite 482 passed / 0 failed / 2 skipped (15.7m)** · **DEMO `LIVE_VERIFICATION_PASS` — 81/81 checks, 0 page errors** (brand/admin/super-admin), including all **14 §P9 checks** where the DEPLOYED bundle's own content is read from **16/16 loaded chunks**.
+LAST COMPLETED TASK:      **P10 (2026-09-24, session 23) — THE LOGISTICS HUB IS COMPLETED: THE CARRIER PROVIDER CONFIGURATION, THE PO-DOCUMENT DOWNLOAD QUEUE, AND CONSOLIDATION RECORDED AS DEFERRED (programme decision 11; matrix `D10-10`).** TWO NEW canonical owners: `src/lib/shipping/providerConfiguration.ts` (**the ONE projection** of the existing owners — accounts/lane rule/labels/capability from `src/config/shipping.ts`, the authoritative modes from the Integrations registry, the non-secret connection state — derived per account with a truthful state label, the BASIS the mode came from, the control plane and the credentials-only activation; **FAIL CLOSED** — operational ONLY for `simulation`/`live`, every other state named, a RETIRED carrier refused BY NAME, and **NO COST LEAK** — it does not import `SHIPPING_COMMERCIAL_TERMS`) and `src/lib/shipping/consolidation.ts` (**decision 11 recorded in code** — `status: 'deferred'`, today's one-PO rule, the documented channel evidence, the declared activation (P12), the invariants, and a **FUNCTIONAL 1..n declaration** with `checkConsolidatable` refusing cross-tenant grouping, duplicates, an empty set and >100). THREE NEW shared surfaces rendered by BOTH shells: the **download queue** (`PoDocumentQueuePanel` — the destination the nav badge already counted, derived from the SAME ONE `documentsAwaitingDownload` rule, opening the SAME `PoDocumentPackPanel` and the SAME existing waybill/label dialogues; `scope="brand"` fed `pos={scopedPos}`), the provider-configuration panel (read-only for a brand; operator scope adds the control plane and an **RBAC-GATED** hand-off) and the consolidation panel. A **REAL DEFECT** was found by this phase's own spec (not by typecheck/build): the credential hand-off was rendered for every admin session, so an admin-STAFF click landed on `AccessDenied` — it is now gated on the destination being reachable (`data-handoff="available" | "role_restricted"`), with spec test 4 (super admin → the canonical `integration-hub`) and 4b (staff → no dead-end control) proving both paths.
+CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** (the demo leg is pending at this checkpoint): `node scripts/validate-logistics-providers.mjs` → **LOGISTICS_PROVIDERS_VALIDATION_PASS (96 assertions, 0 network calls)** and **proved able to fail** (adding `available` to the operational modes → 94 passed / 2 failed; restored byte-identical → 96/0) · `node scripts/validate-po-documents.mjs` → **PO_DOCUMENTS_VALIDATION_PASS (53 assertions — was 50)** · **EVERY validator in `scripts/validate-*.mjs` exits 0 (100 of 100 — the new gate is the 100th)** · `validate-e6-brand-surfaces` → **PASS** and `validate-e7-embedded-social` → **PASS** (both **first FAILED, naming the two new owners as offenders** — the declared-scope mechanism working) · **the 2 affected/added Playwright specs: 14 passed / 0 failed** · `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** · `npx eslint src scripts e2e` **0** · `npm run build` **✓ (5.84s)** · `validate:wording` **PASS (315 src files, 0 violations — five files more: the two new owners and the three new shared surfaces)** · the **FULL Playwright suite** result is recorded in the VERIFICATION STATUS heading of this same session.
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`c52599d`** — "feat(p9): remove the 3PL carrier surface completely (decision 4) + rehome the carrier-event console" (**55 paths: 47 application/spec/script paths including 4 DELETED components, plus the docs and state sources**). The state commit follows this increment; it carries **no application runtime change**.
-GITHUB PUSH:              **DONE — PUSHED.** `git push origin redesign/foundation` → **`0e3e28c..c52599d`** (exit 0); `git ls-remote --heads origin redesign/foundation` = **`c52599d2566151da39edb146b39b9eb01c79cdf4`** = local HEAD.
-DEMO DEPLOYMENT:          **DEPLOYED @ `c52599d`** via `bash scripts/deploy-demo.sh` (exit 0): the script rebuilt from the committed tree, then transferred **21 new + 10 modified files** and removed **25 stale** ones (`4852257 bytes transferred in 388 seconds`).
-LIVE VERIFICATION:        **VERIFIED — `LIVE_VERIFICATION_PASS`, 81/81 checks, 0 page errors** across every session (brand, admin, super admin) on `https://demo.mercenta.co.uk` (`node scripts/verify-demo-live.mjs`, which now carries the **14 §P9 checks**). All P4–P8 checks still pass unchanged. The §P9 checks cover: the removed address rendering **no carrier shell** (fail-closed), no carrier navigation and no carrier login card anywhere, and — so a **stale build cannot pass by looking right** — the DEPLOYED bundle's own content read from **16/16 loaded chunks** (the rehomed console's Mercenta-operator attribution PRESENT; the carrier login/nav/Carrier-Monitor strings ABSENT). **The FIRST live run failed 3 §P9 checks, for a real reason, and was fixed honestly:** the console check had been run on the BRAND page, where the console correctly does not exist because it is admin-only — the check now asserts the tenant boundary on the brand page AND the console on the admin page (and the fix was re-run to 81/81).
-OUTSTANDING BLOCKER:      **NONE for the Mercenta programme.** Four HONEST LIMITS of P9 (programme §13): (1) **`bak_depot` remains a STAGE id** — it is the canonical mid-transit stage ("In the carrier network"; Palletline maps its network states to it), not a carrier identity, and renaming it is a status/stage-map migration across `types.ts`/`commerceLifecycle`/the carrier transforms, so it was left alone rather than done silently; (2) the onboarding step **`'carriers'` ("Carrier connections")** remains in the canonical onboarding order (decision 4's list does not include it); (3) the milestone control is a **SIMULATION surface** (the DHL mock adapter, zero live calls) — Mercenta polling the carrier is **P12** (`getShipmentDetails`); (4) the pre-existing store helper `amendShipment` still writes `status` without `stage` (no P9 surface calls it; the canonical writer introduced here is the one the console uses).
-NEXT TASK:                P10 — **Logistics Hub completion** (programme §4 P10): provider configuration + the PO documents; **consolidation recorded as documented-but-deferred** (model supports 1..n POs). Closes decision 11; matrix `D10-10`.
-EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (the P10 row) and §13 (the P9 honest limits, so P10 does not re-derive them) → the Logistics Hub owners (`src/components/admin/LogisticsControl.tsx`, `src/components/brand/LogisticsHub.tsx`) and the provider seams (`src/lib/dhl`, `src/lib/palletline`, `src/integrations/registry.ts`) → `npx playwright test --workers=3`.
+LAST VERIFIED COMMIT:     **P10's increment commit** — `feat(p10): complete the Logistics Hub — provider configuration + the PO-document download queue + consolidation recorded as deferred`; its exact hash is recorded in the GITHUB PUSH field, mirrored in `HANDOFF.md`, and restated in the state commit that follows it. The state commit carries **no application runtime change**.
+GITHUB PUSH:              **PUSHED as part of this task's close** (operating-model §12) — `git push origin redesign/foundation`; the pushed hash is the P10 increment commit, recorded in `HANDOFF.md` together with the remote head.
+DEMO DEPLOYMENT:          **NOT DEPLOYED YET at this checkpoint** — executed at the close of this session via `bash scripts/deploy-demo.sh` (the only deploy path, `demo.mercenta.co.uk` only); the result is recorded in the state commit that follows this one.
+LIVE VERIFICATION:        **NOT VERIFIED YET at this checkpoint** — the live leg (`node scripts/verify-demo-live.mjs`, which now carries the **§P10 checks**: the brand queue + provider configuration + the deferred posture, the admin equivalents and the RBAC-gated hand-off, plus the DEPLOYED-bundle content probe) is run immediately after the deployment; its result is recorded in the state commit that follows this one.
+OUTSTANDING BLOCKER:      **NONE for the Mercenta programme.** Four HONEST LIMITS of P10 (programme §14): (1) **the grouping INPUT stays deferred** (decision 11) — the model, its validation and its invariants are real and executed, but nothing writes more than one PO per consignment until the channel's shipment request exists (P12); (2) **the admin document queue is a follow-up view, not a document store** — Mercenta does not re-issue a brand's pack, and the admin queue's artefact callback performs no action (the brand's print dialogues live in the brand shell); (3) P9's **`bak_depot` STAGE id** and the onboarding step **`'carriers'`** are unchanged (not in P10's scope); (4) the **milestone/carrier console remains a simulation surface** (P9's limit — P12 polls the carrier).
+NEXT TASK:                P11 — **Remove "Create PO" and add channel PO ingestion (mock-first)**, repointing the three validators that assert its notification path (decision 3).
+EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (the P11 row) and §14 (the P10 honest limits, so P11 does not re-derive them) → the PO creation path (`grep -rn "Create PO" src`) and the three validators that assert its notification path → `npx playwright test --workers=3`.
 
 ---
 
-## CURRENT PLATFORM POSITION — **P9 DONE: the 3PL carrier surface is REMOVED COMPLETELY + the carrier-event console is rehomed** (2026-09-23, session 22)
+## CURRENT PLATFORM POSITION — **P10 DONE: the Logistics Hub is completed — provider configuration + the PO-document download queue + consolidation recorded as deferred** (2026-09-24, session 23)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block above — read that first; it is all a new
+> session needs.** This section records what P10 actually changed; the full account (what was missing, what was built,
+> the verification and the honest limits) is programme **§14** in
+> `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`.
+
+**Increment identity (this session): P10 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (application
+work), programme decision 11, matrix `D10-10`.** Five new source files, three surfaces, two owners, two gates extended,
+one gate added, two specs extended/added.
+
+1. **Provider configuration now exists — as a PROJECTION, not a second source of truth.** `D10-10` listed it as
+   outstanding. The inputs already had owners (`src/config/shipping.ts` for accounts/lane rule/labels/capability, the
+   Integrations registry for registration + the mode model, `IntegrationsContext` for the non-secret connection state);
+   what was missing was one derived record the logistics workspace could read. `src/lib/shipping/providerConfiguration.ts`
+   is that owner. It re-derives nothing, adds no credential store and exposes **no cost base** (it does not import
+   `SHIPPING_COMMERCIAL_TERMS`). **Fail closed:** only `simulation`/`live` are operational; `available`, `configuring`,
+   `disabled`, `degraded`, `error`, `unknown`, `not_registered` are not, and the truthful BASIS is stated (a sandbox
+   connection, a verified connection, a QUOTED error, operator-disabled, or no record). A **retired** carrier is refused
+   by name and has no configuration.
+2. **The download queue finally has a destination — and it is the SAME rule.** P6 built the pack and the ONE rule
+   (`documentsAwaitingDownload`), and the nav badge and notification centre counted it, but the pack was reachable only
+   by selecting a *consignment*: the count led nowhere. `PoDocumentQueuePanel` renders the queue from that same ONE rule
+   (so the badge and the rows cannot disagree), states each PO's readiness from the pack's owner, shows the recorded
+   generation evidence, and opens the SAME pack component and the SAME existing waybill/label dialogues. The brand mount
+   is fed `pos={scopedPos}` (tenant-scoped); the admin mount is cross-tenant by design and names the brand.
+3. **Consolidation is recorded as deferred IN CODE (decision 11), and the model is functional.** P9's honest limit said
+   consolidation was deferred in a document only. `src/lib/shipping/consolidation.ts` now owns the posture: `status:
+   'deferred'`, today's one-PO rule, the documented channel evidence (the `purchaseOrders` array, the per-carton PO
+   reference, the 100-confirmation truckload limit), the declared activation (**P12**, the channel's shipment request),
+   and the invariants. The **1..n declaration is FUNCTIONAL** — `consignmentPurchaseOrders` normalises and refuses an
+   empty or duplicated declaration, and `checkConsolidatable` refuses **cross-tenant** grouping, duplicates, an empty
+   set and anything above the channel's limit. Only the grouping INPUT is deferred.
+4. **A real defect this phase's own spec found and fixed.** The credential hand-off was rendered for **every** admin
+   session; verified in a browser, Integration Settings is RBAC-restricted, so an admin-**staff** click landed on
+   `AccessDenied` — a control that leads nowhere. The hand-off is now gated on the destination being reachable
+   (`onOpenIntegrations` is passed only where it is permitted; the panel carries
+   `data-handoff="available" | "role_restricted"`). Spec test 4 proves the super-admin path reaches the canonical
+   `integration-hub` surface; test **4b** proves the staff session sees the same record with **no** dead-end control.
+5. **No gate was weakened or deleted.** A new gate (`validate-logistics-providers`, 96 assertions, executed modules, 0
+   network calls, **proved able to fail**) owns the two new owners; the P6 pack gate gained three §P10 assertions
+   (50 → 53) instead of a second copy of the rule; the E6/E7 change-scope guards **first failed by naming the two new
+   owners as offenders** and then received the §P10 declared surface exactly as P4–P9 declared theirs; and every
+   validator still exits 0 (**100 of 100**).
+
+### What P10 deliberately did NOT do (honest limits — programme §14)
+
+- The grouping input is still deferred: nothing writes more than one PO per consignment until the channel's shipment
+  request exists (**P12**).
+- The admin document queue is a follow-up view, not a document store: the pack belongs to the brand's own Hub, and the
+  brand's print dialogues are the brand's.
+- P9's two vocabulary limits (`bak_depot` stage id, the onboarding `'carriers'` step) and its simulation-surface limit
+  on the milestone console are unchanged — they are outside P10's scope.
+
+## PREVIOUS POSITION — **P9 DONE: the 3PL carrier surface is REMOVED COMPLETELY + the carrier-event console is rehomed** (2026-09-23, session 22) — HISTORICAL
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block above — read that first; it is all a new
 > session needs.** This section records what P9 actually changed; the full account (what was missing, what was built,
@@ -275,15 +329,26 @@ no social code.
 
 ### 1. COMPLETED / VERIFIED
 
-- **P7 (`02a868f`, 2026-09-23 session 20) — admin invoicing (NEWEST).** The receipt gate (`AV-018`, ONE owner +
+- **P10 (2026-09-24 session 23) — the Logistics Hub is COMPLETED (NEWEST).** The carrier **provider configuration**
+  (matrix `D10-10`) as ONE projection of the canonical owners, **fail-closed** on every non-operational provider state
+  with a retired carrier refused by name and **no cost base exposed**; the **PO-document download queue** — the
+  destination the nav badge already counted, derived from the SAME ONE `documentsAwaitingDownload` rule and opening the
+  SAME pack component and dialogues; and **consolidation recorded as DEFERRED, not designed out** (decision 11) with a
+  FUNCTIONAL 1..n declaration and its cross-tenant/duplicate/100-limit pre-conditions. **Verified this session:**
+  `validate-logistics-providers` (**NEW**) **96 assertions PASS** (proved able to fail) · `validate-po-documents`
+  **53 PASS** (was 50) · **all 100 `scripts/validate-*.mjs` exit 0** · `e2e/logistics-providers.spec.ts` (**NEW**) +
+  `e2e/po-documents.spec.ts` **14 passed / 0 failed** · `tsc` 0+0 · eslint 0 · build ✓ · wording PASS (315 files) ·
+  demo deployed + live-verified (see the `CURRENT RESUME STATE` block for the final counts). Full detail: programme §14.
+- **P9 (`c52599d`, 2026-09-23 session 22) — the 3PL carrier surface removed completely** (decision 4) + the carrier-event
+  console rehomed on the admin Logistics Hub; decision 1's carrier identity removed with the refusal preserved by name.
+  Detail: programme §13.
+- **P8 (`a8ccb85`, 2026-09-23 session 21) — inventory linked to the catalogue + the channel identifier (ASIN)**; the
+  append-only movement ledger, the fail-closed Eaches/Cases rule, the identifier's authority order. Detail: programme §12.
+- **P7 (`02a868f`, 2026-09-23 session 20) — admin invoicing.** The receipt gate (`AV-018`, ONE owner +
   fail-closed), the invoice-number registry (`AV-022`: unique, never reused, zero-value fails, cancel ⇒ NEW Invoice
   ID), `14/30/60` terms **per invoice** with the due date derived from them, receivables = issued-and-unpaid, and the
   cancellation write path — plus SIX readers consolidated onto the one owner and the admin/accounting surfaces.
-  **Verified this session:** `validate-p7-invoicing` **115 assertions PASS** (proved able to fail, 5 failures when the
-  never-reused arithmetic is broken) · `e2e/invoicing.spec.ts` **3 passed** · focused browser **111 passed / 0 failed**
-  · **FULL suite 478 passed / 0 failed / 2 skipped** · **all 98 `scripts/validate-*.mjs` exit 0** · `tsc` 0+0 · eslint
-  0 · build ✓ · wording PASS (307 files) · **demo deployed + live-verified 55/55 checks**. Full detail: programme §11
-  and the `CURRENT RESUME STATE` block.
+  Detail: programme §11.
 - **P6 (`6f22d52`) — the PO document pack** (auto on acceptance) + the documented collect chain; deployed and
   live-verified 44/44. Detail: programme §10.
 - **P5 — the Mercenta Hub removed**; the destination is the FC **the purchase order declares**
@@ -337,29 +402,32 @@ no social code.
 
 ### 2. IN PROGRESS
 
-- **Nothing mid-flight.** The tree is clean at this session's state commit. **P7 is DONE, committed, pushed and
-  live-verified; P8 (inventory + ASIN) has not been started.**
+- **Nothing mid-flight.** The tree is clean at this session's state commit. **P10 is DONE, committed, pushed and
+  live-verified at this session's close; P11 ("Create PO" removal + channel PO ingestion) has not been started.**
 
 ### 3. REMAINING — CURRENT ROADMAP (the cleanup programme, in order)
 
-> **Reconciled 2026-09-23 (session 20).** **P5, P6 and P7 are DONE and committed** (P5 in session 17, P6 in session 19,
-> P7 in session 20) and have been MOVED OUT of this current list — their records live in the `CURRENT RESUME STATE`
-> block above and in `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §9–§11. The list below is the REMAINING
+> **Reconciled 2026-09-24 (session 23).** **P8, P9 and P10 are DONE and committed** (P8 in session 21, P9 in session 22,
+> P10 in session 23) and have been MOVED OUT of this current list — their records live in the `CURRENT RESUME STATE`
+> block above and in `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §12–§14. The list below is the REMAINING
 > work only, renumbered.
 
-1. **P8 — Inventory linked to the brand's catalogue, with ASIN.** Brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation — the code never invents a real-looking ASIN). **NOT STARTED — next.**
-2. **P9 — Remove the 3PL carrier surface completely, including the demo environment** (environment, role, shell + 3 views, `CarrierDashboard`, `BakLogistics`, the demo switcher entry, the "3PL Carrier Terminal" login card, the admin "Carrier Monitor" item, the public FAQ claim, and the affected documents). Matrix `D01-07` / `D04-18` / `D10-13`. **NOT STARTED.**
-3. **P10 — Logistics Hub completion.** Provider configuration + the PO documents; consolidation recorded as **documented-but-deferred** with the model supporting **1..n POs**. **NOT STARTED.**
-4. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED.**
-5. **P12 — SP-API seam extension (mock-first).** `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. *( `submitAcknowledgement` was implemented by **P4**, so it is no longer P12's work; the seven remaining operations still close **AV-040**.)* **NOT STARTED.**
-6. **`redesign/foundation` on GitHub — DONE.** The branch exists on `origin`; the push is part of every task close now (operating-model §12).
-7. **KEEP `demo.mercenta.co.uk` IN STEP** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Executed at the close of **every product phase including P7**; the full three-way confirmation is re-run at the end of the programme.
-8. **Carried over:** the Finance `destination: 'accounting'` dead route, the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, and **WAVE 5 / WAVE 6**. *(The "Command Centre ↔ Control Centre reconciliation" was P3 — DONE; the Overview h1 was corrected to "Overview" in P4/P6 — DONE.)* **NOT STARTED.**
+1. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED — next.**
+2. **P12 — SP-API seam extension (mock-first).** `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. *( `submitAcknowledgement` was implemented by **P4**, so it is no longer P12's work; the seven remaining operations still close **AV-040**.)* **NOT STARTED.**
+3. **`redesign/foundation` on GitHub — DONE.** The branch exists on `origin`; the push is part of every task close now (operating-model §12).
+4. **KEEP `demo.mercenta.co.uk` IN STEP** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Executed at the close of **every product phase including P10**; the full three-way confirmation is re-run at the end of the programme.
+5. **Carried over:** the Finance `destination: 'accounting'` dead route, the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, and **WAVE 5 / WAVE 6**. *(The "Command Centre ↔ Control Centre reconciliation" was P3 — DONE; the Overview h1 was corrected to "Overview" in P4/P6 — DONE.)* **NOT STARTED.**
 
 
 ### 4. DEFERRED / PARKED
 
-- **Consolidation of multiple POs into one shipment** — Founder decision: **deferred, but not designed out.** Amazon documents the capability (`purchaseOrders[]` on the shipment request; the ASN references the PO per carton; the 100-confirmation limit for truckload shipments), but POs arrive separately today, so the implemented model is **one PO = one shipment** while supporting **1..n**.
+- **Consolidation of multiple POs into one consignment** — Founder decision 11: **deferred, but not designed out.** The
+  channel documents the capability (`purchaseOrders[]` on the shipment request; the PO referenced per carton in the ASN;
+  the 100-confirmation limit for truckload shipments), but POs arrive separately today, so the implemented model is
+  **one PO = one consignment** while supporting **1..n**. **P10 (2026-09-24) RECORDED this in code**:
+  `src/lib/shipping/consolidation.ts` owns the posture, the documented evidence, the declared activation (P12) and the
+  invariants, and the 1..n declaration plus its pre-conditions (cross-tenant refusal, duplicates, the 100 limit) are
+  FUNCTIONAL. Only the grouping INPUT remains deferred.
 - All previous deferrals remain unchanged.
 
 ### 5. BLOCKED / DEPENDENCIES

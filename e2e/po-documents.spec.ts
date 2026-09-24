@@ -220,3 +220,53 @@ test.describe('§P6 — the collect lane and renderer reuse', () => {
     await expect(page.locator('[data-testid="logistics-labels-dialog"]')).toHaveCount(0);
   });
 });
+
+/**
+ * §P10 — THE DOWNLOAD QUEUE (the destination the badge counts).
+ *
+ * P6 produced the pack and its rule, and the badge/notification counted the queue — but
+ * the count had nowhere to lead. P10 added the Hub's "Shipping documents" queue. These
+ * tests prove, in the product, that the queue renders the SAME rule the badge counts,
+ * that it needs no consignment selection, and that it opens the SAME pack.
+ */
+test.describe('§P10 — the Logistics Hub download queue', () => {
+  test('7. the accepted PO is in the Hub queue and opens its pack without selecting a consignment', async ({
+    page,
+  }) => {
+    await acceptAndOpenDocuments(page, 'Tapatío', 'PO-9002');
+
+    const queue = page.locator('[data-testid="po-documents-queue-brand"]');
+    await expect(queue).toBeVisible({ timeout: 8000 });
+    // The row is on the page WITHOUT selecting anything on the map or in the list: the
+    // queue is a destination in its own right (the deep link may also select a
+    // consignment, so this asserts the queue, not the inspector's state).
+    await expect(page.locator('[data-testid="po-documents-queue-row-PO-9002"]')).toBeVisible();
+
+    await page.locator('[data-testid="po-documents-queue-open-PO-9002"]').click();
+    const opened = page.locator('[data-testid="po-documents-queue-panel-PO-9002"]');
+    await expect(opened).toBeVisible({ timeout: 6000 });
+
+    // The SAME pack component renders inside the queue (no second document list).
+    await expect(opened.locator('[data-testid="po-documents-panel"]')).toBeVisible();
+    await expect(opened.locator('[data-testid="po-document-asn_sheet"]')).toBeVisible();
+    await expect(page.locator('[data-testid="po-documents-queue-ready-PO-9002"]')).toContainText(
+      /documents ready/
+    );
+  });
+
+  test('8. the queue count is the SAME rule the nav badge counts', async ({ page }) => {
+    await acceptAndOpenDocuments(page, 'Tapatío', 'PO-9002');
+
+    const badge = page.locator('[data-testid="nav-badge-logistics"]');
+    await expect(badge).toBeVisible({ timeout: 8000 });
+    const badgeCount = Number(((await badge.innerText()) ?? '').replace(/\D/g, ''));
+
+    const rows = page.locator('[data-testid^="po-documents-queue-row-"]');
+    expect(await rows.count()).toBe(badgeCount);
+
+    // The header states the queue against the tenant's own PO total.
+    await expect(page.locator('[data-testid="po-documents-queue-count"]')).toContainText(
+      new RegExp(`${badgeCount} of \\d+ purchase orders`)
+    );
+  });
+});

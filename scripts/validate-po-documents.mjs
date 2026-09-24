@@ -483,6 +483,37 @@ check(
   navSource.includes('documentsAwaitingDownload') && notifSource.includes('documentsAwaitingDownload')
 );
 
+/**
+ * §P10 (programme §4 P10) — THE COUNT HAS A DESTINATION.
+ *
+ * P6 left the derived queue counted by the badge and the notification centre but with
+ * no surface for it: the brand had to find the PO's consignment to open its pack. P10
+ * added the Hub's download queue, and it must obey the SAME ONE rule — otherwise the
+ * badge, the notification and the queue could disagree. (The queue's own behaviour is
+ * asserted by `scripts/validate-logistics-providers.mjs`; these assertions prove the
+ * pack's gate still owns the rule and that its consumers cannot drift from it.)
+ */
+const queueSource = fs.readFileSync(
+  path.join(ROOT, 'src/components/shared/logistics/PoDocumentQueuePanel.tsx'),
+  'utf8'
+);
+check(
+  '§P10: the Hub download queue derives from the SAME ONE rule (never a second definition)',
+  queueSource.includes('documentsAwaitingDownload') && !queueSource.includes("status === 'accepted'")
+);
+check(
+  '§P10: the queue renders the SAME pack component, so no second document renderer exists',
+  queueSource.includes('PoDocumentPackPanel')
+);
+const brandHubSource = fs.readFileSync(
+  path.join(ROOT, 'src/components/brand/LogisticsHub.tsx'),
+  'utf8'
+);
+check(
+  '§P10: the brand Hub mounts the queue with TENANT-SCOPED purchase orders',
+  brandHubSource.includes('pos={scopedPos}') && brandHubSource.includes('scope="brand"')
+);
+
 
 
 /* ── 8. the documented collect chain ────────────────────────────────────── */

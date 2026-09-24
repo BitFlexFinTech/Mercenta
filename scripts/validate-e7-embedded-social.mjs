@@ -1009,6 +1009,45 @@ try {
     'requirements-registry.json',
     'PRODUCTION_READINESS.md',
   ];
+  /**
+   * §P10 — LOGISTICS-COMPLETION DECLARED SURFACE (2026-09-24, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P10; matrix `D10-10`;
+   * decision 11).
+   *
+   * P10 completes the Logistics Hub: the carrier PROVIDER CONFIGURATION, the PO-document
+   * DOWNLOAD QUEUE (the destination the nav badge already counted) and the consolidation
+   * posture recorded as DEFERRED with its documented channel evidence. It adds two domain
+   * owners plus three shared surfaces and wires BOTH workspaces to them. The E7 guard's
+   * contract is UNCHANGED: a changed source/test file outside EVERY declared set is still
+   * refused.
+   */
+  const P10_LOGISTICS_COMPLETION_DECLARED = [
+    'src/lib/shipping/providerConfiguration.ts',
+    'src/lib/shipping/consolidation.ts',
+    'src/components/shared/logistics/PoDocumentQueuePanel.tsx',
+    'src/components/shared/logistics/CarrierProviderConfigurationPanel.tsx',
+    'src/components/shared/logistics/ConsolidationPosturePanel.tsx',
+    'src/components/brand/LogisticsHub.tsx',
+    'src/components/admin/LogisticsControl.tsx',
+    'src/components/layout/AdminShell.tsx',
+    'scripts/validate-logistics-providers.mjs',
+    'scripts/validate-po-documents.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/verify-demo-live.mjs',
+    'package.json',
+    'e2e/po-documents.spec.ts',
+    'e2e/logistics-providers.spec.ts',
+    'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+    'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+    'requirements-registry.json',
+    'PRODUCTION_READINESS.md',
+  ];
+
+
 
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
@@ -1175,6 +1214,12 @@ try {
      * file outside EVERY declared set is still refused.
      */
     ...P9_CARRIER_REMOVAL_DECLARED,
+    /**
+     * §P10 — REPOINTED (not weakened). The logistics-completion phase's declared surface
+     * is accepted here exactly as every earlier phase's is; a changed source/test file
+     * outside EVERY declared set is still refused.
+     */
+    ...P10_LOGISTICS_COMPLETION_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

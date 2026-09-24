@@ -58,6 +58,15 @@ import { LogisticsHero } from '@/components/shared/logistics/LogisticsHero';
  * EXISTING waybill / label dialogues for the two artefacts they already render.
  */
 import { PoDocumentPackPanel } from '@/components/shared/logistics/PoDocumentPackPanel';
+/**
+ * §P10 (programme §4 P10) — the Hub's completion surfaces, each backed by its ONE owner:
+ * the download QUEUE (same rule as the badge), the CARRIER PROVIDER CONFIGURATION and the
+ * CONSOLIDATION posture (programme decision 11).
+ */
+import { PoDocumentQueuePanel } from '@/components/shared/logistics/PoDocumentQueuePanel';
+import { CarrierProviderConfigurationPanel } from '@/components/shared/logistics/CarrierProviderConfigurationPanel';
+import { ConsolidationPosturePanel } from '@/components/shared/logistics/ConsolidationPosturePanel';
+import { carrierProviderConfigurations } from '@/lib/shipping/providerConfiguration';
 import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
 import {
   ContextPanel,
@@ -581,7 +590,7 @@ export function LogisticsHub() {
   const { session, products } = useApp();
   const shipmentsQuery = useShipmentsAll();
   const posQuery = usePurchaseOrders();
-  const { modes } = useIntegrations();
+  const { modes, integrations } = useIntegrations();
 
   const [query, setQuery] = useState('');
   const [truthFilter, setTruthFilter] = useState('all');
@@ -848,6 +857,18 @@ export function LogisticsHub() {
   }, [visibleLegs]);
 
   const selected = model.legs.find((l) => l.id === selectedId) ?? null;
+
+  /**
+   * §P10 — THE CARRIER PROVIDER CONFIGURATION (matrix `D10-10`).
+   *
+   * Derived by its ONE owner from the canonical shipping config + the AUTHORITATIVE
+   * provider modes + the non-secret connection state. The Hub re-derives no mode, no
+   * lane and no account label — and it never sees Mercenta's cost base.
+   */
+  const providerConfigurations = useMemo(
+    () => carrierProviderConfigurations({ modes, connections: integrations }),
+    [modes, integrations]
+  );
 
   /**
    * §P6 — the purchase order behind the selected consignment, and the shipment
@@ -1156,6 +1177,48 @@ export function LogisticsHub() {
         </div>
       )}
 
+      {/* ── §P10 — THE DOWNLOAD QUEUE: the destination the nav badge counts ──
+          Decision 6 makes the document pack the Hub's core deliverable, and the brand's
+          remaining job is to download & print it before dispatch. The badge and the
+          notification already counted this queue; this is the surface that renders it,
+          from the SAME ONE rule, so the count always has a reachable set of rows. */}
+      <WorkspaceSection
+        title="Shipping documents"
+        description="Every accepted purchase order whose document pack is ready to download and print, until its consignment is dispatched."
+        domain="logistics"
+        className="mt-4"
+      >
+        <PoDocumentQueuePanel
+          pos={scopedPos}
+          brandNameFor={(brandId) =>
+            brandsQuery.data?.data.find((b) => b.id === brandId)?.profile.businessName ?? brandId
+          }
+          brandNationFor={(brandId) =>
+            brandsQuery.data?.data.find((b) => b.id === brandId)?.nation ?? null
+          }
+          products={products}
+          instructionForPo={instructionForPo}
+          shipmentForPo={(poNumber) => {
+            const row = liveShipments.find((s) => s.poNumber === poNumber);
+            return row
+              ? {
+                  id: row.id,
+                  status: row.status,
+                  carrier: row.carrier ?? '',
+                  trackingNumber: row.trackingNumber ?? null,
+                  waybill: row.waybill ?? null,
+                }
+              : null;
+          }}
+          onOpenCarrierArtefact={(kind, shipmentId) => {
+            if (!shipmentId) return;
+            if (kind === 'carrier_label') setLabelsShipment(shipmentId);
+            else setWaybillShipment(shipmentId);
+          }}
+          scope="brand"
+        />
+      </WorkspaceSection>
+
       {/*
         §WAVE 3 — THE CINEMATIC LOGISTICS HERO.
         It is the HERO SECTION of this same page, not a second page: a fixed
@@ -1454,6 +1517,30 @@ export function LogisticsHub() {
                   )}
                 </div>
               </div>
+            </ContextPanel>
+
+            {/*
+              §P10 — CARRIER PROVIDER CONFIGURATION (matrix `D10-10`).
+              The brand sees WHICH Mercenta account serves its lane, what it is declared
+              capable of, and its truthful operational state. It cannot configure one and
+              never holds a credential: the lane decides, Mercenta configures.
+            */}
+            <ContextPanel title="Carrier providers">
+              <div className="p-3" data-testid="brand-carrier-providers">
+                <CarrierProviderConfigurationPanel
+                  configurations={providerConfigurations}
+                  scope="brand"
+                />
+              </div>
+            </ContextPanel>
+
+            {/*
+              §P10 — CONSOLIDATION (programme decision 11): DEFERRED, NOT DESIGNED OUT.
+              The posture and the consignment's declared purchase orders come from the
+              owner, so the surface cannot state something the model does not support.
+            */}
+            <ContextPanel title="Consolidation">
+              <ConsolidationPosturePanel poNumber={selected?.poNumber ?? null} />
             </ContextPanel>
           </>
         }

@@ -32,6 +32,7 @@
     "validate:po-documents": "node scripts/validate-po-documents.mjs",
     "validate:invoicing": "node scripts/validate-p7-invoicing.mjs",
     "validate:inventory": "node scripts/validate-p8-inventory.mjs",
+    "validate:logistics-providers": "node scripts/validate-logistics-providers.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs"
   },
   "dependencies": {

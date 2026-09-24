@@ -318,6 +318,17 @@ const bundleProbe = await superAdmin
       p9CarrierLoginGone: !all.includes('3PL Carrier Terminal'),
       p9CarrierNavGone: !all.includes('BAK Logistics Hub') && !all.includes('API Request Auditor'),
       p9CarrierMonitorGone: !all.includes('Carrier Integration Monitor'),
+      /**
+       * §P10 — the logistics-completion build, read from the DEPLOYED bundle itself.
+       * The provider-configuration projection, the download queue and the deferred
+       * consolidation posture must all be IN the shipped code, so a stale build cannot
+       * pass the live leg by rendering a page that merely looks right.
+       */
+      p10ProviderConfig: all.includes('carrier-provider-configuration'),
+      p10Consolidation: all.includes('consolidation-posture'),
+      p10Queue: all.includes('po-documents-queue'),
+      p10Deferred: all.includes('One purchase order = one consignment'),
+      p10Truckload: all.includes('100 shipment confirmations for every truckload shipment'),
     };
   })
   .catch(() => ({ count: 0, read: 0 }));
@@ -338,6 +349,12 @@ check('§P9 the deployed bundle carries the REHOMED carrier console (attributed 
 check('§P9 the deployed bundle carries NO carrier login card', bundleProbe.p9CarrierLoginGone === true, probeDetail);
 check('§P9 the deployed bundle carries NO carrier navigation (BAK Logistics Hub / API Request Auditor)', bundleProbe.p9CarrierNavGone === true, probeDetail);
 check('§P9 the deployed bundle carries NO admin Carrier Monitor', bundleProbe.p9CarrierMonitorGone === true, probeDetail);
+/* §P10 — the deployed bundle IS the logistics-completion build. */
+check('§P10 the deployed bundle carries the carrier provider configuration surface', bundleProbe.p10ProviderConfig === true, probeDetail);
+check('§P10 the deployed bundle carries the consolidation posture surface', bundleProbe.p10Consolidation === true, probeDetail);
+check('§P10 the deployed bundle carries the PO-document download queue', bundleProbe.p10Queue === true, probeDetail);
+check('§P10 the deployed bundle records consolidation as DEFERRED (one PO = one consignment)', bundleProbe.p10Deferred === true, probeDetail);
+check('§P10 the deployed bundle carries the documented 100-confirmation truckload evidence', bundleProbe.p10Truckload === true, probeDetail);
 check('no uncaught page error on the deployed P7 invoicing flows',
   adminErrors.length === 0 && superAdminErrors.length === 0,
   [...adminErrors, ...superAdminErrors].slice(0, 2).join(' | '));
@@ -358,6 +375,22 @@ const hubBody = await page.locator('body').innerText().catch(() => '');
 check('§P9 the deployed brand Logistics Hub does NOT carry the Mercenta-side carrier console',
   !/Carrier API console/i.test(hubBody) &&
     (await page.locator('select[aria-label^="Update milestone for"]').count()) === 0);
+
+/* ── §P10 (programme §4 P10) — the BRAND hub's completion surfaces, live ──── */
+check('§P10 the deployed brand Hub carries the PO-document DOWNLOAD QUEUE',
+  (await page.locator('[data-testid^="po-documents-queue-row-"]').count()) > 0 ||
+    /Shipping documents awaiting download/i.test(hubBody));
+check('§P10 the deployed brand Hub states BOTH Mercenta carrier accounts (provider configuration)',
+  (await page.locator('[data-testid="carrier-provider-dhl"]').count()) > 0 &&
+    (await page.locator('[data-testid="carrier-provider-palletline"]').count()) > 0);
+check('§P10 the deployed brand Hub tells the brand who configures its carriers',
+  /Mercenta holds and configures these carrier accounts/i.test(hubBody));
+check('§P10 the deployed brand Hub exposes NO credential form for a carrier',
+  (await page.locator('input[type="password"]').count()) === 0);
+check('§P10 the deployed brand Hub renders the consolidation posture as DEFERRED',
+  (await page.locator('[data-testid="consolidation-status"][data-status="deferred"]').count()) > 0);
+check('§P10 the deployed brand Hub never names a retired carrier as an account',
+  !/FedEx|BAK Logistics/i.test(hubBody));
 /* Navigate the EXISTING admin session through the product's own nav (a reload
    would land on the login entry: each Playwright page has its own tab-scoped
    session, and the admin tab's session lives in that tab). */
@@ -370,6 +403,22 @@ check('§P9 the deployed console exposes the interactive milestone control',
   (await admin.locator('select[aria-label^="Update milestone for"]').count()) > 0);
 check('§P9 the deployed console offers the simulated DHL advance',
   /DHL status → next milestone/i.test(adminHubBody));
+
+/* ── §P10 — the ADMIN hub's completion surfaces, live ────────────────────── */
+check('§P10 the deployed ADMIN Logistics Hub carries the carrier provider configuration',
+  (await admin.locator('[data-testid="carrier-provider-configuration-admin"]').count()) > 0);
+check('§P10 the deployed ADMIN provider configuration states both Mercenta accounts',
+  (await admin.locator('[data-testid="carrier-provider-dhl"]').count()) > 0 &&
+    (await admin.locator('[data-testid="carrier-provider-palletline"]').count()) > 0);
+check('§P10 the deployed ADMIN provider configuration is RBAC-gated on its credential hand-off',
+  (await admin.locator('[data-testid="carrier-provider-configuration-admin"][data-handoff]').count()) > 0);
+check('§P10 a non-super admin session gets NO dead-end credential control',
+  (await admin.getByRole('button', { name: 'Open Integration Settings' }).count()) === 0);
+check('§P10 the deployed ADMIN Hub carries the cross-tenant PO-document queue',
+  (await admin.locator('[data-testid="po-documents-queue-admin"]').count()) > 0 ||
+    /PO documents awaiting the brand/i.test(adminHubBody));
+check('§P10 the deployed ADMIN Hub renders the consolidation posture',
+  (await admin.locator('[data-testid="consolidation-posture"]').count()) > 0);
 const hubNodeKinds = await page
   .locator('[data-testid^="logistics-node-"]')
   .evaluateAll((els) => els.map((e) => e.getAttribute('data-kind')))

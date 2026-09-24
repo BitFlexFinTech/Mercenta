@@ -938,6 +938,49 @@ const P9_CARRIER_REMOVAL_SCOPE = new Set([
   'PRODUCTION_READINESS.md',
 ]);
 
+/**
+ * §P10 (2026-09-24, programme `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`
+ * §4 P10; matrix `D10-10`; programme decision 11) — LOGISTICS-COMPLETION DECLARED SURFACE.
+ *
+ * P10 completes the Logistics Hub: the carrier PROVIDER CONFIGURATION, the PO-document
+ * DOWNLOAD QUEUE (the destination the nav badge already counted) and the consolidation
+ * posture recorded as DEFERRED with its documented channel evidence. It adds two domain
+ * owners plus three shared surfaces and wires BOTH logistics workspaces to them. The F5/
+ * F5b/F6 contract is UNCHANGED: a changed source/test file in NO declared set still
+ * fails, and an undeclared protected path still fails.
+ */
+const P10_LOGISTICS_COMPLETION_SCOPE = new Set([
+  /* The new domain owners */
+  'src/lib/shipping/providerConfiguration.ts',
+  'src/lib/shipping/consolidation.ts',
+  /* The shared surfaces (one per record, rendered by both shells) */
+  'src/components/shared/logistics/PoDocumentQueuePanel.tsx',
+  'src/components/shared/logistics/CarrierProviderConfigurationPanel.tsx',
+  'src/components/shared/logistics/ConsolidationPosturePanel.tsx',
+  /* The two workspaces + the shell hand-off to the credential owner */
+  'src/components/brand/LogisticsHub.tsx',
+  'src/components/admin/LogisticsControl.tsx',
+  'src/components/layout/AdminShell.tsx',
+  /* The gates + the browser specs */
+  'scripts/validate-logistics-providers.mjs',
+  'scripts/validate-po-documents.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'scripts/verify-demo-live.mjs',
+  'package.json',
+  'e2e/po-documents.spec.ts',
+  'e2e/logistics-providers.spec.ts',
+  /* Documentation + the state sources */
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+  'STATUS_CHECK.md',
+  'requirements-registry.json',
+  'PRODUCTION_READINESS.md',
+]);
+
+
 try {
   /* ── modules under test (the EXISTING architecture) ── */
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
@@ -1203,6 +1246,9 @@ try {
         /** §P5 — REPOINTED (not weakened): the destination-FC phase's declared surface. */
         P5_DESTINATION_FC_SCOPE.has(p) ||
         [...P5_DESTINATION_FC_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P10 — the logistics-completion phase's declared surface (see above). */
+        P10_LOGISTICS_COMPLETION_SCOPE.has(p) ||
+        [...P10_LOGISTICS_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
@@ -1215,6 +1261,9 @@ try {
         /** §P5 — same declaration, second protected-path check (F5b). */
         P5_DESTINATION_FC_SCOPE.has(p) ||
         [...P5_DESTINATION_FC_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P10 — same declaration, second protected-path check (F5b). */
+        P10_LOGISTICS_COMPLETION_SCOPE.has(p) ||
+        [...P10_LOGISTICS_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
@@ -1387,7 +1436,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...P8_INVENTORY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §P9 — the carrier-removal phase's declared surface (see above). */
           P9_CARRIER_REMOVAL_SCOPE.has(p) ||
-          [...P9_CARRIER_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...P9_CARRIER_REMOVAL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P10 — the logistics-completion phase's declared surface (see above). */
+          P10_LOGISTICS_COMPLETION_SCOPE.has(p) ||
+          [...P10_LOGISTICS_COMPLETION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
