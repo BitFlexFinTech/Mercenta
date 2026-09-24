@@ -26,7 +26,56 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P7 DONE: ADMIN INVOICING — THE RECEIPT GATE, THE INVOICE-NUMBER REGISTRY AND PER-INVOICE TERMS** (2026-09-23, session 20)
+## CURRENT STATE — **P8 DONE: INVENTORY LINKED TO THE BRAND'S CATALOGUE + THE CHANNEL IDENTIFIER (ASIN)** (2026-09-23, session 21)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
+> first — a new session needs nothing else from this file. This section is a projection of it.
+
+**Checkpoint (this increment):** **P8 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`** — application
+work, verified and committed; the three-way leg (deploy + live verification) is recorded in the resume block.
+
+**What this increment added:** inventory **linked to the catalogue** (programme decision 5) and the channel
+**identifier** (decision 10), each behind ONE owner, entered **inside Mercenta**.
+
+- `src/lib/inventory/inventoryRecord.ts` (NEW) owns the **stock figures**. Every one is **DERIVED from an
+  append-only movement ledger**: on-hand / committed / inbound are its sums and **available = on-hand − committed**
+  (a NEGATIVE available position — oversold — is stated, never clamped). `inventoryStatusOf` derives *out of stock /
+  below safety stock / in stock* and `summariseInventory` is the ONE tenant roll-up. The unit vocabulary is the
+  channel's own **Eaches / Cases** (register **`AV-029` CONFIRMED**); a CASE entry converts through the product's
+  **own case pack** and is **REFUSED when none is declared**, so a case is never silently read as one each.
+  `validateMovement` is the single acceptance point (undeclared unit / zero or NaN quantity / undeclared type /
+  correction without a reason / any movement taking a bucket negative → refused).
+- `src/lib/inventory/inventoryLifecycle.ts` (NEW) is the **domain write path**: RBAC (`canMutate`), TENANT ISOLATION
+  and an attributed audit entry on the canonical log for every write, via `recordStockMovement`,
+  `setInventorySettings`, `declareBrandAsin` (the brand half of decision 10), `populateAsinFromChannel` (the channel
+  half) and a separate `adminOverrideAsin` that **requires a stated reason and is refused for a brand-pinned actor**.
+- `src/lib/catalog/asin.ts` (NEW) owns the **identifier rule**: the 10-alphanumeric-character shape, the deliberately
+  **unmistakable `SIM-ASIN-…` placeholder** (which is NOT a valid shape, so it can never be misread as real), the
+  **existing-listing confirmation** a brand declaration requires (fail closed), and the **authority order** — a
+  channel-assigned identifier is never downgraded by a brand declaration. Basis recorded: register **`AV-035`** (no
+  public Vendor catalogue/item API exists, so there is no documented API an identifier could be fetched from).
+- **Decision 10's channel half is REAL** through the existing mock-first SP-API seam: `getSubmissionStatus` returns
+  the channel's identifier when it ACCEPTS the product and `pollCatalogSubmission` records it in the canonical store —
+  so the submission's identifier and the canonical identifier both come from that ONE response and cannot drift.
+- **Two inherited fabrications were removed/repointed (honest fixes):** the seed's **invented `B0<sku>` ASIN** is
+  gone (every seeded identifier is now the unmistakable placeholder) and the brand Reports surface's **fabricated
+  "On-Hand Inventory (est.)"** (`unitsPerCase × 10`) now reads the canonical owner.
+- **The surfaces:** a NEW brand **Inventory destination in the Catalogue section** (the decision-5 field set, the
+  Manage panel, the movement ledger as the provenance, the rules + the honest basis) and an admin **Inventory tab** in
+  the Global Catalog (the derived position, the identifier, the attributed override). `ProductCatalog` shows the
+  identifier **inside the SKU/barcode cell**.
+- **A regression this increment caused was found and fixed:** an extra ASIN *column* widened the catalogue table and
+  pushed a row's own control under the floating live-chat button, breaking the existing E3 catalog browser contract.
+  Proven by reverting only `ProductCatalog.tsx` (4 passed) and re-introducing it (1 failed), then fixed properly —
+  the identifier now lives in the identity cell, and E3 (4/4) + P8 (4/4) pass together.
+- **Honest limits:** the inventory model is Mercenta's own (no Vendor inventory-availability API — truth validation
+  §769 "REQUIRES BUSINESS DECISION"), the figures are never a channel reading, pushing stock to the channel
+  (`submitInventoryUpdate`) is **P12**, the identifier is validated by SHAPE only with its SOURCE always recorded, and
+  the ledger is in-memory in this environment.
+
+---
+
+## PREVIOUS STATE — **P7 DONE: ADMIN INVOICING — THE RECEIPT GATE, THE INVOICE-NUMBER REGISTRY AND PER-INVOICE TERMS** (2026-09-23, session 20) — HISTORICAL
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
