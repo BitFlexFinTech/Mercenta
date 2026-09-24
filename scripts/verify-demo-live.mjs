@@ -722,6 +722,55 @@ check('§P6 the deployed collect lane presents no ARN value',
 check('no uncaught page error on the deployed collect-lane flow',
   astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
 
+/* ── §P13 / S3 — THE DEPLOYED WORK LAYER ASKS THE RULE'S OWNER ────────────
+   S3's changed functionality is a DERIVED queue, so it must be verified ON the
+   deployed bundle rather than merely built: the deployed queue must still present
+   the acknowledgement work of genuinely OPEN purchase orders (with the OWNER's
+   real window state) and must present NO acknowledgement work for a PO that is
+   past the acknowledgement decision — `PO-9003` is `accepted`, i.e. no longer in
+   the channel's `New` set, and presenting it as acknowledgement work is the
+   founder-reported defect class S3 removed at source. */
+async function openLiveNav(target, label) {
+  const nav = target.locator('nav[aria-label="Primary"]:visible').first();
+  const el = nav
+    .locator('span')
+    .filter({ hasText: new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`) })
+    .first();
+  await el.click();
+  await target.waitForTimeout(1500);
+}
+
+/* The brand's OWN queue (Tapatío): this session accepted PO-9002 above, so its only
+   remaining seeded PO is PO-9003 — which must NOT be offered as acknowledgement work. */
+await openLiveNav(page, 'Tasks & Deadlines');
+await page.waitForTimeout(2500);
+const brandWorkBody = await page.locator('body').innerText().catch(() => '');
+check('§P13/S3 the deployed brand work list renders (Operations → Tasks & Deadlines)',
+  brandWorkBody.length > 200 && /Tasks & Deadlines/i.test(brandWorkBody),
+  brandWorkBody.replace(/\s+/g, ' ').slice(0, 100));
+check('§P13/S3 the deployed brand queue offers NO acknowledgement work for PO-9003 (accepted = past the decision)',
+  !/Acknowledge PO-9003/.test(brandWorkBody));
+
+/* Mercenta's queue spans BOTH tenants on the SAME deployed bundle. */
+await openLiveNav(admin, 'Work Management');
+await admin.waitForTimeout(2500);
+const adminWorkBody = await admin.locator('body').innerText().catch(() => '');
+const liveAckRows = await admin.locator('[data-testid^="work-row-work-po_acknowledgement-"]').count();
+check('§P13/S3 the deployed admin work list renders (Work Management)',
+  adminWorkBody.length > 200 && /Work Management/i.test(adminWorkBody));
+check('§P13/S3 the deployed admin queue STILL presents the open PO of tenant 1 (PO-9001)',
+  /Acknowledge PO-9001/.test(adminWorkBody));
+check('§P13/S3 …and of tenant 2 (PO-9002) — the deployed queue spans both tenants',
+  /Acknowledge PO-9002/.test(adminWorkBody));
+check('§P13/S3 the deployed admin queue offers NO acknowledgement work for PO-9003 (the defect is ABSENT live)',
+  !/Acknowledge PO-9003/.test(adminWorkBody));
+check('§P13/S3 every deployed acknowledgement row states the OWNER’s real window state',
+  liveAckRows > 0 && /left of the 24-hour window/.test(adminWorkBody),
+  `${liveAckRows} acknowledgement row(s)`);
+check('no uncaught page error on the deployed §P13/S3 work-layer flow',
+  pageErrors.length === 0 && adminErrors.length === 0,
+  [...pageErrors, ...adminErrors].slice(0, 2).join(' | '));
+
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
 console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length} superAdmin=${superAdminErrors.length}`);
