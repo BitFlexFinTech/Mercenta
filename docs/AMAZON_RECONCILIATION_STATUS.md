@@ -59,7 +59,7 @@ nothing, and increment S0/S1-a applied nothing from this register.
 | AV-020 | Supplier performance | UNKNOWN | **EVIDENCE-BLOCKED** — do not model Amazon performance metrics | S13 | OPEN — not applied |
 | AV-020b | Backorder restock | UNSUPPORTED | **RELABEL** — remove the unverified 30-day countdown until evidenced | S5 | OPEN — not applied |
 | AV-021 | Payments architecture | CONFIRMED | **KEEP** — never present as an Amazon process | — | NO ACTION REQUIRED |
-| AV-022 | Invoice rules | INCOMPLETE | **BUILD** — invoice rules + parallel testing as an activation prerequisite | S7 | OPEN — not applied |
+| AV-022 | Invoice rules | MODELLED IN PART (P7, 2026-09-23) | **BUILD (in part) — the number/zero-value/cancel rules and the parallel-testing precondition are implemented (`src/lib/commerce/invoiceRegistry.ts` + `INVOICE_NUMBER_RULES` + `PRODUCTION_READINESS.md`); bill-to/Payee matching, credit notes and the `submitInvoices` API submission (P12) remain** | S7 | APPLIED 2026-09-23 (P7) |
 | AV-023 | Ack price ↔ invoice price | INCOMPLETE | **BUILD** — enforce the match at ack/invoice time | S5 | OPEN — not applied |
 | AV-024 | PO changes | INCOMPLETE | **BUILD** — PO-revision concept + change ingestion when live | S5 | OPEN — not applied |
 | AV-025 | Naming | INFERENCE | **RELABEL** — rename the internal concept (e.g. "brand-direct supply") | S3 | OPEN — not applied |

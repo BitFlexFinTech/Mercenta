@@ -418,6 +418,13 @@ export type CommerceActivityType =
   | 'shipment_advanced'
   | 'po_received'
   | 'invoice_issued'
+  /**
+   * §P7 — a retail-channel invoice was CANCELLED. The channel's documented rule
+   * (register S11 / `AV-022`) is that a wrong invoice is cancelled and must be
+   * re-sent under a NEW Invoice ID, so cancellation is a real operational step
+   * on the same canonical trail — never a silent edit of an issued invoice.
+   */
+  | 'invoice_cancelled'
   | 'payment_recorded'
   | 'exception_raised'
   | 'dispute_opened'
@@ -462,22 +469,61 @@ export interface CommerceEligibility {
   submissionStatus?: CatalogSubmissionStatus;
 }
 
+/**
+ * §P7 — THE PAYMENT TERMS MERCENTA OFFERS ON A RETAIL-CHANNEL INVOICE.
+ *
+ * Declared ONCE here (the types file owns enum-like unions, exactly like
+ * `PO_REJECTION_CODES`), then consumed by `src/lib/commerce/invoiceTerms.ts`,
+ * which is the single owner of the arithmetic derived from them. Terms are
+ * chosen PER INVOICE (programme decision 2) — there is no global term.
+ */
+export const INVOICE_TERM_CHOICES = [14, 30, 60] as const;
+export type InvoiceTermDays = (typeof INVOICE_TERM_CHOICES)[number];
+
 /** §Phase E4 — canonical SIMULATED invoice raised against a commerce PO. */
 export interface CommerceInvoice {
-  /** Deterministic id: `cinv-<brandId>-<poNumber>`. */
+  /**
+   * Deterministic id. The FIRST invoice for a PO is `cinv-<brandId>-<poNumber>`;
+   * a replacement after a cancellation gets the allocation ordinal appended
+   * (`…-r2`), so the id and the number move together (§P7 — `AV-022`).
+   */
   id: string;
   brandId: string;
   purchaseOrderId: string;
   poNumber: string;
+  /**
+   * §P7 — the invoice number, allocated by the ONE registry
+   * (`src/lib/commerce/invoiceRegistry.ts`). Unique and NEVER reused: the number
+   * of a cancelled invoice stays consumed for ever (`AV-022`).
+   */
   number: string;
   lines: { description: string; amountGbp: number }[];
   subtotalGbp: number;
-  status: 'issued' | 'paid';
+  /**
+   * §P7 — `cancelled` is a real terminal state (a wrong invoice is cancelled by
+   * the channel and re-sent under a NEW Invoice ID — `AV-022`). A cancelled
+   * invoice is never a receivable and never carries a payment.
+   */
+  status: 'issued' | 'paid' | 'cancelled';
+  /**
+   * §P7 — the terms THIS invoice carries (`14 | 30 | 60`). Optional because the
+   * pre-P7 ledger has rows that predate the choice; an absent value resolves to
+   * the declared default in `invoiceTerms.ts` — the derivation is NEVER guessed
+   * in a component.
+   */
+  termDays?: InvoiceTermDays;
   currency: 'GBP';
   mode: CommerceMode;
   simulated: boolean;
   issuedAt: string;
   paidAt?: string;
+  /** §P7 — when and why the invoice was cancelled (present when `cancelled`). */
+  cancelledAt?: string;
+  cancellationReason?: string;
+  /** §P7 — the invoice this replacement supersedes (`AV-022` re-issue chain). */
+  replacesInvoiceId?: string;
+  /** §P7 — the replacement raised after this invoice was cancelled. */
+  replacedByInvoiceId?: string;
 }
 
 /** §Phase E4 — canonical SIMULATED payment settled against an invoice. */
@@ -1177,6 +1223,43 @@ export type PurchaseOrderStatus =
   | 'delivered';
 
 /**
+ * §P7 — A RETAIL-CHANNEL INVOICE NUMBER, AS THE REGISTRY CONSUMED IT.
+ *
+ * The canonical ledger row behind `AV-022`. It is an append-only record: a row is
+ * never deleted and a `number` is never reissued — a cancelled invoice VOIDS its
+ * row (recording when and why) and the replacement takes a NEW number.
+ */
+export interface InvoiceNumberAllocation {
+  /** The number itself — the registry key. Unique for ever. */
+  number: string;
+  purchaseOrderId: string;
+  poNumber: string;
+  brandId: string;
+  /** 1 for the PO's first invoice; 2+ for a re-issue after a cancellation. */
+  ordinal: number;
+  /** The invoice that consumed this number. */
+  invoiceId: string;
+  allocatedAt: string;
+  /** Set when the invoice carrying this number was cancelled — stays consumed. */
+  voidedAt?: string;
+  voidReason?: string;
+}
+
+/**
+ * §P7 — THE RECEIVING STATUS OF A PURCHASE ORDER.
+ *
+ * The retail channel's OWN concept (register `AV-018` / source `S5`:
+ * `receivingStatus` = *"the Amazon fulfillment center received status and
+ * received quantity"*). Declared ONCE here; the derivation, the labels and the
+ * invoice gate live in `src/lib/commerce/receivingStatus.ts`.
+ *
+ * The status is DERIVED from the per-line received quantity the receiving step
+ * logs — never stored as a second copy that could drift (the §P6 rule).
+ */
+export const RECEIVING_STATUSES = ['not_received', 'partially_received', 'received'] as const;
+export type ReceivingStatus = (typeof RECEIVING_STATUSES)[number];
+
+/**
  * §P5 — THE DESTINATION CARRIED ON THE PURCHASE ORDER.
  *
  * The retail channel states the destination **on each purchase order** as its
@@ -1253,6 +1336,15 @@ export interface PurchaseOrder {
   simulated?: boolean;
   /** §Phase E4 — the canonical catalog product the PO was raised against. */
   originProductId?: string;
+  /**
+   * §P7 — WHEN the channel's receiving step completed for this PO. Written by
+   * the ONE receiving path (`src/lib/commerce/commerceLifecycle.ts →
+   * receiveCommercePurchaseOrder`). The receiving STATUS itself is DERIVED from
+   * the line quantities (`src/lib/commerce/receivingStatus.ts`), so there is no
+   * second copy to drift; this timestamp cannot be derived and is therefore
+   * recorded.
+   */
+  receivedAt?: string;
 }
 
 /** §Stage-24 — line-item level acknowledgment, not whole-PO toggle. */

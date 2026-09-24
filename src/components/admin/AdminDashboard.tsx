@@ -63,9 +63,9 @@ import { renewalUrgency } from '@/lib/contracts';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import {
   demoCommerceInvoices,
-  getCommercePaymentsForInvoice,
+  getAllCommercePayments,
 } from '@/data/demoStore';
-import { INVOICE_TERM_DAYS, addDays } from '@/lib/work/workStore';
+import { summariseInvoiceLedger, UPCOMING_PAYMENTS_HORIZON_DAYS } from '@/lib/commerce/invoiceTerms';
 import { Alert, Button, EmptyState, StatusBadge, Skeleton } from '@/components/ui';
 import type { StatusTone } from '@/components/ui';
 import {
@@ -255,24 +255,28 @@ export function AdminDashboard({
   const shipmentExceptions = shipmentsAll.filter((s) => s.exception).length;
 
   /**
-   * RECEIVABLES / UPCOMING PAYMENTS — the P7 definition applied to the CURRENT
-   * canonical ledger: an issued invoice with no settled payment is outstanding;
-   * its due date is DERIVED from its own issue date plus the declared terms
-   * (`INVOICE_TERM_DAYS`, the same constant the work layer and the reminder
-   * sweep use). No Vendor Payments API exists (register S14), so a due date can
-   * only ever be derived — and it is labelled as derived wherever it is shown.
+   * §P7 — RECEIVABLES / UPCOMING PAYMENTS, computed by the ONE owner.
+   *
+   * Programme decision 2: an invoice is a receivable when it is **issued and
+   * unpaid**, and its due date is DERIVED from its own issue date plus **its own
+   * terms** (14/30/60 — chosen per invoice). Register S14: no Vendor Payments API
+   * exists, so a payment date can only ever be derived; the arithmetic and the
+   * "as derived" basis live in `src/lib/commerce/invoiceTerms.ts` so the admin
+   * Overview, the founder console, the work layer and the automation sweep cannot
+   * disagree. §P7 — REPOINTED: this block used to re-derive both figures from the
+   * single global `INVOICE_TERM_DAYS` constant.
    */
   const todayIso = new Date().toISOString().slice(0, 10);
-  const invoiceDueDate = (issuedAt: string) => addDays(issuedAt.slice(0, 10), INVOICE_TERM_DAYS);
-  const unpaidInvoices = demoCommerceInvoices.filter(
-    (i) => i.status !== 'paid' && getCommercePaymentsForInvoice(i.id).length === 0
+  const invoiceLedger = summariseInvoiceLedger(
+    demoCommerceInvoices,
+    getAllCommercePayments(),
+    todayIso
   );
-  const receivablesGbp = unpaidInvoices.reduce((s, i) => s + i.subtotalGbp, 0);
-  const overdueInvoices = unpaidInvoices.filter((i) => invoiceDueDate(i.issuedAt) < todayIso);
-  const dueWithinHorizon = unpaidInvoices.filter(
-    (i) => invoiceDueDate(i.issuedAt) <= addDays(todayIso, 30)
-  );
-  const upcomingPaymentsGbp = dueWithinHorizon.reduce((s, i) => s + i.subtotalGbp, 0);
+  const unpaidInvoices = invoiceLedger.outstanding;
+  const receivablesGbp = invoiceLedger.receivablesGbp;
+  const overdueInvoices = invoiceLedger.overdue;
+  const dueWithinHorizon = invoiceLedger.upcoming;
+  const upcomingPaymentsGbp = invoiceLedger.upcomingGbp;
 
   const docsPending = docsAll.filter(
     (d) => d.status === 'under_review' || d.status === 'uploaded'
@@ -524,7 +528,7 @@ export function AdminDashboard({
       context:
         unpaidInvoices.length === 0
           ? 'No issued-and-unpaid invoices recorded in the canonical ledger.'
-          : `${unpaidInvoices.length} issued-and-unpaid invoice(s) · due ${INVOICE_TERM_DAYS} days from issue (derived — no Vendor Payments API exists).`,
+          : `${unpaidInvoices.length} issued-and-unpaid invoice(s) · each due on its own terms (14/30/60 days from issue, derived — no Vendor Payments API exists).`,
       // §P2 — Accounting lives inside Super Admin (Accounting → Brand Payouts /
       // receivables); `super_admin` is the real shell view id (there is no
       // `accounting` nav id, and a dead id would be a dead end).
@@ -604,8 +608,8 @@ export function AdminDashboard({
       statusText: 'Derived',
       context:
         dueWithinHorizon.length === 0
-          ? `No invoice falls due within 30 days at the declared ${INVOICE_TERM_DAYS}-day terms.`
-          : `${dueWithinHorizon.length} invoice(s) fall due within 30 days at the declared ${INVOICE_TERM_DAYS}-day terms (derived from the invoice date — no Vendor Payments API exists).`,
+          ? `No invoice falls due within ${UPCOMING_PAYMENTS_HORIZON_DAYS} days at the invoices' own terms.`
+          : `${dueWithinHorizon.length} invoice(s) fall due within ${UPCOMING_PAYMENTS_HORIZON_DAYS} days at the invoices' own terms (derived from the invoice date — no Vendor Payments API exists).`,
       // §P2 — receivables/payments drill into Super Admin → Accounting (the real
       // shell view id); no dead `accounting` id.
       onOpen: go('super_admin'),

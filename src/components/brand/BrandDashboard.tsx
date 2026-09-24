@@ -78,6 +78,7 @@ import {
 import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
 import { demoReturns } from '@/data/api';
 import { demoCommerceInvoices, demoCommercePayments } from '@/data/demoStore';
+import { invoiceIsOutstanding } from '@/lib/commerce/invoiceTerms';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import { assertBrandScope } from '@/lib/auth/rbac';
 import { Alert, Button, DataTable, EmptyState, StatusBadge } from '@/components/ui';
@@ -204,15 +205,20 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
    * §P2 — the brand's own issued-and-unpaid invoices (canonical commerce ledger,
    * the same rows the work layer derives its `invoice_due` items from). The
    * Overview OBSERVES the position; the action is owned by the work list.
+   *
+   * §P7 — REPOINTED to the ONE owner. The rule used to be re-implemented here
+   * (`i.status !== 'paid' && !payments.some(...)`), which is exactly the kind of
+   * second copy §03 forbids: the receivable predicate is now
+   * `invoiceIsOutstanding` in `src/lib/commerce/invoiceTerms.ts`, so the brand's
+   * observe tile, the admin Overview, the founder console and the work layer can
+   * never disagree — and a CANCELLED invoice stops being a receivable everywhere
+   * at once (`AV-022`).
    */
   const brandUnpaidInvoices = useMemo(
     () =>
       tenantId
         ? demoCommerceInvoices.filter(
-            (i) =>
-              i.brandId === tenantId &&
-              i.status !== 'paid' &&
-              !demoCommercePayments.some((p) => p.invoiceId === i.id)
+            (i) => i.brandId === tenantId && invoiceIsOutstanding(i, demoCommercePayments)
           )
         : [],
     [tenantId]

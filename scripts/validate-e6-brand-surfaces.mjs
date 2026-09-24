@@ -785,6 +785,33 @@ const P6_PO_DOCUMENT_PACK_SCOPE = new Set([
   'PRODUCTION_READINESS.md',
 ]);
 
+const P7_ADMIN_INVOICING_SCOPE = new Set([
+  'src/lib/commerce/invoiceTerms.ts',      // NEW — terms 14/30/60 + the ONE due-date owner
+  'src/lib/commerce/invoiceRegistry.ts',   // NEW — the ONE invoice-number registry (AV-022)
+  'src/lib/commerce/receivingStatus.ts',   // NEW — receiving status + the receipt gate (AV-018)
+  'src/lib/commerce/commerceLifecycle.ts', // issue/cancel on the ONE write path
+  'src/lib/dates.ts',                      // NEW — the pure date helpers (one declaration)
+  'src/types.ts',                          // PROTECTED prefix — declared
+  'src/data/demoStore.ts',                 // the append-only registry ledger + the receipt timestamp
+  'src/lib/work/workStore.ts',             // invoice_due repointed to the ONE owner
+  'src/lib/commandCentre/controlCentre.ts',
+  'src/lib/ai/founderOpsAi.ts',
+  'src/lib/automation/registry.ts',
+  'src/components/admin/AdminDashboard.tsx',
+  'src/components/admin/CommerceOperationsPanel.tsx',
+  'src/components/admin/AccountingPanel.tsx',
+  'src/components/brand/BrandDashboard.tsx',  // receivable predicate repointed to the ONE owner
+  'src/lib/simulation/investorDemo.ts',       // the registry participates in the deterministic reset
+  'e2e/invoicing.spec.ts',
+  'scripts/validate-p7-invoicing.mjs',
+  'scripts/validate-work-layer.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+  'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
+  'PRODUCTION_READINESS.md',
+]);
+
 try {
   /* ── modules under test (the EXISTING architecture) ── */
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
@@ -865,10 +892,23 @@ try {
   test('B1 the brand dashboard reads the canonical E4 commerce stores',
     /from '@\/data\/demoStore'/.test(DASH) &&
     /demoCommerceInvoices/.test(DASH) && /demoCommercePayments/.test(DASH));
+  /**
+   * §P7 — REPOINTED (not weakened). B2's contract is unchanged: the brand
+   * Overview OBSERVES the issued-unpaid canonical position and the work layer owns
+   * the ACTION. What changed is WHERE the receivable predicate lives: it used to be
+   * re-implemented in the brand dashboard (`i.status !== 'paid'`) and in the work
+   * layer (`getCommercePaymentsForInvoice`). It is now declared ONCE as
+   * `invoiceIsOutstanding` in `src/lib/commerce/invoiceTerms.ts`, and every reader
+   * imports it — so the gate now points at the canonical owner and additionally
+   * requires that no second copy is re-derived. A cancelled invoice is excluded by
+   * the same predicate (`AV-022`).
+   */
   test('B2 it derives issued-unpaid simulated invoices canonically (observe), and the work layer owns the action',
-    /i\.status !== 'paid'/.test(code(DASH)) && /invoiceId === i\.id/.test(code(DASH)) &&
-    /demoCommerceInvoices/.test(WORK) && /getCommercePaymentsForInvoice/.test(WORK) &&
-    /'invoice_due'/.test(WORK));
+    /invoiceIsOutstanding/.test(code(DASH)) && /demoCommerceInvoices/.test(code(DASH)) &&
+    /demoCommerceInvoices/.test(WORK) && /invoiceIsOutstanding/.test(WORK) &&
+    /getAllCommercePayments/.test(WORK) &&
+    /'invoice_due'/.test(WORK) &&
+    /export function invoiceIsOutstanding/.test(readSrc('src/lib/commerce/invoiceTerms.ts')));
   test('B3 delivered-awaiting-invoice is still derived from the canonical PO list (NotificationCenter)',
     /p\.status === 'delivered' && !invoicedPoIds\.has\(p\.id\)/.test(code(NOTIF)) &&
     /invoicedPoIds/.test(NOTIF));
@@ -1213,7 +1253,9 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §P6 — the PO-document-pack phase's declared surface (see above). */
           P6_PO_DOCUMENT_PACK_SCOPE.has(p) ||
-          [...P6_PO_DOCUMENT_PACK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...P6_PO_DOCUMENT_PACK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P7 — the admin-invoicing phase's declared surface (see above). */
+          P7_ADMIN_INVOICING_SCOPE.has(p)
         )
     );
   test(

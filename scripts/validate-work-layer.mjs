@@ -27,6 +27,8 @@ const work = await server.ssrLoadModule('/src/lib/work/workStore.ts');
 const cal = await server.ssrLoadModule('/src/lib/work/calendar.ts');
 const feed = await server.ssrLoadModule('/src/lib/events/eventFeed.ts');
 const store = await server.ssrLoadModule('/src/data/demoStore.ts');
+/** §P7 — the CANONICAL owner of the invoice terms + the derived due date. */
+const invoiceTerms = await server.ssrLoadModule('/src/lib/commerce/invoiceTerms.ts');
 
 /* ── 1. Source hygiene: no nondeterminism in the work layer ────────────────── */
 for (const f of [
@@ -360,6 +362,8 @@ const invoice = {
   lines: [{ description: 'validator line', amountGbp: 1000 }],
   subtotalGbp: 1000,
   status: 'issued',
+  /** §P7 — the invoice carries its own terms; the due date derives from THESE. */
+  termDays: 30,
   currency: 'GBP',
   mode: 'simulation',
   simulated: true,
@@ -372,9 +376,22 @@ test(
   'invoice_due work id is deterministic and derived from the canonical invoice id',
   invoiceWork[0].id === `work-invoice_due-${invoice.id}`
 );
+/**
+ * §P7 — REPOINTED (not weakened). The old contract asserted the deadline against
+ * the single global `INVOICE_TERM_DAYS`; the current canonical contract is that
+ * the deadline is the invoice's OWN derived due date
+ * (`src/lib/commerce/invoiceTerms.ts`), which for an undeclared term falls back
+ * to the declared default. Asserting BOTH keeps the old guarantee AND the new one.
+ */
 test(
-  'invoice_due work carries the declared payment-terms deadline',
-  invoiceWork[0].dueDate === work.addDays('2026-09-01', work.INVOICE_TERM_DAYS)
+  'invoice_due work carries the invoice’s own derived payment-terms deadline',
+  invoiceWork[0].dueDate === invoiceTerms.invoiceDueDate(invoice) &&
+    invoiceWork[0].dueDate === work.addDays('2026-09-01', invoiceTerms.INVOICE_TERM_DAYS)
+);
+test(
+  '§P7: a 14-day invoice derives an EARLIER deadline than a 30-day one (per-invoice terms)',
+  invoiceTerms.invoiceDueDate({ issuedAt: invoice.issuedAt, termDays: 14 }) <
+    invoiceTerms.invoiceDueDate({ issuedAt: invoice.issuedAt, termDays: 30 })
 );
 test('invoice_due work points at the invoice entity', invoiceWork[0].entity.type === 'invoice');
 test('invoice_due work is tenant-scoped to the invoice’s brand', invoiceWork[0].tenantId === invoiceBrand);

@@ -4759,18 +4759,18 @@
    "id": "cleanup-p6-po-document-pack",
    "description": "P6: the PO document pack, automatic on acceptance - SSCC carton labels, carrier label + waybill, packing list/delivery note, ASN sheet, customs documents for international lanes; notification + nav badge; \"Documents for this PO\" in the Hub; the collect lane shows the documented status chain (request -> carrier assigned -> ARN -> pickup).",
    "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
-   "status": "not_started",
-   "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
-   "last_verified": "2026-09-22",
+   "status": "built_and_tested",
+   "evidence": "DONE 2026-09-23 (session 19, commit 6f22d52) - the ONE pack owner src/lib/documents/poDocumentPack.ts + the SSCC-18 owner src/lib/documents/sscc.ts (published GS1 mod-10 check digit, deterministic serial, declared UNASSIGNED placeholder prefix) + src/lib/shipping/collectChain.ts (the documented request -> carrier assigned -> ARN -> pickup chain; no ARN is ever fabricated) + the Hub surface PoDocumentPackPanel.tsx + the po_documents_ready event. scripts/validate-po-documents.mjs PASS (50 assertions, 0 network calls) and proved able to fail; e2e/po-documents.spec.ts 6 passed; deployed + live-verified 44/44 checks. NOTE: this row was left at \"not_started\" by the P6 state commit and is reconciled here (2026-09-23) as part of the P7 task - the project-state contract requires the five sources to agree.",
+   "last_verified": "2026-09-23",
    "superseded_by": null
   },
   {
    "id": "cleanup-p7-admin-invoicing-receiving",
    "description": "P7: admin invoicing - invoice per PO AFTER receipt; receivingStatus sync; invoice-number registry (unique, never reused - AV-022); payment terms 14/30/60 selected per invoice; derived upcoming payments; receivables = issued-and-unpaid.",
    "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
-   "status": "not_started",
-   "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
-   "last_verified": "2026-09-22",
+   "status": "built_and_tested",
+   "evidence": "DONE 2026-09-23 (session 20) - THREE new ONE-owner modules: src/lib/commerce/invoiceTerms.ts (terms 14/30/60 + the single due-date / receivables derivation, INVOICE_TERM_DAYS moved out of workStore which now re-exports it), src/lib/commerce/invoiceRegistry.ts (unique + never-reused numbers, zero-value refusal, cancel + re-issue under a NEW Invoice ID), src/lib/commerce/receivingStatus.ts (derived receiving status + the fail-closed receipt gate, AV-018); src/lib/dates.ts (pure date helpers, one declaration); src/data/demoStore.ts gains the append-only demoInvoiceNumberRegistry + the receipt timestamp; commerceLifecycle.issueCommerceInvoice enforces the receipt gate / declared terms / zero-value rule and takes its number from the registry, plus NEW cancelCommerceInvoice (reason required, attributed, void number, settled invoice refused); five readers repointed to the ONE owner with the old contract recorded inline. scripts/validate-p7-invoicing.mjs PASS (115 assertions, 0 network calls), proved able to fail (FAIL 5 when the ordinal arithmetic is broken); e2e/invoicing.spec.ts 3 passed; validate-work-layer repointed to the canonical owner and PASS; the E6/E7 scope guards gained the declared P7 surface with their contracts unchanged.",
+   "last_verified": "2026-09-23",
    "superseded_by": null
   },
   {

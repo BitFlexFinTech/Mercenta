@@ -378,7 +378,7 @@ Read a row together with its domain contract block. Together they carry all 26 d
 
 | ID | Feature / function | Function | Surface | Status | Evidence |
 |---|---|---|---|---|---|
-| `D11-01` | Invoice issuance | Issue an invoice against a fulfilled PO; raising it creates an `invoice_due` work item | brand / admin | **VERIFIED** | `e2e/deterministic-journey.spec.ts`, `e2e/commerce-operational-simulation.spec.ts` |
+| `D11-01` | Invoice issuance | Issue an invoice against a fulfilled PO; raising it creates an `invoice_due` work item. **§P7 (2026-09-23): gated on RECEIPT (`AV-018`), refused when zero-value, and the terms are chosen PER INVOICE (`14/30/60`)** | brand / admin | **VERIFIED** | `e2e/deterministic-journey.spec.ts`, `e2e/commerce-operational-simulation.spec.ts`, **`e2e/invoicing.spec.ts`**, `scripts/validate-p7-invoicing.mjs` |
 | `D11-02` | Payment settlement (simulated) | `recordCommercePayment` → `CommercePayment` (`settled`, `simulated_bank_transfer`) | domain | **VERIFIED** | `e2e/commerce-operational-simulation.spec.ts` |
 | `D11-03` | Reconciliation | `financialReconciliation.ts` — per-payment / per-PO reconciliation, unresolved deductions | admin `accounting` | **VERIFIED** | `e2e/xero.spec.ts`, `e2e/deductions.spec.ts` |
 | `D11-04` | Xero accounting seam | `selectAccountingClient` + `src/services/xero/**` — Xero is the accounting/reconciliation layer, **NOT the bank** | admin `accounting` | **VERIFIED** | `e2e/xero.spec.ts` |
@@ -390,9 +390,10 @@ Read a row together with its domain contract block. Together they carry all 26 d
 | `D11-10` | Stripe | Subscription billing only — explicitly refused as a payout rail | admin `billing` | **VERIFIED** | `e2e/billing.spec.ts` |
 | `D11-11` | Commercial-model arithmetic | `computeCommissionModel` (Model A) and `computeBuyResellModel` (Model B) in `src/lib/finance/commercialModel.ts`; Model B's gross spread is never called the net margin | both | **VERIFIED** | `e2e/commercial-model.spec.ts` |
 | `D11-12` | Amazon remittance/payment APIs | Payment/remittance API modelling | seam | **EVIDENCE-BLOCKED** | No verified Amazon payment/remittance API evidence — do not claim one |
+| `D11-13` | **Invoice-number registry + terms + receipt gate (§P7, 2026-09-23)** | `invoiceRegistry.ts` — numbers UNIQUE and NEVER reused, a voided number stays consumed, **zero-value FAILS**, cancel + re-issue under a NEW Invoice ID (`AV-022`); `invoiceTerms.ts` — `14/30/60` **per invoice** with the due date DERIVED from them, receivables = issued-and-unpaid (`S14`: no Vendor Payments API exists, so a payment date is derived and labelled); `receivingStatus.ts` — the receiving status DERIVED from the received quantities + the fail-closed receipt gate (`AV-018`). Issuing/cancelling contacts **no** provider; `submitInvoices` remains **P12**. | admin / domain | **VERIFIED** | `scripts/validate-p7-invoicing.mjs` (115 assertions PASS, proved able to fail), `e2e/invoicing.spec.ts` (3 passed) |
 
 **Domain contract — D11**
-- **Module:** `src/config/payouts.ts`, `src/config/vat.ts`, `src/config/commercial.ts`, `src/lib/finance/**`, `src/services/xero/**`, `src/data/demoStore.ts` (commerce records).
+- **Module:** `src/config/payouts.ts`, `src/config/vat.ts`, `src/config/commercial.ts`, `src/lib/finance/**`, `src/services/xero/**`, `src/data/demoStore.ts` (commerce records). **§P7 adds the invoice owners:** `src/lib/commerce/invoiceTerms.ts` (terms + the ONE due-date / receivables derivation), `src/lib/commerce/invoiceRegistry.ts` (the number registry, `AV-022`) and `src/lib/commerce/receivingStatus.ts` (the receipt status + gate, `AV-018`).
 - **Money chain (canonical):** PO → invoice → payment → reconciliation → Xero → payout proposal → **HUMAN APPROVAL** → rail.
 - **Tenant boundary:** `listReconciliationsForBrand`, `listPayoutsForBrand`, `getDestinationForBrand` are tenant-scoped; operator read models are RBAC-gated at the caller.
 - **Founder intervention:** payout approval is a mandatory human gate; an account change must be authorised and audited.

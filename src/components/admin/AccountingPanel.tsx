@@ -16,7 +16,8 @@ import {
   getReconciliationForPo,
   setDestinationStatus,
 } from '@/lib/finance/financialReconciliation';
-import { demoPurchaseOrders } from '@/data/demoStore';
+import { demoPurchaseOrders, getAllCommerceInvoices, getAllCommercePayments, getInvoiceNumberLedger } from '@/data/demoStore';
+import { PAYMENT_DERIVATION_BASIS, summariseInvoiceLedger } from '@/lib/commerce/invoiceTerms';
 import { useApp } from '@/context/GlobalStateContext';
 import { supabase } from '@/lib/supabase';
 import { isXeroDemoMode } from '@/services/xero';
@@ -251,6 +252,18 @@ export function AccountingPanel() {
   const today = demoToday();
   const overdueFinanceWork = financeWork.filter((w) => w.dueDate !== null && w.dueDate < today);
 
+  /**
+   * §P7 — the invoice-number REGISTRY ledger and the ONE receivables summary.
+   * The ledger is append-only (`AV-022`): a voided number stays visible so the
+   * "never reused" rule is auditable from this surface, not just from the code.
+   */
+  const invoiceLedgerRows = getInvoiceNumberLedger();
+  const invoiceSummary = summariseInvoiceLedger(
+    getAllCommerceInvoices(),
+    getAllCommercePayments(),
+    new Date().toISOString().slice(0, 10)
+  );
+
   const [summaryDetail, setSummaryDetail] = useState(false);
 
   const financeMetrics: MetricTileData[] = [
@@ -413,6 +426,46 @@ export function AccountingPanel() {
                 Payoneer → settlement. Xero is the accounting layer, never the bank; Stripe bills the
                 subscription only and is refused as a payout rail.
               </p>
+            </ContextPanel>
+            {/* §P7 — the retail-channel invoice-number registry (`AV-022`). */}
+            <ContextPanel title="Retail-channel invoice numbers">
+              <div data-testid="accounting-invoice-registry">
+                <RecordFieldList
+                  fields={[
+                    { label: 'Numbers allocated', value: String(invoiceLedgerRows.length) },
+                    {
+                      label: 'Void (cancelled)',
+                      value: String(invoiceLedgerRows.filter((r) => r.voidedAt).length),
+                    },
+                    { label: 'Receivables', value: `£${invoiceSummary.receivablesGbp.toFixed(2)}` },
+                    { label: 'Upcoming (30 days)', value: `£${invoiceSummary.upcomingGbp.toFixed(2)}` },
+                  ]}
+                />
+                <ul className="mt-2 space-y-1.5">
+                  {invoiceLedgerRows
+                    .slice(-5)
+                    .reverse()
+                    .map((r) => (
+                      <li key={r.number} className="text-ds-label leading-snug text-zinc-400">
+                        <span className="font-mono text-zinc-200">{r.number}</span>
+                        {' · '}
+                        {r.voidedAt ? 'void — never reusable' : 'in force'}
+                      </li>
+                    ))}
+                  {invoiceLedgerRows.length === 0 && (
+                    <li className="text-ds-label text-zinc-500">
+                      No invoice number has been allocated yet.
+                    </li>
+                  )}
+                </ul>
+                <p className="mt-2 text-ds-label leading-snug text-zinc-400">
+                  Numbers are unique and are never reused; a zero-value invoice fails; a wrong invoice
+                  is cancelled and re-sent under a NEW Invoice ID.
+                </p>
+                <p className="mt-1 text-ds-label leading-snug text-zinc-500">
+                  Receivables and upcoming payments are {PAYMENT_DERIVATION_BASIS}.
+                </p>
+              </div>
             </ContextPanel>
           </>
         }

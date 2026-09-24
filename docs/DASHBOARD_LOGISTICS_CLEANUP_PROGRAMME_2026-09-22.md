@@ -1,6 +1,6 @@
 # DASHBOARD + LOGISTICS CLEANUP PROGRAMME (2026-09-22) — AGREED PLAN, DECISIONS AND RESUME POINT
 
-**Status: IN PROGRESS — P0, P0.4, P1, **P2**, **P3**, **P4**, **P5** and **P6** are DONE and committed; P7–P12 remain.**
+**Status: IN PROGRESS — P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6** and **P7** are DONE and committed; P8–P12 remain.**
 **Checkpoint: branch `redesign/foundation`; P2's checkpoint commit is recorded in
 `PROJECT_STATUS.md` heading 7 and `HANDOFF.md`; P3's and P4's are recorded in the `CURRENT RESUME STATE` block.
 `git status --porcelain` EMPTY.**
@@ -78,7 +78,7 @@ documents → ship on time. Everything else is Mercenta's.
 | **P4** | ✅ **DONE** (2026-09-23, session 16 — see §8) | **Proxy-model corrections**: the brand does its 3 jobs only; **MERCENTA** raises the routing/shipment request and files the ASN (the brand sees status); ack writes an **instruction-to-Mercenta** record; `submitAcknowledgement` behind the SP-API seam (mock-first, Mercenta-side) | **AV-040** (partially), wrong direction, truthfulness |
 | **P5** | ✅ **DONE** (2026-09-23, session 17 — see §9) | **Remove the Mercenta Hub completely** → the destination is **the FC declared on each PO** (`PurchaseOrder.shipToParty`, the channel's `shipToPartyId`, resolved once by `src/config/destinationFc.ts`); the `mercenta_hub` stage/status, the hub coordinate, the hub node kind and the Hero's hub node are **deleted**; the Hero/map arrival node **is** that FC; copy, validators and specs repointed with the old contract recorded inline | **D09-13 / AV-026 / AV-027** |
 | **P6** | ✅ **DONE** (2026-09-23, session 19 — see §10) | **PO document pack** (auto on acceptance): **SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes**; notification + nav badge; Hub "Documents for this PO"; collect lane shows the documented status chain (request → carrier assigned → ARN → pickup) | decisions 6/9; `D10-10` |
-| **P7** | | **Admin invoicing**: invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60** terms per invoice; derived **upcoming payments**; receivables = issued-and-unpaid | decision 2; **AV-022** |
+| **P7** | ✅ **DONE** (2026-09-23, session 20 — see §11) | **Admin invoicing**: an invoice per PO **after receipt** (the receipt gate, `AV-018`); the **invoice-number registry** (unique, never reused, zero-value fails, cancel + re-issue under a NEW Invoice ID — **`AV-022`**); **14/30/60 terms chosen PER INVOICE** with the due date DERIVED from them; **upcoming payments**; receivables = **issued-and-unpaid** | decision 2; **AV-022** |
 | **P8** | | **Inventory** linked to the catalogue + **ASIN** field (rule = decision 10) | decision 5 |
 | **P9** | | **Remove the 3PL carrier surface** (decision 4) incl. the demo environment; repoint the affected specs/scripts | decision 4; matrix `D01-07`/`D04-18`/`D10-13` |
 | **P10** | | **Logistics Hub completion**: provider configuration + the PO documents; **consolidation recorded as documented-but-deferred** (model supports 1..n POs) | decision 11; `D10-10` |
@@ -101,12 +101,12 @@ node (P5).
 
 Read `PROJECT_STATUS.md` (current platform position), this document, then `git log`.
 
-- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6** (committed; the P2 checkpoint hash is recorded in
-  `PROJECT_STATUS.md` §7, and P3/P4/P5/P6's in the `CURRENT RESUME STATE` block).
-- **Next:** **P7 — admin invoicing**: invoice per PO **after receipt**; `receivingStatus` sync; the
-  invoice-number registry; **14/30/60** terms per invoice; derived **upcoming payments**;
-  receivables = issued-and-unpaid (decision 2; **AV-022**).
-- **Then:** P7 → P12 in order.
+- **Done:** P0, P0.4, P1, **P2**, **P3**, **P4**, **P5**, **P6**, **P7** (committed; the P2 checkpoint hash is recorded in
+  `PROJECT_STATUS.md` §7, and P3/P4/P5/P6/P7's in the `CURRENT RESUME STATE` block).
+- **Next:** **P8 — inventory linked to the brand's catalogue with an ASIN field** (brand-entered inside Mercenta,
+  never an Amazon login; a clearly-simulated `SIM-ASIN-…` placeholder until the channel returns a real identifier —
+  see `PRODUCTION_READINESS.md`).
+- **Then:** P8 → P12 in order.
 - **Deployment:** executed at the close of each product phase. P3, P4 and P5 were deployed and live-verified; the full
   three-way confirmation is re-run at the end of the programme.
 
@@ -466,3 +466,107 @@ platform being able to produce a single one of them:
   in `PRODUCTION_READINESS.md`.
 - **The carrier label and waybill stay the existing printable templates** until a carrier account is live; the pack
   reports them as not ready until the carrier booking exists rather than printing a fake.
+
+---
+
+## 11. P7 — WHAT WAS BUILT, VERIFIED AND HOW (so P8+ does not have to re-derive it)
+
+### What was missing
+
+The platform could issue a "simulated invoice" — one row, keyed by the PO, with a number literally built as
+`SIM-INV-<poNumber>` — and four separate screens each re-derived a due date as `invoice date + INVOICE_TERM_DAYS`, a
+single global constant. The channel's documented invoicing rules were therefore **not modelled at all**:
+
+1. **Numbers were not unique-by-rule and could be reused.** There was no registry, so `AV-022`'s first rule
+   (*invoice numbers unique and never reused*) had no representation. The reason the rule exists — *a wrong invoice is
+   cancelled and re-sent under a NEW Invoice ID* — also had no path: an issued invoice could not be cancelled, and
+   re-issuing returned the same row.
+2. **A zero-value invoice was issued silently.** `AV-022` says it fails.
+3. **Terms were global, not per invoice.** Programme decision 2 fixes **14 / 30 / 60 chosen per invoice**; the code had
+   one `INVOICE_TERM_DAYS = 30` in the work layer, imported by the admin Overview, the founder console, the automation
+   registry and the founder AI context — four independent copies of the same arithmetic (a §03 violation).
+4. **The receiving status was not a modelled concept.** `AV-018` / `S5` document the channel's `receivingStatus` (the
+   FC's received status **and** received quantity); the platform had per-line `receivedQty` and a PO status, but no
+   single owner and no gate tying "invoice" to "received".
+
+### What was built
+
+- **`src/lib/commerce/invoiceTerms.ts` (NEW) — the ONE owner of the terms and of every figure derived from them.**
+  `INVOICE_TERM_CHOICES = [14, 30, 60]` (declared once in `src/types.ts`, like `PO_REJECTION_CODES`),
+  `INVOICE_TERM_DAYS = 30` (the declared default), `isInvoiceTermDays` (fail closed), `invoiceTermDays(invoice)` (the
+  invoice's OWN terms, falling back to the declared default for a legacy row), `invoiceDueDate`,
+  `invoiceIsOutstanding` (**receivables = issued-and-unpaid**), `invoiceIsOverdue`, `invoiceIsUpcoming` and
+  `summariseInvoiceLedger` (receivables / overdue / upcoming in ONE implementation). `PAYMENT_DERIVATION_BASIS` states
+  the honest basis (register **S14**: no Vendor Payments API exists, so a payment date is *derived* and labelled).
+- **`src/lib/commerce/invoiceRegistry.ts` (NEW) — the ONE owner of invoice numbers (`AV-022`).** A number is derived
+  from the PO number plus the allocation ordinal recorded in the canonical ledger — the first is `SIM-INV-<poNumber>`
+  (the established shape, so nothing downstream changed), a re-issue after a cancellation is `SIM-INV-<poNumber>-R2`.
+  `nextInvoiceNumber` never returns a consumed number; `invoiceNumberIsConsumed` reports a **voided** number as still
+  consumed; `invoiceAmountIsValid` implements the zero-value refusal; `INVOICE_NUMBER_RULES` states the four documented
+  rules where the numbers are handled.
+- **`src/lib/commerce/receivingStatus.ts` (NEW) — the ONE owner of the receiving status and the receipt gate
+  (`AV-018`).** The status is **DERIVED** from the per-line quantities the receiving step logs (never stored — a stored
+  copy could drift from the quantities it describes, the §P6 rule), with `summariseReceiving` giving
+  ordered/confirmed/received/shortfall units. `invoiceReceiptGate` is the single "invoice only AFTER receipt" rule and
+  it **fails closed**, naming the register it rests on. A partial receipt may be invoiced (the invoice bills the
+  quantity that arrived); an unreceived PO may not.
+- **`src/data/demoStore.ts`** — `demoInvoiceNumberRegistry`, the **append-only** ledger
+  (`recordInvoiceNumberAllocation` is idempotent on the number; `voidInvoiceNumberAllocation` writes void evidence and
+  never frees the number), `setPurchaseOrderReceivedAt`, `getAllCommerceInvoices` / `getAllCommercePayments`, and
+  `getCommerceInvoiceForPo` **repointed** to return the invoice still IN FORCE (a cancelled row no longer blocks a
+  correction).
+- **`src/lib/commerce/commerceLifecycle.ts`** — `issueCommerceInvoice(poId, actor, { termDays })` now enforces, in
+  order: the delivered-PO check (unchanged), the **receipt gate**, the **term declaration**, and the **zero-value
+  refusal**; it takes its number from the registry, records the allocation in the SAME step, carries `termDays`, and
+  links the `AV-022` re-issue chain both ways (`replacesInvoiceId` / `replacedByInvoiceId`). NEW
+  **`cancelCommerceInvoice(invoiceId, actor, reason)`**: the reason is REQUIRED, the action is attributed and audited,
+  the number is voided for ever, and a **settled** invoice is refused (money has moved — the ledger corrects it).
+  `receiveCommercePurchaseOrder` now records the receipt timestamp and reports the derived receiving status.
+- **`src/lib/dates.ts` (NEW)** — `addDays` / `daysBetween` moved out of `workStore` (the invoice-terms owner needs them
+  and importing the work layer back would be a cycle). The work layer **re-exports the same names**, so every consumer
+  is unchanged and there is still exactly ONE implementation.
+- **Five readers repointed** to the ONE owner, each with the old contract recorded in an inline `§P7 — REPOINTED`
+  comment: `workStore` (the `invoice_due` deadline is now the invoice's own derived due date, and a cancelled invoice
+  is never receivable), `AdminDashboard` (receivables + upcoming payments from `summariseInvoiceLedger`),
+  `controlCentre`, `founderOpsAi` and `automation/registry` (`invoiceIsOverdue`).
+- **The admin surfaces.** `CommerceOperationsPanel` gains a **per-PO 14/30/60 selector** (disabled once a number is
+  allocated), the **receiving status** badge, the invoice's **own terms + derived due date**, the `AV-022` rule list,
+  and the **cancel + reason** path; `AccountingPanel` gains the **invoice-number registry ledger** (allocated / void /
+  receivables / upcoming) with the derivation basis stated.
+
+
+### What is verified (session 20)
+
+- **`scripts/validate-p7-invoicing.mjs` (NEW)** → **PASS (115 assertions, 0 network calls)**, executing the REAL modules
+  through the project's own module graph. It proves the terms and their refusal, the per-invoice due date, the
+  receivable predicate, the registry's uniqueness / never-reuse / append-only / idempotence, the zero-value refusal, the
+  derived receiving status and the fail-closed gate, and then drives the real DOMAIN: an unreceived PO refused with
+  `RECEIPT_REQUIRED` (recording nothing, consuming no number), a 60-day invoice issued and idempotent, an undeclared
+  term refused, a zero-value invoice refused, cancel-without-reason refused, cancellation voiding the number, the
+  correction issued as `…-R2` with the chain linked both ways, a settled invoice refused cancellation, RBAC and tenant
+  isolation refused, and the receiving path driving a full and a partial receipt. It also asserts ONE owner per value
+  across 14 source files and that **no consumer re-derives a due date from the global constant**.
+- **Proved able to fail:** mutating the registry's ordinal arithmetic to a constant → **FAIL (5 failures)**; restored →
+  PASS.
+- **`e2e/invoicing.spec.ts` (NEW)** → **3 passed** in real Chromium (terms chosen per invoice + derived due date +
+  receiving status; cancel-with-reason then re-issue as `…-R2`; the receipt gate and the registry ledger in the live
+  build on the Accounting surface). **This spec found and fixed a real defect in the new code:** `Badge` does not
+  forward `data-*` props, so the test hook had to sit on a native element — the validator now guards that class.
+- **`scripts/validate-work-layer.mjs`** → **PASS**, with its due-date assertion **repointed** to the canonical owner
+  (plus a new assertion that a 14-day invoice is due earlier than a 30-day one) — the old guarantee is kept, not
+  weakened.
+- The **E6/E7 change-scope guards** gained the declared P7 scope with their contracts unchanged.
+
+### Honest limits
+
+- **The receiving status is established by Mercenta's OWN receiving step** in this environment (the channel's receiving
+  system is simulated). Reading the channel's `receivingStatus` directly — `getPurchaseOrdersStatus` — is **P12's**
+  declared scope; the platform never claims a live channel reading.
+- **No part of this is a live submission.** Issuing or cancelling an invoice contacts no accounting provider; the
+  invoice-number rules are modelled and enforced, and `INVOICE_NUMBER_RULES` states the documented activation
+  precondition that **API invoicing requires parallel testing with the channel's accounts-payable team** before
+  payments process (register **S11**) — a business/activation step, not a code change, recorded in
+  `PRODUCTION_READINESS.md`.
+- **The invoice ledger is in-memory in this environment** (the D4 persistence port is honest about it: memory by
+  default, Supabase when credentials exist). Nothing is claimed as durable here.
+

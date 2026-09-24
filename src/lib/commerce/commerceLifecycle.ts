@@ -41,7 +41,9 @@ import type {
   Deduction,
   DeductionType,
   DisputeOutcome,
+  InvoiceTermDays,
   PurchaseOrder,
+  ReceivingStatus,
 } from '@/types';
 import type { AcquisitionActor } from '@/lib/acquisition/outreachLifecycle';
 import { evaluateCatalogReadiness } from '@/lib/catalog/catalogLifecycle';
@@ -57,6 +59,20 @@ import { findOrCreateTicketForBrand } from '@/lib/helpdesk/ticketStore';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 import { getChannelInstructionForPO, markChannelInstructionActioned } from './channelInstructions';
 import { beginProxyProcessing } from './proxyProcessor';
+import {
+  INVOICE_TERM_CHOICES,
+  INVOICE_TERM_DAYS,
+  invoiceDueDate,
+  isInvoiceTermDays,
+} from './invoiceTerms';
+import {
+  invoiceAmountIsValid,
+  invoiceCannotBeCancelled,
+  invoiceIdForOrdinal,
+  nextInvoiceNumber,
+} from './invoiceRegistry';
+import { invoiceReceiptGate, RECEIVING_STATUS_LABELS, summariseReceiving } from './receivingStatus';
+import type { ReceivingSummary } from './receivingStatus';
 
 /**
  * The actor performing an operational commerce action. Extends the acquisition
@@ -540,6 +556,10 @@ export function receiveCommercePurchaseOrder(
   po: PurchaseOrder;
   shortfalls: { sku: string; confirmedQty: number; receivedQty: number }[];
   deductions: Deduction[];
+  /** §P7 — the receiving status the channel's concept resolves to (`AV-018`). */
+  receivingStatus: ReceivingStatus;
+  /** §P7 — the full receipt picture (ordered / confirmed / received / short). */
+  receiving: ReceivingSummary;
 }> {
   if (!actor.canMutate) return forbidden();
   const po = fetchPurchaseOrder(poId);
@@ -564,14 +584,22 @@ export function receiveCommercePurchaseOrder(
     store.setPurchaseOrderStatus(poId, 'delivered') ?? reconciliation.po
   );
   mirrorPo(delivered);
+  /**
+   * §P7 — the receipt is recorded on the PO. The STATUS is derived from the line
+   * quantities (`receivingStatus.ts`), so only the timestamp is written here; the
+   * invoice gate reads the derived status, never a stale copy.
+   */
+  const receivedAt = new Date().toISOString();
+  store.setPurchaseOrderReceivedAt(poId, receivedAt);
+  const receiving = summariseReceiving(delivered);
   recordStep({
     brandId: delivered.brandId,
     type: 'po_received',
     status: delivered.status,
     detail:
       reconciliation.shortfalls.length === 0
-        ? `SIMULATED receiving complete for ${delivered.poNumber} — received matches acknowledged`
-        : `SIMULATED receiving logged ${reconciliation.shortfalls.length} shortfall line(s) on ${delivered.poNumber}`,
+        ? `SIMULATED receiving complete for ${delivered.poNumber} — received matches acknowledged · receiving status ${RECEIVING_STATUS_LABELS[receiving.status]} (${receiving.receivedUnits}/${receiving.confirmedUnits} units)`
+        : `SIMULATED receiving logged ${reconciliation.shortfalls.length} shortfall line(s) on ${delivered.poNumber} · receiving status ${RECEIVING_STATUS_LABELS[receiving.status]} (${receiving.receivedUnits}/${receiving.confirmedUnits} units)`,
     actorId: actor.staffId,
     purchaseOrderId: delivered.id,
   });
@@ -598,6 +626,8 @@ export function receiveCommercePurchaseOrder(
       po: delivered,
       shortfalls: reconciliation.shortfalls,
       deductions: reconciliation.deductionsCreated,
+      receivingStatus: receiving.status,
+      receiving,
     },
   };
 }
@@ -605,16 +635,25 @@ export function receiveCommercePurchaseOrder(
 /* ── 5. SIMULATED INVOICE ────────────────────────────────────────────────── */
 
 /**
- * §Phase E4 — issue the SIMULATED goods invoice for a DELIVERED PO.
+ * §Phase E4, extended by §P7 — issue the SIMULATED goods invoice for a PO that
+ * has been RECEIVED.
  *
- * The invoice is keyed by the PO (`cinv-<brandId>-<poNumber>`) so replaying the
- * step cannot create a second invoice. Commission figures are taken from the
- * canonical PO's own computed fields — no duplicated commission maths, and no
- * Xero/Wise/Stripe call.
+ * §P7 adds the documented channel rules (`AV-022`) to this ONE write path:
+ *  - the PO must have been RECEIVED — the receipt gate lives in
+ *    `src/lib/commerce/receivingStatus.ts` and fails closed (`AV-018`);
+ *  - the number is allocated by the ONE registry and is unique + NEVER reused;
+ *  - a ZERO-VALUE invoice FAILS;
+ *  - the terms (`14 | 30 | 60`) are chosen PER INVOICE and carried on the record,
+ *    so the derived due date is the invoice's own (programme decision 2).
+ *
+ * Idempotent: an ACTIVE invoice for the PO is returned rather than duplicated.
+ * Commission figures are taken from the canonical PO's own computed fields — no
+ * duplicated commission maths, and no Xero/Wise/Stripe call.
  */
 export function issueCommerceInvoice(
   poId: string,
-  actor: CommerceActor
+  actor: CommerceActor,
+  options: { termDays?: InvoiceTermDays } = {}
 ): CommerceResult<CommerceInvoice> {
   if (!actor.canMutate) return forbidden();
   const po = fetchPurchaseOrder(poId);
@@ -622,12 +661,25 @@ export function issueCommerceInvoice(
   if (crossTenant(actor, po.brandId)) return { ok: false, error: CROSS_TENANT };
 
   const existing = store.getCommerceInvoiceForPo(poId);
-  if (existing) return { ok: true, value: existing };
+  if (existing && existing.status !== 'cancelled') return { ok: true, value: existing };
 
   if (po.status !== 'delivered') {
     return {
       ok: false,
       error: `ILLEGAL_TRANSITION — an invoice requires a DELIVERED PO (currently "${po.status}").`,
+    };
+  }
+
+  /* §P7 — the RECEIPT gate: an invoice is raised only AFTER receipt. */
+  const receipt = invoiceReceiptGate(po);
+  if (!receipt.allowed) return { ok: false, error: receipt.reason };
+
+  /* §P7 — terms are chosen PER INVOICE; an undeclared value is REFUSED. */
+  const termDays = options.termDays ?? INVOICE_TERM_DAYS;
+  if (!isInvoiceTermDays(termDays)) {
+    return {
+      ok: false,
+      error: `INVOICE_TERM_RULE — "${String(options.termDays)}" is not a declared term; Mercenta offers ${INVOICE_TERM_CHOICES.join('/')} days on an invoice (programme decision 2).`,
     };
   }
 
@@ -652,21 +704,54 @@ export function issueCommerceInvoice(
       : []),
   ];
 
+  const subtotalGbp = round2(lines.reduce((s, l) => s + l.amountGbp, 0));
+
+  /* §P7 / AV-022 — a ZERO-VALUE invoice FAILS. Never issued, never rounded up. */
+  if (!invoiceAmountIsValid(subtotalGbp)) {
+    return {
+      ok: false,
+      error: `INVOICE_ZERO_VALUE — a zero-value invoice fails validation and was not issued (AV-022). The received quantity on ${po.poNumber} totals GBP 0.00.`,
+    };
+  }
+
+  /* §P7 / AV-022 — the ONE registry allocates a number that is never reused. */
+  const { number, ordinal } = nextInvoiceNumber(store.getInvoiceNumberLedger(), po);
+  const priorInvoices = store.getAllCommerceInvoicesForPo(po.id);
+  const superseded = priorInvoices[priorInvoices.length - 1];
+
   const invoice: CommerceInvoice = {
-    id: `cinv-${po.brandId}-${po.poNumber}`,
+    id: invoiceIdForOrdinal(po.brandId, po.poNumber, ordinal),
     brandId: po.brandId,
     purchaseOrderId: po.id,
     poNumber: po.poNumber,
-    number: `SIM-INV-${po.poNumber}`,
+    number,
     lines,
-    subtotalGbp: round2(lines.reduce((s, l) => s + l.amountGbp, 0)),
+    subtotalGbp,
     status: 'issued',
+    termDays,
     currency: 'GBP',
     mode: SIMULATION,
     simulated: true,
     issuedAt: new Date().toISOString(),
+    replacesInvoiceId: ordinal > 1 ? superseded?.id : undefined,
   };
   store.recordCommerceInvoice(invoice);
+  /* The allocation is recorded in the SAME step as the invoice, so a number can
+     never be handed out without an invoice consuming it. */
+  store.recordInvoiceNumberAllocation({
+    number,
+    purchaseOrderId: po.id,
+    poNumber: po.poNumber,
+    brandId: po.brandId,
+    ordinal,
+    invoiceId: invoice.id,
+    allocatedAt: invoice.issuedAt,
+  });
+  /* `AV-022` re-issue chain: the cancelled invoice points forward to its
+     replacement, so the journal reads as a version history, never as a gap. */
+  if (superseded) {
+    store.updateCommerceInvoice(superseded.id, { replacedByInvoiceId: invoice.id });
+  }
   persistence.write('commerce_invoices', invoice.id, () =>
     getDomainRepository().persistCommerceInvoice(invoice, invoice.brandId)
   );
@@ -674,13 +759,82 @@ export function issueCommerceInvoice(
     brandId: invoice.brandId,
     type: 'invoice_issued',
     status: invoice.status,
-    detail: `SIMULATED invoice ${invoice.number} issued for ${po.poNumber} — GBP ${invoice.subtotalGbp.toFixed(2)}. No accounting provider contacted.`,
+    detail: `SIMULATED invoice ${invoice.number} issued for ${po.poNumber} — GBP ${invoice.subtotalGbp.toFixed(2)} · ${termDays}-day terms (${receipt.reason}) · derived due ${invoiceDueDate(invoice)}. No accounting provider contacted.`,
     actorId: actor.staffId,
     purchaseOrderId: po.id,
     invoiceId: invoice.id,
   });
   return { ok: true, value: invoice };
 }
+
+/* ── 5b. CANCELLING AN ISSUED INVOICE (AV-022) ───────────────────────────── */
+
+/**
+ * §P7 — CANCEL an issued invoice.
+ *
+ * Documented channel rule (`AV-022`, source `S11`): a wrong invoice is cancelled
+ * and re-sent under a **NEW Invoice ID**. That is why invoice numbers are never
+ * reused — cancelling VOIDS the number for ever, and the next
+ * `issueCommerceInvoice` hands out the next ordinal instead.
+ *
+ * Refused (fail closed) when the invoice is not in force: it may not be cancelled
+ * twice, and a SETTLED invoice may not be cancelled at all — money has moved, so
+ * the correction belongs on the ledger (credit / deduction path), never in a
+ * rewrite of an issued record. The reason is REQUIRED, attributed and audited.
+ */
+export function cancelCommerceInvoice(
+  invoiceId: string,
+  actor: CommerceActor,
+  reason: string
+): CommerceResult<CommerceInvoice> {
+  if (!actor.canMutate) return forbidden();
+  const invoice = store.getCommerceInvoice(invoiceId);
+  if (!invoice) return { ok: false, error: NOT_FOUND };
+  if (crossTenant(actor, invoice.brandId)) return { ok: false, error: CROSS_TENANT };
+  if (!reason || !reason.trim()) {
+    return {
+      ok: false,
+      error:
+        'INVOICE_CANCEL_REASON_REQUIRED — a cancellation must state why (AV-022); it is attributed and audited.',
+    };
+  }
+  if (invoiceCannotBeCancelled(invoice)) {
+    return {
+      ok: false,
+      error: `INVOICE_NOT_CANCELLABLE — only an ISSUED invoice can be cancelled (this one is "${invoice.status}").`,
+    };
+  }
+  if (store.getCommercePaymentsForInvoice(invoice.id).length > 0) {
+    return {
+      ok: false,
+      error: `INVOICE_NOT_CANCELLABLE — invoice ${invoice.number} has a settled payment; a paid invoice is corrected on the ledger, never cancelled.`,
+    };
+  }
+
+  const at = new Date().toISOString();
+  const updated =
+    store.updateCommerceInvoice(invoice.id, {
+      status: 'cancelled',
+      cancelledAt: at,
+      cancellationReason: reason.trim(),
+    }) ?? invoice;
+  /* The NUMBER stays consumed for ever — voided, never freed (`AV-022`). */
+  store.voidInvoiceNumberAllocation(invoice.number, reason.trim(), at);
+  persistence.write('commerce_invoices', updated.id, () =>
+    getDomainRepository().persistCommerceInvoice(updated, updated.brandId)
+  );
+  recordStep({
+    brandId: updated.brandId,
+    type: 'invoice_cancelled',
+    status: updated.status,
+    detail: `SIMULATED invoice ${updated.number} CANCELLED for ${updated.poNumber} — ${reason.trim()}. The number stays consumed for ever; the correction must be issued under a NEW Invoice ID (AV-022).`,
+    actorId: actor.staffId,
+    purchaseOrderId: updated.purchaseOrderId,
+    invoiceId: updated.id,
+  });
+  return { ok: true, value: updated };
+}
+
 
 /* ── 6. SIMULATED PAYMENT ────────────────────────────────────────────────── */
 

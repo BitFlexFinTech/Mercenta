@@ -146,6 +146,7 @@ import {
   demoBrandCommercialModels,
   demoCommerceActivities,
   demoCommerceInvoices,
+  demoInvoiceNumberRegistry,
   demoCommercePayments,
   demoComplianceDocs,
   demoContracts,
@@ -448,6 +449,16 @@ function purgeInvestorDemoRecords(): number {
   purge(demoCommerceActivities);
   purge(demoCommerceInvoices);
   purge(demoCommercePayments);
+  /**
+   * §P7 — the invoice-NUMBER registry is canonical state too. Without this purge
+   * a replay after a reset would find the previous run's allocation still in the
+   * ledger, so the demo tenant's invoice would be allocated the NEXT ordinal
+   * (`SIM-INV-…-R2` instead of `SIM-INV-…`) and the replay digest would differ —
+   * measured: `reset → run` produced b63bd0b4 vs 34e305e7 until this purge was
+   * added. Numbers are never REUSED in production; in a deterministic replay the
+   * whole demo tenant is returned to baseline.
+   */
+  purge(demoInvoiceNumberRegistry);
   purge(demoComplianceDocs);
   purge(demoContracts);
   purge(demoDeductions);

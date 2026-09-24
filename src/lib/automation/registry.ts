@@ -41,7 +41,6 @@ import type { WorkItem, WorkScope } from '@/lib/work/types';
 import {
   DEDUCTION_DISPUTE_WINDOW_DAYS,
   EXPIRY_HORIZON_DAYS,
-  INVOICE_TERM_DAYS,
   OUTREACH_FOLLOW_UP_DAYS,
   addDays,
   daysBetween,
@@ -49,6 +48,7 @@ import {
   getWorkItems,
   overdueWorkItems,
 } from '@/lib/work/workStore';
+import { invoiceIsOverdue } from '@/lib/commerce/invoiceTerms';
 import { runReminderSweep } from '@/lib/work/reminderRunner';
 import { allCommercialReadinessRecords } from '@/data/commercialReadinessStore';
 import { commercialViabilityInputFromRecord } from '@/lib/commercial/commercialReadinessRecorder';
@@ -63,6 +63,7 @@ import {
   demoDeductions,
   demoPurchaseOrders,
   getCommercePaymentsForInvoice,
+  getAllCommercePayments,
 } from '@/data/demoStore';
 import { ensureProspectStore, getProspects } from '@/data/prospectStore';
 import { emitEvent } from '@/lib/events/eventFeed';
@@ -649,11 +650,12 @@ const IMPLEMENTATIONS: Record<AutomationId, (actor: string) => AutomationOutcome
 
   finance_overdue_monitor: () => {
     const today = demoToday();
-    const overdueInvoices = demoCommerceInvoices.filter((inv) => {
-      if (inv.status === 'paid') return false;
-      if (getCommercePaymentsForInvoice(inv.id).length > 0) return false;
-      return addDays(inv.issuedAt.slice(0, 10), INVOICE_TERM_DAYS) < today;
-    });
+    /* §P7 — REPOINTED: an invoice is overdue when its OWN derived due date (its
+       own 14/30/60 terms) has passed and it is still issued-and-unpaid. */
+    const payments = getAllCommercePayments();
+    const overdueInvoices = demoCommerceInvoices.filter((inv) =>
+      invoiceIsOverdue(inv, payments, today)
+    );
     const overdueDeductions = demoDeductions.filter((d) => {
       if (d.status === 'resolved' || d.status === 'accepted') return false;
       return addDays(d.date, DEDUCTION_DISPUTE_WINDOW_DAYS) < today;
@@ -664,7 +666,7 @@ const IMPLEMENTATIONS: Record<AutomationId, (actor: string) => AutomationOutcome
       escalated: overdueInvoices.length + overdueDeductions.length,
       affected: [...overdueInvoices.map((i) => i.id), ...overdueDeductions.map((d) => d.id)],
       notes: [
-        `${overdueInvoices.length} invoice(s) past the declared ${INVOICE_TERM_DAYS}-day terms with no settled payment.`,
+        `${overdueInvoices.length} invoice(s) past the payment terms recorded on the invoice itself, with no settled payment.`,
         `${overdueDeductions.length} deduction(s) past the declared ${DEDUCTION_DISPUTE_WINDOW_DAYS}-day dispute window.`,
       ],
     };

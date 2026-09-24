@@ -30,6 +30,7 @@
     "validate:provider-safety": "node scripts/validate-provider-mode-safety.mjs",
     "validate:proxy-model": "node scripts/validate-proxy-model.mjs",
     "validate:po-documents": "node scripts/validate-po-documents.mjs",
+    "validate:invoicing": "node scripts/validate-p7-invoicing.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs"
   },
   "dependencies": {

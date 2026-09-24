@@ -32,14 +32,13 @@ import {
 } from '@/lib/founder/briefFacts';
 import { automationHealth, automationSummary, pendingApprovals } from '@/lib/automation/registry';
 import {
-  INVOICE_TERM_DAYS,
-  addDays,
   demoToday,
   getWorkItems,
   overdueWorkItems,
 } from '@/lib/work/workStore';
 import { acquisitionAttention, acquisitionPipeline } from '@/lib/acquisition/acquisitionEngine';
-import { demoAuditLog, demoCommerceInvoices, getCommercePaymentsForInvoice } from '@/data/demoStore';
+import { demoAuditLog, demoCommerceInvoices, getAllCommercePayments } from '@/data/demoStore';
+import { invoiceIsOverdue } from '@/lib/commerce/invoiceTerms';
 
 /* ── Automation facts injected into the brief (no import cycle) ────────────── */
 
@@ -216,16 +215,15 @@ function answerFor(intent: MercentaIntentId): DeterministicAnswer {
     }
     case 'invoices_overdue': {
       const today = demoToday();
-      const rows = demoCommerceInvoices.filter((inv) => {
-        if (inv.status === 'paid') return false;
-        if (getCommercePaymentsForInvoice(inv.id).length > 0) return false;
-        return addDays(inv.issuedAt.slice(0, 10), INVOICE_TERM_DAYS) < today;
-      });
+      /* §P7 — REPOINTED: overdue means the invoice's OWN derived due date (its
+         own terms) has passed while it is still issued-and-unpaid. */
+      const payments = getAllCommercePayments();
+      const rows = demoCommerceInvoices.filter((inv) => invoiceIsOverdue(inv, payments, today));
       return {
         answer:
           rows.length === 0
             ? 'No invoice is past its declared payment terms with an unsettled balance.'
-            : `${rows.length} invoice(s) are past the declared ${INVOICE_TERM_DAYS}-day terms.`,
+            : `${rows.length} invoice(s) are past the payment terms recorded on the invoice itself.`,
         facts: rows.map(
           (inv) => `${inv.number} — £${inv.subtotalGbp.toFixed(2)} issued ${inv.issuedAt.slice(0, 10)} (${inv.mode})`
         ),

@@ -31,7 +31,7 @@ import {
   demoDeductions,
   demoPurchaseOrders,
   demoShipments,
-  getCommercePaymentsForInvoice,
+  getAllCommercePayments,
 } from '@/data/demoStore';
 import { getProspects, ensureProspectStore } from '@/data/prospectStore';
 import { getOnboardings } from '@/data/acquisitionStore';
@@ -43,13 +43,22 @@ import { emitEvent } from '@/lib/events/eventFeed';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 import { buildCommandCentre } from '@/lib/commandCentre/commandCentre';
 import { loadIntegrationsSync } from '@/integrations/connections';
+import { addDays, daysBetween } from '@/lib/dates';
+import { invoiceDueDate, invoiceIsOutstanding, invoiceTermDays } from '@/lib/commerce/invoiceTerms';
 
 /* ── DECLARED deterministic terms (single source of truth) ─────────────────── */
 
 /** Vendor-Central rule: an unacknowledged PO is at risk after 24 hours. */
 export const PO_ACKNOWLEDGEMENT_HOURS = 24;
-/** Simulated payment terms on a commerce invoice. Declared, not random. */
-export const INVOICE_TERM_DAYS = 30;
+/**
+ * §P7 — REPOINTED (not re-declared). The DECLARED default payment terms used to
+ * be declared here as `INVOICE_TERM_DAYS = 30`. They are now owned by
+ * `src/lib/commerce/invoiceTerms.ts` (which also owns the 14/30/60 choice and
+ * every derived due date), and re-exported here so this module's public surface
+ * is unchanged. An invoice's terms are read from THE INVOICE, never from this
+ * constant — it is only the default applied to a legacy row.
+ */
+export { INVOICE_TERM_DAYS } from '@/lib/commerce/invoiceTerms';
 /** Simulated window to dispute a posted deduction. Declared, not random. */
 export const DEDUCTION_DISPUTE_WINDOW_DAYS = 14;
 /** Days a warehouse return may sit in an actionable stage. Declared. */
@@ -209,15 +218,14 @@ export function isDemoClockPinned(): boolean {
 
 /* ── Date helpers (pure, deterministic) ────────────────────────────────────── */
 
-const DAY_MS = 86_400_000;
-
-export function addDays(iso: string, days: number): string {
-  return new Date(new Date(iso).getTime() + days * DAY_MS).toISOString().slice(0, 10);
-}
-
-export function daysBetween(from: string, to: string): number {
-  return Math.round((new Date(to).getTime() - new Date(from).getTime()) / DAY_MS);
-}
+/**
+ * §P7 — REPOINTED (not re-declared). `addDays` / `daysBetween` used to be
+ * declared here. Their DECLARATION now lives in `src/lib/dates.ts`, because the
+ * invoice-terms owner needs them and importing the work layer from it would be a
+ * cycle. They are re-exported unchanged, so every consumer of the work layer's
+ * date helpers is unaffected and there is still exactly ONE implementation.
+ */
+export { addDays, daysBetween } from '@/lib/dates';
 
 export function daysUntil(iso: string | null | undefined): number | null {
   if (!iso) return null;
@@ -506,18 +514,21 @@ export function deriveWorkItems(): WorkItem[] {
 
   /* 9. §Sprint 2 — commerce INVOICE DUE. Derived from the canonical simulated
         invoice/payment pair (E4): an issued invoice with no settled payment is
-        due `INVOICE_TERM_DAYS` after its own issue date. Settling the payment
-        removes the item from the attention set, so its reminder stops. */
+        due on its OWN derived due date (§P7 — the invoice's own issue date plus
+        ITS OWN terms, via `invoiceTerms.ts`; a cancelled invoice is never a
+        receivable). Settling the payment removes the item from the attention
+        set, so its reminder stops. */
+  const paymentsForInvoiceDue = getAllCommercePayments();
   for (const inv of demoCommerceInvoices) {
-    if (inv.status === 'paid') continue;
-    if (getCommercePaymentsForInvoice(inv.id).length > 0) continue;
+    if (!invoiceIsOutstanding(inv, paymentsForInvoiceDue)) continue;
     const issued = inv.issuedAt.slice(0, 10);
-    const due = addDays(issued, INVOICE_TERM_DAYS);
+    const due = invoiceDueDate(inv);
+    const terms = invoiceTermDays(inv);
     const left = daysBetween(today, due);
     out.push(
       make('invoice_due', { type: 'invoice', id: inv.id, label: inv.number }, {
         title: `Invoice ${inv.number} due`,
-        detail: `${brandLabel(inv.brandId)} · £${inv.subtotalGbp.toFixed(2)} · ${inv.mode} · ${INVOICE_TERM_DAYS}-day terms from issue ${issued}`,
+        detail: `${brandLabel(inv.brandId)} · £${inv.subtotalGbp.toFixed(2)} · ${inv.mode} · ${terms}-day terms from issue ${issued}`,
         priority: left < 0 ? 'critical' : left <= 7 ? 'high' : 'normal',
         dueDate: due,
         tenantId: inv.brandId,

@@ -1,7 +1,7 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: session 19 (23 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0, P0.4, P1, P2, P3, P4, P5 and P6
-are DONE, committed and (for the product phases) verified live on the demo; P7–P12 are NOT STARTED. Plan + the 11
+**Last updated: session 20 (23 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0, P0.4, P1, P2, P3, P4, P5, P6 and
+P7 are DONE, committed and (for the product phases) verified live on the demo; P8–P12 are NOT STARTED. Plan + the 11
 binding Founder decisions: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (each completed phase's evidence
 is in `PROJECT_STATUS.md` and in that document's per-phase sections). Everything below is still simulated; nothing was
 re-labelled live.**
@@ -14,10 +14,27 @@ re-labelled live.**
   `SIM-ASIN-…` (never a plausible-looking real ASIN — the code must never invent one). **Live activation:** the SP-API
   seam (P12) returns the real identifier behind the same interface. **Remaining non-credential work:** the P8 model and
   UI.
-- **Payment terms 14 / 30 / 60 are MERCENTA'S OWN CONFIGURATION, not channel data (P7).** The repo's truth register
-  records that **no public Vendor Payments API exists** (S14), so a payment date can only be **derived** from the
-  invoice date + the configured terms. Nothing may claim Amazon-published payment terms or a Vendor Payments feed.
-  **Live activation:** a real payment notice/receipt imported from accounting (Xero) behind the existing seam.
+- **Payment terms 14 / 30 / 60 are MERCENTA'S OWN CONFIGURATION, not channel data (P7 — DONE 2026-09-23).** The terms
+  are chosen **per invoice** and the due date is **DERIVED** from the invoice's own date plus its own terms
+  (`src/lib/commerce/invoiceTerms.ts` — the ONE owner). The repo's truth register records that **no public Vendor
+  Payments API exists** (S14), so nothing may claim Amazon-published payment terms or a Vendor Payments feed, and every
+  payment date is labelled as derived. **Live activation:** a real payment notice/receipt imported from accounting
+  (Xero) behind the existing seam. **Remaining non-credential work:** none — the terms, the derivation, the receivables
+  definition and the surfaces are built.
+- **The invoice-number registry is modelled and enforced, but INVOKING THE CHANNEL'S INVOICING API IS AN ACTIVATION
+  STEP (P7 — DONE 2026-09-23).** `src/lib/commerce/invoiceRegistry.ts` implements the documented rules (`AV-022`):
+  numbers are **unique and never reused**, a **zero-value invoice fails**, and a wrong invoice is **cancelled and
+  re-sent under a NEW Invoice ID** (the cancelled number stays consumed for ever — the ledger is append-only). Issuing
+  and cancelling contact **no** accounting provider and no channel API. **Documented activation precondition (register
+  S11): API invoicing requires PARALLEL TESTING WITH THE CHANNEL'S ACCOUNTS-PAYABLE TEAM before payments process.** That
+  is a business/activation step, not a code change; the four rules are stated on the admin surface
+  (`INVOICE_NUMBER_RULES`) so the precondition cannot be forgotten. **Remaining non-credential work:** the
+  `submitInvoices` operation itself is **P12's** scope (AV-040).
+- **The receiving status is derived from MERCENTA'S OWN receiving step (P7 — DONE 2026-09-23).** `receivingStatus`
+  (not received / partially received / received) is derived from the per-line received quantities
+  (`src/lib/commerce/receivingStatus.ts`, `AV-018`) and gates invoicing — an unreceived PO cannot be invoiced (fail
+  closed). **Honest limit:** reading the CHANNEL's own `receivingStatus` is `getPurchaseOrdersStatus`, which is
+  **P12's** declared scope; the platform never claims a live channel reading.
 - **Carriers are DHL + Palletline BY API ONLY (P9/P10).** Mercenta connects the carrier APIs itself; **a carrier never
   logs into Mercenta**, so the 3PL carrier portal, its role, its environment and the "3PL Carrier Terminal" login card are
   removed (P9), including the demo-environment entry. **Live activation:** DHL + Palletline API credentials behind the

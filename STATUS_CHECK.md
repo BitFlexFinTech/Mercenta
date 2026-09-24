@@ -26,7 +26,82 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P6 DONE: THE PO DOCUMENT PACK (automatic on acceptance) + THE DOCUMENTED COLLECT CHAIN** (2026-09-23, session 19)
+## CURRENT STATE — **P7 DONE: ADMIN INVOICING — THE RECEIPT GATE, THE INVOICE-NUMBER REGISTRY AND PER-INVOICE TERMS** (2026-09-23, session 20)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
+> first — a new session needs nothing else from this file. This section is a projection of it.
+
+**Checkpoint (this increment):** **P7 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`** — application
+work, verified and committed; the three-way leg (deploy + live verification) is recorded in the resume block.
+
+**What this increment added:** the retail channel's **documented invoicing rules** (`AV-022`) and the **receipt gate**
+(`AV-018`), each behind ONE owner.
+
+- `src/lib/commerce/invoiceTerms.ts` (NEW) owns the **terms and every figure derived from them**: `14 / 30 / 60`
+  **chosen per invoice** (programme decision 2), the DERIVED due date (the invoice's own date + **its own** terms),
+  **receivables = issued-and-unpaid**, overdue, upcoming and the ONE ledger summary. Register **S14** (no Vendor
+  Payments API exists) is stated as the reason a payment date is derived and labelled as derived.
+- `src/lib/commerce/invoiceRegistry.ts` (NEW) owns **invoice numbers**: unique and **never reused**, an append-only
+  ledger whose VOIDED numbers stay consumed for ever, the **zero-value refusal** and the cancel ⇒ **NEW Invoice ID**
+  rule. The first number keeps the established shape `SIM-INV-<poNumber>`; a correction after a cancellation is
+  `SIM-INV-<poNumber>-R2`.
+- `src/lib/commerce/receivingStatus.ts` (NEW) owns the **receiving status** (`not_received` / `partially_received` /
+  `received`, DERIVED from the received quantities — never a stored copy that could drift) and the **fail-closed
+  "invoice only AFTER receipt" gate**, which names the register it rests on. Reading the **channel's** own status is
+  **P12** (`getPurchaseOrdersStatus`); the platform never claims a live channel reading.
+- `src/lib/dates.ts` (NEW) owns the pure date helpers (`addDays` / `daysBetween`, moved out of the work layer which
+  re-exports the same names) so the invoice-terms owner can use them without a cycle.
+- **The domain** (`commerceLifecycle.ts`): `issueCommerceInvoice` now enforces the delivered-PO check, the receipt
+  gate, the declared-term rule and the zero-value refusal, takes its number from the registry, records the allocation
+  in the same step and links the `AV-022` re-issue chain both ways; NEW **`cancelCommerceInvoice`** requires a stated
+  reason, attributes and audits it, voids the number for ever and **refuses to cancel a settled invoice** (money has
+  moved — the ledger corrects it). `receiveCommercePurchaseOrder` records the receipt and reports the derived status.
+- **Consolidation (§03):** the receivable predicate and the due-date arithmetic were re-derived in SIX readers
+  (`workStore`, the admin `AdminDashboard`, the brand `BrandDashboard`, `controlCentre`, `founderOpsAi`,
+  `automation/registry`) and are now imported from the ONE owner, each with the old contract recorded in an inline
+  `§P7 — REPOINTED` comment.
+- **Surfaces:** the admin Retail Pipeline gains a **per-PO 14/30/60 selector**, the **receiving status**, the invoice's
+  **own terms + derived due date**, the rule list and the **cancel + reason** path; **Accounting** gains the
+  **invoice-number registry ledger** (allocated / void / receivables / upcoming) with the derivation basis stated.
+
+**Verification (this session):** `scripts/validate-p7-invoicing.mjs` (**NEW**, `npm run validate:invoicing`) → **PASS
+(115 assertions, 0 network calls)** and **proved able to fail** (the registry's ordinal arithmetic mutated to a
+constant → **FAIL 5 of 115**; restored → PASS) · `e2e/invoicing.spec.ts` (**NEW**) → **3 passed** (this spec found and
+fixed a real defect: `Badge` does not forward `data-*`, so the test hook had to sit on a native element — the
+validator now guards that class) · focused browser run **111 passed / 0 failed** · **FULL Playwright suite 478 passed /
+0 failed / 2 skipped (13.5m)** · **EVERY validator in `scripts/validate-*.mjs` exits 0 (98 of 98)** · `tsc` app **0** +
+node **0** · `eslint .` **0** · `npm run build` **✓** · `validate:wording` **PASS (307 src files, 0 violations)**.
+
+**Two problems found and fixed honestly during this increment:**
+
+1. **A real determinism break this increment introduced, caught by `validate-investor-demo`:** `reset → run` produced
+   `b63bd0b4` vs `34e305e7`, because the new invoice-number registry was not part of the deterministic reset — the
+   replay found the previous run's allocation and handed the demo tenant the NEXT ordinal. The registry now
+   participates in `purgeInvestorDemoRecords`, and the validator is **PASS** again. (Numbers are still never reused in
+   production; a deterministic replay returns the whole demo tenant to baseline.)
+2. **An inherited project-state divergence:** `requirements-registry.json` still described **P6** as `not_started` (as
+   well as P7). Both rows are now `built_and_tested` with real evidence — the project-state contract requires the five
+   sources to agree, so the P6 row was reconciled as part of this task.
+
+**Gates repointed, never weakened:** `scripts/validate-e6-brand-surfaces.mjs` **B2** (the receivable predicate moved to
+the canonical owner, with the old contract recorded inline and an added "no second copy" assertion) ·
+`scripts/validate-work-layer.mjs` (the `invoice_due` deadline assertion now points at the canonical owner and still
+asserts the pre-P7 value) · the **E6/E7 change-scope guards** gained the declared P7 surface with their contracts
+unchanged.
+
+**Honest limits:** issuing/cancelling an invoice contacts **no** provider, and the API submission (`submitInvoices`)
+remains **P12** (`AV-040`); the **parallel-testing-with-the-channel's-AP precondition** (`S11`) is business/activation
+work recorded in `PRODUCTION_READINESS.md` and stated on the admin surface (`INVOICE_NUMBER_RULES`); `billToParty` /
+Payee matching (`AV-035`) and credit notes remain open; the ledger is in-memory in this environment (the D4 port
+reports that honestly). Full detail: the programme document's **§11**.
+
+**Status / checkpoint / deploy / live verification:** recorded in the `CURRENT RESUME STATE` block at the top of
+`PROJECT_STATUS.md`.
+
+
+---
+
+## PREVIOUS STATE — **P6 DONE: THE PO DOCUMENT PACK (automatic on acceptance) + THE DOCUMENTED COLLECT CHAIN** (2026-09-23, session 19) — HISTORICAL
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — a new session needs nothing else from this file. This section is a projection of it.
@@ -1125,3 +1200,41 @@ ready until a carrier books the consignment.
 **Checkpoint commit:** `03675dcc78639a157b4c5dccd54527304feccfcb`, re-verified from the committed tree.
 
 **Evidence:** `npm run typecheck` PASS, `npm run build` PASS, `scripts/verify-registry.mjs` 106 entries 100 verified, E2E: all test suites green (64 stable + 10 previously-failing = 74 PASS, 1 graceful skip).
+
+### Session 2026-09-23 (session 20) — P7: admin invoicing (receipt gate, invoice-number registry, per-invoice terms)
+
+**Increment:** P7 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (application work; programme decision 2,
+registers `AV-022`, `AV-018`, `S11`, `S14`; matrix `D11-01` / new `D11-13`).
+
+**Built:** `src/lib/commerce/invoiceTerms.ts`, `src/lib/commerce/invoiceRegistry.ts`,
+`src/lib/commerce/receivingStatus.ts` and `src/lib/dates.ts` (all NEW — one owner each); `src/types.ts`
+(`INVOICE_TERM_CHOICES` / `InvoiceTermDays`, `RECEIVING_STATUSES` / `ReceivingStatus`, `InvoiceNumberAllocation`, the
+`cancelled` invoice state + its evidence fields, `PurchaseOrder.receivedAt`, the `invoice_cancelled` activity);
+`src/data/demoStore.ts` (the append-only `demoInvoiceNumberRegistry` + its accessors, `setPurchaseOrderReceivedAt`,
+`getAllCommerceInvoices` / `getAllCommercePayments`, and `getCommerceInvoiceForPo` repointed to the invoice IN FORCE);
+`src/lib/commerce/commerceLifecycle.ts` (the receipt gate, the declared-term rule, the zero-value refusal, the registry
+allocation, the `AV-022` re-issue chain, the NEW `cancelCommerceInvoice`, and the receipt write on
+`receiveCommercePurchaseOrder`); SIX readers repointed to the ONE owner with inline `§P7 — REPOINTED` comments
+(`workStore`, `AdminDashboard`, `BrandDashboard`, `controlCentre`, `founderOpsAi`, `automation/registry`);
+`src/components/admin/CommerceOperationsPanel.tsx` (per-PO terms selector, receiving status, own terms + derived due
+date, the rule list, cancel + required reason) and `src/components/admin/AccountingPanel.tsx` (the registry ledger);
+`src/lib/simulation/investorDemo.ts` (the registry participates in the deterministic reset).
+
+**Gates:** `scripts/validate-p7-invoicing.mjs` (NEW, `npm run validate:invoicing`); `e2e/invoicing.spec.ts` (NEW);
+`validate-e6-brand-surfaces.mjs` B2 and `validate-work-layer.mjs` repointed to the canonical owner;
+`validate-e6-brand-surfaces.mjs` + `validate-e7-embedded-social.mjs` gained the declared P7 surface.
+
+**Evidence:** validate-p7-invoicing **PASS (115 assertions, 0 network calls)** and **proved able to fail (FAIL 5 of 115
+when the registry's ordinal arithmetic is mutated to a constant)** · `e2e/invoicing.spec.ts` **3 passed** · focused
+browser run **111 passed / 0 failed** · **FULL Playwright 478 passed / 0 failed / 2 skipped (13.5m)** · **all 98
+`scripts/validate-*.mjs` exit 0** · `tsc` app **0** + node **0** · `eslint .` **0** · `build` **✓** · wording **PASS
+(307 files)**.
+
+**Honest notes:** a real determinism break introduced by this increment (the registry was not in the deterministic
+reset; `reset → run` digest `b63bd0b4` vs `34e305e7`) was caught by `validate-investor-demo` and fixed; an inherited
+registry divergence (P6 left `not_started`) was reconciled. No provider is contacted; `submitInvoices` remains P12;
+`billToParty`/Payee matching and credit notes remain open.
+
+**Status / checkpoint / deploy / live verification:** recorded in the `CURRENT RESUME STATE` block at the top of
+`PROJECT_STATUS.md`.
+

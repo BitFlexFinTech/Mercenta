@@ -855,6 +855,44 @@ try {
     'package.json',
   ];
 
+  /**
+   * §P7 — ADMIN INVOICING PHASE DECLARED SURFACE (2026-09-23, programme
+   * `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §4 P7).
+   *
+   * P7 adds the channel's documented invoicing rules (`AV-022`) and the receipt
+   * gate (`AV-018`): ONE owner for the terms (14/30/60 per invoice), ONE owner for
+   * the invoice-number registry, ONE owner for the receiving status, the receipt
+   * + cancellation write paths, the pure date helpers moved out of the work layer,
+   * and the four readers that used to re-derive a due date from a global constant.
+   * It legitimately touches the canonical types (`src/types.ts` — a PROTECTED
+   * prefix, declared here exactly as P4/P5/P6 declared it) and the canonical store
+   * (the append-only registry ledger). The E7 guard's contract is UNCHANGED — a
+   * changed source/test file in NO declared set still fails, and an undeclared
+   * protected path still fails.
+   */
+  const P7_ADMIN_INVOICING_DECLARED = [
+    'src/lib/commerce/invoiceTerms.ts',      // NEW — terms + the ONE due-date owner
+    'src/lib/commerce/invoiceRegistry.ts',   // NEW — the ONE invoice-number registry (AV-022)
+    'src/lib/commerce/receivingStatus.ts',   // NEW — receiving status + the receipt gate
+    'src/lib/commerce/commerceLifecycle.ts', // issue/cancel on the ONE write path
+    'src/lib/dates.ts',                      // NEW — the pure date helpers
+    'src/types.ts',                          // PROTECTED prefix — declared
+    'src/data/demoStore.ts',
+    'src/lib/work/workStore.ts',
+    'src/lib/commandCentre/controlCentre.ts',
+    'src/lib/ai/founderOpsAi.ts',
+    'src/lib/automation/registry.ts',
+    'src/components/admin/AdminDashboard.tsx',
+    'src/components/admin/CommerceOperationsPanel.tsx',
+    'src/components/admin/AccountingPanel.tsx',
+    'src/components/brand/BrandDashboard.tsx',  // receivable predicate repointed to the ONE owner
+    'src/lib/simulation/investorDemo.ts',       // the registry participates in the deterministic reset
+    'e2e/invoicing.spec.ts',
+    'scripts/validate-p7-invoicing.mjs',
+    'scripts/validate-work-layer.mjs',
+    'package.json',
+  ];
+
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -878,7 +916,9 @@ try {
           !P5_DESTINATION_FC_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §P6 — the PO-document-pack phase's declared surface (see above). */
           !P6_PO_DOCUMENT_PACK_DECLARED.includes(f) &&
-          !P6_PO_DOCUMENT_PACK_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P6_PO_DOCUMENT_PACK_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §P7 — the admin-invoicing phase's declared surface (see above). */
+          !P7_ADMIN_INVOICING_DECLARED.includes(f)
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -997,6 +1037,12 @@ try {
      * file outside EVERY declared set is still refused.
      */
     ...P6_PO_DOCUMENT_PACK_DECLARED,
+    /**
+     * §P7 — REPOINTED (not weakened). The admin-invoicing phase's declared surface
+     * is accepted here exactly as every earlier phase's is; a changed source/test
+     * file outside EVERY declared set is still refused.
+     */
+    ...P7_ADMIN_INVOICING_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

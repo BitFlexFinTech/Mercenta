@@ -15,10 +15,14 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useCanonicalStoreVersion } from '@/data/queries';
-import { demoPurchaseOrders, getCommerceInvoiceForPo } from '@/data/demoStore';
-import type { PurchaseOrder } from '@/types';
+import { demoPurchaseOrders, getAllCommerceInvoicesForPo, getCommerceInvoiceForPo } from '@/data/demoStore';
+import type { CommerceInvoice, InvoiceTermDays, PurchaseOrder } from '@/types';
+import { INVOICE_TERM_CHOICES, INVOICE_TERM_DAYS, invoiceDueDate, invoiceTermDays } from '@/lib/commerce/invoiceTerms';
+import { INVOICE_NUMBER_RULES } from '@/lib/commerce/invoiceRegistry';
+import { deriveReceivingStatus, RECEIVING_STATUS_LABELS } from '@/lib/commerce/receivingStatus';
 import {
   acknowledgeCommercePurchaseOrder,
+  cancelCommerceInvoice,
   fulfilCommercePurchaseOrder,
   getCommercePersistenceStatus,
   issueCommerceInvoice,
@@ -72,6 +76,16 @@ export function CommerceOperationsPanel() {
 
   /** §Phase E5 (G1) — only SIMULATED POs belong to the commerce simulation. */
   const simulatedPos = demoPurchaseOrders.filter((p) => p.simulated === true);
+
+  /**
+   * §P7 — the terms chosen for each PO BEFORE its invoice is issued (`14/30/60`
+   * — programme decision 2). Held as ONE map, never as a hook inside the row
+   * loop: a hook in a loop is a rules-of-hooks violation, and the terms are
+   * per-PO UI state rather than component state.
+   */
+  const [termChoice, setTermChoice] = useState<Record<string, InvoiceTermDays>>({});
+  /** §P7 — the STATED cancellation reason per PO (required by `AV-022`). */
+  const [cancelReason, setCancelReason] = useState<Record<string, string>>({});
 
   const [busyId, setBusyId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -144,9 +158,18 @@ export function CommerceOperationsPanel() {
         )}
 
         {simulatedPos.map((po) => {
+          /* §P7 — `getCommerceInvoiceForPo` returns the invoice still IN FORCE. A
+             cancelled invoice therefore does not count as "has an invoice", so the
+             PO can be corrected under a NEW number (`AV-022`). */
           const invoice = getCommerceInvoiceForPo(po.id);
-          const n = nextActionsFor(po, !!invoice, invoice?.status === 'paid');
+          const activeInvoice = invoice && invoice.status !== 'cancelled' ? invoice : undefined;
+          const n = nextActionsFor(po, !!activeInvoice, activeInvoice?.status === 'paid');
           const busy = busyId === po.id;
+          const receiving = deriveReceivingStatus(po);
+          const chosenTerms = termChoice[po.id] ?? INVOICE_TERM_DAYS;
+          const journal = getAllCommerceInvoicesForPo(po.id);
+          const cancelledInvoice = journal.find((i) => i.status === 'cancelled');
+          const reason = cancelReason[po.id] ?? '';
           return (
             <div key={po.id} className="rounded-lg border border-white/[0.06] bg-ink-850/60 p-3 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -157,13 +180,59 @@ export function CommerceOperationsPanel() {
                 </Badge>
                 <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
                 <span className="text-ds-micro text-zinc-500">£{po.poValue.toFixed(2)}</span>
+                {/* §P7 — the channel's receiving status, derived from the received
+                    quantities. An unreceived PO cannot be invoiced (AV-018). */}
+                <span data-state="admin-commerce-receiving-status">
+                  <Badge
+                    className={cn(
+                      'text-ds-micro border-white/[0.08]',
+                      receiving === 'received'
+                        ? 'bg-emerald-500/10 text-emerald-300'
+                        : receiving === 'partially_received'
+                          ? 'bg-amber-500/10 text-amber-300'
+                          : 'bg-white/[0.05] text-zinc-400'
+                    )}
+                  >
+                    receiving: {RECEIVING_STATUS_LABELS[receiving]}
+                  </Badge>
+                </span>
                 {invoice && (
-                  <span className="text-ds-micro text-zinc-500">
-                    · {invoice.number} ({invoice.status})
+                  <span data-state="admin-commerce-invoice-terms" className="text-ds-micro text-zinc-500">
+                    · {invoice.number} ({invoice.status}){invoice.status !== 'cancelled' && (
+                      <> · {invoiceTermDays(invoice)}-day terms · due {invoiceDueDate(invoice)} (derived)</>
+                    )}
+                  </span>
+                )}
+                {cancelledInvoice && (
+                  <span data-state="admin-commerce-cancelled-note" className="text-ds-micro text-amber-300/80">
+                    · {cancelledInvoice.number} cancelled{cancelledInvoice.cancellationReason ? `: ${cancelledInvoice.cancellationReason}` : ''} —
+                    the number stays consumed; the correction needs a NEW Invoice ID
                   </span>
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
+                {/* §P7 — the terms the invoice will carry, chosen HERE (14/30/60).
+                    An issued invoice shows its own terms; the choice is disabled
+                    once the number has been allocated. */}
+                <select
+                  data-state="admin-commerce-terms-select"
+                  aria-label={`Payment terms for ${po.poNumber}`}
+                  className="text-ds-label rounded-md border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 disabled:opacity-50"
+                  value={chosenTerms}
+                  disabled={busy || !!activeInvoice || po.status !== 'delivered'}
+                  onChange={(e) =>
+                    setTermChoice((prev) => ({
+                      ...prev,
+                      [po.id]: Number(e.target.value) as InvoiceTermDays,
+                    }))
+                  }
+                >
+                  {INVOICE_TERM_CHOICES.map((t) => (
+                    <option key={t} value={t}>
+                      {t}-day terms
+                    </option>
+                  ))}
+                </select>
                 <Button
                   className="text-ds-label"
                   data-state="admin-commerce-acknowledge"
@@ -202,7 +271,7 @@ export function CommerceOperationsPanel() {
                   data-state="admin-commerce-issue-invoice"
                   disabled={busy || !n.invoice}
                   onClick={() =>
-                    run(po.id, 'Issue simulated invoice', () => issueCommerceInvoice(po.id, actor), (i: { number: string; subtotalGbp: number }) => `${i.number} — £${i.subtotalGbp.toFixed(2)} (sim)`)
+                    run(po.id, 'Issue simulated invoice', () => issueCommerceInvoice(po.id, actor, { termDays: chosenTerms }), (i: CommerceInvoice) => `${i.number} — £${i.subtotalGbp.toFixed(2)} · ${invoiceTermDays(i)}-day terms, due ${invoiceDueDate(i)} (derived, sim)`)
                   }
                 >
                   Issue invoice
@@ -211,14 +280,49 @@ export function CommerceOperationsPanel() {
                   variant="ghost"
                   className="text-ds-label"
                   data-state="admin-commerce-record-payment"
-                  disabled={busy || !n.pay || !invoice}
+                  disabled={busy || !n.pay || !activeInvoice}
                   onClick={() =>
-                    invoice &&
-                    run(po.id, 'Record simulated payment', () => recordCommercePayment(invoice.id, actor), (p: { amountGbp: number; invoiceId: string }) => `£${p.amountGbp.toFixed(2)} against ${p.invoiceId} (sim)`)
+                    activeInvoice &&
+                    run(po.id, 'Record simulated payment', () => recordCommercePayment(activeInvoice.id, actor), (p: { amountGbp: number; invoiceId: string }) => `£${p.amountGbp.toFixed(2)} against ${p.invoiceId} (sim)`)
                   }
                 >
                   Record payment
                 </Button>
+                {/* §P7 / AV-022 — a WRONG invoice is cancelled (with a stated
+                    reason) and re-issued under a NEW number. The old number stays
+                    consumed for ever, which is why the registry exists. */}
+                {activeInvoice && (
+                  <>
+                    <input
+                      data-state="admin-commerce-cancel-reason"
+                      aria-label={`Cancellation reason for ${activeInvoice.number}`}
+                      className="text-ds-label rounded-md border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 placeholder:text-zinc-600"
+                      placeholder="Cancellation reason (required)"
+                      value={reason}
+                      disabled={busy}
+                      onChange={(e) =>
+                        setCancelReason((prev) => ({ ...prev, [po.id]: e.target.value }))
+                      }
+                    />
+                    <Button
+                      variant="ghost"
+                      className="text-ds-label"
+                      data-state="admin-commerce-cancel-invoice"
+                      disabled={busy || reason.trim().length === 0}
+                      onClick={() =>
+                        run(
+                          po.id,
+                          'Cancel simulated invoice',
+                          () => cancelCommerceInvoice(activeInvoice.id, actor, reason),
+                          (i: CommerceInvoice) =>
+                            `${i.number} cancelled — the number stays consumed for ever (AV-022)`
+                        )
+                      }
+                    >
+                      Cancel invoice
+                    </Button>
+                  </>
+                )}
                 <Button
                   variant="ghost"
                   className="text-ds-label"
@@ -319,9 +423,25 @@ export function CommerceOperationsPanel() {
                 <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
                   {i.status}
                 </Badge>{' '}
-                £{i.subtotalGbp.toFixed(2)} <span className="text-ds-micro text-brass-400">(sim)</span>
+                £{i.subtotalGbp.toFixed(2)}
+                {i.status !== 'cancelled' && (
+                  <>
+                    {' '}· {invoiceTermDays(i)}d terms · due {invoiceDueDate(i)}{' '}
+                    <span className="text-ds-micro text-zinc-600">(derived)</span>
+                  </>
+                )}{' '}
+                <span className="text-ds-micro text-brass-400">(sim)</span>
               </div>
             ))}
+          {/* §P7 / AV-022 — the invoice-number rules, stated where the numbers
+              are handled (they are the reason this ledger is append-only). */}
+          <ul data-state="admin-invoice-number-rules" className="mt-1 space-y-0.5">
+            {INVOICE_NUMBER_RULES.map((rule) => (
+              <li key={rule} className="text-ds-micro text-zinc-600">
+                {rule}
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="space-y-1">

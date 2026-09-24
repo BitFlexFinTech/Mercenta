@@ -26,6 +26,7 @@ import type {
   CommerceActivity,
   CommerceActivityType,
   CommerceInvoice,
+  InvoiceNumberAllocation,
   CommercePayment,
   CommerceMode,
   AdCampaign,
@@ -532,6 +533,15 @@ export function recordCatalogAudit(
 export const demoCommerceActivities: CommerceActivity[] = [];
 export const demoCommerceInvoices: CommerceInvoice[] = [];
 export const demoCommercePayments: CommercePayment[] = [];
+/**
+ * §P7 — THE CANONICAL INVOICE-NUMBER LEDGER (`AV-022`).
+ *
+ * Every number the registry has ever allocated, in allocation order, including
+ * the numbers of invoices that were later cancelled (a cancelled number stays
+ * consumed for ever — it is never reissued). Add-only: a row is voided, never
+ * removed, so the "never reused" rule is provable from the ledger alone.
+ */
+export const demoInvoiceNumberRegistry: InvoiceNumberAllocation[] = [];
 
 /** The number derived so far for one (brand, activity-type) pair. */
 export function nextCommerceSequence(brandId: string, type: CommerceActivityType): number {
@@ -599,13 +609,74 @@ export function getCommerceInvoice(id: string): CommerceInvoice | undefined {
   return demoCommerceInvoices.find((i) => i.id === id);
 }
 
-/** The canonical invoice for a PO — the invoice is keyed by the PO, never copied. */
+/**
+ * The canonical ACTIVE invoice for a PO — the invoice is keyed by the PO, never
+ * copied.
+ *
+ * §P7 — REPOINTED (not weakened). Before P7 this returned the FIRST invoice
+ * recorded for the PO. `AV-022` makes a re-issue under a NEW Invoice ID a real
+ * outcome (a wrong invoice is cancelled), so "the invoice for a PO" now means
+ * the one that is still in force: the first non-cancelled row. The full journal
+ * (cancelled rows included) is available through `getAllCommerceInvoicesForPo`.
+ */
 export function getCommerceInvoiceForPo(purchaseOrderId: string): CommerceInvoice | undefined {
-  return demoCommerceInvoices.find((i) => i.purchaseOrderId === purchaseOrderId);
+  const rows = demoCommerceInvoices.filter((i) => i.purchaseOrderId === purchaseOrderId);
+  return rows.find((i) => i.status !== 'cancelled') ?? rows[rows.length - 1];
+}
+
+/** §P7 — every invoice ever raised against a PO, cancelled rows included. */
+export function getAllCommerceInvoicesForPo(purchaseOrderId: string): CommerceInvoice[] {
+  return demoCommerceInvoices.filter((i) => i.purchaseOrderId === purchaseOrderId);
 }
 
 export function getCommerceInvoicesForBrand(brandId: string): CommerceInvoice[] {
   return demoCommerceInvoices.filter((i) => i.brandId === brandId);
+}
+
+/* ── §P7 — the invoice-number registry (`AV-022`) ─────────────────────────── */
+
+/** The canonical ledger, in allocation order (read-only view). */
+export function getInvoiceNumberLedger(): InvoiceNumberAllocation[] {
+  return demoInvoiceNumberRegistry;
+}
+
+export function getInvoiceNumberAllocation(
+  number: string
+): InvoiceNumberAllocation | undefined {
+  return demoInvoiceNumberRegistry.find((a) => a.number === number);
+}
+
+/**
+ * Record ONE allocation. Idempotent on the NUMBER: re-recording an allocated
+ * number returns the existing row rather than duplicating the ledger — a number
+ * is consumed exactly once, for ever.
+ */
+export function recordInvoiceNumberAllocation(
+  allocation: InvoiceNumberAllocation
+): InvoiceNumberAllocation {
+  const existing = getInvoiceNumberAllocation(allocation.number);
+  if (existing) return existing;
+  demoInvoiceNumberRegistry.push(allocation);
+  notifyCanonicalStoreChange();
+  return allocation;
+}
+
+/**
+ * §P7 / `AV-022` R4 — VOID a number because its invoice was cancelled. The row
+ * stays (ADD-ONLY) so the number can never be allocated again; only the void
+ * evidence is written.
+ */
+export function voidInvoiceNumberAllocation(
+  number: string,
+  reason: string,
+  at: string
+): InvoiceNumberAllocation | undefined {
+  const row = getInvoiceNumberAllocation(number);
+  if (!row) return undefined;
+  row.voidedAt = at;
+  row.voidReason = reason;
+  notifyCanonicalStoreChange();
+  return row;
 }
 
 /** Upsert a simulated payment — idempotent on the canonical id. */
@@ -627,6 +698,16 @@ export function getCommercePaymentsForInvoice(invoiceId: string): CommercePaymen
 
 export function getCommercePaymentsForBrand(brandId: string): CommercePayment[] {
   return demoCommercePayments.filter((p) => p.brandId === brandId);
+}
+
+/** §P7 — the whole payment ledger, so the ONE summary can be computed anywhere. */
+export function getAllCommercePayments(): CommercePayment[] {
+  return demoCommercePayments;
+}
+
+/** §P7 — the whole invoice ledger, so the ONE summary can be computed anywhere. */
+export function getAllCommerceInvoices(): CommerceInvoice[] {
+  return demoCommerceInvoices;
 }
 
 /**
@@ -1088,6 +1169,21 @@ export function setPurchaseOrderStatus(
   if (!po) return null;
   po.status = status;
   if (status === 'rejected') po.rejectionReason = rejectionReason;
+  notifyCanonicalStoreChange();
+  return po;
+}
+
+/**
+ * §P7 — record WHEN the channel's receiving step completed for a PO.
+ *
+ * The receiving STATUS is derived from the line quantities (never stored — see
+ * `src/lib/commerce/receivingStatus.ts`); this timestamp is the one part of the
+ * receipt that cannot be derived, so it is written here by the receiving path.
+ */
+export function setPurchaseOrderReceivedAt(id: string, receivedAt: string): PurchaseOrder | null {
+  const po = demoPurchaseOrders.find((p) => p.id === id);
+  if (!po) return null;
+  po.receivedAt = receivedAt;
   notifyCanonicalStoreChange();
   return po;
 }

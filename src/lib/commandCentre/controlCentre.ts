@@ -29,13 +29,13 @@ import {
   demoDeductions,
   demoPurchaseOrders,
   demoShipments,
-  getCommercePaymentsForInvoice,
+  getAllCommercePayments,
 } from '@/data/demoStore';
+import { summariseInvoiceLedger } from '@/lib/commerce/invoiceTerms';
 import { getAllReturnTracking } from '@/lib/warehouse/returnsTracking';
 import {
   DEDUCTION_DISPUTE_WINDOW_DAYS,
   EXPIRY_HORIZON_DAYS,
-  INVOICE_TERM_DAYS,
   addDays,
   brandLabel,
   daysBetween,
@@ -375,13 +375,19 @@ export function buildControlCentre(): ControlCentreModel {
   const delayedShipments = demoShipments.filter((s) => s.delayed);
   const returns = getAllReturnTracking();
 
-  /* ── Finance ── */
-  const unpaidInvoices = demoCommerceInvoices.filter(
-    (inv) => inv.status !== 'paid' && getCommercePaymentsForInvoice(inv.id).length === 0
+  /* ── Finance ──
+   * §P7 — REPOINTED to the ONE owner (`src/lib/commerce/invoiceTerms.ts`):
+   * receivables are ISSUED-and-unpaid, and an invoice's due date is its own issue
+   * date plus ITS OWN terms (14/30/60). This used to re-derive both figures from
+   * the single global `INVOICE_TERM_DAYS`.
+   */
+  const invoiceLedger = summariseInvoiceLedger(
+    demoCommerceInvoices,
+    getAllCommercePayments(),
+    today
   );
-  const overdueInvoices = unpaidInvoices.filter(
-    (inv) => addDays(inv.issuedAt.slice(0, 10), INVOICE_TERM_DAYS) < today
-  );
+  const unpaidInvoices = invoiceLedger.outstanding;
+  const overdueInvoices = invoiceLedger.overdue;
   const openDeductions = demoDeductions.filter((d) => d.status !== 'resolved' && d.status !== 'accepted');
   const overdueDeductions = openDeductions.filter(
     (d) => addDays(d.date, DEDUCTION_DISPUTE_WINDOW_DAYS) < today
@@ -442,7 +448,7 @@ export function buildControlCentre(): ControlCentreModel {
       metric('ops-returns', 'Returns in progress', String(returns.length), 'neutral', 'Warehouse', 'Returns not yet confirmed by the brand.', 'returns_tracking'),
     ],
     finance: [
-      metric('fin-unpaid', 'Unpaid invoices', String(unpaidInvoices.length), unpaidInvoices.length > 0 ? 'warning' : 'success', 'Receivables', `${overdueInvoices.length} past the declared ${INVOICE_TERM_DAYS}-day terms.`, 'accounting'),
+      metric('fin-unpaid', 'Unpaid invoices', String(unpaidInvoices.length), unpaidInvoices.length > 0 ? 'warning' : 'success', 'Receivables', `${overdueInvoices.length} past the payment terms on the invoice itself (derived; 14/30/60 per invoice).`, 'accounting'),
       metric('fin-deductions', 'Open deductions', String(openDeductions.length), openDeductions.length > 0 ? 'warning' : 'success', 'Chargebacks', `${overdueDeductions.length} past the declared dispute window.`, 'accounting'),
       metric('fin-reminders', 'Active reminders', String(reminders.length), reminders.length > 0 ? 'warning' : 'success', 'Escalations', 'Raised by the deterministic reminder sweep.', 'work'),
       metric('fin-revenue', 'Recorded revenue', `£${revenueTotal.toLocaleString('en-GB')}`, 'neutral', 'Canonical streams', 'Per-stream labels are preserved on the Accounting surface.', 'accounting'),
