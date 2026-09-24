@@ -26,7 +26,66 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P10 DONE: THE LOGISTICS HUB IS COMPLETED — PROVIDER CONFIGURATION + THE PO-DOCUMENT DOWNLOAD QUEUE + CONSOLIDATION RECORDED AS DEFERRED** (2026-09-24, session 23)
+## CURRENT STATE — **P11 DONE: "CREATE PO" IS REMOVED AND CHANNEL PURCHASE-ORDER INGESTION IS REAL** (2026-09-24, session 24)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
+> first — it is all a new session needs. Full account: programme **§15** in
+> `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`.
+
+**Checkpoint (this increment):** **P11 of `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`** — application
+work; programme decision **3**; matrix **`cleanup-p11-remove-create-po`**. **COMPLETE — LOCAL/GITHUB/DEMO
+SYNCHRONIZED** at **`93d7c63`**: committed and pushed (`09c1f16..93d7c63`), deployed via `scripts/deploy-demo.sh`
+(rebuilt from the committed tree, `✓ built in 7.65s`) and **live-verified — `LIVE_VERIFICATION_PASS`, 111/111 checks,
+0 page errors**, including all **13 §P11 checks** (the deployed bundle's own content read from 16/16 loaded chunks).
+
+**What changed**
+
+- **A purchase order ARRIVES; Mercenta never creates one (decision 3).** `src/lib/commerce/channelPurchaseOrderIngestion.ts`
+  is the ONE PO entry point. The PO is addressed to Mercenta and the brand is identified from the PO's **own lines**
+  (`vendorSku`, or `asin` once the product is accepted on the channel) — never supplied by a caller, so a PO can never
+  be filed against a tenant whose catalogue does not contain the ordered products.
+- **It FAILS CLOSED.** `CHANNEL_PO_EMPTY` (no lines), `CHANNEL_PO_LINE_NOT_IN_CATALOGUE` (out of scope — held for
+  Mercenta review) and `CHANNEL_PO_CROSSES_TENANTS` (one PO is one brand's order). An unmatched line refuses the WHOLE
+  PO; nothing is guessed and no partial PO is filed.
+- **The canonical record is built from the channel's own PO.** `poNumber` IS the channel's PO number, the id is
+  deterministic (`po-channel-…`), the destination is the FC the **channel** declared (an unknown code keeps the
+  channel's `partyId` — no site is invented), the channel's windows are carried, the value is recomputed from the
+  channel's own lines, and `mode: 'simulation'`/`simulated: true` is set ONLY when the seam says the read was
+  simulated. **Idempotent** by channel PO number; every filing writes a canonical `po_ingested` audit record
+  (actor, tenant, entity, `channelSource`, the channel's declared total) and announces the canonical-store change.
+- **The SP-API read was extended in BOTH clients** (`src/lib/spapi/client.ts`, `src/lib/spapi/mockClient.ts`): it now
+  returns the channel's own PO payload instead of `{ purchaseOrderId, poValue }`. The mock's pool is **derived from
+  the canonical catalogue** (one source of truth for SKUs) so a simulated PO is genuinely routable, and it contains
+  **one deliberately out-of-catalogue PO** so the refusal path is reachable from the product.
+- **The admin queue's create action was REPLACED, not just deleted.** "Create Purchase Order on Behalf of Brand" is
+  gone; the header action is **"Read channel POs"** (`data-state="admin-po-ingest"`) behind the **SAME RBAC guard**,
+  and a "Channel purchase orders" section states the seam's mode before and after the read ("Simulated read — no live
+  channel call was made"), the outcome counts, and **every** outcome row — filed rows are clickable and open the SAME
+  record drawer the queue uses; refusals state their reason.
+- **`createPurchaseOrder` and `src/lib/notifications/postmarkNotifier.ts` are DELETED.** The Postmark
+  PO-notification seam existed solely to announce an ADMIN-created PO; the canonical mock-first transactional-email
+  seam is `src/lib/mail/**` (matrix `D14-04`) and a brand's new-PO signal is in-app (`NotificationCenter`).
+  `createSimulatedPurchaseOrder` remains the scenario engine's simulation-only path (E4).
+
+**Two real defects this phase's own gates found (and how they were fixed)**
+
+- **`validate-canonical-propagation` S2 FIRST FAILED**, naming `channelPurchaseOrderIngestion.ts`: the owner signalled
+  conditionally, which the gate's contract (a signal must be a statement of its own) cannot express. Fixed at the
+  source — the signal now fires immediately after a record is filed, so it is a standalone statement AND only when a
+  PO actually entered the store. **25 PASS / 0 FAIL** after.
+- **`validate-mock-seam` FIRST FAILED** on its own stale contract (the PO read used to ROTATE 2 POs per poll).
+  Repointed, not weakened: it now asserts MORE — the lines/FC fields ingestion routes by, the seam-declared
+  `simulated: true`, a STABLE window on re-read, and the out-of-catalogue PO being reachable.
+
+**Verification (this session)** — `npm run typecheck` **0** · root `tsc --noEmit` **0** · `eslint src scripts e2e`
+**0** · `npm run build` **✓ 7.70s** · `validate:wording` **PASS (315 src files)** · `scripts/validate-channel-po-ingestion.mjs`
+**39 assertions / 0 failures / 0 network calls** and **proved able to fail** (37/1 with the cross-tenant refusal
+broken; restored byte-identical → 39/0) · **every validator in `scripts/validate-*.mjs` exits 0 — 101 of 101** · the
+2 affected/added specs **9 passed / 0 failed** · **FULL Playwright 495 passed / 0 failed / 2 skipped (16.5m)** (the
+first full run's single 30s timeout in `e2e/design-system.spec.ts` did not reproduce and is recorded as a flake).
+
+
+## PREVIOUS STATE — **P10 DONE: THE LOGISTICS HUB IS COMPLETED — PROVIDER CONFIGURATION + THE PO-DOCUMENT DOWNLOAD QUEUE + CONSOLIDATION RECORDED AS DEFERRED** (2026-09-24, session 23) — HISTORICAL
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block at the top of `PROJECT_STATUS.md`.** Read it
 > first — it is all a new session needs. Full account: programme **§14** in
