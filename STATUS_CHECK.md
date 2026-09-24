@@ -26,42 +26,45 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **PO-ACK S2 DONE: the 24-hour window is ENFORCED at the domain boundary, and Mercenta performs the channel-required rejection on the brand's behalf** (2026-09-24, session 27)
+## CURRENT STATE — **PO-ACK S3 DONE: the work layer consumes the rule's owner, so the founder-reported acknowledgement defect is removed at source** (2026-09-25, session 28)
 
-**Branch:** `redesign/foundation`. **Checkpoint:** `5a36e94` — recorded in the `CURRENT RESUME STATE` block of
-`PROJECT_STATUS.md` (the canonical source) and mirrored in `HANDOFF.md`. **`git status --porcelain` EMPTY** after the
-state commit. **THREE-WAY STATUS: see the resume block** (local ✅ · GitHub ✅ · demo — deploy + live verification
-recorded there).
+**Branch:** `redesign/foundation`. **Checkpoint:** `64f1994` (application code) + `111c59b` (the live-verification
+legs) — recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (the canonical source) and mirrored in
+`HANDOFF.md`. **`git status --porcelain` EMPTY** after the state commit. **THREE-WAY STATUS: see the resume block**
+(local ✅ · GitHub ✅ · demo ✅ deployed at `64f1994` and live-verified).
 
 **Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
-nothing.* S1 (`418d18b`) delivered the window OWNER; **S2 makes the rule REAL where it matters** and records the
-outcome honestly. Programme record: `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (the ten stages S1–S10).
+nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary + the on-behalf
+writer; **S3 makes the WORK LAYER ask the owner**, so the founder-reported defect is gone AT SOURCE. Programme record:
+`docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (the ten stages S1–S10, §S3).
 
-**What changed (16 paths):**
+**What changed (6 paths + the live-verification script):**
 
-1. **Enforcement at the DOMAIN BOUNDARY** (`src/data/api.ts → acknowledgePurchaseOrder`): inside the window any
-   decision is valid; PAST the limit the documented action is a rejection, so an acceptance/backorder is REFUSED and
-   only an ALL-REJECTED submission is accepted; an unreadable window fails CLOSED.
-2. **A non-mutating validation pass runs BEFORE the window is judged and before any line is written** — a refused
-   submission leaves the PO byte-for-byte unchanged, and the existing quantity/required-field refusals are unchanged.
-3. **`AckHistoryEntry.timeliness`** (`on_time` / `late` / `on_behalf`, config-owned) recorded on every event AND on
-   the canonical audit entry, with the deadline it met.
-4. **NEW `autoRejectPurchaseOrderOnBehalf(poId, now?)`** — the channel-REQUIRED rejection performed on the brand's
-   behalf at the final notification stage (BEFORE the limit), attributed to `PO_ACK_SYSTEM_ACTOR_ID`, audited, issued
-   as an INSTRUCTION, **idempotent**, and never touching a PO with a decision / no obligation / an unreadable window.
-5. **A caller-clock seam** on `acknowledgePurchaseOrder`; `scenarioEngine` passes its own deterministic instant — a
-   real regression `validate:provider-safety` caught (every scenario found its own PO "past the limit").
-6. **The demo seed's OPEN POs are genuinely in-window** (an honest fix of factually wrong demo data; the frozen seed
-   dated every PO 9/18 days back, which made the demo's acknowledgement workflow — and the live verification that
-   exercises it — unreachable). A PO past the decision keeps its historical date and lives in history.
-7. **SSOT repair:** `workStore` re-exports the 24-hour constant instead of declaring a second `= 24` (the S1 comment
-   already claimed this; it was false). Plus **two inherited `validate:wording` violations fixed**.
+1. **`deriveWorkItems` consumes the owner.** §P13 / S3 — REPOINTED: the old hand-rolled predicate
+   (`po.status !== 'rejected' && po.status !== 'delivered' && !po.acknowledgedAt`) is what made PO-9201/PO-9211 —
+   shipped, 41 days past their deadline — arrive as "Acknowledge PO-…" work. An item is now derived ONLY when the
+   owner has the PO in its QUEUE (Amazon's `New` set INSIDE the 24-hour window); the hand-rolled channel-closed
+   short-circuit went with it, because the owner classifies that too.
+2. **The wording and the deadline ARE the owner's.** The row's detail carries the owner's own `reason` (so the queue
+   row, the PO surface and the writer cannot state different window states) and `poAcknowledgementDeadline(po)`
+   supplies the due date, removing the duplicate `addDays(orderDate, 1)` arithmetic.
+3. **The clock seam.** The window is judged on an INSTANT (`deriveWorkItems(now?)`, defaulting to the same instant
+   `src/data/api.ts` enforces with) — never `demoToday()`, the DATE clock tests pin for the overdue / due-soon
+   buckets. `scripts/validate-work-layer.mjs` carries a NOTE so nobody "fixes" the window onto that pinned date.
+4. **One spec repointed.** `e2e/deterministic-journey.spec.ts` asserted the admin queue contained PO-9003, whose
+   status is `accepted` (past the acknowledgement decision → no obligation); it now asserts PO-9002 (Tapatío's
+   genuinely OPEN PO) for the cross-tenant claim AND the defect's absence (`Acknowledge PO-9003` must not appear).
+5. **Eight new live legs** in `scripts/verify-demo-live.mjs` — the changed functionality is a DERIVED queue, so the
+   third leg of the completion contract now exercises IT rather than merely proving the site is reachable.
 
-**Evidence (produced this session):** NEW gate `validate:po-ack-enforcement` → **45 assertions PASS, 0 network calls,
-proved able to fail twice** (window refusal disabled → 8 red; the idempotency guard removed → 3 red; both restored
-byte-identical) · S1 gate PASS 60/60 · **the whole `validate:*` sweep PASSED** (after the fixes) · `npm run typecheck`
-0 · root `npx tsc --noEmit` 0 · eslint 0 · `npm run build` ✓ (9.00s) · Playwright **131/131 passed** across 18 affected
-specs (one repointed: `po-lifecycle` #6 asserted an overdue window — a state the demo deliberately no longer contains).
+**Evidence (produced this session):** NEW gate `validate:po-ack-work` → **41 assertions PASS, 0 network calls, proved
+able to fail twice** (owner consumption removed → 8 red; the window judged on the pinned demo DATE → 4 red; both
+restored byte-identical, `workStore.ts` shasum `6fa49641…`) · S1 gate 60 PASS · S2 gate 45 PASS · **the whole
+`validate:*` sweep 28/28 PASS** · `npm run typecheck` 0 · root `npx tsc --noEmit` 0 · eslint 0 · `npm run build`
+✓ (7.73s) · **the FULL Playwright suite: 500 passed / 2 skipped / 0 failed (502 tests, 6.5m)** · **LIVE
+`LIVE_VERIFICATION_PASS`: 133/133 checks, 0 page errors** (the 8 §P13/S3 legs: NO "Acknowledge PO-9003" on the
+deployed brand queue; PO-9001 and PO-9002 still presented on the deployed admin queue; 3 acknowledgement rows, each
+stating "left of the 24-hour window").
 
 ---
 
@@ -280,6 +283,22 @@ from **16/16 chunks**.
 `'carriers'` remains; the milestone control is a simulation surface (carrier polling is P12); the pre-existing
 `amendShipment` helper still writes `status` without `stage`. The first live run failed 3 §P9 checks for a real reason
 (the check ran on the brand page, where the console is correctly absent) and was fixed, then re-run green.
+
+### PO-ACK programme (2026-09-25, session 28) — **S3 DONE: the work layer consumes the rule's owner (the founder-reported defect, removed at source)**
+
+`src/lib/work/workStore.ts → deriveWorkItems` derives acknowledgement work ONLY for a PO the window OWNER
+(`src/lib/commerce/poAcknowledgementWindow.ts`) has in its QUEUE — its old hand-rolled predicate
+(`status !== rejected/delivered` + `!acknowledgedAt`) was the founder-reported defect that presented PO-9201/PO-9211
+(shipped, 41 days past their deadline) as acknowledgement work. The row's wording IS the owner's `reason`; its deadline
+IS the owner's own `poAcknowledgementDeadline` (the duplicate `addDays(orderDate, 1)` arithmetic is gone); the
+channel-closed short-circuit is gone; the window is judged on an INSTANT through the new `deriveWorkItems(now?)` seam,
+never the pinned demo DATE. New gate `validate:po-ack-work` — **41 assertions PASS, 0 network calls**, proved able to
+fail twice (owner consumption removed → 8 red; the window judged on the pinned demo DATE → 4 red; restored
+byte-identical, shasum `6fa49641…`). One spec REPOINTED (`e2e/deterministic-journey.spec.ts` asserted PO-9003 —
+`accepted`, i.e. past the decision — as acknowledgement work; it now asserts PO-9002 + the defect's absence). Whole
+`validate:*` sweep 28/28 PASS · typecheck 0 · root tsc 0 · eslint 0 · build ✓ 7.73s · **FULL Playwright 500 passed /
+2 skipped / 0 failed (502)** · **LIVE 133/133 checks PASS, 0 page errors** (8 new §P13/S3 legs on the deployed build).
+Checkpoint `64f1994` (+ `111c59b` = the live legs).
 
 ### PO-ACK programme (2026-09-24, session 27) — **S2 DONE: the 24-hour window is ENFORCED, and Mercenta rejects on the brand's behalf**
 

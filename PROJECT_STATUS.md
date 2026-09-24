@@ -5,62 +5,81 @@
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
 
-LAST COMPLETED TASK:      **PO-ACK S2 (2026-09-24, session 27) — THE 24-HOUR WINDOW IS NOW ENFORCED AT THE DOMAIN BOUNDARY, AND MERCENTA PERFORMS THE CHANNEL-REQUIRED REJECTION ON THE BRAND'S BEHALF.** Founder directive: the Amazon PO process is a REPLICA of Amazon's documented rules — Mercenta invents nothing. S2 wires the S1 owner into `src/data/api.ts → acknowledgePurchaseOrder` (past the limit only an ALL-REJECTED submission is accepted; an acceptance/backorder is refused; an unreadable window fails closed), adds a NON-MUTATING validation pass that runs BEFORE the window is judged and before any line is written (so a refusal leaves the PO byte-for-byte unchanged and the existing quantity/required-field refusals are unchanged), records `AckHistoryEntry.timeliness` (`on_time` / `late` / `on_behalf`, config-owned) on every event AND the canonical audit entry, and adds `autoRejectPurchaseOrderOnBehalf` — the attributed, idempotent writer that performs the REQUIRED rejection at the final notification stage, BEFORE the limit, so every PO ends acknowledged. Plus: the caller-clock seam that keeps the simulation honest, the SSOT repair in the work layer, the seed's open-PO window (an honest fix of factually wrong demo data) and two inherited wording violations.
-CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`5a36e94`**. LOCAL: `node scripts/validate-po-acknowledgement-enforcement.mjs` → **PO_ACK_ENFORCEMENT_VALIDATION_PASS (45 assertions, 0 network calls)** and `validate:po-ack-window` → **PO_ACK_WINDOW_VALIDATION_PASS (60)** — the new gate **proved able to fail twice** (window refusal disabled → **8 red**; the auto-rejection's idempotency guard removed → **3 red**; both restored **byte-identical**, `api.ts` shasum `4f911f3f…` unchanged) · **the WHOLE `validate:*` sweep (27 scripts) PASSED** — including two INHERITED `validate:wording` violations fixed and `validate:provider-safety` (a real regression this stage caught) · `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** · `npx eslint` **0** · `npm run build` **✓ (9.00s)** · Playwright **131/131 passed** across 18 affected specs. GITHUB: pushed (`902abb3..5a36e94`; remote head = local HEAD). DEMO: deployed and **LIVE-VERIFIED — `LIVE_VERIFICATION_PASS 125/125 checks, 0 page errors`**, including **§P6 "the deployed build offers 'Open shipping documents' after acceptance"** — i.e. the LIVE brand acknowledgement of PO-9002 SUCCEEDED under the newly enforced rule, which is the live proof that the seed's open PO is genuinely inside its window.
+LAST COMPLETED TASK:      **PO-ACK S3 (2026-09-25, session 28) — THE WORK LAYER CONSUMES THE RULE'S OWNER, SO THE FOUNDER-REPORTED ACKNOWLEDGEMENT DEFECT IS REMOVED AT SOURCE.** Founder directive: the Amazon PO process is a REPLICA of Amazon's documented rules — Mercenta invents nothing. `src/lib/work/workStore.ts → deriveWorkItems` no longer re-derives "is this PO still actionable?" — its old hand-rolled predicate (`status !== rejected/delivered` + `!acknowledgedAt`) is exactly what made PO-9201/PO-9211 (shipped, 41 days past their deadline) arrive as "Acknowledge PO-…" work. It now asks `poAcknowledgementWindow()` and derives an item ONLY for a PO in the owner's QUEUE (Amazon's `New` set INSIDE the 24-hour window); the hand-rolled channel-closed short-circuit went with it. The row's wording IS the owner's own `reason` (so the queue row, the PO surface and the writer cannot state different window states) and its deadline IS the owner's own deadline (`poAcknowledgementDeadline`), so the duplicate `addDays(orderDate, 1)` arithmetic is gone. The window is judged on an INSTANT through the new `deriveWorkItems(now?)` seam — the same default instant `api.ts` enforces with — NEVER the pinned demo DATE (`demoToday()` is the DATE clock for the overdue/due-soon buckets). ONE spec repointed: `e2e/deterministic-journey.spec.ts` asserted the admin queue contained PO-9003, whose status is `accepted` (PAST the decision, so it owes no acknowledgement) — it now asserts PO-9002 (Tapatío's genuinely open PO) and the defect's ABSENCE.
+CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`64f1994`** (application code; `111c59b` adds only the live-verification legs). LOCAL: NEW `node scripts/validate-po-acknowledgement-work.mjs` → **PO_ACK_WORK_VALIDATION_PASS (41 assertions, 0 network calls)**, proved able to fail twice (owner consumption removed → **8 red**; the window judged on the pinned demo DATE → **4 red**; both restored byte-identical, `workStore.ts` shasum `6fa49641…`) · **the WHOLE `validate:*` sweep (28 scripts) PASSED** · `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** · `npx eslint` **0** · `npm run build` **✓ (7.73s)** · **the ENTIRE Playwright suite: 500 passed / 2 skipped / 0 failed (502 tests, 6.5m)**. GITHUB: pushed. DEMO: deployed at `64f1994` and **LIVE-VERIFIED `133/133 checks, 0 page errors`**.
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`5a36e94`** — "feat(po-ack): S2 — the 24-hour window is enforced at the domain boundary, with the on-behalf rejection" (**16 paths**: `src/config/purchaseOrders.ts`, `src/lib/commerce/poAcknowledgementWindow.ts`, `src/data/api.ts`, `src/types.ts`, `src/lib/dates.ts`, `src/data/demoData.ts`, `src/lib/work/workStore.ts`, `src/lib/simulation/scenarioEngine.ts`, 4 surfaces, `e2e/po-lifecycle.spec.ts`, `package.json`, `scripts/validate-po-acknowledgement-enforcement.mjs` NEW, `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` NEW).
-GITHUB PUSH:              **DONE — PUSHED.** `902abb3..5a36e94` (exit 0); `git ls-remote --heads origin redesign/foundation` = **`5a36e948cca6bd1bb7e58032453fbf1d6facea61`** = local HEAD.
-DEMO DEPLOYMENT:          **DEPLOYED — `bash scripts/deploy-demo.sh` at `5a36e94`.** Build ✓ (7.75s), `dist/` mirrored to `demo.mercenta.co.uk` (19 stale files removed), exit 0. Only `demo.mercenta.co.uk`; the live domain remains untouched pending `GO_LIVE.md`.
-LIVE VERIFICATION:        **VERIFIED on `https://demo.mercenta.co.uk` — `LIVE_VERIFICATION_PASS`: 125/125 checks PASS · 0 page errors (brand 0 / admin 0 / superAdmin 0), exit 0.** The §P6 limb proves the stage ON the deployed build: the brand acknowledged PO-9002 live and Mercenta filed the acknowledgement, the routing request and the ASN — i.e. **the enforced 24-hour window ACCEPTED the seeded open PO** (the whole point of the seed correction), and the document pack then rendered (SSCC ready, waybill honestly not ready). NOTE, corrected here: the script currently declares exactly **125** checks (confirmed against the committed revision and by executing it — nothing was skipped); session 25's recorded "127/127" does not match the script and was an inaccurate tally, not a regression.
-OUTSTANDING BLOCKER:      **NONE.** Recorded limitations (not blockers): Amazon SP-API credentials are PENDING — the channel stays simulated and every operation declares its own provenance · Vendor Central's UI is sign-in gated, so the replica is of Amazon's DOCUMENTED process and state vocabulary · nothing yet PRODUCES the on-behalf rejection automatically (the writer exists and is gated; the producer is S4/S5) · iMessage requires an Apple-approved MSP + Experience Review · WhatsApp business-initiated notifications require a pre-approved template + brand opt-in · invoice submission for payment requires parallel testing with Amazon AP.
-NEXT TASK:                **PO-ACK S3 — THE WORK LAYER CONSUMES THE OWNER.** Make `src/lib/work/workStore.ts → deriveWorkItems` ask `poAcknowledgementWindow()` instead of its own `status !== rejected/delivered` test, so the founder-reported defect is removed AT SOURCE (a stale PO no longer produces an "Acknowledge PO-…" work item) and the seeded open POs — which are now genuinely in-window — keep producing theirs. The work item's wording must state the REAL window state (queue vs closing window), and the duplicate 24-hour constant is already repointed (S2).
-EXACT NEXT STARTING POINT:`PROJECT_STATUS.md` → this block → `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (§S2 + the ten-stage table) → `src/lib/work/workStore.ts` (`deriveWorkItems`, the PO section ~lines 354-400) → `src/lib/commerce/poAcknowledgementWindow.ts` (`poInQueue` / `poAcknowledgementWindow` / `poNotificationStagesDue`).
+LAST VERIFIED COMMIT:     **`64f1994`** — "feat(po-ack): S3 — the work layer consumes the rule's owner, so the founder-reported acknowledgement defect is removed at source" (**6 paths**: `src/lib/work/workStore.ts`, `scripts/validate-po-acknowledgement-work.mjs` NEW, `scripts/validate-work-layer.mjs` (the clock NOTE), `e2e/deterministic-journey.spec.ts`, `package.json` (`validate:po-ack-work`), `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md`). Plus **`111c59b`** — "test(po-ack): S3 — the live verification now exercises the deployed work layer (8 legs)" (`scripts/verify-demo-live.mjs`, NO runtime change).
+GITHUB PUSH:              **DONE — PUSHED.** `8e93b9d..64f1994` (exit 0); `111c59b` pushed in this same close-out. Remote `redesign/foundation` head = local HEAD.
+DEMO DEPLOYMENT:          **DEPLOYED at `64f1994`** via `bash scripts/deploy-demo.sh` (build ✓ 7.75s; 19 files new, 12 modified, 19 stale removed; exit 0). Only `demo.mercenta.co.uk`; the live domain remains untouched pending `GO_LIVE.md`.
+LIVE VERIFICATION:        **VERIFIED on `https://demo.mercenta.co.uk` — `LIVE_VERIFICATION_PASS`: 133/133 checks PASS · 0 page errors (brand 0 / admin 0 / superAdmin 0), exit 0.** The EIGHT new §P13/S3 legs prove the stage ON the deployed build: the brand queue (Operations → Tasks & Deadlines) offers **NO** acknowledgement work for PO-9003 (`accepted` = past the decision — the defect class, ABSENT live) while the admin queue (Work Management) STILL presents the genuinely open **PO-9001** (tenant 1) and **PO-9002** (tenant 2) — **3 acknowledgement rows, every one stating the owner's own real window state ("left of the 24-hour window")**, with 0 page errors on the flow.
+OUTSTANDING BLOCKER:      **NONE.** Recorded limitations (not blockers): Amazon SP-API credentials are PENDING — the channel stays simulated and every operation declares its own provenance · Vendor Central's UI is sign-in gated, so the replica is of Amazon's DOCUMENTED process and state vocabulary · nothing yet PRODUCES the on-behalf rejection automatically (the writer exists and is gated; the producer is S4/S5 — so a PO in the closing window is still the brand's to decide, and the row now SAYS so) · iMessage requires an Apple-approved MSP + Experience Review · WhatsApp business-initiated notifications require a pre-approved template + brand opt-in · invoice submission for payment requires parallel testing with Amazon AP.
+NEXT TASK:                **PO-ACK S4 — ON-BEHALF DRAFT + APPROVE.** The closing window (`onBehalfAvailable`, T−2h) must surface a DRAFT of the channel-required rejection for the brand to approve, and Mercenta's approval must call the S2 writer `autoRejectPurchaseOrderOnBehalf` — so the writer that exists and is gated finally has its PRODUCER. Nothing may execute without the brand's approval, and the draft must be attributed + audited.
+EXACT NEXT STARTING POINT:`src/data/api.ts` (`autoRejectPurchaseOrderOnBehalf` — the S2 writer: its refusal before the instant, `on_behalf` timeliness, instruction, audit, idempotency) → `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (the ten-stage table + §S2 point 4 + §S3) → `src/lib/commerce/poAcknowledgementWindow.ts` (`onBehalfAvailable` / `autoRejectAt` / `autoRejectDue` / `poNeedsAutoRejection`) → the brand + admin PO surfaces that must carry the draft/approve control.
 
 ---
 
-## CURRENT PLATFORM POSITION — **PO-ACK PROGRAMME, S2 DONE: the 24-hour window is ENFORCED at the domain boundary** (2026-09-24, session 27)
+## CURRENT PLATFORM POSITION — **PO-ACK PROGRAMME, S3 DONE: the work layer consumes the rule's owner (the founder-reported defect, removed at source)** (2026-09-25, session 28)
 
 **Founder directive (2026-09-24):** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules —
 Mercenta invents nothing.* Programme record: `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (ten stages S1–S10).
 
-1. **COMPLETED / VERIFIED — S1 + S2.** S1 (`418d18b`) = the window OWNER (config + pure logic + gate). **S2
-   (`5a36e94`) = THE RULE IS REAL:** `src/data/api.ts → acknowledgePurchaseOrder` now enforces the 24-hour window
-   (inside it any decision is valid; PAST the limit only an ALL-REJECTED submission is accepted and an
-   acceptance/backorder is refused; an unreadable window fails CLOSED); a NON-MUTATING validation pass runs BEFORE the
-   window is judged and before any line is written (a refusal leaves the PO byte-for-byte unchanged and the existing
-   quantity/required-field refusals are unchanged); `AckHistoryEntry.timeliness` (`on_time`/`late`/`on_behalf`,
-   config-owned) is recorded on every event AND on the canonical audit entry; **`autoRejectPurchaseOrderOnBehalf`**
-   performs the channel-REQUIRED rejection on the brand's behalf at the final notification stage, BEFORE the limit —
-   attributed to `PO_ACK_SYSTEM_ACTOR_ID`, audited, issued as an INSTRUCTION, IDEMPOTENT. Supporting corrections: the
-   caller-clock seam (`scenarioEngine` judges the rule in its own world — the regression `validate:provider-safety`
-   caught), the seed's open-PO window (an honest fix of factually wrong demo data: the frozen seed made every open PO
-   un-acknowledgeable and the live workflow unreachable), the `workStore` SSOT repair, `orderDateLabel()` as the ONE
-   order-date display owner, and two inherited `validate:wording` violations. ONE new gate
-   (`scripts/validate-po-acknowledgement-enforcement.mjs`, 45 assertions).
-2. **IN PROGRESS.** The programme itself: **S3 (the work layer consumes the owner)** is the next stage; S4–S10
-   (on-behalf draft+approve · all-channel fan-out + the instant-message seam · brand surfaces · admin surfaces ·
-   onboarding linking wizard · receipt→invoice automation · seed/gates/deploy) are sequenced.
-3. **REMAINING — CURRENT ROADMAP.** S3 → S4 → S5 → S6 → S7 → S8 → S9 → S10, each stage closing with its own gate,
+1. **COMPLETED / VERIFIED — S1 + S2 + S3.** S1 (`418d18b`) = the window OWNER (config + pure logic + gate, 60
+   assertions). S2 (`5a36e94`) = THE RULE IS REAL at the domain boundary, plus the on-behalf writer, the caller-clock
+   seam and the seed's honest open-PO window (45 assertions). **S3 (`64f1994`) = THE WORK LAYER CONSUMES THE OWNER:**
+   `src/lib/work/workStore.ts → deriveWorkItems` derives acknowledgement work ONLY for a PO the owner has in its QUEUE
+   (`inQueue` = Amazon's `New` set INSIDE the 24-hour window), so PO-9201/PO-9211 (shipped, 41 days past their
+   deadline) stop arriving as "Acknowledge PO-…" items; the row's wording IS the owner's own `reason` and its deadline
+   IS the owner's own `poAcknowledgementDeadline`; the hand-rolled predicate, the hand-written window copy, the
+   duplicate `addDays(orderDate, 1)` arithmetic and the channel-closed short-circuit are all gone; the window is
+   judged on an INSTANT (`deriveWorkItems(now?)`), never the pinned demo DATE. ONE new gate
+   (`scripts/validate-po-acknowledgement-work.mjs`, 41 assertions) and ONE repointed spec
+   (`e2e/deterministic-journey.spec.ts`: PO-9003 is `accepted` = past the decision, so it is NOT acknowledgement work;
+   the cross-tenant claim now rides PO-9002 and the defect's absence is asserted).
+2. **IN PROGRESS.** The programme itself: **S4 (on-behalf draft + approve)** is the next stage; S5–S10 (all-channel
+   fan-out + the instant-message seam · brand surfaces · admin surfaces · onboarding linking wizard · receipt→invoice
+   automation · seed/gates/deploy) are sequenced.
+3. **REMAINING — CURRENT ROADMAP.** S4 → S5 → S6 → S7 → S8 → S9 → S10, each stage closing with its own gate,
    typecheck, targeted Playwright and build.
 4. **DEFERRED / PARKED.** None newly; the P12 honest limits stand unchanged (channel simulated until LWA credentials;
    receiving sync reads but does not apply; consolidation grouping input is a product decision).
 5. **BLOCKED / DEPENDENCIES.** NONE blocking. Recorded dependencies: Amazon SP-API credentials (PENDING — the channel
    stays simulated and declares its provenance) · Vendor Central's UI is sign-in gated (so the replica is of the
-   DOCUMENTED process and state vocabulary) · NOTHING YET PRODUCES the on-behalf rejection automatically (the writer
-   exists and is gated; the producer is S4/S5) · iMessage (Apple MSP + Experience Review) · WhatsApp
+   DOCUMENTED process and state vocabulary) · **NOTHING YET PRODUCES the on-behalf rejection automatically (the writer
+   exists and is gated; the producer is S4/S5)** · iMessage (Apple MSP + Experience Review) · WhatsApp
    business-initiated templates + opt-in · invoice submission for payment (parallel testing with Amazon AP).
 6. **KNOWN EXCEPTIONS.** The auto-rejection reason is a MAPPING onto Amazon's three documented codes
    (`TemporarilyUnavailable`), declared with its rationale rather than invented as a fourth code. Amazon documents
    invoices for "shipped" orders; the founder's rule is RECEIPT-gated (stricter) and is what the platform enforces.
    `PO-ACK` D-1: the demo's older POs (accepted / ready_to_fulfil / shipped / delivered) keep historical order dates —
-   they owe no acknowledgement; only OPEN POs carry a real window.
-7. **CURRENT CHECKPOINT.** `5a36e94` — pushed to `origin/redesign/foundation`; tree EMPTY (after this state commit).
-8. **VERIFICATION STATUS.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**: local green (45+60 assertions, whole
-   `validate:*` sweep PASS, typecheck 0, root tsc 0, eslint 0, build ✓ 9.00s, Playwright 131/131) · GitHub pushed ·
-   demo deployed and LIVE-VERIFIED (`125/125 checks, 0 page errors`).
-9. **NEXT EXECUTION SCOPE.** S3 — make `src/lib/work/workStore.ts → deriveWorkItems` consume
-   `poAcknowledgementWindow()`, so a stale PO stops producing an "Acknowledge PO-…" work item AT SOURCE and the item's
-   wording states the real window state.
+   they owe no acknowledgement; only OPEN POs carry a real window. **NEW in S3:** the work layer therefore derives NO
+   acknowledgement item for a PO whose status is past the decision (`accepted`, `ready_to_fulfil`, `shipped`) even when
+   no acknowledgement record exists — that is the owner's declared contract, and it is what the repointed journey
+   assertion now reflects.
+7. **CURRENT CHECKPOINT.** `64f1994` (application code) + `111c59b` (the live-verification legs) — pushed to
+   `origin/redesign/foundation`; tree EMPTY (after this state commit).
+8. **VERIFICATION STATUS.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED**: local green (the 41-assertion gate proved
+   able to fail twice; the inherited 60- and 45-assertion gates PASS; the whole `validate:*` sweep 28/28 PASS;
+   typecheck 0; root tsc 0; eslint 0; build ✓ 7.73s; the FULL Playwright suite 500 passed / 2 skipped / 0 failed of
+   502) · GitHub pushed · demo deployed at `64f1994` and **LIVE-VERIFIED (`133/133 checks, 0 page errors`,
+   brand/admin/superAdmin page errors all 0)**, including the eight new S3 legs.
+9. **NEXT EXECUTION SCOPE.** S4 — the closing window must surface a DRAFT of the channel-required rejection
+   (`onBehalfAvailable`, T−2h) for the brand to APPROVE, whose approval calls
+   `src/data/api.ts → autoRejectPurchaseOrderOnBehalf` (attributed + audited, and never executing without the
+   approval).
+
+## PREVIOUS POSITION — **PO-ACK PROGRAMME, S2 DONE: the 24-hour window is ENFORCED at the domain boundary, and Mercenta performs the channel-required rejection on the brand's behalf** (2026-09-24, session 27) — HISTORICAL
+
+Full record: `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` §S2 and `STATUS_CHECK.md` (session 27 history). Summary:
+`src/data/api.ts → acknowledgePurchaseOrder` enforces the window (inside it any decision is valid; PAST the limit only
+an ALL-REJECTED submission is accepted and an acceptance/backorder is refused; an unreadable window fails closed),
+with a NON-MUTATING validation pass running BEFORE the window is judged and before any line is written;
+`AckHistoryEntry.timeliness` (`on_time` / `late` / `on_behalf`, config-owned) is recorded on every event and on the
+canonical audit entry; `autoRejectPurchaseOrderOnBehalf` performs the channel-REQUIRED rejection on the brand's behalf
+at the final notification stage, attributed to `PO_ACK_SYSTEM_ACTOR_ID`, audited, issued as an INSTRUCTION and
+idempotent; a caller-clock seam keeps the simulation honest; the seed's open POs were corrected to be genuinely
+in-window; the work layer's duplicate `= 24` was repointed at the config owner; two inherited `validate:wording`
+violations were fixed. Checkpoint `5a36e94` — **COMPLETE (local/GitHub/demo synchronized)**, live-verified 125/125 at
+the time (the live script now declares 133 checks).
 
 ## PREVIOUS POSITION — **PO-ACK PROGRAMME, S1 DONE: the Amazon PO acknowledgement window has ONE owner** (2026-09-24, session 26) — HISTORICAL
 
