@@ -252,7 +252,7 @@ three documented codes and guarded at module load · the obligation set = Amazon
 `src/lib/commerce/poAcknowledgementWindow.ts` (pure: deadline `orderDate + 24h`; Amazon's lifecycle vocabulary
 `new`/`acknowledged`/`closed`; the queue/history split; notification stages; the closing window; `mustReject` past the
 limit; `lateAcceptanceRefusal`; `sortPosByUrgency`; fail-closed `unknown`). New gate
-`scripts/validate-po-acknowledgement-window.mjs` — **61 assertions, PASS, 0 network calls**, proved able to fail twice
+`scripts/validate-po-acknowledgement-window.mjs` — **60 assertions, PASS, 0 network calls**, proved able to fail twice
 (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red — both restored byte-identical). The founder-reported defect
 (PO-9201 / PO-9211 shipped, 41 days past the deadline) is asserted DIRECTLY as history, not acknowledgement work.
 Typecheck 0 · root tsc 0 · eslint 0 · build ✓ (7.87s). Checkpoint `418d18b`, pushed; tree empty. Next: **S2** (domain
