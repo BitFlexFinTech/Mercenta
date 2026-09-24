@@ -807,6 +807,7 @@ const P7_ADMIN_INVOICING_SCOPE = new Set([
   'scripts/validate-work-layer.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
+  'scripts/verify-demo-live.mjs',          // carries the §P7 live checks
   'package.json',
   'docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md',
   'PRODUCTION_READINESS.md',

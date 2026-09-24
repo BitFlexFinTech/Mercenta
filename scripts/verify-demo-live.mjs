@@ -134,6 +134,114 @@ const adminBody = await admin.locator('body').innerText().catch(() => '');
 check('the admin Purchase Orders surface renders on the deployed build', /Purchase Orders/i.test(adminBody));
 check('no uncaught page error on the admin flow', adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
 
+/* ── 4b. §P7 — THE DEPLOYED INVOICING SURFACES + THE DEPLOYED BUNDLE'S RULES ─ */
+
+/**
+ * §P7 — the admin Retail Pipeline carries the invoicing surfaces: the per-PO
+ * terms selector, the receiving status and the published AV-022 rule list. The
+ * rule list renders whether or not any invoice exists yet, so this is a real
+ * check of the deployed build rather than of seeded state.
+ */
+await admin.goto(`${BASE}/admin/purchase-orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await admin.waitForTimeout(2500);
+await admin.click('nav[aria-label="Primary"] >> text=Retail Pipeline').catch(() => {});
+await admin.waitForTimeout(3500);
+const livePipelineBody = await admin.locator('body').innerText().catch(() => '');
+check('§P7 the deployed Retail Pipeline renders the operable simulated-PO section',
+  /Operable simulated purchase orders/i.test(livePipelineBody));
+const liveRuleList = await admin
+  .locator('[data-state="admin-invoice-number-rules"]')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P7 the deployed build states the invoice-number rules where the numbers are handled',
+  /never reused/i.test(liveRuleList) && /zero-value/i.test(liveRuleList) && /NEW Invoice ID/i.test(liveRuleList),
+  liveRuleList.replace(/\s+/g, ' ').slice(0, 160));
+
+/**
+ * §P7 — the Accounting surface carries the invoice-number REGISTRY ledger. The
+ * Accounting tab lives inside SUPER ADMIN, so this leg opens its own session:
+ * the Mercenta Admin Hub role does not see that destination (RBAC is enforced in
+ * the domain), and asking its session to render it would be a false negative.
+ */
+const superAdmin = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const superAdminErrors = [];
+superAdmin.on('pageerror', (e) => superAdminErrors.push(String(e)));
+await superAdmin.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+await superAdmin.waitForTimeout(3000);
+await superAdmin.getByRole('button', { name: 'Partner Login' }).first().click().catch(() => {});
+await superAdmin.waitForTimeout(800);
+await superAdmin.click('text=Super Admin — Tadii').catch(() => {});
+await superAdmin.waitForTimeout(2500);
+await superAdmin.click('nav[aria-label="Primary"] >> text=Super Admin').catch(() => {});
+await superAdmin.waitForTimeout(1200);
+await superAdmin.locator('button', { hasText: 'Accounting' }).first().click().catch(() => {});
+await superAdmin.waitForTimeout(3000);
+const liveRegistry = await superAdmin
+  .getByTestId('accounting-invoice-registry')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P7 the deployed Accounting surface renders the invoice-number registry ledger',
+  /Numbers allocated/i.test(liveRegistry) && /Receivables/i.test(liveRegistry),
+  liveRegistry.replace(/\s+/g, ' ').slice(0, 160));
+check('§P7 the deployed registry states that a number is never reused',
+  /never reused/i.test(liveRegistry));
+check('§P7 the deployed registry labels the payment figures as derived (no Vendor Payments API)',
+  /derived from the invoice date/i.test(liveRegistry), liveRegistry.replace(/\s+/g, ' ').slice(0, 200));
+
+/**
+ * §P7 — THE DEPLOYED BUNDLE IS THE P7 BUILD.
+ *
+ * The refusal codes are read out of the deployed JavaScript ITSELF, so a stale
+ * build cannot pass this leg by merely rendering a page that looks right. The
+ * app is code-split, so the probe must read every chunk the deployed page
+ * actually loaded (script tags + the resource timeline), not only the entry
+ * scripts named in `index.html` — reading only those produced a false negative
+ * when this leg first ran.
+ */
+const bundleProbe = await superAdmin
+  .evaluate(async () => {
+    const urls = Array.from(
+      new Set([
+        ...Array.from(document.querySelectorAll('script[src]')).map((s) => s.getAttribute('src') ?? ''),
+        ...performance
+          .getEntriesByType('resource')
+          .map((r) => r.name)
+          .filter((n) => n.endsWith('.js')),
+      ])
+    ).filter(Boolean);
+    const texts = [];
+    for (const u of urls) {
+      try {
+        const r = await fetch(u);
+        texts.push(await r.text());
+      } catch {
+        /* a chunk that cannot be read is simply not part of the evidence */
+      }
+    }
+    const all = texts.join('\n');
+    return {
+      count: urls.length,
+      read: texts.length,
+      receiptGate: all.includes('RECEIPT_REQUIRED'),
+      zeroValue: all.includes('INVOICE_ZERO_VALUE'),
+      terms: all.includes('INVOICE_TERM_RULE'),
+      numberShape: all.includes('SIM-INV'),
+      cancel: all.includes('INVOICE_NOT_CANCELLABLE'),
+    };
+  })
+  .catch(() => ({ count: 0, read: 0 }));
+const probeDetail = `${bundleProbe.read}/${bundleProbe.count} loaded chunk(s) read`;
+check('§P7 the deployed bundle carries the receipt gate (AV-018)', bundleProbe.receiptGate === true, probeDetail);
+check('§P7 the deployed bundle carries the zero-value refusal (AV-022)', bundleProbe.zeroValue === true, probeDetail);
+check('§P7 the deployed bundle carries the declared-term refusal', bundleProbe.terms === true, probeDetail);
+check('§P7 the deployed bundle carries the unmistakably-simulated invoice-number prefix', bundleProbe.numberShape === true, probeDetail);
+check('§P7 the deployed bundle carries the cancellation rule (NEW Invoice ID)', bundleProbe.cancel === true, probeDetail);
+check('no uncaught page error on the deployed P7 invoicing flows',
+  adminErrors.length === 0 && superAdminErrors.length === 0,
+  [...adminErrors, ...superAdminErrors].slice(0, 2).join(' | '));
+
 /* ── 5. §P5 — THE DEPLOYED ARRIVAL NODE IS THE FC ON THE PO, NOT A HUB ───── */
 await page.click('nav[aria-label="Primary"] >> text=Logistics Hub').catch(() => {});
 await page.waitForTimeout(4000);
@@ -339,7 +447,7 @@ check('no uncaught page error on the deployed collect-lane flow',
 
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
-console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length}`);
+console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length} superAdmin=${superAdminErrors.length}`);
 console.log(failures === 0 ? 'LIVE_VERIFICATION_PASS' : `LIVE_VERIFICATION_FAIL (${failures})`);
 await browser.close();
 process.exit(failures === 0 ? 0 : 1);

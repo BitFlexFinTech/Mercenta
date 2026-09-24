@@ -5,20 +5,56 @@
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
 
-LAST COMPLETED TASK:      **P6 (2026-09-23, session 19) — THE PO DOCUMENT PACK, AUTOMATIC ON ACCEPTANCE, + THE DOCUMENTED COLLECT CHAIN.** Built: `src/lib/documents/poDocumentPack.ts` (NEW — the ONE owner of the pack: **SSCC carton labels · carrier label · freight waybill · packing list/delivery note · ASN sheet · the three customs documents**, each with a STATED reason when not applicable/not ready, the renderer that presents it, and the ONE `documentsAwaitingDownload` rule) · `src/lib/documents/sscc.ts` (NEW — the ONE SSCC-18 owner: published GS1 mod-10 check digit, deterministic serial from PO + carton index, explicitly UNASSIGNED placeholder prefix `0000000` / `XX-PENDING-GS1-LICENCE`) · `src/lib/shipping/collectChain.ts` (NEW — the documented request → carrier assigned → ARN → pickup chain, the channel's two-BUSINESS-day pickup rule (register `AV-014`), and a hard refusal to fabricate an ARN) · `src/components/shared/logistics/PoDocumentPackPanel.tsx` (NEW — **"Documents for this PO"** + the collect chain on the Logistics Hub, printable previews, opening the EXISTING waybill/label dialogues) · the acceptance write-path generates the pack and emits the canonical `po_documents_ready` event (`proxyProcessor`, `events/types`, `events/feed`) · the brand Logistics Hub badge + the notification centre carry the download queue from that ONE rule (`navBadges`, `NotificationCenter`) · `src/types.ts` gains `routingInstructions`, `routingRequest.requestedPickUp` and the pack-generation evidence fields · `customsDocs` input widened `DemoProduct`→`Product` (no behaviour change). Customs documents apply to **international lanes only**; every document names the FC **the purchase order declares** (P5); an undeclared PO fails closed.
-CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`6f22d52`**: `node scripts/validate-po-documents.mjs` → **PASS (50 assertions, 0 network calls)**, and **proved able to fail** (check digit mod 10 → mod 9 → **FAIL 2 of 50**; restored → PASS) · `e2e/po-documents.spec.ts` (NEW) → **6 passed** · focused browser run → **42 passed / 0 failed** · **EVERY validator in `scripts/validate-*.mjs` exits 0** · `tsc` app **0** + node **0** · `eslint .` **0** · `npm run build` **✓** · `validate:wording` **PASS (303 src files, 0 violations)** · **FULL Playwright suite 475 passed / 0 failed / 2 skipped (16.1m)** · the E6/E7 change-scope guards gained the declared P6 scope with their contracts **unchanged**. **DEMO: `LIVE_VERIFICATION_PASS` — 44/44 checks, 0 page errors**, including the pack on the deployed Logistics Hub ("7/8 ready · International · Destination: Doncaster (LBA3), DN4 5HJ"), SSCC labels READY / waybill honestly NOT READY, the SSCC placeholder notice and 2 complete 18-digit identifiers on the live document, the brand rail badge, and the live collect chain with its ARN step `awaiting_channel` (no ARN presented).
+LAST COMPLETED TASK:      **P7 (2026-09-23, session 20) — ADMIN INVOICING: THE RECEIPT GATE, THE INVOICE-NUMBER REGISTRY AND PER-INVOICE TERMS.** Built: `src/lib/commerce/invoiceTerms.ts` (NEW — the ONE owner of the terms and every figure derived from them: **14/30/60 chosen PER INVOICE** (programme decision 2), the DERIVED due date from **the invoice's own** terms, **receivables = issued-and-unpaid**, overdue, upcoming, and the ONE `summariseInvoiceLedger`; `PAYMENT_DERIVATION_BASIS` states the honest basis — register **S14**: no Vendor Payments API exists) · `src/lib/commerce/invoiceRegistry.ts` (NEW — the ONE owner of invoice NUMBERS, **`AV-022`**: unique + **never reused**, an append-only ledger whose **voided numbers stay consumed for ever**, the **zero-value refusal**, `nextInvoiceNumber` / `invoiceNumberIsConsumed` / `INVOICE_NUMBER_RULES`; first number keeps the established shape `SIM-INV-<poNumber>`, a correction after a cancellation is `SIM-INV-<poNumber>-R2`) · `src/lib/commerce/receivingStatus.ts` (NEW — the ONE owner of the **receiving status** (`AV-018`), DERIVED from the received quantities, + the **fail-closed "invoice only AFTER receipt" gate** that names the register it rests on) · `src/lib/dates.ts` (NEW — the pure date helpers with ONE declaration; the work layer re-exports the same names) · `src/data/demoStore.ts` gains the append-only `demoInvoiceNumberRegistry` + `setPurchaseOrderReceivedAt` / `getAllCommerceInvoices` / `getAllCommercePayments` and `getCommerceInvoiceForPo` is **repointed** to the invoice IN FORCE · `commerceLifecycle.ts`: `issueCommerceInvoice` enforces the delivered-PO check, the receipt gate, the declared-term rule and the zero-value refusal, takes its number from the registry, records the allocation in the SAME step and links the re-issue chain both ways; NEW **`cancelCommerceInvoice`** (reason REQUIRED, attributed + audited, voids the number for ever, **refuses a settled invoice**); `receiveCommercePurchaseOrder` records the receipt + reports the derived status · SIX readers repointed to the ONE owner with inline `§P7 — REPOINTED` comments (`workStore`, `AdminDashboard`, `BrandDashboard`, `controlCentre`, `founderOpsAi`, `automation/registry`) · `CommerceOperationsPanel` gains the per-PO **terms selector**, the **receiving status**, the invoice's own terms + derived due date, the rule list and the **cancel + required reason** path · `AccountingPanel` gains the **invoice-number registry ledger**. No provider is contacted; `submitInvoices` remains **P12**.
+CURRENT VERIFIED STATE:   **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** at **`02a868f`**: `node scripts/validate-p7-invoicing.mjs` → **PASS (115 assertions, 0 network calls)**, and **proved able to fail** (registry ordinal arithmetic → constant → **FAIL 5 of 115**; restored → PASS) · `e2e/invoicing.spec.ts` (NEW) → **3 passed** (it FOUND and FIXED a real defect: `Badge` does not forward `data-*`, so the test hook had to move to a native element — now guarded by the validator) · focused browser run → **111 passed / 0 failed** · **EVERY validator in `scripts/validate-*.mjs` exits 0 (98 of 98)** · `tsc` app **0** + node **0** · `eslint .` **0** · `npm run build` **✓** · `validate:wording` **PASS (307 src files, 0 violations)** · **FULL Playwright suite 478 passed / 0 failed / 2 skipped (13.5m)** · `validate-e6` **B2** and `validate-work-layer` repointed to the canonical owner with their old contracts recorded inline (never weakened) · the E6/E7 change-scope guards gained the declared P7 surface with their contracts **unchanged**. **TWO real problems found and fixed honestly:** (1) this increment broke `reset → run` determinism (`validate-investor-demo`: `b63bd0b4` vs `34e305e7`) because the new registry was not part of the deterministic reset — it now participates in `purgeInvestorDemoRecords` and the validator is PASS; (2) **inherited**: `requirements-registry.json` still described **P6** as `not_started` — reconciled to `built_and_tested` with real evidence in this task. **DEMO: `LIVE_VERIFICATION_PASS` — 55/55 checks, 0 page errors, with all 11 §P7 checks green (see `LIVE VERIFICATION` below).**
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`6f22d52`** — "feat(p6): the PO document pack, automatic on acceptance + the documented collect chain" (**22 files, 2854 insertions / 54 deletions**: 5 NEW source/script/spec paths + 17 modified). The state commit follows this increment (this block · `HANDOFF.md` · `STATUS_CHECK.md` · `requirements-registry.json` · `PRODUCTION_READINESS.md`).
-GITHUB PUSH:              **DONE — PUSHED.** `git push origin redesign/foundation` → **`bfebb63..6f22d52`**, exit 0; `git ls-remote --heads origin redesign/foundation` = **`6f22d52def244fc422cd31eb503a88ccd41dcac9`** = local HEAD. The state commit is pushed in the same session.
-DEMO DEPLOYMENT:          **DEPLOYED @ `6f22d52`** via `bash scripts/deploy-demo.sh` (exit 0; 24 new files + 10 modified transferred). **Byte-identity: 33 of 33 SERVABLE emitted files are SHA-256-identical to the local build**, and the deployed `index.html` is byte-identical to `dist/index.html`; the only file that cannot be compared over HTTP is `.htaccess`, which the host correctly refuses to serve (**403 by design** — not a divergence).
-LIVE VERIFICATION:        **VERIFIED — `LIVE_VERIFICATION_PASS`, 44/44 checks, 0 page errors** on `https://demo.mercenta.co.uk` (`node scripts/verify-demo-live.mjs`, which now carries the §P6 checks). The 28 P5/P4 checks still pass unchanged; the P6 checks cover the pack on the deployed Hub, its honest readiness (SSCC ready, waybill not ready with its reason), the SSCC placeholder artefact with 18-digit identifiers, the brand rail badge, and the collect chain with no fabricated ARN.
-OUTSTANDING BLOCKER:      **NONE for the Mercenta programme.** Two HONEST LIMITS of this increment, recorded in the programme doc §10 and `PRODUCTION_READINESS.md`: (1) the collect chain's channel steps cannot advance in this environment (no live Amazon connection), so no carrier is assigned and no ARN exists — the chain states `awaiting_channel` and the platform refuses to invent one; populating `ChannelInstructionOutcome.routingInstructions` from `getShipmentDetails` is **P12's declared scope**. (2) The SSCC identifiers are placeholders by definition (no GS1 licence): the unassigned all-zero prefix and the `XX-PENDING-GS1-LICENCE` label are printed on every carton label, and replacing `SSCC_GS1_PREFIX.value` with the licensed prefix is the whole activation.
-NEXT TASK:                P7 — **admin invoicing**: an invoice per PO **after receipt**; **`receivingStatus` sync**; the invoice-number registry (register `AV-022`: unique, never reused); **14/30/60** terms **per invoice**; derived **upcoming payments**; receivables = issued-and-unpaid.
-EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P7 row) and §10 (what P6 built, so P7 does not re-derive it) → then `src/lib/work/workStore.ts` (`INVOICE_TERM_DAYS`, the existing derived due date) and `src/components/admin/AdminDashboard.tsx` (the P2 receivables/upcoming-payments derivation) → then `npx playwright test --workers=3`.
+LAST VERIFIED COMMIT:     **`02a868f`** — "feat(p7): admin invoicing — receipt gate, invoice-number registry, per-invoice terms" (**29 paths: 23 modified, 6 NEW** — `src/lib/commerce/invoiceTerms.ts`, `src/lib/commerce/invoiceRegistry.ts`, `src/lib/commerce/receivingStatus.ts`, `src/lib/dates.ts`, `scripts/validate-p7-invoicing.mjs`, `e2e/invoicing.spec.ts`). The state commit follows this increment (this block · `HANDOFF.md` · `STATUS_CHECK.md` · `requirements-registry.json` · `PRODUCTION_READINESS.md` · the programme doc/matrix/register).
+GITHUB PUSH:              **DONE — PUSHED.** `git push origin redesign/foundation` → **`37979f6..02a868f`**, exit 0; `git ls-remote --heads origin redesign/foundation` = **`02a868fe46620ecd3a0564efc8bf217b49ff1329`** = local HEAD (`02a868f`). The state commit is pushed in the same session.
+DEMO DEPLOYMENT:          **DEPLOYED @ `02a868f`** via `bash scripts/deploy-demo.sh` (exit 0; **23 new + 11 modified files** transferred, 23 stale hashed assets removed). **Byte-identity: 33 of 33 SERVABLE emitted files are SHA-256-identical to the local build** (checked over HTTP, file by file); the only file that cannot be compared is `.htaccess`, which the host correctly refuses to serve (**403 by design** — not a divergence).
+LIVE VERIFICATION:        **VERIFIED — `LIVE_VERIFICATION_PASS`, 55/55 checks, 0 page errors across every session** (brand, admin, super admin) on `https://demo.mercenta.co.uk` (`node scripts/verify-demo-live.mjs`, which now carries the **11 §P7 checks**). All 44 P4/P5/P6 checks still pass unchanged. The §P7 checks cover the deployed Retail Pipeline's **rule list**, the **Accounting invoice-number registry ledger** (allocated / void / receivables / upcoming + the never-reused rule + the "derived … no Vendor Payments API" basis), and — so a **stale build cannot pass by merely looking right** — that the **DEPLOYED BUNDLE ITSELF** carries the P7 refusal codes (`RECEIPT_REQUIRED`, `INVOICE_ZERO_VALUE`, `INVOICE_TERM_RULE`, `INVOICE_NOT_CANCELLABLE`, `SIM-INV`) read out of **18/18 loaded chunks**. Two false negatives in the *harness* were found and fixed while establishing this (the code-split bundle needed the resource timeline, not just `index.html`'s script tags; and the Accounting tab requires a SUPER ADMIN session) — recorded here rather than hidden.
+OUTSTANDING BLOCKER:      **NONE for the Mercenta programme.** Four HONEST LIMITS of this increment, recorded in programme §11 and `PRODUCTION_READINESS.md`: (1) the **receiving status is established by Mercenta's OWN receiving step** — reading the channel's own `receivingStatus` is `getPurchaseOrdersStatus`, which is **P12's** declared scope (`AV-040`), and the platform never claims a live channel reading; (2) **issuing/cancelling contacts no provider** — the `submitInvoices` API submission is **P12**, and the documented **parallel-testing-with-the-channel's-AP precondition** (`S11`, `AV-022`) is business/activation work, now stated on the admin surface (`INVOICE_NUMBER_RULES`) and in `PRODUCTION_READINESS.md`; (3) **`billToParty` / Payee-system matching (`AV-035`) and credit notes remain open**; (4) the **invoice ledger is in-memory in this environment** (the D4 port reports that honestly — memory by default, Supabase when credentials exist).
+NEXT TASK:                P8 — **inventory linked to the brand's catalogue with an ASIN field**: the brand enters the ASIN **inside Mercenta** (never an Amazon login); if the product already exists the brand adds it, otherwise **Mercenta populates it when the channel accepts the product**; until a real identifier exists it is a **clearly-simulated `SIM-ASIN-…` placeholder** (the code never invents a real-looking ASIN).
+EXACT NEXT STARTING POINT:docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §4 (P8 row) and §11 (what P7 built, so P8 does not re-derive it) → PRODUCTION_READINESS.md (the P8 `SIM-ASIN-…` placeholder decision + the credential that replaces it) → then the catalogue owners (`src/lib/catalog/**`, the brand catalogue surface) and `src/data/demoStore.ts` (the product/submission stores) → then `npx playwright test --workers=3`.
 
 ---
 
-## CURRENT PLATFORM POSITION — **P6 DONE: the PO document pack (automatic on acceptance) + the documented collect chain** (2026-09-23, session 19)
+## CURRENT PLATFORM POSITION — **P7 DONE: admin invoicing — the receipt gate, the invoice-number registry and per-invoice terms** (2026-09-23, session 20)
+
+> **The authoritative resume data is the `## CURRENT RESUME STATE` block above — read that first; it is all a new
+> session needs.** This section records what P7 actually changed and how it was verified. Full detail (what was
+> missing, what was built, the verification and the honest limits): `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` **§11**.
+
+**Increment identity (this session): P7 of the programme document (application work), programme decision 2, registers
+`AV-022` / `AV-018` / `S11` / `S14`, matrix `D11-01` + the new `D11-13`.**
+
+1. **A receipt is now a modelled concept with ONE owner.** `src/lib/commerce/receivingStatus.ts` (NEW) derives
+   `not_received` / `partially_received` / `received` from the per-line received quantities (never a stored copy) and
+   owns the **fail-closed "invoice only AFTER receipt" gate** (`AV-018`) — an unreceived PO cannot be invoiced, and the
+   refusal names the register. A partial receipt may be invoiced, on the quantity that actually arrived.
+2. **Terms are per invoice, and the due date follows the invoice.** `src/lib/commerce/invoiceTerms.ts` (NEW) owns
+   **14/30/60 chosen per invoice** (decision 2) plus every figure derived from them — the derived due date, overdue,
+   upcoming and **receivables = issued-and-unpaid** in ONE implementation, with the S14 basis ("no Vendor Payments API
+   exists, so a payment date is derived") carried as text. This replaced SIX independent re-derivations.
+3. **Invoice numbers are a registry, not a string.** `src/lib/commerce/invoiceRegistry.ts` (NEW) implements `AV-022`:
+   unique + **never reused**, an append-only ledger whose VOIDED numbers stay consumed for ever, the **zero-value
+   refusal**, and cancel ⇒ **NEW Invoice ID**. The first number keeps the established shape; a correction after a
+   cancellation is `SIM-INV-<poNumber>-R2`, with the re-issue chain linked both ways.
+4. **Cancellation is a real, attributed, audited step.** NEW `cancelCommerceInvoice` requires a STATED reason, voids
+   the number for ever, and **refuses to cancel a settled invoice** — money that has moved is corrected on the ledger,
+   never by rewriting an issued record.
+5. **The admin surfaces.** The Retail Pipeline gains the per-PO **terms selector**, the **receiving status**, the
+   invoice's own terms + derived due date, the `AV-022` rule list and the **cancel + reason** path; **Accounting** gains
+   the **invoice-number registry ledger** (allocated / void / receivables / upcoming) with the basis stated.
+6. **The whole thing is gated.** New `scripts/validate-p7-invoicing.mjs` (115 assertions, 0 network calls; proved able
+   to fail) and `e2e/invoicing.spec.ts` (3 passed) — and the LIVE leg additionally reads the refusal codes out of the
+   **deployed bundle's own chunks**, so a stale build cannot pass by looking right.
+
+**Historical (P6 and earlier):** the headings below are the superseded position records. **The authoritative resume
+data is the `CURRENT RESUME STATE` block above.**
+
+---
+
+## PREVIOUS POSITION — **P6 DONE: the PO document pack (automatic on acceptance) + the documented collect chain** (2026-09-23, session 19) — HISTORICAL
 
 > **The authoritative resume data is the `## CURRENT RESUME STATE` block above — read that first; it is all a new
 > session needs.** This section records what P6 actually changed and how it was verified; the blocks below it are
@@ -158,6 +194,22 @@ no social code.
 
 ### 1. COMPLETED / VERIFIED
 
+- **P7 (`02a868f`, 2026-09-23 session 20) — admin invoicing (NEWEST).** The receipt gate (`AV-018`, ONE owner +
+  fail-closed), the invoice-number registry (`AV-022`: unique, never reused, zero-value fails, cancel ⇒ NEW Invoice
+  ID), `14/30/60` terms **per invoice** with the due date derived from them, receivables = issued-and-unpaid, and the
+  cancellation write path — plus SIX readers consolidated onto the one owner and the admin/accounting surfaces.
+  **Verified this session:** `validate-p7-invoicing` **115 assertions PASS** (proved able to fail, 5 failures when the
+  never-reused arithmetic is broken) · `e2e/invoicing.spec.ts` **3 passed** · focused browser **111 passed / 0 failed**
+  · **FULL suite 478 passed / 0 failed / 2 skipped** · **all 98 `scripts/validate-*.mjs` exit 0** · `tsc` 0+0 · eslint
+  0 · build ✓ · wording PASS (307 files) · **demo deployed + live-verified 55/55 checks**. Full detail: programme §11
+  and the `CURRENT RESUME STATE` block.
+- **P6 (`6f22d52`) — the PO document pack** (auto on acceptance) + the documented collect chain; deployed and
+  live-verified 44/44. Detail: programme §10.
+- **P5 — the Mercenta Hub removed**; the destination is the FC **the purchase order declares**
+  (`src/config/destinationFc.ts`). Detail: programme §9.
+- **P4 (`fe20521`) — proxy-model corrections.** The brand's decision is an INSTRUCTION to Mercenta
+  (`src/lib/commerce/channelInstructions.ts`); MERCENTA performs the channel action
+  (`src/lib/commerce/proxyProcessor.ts`) through the SP-API seam (mock-first). Detail: programme §8.
 - **P0 (`ee6d5eb`) — 3 items.** ① The brand Overview's payout tiles no longer dead-end: they scroll to the brand's own payout ledger (`#brand-payouts` + pulse), and settlement stays Admin → Accounting (no duplicate workflow). ② **AV-002 / AV-003 corrected** in the brand-facing email and the ack-deadline label — the unsupported Amazon claim ("at risk of cancellation") was replaced with Mercenta's own attributed operational consequence; no channel consequence is invented. ③ **"Logistics Hub"** naming applied across **16 source files + 13 specs**, matching the project's own canonical documentation.
 - **P0.4 (`b6bd046`) — acceptance now leads to the documents.** `navigateProductView()` / `currentQueryParam()` were added to the existing address layer (`src/lib/runtime/productRoutes.ts`) — **no second navigation mechanism**. An accepted / ready-to-fulfil PO shows **"Open shipping documents"** → `/brand/logistics?po=<PO>`, and the Hub selects that consignment once its rows load. New browser test (`logistics-wave3` test 7).
 - **P1 (`92dd06b`) — Operations is the action centre, directly under Overview.** **Admin:** Operations = Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Carrier Monitor · Calendar; the Commerce group keeps only the commercial pipelines and the empty Logistics group is gone. **Brand:** Operations moved from 6th → **2nd** and holds Purchase Orders · Logistics Hub · Returns · Tasks & Deadlines · Calendar; the Commerce and Logistics groups dissolved into it. **Nav ids are unchanged**, so every address, deep link and RBAC guard is untouched.
@@ -204,22 +256,25 @@ no social code.
 
 ### 2. IN PROGRESS
 
-- **Nothing mid-flight.** The tree is clean at this session's P4 commit plus its state commit. **P4 is DONE and
-  committed; P5 has not been started.**
+- **Nothing mid-flight.** The tree is clean at this session's state commit. **P7 is DONE, committed, pushed and
+  live-verified; P8 (inventory + ASIN) has not been started.**
 
 ### 3. REMAINING — CURRENT ROADMAP (the cleanup programme, in order)
 
-1. **P5 — Remove the Mercenta Hub completely.** Destination = **the FC on the PO**; Hero/map arrival node = that FC; `createShipmentForPO` + `demoData.ts`'s `destination: 'Mercenta UK Hub'`; copy, validators, specs and docs. Closes **D09-13 / AV-026/027**. **NOT STARTED — next.** (P4 deliberately left the destination string alone: it belongs to P5, and the programme forbids collapsing phases.)
-2. **P6 — The PO document pack** (automatic on acceptance): SSCC carton labels · carrier label + waybill · packing list/delivery note · ASN sheet · customs documents for international lanes; notification + nav badge; "Documents for this PO" in the Hub; the collect lane shows the documented status chain (request → carrier assigned → ARN → pickup). **NOT STARTED.**
-3. **P7 — Admin invoicing.** Invoice per PO **after receipt**; **`receivingStatus` sync**; invoice-number registry; **14/30/60 payment terms selected per invoice**; derived upcoming payments; receivables = issued-and-unpaid. Closes **AV-022**. *(P2 already derives receivables/upcoming payments from the current ledger with the declared terms; P7 adds the terms CHOICE, the number registry and the receiving sync.)* **NOT STARTED.**
-4. **P8 — Inventory linked to the brand's catalogue, with ASIN.** Brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation — the code never invents a real-looking ASIN). **NOT STARTED.**
-5. **P9 — Remove the 3PL carrier surface completely, including the demo environment** (environment, role, shell + 3 views, `CarrierDashboard`, `BakLogistics`, the demo switcher entry, the "3PL Carrier Terminal" login card, the admin "Carrier Monitor" item, the public FAQ claim, and the affected documents). Matrix `D01-07` / `D04-18` / `D10-13`. **NOT STARTED.**
-6. **P10 — Logistics Hub completion.** Provider configuration + the PO documents; consolidation recorded as **documented-but-deferred** with the model supporting **1..n POs**. **NOT STARTED.**
-7. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED.**
-8. **P12 — SP-API seam extension (mock-first).** `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. *( `submitAcknowledgement` was implemented by **P4**, so it is no longer P12's work; the seven remaining operations still close **AV-040**.)* **NOT STARTED.**
-9. **`redesign/foundation` on GitHub — DONE.** The branch exists on `origin`; the push is part of every task close now (operating-model §12).
-10. **KEEP `demo.mercenta.co.uk` IN STEP** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Executed at the close of each product phase (P3 and P4); the full three-way confirmation is re-run at the end of the programme.
-11. **Carried over:** the Finance `destination: 'accounting'` dead route, the Overview header still titled **"Operations Overview"**, the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, and **WAVE 5 / WAVE 6**. *(The "Command Centre ↔ Control Centre reconciliation" was the P3 work — DONE. P4 left the Overview header title to P5, which owns the copy pass.)* **NOT STARTED.**
+> **Reconciled 2026-09-23 (session 20).** **P5, P6 and P7 are DONE and committed** (P5 in session 17, P6 in session 19,
+> P7 in session 20) and have been MOVED OUT of this current list — their records live in the `CURRENT RESUME STATE`
+> block above and in `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` §9–§11. The list below is the REMAINING
+> work only, renumbered.
+
+1. **P8 — Inventory linked to the brand's catalogue, with ASIN.** Brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation — the code never invents a real-looking ASIN). **NOT STARTED — next.**
+2. **P9 — Remove the 3PL carrier surface completely, including the demo environment** (environment, role, shell + 3 views, `CarrierDashboard`, `BakLogistics`, the demo switcher entry, the "3PL Carrier Terminal" login card, the admin "Carrier Monitor" item, the public FAQ claim, and the affected documents). Matrix `D01-07` / `D04-18` / `D10-13`. **NOT STARTED.**
+3. **P10 — Logistics Hub completion.** Provider configuration + the PO documents; consolidation recorded as **documented-but-deferred** with the model supporting **1..n POs**. **NOT STARTED.**
+4. **P11 — Remove "Create PO"** and channel PO ingestion (mock-first); repoint the three validators that assert its notification path. **NOT STARTED.**
+5. **P12 — SP-API seam extension (mock-first).** `getPurchaseOrdersStatus` (receiving sync), `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels` (honest UK/EU refusal — NA-only), `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`. *( `submitAcknowledgement` was implemented by **P4**, so it is no longer P12's work; the seven remaining operations still close **AV-040**.)* **NOT STARTED.**
+6. **`redesign/foundation` on GitHub — DONE.** The branch exists on `origin`; the push is part of every task close now (operating-model §12).
+7. **KEEP `demo.mercenta.co.uk` IN STEP** — `bash scripts/deploy-demo.sh` → open `https://demo.mercenta.co.uk` → verify the changed behaviour live → confirm the live build matches the recorded verified commit. Executed at the close of **every product phase including P7**; the full three-way confirmation is re-run at the end of the programme.
+8. **Carried over:** the Finance `destination: 'accounting'` dead route, the Overview "Fulfilment in motion" queue vs Logistics Control's authoritative table, and **WAVE 5 / WAVE 6**. *(The "Command Centre ↔ Control Centre reconciliation" was P3 — DONE; the Overview h1 was corrected to "Overview" in P4/P6 — DONE.)* **NOT STARTED.**
+
 
 ### 4. DEFERRED / PARKED
 
@@ -267,17 +322,36 @@ no social code.
 
 - **Branch:** `redesign/foundation` (tracking `origin/redesign/foundation`). **P2 checkpoint commit:**
   `0c05fe0d6537ea1c46b1053282bab19d051e38ea`. **P3:** `21c6869` (code) → `17a99eb` (completion) → `8203a03`
-  (production-boot fix + gate). **P4 checkpoint commit:** **`fe20521`** ("P4 complete: the brand instructs Mercenta —
-  Mercenta performs the channel action (proxy model)"), pushed to `origin/redesign/foundation` (`2646a34..fe20521`,
-  exit 0) and deployed to `https://demo.mercenta.co.uk` with the deployed build byte-identical to it (33/33 files).
-  `git status --porcelain`: **EMPTY**.
+  (production-boot fix + gate). **P4:** `fe20521`. **P6:** `6f22d52` (+ `37979f6` state). **P7 (this session):**
+  **`02a868f`** ("feat(p7): admin invoicing — receipt gate, invoice-number registry, per-invoice terms"), pushed to
+  `origin/redesign/foundation` (`37979f6..02a868f`, exit 0) and deployed to `https://demo.mercenta.co.uk` with the
+  deployed build byte-identical to it (**33/33 servable files**). `git status --porcelain`: **EMPTY** after the state
+  commit.
 - **THREE-WAY STATUS: `COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED`** — local ✅ (verified this session) · GitHub ✅
-  (`origin/redesign/foundation` at `fe20521`) · demo ✅ (**live verification 19/19 checks, 0 page errors**; deployed build
-  byte-identical to the committed build). The state commit that carries this very text is a **docs + live-verification
-  script** increment, so its own three-way status is **NOT APPLICABLE (no application runtime change)** — it does not
-  change what is deployed.
+  (`origin/redesign/foundation` at `02a868f`, confirmed with `git ls-remote`) · demo ✅ (**live verification 55/55
+  checks, 0 page errors**, including the deployed-bundle probe). The state commit that carries this very text is a
+  **docs + live-verification script** increment, so its own three-way status is **NOT APPLICABLE (no application
+  runtime change)** — it changes nothing that is deployed.
 
-### 8. VERIFICATION STATUS — **P4 (2026-09-23, session 16): every run below was executed in THIS session**
+### 8. VERIFICATION STATUS — **P7 (2026-09-23, session 20): every run below was executed in THIS session**
+
+| Gate | Result |
+|---|---|
+| `npx tsc --noEmit -p tsconfig.app.json` · `npx tsc --noEmit -p tsconfig.node.json` | **0 errors · 0 errors** |
+| `npx eslint .` | **0 problems** — with `react-hooks/rules-of-hooks` and `react-hooks/exhaustive-deps` set to **ERROR** (§Stage-18 functional-parity pipeline) |
+| `npm run build` | **✓ built** (5.6s) |
+| `node scripts/validate-p7-invoicing.mjs` (**NEW gate**, `npm run validate:invoicing`) | **P7_INVOICING_VALIDATION_PASS — 115 assertions, 0 network calls**, driving the REAL modules through the project's own module graph: the terms + their refusal, the per-invoice derived due date, receivables = issued-and-unpaid, the registry's uniqueness/never-reuse/append-only/idempotence, the zero-value refusal, the derived receiving status + the fail-closed gate, and then the real DOMAIN (unreceived PO refused recording nothing, 60-day invoice issued + idempotent, undeclared term refused, zero-value refused, cancel-without-reason refused, cancellation voiding the number, correction as `…-R2` with the chain linked both ways, settled invoice refused, RBAC + tenant isolation refused, full + partial receipts). **Proved able to FAIL**: mutating the registry's ordinal arithmetic to a constant → **FAIL (5 of 115)** |
+| `e2e/invoicing.spec.ts` (**NEW**) | **3 passed** (17.2s) — terms per invoice + derived due date + receiving status; cancel-with-reason ⇒ re-issue as `…-R2`; the receipt gate + the registry ledger in the live build. **This spec found and fixed a REAL defect in the new code:** `Badge` does not forward `data-*`, so the test hook had to move to a native element (the validator now guards that class) |
+| `node scripts/validate-work-layer.mjs` | **WORK LAYER: PASS (0 failures)** — its `invoice_due` deadline assertion **REPOINTED** to the canonical owner (old contract recorded inline) plus a new per-invoice-terms assertion |
+| `validate-e6-brand-surfaces` | **PASS** — **B2 REPOINTED** to the canonical owner (with an added "no second copy" assertion); the P7 declared scope added; F5/F5b/F6 contracts unchanged |
+| `validate-e7-embedded-social` | **PASS — 0 failures** — the P7 declared scope added; the protected-area guard unchanged |
+| `validate-investor-demo` | **PASS** — after fixing a REAL determinism break this increment introduced (the new registry was not part of the deterministic reset: `reset → run` gave `b63bd0b4` vs `34e305e7`) |
+| **EVERY validator in `scripts/validate-*.mjs`** | **98 of 98 exit 0** |
+| `npm run validate:wording` | **WORDING_LINT_PASS — 307 src files scanned, 0 outward-facing violations** |
+| Playwright focused (invoicing + dashboard + work-layer + commerce sim + admin/brand operational surfaces + deterministic-journey + xero + billing + command-centre + investor-demo + notifications + po-lifecycle + simulation-control + brand-payouts + multi-tenant + canonical-propagation) | **111 passed / 0 failed (3.2m)** |
+| Playwright **FULL suite** — `npx playwright test --workers=3` | **478 passed / 0 failed / 2 skipped (13.5m)**, exit 0 |
+| `node scripts/verify-demo-live.mjs` (**live**, `https://demo.mercenta.co.uk`) | **LIVE_VERIFICATION_PASS — 55/55 checks, 0 page errors** across the brand/admin/super-admin sessions, including the 11 **§P7** checks and the deployed-bundle probe (18/18 chunks) |
+| `git status --porcelain` | **EMPTY** after the state commit |
 
 | Gate | Result |
 |---|---|

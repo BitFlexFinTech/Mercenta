@@ -890,6 +890,7 @@ try {
     'e2e/invoicing.spec.ts',
     'scripts/validate-p7-invoicing.mjs',
     'scripts/validate-work-layer.mjs',
+    'scripts/verify-demo-live.mjs',          // carries the §P7 live checks
     'package.json',
   ];
 
