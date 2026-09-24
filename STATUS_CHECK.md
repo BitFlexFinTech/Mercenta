@@ -56,11 +56,11 @@ seam mode stated truthfully — mounted on the admin Retail Pipeline), the attri
 inventory tab, and the label rule stated in the PO document pack.
 
 **Verified (all evidence produced this session).** `scripts/validate-p12-spapi-seam.mjs` (NEW, the 102nd gate) →
-**57 PASS / 0 FAIL**, 0 network calls, executing the real modules AND both clients, and **PROVED ABLE TO FAIL**
+**59 PASS / 0 FAIL**, 0 network calls, executing the real modules AND both clients, and **PROVED ABLE TO FAIL**
 (an available unknown/UK marketplace → 52/5; the simulated-reading guard removed → 56/1; both restored
 **byte-identical**, shasum unchanged) · **all 102 `scripts/validate-*.mjs` exit 0** · `npm run typecheck` 0 ·
 root `tsc` 0 · `eslint src scripts e2e` 0 · `npm run build` ✓ 7.65s · `validate:wording` PASS (319 files) ·
-`e2e/p12-channel-operations.spec.ts` (NEW) 4 passed · **FULL Playwright 499 passed / 0 failed / 2 skipped
+`e2e/p12-channel-operations.spec.ts` (NEW) 5 passed · **FULL Playwright 499 passed / 0 failed / 2 skipped
 (17.1m)**. Repointed gates (old contracts recorded inline, none weakened): `validate-proxy-model`,
 `validate-logistics-providers`, E6 F5/F5b/F6, E7.
 

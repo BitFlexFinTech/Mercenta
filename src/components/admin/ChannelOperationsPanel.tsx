@@ -35,6 +35,7 @@ import { demoCommerceInvoices } from '@/data/demoStore';
 import { Badge, Button, Card } from '@/components/ui';
 import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
 import { refreshChannelRoutingInstructions } from '@/lib/commerce/proxyProcessor';
+import { applyChannelReceivingReadingToStore } from '@/lib/commerce/commerceLifecycle';
 import { readChannelReceivingSync, submitCommerceInvoiceToChannel } from '@/data/api';
 import { CHANNEL_SHIPMENT_LABEL_RULE, channelShipmentLabelsAvailability } from '@/config/shipping';
 import { RECEIVING_STATUS_LABELS } from '@/lib/commerce/receivingStatus';
@@ -55,6 +56,8 @@ export function ChannelOperationsPanel() {
   const [invoiceResults, setInvoiceResults] = useState<
     Record<string, ChannelInvoiceSubmissionRecord>
   >({});
+  /** §P12 — the outcome of applying a reading to the canonical store, per PO. */
+  const [applyResults, setApplyResults] = useState<Record<string, string>>({});
 
   /**
    * The channel's own instructions that carry a RAISED shipment request — the only
@@ -76,6 +79,22 @@ export function ChannelOperationsPanel() {
   );
 
   const labels = channelShipmentLabelsAvailability(UK_MARKETPLACE_ID);
+
+  const actor = useMemo(
+    () => ({ staffId: actingStaffId, canMutate: canCurrentUserMutate }),
+    [actingStaffId, canCurrentUserMutate]
+  );
+
+  /** §P12 — apply ONE live channel reading as the canonical receipt. */
+  function applyReading(reading: ChannelReceivingSyncResult['readings'][number]) {
+    const result = applyChannelReceivingReadingToStore(reading, actor);
+    const message = result.ok
+      ? `Applied — canonical receiving status ${result.receivingStatus ?? 'recorded'}.`
+      : (result.refusal ?? 'The canonical write was refused.');
+    setApplyResults((prev) => ({ ...prev, [reading.poId]: message }));
+    if (result.ok) setNotice(`Channel reading applied to ${reading.channelPurchaseOrderId}.`);
+    else setError(`Channel reading for ${reading.channelPurchaseOrderId}: ${message}`);
+  }
 
   async function readReceiving() {
     setBusyId('receiving');
@@ -210,6 +229,39 @@ export function ChannelOperationsPanel() {
                   {RECEIVING_STATUS_LABELS[reading.mercentaReceivingStatus]} ·{' '}
                   {reading.lines.reduce((sum, l) => sum + l.receivedQty, 0)} unit(s) received
                   {reading.differs ? ' · the two views differ' : ''}
+                  {/*
+                    §P12 — the canonical WRITE path is here, not hidden: a LIVE reading is
+                    applied through the canonical receiving step, and a SIMULATED one is never
+                    offered as an action — its refusal is STATED instead, so there is no control
+                    that could only ever fail.
+                  */}
+                  {reading.simulated ? (
+                    <span
+                      data-state="channel-apply-refused"
+                      className="mt-0.5 block text-ds-micro text-amber-300"
+                    >
+                      Not applied — this reading is SIMULATED, and a simulated channel reading is
+                      never written as a canonical receipt. Configure live channel credentials to
+                      apply it.
+                    </span>
+                  ) : (
+                    <span className="mt-0.5 flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        className="text-ds-micro"
+                        data-testid={`channel-apply-${reading.channelPurchaseOrderId}`}
+                        disabled={!canCurrentUserMutate}
+                        onClick={() => applyReading(reading)}
+                      >
+                        Apply as canonical receipt
+                      </Button>
+                      {applyResults[reading.poId] && (
+                        <span data-state="channel-apply-result" className="text-ds-micro text-zinc-400">
+                          {applyResults[reading.poId]}
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>

@@ -517,6 +517,9 @@ check('§P12 the deployed receiving read reports the channel’s own state per p
     /Mercenta: /.test(p12Sync));
 check('§P12 the deployed console states the reading is REPORTED, never written as a receipt',
   /never written/.test(p12Sync));
+check('§P12 the deployed console STATES why a simulated reading is not applied (no dead control)',
+  (await admin.locator('[data-state="channel-apply-refused"]').count()) > 0 &&
+    (await admin.locator('[data-testid^="channel-apply-"]').count()) === 0);
 check('no uncaught page error on the deployed §P12 channel-operations flow',
   adminErrors.length === 0,
   adminErrors.slice(0, 2).join(' | '));

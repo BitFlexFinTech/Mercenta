@@ -1038,7 +1038,7 @@ Three things the register and the repository agreed on:
 
 | Check | Result |
 |---|---|
-| `node scripts/validate-p12-spapi-seam.mjs` (NEW, the 102nd gate) | **P12_SPAPI_SEAM_VALIDATION_PASS (57 assertions, 0 network calls, executing the real modules AND both clients)**, **proved able to fail twice**: (a) making an unknown/UK marketplace "available" → **52 passed / 5 failed**; (b) removing the simulated-reading guard → **56 / 1**. Both restored **byte-identical** (`shasum` unchanged) → PASS again. |
+| `node scripts/validate-p12-spapi-seam.mjs` (NEW, the 102nd gate) | **P12_SPAPI_SEAM_VALIDATION_PASS (59 assertions, 0 network calls, executing the real modules AND both clients)**, **proved able to fail twice**: (a) making an unknown/UK marketplace "available" → **52 passed / 5 failed**; (b) removing the simulated-reading guard → **56 / 1**. Both restored **byte-identical** (`shasum` unchanged) → PASS again. |
 | every validator in `scripts/validate-*.mjs` | **102 of 102 exit 0** (the whole set was executed this session; the new gate is the 102nd) |
 | repointed gates | `validate-proxy-model` (the routing request is now the CHANNEL's own reference — the old `RR-` contract recorded inline, and MORE asserted), `validate-logistics-providers` (the consolidation activation is recorded as DELIVERED while the posture stays `deferred`), E6 F5/F5b/F6 + E7 (`P12_SPAPI_SEAM_SCOPE` / `P12_SPAPI_SEAM_DECLARED`, with the protected `src/lib/spapi/**` prefix declared, not widened) |
 | `npm run typecheck` / `npx tsc --noEmit` (app + root, incl. `e2e/` + `scripts/`) | **0 errors** |
@@ -1048,6 +1048,23 @@ Three things the register and the repository agreed on:
 | `e2e/p12-channel-operations.spec.ts` (NEW) | **4 passed** in real Chromium (the console renders all four operations; the label rule is stated as refused; the receiving sync reads the channel's own state for the POs the §P11 entry point just filed, with the simulated provenance; the read is not a dead end) |
 | **FULL Playwright suite** (`npx playwright test --workers=3`) | recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` |
 | committed-state re-verification + demo deployment + live verification | recorded in the `CURRENT RESUME STATE` block (the three-way gate) |
+
+### A REAL DEFECT the live leg found — and the fix (so P13+ does not repeat it)
+
+**The live bundle probe failed on the FIRST deployment** — `§P12 the deployed bundle carries the simulated-reading
+refusal in the receiving sync` — because `CHANNEL_READ_SIMULATED` was **absent from the shipped bundle**. The
+cause was not the probe: `applyChannelReceivingReading` (the canonical write path) was implemented and
+gate-proven, but **no surface called it**, so the bundler tree-shook it away. The consequence would have been
+real: even with live credentials, a channel reading could never have been applied.
+
+**The fix:** the admin console now WIRES the write path — a LIVE reading offers *"Apply as canonical receipt"*
+(through `applyChannelReceivingReadingToStore`, i.e. the canonical receiving step), while a SIMULATED reading
+**offers no control at all** and states why it is not applied. There is therefore no control that can only ever
+fail, the string ships (verified in `dist/assets/index-*.js`), and the gate now asserts the wiring so the
+regression cannot recur (`the console WIRES the canonical receiving write path` +
+`a SIMULATED reading offers no apply control`). The lesson is recorded here deliberately: **an exported,
+gate-proven domain function is not a delivered feature until a surface calls it — and only a bundle-level live
+check catches the difference.**
 
 ### Honest limits
 

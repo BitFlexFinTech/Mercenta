@@ -673,6 +673,22 @@ check(
   'the app seam derives the pushed quantity from the canonical ledger accessor',
   /movements: getInventoryMovements\(/.test(apiSrc)
 );
+/**
+ * §P12 — THE CANONICAL WRITE PATH MUST BE WIRED INTO THE PRODUCT, not merely
+ * exported. This assertion exists because the FIRST live run caught exactly that:
+ * the apply path was implemented and gate-proven, but NO surface called it, so the
+ * bundler dropped it and even a live channel reading could never have been applied.
+ */
+const panelSrc = read('src/components/admin/ChannelOperationsPanel.tsx');
+check(
+  'the console WIRES the canonical receiving write path (a live reading can be applied)',
+  /applyChannelReceivingReadingToStore/.test(panelSrc) &&
+    /applyChannelReceivingReadingToStore\(reading, actor\)/.test(panelSrc)
+);
+check(
+  'a SIMULATED reading offers no apply control — its refusal is stated instead',
+  /channel-apply-refused/.test(panelSrc) && /reading\.simulated \?/.test(panelSrc)
+);
 check('the gate is registered as an npm script', /"validate:p12-spapi-seam"/.test(read('package.json')));
 
 console.log('');

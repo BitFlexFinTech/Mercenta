@@ -99,4 +99,22 @@ test.describe('§P12 — the receiving sync reads the CHANNEL, truthfully', () =
       { timeout: 12000 }
     );
   });
+
+  test('5. a SIMULATED reading states why it is NOT applied — and offers no control that can only fail', async ({
+    page,
+  }) => {
+    await ingestChannelPosThenOpenConsole(page);
+    await page.locator('[data-state="channel-receiving-read"]').click();
+    await expect(page.locator('[data-testid="channel-receiving-readings"] li').first()).toBeVisible({
+      timeout: 12000,
+    });
+
+    // Every reading here is simulated, so the canonical write is refused BY DESIGN —
+    // and the surface says so, per reading, instead of offering a dead control.
+    await expect(page.locator('[data-state="channel-apply-refused"]').first()).toBeVisible();
+    await expect(page.locator('[data-state="channel-apply-refused"]').first()).toContainText(
+      /never written as a canonical receipt/
+    );
+    expect(await page.locator('[data-testid^="channel-apply-"]').count()).toBe(0);
+  });
 });
