@@ -32,7 +32,7 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 |---|---|---|
 | **S1** | the window OWNER (config + pure logic + gate) | **DONE** (`418d18b`) |
 | **S2** | DOMAIN ENFORCEMENT + the auto-rejection | **DONE** (this sprint) |
-| **S3** | WORK LAYER — `deriveWorkItems` consumes the owner (the founder-reported defect, removed at source) | NOT STARTED |
+| **S3** | WORK LAYER — `deriveWorkItems` consumes the owner (the founder-reported defect, removed at source) | **DONE** (this sprint) |
 | **S4** | ON-BEHALF draft + approve | NOT STARTED |
 | **S5** | ALL-CHANNEL fan-out + the instant-message seam | NOT STARTED |
 | **S6** | BRAND surfaces | NOT STARTED |
@@ -102,4 +102,62 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
 
 - Nothing yet PRODUCES the on-behalf rejection automatically: the writer exists and is gated; the producer is S4/S5.
 - The notification schedule (12/6/2h) is declared and derivable but not yet fanned out (S5).
-- `deriveWorkItems` does not yet consume the owner, so the founder-reported work-layer defect persists until S3.
+- ~~`deriveWorkItems` does not yet consume the owner, so the founder-reported work-layer defect persists until S3.~~
+  **§P13 / S3 — SUPERSEDED 2026-09-25 (session 28): the work layer DOES consume the owner now — see §S3 below.
+  S3 removed the defect at source; the OLD work-layer predicate
+  (`status !== rejected/delivered` + `!acknowledgedAt`) is recorded in the inline `REPOINTED` comment in
+  `src/lib/work/workStore.ts` and in the repointed `e2e/deterministic-journey.spec.ts` assertion.**
+
+## S3 — the work layer consumes the owner (2026-09-25, session 28)
+
+**Built**
+
+1. **`deriveWorkItems` derives acknowledgement work from the RULE'S OWNER, not from its own predicate.**
+   §P13 / S3 — REPOINTED. The test was hand-rolled in the work layer
+   (`po.status !== 'rejected' && po.status !== 'delivered' && !po.acknowledgedAt`), which is exactly why the
+   founder-reported `PO-9201` / `PO-9211` — shipped, 41 days past their deadline — arrived as
+   `Acknowledge PO-…` work. The item is now derived ONLY when the owner has the PO in its QUEUE
+   (`poAcknowledgementWindow(po, now).inQueue` = Amazon's `New` set INSIDE the 24-hour window). The
+   hand-rolled channel-closed short-circuit went with it: the owner owns that classification too.
+2. **The row's wording IS the owner's own `reason`**, so the queue row, the PO surface and the writer cannot
+   state three different window states. The row reads
+   `… · Awaiting the brand's decision — 3h 30m left of the 24-hour window.` and, inside the closing window,
+   `…; Mercenta may act on the brand's behalf inside this closing window, with the brand's approval`. The
+   hand-written "at risk of cancellation after 24h" copy is gone.
+3. **The deadline IS the owner's deadline** (`poAcknowledgementDeadline(po)`, its DATE part), so the duplicate
+   `addDays(po.orderDate, 1)` arithmetic is gone. The VALUE is unchanged (both compute `orderDate + 24h`); what
+   changed is that the arithmetic has ONE owner.
+4. **THE CLOCK SEAM.** The window is an INSTANT-resolution rule, so it is judged against `now` — the same
+   default instant `src/data/api.ts` enforces it with — and NEVER against `demoToday()`, the DATE-resolution
+   clock tests pin for the overdue / due-soon buckets. `deriveWorkItems(now?)` exposes the seam, as S2 did for
+   `acknowledgePurchaseOrder`. Judging the window on a pinned demo DATE would let the queue advertise work the
+   writer REFUSES, or hide work it performs.
+5. **`scripts/validate-work-layer.mjs`** carries a NOTE beside its pinned date, so a future session cannot
+   "fix" the window onto that date and silently break the agreement with the writer.
+
+**Tested (all evidence produced in this session)**
+
+- NEW `scripts/validate-po-acknowledgement-work.mjs` → **41 assertions, PASS, 0 network calls**: ONE owner
+  (source-level) · the derived queue is a BIJECTION with the owner's `inQueue` set over the real demo POs ·
+  the founder-reported stale POs derive nothing · the wording is the owner's `reason` verbatim · past the
+  limit / unreadable order date / already acknowledged / channel-closed / no-obligation fixtures all derive
+  nothing · the clock seam (in the queue at one instant, out of it at another) · tenant isolation · reminders
+  stop on resolution. **Proved able to fail twice**: owner consumption removed → **8 red**; the window judged
+  on the pinned demo DATE → **4 red**; both restored byte-identical (`workStore.ts` shasum `6fa49641…`).
+- Whole-validator sweep: **all 28 `validate:*` scripts PASS**.
+- `npm run typecheck` 0 · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) 0 · eslint 0 ·
+  `npm run build` ✓ (7.73s).
+- Playwright: `e2e/deterministic-journey.spec.ts` REPOINTED — it asserted the admin queue contained `PO-9003`,
+  whose status is `accepted` (PAST the acknowledgement decision) and which is therefore NOT acknowledgement
+  work at all. It now asserts `PO-9002` (Tapatío's genuinely OPEN PO) for the cross-tenant claim, and asserts
+  the defect's ABSENCE (`Acknowledge PO-9003` must not appear). The six affected specs then passed 45/45, and a
+  full-suite run is reported in the session report.
+
+**Honest limits / non-credential follow-ups**
+
+- Nothing yet PRODUCES the on-behalf rejection automatically (the writer exists and is gated; the producer is
+  S4/S5), so a PO in the closing window is still the brand's to decide — and the row now SAYS so rather than
+  implying Mercenta has already acted.
+- The notification schedule (12/6/2h) is declared and derivable but not yet fanned out (S5).
+- A PO PAST the limit derives no acknowledgement work here because the owner classifies it as history; the work
+  a closed window implies is Mercenta's on-behalf action, owned by S4.

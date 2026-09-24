@@ -190,7 +190,20 @@ test.describe('A. Deterministic investor journey — brand → channel → finan
     /* Platform oversight: the admin queue carries EVERY tenant's work, including
        the seeded POs of two different brands. */
     await expect(page.getByTestId('work-primary')).toContainText('PO-9001');
-    await expect(page.getByTestId('work-primary')).toContainText('PO-9003');
+    /**
+     * §P13 / S3 — REPOINTED. OLD CONTRACT: this asserted `PO-9003`, which the work
+     * layer used to present as acknowledgement work. PO-9003's status is
+     * `accepted` — PAST the acknowledgement decision — so it owes no
+     * acknowledgement: presenting it as acknowledgement work was the
+     * founder-reported defect class (PO-9201 / PO-9211 arrived as "Acknowledge
+     * PO-…" 41 days past their deadline), and S3 removed it at source by making
+     * `deriveWorkItems` ask the window owner. The cross-tenant claim is therefore
+     * asserted on `PO-9002` — Tapatío's seeded OPEN PO, which the owner genuinely
+     * has in its queue — so this still proves the admin queue spans two tenants'
+     * real work, in both directions.
+     */
+    await expect(page.getByTestId('work-primary')).toContainText('PO-9002');
+    await expect(page.getByTestId('work-primary')).not.toContainText('Acknowledge PO-9003');
 
     await openAdminView(page, 'Logistics Hub');
     await expect(page.getByTestId('logistics-metric-in-transit')).toBeVisible({ timeout: 8000 });

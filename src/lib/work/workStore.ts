@@ -46,6 +46,15 @@ import { loadIntegrationsSync } from '@/integrations/connections';
 import { addDays, daysBetween } from '@/lib/dates';
 import { invoiceDueDate, invoiceIsOutstanding, invoiceTermDays } from '@/lib/commerce/invoiceTerms';
 import { PO_ACKNOWLEDGEMENT_HOURS } from '@/config/purchaseOrders';
+/**
+ * §P13 / S3 — THE RULE'S OWNER. The work layer ASKS the acknowledgement-window
+ * owner whether a PO is still actionable instead of deriving that itself, so
+ * "is this acknowledgement work?" has exactly ONE answer in the platform.
+ */
+import {
+  poAcknowledgementDeadline,
+  poAcknowledgementWindow,
+} from '@/lib/commerce/poAcknowledgementWindow';
 
 /* ── DECLARED deterministic terms (single source of truth) ─────────────────── */
 
@@ -358,22 +367,48 @@ function make(source: WorkSource, entity: WorkEntityRef, input: DeriveInput): Wo
 /**
  * Project every open unit of work out of the canonical stores. Pure: calling it
  * twice with unchanged state returns identical ids, deadlines and priorities.
+ *
+ * §P13 / S3 — THE CLOCK SEAM. The acknowledgement window is an
+ * INSTANT-resolution rule (`orderDate + 24h`), so it is judged against `now` —
+ * the same default instant `src/data/api.ts` enforces it with — and NOT against
+ * `demoToday()`, which is a DATE-resolution convenience that tests pin for the
+ * overdue / due-soon buckets. Judging the window on a pinned demo DATE would let
+ * this queue advertise work the writer REFUSES, or hide work the writer
+ * performs — exactly the class of disagreement S3 removes. `now` is a parameter
+ * so a gate can pin it, following the caller-clock seam S2 added to
+ * `acknowledgePurchaseOrder`.
  */
-export function deriveWorkItems(): WorkItem[] {
+export function deriveWorkItems(now: Date | string | number = new Date()): WorkItem[] {
   const out: WorkItem[] = [];
   const today = demoToday();
 
-  /* 1. Retail-channel PO acknowledgement (24h rule) — always critical, because
-        an unacknowledged PO is at risk of forced cancellation. */
+  /* 1. Retail-channel PO acknowledgement — the queue is the RULE OWNER's, so this
+        layer can no longer invent acknowledgement work. Always critical: an
+        unacknowledged PO inside its window is at risk of the channel's forced
+        cancellation.
+
+        §P13 / S3 — REPOINTED (the founder-reported defect, removed at source).
+        The predicate used to be hand-rolled here (`status !== rejected/delivered`
+        + `!acknowledgedAt`), which is why PO-9201 / PO-9211 — shipped, 41 days past
+        their deadline — still produced "Acknowledge PO-…" items. The owner now
+        decides (`inQueue` = Amazon's `New` set INSIDE the 24-hour window): a PO
+        whose window has closed, that the channel has closed, that already carries
+        an acknowledgement, or that owes no acknowledgement, derives NO
+        acknowledgement work. The row's wording IS the owner's own `reason` and its
+        deadline IS the owner's own deadline, so the queue row and the PO surface
+        cannot state different window states. (`PO_ACKNOWLEDGEMENT_HOURS` is still
+        imported for the re-export this module's public surface promises.) */
   for (const po of demoPurchaseOrders) {
-    if (po.status === 'rejected' || po.status === 'delivered') continue;
-    if (!po.acknowledgedAt) {
+    const ackWindow = poAcknowledgementWindow(po, now);
+    if (ackWindow.inQueue) {
+      /** The DATE of the owner's deadline; in the queue it is always readable. */
+      const deadline = poAcknowledgementDeadline(po);
       out.push(
         make('po_acknowledgement', { type: 'purchase_order', id: po.id, label: po.poNumber }, {
           title: `Acknowledge ${po.poNumber}`,
-          detail: `${brandLabel(po.brandId)} · £${po.poValue.toLocaleString('en-GB')} · unacknowledged POs are at risk of cancellation after ${PO_ACKNOWLEDGEMENT_HOURS}h`,
+          detail: `${brandLabel(po.brandId)} · £${po.poValue.toLocaleString('en-GB')} · ${ackWindow.reason}`,
           priority: 'critical',
-          dueDate: addDays(po.orderDate, 1),
+          dueDate: deadline ? deadline.slice(0, 10) : null,
           tenantId: po.brandId,
           actionView: 'purchase_orders',
           createdAt: po.orderDate,

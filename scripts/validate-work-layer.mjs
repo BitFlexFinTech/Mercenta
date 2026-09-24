@@ -49,6 +49,16 @@ test(
 );
 
 /* ── 2. Determinism of derivation ─────────────────────────────────────────── */
+/**
+ * §P13 / S3 — NOTE. This pins the work layer's DATE clock (the overdue / due-soon
+ * buckets). The PO acknowledgement window is an INSTANT-resolution rule and is
+ * judged against the real clock — the same default instant `src/data/api.ts`
+ * enforces it with — so acknowledgement items below reflect the live 24-hour
+ * window exactly as the app does. Do not "fix" that by pointing the window at
+ * this pinned date: the queue would then advertise work the writer REFUSES.
+ * `deriveWorkItems(now)` is the seam; `scripts/validate-po-acknowledgement-work.mjs`
+ * asserts both directions.
+ */
 work.setDemoClock('2026-09-19');
 const first = work.deriveWorkItems();
 const second = work.deriveWorkItems();
