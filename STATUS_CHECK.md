@@ -242,6 +242,22 @@ from **16/16 chunks**.
 `amendShipment` helper still writes `status` without `stage`. The first live run failed 3 §P9 checks for a real reason
 (the check ran on the brand page, where the console is correctly absent) and was fixed, then re-run green.
 
+### PO-ACK programme (2026-09-24, session 26) — **S1 DONE: the Amazon PO acknowledgement window has ONE owner**
+
+Founder directive: **the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
+nothing.** S1 delivers the single owner: `src/config/purchaseOrders.ts` (declared terms WITH provenance — 24h window ·
+48h update window · the 12/6/2h notification SCHEDULE labelled as scheduling, not an Amazon rule · the
+on-behalf/auto-rejection instant at the final stage, before expiry · the auto-rejection reason mapped onto Amazon's
+three documented codes and guarded at module load · the obligation set = Amazon's `New` set) and
+`src/lib/commerce/poAcknowledgementWindow.ts` (pure: deadline `orderDate + 24h`; Amazon's lifecycle vocabulary
+`new`/`acknowledged`/`closed`; the queue/history split; notification stages; the closing window; `mustReject` past the
+limit; `lateAcceptanceRefusal`; `sortPosByUrgency`; fail-closed `unknown`). New gate
+`scripts/validate-po-acknowledgement-window.mjs` — **61 assertions, PASS, 0 network calls**, proved able to fail twice
+(24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red — both restored byte-identical). The founder-reported defect
+(PO-9201 / PO-9211 shipped, 41 days past the deadline) is asserted DIRECTLY as history, not acknowledgement work.
+Typecheck 0 · root tsc 0 · eslint 0 · build ✓ (7.87s). Checkpoint `418d18b`, pushed; tree empty. Next: **S2** (domain
+enforcement + the auto-rejection).
+
 **Status / checkpoint / deploy / live verification:** recorded in the `CURRENT RESUME STATE` block at the top of
 `PROJECT_STATUS.md`.
 

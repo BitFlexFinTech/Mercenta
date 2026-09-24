@@ -12,7 +12,7 @@
    "deferred",
    "blocked"
   ],
-  "total_entries": 487,
+  "total_entries": 488,
   "founder_os_sprint": {
    "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
    "added": [
@@ -4995,6 +4995,15 @@
   "status": "built_and_tested",
   "source": "P10 - consolidation recorded as deferred (docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md section 4 P10, section 14; decision 11; research section 3)",
   "evidence": "scripts/validate-logistics-providers.mjs -> LOGISTICS_PROVIDERS_VALIDATION_PASS (96 assertions): the posture is 'deferred' and names decision 11; today states one PO = one consignment; the model support states 1..n; the THREE documented evidence entries are present (the purchaseOrders array, the per-carton reference, the 100-confirmation truckload limit); the activation names the channel shipment request and P12; the tenant invariant is declared first; a single-PO declaration is not grouped while a three-PO declaration IS (the 1..n shape executed, not described); an empty declaration, a duplicated extra PO and a re-declared own PO are all refused; and the pre-conditions hold (same-brand grouping passes; cross-tenant, duplicate and empty are refused; 101 POs are refused with the limit named and exactly 100 are allowed). e2e/logistics-providers.spec.ts test 3 -> the brand Hub renders the posture with data-status=deferred, the today rule, the 1..n statement, the three quoted evidence lines and the invariants. scripts/verify-demo-live.mjs carries the live checks. tsc 0, root tsc 0, eslint 0, build OK.",
+  "last_verified": "2026-09-24",
+  "superseded_by": null
+ },
+ {
+  "id": "po-ack-s1-window-owner",
+  "description": "PO-ACK S1 (2026-09-24, session 26) \u2014 THE AMAZON PO ACKNOWLEDGEMENT WINDOW HAS ONE OWNER. Founder directive: the Amazon purchase-order process is a REPLICA of Amazon's documented rules; Mercenta invents nothing. NEW src/config/purchaseOrders.ts declares the terms WITH their provenance: PO_ACKNOWLEDGEMENT_HOURS=24 and PO_ACK_UPDATE_WINDOW_HOURS=48 (Amazon developer docs, quoted in the header), the 12/6/2h notification SCHEDULE labelled as scheduling rather than an Amazon rule, PO_ACK_ON_BEHALF_WINDOW_HOURS=2 (the final stage = the auto-rejection instant, BEFORE expiry), PO_ACK_AUTO_REJECT_REASON='TemporarilyUnavailable' mapped onto Amazon's three documented rejection codes and guarded at module load so it can never drift, the obligation set = Amazon's own `New` operational set, and the ONE operator-facing rule text. NEW src/lib/commerce/poAcknowledgementWindow.ts is the PURE owner (no clock, no randomness, no network, no store access): deadline orderDate+24h; Amazon's lifecycle vocabulary new/acknowledged/closed derived from status + acknowledgement record; the queue/history split; notification stages; the closing window; mustReject past the limit; lateAcceptanceRefusal (past the limit only an all-rejected submission is valid \u2014 the documented late action); sortPosByUrgency for BOTH portals; and fail-closed `unknown` on an unreadable order date. NEW scripts/validate-po-acknowledgement-window.mjs (61 assertions, 0 network calls) proves the 1ms boundaries, the stages, the lifecycle mapping, fail-closed, the late-action rule, the queue/history partition over the REAL demo POs and \u2014 directly \u2014 the founder-reported defect: PO-9201/PO-9211 (shipped, 41 days past the deadline) are HISTORY, not acknowledgement work. The gate was proved able to fail twice (24h->48h: 14 red; msLeft>0 -> msLeft>=0: 1 red), both restored byte-identical. package.json gains validate:po-ack-window. Gates: gate PASS 61/61 \u00b7 npm run typecheck 0 \u00b7 npx tsc --noEmit 0 \u00b7 eslint 0 \u00b7 npm run build OK (7.87s). NOT COMPLETE: no surface consumes the owner yet (S2+), so the demo/live leg is pending by design.",
+  "status": "built_and_tested",
+  "source": "Founder directive 2026-09-24 (Amazon-exact PO process) \u2014 session 26, stage S1 of S1-S10",
+  "evidence": "node scripts/validate-po-acknowledgement-window.mjs -> PO_ACK_WINDOW_VALIDATION_PASS (61 assertions, 0 network calls); mutation 1 (PO_ACKNOWLEDGEMENT_HOURS 24->48) -> 14 assertions red, restored byte-identical; mutation 2 (msLeft > 0 -> msLeft >= 0) -> 1 assertion red, restored byte-identical; npm run typecheck 0; npx tsc --noEmit (root) 0; npx eslint 0; npm run build OK (7.87s); checkpoint 418d18b pushed to origin/redesign/foundation.",
   "last_verified": "2026-09-24",
   "superseded_by": null
  }
