@@ -26,7 +26,46 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **P12 DONE: THE SP-API SEAM IS COMPLETE — `AV-040` IS CLOSED (the programme's FINAL phase)** (2026-09-24, session 25)
+## CURRENT STATE — **PO-ACK S2 DONE: the 24-hour window is ENFORCED at the domain boundary, and Mercenta performs the channel-required rejection on the brand's behalf** (2026-09-24, session 27)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** `5a36e94` — recorded in the `CURRENT RESUME STATE` block of
+`PROJECT_STATUS.md` (the canonical source) and mirrored in `HANDOFF.md`. **`git status --porcelain` EMPTY** after the
+state commit. **THREE-WAY STATUS: see the resume block** (local ✅ · GitHub ✅ · demo — deploy + live verification
+recorded there).
+
+**Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
+nothing.* S1 (`418d18b`) delivered the window OWNER; **S2 makes the rule REAL where it matters** and records the
+outcome honestly. Programme record: `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (the ten stages S1–S10).
+
+**What changed (16 paths):**
+
+1. **Enforcement at the DOMAIN BOUNDARY** (`src/data/api.ts → acknowledgePurchaseOrder`): inside the window any
+   decision is valid; PAST the limit the documented action is a rejection, so an acceptance/backorder is REFUSED and
+   only an ALL-REJECTED submission is accepted; an unreadable window fails CLOSED.
+2. **A non-mutating validation pass runs BEFORE the window is judged and before any line is written** — a refused
+   submission leaves the PO byte-for-byte unchanged, and the existing quantity/required-field refusals are unchanged.
+3. **`AckHistoryEntry.timeliness`** (`on_time` / `late` / `on_behalf`, config-owned) recorded on every event AND on
+   the canonical audit entry, with the deadline it met.
+4. **NEW `autoRejectPurchaseOrderOnBehalf(poId, now?)`** — the channel-REQUIRED rejection performed on the brand's
+   behalf at the final notification stage (BEFORE the limit), attributed to `PO_ACK_SYSTEM_ACTOR_ID`, audited, issued
+   as an INSTRUCTION, **idempotent**, and never touching a PO with a decision / no obligation / an unreadable window.
+5. **A caller-clock seam** on `acknowledgePurchaseOrder`; `scenarioEngine` passes its own deterministic instant — a
+   real regression `validate:provider-safety` caught (every scenario found its own PO "past the limit").
+6. **The demo seed's OPEN POs are genuinely in-window** (an honest fix of factually wrong demo data; the frozen seed
+   dated every PO 9/18 days back, which made the demo's acknowledgement workflow — and the live verification that
+   exercises it — unreachable). A PO past the decision keeps its historical date and lives in history.
+7. **SSOT repair:** `workStore` re-exports the 24-hour constant instead of declaring a second `= 24` (the S1 comment
+   already claimed this; it was false). Plus **two inherited `validate:wording` violations fixed**.
+
+**Evidence (produced this session):** NEW gate `validate:po-ack-enforcement` → **45 assertions PASS, 0 network calls,
+proved able to fail twice** (window refusal disabled → 8 red; the idempotency guard removed → 3 red; both restored
+byte-identical) · S1 gate PASS 60/60 · **the whole `validate:*` sweep PASSED** (after the fixes) · `npm run typecheck`
+0 · root `npx tsc --noEmit` 0 · eslint 0 · `npm run build` ✓ (9.00s) · Playwright **131/131 passed** across 18 affected
+specs (one repointed: `po-lifecycle` #6 asserted an overdue window — a state the demo deliberately no longer contains).
+
+---
+
+## PREVIOUS STATE — **P12 DONE: THE SP-API SEAM IS COMPLETE — `AV-040` IS CLOSED (the programme's FINAL phase)** (2026-09-24, session 25) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`
 (the canonical source) and mirrored in `HANDOFF.md`. **`git status --porcelain` EMPTY** after the state commit. **THREE-WAY STATUS: `COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED` at `3bb03eb`** — local ✅, GitHub ✅ (`c704182..3bb03eb` pushed; remote head = local HEAD), demo ✅ (**`LIVE_VERIFICATION_PASS` 127/127 checks, 0 page errors**, all 14 §P12 checks, bundle read from 16/16 chunks).
@@ -241,6 +280,23 @@ from **16/16 chunks**.
 `'carriers'` remains; the milestone control is a simulation surface (carrier polling is P12); the pre-existing
 `amendShipment` helper still writes `status` without `stage`. The first live run failed 3 §P9 checks for a real reason
 (the check ran on the brand page, where the console is correctly absent) and was fixed, then re-run green.
+
+### PO-ACK programme (2026-09-24, session 27) — **S2 DONE: the 24-hour window is ENFORCED, and Mercenta rejects on the brand's behalf**
+
+Founder directive: **the Amazon purchase-order process is a REPLICA of Amazon's documented rules.** S2 wires the S1
+owner into the DOMAIN BOUNDARY (`src/data/api.ts → acknowledgePurchaseOrder`): inside the window any decision is valid;
+past the limit only an ALL-REJECTED submission is accepted (the documented late action) and an acceptance/backorder is
+refused; an unreadable window fails closed. A non-mutating validation pass now runs BEFORE the window is judged and
+before any line is written, so a refusal leaves the PO byte-for-byte unchanged. `AckHistoryEntry.timeliness`
+(`on_time`/`late`/`on_behalf`, config-owned) is recorded on every event and on the canonical audit entry. NEW
+`autoRejectPurchaseOrderOnBehalf` performs the channel-REQUIRED rejection on the brand's behalf at the final
+notification stage, BEFORE the limit — attributed to `PO_ACK_SYSTEM_ACTOR_ID`, audited, issued as an INSTRUCTION,
+IDEMPOTENT. Supporting corrections: the caller-clock seam (`scenarioEngine` judges the rule in its own world — the
+regression `validate:provider-safety` caught), the seed's open-PO window (an honest fix of factually wrong demo data),
+the `workStore` SSOT repair, `orderDateLabel()` as the ONE order-date display owner, and two inherited wording
+violations. New gate `validate:po-ack-enforcement` — **45 assertions PASS, 0 network calls**, proved able to fail twice
+(8 red / 3 red, both restored byte-identical). Whole `validate:*` sweep PASS · typecheck 0 · root tsc 0 · eslint 0 ·
+build ✓ (9.00s) · Playwright **131/131** across 18 specs (one repointed). Checkpoint `5a36e94`.
 
 ### PO-ACK programme (2026-09-24, session 26) — **S1 DONE: the Amazon PO acknowledgement window has ONE owner**
 
