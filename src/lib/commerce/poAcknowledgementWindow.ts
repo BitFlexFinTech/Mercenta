@@ -39,6 +39,7 @@ import {
   PO_ACK_ON_BEHALF_WINDOW_HOURS,
   PO_ACK_STATUSES_WITH_OBLIGATION,
   PO_ACK_WINDOW_RULE_TEXT,
+  type PoAckTimeliness,
   type PoChannelState,
 } from '@/config/purchaseOrders';
 import type { PurchaseOrder } from '@/types';
@@ -182,7 +183,7 @@ export function poAcknowledgementWindow(
       inQueue: false,
       reason:
         po.status === 'rejected'
-          ? 'Rejected — the order is closed (Amazon: "Status of the orders that are completed.").'
+          ? 'Rejected — the order is closed (the channel’s own status vocabulary: a completed order).'
           : 'Delivered and received — the order is closed and lives in history.',
     };
   }
@@ -273,6 +274,40 @@ export function lateAcceptanceRefusal(
 }
 
 /**
+ * HOW THE DECISION MEETS THE WINDOW — the ONE classifier every writer records
+ * (`AckHistoryEntry.timeliness` + the canonical audit entry), so the trail can
+ * never say something the window owner would contradict.
+ *
+ *   · `on_behalf` — Mercenta performed the required rejection for the brand;
+ *   · `late`      — past the limit (only an all-rejected submission is valid);
+ *   · `on_time`   — decided inside the 24-hour window.
+ */
+export function poAckTimeliness(
+  po: PurchaseOrder,
+  now: Date | string | number = new Date(),
+  onBehalf = false
+): PoAckTimeliness {
+  if (onBehalf) return 'on_behalf';
+  return poAcknowledgementWindow(po, now).mustReject ? 'late' : 'on_time';
+}
+
+/**
+ * TRUE when the channel-REQUIRED rejection is now Mercenta's to perform: the PO
+ * is still unacknowledged (Amazon's `New` set) and the declared on-behalf instant
+ * (the final notification stage, BEFORE the limit) has passed.
+ *
+ * Used by the automatic producer and asserted by the gate; the WRITE itself is
+ * `src/data/api.ts → autoRejectPurchaseOrderOnBehalf`, which is idempotent.
+ */
+export function poNeedsAutoRejection(
+  po: PurchaseOrder,
+  now: Date | string | number = new Date()
+): boolean {
+  const window = poAcknowledgementWindow(po, now);
+  return window.channelState === 'new' && window.autoRejectDue;
+}
+
+/**
  * Queue first (soonest deadline first), history after (most recent first) — ONE
  * ordering used by BOTH portals, so the two can never disagree.
  */
@@ -292,4 +327,6 @@ export function sortPosByUrgency(
 
 /** The ONE statement of the window rule (config owns the wording). */
 export { PO_ACK_WINDOW_RULE_TEXT };
+/** §P13 — the timeliness vocabulary is config-owned; re-exported for consumers. */
+export type { PoAckTimeliness };
 

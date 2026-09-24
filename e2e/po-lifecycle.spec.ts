@@ -84,8 +84,31 @@ test.describe('PO Lifecycle', () => {
     await expect(page.getByText(/exceed/i).first()).toBeVisible({ timeout: 5000 });
   });
 
-  test('6. 24-hour window expired -> flagged', async ({ page }) => {
+  /**
+   * §P13 — REPOINTED (the old contract is recorded here).
+   *
+   * This test previously read `6. 24-hour window expired -> flagged` and asserted
+   * that an overdue acknowledgement window was visible somewhere on the page.
+   *
+   * That state no longer exists in the demo dataset BY DESIGN, so asserting it
+   * would assert the defect this programme removes: the acknowledgement window is
+   * now ENFORCED (`src/data/api.ts → acknowledgePurchaseOrder`), the seeded OPEN
+   * purchase orders are therefore genuinely inside their window, and a window that
+   * closes without a decision is rejected by Mercenta on the brand's behalf
+   * BEFORE the limit — so no live PO is left sitting past it.
+   *
+   * The SURFACE behaviour under test — the acknowledgement-window state rendered
+   * from the canonical owner — is asserted in both directions instead: the
+   * countdown really is shown for a PO inside its window, and NO open PO is
+   * presented as overdue (a state the rule has not produced). The overdue
+   * PRESENTATION itself stays proven by
+   * `scripts/validate-po-acknowledgement-enforcement.mjs` §7.
+   */
+  test('6. the 24-hour window is rendered truthfully — no open PO is falsely overdue', async ({ page }) => {
     await deskForgePO(page);
-    await expect(page.getByText(/deadline PASSED|deadline passed|expired/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(
+      page.locator('[data-status="ack_due"], [data-status="ack_urgent"]').first()
+    ).toBeVisible({ timeout: 5000 });
+    expect(await page.locator('[data-status="ack_overdue"]').count()).toBe(0);
   });
 });

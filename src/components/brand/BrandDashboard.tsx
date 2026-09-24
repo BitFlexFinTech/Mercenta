@@ -66,6 +66,8 @@
  */
 import { useCallback, useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
+/** §P13 — the order DATE is rendered through the ONE display helper. */
+import { orderDateLabel } from '@/lib/dates';
 import {
   useCommissions,
   useComplianceDocuments,
@@ -499,7 +501,7 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
       id: p.id,
       ref: p.poNumber,
       title: `${p.lineItems.length} line${p.lineItems.length === 1 ? '' : 's'} · £${p.poValue.toLocaleString()}`,
-      meta: `ordered ${p.orderDate}`,
+      meta: `ordered ${orderDateLabel(p.orderDate)}`,
       status: { tone: s.tone, label: s.label },
       domain: 'orders',
       onOpen: go('purchase_orders'),

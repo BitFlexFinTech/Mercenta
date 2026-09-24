@@ -4,6 +4,15 @@
  * imported so it cannot drift from the single source of truth.
  */
 import type { CommercialModelSelection } from '@/config/commercialModel';
+/**
+ * §P13 — the acknowledgement-timeliness union is owned by
+ * `src/config/purchaseOrders.ts` (beside the rule it describes) and imported
+ * here so `AckHistoryEntry` cannot drift from it. Type-only, so no runtime cycle
+ * exists with the config module (which imports the rejection-code table).
+ */
+import type { PoAckTimeliness } from '@/config/purchaseOrders';
+/** Re-exported so `import('@/types').PoAckTimeliness` resolves for consumers. */
+export type { PoAckTimeliness };
 
 /**
  * §P9 (programme decision 4) — the `carrier` environment is REMOVED. A carrier
@@ -1627,6 +1636,15 @@ export interface AckHistoryEntry {
   scheduledShipDate?: string;
   /** The unit price acknowledged (may differ from original PO line price). */
   unitPrice: number;
+  /**
+   * §P13 — how THIS decision met the channel's 24-hour window
+   * (`PO_ACK_TIMELINESS` in `src/config/purchaseOrders.ts`): decided inside the
+   * window (`on_time`), past the limit where only a rejection is valid (`late`),
+   * or the required rejection Mercenta performed on the brand's behalf at the
+   * final notification stage (`on_behalf`). Recorded per event so the audit trail
+   * shows WHEN each decision was made relative to the rule.
+   */
+  timeliness?: PoAckTimeliness;
 }
 
 /* ── §P4 — THE INSTRUCTION-TO-MERCENTA RECORD (the proxy model's write path) ── */

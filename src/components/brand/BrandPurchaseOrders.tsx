@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+/** §P13 — the order DATE is rendered through the ONE display helper. */
+import { orderDateLabel } from '@/lib/dates';
 import { useApp } from '@/context/GlobalStateContext';
 import {
   acknowledgePurchaseOrder,
@@ -345,7 +347,7 @@ export function BrandPurchaseOrders() {
                     ['PO', 'Date', 'Status', 'Lines', 'Value GBP'],
                     filteredPos.map((p) => [
                       p.poNumber,
-                      p.orderDate,
+                      orderDateLabel(p.orderDate),
                       poStatusPresentation(p.status).label,
                       p.lineItems.length,
                       p.poValue,
@@ -437,7 +439,7 @@ export function BrandPurchaseOrders() {
                     )}
                   </div>
                   <div className="font-mono text-ds-micro text-zinc-600 mt-1">
-                    {po.orderDate} · {po.lineItems.length} line item(s)
+                    {orderDateLabel(po.orderDate)} · {po.lineItems.length} line item(s)
                     {po.freightTerm && (
                       <span className="ml-2 text-zinc-500">
                         · {po.freightTerm === 'collect' ? 'Freight Collect' : 'Freight Prepaid'}
@@ -1076,7 +1078,7 @@ function BrandPoPreviewBody({
 
       <RecordFieldList
         fields={[
-          { label: 'Order date', value: po.orderDate },
+          { label: 'Order date', value: orderDateLabel(po.orderDate) },
           { label: 'Order value', value: `£${po.poValue.toLocaleString()}` },
           { label: 'Line items', value: String(po.lineItems.length) },
           { label: 'Acknowledged', value: po.acknowledgedAt ? po.acknowledgedAt.slice(0, 16).replace('T', ' ') : 'Not yet' },

@@ -5,6 +5,8 @@
  */
 import { useState, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+/** §P13 — the order DATE is rendered through the ONE display helper. */
+import { orderDateLabel } from '@/lib/dates';
 import { useApp } from '@/context/GlobalStateContext';
 import {
   useBrands,
@@ -603,7 +605,7 @@ function PoPreviewBody({
       <RecordFieldList
         fields={[
           { label: 'Brand', value: brandName },
-          { label: 'Order date', value: po.orderDate || '—' },
+          { label: 'Order date', value: orderDateLabel(po.orderDate) },
           { label: 'Order value', value: `GBP ${po.poValue.toLocaleString()}` },
           { label: 'Commission', value: `${po.commissionRate}% · GBP ${po.commissionAmount.toLocaleString()}` },
           { label: 'Line items', value: String(po.lineItems.length) },

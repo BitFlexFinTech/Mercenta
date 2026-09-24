@@ -36,6 +36,7 @@
     "validate:channel-po-ingestion": "node scripts/validate-channel-po-ingestion.mjs",
     "validate:p12-spapi-seam": "node scripts/validate-p12-spapi-seam.mjs",
     "validate:po-ack-window": "node scripts/validate-po-acknowledgement-window.mjs",
+    "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs"
   },
   "dependencies": {

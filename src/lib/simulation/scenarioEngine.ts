@@ -302,8 +302,17 @@ async function scenarioNormalPo(ctx: ScenarioRunContext): Promise<ScenarioResult
   emitScenarioEvent(runId, 'new_po_above_threshold', 'critical', `PO ${po.poNumber} received`,
     `Simulated NORMAL_PO received for ${brandId} — ${lines.reduce((a, l) => a + l.quantity, 0)} units`, po.id, { scenario: 'NORMAL_PO', poNumber: po.poNumber });
 
-  // Acknowledge all lines accepted via the real domain rule.
-  const ack = acknowledgePurchaseOrder(po.id, lines.map((l) => ({ sku: l.sku, ackStatus: 'accepted' as const, acknowledgedQty: l.quantity })));
+  /**
+   * Acknowledge all lines accepted via the real domain rule.
+   *
+   * §P13 — THE SCENARIO'S OWN CLOCK IS PASSED THROUGH. The scenario lives on a
+   * deterministic instant (`base`), decides the purchase order's windows from it
+   * and receives the PO at it, so the 24-hour acknowledgement rule must be judged
+   * at the SAME instant — otherwise replaying a fixed timestamp would be judged
+   * against wall-clock time and every scenario would find its own PO "past the
+   * limit". The rule itself (and its refusals) is unchanged.
+   */
+  const ack = acknowledgePurchaseOrder(po.id, lines.map((l) => ({ sku: l.sku, ackStatus: 'accepted' as const, acknowledgedQty: l.quantity })), undefined, base);
   if (!ack.ok) {
     return { scenario: 'NORMAL_PO', runId, status: 'error', steps, created: { deductions: [], purchaseOrder: po.id }, auditIds, error: ack.error };
   }
@@ -361,10 +370,11 @@ async function scenarioPartialPo(ctx: ScenarioRunContext): Promise<ScenarioResul
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_po_received', 'purchase_order', po.id, brandId, `${actorId}: SIM PO ${po.poNumber} received (PARTIAL_PO)`, { runId, scenario: 'PARTIAL_PO' }));
 
   // Partial acceptance: first line accepted, second line backordered with a future date.
+  // §P13 — judged at the scenario's own clock (`base`), as above.
   const ack = acknowledgePurchaseOrder(po.id, [
     { sku: lines[0].sku, ackStatus: 'accepted', acknowledgedQty: lines[0].quantity },
     { sku: lines[1].sku, ackStatus: 'backordered', acknowledgedQty: Math.floor(lines[1].quantity / 2), scheduledShipDate: atDays(base, 14).slice(0, 10) },
-  ]);
+  ], undefined, base);
   if (!ack.ok) {
     return { scenario: 'PARTIAL_PO', runId, status: 'error', steps, created: { deductions: [], purchaseOrder: po.id }, auditIds, error: ack.error };
   }
@@ -420,7 +430,7 @@ async function scenarioDelayedDelivery(ctx: ScenarioRunContext): Promise<Scenari
   steps.push({ step: 1, action: 'po_received', entityType: 'purchase_order', entityId: po.id, to: 'received', at: base.toISOString() });
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_po_received', 'purchase_order', po.id, brandId, `${actorId}: SIM PO ${po.poNumber} received (DELAYED_DELIVERY)`, { runId, scenario: 'DELAYED_DELIVERY' }));
 
-  const ack = acknowledgePurchaseOrder(po.id, lines.map((l) => ({ sku: l.sku, ackStatus: 'accepted', acknowledgedQty: l.quantity })));
+  const ack = acknowledgePurchaseOrder(po.id, lines.map((l) => ({ sku: l.sku, ackStatus: 'accepted', acknowledgedQty: l.quantity })), undefined, base);
   if (!ack.ok) return { scenario: 'DELAYED_DELIVERY', runId, status: 'error', steps, created: { deductions: [], purchaseOrder: po.id }, auditIds, error: ack.error };
   steps.push({ step: 2, action: 'po_acknowledged', entityType: 'purchase_order', entityId: po.id, from: 'received', to: 'accepted', at: new Date().toISOString() });
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_acknowledged', 'purchase_order', po.id, brandId, `${actorId}: PO ${po.poNumber} acknowledged`, { runId, scenario: 'DELAYED_DELIVERY' }));
@@ -662,7 +672,7 @@ async function scenarioShipmentProgression(ctx: ScenarioRunContext): Promise<Sce
   steps.push({ step: 1, action: 'po_received', entityType: 'purchase_order', entityId: po.id, to: 'received', detail: `${po.poNumber} received`, at: base.toISOString() });
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_po_received', 'purchase_order', po.id, brandId, `${actorId}: SIM PO ${po.poNumber} received (SHIPMENT_PROGRESSION)`, { runId, scenario: 'SHIPMENT_PROGRESSION' }));
 
-  const ack = acknowledgePurchaseOrder(po.id, lines.map((l) => ({ sku: l.sku, ackStatus: 'accepted', acknowledgedQty: l.quantity })));
+  const ack = acknowledgePurchaseOrder(po.id, lines.map((l) => ({ sku: l.sku, ackStatus: 'accepted', acknowledgedQty: l.quantity })), undefined, base);
   if (!ack.ok) return { scenario: 'SHIPMENT_PROGRESSION', runId, status: 'error', steps, created: { deductions: [], purchaseOrder: po.id }, auditIds, error: ack.error };
   steps.push({ step: 2, action: 'po_acknowledged', entityType: 'purchase_order', entityId: po.id, from: 'received', to: 'accepted', at: new Date().toISOString() });
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_acknowledged', 'purchase_order', po.id, brandId, `${actorId}: PO ${po.poNumber} acknowledged`, { runId, scenario: 'SHIPMENT_PROGRESSION' }));

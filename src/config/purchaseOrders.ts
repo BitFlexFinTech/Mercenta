@@ -86,10 +86,38 @@ export const PO_ACK_AUTO_REJECT_REASON: PoRejectionCode = 'TemporarilyUnavailabl
 
 if (!PO_REJECTION_CODES.includes(PO_ACK_AUTO_REJECT_REASON)) {
   throw new Error(
-    `[purchaseOrders] PO_ACK_AUTO_REJECT_REASON "${PO_ACK_AUTO_REJECT_REASON}" is not one of Amazon's ` +
-      `documented rejection reasons (${PO_REJECTION_CODES.join(', ')}). Mercenta never invents a rejection code.`
+    `[purchaseOrders] PO_ACK_AUTO_REJECT_REASON "${PO_ACK_AUTO_REJECT_REASON}" is not one of the retail ` +
+      `channel's documented rejection reasons (${PO_REJECTION_CODES.join(', ')}). Mercenta never invents a ` +
+      `rejection code. (Provenance: the channel's own published acknowledgement schema.)`
   );
 }
+
+/**
+ * HOW A RECORDED DECISION MET THE CHANNEL'S 24-HOUR WINDOW. Declared ONCE here
+ * (consumed by `src/lib/commerce/poAcknowledgementWindow.ts`,
+ * `src/data/api.ts` and every surface/audit projection):
+ *
+ *   `on_time`   — the brand decided inside the 24-hour window;
+ *   `late`      — past the limit, where Amazon's only documented action is a
+ *                 rejection (so the submission is an all-rejected one);
+ *   `on_behalf` — the brand did not decide, so Mercenta performed the
+ *                 channel-REQUIRED rejection on its behalf at the final
+ *                 notification stage, BEFORE the limit.
+ */
+export const PO_ACK_TIMELINESS = ['on_time', 'late', 'on_behalf'] as const;
+export type PoAckTimeliness = (typeof PO_ACK_TIMELINESS)[number];
+
+/**
+ * THE ACTOR MERCENTA'S OWN AUTOMATIC CHANNEL ACTIONS ARE ATTRIBUTED TO.
+ *
+ * Mercenta operates the retail-channel account, so when a window closes without
+ * the brand's decision the rejection is MERCENTA's own action performed on the
+ * brand's behalf — never the brand's. Every such write is attributed to this
+ * declared identity and audited (`.clinerules/mercenta-business-model.md`:
+ * "every intervention is attributed and audited"). Declared once so the audit
+ * trail can never disagree with itself.
+ */
+export const PO_ACK_SYSTEM_ACTOR_ID = 'mercenta-system:po-acknowledgement';
 
 /**
  * The statuses that carry an acknowledgement OBLIGATION — i.e. Amazon's `New`

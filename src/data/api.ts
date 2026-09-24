@@ -14,6 +14,22 @@ import { evaluateComplianceGate, latestDocumentsByType } from '@/lib/compliance'
 import { submitDocumentForVerification } from '@/lib/verification/documentVerification';
 import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { ackStatusTransitionRefusal, backOrderBlockedReason } from '@/lib/commerce/backorderGate';
+/**
+ * §P13 — the acknowledgement WINDOW's assertions are consumed at the domain
+ * boundary: the writer refuses what the documented rule refuses and records the
+ * decision's timeliness, and the automatic on-behalf rejection is written here.
+ * The rule itself (and its provenance) stays owned by
+ * `src/config/purchaseOrders.ts`.
+ */
+import {
+  lateAcceptanceRefusal,
+  poAckTimeliness,
+  poAcknowledgementWindow,
+} from '@/lib/commerce/poAcknowledgementWindow';
+import {
+  PO_ACK_AUTO_REJECT_REASON,
+  PO_ACK_SYSTEM_ACTOR_ID,
+} from '@/config/purchaseOrders';
 import { issueChannelInstruction, instructionLineFor } from '@/lib/commerce/channelInstructions';
 import {
   ingestChannelPurchaseOrders as ingestChannelPurchaseOrdersFromChannel,
@@ -861,20 +877,87 @@ export async function updatePurchaseOrderStatus(
  *  - Full acknowledgment history: every ack appends to ackHistory[].
  *  - Omitted lines (unacknowledged at submit time) are treated as
  *    implicit rejections with a 'TemporarilyUnavailable' code.
+ *
+ * §P13 — THE 24-HOUR WINDOW IS ENFORCED AT THIS BOUNDARY (the founder's rule: the
+ * Amazon purchase-order process is a replica of Amazon's documented rules, so
+ * Mercenta invents nothing). Past the limit the documented action is a rejection,
+ * so an acceptance/backorder is REFUSED and only an all-rejected submission is
+ * accepted; an unreadable window fails CLOSED. The decision's timeliness is
+ * recorded on every history event and on the canonical audit entry.
  */
+
+/**
+ * §P13 — ONE line's decision, exactly as submitted.
+ *
+ * Declared once and used by both the writer and its validation pass, so the
+ * accepted submission shape and the validated shape cannot drift.
+ */
+export interface PoLineAckSubmission {
+  sku: string;
+  ackStatus: import('@/types').LineAckStatus;
+  acknowledgedQty?: number;
+  scheduledShipDate?: string;
+  rejectionCode?: import('@/types').PoRejectionCode;
+  /** §Batch-3 — what the brand actually expects to invoice. */
+  unitPrice?: number;
+}
+
+/**
+ * §P13 — VALIDATE A SUBMISSION WITHOUT MUTATING ANYTHING.
+ *
+ * Returns the FIRST refusal, using byte-for-byte the messages this writer has
+ * always returned, or `null` when the submission is valid. An omitted line is an
+ * implicit rejection (Amazon: omitted line items are rejected) and therefore
+ * carries no per-line requirement of its own — it is normalised later, never
+ * rejected here for a missing code the caller never had the chance to send.
+ */
+function ackSubmissionRefusal(
+  po: PurchaseOrder,
+  lineAcks: PoLineAckSubmission[]
+): string | null {
+  for (const line of po.lineItems) {
+    const ack = lineAcks.find((a) => a.sku === line.sku);
+    if (!ack || ack.ackStatus === 'unacknowledged') continue;
+
+    if (ack.ackStatus === 'rejected' && !ack.rejectionCode) {
+      return `Line ${line.sku} is rejected — a rejection reason code is required.`;
+    }
+    if (ack.ackStatus === 'backordered' && !ack.scheduledShipDate) {
+      return `Line ${line.sku} is backordered — a scheduled ship date is required.`;
+    }
+
+    const qty = ack.acknowledgedQty ?? line.quantity;
+    if (qty > line.quantity) {
+      return `Line ${line.sku}: acknowledged quantity (${qty}) cannot exceed ordered quantity (${line.quantity}).`;
+    }
+    if (ack.ackStatus !== 'rejected' && qty <= 0) {
+      return `Line ${line.sku}: acknowledged quantity must be at least 1.`;
+    }
+  }
+  return null;
+}
+
 export function acknowledgePurchaseOrder(
   poId: string,
-  lineAcks: {
-    sku: string;
-    ackStatus: import('@/types').LineAckStatus;
-    acknowledgedQty?: number;
-    scheduledShipDate?: string;
-    rejectionCode?: import('@/types').PoRejectionCode;
-    unitPrice?: number; // §Batch-3 — what the brand actually expects to invoice
-  }[],
+  lineAcks: PoLineAckSubmission[],
   /** §Batch-0.5 — when set, the action is attributed to this admin/staff as 'on behalf of brand'. Omit for brand self-action. */
-  actorStaffId?: string
-): { ok: boolean; error?: string; warnings?: string[]; instructionId?: string } {
+  actorStaffId?: string,
+  /**
+   * §P13 — THE CALLER'S CLOCK. Production callers omit it (the real instant is
+   * used). A SIMULATION that lives on its own deterministic clock passes its own
+   * instant, so the 24-hour rule is judged in the SAME world that received the
+   * purchase order (`src/lib/simulation/scenarioEngine.ts`) — otherwise a
+   * scenario replaying a fixed timestamp would be judged against wall-clock time.
+   */
+  now: Date | string | number = new Date()
+): {
+  ok: boolean;
+  error?: string;
+  warnings?: string[];
+  instructionId?: string;
+  /** §P13 — how the recorded decision met the 24-hour window. */
+  timeliness?: import('@/types').PoAckTimeliness;
+} {
   const po = demoPurchaseOrders.find((p) => p.id === poId);
   if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
 
@@ -914,17 +997,55 @@ export function acknowledgePurchaseOrder(
     }
   }
 
+  /**
+   * §P13 — VALIDATE THE WHOLE SUBMISSION BEFORE ANYTHING IS JUDGED OR WRITTEN.
+   *
+   * Every per-line requirement (a rejection code, a scheduled ship date, the
+   * acknowledged quantity) is checked in ONE pass before the window is judged and
+   * before any line is mutated, so a refused submission can never leave the
+   * purchase order half-written. The refusals are the ones this writer has always
+   * returned.
+   */
+  const validationRefusal = ackSubmissionRefusal(po, lineAcks);
+  if (validationRefusal) return { ok: false, error: validationRefusal };
+
+  /**
+   * §P13 — THE 24-HOUR WINDOW IS ENFORCED, AT THE DOMAIN BOUNDARY.
+   *
+   * Amazon documents both the deadline and its consequence, so Mercenta
+   * reproduces them instead of inventing a behaviour: inside the window any
+   * decision is valid; PAST the limit the documented action is a rejection, so an
+   * acceptance or a backorder is REFUSED and only an ALL-REJECTED submission is
+   * accepted — that IS the documented late action. An unreadable window fails
+   * CLOSED: no acknowledgement is accepted at all.
+   */
+  const decidedAt = new Date(now);
+  /** §P13 — the derived window, read once and reused by the refusal, the
+      timeliness classifier and the audit entry below. */
+  const window = poAcknowledgementWindow(po, decidedAt);
+  const allLinesRejected = po.lineItems.every((line) => {
+    const ack = lineAcks.find((a) => a.sku === line.sku);
+    return !ack || ack.ackStatus === 'unacknowledged' || ack.ackStatus === 'rejected';
+  });
+  const lateRefusal = lateAcceptanceRefusal(po, allLinesRejected, decidedAt);
+  if (lateRefusal) return { ok: false, error: lateRefusal };
+
+  /** §P13 — how this decision met the window; recorded on every event + the audit. */
+  const timeliness = poAckTimeliness(po, decidedAt);
+  const decidedAtIso = decidedAt.toISOString();
+
   for (const line of po.lineItems) {
     const ack = lineAcks.find((a) => a.sku === line.sku);
 
     // §Batch-3 — omitted acknowledgment = implicit rejection
     if (!ack || ack.ackStatus === 'unacknowledged') {
       const historyEntry: import('@/types').AckHistoryEntry = {
-        acknowledgedAt: new Date().toISOString(),
+        acknowledgedAt: decidedAtIso,
         ackStatus: 'rejected',
         acknowledgedQty: 0,
         rejectionCode: 'TemporarilyUnavailable',
         unitPrice: line.unitPrice,
+        timeliness,
       };
       line.ackHistory = [...(line.ackHistory ?? []), historyEntry];
       line.ackStatus = 'rejected';
@@ -934,23 +1055,12 @@ export function acknowledgePurchaseOrder(
       continue;
     }
 
-    if (ack.ackStatus === 'rejected' && !ack.rejectionCode) {
-      return { ok: false, error: `Line ${line.sku} is rejected — a rejection reason code is required.` };
-    }
-    if (ack.ackStatus === 'backordered' && !ack.scheduledShipDate) {
-      return { ok: false, error: `Line ${line.sku} is backordered — a scheduled ship date is required.` };
-    }
-
+    /**
+     * §P13 — the per-line requirements and the acknowledged-quantity bound were
+     * already validated by `ackSubmissionRefusal` BEFORE the window was judged and
+     * before any line was written, so this pass only RECORDS the decision.
+     */
     const qty = ack.acknowledgedQty ?? line.quantity;
-    if (qty > line.quantity) {
-      return {
-        ok: false,
-        error: `Line ${line.sku}: acknowledged quantity (${qty}) cannot exceed ordered quantity (${line.quantity}).`,
-      };
-    }
-    if (ack.ackStatus !== 'rejected' && qty <= 0) {
-      return { ok: false, error: `Line ${line.sku}: acknowledged quantity must be at least 1.` };
-    }
 
     // §Batch-3 — cost-price consistency check
     const ackedPrice = ack.unitPrice ?? line.unitPrice;
@@ -964,12 +1074,13 @@ export function acknowledgePurchaseOrder(
 
     // §Batch-3 — push to history instead of overwriting current state
     const historyEntry: import('@/types').AckHistoryEntry = {
-      acknowledgedAt: new Date().toISOString(),
+      acknowledgedAt: decidedAtIso,
       ackStatus: ack.ackStatus,
       acknowledgedQty: ack.ackStatus === 'rejected' ? 0 : qty,
       rejectionCode: ack.rejectionCode,
       scheduledShipDate: ack.scheduledShipDate,
       unitPrice: ackedPrice,
+      timeliness,
     };
     line.ackHistory = [...(line.ackHistory ?? []), historyEntry];
 
@@ -987,7 +1098,7 @@ export function acknowledgePurchaseOrder(
     }
   }
 
-  po.acknowledgedAt = new Date().toISOString();
+  po.acknowledgedAt = decidedAtIso;
   // Acknowledgment advances the workflow: any accepted/backordered volume
   // means accepted; an all-rejected PO means rejected.
   // §all-or-line-item-complete — acknowledgment must be all-or-line-item-complete:
@@ -1051,18 +1162,157 @@ export function acknowledgePurchaseOrder(
     reason:
       `${actorLabel}: ${acceptedLines.length}/${po.lineItems.length} lines accepted/backordered, ` +
       `${rejectedLines.length} rejected — decision issued to Mercenta as an INSTRUCTION` +
-      `${instructionId ? ` (${instructionId})` : ''}. Mercenta performs the channel action.`,
+      `${instructionId ? ` (${instructionId})` : ''}. Mercenta performs the channel action. ` +
+      `Timeliness: ${timeliness} against the 24-hour acknowledgement window (deadline ${window.deadline ?? 'unreadable'}).`,
     metadata: {
       actorLabel,
       acceptedLines: acceptedLines.map((l) => l.sku),
       rejectedLines: rejectedLines.map((l) => l.sku),
       instructionId,
       direction: 'brand → Mercenta → retail channel',
+      /** §P13 — how the decision met the channel's 24-hour window. */
+      timeliness,
+      acknowledgementDeadline: window.deadline,
     },
   });
 
   notifyCanonicalStoreChange();
-  return { ok: true, warnings: warnings.length > 0 ? warnings : undefined, instructionId };
+  return {
+    ok: true,
+    warnings: warnings.length > 0 ? warnings : undefined,
+    instructionId,
+    timeliness,
+  };
+}
+
+/**
+ * §P13 — MERCENTA PERFORMS THE CHANNEL-REQUIRED REJECTION ON THE BRAND'S BEHALF.
+ *
+ * Amazon: *"You have 24 hours to accept a purchase order. Vendors must reject any
+ * purchase order that is on hold past the 24-hour time limit."* Mercenta operates
+ * the retail-channel account, so when the window closes without the brand's
+ * decision the required rejection is MERCENTA's action, performed on the brand's
+ * behalf AT THE FINAL NOTIFICATION STAGE — before the limit expires — so no
+ * purchase order is ever left unacknowledged
+ * (`src/config/purchaseOrders.ts → PO_ACK_ON_BEHALF_WINDOW_HOURS`).
+ *
+ * WHAT IT WRITES (all through the existing canonical paths):
+ *  · every line is REJECTED with Amazon's documented reason
+ *    (`PO_ACK_AUTO_REJECT_REASON` — a mapping onto Amazon's own codes, never a
+ *    new code) and the event is appended to the line's `ackHistory` with
+ *    `timeliness: 'on_behalf'`;
+ *  · the PO carries `acknowledgedAt` and moves to `rejected` with the rule as its
+ *    stated reason;
+ *  · the decision is issued as an INSTRUCTION to Mercenta (the proxy model's
+ *    direction — the brand never talks to the channel), attributed to the
+ *    declared system actor;
+ *  · ONE attributed audit entry records the automatic action, its actor, the
+ *    window it acted on and the instruction it produced.
+ *
+ * IDEMPOTENT: a PO that already carries a decision is never re-decided, and a PO
+ * with no acknowledgement obligation is not this writer's work.
+ */
+export function autoRejectPurchaseOrderOnBehalf(
+  poId: string,
+  now: Date | string | number = new Date()
+): {
+  ok: boolean;
+  error?: string;
+  /** TRUE when nothing was written because a decision already exists. */
+  alreadyAcknowledged?: boolean;
+  instructionId?: string;
+  timeliness?: import('@/types').PoAckTimeliness;
+} {
+  const po = demoPurchaseOrders.find((p) => p.id === poId);
+  if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
+
+  const window = poAcknowledgementWindow(po, now);
+  if (po.acknowledgedAt || window.channelState !== 'new') {
+    return { ok: true, alreadyAcknowledged: true };
+  }
+  if (!window.autoRejectDue) {
+    return {
+      ok: false,
+      error:
+        `PO ${po.poNumber}: the on-behalf rejection is not due yet — Mercenta performs the channel-required ` +
+        `rejection at the final notification stage (${window.autoRejectAt ?? 'unreadable'}), and the brand may ` +
+        `still decide until ${window.deadline ?? 'unreadable'}.`,
+    };
+  }
+
+  const at = new Date(now).toISOString();
+  for (const line of po.lineItems) {
+    const historyEntry: import('@/types').AckHistoryEntry = {
+      acknowledgedAt: at,
+      ackStatus: 'rejected',
+      acknowledgedQty: 0,
+      rejectionCode: PO_ACK_AUTO_REJECT_REASON,
+      unitPrice: line.acknowledgedUnitPrice ?? line.unitPrice,
+      /** §P13 — Mercenta's own action, performed for the brand under the rule. */
+      timeliness: 'on_behalf',
+    };
+    line.ackHistory = [...(line.ackHistory ?? []), historyEntry];
+    line.ackStatus = 'rejected';
+    line.acknowledgedQty = 0;
+    line.rejectionCode = PO_ACK_AUTO_REJECT_REASON;
+  }
+  po.acknowledgedAt = at;
+
+  setPurchaseOrderStatus(
+    po.id,
+    'rejected',
+    /**
+     * §P13 — outward-facing copy: it states the RULE (which the brand may quote
+     * back) and never names the retail channel
+     * (`scripts/lint-wording.mjs`). The rule's provenance — the channel's own
+     * published wording, "Vendors must reject any purchase order that is on hold
+     * past the 24-hour time limit." — is recorded here, not in brand-visible text.
+     */
+    `The 24-hour acknowledgement window closed without the brand's decision, so Mercenta performed the retail ` +
+      `channel's documented rejection (${PO_ACK_AUTO_REJECT_REASON}) on the brand's behalf.`
+  );
+
+  let instructionId: string | undefined;
+  if (po.lineItems.length > 0) {
+    const issued = issueChannelInstruction({
+      type: 'po_acknowledgement',
+      brandId: po.brandId,
+      purchaseOrderId: po.id,
+      poNumber: po.poNumber,
+      issuedBy: PO_ACK_SYSTEM_ACTOR_ID,
+      /** The automatic decision is recorded VERBATIM, as a brand's would be. */
+      lines: po.lineItems.map((l) => instructionLineFor(po, l)),
+    });
+    if (issued.ok && issued.instruction) instructionId = issued.instruction.id;
+  }
+
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: at,
+    actorId: PO_ACK_SYSTEM_ACTOR_ID,
+    action: 'purchase_order_auto_rejected',
+    entityType: 'purchase_order',
+    entityId: po.id,
+    brandId: po.brandId,
+    reason:
+      `${PO_ACK_SYSTEM_ACTOR_ID}: PO ${po.poNumber} was not acknowledged inside the 24-hour window, so Mercenta ` +
+      `issued the channel-required rejection on the brand's behalf at the final notification stage ` +
+      `(${window.autoRejectAt}), before the limit (${window.deadline}). Automatic action, ATTRIBUTED to Mercenta ` +
+      `and issued to the channel as an INSTRUCTION${instructionId ? ` (${instructionId})` : ''}.`,
+    metadata: {
+      timeliness: 'on_behalf',
+      rejectionCode: PO_ACK_AUTO_REJECT_REASON,
+      actorLabel: `${PO_ACK_SYSTEM_ACTOR_ID} (automatic, on behalf of ${po.brandId})`,
+      autoRejectAt: window.autoRejectAt,
+      acknowledgementDeadline: window.deadline,
+      rejectedLines: po.lineItems.map((l) => l.sku),
+      instructionId,
+      direction: 'brand (no decision) → Mercenta → retail channel',
+    },
+  });
+
+  notifyCanonicalStoreChange();
+  return { ok: true, instructionId, timeliness: 'on_behalf' };
 }
 
 export interface AsnCarton {

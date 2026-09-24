@@ -24,3 +24,17 @@ export function addDays(iso: string, days: number): string {
 export function daysBetween(from: string, to: string): number {
   return Math.round((new Date(to).getTime() - new Date(from).getTime()) / DAY_MS);
 }
+
+/**
+ * §P13 — THE ORDER DATE AS THE CHANNEL STATES IT (ONE owner of the display rule).
+ *
+ * The channel's `purchaseOrderDate` is a DATE, but `PurchaseOrder.orderDate` may
+ * carry an instant where an hour-resolution rule depends on it (the
+ * acknowledgement window is `orderDate + 24h` — see
+ * `src/config/purchaseOrders.ts`). Surfaces therefore render the DATE through
+ * this ONE helper rather than printing a stored instant, so no surface leaks a
+ * timestamp where a date belongs.
+ */
+export function orderDateLabel(iso: string | undefined | null): string {
+  return iso ? iso.slice(0, 10) : '—';
+}

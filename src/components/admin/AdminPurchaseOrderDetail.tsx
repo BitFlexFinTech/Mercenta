@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+/** §P13 — the order DATE is rendered through the ONE display helper. */
+import { orderDateLabel } from '@/lib/dates';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useCanonicalStoreVersion, useDeductions, usePurchaseOrders } from '@/data/queries';
 import { acknowledgePurchaseOrder, createShipmentForPO } from '@/data/api';
@@ -234,7 +236,7 @@ function beginOnBehalfAsn() {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-ink-900 rounded-lg p-2.5">
               <p className="text-ds-micro text-zinc-500">Order date</p>
-              <p className="text-xs text-white font-mono">{po.orderDate}</p>
+              <p className="text-xs text-white font-mono">{orderDateLabel(po.orderDate)}</p>
             </div>
             <div className="bg-ink-900 rounded-lg p-2.5">
               <p className="text-ds-micro text-zinc-500">Status</p>

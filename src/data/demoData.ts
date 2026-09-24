@@ -355,9 +355,30 @@ export const DEMO_WORKFLOW_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
       }));
       const poValue =
         Math.round(items.reduce((s, i) => s + i.quantity * i.unitPrice, 0) * 100) / 100;
-      const orderDate = new Date(Date.now() - (pi + 1) * 9 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .slice(0, 10);
+      /**
+       * §P13 — A SEEDED OPEN PO CARRIES A REAL ACKNOWLEDGEMENT WINDOW.
+       *
+       * An OPEN purchase order (received / under_review) owes the brand's decision
+       * inside 24 hours (`src/config/purchaseOrders.ts`), and the platform now
+       * ENFORCES that at the domain boundary
+       * (`src/lib/commerce/poAcknowledgementWindow.ts` +
+       * `src/data/api.ts → acknowledgePurchaseOrder`): past the limit the
+       * documented action is a rejection. A seeded open PO dated 9 or 18 days back
+       * therefore could not be acknowledged at all, which would make the demo's
+       * acknowledgement workflow — and the live verification that exercises it —
+       * unreachable, and would leave the demo contradicting the rule it displays.
+       *
+       * So an open PO is dated INSIDE the window, while a PO that is past the
+       * decision keeps its historical date and lives in history, exactly as the
+       * enforced rule requires. The window is an HOUR-resolution rule, so an open
+       * PO carries an instant — the same shape the simulated channel POs already
+       * use (`src/lib/simulation/scenarioEngine.ts`); surfaces render the DATE
+       * through `orderDateLabel()` (`src/lib/dates.ts`).
+       */
+      const openForAcknowledgement = status === 'received' || status === 'under_review';
+      const orderDate = openForAcknowledgement
+        ? new Date(Date.now() - (pi + 1) * 3 * 3_600_000).toISOString()
+        : new Date(Date.now() - (pi + 1) * 9 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
       const freightTerm: import('@/types').FreightTerm = bi % 2 === 0 ? 'collect' : 'prepaid';
       const orderDateObj = new Date(orderDate);
       const shipWindowStart = new Date(orderDateObj.getTime() + 14 * 864e5).toISOString().slice(0, 10);

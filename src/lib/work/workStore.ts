@@ -45,11 +45,19 @@ import { buildCommandCentre } from '@/lib/commandCentre/commandCentre';
 import { loadIntegrationsSync } from '@/integrations/connections';
 import { addDays, daysBetween } from '@/lib/dates';
 import { invoiceDueDate, invoiceIsOutstanding, invoiceTermDays } from '@/lib/commerce/invoiceTerms';
+import { PO_ACKNOWLEDGEMENT_HOURS } from '@/config/purchaseOrders';
 
 /* ── DECLARED deterministic terms (single source of truth) ─────────────────── */
 
-/** Vendor-Central rule: an unacknowledged PO is at risk after 24 hours. */
-export const PO_ACKNOWLEDGEMENT_HOURS = 24;
+/**
+ * Vendor-Central rule: an unacknowledged PO is at risk after 24 hours.
+ *
+ * §P13 — REPOINTED (not re-declared). The number is owned by
+ * `src/config/purchaseOrders.ts`, beside the rest of the acknowledgement rules
+ * and their provenance, and re-exported here so this module's public surface is
+ * unchanged and there is exactly ONE copy of the number in the platform.
+ */
+export { PO_ACKNOWLEDGEMENT_HOURS };
 /**
  * §P7 — REPOINTED (not re-declared). The DECLARED default payment terms used to
  * be declared here as `INVOICE_TERM_DAYS = 30`. They are now owned by
