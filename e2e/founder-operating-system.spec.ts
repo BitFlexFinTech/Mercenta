@@ -29,13 +29,15 @@ const SHOTS = 'test-screenshots/founder-os';
 /**
  * §Phase 2 (2026-09-20) — the Control Centre gained the COMMERCIAL readiness
  * section, and the automation registry gained the commercial readiness monitor.
+ * §P13 / S5 (2026-09-25) — the registry gained the ACKNOWLEDGEMENT NOTIFICATION
+ * FAN-OUT (`po_acknowledgement_fanout`), so the canonical count moved 9 → 10.
  * These counts are the CURRENT canonical figures (declared here ONCE so the spec
  * states what it expects rather than drifting silently):
  *   - 10 operating views  (was 9 before the commercial section was added)
- *   - 9 declared automations (was 8 before commercial_readiness_monitor)
+ *   - 10 declared automations (was 9 before the acknowledgement fan-out)
  */
 const TEN_OPERATING_VIEWS = 10;
-const DECLARED_AUTOMATIONS = 9;
+const DECLARED_AUTOMATIONS = 10;
 
 async function openControlCentre(page: Page) {
   await loginAs(page, 'Super Admin — Tadii', 1200);

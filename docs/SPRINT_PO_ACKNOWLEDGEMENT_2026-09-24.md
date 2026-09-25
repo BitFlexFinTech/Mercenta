@@ -34,7 +34,7 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 | **S2** | DOMAIN ENFORCEMENT + the auto-rejection | **DONE** (this sprint) |
 | **S3** | WORK LAYER — `deriveWorkItems` consumes the owner (the founder-reported defect, removed at source) | **DONE** (this sprint) |
 | **S4** | ON-BEHALF draft + approve | **DONE** (this sprint) |
-| **S5** | ALL-CHANNEL fan-out + the instant-message seam | NOT STARTED |
+| **S5** | ALL-CHANNEL fan-out + the instant-message seam | **DONE** (this sprint) |
 | **S6** | BRAND surfaces | NOT STARTED |
 | **S7** | ADMIN surfaces | NOT STARTED |
 | **S8** | ONBOARDING linking wizard | NOT STARTED |
@@ -101,7 +101,7 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
 **Honest limits / non-credential follow-ups**
 
 - Nothing yet PRODUCES the on-behalf rejection automatically: the writer exists and is gated; the producer is S4/S5.
-- The notification schedule (12/6/2h) is declared and derivable but not yet fanned out (S5).
+- ~~The notification schedule (12/6/2h) is declared and derivable but not yet fanned out (S5).~~ **§P13 / S5 — SUPERSEDED 2026-09-25 (session 30): the schedule now FANS OUT on every channel the platform can genuinely deliver on, the final stage produces the on-behalf draft, and the external instant-message seam is declared and fails closed. See §S5 below.**
 - ~~`deriveWorkItems` does not yet consume the owner, so the founder-reported work-layer defect persists until S3.~~
   **§P13 / S3 — SUPERSEDED 2026-09-25 (session 28): the work layer DOES consume the owner now — see §S3 below.
   S3 removed the defect at source; the OLD work-layer predicate
@@ -160,7 +160,7 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
   (session 29): the PRODUCER now exists (`src/data/api.ts → draftOnBehalfRejection`, attributed to
   `PO_ACK_SYSTEM_ACTOR_ID` and audited once per draft content) and the brand's approval executes it
   (`approveOnBehalfRejection` → the S2 writer). See §S4 below.**
-- The notification schedule (12/6/2h) is declared and derivable but not yet fanned out (S5).
+- ~~The notification schedule (12/6/2h) is declared and derivable but not yet fanned out (S5).~~ **§P13 / S5 — SUPERSEDED 2026-09-25 (session 30): the schedule now FANS OUT on every channel the platform can genuinely deliver on, the final stage produces the on-behalf draft, and the external instant-message seam is declared and fails closed. See §S5 below.**
 - A PO PAST the limit derives no acknowledgement work here because the owner classifies it as history; the work
   a closed window implies is Mercenta's on-behalf action, owned by S4 — **now implemented: PAST the limit the
   draft is still offered (the documented action past the limit IS a rejection), with `brandMayStillDecide: false`
@@ -247,4 +247,94 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
 - The execution remains the brand's (or Mercenta staff's) explicit approval — that IS this stage's point. An
   UNATTENDED sweep that performs the rejection when nobody approves is S5/S10 territory and would need the
   founder's decision on the trigger.
+
+## S5 — the all-channel fan-out, and the instant-message seam (2026-09-25, session 30)
+
+**Built**
+
+1. **THE FAN-OUT OWNER** — NEW `src/lib/commerce/poAcknowledgementNotifications.ts`. S1 declared the schedule
+   (12/6/2h — SCHEDULING, never presented as a channel rule) and S4 gave the writer its producer, but nothing
+   FANNED THE SCHEDULE OUT: it was derivable and delivered nowhere. This module is the one owner of:
+   · WHICH channels a message may travel on — the brand's OWN declared `NotificationPreference` for
+   `po_acknowledgment_deadline` (the record the brand edits in Settings); a disabled preference, or one with no
+   channel selected, yields NO channels, and a brand with no preference record yields no channels at all (the
+   platform never invents a subscription);
+   · WHERE each channel delivers — `in_app` is internal (Mercenta operates it), `email` is the brand's declared
+   contact email (`DemoBrand.email`, the canonical declaration the brand rows are generated from), and `sms` is
+   the brand's declared instant-message number (the brand row's `profile.phone`). A missing destination is
+   `null` and is NEVER defaulted to a plausible fake address;
+   · WHETHER a channel may be used at all (`resolvePoAckChannel`, fail-closed, reason always stated);
+   · WHAT the message says (`poAckNotificationCopy`, derived from the owner + the config-owned rule text, so no
+   surface writes its own copy — and wording-safe by construction);
+   · WHAT WAS DELIVERED (`runPoAckNotificationFanout` + the canonical delivery ledger).
+   The module is PURE where it decides (`poAckNotificationPlan`) and EXPLICIT where it acts: no `setInterval`,
+   no `setTimeout`, no randomness — the instant is the caller's clock, the same seam the window owner takes.
+2. **THE INSTANT-MESSAGE SEAM — DECLARED, AND FAILING CLOSED.** The channel is EXTERNAL, so the canonical
+   provider-safety rule applies: a provider is simulated ONLY when its mode POSITIVELY resolves `simulation`
+   (`isProviderSimulationSafe`), and `live` is the configured live path. Every other mode — `available`,
+   `configuring`, `degraded`, `error`, `disabled`, `unknown`, `not_registered` — REFUSES the send and says so in
+   the provider's own terms ("…resolves \"available\", which is neither a positively-resolved simulation nor a
+   configured live connection. An unverified provider is NEVER treated as simulation, so no instant message is
+   sent (fail-closed)."). `resolveInstantMessageClient` is the ONE factory: `simulation` → `MockInstantMessageClient`
+   (deterministic, synchronous, zero network, unmistakably `MOCK-IM-…`); `live` → `RealInstantMessageClient`
+   (the existing Twilio-backed adapter in `src/lib/whatsapp/whatsAppClient.ts`). A live send is genuinely
+   asynchronous, so the delivery is recorded as `dispatching` and completed when the provider answers — it can
+   never be mistaken for a completed send. A missing destination refuses too, independently of the mode.
+3. **THE FINAL STAGE PRODUCES MERCENTA'S DRAFT.** When the plan's `draftDue` (the owner's own
+   `poNeedsAutoRejection`) is true, the sweep invokes S4's producer (`src/data/api.ts → draftOnBehalfRejection`),
+   so the on-behalf draft exists because the SCHEDULE reached its final stage — not because a surface happened to
+   render the purchase order. **Nothing is performed**: the brand's (or Mercenta staff's) approval remains the
+   only path that executes, and the gate asserts the purchase order is still undecided afterwards.
+4. **THE SCHEDULE RUNS THROUGH THE EXISTING AUTOMATION SEAM.** `src/lib/automation/registry.ts` gains the
+   automation id `po_acknowledgement_fanout` (declared ONCE as `PO_ACK_NOTIFICATION_AUTOMATION_ID` in the fan-out
+   module and consumed by the registry's type, order, definition, digest and runner, so the two can never
+   disagree). The Founder Control Centre therefore gets a REAL Run control for it with no UI work — and
+   `resetAutomationStore` now also clears the fan-out's ledger (`fanoutDeliveriesCleared`), because the
+   registry's reset returns the platform to its initial state and a delivery is made at most once, ever.
+5. **THE IN-APP CHANNEL REACHES THE BRAND.** `src/components/shared/NotificationCenter.tsx` lists the delivered
+   in-app reminders through `poAckInAppDeliveries(scope, tenantId)` — the SAME ledger the fan-out writes, never a
+   second notification store — with the channel and the stage on each item. TENANT SCOPING is enforced INSIDE the
+   domain accessor (and fails closed for a brand scope with no tenant), so the shared shell can never present
+   another brand's notification.
+6. **THE SEED MAKES THE EXTERNAL CHANNEL GENUINELY REACHABLE.** `src/data/demoStore.ts` gives exactly ONE brand
+   (Astonish, the tenant whose PO-9001 sits in the closing window) an instant-message subscription for the
+   acknowledgement event, so the fan-out really ATTEMPTS the external channel and REFUSES it, with the refusal
+   attributed and audited — otherwise the seam would be declared but unprovable in the running product. No demo
+   brand or account is removed, and `DemoBrandRow.profile` is widened to carry the declared instant-message
+   number (`phone?`) that the demo deliberately does NOT set for anyone.
+7. **THE GATES.** NEW `scripts/validate-po-acknowledgement-notifications.mjs` (68 assertions,
+   `validate:po-ack-notifications`) and NEW `e2e/po-notification-fanout.spec.ts` (2 functional tests). The two
+   places that assert the automation COUNT were repointed 9 → 10 with the old contract recorded
+   (`scripts/validate-founder-operating-system.mjs` and `e2e/founder-operating-system.spec.ts`).
+
+**Tested (all evidence produced in this session)**
+
+- NEW `scripts/validate-po-acknowledgement-notifications.mjs` → **68 assertions PASS, 0 network calls**. Proved
+  able to fail twice: a fabricated instant-message destination default → **2 red**; the duplicate-delivery guard
+  removed → **4 red** (including "the second fan-out delivered NOTHING new — 6 delivered / 3 suppressed" and
+  "every delivery and refusal emitted exactly ONE canonical event — 12 vs 9"); both restored byte-identical
+  (`poAcknowledgementNotifications.ts` shasum `a015027e7ee5c32f43df30a5210bd69a2046f5b389fb321747178b459a173c5d`).
+- Whole-validator sweep: **30/30 PASS** (the founder-OS validator initially failed on the reset → re-run
+  determinism contract, which the `resetAutomationStore` fix above resolves).
+- `npm run typecheck` 0 · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) 0 · `npx eslint .` 0 · `npm run
+  build` ✓ (7.70s).
+- NEW `e2e/po-notification-fanout.spec.ts` **2/2**, plus the affected specs (founder-operating-system ·
+  notifications · deterministic-journey · uiux-foundation · po-onbehalf · multi-tenant) — **36/36**. The
+  full-suite result is reported in the session report.
+
+**Honest limits / non-credential follow-ups**
+
+- **No brand has an instant-message number on record**, so the channel refuses for EVERY brand in the demo — the
+  destination is a brand-supplied fact and Mercenta may not invent one. The seam's success path is therefore
+  proven in the gate (a fixture destination pushed through the real store) rather than in the running demo.
+- **The provider resolves `available`** (not `simulation`), so even with a number the channel would refuse until
+  the provider positively resolves — which is exactly the canonical rule, and why the refusal NAMES the mode.
+- **The live path is the ONE asynchronous provider call** and cannot be exercised without Twilio credentials; the
+  simulation path (mock client, zero network) is what runs, and it is asserted.
+- **The delivery ledger is in-memory** (the demo store), so deliveries last for the browser session — the same
+  honest limit the S4 draft approval carries.
+- The three legacy inline countdowns remain S6/S7 scope (unchanged from S4's record), and an UNATTENDED sweep that
+  PERFORMS the rejection when nobody approves remains S10 plus a founder decision on the trigger.
+
+
 

@@ -871,6 +871,94 @@ check('§P13/S4 the deployed admin override records the approval AND its attribu
 check('no uncaught page error on the deployed §P13/S4 admin flow',
   adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
 
+/* ── §P13 / S5 — THE DEPLOYED NOTIFICATION FAN-OUT + THE INSTANT-MESSAGE SEAM ──
+   S5's changed functionality is invoked through the EXISTING automation seam, so it
+   must be exercised ON the deployed bundle: the deployed console must declare the
+   fan-out (with the schedule it actually uses), RUNNING it must deliver the
+   acknowledgement reminders on every channel the platform can genuinely deliver on,
+   must REFUSE the external instant-message channel with its fail-closed reason, and a
+   repeat run must deliver nothing twice. The delivered in-app reminders must then be
+   READABLE in the deployed notification centre — the in-app channel's whole point.
+   NOTE ON SCOPE: this page is the Super Admin session, and the §P13/S4 legs above
+   already approved PO-9001's on-behalf rejection, so PO-9001 is closed here; the
+   fan-out's remaining open work in the seed is PO-9000 (Astonish — the tenant that
+   declares the instant-message subscription) and any PO the brand flow did not decide. */
+await superAdmin
+  .locator('nav[aria-label="Primary"]')
+  .locator('text=Control Centre')
+  .first()
+  .click()
+  .catch(() => {});
+await superAdmin.waitForTimeout(2500);
+if (!(await superAdmin.getByTestId('automation-table').isVisible({ timeout: 4000 }).catch(() => false))) {
+  await superAdmin.goto(`${BASE}/admin/founder_control_centre`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+  await superAdmin.waitForTimeout(3000);
+}
+await superAdmin.getByRole('tab', { name: /^Automation/ }).click().catch(() => {});
+await superAdmin.waitForTimeout(1200);
+
+const s5Row = superAdmin.locator('[data-testid="automation-row-po_acknowledgement_fanout"]').first();
+const s5RowVisible = await s5Row
+  .waitFor({ state: 'visible', timeout: 15000 })
+  .then(() => true)
+  .catch(() => false);
+const s5RowText = s5RowVisible ? await s5Row.innerText().catch(() => '') : '';
+check('§P13/S5 the deployed console declares the acknowledgement notification fan-out', s5RowVisible,
+  s5RowText.replace(/\s+/g, ' ').slice(0, 140));
+check('§P13/S5 the deployed fan-out states the schedule it actually uses (12h / 6h / 2h)',
+  /12h \/ 6h \/ 2h/.test(s5RowText));
+check('§P13/S5 the deployed fan-out is runnable (a real Run control, not a stub)', await superAdmin
+  .getByTestId('automation-run-po_acknowledgement_fanout')
+  .first()
+  .isVisible({ timeout: 6000 })
+  .catch(() => false));
+
+await superAdmin.getByTestId('automation-run-po_acknowledgement_fanout').click().catch(() => {});
+await superAdmin.waitForTimeout(3500);
+const s5DrawerText = await superAdmin
+  .getByTestId('control-run-drawer')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P13/S5 running the deployed fan-out DELIVERS the reminders on the channels it can use',
+  /message\(s\) delivered on \d+ channel\(s\)/.test(s5DrawerText) &&
+    !/message\(s\) delivered on 0 channel\(s\)/.test(s5DrawerText),
+  s5DrawerText.replace(/\s+/g, ' ').slice(0, 200));
+check('§P13/S5 the deployed fan-out REFUSES the external instant-message channel, with its fail-closed reason',
+  /Instant message: \d+ refusal\(s\)/.test(s5DrawerText) &&
+    /NEVER treated as\s*simulation|No instant-message number/.test(s5DrawerText),
+  s5DrawerText.replace(/\s+/g, ' ').slice(0, 240));
+await superAdmin.getByRole('button', { name: 'Close record' }).click().catch(() => {});
+await superAdmin.waitForTimeout(1200);
+
+/** A repeat run must deliver NOTHING twice — a delivery is made at most once, ever. */
+await superAdmin.getByTestId('automation-run-po_acknowledgement_fanout').click().catch(() => {});
+await superAdmin.waitForTimeout(3000);
+const s5RepeatText = await superAdmin
+  .getByTestId('control-run-drawer')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P13/S5 a repeat deployed run delivers NOTHING new (no duplicate notification, ever)',
+  /0 message\(s\) delivered/.test(s5RepeatText) || /duplicate_suppressed/.test(s5RepeatText),
+  s5RepeatText.replace(/\s+/g, ' ').slice(0, 200));
+await superAdmin.getByRole('button', { name: 'Close record' }).click().catch(() => {});
+await superAdmin.waitForTimeout(1200);
+
+/** THE IN-APP CHANNEL'S SURFACE: the deployed notification centre reads the SAME ledger. */
+await superAdmin.locator('[data-testid="notification-center"]').first().click().catch(() => {});
+await superAdmin.waitForTimeout(1500);
+const s5NotifyList = await superAdmin
+  .getByTestId('notification-list')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P13/S5 the deployed notification centre lists the delivered reminders (the in-app channel reaches its reader)',
+  /left to acknowledge/.test(s5NotifyList) && /In-app · \d+h reminder · sent by Mercenta/.test(s5NotifyList),
+  s5NotifyList.replace(/\s+/g, ' ').slice(0, 200));
+check('no uncaught page error on the deployed §P13/S5 fan-out flow',
+  superAdminErrors.length === 0, superAdminErrors.slice(0, 2).join(' | '));
+
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
 console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length} superAdmin=${superAdminErrors.length}`);

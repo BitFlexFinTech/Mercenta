@@ -37,12 +37,13 @@ try {
 
   /* ── A. The automation catalogue ────────────────────────────────────────── */
   const declared = reg.AUTOMATION_ORDER;
-  // §Foundation increment — REPOINTED: this previously asserted 8 declared
-  // automations. The canonical registry now declares 9 (commercial_readiness_monitor
-  // was added by Phase 2, and `e2e/founder-operating-system.spec.ts` was already
-  // repointed to 9 for exactly this reason). The old contract (8) is recorded
-  // here; the assertion now reads the canonical count.
-  test('9 deterministic automations are declared', declared.length === 9, declared.length);
+  // §P13 / S5 — REPOINTED: this previously asserted 9 declared automations. The
+  // acknowledgement notification fan-out (`po_acknowledgement_fanout`) was
+  // registered in the SAME registry this stage, so the canonical count is now 10,
+  // and `e2e/founder-operating-system.spec.ts` was repointed for exactly this
+  // reason. The old contract (9) is recorded here; the assertion reads the
+  // canonical count.
+  test('10 deterministic automations are declared', declared.length === 10, declared.length);
   test(
     'every automation declares cadence, entry point, idempotency key and a free-first cost note',
     declared.every((id) => {

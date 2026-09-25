@@ -39,6 +39,7 @@
     "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",
     "validate:po-ack-work": "node scripts/validate-po-acknowledgement-work.mjs",
     "validate:po-ack-on-behalf": "node scripts/validate-po-acknowledgement-on-behalf.mjs",
+    "validate:po-ack-notifications": "node scripts/validate-po-acknowledgement-notifications.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs"
   },
   "dependencies": {

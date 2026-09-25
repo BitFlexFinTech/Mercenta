@@ -236,7 +236,15 @@ export interface DemoBrandRow {
    *  on the financed-fee clause without a cast or a silent default. */
   track: FulfillmentTrack;
   contractStatus: string;
-  profile: { businessName: string };
+  /**
+   * §P13 / S5 — the brand's own contact record. `phone` is the brand's DECLARED
+   * instant-message destination for notifications; it is OPTIONAL because the demo
+   * holds no verified number for any brand, and its absence is exactly why the
+   * instant-message channel fails CLOSED rather than sending to a fabricated
+   * address (`src/lib/commerce/poAcknowledgementNotifications.ts →
+   * poAckDestinationFor`). Nothing else reads it.
+   */
+  profile: { businessName: string; phone?: string };
   /**
    * §Canonical model §11 — the brand's nation, used by the shipping-lane
    * routing rule (UK domestic → Palletline, international → DHL). Optional so

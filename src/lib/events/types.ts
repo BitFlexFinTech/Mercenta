@@ -68,7 +68,12 @@ export type EventType =
   // (programme decision 9). The pack is the Logistics Hub's core deliverable, so
   // its availability is a canonical event like any other — added to the EXISTING
   // union, never a second feed.
-  | 'po_documents_ready';
+  | 'po_documents_ready'
+  // §P13 / S5 — the acknowledgement notification fan-out. The declared schedule
+  // (12/6/2h remaining) reached a brand's purchase order on a channel (in-app,
+  // email, or the instant-message seam), or a channel REFUSED it with its stated
+  // reason. Added to the EXISTING union — one event system, never a second feed.
+  | 'po_acknowledgement_notification';
 
 export interface PlatformEvent {
   id: string;
@@ -153,4 +158,6 @@ export const EVENT_SEVERITY_MAP: Record<EventType, EventSeverity> = {
   // §P6 — the document pack exists and there is something to download and print.
   // Informational: it is a readiness notice, not an exception.
   po_documents_ready: 'informational',
+  /** §P13 / S5 — a brand's acknowledgement reminder (or a refused channel). */
+  po_acknowledgement_notification: 'important',
 };

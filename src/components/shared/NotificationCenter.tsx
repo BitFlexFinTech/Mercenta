@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { cn } from '@/utils/cn';
 import {
   AlertTriangle,
@@ -25,6 +25,12 @@ import {
   useShipmentsAll,
 } from '@/data/queries';
 import { isBorderline } from '@/lib/automation/scoringBridge';
+import {
+  PO_ACK_CHANNEL_LABELS,
+  poAckInAppDeliveries,
+  poAckNotificationVersion,
+  subscribePoAckNotifications,
+} from '@/lib/commerce/poAcknowledgementNotifications';
 import { renewalUrgency } from '@/lib/contracts';
 import { documentsAwaitingDownload } from '@/lib/documents/poDocumentPack';
 import { useWorkItems } from '@/lib/work/useWork';
@@ -191,6 +197,27 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
   const workItems = useWorkItems(workScope, tenantId);
 
   /**
+   * §P13 / S5 — THE IN-APP CHANNEL OF THE ACKNOWLEDGEMENT FAN-OUT.
+   *
+   * The declared reminder schedule (12/6/2h remaining) reaches the brand through the
+   * SAME ledger the fan-out writes
+   * (`src/lib/commerce/poAcknowledgementNotifications.ts`) — no second notification
+   * store, and no re-derivation of the window or of the rule's wording.
+   *
+   * TENANT SCOPING: `poAckInAppDeliveries(scope, tenantId)` filters INSIDE the
+   * domain and fails closed for a brand scope with no tenant, so this shared shell
+   * can never present another brand's notification.
+   */
+  const fanoutVersion = useSyncExternalStore(
+    subscribePoAckNotifications,
+    poAckNotificationVersion,
+    poAckNotificationVersion
+  );
+  void fanoutVersion;
+  const poAckReminders = poAckInAppDeliveries(workScope, tenantId);
+  const poTarget = isBrandSession ? 'purchase_orders' : 'purchase_orders_admin';
+
+  /**
    * §Phase E5 (G7) — canonical operational-commerce items.
    *
    * Derived from the SAME canonical stores the E4 lifecycle writes
@@ -304,6 +331,23 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
           severity: w.priority === 'critical' ? ('high' as const) : ('medium' as const),
           navTarget: workScope === 'brand' ? 'work' : 'work',
         }))
+    )
+    /**
+     * §P13 / S5 — the DELIVERED acknowledgement reminders (the in-app channel).
+     *
+     * These are NOT derived from the purchase orders a second time: they are the
+     * messages the fan-out actually delivered, so the brand sees the schedule
+     * Mercenta sent it — with the channel it arrived on and the stage it belongs to.
+     */
+    .concat(
+      poAckReminders.map((d) => ({
+        id: d.id,
+        kind: 'po' as const,
+        title: d.subject,
+        detail: `${brandName(d.brandId)} · ${PO_ACK_CHANNEL_LABELS[d.channel]} · ${d.stage}h reminder · sent by Mercenta`,
+        severity: d.finalStage ? ('high' as const) : ('medium' as const),
+        navTarget: poTarget,
+      }))
     );
 }
 

@@ -50,6 +50,11 @@ import {
 } from '@/lib/work/workStore';
 import { invoiceIsOverdue } from '@/lib/commerce/invoiceTerms';
 import { runReminderSweep } from '@/lib/work/reminderRunner';
+import {
+  PO_ACK_NOTIFICATION_AUTOMATION_ID,
+  resetPoAckNotificationStore,
+  runPoAckNotificationFanout,
+} from '@/lib/commerce/poAcknowledgementNotifications';
 import { allCommercialReadinessRecords } from '@/data/commercialReadinessStore';
 import { commercialViabilityInputFromRecord } from '@/lib/commercial/commercialReadinessRecorder';
 import { evaluateCommercialViability } from '@/lib/commercial/commercialGate';
@@ -78,6 +83,15 @@ export type AutomationDomain = 'operations' | 'finance' | 'compliance' | 'acquis
 export type AutomationId =
   | 'work_projection'
   | 'reminder_sweep'
+  /**
+   * §P13 / S5 — THE ACKNOWLEDGEMENT NOTIFICATION FAN-OUT. The declared
+   * notification schedule (12/6/2h remaining) actually reaches the brand on every
+   * channel it can deliver on, and the FINAL stage produces Mercenta's on-behalf
+   * rejection draft. The id is declared ONCE in the fan-out module
+   * (`PO_ACK_NOTIFICATION_AUTOMATION_ID`) and used here, so the registry entry and
+   * the implementation can never disagree about what is being run.
+   */
+  | typeof PO_ACK_NOTIFICATION_AUTOMATION_ID
   | 'overdue_escalation'
   | 'compliance_gate_monitor'
   | 'finance_overdue_monitor'
@@ -119,6 +133,7 @@ export interface AutomationDefinition {
 export const AUTOMATION_ORDER: readonly AutomationId[] = [
   'work_projection',
   'reminder_sweep',
+  PO_ACK_NOTIFICATION_AUTOMATION_ID,
   'overdue_escalation',
   'compliance_gate_monitor',
   'finance_overdue_monitor',
@@ -164,6 +179,26 @@ export const AUTOMATION_REGISTRY: Record<AutomationId, AutomationDefinition> = {
     approvalRequired: false,
     tenantScoped: true,
     costNote: 'Deterministic sweep over the canonical work set — $0.',
+  },
+  [PO_ACK_NOTIFICATION_AUTOMATION_ID]: {
+    id: PO_ACK_NOTIFICATION_AUTOMATION_ID,
+    name: 'PO acknowledgement notification fan-out',
+    description:
+      'Delivers the declared acknowledgement reminder schedule (12/6/2 hours remaining — Mercenta scheduling, never presented as a retail-channel rule) to the brand on every channel it can genuinely deliver on (in-app, email, and the instant-message seam, which fails closed on an unverified provider), records each delivery and refusal with its attribution, and at the FINAL stage produces Mercenta’s on-behalf rejection draft for the brand’s approval.',
+    domain: 'operations',
+    cadence: 'at each declared notification stage (12h / 6h / 2h remaining) + on demand',
+    cadenceDays: 1,
+    entryPoint: "runAutomation('po_acknowledgement_fanout')",
+    scope: 'admin',
+    deterministic: true,
+    requiresAi: false,
+    externalProviders: ['twilio_whatsapp'],
+    idempotencyKey: '<automationId>|<demoDate>|<PO acknowledgement fingerprint>',
+    approvalRequired: false,
+    tenantScoped: true,
+    costNote:
+      'Deterministic fan-out over the canonical purchase orders and the brand’s own notification preferences — $0; the ' +
+      'instant-message provider is asked for nothing until it positively resolves.',
   },
   overdue_escalation: {
     id: 'overdue_escalation',
@@ -523,9 +558,28 @@ function commercialReadinessFingerprint(): string {
   );
 }
 
+/**
+ * §P13 / S5 — what the acknowledgement notification fan-out actually reads: the
+ * purchase orders' own acknowledgement state (status, decision, window start, line
+ * count, and any standing on-behalf draft the final stage produced).
+ */
+function poAckNotificationFingerprint(): string {
+  return fingerprint(
+    demoPurchaseOrders
+      .map(
+        (po) =>
+          `${po.id}:${po.status}:${po.acknowledgedAt ?? '-'}:${po.orderDate}:${po.lineItems.length}:${
+            po.onBehalfDraft?.digest ?? '-'
+          }`
+      )
+      .join('|')
+  );
+}
+
 const DIGEST_FUNCTIONS: Record<AutomationId, () => string> = {
   work_projection: () => workFingerprint(true),
   reminder_sweep: () => workFingerprint(false),
+  [PO_ACK_NOTIFICATION_AUTOMATION_ID]: poAckNotificationFingerprint,
   overdue_escalation: () => workFingerprint(false),
   compliance_gate_monitor: complianceFingerprint,
   finance_overdue_monitor: financeFingerprint,
@@ -603,6 +657,26 @@ const IMPLEMENTATIONS: Record<AutomationId, (actor: string) => AutomationOutcome
         `${result.suppressedResolved} boundary(ies) suppressed because the work item is resolved.`,
         `${result.active} reminder(s) currently active.`,
       ],
+    };
+  },
+
+  /**
+   * §P13 / S5 — THE ACKNOWLEDGEMENT NOTIFICATION FAN-OUT.
+   *
+   * Runs the declared schedule across every channel the platform can genuinely
+   * deliver on, and produces Mercenta's on-behalf draft at the final stage. The
+   * fan-out is idempotent at the DELIVERY level (`po-ack-notify-<poId>-<stage>-<channel>`),
+   * so a repeat run delivers nothing twice even when the registry's own input
+   * fingerprint has changed (the final stage writing the draft changes it).
+   */
+  [PO_ACK_NOTIFICATION_AUTOMATION_ID]: (actor) => {
+    const result = runPoAckNotificationFanout('admin', null, actor);
+    return {
+      evaluated: result.evaluated,
+      raised: result.deliveries.length,
+      escalated: result.refused.length,
+      affected: [...new Set(result.deliveries.map((d) => d.poId))],
+      notes: result.notes,
     };
   },
 
@@ -1363,11 +1437,20 @@ export interface AutomationResetResult {
   approvalsCleared: number;
   statesCleared: number;
   simulatedFailuresCleared: number;
+  /**
+   * §P13 / S5 — deliveries cleared from the acknowledgement notification fan-out's
+   * own ledger. The registry reset returns the platform to its INITIAL state, and the
+   * fan-out's idempotency ledger is part of that state: without clearing it, a
+   * deterministic replay would report 0 deliveries on the second pass and the
+   * reset-and-re-run contract would be broken (a delivery is made at most once, ever).
+   */
+  fanoutDeliveriesCleared: number;
   /** True when the deterministic reset also cleared an engaged global halt. */
   haltCleared: boolean;
 }
 
 export function resetAutomationStore(): AutomationResetResult {
+  const fanout = resetPoAckNotificationStore();
   const result: AutomationResetResult = {
     runsCleared: runs.length,
     keysCleared: runKeys.size,
@@ -1375,6 +1458,7 @@ export function resetAutomationStore(): AutomationResetResult {
     approvalsCleared: approvals.size,
     statesCleared: state.size,
     simulatedFailuresCleared: injectedFailures.size,
+    fanoutDeliveriesCleared: fanout.deliveriesCleared,
     haltCleared: haltState.halted,
   };
   runs.length = 0;
