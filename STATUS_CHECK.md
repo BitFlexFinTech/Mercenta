@@ -28,9 +28,9 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 
 ## CURRENT STATE — **PO-ACK S6 DONE: the brand surfaces present the rule from its ONE owner, and every delivered reminder carries its own channel detail** (2026-09-25, session 31)
 
-**Branch:** `redesign/foundation`. **Checkpoint:** the S6 application commit, recorded in the `CURRENT RESUME STATE`
-block of `PROJECT_STATUS.md` (the canonical source) and mirrored in `HANDOFF.md`. **`git status --porcelain` EMPTY**
-after the state commit. **THREE-WAY STATUS:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `d3da66e`** (local ✅ · GitHub ✅ pushed · demo ✅
+**Branch:** `redesign/foundation`. **Checkpoint:** `d3da66e` (application) + `9ef75e3` (this state checkpoint, DOCS-ONLY)
+— recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (the canonical source) and mirrored in
+`HANDOFF.md`. **`git status --porcelain` EMPTY** after the state commit. **THREE-WAY STATUS:** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `d3da66e`** (local ✅ · GitHub ✅ pushed · demo ✅
 deployed and **LIVE-VERIFIED 163/163, 0 page errors**, including the nine new §P13/S6 legs).
 
 **Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
