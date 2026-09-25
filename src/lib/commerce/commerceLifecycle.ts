@@ -80,6 +80,17 @@ import {
   type ChannelReceivingApplyResult,
   type ChannelReceivingReading,
 } from './channelReceivingSync';
+/**
+ * §S9 — THE RECEIPT → INVOICE AUTOMATION. The RECEIPT is its trigger; the owner
+ * below holds the decision, the terms it carries and the refusals that stop it,
+ * while the invoice itself still goes through `issueCommerceInvoice` — the SAME
+ * write path, so no `AV-022` rule, registry number or audit entry changes.
+ */
+import {
+  applyReceiptInvoiceAutomation,
+  RECEIPT_INVOICE_AUTOMATION_ACTOR_ID,
+} from './receiptInvoiceAutomation';
+import type { ReceiptInvoiceAutomationOutcome } from './receiptInvoiceAutomation';
 
 /**
  * The actor performing an operational commerce action. Extends the acquisition
@@ -554,17 +565,37 @@ export function advanceCommerceShipment(
 /* ── 4. RECEIVING ────────────────────────────────────────────────────────── */
 
 /**
- * §Phase E4 — receive a shipped PO.
+ * §Phase E4 — receive a shipped PO. §S9 makes the receipt the TRIGGER of the
+ * invoice.
  *
  * Reuses the EXISTING delivery-time reconciliation (`reconcileDelivery`), which
  * compares received against acknowledged quantities and auto-raises shortage
  * deductions. Default receiving records the full acknowledged quantity; an
  * explicit `receivedBySku` map exercises the exception path.
+ *
+ * §S9 — RECEIPT → INVOICE AUTOMATION. Once the receipt is recorded, the ONE
+ * owner of the automation (`src/lib/commerce/receiptInvoiceAutomation.ts`)
+ * decides whether the invoice is raised now, with which terms, and what stops it,
+ * and the invoice is then raised through `issueCommerceInvoice` below — the SAME
+ * canonical writer, so the receipt gate (`AV-018`), the number registry
+ * (`AV-022`), the zero-value refusal, the audit trail and the derived due date
+ * are all unchanged. The automatic issue is attributed to Mercenta's declared
+ * automatic identity with THIS receipt's actor named as the trigger.
+ *
+ * A REFUSAL NEVER HIDES THE RECEIPT: the goods arrived, so the receipt stands and
+ * the refusal is recorded on the canonical activity trail (`invoice_automation_refused`).
  */
 export function receiveCommercePurchaseOrder(
   poId: string,
   actor: CommerceActor,
-  receivedBySku?: Record<string, number>
+  receivedBySku?: Record<string, number>,
+  /**
+   * §S9 — the terms the AUTOMATIC invoice will carry. The receipt is what raises
+   * the invoice, so the terms travel with it; absent ⇒ the owner's DECLARED
+   * default (`invoiceTerms.INVOICE_TERM_DAYS`), stated in the outcome. An
+   * undeclared value is refused, never coerced.
+   */
+  options: { termDays?: InvoiceTermDays } = {}
 ): CommerceResult<{
   po: PurchaseOrder;
   shortfalls: { sku: string; confirmedQty: number; receivedQty: number }[];
@@ -573,6 +604,10 @@ export function receiveCommercePurchaseOrder(
   receivingStatus: ReceivingStatus;
   /** §P7 — the full receipt picture (ordered / confirmed / received / short). */
   receiving: ReceivingSummary;
+  /** §S9 — what the receipt did about the invoice: raised, skipped or refused. */
+  invoiceAutomation: ReceiptInvoiceAutomationOutcome;
+  /** §S9 — the invoice in force after the receipt, when there is one. */
+  invoice?: CommerceInvoice;
 }> {
   if (!actor.canMutate) return forbidden();
   const po = fetchPurchaseOrder(poId);
@@ -633,6 +668,53 @@ export function receiveCommercePurchaseOrder(
     });
   }
 
+  /**
+   * §S9 — THE RECEIPT → INVOICE AUTOMATION (the receipt is the TRIGGER).
+   *
+   * The decision, the terms and the refusals belong to ONE owner
+   * (`src/lib/commerce/receiptInvoiceAutomation.ts`); the invoice itself is raised
+   * through `issueCommerceInvoice` — the same canonical writer every other caller
+   * uses — attributed to Mercenta's declared automatic identity with THIS
+   * receipt's actor named as the trigger.
+   *
+   * The trigger's own authorisation is what authorises the automatic issue: RBAC
+   * and tenant isolation were enforced above, BEFORE the receipt was recorded.
+   */
+  const invoiceAutomation = applyReceiptInvoiceAutomation({
+    po: delivered,
+    existingInvoice: store.getCommerceInvoiceForPo(delivered.id),
+    termDays: options.termDays,
+    triggerActorId: actor.staffId,
+    writer: {
+      issue: ({ poId: invoicePoId, termDays, triggerActorId }) => {
+        const issued = issueCommerceInvoice(
+          invoicePoId,
+          { staffId: RECEIPT_INVOICE_AUTOMATION_ACTOR_ID, canMutate: true },
+          { termDays, automatedBy: { triggerActorId, trigger: 'receipt' } }
+        );
+        if (!issued.ok) return { ok: false, error: issued.error };
+        return { ok: true, invoice: issued.value };
+      },
+    },
+  });
+  /**
+   * A REFUSAL IS NEVER A SILENT NO-OP. The receipt stands (the goods arrived) and
+   * the refusal is recorded on the SAME canonical activity trail and audit log, so
+   * a broken money chain is visible rather than implied.
+   */
+  if (invoiceAutomation.action === 'refused') {
+    recordStep({
+      brandId: delivered.brandId,
+      type: 'invoice_automation_refused',
+      status: invoiceAutomation.code,
+      detail:
+        `SIMULATED invoice NOT raised automatically on receipt of ${delivered.poNumber} — ${invoiceAutomation.reason} ` +
+        `The receipt stands; the invoice is raised manually once the cause is corrected.`,
+      actorId: actor.staffId,
+      purchaseOrderId: delivered.id,
+    });
+  }
+
   return {
     ok: true,
     value: {
@@ -641,6 +723,8 @@ export function receiveCommercePurchaseOrder(
       deductions: reconciliation.deductionsCreated,
       receivingStatus: receiving.status,
       receiving,
+      invoiceAutomation,
+      ...(invoiceAutomation.invoice ? { invoice: invoiceAutomation.invoice } : {}),
     },
   };
 }
@@ -706,11 +790,28 @@ export function applyChannelReceivingReadingToStore(
  * Idempotent: an ACTIVE invoice for the PO is returned rather than duplicated.
  * Commission figures are taken from the canonical PO's own computed fields — no
  * duplicated commission maths, and no Xero/Wise/Stripe call.
+ *
+ * §S9 — this writer is ALSO what the receipt automation calls, so an invoice
+ * raised at receipt is this same record with this same number registry: nothing
+ * here is re-implemented for the automatic path. Since S9 the happy path is
+ * automated (`receiveCommercePurchaseOrder`), so this writer is reached by hand
+ * for a PO received outside the automation and for `AV-022`'s correction path
+ * (cancel, then re-issue under a NEW Invoice ID).
  */
 export function issueCommerceInvoice(
   poId: string,
   actor: CommerceActor,
-  options: { termDays?: InvoiceTermDays } = {}
+  options: {
+    termDays?: InvoiceTermDays;
+    /**
+     * §S9 — set ONLY by the receipt automation: the human whose receipt raised
+     * this invoice AUTOMATICALLY. The issue stays attributed to the declared
+     * automatic identity (`RECEIPT_INVOICE_AUTOMATION_ACTOR_ID`); this records WHO
+     * triggered it (the S2/S5 precedent), so the trail can never read as if a
+     * person had issued the invoice by hand.
+     */
+    automatedBy?: { triggerActorId: string; trigger: string };
+  } = {}
 ): CommerceResult<CommerceInvoice> {
   if (!actor.canMutate) return forbidden();
   const po = fetchPurchaseOrder(poId);
@@ -816,7 +917,18 @@ export function issueCommerceInvoice(
     brandId: invoice.brandId,
     type: 'invoice_issued',
     status: invoice.status,
-    detail: `SIMULATED invoice ${invoice.number} issued for ${po.poNumber} — GBP ${invoice.subtotalGbp.toFixed(2)} · ${termDays}-day terms (${receipt.reason}) · derived due ${invoiceDueDate(invoice)}. No accounting provider contacted.`,
+    /**
+     * §S9 — the AUTOMATIC path says so, and names the human whose receipt
+     * triggered it, so the canonical trail can never read as if somebody had
+     * issued the invoice by hand.
+     */
+    detail:
+      `SIMULATED invoice ${invoice.number} issued for ${po.poNumber} — GBP ${invoice.subtotalGbp.toFixed(2)} · ` +
+      `${termDays}-day terms (${receipt.reason}) · derived due ${invoiceDueDate(invoice)}. No accounting provider contacted.` +
+      (options.automatedBy
+        ? ` Raised AUTOMATICALLY by ${RECEIPT_INVOICE_AUTOMATION_ACTOR_ID} ` +
+          `(${options.automatedBy.trigger} by ${options.automatedBy.triggerActorId}).`
+        : ''),
     actorId: actor.staffId,
     purchaseOrderId: po.id,
     invoiceId: invoice.id,

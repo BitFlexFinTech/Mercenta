@@ -38,7 +38,7 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 | **S6** | BRAND surfaces | **DONE** (`d3da66e`) |
 | **S7** | ADMIN surfaces | **DONE** (this sprint) |
 | **S8** | ONBOARDING linking wizard | **DONE** (this sprint) |
-| **S9** | RECEIPT → INVOICE automation | NOT STARTED |
+| **S9** | RECEIPT → INVOICE automation | **DONE** (this sprint) |
 | **S10** | SEED / gates / deploy (final pass) | NOT STARTED |
 
 ## S1 — the window owner (2026-09-24, session 26)
@@ -626,4 +626,156 @@ a vendor performance rating or its triggers"*):
    performance"* and *"…affect my vendor performance"*. **These two were found by the S8 functional
    spec, not by the first pass of the gate**: a JSX text node wrapped across two lines hid from the
    gate's regex, so the gate's repo-wide check now NORMALISES whitespace before matching.
+
+**Tested** — recorded at the S8 checkpoint (`8d9a092`): the new gate `validate:po-ack-onboarding`
+**45 assertions PASS** (proved able to fail twice), the new spec **4/4**, the affected suites
+**39/39**, the full Playwright suite **515 passed / 2 skipped / 0 failed**, and the deployed live
+verification **180/180 checks, 0 page errors** (`PROJECT_STATUS.md` → the S8 checkpoint).
+
+## S9 — RECEIPT → INVOICE AUTOMATION (2026-09-25, session 34)
+
+**THE CONTRACT, FIXED FROM THE REPOSITORY FIRST (as the S7/S8 records required).** The stage's row
+("RECEIPT → INVOICE automation") is the only written scope, so the contract was derived from the
+repository itself and is recorded here BEFORE the implementation:
+
+- **The two writers, and the missing link.** The receipt has ONE writer
+  (`src/lib/commerce/commerceLifecycle.ts → receiveCommercePurchaseOrder`: it records the receipt,
+  derives the receiving status through `receivingStatus.ts`, and auto-raises the shortage deductions
+  through `demoStore.reconcileDelivery`) and the invoice has ONE writer
+  (`commerceLifecycle → issueCommerceInvoice`: the receipt gate `AV-018` from
+  `receivingStatus.ts → invoiceReceiptGate`, the number from `invoiceRegistry.ts` (`AV-022`), the
+  zero-value refusal, and the terms from `invoiceTerms.ts`). The receipt is the invoice's
+  PRECONDITION and the ONLY link between them — and **nothing in the platform connects the two**:
+  the invoice appears only when a human presses "Issue invoice" (`CommerceOperationsPanel`,
+  `CommerceSimulationPanel`) or a script calls the writer (`investorDemo`, the validators, the
+  specs). **That missing link IS the stage.**
+- **Whose rule the automation is.** The channel documents its invoice rules (`AV-022`) and documents
+  invoicing a **shipped** order; invoicing **after RECEIPT** is Mercenta's OWN, stricter rule
+  (`AV-018`). The automation of that rule is therefore a **Mercenta operating decision** and must be
+  LABELLED as Mercenta's — never presented as a channel requirement (the S8 lesson: an unsupported
+  consequence stated as the channel's is exactly what `AV-003` records).
+- **The terms must travel with the trigger.** Programme decision 2 fixes `14/30/60` chosen **PER
+  INVOICE**, with the declared default `INVOICE_TERM_DAYS = 30` owned by `invoiceTerms.ts`. An
+  automation that raises the invoice must therefore carry a terms CHOICE: the TRIGGER states it, and
+  when the trigger states none the owner's DECLARED DEFAULT applies — stated, never guessed. An
+  undeclared value is REFUSED, never coerced (`isInvoiceTermDays`).
+- **The attribution precedent.** Mercenta's automatic actions are attributed to a DECLARED automatic
+  identity with the human trigger named — `PO_ACK_SYSTEM_ACTOR_ID`
+  (`src/config/purchaseOrders.ts`), used by S2's on-behalf rejection and S5's fan-out
+  (`"${PO_ACK_SYSTEM_ACTOR_ID} (triggered by ${actor})"`).
+- **The idempotency precedent.** `issueCommerceInvoice` is idempotent per PO and `AV-022` makes a
+  correction a **cancel + a NEW Invoice ID** — so the automation must never raise a second invoice
+  for a PO, and must never overwrite the terms already chosen.
+- **What the repository does NOT provide (and therefore is NOT invented).** No channel document
+  requires automatic invoicing, and nothing in the repository asks the invoice to be SUBMITTED to the
+  channel automatically: the submission is P12's own explicit, labelled action
+  (`channelInvoiceSubmission.ts`, `ChannelOperationsPanel`). Auto-submitting through the simulated
+  seam would manufacture automatic simulated channel submissions, which the mock-first policy
+  forbids representing as live — so submission is **out of scope by decision**, recorded below.
+
+**THE CONTRACT IMPLEMENTED**
+
+1. **ONE owner:** NEW `src/lib/commerce/receiptInvoiceAutomation.ts` — the pure decision plus the
+   write path with the canonical invoice writer INJECTED (exactly the `channelReceivingSync.ts`
+   shape), so the module never becomes a second way to raise an invoice.
+2. **The trigger is the RECEIPT.** `receiveCommercePurchaseOrder` invokes the automation AFTER the
+   receipt is recorded, and the invoice goes through `issueCommerceInvoice` — the SAME writer — so no
+   `AV-022` rule, no registry number, no canonical trail and no derived due date changes.
+3. **The terms travel with the receipt** (a new optional argument; absent ⇒ the owner's declared
+   default, stated in the outcome).
+4. **Idempotent:** an ACTIVE invoice on the PO ⇒ `skipped`; a second invoice is never raised and the
+   terms already chosen are never overwritten.
+5. **Fail closed, never silent:** an undeclared term, a PO that is not delivered, and anything the
+   canonical writer refuses (a zero-value invoice, the receipt gate) leave the RECEIPT standing and
+   are RECORDED on the canonical activity trail and the platform audit log.
+6. **Attribution:** the automatic invoice is raised by the declared automatic identity
+   (`RECEIPT_INVOICE_AUTOMATION_ACTOR_ID`) with the human trigger named on the record.
+7. **Out of scope by decision (recorded):** the channel SUBMISSION (P12) stays an explicit, labelled
+   action; the automation is NOT a scheduled sweep (no automation-registry entry) — the receipt IS
+   the trigger, and a sweep would silently invoice historical rows. Neither is a gap: both are
+   deliberate boundaries of this stage.
+
+**BUILT**
+
+1. **`src/lib/commerce/receiptInvoiceAutomation.ts` (NEW) — the ONE owner.** The pure decision
+   (`receiptInvoiceAutomationDecision`: terms validated FIRST, then skip/refuse/issue), the write path
+   with the canonical invoice writer INJECTED (`applyReceiptInvoiceAutomation`), the declared automatic
+   identity (`RECEIPT_INVOICE_AUTOMATION_ACTOR_ID`), the outcome codes, the statement
+   (`RECEIPT_INVOICE_AUTOMATION_STATEMENT`) and the ONE surface wording
+   (`receiptInvoiceAutomationSummary`). No store, no clock, no network.
+2. **The receipt is the TRIGGER** (`commerceLifecycle.receiveCommercePurchaseOrder`): a new optional
+   4th argument carries the terms; the automation runs AFTER the receipt is recorded; the result
+   carries `invoiceAutomation` and `invoice`. The invoice goes through `issueCommerceInvoice` — the
+   SAME canonical writer, so the receipt gate (`AV-018`), the number registry (`AV-022`), the
+   zero-value refusal, the canonical trail and the derived due date are all unchanged. The trigger's
+   own authorisation (RBAC + tenant isolation, enforced before the receipt) is what authorises the
+   automatic issue.
+3. **`issueCommerceInvoice` gains `automatedBy`**: the automatic issue is attributed to the declared
+   automatic identity and NAMES the human trigger on BOTH canonical records
+   (`… Raised AUTOMATICALLY by mercenta-system:receipt-invoice (receipt by <actor>)`), so the trail can
+   never read as if somebody had issued the invoice by hand.
+4. **`src/types.ts`** — ONE new member of the canonical activity union,
+   `invoice_automation_refused`, so a refusal is recorded on the same trail rather than swallowed.
+5. **The admin surface** (`CommerceOperationsPanel`): the terms are chosen AT THE RECEIPT (the select's
+   enablement REPOINTED — offered while an invoice can still be raised, disabled once one is in force),
+   the receipt passes the terms and states the outcome, the statement renders from its owner, and the
+   MANUAL issue control survives as the fallback and `AV-022`'s correction path. The old contract is
+   recorded inline.
+6. **The brand console** (`CommerceSimulationPanel`): renders the owner's statement and the automation
+   outcome; the manual issue stays the fallback. Both surfaces read ONE wording, so they cannot
+   describe the same outcome differently.
+7. **Repointed carriers (old contract recorded inline):** the four browser specs that asserted the
+   manual two-step — `e2e/invoicing.spec.ts` (the terms are now chosen BEFORE the receipt, which is
+   what raises the invoice), `e2e/admin-operational-surfaces.spec.ts`,
+   `e2e/commerce-operational-simulation.spec.ts` and `e2e/deterministic-journey.spec.ts` (including
+   its shared `driveToDelivered` helper).
+8. **NEW gate** `scripts/validate-receipt-invoice-automation.mjs` (+ `validate:receipt-invoice`), and
+   the **§S9 live legs** in `scripts/verify-demo-live.mjs`.
+9. **Two REAL regressions the existing gates found, and the repoints (never weakened):**
+   `validate-e4-commerce`'s Q1/Q2/Q4 durable-write guarantee produced its invoice AFTER the conformance
+   repository was injected — a write the automation now performs at the earlier receipt — so it is
+   repointed to a PO RECEIVED after the injection (the guarantee is now proved through the §S9 path
+   itself); and the E6/E7 change-scope guards gained the declared `S9_RECEIPT_INVOICE_SCOPE` /
+   `S9_RECEIPT_INVOICE_DECLARED` surface with their contracts unchanged.
+10. **INHERITED DEFECT RECONCILED (not S9-caused, proved by running it at the §S8 checkpoint).**
+    `validate-work-layer.mjs`'s *"brand reminder scope is a subset of the admin reminder set"* compared
+    COUNTS (`brand < admin`) while its title states a SUBSET relation; it FAILED at `7365e8f`
+    (reproduced in a `git worktree` at that commit) and was never in the `validate:*` npm sweep, so no
+    session had run it. It is repointed to the invariant it names — every brand reminder IS in the
+    admin set, and the brand scope is non-empty so the check cannot pass vacuously — with the real
+    numbers printed on failure (they were `brand=2 admin=2`).
+
+**TESTED (all evidence produced in this session)**
+
+- **NEW gate → 61 assertions PASS, 0 network calls.** Proved able to FAIL twice: the skip branch
+  disabled → **5 red**; the undeclared-term refusal disabled → **4 red**; both restored
+  byte-identical (`shasum bbd95e59d8865c4718c0293ffbc6b215ec3ac65a`, unchanged).
+- **Whole `validate:*` sweep → 34/34 PASS** (33 → 34), measured on EXIT CODES.
+- **The affected non-npm gates:** `validate-e4-commerce`, `validate-e5-admin-surfaces`,
+  `validate-e6-brand-surfaces`, `validate-e7-embedded-social`, `validate-work-layer`,
+  `validate-financial-reconciliation`, `validate-investor-demo`, `validate-automation`,
+  `validate-demo-completeness`, `validate-canonical-model`, `validate-canonical-propagation`,
+  `validate-command-centre` — **all PASS**.
+- `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** ·
+  `npx eslint` **0** on every changed file · `npm run build` **✓ (5.47s)**.
+- **Playwright — the five affected specs: 22 passed / 0 failed (28.1s)**: `invoicing`,
+  `admin-operational-surfaces`, `commerce-operational-simulation`, `deterministic-journey`,
+  `brand-operational-surfaces`.
+
+**HONEST LIMITS**
+
+- **The deployed demo holds NO simulated purchase order** (the ten seeded POs are the CHANNEL's own,
+  none `simulated`), so the console legitimately states *"Operable simulated purchase orders (0)"*.
+  The automation is therefore proved at the DOMAIN level (the gate drives the REAL receipt through the
+  canonical writer) and by the surfaces' rendering; the live legs assert the statements and that
+  honest empty state rather than pretending a live automatic invoice exists.
+- **No historical row is touched:** because the receipt is the only trigger (no sweep), the seeded
+  delivered POs — which were never received through this lifecycle — gain no invoice. That is the
+  recorded boundary working as intended.
+- **The channel submission is still P12's explicit action** (`channelInvoiceSubmission.ts`): the
+  automation stops at the ISSUED invoice, and auto-submitting through the simulated seam would
+  manufacture automatic simulated channel submissions.
+- **Everything stays simulated:** no accounting provider is contacted, the invoice ledger is in memory,
+  and `S11`'s parallel-testing precondition remains an activation step.
+
 

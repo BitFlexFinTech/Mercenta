@@ -333,10 +333,27 @@ work.reopenWorkItem(reminderTarget.workItemId, 'test:operator', 'Restore baselin
 
 /* ── 12. Tenant scope is respected by the runner ─────────────────────────── */
 const brandReminders = runner.getActiveReminders('brand', tenantA);
+const adminReminders = runner.getActiveReminders('admin');
+const adminReminderIds = new Set(adminReminders.map((r) => r.id));
 test('brand reminder scope returns only that tenant’s reminders', brandReminders.every((r) => r.tenantId === tenantA));
+/**
+ * §S9 — REPOINTED (the old contract recorded):
+ *
+ *   test('brand reminder scope is a subset of the admin reminder set',
+ *     brandReminders.length < runner.getActiveReminders('admin').length);
+ *
+ * The TITLE states the invariant (a brand's reminders are a SUBSET of the
+ * admin's), but the assertion compared COUNTS — a weaker proxy that fails the
+ * moment the brand's own tenant legitimately accounts for most of the admin set
+ * (this failed on `7365e8f`, the §S8 checkpoint, and was never in the `validate:*`
+ * npm sweep, so no session had run it). The invariant is now asserted as what it
+ * is: every brand reminder IS in the admin set, and the brand scope is genuinely
+ * non-empty (so the subset check cannot pass vacuously).
+ */
 test(
   'brand reminder scope is a subset of the admin reminder set',
-  brandReminders.length < runner.getActiveReminders('admin').length
+  brandReminders.length > 0 && brandReminders.every((r) => adminReminderIds.has(r.id)),
+  `brand=${brandReminders.length} admin=${adminReminders.length}`
 );
 
 /* ── 13. Dismissal is an audited decision, not a snooze ──────────────────── */

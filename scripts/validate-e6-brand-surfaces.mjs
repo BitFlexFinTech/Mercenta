@@ -1084,6 +1084,37 @@ const P12_SPAPI_SEAM_SCOPE = new Set([
   'PRODUCTION_READINESS.md',
 ]);
 
+/**
+ * §S9 — RECEIPT → INVOICE AUTOMATION DECLARED SURFACE (2026-09-25, session 34;
+ * programme `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` §S9).
+ *
+ * S9 makes the RECEIPT the trigger of the invoice: a NEW owner
+ * (`src/lib/commerce/receiptInvoiceAutomation.ts`) holds the decision, the terms
+ * the invoice carries and the refusals, and the canonical receipt writer invokes
+ * it — the invoice itself still goes through `issueCommerceInvoice`, so `AV-022`,
+ * the number registry and the audit trail are unchanged. The surfaces state the
+ * automation from that ONE owner, and the specs/validators that asserted the OLD
+ * two-step contract (a separate "Issue invoice" click after receipt) are
+ * REPOINTED to the new one. The E6 guard's contract is UNCHANGED — a changed
+ * source/test file in NO declared set still fails.
+ */
+const S9_RECEIPT_INVOICE_SCOPE = new Set([
+  'src/lib/commerce/receiptInvoiceAutomation.ts',      // NEW — the ONE owner of the automation
+  'src/lib/commerce/commerceLifecycle.ts',             // the receipt triggers the automation
+  'src/types.ts',                                      // PROTECTED prefix — the recorded refusal activity
+  'src/components/admin/CommerceOperationsPanel.tsx',  // terms travel with the receipt; the statement is rendered
+  'src/components/shared/CommerceSimulationPanel.tsx', // the brand console states the automation
+  'e2e/invoicing.spec.ts',
+  'e2e/admin-operational-surfaces.spec.ts',
+  'e2e/commerce-operational-simulation.spec.ts',
+  'e2e/deterministic-journey.spec.ts',
+  'scripts/validate-receipt-invoice-automation.mjs',   // NEW — the S9 gate
+  'scripts/validate-e4-commerce.mjs',                  // the durable-write guarantee repointed
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'package.json',
+  'docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md',
+]);
+
 
 try {
   /* ── modules under test (the EXISTING architecture) ── */
@@ -1573,7 +1604,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...P11_CHANNEL_PO_INGESTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §P12 — the SP-API seam-extension phase's declared surface (see above). */
           P12_SPAPI_SEAM_SCOPE.has(p) ||
-          [...P12_SPAPI_SEAM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...P12_SPAPI_SEAM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §S9 — the receipt → invoice automation's declared surface (see above). */
+          S9_RECEIPT_INVOICE_SCOPE.has(p) ||
+          [...S9_RECEIPT_INVOICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

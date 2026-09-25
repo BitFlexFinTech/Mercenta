@@ -22,6 +22,16 @@ import { PO_ACK_STATUSES_WITH_OBLIGATION } from '@/config/purchaseOrders';
 import { INVOICE_TERM_CHOICES, INVOICE_TERM_DAYS, invoiceDueDate, invoiceTermDays } from '@/lib/commerce/invoiceTerms';
 import { INVOICE_NUMBER_RULES } from '@/lib/commerce/invoiceRegistry';
 import { deriveReceivingStatus, RECEIVING_STATUS_LABELS } from '@/lib/commerce/receivingStatus';
+/**
+ * §S9 — the receipt → invoice automation is stated from its ONE owner (the
+ * statement, the outcome wording and the automatic identity are never re-typed
+ * here).
+ */
+import {
+  receiptInvoiceAutomationSummary,
+  RECEIPT_INVOICE_AUTOMATION_STATEMENT,
+} from '@/lib/commerce/receiptInvoiceAutomation';
+import type { ReceiptInvoiceAutomationOutcome } from '@/lib/commerce/receiptInvoiceAutomation';
 import {
   acknowledgeCommercePurchaseOrder,
   cancelCommerceInvoice,
@@ -45,6 +55,16 @@ import { Badge, Button, Card, DataTable } from '@/components/ui';
 import { cn } from '@/utils/cn';
 
 const MONO = 'font-mono text-ds-label';
+
+/**
+ * §S9 — the receipt result's automation fields, as this surface needs them: the
+ * outcome is READ from the canonical result, never re-derived here.
+ */
+type ReceiveInvoiceResult = {
+  po: PurchaseOrder;
+  shortfalls: unknown[];
+  invoiceAutomation: ReceiptInvoiceAutomationOutcome;
+};
 
 /**
  * §Phase E5 — the legitimate next actions for a simulated PO, in order.
@@ -224,15 +244,21 @@ export function CommerceOperationsPanel() {
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
-                {/* §P7 — the terms the invoice will carry, chosen HERE (14/30/60).
-                    An issued invoice shows its own terms; the choice is disabled
-                    once the number has been allocated. */}
+                {/* §S9 — the terms the invoice will carry, chosen HERE (14/30/60).
+                    REPOINTED (the old contract recorded): this control used to be
+                    enabled only on a DELIVERED PO, because the invoice was a
+                    separate manual step performed after receipt. The receipt now
+                    RAISES the invoice, so the choice is made AT THE RECEIPT and the
+                    control is offered exactly while an invoice can still be raised
+                    — disabled once one is in force, because an issued invoice's
+                    terms are its own and AV-022's correction is a cancellation,
+                    never an edit. */}
                 <select
                   data-state="admin-commerce-terms-select"
-                  aria-label={`Payment terms for ${po.poNumber}`}
+                  aria-label={`Payment terms for ${po.poNumber} — carried on the invoice raised at receipt`}
                   className="text-ds-label rounded-md border border-white/[0.08] bg-ink-850 px-2 py-1 text-zinc-300 disabled:opacity-50"
                   value={chosenTerms}
-                  disabled={busy || !!activeInvoice || po.status !== 'delivered'}
+                  disabled={busy || !!activeInvoice || !(n.receive || n.invoice)}
                   onChange={(e) =>
                     setTermChoice((prev) => ({
                       ...prev,
@@ -273,11 +299,26 @@ export function CommerceOperationsPanel() {
                   data-state="admin-commerce-receive"
                   disabled={busy || !n.receive}
                   onClick={() =>
-                    run(po.id, 'Receive', () => receiveCommercePurchaseOrder(po.id, actor), (r: { po: PurchaseOrder; shortfalls: unknown[] }) => `PO ${r.po.status}, ${r.shortfalls.length} shortfall(s) (sim)`)
+                    /* §S9 — the receipt RAISES the invoice: the terms chosen above
+                       travel with it, and the outcome (raised / already in force /
+                       refused) is STATED rather than implied. */
+                    run(
+                      po.id,
+                      'Receive',
+                      () =>
+                        receiveCommercePurchaseOrder(po.id, actor, undefined, {
+                          termDays: chosenTerms,
+                        }),
+                      (r: ReceiveInvoiceResult) =>
+                        `PO ${r.po.status}, ${r.shortfalls.length} shortfall(s) — ${receiptInvoiceAutomationSummary(r.invoiceAutomation)}`
+                    )
                   }
                 >
                   Receive
                 </Button>
+                {/* §S9 — the MANUAL issue is now the FALLBACK, not the happy path:
+                    a PO received outside the automation, and AV-022's correction
+                    path (cancel, then re-issue under a NEW Invoice ID). */}
                 <Button
                   variant="ghost"
                   className="text-ds-label"
@@ -452,6 +493,19 @@ export function CommerceOperationsPanel() {
             {INVOICE_NUMBER_RULES.map((rule) => (
               <li key={rule} className="text-ds-micro text-zinc-600">
                 {rule}
+              </li>
+            ))}
+          </ul>
+          {/* §S9 — the receipt → invoice automation, stated from its ONE owner. */}
+          <ul data-state="admin-receipt-invoice-automation" className="mt-2 space-y-0.5">
+            {[
+              RECEIPT_INVOICE_AUTOMATION_STATEMENT.headline,
+              RECEIPT_INVOICE_AUTOMATION_STATEMENT.mercentaProcess,
+              RECEIPT_INVOICE_AUTOMATION_STATEMENT.terms,
+              RECEIPT_INVOICE_AUTOMATION_STATEMENT.correction,
+            ].map((line) => (
+              <li key={line} className="text-ds-micro text-zinc-600">
+                {line}
               </li>
             ))}
           </ul>

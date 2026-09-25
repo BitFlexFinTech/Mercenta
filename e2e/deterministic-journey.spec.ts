@@ -96,7 +96,9 @@ async function driveToDelivered(page: import('@playwright/test').Page): Promise<
   await page.locator('button[data-state="commerce-fulfil"]').first().click();
   await expect(page.getByText(/Fulfil: shipment-/).first()).toBeVisible({ timeout: 8000 });
   await page.locator('button[data-state="commerce-receive"]').first().click();
-  await expect(page.getByText(/Receive: PO delivered/).first()).toBeVisible({ timeout: 8000 });
+  /* §S9 — REPOINTED (the old contract recorded): the receipt now RAISES the
+     invoice, so arriving at "delivered" is also the arrival of the invoice. */
+  await expect(page.getByText(/Receive: PO delivered.*SIM-INV-/).first()).toBeVisible({ timeout: 8000 });
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -139,14 +141,14 @@ test.describe('A. Deterministic investor journey — brand → channel → finan
     await page.locator('button[data-state="commerce-fulfil"]').first().click();
     await expect(page.getByText(/Fulfil: shipment-/).first()).toBeVisible({ timeout: 8000 });
 
-    /* ── 9. Shipment / delivery ─────────────────────────────────────────── */
+    /* ── 9. Shipment / delivery — and the invoice the receipt raises (§S9) ── */
     await page.locator('button[data-state="commerce-receive"]').first().click();
-    await expect(page.getByText(/Receive: PO delivered/).first()).toBeVisible({ timeout: 8000 });
+    /* §S9 — REPOINTED (the old contract recorded): the invoice used to need a
+       separate "Issue invoice" click after receipt; the RECEIPT now raises it. */
+    await expect(page.getByText(/Receive: PO delivered.*SIM-INV-/).first()).toBeVisible({ timeout: 8000 });
     await page.screenshot({ path: `${SHOTS}/09-delivered.png`, fullPage: false });
 
     /* ── 10. Finance / invoice ──────────────────────────────────────────── */
-    await page.locator('button[data-state="commerce-issue-invoice"]').first().click();
-    await expect(page.getByText(/Issue simulated invoice: SIM-INV-/).first()).toBeVisible({ timeout: 8000 });
 
     /* The canonical operating layer must now hold an INVOICE DUE work item for
        this brand — derived from the real invoice, not invented. */
@@ -360,8 +362,11 @@ test.describe('D. Tenant isolation and RBAC', () => {
     await loginAs(page, 'Astonish', 1200);
     await openBrandView(page, 'Purchase Orders');
     await driveToDelivered(page);
-    await page.locator('button[data-state="commerce-issue-invoice"]').first().click();
-    await expect(page.getByText(/Issue simulated invoice: SIM-INV-/).first()).toBeVisible({ timeout: 8000 });
+    /* §S9 — REPOINTED (the old contract recorded): the receipt inside
+       `driveToDelivered` already raised the invoice, so the separate
+       "Issue invoice" click is gone and the work item below is derived from the
+       invoice the automation produced. */
+    await expect(page.getByText(/Receive: PO delivered.*SIM-INV-/).first()).toBeVisible({ timeout: 8000 });
 
     await openBrandView(page, 'Tasks & Deadlines');
     await expect(page.getByTestId('work-primary')).toContainText('Invoice due', { timeout: 8000 });

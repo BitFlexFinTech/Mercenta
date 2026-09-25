@@ -86,12 +86,10 @@ test.describe('E5 — admin operational surfaces', () => {
     const receive = page.locator('button[data-state="admin-commerce-receive"]').first();
     await expect(receive).toBeEnabled({ timeout: 6000 });
     await receive.click();
-    await expect(page.getByText(/Receive: PO delivered/).first()).toBeVisible({ timeout: 8000 });
-
-    const invoice = page.locator('button[data-state="admin-commerce-issue-invoice"]').first();
-    await expect(invoice).toBeEnabled({ timeout: 6000 });
-    await invoice.click();
-    await expect(page.getByText(/Issue simulated invoice: SIM-INV-/).first()).toBeVisible({ timeout: 8000 });
+    // §S9 — REPOINTED (the old contract recorded): the invoice used to require a
+    // separate "Issue invoice" click after receipt; the RECEIPT now raises it, and
+    // the notice names the number it raised.
+    await expect(page.getByText(/Receive: PO delivered.*SIM-INV-/).first()).toBeVisible({ timeout: 8000 });
 
     const pay = page.locator('button[data-state="admin-commerce-record-payment"]').first();
     await expect(pay).toBeEnabled({ timeout: 6000 });

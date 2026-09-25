@@ -35,8 +35,24 @@ import {
 } from '@/lib/commerce/commerceLifecycle';
 import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/utils/cn';
+/**
+ * §S9 — the receipt → invoice automation is stated from its ONE owner (the
+ * statement and the outcome wording are never re-typed here).
+ */
+import {
+  receiptInvoiceAutomationSummary,
+  RECEIPT_INVOICE_AUTOMATION_STATEMENT,
+} from '@/lib/commerce/receiptInvoiceAutomation';
+import type { ReceiptInvoiceAutomationOutcome } from '@/lib/commerce/receiptInvoiceAutomation';
 
 const MONO = 'font-mono text-ds-label';
+
+/** §S9 — the receipt result's automation fields, as this console needs them. */
+type ReceiveInvoiceResult = {
+  po: PurchaseOrder;
+  shortfalls: unknown[];
+  invoiceAutomation: ReceiptInvoiceAutomationOutcome;
+};
 
 export function CommerceSimulationPanel() {
   const { session } = useApp();
@@ -120,6 +136,13 @@ export function CommerceSimulationPanel() {
           <p className="text-ds-label text-zinc-500 mt-0.5">
             Simulated purchase orders, fulfilment, receiving, invoicing, payments and
             exceptions. No live provider is contacted and no email is sent.
+          </p>
+          {/* §S9 — the receipt → invoice automation, stated from its ONE owner. */}
+          <p
+            data-state="commerce-receipt-invoice-automation"
+            className="text-ds-label text-zinc-500 mt-0.5"
+          >
+            {RECEIPT_INVOICE_AUTOMATION_STATEMENT.text}
           </p>
         </div>
         <Badge className="text-ds-micro bg-white/[0.05] text-zinc-400 border-white/[0.08]">
@@ -209,10 +232,13 @@ export function CommerceSimulationPanel() {
           disabled={busy || !po || (po.status !== 'shipped' && po.status !== 'ready_to_fulfil' && po.status !== 'accepted')}
           onClick={() =>
             po &&
+            /* §S9 — the receipt RAISES the invoice (the declared 30-day default,
+               because this console states no choice), and the outcome is stated. */
             act(
               'Receive',
               () => Promise.resolve(receiveCommercePurchaseOrder(po.id, actor)),
-              (r: { po: PurchaseOrder; shortfalls: unknown[] }) => `PO ${r.po.status}, ${r.shortfalls.length} shortfall(s) (sim)`
+              (r: ReceiveInvoiceResult) =>
+                `PO ${r.po.status}, ${r.shortfalls.length} shortfall(s) — ${receiptInvoiceAutomationSummary(r.invoiceAutomation)}`
             )
           }
         >
@@ -234,6 +260,9 @@ export function CommerceSimulationPanel() {
         >
           Raise exception
         </Button>
+        {/* §S9 — the MANUAL issue is now the FALLBACK, not the happy path: a PO
+            received outside the automation, and AV-022's correction path (cancel,
+            then re-issue under a NEW Invoice ID). */}
         <Button
           variant="ghost"
           className="text-xs"

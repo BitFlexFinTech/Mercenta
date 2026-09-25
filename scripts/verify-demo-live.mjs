@@ -1244,6 +1244,74 @@ check('§P13/S8 the deployed onboarding pipeline renders, and every record state
 check('no uncaught page error on the deployed §P13/S8 onboarding-surface flow',
   adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
 
+/* ── §S9 — THE DEPLOYED RECEIPT → INVOICE AUTOMATION ──────────────────────────
+   S9 made the RECEIPT the trigger of the invoice and retired the manual two-step
+   contract from the surfaces. On the DEPLOYED bundle BOTH commerce surfaces must
+   state the automation from its ONE owner — Mercenta's own operating process, NOT
+   a channel rule — with the terms basis and the AV-022 correction; the receipt
+   stays the trigger; and the MANUAL issue control survives as the fallback and the
+   AV-022 correction path. HONEST LIMIT OF THE DEPLOYED DEMO: the seeded purchase
+   orders are the channel's own (NOT the simulated set this console operates), so
+   the admin console legitimately states "Operable simulated purchase orders (0)"
+   — the leg asserts that state explicitly instead of pretending a row exists. */
+
+await closeLiveOverlays(astonish);
+await astonish.goto(`${BASE}/brand/purchase_orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await astonish.waitForTimeout(4000);
+const s9BrandStatement = astonish.locator('[data-state="commerce-receipt-invoice-automation"]').first();
+const s9BrandVisible = await s9BrandStatement
+  .waitFor({ state: 'visible', timeout: 12000 })
+  .then(() => true)
+  .catch(() => false);
+const s9BrandText = s9BrandVisible ? await s9BrandStatement.innerText().catch(() => '') : '';
+check('§S9 the deployed brand console states the automation from its OWNER',
+  s9BrandVisible &&
+    /raised automatically the moment the receipt is logged/.test(s9BrandText) &&
+    /Mercenta's own operating process/.test(s9BrandText) &&
+    /not a channel rule/.test(s9BrandText),
+  s9BrandText.replace(/\s+/g, ' ').slice(0, 220));
+check('§S9 the deployed brand console states the terms basis (14/30/60, the declared default)',
+  /14\/30\/60 days/.test(s9BrandText) && /30 days is the declared default/.test(s9BrandText),
+  s9BrandText.replace(/\s+/g, ' ').slice(0, 220));
+check('§S9 the deployed brand console still offers the RECEIPT — the trigger of the invoice',
+  (await astonish.locator('[data-state="commerce-receive"]').count()) > 0);
+check('no uncaught page error on the deployed §S9 brand-console flow',
+  astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
+
+/* The admin surface states the SAME automation (one owner, two surfaces). */
+await closeLiveOverlays(admin);
+let s9AdminNavOk = true;
+try {
+  await openLiveNav(admin, 'Retail Pipeline');
+} catch (err) {
+  s9AdminNavOk = false;
+  check('§S9 the deployed admin navigation can reach the commerce surface',
+    false, String(err).split('\n')[0].slice(0, 120));
+}
+await admin.waitForTimeout(2400);
+const s9AdminStatement = admin.locator('[data-state="admin-receipt-invoice-automation"]').first();
+const s9AdminVisible = await s9AdminStatement
+  .waitFor({ state: 'visible', timeout: 10000 })
+  .then(() => true)
+  .catch(() => false);
+const s9AdminText = s9AdminVisible ? await s9AdminStatement.innerText().catch(() => '') : '';
+check('§S9 the deployed admin commerce surface states the automation from its OWNER',
+  s9AdminNavOk && s9AdminVisible &&
+    /raised automatically the moment the receipt is logged/.test(s9AdminText) &&
+    /Mercenta's own operating process/.test(s9AdminText) &&
+    /NEW Invoice ID/.test(s9AdminText),
+  s9AdminText.replace(/\s+/g, ' ').slice(0, 220));
+/** The manual issue control is the FALLBACK: it exists wherever an operable PO does. */
+const s9AdminRows = await admin.locator('[data-state="admin-commerce-receive"]').count();
+const s9AdminBody = await admin.locator('body').innerText().catch(() => '');
+check('§S9 the deployed admin surface keeps the RECEIPT + the manual issue fallback (or states honestly that it has no operable PO)',
+  s9AdminRows > 0
+    ? (await admin.locator('[data-state="admin-commerce-issue-invoice"]').count()) > 0
+    : /Operable simulated purchase orders \(0\)/.test(s9AdminBody),
+  `${s9AdminRows} operable row(s)`);
+check('no uncaught page error on the deployed §S9 admin-commerce flow',
+  adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
+
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
 console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length} superAdmin=${superAdminErrors.length}`);

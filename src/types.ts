@@ -633,6 +633,14 @@ export type CommerceActivityType =
   | 'po_received'
   | 'invoice_issued'
   /**
+   * §S9 — the RECEIPT → INVOICE automation REFUSED to raise the invoice the
+   * receipt would otherwise have produced (an undeclared term, a state that does
+   * not permit an invoice, or a refusal from the canonical writer such as a
+   * zero-value invoice). The receipt itself stands — the goods arrived — so the
+   * refusal is recorded on the same canonical trail rather than swallowed.
+   */
+  | 'invoice_automation_refused'
+  /**
    * §P7 — a retail-channel invoice was CANCELLED. The channel's documented rule
    * (register S11 / `AV-022`) is that a wrong invoice is cancelled and must be
    * re-sent under a NEW Invoice ID, so cancellation is a real operational step

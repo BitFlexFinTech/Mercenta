@@ -1135,6 +1135,34 @@ try {
     'PRODUCTION_READINESS.md',
   ];
 
+  /**
+   * §S9 — RECEIPT → INVOICE AUTOMATION DECLARED SURFACE (2026-09-25, session 34;
+   * programme `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` §S9), accepted here
+   * exactly as every earlier phase's declared surface is. The RECEIPT becomes the
+   * trigger of the invoice: a NEW owner holds the decision, the terms and the
+   * refusals; the canonical receipt writer invokes it; the invoice still goes
+   * through `issueCommerceInvoice`, so `AV-022` and the registry are unchanged.
+   * The E7 guard's contract is UNCHANGED — a changed source/test file outside
+   * EVERY declared set is still refused.
+   */
+  const S9_RECEIPT_INVOICE_DECLARED = [
+    'src/lib/commerce/receiptInvoiceAutomation.ts',      // NEW — the ONE owner of the automation
+    'src/lib/commerce/commerceLifecycle.ts',             // the receipt triggers the automation
+    'src/types.ts',                                      // PROTECTED prefix — the recorded refusal activity
+    'src/components/admin/CommerceOperationsPanel.tsx',  // terms travel with the receipt
+    'src/components/shared/CommerceSimulationPanel.tsx', // the brand console states the automation
+    'e2e/invoicing.spec.ts',
+    'e2e/admin-operational-surfaces.spec.ts',
+    'e2e/commerce-operational-simulation.spec.ts',
+    'e2e/deterministic-journey.spec.ts',
+    'scripts/validate-receipt-invoice-automation.mjs',   // NEW — the S9 gate
+    'scripts/validate-e4-commerce.mjs',                  // the durable-write guarantee repointed
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/validate-work-layer.mjs',                   // the inherited reminder-scope repoint
+    'package.json',
+  ];
+
   test(
     'protected areas untouched (BI, SP-API, DHL, Xero, design system, deploy scripts)',
     !e7Changed
@@ -1169,7 +1197,10 @@ try {
           !P11_CHANNEL_PO_INGESTION_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §P12 — the SP-API seam-extension phase's declared surface (see above). */
           !P12_SPAPI_SEAM_DECLARED.includes(f) &&
-          !P12_SPAPI_SEAM_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P12_SPAPI_SEAM_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §S9 — the receipt → invoice automation's declared surface (see above). */
+          !S9_RECEIPT_INVOICE_DECLARED.includes(f) &&
+          !S9_RECEIPT_INVOICE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1324,6 +1355,12 @@ try {
      * declared set is still refused.
      */
     ...P12_SPAPI_SEAM_DECLARED,
+    /**
+     * §S9 — the receipt → invoice automation's declared surface, accepted here
+     * exactly as every earlier phase's is; a changed source/test file outside EVERY
+     * declared set is still refused.
+     */
+    ...S9_RECEIPT_INVOICE_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

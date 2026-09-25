@@ -48,6 +48,9 @@ async function seedSimulatedPo(page: import('@playwright/test').Page, advance = 
     if (shouldAdvance) {
       mod.acknowledgeCommercePurchaseOrder(poId, adminActor);
       mod.fulfilCommercePurchaseOrder(poId, adminActor);
+      /* §S9 — the RECEIPT raises the invoice; the explicit issue that follows is
+         REPOINTED to prove the writer stays IDEMPOTENT (it returns the invoice the
+         automation already raised, never a second one). */
       mod.receiveCommercePurchaseOrder(poId, adminActor);
       const inv = mod.issueCommerceInvoice(poId, adminActor);
       return { ok: true, poNumber: created.value.poNumber, poId, invoiceIssued: inv.ok };
@@ -74,31 +77,34 @@ test.describe('P7 — admin invoicing', () => {
     expect(seeded.ok).toBe(true);
     await page.waitForTimeout(400);
 
-    // Drive the lifecycle to RECEIVED through the UI (the admin's own controls).
+    // Drive the lifecycle through the admin's own controls. §S9 — REPOINTED (the
+    // old contract recorded): the terms used to be chosen AFTER receipt and the
+    // invoice needed a separate "Issue invoice" click. The RECEIPT now raises the
+    // invoice, so the terms are chosen BEFORE it and the receipt's own notice
+    // states the number and the terms the invoice carries.
     await page.locator('button[data-state="admin-commerce-acknowledge"]').first().click();
     await page.waitForTimeout(500);
     await page.locator('button[data-state="admin-commerce-fulfil"]').first().click();
     await page.waitForTimeout(600);
-    await page.locator('button[data-state="admin-commerce-receive"]').first().click();
-    await expect(page.getByText(/Receive: PO delivered/).first()).toBeVisible({ timeout: 8000 });
 
-    // §P7 — the receiving status is visible (the channel's own concept, AV-018).
-    const receivingBadge = page.locator('[data-state="admin-commerce-receiving-status"]').first();
-    await expect(receivingBadge).toContainText('Received', { timeout: 6000 });
-
-    // §P7 — choose the terms BEFORE issuing: 60 days (not the 30-day default).
+    // §P7 — choose the terms BEFORE the step that raises the invoice: 60 days.
     const termsSelect = page.locator('select[data-state="admin-commerce-terms-select"]').first();
     await expect(termsSelect).toBeEnabled({ timeout: 6000 });
     await termsSelect.selectOption('60');
 
-    const invoice = page.locator('button[data-state="admin-commerce-issue-invoice"]').first();
-    await expect(invoice).toBeEnabled({ timeout: 6000 });
-    await invoice.click();
-
-    // The notice states the terms the invoice actually carries and its derived due date.
-    await expect(page.getByText(/Issue simulated invoice: SIM-INV-.*60-day terms/).first()).toBeVisible({
+    await page.locator('button[data-state="admin-commerce-receive"]').first().click();
+    await expect(page.getByText(/Receive: PO delivered.*SIM-INV-.*60-day terms/).first()).toBeVisible({
       timeout: 8000,
     });
+
+    // §S9 — the automation is stated from its ONE owner where the numbers are handled.
+    await expect(page.locator('[data-state="admin-receipt-invoice-automation"]')).toContainText(
+      'raised automatically the moment the receipt is logged'
+    );
+
+    // §P7 — the receiving status is visible (the channel's own concept, AV-018).
+    const receivingBadge = page.locator('[data-state="admin-commerce-receiving-status"]').first();
+    await expect(receivingBadge).toContainText('Received', { timeout: 6000 });
     const termsLine = page.locator('[data-state="admin-commerce-invoice-terms"]').first();
     await expect(termsLine).toContainText('60-day terms', { timeout: 6000 });
     await expect(termsLine).toContainText('(derived)');

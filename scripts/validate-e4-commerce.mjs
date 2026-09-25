@@ -486,12 +486,53 @@ try {
 
   const conformance = new ConformanceRepository();
   dr.setDomainRepository(conformance);
-  const confInvoice = commerce.issueCommerceInvoice(po2, zambeziActor);
+  /**
+   * §S9 — REPOINTED (the old contract recorded):
+   *
+   *   const confInvoice = commerce.issueCommerceInvoice(po2, zambeziActor);
+   *
+   * That call produced po2's FIRST invoice through the writer AFTER the durable
+   * repository was injected — the write this guarantee rested on. Since §S9 the
+   * RECEIPT raises the invoice, so po2 already carried one (raised when it was
+   * received above) and the writer correctly RETURNED it: no new write happened,
+   * and the guarantee would have been asserted against nothing.
+   *
+   * The guarantee is UNCHANGED — a canonical invoice write performed after the
+   * injection must reach the durable repository — and it is now proved through the
+   * §S9 path itself: a purchase order RECEIVED after the injection has its invoice
+   * raised automatically, through the SAME canonical writer.
+   */
+  const confPo = {
+    id: 'po-e4-conformance',
+    brandId: ZAMBEZI,
+    poNumber: 'PO-E4-CONFORMANCE',
+    status: 'accepted',
+    poValue: 100,
+    commissionRate: 0.2,
+    commissionAmount: 20,
+    orderDate: '2026-09-01T00:00:00.000Z',
+    mode: 'simulation',
+    simulated: true,
+    lineItems: [
+      {
+        sku: 'SKU-E4-CONFORMANCE',
+        productName: 'conformance widget',
+        quantity: 10,
+        unitPrice: 10,
+        commodityCode: '1234',
+        ackStatus: 'accepted',
+        acknowledgedQty: 10,
+      },
+    ],
+  };
+  store.demoPurchaseOrders.push(confPo);
+  const confReceipt = commerce.receiveCommercePurchaseOrder(confPo.id, zambeziActor);
   await commerce.flushCommercePersistence();
+  const confInvoiceId = confReceipt.ok ? confReceipt.value.invoice?.id : undefined;
   const confActivityRows = [...conformance.rows.values()].filter((r) => r.table === 'commerce_activities');
   test('Q1 an injected durable repository receives the canonical commerce writes',
-    confInvoice.ok === true && confActivityRows.length >= 1 &&
-    conformance.rows.has(`commerce_invoices:${confInvoice.value.id}`));
+    confReceipt.ok === true && !!confInvoiceId && confActivityRows.length >= 1 &&
+    conformance.rows.has(`commerce_invoices:${confInvoiceId}`));
   test('Q2 the durable write is reported honestly (backend supabase, durable true)',
     commerce.getCommercePersistenceStatus().backend === 'supabase' &&
     commerce.getCommercePersistenceStatus().durable === true);
