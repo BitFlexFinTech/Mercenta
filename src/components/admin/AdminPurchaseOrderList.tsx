@@ -19,6 +19,8 @@ import type { ChannelIngestionResult } from '@/lib/commerce/channelPurchaseOrder
 import { Button, Card, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AdminPurchaseOrderDetail } from '@/components/admin/AdminPurchaseOrderDetail';
+/** §P13 / S7 — the acknowledgement WINDOW is read from its OWNER, never re-derived. */
+import { poAcknowledgementWindow } from '@/lib/commerce/poAcknowledgementWindow';
 /**
  * §UI/UX Wave 2 completion — this surface is migrated onto the SAME workspace
  * architecture Operations Overview uses (frame → header → toolbar → metric band →
@@ -40,8 +42,8 @@ import {
   WorkspaceSection,
 } from '@/components/shared/workspace';
 import {
+  ackDeadlinePresentation,
   ackStatusPresentation,
-  ackWindowPresentation,
   poStatusPresentation,
 } from '@/lib/statusPresentation';
 import type { Deduction, PurchaseOrder } from '@/types';
@@ -85,9 +87,21 @@ export function AdminPurchaseOrderList() {
      Logistics Control uses) — never a re-derived guess. */
   const shipments = useShipmentsAll().data?.data ?? [];
 
-  /** Queue metrics — every figure derived from the canonical stores above. */
+  /**
+   * Queue metrics — every figure derived from the canonical stores above.
+   *
+   * §P13 / S7 — THE ACTIONABLE SET IS THE OWNER'S OWN `inQueue`.
+   *
+   * REPOINTED (the old contract is recorded here): this figure previously
+   * hand-rolled `p.status === 'received' || p.status === 'under_review'` — a second
+   * copy of a rule whose owner is `src/lib/commerce/poAcknowledgementWindow.ts`, and
+   * a second copy of the config's own obligation set
+   * (`PO_ACK_STATUSES_WITH_OBLIGATION`). The owner's `inQueue` is Amazon's `New` set
+   * INSIDE the window, so "Awaiting action" can no longer count a purchase order
+   * past its limit — or one whose order date cannot be read at all.
+   */
   const queueMetrics = useMemo(() => {
-    const awaiting = pos.filter((p) => p.status === 'received' || p.status === 'under_review');
+    const awaiting = pos.filter((p) => poAcknowledgementWindow(p).inQueue);
     return {
       total: pos.length,
       value: pos.reduce((sum, p) => sum + p.poValue, 0),
@@ -576,14 +590,36 @@ function PoPreviewBody({
   shipments: DemoShipment[];
 }) {
   const status = poStatusPresentation(po.status);
-  const hoursLeft = Math.floor(
-    (new Date(po.orderDate).getTime() + 24 * 3600 * 1000 - Date.now()) / 3600000
-  );
-  const ackWindow = ackWindowPresentation(
-    Boolean(po.acknowledgedAt),
-    Math.max(0, hoursLeft),
-    Math.max(0, Math.floor(((hoursLeft % 1) * 60) | 0))
-  );
+  /**
+   * §P13 / S7 — THE WINDOW COMES FROM ITS OWNER.
+   *
+   * REPOINTED (the old contract is recorded here): this preview hand-rolled
+   * `Math.floor((orderDate + 24 * 3600 * 1000 − Date.now()) / 3600000)` with
+   * `Math.max(0, …)` clamps, its own minutes arithmetic (`(hoursLeft % 1) * 60`,
+   * which is ALWAYS 0 once `hoursLeft` has been floored), and its own
+   * acknowledged flag from `po.acknowledgedAt` — a second copy of an Amazon rule and
+   * a second presentation of it. The owner derives the window, the presentation
+   * owner classifies the urgency, a decided or closed order renders NO window badge
+   * (nothing is owed), and an unreadable order date is STATED rather than rendered
+   * as a figure.
+   */
+  const ackWindow = poAcknowledgementWindow(po);
+  const ackPresentation =
+    ackWindow.hoursLeft === null ? null : ackDeadlinePresentation(ackWindow.hoursLeft);
+  const ackBadge =
+    ackWindow.channelState === 'acknowledged' || ackWindow.channelState === 'closed'
+      ? null
+      : ackPresentation
+        ? {
+            dataStatus: ackPresentation.dataStatus,
+            tone: ackPresentation.tone,
+            label: ackPresentation.label,
+          }
+        : {
+            dataStatus: 'ack_unknown',
+            tone: 'neutral' as const,
+            label: 'Ack window unreadable',
+          };
   const deductionsTotal = deductions.reduce(function(sum, d) { return sum + d.amountGbp; }, 0);
 
   return (
@@ -592,9 +628,13 @@ function PoPreviewBody({
         <StatusBadge dataStatus={status.dataStatus} tone={status.tone}>
           {status.label}
         </StatusBadge>
-        <StatusBadge dataStatus={ackWindow.dataStatus} tone={ackWindow.tone}>
-          {ackWindow.label}
-        </StatusBadge>
+        {ackBadge && (
+          <span title={ackWindow.reason}>
+            <StatusBadge dataStatus={ackBadge.dataStatus} tone={ackBadge.tone}>
+              {ackBadge.label}
+            </StatusBadge>
+          </span>
+        )}
         {po.simulated === true && (
           <span className="rounded border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
             (sim)

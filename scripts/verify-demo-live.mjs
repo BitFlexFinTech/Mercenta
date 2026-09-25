@@ -835,6 +835,78 @@ check('§P13/S6 the deployed acknowledgement panel states the window state in th
 check('no uncaught page error on the deployed §P13/S6 brand-surface flow',
   astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
 
+/* ── §P13 / S7 — THE DEPLOYED ADMIN ACKNOWLEDGEMENT SURFACES ──────────────────
+   S7 removed the ADMIN side's hand-rolled copies of the 24-hour rule: the detail's
+   `setHours(getHours() + 24)` deadline, its status-derived actionability predicate,
+   its own `EXPIRED` wording and second badge rendering; the list's
+   `orderDate + 24 * 3600 * 1000` preview arithmetic and its status-derived
+   "Awaiting action" figure; and three further copies of the obligation set (the
+   dashboard KPI, its pipeline bucket, and the shared notification centre). So the
+   DEPLOYED admin bundle must present the window FROM ITS ONE OWNER: the seeded
+   closing-window purchase order (PO-9001) reads as urgent with the closing window
+   called out, its deadline tile is the owner's classification (never the old
+   `EXPIRED` wording), the acceptance the owner permits IS offered there, and a
+   DECIDED order (PO-9003, `accepted`) states the owner's reason with NO control the
+   domain writer would refuse.
+   ORDERING: runs BEFORE the §P13/S4 legs below, which approve and close PO-9001. */
+await admin.goto(`${BASE}/admin/purchase_orders_admin`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await admin.waitForTimeout(3500);
+const s7ListText = await admin.locator('body').innerText().catch(() => '');
+check('§P13/S7 the deployed admin PO list renders the owner-derived queue figure',
+  /Awaiting action/.test(s7ListText));
+check('§P13/S7 the deployed admin list presents NO overdue window the rule has not produced',
+  (await admin.locator('[data-status="ack_overdue"]').count()) === 0);
+check('§P13/S7 the deployed admin list renders NO NaN countdown (the old arithmetic’s failure mode)',
+  (await admin.getByText(/NaN/).count()) === 0);
+
+/** The record PREVIEW derives the same window from the owner. */
+await admin.locator('[data-testid="po-preview-po-brand-astonish-2"]').first().click().catch(() => {});
+await admin.waitForTimeout(1800);
+const s7DrawerText = await admin.getByTestId('po-record-drawer').first().innerText().catch(() => '');
+check('§P13/S7 the deployed admin record preview shows the OWNER-derived window',
+  /Ack within [\d.]+h|Ack deadline PASSED/.test(s7DrawerText),
+  s7DrawerText.replace(/\s+/g, ' ').slice(0, 160));
+await admin.keyboard.press('Escape').catch(() => {});
+await admin.waitForTimeout(900);
+
+/** The DETAIL: the owner's urgency, its classification, and the permitted acceptance. */
+const s7Row = admin
+  .locator('div.flex.items-center.justify-between', { hasText: 'PO-9001' })
+  .filter({ has: admin.locator('button[title="View detail"]') })
+  .first();
+await s7Row.locator('button[title="View detail"]').click().catch(() => {});
+await admin.waitForTimeout(2000);
+const s7BadgeText = await admin.locator('[data-status="ack_urgent"], [data-status="ack_due"]').first().innerText().catch(() => '');
+const s7TileText = await admin.locator('[data-testid="admin-po-ack-window-PO-9001"]').first().innerText().catch(() => '');
+check('§P13/S7 the deployed admin detail presents the window from its OWNER (a real countdown)',
+  /Ack within [\d.]+h/.test(s7BadgeText), s7BadgeText.replace(/\s+/g, ' ').slice(0, 120));
+check('§P13/S7 the deployed admin detail calls the CLOSING window out (the owner’s classification)',
+  /closing window/i.test(s7BadgeText));
+check('§P13/S7 the deployed admin detail’s deadline tile is the OWNER’s state — never the old EXPIRED wording',
+  /Ack within/.test(s7TileText) && !/EXPIRED/.test(s7TileText),
+  s7TileText.replace(/\s+/g, ' ').slice(0, 120));
+check('§P13/S7 the deployed admin detail offers the acceptance the owner permits (an in-queue PO)',
+  (await admin.locator('button', { hasText: 'Acknowledge on behalf of' }).count()) > 0);
+
+/** A DECIDED order: the owner's reason is stated and NO dead control is offered. */
+await admin.goto(`${BASE}/admin/purchase_orders_admin`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await admin.waitForTimeout(3000);
+const s7DecidedRow = admin
+  .locator('div.flex.items-center.justify-between', { hasText: 'PO-9003' })
+  .filter({ has: admin.locator('button[title="View detail"]') })
+  .first();
+await s7DecidedRow.locator('button[title="View detail"]').click().catch(() => {});
+await admin.waitForTimeout(2000);
+const s7DecidedState = await admin.locator('[data-testid="admin-po-ack-state-PO-9003"]').first().innerText().catch(() => '');
+check('§P13/S7 a DECIDED order states the OWNER’s reason in the deployed admin detail',
+  /past the acknowledgement decision|in the fulfilment track/.test(s7DecidedState),
+  s7DecidedState.replace(/\s+/g, ' ').slice(0, 160));
+check('§P13/S7 …and offers NO acceptance the domain writer would refuse (no dead control)',
+  (await admin.locator('button', { hasText: 'Acknowledge on behalf of' }).count()) === 0);
+check('no uncaught page error on the deployed §P13/S7 admin-surface flow',
+  adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
+
+
 /* ── §P13 / S4 — THE DEPLOYED ON-BEHALF DRAFT + THE BRAND'S APPROVAL ──────────
    S4's changed functionality is a REAL control on both PO surfaces, so it must be
    exercised ON the deployed bundle: the deployed brand surface must offer

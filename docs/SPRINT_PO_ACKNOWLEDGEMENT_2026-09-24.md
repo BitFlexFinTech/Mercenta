@@ -35,8 +35,8 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 | **S3** | WORK LAYER — `deriveWorkItems` consumes the owner (the founder-reported defect, removed at source) | **DONE** (this sprint) |
 | **S4** | ON-BEHALF draft + approve | **DONE** (this sprint) |
 | **S5** | ALL-CHANNEL fan-out + the instant-message seam | **DONE** (this sprint) |
-| **S6** | BRAND surfaces | **DONE** (this sprint) |
-| **S7** | ADMIN surfaces | NOT STARTED |
+| **S6** | BRAND surfaces | **DONE** (`d3da66e`) |
+| **S7** | ADMIN surfaces | **DONE** (this sprint) |
 | **S8** | ONBOARDING linking wizard | NOT STARTED |
 | **S9** | RECEIPT → INVOICE automation | NOT STARTED |
 | **S10** | SEED / gates / deploy (final pass) | NOT STARTED |
@@ -429,3 +429,91 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
   hover (`title`). No expandable per-reminder drawer was added — the drill-down is the purchase order the reminder is
   about, which the existing click-through already provides.
 
+
+## S7 — the admin surfaces present the rule from its owner (2026-09-25, session 32)
+
+**Built**
+
+1. **THE RULE WAS RE-TYPED IN *FIVE* ADMIN-SIDE PLACES — more than the S6 record listed**, the same way S6
+   discovered a fourth brand copy. All five are repointed onto the ONE owner
+   (`src/lib/commerce/poAcknowledgementWindow.ts`), the ONE presentation owner
+   (`ackDeadlinePresentation`) and the ONE config array (`PO_ACK_STATUSES_WITH_OBLIGATION`):
+   · **`AdminPurchaseOrderDetail.tsx`** — the window was derived on the surface: `new Date(po.orderDate)` mutated in
+   LOCAL time by `setHours(getHours() + 24)` (which drifts across a DST boundary), its own
+   `msLeft`/`hoursLeft`/`minutesLeft`, its own `isDeadlinePassed`, its own `EXPIRED` wording, its own header badge
+   (through a SECOND presentation helper) and its own actionability predicate
+   `po.status !== 'received' && po.status !== 'under_review'`. The last of those is the S3/S6 defect class: past the
+   limit the surface offered an on-behalf ACCEPTANCE the domain writer REFUSES, and an unreadable order date rendered
+   a countdown instead of failing closed. Now: the owner derives the window, the owner's `reason` is the badge's
+   tooltip, the acceptance control is offered exactly when the owner's `inQueue` permits one (past the limit the
+   remaining action is the S4 on-behalf rejection draft already on the panel), and when nothing is offered the
+   surface STATES the owner's own reason (`data-testid="admin-po-ack-state-<poNumber>"`).
+   · **`AdminPurchaseOrderList.tsx`** — the "Awaiting action" figure was the same status predicate, and the record
+   preview was `Math.floor((orderDate + 24 * 3600 * 1000 − Date.now()) / 3600000)` with `Math.max(0, …)` clamps and
+   a minutes term (`(hoursLeft % 1) * 60`) that is ALWAYS 0 once `hoursLeft` has been floored. Both now read the
+   owner; the preview badge is built exactly as the brand's (parity with S6), so a decided or closed order renders
+   NO window badge and an unreadable one is STATED.
+   · **`AdminDashboard.tsx`** — a third copy of the obligation set (`const PO_AWAITING: new Set(['received',
+   'under_review'])`) drove the "POs awaiting action" KPI ("Action needed", "received but not yet actioned"), and a
+   fourth sat in the PO-pipeline bucket. The KPI now reads the owner's `inQueue` (the claim IS actionability); the
+   pipeline bucket is a STATUS-FAMILY view, so it reads the CONFIG array rather than re-typing the literal — and the
+   distinction between "the acknowledgement queue" and "the status family" is stated in the code.
+   · **`CommerceOperationsPanel.tsx`** and **`src/lib/commerce/commerceLifecycle.ts`** — both re-typed
+   `'received' || 'under_review'`; both now read the config array (values unchanged, so the simulated lifecycle's
+   panel behaves identically).
+   · **`src/components/shared/NotificationCenter.tsx`** — the shared centre re-typed the predicate for its "PO …
+   awaiting action" items; it now reads the owner (its rows are still tenant-scoped BEFORE the filter, asserted).
+   · **`src/data/demoData.ts`** — the seed re-typed it in TWO places; both now read the config array through ONE
+   local derivation. The generated seed is unchanged.
+2. **THE SECOND ACKNOWLEDGEMENT PRESENTATION IS REMOVED** (`src/lib/statusPresentation.ts`). `ackWindowPresentation`
+   took raw figures a surface had derived itself plus an `acknowledged` boolean derived from STATUS, and owned a
+   second label vocabulary (`Acknowledged` / `Deadline passed` / `Nh Nm left`) beside `ackDeadlinePresentation`. After
+   the repoint it had ZERO readers, and two competing renderings of one value is how a rule drifts — so it is deleted
+   with the old contract recorded in full inline, and the gate asserts it cannot reappear.
+3. **A NEW GATE** — `scripts/validate-po-acknowledgement-admin-surfaces.mjs` (`validate:po-ack-admin`, 32 assertions).
+4. **A NEW FUNCTIONAL SPEC** — `e2e/po-admin-ack-surface.spec.ts` (3 tests), and the live verifier
+   (`scripts/verify-demo-live.mjs`) gained **TEN §P13/S7 legs**.
+
+
+
+**Tested (all evidence produced in this session)**
+
+- NEW `scripts/validate-po-acknowledgement-admin-surfaces.mjs` → **32 assertions, PASS, 0 network calls**: one owner
+  at every admin surface (source-level, comment-stripped, so the REQUIRED inline §REPOINTED records do not defeat the
+  checks) · the hand-rolled arithmetic gone as code at both admin surfaces while its recorded contract survives ·
+  the acceptance control IS the owner's `inQueue` · the deadline tile is the owner's classification (no `EXPIRED`) ·
+  the header badge handles every channel state (unknown/acknowledged/closed/open) · the dashboard KPI reads the owner
+  and its hand-written set is gone · the pipeline bucket, the operations panel, the simulated lifecycle and the seed
+  all read the CONFIG family (no re-typed literal anywhere) · the centre's rows are tenant-scoped before the queue
+  filter · there is ONE acknowledgement presentation (`ackWindowPresentation` removed) · the owner's queue set AGREES
+  with the old status predicate over the real seed (**no demo behaviour changed**) · past the limit no acceptance is
+  offered and Mercenta's draft is the remaining action · an unreadable order date fails closed and the admin surfaces
+  STATE it. **Proved able to fail twice**: the list's hand-rolled arithmetic reintroduced → **2 red**; the owner's
+  reason dropped from the detail's state paragraph → **1 red**; both restored byte-identical (shasum `OK`).
+- Whole-validator sweep: **32/32 `validate:*` scripts PASS, 0 failing** (31 → 32 with the new gate), measured on
+  EXIT CODES.
+- `npm run typecheck` 0 · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) 0 · `npx eslint` 0 on every changed
+  file · `npm run build` ✓ (7.90s).
+- Playwright: NEW `e2e/po-admin-ack-surface.spec.ts` **3/3** · the affected suites (po-lifecycle · po-onbehalf ·
+  po-brand-ack-surface · po-notification-fanout · notifications · status-semantics · record-drawer ·
+  commerce-operational-simulation · dashboard · domain-acceptance · rocketchat-removal · p12-channel-operations ·
+  channel-po-ingestion · multi-tenant) **84/84** · the ENTIRE suite: see the session report.
+
+**A real defect found while writing the spec**: the S6-era guard `getByText('NaN', { exact: false })` is
+CASE-INSENSITIVE in Playwright, so on an admin surface it matches **"Fi-NaN-ce"**. The S7 spec and the live verifier
+therefore use a REGEX locator (`/NaN/`), which is case-sensitive.
+
+**Honest limits / non-credential follow-ups**
+
+- The **window is still enforced only at the canonical domain writer** (`src/data/api.ts →
+  acknowledgePurchaseOrder`). The SIMULATED commerce seam (`commerceLifecycle.acknowledgeCommercePurchaseOrder`) owns
+  its own status machine and does not judge the 24-hour window, so its panel's `Ack` affordance reads the
+  config-owned obligation family (behaviour unchanged) rather than the time-dependent queue — recorded deliberately,
+  because that panel is a self-contained simulation of the commerce lifecycle.
+- The admin dashboard's PO-PIPELINE bucket remains a status-family view (not the acknowledgement queue); the
+  distinction is stated in the code and asserted by the gate.
+- The S5/S6 honest limits stand unchanged (no brand has an instant-message number on record, so the channel refuses
+  in the demo while its success path is proven in the gate; the provider resolves `available`; the ledger and the
+  demo store are in-memory).
+- An UNATTENDED sweep that performs the rejection without an approval remains S10 plus a founder decision on the
+  trigger.

@@ -199,27 +199,21 @@ export const PO_STATUS_ORDER: PurchaseOrderStatus[] = [
 ];
 
 /**
- * The 24-hour acknowledgement WINDOW of one purchase order (admin detail).
- * `acknowledged` is derived from the PO status, so this is presentation only.
+ * §P13 / S7 — REMOVED (the old contract is recorded here, in full).
+ *
+ * `ackWindowPresentation(acknowledged, hoursLeft, minutesLeft)` was a SECOND
+ * presentation of the acknowledgement window: it took the raw figures a surface
+ * had derived itself plus an `acknowledged` boolean derived from the PO's STATUS
+ * (`po.status !== 'received' && po.status !== 'under_review'`), and it owned a
+ * second label vocabulary (`Acknowledged` / `Deadline passed` / `Nh Nm left`)
+ * alongside `ackDeadlinePresentation` below.
+ *
+ * Both admin surfaces now render the window through the window's OWNER
+ * (`src/lib/commerce/poAcknowledgementWindow.ts` → `channelState` / `hoursLeft` /
+ * `reason`) and classify its urgency with `ackDeadlinePresentation`, so the
+ * urgency vocabulary has ONE owner and a drifting second one cannot reappear.
+ * Asserted by `scripts/validate-po-acknowledgement-admin-surfaces.mjs`.
  */
-export function ackWindowPresentation(
-  acknowledged: boolean,
-  hoursLeft: number,
-  minutesLeft: number
-): StatusPresentation {
-  if (acknowledged) {
-    return { label: 'Acknowledged', tone: 'success', dataStatus: 'acknowledged', actionable: false };
-  }
-  if (hoursLeft <= 0 && minutesLeft <= 0) {
-    return { label: 'Deadline passed', tone: 'danger', dataStatus: 'ack_overdue', actionable: true };
-  }
-  return {
-    label: `${hoursLeft}h ${minutesLeft}m left`,
-    tone: 'warning',
-    dataStatus: 'ack_due',
-    actionable: true,
-  };
-}
 
 /** Per-line acknowledgement outcome (`unacknowledged` renders as `pending`). */
 export type AckStatusValue = 'accepted' | 'rejected' | 'backordered' | 'unacknowledged';

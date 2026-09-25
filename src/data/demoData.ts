@@ -22,6 +22,7 @@ import { DEFAULT_PRODUCT_TAX_CODE } from '@/types';
 import {
   PO_ACKNOWLEDGEMENT_HOURS,
   PO_ACK_ON_BEHALF_WINDOW_HOURS,
+  PO_ACK_STATUSES_WITH_OBLIGATION,
 } from '@/config/purchaseOrders';
 import type {
   ComplianceDocument,
@@ -332,6 +333,15 @@ export const DEMO_WORKFLOW_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
   (brand, bi) =>
     [0, 1].map((pi): PurchaseOrder => {
       const status = poStatusFor(bi, pi);
+      /**
+       * §P13 / S7 — WHICH statuses owe an acknowledgement is CONFIG-owned
+       * (`src/config/purchaseOrders.ts → PO_ACK_STATUSES_WITH_OBLIGATION`, the very
+       * array the window owner consumes). REPOINTED: this was previously re-typed
+       * inline as `status === 'received' || status === 'under_review'` in TWO places
+       * in this seed. The generated seed is UNCHANGED (the array holds exactly those
+       * two statuses).
+       */
+      const openForAcknowledgement = PO_ACK_STATUSES_WITH_OBLIGATION.includes(status);
       const items = productsForBrand(brand.id).map((p, idx) => ({
         sku: p.sku,
         productName: p.name,
@@ -363,7 +373,7 @@ export const DEMO_WORKFLOW_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
          * (`src/lib/commerce/backorderGate.ts`), and it is enforced at the domain
          * boundary rather than in the UI.
          */
-        isBackOrderAllowed: (status === 'received' || status === 'under_review') && bi === 1,
+        isBackOrderAllowed: openForAcknowledgement && bi === 1,
       }));
       const poValue =
         Math.round(items.reduce((s, i) => s + i.quantity * i.unitPrice, 0) * 100) / 100;
@@ -406,7 +416,6 @@ export const DEMO_WORKFLOW_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
        * never a hand-written 22.
        */
       const closingWindowPo = bi === 0 && pi === 1;
-      const openForAcknowledgement = status === 'received' || status === 'under_review';
       const orderDate = openForAcknowledgement
         ? new Date(
             Date.now() -

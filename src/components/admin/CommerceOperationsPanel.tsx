@@ -17,6 +17,8 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import { demoPurchaseOrders, getAllCommerceInvoicesForPo, getCommerceInvoiceForPo } from '@/data/demoStore';
 import type { CommerceInvoice, InvoiceTermDays, PurchaseOrder } from '@/types';
+/** §P13 / S7 — which statuses owe an acknowledgement has ONE owner (the config). */
+import { PO_ACK_STATUSES_WITH_OBLIGATION } from '@/config/purchaseOrders';
 import { INVOICE_TERM_CHOICES, INVOICE_TERM_DAYS, invoiceDueDate, invoiceTermDays } from '@/lib/commerce/invoiceTerms';
 import { INVOICE_NUMBER_RULES } from '@/lib/commerce/invoiceRegistry';
 import { deriveReceivingStatus, RECEIVING_STATUS_LABELS } from '@/lib/commerce/receivingStatus';
@@ -44,10 +46,21 @@ import { cn } from '@/utils/cn';
 
 const MONO = 'font-mono text-ds-label';
 
-/** §Phase E5 — the legitimate next actions for a simulated PO, in order. */
-function nextActionsFor(po: { status: string }, hasInvoice: boolean, invoicePaid: boolean) {
+/**
+ * §Phase E5 — the legitimate next actions for a simulated PO, in order.
+ *
+ * §P13 / S7 — `ack` reads the CONFIG-owned obligation family instead of re-typing
+ * `'received' || 'under_review'`: which statuses owe an acknowledgement has ONE
+ * owner (`src/config/purchaseOrders.ts → PO_ACK_STATUSES_WITH_OBLIGATION`, the same
+ * input the window owner consumes). The value is unchanged.
+ */
+function nextActionsFor(
+  po: Pick<PurchaseOrder, 'status'>,
+  hasInvoice: boolean,
+  invoicePaid: boolean
+) {
   return {
-    ack: po.status === 'received' || po.status === 'under_review',
+    ack: PO_ACK_STATUSES_WITH_OBLIGATION.includes(po.status),
     fulfil: po.status === 'accepted' || po.status === 'ready_to_fulfil',
     receive: po.status === 'shipped' || po.status === 'ready_to_fulfil',
     invoice: po.status === 'delivered' && !hasInvoice,

@@ -90,9 +90,12 @@ import type { AdminDepartment, ShipmentStatus } from '@/types';
 import type { PaletteDomain } from '@/config/themes';
 import { operatingCostSummary } from '@/lib/costs/costSummary';
 import { shipmentStatusPresentation } from '@/lib/statusPresentation';
+/** §P13 / S7 — the acknowledgement QUEUE is read from its OWNER, never re-derived. */
+import { poAcknowledgementWindow } from '@/lib/commerce/poAcknowledgementWindow';
+/** §P13 — the config owns WHICH statuses owe an acknowledgement (one source). */
+import { PO_ACK_STATUSES_WITH_OBLIGATION } from '@/config/purchaseOrders';
 import { ArrowRight } from 'lucide-react';
 
-const PO_AWAITING: ReadonlySet<string> = new Set(['received', 'under_review']);
 const PO_IN_FLIGHT: ReadonlySet<string> = new Set([
   'accepted',
   'ready_to_fulfil',
@@ -229,7 +232,17 @@ export function AdminDashboard({
   }, [brands]);
 
   /* ── Real, derivable operational measures (no invented metrics) ──────── */
-  const posAwaitingAction = posAll.filter((p) => PO_AWAITING.has(p.status));
+  /**
+   * §P13 / S7 — "POs awaiting action" IS THE OWNER'S QUEUE.
+   *
+   * REPOINTED (the old contract is recorded here): this figure previously read
+   * `PO_AWAITING.has(p.status)` over a hand-written `new Set(['received',
+   * 'under_review'])` — a second copy of the 24-hour rule AND of the config's own
+   * obligation set. The owner's `inQueue` is Amazon's `New` set INSIDE the window,
+   * so this KPI ("Action needed") can no longer count a purchase order past its
+   * limit — or one whose order date cannot be read.
+   */
+  const posAwaitingAction = posAll.filter((p) => poAcknowledgementWindow(p).inQueue);
   const awaitingValue = posAwaitingAction.reduce((sum, p) => sum + p.poValue, 0);
   const posInFulfilment = posAll.filter((p) => PO_IN_FLIGHT.has(p.status));
 
@@ -674,10 +687,19 @@ export function AdminDashboard({
     domain: KPI_DOMAIN[k.id] ?? 'catalogue',
   }));
 
-  /** PO pipeline: the real status families this platform moves work through. */
+  /**
+   * PO pipeline: the real status families this platform moves work through.
+   *
+   * §P13 / S7 — the "awaiting" bucket is a STATUS-FAMILY view of the channel's own
+   * `New` set, so it reads the CONFIG-owned family
+   * (`PO_ACK_STATUSES_WITH_OBLIGATION`) instead of re-typing the literal. It is
+   * deliberately NOT the acknowledgement queue: the queue claim ("POs awaiting
+   * action", "Action needed") belongs to the window's owner and is derived above
+   * from `poAcknowledgementWindow(...).inQueue`.
+   */
   const pipelineStages: PipelineStageData[] = useMemo(() => {
-    const buckets: { id: string; label: string; domain: PaletteDomain; statuses: string[] }[] = [
-      { id: 'awaiting', label: 'Awaiting action', domain: 'orders', statuses: ['received', 'under_review'] },
+    const buckets: { id: string; label: string; domain: PaletteDomain; statuses: readonly string[] }[] = [
+      { id: 'awaiting', label: 'Awaiting action', domain: 'orders', statuses: PO_ACK_STATUSES_WITH_OBLIGATION },
       { id: 'committed', label: 'Committed', domain: 'catalogue', statuses: ['accepted', 'ready_to_fulfil'] },
       { id: 'in-transit', label: 'In transit', domain: 'logistics', statuses: ['shipped'] },
       { id: 'delivered', label: 'Delivered', domain: 'finance', statuses: ['delivered'] },

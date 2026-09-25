@@ -58,6 +58,8 @@ import * as store from '@/data/demoStore';
 import { findOrCreateTicketForBrand } from '@/lib/helpdesk/ticketStore';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 import { getChannelInstructionForPO, markChannelInstructionActioned } from './channelInstructions';
+/** §P13 / S7 — the acknowledgement obligation family has ONE owner (the config). */
+import { PO_ACK_STATUSES_WITH_OBLIGATION } from '@/config/purchaseOrders';
 import { beginProxyProcessing } from './proxyProcessor';
 import {
   INVOICE_TERM_CHOICES,
@@ -337,7 +339,13 @@ export function acknowledgeCommercePurchaseOrder(
   if (po.acknowledgedAt) {
     return { ok: false, error: 'ALREADY_ACKNOWLEDGED — duplicate acknowledgement refused.' };
   }
-  if (po.status !== 'received' && po.status !== 'under_review') {
+  /**
+   * §P13 / S7 — the obligation family has ONE owner: the SAME config array the
+   * acknowledgement window consumes (`src/config/purchaseOrders.ts →
+   * PO_ACK_STATUSES_WITH_OBLIGATION`), never a re-typed literal. The value is
+   * unchanged (`received` / `under_review`).
+   */
+  if (!PO_ACK_STATUSES_WITH_OBLIGATION.includes(po.status)) {
     return {
       ok: false,
       error: `ILLEGAL_TRANSITION — a PO in "${po.status}" cannot be acknowledged.`,

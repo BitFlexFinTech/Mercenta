@@ -32,6 +32,8 @@ import {
   poAckReminderViews,
   subscribePoAckNotifications,
 } from '@/lib/commerce/poAcknowledgementNotifications';
+/** §P13 / S7 — the acknowledgement QUEUE is read from its OWNER, never re-derived. */
+import { poAcknowledgementWindow } from '@/lib/commerce/poAcknowledgementWindow';
 import { renewalUrgency } from '@/lib/contracts';
 import { documentsAwaitingDownload } from '@/lib/documents/poDocumentPack';
 import { useWorkItems } from '@/lib/work/useWork';
@@ -91,7 +93,14 @@ function useNotifications(): NotificationItem[] {
   return ([] as NotificationItem[])
     .concat(
       pos
-        .filter((p) => p.status === 'received' || p.status === 'under_review')
+        /**
+         * §P13 / S7 — REPOINTED (the old contract is recorded here): this previously
+         * hand-rolled `p.status === 'received' || p.status === 'under_review'` — a
+         * second copy of the 24-hour rule and of the config's own obligation set. The
+         * owner's `inQueue` is Amazon's `New` set INSIDE the window, so a purchase
+         * order past its limit is no longer announced as "awaiting action".
+         */
+        .filter((p) => poAcknowledgementWindow(p).inQueue)
         .map((p) => ({
           id: `po-${p.id}`,
           kind: 'po' as const,

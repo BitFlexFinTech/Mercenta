@@ -11,10 +11,12 @@ import {
   draftOnBehalfRejection,
 } from '@/data/api';
 /**
- * §P13 / S4 — the on-behalf DRAFT and the question "is it Mercenta's to perform?"
- * are answered by the rule's OWNER, never re-derived on the surface.
+ * §P13 / S4 / S7 — the on-behalf DRAFT, the question "is it Mercenta's to perform?"
+ * AND the acknowledgement WINDOW itself are answered by the rule's OWNER, never
+ * re-derived on the surface.
  */
 import {
+  poAcknowledgementWindow,
   poNeedsAutoRejection,
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
@@ -24,12 +26,15 @@ import {
 } from '@/lib/commerce/channelInstructions';
 import { beginProxyProcessing, processChannelInstruction } from '@/lib/commerce/proxyProcessor';
 import { Badge, Button, Card, StatusBadge } from '@/components/ui';
+import type { StatusTone } from '@/components/ui';
 import {
+  ackDeadlinePresentation,
   ackStatusPresentation,
-  ackWindowPresentation,
   deductionStatusPresentation,
+  poStatusPresentation,
 } from '@/lib/statusPresentation';
 import { cn } from '@/utils/cn';
+import type { PoAcknowledgementWindow } from '@/lib/commerce/poAcknowledgementWindow';
 import type { PurchaseOrder, PurchaseOrderLineItem } from '@/types';
 import { PO_REJECTION_CODES } from '@/types';
 import { AlertTriangle, CheckCircle2, X, Truck, Gavel, History } from 'lucide-react';
@@ -55,6 +60,42 @@ function carrierOptionsForPO(po: PurchaseOrder) {
 interface Props {
   poId: string;
   onClose: () => void;
+}
+
+/**
+ * §P13 / S7 — THE HEADER BADGE, DERIVED FROM THE WINDOW'S OWNER.
+ *
+ * The owner's channel state decides what the badge says: an unreadable window
+ * fails CLOSED and STATES that (never a figure rendered from it), a decided order
+ * shows its own decision, a closed order shows its own closed status, and an open
+ * order shows the owner's urgency — with the closing window called out, because
+ * Mercenta may act on the brand's behalf inside it. The owner's own `reason` is
+ * the tooltip at the call site.
+ *
+ * Pure and module-level (no hooks), so the render body stays readable.
+ */
+function ackHeaderBadge(
+  po: PurchaseOrder,
+  window: PoAcknowledgementWindow
+): { label: string; tone: StatusTone; dataStatus: string } {
+  if (window.channelState === 'unknown') {
+    return { label: 'Ack window unreadable', tone: 'neutral', dataStatus: 'ack_unknown' };
+  }
+  if (window.channelState === 'acknowledged') {
+    return { label: 'Acknowledged', tone: 'success', dataStatus: 'acknowledged' };
+  }
+  if (window.channelState === 'closed') {
+    const closed = poStatusPresentation(po.status);
+    return { label: closed.label, tone: closed.tone, dataStatus: closed.dataStatus };
+  }
+  const urgency = window.hoursLeft === null ? null : ackDeadlinePresentation(window.hoursLeft);
+  return {
+    label: `${urgency?.label ?? 'Ack window unreadable'}${
+      window.onBehalfAvailable ? ' · closing window' : ''
+    }`,
+    tone: urgency?.tone ?? 'neutral',
+    dataStatus: urgency?.dataStatus ?? 'ack_unknown',
+  };
 }
 
 /** §Batch-0.5 — Admin PO Detail */
@@ -126,14 +167,31 @@ const [onBehalfAsn, setOnBehalfAsn] = useState(false);
     );
   }
 
-  const deadlineDate = new Date(po.orderDate);
-  deadlineDate.setHours(deadlineDate.getHours() + 24);
-  const now = new Date();
-  const msLeft = deadlineDate.getTime() - now.getTime();
-  const hoursLeft = Math.max(0, Math.floor(msLeft / (1000 * 60 * 60)));
-  const minutesLeft = Math.max(0, Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60)));
-  const isDeadlinePassed = msLeft <= 0;
-  const isAcknowledged = po.status !== 'received' && po.status !== 'under_review';
+  /**
+   * §P13 / S7 — THE WINDOW COMES FROM ITS OWNER.
+   *
+   * REPOINTED (the old contract is recorded here): this surface derived the window
+   * itself — `new Date(po.orderDate)` mutated in LOCAL time by
+   * `setHours(getHours() + 24)` (which drifts across a DST boundary), its own
+   * `msLeft / hoursLeft / minutesLeft`, its own `isDeadlinePassed`, and its own
+   * actionability predicate `po.status !== 'received' && po.status !== 'under_review'`
+   * — a second copy of the 24-hour rule AND a second copy of the config's own
+   * obligation set (`PO_ACK_STATUSES_WITH_OBLIGATION`). Past the limit it therefore
+   * offered an acceptance the domain writer REFUSES, and an unreadable order date
+   * rendered a countdown instead of failing closed.
+   *
+   * Now the owner (`src/lib/commerce/poAcknowledgementWindow.ts`) derives the
+   * window, its `reason` states it verbatim (the badge's tooltip), the presentation
+   * owner classifies the urgency, and the acceptance control is offered exactly when
+   * the owner permits an acceptance.
+   */
+  const ackWindow = poAcknowledgementWindow(po);
+  /** The owner's urgency classification — only while a window is genuinely owed. */
+  const ackUrgency =
+    ackWindow.channelState === 'new' && ackWindow.hoursLeft !== null
+      ? ackDeadlinePresentation(ackWindow.hoursLeft)
+      : null;
+  const ackBadge = ackHeaderBadge(po, ackWindow);
 const thePo = po;
   function beginOnBehalfAck() {
     setOnBehalfAck(true);
@@ -276,13 +334,15 @@ function beginOnBehalfAsn() {
             <p className="text-ds-label text-zinc-400 mt-0.5">{brandName} £{po.poValue.toLocaleString()}</p>
           </div>
           <div className="flex items-center gap-2">
-            <StatusBadge
-              className="text-ds-micro"
-              dataStatus={ackWindowPresentation(isAcknowledged, hoursLeft, minutesLeft).dataStatus}
-              tone={ackWindowPresentation(isAcknowledged, hoursLeft, minutesLeft).tone}
-            >
-              {ackWindowPresentation(isAcknowledged, hoursLeft, minutesLeft).label}
-            </StatusBadge>
+            <span title={ackWindow.reason}>
+              <StatusBadge
+                className="text-ds-micro"
+                dataStatus={ackBadge.dataStatus}
+                tone={ackBadge.tone}
+              >
+                {ackBadge.label}
+              </StatusBadge>
+            </span>
             <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
           </div>
         </div>
@@ -299,8 +359,16 @@ function beginOnBehalfAsn() {
             </div>
             <div className="bg-ink-900 rounded-lg p-2.5">
               <p className="text-ds-micro text-zinc-500">Deadline</p>
-              <p className="text-xs text-white font-mono">
-                {isDeadlinePassed ? <span className="text-red-400">EXPIRED</span> : hoursLeft + 'h ' + minutesLeft + 'm'}
+              <p
+                className="text-xs text-white font-mono"
+                title={ackWindow.reason}
+                data-testid={`admin-po-ack-window-${po.poNumber}`}
+              >
+                {ackUrgency
+                  ? ackUrgency.label
+                  : ackWindow.deadline
+                    ? ackWindow.deadline.slice(0, 16).replace('T', ' ')
+                    : 'Window unreadable'}
               </p>
             </div>
           </div>
@@ -336,13 +404,29 @@ function beginOnBehalfAsn() {
             </table>
           </Card>
 
-          {!isAcknowledged && !onBehalfAck && (
+          {/**
+            * §P13 / S7 — the acceptance is offered EXACTLY when the owner permits
+            * one (Amazon's `New` set INSIDE the window). Past the limit the domain
+            * writer REFUSES an acceptance, so no such control is offered and the
+            * remaining action is Mercenta's on-behalf rejection draft below; an
+            * unreadable window fails closed, and the owner's own `reason` states
+            * why no acceptance is on offer.
+            */}
+          {ackWindow.inQueue && !onBehalfAck && (
             <div className="flex gap-2">
               <Button className="text-xs" onClick={beginOnBehalfAck}>
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                 Acknowledge on behalf of {brandName}
               </Button>
             </div>
+          )}
+          {!ackWindow.inQueue && !onBehalfAck && (
+            <p
+              className="text-ds-micro text-zinc-500"
+              data-testid={`admin-po-ack-state-${po.poNumber}`}
+            >
+              {ackWindow.reason}
+            </p>
           )}
           {onBehalfAck && (
             <div className="bg-brass-500/10 border border-brass-500/20 rounded-lg p-3">
