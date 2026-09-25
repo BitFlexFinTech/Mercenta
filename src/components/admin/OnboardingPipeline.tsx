@@ -308,6 +308,27 @@ function OnboardingDetail({
             {o.acceptedAt ? ` Accepted ${o.acceptedAt.slice(0, 10)}.` : ''}
           </p>
         )}
+        {/* §P13 / S8 — THE LINK, visible to operations: the brand's acknowledgement of
+            the channel's purchase-order rule is a canonical, audited act on THIS record
+            (not a tick in a wizard), and the exact wording the brand was shown is
+            carried on the record itself. An unacknowledged record says so rather than
+            leaving the link silently absent. */}
+        {o.poRulesAcknowledgedAt ? (
+          <p
+            className="text-ds-micro text-emerald-300/90"
+            data-onboarding-po-rules="acknowledged"
+            data-po-rules-text={o.poRulesRuleText ?? ''}
+          >
+            PO acknowledgement rule acknowledged {o.poRulesAcknowledgedAt.slice(0, 10)}
+            {o.poRulesAcknowledgedBy ? ` by ${o.poRulesAcknowledgedBy}` : ''} — the wording shown is recorded on
+            this record.
+          </p>
+        ) : o.status !== 'completed' ? (
+          <p className="text-ds-micro text-amber-300/80" data-onboarding-po-rules="outstanding">
+            PO acknowledgement rule not yet acknowledged — the brand acknowledges it in the operational-guidance
+            step of its onboarding wizard.
+          </p>
+        ) : null}
         <span className="text-ds-micro text-zinc-600">
           record <span className="font-mono">{o.id}</span> · initiated {o.initiatedAt.slice(0, 10)} by{' '}
           {o.initiatedBy}

@@ -631,9 +631,15 @@ function AddProductPanel({
         {!guidanceAcked ? (
           <div className="p-5 space-y-4">
             <p className="text-xs text-zinc-500">
-              Please review this quick guidance on pricing, packaging, and PO
-              rejections — understanding these factors helps protect your vendor
-              performance.
+              {/*
+                §P13 / S8 — REPOINTED (old contract recorded): this line used to read
+                *"Please review this quick guidance on pricing, packaging, and PO
+                rejections — understanding these factors helps protect your vendor
+                performance."* — an unsupported vendor-performance claim (AV-003). The
+                rule itself is rendered from its ONE owner by `BrandGuidance` below.
+              */}
+              Please review this quick guidance on pricing, packaging, and the
+              channel's purchase-order acknowledgement rule.
             </p>
             <BrandGuidance
               compact

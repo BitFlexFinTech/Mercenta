@@ -178,7 +178,17 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
     if (legalAgreements.chargebackIndemnity) {
       acceptBrandAgreement(brandId, 'chargeback_indemnity' as BrandAgreementType, AGREEMENT_VERSIONS.chargeback_indemnity);
     }
-    completeOnboarding();
+    /**
+     * §P13 / S8 — THE LINK. The operational-guidance step's acknowledgement used to be
+     * LOCAL STATE ONLY: the brand ticked the box, the wizard closed, and nothing on the
+     * canonical onboarding record said the brand had ever been shown the channel's
+     * purchase-order rule. It is now passed to the canonical domain writer
+     * (`onboardingLifecycle.acknowledgePurchaseOrderRules`, reached through
+     * `completeOnboarding`), which records WHAT was acknowledged (the rule's own text)
+     * against the brand's onboarding record, attributed and audited. A brand that has
+     * not acknowledged cannot claim it: the flag is passed, never assumed.
+     */
+    completeOnboarding({ poRulesAcknowledged: guidanceAck });
   };
 
   return (
@@ -732,10 +742,17 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
           {step === 6 && (
             <div className="space-y-4 animate-fade-in">
               <h2 className="text-base font-semibold text-white mb-1">Operational Guidance</h2>
+              {/*
+                §P13 / S8 — REPOINTED (old contract recorded): this paragraph used to read
+                *"…understanding how pricing, packaging, and PO rejections affect your
+                vendor performance is essential for a successful partnership."* — an
+                unsupported consequence claim (AV-003). The rule itself now comes from its
+                ONE owner (`PO_ACK_ONBOARDING_STATEMENT`).
+              */}
               <p className="text-xs text-zinc-500 mb-2">
-                Please review the following operational information. This is a required
-                step — understanding how pricing, packaging, and PO rejections affect
-                your vendor performance is essential for a successful partnership.
+                Please review the following operational information. This is a required step —
+                pricing, packaging and the channel's purchase-order acknowledgement rule are
+                what a successful partnership is built on.
               </p>
               <BrandGuidance
                 requireAck

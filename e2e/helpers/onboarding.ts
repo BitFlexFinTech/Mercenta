@@ -65,6 +65,24 @@ export async function checkAllWizardCheckboxes(page: Page): Promise<void> {
       await box.click().catch(() => {});
     }
   }
+  /**
+   * §P13 / S8 — DEFECT FOUND AND FIXED (test-only helper). The step-5 mandatory legal
+   * agreements are NOT label-wrapped: each is `<input id="agreement-…">` followed by a
+   * SIBLING `<label htmlFor="agreement-…">`, so the loop above never reached them and
+   * this helper could not walk the wizard past step 5 (no spec had ever asked it to —
+   * `finishWizard` had no caller). The two agreements are ticked here through the same
+   * visible labels a brand clicks, so step 5 → 6 is a real UI transition.
+   */
+  for (const id of ['agreement-logistics', 'agreement-chargeback']) {
+    const input = page.locator(`#${id}`);
+    if ((await input.count().catch(() => 0)) === 0) continue;
+    const checked = await input.isChecked().catch(() => true);
+    if (!checked) {
+      await page.locator(`label[for="${id}"]`).first().scrollIntoViewIfNeeded().catch(() => {});
+      await page.locator(`label[for="${id}"]`).first().click().catch(() => {});
+      await page.waitForTimeout(150);
+    }
+  }
 }
 
 /** Identify which wizard step is visible (by its <h2>). */

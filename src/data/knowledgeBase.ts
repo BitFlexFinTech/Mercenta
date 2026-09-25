@@ -6,6 +6,7 @@
  * claims).
  */
 import type { KBArticle } from '@/types';
+import { PO_ACKNOWLEDGEMENT_HOURS, PO_ACK_ONBOARDING_STATEMENT } from '@/config/purchaseOrders';
 
 export const KB_ARTICLES: KBArticle[] = [
   {
@@ -28,11 +29,30 @@ export const KB_ARTICLES: KBArticle[] = [
   },
   {
     id: 'kb-purchase-orders',
-    title: 'Purchase orders & the 24-hour rule',
-    summary: 'Acknowledge each purchase order within 24 hours and acknowledge only what you can actually ship.',
+    /**
+     * §P13 / S8 — REPOINTED (old contract recorded). This article used to read:
+     *
+     *   title:   'Purchase orders & the 24-hour rule'
+     *   summary: 'Acknowledge each purchase order within 24 hours and acknowledge only
+     *             what you can actually ship.'
+     *   body:    'An unacknowledged order after 24 hours is flagged and can lead to a
+     *             vendor-performance deduction. Check your purchase order list every day.'
+     *
+     * The body asserted a consequence the platform's own discrepancy register records
+     * as UNSUPPORTED (`docs/AMAZON_RECONCILIATION_STATUS.md` AV-003 — no Amazon source
+     * documents a vendor-performance rating or its triggers). The rule, its short form
+     * and the documented rejection reasons now come from the ONE owner
+     * (`src/config/purchaseOrders.ts → PO_ACK_ONBOARDING_STATEMENT`); this article is
+     * the target of both acknowledgement tour steps' `learnMore` link, so it can no
+     * longer teach a different rule from the tours. Asserted by
+     * `scripts/validate-po-acknowledgement-onboarding-surfaces.mjs`.
+     */
+    title: `Purchase orders & the ${PO_ACKNOWLEDGEMENT_HOURS}-hour acknowledgement rule`,
+    summary: PO_ACK_ONBOARDING_STATEMENT.shortText,
     sections: [
       { heading: 'Acknowledging', body: 'For each line you can accept the full quantity, reject it, or backorder it. You cannot acknowledge more than the ordered quantity, and you acknowledge at or below the PO unit price.' },
-      { heading: 'Why the window matters', body: 'An unacknowledged order after 24 hours is flagged and can lead to a vendor-performance deduction. Check your purchase order list every day.' },
+      { heading: 'The window', body: PO_ACK_ONBOARDING_STATEMENT.text },
+      { heading: 'Rejection reasons', body: `If you reject a line, you must use one of the channel's documented reason codes: ${PO_ACK_ONBOARDING_STATEMENT.rejectionCodes.join(' · ')}. Mercenta reviews avoidable rejections with you, because Mercenta is the vendor of record on the channel account.` },
       { heading: 'Accuracy', body: 'If your shipment information (ASN) differs from what you acknowledged, the channel may apply an inaccuracy deduction. Count every carton before sealing.' },
     ],
   },

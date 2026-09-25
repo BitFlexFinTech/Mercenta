@@ -6,7 +6,29 @@
  *
  * Each tour can auto-start, be force-shown before the user can act
  * (Tour 1, Tour 3), or be manually started from Settings.
+ *
+ * §P13 / S8 — REPOINTED (old contract recorded). The acknowledgement steps used to
+ * RE-TYPE the channel's 24-hour rule and to ASSERT a consequence the platform's own
+ * discrepancy register records as unsupported (AV-003):
+ *
+ *   · `orientation-purchase-orders` — *"You must acknowledge each one within 24 hours
+ *      or it will be flagged. A flagged PO may result in a vendor performance
+ *      deduction."*
+ *   · `po-24-hour-rule` — *"You have 24 hours to acknowledge this PO. If you miss the
+ *      window, the PO is flagged and may result in a deduction from the retail
+ *      channel."*
+ *   · `po-reject-reason` — *"you must select a reason code (e.g. "Out of stock",
+ *      "Discontinued", "Price dispute"). Frequent rejections affect your vendor
+ *      performance score."* — the three named codes are NOT the channel's documented
+ *      rejection reasons.
+ *
+ * The onboarding surfaces now render the ONE brand-facing statement
+ * (`src/config/purchaseOrders.ts → PO_ACK_ONBOARDING_STATEMENT`), so the rule, the
+ * documented past-limit action and the documented rejection reasons can never drift
+ * from the owner. Asserted by
+ * `scripts/validate-po-acknowledgement-onboarding-surfaces.mjs`.
  */
+import { PO_ACK_ONBOARDING_STATEMENT } from '@/config/purchaseOrders';
 
 export interface TourStep {
   id: string;
@@ -66,7 +88,7 @@ export const ORIENTATION_TOUR: TourDefinition = {
     {
       id: 'orientation-purchase-orders',
       title: 'Purchase Orders — 24-Hour Rule',
-      description: 'You will receive Purchase Orders from the retail channel. You must acknowledge each one within 24 hours or it will be flagged. A flagged PO may result in a vendor performance deduction. Visit this section daily.',
+      description: `${PO_ACK_ONBOARDING_STATEMENT.text} Visit this section daily.`,
       targetSelector: '[data-tour="nav-purchase_orders"]',
       position: 'right',
       action: 'next',
@@ -199,7 +221,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-24-hour-rule',
       title: '24-Hour Window',
-      description: 'You have 24 hours to acknowledge this PO. If you miss the window, the PO is flagged and may result in a deduction from the retail channel. Always check your PO list at least once per day.',
+      description: `${PO_ACK_ONBOARDING_STATEMENT.text} Always check your PO list at least once per day.`,
       targetSelector: '[data-tour="po-deadline"]',
       position: 'bottom',
       action: 'next',
@@ -207,7 +229,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-reject-reason',
       title: 'Rejection Requires Reason Code',
-      description: 'If you reject a line item, you must select a reason code (e.g. "Out of stock", "Discontinued", "Price dispute"). Frequent rejections affect your vendor performance score.',
+      description: `If you reject a line item, you must select one of the channel's documented reason codes: ${PO_ACK_ONBOARDING_STATEMENT.rejectionCodes.join(' · ')}.`,
       targetSelector: '[data-tour="po-reject-reason"]',
       position: 'bottom',
       action: 'next',

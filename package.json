@@ -42,6 +42,7 @@
     "validate:po-ack-notifications": "node scripts/validate-po-acknowledgement-notifications.mjs",
     "validate:po-ack-brand": "node scripts/validate-po-acknowledgement-brand-surfaces.mjs",
     "validate:po-ack-admin": "node scripts/validate-po-acknowledgement-admin-surfaces.mjs",
+    "validate:po-ack-onboarding": "node scripts/validate-po-acknowledgement-onboarding-surfaces.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs"
   },
   "dependencies": {

@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { Card, Badge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import type { ApprovedCategory } from '@/types';
+import { PO_REJECTION_CODES } from '@/types';
+import { PO_ACK_ONBOARDING_STATEMENT } from '@/config/purchaseOrders';
 import {
   Package, DollarSign, AlertTriangle, Shield, Info,
   ChevronDown, ChevronRight, FileText, Scale,
@@ -103,7 +105,15 @@ function NetPpmSection({ category }: { category?: ApprovedCategory }) {
           <p>
             <strong className="text-zinc-200">Net PPM</strong> (Net Profit Per Mille) = the
             retail channel's profit per 1,000 units sold, expressed as a percentage of
-            the selling price. It is the single most important metric for vendor performance.
+            the selling price.{' '}
+            {/*
+              §P13 / S8 — REPOINTED (old contract recorded): this sentence used to end
+              *"It is the single most important metric for vendor performance."* — the
+              same unsupported vendor-performance claim as AV-003. It now states what the
+              metric IS and MERCENTA'S own position on it, never an unverified rating.
+            */}
+            It is the margin the channel makes on your products, and the number Mercenta
+            negotiates your wholesale pricing against.
           </p>
           <div className="bg-ink-900 rounded p-2 text-ds-micro font-mono text-zinc-500 space-y-1">
             <p className="text-zinc-300 font-medium text-ds-label">Net PPM Formula</p>
@@ -238,15 +248,34 @@ function PORejectionSection() {
       </button>
       {open && (
         <div className="px-4 pb-3 space-y-2 text-ds-label text-zinc-400 leading-relaxed">
+          {/*
+            §P13 / S8 — REPOINTED (old contract recorded). This section used to assert
+            three UNSUPPORTED consequences, each presented as if the channel documented
+            it (`docs/AMAZON_RECONCILIATION_STATUS.md` AV-003 — no Amazon source
+            documents a vendor-performance rating, its thresholds or its triggers):
+
+              · "Every purchase order rejection is tracked against your brand's vendor
+                 performance score."
+              · "ASIN Confirmation Rate — % of ordered lines confirmed. Below 80%
+                 triggers review, may reduce future PO volume. Repeat rejections can
+                 delist ASINs."
+              · "Net PPM Impact — Rejected POs reduce sell-through, lowering Net PPM…"
+              · "Valid rejection codes: TemporarilyUnavailable, InvalidProductIdentifier,
+                 ObsoleteProduct." — a hand-typed SECOND copy of `PO_REJECTION_CODES`.
+
+            The rule, the documented past-limit action and the channel's documented
+            reason codes now come from the ONE owner
+            (`src/config/purchaseOrders.ts → PO_ACK_ONBOARDING_STATEMENT`). What remains
+            here is MERCENTA'S OWN declared position — Mercenta operates the channel
+            account, so it reviews avoidable rejections with the brand — stated as
+            Mercenta's process and never as a channel rule.
+          */}
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-amber-200 mb-1">How Rejections Affect Your Account</p>
-                <p className="text-zinc-400">
-                  Every purchase order rejection is tracked against your brand's
-                  vendor performance score. Key metrics affected:
-                </p>
+                <p className="font-medium text-amber-200 mb-1">The acknowledgement rule</p>
+                <p className="text-zinc-400">{PO_ACK_ONBOARDING_STATEMENT.ruleText}</p>
               </div>
             </div>
           </div>
@@ -254,31 +283,22 @@ function PORejectionSection() {
             <div className="flex items-start gap-2 text-xs">
               <span className="w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0 mt-1.5" />
               <div>
-                <strong className="text-zinc-300">ASIN Confirmation Rate</strong>
+                <strong className="text-zinc-300">Rejection requires a documented reason code</strong>
                 <p className="text-ds-micro text-zinc-500">
-                  % of ordered lines confirmed. Below 80% triggers review, may
-                  reduce future PO volume. Repeat rejections can delist ASINs.
+                  The channel accepts three rejection reasons —{' '}
+                  <span className="font-mono text-zinc-400">{PO_REJECTION_CODES.join(' · ')}</span> — and a
+                  rejection that carries the wrong code is treated as avoidable.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-2 text-xs">
-              <span className="w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0 mt-1.5" />
+              <span className="w-2 h-2 rounded-full bg-amber-500/50 flex-shrink-0 mt-1.5" />
               <div>
-                <strong className="text-zinc-300">Net PPM Impact</strong>
+                <strong className="text-zinc-300">Mercenta's own position (not a channel rule)</strong>
                 <p className="text-ds-micro text-zinc-500">
-                  Rejected POs reduce sell-through, lowering Net PPM as fixed costs
-                  spread across fewer units. Damages category profitability.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2 text-xs">
-              <span className="w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0 mt-1.5" />
-              <div>
-                <strong className="text-zinc-300">Mercenta Account Standing</strong>
-                <p className="text-ds-micro text-zinc-500">
-                  Mercenta is vendor of record — every rejection on your account
-                  affects our standing with the retail buyer. Pattern of avoidable
-                  rejections may restrict PO assignment or add oversight.
+                  Mercenta is the vendor of record on the channel account, so every rejection placed on
+                  that account is reviewed with you. Rejecting only what you genuinely cannot supply —
+                  and coding it correctly — is how avoidable rejections are kept off the account.
                 </p>
               </div>
             </div>
@@ -286,9 +306,7 @@ function PORejectionSection() {
           <div className="mt-2 text-ds-micro text-zinc-500 border-t border-white/[0.06] pt-2">
             <p className="flex items-start gap-1">
               <Info className="w-3 h-3 text-zinc-600 flex-shrink-0 mt-0.5" />
-              Valid rejection codes: TemporarilyUnavailable, InvalidProductIdentifier,
-              ObsoleteProduct. Use the correct code — miscoded rejections count
-              as avoidable.
+              {PO_ACK_ONBOARDING_STATEMENT.mercentaProcess}
             </p>
           </div>
         </div>
@@ -305,9 +323,19 @@ function RequiredReadingAck({ ack, setAck }: { ack: boolean; setAck: (v: boolean
         className="mt-0.5 accent-brass-500" />
       <div>
         <p className="text-xs text-white font-medium">I acknowledge the guidance above</p>
+        {/*
+          §P13 / S8 — REPOINTED (old contract recorded): this line used to read
+          *"I understand how pricing, packaging, and PO rejections affect my vendor
+          performance. I confirm my category's minimum Net PPM benchmark has been
+          reviewed."* — the same unsupported vendor-performance claim as AV-003 (a JSX
+          text node wrapped across two lines, which is exactly how it survived the first
+          pass of the S8 sweep and was caught by the browser spec).
+        */}
         <p className="text-ds-micro text-zinc-500 mt-0.5">
-          I understand how pricing, packaging, and PO rejections affect my vendor
-          performance. I confirm my category's minimum Net PPM benchmark has been reviewed.
+          I understand the pricing, packaging and purchase-order acknowledgement rules
+          above, and that Mercenta — as the vendor of record on the channel account —
+          reviews avoidable rejections with me. I confirm my category's minimum Net PPM
+          benchmark has been reviewed.
         </p>
       </div>
     </label>

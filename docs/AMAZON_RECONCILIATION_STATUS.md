@@ -36,7 +36,7 @@ nothing, and increment S0/S1-a applied nothing from this register.
 |---|---|---|---|---|---|
 | AV-001 | PO ack | CONFIRMED | **KEEP** (add the "on hold" nuance via AV-010b) | S5 | OPEN — not applied |
 | AV-002 | PO ack | INFERENCE | **RELABEL** — "subject to forced cancellation" → "at risk" (risk, not certainty) | S5 | OPEN — not applied |
-| AV-003 | Supplier performance | UNSUPPORTED | **RELABEL** — remove/soften the unverified "vendor performance rating" claim | S5 | OPEN — not applied |
+| AV-003 | Supplier performance | UNSUPPORTED | **APPLIED 2026-09-25 (S8)** — the unverified *"vendor performance"* claim is REMOVED from its last carriers, all of them ONBOARDING surfaces that teach the purchase-order rule: the guided tours (`tourDefinitions.ts`), the legacy tour path (`TourLoader.tsx`, the `TOUR_STEPS` constant), the `kb-purchase-orders` article both acknowledgement tour steps link to, the wizard's operational-guidance step (`BrandGuidance.tsx`) and the wizard/Add-Product intros. Each now renders the rule's ONE owner (`PO_ACK_ONBOARDING_STATEMENT`) and states Mercenta's own position, labelled as Mercenta's. The `postmarkNotifier.ts` carriers recorded in the 2026-09-20 register no longer exist. Asserted by `validate:po-ack-onboarding` (repo-wide, comment-stripped, whitespace-normalised sweep = 0 remaining carriers). | S8 | **APPLIED** |
 | AV-004 | Rejection codes | CONFIRMED | **KEEP** (three codes verbatim) | — | NO ACTION REQUIRED |
 | AV-005 | Ack model | CONFIRMED | **KEEP** (line-level model, qty ≤ ordered) | — | NO ACTION REQUIRED |
 | AV-006 | Ack update | INCOMPLETE | **BUILD** — declared amendment window | S5 | OPEN — not applied |
@@ -101,7 +101,8 @@ nothing, and increment S0/S1-a applied nothing from this register.
 | **EVIDENCE-BLOCKED** (cannot be done truthfully yet) | **7** | AV-020, AV-033, AV-034, AV-035, AV-046, AV-047, AV-048 |
 | **Total** | **52** | — |
 
-**Applied so far: 0 of 52.** This is the honest position. The register is a plan, not a record of work.
+**Applied so far: 1 of 52** (AV-003 — the unsupported *"vendor performance"* claim, removed from its
+last carriers by S8, 2026-09-25). This is the honest position. The register is a plan, not a record of work.
 
 ---
 

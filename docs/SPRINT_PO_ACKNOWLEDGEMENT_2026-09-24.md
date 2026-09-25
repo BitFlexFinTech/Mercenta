@@ -37,7 +37,7 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 | **S5** | ALL-CHANNEL fan-out + the instant-message seam | **DONE** (this sprint) |
 | **S6** | BRAND surfaces | **DONE** (`d3da66e`) |
 | **S7** | ADMIN surfaces | **DONE** (this sprint) |
-| **S8** | ONBOARDING linking wizard | NOT STARTED |
+| **S8** | ONBOARDING linking wizard | **DONE** (this sprint) |
 | **S9** | RECEIPT → INVOICE automation | NOT STARTED |
 | **S10** | SEED / gates / deploy (final pass) | NOT STARTED |
 
@@ -525,3 +525,105 @@ therefore use a REGEX locator (`/NaN/`), which is case-sensitive.
   demo store are in-memory).
 - An UNATTENDED sweep that performs the rejection without an approval remains S10 plus a founder decision on the
   trigger.
+
+**THE LINK.** `src/lib/onboarding/onboardingLifecycle.ts` gained
+`acknowledgePurchaseOrderRules(onboardingId, actor, note?)`: RBAC in the domain (a view-only account
+is refused), tenant isolation (a brand-pinned session may only acknowledge its OWN record), an
+unknown id is `NOT_FOUND`, it is idempotent, it records the rule's OWN text on the record
+(`poRulesAcknowledgedAt` / `poRulesAcknowledgedBy` / `poRulesRuleText` — so the record proves WHAT the
+brand was shown), and it audits twice (the acquisition timeline event
+`onboarding_po_rules_acknowledged` + the platform audit log with the real tenant).
+`GlobalStateContext.completeOnboarding` passes the flag EXPLICITLY from the wizard's guidance step,
+and `OnboardingPipeline.tsx` renders the link in BOTH states (acknowledged with the recorded wording,
+or honestly outstanding).
+
+**TESTED (all evidence produced in this session)**
+
+- NEW `scripts/validate-po-acknowledgement-onboarding-surfaces.mjs` → **45 assertions, PASS, 0 network
+  calls**: the statement is derived (not re-typed) · every onboarding surface renders it · the
+  hand-typed copies are gone as code while their OLD contracts survive inline (§REPOINTED) · a
+  repo-wide, comment-stripped, whitespace-normalised sweep finds ZERO remaining carriers of the
+  invented consequence · the LINK's RBAC / tenant / idempotence / audit / recorded wording · the
+  pipeline renders both link states. **Proved able to fail twice**: a hand-rolled rule reintroduced
+  into the tours → **2 red**; the owner's rule text dropped from the domain writer → **3 red**; both
+  restored byte-identical (shasum `OK`).
+- NEW `e2e/po-onboarding-ack-surfaces.spec.ts` → **4/4**: the brand tour step AND the KB article its
+  "Learn more" opens · the wizard's guidance step · the admin tour preview · the pipeline's link
+  state. **The spec found a real defect the gate missed** (the wrapped JSX text node above) and a
+  second real defect in a shared test helper: `checkAllWizardCheckboxes` could not tick the step-5
+  legal agreements (they are `<input>` + sibling `<label htmlFor>`, not label-wrapped), so the wizard
+  could never be walked past step 5 — fixed in `e2e/helpers/onboarding.ts` (no caller had ever asked
+  for step 6).
+- `npm run typecheck` 0 · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) 0 · `npx eslint` 0 on
+  every changed file · `npm run build` ✓ · whole `validate:*` sweep and the affected Playwright
+  suites: see the session report.
+
+**Honest limits (recorded, not blockers)**
+
+- The demo holds **no brand session whose tenant owns a canonical onboarding record**, so the LINK
+  cannot be exercised through the demo UI end-to-end: it is proven at the domain level by the gate
+  (RBAC, tenant isolation, idempotence, audit, the recorded wording) and by the pipeline's rendering
+  of both link states. Creating the record requires an approved application or a manual brand, which
+  the demo does not seed as a loggable brand.
+- The tours' **support-response** blurb ("a response within 24 hours") and `BrandReports`' own
+  computed *ASIN Confirmation Rate* are NOT the acknowledgement rule and were deliberately left
+  alone; the sweep's patterns are the invented CONSEQUENCE, not the phrase "24 hours".
+- `BrandGuidance`'s Net PPM benchmark values (40/35/30) are Mercenta's own declared benchmarks and
+  remain a separate AV-020-class question, not part of the acknowledgement rule.
+
+
+## S8 — THE ONBOARDING SURFACES, AND THE LINK TO THE ONBOARDING RECORD (2026-09-25, session 33)
+
+**THE CONTRACT, FIXED FROM THE REPOSITORY FIRST (as the S7 record required).** The stage's row
+("ONBOARDING linking wizard") is the only written scope, so the contract was derived from the
+repository itself — a repo-wide sweep for the rule and its consequences — and is recorded here
+BEFORE the implementation:
+
+- The rule's ONE owner is `src/config/purchaseOrders.ts` (`PO_ACK_WINDOW_RULE_TEXT`,
+  `PO_ACKNOWLEDGEMENT_HOURS`, `PO_ACK_NOTIFICATION_HOURS`, `PO_REJECTION_CODES` via `src/types.ts`)
+  and its derived owner is `src/lib/commerce/poAcknowledgementWindow.ts`.
+- The ONBOARDING surfaces that TEACH the rule are: the guided tours
+  (`src/config/tours/tourDefinitions.ts`), the legacy Usertour path
+  (`src/components/shared/TourLoader.tsx` + the legacy `TOUR_STEPS` constant in `src/types.ts`),
+  the knowledge-base article BOTH acknowledgement tour steps link to
+  (`src/data/knowledgeBase.ts → kb-purchase-orders`), the wizard's required operational-guidance
+  step (`src/components/shared/BrandGuidance.tsx`, also the Add-Product interstitial in
+  `src/components/brand/ProductCatalog.tsx`) and the wizard's step intro.
+- The "linking" is the LINK the onboarding makes to the purchase-order obligation: the brand's
+  acknowledgement of the rule is a canonical, audited act on its onboarding record — not a tick in
+  component state.
+
+**BUILT (what the sweep found, and what changed).** The rule was re-typed in **SEVEN** places and
+**FOUR** of them asserted a consequence the platform's own discrepancy register records as
+UNSUPPORTED (`docs/AMAZON_RECONCILIATION_STATUS.md` AV-003 — *"No Amazon source reached documents
+a vendor performance rating or its triggers"*):
+
+1. **`src/config/purchaseOrders.ts`** — NEW `PO_ACK_ONBOARDING_STATEMENT`: the ONE brand-facing
+   statement, DERIVED from the declarations above (`ruleText` = `PO_ACK_WINDOW_RULE_TEXT` verbatim,
+   `shortText` from `PO_ACKNOWLEDGEMENT_HOURS`, the schedule from `PO_ACK_NOTIFICATION_HOURS`,
+   `rejectionCodes` = `PO_REJECTION_CODES` by identity, and Mercenta's OWN process LABELLED as
+   Mercenta's — never presented as a channel rule).
+2. **The guided tours** — the orientation step (*"within 24 hours or it will be flagged. A flagged PO
+   may result in a vendor performance deduction"*), the `po-24-hour-rule` step (*"the PO is flagged
+   and may result in a deduction from the retail channel"*) and the `po-reject-reason` step (which
+   named three reason codes — "Out of stock", "Discontinued", "Price dispute" — that are NOT the
+   channel's documented ones) now render the owner's statement and the owner's codes.
+3. **`TourLoader.tsx`** and the legacy **`TOUR_STEPS`** constant in `src/types.ts` — the same
+   *"rejection affects your vendor performance"* blurb in two more places. (`types.ts` may NOT import
+   the config owner — the config imports THESE types — so the legacy constant points at the owner
+   instead of re-typing it; the live tours render the owner's own text.)
+4. **`kb-purchase-orders`** — the article both acknowledgement steps link to via `learnMore` read
+   *"An unacknowledged order after 24 hours is flagged and can lead to a vendor-performance
+   deduction."* Its title, summary and window/rejection sections are now the owner's own text.
+5. **`BrandGuidance.tsx`** — the wizard's required guidance step asserted an invented *"vendor
+   performance score"*, an *"ASIN Confirmation Rate … Below 80% triggers review … can delist
+   ASINs"* threshold, and a hand-typed second copy of `PO_REJECTION_CODES`. It now renders the
+   config-owned codes, the owner's rule and Mercenta's own declared position; the Net PPM sentence's
+   *"single most important metric for vendor performance"* claim is repointed too.
+6. **The wizard intro** (`OnboardingWizard.tsx`) — *"PO rejections affect your vendor performance"*
+   replaced by the documented rule.
+7. **`ProductCatalog.tsx` + the guidance acknowledgement** — *"helps protect your vendor
+   performance"* and *"…affect my vendor performance"*. **These two were found by the S8 functional
+   spec, not by the first pass of the gate**: a JSX text node wrapped across two lines hid from the
+   gate's regex, so the gate's repo-wide check now NORMALISES whitespace before matching.
+

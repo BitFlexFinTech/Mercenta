@@ -2236,7 +2236,14 @@ export const TOUR_STEPS = [
   {
     id: 'purchase_orders',
     title: 'Purchase Orders',
-    description: 'Review and accept/reject POs here. Remember: rejection affects your vendor performance — read the guidance in Settings > Operational Guidance.',
+    // §P13 / S8 — REPOINTED (old contract recorded): this step used to read
+    // *"Review and accept/reject POs here. Remember: rejection affects your vendor
+    // performance — read the guidance in Settings > Operational Guidance."* — an
+    // unsupported consequence claim (AV-003). `src/types.ts` may NOT import the rule's
+    // config owner (the config imports THESE types), so this legacy constant points at
+    // the owner instead of re-typing it; the live tours render the owner's own
+    // statement (`src/config/tours/tourDefinitions.ts`).
+    description: 'Review and accept or reject POs here. The channel\'s acknowledgement rule is stated in full, from its single owner, in Settings > Operational Guidance.',
     targetSelector: '[data-tour="nav-purchase_orders"]',
     position: 'right' as const,
     action: 'next' as const,
@@ -3656,6 +3663,8 @@ export type AcquisitionEventType =
   | 'onboarding_started'
   | 'onboarding_accepted'
   | 'onboarding_step_completed'
+  /* §P13 / S8 — the brand acknowledged the channel's PO acknowledgement rule */
+  | 'onboarding_po_rules_acknowledged'
   | 'onboarding_completed';
 
 /** A single audited acquisition transition for a canonical prospect. */
@@ -4033,6 +4042,19 @@ export interface BrandOnboarding {
   /** Set when the BRAND accepts (wizard submission) — a distinct audited act. */
   acceptedAt?: string;
   acceptedBy?: string;
+  /**
+   * §P13 / S8 — THE LINK TO THE PO ACKNOWLEDGEMENT OBLIGATION.
+   *
+   * Set when the brand acknowledged the channel's documented purchase-order
+   * acknowledgement rule in the onboarding wizard's operational-guidance step. It is
+   * a canonical, audited act (`acknowledgePurchaseOrderRules`), and
+   * `poRulesRuleText` records the EXACT wording the brand was shown (the rule's own
+   * config-owned text at the time), so the record proves what was acknowledged and
+   * can never be reconstructed from a later version of the rule.
+   */
+  poRulesAcknowledgedAt?: string;
+  poRulesAcknowledgedBy?: string;
+  poRulesRuleText?: string;
   completedAt?: string;
   completedBy?: string;
 }

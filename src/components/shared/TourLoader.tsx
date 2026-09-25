@@ -16,8 +16,24 @@ import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { TourEngine } from '@/components/shared/TourEngine';
 import { useUsertour } from '@/lib/usertour/useUsertour';
+import { PO_ACK_ONBOARDING_STATEMENT } from '@/config/purchaseOrders';
 /* ── Usertour-format tour definition (embedded — single onboarding tour
      for the Usertour SDK path, kept here as its only consumer) ────── */
+
+/*
+  §P13 / S8 — REPOINTED (old contract recorded). The `purchase_orders` step below used
+  to read:
+
+    'Review and accept or reject POs here. Rejection affects your vendor performance —
+     read the guidance in Settings > Operational Guidance.'
+
+  That consequence is recorded as UNSUPPORTED in the platform's own discrepancy register
+  (`docs/AMAZON_RECONCILIATION_STATUS.md` AV-003 — no Amazon source documents a vendor
+  performance rating or its triggers), and the founder directive is that Mercenta
+  invents nothing in the channel's purchase-order process. The step now renders the
+  owner's own short form (`src/config/purchaseOrders.ts → PO_ACK_ONBOARDING_STATEMENT`).
+  Asserted by `scripts/validate-po-acknowledgement-onboarding-surfaces.mjs`.
+*/
 
 interface UsertourStep {
   id: string;
@@ -56,7 +72,7 @@ const ONBOARDING_TOUR: UsertourDefinition = {
     },
     {
       id: 'purchase_orders', title: 'Purchase Orders',
-      description: 'Review and accept or reject POs here. Rejection affects your vendor performance — read the guidance in Settings > Operational Guidance.',
+      description: `${PO_ACK_ONBOARDING_STATEMENT.shortText} The rule is stated in full in Settings > Operational Guidance.`,
       targetSelector: '[data-tour="nav-purchase_orders"]', position: 'right',
     },
     {

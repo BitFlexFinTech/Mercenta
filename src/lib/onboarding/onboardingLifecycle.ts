@@ -38,6 +38,7 @@ import type {
   OpportunityStage,
 } from '@/types';
 import { deriveIcpOriginRegion, normalizeBrandKey } from '@/lib/intelligence/prospectPipeline';
+import { PO_ACK_WINDOW_RULE_TEXT } from '@/config/purchaseOrders';
 import { getProspect } from '@/data/prospectStore';
 import * as store from '@/data/acquisitionStore';
 import { getApplicationById } from '@/data/applicationStore';
@@ -126,7 +127,12 @@ function initialSteps(): OnboardingStep[] {
 }
 
 function pushEvent(
-  type: 'onboarding_started' | 'onboarding_accepted' | 'onboarding_step_completed' | 'onboarding_completed',
+  type:
+    | 'onboarding_started'
+    | 'onboarding_accepted'
+    | 'onboarding_step_completed'
+    | 'onboarding_po_rules_acknowledged'
+    | 'onboarding_completed',
   prospectId: string,
   brand: string,
   actor: AcquisitionActor,
@@ -428,6 +434,77 @@ export function acceptOnboarding(
 /** §Phase E2 — the canonical onboarding record owning a brand TENANT id. */
 export function getOnboardingForTenant(brandId: string): BrandOnboarding | null {
   return store.getOnboardingForBrand(brandId);
+}
+
+/* ── §P13 / S8 — THE LINK TO THE PO ACKNOWLEDGEMENT OBLIGATION ─────────────── */
+
+/** The canonical audit action for the acknowledgement (declared once). */
+export const PO_RULES_ACKNOWLEDGEMENT_ACTION = 'onboarding_po_rules_acknowledged';
+
+/**
+ * §P13 / S8 — THE BRAND ACKNOWLEDGES THE CHANNEL'S PURCHASE-ORDER RULE.
+ *
+ * WHY THIS EXISTS: the onboarding wizard's operational-guidance step already made the
+ * brand acknowledge the rule (`BrandGuidance` with `requireAck`), but the tick was
+ * LOCAL COMPONENT STATE — nothing on the canonical onboarding record said the brand
+ * had ever been shown the rule, so the onboarding was not actually LINKED to the
+ * purchase-order obligation it creates. This is that link.
+ *
+ * WHAT IS RECORDED, and why the wording is stored: the rule's OWN text
+ * (`PO_ACK_WINDOW_RULE_TEXT`, the one config owner) is written onto the record, so
+ * the record proves what the brand was shown and cannot be silently re-interpreted
+ * by a later revision of the rule. The writer never composes rule wording itself.
+ *
+ * INVARIANTS (identical to every other mutator in this module):
+ *   · RBAC IN THE DOMAIN — a view-only account is refused, never merely hidden.
+ *   · TENANT ISOLATION — a brand-pinned session may only acknowledge its OWN record.
+ *   · IDEMPOTENT — a repeated acknowledgement returns the existing record unchanged,
+ *     so the audit trail cannot fill with duplicates.
+ *   · AUDITED TWICE — the acquisition timeline (when the record has a prospect) and
+ *     the platform audit log, with the real tenant id.
+ */
+export function acknowledgePurchaseOrderRules(
+  onboardingId: string,
+  actor: OnboardingActor,
+  note?: string
+): OnboardingResult<BrandOnboarding> {
+  if (!actor.canMutate) return forbidden();
+
+  const onboarding = store.getOnboardingById(onboardingId);
+  if (!onboarding) return { ok: false, error: 'NOT_FOUND — no such onboarding record.' };
+  if (crossTenant(actor, onboarding.brandId)) {
+    return { ok: false, error: `CROSS_TENANT — this session is pinned to another brand tenant.` };
+  }
+  if (onboarding.poRulesAcknowledgedAt) return { ok: true, value: onboarding };
+
+  const now = nowIso();
+  const updated = store.updateOnboarding(onboardingId, {
+    poRulesAcknowledgedAt: now,
+    poRulesAcknowledgedBy: actor.staffId,
+    // The rule's own config-owned wording — never a copy written here.
+    poRulesRuleText: PO_ACK_WINDOW_RULE_TEXT,
+  });
+  if (!updated) return { ok: false, error: 'NOT_FOUND — no such onboarding record.' };
+
+  if (updated.prospectId) {
+    pushEvent(
+      'onboarding_po_rules_acknowledged',
+      updated.prospectId,
+      updated.businessName,
+      actor,
+      `${updated.businessName} acknowledged the purchase-order acknowledgement rule (tenant ${updated.brandId})`,
+      note ?? PO_ACK_WINDOW_RULE_TEXT
+    );
+  }
+  store.recordOnboardingAudit(
+    PO_RULES_ACKNOWLEDGEMENT_ACTION,
+    updated.id,
+    `Purchase-order acknowledgement rule acknowledged${note ? ` · ${note}` : ''}`,
+    actor.staffId,
+    updated.brandId
+  );
+
+  return { ok: true, value: updated };
 }
 
 /**

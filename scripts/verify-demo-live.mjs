@@ -1116,6 +1116,75 @@ check('§P13/S6 the deployed reminder states WHY the instant-message channel cou
 check('no uncaught page error on the deployed §P13/S5 fan-out flow',
   superAdminErrors.length === 0, superAdminErrors.slice(0, 2).join(' | '));
 
+/* ── §P13 / S8 — THE DEPLOYED ONBOARDING SURFACES ─────────────────────────────
+   S8 removed the onboarding surfaces' re-typed copies of the 24-hour rule AND the
+   unsupported consequence they asserted ("flagged", "vendor performance deduction",
+   "Below 80% triggers review … can delist ASINs") — the last carriers of the
+   platform's own AV-003 discrepancy. So the DEPLOYED bundle must present the rule in
+   its owner's words: the guided tours (readable through the admin tour-management
+   preview of the same definitions the TourEngine renders), the knowledge-base article
+   they link to, and the wizard's operational-guidance step must all state the
+   documented rule and the documented past-limit action, and none of them may still
+   assert the invented consequence. The onboarding pipeline must also state the LINK
+   (the brand's canonical acknowledgement) for every record it shows. */
+await openLiveNav(admin, 'Onboarding Tours');
+await admin.waitForTimeout(2500);
+const s8ToursBody = await admin.locator('body').innerText().catch(() => '');
+check('§P13/S8 the deployed tour-management surface renders (Onboarding Tours)',
+  /Onboarding Tours|guided onboarding tours/i.test(s8ToursBody) && s8ToursBody.length > 200);
+
+const s8PoCard = admin
+  .locator('div')
+  .filter({ hasText: 'PO Acknowledgment' })
+  .filter({ has: admin.getByRole('button', { name: /Preview/i }) })
+  .last();
+const s8Preview = await s8PoCard.getByRole('button', { name: /Preview/i }).click().then(() => true).catch(() => false);
+await admin.waitForTimeout(900);
+const s8Modal = admin.locator('div.fixed.inset-0').first();
+const s8ModalVisible = await s8Modal.isVisible({ timeout: 4000 }).catch(() => false);
+for (let i = 0; i < 2; i++) {
+  const next = s8Modal.locator('button', { hasText: /Next/ }).first();
+  if (await next.isVisible({ timeout: 1500 }).catch(() => false)) {
+    await next.click().catch(() => {});
+    await admin.waitForTimeout(400);
+  }
+}
+const s8ModalText = s8ModalVisible ? await s8Modal.innerText().catch(() => '') : '';
+check('§P13/S8 the deployed PO acknowledgment tour teaches the rule in its OWNER’s words',
+  s8Preview && s8ModalVisible &&
+    /The retail channel requires every purchase order to be acknowledged/.test(s8ModalText) &&
+    /Past the 24-hour limit the documented action is a rejection/.test(s8ModalText),
+  s8ModalText.replace(/\s+/g, ' ').slice(0, 200));
+check('§P13/S8 the deployed tour asserts NO invented consequence (AV-003 absent live)',
+  !/flagged|vendor performance|delist ASINs/i.test(s8ToursBody));
+check('§P13/S8 the deployed PO tour names the channel’s DOCUMENTED rejection reasons',
+  /TemporarilyUnavailable/.test(s8ModalText) && !/Out of stock|Price dispute/.test(s8ModalText),
+  s8ModalText.replace(/\s+/g, ' ').slice(0, 160));
+await s8Modal.locator('button', { hasText: /Close/ }).first().click().catch(() => {});
+await admin.waitForTimeout(600);
+
+/** The deployed onboarding pipeline states the LINK (or says honestly that it has none). */
+await openLiveNav(admin, 'Onboarding');
+await admin.waitForTimeout(2200);
+const s8Pipeline = admin.locator('[data-section="onboarding-pipeline"]').first();
+const s8PipelineVisible = await s8Pipeline.isVisible({ timeout: 8000 }).catch(() => false);
+const s8PipelineText = s8PipelineVisible ? await s8Pipeline.innerText().catch(() => '') : '';
+const s8Rows = await admin.locator('[data-onboarding-row]').count();
+let s8LinkStates = 0;
+if (s8Rows > 0) {
+  await admin.locator('[data-onboarding-row]').first().click().catch(() => {});
+  await admin.waitForTimeout(700);
+  s8LinkStates = await admin
+    .locator('[data-onboarding-po-rules="acknowledged"], [data-onboarding-po-rules="outstanding"]')
+    .count();
+}
+check('§P13/S8 the deployed onboarding pipeline renders, and every record states its LINK',
+  s8PipelineVisible &&
+    (s8Rows === 0 ? /No onboarding records yet/i.test(s8PipelineText) : s8LinkStates > 0),
+  `${s8Rows} record(s), ${s8LinkStates} link state(s)`);
+check('no uncaught page error on the deployed §P13/S8 onboarding-surface flow',
+  adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
+
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
 console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length} superAdmin=${superAdminErrors.length}`);

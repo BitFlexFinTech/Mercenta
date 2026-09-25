@@ -142,3 +142,43 @@ export type PoChannelState = (typeof PO_CHANNEL_STATES)[number];
 export const PO_ACK_WINDOW_RULE_TEXT =
   'The retail channel requires every purchase order to be acknowledged within 24 hours of receipt — accepted, ' +
   'backordered or rejected. Past the 24-hour limit the documented action is a rejection.';
+
+/**
+ * §P13 / S8 — THE ONE BRAND-FACING STATEMENT FOR THE ONBOARDING SURFACES.
+ *
+ * The brand's onboarding teaches the acknowledgement rule in four places — the
+ * guided tours, the knowledge-base article those tours link to, the wizard's
+ * operational-guidance step and the purchase-orders blurb. Before S8 each of them
+ * RE-TYPED the rule and, worse, ASSERTED a consequence the platform's own
+ * discrepancy register records as unsupported (`docs/AMAZON_RECONCILIATION_STATUS.md`
+ * AV-003: *"No Amazon source reached documents a vendor performance rating or its
+ * triggers"*): an unacknowledged order was said to be *"flagged"* and to cause a
+ * *"vendor performance deduction"*. The founder directive is that Mercenta invents
+ * NOTHING in the channel's purchase-order process, so those claims are removed and
+ * every onboarding surface now renders THIS object.
+ *
+ * Everything below is DERIVED from the declarations above — no figure, code or
+ * consequence is re-typed:
+ *   · `ruleText`       — the config-owned rule sentence, verbatim.
+ *   · `shortText`      — the list/summary form, derived from `PO_ACKNOWLEDGEMENT_HOURS`.
+ *   · `mercentaProcess`— MERCENTA'S OWN declared operating process (the notification
+ *                        schedule + the on-behalf rejection), labelled as Mercenta's
+ *                        and never presented as a channel rule.
+ *   · `rejectionCodes` — the channel's documented rejection reasons (`types.ts`).
+ *   · `text`           — the ONE paragraph the onboarding surfaces render.
+ */
+export const PO_ACK_ONBOARDING_STATEMENT = {
+  ruleText: PO_ACK_WINDOW_RULE_TEXT,
+  shortText:
+    `Acknowledge each purchase order within ${PO_ACKNOWLEDGEMENT_HOURS} hours of receipt — accepted, backordered ` +
+    `or rejected — and acknowledge only what you can actually ship.`,
+  mercentaProcess:
+    `Mercenta reminds you at ${PO_ACK_NOTIFICATION_HOURS.join('/')} hours remaining and, if you have not decided by ` +
+    `the final stage, performs the rejection the channel requires on your behalf. That schedule and that on-behalf ` +
+    `action are Mercenta's own operating process, not channel rules.`,
+  rejectionCodes: PO_REJECTION_CODES,
+  text:
+    `${PO_ACK_WINDOW_RULE_TEXT} Mercenta reminds you at ${PO_ACK_NOTIFICATION_HOURS.join('/')} hours remaining and, ` +
+    `if you have not decided by the final stage, performs the rejection the channel requires on your behalf. That ` +
+    `schedule and that on-behalf action are Mercenta's own operating process, not channel rules.`,
+} as const;

@@ -104,7 +104,7 @@ interface AppState {
 
   brandProfile: BrandProfile;
   setBrandProfile: (profile: BrandProfile) => void;
-  completeOnboarding: () => void;
+  completeOnboarding: (opts?: { poRulesAcknowledged?: boolean }) => void;
   /** §3 — compliance-gate documents for the active brand; catalog sync blocked until all approved. */
   gateDocs: ComplianceDocument[];
   reviewGateDocument: (id: string, status: ComplianceDocument['status']) => void;
@@ -665,7 +665,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe?.();
   }, [refreshLeadsFromProspects]);
 
-  const completeOnboarding = useCallback(() => {
+  const completeOnboarding = useCallback((opts?: { poRulesAcknowledged?: boolean }) => {
     setBrandProfile((prev) => {
       // §3: completing onboarding auto-generates the Distribution Agreement
       // from the template and puts the compliance gate into review.
@@ -708,6 +708,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const actor = { staffId: `brand:${tenantId}`, canMutate: true, tenantId };
         onboarding.acceptOnboarding(record.id, actor, 'Submitted by the brand through the onboarding wizard');
         onboarding.completeOnboardingStep(record.id, 'profile', actor, 'Brand profile submitted in the wizard');
+        /**
+         * §P13 / S8 — THE LINK. The wizard's operational-guidance acknowledgement is
+         * written onto the canonical onboarding record (the rule's own text included),
+         * so the onboarding is linked to the purchase-order obligation it creates
+         * instead of the tick living only in component state. Passed EXPLICITLY by the
+         * wizard: an unacknowledged brand claims nothing, and the domain writer refuses
+         * a view-only actor or a foreign tenant regardless of what the surface does.
+         */
+        if (opts?.poRulesAcknowledged) {
+          onboarding.acknowledgePurchaseOrderRules(
+            record.id,
+            actor,
+            'Acknowledged in the onboarding wizard (operational guidance step)'
+          );
+        }
       });
 
       /**
