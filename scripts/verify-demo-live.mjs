@@ -890,12 +890,23 @@ await superAdmin
   .click()
   .catch(() => {});
 await superAdmin.waitForTimeout(2500);
-if (!(await superAdmin.getByTestId('automation-table').isVisible({ timeout: 4000 }).catch(() => false))) {
-  await superAdmin.goto(`${BASE}/admin/founder_control_centre`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+/**
+ * The Console's DEFAULT tab is Business, so the Automation tab must be selected
+ * BEFORE the table is looked for (the wrong order made an earlier run fall back to an
+ * undeclared route). The declared route is `/admin/control_centre`.
+ */
+if (
+  !(await superAdmin
+    .getByRole('tab', { name: /^Automation/ })
+    .first()
+    .isVisible({ timeout: 5000 })
+    .catch(() => false))
+) {
+  await superAdmin.goto(`${BASE}/admin/control_centre`, { waitUntil: 'domcontentloaded' }).catch(() => {});
   await superAdmin.waitForTimeout(3000);
 }
 await superAdmin.getByRole('tab', { name: /^Automation/ }).click().catch(() => {});
-await superAdmin.waitForTimeout(1200);
+await superAdmin.waitForTimeout(1500);
 
 const s5Row = superAdmin.locator('[data-testid="automation-row-po_acknowledgement_fanout"]').first();
 const s5RowVisible = await s5Row
@@ -927,6 +938,14 @@ check('§P13/S5 running the deployed fan-out DELIVERS the reminders on the chann
 check('§P13/S5 the deployed fan-out REFUSES the external instant-message channel, with its fail-closed reason',
   /Instant message: \d+ refusal\(s\)/.test(s5DrawerText) &&
     /NEVER treated as\s*simulation|No instant-message number/.test(s5DrawerText),
+  s5DrawerText.replace(/\s+/g, ' ').slice(0, 240));
+/**
+ * THE FINAL STAGE PRODUCED THE DRAFT. This page's seed carries the closing-window
+ * purchase order (PO-9001, seeded 1h30m inside the on-behalf stage), so the deployed
+ * run must report the draft it produced — and that NOTHING was performed by it.
+ */
+check('§P13/S5 the deployed FINAL stage produced Mercenta’s on-behalf rejection draft (and performed nothing)',
+  /on-behalf rejection draft/.test(s5DrawerText) && /nothing was performed/.test(s5DrawerText),
   s5DrawerText.replace(/\s+/g, ' ').slice(0, 240));
 await superAdmin.getByRole('button', { name: 'Close record' }).click().catch(() => {});
 await superAdmin.waitForTimeout(1200);
