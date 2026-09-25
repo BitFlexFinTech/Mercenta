@@ -33,7 +33,7 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 | **S1** | the window OWNER (config + pure logic + gate) | **DONE** (`418d18b`) |
 | **S2** | DOMAIN ENFORCEMENT + the auto-rejection | **DONE** (this sprint) |
 | **S3** | WORK LAYER — `deriveWorkItems` consumes the owner (the founder-reported defect, removed at source) | **DONE** (this sprint) |
-| **S4** | ON-BEHALF draft + approve | NOT STARTED |
+| **S4** | ON-BEHALF draft + approve | **DONE** (this sprint) |
 | **S5** | ALL-CHANNEL fan-out + the instant-message seam | NOT STARTED |
 | **S6** | BRAND surfaces | NOT STARTED |
 | **S7** | ADMIN surfaces | NOT STARTED |
@@ -155,9 +155,96 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
 
 **Honest limits / non-credential follow-ups**
 
-- Nothing yet PRODUCES the on-behalf rejection automatically (the writer exists and is gated; the producer is
-  S4/S5), so a PO in the closing window is still the brand's to decide — and the row now SAYS so rather than
-  implying Mercenta has already acted.
+- ~~Nothing yet PRODUCES the on-behalf rejection automatically (the writer exists and is gated; the producer is
+  S4/S5), so a PO in the closing window is still the brand's to decide.~~ **§P13 / S4 — SUPERSEDED 2026-09-25
+  (session 29): the PRODUCER now exists (`src/data/api.ts → draftOnBehalfRejection`, attributed to
+  `PO_ACK_SYSTEM_ACTOR_ID` and audited once per draft content) and the brand's approval executes it
+  (`approveOnBehalfRejection` → the S2 writer). See §S4 below.**
 - The notification schedule (12/6/2h) is declared and derivable but not yet fanned out (S5).
 - A PO PAST the limit derives no acknowledgement work here because the owner classifies it as history; the work
-  a closed window implies is Mercenta's on-behalf action, owned by S4.
+  a closed window implies is Mercenta's on-behalf action, owned by S4 — **now implemented: PAST the limit the
+  draft is still offered (the documented action past the limit IS a rejection), with `brandMayStillDecide: false`
+  stating that the brand's own decision has closed.**
+
+## S4 — the on-behalf draft, and the brand's approval that executes it (2026-09-25, session 29)
+
+**Built**
+
+1. **THE DRAFT IS DERIVED BY THE RULE'S OWNER** — `src/lib/commerce/poAcknowledgementWindow.ts →
+   poOnBehalfRejectionDraft(po, now?)`. It returns the draft's CONTENT: every line rejected with the channel's
+   documented reason (config-owned `PO_ACK_AUTO_REJECT_REASON`), the rule in its own words
+   (`PO_ACK_WINDOW_RULE_TEXT`), both instants (the 24-hour limit and the earlier on-behalf stage), and a CONTENT
+   ADDRESS (`digest`, FNV-1a — pure, no crypto) so an approval can be bound to the exact draft that was shown.
+   Availability is the OWNER'S OWN predicate (`poNeedsAutoRejection` = Amazon's `New` set at/after the on-behalf
+   instant), so the draft is offered exactly when the S2 writer will perform the rejection and FAILS CLOSED
+   everywhere else with a stated `refusal`: not yet due (naming the instant), past the limit
+   (`brandMayStillDecide: false` — the documented action past the limit is a rejection), already decided, no
+   obligation, or an unreadable order date.
+2. **THE PRODUCER THE S2 WRITER NEVER HAD** — `src/data/api.ts → draftOnBehalfRejection(poId, now?)`. It records
+   what is NOT derivable and nothing else: the content address and the ATTRIBUTION (produced BY
+   `PO_ACK_SYSTEM_ACTOR_ID`, FOR the brand whose purchase order it is), with ONE canonical audit entry
+   (`purchase_order_on_behalf_draft_created`) naming the window it was drafted on. **IDEMPOTENT** (the same
+   content never records a second draft, so a surface may ask on every render) and it **performs NOTHING** —
+   drafting never touches the purchase order. A draft whose content changed supersedes the previous one and names
+   the superseded draft in its audit entry, so history is never destroyed.
+3. **THE APPROVAL IS THE ONLY PATH THAT EXECUTES THE REJECTION** —
+   `src/data/api.ts → approveOnBehalfRejection(poId, approval, now?)`. It enforces, in order: UNKNOWN PO → TENANT
+   ISOLATION (an `actorBrandId` that is not the PO's own brand is refused, fail-closed) → IDEMPOTENCY (a purchase
+   order that already carries a decision is never re-decided) → the owner's availability → a draft MUST be on
+   record → the recorded digest MUST equal the CURRENT derivation (so a PO that changed after drafting cannot be
+   approved blind) → the approval's `draftId` MUST be the draft on record → and only then does it call the S2
+   writer `autoRejectPurchaseOrderOnBehalf`. Every refusal leaves the purchase order byte-for-byte unchanged. The
+   approval is attributed to the acting human on the record (`approvedBy` / `approvedAt`, plus `approvedByAdmin`
+   for Mercenta staff) and audited ONCE (`purchase_order_on_behalf_rejection_approved`) with the draft id, its
+   digest, the actor, the instruction the rejection was issued as, and whether the approval happened inside or
+   after the window. The execution stays attributed separately to the writer's own
+   `purchase_order_auto_rejected` entry, so the trail shows BOTH facts: WHO approved and WHO performed.
+4. **BOTH PO SURFACES CARRY THE REAL CONTROL** — the brand PO surface
+   (`src/components/brand/BrandPurchaseOrders.tsx`) shows Mercenta's draft (the rule, the reason code, the draft
+   id, both instants, every line it rejects) and approves it as the brand (`actorBrandId` = its own tenant, so a
+   cross-tenant approval is impossible); the admin PO detail
+   (`src/components/admin/AdminPurchaseOrderDetail.tsx`) shows the SAME draft and records the approval as an
+   ATTRIBUTED MERCENTA OVERRIDE (`actorStaffId` + `actorLabel`, audited as `approvedByAdmin`). Each surface
+   PRODUCES the draft through the idempotent api call in an effect, and each renders the owner's derivation —
+   neither re-derives the window, the reason code or the instants.
+5. **THE SEED MAKES THE CAPABILITY REACHABLE** (`src/data/demoData.ts`): the second open PO of the first cleared
+   tenant is dated into its closing window (deadline − 1h 30m, arithmetic owned by
+   `PO_ACKNOWLEDGEMENT_HOURS − PO_ACK_ON_BEHALF_WINDOW_HOURS`), so the demo — and the live verification — can
+   genuinely exercise the draft and the approval. It deliberately stays INSIDE the 24-hour limit, so the brand's
+   own decision remains valid alongside the draft (the rule is not replaced by the automation).
+6. **THE GATE** — NEW `scripts/validate-po-acknowledgement-on-behalf.mjs` (48 assertions,
+   `validate:po-ack-on-behalf`).
+
+**Tested (all evidence produced in this session)**
+
+- NEW `scripts/validate-po-acknowledgement-on-behalf.mjs` → **48 assertions, PASS, 0 network calls**: ONE owner
+  (source-level, both surfaces included) · the draft's content is never stored twice · the derivation is pure ·
+  availability across every window state (mid-window, exactly T−2h, past the limit, unreadable, decided, no
+  obligation) · the content IS the channel's documented rejection at the ORDERED quantity · content addressing
+  (a changed line yields a different draft) · production attributed + audited + idempotent + performs nothing ·
+  every refusal path (no draft on record, before the instant, cross-tenant, wrong draft, stale draft) writes
+  NOTHING · the happy path (rejected lines, `on_behalf` history, instruction to Mercenta, attributed approval
+  audit, execution audit) · approval idempotency · the Mercenta override · the instant seam · the seed
+  genuinely contains an on-behalf PO inside the limit. **Proved able to fail twice**: the owner's availability
+  predicate removed → **7 red**; the draft-binding guard removed → **2 red** (including "the stale approval wrote
+  NOTHING"); both restored byte-identical (`poAcknowledgementWindow.ts` shasum `e00fbfb8…`, `api.ts` `5d5a43f3…`,
+  `demoData.ts` `907c411f…`).
+- Whole-validator sweep: every `validate:*` script run — see the session report for the result.
+- `npm run typecheck` 0 · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) 0 · eslint 0 · `npm run build` ✓.
+- Playwright: the PO specs + the full suite — see the session report for the pass/fail/skip counts.
+
+**Honest limits / non-credential follow-ups**
+
+- **The three legacy inline countdowns still hand-roll the 24-hour arithmetic** —
+  `BrandPurchaseOrders.tsx → AckDeadline` (`received + 24 * 60 * 60 * 1000`),
+  `AdminPurchaseOrderDetail.tsx` (deadline via `setHours(getHours() + 24)` and `isAcknowledged` from status) and
+  `AdminPurchaseOrderList.tsx → PoPreviewBody` (`+ 24 * 3600 * 1000`). They are NOT S4's code path (the draft and
+  the approval go through the owner only) and they are S6/S7's surface scope — but they are a live single-source-
+  of-truth violation, recorded here so a later pass repoints them onto `poAcknowledgementWindow` instead of
+  leaving the claim in the owner's module header unearned.
+- Nothing yet FANS the draft out to the brand's channels (`S5`); today the draft is materialised when a PO
+  surface reads the purchase order (idempotent, recorded once).
+- The execution remains the brand's (or Mercenta staff's) explicit approval — that IS this stage's point. An
+  UNATTENDED sweep that performs the rejection when nobody approves is S5/S10 territory and would need the
+  founder's decision on the trigger.
+

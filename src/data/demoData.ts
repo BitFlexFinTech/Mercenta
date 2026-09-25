@@ -19,6 +19,10 @@
  * seed → live without any UI change.
  */
 import { DEFAULT_PRODUCT_TAX_CODE } from '@/types';
+import {
+  PO_ACKNOWLEDGEMENT_HOURS,
+  PO_ACK_ON_BEHALF_WINDOW_HOURS,
+} from '@/config/purchaseOrders';
 import type {
   ComplianceDocument,
   Contract,
@@ -375,9 +379,33 @@ export const DEMO_WORKFLOW_PURCHASE_ORDERS: PurchaseOrder[] = ALL_DEMO_BRANDS
        * use (`src/lib/simulation/scenarioEngine.ts`); surfaces render the DATE
        * through `orderDateLabel()` (`src/lib/dates.ts`).
        */
+      /**
+       * §P13 / S4 — ONE SEEDED OPEN PO SITS INSIDE THE ON-BEHALF CLOSING WINDOW.
+       *
+       * The platform now offers the brand a DRAFT of the channel-required rejection
+       * from the final notification stage (`PO_ACK_ON_BEHALF_WINDOW_HOURS`) and lets
+       * the brand approve it (`src/data/api.ts → draftOnBehalfRejection` /
+       * `approveOnBehalfRejection`). If every seeded open PO sat in the middle of its
+       * window, that capability — and the live verification that exercises it —
+       * would be unreachable in the running product, exactly as the S2 rule would
+       * have been unreachable with POs dated 9 days back.
+       *
+       * So the SECOND open purchase order of the FIRST cleared tenant is dated into
+       * its closing window (deadline − 1h 30m): it is still inside the 24-hour limit
+       * — so the brand may still decide for itself, and an acceptance is still valid
+       * — while the on-behalf draft is genuinely due. The declared schedule owns the
+       * arithmetic (`PO_ACKNOWLEDGEMENT_HOURS` − `PO_ACK_ON_BEHALF_WINDOW_HOURS`),
+       * never a hand-written 22.
+       */
+      const closingWindowPo = bi === 0 && pi === 1;
       const openForAcknowledgement = status === 'received' || status === 'under_review';
       const orderDate = openForAcknowledgement
-        ? new Date(Date.now() - (pi + 1) * 3 * 3_600_000).toISOString()
+        ? new Date(
+            Date.now() -
+              (closingWindowPo
+                ? (PO_ACKNOWLEDGEMENT_HOURS - PO_ACK_ON_BEHALF_WINDOW_HOURS) * 3_600_000 + 30 * 60_000
+                : (pi + 1) * 3 * 3_600_000)
+          ).toISOString()
         : new Date(Date.now() - (pi + 1) * 9 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
       const freightTerm: import('@/types').FreightTerm = bi % 2 === 0 ? 'collect' : 'prepaid';
       const orderDateObj = new Date(orderDate);

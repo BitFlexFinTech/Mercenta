@@ -35,6 +35,7 @@
  */
 import {
   PO_ACKNOWLEDGEMENT_HOURS,
+  PO_ACK_AUTO_REJECT_REASON,
   PO_ACK_NOTIFICATION_HOURS,
   PO_ACK_ON_BEHALF_WINDOW_HOURS,
   PO_ACK_STATUSES_WITH_OBLIGATION,
@@ -42,7 +43,7 @@ import {
   type PoAckTimeliness,
   type PoChannelState,
 } from '@/config/purchaseOrders';
-import type { PurchaseOrder } from '@/types';
+import type { PoRejectionCode, PurchaseOrder } from '@/types';
 
 const HOUR_MS = 3_600_000;
 const MINUTE_MS = 60_000;
@@ -305,6 +306,140 @@ export function poNeedsAutoRejection(
 ): boolean {
   const window = poAcknowledgementWindow(po, now);
   return window.channelState === 'new' && window.autoRejectDue;
+}
+
+/* ── §P13 / S4 — THE ON-BEHALF REJECTION DRAFT (pure; content-addressed) ──── */
+
+/** One line of the drafted rejection — the PO's own line, at its ordered quantity. */
+export interface PoOnBehalfRejectionDraftLine {
+  sku: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  /** The documented acknowledgement code the drafted line carries. */
+  ackStatus: 'rejected';
+  rejectionCode: PoRejectionCode;
+}
+
+/**
+ * §P13 / S4 — WHAT THE BRAND IS ASKED TO APPROVE.
+ *
+ * Mercenta drafts the channel-REQUIRED rejection for a purchase order that has
+ * reached the final notification stage without the brand's decision
+ * (`PO_ACK_ON_BEHALF_WINDOW_HOURS`), and the brand approves it before anything is
+ * performed. This type is the DRAFT'S CONTENT, derived — never hand-written by a
+ * surface and never stored, so it cannot drift from the rule or from the PO.
+ *
+ * `available` is the owner's OWN predicate (`poNeedsAutoRejection` = Amazon's
+ * `New` set at/after the on-behalf instant), so the draft is offered exactly when
+ * the rejection is Mercenta's to perform and the S2 writer will perform it:
+ *   · the CLOSING window — the brand may still decide for itself
+ *     (`brandMayStillDecide`), and Mercenta offers to act for it;
+ *   · PAST the limit — the documented action is a rejection, so the draft is the
+ *     action that is actually left.
+ * Anything else fails CLOSED with a stated `refusal` and no draft at all.
+ *
+ * `digest` content-addresses the draft (PO, instants, reason and every line's
+ * sku/quantity/price), so an approval can be bound to the exact draft the brand
+ * was shown and a stale one refused.
+ */
+export interface PoOnBehalfRejectionDraft {
+  available: boolean;
+  /** Why no draft is offered (null when it is). Never a silent absence. */
+  refusal: string | null;
+  poId: string;
+  poNumber: string;
+  brandId: string;
+  /** TRUE while the brand may still decide for itself, inside the 24-hour window. */
+  brandMayStillDecide: boolean;
+  /** The channel's own documented rejection reason (config-owned, never invented). */
+  rejectionCode: PoRejectionCode;
+  /** The ONE operator-facing statement of the window rule (config-owned wording). */
+  ruleText: string;
+  acknowledgementDeadline: string | null;
+  autoRejectAt: string | null;
+  lines: PoOnBehalfRejectionDraftLine[];
+  digest: string;
+  /** Content-addressed identity: `draft-<poId>-<digest>`. */
+  draftId: string;
+}
+
+/** FNV-1a — content addressing without crypto, so the digest is pure and deterministic. */
+function draftDigest(input: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, '0');
+}
+
+/** Derive the on-behalf rejection draft for ONE purchase order at an INSTANT. */
+export function poOnBehalfRejectionDraft(
+  po: PurchaseOrder,
+  now: Date | string | number = new Date()
+): PoOnBehalfRejectionDraft {
+  const window = poAcknowledgementWindow(po, now);
+  const lines: PoOnBehalfRejectionDraftLine[] = po.lineItems.map((l) => ({
+    sku: l.sku,
+    productName: l.productName,
+    quantity: l.quantity,
+    unitPrice: l.unitPrice,
+    ackStatus: 'rejected',
+    rejectionCode: PO_ACK_AUTO_REJECT_REASON,
+  }));
+  const digest = draftDigest(
+    [
+      po.id,
+      window.deadline ?? 'unreadable',
+      window.autoRejectAt ?? 'unreadable',
+      PO_ACK_AUTO_REJECT_REASON,
+      ...lines.map((l) => `${l.sku}:${l.quantity}:${l.unitPrice}`),
+    ].join('|')
+  );
+  const base = {
+    poId: po.id,
+    poNumber: po.poNumber,
+    brandId: po.brandId,
+    rejectionCode: PO_ACK_AUTO_REJECT_REASON,
+    ruleText: PO_ACK_WINDOW_RULE_TEXT,
+    acknowledgementDeadline: window.deadline,
+    autoRejectAt: window.autoRejectAt,
+    lines,
+    digest,
+    draftId: `draft-${po.id}-${digest}`,
+  };
+
+  /** Fail CLOSED: an unreadable window drafts nothing. */
+  if (window.channelState === 'unknown') {
+    return {
+      ...base,
+      available: false,
+      brandMayStillDecide: false,
+      refusal:
+        `PO ${po.poNumber}: the acknowledgement window could not be read from the order date, so no on-behalf ` +
+        `draft is offered (fail-closed).`,
+    };
+  }
+
+  /**
+   * Available exactly when the owner says the rejection is Mercenta's to perform —
+   * so the draft and the writer agree by construction.
+   */
+  if (!poNeedsAutoRejection(po, now)) {
+    return {
+      ...base,
+      available: false,
+      brandMayStillDecide: window.actionable,
+      refusal: window.autoRejectDue
+        ? `PO ${po.poNumber}: the acknowledgement decision is already recorded, so no on-behalf rejection is drafted.`
+        : `PO ${po.poNumber}: the on-behalf draft is not due yet — Mercenta drafts it at the final notification ` +
+          `stage (${window.autoRejectAt ?? 'unreadable'}), and the brand may still decide until ` +
+          `${window.deadline ?? 'unreadable'}.`,
+    };
+  }
+
+  return { ...base, available: true, brandMayStillDecide: window.actionable, refusal: null };
 }
 
 /**

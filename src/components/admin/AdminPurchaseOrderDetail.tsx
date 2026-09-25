@@ -1,10 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 /** §P13 — the order DATE is rendered through the ONE display helper. */
 import { orderDateLabel } from '@/lib/dates';
 import { useApp } from '@/context/GlobalStateContext';
 import { useBrands, useCanonicalStoreVersion, useDeductions, usePurchaseOrders } from '@/data/queries';
-import { acknowledgePurchaseOrder, createShipmentForPO } from '@/data/api';
+import {
+  acknowledgePurchaseOrder,
+  approveOnBehalfRejection,
+  createShipmentForPO,
+  draftOnBehalfRejection,
+} from '@/data/api';
+/**
+ * §P13 / S4 — the on-behalf DRAFT and the question "is it Mercenta's to perform?"
+ * are answered by the rule's OWNER, never re-derived on the surface.
+ */
+import {
+  poNeedsAutoRejection,
+  poOnBehalfRejectionDraft,
+} from '@/lib/commerce/poAcknowledgementWindow';
 import {
   listChannelInstructions,
   requeueChannelInstruction,
@@ -85,6 +98,20 @@ const [onBehalfAsn, setOnBehalfAsn] = useState(false);
   // lot number + expiry date on the on-behalf ASN (mirrors the brand ASN form).
   const [asnLot, setAsnLot] = useState('');
   const [asnExpiry, setAsnExpiry] = useState('');
+  /**
+   * §P13 / S4 — MERCENTA'S ON-BEHALF REJECTION DRAFT FOR THIS PURCHASE ORDER.
+   *
+   * The draft is DERIVED by the rule's owner and produced (idempotently,
+   * attributed to Mercenta's declared automatic identity and audited) as soon as
+   * the channel's required rejection becomes Mercenta's to perform, so the brand
+   * portal finds a draft to approve and Mercenta's staff see the same one. The
+   * `useEffect` sits above the not-found return so the hook order is unconditional.
+   */
+  const [onBehalfRejectNotice, setOnBehalfRejectNotice] = useState<string | null>(null);
+  useEffect(() => {
+    if (po && poNeedsAutoRejection(po)) draftOnBehalfRejection(po.id);
+  }, [po]);
+  const onBehalfRejectDraft = po ? poOnBehalfRejectionDraft(po) : null;
 
   const poDeductions = po ? deductions.filter((d) => d.purchaseOrderId === poId) : [];
 
@@ -147,6 +174,34 @@ const thePo = po;
       + (result.warnings?.length ? ' Warnings: ' + result.warnings.join('; ') : ''));
     void qc.invalidateQueries({ queryKey: ['purchase_orders'] });
     setOnBehalfAck(false);
+  }
+
+  /**
+   * §P13 / S4 — MERCENTA'S STAFF RECORD THE BRAND'S APPROVAL OF THE ON-BEHALF
+   * REJECTION DRAFT (an ATTRIBUTED OVERRIDE).
+   *
+   * The brand approves from its own portal; where Mercenta's staff must record the
+   * approval (the brand is unreachable, the window is closing), this surface does it
+   * — attributed to the acting staff member and audited as an override. It approves
+   * the EXACT draft on record (content-addressed), never a re-invented one, and the
+   * channel action itself is performed by the ONE writer, not here.
+   */
+  function handleOnBehalfRejectApprove() {
+    const result = approveOnBehalfRejection(thePo.id, {
+      actorStaffId: actingStaff?.id ?? 'unknown-admin',
+      actorLabel: actingStaff?.name ?? 'Unknown admin',
+      draftId: onBehalfRejectDraft?.draftId,
+    });
+    if (!result.ok) {
+      setOnBehalfRejectNotice(result.error ?? 'Refused.');
+      return;
+    }
+    setOnBehalfRejectNotice(
+      `On-behalf rejection performed for ${brandName} by ${actingStaff?.name ?? 'Unknown admin'} — draft ` +
+        `${result.draftId} approved, channel action recorded against the instruction` +
+        `${result.instructionId ? ` ${result.instructionId}` : ''}.`
+    );
+    void qc.invalidateQueries({ queryKey: ['purchase_orders'] });
   }
 
   /** §P4 — Mercenta retries a refused instruction (an attributed, audited action). */
@@ -297,6 +352,90 @@ function beginOnBehalfAsn() {
               <Button className="text-xs" onClick={handleOnBehalfAckSubmit}>Submit On-Behalf Acknowledgment</Button>
               {ackNotice && <p className={cn('text-ds-micro mt-2', ackNotice.startsWith('Acknowledgment') ? 'text-emerald-400' : 'text-red-400')}>{ackNotice}</p>}
             </div>
+          )}
+
+          {/**
+            * §P13 / S4 — THE ON-BEHALF REJECTION DRAFT, AND MERCENTA'S ATTRIBUTED
+            * OVERRIDE TO RECORD THE BRAND'S APPROVAL OF IT.
+            *
+            * The draft is what the channel's rule REQUIRES once the window reaches its
+            * final stage, so it is stated in full: the rule, the reason code, the
+            * lines it rejects, the draft's content address, and the two instants that
+            * matter (the limit, and the earlier on-behalf stage). The approval records
+            * the EXACT draft on record; the channel action is performed by the ONE
+            * writer and attributed to Mercenta's declared automatic identity.
+            */}
+          {onBehalfRejectDraft?.available && (
+            <div
+              className="bg-red-500/5 border border-red-500/20 rounded-lg p-3 space-y-2"
+              data-testid={`admin-po-onbehalf-draft-${po.poNumber}`}
+            >
+              <p className="text-ds-label text-red-200 font-medium">
+                On-behalf rejection draft — awaiting {brandName}'s approval
+              </p>
+              <p className="text-ds-micro text-zinc-400">{onBehalfRejectDraft.ruleText}</p>
+              <p className="text-ds-micro text-zinc-400" data-testid={`admin-po-onbehalf-draft-id-${po.poNumber}`}>
+                Draft <span className="font-mono">{onBehalfRejectDraft.draftId}</span> · produced by{' '}
+                <span className="font-mono">{po.onBehalfDraft?.createdBy ?? 'pending'}</span>
+                {po.onBehalfDraft ? ` at ${new Date(po.onBehalfDraft.createdAt).toLocaleString('en-GB')}` : ''} · reason
+                code <span className="font-mono">{onBehalfRejectDraft.rejectionCode}</span>
+                {onBehalfRejectDraft.acknowledgementDeadline
+                  ? ` · limit ${new Date(onBehalfRejectDraft.acknowledgementDeadline).toLocaleString('en-GB')}`
+                  : ''}
+                {onBehalfRejectDraft.autoRejectAt
+                  ? ` · on-behalf stage ${new Date(onBehalfRejectDraft.autoRejectAt).toLocaleString('en-GB')}`
+                  : ''}
+              </p>
+              <p className="text-ds-micro text-amber-300" data-testid={`admin-po-onbehalf-state-${po.poNumber}`}>
+                {onBehalfRejectDraft.brandMayStillDecide
+                  ? `Still inside the 24-hour window — the brand may decide for itself until the limit.`
+                  : `The 24-hour window has closed — the documented action past the limit is a rejection.`}
+              </p>
+              <ul className="space-y-0.5">
+                {onBehalfRejectDraft.lines.map((l) => (
+                  <li key={l.sku} className="text-ds-micro text-zinc-300 font-mono">
+                    {l.sku} · {l.productName} · reject {l.quantity} @ £{l.unitPrice} · {l.rejectionCode}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                className="text-xs"
+                data-testid={`admin-po-onbehalf-approve-${po.poNumber}`}
+                onClick={handleOnBehalfRejectApprove}
+              >
+                <Gavel className="w-3.5 h-3.5 mr-1" />
+                Approve on behalf of {brandName} (attributed override)
+              </Button>
+            </div>
+          )}
+
+          {/**
+            * §P13 / S4 — MERCENTA'S REPORTED OUTCOME. It is rendered OUTSIDE the
+            * draft panel because a successful approval makes the draft no longer
+            * available, and the outcome must not vanish with it.
+            */}
+          {onBehalfRejectNotice && (
+            <p
+              role="status"
+              data-testid={`admin-po-onbehalf-notice-${po.poNumber}`}
+              className={cn(
+                'text-ds-micro',
+                onBehalfRejectNotice.startsWith('On-behalf') ? 'text-emerald-400' : 'text-red-400'
+              )}
+            >
+              {onBehalfRejectNotice}
+            </p>
+          )}
+
+          {/* §P13 / S4 — the recorded draft and the human approval of it */}
+          {po.onBehalfDraft?.approvedAt && (
+            <p className="text-ds-micro text-zinc-500" data-testid={`admin-po-onbehalf-approved-${po.poNumber}`}>
+              On-behalf rejection draft <span className="font-mono">{po.onBehalfDraft.id}</span> approved by{' '}
+              {po.onBehalfDraft.approvedBy}
+              {po.onBehalfDraft.approvedByAdmin ? ' (Mercenta admin override)' : ' (brand)'} at{' '}
+              {new Date(po.onBehalfDraft.approvedAt).toLocaleString('en-GB')} · reason{' '}
+              {po.onBehalfDraft.rejectionCode}
+            </p>
           )}
 
           {/**

@@ -1559,6 +1559,13 @@ export interface PurchaseOrder {
    * recorded.
    */
   receivedAt?: string;
+  /**
+   * §P13 / S4 — THE ON-BEHALF REJECTION DRAFT Mercenta produced for this PO, and
+   * the brand's approval of it. Produced (idempotently, attributed and audited) at
+   * the final notification stage and DERIVED for its content by the rule's owner,
+   * so the surface, the record and the writer can never state different windows.
+   */
+  onBehalfDraft?: PoOnBehalfDraftRecord;
 }
 
 /** §Stage-24 — line-item level acknowledgment, not whole-PO toggle. */
@@ -1645,6 +1652,43 @@ export interface AckHistoryEntry {
    * shows WHEN each decision was made relative to the rule.
    */
   timeliness?: PoAckTimeliness;
+}
+
+/**
+ * §P13 / S4 — THE ON-BEHALF REJECTION DRAFT (the record of what was drafted and who approved it).
+ *
+ * Mercenta OPERATES the retail-channel account and Amazon documents that *"Vendors must reject any purchase
+ * order that is on hold past the 24-hour time limit."* When a purchase order reaches the final notification
+ * stage without the brand's decision, Mercenta DRAFTS the channel-required rejection and asks the brand to
+ * approve it. Nothing executes without that approval.
+ *
+ * The DRAFT'S CONTENT is never stored: it is derived by the rule's owner
+ * (`src/lib/commerce/poAcknowledgementWindow.ts → poOnBehalfRejectionDraft`), so the draft the brand reads and
+ * the rejection Mercenta performs cannot state different things. What IS stored is what cannot be derived —
+ * the draft's CONTENT ADDRESS (`digest`, which is what an approval approves, and which is therefore how a stale
+ * approval is refused), its instants, and its ATTRIBUTION: who produced it and who approved it. The production
+ * and the approval each write a canonical audit record (`purchase_order_on_behalf_draft_created` /
+ * `purchase_order_on_behalf_rejection_approved`).
+ */
+export interface PoOnBehalfDraftRecord {
+  /** Content-addressed identity of THIS draft: `draft-<poId>-<digest>`. */
+  id: string;
+  digest: string;
+  /** The channel's own documented rejection reason the draft carries — never an invented code. */
+  rejectionCode: PoRejectionCode;
+  /** The rule the draft states, quoted from its config owner. */
+  ruleText: string;
+  acknowledgementDeadline: string | null;
+  autoRejectAt: string | null;
+  /** When Mercenta produced the draft. */
+  createdAt: string;
+  /** WHO produced it — Mercenta's declared automatic identity. */
+  createdBy: string;
+  /** WHO approved it (a human), and when. Absent until the brand approves. */
+  approvedBy?: string;
+  approvedAt?: string;
+  /** TRUE when the approval was performed by Mercenta staff as an attributed override. */
+  approvedByAdmin?: boolean;
 }
 
 /* ── §P4 — THE INSTRUCTION-TO-MERCENTA RECORD (the proxy model's write path) ── */

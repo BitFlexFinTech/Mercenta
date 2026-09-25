@@ -25,6 +25,8 @@ import {
   lateAcceptanceRefusal,
   poAckTimeliness,
   poAcknowledgementWindow,
+  poNeedsAutoRejection,
+  poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
 import {
   PO_ACK_AUTO_REJECT_REASON,
@@ -1313,6 +1315,269 @@ export function autoRejectPurchaseOrderOnBehalf(
 
   notifyCanonicalStoreChange();
   return { ok: true, instructionId, timeliness: 'on_behalf' };
+}
+
+/* ── §P13 / S4 — THE DRAFT THE BRAND APPROVES, AND THE APPROVAL THAT EXECUTES ── */
+
+/**
+ * §P13 / S4 — MERCENTA PRODUCES THE ON-BEHALF REJECTION DRAFT.
+ *
+ * S2 built the WRITER (`autoRejectPurchaseOrderOnBehalf`) and left it with no
+ * producer. This is the producer: at the final notification stage
+ * (`PO_ACK_ON_BEHALF_WINDOW_HOURS`) Mercenta drafts the channel-REQUIRED
+ * rejection — every line rejected with the channel's own documented reason, the
+ * rule stated in its own words — and asks the brand to approve it.
+ *
+ * The DRAFT'S CONTENT is not stored: it is derived by the rule's owner
+ * (`poOnBehalfRejectionDraft`), so the draft the brand reads, the record and the
+ * writer cannot state different windows. What is recorded is the draft's
+ * CONTENT ADDRESS (`digest` — what an approval approves) and its ATTRIBUTION:
+ * produced BY Mercenta's declared automatic identity, FOR the brand whose
+ * purchase order it is, with ONE canonical audit entry
+ * (`purchase_order_on_behalf_draft_created`) recording the window it was drafted
+ * on. Nothing is performed by drafting.
+ *
+ * IDEMPOTENT: the same draft content never produces a second record, so a surface
+ * may ask for the draft on every render. A draft whose content has changed
+ * (a different line quantity, a different window) supersedes the previous one and
+ * is recorded as a new draft — the superseded digest is named in the audit entry,
+ * so history is never destroyed.
+ *
+ * FAIL CLOSED: a purchase order with an unreadable window, no obligation, an
+ * already-recorded decision, or a window that has not reached the on-behalf
+ * instant produces NO draft and says why — nothing is written.
+ */
+export function draftOnBehalfRejection(
+  poId: string,
+  now: Date | string | number = new Date()
+): {
+  ok: boolean;
+  error?: string;
+  draft?: import('@/lib/commerce/poAcknowledgementWindow').PoOnBehalfRejectionDraft;
+  /** TRUE when THIS call recorded the draft (false when it already stood). */
+  created?: boolean;
+} {
+  const po = demoPurchaseOrders.find((p) => p.id === poId);
+  if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
+
+  const draft = poOnBehalfRejectionDraft(po, now);
+  if (!draft.available) {
+    return {
+      ok: false,
+      error: draft.refusal ?? `PO ${po.poNumber}: no on-behalf rejection draft is due.`,
+    };
+  }
+
+  const standing = po.onBehalfDraft;
+  if (standing && standing.digest === draft.digest) {
+    return { ok: true, draft, created: false };
+  }
+
+  const at = new Date(now).toISOString();
+  po.onBehalfDraft = {
+    id: draft.draftId,
+    digest: draft.digest,
+    rejectionCode: draft.rejectionCode,
+    ruleText: draft.ruleText,
+    acknowledgementDeadline: draft.acknowledgementDeadline,
+    autoRejectAt: draft.autoRejectAt,
+    createdAt: at,
+    createdBy: PO_ACK_SYSTEM_ACTOR_ID,
+  };
+
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: at,
+    actorId: PO_ACK_SYSTEM_ACTOR_ID,
+    action: 'purchase_order_on_behalf_draft_created',
+    entityType: 'purchase_order',
+    entityId: po.id,
+    brandId: po.brandId,
+    reason:
+      `${PO_ACK_SYSTEM_ACTOR_ID}: PO ${po.poNumber} reached the final notification stage ` +
+      `(${draft.autoRejectAt}) without the brand's decision, so Mercenta drafted the retail channel's required ` +
+      `rejection (${draft.rejectionCode}) for the brand to approve — draft ${draft.draftId}. Nothing has been ` +
+      `performed: the draft executes only on the brand's approval.` +
+      (standing ? ` Supersedes draft ${standing.id}, whose content no longer matches the purchase order.` : ''),
+    metadata: {
+      draftId: draft.draftId,
+      digest: draft.digest,
+      supersededDraftId: standing?.id,
+      rejectionCode: draft.rejectionCode,
+      autoRejectAt: draft.autoRejectAt,
+      acknowledgementDeadline: draft.acknowledgementDeadline,
+      draftedFor: po.brandId,
+      lines: draft.lines.map((l) => l.sku),
+      direction: 'Mercenta drafts → brand approves → Mercenta performs the channel action',
+    },
+  });
+
+  notifyCanonicalStoreChange();
+  return { ok: true, draft, created: true };
+}
+
+/**
+ * §P13 / S4 — THE BRAND'S APPROVAL, AND THE ONLY PATH THAT EXECUTES THE
+ * ON-BEHALF REJECTION.
+ *
+ * The draft is offered; the brand approves it; Mercenta performs the channel
+ * action through the S2 writer. **Nothing executes without this approval.** The
+ * approval is bound to the EXACT draft that was shown (its content address), so a
+ * purchase order that changed after drafting cannot be approved blind, and an
+ * approval aimed at a different draft is refused.
+ *
+ * ATTRIBUTION AND AUDIT: the approval names the acting human — the brand itself
+ * for a brand's own approval, or a Mercenta staff member for an attributed admin
+ * override — and records the draft it approved, the window it acted on, the
+ * instruction the rejection was issued as, and the resulting timeliness, in ONE
+ * canonical audit entry (`purchase_order_on_behalf_rejection_approved`). The
+ * rejection itself stays attributed to the declared automatic identity by the
+ * writer's own `purchase_order_auto_rejected` entry, so the trail shows both
+ * facts: WHO approved, and WHO performed.
+ *
+ * FAIL CLOSED: an unknown purchase order, a cross-tenant approval, a draft that
+ * is not due / not on record / no longer current, or a writer refusal all leave
+ * the purchase order UNTOUCHED and return the reason.
+ *
+ * IDEMPOTENT: a purchase order that already carries a decision is never
+ * re-decided — no second write, no second instruction, no second rejection.
+ */
+export function approveOnBehalfRejection(
+  poId: string,
+  approval: {
+    /** The acting Mercenta staff member — present = an attributed admin override. */
+    actorStaffId?: string;
+    /** Human-readable actor label for the audit record. */
+    actorLabel?: string;
+    /**
+     * The tenant the approver is acting for. When supplied it MUST be the PO's own
+     * brand (fail closed), so one tenant can never approve another's purchase order.
+     */
+    actorBrandId?: string;
+    /** The draft the approver was SHOWN (its content-addressed id). */
+    draftId?: string;
+  } = {},
+  now: Date | string | number = new Date()
+): {
+  ok: boolean;
+  error?: string;
+  /** TRUE when nothing was performed because a decision already exists. */
+  alreadyAcknowledged?: boolean;
+  draftId?: string;
+  instructionId?: string;
+  timeliness?: import('@/types').PoAckTimeliness;
+} {
+  const po = demoPurchaseOrders.find((p) => p.id === poId);
+  if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
+
+  /** TENANT ISOLATION — fail closed on a cross-tenant approval. */
+  if (approval.actorBrandId && approval.actorBrandId !== po.brandId) {
+    return {
+      ok: false,
+      error: `PO ${po.poNumber} belongs to another tenant — an on-behalf approval for it is refused.`,
+    };
+  }
+
+  /** IDEMPOTENT — a recorded decision is never re-decided. */
+  const window = poAcknowledgementWindow(po, now);
+  if (po.acknowledgedAt || window.channelState !== 'new') {
+    return { ok: true, alreadyAcknowledged: true, draftId: po.onBehalfDraft?.id };
+  }
+
+  const draft = poOnBehalfRejectionDraft(po, now);
+  if (!draft.available) {
+    return {
+      ok: false,
+      error: draft.refusal ?? `PO ${po.poNumber}: no on-behalf rejection is Mercenta's to perform.`,
+    };
+  }
+
+  const record = po.onBehalfDraft;
+  if (!record) {
+    return {
+      ok: false,
+      error:
+        `PO ${po.poNumber}: no on-behalf draft is on record, so an approval is refused — Mercenta produces the ` +
+        `draft first (\`draftOnBehalfRejection\`) and the brand approves the draft it was shown.`,
+    };
+  }
+  if (record.digest !== draft.digest) {
+    return {
+      ok: false,
+      error:
+        `PO ${po.poNumber}: the draft on record (${record.id}) no longer matches the purchase order as it stands ` +
+        `now (${draft.draftId}) — the current draft must be reviewed before it is approved.`,
+    };
+  }
+  if (approval.draftId && approval.draftId !== record.id) {
+    return {
+      ok: false,
+      error:
+        `PO ${po.poNumber}: the approval names draft ${approval.draftId}, but the draft on record is ${record.id} ` +
+        `— an approval may only approve the draft it was shown.`,
+    };
+  }
+
+  /**
+   * THE CHANNEL ACTION — performed ONLY here, and only through the S2 writer
+   * (idempotent, attributed, audited). This function adds no second write path.
+   */
+  const performed = autoRejectPurchaseOrderOnBehalf(po.id, now);
+  if (!performed.ok) return { ok: false, error: performed.error };
+  if (performed.alreadyAcknowledged) {
+    return { ok: true, alreadyAcknowledged: true, draftId: record.id };
+  }
+
+  const at = new Date(now).toISOString();
+  const adminOverride = Boolean(approval.actorStaffId);
+  const approverId = approval.actorStaffId ?? po.brandId;
+  const approverLabel =
+    approval.actorLabel ??
+    (adminOverride ? approval.actorStaffId! : `${po.brandId} (brand self-approval)`);
+  record.approvedBy = approverId;
+  record.approvedAt = at;
+  if (adminOverride) record.approvedByAdmin = true;
+
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: at,
+    actorId: approverId,
+    action: 'purchase_order_on_behalf_rejection_approved',
+    entityType: 'purchase_order',
+    entityId: po.id,
+    brandId: po.brandId,
+    reason:
+      `${approverLabel}${adminOverride ? ' (Mercenta, attributed admin override)' : ''}: approved on-behalf ` +
+      `rejection draft ${record.id} for PO ${po.poNumber}, so Mercenta performed the retail channel's required ` +
+      `rejection (${record.rejectionCode}) on the brand's behalf` +
+      `${performed.instructionId ? ` as INSTRUCTION ${performed.instructionId}` : ''}. The approved draft is bound ` +
+      `to its content address (${record.digest}); the action itself is attributed to the writer's own audit entry. ` +
+      (draft.brandMayStillDecide
+        ? `Approved INSIDE the 24-hour window, before the limit (${draft.acknowledgementDeadline}).`
+        : `Approved after the 24-hour window closed (${draft.acknowledgementDeadline}) — the documented action past the limit is a rejection.`),
+    metadata: {
+      draftId: record.id,
+      digest: record.digest,
+      approvedBy: approverId,
+      approvedByAdmin: adminOverride,
+      rejectionCode: record.rejectionCode,
+      instructionId: performed.instructionId,
+      autoRejectAt: record.autoRejectAt,
+      acknowledgementDeadline: record.acknowledgementDeadline,
+      brandMayStillDecide: draft.brandMayStillDecide,
+      rejectedLines: draft.lines.map((l) => l.sku),
+      timeliness: 'on_behalf',
+      direction: 'brand approves → Mercenta performs → retail channel',
+    },
+  });
+
+  notifyCanonicalStoreChange();
+  return {
+    ok: true,
+    draftId: record.id,
+    instructionId: performed.instructionId,
+    timeliness: 'on_behalf',
+  };
 }
 
 export interface AsnCarton {
