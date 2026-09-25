@@ -198,10 +198,19 @@ await admin.getByRole('button', { name: 'Partner Login' }).first().click().catch
 await admin.waitForTimeout(800);
 await admin.click('text=Mercenta Admin Hub');
 await admin.waitForTimeout(2500);
-await admin.goto(`${BASE}/admin/purchase-orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await admin.goto(`${BASE}/admin/purchase_orders_admin`, { waitUntil: 'domcontentloaded' }).catch(() => {});
 await admin.waitForTimeout(3000);
 const adminBody = await admin.locator('body').innerText().catch(() => '');
-check('the admin Purchase Orders surface renders on the deployed build', /Purchase Orders/i.test(adminBody));
+/**
+ * §P13 / S4 — the deployed admin PO LIST is addressed at its own route
+ * (`/admin/purchase_orders_admin` — the nav view id). The previous address
+ * (`/admin/purchase-orders`) resolves to NO declared admin view and silently
+ * rendered Overview, so this check now asserts the LIST itself (a purchase-order
+ * number is present), not merely the nav label "Purchase Orders".
+ */
+check('the admin Purchase Orders surface renders on the deployed build',
+  /Purchase Orders/i.test(adminBody) && /PO-\d{4}/.test(adminBody),
+  adminBody.replace(/\s+/g, ' ').slice(0, 120));
 check('no uncaught page error on the admin flow', adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
 
 /* ── 4b. §P7 — THE DEPLOYED INVOICING SURFACES + THE DEPLOYED BUNDLE'S RULES ─ */
@@ -815,8 +824,11 @@ check('§P13/S4 the deployed record shows WHO approved, and the draft is no long
 check('no uncaught page error on the deployed §P13/S4 brand flow',
   astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
 
-/* MERCENTA'S CONSOLE: the SAME draft, and an ATTRIBUTED override. */
-await admin.goto(`${BASE}/admin/purchase-orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+/* MERCENTA'S CONSOLE: the SAME draft, and an ATTRIBUTED override.
+   The admin PO LIST is addressed at its own route (the nav view id) — the address
+   `/admin/purchase-orders` resolves to no declared admin view and renders
+   Overview, so the list itself must be opened. */
+await admin.goto(`${BASE}/admin/purchase_orders_admin`, { waitUntil: 'domcontentloaded' }).catch(() => {});
 await admin.waitForTimeout(3500);
 const s4AdminRow = admin
   .locator('div.flex.items-center.justify-between', { hasText: 'PO-9001' })

@@ -26,17 +26,59 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **PO-ACK S3 DONE: the work layer consumes the rule's owner, so the founder-reported acknowledgement defect is removed at source** (2026-09-25, session 28)
+## CURRENT STATE — **PO-ACK S4 DONE: the on-behalf rejection draft exists, and the brand's approval is the ONLY thing that executes it (the S2 writer has its PRODUCER)** (2026-09-25, session 29)
 
-**Branch:** `redesign/foundation`. **Checkpoint:** `64f1994` (application code) + `111c59b` (the live-verification
+**Branch:** `redesign/foundation`. **Checkpoint:** `93d619e` (application code) + `d30b114` (the live-verification
 legs) — recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (the canonical source) and mirrored in
 `HANDOFF.md`. **`git status --porcelain` EMPTY** after the state commit. **THREE-WAY STATUS: see the resume block**
-(local ✅ · GitHub ✅ · demo ✅ deployed at `64f1994` and live-verified).
+(local ✅ · GitHub ✅ · demo ✅ deployed at `93d619e` and live-verified).
 
 **Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
 nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary + the on-behalf
-writer; **S3 makes the WORK LAYER ask the owner**, so the founder-reported defect is gone AT SOURCE. Programme record:
-`docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (the ten stages S1–S10, §S3).
+writer; S3 (`64f1994`) = the work layer consumes the owner; **S4 gives the writer its PRODUCER and makes the brand's
+approval the only trigger.** Programme record: `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (§S4).
+
+**What changed (session 29):**
+
+1. **The DRAFT is DERIVED by the rule's owner** — `src/lib/commerce/poAcknowledgementWindow.ts →
+   poOnBehalfRejectionDraft(po, now?)`: every line rejected with the channel's documented reason
+   (`PO_ACK_AUTO_REJECT_REASON`), the config-owned rule text, both instants (the limit and the earlier on-behalf
+   stage), and a CONTENT ADDRESS (`digest`, FNV-1a — pure). Availability IS the owner's own predicate
+   (`poNeedsAutoRejection`): the closing window AND past the limit; FAIL CLOSED with a stated refusal for not-due,
+   already-decided, no-obligation and unreadable-window POs.
+2. **The PRODUCER the S2 writer never had** — `src/data/api.ts → draftOnBehalfRejection`: idempotent per draft
+   content, attributed to `PO_ACK_SYSTEM_ACTOR_ID`, ONE audit entry (`purchase_order_on_behalf_draft_created`) naming
+   the window, and it performs NOTHING.
+3. **The APPROVAL is the only path that executes** — `approveOnBehalfRejection`, in order: unknown PO → TENANT
+   ISOLATION → IDEMPOTENCY → the owner's availability → a draft MUST be on record → its digest MUST equal the CURRENT
+   derivation (a stale approval is refused) → the approval's `draftId` MUST be the draft shown → then the S2 writer.
+   Attributed to the acting human on the record + ONE audit entry (`purchase_order_on_behalf_rejection_approved`);
+   the execution stays attributed to the writer's own `purchase_order_auto_rejected` entry.
+4. **Both PO surfaces carry the REAL control** — the brand approves its own (tenant-pinned: a cross-tenant approval
+   is refused), Mercenta's staff record an ATTRIBUTED OVERRIDE. The functional spec caught a REAL defect here (the
+   admin outcome notice unmounted with the draft panel); fixed in the SURFACE, not the test.
+5. **The seed makes it reachable** — the second open PO of the first cleared tenant (Astonish **PO-9001**) now sits
+   inside its closing window while remaining INSIDE the 24-hour limit, so the brand may still decide for itself.
+6. **TWO new gates** — `scripts/validate-po-acknowledgement-on-behalf.mjs` (48 assertions) and
+   `e2e/po-onbehalf.spec.ts` (3 functional tests).
+
+**Evidence (produced this session):** NEW gate `validate:po-ack-on-behalf` → **48 assertions PASS, 0 network calls,
+proved able to fail twice** (the owner's availability predicate removed → 7 red; the draft-binding guard removed →
+2 red, incl. "the stale approval wrote NOTHING"; both restored byte-identical — `poAcknowledgementWindow.ts` shasum
+`e00fbfb8…`, `api.ts` `5d5a43f3…`, `demoData.ts` `907c411f…`) · S1 gate 60 PASS · S2 gate 45 PASS · S3 gate 41 PASS ·
+**the whole `validate:*` sweep 29/29 PASS** · `npm run typecheck` 0 · root `npx tsc --noEmit` 0 · `npx eslint .` 0 ·
+`npm run build` ✓ (7.90s) · NEW spec `e2e/po-onbehalf.spec.ts` 3/3 · targeted PO specs 56/56 · **the FULL Playwright
+suite: 503 passed / 2 skipped / 0 failed (505 tests, 6.9m)** · **LIVE `LIVE_VERIFICATION_PASS`: 145/145 checks,
+0 page errors** (the 10 §P13/S4 legs exercise the deployed draft and approval).
+
+**Honest limits (recorded, not blockers):** the draft is not yet fanned out to the brand's channels (S5 — today it is
+materialised when a PO surface reads the PO, idempotent and recorded once) · an UNATTENDED sweep that performs the
+rejection without an approval is S5/S10 and needs the founder's decision on the trigger · three legacy inline
+countdowns still hand-roll the 24-hour arithmetic (`BrandPurchaseOrders → AckDeadline`, `AdminPurchaseOrderDetail`,
+`AdminPurchaseOrderList → PoPreviewBody`) — S6/S7 surface scope, NOT S4's code path · the demo store is in-memory, so
+an approval lasts for the browser session only.
+
+## PREVIOUS STATE — **PO-ACK PROGRAMME, S3 DONE: the work layer consumes the rule's owner (the founder-reported defect, removed at source)** (2026-09-25, session 28) — HISTORICAL
 
 **What changed (6 paths + the live-verification script):**
 
@@ -283,6 +325,27 @@ from **16/16 chunks**.
 `'carriers'` remains; the milestone control is a simulation surface (carrier polling is P12); the pre-existing
 `amendShipment` helper still writes `status` without `stage`. The first live run failed 3 §P9 checks for a real reason
 (the check ran on the brand page, where the console is correctly absent) and was fixed, then re-run green.
+
+### PO-ACK programme (2026-09-25, session 29) — **S4 DONE: the on-behalf rejection draft exists, and the brand's approval is the only thing that executes it**
+
+`src/lib/commerce/poAcknowledgementWindow.ts → poOnBehalfRejectionDraft(po, now?)` DERIVES the draft (every line
+rejected with the channel's documented reason, the config-owned rule text, both instants, and a content address
+`digest`), offered EXACTLY when the owner's own `poNeedsAutoRejection` says the rejection is Mercenta's to perform —
+the closing window AND past the limit — failing CLOSED with a stated refusal everywhere else.
+`src/data/api.ts → draftOnBehalfRejection` is the PRODUCER the S2 writer never had (idempotent per draft content,
+attributed to `PO_ACK_SYSTEM_ACTOR_ID`, ONE audit entry, performs NOTHING); `approveOnBehalfRejection` is the ONLY
+path that executes (unknown PO → tenant isolation → idempotency → owner availability → a draft MUST be on record →
+its digest MUST equal the CURRENT derivation → the approval's `draftId` MUST be the draft shown → then the S2 writer),
+attributed to the acting human + audited once, with the execution attributed separately by the writer. BOTH PO surfaces
+carry the real control (the brand approves its own, tenant-pinned; Mercenta's staff record an attributed override) —
+and the new functional spec caught a REAL defect there (the admin outcome notice unmounted with the draft panel; fixed
+in the surface, not the test). The seed now genuinely contains an on-behalf PO (Astonish **PO-9001**, inside the closing
+window, still inside the 24-hour limit). New gate `validate:po-ack-on-behalf` — **48 assertions PASS, 0 network calls**,
+proved able to fail twice (the owner's availability predicate removed → 7 red; the draft-binding guard removed → 2 red,
+incl. "the stale approval wrote NOTHING"; both restored byte-identical). NEW spec `e2e/po-onbehalf.spec.ts` (3/3) ·
+targeted PO specs 56/56 · whole `validate:*` sweep **29/29 PASS** · typecheck 0 · root tsc 0 · eslint 0 · build ✓ 7.90s ·
+**FULL Playwright 503 passed / 2 skipped / 0 failed (505)** · **LIVE `LIVE_VERIFICATION_PASS`** with 10 new §P13/S4
+legs on the deployed build. Checkpoint `93d619e` (+ `d30b114` = the live legs).
 
 ### PO-ACK programme (2026-09-25, session 28) — **S3 DONE: the work layer consumes the rule's owner (the founder-reported defect, removed at source)**
 
