@@ -26,7 +26,93 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **PO-ACK S7 DONE: the admin surfaces present the rule from its ONE owner — and a SIXTH copy, found on the brand dashboard by the same sweep, is repointed too** (2026-09-25, session 32)
+## CURRENT STATE — **PO-ACK S8 DONE: the onboarding surfaces present the rule from its ONE owner, and the brand's acknowledgement is LINKED to the canonical onboarding record** (2026-09-25, session 33)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** `8d9a092` + the state check point that carries this section — recorded in
+the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (the canonical source) and mirrored in `HANDOFF.md`.
+**`git status --porcelain` EMPTY** after the state commit. **THREE-WAY STATUS:** **COMPLETE — LOCAL/GITHUB/DEMO
+SYNCHRONIZED at `8d9a092`** (local ✅ · GitHub ✅ pushed · demo ✅ deployed and **LIVE-VERIFIED 180/180, 0 page errors**,
+including the SEVEN new §P13/S8 legs; the deployed `index.html` serves the S8 build's own asset hash
+`assets/index-yP-0dExB.js`).
+
+**Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
+nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary; S3 (`64f1994`) =
+the work layer consumes the owner; S4 (`93d619e`) = the on-behalf draft + the approval that executes it; S5 (`8843ad2`) =
+the all-channel fan-out + the instant-message seam; S6 (`d3da66e`) = the brand surfaces; S7 (`dfa9cdb` + `5753a43`) = the
+admin surfaces; **S8 makes the ONBOARDING surfaces — the surfaces that TEACH the rule — present it from its owner, and
+LINKs the brand's acknowledgement to its canonical onboarding record.** Programme record:
+`docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (§S8, which opens with the CONTRACT fixed from the repository — the stage's
+row is the only written scope).
+
+**What changed (session 33):**
+
+1. **SEVEN COPIES OF THE RULE IN THE ONBOARDING SURFACES, ALL REPOINTED; FOUR OF THEM ASSERTED AN UNSUPPORTED CLAIM.**
+   The platform's own discrepancy register records **AV-003** as UNSUPPORTED (*"No Amazon source reached documents a
+   vendor performance rating or its triggers"*) and its status was OPEN. The sweep found the claim's last carriers in the
+   onboarding surfaces: the guided tours (`tourDefinitions.ts` — the orientation step's *"within 24 hours or it will be
+   flagged … a vendor performance deduction"*, the `po-24-hour-rule` step, and `po-reject-reason`, whose three named codes
+   — "Out of stock", "Discontinued", "Price dispute" — are NOT the channel's documented ones), the legacy tour path
+   (`TourLoader.tsx`) and the legacy `TOUR_STEPS` constant (`src/types.ts`), the `kb-purchase-orders` article that BOTH
+   acknowledgement tour steps link to via `learnMore`, the wizard's required operational-guidance step
+   (`BrandGuidance.tsx`) plus its acknowledgement line, the wizard's step intro, and the Add-Product interstitial
+   (`ProductCatalog.tsx`). All of them now render ONE derived, config-owned statement (below), and each old contract is
+   recorded inline as a `§P13 / S8 — REPOINTED` record.
+2. **THE ONE OWNER.** NEW `PO_ACK_ONBOARDING_STATEMENT` in `src/config/purchaseOrders.ts` — DERIVED from the existing
+   declarations (`ruleText` = `PO_ACK_WINDOW_RULE_TEXT` verbatim, `shortText` from `PO_ACKNOWLEDGEMENT_HOURS`, the
+   notification schedule from `PO_ACK_NOTIFICATION_HOURS`, `rejectionCodes` = `PO_REJECTION_CODES` by IDENTITY, and
+   Mercenta's OWN process LABELLED as Mercenta's — never presented as a channel rule). `src/types.ts` may not import the
+   config owner (the config imports THOSE types), so the legacy `TOUR_STEPS` blurb points at the owner instead of
+   re-typing the rule. **AV-003 is now APPLIED (1 of 52)** in `docs/AMAZON_RECONCILIATION_STATUS.md`, with the 2026-09-20
+   register row updated to name the S8 carriers.
+3. **THE LINK.** NEW `src/lib/onboarding/onboardingLifecycle.ts → acknowledgePurchaseOrderRules(onboardingId, actor,
+   note?)`. The wizard's operational-guidance acknowledgement used to be LOCAL COMPONENT STATE — nothing on the canonical
+   record said the brand had ever been shown the rule. It is now a canonical, audited act: RBAC in the domain (a
+   view-only account is refused), tenant isolation (a brand-pinned session may only acknowledge its OWN record),
+   `NOT_FOUND` for an unknown id, idempotent, the rule's OWN config text stored on the record
+   (`poRulesAcknowledgedAt` / `poRulesAcknowledgedBy` / `poRulesRuleText`, so the record proves WHAT was acknowledged),
+   audited twice (the acquisition timeline event `onboarding_po_rules_acknowledged` + the platform audit log with the
+   real tenant). `GlobalStateContext.completeOnboarding` passes the flag EXPLICITLY from the wizard's guidance step, and
+   `OnboardingPipeline.tsx` renders the link in BOTH states (acknowledged with the recorded wording, or honestly
+   outstanding).
+4. **A NEW GATE** — `scripts/validate-po-acknowledgement-onboarding-surfaces.mjs` (`validate:po-ack-onboarding`, 45
+   assertions) — and a **NEW FUNCTIONAL SPEC** — `e2e/po-onboarding-ack-surfaces.spec.ts` (4 tests) — plus **SEVEN
+   §P13/S8 legs** in `scripts/verify-demo-live.mjs`.
+
+
+**Evidence — and two real defects found by the spec, not by the gate:**
+
+- NEW gate → **45 assertions, PASS, 0 network calls**; **proved able to fail twice** (a hand-rolled rule reintroduced
+  into the tours → **2 red**; the owner's rule text dropped from the domain writer → **3 red**; both restored
+  byte-identical, shasum `OK`).
+- NEW spec → **4/4**. Writing it found: (i) a **JSX text node wrapped across two lines** (`…affect my vendor` + newline +
+  `performance`) that hid from the gate's repo-wide regex — the check now NORMALISES whitespace, which then found two
+  further carriers (the guidance acknowledgement line and `ProductCatalog`'s intro); and (ii) a **defect in a shared test
+  helper**: `checkAllWizardCheckboxes` could not tick the step-5 legal agreements (they are `<input>` + sibling
+  `<label htmlFor>`, not label-wrapped) so the wizard could never be walked past step 5 — fixed in
+  `e2e/helpers/onboarding.ts`.
+- `npm run typecheck` **0** · root `npx tsc --noEmit` **0** · `npx eslint` **0** on every changed file · `npm run build`
+  **✓ (7.80s)** · whole `validate:*` sweep **33/33 PASS** (32 → 33) on EXIT CODES · affected Playwright suites **39/39** ·
+  **FULL Playwright 515 passed / 2 skipped / 0 failed (517, 7.5m)** · registry verifier **identical to the HEAD baseline
+  (208 issues / 63 manual / 17 reachability flags — the new entry adds none)** · **live 180/180**.
+
+**Live-verification honesty:** the first live runs failed for external reasons — a 45-second cold response from the shared
+host, then ~2 minutes where the host was entirely unreachable (`curl` 000 at 75s × 3), plus the §S5/S6 legs leaving an
+overlay that blocked the first S8 navigation (the verifier now closes leftover overlays and FAILS its navigation leg
+honestly instead of crashing the whole run, which previously destroyed the evidence of the 174 checks that had already
+passed). One S8 leg was also wrong on its first write-up — it read the rejection codes at the window step instead of the
+rejection-reason step — and was corrected. The 180/180 run above is the recorded result.
+
+**Honest limits (recorded, not blockers):** the demo holds **0 canonical onboarding records**, so S8's LINK is proven at
+the DOMAIN level by the gate and by the pipeline's rendering of both states, not through the demo UI; the tours'
+support-response blurb and `BrandReports`' own computed *ASIN Confirmation Rate* are NOT the acknowledgement rule and were
+deliberately left alone; `BrandGuidance`'s Net PPM benchmark values remain a separate AV-020-class question.
+
+**Next:** **S9 — receipt → invoice automation** (fix the contract from the repository first), then S10 (seed / gates /
+deploy — the final pass). **Exact next starting point:** `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (table + §S8) →
+`src/lib/commerce/invoiceRegistry.ts` → `invoiceTerms.ts` → `receivingStatus.ts` → `channelReceivingSync.ts` →
+`src/data/api.ts`.
+
+## PREVIOUS STATE — **PO-ACK S7 DONE: the admin surfaces present the rule from its ONE owner — and a SIXTH copy, found on the brand dashboard by the same sweep, is repointed too** (2026-09-25, session 32) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** `5753a43` (on `dfa9cdb`) + the DOCS-ONLY state check point that carries
 this section — recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (the canonical source) and mirrored in
@@ -516,6 +602,33 @@ from **16/16 chunks**.
 `'carriers'` remains; the milestone control is a simulation surface (carrier polling is P12); the pre-existing
 `amendShipment` helper still writes `status` without `stage`. The first live run failed 3 §P9 checks for a real reason
 (the check ran on the brand page, where the console is correctly absent) and was fixed, then re-run green.
+
+### PO-ACK programme (2026-09-25, session 33) — **S8 DONE: the onboarding surfaces present the rule from its owner, and the brand's acknowledgement is linked to its onboarding record**
+
+**Scope fixed from the repository first** (the stage row "ONBOARDING linking wizard" is the only written scope): the rule
+was re-typed in SEVEN onboarding surfaces and FOUR asserted a consequence the platform's own register records as
+UNSUPPORTED (AV-003) — the guided tours (orientation step, `po-24-hour-rule`, `po-reject-reason` with three non-documented
+codes), `TourLoader.tsx` + the legacy `TOUR_STEPS`, the `kb-purchase-orders` article BOTH acknowledgement steps link to,
+`BrandGuidance.tsx` + its acknowledgement line, the wizard intro, and `ProductCatalog.tsx`'s Add-Product intro.
+
+**Delivered:** NEW `PO_ACK_ONBOARDING_STATEMENT` (the ONE derived, config-owned brand-facing statement: rule text
+verbatim, window + schedule from the constants, `PO_REJECTION_CODES` by identity, Mercenta's own process labelled as
+Mercenta's) with every old contract recorded inline; NEW `acknowledgePurchaseOrderRules` (RBAC + tenant isolation +
+idempotent + the rule's own text recorded + audited twice) passed EXPLICITLY by the wizard and rendered by the admin
+pipeline in both states; NEW gate `validate:po-ack-onboarding` (45); NEW spec `e2e/po-onboarding-ack-surfaces.spec.ts`
+(4); SEVEN new live legs. **AV-003 → APPLIED (1 of 52).**
+
+**Two real defects found by the spec, not by the gate:** a JSX text node wrapped across two lines hid from the gate's
+repo-wide regex (the check now normalises whitespace, which then found two further carriers), and
+`checkAllWizardCheckboxes` could not tick the step-5 legal agreements (input + sibling `<label htmlFor>`), so the wizard
+could never be walked past step 5 — fixed in `e2e/helpers/onboarding.ts`.
+
+**Evidence:** gate 45/45 PASS, 0 network calls, proved able to fail twice (2 red / 3 red; restored byte-identical) ·
+spec 4/4 · typecheck 0 · root tsc 0 · eslint 0 · build ✓ (7.80s) · `validate:*` 33/33 (32 → 33) · affected suites 39/39 ·
+**FULL Playwright 515 passed / 2 skipped / 0 failed (517, 7.5m)** · registry verifier identical to baseline · deploy exit 0
+(20 new / 11 modified / 20 stale removed; 4,934,806 bytes) · **live `LIVE_VERIFICATION_PASS` 180/180, 0 page errors**.
+**Checkpoint `8d9a092` — COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.**
+
 
 ### PO-ACK programme (2026-09-25, session 30) — **S5 DONE: the declared schedule fans out on every channel, the final stage produces the draft, and the instant-message seam fails closed**
 

@@ -749,6 +749,36 @@ async function openLiveNav(target, label) {
   await target.waitForTimeout(1500);
 }
 
+/**
+ * §P13 / S8 — CLOSE WHATEVER THE PREVIOUS LEGS LEFT OPEN.
+ *
+ * The §P13/S5–S6 legs end with the notification centre open, and its overlay
+ * (`div.fixed.inset-0.z-50`) intercepts pointer events, so the next navigation click
+ * timed out. The earlier script ended at that point, which is why it never surfaced.
+ * This closes ANY open overlay through its own visible Close control (and Escape),
+ * without touching the application.
+ */
+async function closeLiveOverlays(target) {
+  for (let i = 0; i < 4; i++) {
+    const overlay = target.locator('div.fixed.inset-0.z-50').first();
+    if (!(await overlay.isVisible({ timeout: 400 }).catch(() => false))) return;
+    await target.keyboard.press('Escape').catch(() => {});
+    await target.waitForTimeout(300);
+    if (await overlay.isVisible({ timeout: 300 }).catch(() => false)) {
+      /** These modals close on their BACKDROP (`onClick={onClose}`) — click a corner. */
+      await overlay.click({ position: { x: 4, y: 4 }, force: true }).catch(() => {});
+      await target.waitForTimeout(350);
+    }
+    if (await overlay.isVisible({ timeout: 300 }).catch(() => false)) {
+      const close = target.locator('button[aria-label^="Close"], button:has-text("Close")').last();
+      if (await close.isVisible({ timeout: 300 }).catch(() => false)) {
+        await close.click({ force: true }).catch(() => {});
+        await target.waitForTimeout(350);
+      }
+    }
+  }
+}
+
 /* The brand's OWN queue (Tapatío): this session accepted PO-9002 above, so its only
    remaining seeded PO is PO-9003 — which must NOT be offered as acknowledgement work. */
 await openLiveNav(page, 'Tasks & Deadlines');
@@ -1127,11 +1157,24 @@ check('no uncaught page error on the deployed §P13/S5 fan-out flow',
    documented rule and the documented past-limit action, and none of them may still
    assert the invented consequence. The onboarding pipeline must also state the LINK
    (the brand's canonical acknowledgement) for every record it shows. */
-await openLiveNav(admin, 'Onboarding Tours');
+await closeLiveOverlays(admin);
+/**
+ * §S8 — the navigation is guarded: if an overlay still blocks the click, the legs FAIL
+ * honestly (check + non-zero exit) instead of crashing the run and destroying the
+ * evidence of the 174 checks that already passed.
+ */
+let s8NavOk = true;
+try {
+  await openLiveNav(admin, 'Onboarding Tours');
+} catch (err) {
+  s8NavOk = false;
+  check('§P13/S8 the deployed admin navigation can reach the onboarding surfaces',
+    false, String(err).split('\n')[0].slice(0, 120));
+}
 await admin.waitForTimeout(2500);
 const s8ToursBody = await admin.locator('body').innerText().catch(() => '');
 check('§P13/S8 the deployed tour-management surface renders (Onboarding Tours)',
-  /Onboarding Tours|guided onboarding tours/i.test(s8ToursBody) && s8ToursBody.length > 200);
+  s8NavOk && /Onboarding Tours|guided onboarding tours/i.test(s8ToursBody) && s8ToursBody.length > 200);
 
 const s8PoCard = admin
   .locator('div')
@@ -1157,14 +1200,30 @@ check('§P13/S8 the deployed PO acknowledgment tour teaches the rule in its OWNE
   s8ModalText.replace(/\s+/g, ' ').slice(0, 200));
 check('§P13/S8 the deployed tour asserts NO invented consequence (AV-003 absent live)',
   !/flagged|vendor performance|delist ASINs/i.test(s8ToursBody));
+/** Step 4 of the PO tour is the REJECTION-REASON step (step 3 is the window). */
+const s8NextStep = s8Modal.locator('button', { hasText: /Next/ }).first();
+if (await s8NextStep.isVisible({ timeout: 1500 }).catch(() => false)) {
+  await s8NextStep.click().catch(() => {});
+  await admin.waitForTimeout(700);
+}
+const s8ReasonText = await s8Modal.innerText().catch(() => '');
 check('§P13/S8 the deployed PO tour names the channel’s DOCUMENTED rejection reasons',
-  /TemporarilyUnavailable/.test(s8ModalText) && !/Out of stock|Price dispute/.test(s8ModalText),
-  s8ModalText.replace(/\s+/g, ' ').slice(0, 160));
+  ['TemporarilyUnavailable', 'InvalidProductIdentifier', 'ObsoleteProduct'].every((c) =>
+    s8ReasonText.includes(c)) && !/Out of stock|Price dispute/.test(s8ReasonText),
+  s8ReasonText.replace(/\s+/g, ' ').slice(0, 160));
 await s8Modal.locator('button', { hasText: /Close/ }).first().click().catch(() => {});
 await admin.waitForTimeout(600);
 
 /** The deployed onboarding pipeline states the LINK (or says honestly that it has none). */
-await openLiveNav(admin, 'Onboarding');
+await closeLiveOverlays(admin);
+let s8PipelineNavOk = true;
+try {
+  await openLiveNav(admin, 'Onboarding');
+} catch (err) {
+  s8PipelineNavOk = false;
+  check('§P13/S8 the deployed admin navigation can reach the onboarding pipeline',
+    false, String(err).split('\n')[0].slice(0, 120));
+}
 await admin.waitForTimeout(2200);
 const s8Pipeline = admin.locator('[data-section="onboarding-pipeline"]').first();
 const s8PipelineVisible = await s8Pipeline.isVisible({ timeout: 8000 }).catch(() => false);
@@ -1179,7 +1238,7 @@ if (s8Rows > 0) {
     .count();
 }
 check('§P13/S8 the deployed onboarding pipeline renders, and every record states its LINK',
-  s8PipelineVisible &&
+  s8PipelineNavOk && s8PipelineVisible &&
     (s8Rows === 0 ? /No onboarding records yet/i.test(s8PipelineText) : s8LinkStates > 0),
   `${s8Rows} record(s), ${s8LinkStates} link state(s)`);
 check('no uncaught page error on the deployed §P13/S8 onboarding-surface flow',
