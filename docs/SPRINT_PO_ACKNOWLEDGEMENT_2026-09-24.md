@@ -434,9 +434,9 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
 
 **Built**
 
-1. **THE RULE WAS RE-TYPED IN *FIVE* ADMIN-SIDE PLACES — more than the S6 record listed**, the same way S6
-   discovered a fourth brand copy. All five are repointed onto the ONE owner
-   (`src/lib/commerce/poAcknowledgementWindow.ts`), the ONE presentation owner
+1. **THE RULE WAS RE-TYPED IN *SIX* PLACES** (five admin-side — the S6 record listed two — plus one brand-side
+   surface the same sweep found), the same way S6 discovered a fourth brand copy. All six are repointed onto the ONE
+   owner (`src/lib/commerce/poAcknowledgementWindow.ts`), the ONE presentation owner
    (`ackDeadlinePresentation`) and the ONE config array (`PO_ACK_STATUSES_WITH_OBLIGATION`):
    · **`AdminPurchaseOrderDetail.tsx`** — the window was derived on the surface: `new Date(po.orderDate)` mutated in
    LOCAL time by `setHours(getHours() + 24)` (which drifts across a DST boundary), its own
@@ -465,12 +465,19 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
    awaiting action" items; it now reads the owner (its rows are still tenant-scoped BEFORE the filter, asserted).
    · **`src/data/demoData.ts`** — the seed re-typed it in TWO places; both now read the config array through ONE
    local derivation. The generated seed is unchanged.
+   · **`src/components/brand/BrandDashboard.tsx` — A SIXTH COPY, FOUND BY THE SAME SWEEP (brand-side, and it
+   was the worst of them):** the "Awaiting acknowledgement" KPI ("Action needed", "Acknowledge within 24 hours of
+   receipt") hand-rolled the obligation family (`PO_AWAITING_ACK = new Set(['received', 'under_review'])`) AND its
+   own unacknowledged-line check, and it NEVER consulted the 24-hour window — so a purchase order PAST its limit was
+   still counted as awaiting acknowledgement, judged by a different rule from the one the domain writer enforces. The
+   KPI now reads the owner's `inQueue`, and the set is removed. (S6's record asserted the brand PURCHASE-ORDER
+   surface; the brand DASHBOARD is a second brand surface, which is why the copy survived.)
 2. **THE SECOND ACKNOWLEDGEMENT PRESENTATION IS REMOVED** (`src/lib/statusPresentation.ts`). `ackWindowPresentation`
    took raw figures a surface had derived itself plus an `acknowledged` boolean derived from STATUS, and owned a
    second label vocabulary (`Acknowledged` / `Deadline passed` / `Nh Nm left`) beside `ackDeadlinePresentation`. After
    the repoint it had ZERO readers, and two competing renderings of one value is how a rule drifts — so it is deleted
    with the old contract recorded in full inline, and the gate asserts it cannot reappear.
-3. **A NEW GATE** — `scripts/validate-po-acknowledgement-admin-surfaces.mjs` (`validate:po-ack-admin`, 32 assertions).
+3. **A NEW GATE** — `scripts/validate-po-acknowledgement-admin-surfaces.mjs` (`validate:po-ack-admin`, 34 assertions).
 4. **A NEW FUNCTIONAL SPEC** — `e2e/po-admin-ack-surface.spec.ts` (3 tests), and the live verifier
    (`scripts/verify-demo-live.mjs`) gained **TEN §P13/S7 legs**.
 
@@ -478,13 +485,14 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
 
 **Tested (all evidence produced in this session)**
 
-- NEW `scripts/validate-po-acknowledgement-admin-surfaces.mjs` → **32 assertions, PASS, 0 network calls**: one owner
+- NEW `scripts/validate-po-acknowledgement-admin-surfaces.mjs` → **34 assertions, PASS, 0 network calls**: one owner
   at every admin surface (source-level, comment-stripped, so the REQUIRED inline §REPOINTED records do not defeat the
   checks) · the hand-rolled arithmetic gone as code at both admin surfaces while its recorded contract survives ·
   the acceptance control IS the owner's `inQueue` · the deadline tile is the owner's classification (no `EXPIRED`) ·
   the header badge handles every channel state (unknown/acknowledged/closed/open) · the dashboard KPI reads the owner
-  and its hand-written set is gone · the pipeline bucket, the operations panel, the simulated lifecycle and the seed
-  all read the CONFIG family (no re-typed literal anywhere) · the centre's rows are tenant-scoped before the queue
+  and its hand-written set is gone · **the brand dashboard's "Awaiting acknowledgement" KPI reads the owner and its
+  hand-rolled set + line rule are gone** · the pipeline bucket, the operations panel, the simulated lifecycle and the
+  seed all read the CONFIG family (no re-typed literal anywhere) · the centre's rows are tenant-scoped before the queue
   filter · there is ONE acknowledgement presentation (`ackWindowPresentation` removed) · the owner's queue set AGREES
   with the old status predicate over the real seed (**no demo behaviour changed**) · past the limit no acceptance is
   offered and Mercenta's draft is the remaining action · an unreadable order date fails closed and the admin surfaces

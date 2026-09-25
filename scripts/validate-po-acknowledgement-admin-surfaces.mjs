@@ -75,6 +75,8 @@ const LIST_SRC = src('src/components/admin/AdminPurchaseOrderList.tsx');
 const LIST = code('src/components/admin/AdminPurchaseOrderList.tsx');
 const DASH_SRC = src('src/components/admin/AdminDashboard.tsx');
 const DASH = code('src/components/admin/AdminDashboard.tsx');
+const BRAND_DASH_SRC = src('src/components/brand/BrandDashboard.tsx');
+const BRAND_DASH = code('src/components/brand/BrandDashboard.tsx');
 const CENTRE = code('src/components/shared/NotificationCenter.tsx');
 const PANEL = code('src/components/admin/CommerceOperationsPanel.tsx');
 const LIFECYCLE = code('src/lib/commerce/commerceLifecycle.ts');
@@ -161,6 +163,20 @@ test(
 test(
   'the dashboard’s pipeline bucket reads the CONFIG-owned status family (no re-typed literal)',
   /statuses: PO_ACK_STATUSES_WITH_OBLIGATION/.test(DASH)
+);
+
+/* ── 3b. ONE OWNER — the BRAND dashboard's acknowledgement KPI (found in S7) ─── */
+test(
+  'the BRAND dashboard’s "Awaiting acknowledgement" KPI IS the owner’s `inQueue`',
+  /const awaitingAck = useMemo\([\s\S]{0,90}poAcknowledgementWindow\(p\)\.inQueue/.test(BRAND_DASH) &&
+    !/PO_AWAITING_ACK/.test(BRAND_DASH) &&
+    /PO_AWAITING_ACK/.test(BRAND_DASH_SRC),
+  'the inline §REPOINTED record must survive'
+);
+test(
+  'the brand dashboard no longer hand-rolls the obligation family or its own unacknowledged-line rule',
+  !/new Set\(\[\s*'received', 'under_review',?\s*\]\)/.test(BRAND_DASH) &&
+    !/l\.ackStatus === 'unacknowledged'/.test(BRAND_DASH)
 );
 
 /* ── 4. ONE OWNER — the shared centre and the config-owned obligation FAMILY ─── */

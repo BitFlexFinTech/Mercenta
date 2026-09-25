@@ -107,13 +107,12 @@ import {
   poStatusPresentation,
   shipmentStatusPresentation,
 } from '@/lib/statusPresentation';
+/** §P13 / S6–S7 — the acknowledgement QUEUE is read from its OWNER, never re-derived. */
+import { poAcknowledgementWindow } from '@/lib/commerce/poAcknowledgementWindow';
 import { ArrowRight, FileText, ShieldCheck } from 'lucide-react';
 
 const PO_OPEN: ReadonlySet<PurchaseOrderStatus> = new Set([
   'received', 'under_review', 'accepted', 'ready_to_fulfil',
-]);
-const PO_AWAITING_ACK: ReadonlySet<PurchaseOrderStatus> = new Set([
-  'received', 'under_review',
 ]);
 const PO_IN_FLIGHT: ReadonlySet<PurchaseOrderStatus> = new Set([
   'accepted', 'ready_to_fulfil', 'shipped',
@@ -262,19 +261,21 @@ export function BrandDashboard({ onNavigate }: { onNavigate?: (view: string) => 
   /* ── Derived brand KPIs (all real, all tenant-scoped) ─────────────── */
   const openPos = useMemo(() => pos.filter((p) => PO_OPEN.has(p.status)), [pos]);
   /**
-   * A brand-side line counts as unacknowledged until the brand explicitly
-   * accepts/rejects/backorders every line (the same rule Vendor Central
-   * applies; seed POs arrive with no ackStatus). The rule lives HERE because the
-   * Overview still OBSERVES it as a KPI; the work it implies is owned by the
-   * work layer (Operations → Tasks & Deadlines).
+   * §P13 / S6–S7 — THE ACKNOWLEDGEMENT QUEUE IS THE RULE'S OWNER'S.
+   *
+   * REPOINTED (the old contract is recorded here): this KPI hand-rolled the
+   * obligation family (`PO_AWAITING_ACK = new Set(['received', 'under_review'])`,
+   * removed) AND its own unacknowledged-line check, and it never consulted the
+   * 24-hour window — so a purchase order PAST its limit still counted as "Awaiting
+   * acknowledgement" with "Action needed", and a per-line decision was judged by a
+   * second, different rule from the one the domain writer enforces.
+   *
+   * The owner's `inQueue` is Amazon's `New` set INSIDE the window — unacknowledged
+   * and inside the limit — which IS what this KPI claims, so the Overview observes
+   * exactly the work the work layer (Operations → Tasks & Deadlines) derives.
    */
   const awaitingAck = useMemo(
-    () =>
-      pos.filter(
-        (p) =>
-          PO_AWAITING_ACK.has(p.status) &&
-          p.lineItems.some((l) => !l.ackStatus || l.ackStatus === 'unacknowledged')
-      ),
+    () => pos.filter((p) => poAcknowledgementWindow(p).inQueue),
     [pos]
   );
   const inFlightPos = useMemo(() => pos.filter((p) => PO_IN_FLIGHT.has(p.status)), [pos]);
