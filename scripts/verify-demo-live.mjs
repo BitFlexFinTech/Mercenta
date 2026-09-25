@@ -780,6 +780,61 @@ check('no uncaught page error on the deployed §P13/S3 work-layer flow',
   pageErrors.length === 0 && adminErrors.length === 0,
   [...pageErrors, ...adminErrors].slice(0, 2).join(' | '));
 
+/* ── §P13 / S6 — THE DEPLOYED BRAND ACKNOWLEDGEMENT SURFACES ──────────────────
+   S6 removed the brand surface's LAST hand-rolled copies of the 24-hour rule — the
+   row badge's `received + 24 * 60 * 60 * 1000`, the preview's `+ 24 * 3600 * 1000`,
+   and the surface's own actionability predicate. So the DEPLOYED bundle must now
+   present the window FROM ITS ONE OWNER: an in-window purchase order reads as
+   due/urgent (never overdue, never `NaN`), the record preview shows the same
+   owner-derived window, and the acknowledgement panel states the window the decision
+   is being made inside in the owner's own words.
+   ORDERING: this runs BEFORE the §P13/S4 legs below, which approve and close the
+   seeded closing-window purchase order (PO-9001, Astonish). */
+await astonish.goto(`${BASE}/brand/purchase_orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await astonish.waitForTimeout(4000);
+const s6Badge = astonish.locator('[data-status="ack_urgent"], [data-status="ack_due"]').first();
+const s6BadgeVisible = await s6Badge
+  .waitFor({ state: 'visible', timeout: 12000 })
+  .then(() => true)
+  .catch(() => false);
+const s6BadgeText = s6BadgeVisible ? await s6Badge.innerText().catch(() => '') : '';
+check('§P13/S6 the deployed brand PO surface presents the window from its OWNER (a real countdown)',
+  s6BadgeVisible && /Ack within [\d.]+h/.test(s6BadgeText),
+  s6BadgeText.replace(/\s+/g, ' ').slice(0, 120));
+check('§P13/S6 the deployed brand surface presents NO overdue window the rule has not produced',
+  (await astonish.locator('[data-status="ack_overdue"]').count()) === 0);
+check('§P13/S6 the deployed brand surface renders NO NaN countdown (the old arithmetic’s failure mode)',
+  (await astonish.getByText('NaN', { exact: false }).count()) === 0);
+check('§P13/S6 the deployed closing window states itself (the owner’s own classification)',
+  /closing window/i.test(s6BadgeText) || /closing window/i.test(await astonish.locator('body').innerText().catch(() => '')));
+
+/** The record PREVIEW shows the same owner-derived window — not its own copy. */
+await astonish.locator('[data-state^="brand-po-preview-"]').first().click().catch(() => {});
+await astonish.waitForTimeout(1500);
+const s6Drawer = astonish.getByTestId('brand-po-record-drawer').first();
+const s6DrawerText = await s6Drawer.innerText().catch(() => '');
+check('§P13/S6 the deployed record preview shows the owner-derived window and NOT its own copy',
+  /Ack within [\d.]+h|Ack deadline PASSED/.test(s6DrawerText) &&
+    !/Acknowledge within/.test(s6DrawerText) &&
+    !/Acknowledgment deadline passed/.test(s6DrawerText),
+  s6DrawerText.replace(/\s+/g, ' ').slice(0, 160));
+await astonish.getByRole('button', { name: 'Close record' }).click().catch(() => {});
+await astonish.waitForTimeout(1000);
+
+/** The acknowledgement panel states the window the decision is made inside. */
+await astonish.locator('button', { hasText: 'Acknowledge' }).first().click().catch(() => {});
+await astonish.waitForTimeout(1200);
+const s6WindowState = await astonish
+  .locator('[data-testid^="po-ack-window-state-"]')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P13/S6 the deployed acknowledgement panel states the window state in the OWNER’s words',
+  /24-hour window/.test(s6WindowState),
+  s6WindowState.replace(/\s+/g, ' ').slice(0, 200));
+check('no uncaught page error on the deployed §P13/S6 brand-surface flow',
+  astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
+
 /* ── §P13 / S4 — THE DEPLOYED ON-BEHALF DRAFT + THE BRAND'S APPROVAL ──────────
    S4's changed functionality is a REAL control on both PO surfaces, so it must be
    exercised ON the deployed bundle: the deployed brand surface must offer
@@ -975,6 +1030,17 @@ const s5NotifyList = await superAdmin
 check('§P13/S5 the deployed notification centre lists the delivered reminders (the in-app channel reaches its reader)',
   /left to acknowledge/.test(s5NotifyList) && /In-app · \d+h reminder · sent by Mercenta/.test(s5NotifyList),
   s5NotifyList.replace(/\s+/g, ' ').slice(0, 200));
+/**
+ * §P13 / S6 — the deployed reminder also carries its OWN brand-side record detail:
+ * the destination each delivered channel actually reached, and the fail-closed reason
+ * for the channel that could not be used. Both are the domain's own sentence, so the
+ * centre must show them without writing any of that copy itself.
+ */
+check('§P13/S6 the deployed reminder states each channel’s DESTINATION (the domain’s own sentence)',
+  /\u2192/.test(s5NotifyList), s5NotifyList.replace(/\s+/g, ' ').slice(0, 240));
+check('§P13/S6 the deployed reminder states WHY the instant-message channel could not be used',
+  /Instant message unavailable — /.test(s5NotifyList),
+  s5NotifyList.replace(/\s+/g, ' ').slice(0, 240));
 check('no uncaught page error on the deployed §P13/S5 fan-out flow',
   superAdminErrors.length === 0, superAdminErrors.slice(0, 2).join(' | '));
 

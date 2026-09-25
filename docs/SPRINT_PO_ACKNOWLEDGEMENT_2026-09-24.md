@@ -35,7 +35,7 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 | **S3** | WORK LAYER — `deriveWorkItems` consumes the owner (the founder-reported defect, removed at source) | **DONE** (this sprint) |
 | **S4** | ON-BEHALF draft + approve | **DONE** (this sprint) |
 | **S5** | ALL-CHANNEL fan-out + the instant-message seam | **DONE** (this sprint) |
-| **S6** | BRAND surfaces | NOT STARTED |
+| **S6** | BRAND surfaces | **DONE** (this sprint) |
 | **S7** | ADMIN surfaces | NOT STARTED |
 | **S8** | ONBOARDING linking wizard | NOT STARTED |
 | **S9** | RECEIPT → INVOICE automation | NOT STARTED |
@@ -242,6 +242,10 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
   the approval go through the owner only) and they are S6/S7's surface scope — but they are a live single-source-
   of-truth violation, recorded here so a later pass repoints them onto `poAcknowledgementWindow` instead of
   leaving the claim in the owner's module header unearned.
+  **§P13 / S6 — PARTIALLY SUPERSEDED 2026-09-25 (session 31):** the BRAND copies are repointed (and the list was
+  incomplete — the brand surface actually carried a FOURTH, `BrandOrdersPreview`'s own
+  `+ 24 * 3600 * 1000` plus its own labels; walked and repointed in S6 — see §S6 below). The TWO ADMIN countdowns
+  named above remain S7's scope.
 - Nothing yet FANS the draft out to the brand's channels (`S5`); today the draft is materialised when a PO
   surface reads the purchase order (idempotent, recorded once).
 - The execution remains the brand's (or Mercenta staff's) explicit approval — that IS this stage's point. An
@@ -336,5 +340,92 @@ able to fail twice (24h→48h: 14 red; `msLeft > 0`→`msLeft >= 0`: 1 red), bot
 - The three legacy inline countdowns remain S6/S7 scope (unchanged from S4's record), and an UNATTENDED sweep that
   PERFORMS the rejection when nobody approves remains S10 plus a founder decision on the trigger.
 
+## S6 — the brand surfaces (2026-09-25, session 31)
 
+**Built**
+
+1. **THE BRAND SURFACE CONSUMES THE RULE'S OWNER — the last hand-rolled copies are gone**
+   (`src/components/brand/BrandPurchaseOrders.tsx`).
+   The S4 record listed three legacy countdowns; walking the brand surface found **four** — S4 missed the second
+   brand-side one. Both BRAND ones are repointed here (the two ADMIN ones are S7's scope):
+
+   - `AckDeadline` — was `received + 24 * 60 * 60 * 1000` plus its own `Math.ceil` `hoursLeft`. It now reads
+     `poAcknowledgementWindow(po)` and renders the presentation owner's own urgency
+     (`ackDeadlinePresentation(window.hoursLeft)`), with the owner's `reason` as the badge's title. It renders
+     NOTHING for an `acknowledged`/`closed` purchase order (the owner's own classification) and states
+     `Ack window unreadable` — fail-closed — for an unreadable order date. **That last case is a real defect the
+     repoint removes:** the old code rendered `Ack within NaNh` for an unreadable window.
+   - `BrandPoPreviewBody` — was `Math.floor((orderDate + 24 * 3600 * 1000 − now) / 3600000)` plus its OWN
+     `hoursLeft <= 0 ? 'ack_overdue' : 'ack_due'` mapping and its own labels ("Acknowledgment deadline passed" /
+     "Acknowledge within Nh"). It now derives the badge from the owner and the presentation layer, so the preview
+     can no longer state a different window or a different vocabulary from the row.
+   - **THE ACTIONABILITY PREDICATE IS THE OWNER'S** — `actionable` was
+     `po.status === 'received' || po.status === 'under_review'`, exactly the class of defect S3 removed from the
+     work layer: it offered the brand an acceptance control PAST the 24-hour limit that the domain writer
+     (`src/data/api.ts → acknowledgePurchaseOrder`) REFUSES, and treated an unreadable window as actionable instead
+     of failing closed. It is now `poAcknowledgementWindow(po).inQueue` (Amazon's `New` set INSIDE the window).
+   - **The on-behalf draft is no longer gated on `canAct`** but on the owner's own availability predicate, so past
+     the limit — where an acceptance is refused and a rejection is the documented action — the brand is offered
+     Mercenta's draft and approval, not a dead button.
+   - **The acknowledgement panel states the window the decision is made inside**, in the owner's own words
+     (`poAcknowledgementWindow(po).reason`, `data-testid="po-ack-window-state-<poNumber>"`).
+
+
+
+
+2. **THE DELIVERED REMINDER'S OWN BRAND-SIDE DETAIL** — the fan-out module gains the S6 view owner
+   (`src/lib/commerce/poAcknowledgementNotifications.ts`): `poAckReminderViews(scope, tenantId)` returns each
+   delivered in-app reminder WITH every channel attempted for the same purchase order at the same declared stage
+   (the refusals included), each carrying its label, state, destination, mode, `simulated` flag and reason — all read
+   from the canonical ledger through the same tenant-scoped, fail-closed accessors.
+   `poAckReminderChannelDetail(view)` is the ONE sentence: `Email → ops@… · In-app → in-app (Mercenta-operated) ·
+   Instant message unavailable — <the fail-closed reason, verbatim>`.
+
+   The notification centre (`src/components/shared/NotificationCenter.tsx`) now consumes that view and renders the
+   sentence as the item's own second line (`meta`, `data-notification-meta`). **The surface writes none of that copy
+   itself** — asserted at source level (no arrow sentence, no refusal copy in the centre's code).
+
+3. **THE STAGE-24 GATE WAS REPOINTED, NOT WEAKENED.** `scripts/validate-stage24.mjs` asserted
+   `bpo.includes('24 * 60 * 60 * 1000')` — it REQUIRED a second copy of the rule to exist, making the
+   single-source-of-truth violation the test's success condition. It now asserts the opposite (the surface presents
+   the window from the owner and re-derives nothing), with the old contract recorded inline. Comments are stripped
+   for that assertion, because the rules REQUIRE the repointed code to record the old contract inline.
+   `scripts/validate-po-acknowledgement-notifications.mjs`'s in-app-surface assertion was likewise repointed to the
+   domain view that now wraps the same ledger accessor (old contract recorded inline).
+
+4. **A NEW GATE** — `scripts/validate-po-acknowledgement-brand-surfaces.mjs` (`validate:po-ack-brand`).
+
+5. **A NEW FUNCTIONAL SPEC** — `e2e/po-brand-ack-surface.spec.ts` (3 tests), and the S5 spec
+   (`e2e/po-notification-fanout.spec.ts`) gained the reminder's destination + refusal-reason assertions.
+
+**Tested (all evidence produced in this session)**
+
+- NEW `scripts/validate-po-acknowledgement-brand-surfaces.mjs` → **38 assertions, PASS, 0 network calls**: one owner
+  (source-level, comment-stripped) · the view derived from the ledger with every channel's destination, verbatim
+  refusal reason and declared stage · the seam's SUCCESS path (a fixture brand with a number on record + a
+  positively-resolved `simulation` → the instant message DELIVERS and is labelled `(simulated)`) · the refusal path
+  with the SAME number and an unverified mode → refused and NAMING the mode · tenant isolation (a brand scope with no
+  tenant yields nothing) · the owner's queue set AGREES with the old status predicate over the real seed (the repoint
+  changed no demo behaviour) · past the limit → no acceptance offered and the owner's draft is the remaining action ·
+  an unreadable order date fails closed. **Proved able to fail twice:** the brand surface's hand-rolled arithmetic
+  reintroduced → **1 red**; the refusal dropped from the brand-side detail sentence → **2 red**; both restored
+  byte-identical (`BrandPurchaseOrders.tsx` shasum `6af5519b…`, `poAcknowledgementNotifications.ts` `b2969daa…`).
+- Whole-validator sweep: **31/31 `validate:*` scripts PASS** (30 → 31 with the new gate).
+- `npm run typecheck` 0 · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) 0 · `npx eslint` 0 on the changed
+  files · `npm run build` ✓ (8.14s).
+- Playwright: NEW `e2e/po-brand-ack-surface.spec.ts` **3/3** · the affected specs (po-notification-fanout ·
+  po-lifecycle · po-onbehalf · notifications) **18/18** · **the ENTIRE suite: 508 passed / 2 skipped / 0 failed
+  (8.6m)**.
+
+**Honest limits / non-credential follow-ups**
+
+- **The TWO ADMIN countdowns remain** (`AdminPurchaseOrderDetail` via `setHours(getHours() + 24)` and
+  `AdminPurchaseOrderList → PoPreviewBody` via `+ 24 * 3600 * 1000`) — they are S7's surface scope, recorded here so
+  the next pass repoints them onto the same owner.
+- The S5 honest limits stand unchanged (no instant-message number on record for any demo brand, so the channel
+  refuses in the demo — its success path is proven in the gate; the provider resolves `available`; the ledger is
+  in-memory; an unattended rejection sweep is S10 plus a founder decision on the trigger).
+- A brand's reminder detail is rendered as a second line, clamped to two lines, with the full sentence available on
+  hover (`title`). No expandable per-reminder drawer was added — the drill-down is the purchase order the reminder is
+  about, which the existing click-through already provides.
 

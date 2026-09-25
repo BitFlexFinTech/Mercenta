@@ -105,6 +105,15 @@ test.describe('Acknowledgement notification fan-out (§P13 / S5)', () => {
     await expect(list).toContainText(/left to acknowledge/);
     /** Each one names the channel it arrived on and the stage it belongs to. */
     await expect(list).toContainText(/In-app · \d+h reminder · sent by Mercenta/);
+    /**
+     * §P13 / S6 — the reminder also carries its OWN brand-side record detail: the
+     * destination each delivered channel actually reached, and the fail-closed
+     * reason for the channel that could not be used (no copy written by the centre).
+     */
+    const meta = list.locator('[data-notification-meta="po"]').first();
+    await expect(meta).toBeVisible({ timeout: 6000 });
+    await expect(meta).toContainText(/→/);
+    await expect(meta).toContainText(/Instant message unavailable — /);
     /** The final stage's reminder carries the severity the fan-out assigned it. */
     await expect(
       list.locator('[data-notification="po"]').filter({ hasText: /PO-9001/ }).first()

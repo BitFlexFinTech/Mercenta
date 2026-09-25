@@ -130,9 +130,23 @@ test(
   fanout.PO_ACK_FINAL_NOTIFICATION_STAGE === cfg.PO_ACK_ON_BEHALF_WINDOW_HOURS,
   `${fanout.PO_ACK_FINAL_NOTIFICATION_STAGE} vs ${cfg.PO_ACK_ON_BEHALF_WINDOW_HOURS}`
 );
+/**
+ * §P13 / S6 — REPOINTED (the old contract is recorded here).
+ *
+ * This used to assert `/poAckInAppDeliveries/.test(CENTRE_SRC)` — i.e. the CENTRE
+ * itself had to call the ledger accessor. §S6 moved the brand-side detail into the
+ * domain's own view (`poAckReminderViews` → per-channel destination + refusal
+ * reason), so the centre now consumes that view while the ACCESSOR it wraps
+ * (`poAckInAppDeliveries`, tenant-scoped + fail-closed) still lives — and is still
+ * asserted — in the fan-out module. The contract under test is unchanged: the
+ * in-app SURFACE reads the CANONICAL ledger, tenant-scoped, and subscribes to it.
+ * Nothing was weakened; only the accessor's owner moved.
+ */
 test(
-  'the in-app SURFACE consumes the ledger through the tenant-scoped accessor',
-  /poAckInAppDeliveries/.test(CENTRE_SRC) && /subscribePoAckNotifications/.test(CENTRE_SRC)
+  'the in-app SURFACE consumes the ledger through the tenant-scoped domain view',
+  /poAckReminderViews/.test(CENTRE_SRC) &&
+    /poAckInAppDeliveries/.test(SRC) &&
+    /subscribePoAckNotifications/.test(CENTRE_SRC)
 );
 test(
   'the fan-out runs through the EXISTING automation seam (registry + one declared id)',

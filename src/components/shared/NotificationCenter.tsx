@@ -27,8 +27,9 @@ import {
 import { isBorderline } from '@/lib/automation/scoringBridge';
 import {
   PO_ACK_CHANNEL_LABELS,
-  poAckInAppDeliveries,
   poAckNotificationVersion,
+  poAckReminderChannelDetail,
+  poAckReminderViews,
   subscribePoAckNotifications,
 } from '@/lib/commerce/poAcknowledgementNotifications';
 import { renewalUrgency } from '@/lib/contracts';
@@ -58,6 +59,13 @@ export interface NotificationItem {
   kind: 'po' | 'contract' | 'compliance' | 'deduction' | 'score' | 'submission' | 'shipment' | 'commerce' | 'work' | 'documents';
   title: string;
   detail: string;
+  /**
+   * §P13 / S6 — the optional SECOND line, carrying the item's own record detail
+   * where the one-line `detail` cannot state it honestly (the acknowledgement
+   * reminder's per-channel disposition: which channel reached which destination,
+   * and which could not be used, with its reason). Absent = no second line.
+   */
+  meta?: string;
   severity: 'high' | 'medium';
   /** §Batch-10 — navigation target when clicked. */
   navTarget?: string;
@@ -197,14 +205,19 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
   const workItems = useWorkItems(workScope, tenantId);
 
   /**
-   * §P13 / S5 — THE IN-APP CHANNEL OF THE ACKNOWLEDGEMENT FAN-OUT.
+   * §P13 / S5 / S6 — THE IN-APP CHANNEL OF THE ACKNOWLEDGEMENT FAN-OUT.
    *
    * The declared reminder schedule (12/6/2h remaining) reaches the brand through the
    * SAME ledger the fan-out writes
    * (`src/lib/commerce/poAcknowledgementNotifications.ts`) — no second notification
    * store, and no re-derivation of the window or of the rule's wording.
    *
-   * TENANT SCOPING: `poAckInAppDeliveries(scope, tenantId)` filters INSIDE the
+   * §S6 — the reminder carries its OWN brand-side record detail: the channel the
+   * message travelled on, the DESTINATION it reached, and — verbatim — the reason a
+   * channel the brand subscribed to could not be used (`poAckReminderChannelDetail`,
+   * derived entirely from the ledger). The surface writes none of that copy itself.
+   *
+   * TENANT SCOPING: `poAckReminderViews(scope, tenantId)` filters INSIDE the
    * domain and fails closed for a brand scope with no tenant, so this shared shell
    * can never present another brand's notification.
    */
@@ -214,7 +227,7 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
     poAckNotificationVersion
   );
   void fanoutVersion;
-  const poAckReminders = poAckInAppDeliveries(workScope, tenantId);
+  const poAckReminders = poAckReminderViews(workScope, tenantId);
   const poTarget = isBrandSession ? 'purchase_orders' : 'purchase_orders_admin';
 
   /**
@@ -338,14 +351,21 @@ function useNotificationsRest(brandName: (id: string) => string): NotificationIt
      * These are NOT derived from the purchase orders a second time: they are the
      * messages the fan-out actually delivered, so the brand sees the schedule
      * Mercenta sent it — with the channel it arrived on and the stage it belongs to.
+     *
+     * §P13 / S6 — each one also carries its OWN record detail on the second line:
+     * the destination the message reached, and the reason any channel it subscribed
+     * to could not be used. Both come from the ledger through the domain's own
+     * `poAckReminderChannelDetail`, so this surface never states a channel outcome
+     * itself.
      */
     .concat(
-      poAckReminders.map((d) => ({
-        id: d.id,
+      poAckReminders.map((view) => ({
+        id: view.delivery.id,
         kind: 'po' as const,
-        title: d.subject,
-        detail: `${brandName(d.brandId)} · ${PO_ACK_CHANNEL_LABELS[d.channel]} · ${d.stage}h reminder · sent by Mercenta`,
-        severity: d.finalStage ? ('high' as const) : ('medium' as const),
+        title: view.delivery.subject,
+        detail: `${brandName(view.delivery.brandId)} · ${PO_ACK_CHANNEL_LABELS[view.delivery.channel]} · ${view.delivery.stage}h reminder · sent by Mercenta`,
+        meta: poAckReminderChannelDetail(view),
+        severity: view.delivery.finalStage ? ('high' as const) : ('medium' as const),
         navTarget: poTarget,
       }))
     );
@@ -499,7 +519,18 @@ export function NotificationCenter({ onNavigate }: { onNavigate?: (view: string)
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-ds-label font-medium text-white leading-snug">{n.title}</span>
-                      <span className="block text-ds-micro text-zinc-500 truncate">{n.detail}</span>
+                      <span className="block text-ds-micro text-zinc-500 truncate" title={n.detail}>{n.detail}</span>
+                      {/* §P13 / S6 — the reminder's OWN record detail (channel →
+                          destination, and any channel that could not be used). */}
+                      {n.meta && (
+                        <span
+                          className="block text-ds-micro text-zinc-600 mt-0.5 line-clamp-2"
+                          title={n.meta}
+                          data-notification-meta={n.kind}
+                        >
+                          {n.meta}
+                        </span>
+                      )}
                     </span>
                   </button>
                 );

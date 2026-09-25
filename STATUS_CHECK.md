@@ -26,7 +26,57 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **PO-ACK S5 DONE: the declared notification schedule FANS OUT on every channel the platform can deliver on, the FINAL stage produces Mercenta's on-behalf draft, and the EXTERNAL instant-message seam is declared and FAILS CLOSED** (2026-09-25, session 30)
+## CURRENT STATE — **PO-ACK S6 DONE: the brand surfaces present the rule from its ONE owner, and every delivered reminder carries its own channel detail** (2026-09-25, session 31)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** the S6 application commit, recorded in the `CURRENT RESUME STATE`
+block of `PROJECT_STATUS.md` (the canonical source) and mirrored in `HANDOFF.md`. **`git status --porcelain` EMPTY**
+after the state commit. **THREE-WAY STATUS: see the resume block** (local ✅ · GitHub + demo recorded by the state
+commit).
+
+**Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
+nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary; S3 (`64f1994`)
+= the work layer consumes the owner; S4 (`93d619e`) = the on-behalf draft + the approval that executes it; S5
+(`8843ad2`) = the all-channel fan-out + the instant-message seam; **S6 makes the BRAND'S OWN SURFACES present the rule
+from its owner and gives the delivered reminder its own channel detail.** Programme record:
+`docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (§S6).
+
+**What changed (session 31):**
+
+1. **THE BRAND SURFACE CONSUMES THE RULE'S OWNER** (`src/components/brand/BrandPurchaseOrders.tsx`). The surface
+   carried FOUR hand-rolled copies of the 24-hour rule; the S4 record listed three and MISSED one. Repointed:
+   `AckDeadline` (`received + 24 * 60 * 60 * 1000`) and `BrandPoPreviewBody` (`+ 24 * 3600 * 1000`, WITH its own
+   `ack_overdue`/`ack_due` mapping and its own labels) now read `poAcknowledgementWindow` and the presentation owner
+   (`ackDeadlinePresentation`); the ACTIONABILITY predicate is the owner's `inQueue` (it was the S3 defect class —
+   `status === 'received' || status === 'under_review'` — which offered an acceptance the domain writer REFUSES past
+   the limit and treated an unreadable window as actionable); the on-behalf draft is gated by the OWNER's availability
+   rather than `canAct`; and the acknowledgement panel states the window in the owner's own words
+   (`poAcknowledgementWindow(po).reason`). **A real defect removed:** an unreadable order date rendered
+   `Ack within NaNh`; it now fails closed and says so.
+2. **THE DELIVERED REMINDER'S OWN BRAND-SIDE DETAIL** (`src/lib/commerce/poAcknowledgementNotifications.ts` +
+   `src/components/shared/NotificationCenter.tsx`). `poAckReminderViews(scope, tenantId)` returns each delivered
+   in-app reminder with every channel attempted at the same declared stage (the refusals included); the ONE sentence
+   (`poAckReminderChannelDetail`) names each delivered channel with the DESTINATION it reached and each unusable one
+   with its fail-closed reason VERBATIM. The centre renders it as the item's own second line
+   (`data-notification-meta`) and writes none of that copy itself.
+3. **GATES REPOINTED, NOT WEAKENED.** `scripts/validate-stage24.mjs` REQUIRED a second copy of the rule to exist
+   (`bpo.includes('24 * 60 * 60 * 1000')`); it now asserts the opposite contract, with the old contract recorded
+   inline and comments stripped for that assertion. `scripts/validate-po-acknowledgement-notifications.mjs`'s
+   in-app-surface assertion was repointed to the domain view that now wraps the same ledger accessor.
+4. **NEW GATE + SPEC.** `scripts/validate-po-acknowledgement-brand-surfaces.mjs` (`validate:po-ack-brand`, 38
+   assertions) and `e2e/po-brand-ack-surface.spec.ts` (3 functional tests).
+
+**Verification (all evidence produced in this session):** NEW gate **38 assertions PASS, 0 network calls**, proved able
+to fail twice (1 red / 2 red; restored byte-identical) · whole `validate:*` sweep **31/31 PASS** · typecheck **0** ·
+root `tsc --noEmit` **0** · eslint **0** on the changed files · build **✓ (8.14s)** · NEW spec **3/3** · affected specs
+(po-notification-fanout · po-lifecycle · po-onbehalf · notifications) **18/18** · **FULL Playwright 508 passed /
+2 skipped / 0 failed of 510 (8.6m)**.
+
+**Honest limits / follow-ups:** the TWO ADMIN countdowns remain (`AdminPurchaseOrderDetail`'s
+`setHours(getHours() + 24)` + `isAcknowledged` from status, `AdminPurchaseOrderList → PoPreviewBody`'s
+`+ 24 * 3600 * 1000`) — S7's scope; the S5 limits stand unchanged (no instant-message number on record for any demo
+brand, so the channel refuses in the demo while its success path is proven in the gate; the provider resolves
+`available`; the ledger is in-memory; an unattended rejection sweep is S10 plus a founder decision on the trigger).
+## PREVIOUS STATE — **PO-ACK S5 DONE: the declared notification schedule FANS OUT on every channel the platform can deliver on, the FINAL stage produces Mercenta's on-behalf draft, and the EXTERNAL instant-message seam is declared and FAILS CLOSED** (2026-09-25, session 30) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** `8843ad2` — recorded in the `CURRENT RESUME STATE` block of
 `PROJECT_STATUS.md` (the canonical source) and mirrored in `HANDOFF.md`. **`git status --porcelain` EMPTY** after the

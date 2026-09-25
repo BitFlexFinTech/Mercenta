@@ -11,11 +11,19 @@ import {
   fetchPurchaseOrders,
 } from '@/data/api';
 /**
- * §P13 / S4 — the on-behalf DRAFT is derived by the rule's OWNER
+ * §P13 / S4 / S6 — the on-behalf DRAFT is derived by the rule's OWNER
  * (`poOnBehalfRejectionDraft`), never hand-written here, so the draft the brand
  * approves and the rejection Mercenta performs cannot state different windows.
+ *
+ * §S6 — the WINDOW ITSELF is now read from the same owner (`poAcknowledgementWindow`):
+ * the surface's actionable predicate, its deadline badge, its preview badge and the
+ * window state it states to the brand are all the owner's own derivation. The
+ * hand-rolled `received + 24 * 60 * 60 * 1000`, `+ 24 * 3600 * 1000` and
+ * `status === 'received' || status === 'under_review'` are gone (the last one was
+ * the same class of defect S3 removed from the work layer).
  */
 import {
+  poAcknowledgementWindow,
   poNeedsAutoRejection,
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
@@ -277,8 +285,22 @@ export function BrandPurchaseOrders() {
         p.poNumber.toLowerCase().includes(poSearch.trim().toLowerCase())
     );
 
-  const actionable = (po: PurchaseOrder) =>
-    po.status === 'received' || po.status === 'under_review';
+  /**
+   * §P13 / S6 — REPOINTED to the rule's OWNER (the old contract is recorded here).
+   *
+   * This used to hand-roll the predicate
+   * (`po.status === 'received' || po.status === 'under_review'`) — exactly the
+   * defect S3 removed from the work layer: a purchase order PAST its 24-hour limit
+   * still offered the brand an acknowledgement control that the domain writer
+   * (`src/data/api.ts → acknowledgePurchaseOrder`) REFUSES, and one whose order date
+   * could not be read was treated as actionable rather than failing closed.
+   *
+   * The QUEUE set is the owner's own `inQueue` (Amazon's `New` set INSIDE the
+   * window), so the control the brand is offered is exactly the action the rule
+   * permits — and past the limit the remaining action is the owner's own on-behalf
+   * rejection draft below, not a dead acceptance button.
+   */
+  const actionable = (po: PurchaseOrder) => poAcknowledgementWindow(po).inQueue;
 
   /** The PO record the preview drawer is showing (brand-scoped list only). */
   const previewRecord = pos.find((p) => p.id === previewPO) ?? null;
@@ -353,16 +375,42 @@ export function BrandPurchaseOrders() {
     await qc.invalidateQueries({ queryKey: ['deductions'] });
   }
 
-  /** §Stage-24 — 24-hour acknowledgment deadline, a real Vendor Central rule. */
-  function AckDeadline({ orderDate }: { orderDate: string }) {
-    const received = new Date(orderDate).getTime();
-    const deadline = received + 24 * 60 * 60 * 1000;
-    const hoursLeft = Math.ceil((deadline - Date.now()) / (60 * 60 * 1000));
-    const ack = ackDeadlinePresentation(hoursLeft);
+  /**
+   * §Stage-24 / §P13 / S6 — THE 24-HOUR ACKNOWLEDGEMENT WINDOW, PRESENTED FROM ITS
+   * OWNER.
+   *
+   * REPOINTED (the old contract is recorded here): this previously computed the
+   * deadline itself — `received + 24 * 60 * 60 * 1000` — and derived `hoursLeft`
+   * from it, which was a second copy of an Amazon rule whose owner is
+   * `src/lib/commerce/poAcknowledgementWindow.ts`. It also rendered
+   * `Ack within NaNh` for a purchase order whose order date could not be read
+   * (instead of failing closed, as the owner requires).
+   *
+   * Now: the owner derives the window, the owner's `reason` states it (verbatim)
+   * and the presentation owner (`ackDeadlinePresentation`) renders the urgency. An
+   * unreadable window is stated as unreadable — never as an open one.
+   */
+  function AckDeadline({ po }: { po: PurchaseOrder }) {
+    const window = poAcknowledgementWindow(po);
+    /** Nothing is owed (or the decision is recorded) — the owner says so. */
+    if (window.channelState === 'acknowledged' || window.channelState === 'closed') return null;
+    if (window.channelState === 'unknown' || window.hoursLeft === null) {
+      return (
+        <span title={window.reason}>
+          <StatusBadge className="text-ds-micro" tone="neutral" dataStatus="ack_unknown">
+            Ack window unreadable
+          </StatusBadge>
+        </span>
+      );
+    }
+    const ack = ackDeadlinePresentation(window.hoursLeft);
     return (
-      <StatusBadge className="text-ds-micro" tone={ack.tone} dataStatus={ack.dataStatus}>
-        {ack.label}
-      </StatusBadge>
+      <span title={window.reason}>
+        <StatusBadge className="text-ds-micro" tone={ack.tone} dataStatus={ack.dataStatus}>
+          {ack.label}
+          {window.onBehalfAvailable ? ' · closing window' : ''}
+        </StatusBadge>
+      </span>
     );
   }
 
@@ -493,12 +541,18 @@ export function BrandPurchaseOrders() {
           const canAct = actionable(po);
           const expanded = expandedPO === po.id;
           /**
-           * §P13 / S4 — the on-behalf rejection draft for THIS purchase order,
+           * §P13 / S4 / S6 — the on-behalf rejection draft for THIS purchase order,
            * derived by the rule's OWNER (`poOnBehalfRejectionDraft`). Present only
            * while the rejection the retail channel requires is Mercenta's to perform
            * and the brand has not already decided.
+           *
+           * §S6 — NOT gated on `canAct`: the owner offers the draft in the closing
+           * window AND PAST the limit, which is exactly the case where the brand can
+           * no longer accept and a rejection is the only remaining action. The
+           * owner's own `available` predicate is the gate (it fails closed with a
+           * stated refusal everywhere else).
            */
-          const onBehalfDraft = canAct ? onBehalfDraftFor(po) : null;
+          const onBehalfDraft = onBehalfDraftFor(po);
           const isFinanced =
             brands.find((b) => b.id === viewingBrandId_)?.track === 'financed';
           return (
@@ -555,8 +609,10 @@ export function BrandPurchaseOrders() {
                       {po.rejectionReason}
                     </Badge>
                   )}
-                  {/* §Stage-24 — 24-hour acknowledgment deadline countdown */}
-                  {canAct && <AckDeadline orderDate={po.orderDate} />}
+                  {/* §Stage-24 / §P13 / S6 — the 24-hour acknowledgment window, as its
+                      OWNER derives it. A decided or closed purchase order renders
+                      nothing; an unreadable window is stated as unreadable. */}
+                  <AckDeadline po={po} />
                   <Button
                     variant="ghost"
                     className="text-ds-label"
@@ -680,6 +736,14 @@ export function BrandPurchaseOrders() {
                     Acknowledge each line — Accepted, Rejected (reason code
                     required), or Backordered (scheduled ship date required).
                     Acknowledged quantity can never exceed the ordered quantity.
+                  </p>
+                  {/* §P13 / S6 — the window this decision is being made inside, stated
+                      by the rule's OWNER verbatim (never re-derived by the surface). */}
+                  <p
+                    className="text-ds-micro text-emerald-200/80"
+                    data-testid={`po-ack-window-state-${po.poNumber}`}
+                  >
+                    {poAcknowledgementWindow(po).reason}
                   </p>
                   {po.lineItems.map((li) => {
                     const a = lineAcks[li.sku];
@@ -1203,9 +1267,37 @@ function BrandPoPreviewBody({
   carrierLabel: (v: string) => string;
 }) {
   const status = poStatusPresentation(po.status);
-  const hoursLeft = Math.floor(
-    (new Date(po.orderDate).getTime() + 24 * 3600 * 1000 - Date.now()) / 3600000
-  );
+  /**
+   * §P13 / S6 — REPOINTED (the old contract is recorded here).
+   *
+   * This previously hand-rolled the whole window:
+   * `Math.floor((orderDate + 24 * 3600 * 1000 − now) / 3600000)` plus its own
+   * `hoursLeft <= 0 ? 'ack_overdue' : 'ack_due'` mapping and its own labels
+   * ("Acknowledgment deadline passed" / "Acknowledge within Nh") — three copies of
+   * an Amazon rule and of the presentation layer's own vocabulary, and it showed
+   * an unreadable order date as an open window.
+   *
+   * Now the OWNER derives the window, the owner's `reason` states it, and the
+   * presentation owner renders the urgency. A decided or closed purchase order
+   * renders no window badge at all; an unreadable one says so.
+   */
+  const ackWindow = poAcknowledgementWindow(po);
+  const ackPresentation =
+    ackWindow.hoursLeft === null ? null : ackDeadlinePresentation(ackWindow.hoursLeft);
+  const ackBadge =
+    ackWindow.channelState === 'acknowledged' || ackWindow.channelState === 'closed'
+      ? null
+      : ackPresentation
+        ? {
+            dataStatus: ackPresentation.dataStatus,
+            tone: ackPresentation.tone,
+            label: ackPresentation.label,
+          }
+        : {
+            dataStatus: 'ack_unknown',
+            tone: 'neutral' as const,
+            label: 'Ack window unreadable',
+          };
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -1215,11 +1307,13 @@ function BrandPoPreviewBody({
         {po.simulated === true && (
           <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">(sim)</Badge>
         )}
-        {po.status === 'received' || po.status === 'under_review' ? (
-          <StatusBadge dataStatus={hoursLeft <= 0 ? 'ack_overdue' : 'ack_due'} tone={hoursLeft <= 0 ? 'danger' : 'warning'}>
-            {hoursLeft <= 0 ? 'Acknowledgment deadline passed' : `Acknowledge within ${hoursLeft}h`}
-          </StatusBadge>
-        ) : null}
+        {ackBadge && (
+          <span title={ackWindow.reason}>
+            <StatusBadge dataStatus={ackBadge.dataStatus} tone={ackBadge.tone}>
+              {ackBadge.label}
+            </StatusBadge>
+          </span>
+        )}
       </div>
 
       <RecordFieldList

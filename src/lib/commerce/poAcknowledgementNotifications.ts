@@ -1104,6 +1104,97 @@ export function poAckRefusals(
   return getPoAckDeliveries(scope, tenantId).filter((r) => r.state === 'refused');
 }
 
+/* ── §P13 / S6 — THE BRAND-SIDE VIEW of ONE reminder ───────────────────────
+ *
+ * S5 made the schedule REACH the brand and recorded every delivery and every
+ * refusal in the canonical ledger. The brand's surfaces must then present what
+ * actually happened — the declared stage, the channel the message travelled on,
+ * the DESTINATION it reached, and (where a channel the brand subscribed to could
+ * not be used) the fail-closed reason, verbatim.
+ *
+ * ONE owner, so no surface re-reads the ledger, re-states a channel outcome or
+ * invents a destination of its own.
+ */
+
+/** ONE channel's disposition for ONE reminder (same purchase order, same stage). */
+export interface PoAckChannelDisposition {
+  channel: NotificationChannel;
+  /** The declared human label for the channel (never written by a surface). */
+  label: string;
+  state: PoAckDeliveryState;
+  /** The destination the message reached, or null when none was on record. */
+  destination: string | null;
+  mode: PoAckChannelMode;
+  /** TRUE when a mock/simulated client performed the send (never presented as live). */
+  simulated: boolean;
+  /** Why the channel refused or failed. Never a silent absence. */
+  reason: string | null;
+}
+
+/**
+ * ONE delivered in-app reminder, WITH every channel that was attempted for the
+ * same purchase order at the same declared stage — the refusals included, so the
+ * brand can see that a channel it subscribed to could not reach it, and why.
+ */
+export interface PoAckReminderView {
+  /** The IN-APP delivery the brand genuinely reads. */
+  delivery: PoAckDeliveryRecord;
+  /** Every channel attempted for this PO at this stage (`delivery` included). */
+  channels: PoAckChannelDisposition[];
+}
+
+/**
+ * The brand-side views: the in-app reminders on record, each with its own
+ * per-channel disposition. Derived ENTIRELY from the canonical ledger, so a
+ * surface can never disagree with what the fan-out actually delivered — and
+ * tenant-scoped by the same accessors (`poAckInAppDeliveries` /
+ * `getPoAckDeliveries`), which fail closed for a brand scope with no tenant.
+ */
+export function poAckReminderViews(
+  scope: WorkScope = 'admin',
+  tenantId?: string | null
+): PoAckReminderView[] {
+  const messages = getPoAckDeliveries(scope, tenantId);
+  return poAckInAppDeliveries(scope, tenantId).map((delivery) => ({
+    delivery,
+    channels: messages
+      .filter((r) => r.poId === delivery.poId && r.stage === delivery.stage)
+      .map((r) => ({
+        channel: r.channel,
+        label: PO_ACK_CHANNEL_LABELS[r.channel],
+        state: r.state,
+        destination: r.destination,
+        mode: r.mode,
+        simulated: r.simulated,
+        reason: r.reason,
+      })),
+  }));
+}
+
+/**
+ * The ONE sentence that states a reminder's channel outcome: every channel that
+ * carried the message WITH the destination it reached, then every channel that
+ * could not be used WITH its fail-closed reason (verbatim — never paraphrased,
+ * never softened). Nothing here is inferred; everything is read from the ledger.
+ */
+export function poAckReminderChannelDetail(view: PoAckReminderView): string {
+  const reached = view.channels
+    .filter((c) => c.state === 'delivered')
+    .map(
+      (c) =>
+        `${c.label} → ${c.destination ?? 'no destination on record'}${c.simulated ? ' (simulated)' : ''}`
+    );
+  const unusable = view.channels
+    .filter((c) => c.state === 'refused' || c.state === 'failed')
+    .map(
+      (c) =>
+        `${c.label} unavailable — ${
+          c.reason ?? (c.state === 'failed' ? 'the send failed' : 'no reason recorded')
+        }`
+    );
+  return [...reached, ...unusable].join(' · ');
+}
+
 /* ── Scheduler seam ───────────────────────────────────────────────────────── */
 
 /**
