@@ -26,7 +26,81 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **PO-ACK S6 DONE: the brand surfaces present the rule from its ONE owner, and every delivered reminder carries its own channel detail** (2026-09-25, session 31)
+## CURRENT STATE — **PO-ACK S7 DONE: the admin surfaces present the rule from its ONE owner — and a SIXTH copy, found on the brand dashboard by the same sweep, is repointed too** (2026-09-25, session 32)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** `5753a43` (on `dfa9cdb`) + the DOCS-ONLY state check point that carries
+this section — recorded in the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (the canonical source) and mirrored in
+`HANDOFF.md`. **`git status --porcelain` EMPTY** after the state commit. **THREE-WAY STATUS:** **COMPLETE —
+LOCAL/GITHUB/DEMO SYNCHRONIZED at `5753a43`** (local ✅ · GitHub ✅ pushed · demo ✅ deployed and **LIVE-VERIFIED
+174/174, 0 page errors**, including the eleven new §P13/S7 legs).
+
+**Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
+nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary; S3 (`64f1994`) =
+the work layer consumes the owner; S4 (`93d619e`) = the on-behalf draft + the approval that executes it; S5 (`8843ad2`) =
+the all-channel fan-out + the instant-message seam; S6 (`d3da66e`) = the brand surfaces; **S7 makes the ADMIN surfaces
+present the rule from its owner, and removes the last competing acknowledgement presentation.** Programme record:
+`docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (§S7).
+
+**What changed (session 32):**
+
+1. **SIX COPIES OF THE 24-HOUR RULE, ALL REPOINTED.** The S6 record named two admin-side countdowns; the sweep found
+   four more admin-side copies and one brand-side. Every one now reads the rule's ONE owner
+   (`src/lib/commerce/poAcknowledgementWindow.ts`), the ONE presentation owner (`ackDeadlinePresentation`) and the ONE
+   config array (`PO_ACK_STATUSES_WITH_OBLIGATION`):
+   · **`AdminPurchaseOrderDetail.tsx`** — the window was derived on the surface (`new Date(po.orderDate)` mutated in
+   LOCAL time by `setHours(getHours() + 24)`, its own `msLeft`/`hoursLeft`/`minutesLeft`, its own `isDeadlinePassed`, its
+   own `EXPIRED` wording, its own header badge through a SECOND presentation helper) and its actionability predicate was
+   `po.status !== 'received' && po.status !== 'under_review'` — the S3/S6 defect class, which past the limit offered an
+   ACCEPTANCE the domain writer REFUSES and rendered a countdown for an unreadable order date. The owner derives the
+   window, its `reason` is the badge's tooltip, the acceptance is offered exactly when the owner's `inQueue` permits one
+   (past the limit the remaining action is the S4 draft already on the panel), and when nothing is offered the surface
+   STATES the owner's own reason (`data-testid="admin-po-ack-state-<poNumber>"`).
+   · **`AdminPurchaseOrderList.tsx`** — "Awaiting action" was the same status predicate; the record preview was
+   `Math.floor((orderDate + 24 * 3600 * 1000 − Date.now()) / 3600000)` with `Math.max(0, …)` clamps and a minutes term
+   (`(hoursLeft % 1) * 60`) that is ALWAYS 0 once `hoursLeft` has been floored. Both read the owner now, and the preview
+   badge is built exactly as the brand's (S6 parity): a decided or closed order renders NO badge, an unreadable one says
+   so.
+   · **`AdminDashboard.tsx`** — a third copy of the obligation set (`PO_AWAITING`) drove the "POs awaiting action" KPI
+   ("Action needed"), and a fourth sat in the PO-pipeline bucket. The KPI reads the owner (the claim IS actionability);
+   the bucket is a STATUS-FAMILY view and reads the CONFIG array, with the distinction stated in the code.
+   · **`CommerceOperationsPanel.tsx`** + **`src/lib/commerce/commerceLifecycle.ts`** — the legitimate-next-actions flag
+   and the domain guard read the config array (values unchanged).
+   · **`src/components/shared/NotificationCenter.tsx`** — the shared centre's PO queue reads the owner (rows stay
+   tenant-scoped BEFORE the filter, asserted).
+2. **THE SECOND ACKNOWLEDGEMENT PRESENTATION IS REMOVED** (`src/lib/statusPresentation.ts → ackWindowPresentation`): it
+   took raw figures a surface had derived itself plus an `acknowledged` boolean derived from STATUS and owned a second
+   label vocabulary. Zero readers after the repoint — deleted, with the old contract recorded in full inline, and the gate
+   asserts it cannot reappear.
+3. **NEW GATE + SPEC + LIVE LEGS.** `scripts/validate-po-acknowledgement-admin-surfaces.mjs` (`validate:po-ack-admin`,
+   34 assertions), `e2e/po-admin-ack-surface.spec.ts` (3 functional tests), and TEN new §P13/S7 legs in
+   `scripts/verify-demo-live.mjs`.
+
+**A real defect found while writing the spec:** the S6-era guard `getByText('NaN', { exact: false })` is
+CASE-INSENSITIVE in Playwright, so on an admin surface it matches **"Fi-NaN-ce"**. The S7 spec and the live verifier use a
+REGEX locator (`/NaN/`) instead.
+
+**Verification (all evidence produced in this session):** NEW gate **34 assertions PASS, 0 network calls**, proved able to
+fail twice (2 red / 1 red; restored byte-identical, shasum `OK`) · whole `validate:*` sweep **32/32 PASS** (31 → 32;
+measured on EXIT CODES) · typecheck **0** · root `tsc --noEmit` **0** · eslint **0** on every changed file · build **✓
+(7.90s)** · NEW spec **3/3** · affected suites **84/84** · the brand-dashboard set (dashboard, brand-operational-surfaces,
+domain-acceptance, accessibility) **41/41** · **FULL Playwright: 511 passed / 2 skipped / 0 failed (513, 7.6m)** ·
+**LIVE `LIVE_VERIFICATION_PASS`: 174/174 checks, 0 page errors (brand 0 / admin 0 / superAdmin 0)** on the deployed
+`5753a43`.
+
+**Honest notes:** the window is enforced at the CANONICAL domain writer only — the SIMULATED commerce seam owns its own
+status machine and does not judge the window, so its panel reads the config-owned obligation family (behaviour
+unchanged); the admin pipeline bucket is deliberately a status-family view. Both are stated in the code and asserted by
+the gate. Two specs (`record-drawer` 390x844, `status-semantics` narrow-viewport) timed out once in a contended full-suite
+run and passed **19/19** when re-run in isolation; the subsequent clean full run was **511 passed / 2 skipped / 0 failed**.
+
+   · **`src/data/demoData.ts`** — the seed's TWO copies now read the config array through ONE local derivation; the
+   generated seed is unchanged.
+   · **`src/components/brand/BrandDashboard.tsx` — the SIXTH copy, found by the same sweep, and the worst of them:** the
+   "Awaiting acknowledgement" KPI hand-rolled the family AND its own unacknowledged-line rule and NEVER consulted the
+   window, so a purchase order past its limit still read "Action needed". It now reads the owner's `inQueue`. (S6's
+   record asserted the brand PURCHASE-ORDER surface; the brand DASHBOARD is a second brand surface.)
+
+## PREVIOUS STATE — **PO-ACK S6 DONE: the brand surfaces present the rule from its ONE owner, and every delivered reminder carries its own channel detail** (2026-09-25, session 31) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** `d3da66e` (the verified application commit) + the DOCS-ONLY state
 check points that follow it (`9ef75e3`, `a75f3bf`, and the commit carrying this block) — recorded in the
