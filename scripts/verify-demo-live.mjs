@@ -771,6 +771,94 @@ check('no uncaught page error on the deployed §P13/S3 work-layer flow',
   pageErrors.length === 0 && adminErrors.length === 0,
   [...pageErrors, ...adminErrors].slice(0, 2).join(' | '));
 
+/* ── §P13 / S4 — THE DEPLOYED ON-BEHALF DRAFT + THE BRAND'S APPROVAL ──────────
+   S4's changed functionality is a REAL control on both PO surfaces, so it must be
+   exercised ON the deployed bundle: the deployed brand surface must offer
+   Mercenta's draft for the seeded closing-window purchase order (and NOT for a PO
+   in the middle of its window), the brand's approval must perform the channel
+   rejection through the ONE writer, and Mercenta's console must show the SAME
+   draft and record an attributed override. */
+await astonish.goto(`${BASE}/brand/purchase_orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await astonish.waitForTimeout(4000);
+const s4Draft = astonish.locator('[data-testid="po-onbehalf-draft-PO-9001"]').first();
+const s4DraftVisible = await s4Draft
+  .waitFor({ state: 'visible', timeout: 15000 })
+  .then(() => true)
+  .catch(() => false);
+const s4DraftText = s4DraftVisible ? await s4Draft.innerText().catch(() => '') : '';
+check('§P13/S4 the deployed brand surface offers Mercenta’s on-behalf rejection draft for the closing-window PO',
+  s4DraftVisible, s4DraftText.replace(/\s+/g, ' ').slice(0, 160));
+check('§P13/S4 the deployed draft states the rule, the channel’s own reason code and its content address',
+  /24 hours/i.test(s4DraftText) &&
+    /TemporarilyUnavailable/.test(s4DraftText) &&
+    /draft-po-brand-astonish-2-/.test(s4DraftText));
+check('§P13/S4 the deployed draft states honestly that the brand may still decide for itself',
+  /may still decide for yourself/i.test(s4DraftText));
+check('§P13/S4 the deployed surface offers NO draft for a PO in the middle of its window (the offer is rule-driven)',
+  (await astonish.locator('[data-testid="po-onbehalf-draft-PO-9000"]').count()) === 0);
+check('§P13/S4 nothing is performed before the brand approves (no approved record yet)',
+  (await astonish.locator('[data-testid="po-onbehalf-approved-PO-9001"]').count()) === 0);
+await astonish.locator('[data-testid="po-onbehalf-approve-PO-9001"]').first().click().catch(() => {});
+await astonish.waitForTimeout(3500);
+const s4BrandBody = await astonish.locator('body').innerText().catch(() => '');
+check('§P13/S4 the deployed approval performs the channel rejection through the ONE writer',
+  /Mercenta performed the retail channel's required rejection on your behalf/i.test(s4BrandBody));
+const s4ApprovedText = await astonish
+  .locator('[data-testid="po-onbehalf-approved-PO-9001"]')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P13/S4 the deployed record shows WHO approved, and the draft is no longer on offer',
+  /brand-astonish/.test(s4ApprovedText) &&
+    (await astonish.locator('[data-testid="po-onbehalf-draft-PO-9001"]').count()) === 0,
+  s4ApprovedText.replace(/\s+/g, ' ').slice(0, 140));
+check('no uncaught page error on the deployed §P13/S4 brand flow',
+  astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
+
+/* MERCENTA'S CONSOLE: the SAME draft, and an ATTRIBUTED override. */
+await admin.goto(`${BASE}/admin/purchase-orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await admin.waitForTimeout(3500);
+const s4AdminRow = admin
+  .locator('div.flex.items-center.justify-between', { hasText: 'PO-9001' })
+  .filter({ has: admin.locator('button[title="View detail"]') })
+  .first();
+const s4RowVisible = await s4AdminRow
+  .waitFor({ state: 'visible', timeout: 15000 })
+  .then(() => true)
+  .catch(() => false);
+check('§P13/S4 the deployed admin PO list presents the seeded closing-window PO', s4RowVisible);
+if (s4RowVisible) {
+  await s4AdminRow.locator('button[title="View detail"]').click().catch(() => {});
+  await admin.waitForTimeout(2500);
+}
+const s4AdminDraft = await admin
+  .locator('[data-testid="admin-po-onbehalf-draft-PO-9001"]')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P13/S4 the deployed admin console shows the SAME draft, naming its producer',
+  /TemporarilyUnavailable/.test(s4AdminDraft) &&
+    /mercenta-system:po-acknowledgement/.test(s4AdminDraft),
+  s4AdminDraft.replace(/\s+/g, ' ').slice(0, 160));
+await admin.locator('[data-testid="admin-po-onbehalf-approve-PO-9001"]').first().click().catch(() => {});
+await admin.waitForTimeout(3500);
+const s4AdminNotice = await admin
+  .locator('[data-testid="admin-po-onbehalf-notice-PO-9001"]')
+  .first()
+  .innerText()
+  .catch(() => '');
+const s4AdminApproved = await admin
+  .locator('[data-testid="admin-po-onbehalf-approved-PO-9001"]')
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P13/S4 the deployed admin override records the approval AND its attribution',
+  /On-behalf rejection performed for Astonish/i.test(s4AdminNotice) &&
+    /Mercenta admin override/i.test(s4AdminApproved),
+  `${s4AdminNotice.replace(/\s+/g, ' ').slice(0, 70)} | ${s4AdminApproved.replace(/\s+/g, ' ').slice(0, 70)}`);
+check('no uncaught page error on the deployed §P13/S4 admin flow',
+  adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
+
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
 console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length} superAdmin=${superAdminErrors.length}`);
