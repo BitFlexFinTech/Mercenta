@@ -109,5 +109,17 @@ test.describe('Acknowledgement notification fan-out (§P13 / S5)', () => {
     await expect(
       list.locator('[data-notification="po"]').filter({ hasText: /PO-9001/ }).first()
     ).toBeVisible();
+
+    /**
+     * THE REMINDER IS ACTIONABLE, not a static row: clicking the delivered reminder
+     * opens the purchase order it is about — and that PO is exactly the one the fan-out's
+     * FINAL stage drafted Mercenta's on-behalf rejection for, so the drill-down proves the
+     * delivered message and the draft are about the SAME record.
+     */
+    await list.locator('[data-notification="po"]').filter({ hasText: /PO-9001/ }).first().click();
+    await page.waitForTimeout(1500);
+    await expect(page.locator('[data-testid="po-onbehalf-draft-PO-9001"]')).toBeVisible({
+      timeout: 8000,
+    });
   });
 });
