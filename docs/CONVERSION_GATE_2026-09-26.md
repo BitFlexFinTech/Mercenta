@@ -148,4 +148,32 @@ work recorded as unfinished:
 
 The new gate asserts both facts, so neither can silently drift back to "unfinished".
 
+---
+
+## §7 THE VERIFICATION OF THIS INCREMENT (measured, with its honest corrections)
+
+**Locally:** the owner gate **146 assertions PASS / 0 FAIL / 0 network calls**, proved able to fail in TWO independent
+places (`minFillMs` 2_500→0 → the timing cases go RED; a repointed spec's wait 2600→200 → the *"the spec really waits
+that long"* assertion goes RED), with both files restored **byte-identical** (sha256 `44db2d7e4f94…`,
+`3eaaba092b27…`) · whole `validate:*` sweep **36/36 on EXIT CODES** (35 → 36) · `npm run typecheck` 0 · root
+`tsc --noEmit` 0 · `eslint` 0 · `npm run build` ✓ 7.90s · `e2e/conversion-gate.spec.ts` **5/5 (13.7s)** · the three specs
+together **18 passed / 0 failed / 2 skipped (42.3s)** · `validate-investor-demo` **PASS** (`reset → run` reproduces the
+SAME digest, so the ledger joining `RESTORABLE` did not disturb determinism) · registry verifier **322/64/209/17**.
+
+**Deployed:** `LIVE_VERIFICATION_PASS` — **205/205 checks, 0 page errors**, all ELEVEN `§P13/CG` legs green, on a build
+proved to be this commit (the live `index.html` serves `assets/index-BcbITdAi.js`, the same hash as the local build).
+
+**The two honest corrections made DURING verification** (recorded rather than hidden):
+
+1. **A truthfulness defect in the gate itself** — the duplicate rule originally counted refused attempts, which would
+   have told an applicant who retried after a *too fast* refusal that their application "was already received". Fixed
+   (§3.2) and now asserted in both directions.
+2. **A defect in MY OWN live legs** — the first live run reported 2 failures. Neither was a product defect: one leg
+   assumed a remote fill could beat the declared clock (it cannot — the fill itself takes ~1.9s), and its fourth
+   attempt submitted an **empty** form, which validation correctly refuses *before* any spam signal is evaluated. The
+   legs were rewritten to be **measured** (the timing leg now asserts consistency between the measured elapsed time and
+   the refusal actually displayed, so it can fail if the gate ever lies about the signal) and to carry a valid payload.
+   The recorded run is the corrected one; the failed run is documented in `PROJECT_STATUS.md` and the registry.
+
+
 

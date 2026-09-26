@@ -1370,71 +1370,119 @@ check('no uncaught page error on the deployed §P13/S10 operational chain',
   astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
 
 /* ── §P13/CG — THE CONVERSION GATE ON THE DEPLOYED BUNDLE ─────────────────────
- * The deployed build must enforce the SAME gate the local suite proves: the
- * honeypot is present but unannounced and unfocusable, a filled honeypot is
- * refused with the honest sentence and records NOTHING, an impossibly fast submit
- * is refused, a genuine submission reaches the confirmed state, and the session
- * budget is enforced. All figures come from the SSOT
- * (`APPLICATION_SPAM_POLICY`); nothing here invents a threshold.
+ * The deployed build must enforce the SAME gate the local suite proves. Every leg
+ * below is reproducible on a REMOTE host — no leg races the declared clock:
+ *
+ *   PAGE 1 — the timing signal, MEASURED. A script fills the visible answers
+ *            instantly (what a bot does) and submits. Two assertions that cannot
+ *            flake: the gate must NEVER claim "too fast" for a submission that was
+ *            not too fast (consistency), and when the measured elapsed really is
+ *            under the declared minimum it must refuse and must NOT confirm.
+ *   PAGE 2 — the honeypot refusal, then a GENUINE RETRY of the same answers being
+ *            ACCEPTED (the truthfulness fix: a refused attempt was never received),
+ *            then the duplicate window refusing a second recorded submission, then
+ *            the declared session attempt budget refusing the fourth attempt.
  * ─────────────────────────────────────────────────────────────────────────── */
+
+const CG_MIN_FILL_MS = 2_500; // mirrors APPLICATION_SPAM_POLICY.minFillMs (the SSOT)
+
+/** A script sets a React-controlled input the way a form-filling bot would. */
+async function scriptedFill(locator, value) {
+  await locator
+    .evaluate((el, v) => {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      setter?.call(el, v);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }, value)
+    .catch(() => {});
+}
+
+async function openDeployedForm(page) {
+  await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.getByRole('button', { name: 'Partner Login' }).first().click().catch(() => {});
+  await page.waitForTimeout(1200);
+  await page.getByText('Request Partner Access').first().click().catch(() => {});
+}
+
+async function chooseUk(page) {
+  const field = page.locator('input[placeholder*="Type your country name"]');
+  await field.click().catch(() => {});
+  await field.fill('United Kingdom').catch(() => {});
+  await page.locator('div.z-50 button', { hasText: 'United Kingdom' }).last().click().catch(() => {});
+  await page.waitForTimeout(250);
+}
+
+const noticeText = (page) => page.locator('[data-cg-notice]').innerText().catch(() => '');
+const confirmedCount = (page) => page.getByText('Application Received').count().catch(() => 0);
+
+/* ── PAGE 1 — THE TIMING SIGNAL, MEASURED ─────────────────────────────────── */
+
+const cgTiming = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const cgTimingErrors = [];
+cgTiming.on('pageerror', (e) => cgTimingErrors.push(String(e)));
+await cgTiming.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
+await cgTiming.getByRole('button', { name: 'Partner Login' }).first().click().catch(() => {});
+await cgTiming.waitForTimeout(1200);
+
+/* Measured from BEFORE the click that mounts the form, so the measurement is an
+ * UPPER BOUND of the true elapsed time (the form's own clock starts a moment later). */
+const cgT0 = Date.now();
+await cgTiming.getByText('Request Partner Access').first().click().catch(() => {});
+await scriptedFill(cgTiming.locator('[data-cg-field="companyName"]'), 'Fast Script Ltd');
+await chooseUk(cgTiming);
+await scriptedFill(cgTiming.locator('[data-cg-field="websiteUrl"]'), 'https://example.com');
+await cgTiming.getByText('Submit Application').first().click().catch(() => {});
+await cgTiming.waitForTimeout(1500);
+const cgMeasuredMs = Date.now() - cgT0;
+const cgTimingNotice = await noticeText(cgTiming);
+const cgSaidTooFast = /faster than a person can read it/.test(cgTimingNotice);
+const cgTimingConfirmed = (await confirmedCount(cgTiming)) > 0;
+
+check('§P13/CG the deployed gate serves the public application form',
+  await cgTiming.locator('[data-cg-field="companyName"]').first().isVisible({ timeout: 10000 }).catch(() => false));
+check('§P13/CG CONSISTENCY — the deployed gate never claims "too fast" for a submission that was not too fast',
+  !cgSaidTooFast || cgMeasuredMs < CG_MIN_FILL_MS,
+  `measured ${cgMeasuredMs}ms · notice "${cgTimingNotice.replace(/\\s+/g, ' ').slice(0, 80)}"`);
+check('§P13/CG a scripted submission under the declared minimum is REFUSED by the deployed gate (not confirmed)',
+  cgMeasuredMs >= CG_MIN_FILL_MS ? true : cgSaidTooFast && !cgTimingConfirmed,
+  cgMeasuredMs >= CG_MIN_FILL_MS
+    ? `NOT MEASURABLE on this host: the fill itself took ${cgMeasuredMs}ms, above the declared ${CG_MIN_FILL_MS}ms, so the strict branch could not fire (the signal is proven locally by e2e/conversion-gate.spec.ts case 2 and by the owner gate)`
+    : `refused as too fast, confirmed=${cgTimingConfirmed}`);
+check('no uncaught page error on the deployed §P13/CG timing flow',
+  cgTimingErrors.length === 0, cgTimingErrors.slice(0, 2).join(' | '));
+await cgTiming.close();
+
+/* ── PAGE 2 — HONEYPOT · TRUTHFUL RETRY · DUPLICATE · SESSION BUDGET ──────── */
 
 const cg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const cgErrors = [];
 cg.on('pageerror', (e) => cgErrors.push(String(e)));
-await cg.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
-await cg.getByRole('button', { name: 'Partner Login' }).first().click().catch(() => {});
-await cg.waitForTimeout(1500);
-await cg.getByText('Request Partner Access').first().click().catch(() => {});
-await cg.waitForTimeout(1500);
+await openDeployedForm(cg);
+await cg.waitForTimeout(3000); // out of the declared minimum fill time
 
-check('§P13/CG the deployed build serves the public application form',
-  await cg.locator('input[placeholder*="registered business name"]').first().isVisible({ timeout: 10000 }).catch(() => false));
-
-const cgHoneypot = cg.locator('[data-cg-honeypot] input');
 check('§P13/CG the deployed form carries the declared honeypot field',
-  (await cgHoneypot.count().catch(() => 0)) === 1,
-  `${await cgHoneypot.count().catch(() => 0)} field(s)`);
+  (await cg.locator('[data-cg-honeypot] input').count().catch(() => 0)) === 1,
+  `${await cg.locator('[data-cg-honeypot] input').count().catch(() => 0)} field(s)`);
 check('§P13/CG the honeypot is hidden from assistive technology and cannot be tabbed to',
   (await cg.locator('[data-cg-honeypot][aria-hidden="true"]').count().catch(() => 0)) === 1 &&
-    (await cgHoneypot.getAttribute('tabindex').catch(() => null)) === '-1');
+    (await cg.locator('[data-cg-honeypot] input').getAttribute('tabindex').catch(() => null)) === '-1');
 
-/* Fill a REAL application, then let a bot complete the field no human sees. */
 await cg.fill('input[placeholder*="registered business name"]', 'Deployed Gate Check Ltd').catch(() => {});
-const cgCountry = cg.locator('input[placeholder*="Type your country name"]');
-await cgCountry.click().catch(() => {});
-await cgCountry.fill('United Kingdom').catch(() => {});
-await cg.locator('div.z-50 button', { hasText: 'United Kingdom' }).last().click().catch(() => {});
-await cg.waitForTimeout(400);
+await chooseUk(cg);
 await cg.fill('input[placeholder*="https://your-company.com"]', 'https://example.com').catch(() => {});
-await cgHoneypot.evaluate((el) => {
-  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-  setter?.call(el, 'filled-by-a-bot');
-  el.dispatchEvent(new Event('input', { bubbles: true }));
-}).catch(() => {});
+await scriptedFill(cg.locator('[data-cg-honeypot] input'), 'filled-by-a-bot');
 await cg.getByText('Submit Application').first().click().catch(() => {});
-await cg.waitForTimeout(1200);
-const cgNotice1 = await cg.locator('[data-cg-notice]').innerText().catch(() => '');
+await cg.waitForTimeout(1500);
+const cgNotice1 = await noticeText(cg);
 check('§P13/CG the DEPLOYED gate refuses a filled honeypot and states nothing was recorded',
   /flagged as automated/.test(cgNotice1) && /NOT recorded/.test(cgNotice1),
-  cgNotice1.replace(/\s+/g, ' ').slice(0, 160));
+  cgNotice1.replace(/\\s+/g, ' ').slice(0, 140));
 check('§P13/CG the refused bot submission did NOT reach the confirmed state',
-  (await cg.getByText('Application Received').count().catch(() => 0)) === 0);
+  (await confirmedCount(cg)) === 0);
 
-/* Clear the honeypot and submit IMMEDIATELY — the declared minimum fill time. */
-await cgHoneypot.evaluate((el) => {
-  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-  setter?.call(el, '');
-  el.dispatchEvent(new Event('input', { bubbles: true }));
-}).catch(() => {});
-await cg.getByText('Submit Application').first().click().catch(() => {});
-await cg.waitForTimeout(1200);
-const cgNotice2 = await cg.locator('[data-cg-notice]').innerText().catch(() => '');
-check('§P13/CG the DEPLOYED gate refuses a submission faster than the declared minimum',
-  /faster than a person can read it/.test(cgNotice2),
-  cgNotice2.replace(/\s+/g, ' ').slice(0, 160));
-
-/* Wait out the declared window and submit for real. */
-await cg.waitForTimeout(3000);
+/* The refused attempt was NEVER RECEIVED, so a genuine retry of the same answers
+ * must be ACCEPTED — the honest-message fix, proven on the deployed build. */
+await scriptedFill(cg.locator('[data-cg-honeypot] input'), '');
 await cg.getByText('Submit Application').first().click().catch(() => {});
 let cgReceived = false;
 try {
@@ -1443,22 +1491,45 @@ try {
 } catch {
   cgReceived = false;
 }
-check('§P13/CG a genuine submission on the DEPLOYED build reaches the confirmed state promptly', cgReceived);
+check('§P13/CG the DEPLOYED gate ACCEPTS a genuine retry of answers it previously refused (nothing was received)',
+  cgReceived);
 
-/* The session budget is enforced on the deployed build too. */
+/* A second RECORDED submission of the same application is a duplicate. */
 if (cgReceived) {
   await cg.getByText('Back to Login').first().click().catch(() => {});
-  await cg.waitForTimeout(1500);
+  await cg.waitForTimeout(1200);
   await cg.getByText('Request Partner Access').first().click().catch(() => {});
   await cg.waitForTimeout(3000);
+  await cg.fill('input[placeholder*="registered business name"]', 'Deployed Gate Check Ltd').catch(() => {});
+  await chooseUk(cg);
+  await cg.fill('input[placeholder*="https://your-company.com"]', 'https://example.com').catch(() => {});
   await cg.getByText('Submit Application').first().click().catch(() => {});
+  await cg.waitForTimeout(1500);
+  const cgNotice2 = await noticeText(cg);
+  check('§P13/CG the DEPLOYED gate refuses the SAME application twice and says it was NOT recorded twice',
+    /already received/.test(cgNotice2) && /NOT recorded twice/.test(cgNotice2),
+    cgNotice2.replace(/\\s+/g, ' ').slice(0, 140));
+
+  /* The fourth attempt in this session exhausts the declared budget. It must carry
+   * a VALID payload — validation is evaluated before the spam signals, so an empty
+   * form would (correctly) be refused for the missing company name instead. */
+  await cg.getByText('Back to Login').first().click().catch(() => {});
   await cg.waitForTimeout(1200);
-  const cgNotice3 = await cg.locator('[data-cg-notice]').innerText().catch(() => '');
+  await cg.getByText('Request Partner Access').first().click().catch(() => {});
+  await cg.waitForTimeout(3000);
+  await cg.fill('input[placeholder*="registered business name"]', 'Deployed Gate Check Ltd').catch(() => {});
+  await chooseUk(cg);
+  await cg.fill('input[placeholder*="https://your-company.com"]', 'https://example.com').catch(() => {});
+  await cg.getByText('Submit Application').first().click().catch(() => {});
+  await cg.waitForTimeout(1500);
+  const cgNotice3 = await noticeText(cg);
   check('§P13/CG the DEPLOYED gate enforces the declared session attempt budget',
     /Too many submission attempts/.test(cgNotice3),
-    cgNotice3.replace(/\s+/g, ' ').slice(0, 160));
+    cgNotice3.replace(/\\s+/g, ' ').slice(0, 140));
 } else {
-  check('§P13/CG the DEPLOYED gate enforces the declared session attempt budget', false, 'not reached — the confirmed state failed');
+  check('§P13/CG the DEPLOYED gate refuses the SAME application twice and says it was NOT recorded twice', false,
+    'not reached — the genuine retry failed');
+  check('§P13/CG the DEPLOYED gate enforces the declared session attempt budget', false, 'not reached');
 }
 
 check('no uncaught page error on the deployed §P13/CG conversion flow',

@@ -28,11 +28,12 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 
 ## CURRENT STATE — **§CG: THE CONVERSION GATE — form validation, spam protection and submission reliability are DONE, each with ONE declared owner** (2026-09-26, session 36)
 
-**Branch:** `redesign/foundation`. **Checkpoint:** the §CG commit + the state checkpoint that follows it. **Canonical
+**Branch:** `redesign/foundation`. **Checkpoint:** **`ba43f45`** + the state checkpoint that follows it. **Canonical
 source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain`
-EMPTY** after the state commit. **THREE-WAY STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at the §CG commit**
-(local ✅ every figure re-run after the last edit · GitHub ✅ pushed · demo ✅ deployed + `LIVE_VERIFICATION_PASS`
-including the seven new `§P13/CG` legs).
+EMPTY** after the state commit. **THREE-WAY STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `ba43f45`**
+(local ✅ every figure re-run after the last edit · GitHub ✅ pushed · demo ✅ deployed — the live `index.html` serves
+`assets/index-BcbITdAi.js`, the same hash as the local build — and `LIVE_VERIFICATION_PASS`: **205/205 checks,
+0 page errors**, all ELEVEN `§P13/CG` legs GREEN).
 
 **Founder-level scope:** the registry's OWN recorded remainder for `phase15-conversion` — *"spam protection and
 submission reliability remain"* — and nothing invented. **Programme record:** `docs/CONVERSION_GATE_2026-09-26.md`
@@ -62,7 +63,11 @@ submission reliability remain"* — and nothing invented. **Programme record:** 
 to fail in TWO independent places (byte-identical restores) · `validate:*` sweep **36/36** on EXIT CODES · typecheck 0 ·
 root `tsc` 0 · eslint 0 · build ✓ 7.90s · `e2e/conversion-gate.spec.ts` **5/5** · the three specs together **18 passed /
 0 failed / 2 skipped** · `validate-investor-demo` **PASS** (same replay digest) · registry verifier **322/64/209/17** ·
-deployed `LIVE_VERIFICATION_PASS` with the seven `§P13/CG` legs.
+deployed **`LIVE_VERIFICATION_PASS` — 205/205 checks, 0 page errors**, all ELEVEN `§P13/CG` legs green (a honeypot
+submission refused with the honest sentence; a GENUINE RETRY of those answers accepted; the same application twice
+refused as *"NOT recorded twice"*; the session budget enforced; a scripted submission measured at **1879 ms** refused as
+too fast). **Honest note:** the FIRST live run's 2 failures were my own leg designs, not the product — rewritten to be
+measured and to carry a valid payload.
 
 ---
 
