@@ -28,12 +28,22 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 
 ## CURRENT STATE — **PO-ACK PROGRAMME COMPLETE: S10 (seed / gates / deploy, the closing pass) is DONE — the ten-stage INVENTORY gate, and the deployed chain that PROVES the receipt raises the invoice** (2026-09-26, session 35)
 
-**Branch:** `redesign/foundation`. **Checkpoint:** `4122f84` + the state checkpoint that follows it. **Canonical source:**
+**Branch:** `redesign/foundation`. **Checkpoint:** `4122f84` (the verified PRODUCT commit) + the state checkpoint `6102052` + the docs-only head `15549de`. **Canonical source:**
 the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain` EMPTY**
 after the state commit. **THREE-WAY STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `4122f84`** (local ✅ ·
-GitHub ✅ pushed `37f0c64..4122f84` · demo ✅ deployed, `LIVE_VERIFICATION_PASS` **193/193 checks, 0 page errors**,
+GitHub ✅ pushed `37f0c64..4122f84` → `6102052` → `15549de` · demo ✅ deployed, `LIVE_VERIFICATION_PASS` **193/193 checks, 0 page errors**,
 including the SEVEN new §P13/S10 legs; the deployed `index.html` serves the same asset hash as the local build,
 `assets/index-BV7nUE7X.js`).
+
+**Resume verification + state reconciliation (2026-09-26, session 36):** on resume the repository was found CLEAN and
+the recorded checkpoint was still valid, but this block's `LAST VERIFIED COMMIT`/`GITHUB PUSH` fields were stale —
+HEAD had advanced to **`15549de`**, a docs-only §S10 heading-date correction committed after the S10 state checkpoint
+(`6102052`) and therefore unrecorded. That is a **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no
+application runtime change)** and is now recorded. The whole recorded checkpoint was re-run in-session and still
+holds: `validate:*` sweep **35/35** (exit codes) · `npm run typecheck` **0** · root `tsc --noEmit` **0** · `eslint` **0**
+on both S10-changed scripts · `npm run build` **✓ 5.89s** · registry verifier **209/64/17** · the deployed demo
+**`LIVE_VERIFICATION_PASS` — 193/193 checks, 0 page errors (brand 0 / admin 0 / superAdmin 0)**. No code change was
+made by this session.
 
 **Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
 nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary + the on-behalf
