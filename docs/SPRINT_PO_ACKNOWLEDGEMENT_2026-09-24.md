@@ -39,7 +39,7 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 | **S7** | ADMIN surfaces | **DONE** (this sprint) |
 | **S8** | ONBOARDING linking wizard | **DONE** (this sprint) |
 | **S9** | RECEIPT → INVOICE automation | **DONE** (this sprint) |
-| **S10** | SEED / gates / deploy (final pass) | NOT STARTED |
+| **S10** | SEED / gates / deploy (final pass) | **IN PROGRESS** (this sprint — the deploy/live leg closes it) |
 
 ## S1 — the window owner (2026-09-24, session 26)
 
@@ -786,3 +786,129 @@ repository itself and is recorded here BEFORE the implementation:
   and `S11`'s parallel-testing precondition remains an activation step.
 
 
+## S10 — SEED / GATES / DEPLOY (THE CLOSING PASS) (2026-09-25, session 35)
+
+**THE CONTRACT, FIXED FROM THE REPOSITORY FIRST (the S7/S8/S9 pattern).** The stage's row
+("SEED / gates / deploy (final pass)") is the only written scope, so the contract was derived
+from the repository itself — a sweep for what "seed", "gates" and "deploy" can only mean here —
+and is recorded BEFORE the implementation.
+
+### 1. SEED — what the demo must make REACHABLE, and what must NOT be fabricated
+
+The programme already has the precedent: S4 recorded *"THE SEED MAKES THE CAPABILITY REACHABLE"*
+(`src/data/demoData.ts`, the closing-window PO) and S5 recorded *"THE SEED MAKES THE EXTERNAL
+CHANNEL GENUINELY REACHABLE"* (`src/data/demoStore.ts`, the one instant-message subscription).
+The closing pass therefore sweeps the demo seed for the capability **each of the ten stages**
+needs, and records the finding per stage. The sweep produced exactly TWO empty-at-boot states,
+and BOTH are deliberate contracts rather than oversights — so neither may be "fixed" by
+fabrication:
+
+- **S9 — no operable simulated purchase order at boot.** `CommerceOperationsPanel` defines an
+  operable simulated PO as `p.simulated === true` over `demoPurchaseOrders`. No seeded PO carries
+  that flag. This is REQUIRED by the declared provenance contract, not an oversight:
+  `src/types.ts → PurchaseOrder.mode/simulated` reads *"§Phase E4 — provenance of an
+  OPERATIONAL-SIMULATION PO. **Absent on legacy seed rows (unknown provenance is never
+  re-labelled as simulation).**"* Setting `simulated: true` on the seeded channel stand-ins would
+  be exactly the provenance lie that contract forbids. The capability IS reachable in the
+  deployed demo by DOING (Astonish is cleared, holds a non-rejected seeded catalog submission —
+  `demoStore.demoProductSubmissions` — so `evaluateCommerceEligibility` positively resolves and
+  the brand console's `data-state="commerce-raise-po"` control is ENABLED), and the closing pass
+  therefore PROVES the real chain on the deployed bundle instead of inventing a row.
+- **S8 — no canonical onboarding record at boot.** `acquisitionStore` boots
+  `opportunities = []` / `onboardings = []`, and `GlobalStateContext` states the intent:
+  *"For demo tenants (which have no canonical record) this is a no-op, so their behaviour is
+  unchanged."* The S8 LINK (the brand's acknowledgement written onto its onboarding record) is
+  reachable through the REAL flow (application → approval → onboarding), so the empty pipeline is
+  an honest state, not a gap. The closing pass records it and requires the deployed surface to
+  say so in its own words.
+
+Every other stage's seed requirement was verified PRESENT (S1/S2/S3 the in-window open POs; S4 the
+closing-window PO; S5 Astonish's instant-message subscription; S6 the brand PO surfaces; S7 the
+admin surfaces; S9 the E3-eligible product + seeded submission). No demo brand or account is
+removed or modified by this stage.
+
+### 2. GATES — the closing INVENTORY gate
+
+Every stage S1–S9 shipped its own gate; S10 must ship the INVENTORY that makes the set auditable
+as one programme: NEW `scripts/validate-po-ack-programme.mjs` (`validate:po-ack-programme`)
+asserting, against the real files:
+
+- the ten-stage table exists and S1–S9 are DONE (S10 resolves to DONE on completion);
+- every stage's declared gate FILE exists on disk;
+- every stage's gate is REGISTERED as a `validate:*` npm script (a gate nobody runs is not a gate);
+- each gate really asserts something (a non-zero `test(`/`check(` assertion count) and NAMES its
+  stage, so the inventory cannot pass over an empty or unrelated file;
+- the live-verification script carries the programme's `§P13/S1…S10` legs;
+- the programme's ONE-OWNER invariants still hold (the config owner declares the rule; the pure
+  window owner derives it; the surfaces render the owner's statement rather than a re-typed copy).
+
+### 3. DEPLOY — the whole-programme leg, with the one honest gap closed
+
+The deploy leg is the established three-way chain for the programme: deploy the verified commit
+to `demo.mercenta.co.uk`, open it, and verify live. §S10 adds the live legs that close S9's
+recorded limitation truthfully: the deployed brand console's operational-simulation control must
+be genuinely OPERABLE (not a dead control), and the deployed admin console must state its
+operable count from the real store — never a fabricated row. The full ten-stage live run is the
+evidence; the result is recorded below.
+
+**Recorded boundaries of this stage (decisions, not deferrals):** no demo fixture is fabricated
+for the two empty-at-boot states (the provenance contract and the demo-tenant no-op remain
+intact); S11's channel-side activation preconditions are unchanged; the automation still stops at
+**BUILT (what the closing sweep found, and what changed)**
+
+1. **NEW `scripts/validate-po-ack-programme.mjs` (`validate:po-ack-programme`) — the closing
+   INVENTORY gate.** It asserts the ten-stage table (TEN rows; S1–S9 DONE; S10 IN PROGRESS→DONE),
+   the §S10 section and the recorded no-fabrication contract; that every stage's gate FILE exists;
+   that every stage's gate is REGISTERED as a `validate:*` npm script that really runs the file;
+   that no two stages share a gate file; that every gate asserts above a floor (**≥ 20** real
+   assertion calls, measured on comment-stripped source) and NAMES its own stage; that the live
+   script carries the programme's `§P13/S3…S10` legs and ≥ 150 checks; the ONE-OWNER invariants
+   against the REAL modules (the config declarations are the documented channel facts, the
+   brand-facing statement is identity-derived, the pure owner's deadline/queue/closing-window/fail-
+   closed arithmetic executes, the S9 owner's declared identity and statement hold, and a walk of
+   `src/` proves each window constant has exactly ONE declaration); and the SEED inventory — the
+   provenance contract (no seeded channel PO is re-labelled as simulation), the honest zero-operable
+   boot state, the E4 eligibility seed (a labelled `SEED-SIM-*` submission), the deployed
+   reachability of the operational-simulation control (eligibility computed live through the real
+   `evaluateCommerceEligibility`), and the demo-tenant no-op.
+2. **NEW `§P13/S10` live legs** (`scripts/verify-demo-live.mjs`) — the closing pass's deploy leg:
+   the deployed brand console must render the operational-simulation surface, its raise control must
+   be genuinely ENABLED (a disabled control is a dead control and FAILS), the REAL chain must walk
+   live (raise → acknowledge → fulfil → RECEIPT, each step enabling the next), and the receipt must
+   raise the invoice AUTOMATICALLY with the terms the receipt carried. This closes S9's recorded
+   "empty-state only" limitation truthfully, without a fabricated row.
+3. **`package.json`** — `validate:po-ack-programme` registered, so the closing gate is part of the
+   standard sweep rather than an unused file.
+4. **No demo brand, account or fixture was added, removed or re-labelled.** The two empty-at-boot
+   states are recorded as contracts (§1 above) and the gate now LOCKS the provenance contract, so a
+   later session cannot silently mark the seeded channel POs as simulated.
+
+**TESTED (all evidence produced in this session)**
+
+- **NEW gate → 88 assertions PASS, 0 FAIL, 0 network calls.** Proved able to FAIL twice in one
+  sabotage run: the S1 gate's npm registration renamed → `S1's gate is registered` red; and
+  `simulated: true` added to a seeded lifecycle PO → **3 red** (the provenance-contract check, the
+  honest zero-operable check, and the count detail `6 re-labelled row(s)`). Both files restored
+  **byte-identical** (`package.json` sha256 `2b187fec…decff`, `src/data/demoData.ts` sha256
+  `61aceeb3…f8238`, both unchanged).
+- **Whole `validate:*` sweep → 35/35 PASS** (34 → 35), measured on EXIT CODES.
+- `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** ·
+  `npx eslint` **0** on both changed scripts · `npm run build` **✓ (5.34s)**.
+- **Playwright — the five affected specs: 22 passed / 0 failed (27.8s)**: `commerce-operational-
+  simulation`, `invoicing`, `admin-operational-surfaces`, `brand-operational-surfaces`,
+  `deterministic-journey`.
+- **The deployed leg of the contract (§P13/S10)** is recorded with the LIVE result in
+  `PROJECT_STATUS.md` — this stage is not COMPLETE until local = GitHub = demo are verified.
+
+**HONEST LIMITS**
+
+- **The two empty-at-boot states remain.** They are the declared contracts (§1), not unfinished
+  work: re-labelling the seeded channel POs as simulation would break the `types.ts` provenance
+  rule, and seeding a demo onboarding record would break the recorded demo-tenant no-op.
+- **The §P13/S10 chain is a live-browser leg.** It depends on the deployed host being warm; an
+  absent or disabled control, or a chain that fails to enable the next step, is reported as a FAIL
+  rather than papered over.
+- **Nothing else in the programme is outstanding.** The recorded boundaries (channel invoice
+  SUBMISSION stays P12/S11's explicit, labelled action; the automation stops at the ISSUED invoice)
+  stand unchanged.
+the ISSUED invoice.

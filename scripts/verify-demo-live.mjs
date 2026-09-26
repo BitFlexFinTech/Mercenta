@@ -1317,6 +1317,58 @@ check('§S9 the deployed admin surface keeps the RECEIPT + the manual issue fall
 check('no uncaught page error on the deployed §S9 admin-commerce flow',
   adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));
 
+/* ── §P13/S10 — THE CLOSING PASS: THE DEPLOYED SEED IS GENUINELY OPERABLE ─────
+   S9 recorded an HONEST LIMIT: the deployed demo boots with ZERO operable
+   simulated POs (the ten seeded POs are the channel's own, and `src/types.ts`
+   forbids re-labelling unknown-provenance seed rows as simulation). §S10 closes
+   that limit the only truthful way — by PROVING the capability is reachable in
+   the running product rather than fabricating a row: the deployed brand console's
+   operational-simulation control must be ENABLED (its eligibility derived from the
+   real E3 catalog state), and the REAL chain must run live — raise → acknowledge →
+   fulfil → RECEIPT → the invoice raised AUTOMATICALLY, with the terms the receipt
+   carried. A disabled or absent control is a dead control and FAILS here. */
+
+await closeLiveOverlays(astonish);
+await astonish.goto(`${BASE}/brand/purchase_orders`, { waitUntil: 'domcontentloaded' }).catch(() => {});
+await astonish.waitForTimeout(4000);
+check('§P13/S10 the deployed brand console renders the operational-simulation surface',
+  await astonish.getByText('Operational commerce simulation').first()
+    .isVisible({ timeout: 12000 }).catch(() => false));
+
+const s10Raise = astonish.locator('button[data-state="commerce-raise-po"]').first();
+const s10RaiseVisible = await s10Raise.isVisible({ timeout: 10000 }).catch(() => false);
+const s10RaiseEnabled = s10RaiseVisible && (await s10Raise.isEnabled().catch(() => false));
+check('§P13/S10 SEED REACHABILITY — the deployed raise control is genuinely OPERABLE (no dead control)',
+  s10RaiseEnabled, s10RaiseVisible ? 'present but DISABLED' : 'not present');
+
+let s10Chain = '';
+if (s10RaiseEnabled) {
+  await s10Raise.click().catch(() => {});
+  const s10Ack = astonish.locator('button[data-state="commerce-acknowledge"]').first();
+  s10Chain += (await s10Ack.isEnabled({ timeout: 8000 }).catch(() => false)) ? '>' : 'x';
+  await s10Ack.click().catch(() => {});
+  await astonish.waitForTimeout(600);
+  const s10Fulfil = astonish.locator('button[data-state="commerce-fulfil"]').first();
+  s10Chain += (await s10Fulfil.isEnabled({ timeout: 8000 }).catch(() => false)) ? '>' : 'x';
+  await s10Fulfil.click().catch(() => {});
+  await astonish.waitForTimeout(600);
+  const s10Receive = astonish.locator('button[data-state="commerce-receive"]').first();
+  s10Chain += (await s10Receive.isEnabled({ timeout: 8000 }).catch(() => false)) ? '>' : 'x';
+  await s10Receive.click().catch(() => {});
+  await astonish.waitForTimeout(3000);
+}
+check('§P13/S10 the deployed chain walks raise → acknowledge → fulfil → RECEIPT (each step ENABLES the next)',
+  s10Chain === '>>>', `chain: ${s10Chain || 'not run'}`);
+const s10Body = s10RaiseEnabled ? await astonish.locator('body').innerText().catch(() => '') : '';
+check('§P13/S10 THE RECEIPT RAISED THE INVOICE AUTOMATICALLY on the deployed bundle',
+  /raised automatically/.test(s10Body) && /SIM-INV-/.test(s10Body),
+  s10Body.replace(/\s+/g, ' ').slice(0, 220));
+check('§P13/S10 the deployed surface states the terms the RECEIPT carried (the declared 30-day default)',
+  /30-day terms/.test(s10Body),
+  s10Body.replace(/\s+/g, ' ').slice(0, 160));
+check('no uncaught page error on the deployed §P13/S10 operational chain',
+  astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
+
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
 console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length} superAdmin=${superAdminErrors.length}`);
