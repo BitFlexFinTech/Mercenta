@@ -30,6 +30,10 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.locator('text=Partner Login').first().click();
     await page.waitForTimeout(500);
     await page.click('text=Request Partner Access');
+    // §CG minFillMs=2600 — the conversion gate refuses a submission faster than the
+    // declared minimum (APPLICATION_SPAM_POLICY.minFillMs = 2500 in the SSOT). §CG
+    // REPOINTED: these specs used to submit as soon as the answers were filled.
+    await page.waitForTimeout(2600);
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Test Brand Ltd');
     await fillCountry(page, 'United Kingdom');
@@ -43,6 +47,10 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.locator('text=Partner Login').first().click();
     await page.waitForTimeout(500);
     await page.click('text=Request Partner Access');
+    // §CG minFillMs=2600 — the conversion gate refuses a submission faster than the
+    // declared minimum (APPLICATION_SPAM_POLICY.minFillMs = 2500 in the SSOT). §CG
+    // REPOINTED: these specs used to submit as soon as the answers were filled.
+    await page.waitForTimeout(2600);
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Test Brand Ltd');
     await fillCountry(page, 'United Kingdom');
@@ -58,6 +66,10 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.locator('text=Partner Login').first().click();
     await page.waitForTimeout(500);
     await page.click('text=Request Partner Access');
+    // §CG minFillMs=2600 — the conversion gate refuses a submission faster than the
+    // declared minimum (APPLICATION_SPAM_POLICY.minFillMs = 2500 in the SSOT). §CG
+    // REPOINTED: these specs used to submit as soon as the answers were filled.
+    await page.waitForTimeout(2600);
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Admin Test Brand');
     await fillCountry(page, 'Germany');
@@ -85,6 +97,10 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.locator('text=Partner Login').first().click();
     await page.waitForTimeout(500);
     await page.click('text=Request Partner Access');
+    // §CG minFillMs=2600 — the conversion gate refuses a submission faster than the
+    // declared minimum (APPLICATION_SPAM_POLICY.minFillMs = 2500 in the SSOT). §CG
+    // REPOINTED: these specs used to submit as soon as the answers were filled.
+    await page.waitForTimeout(2600);
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Flag Test Brand');
     await fillCountry(page, 'France');
@@ -132,6 +148,10 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.locator('text=Partner Login').first().click();
     await page.waitForTimeout(500);
     await page.click('text=Request Partner Access');
+    // §CG minFillMs=2600 — the conversion gate refuses a submission faster than the
+    // declared minimum (APPLICATION_SPAM_POLICY.minFillMs = 2500 in the SSOT). §CG
+    // REPOINTED: these specs used to submit as soon as the answers were filled.
+    await page.waitForTimeout(2600);
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Approved Entry Ltd');
     await fillCountry(page, 'Germany');
@@ -191,6 +211,10 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.locator('text=Partner Login').first().click();
     await page.waitForTimeout(500);
     await page.click('text=Request Partner Access');
+    // §CG minFillMs=2600 — the conversion gate refuses a submission faster than the
+    // declared minimum (APPLICATION_SPAM_POLICY.minFillMs = 2500 in the SSOT). §CG
+    // REPOINTED: these specs used to submit as soon as the answers were filled.
+    await page.waitForTimeout(2600);
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Reject Test Ltd');
     await fillCountry(page, 'Spain');

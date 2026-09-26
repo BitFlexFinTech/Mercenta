@@ -26,7 +26,47 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **PO-ACK PROGRAMME COMPLETE: S10 (seed / gates / deploy, the closing pass) is DONE — the ten-stage INVENTORY gate, and the deployed chain that PROVES the receipt raises the invoice** (2026-09-26, session 35)
+## CURRENT STATE — **§CG: THE CONVERSION GATE — form validation, spam protection and submission reliability are DONE, each with ONE declared owner** (2026-09-26, session 36)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** the §CG commit + the state checkpoint that follows it. **Canonical
+source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain`
+EMPTY** after the state commit. **THREE-WAY STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at the §CG commit**
+(local ✅ every figure re-run after the last edit · GitHub ✅ pushed · demo ✅ deployed + `LIVE_VERIFICATION_PASS`
+including the seven new `§P13/CG` legs).
+
+**Founder-level scope:** the registry's OWN recorded remainder for `phase15-conversion` — *"spam protection and
+submission reliability remain"* — and nothing invented. **Programme record:** `docs/CONVERSION_GATE_2026-09-26.md`
+(the contract fixed from the repository FIRST).
+
+**What changed (session 36):**
+
+1. **FIVE GAPS, VERIFIED IN THE CODE BEFORE IMPLEMENTING:** no spam protection anywhere in the public path; no
+   `try/catch` (a throw left the submit button on `...` for ever); the REAL link check (10s per link, CORS-blocked for
+   most hosts) ran INSIDE the submit handler although an unused `verifyLinksNonBlocking` already existed; a double
+   submit could record two applications; validation was three checks with `parseInt()` → `NaN`.
+2. **FOUR OWNERS:** SSOT `src/config/partnerApplication.ts` · pure fail-closed decision
+   `src/lib/onboarding/applicationGuard.ts` (injected clock, zero network) · state `src/data/applicationStore.ts`
+   (attempt ledger counting REFUSED attempts, duplicate fail-safe at the DOMAIN boundary, deferred link patch) ·
+   surface `src/components/auth/PartnerApplicationForm.tsx` (honeypot off-screen/aria-hidden/unfocusable, one
+   announcement per refusal, synchronous double-submit ref, cannot leave the button stuck).
+3. **TWO STALE REGISTRY ROWS RECONCILED:** `s0-discovered-carrier-architecture-disposition` (blocked → built_and_tested;
+   resolved by §P9) and `discovered-playwright-app-shell-390x844-timeout-under-load` (deferred → built_and_tested;
+   `test.slow()` present).
+4. **ONE UI CLAIM CORRECTED, NOT INVENTED:** the phone `*` was removed (the domain never required it) — the label now
+   reads `(optional)`; making a phone COMPULSORY is an **open Founder decision**.
+5. **TWO SPECS REPOINTED, NEVER WEAKENED:** `e2e/access-gate.spec.ts` (6 form-opens) + `e2e/status-semantics.spec.ts`
+   (1) now wait the declared minimum (`§CG minFillMs=2600`, asserted against the SSOT by the new gate) with **24 + 4
+   insertions and 0 deletions** — no assertion altered.
+
+**Verified this session:** `validate:conversion-gate` **146 assertions PASS / 0 FAIL / 0 network calls**, proved able
+to fail in TWO independent places (byte-identical restores) · `validate:*` sweep **36/36** on EXIT CODES · typecheck 0 ·
+root `tsc` 0 · eslint 0 · build ✓ 7.90s · `e2e/conversion-gate.spec.ts` **5/5** · the three specs together **18 passed /
+0 failed / 2 skipped** · `validate-investor-demo` **PASS** (same replay digest) · registry verifier **322/64/209/17** ·
+deployed `LIVE_VERIFICATION_PASS` with the seven `§P13/CG` legs.
+
+---
+
+## PREVIOUS STATE — **PO-ACK PROGRAMME COMPLETE: S10 (seed / gates / deploy, the closing pass) is DONE — the ten-stage INVENTORY gate, and the deployed chain that PROVES the receipt raises the invoice** (2026-09-26, session 35) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** `4122f84` (the verified PRODUCT commit) + the state checkpoint `6102052` + the docs-only head `15549de`. **Canonical source:**
 the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain` EMPTY**

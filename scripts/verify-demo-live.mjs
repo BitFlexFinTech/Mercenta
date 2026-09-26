@@ -1369,6 +1369,102 @@ check('§P13/S10 the deployed surface states the terms the RECEIPT carried (the 
 check('no uncaught page error on the deployed §P13/S10 operational chain',
   astonishErrors.length === 0, astonishErrors.slice(0, 2).join(' | '));
 
+/* ── §P13/CG — THE CONVERSION GATE ON THE DEPLOYED BUNDLE ─────────────────────
+ * The deployed build must enforce the SAME gate the local suite proves: the
+ * honeypot is present but unannounced and unfocusable, a filled honeypot is
+ * refused with the honest sentence and records NOTHING, an impossibly fast submit
+ * is refused, a genuine submission reaches the confirmed state, and the session
+ * budget is enforced. All figures come from the SSOT
+ * (`APPLICATION_SPAM_POLICY`); nothing here invents a threshold.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+const cg = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const cgErrors = [];
+cg.on('pageerror', (e) => cgErrors.push(String(e)));
+await cg.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 60000 });
+await cg.getByRole('button', { name: 'Partner Login' }).first().click().catch(() => {});
+await cg.waitForTimeout(1500);
+await cg.getByText('Request Partner Access').first().click().catch(() => {});
+await cg.waitForTimeout(1500);
+
+check('§P13/CG the deployed build serves the public application form',
+  await cg.locator('input[placeholder*="registered business name"]').first().isVisible({ timeout: 10000 }).catch(() => false));
+
+const cgHoneypot = cg.locator('[data-cg-honeypot] input');
+check('§P13/CG the deployed form carries the declared honeypot field',
+  (await cgHoneypot.count().catch(() => 0)) === 1,
+  `${await cgHoneypot.count().catch(() => 0)} field(s)`);
+check('§P13/CG the honeypot is hidden from assistive technology and cannot be tabbed to',
+  (await cg.locator('[data-cg-honeypot][aria-hidden="true"]').count().catch(() => 0)) === 1 &&
+    (await cgHoneypot.getAttribute('tabindex').catch(() => null)) === '-1');
+
+/* Fill a REAL application, then let a bot complete the field no human sees. */
+await cg.fill('input[placeholder*="registered business name"]', 'Deployed Gate Check Ltd').catch(() => {});
+const cgCountry = cg.locator('input[placeholder*="Type your country name"]');
+await cgCountry.click().catch(() => {});
+await cgCountry.fill('United Kingdom').catch(() => {});
+await cg.locator('div.z-50 button', { hasText: 'United Kingdom' }).last().click().catch(() => {});
+await cg.waitForTimeout(400);
+await cg.fill('input[placeholder*="https://your-company.com"]', 'https://example.com').catch(() => {});
+await cgHoneypot.evaluate((el) => {
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+  setter?.call(el, 'filled-by-a-bot');
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+}).catch(() => {});
+await cg.getByText('Submit Application').first().click().catch(() => {});
+await cg.waitForTimeout(1200);
+const cgNotice1 = await cg.locator('[data-cg-notice]').innerText().catch(() => '');
+check('§P13/CG the DEPLOYED gate refuses a filled honeypot and states nothing was recorded',
+  /flagged as automated/.test(cgNotice1) && /NOT recorded/.test(cgNotice1),
+  cgNotice1.replace(/\s+/g, ' ').slice(0, 160));
+check('§P13/CG the refused bot submission did NOT reach the confirmed state',
+  (await cg.getByText('Application Received').count().catch(() => 0)) === 0);
+
+/* Clear the honeypot and submit IMMEDIATELY — the declared minimum fill time. */
+await cgHoneypot.evaluate((el) => {
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+  setter?.call(el, '');
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+}).catch(() => {});
+await cg.getByText('Submit Application').first().click().catch(() => {});
+await cg.waitForTimeout(1200);
+const cgNotice2 = await cg.locator('[data-cg-notice]').innerText().catch(() => '');
+check('§P13/CG the DEPLOYED gate refuses a submission faster than the declared minimum',
+  /faster than a person can read it/.test(cgNotice2),
+  cgNotice2.replace(/\s+/g, ' ').slice(0, 160));
+
+/* Wait out the declared window and submit for real. */
+await cg.waitForTimeout(3000);
+await cg.getByText('Submit Application').first().click().catch(() => {});
+let cgReceived = false;
+try {
+  await cg.getByText('Application Received').first().waitFor({ state: 'visible', timeout: 8000 });
+  cgReceived = true;
+} catch {
+  cgReceived = false;
+}
+check('§P13/CG a genuine submission on the DEPLOYED build reaches the confirmed state promptly', cgReceived);
+
+/* The session budget is enforced on the deployed build too. */
+if (cgReceived) {
+  await cg.getByText('Back to Login').first().click().catch(() => {});
+  await cg.waitForTimeout(1500);
+  await cg.getByText('Request Partner Access').first().click().catch(() => {});
+  await cg.waitForTimeout(3000);
+  await cg.getByText('Submit Application').first().click().catch(() => {});
+  await cg.waitForTimeout(1200);
+  const cgNotice3 = await cg.locator('[data-cg-notice]').innerText().catch(() => '');
+  check('§P13/CG the DEPLOYED gate enforces the declared session attempt budget',
+    /Too many submission attempts/.test(cgNotice3),
+    cgNotice3.replace(/\s+/g, ' ').slice(0, 160));
+} else {
+  check('§P13/CG the DEPLOYED gate enforces the declared session attempt budget', false, 'not reached — the confirmed state failed');
+}
+
+check('no uncaught page error on the deployed §P13/CG conversion flow',
+  cgErrors.length === 0, cgErrors.slice(0, 2).join(' | '));
+await cg.close();
+
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;
 console.log(`${passed}/${results.length} checks PASS · page errors: brand=${pageErrors.length} admin=${adminErrors.length} superAdmin=${superAdminErrors.length}`);

@@ -407,6 +407,26 @@
       "re_verification": "In-session: validate:* sweep 35/35 (exit codes) · npm run typecheck 0 · root tsc --noEmit 0 · eslint 0 on both S10-changed scripts · npm run build OK 5.89s · registry verifier 209/64/17 · demo.mercenta.co.uk LIVE_VERIFICATION_PASS 193/193 checks, 0 page errors (brand 0 / admin 0 / superAdmin 0).",
       "application_files_changed": "NONE",
       "completion_status": "VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change) for the reconciliation increment; the verified product checkpoint remains COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at 4122f84"
+    },
+    "conversion_gate_increment": {
+      "increment": "§CG — conversion gate: form validation + spam protection + submission reliability (2026-09-26, session 36)",
+      "closes": "phase15-conversion — the recorded remainder 'spam protection and submission reliability remain'",
+      "reconciled_alongside": [
+        "s0-discovered-carrier-architecture-disposition — resolved by §P9, was still marked blocked",
+        "discovered-playwright-app-shell-390x844-timeout-under-load — repaired, was still marked deferred"
+      ],
+      "owners": {
+        "ssot": "src/config/partnerApplication.ts",
+        "pure_decision": "src/lib/onboarding/applicationGuard.ts",
+        "state": "src/data/applicationStore.ts",
+        "surface": "src/components/auth/PartnerApplicationForm.tsx"
+      },
+      "new_gate": "scripts/validate-conversion-gate.mjs → npm run validate:conversion-gate",
+      "new_spec": "e2e/conversion-gate.spec.ts",
+      "live_legs": "scripts/verify-demo-live.mjs §P13/CG",
+      "programme_record": "docs/CONVERSION_GATE_2026-09-26.md",
+      "honest_limits": "the honeypot, minimum fill time, session budget and duplicate window are the signals a browser can supply WITHOUT a third-party service: this is NOT a CAPTCHA and NO reputation score is claimed. The applicant's own links are still fetched for real by the verifier (browser CORS means most results resolve 'unverified_manual_check', which the admin sees); the record is created with NO verification claim and the status is attached afterwards.",
+      "repointed_specs": "e2e/access-gate.spec.ts (6 form-opens) + e2e/status-semantics.spec.ts (1) gained the declared minimum-fill wait — every assertion unchanged, old contract recorded inline (§CG minFillMs=2600, asserted against the SSOT by the new gate)."
     }
   },
   "entries": [
@@ -3538,11 +3558,20 @@
     },
     {
       "id": "phase15-conversion",
-      "description": "Phase 15 — conversion launch gate: form validation, spam protection, submission reliability, the primary CTA and the Partner Login hierarchy. The CTA hierarchy part is DONE (Phase 1: \"Explore UK Market Fit\" is the primary hero CTA and Partner Login is a separate header utility action); spam protection and submission reliability remain",
-      "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "in_progress",
-      "evidence": "src/config/ukMarketFit.ts → EXPLORE_UK_MARKET_FIT_CTA",
-      "last_verified": "2026-09-19",
+      "description": "Phase 15 — conversion launch gate: form validation, spam protection, submission reliability, the primary CTA and the Partner Login hierarchy. ALL FOUR PARTS ARE NOW DONE. The CTA hierarchy was done in Phase 1 (\"Explore UK Market Fit\" is the primary hero CTA and Partner Login is a separate header utility action). SESSION 36 (2026-09-26) closed the remainder — 'spam protection and submission reliability remain' — and the gaps were verified ABSENT in the code BEFORE implementing: no honeypot, no rate limit and no duplicate rule existed anywhere in the public path; the submit handler had no try/catch (a throw left the button stuck on '...' with no message and no reset); the real link verification (10s per link, CORS-blocked for most hosts) ran INSIDE the submit handler, so it held the applicant open; a double submit could record two applications; and validation was three checks with parseInt() turning a non-numeric product count into NaN. NOW: ONE SSOT (src/config/partnerApplication.ts) declares the honeypot, the minimum fill time, the session attempt budget, the duplicate window, the field limits, the country list and every applicant-facing sentence; ONE pure fail-closed decision owner (src/lib/onboarding/applicationGuard.ts) validates and decides with an INJECTED clock and zero network; the store (src/data/applicationStore.ts) counts REFUSED attempts too, enforces the duplicate fail-safe at the DOMAIN boundary and patches verification after the record exists; the form (src/components/auth/PartnerApplicationForm.tsx) renders the honeypot unannounced and unfocusable, shows a per-field announced refusal (aria-invalid + role=alert + focus), stops a double click with a synchronous ref, cannot leave the button stuck (try/catch/finally) and records the application BEFORE the third-party check runs. NOTE: the phone field's '*' marker was REMOVED because the label claimed a requirement the domain never enforced (BrandApplication.phone is nullable); it is now labelled (optional) — making a phone COMPULSORY is a commercial decision for the Founder, not a defect fix.",
+      "source": "Mercenta roadmap reconciliation (2026-09-19); remainder closed by §CG increment (2026-09-26, session 36)",
+      "status": "built_and_tested",
+      "evidence": "src/config/partnerApplication.ts (SSOT) · src/lib/onboarding/applicationGuard.ts (pure, fail-closed, injected clock) · src/data/applicationStore.ts (attempt ledger + duplicate fail-safe + deferred link patch) · src/components/auth/PartnerApplicationForm.tsx · scripts/validate-conversion-gate.mjs (npm run validate:conversion-gate, proved able to fail) · e2e/conversion-gate.spec.ts (5 browser cases incl. hanging third-party hosts) · scripts/verify-demo-live.mjs §P13/CG (deployed legs) · docs/CONVERSION_GATE_2026-09-26.md",
+      "last_verified": "2026-09-26",
+      "superseded_by": null
+    },
+    {
+      "id": "cg-conversion-gate-validation-spam-reliability",
+      "description": "§CG (2026-09-26, session 36) — the conversion gate's three capabilities, now owned by declared code rather than by scattered inline checks. VALIDATION: every answer is validated in ONE place against the SSOT limits (company-name length, a country the form actually offers, URL format and host family per link, phone digits, integer product count, per-field and total payload ceilings) — previously three checks plus parseInt() (so a non-numeric count became NaN) and no format check at all. SPAM PROTECTION: four deterministic signals — an off-screen unannounced honeypot, a minimum fill time, a session attempt budget that counts REFUSED attempts, and a duplicate window over RECORDED applications only (so a retry after a refusal is never falsely told 'already received'). No CAPTCHA and no reputation score is claimed: neither is available without an external provider, and inventing one would be a lie. SUBMISSION RELIABILITY: the application is recorded BEFORE the real third-party link check runs (that check previously held the applicant open for up to 10s per link and is CORS-blocked for most hosts), every refusal has an honest declared sentence, the button can no longer be left stuck (try/catch/finally), and a double click cannot record two applications (a synchronous ref plus a DOMAIN-boundary fail-safe). FAIL CLOSED: a missing, non-string, non-finite or malformed signal is a REFUSAL, never a silent acceptance.",
+      "source": "§CG increment (2026-09-26, session 36) — closes the recorded phase15-conversion remainder",
+      "status": "built_and_tested",
+      "evidence": "npm run validate:conversion-gate (owner gate: zero network, exercised against the real modules, proved able to fail) · e2e/conversion-gate.spec.ts (5 browser cases) · scripts/verify-demo-live.mjs §P13/CG (deployed legs) · docs/CONVERSION_GATE_2026-09-26.md",
+      "last_verified": "2026-09-26",
       "superseded_by": null
     },
     {
@@ -3881,11 +3910,11 @@
     },
     {
       "id": "s0-discovered-carrier-architecture-disposition",
-      "description": "DISCOVERED (S0): a carrier environment, a 3PL session tier with its own view allowlist and three carrier views already exist, which Founder decision T-2 retires (no external carrier users/logins). The code must NOT be deleted blindly: it is referenced by the RBAC tier tables and by browser specs. The dependency analysis and safe retirement belong to the Logistics Hub increment. Owner: Logistics Hub increment (S3/S4)",
-      "evidence": "src/lib/auth/rbac.ts (TIER_ENVIRONMENTS / VIEW_ALLOWLIST 3pl); src/components/layout/CarrierShell.tsx; docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md §8",
-      "status": "blocked",
-      "source": "Master build reconciliation — increment S0 + S1-a (2026-09-20)",
-      "last_verified": "2026-09-20",
+      "description": "DISCOVERED (S0): a carrier environment, a 3PL session tier with its own view allowlist and three carrier views already exist, which Founder decision T-2 retires (no external carrier users/logins). The code must NOT be deleted blindly: it is referenced by the RBAC tier tables and by browser specs. The dependency analysis and safe retirement belong to the Logistics Hub increment. Owner: Logistics Hub increment (S3/S4). **RESOLVED — RECONCILED 2026-09-26 (session 36): the retirement happened in §P9 ('the 3PL carrier surface is REMOVED COMPLETELY', 2026-09-23 session 22) and this row was left 'blocked', i.e. recorded as unfinished work that no longer existed. Verified against the repository this session: `src/components/layout/CarrierShell.tsx` and `src/components/carrier/` DO NOT EXIST, `src/lib/auth/rbac.ts` carries the inline '§P9 (programme decision 4) — REPOINTED' comments where the `'3pl'` environment/tier/allowlist used to be, and `src/App.tsx` names the removed branch. Nothing is left to do here.**",
+      "evidence": "src/lib/auth/rbac.ts (§P9 REPOINTED); src/App.tsx (§P9 comment at the removed route branch); absence of src/components/layout/CarrierShell.tsx and src/components/carrier/ (asserted by scripts/validate-conversion-gate.mjs)",
+      "status": "built_and_tested",
+      "source": "Master build reconciliation — increment S0 + S1-a (2026-09-20); resolved by §P9 (2026-09-23); reconciled 2026-09-26 (session 36)",
+      "last_verified": "2026-09-26",
       "superseded_by": null
     },
     {
@@ -4883,10 +4912,10 @@
     {
       "id": "discovered-playwright-app-shell-390x844-timeout-under-load",
       "description": "DISCOVERED (2026-09-23, session 15) - the FULL Playwright suite (npx playwright test --workers=3) reports 1 failure: e2e/app-shell.spec.ts:298 'shell 390x844 - no horizontal overflow, drawer present' exceeds the 30s per-test budget INSIDE the page (Error: page.waitForTimeout: Test timeout of 30000ms exceeded) after loginAs + the drawer toggle, i.e. BEFORE any assertion runs, while the 430x932 and 375x812 variants of the SAME test pass in 27.3s / 24.6s under the same load. Re-run in isolation (--workers=1): 23/23 PASS, 390x844 green at 22.8s with no horizontal overflow. The product contract therefore holds; this is load/budget contention in the parallel run (each login flow costs ~20-23s), not an application defect. REPAIRED the same way the P2 pass repaired investor-demo 375x812: test.slow() with EVERY assertion unchanged - the suite re-run afterwards was fully green (464 passed / 0 failed / 2 skipped).",
-      "source": "P3 verification (Dashboard + logistics cleanup programme, 2026-09-23, session 15)",
-      "status": "deferred",
-      "evidence": "Full suite log: '1 failed ... 463 passed (19.0m)' + test-results/app-shell-App-Shell-.../error-context.md; isolated re-run: npx playwright test e2e/app-shell.spec.ts --workers=1 => 23 passed (3.2m)",
-      "last_verified": "2026-09-23",
+      "source": "P3 verification (Dashboard + logistics cleanup programme, 2026-09-23, session 15); reconciled to its true state 2026-09-26 (session 36)",
+      "status": "built_and_tested",
+      "evidence": "Full suite log: '1 failed ... 463 passed (19.0m)' + test-results/app-shell-App-Shell-.../error-context.md; isolated re-run: npx playwright test e2e/app-shell.spec.ts --workers=1 => 23 passed (3.2m); the repair is present at e2e/app-shell.spec.ts (`test.slow()` — asserted by scripts/validate-conversion-gate.mjs). RECONCILED 2026-09-26 (session 36): the row's own text says 'REPAIRED ... the suite re-run afterwards was fully green' while its status still read `deferred` — deferred is for work not being done, not for work already finished, so it was recorded as built_and_tested.",
+      "last_verified": "2026-09-26",
       "superseded_by": null
     },
     {

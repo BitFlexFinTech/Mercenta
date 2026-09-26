@@ -48,6 +48,7 @@ import type {
   ReturnTrackingEntry,
 } from '@/types';
 import {
+  applicationAttempts,
   demoApplications,
   getApplicationById,
   submitApplication,
@@ -402,6 +403,14 @@ function restorable<T>(name: string, arr: T[]): Restorable {
  */
 const RESTORABLE: Restorable[] = [
   restorable('applications', demoApplications),
+  /**
+   * §CG — the conversion gate's session attempt budget is canonical demo state:
+   * a replay after a reset must find an EMPTY ledger, exactly like the §P4
+   * channel-instruction store. Without this, attempts left by the previous run
+   * would count against the next one and the deterministic run could be refused
+   * as `attempt_limit` — a difference the replay digest would have to explain.
+   */
+  restorable('application_attempts', applicationAttempts),
   restorable('purchase_orders', demoPurchaseOrders),
   restorable('shipments', demoShipments),
   restorable('deductions', demoDeductions),

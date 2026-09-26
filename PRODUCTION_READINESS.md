@@ -6,6 +6,28 @@ and P8 are DONE, committed and (for the product phases) verified live on the dem
 evidence is in `PROJECT_STATUS.md` and in that document's per-phase sections). Everything below is still simulated;
 nothing was re-labelled live.**
 
+> **Addendum — session 36 (26 Sep): the §CG section immediately below was ADDED by the conversion-gate increment; the
+> P9–P12 sentence in the paragraph above is stale (P9–P13 and the whole PO-ACK programme are complete — see
+> `PROJECT_STATUS.md`). Only the §CG entry is new; the rest of this file has not been re-reviewed by that session.**
+
+## §CG — THE CONVERSION GATE (session 36, 26 Sep): what is honest about it, and its one go-live prerequisite
+
+- **The conversion gate's spam signals are BROWSER-SIDE, and the attempt budget is per session (§CG — DONE
+  2026-09-26).** The public application form (`src/components/auth/PartnerApplicationForm.tsx`) now enforces form
+  validation, an off-screen honeypot, a declared minimum fill time, a session attempt budget and a duplicate window —
+  every threshold and every applicant-facing sentence from ONE SSOT (`src/config/partnerApplication.ts`) through ONE
+  pure, fail-closed owner (`src/lib/onboarding/applicationGuard.ts`, zero network, injected clock). **No CAPTCHA and no
+  reputation score is claimed** (neither exists without a third-party service, and inventing a score would be a lie),
+  and **no provider is contacted**. **Remaining non-credential work — a genuine go-live prerequisite: a SERVER-SIDE
+  rate limit on the application write path, enforcing the SAME declared policy, once the applications table (Supabase)
+  is that write path.** Until then the budget is per browser session and a determined attacker is NOT blocked; the
+  platform states that plainly rather than implying protection it does not have.
+- **Link verification is still a REAL fetch of the applicant's own links (§CG — 2026-09-26).** It can take up to 10s
+  per link (`src/lib/verification/linkVerifier.ts`) and browser CORS leaves most results `unverified_manual_check`.
+  Since §CG it **never holds the submission open** — the application is recorded first and the verification status is
+  attached when it resolves — but a **server-side fetcher** would be needed for the results to be dependable. The
+  record never overstates what was checked, and the form never tells an applicant a link was verified.
+
 ## SESSION 13 — dashboard + logistics cleanup programme: what is still simulated / placeholder
 
 - **The ASIN is a clearly-simulated placeholder UNTIL the channel returns a real identifier (P8 — DONE 2026-09-23).**

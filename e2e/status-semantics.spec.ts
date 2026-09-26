@@ -33,6 +33,10 @@ test.describe('Phase D — status semantics & decision queue', () => {
     await page.locator('text=Partner Login').first().click();
     await page.waitForTimeout(500);
     await page.click('text=Request Partner Access');
+    // §CG minFillMs=2600 — the conversion gate refuses a submission faster than the
+    // declared minimum (APPLICATION_SPAM_POLICY.minFillMs = 2500 in the SSOT). §CG
+    // REPOINTED: these specs used to submit as soon as the answers were filled.
+    await page.waitForTimeout(2600);
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Queue Check Ltd');
     await fillCountry(page, 'Spain');
