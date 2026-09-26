@@ -26,7 +26,48 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **§PHONE: the partner-application phone number is COMPULSORY — ONE declared refusal, non-nullable types, and a number the reviewer can finally read** (2026-09-26, session 36)
+## CURRENT STATE — **§SSOT STAGE 1: ONE SOURCE OF TRUTH FOR THE WORK LAYER — a consignment's in-transit exception now has ONE writer and a real closing path; the work item closes by doing the work** (2026-09-26, session 36, third increment)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** **`5dd061d`** + the state checkpoint that follows it. **Canonical
+source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain` EMPTY** after the state
+commit. **THREE-WAY STATUS: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Local ✅ `npm run validate:all`
+**113 PASS / 0 FAIL (of 113)** · typecheck 0 · root tsc 0 · lint 0 · build ✓ 5.76s · GitHub ✅ pushed · **demo ⏸ NOT
+DEPLOYED — DELIBERATELY DEFERRED** to the programme's close (Stages 2-5 change the same surfaces) · **live ⏸ NOT
+VERIFIED.**
+
+**Founder-level scope:** the Founder's own observation that Work Management still showed open work — which was proved
+correct. **Programme record:** `docs/WORK_LAYER_SSOT_2026-09-26.md`.
+
+**What was found (measured, not inferred):**
+
+1. A consignment seeded at the terminal `live_amazon` milestone AND `delayed: true` — **the seed contradicted itself**
+   (Logistics: *"Live on retail-channel"*; Work Management: an open *"Delay — DH-PO-9212"*).
+2. **THREE writers, one fact:** the seed (`i % 4 === 1` / `i % 7 === 3`, in TWO files) · the DHL seam (set-only) · the
+   investor-demo script assigning `shipment.delayed` **directly**; plus the scenario engine assigning
+   `delayed`/`status` directly.
+3. **No platform action could clear the flag** — `setShipmentMilestone` wrote `status` only. Proven: advancing the
+   consignment to `live_amazon` left `exception` true and the item open, so the only way to hide it was to mark the
+   TASK done while the RECORD still said exception.
+4. `contract_renewal` has **no closing path at all** (`demoContracts` has no writer anywhere; the panel keeps renewal
+   drafts in local component state).
+5. **27 of the 47 open items are fabricated by arithmetic** (`COMPLIANCE_PATTERNS[bi % 3]`).
+6. The work layer's own gate (`validate-work-layer.mjs`, 103 assertions) was **never registered and never run**, and
+   there is no CI. The reported *"whole `validate:*` sweep 36/36"* covered **36 of 113** validators.
+   `npm run validate:all` now runs all 113.
+
+**What was fixed (Stage 1):** `SHIPMENT_RESOLVED_STATUSES` + `isResolvedShipmentStatus` · the NAMED
+`DEMO_SHIPMENT_EXCEPTION_SCENARIO` (arithmetic removed from both files, self-contradiction removed) ·
+`setShipmentMilestone` clears the flags at a resolved milestone (audited) · `raiseShipmentException` (raise-only,
+audited, REFUSES a resolved consignment) and `clearShipmentException` (idempotent, audited) are the ONLY writers ·
+every former writer routed through them with its old contract recorded inline · `WORK_SOURCE_CLOSING` declares every
+source's closing path with 7 gaps REPORTED · 14 new gate assertions (declaration completeness, the closing path driven
+for real, the refusal guard, the audit trail, no second writer, no arithmetic, seed coherence) ·
+`scripts/validate-all.sh` + `npm run validate:all`.
+
+**Remaining (the programme):** Stage 2 the parallel status · Stage 3 the surfaces · Stage 4 stop fabricating work ·
+Stage 5 one number · Stage 6 CI · Stage 7 the contract closing path. **Declared gaps:** `contract_renewal`,
+`founder_compliance`, `founder_setup`, `founder_integration`, `founder_funding`, `founder_finance`, `founder_ai_cost`.
+## PREVIOUS STATE — **§PHONE: the partner-application phone number is COMPULSORY — ONE declared refusal, non-nullable types, and a number the reviewer can finally read** (2026-09-26, session 36) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** **`d726166`** + the state checkpoint that follows it. **Canonical
 source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain`
