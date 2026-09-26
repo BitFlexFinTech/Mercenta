@@ -43,7 +43,9 @@ application runtime change)** and is now recorded. The whole recorded checkpoint
 holds: `validate:*` sweep **35/35** (exit codes) · `npm run typecheck` **0** · root `tsc --noEmit` **0** · `eslint` **0**
 on both S10-changed scripts · `npm run build` **✓ 5.89s** · registry verifier **209/64/17** · the deployed demo
 **`LIVE_VERIFICATION_PASS` — 193/193 checks, 0 page errors (brand 0 / admin 0 / superAdmin 0)**. No code change was
-made by this session.
+made by this session. The reconciliation checkpoint is **`72e664a`** (4 docs/state paths, no application runtime
+change). **Convention:** a state-checkpoint hash recorded here is always exactly one commit behind the branch head,
+because the commit that records the hash cannot contain its own hash — read the live head with `git rev-parse HEAD`.
 
 **Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
 nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary + the on-behalf
