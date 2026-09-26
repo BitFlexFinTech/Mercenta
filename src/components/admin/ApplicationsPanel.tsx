@@ -188,7 +188,12 @@ return(<div className="space-y-4">
                 {applicationStatusPresentation(app.status).label}
               </StatusBadge>
             </div>
-            <div className="grid grid-cols-3 gap-4 text-xs mb-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs mb-3">
+              {/* §PHONE — the applicant's number is COMPULSORY, so the reviewer must be
+                  able to read it here. Before this increment a phone was optional and
+                  the card showed SKUs / Revenue / Submitted only: a required contact
+                  number that the reviewer could not see would be collected and lost. */}
+              <div><span className="text-zinc-600">Phone:</span><span className="text-zinc-300 ml-1">{app.phone}</span></div>
               <div><span className="text-zinc-600">SKUs:</span><span className="text-zinc-300 ml-1">{app.skuCount??'N/A'}</span></div>
               <div><span className="text-zinc-600">Revenue:</span><span className="text-zinc-300 ml-1">{app.monthlyRevenue??'N/A'}</span></div>
               <div><span className="text-zinc-600">Submitted:</span><span className="text-zinc-300 ml-1">{new Date(app.createdAt).toLocaleDateString()}</span></div>

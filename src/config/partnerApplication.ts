@@ -25,6 +25,13 @@
  * FAIL CLOSED: an unknown, missing or uncomputable signal is a REJECTION, never a
  * silent acceptance (`src/lib/onboarding/applicationGuard.ts`).
  *
+ * WHAT IS COMPULSORY (Founder decision, 2026-09-26)
+ * -------------------------------------------------
+ * Company name · country (from the declared list) · AT LEAST ONE brand link ·
+ * and, since this increment, A PHONE NUMBER. The phone moved from optional to
+ * REQUIRED; `missing_phone` is the declared refusal and the applicant-facing
+ * sentence says why it is needed. Nothing about the spam signals changed.
+ *
  * SUBMISSION RELIABILITY IS A SEPARATE, EXPLICIT PROMISE
  * -----------------------------------------------------
  * `verificationNeverBlocksSubmission` records the rule that link verification —
@@ -41,6 +48,7 @@ export type ApplicationSubmissionCode =
   | 'invalid_company'
   | 'missing_country'
   | 'unknown_country'
+  | 'missing_phone'
   | 'no_link'
   | 'invalid_website_url'
   | 'invalid_instagram_url'
@@ -67,6 +75,7 @@ export const APPLICATION_SUBMISSION_MESSAGES: Record<ApplicationSubmissionCode, 
   invalid_company: 'Company name must be between {min} and {max} characters.',
   missing_country: 'Please select your country.',
   unknown_country: 'Please choose your country from the list provided.',
+  missing_phone: 'Please enter a phone number so we can contact you about your application.',
   no_link: 'Please provide at least one link so we can verify your brand.',
   invalid_website_url: 'Please enter a valid website address, for example https://your-company.com.',
   invalid_instagram_url: 'Please enter a valid Instagram profile URL, for example https://instagram.com/your-brand.',
@@ -91,6 +100,17 @@ export const APPLICATION_SUBMISSION_MESSAGES: Record<ApplicationSubmissionCode, 
 export const PARTNER_APPLICATION_LIMITS = {
   companyName: { min: 2, max: 120 },
   country: { max: 80 },
+  /**
+   * §PHONE — THE PHONE NUMBER IS COMPULSORY (Founder decision, 2026-09-26).
+   *
+   * §PHONE — REPOINTED (the old contract recorded, never silently dropped): until
+   * this increment the phone was OPTIONAL — an empty answer was accepted, stored
+   * as `null`, and the label said `(optional)` because "the domain never enforced
+   * it". The Founder has now decided it IS required, so an empty or
+   * separator-only answer is refused as `missing_phone` and NOTHING is recorded.
+   * The digits are counted AFTER the separators a person actually types (space,
+   * `(`, `)`, `+`, `-`) are removed, so `+44 (0) 20 7946 0958` is 13 digits.
+   */
   phone: { minDigits: 6, maxDigits: 15 },
   skuCount: { min: 1, max: 1_000_000 },
   referralSource: { max: 80 },
@@ -162,6 +182,7 @@ export const APPLICANT_FIXABLE_CODES: readonly ApplicationSubmissionCode[] = [
   'invalid_company',
   'missing_country',
   'unknown_country',
+  'missing_phone',
   'no_link',
   'invalid_website_url',
   'invalid_instagram_url',

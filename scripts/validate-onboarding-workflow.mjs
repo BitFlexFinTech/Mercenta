@@ -116,7 +116,7 @@ try {
   // Application-origin record (no prospect needed) = the tenant under test.
   const app = apps.submitApplication({
     companyName: 'Harbour & Fen Trading Co', country: 'United Kingdom', category: 'Home',
-    phone: null, skuCount: 12, monthlyRevenue: '£250k', websiteUrl: null, instagramUrl: null,
+    phone: '+44 20 7946 0958', skuCount: 12, monthlyRevenue: '£250k', websiteUrl: null, instagramUrl: null,
     facebookUrl: null, websiteStatus: null, instagramStatus: null, facebookStatus: null,
     referralSource: 'Direct Outreach', description: 'UK homeware brand',
   });
@@ -200,7 +200,7 @@ try {
   /* ══ E. application → acceptance → ordered steps → OPERATIONAL ══ */
   const app2 = apps.submitApplication({
     companyName: 'Sable Ridge Homeware', country: 'Denmark', category: 'Home',
-    phone: null, skuCount: 30, monthlyRevenue: '€400k', websiteUrl: null, instagramUrl: null,
+    phone: '+45 32 12 34 56', skuCount: 30, monthlyRevenue: '€400k', websiteUrl: null, instagramUrl: null,
     facebookUrl: null, websiteStatus: null, instagramStatus: null, facebookStatus: null,
     referralSource: 'Embassy Referral', description: 'Danish homeware brand',
   });

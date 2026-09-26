@@ -293,7 +293,7 @@ try {
   acqStore.resetAcquisitionStore();
   const app = apps.submitApplication({
     companyName: 'E3 Regression Trading Co', country: 'United Kingdom', category: 'Home',
-    phone: null, skuCount: 8, monthlyRevenue: '£120k', websiteUrl: null, instagramUrl: null,
+    phone: '+44 20 7946 0958', skuCount: 8, monthlyRevenue: '£120k', websiteUrl: null, instagramUrl: null,
     facebookUrl: null, websiteStatus: null, instagramStatus: null, facebookStatus: null,
     referralSource: 'Direct Outreach', description: 'E3 regression brand',
   });

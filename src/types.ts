@@ -3100,7 +3100,17 @@ export interface BrandApplication {
   id: string;
   companyName: string;
   country: string;
-phone: string | null;
+  /**
+   * §PHONE — COMPULSORY (Founder decision, 2026-09-26).
+   *
+   * §PHONE — REPOINTED: this was `string | null` while the phone was optional, and
+   * the application form wrote `null` for a blank answer. An application without a
+   * contact number is now refused by the guard (`missing_phone`) before this writer
+   * is reached, and the type says so: no caller can construct an application that
+   * has no phone. (The three validator fixtures that used to pass `phone: null`
+   * were updated in the same increment.)
+   */
+  phone: string;
   category: string;
   skuCount: number | null;
   monthlyRevenue: string | null;

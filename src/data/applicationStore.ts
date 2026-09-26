@@ -106,7 +106,12 @@ export function submitApplication(input: {
   companyName: string;
   country: string;
   category: string;
-phone: string | null;
+  /**
+   * §PHONE — COMPULSORY, so never `null` (Founder decision, 2026-09-26).
+   * REPOINTED: this was `string | null`; the form used to write `null` whenever the
+   * applicant left the optional phone field blank.
+   */
+  phone: string;
   skuCount: number | null;
   monthlyRevenue: string | null;
   websiteUrl: string | null;

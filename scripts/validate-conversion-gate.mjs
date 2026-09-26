@@ -16,7 +16,9 @@
  *   2  the pure guard (`src/lib/onboarding/applicationGuard.ts`) is PURE (no clock,
  *      no network, no store) and FAILS CLOSED — every signal is exercised against
  *      the real module: honeypot, fill time, session rate, duplicate, URL/field
- *      validation, and the malformed-input paths;
+ *      validation, and the malformed-input paths. Since the 2026-09-26 Founder
+ *      decision the PHONE NUMBER is COMPULSORY, so an empty, whitespace-only or
+ *      separator-only answer must refuse as `missing_phone` and never be recorded;
  *   3  the store enforces the duplicate fail-safe at the domain boundary, records
  *      REFUSED attempts in the session budget, and patches link verification after
  *      the record exists;
@@ -197,6 +199,15 @@ const CASES = [
   ['a non-numeric product count is refused (NaN is not a number)', { skuCount: 'abc' }, {}, 'reject:invalid_sku_count'],
   ['a zero product count is refused', { skuCount: '0' }, {}, 'reject:invalid_sku_count'],
   ['a two-digit phone number is refused', { phone: '12' }, {}, 'reject:invalid_phone'],
+  /* §PHONE — the Founder made the phone COMPULSORY on 2026-09-26. These four cases
+   * are the refusal contract: an absent, blank, separator-only or non-string answer
+   * is REFUSED (never coerced to "no phone, carry on"), and the separators a person
+   * actually types are stripped before the digits are counted. */
+  ['a MISSING phone number is refused (it is compulsory)', { phone: '' }, {}, 'reject:missing_phone'],
+  ['a whitespace-only phone number is refused', { phone: '   ' }, {}, 'reject:missing_phone'],
+  ['a separator-only phone number is refused (absent, not "empty ⇒ accepted")', { phone: '---' }, {}, 'reject:missing_phone'],
+  ['a NON-STRING phone number FAILS CLOSED as missing', { phone: undefined }, {}, 'reject:missing_phone'],
+  ['a phone number typed with the usual separators is accepted and normalised', { phone: '+44 (0) 20 7946 0958' }, {}, 'accept:accepted'],
   ['an over-long description is refused', { description: 'x'.repeat(201) }, {}, 'reject:field_too_long'],
   [
     'an over-large payload is refused',
@@ -249,6 +260,68 @@ for (const [name, overrides, signals, expected] of CASES) {
   const decision = decide(overrides, signals);
   check(name, outcomeOf(decision) === expected, `got ${outcomeOf(decision)}, expected ${expected}`);
 }
+
+/* ── 3b. §PHONE — THE COMPULSORY ANSWER (Founder decision, 2026-09-26) ───────── */
+
+check(
+  'the accepted payload ALWAYS carries a phone (it is compulsory, never null)',
+  typeof decide().normalised?.phone === 'string' && (decide().normalised?.phone ?? '').length > 0,
+  String(decide().normalised?.phone)
+);
+check(
+  'the separators a person types are stripped before the digits are counted',
+  decide({ phone: '+44 (0) 20 7946 0958' }).normalised?.phone === '4402079460958',
+  String(decide({ phone: '+44 (0) 20 7946 0958' }).normalised?.phone)
+);
+check(
+  'missing_phone is declared in the SSOT vocabulary AND is applicant-fixable',
+  typeof cfg.APPLICATION_SUBMISSION_MESSAGES.missing_phone === 'string' &&
+    cfg.APPLICATION_SUBMISSION_MESSAGES.missing_phone.length > 0 &&
+    cfg.APPLICANT_FIXABLE_CODES.includes('missing_phone')
+);
+check(
+  'the missing-phone sentence says WHY it is needed (not "invalid input")',
+  /phone number/i.test(cfg.applicationMessage('missing_phone')) &&
+    /contact you/i.test(cfg.applicationMessage('missing_phone')),
+  cfg.applicationMessage('missing_phone')
+);
+check(
+  'a phone refusal blames the phone FIELD (so the form focuses it)',
+  decide({ phone: '' }).field === 'phone',
+  String(decide({ phone: '' }).field)
+);
+/* NEGATIVE — the type-level invariant, asserted against the DECLARATIONS (a local
+ * reassignment variable inside the guard is not a contract). `phone: string | null`
+ * on any of these three is what allowed the old optional contract; if it returns,
+ * the domain can once again record an application nobody can be contacted about. */
+check(
+  'NEGATIVE: the accepted-payload type declares a NON-NULLABLE phone',
+  /export interface NormalisedApplication[\s\S]*?\n  phone: string;/.test(readSrc(GUARD)) &&
+    !/export interface NormalisedApplication[\s\S]*?\n  phone: string \| null;/.test(readSrc(GUARD))
+);
+check(
+  'NEGATIVE: the stored-application type declares a NON-NULLABLE phone',
+  /export interface BrandApplication \{[\s\S]*?\n  phone: string;/.test(readSrc('src/types.ts')) &&
+    !/export interface BrandApplication \{[\s\S]*?\n  phone: string \| null;/.test(readSrc('src/types.ts'))
+);
+check(
+  'NEGATIVE: the canonical writer refuses a nullable phone in its input contract',
+  /export function submitApplication\(input: \{[\s\S]*?\n  phone: string;/.test(readSrc(STORE)) &&
+    !/export function submitApplication\(input: \{[\s\S]*?\n  phone: string \| null;/.test(readSrc(STORE))
+);
+check(
+  'NEGATIVE: the guard — not the form — is where the missing phone is refused',
+  /issue\('phone', 'missing_phone'\)/.test(codeOf(GUARD))
+);
+check(
+  'NEGATIVE: the form can no longer write a null phone',
+  !/phone:\s*normalised\.phone \?/.test(codeOf(FORM)) && /phone: `\$\{phoneCode\}/.test(codeOf(FORM))
+);
+check(
+  'the reviewer can READ the compulsory number on the application card',
+  /\{app\.phone\}/.test(readSrc('src/components/admin/ApplicationsPanel.tsx')),
+  'the admin card would collect a required phone and hide it'
+);
 
 /* ── 4. PURITY, NORMALISATION AND THE TIME-BASED REFUSALS ─────────────────── */
 
@@ -376,7 +449,9 @@ const submission = (over = {}) => ({
   companyName: 'Dedupe Fail-Safe Ltd',
   country: 'United Kingdom',
   category: 'Home',
-  phone: null,
+  /* §PHONE — compulsory since the 2026-09-26 Founder decision, so no fixture can
+   * hand the writer a null phone any more. */
+  phone: '+44 2079460958',
   skuCount: 5,
   monthlyRevenue: '£5k–£20k',
   websiteUrl: 'https://dedupe.example',
@@ -476,9 +551,10 @@ check(
 check('the form-level refusal is separately addressable', /data-cg-notice/.test(formCode));
 check('browser-native validation cannot pre-empt the declared messages', /noValidate/.test(formCode));
 check(
-  'the form no longer claims a phone number is required (the domain never did)',
-  /Phone Number <span className="text-zinc-600">\(optional\)<\/span>/.test(readSrc(FORM)) &&
-    !/Phone Number <span className="text-red-400">\*<\/span>/.test(readSrc(FORM))
+  'the form is now allowed (and required) to claim the phone is required — §PHONE REPOINTED',
+  /Phone Number <span className="text-red-400">\*<\/span>/.test(readSrc(FORM)) &&
+    !/Phone Number <span className="text-zinc-600">\(optional\)<\/span>/.test(readSrc(FORM)),
+  'the label still disagrees with the domain about the phone'
 );
 
 /* ── 7. THE TWO REGISTRY ROWS THIS SESSION RECONCILED ─────────────────────── */
@@ -510,14 +586,23 @@ check(
   conversion ? conversion.status : 'row missing'
 );
 check(
-  'the row records WHY the phone label changed (a UI claim corrected, not a new requirement)',
-  Boolean(conversion) && /optional/i.test(conversion.description)
+  'the row records the Founder decision that made the phone COMPULSORY (§PHONE REPOINTED)',
+  Boolean(conversion) &&
+    /COMPULSORY/i.test(conversion.description) &&
+    /missing_phone/.test(conversion.description),
+  conversion ? 'the row does not record the compulsory-phone decision' : 'row missing'
 );
 
 /* ── 8. THE BROWSER SPEC AND THE DEPLOYED LIVE LEGS ───────────────────────── */
 
 const specSrc = readSrc(SPEC);
 check('the browser spec drives the honeypot through its declared hook', /data-cg-honeypot/.test(specSrc));
+/* §PHONE — the applicant-visible half of the compulsory-phone contract must be proved
+ * in a real browser, not only by the domain gate. */
+check(
+  'the browser spec proves a MISSING phone is refused under the phone control',
+  /data-cg-error="phone"/.test(specSrc) && /#cg-phone/.test(specSrc)
+);
 check('the browser spec reads the declared form-level refusal', /data-cg-notice/.test(specSrc));
 check('the browser spec drives the declared minimum fill time', /§CG minFillMs=\d+/.test(specSrc));
 

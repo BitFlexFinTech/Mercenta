@@ -1430,6 +1430,10 @@ const cgT0 = Date.now();
 await cgTiming.getByText('Request Partner Access').first().click().catch(() => {});
 await scriptedFill(cgTiming.locator('[data-cg-field="companyName"]'), 'Fast Script Ltd');
 await chooseUk(cgTiming);
+/* §P13/CG — §PHONE · the phone is COMPULSORY since 2026-09-26 and VALIDATION runs
+ * before the spam signals, so a timing leg without a phone would be refused for the
+ * missing phone instead of for being too fast. Every other leg below supplies one. */
+await scriptedFill(cgTiming.locator('[data-cg-field="phone"]'), '2079460958');
 await scriptedFill(cgTiming.locator('[data-cg-field="websiteUrl"]'), 'https://example.com');
 await cgTiming.getByText('Submit Application').first().click().catch(() => {});
 await cgTiming.waitForTimeout(1500);
@@ -1469,6 +1473,7 @@ check('§P13/CG the honeypot is hidden from assistive technology and cannot be t
 
 await cg.fill('input[placeholder*="registered business name"]', 'Deployed Gate Check Ltd').catch(() => {});
 await chooseUk(cg);
+await cg.fill('#cg-phone', '2079460958').catch(() => {});
 await cg.fill('input[placeholder*="https://your-company.com"]', 'https://example.com').catch(() => {});
 await scriptedFill(cg.locator('[data-cg-honeypot] input'), 'filled-by-a-bot');
 await cg.getByText('Submit Application').first().click().catch(() => {});
@@ -1502,6 +1507,7 @@ if (cgReceived) {
   await cg.waitForTimeout(3000);
   await cg.fill('input[placeholder*="registered business name"]', 'Deployed Gate Check Ltd').catch(() => {});
   await chooseUk(cg);
+  await cg.fill('#cg-phone', '2079460958').catch(() => {});
   await cg.fill('input[placeholder*="https://your-company.com"]', 'https://example.com').catch(() => {});
   await cg.getByText('Submit Application').first().click().catch(() => {});
   await cg.waitForTimeout(1500);
@@ -1519,6 +1525,7 @@ if (cgReceived) {
   await cg.waitForTimeout(3000);
   await cg.fill('input[placeholder*="registered business name"]', 'Deployed Gate Check Ltd').catch(() => {});
   await chooseUk(cg);
+  await cg.fill('#cg-phone', '2079460958').catch(() => {});
   await cg.fill('input[placeholder*="https://your-company.com"]', 'https://example.com').catch(() => {});
   await cg.getByText('Submit Application').first().click().catch(() => {});
   await cg.waitForTimeout(1500);
@@ -1535,6 +1542,45 @@ if (cgReceived) {
 check('no uncaught page error on the deployed §P13/CG conversion flow',
   cgErrors.length === 0, cgErrors.slice(0, 2).join(' | '));
 await cg.close();
+
+/* ── PAGE 3 — THE COMPULSORY PHONE, ON THE DEPLOYED BUNDLE ───────────────────
+ * Its own page (its own session ledger, so the attempt-budget legs above are not
+ * disturbed). Every answer except the phone is valid, so the ONLY refusal that can
+ * fire is the phone — which is what makes this leg a real proof rather than a
+ * second copy of the "missing company" case.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+const cgPhone = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const cgPhoneErrors = [];
+cgPhone.on('pageerror', (e) => cgPhoneErrors.push(String(e)));
+await openDeployedForm(cgPhone);
+await cgPhone.waitForTimeout(3000); // out of the declared minimum fill time
+await cgPhone.fill('input[placeholder*="registered business name"]', 'Deployed No-Phone Ltd').catch(() => {});
+await chooseUk(cgPhone);
+await cgPhone.fill('input[placeholder*="https://your-company.com"]', 'https://example.com').catch(() => {});
+await cgPhone.getByText('Submit Application').first().click().catch(() => {});
+await cgPhone.waitForTimeout(1500);
+
+const cgPhoneLabel = await cgPhone
+  .locator('label')
+  .filter({ hasText: 'Phone Number' })
+  .first()
+  .innerText()
+  .catch(() => '');
+check('§P13/CG the DEPLOYED form labels the phone as REQUIRED and no longer says "(optional)"',
+  cgPhoneLabel.includes('*') && !/optional/i.test(cgPhoneLabel),
+  cgPhoneLabel.slice(0, 80));
+
+const cgPhoneError = await cgPhone.locator('[data-cg-error="phone"]').innerText().catch(() => '');
+check('§P13/CG the DEPLOYED gate REFUSES a submission with no phone and does NOT confirm it',
+  /phone number/i.test(cgPhoneError) && (await confirmedCount(cgPhone)) === 0,
+  cgPhoneError.slice(0, 140));
+check('§P13/CG the DEPLOYED phone refusal marks the control invalid for assistive technology',
+  (await cgPhone.locator('[data-cg-field="phone"][aria-invalid="true"]').count().catch(() => 0)) === 1);
+check('no uncaught page error on the deployed §P13/CG compulsory-phone flow',
+  cgPhoneErrors.length === 0, cgPhoneErrors.slice(0, 2).join(' | '));
+await cgPhone.close();
+
 
 console.log('\n--- LIVE VERIFICATION SUMMARY ---');
 const passed = results.filter((r) => r.startsWith('PASS')).length;

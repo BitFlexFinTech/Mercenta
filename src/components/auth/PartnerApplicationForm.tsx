@@ -184,7 +184,11 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
         companyName: normalised.companyName,
         country: normalised.country,
         category,
-        phone: normalised.phone ? `${phoneCode} ${normalised.phone}`.trim() : null,
+        /* §PHONE — COMPULSORY, so this is never null: the guard refuses an empty
+         * answer before this line is reached, and `NormalisedApplication.phone` is a
+         * `string`. The applicant's digits carry their country's declared dialling
+         * code, which the control above shows them. */
+        phone: `${phoneCode} ${normalised.phone}`.trim(),
         skuCount: normalised.skuCount,
         monthlyRevenue,
         websiteUrl: normalised.websiteUrl,
@@ -322,12 +326,15 @@ export function PartnerApplicationForm({ onBack, onSubmitted }: PartnerApplicati
           </div>
           {selectedCountry && (
             <div>
-              {/* §CG — the `*` that used to sit here claimed a requirement the
-                  domain never enforced (`BrandApplication.phone` is nullable and the
-                  applicant was allowed to leave it empty). The UI no longer claims
-                  it; making a phone COMPULSORY is a commercial decision, not a
-                  defect fix, and is recorded as such rather than invented. */}
-              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Phone Number <span className="text-zinc-600">(optional)</span></label>
+              {/* §PHONE — REPOINTED (Founder decision, 2026-09-26). The comment that
+                  stood here recorded that the `*` had been REMOVED because the domain
+                  did not enforce a phone (`BrandApplication.phone` was nullable) and
+                  that making one COMPULSORY was a commercial decision for the Founder
+                  rather than a defect fix. That decision has now been taken: the guard
+                  refuses an empty answer as `missing_phone` and the stored record type
+                  is non-nullable, so the `*` is BACK and the label matches the domain
+                  exactly — it claims nothing the domain does not enforce. */}
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Phone Number <span className="text-red-400">*</span></label>
               <div className="flex gap-2">
                 <div className="flex-shrink-0 bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-zinc-400 font-mono flex items-center">
                   {phoneCode || '—'}

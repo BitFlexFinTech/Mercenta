@@ -16,6 +16,14 @@
  *      so a rejection from link verification left the button on "..." forever with
  *      no message, and a double submit could record two applications.
  *
+ * WHAT IS COMPULSORY (Founder decision, 2026-09-26)
+ * -------------------------------------------------
+ * Company name · country · at least one brand link · and, since this increment, a
+ * PHONE NUMBER. `missing_phone` is the declared refusal for an empty (or
+ * separator-only) answer. REPOINTED: the phone was optional and stored as `null`
+ * before this increment; the refusal now happens here, at the domain owner, not in
+ * the form.
+ *
  * WHAT THIS MODULE OWNS
  * ---------------------
  * ONE deterministic decision for one submission attempt:
@@ -60,7 +68,15 @@ export interface RawApplicationInput {
 export interface NormalisedApplication {
   companyName: string;
   country: string;
-  phone: string | null;
+  /**
+   * §PHONE — COMPULSORY, so never `null` (Founder decision, 2026-09-26).
+   *
+   * §PHONE — REPOINTED: this was `string | null` while the phone was optional.
+   * Making it non-nullable is the point of the change — an accepted application
+   * ALWAYS carries a contact number, and the compiler now says so instead of a
+   * comment saying so.
+   */
+  phone: string;
   skuCount: number | null;
   websiteUrl: string | null;
   instagramUrl: string | null;
@@ -266,7 +282,15 @@ export function validateApplicationInput(raw: unknown): ValidationResult {
 
   const phoneDigits = text(raw.phone).replace(/[\s()+-]/g, '');
   let phone: string | null = null;
-  if (phoneDigits) {
+  /* §PHONE — THE PHONE IS COMPULSORY (Founder decision, 2026-09-26).
+   * REPOINTED: this used to accept an empty answer silently (`phone` stayed
+   * `null`) because the domain did not require one. An empty — or
+   * separator-only, e.g. `'---'` — answer is now REFUSED as `missing_phone` and
+   * NOTHING is recorded, which is the same fail-closed treatment the company name
+   * and the country already receive. */
+  if (!phoneDigits) {
+    issues.push(issue('phone', 'missing_phone'));
+  } else {
     const { minDigits, maxDigits } = limits.phone;
     if (!/^\d+$/.test(phoneDigits) || phoneDigits.length < minDigits || phoneDigits.length > maxDigits) {
       issues.push(issue('phone', 'invalid_phone', { min: minDigits, max: maxDigits }));
@@ -335,6 +359,10 @@ export function validateApplicationInput(raw: unknown): ValidationResult {
 
   if (issues.length > 0) return { ok: false, issues };
   if (!country) return { ok: false, issues: [issue('country', 'unknown_country')] };
+  /* §PHONE — the same fail-closed backstop the country has: reaching here without a
+   * phone is impossible while the check above stands, and if the check is ever
+   * removed the value still cannot be recorded as `null`. */
+  if (!phone) return { ok: false, issues: [issue('phone', 'missing_phone')] };
 
   return {
     ok: true,

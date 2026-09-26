@@ -37,6 +37,10 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Test Brand Ltd');
     await fillCountry(page, 'United Kingdom');
+    /* §PHONE — compulsory since the 2026-09-26 Founder decision: without a number
+     * the form is refused for the phone (and the link rule below would never be
+     * reached), so this test supplies one and leaves the LINK as the only fault. */
+    await page.fill('#cg-phone', '2079460958');
     await page.click('text=Submit Application');
     await page.waitForTimeout(500);
     await expect(page.locator('text=Please provide at least one link')).toBeVisible({ timeout: 3000 });
@@ -54,6 +58,7 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Test Brand Ltd');
     await fillCountry(page, 'United Kingdom');
+    await page.fill('#cg-phone', '2079460958');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
     // §Phase 7F — submission runs real link verification (10s cap per link in
@@ -73,6 +78,7 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Admin Test Brand');
     await fillCountry(page, 'Germany');
+    await page.fill('#cg-phone', '3022112345');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
     // §Phase 7F — submission runs real link verification (10s cap per link in
@@ -104,6 +110,7 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Flag Test Brand');
     await fillCountry(page, 'France');
+    await page.fill('#cg-phone', '142681234');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
     // §Phase 7F — submission runs real link verification (10s cap per link in
@@ -155,6 +162,7 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Approved Entry Ltd');
     await fillCountry(page, 'Germany');
+    await page.fill('#cg-phone', '3022112345');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
     await expect(page.locator('text=Application Received')).toBeVisible({ timeout: 15000 });
@@ -218,6 +226,7 @@ test.describe('Access Gate — Brand Application & Approval Flow', () => {
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Reject Test Ltd');
     await fillCountry(page, 'Spain');
+    await page.fill('#cg-phone', '912345678');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
     // §Phase 7F — submission runs real link verification (10s cap per link in

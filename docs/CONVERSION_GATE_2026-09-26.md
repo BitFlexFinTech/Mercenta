@@ -177,3 +177,50 @@ proved to be this commit (the live `index.html` serves `assets/index-BcbITdAi.js
 
 
 
+
+---
+
+## §8 THE PHONE NUMBER BECOMES COMPULSORY (Founder decision, 2026-09-26 — a separate increment, same day)
+
+**The decision.** §CG closed with exactly one open PRODUCT decision recorded in the registry and in
+`PROJECT_STATUS.md`: *should a phone number become COMPULSORY on the partner application?* `BrandApplication.phone`
+was `string | null`, the guard accepted an empty answer as `null`, and the label had been corrected to `(optional)`
+precisely so the UI would stop claiming a requirement the domain did not enforce. The Founder has now taken that
+decision: **the phone is COMPULSORY.**
+
+**The requirement, fixed from the repository BEFORE implementing it.** R1 an empty, whitespace-only or separator-only
+answer is REFUSED as `missing_phone` and NOTHING is recorded · R2 the digits are counted after the separators a person
+actually types (space, `(`, `)`, `+`, `-`) are removed — non-numeric, fewer than 6 or more than 15 stays the
+pre-existing `invalid_phone` · R3 the accepted payload and the stored record are NON-NULLABLE
+(`BrandApplication.phone`, `NormalisedApplication.phone`, `submitApplication`'s input contract) · R4 the stored value
+is the applicant's digits prefixed with their country's declared dialling code · R5 the label claims the requirement,
+because the domain now enforces it · R6 the REVIEWER can read the number.
+
+**R6 was a finding, not a nicety.** The admin application card rendered SKUs / Revenue / Submitted only. Making a
+contact number compulsory while the only screen that reviews applications cannot display it would have collected the
+number and lost it — a requirement with no purpose. `ApplicationsPanel.tsx` now renders the phone.
+
+**The owners, unchanged in kind.** The SSOT (`src/config/partnerApplication.ts`) declares `missing_phone` and its one
+honest sentence; the pure owner (`src/lib/onboarding/applicationGuard.ts`) refuses it with the same fail-closed
+treatment the company name and the country already received, still with an injected clock and zero network; the shared
+type and the canonical writer's input contract are non-nullable; the form labels the field required and writes
+`dialling code + digits`; the reviewer reads it.
+
+**REPOINTED, never weakened.** Two assertions were pointed at the new source of truth, with their old contracts
+recorded inline: the form assertion used to require that the form did NOT claim a phone was required (*"the domain
+never did"*) — it now requires that it DOES, because the domain now does; and the registry assertion used to require
+the row to record the phone as `(optional)` — it now requires the row to record the DECISION. Both express the same
+invariant — the label and the registry tell the truth about the domain — aimed at the current contract.
+
+**What this broke, and how it was caught rather than hidden.** Because VALIDATION is evaluated before the spam
+signals, every leg whose purpose is to reach a SPAM signal must now carry a valid payload. The browser run caught this
+itself: `e2e/conversion-gate.spec.ts` test 2 (the timing signal) went RED, because a phone-less submission is refused
+for the missing phone — a FIELD refusal, so no form-level notice is rendered at all. A phone was supplied and the
+comment in the spec records why. The same correction was applied to `e2e/access-gate.spec.ts` (five submissions),
+`e2e/status-semantics.spec.ts` (one) and all three pages of the DEPLOYED legs in `scripts/verify-demo-live.mjs`.
+Three validator fixtures that used to pass `phone: null` were updated in the same pass — fixtures, not historical
+records.
+
+**Not in scope, recorded as an assumption.** No E.164 reformatting was introduced; the stored value stays the country's
+declaring dialling code plus the national digits exactly as the applicant typed them. That normalisation is unchanged
+and was already the behaviour while the phone was optional.

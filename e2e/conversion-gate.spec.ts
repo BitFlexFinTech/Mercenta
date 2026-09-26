@@ -50,6 +50,10 @@ async function openApplicationForm(page: Page) {
 async function fillRealApplication(page: Page, company: string) {
   await page.fill('input[placeholder*="registered business name"]', company);
   await fillCountry(page, 'United Kingdom');
+  /* §PHONE — the phone is COMPULSORY (Founder decision, 2026-09-26), so every helper
+   * that means "a complete application" must supply one. The country code is filled
+   * by selecting the country; the applicant adds their national number. */
+  await page.fill('#cg-phone', '2079460958');
   await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
 }
 
@@ -97,6 +101,11 @@ test.describe('§CG — conversion gate', () => {
     await page.click('text=Request Partner Access');
     await page.fill('input[placeholder*="registered business name"]', 'Too Fast Ltd');
     await fillCountry(page, 'United Kingdom');
+    /* §PHONE — the phone is COMPULSORY and VALIDATION is evaluated BEFORE the spam
+     * signals, so this leg must submit a VALID payload: without a phone it would be
+     * refused for the missing phone (a field refusal, no form-level notice at all)
+     * instead of for being too fast, and the timing signal would never be tested. */
+    await page.fill('#cg-phone', '2079460958');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
 
@@ -123,6 +132,25 @@ test.describe('§CG — conversion gate', () => {
     // The FIRST invalid field receives focus, so a keyboard or screen-reader user
     // lands on the field that needs fixing instead of hunting for it.
     await expect(page.locator('#cg-companyName')).toBeFocused();
+    await expect(page.locator('text=Application Received')).toHaveCount(0);
+  });
+
+  test('3b. a MISSING phone number is refused under the phone control (it is compulsory)', async ({ page }) => {
+    /* §PHONE — the Founder made the phone COMPULSORY on 2026-09-26. This is the
+     * applicant-visible half of that contract: the refusal appears UNDER the phone
+     * control (not only in a banner), the control is marked invalid, the applicant
+     * is focused on it, and the form never reaches the confirmed state. */
+    await openApplicationForm(page);
+    await fillRealApplication(page, 'No Phone Ltd');
+    await page.fill('#cg-phone', '');
+    await page.click('text=Submit Application');
+
+    const phoneError = page.locator('[data-cg-error="phone"]');
+    await expect(phoneError).toBeVisible({ timeout: 5000 });
+    await expect(phoneError).toHaveAttribute('role', 'alert');
+    await expect(phoneError).toContainText('phone number');
+    await expect(page.locator('[data-cg-field="phone"]')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#cg-phone')).toBeFocused();
     await expect(page.locator('text=Application Received')).toHaveCount(0);
   });
 

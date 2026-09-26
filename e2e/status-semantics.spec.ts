@@ -40,6 +40,7 @@ test.describe('Phase D — status semantics & decision queue', () => {
     await page.waitForTimeout(500);
     await page.fill('input[placeholder*="registered business name"]', 'Queue Check Ltd');
     await fillCountry(page, 'Spain');
+    await page.fill('#cg-phone', '912345678');
     await page.fill('input[placeholder*="https://your-company.com"]', 'https://example.com');
     await page.click('text=Submit Application');
     await expect(page.locator('text=Application Received')).toBeVisible({ timeout: 15000 });
