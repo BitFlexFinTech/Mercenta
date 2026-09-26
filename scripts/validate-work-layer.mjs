@@ -27,6 +27,8 @@ const work = await server.ssrLoadModule('/src/lib/work/workStore.ts');
 const cal = await server.ssrLoadModule('/src/lib/work/calendar.ts');
 const feed = await server.ssrLoadModule('/src/lib/events/eventFeed.ts');
 const store = await server.ssrLoadModule('/src/data/demoStore.ts');
+/** §SSOT — the resolved-milestone rule the consignment closing path obeys. */
+const types = await server.ssrLoadModule('/src/types.ts');
 /** §P7 — the CANONICAL owner of the invoice terms + the derived due date. */
 const invoiceTerms = await server.ssrLoadModule('/src/lib/commerce/invoiceTerms.ts');
 
@@ -534,6 +536,124 @@ test('reminder reset reports what it cleared', reminderReset.ledgerCleared > 0);
 test('after reminder reset nothing is active', runner.getActiveReminders('admin').length === 0);
 test('after reminder reset the sweep count is back to zero', runner.reminderSweepCount() === 0);
 work.resetWorkStore();
+
+/* ── 17. §SSOT — ONE SOURCE OF TRUTH FOR DERIVED WORK ─────────────────────────
+ * The user-visible defect this closes: a `shipment_exception` item ("Delay —
+ * PO-9212") stayed open for a consignment ALREADY at the terminal `live_amazon`
+ * milestone, and NO platform action could clear it, because three different writers
+ * owned the flag and none of them cleared it — the only way to hide the item was to
+ * mark the TASK done while the RECORD still said exception. These assertions make
+ * that impossible again.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+console.log('\n§ Single source of truth — a derived item must be closable by doing the work\n');
+
+/* (a) COMPLETENESS — every work source declares its closing path. */
+const closing = work.WORK_SOURCE_CLOSING;
+const labelledSources = Object.keys(work.WORK_SOURCE_LABELS);
+test(
+  'every work source declares a closing path (a source cannot exist undeclared)',
+  labelledSources.length === Object.keys(closing).length &&
+    labelledSources.every((s) => closing[s] !== undefined),
+  `${Object.keys(closing).length} declared / ${labelledSources.length} labelled`
+);
+
+/* (b) THE CLOSING PATH WORKS — the source this stage fixed. */
+const flagged = store.demoShipments.filter((s) => s.delayed || s.exception);
+const shipItems = () => work.getWorkItems('admin').filter((w) => w.source === 'shipment_exception');
+test(
+  'every flagged consignment produces exactly ONE work item (nothing invented or duplicated)',
+  flagged.length > 0 && flagged.every((s) => shipItems().filter((w) => w.entity.id === s.id).length === 1),
+  `${flagged.length} flagged · ${shipItems().length} item(s)`
+);
+test(
+  'NO consignment at a resolved milestone carries an in-transit flag (the seed cannot contradict itself)',
+  flagged.every((s) => !types.isResolvedShipmentStatus(s.status)),
+  flagged.filter((s) => types.isResolvedShipmentStatus(s.status)).map((s) => `${s.id}@${s.status}`).join(', ')
+);
+
+const shipTarget = shipItems()[0];
+const advancedShipment = store.setShipmentMilestone(shipTarget.entity.id, 'live_amazon');
+test(
+  'advancing a flagged consignment to a resolved milestone CLOSES its work item (doing the work closes the work)',
+  advancedShipment === true && !shipItems().some((w) => w.entity.id === shipTarget.entity.id)
+);
+
+const stillFlagged = shipItems()[0];
+const clearedExplicitly = stillFlagged
+  ? store.clearShipmentException(stillFlagged.entity.id, 'test:operator', 'Validator: carrier confirmed recovery')
+  : true;
+test(
+  'the explicit clearing writer also closes the item, and is idempotent',
+  clearedExplicitly === true &&
+    (stillFlagged === undefined || !shipItems().some((w) => w.entity.id === stillFlagged.entity.id)) &&
+    store.clearShipmentException(shipTarget.entity.id, 'test:operator', 'Validator: already clear') === true
+);
+
+/* (c) THE GUARD — a resolved consignment cannot acquire an in-transit problem. */
+const liveConsignment = store.demoShipments.find((s) => s.status === 'live_amazon');
+test(
+  'raising an in-transit exception on a RESOLVED consignment is REFUSED and leaves the record untouched',
+  store.raiseShipmentException(liveConsignment.id, { delayed: true }, 'test:operator', 'Validator: contradiction attempt') === false &&
+    liveConsignment.delayed === false &&
+    liveConsignment.exception === false
+);
+test(
+  'the refusal is AUDITED rather than silently accepted',
+  store.demoAuditLog.some((a) => a.action === 'shipment_exception_refused' && a.entityId === liveConsignment.id)
+);
+test(
+  'the automatic clearing transition is AUDITED',
+  store.demoAuditLog.some((a) => a.action === 'shipment_exception_cleared')
+);
+
+/* (d) NO SECOND WRITER — the facts the work layer derives from have one owner. */
+/* Assertions judge CODE, never comments: the old contract is recorded in a
+ * `REPOINTED` comment beside each fix, and a comment must not be able to satisfy —
+ * or fail — an assertion. */
+const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+const codeOf = (rel) => stripComments(readFileSync(rel, 'utf8'));
+const dhlSrc = codeOf('src/lib/dhl/domain.ts');
+const scenarioSrc = codeOf('src/lib/simulation/scenarioEngine.ts');
+const simSrc = codeOf('src/lib/simulation/investorDemo.ts');
+const seedSrc = codeOf('src/data/demoData.ts');
+const storeSrc = codeOf('src/data/demoStore.ts');
+test(
+  'the provider seam uses the owner instead of assigning consignment state directly',
+  !/shipment\.(delayed|exception) =/.test(dhlSrc) &&
+    !/shipment\.status = to;/.test(dhlSrc) &&
+    /raiseShipmentException\(/.test(dhlSrc) &&
+    /setShipmentMilestone\(/.test(dhlSrc)
+);
+test(
+  'the scenario engine uses the owner instead of assigning consignment state directly',
+  !/s\.(delayed|status) = /.test(scenarioSrc) && /raiseShipmentException\(/.test(scenarioSrc)
+);
+test(
+  'the investor-demo drill uses the owner instead of assigning the flag directly',
+  !/shipment\.delayed = /.test(simSrc) &&
+    /clearShipmentException\(/.test(simSrc) &&
+    /raiseShipmentException\(/.test(simSrc)
+);
+test(
+  'the seed declares the scenario instead of deriving it from position arithmetic',
+  !/i % 4 === 1/.test(seedSrc) && !/i % 7 === 3/.test(seedSrc) && /DEMO_SHIPMENT_EXCEPTION_SCENARIO/.test(seedSrc)
+);
+test(
+  'the consignment flags are written in ONE module (the domain owner), nowhere else under src/',
+  !/\.(delayed|exception) = /.test(dhlSrc) &&
+    !/\.(delayed|exception) = /.test(scenarioSrc) &&
+    !/\.(delayed|exception) = /.test(simSrc) &&
+    /\.(delayed|exception) = /.test(storeSrc)
+);
+
+/* (e) THE REMAINDER IS REPORTED, NOT HIDDEN. */
+console.log(`    declared gaps (a source with no closing path yet): ${work.WORK_SOURCE_CLOSING_GAPS.join(', ') || 'none'}`);
+test(
+  'the declared gaps are enumerable from the SSOT (so they are reported, never silently tolerated)',
+  Array.isArray(work.WORK_SOURCE_CLOSING_GAPS)
+);
+
 
 
 console.log(`\nWORK LAYER: ${failures === 0 ? 'PASS' : 'FAIL'} (${failures} failure(s))`);

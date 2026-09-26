@@ -592,10 +592,43 @@ export interface DemoShipment {
   eta?: ShipmentEta;
 }
 
+/**
+ * §SSOT — THE DEMO'S IN-TRANSIT EXCEPTION SCENARIO, NAMED (declared ONCE).
+ *
+ * WHO CARRIES AN IN-TRANSIT PROBLEM, and nothing else does. Each entry closes
+ * through the ONE writer (`clearShipmentException`, or a milestone in
+ * `SHIPMENT_RESOLVED_STATUSES`), so no consignment can hold work that no action
+ * clears. `scripts/validate-work-layer.mjs` asserts both the declaration and the
+ * closing path.
+ */
+const DEMO_SHIPMENT_EXCEPTION_SCENARIO: Record<string, { delayed?: boolean; exception?: boolean }> = {
+  /** PO-9201 · Astonish · Palletline, in the carrier network — a real in-transit delay. */
+  'shipment-po-lifecycle-brand-astonish-1': { delayed: true },
+  /** PO-9210 · Tapatío · DHL, at factory intake — a real in-transit exception. */
+  'shipment-po-lifecycle-brand-tapatio-0': { exception: true },
+};
+
 export const DEMO_SHIPMENTS: DemoShipment[] = DEMO_PURCHASE_ORDERS
   .filter((po) => po.status in SHIPMENT_STATUS_BY_PO)
-  .map((po, i) => {
+  .map((po) => {
     const brand = ALL_DEMO_BRANDS.find((b) => b.id === po.brandId)!;
+    const id = `shipment-${po.id}`;
+    /**
+     * §SSOT — THE DEMO'S IN-TRANSIT EXCEPTION SCENARIO, NAMED.
+     *
+     * REPOINTED (the old contract, recorded): these two flags used to be produced
+     * by POSITION ARITHMETIC — `delayed: i % 4 === 1` and `exception: i % 7 === 3`,
+     * in this file AND again in `demoStore.ts` — so the demo raised delay/exception
+     * work from a loop counter rather than from a declared situation, and the same
+     * fact had two writers. One consignment contradicted itself outright: PO-9212
+     * was at the terminal `live_amazon` milestone while flagged delayed.
+     *
+     * The scenario is now an explicit, reviewable declaration of WHICH consignments
+     * carry an in-transit problem, each of which closes through the ONE writer
+     * (`clearShipmentException`, or a milestone in `SHIPMENT_RESOLVED_STATUSES`).
+     * The assertion lives in `scripts/validate-work-layer.mjs`.
+     */
+    const scenario = DEMO_SHIPMENT_EXCEPTION_SCENARIO[id] ?? {};
     /**
      * Freight Collect = the retail channel arranges carriage, so the
      * channel-arranged carrier is used and Mercenta is never shown as choosing
@@ -607,7 +640,7 @@ export const DEMO_SHIPMENTS: DemoShipment[] = DEMO_PURCHASE_ORDERS
         ? AMAZON_PARTNERED_CARRIER
         : selectCarrierForLane(resolveShippingLane({ brandNation: brand.nation }));
     return {
-      id: `shipment-${po.id}`,
+      id,
       brandId: po.brandId,
       poNumber: po.poNumber,
       carrier,
@@ -624,8 +657,13 @@ export const DEMO_SHIPMENTS: DemoShipment[] = DEMO_PURCHASE_ORDERS
        * and the runtime path cannot disagree.
        */
       destination: destinationLabelForPo(po),
-      delayed: i % 4 === 1,
-      exception: i % 7 === 3,
+      /**
+       * §SSOT — the flags come from the NAMED scenario above, never from the row's
+       * position in this array. A consignment whose milestone is already resolved
+       * carries NO in-transit flag (see `SHIPMENT_RESOLVED_STATUSES`).
+       */
+      delayed: scenario.delayed === true,
+      exception: scenario.exception === true,
     };
   });
 

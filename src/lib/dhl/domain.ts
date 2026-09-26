@@ -15,7 +15,12 @@
  * audit are the existing Mercenta stores — never a parallel pipeline.
  */
 
-import { demoAuditLog, demoShipments } from '@/data/demoStore';
+import {
+  demoAuditLog,
+  demoShipments,
+  raiseShipmentException,
+  setShipmentMilestone,
+} from '@/data/demoStore';
 import { emitEvent } from '@/lib/events/eventFeed';
 import { createDhlClientForConnection } from './index';
 import { milestoneToShipmentStatus } from './transform';
@@ -234,9 +239,25 @@ export async function advanceShipmentViaDhl(ctx: DhlDomainInput): Promise<DhlAdv
 
   // Domain state transition (shared store — Carrier and Brand views see the
   // SAME record, tenant-scoped by their own queries).
-  shipment.status = to;
-  shipment.delayed = delayed || shipment.delayed;
-  shipment.exception = exception || shipment.exception;
+  /**
+   * §SSOT — REPOINTED (the old contract, recorded): the milestone was assigned
+   * DIRECTLY here (`shipment.status = to`), and the flags were merged with
+   * `delayed || shipment.delayed` — so the provider seam was a SECOND writer of
+   * consignment state, bypassing `STATUS_TO_STAGE` conformance, the canonical
+   * notify, and (most importantly) the resolved-milestone transition that clears an
+   * in-transit delay/exception. Both now go through the ONE owner, so the
+   * consignment record and the work list can never disagree. Semantics are
+   * unchanged: the provider can only RAISE a problem, never clear one by omission.
+   */
+  setShipmentMilestone(ctx.shipmentId, to);
+  raiseShipmentException(
+    ctx.shipmentId,
+    { delayed, exception },
+    actor,
+    exception
+      ? `DHL exception (simulated): ${status.exceptionReason ?? 'customs hold'}`
+      : `DHL reported a transit delay on milestone ${status.milestone}`
+  );
 
   auditIds.push(pushAudit({
     actor,

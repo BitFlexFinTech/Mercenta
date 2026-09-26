@@ -29,12 +29,13 @@ import {
   demoBrands,
   demoDeductions,
   demoPurchaseOrders,
-  demoShipments,
   createDeductionInStore,
   disputeDeduction,
+  raiseShipmentException,
   recordDisputeOutcome,
   reconcileDelivery,
   setPurchaseOrderStatus,
+  setShipmentMilestone,
 } from '@/data/demoStore';
 import { selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import {
@@ -449,11 +450,21 @@ async function scenarioDelayedDelivery(ctx: ScenarioRunContext): Promise<Scenari
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_shipment_created', 'shipment', shipmentId, brandId, `${actorId}: shipment created for PO ${po.poNumber}`, { runId, scenario: 'DELAYED_DELIVERY' }));
 
   // Mark shipment delayed + exception (real store flags), emit notification.
-  const s = demoShipments.find((x) => x.id === shipmentId);
-  if (s) {
-    s.delayed = true;
-    s.status = 'uk_customs_cleared';
-  }
+  /**
+   * §SSOT — REPOINTED (the old contract, recorded): this assigned `s.delayed` and
+   * `s.status` DIRECTLY on the domain record, making the scenario engine yet another
+   * writer of consignment state that bypassed the canonical milestone and exception
+   * writers (and their resolved-milestone transition). It now goes through the ONE
+   * owner, so a simulated scenario produces exactly the record state every other
+   * path produces and the work layer derives from the SAME facts.
+   */
+  setShipmentMilestone(shipmentId, 'uk_customs_cleared');
+  raiseShipmentException(
+    shipmentId,
+    { delayed: true },
+    actorId,
+    `${actorId}: SIM shipment ${shipmentId} delayed (DELAYED_DELIVERY)`
+  );
   steps.push({ step: 4, action: 'delivery_delayed', entityType: 'shipment', entityId: shipmentId, from: 'factory_intake', to: 'delayed', detail: 'uk_customs_cleared delayed', at: new Date().toISOString() });
   auditIds.push(audit(runId, () => ++auditCounter.n, 'scenario_delay', 'shipment', shipmentId, brandId, `${actorId}: shipment ${shipmentId} delayed`, { runId, scenario: 'DELAYED_DELIVERY' }));
   emitScenarioEvent(runId, 'compliance_doc_expiring', 'important', 'Shipment delayed', `SIM shipment ${shipmentId} delayed`, shipmentId, { scenario: 'DELAYED_DELIVERY' });

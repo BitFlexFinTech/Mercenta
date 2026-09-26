@@ -44,7 +44,7 @@ import type {
 } from '@/types';
 /* §P9 — the ONE shipment status → stage mapping (a VALUE, so imported separately
    from the type-only block above; declared once in `src/types.ts`). */
-import { STATUS_TO_STAGE } from '@/types';
+import { STATUS_TO_STAGE, isResolvedShipmentStatus } from '@/types';
 import {
   ALL_DEMO_BRANDS,
   DEMO_COMPLIANCE_DOCS,
@@ -56,6 +56,7 @@ import {
   DEMO_WORKFLOW_PURCHASE_ORDERS,
   type DemoBrandRow,
   type DemoProduct,
+  type DemoShipment,
 } from './demoData';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 import { simulatedAsinFor } from '@/lib/catalog/asin';
@@ -93,12 +94,17 @@ export const demoMessages: Message[] = [...DEMO_MESSAGES];
 
 export const demoPurchaseOrders: PurchaseOrder[] = [...DEMO_PURCHASE_ORDERS];
 
-export const demoShipments = DEMO_SHIPMENTS.map((s, i) => ({
-  ...s,
-  /** Deterministic operational flags for Logistics Control. */
-  delayed: i % 4 === 1,
-  exception: i % 7 === 3,
-}));
+/**
+ * §SSOT — the consignment collection IS the seed, and nothing is re-derived here.
+ *
+ * REPOINTED (the old contract, recorded): this used to RE-DERIVE the delay and
+ * exception flags with the same position arithmetic the seed already used
+ * (`delayed: i % 4 === 1` / `exception: i % 7 === 3`), so one fact had two writers
+ * in two files. The scenario is now declared ONCE
+ * (`DEMO_SHIPMENT_EXCEPTION_SCENARIO` in `demoData.ts`), and from then on the flags
+ * are domain state with ONE owner: the writers below.
+ */
+export const demoShipments: DemoShipment[] = DEMO_SHIPMENTS.map((s) => ({ ...s }));
 
 export const demoAuditLog: AuditLogEntry[] = [];
 export const demoShippingMargins: ShippingMargin[] = [];
@@ -275,9 +281,54 @@ export function amendShipment(
 ): boolean {
   const s = demoShipments.find((x) => x.id === shipmentId);
   if (!s) return false;
-  if (patch.carrier) s.carrier = patch.carrier;
-  if (patch.status) s.status = patch.status;
+  if (patch.carrier && patch.carrier !== s.carrier) {
+    const from = s.carrier;
+    s.carrier = patch.carrier;
+    pushShipmentAudit(s.id, s.brandId, 'shipment_carrier_amended', `Carrier ${from} → ${patch.carrier}`);
+    notifyCanonicalStoreChange();
+  }
+  /**
+   * §SSOT — REPOINTED (the old contract, recorded): the status branch used to
+   * assign `s.status` DIRECTLY, making this a SECOND writer of a consignment's
+   * milestone — no `STATUS_TO_STAGE` conformance check, no canonical notify, and
+   * none of the resolved-milestone transition that clears an in-transit
+   * delay/exception. Status now goes through the ONE writer, which fails closed on
+   * an unknown milestone.
+   */
+  if (patch.status) {
+    if (!setShipmentMilestone(shipmentId, patch.status as ShipmentStatus)) return false;
+  }
   return true;
+}
+
+/**
+ * §SSOT — THE ONE AUDIT LINE for consignment state. Every consignment mutation
+ * (milestone, carrier, exception raised/cleared/refused) records WHY it happened
+ * and WHO did it, exactly like the rest of the platform's domain writes.
+ *
+ * It SIGNALS the canonical change itself, following the established pattern for an
+ * audit helper (`recordComplianceAudit`): a function that writes to a canonical
+ * collection must announce it, which is what keeps the Brain and the logistics
+ * projection dynamic — asserted by `scripts/validate-canonical-propagation.mjs`.
+ */
+function pushShipmentAudit(
+  shipmentId: string,
+  brandId: string,
+  action: string,
+  reason: string,
+  actor = 'system:consignment'
+): void {
+  demoAuditLog.push({
+    id: `audit-shipment-${shipmentId}-${action}-${demoAuditLog.length + 1}`,
+    createdAt: new Date().toISOString(),
+    actorId: actor,
+    action,
+    entityType: 'shipment',
+    entityId: shipmentId,
+    brandId,
+    reason,
+  });
+  notifyCanonicalStoreChange();
 }
 
 /**
@@ -317,8 +368,95 @@ export function setShipmentMilestone(
    */
   if (!(status in STATUS_TO_STAGE)) return false;
   s.status = status;
+  /**
+   * §SSOT — THE CLOSING TRANSITION. A consignment at a resolved milestone is no
+   * longer in transit, so an in-transit delay/exception CANNOT survive the
+   * milestone that ends transit. This is what makes the work layer's
+   * `shipment_exception` item closable BY DOING THE WORK — advancing the
+   * consignment — instead of by marking the task done while the record still says
+   * exception (the two-sources-of-truth failure this replaces). See
+   * `SHIPMENT_RESOLVED_STATUSES` in `src/types.ts`.
+   */
+  if (isResolvedShipmentStatus(status) && (s.delayed || s.exception)) {
+    s.delayed = false;
+    s.exception = false;
+    pushShipmentAudit(
+      s.id,
+      s.brandId,
+      'shipment_exception_cleared',
+      `Milestone ${status} ends transit — the in-transit delay/exception was cleared automatically`
+    );
+  }
   /* The canonical conformance collection carries `status` (its `stage` lives on
      the legacy `Shipment` shape, which derives it from `STATUS_TO_STAGE`). */
+  notifyCanonicalStoreChange();
+  return true;
+}
+
+/**
+ * §SSOT — THE ONE RAISER for a consignment's in-transit exception flags.
+ *
+ * WHY IT EXISTS. `delayed` / `exception` are the ONLY gate on the work layer's
+ * `shipment_exception` item, and before this writer they had THREE writers: the
+ * seed (position arithmetic), the DHL seam (which could only ever SET them), and
+ * the investor-demo script assigning `shipment.delayed` DIRECTLY. One fact, three
+ * owners — so the work list could disagree with the record it points at.
+ *
+ * Semantics preserved exactly: it RAISES (never clears by omission — a carrier that
+ * reports no problem has not reported a recovery), and it is idempotent.
+ *
+ * FAIL CLOSED against a self-contradiction: a consignment already at a resolved
+ * milestone is REFUSED the flag, the record is untouched, and the refusal is
+ * audited rather than silently accepted.
+ */
+export function raiseShipmentException(
+  shipmentId: string,
+  flags: { delayed?: boolean; exception?: boolean },
+  actor: string,
+  reason: string
+): boolean {
+  const s = demoShipments.find((x) => x.id === shipmentId);
+  if (!s) return false;
+  if (isResolvedShipmentStatus(s.status)) {
+    pushShipmentAudit(
+      s.id,
+      s.brandId,
+      'shipment_exception_refused',
+      `REFUSED: ${s.status} is a resolved milestone, so an in-transit delay/exception cannot apply — ${reason}`,
+      actor
+    );
+    notifyCanonicalStoreChange();
+    return false;
+  }
+  const delayed = flags.delayed === true;
+  const exception = flags.exception === true;
+  if (!delayed && !exception) return true; // nothing raised (no new problem reported)
+  const changed = (delayed && !s.delayed) || (exception && !s.exception);
+  s.delayed = s.delayed || delayed;
+  s.exception = s.exception || exception;
+  if (changed) {
+    pushShipmentAudit(s.id, s.brandId, exception ? 'shipment_exception' : 'shipment_delayed', reason, actor);
+  }
+  notifyCanonicalStoreChange();
+  return true;
+}
+
+/**
+ * §SSOT — THE ONE CLEARER for a consignment's in-transit exception flags.
+ *
+ * The closing path the work layer was missing: before this existed, nothing but a
+ * demo script could clear the flags, so "Exception — <ref>" stayed open for ever
+ * and the only way to hide it was to mark the TASK done while the RECORD still said
+ * exception. Idempotent — clearing an already-clear consignment changes nothing and
+ * is not an error — and fail-closed on an unknown consignment.
+ */
+export function clearShipmentException(shipmentId: string, actor: string, reason: string): boolean {
+  const s = demoShipments.find((x) => x.id === shipmentId);
+  if (!s) return false;
+  if (!s.delayed && !s.exception) return true; // already clear: idempotent, nothing recorded
+  s.delayed = false;
+  s.exception = false;
+  pushShipmentAudit(s.id, s.brandId, 'shipment_exception_cleared', reason, actor);
   notifyCanonicalStoreChange();
   return true;
 }

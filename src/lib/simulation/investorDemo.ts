@@ -171,9 +171,11 @@ import {
   demoReconciliations,
   demoReturns,
   demoShipments,
+  clearShipmentException,
   getBrandCommercialModelRecord,
   getCommerceInvoiceForPo,
   listCommissionsForPayout,
+  raiseShipmentException,
   recordShippingMargin,
   resetBrandCommercialModels,
   resetSettledCommissions,
@@ -2245,15 +2247,22 @@ export async function runInvestorDemo(
     checks.invalidSubmissionCorrected = corrected.ok;
 
     // 3. Delayed shipment → recovery on the canonical shipment record.
+    /**
+     * §SSOT — REPOINTED (the old contract, recorded): this drill used to assign
+     * `shipment.delayed = true/false` DIRECTLY on the domain record, bypassing the
+     * canonical writers entirely (no audit, no canonical notify) — a third writer of
+     * a fact the work layer derives from. It now raises and clears through the ONE
+     * owner, exactly like the carrier seam does.
+     */
     const shipment = demoShipments.find((s) => s.id === shipId);
     if (!shipment) throw new Error('the demo shipment is missing');
     amendShipment(shipId, { status: 'uk_customs_cleared' });
-    shipment.delayed = true;
+    raiseShipmentException(shipId, { delayed: true }, 'sim:investor-demo', 'Investor-demo delay drill (simulated)');
     const delayed = demoShipments.find((s) => s.id === shipId);
     checks.delayedShipmentRecorded =
       delayed?.delayed === true && delayed.status === 'uk_customs_cleared';
     amendShipment(shipId, { status: 'destination_fc' });
-    shipment.delayed = false;
+    clearShipmentException(shipId, 'sim:investor-demo', 'Investor-demo recovery drill (simulated)');
     const recoveredShipment = demoShipments.find((s) => s.id === shipId);
     checks.delayedShipmentRecovered =
       recoveredShipment?.delayed === false && recoveredShipment.status === 'destination_fc';

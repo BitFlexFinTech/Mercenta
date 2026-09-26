@@ -34,6 +34,8 @@
     "validate:receipt-invoice": "node scripts/validate-receipt-invoice-automation.mjs",
     "validate:po-ack-programme": "node scripts/validate-po-ack-programme.mjs",
     "validate:conversion-gate": "node scripts/validate-conversion-gate.mjs",
+    "validate:work-layer": "node scripts/validate-work-layer.mjs",
+    "validate:all": "bash scripts/validate-all.sh",
     "validate:inventory": "node scripts/validate-p8-inventory.mjs",
     "validate:logistics-providers": "node scripts/validate-logistics-providers.mjs",
     "validate:channel-po-ingestion": "node scripts/validate-channel-po-ingestion.mjs",

@@ -168,6 +168,158 @@ export const WORK_SOURCE_LABELS: Record<WorkSource, string> = {
 };
 
 /**
+ * §SSOT — EVERY DERIVED SOURCE DECLARES HOW IT CLOSES.
+ *
+ * A derived work item exists because a canonical RECORD qualifies. It must
+ * therefore be closable BY THE PLATFORM ACTION THAT CHANGES THAT RECORD — never by
+ * marking the task done, which would leave the record and the work list
+ * disagreeing (two sources of truth for one fact).
+ *
+ *   `via`    — the action a human performs.
+ *   `owner`  — the module that owns the record whose state closes the item.
+ *   `writer` — the canonical writer that performs it, or `null` where the platform
+ *              currently has NO closing path. A `null` is a DECLARED GAP: it is
+ *              counted and reported, and `scripts/validate-work-layer.mjs` fails if
+ *              a WorkSource can exist without appearing here at all.
+ *
+ * The single-source-of-truth programme closed `shipment_exception` first (three
+ * writers → one, plus a real closing path). The `null` entries are the discovered
+ * remainder, reported rather than hidden.
+ */
+export interface WorkSourceClosing {
+  via: string;
+  owner: string;
+  writer: string | null;
+}
+
+export const WORK_SOURCE_CLOSING: Record<WorkSource, WorkSourceClosing> = {
+  po_acknowledgement: {
+    via: "Acknowledge the purchase order (the brand's decision; Mercenta may act on its behalf inside the closing window)",
+    owner: 'src/lib/commerce/poAcknowledgementWindow.ts',
+    writer: 'acknowledgePurchaseOrder',
+  },
+  po_window: {
+    via: 'Ship the purchase order — creating the consignment moves it out of the accepted/ready-to-fulfil window state',
+    owner: 'src/data/demoStore.ts',
+    writer: 'createShipmentForPO',
+  },
+  compliance_expiry: {
+    via: 'Submit or approve the compliance document',
+    owner: 'src/data/demoStore.ts',
+    writer: 'setComplianceDocStatus',
+  },
+  invoice_due: {
+    via: 'Settle the invoice payment',
+    owner: 'src/data/demoStore.ts',
+    writer: 'recordCommercePayment',
+  },
+  deduction_dispute: {
+    via: 'Resolve or accept the deduction',
+    owner: 'src/data/demoStore.ts',
+    writer: 'recordDisputeOutcome / setDeductionStatus',
+  },
+  /** The closing path this programme added first. */
+  shipment_exception: {
+    via: 'Advance the consignment to a resolved milestone, or clear the in-transit exception explicitly',
+    owner: 'src/data/demoStore.ts',
+    writer: 'setShipmentMilestone / clearShipmentException',
+  },
+  return_action: {
+    via: 'Confirm the forwarded return was received',
+    owner: 'src/lib/warehouse/returnsTracking.ts',
+    writer: 'recordBrandConfirmation',
+  },
+  outreach_followup: {
+    via: 'Progress or disqualify the prospect in CRM',
+    owner: 'src/data/prospectStore.ts',
+    writer: 'updateProspect',
+  },
+  /**
+   * DECLARED GAP (discovered 2026-09-26). `demoContracts` has NO writer anywhere in
+   * the platform — every reference is a read — and `ContractsAdminPanel` keeps a
+   * renewal DRAFT in local component state (`extraDrafts`) instead of in the
+   * canonical store. So a renewal cannot close this item, and the renewal flow is
+   * itself a second source of truth for contracts.
+   */
+  contract_renewal: {
+    via: 'Renew the contract (advance its term) or terminate it',
+    owner: 'src/data/demoStore.ts',
+    writer: null,
+  },
+  onboarding_step: {
+    via: 'Complete the onboarding step',
+    owner: 'src/lib/onboarding/onboardingLifecycle.ts',
+    writer: 'completeOnboardingStep',
+  },
+  commercial_remediation: {
+    via: 'Reassess the product once the brand supplies the missing commercial information',
+    owner: 'src/data/commercialReadinessStore.ts',
+    writer: 'upsertCommercialReadinessRecord',
+  },
+  commercial_review: {
+    via: "Record Mercenta's commercial decision and reassess the product",
+    owner: 'src/data/commercialReadinessStore.ts',
+    writer: 'upsertCommercialReadinessRecord',
+  },
+  founder_compliance: {
+    via: 'Complete the company-register check in the founder console',
+    owner: 'src/lib/commandCentre/commandCentre.ts',
+    writer: null,
+  },
+  founder_setup: {
+    via: 'Complete the platform setup item (Google / launch)',
+    owner: 'src/lib/commandCentre/commandCentre.ts',
+    writer: null,
+  },
+  founder_application: {
+    via: 'Decide the brand application',
+    owner: 'src/data/applicationStore.ts',
+    writer: 'updateApplicationStatus',
+  },
+  founder_integration: {
+    via: 'Clear the provider error — repair or reconnect the integration',
+    owner: 'src/integrations/connections.ts',
+    writer: null,
+  },
+  founder_opportunity: {
+    via: 'Progress the prospect / opportunity in CRM',
+    owner: 'src/data/prospectStore.ts',
+    writer: 'updateProspect',
+  },
+  founder_funding: {
+    via: 'Progress the funding route or relationship',
+    owner: 'src/lib/commandCentre/commandCentre.ts',
+    writer: null,
+  },
+  founder_finance: {
+    via: 'Record the finance/contribution decision',
+    owner: 'src/lib/commandCentre/commandCentre.ts',
+    writer: null,
+  },
+  founder_ai_cost: {
+    via: 'Resolve the AI cost-protection action',
+    owner: 'src/lib/commandCentre/commandCentre.ts',
+    writer: null,
+  },
+  manual: {
+    via: 'The work layer itself — a manual task has no canonical record, so the work layer IS its single source of truth',
+    owner: 'src/lib/work/workStore.ts',
+    writer: 'resolveWorkItem',
+  },
+};
+
+/** The DECLARED GAPS — sources with no closing path in the platform today. */
+export const WORK_SOURCE_CLOSING_GAPS: readonly WorkSource[] = (
+  Object.keys(WORK_SOURCE_CLOSING) as WorkSource[]
+).filter((s) => WORK_SOURCE_CLOSING[s].writer === null);
+
+/** The declared closing path for a source (every source is declared above). */
+export function closingForSource(source: WorkSource): WorkSourceClosing {
+  return WORK_SOURCE_CLOSING[source];
+}
+
+
+/**
  * §P3 — the declared action-id → work-source map for the founder console.
  *
  * Declared ONCE so the projection, the filters and the validators cannot drift,

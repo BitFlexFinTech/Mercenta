@@ -160,6 +160,38 @@ export const STATUS_TO_STAGE: Record<ShipmentStatus, ShipmentStage> = {
   live_amazon: 'live_amazon',
 };
 
+/**
+ * §SSOT — THE MILESTONES AT WHICH A CONSIGNMENT IS NO LONGER IN TRANSIT.
+ *
+ * Declared ONCE here, beside the milestone vocabulary and `STATUS_TO_STAGE`,
+ * because it is a fact about the milestone vocabulary and not about any one
+ * surface.
+ *
+ * WHY IT EXISTS. The work layer raises a `shipment_exception` item from a
+ * consignment's `delayed` / `exception` flags. Those flags describe an IN-TRANSIT
+ * problem, so a consignment that has arrived (`destination_fc`) or gone live
+ * (`live_amazon`) cannot still be carrying one. Before this declaration the demo
+ * contradicted itself at boot — `shipment-po-lifecycle-brand-tapatio-2` (PO-9212)
+ * sat at `live_amazon` WITH `delayed: true`, so Logistics showed "Live on
+ * retail-channel" while Work Management showed an open *"Delay — DH-PO-9212"* that
+ * no action could clear: two sources of truth for one fact.
+ *
+ * THE RULE. The ONE consignment writer (`demoStore.setShipmentMilestone`) clears
+ * both flags when the new milestone is in this set, and the exception raiser
+ * REFUSES to add a flag to a consignment already at one of these milestones
+ * (fail closed; `src/data/demoStore.ts`). `src/lib/work/workStore.ts` reads the
+ * flags and never keeps a copy.
+ */
+export const SHIPMENT_RESOLVED_STATUSES: readonly ShipmentStatus[] = [
+  'destination_fc',
+  'live_amazon',
+];
+
+/** True only for a milestone at which an in-transit delay/exception cannot exist. */
+export function isResolvedShipmentStatus(status: string): boolean {
+  return (SHIPMENT_RESOLVED_STATUSES as readonly string[]).includes(status);
+}
+
 export type ShipmentStatus =
   | 'factory_intake'
   | 'bak_depot'
