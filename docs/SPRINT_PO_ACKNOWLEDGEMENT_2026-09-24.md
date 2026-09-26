@@ -786,7 +786,7 @@ repository itself and is recorded here BEFORE the implementation:
   and `S11`'s parallel-testing precondition remains an activation step.
 
 
-## S10 — SEED / GATES / DEPLOY (THE CLOSING PASS) (2026-09-25, session 35)
+## S10 — SEED / GATES / DEPLOY (THE CLOSING PASS) (2026-09-26, session 35)
 
 **THE CONTRACT, FIXED FROM THE REPOSITORY FIRST (the S7/S8/S9 pattern).** The stage's row
 ("SEED / gates / deploy (final pass)") is the only written scope, so the contract was derived
