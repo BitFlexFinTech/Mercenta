@@ -1339,7 +1339,7 @@ const s10Raise = astonish.locator('button[data-state="commerce-raise-po"]').firs
 const s10RaiseVisible = await s10Raise.isVisible({ timeout: 10000 }).catch(() => false);
 const s10RaiseEnabled = s10RaiseVisible && (await s10Raise.isEnabled().catch(() => false));
 check('§P13/S10 SEED REACHABILITY — the deployed raise control is genuinely OPERABLE (no dead control)',
-  s10RaiseEnabled, s10RaiseVisible ? 'present but DISABLED' : 'not present');
+  s10RaiseEnabled, s10RaiseEnabled ? 'enabled' : s10RaiseVisible ? 'present but DISABLED' : 'not present');
 
 let s10Chain = '';
 if (s10RaiseEnabled) {

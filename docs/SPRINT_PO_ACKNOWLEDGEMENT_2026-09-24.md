@@ -39,7 +39,7 @@ the notification stages; the closing window; `mustReject` past the limit; `lateA
 | **S7** | ADMIN surfaces | **DONE** (this sprint) |
 | **S8** | ONBOARDING linking wizard | **DONE** (this sprint) |
 | **S9** | RECEIPT → INVOICE automation | **DONE** (this sprint) |
-| **S10** | SEED / gates / deploy (final pass) | **IN PROGRESS** (this sprint — the deploy/live leg closes it) |
+| **S10** | SEED / gates / deploy (final pass) | **DONE** (this sprint — `4122f84`, live-verified) |
 
 ## S1 — the window owner (2026-09-24, session 26)
 
@@ -897,8 +897,15 @@ intact); S11's channel-side activation preconditions are unchanged; the automati
 - **Playwright — the five affected specs: 22 passed / 0 failed (27.8s)**: `commerce-operational-
   simulation`, `invoicing`, `admin-operational-surfaces`, `brand-operational-surfaces`,
   `deterministic-journey`.
-- **The deployed leg of the contract (§P13/S10)** is recorded with the LIVE result in
-  `PROJECT_STATUS.md` — this stage is not COMPLETE until local = GitHub = demo are verified.
+- **The deployed leg of the contract (§P13/S10) — DONE: `LIVE_VERIFICATION_PASS`, 193/193 checks, 0 page errors**
+  (brand 0 / admin 0 / superAdmin 0) on `https://demo.mercenta.co.uk`, deployed from the verified commit `4122f84`
+  (the live `index.html` serves the SAME asset hash as the local build, `assets/index-BV7nUE7X.js`). The §P13/S10 legs
+  recorded: the operational-simulation surface renders; the raise control is **enabled**; the REAL chain walks live
+  **`chain: >>>`**; and **"THE RECEIPT RAISED THE INVOICE AUTOMATICALLY"** appears with a `SIM-INV-` number and the
+  terms the receipt carried. This closes S9's recorded "empty-state only" limitation. The FIRST live run reported
+  190/193 (an early admin page still reading "Loading..." and the two §P6 collect-lane legs) — all three PASS on the
+  warm re-run and none is in the S10 area: the cold-host/timing flake class S9 recorded, recorded not hidden.
+  **STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.**
 
 **HONEST LIMITS**
 

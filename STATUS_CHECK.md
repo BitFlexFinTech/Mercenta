@@ -26,7 +26,50 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **PO-ACK S9 DONE: the RECEIPT raises the invoice, and the automation has ONE owner** (2026-09-25, session 34)
+## CURRENT STATE — **PO-ACK PROGRAMME COMPLETE: S10 (seed / gates / deploy, the closing pass) is DONE — the ten-stage INVENTORY gate, and the deployed chain that PROVES the receipt raises the invoice** (2026-09-26, session 35)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** `4122f84` + the state checkpoint that follows it. **Canonical source:**
+the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain` EMPTY**
+after the state commit. **THREE-WAY STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `4122f84`** (local ✅ ·
+GitHub ✅ pushed `37f0c64..4122f84` · demo ✅ deployed, `LIVE_VERIFICATION_PASS` **193/193 checks, 0 page errors**,
+including the SEVEN new §P13/S10 legs; the deployed `index.html` serves the same asset hash as the local build,
+`assets/index-BV7nUE7X.js`).
+
+**Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
+nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary + the on-behalf
+writer; S3 (`64f1994`) = the work layer consumes the owner; S4 (`93d619e`) = the on-behalf draft + the approval that
+executes it; S5 (`8843ad2`) = the all-channel fan-out + the instant-message seam; S6 (`d3da66e`) = the brand surfaces;
+S7 (`dfa9cdb` + `5753a43`) = the admin surfaces; S8 (`8d9a092`) = the onboarding surfaces + the canonical LINK;
+S9 (`c037641`) = the RECEIPT → INVOICE automation. **S10 closes the programme: the seed inventory, the ten-stage gate
+inventory, and the deployed leg that proves the automation works live.** Programme record:
+`docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (§S10 — which opens with the CONTRACT fixed from the repository, because
+the stage row is the only written scope).
+
+**What changed (session 35):**
+
+1. **THE SEED QUESTION, ANSWERED FROM THE REPOSITORY.** The sweep found exactly TWO empty-at-boot demo states and BOTH
+   are DELIBERATE CONTRACTS, so neither was "fixed" by fabrication: (a) no seeded PO carries `simulated: true` —
+   `src/types.ts` declares *"Absent on legacy seed rows (unknown provenance is never re-labelled as simulation)"*, so the
+   console's *"Operable simulated purchase orders (0)"* is correct and the capability is reachable by DOING (Astonish is
+   cleared and holds a labelled `SEED-SIM-*` submission, so `evaluateCommerceEligibility` resolves `true`); (b) demo
+   tenants hold NO canonical onboarding record — `GlobalStateContext` declares it an intended *"no-op, so their behaviour
+   is unchanged"*. **No demo brand, account or fixture was added, removed or re-labelled.**
+2. **THE CLOSING INVENTORY GATE** — NEW `scripts/validate-po-ack-programme.mjs` (`validate:po-ack-programme`): the
+   ten-stage table (S1–S9 DONE), every stage's gate FILE, its `validate:*` REGISTRATION, a real assertion count above a
+   floor and the stage it NAMES, the live script's `§P13/S3…S10` legs, the ONE-OWNER invariants against the REAL modules
+   (config declarations, the identity-derived statement, the pure owner's arithmetic, the S9 owner, ONE declaration of
+   each window constant across `src/`), and the SEED inventory.
+3. **THE DEPLOYED CHAIN LEG** — NEW `§P13/S10` live legs: the deployed raise control must be ENABLED (a dead control
+   FAILS) and the REAL chain must run live — raise → acknowledge → fulfil → RECEIPT → **the invoice raised
+   AUTOMATICALLY** with the terms the receipt carried. This closes S9's recorded "empty-state only" limitation the only
+   truthful way.
+
+**Verified this session:** gate **88 assertions PASS / 0 FAIL / 0 network calls** (proved able to fail: 1 + 3 red, both
+files restored byte-identical) · `validate:*` sweep **35/35** on EXIT CODES · typecheck 0 · root `tsc` 0 · eslint 0 ·
+build ✓ 5.34s · the five affected specs **22/22 (27.8s)** · live **193/193, 0 page errors** (the first live run reported
+190/193 — a cold-host/timing flake of the class S9 recorded; all three legs pass on the warm re-run) · registry verifier
+**209/64/17**. **`S11`'s channel-side activation remains a credential step, not unfinished work.**
+## PREVIOUS STATE — **PO-ACK S9 DONE: the RECEIPT raises the invoice, and the automation has ONE owner** (2026-09-25, session 34) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** `c037641` + the state checkpoint that follows it. **Canonical source:**
 the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain` EMPTY**
