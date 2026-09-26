@@ -1304,10 +1304,15 @@ check('§S9 the deployed admin commerce surface states the automation from its O
 /** The manual issue control is the FALLBACK: it exists wherever an operable PO does. */
 const s9AdminRows = await admin.locator('[data-state="admin-commerce-receive"]').count();
 const s9AdminBody = await admin.locator('body').innerText().catch(() => '');
+/**
+ * §S9 — the empty-state sentence is styled `uppercase`, and `innerText` returns the
+ * RENDERED text, so the match is case-insensitive (the first run of this leg failed
+ * on exactly that, with the panel's statement passing in the same run).
+ */
 check('§S9 the deployed admin surface keeps the RECEIPT + the manual issue fallback (or states honestly that it has no operable PO)',
   s9AdminRows > 0
     ? (await admin.locator('[data-state="admin-commerce-issue-invoice"]').count()) > 0
-    : /Operable simulated purchase orders \(0\)/.test(s9AdminBody),
+    : /operable simulated purchase orders \(0\)/i.test(s9AdminBody),
   `${s9AdminRows} operable row(s)`);
 check('no uncaught page error on the deployed §S9 admin-commerce flow',
   adminErrors.length === 0, adminErrors.slice(0, 2).join(' | '));

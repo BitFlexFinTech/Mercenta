@@ -760,7 +760,14 @@ repository itself and is recorded here BEFORE the implementation:
   `npx eslint` **0** on every changed file · `npm run build` **✓ (5.47s)**.
 - **Playwright — the five affected specs: 22 passed / 0 failed (28.1s)**: `invoicing`,
   `admin-operational-surfaces`, `commerce-operational-simulation`, `deterministic-journey`,
-  `brand-operational-surfaces`.
+  `brand-operational-surfaces`; and **the ENTIRE suite: 515 passed / 2 skipped / 0 failed (517, 7.0m)** (one
+  earlier full run showed a single failure in `e2e/embedded-social.spec.ts` §6, unrelated to S9, which passes in
+  isolation and passed on the re-run — a parallel-run flake, recorded not hidden).
+- **LIVE on the deployed bundle — `LIVE_VERIFICATION_PASS`: 187/187 checks, 0 page errors** (brand 0 / admin 0 /
+  superAdmin 0), with the SEVEN new §S9 legs. The FIRST live run failed 18 legs on a COLD host (the app did not
+  mount, `#root html length 127`, and every brand-page leg failed with it) — one of those 18 was a REAL bug in the
+  new leg (a case-sensitive match against an element styled CSS-`uppercase`), which is fixed; the warm run is the
+  recorded result.
 
 **HONEST LIMITS**
 

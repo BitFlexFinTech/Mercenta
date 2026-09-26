@@ -26,7 +26,108 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **PO-ACK S8 DONE: the onboarding surfaces present the rule from its ONE owner, and the brand's acknowledgement is LINKED to the canonical onboarding record** (2026-09-25, session 33)
+## CURRENT STATE — **PO-ACK S9 DONE: the RECEIPT raises the invoice, and the automation has ONE owner** (2026-09-25, session 34)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** `c037641` + the state checkpoint that follows it. **Canonical source:**
+the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain` EMPTY**
+after the state commit. **THREE-WAY STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `c037641`** (local ✅ ·
+GitHub ✅ pushed `7365e8f..c037641` · demo ✅ deployed, `LIVE_VERIFICATION_PASS` **187/187 checks, 0 page errors**,
+including the SEVEN new §S9 legs; the deployed `index.html` serves the S9 bundle
+`assets/index-BV7nUE7X.js` — the same asset hash as the local build).
+
+**Founder directive:** *the Amazon purchase-order process is a REPLICA of Amazon's documented rules — Mercenta invents
+nothing.* S1 (`418d18b`) = the window OWNER; S2 (`5a36e94`) = the rule ENFORCED at the domain boundary +
+the on-behalf writer; S3 (`64f1994`) = the work layer consumes the owner; S4 (`93d619e`) = the on-behalf draft + the
+approval that executes it; S5 (`8843ad2`) = the all-channel fan-out + the instant-message seam; S6 (`d3da66e`) = the
+brand surfaces; S7 (`dfa9cdb` + `5753a43`) = the admin surfaces; S8 (`8d9a092`) = the onboarding surfaces + the
+canonical LINK. **S9 makes the RECEIPT the trigger of the invoice, with the automation owned in ONE place.**
+Programme record: `docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md` (§S9, which opens with the CONTRACT fixed from the
+repository — the stage row is the only written scope).
+
+**What changed (session 34):**
+
+1. **THE MISSING LINK, NAMED FIRST.** The receipt (`commerceLifecycle.receiveCommercePurchaseOrder`) and the invoice
+   (`commerceLifecycle.issueCommerceInvoice`, §P7) were **TWO human actions with nothing between them**, and the
+   receipt is the invoice's ONLY precondition — so the stage's job was exactly that link. **Whose rule it is:** the
+   channel documents its invoice rules (`AV-022`) and documents invoicing a **shipped** order; invoicing **after
+   RECEIPT** is Mercenta's OWN, stricter rule (`AV-018`). The automation is therefore a **Mercenta operating decision,
+   labelled as Mercenta's**, and never presented as a channel requirement.
+2. **THE ONE OWNER** — NEW `src/lib/commerce/receiptInvoiceAutomation.ts`: the PURE decision
+   (`receiptInvoiceAutomationDecision` — the **terms are validated FIRST**, then skip / refuse / issue), the write path
+   with the canonical invoice writer **INJECTED** (`applyReceiptInvoiceAutomation`, the `channelReceivingSync` shape,
+   so this module can never become a second way to raise an invoice), the declared automatic identity
+   `RECEIPT_INVOICE_AUTOMATION_ACTOR_ID = 'mercenta-system:receipt-invoice'`, the outcome codes
+   (`issue_on_receipt` / `already_invoiced` / `not_delivered` / `undeclared_terms` / `writer_refused`), the statement
+   `RECEIPT_INVOICE_AUTOMATION_STATEMENT` (Mercenta's own process labelled; the terms basis DERIVED from
+   `invoiceTerms`; the `AV-022` correction; the simulation provenance) and the ONE surface wording
+   `receiptInvoiceAutomationSummary`. No store, no clock, no randomness, no network.
+3. **THE RECEIPT IS THE TRIGGER.** `receiveCommercePurchaseOrder` gains an optional 4th argument carrying the terms
+   (absent ⇒ the owner's DECLARED default 30, **stated** in the outcome), runs the automation AFTER the receipt is
+   recorded, and returns `invoiceAutomation` + `invoice`. The invoice goes through `issueCommerceInvoice` — the SAME
+   canonical writer — so the receipt gate (`AV-018`), the number registry (`AV-022`), the zero-value refusal, the
+   canonical trail and the derived due date are all unchanged. The trigger's own authorisation (RBAC + tenant
+   isolation, enforced BEFORE the receipt) is what authorises the automatic issue.
+4. **ATTRIBUTION.** `issueCommerceInvoice` gains `automatedBy`: the automatic issue is attributed to Mercenta's
+   DECLARED automatic identity and **NAMES the human trigger on BOTH canonical records**
+   (`… Raised AUTOMATICALLY by mercenta-system:receipt-invoice (receipt by <actor>)`) — the S2/S5 precedent — so the
+   trail can never read as if somebody had issued the invoice by hand.
+5. **FAIL CLOSED, NEVER SILENT.** An undeclared term, a PO that is not delivered, and anything the canonical writer
+   refuses (a zero-value invoice) leave the **RECEIPT standing** (the goods arrived) and are **recorded** on the
+   canonical activity trail as `invoice_automation_refused` — ONE new member of the canonical activity union in
+   `src/types.ts`. Idempotency: an ACTIVE invoice ⇒ `skipped` (no second invoice, the chosen terms never overwritten;
+   `AV-022`'s correction is a cancel + a NEW Invoice ID).
+6. **THE SURFACES.** `CommerceOperationsPanel`: the terms are chosen **AT THE RECEIPT** (the select's enablement
+   REPOINTED — offered while an invoice can still be raised, disabled once one is in force), the receipt passes them
+   and states the outcome, the owner's statement renders (`data-state="admin-receipt-invoice-automation"`), and the
+   MANUAL issue control **survives as the fallback** and `AV-022`'s correction path. `CommerceSimulationPanel`: the
+   same statement (`data-state="commerce-receipt-invoice-automation"`) and the same outcome wording — ONE wording, so
+   two surfaces cannot describe the same outcome differently.
+7. **REPOINTED CARRIERS (old contract recorded inline).** The four browser specs that asserted the manual two-step:
+   `e2e/invoicing.spec.ts` (the terms are chosen BEFORE the receipt, which is what raises the invoice),
+   `e2e/admin-operational-surfaces.spec.ts`, `e2e/commerce-operational-simulation.spec.ts` and
+   `e2e/deterministic-journey.spec.ts` (including its shared `driveToDelivered` helper).
+8. **TWO REAL REGRESSIONS THE EXISTING GATES FOUND — repointed, never weakened.** `validate-e4-commerce`'s Q1/Q2/Q4
+   durable-write guarantee produced its invoice AFTER the conformance repository was injected — a write the automation
+   now performs at the earlier receipt — so it now proves the guarantee through the §S9 path itself (a PO RECEIVED
+   after the injection); and the E6/E7 change-scope guards gained the declared `S9_RECEIPT_INVOICE_SCOPE` /
+   `S9_RECEIPT_INVOICE_DECLARED` surface with their contracts unchanged.
+9. **AN INHERITED DEFECT RECONCILED — proved NOT S9-caused.** `validate-work-layer.mjs`'s *"brand reminder scope is a
+   subset of the admin reminder set"* compared **COUNTS** while its title states a **SUBSET relation**; it FAILED at
+   the §S8 checkpoint `7365e8f` (reproduced in a `git worktree` at that commit) and was never in the `validate:*` npm
+   sweep, so no session had run it. It is repointed to the invariant it names — every brand reminder IS in the admin
+   set, and the brand scope is non-empty so the check cannot pass vacuously — with the real numbers printed on failure
+   (they were `brand=2 admin=2`).
+
+**Verification (session 34 — all evidence produced in the same session):**
+
+- NEW gate `validate:receipt-invoice` → **61 assertions PASS, 0 FAIL, 0 network calls**. **Proved able to fail twice:**
+  the skip branch disabled → **5 red**; the undeclared-term refusal disabled → **4 red**; both restored
+  **byte-identical** (`shasum bbd95e59d8865c4718c0293ffbc6b215ec3ac65a`, unchanged).
+- Whole `validate:*` sweep → **34/34 PASS** (33 → 34), measured on **EXIT CODES**.
+- The affected non-npm gates **all PASS**: `validate-e4-commerce`, `e5-admin-surfaces`, `e6-brand-surfaces`,
+  `e7-embedded-social`, `work-layer`, `financial-reconciliation`, `investor-demo`, `automation`,
+  `demo-completeness`, `canonical-model`, `canonical-propagation`, `command-centre`.
+- `npm run typecheck` **0** · `npx tsc --noEmit` (root, incl. `e2e/` + `scripts/`) **0** · `npx eslint` **0** on every
+  changed file · `npm run build` **✓ (5.47s)**.
+- Playwright: the five affected specs **22 passed / 0 failed (28.1s)**; the FULL suite **515 passed / 2 skipped /
+  0 failed (517, 7.0m)**. (One earlier full run showed a SINGLE failure — `e2e/embedded-social.spec.ts` §6, E7
+  social-workspace isolation, unrelated to S9 — which **PASSES IN ISOLATION (1 passed, 10.9s)** and passed on the
+  re-run: a parallel-run flake, recorded rather than hidden.)
+- **LIVE:** `LIVE_VERIFICATION_PASS` — **187/187 checks, 0 page errors** (brand 0 / admin 0 / superAdmin 0) on the
+  deployed bundle, with the SEVEN new §S9 legs.
+- Registry verifier **209/64/17** (baseline `208/63/17` — the ONE new entry legitimately needs manual review).
+
+**Honest limits (recorded, not hidden):** the **deployed demo holds NO simulated purchase order** (the ten seeded POs
+are the channel's own, none `simulated`), so the admin console states *"Operable simulated purchase orders (0)"* and
+S9's automation is proved at the **DOMAIN level** (the gate drives the REAL receipt through the canonical writer) and
+by the surfaces' rendering rather than through a live automatic invoice. Two boundaries are DECISIONS: the channel
+**submission** stays P12's explicit, labelled action, and there is **no scheduled sweep** — the receipt IS the
+trigger, so no historical row is silently invoiced. Everything remains simulated (no accounting provider contacted;
+the invoice ledger is in memory; `S11`'s parallel-testing precondition is an activation step). The deploy log did not
+reach the script's final `Done.` line while the upload demonstrably landed — the artefact comparison (live
+`index.html` == local build hash) is the evidence.
+
+## PREVIOUS STATE — **PO-ACK S8 DONE: the onboarding surfaces present the rule from its ONE owner, and the brand's acknowledgement is LINKED to the canonical onboarding record** (2026-09-25, session 33) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** `8d9a092` + the state check point that carries this section — recorded in
 the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (the canonical source) and mirrored in `HANDOFF.md`.
