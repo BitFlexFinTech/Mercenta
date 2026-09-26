@@ -26,7 +26,55 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **§CG: THE CONVERSION GATE — form validation, spam protection and submission reliability are DONE, each with ONE declared owner** (2026-09-26, session 36)
+## CURRENT STATE — **§PHONE: the partner-application phone number is COMPULSORY — ONE declared refusal, non-nullable types, and a number the reviewer can finally read** (2026-09-26, session 36)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** **`d726166`** + the state checkpoint that follows it. **Canonical
+source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain`
+EMPTY** after the state commit. **THREE-WAY STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `d726166`**
+(local ✅ every figure re-run after the last edit · GitHub ✅ pushed · demo ✅ deployed — the live `index.html` serves
+`assets/index-MYBxCX4U.js`, the same hash as the local build — and `LIVE_VERIFICATION_PASS`: **209/209 checks,
+0 page errors**, all TWELVE `§P13/CG` legs GREEN including the three new `§PHONE` legs).
+
+**Founder-level scope:** the ONE decision the §CG pass recorded as OPEN — *"should a phone number become COMPULSORY on
+the partner application?"* — answered by the Founder, and nothing else. **Programme record:**
+`docs/CONVERSION_GATE_2026-09-26.md` **§8**.
+
+**What changed (session 36, second increment):**
+
+1. **THE RULE HAS ONE OWNER, AND IT FAILS CLOSED.** `src/config/partnerApplication.ts` declares `missing_phone` (the
+   vocabulary, its one honest sentence, and the applicant-fixable list);
+   `src/lib/onboarding/applicationGuard.ts` refuses an **empty / whitespace-only / separator-only / non-string**
+   answer — the same treatment `companyName` and `country` already received — with the fail-closed backstop the
+   country has, an injected clock and zero network.
+2. **THE TYPES MAKE THE INVARIANT STRUCTURAL.** `NormalisedApplication.phone` is a `string`;
+   `BrandApplication.phone` and `submitApplication`'s input contract are **non-nullable**, so no caller can construct
+   an application without a number.
+3. **THE SURFACES MATCH THE DOMAIN.** The form labels the phone **required** (`*`, no longer `(optional)`) and writes
+   the country's declared dialling code plus the national digits. **`ApplicationsPanel` now RENDERS the number** — a
+   *finding*, not a nicety: the admin card showed SKUs / Revenue / Submitted only, so a compulsory contact number
+   would have been collected and hidden from the only screen that reviews applications.
+4. **TWO GATES REPOINTED, NEVER WEAKENED.** The form-label assertion used to require that the form did NOT claim a
+   phone was required (*"the domain never did"*); it now requires that it DOES. The registry assertion used to require
+   the row to record the phone as `(optional)`; it now requires the row to record the DECISION. Same invariant — the
+   label and the registry tell the truth about the domain — aimed at the current contract, with both old contracts
+   recorded inline.
+5. **WHAT BROKE, CAUGHT IN THE RUN AND FIXED:** because VALIDATION is evaluated BEFORE the spam signals, every
+   spam-signal leg must carry a valid payload. `e2e/conversion-gate.spec.ts` **test 2 (the timing signal) went RED**
+   for exactly that reason, and a phone was supplied with the reason recorded in the spec. The same correction was
+   applied to `e2e/access-gate.spec.ts` (5 submissions), `e2e/status-semantics.spec.ts` (1) and all three deployed
+   pages in `scripts/verify-demo-live.mjs`; three validator fixtures that passed `phone: null` were updated
+   (fixtures, not historical records).
+6. **VERIFICATION (every figure measured this session).** `validate:conversion-gate` **163 PASS / 0 FAIL / 0 network**
+   (146 → 163), proved able to fail in TWO independent places with both files restored byte-identical · registered
+   `validate:*` sweep **36/36** · affected unregistered validators **5/5** · registry verifier **322/64/209/17**
+   (unchanged) · typecheck 0 · root `tsc` 0 · eslint 0 · build ✓ 5.90s · three affected specs
+   **19 passed / 0 failed / 2 skipped** · `app-shell` **23 passed** · live **209/209, 0 page errors**.
+7. **ONE HONEST LIVE NOTE.** The FIRST live run reported 208/209: the single failure was on an **UNRELATED** leg
+   (*"the admin Purchase Orders surface renders on the deployed build :: Loading..."*), read after a fixed 3000 ms
+   delay on a freshly deployed build. The re-run is **209/209**. **Nothing was weakened, skipped or altered to make
+   it pass**; the candidate robustness fix (wait on the PO number rather than a fixed delay) is recorded as a
+   follow-up, not applied unasked.
+## PREVIOUS STATE — **§CG: THE CONVERSION GATE — form validation, spam protection and submission reliability are DONE, each with ONE declared owner** (2026-09-26, session 36) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** **`ba43f45`** + the state checkpoint that follows it. **Canonical
 source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md` (this section mirrors it). **`git status --porcelain`
