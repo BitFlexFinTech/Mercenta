@@ -26,6 +26,18 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
+## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY (never ask)
+
+**This platform is STRICTLY for Amazon Vendor Central** — Mercenta operates the Vendor Central account, not the
+brand. The marketplace is the **UK** (`A1F83G8C2ARO7P`). The ten approved categories are the Amazon UK Vendor
+Central categories (`src/types.ts → APPROVED_CATEGORIES`).
+
+**Never ask the Founder to confirm the channel, the marketplace, or whether to start the Amazon process — those
+are decided and recorded.** Canonical sources: `.clinerules/mercenta-business-model.md` ·
+`docs/MERCENTA_BUSINESS_MODEL.md` §1 · `src/lib/spapi/transform.ts → UK_MARKETPLACE_ID` ·
+`src/types.ts → APPROVED_CATEGORIES`. Only TECHNICAL readiness is open (the missing server-side helpers behind
+the real SP-API / DHL / Palletline paths) — never the business model.
+
 ## CURRENT STATE — **§SSOT STAGE 5: ONE NUMBER — the nav badge and the work list count from ONE owner (`workCounts`) and every number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement** (2026-09-27, session 39, sixth increment)
 
 **Branch:** `redesign/foundation`. **Checkpoint:** **`b4d9037`** (the SECOND S5 implementation commit; its predecessor

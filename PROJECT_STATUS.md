@@ -14,6 +14,24 @@ LIVE VERIFICATION:        **NOT VERIFIED — deferred with the deployment.** No 
 OUTSTANDING BLOCKER:      none
 NEXT TASK:                **§SSOT STAGE 6 — CI WIRING.** `.github/` contains ONLY `dependabot.yml`, so NO gate runs on a push: add a workflow that runs `npm ci`, `npm run typecheck`, `npm run lint`, `npm run build` and `npm run validate:all` (the full 113-file corpus — `validate-work-layer` IS registered), and keep it honest (a failing validator must fail the job). THEN **S7 — the contract closing path (F5):** a canonical `renewContract`/`terminateContract` writer on the contract store, and the renewal draft written to the CANONICAL store instead of `ContractsAdminPanel.extraDrafts` (local component state). **Re-run `npm run validate:all` after EVERY stage — 113/113 is the bar.**
 EXACT NEXT STARTING POINT:`docs/WORK_LAYER_SSOT_2026-09-26.md` (§3 — the S5 DONE record and the S6/S7 entries) → `.github/` (today only `dependabot.yml`) → `package.json` (`validate:all` / `validate:work-layer`) → `scripts/validate-all.sh` → `src/components/admin/ContractsAdminPanel.tsx` (`extraDrafts` ~171-183, 225-239) + `src/data/demoStore.ts` (the contract store — F5 has NO writer) → `PROJECT_STATUS.md` headings 1–9.
+## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY
+
+**This platform is STRICTLY for Amazon Vendor Central.** Mercenta operates the Vendor Central account; a
+brand does not. The marketplace is the **UK** (`A1F83G8C2ARO7P`). The ten approved categories are the Amazon
+UK Vendor Central categories, declared ONCE in `src/types.ts` (`APPROVED_CATEGORIES`).
+
+**Do NOT ask the Founder to confirm the channel, the marketplace, or whether another channel should be
+considered. Never raise "which marketplace" or "should we start the Amazon process" as an open question — it
+is NOT open. It is already decided and already recorded.**
+
+Canonical sources (READ these; do not re-derive, do not ask):
+`.clinerules/mercenta-business-model.md` · `docs/MERCENTA_BUSINESS_MODEL.md` §1 ·
+`src/lib/spapi/transform.ts → UK_MARKETPLACE_ID` · `src/types.ts → APPROVED_CATEGORIES`.
+
+What IS legitimately open is only **technical readiness** — e.g. the missing server-side helpers the real
+SP-API / DHL / Palletline paths call — never the business model, the channel or the marketplace.
+
+
 
 
 
