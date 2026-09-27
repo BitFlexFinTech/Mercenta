@@ -190,8 +190,9 @@ PRODUCT_FAILURE · INTEGRATION_FAILURE · **SHIPMENT_PROGRESSION** (new) ·
 
 | Provider | Live credentials | Where entered | Extra code needed |
 |---|---|---|---|
-| Amazon SP-API | LWA Client ID + Secret + OAuth consent | Integrations → Amazon SP-API | Edge Functions `/functions/v1/spapi/*`; store refresh token as `vault:` secretRef |
-| DHL | DHL Express API key + billing account | Integrations → DHL UK | EF `/functions/v1/dhl/*` |
+| Amazon SP-API | LWA Client ID + Secret + OAuth consent | Integrations → Amazon SP-API | **EFs `/functions/v1/spapi/*` NOW EXIST (Batch 1a, session 40)** — deploy them (`supabase functions deploy spapi`, JWT verification ON) and set `SPAPI_CLIENT_ID/SECRET/REFRESH_TOKEN/MARKETPLACE_ID` (or store the refresh token as a `vault:` secretRef). 3 routes are live-capable; the rest refuse with a stated code — see `PRODUCTION_READINESS.md` §BATCH1a |
+| DHL | DHL Express API key + billing account | Integrations → DHL UK | **EF `/functions/v1/dhl/*` NOW EXISTS (Batch 1a, session 40)** — deploy it and set `DHL_API_KEY` (+ `DHL_ACCOUNT_NUMBER`) or store a `vault:` blob. Tracking is live-capable; booking + pickup refuse live until the shipment domain holds addresses/weights/dimensions |
+| Palletline | Palletline account creds (API/FTP per agreement) | Integrations → Palletline | **EF `/functions/v1/palletline/*` NOW EXISTS (Batch 1a, session 40)** — simulation only: the partner's wire contract is not confirmed, so every route refuses live with `PALLETLINE_CONTRACT_NOT_CONFIRMED` rather than inventing an endpoint |
 | Companies House | free-tier API key | Integrations → Companies House | EF `/functions/v1/companies-house` |
 | HMRC | MTD OAuth client id/secret + fraud headers | Integrations → HMRC | EF `/functions/v1/hmrc` |
 | Xero | client id/secret + tenant | Accounting panel / XERO_MODE | none (existing) |

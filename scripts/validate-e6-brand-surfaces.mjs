@@ -1549,6 +1549,32 @@ const SSOT_PROGRAMME_SCOPE = new Set([
   'scripts/validate-work-layer.mjs',
 ]);
 
+/**
+ * §BATCH1 — MAKE THE KEY HANDOVER REAL (2026-09-27) — REPOINTED.
+ *
+ * The recorded next task (`docs/NEXT_BUILD_PLAN_2026-09-27.md`, Batch 1) builds
+ * the server helpers the REAL provider clients have always called and which did
+ * not exist in this repository, so a real key could never make anything sync.
+ * Its declared surface is: the three provider Edge Functions, the ONE shared
+ * route manifest (routes + simulation + fail-closed orchestration), the per
+ * provider live callers, and this phase's own gate.
+ *
+ * F6's contract is UNCHANGED and NOT weakened: a working-tree path in NO declared
+ * set still fails, and no protected path may appear anywhere in the change set.
+ */
+const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
+  'supabase/functions/_shared/',
+  'supabase/functions/spapi/',
+  'supabase/functions/dhl/',
+  'supabase/functions/palletline/',
+  'scripts/validate-integration-proxy.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'package.json',
+  'docs/NEXT_BUILD_PLAN_2026-09-27.md',
+  'docs/INTEGRATIONS.md',
+  'PRODUCTION_READINESS.md',
+]);
+
   /**
    * §Sprint 2 — DETERMINISTIC PLATFORM COMPLETION (2026-09-19) — REPOINTED.
    *
@@ -1646,7 +1672,10 @@ const SSOT_PROGRAMME_SCOPE = new Set([
           [...S9_RECEIPT_INVOICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §SSOT — the work-layer single-source-of-truth programme (see above). */
           SSOT_PROGRAMME_SCOPE.has(p) ||
-          [...SSOT_PROGRAMME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...SSOT_PROGRAMME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH1 — the integration-proxy helpers phase (see above). */
+          BATCH1_INTEGRATION_PROXY_SCOPE.has(p) ||
+          [...BATCH1_INTEGRATION_PROXY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

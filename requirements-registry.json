@@ -442,7 +442,7 @@
         "S3": "DONE",
         "S4": "DONE (2026-09-27, session 38) — the demo's document states are DECLARED by name and the declared baseline is asserted by the gate",
         "S5": "DONE (2026-09-27, session 39) — one counting owner (`workCounts`) + the declared sets `WORK_COUNT_SETS` (attention / open / overdue) whose labels travel with every number; the OLD second counting path `workAttentionCount` is DELETED; the nav badge renders its label and equals the attention tile; §20 (17 assertions) proved able to fail",
-        "S6": "PARTIAL (validate:work-layer registered; validate:all runs 113/113; CI absent)",
+        "S6": "PARTIAL (validate:work-layer + validate:integration-proxy registered; validate:all runs 114/114; CI absent)",
         "S7": "NOT STARTED"
       },
       "declared_gaps": [
@@ -456,7 +456,53 @@
       ],
       "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (deployment + live verification deliberately deferred to the programme close, because S7 changes the same work surfaces; S5 is DONE and locally verified at the S5 commit)",
       "s5_evidence": "src/lib/work/workStore.ts (workCounts + WORK_COUNT_SETS; the second path workAttentionCount is DELETED); src/lib/nav/navBadges.ts (workCounts + NAV_BADGE_LABELS); src/components/layout/Sidebar.tsx (data-badge-label rendered with the number); AdminShell/BrandShell (badgeLabel from NAV_BADGE_LABELS); src/components/shared/WorkWorkspace.tsx (counts + declared labels); src/components/admin/SuperAdminPanel.tsx (counts.open / counts.overdue); scripts/validate-work-layer.mjs §20 (17 assertions, PASS); scripts/validate-uiux-redesign.mjs (the removed identifiers REPOINTED to workCounts/NAV_BADGE_LABELS, 348 PASS / 0 FAIL); e2e/work-layer.spec.ts test 1b (14 passed / 0 failed). Measured this session: validate:all 113 PASS / 0 FAIL; typecheck 0; lint 0; build ✓ 8.22s. Proved able to fail: re-introducing a second counting function ⇒ 3 §20 failures; a delegate-style second path ⇒ 2; removing the sidebar badge label ⇒ 1; every file restored byte-identical (workStore.ts sha256 e0a37b2c2a9f5d7db223beed7c85491bdcd725383be3343ebf00c34e30c7b95b). Measured demo counts at the pinned clock: admin {attention 39, open 46, overdue 1}; admin+superAdmin {attention 41, open 78, overdue 1} — the badge can never exceed the list because attention ⊆ open is asserted.",
-      "next_plan": "docs/NEXT_BUILD_PLAN_2026-09-27.md — the Founder-agreed order of work in THREE BATCHES. BATCH 1 make the key handover real: build the server helpers the real clients already call but which DO NOT EXIST (Amazon SP-API 12 routes at src/lib/spapi/client.ts 356-674; DHL 3 at src/lib/dhl/client.ts 108-157; Palletline 4 routes at src/lib/palletline/client.ts 113-208 — supabase/functions/ holds 9 functions and none of these), each mirroring the mock's shapes, making ZERO live calls and failing closed; then the connect wizard's backend half (secure key exchange + vault + the real harmless test); then S6 CI wiring + demo deploy + live verification; gate = a validator proving every route the real clients call HAS a helper, proved able to fail, then validate:all 113/113. BATCH 2 Amazon accuracy: the 37 OPEN findings in docs/AMAZON_RECONCILIATION_STATUS.md (52 total, 3 applied) — start AV-019/AV-019b, AV-024, AV-006, AV-007; the UNKNOWNs need a signed-in Vendor Central session and are never guessed. BATCH 3 prove what we claim: the 126 'built but never independently re-verified' registry rows (page-by-page parity audit), S7 the contract closing path (F5), and a closing path or a recorded reason for every declared gap. S6 and S7 of this programme map to Batch 1 and Batch 3 respectively."
+      "next_plan": "Batch 1a is DONE (the provider proxy helpers exist); the recorded next work is Batch 1b (the connect wizard backend half) and 1c (S6 CI wiring), then Batch 2 (Amazon accuracy) and Batch 3 (the registry re-verification + S7)."
+    },
+    "batch1_integration_proxy": {
+      "increment": "BATCH 1a — MAKE THE KEY HANDOVER REAL (session 40, 2026-09-27)",
+      "record": "docs/NEXT_BUILD_PLAN_2026-09-27.md (+ PRODUCTION_READINESS.md §BATCH1a)",
+      "status": "PARTIAL — 1a DONE; 1b and 1c NOT STARTED",
+      "built": [
+        "supabase/functions/_shared/proxyRoutes.ts (ONE manifest: 20 routes, simulation shapes, live status, stated refusal codes)",
+        "supabase/functions/spapi/index.ts + dhl/index.ts + palletline/index.ts (thin Deno helpers serving the manifest)",
+        "supabase/functions/_shared/live/spapiLive.ts + dhlLive.ts (the 3 contract-confirmed live routes, injectable transport)",
+        "supabase/functions/_shared/vault.ts + liveFetch.ts + operatorAuth.ts (server-side credential resolution, transport, operator gate)",
+        "scripts/validate-integration-proxy.mjs (51 assertions) registered as npm run validate:integration-proxy"
+      ],
+      "route_totals": {
+        "declared": 20,
+        "derived_from_clients": 20,
+        "live_capable": 3,
+        "simulation_only_stated_refusal": 17
+      },
+      "gates": {
+        "validate:integration-proxy": "51 assertions / 0 failures — INTEGRATION_PROXY_VALIDATION_PASS",
+        "validate:all": "114 PASS / 0 FAIL (of 114 files)",
+        "validate-e6-brand-surfaces": "PASS — F6 working-tree scope guard repointed with a declared §BATCH1 surface (mechanism unchanged)",
+        "typecheck": "0 errors",
+        "lint": "0 problems",
+        "build": "succeeded",
+        "proved_able_to_fail": [
+          "a client call with no declared route → 3 failures",
+          "the simulation branch invoking the live caller → non-zero exit"
+        ],
+        "restored_byte_identical": [
+          "src/lib/spapi/client.ts sha256 aaad77d0dab2ea7080bdbb5bc40a2c32b275f3addafa6723b018ca7e49529cf8",
+          "supabase/functions/_shared/proxyRoutes.ts sha256 86ffc85ca411d69a8c62061419e82aa6d08781049bdb89686b58a1f88673608d"
+        ]
+      },
+      "not_done": [
+        "the three Edge Functions are NOT deployed (no Supabase project credential / CLI in this environment)",
+        "none of the 3 live-capable routes has ever run against a provider (no live credential)",
+        "Batch 1b — the connect wizard backend half: /functions/v1/spapi-token-exchange is called by IntegrationsPanel.tsx and does not exist; secure key exchange + Vault WRITE unbuilt",
+        "Batch 1c — S6 CI wiring (.github/ holds only dependabot.yml)"
+      ],
+      "findings_recorded": [
+        "supabase/migrations/0002_integration_connections.sql is cited by STATUS_CHECK.md/PRODUCTION_READINESS.md but does NOT exist (27 migrations, none for integration connections)",
+        "pre-existing mock defect: src/lib/dhl/mockClient.ts raises the simulated customs exception at in_transit without holding the milestone, so its eventual retry branch is unreachable (the helper mirrors the mock exactly; the mock is unchanged)",
+        "the platform holds neither the channel itemSequenceNumber nor Mercenta's selling-party id, and the shipment domain holds no addresses/weights/dimensions — the three real gaps the live refusals name"
+      ],
+      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (demo deployment NOT APPLICABLE: no deployable runtime change; live verification NOT VERIFIED)"
     }
   },
   "entries": [

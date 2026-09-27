@@ -26,6 +26,26 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
+## BATCH 1a — THE PROVIDER PROXY HELPERS NOW EXIST (session 40, 2026-09-27)
+
+**Before this session:** the real provider clients (`src/lib/spapi/client.ts`, `src/lib/dhl/client.ts`,
+`src/lib/palletline/client.ts`) already called `/functions/v1/spapi|dhl|palletline/...` and **no such Edge Function
+existed** in the repository (only 9 unrelated ones) — so entering a real key could never make anything sync.
+
+- **NOW:** ONE manifest (`supabase/functions/_shared/proxyRoutes.ts`) declares all **20 routes** the clients call
+  (12 SP-API · 3 DHL · 5 Palletline); three helpers (`supabase/functions/spapi|dhl|palletline/index.ts`) serve it;
+  **3 routes are live-capable** (SP-API PO read · SP-API PO status · DHL tracking) and **17 refuse live with a
+  STATED code** naming the exact missing input. Simulation does **zero credential work and ZERO network calls**; a
+  live call needs a server-side credential (function env or Vault) **and** a verified operator session, so a brand
+  can never trigger a channel read.
+- **Gate:** `npm run validate:integration-proxy` — **51 assertions**, deriving the routes from the CLIENT sources and
+  EXECUTING the helpers; proved able to fail twice (undeclared client route → 3 failures; simulation invoking the
+  live caller → non-zero exit), with both files restored byte-identical. Corpus: `validate:all` **114/114 PASS**.
+- **NOT done (stated, not implied):** the three functions are **NOT deployed** (no Supabase credential + no CLI);
+  the 3 live paths have **never run against a provider**; **Batch 1b** (the connect wizard's backend half —
+  `/functions/v1/spapi-token-exchange` is called by `IntegrationsPanel.tsx` and does not exist) and **1c** (CI
+  wiring) remain. Every activation item is listed in `PRODUCTION_READINESS.md` §BATCH1a.
+
 ## INTEGRATIONS — ONE-CLICK CONNECT IS THE REQUIRED SHAPE
 
 **Every provider is connected in ONE action from its card in Integration Settings:** click Connect → the wizard
@@ -37,7 +57,10 @@ Entering a real key must NEVER need a code change.
   `src/integrations/`).
 - **Missing (same plumbing as the live-activation rows):** the backend half — secure key exchange, vault storage,
   and the real harmless test call. A connect today completes `sandbox: true` and is labelled "(Mock)"; demo secrets
-  sit in the browser; real ones must go to a vault (`supabase/migrations/0002_integration_connections.sql`).
+  sit in the browser; real ones must go to a vault.
+  **⚠ The file this line used to cite — `supabase/migrations/0002_integration_connections.sql` — DOES NOT EXIST**
+  (there are 27 migrations and none covers integration connections). Batch 1b must write that schema, or the
+  citation is corrected; until then the connection-record schema is unestablished.
 - **Never relax:** a simulated connect is never shown or treated as live.
 
 ## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY (never ask)

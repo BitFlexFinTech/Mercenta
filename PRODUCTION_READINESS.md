@@ -303,6 +303,71 @@ DEFERRED** — the droplet was not resized and the Postiz roadmap was not contin
 
 **Policy:** every external integration is built behind a swappable seam (`createSPApiClientForConnection` pattern): a `Mock*Client` runs whenever real credentials are absent; the `Real*Client` activates purely by entering real credentials in the Integrations wizard. **Going live should never require code changes** — only credentials + flipping the connection out of mock mode.
 
+## §BATCH1a — THE PROVIDER PROXY HELPERS NOW EXIST (session 40, 27 Sep 2026)
+
+**Why this section exists:** the real provider clients (`src/lib/spapi/client.ts`, `src/lib/dhl/client.ts`,
+`src/lib/palletline/client.ts`) had always called `/functions/v1/spapi|dhl|palletline/...` — and **no such Edge
+Function existed**, so entering a real key could never make anything sync. Three helpers now exist
+(`supabase/functions/spapi|dhl|palletline/index.ts`), served by ONE route manifest
+(`supabase/functions/_shared/proxyRoutes.ts`, **20 routes**: 12 SP-API · 3 DHL · 5 Palletline), mirrored and
+pinned by `npm run validate:integration-proxy` (**51 assertions**, proved able to fail).
+
+### Deployment requirement (NOT yet done — no Supabase project credential/CLI in this environment)
+
+```
+supabase functions deploy spapi
+supabase functions deploy dhl
+supabase functions deploy palletline
+```
+
+Keep **JWT verification ON** (never `--no-verify-jwt`): a LIVE call additionally requires a verified operator
+session (`super_admin` / `admin_staff`), so a BRAND can never trigger a channel read with Mercenta's credentials.
+SIMULATION needs no session and no credential — it is fully demoable without any key.
+
+### Credentials: where each goes (no code change needed)
+
+| Provider | Server env (alternative 1) | Vault blob, referenced as `vault:<name>` (alternative 2) |
+|---|---|---|
+| Amazon SP-API | `SPAPI_CLIENT_ID`, `SPAPI_CLIENT_SECRET`, `SPAPI_REFRESH_TOKEN`, `SPAPI_MARKETPLACE_ID` | JSON `{ "clientId", "clientSecret", "refreshToken", "marketplaceId" }` |
+| DHL Express | `DHL_API_KEY`, `DHL_ACCOUNT_NUMBER` | JSON `{ "apiKey", "accountNumber" }` (a bare string is accepted as the API key) |
+| Palletline | — | — (no confirmed contract to use a credential with) |
+
+### Live-capable today (3 routes) — WRITTEN, NOT YET VERIFIED AGAINST A LIVE RESPONSE
+
+| Route | Real operation |
+|---|---|
+| `GET /purchase-orders` | `GET {eu-host}/vendor/orders/v1/purchaseOrders?createdAfter=…&limit=100` |
+| `GET /purchase-orders/status` | `GET {eu-host}/vendor/orders/v1/purchaseOrdersStatus?purchaseOrderNumbers=…` |
+| `GET /shipments/{waybill}` (DHL) | `GET https://api-eu.dhl.com/track/shipments?trackingNumber=…` (`DHL-API-Key`) |
+
+**Honest status:** the hosts, request shapes and the wire→Mercenta mappings are written from the DOCUMENTED
+SP-API Vendor Orders / DHL Shipment Tracking schemas. No live credential exists here, so **none of these three has
+ever run against the provider** — treat the first live call as a mapping review. An unmapped channel value (an
+unknown PO state, an unknown DHL status code) is a STATED refusal, never a guessed state.
+
+### Simulation-only routes (17) — each with its STATED refusal code, and exactly what it needs
+
+| Refusal code | Routes | What is actually missing |
+|---|---|---|
+| `CATALOG_ROUTE_NOT_CONFIRMED` | SP-API catalog submit / status (2) | `AV-035` — no Vendor catalogue/item operation was found in the public SP-API surface (EVIDENCE-BLOCKED) |
+| `INVENTORY_ROUTE_NOT_CONFIRMED` | SP-API inventory push (1) | `AV-035` — no Vendor inventory operation exists; inventory lives in Mercenta's own canonical model |
+| `CHANNEL_ITEM_SEQUENCE_NOT_HELD` | SP-API acknowledgements / shipment confirmations / invoices (3) | the channel's own `itemSequenceNumber` (required on every line) is held nowhere in the platform |
+| `MERCENTA_PARTY_ID_NOT_HELD` | SP-API shipment request / shipment details (2) | the channel's `sellingParty.partyId` for Mercenta (required by SubmitShipments) is held nowhere |
+| `SHIPMENT_CONFIRM_SUPERSEDED` | SP-API `POST /shipments/confirm` (1) | not a channel operation — the channel confirmation is the ASN (`AV-015`) |
+| `LABELS_LIVE_OPERATION_NOT_CONFIRMED` | SP-API shipment labels (1) | the channel generates labels in **NA only**; this platform is UK-only (`A1F83G8C2ARO7P`), so the canonical region rule refuses it |
+| `DHL_BOOKING_INPUT_INCOMPLETE` | DHL create shipment / pickup (2) | a live MyDHL booking needs shipper/receiver **addresses** and per-package **weight + dimensions**; the shipment domain holds an origin label, a destination label and a carton count |
+| `PALLETLINE_CONTRACT_NOT_CONFIRMED` | all 5 Palletline routes | the partner's wire contract is not confirmed (recorded in `src/lib/palletline/client.ts`) — no endpoint is invented |
+
+Each row is a genuine activation item: **live mode refuses with the code above rather than inventing a call**, and
+the simulation for every one of the 20 routes is fully functional (deterministic lifecycle, refusals, retry paths,
+zero network calls) so nothing is un-demoable in the meantime.
+
+### Also still missing for a real key handover (Batch 1b)
+
+The Integrations wizard calls `${supabaseUrl}/functions/v1/spapi-token-exchange` for the OAuth consent exchange —
+that function **does not exist** either, and the secure key exchange + Vault WRITE for a pasted API key is still
+unbuilt. **The backend half of one-click connect is Batch 1b**, not delivered by this increment.
+
 ## Integration credentials
 
 | Integration | Currently active | What's needed to go live | Where it's entered | Code changes needed |

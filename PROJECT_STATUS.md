@@ -4,16 +4,16 @@
 ## CURRENT RESUME STATE
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
-LAST COMPLETED TASK:      **§SSOT STAGE 5 — ONE NUMBER: the nav badge and the work list count from ONE owner (`workCounts`) and EVERY number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement (2026-09-27, session 39, sixth increment).** The programme is recorded in `docs/WORK_LAYER_SSOT_2026-09-26.md`. **F1, closed at source:** the rail badge counted critical+high (`workAttentionCount`) while the list rendered EVERY unresolved item (measured 41 badged vs 47/78 rendered) and NEITHER surface said which set its number was. NOW: `workCounts()` in `src/lib/work/workStore.ts` is the ONLY function that counts work, and `WORK_COUNT_SETS` declares three sets WITH the label that must travel with each number (`attention` "Needs attention" = what a badge counts · `open` "All open work" = what the list renders · `overdue` "Overdue work"); `workAttentionCount` (the old second counting path) is DELETED; `src/lib/nav/navBadges.ts` reads every badge number from the owner and exports `NAV_BADGE_LABELS`; the Sidebar renders the label WITH the number (`data-badge-label` + `aria-label`) and both shells attach it; the work tiles and the Super Admin oversight read the same numbers and the declared labels. The Notification Centre is deliberately NOT relabelled (its number counts ALL notification kinds and already says so). **THE PROGRAMME IS NOT FINISHED — S6 (CI wiring) · S7 (the contract closing path) stand.**
-CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** at the S5 implementation commit. LOCAL, every figure measured this session AFTER the last edit: `npm run validate:all` → **113 PASS / 0 FAIL (of 113 files)** · `validate-work-layer` **PASS (0 failures)** with a NEW §20 (17 assertions: ONE counting owner · the second counting path `workAttentionCount` is GONE everywhere · exactly ONE counting function exists · the old critical+high expression gone · three declared sets with id/label/definition · distinct labels · the numbers match the item sets in every scope · attention ⊆ open · the badge number IS the declared attention set · the badge label derived from a declared set · the badge number from the owner · the Sidebar renders the label · both shells attach it · the workspace numbers + declared labels · the Super Admin oversight) · `validate-uiux-redesign` **348 PASS / 0 FAIL** (its one repointed assertion) · `npm run typecheck` **0** · root `npx tsc --noEmit` **0** · `npm run lint` **0** · `npm run build` **✓ 8.22s** · `e2e/work-layer.spec.ts` **14 passed / 0 failed (24.6s)** — the NEW test 1b asserts in real Chromium that `nav-badge-work` carries `data-badge-label="Needs attention"` and equals the attention tile. **THE NEW GATE WAS PROVED ABLE TO FAIL THREE TIMES: re-introducing a second counting function (`workAttentionCount`) made §20 report FAIL (3 failures), the same second path written as a delegate to `workCounts` made it report FAIL (2 failures), and deleting the sidebar's `data-badge-label` attribute made it report FAIL (1 failure); every file was then restored BYTE-IDENTICAL (`workStore.ts` sha256 `e0a37b2c2a9f5d7db223beed7c85491bdcd725383be3343ebf00c34e30c7b95b`, `Sidebar.tsx` sha256 `6781f94f2ed142fb7107a57acf6c9fa1a9ee196bdbd4c3590430bd9eea72950c`).** Measured demo counts at the pinned clock: admin `{attention 39, open 46, overdue 1}`; admin+Super-Admin `{attention 41, open 78, overdue 1}`. **DEPLOYMENT AND LIVE VERIFICATION ARE NOT DONE — DELIBERATELY DEFERRED to the programme's close** (S7 changes the same work surfaces, so the demo is never left mid-refactor). This is NOT a complete product increment and must NOT be reported as complete.
+LAST COMPLETED TASK:      **BATCH 1a — MAKE THE KEY HANDOVER REAL (session 40, 2026-09-27): the server helpers the real provider clients always called now EXIST.** ONE manifest (`supabase/functions/_shared/proxyRoutes.ts`) declares all **20 routes** (12 SP-API · 3 DHL · 5 Palletline); three functions serve it (`supabase/functions/spapi|dhl|palletline/`); **3 routes are live-capable** (SP-API PO read · SP-API PO status · DHL tracking) and **17 refuse live with a STATED code naming the exact missing input**; simulation = zero credential work + zero network calls; a live call additionally needs a verified operator session. Gate: `npm run validate:integration-proxy` (**51 assertions**), proved able to fail. Detail: `PRODUCTION_READINESS.md` §BATCH1a. **BATCH 1 IS NOT FINISHED — 1b and 1c stand.**
+CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Measured this session AFTER the last edit: `validate:all` **114 PASS / 0 FAIL (of 114)** · `validate:integration-proxy` **51 assertions / 0 failures** · `validate-e6-brand-surfaces` **PASS** (F6 scope guard repointed, contract unchanged) · `typecheck` **0** · `lint` **0** · `build` **✓ 5.58s**. The new gate was PROVED ABLE TO FAIL TWICE (an undeclared client route → 3 failures; simulation invoking the live caller → non-zero exit); both files were then restored BYTE-IDENTICAL (`src/lib/spapi/client.ts` sha256 `aaad77d0…`, `_shared/proxyRoutes.ts` sha256 `86ffc85c…`).
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`96d2061`** — "docs(plan): the Founder-agreed NEXT PLAN recorded — BATCH 1 make the key handover real, BATCH 2 Amazon accuracy (37 open findings), BATCH 3 prove what we claim; a new chat resumes with 'continue where you left off'" (**5 paths**: `docs/NEXT_BUILD_PLAN_2026-09-27.md` (new) + the three project-state sources + the registry `_meta.ssot_work_layer_programme.next_plan`; GOVERNANCE/DOCS increment — no application runtime change). It follows `68a9468`/`8a5dccd` (the global-rules run) and `c107bc2` (the review-zip fix), before which sit `d8f6f1a`, `f0adae9`, `f14da49`, `5eb4cd4`, `b172ed1`, `acf1bce` and the §SSOT S5 commits. The state checkpoint carrying THIS block follows it. **CONVENTION: a STATE-CHECKPOINT hash written in this block is always exactly one commit behind the branch head, because the commit that records the hash cannot contain its own hash.**
-GITHUB PUSH:              **DONE — PUSHED** to `origin/redesign/foundation` together with the state checkpoint that carries THIS block (`git status --porcelain` EMPTY at session close; push performed as part of the task close, `operating-model.md` §12.2).
-DEMO DEPLOYMENT:          **NOT DEPLOYED — DELIBERATELY DEFERRED** to the close of the §SSOT programme (S7 changes the SAME work surfaces, so the demo is never left mid-refactor). The last deployed build remains `d726166` (§PHONE), which was live-verified 209/209.
-LIVE VERIFICATION:        **NOT VERIFIED — deferred with the deployment.** No live leg has been run for S1/S2/S3/S4/S5, and none is claimed.
-OUTSTANDING BLOCKER:      none
-NEXT TASK:                **BATCH 1 — MAKE THE KEY HANDOVER REAL** (the recorded plan is `docs/NEXT_BUILD_PLAN_2026-09-27.md`; the Founder’s goal is that entering a real key is the ENTIRE job). In simulation only, build the server helpers the REAL clients already call but which DO NOT EXIST: **Amazon SP-API (12 routes — `/catalog-items`, `/catalog-items/{id}`, `/purchase-orders`, `/purchase-orders/status`, `/acknowledgements`, `/shipments/request`, `/shipments/{id}/details`, `/shipments/{id}/labels`, `/shipments/confirmations`, `/shipments/confirm`, `/invoices`, `/inventory` — `src/lib/spapi/client.ts` 356-674) · DHL (3 — `/shipments`, `/shipments/{waybill}`, `/shipments/pickup` — `src/lib/dhl/client.ts` 108-157) · Palletline (4 routes — `src/lib/palletline/client.ts` 113-208)**; each must mirror the mock’s shapes, make ZERO live calls, be labelled simulated and FAIL CLOSED. Then 1b the connect wizard’s backend half (secure key exchange + vault + the real harmless test; `supabase/migrations/0002_integration_connections.sql` exists) and 1c S6 CI wiring (`.github/` holds only `dependabot.yml`) + deploy to demo + live verification. **Gate: a validator proving every route the real clients call HAS a helper, PROVED ABLE TO FAIL; then `npm run validate:all` 113/113.** THEN **BATCH 2** (Amazon accuracy — 37 open findings; start AV-019/AV-019b, AV-024, AV-006, AV-007) and **BATCH 3** (the 126 unverified registry rows + S7 the contract closing path).
-EXACT NEXT STARTING POINT:`docs/NEXT_BUILD_PLAN_2026-09-27.md` (Batch 1 — scope, evidence and gate) → `supabase/functions/` (9 functions exist; NONE for SP-API/DHL/Palletline) → `src/lib/spapi/client.ts` (the 12 routes, 356-674) + `src/lib/spapi/mockClient.ts` (the shapes to mirror) → `src/lib/dhl/client.ts` + `mockClient.ts` → `src/lib/palletline/client.ts` + `mockClient.ts` → `src/integrations/registry.ts` + `src/integrations/IntegrationsContext.tsx` (the wizard’s missing steps 2-3) → `.github/` (CI) → `scripts/validate-all.sh` → `PROJECT_STATUS.md` headings 1–9.
+LAST VERIFIED COMMIT:     the state checkpoint carrying THIS block (it follows `f439efd`); its hash is in the commit subject. **CONVENTION: a STATE-CHECKPOINT hash written in this block is always one commit behind the branch head.**
+GITHUB PUSH:              **DONE — PUSHED** to `origin/redesign/foundation` with the state checkpoint carrying this block; `git status --porcelain` EMPTY at close.
+DEMO DEPLOYMENT:          **NOT APPLICABLE TO THIS INCREMENT — no deployable runtime change; the larger deployment remains DELIBERATELY DEFERRED.** (a) This increment changed NO client-side source: the three new Edge Functions are server-side Supabase functions, are not part of the static Vite build `scripts/deploy-demo.sh` uploads, and cannot be deployed from here (no Supabase credential + no CLI). (b) The demo is therefore still `d726166` (§PHONE, live-verified 209/209) and is BEHIND the repository by the §SSOT S1–S5 client changes, whose deployment the previous session deferred to the close of that programme — S7 is Batch 3, so the deferral stands.
+LIVE VERIFICATION:        **NOT VERIFIED** — nothing in this increment is visible or exercisable on the demo (no client-side change), and the 3 live-capable routes have NO live credential (never executed against Amazon/DHL; the gate uses a scripted transport).
+OUTSTANDING BLOCKER:      **(1)** a Supabase project credential + the CLI to deploy the three functions (JWT verification ON). **(2) Batch 1b:** `/functions/v1/spapi-token-exchange` is called by the wizard but has no function, and the secure key exchange + Vault WRITE is unbuilt. **(3)** live provider credentials, needed before the 3 live-capable routes can be exercised and before any of the 17 refused routes can be closed.
+NEXT TASK:                **BATCH 1b — the connect wizard's backend half** (key exchange + Vault write + the real harmless test + wizard steps 2–3), then **1c** (S6 CI wiring), then **BATCH 2** (Amazon accuracy — 37 open findings) and **BATCH 3** (the 126 unverified registry rows + S7).
+EXACT NEXT STARTING POINT:`docs/NEXT_BUILD_PLAN_2026-09-27.md` §1b/§1c → `PRODUCTION_READINESS.md` §BATCH1a → `src/components/admin/integrations/IntegrationsPanel.tsx` (`ConnectWizard`; `completeOAuthExchange` ~L386 calls the MISSING `spapi-token-exchange`) → `src/integrations/IntegrationsContext.tsx` + `registry.ts` → `supabase/migrations/` (the `0002_integration_connections.sql` cited by STATUS_CHECK/PRODUCTION_READINESS **does not exist**) → `.github/` (S6) → `scripts/validate-integration-proxy.mjs` → `PROJECT_STATUS.md` headings 1–9.
 
 ## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY
 
@@ -126,7 +126,90 @@ every project.
 
 ---
 
-## CURRENT PLATFORM POSITION — **§SSOT STAGE 5: ONE NUMBER — the nav badge and the work list now count from ONE owner (`workCounts`) and every number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement** (2026-09-27, session 39, sixth increment)
+## CURRENT PLATFORM POSITION — **BATCH 1a: THE PROVIDER PROXY HELPERS EXIST — every route the real clients call now has a helper, 3 are live-capable and 17 refuse live with a STATED code** (2026-09-27, session 40)
+
+**Why this was the next task:** the real provider clients (`src/lib/spapi/client.ts`, `src/lib/dhl/client.ts`,
+`src/lib/palletline/client.ts`) already called `/functions/v1/spapi|dhl|palletline/...`, and **no such Edge Function
+existed in this repository** (only 9 unrelated ones). So the Founder's goal — *"when I get the API keys, I should
+just need to give them to you and everything will sync up"* — was impossible: the helpers had to exist first.
+
+### 1. COMPLETED / VERIFIED
+
+- **ONE route manifest** (`supabase/functions/_shared/proxyRoutes.ts`): all **20 routes** the real clients call
+  (12 SP-API · 3 DHL · 5 Palletline), each with its client method + client file, its **simulation response**
+  (mirroring the mock clients' shapes AND their deterministic behaviour), its **live status**, and — where live is
+  impossible — a **STATED refusal code with the exact missing input**.
+- **Three helpers** (`supabase/functions/spapi|dhl|palletline/index.ts`): they resolve the provider mode themselves,
+  read the runtime path through the shared normaliser, and delegate every decision to the manifest. Palletline holds
+  **no** credential, by design, because no contract is confirmed.
+- **Two live callers** (`_shared/live/spapiLive.ts`, `_shared/live/dhlLive.ts`): the 3 contract-confirmed routes,
+  with LWA token exchange + `x-amz-access-token` for SP-API, `DHL-API-Key` for tracking, and a **stated refusal for
+  any channel value the client cannot map** (it never guesses a PO state or a milestone).
+- **Server-side credential resolution** (`_shared/vault.ts`: function env first, then Supabase Vault) and
+  **operator authorisation** (`_shared/operatorAuth.ts`: a LIVE call needs a verified `super_admin`/`admin_staff`
+  session, so a brand can never spend Mercenta's channel credentials). Simulation resolves nothing.
+- **The gate** (`scripts/validate-integration-proxy.mjs`, registered as `npm run validate:integration-proxy`):
+  **51 assertions**. It DERIVES the routes from the client sources, executes every route in simulation (fetch spy),
+  proves fail-closed behaviour, executes the live callers against a scripted transport, and pins every mirrored fact
+  (UK/NA marketplace ids, label regions, truckload limit, 18 refusal codes, both milestone lifecycles, the
+  carrier-cost formula) to its canonical owner.
+- `PRODUCTION_READINESS.md` §BATCH1a records every activation item, the deployment requirement and the JWT rule.
+
+### 2. IN PROGRESS
+
+Nothing is mid-edit: the tree is clean and every figure above was measured after the last edit.
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. **Batch 1b — the connect wizard's backend half** (key exchange + Vault WRITE + the real harmless test + wizard
+   steps 2–3). The wizard already calls `/functions/v1/spapi-token-exchange`, which **does not exist**.
+2. **Batch 1c — S6 CI wiring** (`.github/` holds only `dependabot.yml`).
+3. **Deploy** the three functions (Supabase credential + CLI) and **live-verify** the 3 live-capable routes.
+4. **Batch 2 — Amazon accuracy** (37 open findings; AV-019/AV-019b, AV-024, AV-006, AV-007 first).
+5. **Batch 3** — the 126 unverified registry rows + **S7** (the contract closing path).
+
+### 4. DEFERRED / PARKED
+
+The 17 simulation-only routes (each has a stated code and a named missing input — see §BATCH1a) and the Amazon
+`AV-020/034/035/046/047/048` UNKNOWNs, which need a signed-in Vendor Central session (a founder action, not code).
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **Deployment:** no Supabase project credential and no `supabase` CLI in this environment.
+- **Live verification:** no provider credentials (Amazon / DHL).
+- **Three genuine platform gaps named by the refusals:** the channel's `itemSequenceNumber`, Mercenta's
+  selling-party id, and the shipment domain's address/weight/dimension inputs.
+
+### 6. KNOWN EXCEPTIONS
+
+- **The shipped Edge Functions are NOT deployed**, and the three live paths have never run against a provider.
+  Both are stated in the resume block and in §BATCH1a — neither is claimed as working.
+- **Pre-existing mock defect found while mirroring (not fixed, not introduced):** `src/lib/dhl/mockClient.ts` raises
+  the simulated customs exception at `in_transit` but does not hold the milestone (unlike the Palletline mock, which
+  does with an explicit comment), so its *eventual* retry branch is unreachable. The helper mirrors the mock exactly
+  (parity is the requirement); the mock's own behaviour is unchanged.
+- **A cited file that does not exist:** `supabase/migrations/0002_integration_connections.sql` — cited by
+  `STATUS_CHECK.md` and `PRODUCTION_READINESS.md`, but there is no such migration (27 migrations exist, none for
+  integration connections). Recorded for Batch 1b to correct or write.
+
+### 7. CURRENT CHECKPOINT
+
+`VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE` at this session's commit (the hash is in the resume block and
+the commit subject). The working-tree scope guard `validate-e6-brand-surfaces` F6 required a **declared surface**
+for this phase: a new `§BATCH1` set was added, its mechanism unchanged and not weakened.
+
+### 8. VERIFICATION STATUS
+
+`validate:all` **114/114 PASS** · `validate:integration-proxy` **51/51** · `typecheck` **0** · `lint` **0** ·
+`build` **✓** · gate **proved able to fail twice** · files restored **byte-identical** after the probes.
+Not verified: any live provider call; any demo-visible behaviour.
+
+### 9. NEXT EXECUTION SCOPE
+
+**Batch 1b + 1c** from `docs/NEXT_BUILD_PLAN_2026-09-27.md` (see `EXACT NEXT STARTING POINT`), then the deployment
+and live verification that close Batch 1.
+
+## PREVIOUS POSITION — **§SSOT STAGE 5: ONE NUMBER — the nav badge and the work list now count from ONE owner (`workCounts`) and every number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement** (2026-09-27, session 39, sixth increment)
 
 **Scope:** finding F1 — *the deployed rail badge read 41 while the work list rendered 47, and NEITHER surface said which set its number was, so two correct numbers read as a contradiction.* The programme is recorded in `docs/WORK_LAYER_SSOT_2026-09-26.md`.
 
