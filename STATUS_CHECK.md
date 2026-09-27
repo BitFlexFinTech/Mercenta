@@ -52,6 +52,28 @@ are decided and recorded.** Canonical sources: `.clinerules/mercenta-business-mo
 `src/types.ts → APPROVED_CATEGORIES`. Only TECHNICAL readiness is open (the missing server-side helpers behind
 the real SP-API / DHL / Palletline paths) — never the business model.
 
+## NEXT PLAN — BATCHES 1, 2 and 3 (recorded 2026-09-27)
+
+**The plan detail lives in `docs/NEXT_BUILD_PLAN_2026-09-27.md`; the state lives in `CURRENT RESUME STATE`.**
+Agreed order of work, so a new chat can resume with **"continue where you left off"**:
+
+1. **BATCH 1 — make the key handover real** (no credentials needed, simulation only): build the server helpers
+   the REAL clients already call but which DO NOT EXIST — **Amazon SP-API ×12 routes**, **DHL ×3**,
+   **Palletline ×4** (`src/lib/spapi/client.ts` 356-674 · `src/lib/dhl/client.ts` 108-157 ·
+   `src/lib/palletline/client.ts` 113-208; `supabase/functions/` has 9 functions and NONE of these) — each
+   mirroring the mock's shapes, zero live calls, labelled simulated, fail-closed; then the connect wizard's
+   backend half (secure key exchange + vault + the real harmless test); then **S6 CI wiring**, the demo deploy
+   and the live verification. **Gate:** a validator proving every route the real clients call has a helper,
+   proved able to fail, then `validate:all` 113/113.
+2. **BATCH 2 — Amazon accuracy:** the **37 OPEN** findings in `docs/AMAZON_RECONCILIATION_STATUS.md`
+   (52 total; 3 applied). Start AV-019/AV-019b, AV-024, AV-006, AV-007. The UNKNOWNs need a signed-in Vendor
+   Central session (founder action) and are never guessed.
+3. **BATCH 3 — prove what we claim:** the **126** registry rows that are "built but never independently
+   re-verified" (page-by-page parity audit), **S7** the contract closing path (F5), and a closing path or a
+   recorded reason for every declared gap.
+
+**Pending decisions:** rules defects #5–#8 (generalise or leave).
+
 ## GLOBAL RULES — INSTALLED FOR EVERY PROJECT (2026-09-27)
 
 Five rules now apply to **every project** (identical copies in `~/Documents/Cline/Rules/` AND `~/.cline/rules/`):

@@ -12,8 +12,8 @@ GITHUB PUSH:              **DONE — PUSHED** to `origin/redesign/foundation` to
 DEMO DEPLOYMENT:          **NOT DEPLOYED — DELIBERATELY DEFERRED** to the close of the §SSOT programme (S7 changes the SAME work surfaces, so the demo is never left mid-refactor). The last deployed build remains `d726166` (§PHONE), which was live-verified 209/209.
 LIVE VERIFICATION:        **NOT VERIFIED — deferred with the deployment.** No live leg has been run for S1/S2/S3/S4/S5, and none is claimed.
 OUTSTANDING BLOCKER:      none
-NEXT TASK:                **§SSOT STAGE 6 — CI WIRING.** `.github/` contains ONLY `dependabot.yml`, so NO gate runs on a push: add a workflow that runs `npm ci`, `npm run typecheck`, `npm run lint`, `npm run build` and `npm run validate:all` (the full 113-file corpus — `validate-work-layer` IS registered), and keep it honest (a failing validator must fail the job). THEN **S7 — the contract closing path (F5):** a canonical `renewContract`/`terminateContract` writer on the contract store, and the renewal draft written to the CANONICAL store instead of `ContractsAdminPanel.extraDrafts` (local component state). **Re-run `npm run validate:all` after EVERY stage — 113/113 is the bar.**
-EXACT NEXT STARTING POINT:`docs/WORK_LAYER_SSOT_2026-09-26.md` (§3 — the S5 DONE record and the S6/S7 entries) → `.github/` (today only `dependabot.yml`) → `package.json` (`validate:all` / `validate:work-layer`) → `scripts/validate-all.sh` → `src/components/admin/ContractsAdminPanel.tsx` (`extraDrafts` ~171-183, 225-239) + `src/data/demoStore.ts` (the contract store — F5 has NO writer) → `PROJECT_STATUS.md` headings 1–9.
+NEXT TASK:                **BATCH 1 — MAKE THE KEY HANDOVER REAL** (the recorded plan is `docs/NEXT_BUILD_PLAN_2026-09-27.md`; the Founder’s goal is that entering a real key is the ENTIRE job). In simulation only, build the server helpers the REAL clients already call but which DO NOT EXIST: **Amazon SP-API (12 routes — `/catalog-items`, `/catalog-items/{id}`, `/purchase-orders`, `/purchase-orders/status`, `/acknowledgements`, `/shipments/request`, `/shipments/{id}/details`, `/shipments/{id}/labels`, `/shipments/confirmations`, `/shipments/confirm`, `/invoices`, `/inventory` — `src/lib/spapi/client.ts` 356-674) · DHL (3 — `/shipments`, `/shipments/{waybill}`, `/shipments/pickup` — `src/lib/dhl/client.ts` 108-157) · Palletline (4 routes — `src/lib/palletline/client.ts` 113-208)**; each must mirror the mock’s shapes, make ZERO live calls, be labelled simulated and FAIL CLOSED. Then 1b the connect wizard’s backend half (secure key exchange + vault + the real harmless test; `supabase/migrations/0002_integration_connections.sql` exists) and 1c S6 CI wiring (`.github/` holds only `dependabot.yml`) + deploy to demo + live verification. **Gate: a validator proving every route the real clients call HAS a helper, PROVED ABLE TO FAIL; then `npm run validate:all` 113/113.** THEN **BATCH 2** (Amazon accuracy — 37 open findings; start AV-019/AV-019b, AV-024, AV-006, AV-007) and **BATCH 3** (the 126 unverified registry rows + S7 the contract closing path).
+EXACT NEXT STARTING POINT:`docs/NEXT_BUILD_PLAN_2026-09-27.md` (Batch 1 — scope, evidence and gate) → `supabase/functions/` (9 functions exist; NONE for SP-API/DHL/Palletline) → `src/lib/spapi/client.ts` (the 12 routes, 356-674) + `src/lib/spapi/mockClient.ts` (the shapes to mirror) → `src/lib/dhl/client.ts` + `mockClient.ts` → `src/lib/palletline/client.ts` + `mockClient.ts` → `src/integrations/registry.ts` + `src/integrations/IntegrationsContext.tsx` (the wizard’s missing steps 2-3) → `.github/` (CI) → `scripts/validate-all.sh` → `PROJECT_STATUS.md` headings 1–9.
 
 ## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY
 
@@ -154,12 +154,19 @@ every project.
      `NAV_BADGE_LABELS`, with the old contract recorded inline.
 2. **IN PROGRESS.** The §SSOT programme — **S6 · S7 stand**. The demo is deliberately not redeployed until the
    programme closes (S7 changes the same work surfaces).
-3. **REMAINING — CURRENT ROADMAP.**
-   1. **S6** CI wiring — `.github/` holds only `dependabot.yml` (`validate:work-layer` IS registered and
-      `validate:all` runs all 113 files).
-   2. **S7** the contract closing path (F5) — a canonical `renewContract`/`terminateContract` writer and the renewal
-      draft written to the canonical store instead of `ContractsAdminPanel.extraDrafts`.
-   3. Then the standing roadmap (channel simulated until LWA/SP-API credentials; P12/S11 boundaries).
+3. **REMAINING — CURRENT ROADMAP (the recorded plan: `docs/NEXT_BUILD_PLAN_2026-09-27.md`).**
+   1. **BATCH 1 — make the key handover real.** The server helpers the real clients call but which DO NOT
+      EXIST (Amazon SP-API ×12 · DHL ×3 · Palletline ×4 routes), each mirroring the mock's shapes with zero live
+      calls and failing closed; then the connect wizard's backend half (secure key exchange + vault + the real
+      harmless test); then **S6** CI wiring, the demo deploy and the live verification. Gate: a validator proving
+      every route the real clients call has a helper — proved able to fail — then 113/113.
+   2. **BATCH 2 — Amazon accuracy.** The 37 OPEN findings (`docs/AMAZON_RECONCILIATION_STATUS.md`): 3 applied so
+      far. Start AV-019/AV-019b (deduction taxonomy — unsupported), AV-024 (PO changes absent), AV-006 (48h
+      amendment window), AV-007 (a rejected line must not be re-acknowledged).
+   3. **BATCH 3 — prove what we claim, and close the gaps.** The **126** registry rows that are "built but never
+      independently re-verified" → page-by-page parity audit; **S7** the contract closing path (F5); the declared
+      gaps given a closing path or a recorded reason.
+   4. Then the standing roadmap (channel simulated until LWA/SP-API credentials; P12/S11 boundaries).
 4. **DEFERRED / PARKED.** The §CG deferrals stand (server-side rate limit; server-side link fetcher). No E.164
    reformatting (§PHONE).
 5. **BLOCKED / DEPENDENCIES.** Unchanged: Amazon SP-API credentials (PENDING) · Vendor Central sign-in gate · no
