@@ -12,7 +12,7 @@
 > Mercenta programme.
 >
 > **§GLOBAL COMPANIONS (added 2026-09-27).** THREE *global* rules now carry the project-agnostic version of
-> this concern for every project: `~/.cline/rules/persona-and-skill-routing.md` (the always-first triage +
+> this concern for every project: `~/.cline/rules/00-task-mode-selection.md` (the always-first triage +
 > persona router: classify QUESTION/ANALYZE/PLAN/IMPLEMENT, then pick the minimum persona — business-analyst,
 > project-manager, senior-software-architect, senior-software-engineer, ux-product-analyst — with "the project
 > outranks a persona or skill" and a mandatory stack fit check), `~/.cline/rules/skill-usage.md` (how to

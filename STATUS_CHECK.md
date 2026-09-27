@@ -57,7 +57,7 @@ the real SP-API / DHL / Palletline paths) — never the business model.
 Five rules now apply to **every project** (identical copies in `~/Documents/Cline/Rules/` AND `~/.cline/rules/`):
 **plain-english-responses** (plain English always; overrides any brevity/budget guidance) ·
 **answer-from-the-project** (answer from the project's own records; never re-ask a recorded fact) ·
-**persona-and-skill-routing** (FIRST STEP everywhere: classify QUESTION/ANALYZE/PLAN/IMPLEMENT, then pick the
+**00-task-mode-selection** (task modes + specialist routing: FIRST STEP everywhere: classify QUESTION/ANALYZE/PLAN/IMPLEMENT, then pick the
 minimum persona — business-analyst · project-manager · senior-software-architect · senior-software-engineer ·
 ux-product-analyst) · **skill-usage** (minimum skills only, invoked properly, with a MANDATORY fit check so
 `shadcn`, `write-swift`, `animate-expo`, `mobile-native`, `apple-design`, `oklch-skill` are never applied to a

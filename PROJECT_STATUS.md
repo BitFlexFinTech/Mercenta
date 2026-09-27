@@ -7,7 +7,7 @@
 LAST COMPLETED TASK:      **§SSOT STAGE 5 — ONE NUMBER: the nav badge and the work list count from ONE owner (`workCounts`) and EVERY number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement (2026-09-27, session 39, sixth increment).** The programme is recorded in `docs/WORK_LAYER_SSOT_2026-09-26.md`. **F1, closed at source:** the rail badge counted critical+high (`workAttentionCount`) while the list rendered EVERY unresolved item (measured 41 badged vs 47/78 rendered) and NEITHER surface said which set its number was. NOW: `workCounts()` in `src/lib/work/workStore.ts` is the ONLY function that counts work, and `WORK_COUNT_SETS` declares three sets WITH the label that must travel with each number (`attention` "Needs attention" = what a badge counts · `open` "All open work" = what the list renders · `overdue` "Overdue work"); `workAttentionCount` (the old second counting path) is DELETED; `src/lib/nav/navBadges.ts` reads every badge number from the owner and exports `NAV_BADGE_LABELS`; the Sidebar renders the label WITH the number (`data-badge-label` + `aria-label`) and both shells attach it; the work tiles and the Super Admin oversight read the same numbers and the declared labels. The Notification Centre is deliberately NOT relabelled (its number counts ALL notification kinds and already says so). **THE PROGRAMME IS NOT FINISHED — S6 (CI wiring) · S7 (the contract closing path) stand.**
 CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** at the S5 implementation commit. LOCAL, every figure measured this session AFTER the last edit: `npm run validate:all` → **113 PASS / 0 FAIL (of 113 files)** · `validate-work-layer` **PASS (0 failures)** with a NEW §20 (17 assertions: ONE counting owner · the second counting path `workAttentionCount` is GONE everywhere · exactly ONE counting function exists · the old critical+high expression gone · three declared sets with id/label/definition · distinct labels · the numbers match the item sets in every scope · attention ⊆ open · the badge number IS the declared attention set · the badge label derived from a declared set · the badge number from the owner · the Sidebar renders the label · both shells attach it · the workspace numbers + declared labels · the Super Admin oversight) · `validate-uiux-redesign` **348 PASS / 0 FAIL** (its one repointed assertion) · `npm run typecheck` **0** · root `npx tsc --noEmit` **0** · `npm run lint` **0** · `npm run build` **✓ 8.22s** · `e2e/work-layer.spec.ts` **14 passed / 0 failed (24.6s)** — the NEW test 1b asserts in real Chromium that `nav-badge-work` carries `data-badge-label="Needs attention"` and equals the attention tile. **THE NEW GATE WAS PROVED ABLE TO FAIL THREE TIMES: re-introducing a second counting function (`workAttentionCount`) made §20 report FAIL (3 failures), the same second path written as a delegate to `workCounts` made it report FAIL (2 failures), and deleting the sidebar's `data-badge-label` attribute made it report FAIL (1 failure); every file was then restored BYTE-IDENTICAL (`workStore.ts` sha256 `e0a37b2c2a9f5d7db223beed7c85491bdcd725383be3343ebf00c34e30c7b95b`, `Sidebar.tsx` sha256 `6781f94f2ed142fb7107a57acf6c9fa1a9ee196bdbd4c3590430bd9eea72950c`).** Measured demo counts at the pinned clock: admin `{attention 39, open 46, overdue 1}`; admin+Super-Admin `{attention 41, open 78, overdue 1}`. **DEPLOYMENT AND LIVE VERIFICATION ARE NOT DONE — DELIBERATELY DEFERRED to the programme's close** (S7 changes the same work surfaces, so the demo is never left mid-refactor). This is NOT a complete product increment and must NOT be reported as complete.
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`f14da49`** — "docs(rules): persona routing is now GLOBAL (which specialist for which task) + 8 more skills installed for every project" (**4 paths**: 3 project-state sources + the project router pointer; GOVERNANCE/DOCS increment — no application runtime change). Adds the global rule `persona-and-skill-routing.md` and takes the global skill set to **34**. Its predecessor is **`5eb4cd4`** (the first four global rules + the E6 repoint), before which sit `b172ed1` (one-click connect) and the §SSOT S5 commits. The state checkpoint carrying THIS block follows it. **CONVENTION: a STATE-CHECKPOINT hash written in this block is always exactly one commit behind the branch head, because the commit that records the hash cannot contain its own hash.**
+LAST VERIFIED COMMIT:     **`f14da49`** — "docs(rules): persona routing is now GLOBAL (which specialist for which task) + 8 more skills installed for every project" (**4 paths**: 3 project-state sources + the project router pointer; GOVERNANCE/DOCS increment — no application runtime change). Adds the global rule `00-task-mode-selection.md` and takes the global skill set to **34**. Its predecessor is **`5eb4cd4`** (the first four global rules + the E6 repoint), before which sit `b172ed1` (one-click connect) and the §SSOT S5 commits. The state checkpoint carrying THIS block follows it. **CONVENTION: a STATE-CHECKPOINT hash written in this block is always exactly one commit behind the branch head, because the commit that records the hash cannot contain its own hash.**
 GITHUB PUSH:              **DONE — PUSHED** to `origin/redesign/foundation` together with the state checkpoint that carries THIS block (`git status --porcelain` EMPTY at session close; push performed as part of the task close, `operating-model.md` §12.2).
 DEMO DEPLOYMENT:          **NOT DEPLOYED — DELIBERATELY DEFERRED** to the close of the §SSOT programme (S7 changes the SAME work surfaces, so the demo is never left mid-refactor). The last deployed build remains `d726166` (§PHONE), which was live-verified 209/209.
 LIVE VERIFICATION:        **NOT VERIFIED — deferred with the deployment.** No live leg has been run for S1/S2/S3/S4/S5, and none is claimed.
@@ -61,20 +61,32 @@ Six rules now apply to **all projects**, installed OUTSIDE this repository.
 
 - **Added 2026-09-27 (installed in BOTH global locations, identical copies — `~/Documents/Cline/Rules/` and
   `~/.cline/rules/`):** `plain-english-responses.md` · `answer-from-the-project.md` · `skill-usage.md` ·
-  `design-work.md` · `persona-and-skill-routing.md`.
-- **`persona-and-skill-routing.md`** is the FIRST STEP for every task in every project: classify the request
-  (QUESTION · ANALYZE · PLAN · IMPLEMENT) and then choose the minimum persona — business-analyst (requirement) ·
-  project-manager (sequencing) · senior-software-architect (boundaries/contracts) · senior-software-engineer
-  (code + proof) · ux-product-analyst (experience) — with the safeguards that stop a rule breaking a project
-  (**the project outranks a persona or skill**; a skill never authorises a rewrite or a new dependency; a
-  stack-specific skill applies only where that stack is actually used).
+  `design-work.md` · `always-batch-work.md`, and `00-task-mode-selection.md` (pre-existing, now in BOTH folders
+  and extended — see below).
+- **`00-task-mode-selection.md` — THE RULE THAT CALLS THE EXPERT — is now global in BOTH folders.** It was
+  already the existing expert-selection rule (Founding Engineer · Onboarding Engineer · Debugging Engineer ·
+  Systems Architect · Performance Engineer · Clean Architecture Rebuild · Multi-Agent Workflow · Frontend
+  Component Engineer) but existed in only ONE global folder (`~/.cline/rules/`), and this project's older rules
+  file already declared that "task modes live in the global rules directory". It is now installed in
+  `~/Documents/Cline/Rules/` too, EXTENDED (original mode table preserved word-for-word) with the
+  QUESTION/ANALYZE/PLAN/IMPLEMENT classification and the specialist routing — business-analyst · project-manager ·
+  senior-software-architect · senior-software-engineer · ux-product-analyst — plus the safeguards (**the project
+  outranks a persona/mode/skill**; a skill never authorises a rewrite or a new dependency; a mandatory stack fit
+  check; "use the project's own router where one exists").
+  **The parallel rule I wrote earlier (`persona-and-skill-routing.md`) has been DELETED from both global folders
+  — one router, not two** — and every reference in this project was repointed to `00-task-mode-selection.md`.
+- **`always-batch-work.md`** was also promoted to both global folders (a project-agnostic rule already used by
+  this project's own history: structure large requests into independently verifiable batches, state the
+  breakdown first, and extend the batch list rather than folding new scope into an in-flight batch).
+  `always-check-requirements-registry.md` was NOT promoted: it names this project's script
+  (`scripts/verify-registry.mjs`) and registry, so it is project-specific by content.
 - **Skills available to every project: 34** in `~/.agents/skills/` (the 26 already there + 8 copied from this
   project on 2026-09-27: `design-review`, `frontend-design`, `interaction-design`, `impeccable`, `shadcn`,
   `accessibility`, `beautiful-shadows`, `project-manager`). Copies verified byte-identical to the project's.
   **NOT copied, deliberately:** `business-analyst`, `senior-software-architect`, `senior-software-engineer`,
   `ux-product-analyst`, `skill-router` — their bodies contain Mercenta-domain and stack-specific content that
   must not be injected into other projects (e.g. `senior-software-engineer` covers TypeScript/React/Vite). Their
-  ROLES are still available everywhere through `persona-and-skill-routing.md`.
+  ROLES are still available everywhere through `00-task-mode-selection.md`.
 - **Honest limitation recorded in the rule itself:** hand-copied skills are NOT registered in
   `~/.agents/.skill-lock.json` (the official skills CLI manifest), so the CLI cannot update them; the CLI is not
   installed on this machine.
