@@ -26,7 +26,58 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **§SSOT STAGES 2 + 3: THE RECORD OWNS A DERIVED WORK ITEM'S STATUS — the work layer's own resolution map is DELETED and the call is REFUSED, and every surface offers the OWNING ACTION instead of a Resolve button** (2026-09-26, session 37, fourth increment)
+## CURRENT STATE — **§SSOT STAGE 4: STOP FABRICATING WORK — the demo's compliance-document states are DECLARED BY NAME (the position arithmetic that fabricated 27 work items is GONE), the demo baseline is a DECLARED NUMBER the gate asserts, and simulated operational state presented as work says so** (2026-09-27, session 38, fifth increment)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** **`834a691`** (the S4 implementation commit) + the state checkpoint
+that follows it (which also corrects the session date in the annotations first written as 2026-09-26). **Canonical
+source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain` EMPTY** after the state
+commit. **THREE-WAY STATUS: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.**
+Local ✅ `npm run validate:all` **113 PASS / 0 FAIL (of 113)** · typecheck 0 · root tsc 0 · lint 0 · build ✓ 8.04s ·
+`e2e/work-layer.spec.ts` + `e2e/command-centre.spec.ts` **17 passed / 0 failed (19.0s)** · GitHub ✅ pushed ·
+**demo ⏸ NOT DEPLOYED — DELIBERATELY DEFERRED** to the programme's close (S5/S7 change the same surfaces) ·
+**live ⏸ NOT VERIFIED.**
+
+**Founder-level scope:** finding F6 — *57% of the open work list was produced by a row's position in an array.*
+**Programme record:** `docs/WORK_LAYER_SSOT_2026-09-26.md`.
+
+**What S4 changed (measured):**
+
+1. `COMPLIANCE_PATTERNS[bi % 3]` and `COMPLIANCE_SCENARIO_DOC_STATES` are **DELETED** from
+   `src/data/demoData.ts` — 27 blocking documents (and therefore 27 open work items) came from a brand's POSITION in
+   `DEMO_BRANDS`, so inserting a brand silently re-rolled every later brand's state.
+2. Six **NAMED** scenarios (`DEMO_COMPLIANCE_SCENARIOS`, each carrying a `why`) declare every required base
+   document's status plus the category document; `DEMO_COMPLIANCE_SCENARIO_BY_BRAND` assigns one to **all 20**
+   canonical brands **by name**, with no default and no fallback — `complianceScenarioFor()` **FAILS CLOSED** on an
+   unassigned brand ("refusing to fabricate document state").
+3. `DEMO_COMPLIANCE_BASELINE` declares the demo's counts (**95 documents / 27 blocking**) so a seed change must be
+   **deliberate**; the gate compares the real seeded records AND the real derived work list against it.
+4. **Labelling:** simulated operational state presented as work says so, from ONE declared sentence
+   (`src/config/demo.ts → DEMO_OPERATIONAL_STATE_LABEL`) rendered by the shared work workspace
+   (`data-testid="work-operational-state-label"`).
+5. **Gates:** `scripts/validate-work-layer.mjs` gains **§19** (13 assertions: no positional lookup · 20/20 assignment
+   coverage · no dead scenario · fail-closed refusal driven · cleared-brand drift check · declared document baseline ·
+   declared blocking baseline · 1:1 blocking-document↔item · no expiry dates · label declared once · label rendered);
+   `validate-uiux-redesign` gains the labelling check (**348 PASS**); the **E6/E7 change-set guards were REPOINTED,
+   not weakened** (the programme's declared surface added; a file outside EVERY declared set still fails).
+
+**Evidence — every figure measured this session:** `validate:all` **113/113 PASS**; `validate-work-layer` **PASS (0
+failures)**; `validate-uiux-redesign` **348 PASS / 0 FAIL**; `validate-commercial-readiness` **79 / 0**;
+`validate-po-acknowledgement-work` **PASS**; `validate-demo-completeness` **27 checks pass**;
+`validate-e6-brand-surfaces` **PASS** · `validate-e7-embedded-social` **PASS (0 failures)**; typecheck 0 · root tsc 0 ·
+lint 0 · build ✓ 8.04s; `e2e/work-layer.spec.ts` **13 passed** + `e2e/command-centre.spec.ts` **4 passed** (test 1 now
+asserts the label in real Chromium). **The new gate was PROVED ABLE TO FAIL:** re-assigning one brand to
+`gate_cleared` made §19 report **FAIL (3 failures)** — cleared-brand drift, blocking baseline 27→26, compliance work
+27→26 — and the file was then restored **byte-identical**
+(sha256 `cf13b24ff623593ba25f5c8170964cb1ac7eea28589e1be3423e57d5c8ef8b8a`). **The seed change was PROVED
+STATE-PRESERVING:** the 27 resulting blocking documents were diffed against the pre-change measurement and are
+identical.
+
+**Remaining (the programme):** **S5** one number (badge and list from ONE owner, each labelled — 47 rendered vs 41
+badged today) · **S6** CI wiring · **S7** the contract closing path. **Declared gaps:** `contract_renewal`,
+`founder_compliance`, `founder_setup`, `founder_integration`, `founder_funding`, `founder_finance`, `founder_ai_cost`.
+
+
+## PREVIOUS STATE — **§SSOT STAGES 2 + 3: THE RECORD OWNS A DERIVED WORK ITEM'S STATUS — the work layer's own resolution map is DELETED and the call is REFUSED, and every surface offers the OWNING ACTION instead of a Resolve button** (2026-09-26, session 37, fourth increment) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** **`b423637`** (the S2/S3 implementation commit) + the state checkpoint
 that follows it. **Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status
@@ -75,7 +126,6 @@ preserved). **The new gate was PROVED ABLE TO FAIL:** disabling the guard (`canR
 asserted baseline) · **S5** one number (badge and list from ONE owner, labelled — 47 rendered vs 41 badged today) ·
 **S6** CI wiring · **S7** the contract closing path. **Declared gaps:** `contract_renewal`, `founder_compliance`,
 `founder_setup`, `founder_integration`, `founder_funding`, `founder_finance`, `founder_ai_cost`.
-
 ## PREVIOUS STATE — **§SSOT STAGE 1: ONE SOURCE OF TRUTH FOR THE WORK LAYER — a consignment's in-transit exception now has ONE writer and a real closing path; the work item closes by doing the work** (2026-09-26, session 36, third increment) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** **`5dd061d`** + the state checkpoint that follows it. **Canonical

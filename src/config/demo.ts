@@ -13,7 +13,7 @@ export const DEMO_BANNER_TEXT =
   'Investor Demo Mode — all data is simulated for presentation purposes. Connect real integrations in Settings to activate live data flow.';
 
 /**
- * §SSOT S4 (2026-09-26) — THE LABEL FOR SIMULATED OPERATIONAL STATE PRESENTED AS WORK.
+ * §SSOT S4 (2026-09-27) — THE LABEL FOR SIMULATED OPERATIONAL STATE PRESENTED AS WORK.
  *
  * Why this exists: the operating layer derives work items from the seeded
  * operational records (compliance documents, consignments, invoices, channel POs).

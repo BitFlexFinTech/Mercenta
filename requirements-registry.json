@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-09-26",
+    "last_updated": "2026-09-27",
     "status_enum": [
       "not_started",
       "built",
@@ -440,7 +440,7 @@
         "S1": "DONE (retrospectively registered here)",
         "S2": "DONE",
         "S3": "DONE",
-        "S4": "NOT STARTED",
+        "S4": "DONE (2026-09-27, session 38) — the demo's document states are DECLARED by name and the declared baseline is asserted by the gate",
         "S5": "NOT STARTED",
         "S6": "PARTIAL (validate:work-layer registered; validate:all runs 113/113; CI absent)",
         "S7": "NOT STARTED"
@@ -454,7 +454,7 @@
         "founder_finance",
         "founder_ai_cost"
       ],
-      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (deployment + live verification deliberately deferred to the programme close, because S4/S5 change the same work surfaces)"
+      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (deployment + live verification deliberately deferred to the programme close, because S5 changes the same work surfaces; S4 is DONE at 834a691)"
     }
   },
   "entries": [
@@ -5185,11 +5185,12 @@
     },
     {
       "id": "ssot-work-layer-s4-stop-fabricating-work",
-      "description": "§SSOT S4 (NOT STARTED) — 27 of the 47 open work items are produced by position arithmetic (COMPLIANCE_PATTERNS[bi % 3]). Replace it with NAMED scenarios, ASSERT the demo baseline count in the gate so a fabricated item can never reappear unnoticed, and label simulated operational state where it is presented as work",
-      "source": "§SSOT programme 2026-09-26 — owner: src/data/demoData.ts (COMPLIANCE_PATTERNS ~659-663, 724-727, 749) + scripts/validate-work-layer.mjs",
-      "status": "not_started",
-      "evidence": "Finding F6 recorded in docs/WORK_LAYER_SSOT_2026-09-26.md with measured line numbers; not implemented as at 2026-09-26",
-      "last_verified": "2026-09-26",
+      "description": "§SSOT S4 — stop fabricating work. The demo's compliance-document states are DECLARED, never computed: COMPLIANCE_PATTERNS[bi % 3] and COMPLIANCE_SCENARIO_DOC_STATES are GONE, six NAMED scenarios (DEMO_COMPLIANCE_SCENARIOS, each with a why) are assigned to all 20 canonical brands BY NAME (DEMO_COMPLIANCE_SCENARIO_BY_BRAND), complianceScenarioFor() fails CLOSED on an unassigned brand instead of defaulting, DEMO_COMPLIANCE_BASELINE declares the demo's document counts (95 / 27 blocking), and simulated operational state presented as work is labelled from ONE declared sentence (src/config/demo.ts → DEMO_OPERATIONAL_STATE_LABEL, rendered as work-operational-state-label)",
+      "source": "§SSOT programme 2026-09-27 session 38 — owner: src/data/demoData.ts + src/config/demo.ts + src/components/shared/WorkWorkspace.tsx + scripts/validate-work-layer.mjs §19",
+      "status": "built_and_tested",
+      "evidence": "src/data/demoData.ts (DEMO_COMPLIANCE_SCENARIOS · DEMO_COMPLIANCE_SCENARIO_BY_BRAND · complianceScenarioFor · DEMO_COMPLIANCE_BASELINE; 9 files, +447/−63 at 834a691); src/config/demo.ts (DEMO_OPERATIONAL_STATE_LABEL); src/components/shared/WorkWorkspace.tsx (work-operational-state-label). Gates: scripts/validate-work-layer.mjs §19 asserts the declared baseline, the 20/20 assignment coverage, the dead-scenario check, the fail-closed refusal, the 1:1 blocking-document↔item mapping and the label — PROVED ABLE TO FAIL (one brand re-assigned to gate_cleared ⇒ 3 failures; restored byte-identical, sha256 cf13b24ff623593ba25f5c8170964cb1ac7eea28589e1be3423e57d5c8ef8b8a); scripts/validate-uiux-redesign.mjs 348 PASS / 0 FAIL; e2e/work-layer.spec.ts test 1 asserts the label in Chromium (17 passed / 0 failed with command-centre.spec.ts, 19.0s); npm run validate:all 113 PASS / 0 FAIL (of 113). The seed change is STATE-PRESERVING: the resulting 27 blocking documents were diffed against the pre-change measurement and are identical.",
+      "e2eRef": "e2e/work-layer.spec.ts",
+      "last_verified": "2026-09-27",
       "superseded_by": null
     },
     {

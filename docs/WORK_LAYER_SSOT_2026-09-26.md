@@ -84,7 +84,7 @@ work items could not be closed by doing the work, and nothing enforced any of it
   action; operator states become annotations. Repoint the four gates that assert derived
   resolution (`validate-work-layer`, `validate-commercial-readiness:479`,
   `validate-po-acknowledgement-work:243`, `validate-uiux-redesign`). — **DONE above.**
-- **S4 — DONE (2026-09-26, session 38). Stop fabricating work.**
+- **S4 — DONE (2026-09-27, session 38). Stop fabricating work.**
   `COMPLIANCE_PATTERNS[bi % 3]` and `COMPLIANCE_SCENARIO_DOC_STATES` are GONE.
   `src/data/demoData.ts` now declares six NAMED document scenarios
   (`DEMO_COMPLIANCE_SCENARIOS`, each with a `why`) and assigns one to every

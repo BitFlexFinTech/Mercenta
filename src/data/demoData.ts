@@ -707,7 +707,7 @@ const BASE_COMPLIANCE_TYPES = [
 type ComplianceBaseType = (typeof BASE_COMPLIANCE_TYPES)[number];
 
 /**
- * §SSOT S4 (2026-09-26) — A COMPLIANCE-DOCUMENT SCENARIO, DECLARED BY NAME.
+ * §SSOT S4 (2026-09-27) — A COMPLIANCE-DOCUMENT SCENARIO, DECLARED BY NAME.
  *
  * OLD CONTRACT (recorded, not hidden): the status of every non-cleared brand's
  * documents came from ARITHMETIC — `COMPLIANCE_PATTERNS[bi % 3]`, an array indexed
@@ -878,7 +878,7 @@ export function complianceScenarioFor(brandId: string): ComplianceDocumentScenar
  * a fabricated work item impossible to land unnoticed: the gate compares the derived
  * compliance work list against these numbers and fails otherwise.
  *
- * Measured from the canonical seed on 2026-09-26: 20 brands × 4 base documents (80)
+ * Measured from the canonical seed on 2026-09-27: 20 brands × 4 base documents (80)
  * + 15 category documents (95), of which 27 are blocking.
  */
 export const DEMO_COMPLIANCE_BASELINE = {

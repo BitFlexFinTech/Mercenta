@@ -497,7 +497,7 @@ try {
   ];
 
   /**
-   * §SSOT — THE WORK-LAYER SINGLE-SOURCE-OF-TRUTH PROGRAMME (2026-09-26) — REPOINTED.
+   * §SSOT — THE WORK-LAYER SINGLE-SOURCE-OF-TRUTH PROGRAMME (2026-09-27) — REPOINTED.
    *
    * The programme in `docs/WORK_LAYER_SSOT_2026-09-26.md` (S1 one writer for a
    * consignment exception · S2/S3 the RECORD owns a derived item's status and the

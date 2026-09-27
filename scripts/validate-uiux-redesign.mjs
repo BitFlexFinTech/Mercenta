@@ -591,7 +591,7 @@ check(
   /opts\?\.superAdmin \? scoped : scoped\.filter\(\(r\) => r\.superAdminOnly !== true\)/.test(WORK_STORE)
 );
 /**
- * §SSOT S4 (2026-09-26) — HONEST LABELLING. Every row on the work surface is
+ * §SSOT S4 (2026-09-27) — HONEST LABELLING. Every row on the work surface is
  * projected from a SEEDED operational record, so the surface must say the state is
  * simulated. The sentence is declared ONCE (`src/config/demo.ts`); the component
  * imports it, so the wording cannot drift between surfaces.

@@ -1514,7 +1514,7 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
 ]);
 
 /**
- * §SSOT — THE WORK-LAYER SINGLE-SOURCE-OF-TRUTH PROGRAMME (2026-09-26) — REPOINTED.
+ * §SSOT — THE WORK-LAYER SINGLE-SOURCE-OF-TRUTH PROGRAMME (2026-09-27) — REPOINTED.
  *
  * The programme recorded in `docs/WORK_LAYER_SSOT_2026-09-26.md` removes the
  * multiple-writers / fabricated-work class from the operating layer: S1 (one
