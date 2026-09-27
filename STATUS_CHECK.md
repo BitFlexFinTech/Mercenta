@@ -65,8 +65,8 @@ accessibility and states). The stale project path in `05-thoroughness-overrides-
 
 ## CURRENT STATE — **§SSOT STAGE 5: ONE NUMBER — the nav badge and the work list count from ONE owner (`workCounts`) and every number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement** (2026-09-27, session 39, sixth increment)
 
-**Branch:** `redesign/foundation`. **Checkpoint:** **`b172ed1`** (the one-click-connect governance commit; predecessors
-`acf1bce` then `b4d9037`/`bf4edbf`, the §SSOT S5 commits) + the state checkpoint that follows it. **Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain`
+**Branch:** `redesign/foundation`. **Checkpoint:** **`5eb4cd4`** (the global-rules + E6-repoint governance commit; predecessors
+`b172ed1`, `acf1bce`, then the §SSOT S5 commits) + the state checkpoint that follows it. **Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain`
 EMPTY** after the state commit. **THREE-WAY STATUS: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.**
 Local ✅ `npm run validate:all` **113 PASS / 0 FAIL (of 113)** · typecheck 0 · root tsc 0 · lint 0 · build ✓ 8.22s ·
 `e2e/work-layer.spec.ts` **14 passed / 0 failed (24.6s)** · GitHub ✅ pushed ·
