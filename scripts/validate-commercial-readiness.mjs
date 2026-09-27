@@ -473,12 +473,36 @@ try {
     new Set(openWork.map((w) => w.id)).size === openWork.length
   );
   const stillOpen = openWork.find((w) => w.source === 'commercial_review');
+  /**
+   * §SSOT S2 — REPOINTED, NOT WEAKENED. OLD CONTRACT (recorded): `O6 a commercial
+   * work item is resolvable and leaves the attention set` — it called
+   * `work.resolveWorkItem(...)` on a DERIVED item, which is the defect S2 removes
+   * (a ticked task hiding record-qualified work). The invariant asserted now is the
+   * stronger one the rule actually states: the item's EXISTENCE tracks the RECORD,
+   * in BOTH directions, and the work layer cannot resolve it at all.
+   */
+  let reviewRefusal = null;
+  try {
+    work.resolveWorkItem(stillOpen.id, 'staff:validator', 'Decision recorded');
+  } catch (e) {
+    reviewRefusal = e;
+  }
   test(
-    'O6 a commercial work item is resolvable and leaves the attention set',
-    stillOpen
-      ? work.resolveWorkItem(stillOpen.id, 'staff:validator', 'Decision recorded') !== null &&
-          !work.getWorkItems('admin', null).some((w) => w.id === stillOpen.id)
-      : false
+    'O6 the work layer REFUSES to resolve a commercial work item (the record owns its status)',
+    reviewRefusal !== null &&
+      reviewRefusal.name === 'DERIVED_RESOLUTION_REFUSED' &&
+      work.getWorkItems('admin', null).some((w) => w.id === stillOpen.id)
+  );
+  const reviewRecordId = stillOpen.entity.id;
+  const routeBeforeClose = store.getCommercialReadinessRecord(reviewRecordId)?.route;
+  recorder.reassessCommercialReadiness(reviewRecordId, 'staff:validator');
+  const routeAfterClose = store.getCommercialReadinessRecord(reviewRecordId)?.route;
+  const stillDerives = cfg.COMMERCIAL_WORK_BY_ROUTE[routeAfterClose]?.source === 'commercial_review';
+  test(
+    'O7 the item exists EXACTLY while the record qualifies (one source of truth, both directions)',
+    stillDerives === work.getWorkItems('admin', null).some((w) => w.id === stillOpen.id) &&
+      routeAfterClose === routeBeforeClose,
+    `route=${routeAfterClose} derives=${stillDerives}`
   );
 
   /* ── P. AUTOMATION — registered, idempotent, never changes a route ──────── */

@@ -565,16 +565,25 @@ check(
   /export function getWorkItems\(/.test(WORK_STORE) && WORK_STORE.includes("scope === 'brand'")
 );
 /**
- * §P3 (2026-09-22) — REPOINTED, not weakened. OLD CONTRACT: the literal
- * `scoped.filter((r) => r.status !== 'done')`. The §P3 Super-Admin gate renamed
- * that local (`authorised` = the scope/tenant filter PLUS the fail-closed
- * `superAdminOnly` gate), so the assertion follows the CURRENT canonical source.
- * The invariant is unchanged — a resolved item leaves the attention set — and the
- * new form additionally requires the gate to be present, so the check is stronger.
+ * §SSOT S2 (2026-09-26) — REPOINTED, NOT WEAKENED. OLD CONTRACT (recorded):
+ *
+ *   WORK_STORE.includes('resolvedDerived.set') &&
+ *     /authorised\.filter\(\(r\) => r\.status !== 'done'\)/.test(WORK_STORE)
+ *
+ * That asserted the work layer held its OWN resolution for derived work — which is
+ * precisely the defect S2 removes (a ticked task hiding record-qualified work). The
+ * invariant is now asserted against the CURRENT canonical owner: derived items are
+ * never `done`, the resolution map does not exist, and the attention filter is
+ * unchanged. The check is STRONGER (three conditions, plus the refusal guard), and
+ * it judges CODE rather than comments.
  */
+const WORK_STORE_CODE = WORK_STORE.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
 check(
-  'resolution removes the item from the attention set (reminders stop)',
-  WORK_STORE.includes('resolvedDerived.set') &&
+  'the attention set is closed by the RECORD, never by a resolved derived task',
+  !WORK_STORE_CODE.includes('resolvedDerived') &&
+    !WORK_STORE_CODE.includes('derivedStatus') &&
+    WORK_STORE_CODE.includes("status: annotation?.status ?? 'open'") &&
+    WORK_STORE_CODE.includes('DERIVED_RESOLUTION_REFUSED') &&
     /authorised\.filter\(\(r\) => r\.status !== 'done'\)/.test(WORK_STORE)
 );
 check(

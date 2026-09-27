@@ -53,6 +53,8 @@ const work = await server.ssrLoadModule('/src/lib/work/workStore.ts');
 const win = await server.ssrLoadModule('/src/lib/commerce/poAcknowledgementWindow.ts');
 const cfg = await server.ssrLoadModule('/src/config/purchaseOrders.ts');
 const store = await server.ssrLoadModule('/src/data/demoStore.ts');
+/** §SSOT S2 — the canonical writer that actually closes an acknowledgement item. */
+const api = await server.ssrLoadModule('/src/data/api.ts');
 
 const NOW = new Date();
 const HOUR = 3_600_000;
@@ -240,9 +242,54 @@ test(
 test('a brand NEVER receives another tenant’s acknowledgement work', !brandA.some((w) => w.tenantId === tB));
 const target = brandA[0];
 const before = work.getWorkItems('brand', tA).length;
-const resolved = work.resolveWorkItem(target.id, 'staff:mercenta-ops', 'S3 gate: acknowledgement worked');
-test('resolving an acknowledgement item marks it done', resolved !== null && resolved.status === 'done');
-test('…and its reminders STOP (it has left the attention set)', work.getWorkItems('brand', tA).length === before - 1);
+
+/**
+ * §SSOT S2 — REPOINTED, NOT WEAKENED. OLD CONTRACT (recorded): this section called
+ * `work.resolveWorkItem(target.id, …)` on a DERIVED acknowledgement item and
+ * asserted it became `done` and left the attention set. That is exactly the defect
+ * S2 removes — a task tick could hide record-qualified work. The SAME invariant is
+ * now asserted against the owner that can actually close it:
+ *   (a) the work layer REFUSES to resolve it, and the item STAYS;
+ *   (b) performing the ACKNOWLEDGEMENT (the canonical writer) closes it for real.
+ */
+test('the acknowledgement item is DERIVED (so the refusal below is the real case)', target.derived === true);
+
+let ackRefusal = null;
+try {
+  work.resolveWorkItem(target.id, 'staff:mercenta-ops', 'S3 gate: attempt to tick the task');
+} catch (e) {
+  ackRefusal = e;
+}
+test(
+  'resolving an acknowledgement item from the work layer is REFUSED, naming the owning action',
+  ackRefusal !== null &&
+    ackRefusal.name === 'DERIVED_RESOLUTION_REFUSED' &&
+    String(ackRefusal.message).includes('Acknowledge the purchase order')
+);
+test(
+  '…and the item is STILL open (nothing was half-resolved)',
+  work.getWorkItems('brand', tA).some((w) => w.id === target.id) &&
+    work.getWorkItems('brand', tA).length === before
+);
+
+const ackPo = store.demoPurchaseOrders.find((p) => p.id === target.entity.id);
+const ackResult = ackPo
+  ? api.acknowledgePurchaseOrder(
+      ackPo.id,
+      ackPo.lineItems.map((l) => ({ sku: l.sku, ackStatus: 'accepted', acknowledgedQty: l.quantity })),
+      undefined,
+      NOW
+    )
+  : { ok: false };
+test('the CANONICAL acknowledgement writer accepts the submission', ackResult.ok === true, ackResult.error);
+test(
+  '…and DOING THE WORK closes the item (it has left the attention set)',
+  work.getWorkItems('brand', tA).length === before - 1 && !work.getWorkItems('brand', tA).some((w) => w.id === target.id)
+);
+test(
+  '…and the closure came from the RECORD, not from the task (the PO itself carries the acknowledgement)',
+  Boolean(ackPo?.acknowledgedAt) && !work.getWorkItems('brand', tA).some((w) => w.id === target.id)
+);
 
 /* ── 8. Zero network calls, and the run stays deterministic ─────────────── */
 test('every assertion above ran with fetch sabotaged (zero network calls)', fetchCalls === 0, String(fetchCalls));

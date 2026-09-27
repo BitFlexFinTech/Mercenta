@@ -112,6 +112,21 @@ export interface WorkActivityEntry {
   detail: string;
 }
 
+/**
+ * §SSOT S2 — AN OPERATOR'S OWN PROGRESS ANNOTATION ON A DERIVED ITEM.
+ *
+ * The canonical record owns a derived item's EXISTENCE and its RESOLUTION, so a
+ * derived item is never `done` and `status` is computed (`open` unless the
+ * operator has annotated it). This describes the operator's own progress only —
+ * `in_progress` or `blocked`, never `done` — which is why it can never hide
+ * record-qualified work from the attention set.
+ */
+export interface WorkOperatorAnnotation {
+  status: 'in_progress' | 'blocked';
+  at: string;
+  actor: string;
+}
+
 export interface WorkItem {
   /** Deterministic: derived items are `work-<source>-<entityId>`; manual items
    *  take the next sequence number. Never time- or random-derived. */
@@ -120,6 +135,13 @@ export interface WorkItem {
   detail: string;
   source: WorkSource;
   priority: WorkPriority;
+  /**
+   * §SSOT S2 — for a DERIVED item this is COMPUTED, never stored: the record
+   * owns resolution, so a derived item can only be `open` / `in_progress` /
+   * `blocked` and NEVER `done`. It disappears by performing the owning action
+   * (`WORK_SOURCE_CLOSING`), which changes the record. A manual item keeps the
+   * full lifecycle including `done`.
+   */
   status: WorkStatus;
   /** Owner identity — a staff id for admin work, `brand:<tenantId>` for brand work. */
   owner: string;
@@ -150,8 +172,14 @@ export interface WorkItem {
    * record to an ordinary admin session.
    */
   superAdminOnly?: boolean;
-  /** Derived items are resolved by override; manual items are edited directly. */
+  /**
+   * §SSOT S2 — TRUE when the item is a projection of a canonical record. Such an
+   * item is closed ONLY by the owning platform action that changes that record;
+   * the work layer cannot resolve it (`resolveWorkItem` refuses it).
+   */
   derived: boolean;
+  /** §SSOT S2 — the operator's own progress annotation on a derived item. */
+  annotation?: WorkOperatorAnnotation;
   activity: WorkActivityEntry[];
   createdAt: string;
   completedAt?: string;

@@ -39,14 +39,51 @@ work items could not be closed by doing the work, and nothing enforced any of it
   REFUSES a resolved consignment) and `clearShipmentException` (idempotent, audited) are the ONLY
   writers; `amendShipment`, the DHL seam, the scenario engine and the investor demo all route through
   them; `WORK_SOURCE_CLOSING` declares every source's closing path with its gaps marked.
-- **S2 — the parallel status.** A derived item's status must be COMPUTED from the record, never read
-  from `derivedStatus` / `resolvedDerived` (`workStore.ts:254-257, 339-365, 793-866`). `resolveWorkItem`
-  on a derived item must be REFUSED while the record still qualifies, naming the owning action;
-  operator states become annotations. Repoint the four gates that assert derived resolution
-  (`validate-work-layer`, `validate-commercial-readiness:479`, `validate-po-acknowledgement-work:243`,
-  `validate-uiux-redesign`).
-- **S3 — the surfaces.** Kanban / detail panel must offer the OWNING ACTION for derived items instead
-  of a Resolve button (`WorkWorkspace.tsx:637, 647, 657, 1032, 1045, 1057`).
+- **S2 — DONE (2026-09-26, session 37). The parallel status is gone: the record owns
+  a derived item's status.** `resolvedDerived` / `derivedStatus` are DELETED from
+  `src/lib/work/workStore.ts`; `make()` COMPUTES the status
+  (`status: annotation?.status ?? 'open'`) and a derived item can never be `done`.
+  `resolveWorkItem` REFUSES a derived item — the refusal names the owning action, the
+  canonical writer and the record module from `WORK_SOURCE_CLOSING`, is attributed and
+  audited (`work_item_resolution_refused`), and emits no `work_item_resolved` event.
+  `setWorkItemStatus(id, 'done')` routes into the same refusal; `in_progress` /
+  `blocked` become an ANNOTATION (`WorkOperatorAnnotation`, structurally unable to hold
+  `done`) that can never remove the item from the attention set; `reopenWorkItem` on a
+  derived item clears the annotation. `canResolveFromWorkLayer` / `describeWorkClosing`
+  / `DERIVED_RESOLUTION_REFUSED` / `isDerivedResolutionRefusal` are the surface seam.
+  Evidence: `validate-work-layer` §4 rewritten (refusal + naming + audit + annotation,
+  no `done`) and a new §18 judges the CODE (no resolution map, computed status, the
+  refusal guard, the annotation union) — **PASS, 0 failures**, and the four gates that
+  asserted the old contract were REPOINTED, not weakened:
+  `validate-work-layer` §11 (a manual task's reminder still stops on resolution; a
+  record-qualified reminder survives a refused resolution), `validate-commercial-readiness`
+  O6/O7 (the item exists EXACTLY while the record qualifies, in both directions),
+  `validate-po-acknowledgement-work` §7 (the canonical `acknowledgePurchaseOrder`
+  writer is driven and CLOSES the item; the refusal leaves it), `validate-uiux-redesign`
+  (the attention filter plus the absence of any derived resolution map, judged on
+  comment-stripped source).
+- **S3 — DONE (2026-09-26, session 37). The surfaces offer the OWNING ACTION.**
+  `WorkWorkspace.tsx`: one `openOwningRecord(item)` helper (raises the Super-Admin tab
+  intent, closes the drawer, navigates) is used by the board card and the drawer; a
+  record-qualified card/drawer renders the owning destination as its PRIMARY action with
+  the closing path named inline (`work-drawer-closing`, `describeWorkClosing`), plus
+  `Start` / `Block` / `Clear mark` annotations — and NO Resolve button; only a manual
+  task keeps Resolve/Reopen. The header meta and the "Open work" tile now label the two
+  sets honestly (`record-qualified` vs `resolved manually`). Evidence: the browser
+  contract was repointed, not deleted — `e2e/work-layer.spec.ts` test 5 now asserts the
+  record-qualified drawer has ZERO `work-drawer-resolve`, shows the named closing path,
+  and that a mark leaves the row in place; new test 5b asserts a MANUAL task still
+  resolves and leaves the list — **13 passed / 0 failed (25.7s)**.
+- **S2/S3 — the next stage is S4** (stop fabricating work: `COMPLIANCE_PATTERNS[bi % 3]`
+  → named scenarios + an asserted demo baseline), then S5 (one number: badge and list
+  from ONE owner), S6 (CI wiring), S7 (the contract closing path).
+- **S2 — SUPERSEDED TEXT, KEPT FOR THE RECORD (was "the parallel status")**: a derived
+  item's status must be COMPUTED from the record, never read from `derivedStatus` /
+  `resolvedDerived` (`workStore.ts:254-257, 339-365, 793-866`); `resolveWorkItem` on a
+  derived item must be REFUSED while the record still qualifies, naming the owning
+  action; operator states become annotations. Repoint the four gates that assert derived
+  resolution (`validate-work-layer`, `validate-commercial-readiness:479`,
+  `validate-po-acknowledgement-work:243`, `validate-uiux-redesign`). — **DONE above.**
 - **S4 — stop fabricating work.** Replace `COMPLIANCE_PATTERNS[bi % 3]` with named scenarios; assert
   the demo baseline count; label simulated operational state where it is presented as work.
 - **S5 — one number.** Badge and list from one owner, with the label stating which set each number is

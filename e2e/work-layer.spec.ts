@@ -9,8 +9,8 @@
  *   - LIST / KANBAN / CALENDAR are real views over the same items
  *   - filters and search are REAL state changes
  *   - a row opens the shared record drawer with its activity trail
- *   - resolving stops the reminder: the item leaves the list and the kanban
- *     moves it to Done
+ *   - a record-qualified item offers the OWNING action (never a Resolve button),
+ *     and an operator mark can never hide it — while a manual task still resolves
  *   - a brand only ever sees its OWN tenant's work (browser-level isolation check)
  *   - a manually created task appears in the list, board and calendar
  *   - no horizontal overflow at 390px
@@ -121,22 +121,59 @@ test.describe('Work layer — admin workspace', () => {
     await page.screenshot({ path: `${SHOTS}/admin-work-kanban.png`, fullPage: false });
   });
 
-  test('5. resolving stops the reminder and moves the card to Done', async ({ page }) => {
+  /**
+   * §SSOT S2/S3 — THE FOUNDER-REPORTED DEFECT, AS SEEN IN A BROWSER.
+   *
+   * OLD CONTRACT (recorded, not weakened): this test opened the first row and
+   * clicked `work-drawer-resolve`, then asserted the row left the list and the
+   * kanban card moved to Done. That button is exactly what S2 removes for
+   * record-qualified work: a ticked task could hide work the RECORD still
+   * qualified. The same flow is now asserted as the two halves of the rule:
+   * record-qualified work offers its OWNING ACTION (5), and a manual task — which
+   * the work layer genuinely owns — still resolves (5b).
+   */
+  test('5. a record-qualified row offers the OWNING action, and a mark never hides it', async ({ page }) => {
     await openAdminWork(page);
     const firstRow = page.locator('[data-testid^="work-row-"]').first();
     const rowId = String(await firstRow.getAttribute('data-testid'));
     const before = await page.locator('[data-testid^="work-row-"]').count();
 
     await firstRow.locator('button').click();
+    await expect(page.getByTestId('work-record-drawer')).toBeVisible();
+
+    /* No Resolve button exists for this item, and the closing path is named on it. */
+    await expect(page.getByTestId('work-drawer-resolve')).toHaveCount(0);
+    await expect(page.getByTestId('work-drawer-open-record')).toBeVisible();
+    await expect(page.getByTestId('work-drawer-closing')).toBeVisible();
+    await expect(page.getByTestId('work-drawer-closing')).toContainText('owned by');
+
+    /* An operator mark is an ANNOTATION: it can never remove the item. */
+    await page.getByTestId('work-drawer-start').click();
+    await expect(page.locator(`[data-testid="${rowId}"]`)).toHaveCount(1);
+    await expect(page.locator('[data-testid^="work-row-"]')).toHaveCount(before);
+
+    /* The owning action hands the operator to the record's own workspace. */
+    await page.getByTestId('work-drawer-open-record').click();
+    await expect(page.getByTestId('work-record-drawer')).toHaveCount(0);
+    await page.screenshot({ path: `${SHOTS}/admin-work-owning-action.png`, fullPage: false });
+  });
+
+  test('5b. a MANUAL task still resolves and leaves the list (the work layer owns it)', async ({ page }) => {
+    await openAdminWork(page);
+    const before = await page.locator('[data-testid^="work-row-"]').count();
+
+    await page.getByTestId('work-new-title').fill('Register the new pallet spec');
+    await page.getByTestId('work-new-submit').click();
+    await expect(page.locator('[data-testid^="work-row-"]')).toHaveCount(before + 1);
+
+    const manualRow = page.locator('[data-testid^="work-row-work-manual-"]').first();
+    await manualRow.locator('button').click();
+    await expect(page.getByTestId('work-drawer-resolve')).toBeVisible();
     await page.getByTestId('work-drawer-resolve').click();
 
-    await expect(page.locator(`[data-testid="${rowId}"]`)).toHaveCount(0);
-    await expect(page.locator('[data-testid^="work-row-"]')).toHaveCount(before - 1);
-
-    const workItemId = rowId.replace('work-row-', '');
-    await page.getByRole('tab', { name: /Kanban/ }).click();
-    await expect(page.getByTestId(`work-card-${workItemId}`)).toBeVisible();
-    await expect(page.getByTestId('work-column-done')).toContainText('Reopen');
+    await expect(page.locator('[data-testid^="work-row-"]')).toHaveCount(before);
+    await expect(page.locator('[data-testid^="work-row-work-manual-"]')).toHaveCount(0);
+    await page.getByTestId('work-reset').click();
   });
 
   test('6. calendar is a real derived month grid', async ({ page }) => {

@@ -9,19 +9,33 @@
  *
  * Non-negotiable rules implemented here:
  * - DERIVED items are pure projections of real records (`src/data/demoStore`,
- *   `prospectStore`, `returnsTracking`). Nothing is invented; a derived item can
- *   be RESOLVED without rewriting the record it points at, because resolving a
- *   task is not the same act as changing the record.
+ *   `prospectStore`, `returnsTracking`). Nothing is invented.
+ * - §SSOT S2 — FOR DERIVED WORK THE RECORD OWNS BOTH EXISTENCE AND STATUS. A
+ *   derived item's status is COMPUTED (`open`, or an operator annotation of
+ *   `in_progress` / `blocked`) and can never be `done`: it disappears only when
+ *   the owning platform action changes the record (`WORK_SOURCE_CLOSING`).
+ *   `resolveWorkItem` therefore REFUSES a derived item, and the refusal is
+ *   attributed and audited. (At S1 the work layer held a second, independent
+ *   `resolvedDerived` status; that map is gone.)
  * - IDs are deterministic (`work-<source>-<entityId>`), never time- or
  *   random-derived, so the same reset produces the same scenario.
  * - Deadlines come from the record's own dates plus DECLARED terms. No random
  *   prices, no random dates.
- * - Resolving the underlying action REMOVES the item from the attention set, so
+ * - Doing the owning action REMOVES the item from the attention set, so
  *   reminders stop. This is enforced in one place (`getWorkItems`).
  * - Every mutation is attributed and audited (`demoAuditLog`) and emits a
  *   canonical platform event.
  */
-import type { WorkActivityEntry, WorkEntityRef, WorkItem, WorkPriority, WorkScope, WorkSource, WorkStatus } from './types';
+import type {
+  WorkActivityEntry,
+  WorkEntityRef,
+  WorkItem,
+  WorkOperatorAnnotation,
+  WorkPriority,
+  WorkScope,
+  WorkSource,
+  WorkStatus,
+} from './types';
 import {
   demoAuditLog,
   demoBrands,
@@ -318,6 +332,55 @@ export function closingForSource(source: WorkSource): WorkSourceClosing {
   return WORK_SOURCE_CLOSING[source];
 }
 
+/* ── §SSOT S2 — "the record owns it": refusal + the named owning action ─────── */
+
+/**
+ * The error NAME carried by a refused derived resolution. A caller can branch on
+ * `isDerivedResolutionRefusal(err)` without importing a class (keeps the seam
+ * usable from plain JS validators as well as TS components).
+ */
+export const DERIVED_RESOLUTION_REFUSED = 'DERIVED_RESOLUTION_REFUSED';
+
+/** Is this the work layer's refusal to resolve a record-owned item? */
+export function isDerivedResolutionRefusal(err: unknown): boolean {
+  return err instanceof Error && err.name === DERIVED_RESOLUTION_REFUSED;
+}
+
+/**
+ * §SSOT S2 — the sentence a surface shows INSTEAD of a Resolve button for a
+ * derived item: which platform action closes it, who owns that action, and
+ * whether the platform has a closing path at all yet.
+ */
+export function describeWorkClosing(source: WorkSource): string {
+  const closing = WORK_SOURCE_CLOSING[source];
+  const writer = closing.writer ? `via ${closing.writer}` : 'and the platform has NO closing path for it yet (a declared gap)';
+  return `${closing.via} — ${writer} · owned by ${closing.owner}`;
+}
+
+/**
+ * §SSOT S2 — can the WORK LAYER itself mark this item done?
+ *
+ * TRUE only for a manual item, which has no canonical record and whose single
+ * source of truth IS this store. A derived item is always FALSE: its resolution
+ * is owned by the record, so resolving the task would leave the record and the
+ * work list disagreeing — the defect this stage removes.
+ */
+export function canResolveFromWorkLayer(item: Pick<WorkItem, 'derived'>): boolean {
+  return item.derived !== true;
+}
+
+/**
+ * §SSOT S2 — the refusal message, NAMING the owning action (§S2 requires the
+ * refusal to name it, not merely to fail).
+ */
+function derivedResolutionRefusalMessage(item: WorkItem): string {
+  return (
+    `[work] ${item.id} is DERIVED from a canonical record (${WORK_SOURCE_LABELS[item.source]}), ` +
+    `so the work layer cannot resolve it. Close it by the owning action: ${describeWorkClosing(item.source)}. ` +
+    'Resolving the task while the record still qualifies would give ONE fact two sources of truth.'
+  );
+}
+
 
 /**
  * §P3 — the declared action-id → work-source map for the founder console.
@@ -403,10 +466,16 @@ export function daysUntil(iso: string | null | undefined): number | null {
 
 /* ── Store state ───────────────────────────────────────────────────────────── */
 
-/** Derived items the operator has explicitly resolved (deterministic key → record). */
-const resolvedDerived = new Map<string, { at: string; actor: string; reason: string }>();
-/** Derived items the operator has explicitly progressed / blocked. */
-const derivedStatus = new Map<string, WorkStatus>();
+/**
+ * §SSOT S2 — OPERATOR PROGRESS ANNOTATIONS ON DERIVED ITEMS (deterministic key →
+ * annotation).
+ *
+ * This replaced `resolvedDerived` + `derivedStatus`, which let an operator mark a
+ * derived item `done` (or `blocked`) independently of the record it projected.
+ * What remains can hold ONLY `in_progress` / `blocked` — a description of the
+ * operator's own progress — so it can never hide record-qualified work.
+ */
+const derivedAnnotations = new Map<string, WorkOperatorAnnotation>();
 /** Operator-created items. */
 const manualItems: WorkItem[] = [];
 /** Per-derived-item activity history (resolution / reopen lines). */
@@ -488,31 +557,37 @@ interface DeriveInput {
   createdAt: string;
 }
 
+/**
+ * §SSOT S2 — PROJECT A RECORD-QUALIFIED ITEM. Status is COMPUTED here:
+ *
+ *   open                      — the record qualifies and the operator has said nothing
+ *   in_progress / blocked     — the operator's own ANNOTATION (progress, not resolution)
+ *   done                      — IMPOSSIBLE. No input can produce it.
+ *
+ * The item therefore exists for exactly as long as its record qualifies, and the
+ * ONLY way to remove it from the attention set is the owning action that changes
+ * the record (`WORK_SOURCE_CLOSING`). That is what makes ONE fact have ONE source
+ * of truth.
+ */
 function make(source: WorkSource, entity: WorkEntityRef, input: DeriveInput): WorkItem {
   const id = workItemId(source, entity.id);
-  const status = derivedStatus.get(id) ?? 'open';
-  const resolution = resolvedDerived.get(id);
+  const annotation = derivedAnnotations.get(id);
   return {
     id,
     title: input.title,
     detail: input.detail,
     source,
     priority: input.priority,
-    status: resolution ? 'done' : status,
+    status: annotation?.status ?? 'open',
     owner: input.owner ?? (input.tenantId ? `brand:${input.tenantId}` : 'staff:mercenta-ops'),
     dueDate: input.dueDate,
     tenantId: input.tenantId,
     entity,
     actionView: input.actionView,
     derived: true,
-    activity: [
-      ...(derivedActivity.get(id) ?? []),
-      ...(resolution
-        ? [{ id: activityId(id, 0), at: resolution.at, actor: resolution.actor, action: 'resolved', detail: resolution.reason }]
-        : []),
-    ],
+    annotation: annotation ? { ...annotation } : undefined,
+    activity: [...(derivedActivity.get(id) ?? [])],
     createdAt: input.createdAt,
-    completedAt: resolution?.at,
   };
 }
 
@@ -937,26 +1012,45 @@ function appendDerivedActivity(itemId: string, entry: Omit<WorkActivityEntry, 'i
 }
 
 /**
- * Resolve a work item. For a DERIVED item this records an explicit resolution
- * against the deterministic key — the canonical record is untouched (resolving a
- * task is not the same act as changing the record). Either way the item leaves
- * the attention set, so its reminders stop.
+ * §SSOT S2 — RESOLVE A MANUAL ITEM. Derived work is REFUSED.
+ *
+ * A manual task has no canonical record, so this store IS its single source of
+ * truth and resolving it here is correct. A DERIVED item is a projection of a
+ * record the platform owns: resolving the TASK would leave the record (still
+ * qualifying) and the work list (resolved) disagreeing — one fact, two sources of
+ * truth — so the call is refused, the attempt is ATTRIBUTED AND AUDITED, and the
+ * error names the owning action from `WORK_SOURCE_CLOSING`.
+ *
+ * @throws an Error whose `name` is `DERIVED_RESOLUTION_REFUSED`.
  */
 export function resolveWorkItem(id: string, actor: string, reason = 'Action completed'): WorkItem | null {
   const item = getWorkItem(id);
   if (!item) return null;
+
+  if (!canResolveFromWorkLayer(item)) {
+    const closing = WORK_SOURCE_CLOSING[item.source];
+    /** The refusal is a business event: who tried to hide record-qualified work,
+     *  and by which action the record is actually closed. */
+    pushAudit(
+      'work_item_resolution_refused',
+      'work_item',
+      id,
+      item.tenantId,
+      `${item.title} — ${reason} · closes only via ${closing.writer ?? 'NO CLOSING PATH (declared gap)'} (${closing.owner})`,
+      actor
+    );
+    const refusal = new Error(derivedResolutionRefusalMessage(item));
+    refusal.name = DERIVED_RESOLUTION_REFUSED;
+    throw refusal;
+  }
+
   if (item.status === 'done') return item;
   const at = new Date().toISOString();
-  if (item.derived) {
-    resolvedDerived.set(id, { at, actor, reason });
-    appendDerivedActivity(id, { at, actor, action: 'resolved', detail: reason });
-  } else {
-    const m = manualItems.find((x) => x.id === id);
-    if (m) {
-      m.status = 'done';
-      m.completedAt = at;
-      m.activity.push({ id: activityId(id, m.activity.length + 1), at, actor, action: 'resolved', detail: reason });
-    }
+  const m = manualItems.find((x) => x.id === id);
+  if (m) {
+    m.status = 'done';
+    m.completedAt = at;
+    m.activity.push({ id: activityId(id, m.activity.length + 1), at, actor, action: 'resolved', detail: reason });
   }
   pushAudit('work_item_resolved', 'work_item', id, item.tenantId, `${item.title} — ${reason}`, actor);
   emitEvent({
@@ -972,14 +1066,20 @@ export function resolveWorkItem(id: string, actor: string, reason = 'Action comp
   return getWorkItem(id);
 }
 
+/**
+ * §SSOT S2 — a derived item is NEVER `done`, so there is nothing to reopen: what
+ * an operator can clear is their OWN ANNOTATION (progress back to open). The
+ * record decides whether the item exists at all, so this can neither create nor
+ * destroy work. A manual item keeps the full reopen lifecycle.
+ */
 export function reopenWorkItem(id: string, actor: string, reason = 'Reopened'): WorkItem | null {
   const item = getWorkItem(id);
   if (!item) return null;
   const at = new Date().toISOString();
   if (item.derived) {
-    resolvedDerived.delete(id);
-    derivedStatus.set(id, 'open');
-    appendDerivedActivity(id, { at, actor, action: 'reopened', detail: reason });
+    if (!item.annotation) return item;
+    derivedAnnotations.delete(id);
+    appendDerivedActivity(id, { at, actor, action: 'annotation_cleared', detail: reason });
   } else {
     const m = manualItems.find((x) => x.id === id);
     if (m) {
@@ -994,14 +1094,22 @@ export function reopenWorkItem(id: string, actor: string, reason = 'Reopened'): 
   return getWorkItem(id);
 }
 
+/**
+ * §SSOT S2 — set an operator's own state.
+ *
+ * For a DERIVED item this can only ANNOTATE (`in_progress` / `blocked`, or back to
+ * `open`); a request for `done` is routed to `resolveWorkItem`, which REFUSES it.
+ * A derived item therefore never leaves the attention set by an operator action —
+ * only by the owning action on the record.
+ */
 export function setWorkItemStatus(id: string, status: WorkStatus, actor: string): WorkItem | null {
   const item = getWorkItem(id);
   if (!item) return null;
   if (status === 'done') return resolveWorkItem(id, actor, 'Marked done');
   const at = new Date().toISOString();
   if (item.derived) {
-    resolvedDerived.delete(id);
-    derivedStatus.set(id, status);
+    if (status === 'open') derivedAnnotations.delete(id);
+    else derivedAnnotations.set(id, { status, at, actor });
     appendDerivedActivity(id, { at, actor, action: `status_${status}`, detail: `Status → ${WORK_STATUS_LABELS[status]}` });
   } else {
     const m = manualItems.find((x) => x.id === id);
@@ -1115,19 +1223,19 @@ export function workByStatus(
 /* ── Deterministic reset (investor demo) ───────────────────────────────────── */
 
 export interface WorkResetResult {
-  derivedResolutionsCleared: number;
+  /** §SSOT S2 — operator annotations cleared (there is no derived resolution to clear any more). */
+  derivedAnnotationsCleared: number;
   manualItemsCleared: number;
   clockUnpinned: boolean;
 }
 
 export function resetWorkStore(): WorkResetResult {
   const result: WorkResetResult = {
-    derivedResolutionsCleared: resolvedDerived.size,
+    derivedAnnotationsCleared: derivedAnnotations.size,
     manualItemsCleared: manualItems.length,
     clockUnpinned: pinnedToday !== null,
   };
-  resolvedDerived.clear();
-  derivedStatus.clear();
+  derivedAnnotations.clear();
   derivedActivity.clear();
   manualItems.length = 0;
   manualSeq = 0;

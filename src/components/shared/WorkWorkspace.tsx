@@ -31,9 +31,11 @@ import {
   WORK_SOURCE_LABELS,
   WORK_STATUS_LABELS,
   brandLabel,
+  canResolveFromWorkLayer,
   createWorkItem,
   demoToday,
   daysBetween,
+  describeWorkClosing,
   reopenWorkItem,
   resetWorkStore,
   resolveWorkItem,
@@ -173,6 +175,22 @@ export function WorkWorkspace({
    * board, calendar, metrics), so the view and its counts can never disagree, and
    * it is a positive declaration: absent ⇒ founder items are excluded.
    */
+  /**
+   * §SSOT S3 — HAND THE OPERATOR TO THE ACTION THAT ACTUALLY CLOSES THE ITEM.
+   *
+   * A record-qualified item cannot be resolved here, so the surfaces offer the
+   * owning destination instead: this navigates to the record's own workspace (and
+   * raises the Super-Admin tab intent when the item carries one) — one
+   * implementation, used by the board card, the drawer and the record link.
+   */
+  const openOwningRecord = (item: WorkItem) => {
+    if (item.navTab) {
+      requestAdminNav({ view: item.actionView, tab: item.navTab, source: `work:${item.id}` });
+    }
+    setSelectedId(null);
+    onNavigate(item.actionView);
+  };
+
   const workScopeOpts = { superAdmin: includeSuperAdminOnly };
   const all = useWorkItems(scope, tenantId, workScopeOpts);
   const everything = useWorkItems(scope, tenantId, { ...workScopeOpts, includeResolved: true });
@@ -214,6 +232,14 @@ export function WorkWorkspace({
     return d >= 0 && d <= 7;
   });
   const critical = all.filter((w) => w.priority === 'critical');
+
+  /**
+   * §SSOT S2/S3 — TWO SETS, LABELLED, so a count can never be read as its
+   * opposite: record-qualified items (closed only by doing the work) and manual
+   * tasks (the only items the work layer itself can resolve).
+   */
+  const recordQualified = all.filter((w) => w.derived).length;
+  const closedManually = everything.filter((w) => !w.derived && w.status === 'done').length;
 
   const metrics: MetricTileData[] = [
     {
@@ -280,7 +306,7 @@ export function WorkWorkspace({
       label: 'Open work',
       value: String(all.length),
       tone: 'info',
-      statusText: `${everything.length - all.length} resolved`,
+      statusText: `${recordQualified} record-qualified · ${closedManually} resolved manually`,
       context: 'Every unresolved item in scope',
       domain: 'catalogue',
       onOpen: () => {
@@ -358,7 +384,7 @@ export function WorkWorkspace({
         meta={
           <>
             <span className="font-mono text-ds-label text-zinc-500">
-              {all.length} open · {everything.length - all.length} resolved
+              {all.length} open · {closedManually} resolved (manual tasks)
             </span>
             <span className="font-mono text-ds-label text-zinc-500">
               {reminders.length} reminder{reminders.length === 1 ? '' : 's'} active
@@ -503,7 +529,12 @@ export function WorkWorkspace({
           )}
 
           {view === 'board' && (
-            <KanbanBoard items={filteredAll} actor={actor} onOpen={(id) => setSelectedId(id)} />
+            <KanbanBoard
+              items={filteredAll}
+              actor={actor}
+              onOpen={(id) => setSelectedId(id)}
+              onOpenRecord={openOwningRecord}
+            />
           )}
 
           {view === 'calendar' && (
@@ -530,8 +561,10 @@ export function WorkWorkspace({
             <p className="text-ds-label leading-snug text-zinc-400">
               Every item is projected from an existing record — a retail-channel PO, a compliance
               document, a contract, a deduction, a shipment, a return, an outreach follow-up.
-              Resolving an item stops its reminders; the underlying record is changed in its own
-              workspace.
+              <strong className="font-semibold text-zinc-300"> Record-qualified items close by doing the
+              work</strong>: the surfaces hand you to the record's own workspace, and the item disappears
+              when the record changes. Only a manual task — which has no record — is resolved here, and
+              either way its reminders stop.
             </p>
           </ContextPanel>
           {contextExtra}
@@ -562,10 +595,7 @@ export function WorkWorkspace({
         onClose={() => setSelectedId(null)}
         actor={actor}
         openLabel={openLabel}
-        onNavigate={(v) => {
-          setSelectedId(null);
-          onNavigate(v);
-        }}
+        onOpenRecord={openOwningRecord}
       />
     </WorkspaceFrame>
   );
@@ -579,10 +609,13 @@ function KanbanBoard({
   items,
   actor,
   onOpen,
+  onOpenRecord,
 }: {
   items: WorkItem[];
   actor: string;
   onOpen: (id: string) => void;
+  /** §SSOT S3 — the owning destination for a record-qualified item. */
+  onOpenRecord: (item: WorkItem) => void;
 }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" data-testid="work-board">
@@ -630,35 +663,78 @@ function KanbanBoard({
                     <span className="mt-0.5 block text-ds-label text-zinc-500">{dueLabel(w.dueDate)}</span>
                   </button>
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {status !== 'done' && status !== 'in_progress' && (
-                      <Button
-                        variant="ghost"
-                        className="text-ds-micro"
-                        onClick={() => setWorkItemStatus(w.id, 'in_progress', actor)}
-                        data-testid={`work-progress-${w.id}`}
-                      >
-                        Start
-                      </Button>
-                    )}
-                    {status !== 'done' && (
-                      <Button
-                        variant="ghost"
-                        className="text-ds-micro"
-                        onClick={() => resolveWorkItem(w.id, actor, 'Resolved from the kanban board')}
-                        data-testid={`work-resolve-${w.id}`}
-                      >
-                        Resolve
-                      </Button>
-                    )}
-                    {status === 'done' && (
-                      <Button
-                        variant="ghost"
-                        className="text-ds-micro"
-                        onClick={() => reopenWorkItem(w.id, actor, 'Reopened from the kanban board')}
-                        data-testid={`work-reopen-${w.id}`}
-                      >
-                        Reopen
-                      </Button>
+                    {/*
+                      §SSOT S3 — A RECORD-QUALIFIED CARD NEVER OFFERS "Resolve".
+                      It offers the owning destination (the action that changes the
+                      record) plus the operator's own annotation; the card leaves
+                      this board when the record changes, not when a task is ticked.
+                    */}
+                    {w.derived ? (
+                      <>
+                        {status !== 'in_progress' && (
+                          <Button
+                            variant="ghost"
+                            className="text-ds-micro"
+                            onClick={() => setWorkItemStatus(w.id, 'in_progress', actor)}
+                            data-testid={`work-progress-${w.id}`}
+                          >
+                            Start
+                          </Button>
+                        )}
+                        {status !== 'open' && (
+                          <Button
+                            variant="ghost"
+                            className="text-ds-micro"
+                            onClick={() => reopenWorkItem(w.id, actor, 'Cleared the operator mark from the kanban board')}
+                            data-testid={`work-clear-${w.id}`}
+                            title="Clear your own progress mark — the record is unchanged"
+                          >
+                            Clear mark
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          className="text-ds-micro"
+                          onClick={() => onOpenRecord(w)}
+                          data-testid={`work-open-record-${w.id}`}
+                          title={describeWorkClosing(w.source)}
+                        >
+                          {WORK_SOURCE_LABELS[w.source]}
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        {status !== 'done' && status !== 'in_progress' && (
+                          <Button
+                            variant="ghost"
+                            className="text-ds-micro"
+                            onClick={() => setWorkItemStatus(w.id, 'in_progress', actor)}
+                            data-testid={`work-progress-${w.id}`}
+                          >
+                            Start
+                          </Button>
+                        )}
+                        {status !== 'done' && (
+                          <Button
+                            variant="ghost"
+                            className="text-ds-micro"
+                            onClick={() => resolveWorkItem(w.id, actor, 'Resolved from the kanban board')}
+                            data-testid={`work-resolve-${w.id}`}
+                          >
+                            Resolve
+                          </Button>
+                        )}
+                        {status === 'done' && (
+                          <Button
+                            variant="ghost"
+                            className="text-ds-micro"
+                            onClick={() => reopenWorkItem(w.id, actor, 'Reopened from the kanban board')}
+                            data-testid={`work-reopen-${w.id}`}
+                          >
+                            Reopen
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </li>
@@ -1004,14 +1080,16 @@ function WorkRecordDrawer({
   onClose,
   actor,
   openLabel,
-  onNavigate,
+  onOpenRecord,
 }: {
   item: WorkItem | null;
   onClose: () => void;
   actor: string;
   openLabel: string;
-  onNavigate: (view: string) => void;
+  /** §SSOT S3 — the owning destination for a record-qualified item. */
+  onOpenRecord: (item: WorkItem) => void;
 }) {
+  const resolvableHere = item !== null && canResolveFromWorkLayer(item);
   return (
     <RecordDrawer
       open={item !== null}
@@ -1022,20 +1100,21 @@ function WorkRecordDrawer({
       footer={
         item && (
           <div className="flex flex-wrap items-center gap-2">
-            {item.status !== 'done' && (
+            {/*
+              §SSOT S3 — A RECORD-QUALIFIED ITEM IS CLOSED BY ITS OWNING ACTION,
+              never by a Resolve button here (S2 refuses that call). The primary
+              action therefore hands the operator to the record's own workspace.
+            */}
+            {!resolvableHere ? (
               <>
                 <Button
                   variant="primary"
                   className="text-ds-label"
-                  data-testid="work-drawer-resolve"
-                  onClick={() => {
-                    resolveWorkItem(item.id, actor, 'Resolved from the work record');
-                    // The work is done: return the operator to the queue rather
-                    // than leaving a resolved record open.
-                    onClose();
-                  }}
+                  data-testid="work-drawer-open-record"
+                  onClick={() => onOpenRecord(item)}
+                  title={describeWorkClosing(item.source)}
                 >
-                  Resolve
+                  {openLabel}
                 </Button>
                 {item.status !== 'in_progress' && (
                   <Button
@@ -1047,19 +1126,69 @@ function WorkRecordDrawer({
                     Start
                   </Button>
                 )}
+                {item.status !== 'blocked' && (
+                  <Button
+                    variant="ghost"
+                    className="text-ds-label"
+                    data-testid="work-drawer-block"
+                    onClick={() => setWorkItemStatus(item.id, 'blocked', actor)}
+                  >
+                    Block
+                  </Button>
+                )}
+                {item.status !== 'open' && (
+                  <Button
+                    variant="ghost"
+                    className="text-ds-label"
+                    data-testid="work-drawer-clear-mark"
+                    onClick={() => reopenWorkItem(item.id, actor, 'Cleared the operator mark from the work record')}
+                  >
+                    Clear mark
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                {item.status !== 'done' && (
+                  <>
+                    <Button
+                      variant="primary"
+                      className="text-ds-label"
+                      data-testid="work-drawer-resolve"
+                      onClick={() => {
+                        resolveWorkItem(item.id, actor, 'Resolved from the work record');
+                        // The work is done: return the operator to the queue rather
+                        // than leaving a resolved record open.
+                        onClose();
+                      }}
+                    >
+                      Resolve
+                    </Button>
+                    {item.status !== 'in_progress' && (
+                      <Button
+                        variant="ghost"
+                        className="text-ds-label"
+                        data-testid="work-drawer-start"
+                        onClick={() => setWorkItemStatus(item.id, 'in_progress', actor)}
+                      >
+                        Start
+                      </Button>
+                    )}
+                  </>
+                )}
+                {item.status === 'done' && (
+                  <Button
+                    variant="ghost"
+                    className="text-ds-label"
+                    data-testid="work-drawer-reopen"
+                    onClick={() => reopenWorkItem(item.id, actor, 'Reopened from the work record')}
+                  >
+                    Reopen
+                  </Button>
+                )}
               </>
             )}
-            {item.status === 'done' && (
-              <Button
-                variant="ghost"
-                className="text-ds-label"
-                data-testid="work-drawer-reopen"
-                onClick={() => reopenWorkItem(item.id, actor, 'Reopened from the work record')}
-              >
-                Reopen
-              </Button>
-            )}
-            {item.entity.type !== 'none' && (
+            {item.entity.type !== 'none' && !item.derived && (
               <Button
                 variant="ghost"
                 className="text-ds-label"
@@ -1072,10 +1201,7 @@ function WorkRecordDrawer({
                    * tab-aware navigation intent is raised before the view changes.
                    * The Super Admin panel validates the tab id before selecting it.
                    */
-                  if (item.navTab) {
-                    requestAdminNav({ view: item.actionView, tab: item.navTab, source: `work:${item.id}` });
-                  }
-                  onNavigate(item.actionView);
+                  onOpenRecord(item);
                 }}
               >
                 {openLabel}
@@ -1095,6 +1221,30 @@ function WorkRecordDrawer({
                 ? [{ label: 'Founder rank', value: `#${item.rank}` }]
                 : []),
               { label: 'Status', value: WORK_STATUS_LABELS[item.status] },
+              /*
+                §SSOT S2/S3 — the operator's OWN mark is shown as an annotation, and
+                a record-qualified item names the action that closes it, so nobody
+                reads "Open" as "nobody is looking at this" or hunts for a way to
+                tick the record off.
+              */
+              ...(item.derived
+                ? [
+                    {
+                      label: 'Closed by',
+                      value: (
+                        <span data-testid="work-drawer-closing">{describeWorkClosing(item.source)}</span>
+                      ),
+                    },
+                  ]
+                : []),
+              ...(item.annotation
+                ? [
+                    {
+                      label: 'Your mark',
+                      value: `${WORK_STATUS_LABELS[item.annotation.status]} · ${item.annotation.actor} · ${item.annotation.at.slice(0, 10)}`,
+                    },
+                  ]
+                : []),
               { label: 'Owner', value: item.owner },
               { label: 'Due', value: item.dueDate ? `${item.dueDate} · ${dueLabel(item.dueDate)}` : 'No deadline' },
               { label: 'Entity', value: `${item.entity.type.replace(/_/g, ' ')} · ${item.entity.label}` },

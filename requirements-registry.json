@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 497,
+    "total_entries": 505,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -369,13 +369,15 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "built_and_tested": 276,
+      "built_and_tested": 302,
       "built": 126,
-      "not_started": 62,
+      "not_started": 60,
       "regressed": 2,
-      "deferred": 8,
+      "removed": 2,
+      "deferred": 7,
       "in_progress": 2,
-      "blocked": 4
+      "blocked": 3,
+      "complete": 1
     },
     "dashboard_logistics_cleanup_programme": {
       "programme": "docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md",
@@ -430,6 +432,29 @@
       "verification": "Owner gate: 146 assertions PASS / 0 FAIL / 0 network calls, proved able to fail in TWO independent places (minFillMs 2_500→0; a repointed spec's wait 2600→200) with both files restored BYTE-IDENTICAL (sha256 44db2d7e4f94… / 3eaaba092b27…). validate:* sweep 36/36 on EXIT CODES. typecheck 0 · root tsc 0 · eslint 0 · build OK 7.90s. e2e/conversion-gate.spec.ts 5/5 (13.7s); the three specs together 18 passed / 0 failed / 2 skipped (42.3s). validate-investor-demo PASS (reset → run reproduces the SAME digest). registry verifier 322/64/209/17 (baseline 320/64/209/17). DEPLOYED and live-verified: LIVE_VERIFICATION_PASS 205/205 checks, 0 page errors, all ELEVEN §P13/CG legs green.",
       "completion_status": "COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at ba43f45 (the deployed build is proved to be this commit: the live index.html serves assets/index-BcbITdAi.js, the same hash as the local build)",
       "honest_note": "The FIRST live run of this increment reported 2 failures, and BOTH were the verification legs' own design, not the product: one leg assumed a remote fill could beat the declared minimum fill time, and its fourth attempt submitted an EMPTY form (which validation correctly refuses before any spam signal). The legs were rewritten to be MEASURED (the timing leg asserts consistency between the measured elapsed time and the displayed refusal) and to carry a valid payload, and the recorded run is the corrected one."
+    },
+    "ssot_work_layer_programme": {
+      "programme_record": "docs/WORK_LAYER_SSOT_2026-09-26.md",
+      "origin": "the Founder opened Work Management on the deployed demo and found work that should not have been there — the observation was CORRECT, and the platform had no single source of truth for derived work",
+      "stage_status": {
+        "S1": "DONE (retrospectively registered here)",
+        "S2": "DONE",
+        "S3": "DONE",
+        "S4": "NOT STARTED",
+        "S5": "NOT STARTED",
+        "S6": "PARTIAL (validate:work-layer registered; validate:all runs 113/113; CI absent)",
+        "S7": "NOT STARTED"
+      },
+      "declared_gaps": [
+        "contract_renewal",
+        "founder_compliance",
+        "founder_setup",
+        "founder_integration",
+        "founder_funding",
+        "founder_finance",
+        "founder_ai_cost"
+      ],
+      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (deployment + live verification deliberately deferred to the programme close, because S4/S5 change the same work surfaces)"
     }
   },
   "entries": [
@@ -5119,12 +5144,78 @@
       "last_verified": "2026-09-25",
       "superseded_by": null
     },
-{
+    {
       "id": "po-ack-s10-closing-pass",
       "description": "PO-ACK S10 (2026-09-26, session 35) - SEED / GATES / DEPLOY, THE CLOSING PASS. The stage row is the only written scope, so the contract was FIXED FROM THE REPOSITORY FIRST and recorded in the programme doc (section S10) BEFORE implementing. THE SEED QUESTION, ANSWERED FROM THE REPOSITORY: the sweep found exactly TWO empty-at-boot demo states and BOTH are DELIBERATE CONTRACTS, so neither was 'fixed' by fabrication. (a) No seeded purchase order carries simulated: true - required by the declared provenance contract (src/types.ts -> PurchaseOrder.mode/simulated: 'Absent on legacy seed rows (unknown provenance is never re-labelled as simulation)'), so the admin console's 'Operable simulated purchase orders (0)' is CORRECT and re-labelling the seeded channel stand-ins would be a provenance lie; the capability IS reachable in the deployed demo by DOING, because Astonish is cleared and holds a non-rejected labelled SEED-SIM-* submission (demoStore.demoProductSubmissions) so evaluateCommerceEligibility positively resolves and the brand console's data-state='commerce-raise-po' control is ENABLED. (b) Demo tenants hold NO canonical onboarding record (acquisitionStore boots opportunities=[] / onboardings=[]), which GlobalStateContext declares as an intended 'no-op, so their behaviour is unchanged'; the S8 LINK is reachable through the real flow (application -> approval -> onboarding), so the empty pipeline is an honest state. NO demo brand, account or fixture was added, removed or re-labelled. (1) THE CLOSING INVENTORY GATE: NEW scripts/validate-po-ack-programme.mjs (validate:po-ack-programme) - the ten-stage table (TEN rows; S1-S9 DONE), every stage's gate FILE on disk, every stage's gate REGISTERED as a validate:* npm script that really runs the file, no two stages sharing a gate file, every gate asserting above a floor (>= 20 real assertion calls, measured on comment-stripped source) and NAMING its own stage, the live script carrying the programme's section P13/S3...S10 legs and >= 150 checks, the ONE-OWNER invariants against the REAL modules (the config declarations are the documented channel facts; PO_ACK_ONBOARDING_STATEMENT is identity-derived; the pure owner's deadline / closing-window / late-action / fail-closed arithmetic EXECUTES; the S9 owner's declared identity and statement hold; a walk of all of src/ proves each window constant has exactly ONE declaration), and the SEED inventory (the provenance contract, the honest zero-operable boot state, the eligibility seed, and the demo-tenant no-op). (2) THE DEPLOYED CHAIN LEG: NEW section P13/S10 live legs (scripts/verify-demo-live.mjs) - the deployed brand console must render the operational-simulation surface, its raise control must be genuinely ENABLED (a disabled or absent control is a DEAD CONTROL and FAILS), the REAL chain must run live (raise -> acknowledge -> fulfil -> RECEIPT, each step ENABLING the next), and the RECEIPT must raise the invoice AUTOMATICALLY with the terms the receipt carried - closing S9's recorded 'empty-state only' limitation truthfully, without a fabricated row. (3) package.json gains validate:po-ack-programme, so the closing gate is part of the standard sweep. RECORDED BOUNDARIES (decisions, not deferrals): the two empty-at-boot states remain and are now LOCKED by the gate; no historical row is invoiced (the receipt IS the trigger); the channel SUBMISSION stays P12's explicit labelled action; S11's channel-side activation is a credential step.",
       "status": "built_and_tested",
       "source": "Founder directive 2026-09-24 (Amazon-exact PO process) - session 35, stage S10 of S1-S10 (docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md section S10)",
       "evidence": "node scripts/validate-po-ack-programme.mjs -> 88 assertions PASS, 0 FAIL, 0 network calls (fetch sabotaged before any module loads): the ten-stage table parses with S1-S9 DONE and an S10 section; the section S10 no-fabrication contract is recorded; every stage's gate file exists and is registered as an npm validate:* script running that exact file; no two stages share a gate file; every gate asserts >= 20 real assertion calls and NAMES its stage; the live script carries the section P13/S3...S10 legs and >= 150 checks; the config declarations (24h window, 48h update window, the 12/6/2 schedule, the 2h on-behalf stage, the documented three rejection codes, the received/under_review obligation family, the identity-derived brand statement); the PURE owner EXECUTES (deadline = orderDate + 24h, a PO in its closing window is actionable AND offers the on-behalf draft, past the limit the documented action is a rejection, an unreadable window fails closed to unknown); the S9 owner declares ONE automatic identity and labels the automation as Mercenta's own process and NOT a channel rule; the receipt consumes the automation owner; exactly ONE declaration of each window constant across all of src/; and the SEED inventory (>= 10 seeded POs, NONE re-labelled as simulation, ZERO operable simulated POs at boot, the first cleared tenant owning seeded products, the eligibility computed LIVE through the real evaluateCommerceEligibility returning eligible=true, the labelled SEED-SIM-* submissions, and the empty acquisition/onboarding stores); plus 0 network calls. PROVED ABLE TO FAIL in one sabotage run: the S1 gate's npm registration renamed -> 1 red; simulated: true added to a seeded lifecycle PO -> 3 red (incl. the provenance contract and '6 re-labelled row(s)'); BOTH files restored BYTE-IDENTICAL (package.json sha256 2b187fec21749357815a97bca5fd5666a323a7d6f7454a3437998170e43decff; src/data/demoData.ts sha256 61aceeb341968a79fdb16039b11696872ea985f68447e299cc369dc1a0df8238). Whole validate:* sweep 35/35 PASS on EXIT CODES (34 -> 35 with the new gate). npm run typecheck 0; npx tsc --noEmit (root, incl. e2e/ and scripts/) 0; npx eslint 0 on both changed scripts; npm run build OK (5.34s). Playwright: the five affected specs 22 passed / 0 failed (27.8s) - commerce-operational-simulation, invoicing, admin-operational-surfaces, brand-operational-surfaces, deterministic-journey. LIVE on the deployed bundle: LIVE_VERIFICATION_PASS 193/193 checks, 0 page errors (brand 0 / admin 0 / superAdmin 0), including the SEVEN new section P13/S10 legs - the deployed brand console renders the operational-simulation surface; the raise control is genuinely ENABLED; the REAL chain walks live (chain: >>>); 'THE RECEIPT RAISED THE INVOICE AUTOMATICALLY' appears with a SIM-INV- number; and the surface states the terms the receipt carried (the declared 30-day default). The FIRST live run reported 190/193 (an early admin page still reading 'Loading...' and the two section P6 collect-lane legs) - all THREE pass on the warm re-run and none is in the S10 area: the cold-host/timing flake class S9 recorded, recorded rather than hidden. Deployed via bash scripts/deploy-demo.sh (build OK 5.42s; 'Modified: 31 files, 0 symlinks'; the Done. line reached) to demo.mercenta.co.uk only; the live index.html references the SAME asset hash as the local build (assets/index-BV7nUE7X.js). Registry verifier 209/64/17 (baseline 208/63/17; the ONE new entry legitimately needs manual review).",
+      "last_verified": "2026-09-26",
+      "superseded_by": null
+    },
+    {
+      "id": "ssot-work-layer-s1-shipment-exception-one-writer",
+      "description": "§SSOT S1 — one source of truth for the work layer: a consignment's in-transit exception has ONE writer and a real closing path (SHIPMENT_RESOLVED_STATUSES · the NAMED DEMO_SHIPMENT_EXCEPTION_SCENARIO replacing position arithmetic in both files · setShipmentMilestone clearing the flags at a resolved milestone · raiseShipmentException raise-only, REFUSING a resolved consignment · clearShipmentException idempotent · WORK_SOURCE_CLOSING declaring every source's closing path with 7 gaps REPORTED · validate:all running the whole 113-file corpus)",
+      "source": "§SSOT programme 2026-09-26 session 36 — REGISTERED RETROSPECTIVELY in session 37 (the increment shipped without a registry row)",
+      "status": "built_and_tested",
+      "evidence": "src/types.ts (SHIPMENT_RESOLVED_STATUSES, isResolvedShipmentStatus); src/data/demoData.ts + src/data/demoStore.ts (DEMO_SHIPMENT_EXCEPTION_SCENARIO and the ONE writer pair); src/lib/work/workStore.ts (WORK_SOURCE_CLOSING · WORK_SOURCE_CLOSING_GAPS); scripts/validate-work-layer.mjs §SSOT (14 assertions: declaration completeness · the closing path driven for real · the refusal guard · the audit trail · no second writer under src/ · no position arithmetic · seed coherence · the declared gaps printed); scripts/validate-all.sh + npm run validate:all (113 PASS / 0 FAIL of 113 files); git 5dd061d; e2e/work-layer.spec.ts",
+      "e2eRef": "e2e/work-layer.spec.ts",
+      "last_verified": "2026-09-26",
+      "superseded_by": null
+    },
+    {
+      "id": "ssot-work-layer-s2-record-owns-derived-status",
+      "description": "§SSOT S2 — for DERIVED work the canonical RECORD owns both existence and status. The work layer's own resolution map (resolvedDerived + derivedStatus) is DELETED; make() COMPUTES status from the record-qualified projection (open / in_progress / blocked, NEVER done); resolveWorkItem REFUSES a derived item (DERIVED_RESOLUTION_REFUSED) naming the owning action + canonical writer + record module from WORK_SOURCE_CLOSING, attributed and audited (work_item_resolution_refused) with no work_item_resolved event; setWorkItemStatus(id,'done') routes into the same refusal; in_progress/blocked are a WorkOperatorAnnotation that can never hide record-qualified work; reopenWorkItem on a derived item clears the annotation",
+      "source": "§SSOT programme 2026-09-26 session 37 (fourth increment)",
+      "status": "built_and_tested",
+      "evidence": "src/lib/work/workStore.ts (derivedAnnotations · make() computed status · resolveWorkItem refusal + audit · reopenWorkItem annotation clear · setWorkItemStatus · derivedAnnotationsCleared · canResolveFromWorkLayer · describeWorkClosing · DERIVED_RESOLUTION_REFUSED · isDerivedResolutionRefusal); src/lib/work/types.ts (WorkOperatorAnnotation); scripts/validate-work-layer.mjs §4 + NEW §18 (PASS, 0 failures — and PROVED ABLE TO FAIL: the guard disabled reported FAIL (7 failures), file restored byte-identical sha256 84c49b2b678aa01cd156f072f7ce470eb5e40c02215603e35e34a1d1906d208c); scripts/validate-po-acknowledgement-work.mjs §7 (the canonical acknowledgePurchaseOrder writer is DRIVEN and CLOSES the item); scripts/validate-commercial-readiness.mjs O6/O7 (the item exists EXACTLY while the record qualifies); scripts/validate-uiux-redesign.mjs (judged on comment-stripped source); npm run validate:all 113 PASS / 0 FAIL; e2e/work-layer.spec.ts 13 passed / 0 failed",
+      "e2eRef": "e2e/work-layer.spec.ts",
+      "last_verified": "2026-09-26",
+      "superseded_by": null
+    },
+    {
+      "id": "ssot-work-layer-s3-surfaces-owning-action",
+      "description": "§SSOT S3 — the work surfaces offer the OWNING ACTION for record-qualified items instead of a Resolve button. ONE openOwningRecord(item) helper (Super-Admin tab intent, drawer close, navigate) is used by the kanban card and the record drawer; a record-qualified card/drawer renders the owning destination as its PRIMARY action with the closing path named inline (work-drawer-closing) plus Start / Block / Clear mark annotations and NO Resolve; only a manual task keeps Resolve/Reopen; the header meta and the Open-work tile label the two sets (record-qualified vs resolved manually)",
+      "source": "§SSOT programme 2026-09-26 session 37 (fourth increment)",
+      "status": "built_and_tested",
+      "evidence": "src/components/shared/WorkWorkspace.tsx (openOwningRecord · the derived/manual action split · work-drawer-closing · the labelled record-qualified vs resolved-manually counts); e2e/work-layer.spec.ts test 5 (repointed: ZERO work-drawer-resolve on a record-qualified drawer, the closing path named, an operator mark leaves the row in place) + NEW test 5b (a MANUAL task still resolves and leaves the list) — 13 passed / 0 failed (25.7s); e2e/command-centre.spec.ts 4 passed (the work-drawer-open-record browser contract is preserved)",
+      "e2eRef": "e2e/work-layer.spec.ts",
+      "last_verified": "2026-09-26",
+      "superseded_by": null
+    },
+    {
+      "id": "ssot-work-layer-s4-stop-fabricating-work",
+      "description": "§SSOT S4 (NOT STARTED) — 27 of the 47 open work items are produced by position arithmetic (COMPLIANCE_PATTERNS[bi % 3]). Replace it with NAMED scenarios, ASSERT the demo baseline count in the gate so a fabricated item can never reappear unnoticed, and label simulated operational state where it is presented as work",
+      "source": "§SSOT programme 2026-09-26 — owner: src/data/demoData.ts (COMPLIANCE_PATTERNS ~659-663, 724-727, 749) + scripts/validate-work-layer.mjs",
+      "status": "not_started",
+      "evidence": "Finding F6 recorded in docs/WORK_LAYER_SSOT_2026-09-26.md with measured line numbers; not implemented as at 2026-09-26",
+      "last_verified": "2026-09-26",
+      "superseded_by": null
+    },
+    {
+      "id": "ssot-work-layer-s5-one-number",
+      "description": "§SSOT S5 (NOT STARTED) — the nav badge and the work list must come from ONE owner, with the label stating which set each number is (attention vs all-open), so 47 rendered and 41 badged can never read as a disagreement",
+      "source": "§SSOT programme 2026-09-26 — owner: src/lib/work/workStore.ts (workAttentionCount) + src/lib/nav/navBadges.ts + the work surfaces",
+      "status": "not_started",
+      "evidence": "Finding F1 recorded in docs/WORK_LAYER_SSOT_2026-09-26.md — workAttentionCount() filters to critical+high while the list renders every open item; not implemented as at 2026-09-26",
+      "last_verified": "2026-09-26",
+      "superseded_by": null
+    },
+    {
+      "id": "ssot-work-layer-s6-ci-wiring",
+      "description": "§SSOT S6 (PARTIAL) — validate:work-layer IS registered and npm run validate:all runs all 113 validator files; CI wiring is still outstanding (.github/ contains only dependabot.yml)",
+      "source": "§SSOT programme 2026-09-26 — owner: .github/workflows/ (does not exist yet)",
+      "status": "in_progress",
+      "evidence": "package.json (validate:work-layer · validate:all) + scripts/validate-all.sh 113 PASS / 0 FAIL (of 113 files); the CI step is genuinely absent",
+      "last_verified": "2026-09-26",
+      "superseded_by": null
+    },
+    {
+      "id": "ssot-work-layer-s7-contract-closing-path",
+      "description": "§SSOT S7 (NOT STARTED) — contract_renewal has no closing path: demoContracts has no writer anywhere and ContractsAdminPanel keeps renewal drafts in LOCAL component state (extraDrafts). Needs a canonical contract writer (renewContract/terminateContract) and the renewal draft written to the canonical store",
+      "source": "§SSOT programme 2026-09-26 — owner: src/data/demoStore.ts (demoContracts) + src/components/admin/ContractsAdminPanel.tsx + src/lib/work/workStore.ts (WORK_SOURCE_CLOSING.contract_renewal.writer = null)",
+      "status": "not_started",
+      "evidence": "Finding F5 recorded in docs/WORK_LAYER_SSOT_2026-09-26.md and declared by WORK_SOURCE_CLOSING_GAPS, printed on every run of scripts/validate-work-layer.mjs; not implemented as at 2026-09-26",
       "last_verified": "2026-09-26",
       "superseded_by": null
     }

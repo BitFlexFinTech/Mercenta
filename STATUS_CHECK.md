@@ -26,7 +26,57 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## CURRENT STATE — **§SSOT STAGE 1: ONE SOURCE OF TRUTH FOR THE WORK LAYER — a consignment's in-transit exception now has ONE writer and a real closing path; the work item closes by doing the work** (2026-09-26, session 36, third increment)
+## CURRENT STATE — **§SSOT STAGES 2 + 3: THE RECORD OWNS A DERIVED WORK ITEM'S STATUS — the work layer's own resolution map is DELETED and the call is REFUSED, and every surface offers the OWNING ACTION instead of a Resolve button** (2026-09-26, session 37, fourth increment)
+
+**Branch:** `redesign/foundation`. **Checkpoint:** **`5dd061d`** + the S2/S3 implementation commit + the state checkpoint
+that follows it. **Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status
+--porcelain` EMPTY** after the state commit. **THREE-WAY STATUS: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.**
+Local ✅ `npm run validate:all` **113 PASS / 0 FAIL (of 113)** · typecheck 0 · root tsc 0 · lint 0 · build ✓ 5.30s ·
+`e2e/work-layer.spec.ts` 13 passed · `e2e/command-centre.spec.ts` 4 passed · GitHub ✅ pushed · **demo ⏸ NOT DEPLOYED —
+DELIBERATELY DEFERRED** to the programme's close (S4/S5 change the same surfaces) · **live ⏸ NOT VERIFIED.**
+
+**Founder-level scope:** the class behind the Stage 1 instance — *who owns a derived work item's status?* **Programme
+record:** `docs/WORK_LAYER_SSOT_2026-09-26.md`.
+
+**What S2 changed (measured):**
+
+1. `resolvedDerived` and `derivedStatus` are **DELETED** from `src/lib/work/workStore.ts` — the work layer can no longer
+   hold an independent status for derived work. `make()` COMPUTES it (`status: annotation?.status ?? 'open'`), so a
+   derived item is `open` / `in_progress` / `blocked` and **NEVER `done`**.
+2. `resolveWorkItem` on a derived item is **REFUSED** while the record still qualifies: the error name is
+   `DERIVED_RESOLUTION_REFUSED`, the message NAMES the owning action + canonical writer + record module from
+   `WORK_SOURCE_CLOSING`, the attempt is **attributed and audited** (`work_item_resolution_refused`), and **no**
+   `work_item_resolved` event is emitted.
+3. `setWorkItemStatus(id,'done')` routes into the same refusal; `in_progress`/`blocked` are an
+   `WorkOperatorAnnotation` — structurally unable to hold `done` — which can never remove the item from the attention
+   set; `reopenWorkItem` on a derived item clears the annotation.
+4. New exported seam: `canResolveFromWorkLayer` · `describeWorkClosing` · `DERIVED_RESOLUTION_REFUSED` ·
+   `isDerivedResolutionRefusal`; `WorkResetResult.derivedResolutionsCleared` → `derivedAnnotationsCleared`.
+
+**What S3 changed (measured):** `WorkWorkspace.tsx` gains ONE `openOwningRecord(item)` helper (raises the Super-Admin tab
+intent, closes the drawer, navigates) used by the board card and the record drawer. A record-qualified card/drawer shows
+the OWNING DESTINATION as its primary action with the closing path named inline (`work-drawer-closing`) plus
+Start / Block / Clear mark — and **no Resolve**; only a manual task keeps Resolve/Reopen. The header meta and the "Open
+work" tile label the two sets (`record-qualified` vs `resolved manually`).
+
+**Evidence — every figure measured this session:** `validate:all` **113/113 PASS**; `validate-work-layer` **PASS**
+(§4 rewritten to the refusal/annotation contract; NEW §18 judges the CODE: no resolution map · computed status · the
+refusal guard · the annotation union · no completion timestamp · annotations-only reset result);
+`validate-po-acknowledgement-work` **PASS** (the canonical `acknowledgePurchaseOrder` writer is DRIVEN and CLOSES the
+item); `validate-commercial-readiness` **79 assertions / 0** (O6/O7 — the item exists EXACTLY while the record
+qualifies); `validate-uiux-redesign` **347 PASS / 0 FAIL**; typecheck 0 · root tsc 0 · lint 0 · build ✓ 5.30s;
+`e2e/work-layer.spec.ts` **13 passed / 0 failed (25.7s)** — test 5 repointed to the owning-action contract, new test 5b
+for the manual path; `e2e/command-centre.spec.ts` **4 passed** (the `work-drawer-open-record` browser contract is
+preserved). **The new gate was PROVED ABLE TO FAIL:** disabling the guard (`canResolveFromWorkLayer` → always true) made
+`validate-work-layer` report **FAIL (7 failures)**; the file was then restored **byte-identical**
+(sha256 `84c49b2b678aa01cd156f072f7ce470eb5e40c02215603e35e34a1d1906d208c`).
+
+**Remaining (the programme):** **S4** stop fabricating work (`COMPLIANCE_PATTERNS[bi % 3]` → named scenarios + an
+asserted baseline) · **S5** one number (badge and list from ONE owner, labelled — 47 rendered vs 41 badged today) ·
+**S6** CI wiring · **S7** the contract closing path. **Declared gaps:** `contract_renewal`, `founder_compliance`,
+`founder_setup`, `founder_integration`, `founder_funding`, `founder_finance`, `founder_ai_cost`.
+
+## PREVIOUS STATE — **§SSOT STAGE 1: ONE SOURCE OF TRUTH FOR THE WORK LAYER — a consignment's in-transit exception now has ONE writer and a real closing path; the work item closes by doing the work** (2026-09-26, session 36, third increment) — HISTORICAL
 
 **Branch:** `redesign/foundation`. **Checkpoint:** **`5dd061d`** + the state checkpoint that follows it. **Canonical
 source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain` EMPTY** after the state

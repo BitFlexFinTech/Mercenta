@@ -106,47 +106,108 @@ test(
 );
 test('brand scope is a strict subset of admin scope', brandItems.length < adminItems.length);
 
-/* ── 4. Reminders stop on resolution ──────────────────────────────────────── */
+/* ── 4. §SSOT S2 — DERIVED WORK IS CLOSED BY ITS RECORD, NEVER BY A TICKED TASK ─
+ *
+ * OLD CONTRACT (recorded here, NOT weakened): this section resolved a DERIVED
+ * item from the work layer and asserted it became `done`, left the attention set
+ * and emitted `work_item_resolved`. That capability WAS the defect — it let one
+ * fact (the canonical record) have two sources of truth (the record and the task).
+ *
+ * The same invariants are now asserted against their CURRENT canonical owner:
+ *   (a) a derived item REFUSES resolution, the refusal NAMES the owning action and
+ *       its writer, nothing changes, and the attempt is audited;
+ *   (b) an operator mark on a derived item is an ANNOTATION that can never be
+ *       `done` and never removes the item from the attention set;
+ *   (c) a MANUAL task (no record — this store IS its single source of truth) still
+ *       resolves here, leaves the attention set, emits the event and is audited.
+ *   (d) the record's OWN closing path is driven for real in section 17 below.
+ * ──────────────────────────────────────────────────────────────────────────── */
 const target = brandItems[0];
 const beforeCount = work.getWorkItems('brand', tenantA).length;
 feed.resetEvents();
-const resolved = work.resolveWorkItem(target.id, 'test:operator', 'Validated in the validator');
-test('resolveWorkItem returns the item as done', resolved !== null && resolved.status === 'done');
 test(
-  'resolved item leaves the attention set',
-  work.getWorkItems('brand', tenantA).length === beforeCount - 1
+  'the target of the old resolution assertion is genuinely DERIVED (so the refusal below is the real case)',
+  target.derived === true,
+  target.source
+);
+test('the work layer declares it cannot resolve a record-qualified item', work.canResolveFromWorkLayer(target) === false);
+test(
+  'the row still appears after a refusal (the record still qualifies)',
+  (() => {
+    try {
+      work.resolveWorkItem(target.id, 'test:operator', 'Validator: attempt to tick a record-qualified item');
+      return false; // no refusal — the defect would be back
+    } catch (e) {
+      return (
+        e.name === 'DERIVED_RESOLUTION_REFUSED' &&
+        work.getWorkItems('brand', tenantA).length === beforeCount &&
+        work.getWorkItems('brand', tenantA).some((w) => w.id === target.id)
+      );
+    }
+  })()
 );
 test(
-  'resolved item is excluded from the notification projection',
-  !work.getWorkItems('brand', tenantA).some((w) => w.id === target.id)
+  'the refusal NAMES the owning action, the writer and the owner of the record',
+  (() => {
+    try {
+      work.resolveWorkItem(target.id, 'test:operator', 'Validator: named refusal');
+      return false;
+    } catch (e) {
+      const closing = work.WORK_SOURCE_CLOSING[target.source];
+      return (
+        String(e.message).includes(closing.via) &&
+        closing.writer !== null &&
+        String(e.message).includes(closing.writer) &&
+        String(e.message).includes(closing.owner)
+      );
+    }
+  })()
 );
 test(
-  'resolved item remains visible as history when asked for',
-  work.getWorkItems('brand', tenantA, { includeResolved: true }).some((w) => w.id === target.id)
-);
-test(
-  'resolution emits the canonical work_item_resolved event',
-  feed.queryEvents({ type: 'work_item_resolved' }).length === 1
-);
-test(
-  'resolution is attributed in the audit log',
+  'the refusal is ATTRIBUTED and AUDITED (hiding record-qualified work is a business event, not a no-op)',
   store.demoAuditLog.some(
-    (a) => a.action === 'work_item_resolved' && a.actorId === 'test:operator' && a.entityId === target.id
+    (a) => a.action === 'work_item_resolution_refused' && a.actorId === 'test:operator' && a.entityId === target.id
   )
 );
 test(
-  'resolution is recorded on the item’s own activity trail',
-  resolved.activity.some((a) => a.action === 'resolved' && a.actor === 'test:operator')
+  'a refusal emits NO work_item_resolved event (nothing half-happened)',
+  feed.queryEvents({ type: 'work_item_resolved' }).length === 0
 );
 
-const reopened = work.reopenWorkItem(target.id, 'test:operator', 'Reopened in the validator');
-test('reopen restores the item to the attention set', work.getWorkItems('brand', tenantA).length === beforeCount);
-test('reopen resets status to open', reopened.status === 'open');
-
-work.setWorkItemStatus(target.id, 'in_progress', 'test:operator');
+/* (b) The operator mark is an annotation, and it can never resolve anything. */
+const annotated = work.setWorkItemStatus(target.id, 'in_progress', 'test:operator');
 test(
-  'status progression is observable in the kanban grouping',
-  work.workByStatus('brand', tenantA).in_progress.some((w) => w.id === target.id)
+  'an operator mark is observable in the kanban grouping without resolving the item',
+  work.workByStatus('brand', tenantA).in_progress.some((w) => w.id === target.id) &&
+    work.getWorkItems('brand', tenantA).some((w) => w.id === target.id)
+);
+test(
+  'the mark is exposed as an ANNOTATION on the item',
+  annotated !== null && annotated.annotation?.status === 'in_progress' && annotated.derived === true
+);
+test(
+  'asking a derived item to be `done` is REFUSED even through setWorkItemStatus',
+  (() => {
+    try {
+      work.setWorkItemStatus(target.id, 'done', 'test:operator');
+      return false;
+    } catch (e) {
+      return e.name === 'DERIVED_RESOLUTION_REFUSED';
+    }
+  })()
+);
+test(
+  'clearing the mark leaves the item open and present (annotations can never hide work)',
+  work.setWorkItemStatus(target.id, 'open', 'test:operator')?.status === 'open' &&
+    work.getWorkItems('brand', tenantA).length === beforeCount &&
+    work.getWorkItems('brand', tenantA).some((w) => w.id === target.id)
+);
+test(
+  'NO derived item anywhere in the store is ever `done`',
+  work
+    .getWorkItems('admin', null, { includeResolved: true })
+    .filter((w) => w.derived)
+    .every((w) => w.status !== 'done')
 );
 
 /* ── 5. Manual task creation ──────────────────────────────────────────────── */
@@ -175,6 +236,38 @@ test(
   'manual creation is audited',
   store.demoAuditLog.some((a) => a.action === 'work_item_created' && a.entityId === created.id)
 );
+
+/* §SSOT S2 (c) — A MANUAL TASK IS THE ONE THING THE WORK LAYER ITSELF CLOSES.
+ * Recorded move: these four assertions used to run against a DERIVED item (the
+ * false-resolution defect). They now run against the manual task, which has no
+ * canonical record, so this store legitimately owns its lifecycle. */
+feed.resetEvents();
+const resolvedManual = work.resolveWorkItem(created.id, 'test:operator', 'Validated in the validator');
+test('a MANUAL task resolves to done in the work layer', resolvedManual !== null && resolvedManual.status === 'done');
+test(
+  '…leaves the attention set',
+  !work.getWorkItems('brand', tenantA).some((w) => w.id === created.id)
+);
+test(
+  '…remains visible as history when asked for',
+  work.getWorkItems('brand', tenantA, { includeResolved: true }).some((w) => w.id === created.id)
+);
+test(
+  '…emits the canonical work_item_resolved event exactly once',
+  feed.queryEvents({ type: 'work_item_resolved' }).length === 1
+);
+test(
+  '…is attributed in the audit log',
+  store.demoAuditLog.some(
+    (a) => a.action === 'work_item_resolved' && a.actorId === 'test:operator' && a.entityId === created.id
+  )
+);
+test(
+  '…is recorded on the item’s own activity trail',
+  resolvedManual.activity.some((a) => a.action === 'resolved' && a.actor === 'test:operator')
+);
+const reopenedManual = work.reopenWorkItem(created.id, 'test:operator', 'Reopened in the validator');
+test('reopening a manual task restores it to the attention set', reopenedManual?.status === 'open');
 
 /* ── 6. Calendar is derived, not decorative ───────────────────────────────── */
 const entries = cal.deriveCalendarEntries('brand', tenantA);
@@ -308,30 +401,61 @@ test(
   store.demoAuditLog.some((a) => a.action === 'reminder_raised' && a.entityType === 'reminder')
 );
 
-/* ── 11. Reminders stop on resolution and respect reopen ─────────────────── */
-const reminderTarget = sweep1.raised[0];
-const activeBefore = runner.getActiveReminders('admin').length;
-work.resolveWorkItem(reminderTarget.workItemId, 'test:operator', 'Reminder resolution check');
+/* ── 11. §SSOT S2 — REMINDERS FOLLOW THE RECORD, NOT A TICKED TASK ───────────
+ *
+ * OLD CONTRACT (recorded, NOT weakened): this section resolved the DERIVED item
+ * behind `sweep1.raised[0]` and asserted its reminder vanished. That resolution is
+ * now REFUSED, so the same invariants are asserted against the owner that can
+ * actually close each case:
+ *   (a) a reminder for a RECORD-QUALIFIED item cannot be removed by the work layer
+ *       at all — the attempt is refused and the reminder is UNCHANGED;
+ *   (b) a MANUAL task — which the work layer does own — removes its reminder when
+ *       resolved, restores it when reopened, and is never re-reminded afterwards.
+ * ──────────────────────────────────────────────────────────────────────────── */
+const derivedReminder = sweep1.raised.find((r) => work.getWorkItem(r.workItemId)?.derived === true);
+const derivedReminderActive = runner.getActiveReminders('admin').some((r) => r.id === derivedReminder?.id);
+let derivedReminderRefused = false;
+try {
+  work.resolveWorkItem(derivedReminder.workItemId, 'test:operator', 'Validator: tick a record-qualified item');
+} catch (e) {
+  derivedReminderRefused = e.name === 'DERIVED_RESOLUTION_REFUSED';
+}
 test(
-  'resolving the work item removes its reminder',
-  !runner.getActiveReminders('admin').some((r) => r.workItemId === reminderTarget.workItemId)
+  'a record-qualified reminder survives a refused task resolution (nothing half-happened)',
+  derivedReminderRefused && derivedReminderActive && runner.getActiveReminders('admin').some((r) => r.id === derivedReminder.id)
+);
+
+const reminderManual = work.createWorkItem(
+  { title: 'Validator reminder task', detail: 'reminder-stop check', priority: 'high', dueDate: '2026-09-01', tenantId: tenantA },
+  'test:operator'
+);
+runner.runReminderSweep('admin', null, 'test:runner');
+test(
+  'a manual task past its deadline is raised as a reminder',
+  runner.getActiveReminders('admin').some((r) => r.workItemId === reminderManual.id)
+);
+const activeBefore = runner.getActiveReminders('admin').length;
+work.resolveWorkItem(reminderManual.id, 'test:operator', 'Reminder resolution check');
+test(
+  'resolving the MANUAL work item removes its reminder',
+  !runner.getActiveReminders('admin').some((r) => r.workItemId === reminderManual.id)
 );
 test(
   'the active reminder count falls by one',
   runner.getActiveReminders('admin').length === activeBefore - 1
 );
-work.reopenWorkItem(reminderTarget.workItemId, 'test:operator', 'Reopen check');
+work.reopenWorkItem(reminderManual.id, 'test:operator', 'Reopen check');
 test(
   'reopening the work item restores its reminder (state respected)',
-  runner.getActiveReminders('admin').some((r) => r.workItemId === reminderTarget.workItemId)
+  runner.getActiveReminders('admin').some((r) => r.workItemId === reminderManual.id)
 );
-work.resolveWorkItem(reminderTarget.workItemId, 'test:operator', 'Re-resolve');
+work.resolveWorkItem(reminderManual.id, 'test:operator', 'Re-resolve');
 runner.runReminderSweep('admin', null, 'test:runner');
 test(
   'a resolved item is never re-reminded by a later sweep',
-  !runner.getActiveReminders('admin').some((r) => r.workItemId === reminderTarget.workItemId)
+  !runner.getActiveReminders('admin').some((r) => r.workItemId === reminderManual.id)
 );
-work.reopenWorkItem(reminderTarget.workItemId, 'test:operator', 'Restore baseline');
+work.reopenWorkItem(reminderManual.id, 'test:operator', 'Restore baseline');
 
 /* ── 12. Tenant scope is respected by the runner ─────────────────────────── */
 const brandReminders = runner.getActiveReminders('brand', tenantA);
@@ -655,6 +779,56 @@ test(
 );
 
 
+
+/* ── 18. §SSOT S2 — THE WORK LAYER HOLDS NO SECOND STATUS FOR DERIVED WORK ───
+ * The stage's rule judged on the CODE (comments stripped), so it cannot be
+ * satisfied by prose: a derived item's status must be COMPUTED from the record,
+ * and the map that let the work layer resolve it independently (`resolvedDerived`)
+ * must not exist. If a future change reintroduces one, these fail.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+console.log('\n§ SSOT S2 — the record owns a derived item’s status, not the work layer\n');
+
+const workStoreSrc = codeOf('src/lib/work/workStore.ts');
+const workTypesSrc = codeOf('src/lib/work/types.ts');
+test(
+  'no independent resolution map for derived work exists in the store',
+  !/resolvedDerived/.test(workStoreSrc) && !/derivedStatus/.test(workStoreSrc)
+);
+test(
+  'a derived item’s status is COMPUTED (annotation, else open) — never read from a resolution',
+  /status: annotation\?\.status \?\? 'open'/.test(workStoreSrc) && /derivedAnnotations\.get\(/.test(workStoreSrc)
+);
+test(
+  'the refusal guard is the ONLY path a derived resolution can take',
+  /canResolveFromWorkLayer\(item\)/.test(workStoreSrc) &&
+    /refusal\.name = DERIVED_RESOLUTION_REFUSED/.test(workStoreSrc) &&
+    /work_item_resolution_refused/.test(workStoreSrc)
+);
+test(
+  'the operator annotation type is structurally unable to hold `done`',
+  /export interface WorkOperatorAnnotation \{\s*status: 'in_progress' \| 'blocked';/.test(workTypesSrc)
+);
+test(
+  'a derived item can never carry a completion timestamp',
+  !/completedAt: resolution/.test(workStoreSrc)
+);
+test(
+  'the reset result reports annotations (there is no derived resolution left to clear)',
+  /derivedAnnotationsCleared/.test(workStoreSrc) && !/derivedResolutionsCleared/.test(workStoreSrc)
+);
+
+/* A derived item in EVERY tenant-free scope is never `done` (the invariant the
+ * cadence above proves on one item, asserted across the whole projection). */
+test(
+  'across every scope, no derived item is ever done',
+  ['admin', 'brand'].every((scope) =>
+    work
+      .getWorkItems(scope, scope === 'brand' ? tenantA : null, { includeResolved: true })
+      .filter((w) => w.derived)
+      .every((w) => w.status !== 'done')
+  )
+);
 
 console.log(`\nWORK LAYER: ${failures === 0 ? 'PASS' : 'FAIL'} (${failures} failure(s))`);
 await server.close();
