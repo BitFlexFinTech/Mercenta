@@ -14,6 +14,7 @@ LIVE VERIFICATION:        **NOT VERIFIED — deferred with the deployment.** No 
 OUTSTANDING BLOCKER:      none
 NEXT TASK:                **§SSOT STAGE 6 — CI WIRING.** `.github/` contains ONLY `dependabot.yml`, so NO gate runs on a push: add a workflow that runs `npm ci`, `npm run typecheck`, `npm run lint`, `npm run build` and `npm run validate:all` (the full 113-file corpus — `validate-work-layer` IS registered), and keep it honest (a failing validator must fail the job). THEN **S7 — the contract closing path (F5):** a canonical `renewContract`/`terminateContract` writer on the contract store, and the renewal draft written to the CANONICAL store instead of `ContractsAdminPanel.extraDrafts` (local component state). **Re-run `npm run validate:all` after EVERY stage — 113/113 is the bar.**
 EXACT NEXT STARTING POINT:`docs/WORK_LAYER_SSOT_2026-09-26.md` (§3 — the S5 DONE record and the S6/S7 entries) → `.github/` (today only `dependabot.yml`) → `package.json` (`validate:all` / `validate:work-layer`) → `scripts/validate-all.sh` → `src/components/admin/ContractsAdminPanel.tsx` (`extraDrafts` ~171-183, 225-239) + `src/data/demoStore.ts` (the contract store — F5 has NO writer) → `PROJECT_STATUS.md` headings 1–9.
+
 ## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY
 
 **This platform is STRICTLY for Amazon Vendor Central.** Mercenta operates the Vendor Central account; a
@@ -27,6 +28,9 @@ is NOT open. It is already decided and already recorded.**
 Canonical sources (READ these; do not re-derive, do not ask):
 `.clinerules/mercenta-business-model.md` · `docs/MERCENTA_BUSINESS_MODEL.md` §1 ·
 `src/lib/spapi/transform.ts → UK_MARKETPLACE_ID` · `src/types.ts → APPROVED_CATEGORIES`.
+
+What IS legitimately open is only **technical readiness** — e.g. the missing server-side helpers the real
+SP-API / DHL / Palletline paths call — never the business model, the channel or the marketplace.
 
 ## INTEGRATIONS — THE REQUIRED SHAPE IS ONE-CLICK CONNECT (Founder directive 2026-09-27)
 
@@ -51,11 +55,24 @@ never in localStorage or plain columns.
 mode the click works and is honestly marked simulated; with a real key the SAME wizard path performs the real
 exchange + test and flips to Live — no code change.
 
+## GLOBAL RULES — INSTALLED FOR EVERY PROJECT (2026-09-27)
 
-What IS legitimately open is only **technical readiness** — e.g. the missing server-side helpers the real
-SP-API / DHL / Palletline paths call — never the business model, the channel or the marketplace.
+Six rules now apply to **all projects**, installed OUTSIDE this repository.
 
+- **Added 2026-09-27 (installed in BOTH global locations, identical copies — `~/Documents/Cline/Rules/` and
+  `~/.cline/rules/`):** `plain-english-responses.md` · `answer-from-the-project.md` · `skill-usage.md` ·
+  `design-work.md`.
+- **Pre-existing global rules they join:** `always-export-review-zip.md`, `always-maintain-status-file.md`,
+  `budget-token-saving-rules.md` (`~/Documents/Cline/Rules/`) and the numbered set `00-task-mode-selection` →
+  `06-page-by-page-functional-parity-audit` plus `no-placeholders-vs-mock-first`,
+  `reference-implementation-parity-check`, `shared-component-tenant-scoping-check` (`~/.cline/rules/`).
 
+They are **generic by design — no project-specific instructions**, so they cannot break an unrelated project.
+Two safeguards they carry: a **mandatory stack fit check** (a skill that assumes a technology a project does not
+use — `shadcn`, `write-swift`, `animate-expo`, `mobile-native`, `apple-design`, `oklch-skill` — must NOT be
+applied) and **"the project outranks a skill"**. Also corrected: `05-thoroughness-overrides-brevity.md` carried a
+stale project path (`BoxBee/BoxBee`); it now reads `/Users/tadii/Desktop/1. Mercenta` and states the rule for
+every project.
 
 
 

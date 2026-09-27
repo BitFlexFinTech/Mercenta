@@ -531,7 +531,18 @@ const PROJECT_STATE_DOCS = [
   'requirements-registry.json',
   'PRODUCTION_READINESS.md',
 ];
-const isProjectStateDoc = (p) => PROJECT_STATE_DOCS.includes(p) || p.startsWith('docs/');
+/**
+ * §SSOT — REPOINTED (2026-09-27). F6's contract is UNCHANGED: a changed SOURCE file that sits in NO
+ * declared set still FAILS (the mechanism below is untouched). What this predicate adds is the other
+ * half of the operating model's own §10.4 distinction, which governance always intended: **internal
+ * Cline governance files (`.clinerules/**`) are NOT application source.** They are how the project's
+ * rules are recorded — the same category as `PROJECT_STATUS.md` / `HANDOFF.md`, which this predicate
+ * already excluded — so editing a rule cannot be an unexplained *application* change.
+ * OLD CONTRACT (recorded, not deleted): `.clinerules/**` was previously not excluded, so a governance
+ * edit had to be declared in some phase's scope set or it failed here.
+ */
+const isProjectStateDoc = (p) =>
+  PROJECT_STATE_DOCS.includes(p) || p.startsWith('docs/') || p.startsWith('.clinerules/');
 
 
 /** Paths that must never appear in the E6 change set. */

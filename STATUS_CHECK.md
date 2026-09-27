@@ -52,6 +52,17 @@ are decided and recorded.** Canonical sources: `.clinerules/mercenta-business-mo
 `src/types.ts → APPROVED_CATEGORIES`. Only TECHNICAL readiness is open (the missing server-side helpers behind
 the real SP-API / DHL / Palletline paths) — never the business model.
 
+## GLOBAL RULES — INSTALLED FOR EVERY PROJECT (2026-09-27)
+
+Four rules now apply to **every project** (identical copies in `~/Documents/Cline/Rules/` AND `~/.cline/rules/`):
+**plain-english-responses** (plain English always; overrides any brevity/budget guidance) ·
+**answer-from-the-project** (answer from the project's own records; never re-ask a recorded fact) ·
+**skill-usage** (minimum skills only, invoked properly, with a MANDATORY fit check so `shadcn`, `write-swift`,
+`animate-expo`, `mobile-native`, `apple-design`, `oklch-skill` are never applied to a project that does not use
+that stack) · **design-work** (which design skill for which problem; UI is not "done" without rendering,
+accessibility and states). The stale project path in `05-thoroughness-overrides-brevity.md` was corrected to
+`/Users/tadii/Desktop/1. Mercenta`.
+
 ## CURRENT STATE — **§SSOT STAGE 5: ONE NUMBER — the nav badge and the work list count from ONE owner (`workCounts`) and every number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement** (2026-09-27, session 39, sixth increment)
 
 **Branch:** `redesign/foundation`. **Checkpoint:** **`b172ed1`** (the one-click-connect governance commit; predecessors
