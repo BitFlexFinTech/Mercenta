@@ -102,13 +102,13 @@ work items could not be closed by doing the work, and nothing enforced any of it
   `workCounts()` in `src/lib/work/workStore.ts` is now the ONLY function that counts work, and
   `WORK_COUNT_SETS` declares three sets with the label that must travel with each number
   (`attention` = "Needs attention" — what a badge counts · `open` = "All open work" — what the list
-  renders · `overdue` = "Overdue work"). `workAttentionCount` is a DELEGATE to the owner (its old
-  independent critical+high filter is gone). The rail badge numbers come from `workCounts` and carry
+  renders · `overdue` = "Overdue work"). `workAttentionCount` is **DELETED** — it had NO caller once the surfaces were repointed, and a second
+  counting name is exactly the drift this stage removes. The rail badge numbers come from `workCounts` and carry
   `NAV_BADGE_LABELS`; the Sidebar renders the label with the number (`data-badge-label` + `aria-label`);
   the work workspace tiles and the Super Admin oversight read the same numbers and the declared labels.
-  Evidence: `scripts/validate-work-layer.mjs` §20 (16 assertions) — PROVED ABLE TO FAIL twice
-  (re-introducing the old filter ⇒ 2 failures; removing the sidebar label ⇒ 1 failure; both files
-  restored byte-identical, `workStore.ts` sha256 `28ff046761394d004e52a9e311405ea45e1e154c7e7b522976b38d0c1ba4421b`);
+  Evidence: `scripts/validate-work-layer.mjs` §20 (17 assertions) — PROVED ABLE TO FAIL THREE TIMES
+  (re-introducing a second counting function ⇒ 3 failures; removing the sidebar label ⇒ 1 failure; both files
+  restored byte-identical, `workStore.ts` sha256 `e0a37b2c2a9f5d7db223beed7c85491bdcd725383be3343ebf00c34e30c7b95b`);
   `e2e/work-layer.spec.ts` test 1b asserts in real Chromium that the badge is labelled and equals the
   attention tile. The declarative check in `scripts/validate-uiux-redesign.mjs` that pinned the removed
   identifiers was REPOINTED to `workCounts` / `NAV_BADGE_LABELS`, recorded inline.

@@ -967,11 +967,16 @@ test(
   /export function workCounts\(/.test(workStoreSrc)
 );
 test(
-  '`workAttentionCount` is a DELEGATE to the owner, never a second filter',
-  (() => {
-    const body = (workStoreSrc.match(/export function workAttentionCount\([\s\S]*?\n\}/) || [''])[0];
-    return /return workCounts\(scope, tenantId, opts\)\.attention;/.test(body) && !/\.filter\(/.test(body);
-  })()
+  'the SECOND counting path is GONE — `workAttentionCount` no longer exists anywhere',
+  !/workAttentionCount/.test(workStoreSrc) &&
+    !/workAttentionCount/.test(navBadgesSrc) &&
+    !/workAttentionCount/.test(workWsSrc) &&
+    !/workAttentionCount/.test(superAdminSrc)
+);
+test(
+  'the store exposes exactly ONE counting function (`workCounts`)',
+  (workStoreSrc.match(/export function [A-Za-z_]*[Cc]ount[A-Za-z_]*\(/g) || []).join('|') ===
+    'export function workCounts('
 );
 test(
   'the old independent critical/high expression is gone',
@@ -1028,7 +1033,9 @@ test(
 test(
   'the attention number the badge reads IS the declared `attention` set',
   scopes.every(
-    ([scope, tenant, opts]) => work.workAttentionCount(scope, tenant, opts) === work.workCounts(scope, tenant, opts).attention
+    ([scope, tenant, opts]) =>
+      work.workCounts(scope, tenant, opts).attention ===
+      work.getWorkItems(scope, tenant, opts).filter((w) => w.priority !== 'normal').length
   )
 );
 

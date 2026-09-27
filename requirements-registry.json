@@ -441,7 +441,7 @@
         "S2": "DONE",
         "S3": "DONE",
         "S4": "DONE (2026-09-27, session 38) — the demo's document states are DECLARED by name and the declared baseline is asserted by the gate",
-        "S5": "DONE (2026-09-27, session 39) — one counting owner (`workCounts`) + the declared sets `WORK_COUNT_SETS` (attention / open / overdue) whose labels travel with every number; the nav badge renders its label and equals the attention tile; §20 (16 assertions) proved able to fail",
+        "S5": "DONE (2026-09-27, session 39) — one counting owner (`workCounts`) + the declared sets `WORK_COUNT_SETS` (attention / open / overdue) whose labels travel with every number; the OLD second counting path `workAttentionCount` is DELETED; the nav badge renders its label and equals the attention tile; §20 (17 assertions) proved able to fail",
         "S6": "PARTIAL (validate:work-layer registered; validate:all runs 113/113; CI absent)",
         "S7": "NOT STARTED"
       },
@@ -455,7 +455,7 @@
         "founder_ai_cost"
       ],
       "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (deployment + live verification deliberately deferred to the programme close, because S7 changes the same work surfaces; S5 is DONE and locally verified at the S5 commit)",
-      "s5_evidence": "src/lib/work/workStore.ts (workCounts + WORK_COUNT_SETS + the delegate workAttentionCount); src/lib/nav/navBadges.ts (workCounts + NAV_BADGE_LABELS); src/components/layout/Sidebar.tsx (data-badge-label rendered with the number); AdminShell/BrandShell (badgeLabel from NAV_BADGE_LABELS); src/components/shared/WorkWorkspace.tsx (counts + declared labels); src/components/admin/SuperAdminPanel.tsx (counts.open / counts.overdue); scripts/validate-work-layer.mjs §20 (16 assertions, PASS); scripts/validate-uiux-redesign.mjs (the removed identifiers REPOINTED to workCounts/NAV_BADGE_LABELS, 348 PASS / 0 FAIL); e2e/work-layer.spec.ts test 1b (14 passed / 0 failed). Measured this session: validate:all 113 PASS / 0 FAIL; typecheck 0; lint 0; build ✓ 8.22s. Proved able to fail: re-introducing the old critical+high filter ⇒ 2 §20 failures; removing the sidebar badge label ⇒ 1 §20 failure; both files restored byte-identical (workStore.ts sha256 28ff046761394d004e52a9e311405ea45e1e154c7e7b522976b38d0c1ba4421b). Measured demo counts at the pinned clock: admin {attention 39, open 46, overdue 1}; admin+superAdmin {attention 41, open 78, overdue 1} — the badge can never exceed the list because attention ⊆ open is asserted."
+      "s5_evidence": "src/lib/work/workStore.ts (workCounts + WORK_COUNT_SETS; the second path workAttentionCount is DELETED); src/lib/nav/navBadges.ts (workCounts + NAV_BADGE_LABELS); src/components/layout/Sidebar.tsx (data-badge-label rendered with the number); AdminShell/BrandShell (badgeLabel from NAV_BADGE_LABELS); src/components/shared/WorkWorkspace.tsx (counts + declared labels); src/components/admin/SuperAdminPanel.tsx (counts.open / counts.overdue); scripts/validate-work-layer.mjs §20 (17 assertions, PASS); scripts/validate-uiux-redesign.mjs (the removed identifiers REPOINTED to workCounts/NAV_BADGE_LABELS, 348 PASS / 0 FAIL); e2e/work-layer.spec.ts test 1b (14 passed / 0 failed). Measured this session: validate:all 113 PASS / 0 FAIL; typecheck 0; lint 0; build ✓ 8.22s. Proved able to fail: re-introducing a second counting function ⇒ 3 §20 failures; a delegate-style second path ⇒ 2; removing the sidebar badge label ⇒ 1; every file restored byte-identical (workStore.ts sha256 e0a37b2c2a9f5d7db223beed7c85491bdcd725383be3343ebf00c34e30c7b95b). Measured demo counts at the pinned clock: admin {attention 39, open 46, overdue 1}; admin+superAdmin {attention 41, open 78, overdue 1} — the badge can never exceed the list because attention ⊆ open is asserted."
     }
   },
   "entries": [
@@ -5196,11 +5196,11 @@
     },
     {
       "id": "ssot-work-layer-s5-one-number",
-      "description": "§SSOT S5 (NOT STARTED) — the nav badge and the work list must come from ONE owner, with the label stating which set each number is (attention vs all-open), so 47 rendered and 41 badged can never read as a disagreement",
-      "source": "§SSOT programme 2026-09-26 — owner: src/lib/work/workStore.ts (workAttentionCount) + src/lib/nav/navBadges.ts + the work surfaces",
-      "status": "not_started",
-      "evidence": "Finding F1 recorded in docs/WORK_LAYER_SSOT_2026-09-26.md — workAttentionCount() filters to critical+high while the list renders every open item; not implemented as at 2026-09-26",
-      "last_verified": "2026-09-26",
+      "description": "§SSOT S5 (DONE 2026-09-27, session 39) — ONE NUMBER: the nav badge and the work list count from ONE owner (`workCounts`) and every number carries the DECLARED set it counts (attention / open / overdue), so a badge and a list can never read as a disagreement",
+      "source": "§SSOT programme 2026-09-27 session 39 — owner: src/lib/work/workStore.ts (workCounts + WORK_COUNT_SETS; the old second path workAttentionCount is DELETED) + src/lib/nav/navBadges.ts (NAV_BADGE_LABELS) + the work surfaces",
+      "status": "built_and_tested",
+      "evidence": "src/lib/work/workStore.ts (workCounts returns {attention, open, overdue}; WORK_COUNT_SETS declares each set's label + definition; workAttentionCount DELETED — §20 asserts the name exists nowhere and that the store exposes exactly ONE counting function); src/lib/nav/navBadges.ts (every badge number from workCounts; NAV_BADGE_LABELS derived from the declared sets); src/components/layout/Sidebar.tsx (data-badge-label + title + aria-label rendered WITH the number); AdminShell + BrandShell (badgeLabel: NAV_BADGE_LABELS[i.id]); src/components/shared/WorkWorkspace.tsx and src/components/admin/SuperAdminPanel.tsx (numbers + declared labels from the owner). Gates: scripts/validate-work-layer.mjs §20 (17 assertions) PROVED ABLE TO FAIL THREE TIMES (a reinvented second counting function ⇒ 3 failures; a delegate-style second path ⇒ 2; no sidebar label ⇒ 1) with every file restored byte-identical (workStore.ts sha256 e0a37b2c2a9f5d7db223beed7c85491bdcd725383be3343ebf00c34e30c7b95b); scripts/validate-uiux-redesign.mjs repointed (the two removed identifiers now assert workCounts + NAV_BADGE_LABELS) 348 PASS / 0 FAIL; e2e/work-layer.spec.ts test 1b asserts in Chromium that nav-badge-work carries data-badge-label=\"Needs attention\" and equals the attention tile (14 passed / 0 failed, 24.6s); npm run validate:all 113 PASS / 0 FAIL (of 113). Measured at the pinned clock: admin {attention 39, open 46, overdue 1}; admin+superAdmin {attention 41, open 78, overdue 1}. The Notification Centre is deliberately NOT relabelled (its number counts all notification kinds and states so).",
+      "last_verified": "2026-09-27",
       "superseded_by": null
     },
     {

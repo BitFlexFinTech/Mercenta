@@ -1236,17 +1236,16 @@ export function workCounts(
 }
 
 /**
- * Attention count for nav badges / notification centre — the DECLARED
- * `attention` set. Kept as a named delegate (never a second filter) because the
- * existing contracts read it by name; it holds no counting logic of its own.
+ * §SSOT S5 — DELETED, DELIBERATELY: `workAttentionCount(scope, tenantId, opts)`.
+ *
+ * REPOINTED CONTRACT (recorded here, NOT weakened): this function returned the
+ * critical+high count and was the SECOND counting path behind the badge/list
+ * disagreement. It had no caller after the surfaces were repointed, so it is
+ * REMOVED rather than kept as a compatibility alias — a name that counts work
+ * and is not `workCounts` is exactly the drift the stage removes. `workCounts`
+ * is now the ONLY counting function in the platform, and
+ * `scripts/validate-work-layer.mjs` §20 asserts this name no longer exists.
  */
-export function workAttentionCount(
-  scope: WorkScope,
-  tenantId?: string | null,
-  opts?: { superAdmin?: boolean }
-): number {
-  return workCounts(scope, tenantId, opts).attention;
-}
 
 /** Overdue items only — used by the proactive reminder automation. */
 export function overdueWorkItems(
