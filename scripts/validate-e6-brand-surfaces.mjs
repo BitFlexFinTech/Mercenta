@@ -1513,6 +1513,31 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
   'e2e/work-layer.spec.ts',
 ]);
 
+/**
+ * §SSOT — THE WORK-LAYER SINGLE-SOURCE-OF-TRUTH PROGRAMME (2026-09-26) — REPOINTED.
+ *
+ * The programme recorded in `docs/WORK_LAYER_SSOT_2026-09-26.md` removes the
+ * multiple-writers / fabricated-work class from the operating layer: S1 (one
+ * writer for a consignment exception), S2/S3 (a derived item's status is owned by
+ * its RECORD, and the surfaces offer the owning action) and S4 (a demo document
+ * state is DECLARED by name, never produced by position arithmetic — which added
+ * the shared label `src/config/demo.ts → DEMO_OPERATIONAL_STATE_LABEL`).
+ *
+ * The F6 mechanism is UNCHANGED and not weakened: a source file in NO declared set
+ * still fails.
+ */
+const SSOT_PROGRAMME_SCOPE = new Set([
+  'src/config/demo.ts',
+  'src/data/demoData.ts',
+  'src/data/demoStore.ts',
+  'src/lib/work/',
+  'src/lib/dhl/domain.ts',
+  'src/lib/simulation/scenarioEngine.ts',
+  'src/lib/simulation/investorDemo.ts',
+  'src/components/shared/WorkWorkspace.tsx',
+  'scripts/validate-work-layer.mjs',
+]);
+
   /**
    * §Sprint 2 — DETERMINISTIC PLATFORM COMPLETION (2026-09-19) — REPOINTED.
    *
@@ -1607,7 +1632,10 @@ const SPRINT_WORK_LAYER_SCOPE = new Set([
           [...P12_SPAPI_SEAM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §S9 — the receipt → invoice automation's declared surface (see above). */
           S9_RECEIPT_INVOICE_SCOPE.has(p) ||
-          [...S9_RECEIPT_INVOICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...S9_RECEIPT_INVOICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §SSOT — the work-layer single-source-of-truth programme (see above). */
+          SSOT_PROGRAMME_SCOPE.has(p) ||
+          [...SSOT_PROGRAMME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

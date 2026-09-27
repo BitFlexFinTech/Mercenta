@@ -150,7 +150,7 @@ export const DEMO_BRAND_PC: DemoBrand =
  *
  * These brands reached the PORTAL (onboarded = true) but are NOT gate-cleared,
  * so the compliance gate can be genuinely exercised in the meaningful states
- * the product claims to support (see `COMPLIANCE_SCENARIO_DOC_STATES` and the
+ * the product claims to support (see `DEMO_COMPLIANCE_SCENARIOS` and the
  * compliance matrix in PROJECT_STATUS.md). Phase 4 repointed them onto REAL
  * brands from the canonical 20 (the previous tenants were invented companies):
  *
@@ -208,7 +208,7 @@ export const CLEARED_BRAND_IDS: string[] = [
 /**
  * §Phase 7F — compliance-scenario tenant IDs (portal-accessible, NOT cleared).
  * Deterministic demo states so the compliance gate can be genuinely exercised.
- * See `DEMO_BRANDS_COMPLIANCE_SCENARIOS` above and `COMPLIANCE_SCENARIO_DOC_STATES` below.
+ * See `DEMO_BRANDS_COMPLIANCE_SCENARIOS` above and `DEMO_COMPLIANCE_SCENARIOS` below.
  */
 export const COMPLIANCE_SCENARIO_BRAND_IDS: string[] = [
   'brand-lecreuset',
@@ -692,60 +692,201 @@ export const DEMO_CONTRACTS: Contract[] = ALL_DEMO_BRANDS.map((brand, i) => {
   };
 });
 
-/* ── Compliance docs — rotating state patterns + category-specific ── */
+/* ── Compliance docs — NAMED state scenarios (never position arithmetic) ── */
 
-const COMPLIANCE_PATTERNS: ComplianceDocument['status'][][] = [
-  ['approved', 'approved', 'approved', 'approved'], // fully cleared (pattern 0)
-  ['approved', 'under_review', 'missing', 'approved'], // partially blocked (pattern 1)
-  ['uploaded', 'uploaded', 'under_review', 'missing'], // early stage (pattern 2)
-];
+type ComplianceDocStatus = ComplianceDocument['status'];
 
-/**
- * §Phase 7F — Explicit per-required-type document states for the
- * compliance-scenario tenants (overrides the rotating pattern so the gate can
- * be exercised in exactly these states — the compliance MATRIX):
- *
- * NOTE on 'missing': every required document still HAS a demo record (the seed
- * generates records for all required types); a 'missing' status means
- * present-but-not-approved, so the canonical gate classifies it as BLOCKING —
- * the same convention the pre-existing rotating patterns already used.
- *
- * | tenant (brandId)  | approved / total | present-but-not-approved                  | expected gate |
- * |-------------------|------------------|------------------------------------------|----------------|
- * | brand-lecreuset   | 0 / 5            | 5 (uploaded ×2, under_review ×1, missing ×1, rejected ×1) | BLOCKED     |
- * | brand-autoglym    | 4 / 5            | 1 (type_approval missing)                   | BLOCKED     |
- *
- * Both tenants have an active contract + both §4.1/§4.2 agreements accepted,
- * so the document state is the sole reason the gate blocks.
- */
-export const COMPLIANCE_SCENARIO_DOC_STATES: Record<
-  string,
-  Partial<Record<ComplianceDocument['type'], ComplianceDocument['status']>>
-> = {
-  'brand-lecreuset': {
-    letter_of_authorization: 'uploaded',
-    product_safety_ukca: 'under_review',
-    insurance_certificate: 'uploaded',
-    brand_registry_confirmation: 'missing',
-    // §M2 — the rejected lifecycle state, exercised end-to-end (the brand sees
-    // the failure reason and the Replace action on this row).
-    food_contact_material: 'rejected',
-  },
-  'brand-autoglym': {
-    letter_of_authorization: 'approved',
-    product_safety_ukca: 'approved',
-    insurance_certificate: 'approved',
-    brand_registry_confirmation: 'approved',
-    type_approval: 'missing',
-  },
-};
-
-const COMPLIANCE_TYPES: ComplianceDocument['type'][] = [
+/** The four documents EVERY brand must hold, in canonical order. */
+const BASE_COMPLIANCE_TYPES = [
   'letter_of_authorization',
   'product_safety_ukca',
   'insurance_certificate',
   'brand_registry_confirmation',
-];
+] as const;
+
+type ComplianceBaseType = (typeof BASE_COMPLIANCE_TYPES)[number];
+
+/**
+ * §SSOT S4 (2026-09-26) — A COMPLIANCE-DOCUMENT SCENARIO, DECLARED BY NAME.
+ *
+ * OLD CONTRACT (recorded, not hidden): the status of every non-cleared brand's
+ * documents came from ARITHMETIC — `COMPLIANCE_PATTERNS[bi % 3]`, an array indexed
+ * by the brand's POSITION in `DEMO_BRANDS` — plus a per-brand override map for two
+ * tenants. That produced 27 blocking documents and therefore 27 of the open work
+ * items on the demo: more than half the list was fabricated by a row's index rather
+ * than declared as a scenario, so inserting a brand silently re-rolled the state of
+ * every brand after it — the same class of defect F3 found in the consignment flags.
+ *
+ * A scenario now declares, explicitly: the status of each required BASE document
+ * and the status of the brand's CATEGORY document. The scenario a brand runs is
+ * assigned BY NAME in `DEMO_COMPLIANCE_SCENARIO_BY_BRAND` below — no position
+ * arithmetic anywhere, and an unassigned brand is REFUSED by
+ * `complianceScenarioFor()` rather than silently inheriting someone else's state.
+ *
+ * NOTE on 'missing': every required document still HAS a demo record (the seed
+ * generates records for all required types); a 'missing' status means
+ * present-but-not-approved, so the canonical gate classifies it as BLOCKING.
+ * A document that was never submitted carries NO simulated artefact.
+ */
+export interface ComplianceDocumentScenario {
+  /** Why this scenario exists in the demo. Read by a human; asserted by the gate. */
+  readonly why: string;
+  /** The declared status of each REQUIRED base document. */
+  readonly base: Readonly<Record<ComplianceBaseType, ComplianceDocStatus>>;
+  /** The declared status of the brand's CATEGORY document, when its category has one. */
+  readonly categoryDocument: ComplianceDocStatus;
+}
+
+export const DEMO_COMPLIANCE_SCENARIOS = {
+  /** Both base and category documents cleared — an operational tenant can trade. */
+  gate_cleared: {
+    why: 'Trading tenant: every required document is approved.',
+    base: {
+      letter_of_authorization: 'approved',
+      product_safety_ukca: 'approved',
+      insurance_certificate: 'approved',
+      brand_registry_confirmation: 'approved',
+    },
+    categoryDocument: 'approved',
+  },
+
+  /** Mid-review: the insurance certificate is the one document outstanding. */
+  insurance_pending: {
+    why: 'Compliance review in progress: the insurance certificate is not approved yet.',
+    base: {
+      letter_of_authorization: 'approved',
+      product_safety_ukca: 'under_review',
+      insurance_certificate: 'missing',
+      brand_registry_confirmation: 'approved',
+    },
+    categoryDocument: 'missing',
+  },
+
+  /** Early stage: the brand registry confirmation is the one document outstanding. */
+  registry_pending: {
+    why: 'Early submission: documents uploaded but not yet verified; brand registry confirmation outstanding.',
+    base: {
+      letter_of_authorization: 'uploaded',
+      product_safety_ukca: 'uploaded',
+      insurance_certificate: 'under_review',
+      brand_registry_confirmation: 'missing',
+    },
+    categoryDocument: 'missing',
+  },
+
+  /** Base documents approved; only the category-specific document is outstanding. */
+  category_pending: {
+    why: 'Base documents approved; the category-specific document has not been submitted.',
+    base: {
+      letter_of_authorization: 'approved',
+      product_safety_ukca: 'approved',
+      insurance_certificate: 'approved',
+      brand_registry_confirmation: 'approved',
+    },
+    categoryDocument: 'missing',
+  },
+
+  /**
+   * §Phase 7F — the BLOCKED compliance-scenario tenant (Le Creuset): 0/5 approved,
+   * including one 'rejected' so the failure reason + Replace action on that row are
+   * exercised end-to-end (§M2). Its contract is 'active' and both mandatory
+   * §4.1/§4.2 agreements are accepted, so the document state is the SOLE reason the
+   * gate blocks — exactly what e2e/compliance-gate.spec.ts asserts.
+   */
+  lecreuset_blocked: {
+    why: 'Compliance matrix: 0 of 5 documents approved, with one rejected outcome exercised.',
+    base: {
+      letter_of_authorization: 'uploaded',
+      product_safety_ukca: 'under_review',
+      insurance_certificate: 'uploaded',
+      brand_registry_confirmation: 'missing',
+    },
+    categoryDocument: 'rejected',
+  },
+
+  /**
+   * §Phase 7F — the 4/5 compliance-scenario tenant (Autoglym): every base document
+   * approved, the category document (type approval) outstanding. Active contract +
+   * both agreements accepted, so the gate blocks on the document alone.
+   */
+  autoglym_one_document_outstanding: {
+    why: 'Compliance matrix: 4 of 5 documents approved; the category type approval is outstanding.',
+    base: {
+      letter_of_authorization: 'approved',
+      product_safety_ukca: 'approved',
+      insurance_certificate: 'approved',
+      brand_registry_confirmation: 'approved',
+    },
+    categoryDocument: 'missing',
+  },
+} satisfies Record<string, ComplianceDocumentScenario>;
+
+/** The declared scenario names — the ONLY values `..._BY_BRAND` may hold. */
+export type ComplianceScenarioName = keyof typeof DEMO_COMPLIANCE_SCENARIOS;
+
+/**
+ * §SSOT S4 — THE DECLARED ASSIGNMENT. Every canonical brand names its scenario
+ * here; there is no default and no fallback, so the demo's document states are
+ * READABLE rather than computed. The gate asserts that this map covers
+ * `ALL_DEMO_BRANDS` exactly, that no declared scenario is dead, and that
+ * `CLEARED_BRAND_IDS` and the `gate_cleared` assignment cannot drift apart.
+ */
+export const DEMO_COMPLIANCE_SCENARIO_BY_BRAND: Record<string, ComplianceScenarioName> = {
+  'brand-astonish': 'gate_cleared', // cleared operational tenant (Home)
+  'brand-seep': 'insurance_pending',
+  'brand-delphis': 'registry_pending',
+  'brand-kitkin': 'category_pending', // Baby → baby_product_safety outstanding
+  'brand-bulldog': 'insurance_pending', // Health & Personal Care → CPNP outstanding
+  'brand-joseph': 'registry_pending', // Kitchen → food contact material outstanding
+  'brand-roberts': 'category_pending', // Consumer Electronics → WEEE outstanding
+  'brand-clipper': 'insurance_pending', // Grocery → food safety certificate outstanding
+  'brand-regatta': 'registry_pending', // Apparel → textile labelling outstanding
+  'brand-autoglym': 'autoglym_one_document_outstanding', // §Phase 7F scenario tenant (4/5)
+  'brand-tapatio': 'gate_cleared', // cleared operational tenant (Grocery)
+  'brand-cholula': 'registry_pending',
+  'brand-valentina': 'category_pending',
+  'brand-flybyjing': 'insurance_pending',
+  'brand-locknlock': 'registry_pending',
+  'brand-lecreuset': 'lecreuset_blocked', // §Phase 7F scenario tenant (0/5)
+  'brand-moleskine': 'insurance_pending',
+  'brand-sennheiser': 'registry_pending',
+  'brand-vileda': 'category_pending',
+  'brand-logitech': 'insurance_pending',
+};
+
+/**
+ * §SSOT S4 — THE OWNER OF A BRAND'S DOCUMENT STATE. FAIL CLOSED: a brand with no
+ * declared scenario is REFUSED, never given another brand's state (the silent
+ * default is exactly what the position arithmetic used to do).
+ */
+export function complianceScenarioFor(brandId: string): ComplianceDocumentScenario {
+  const name = DEMO_COMPLIANCE_SCENARIO_BY_BRAND[brandId];
+  if (!name) {
+    throw new Error(
+      `No declared compliance scenario for brand '${brandId}' — refusing to fabricate document state. ` +
+        'Add an explicit entry to DEMO_COMPLIANCE_SCENARIO_BY_BRAND.',
+    );
+  }
+  return DEMO_COMPLIANCE_SCENARIOS[name];
+}
+
+/**
+ * §SSOT S4 — THE DECLARED DEMO BASELINE, ASSERTED BY THE WORK-LAYER GATE.
+ *
+ * A seed change that alters how many documents (or how many BLOCKING documents)
+ * the demo holds must update this declaration in the same commit. That is what makes
+ * a fabricated work item impossible to land unnoticed: the gate compares the derived
+ * compliance work list against these numbers and fails otherwise.
+ *
+ * Measured from the canonical seed on 2026-09-26: 20 brands × 4 base documents (80)
+ * + 15 category documents (95), of which 27 are blocking.
+ */
+export const DEMO_COMPLIANCE_BASELINE = {
+  documents: 95,
+  blockingDocuments: 27,
+} as const;
+
+const COMPLIANCE_TYPES = BASE_COMPLIANCE_TYPES;
 
 /** Category-specific extra compliance docs per Amazon UK requirements. */
 const CATEGORY_EXTRA_DOCS: Record<string, { type: ComplianceDocument['type']; label: string }[]> = {
@@ -760,11 +901,14 @@ const CATEGORY_EXTRA_DOCS: Record<string, { type: ComplianceDocument['type']; la
 };
 
 export const DEMO_COMPLIANCE_DOCS: ComplianceDocument[] = ALL_DEMO_BRANDS.flatMap(
-  (brand, bi) => {
-    const pattern = COMPLIANCE_PATTERNS[bi % COMPLIANCE_PATTERNS.length];
-    const isCleared = CLEARED_BRAND_IDS.includes(brand.id);
-    // §Phase 7F — explicit scenario override (see COMPLIANCE_SCENARIO_DOC_STATES).
-    const scenario = COMPLIANCE_SCENARIO_DOC_STATES[brand.id];
+  (brand) => {
+    /**
+     * §SSOT S4 — the brand's NAMED scenario, and the ONLY input to its document
+     * state. `complianceScenarioFor` FAILS CLOSED on an unassigned brand, so a new
+     * brand cannot silently inherit another brand's documents (what the retired
+     * `COMPLIANCE_PATTERNS[bi % 3]` lookup did).
+     */
+    const scenario = complianceScenarioFor(brand.id);
 
     /**
      * §M2 — a submitted document always carries an artefact. The demo dataset
@@ -781,10 +925,10 @@ export const DEMO_COMPLIANCE_DOCS: ComplianceDocument[] = ALL_DEMO_BRANDS.flatMa
             issuer: 'Simulated issuing body (no external provider)',
           };
 
-    // Base docs: cleared brands get all approved; scenario tenants use their
-    // declared statuses; everyone else gets the rotating pattern.
+    // Base documents: the status is the scenario's DECLARED value. Nothing here
+    // reads the brand's position in the array.
     const baseDocs = COMPLIANCE_TYPES.map((type, ti) => {
-      const status = scenario?.[type] ?? (isCleared ? ('approved' as const) : pattern[ti]);
+      const status = scenario.base[type];
       return {
         id: `cd-${brand.id}-${ti}`,
         brandId: brand.id,
@@ -795,11 +939,10 @@ export const DEMO_COMPLIANCE_DOCS: ComplianceDocument[] = ALL_DEMO_BRANDS.flatMa
       };
     });
 
-    // Category-specific docs: cleared brands get approved; scenario tenants use
-    // the declared status (so a missing 5th doc is exactly representable);
-    // everyone else gets missing.
+    // Category-specific documents: the scenario declares their status too (so a
+    // missing or rejected 5th document is exactly representable).
     const extraDocs = (CATEGORY_EXTRA_DOCS[brand.category] ?? []).map((extra, ei) => {
-      const status = scenario?.[extra.type] ?? (isCleared ? ('approved' as const) : ('missing' as const));
+      const status = scenario.categoryDocument;
       return {
         id: `cd-${brand.id}-extra-${ei}`,
         brandId: brand.id,

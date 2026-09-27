@@ -71,6 +71,8 @@ import type {
   WorkStatus,
 } from '@/lib/work/types';
 import { DOMAIN_COLOURS, type PaletteDomain } from '@/config/themes';
+/** §SSOT S4 — the declared label for simulated operational state shown as work. */
+import { DEMO_OPERATIONAL_STATE_LABEL } from '@/config/demo';
 import { ChevronLeft, ChevronRight, RotateCcw, BellRing } from 'lucide-react';
 
 /* ── Presentation maps (one source for all three views) ────────────────────── */
@@ -390,6 +392,20 @@ export function WorkWorkspace({
               {reminders.length} reminder{reminders.length === 1 ? '' : 's'} active
             </span>
             <span className="font-mono text-ds-label text-zinc-500">As at {today}</span>
+            {/*
+              §SSOT S4 — HONEST LABELLING. Every item in this list is projected from
+              a canonical operational RECORD, and in demo mode those records are
+              SIMULATED (no provider is contacted, no live network call is made).
+              Without this the surface would read as live operational state, so the
+              declared label is rendered here, in the same words as the rest of the
+              platform (`src/config/demo.ts → DEMO_OPERATIONAL_STATE_LABEL`).
+            */}
+            <span
+              className="font-mono text-ds-label text-amber-300"
+              data-testid="work-operational-state-label"
+            >
+              {DEMO_OPERATIONAL_STATE_LABEL}
+            </span>
           </>
         }
         actions={

@@ -590,6 +590,19 @@ check(
   'the work list fails closed on Super-Admin-only items',
   /opts\?\.superAdmin \? scoped : scoped\.filter\(\(r\) => r\.superAdminOnly !== true\)/.test(WORK_STORE)
 );
+/**
+ * §SSOT S4 (2026-09-26) — HONEST LABELLING. Every row on the work surface is
+ * projected from a SEEDED operational record, so the surface must say the state is
+ * simulated. The sentence is declared ONCE (`src/config/demo.ts`); the component
+ * imports it, so the wording cannot drift between surfaces.
+ */
+check(
+  'the work surface labels simulated operational state instead of presenting it as live',
+  WORK_WS.includes('DEMO_OPERATIONAL_STATE_LABEL') &&
+    WORK_WS.includes('work-operational-state-label') &&
+    read('src/config/demo.ts').includes('export const DEMO_OPERATIONAL_STATE_LABEL') &&
+    !/['"]Simulated operational state/.test(WORK_WS)
+);
 check(
   'every work mutation is audited',
   WORK_STORE.includes('pushAudit(') && WORK_STORE.includes("'work_item_resolved'")

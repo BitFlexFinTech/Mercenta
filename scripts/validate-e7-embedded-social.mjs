@@ -497,6 +497,29 @@ try {
   ];
 
   /**
+   * §SSOT — THE WORK-LAYER SINGLE-SOURCE-OF-TRUTH PROGRAMME (2026-09-26) — REPOINTED.
+   *
+   * The programme in `docs/WORK_LAYER_SSOT_2026-09-26.md` (S1 one writer for a
+   * consignment exception · S2/S3 the RECORD owns a derived item's status and the
+   * surfaces offer the owning action · S4 a demo document state is DECLARED by name
+   * and simulated operational state is labelled) declares the files it changed here,
+   * exactly as every earlier phase's declared surface is accepted above. The
+   * scope-guard MECHANISM is unchanged and not weakened: a changed source/test file
+   * outside EVERY declared set is still refused.
+   */
+  const SSOT_PROGRAMME_DECLARED = [
+    'src/config/demo.ts',
+    'src/data/demoData.ts',
+    'src/data/demoStore.ts',
+    'src/lib/work/',
+    'src/lib/dhl/domain.ts',
+    'src/lib/simulation/scenarioEngine.ts',
+    'src/lib/simulation/investorDemo.ts',
+    'src/components/shared/WorkWorkspace.tsx',
+    'scripts/validate-work-layer.mjs',
+  ];
+
+  /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
    *
    * Same declaration mechanism as SPRINT_WORK_LAYER_DECLARED above: the files
@@ -1361,6 +1384,12 @@ try {
      * declared set is still refused.
      */
     ...S9_RECEIPT_INVOICE_DECLARED,
+    /**
+     * §SSOT — the work-layer single-source-of-truth programme's declared surface
+     * (see the declaration above). Same mechanism: a changed source/test file
+     * outside EVERY declared set is still refused.
+     */
+    ...SSOT_PROGRAMME_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

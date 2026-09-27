@@ -32,6 +32,10 @@ const types = await server.ssrLoadModule('/src/types.ts');
 /** §P7 — the CANONICAL owner of the invoice terms + the derived due date. */
 const invoiceTerms = await server.ssrLoadModule('/src/lib/commerce/invoiceTerms.ts');
 
+/** §SSOT S4 — the canonical seed + the declared labels the gate asserts against. */
+const seed = await server.ssrLoadModule('/src/data/demoData.ts');
+const demoConfig = await server.ssrLoadModule('/src/config/demo.ts');
+
 /* ── 1. Source hygiene: no nondeterminism in the work layer ────────────────── */
 for (const f of [
   'src/lib/work/workStore.ts',
@@ -828,6 +832,114 @@ test(
       .filter((w) => w.derived)
       .every((w) => w.status !== 'done')
   )
+);
+
+/* ── 19. §SSOT S4 — NO DEMO WORK FROM ARITHMETIC; THE BASELINE IS DECLARED ───
+ * The founder-facing defect this stage removes: 27 of the open work items were
+ * FABRICATED by a row's position in the brand array (`COMPLIANCE_PATTERNS[bi % 3]`).
+ * The seed now declares every brand's document scenario BY NAME and the demo
+ * baseline as a NUMBER; this section asserts both, so a fabricated item (or an
+ * accidental seed change) cannot land unnoticed.
+ *
+ * These assertions judge CODE (comments stripped) and the REAL seed module.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+console.log('\n§ SSOT S4 — the demo baseline is DECLARED and asserted, never produced by arithmetic\n');
+
+test(
+  'the seed holds no rotating compliance pattern and no positional status lookup',
+  !/COMPLIANCE_PATTERNS/.test(seedSrc) &&
+    !/bi % COMPLIANCE/.test(seedSrc) &&
+    !/COMPLIANCE_SCENARIO_DOC_STATES/.test(seedSrc) &&
+    /DEMO_COMPLIANCE_SCENARIOS/.test(seedSrc)
+);
+
+const declaredBrands = seed.ALL_DEMO_BRANDS.map((b) => b.id);
+const assignedBrands = Object.keys(seed.DEMO_COMPLIANCE_SCENARIO_BY_BRAND);
+test(
+  'every canonical brand has an EXPLICITLY declared compliance scenario (no default, no fallback)',
+  declaredBrands.length === assignedBrands.length && declaredBrands.every((id) => assignedBrands.includes(id)),
+  `${declaredBrands.length} brand(s) / ${assignedBrands.length} assignment(s)`
+);
+
+const scenarioNames = Object.keys(seed.DEMO_COMPLIANCE_SCENARIOS);
+const usedNames = Object.values(seed.DEMO_COMPLIANCE_SCENARIO_BY_BRAND);
+test(
+  'no declared scenario is dead (each one is genuinely assigned to a brand)',
+  scenarioNames.every((n) => usedNames.includes(n)),
+  scenarioNames.filter((n) => !usedNames.includes(n)).join(', ') || 'none'
+);
+test(
+  'every scenario states WHY it exists in the demo (a readable demo, not a computed one)',
+  scenarioNames.every((n) => typeof seed.DEMO_COMPLIANCE_SCENARIOS[n].why === 'string' && seed.DEMO_COMPLIANCE_SCENARIOS[n].why.length > 10)
+);
+test(
+  'an unassigned brand is REFUSED rather than inheriting another brand’s document state',
+  (() => {
+    try {
+      seed.complianceScenarioFor('brand-not-in-this-demo');
+      return false;
+    } catch (e) {
+      return /refusing to fabricate document state/.test(String(e.message));
+    }
+  })()
+);
+test(
+  'the cleared operational tenants and the `gate_cleared` assignment cannot drift apart',
+  seed.CLEARED_BRAND_IDS.every((id) => seed.DEMO_COMPLIANCE_SCENARIO_BY_BRAND[id] === 'gate_cleared') &&
+    assignedBrands.filter((id) => seed.DEMO_COMPLIANCE_SCENARIO_BY_BRAND[id] === 'gate_cleared').sort().join('|') ===
+      [...seed.CLEARED_BRAND_IDS].sort().join('|'),
+  `cleared: ${seed.CLEARED_BRAND_IDS.join(', ')}`
+);
+
+/* THE BASELINE — a declared number, compared against the real seeded records and
+ * the real derived work list. */
+const seedDocs = store.demoComplianceDocs;
+const blockingDocs = seedDocs.filter((d) => d.status === 'missing' || d.status === 'rejected');
+const complianceWork = work.getWorkItems('admin').filter((w) => w.source === 'compliance_expiry');
+test(
+  'the demo document baseline is DECLARED and matches the seed',
+  seedDocs.length === seed.DEMO_COMPLIANCE_BASELINE.documents,
+  `declared ${seed.DEMO_COMPLIANCE_BASELINE.documents} · actual ${seedDocs.length}`
+);
+test(
+  'the demo BLOCKING-document baseline is DECLARED and matches the seed',
+  blockingDocs.length === seed.DEMO_COMPLIANCE_BASELINE.blockingDocuments,
+  `declared ${seed.DEMO_COMPLIANCE_BASELINE.blockingDocuments} · actual ${blockingDocs.length}`
+);
+test(
+  'compliance work is 1:1 with the blocking documents — no item exists without a record',
+  complianceWork.length === blockingDocs.length &&
+    blockingDocs.every((d) => complianceWork.filter((w) => w.entity.id === d.id).length === 1),
+  `${complianceWork.length} item(s) / ${blockingDocs.length} blocking document(s)`
+);
+test(
+  'the compliance work count equals the DECLARED baseline (a fabricated item fails this gate)',
+  complianceWork.length === seed.DEMO_COMPLIANCE_BASELINE.blockingDocuments,
+  `declared ${seed.DEMO_COMPLIANCE_BASELINE.blockingDocuments} · derived ${complianceWork.length}`
+);
+/* The 1:1 above holds because no seeded document carries an expiry date (expiry is
+ * the other reason this source derives work). If that ever changes, the gate must be
+ * updated DELIBERATELY rather than silently absorbing the difference. */
+test(
+  'no seeded document carries an expiry date (so blocking documents are the ONLY compliance work)',
+  seedDocs.every((d) => !d.expiryDate)
+);
+
+/* HONEST LABELLING — simulated operational state presented as work says so. */
+const demoConfigSrc = codeOf('src/config/demo.ts');
+const workWsSrc = codeOf('src/components/shared/WorkWorkspace.tsx');
+test(
+  'the label for simulated operational state is declared ONCE in config (not pasted per component)',
+  /export const DEMO_OPERATIONAL_STATE_LABEL/.test(demoConfigSrc) &&
+    /no live provider/.test(demoConfig.DEMO_OPERATIONAL_STATE_LABEL)
+);
+test(
+  'the work workspace renders the DECLARED label on the surface that presents seeded records as work',
+  workWsSrc.includes('DEMO_OPERATIONAL_STATE_LABEL') &&
+    workWsSrc.includes('work-operational-state-label') &&
+    !/['"]Simulated operational state/.test(workWsSrc),
+  'the component must import the constant, not restate the sentence'
 );
 
 console.log(`\nWORK LAYER: ${failures === 0 ? 'PASS' : 'FAIL'} (${failures} failure(s))`);

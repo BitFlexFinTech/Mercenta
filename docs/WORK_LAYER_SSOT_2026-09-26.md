@@ -74,9 +74,9 @@ work items could not be closed by doing the work, and nothing enforced any of it
   record-qualified drawer has ZERO `work-drawer-resolve`, shows the named closing path,
   and that a mark leaves the row in place; new test 5b asserts a MANUAL task still
   resolves and leaves the list — **13 passed / 0 failed (25.7s)**.
-- **S2/S3 — the next stage is S4** (stop fabricating work: `COMPLIANCE_PATTERNS[bi % 3]`
-  → named scenarios + an asserted demo baseline), then S5 (one number: badge and list
-  from ONE owner), S6 (CI wiring), S7 (the contract closing path).
+- **S4 — the next stage is S5** (one number: nav badge and list from ONE owner,
+  with the label stating which set each number is), then S6 (CI wiring), S7 (the
+  contract closing path).
 - **S2 — SUPERSEDED TEXT, KEPT FOR THE RECORD (was "the parallel status")**: a derived
   item's status must be COMPUTED from the record, never read from `derivedStatus` /
   `resolvedDerived` (`workStore.ts:254-257, 339-365, 793-866`); `resolveWorkItem` on a
@@ -84,8 +84,23 @@ work items could not be closed by doing the work, and nothing enforced any of it
   action; operator states become annotations. Repoint the four gates that assert derived
   resolution (`validate-work-layer`, `validate-commercial-readiness:479`,
   `validate-po-acknowledgement-work:243`, `validate-uiux-redesign`). — **DONE above.**
-- **S4 — stop fabricating work.** Replace `COMPLIANCE_PATTERNS[bi % 3]` with named scenarios; assert
-  the demo baseline count; label simulated operational state where it is presented as work.
+- **S4 — DONE (2026-09-26, session 38). Stop fabricating work.**
+  `COMPLIANCE_PATTERNS[bi % 3]` and `COMPLIANCE_SCENARIO_DOC_STATES` are GONE.
+  `src/data/demoData.ts` now declares six NAMED document scenarios
+  (`DEMO_COMPLIANCE_SCENARIOS`, each with a `why`) and assigns one to every
+  canonical brand BY NAME (`DEMO_COMPLIANCE_SCENARIO_BY_BRAND`, 20 explicit
+  entries). `complianceScenarioFor()` FAILS CLOSED on an unassigned brand instead
+  of defaulting, and the demo baseline is a DECLARED number
+  (`DEMO_COMPLIANCE_BASELINE`: 95 documents / 27 blocking). Simulated operational
+  state is labelled where it is presented as work: the sentence is declared ONCE
+  (`src/config/demo.ts → DEMO_OPERATIONAL_STATE_LABEL`) and rendered by the shared
+  work workspace (`data-testid="work-operational-state-label"`). Evidence: the seed
+  change is STATE-PRESERVING (same 27 blocking documents, diffed against the
+  pre-change measurement); a new validator section §19 asserts the baseline, the
+  assignment coverage, the dead-scenario check, the fail-closed refusal, the 1:1
+  blocking-document↔item mapping and the label — and was PROVED ABLE TO FAIL
+  (one brand re-assigned to `gate_cleared` ⇒ 3 failures, then restored
+  byte-identical, sha256 `cf13b24ff623593ba25f5c8170964cb1ac7eea28589e1be3423e57d5c8ef8b8a`).
 - **S5 — one number.** Badge and list from one owner, with the label stating which set each number is
   (attention vs all-open), so the two can never read as disagreement.
 - **S6 — enforcement.** `scripts/validate-all.sh` + `npm run validate:all` (**DONE — 113 PASS / 0

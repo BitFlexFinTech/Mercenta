@@ -9,6 +9,7 @@
  *   - LIST / KANBAN / CALENDAR are real views over the same items
  *   - filters and search are REAL state changes
  *   - a row opens the shared record drawer with its activity trail
+ *   - the surface labels its seeded operational state as simulated (§SSOT S4)
  *   - a record-qualified item offers the OWNING action (never a Resolve button),
  *     and an operator mark can never hide it — while a manual task still resolves
  *   - a brand only ever sees its OWN tenant's work (browser-level isolation check)
@@ -79,6 +80,15 @@ test.describe('Work layer — admin workspace', () => {
 
     const rows = page.locator('[data-testid^="work-row-"]');
     expect(await rows.count()).toBe(open);
+
+    /*
+      §SSOT S4 — HONEST LABELLING, asserted in a real browser. Every row on this
+      surface is projected from a seeded operational record, so the surface must say
+      that the state is simulated (the sentence is declared ONCE in
+      `src/config/demo.ts`). Without this the list reads as live operational state.
+    */
+    await expect(page.getByTestId('work-operational-state-label')).toBeVisible();
+    await expect(page.getByTestId('work-operational-state-label')).toContainText('no live provider');
 
     await page.screenshot({ path: `${SHOTS}/admin-work-list.png`, fullPage: false });
   });
