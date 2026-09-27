@@ -31,6 +31,19 @@ Canonical: `.clinerules/mercenta-business-model.md` · `docs/MERCENTA_BUSINESS_M
 server-side helpers behind the real SP-API/DHL/Palletline paths) — never the business model.
 
 
+## INTEGRATIONS — ONE-CLICK CONNECT IS THE REQUIRED SHAPE (never redesign it away)
+
+**Every provider is connected by the operator in ONE action from its card: Connect → wizard asks for the API key
+or opens the provider's own login → Test connection → the card shows the real result.** No code change may ever
+be needed to enter a real key.
+
+**Exists today:** the Connect button, the generic `ConnectWizard` (provider → credentials → test), per-card
+health check, Live / "(Mock)" status, one registry driving every provider.
+**Missing (the same missing plumbing recorded elsewhere):** the backend half — secure key exchange + vault
+storage + the real harmless test call. Today a connect is flagged `sandbox: true` and labelled "(Mock)".
+**Never relax:** a simulated connect is never shown or treated as live.
+
+
 
 ### How a brand-new chat resumes (no transcript required)
 

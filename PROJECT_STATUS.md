@@ -28,6 +28,30 @@ Canonical sources (READ these; do not re-derive, do not ask):
 `.clinerules/mercenta-business-model.md` · `docs/MERCENTA_BUSINESS_MODEL.md` §1 ·
 `src/lib/spapi/transform.ts → UK_MARKETPLACE_ID` · `src/types.ts → APPROVED_CATEGORIES`.
 
+## INTEGRATIONS — THE REQUIRED SHAPE IS ONE-CLICK CONNECT (Founder directive 2026-09-27)
+
+**Every third-party provider must be connected by the operator in ONE action from its card in Integration
+Settings: click Connect → the wizard either asks for the API key or sends the operator to the provider's own
+login → a "Test connection" step runs → the card shows the real result. Nothing else may ever be required of
+the operator, and entering a real key must never require a code change.**
+
+**What EXISTS TODAY (verified in the code — `src/components/admin/integrations/IntegrationsPanel.tsx`,
+`src/integrations/registry.ts`, `src/integrations/IntegrationsContext.tsx`, `src/integrations/types.ts`):** the
+Connect button; the generic `ConnectWizard` (provider choice → credential input → Test connection → done); the
+per-card health check; Live / Configuring / "(Mock)" status; and ONE registry that drives the wizard for every
+provider, so a provider change is data, not a new screen.
+
+**What is MISSING — the backend half, and it is the same missing plumbing recorded elsewhere:** steps 2–3 of
+the wizard (secure key exchange + encrypted secret storage, and the real harmless test call) are NOT wired.
+Today a connect completes flagged `sandbox: true` and is labelled "(Mock)". Secrets currently sit in the
+browser for the demo; real secrets must live in a vault (`supabase/migrations/0002_integration_connections.sql`),
+never in localStorage or plain columns.
+
+**Safety rule that must NOT be relaxed:** a simulated connect must never be shown or treated as live. In demo
+mode the click works and is honestly marked simulated; with a real key the SAME wizard path performs the real
+exchange + test and flips to Live — no code change.
+
+
 What IS legitimately open is only **technical readiness** — e.g. the missing server-side helpers the real
 SP-API / DHL / Palletline paths call — never the business model, the channel or the marketplace.
 

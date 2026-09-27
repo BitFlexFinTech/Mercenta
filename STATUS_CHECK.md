@@ -26,6 +26,20 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
+## INTEGRATIONS — ONE-CLICK CONNECT IS THE REQUIRED SHAPE
+
+**Every provider is connected in ONE action from its card in Integration Settings:** click Connect → the wizard
+asks for the API key (or opens the provider's own login) → "Test connection" → the card shows the real result.
+Entering a real key must NEVER need a code change.
+
+- **Exists today:** Connect button · generic `ConnectWizard` (provider → credentials → Test connection) · per-card
+  health check · Live / Configuring / "(Mock)" status · ONE registry driving every provider (`IntegrationsPanel.tsx`,
+  `src/integrations/`).
+- **Missing (same plumbing as the live-activation rows):** the backend half — secure key exchange, vault storage,
+  and the real harmless test call. A connect today completes `sandbox: true` and is labelled "(Mock)"; demo secrets
+  sit in the browser; real ones must go to a vault (`supabase/migrations/0002_integration_connections.sql`).
+- **Never relax:** a simulated connect is never shown or treated as live.
+
 ## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY (never ask)
 
 **This platform is STRICTLY for Amazon Vendor Central** — Mercenta operates the Vendor Central account, not the
