@@ -36,7 +36,7 @@ import { SalesAnalytics } from '@/components/brand/SalesAnalytics';
 import { BrandWorkCalendar, BrandWorkManagement } from '@/components/brand/WorkManagement';
 import { BrandSupport } from '@/components/brand/BrandSupport';
 import { MERCENTA_SOCIAL } from '@/config/mercentaSocial';
-import { useBrandNavBadges } from '@/lib/nav/navBadges';
+import { NAV_BADGE_LABELS, useBrandNavBadges } from '@/lib/nav/navBadges';
 import {
   LayoutDashboard, FileCheck2, FileText, Package, Truck,
   ShieldCheck, BarChart3, RotateCcw, Target, Settings,
@@ -152,7 +152,12 @@ export default function BrandShell() {
   const navBadges = useBrandNavBadges(brandProfile.onboarded);
   const navSections = BRAND_SECTIONS.map((s) => ({
     ...s,
-    items: s.items.map((i) => (navBadges[i.id] ? { ...i, badge: navBadges[i.id] } : i)),
+    // §SSOT S5 — the badge number travels with its DECLARED set label.
+    items: s.items.map((i) =>
+      navBadges[i.id]
+        ? { ...i, badge: navBadges[i.id], badgeLabel: NAV_BADGE_LABELS[i.id] }
+        : i
+    ),
   }));
 
   if (!brandProfile.onboarded) return <OnboardingWizard />;

@@ -27,6 +27,7 @@ import {
 } from '@/components/shared/workspace';
 import { Button, Input, StatusBadge, type StatusTone } from '@/components/ui';
 import {
+  WORK_COUNT_SETS,
   WORK_PRIORITY_LABELS,
   WORK_SOURCE_LABELS,
   WORK_STATUS_LABELS,
@@ -40,6 +41,7 @@ import {
   resetWorkStore,
   resolveWorkItem,
   setWorkItemStatus,
+  workCounts,
 } from '@/lib/work/workStore';
 import {
   addMonths,
@@ -243,15 +245,25 @@ export function WorkWorkspace({
   const recordQualified = all.filter((w) => w.derived).length;
   const closedManually = everything.filter((w) => !w.derived && w.status === 'done').length;
 
+  /**
+   * §SSOT S5 — THE DECLARED NUMBERS, from the ONE counting owner.
+   *
+   * `workCounts` is the same function the nav badge reads. The tiles below render
+   * these numbers WITH the label each set declares, so a badge (Needs attention)
+   * and this list (All open work) can never be read as a disagreement — the
+   * founder-facing 47-vs-41 class of defect.
+   */
+  const counts = workCounts(scope, tenantId, workScopeOpts);
+
   const metrics: MetricTileData[] = [
     {
       id: 'work-attention',
-      label: 'Needs attention',
-      value: String(all.filter((w) => w.priority !== 'normal').length),
+      label: WORK_COUNT_SETS.attention.label,
+      value: String(counts.attention),
       size: 'hero',
       tone: critical.length > 0 ? 'danger' : 'success',
       statusText: critical.length > 0 ? `${critical.length} critical` : 'No critical items',
-      context: 'Critical + high priority work in scope',
+      context: WORK_COUNT_SETS.attention.definition,
       domain: 'compliance',
       onOpen: () => {
         setPriority('all');
@@ -264,11 +276,11 @@ export function WorkWorkspace({
     },
     {
       id: 'work-overdue',
-      label: 'Overdue',
-      value: String(overdue.length),
-      tone: overdue.length > 0 ? 'danger' : 'success',
-      statusText: overdue.length > 0 ? 'Past deadline' : 'Nothing overdue',
-      context: 'Deadline already passed',
+      label: WORK_COUNT_SETS.overdue.label,
+      value: String(counts.overdue),
+      tone: counts.overdue > 0 ? 'danger' : 'success',
+      statusText: counts.overdue > 0 ? 'Past deadline' : 'Nothing overdue',
+      context: WORK_COUNT_SETS.overdue.definition,
       domain: 'logistics',
       onOpen: () => setView('reminders'),
       testId: 'work-metric-overdue',
@@ -305,11 +317,11 @@ export function WorkWorkspace({
     },
     {
       id: 'work-open',
-      label: 'Open work',
-      value: String(all.length),
+      label: WORK_COUNT_SETS.open.label,
+      value: String(counts.open),
       tone: 'info',
       statusText: `${recordQualified} record-qualified · ${closedManually} resolved manually`,
-      context: 'Every unresolved item in scope',
+      context: WORK_COUNT_SETS.open.definition,
       domain: 'catalogue',
       onOpen: () => {
         setPriority('all');

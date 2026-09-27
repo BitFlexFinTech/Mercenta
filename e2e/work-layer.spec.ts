@@ -93,6 +93,34 @@ test.describe('Work layer — admin workspace', () => {
     await page.screenshot({ path: `${SHOTS}/admin-work-list.png`, fullPage: false });
   });
 
+  test('1b. §SSOT S5 — the work badge is LABELLED and counts the attention set, not the open set', async ({
+    page,
+  }) => {
+    await openAdminWork(page);
+
+    /**
+     * The founder-facing defect this asserts away (F1): the rail badge counted
+     * critical + high while this list rendered every unresolved item, unlabelled.
+     * The badge number and the list number now come from ONE owner and each is
+     * labelled with the DECLARED set it counts.
+     */
+    const badge = page.locator('[data-testid="nav-badge-work"]');
+    await expect(badge).toBeVisible();
+    await expect(badge).toHaveAttribute('data-badge-label', 'Needs attention');
+
+    const badged = Number(await badge.innerText());
+    const attention = Number(await page.getByTestId('work-metric-attention-value').innerText());
+    const open = Number(await page.getByTestId('work-metric-open-value').innerText());
+
+    // The badge IS the attention tile (same owner, same scope)…
+    expect(badged).toBe(attention);
+    // …and the list is a DIFFERENT declared set, so the two numbers can only ever
+    // be read correctly because both surfaces state which set they are.
+    expect(open).toBeGreaterThanOrEqual(badged);
+    await expect(page.getByTestId('work-metric-open')).toContainText('All open work');
+    await expect(page.getByTestId('work-metric-attention')).toContainText('Needs attention');
+  });
+
   test('2. priority filter and search are real state changes', async ({ page }) => {
     await openAdminWork(page);
     const before = await page.locator('[data-testid^="work-row-"]').count();

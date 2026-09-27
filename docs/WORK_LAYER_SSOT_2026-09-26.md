@@ -74,9 +74,6 @@ work items could not be closed by doing the work, and nothing enforced any of it
   record-qualified drawer has ZERO `work-drawer-resolve`, shows the named closing path,
   and that a mark leaves the row in place; new test 5b asserts a MANUAL task still
   resolves and leaves the list — **13 passed / 0 failed (25.7s)**.
-- **S4 — the next stage is S5** (one number: nav badge and list from ONE owner,
-  with the label stating which set each number is), then S6 (CI wiring), S7 (the
-  contract closing path).
 - **S2 — SUPERSEDED TEXT, KEPT FOR THE RECORD (was "the parallel status")**: a derived
   item's status must be COMPUTED from the record, never read from `derivedStatus` /
   `resolvedDerived` (`workStore.ts:254-257, 339-365, 793-866`); `resolveWorkItem` on a
@@ -101,8 +98,20 @@ work items could not be closed by doing the work, and nothing enforced any of it
   blocking-document↔item mapping and the label — and was PROVED ABLE TO FAIL
   (one brand re-assigned to `gate_cleared` ⇒ 3 failures, then restored
   byte-identical, sha256 `cf13b24ff623593ba25f5c8170964cb1ac7eea28589e1be3423e57d5c8ef8b8a`).
-- **S5 — one number.** Badge and list from one owner, with the label stating which set each number is
-  (attention vs all-open), so the two can never read as disagreement.
+- **S5 — DONE (2026-09-27, session 39). ONE NUMBER: badge and list from ONE owner, each number labelled.**
+  `workCounts()` in `src/lib/work/workStore.ts` is now the ONLY function that counts work, and
+  `WORK_COUNT_SETS` declares three sets with the label that must travel with each number
+  (`attention` = "Needs attention" — what a badge counts · `open` = "All open work" — what the list
+  renders · `overdue` = "Overdue work"). `workAttentionCount` is a DELEGATE to the owner (its old
+  independent critical+high filter is gone). The rail badge numbers come from `workCounts` and carry
+  `NAV_BADGE_LABELS`; the Sidebar renders the label with the number (`data-badge-label` + `aria-label`);
+  the work workspace tiles and the Super Admin oversight read the same numbers and the declared labels.
+  Evidence: `scripts/validate-work-layer.mjs` §20 (16 assertions) — PROVED ABLE TO FAIL twice
+  (re-introducing the old filter ⇒ 2 failures; removing the sidebar label ⇒ 1 failure; both files
+  restored byte-identical, `workStore.ts` sha256 `28ff046761394d004e52a9e311405ea45e1e154c7e7b522976b38d0c1ba4421b`);
+  `e2e/work-layer.spec.ts` test 1b asserts in real Chromium that the badge is labelled and equals the
+  attention tile. The declarative check in `scripts/validate-uiux-redesign.mjs` that pinned the removed
+  identifiers was REPOINTED to `workCounts` / `NAV_BADGE_LABELS`, recorded inline.
 - **S6 — enforcement.** `scripts/validate-all.sh` + `npm run validate:all` (**DONE — 113 PASS / 0
   FAIL**); `validate:work-layer` registered; CI wiring still outstanding.
 - **S7 — the contract closing path (F5).** A canonical contract writer (`renewContract` /

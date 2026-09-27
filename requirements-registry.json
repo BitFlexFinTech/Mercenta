@@ -441,7 +441,7 @@
         "S2": "DONE",
         "S3": "DONE",
         "S4": "DONE (2026-09-27, session 38) — the demo's document states are DECLARED by name and the declared baseline is asserted by the gate",
-        "S5": "NOT STARTED",
+        "S5": "DONE (2026-09-27, session 39) — one counting owner (`workCounts`) + the declared sets `WORK_COUNT_SETS` (attention / open / overdue) whose labels travel with every number; the nav badge renders its label and equals the attention tile; §20 (16 assertions) proved able to fail",
         "S6": "PARTIAL (validate:work-layer registered; validate:all runs 113/113; CI absent)",
         "S7": "NOT STARTED"
       },
@@ -454,7 +454,8 @@
         "founder_finance",
         "founder_ai_cost"
       ],
-      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (deployment + live verification deliberately deferred to the programme close, because S5 changes the same work surfaces; S4 is DONE at 834a691)"
+      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (deployment + live verification deliberately deferred to the programme close, because S7 changes the same work surfaces; S5 is DONE and locally verified at the S5 commit)",
+      "s5_evidence": "src/lib/work/workStore.ts (workCounts + WORK_COUNT_SETS + the delegate workAttentionCount); src/lib/nav/navBadges.ts (workCounts + NAV_BADGE_LABELS); src/components/layout/Sidebar.tsx (data-badge-label rendered with the number); AdminShell/BrandShell (badgeLabel from NAV_BADGE_LABELS); src/components/shared/WorkWorkspace.tsx (counts + declared labels); src/components/admin/SuperAdminPanel.tsx (counts.open / counts.overdue); scripts/validate-work-layer.mjs §20 (16 assertions, PASS); scripts/validate-uiux-redesign.mjs (the removed identifiers REPOINTED to workCounts/NAV_BADGE_LABELS, 348 PASS / 0 FAIL); e2e/work-layer.spec.ts test 1b (14 passed / 0 failed). Measured this session: validate:all 113 PASS / 0 FAIL; typecheck 0; lint 0; build ✓ 8.22s. Proved able to fail: re-introducing the old critical+high filter ⇒ 2 §20 failures; removing the sidebar badge label ⇒ 1 §20 failure; both files restored byte-identical (workStore.ts sha256 28ff046761394d004e52a9e311405ea45e1e154c7e7b522976b38d0c1ba4421b). Measured demo counts at the pinned clock: admin {attention 39, open 46, overdue 1}; admin+superAdmin {attention 41, open 78, overdue 1} — the badge can never exceed the list because attention ⊆ open is asserted."
     }
   },
   "entries": [

@@ -31,9 +31,9 @@ import { renewalUrgency } from '@/lib/contracts';
 import { documentsAwaitingDownload } from '@/lib/documents/poDocumentPack';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
 import {
-  overdueWorkItems,
   subscribeWork,
-  workAttentionCount,
+  WORK_COUNT_SETS,
+  workCounts,
   workVersion,
 } from '@/lib/work/workStore';
 
@@ -41,27 +41,51 @@ import {
 const STALE_TIME = 30_000;
 
 /**
- * §Sprint — the canonical work layer's attention counts. Subscribed (not
- * fetched) so resolving a task anywhere updates the rail immediately. Scoping is
- * enforced inside the store: `brand` scope filters by the session's tenantId.
+ * §SSOT S5 — the canonical work layer's declared counts. Subscribed (not
+ * fetched) so doing the owning action anywhere updates the rail immediately.
+ * Scoping is enforced inside the store: `brand` scope filters by the session's
+ * tenantId.
  *
  * §P3 — `superAdmin` is threaded through so the Work Management badge counts
  * EXACTLY what the list shows: for a Super Admin it includes the founder-console
  * items, and for every other session those items are excluded (the store fails
  * closed). A badge that disagreed with its list would be a defect.
+ *
+ * §SSOT S5 — the numbers come from `workCounts()`, the ONE counting owner. The
+ * badge is the DECLARED `attention` set; the workspace header tile labelled
+ * `All open work` is the DECLARED `open` set. Each label is declared in
+ * `WORK_COUNT_SETS` and travels with its number (`NAV_BADGE_LABELS`), so a
+ * badge and a list can never be read as a disagreement.
  */
 function useWorkBadges(
   scope: 'admin' | 'brand',
   tenantId?: string | null,
   opts?: { superAdmin?: boolean }
-): { work: number; calendar: number } {
+): { attention: number; open: number; calendar: number } {
   const version = useSyncExternalStore(subscribeWork, workVersion, workVersion);
   void version;
+  const counts = workCounts(scope, tenantId, opts);
   return {
-    work: workAttentionCount(scope, tenantId, opts),
-    calendar: overdueWorkItems(scope, tenantId, opts).length,
+    /** The work badge = the DECLARED `attention` set. */
+    attention: counts.attention,
+    /** The list's headline number = the DECLARED `open` set (never badged). */
+    open: counts.open,
+    /** The calendar badge = the declared overdue subset. */
+    calendar: counts.overdue,
   };
 }
+
+/**
+ * §SSOT S5 — THE LABEL THAT MUST TRAVEL WITH EACH NAV BADGE.
+ *
+ * `NAV_BADGE_LABELS` is the single source of the wording rendered beside a nav
+ * badge, derived from the declared count sets rather than restated in a shell or
+ * a sidebar. A number without its label is the defect S5 removes.
+ */
+export const NAV_BADGE_LABELS: Record<string, string> = {
+  work: WORK_COUNT_SETS.attention.label,
+  calendar: WORK_COUNT_SETS.overdue.label,
+};
 
 /** Views whose badge counts outstanding operator work. */
 export type NavBadgeMap = Record<string, number>;
@@ -96,7 +120,7 @@ export function useAdminNavBadges(opts?: { superAdmin?: boolean }): NavBadgeMap 
      * the SAME item set its destination renders. A badge here would therefore
      * point at something the destination does not show, so it is not declared.
      */
-    work: workBadges.work,
+    work: workBadges.attention,
     calendar: workBadges.calendar,
   };
 }
@@ -135,7 +159,7 @@ export function useBrandNavBadges(enabled = true): NavBadgeMap {
      * narrowed to this tenant by `assertBrandScope`, which fails closed).
      */
     logistics: ownPos.filter(documentsAwaitingDownload).length,
-    work: workBadges.work,
+    work: workBadges.attention,
     calendar: workBadges.calendar,
   };
 }

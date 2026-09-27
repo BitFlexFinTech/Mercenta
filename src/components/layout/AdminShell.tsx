@@ -47,7 +47,7 @@ import { FounderInvestorCentre } from '@/components/admin/FounderInvestorCentre'
 import { PartnershipsCentre } from '@/components/admin/PartnershipsCentre';
 import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
 import { AdminWorkCalendar, AdminWorkManagement } from '@/components/admin/WorkManagement';
-import { useAdminNavBadges } from '@/lib/nav/navBadges';
+import { NAV_BADGE_LABELS, useAdminNavBadges } from '@/lib/nav/navBadges';
 import { usePurchaseOrders } from '@/data/queries';
 import type { CommandGroup } from '@/components/shared/CommandPalette';
 import type { AdminDepartment } from '@/types';
@@ -243,7 +243,13 @@ export default function AdminShell() {
   ).map((s) => ({
     ...s,
     // §UI/UX Wave 2 — presentation-only badge from the canonical count map.
-    items: s.items.map((i) => (navBadges[i.id] ? { ...i, badge: navBadges[i.id] } : i)),
+    // §SSOT S5 — each badge carries the DECLARED set its number belongs to, so a
+    // badge can never be read as a different set than the one it counts.
+    items: s.items.map((i) =>
+      navBadges[i.id]
+        ? { ...i, badge: navBadges[i.id], badgeLabel: NAV_BADGE_LABELS[i.id] }
+        : i
+    ),
   }));
 
   /** §UI/UX Wave 2 — command palette: real purchase orders, newest first. */

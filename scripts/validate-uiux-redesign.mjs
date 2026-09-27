@@ -655,8 +655,16 @@ check(
 );
 check(
   'the nav rail counts outstanding work from the canonical store',
-  read('src/lib/nav/navBadges.ts').includes('workAttentionCount(') &&
-    read('src/lib/nav/navBadges.ts').includes('overdueWorkItems(')
+  /**
+   * §SSOT S5 — REPOINTED. The old contract asserted `workAttentionCount(` and
+   * `overdueWorkItems(` in `navBadges.ts`. Both were removed as independent
+   * counting paths: the badge numbers and their declared labels now come from the
+   * ONE owner (`workCounts` / `WORK_COUNT_SETS`), so the old literals no longer
+   * exist by design. The assertion is re-pointed to the current canonical source,
+   * not weakened — the rail must still count from the canonical store.
+   */
+  read('src/lib/nav/navBadges.ts').includes('workCounts(') &&
+    read('src/lib/nav/navBadges.ts').includes('NAV_BADGE_LABELS')
 );
 check(
   'the work views are RBAC allowlisted for both tiers',

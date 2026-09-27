@@ -44,7 +44,7 @@ import {
 } from '@/components/shared/workspace';
 import { useBrands } from '@/data/queries';
 import { useWorkItems } from '@/lib/work/useWork';
-import { WORK_SOURCE_LABELS, demoToday } from '@/lib/work/workStore';
+import { WORK_COUNT_SETS, WORK_SOURCE_LABELS, demoToday, workCounts } from '@/lib/work/workStore';
 
 const SUPER_ADMIN_TABS = [
   { id: 'staff', label: 'Staff & RBAC', icon: Users },
@@ -171,8 +171,20 @@ export function SuperAdminPanel() {
   const brands = useBrands().data?.data ?? [];
   const allWork = useWorkItems('admin');
   const today = demoToday();
-  const overdueWork = allWork.filter((w) => w.dueDate !== null && w.dueDate < today);
+  /**
+   * §SSOT S5 — the platform-wide numbers come from the ONE counting owner
+   * (`workCounts`), the same function the nav badge and the work workspace read.
+   * `criticalWork` below is a separate drill-down fact (critical ONLY), not the
+   * declared `attention` set, and is labelled as such.
+   */
+  const counts = workCounts('admin');
   const criticalWork = allWork.filter((w) => w.priority === 'critical');
+  /**
+   * §SSOT S5 — this array selects the ROWS of the overdue drill-down; the NUMBER
+   * rendered anywhere is `counts.overdue` (the one owner). The gate asserts the
+   * two agree, so the selection can never drift from the count.
+   */
+  const overdueWork = allWork.filter((w) => w.dueDate !== null && w.dueDate < today);
   const [oversight, setOversight] = useState<'none' | 'work' | 'overdue' | 'brands'>('none');
 
   const oversightMetrics: MetricTileData[] = [
@@ -204,7 +216,7 @@ export function SuperAdminPanel() {
     {
       id: 'sa-work',
       label: 'Operational work',
-      value: String(allWork.length),
+      value: String(counts.open),
       tone: criticalWork.length > 0 ? 'danger' : 'warning',
       statusText: `${criticalWork.length} critical`,
       context: 'Every unresolved work item across the platform',
@@ -215,11 +227,11 @@ export function SuperAdminPanel() {
     },
     {
       id: 'sa-overdue',
-      label: 'Overdue',
-      value: String(overdueWork.length),
-      tone: overdueWork.length > 0 ? 'danger' : 'success',
-      statusText: overdueWork.length > 0 ? 'Past deadline' : 'Nothing overdue',
-      context: 'Work items whose declared deadline has passed',
+      label: WORK_COUNT_SETS.overdue.label,
+      value: String(counts.overdue),
+      tone: counts.overdue > 0 ? 'danger' : 'success',
+      statusText: counts.overdue > 0 ? 'Past deadline' : 'Nothing overdue',
+      context: WORK_COUNT_SETS.overdue.definition,
       domain: 'finance',
       onOpen: () => setOversight('overdue'),
       testId: 'sa-metric-overdue',
@@ -281,9 +293,9 @@ export function SuperAdminPanel() {
                 fields={[
                   { label: 'Staff', value: `${activeCount}/${staff.length} active` },
                   { label: 'Brand tenants', value: String(brands.length) },
-                  { label: 'Open work', value: String(allWork.length) },
+                  { label: WORK_COUNT_SETS.open.label, value: String(counts.open) },
                   { label: 'Critical work', value: String(criticalWork.length) },
-                  { label: 'Overdue', value: String(overdueWork.length) },
+                  { label: WORK_COUNT_SETS.overdue.label, value: String(counts.overdue) },
                   { label: 'Simulation state', value: 'Simulated providers only' },
                 ]}
               />

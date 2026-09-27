@@ -942,6 +942,146 @@ test(
   'the component must import the constant, not restate the sentence'
 );
 
+/* ── 20. §SSOT S5 — ONE NUMBER, ONE OWNER, AND EVERY NUMBER LABELLED ────────
+ * The founder-facing defect this stage removes (F1): the nav badge counted
+ * critical + high while the Work Management list rendered EVERY unresolved item,
+ * and neither surface said which set it counted — so a rendered 47 against a
+ * badged 41 read as a contradiction.
+ *
+ * These assertions judge CODE (comments stripped) AND the real store: there is
+ * ONE counting owner, the declared sets/labels live in it, the badge number and
+ * the list number both come from it, and the label reaches the rendered badge.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+console.log('\n§ SSOT S5 — one number: badge and list from ONE owner, each number labelled\n');
+
+const navBadgesSrc = codeOf('src/lib/nav/navBadges.ts');
+const sidebarSrc = codeOf('src/components/layout/Sidebar.tsx');
+const adminShellSrc = codeOf('src/components/layout/AdminShell.tsx');
+const brandShellSrc = codeOf('src/components/layout/BrandShell.tsx');
+const superAdminSrc = codeOf('src/components/admin/SuperAdminPanel.tsx');
+
+/* (a) ONE OWNER — and the attention count holds no filter of its own. */
+test(
+  'the store exposes exactly ONE counting owner (`workCounts`)',
+  /export function workCounts\(/.test(workStoreSrc)
+);
+test(
+  '`workAttentionCount` is a DELEGATE to the owner, never a second filter',
+  (() => {
+    const body = (workStoreSrc.match(/export function workAttentionCount\([\s\S]*?\n\}/) || [''])[0];
+    return /return workCounts\(scope, tenantId, opts\)\.attention;/.test(body) && !/\.filter\(/.test(body);
+  })()
+);
+test(
+  'the old independent critical/high expression is gone',
+  !/priority === 'critical' \|\| w\.priority === 'high'/.test(workStoreSrc)
+);
+
+/* (b) THE DECLARED SETS carry the label that must travel with the number. */
+const countSets = work.WORK_COUNT_SETS;
+test(
+  'three declared sets exist: attention (badge) / open (list) / overdue',
+  countSets &&
+    ['attention', 'open', 'overdue'].every((k) => countSets[k] && countSets[k].id === k) &&
+    Object.keys(countSets).length === 3,
+  `keys: ${countSets ? Object.keys(countSets).join(', ') : 'none'}`
+);
+test(
+  'every declared set states a non-empty label AND definition',
+  countSets &&
+    Object.values(countSets).every(
+      (s) => typeof s.label === 'string' && s.label.length > 2 && typeof s.definition === 'string' && s.definition.length > 10
+    )
+);
+test(
+  'the declared labels are DISTINCT (two sets cannot read as one)',
+  new Set(Object.values(countSets).map((s) => s.label)).size === Object.keys(countSets).length
+);
+
+/* (c) LIVE AGREEMENT — the numbers describe the sets they claim to, in every
+ * scope, and the badge set is a declared subset of the list set. */
+const scopes = [
+  ['admin', null, {}],
+  ['admin', null, { superAdmin: true }],
+  ['brand', tenantA, {}],
+];
+test(
+  'the declared numbers match the item sets in EVERY scope',
+  scopes.every(([scope, tenant, opts]) => {
+    const rows = work.getWorkItems(scope, tenant, opts);
+    const c = work.workCounts(scope, tenant, opts);
+    return (
+      c.open === rows.length &&
+      c.attention === rows.filter((w) => w.priority !== 'normal').length &&
+      c.overdue === rows.filter((w) => w.dueDate !== null && w.dueDate < work.demoToday()).length
+    );
+  })
+);
+test(
+  'attention and overdue are SUBSETS of open (a badge can never exceed the list)',
+  scopes.every(([scope, tenant, opts]) => {
+    const c = work.workCounts(scope, tenant, opts);
+    return c.attention <= c.open && c.overdue <= c.open;
+  })
+);
+test(
+  'the attention number the badge reads IS the declared `attention` set',
+  scopes.every(
+    ([scope, tenant, opts]) => work.workAttentionCount(scope, tenant, opts) === work.workCounts(scope, tenant, opts).attention
+  )
+);
+
+/* (d) THE BADGE LABEL — declared once, derived from the sets, reaching the DOM. */
+test(
+  'each nav badge label is derived from a DECLARED set, never restated',
+  /work: WORK_COUNT_SETS\.attention\.label/.test(navBadgesSrc) &&
+    /calendar: WORK_COUNT_SETS\.overdue\.label/.test(navBadgesSrc) &&
+    !/label: 'Needs attention'/.test(navBadgesSrc)
+);
+test(
+  'the nav badge number comes from the ONE owner (`workCounts`)',
+  /workCounts\(scope, tenantId, opts\)/.test(navBadgesSrc) &&
+    !/overdueWorkItems\(/.test(navBadgesSrc) &&
+    !/workAttentionCount\(scope/.test(navBadgesSrc)
+);
+test(
+  'the sidebar renders the DECLARED label with the badge number',
+  /badgeLabel\?: string/.test(sidebarSrc) &&
+    /data-badge-label=\{item\.badgeLabel\}/.test(sidebarSrc) &&
+    /aria-label=\{item\.badgeLabel \?/.test(sidebarSrc)
+);
+test(
+  'both shells attach the declared label to every badge',
+  /badgeLabel: NAV_BADGE_LABELS\[i\.id\]/.test(adminShellSrc) &&
+    /badgeLabel: NAV_BADGE_LABELS\[i\.id\]/.test(brandShellSrc)
+);
+
+/* (e) THE LIST SURFACE — numbers AND labels from the owner/declared sets. */
+test(
+  'the work workspace takes its numbers from the ONE owner',
+  /const counts = workCounts\(scope, tenantId, workScopeOpts\)/.test(workWsSrc) &&
+    /value: String\(counts\.attention\)/.test(workWsSrc) &&
+    /value: String\(counts\.open\)/.test(workWsSrc) &&
+    /value: String\(counts\.overdue\)/.test(workWsSrc)
+);
+test(
+  'the two work tiles render the DECLARED labels, not pasted literals',
+  /label: WORK_COUNT_SETS\.attention\.label/.test(workWsSrc) &&
+    /label: WORK_COUNT_SETS\.open\.label/.test(workWsSrc) &&
+    !/label: 'Needs attention'/.test(workWsSrc) &&
+    !/label: 'Open work'/.test(workWsSrc)
+);
+
+/* (f) THE FOUNDER OVERSIGHT SURFACE — same owner, no re-counted literal. */
+test(
+  'the Super Admin oversight numbers come from the ONE owner',
+  /workCounts\('admin'\)/.test(superAdminSrc) &&
+    /String\(counts\.open\)/.test(superAdminSrc) &&
+    /String\(counts\.overdue\)/.test(superAdminSrc) &&
+    !/String\(overdueWork\.length\)/.test(superAdminSrc)
+);
+
 console.log(`\nWORK LAYER: ${failures === 0 ? 'PASS' : 'FAIL'} (${failures} failure(s))`);
 await server.close();
 process.exit(failures === 0 ? 0 : 1);

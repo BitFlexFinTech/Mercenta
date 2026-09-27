@@ -31,6 +31,12 @@ export interface NavItem {
   tourAttr?: string;
   /** Optional outstanding-work count (numeric pill + accessible label). */
   badge?: number;
+  /**
+   * §SSOT S5 — the DECLARED set the badge number belongs to ("Needs attention",
+   * "Overdue work", …). A badge number is never rendered without it, so a count
+   * can never be read as a different set than the one it counts.
+   */
+  badgeLabel?: string;
 }
 
 export interface NavSection {
@@ -319,6 +325,10 @@ export function Sidebar({
                         {!compact && typeof item.badge === 'number' && item.badge > 0 && (
                           <span
                             data-testid={`nav-badge-${item.id}`}
+                            /* §SSOT S5 — the number travels with its DECLARED set. */
+                            data-badge-label={item.badgeLabel}
+                            title={item.badgeLabel ? `${item.badge} ${item.badgeLabel}` : undefined}
+                            aria-label={item.badgeLabel ? `${item.badge} ${item.badgeLabel}` : undefined}
                             className="flex-shrink-0 rounded-full px-1.5 py-0.5 font-mono text-ds-micro font-semibold leading-none"
                             style={{ backgroundColor: accent, color: 'var(--mr-on-palette)' }}
                           >

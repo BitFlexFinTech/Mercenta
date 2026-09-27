@@ -1172,13 +1172,80 @@ export function getWorkItem(id: string): WorkItem | null {
   return allItems().find((w) => w.id === id) ?? null;
 }
 
-/** Attention count for nav badges / notification centre — resolved work excluded. */
+/**
+ * §SSOT S5 — ONE NUMBER, ONE OWNER.
+ *
+ * The founder-facing defect this stage removes: the nav badge counted one set
+ * (`workAttentionCount` — critical + high) while the Work Management list
+ * rendered a DIFFERENT set (every unresolved item), and NEITHER surface said
+ * which set its number was, so a rendered 47 against a badged 41 read as a
+ * contradiction. Both were numerically correct.
+ *
+ * There are now TWO DECLARED SETS, each carrying the label that must travel
+ * with its number. `workCounts` is the ONLY function in the platform that
+ * counts work: the rail badge, the calendar badge, the workspace tiles and the
+ * founder oversight all read their number here, so no surface can re-invent a
+ * third filter and drift again.
+ */
+export const WORK_COUNT_SETS = {
+  attention: {
+    id: 'attention',
+    /** The phrase rendered WITH the number — never omitted. */
+    label: 'Needs attention',
+    definition: 'Unresolved critical + high priority work in scope',
+  },
+  open: {
+    id: 'open',
+    label: 'All open work',
+    definition: 'Every unresolved item in scope, any priority',
+  },
+  overdue: {
+    id: 'overdue',
+    label: 'Overdue work',
+    definition: 'Unresolved items whose deadline has already passed',
+  },
+} as const satisfies Record<string, { id: string; label: string; definition: string }>;
+
+export type WorkCountSetId = keyof typeof WORK_COUNT_SETS;
+
+export interface WorkCounts {
+  /** §SSOT S5 — the DECLARED `attention` set. This is what a badge counts. */
+  attention: number;
+  /** §SSOT S5 — the DECLARED `open` set. This is what the work list renders. */
+  open: number;
+  /** Deadline already passed — a declared subset of `open`. */
+  overdue: number;
+}
+
+/**
+ * §SSOT S5 — the SINGLE counting owner. Resolved work is excluded by
+ * `getWorkItems` (the one read), so every number below shares one existence rule.
+ */
+export function workCounts(
+  scope: WorkScope,
+  tenantId?: string | null,
+  opts?: { superAdmin?: boolean }
+): WorkCounts {
+  const rows = getWorkItems(scope, tenantId, opts);
+  const today = demoToday();
+  return {
+    attention: rows.filter((w) => w.priority !== 'normal').length,
+    open: rows.length,
+    overdue: rows.filter((w) => w.dueDate !== null && w.dueDate < today).length,
+  };
+}
+
+/**
+ * Attention count for nav badges / notification centre — the DECLARED
+ * `attention` set. Kept as a named delegate (never a second filter) because the
+ * existing contracts read it by name; it holds no counting logic of its own.
+ */
 export function workAttentionCount(
   scope: WorkScope,
   tenantId?: string | null,
   opts?: { superAdmin?: boolean }
 ): number {
-  return getWorkItems(scope, tenantId, opts).filter((w) => w.priority === 'critical' || w.priority === 'high').length;
+  return workCounts(scope, tenantId, opts).attention;
 }
 
 /** Overdue items only — used by the proactive reminder automation. */
