@@ -28,8 +28,8 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 
 ## CURRENT STATE — **§SSOT STAGE 5: ONE NUMBER — the nav badge and the work list count from ONE owner (`workCounts`) and every number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement** (2026-09-27, session 39, sixth increment)
 
-**Branch:** `redesign/foundation`. **Checkpoint:** **`bf4edbf`** (the S5 implementation commit) + the state checkpoint
-that follows it. **Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain`
+**Branch:** `redesign/foundation`. **Checkpoint:** **`b4d9037`** (the SECOND S5 implementation commit; its predecessor
+`bf4edbf` built the owner and the labels) + the state checkpoint that follows it. **Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain`
 EMPTY** after the state commit. **THREE-WAY STATUS: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.**
 Local ✅ `npm run validate:all` **113 PASS / 0 FAIL (of 113)** · typecheck 0 · root tsc 0 · lint 0 · build ✓ 8.22s ·
 `e2e/work-layer.spec.ts` **14 passed / 0 failed (24.6s)** · GitHub ✅ pushed ·
@@ -46,15 +46,15 @@ surface said which set its number was.* **Programme record:** `docs/WORK_LAYER_S
 2. `WORK_COUNT_SETS` **declares** the three sets WITH the label that must travel with each number: `attention` =
    **"Needs attention"** (what a badge counts) · `open` = **"All open work"** (what the list renders) · `overdue` =
    **"Overdue work"** — each carrying a `definition` rendered as the tile context.
-3. `workAttentionCount` is a **DELEGATE** (`return workCounts(...).attention`); its old independent critical+high
-   filter is **DELETED** and §20 asserts the delegate body contains no `.filter(`.
+3. `workAttentionCount` (the old **SECOND** counting path) is **DELETED** — it had no caller once the surfaces
+   were repointed; §20 asserts the name exists NOWHERE and that exactly ONE counting function (`workCounts`) exists.
 4. `src/lib/nav/navBadges.ts` reads every badge number from the owner (work = attention, calendar = overdue) and
    exports `NAV_BADGE_LABELS` from the declared sets; `src/components/layout/Sidebar.tsx` renders the label WITH the
    number (`data-badge-label`, `title`, `aria-label`) and both shells attach `badgeLabel: NAV_BADGE_LABELS[i.id]`.
 5. The work tiles (`WorkWorkspace.tsx`) and the Super Admin oversight (`SuperAdminPanel.tsx`) read the same numbers
    and the declared labels; the restated literals are gone. The **Notification Centre is deliberately NOT
    relabelled** — its number counts ALL notification kinds and already says so.
-6. **Gates:** `scripts/validate-work-layer.mjs` gains **§20** (16 assertions: ONE owner · the delegate holds no filter ·
+6. **Gates:** `scripts/validate-work-layer.mjs` gains **§20** (17 assertions: ONE owner · the second path is GONE · exactly one counting function ·
    the old critical+high expression gone · three declared sets with id/label/definition · distinct labels · the numbers
    match the item sets in every scope · attention ⊆ open · the badge number IS the declared attention set · the badge
    label derived from a declared set · the badge number from the owner · the Sidebar renders the label · both shells
@@ -66,9 +66,9 @@ surface said which set its number was.* **Programme record:** `docs/WORK_LAYER_S
 failures)**; `validate-uiux-redesign` **348 PASS / 0 FAIL**; typecheck 0 · root tsc 0 · lint 0; build ✓ **8.22s**;
 `e2e/work-layer.spec.ts` **14 passed / 0 failed (24.6s)** — the NEW test 1b asserts in real Chromium that
 `nav-badge-work` carries `data-badge-label="Needs attention"` and equals the attention tile. **The new gate was
-PROVED ABLE TO FAIL TWICE:** re-introducing the old critical+high filter made §20 report **FAIL (2 failures)**, and
-deleting the sidebar’s `data-badge-label` made it report **FAIL (1 failure)**; both files were then restored
-**byte-identical** (`workStore.ts` sha256 `28ff046761394d004e52a9e311405ea45e1e154c7e7b522976b38d0c1ba4421b`,
+PROVED ABLE TO FAIL THREE TIMES:** re-introducing a second counting function made §20 report **FAIL (3 failures)**, a
+delegate-style second path made it report **FAIL (2 failures)**, and deleting the sidebar’s `data-badge-label` made it
+report **FAIL (1 failure)**; every file was then restored **byte-identical** (`workStore.ts` sha256 `e0a37b2c2a9f5d7db223beed7c85491bdcd725383be3343ebf00c34e30c7b95b`,
 `Sidebar.tsx` sha256 `6781f94f2ed142fb7107a57acf6c9fa1a9ee196bdbd4c3590430bd9eea72950c`). Measured demo counts at the
 pinned clock: admin `{attention 39, open 46, overdue 1}` · admin+Super-Admin `{attention 41, open 78, overdue 1}`.
 
