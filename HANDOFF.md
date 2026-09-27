@@ -56,14 +56,20 @@ storage + the real harmless test call. Today a connect is flagged `sandbox: true
 
 ## GLOBAL RULES — INSTALLED FOR EVERY PROJECT (2026-09-27)
 
-Four rules now apply to **every project** (installed outside this repo, identical copies in
+Five rules now apply to **every project** (installed outside this repo, identical copies in
 `~/Documents/Cline/Rules/` AND `~/.cline/rules/`): **plain-english-responses** (plain English always; overrides
 any brevity/budget guidance) · **answer-from-the-project** (answer from the project's own records, never from
-memory/templates, never re-ask a recorded fact) · **skill-usage** (choose the minimum skills, invoke them
-properly, and a MANDATORY fit check so a stack-specific skill — `shadcn`, `write-swift`, `animate-expo`,
-`mobile-native`, `apple-design`, `oklch-skill` — is never applied to a project that does not use that stack) ·
-**design-work** (which design skill for which problem; UI work is not "done" without rendering, accessibility
-and states; never disturb visuals the user did not ask for). They join the pre-existing global rules
+memory/templates, never re-ask a recorded fact) · **persona-and-skill-routing** (the FIRST STEP everywhere:
+classify the request as QUESTION/ANALYZE/PLAN/IMPLEMENT, then pick the minimum persona — business-analyst ·
+project-manager · senior-software-architect · senior-software-engineer · ux-product-analyst) · **skill-usage**
+(choose the minimum skills, invoke them properly, and a MANDATORY fit check so a stack-specific skill —
+`shadcn`, `write-swift`, `animate-expo`, `mobile-native`, `apple-design`, `oklch-skill` — is never applied to a
+project that does not use that stack) · **design-work** (which design skill for which problem; UI work is not
+"done" without rendering, accessibility and states; never disturb visuals the user did not ask for).
+**34 skills are available to every project** in `~/.agents/skills/` (26 existing + 8 copied from this project,
+byte-identical); five project-only skills were deliberately NOT copied because their bodies carry Mercenta-domain
+or stack-specific content (`business-analyst`, `senior-software-architect`, `senior-software-engineer`,
+`ux-product-analyst`, `skill-router`). They join the pre-existing global rules
 (`always-export-review-zip`, `always-maintain-status-file`, `budget-token-saving-rules`, and the numbered
 `00-task-mode-selection` → `06-page-by-page-functional-parity-audit` set). The stale project path in
 `05-thoroughness-overrides-brevity.md` was corrected to `/Users/tadii/Desktop/1. Mercenta`.

@@ -61,7 +61,23 @@ Six rules now apply to **all projects**, installed OUTSIDE this repository.
 
 - **Added 2026-09-27 (installed in BOTH global locations, identical copies — `~/Documents/Cline/Rules/` and
   `~/.cline/rules/`):** `plain-english-responses.md` · `answer-from-the-project.md` · `skill-usage.md` ·
-  `design-work.md`.
+  `design-work.md` · `persona-and-skill-routing.md`.
+- **`persona-and-skill-routing.md`** is the FIRST STEP for every task in every project: classify the request
+  (QUESTION · ANALYZE · PLAN · IMPLEMENT) and then choose the minimum persona — business-analyst (requirement) ·
+  project-manager (sequencing) · senior-software-architect (boundaries/contracts) · senior-software-engineer
+  (code + proof) · ux-product-analyst (experience) — with the safeguards that stop a rule breaking a project
+  (**the project outranks a persona or skill**; a skill never authorises a rewrite or a new dependency; a
+  stack-specific skill applies only where that stack is actually used).
+- **Skills available to every project: 34** in `~/.agents/skills/` (the 26 already there + 8 copied from this
+  project on 2026-09-27: `design-review`, `frontend-design`, `interaction-design`, `impeccable`, `shadcn`,
+  `accessibility`, `beautiful-shadows`, `project-manager`). Copies verified byte-identical to the project's.
+  **NOT copied, deliberately:** `business-analyst`, `senior-software-architect`, `senior-software-engineer`,
+  `ux-product-analyst`, `skill-router` — their bodies contain Mercenta-domain and stack-specific content that
+  must not be injected into other projects (e.g. `senior-software-engineer` covers TypeScript/React/Vite). Their
+  ROLES are still available everywhere through `persona-and-skill-routing.md`.
+- **Honest limitation recorded in the rule itself:** hand-copied skills are NOT registered in
+  `~/.agents/.skill-lock.json` (the official skills CLI manifest), so the CLI cannot update them; the CLI is not
+  installed on this machine.
 - **Pre-existing global rules they join:** `always-export-review-zip.md`, `always-maintain-status-file.md`,
   `budget-token-saving-rules.md` (`~/Documents/Cline/Rules/`) and the numbered set `00-task-mode-selection` →
   `06-page-by-page-functional-parity-audit` plus `no-placeholders-vs-mock-first`,

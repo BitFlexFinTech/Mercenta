@@ -54,14 +54,19 @@ the real SP-API / DHL / Palletline paths) — never the business model.
 
 ## GLOBAL RULES — INSTALLED FOR EVERY PROJECT (2026-09-27)
 
-Four rules now apply to **every project** (identical copies in `~/Documents/Cline/Rules/` AND `~/.cline/rules/`):
+Five rules now apply to **every project** (identical copies in `~/Documents/Cline/Rules/` AND `~/.cline/rules/`):
 **plain-english-responses** (plain English always; overrides any brevity/budget guidance) ·
 **answer-from-the-project** (answer from the project's own records; never re-ask a recorded fact) ·
-**skill-usage** (minimum skills only, invoked properly, with a MANDATORY fit check so `shadcn`, `write-swift`,
-`animate-expo`, `mobile-native`, `apple-design`, `oklch-skill` are never applied to a project that does not use
-that stack) · **design-work** (which design skill for which problem; UI is not "done" without rendering,
-accessibility and states). The stale project path in `05-thoroughness-overrides-brevity.md` was corrected to
-`/Users/tadii/Desktop/1. Mercenta`.
+**persona-and-skill-routing** (FIRST STEP everywhere: classify QUESTION/ANALYZE/PLAN/IMPLEMENT, then pick the
+minimum persona — business-analyst · project-manager · senior-software-architect · senior-software-engineer ·
+ux-product-analyst) · **skill-usage** (minimum skills only, invoked properly, with a MANDATORY fit check so
+`shadcn`, `write-swift`, `animate-expo`, `mobile-native`, `apple-design`, `oklch-skill` are never applied to a
+project that does not use that stack) · **design-work** (which design skill for which problem; UI is not "done"
+without rendering, accessibility and states). **34 skills are now available to every project** in
+`~/.agents/skills/` (8 copied from this project); five project-only skills were deliberately NOT copied because
+their bodies carry Mercenta/stack-specific content (`business-analyst`, `senior-software-architect`,
+`senior-software-engineer`, `ux-product-analyst`, `skill-router`). The stale project path in
+`05-thoroughness-overrides-brevity.md` was corrected to `/Users/tadii/Desktop/1. Mercenta`.
 
 ## CURRENT STATE — **§SSOT STAGE 5: ONE NUMBER — the nav badge and the work list count from ONE owner (`workCounts`) and every number carries the DECLARED set it counts (attention · all-open · overdue), so a badge and a list can never read as a disagreement** (2026-09-27, session 39, sixth increment)
 

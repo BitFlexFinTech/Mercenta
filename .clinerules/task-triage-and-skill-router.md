@@ -11,16 +11,18 @@
 > *procedure*. Installing this layer did not renumber, rename or re-scope any phase of the current
 > Mercenta programme.
 >
-> **§GLOBAL COMPANIONS (added 2026-09-27).** Two *global* rules now carry the project-agnostic version of
-> this concern for every project: `~/.cline/rules/skill-usage.md` (how to choose/load skills, the mandatory
-> stack **fit check** so a skill that does not fit a project is never applied, and "the project outranks a
-> skill") and `~/.cline/rules/design-work.md` (which design skill for which design problem, and the rule that
-> UI work is not "done" without rendering, accessibility and states). Both are also installed at
-> `~/Documents/Cline/Rules/`. **This file remains the stricter, Mercenta-specific router and wins wherever
-> they differ** (e.g. the Mercenta-only skills `business-analyst`, `project-manager`,
-> `senior-software-architect`, `senior-software-engineer`, `ux-product-analyst`, `design-review`,
-> `frontend-design`, `impeccable`, `interaction-design`, `shadcn`, `accessibility`, `beautiful-shadows` are
-> installed in THIS project and are not available to other projects).
+> **§GLOBAL COMPANIONS (added 2026-09-27).** THREE *global* rules now carry the project-agnostic version of
+> this concern for every project: `~/.cline/rules/persona-and-skill-routing.md` (the always-first triage +
+> persona router: classify QUESTION/ANALYZE/PLAN/IMPLEMENT, then pick the minimum persona — business-analyst,
+> project-manager, senior-software-architect, senior-software-engineer, ux-product-analyst — with "the project
+> outranks a persona or skill" and a mandatory stack fit check), `~/.cline/rules/skill-usage.md` (how to
+> choose/load skills, and never apply a skill that does not fit the project) and `~/.cline/rules/design-work.md`
+> (which design skill for which design problem, and the rule that UI work is not "done" without rendering,
+> accessibility and states). All three are also installed at `~/Documents/Cline/Rules/`. **This file remains the
+> stricter, Mercenta-specific router and wins wherever they differ** (e.g. the Mercenta-only skills
+> `business-analyst`, `project-manager`, `senior-software-architect`, `senior-software-engineer`,
+> `ux-product-analyst`, `design-review`, `frontend-design`, `impeccable`, `interaction-design`, `shadcn`,
+> `accessibility`, `beautiful-shadows` remain installed here with their Mercenta-specific depth).
 
 ## 1. Why this exists — context economy
 
