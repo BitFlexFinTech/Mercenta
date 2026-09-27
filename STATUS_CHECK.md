@@ -28,7 +28,7 @@ Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-repo
 
 ## CURRENT STATE — **§SSOT STAGES 2 + 3: THE RECORD OWNS A DERIVED WORK ITEM'S STATUS — the work layer's own resolution map is DELETED and the call is REFUSED, and every surface offers the OWNING ACTION instead of a Resolve button** (2026-09-26, session 37, fourth increment)
 
-**Branch:** `redesign/foundation`. **Checkpoint:** **`5dd061d`** + the S2/S3 implementation commit + the state checkpoint
+**Branch:** `redesign/foundation`. **Checkpoint:** **`b423637`** (the S2/S3 implementation commit) + the state checkpoint
 that follows it. **Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status
 --porcelain` EMPTY** after the state commit. **THREE-WAY STATUS: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.**
 Local ✅ `npm run validate:all` **113 PASS / 0 FAIL (of 113)** · typecheck 0 · root tsc 0 · lint 0 · build ✓ 5.30s ·
