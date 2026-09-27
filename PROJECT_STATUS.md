@@ -87,6 +87,16 @@ Six rules now apply to **all projects**, installed OUTSIDE this repository.
   `ux-product-analyst`, `skill-router` — their bodies contain Mercenta-domain and stack-specific content that
   must not be injected into other projects (e.g. `senior-software-engineer` covers TypeScript/React/Vite). Their
   ROLES are still available everywhere through `00-task-mode-selection.md`.
+- **ZIP-LOCATION BUG FIXED GLOBALLY (2026-09-27, Founder report).** The two global copies of the review-zip rule
+  contradicted each other AND both were wrong: `~/Documents/Cline/Rules/always-export-review-zip.md` hardcoded
+  `/Users/tadii/Desktop/homekava-review-N.zip` (a DIFFERENT project's name, at the Desktop root), while
+  `~/.cline/rules/04-always-export-review-zip.md` wrote to `~/Desktop/<project>/` — still OUTSIDE the project.
+  NOW: one rule, identical content in both folders (sha256 `aa89ba1418720a8b9c71ab4a2fa8304e17937b9e2f404071aa426dcb17cafdc6`),
+  stating that the zip goes to `<project root>/Review Zip/<project>-review-N.zip`; the name is DERIVED
+  (`package.json` `name`, else the project folder name — **never hardcoded**); the number is scanned in that folder
+  only; secrets are proved absent; the `ls -la` proof is mandatory; and a project's own export script or rule
+  **wins**. The two old wrong behaviours are recorded inside the rule so they cannot return (verified: the only
+  remaining `homekava` hit is inside that recorded-history note).
 - **Prevention recorded globally:** the global `03-single-source-of-truth.md` now states that the rule applies to
   RULES and SKILLS too — search for an existing rule/skill before writing a new one, extend it, and never leave a
   parallel copy — and that "global" means present in EVERY location the runtime reads, proved with paths and
