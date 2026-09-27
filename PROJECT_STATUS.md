@@ -97,6 +97,11 @@ Six rules now apply to **all projects**, installed OUTSIDE this repository.
   only; secrets are proved absent; the `ls -la` proof is mandatory; and a project's own export script or rule
   **wins**. The two old wrong behaviours are recorded inside the rule so they cannot return (verified: the only
   remaining `homekava` hit is inside that recorded-history note).
+- **"HALF-GLOBAL" GAP CLOSED (2026-09-27).** Eight rules existed ONLY in `~/.cline/rules/` and three ONLY in
+  `~/Documents/Cline/Rules/`, and the zip rule existed in both under DIFFERENT filenames with DIFFERENT content
+  (the drift that produced the zip bug). NOW **all 17 global rules exist in BOTH folders with identical content**
+  (verified: one unique sha256 per rule across the two copies) and the divergent `04-always-export-review-zip.md`
+  was DELETED, standardising on `always-export-review-zip.md` in both folders.
 - **Prevention recorded globally:** the global `03-single-source-of-truth.md` now states that the rule applies to
   RULES and SKILLS too — search for an existing rule/skill before writing a new one, extend it, and never leave a
   parallel copy — and that "global" means present in EVERY location the runtime reads, proved with paths and
