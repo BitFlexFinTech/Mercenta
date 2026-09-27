@@ -87,6 +87,10 @@ Six rules now apply to **all projects**, installed OUTSIDE this repository.
   `ux-product-analyst`, `skill-router` — their bodies contain Mercenta-domain and stack-specific content that
   must not be injected into other projects (e.g. `senior-software-engineer` covers TypeScript/React/Vite). Their
   ROLES are still available everywhere through `00-task-mode-selection.md`.
+- **Prevention recorded globally:** the global `03-single-source-of-truth.md` now states that the rule applies to
+  RULES and SKILLS too — search for an existing rule/skill before writing a new one, extend it, and never leave a
+  parallel copy — and that "global" means present in EVERY location the runtime reads, proved with paths and
+  matching fingerprints (the exact mistake this session made and corrected).
 - **Honest limitation recorded in the rule itself:** hand-copied skills are NOT registered in
   `~/.agents/.skill-lock.json` (the official skills CLI manifest), so the CLI cannot update them; the CLI is not
   installed on this machine.
