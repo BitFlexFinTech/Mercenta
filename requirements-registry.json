@@ -689,7 +689,7 @@
         "AV-020 (the channel performance scorecard) remains EVIDENCE-BLOCKED. The platform's own 'fulfillment score' is Mercenta's financing-track score and is not presented as the channel's; renaming it for unambiguity is still carried by that row.",
         "The rest of Batch 2 is untouched: AV-024, AV-006, AV-008/AV-023, AV-032, AV-040/AV-042/AV-043/AV-045 and the remaining INCOMPLETE/INFERENCE rows."
       ],
-      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT (no application runtime change requiring deployment: attribution, labels and state documentation). GLOBAL STATE REMAINS 'NOT COMPLETE' — Batch 1's delivery leg and the demo deployment are still open.",
+      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (this increment changes user-visible wording on two brand surfaces, so the three-way gate applies and its DEMO leg is UNSATISFIED: deployment stays deferred to S7 = Batch 3; demo still d726166. Local: typecheck 0, lint 0, build OK, corpus 118/118, both new gates proved able to fail; the pushed commit's CI run was green with the same 118/118.)",
       "next_plan": "Continue Batch 2 at AV-024 (PO changes/revisions do not exist though the channel can change an order), then AV-006 (the documented 48-hour amendment window), then AV-008/AV-023 (ack ↔ invoice price/time rules), then AV-032/AV-040/AV-042/AV-043/AV-045; Batch 3 after that.",
       "verified_commit": "9fea8ad",
       "github_push": "PUSHED to origin/redesign/foundation — checkpoint 9fea8ad plus the state-record commit (see PROJECT_STATUS.md → CURRENT RESUME STATE)",

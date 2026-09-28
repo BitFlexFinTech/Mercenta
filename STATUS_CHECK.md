@@ -65,7 +65,10 @@ fix. Both now PASS.
 
 **Checkpoint:** `9fea8ad` — "feat(amazon): BATCH 2a …" (19 files). The state-record commit follows, per the project's convention that a commit cannot name its own hash.
 
-**Three-way status:** **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT** (attribution,
+**Three-way status:** **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** This increment changes what a user sees,
+so the three-way gate in `operating-model.md` §10 applies in full and its **DEMO leg is NOT SATISFIED** — deployment stays
+deferred to the recorded plan (S7 = Batch 3). **Corrected in session 43** from an earlier "THREE-WAY NOT
+APPLICABLE (no application runtime change)" claim, which understated the change. (attribution,
 labels and state documentation; no deployable runtime change). **GLOBAL STATE REMAINS "NOT COMPLETE"** — Batch 1's
 delivery leg and the demo deployment are still open, and the demo is still `d726166`. Measured after the last
 edit: `typecheck` **0** · `lint` **0** · `build` **✓** · `validate:all` **118 PASS / 0 FAIL (of 118)** ·
