@@ -26,7 +26,44 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## BATCH 1a — THE PROVIDER PROXY HELPERS NOW EXIST (session 40, 2026-09-27)
+## BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF NOW EXISTS (session 41, 2026-09-28)
+
+**Before this session:** the Integrations wizard's "Test Connection & Save" ran its test **in the browser**
+(`src/lib/integrations/testCalls.ts`) and kept the key in memory only; the OAuth path called
+`/functions/v1/spapi-token-exchange` — **a function that did not exist**; and the connection record the live
+factories read had **no table behind it** (the `0002_integration_connections.sql` older documents cited was never in
+the repository). So a real key could not become a real connection.
+
+- **NOW:** `supabase/migrations/028_create_integration_connections.sql` (ONE record per provider, operator-level,
+  staff-only RLS, **no DELETE policy**, `secret_ref` CHECK-constrained to `vault:`, and a non-sandbox row MUST hold a
+  vault reference) · `_shared/vault.ts → writeVaultSecret`/`credentialSecretName` (the encrypted write, server-side,
+  deterministic naming) · `_shared/providerConnect.ts` + `integration-connect/index.ts` (harmless test SERVER-SIDE →
+  Vault write → **only the `vault:` reference returned**) · `_shared/tokenExchange.ts` +
+  `spapi-token-exchange/index.ts` (the real Amazon LWA exchange, refresh token stored in Vault) · the wizard now
+  calls the server function, sends the `redirect_uri` the popup used and stores the returned reference ·
+  `src/lib/integrations/connectClient.ts` is the ONE place that builds a function URL.
+- **Behaviour proven by `npm run validate:connect-wizard` (49 assertions, EXECUTES the handlers):** simulation only
+  on an explicit request, with **zero network calls, zero writes** and a `mock:` reference · a **bad key** rejected
+  by a real call with the provider's own error text and nothing stored · a **good key** stored with only the
+  reference returned · a verified-but-unstorable key reported `VAULT_WRITE_FAILED`, never as a connection · an
+  undeclared provider `TEST_ENDPOINT_NOT_DECLARED` (7 providers ARE declared; 14 refuse honestly) · a live call
+  requires a verified operator session.
+- **Gate proved able to fail four times** (failing response treated as success → 8 failures; the migration's
+  vault-reference CHECK weakened → 2; client/server declared-set divergence → 1); every mutated file restored
+  byte-identical. Corpus: **`validate:all` 115 PASS / 0 FAIL (of 115)**. Also PASS: `validate-e6-brand-surfaces`
+  (F4/F5/F5b/F6 repointed with a declared §BATCH1b surface), `validate-rls-hardening` (20 checks),
+  `rls-audit` (34 tables · 96 checks), `validate-e5`, `validate-e7`, `typecheck` 0, `lint` 0, `build` ✓.
+- **DEFECTS FIXED AT SOURCE:** the wizard no longer marks a no-API provider (CSV import) as "Live" (it completed
+  `sandbox:false` and claimed a verified connection although nothing had been verified) · the registry row
+  `stage1-token-exchange-edge-function` no longer claims a non-existent file · five validator statements the new
+  migration made false were repointed (the newest migration must now be **declared by the current phase** — an
+  undeclared one still fails — and `integration_connections` is pinned as a genuine RLS-protected table).
+- **NOT done (stated, not implied):** the five functions are **NOT deployed** (no Supabase credential + CLI);
+  `SPAPI_CLIENT_SECRET` is unset, so the OAuth exchange answers 503 `SPAPI_CLIENT_SECRET_MISSING`; the `vault`
+  extension is not confirmed enabled, so a verified key would answer `VAULT_WRITE_FAILED`; **no live path has ever
+  run against a provider**; **1c (CI wiring)** and the deployment remain. Every activation item is in
+  `PRODUCTION_READINESS.md` §BATCH1b.
+## BATCH 1a — THE PROVIDER PROXY HELPERS NOW EXIST (session 40, 2026-09-27) — HISTORICAL
 
 **Before this session:** the real provider clients (`src/lib/spapi/client.ts`, `src/lib/dhl/client.ts`,
 `src/lib/palletline/client.ts`) already called `/functions/v1/spapi|dhl|palletline/...` and **no such Edge Function
@@ -42,9 +79,8 @@ existed** in the repository (only 9 unrelated ones) — so entering a real key c
   EXECUTING the helpers; proved able to fail twice (undeclared client route → 3 failures; simulation invoking the
   live caller → non-zero exit), with both files restored byte-identical. Corpus: `validate:all` **114/114 PASS**.
 - **NOT done (stated, not implied):** the three functions are **NOT deployed** (no Supabase credential + no CLI);
-  the 3 live paths have **never run against a provider**; **Batch 1b** (the connect wizard's backend half —
-  `/functions/v1/spapi-token-exchange` is called by `IntegrationsPanel.tsx` and does not exist) and **1c** (CI
-  wiring) remain. Every activation item is listed in `PRODUCTION_READINESS.md` §BATCH1a.
+  the 3 live paths have **never run against a provider**; **1c** (CI wiring) remains — **Batch 1b is DONE (see the
+  section above)**. Every activation item is listed in `PRODUCTION_READINESS.md` §BATCH1a and §BATCH1b.
 
 ## INTEGRATIONS — ONE-CLICK CONNECT IS THE REQUIRED SHAPE
 
@@ -55,12 +91,14 @@ Entering a real key must NEVER need a code change.
 - **Exists today:** Connect button · generic `ConnectWizard` (provider → credentials → Test connection) · per-card
   health check · Live / Configuring / "(Mock)" status · ONE registry driving every provider (`IntegrationsPanel.tsx`,
   `src/integrations/`).
-- **Missing (same plumbing as the live-activation rows):** the backend half — secure key exchange, vault storage,
-  and the real harmless test call. A connect today completes `sandbox: true` and is labelled "(Mock)"; demo secrets
-  sit in the browser; real ones must go to a vault.
-  **⚠ The file this line used to cite — `supabase/migrations/0002_integration_connections.sql` — DOES NOT EXIST**
-  (there are 27 migrations and none covers integration connections). Batch 1b must write that schema, or the
-  citation is corrected; until then the connection-record schema is unestablished.
+- **Backend half — BUILT in Batch 1b (session 41, 2026-09-28; see the section above):** secure key exchange, the
+  Vault WRITE, the connection-record schema and the real harmless test call all exist; a connect with a real key
+  performs the genuine test, stores the credential in Vault and reports the result honestly. A simulated connect
+  still completes `sandbox: true` and is labelled "(Mock)". Demo secrets are no longer held in memory as the only
+  store, and no real secret is ever written to `localStorage` or a plain column.
+  **The connection-record schema EXISTS: `supabase/migrations/028_create_integration_connections.sql`.** (The
+  `0002_integration_connections.sql` cited by older documents never existed; every live citation was corrected on
+  2026-09-27 and the real migration was written on 2026-09-28.)
 - **Never relax:** a simulated connect is never shown or treated as live.
 
 ## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY (never ask)

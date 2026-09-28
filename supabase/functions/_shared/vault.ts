@@ -36,6 +36,61 @@ export async function readVaultSecret(secretRef: string): Promise<string | null>
   }
 }
 
+/** The vault reference a stored secret is handed out as. Never the value. */
+export function vaultSecretRef(name: string): string {
+  return name.startsWith('vault:') ? name : `vault:${name}`;
+}
+
+/**
+ * §BATCH1b — SUPABASE VAULT WRITE (server-side only).
+ *
+ * The connect flow's missing step 2: a real credential must be stored
+ * ENCRYPTED, server-side, and the client must only ever receive the
+ * `vault:<name>` REFERENCE. This is that write.
+ *
+ * Deterministic naming (one secret per integration+provider) so a re-connect
+ * UPDATES rather than piling up secrets.
+ *
+ * Returns false — NEVER throws, NEVER pretends — when Vault is unreachable, so
+ * the caller fails closed instead of reporting a connection it did not store.
+ */
+export function credentialSecretName(integrationId: string, provider: string): string {
+  const safe = (v: string) => v.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  return `integration_${safe(integrationId)}${provider ? `_${safe(provider)}` : ''}`;
+}
+
+export async function writeVaultSecret(
+  name: string,
+  value: string,
+  description = ''
+): Promise<boolean> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  if (!supabaseUrl || !serviceKey || !name || !value) return false;
+  try {
+    const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+    const existing = await supabase
+      .schema('vault')
+      .from('secrets')
+      .select('id')
+      .eq('name', name)
+      .maybeSingle();
+    const id = (existing.data as { id?: string } | null)?.id;
+    if (id) {
+      const { error } = await supabase
+        .schema('vault')
+        .rpc('update_secret', { secret_id: id, new_secret: value });
+      return !error;
+    }
+    const { error } = await supabase
+      .schema('vault')
+      .rpc('create_secret', { new_secret: value, new_name: name, new_description: description });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Parse a stored credential blob. The wizard stores JSON; a bare string is
  * accepted only for the single-field case the caller names.

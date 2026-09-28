@@ -14,8 +14,13 @@
  * It also pins the real, evidenced conclusion behind the repoint of
  * `rls-audit.mjs`: the "missing RLS" table names the old hardcoded audit reported
  * (`shipping_margins`, `subscriptions`, `commissions`, `fulfillment_scores`,
- * `ad_spend_budgets`, `leads`, `integration_connections`) DO NOT EXIST in the
- * schema — they were stale names, not unprotected tables.
+ * `ad_spend_budgets`, `leads`) DO NOT EXIST in the schema — they were stale names,
+ * not unprotected tables.
+ *
+ * §BATCH1b (2026-09-28) — `integration_connections` WAS one of those stale names,
+ * and Batch 1b has now CREATED it for real (migration 028, the connect wizard's
+ * connection-record table), so it is pinned BELOW as a genuine RLS-protected table
+ * instead of being listed as absent.
  *
  * The general per-table invariant (EVERY schema table is RLS-protected) is audited
  * by `scripts/rls-audit.mjs`; this validator is the focused, regression-proof pin.
@@ -40,8 +45,19 @@ const test = (name, ok, detail = '') => {
 
 /* ── The hardening migration exists and is sequential ─────────────────────── */
 const HARDENING = '027_harden_audit_log_rls.sql';
-test('the M13 hardening migration exists as the newest in the history',
-  files.at(-1) === HARDENING, files.at(-1));
+/**
+ * §BATCH1b — REPOINTED (not weakened).
+ * OLD CONTRACT: 027 was asserted to be the NEWEST file in the history. That was
+ * true when M13 wrote this validator, but Batch 1b legitimately added
+ * `028_create_integration_connections.sql` (the connection-record schema the
+ * connect wizard needs), so the newest file moved. The INTENT — "the M13
+ * hardening is still present and its invariants still hold" — is unchanged, and
+ * the invariants themselves are asserted individually below. What must never
+ * happen is 027 disappearing or its hardening being undone.
+ * The M13 hardening migration (027) is present in the sequential history.
+ */
+test('the M13 hardening migration (027) is present in the sequential history',
+  files.some((f) => f.startsWith('027_')), files.at(-1));
 const sql = read(HARDENING);
 
 /* ── 1. audit_log ─────────────────────────────────────────────────────────── */
@@ -83,14 +99,39 @@ test('applications: NO delete policy (an application is a retained record)',
   !appPolicies.some((p) => /for\s+delete/i.test(p.body)));
 
 /* ── 3. the stale-name conclusion is pinned ──────────────────────────────── */
+/**
+ * §BATCH1b — REPOINTED (not weakened).
+ * OLD CONTRACT: `integration_connections` was pinned as a GHOST — a name the old
+ * hardcoded audit reported as "missing RLS" that did not exist in the schema at
+ * all. Batch 1b has now CREATED it (migration 028, the connect wizard's
+ * connection-record table), so it is no longer a ghost. It is removed from the
+ * ghost list and — so the change makes this validator STRONGER, never weaker — it
+ * is pinned as a real table that MUST have RLS enabled and staff-scoped policies
+ * with NO delete policy. The remaining ghosts are still asserted absent.
+ */
 const GHOSTS = ['shipping_margins', 'subscriptions', 'commissions', 'fulfillment_scores',
-  'ad_spend_budgets', 'leads', 'integration_connections'];
+  'ad_spend_budgets', 'leads'];
 const created = new Set(
   [...code.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-z_][a-z0-9_]*)/gi)]
     .map((m) => m[1].toLowerCase()));
 const ghostsPresent = GHOSTS.filter((t) => created.has(t));
 test('the old audit\'s "missing RLS" names are genuinely absent from the schema',
   ghostsPresent.length === 0, ghostsPresent.join(', '));
+
+/* ── 3b. §BATCH1b — the created connection table is RLS-protected ────────── */
+test('integration_connections: created by migration 028 and RLS is enabled',
+  created.has('integration_connections') &&
+    /alter\s+table\s+(?:public\.)?integration_connections\s+enable\s+row\s+level\s+security/i.test(all));
+const connPolicies = policies.filter((p) => p.table === 'integration_connections');
+test('integration_connections: every policy is staff-scoped (never blanket-open)',
+  connPolicies.length > 0 &&
+    connPolicies.every((p) =>
+      /auth\.jwt\(\)\s*->>\s*'role'/.test(p.body) && !/using\s*\(\s*true\s*\)/i.test(p.body)));
+test('integration_connections: NO delete policy (a connection record is retained)',
+  !connPolicies.some((p) => /for\s+delete/i.test(p.body)));
+test('integration_connections: a LIVE row must hold a `vault:` reference (plaintext is impossible)',
+  /secret_ref\s+text\s+check\s*\(\s*secret_ref\s+is\s+null\s+or\s+secret_ref\s+like\s+'vault:%'/i.test(all) &&
+    /check\s*\(\s*sandbox\s+or\s+secret_ref\s+is\s+not\s+null\s*\)/i.test(all));
 
 /* ── 4. the tenancy predicate is the canonical one ───────────────────────── */
 test('the hardening uses the canonical `auth.jwt() ->> \'role\'` staff predicate',

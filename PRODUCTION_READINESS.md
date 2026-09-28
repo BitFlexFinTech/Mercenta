@@ -362,11 +362,47 @@ Each row is a genuine activation item: **live mode refuses with the code above r
 the simulation for every one of the 20 routes is fully functional (deterministic lifecycle, refusals, retry paths,
 zero network calls) so nothing is un-demoable in the meantime.
 
-### Also still missing for a real key handover (Batch 1b)
+### §BATCH1b — THE CONNECT WIZARD'S BACKEND HALF NOW EXISTS (session 41, 28 Sep 2026)
 
-The Integrations wizard calls `${supabaseUrl}/functions/v1/spapi-token-exchange` for the OAuth consent exchange —
-that function **does not exist** either, and the secure key exchange + Vault WRITE for a pasted API key is still
-unbuilt. **The backend half of one-click connect is Batch 1b**, not delivered by this increment.
+**What was missing and is now built** (each item is verified by
+`npm run validate:connect-wizard` — the fake-key rehearsal gate, 49 assertions):
+
+| Piece | File | What it does |
+|---|---|---|
+| The connection-record schema | `supabase/migrations/028_create_integration_connections.sql` | ONE record per provider (operator-level, staff-only RLS, **no delete policy**). `secret_ref` is constrained to the `vault:` scheme, and a non-sandbox (LIVE) row MUST carry a vault reference — so a "live" row with no stored credential, or a plaintext secret, is impossible at the database boundary. **This migration did not exist before** (`0002_integration_connections.sql` was cited by older documents but was never in the repository). |
+| The Vault **write** half | `supabase/functions/_shared/vault.ts → writeVaultSecret`, `credentialSecretName` | Stores a credential encrypted, server-side, under a deterministic name (re-connect updates rather than duplicating). Returns a boolean only — never the value. |
+| The API-key connect path | `supabase/functions/_shared/providerConnect.ts` + `supabase/functions/integration-connect/index.ts` | Runs the harness provider test server-side, then writes the credential to Vault and returns ONLY the `vault:` reference. |
+| The SP-API OAuth exchange | `supabase/functions/_shared/tokenExchange.ts` + `supabase/functions/spapi-token-exchange/index.ts` | The function the wizard has always called and which **did not exist**: exchanges the consent code at Amazon LWA and stores the refresh token in Vault. |
+
+**Behaviour, stated exactly**
+
+- A **simulated** connect happens only when explicitly requested, makes **zero network calls**, stores **nothing**,
+  and returns a `mock:` reference that the live factories reject. A simulated connect is never shown as live.
+- A **bad key** is rejected with the provider's own error text; **nothing** is stored.
+- A key that the provider accepted but that **could not be stored in Vault** is reported as **FAILED**
+  (`VAULT_WRITE_FAILED`), never as a connection.
+- A **provider whose harmless test endpoint is not declared** is refused with
+  `TEST_ENDPOINT_NOT_DECLARED` — no endpoint is invented and no success is faked. Declared today (7):
+  `openrouter`, `hunter`, `instantly`, `email` (postmark · sendgrid), `lead_sourcing` (apollo · instantly).
+  **Not yet declared** (entering a real key for these refuses honestly and stores nothing): Stripe, E-Signature,
+  Amazon Ads, Keepa, Firecrawl, Usertour, Twilio WhatsApp, Postiz, Xero, Google, Wise, Payoneer, Companies House,
+  HMRC, CSV import (which has no provider API at all — the wizard records it as a manual choice and claims nothing).
+- A provider with **no API** (CSV import) is no longer marked "Live": previously it completed as `connected` with
+  `sandbox: false`, i.e. it displayed a verified live connection although nothing had been verified. **Fixed.**
+- **The browser keeps NOTHING.** After a server-side connect the wizard deliberately does NOT put the key in the
+  client-side memory store, so a live connection's "Re-check" reports `no-credential-in-memory` — truthful, because
+  the credential is in Vault and only the server reads it. (The demo auto-connect paths that read a `VITE_*` key are
+  unaffected: a key shipped in a browser env var is already public to the browser and is labelled as such.)
+
+**What a real key handover still needs (genuine blockers, not placeholders)**
+
+| # | Missing input | Where it is entered | Consequence until supplied |
+|---|---|---|---|
+| 1 | A **Supabase project credential + the CLI** | Behind `scripts/deploy-demo.sh`'s deployment of the Edge Functions (JWT verification ON) | the two functions cannot be deployed, so a real key on the deployed demo reaches the honest "connect service unavailable" refusal |
+| 2 | **`SPAPI_CLIENT_SECRET`** (+ `SPAPI_CLIENT_ID`) as a Supabase function secret | `supabase secrets set SPAPI_CLIENT_SECRET=...` | the OAuth exchange answers **503 `SPAPI_CLIENT_SECRET_MISSING`** naming exactly this secret; it never simulates to look successful |
+| 3 | The **`vault` extension enabled** on the project | Supabase project → Extensions | the connect handler refuses with `VAULT_WRITE_FAILED` rather than claiming a connection it could not store |
+| 4 | **Live provider credentials** (Amazon, DHL, Palletline, …) | the Integrations wizard | the 3 live-capable proxy routes and the 17 refused routes stay as recorded above |
+| 5 | **A declared harmless test endpoint** for the 14 providers listed above | `supabase/functions/_shared/providerConnect.ts → PROVIDER_TESTS` | those providers refuse honestly; no fake success |
 
 ## Integration credentials
 

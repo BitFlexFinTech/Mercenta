@@ -143,7 +143,38 @@ export async function pingSendGrid(
   }
 }
 
+/**
+ * §BATCH1b — DOES THIS PROVIDER HAVE A SERVER-SIDE LIVE TEST?
+ *
+ * The wizard must NOT try to verify a provider that has no API at all (CSV import),
+ * and must NOT claim one is verified. This is the CLIENT's declaration of which
+ * providers have a harmless live test.
+ *
+ * It must stay IDENTICAL to the server's declared set
+ * (`supabase/functions/_shared/providerConnect.ts → PROVIDER_TESTS`), and
+ * `scripts/validate-connect-wizard-backend.mjs` DERIVES BOTH and fails if they
+ * diverge — so the two can never drift into a state where the wizard asks for a
+ * verification the backend will refuse, or vice versa.
+ */
+export const LIVE_TEST_ENDPOINTS: ReadonlyArray<{ integrationId: string; provider: string }> = [
+  { integrationId: 'openrouter', provider: '' },
+  { integrationId: 'hunter', provider: '' },
+  { integrationId: 'instantly', provider: '' },
+  { integrationId: 'email', provider: 'postmark' },
+  { integrationId: 'email', provider: 'sendgrid' },
+  { integrationId: 'lead_sourcing', provider: 'apollo' },
+  { integrationId: 'lead_sourcing', provider: 'instantly' },
+];
+
+export function hasLiveTestEndpoint(integrationId: string, provider: string): boolean {
+  const p = provider.toLowerCase();
+  return LIVE_TEST_ENDPOINTS.some(
+    (e) => e.integrationId === integrationId && e.provider.toLowerCase() === p
+  );
+}
+
 /** Dispatch a real ping for an integration card + chosen provider. */
+
 export async function pingForService(
   integrationId: string,
   provider: string,

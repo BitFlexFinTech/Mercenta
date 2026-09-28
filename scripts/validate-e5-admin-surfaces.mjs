@@ -253,8 +253,13 @@ try {
   // hardening for audit_log + applications), so the absolute count is stale. E5's
   // actual INVARIANT — that E5 itself added no migration — is unchanged and is still
   // asserted by the E5-scope guard elsewhere in this file.
-  test('J1 no migration was added by E5 (newest is 027 after M13)',
-    migFiles.length === 27 && migFiles.sort().at(-1).startsWith('027_'));
+  //
+  // §BATCH1b (2026-09-28) — REPOINTED AGAIN (not weakened). Batch 1b legitimately
+  // adds 028 (the `integration_connections` schema the connect wizard needs). The
+  // count and the newest file move; E5's invariant is still that E5 added none, and
+  // the working tree is still guarded by the E5-scope check later in this file.
+  test('J1 no migration was added by E5 (history is now 28 after Batch 1b)',
+    migFiles.length === 28 && migFiles.sort().at(-1).startsWith('028_'));
   /**
    * §P11 — REPOINTED (not weakened). OLD CONTRACT (recorded verbatim):
    *

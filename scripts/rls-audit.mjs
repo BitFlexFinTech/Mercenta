@@ -12,9 +12,12 @@
  *     `(auth.jwt() ->> 'tenant_id')::uuid` (+ `auth.jwt() ->> 'role'` for staff),
  *     NOT `auth.uid()` — so the old check could never pass;
  *   • `shipping_margins`, `subscriptions`, `commissions`, `fulfillment_scores`,
- *     `ad_spend_budgets`, `leads`, `integration_connections` DO NOT EXIST anywhere
- *     in the migration history (grep → 0 hits) — there is no table, so there was no
- *     RLS gap to report; the names were stale;
+ *     `ad_spend_budgets`, `leads` DO NOT EXIST anywhere in the migration history
+ *     (grep → 0 hits) — there is no table, so there was no RLS gap to report; the
+ *     names were stale. §BATCH1b (2026-09-28): `integration_connections` was a
+ *     seventh such name and has since been CREATED for real by migration 028 — it
+ *     is now derived into the audited table list like every other table, which is
+ *     exactly how this audit is designed to pick it up;
  *   • `compliance_documents` is really `compliance_docs`;
  *   • `audit_log` genuinely had NO RLS (migration 015) — fixed by migration 027.
  *

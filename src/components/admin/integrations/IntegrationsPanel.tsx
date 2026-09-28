@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
-import { rememberApiKey } from '@/integrations/types';
-import { pingForService } from '@/lib/integrations/testCalls';
+import { hasLiveTestEndpoint } from '@/lib/integrations/testCalls';
+import { connectProvider, exchangeSpapiCode } from '@/lib/integrations/connectClient';
 import { runHealthCheck } from '@/lib/integrations/health';
 import { INTEGRATION_CATEGORY_LABELS, INTEGRATION_MODE_LABELS } from '@/integrations/types';
 import {
@@ -350,6 +350,7 @@ function ConnectWizard({ id, onClose }: WizardProps) {
     completeApiKeyConnect,
     completeSandboxConnect,
     oauthCodeReceived,
+    markManualConnect,
     integrations,
   } = useIntegrations();
   const state = integrations[id];
@@ -380,35 +381,27 @@ function ConnectWizard({ id, onClose }: WizardProps) {
     setStepError(null);
     startConnect({ integrationId: id, provider: provider || undefined });
     try {
-      const supabaseUrl = (typeof import.meta !== 'undefined' && import.meta.env.VITE_SUPABASE_URL) as string | undefined;
-      const anonKey = (typeof import.meta !== 'undefined' && import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined;
-      const fnUrl = supabaseUrl
-        ? `${supabaseUrl}/functions/v1/spapi-token-exchange`
-        : '/api/functions/v1/spapi-token-exchange';
-      const res = await fetch(fnUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${anonKey ?? ''}`,
-        },
-        body: JSON.stringify({
-          code: receivedCode,
-          clientId: oauthClientId.trim(),
-          marketplaceId: 'A1F83G8C2ARO7P',
-        }),
+      /* §BATCH1b — the redirect_uri MUST match the one the consent screen used,
+         so the exchange is given the same value the popup was opened with. */
+      const data = await exchangeSpapiCode({
+        code: receivedCode,
+        clientId: oauthClientId.trim(),
+        redirectUri: window.location.origin + '/oauth/callback.html',
+        marketplaceId: 'A1F83G8C2ARO7P',
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        const msg = data.error ?? `Exchange failed (HTTP ${res.status})`;
+      if (!data.ok) {
+        const msg = data.error ?? 'Exchange failed';
         setStepError(msg);
         failConnect(id, msg);
         return;
       }
-      // Exchange succeeded — mark as connected with the marketplace metadata.
+      // Exchange succeeded — the credential lives in Vault; only its reference
+      // (and the non-secret marketplace) is kept client-side.
       const metadata: Record<string, string> = {
         mode: data.mode ?? 'real',
         marketplaceId: data.marketplaceId ?? 'A1F83G8C2ARO7P',
         expiresIn: String(data.expiresIn ?? 3600),
+        ...(data.secretRef ? { secretRef: data.secretRef } : {}),
       };
       completeApiKeyConnect(id, provider, metadata);
       setReceivedCode(null);
@@ -422,8 +415,21 @@ function ConnectWizard({ id, onClose }: WizardProps) {
     }
   }
 
+  /**
+   * §BATCH1b — the real connect: server-side harmless test, then Vault storage.
+   * A provider with NO API (CSV import) is recorded honestly as a manual choice;
+   * nothing live is claimed for it.
+   */
   async function testApiKey() {
     setStepError(null);
+
+    if (!hasLiveTestEndpoint(id, provider)) {
+      // No provider API to verify — record the operator's choice and claim nothing.
+      markManualConnect(id, provider, { note: 'No provider API to verify — nothing was connected.' });
+      onClose();
+      return;
+    }
+
     const key = fieldValues.api_key ?? '';
     if (!key.trim()) {
       const msg = 'API key is required.';
@@ -431,24 +437,34 @@ function ConnectWizard({ id, onClose }: WizardProps) {
       failConnect(id, msg);
       return;
     }
+
     setBusy(true);
     startConnect({ integrationId: id, provider: provider || undefined, fields: fieldValues });
-    const result = await pingForService(id, provider, key.trim());
-    if (!result) {
-      // No live endpoint for this selection (e.g. CSV import) — not a failure.
-      setBusy(false);
-      completeApiKeyConnect(id, provider, { mode: 'no-live-endpoint' });
+    const result = await connectProvider({
+      integrationId: id,
+      provider,
+      fields: fieldValues,
+    });
+    setBusy(false);
+
+    if (result.ok && result.secretRef && !result.simulated) {
+      /* §BATCH1b — the credential is now in Vault, so the BROWSER keeps nothing.
+         It is deliberately NOT put in the client-side memory store: holding a real
+         secret in the browser (where the health check would then ping the provider
+         with it) is exactly what the vault move was for. A live connection's
+         "Re-check" therefore reports honestly that the browser holds no credential —
+         the server does. */
+      completeApiKeyConnect(id, provider, {
+        httpStatus: String(result.httpStatus ?? 200),
+        secretRef: result.secretRef,
+      });
+      onClose();
       return;
     }
-    setBusy(false);
-    if (result.ok) {
-      rememberApiKey(id, key.trim());
-      completeApiKeyConnect(id, provider, { httpStatus: String(result.httpStatus) });
-    } else {
-      const msg = result.error ?? 'Test failed';
-      setStepError(msg);
-      failConnect(id, msg);
-    }
+
+    const msg = result.error ?? 'The provider did not accept this key.';
+    setStepError(msg);
+    failConnect(id, msg);
   }
 
   function launchOAuth() {
@@ -537,9 +553,9 @@ function ConnectWizard({ id, onClose }: WizardProps) {
             ) : (
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-200 leading-relaxed">
                 Clicking connect opens the provider's real consent screen in a
-                popup. The authorization code is exchanged server-side and stored
-                encrypted (Supabase Vault); a live test call then verifies the
-                connection. Without Edge Functions deployed you will reach the
+                popup. The authorization code is exchanged server-side by the
+                <strong> spapi-token-exchange</strong> function and stored encrypted
+                (Supabase Vault). Until that function is deployed you will reach the
                 honest <strong>Code received</strong> state, not a fake success.
               </div>
             )}
@@ -559,9 +575,10 @@ function ConnectWizard({ id, onClose }: WizardProps) {
               />
             ))}
             <p className="text-ds-label text-zinc-600">
-              The key is tested live against {def.name} before saving — no fake
-              success. On success the key is held in memory only (Vault-backed
-              storage once deployed); it is never persisted client-side.
+              The key is tested live against {def.name} by the server before saving —
+              no fake success. On success the key is stored encrypted in Supabase
+              Vault and only its reference is kept here; it is never persisted
+              client-side.
             </p>
           </div>
         )}

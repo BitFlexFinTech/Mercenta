@@ -4,16 +4,16 @@
 ## CURRENT RESUME STATE
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
-LAST COMPLETED TASK:      **BATCH 1a — MAKE THE KEY HANDOVER REAL (session 40, 2026-09-27): the server helpers the real provider clients always called now EXIST.** ONE manifest (`supabase/functions/_shared/proxyRoutes.ts`) declares all **20 routes** (12 SP-API · 3 DHL · 5 Palletline); three functions serve it (`supabase/functions/spapi|dhl|palletline/`); **3 routes are live-capable** (SP-API PO read · SP-API PO status · DHL tracking) and **17 refuse live with a STATED code naming the exact missing input**; simulation = zero credential work + zero network calls; a live call additionally needs a verified operator session. Gate: `npm run validate:integration-proxy` (**51 assertions**), proved able to fail. Detail: `PRODUCTION_READINESS.md` §BATCH1a. **BATCH 1 IS NOT FINISHED — 1b and 1c stand.** **DEFECT FIX (Founder report, same session):** the simulated DHL customs exception did not hold its milestone, so its *"retry recovered"* branch was **unreachable** in the mock **and in the new helper** — **FIXED AT SOURCE IN BOTH** (it was never acceptable to mirror it as "parity" or to park it as a "known exception"); **three** new gate assertions were added — the exception is cleared by the next poll in the EXECUTED helper, the mock's hold is pinned at source, and a **BEHAVIOURAL** assertion runs the REAL mock through Vite SSR (`validate-mock-providers`) — each **proved able to fail** (files restored byte-identical). **THE GLOBAL RULE WAS THEN SAVED: `07-fix-defects-at-source.md`, identical in BOTH global folders (sha256 `d2272d1c144993e4f7ed9acf10f3352733ddc1ea6a3f7e334dca45da39f020f5`), and the global parity rule was extended with the matching exception ("parity with a known defect is a defect, not parity") so the two can never be read as contradictory.**
-CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Measured this session AFTER the last edit: `validate:all` **114 PASS / 0 FAIL (of 114)** · `validate:integration-proxy` **53 assertions / 0 failures** · `validate-e6-brand-surfaces` **PASS** (F6 scope guard repointed, contract unchanged) · `typecheck` **0** · `lint` **0** · `build` **✓**. The gate was PROVED ABLE TO FAIL **FIVE TIMES**: an undeclared client route → 3 failures; simulation invoking the live caller → non-zero exit; removing the FIXED helper's milestone hold → 1 failure; removing the mock's hold → 1 failure in `validate-integration-proxy`; and removing the mock's hold → 1 failure in the BEHAVIOURAL gate (`validate-mock-providers`, which executes the real mock). Every mutated file was restored BYTE-IDENTICAL (`src/lib/spapi/client.ts` sha256 `aaad77d0dab2ea7080bdbb5bc40a2c32b275f3addafa6723b018ca7e49529cf8`; `src/lib/dhl/mockClient.ts` sha256 `3276a00230005e384d3055d4b3e803feee528b44a6b2d9eb79d4906e36d66357`; `supabase/functions/_shared/proxyRoutes.ts` was `86ffc85ca411d69a8c62061419e82aa6d08781049bdb89686b58a1f88673608d` BEFORE the defect fix and is `2dd42777b03bd94e0df12fa62b5e89492732ca57bf755514e5e3eb9a8e356567` AFTER it — each probe returned its file to that file's current bytes).
+LAST COMPLETED TASK:      **BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF (session 41, 2026-09-28): the missing backend of one-click connect now EXISTS.** The connection-record schema was WRITTEN (`supabase/migrations/028_create_integration_connections.sql` — the `0002_integration_connections.sql` cited for months NEVER existed); the Vault WRITE half exists (`_shared/vault.ts → writeVaultSecret`/`credentialSecretName`); the API-key path exists (`_shared/providerConnect.ts` + `integration-connect/index.ts`: harmless test server-side, then a Vault write, returning ONLY the `vault:` reference); and **`spapi-token-exchange` — the function the wizard has ALWAYS called and which did not exist — now exists** (`_shared/tokenExchange.ts` + its Edge Function: real Amazon LWA exchange, refresh token stored in Vault). The wizard calls the server function instead of pinging from the browser, sends the `redirect_uri` the popup used, and stores the returned reference. **Gate: `npm run validate:connect-wizard` — the FAKE-KEY REHEARSAL, 49 assertions, proved able to fail (see below).** **DEFECTS FIXED AT SOURCE THIS SESSION:** (1) the wizard marked a provider with NO API (CSV import) as a VERIFIED LIVE connection — `completeApiKeyConnect` sets `sandbox:false`, so it rendered "Live" although nothing had been verified; now routed through the new `markManualConnect`; (2) the registry row `stage1-token-exchange-edge-function` claimed a file that DID NOT EXIST; (3) five validators carried statements the new migration made false (three pinned "no migration was added (newest is 027)" and two listed `integration_connections` among names that "DO NOT EXIST") — every live citation repointed, and the newly-created table is now PINNED as RLS-protected. **BATCH 1 IS STILL NOT FINISHED — 1c (S6 CI wiring) stands, as does deployment.**
+CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Measured AFTER the last edit: `validate:all` **115 PASS / 0 FAIL (of 115)** · `validate:connect-wizard` **49 assertions / 0 failures** · `validate:integration-proxy` **53 / 0** · `validate-e6-brand-surfaces` **PASS** (F4/F5/F5b/F6 repointed with a declared §BATCH1b surface) · `validate-rls-hardening` **PASS (20 checks)** · `rls-audit` **PASS (34 tables · 34 RLS-enabled · 51 policies · 96 checks)** · `validate-e5-admin-surfaces` **PASS** · `validate-e7-embedded-social` **PASS (121 assertions)** · `typecheck` **0** · `lint` **0** · `build` **✓**. The fake-key rehearsal gate was PROVED ABLE TO FAIL **four times**: treating a failing provider response as success → **8 failures**; weakening the migration's vault-reference CHECK to `CHECK (true)` → **2 failures**; making the client's declared test set diverge from the server registry → **1 failure**; re-introducing a client-side copy of the real key after a server-side connect → **1 failure**. Every mutated file was restored BYTE-IDENTICAL (`providerConnect.ts` sha256 `3c3e8a75538af1d12eccf9cd5c33118a11964f64dc456b3bdd5e737f40188e9e`; `028_create_integration_connections.sql` sha256 `e4302a17f69cd3f8e2505825e781c2b2a18dd945d123df3fda1d701c3a45ca74`; `testCalls.ts` sha256 `308ba68b42f1c1165c5037f27c0485480ef69098de758764a9a01bcaf8614875`; `IntegrationsPanel.tsx` sha256 `8ecc4aa838740bb0c99c13f4814db6acdb0f759795947c9a9b3f321d991d04a6`).
 CURRENT BRANCH:           redesign/foundation
-LAST VERIFIED COMMIT:     **`a63326e`** — "fix(defects): fix the DHL mock defect at source (and its mirror), correct every stale citation, and save the global rule 07-fix-defects-at-source" (**the defect-fix commit**, which carries its own state updates along with the mock/helper/gate/doc/rule changes). Preceded in this session by `947095d` ("feat(integrations): BATCH 1a — the provider proxy helpers the real clients always called now exist", 18 paths) and `d48ca67` (the Batch 1a state checkpoint); before this session sit `f439efd`, `96d2061`, `68a9468`/`8a5dccd`, `c107bc2`. The state checkpoint recording THIS line follows it. **CONVENTION: the hash named here is always exactly one commit behind the branch head, because the commit that records the hash cannot contain its own hash.**
-GITHUB PUSH:              **DONE — PUSHED** to `origin/redesign/foundation` with the state checkpoint carrying this block; `git status --porcelain` EMPTY at close.
-DEMO DEPLOYMENT:          **NOT APPLICABLE TO THIS INCREMENT — no deployable runtime change; the larger deployment remains DELIBERATELY DEFERRED.** (a) This increment changed NO client-side source: the three new Edge Functions are server-side Supabase functions, are not part of the static Vite build `scripts/deploy-demo.sh` uploads, and cannot be deployed from here (no Supabase credential + no CLI). (b) The demo is therefore still `d726166` (§PHONE, live-verified 209/209) and is BEHIND the repository by the §SSOT S1–S5 client changes, whose deployment the previous session deferred to the close of that programme — S7 is Batch 3, so the deferral stands.
-LIVE VERIFICATION:        **NOT VERIFIED** — nothing in this increment is visible or exercisable on the demo (no client-side change), and the 3 live-capable routes have NO live credential (never executed against Amazon/DHL; the gate uses a scripted transport).
-OUTSTANDING BLOCKER:      **(1)** a Supabase project credential + the CLI to deploy the three functions (JWT verification ON). **(2) Batch 1b:** `/functions/v1/spapi-token-exchange` is called by the wizard but has no function, and the secure key exchange + Vault WRITE is unbuilt. **(3)** live provider credentials, needed before the 3 live-capable routes can be exercised and before any of the 17 refused routes can be closed.
-NEXT TASK:                **BATCH 1b — the connect wizard's backend half** (key exchange + Vault write + the real harmless test + wizard steps 2–3), then **1c** (S6 CI wiring), then **BATCH 2** (Amazon accuracy — 37 open findings) and **BATCH 3** (the 126 unverified registry rows + S7).
-EXACT NEXT STARTING POINT:`docs/NEXT_BUILD_PLAN_2026-09-27.md` §1b/§1c → `PRODUCTION_READINESS.md` §BATCH1a → `src/components/admin/integrations/IntegrationsPanel.tsx` (`ConnectWizard`; `completeOAuthExchange` ~L386 calls the MISSING `spapi-token-exchange`) → `src/integrations/IntegrationsContext.tsx` + `registry.ts` → `supabase/migrations/` (the `0002_integration_connections.sql` cited by STATUS_CHECK/PRODUCTION_READINESS **does not exist**) → `.github/` (S6) → `scripts/validate-integration-proxy.mjs` → `PROJECT_STATUS.md` headings 1–9.
+LAST VERIFIED COMMIT:     **PENDING — the commit carrying this Batch 1b work is created in this session; the state checkpoint recording its hash follows it immediately** (the session's convention: the hash named here is always exactly one commit behind the branch head, because the commit that records a hash cannot contain its own hash). The previous verified commit was `a63326e` (the Batch 1a defect-fix commit) with state checkpoint `4f45dc6`.
+GITHUB PUSH:              **PUSHED** to `origin/redesign/foundation` with the state checkpoint carrying this block; `git status --porcelain` EMPTY at close.
+DEMO DEPLOYMENT:          **NOT APPLICABLE TO THIS INCREMENT — no deployable runtime change in the demo build, and the larger deployment remains DELIBERATELY DEFERRED.** (a) This increment added SERVER-SIDE Supabase Edge Functions and a migration; neither is part of the static Vite build `scripts/deploy-demo.sh` uploads, and neither can be deployed from here (no Supabase credential + no CLI). (b) The demo is therefore still `d726166` (§PHONE, live-verified 209/209) and is BEHIND the repository by the §SSOT S1–S5 client changes, whose deployment the §SSOT programme deferred to its close (S7 = Batch 3). **This increment DID change client source** (`IntegrationsPanel.tsx`, `IntegrationsContext.tsx`, `connectClient.ts`, `testCalls.ts`) — those changes travel with that deferred deployment and are NOT live on the demo. Nothing in this increment has been seen on `https://demo.mercenta.co.uk`.
+LIVE VERIFICATION:        **NOT VERIFIED** — nothing in this increment is exercisable on the demo (the deployed build predates it), and the two new connect functions plus the 3 live-capable proxy routes have NO live credential: none has ever run against Amazon or any other provider. The only executions to date are the gate's scripted transports.
+OUTSTANDING BLOCKER:      **(1)** a Supabase project credential + the CLI to deploy the functions (JWT verification ON) — without it no real key can be verified on the deployed demo. **(2)** `SPAPI_CLIENT_SECRET` (+ `SPAPI_CLIENT_ID`) as a Supabase function secret, and the `vault` extension enabled — without them the OAuth exchange answers 503 `SPAPI_CLIENT_SECRET_MISSING` and a verified-but-unstorable key answers `VAULT_WRITE_FAILED`, both STATED, neither faked. **(3)** live provider credentials. **(4)** a declared harmless test endpoint for 14 providers (they refuse honestly with `TEST_ENDPOINT_NOT_DECLARED`). **(5)** Batch 1c — S6 CI wiring.
+NEXT TASK:                **BATCH 1c — S6 CI wiring** (`.github/` holds only `dependabot.yml`; add a workflow running `npm ci`, `typecheck`, `lint`, `build` and `validate:all`, so a break cannot be committed unnoticed), then **BATCH 2** (Amazon accuracy — 37 open findings) and **BATCH 3** (the unverified registry rows + S7).
+EXACT NEXT STARTING POINT:`docs/NEXT_BUILD_PLAN_2026-09-27.md` §1c → `.github/` (add the workflow; only `dependabot.yml` exists today) → `scripts/validate-all.sh` (the corpus the workflow must run) → `package.json` (the scripts it calls) → `PRODUCTION_READINESS.md` §BATCH1b (the activation checklist, incl. blockers 1–3) → `PROJECT_STATUS.md` headings 1–9.
 
 ## THE CHANNEL IS SETTLED — AMAZON VENDOR CENTRAL ONLY
 
@@ -142,7 +142,142 @@ every project.
 
 ---
 
-## CURRENT PLATFORM POSITION — **BATCH 1a: THE PROVIDER PROXY HELPERS EXIST — every route the real clients call now has a helper, 3 are live-capable and 17 refuse live with a STATED code** (2026-09-27, session 40)
+## CURRENT PLATFORM POSITION — **BATCH 1b: THE CONNECT WIZARD'S BACKEND HALF EXISTS — the connection schema is WRITTEN, the Vault write exists, and `spapi-token-exchange` (called by the wizard but never present) is real** (2026-09-28, session 41)
+
+**Why this was the next task:** Batch 1a made the provider *proxy* helpers real, but the Founder's goal — *"when I get
+the API keys, I should just need to give them to you and everything will sync up"* — still failed at the very first
+step. The wizard's "Test Connection & Save" pinged the provider **from the browser** and kept the key in memory only
+(no storage, and for most providers no test at all), the OAuth path called
+`/functions/v1/spapi-token-exchange` — **a function that did not exist** — and the connection record the live
+factories read (`src/integrations/connections.ts` needs `metadata.secretRef` starting `vault:`) had **no table
+behind it** (the `0002_integration_connections.sql` cited in older documents was never in the repository). So a real
+key could not become a real connection.
+
+**What now exists (verified this session):**
+
+- **The connection-record schema — `supabase/migrations/028_create_integration_connections.sql`.** ONE record per
+  provider (Mercenta's own operator accounts, not brand data): staff-only RLS, **no DELETE policy** (records are
+  retained), `secret_ref` CHECK-constrained to the `vault:` scheme, and a **non-sandbox (LIVE) row MUST carry a vault
+  reference** — so a "Live" record with no stored credential, or a plaintext secret in that column, cannot exist at
+  the database boundary.
+- **The Vault WRITE half** — `_shared/vault.ts → writeVaultSecret` + `credentialSecretName` (deterministic naming, so
+  a re-connect UPDATES rather than duplicating; returns a boolean only, never the value).
+- **The API-key connect path** — `_shared/providerConnect.ts` (executable handler) + `integration-connect/index.ts`.
+  The harmless test runs SERVER-SIDE with the submitted key; on a genuine 2xx the credential is written to Vault and
+  **only the `vault:` reference comes back**; the browser never holds a real secret.
+- **The SP-API OAuth exchange** — `_shared/tokenExchange.ts` + `spapi-token-exchange/index.ts`: the real Amazon
+  Login-with-Amazon code exchange, with the refresh token stored in Vault as a credential blob.
+- **The wizard wiring** — `testApiKey` calls the server function (no browser ping, no client-side secret handling);
+  `completeOAuthExchange` now sends the **`redirect_uri` the popup actually used**; the returned reference is stored
+  on the connection; `src/lib/integrations/connectClient.ts` is the ONE place that builds an Edge-Function URL.
+- **The gate** — `scripts/validate-connect-wizard-backend.mjs`, registered as `npm run validate:connect-wizard`:
+  **49 assertions**, the FAKE-KEY REHEARSAL. It EXECUTES the handlers with a scripted transport and a recording Vault
+  writer.
+
+**Behaviour, stated exactly (each proven by the gate, not asserted):**
+
+| Situation | Result |
+|---|---|
+| Simulation | only when explicitly requested (`simulate: true`); **zero network calls, zero writes**, `simulated: true`, and a `mock:` reference that never starts with `vault:` |
+| A **bad key** | the provider's real endpoint IS called; rejected with the provider's own error text; **nothing stored** |
+| A **good key** | verified, stored in Vault; only `vault:<name>` returned — the secret is never echoed back to the caller |
+| Verified but **unstorable** | reported FAILED (`VAULT_WRITE_FAILED`), never as a connection |
+| A provider with **no declared test endpoint** | `TEST_ENDPOINT_NOT_DECLARED` — no endpoint is invented, nothing stored |
+| A provider with **no API at all** (CSV import) | recorded via the new `markManualConnect`; **nothing live is claimed** |
+| A **live** call | requires a verified operator session (`super_admin`/`admin_staff`) — a brand can never connect a provider with Mercenta's credentials |
+
+Declared harmless test endpoints today (**7**): `openrouter`, `hunter`, `instantly`, `email/postmark`,
+`email/sendgrid`, `lead_sourcing/apollo`, `lead_sourcing/instantly`. **The other 14 providers** (Stripe, E-Signature,
+Amazon Ads, Keepa, Firecrawl, Usertour, Twilio WhatsApp, Postiz, Xero, Google, Wise, Payoneer, Companies House, HMRC)
+have **no declared endpoint yet** and therefore refuse honestly — they are ROADMAP work, and entering a key for them
+stores nothing.
+
+**DEFECTS FOUND THIS SESSION — ALL FIXED AT SOURCE (none parked):** (1) the wizard marked CSV import `connected`
+with `sandbox:false`, i.e. it displayed **"Live"** although nothing had been verified → now `markManualConnect`;
+(2) registry row `stage1-token-exchange-edge-function` claimed a file that **did not exist** → the file now exists
+and the row is reconciled (and deliberately `built`, not `built_and_tested`, because that enum demands an e2e
+reference and none exercises this path); (3) **five validators** carried statements the new migration made false
+(three pinned "the newest migration is 027" and two listed `integration_connections` among names that "DO NOT
+EXIST") → every live citation repointed, with the migration now required to be **declared by the current phase** (an
+undeclared new migration still fails) and the created table **pinned** as RLS-protected.
+
+### 1. COMPLETED / VERIFIED
+
+- The migration, the Vault write, both handlers, both Edge Functions, the wizard wiring and the gate (files above).
+- `PRODUCTION_READINESS.md` §BATCH1b states what exists, what refuses and every genuine blocker with its exact entry
+  point.
+- Measured this session: `validate:all` **115 PASS / 0 FAIL (of 115)** · `validate:connect-wizard` **49 / 0** ·
+  `validate:integration-proxy` **53 / 0** · `validate-e6-brand-surfaces` **PASS** · `validate-rls-hardening`
+  **PASS (20)** · `rls-audit` **PASS (34 tables · 96 checks)** · `validate-e5` **PASS** · `validate-e7`
+  **PASS (121 assertions)** · `typecheck` **0** · `lint` **0** · `build` **✓**.
+
+### 2. IN PROGRESS
+
+Nothing is mid-edit: the tree is clean and every figure above was measured after the last edit.
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. **Batch 1c — S6 CI wiring** (`.github/` holds only `dependabot.yml`).
+2. **Deploy the five functions** (`spapi`, `dhl`, `palletline`, `integration-connect`, `spapi-token-exchange`) with
+   **JWT verification ON**, set `SPAPI_CLIENT_SECRET`/`SPAPI_CLIENT_ID`, enable the `vault` extension, then
+   **live-verify** a connect and the 3 live-capable proxy routes.
+3. **Declare harmless test endpoints** for the 14 providers that refuse today.
+4. **Batch 2 — Amazon accuracy** (37 open findings; AV-019/AV-019b, AV-024, AV-006, AV-007 first).
+5. **Batch 3** — the unverified registry rows + **S7** (the contract closing path).
+
+### 4. DEFERRED / PARKED
+
+The §SSOT S1–S5 client-side deployment to the demo (deliberately deferred to that programme's close, S7 = Batch 3);
+the 17 simulation-only proxy routes and the Amazon `AV-020/034/035/046/047/048` UNKNOWNs (each needs a founder
+action or a live credential).
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **Deployment:** no Supabase project credential and no `supabase` CLI in this environment.
+- **The OAuth exchange's live leg:** `SPAPI_CLIENT_SECRET` (+ `SPAPI_CLIENT_ID`) is not set, so it answers
+  **503 `SPAPI_CLIENT_SECRET_MISSING`** — stated, never faked.
+- **Credential storage:** the `vault` extension is not confirmed enabled on any project, so a verified-but-unstorable
+  key answers `VAULT_WRITE_FAILED` — stated, never faked.
+- **Live verification:** no provider credentials (Amazon / DHL / Palletline).
+- **The three genuine platform gaps** named by the proxy refusals: the channel's `itemSequenceNumber`, Mercenta's
+  selling-party id, and the shipment domain's address/weight/dimension inputs.
+
+### 6. KNOWN EXCEPTIONS
+
+**This section is EMPTY of unfixed defects: everything found this session was FIXED at source (see §1) or is
+BLOCKED with the exact missing input (§5).** The statements below are BLOCKED-capability facts, NOT defects parked
+here — none describes a behaviour as working:
+
+- **The five Edge Functions are NOT deployed** (blocker: Supabase credential + CLI) and **none of the live paths has
+  ever run against a provider** (blocker: credentials). Nothing here is claimed to work against a real provider.
+- **The 14 providers without a declared test endpoint refuse by design**, each with a stated code — ROADMAP work, not
+  exceptions.
+- **`verify-registry` reports 330 files/tests verified · 64 needs-manual-check · 207 issues.** No row this session
+  touched contributes an issue (the `stage1-token-exchange-edge-function` row was fixed from a false claim to a
+  verified one, and measured at zero issues afterwards). The figures recorded by the previous session (272 / 62 /
+  185) were produced against a different tree and are superseded by this measurement — the discrepancy is NOT
+  explained by this increment and is recorded as such rather than smoothed over.
+
+### 7. CURRENT CHECKPOINT
+
+`VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE` at this session's commit (the hash is in the resume block and
+the commit subject). The working-tree scope guards required **declared surfaces** for this phase: `§BATCH1b` sets
+were added to `validate-e6-brand-surfaces` (F4/F5/F5b/F6), `validate-e7-embedded-social` and the migrated-migration
+lists of `validate-e5-admin-surfaces`/`validate-e7-embedded-social`. The mechanism is unchanged: an **undeclared**
+path or migration still fails.
+
+### 8. VERIFICATION STATUS
+
+`validate:all` **115/115 PASS** · `validate:connect-wizard` **49/49** · `validate:integration-proxy` **53/53** ·
+`typecheck` **0** · `lint` **0** · `build` **✓** · the new gate **proved able to fail four times** (8 / 2 / 1 / 1
+failures) with every mutated file restored **byte-identical**. Not verified: any live provider call; any demo-visible
+behaviour (the deployed build predates this increment).
+
+### 9. NEXT EXECUTION SCOPE
+
+**Batch 1c** from `docs/NEXT_BUILD_PLAN_2026-09-27.md` (see `EXACT NEXT STARTING POINT`), then the deployment and
+live verification that close Batch 1.
+## PREVIOUS POSITION — **BATCH 1a: THE PROVIDER PROXY HELPERS EXIST — every route the real clients call now has a helper, 3 are live-capable and 17 refuse live with a STATED code** (2026-09-27, session 40) — HISTORICAL
 
 **Why this was the next task:** the real provider clients (`src/lib/spapi/client.ts`, `src/lib/dhl/client.ts`,
 `src/lib/palletline/client.ts`) already called `/functions/v1/spapi|dhl|palletline/...`, and **no such Edge Function

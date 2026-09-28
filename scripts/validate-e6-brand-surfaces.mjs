@@ -1354,6 +1354,36 @@ try {
     !/fetch\s*\(/.test(PO + DASH + CATALOG + NOTIF) &&
     !/spapi\/client|dhl\/client|services\/xero|postmarkNotifier/.test(PO + DASH + CATALOG + NOTIF));
 
+/**
+ * §BATCH1b — THE CONNECT WIZARD'S BACKEND HALF (2026-09-28) — declared surface.
+ *
+ * DECLARED HERE, ABOVE ITS FIRST USE: F4 (below) reads this set, so declaring it
+ * among the later `*_SCOPE` blocks raised a TDZ ReferenceError.
+ *
+ * F5/F5b/F6's contract is UNCHANGED: a working-tree path in NO declared set still
+ * fails, and no protected path may appear anywhere in the change set. This phase
+ * legitimately WRITES a migration (`supabase/migrations/` is a PROTECTED prefix —
+ * naming the EXACT file here is the documented, reviewable act the defect-
+ * remediation note requires; the prefix itself is NOT widened), and it adds the two
+ * connect Edge Functions, their shared handlers, the Vault write, the wizard wiring
+ * and this phase's own gate.
+ */
+const BATCH1B_CONNECT_BACKEND_SCOPE = new Set([
+  'supabase/functions/_shared/',
+  'supabase/functions/integration-connect/',
+  'supabase/functions/spapi-token-exchange/',
+  'supabase/migrations/028_create_integration_connections.sql',
+  'src/lib/integrations/connectClient.ts',
+  'src/lib/integrations/testCalls.ts',
+  'src/integrations/IntegrationsContext.tsx',
+  'src/components/admin/integrations/IntegrationsPanel.tsx',
+  'scripts/validate-connect-wizard-backend.mjs',
+  'scripts/validate-rls-hardening.mjs',
+  'scripts/rls-audit.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'PRODUCTION_READINESS.md',
+]);
+
   const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
   // §Phase M13 — REPOINTED. This pinned "026 remains the newest; 26 total", which
@@ -1361,8 +1391,18 @@ try {
   // hardening for audit_log + applications), so the absolute count is stale. E6's
   // actual INVARIANT — that E6 itself added no migration — is preserved by
   // `F5`/`F6` below, which still refuse any unexplained change in the working tree.
-  test('F4 no migration was added by E6 (newest is 027 after M13)',
-    migFiles.length === 27 && migFiles.sort().at(-1).startsWith('027_'));
+  //
+  // §BATCH1b (2026-09-28) — REPOINTED AGAIN (not weakened). Batch 1b legitimately
+  // adds 028 (the `integration_connections` connection-record schema the connect
+  // wizard needs — the migration that, until now, had been cited but never
+  // existed). The assertion is therefore: the history is at 28 files, the newest
+  // is 028, and — the part that keeps it honest — the newest migration must be
+  // EXPLICITLY DECLARED by the current phase's scope set. An undeclared new
+  // migration still fails.
+  test('F4 no migration was added by E6 (history is now 28 after Batch 1b, whose 028 is declared)',
+    migFiles.length === 28 &&
+      migFiles.sort().at(-1).startsWith('028_') &&
+      BATCH1B_CONNECT_BACKEND_SCOPE.has(`supabase/migrations/${migFiles.sort().at(-1)}`));
 
   /** Working-tree scope proof (read-only `git status`). */
   let changed = [];
@@ -1413,7 +1453,10 @@ try {
         /** §P12 — the SP-API seam-extension phase's declared surface (see above). */
         P12_SPAPI_SEAM_SCOPE.has(p) ||
         [...P12_SPAPI_SEAM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH1b — the connect-wizard backend phase's declared surface. */
+        BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
+        [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -1434,7 +1477,10 @@ try {
         /** §P12 — same declaration, second protected-path check (F5b). */
         P12_SPAPI_SEAM_SCOPE.has(p) ||
         [...P12_SPAPI_SEAM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
-        [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH1b — same declaration, second protected-path check (F5b). */
+        BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
+        [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -1681,7 +1727,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...SSOT_PROGRAMME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH1 — the integration-proxy helpers phase (see above). */
           BATCH1_INTEGRATION_PROXY_SCOPE.has(p) ||
-          [...BATCH1_INTEGRATION_PROXY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH1_INTEGRATION_PROXY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH1b — the connect-wizard backend phase (see above). */
+          BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
+          [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

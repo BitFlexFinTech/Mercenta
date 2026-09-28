@@ -36,17 +36,29 @@ response shapes the mock client returns** (mirror the mock, do not invent a seco
 network calls**, is **unmistakably labelled simulated**, and **fails closed** on an unknown provider mode.
 With real credentials present, the same helper performs the real call — **no application code changes**.
 
-### 1b. Build the connect wizard's backend half (the one-click promise)
+### 1b. Build the connect wizard's backend half (the one-click promise) — **DONE (session 41, 2026-09-28)**
 
 The front half exists (`ConnectWizard` in `src/components/admin/integrations/IntegrationsPanel.tsx`). Missing:
 step 2 (**secure key exchange + encrypted secret storage**) and step 3 (**the real harmless test call**).
-- Real secrets must move to the vault, and demo secrets must leave `localStorage`. **CORRECTED 2026-09-27:** this
-  line used to assert `supabase/migrations/0002_integration_connections.sql` *exists* — **it does not** (27 migrations
-  are present and none covers integration connections). **The connection-record schema has to be WRITTEN in Batch 1b**;
-  until it exists, nothing durable may be claimed for a stored key.
-- **Never relax:** a simulated connect is shown and treated as **"(Mock)"**, never as live.
-- Definition of done: a **fake-key rehearsal** proves the same wizard path performs the real exchange + test and
-  reports an honest failure for a bad key, with **zero code edits** — and it stays a permanent gate.
+**Both are now built.** `supabase/functions/_shared/providerConnect.ts` + `integration-connect/index.ts` (API-key
+path) and `_shared/tokenExchange.ts` + `spapi-token-exchange/index.ts` (the OAuth exchange the wizard has always
+called) run the harmless test server-side and write the credential to Vault, returning ONLY the `vault:` reference.
+- ~~Real secrets must move to the vault, and demo secrets must leave `localStorage`.~~ **DONE** — the write half
+  (`writeVaultSecret` / `credentialSecretName`) exists, and the connection-record schema was WRITTEN as
+  `supabase/migrations/028_create_integration_connections.sql` (the cited `0002_…` never existed; the table is
+  operator-level, staff-only RLS, no DELETE, `secret_ref` constrained to `vault:`, and a non-sandbox row MUST hold
+  a vault reference).
+- **Never relax:** a simulated connect is shown and treated as **"(Mock)"**, never as live. A simulation happens
+  only on an explicit request, makes zero network calls and stores nothing.
+- Definition of done: **DONE** — `scripts/validate-connect-wizard-backend.mjs` **is** the permanent fake-key
+  rehearsal (49 assertions): for every declared provider a bad key is rejected by a real call with nothing stored
+  and a good key is stored with only the reference returned; an undeclared provider, a missing key, a missing
+  server secret and an unstorable verified key each fail with a stated code. **No code edits are needed to switch
+  a key from fake to real** — only credentials.
+- **Still open for a real handover (genuine blockers):** a Supabase project credential + CLI (to deploy the two
+  functions, JWT verification ON), `SPAPI_CLIENT_SECRET` (+ `SPAPI_CLIENT_ID`) as a function secret, the Vault
+  extension enabled, live provider credentials, and a declared harmless test endpoint for the 14 providers that do
+  not yet have one (they refuse honestly with `TEST_ENDPOINT_NOT_DECLARED`).
 
 ### 1c. Enforcement and delivery
 - **S6 — CI wiring:** `.github/` holds only `dependabot.yml`; add a workflow running `npm ci`, `typecheck`,

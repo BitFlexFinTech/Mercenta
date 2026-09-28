@@ -71,6 +71,16 @@ interface IntegrationsContextValue {
     metadata?: Record<string, string>
   ) => void;
   oauthCodeReceived: (id: IntegrationId, provider: string, codePreview: string) => void;
+  /**
+   * §BATCH1b — record a provider that has NO API to connect (e.g. CSV import).
+   * NOTHING is verified and NOTHING live is claimed: the mode stays the registry
+   * default (`available`), never `live`.
+   */
+  markManualConnect: (
+    id: IntegrationId,
+    provider: string,
+    metadata?: Record<string, string>
+  ) => void;
   disconnect: (id: IntegrationId) => void;
   /** §2A — operator-forced mode change (disable / restore simulation). */
   setMode: (id: IntegrationId, mode: IntegrationMode) => void;
@@ -256,6 +266,36 @@ export function IntegrationsProvider({
     []
   );
 
+  /**
+   * §BATCH1b — a provider with no API (CSV import). The operator's choice is
+   * recorded, but no verification happened, so the status stays NOT connected and
+   * `modeForState` keeps the registry default. This replaces the previous
+   * behaviour, which marked such a provider `connected` with `sandbox: false` —
+   * i.e. it displayed "Live" without anything having been verified.
+   */
+  const markManualConnect = useCallback(
+    (id: IntegrationId, provider: string, metadata?: Record<string, string>) => {
+      setIntegrations((prev) => ({
+        ...prev,
+        [id]: {
+          ...prev[id],
+          status: 'disconnected',
+          provider,
+          sandbox: undefined,
+          disabled: false,
+          metadata: {
+            ...prev[id].metadata,
+            ...metadata,
+            mode: 'no-live-endpoint',
+            verified: 'not-applicable-no-api',
+          },
+          error: undefined,
+        },
+      }));
+    },
+    []
+  );
+
   const disconnect = useCallback((id: IntegrationId) => {
     setIntegrations((prev) => ({
       ...prev,
@@ -344,6 +384,7 @@ export function IntegrationsProvider({
       completeSandboxConnect,
       completeApiKeyConnect,
       oauthCodeReceived,
+      markManualConnect,
       disconnect,
       setMode,
       recordHealth,
@@ -358,6 +399,7 @@ export function IntegrationsProvider({
       completeSandboxConnect,
       completeApiKeyConnect,
       oauthCodeReceived,
+      markManualConnect,
       disconnect,
       setMode,
       recordHealth,

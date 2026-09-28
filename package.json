@@ -41,6 +41,7 @@
     "validate:channel-po-ingestion": "node scripts/validate-channel-po-ingestion.mjs",
     "validate:p12-spapi-seam": "node scripts/validate-p12-spapi-seam.mjs",
     "validate:integration-proxy": "node scripts/validate-integration-proxy.mjs",
+    "validate:connect-wizard": "node scripts/validate-connect-wizard-backend.mjs",
     "validate:po-ack-window": "node scripts/validate-po-acknowledgement-window.mjs",
     "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",
     "validate:po-ack-work": "node scripts/validate-po-acknowledgement-work.mjs",

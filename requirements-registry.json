@@ -461,7 +461,7 @@
     "batch1_integration_proxy": {
       "increment": "BATCH 1a — MAKE THE KEY HANDOVER REAL (session 40, 2026-09-27)",
       "record": "docs/NEXT_BUILD_PLAN_2026-09-27.md (+ PRODUCTION_READINESS.md §BATCH1a)",
-      "status": "PARTIAL — 1a DONE; 1b and 1c NOT STARTED",
+      "status": "1a DONE; 1b DONE (see _meta.batch1b_connect_backend); 1c NOT STARTED",
       "built": [
         "supabase/functions/_shared/proxyRoutes.ts (ONE manifest: 20 routes, simulation shapes, live status, stated refusal codes)",
         "supabase/functions/spapi/index.ts + dhl/index.ts + palletline/index.ts (thin Deno helpers serving the manifest)",
@@ -515,6 +515,91 @@
         "docs/NEXT_BUILD_PLAN_2026-09-27.md asserted the integration-connections migration exists — it does not; corrected.",
         "My first report of this session said PRODUCTION_READINESS.md cited that non-existent migration; it never did. Corrected here and in PROJECT_STATUS.md."
       ]
+    },
+    "batch1b_connect_backend": {
+      "increment": "BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF (session 41, 2026-09-28)",
+      "record": "docs/NEXT_BUILD_PLAN_2026-09-27.md (+ PRODUCTION_READINESS.md §BATCH1b)",
+      "status": "DONE — 1a DONE; 1b DONE; 1c (S6 CI wiring) NOT STARTED",
+      "built": [
+        "supabase/migrations/028_create_integration_connections.sql — the connection-record schema the wizard needed. IT DID NOT EXIST (the `0002_integration_connections.sql` cited by older documents was never in the repository). ONE record per provider, operator-level, staff-only RLS, NO delete policy, `secret_ref` CHECK-constrained to the `vault:` scheme, and a non-sandbox row MUST carry a vault reference.",
+        "supabase/functions/_shared/vault.ts — the VAULT WRITE half (writeVaultSecret + credentialSecretName); deterministic naming so a re-connect updates; returns a boolean only, never the value.",
+        "supabase/functions/_shared/providerConnect.ts — the connect handler: server-side harmless test, then Vault write, returning ONLY the `vault:` reference. Injectable transport + vault writer so the gate EXECUTES it.",
+        "supabase/functions/integration-connect/index.ts — the Edge Function the wizard calls (operator JWT required for live; simulation needs none).",
+        "supabase/functions/_shared/tokenExchange.ts + supabase/functions/spapi-token-exchange/index.ts — the SP-API LWA exchange the wizard has ALWAYS called and which did not exist; writes the refresh token to Vault.",
+        "src/lib/integrations/connectClient.ts (ONE place that builds the Edge-Function URL and shapes the result; fail-closed: anything that is not a parsed {ok:true} is a failure) + LIVE_TEST_ENDPOINTS/hasLiveTestEndpoint in src/lib/integrations/testCalls.ts.",
+        "src/components/admin/integrations/IntegrationsPanel.tsx — testApiKey now calls the server function and stores the returned vault reference; completeOAuthExchange sends the redirect_uri the popup used; the panel no longer builds any function URL.",
+        "src/integrations/IntegrationsContext.tsx — markManualConnect: a provider with NO API is recorded honestly and is NEVER marked connected.",
+        "scripts/validate-connect-wizard-backend.mjs (49 assertions) registered as npm run validate:connect-wizard — the FAKE-KEY REHEARSAL."
+      ],
+      "behaviour_proven": {
+        "simulation": "explicit only (simulate:true): zero network calls, zero writes, `mock:` reference that never starts with `vault:`, labelled simulated:true",
+        "bad_key": "rejected by a REAL call with the provider's own error text; NOTHING stored",
+        "good_key": "verified, stored in Vault, and only the `vault:` reference returned — the secret value is never echoed back",
+        "half_connection": "a key the provider accepted but that could not be stored is reported FAILED (VAULT_WRITE_FAILED), never as a connection",
+        "undeclared_provider": "TEST_ENDPOINT_NOT_DECLARED — no endpoint is invented and nothing is stored",
+        "oauth": "no server secret → 503 SPAPI_CLIENT_SECRET_MISSING (zero calls, zero writes); bad code → the real Amazon LWA host is called and the rejection is honest; good code → the refresh token is stored as a credential blob",
+        "declared_test_providers": [
+          "openrouter",
+          "hunter",
+          "instantly",
+          "email/postmark",
+          "email/sendgrid",
+          "lead_sourcing/apollo",
+          "lead_sourcing/instantly"
+        ]
+      },
+      "gates": {
+        "validate:all": "115 PASS / 0 FAIL (of 115 files)",
+        "validate:connect-wizard": "49 assertions / 0 failures — CONNECT_WIZARD_BACKEND_PASS (the fake-key rehearsal; client/server declared-set parity; no-fake-success for EVERY declared provider)",
+        "validate:integration-proxy": "53 assertions / 0 failures",
+        "validate-e6-brand-surfaces": "PASS — F4/F5/F5b/F6 repointed with a declared §BATCH1b surface (mechanism unchanged; an undeclared migration or path still fails)",
+        "validate-rls-hardening": "PASS (20 checks) — 027 still present; integration_connections pinned as RLS-on, staff-only, no-delete, vault-ref-required",
+        "rls-audit": "RLS_STATIC_AUDIT_PASS — 34 tables · 34 RLS-enabled · 51 policies · 96 checks",
+        "validate-e5-admin-surfaces": "PASS (J1 repointed: history is now 28)",
+        "validate-e7-embedded-social": "PASS (121 assertions) — migration count repointed, 028 declared",
+        "typecheck": "0 errors",
+        "lint": "0 problems",
+        "build": "succeeded",
+        "proved_able_to_fail": [
+          "the connect handler treating a failing provider response as success → 8 failures",
+          "the wizard re-introducing a client-side copy of the real key after a server-side connect → 1 failure",
+          "the migration's vault-reference CHECK weakened to `CHECK (true)` → 2 failures",
+          "the client's declared test set diverging from the server registry (an extra entry) → 1 failure"
+        ],
+        "restored_byte_identical": [
+          "supabase/functions/_shared/providerConnect.ts sha256 3c3e8a75538af1d12eccf9cd5c33118a11964f64dc456b3bdd5e737f40188e9e",
+          "supabase/migrations/028_create_integration_connections.sql sha256 e4302a17f69cd3f8e2505825e781c2b2a18dd945d123df3fda1d701c3a45ca74",
+          "src/lib/integrations/testCalls.ts sha256 308ba68b42f1c1165c5037f27c0485480ef69098de758764a9a01bcaf8614875",
+          "src/components/admin/integrations/IntegrationsPanel.tsx sha256 8ecc4aa838740bb0c99c13f4814db6acdb0f759795947c9a9b3f321d991d04a6"
+        ]
+      },
+      "not_done": [
+        "the two new Edge Functions are NOT deployed (no Supabase project credential / CLI in this environment)",
+        "SPAPI_CLIENT_SECRET is not set, so a live OAuth exchange answers 503 SPAPI_CLIENT_SECRET_MISSING (stated, never faked)",
+        "14 providers have no declared harmless test endpoint and therefore refuse honestly with TEST_ENDPOINT_NOT_DECLARED",
+        "Batch 1c — S6 CI wiring (.github/ holds only dependabot.yml)"
+      ],
+      "defects_fixed": [
+        {
+          "defect": "The wizard marked a provider with NO API (CSV import) as a VERIFIED LIVE connection: completeApiKeyConnect sets sandbox:false, so the card displayed 'Live' and isConnected() returned true although nothing whatsoever had been verified.",
+          "disposition": "FIXED AT SOURCE",
+          "fix": "The wizard now routes such a provider through the new markManualConnect, which records the operator's choice with status 'disconnected' and metadata verified:'not-applicable-no-api' — the mode stays the registry default and nothing live is claimed.",
+          "gate": "validate-connect-wizard-backend asserts the panel uses markManualConnect and contains NO call that marks a no-live-endpoint provider connected; proved able to fail (re-introducing the old call → the wiring check fails)."
+        },
+        {
+          "defect": "requirements-registry.json recorded stage1-token-exchange-edge-function as BUILT with evidence supabase/functions/spapi-token-exchange/index.ts — a file that DID NOT EXIST (the wizard called it and reached nothing). A registry row claiming a non-existent artefact is a false statement.",
+          "disposition": "FIXED — the file now exists and the row's status/evidence/date were reconciled to the verified truth",
+          "gate": "validate-connect-wizard-backend executes the handler and asserts the LWA exchange is real."
+        },
+        {
+          "defect": "Three phase-scope guards and the two RLS validators carried statements the new migration made FALSE: 'no migration was added (newest is 027)', 'integration_connections DO NOT EXIST anywhere in the migration history', and the rls-audit / RLS-hardening header prose listing it among the ghost names.",
+          "disposition": "FIXED at every live citation (the historical session log in STATUS_CHECK.md is preserved verbatim by design)",
+          "fix": "The migration count/newest checks were repointed (028 declared by the current phase, so an UNDECLARED new migration still fails) and the ghost list corrected, with integration_connections now pinned as a genuine RLS-protected table instead of an absent one.",
+          "gate": "validate-rls-hardening gained 4 assertions pinning integration_connections; validate-e5/e6/e7 all PASS."
+        }
+      ],
+      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (demo deployment NOT APPLICABLE to this increment: the Edge Functions are server-side and are not part of the static demo build; live verification NOT VERIFIED — nothing in this increment is visible on the demo and no live provider credential exists)",
+      "next_plan": "Batch 1c (S6 CI wiring: a GitHub workflow running npm ci, typecheck, lint, build, validate:all), then Batch 2 (Amazon accuracy — 37 open findings) and Batch 3 (the 126 unverified registry rows + S7)."
     }
   },
   "entries": [
@@ -1562,8 +1647,8 @@
       "description": "Created spapi-token-exchange Edge Function for Amazon LWA OAuth token exchange (mock-first)",
       "source": "Stage 1",
       "status": "built",
-      "evidence": "supabase/functions/spapi-token-exchange/index.ts",
-      "last_verified": "2026-09-01",
+      "evidence": "supabase/functions/spapi-token-exchange/index.ts; supabase/functions/_shared/tokenExchange.ts (the real LWA exchange, Vault write, explicit simulation, fail-closed 503 SPAPI_CLIENT_SECRET_MISSING); src/lib/integrations/connectClient.ts (the ONE client path); scripts/validate-connect-wizard-backend.mjs EXECUTES the handler end-to-end (bad code → honest rejection with nothing stored; good code → refresh token stored and only a vault reference returned; explicit simulation → zero calls, zero writes). STATUS DELIBERATELY 'built', NOT 'built_and_tested': that enum requires an e2e reference and NO e2e spec exercises this exchange — the exhaustive proof is the validator above. RECONCILED 2026-09-28: this row previously claimed the file existed while it DID NOT — the wizard called a function that was never there.",
+      "last_verified": "2026-09-28",
       "superseded_by": null
     },
     {

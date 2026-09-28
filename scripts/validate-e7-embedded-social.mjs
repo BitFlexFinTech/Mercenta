@@ -325,13 +325,37 @@ try {
     .filter(Boolean);
 
   const migrations = readdirSync(join(process.cwd(), 'supabase/migrations'));
+  /**
+   * §BATCH1b (2026-09-28) — DECLARED BEFORE USE (both tests below read it; declaring
+   * it after them raised a TDZ ReferenceError).
+   *
+   * REPOINTED (not weakened). Batch 1b legitimately WRITES a migration: 028, the
+   * `integration_connections` connection-record schema the connect wizard needs
+   * (cited by older documents but never present until now). The invariant is
+   * unchanged — the working tree may contain ONLY migrations a CURRENT phase has
+   * explicitly declared — so the declared list grows by exactly that one file and an
+   * undeclared migration still fails.
+   */
+  const M13_DECLARED_MIGRATION = 'supabase/migrations/027_harden_audit_log_rls.sql';
+  const PHASE4_DECLARED_MIGRATIONS = [
+    M13_DECLARED_MIGRATION,
+    // §Phase 4 — canonical 20-real-brand universe: 016 carried the invented
+    // tenant set, so the migration is regenerated with the canonical brands.
+    'supabase/migrations/016_seed_demo_data.sql',
+  ];
+  const PHASE_DECLARED_MIGRATIONS = [
+    ...PHASE4_DECLARED_MIGRATIONS,
+    'supabase/migrations/028_create_integration_connections.sql',
+  ];
   // §Phase M13 — REPOINTED. This pinned "026 remains newest of 26", which was TRUE
   // after M11. Phase M13 legitimately added 027 (the §39 RLS hardening for audit_log
   // + applications), so the absolute count is stale. E7's actual INVARIANT (E7
   // itself added no migration) is unchanged and is asserted by the `e7Changed`
   // check on the next line, which still fails if E7's own range touches them.
-  test('E7 added no migration (newest is 027 after M13)',
-    migrations.length === 27 && migrations.sort().at(-1).startsWith('027_'));
+  test('E7 added no migration (history is now 28 after Batch 1b, whose 028 is declared)',
+    migrations.length === 28 &&
+      migrations.sort().at(-1).startsWith('028_') &&
+      PHASE_DECLARED_MIGRATIONS.includes(`supabase/migrations/${migrations.sort().at(-1)}`));
   // §Phase M13 — REPOINTED. E7's real invariant is that E7's OWN commit range
   // touched no migration — a historical fact about E7 (M10 already repointed the
   // phase RANGE for exactly this reason). Folding the whole working tree in meant
@@ -342,18 +366,11 @@ try {
     .split('\n')
     .map((s) => s.trim())
     .filter(Boolean);
-  const M13_DECLARED_MIGRATION = 'supabase/migrations/027_harden_audit_log_rls.sql';
-  const PHASE4_DECLARED_MIGRATIONS = [
-    M13_DECLARED_MIGRATION,
-    // §Phase 4 — canonical 20-real-brand universe: 016 carried the invented
-    // tenant set, so the migration is regenerated with the canonical brands.
-    'supabase/migrations/016_seed_demo_data.sql',
-  ];
   test('migrations untouched by E7', !e7RangeChanged.some((f) => f.startsWith('supabase/migrations')));
-  test('only the declared (M13 + Phase 4) migrations appear in the working tree',
+  test('only the phase-declared (M13 + Phase 4 + BATCH1b) migrations appear in the working tree',
     working
       .filter((f) => f.startsWith('supabase/migrations'))
-      .every((f) => PHASE4_DECLARED_MIGRATIONS.includes(f)));
+      .every((f) => PHASE_DECLARED_MIGRATIONS.includes(f)));
 
   // §Phase M13 — the CURRENT documented phase's declared surface, extended into this
 // guard exactly as E8 and M10 extended it before: the working-tree change set may
@@ -538,6 +555,18 @@ try {
     'scripts/validate-mock-providers.mjs',
     'src/lib/dhl/mockClient.ts',
     'src/integrations/IntegrationsContext.tsx',
+  ];
+  /**
+   * §BATCH1b (2026-09-28) — the connect-wizard backend phase's declared surface.
+   * Same mechanism as every phase above: a changed source/test file outside EVERY
+   * declared set is still refused.
+   */
+  const BATCH1B_CONNECT_BACKEND_DECLARED = [
+    'src/lib/integrations/connectClient.ts',
+    'src/lib/integrations/testCalls.ts',
+    'scripts/validate-connect-wizard-backend.mjs',
+    'scripts/rls-audit.mjs',
+    'src/components/admin/integrations/IntegrationsPanel.tsx',
   ];
 
   /**
@@ -1417,6 +1446,10 @@ try {
      * EVERY declared set is still refused.
      */
     ...BATCH1_INTEGRATION_PROXY_DECLARED,
+    /**
+     * §BATCH1b — the connect-wizard backend phase's declared surface (see above).
+     */
+    ...BATCH1B_CONNECT_BACKEND_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
