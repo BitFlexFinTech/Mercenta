@@ -6,7 +6,6 @@ import { UnlockGrowth } from '@/components/shared/UnlockGrowth';
 import {
   DEFAULT_HOMEPAGE_CONTENT,
   type HomepageContent,
-  type HomeIconName,
 } from '@/config/homepageContent';
 import { cn } from '@/utils/cn';
 import { PRE_AUDIT_TESTIDS } from '@/config/ukMarketFit';
@@ -27,34 +26,24 @@ const ExploreUkMarketFit = lazy(() =>
   import('@/components/marketing/ExploreUkMarketFit').then(m => ({ default: m.ExploreUkMarketFit }))
 );
 
-import {
-  ArrowRight,
-  Truck,
-  ShieldCheck,
-  Package,
-  TrendingUp,
-  Target,
-  Award,
-  CheckCircle2,
-  Plane,
-  Ship,
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
-const ICONS: Record<HomeIconName, typeof Truck> = {
-  truck: Truck,
-  shield: ShieldCheck,
-  package: Package,
-  trending: TrendingUp,
-  target: Target,
-  award: Award,
-  check: CheckCircle2,
-  plane: Plane,
-  ship: Ship,
-};
-
-function icon(name: HomeIconName | undefined) {
-  return name ? ICONS[name] : CheckCircle2;
-}
+/**
+ * §DESIGN OVERHAUL (2026-09-28) — THE DOCUMENT INDEX.
+ *
+ * The page is long, so the hero hands the reader its contents: numbered,
+ * mono-coded, clickable. This is the only numbered list on the page outside the
+ * shipment rail, because a contents list genuinely IS a sequence — numbering
+ * sections that are not a sequence is decoration, and decoration is what this
+ * overhaul removed.
+ */
+const PAGE_INDEX: readonly { id: string; code: string; label: string }[] = [
+  { id: 'about', code: '01', label: 'Who we work with' },
+  { id: 'services', code: '02', label: 'What changes for you' },
+  { id: 'network', code: '03', label: 'Why brands stay' },
+  { id: 'visibility', code: '04', label: 'Inside the workspace' },
+  { id: 'protection', code: '05', label: 'When things go wrong' },
+];
 
 const fillBrand = (s: string) => s.split('{{brand}}').join(BRAND_NAME);
 
@@ -172,6 +161,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
 
   const rv = !reducedMotion ? 'reveal' : '';
 
+
   return (
     <div
       data-shell-theme={shellMode}
@@ -180,436 +170,539 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
     >
       <PublicNav currentPage="home" onNavigate={navigate} onOpenPortal={openPortal} />
 
-      {/* Hero — two columns: pitch left, live tracker right */}
-      <section id="home" className="pt-24 pb-24 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className={cn(rv, 'is-revealed')}>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.04] px-3 py-1 text-ds-label font-mono uppercase tracking-[0.25em] text-[var(--mr-accent-700)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-state-success" aria-hidden="true" />
-              {c.hero.eyebrow}
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl font-semibold leading-[1.06] mt-6">
-              {c.hero.headingStart}{' '}
-              <span className="text-brass italic">{c.hero.headingHighlight}</span>
-            </h1>
-            <p className="text-base md:text-lg leading-relaxed mt-6 max-w-xl" style={{ color: 'var(--mr-text-muted)' }}>
-              {fillBrand(c.hero.subheading)}
-            </p>
-            <div className="flex flex-wrap items-center gap-4 mt-8">
-              {/*
-                §Phase 1 — the PRIMARY prospect CTA is Explore UK Market Fit, and
-                it opens the assessment. Partner Login is deliberately NOT placed
-                beside it: the two actions serve different audiences, so Partner
-                Login lives in the header as a separate secondary utility action
-                (PublicNav). Its hero duplicate was removed rather than restyled.
-              */}
-              <button
-                onClick={() => navigate('explore-uk-market-fit')}
-                data-testid={PRE_AUDIT_TESTIDS.cta}
-                className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette shadow-ds-subtle transition-colors hover:opacity-90"
+      {/*
+        §DESIGN OVERHAUL (2026-09-28) — HERO.
+        The old hero was a two-column "pitch left, rounded card right" layout, and
+        every section below it repeated the same shape: an uppercase mono eyebrow,
+        a centred heading, and a grid of rounded cards. That is the templated
+        default. The subject here is freight documentation, so the page is now
+        built from that vernacular — hairline rules, mono references, stage stamps
+        and a document index — with one bold moment, the manifest band below.
+        Left-aligned editorial; the display face carries the personality.
+      */}
+      <section id="home" className="px-6 pt-14 md:pt-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,1fr)_14rem]">
+            <div className={cn(rv, 'is-revealed')}>
+              <span className="inline-flex items-center gap-2 font-mono text-ds-micro uppercase tracking-[0.12em] text-[var(--mr-accent-700)] sm:rounded-full sm:border sm:border-white/[0.14] sm:px-3 sm:py-1 sm:text-ds-label sm:tracking-[0.2em]">
+                <span className="h-1.5 w-1.5 rounded-full bg-state-success" aria-hidden="true" />
+                {c.hero.eyebrow}
+              </span>
+              <h1 className="mt-7 font-display text-[clamp(2.5rem,5.4vw,4.5rem)] font-semibold leading-[1.02] tracking-[-0.02em] text-parchment">
+                {c.hero.headingStart}
+                <span className="mt-2 block text-[clamp(1.4rem,2.4vw,2.1rem)] font-normal italic leading-[1.2] text-[var(--mr-accent-700)]">
+                  {c.hero.headingHighlight}
+                </span>
+              </h1>
+              <p
+                className="mt-8 max-w-[64ch] text-base leading-relaxed md:text-lg"
+                style={{ color: 'var(--mr-text-muted)' }}
               >
-                {c.hero.primaryCta}
-                <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </button>
-            </div>
-            <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs tracking-wider" style={{ color: 'var(--mr-text-muted)' }}>
-              {c.hero.trustBadges.map((badge) => (
-                <span key={badge} className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-brass" aria-hidden="true" /> {badge}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Animated shipment-tracker card */}
-          <div className={cn('relative', rv, 'is-revealed')}>
-            <div className="bg-ink-2 border border-white/[0.07] rounded-2xl p-6 shadow-ds-overlay">
-              <div className="flex items-center justify-between mb-6">
-                <span className="font-mono text-ds-label tracking-[0.25em] text-steel uppercase">
-                  Shipment Tracker
-                </span>
-                <span className="flex items-center gap-2 font-mono text-ds-label" style={{ color: 'var(--mr-palette-green)' }}>
-                  <span className="relative flex w-2 h-2">
-                    <span
-                      className="animate-tracker-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                      style={{ backgroundColor: 'var(--mr-palette-green)' }}
-                    />
-                    <span
-                      className="relative inline-flex w-2 h-2 rounded-full"
-                      style={{ backgroundColor: 'var(--mr-palette-green)' }}
-                    />
-                  </span>
-                  <span
-                    className="font-mono text-ds-label tracking-[0.25em] uppercase"
-                    style={{ color: 'var(--mr-text-muted)' }}
-                  >
-                    EXAMPLE
-                  </span>
-                </span>
-              </div>
-
-              {/* Dotted route-line with moving waypoint dot. §UI/UX Wave 2 — the
-                  animation itself is PRESERVED verbatim (`animate-route-dot`, a
-                  6s loop); only its colour moved into the new saturated system. */}
-              <div className="relative h-10 mb-1" aria-hidden="true">
-                <div className="absolute top-1/2 -translate-y-1/2 inset-x-0 border-t-2 border-dotted border-steel/40" />
-                <span className="animate-route-dot absolute top-1/2 -translate-y-1/2 flex items-center justify-center">
-                  <span
-                    className="w-3.5 h-3.5 rounded-full"
-                    style={{
-                      backgroundColor: 'var(--mr-palette-cyan)',
-                      boxShadow: '0 0 12px var(--mr-palette-cyan)',
-                    }}
-                  />
-                </span>
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-2 border-steel/60 bg-ink" />
-                <span className="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full border-2 border-steel/60 bg-ink" />
-                <span
-                  className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-2 bg-ink"
-                  style={{ borderColor: 'var(--mr-palette-cyan)' }}
-                />
-              </div>
-              <div className="flex justify-between font-mono text-ds-micro tracking-wider text-steel uppercase mb-6">
-                <span>Origin</span>
-                <span>In Transit</span>
-                <span style={{ color: 'var(--mr-palette-cyan)' }}>UK Arrival</span>
-              </div>
-
-              <div className="bg-ink rounded-xl border border-white/[0.05] divide-y divide-white/[0.05]">
-                <div className="flex items-center justify-between px-4 py-3">
-                  <span className="font-mono text-xs text-steel">
-                    {c.tracker.reference} · {c.tracker.cargoLabel}
-                  </span>
-                  <span className="rounded-full border border-white/[0.12] bg-white/[0.06] px-2 py-0.5 font-mono text-ds-micro text-zinc-300">
-                    {c.tracker.freightMode}
-                  </span>
-                </div>
-                {c.tracker.stages.map((stage) => (
-                  <div key={stage.label} className="flex items-center justify-between px-4 py-2.5">
-                    <span className="font-mono text-xs text-parchment">{stage.label}</span>
-                    {stage.done ? (
-                      <CheckCircle2
-                        className="w-4 h-4"
-                        style={{ color: 'var(--mr-palette-green)' }}
-                      />
-                    ) : (
+                {fillBrand(c.hero.subheading)}
+              </p>
+              <div className="mt-10 flex flex-wrap items-center gap-x-10 gap-y-5">
+                {/*
+                  §Phase 1 — the PRIMARY prospect CTA is Explore UK Market Fit, and
+                  it opens the assessment. Partner Login is deliberately NOT placed
+                  beside it: the two actions serve different audiences, so Partner
+                  Login lives in the header as a separate secondary utility action
+                  (PublicNav).
+                */}
+                <button
+                  onClick={() => navigate('explore-uk-market-fit')}
+                  data-testid={PRE_AUDIT_TESTIDS.cta}
+                  className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette shadow-ds-subtle transition-colors hover:opacity-90"
+                >
+                  {c.hero.primaryCta}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <ul className="flex flex-wrap gap-x-7 gap-y-3">
+                  {c.hero.trustBadges.map((badge) => (
+                    <li
+                      key={badge}
+                      className="flex items-center gap-2.5 font-mono text-ds-label"
+                      style={{ color: 'var(--mr-text-muted)' }}
+                    >
                       <span
-                        className="rounded-full px-2 py-0.5 font-mono text-ds-micro font-semibold"
-                        style={{
-                          backgroundColor: 'var(--mr-palette-indigo)',
-                          color: 'var(--mr-on-palette)',
-                        }}
-                      >
-                        IN PROGRESS
-                      </span>
-                    )}
-                  </div>
-                ))}
+                        aria-hidden="true"
+                        className="h-px w-5"
+                        style={{ backgroundColor: 'var(--mr-accent)' }}
+                      />
+                      {badge}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-            {/*
-              §PUBLIC MESSAGING (2026-09-28) — THE TRACKER IS LABELLED HONESTLY.
-              The panel above is an ILLUSTRATION built from `homepageContent.tracker`
-              (reference MCT-2418), not a real consignment — so the badge says
-              EXAMPLE and this caption says so in words. Our own rule is that
-              simulated or example content is never presented as live data.
-            */}
-            <p
-              className="mt-3 text-center text-ds-label"
-              style={{ color: 'var(--mr-text-muted)' }}
-            >
-              An example of the live view — your own consignments appear here as they move.
-            </p>
-          </div>
 
-          {/* §UI/UX Wave 1 — "Unlock growth with data" (truthful platform copy) */}
-          <div className="mt-10 max-w-2xl mx-auto lg:mx-0">
-            <UnlockGrowth />
+            {/*
+              The document index: a real structural device, not decoration. The
+              page is long, so it hands the reader its contents as a numbered
+              record. It is the ONLY numbered device outside the shipment rail,
+              because a contents list genuinely IS a sequence.
+            */}
+            <nav aria-label="On this page" className="hidden lg:block">
+              <p
+                className="font-mono text-ds-micro uppercase tracking-[0.2em]"
+                style={{ color: 'var(--mr-text-muted)' }}
+              >
+                On this page
+              </p>
+              <ol className="mt-4 border-t border-white/[0.06]">
+                {PAGE_INDEX.map((item) => (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => scrollTo(item.id)}
+                      className="flex w-full items-baseline justify-between gap-4 border-b border-white/[0.06] py-2.5 text-left transition-colors hover:text-[var(--mr-accent-700)]"
+                      style={{ color: 'var(--mr-text-muted)' }}
+                    >
+                      <span className="font-mono text-ds-micro">{item.code}</span>
+                      <span className="text-ds-label">{item.label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </nav>
           </div>
         </div>
       </section>
 
-      {/* §UI/UX Wave 2 — what the platform is, in three numbered moves */}
-      <section id="about" className="px-6 py-16 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
-            Who we work with
+      {/*
+        §DESIGN OVERHAUL — THE MANIFEST BAND: the page's one bold moment.
+        The tracker was a small rounded card in the hero's right column. It is now
+        the full-width anchor of the page: a shipment record with a mono data row,
+        a five-stage numbered rail, and the animated route line running through
+        the rail itself. The animation is PRESERVED exactly (`animate-route-dot`,
+        the same 6s loop, same cyan waypoint); only its container changed, so the
+        moving dot now travels the record it describes instead of floating above a
+        separate dotted line.
+      */}
+      <section
+        aria-label="Shipment record"
+        className="mt-16 border-y border-white/[0.06] bg-ink-850"
+      >
+        <div className="mx-auto max-w-6xl px-6 py-9">
+          <div className="flex flex-col items-start gap-2 font-mono text-ds-label uppercase tracking-[0.2em] sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-x-8 sm:gap-y-3">
+            <span style={{ color: 'var(--mr-text-muted)' }}>Shipment record</span>
+            <span style={{ color: 'var(--mr-text-muted)' }}>
+              {c.tracker.reference} · {c.tracker.cargoLabel} · {c.tracker.freightMode}
+            </span>
+            <span
+              className="flex items-center gap-2 whitespace-nowrap"
+              style={{ color: 'var(--mr-palette-green)' }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span
+                  className="animate-tracker-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                  style={{ backgroundColor: 'var(--mr-palette-green)' }}
+                />
+                <span
+                  className="relative inline-flex h-2 w-2 rounded-full"
+                  style={{ backgroundColor: 'var(--mr-palette-green)' }}
+                />
+              </span>
+              {/*
+                §HONEST LABELLING — the record is an illustration built from
+                `homepageContent.tracker` (reference MCT-2418), so the status chip
+                says EXAMPLE. The pre-overhaul panel said "LIVE" over an invented
+                consignment, which the platform's truthfulness rule forbids. The
+                label belongs here, in the record's own header, where a status
+                belongs — not in a caption sentence under the animation.
+              */}
+              EXAMPLE
+            </span>
+          </div>
+
+          <div className="relative mt-9">
+            <div aria-hidden="true" className="absolute inset-x-0 top-[5px] hidden lg:block">
+              {/*
+                The rail line must be visible on BOTH shells. `border-steel/40`
+                was invisible on the light theme (40% of an already-light steel
+                token), so the `border-white/[0.16]` hairline class is used
+                instead — the light-theme remap layer maps it to the strong
+                hairline token, and it stays a visible 16% white on the dark one.
+              */}
+              <div className="border-t-2 border-dotted border-white/[0.16]" />
+            </div>
+            <span
+              aria-hidden="true"
+              className="animate-route-dot absolute top-[1px] hidden items-center justify-center lg:flex"
+            >
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{
+                  backgroundColor: 'var(--mr-palette-cyan)',
+                  boxShadow: '0 0 12px var(--mr-palette-cyan)',
+                }}
+              />
+            </span>
+            <ol className="relative grid grid-cols-1 gap-x-6 gap-y-7 sm:grid-cols-2 lg:grid-cols-5">
+              {c.tracker.stages.map((stage, i) => (
+                <li key={stage.label}>
+                  <span
+                    aria-hidden="true"
+                    className="block h-2.5 w-2.5 rounded-full"
+                    style={{
+                      backgroundColor: stage.done
+                        ? 'var(--mr-palette-green)'
+                        : 'var(--mr-surface-overlay)',
+                      boxShadow: stage.done
+                        ? '0 0 0 4px var(--mr-surface-raised)'
+                        : '0 0 0 1px var(--mr-hairline-strong)',
+                    }}
+                  />
+                  <span
+                    className="mt-3 block font-mono text-ds-micro tracking-[0.2em]"
+                    style={{ color: 'var(--mr-text-muted)' }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="mt-1 block font-display text-base text-parchment">
+                    {stage.label}
+                  </span>
+                  <span className="font-mono text-ds-micro" style={{ color: 'var(--mr-text-muted)' }}>
+                    {stage.done ? 'cleared' : 'in progress'}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      {/*
+        §DESIGN OVERHAUL — WHO WE WORK WITH.
+        Was: a centred heading over a grid of rounded cards, each with a coloured
+        icon square and an "01/02" marker (the content is a comparison, not a
+        sequence, so the numbering was decoration). Now: a left-aligned heading
+        over a two-part split divided by a hairline — the comparison reads as a
+        comparison. The mono marker ties the section to the hero's index.
+      */}
+      <section id="about" className="px-6 py-20">
+        <div className="mx-auto max-w-6xl">
+          <p
+            className="font-mono text-ds-micro uppercase tracking-[0.2em]"
+            style={{ color: 'var(--mr-text-muted)' }}
+          >
+            01 — Who we work with
           </p>
-          <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
+          <h2
+            className={cn(
+              'mt-4 max-w-[24ch] font-display text-[clamp(1.8rem,3.2vw,2.75rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-parchment',
+              rv
+            )}
+          >
             {c.about.heading}
           </h2>
           <p
-            className={cn('text-sm text-center mb-10 max-w-2xl mx-auto', rv)}
+            className={cn('mt-5 max-w-[58ch] text-base leading-relaxed md:text-lg', rv)}
             style={{ color: 'var(--mr-text-muted)' }}
           >
             {c.about.subheading}
           </p>
-          <div
-            className={cn(
-              'grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06]',
-              c.about.points.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
-            )}
-          >
-            {c.about.points.map((point, i) => {
-              const Icon = icon(point.icon);
-              const palette = ['var(--mr-palette-indigo)', 'var(--mr-palette-cyan)', 'var(--mr-palette-green)'][i % 3];
-              return (
-                <div key={point.title} className={cn('bg-ink-850 p-6', rv)}>
-                  <div className="mb-4 flex items-center gap-3">
-                    <span
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: palette, color: 'var(--mr-on-palette)' }}
-                    >
-                      <Icon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <span className="font-mono text-ds-label tracking-[0.2em] text-zinc-500">
-                      0{i + 1}
-                    </span>
-                  </div>
-                  <h3 className="font-display text-base font-semibold text-parchment mb-2">
-                    {point.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-steel">{point.description}</p>
-                </div>
-              );
-            })}
+          <div className={cn('mt-14 grid grid-cols-1 border-t border-white/[0.06] md:grid-cols-2', rv)}>
+            {c.about.points.map((point, i) => (
+              <div
+                key={point.title}
+                className={cn(
+                  'py-9',
+                  i === 0
+                    ? 'md:pr-14'
+                    : 'border-t border-white/[0.06] md:border-l md:border-t-0 md:pl-14'
+                )}
+              >
+                <h3 className="font-display text-2xl font-semibold leading-snug text-parchment md:text-[1.75rem]">
+                  {point.title}
+                </h3>
+                <p
+                  className="mt-4 max-w-[46ch] text-base leading-relaxed"
+                  style={{ color: 'var(--mr-text-muted)' }}
+                >
+                  {point.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* §PUBLIC MESSAGING — the four things that stop being the brand's job */}
-      <section id="services" className="px-6 py-16 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
-            What changes for you
+      {/*
+        §DESIGN OVERHAUL — WHAT CHANGES FOR YOU.
+        Was: four equal rounded cards in a 3-column grid that wrapped awkwardly into
+        3 + 1. Now: four editorial rows separated by hairlines — title left, the
+        consequence right — which reads as a register of what stops, and holds its
+        shape at every width because it is a row, not a tile.
+      */}
+      <section id="services" className="px-6 pb-20">
+        <div className="mx-auto max-w-6xl">
+          <p
+            className="font-mono text-ds-micro uppercase tracking-[0.2em]"
+            style={{ color: 'var(--mr-text-muted)' }}
+          >
+            02 — What changes for you
           </p>
-          <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
+          <h2
+            className={cn(
+              'mt-4 max-w-[22ch] font-display text-[clamp(1.8rem,3.2vw,2.75rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-parchment',
+              rv
+            )}
+          >
             {c.services.heading}
           </h2>
           <p
-            className={cn('text-sm text-center mb-10 max-w-3xl mx-auto', rv)}
+            className={cn('mt-5 max-w-[52ch] text-base leading-relaxed md:text-lg', rv)}
             style={{ color: 'var(--mr-text-muted)' }}
           >
             {c.services.subheading}
           </p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {c.services.cards.map((service, i) => {
-              const Icon = icon(service.icon);
-              const palette = [
-                'var(--mr-palette-indigo)',
-                'var(--mr-palette-cyan)',
-                'var(--mr-palette-green)',
-                'var(--mr-palette-amber)',
-                'var(--mr-palette-pink)',
-                'var(--mr-palette-violet)',
-              ][i % 6];
-              return (
-                <div
-                  key={service.title}
-                  className={cn(
-                    'relative overflow-hidden rounded-xl border border-white/[0.06] bg-ink-850 p-5 transition-colors hover:border-white/[0.16]',
-                    rv
-                  )}
+          <div className={cn('mt-14 border-t border-white/[0.06]', rv)}>
+            {c.services.cards.map((card) => (
+              <div
+                key={card.title}
+                className="grid grid-cols-1 gap-x-16 gap-y-3 border-b border-white/[0.06] py-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-baseline"
+              >
+                <h3 className="font-display text-xl font-semibold leading-snug text-parchment md:text-2xl">
+                  {card.title}
+                </h3>
+                <p
+                  className="max-w-[52ch] text-base leading-relaxed"
+                  style={{ color: 'var(--mr-text-muted)' }}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-x-0 top-0 h-[3px]"
-                    style={{ backgroundColor: palette }}
-                  />
-                  <div className="mb-4 flex items-center gap-2.5">
-                    <span
-                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: palette, color: 'var(--mr-on-palette)' }}
-                    >
-                      <Icon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <h3 className="font-display text-base font-semibold text-parchment">
-                      {service.title}
-                    </h3>
-                  </div>
-                  <p className="text-sm leading-relaxed text-steel">{service.description}</p>
-                </div>
-              );
-            })}
+                  {card.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* §PUBLIC MESSAGING — why brands stay */}
-      <section id="network" className="px-6 py-16 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto">
-          <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
-            Why brands stay
+      {/*
+        §DESIGN OVERHAUL — WHY BRANDS STAY.
+        Was: six small neutral tiles with tiny text and numbered markers. Now the
+        page's tonal break: a tinted band carrying a pull-quote at display scale —
+        type used as the visual element — with the four reasons beneath it as a
+        hairline register in two columns.
+
+        The tint is the design system's OWN soft-background token
+        (`--mr-surface-tint` — the token `src/index.css` already maps the light
+        shell's `bg-white/…` fills to). `bg-ink-800` (`--mr-surface-overlay`) was
+        MEASURED at 1.04:1 against the light page, so the band did not read as a
+        band on the default theme; the token named explicitly measures 1.06:1 on
+        the light shell and 1.40:1 on the dark one. The tone is expressed per
+        theme rather than as a fixed ink shade.
+      */}
+      <section
+        id="network"
+        className="border-y border-white/[0.12] px-6 py-20"
+        style={{ backgroundColor: 'var(--mr-surface-tint)' }}
+      >
+        <div className="mx-auto max-w-6xl">
+          <p
+            className="font-mono text-ds-micro uppercase tracking-[0.2em]"
+            style={{ color: 'var(--mr-text-muted)' }}
+          >
+            03 — Why brands stay
           </p>
-          <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
+          <h2
+            className={cn(
+              'mt-5 max-w-[30ch] font-display text-[clamp(2rem,4.2vw,3.5rem)] font-semibold leading-[1.04] tracking-[-0.02em] text-parchment',
+              rv
+            )}
+          >
             {c.route.heading}
           </h2>
           <p
-            className={cn('text-sm text-center mb-10 max-w-2xl mx-auto', rv)}
+            className={cn('mt-6 max-w-[52ch] text-base leading-relaxed md:text-lg', rv)}
             style={{ color: 'var(--mr-text-muted)' }}
           >
             {c.route.subheading}
           </p>
-          <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-            {c.route.steps.map((step, i) => {
-              const Icon = icon(step.icon);
-              return (
-                <li
-                  key={step.title}
-                  className={cn(
-                    'relative rounded-lg border border-white/[0.06] bg-ink-850 p-3.5',
-                    rv
-                  )}
+          <div className={cn('mt-14 grid grid-cols-1 border-t border-white/[0.06] md:grid-cols-2', rv)}>
+            {c.route.steps.map((step, i) => (
+              <div
+                key={step.title}
+                className={cn(
+                  'border-b border-white/[0.06] py-7',
+                  i % 2 === 1 ? 'md:pl-16' : 'md:pr-16'
+                )}
+              >
+                <h3 className="font-display text-lg font-semibold text-parchment md:text-xl">
+                  {step.title}
+                </h3>
+                <p
+                  className="mt-2.5 max-w-[46ch] text-sm leading-relaxed md:text-base"
+                  style={{ color: 'var(--mr-text-muted)' }}
                 >
-                  <span className="mb-2 flex items-center gap-2">
-                    <span
-                      aria-hidden="true"
-                      className="font-mono text-ds-micro tracking-widest text-zinc-500"
-                    >
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <Icon className="h-3.5 w-3.5 text-brass" aria-hidden="true" />
-                  </span>
-                  <span className="block font-display text-sm font-semibold text-parchment">
-                    {step.title}
-                  </span>
-                  <span className="mt-1 block text-ds-label leading-snug text-steel">
-                    {step.description}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+                  {step.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* §UI/UX Wave 2 — visibility & control */}
-      <section id="visibility" className="px-6 py-16 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+      {/*
+        §DESIGN OVERHAUL — INSIDE THE WORKSPACE.
+        Was: a heading column beside three rounded icon cards, with the platform
+        panel (<UnlockGrowth>) orphaned as a grey box directly under the hero,
+        where it belonged to nothing. Now the panel is part of the story it
+        illustrates — it sits in this section's left column — and the three records
+        are a single bordered ledger read top to bottom, each with a brass rule.
+      */}
+      <section id="visibility" className="px-6 py-20">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-x-16 gap-y-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
           <div>
-            <p className="mb-3 font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500">
-              Inside the workspace
+            <p
+              className="font-mono text-ds-micro uppercase tracking-[0.2em]"
+              style={{ color: 'var(--mr-text-muted)' }}
+            >
+              04 — Inside the workspace
             </p>
-            <h2 className={cn('font-display text-2xl md:text-3xl font-semibold mb-3', rv)}>
+            <h2
+              className={cn(
+                'mt-4 font-display text-[clamp(1.8rem,3vw,2.5rem)] font-semibold leading-[1.1] tracking-[-0.01em] text-parchment',
+                rv
+              )}
+            >
               {c.visibility.heading}
             </h2>
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--mr-text-muted)' }}>
+            <p
+              className={cn('mt-5 max-w-[46ch] text-base leading-relaxed', rv)}
+              style={{ color: 'var(--mr-text-muted)' }}
+            >
               {c.visibility.subheading}
             </p>
+            <div className="mt-10 max-w-md">
+              <UnlockGrowth />
+            </div>
           </div>
-          <ul className="space-y-3">
-            {c.visibility.points.map((point, i) => {
-              const Icon = icon(point.icon);
-              const palette = [
-                'var(--mr-palette-cyan)',
-                'var(--mr-palette-green)',
-                'var(--mr-palette-amber)',
-              ][i % 3];
-              return (
-                <li
-                  key={point.title}
-                  className={cn(
-                    'flex gap-3.5 rounded-xl border border-white/[0.06] bg-ink-850 p-4',
-                    rv
-                  )}
+          <ul className={cn('border-t border-white/[0.06]', rv)}>
+            {c.visibility.points.map((point) => (
+              <li key={point.title} className="border-b border-white/[0.06] py-6">
+                <span
+                  aria-hidden="true"
+                  className="mb-4 block h-px w-8"
+                  style={{ backgroundColor: 'var(--mr-accent)' }}
+                />
+                <h3 className="font-display text-lg font-semibold text-parchment md:text-xl">
+                  {point.title}
+                </h3>
+                <p
+                  className="mt-2 max-w-[52ch] text-sm leading-relaxed md:text-base"
+                  style={{ color: 'var(--mr-text-muted)' }}
                 >
-                  <span
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: palette, color: 'var(--mr-on-palette)' }}
-                  >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block font-display text-sm font-semibold text-parchment">
-                      {point.title}
-                    </span>
-                    <span className="mt-1 block text-sm leading-relaxed text-steel">
-                      {point.description}
-                    </span>
-                  </span>
-                </li>
-              );
-            })}
+                  {point.description}
+                </p>
+              </li>
+            ))}
           </ul>
         </div>
       </section>
 
-      {/* §UI/UX Wave 2 — proactive brand success protection */}
-      <section id="protection" className="px-6 py-16 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto">
-          <p className="mb-3 text-center font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500">
-            When things go wrong
+      {/*
+        §DESIGN OVERHAUL — WHEN THINGS GO WRONG.
+        Was: three rounded cards with coloured icon squares and coloured top
+        borders — three different accent colours carrying no meaning. Now: three
+        statements divided by hairlines under one brass rule, on the page's main
+        rhythm. Colour is reserved for data that means something (the rail).
+      */}
+      <section id="protection" className="px-6 pb-20">
+        <div className="mx-auto max-w-6xl">
+          <p
+            className="font-mono text-ds-micro uppercase tracking-[0.2em]"
+            style={{ color: 'var(--mr-text-muted)' }}
+          >
+            05 — When things go wrong
           </p>
-          <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
+          <h2
+            className={cn(
+              'mt-4 max-w-[26ch] font-display text-[clamp(1.8rem,3.2vw,2.75rem)] font-semibold leading-[1.08] tracking-[-0.01em] text-parchment',
+              rv
+            )}
+          >
             {c.protection.heading}
           </h2>
           <p
-            className={cn('mx-auto mb-10 max-w-3xl text-center text-sm', rv)}
+            className={cn('mt-5 max-w-[56ch] text-base leading-relaxed md:text-lg', rv)}
             style={{ color: 'var(--mr-text-muted)' }}
           >
             {c.protection.subheading}
           </p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {c.protection.points.map((point, i) => {
-              const Icon = icon(point.icon);
-              const palette = [
-                'var(--mr-palette-orange)',
-                'var(--mr-palette-red)',
-                'var(--mr-palette-violet)',
-              ][i % 3];
-              return (
-                <div
-                  key={point.title}
-                  className={cn(
-                    'rounded-xl border-t-[3px] border border-white/[0.06] bg-ink-850 p-5',
-                    rv
-                  )}
-                  style={{ borderTopColor: palette }}
+          <div className={cn('mt-14 grid grid-cols-1 border-t border-white/[0.06] md:grid-cols-3', rv)}>
+            {c.protection.points.map((point, i) => (
+              <div
+                key={point.title}
+                className={cn(
+                  'border-b border-white/[0.06] py-8',
+                  i > 0 ? 'md:border-l md:border-t-0 md:pl-10' : 'md:pr-10',
+                  i > 0 && 'border-t md:border-t-0'
+                )}
+              >
+                <h3 className="font-display text-lg font-semibold leading-snug text-parchment md:text-xl">
+                  {point.title}
+                </h3>
+                <p
+                  className="mt-2.5 max-w-[40ch] text-sm leading-relaxed md:text-base"
+                  style={{ color: 'var(--mr-text-muted)' }}
                 >
-                  <span
-                    className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: palette, color: 'var(--mr-on-palette)' }}
-                  >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                  </span>
-                  <h3 className="mb-2 font-display text-base font-semibold text-parchment">
-                    {point.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-steel">{point.description}</p>
-                </div>
-              );
-            })}
+                  {point.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA with onboarding-status stamp badge */}
-      <section className="py-24 px-6 border-t border-white/[0.06] relative overflow-hidden">
-        <div className="max-w-2xl mx-auto text-center relative">
-          <div
-            aria-hidden="true"
-            className="absolute -top-16 right-0 md:-top-14 md:right-4 rotate-[8deg] select-none pointer-events-none"
-          >
-            <div className="border-[3px] border-stamp text-stamp rounded-md px-4 py-2 font-mono text-ds-label tracking-[0.2em] uppercase opacity-80 shadow-[inset_0_0_12px_rgba(181,73,58,0.15)]">
-              <div className="border border-stamp/70 rounded-sm px-3 py-1.5 text-center leading-relaxed">
-                {c.finalCta.stampLine1}
-                <br />
-                <span className="text-base font-semibold">{c.finalCta.stampLine2}</span>
-              </div>
+      {/*
+        §DESIGN OVERHAUL — THE LAST MOVEMENT.
+        Was: narrow centred text with a rotated stamp colliding with the heading.
+        Now: a full-width band, left-aligned at display scale, with the stamp
+        promoted to a corner mark in the band's own margin where it cannot collide
+        at any width — the document metaphor closing the document.
+
+        Same `--mr-surface-tint` band token as the section above, so the page's two
+        tonal bands are one system rather than two ad-hoc greys.
+      */}
+      <section
+        className="relative border-t border-white/[0.12] px-6 py-24"
+        style={{ backgroundColor: 'var(--mr-surface-tint)' }}
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-6 top-10 hidden select-none md:block md:right-12"
+        >
+          <div className="rotate-[7deg] rounded-md border-[3px] border-stamp px-4 py-2 font-mono text-ds-label uppercase tracking-[0.2em] text-stamp opacity-80">
+            <div className="rounded-sm border border-stamp/70 px-3 py-1.5 text-center leading-relaxed">
+              {c.finalCta.stampLine1}
+              <br />
+              <span className="text-base font-semibold">{c.finalCta.stampLine2}</span>
             </div>
           </div>
-          <h2 className={cn('font-display text-2xl md:text-3xl font-semibold mb-3', rv)}>
+        </div>
+        <div className="relative mx-auto max-w-6xl">
+          <h2
+            className={cn(
+              'max-w-[26ch] font-display text-[clamp(2rem,4.4vw,3.5rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-parchment',
+              rv
+            )}
+          >
             {c.finalCta.heading}
           </h2>
-          <p className={cn('text-sm text-steel mb-8 max-w-xl mx-auto', rv)}>
+          <p
+            className={cn('mt-6 max-w-[52ch] text-base leading-relaxed md:text-lg', rv)}
+            style={{ color: 'var(--mr-text-muted)' }}
+          >
             {fillBrand(c.finalCta.subheading)}
           </p>
           <button
             onClick={() => navigate('explore-uk-market-fit')}
-            className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
+            className={cn(
+              'mt-10 inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90',
+              rv
+            )}
           >
             {c.finalCta.buttonLabel}
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </section>
@@ -618,3 +711,4 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
     </div>
   );
 }
+

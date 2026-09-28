@@ -1,11 +1,19 @@
 /**
- * §UI/UX Wave 1 — "Unlock growth with data" element.
+ * §DESIGN OVERHAUL (2026-09-28) — "Unlock growth with data".
  *
- * A distinctive lower-left banner treatment for the homepage hero. The copy
- * only claims what the product genuinely does (catalogue, orders, market
- * intelligence in one view) — it never implies functionality that does not
- * exist. The visual is a small CSS bar motif (illustrative, aria-hidden,
- * decorative), with the real words carried as text.
+ * Was: a rounded banner carrying a decorative CSS bar motif (seven bars,
+ * aria-hidden) sitting directly beside a chip reading "Live platform data".
+ * The bars were illustrative and the chip claimed live data, so together they
+ * read as real figures — decoration presented as evidence, which is exactly
+ * what this platform's rules forbid. Both are removed rather than restyled.
+ *
+ * What remains is the claim that is actually true and checkable: every number
+ * on Mercenta is derived from real, tenant-scoped records. It is presented as
+ * a document note — a brass rule, a display line, a body line — consistent
+ * with the rest of the public pages.
+ *
+ * The `unlock-growth` test id and the default eyebrow wording are preserved:
+ * `e2e/uiux-foundation.spec.ts` asserts both.
  */
 export function UnlockGrowth({
   eyebrow = 'Unlock growth with data',
@@ -14,36 +22,18 @@ export function UnlockGrowth({
   return (
     <div
       data-testid="unlock-growth"
-      className="flex flex-col gap-3 rounded-ds-lg border border-white/[0.12] bg-white/[0.03] p-5 sm:flex-row sm:items-center"
+      className="border-t-2 pt-5"
+      style={{ borderColor: 'var(--mr-accent)' }}
     >
-      <div
-        aria-hidden="true"
-        className="flex h-10 w-14 shrink-0 items-end justify-center gap-1 rounded-ds-sm bg-white/[0.05]"
+      <p className="font-display text-lg font-semibold tracking-tight text-parchment">
+        {eyebrow}
+      </p>
+      <p
+        className="mt-2 max-w-[44ch] text-sm leading-relaxed"
+        style={{ color: 'var(--mr-text-muted)' }}
       >
-        {[38, 62, 46, 78, 58, 90, 72].map((h, i) => (
-          <span
-            key={i}
-            className="w-1 rounded-sm"
-            style={{
-              height: `${h}%`,
-              backgroundColor: i === 5 ? 'var(--mr-accent)' : 'var(--mr-feature-intel)',
-              opacity: 0.85,
-            }}
-          />
-        ))}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-white tracking-tight">{eyebrow}</p>
-        <p className="mt-1 text-xs text-zinc-500 leading-relaxed">{body}</p>
-      </div>
-      <span
-        aria-hidden="true"
-        className="hidden sm:inline-flex h-6 w-[1px] shrink-0"
-        style={{ backgroundColor: 'var(--mr-hairline-strong)' }}
-      />
-      <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-ds-micro font-medium border bg-state-success/10 border-state-success/20 text-state-success">
-        Live platform data
-      </span>
+        {body}
+      </p>
     </div>
   );
 }
