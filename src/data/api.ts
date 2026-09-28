@@ -29,15 +29,19 @@ import { BACKORDER_RESTOCK_TARGET } from '@/config/deductions';
  * `src/config/purchaseOrders.ts`.
  */
 import {
+  amendmentChangedGroups,
+  amendmentRefusal,
   lateAcceptanceRefusal,
   poAckTimeliness,
   poAcknowledgementWindow,
+  poAmendmentWindow,
   poNeedsAutoRejection,
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
 import {
   PO_ACK_AUTO_REJECT_REASON,
   PO_ACK_SYSTEM_ACTOR_ID,
+  PO_ACK_UPDATE_WINDOW_HOURS,
 } from '@/config/purchaseOrders';
 import { issueChannelInstruction, instructionLineFor } from '@/lib/commerce/channelInstructions';
 import {
@@ -971,17 +975,22 @@ export function acknowledgePurchaseOrder(
   if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
 
   /**
-   * §WAVE 3 — DUPLICATE ACKNOWLEDGEMENT REFUSED.
-   * Acknowledging twice would let a second submission rewrite a line that was
-   * already rejected, which is exactly the contradictory state
-   * `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md → AV-007` forbids.
+   * §BATCH 2b (`AV-006`) — A SECOND SUBMISSION IS AN AMENDMENT, NOT A DUPLICATE.
+   *
+   * Before this the writer refused ANY second acknowledgement outright. That was
+   * an over-restriction Mercenta invented, because the channel DOES accept a change
+   * to an acknowledgement: *"You must submit an updated acknowledgment within 48
+   * hours for any changes to quantity, price, ship dates, or delivery dates… After
+   * 48 hours, we only expect to receive updates to ship dates or delivery dates."*
+   *
+   * A submission against an already-acknowledged PO is therefore an UPDATE: the
+   * 24-hour acceptance window is NOT re-judged (it governed the first decision),
+   * and the channel's 48-hour UPDATE window decides what may still change
+   * (`src/lib/commerce/poAcknowledgementWindow.ts → amendmentRefusal`). The AV-007
+   * rule — a rejected line stays rejected for ever — is still enforced by the
+   * fail-closed pre-pass below, so an amendment can never resurrect a rejection.
    */
-  if (po.acknowledgedAt) {
-    return {
-      ok: false,
-      error: `PO ${po.poNumber} has already been acknowledged — a duplicate acknowledgement is refused.`,
-    };
-  }
+  const isAmendment = Boolean(po.acknowledgedAt);
 
   const warnings: string[] = [];
 
@@ -1019,6 +1028,46 @@ export function acknowledgePurchaseOrder(
   if (validationRefusal) return { ok: false, error: validationRefusal };
 
   /**
+   * §BATCH 2b (`AV-006`) — THE CHANNEL'S UPDATE RULE IS ENFORCED at the domain
+   * boundary for a second submission. A change to quantity or price past the
+   * 48-hour update window is REFUSED; a ship-date change is accepted at any time.
+   * The refusal comes from the rule's ONE owner, so it states the real obligation
+   * rather than a Mercenta invention — and because it is checked HERE, no alternate
+   * path (admin on-behalf, simulation, a direct store call) can bypass it.
+   */
+  if (isAmendment) {
+    const amendmentBlock = amendmentRefusal(po, lineAcks, now);
+    if (amendmentBlock) return { ok: false, error: amendmentBlock };
+  }
+
+  /**
+   * §BATCH 2b (`AV-006`) — WHICH documented change groups this update touches,
+   * computed BEFORE any line is written (after the write the comparison would be
+   * against the updated values and would report nothing). Recorded in the audit
+   * entry so "what changed" is answerable without diffing history.
+   */
+  const amendedGroups = isAmendment ? amendmentChangedGroups(po, lineAcks) : [];
+
+  /**
+   * §BATCH 2b (`AV-006`) — A SUBMISSION THAT CHANGES NOTHING IS STILL A DUPLICATE.
+   *
+   * The channel accepts an UPDATE, not a re-statement of the same decision. A
+   * second submission whose acknowledged quantity, cost price and schedule all
+   * match the recorded ones therefore changes nothing, and is refused exactly as a
+   * duplicate was refused before this change — so the Wave-3 behaviour ("a
+   * duplicate acknowledgement of the same PO is refused") is preserved, while a
+   * genuine change now takes the amendment path above.
+   */
+  if (isAmendment && amendedGroups.length === 0) {
+    return {
+      ok: false,
+      error:
+        `PO ${po.poNumber} has already been acknowledged — this submission changes nothing, so it is refused as a ` +
+        `duplicate. Change the acknowledged quantity, cost price or schedule to submit an update.`,
+    };
+  }
+
+  /**
    * §P13 — THE 24-HOUR WINDOW IS ENFORCED, AT THE DOMAIN BOUNDARY.
    *
    * Amazon documents both the deadline and its consequence, so Mercenta
@@ -1027,6 +1076,11 @@ export function acknowledgePurchaseOrder(
    * acceptance or a backorder is REFUSED and only an ALL-REJECTED submission is
    * accepted — that IS the documented late action. An unreadable window fails
    * CLOSED: no acknowledgement is accepted at all.
+   *
+   * §BATCH 2b (`AV-006`) — this rule governs the FIRST decision only. An amendment
+   * is judged by the channel's 48-hour UPDATE window above instead, so a PO that
+   * was acknowledged inside its 24 hours can still take a schedule change months
+   * later without being re-judged as "late".
    */
   const decidedAt = new Date(now);
   /** §P13 — the derived window, read once and reused by the refusal, the
@@ -1036,11 +1090,23 @@ export function acknowledgePurchaseOrder(
     const ack = lineAcks.find((a) => a.sku === line.sku);
     return !ack || ack.ackStatus === 'unacknowledged' || ack.ackStatus === 'rejected';
   });
-  const lateRefusal = lateAcceptanceRefusal(po, allLinesRejected, decidedAt);
-  if (lateRefusal) return { ok: false, error: lateRefusal };
+  if (!isAmendment) {
+    const lateRefusal = lateAcceptanceRefusal(po, allLinesRejected, decidedAt);
+    if (lateRefusal) return { ok: false, error: lateRefusal };
+  }
 
-  /** §P13 — how this decision met the window; recorded on every event + the audit. */
-  const timeliness = poAckTimeliness(po, decidedAt);
+  /**
+   * §P13 — how this decision met the window; recorded on every event + the audit.
+   * §BATCH 2b (`AV-006`) — for an AMENDMENT the truthful verdict is the UPDATE
+   * window's (inside → `on_time`, past → `late`), because that is the window the
+   * channel actually judged it against.
+   */
+  const updateWindow = isAmendment ? poAmendmentWindow(po, decidedAt) : null;
+  const timeliness: import('@/types').PoAckTimeliness = updateWindow
+    ? updateWindow.open
+      ? 'on_time'
+      : 'late'
+    : poAckTimeliness(po, decidedAt);
   const decidedAtIso = decidedAt.toISOString();
 
   for (const line of po.lineItems) {
@@ -1055,6 +1121,8 @@ export function acknowledgePurchaseOrder(
         rejectionCode: 'TemporarilyUnavailable',
         unitPrice: line.unitPrice,
         timeliness,
+        amended: isAmendment,
+        withinUpdateWindow: updateWindow?.open ?? false,
       };
       line.ackHistory = [...(line.ackHistory ?? []), historyEntry];
       line.ackStatus = 'rejected';
@@ -1090,6 +1158,8 @@ export function acknowledgePurchaseOrder(
       scheduledShipDate: ack.scheduledShipDate,
       unitPrice: ackedPrice,
       timeliness,
+      amended: isAmendment,
+      withinUpdateWindow: updateWindow?.open ?? false,
     };
     line.ackHistory = [...(line.ackHistory ?? []), historyEntry];
 
@@ -1108,7 +1178,13 @@ export function acknowledgePurchaseOrder(
     }
   }
 
-  po.acknowledgedAt = decidedAtIso;
+  /**
+   * §BATCH 2b (`AV-006`) — an AMENDMENT must not overwrite the FIRST decision's
+   * instant: `acknowledgedAt` stays the instant the 24-hour window was met, and the
+   * update is recorded separately so both survive.
+   */
+  if (isAmendment) po.lastAmendedAt = decidedAtIso;
+  else po.acknowledgedAt = decidedAtIso;
   // Acknowledgment advances the workflow: any accepted/backordered volume
   // means accepted; an all-rejected PO means rejected.
   // §all-or-line-item-complete — acknowledgment must be all-or-line-item-complete:
@@ -1160,7 +1236,12 @@ export function acknowledgePurchaseOrder(
     id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     createdAt: new Date().toISOString(),
     actorId: actorStaffId ?? po.brandId,
-    action: 'purchase_order_acknowledged',
+    /**
+     * §BATCH 2b (`AV-006`) — an AMENDMENT is its OWN canonical event, so an audit
+     * query for "what was acknowledged" and one for "what was later changed" can
+     * never return the same record.
+     */
+    action: isAmendment ? 'purchase_order_amended' : 'purchase_order_acknowledged',
     entityType: 'purchase_order',
     entityId: po.id,
     brandId: po.brandId,
@@ -1171,9 +1252,12 @@ export function acknowledgePurchaseOrder(
      */
     reason:
       `${actorLabel}: ${acceptedLines.length}/${po.lineItems.length} lines accepted/backordered, ` +
-      `${rejectedLines.length} rejected — decision issued to Mercenta as an INSTRUCTION` +
+      `${rejectedLines.length} rejected — ${isAmendment ? 'UPDATE' : 'decision'} issued to Mercenta as an INSTRUCTION` +
       `${instructionId ? ` (${instructionId})` : ''}. Mercenta performs the channel action. ` +
-      `Timeliness: ${timeliness} against the 24-hour acknowledgement window (deadline ${window.deadline ?? 'unreadable'}).`,
+      (isAmendment
+        ? `Timeliness: ${timeliness} against the ${PO_ACK_UPDATE_WINDOW_HOURS}-hour update window ` +
+          `(closes ${updateWindow?.deadline ?? 'unreadable'}).`
+        : `Timeliness: ${timeliness} against the 24-hour acknowledgement window (deadline ${window.deadline ?? 'unreadable'}).`),
     metadata: {
       actorLabel,
       acceptedLines: acceptedLines.map((l) => l.sku),
@@ -1183,6 +1267,11 @@ export function acknowledgePurchaseOrder(
       /** §P13 — how the decision met the channel's 24-hour window. */
       timeliness,
       acknowledgementDeadline: window.deadline,
+      /** §BATCH 2b (`AV-006`) — the update verdict, present on every record. */
+      amended: isAmendment,
+      updateWindowOpen: updateWindow?.open ?? false,
+      updateDeadline: updateWindow?.deadline ?? null,
+      changedGroups: amendedGroups,
     },
   });
 

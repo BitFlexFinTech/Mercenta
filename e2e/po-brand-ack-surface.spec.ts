@@ -88,4 +88,46 @@ test.describe('Brand acknowledgement surfaces (§P13 / S6)', () => {
       timeout: 7000,
     });
   });
+
+  /**
+   * §BATCH 2b (`AV-006`) — THE AMENDMENT PATH IS REACHABLE IN THE RUNNING PRODUCT.
+   *
+   * The documented rule is that a change to an acknowledgement is accepted within
+   * 48 hours; before this phase the writer refused ANY second acknowledgement, so
+   * no surface could offer one. This test exercises the real brand surface: accept
+   * an order, then amend it inside the update window, and confirm the amendment is
+   * ACCEPTED (the pre-fix behaviour would have refused it as a duplicate) and that
+   * the rule shown to the brand is the config owner's own sentence.
+   */
+  test('4. an acknowledged order can be AMENDED inside the update window', async ({ page }) => {
+    await brandPurchaseOrders(page, 'Tapatío');
+
+    /** First decision: accept the order. */
+    await page.locator('button', { hasText: 'Acknowledge' }).first().click();
+    await page.locator('button', { hasText: 'Submit acknowledgment' }).first().click();
+    await expect(page.getByText(/Decision issued to Mercenta/).first()).toBeVisible({ timeout: 7000 });
+
+    /** The amendment control is offered (the 48-hour update window is open)… */
+    const amend = page.locator('button', { hasText: 'Amend acknowledgement' }).first();
+    await expect(amend).toBeVisible({ timeout: 7000 });
+    await amend.click();
+
+    /** …and the rule it states is the ONE owner's sentence, never a re-typed copy. */
+    const windowState = page.locator('[data-testid^="po-amend-window-state-"]').first();
+    await expect(windowState).toBeVisible({ timeout: 6000 });
+    await expect(windowState).toContainText(/48 hours/);
+    await expect(windowState).toContainText(/ship dates or delivery dates/);
+
+    /** Change the first line's acknowledged quantity, then submit the amendment. */
+    const qty = page.locator('label', { hasText: 'Qty' }).first().locator('input');
+    const current = Number(await qty.inputValue());
+    await qty.fill(String(Math.max(1, current - 1)));
+    await page.locator('button', { hasText: 'Submit amendment' }).first().click();
+
+    /** ACCEPTED (not refused as a duplicate) — the pre-fix behaviour is gone. */
+    await expect(page.getByText(/Decision issued to Mercenta/).first()).toBeVisible({ timeout: 7000 });
+    await expect(
+      page.getByText(/this submission changes nothing|already been acknowledged/i)
+    ).toHaveCount(0);
+  });
 });

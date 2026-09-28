@@ -1612,6 +1612,13 @@ export interface PurchaseOrder {
    * so the surface, the record and the writer can never state different windows.
    */
   onBehalfDraft?: PoOnBehalfDraftRecord;
+  /**
+   * §BATCH 2b (`AV-006`) — WHEN the acknowledgement was last AMENDED. `acknowledgedAt`
+   * stays the FIRST decision's instant (the 24-hour window is measured from the
+   * order, not from an amendment); this records the most recent update so the
+   * surface and the audit trail can show both without overwriting either.
+   */
+  lastAmendedAt?: string;
 }
 
 /** §Stage-24 — line-item level acknowledgment, not whole-PO toggle. */
@@ -1703,6 +1710,19 @@ export interface AckHistoryEntry {
    * shows WHEN each decision was made relative to the rule.
    */
   timeliness?: PoAckTimeliness;
+  /**
+   * §BATCH 2b (`AV-006`) — TRUE when this event is an AMENDMENT to an existing
+   * acknowledgement (a second submission against an already-acknowledged PO)
+   * rather than the first decision.
+   *
+   * The update window itself is owned by `src/config/purchaseOrders.ts`
+   * (`PO_ACK_UPDATE_WINDOW_HOURS`) and derived by
+   * `src/lib/commerce/poAcknowledgementWindow.ts`; only this VERDICT is recorded
+   * here, so the history never restates a rule it does not own.
+   */
+  amended?: boolean;
+  /** §BATCH 2b (`AV-006`) — TRUE when that amendment fell inside the 48-hour update window. */
+  withinUpdateWindow?: boolean;
 }
 
 /**

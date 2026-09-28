@@ -26,7 +26,41 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## BATCH 2a — THE AMAZON-ATTRIBUTION FAMILY + THE RESUME-STATE DEFECT (session 43, 2026-09-28) — CURRENT
+## BATCH 2b — THE 48-HOUR AMENDMENT WINDOW (`AV-006`) (session 44, 2026-09-28) — CURRENT
+
+**What is now true:** the channel's documented **48-hour UPDATE window** is modelled, enforced and told — it had
+never been represented, and the acknowledgement writer even refused ANY second acknowledgement (an
+over-restriction Mercenta had invented).
+
+- **ONE owner:** `src/config/purchaseOrders.ts` declares `PO_ACK_UPDATE_WINDOW_HOURS = 48`, the four documented
+  change groups (`PO_AMENDABLE_FIELD_GROUPS` = quantity · price · ship dates · delivery dates), the after-window
+  set (`PO_AMENDABLE_FIELD_GROUPS_AFTER_WINDOW` = ship dates · delivery dates) and the ONE operator statement
+  `PO_AMENDMENT_WINDOW_RULE_TEXT`. No surface re-types the rule.
+- **Pure, fail-closed derivation:** `src/lib/commerce/poAcknowledgementWindow.ts` adds `poAmendmentDeadline`,
+  `poAmendmentWindow`, `amendmentChangedGroups` and `amendmentRefusal`. An unreadable order date yields
+  `unknown: true`, `open: false` and NO permitted change group — never treated as open.
+- **Enforced at the domain boundary:** `src/data/api.ts → acknowledgePurchaseOrder` now treats a second
+  submission as an **AMENDMENT**: a quantity or price change is REFUSED past the window, a schedule change is
+  accepted at any time, and a submission that changes nothing is still refused as a duplicate (so the Wave-3
+  duplicate behaviour is preserved). The AV-007 rejected-line permanence is untouched and still enforced.
+- **Told:** the brand purchase-order surface offers an **“Amend acknowledgement”** control gated by the owner's
+  own `open` state and renders the owner's rule; Operational Guidance and the onboarding statement carry it.
+- **Recorded:** `PurchaseOrder.lastAmendedAt`, `AckHistoryEntry.amended` / `withinUpdateWindow`, and the distinct
+  canonical audit action `purchase_order_amended` — `acknowledgedAt` is NEVER overwritten by an amendment.
+- **Gates:** `npm run validate:po-amendment-window` (**31 assertions, 0 failures**) executes the real modules and
+  proved able to fail twice (config `48`→`47` → 5 failures; a never-closing window → 8 failures; both files
+  restored byte-identical, sha256 `243a62f5…` / `2fd6503e…`). `e2e/po-brand-ack-surface.spec.ts` case 4 drives the
+  real surface (acknowledge → amend → ACCEPTED). Wave 3's duplicate-refusal check was **REPOINTED** to the new
+  truth with its old contract recorded inline.
+
+**Measured after the last edit:** `typecheck` 0 · `lint` 0 · `build` ✓ · `validate:all` **119 PASS / 0 FAIL (of
+119)** · `validate:wording` PASS (327 files) · Playwright **58 passed / 0 failed across 11 specs**.
+
+**Three-way status: VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** (this increment changes what a brand
+sees and does, so the demo leg applies and is UNSATISFIED — deployment remains deferred to S7 = Batch 3; the demo
+is still `d726166`).
+
+## BATCH 2a — THE AMAZON-ATTRIBUTION FAMILY + THE RESUME-STATE DEFECT (session 43, 2026-09-28) — HISTORICAL (superseded by the Batch 2b section above)
 
 **What is now true:** the register's three "Mercenta invention presented as the retail channel's rule" findings are
 **APPLIED** — `AV-019` (the deduction/chargeback taxonomy), `AV-019b` (the fourteen-day dispute window) and

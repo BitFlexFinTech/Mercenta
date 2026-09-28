@@ -593,6 +593,29 @@ try {
   ];
 
   /**
+   * §BATCH 2b (2026-09-28, session 44) — the PO amendment-window phase's declared
+   * surface. It models the channel's documented 48-hour UPDATE window (`AV-006`),
+   * replaces the invented blanket refusal of a second acknowledgement with an
+   * AMENDMENT governed by that window, and renders the rule from its ONE config
+   * owner. Same mechanism as every phase above: a changed source/test file outside
+   * EVERY declared set is still refused.
+   */
+  const BATCH2B_AMENDMENT_WINDOW_DECLARED = [
+    'src/config/purchaseOrders.ts',
+    'src/lib/commerce/poAcknowledgementWindow.ts',
+    'src/types.ts',
+    'src/data/api.ts',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'src/components/shared/BrandGuidance.tsx',
+    'scripts/validate-po-amendment-window.mjs',
+    'scripts/validate-wave3-logistics.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'e2e/po-brand-ack-surface.spec.ts',
+    'package.json',
+  ];
+
+  /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
    *
    * Same declaration mechanism as SPRINT_WORK_LAYER_DECLARED above: the files
@@ -1477,6 +1500,10 @@ try {
      * §BATCH 2a — the Amazon-attribution phase's declared surface (see above).
      */
     ...BATCH2A_AMAZON_ATTRIBUTION_DECLARED,
+    /**
+     * §BATCH 2b — the PO amendment-window phase's declared surface (see above).
+     */
+    ...BATCH2B_AMENDMENT_WINDOW_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

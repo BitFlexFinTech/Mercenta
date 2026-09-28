@@ -39,8 +39,13 @@ import {
   PO_ACK_NOTIFICATION_HOURS,
   PO_ACK_ON_BEHALF_WINDOW_HOURS,
   PO_ACK_STATUSES_WITH_OBLIGATION,
+  PO_ACK_UPDATE_WINDOW_HOURS,
   PO_ACK_WINDOW_RULE_TEXT,
+  PO_AMENDABLE_FIELD_GROUP_LABELS,
+  PO_AMENDABLE_FIELD_GROUPS,
+  PO_AMENDABLE_FIELD_GROUPS_AFTER_WINDOW,
   type PoAckTimeliness,
+  type PoAmendableFieldGroup,
   type PoChannelState,
 } from '@/config/purchaseOrders';
 import type { PoRejectionCode, PurchaseOrder } from '@/types';
@@ -104,6 +109,153 @@ export function poAcknowledgementDeadline(po: Pick<PurchaseOrder, 'orderDate'>):
 export function poAcknowledgementRecorded(po: PurchaseOrder): boolean {
   if (po.acknowledgedAt) return true;
   return po.lineItems.some((l) => l.ackStatus !== undefined && l.ackStatus !== 'unacknowledged');
+}
+
+/* ── §BATCH 2b (`AV-006`) — THE AMENDMENT (UPDATE) WINDOW ──────────────────── */
+
+/**
+ * A line of an amendment submission. `src/data/api.ts → PoLineAckSubmission`
+ * structurally satisfies this, so the owner module stays free of any dependency on
+ * the domain boundary (which imports THIS module — importing it back would be a
+ * cycle). Only the fields a change can touch are named.
+ */
+export interface PoAmendmentSubmissionLine {
+  sku: string;
+  acknowledgedQty?: number;
+  unitPrice?: number;
+  scheduledShipDate?: string;
+}
+
+/**
+ * THE CHANNEL'S UPDATE WINDOW, DERIVED (`AV-006`).
+ *
+ * Amazon documents that *"You must submit an updated acknowledgment within 48
+ * hours for any changes to quantity, price, ship dates, or delivery dates… After
+ * 48 hours, we only expect to receive updates to ship dates or delivery dates."*
+ * This type is that rule, derived from the ONE config owner so the window the
+ * brand is told about and the window the writer enforces cannot disagree.
+ *
+ * FAIL CLOSED: an unreadable order date yields `unknown: true`, `open: false` and
+ * NO permitted change groups — an unknown window is never treated as "still open".
+ */
+export interface PoAmendmentWindow {
+  /** The update deadline (`orderDate + 48h`) as an ISO instant; null when unreadable. */
+  deadline: string | null;
+  msLeft: number | null;
+  hoursLeft: number | null;
+  /** TRUE while a change to quantity or price is still accepted. */
+  open: boolean;
+  /** The documented field groups a change may currently touch (empty when unknown). */
+  permittedChangeGroups: readonly PoAmendableFieldGroup[];
+  /** TRUE when the window could not be read from the order date. */
+  unknown: boolean;
+  /** Honest, operator-readable explanation of the state. */
+  reason: string;
+}
+
+/** The Amazon update deadline for one PO: `orderDate + 48h`; null when unreadable. */
+export function poAmendmentDeadline(po: Pick<PurchaseOrder, 'orderDate'>): string | null {
+  const received = new Date(po.orderDate).getTime();
+  if (!Number.isFinite(received)) return null;
+  return new Date(received + PO_ACK_UPDATE_WINDOW_HOURS * HOUR_MS).toISOString();
+}
+
+/** Derive the update window for ONE purchase order at an INSTANT. Pure. */
+export function poAmendmentWindow(
+  po: Pick<PurchaseOrder, 'orderDate'>,
+  now: Date | string | number = new Date()
+): PoAmendmentWindow {
+  const nowMs = instantOf(now);
+  const deadline = poAmendmentDeadline(po);
+
+  if (!deadline) {
+    return {
+      deadline: null,
+      msLeft: null,
+      hoursLeft: null,
+      open: false,
+      permittedChangeGroups: [],
+      unknown: true,
+      reason:
+        'The update window could not be read — the order date is unusable, so no change is accepted (fail-closed).',
+    };
+  }
+
+  const msLeft = new Date(deadline).getTime() - nowMs;
+  const open = msLeft > 0;
+  const permittedChangeGroups = open ? PO_AMENDABLE_FIELD_GROUPS : PO_AMENDABLE_FIELD_GROUPS_AFTER_WINDOW;
+
+  return {
+    deadline,
+    msLeft,
+    hoursLeft: msLeft / HOUR_MS,
+    open,
+    permittedChangeGroups,
+    unknown: false,
+    reason: open
+      ? `Inside the update window (closes ${deadline}): quantity, price, ship-date and delivery-date changes are accepted.`
+      : `Past the update window (closed ${deadline}): only ship-date and delivery-date changes are expected.`,
+  };
+}
+
+/** The operator-readable label of a declared change group (`quantity` → "acknowledged quantity"). */
+export function amendableGroupLabel(group: PoAmendableFieldGroup): string {
+  return PO_AMENDABLE_FIELD_GROUP_LABELS[group];
+}
+
+/**
+ * WHICH DOCUMENTED CHANGE GROUPS a submission actually changes, relative to the
+ * PO's current acknowledged state. Only the groups the submission can express are
+ * ever returned (`quantity` · `price` · `ship_dates`); `delivery_dates` is a
+ * channel-issued PO-level change and arrives through the revision path (`AV-024`).
+ */
+export function amendmentChangedGroups(
+  po: PurchaseOrder,
+  submission: readonly PoAmendmentSubmissionLine[]
+): PoAmendableFieldGroup[] {
+  const changed = new Set<PoAmendableFieldGroup>();
+  for (const line of po.lineItems) {
+    const ack = submission.find((a) => a.sku === line.sku);
+    if (!ack) continue;
+    if (ack.acknowledgedQty !== undefined && ack.acknowledgedQty !== (line.acknowledgedQty ?? line.quantity)) {
+      changed.add('quantity');
+    }
+    if (ack.unitPrice !== undefined && ack.unitPrice !== (line.acknowledgedUnitPrice ?? line.unitPrice)) {
+      changed.add('price');
+    }
+    if (ack.scheduledShipDate !== undefined && ack.scheduledShipDate !== (line.scheduledShipDate ?? '')) {
+      changed.add('ship_dates');
+    }
+  }
+  return PO_AMENDABLE_FIELD_GROUPS.filter((g) => changed.has(g));
+}
+
+/**
+ * THE UPDATE RULE, ENFORCED — the refusal for a change the channel does not accept
+ * at this instant, or `null` when the change is permitted (`AV-006`).
+ *
+ * The one refusal this returns is the documented one: a quantity or price change
+ * past the update window. It quotes the rule's ONE owner, so the brand is told its
+ * real obligation rather than a Mercenta invention.
+ */
+export function amendmentRefusal(
+  po: PurchaseOrder,
+  submission: readonly PoAmendmentSubmissionLine[],
+  now: Date | string | number = new Date()
+): string | null {
+  const window = poAmendmentWindow(po, now);
+  if (window.unknown) return window.reason;
+
+  const changed = amendmentChangedGroups(po, submission);
+  const disallowed = changed.filter((g) => !window.permittedChangeGroups.includes(g));
+  if (disallowed.length === 0) return null;
+
+  const named = disallowed.map((g) => `\`${PO_AMENDABLE_FIELD_GROUP_LABELS[g]}\``).join(' and ');
+  return (
+    `PO ${po.poNumber}: ${named} cannot be changed now — the ${PO_ACK_UPDATE_WINDOW_HOURS}-hour update window closed ` +
+    `at ${window.deadline}. After the window only ship-date and delivery-date changes are expected, so this change is ` +
+    `refused.`
+  );
 }
 
 /**

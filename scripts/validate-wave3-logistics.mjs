@@ -105,10 +105,36 @@ out.allowLineAfter = {
 };
 out.allowPoAcknowledged = Boolean(poAllows.acknowledgedAt);
 
-// duplicate acknowledgement of the SAME PO → refused
-out.duplicateResult = acknowledgePurchaseOrder(poAllows.id, [
-  { sku: allowLine.sku, ackStatus: 'accepted', acknowledgedQty: allowLine.quantity },
-]);
+// §BATCH 2b (AV-006) — REPOINTED. The OLD contract asserted here was "ANY second
+// acknowledgement of the same PO is refused outright". That was an over-restriction
+// Mercenta invented: the channel's documented rule is that a CHANGE to an
+// acknowledgement is accepted within 48 hours (quantity, price, ship dates,
+// delivery dates) and that after 48 hours only ship-date/delivery-date changes are
+// expected. A second submission is therefore an AMENDMENT judged by the update
+// window — and only a submission that changes NOTHING is still refused as a
+// duplicate (which is what this check now asserts, with the same wording test).
+//
+// A no-op re-statement of the recorded decision → refused as a duplicate;
+const duplicateSubmission = [
+  { sku: allowLine.sku, ackStatus: 'backordered', acknowledgedQty: 1, scheduledShipDate: '2026-12-01' },
+  ...poAllows.lineItems.slice(1).map((l) => ({ sku: l.sku, ackStatus: 'accepted', acknowledgedQty: l.quantity })),
+];
+out.duplicateResult = acknowledgePurchaseOrder(poAllows.id, duplicateSubmission);
+
+// a genuine SCHEDULE change, at an instant inside the channel's update window
+// (order + 30h: past the 24-hour acceptance limit, inside the 48-hour update
+// window) → accepted, and recorded as an amendment.
+out.amendInsideResult = acknowledgePurchaseOrder(
+  poAllows.id,
+  [
+    { sku: allowLine.sku, ackStatus: 'backordered', acknowledgedQty: 1, scheduledShipDate: '2026-12-05' },
+    ...poAllows.lineItems.slice(1).map((l) => ({ sku: l.sku, ackStatus: 'accepted', acknowledgedQty: l.quantity })),
+  ],
+  undefined,
+  new Date(Date.parse(poAllows.orderDate) + 30 * 3600_000)
+);
+out.amendInsideLastAmendedAt = poAllows.lastAmendedAt || null;
+out.amendInsideHistoryLast = allowLine.ackHistory[allowLine.ackHistory.length - 1] || null;
 
 // false → refused, nothing mutated
 const denyBefore = JSON.stringify(poDenies.lineItems);
@@ -336,6 +362,23 @@ check(
   'a duplicate acknowledgement of the same PO is refused',
   R.duplicateResult.ok === false && /already been acknowledged/i.test(R.duplicateResult.error || ''),
   JSON.stringify(R.duplicateResult)
+);
+/**
+ * §BATCH 2b (`AV-006`) — the NEW canonical truth, alongside the preserved
+ * duplicate refusal above: a second submission that genuinely CHANGES something is
+ * an amendment judged by the channel's 48-hour update window.
+ */
+check(
+  'a genuine schedule change inside the update window is accepted as an AMENDMENT',
+  R.amendInsideResult.ok === true &&
+    typeof R.amendInsideLastAmendedAt === 'string' &&
+    R.amendInsideHistoryLast?.amended === true &&
+    R.amendInsideHistoryLast?.withinUpdateWindow === true,
+  JSON.stringify({
+    result: R.amendInsideResult,
+    lastAmendedAt: R.amendInsideLastAmendedAt,
+    last: R.amendInsideHistoryLast,
+  })
 );
 check(
   'the pure gate allows ONLY a positive true',

@@ -24,9 +24,15 @@ import {
  */
 import {
   poAcknowledgementWindow,
+  poAmendmentWindow,
   poNeedsAutoRejection,
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
+/**
+ * §BATCH 2b (`AV-006`) — the channel's 48-hour UPDATE rule is rendered from its ONE
+ * owner; the surface never re-types the window.
+ */
+import { PO_AMENDMENT_WINDOW_RULE_TEXT } from '@/config/purchaseOrders';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import {
   instructionLineFor,
@@ -160,8 +166,20 @@ export function BrandPurchaseOrders() {
   function beginAck(po: PurchaseOrder) {
     setAckingPO(po.id);
     const init: typeof lineAcks = {};
+    /**
+     * §BATCH 2b (`AV-006`) — the panel opens on the RECORDED decision when one
+     * exists, so an amendment starts from what was acknowledged and a brand that
+     * changes one field does not silently re-submit the ordered quantities (which
+     * would itself be an unintended amendment).
+     */
     for (const l of po.lineItems) {
-      init[l.sku] = { ackStatus: 'accepted', acknowledgedQty: l.quantity, unitPrice: l.unitPrice };
+      init[l.sku] = {
+        ackStatus: l.ackStatus && l.ackStatus !== 'unacknowledged' ? l.ackStatus : 'accepted',
+        acknowledgedQty: l.acknowledgedQty ?? l.quantity,
+        unitPrice: l.acknowledgedUnitPrice ?? l.unitPrice,
+        ...(l.scheduledShipDate ? { scheduledShipDate: l.scheduledShipDate } : {}),
+        ...(l.rejectionCode ? { rejectionCode: l.rejectionCode } : {}),
+      };
     }
     setLineAcks(init);
   }
@@ -540,6 +558,16 @@ export function BrandPurchaseOrders() {
       <div className="mt-3 space-y-3">
         {filteredPos.map((po) => {
           const canAct = actionable(po);
+          /**
+           * §BATCH 2b (`AV-006`) — AN AMENDMENT CONTROL, offered exactly when the
+           * channel's update window is OPEN. The rule's OWNER decides
+           * (`poAmendmentWindow`), so past the window — where only ship-date and
+           * delivery-date changes remain — no control is offered that the domain
+           * writer would then refuse (the defect class S3 removed from the work
+           * layer). A PO already in an acknowledgement obligation keeps the
+           * first-decision control above instead.
+           */
+          const canAmend = !canAct && poAmendmentWindow(po).open && po.status !== 'rejected';
           const expanded = expandedPO === po.id;
           /**
            * §P13 / S4 / S6 — the on-behalf rejection draft for THIS purchase order,
@@ -663,6 +691,19 @@ export function BrandPurchaseOrders() {
                       {ackingPO === po.id ? 'Submit acknowledgment' : 'Acknowledge'}
                     </Button>
                   )}
+                  {/* §BATCH 2b (`AV-006`) — amend a recorded acknowledgement inside
+                      the channel's 48-hour update window. */}
+                  {canAmend && (
+                    <Button
+                      variant="secondary"
+                      className={cn('text-xs', ackingPO === po.id && 'bg-emerald-500/20')}
+                      data-testid={`po-amend-${po.poNumber}`}
+                      onClick={() => (ackingPO === po.id ? submitAck(po) : beginAck(po))}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                      {ackingPO === po.id ? 'Submit amendment' : 'Amend acknowledgement'}
+                    </Button>
+                  )}
                   {!canAct &&
                     po.status !== 'rejected' &&
                     (po.status === 'accepted' || po.status === 'ready_to_fulfil') &&
@@ -730,14 +771,26 @@ export function BrandPurchaseOrders() {
                 </div>
               )}
 
-              {/* §Stage-24 — line-item acknowledgment panel */}
-              {ackingPO === po.id && canAct && (
+              {/* §Stage-24 — line-item acknowledgment panel.
+                  §BATCH 2b (`AV-006`) — the same panel also serves an AMENDMENT
+                  when the channel's update window is open. */}
+              {ackingPO === po.id && (canAct || canAmend) && (
                 <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 space-y-3">
                   <p className="text-ds-label text-emerald-200">
                     Acknowledge each line — Accepted, Rejected (reason code
                     required), or Backordered (scheduled ship date required).
                     Acknowledged quantity can never exceed the ordered quantity.
                   </p>
+                  {/* §BATCH 2b (`AV-006`) — the UPDATE rule, rendered from its ONE
+                      owner so the brand is told its real obligation. */}
+                  {canAmend && (
+                    <p
+                      className="text-ds-micro text-sky-200/80"
+                      data-testid={`po-amend-window-state-${po.poNumber}`}
+                    >
+                      {PO_AMENDMENT_WINDOW_RULE_TEXT}
+                    </p>
+                  )}
                   {/* §P13 / S6 — the window this decision is being made inside, stated
                       by the rule's OWNER verbatim (never re-derived by the surface). */}
                   <p

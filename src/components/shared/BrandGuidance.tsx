@@ -279,6 +279,22 @@ function PORejectionSection() {
               </div>
             </div>
           </div>
+          {/*
+            §BATCH 2b (`AV-006`) — the UPDATE rule, from its ONE owner. Before this
+            the 48-hour window was not modelled anywhere, so a brand could not be
+            told its real obligation; the sentence is rendered verbatim from
+            `src/config/purchaseOrders.ts → PO_ACK_ONBOARDING_STATEMENT.amendmentText`
+            rather than re-typed here.
+          */}
+          <div className="bg-sky-500/10 border border-sky-500/20 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium text-sky-200 mb-1">Changing an acknowledgement</p>
+                <p className="text-zinc-400">{PO_ACK_ONBOARDING_STATEMENT.amendmentText}</p>
+              </div>
+            </div>
+          </div>
           <div className="space-y-1.5">
             <div className="flex items-start gap-2 text-xs">
               <span className="w-2 h-2 rounded-full bg-red-500/50 flex-shrink-0 mt-1.5" />

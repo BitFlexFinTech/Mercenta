@@ -1446,6 +1446,42 @@ const BATCH2A_AMAZON_ATTRIBUTION_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §BATCH 2b (`AV-006`, 2026-09-28) — THE PO AMENDMENT-WINDOW DECLARED SURFACE.
+ *
+ * The phase models the channel's documented 48-hour UPDATE window, which had never
+ * been represented: a change to an acknowledgement is accepted within 48 hours for
+ * quantity, price, ship dates or delivery dates, and after 48 hours only ship-date
+ * or delivery-date changes are expected (register row `AV-006`). It REPLACES the
+ * over-restriction in which the writer refused ANY second acknowledgement — a rule
+ * Mercenta had invented — with an AMENDMENT path governed by that window, and it
+ * renders the rule from its ONE config owner on the brand surface and in
+ * Operational Guidance.
+ *
+ * Declared set: the config owner, the window/rule module, the canonical types and
+ * domain writer, the two brand surfaces that render the rule, this phase's own gate
+ * (`scripts/validate-po-amendment-window.mjs`), the Wave-3 gate REPOINTED from the
+ * old duplicate-refusal contract to the new amendment truth, and the scope guards
+ * themselves (which must be able to declare this phase).
+ *
+ * F5/F5b/F6's contract is UNCHANGED: a changed SOURCE file in NO declared set still
+ * FAILS. Nothing protected is touched (no migration, no provider client, no Xero,
+ * no billing).
+ */
+const BATCH2B_AMENDMENT_WINDOW_SCOPE = new Set([
+  'src/config/purchaseOrders.ts',
+  'src/lib/commerce/poAcknowledgementWindow.ts',
+  'src/types.ts',
+  'src/data/api.ts',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'src/components/shared/BrandGuidance.tsx',
+  'scripts/validate-po-amendment-window.mjs',
+  'scripts/validate-wave3-logistics.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'e2e/po-brand-ack-surface.spec.ts',
+  'package.json',
+]);
+
   const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
   // §Phase M13 — REPOINTED. This pinned "026 remains the newest; 26 total", which
@@ -1524,7 +1560,10 @@ const BATCH2A_AMAZON_ATTRIBUTION_SCOPE = new Set([
         [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2a — the Amazon-attribution phase's declared surface (see above). */
         BATCH2A_AMAZON_ATTRIBUTION_SCOPE.has(p) ||
-        [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2b — the PO amendment-window phase's declared surface (see above). */
+        BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
+        [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -1554,7 +1593,10 @@ const BATCH2A_AMAZON_ATTRIBUTION_SCOPE = new Set([
         [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2a — same declaration, second protected-path check (F5b). */
         BATCH2A_AMAZON_ATTRIBUTION_SCOPE.has(p) ||
-        [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2b — same declaration, second protected-path check (F5b). */
+        BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
+        [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -1810,7 +1852,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 2a — the Amazon-attribution phase (see above). */
           BATCH2A_AMAZON_ATTRIBUTION_SCOPE.has(p) ||
-          [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2b — the PO amendment-window phase (see above). */
+          BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
+          [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

@@ -46,11 +46,49 @@ import { PO_REJECTION_CODES, type PoRejectionCode, type PurchaseOrderStatus } fr
 export const PO_ACKNOWLEDGEMENT_HOURS = 24;
 
 /**
- * AMAZON-DOCUMENTED — the update window for changes to quantity, price, ship
- * dates or delivery dates. Declared here so the later update rule has ONE owner
- * (it is not yet enforced by the acknowledgement writer).
+ * AMAZON-DOCUMENTED — the UPDATE window that governs a change to an
+ * acknowledgement (register `AV-006`): *"You must submit an updated
+ * acknowledgment within 48 hours for any changes to quantity, price, ship dates,
+ * or delivery dates… After 48 hours, we only expect to receive updates to ship
+ * dates or delivery dates."*
+ *
+ * Declared ONCE here. `src/lib/commerce/poAcknowledgementWindow.ts` derives the
+ * window from it and the acknowledgement writer enforces it, so no second copy of
+ * the number exists anywhere in the platform.
  */
 export const PO_ACK_UPDATE_WINDOW_HOURS = 48;
+
+/**
+ * AMAZON-DOCUMENTED — the field groups a change to an acknowledgement may touch.
+ * Inside the update window ALL of them are accepted; after it only the SCHEDULE
+ * groups are expected (see `PO_AMENDABLE_FIELD_GROUPS_AFTER_WINDOW`). Declared
+ * once so the rule and the writer cannot drift.
+ *
+ *   `quantity`        — the acknowledged units on a line
+ *   `price`           — the acknowledged unit cost price on a line
+ *   `ship_dates`      — the scheduled ship date on a line
+ *   `delivery_dates`  — the PO's delivery window (a channel-issued change, `AV-024`)
+ */
+export const PO_AMENDABLE_FIELD_GROUPS = ['quantity', 'price', 'ship_dates', 'delivery_dates'] as const;
+export type PoAmendableFieldGroup = (typeof PO_AMENDABLE_FIELD_GROUPS)[number];
+
+/**
+ * AMAZON-DOCUMENTED — after the update window closes, *"we only expect to receive
+ * updates to ship dates or delivery dates."* A quantity or price change past the
+ * window is therefore REFUSED, and the refusal quotes this declaration.
+ */
+export const PO_AMENDABLE_FIELD_GROUPS_AFTER_WINDOW: readonly PoAmendableFieldGroup[] = [
+  'ship_dates',
+  'delivery_dates',
+];
+
+/** Operator-readable labels for the declared field groups, derived from the group names. */
+export const PO_AMENDABLE_FIELD_GROUP_LABELS: Record<PoAmendableFieldGroup, string> = {
+  quantity: 'acknowledged quantity',
+  price: 'cost price',
+  ship_dates: 'ship dates',
+  delivery_dates: 'delivery dates',
+};
 
 /**
  * NOTIFICATION SCHEDULE (Mercenta operational scheduling — NOT an Amazon rule).
@@ -144,6 +182,24 @@ export const PO_ACK_WINDOW_RULE_TEXT =
   'backordered or rejected. Past the 24-hour limit the documented action is a rejection.';
 
 /**
+ * §BATCH 2b (`AV-006`) — THE ONE OPERATOR-FACING STATEMENT OF THE UPDATE RULE.
+ *
+ * Amazon documents that a change to an acknowledgement must be submitted within
+ * 48 hours for changes to quantity, price, ship dates or delivery dates, and that
+ * after 48 hours only ship-date or delivery-date updates are expected. Before this
+ * declaration Mercenta modelled NEITHER the window nor the after-window limit, so
+ * it could not tell a brand its real obligation.
+ *
+ * Surfaces render THIS string (derived from the declared hours and group sets
+ * above) instead of writing their own copy — so the rule can never drift between
+ * the brand portal, the admin console, the knowledge base and Operational Guidance.
+ */
+export const PO_AMENDMENT_WINDOW_RULE_TEXT =
+  `A change to an acknowledgement must be submitted within ${PO_ACK_UPDATE_WINDOW_HOURS} hours of the order for changes ` +
+  `to quantity, price, ship dates or delivery dates. After ${PO_ACK_UPDATE_WINDOW_HOURS} hours only updates to ship ` +
+  `dates or delivery dates are expected.`;
+
+/**
  * §P13 / S8 — THE ONE BRAND-FACING STATEMENT FOR THE ONBOARDING SURFACES.
  *
  * The brand's onboarding teaches the acknowledgement rule in four places — the
@@ -165,6 +221,9 @@ export const PO_ACK_WINDOW_RULE_TEXT =
  *                        schedule + the on-behalf rejection), labelled as Mercenta's
  *                        and never presented as a channel rule.
  *   · `rejectionCodes` — the channel's documented rejection reasons (`types.ts`).
+ *   · `amendmentText`  — the config-owned UPDATE rule (`PO_AMENDMENT_WINDOW_RULE_TEXT`,
+ *                        `AV-006`), so the onboarding surfaces teach the amendment
+ *                        window as well as the acknowledgement window.
  *   · `text`           — the ONE paragraph the onboarding surfaces render.
  */
 export const PO_ACK_ONBOARDING_STATEMENT = {
@@ -177,8 +236,10 @@ export const PO_ACK_ONBOARDING_STATEMENT = {
     `the final stage, performs the rejection the channel requires on your behalf. That schedule and that on-behalf ` +
     `action are Mercenta's own operating process, not channel rules.`,
   rejectionCodes: PO_REJECTION_CODES,
+  amendmentText: PO_AMENDMENT_WINDOW_RULE_TEXT,
   text:
-    `${PO_ACK_WINDOW_RULE_TEXT} Mercenta reminds you at ${PO_ACK_NOTIFICATION_HOURS.join('/')} hours remaining and, ` +
-    `if you have not decided by the final stage, performs the rejection the channel requires on your behalf. That ` +
-    `schedule and that on-behalf action are Mercenta's own operating process, not channel rules.`,
+    `${PO_ACK_WINDOW_RULE_TEXT} ${PO_AMENDMENT_WINDOW_RULE_TEXT} Mercenta reminds you at ` +
+    `${PO_ACK_NOTIFICATION_HOURS.join('/')} hours remaining and, if you have not decided by the final stage, performs ` +
+    `the rejection the channel requires on your behalf. That schedule and that on-behalf action are Mercenta's own ` +
+    `operating process, not channel rules.`,
 } as const;
