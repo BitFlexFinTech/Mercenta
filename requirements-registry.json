@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-09-27",
+    "last_updated": "2026-09-28",
     "status_enum": [
       "not_started",
       "built",
@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 505,
+    "total_entries": 507,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -2976,6 +2976,15 @@
       "status": "built_and_tested",
       "evidence": "src/config/homepageContent.ts; e2e/uiux-redesign.spec.ts (test 10); e2e/homepage-editor.spec.ts (assertion repointed to the content model); src/components/marketing/Home.tsx",
       "last_verified": "2026-09-18",
+      "superseded_by": null
+    },
+    {
+      "id": "public-homepage-design-overhaul",
+      "description": "The public homepage's DESIGN was rebuilt structurally, not merely re-worded, and the unrequested caption was removed. Home.tsx now opens on an editorial floor carrying a numbered document index with a scroll-spy that is desktop-only by design; the section patterns were replaced rather than edited; tonal bands carry the manifest statement; and a stamp corner mark anchors the page. The tracker keeps its animation and its honest EXAMPLE label instead of a caption. UnlockGrowth.tsx was trimmed of its decorative seven-bar motif and its 'Live platform data' chip. The two hardcoded ink bands were replaced with the explicit --mr-surface-tint token AFTER MEASURING them, because the measured 1.04:1 separation was too weak to read as a band.",
+      "source": "Founder directive session 46 (2026-09-28): the homepage's design had to change, not just its words, and an unrequested caption had to go",
+      "status": "built_and_tested",
+      "evidence": "src/components/marketing/Home.tsx; src/components/shared/UnlockGrowth.tsx; e2e/uiux-foundation.spec.ts; e2e/uiux-redesign.spec.ts; e2e/homepage-editor.spec.ts",
+      "last_verified": "2026-09-28",
       "superseded_by": null
     },
     {

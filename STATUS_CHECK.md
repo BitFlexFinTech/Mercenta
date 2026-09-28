@@ -26,7 +26,40 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## BATCH 2b — THE 48-HOUR AMENDMENT WINDOW (`AV-006`) (session 44, 2026-09-28) — CURRENT
+## THE PUBLIC HOMEPAGE — A STRUCTURAL DESIGN OVERHAUL, DEPLOYED AND LIVE-VERIFIED (session 46, 2026-09-28) — CURRENT
+
+**What is now true:** the Founder reported that the homepage had only had its **wording** changed rather than its
+**design**, and that a caption had appeared that nobody asked for. Both are fixed at source, and the result is
+running on the live demo and verified there this session.
+
+- **The structure was replaced, not re-worded.** `src/components/marketing/Home.tsx` was rebuilt: the hero became
+  an editorial floor carrying a **numbered document index** with a scroll-spy (desktop-only by design, `hidden
+  lg:block`), the section patterns were replaced rather than edited, **tonal bands** carry the manifest statement,
+  and a **stamp corner mark** anchors the page.
+- **The unrequested caption is GONE.** The tracker keeps its animation and its honest **EXAMPLE** label instead of
+  a caption; the live check asserts the caption's absence at both widths.
+- **Trimmed:** `src/components/shared/UnlockGrowth.tsx` lost the decorative seven-bar motif and the "Live platform
+  data" chip.
+- **The bands were made readable by measurement, not by eye.** The two hardcoded `bg-ink-800` bands were replaced
+  with the explicit `--mr-surface-tint` token after measuring them, because a **1.04:1** separation was too weak to
+  read as a band (now 1.06:1 light / 1.40:1 dark, with muted text on the band at 5.69:1 light / 6.40:1 dark).
+- **THREE-WAY STATUS: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Commit **`472aac2`**, pushed to
+  `origin/redesign/foundation`, deployed to `https://demo.mercenta.co.uk`. The live HTML references
+  `assets/index-BvITGeZx.js`, **byte-identical** to the local verified `dist/` build (checked this session), so the
+  deployed code is neither a stale build nor an uncommitted edit. Live functional check **16 PASS / 0 FAIL** at
+  1440x900 and 390x844 in both shells.
+- **Gates:** `npx tsc --noEmit` **0** · `npm run lint` **0** · `npm run build` ✓ · `validate:all` **119 PASS / 0
+  FAIL** · `e2e/uiux-foundation.spec.ts` + `e2e/uiux-redesign.spec.ts` + `e2e/homepage-editor.spec.ts` **24 passed**
+  · `npm run validate:resume-state` **53 assertions PASS**.
+- **Two defects found in this session, both FIXED at source — not worked around:**
+  1. **A checker bug, not a page defect.** The live checker asserted the desktop-only "ON THIS PAGE" index at 390px,
+     where the element is `hidden lg:block` by design. The assertion is now scoped to width ≥ 1024 rather than
+     weakening the page or the check.
+  2. **A false statement in the source of truth.** `PROJECT_STATUS.md`'s resume block still read `DEMO DEPLOYMENT:
+     NOT DEPLOYED` and `LAST VERIFIED COMMIT: b4022d9` while the demo was in fact deployed at `472aac2`. The block
+     and its `HANDOFF.md` mirror were corrected in this session's state commit.
+
+## BATCH 2b — THE 48-HOUR AMENDMENT WINDOW (`AV-006`) (session 44, 2026-09-28) — HISTORICAL (superseded by session 46)
 
 **What is now true:** the channel's documented **48-hour UPDATE window** is modelled, enforced and told — it had
 never been represented, and the acknowledgement writer even refused ANY second acknowledgement (an
