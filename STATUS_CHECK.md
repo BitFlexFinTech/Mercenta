@@ -63,6 +63,8 @@ failures; resume-state: 1 / 1 / 1) with every mutated file restored **byte-ident
 both guards — exactly what the project's `defect-remediation` rule requires: declare the surface, never skip the
 fix. Both now PASS.
 
+**Checkpoint:** `9fea8ad` — "feat(amazon): BATCH 2a …" (19 files). The state-record commit follows, per the project's convention that a commit cannot name its own hash.
+
 **Three-way status:** **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT** (attribution,
 labels and state documentation; no deployable runtime change). **GLOBAL STATE REMAINS "NOT COMPLETE"** — Batch 1's
 delivery leg and the demo deployment are still open, and the demo is still `d726166`. Measured after the last
