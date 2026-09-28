@@ -9,7 +9,7 @@ CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE
 CURRENT BRANCH:           redesign/foundation
 LAST VERIFIED COMMIT:     **`193210d`** — "feat(integrations): BATCH 1b — the connect wizard's backend half now exists (schema + Vault WRITE + the missing spapi-token-exchange)": the commit that carries the Batch 1b implementation AND this state block. Preceded by `4f45dc6` (the Batch 1a state checkpoint) and `a63326e` (the Batch 1a defect-fix commit). (the session's convention: the hash named here is always exactly one commit behind the branch head, because the commit that records a hash cannot contain its own hash). The previous verified commit was `a63326e` (the Batch 1a defect-fix commit) with state checkpoint `4f45dc6`.
 GITHUB PUSH:              **PUSHED** to `origin/redesign/foundation` with the state checkpoint carrying this block; `git status --porcelain` EMPTY at close.
-DEMO DEPLOYMENT:          **NOT APPLICABLE TO THIS INCREMENT — no deployable runtime change in the demo build, and the larger deployment remains DELIBERATELY DEFERRED.** (a) This increment added SERVER-SIDE Supabase Edge Functions and a migration; neither is part of the static Vite build `scripts/deploy-demo.sh` uploads, and neither can be deployed from here (no Supabase credential + no CLI). (b) The demo is therefore still `d726166` (§PHONE, live-verified 209/209) and is BEHIND the repository by the §SSOT S1–S5 client changes, whose deployment the §SSOT programme deferred to its close (S7 = Batch 3). **This increment DID change client source** (`IntegrationsPanel.tsx`, `IntegrationsContext.tsx`, `connectClient.ts`, `testCalls.ts`) — those changes travel with that deferred deployment and are NOT live on the demo. Nothing in this increment has been seen on `https://demo.mercenta.co.uk`.
+DEMO DEPLOYMENT:          **NOT DEPLOYED — deliberately deferred to the §SSOT programme's close (S7 = Batch 3).** The two Edge Functions and the migration are SERVER-SIDE and are not part of the static Vite build `scripts/deploy-demo.sh` uploads, and neither can be deployed from here (no Supabase credential + no CLI). The CLIENT files this increment also touched (`IntegrationsPanel.tsx`, `IntegrationsContext.tsx`, `connectClient.ts`, `testCalls.ts`) travel with that deferred deployment. The demo therefore remains `d726166` (§PHONE, live-verified 209/209) and is BEHIND the repository. Nothing in this increment has been seen on `https://demo.mercenta.co.uk`.
 LIVE VERIFICATION:        **NOT VERIFIED** — nothing in this increment is exercisable on the demo (the deployed build predates it), and the two new connect functions plus the 3 live-capable proxy routes have NO live credential: none has ever run against Amazon or any other provider. The only executions to date are the gate's scripted transports.
 OUTSTANDING BLOCKER:      **(1)** a Supabase project credential + the CLI to deploy the functions (JWT verification ON) — without it no real key can be verified on the deployed demo. **(2)** `SPAPI_CLIENT_SECRET` (+ `SPAPI_CLIENT_ID`) as a Supabase function secret, and the `vault` extension enabled — without them the OAuth exchange answers 503 `SPAPI_CLIENT_SECRET_MISSING` and a verified-but-unstorable key answers `VAULT_WRITE_FAILED`, both STATED, neither faked. **(3)** live provider credentials. **(4)** a declared harmless test endpoint for 14 providers (they refuse honestly with `TEST_ENDPOINT_NOT_DECLARED`). **(5)** Batch 1c — S6 CI wiring.
 NEXT TASK:                **BATCH 1c — S6 CI wiring** (`.github/` holds only `dependabot.yml`; add a workflow running `npm ci`, `typecheck`, `lint`, `build` and `validate:all`, so a break cannot be committed unnoticed), then **BATCH 2** (Amazon accuracy — 37 open findings) and **BATCH 3** (the unverified registry rows + S7).
@@ -260,8 +260,11 @@ here — none describes a behaviour as working:
 
 ### 7. CURRENT CHECKPOINT
 
-`VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE` at this session's commit (the hash is in the resume block and
-the commit subject). The working-tree scope guards required **declared surfaces** for this phase: `§BATCH1b` sets
+`VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE` at this session's commit `193210d` (the state checkpoint
+`44a5cd7` records it). Demo deployment did NOT happen for this increment — it is deliberately deferred to the
+§SSOT programme's close, and the client files it touched travel with that deployment.
+
+The working-tree scope guards required **declared surfaces** for this phase: `§BATCH1b` sets
 were added to `validate-e6-brand-surfaces` (F4/F5/F5b/F6), `validate-e7-embedded-social` and the migrated-migration
 lists of `validate-e5-admin-surfaces`/`validate-e7-embedded-social`. The mechanism is unchanged: an **undeclared**
 path or migration still fails.
@@ -359,8 +362,9 @@ parked here — neither describes a behaviour as working:
 
 ### 7. CURRENT CHECKPOINT
 
-`VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE` at this session's commit (the hash is in the resume block and
-the commit subject). The working-tree scope guard `validate-e6-brand-surfaces` F6 required a **declared surface**
+`VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE` at this session's commit `193210d` (the state checkpoint
+`44a5cd7` records it). Demo deployment did NOT happen for this increment — it is deliberately deferred to the
+§SSOT programme's close, and the client files it touched travel with that deployment. The working-tree scope guard `validate-e6-brand-surfaces` F6 required a **declared surface**
 for this phase: a new `§BATCH1` set was added, its mechanism unchanged and not weakened.
 
 ### 8. VERIFICATION STATUS
