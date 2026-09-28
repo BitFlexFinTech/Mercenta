@@ -1525,6 +1525,16 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
   'scripts/validate-uk-market-fit.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
+  /**
+   * §PUBLIC MESSAGING (2026-09-28, session 47) — the live-verification script.
+   * The homepage's live check used to live in /tmp, so verification of the
+   * DEPLOYED public surface was unreproducible: no future session and no
+   * reviewer could re-run it. `npm run verify:live` now does it from the
+   * repository. The file sits in no other declared set, so it is declared here
+   * rather than left as an unexplained working-tree change — the same remedy
+   * this guard documents for a legitimately new file.
+   */
+  'scripts/verify-live-demo.mjs',
   'e2e/homepage-editor.spec.ts',
   'package.json',
 ]);

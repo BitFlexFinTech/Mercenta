@@ -26,7 +26,55 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## THE PUBLIC HOMEPAGE — A STRUCTURAL DESIGN OVERHAUL, DEPLOYED AND LIVE-VERIFIED (session 46, 2026-09-28) — CURRENT
+## THE HOMEPAGE DESIGN WAS REJECTED AND RE-DONE — THE PREFERRED DESIGN IS RESTORED, AND ITS REAL DEFECTS ARE FIXED (session 47, 2026-09-28) — CURRENT
+
+**What is now true:** the Founder rejected `472aac2` — *"this design is ugly. you did not put any thought into it.
+you dont seem to have actually used the design skills that you were supposed to use. you need to redo the design.
+the orginal design was better."* Accepted in full, with no re-litigation. The editorial/index homepage is
+**REVERTED** (the "ON THIS PAGE" document index, its scroll-spy and the replacement section patterns are GONE) and
+the earlier structure is restored as the base. The design was then corrected against **the project's own design
+law** rather than anyone's taste, and every line below is a measurement, not an opinion. The design skills were
+loaded for real this time (`frontend-design`, `impeccable`, `design-review`) after a stack fit check — the shadcn
+and OKLCH skills were deliberately NOT applied, because this project uses neither.
+
+| What was wrong | How it was fixed | Evidence |
+|---|---|---|
+| Card colours contradicted the platform's own colour language (a logistics card in indigo, a payouts card in amber) | colours now follow the canonical HUE → DOMAIN mapping in `src/config/themes.ts` — logistics=orange · compliance=amber · finance=green · insight=cyan · orders=indigo · exceptions=red; brass stays identity-only | `validate-uiux-redesign.mjs` PASS; live token assertion L5 |
+| The customs stamp was absolutely positioned OVER the CTA heading and covered "your products?" at 1440px | the stamp now sits in the flow (right-aligned at md+, centred below it on mobile), so the boxes cannot overlap | **0 overlaps measured** at 1440/1280/1024/768/390/375; live check L6 |
+| The hero eyebrow broke into two ragged lines at 390px with the status dot floating beside line one | 11px micro floor + tighter tracking below `sm` | **one line** at 375 and 390; live check L7 |
+| "Why brands stay" was two columns at 390px — roughly 170px slivers, four- and five-line sentences | starts at one column, two from `sm`, four from `lg` | 390px render |
+| `UnlockGrowth` was orphaned below the hero, its brass rule twice the width of the words it introduced, leaving a dead gap | moved INTO the hero's pitch column, under the trust badges | 1440/390 renders |
+| Decorative "01–04" numbering on two grids that are not sequences | numbering removed; the shipment record's five stages are now the page's **only** numbered device | render |
+| The stamp's ink measured **3.71:1** on the dark ground (below AA) | takes the palette red → **5.21:1** dark / **5.85:1** light | composited contrast measurement |
+| The page ran 7072px tall at 1440px with heavy dead space | **4049px**, with one tonal band ("Why brands stay") providing the rhythm break | measured page height |
+
+**Gates:** `npx tsc --noEmit` 0 errors · `npm run lint` 0 · `npm run build` ✓ · `validate:all` **119 PASS / 0 FAIL**
+· **39 e2e passed** (uiux-foundation, uiux-redesign, homepage-editor, seo-foundation, uk-market-fit) ·
+`npm run verify:live` **54 PASS / 0 FAIL** live · live entry asset byte-identical to the local `dist/` build
+(sha256 `f777711b183d4e7e`, 315,538 bytes both sides). Commit **`94c4d86`**, pushed, deployed, verified live.
+
+**Defects found and FIXED at source this session:** (1) my own explanatory comment contained a palette hex, which
+`validate-uiux-redesign.mjs` §6 (COLOUR SSOT) correctly refused — the comment now names tokens, not values;
+(2) the new live checker read `animationName` off the inner colour dot instead of the wrapper that carries the
+animation class, producing a **false failure** — fixed, and the trap is documented inside the script;
+(3) two registry rows and the resume block still described the REJECTED design as current — both corrected.
+
+**Defect found and honestly BLOCKED (not fixed, not hidden):** in the dark themes the indigo palette token cannot
+carry AA text at all — measured **4.38:1** with `--mr-on-palette` and **4.47:1** with white — and the affected
+text is the two indigo CTAs. A validator REQUIRES `bg-palette-indigo` + `text-on-palette` on the homepage primary
+CTA, and the token is shared by every indigo surface in 3 of the 5 themes, so the correct fix belongs in
+`src/config/themes.ts` and needs the Founder's design decision (lift the dark indigo, or move the dark themes to
+white text on a deeper indigo). The affected text is **NOT** claimed to pass AA.
+
+**Unreproducible-verification defect CLOSED:** the homepage's live verification used to be a throwaway script in
+`/tmp`, so nobody could re-verify the deployed public surface. It is now `scripts/verify-live-demo.mjs` +
+`npm run verify:live`, declared in `§PUBLIC_MESSAGING_SCOPE`, and it reads the palette token FROM THE PAGE so it
+cannot drift from `themes.ts`.
+
+**Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain` EMPTY**
+after the state checkpoint.
+
+## THE PUBLIC HOMEPAGE — A STRUCTURAL DESIGN OVERHAUL, DEPLOYED AND LIVE-VERIFIED (session 46, 2026-09-28)
 
 **What is now true:** the Founder reported that the homepage had only had its **wording** changed rather than its
 **design**, and that a caption had appeared that nobody asked for. Both are fixed at source, and the result is
