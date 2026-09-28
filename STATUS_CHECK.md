@@ -68,6 +68,11 @@ no such file existed anywhere in the repository**.
   source:** `package.json` → `engines.node: ">=22.18.0"` declared ONCE, the workflow installs **Node 24**, and
   `validate-ci-wiring` gained four assertions that fail if the installed version is below the declared minimum
   (proved able to fail: reverting the pin to 20 → 1 failure). The corpus was not weakened.
+- **VERIFIED LIVE ON GITHUB:** run **`36383110010`** (workflow `CI`, headSha **`6b646bd`**) = **success** in 5m48s,
+  its own log showing `WORDING_LINT_PASS — scanned 326 src files, 0 outward-facing violations` and
+  **`FULL VALIDATOR CORPUS: 116 PASS / 0 FAIL (of 116 files)`**. The **first** run (`36380726689`, headSha
+  `d1b392a`) **failed 114/116** — the run that found the Node-pin defect. Pushed to `origin/redesign/foundation`
+  (`f1dc25f..6b646bd`).
 
 ## BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF NOW EXISTS (session 41, 2026-09-28) — HISTORICAL
 
