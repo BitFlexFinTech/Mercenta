@@ -129,12 +129,30 @@ try {
   test('no due date → NOT READ (never a guessed date)',
     store.deriveDueStatus(null, now).state === 'not_read');
 
-  test('no registrar fact is invented in the config (all null until read)',
-    cfg.COMPANY_REGISTRATION.registrar.status === null &&
-      cfg.COMPANY_REGISTRATION.registrar.incorporationDate === null &&
-      cfg.COMPANY_REGISTRATION.registrar.sicCodes === null &&
-      cfg.COMPANY_REGISTRATION.registrar.nextConfirmationStatementDue === null &&
-      cfg.COMPANY_REGISTRATION.registrarStatusLabel === 'awaiting_registrar_read');
+  /*
+   * §PUBLIC MESSAGING BATCH (2026-09-28) — REPOINTED, NOT WEAKENED.
+   *
+   * OLD CONTRACT (recorded): "all registrar facts are null until read" — i.e.
+   * `registrar.* === null` and `registrarStatusLabel === 'awaiting_registrar_read'`.
+   * That was the correct invariant while no register read had been performed.
+   *
+   * A read HAS now been performed (the public register for company 17457777), so
+   * the invariant this assertion exists to protect — "a registrar fact is never
+   * present unless it came from the register" — is asserted DIRECTLY instead: a
+   * populated field must carry `source: 'registrar_read'` and a status label that
+   * says the register was read; an unread config must still say so.
+   */
+  const reg = cfg.COMPANY_REGISTRATION;
+  const hasRegistrarFacts =
+    reg.registrar.status !== null ||
+    reg.registrar.incorporationDate !== null ||
+    reg.registrar.registeredOfficeAddress !== null;
+  test('a registrar fact is never present without READ provenance (repointed: was "all null until read")',
+    hasRegistrarFacts
+      ? reg.source === 'registrar_read' && reg.registrarStatusLabel === 'read_from_register'
+      : reg.registrarStatusLabel === 'awaiting_registrar_read' &&
+        reg.registrar.sicCodes === null &&
+        reg.registrar.nextConfirmationStatementDue === null);
   test('no official confirmation-statement filing channel is claimed',
     cfg.OFFICIAL_CONFIRMATION_STATEMENT_FILING_CONFIGURED === false);
 

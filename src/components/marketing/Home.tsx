@@ -239,7 +239,12 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                       style={{ backgroundColor: 'var(--mr-palette-green)' }}
                     />
                   </span>
-                  LIVE
+                  <span
+                    className="font-mono text-ds-label tracking-[0.25em] uppercase"
+                    style={{ color: 'var(--mr-text-muted)' }}
+                  >
+                    EXAMPLE
+                  </span>
                 </span>
               </div>
 
@@ -302,6 +307,19 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
                 ))}
               </div>
             </div>
+            {/*
+              §PUBLIC MESSAGING (2026-09-28) — THE TRACKER IS LABELLED HONESTLY.
+              The panel above is an ILLUSTRATION built from `homepageContent.tracker`
+              (reference MCT-2418), not a real consignment — so the badge says
+              EXAMPLE and this caption says so in words. Our own rule is that
+              simulated or example content is never presented as live data.
+            */}
+            <p
+              className="mt-3 text-center text-ds-label"
+              style={{ color: 'var(--mr-text-muted)' }}
+            >
+              An example of the live view — your own consignments appear here as they move.
+            </p>
           </div>
 
           {/* §UI/UX Wave 1 — "Unlock growth with data" (truthful platform copy) */}
@@ -315,7 +333,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       <section id="about" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
           <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
-            The operating model
+            Who we work with
           </p>
           <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
             {c.about.heading}
@@ -326,7 +344,12 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
           >
             {c.about.subheading}
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06]">
+          <div
+            className={cn(
+              'grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06]',
+              c.about.points.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
+            )}
+          >
             {c.about.points.map((point, i) => {
               const Icon = icon(point.icon);
               const palette = ['var(--mr-palette-indigo)', 'var(--mr-palette-cyan)', 'var(--mr-palette-green)'][i % 3];
@@ -354,11 +377,11 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
         </div>
       </section>
 
-      {/* §UI/UX Wave 2 — connected platform capabilities (each domain-coloured) */}
+      {/* §PUBLIC MESSAGING — the four things that stop being the brand's job */}
       <section id="services" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
           <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
-            The platform
+            What changes for you
           </p>
           <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
             {c.services.heading}
@@ -369,7 +392,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
           >
             {c.services.subheading}
           </p>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {c.services.cards.map((service, i) => {
               const Icon = icon(service.icon);
               const palette = [
@@ -412,11 +435,11 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
         </div>
       </section>
 
-      {/* §UI/UX Wave 2 — the connected commercial-operations chain */}
+      {/* §PUBLIC MESSAGING — why brands stay */}
       <section id="network" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
           <p className="font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500 mb-3 text-center">
-            Connected end to end
+            Why brands stay
           </p>
           <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
             {c.route.heading}
@@ -427,7 +450,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
           >
             {c.route.subheading}
           </p>
-          <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
             {c.route.steps.map((step, i) => {
               const Icon = icon(step.icon);
               return (
@@ -465,7 +488,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
         <div className="max-w-6xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
           <div>
             <p className="mb-3 font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500">
-              Visibility &amp; control
+              Inside the workspace
             </p>
             <h2 className={cn('font-display text-2xl md:text-3xl font-semibold mb-3', rv)}>
               {c.visibility.heading}
@@ -515,7 +538,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       <section id="protection" className="px-6 py-16 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
           <p className="mb-3 text-center font-mono text-ds-label uppercase tracking-[0.25em] text-zinc-500">
-            Protection, built in
+            When things go wrong
           </p>
           <h2 className={cn('font-display text-2xl md:text-3xl font-semibold text-center mb-3', rv)}>
             {c.protection.heading}
@@ -565,7 +588,7 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
         <div className="max-w-2xl mx-auto text-center relative">
           <div
             aria-hidden="true"
-            className="absolute -top-8 right-0 md:right-6 rotate-[8deg] select-none pointer-events-none"
+            className="absolute -top-16 right-0 md:-top-14 md:right-4 rotate-[8deg] select-none pointer-events-none"
           >
             <div className="border-[3px] border-stamp text-stamp rounded-md px-4 py-2 font-mono text-ds-label tracking-[0.2em] uppercase opacity-80 shadow-[inset_0_0_12px_rgba(181,73,58,0.15)]">
               <div className="border border-stamp/70 rounded-sm px-3 py-1.5 text-center leading-relaxed">

@@ -48,16 +48,23 @@ export const COMPANY_REGISTRATION: CompanyRegistration = {
   companyNumber: '17457777',
   jurisdiction: 'England & Wales',
   incorporated: true,
-  source: 'founder_supplied',
+  /**
+   * §BATCH — read from the public register (2026-09-28). The values below are the
+   * register's own, recorded with the provenance the type requires. They are the
+   * INTERNAL statutory record: the public pages publish only the legal name, the
+   * company number, the registered office and a contact address — never the
+   * incorporation date, the status or the SIC codes.
+   */
+  source: 'registrar_read',
   registrar: {
-    status: null,
-    incorporationDate: null,
-    registeredOfficeAddress: null,
-    sicCodes: null,
-    nextConfirmationStatementDue: null,
-    nextAccountsDue: null,
+    status: 'Active',
+    incorporationDate: '2026-09-14',
+    registeredOfficeAddress: '128 City Road, London, United Kingdom, EC1V 2NX',
+    sicCodes: ['45310', '46342', '46900', '47910'],
+    nextConfirmationStatementDue: '2027-09-27',
+    nextAccountsDue: '2028-06-14',
   },
-  registrarStatusLabel: 'awaiting_registrar_read',
+  registrarStatusLabel: 'read_from_register',
 };
 
 /**

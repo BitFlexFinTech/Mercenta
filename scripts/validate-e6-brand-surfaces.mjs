@@ -1482,6 +1482,53 @@ const BATCH2B_AMENDMENT_WINDOW_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §PUBLIC MESSAGING BATCH (2026-09-28) — THE PUBLIC-SURFACES DECLARED SCOPE.
+ *
+ * The eight public pages each described the platform's INTERNAL specification —
+ * which relationships the business holds, how the rules are enforced, what the
+ * commercial structure is — instead of what a brand gets. That is a competitive
+ * leak as much as a positioning failure. This batch gives the public message ONE
+ * owner (`src/config/positioning.ts`), rewrites the eight pages around the
+ * OUTCOME for the brand, rebuilds the footer to publish a real company identity,
+ * and lands a gate (`scripts/validate-public-claims.mjs`) that fails the build if
+ * the internal detail returns.
+ *
+ * Scope note: the whole marketing directory is named FILE BY FILE rather than as
+ * a directory prefix, so the declaration stays reviewable — a new file dropped
+ * into `src/components/marketing/` still has to be declared.
+ *
+ * F5/F5b/F6's contract is UNCHANGED: a changed SOURCE file in NO declared set is
+ * still refused. Nothing protected is touched (no migration, no provider client,
+ * no Xero, no billing).
+ */
+const PUBLIC_MESSAGING_SCOPE = new Set([
+  'src/config/positioning.ts',
+  'src/config/company.ts',
+  'src/config/homepageContent.ts',
+  'src/config/ukMarketFit.ts',
+  'src/components/marketing/Home.tsx',
+  'src/components/marketing/HowItWorks.tsx',
+  'src/components/marketing/UKMarketAccess.tsx',
+  'src/components/marketing/ForBrands.tsx',
+  'src/components/marketing/FAQ.tsx',
+  'src/components/marketing/ExploreUkMarketFit.tsx',
+  'src/components/marketing/PublicNav.tsx',
+  'src/components/marketing/PublicFooter.tsx',
+  'src/components/marketing/PrivacyPolicy.tsx',
+  'src/components/marketing/TermsOfService.tsx',
+  'scripts/validate-public-claims.mjs',
+  'scripts/validate-company-control-centre.mjs',
+  'scripts/validate-homepage-editor.mjs',
+  'scripts/validate-uiux-redesign.mjs',
+  'scripts/validate-seo-foundation.mjs',
+  'scripts/validate-uk-market-fit.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'e2e/homepage-editor.spec.ts',
+  'package.json',
+]);
+
   const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
   // §Phase M13 — REPOINTED. This pinned "026 remains the newest; 26 total", which
@@ -1563,7 +1610,10 @@ const BATCH2B_AMENDMENT_WINDOW_SCOPE = new Set([
         [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2b — the PO amendment-window phase's declared surface (see above). */
         BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
-        [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PUBLIC MESSAGING — the public-surfaces batch's declared scope (see above). */
+        PUBLIC_MESSAGING_SCOPE.has(p) ||
+        [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -1596,7 +1646,10 @@ const BATCH2B_AMENDMENT_WINDOW_SCOPE = new Set([
         [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2b — same declaration, second protected-path check (F5b). */
         BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
-        [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
+        PUBLIC_MESSAGING_SCOPE.has(p) ||
+        [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -1855,7 +1908,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 2b — the PO amendment-window phase (see above). */
           BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
-          [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
+          PUBLIC_MESSAGING_SCOPE.has(p) ||
+          [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

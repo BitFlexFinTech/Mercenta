@@ -616,6 +616,45 @@ try {
   ];
 
   /**
+   * §PUBLIC MESSAGING BATCH (2026-09-28) — the public-surfaces batch's declared
+   * surface. It gives the public message ONE owner (`src/config/positioning.ts`),
+   * rewrites the eight public pages around the OUTCOME for the brand instead of
+   * the platform's internal specification, rebuilds the footer to publish a real
+   * company identity, reconciles the statutory record with the register read, and
+   * lands `scripts/validate-public-claims.mjs` — the gate carrying the red-line
+   * list that fails the build if the internal detail returns.
+   *
+   * Same mechanism as every phase above: a changed source/test file outside EVERY
+   * declared set is still refused.
+   */
+  const PUBLIC_MESSAGING_DECLARED = [
+    'src/config/positioning.ts',
+    'src/config/company.ts',
+    'src/config/homepageContent.ts',
+    'src/config/ukMarketFit.ts',
+    'src/components/marketing/Home.tsx',
+    'src/components/marketing/HowItWorks.tsx',
+    'src/components/marketing/UKMarketAccess.tsx',
+    'src/components/marketing/ForBrands.tsx',
+    'src/components/marketing/FAQ.tsx',
+    'src/components/marketing/ExploreUkMarketFit.tsx',
+    'src/components/marketing/PublicNav.tsx',
+    'src/components/marketing/PublicFooter.tsx',
+    'src/components/marketing/PrivacyPolicy.tsx',
+    'src/components/marketing/TermsOfService.tsx',
+    'scripts/validate-public-claims.mjs',
+    'scripts/validate-company-control-centre.mjs',
+    'scripts/validate-homepage-editor.mjs',
+    'scripts/validate-uiux-redesign.mjs',
+    'scripts/validate-seo-foundation.mjs',
+    'scripts/validate-uk-market-fit.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'e2e/homepage-editor.spec.ts',
+    'package.json',
+  ];
+
+  /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
    *
    * Same declaration mechanism as SPRINT_WORK_LAYER_DECLARED above: the files
@@ -1504,6 +1543,10 @@ try {
      * §BATCH 2b — the PO amendment-window phase's declared surface (see above).
      */
     ...BATCH2B_AMENDMENT_WINDOW_DECLARED,
+    /**
+     * §PUBLIC MESSAGING — the public-surfaces batch's declared surface (see above).
+     */
+    ...PUBLIC_MESSAGING_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

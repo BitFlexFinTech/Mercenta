@@ -6,19 +6,30 @@
  * Homepage Editor edits a draft of it, and "Publish" promotes the draft to
  * the live copy. Icons are logical names resolved to components by Home.
  *
- * §UI/UX Wave 2 — the copy was completely reassessed for the redesigned
- * homepage. Two rules govern every string in this file:
+ * §PUBLIC MESSAGING (2026-09-28) — THE COPY WAS REBUILT FROM THE OUTCOME UP.
+ * The owner of the public message is now `src/config/positioning.ts`; the
+ * defaults below are BUILT FROM it, so Home, the other seven public pages and
+ * the footer cannot say different things. Three rules govern every string:
  *
- *  1. CHANNEL-NEUTRAL POSITIONING (§19/§33). Public copy describes Mercenta's
- *     commercial value to brands using channel-neutral language ("managed
- *     retail-channel operations", "channel distribution", "purchase-order
- *     management"). The platform's provider-specific operational reality
- *     (Amazon Vendor Central) is represented ONLY in the internal application,
- *     never in customer-facing positioning. No claim of partnership,
- *     endorsement, guaranteed purchase orders or guaranteed sales appears here.
- *  2. NO MARKET-SIZE THEATRE. TAM/SAM market-size content was removed from the
- *     public homepage. Every remaining section has a stated reason to exist.
+ *  1. SAY THE OUTCOME, NEVER THE MECHANISM. The page tells a brand what stops
+ *     being their job and what they get. It never explains how the business is
+ *     structured, who we hold accounts with, how the rules are enforced, or what
+ *     the commercial terms are — that was the leak this rebuild closes.
+ *  2. TWO AUDIENCES, BOTH FIRST-CLASS. Brands outside the UK entering the market,
+ *     and brands already selling here who want the retail side carried.
+ *  3. NO UNEVIDENCED CLAIM. No client counts, no "trusted by", no guarantees, and
+ *     the retail channel is never named (`scripts/lint-wording.mjs`).
+ *
+ * `scripts/validate-public-claims.mjs` fails the build if any of that returns.
  */
+
+import {
+  PUBLIC_AUDIENCES,
+  PUBLIC_HERO_SUBHEADING,
+  PUBLIC_OUTCOMES,
+  PUBLIC_REASONS_TO_STAY,
+  PUBLIC_SOFTWARE_EXPERIENCE,
+} from './positioning';
 
 export type HomeIconName =
   | 'truck' | 'shield' | 'package' | 'trending'
@@ -91,13 +102,20 @@ export interface HomepageContent {
 }
 
 
+/**
+ * Icons for the generated cards — logical names Home resolves to components.
+ * Declared here so the copy model stays free of component imports.
+ */
+const AUDIENCE_ICONS: readonly HomeIconName[] = ['plane', 'check'];
+const OUTCOME_ICONS: readonly HomeIconName[] = ['truck', 'shield', 'trending', 'package'];
+const REASON_ICONS: readonly HomeIconName[] = ['award', 'check', 'target', 'shield'];
+
 export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   hero: {
-    eyebrow: 'Managed retail-channel operations — United Kingdom',
-    headingStart: 'Your brand, listed, ordered',
-    headingHighlight: 'and paid — without the infrastructure.',
-    subheading:
-      'Mercenta is the operating layer between your brand and the retail channel. We manage the orders, fulfilment, logistics, finance and compliance that come with selling at retail scale, and you work inside one platform that shows you every order, shipment, document and payment as it happens.',
+    eyebrow: 'Retail channel partner — United Kingdom',
+    headingStart: 'Your products on UK shelves',
+    headingHighlight: 'without building a UK business.',
+    subheading: PUBLIC_HERO_SUBHEADING,
     primaryCta: 'Explore UK Market Fit',
     /**
      * §Phase 1 — this is the HEADER utility action label, not a hero button.
@@ -107,161 +125,104 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
      * source for its label (and for the Homepage Editor).
      */
     secondaryCta: 'Partner Login',
-    trustBadges: ['UK ESTABLISHED', 'COMPLIANCE-GATED ONBOARDING', 'EVERY ACTION AUDITED'],
+    trustBadges: ['Registered in England & Wales', 'One partner from production line to shelf', 'Your brand stays yours'],
   },
   tracker: {
-    reference: 'BXB-2847',
-    cargoLabel: 'Mixed Consumer Goods',
-    freightMode: 'SEA FREIGHT',
+    reference: 'MCT-2418',
+    cargoLabel: 'Consumer goods',
+    freightMode: 'AIR FREIGHT',
     stages: [
-      { label: 'Factory Intake', done: true },
-      { label: 'In Transit', done: true },
-      { label: 'UK Customs Cleared', done: true },
-      { label: 'UK Retail Live', done: false },
+      { label: 'Origin collected', done: true },
+      { label: 'Export airport', done: true },
+      { label: 'Air transit', done: true },
+      { label: 'UK customs cleared', done: true },
+      { label: 'On shelf', done: false },
     ],
   },
   about: {
-    heading: 'How Mercenta works with your brand',
+    heading: 'Two kinds of brand come to us',
     subheading:
-      'Three moves. No new systems, no new team, no infrastructure build — you keep selling, we run the commercial operation.',
-    points: [
-      {
-        title: 'Onboard once, properly',
-        description:
-          'Submit your products and your compliance documentation. Nothing reaches the catalogue until every applicable requirement is present and approved, so the operation starts clean.',
-        icon: 'check',
-      },
-      {
-        title: 'Mercenta operates the channel',
-        description:
-          'Purchase orders arrive in your workspace. You approve, amend or reject them, and Mercenta handles acknowledgement, fulfilment, carrier booking, customs paperwork, delivery and reconciliation.',
-        icon: 'truck',
-      },
-      {
-        title: 'You see everything, live',
-        description:
-          'Orders, shipments, documents, deductions and payments appear in your portal as they happen — not in a monthly report that arrives after the decisions were already made.',
-        icon: 'package',
-      },
-    ],
+      'One is outside the UK and wants in. The other is already here and wants the retail side carried. Both end up in ' +
+      'the same place — the product stays yours, the operation becomes ours.',
+    points: PUBLIC_AUDIENCES.map((audience, i) => ({
+      title: audience.heading,
+      description: audience.body,
+      icon: AUDIENCE_ICONS[i % AUDIENCE_ICONS.length],
+    })),
   },
   services: {
-    heading: 'One platform for the whole commercial operation',
-    subheading:
-      'These are not separate products bolted together. They are one operating platform where a purchase order, its shipment, its documents, its invoice and its payment stay connected to each other.',
-    cards: [
+    heading: 'What changes when a retailer becomes your partner',
+    subheading: 'Not a feature list. The four things that stop being your job.',
+    cards: PUBLIC_OUTCOMES.map((outcome, i) => ({
+      title: outcome.title,
+      description: outcome.body,
+      icon: OUTCOME_ICONS[i % OUTCOME_ICONS.length],
+    })),
+  },
+  route: {
+    heading: 'Why brands stay',
+    subheading: 'These four come up in almost every conversation we have.',
+    steps: PUBLIC_REASONS_TO_STAY.map((reason, i) => ({
+      title: reason.title,
+      description: reason.body,
+      icon: REASON_ICONS[i % REASON_ICONS.length],
+    })),
+  },
+  visibility: {
+    heading: 'Inside your workspace',
+    subheading: PUBLIC_SOFTWARE_EXPERIENCE,
+    points: [
       {
-        title: 'Purchase-order management',
+        title: 'Every order, in one queue',
         description:
-          'Every order in one queue with its value, deadline and status. Approve, amend or reject, with a full audit trail of who decided what and when.',
+          'What has come in, what it is worth and what is waiting on a decision from you — with the ones that need you soonest at the top.',
         icon: 'package',
       },
       {
-        title: 'Fulfilment & logistics',
+        title: 'Every document, in its place',
         description:
-          'Shipment creation is order-gated: a shipment can only be raised against a valid order that belongs to you. International moves by DHL, UK domestic by Palletline.',
-        icon: 'truck',
-      },
-      {
-        title: 'Finance & reconciliation',
-        description:
-          'Invoices, payments, deductions and chargebacks reconciled against the orders that caused them, with payout proposals visible before anything is settled.',
-        icon: 'trending',
-      },
-      {
-        title: 'Compliance, enforced',
-        description:
-          'Category-aware documentation requirements are enforced as a hard gate. No manual override can bypass a regulatory requirement — it can only change workflow state.',
+          'What is approved, what is coming up for renewal and what is holding something back — so a piece of paper never stalls an order quietly.',
         icon: 'shield',
       },
       {
-        title: 'Communications & cases',
+        title: 'Every payment, explained',
         description:
-          'Message threads and cases stay attached to the order, shipment or deduction they concern, so context never gets lost in an inbox.',
-        icon: 'target',
-      },
-      {
-        title: 'Commercial intelligence',
-        description:
-          'Demand signals, listing quality and category performance for the products you actually sell — presented as estimates, clearly distinguished from confirmed facts.',
-        icon: 'award',
-      },
-    ],
-  },
-  route: {
-    heading: 'From your product to a running commercial operation',
-    subheading:
-      'One connected chain — each stage feeding the next, none of them disconnected from the rest.',
-    steps: [
-      { title: 'Brand', description: 'You join as a brand with its own workspace, users, roles and commercial terms.', icon: 'check' },
-      { title: 'Products', description: 'Catalogued with the paperwork each category actually requires.', icon: 'package' },
-      { title: 'Commercial operations', description: 'Your commercial relationship is agreed, recorded and audited.', icon: 'target' },
-      { title: 'Orders', description: 'Purchase orders land in your queue with the value and the deadline attached.', icon: 'truck' },
-      { title: 'Fulfilment', description: 'Orders are acknowledged and prepared against the correct quantities.', icon: 'truck' },
-      { title: 'Logistics', description: 'Carrier booking, labels, customs paperwork and tracking, end to end.', icon: 'ship' },
-      { title: 'Finance', description: 'Invoices, payments, deductions and payout proposals reconciled per order.', icon: 'trending' },
-      { title: 'Compliance', description: 'Documentation versioned and verified — never a one-off tick at onboarding.', icon: 'shield' },
-      { title: 'Visibility', description: 'Every one of the above visible to you in one place, in real time.', icon: 'award' },
-      { title: 'Growth', description: 'More products, more categories, more channels — without rebuilding the operation.', icon: 'plane' },
-    ],
-  },
-  visibility: {
-    heading: 'You see exactly what we see',
-    subheading:
-      'Complete operational visibility is the product, not a reporting extra. There is no monthly summary that hides what happened in the meantime.',
-    points: [
-      {
-        title: 'Live order and shipment state',
-        description:
-          'Where every order is, which carrier has it, where it is in transit and when it will arrive — updated as the operation moves, not afterwards.',
-        icon: 'truck',
-      },
-      {
-        title: 'Financial position per order',
-        description:
-          'Order value, deductions applied, what is reconciled and what is still pending, connected back to the order that produced it.',
+          'What has settled, what is still to come and what each deduction was for — shown against the order that caused it.',
         icon: 'trending',
-      },
-      {
-        title: 'Documentation status',
-        description:
-          'Which compliance documents are approved, which are expiring and which are blocking a product from trading — with the requirement that applies to that category.',
-        icon: 'shield',
       },
     ],
   },
   protection: {
-    heading: 'Built to stop deadlines becoming problems',
-    subheading:
-      'Commercial operations fail quietly: a window closes, a document expires, an order goes unacknowledged. The platform is designed to make deadlines, urgency and required actions visible before they cost you.',
+    heading: 'When something goes wrong, you hear it from us',
+    subheading: 'Nothing in this business is risk-free. What matters is who tells you, and how quickly.',
     points: [
       {
-        title: 'Deadlines are visible, not buried',
+        title: 'A problem is never hidden',
         description:
-          'Acknowledgement windows, ship windows and renewal dates surface as deadlines with the action each one needs.',
+          'A late consignment, a failed delivery, a document that is rejected — you are told, and told what is being done about it.',
         icon: 'target',
       },
       {
-        title: 'Urgency has a route',
+        title: 'A payment is never quietly absorbed',
         description:
-          'Anything blocked, overdue or at risk is prioritised into a queue with a named destination, so it is obvious who or what resolves it.',
-        icon: 'award',
+          'If a figure looks wrong, it is held and reviewed rather than paid out or written off without you seeing it.',
+        icon: 'shield',
       },
       {
-        title: 'Every action is attributable',
+        title: 'Your approval comes first',
         description:
-          'Approvals, overrides and escalations are recorded with the actor, the reason and the object concerned — for Mercenta and for your brand.',
+          'Nothing happens to your products or your money that you have not agreed to. That is the whole point of the partnership.',
         icon: 'check',
       },
     ],
   },
   finalCta: {
-    heading: 'Ready to run your UK commercial operation properly?',
+    heading: 'Ready to find out whether the UK wants your products?',
     subheading:
-      'Join brands already operating through {{brand}} — the same platform, your own workspace.',
+      'Start with an honest read on the market — free, and worth having whether or not you go any further with {{brand}}.',
     buttonLabel: 'Explore UK Market Fit',
-    stampLine1: 'Onboarding',
-    stampLine2: 'Compliance gated',
+    stampLine1: 'UK market',
+    stampLine2: 'assessment',
   },
 };
 
