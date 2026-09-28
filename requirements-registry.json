@@ -602,6 +602,53 @@
       "next_plan": "Batch 1c (S6 CI wiring) is DONE (2026-09-28, session 42 — see _meta.batch1c_ci_wiring); the next recorded work is Batch 2 (Amazon accuracy — 37 open findings) and Batch 3 (the unverified registry rows + S7), plus the still-open Batch 1 delivery leg (deployment + live verification).",
       "verified_commit": "193210d",
       "github_push": "PUSHED to origin/redesign/foundation (4f45dc6..193210d)"
+    },
+    "batch1c_ci_wiring": {
+      "increment": "BATCH 1c (S6) — THE ENFORCEMENT LEG: CI NOW RUNS THE GATES (session 42, 2026-09-28)",
+      "record": "docs/NEXT_BUILD_PLAN_2026-09-27.md §1c (+ PRODUCTION_READINESS.md §BATCH1c)",
+      "status": "DONE — CI exists, runs the whole corpus on every push and pull request, and is kept honest by its own gate",
+      "built": [
+        ".github/workflows/ci.yml — on every push and every pull request: npm ci (reproducible, from the committed lockfile; never `npm install`) -> typecheck -> lint -> build -> validate:wording -> validate:all (the WHOLE corpus, globbed by scripts/validate-all.sh). Installs the Chromium the production-boot gate drives; cancels superseded runs; timeout-minutes bounded; `contents: read` only; pinned actions/checkout@v4 + actions/setup-node@v4 (Node 20, npm cache); NO secret interpolation and NO deploy command.",
+        "scripts/validate-ci-wiring.mjs — the owner gate, registered as `npm run validate:ci-wiring` (39 assertions). It refuses a workflow that is missing, untriggered on push/PR, unpinned, non-failing, disabled, wrongly ordered (build before validate:all), secret-bearing, deploy-bearing, or that names a gate whose script/config does not exist; and it asserts that EVERY registered `validate:*` script is reachable by CI.",
+        "README.md — the validation-gate section now leads with `npm run validate:all` and names the CI + its gate (the hand-maintained list previously never named the corpus command).",
+        "The §BATCH1c declared surface in scripts/validate-e6-brand-surfaces.mjs (F5/F5b/F6), naming .github/workflows/ (a NEW untracked directory is reported by git status as `dir/`, which is why declaring only the file path was insufficient — found by the guard itself)."
+      ],
+      "gate": "npm run validate:ci-wiring — 39 assertions, 0 failures. PROVED ABLE TO FAIL FOUR TIMES: deleting the validate:all step -> 2 failures; `npm ci` -> `npm install` -> 3; adding `continue-on-error: true` -> 1; deleting the workflow entirely -> 21. The workflow was restored BYTE-IDENTICAL (sha256 59663a46cf1d2c2c3e6cf4e4315970db4b0fd7e79a2e89b9c255d701311112e2 before and after).",
+      "measured": {
+        "typecheck": "0",
+        "lint": "0",
+        "build": "OK",
+        "validate_all": "116 PASS / 0 FAIL (of 116 files)",
+        "validate_ci_wiring": "39/39",
+        "validate_wording": "PASS (326 src files, 0 outward-facing violations)",
+        "clean_clone_rehearsal": "A fresh `git clone` + `npm ci` (NO .env, none of the gitignored local folders): npm ci 0, typecheck 0, lint 0, build 0, wording 0, validate:all 116 PASS / 0 FAIL — i.e. the corpus does not depend on anything that exists only on this machine, which is exactly what CI will do."
+      },
+      "defects_fixed": [
+        {
+          "defect": "requirements-registry.json row `batch-4-ci-cd` recorded status 'built' with evidence `.github/workflows/ci.yml`, describing 'typecheck, build, lint (0 warnings), audit, registry verify, demo completeness, E2E tests on push/PR' — while NO SUCH FILE EXISTED anywhere in the repository. A capability recorded as built, with a cited artefact that is absent, is a false statement.",
+          "disposition": "FIXED AT SOURCE — the workflow now EXISTS and the row states exactly what runs, dated 2026-09-28; the description no longer claims the E2E suite or any deployment (neither is part of the workflow, and the workflow is asserted to contain no deploy command).",
+          "gate": "validate-ci-wiring asserts the workflow exists, runs the five gates, cannot deploy and interpolates no secret; both evidence paths now exist."
+        },
+        {
+          "defect": "docs/WORK_LAYER_SSOT_2026-09-26.md claimed 'there is no CI — .github/ contains only dependabot.yml' (F7) and 'CI wiring still outstanding' (S6); docs/NEXT_BUILD_PLAN_2026-09-27.md §1c still listed 1c as outstanding and pinned a stale '113 files' corpus count.",
+          "disposition": "FIXED at every live citation, with the old text recorded inline (never deleted): F7 marked FIXED 2026-09-28, S6 marked DONE, §1c marked DONE with the measured 116-file count and the still-open delivery leg named.",
+          "gate": "validate-ci-wiring is the standing gate for the CI claim itself; the corrected documents now point at it."
+        },
+        {
+          "defect": "The new gate's own first version asserted that `typecheck`/`lint`/`build` name a scripts/ FILE — untrue: they name tools (tsc/eslint/vite). The assertion failed 3 times on a CORRECT workflow, i.e. it was itself defective.",
+          "disposition": "FIXED AT SOURCE — the assertion now checks what is real: the script exists, plus (for a tool) its devDependency and the config file it reads (tsconfig.app.json / eslint.config.js / vite.config.ts), or (for validate:all / validate:wording) the script file itself.",
+          "gate": "It passes on the correct workflow, and the mutation proof above shows it still fails when the wiring is broken (2/3/1/21)."
+        }
+      ],
+      "not_done": [
+        "CI deploys NOTHING and this increment changes NO application runtime: Batch 1's delivery leg is still open — Batch 1b's client files and the five Edge Functions remain UNDEPLOYED (no Supabase credential + CLI in this environment).",
+        "Nothing in this increment is visible on https://demo.mercenta.co.uk; the demo remains d726166.",
+        "The E2E suite and `verify-registry` are deliberately NOT in the CI workflow (the recorded S6 scope is typecheck/lint/build/wording/corpus); neither is claimed anywhere as running in CI."
+      ],
+      "completion_status": "VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT (no application runtime change: a CI workflow, its gate, one npm script and documentation). GLOBAL STATE REMAINS 'NOT COMPLETE' — the demo leg is unsatisfied for the programme as a whole (demo still d726166).",
+      "next_plan": "Batch 2 (Amazon accuracy — 37 open findings: AV-019/AV-019b, AV-024, AV-006, AV-007 first), then Batch 3 (the unverified registry rows + S7 + the deferred deployment that closes Batch 1's delivery leg).",
+      "verified_commit": "7a3ab8f",
+      "github_push": "PUSHED to origin/redesign/foundation; the live GitHub Actions run for this commit is recorded in the state checkpoint that follows it."
     }
   },
   "entries": [

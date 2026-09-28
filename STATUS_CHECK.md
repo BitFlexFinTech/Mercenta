@@ -26,7 +26,40 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF NOW EXISTS (session 41, 2026-09-28)
+## BATCH 1c (S6) — CI NOW RUNS EVERY GATE ON PUSH AND PULL REQUEST (session 42, 2026-09-28)
+
+**Before this session:** `.github/` held **only `dependabot.yml`**. Nothing enforced `typecheck`, `lint`, `build`
+or the whole validator corpus on a push, so a break could be committed unnoticed — **and one was recorded as
+"built" while absent**: the registry row `batch-4-ci-cd` cited `.github/workflows/ci.yml` as its evidence **while
+no such file existed anywhere in the repository**.
+
+- **NOW:** `.github/workflows/ci.yml` runs, on **every push and every pull request**: `npm ci` (reproducible, from
+  the committed lockfile — never `npm install`) → `typecheck` → `lint` → `build` → `validate:wording` →
+  `validate:all` (the whole corpus, **116 validators**, globbed by `scripts/validate-all.sh`). It installs the
+  Chromium the production-boot gate drives, cancels superseded runs, is time-bounded, holds `contents: read` only,
+  pins `actions/checkout@v4` / `actions/setup-node@v4` at Node 20 with the npm cache, interpolates **no secret**
+  and contains **no deploy command**.
+- **Gate: `npm run validate:ci-wiring`** (`scripts/validate-ci-wiring.mjs`, **39 assertions**). It fails if the
+  workflow or a step/trigger disappears, `npm install` replaces `npm ci`, the ordering breaks (build must precede
+  `validate:all`), a step is made non-failing, an action is pinned to a moving branch, a secret or deploy command
+  appears, or **any registered `validate:*` script becomes unreachable by CI**. Proved able to fail **four times**
+  (2 / 3 / 1 / 21 failures); the workflow was restored **byte-identical** (sha256
+  `59663a46cf1d2c2c3e6cf4e4315970db4b0fd7e79a2e89b9c255d701311112e2`).
+- **The wording gate is named explicitly**: `scripts/validate-all.sh` globs `scripts/validate-*.mjs`, and the
+  compliance wording gate is `scripts/lint-wording.mjs` — a name that glob cannot match. The gap is closed by an
+  explicit CI step and asserted, not assumed.
+- **Rehearsed in a CLEAN CLONE** (a fresh `git clone` + `npm ci`, with **no `.env`** and none of the gitignored
+  local folders): `npm ci` 0 · typecheck 0 · lint 0 · build 0 · wording 0 · **validate:all 116 PASS / 0 FAIL**.
+- **NOT done (stated, not implied):** CI **deploys nothing** and this increment changes **no application
+  runtime** — Batch 1's delivery leg is still open: Batch 1b's client files and the server-side functions remain
+  **undeployed** (no Supabase credential + CLI), and the demo remains `d726166`. Every activation item is in
+  `PRODUCTION_READINESS.md` §BATCH1b/§BATCH1c.
+- **Defects fixed at source:** the registry row now states what actually runs and when it was verified;
+  `docs/WORK_LAYER_SSOT_2026-09-26.md` (F7 "there is no CI", S6 "CI wiring still outstanding") and
+  `docs/NEXT_BUILD_PLAN_2026-09-27.md` §1c (outstanding + a stale 113-file count) were corrected with the old
+  text recorded; the README's validation-gate section now leads with `validate:all` and names the CI.
+
+## BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF NOW EXISTS (session 41, 2026-09-28) — HISTORICAL
 
 **Before this session:** the Integrations wizard's "Test Connection & Save" ran its test **in the browser**
 (`src/lib/integrations/testCalls.ts`) and kept the key in memory only; the OAuth path called
@@ -62,8 +95,8 @@ the repository). So a real key could not become a real connection.
 - **NOT done (stated, not implied):** the five functions are **NOT deployed** (no Supabase credential + CLI);
   `SPAPI_CLIENT_SECRET` is unset, so the OAuth exchange answers 503 `SPAPI_CLIENT_SECRET_MISSING`; the `vault`
   extension is not confirmed enabled, so a verified key would answer `VAULT_WRITE_FAILED`; **no live path has ever
-  run against a provider**; **1c (CI wiring)** and the deployment remain. Every activation item is in
-  `PRODUCTION_READINESS.md` §BATCH1b.
+  run against a provider**; **1c (CI wiring) is DONE (2026-09-28 — see the section above); the deployment
+  remains.** Every activation item is in `PRODUCTION_READINESS.md` §BATCH1b.
 ## BATCH 1a — THE PROVIDER PROXY HELPERS NOW EXIST (session 40, 2026-09-27) — HISTORICAL
 
 **Before this session:** the real provider clients (`src/lib/spapi/client.ts`, `src/lib/dhl/client.ts`,
@@ -80,8 +113,9 @@ existed** in the repository (only 9 unrelated ones) — so entering a real key c
   EXECUTING the helpers; proved able to fail twice (undeclared client route → 3 failures; simulation invoking the
   live caller → non-zero exit), with both files restored byte-identical. Corpus: `validate:all` **114/114 PASS**.
 - **NOT done (stated, not implied):** the three functions are **NOT deployed** (no Supabase credential + no CLI);
-  the 3 live paths have **never run against a provider**; **1c** (CI wiring) remains — **Batch 1b is DONE (see the
-  section above)**. Every activation item is listed in `PRODUCTION_READINESS.md` §BATCH1a and §BATCH1b.
+  the 3 live paths have **never run against a provider**; **1c (CI wiring) is DONE (2026-09-28 — see the section
+  above)** — **Batch 1b is DONE (see the section above)**. Every activation item is listed in
+  `PRODUCTION_READINESS.md` §BATCH1a and §BATCH1b.
 
 ## INTEGRATIONS — ONE-CLICK CONNECT IS THE REQUIRED SHAPE
 

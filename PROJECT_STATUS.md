@@ -4,6 +4,16 @@
 ## CURRENT RESUME STATE
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
+LAST COMPLETED TASK:      **BATCH 1c — S6 CI WIRING: THE ENFORCEMENT LEG NOW EXISTS (session 42, 2026-09-28).** Until this session `.github/` held **only `dependabot.yml`**: `typecheck`, `lint`, `build` and the whole validator corpus ran only when a person remembered to run them, so a break could be committed unnoticed — **and one WAS** (the registry row `batch-4-ci-cd` cited `.github/workflows/ci.yml` as its evidence while **no such file existed**). NOW: **`.github/workflows/ci.yml`** runs, on **every push and every pull request**, `npm ci` → `typecheck` → `lint` → `build` → `validate:wording` → `validate:all` (the whole corpus — **116 validators**, globbed by `scripts/validate-all.sh`); it installs the Chromium the production-boot gate drives, cancels superseded runs, is time-bounded, holds `contents: read` only, pins `actions/checkout@v4`/`actions/setup-node@v4` at Node 20 with the npm cache, interpolates **no secret** and contains **no deploy command** (deployment is still `scripts/deploy-demo.sh`). **Gate: `npm run validate:ci-wiring`** (`scripts/validate-ci-wiring.mjs`, **39 assertions**) — it fails if a step, a trigger, the action pinning, the `npm ci`-only rule, the ordering or the no-deploy/no-secret property is removed, **or if any registered `validate:*` script becomes unreachable by CI**. **DEFECTS FIXED AT SOURCE:** the void claim in `requirements-registry.json` (now true and dated); `docs/WORK_LAYER_SSOT` F7 + S6 had claimed "there is no CI"; `docs/NEXT_BUILD_PLAN` §1c recorded 1c as outstanding with a stale 113 count; `PRODUCTION_READINESS.md` gained §BATCH1c; `README.md` now points at `validate:all` + the CI. **THE DELIVERY LEG OF BATCH 1 IS STILL OPEN** (Batch 1b's client files and the server-side functions are not deployed — deferred to S7 = Batch 3).
+CURRENT VERIFIED STATE:   **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT (no application runtime change: a CI workflow, its gate, one npm script and documentation), GLOBAL STATE STILL "NOT COMPLETE".** The demo leg is NOT satisfied for the programme as a whole: Batch 1b's client files and Batch 1's server-side work remain undeployed (deliberately deferred to S7 = Batch 3), so `https://demo.mercenta.co.uk` is still `d726166`. Measured **after** the last edit: `typecheck` **0** · `lint` **0** · `build` **✓** · `validate:all` **116 PASS / 0 FAIL (of 116)** · `validate:ci-wiring` **39 assertions / 0 failures** · `validate:wording` **PASS (326 src files, 0 violations)** · a **CLEAN-CLONE CI REHEARSAL** (a fresh `git clone` + `npm ci`, **no `.env`, none of the gitignored local folders**) reproduced CI exactly: `npm ci` 0 · typecheck 0 · lint 0 · build 0 · wording 0 · **validate:all 116 PASS / 0 FAIL**. The new gate was **PROVED ABLE TO FAIL FOUR TIMES** — deleting the `validate:all` step → **2 failures**; `npm ci` → `npm install` → **3**; adding `continue-on-error: true` → **1**; deleting the workflow entirely → **21**. The workflow was then restored **BYTE-IDENTICAL** (sha256 `59663a46cf1d2c2c3e6cf4e4315970db4b0fd7e79a2e89b9c255d701311112e2` before and after).
+CURRENT BRANCH:           redesign/foundation
+LAST VERIFIED COMMIT:     **`7a3ab8f`** — "feat(ci): BATCH 1c (S6) — CI now runs the gates on every push/PR, and a gate keeps the wiring honest" (the Batch 1c implementation commit). The commit carrying THIS state block follows it.
+GITHUB PUSH:              pushed to `origin/redesign/foundation` (recorded in the state checkpoint that follows the CI run).
+DEMO DEPLOYMENT:          **NOT DEPLOYED — and NOT APPLICABLE to this increment.** Batch 1c changes no application runtime: the workflow and validators are not part of the static Vite build `scripts/deploy-demo.sh` uploads, and CI deliberately deploys nothing. Batch 1b's client files and the server-side functions still await the deferred deployment (S7 = Batch 3); the demo remains `d726166`.
+LIVE VERIFICATION:        **the GitHub Actions run for this increment is the live verification** (the workflow executing on GitHub's own runners, not locally) — recorded in the state checkpoint that follows it. **NOT VERIFIED on `https://demo.mercenta.co.uk`** — nothing in this increment is visible there.
+OUTSTANDING BLOCKER:      **(1)** the open Batch 1 delivery leg: a Supabase project credential + CLI to deploy the five Edge Functions (JWT verification ON) and the static demo deploy of Batch 1b's client files. **(2)** as before: `SPAPI_CLIENT_SECRET` (+ `SPAPI_CLIENT_ID`) and the `vault` extension (without them the OAuth exchange answers 503 `SPAPI_CLIENT_SECRET_MISSING` and a verified key answers `VAULT_WRITE_FAILED`). **(3)** live provider credentials. **(4)** a declared harmless test endpoint for 14 providers. **No new blocker is introduced by this increment.**
+NEXT TASK:                **BATCH 2 — AMAZON ACCURACY** (37 open findings; register `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md`, start with AV-019/AV-019b, AV-024, AV-006, AV-007), then **BATCH 3** (the unverified registry rows + S7 + the deferred deployment).
+EXACT NEXT STARTING POINT:`docs/NEXT_BUILD_PLAN_2026-09-27.md` §BATCH 2 (the named starting findings) → `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` → `docs/AMAZON_RECONCILIATION_STATUS.md` → the PoA code those findings name. **CI now enforces every gate on push/PR** (`.github/workflows/ci.yml`), so a Batch 2 change cannot be committed with the corpus broken.
 LAST COMPLETED TASK:      **BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF (session 41, 2026-09-28): the missing backend of one-click connect now EXISTS.** The connection-record schema was WRITTEN (`supabase/migrations/028_create_integration_connections.sql` — the `0002_integration_connections.sql` cited for months NEVER existed); the Vault WRITE half exists (`_shared/vault.ts → writeVaultSecret`/`credentialSecretName`); the API-key path exists (`_shared/providerConnect.ts` + `integration-connect/index.ts`: harmless test server-side, then a Vault write, returning ONLY the `vault:` reference); and **`spapi-token-exchange` — the function the wizard has ALWAYS called and which did not exist — now exists** (`_shared/tokenExchange.ts` + its Edge Function: real Amazon LWA exchange, refresh token stored in Vault). The wizard calls the server function instead of pinging from the browser, sends the `redirect_uri` the popup used, and stores the returned reference. **Gate: `npm run validate:connect-wizard` — the FAKE-KEY REHEARSAL, 49 assertions, proved able to fail (see below).** **DEFECTS FIXED AT SOURCE THIS SESSION:** (1) the wizard marked a provider with NO API (CSV import) as a VERIFIED LIVE connection — `completeApiKeyConnect` sets `sandbox:false`, so it rendered "Live" although nothing had been verified; now routed through the new `markManualConnect`; (2) the registry row `stage1-token-exchange-edge-function` claimed a file that DID NOT EXIST; (3) five validators carried statements the new migration made false (three pinned "no migration was added (newest is 027)" and two listed `integration_connections` among names that "DO NOT EXIST") — every live citation repointed, and the newly-created table is now PINNED as RLS-protected. **BATCH 1 IS STILL NOT FINISHED — 1c (S6 CI wiring) stands, as does deployment.**
 CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Measured AFTER the last edit: `validate:all` **115 PASS / 0 FAIL (of 115)** · `validate:connect-wizard` **49 assertions / 0 failures** · `validate:integration-proxy` **53 / 0** · `validate-e6-brand-surfaces` **PASS** (F4/F5/F5b/F6 repointed with a declared §BATCH1b surface) · `validate-rls-hardening` **PASS (20 checks)** · `rls-audit` **PASS (34 tables · 34 RLS-enabled · 51 policies · 96 checks)** · `validate-e5-admin-surfaces` **PASS** · `validate-e7-embedded-social` **PASS (121 assertions)** · `typecheck` **0** · `lint` **0** · `build` **✓**. The fake-key rehearsal gate was PROVED ABLE TO FAIL **four times**: treating a failing provider response as success → **8 failures**; weakening the migration's vault-reference CHECK to `CHECK (true)` → **2 failures**; making the client's declared test set diverge from the server registry → **1 failure**; re-introducing a client-side copy of the real key after a server-side connect → **1 failure**. Every mutated file was restored BYTE-IDENTICAL (`providerConnect.ts` sha256 `3c3e8a75538af1d12eccf9cd5c33118a11964f64dc456b3bdd5e737f40188e9e`; `028_create_integration_connections.sql` sha256 `e4302a17f69cd3f8e2505825e781c2b2a18dd945d123df3fda1d701c3a45ca74`; `testCalls.ts` sha256 `308ba68b42f1c1165c5037f27c0485480ef69098de758764a9a01bcaf8614875`; `IntegrationsPanel.tsx` sha256 `8ecc4aa838740bb0c99c13f4814db6acdb0f759795947c9a9b3f321d991d04a6`).
 CURRENT BRANCH:           redesign/foundation
@@ -142,7 +152,112 @@ every project.
 
 ---
 
-## CURRENT PLATFORM POSITION — **BATCH 1b: THE CONNECT WIZARD'S BACKEND HALF EXISTS — the connection schema is WRITTEN, the Vault write exists, and `spapi-token-exchange` (called by the wizard but never present) is real** (2026-09-28, session 41)
+## CURRENT PLATFORM POSITION — **BATCH 1c (S6): THE ENFORCEMENT LEG NOW EXISTS — CI runs every gate on every push and pull request, and a gate keeps that wiring honest** (2026-09-28, session 42)
+
+**Why this was the next task:** every recorded gate (`typecheck`, `lint`, `build`, the whole validator corpus)
+depended on a person remembering to run it. `.github/` held **only `dependabot.yml`**. So a break could be
+committed and pushed unseen — and one already had: the registry row `batch-4-ci-cd` cited
+`.github/workflows/ci.yml` as its evidence **while no such file existed anywhere in the repository**. A capability
+that is claimed and absent is a defect, not a gap.
+
+**What now exists (verified this session):**
+
+- **`.github/workflows/ci.yml`** — on **every push and every pull request**: `npm ci` (reproducible, from the
+  committed lockfile — never `npm install`) → `typecheck` → `lint` → `build` → **`validate:wording`** →
+  **`validate:all`** (the whole corpus, **116 validators**, globbed by `scripts/validate-all.sh`). It installs
+  the Chromium the production-boot gate drives, cancels superseded runs, is time-bounded (`timeout-minutes`),
+  holds `contents: read` only, pins `actions/checkout@v4` / `actions/setup-node@v4` with Node 20 + the npm cache,
+  interpolates **no secret**, and contains **no deploy command**.
+- **`scripts/validate-ci-wiring.mjs`** — `npm run validate:ci-wiring`, **39 assertions**. It refuses a workflow
+  that is missing, untriggered on push or PR, unpinned, non-failing (`continue-on-error`), disabled
+  (`if: false`), wrongly ordered (build must precede `validate:all`), secret-bearing, deploy-bearing, or that
+  names a gate whose script/config does not exist; and it asserts — mechanically — that **every registered
+  `validate:*` script is reachable by CI**, inside the corpus glob or named explicitly by the workflow.
+- **The wording gate is named explicitly** because `scripts/validate-all.sh` globs `scripts/validate-*.mjs` and
+  the compliance wording gate is `scripts/lint-wording.mjs` — a name that glob cannot match. That coverage gap is
+  closed by an explicit CI step and asserted, rather than left to trust.
+
+**DEFECTS FOUND THIS SESSION — ALL FIXED AT SOURCE (none parked):** (1) the registry row `batch-4-ci-cd` claimed
+a workflow file that did not exist and described gates it did not run → the file now exists and the row states
+exactly what runs, dated; (2) `docs/WORK_LAYER_SSOT_2026-09-26.md` said "there is no CI" (F7) and "CI wiring
+still outstanding" (S6) → both corrected with the old text recorded, not deleted; (3)
+`docs/NEXT_BUILD_PLAN_2026-09-27.md` §1c still recorded 1c as outstanding and pinned a stale "113 files" corpus
+count → now DONE with the measured count and the delivery leg named as the remaining part; (4) the README's "run
+before claiming anything is done" list did not name `validate:all` at all → it now leads with it and names the CI.
+
+### 1. COMPLETED / VERIFIED
+
+- The workflow, the gate, the `validate:ci-wiring` registration, the declared `§BATCH1c` surface in
+  `validate-e6-brand-surfaces.mjs` (F5/F5b/F6), and the documentation reconciliation (files above).
+- `PRODUCTION_READINESS.md` §BATCH1c states what CI now enforces, what it deliberately does NOT do (deploy), and
+  the one still-open delivery item.
+- Measured this session, after the last edit: `typecheck` **0** · `lint` **0** · `build` **✓** ·
+  `validate:all` **116 PASS / 0 FAIL (of 116)** · `validate:ci-wiring` **39 / 0** · `validate:wording` **PASS**.
+- **Clean-clone CI rehearsal** (a fresh `git clone` + `npm ci`, with **no `.env`** and none of the gitignored
+  local folders): `npm ci` 0 · typecheck 0 · lint 0 · build 0 · wording 0 · **validate:all 116 PASS / 0 FAIL** —
+  the corpus does not depend on anything that exists only on this machine.
+
+### 2. IN PROGRESS
+
+Nothing is mid-edit: the tree is clean and every figure above was measured after the last edit.
+
+### 3. REMAINING — CURRENT ROADMAP
+
+1. **Batch 1's delivery leg** — deploy Batch 1b's client files and the server-side functions, then live-verify
+   (blocked on a Supabase credential + CLI; deferred to S7 = Batch 3 by the recorded decision).
+2. **Batch 2 — Amazon accuracy** (37 open findings; AV-019/AV-019b, AV-024, AV-006, AV-007 first).
+3. **Batch 3** — the unverified registry rows + **S7** (the contract closing path) + the deferred deployment.
+
+### 4. DEFERRED / PARKED
+
+The §SSOT S1–S5 client-side deployment and Batch 1b's client files (deliberately deferred to S7 = Batch 3); the
+17 simulation-only proxy routes; the Amazon `AV-020/034/035/046/047/048` UNKNOWNs (each needs a founder action or
+a live credential).
+
+### 5. BLOCKED / DEPENDENCIES
+
+- **Deployment:** no Supabase project credential and no `supabase` CLI in this environment. **CI does not change
+  this** — it proves the repository is sound; it does not publish anything.
+- **The OAuth exchange's live leg:** `SPAPI_CLIENT_SECRET` (+ `SPAPI_CLIENT_ID`) is not set → **503
+  `SPAPI_CLIENT_SECRET_MISSING`**, stated, never faked.
+- **Credential storage:** the `vault` extension is not confirmed enabled → `VAULT_WRITE_FAILED`, stated.
+- **Live verification:** no provider credentials (Amazon / DHL / Palletline).
+- **This increment introduces no new blocker.**
+
+### 6. KNOWN EXCEPTIONS
+
+**Empty of unfixed defects: everything found this session was FIXED at source (§1) or is BLOCKED with the exact
+missing input (§5).** The statements below are BLOCKED-capability facts, not parked defects:
+
+- The five Edge Functions are **NOT deployed** and no live path has ever run against a provider.
+- The 14 providers without a declared test endpoint refuse by design, each with a stated code.
+
+### 7. CURRENT CHECKPOINT
+
+`VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT` (no application runtime change) at
+implementation commit **`7a3ab8f`**, plus the state checkpoint that follows it (recorded in `STATUS_CHECK.md` and
+`HANDOFF.md`). `git status --porcelain` is EMPTY at close. **GLOBAL STATE REMAINS "NOT COMPLETE"**: the demo leg
+is unsatisfied for the programme as a whole (the demo is still `d726166`).
+
+The working-tree scope guard required a **declared surface** for this phase: `§BATCH1c_CI_WIRING_SCOPE` was added
+to `validate-e6-brand-surfaces` (F5/F5b/F6), naming `.github/workflows/` (a new untracked directory is reported by
+`git status` as `dir/`), `scripts/validate-ci-wiring.mjs`, `package.json` and `README.md`. The mechanism is
+unchanged: an **undeclared** path still fails.
+
+### 8. VERIFICATION STATUS
+
+`validate:all` **116/116 PASS** · `validate:ci-wiring` **39/39** · `validate:wording` **PASS** · `typecheck` **0**
+· `lint` **0** · `build` **✓** · the clean-clone rehearsal **reproduced CI exactly** (all six steps 0) · the new
+gate **proved able to fail four times** (2 / 3 / 1 / 21 failures) with the workflow restored **byte-identical**
+(sha256 `59663a46cf1d2c2c3e6cf4e4315970db4b0fd7e79a2e89b9c255d701311112e2`). Not verified: anything on
+`https://demo.mercenta.co.uk` (this increment is not visible there).
+
+### 9. NEXT EXECUTION SCOPE
+
+**Batch 2 — Amazon accuracy** (see `EXACT NEXT STARTING POINT`). CI now enforces every gate on push and PR, so the
+corpus cannot be left broken unnoticed between sessions.
+
+## PREVIOUS POSITION — **BATCH 1b: THE CONNECT WIZARD'S BACKEND HALF EXISTS — the connection schema is WRITTEN, the Vault write exists, and `spapi-token-exchange` (called by the wizard but never present) is real** (2026-09-28, session 41) — HISTORICAL
 
 **Why this was the next task:** Batch 1a made the provider *proxy* helpers real, but the Founder's goal — *"when I get
 the API keys, I should just need to give them to you and everything will sync up"* — still failed at the very first
