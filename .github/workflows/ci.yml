@@ -1,0 +1,86 @@
+# §BATCH1c (S6) — THE ENFORCEMENT LEG (2026-09-28, session 42).
+#
+# WHY THIS EXISTS
+# ---------------
+# Until now NOTHING enforced this repository's own gates: `.github/` held only
+# `dependabot.yml`, so `typecheck`, `lint`, `build` and `npm run validate:all`
+# (the WHOLE validator corpus) ran only when a person remembered to run them.
+# A break could therefore be committed and pushed unnoticed — and one WAS: the
+# registry row `batch-4-ci-cd` cited `.github/workflows/ci.yml` as its evidence
+# for months while no such file existed anywhere in the repository.
+#
+# WHAT IT RUNS — exactly the gates the project's rule files require before
+# anything may be called verified, on EVERY push and EVERY pull request:
+#
+#   npm ci        (reproducible install from the committed lockfile)
+#   typecheck  → lint → build → validate:all   (the whole validator corpus)
+#   validate:wording  (the compliance wording gate, which the corpus glob
+#                      `scripts/validate-*.mjs` does NOT reach — see below)
+#
+# TWO DELIBERATE PROPERTIES, both asserted by `scripts/validate-ci-wiring.mjs`:
+#
+#   1. It NEVER deploys. Deployment is `scripts/deploy-demo.sh` — a local,
+#      credentialed, deliberate act. This workflow must never be able to touch
+#      `demo.mercenta.co.uk`, let alone the live domain, and it interpolates NO
+#      secret, so it cannot leak or require one.
+#   2. It cannot silently skip a gate: no step is `continue-on-error`, no step
+#      is conditionally disabled, and `scripts/validate-all.sh` exits non-zero
+#      if ANY validator fails. Deleting or weakening a step fails the gate above.
+#
+# The wording gate is named explicitly because `scripts/validate-all.sh` runs
+# every `scripts/validate-*.mjs`, and the wording gate is `scripts/lint-wording.mjs`
+# — a name the glob cannot match. Running it here means CI covers it even though
+# the corpus cannot; the reachability of every registered `validate:*` script is
+# asserted mechanically by the gate.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Least privilege: this workflow only ever READS the repository.
+permissions:
+  contents: read
+
+# One run per ref; a superseded push cancels the older run rather than queueing.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck · lint · build · validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install (reproducible — from the committed lockfile)
+        run: npm ci
+
+      # `validate-production-boot` (part of the corpus) loads the built bundle in
+      # Chromium, so the browser must exist before the validation step.
+      - name: Install the Chromium the boot gate drives
+        run: npx playwright install --with-deps chromium
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Compliance wording gate (not reachable by the corpus glob)
+        run: npm run validate:wording
+
+      - name: Validate — the whole validator corpus
+        run: npm run validate:all

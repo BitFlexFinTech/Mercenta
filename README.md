@@ -21,6 +21,19 @@ Vendor Central account; brands work through Mercenta.
 
 ## Validation gates (run before claiming anything is done)
 
+**The whole corpus in one command — and it now runs in CI on every push and pull request:**
+
+```bash
+npm run validate:all                    # EVERY scripts/validate-*.mjs; exits non-zero if any fails
+```
+
+`.github/workflows/ci.yml` runs `npm ci` → `typecheck` → `lint` → `build` → `validate:wording` →
+`validate:all` on every push and every pull request, so a break cannot be committed unnoticed.
+`scripts/validate-ci-wiring.mjs` (`npm run validate:ci-wiring`) keeps that workflow honest: it fails
+if a step, a trigger, the action pinning or the non-deploy/non-secret property is removed.
+
+The named gates below are the ones a contributor is most likely to need individually:
+
 ```bash
 npx tsc --noEmit -p tsconfig.app.json   # types
 npm run lint                            # eslint (src + e2e)

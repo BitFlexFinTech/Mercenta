@@ -19,7 +19,7 @@ work items could not be closed by doing the work, and nothing enforced any of it
 | F4 | **No platform action could clear that flag**, so the work item was un-closable: `setShipmentMilestone` wrote `s.status` only. The sole way to remove the item was to mark the TASK done while the RECORD still said exception — two sources of truth for one fact | PROVEN executably: advance the shipment to `live_amazon` → status changes, `exception` stays true, the item remains |
 | F5 | **`contract_renewal` has no closing path at all** — `demoContracts` has no writer anywhere (every reference is a read) and `ContractsAdminPanel` keeps a renewal DRAFT in local component state (`extraDrafts`) instead of the canonical store | grep of all `demoContracts` references; `ContractsAdminPanel.tsx:171-183, 225-239` |
 | F6 | **57% of the open list (27 of 47) is fabricated by arithmetic**: compliance document states come from `COMPLIANCE_PATTERNS[bi % 3]`, a rotating array indexed by the brand's position | `demoData.ts:659-663, 724-727, 749` |
-| F7 | **The work layer's own owner gate was never run.** `scripts/validate-work-layer.mjs` (103 assertions, and it PASSES) is not a registered npm script, and there is no CI — `.github/` contains only `dependabot.yml` | `package.json`; `.github/` listing |
+| F7 | **The work layer's own owner gate was never run.** `scripts/validate-work-layer.mjs` (103 assertions, and it PASSES) is not a registered npm script, and there is no CI — `.github/` contains only `dependabot.yml` | `package.json`; `.github/` listing | **FIXED 2026-09-28 (Batch 1c):** `validate:work-layer` IS registered, and `.github/workflows/ci.yml` now runs it (inside `npm run validate:all`) on every push and pull request. The finding is recorded as it stood on 2026-09-26. |
 | F8 | **The reported "whole `validate:*` sweep 36/36" covered 32% of the corpus**: 113 `validate-*.mjs` files exist, 36 were registered. 77 validators — including the work layer's own — had never run in any sweep this project reported as complete | file count vs registered script count |
 
 ## §2 THE RULE THIS PROGRAMME ENFORCES
@@ -112,8 +112,11 @@ work items could not be closed by doing the work, and nothing enforced any of it
   `e2e/work-layer.spec.ts` test 1b asserts in real Chromium that the badge is labelled and equals the
   attention tile. The declarative check in `scripts/validate-uiux-redesign.mjs` that pinned the removed
   identifiers was REPOINTED to `workCounts` / `NAV_BADGE_LABELS`, recorded inline.
-- **S6 — enforcement.** `scripts/validate-all.sh` + `npm run validate:all` (**DONE — 113 PASS / 0
-  FAIL**); `validate:work-layer` registered; CI wiring still outstanding.
+- **S6 — enforcement — DONE (closed 2026-09-28 by Batch 1c).** `scripts/validate-all.sh` + `npm run validate:all`
+  (the whole corpus: **116 PASS / 0 FAIL** as at 2026-09-28); `validate:work-layer` registered; **CI wiring DONE** —
+  `.github/workflows/ci.yml` runs `npm ci` → `typecheck` → `lint` → `build` → `validate:wording` → `validate:all` on
+  every push and every pull request, kept honest by `scripts/validate-ci-wiring.mjs` (39 assertions, PROVED ABLE TO
+  FAIL). *The pre-Batch-1c text here read "CI wiring still outstanding" — corrected at source, recorded not deleted.*
 - **S7 — the contract closing path (F5).** A canonical contract writer (`renewContract` /
   `terminateContract`) and the renewal draft written to the canonical store instead of component state.
 

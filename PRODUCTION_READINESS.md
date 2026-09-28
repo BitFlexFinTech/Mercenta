@@ -404,6 +404,35 @@ zero network calls) so nothing is un-demoable in the meantime.
 | 4 | **Live provider credentials** (Amazon, DHL, Palletline, …) | the Integrations wizard | the 3 live-capable proxy routes and the 17 refused routes stay as recorded above |
 | 5 | **A declared harmless test endpoint** for the 14 providers listed above | `supabase/functions/_shared/providerConnect.ts → PROVIDER_TESTS` | those providers refuse honestly; no fake success |
 
+### §BATCH1c (S6) — THE ENFORCEMENT LEG: CI NOW RUNS THE GATES (session 42, 28 Sep 2026)
+
+**What was missing and is now built.** Until this session `.github/` held only `dependabot.yml`: nothing
+enforced `typecheck`, `lint`, `build` or the whole validator corpus on a push, so a break could be committed and
+pushed unnoticed — and one WAS (the row `batch-4-ci-cd` cited `.github/workflows/ci.yml` as evidence while no such
+file existed). That is fixed:
+
+| Piece | File | What it does |
+|---|---|---|
+| The CI workflow | `.github/workflows/ci.yml` | On **every push and every pull request**: `npm ci` (reproducible, from the committed lockfile — never `npm install`) → `typecheck` → `lint` → `build` → `validate:wording` → `validate:all` (the WHOLE corpus). It installs the Chromium the production-boot gate drives, cancels superseded runs, is time-bounded, holds `contents: read` only, pins `actions/checkout@v4` / `actions/setup-node@v4` with Node 20 + the npm cache. |
+| The workflow's owner gate | `scripts/validate-ci-wiring.mjs` (`npm run validate:ci-wiring`, 39 assertions) | Fails if the workflow is deleted, a step or trigger is removed, `npm install` replaces `npm ci`, the ordering is broken (build must precede `validate:all`), a step is made non-failing, an action is pinned to a moving branch, a secret or a deployment command appears, or **any registered `validate:*` script becomes unreachable by CI**. |
+
+**Two honest notes, both asserted rather than assumed**
+
+- **The wording gate is named explicitly.** `scripts/validate-all.sh` runs every `scripts/validate-*.mjs`; the
+  compliance wording gate is `scripts/lint-wording.mjs`, a name that glob cannot match. The workflow therefore
+  runs `npm run validate:wording` as its own step, and the reachability of **every** registered `validate:*`
+  script is asserted mechanically by the gate.
+- **CI deploys NOTHING.** Deployment remains `scripts/deploy-demo.sh` — a local, credentialed, deliberate act.
+  The workflow cannot reach `demo.mercenta.co.uk` (or the live domain) and interpolates no secret; the gate
+  asserts both properties.
+
+**What is STILL required for go-live (unchanged by this increment)**
+
+| # | Missing input | Where it is entered | Consequence until supplied |
+|---|---|---|---|
+| 1 | The **deployment** of Batch 1's server-side work | `scripts/deploy-demo.sh` + a Supabase credential/CLI for the Edge Functions | CI proves the repository builds and every gate passes in a clean environment; it does **not** publish anything, so the demo remains behind the repository |
+| 2 | Nothing else | — | This increment adds no credential requirement of its own |
+
 ## Integration credentials
 
 | Integration | Currently active | What's needed to go live | Where it's entered | Code changes needed |

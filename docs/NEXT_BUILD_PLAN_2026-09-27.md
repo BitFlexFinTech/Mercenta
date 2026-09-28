@@ -60,14 +60,26 @@ called) run the harmless test server-side and write the credential to Vault, ret
   extension enabled, live provider credentials, and a declared harmless test endpoint for the 14 providers that do
   not yet have one (they refuse honestly with `TEST_ENDPOINT_NOT_DECLARED`).
 
-### 1c. Enforcement and delivery
-- **S6 — CI wiring:** `.github/` holds only `dependabot.yml`; add a workflow running `npm ci`, `typecheck`,
-  `lint`, `build` and `validate:all` (113 files) so a break cannot be committed unnoticed.
-- Publish to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh` and verify live (the §10 three-way leg).
+### 1c. Enforcement and delivery — **CI WIRING DONE (session 42, 2026-09-28); DELIVERY STILL OPEN**
 
-**Gate for Batch 1:** a new/extended validator that asserts **every route the real clients call has a helper
-file**, that each helper mirrors the mock's shape, and that no simulated call is presented as live —
-**proved able to fail**. Then `npm run validate:all` **113/113**, plus the live verification.
+- **S6 — CI wiring: DONE.** `.github/workflows/ci.yml` now runs, on **every push and every pull request**:
+  `npm ci` → `typecheck` → `lint` → `build` → `validate:wording` → `validate:all` (the WHOLE corpus — **116**
+  validators, globbed by `scripts/validate-all.sh`; the `113` this section previously stated was the count on
+  2026-09-27 and had already drifted). Before this, `.github/` held only `dependabot.yml`, so every gate ran only
+  when someone remembered to run it — and the registry row `batch-4-ci-cd` cited this exact workflow path as its
+  evidence for months **while no such file existed**. The workflow is kept honest by
+  `scripts/validate-ci-wiring.mjs` (`npm run validate:ci-wiring`, 39 assertions): it fails if a step, a trigger,
+  the action pinning, the `npm ci`-only rule, the build-before-validate ordering, or the no-deploy/no-secret
+  property is removed. The wording gate is named explicitly because the corpus glob (`scripts/validate-*.mjs`)
+  cannot match `scripts/lint-wording.mjs`; that coverage gap is closed here and asserted mechanically.
+- **Delivery: STILL OPEN.** Publish to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh` and verify live
+  (the §10 three-way leg). The two Batch 1b Edge Functions and the migration are server-side and cannot be deployed
+  from this environment (no Supabase credential, no CLI), so Batch 1's delivery leg remains deferred to the §SSOT
+  programme's close (S7 = Batch 3) — as recorded in `PROJECT_STATUS.md`.
+
+**Gate for Batch 1:** the route-coverage gate (`validate:integration-proxy`, proved able to fail) covers the
+helpers, and `validate:ci-wiring` now covers **enforcement** — the leg that was missing. `npm run validate:all`
+measured **116/116 PASS** on 2026-09-28. The remaining leg is the live verification.
 
 ---
 

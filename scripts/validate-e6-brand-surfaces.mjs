@@ -1384,6 +1384,34 @@ const BATCH1B_CONNECT_BACKEND_SCOPE = new Set([
   'PRODUCTION_READINESS.md',
 ]);
 
+/**
+ * §BATCH1c (S6) — THE ENFORCEMENT LEG (2026-09-28) — declared surface.
+ *
+ * The recorded next task (`docs/NEXT_BUILD_PLAN_2026-09-27.md` §1c, mapped from
+ * the §SSOT programme's S6) wires CI so a break cannot be committed unnoticed:
+ * `.github/` held ONLY `dependabot.yml`, so `typecheck`, `lint`, `build` and
+ * `npm run validate:all` ran only when someone remembered them. This phase adds
+ * the workflow, its owner gate (`scripts/validate-ci-wiring.mjs`, registered as
+ * `npm run validate:ci-wiring`), and the README's gate list.
+ *
+ * F5/F5b/F6's contract is UNCHANGED: a working-tree path in NO declared set still
+ * fails, and no protected path may appear anywhere in the change set. Nothing
+ * inherited is removed by naming these files here.
+ */
+const BATCH1C_CI_WIRING_SCOPE = new Set([
+  /**
+   * `git status` reports a NEW untracked directory as `dir/`, so the directory
+   * itself is declared alongside the exact file: without it, F6 refused
+   * `.github/workflows/` even though the file inside is the declared one.
+   */
+  '.github/workflows/',
+  '.github/workflows/ci.yml',
+  'scripts/validate-ci-wiring.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'package.json',
+  'README.md',
+]);
+
   const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
   // §Phase M13 — REPOINTED. This pinned "026 remains the newest; 26 total", which
@@ -1456,7 +1484,10 @@ const BATCH1B_CONNECT_BACKEND_SCOPE = new Set([
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH1b — the connect-wizard backend phase's declared surface. */
         BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
-        [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH1c — the CI-wiring phase's declared surface (see above). */
+        BATCH1C_CI_WIRING_SCOPE.has(p) ||
+        [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -1480,7 +1511,10 @@ const BATCH1B_CONNECT_BACKEND_SCOPE = new Set([
         [...P4_PROXY_MODEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH1b — same declaration, second protected-path check (F5b). */
         BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
-        [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH1c — same declaration, second protected-path check (F5b). */
+        BATCH1C_CI_WIRING_SCOPE.has(p) ||
+        [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -1730,7 +1764,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH1_INTEGRATION_PROXY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH1b — the connect-wizard backend phase (see above). */
           BATCH1B_CONNECT_BACKEND_SCOPE.has(p) ||
-          [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH1c — the CI-wiring phase (see above). */
+          BATCH1C_CI_WIRING_SCOPE.has(p) ||
+          [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
