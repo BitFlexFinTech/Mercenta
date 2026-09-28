@@ -68,10 +68,16 @@ called) run the harmless test server-side and write the credential to Vault, ret
   2026-09-27 and had already drifted). Before this, `.github/` held only `dependabot.yml`, so every gate ran only
   when someone remembered to run it — and the registry row `batch-4-ci-cd` cited this exact workflow path as its
   evidence for months **while no such file existed**. The workflow is kept honest by
-  `scripts/validate-ci-wiring.mjs` (`npm run validate:ci-wiring`, 39 assertions): it fails if a step, a trigger,
+  `scripts/validate-ci-wiring.mjs` (`npm run validate:ci-wiring`, 43 assertions): it fails if a step, a trigger,
   the action pinning, the `npm ci`-only rule, the build-before-validate ordering, or the no-deploy/no-secret
   property is removed. The wording gate is named explicitly because the corpus glob (`scripts/validate-*.mjs`)
   cannot match `scripts/lint-wording.mjs`; that coverage gap is closed here and asserted mechanically.
+- **The Node version is part of the wiring, not a preference.** Two validators of the corpus
+  (`validate-connect-wizard-backend`, `validate-integration-proxy`) `await import()` real `.ts` modules, which needs
+  Node's type stripping (22.18/23.6+). The first workflow pinned **Node 20 and the first REAL CI run failed**
+  (114 PASS / 2 FAIL of 116, `ERR_UNKNOWN_FILE_EXTENSION`) while the local rehearsal was green on Node 26. The
+  requirement is now declared **once** in `package.json` → `engines.node: ">=22.18.0"`, the workflow installs
+  **Node 24**, and `validate-ci-wiring` fails if the installed version drops below the declared minimum.
 - **Delivery: STILL OPEN.** Publish to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh` and verify live
   (the §10 three-way leg). The two Batch 1b Edge Functions and the migration are server-side and cannot be deployed
   from this environment (no Supabase credential, no CLI), so Batch 1's delivery leg remains deferred to the §SSOT

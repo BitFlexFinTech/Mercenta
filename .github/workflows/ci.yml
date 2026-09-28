@@ -59,7 +59,16 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # NOT an arbitrary pin. `scripts/validate-connect-wizard-backend.mjs` and
+          # `scripts/validate-integration-proxy.mjs` `await import()` real `.ts`
+          # modules, which needs Node's TypeScript type stripping (unflagged from
+          # 22.18 / 23.6). Under Node 20 both die with ERR_UNKNOWN_FILE_EXTENSION.
+          # This was found by the FIRST REAL CI RUN of this workflow (114 PASS /
+          # 2 FAIL of 116) AFTER a green local rehearsal on Node 26 — the pin, not
+          # the corpus, was wrong. The requirement is declared once in
+          # package.json `engines.node`, and `scripts/validate-ci-wiring.mjs`
+          # asserts this version satisfies it, so the two cannot drift apart again.
+          node-version: '24'
           cache: npm
 
       - name: Install (reproducible — from the committed lockfile)

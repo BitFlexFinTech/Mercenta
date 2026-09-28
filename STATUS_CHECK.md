@@ -37,14 +37,16 @@ no such file existed anywhere in the repository**.
   the committed lockfile — never `npm install`) → `typecheck` → `lint` → `build` → `validate:wording` →
   `validate:all` (the whole corpus, **116 validators**, globbed by `scripts/validate-all.sh`). It installs the
   Chromium the production-boot gate drives, cancels superseded runs, is time-bounded, holds `contents: read` only,
-  pins `actions/checkout@v4` / `actions/setup-node@v4` at Node 20 with the npm cache, interpolates **no secret**
+  pins `actions/checkout@v4` / `actions/setup-node@v4` at **Node 24** with the npm cache (not arbitrary: two corpus
+  validators `await import()` real `.ts` modules and need Node's type stripping — `package.json` `engines.node` declares `>=22.18.0`), interpolates **no secret**
   and contains **no deploy command**.
-- **Gate: `npm run validate:ci-wiring`** (`scripts/validate-ci-wiring.mjs`, **39 assertions**). It fails if the
+- **Gate: `npm run validate:ci-wiring`** (`scripts/validate-ci-wiring.mjs`, **43 assertions**). It fails if the
   workflow or a step/trigger disappears, `npm install` replaces `npm ci`, the ordering breaks (build must precede
-  `validate:all`), a step is made non-failing, an action is pinned to a moving branch, a secret or deploy command
-  appears, or **any registered `validate:*` script becomes unreachable by CI**. Proved able to fail **four times**
-  (2 / 3 / 1 / 21 failures); the workflow was restored **byte-identical** (sha256
-  `59663a46cf1d2c2c3e6cf4e4315970db4b0fd7e79a2e89b9c255d701311112e2`).
+  `validate:all`), a step is made non-failing, an action is pinned to a moving branch, **the Node version is one the
+  corpus cannot run**, a secret or deploy command appears, or **any registered `validate:*` script becomes
+  unreachable by CI**. Proved able to fail **five times** (2 / 3 / 1 / 21 / 1 failures); the workflow was restored
+  **byte-identical** each time (sha256 `59663a46cf1d2c2c3e6cf4e4315970db4b0fd7e79a2e89b9c255d701311112e2`, then
+  `97883d6d73625cd6587346824a8b85d20412cebf332bcc936d59f4b080f073ef`).
 - **The wording gate is named explicitly**: `scripts/validate-all.sh` globs `scripts/validate-*.mjs`, and the
   compliance wording gate is `scripts/lint-wording.mjs` — a name that glob cannot match. The gap is closed by an
   explicit CI step and asserted, not assumed.
@@ -58,6 +60,14 @@ no such file existed anywhere in the repository**.
   `docs/WORK_LAYER_SSOT_2026-09-26.md` (F7 "there is no CI", S6 "CI wiring still outstanding") and
   `docs/NEXT_BUILD_PLAN_2026-09-27.md` §1c (outstanding + a stale 113-file count) were corrected with the old
   text recorded; the README's validation-gate section now leads with `validate:all` and names the CI.
+- **Defect found by CI ITSELF (the strongest form of this increment working):** the workflow's own
+  `node-version: '20'` pin was wrong for this corpus — two validators (`validate-connect-wizard-backend`,
+  `validate-integration-proxy`) `await import()` real `.ts` modules, which needs Node's type stripping
+  (22.18/23.6+), so the **first real CI run reported 114 PASS / 2 FAIL (of 116)** with
+  `ERR_UNKNOWN_FILE_EXTENSION` while the local rehearsal was green (this machine runs Node 26). **Fixed at
+  source:** `package.json` → `engines.node: ">=22.18.0"` declared ONCE, the workflow installs **Node 24**, and
+  `validate-ci-wiring` gained four assertions that fail if the installed version is below the declared minimum
+  (proved able to fail: reverting the pin to 20 → 1 failure). The corpus was not weakened.
 
 ## BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF NOW EXISTS (session 41, 2026-09-28) — HISTORICAL
 

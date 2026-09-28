@@ -608,18 +608,19 @@
       "record": "docs/NEXT_BUILD_PLAN_2026-09-27.md §1c (+ PRODUCTION_READINESS.md §BATCH1c)",
       "status": "DONE — CI exists, runs the whole corpus on every push and pull request, and is kept honest by its own gate",
       "built": [
-        ".github/workflows/ci.yml — on every push and every pull request: npm ci (reproducible, from the committed lockfile; never `npm install`) -> typecheck -> lint -> build -> validate:wording -> validate:all (the WHOLE corpus, globbed by scripts/validate-all.sh). Installs the Chromium the production-boot gate drives; cancels superseded runs; timeout-minutes bounded; `contents: read` only; pinned actions/checkout@v4 + actions/setup-node@v4 (Node 20, npm cache); NO secret interpolation and NO deploy command.",
-        "scripts/validate-ci-wiring.mjs — the owner gate, registered as `npm run validate:ci-wiring` (39 assertions). It refuses a workflow that is missing, untriggered on push/PR, unpinned, non-failing, disabled, wrongly ordered (build before validate:all), secret-bearing, deploy-bearing, or that names a gate whose script/config does not exist; and it asserts that EVERY registered `validate:*` script is reachable by CI.",
+        ".github/workflows/ci.yml — on every push and every pull request: npm ci (reproducible, from the committed lockfile; never `npm install`) -> typecheck -> lint -> build -> validate:wording -> validate:all (the WHOLE corpus, globbed by scripts/validate-all.sh). Installs the Chromium the production-boot gate drives; cancels superseded runs; timeout-minutes bounded; `contents: read` only; pinned actions/checkout@v4 + actions/setup-node@v4 (**Node 24**, npm cache — NOT arbitrary: two corpus validators await-import real .ts modules and need Node's type stripping; the requirement is declared once in package.json engines.node = >=22.18.0); NO secret interpolation and NO deploy command.",
+        "package.json — engines.node declared ONCE as \">=22.18.0\": the minimum Node that enables TypeScript type stripping, which two corpus validators require. The workflow's installed version is asserted against it by validate-ci-wiring, so the two cannot drift.",
+        "scripts/validate-ci-wiring.mjs — the owner gate, registered as `npm run validate:ci-wiring` (43 assertions). It refuses a workflow that is missing, untriggered on push/PR, unpinned, non-failing, disabled, wrongly ordered (build before validate:all), secret-bearing, deploy-bearing, that names a gate whose script/config does not exist, or that installs a Node version below the declared engines.node minimum; and it asserts that EVERY registered `validate:*` script is reachable by CI.",
         "README.md — the validation-gate section now leads with `npm run validate:all` and names the CI + its gate (the hand-maintained list previously never named the corpus command).",
         "The §BATCH1c declared surface in scripts/validate-e6-brand-surfaces.mjs (F5/F5b/F6), naming .github/workflows/ (a NEW untracked directory is reported by git status as `dir/`, which is why declaring only the file path was insufficient — found by the guard itself)."
       ],
-      "gate": "npm run validate:ci-wiring — 39 assertions, 0 failures. PROVED ABLE TO FAIL FOUR TIMES: deleting the validate:all step -> 2 failures; `npm ci` -> `npm install` -> 3; adding `continue-on-error: true` -> 1; deleting the workflow entirely -> 21. The workflow was restored BYTE-IDENTICAL (sha256 59663a46cf1d2c2c3e6cf4e4315970db4b0fd7e79a2e89b9c255d701311112e2 before and after).",
+      "gate": "npm run validate:ci-wiring — 43 assertions, 0 failures. PROVED ABLE TO FAIL FIVE TIMES: deleting the validate:all step -> 2 failures; `npm ci` -> `npm install` -> 3; adding `continue-on-error: true` -> 1; deleting the workflow entirely -> 21; and reverting the Node pin to the REAL defect's value (`node-version: '20'`) -> 1. The workflow was restored BYTE-IDENTICAL each time (sha256 59663a46cf1d2c2c3e6cf4e4315970db4b0fd7e79a2e89b9c255d701311112e2, then 97883d6d73625cd6587346824a8b85d20412cebf332bcc936d59f4b080f073ef after the Node fix).",
       "measured": {
         "typecheck": "0",
         "lint": "0",
         "build": "OK",
         "validate_all": "116 PASS / 0 FAIL (of 116 files)",
-        "validate_ci_wiring": "39/39",
+        "validate_ci_wiring": "43/43",
         "validate_wording": "PASS (326 src files, 0 outward-facing violations)",
         "clean_clone_rehearsal": "A fresh `git clone` + `npm ci` (NO .env, none of the gitignored local folders): npm ci 0, typecheck 0, lint 0, build 0, wording 0, validate:all 116 PASS / 0 FAIL — i.e. the corpus does not depend on anything that exists only on this machine, which is exactly what CI will do."
       },
@@ -638,6 +639,11 @@
           "defect": "The new gate's own first version asserted that `typecheck`/`lint`/`build` name a scripts/ FILE — untrue: they name tools (tsc/eslint/vite). The assertion failed 3 times on a CORRECT workflow, i.e. it was itself defective.",
           "disposition": "FIXED AT SOURCE — the assertion now checks what is real: the script exists, plus (for a tool) its devDependency and the config file it reads (tsconfig.app.json / eslint.config.js / vite.config.ts), or (for validate:all / validate:wording) the script file itself.",
           "gate": "It passes on the correct workflow, and the mutation proof above shows it still fails when the wiring is broken (2/3/1/21)."
+        },
+        {
+          "defect": "THE WORKFLOW ITSELF PINNED A NODE THE CORPUS CANNOT RUN: `.github/workflows/ci.yml` installed Node 20, but two validators (validate-connect-wizard-backend, validate-integration-proxy) `await import()` real `.ts` modules, which needs Node's TypeScript type stripping (unflagged from 22.18/23.6). This was found by the FIRST REAL CI RUN — 114 PASS / 2 FAIL (of 116), ERR_UNKNOWN_FILE_EXTENSION — AFTER a green local rehearsal, which passed only because this machine runs Node 26. The environment was wrong, not the corpus.",
+          "disposition": "FIXED AT SOURCE — the requirement is now declared ONCE in package.json `engines.node: \">=22.18.0\"`; the workflow installs Node 24; and validate-ci-wiring gained four assertions binding the installed version to the declared minimum (plus an assertion that the .ts-importing validators still exist, so the requirement cannot become stale). The corpus was NOT weakened and no validator was skipped.",
+          "gate": "validate-ci-wiring fails if the installed Node drops below engines.node — PROVED by reverting the pin to `node-version: '20'` (1 failure), then restoring the workflow byte-identical (sha256 97883d6d73625cd6587346824a8b85d20412cebf332bcc936d59f4b080f073ef). The definitive proof is the re-run of the REAL GitHub workflow."
         }
       ],
       "not_done": [
@@ -1326,7 +1332,7 @@
       "description": "GitHub Actions CI — the enforcement leg (S6). On every push and every pull request: `npm ci` → typecheck → lint → build → `validate:wording` → `validate:all` (the whole validator corpus, globbed by scripts/validate-all.sh), kept honest by scripts/validate-ci-wiring.mjs (39 assertions). CORRECTED 2026-09-28 (Batch 1c): this row previously described 'audit, registry verify, demo completeness, E2E tests on push/PR' and cited .github/workflows/ci.yml as its evidence while NO SUCH FILE EXISTED anywhere in the repository. The workflow NOW exists and does exactly what this description says. The E2E suite and any deployment are deliberately NOT part of it — deployment is scripts/deploy-demo.sh, a local credentialed deliberate act, and the workflow is asserted to contain no deploy command and no secret.",
       "source": "Batch -4, item 6",
       "status": "built",
-      "evidence": ".github/workflows/ci.yml; scripts/validate-ci-wiring.mjs; npm run validate:ci-wiring (39 assertions, PASS); CI run recorded on GitHub for the Batch 1c commit",
+      "evidence": ".github/workflows/ci.yml; scripts/validate-ci-wiring.mjs; package.json (engines.node); npm run validate:ci-wiring (43 assertions, PASS); the CI workflow running on GitHub for the Batch 1c commits",
       "last_verified": "2026-09-28",
       "superseded_by": null
     },

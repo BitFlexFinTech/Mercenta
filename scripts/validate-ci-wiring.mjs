@@ -190,6 +190,43 @@ for (const g of GATES) {
 test('validate:all is the whole-corpus script (scripts/validate-all.sh)',
   scripts['validate:all'] === 'bash scripts/validate-all.sh');
 
+/* ── 6b. the Node version must be one this corpus can actually RUN ─────────
+ * WHY THIS BLOCK EXISTS (a REAL defect this gate found by existing): the first
+ * version of the workflow pinned Node 20. Two validators `await import()` real
+ * `.ts` modules, which needs Node's TypeScript type stripping (unflagged from
+ * 22.18 / 23.6); under Node 20 they die with ERR_UNKNOWN_FILE_EXTENSION. The
+ * FIRST REAL CI RUN therefore reported 114 PASS / 2 FAIL after a green local
+ * rehearsal on Node 26 — the workflow was wrong, not the corpus. The requirement
+ * is now declared ONCE in package.json `engines.node`, and asserted here against
+ * the version the workflow actually installs, so the two cannot drift apart.
+ */
+const scriptFiles = readdirSync(new URL('../scripts/', import.meta.url)).filter((f) =>
+  /^validate-.*\.mjs$/.test(f)
+);
+const tsExecuting = scriptFiles.filter((f) => {
+  const src = read(`scripts/${f}`);
+  return /await import\(/.test(src) && /\.ts['"]/.test(src);
+});
+const enginesNode = String((pkg.engines ?? {}).node ?? '');
+const minMatch = /^>=\s*(\d+)\.(\d+)/.exec(enginesNode);
+const ciNodeMatch = /node-version:\s*['"]?(\d+)(?:\.(\d+))?/.exec(body);
+const minMajor = minMatch ? Number(minMatch[1]) : 0;
+const minMinor = minMatch ? Number(minMatch[2]) : 0;
+const ciMajor = ciNodeMatch ? Number(ciNodeMatch[1]) : 0;
+const ciMinor = ciNodeMatch && ciNodeMatch[2] ? Number(ciNodeMatch[2]) : 0;
+
+test('the corpus really needs TypeScript stripping (validators that import .ts at runtime)',
+  tsExecuting.length >= 2, tsExecuting.join(', ') || 'none detected — the detection is stale');
+test('the repository DECLARES the Node it needs (package.json engines.node)',
+  Boolean(minMatch), enginesNode || 'no engines.node declared');
+test('that declared minimum covers TypeScript stripping (>= 22.18)',
+  minMajor > 22 || (minMajor === 22 && minMinor >= 18), enginesNode);
+test(
+  `the CI Node version satisfies the declared minimum (CI ${ciMajor}${ciMinor ? `.${ciMinor}` : ''} vs engines ${enginesNode || 'MISSING'})`,
+  ciMajor > minMajor || (ciMajor === minMajor && ciMinor >= minMinor),
+  `workflow node-version must be >= ${enginesNode}`
+);
+
 /* ── 7. the corpus really is the whole corpus, and includes THIS gate ───── */
 const corpusSrc = exists(CORPUS) ? read(CORPUS) : '';
 test('the corpus iterates the glob scripts/validate-*.mjs',
