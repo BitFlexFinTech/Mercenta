@@ -72,7 +72,8 @@ no such file existed anywhere in the repository**.
   its own log showing `WORDING_LINT_PASS — scanned 326 src files, 0 outward-facing violations` and
   **`FULL VALIDATOR CORPUS: 116 PASS / 0 FAIL (of 116 files)`**. The **first** run (`36380726689`, headSha
   `d1b392a`) **failed 114/116** — the run that found the Node-pin defect. Pushed to `origin/redesign/foundation`
-  (`f1dc25f..6b646bd`).
+  (`f1dc25f..6b646bd`). **The CI run for the state-checkpoint commit `48760ed` was also observed: run
+  `36384196274` = success, 116/116 inside the run** — so the current HEAD has been verified by CI on GitHub.
 
 ## BATCH 1b — THE CONNECT WIZARD'S BACKEND HALF NOW EXISTS (session 41, 2026-09-28) — HISTORICAL
 
