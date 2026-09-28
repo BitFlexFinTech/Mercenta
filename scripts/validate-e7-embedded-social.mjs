@@ -520,6 +520,27 @@ try {
   ];
 
   /**
+   * §BATCH1 — MAKE THE KEY HANDOVER REAL (2026-09-27) — REPOINTED.
+   *
+   * The recorded next task (`docs/NEXT_BUILD_PLAN_2026-09-27.md`, Batch 1) built
+   * the server helpers the REAL provider clients had always called (and which did
+   * not exist), and fixed the defects found while doing it: the simulated DHL
+   * exception whose retry branch was UNREACHABLE, and the stale citation of a
+   * migration that does not exist. Its source/test surface is declared here,
+   * exactly as every earlier phase's declared surface is accepted above. The
+   * scope-guard MECHANISM is unchanged and NOT weakened: a changed source/test
+   * file outside EVERY declared set is still refused.
+   */
+  const BATCH1_INTEGRATION_PROXY_DECLARED = [
+    'supabase/functions/',
+    'scripts/validate-integration-proxy.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-mock-providers.mjs',
+    'src/lib/dhl/mockClient.ts',
+    'src/integrations/IntegrationsContext.tsx',
+  ];
+
+  /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
    *
    * Same declaration mechanism as SPRINT_WORK_LAYER_DECLARED above: the files
@@ -1390,6 +1411,12 @@ try {
      * outside EVERY declared set is still refused.
      */
     ...SSOT_PROGRAMME_DECLARED,
+    /**
+     * §BATCH1 — the integration-proxy helpers phase's declared surface (see the
+     * declaration above). Same mechanism: a changed source/test file outside
+     * EVERY declared set is still refused.
+     */
+    ...BATCH1_INTEGRATION_PROXY_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

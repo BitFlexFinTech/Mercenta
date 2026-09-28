@@ -167,6 +167,40 @@ try {
   const recovered = await mDhl.getShipmentStatus(booked.waybill);
   test('mock dhl transient failure fails once then recovers', !fail1.ok && recovered.ok && fail1.error.includes('retry'));
 
+  /**
+   * §BATCH1a DEFECT FIX (behavioural gate at the SOURCE).
+   *
+   * Every 6th waybill raises a customs EXCEPTION at `in_transit`, and the NEXT
+   * poll must CLEAR it — a retry the operator can act on. Before the fix the mock
+   * advanced PAST the milestone while raising the exception, so the recovery
+   * branch was UNREACHABLE and a simulated customs hold could never be cleared.
+   * This asserts the real mock's behaviour, which is the defect itself.
+   */
+  let exceptionWaybill = booked.waybill;
+  for (let i = 0; i < 5; i += 1) {
+    const extra = await mDhl.createShipment({
+      reference: `SHIPMENT-EX-${i}`,
+      origin: 'Depot',
+      destination: 'UK Hub',
+      cartons: 1,
+    });
+    exceptionWaybill = extra.waybill;
+  }
+  const exSeries = [];
+  for (let poll = 0; poll < 5; poll += 1) {
+    exSeries.push(await mDhl.getShipmentStatus(exceptionWaybill));
+  }
+  const exRaised = exSeries.find((s) => s.exception === true);
+  const exCleared = exSeries.find(
+    (s) => s.exception === false && /retry recovered/i.test(s.exceptionReason ?? '')
+  );
+  test(
+    'mock dhl customs exception is CLEARED by the very next poll (the retry is reachable — §BATCH1a defect fix)',
+    Boolean(exRaised) &&
+      Boolean(exCleared) &&
+      exSeries.indexOf(exCleared) === exSeries.indexOf(exRaised) + 1
+  );
+
   // Factory: verified connection through a counting transport provokes real calls; mock/mock: secret → zero calls.
   const realSel = dhlIndexMod.createDhlClientForConnectionWithTransport(
     { credentials: { secretRef: 'vault:dhl', verified: true }, edgeFunctionBase: '/fn' }, dhlCountingTransport

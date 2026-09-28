@@ -476,7 +476,7 @@
         "simulation_only_stated_refusal": 17
       },
       "gates": {
-        "validate:integration-proxy": "51 assertions / 0 failures — INTEGRATION_PROXY_VALIDATION_PASS",
+        "validate:integration-proxy": "53 assertions / 0 failures — INTEGRATION_PROXY_VALIDATION_PASS (2 assertions added by the DHL defect fix, both proved able to fail)",
         "validate:all": "114 PASS / 0 FAIL (of 114 files)",
         "validate-e6-brand-surfaces": "PASS — F6 working-tree scope guard repointed with a declared §BATCH1 surface (mechanism unchanged)",
         "typecheck": "0 errors",
@@ -498,11 +498,23 @@
         "Batch 1c — S6 CI wiring (.github/ holds only dependabot.yml)"
       ],
       "findings_recorded": [
-        "supabase/migrations/0002_integration_connections.sql is cited by STATUS_CHECK.md/PRODUCTION_READINESS.md but does NOT exist (27 migrations, none for integration connections)",
-        "pre-existing mock defect: src/lib/dhl/mockClient.ts raises the simulated customs exception at in_transit without holding the milestone, so its eventual retry branch is unreachable (the helper mirrors the mock exactly; the mock is unchanged)",
+        "supabase/migrations/0002_integration_connections.sql was DESCRIBED AS EXISTING by docs/NEXT_BUILD_PLAN_2026-09-27.md, PROJECT_STATUS.md (older text), src/integrations/IntegrationsContext.tsx and this registry note — but it does NOT exist (27 migrations, none for integration connections). Every LIVE citation was CORRECTED on 2026-09-27; the historical session log in STATUS_CHECK.md is preserved verbatim (history is never rewritten). PRODUCTION_READINESS.md never cited it.",
         "the platform holds neither the channel itemSequenceNumber nor Mercenta's selling-party id, and the shipment domain holds no addresses/weights/dimensions — the three real gaps the live refusals name"
       ],
-      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (demo deployment NOT APPLICABLE: no deployable runtime change; live verification NOT VERIFIED)"
+      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (demo deployment NOT APPLICABLE: no deployable runtime change; live verification NOT VERIFIED)",
+      "defects_fixed": [
+        {
+          "defect": "src/lib/dhl/mockClient.ts — the simulated customs exception did not hold the milestone, so its \"retry recovered\" branch was UNREACHABLE: a customs hold could never be cleared in simulation (the Palletline mock already held its milestone; DHL did not).",
+          "disposition": "FIXED AT SOURCE — it was NOT mirrored-for-parity and NOT recorded as a known exception",
+          "fix": "The exception branch now holds the milestone (`st.polls -= 1`), and the helper mirror in supabase/functions/_shared/proxyRoutes.ts holds it identically, so a retry clears the hold in both.",
+          "gate": "validate-integration-proxy asserts (a) in the EXECUTED helper that the exception is cleared by the very next poll and (b) at the SOURCE that the mock still holds the milestone. Both were proved able to fail: removing the helper hold → 1 failure; removing the mock hold → 1 failure. Both files were then restored byte-identical (proxyRoutes.ts sha256 2dd42777b03bd94e0df12fa62b5e89492732ca57bf755514e5e3eb9a8e356567; mockClient.ts sha256 3276a00230005e384d3055d4b3e803feee528b44a6b2d9eb79d4906e36d66357)."
+        }
+      ],
+      "corrections": [
+        "docs/NEXT_BUILD_PLAN_2026-09-27.md said Palletline had 4 routes and omitted /cancel — it has 5 (the gate derives routes from the client source, which is how the discrepancy was found); corrected.",
+        "docs/NEXT_BUILD_PLAN_2026-09-27.md asserted the integration-connections migration exists — it does not; corrected.",
+        "My first report of this session said PRODUCTION_READINESS.md cited that non-existent migration; it never did. Corrected here and in PROJECT_STATUS.md."
+      ]
     }
   },
   "entries": [

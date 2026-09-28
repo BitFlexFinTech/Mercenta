@@ -1178,6 +1178,7 @@ export function simulatedResponse(
       const milestone = DHL_MILESTONE_SEQUENCE[shipment.polls - 1];
       if (shipment.willException && milestone === 'in_transit' && !shipment.exceptionOngoing) {
         shipment.exceptionOngoing = true;
+        shipment.polls -= 1; // hold the milestone so the NEXT poll is the retry (parity with the fixed mock)
         return {
           status: 200,
           body: {

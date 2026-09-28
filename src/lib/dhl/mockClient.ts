@@ -129,6 +129,13 @@ export async function getMockShipmentStatus(waybill: string): Promise<{
   // Exception path: every 6th waybill throws a customs hold at in_transit.
   if (st.willException && milestone === 'in_transit' && !st.exceptionOngoing) {
     st.exceptionOngoing = true;
+    // §BATCH1a DEFECT FIX — HOLD the milestone so the NEXT poll is the retry.
+    // Without this the poll counter had already moved past in_transit, so the
+    // recovery branch below was UNREACHABLE: a customs hold could never be
+    // cleared by a retry, which is the opposite of what a simulation of DHL
+    // must show. The Palletline mock already held its milestone for the same
+    // reason; the DHL mock did not. Both now behave identically.
+    st.polls -= 1;
     return {
       ok: true,
       milestone: 'in_transit',
@@ -137,7 +144,7 @@ export async function getMockShipmentStatus(waybill: string): Promise<{
       delayed: true,
     };
   }
-  // Retry after an exception: same milestone, exception cleared.
+  // Retry after an exception: same milestone, exception cleared (reachable now).
   if (st.exceptionOngoing && milestone === 'in_transit') {
     st.exceptionOngoing = false;
     return {

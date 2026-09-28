@@ -25,7 +25,7 @@ Palletline, because the real client paths call server-side helpers that do not e
 |---|---|---|
 | **Amazon SP-API (12)** | `/catalog-items`, `/catalog-items/{submissionId}`, `/purchase-orders`, `/purchase-orders/status`, `/acknowledgements`, `/shipments/request`, `/shipments/{id}/details`, `/shipments/{id}/labels`, `/shipments/confirmations`, `/shipments/confirm`, `/invoices`, `/inventory` | `src/lib/spapi/client.ts` lines 356–674 |
 | **DHL (3)** | `/shipments`, `/shipments/{waybill}`, `/shipments/pickup` | `src/lib/dhl/client.ts` lines 108–157 |
-| **Palletline (4 routes / 5 calls)** | `/palletline/consignments` (create), `/palletline/consignments/{n}` (status), `/palletline/collections`, `/palletline/consignments/{n}` (invoice) | `src/lib/palletline/client.ts` lines 113–208 |
+| **Palletline (5 routes / 5 calls)** | `/palletline/consignments` (create), `/palletline/consignments/{n}` (status), `/palletline/consignments/{n}/cancel` (cancel), `/palletline/collections`, `/palletline/consignments/{n}/invoice` | `src/lib/palletline/client.ts` lines 107–225 (**CORRECTED 2026-09-27: this row originally said "4 routes" and omitted `/cancel`; the helper gate derives the routes from the client source and found the fifth**) |
 
 **Only these 9 Edge Functions exist today:** `catalog-import`, `discovery-directory`, `esign-envelope`,
 `instantly-reply-webhook`, `payouts-transfer`, `send-email`, `social-session`, `xero-token`, `xero-webhook`
@@ -40,8 +40,10 @@ With real credentials present, the same helper performs the real call — **no a
 
 The front half exists (`ConnectWizard` in `src/components/admin/integrations/IntegrationsPanel.tsx`). Missing:
 step 2 (**secure key exchange + encrypted secret storage**) and step 3 (**the real harmless test call**).
-- Real secrets must move to the vault (`supabase/migrations/0002_integration_connections.sql` exists); demo
-  secrets must leave `localStorage`.
+- Real secrets must move to the vault, and demo secrets must leave `localStorage`. **CORRECTED 2026-09-27:** this
+  line used to assert `supabase/migrations/0002_integration_connections.sql` *exists* — **it does not** (27 migrations
+  are present and none covers integration connections). **The connection-record schema has to be WRITTEN in Batch 1b**;
+  until it exists, nothing durable may be claimed for a stored key.
 - **Never relax:** a simulated connect is shown and treated as **"(Mock)"**, never as live.
 - Definition of done: a **fake-key rehearsal** proves the same wizard path performs the real exchange + test and
   reports an honest failure for a bad key, with **zero code edits** — and it stays a permanent gate.

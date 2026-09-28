@@ -13,10 +13,16 @@
  * non-sandbox connections, so no feature can silently treat a simulated
  * connect as a verified production credential.
  *
- * Persistence: localStorage for now (super-admin convenience); the
- * supabase/migrations/0002_integration_connections.sql table replaces this
- * once a Supabase project is connected — secrets must then live in Vault,
- * never in plain columns or localStorage.
+ * Persistence: localStorage for now (super-admin convenience); once a Supabase
+ * project is connected, secrets must live in Vault, never in plain columns or
+ * localStorage.
+ *
+ * CORRECTED 2026-09-27 — THE CONNECTION-RECORD SCHEMA DOES NOT EXIST. This file
+ * used to name `supabase/migrations/0002_integration_connections.sql` as the
+ * table that replaces the localStorage map, but no such migration is in the
+ * repository (27 migrations are present and none covers integration
+ * connections). Writing it is Batch 1b work; until then a real key has nowhere
+ * durable to go and nothing durable may be claimed.
  */
 import {
   createContext,

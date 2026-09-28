@@ -23,6 +23,15 @@
 > `business-analyst`, `project-manager`, `senior-software-architect`, `senior-software-engineer`,
 > `ux-product-analyst`, `design-review`, `frontend-design`, `impeccable`, `interaction-design`, `shadcn`,
 > `accessibility`, `beautiful-shadows` remain installed here with their Mercenta-specific depth).
+>
+> **§GLOBAL COMPANIONS — ADDED 2026-09-27 (Founder report): `07-fix-defects-at-source.md`.** A defect found is a
+> defect FIXED in the same session, at its source — never mirrored for "parity", never parked in a "known
+> exceptions" list, never merely reported. Every fix carries a gate proved able to fail; the only alternative is
+> BLOCKED with the exact missing input. It is installed in BOTH global folders (identical, sha256
+> `d2272d1c144993e4f7ed9acf10f3352733ddc1ea6a3f7e334dca45da39f020f5`) and applies here with full force; the
+> project-level record is `.clinerules/defect-remediation.md`. **Where this project's own files are concerned, the
+> project's router remains the stricter one and wins** — and a scope guard refusing a file is NEVER a reason to
+> leave a defect: extend the declared scope, or raise a genuinely PROTECTED path with the Founder.
 
 ## 1. Why this exists — context economy
 

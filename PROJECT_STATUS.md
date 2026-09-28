@@ -4,8 +4,8 @@
 ## CURRENT RESUME STATE
 <!-- Machine-readable. A new Cline session reads THIS block first and nothing else from this file.
      Rule: .clinerules/operating-model.md §12 (CHAT IS NOT PROJECT MEMORY) + project-state-contract.md. -->
-LAST COMPLETED TASK:      **BATCH 1a — MAKE THE KEY HANDOVER REAL (session 40, 2026-09-27): the server helpers the real provider clients always called now EXIST.** ONE manifest (`supabase/functions/_shared/proxyRoutes.ts`) declares all **20 routes** (12 SP-API · 3 DHL · 5 Palletline); three functions serve it (`supabase/functions/spapi|dhl|palletline/`); **3 routes are live-capable** (SP-API PO read · SP-API PO status · DHL tracking) and **17 refuse live with a STATED code naming the exact missing input**; simulation = zero credential work + zero network calls; a live call additionally needs a verified operator session. Gate: `npm run validate:integration-proxy` (**51 assertions**), proved able to fail. Detail: `PRODUCTION_READINESS.md` §BATCH1a. **BATCH 1 IS NOT FINISHED — 1b and 1c stand.**
-CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Measured this session AFTER the last edit: `validate:all` **114 PASS / 0 FAIL (of 114)** · `validate:integration-proxy` **51 assertions / 0 failures** · `validate-e6-brand-surfaces` **PASS** (F6 scope guard repointed, contract unchanged) · `typecheck` **0** · `lint` **0** · `build` **✓ 5.58s**. The new gate was PROVED ABLE TO FAIL TWICE (an undeclared client route → 3 failures; simulation invoking the live caller → non-zero exit); both files were then restored BYTE-IDENTICAL (`src/lib/spapi/client.ts` sha256 `aaad77d0…`, `_shared/proxyRoutes.ts` sha256 `86ffc85c…`).
+LAST COMPLETED TASK:      **BATCH 1a — MAKE THE KEY HANDOVER REAL (session 40, 2026-09-27): the server helpers the real provider clients always called now EXIST.** ONE manifest (`supabase/functions/_shared/proxyRoutes.ts`) declares all **20 routes** (12 SP-API · 3 DHL · 5 Palletline); three functions serve it (`supabase/functions/spapi|dhl|palletline/`); **3 routes are live-capable** (SP-API PO read · SP-API PO status · DHL tracking) and **17 refuse live with a STATED code naming the exact missing input**; simulation = zero credential work + zero network calls; a live call additionally needs a verified operator session. Gate: `npm run validate:integration-proxy` (**51 assertions**), proved able to fail. Detail: `PRODUCTION_READINESS.md` §BATCH1a. **BATCH 1 IS NOT FINISHED — 1b and 1c stand.** **DEFECT FIX (Founder report, same session):** the simulated DHL customs exception did not hold its milestone, so its *"retry recovered"* branch was **unreachable** in the mock **and in the new helper** — **FIXED AT SOURCE IN BOTH** (it was never acceptable to mirror it as "parity" or to park it as a "known exception"); **three** new gate assertions were added — the exception is cleared by the next poll in the EXECUTED helper, the mock's hold is pinned at source, and a **BEHAVIOURAL** assertion runs the REAL mock through Vite SSR (`validate-mock-providers`) — each **proved able to fail** (files restored byte-identical). **THE GLOBAL RULE WAS THEN SAVED: `07-fix-defects-at-source.md`, identical in BOTH global folders (sha256 `d2272d1c144993e4f7ed9acf10f3352733ddc1ea6a3f7e334dca45da39f020f5`), and the global parity rule was extended with the matching exception ("parity with a known defect is a defect, not parity") so the two can never be read as contradictory.**
+CURRENT VERIFIED STATE:   **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE.** Measured this session AFTER the last edit: `validate:all` **114 PASS / 0 FAIL (of 114)** · `validate:integration-proxy` **53 assertions / 0 failures** · `validate-e6-brand-surfaces` **PASS** (F6 scope guard repointed, contract unchanged) · `typecheck` **0** · `lint` **0** · `build` **✓**. The gate was PROVED ABLE TO FAIL **FIVE TIMES**: an undeclared client route → 3 failures; simulation invoking the live caller → non-zero exit; removing the FIXED helper's milestone hold → 1 failure; removing the mock's hold → 1 failure in `validate-integration-proxy`; and removing the mock's hold → 1 failure in the BEHAVIOURAL gate (`validate-mock-providers`, which executes the real mock). Every mutated file was restored BYTE-IDENTICAL (`src/lib/spapi/client.ts` sha256 `aaad77d0dab2ea7080bdbb5bc40a2c32b275f3addafa6723b018ca7e49529cf8`; `src/lib/dhl/mockClient.ts` sha256 `3276a00230005e384d3055d4b3e803feee528b44a6b2d9eb79d4906e36d66357`; `supabase/functions/_shared/proxyRoutes.ts` was `86ffc85ca411d69a8c62061419e82aa6d08781049bdb89686b58a1f88673608d` BEFORE the defect fix and is `2dd42777b03bd94e0df12fa62b5e89492732ca57bf755514e5e3eb9a8e356567` AFTER it — each probe returned its file to that file's current bytes).
 CURRENT BRANCH:           redesign/foundation
 LAST VERIFIED COMMIT:     **`947095d`** — "feat(integrations): BATCH 1a — the provider proxy helpers the real clients always called now exist (spapi + dhl + palletline)" (**18 paths**: the 4 Edge-Function entry points + 6 `_shared` modules + 3 live/shared support modules + `scripts/validate-integration-proxy.mjs` (new) + `scripts/validate-e6-brand-surfaces.mjs` (F6 scope repointed) + `package.json` (the new gate registered) + `PRODUCTION_READINESS.md` §BATCH1a + `docs/INTEGRATIONS.md` + the three state sources + the registry `_meta`). It follows `f439efd`, `96d2061`, `68a9468`/`8a5dccd`, `c107bc2`. The state checkpoint carrying THIS block follows it. **CONVENTION: a STATE-CHECKPOINT hash written in this block is always exactly one commit behind the branch head, because the commit that records the hash cannot contain its own hash.**
 GITHUB PUSH:              **DONE — PUSHED** to `origin/redesign/foundation` with the state checkpoint carrying this block; `git status --porcelain` EMPTY at close.
@@ -48,8 +48,10 @@ provider, so a provider change is data, not a new screen.
 **What is MISSING — the backend half, and it is the same missing plumbing recorded elsewhere:** steps 2–3 of
 the wizard (secure key exchange + encrypted secret storage, and the real harmless test call) are NOT wired.
 Today a connect completes flagged `sandbox: true` and is labelled "(Mock)". Secrets currently sit in the
-browser for the demo; real secrets must live in a vault (`supabase/migrations/0002_integration_connections.sql`),
-never in localStorage or plain columns.
+browser for the demo; real secrets must live in a vault — and **the connection-record vault schema does not exist
+yet**: `supabase/migrations/0002_integration_connections.sql` is named in this file's older text but is NOT in the
+repository (27 migrations, none for integration connections), so writing it is Batch 1b work. A real key must never
+be left in localStorage or a plain column.
 
 **Safety rule that must NOT be relaxed:** a simulated connect must never be shown or treated as live. In demo
 mode the click works and is honestly marked simulated; with a real key the SAME wizard path performs the real
@@ -57,7 +59,7 @@ exchange + test and flips to Live — no code change.
 
 ## GLOBAL RULES — INSTALLED FOR EVERY PROJECT (2026-09-27)
 
-Six rules now apply to **all projects**, installed OUTSIDE this repository.
+Seven rules now apply to **all projects**, installed OUTSIDE this repository.
 
 - **Added 2026-09-27 (installed in BOTH global locations, identical copies — `~/Documents/Cline/Rules/` and
   `~/.cline/rules/`):** `plain-english-responses.md` · `answer-from-the-project.md` · `skill-usage.md` ·
@@ -80,6 +82,16 @@ Six rules now apply to **all projects**, installed OUTSIDE this repository.
   breakdown first, and extend the batch list rather than folding new scope into an in-flight batch).
   `always-check-requirements-registry.md` was NOT promoted: it names this project's script
   (`scripts/verify-registry.mjs`) and registry, so it is project-specific by content.
+- **`07-fix-defects-at-source.md` — SAVED 2026-09-27 after a real failure in this project (Founder report).**
+  **A defect found is a defect FIXED in the same session, at its source.** The rule forbids: mirroring a known defect
+  for "parity"; parking a fixable defect in a "known exceptions" / "recorded for later" list; reporting a defect
+  instead of fixing it; and omitting a fix to keep a report short or to avoid extending a declared scope. Every fix
+  must carry a gate that fails if the defect returns — **proved able to fail** (mutate, watch it fail, restore
+  byte-identical). The ONLY alternative is **BLOCKED**, which must name the exact missing input/authority, the exact
+  next action, and must never describe the affected behaviour as working. A session report may therefore use only
+  **FIXED (with evidence)** or **BLOCKED (with the missing input)** — "recorded" is not a disposition. The global
+  `reference-implementation-parity-check.md` was extended in the same pass with the matching exception ("parity with a
+  known defect is a defect, not parity"), so the two rules cannot be read as contradictory.
 - **Skills available to every project: 34** in `~/.agents/skills/` (the 26 already there + 8 copied from this
   project on 2026-09-27: `design-review`, `frontend-design`, `interaction-design`, `impeccable`, `shadcn`,
   `accessibility`, `beautiful-shadows`, `project-manager`). Copies verified byte-identical to the project's.
@@ -99,8 +111,10 @@ Six rules now apply to **all projects**, installed OUTSIDE this repository.
   remaining `homekava` hit is inside that recorded-history note).
 - **"HALF-GLOBAL" GAP CLOSED (2026-09-27).** Eight rules existed ONLY in `~/.cline/rules/` and three ONLY in
   `~/Documents/Cline/Rules/`, and the zip rule existed in both under DIFFERENT filenames with DIFFERENT content
-  (the drift that produced the zip bug). NOW **all 17 global rules exist in BOTH folders with identical content**
-  (verified: one unique sha256 per rule across the two copies) and the divergent `04-always-export-review-zip.md`
+  (the drift that produced the zip bug). NOW **all 18 global rules exist in BOTH folders with identical content**
+  (verified: one unique sha256 per rule across the two copies; the 18th — `07-fix-defects-at-source.md`, added
+  2026-09-27 from this project's Founder report — is byte-identical at sha256
+  `d2272d1c144993e4f7ed9acf10f3352733ddc1ea6a3f7e334dca45da39f020f5`) and the divergent `04-always-export-review-zip.md`
   was DELETED, standardising on `always-export-review-zip.md` in both folders.
 - **Prevention recorded globally:** the global `03-single-source-of-truth.md` now states that the rule applies to
   RULES and SKILLS too — search for an existing rule/skill before writing a new one, extend it, and never leave a
@@ -111,8 +125,10 @@ Six rules now apply to **all projects**, installed OUTSIDE this repository.
   installed on this machine.
 - **Pre-existing global rules they join:** `always-export-review-zip.md`, `always-maintain-status-file.md`,
   `budget-token-saving-rules.md` (`~/Documents/Cline/Rules/`) and the numbered set `00-task-mode-selection` →
-  `06-page-by-page-functional-parity-audit` plus `no-placeholders-vs-mock-first`,
-  `reference-implementation-parity-check`, `shared-component-tenant-scoping-check` (`~/.cline/rules/`).
+  **`07-fix-defects-at-source`** plus `no-placeholders-vs-mock-first`,
+  `reference-implementation-parity-check` (EXTENDED 2026-09-27 with the "never mirror a defect" exception — both
+  copies at sha256 `c5bc6001961c65f43905c4b4dd2f4bfd59d0de6a0b5b43f5c8e48a75eb1aeb86`),
+  `shared-component-tenant-scoping-check` (`~/.cline/rules/`).
 
 They are **generic by design — no project-specific instructions**, so they cannot break an unrelated project.
 Two safeguards they carry: a **mandatory stack fit check** (a skill that assumes a technology a project does not
@@ -153,6 +169,14 @@ just need to give them to you and everything will sync up"* — was impossible: 
   proves fail-closed behaviour, executes the live callers against a scripted transport, and pins every mirrored fact
   (UK/NA marketplace ids, label regions, truckload limit, 18 refusal codes, both milestone lifecycles, the
   carrier-cost formula) to its canonical owner.
+- **ALL 20 routes the real clients call now have a helper**, and **DEFECTS FOUND THIS SESSION ARE FIXED, not
+  reported:** the simulated DHL customs exception did not hold its milestone, so its *"retry recovered"* branch was
+  unreachable — **FIXED at source in `src/lib/dhl/mockClient.ts` AND in the helper that mirrors it**, with three new
+  gate assertions (the exception is cleared by the next poll in the EXECUTED helper; the mock still holds the
+  milestone, pinned at source; and a BEHAVIOURAL assertion that runs the real mock through Vite SSR) **proved able to
+  fail**. Also fixed: `docs/NEXT_BUILD_PLAN_2026-09-27.md` said
+  Palletline had 4 routes (it has 5 — `/cancel` was omitted) and asserted the integration-connections migration
+  exists (it does not); every live citation of that non-existent file was corrected, including one in my own report.
 - `PRODUCTION_READINESS.md` §BATCH1a records every activation item, the deployment requirement and the JWT rule.
 
 ### 2. IN PROGRESS
@@ -182,15 +206,21 @@ The 17 simulation-only routes (each has a stated code and a named missing input 
 
 ### 6. KNOWN EXCEPTIONS
 
-- **The shipped Edge Functions are NOT deployed**, and the three live paths have never run against a provider.
-  Both are stated in the resume block and in §BATCH1a — neither is claimed as working.
-- **Pre-existing mock defect found while mirroring (not fixed, not introduced):** `src/lib/dhl/mockClient.ts` raises
-  the simulated customs exception at `in_transit` but does not hold the milestone (unlike the Palletline mock, which
-  does with an explicit comment), so its *eventual* retry branch is unreachable. The helper mirrors the mock exactly
-  (parity is the requirement); the mock's own behaviour is unchanged.
-- **A cited file that does not exist:** `supabase/migrations/0002_integration_connections.sql` — cited by
-  `STATUS_CHECK.md` and `PRODUCTION_READINESS.md`, but there is no such migration (27 migrations exist, none for
-  integration connections). Recorded for Batch 1b to correct or write.
+**This section is EMPTY of unfixed defects: everything found in this session was FIXED at source (see §1) or is
+BLOCKED with the exact missing input (§5).** The two facts below are BLOCKED-capability statements, NOT defects
+parked here — neither describes a behaviour as working:
+
+- **The shipped Edge Functions are NOT deployed** (blocker: Supabase credential + CLI — §5), and **the three
+  live-capable routes have never run against a provider** (blocker: live credentials — §5). Nothing in this increment
+  is claimed to work against a real provider.
+- **The 17 simulation-only routes refuse live by design**, each with a stated code that names its missing input
+  (§5). They are unfinished capability recorded as ROADMAP work — not exceptions, and not claimed as working.
+- **A cited file that does not exist — CITATIONS FIXED THIS SESSION, the schema still to be WRITTEN:**
+  `supabase/migrations/0002_integration_connections.sql` was described as *existing* by
+  `docs/NEXT_BUILD_PLAN_2026-09-27.md`, `PROJECT_STATUS.md` (older text), `src/integrations/IntegrationsContext.tsx`
+  and the registry note. **`PRODUCTION_READINESS.md` never cited it — my first report of this session said it did, and
+  that was wrong.** Every live citation was corrected; the historical session log in `STATUS_CHECK.md` is preserved
+  verbatim by design (history is never rewritten). The migration itself is Batch 1b work.
 
 ### 7. CURRENT CHECKPOINT
 
@@ -200,9 +230,10 @@ for this phase: a new `§BATCH1` set was added, its mechanism unchanged and not 
 
 ### 8. VERIFICATION STATUS
 
-`validate:all` **114/114 PASS** · `validate:integration-proxy` **51/51** · `typecheck` **0** · `lint` **0** ·
-`build` **✓** · gate **proved able to fail twice** · files restored **byte-identical** after the probes.
-Not verified: any live provider call; any demo-visible behaviour.
+`validate:all` **114/114 PASS** · `validate:integration-proxy` **53/53** · `typecheck` **0** · `lint` **0** ·
+`build` **✓** · gate **proved able to fail five times** · every mutated file restored **byte-identical**.
+Not verified: any live provider call; any demo-visible behaviour. **Defect disposition: everything found this session
+is FIXED (with gates) — nothing is parked in §6.**
 
 ### 9. NEXT EXECUTION SCOPE
 

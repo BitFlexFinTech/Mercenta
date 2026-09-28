@@ -1573,6 +1573,12 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
   'docs/NEXT_BUILD_PLAN_2026-09-27.md',
   'docs/INTEGRATIONS.md',
   'PRODUCTION_READINESS.md',
+  /** §BATCH1a DEFECT FIX — the simulated DHL exception retry was unreachable. */
+  'src/lib/dhl/mockClient.ts',
+  /** §BATCH1a — the stale `0002_integration_connections.sql` citation corrected. */
+  'src/integrations/IntegrationsContext.tsx',
+  /** §BATCH1a — the behavioural gate for the DHL defect fix. */
+  'scripts/validate-mock-providers.mjs',
 ]);
 
   /**

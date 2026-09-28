@@ -888,20 +888,38 @@ const dhlCreated = await callSim(routeById('dhl.shipments.create'));
 // exactly six and poll the sixth (never the seventh).
 let dhl6 = dhlCreated;
 for (let i = 0; i < 5; i += 1) dhl6 = await callSim(routeById('dhl.shipments.create'));
-let dhlException;
-for (let poll = 0; poll < 4; poll += 1) {
-  dhlException = await callSim(routeById('dhl.shipments.status'), {
+const dhlSeries = [];
+for (let poll = 0; poll < 6; poll += 1) {
+  const outcome = await callSim(routeById('dhl.shipments.status'), {
     path: `/shipments/${dhl6.body.waybill}`,
   });
-  if (dhlException.body.exception === true) break;
+  dhlSeries.push(outcome.body);
 }
+const dhlRaised = dhlSeries.find((status) => status.exception === true);
+const dhlRecovered = dhlSeries.find(
+  (status) => status.exception === false && String(status.exceptionReason).includes('retry recovered')
+);
 test(
   'parity: DHL bookings are unmistakable (MOCK-DHL-… / SIM-TRK-…) and the 6th waybill raises the simulated customs exception',
   String(dhlCreated.body.waybill).startsWith('MOCK-DHL-') &&
     String(dhlCreated.body.trackingNumber).startsWith('SIM-TRK-') &&
-    dhlException.body.exception === true &&
-    String(dhlException.body.exceptionReason).includes('Customs hold'),
-  JSON.stringify(dhlException.body)
+    Boolean(dhlRaised) &&
+    String(dhlRaised.exceptionReason).includes('Customs hold'),
+  JSON.stringify(dhlSeries)
+);
+/**
+ * §BATCH1a DEFECT FIX — the exception must be CLEARABLE by a retry. Before the
+ * fix the poll counter had already moved past `in_transit` when the exception was
+ * raised, so this branch was UNREACHABLE in both the mock and its mirror: a
+ * simulated customs hold could never be cleared. This assertion is what stops the
+ * defect returning, in the HELPER (executed here) AND in the mock (pinned below).
+ */
+test(
+  'parity: the simulated DHL customs exception is CLEARED by the next poll (the retry is reachable — the §BATCH1a defect fix)',
+  Boolean(dhlRecovered) &&
+    dhlSeries.indexOf(dhlRecovered) === dhlSeries.indexOf(dhlRaised) + 1 &&
+    dhlRecovered.milestone === 'in_transit',
+  JSON.stringify(dhlSeries)
 );
 
 proxy.resetSimulatedWorld();
@@ -1013,6 +1031,23 @@ test(
   'parity: the DHL simulated lifecycle equals the mock client’s order',
   JSON.stringify(dhlSequence) === JSON.stringify([...proxy.DHL_MILESTONE_SEQUENCE]),
   `${JSON.stringify(dhlSequence)} vs ${JSON.stringify([...proxy.DHL_MILESTONE_SEQUENCE])}`
+);
+/**
+ * §BATCH1a DEFECT FIX (pinned at the SOURCE, not only in the mirror): the mock
+ * must HOLD the milestone when it raises the customs exception, so its recovery
+ * branch is reachable. If this line is ever removed the gate fails — the defect
+ * cannot come back silently.
+ */
+const dhlExceptionStart = mockDhl.indexOf('st.willException && milestone ===');
+const dhlRetryStart = mockDhl.indexOf('// Retry after an exception');
+const dhlExceptionBranch =
+  dhlExceptionStart >= 0 && dhlRetryStart > dhlExceptionStart
+    ? mockDhl.slice(dhlExceptionStart, dhlRetryStart)
+    : '';
+test(
+  'defect fix: the DHL MOCK holds the milestone on an exception, so its retry branch is reachable (pinned at source)',
+  dhlExceptionBranch.includes('st.polls -= 1') && mockDhl.includes('retry recovered'),
+  dhlExceptionBranch.slice(0, 300)
 );
 const palletlineSequence = quotedList(mockPalletline, 'const MILESTONE_SEQUENCE: PalletlineMilestone[] = [');
 test(
