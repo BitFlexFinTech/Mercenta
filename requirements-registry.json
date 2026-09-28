@@ -599,7 +599,7 @@
         }
       ],
       "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (demo deployment NOT DEPLOYED — deliberately deferred to the §SSOT programme's close, S7 = Batch 3; the Edge Functions and the migration are server-side and the client files this increment touched travel with that deferred deployment. Live verification NOT VERIFIED — nothing in this increment is visible on the demo and no live provider credential exists.)",
-      "next_plan": "Batch 1c (S6 CI wiring) is DONE (2026-09-28, session 42 — see _meta.batch1c_ci_wiring); the next recorded work is Batch 2 (Amazon accuracy — 37 open findings) and Batch 3 (the unverified registry rows + S7), plus the still-open Batch 1 delivery leg (deployment + live verification).",
+      "next_plan": "Batch 1c (S6 CI wiring) is DONE (2026-09-28, session 42 — see _meta.batch1c_ci_wiring); Batch 2a (the Amazon-attribution family AV-019/AV-019b/AV-020b, plus the resume-state defect fix) is DONE (see _meta.batch2a_amazon_attribution); the next recorded work is the rest of Batch 2 (Amazon accuracy — 31 open findings: AV-024, AV-006, AV-008/AV-023, AV-032, AV-040/AV-042/AV-043/AV-045) and Batch 3 (the unverified registry rows + S7), plus the still-open Batch 1 delivery leg (deployment + live verification).",
       "verified_commit": "193210d",
       "github_push": "PUSHED to origin/redesign/foundation (4f45dc6..193210d)"
     },
@@ -652,10 +652,48 @@
         "The E2E suite and `verify-registry` are deliberately NOT in the CI workflow (the recorded S6 scope is typecheck/lint/build/wording/corpus); neither is claimed anywhere as running in CI."
       ],
       "completion_status": "VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT (no application runtime change: a CI workflow, its gate, one npm script and documentation). GLOBAL STATE REMAINS 'NOT COMPLETE' — the demo leg is unsatisfied for the programme as a whole (demo still d726166).",
-      "next_plan": "Batch 2 (Amazon accuracy — 37 open findings: AV-019/AV-019b, AV-024, AV-006, AV-007 first), then Batch 3 (the unverified registry rows + S7 + the deferred deployment that closes Batch 1's delivery leg).",
+      "next_plan": "Batch 2 is in progress: 2a (the attribution family AV-019/AV-019b/AV-020b + the resume-state defect fix) is DONE — see _meta.batch2a_amazon_attribution; the remaining Batch 2 work is AV-024, AV-006, AV-008/AV-023, AV-032, AV-040/AV-042/AV-043/AV-045 (31 findings still open, 7 EVIDENCE-BLOCKED), then Batch 3 (the unverified registry rows + S7 + the deferred deployment that closes Batch 1's delivery leg).",
       "verified_commit": "6b646bd",
       "github_push": "PUSHED to origin/redesign/foundation (f1dc25f..6b646bd)",
       "live_verification": "VERIFIED ON GITHUB: run 36383110010 (workflow CI, headSha 6b646bd, conclusion success, 5m48s) — its own log shows WORDING_LINT_PASS (326 src files, 0 outward-facing violations) and FULL VALIDATOR CORPUS: 116 PASS / 0 FAIL (of 116 files). The FIRST run 36380726689 (headSha d1b392a) FAILED with 114 PASS / 2 FAIL (of 116) — that run is what FOUND the Node-pin defect that 6b646bd fixes. The CI run for the state-checkpoint commit 48760ed was ALSO observed: run 36384196274 = success (116/116 inside the run), so the current HEAD is CI-verified. NOT VERIFIED on https://demo.mercenta.co.uk — nothing in this increment is visible there."
+    },
+    "batch2a_amazon_attribution": {
+      "increment": "BATCH 2a — THE AMAZON-ATTRIBUTION FAMILY + THE RESUME-STATE DEFECT (session 43, 2026-09-28)",
+      "record": "docs/NEXT_BUILD_PLAN_2026-09-27.md §BATCH 2 → §2a; docs/AMAZON_RECONCILIATION_STATUS.md (AV-019, AV-019b, AV-020b)",
+      "status": "DONE — a Mercenta invention can no longer be presented as the retail channel's rule, and the state block can no longer hold two field sets",
+      "built": [
+        "src/config/deductions.ts — the ONE owner: DEDUCTION_TAXONOMY (source 'mercenta_working_taxonomy', verifiedAgainstChannel false), DEDUCTION_TYPE_LABELS + deductionTypeLabel (every user-facing category label), DEDUCTION_DISPUTE_WINDOW (14 days, source 'mercenta_service_standard', verifiedAgainstChannel false, plus the sentence every surface renders), BACKORDER_RESTOCK_TARGET (30 days, source 'mercenta_operational_target', verifiedAgainstChannel false, heading + overdue label + attribution).",
+        "scripts/validate-amazon-attribution.mjs — the owner gate, registered as `npm run validate:amazon-attribution` (31 assertions). It imports the config for real (asserting the RUNNING values, not a pattern match), asserts enum↔label parity against src/types.ts, asserts each surface renders the owning config's attribution instead of re-typing a rule, asserts the removed wording is absent from src/ including comments, and asserts the 14 and the 30 each have ONE owner.",
+        "scripts/validate-resume-state.mjs — the state gate, registered as `npm run validate:resume-state` (52 assertions): ONE resume block at the top, EXACTLY ONE line per declared field (all ten present, non-empty, non-placeholder), the same ten mirrored in HANDOFF.md, both agreeing on the SAME next-task token, and the starting point citing files that exist.",
+        "Consumers repointed to the one owner: src/lib/work/workStore.ts (re-exports the config's number instead of a bare 14), src/data/api.ts (adds BACKORDER_RESTOCK_TARGET.days instead of a bare 30), src/types.ts (both type comments corrected), src/config/tours/tourDefinitions.ts (deductions + PO backorder steps render the config's notes; the unsupported performance-score claim removed), src/lib/automation/registry.ts (the note names Mercenta's own standard), src/components/brand/DeductionsLedger.tsx (taxonomy heading/labels/attribution + dispute text, no raw enum printing), src/components/brand/BrandPurchaseOrders.tsx (Mercenta's restock reminder + attribution; the channel-visibility announcement removed)."
+      ],
+      "defects_fixed": [
+        {
+          "defect": "PROJECT_STATUS.md's `## CURRENT RESUME STATE` block held TWO FIELD SETS: the current Batch 1c one and a stale Batch 1b duplicate underneath it whose NEXT TASK still said 'BATCH 1c — S6 CI wiring' — a task already COMPLETE — while HANDOFF.md correctly said 'BATCH 2'. A new session resuming from the block alone would have been told to redo finished work.",
+          "disposition": "FIXED AT SOURCE — the stale duplicate field set is removed (its narrative record survives at 'PREVIOUS POSITION — BATCH 1b' and in STATUS_CHECK.md, so nothing was destroyed), and a note inside the block records the removal.",
+          "gate": "validate-resume-state asserts exactly one line per field and agreement between PROJECT_STATUS.md and HANDOFF.md on the next task; PROVED able to fail (a duplicate field line → 1 failure; NEXT TASK drifting to BATCH 9 → 1 failure; a ghost starting-point path → 1 failure) with the file restored byte-identical (sha256 ae6482e6c52602630f440a1405051eb2dcd0333866c340e0a3dcf7b21d00cead)."
+        },
+        {
+          "defect": "docs/AMAZON_RECONCILIATION_STATUS.md carried false statements about its own content: it described the register as '138 lines' (it is 208), and its summary said 'Applied so far: 1 of 52 (AV-003)' while AV-007, AV-010, AV-022 and AV-027 had ALREADY been applied — with AV-007 and AV-010 still marked 'OPEN — not applied' although their guards and gates existed. docs/NEXT_BUILD_PLAN_2026-09-27.md repeated the error as '3 APPLIED, 37 still OPEN', whose own parenthetical summed to 36.",
+          "disposition": "FIXED AT EVERY LIVE CITATION — the register length is corrected; the applied table now lists all 8 applied findings with their gates; the open position is DERIVED (13 need nothing + 8 applied → 31 open, 7 EVIDENCE-BLOCKED); and AV-007/AV-010/AV-019/AV-019b/AV-020b/AV-027 each state APPLIED with the correcting note.",
+          "gate": "The counts are derivable from §3's own tables; validate-amazon-attribution pins the three attribution rows' implementation; validate-resume-state keeps the state block and its handoff mirror in step."
+        },
+        {
+          "defect": "The guided deductions tour asserted 'The outcome affects your fulfillment score. Repeated lost disputes may hurt your standing.' — a channel-performance consequence no channel source documents (register AV-020; same unsupported-claim family as AV-003).",
+          "disposition": "FIXED AT SOURCE — the step now states what is true: the retail channel decides, and Mercenta records the outcome and chases repeated losses.",
+          "gate": "validate-amazon-attribution fails if that sentence returns — PROVED by restoring removed wording in another surface (2 failures), then restoring the file byte-identical."
+        }
+      ],
+      "not_done": [
+        "AV-019's other half is NOT done: the REAL channel chargeback codes are still unsourced — the taxonomy is honestly Mercenta's own until they are. The row records this rather than claiming completion.",
+        "AV-020 (the channel performance scorecard) remains EVIDENCE-BLOCKED. The platform's own 'fulfillment score' is Mercenta's financing-track score and is not presented as the channel's; renaming it for unambiguity is still carried by that row.",
+        "The rest of Batch 2 is untouched: AV-024, AV-006, AV-008/AV-023, AV-032, AV-040/AV-042/AV-043/AV-045 and the remaining INCOMPLETE/INFERENCE rows."
+      ],
+      "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT (no application runtime change requiring deployment: attribution, labels and state documentation). GLOBAL STATE REMAINS 'NOT COMPLETE' — Batch 1's delivery leg and the demo deployment are still open.",
+      "next_plan": "Continue Batch 2 at AV-024 (PO changes/revisions do not exist though the channel can change an order), then AV-006 (the documented 48-hour amendment window), then AV-008/AV-023 (ack ↔ invoice price/time rules), then AV-032/AV-040/AV-042/AV-043/AV-045; Batch 3 after that.",
+      "verified_commit": "RECORDED IN THE STATE BLOCK (this record is committed with the change it describes)",
+      "github_push": "PUSHED to origin/redesign/foundation with the state checkpoint (see PROJECT_STATUS.md → CURRENT RESUME STATE)",
+      "live_verification": "NOT VERIFIED on https://demo.mercenta.co.uk — this increment is not exercised there; the demo remains at its previous build. What IS verified: typecheck, lint, build, validate:wording, the whole validator corpus, and both new gates proved able to fail."
     }
   },
   "entries": [

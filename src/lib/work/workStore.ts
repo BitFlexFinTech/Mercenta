@@ -60,6 +60,7 @@ import { loadIntegrationsSync } from '@/integrations/connections';
 import { addDays, daysBetween } from '@/lib/dates';
 import { invoiceDueDate, invoiceIsOutstanding, invoiceTermDays } from '@/lib/commerce/invoiceTerms';
 import { PO_ACKNOWLEDGEMENT_HOURS } from '@/config/purchaseOrders';
+import { DEDUCTION_DISPUTE_WINDOW } from '@/config/deductions';
 /**
  * §P13 / S3 — THE RULE'S OWNER. The work layer ASKS the acknowledgement-window
  * owner whether a PO is still actionable instead of deriving that itself, so
@@ -90,8 +91,14 @@ export { PO_ACKNOWLEDGEMENT_HOURS };
  * constant — it is only the default applied to a legacy row.
  */
 export { INVOICE_TERM_DAYS } from '@/lib/commerce/invoiceTerms';
-/** Simulated window to dispute a posted deduction. Declared, not random. */
-export const DEDUCTION_DISPUTE_WINDOW_DAYS = 14;
+/**
+ * §BATCH 2a — REPOINTED (not re-declared). This used to be a bare `14`, which
+ * read as a retail-channel deadline; no channel source states a deduction-dispute
+ * window (register `AV-019b`). The NUMBER and its ATTRIBUTION are now owned by
+ * `src/config/deductions.ts` — Mercenta's own service standard — and re-exported
+ * here so this module's public surface is unchanged.
+ */
+export const DEDUCTION_DISPUTE_WINDOW_DAYS = DEDUCTION_DISPUTE_WINDOW.days;
 /** Days a warehouse return may sit in an actionable stage. Declared. */
 export const RETURN_ACTION_WINDOW_DAYS = 3;
 /** Outreach follow-up cadence for a contacted prospect. Declared. */

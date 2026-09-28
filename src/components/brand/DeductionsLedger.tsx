@@ -37,6 +37,11 @@ import {
 } from '@/lib/commerce/commerceLifecycle';
 import { Badge, Button, Card, DataTable, StatusBadge } from '@/components/ui';
 import { deductionStatusPresentation } from '@/lib/statusPresentation';
+import {
+  DEDUCTION_DISPUTE_WINDOW,
+  DEDUCTION_TAXONOMY,
+  deductionTypeLabel,
+} from '@/config/deductions';
 import { cn } from '@/utils/cn';
 
 const MONO = 'font-mono text-ds-label';
@@ -101,7 +106,7 @@ export function DeductionsLedger() {
       return;
     }
     setNotice(
-      `${res.value.purchaseOrderId} — ${res.value.type.replace(/_/g, ' ')} marked ${res.value.status}. Your evidence notes are recorded against the deduction.`
+      `${res.value.purchaseOrderId} — ${deductionTypeLabel(res.value.type)} marked ${res.value.status}. Your evidence notes are recorded against the deduction.`
     );
     setDisputingId(null);
     setNotes('');
@@ -119,14 +124,14 @@ export function DeductionsLedger() {
       >
         {/* ── Categories ─────────────────────────────────────────────── */}
         <div data-tour="deductions-categories" className="px-5 py-3 border-b border-white/[0.06]">
-          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Deduction Categories</p>
+          <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{DEDUCTION_TAXONOMY.heading}</p>
           <div className="flex flex-wrap gap-2 mt-2">
             {categories.map(([type, c]) => (
               <span
                 key={type}
                 className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-ds-micro text-zinc-300"
               >
-                <span className="capitalize">{type.replace(/_/g, ' ')}</span>
+                <span>{deductionTypeLabel(type)}</span>
                 <span className="text-zinc-500">·</span>
                 <span className="text-zinc-400">{c.count}</span>
                 <span className="text-zinc-500">·</span>
@@ -139,6 +144,9 @@ export function DeductionsLedger() {
               </span>
             )}
           </div>
+          {/* §BATCH 2a (`AV-019`) — the attribution: these are Mercenta's own
+              working categories, never presented as the channel's codes. */}
+          <p className="text-ds-micro text-zinc-600 mt-2">{DEDUCTION_TAXONOMY.attributionNote}</p>
         </div>
 
         {/* ── Ledger rows — canonical DataTable: labelled cards below md (so no
@@ -167,7 +175,7 @@ export function DeductionsLedger() {
               label: 'Type',
               render: (d) => (
                 <span className="text-xs capitalize">
-                  {d.type.replace(/_/g, ' ')}
+                  {deductionTypeLabel(d.type)}
                   {d.simulated && <span className="ml-1 text-ds-micro text-brass-400">(sim)</span>}
                 </span>
               ),
@@ -249,7 +257,7 @@ export function DeductionsLedger() {
           {disputingId && (
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 space-y-2">
               <p className="text-ds-label text-blue-200">
-                Disputes must be raised within 14 days of the deduction date. Provide the evidence
+                {DEDUCTION_DISPUTE_WINDOW.attributionNote} Provide the evidence
                 that supports your claim — shipping documents, proof of delivery, or carton photos.
               </p>
               <textarea
@@ -303,7 +311,7 @@ export function DeductionsLedger() {
               {recordedOutcomes.map((d) => (
                 <div key={d.id} className="flex flex-wrap items-center gap-2 text-ds-label">
                   <span className={cn(MONO, 'text-zinc-400')}>{d.purchaseOrderId}</span>
-                  <span className="capitalize text-zinc-500">{d.type.replace(/_/g, ' ')}</span>
+                  <span className="text-zinc-500">{deductionTypeLabel(d.type)}</span>
                   <Badge className="text-ds-micro bg-white/[0.05] text-zinc-300 border-white/[0.08]">
                     outcome: {d.dispute?.outcome}
                   </Badge>

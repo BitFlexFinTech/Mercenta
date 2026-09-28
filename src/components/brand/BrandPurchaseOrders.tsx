@@ -44,6 +44,7 @@ import {
   PO_STATUS_ORDER,
 } from '@/lib/statusPresentation';
 import { BrandCommPanel } from '@/components/shared/BrandComm';
+import { BACKORDER_RESTOCK_TARGET } from '@/config/deductions';
 /**
  * §UI/UX Wave 2 completion — the brand PO list gains the established
  * QUEUE → PREVIEW (RecordDrawer) → ACT step. Only the record's own real fields
@@ -1091,10 +1092,13 @@ export function BrandPurchaseOrders() {
                     </tbody>
                   </table>
 
-                  {/* §30-day backorder restock deadline — visible countdown */}
+                  {/* §BATCH 2a (`AV-020b`) — Mercenta's OWN replenishment target.
+                      It used to announce that channel visibility had been lost
+                      once the date passed — a consequence no channel source
+                      states. That announcement is removed. */}
                   {po.lineItems.some((l) => l.ackStatus === 'backordered' && l.backorderRestockDeadline) && (
                     <div className="border border-amber-500/20 bg-amber-500/5 rounded-lg p-2">
-                      <p className="text-ds-micro font-medium text-amber-300 mb-1">Backorder Restock Deadlines</p>
+                      <p className="text-ds-micro font-medium text-amber-300 mb-1">{BACKORDER_RESTOCK_TARGET.heading}</p>
                       <div className="space-y-1">
                         {po.lineItems.filter((l) => l.ackStatus === 'backordered' && l.backorderRestockDeadline).map((l) => {
                           const deadline = new Date(l.backorderRestockDeadline + 'T00:00:00Z');
@@ -1104,14 +1108,15 @@ export function BrandPurchaseOrders() {
                               <span className="font-mono text-zinc-400">{l.sku}</span>
                               <span className={daysLeft <= 0 ? 'text-red-400 font-medium' : daysLeft <= 7 ? 'text-amber-400' : 'text-zinc-500'}>
                                 {daysLeft <= 0
-                                  ? 'Visibility LOST — restock overdue'
-                                  : daysLeft + ' day(s) to restock deadline (' + new Date(l.backorderRestockDeadline as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ')'
+                                  ? BACKORDER_RESTOCK_TARGET.overdueLabel
+                                  : daysLeft + " day(s) to Mercenta's restock target (" + new Date(l.backorderRestockDeadline as string).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ')'
                                 }
                               </span>
                             </div>
                           );
                         })}
                       </div>
+                      <p className="text-ds-micro text-zinc-600 mt-1">{BACKORDER_RESTOCK_TARGET.attributionNote}</p>
                     </div>
                   )}
 

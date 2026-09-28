@@ -1412,6 +1412,40 @@ const BATCH1C_CI_WIRING_SCOPE = new Set([
   'README.md',
 ]);
 
+/**
+ * §BATCH 2a (2026-09-28, session 43) — AMAZON-ATTRIBUTION DECLARED SURFACE.
+ *
+ * The phase corrected three findings in which a MERCENTA invention was presented
+ * as the retail channel's rule: the deduction/chargeback taxonomy (`AV-019`), the
+ * dispute window (`AV-019b`) and the thirty-day backorder restock countdown
+ * (`AV-020b`). It also fixed the resume-state defect found at session start (the
+ * duplicated stale field set in `PROJECT_STATUS.md`).
+ *
+ * The ONE owning config (`src/config/deductions.ts`) is new; the consumers are the
+ * brand surfaces that rendered the claims, the type/domain documents that carried
+ * them, the automation note, the guided tours, and the two gates added here — plus
+ * the two scope guards themselves, which must be able to declare this phase.
+ *
+ * F5/F5b/F6's contract is UNCHANGED: a changed SOURCE file in NO declared set
+ * still FAILS. Nothing protected is touched (no migration, no provider client, no
+ * Xero, no billing).
+ */
+const BATCH2A_AMAZON_ATTRIBUTION_SCOPE = new Set([
+  'src/config/deductions.ts',
+  'src/types.ts',
+  'src/data/api.ts',
+  'src/lib/work/workStore.ts',
+  'src/lib/automation/registry.ts',
+  'src/config/tours/tourDefinitions.ts',
+  'src/components/brand/DeductionsLedger.tsx',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'scripts/validate-amazon-attribution.mjs',
+  'scripts/validate-resume-state.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
   const migDir = fileURLToPath(new URL('../supabase/migrations/', import.meta.url));
   const migFiles = readdirSync(migDir).filter((f) => /^0\d\d_/.test(f));
   // §Phase M13 — REPOINTED. This pinned "026 remains the newest; 26 total", which
@@ -1487,7 +1521,10 @@ const BATCH1C_CI_WIRING_SCOPE = new Set([
         [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH1c — the CI-wiring phase's declared surface (see above). */
         BATCH1C_CI_WIRING_SCOPE.has(p) ||
-        [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2a — the Amazon-attribution phase's declared surface (see above). */
+        BATCH2A_AMAZON_ATTRIBUTION_SCOPE.has(p) ||
+        [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -1514,7 +1551,10 @@ const BATCH1C_CI_WIRING_SCOPE = new Set([
         [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH1c — same declaration, second protected-path check (F5b). */
         BATCH1C_CI_WIRING_SCOPE.has(p) ||
-        [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2a — same declaration, second protected-path check (F5b). */
+        BATCH2A_AMAZON_ATTRIBUTION_SCOPE.has(p) ||
+        [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -1767,7 +1807,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH1B_CONNECT_BACKEND_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH1c — the CI-wiring phase (see above). */
           BATCH1C_CI_WIRING_SCOPE.has(p) ||
-          [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH1C_CI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2a — the Amazon-attribution phase (see above). */
+          BATCH2A_AMAZON_ATTRIBUTION_SCOPE.has(p) ||
+          [...BATCH2A_AMAZON_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

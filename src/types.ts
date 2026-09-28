@@ -1398,6 +1398,12 @@ export interface AdSpendRecommendation {
 
 /* ── §19.1 Deductions / chargebacks ledger ─────────────────────────── */
 
+/**
+ * `AV-019` — Mercenta's WORKING taxonomy for grouping deductions. These nine
+ * values are Mercenta's own categories, **NOT** the retail channel's published
+ * chargeback codes: no channel source reached publishes such a list. The
+ * attribution and the user-facing labels are owned by `src/config/deductions.ts`.
+ */
 export type DeductionType =
   | 'late_shipment'
   | 'shortage_claim'
@@ -1648,9 +1654,14 @@ export interface PurchaseOrderLineItem {
   /** Required when ackStatus === 'backordered'. */
   scheduledShipDate?: string;
   /**
-   * §30-day backorder restock rule — backordered items lose visibility on the
-   * retail channel after 30 days without restock. This field is set at
-   * acknowledgment time as scheduledShipDate + 30d.
+   * §BATCH 2a (`AV-020b`) — Mercenta's OWN replenishment target for a backordered
+   * line: the acknowledged scheduled ship date + 30 days, computed in
+   * `src/data/api.ts` from `BACKORDER_RESTOCK_TARGET` (`src/config/deductions.ts`).
+   *
+   * This is NOT a retail-channel rule. The field previously described the target
+   * date as the moment an unrestocked line stops being visible on the channel — a
+   * consequence no channel source states. That description is removed, and no
+   * surface may assert a channel consequence from this date.
    */
   backorderRestockDeadline?: string;
   /** Required when ackStatus === 'rejected' — a real code, not free text. */

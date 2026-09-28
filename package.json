@@ -46,6 +46,8 @@
     "validate:integration-proxy": "node scripts/validate-integration-proxy.mjs",
     "validate:connect-wizard": "node scripts/validate-connect-wizard-backend.mjs",
     "validate:ci-wiring": "node scripts/validate-ci-wiring.mjs",
+    "validate:resume-state": "node scripts/validate-resume-state.mjs",
+    "validate:amazon-attribution": "node scripts/validate-amazon-attribution.mjs",
     "validate:po-ack-window": "node scripts/validate-po-acknowledgement-window.mjs",
     "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",
     "validate:po-ack-work": "node scripts/validate-po-acknowledgement-work.mjs",

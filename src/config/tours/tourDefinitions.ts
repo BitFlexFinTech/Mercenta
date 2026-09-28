@@ -29,6 +29,11 @@
  * `scripts/validate-po-acknowledgement-onboarding-surfaces.mjs`.
  */
 import { PO_ACK_ONBOARDING_STATEMENT } from '@/config/purchaseOrders';
+import {
+  BACKORDER_RESTOCK_TARGET,
+  DEDUCTION_DISPUTE_WINDOW,
+  DEDUCTION_TAXONOMY,
+} from '@/config/deductions';
 
 export interface TourStep {
   id: string;
@@ -237,7 +242,7 @@ export const PO_ACKNOWLEDGMENT_TOUR: TourDefinition = {
     {
       id: 'po-backorder-date',
       title: 'Backorder Requires Ship Date',
-      description: 'A line may only be backordered where the retail channel allows it on that line — otherwise accept it or reject it with a reason code. Where a backorder is allowed, you must provide a scheduled ship date, and the retail channel expects you to meet it.',
+      description: `A line may only be backordered where the retail channel allows it on that line — otherwise accept it or reject it with a reason code. Where a backorder is allowed, you must provide a scheduled ship date, and the retail channel expects you to meet it. ${BACKORDER_RESTOCK_TARGET.attributionNote}`,
       targetSelector: '[data-tour="po-backorder-date"]',
       position: 'bottom',
       action: 'next',
@@ -309,7 +314,7 @@ export const DEDUCTIONS_TOUR: TourDefinition = {
     {
       id: 'deductions-ledger',
       title: 'Deductions Ledger',
-      description: 'This is your deductions ledger. Every deduction the retail channel applies appears here — from late shipments, ASN inaccuracies, carton mismatches, compliance failures, and chargebacks.',
+      description: `Every deduction raised against your POs appears here, grouped by ${DEDUCTION_TAXONOMY.attributionNote}`,
       targetSelector: '[data-tour="deductions-ledger"]',
       position: 'bottom',
       action: 'next',
@@ -317,7 +322,7 @@ export const DEDUCTIONS_TOUR: TourDefinition = {
     {
       id: 'deductions-categories',
       title: 'Deduction Categories',
-      description: 'Common categories: Late Shipment (missed the window), ASN Inaccuracy (quantities don\'t match), Carton Mislabel (wrong SKU on box), Compliance Failure (expired documents), and Damaged Goods (customer returns). Each shows the amount deducted and the PO reference.',
+      description: `Categories in this list are Mercenta's own working grouping — Late shipment (missed the ship window), Shortage claim (received quantity short), Mislabeled carton (wrong SKU on a box), Non-compliance fine, Co-op, Return charge, Unfilled by cancel date, PO on-time accuracy, Other. ${DEDUCTION_TAXONOMY.attributionNote} Each shows the amount deducted and the PO reference.`,
       targetSelector: '[data-tour="deductions-categories"]',
       position: 'bottom',
       action: 'next',
@@ -325,7 +330,7 @@ export const DEDUCTIONS_TOUR: TourDefinition = {
     {
       id: 'deductions-dispute-workflow',
       title: 'Dispute Workflow',
-      description: 'If you believe a deduction is wrong, click "Dispute". You have a limited window (typically 14 days from the deduction date). Provide evidence: shipping documents, proof of delivery, photos of cartons.',
+      description: `If you believe a deduction is wrong, click "Dispute". ${DEDUCTION_DISPUTE_WINDOW.attributionNote} Provide evidence: shipping documents, proof of delivery, photos of cartons.`,
       targetSelector: '[data-tour="deductions-dispute-btn"]',
       position: 'bottom',
       action: 'next',
@@ -333,7 +338,15 @@ export const DEDUCTIONS_TOUR: TourDefinition = {
     {
       id: 'deductions-dispute-outcome',
       title: 'Dispute Outcomes',
-      description: 'Disputes can be: Won (full refund), Lost (deduction stands), or Partially Resolved (partial refund). The outcome affects your fulfillment score. Repeated lost disputes may hurt your standing.',
+      /**
+       * §BATCH 2a — REPOINTED. This step used to assert that a dispute outcome
+       * moves a vendor performance score and that repeated losses damage a
+       * brand's standing. No channel source reached documents a vendor
+       * performance score or its triggers (register `AV-020`, the same
+       * unsupported-claim family as `AV-003`), so it may not be stated as fact.
+       * What is true is what the ledger does, and that is what it now says.
+       */
+      description: `Disputes can be: Won (full refund), Lost (deduction stands), or Partially Resolved (partial refund). The decision is the retail channel's; Mercenta records the outcome against the deduction and chases repeated losses on your behalf.`,
       targetSelector: '[data-tour="deductions-outcome-info"]',
       position: 'bottom',
       action: 'finish',

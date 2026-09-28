@@ -26,6 +26,54 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
+## BATCH 2a — THE AMAZON-ATTRIBUTION FAMILY + THE RESUME-STATE DEFECT (session 43, 2026-09-28) — CURRENT
+
+**What is now true:** the register's three "Mercenta invention presented as the retail channel's rule" findings are
+**APPLIED** — `AV-019` (the deduction/chargeback taxonomy), `AV-019b` (the fourteen-day dispute window) and
+`AV-020b` (the thirty-day backorder restock countdown). **`src/config/deductions.ts`** is the ONE owner: each value
+is declared **with its attribution** (`source`, `verifiedAgainstChannel: false`, and the exact sentence every
+surface renders), `deductionTypeLabel` owns every user-facing category label so the raw enum is never printed as a
+channel code, `workStore` re-exports the config's `14` instead of a bare literal, and the domain boundary adds the
+config's `days` instead of a bare `30`. Consumers repointed: the brand deductions ledger, the brand purchase-order
+surface, the guided tours (`tourDefinitions.ts`) and the automation note. The guided deductions tour's unsupported
+performance-score claim ("the outcome affects your fulfillment score … may hurt your standing") is removed — no
+channel source documents a vendor performance score (register `AV-020`, same family as `AV-003`).
+
+**Defects fixed at source BEFORE the batch, because they would have misled the next session:**
+`PROJECT_STATUS.md`'s `## CURRENT RESUME STATE` block held **TWO FIELD SETS** — the current Batch 1c one plus a
+stale Batch 1b duplicate whose `NEXT TASK` still said "BATCH 1c" (already complete) while `HANDOFF.md` said
+"BATCH 2". And `docs/AMAZON_RECONCILIATION_STATUS.md` was false about itself: it called the register "138 lines"
+(it is 208) and said "Applied so far: 1 of 52 (AV-003)" while **AV-007, AV-010, AV-022 and AV-027 had already been
+applied** — with AV-007 and AV-010 still marked "OPEN — not applied" although their guards and gates existed.
+`docs/NEXT_BUILD_PLAN_2026-09-27.md` repeated that as "3 APPLIED, 37 still OPEN", whose own parenthetical summed to
+36. Every live citation is corrected: **8 APPLIED, 31 OPEN (7 EVIDENCE-BLOCKED)**, derived from §3's own tables.
+
+**Gates (both in the corpus, so CI runs them on every push):** `npm run validate:amazon-attribution`
+(`scripts/validate-amazon-attribution.mjs`, **31 assertions**) imports the config for real — so it asserts the
+RUNNING values, not a pattern match — asserts the enum↔label parity against `src/types.ts`, asserts each surface
+renders the owner's attribution, asserts the removed wording is absent from `src/` **including comments**, and
+asserts the `14` and the `30` each have ONE owner. `npm run validate:resume-state`
+(`scripts/validate-resume-state.mjs`, **54 assertions**) asserts ONE resume block at the top, exactly one line per
+declared field, the same ten mirrored in `HANDOFF.md`, agreement between the two on the SAME next-task token, and
+that `EXACT NEXT STARTING POINT` cites files that exist. Both were **proved able to fail** (attribution: 1 / 2 / 4
+failures; resume-state: 1 / 1 / 1) with every mutated file restored **byte-identical**.
+
+**Why the scope guards refused the change first (this is correct behaviour):** `validate-e6-brand-surfaces` F6 and
+`validate-e7-embedded-social`'s scope check REFUSED the change set until the §BATCH 2a surface was DECLARED in
+both guards — exactly what the project's `defect-remediation` rule requires: declare the surface, never skip the
+fix. Both now PASS.
+
+**Three-way status:** **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE FOR THIS INCREMENT** (attribution,
+labels and state documentation; no deployable runtime change). **GLOBAL STATE REMAINS "NOT COMPLETE"** — Batch 1's
+delivery leg and the demo deployment are still open, and the demo is still `d726166`. Measured after the last
+edit: `typecheck` **0** · `lint` **0** · `build` **✓** · `validate:all` **118 PASS / 0 FAIL (of 118)** ·
+`validate:wording` **PASS (327 src files, 0 violations)** · `validate-e6-brand-surfaces` **PASS** ·
+`validate-e7-embedded-social` **PASS (121 assertions)**.
+
+**Not done, stated plainly:** the REAL channel chargeback codes (`AV-019`) are still unsourced — the taxonomy is
+honestly Mercenta's own until they are; `AV-020` stays EVIDENCE-BLOCKED; and the rest of Batch 2 (`AV-024`,
+`AV-006`, `AV-008/AV-023`, `AV-032`, `AV-040/AV-042/AV-043/AV-045`) is untouched.
+
 ## BATCH 1c (S6) — CI NOW RUNS EVERY GATE ON PUSH AND PULL REQUEST (session 42, 2026-09-28)
 
 **Before this session:** `.github/` held **only `dependabot.yml`**. Nothing enforced `typecheck`, `lint`, `build`

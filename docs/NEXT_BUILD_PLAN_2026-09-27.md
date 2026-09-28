@@ -92,24 +92,37 @@ measured **116/116 PASS** on 2026-09-28. The remaining leg is the live verificat
 ## BATCH 2 — AMAZON ACCURACY (the 37 open findings; start with the HIGH ones)
 
 **Register of record:** `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` (52 findings AV-001…AV-048)
-with dispositions in `docs/AMAZON_RECONCILIATION_STATUS.md`. **As at 2026-09-27: 3 APPLIED, 37 still OPEN**
-(16 INCOMPLETE · 6 UNSUPPORTED · 6 UNKNOWN · 3 CONTRADICTED · 5 INFERENCE; priority 29 HIGH · 17 MEDIUM · 6 LOW).
+with dispositions in `docs/AMAZON_RECONCILIATION_STATUS.md`. **As at 2026-09-28 (Batch 2a applied): 8 APPLIED
+(AV-003, AV-007, AV-010, AV-019, AV-019b, AV-020b, AV-022, AV-027), 31 still OPEN** (14 INCOMPLETE ·
+1 UNSUPPORTED · 6 UNKNOWN · 2 CONTRADICTED · 5 INFERENCE = 28 by classification, plus the 3 KEEP rows
+carrying a labelled follow-up — AV-001, AV-018, AV-039; 7 of the 31 EVIDENCE-BLOCKED).
+
+### 2a. The attribution family — **DONE (session 43, 2026-09-28)**
+
+`AV-019` / `AV-019b` / `AV-020b` shared one defect: a **Mercenta invention presented as the retail
+channel's rule** (the deduction taxonomy, the fourteen-day dispute window, the thirty-day restock
+countdown). All three are now **APPLIED**: one owning config (`src/config/deductions.ts`) declares each
+value WITH its attribution (`source`, `verifiedAgainstChannel: false`, and the exact sentence every
+surface renders), and `npm run validate:amazon-attribution` **fails if the attribution disappears, if a
+second copy of a window is declared, or if the removed wording returns** — proved able to fail three
+times. `AV-020` remains EVIDENCE-BLOCKED, and the reason is now recorded precisely: the platform's
+"fulfillment score" is Mercenta's OWN financing-track score, and no channel scorecard is invented.
 
 **Start here (named, highest business risk):**
 
 | ID | What is wrong | Why it matters |
 |---|---|---|
-| **AV-019 / AV-019b** | The deduction/chargeback taxonomy and dispute window are presented as Amazon's codes; **no Amazon source publishes them** | A brand could believe they are Amazon's real codes (flagged HIGH/HIGH) |
+| ~~**AV-019 / AV-019b**~~ | ~~The deduction/chargeback taxonomy and dispute window are presented as Amazon's codes~~ — **APPLIED (Batch 2a, 2026-09-28)**: one owning config declares both as Mercenta's own, gated by `validate:amazon-attribution`. Not start work. | — |
 | **AV-024** | **PO changes/revisions do not exist** in the platform, though Amazon can change an order | A brand could ship a superseded PO |
 | **AV-006** | The **48-hour amendment window** is not modelled | Mercenta cannot tell a brand its real obligation |
-| **AV-007** | A **rejected line can be re-acknowledged** — the channel refuses that change | The app offers an impossible action |
-| **AV-010 / AV-020b** | Backorder mechanics modelled but **unverified** | Unsupported behaviour shown as fact |
+| ~~**AV-007**~~ | ~~A rejected line can be re-acknowledged~~ — **APPLIED (Wave 3, 2026-09-22)**; the rejection is now permanent and enforced at the domain boundary. Not start work. | — |
+| ~~**AV-020b**~~ (AV-010 is **APPLIED**, Wave 3) | ~~The invented 30-day backorder restock countdown~~ — **APPLIED (Batch 2a, 2026-09-28)**: Mercenta's own restock reminder, attribution rendered, removed wording gated absent. Not start work. | — |
 | **AV-008 / AV-023** | Ack ↔ invoice price/time rules incomplete | Finance mismatch |
 | **AV-032** | The compliance document set is **unsupported** by evidence | A regulatory claim without a source |
 | **AV-040 / AV-042 / AV-043 / AV-045** | SP-API coverage, wording safeguards, PO vocabulary, delivery appointments incomplete | Incomplete fidelity to the channel |
 
-**Then:** the remaining INCOMPLETE rows (AV-009/011/014/015/016/010b), the CONTRADICTED rows (AV-013/027/031),
-and the INFERENCE rows that must be **relabelled** (AV-002/017/025/033/044).
+**Then:** the remaining INCOMPLETE rows (AV-009/011/014/015/016/010b), the CONTRADICTED rows (AV-013/031 —
+AV-027 is applied), and the INFERENCE rows that must be **relabelled** (AV-002/017/025/033/044).
 
 **Do NOT guess the UNKNOWNs** (AV-020/034/035/046/047/048): they need a **signed-in Vendor Central session**
 (founder-only) — record as EVIDENCE-BLOCKED until then.

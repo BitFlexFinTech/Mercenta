@@ -15,6 +15,13 @@ import { submitDocumentForVerification } from '@/lib/verification/documentVerifi
 import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { ackStatusTransitionRefusal, backOrderBlockedReason } from '@/lib/commerce/backorderGate';
 /**
+ * §BATCH 2a (`AV-020b`) — the backorder replenishment target is Mercenta's OWN
+ * operational target, declared with its attribution in `src/config/deductions.ts`.
+ * No retail-channel source states a restock deadline, so nothing here may claim
+ * one.
+ */
+import { BACKORDER_RESTOCK_TARGET } from '@/config/deductions';
+/**
  * §P13 — the acknowledgement WINDOW's assertions are consumed at the domain
  * boundary: the writer refuses what the documented rule refuses and records the
  * decision's timeliness, and the automatic on-behalf rejection is written here.
@@ -1092,10 +1099,11 @@ export function acknowledgePurchaseOrder(
     if (ack.scheduledShipDate) line.scheduledShipDate = ack.scheduledShipDate;
     if (ack.rejectionCode) line.rejectionCode = ack.rejectionCode;
 
-    // §30-day backorder restock deadline — set at scheduledShipDate + 30d
+    // §BATCH 2a (`AV-020b`) — Mercenta's OWN replenishment target (Mercenta's own
+    // operational target, NOT a channel rule), set at scheduledShipDate + 30d.
     if (ack.ackStatus === 'backordered' && ack.scheduledShipDate) {
       const restockDeadline = new Date(ack.scheduledShipDate + 'T00:00:00Z');
-      restockDeadline.setUTCDate(restockDeadline.getUTCDate() + 30);
+      restockDeadline.setUTCDate(restockDeadline.getUTCDate() + BACKORDER_RESTOCK_TARGET.days);
       line.backorderRestockDeadline = restockDeadline.toISOString().slice(0, 10);
     }
   }

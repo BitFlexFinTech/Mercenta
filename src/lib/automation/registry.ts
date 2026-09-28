@@ -741,7 +741,7 @@ const IMPLEMENTATIONS: Record<AutomationId, (actor: string) => AutomationOutcome
       affected: [...overdueInvoices.map((i) => i.id), ...overdueDeductions.map((d) => d.id)],
       notes: [
         `${overdueInvoices.length} invoice(s) past the payment terms recorded on the invoice itself, with no settled payment.`,
-        `${overdueDeductions.length} deduction(s) past the declared ${DEDUCTION_DISPUTE_WINDOW_DAYS}-day dispute window.`,
+        `${overdueDeductions.length} deduction(s) past Mercenta's own declared ${DEDUCTION_DISPUTE_WINDOW_DAYS}-day dispute service standard (a Mercenta commitment to the brand, NOT a published retail-channel deadline — register AV-019b).`,
       ],
     };
   },

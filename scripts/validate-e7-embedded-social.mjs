@@ -568,6 +568,29 @@ try {
     'scripts/rls-audit.mjs',
     'src/components/admin/integrations/IntegrationsPanel.tsx',
   ];
+  /**
+   * §BATCH 2a (2026-09-28, session 43) — the Amazon-attribution phase's declared
+   * surface. It corrected `AV-019` / `AV-019b` / `AV-020b` (a Mercenta invention
+   * presented as the retail channel's rule) around ONE new owning config, and fixed
+   * the duplicated resume-state field set found at session start. Same mechanism as
+   * every phase above: a changed source/test file outside EVERY declared set is
+   * still refused.
+   */
+  const BATCH2A_AMAZON_ATTRIBUTION_DECLARED = [
+    'src/config/deductions.ts',
+    'src/types.ts',
+    'src/data/api.ts',
+    'src/lib/work/workStore.ts',
+    'src/lib/automation/registry.ts',
+    'src/config/tours/tourDefinitions.ts',
+    'src/components/brand/DeductionsLedger.tsx',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'scripts/validate-amazon-attribution.mjs',
+    'scripts/validate-resume-state.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1450,6 +1473,10 @@ try {
      * §BATCH1b — the connect-wizard backend phase's declared surface (see above).
      */
     ...BATCH1B_CONNECT_BACKEND_DECLARED,
+    /**
+     * §BATCH 2a — the Amazon-attribution phase's declared surface (see above).
+     */
+    ...BATCH2A_AMAZON_ATTRIBUTION_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
