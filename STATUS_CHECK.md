@@ -58,6 +58,7 @@ the repository). So a real key could not become a real connection.
   `stage1-token-exchange-edge-function` no longer claims a non-existent file · five validator statements the new
   migration made false were repointed (the newest migration must now be **declared by the current phase** — an
   undeclared one still fails — and `integration_connections` is pinned as a genuine RLS-protected table).
+- **Verified commit:** `193210d` (pushed to `origin/redesign/foundation`); tree clean.
 - **NOT done (stated, not implied):** the five functions are **NOT deployed** (no Supabase credential + CLI);
   `SPAPI_CLIENT_SECRET` is unset, so the OAuth exchange answers 503 `SPAPI_CLIENT_SECRET_MISSING`; the `vault`
   extension is not confirmed enabled, so a verified key would answer `VAULT_WRITE_FAILED`; **no live path has ever

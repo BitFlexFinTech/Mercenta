@@ -599,7 +599,9 @@
         }
       ],
       "completion_status": "VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE (demo deployment NOT APPLICABLE to this increment: the Edge Functions are server-side and are not part of the static demo build; live verification NOT VERIFIED — nothing in this increment is visible on the demo and no live provider credential exists)",
-      "next_plan": "Batch 1c (S6 CI wiring: a GitHub workflow running npm ci, typecheck, lint, build, validate:all), then Batch 2 (Amazon accuracy — 37 open findings) and Batch 3 (the 126 unverified registry rows + S7)."
+      "next_plan": "Batch 1c (S6 CI wiring: a GitHub workflow running npm ci, typecheck, lint, build, validate:all), then Batch 2 (Amazon accuracy — 37 open findings) and Batch 3 (the 126 unverified registry rows + S7).",
+      "verified_commit": "193210d",
+      "github_push": "PUSHED to origin/redesign/foundation (4f45dc6..193210d)"
     }
   },
   "entries": [
