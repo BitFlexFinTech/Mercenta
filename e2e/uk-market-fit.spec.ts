@@ -15,16 +15,32 @@
  *   5. no prohibited promise appears in the rendered result, and the honest
  *      disclaimer is shown
  *   6. the result states what it could not establish
- *   7. a Super Admin sees the assessment in the Control Centre and can feed a
+ *   7. a re-run is deterministic (reset/repeatability)
+ *   8. the RENDERED result publishes no red-line claim (the patterns read from
+ *      `src/config/positioning.ts` §11), takes the shell theme, and publishes
+ *      neither the operator's readiness string nor the research vendors (B6)
+ *   9. a Super Admin sees the assessment in the Control Centre and can feed a
  *      qualified one into the canonical acquisition pipeline — which creates a
  *      PROSPECT, never a brand tenant
- *   8. RBAC: a brand session never reaches the Control Centre
- *   9. the whole run makes ZERO external network calls, and no page errors occur
+ *  10. RBAC: a brand session never reaches the Control Centre
+ *  11. the whole run makes ZERO external network calls, and no page errors occur
  *
  * Dev server started by playwright.config.ts (npm run dev, :5173).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers/auth';
+import { PUBLIC_CLAIM_RED_LINES } from '../src/config/positioning';
+
+/**
+ * §B6 (2026-09-29) — THE RED LINES, READ FROM THEIR OWNER.
+ *
+ * `src/config/positioning.ts` §11 is the single declaration of what a public
+ * surface may never say. It is IMPORTED, never retyped here: a second copy of the
+ * rule would keep passing while the owner changed.
+ */
+const RED_LINES = PUBLIC_CLAIM_RED_LINES.flatMap((family) =>
+  family.patterns.map((source) => ({ family: family.id, re: new RegExp(source, 'i') }))
+);
 
 const SHOTS = 'test-screenshots/uk-market-fit';
 
@@ -153,7 +169,15 @@ test.describe('Explore UK Market Fit — public assessment', () => {
       expect(body, `result must not contain "${banned}"`).not.toContain(banned);
     }
     expect(body).toContain('not a promise of');
-    expect(body).toContain('nothing here is an endorsement');
+    /**
+     * §B6 (2026-09-29) — REPOINTED, not weakened. The disclaimer's denial used to
+     * read "nothing here is an endorsement, a partnership or an approval", and
+     * `partnership` is a red-line pattern (family 7) — a mechanical scan of the
+     * RENDERED page cannot tell a denial from a claim, so the sentence cannot use
+     * a banned term even to refuse it. The denial is preserved: nothing here
+     * CREATES A RELATIONSHIP, an endorsement or an approval.
+     */
+    expect(body).toContain('nothing here creates a relationship');
     /**
      * The result must STATE what it does not know rather than hide it. Which
      * unknown appears depends on what was supplied, so the assertion is that at
@@ -188,10 +212,59 @@ test.describe('Explore UK Market Fit — public assessment', () => {
     expect(second).toBe(first);
     expect(pageErrors, pageErrors.join(' | ')).toEqual([]);
   });
+
+  test('8. the rendered result publishes no red-line claim (read from its owner) and no internal plumbing', async ({ page }) => {
+    const pageErrors = watchForPageErrors(page);
+    /**
+     * §B6 (2026-09-29) — THE RESULT'S PUBLIC COPY IS COMPOSED BY THE ENGINE, so a
+     * red-line claim can reach the page without any component changing. Measured
+     * before this gate existed, on the rendered result: SIX hits —
+     * `customs clearance`, `gross spread`, `net margin`, `Marketplace API`,
+     * `acknowledgement` and `partnership`. All six were fixed at source.
+     *
+     * The patterns are READ from `src/config/positioning.ts` §11 (never retyped),
+     * and the visitor supplies the figures that reach the COST and LEAD-TIME
+     * branches — the branches that published two of the six — because a branch that
+     * is not exercised is a branch that is not gated.
+     *
+     * It also asserts the leak that was NOT a red-line pattern: the operator's
+     * readiness string and the research vendors (`firecrawl`, `keepa`,
+     * `amazon_sp_api`, `companies_house`), which the page rendered verbatim.
+     */
+    await page.addInitScript(() => {
+      try {
+        window.localStorage.setItem('mercenta.theme', 'minimal-light');
+      } catch {
+        /* private mode — the default shell applies and the assertion below says so. */
+      }
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await runAssessment(page);
+
+    /** The PAGE takes the light shell (it hardcoded the dark palette until B6). */
+    const shell = await page.evaluate(() => {
+      let n: HTMLElement | null = document.querySelector('main');
+      while (n && !n.hasAttribute('data-shell-theme')) n = n.parentElement;
+      return n ? n.getAttribute('data-shell-theme') : null;
+    });
+    expect(shell, 'the assessment page must take the shell it was given').toBe('light');
+
+    const body = await page.locator('body').innerText();
+    const hits = RED_LINES.filter((r) => r.re.test(body)).map(
+      (r) => `${r.family}:${r.re.source} :: ${r.re.exec(body)?.[0]}`
+    );
+    expect(hits, `red-line claims rendered on the assessment result:\n${hits.join('\n')}`).toEqual([]);
+
+    expect(body, 'the operator readiness string and the research vendors must not be published')
+      .not.toMatch(/firecrawl|keepa|amazon_sp_api|companies_house/i);
+    expect(body, 'the internal research provider id must not be published').not.toContain('preaudit-mock-research');
+    await page.screenshot({ path: `${SHOTS}/06-result-light-shell.png`, fullPage: true });
+    expect(pageErrors, pageErrors.join(' | ')).toEqual([]);
+  });
 });
 
 test.describe('Explore UK Market Fit — founder visibility, acquisition feed and RBAC', () => {
-  test('8. a Super Admin sees the assessment and can feed a qualified one into acquisition', async ({ page }) => {
+  test('9. a Super Admin sees the assessment and can feed a qualified one into acquisition', async ({ page }) => {
     const pageErrors = watchForPageErrors(page);
     // 1. Run the public assessment.
     await runAssessment(page, 'Fixture Brand Delta');
@@ -227,7 +300,7 @@ test.describe('Explore UK Market Fit — founder visibility, acquisition feed an
     expect(pageErrors, pageErrors.join(' | ')).toEqual([]);
   });
 
-  test('9. RBAC: a brand session never reaches the Control Centre', async ({ page }) => {
+  test('10. RBAC: a brand session never reaches the Control Centre', async ({ page }) => {
     const pageErrors = watchForPageErrors(page);
     await loginAs(page, 'Tapatío', 1500);
     await page.waitForTimeout(800);

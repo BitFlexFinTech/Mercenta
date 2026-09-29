@@ -19,6 +19,17 @@ const test = (name, ok, detail = '') => {
 
 try {
   const cfg = await server.ssrLoadModule('/src/config/ukMarketFit.ts');
+  /**
+   * §PUBLIC MESSAGING B6 (2026-09-29) — THE RED LINES, READ FROM THEIR OWNER.
+   *
+   * `src/config/positioning.ts` §11 is the single declaration of what a public
+   * surface may never say. It is LOADED here, never retyped: a second copy of the
+   * list would let this validator pass while the owner changed.
+   */
+  const positioning = await server.ssrLoadModule('/src/config/positioning.ts');
+  const RED_LINES = positioning.PUBLIC_CLAIM_RED_LINES.flatMap((family) =>
+    family.patterns.map((source) => ({ family: family.id, source, re: new RegExp(source, 'i') }))
+  );
   const engine = await server.ssrLoadModule('/src/lib/preaudit/ukMarketFitEngine.ts');
   const seam = await server.ssrLoadModule('/src/lib/preaudit/researchProvider.ts');
   const fixtures = await server.ssrLoadModule('/src/lib/preaudit/fixtures.ts');
@@ -289,17 +300,174 @@ try {
       { ...snap, disclaimer: '' },
       cfg.PRE_AUDIT_PROHIBITED_PROMISES
     ));
-  test('the disclaimer explicitly denies every prohibited claim',
-    /not a promise of/i.test(snap.disclaimer) &&
-      /nothing here is an endorsement, a partnership or an approval/i.test(snap.disclaimer));
+  test('the disclaimer explicitly denies every prohibited claim', (() => {
+    /**
+     * §PUBLIC MESSAGING B6 (2026-09-29) — REPOINTED, not weakened.
+     *
+     * OLD CONTRACT: the denial had to contain the literal phrase "nothing here is
+     * an endorsement, a partnership or an approval".
+     *
+     * WHY IT MOVED: that sentence published the red-line noun `partnership` on a
+     * public page — `src/config/positioning.ts` §11 family 7. A mechanical scan of
+     * the RENDERED page (the B8 gate, and the live check) cannot tell a denial from
+     * a claim, so the disclaimer cannot use a banned term even to refuse it.
+     *
+     * NEW CONTRACT, STRONGER: the disclaimer still denies the claim in words, and
+     * the sentence itself is proven free of EVERY declared red line.
+     */
+    return (
+      /not a promise of/i.test(snap.disclaimer) &&
+      /nothing here creates a relationship, an endorsement or an approval/i.test(snap.disclaimer)
+    );
+  })());
+  test('the disclaimer publishes no red-line vocabulary of its own',
+    !RED_LINES.some((r) => r.re.test(cfg.PRE_AUDIT_DISCLAIMER)));
   test('the result never claims an approval, endorsement or partnership',
     !/\bapproved\b|\bendorsed\b|\bpartnership\b/.test(claimText));
   test('the result never uses the word guarantee', !/guarantee/.test(claimText));
 
+  /* ── §PUBLIC MESSAGING B6 (2026-09-29) — THE RENDERED RESULT CARRIES NO RED LINE ──
+   *
+   * WHY THIS EXISTS. The result's public copy is composed by the ENGINE, so a
+   * red-line term can reach the page without any component changing — and six of
+   * them had. Rendering the assessment and scanning the RENDERED text found
+   * `customs clearance`, `gross spread`, `net margin`, `Marketplace API`,
+   * `acknowledgement` and `partnership`. All six were fixed at source; this is the
+   * gate that fails if any of them returns.
+   *
+   * It scans EVERY DECLARED FIXTURE × THREE input shapes, because a branch that is
+   * never exercised is a branch that is not gated: the cost branch only renders when
+   * figures are supplied, and the lead-time branch only when a lead time is.
+   *
+   * It scans the strings the SURFACE RENDERS (the headline, the labels, the
+   * disclaimer, each indicator's rationale/observed/unknowns, every section's
+   * statements and unknowns, the open questions, the educational-gap labels and the
+   * "could not establish" list) — never the engine's source and never the owner's
+   * own pattern literals, which is the trap this scan exists to avoid.
+   */
+  const renderedStrings = (s) =>
+    [
+      s.headline,
+      s.qualificationLabel,
+      s.presenceLabel,
+      s.disclaimer,
+      s.recommendedNextStep,
+      s.simulationLabel ?? '',
+      ...s.couldNotEstablish,
+      ...s.openQuestions,
+      ...s.educationalGaps.map((g) => g.label),
+      ...s.indicators.flatMap((i) => [i.label, i.rationale, i.basis, i.confidence, ...i.observed, ...i.unknowns]),
+      ...s.sections.flatMap((sec) => [sec.title, sec.basis, ...sec.statements, ...sec.unknowns]),
+    ].filter((v) => typeof v === 'string');
+
+  const inputShapes = (brandName) => ({
+    minimal: { brandName, website: 'https://example.com', country: 'United States', category: 'Home' },
+    complete: {
+      brandName,
+      website: 'https://example.com',
+      country: 'United States',
+      category: 'Home',
+      productName: 'Fixture Product',
+      productIdentifiers: ['B0FIXTURE1', '5012345678900'],
+      origin: 'United States',
+      leadTimeDays: 200,
+      moq: 300,
+      casePack: 6,
+      wholesaleCost: 8,
+      retailPrice: 15,
+      knownDocumentation: ['Declaration of conformity'],
+      contactName: 'Fixture Buyer',
+      contactEmail: 'buyer@example.com',
+    },
+    out_of_category: { brandName, website: 'https://example.com', country: 'France', category: 'Sports Equipment' },
+  });
+
+  let scannedStrings = 0;
+  const redLineViolations = [];
+  const perFixtureText = new Map();
+  /**
+   * ONE real run supplies the SOURCE LABELS AND NOTES the seam produces, so the
+   * scan reads the same source strings the public page renders. The fixtures
+   * themselves are injected directly below: `selectPreAuditFixture` picks a
+   * fixture by hashing the brand key, so iterating brand names would silently
+   * exercise only some of the six — measured: four of six.
+   */
+  const scanSources = (
+    await provider.fetchBrandResearch({
+      brandName: 'Fixture Brand Alpha',
+      website: 'https://example.com',
+      country: 'United States',
+      category: 'Home',
+    })
+  ).sources;
+
+  for (const fixture of fixtures.PRE_AUDIT_FIXTURES) {
+    for (const [shapeName, shapeInput] of Object.entries(inputShapes(fixture.fixtureBrand))) {
+      const shapeResearch = {
+        ok: true,
+        mode: 'simulation',
+        providerId: 'preaudit-validator-scan',
+        reason: 'validator fixture scan',
+        simulated: true,
+        fixture,
+        sources: scanSources,
+        observedAt: '2026-01-01',
+        networkCalls: 0,
+      };
+      const assessed = engine.assessUkMarketFit(`b6-${fixture.fixtureId}-${shapeName}`, shapeInput, shapeResearch);
+      const text = renderedStrings(assessed.snapshot);
+      perFixtureText.set(
+        fixture.fixtureId,
+        `${perFixtureText.get(fixture.fixtureId) ?? ''} ${text.join(' ')}`
+      );
+      for (const one of text) {
+        scannedStrings += 1;
+        for (const redLine of RED_LINES) {
+          if (redLine.re.test(one)) {
+            redLineViolations.push(
+              `${fixture.fixtureId}/${shapeName} ${redLine.family}:${redLine.source} :: ${one.slice(0, 90)}`
+            );
+          }
+        }
+      }
+    }
+  }
+  test(
+    'the RENDERED result copy is free of every declared red-line claim (six fixtures × three input shapes)',
+    redLineViolations.length === 0,
+    redLineViolations.slice(0, 5).join(' | ')
+  );
+  test(
+    'the red-line scan carried real public text (fail-closed floor, never an empty scan)',
+    scannedStrings >= 400,
+    `${scannedStrings} rendered strings scanned`
+  );
+  test(
+    'every declared fixture produced a non-empty, distinct result to scan',
+    perFixtureText.size === fixtures.PRE_AUDIT_FIXTURES.length &&
+      [...perFixtureText.values()].every((t) => t.length > 200),
+    `${perFixtureText.size} fixture result(s) scanned`
+  );
+
   /* ── §9 — a real number is only ever derived from a supplied number ────── */
   const commercial = snap.indicators.find((i) => i.id === 'commercial_opportunity');
-  test('the commercial indicator computes a spread from the SUPPLIED cost and price',
-    commercial.observed.some((o) => o.includes('gross spread share')));
+  test('the commercial indicator computes the difference from the SUPPLIED cost and price', (() => {
+    /**
+     * §PUBLIC MESSAGING B6 (2026-09-29) — REPOINTED, not weakened.
+     *
+     * OLD CONTRACT: the observed evidence string was literally `gross spread share
+     * X%`. That is the vocabulary of the commercial model — red-line family 4 — and
+     * the observed rows are RENDERED on the public result.
+     *
+     * NEW CONTRACT: the arithmetic and its source are identical (8 → 15 = 46.7% of
+     * the SUPPLIED price); only the words moved to the public-safe form, and the
+     * assertion now proves the difference is derived from the two supplied figures.
+     */
+    return (
+      commercial.observed.some((o) => o.includes('supplied price less supplied cost')) &&
+      commercial.observed.some((o) => o.includes('% of the supplied price'))
+    );
+  })());
   test('the computed spread matches the supplied figures (8 → 15 = 46.7%)',
     commercial.observed.some((o) => o.includes('46.7%')),
     commercial.observed.join(' | '));
@@ -534,6 +702,31 @@ try {
     surfaceSrc.includes('snapshot.sections.map'));
   test('the public surface has no bespoke colour literals',
     !/#[0-9a-fA-F]{6}\b/.test(surfaceSrc));
+
+  /**
+   * §PUBLIC MESSAGING B6 (2026-09-29) — THE PUBLIC SURFACE PUBLISHES THE PUBLIC
+   * RESEARCH REASON, NOT THE OPERATOR'S.
+   *
+   * `preAuditResearchStatus().reason` is the readiness string, and the contract
+   * above requires it to NAME every declared research provider (`firecrawl`,
+   * `keepa`, `amazon_sp_api`) because that is what an operator needs to act. The
+   * public assessment rendered it verbatim until B6 — publishing the list of
+   * services Mercenta buys. It now renders `publicReason`.
+   */
+  test('the public surface renders the PUBLIC research reason, never the operator one',
+    surfaceSrc.includes('status.publicReason') && !surfaceSrc.includes('status.reason'));
+  test('the public research reason names no research vendor',
+    !/firecrawl|keepa|amazon_sp_api|companies_house/.test(seam.preAuditResearchStatus().publicReason),
+    seam.preAuditResearchStatus().publicReason);
+  test('the OPERATOR readiness reason still names every declared provider (unchanged contract)',
+    ['firecrawl', 'keepa', 'amazon_sp_api'].every((p) =>
+      seam.preAuditLiveResearchReadiness().reason.includes(p)));
+  test('the public surface does not publish the internal research provider id',
+    !surfaceSrc.includes('research.providerId'));
+  test('the public surface takes the shell theme like every other public page',
+    surfaceSrc.includes('data-shell-theme={shellMode}') && surfaceSrc.includes("backgroundColor: 'var(--mr-bg)'"));
+  test('the public surface renders no literal white text',
+    !/\btext-white\b/.test(surfaceSrc));
 
 
   /* ── Wording: the assessment copy names no retail channel ──────────────── */

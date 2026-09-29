@@ -109,8 +109,21 @@ function sourceUsage(): PreAuditResearchSourceUsage[] {
       label: s.label,
       providerMode,
       used: false,
+      /**
+       * §PUBLIC MESSAGING B6 (2026-09-29) — THE NOTE IS A PUBLIC STRING, so it no
+       * longer names the vendor behind a source or the registry mode that vendor
+       * resolves to. It used to read `Backed by the canonical "firecrawl"
+       * provider, which resolves to "available".` and this note is RENDERED on
+       * the public assessment ("Source consulted: …"), which published the list
+       * of services Mercenta buys — the leak the red-line family
+       * `service-suppliers` exists to stop.
+       *
+       * The vendor id and its mode are still recorded in the DATA above
+       * (`providerId`/`providerMode`) and still asserted by
+       * `scripts/validate-uk-market-fit.mjs`; only the public sentence changed.
+       */
       note: providerId
-        ? `Backed by the canonical "${providerId}" provider, which resolves to "${providerMode}".`
+        ? 'A declared research source. Nothing has been fetched from it yet.'
         : 'Not backed by a registered provider — public data only.',
     };
   });
@@ -260,6 +273,22 @@ export function preAuditResearchStatus(): {
   simulationSafe: boolean;
   label: string;
   reason: string;
+  /**
+   * §PUBLIC MESSAGING B6 (2026-09-29) — THE PUBLIC-SAFE TWIN OF `reason`.
+   *
+   * `reason` comes from `preAuditLiveResearchReadiness()` and is an OPERATOR
+   * contract: `scripts/validate-uk-market-fit.mjs` requires it to NAME every
+   * declared research provider (`firecrawl`, `keepa`, `amazon_sp_api`), because a
+   * readiness reason that does not say which vendor is missing tells an operator
+   * nothing. That contract is unchanged.
+   *
+   * It must not reach a public page, and until B6 it did: the assessment rendered
+   * `Research source: … {status.reason}` verbatim. `publicReason` states the same
+   * fact — no live source is connected, so the assessment is simulated and
+   * nothing is fetched — without publishing the vendor list or the internal
+   * registry modes. A gate asserts that no public surface reads `reason`.
+   */
+  publicReason: string;
 } {
   const provider = resolvePreAuditResearchProvider();
   const readiness = preAuditLiveResearchReadiness();
@@ -271,6 +300,9 @@ export function preAuditResearchStatus(): {
     reason: readiness.ready
       ? 'Live research providers resolve to live.'
       : readiness.reason,
+    publicReason: readiness.ready
+      ? 'Live research sources are connected for this assessment.'
+      : 'No live research source is connected, so this assessment runs on a clearly-labelled simulation and nothing is fetched from any external service.',
   };
 }
 

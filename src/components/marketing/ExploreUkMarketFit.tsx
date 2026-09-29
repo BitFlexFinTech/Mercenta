@@ -20,10 +20,47 @@
  * - It never renders a number that was not supplied or derived from a real one.
  * - It states what could not be established rather than hiding it.
  */
+/**
+ * §PUBLIC MESSAGING B6 (2026-09-29) — THE LAST PUBLIC SURFACE THROUGH THE B3/B5 PASS.
+ *
+ * WHAT WAS WRONG — none of it visible to a typecheck or a build:
+ *
+ *  1. IT DID NOT TAKE THE SHELL THEME. The root was `bg-ink text-parchment`, with
+ *     no `data-shell-theme`, so the light-shell remap layer never activated
+ *     inside the page: two secondary buttons rendered LITERAL `text-white`
+ *     (invisible on a light surface) and the hairline borders stayed white-alpha.
+ *     Measured on the rendered page: `main` had NO enclosing `[data-shell-theme]`
+ *     at all — the only such element was the cookie notice, which is why the
+ *     e2e assertion that merely looked for the attribute could pass while the
+ *     page ignored the light shell.
+ *  2. IT PUBLISHED SIX RED-LINE CLAIMS, measured by rendering the assessment to
+ *     its result and scanning the RENDERED text against
+ *     `src/config/positioning.ts` §11: `customs clearance` (the regulated
+ *     position), `gross spread` and `net margin` (the commercial arithmetic),
+ *     `Marketplace API` (platform internals), `acknowledgement` (another
+ *     company's rules and vocabulary) and `partnership` (an unevidenced claim).
+ *     Three of the six came from the ENGINE's own result copy, one from the
+ *     config's disclaimer, one from a declared educational-gap label, and one
+ *     from the research source labels.
+ *  3. IT PUBLISHED THE OPERATOR'S READINESS STRING AND THE RESEARCH VENDORS.
+ *     `Research source: … {status.reason}` rendered the INTERNAL refusal reason —
+ *     which names `firecrawl`, `keepa` and `amazon_sp_api` — and the source notes
+ *     repeated each vendor beside its registry mode. The readiness reason is an
+ *     operator contract (asserted by `validate-uk-market-fit`); it is now read by
+ *     no public surface. The public line is `status.publicReason`.
+ *
+ * WHAT IT DOES NOW. It takes the shell theme like every other public page, opens
+ * with the SAME canonical eyebrow as the other five, renders the public-safe
+ * research status, and its six red-line strings are fixed AT SOURCE (the engine,
+ * the config and the provider note) rather than hidden. The assessment itself is
+ * untouched: same fields, same order, same determinism, same simulation labels.
+ */
 import { useCallback, useMemo, useState } from 'react';
 import { ArrowRight, ArrowLeft, RefreshCw, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 import { PublicNav, type PublicPage } from './PublicNav';
 import { PublicFooter } from './PublicFooter';
+import { useTheme } from '@/context/ThemeContext';
+import { PUBLIC_CATEGORY } from '@/config/positioning';
 import { APPROVED_CATEGORIES } from '@/types';
 import type { PreAuditAssessment, PreAuditInput } from '@/types';
 import {
@@ -100,6 +137,7 @@ export function ExploreUkMarketFit({
   const [reviewRequested, setReviewRequested] = useState(false);
   const [contactEmail, setContactEmail] = useState('');
 
+  const { shellMode } = useTheme();
   const status = useMemo(() => preAuditResearchStatus(), []);
   const stepIndex = PRE_AUDIT_STEPS.findIndex((s) => s.id === step);
 
@@ -193,7 +231,7 @@ export function ExploreUkMarketFit({
   const snapshot = record?.snapshot ?? null;
 
   return (
-    <div className="min-h-screen bg-ink text-parchment font-plex">
+    <div data-shell-theme={shellMode} className="min-h-screen font-plex" style={{ backgroundColor: 'var(--mr-bg)' }}>
       <PublicNav
         currentPage="explore-uk-market-fit"
         onNavigate={onNavigate}
@@ -202,22 +240,43 @@ export function ExploreUkMarketFit({
       <main className="pt-24 pb-16 px-6" data-testid={PRE_AUDIT_TESTIDS.surface}>
         <div className="max-w-4xl mx-auto">
           <section className="text-center mb-10">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.04] px-3 py-1 font-mono text-ds-label uppercase tracking-[0.25em] text-[var(--mr-accent-700)]">
-              <Info className="w-3 h-3" aria-hidden="true" />
-              {status.simulationSafe ? 'Simulated research' : 'Live research'}
-            </span>
-            <h1 className="font-display text-3xl md:text-4xl font-semibold mt-5">
+            {/*
+              §B6 — THE SAME CANONICAL EYEBROW THE OTHER FIVE PUBLIC PAGES OPEN
+              WITH, as a `font-mono` paragraph so the live check's one-line
+              assertion at 390px measures THIS page's eyebrow (it reads the FIRST
+              `main p.font-mono`) instead of an element further down the page.
+            */}
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+              {PUBLIC_CATEGORY}
+            </p>
+            <h1 className="font-display text-3xl md:text-4xl font-semibold mt-4">
               {EXPLORE_UK_MARKET_FIT_CTA}
             </h1>
             <p className="text-sm text-steel max-w-2xl mx-auto mt-4 leading-relaxed">
               {EXPLORE_UK_MARKET_FIT_SUMMARY}
             </p>
-            <p
-              className="mt-3 text-ds-label text-zinc-500"
-              data-testid={PRE_AUDIT_TESTIDS.researchSource}
-            >
-              Research source: {status.label} — {status.reason}
-            </p>
+            {/*
+              The two status lines, in ONE row under the summary: the badge says
+              whether the research was simulated, and the line under it says which
+              research source is active.
+
+              §B6 — that line renders `status.publicReason`, NOT `status.reason`.
+              The reason is the OPERATOR's refusal string and names the research
+              vendors (`firecrawl`, `keepa`, `amazon_sp_api`); a public page must
+              not publish the vendor list of the services Mercenta buys.
+            */}
+            <div className="mt-5 flex flex-col items-center gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.04] px-3 py-1 font-mono text-ds-micro uppercase tracking-[0.2em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+                <Info className="w-3 h-3" aria-hidden="true" />
+                {status.simulationSafe ? 'Simulated research' : 'Live research'}
+              </span>
+              <p
+                className="max-w-2xl text-ds-label text-zinc-500"
+                data-testid={PRE_AUDIT_TESTIDS.researchSource}
+              >
+                Research source: {status.label} — {status.publicReason}
+              </p>
+            </div>
           </section>
 
           <StepRail current={step} />
@@ -484,7 +543,7 @@ export function ExploreUkMarketFit({
                 <button
                   type="button"
                   onClick={() => setStep('identity')}
-                  className="inline-flex items-center gap-2 border border-white/[0.2] hover:border-brass/60 text-white px-5 py-3 rounded-lg transition-colors text-sm"
+                  className="inline-flex items-center gap-2 border border-white/[0.2] hover:border-brass/60 text-parchment px-5 py-3 rounded-lg transition-colors text-sm"
                   data-testid={PRE_AUDIT_TESTIDS.back}
                 >
                   <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -699,7 +758,7 @@ export function ExploreUkMarketFit({
                     <button
                       type="button"
                       onClick={submitReview}
-                      className="inline-flex items-center gap-2 rounded-lg border border-white/[0.2] hover:border-brass/60 px-5 py-2.5 text-sm text-white transition-colors"
+                      className="inline-flex items-center gap-2 rounded-lg border border-white/[0.2] hover:border-brass/60 px-5 py-2.5 text-sm text-parchment transition-colors"
                       data-testid={PRE_AUDIT_TESTIDS.requestReview}
                     >
                       Ask Mercenta to review this
@@ -718,9 +777,13 @@ export function ExploreUkMarketFit({
                   </ul>
                 )}
                 {research && (
+                  /*
+                    §B6 — the internal provider id (`preaudit-mock-research`) is
+                    NOT published. The mode and the zero-network proof are the
+                    honest facts a visitor needs; the plumbing identifier is not.
+                  */
                   <p className="mt-3 text-ds-micro text-zinc-600">
-                    Research: {research.providerId} · mode {research.mode} · network calls{' '}
-                    {research.networkCalls}
+                    Research mode {research.mode} · network calls {research.networkCalls}
                   </p>
                 )}
                 <button

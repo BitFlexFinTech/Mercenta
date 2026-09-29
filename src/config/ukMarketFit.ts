@@ -402,7 +402,13 @@ export interface PreAuditResearchSourceDefinition {
 export const PRE_AUDIT_RESEARCH_SOURCES: readonly PreAuditResearchSourceDefinition[] = [
   { id: 'brand_website', label: 'Brand website', state: 'simulated', credential: 'none — fetched only when a crawl provider is configured' },
   { id: 'marketplace_listing_data', label: 'Marketplace listing data', state: 'simulated', credential: 'MARKETPLACE_DATA_PROVIDER_KEY' },
-  { id: 'marketplace_api', label: 'Marketplace API', state: 'not_configured', credential: 'MARKETPLACE_API_CREDENTIALS' },
+  /**
+   * §PUBLIC MESSAGING B6 (2026-09-29) — `label` is RENDERED on the public growth
+   * page as "Source consulted: …", and it used to read "Marketplace API", which
+   * the red-line family `platform-internals` forbids (`\bAPI\b`). The ID
+   * (`marketplace_api`) is a canonical internal identifier and is unchanged.
+   */
+  { id: 'marketplace_api', label: 'Marketplace product data', state: 'not_configured', credential: 'MARKETPLACE_API_CREDENTIALS' },
   { id: 'product_research_provider', label: 'Product research provider', state: 'simulated', credential: 'PRODUCT_RESEARCH_PROVIDER_KEY' },
   { id: 'company_register', label: 'Company register', state: 'not_configured', credential: 'COMPANY_REGISTER_API_KEY' },
   { id: 'public_product_data', label: 'Public product data', state: 'simulated', credential: 'none — public data only' },
@@ -456,14 +462,38 @@ export const PRE_AUDIT_EDUCATIONAL_GAPS: readonly PreAuditEducationalGapDefiniti
   { id: 'compliance_documentation', label: 'Compliance documentation', academyStage: 4 },
   { id: 'category_requirements', label: 'Category requirements', academyStage: 4 },
   { id: 'purchase_orders', label: 'Purchase orders', academyStage: 5 },
-  { id: 'po_acknowledgement', label: 'Purchase-order acknowledgement', academyStage: 5 },
+  /**
+   * §PUBLIC MESSAGING B6 (2026-09-29) — THE LABEL IS RENDERED ON A PUBLIC PAGE.
+   *
+   * The assessment renders each captured gap as a chip, and this one read
+   * "Purchase-order acknowledgement" — another company's workflow vocabulary, and
+   * a `src/config/positioning.ts` §11 family-3 pattern (`\backnowledg`). The ID
+   * (`po_acknowledgement`) is a canonical internal identifier and is unchanged;
+   * only the public sentence is.
+   */
+  { id: 'po_acknowledgement', label: 'Confirming purchase orders', academyStage: 5 },
   { id: 'shipping_fulfilment', label: 'Shipping and fulfilment', academyStage: 5 },
   { id: 'invoices_payments', label: 'Invoices and payments', academyStage: 5 },
   { id: 'returns_deductions', label: 'Returns and deductions', academyStage: 5 },
 ] as const;
 
 export const PRE_AUDIT_DISCLAIMER =
-  'This is a guided commercial assessment based on the available information, not a promise of purchase orders, acceptance, sales, demand, a listing or a margin. Nothing here is an endorsement, a partnership or an approval, and Mercenta does not control the retail channel’s decisions. Where a figure was not supplied, no figure is shown.';
+  /*
+    §PUBLIC MESSAGING B6 (2026-09-29) — THE NEGATION NO LONGER USES A RED-LINE
+    TERM. It read "…not an endorsement, a partnership or an approval", and
+    `partnership` is a `src/config/positioning.ts` §11 family-7 pattern
+    (unevidenced claims). The sentence DENIED a partnership, which is why the
+    pre-audit validator deliberately excluded the disclaimer from its own claim
+    scan — but every mechanical scan of the RENDERED public page (the B8 gate and
+    the live check) must treat it exactly like any other published sentence, and a
+    naive scan cannot tell a denial from a claim.
+
+    The denial is preserved in substance and made explicit: nothing on the
+    assessment CREATES A RELATIONSHIP, an endorsement or an approval. The
+    arithmetic and the "where a figure was not supplied, no figure is shown" clause
+    are unchanged.
+  */
+  'This is a guided commercial assessment based on the available information, not a promise of purchase orders, acceptance, sales, demand, a listing or a margin. Nothing here creates a relationship, an endorsement or an approval, and Mercenta does not control the retail channel’s decisions. Where a figure was not supplied, no figure is shown.';
 
 /** Shown when the assessment ran on simulated research rather than live sources. */
 export const PRE_AUDIT_SIMULATION_LABEL =

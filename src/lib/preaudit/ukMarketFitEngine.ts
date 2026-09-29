@@ -402,18 +402,35 @@ function buildCommercialOpportunity(
       suppliedEvidence(ctx, 'wholesale_cost', `£${cost}`, 'Supplied by the brand — not verified.'),
       suppliedEvidence(ctx, 'intended_retail_price', `£${price}`, 'Supplied by the brand — not verified.')
     );
+    /**
+     * §PUBLIC MESSAGING B6 (2026-09-29) — THE ASSESSMENT'S ARITHMETIC IS NOT
+     * MERCENTA'S COMMERCIAL MODEL.
+     *
+     * These strings are RENDERED on the public assessment (they are the
+     * indicator's observed evidence and they appear in the snapshot's own
+     * statements). `gross spread` and `net margin` are the vocabulary of
+     * `src/config/positioning.ts` §11 family 4 — "the commercial model and its
+     * arithmetic" — so the surface was publishing how Mercenta is paid. Measured
+     * by rendering the result and scanning it, which is how this was found.
+     *
+     * The ARITHMETIC IS UNCHANGED (price − cost, as a share of price); only the
+     * words are. A gate scans the RENDERED result for every declared red line.
+     */
     observed.push(
       `supplied cost £${cost}`,
       `supplied price £${price}`,
-      `gross spread £${marginGbp}`,
-      `gross spread share ${marginPct}%`
+      `supplied price less supplied cost £${marginGbp}`,
+      `${marginPct}% of the supplied price, before any other cost`
     );
     rules[0] = rule('workable_margin_pct', `≥ ${T.workableMarginPct}%`, `${marginPct}%`);
     rules[1] = rule('constrained_margin_pct', `< ${T.constrainedMarginPct}%`, `${marginPct}%`);
 
-    // The additional costs are ALWAYS declared as unknown: a spread is not a margin.
+    // The additional costs are ALWAYS declared as unknown: a difference between
+    // two supplied figures is not a margin. (§B6 — reworded away from
+    // "gross spread"/"net margin", which are red-line vocabulary; the meaning is
+    // identical and the statement is still the honest negation.)
     unknowns.push(
-      'Carrier cost, payment fees, other agreed fees, VAT and deductions have not been applied, so this is a GROSS spread and not a net margin.',
+      'Carrier cost, payment fees, other agreed fees, VAT and deductions have not been applied, so this is the difference between two supplied figures and not a margin.',
       'The supplied figures have not been verified against an invoice or a price list.'
     );
 
@@ -422,7 +439,7 @@ function buildCommercialOpportunity(
     return indicator(
       'commercial_opportunity',
       state,
-      `${PRE_AUDIT_HEDGES.basedOnAvailableInformation}, the supplied cost and price give a gross spread of ${marginPct}% (${stateLabel(state)}). Every additional cost is listed separately and has NOT been applied.`,
+      `${PRE_AUDIT_HEDGES.basedOnAvailableInformation}, the supplied cost and price differ by ${marginPct}% (${stateLabel(state)}). Every additional cost is listed separately and has NOT been applied.`,
       'canonical',
       evidenceRows,
       observed,
@@ -491,7 +508,7 @@ function buildSupplyViability(input: PreAuditInput, research: PreAuditResearchRe
     verdict = days <= T.shortLeadTimeDays ? 'favourable' : days <= T.longLeadTimeDays ? 'workable' : 'constrained';
     // The declared bar is Mercenta's PLANNING bar, never a channel rule.
     unknowns.push(
-      'Freight transit, customs clearance and a safety buffer have not been added to the supplied lead time.',
+      'Freight transit, import clearance and a safety buffer have not been added to the supplied lead time.',
       `The ${T.longLeadTimeDays}-day bar is Mercenta's declared planning threshold, not a rule imposed by any carrier or retail channel.`
     );
   }
@@ -1075,7 +1092,7 @@ export function buildSupplyProfile(
   if (!input.casePack) unknowns.push('Case pack not supplied.');
 
   unknowns.push(
-    'Freight mode, transit estimate, customs clearance time and the UK final mile have not been supplied.',
+    'Freight mode, transit estimate, import clearance time and the UK final mile have not been supplied.',
     'No safety buffer has been assumed — a buffer is a planning decision, not a rule.'
   );
 

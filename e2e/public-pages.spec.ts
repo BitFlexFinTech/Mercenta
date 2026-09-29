@@ -1,5 +1,6 @@
 /**
  * §PUBLIC MESSAGING B3 (2026-09-29) — THE FOUR INNER PUBLIC PAGES, SMOKE-RENDERED.
+ * EXTENDED IN B5 (the two legal documents) AND B6 (the assessment).
  *
  * WHY THIS FILE EXISTS. B3 rewrote HowItWorks, UKMarketAccess, ForBrands and FAQ
  * so they stop publishing the platform's internal specification, and made them
@@ -12,6 +13,13 @@
  *   · the red-line claim list must not be retyped here (that would be a second
  *     source of truth for the same rule) — it is READ from
  *     `src/config/positioning.ts` §11, the owner.
+ *
+ * §B5 added /privacy and /terms. §B6 added the assessment's ENTRY view and
+ * strengthened the shell assertion: it now measures the PAGE's own root — the
+ * `[data-shell-theme]` element that ENCLOSES `<main>` — because `Home` appends the
+ * cookie notice after the page body, so `.first()` on the attribute could belong
+ * to the notice. Measured before that change: the assessment had NO enclosing
+ * shell root at all and the assertion still passed.
  *
  * `scripts/verify-live-demo.mjs` L11 asserts the same properties against the
  * DEPLOYED site; this spec asserts them against the dev server, so a regression
@@ -39,6 +47,15 @@ const PAGES = [
    */
   { route: PUBLIC_NAV[1].children.find((l) => l.page === 'privacy')!.page, h1: /privacy policy/i },
   { route: PUBLIC_NAV[1].children.find((l) => l.page === 'terms')!.page, h1: /terms of service/i },
+  /**
+   * §B6 (2026-09-29) — THE ASSESSMENT IS A PUBLIC PAGE TOO, and it was the LAST
+   * one still hardcoding the dark palette: measured, `main` had no enclosing
+   * `[data-shell-theme]` at all, so the light shell never reached it. Its ENTRY
+   * view is rendered, theme-checked and red-line-checked here; the RESULT view
+   * (which is composed by the engine and published six red-line claims of its
+   * own) is driven and scanned in `e2e/uk-market-fit.spec.ts`.
+   */
+  { route: PUBLIC_NAV[0].children.find((l) => l.page === 'explore-uk-market-fit')!.page, h1: /explore uk market fit/i },
 ];
 
 const RED_LINES = PUBLIC_CLAIM_RED_LINES.flatMap((family) =>
@@ -66,7 +83,7 @@ const THEMES = [
   { id: 'minimal-light', expected: 'light' },
 ] as const;
 
-test.describe('The six inner public pages — render, shell theme and no red-line claim (B3 · B5)', () => {
+test.describe('The seven public pages — render, shell theme and no red-line claim (B3 · B5 · B6)', () => {
   for (const theme of THEMES) {
     for (const meta of PAGES) {
       test(`/${meta.route} [${theme.id}] renders, takes the ${theme.expected} shell and publishes no internal detail`, async ({ page }) => {
@@ -87,9 +104,29 @@ test.describe('The six inner public pages — render, shell theme and no red-lin
         await page.goto(`/${meta.route}`);
 
         await expect(page.locator('h1')).toHaveText(meta.h1);
-        /** SEEN, and the shell it is actually in — not merely present. */
-        await expect(page.locator('[data-shell-theme]').first()).toBeVisible();
-        await expect(page.locator('[data-shell-theme]').first()).toHaveAttribute('data-shell-theme', theme.expected);
+        /**
+         * §B6 (2026-09-29) — THE SHELL TAKEN BY THE PAGE, NOT BY THE COOKIE NOTICE.
+         *
+         * B5 strengthened this from "some `[data-shell-theme]` element is visible"
+         * to "the attribute carries the expected value", but it still took
+         * `.first()` — and `Home` appends the cookie notice AFTER the page body,
+         * so a page that hardcoded the dark palette while the notice carried the
+         * right attribute would still have passed. Measured on the pre-audit page
+         * before B6: `main` had NO `[data-shell-theme]` ancestor at all and the
+         * first matching element was the notice.
+         *
+         * The assertion is now anchored to the page: the shell root that ENCLOSES
+         * `<main>`, exactly as `scripts/verify-live-demo.mjs` measures it live.
+         */
+        const pageShell = await page.evaluate(() => {
+          let n: HTMLElement | null = document.querySelector('main');
+          while (n && !n.hasAttribute('data-shell-theme')) n = n.parentElement;
+          return n ? n.getAttribute('data-shell-theme') : null;
+        });
+        expect(
+          pageShell,
+          `the page itself (the shell root enclosing <main>) must take the ${theme.expected} shell`
+        ).toBe(theme.expected);
         await expect(page.locator('footer')).toBeVisible();
 
         /** No horizontal overflow at 390. */

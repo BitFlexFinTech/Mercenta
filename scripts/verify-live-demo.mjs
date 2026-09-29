@@ -229,18 +229,42 @@ function readRedLines() {
       await page.close();
     }
   }
-  /* ── L11 — THE FOUR INNER PUBLIC PAGES (§PUBLIC MESSAGING B3) ─────────────
-   * WHY THIS EXISTS. The four inner pages each published the operating model —
-   * the regulated position, the authorities it deals with, the companies
-   * carriage is bought from, another company's programme vocabulary and the
-   * commercial arithmetic — and they hardcoded the dark palette, so they ignored
-   * the light shell entirely. Neither a typecheck nor a build can see either
-   * defect: they exist only in a rendered page, at a real viewport.
+  /* ── L11 — THE PUBLIC INNER PAGES (§PUBLIC MESSAGING B3 · B5 · B6) ────────
+   * WHY THIS EXISTS. The inner pages each published the operating model — the
+   * regulated position, the authorities it deals with, the companies carriage is
+   * bought from, another company's programme vocabulary and the commercial
+   * arithmetic — and they hardcoded the dark palette, so they ignored the light
+   * shell entirely. Neither a typecheck nor a build can see either defect: they
+   * exist only in a rendered page, at a real viewport.
+   *
+   * B5 added the two legal documents; B6 added the assessment's entry view and
+   * anchored the shell measurement to the PAGE's own root (`main`'s nearest
+   * `[data-shell-theme]` ancestor) instead of the first such element in document
+   * order, which belonged to the cookie notice.
    *
    * The red-line list is read from its owner (see `readRedLines`), and the check
    * FAILS CLOSED: if the list cannot be read, or holds fewer than the eight
    * declared families, these pages are NOT reported as clean.
    */
+  /**
+   * §B6 (2026-09-29) — THE ASSESSMENT'S ROUTE, READ FROM ITS OWNER.
+   *
+   * `src/config/ukMarketFit.ts` declares the path. Retyping
+   * `/explore-uk-market-fit` here would be a second source of truth for it: after
+   * a rename, L11/L13 would keep passing while verifying a route that no longer
+   * exists. The route feeds BOTH the L11 page list and the L13 driven check, and a
+   * missing declaration is a FAILURE, never a skipped check.
+   */
+  const EXPLORE_PATH = (() => {
+    const src = readFileSync(path.join(ROOT, 'src/config/ukMarketFit.ts'), 'utf8');
+    const m = src.match(/EXPLORE_UK_MARKET_FIT_PATH\s*=\s*'([^']+)'/);
+    return m ? m[1] : null;
+  })();
+  check(
+    `L11 the assessment route was READ from its owner (${EXPLORE_PATH || 'NOT FOUND'})`,
+    Boolean(EXPLORE_PATH)
+  );
+
   const redLines = readRedLines();
   check(
     `L11 the eight red-line families were read from positioning.ts (found ${redLines.familyCount || 0})`,
@@ -261,6 +285,13 @@ function readRedLines() {
      */
     { path: '/privacy', h1: 'privacy policy' },
     { path: '/terms', h1: 'terms of service' },
+    /**
+     * §B6 (2026-09-29) — the assessment's ENTRY view. It was the last public
+     * surface still hardcoding the dark palette: measured on the deployed page,
+     * `main` had NO enclosing `[data-shell-theme]` at all, so the light shell
+     * never reached it. Its RESULT view is driven and scanned separately in L13.
+     */
+    { path: EXPLORE_PATH, h1: 'explore uk market fit' },
   ];
 
   for (const meta of INNER_PAGES) {
@@ -288,7 +319,22 @@ function readRedLines() {
         const eyebrow = document.querySelector('main p.font-mono');
         const cs = eyebrow ? getComputedStyle(eyebrow) : null;
         const lh = cs ? parseFloat(cs.lineHeight) : 0;
-        const shellEl = document.querySelector('[data-shell-theme]');
+        /**
+         * §B6 (2026-09-29) — THE SHELL THE PAGE ITSELF TOOK.
+         *
+         * `document.querySelector('[data-shell-theme]')` returns the FIRST match in
+         * document order, and `Home` appends the cookie notice AFTER the page body.
+         * On the assessment — which had no shell root of its own until B6 — the
+         * attribute read by that selector therefore belonged to the NOTICE, so this
+         * check passed while the page ignored the light shell completely. Measured
+         * on the deployed page before the fix: `<main>` had no
+         * `[data-shell-theme]` ancestor at all.
+         *
+         * The measurement is anchored to the page: the nearest `[data-shell-theme]`
+         * ANCESTOR of `<main>`.
+         */
+        let shellEl = document.querySelector('main');
+        while (shellEl && !shellEl.hasAttribute('data-shell-theme')) shellEl = shellEl.parentElement;
         return {
           h1: (document.querySelector('h1') || {}).innerText || '',
           overflow: document.documentElement.scrollWidth - window.innerWidth,
@@ -439,6 +485,64 @@ function readRedLines() {
       reopenError === '' && afterReopen === true);
     check(`L12 [${theme}] rendered with no uncaught error (errors: ${pageErrors.join(' | ') || 'none'})`, pageErrors.length === 0);
     await page.close();
+  }
+
+  /* ── L13 — B6: THE ASSESSMENT'S RESULT, DRIVEN AND SCANNED ON THE LIVE SITE ──
+   * WHY THIS EXISTS. The result's public copy is composed by the ENGINE, so a
+   * red-line claim can reach the DEPLOYED page without any component changing —
+   * and six of them had: `customs clearance`, `gross spread`, `net margin`,
+   * `Marketplace API`, `acknowledgement` and `partnership`. The entry view L11
+   * loads cannot see any of them: they only render after the assessment has run.
+   * That is why this check DRIVES the assessment on the live site.
+   *
+   * The patterns are the same list L11 read from its owner, and the visitor
+   * supplies the figures that reach the COST and LEAD-TIME branches — the two
+   * branches that published two of the six.
+   */
+  if (EXPLORE_PATH) {
+  for (const theme of ['bold', 'minimal-light']) {
+    const expectedShell = theme === 'minimal-light' ? 'light' : 'dark';
+    console.log(`\n--- L13 assessment result @ 390px, ${theme} ---`);
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.addInitScript((t) => { try { window.localStorage.setItem('mercenta.theme', t); } catch (e) { /* private mode */ } }, theme);
+    const pageErrors = [];
+    page.on('pageerror', (e) => pageErrors.push(String(e.message).slice(0, 120)));
+    await page.goto(`${SITE}${EXPLORE_PATH}`, { waitUntil: 'networkidle' });
+    await page.getByTestId('ukmf-brand-name').fill('Live Verification Brand');
+    await page.getByTestId('ukmf-website').fill('https://live-verification.example.com');
+    await page.getByTestId('ukmf-country').selectOption('Germany');
+    await page.getByTestId('ukmf-category').selectOption('Home');
+    await page.getByTestId('uk-market-fit-next').click();
+    await page.getByTestId('ukmf-lead-time').fill('200');
+    await page.getByTestId('ukmf-wholesale-cost').fill('8');
+    await page.getByTestId('ukmf-retail-price').fill('15');
+    await page.getByTestId('uk-market-fit-submit').click();
+    await page.getByTestId('uk-market-fit-result').waitFor({ timeout: 20000 });
+    await page.waitForTimeout(200);
+
+    const driven = await page.evaluate(() => {
+      let shellEl = document.querySelector('main');
+      while (shellEl && !shellEl.hasAttribute('data-shell-theme')) shellEl = shellEl.parentElement;
+      return {
+        shell: shellEl ? shellEl.getAttribute('data-shell-theme') : null,
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+        text: document.body.innerText,
+      };
+    });
+    check(`L13 ${EXPLORE_PATH} [${theme}] took the ${expectedShell} shell (got ${driven.shell})`, driven.shell === expectedShell);
+    check(`L13 ${EXPLORE_PATH} [${theme}] has no horizontal overflow at 390`, driven.overflow <= 0);
+    const hits = redLines.filter((re) => re.test(driven.text)).map((re) => re.source);
+    check(`L13 ${EXPLORE_PATH} [${theme}] the RENDERED result publishes no red-line claim (hits: ${hits.join(', ') || 'none'})`, hits.length === 0);
+    check(
+      `L13 ${EXPLORE_PATH} [${theme}] publishes no research vendor and no internal provider id`,
+      !/firecrawl|keepa|amazon_sp_api|companies_house|preaudit-mock-research/i.test(driven.text)
+    );
+    check(`L13 ${EXPLORE_PATH} [${theme}] rendered with no uncaught error (errors: ${pageErrors.join(' | ') || 'none'})`, pageErrors.length === 0);
+    await page.close();
+  }
+  } else {
+    /** Routed through `check` so the failure is COUNTED, not merely recorded. */
+    check('L13 SKIPPED — the assessment route was not readable from its owner, so the result view was NOT verified', false);
   }
 
   await browser.close();

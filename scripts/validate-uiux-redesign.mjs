@@ -817,6 +817,37 @@ check(
 );
 check('the pre-audit surface is responsive (single column below md)', UKMF_SRC.includes('grid-cols-1 md:grid-cols-2'));
 check('the pre-audit surface has no leftover bespoke page container', !UKMF_SRC.includes('max-w-[1400px] mx-auto'));
+
+/* ── §PUBLIC MESSAGING B6 (2026-09-29) — THE PRE-AUDIT TAKES THE SHELL THEME ──
+ *
+ * WHY THIS EXISTS. The pre-audit was the LAST public surface that hardcoded the
+ * dark palette: its root was `bg-ink text-parchment` with no `data-shell-theme`,
+ * so the light-shell remap layer never activated inside the page. That is not
+ * cosmetic — measured on the rendered page, `main` had NO enclosing
+ * `[data-shell-theme]` element at all (the only one on the page belonged to the
+ * cookie notice), TWO secondary buttons rendered LITERAL `text-white` (invisible
+ * on a light surface), and every hairline stayed white-alpha.
+ *
+ * The assertion is made on the COMMENT-STRIPPED source, so a comment mentioning
+ * `text-white` cannot satisfy or break it.
+ */
+const UKMF_CODE = stripComments(UKMF_SRC);
+check(
+  'the pre-audit surface takes the SHELL THEME (not the fixed dark palette)',
+  UKMF_CODE.includes('data-shell-theme={shellMode}') &&
+    UKMF_CODE.includes("backgroundColor: 'var(--mr-bg)'") &&
+    UKMF_CODE.includes('useTheme')
+);
+check('the pre-audit surface renders no literal white text', !/\btext-white\b/.test(UKMF_CODE));
+check(
+  'the pre-audit surface opens with the canonical public eyebrow',
+  UKMF_CODE.includes('{PUBLIC_CATEGORY}') &&
+    UKMF_CODE.includes('font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]')
+);
+check(
+  'the pre-audit surface renders the PUBLIC research reason, never the operator string',
+  UKMF_CODE.includes('status.publicReason') && !UKMF_CODE.includes('status.reason')
+);
 check(
   /**
    * §PUBLIC MESSAGING B4 (2026-09-29) — REPOINTED, not weakened.
