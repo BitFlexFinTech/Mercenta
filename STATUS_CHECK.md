@@ -26,7 +26,99 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## PUBLIC-MESSAGING BATCH B6 — THE EXPLORE ASSESSMENT ONTO THE PUBLIC SHELL, SIX RENDERED RED-LINE CLAIMS CLEARED AT SOURCE — DEPLOYED AND LIVE-VERIFIED (session 51, 2026-09-29) — CURRENT
+## PUBLIC-MESSAGING BATCHES B7 + B8 — THE STATIC PUBLIC SURFACE REBUILT AND THE CLAIMS GATE LANDED — DEPLOYED AND LIVE-VERIFIED (session 51, 2026-09-29) — CURRENT
+
+**WHAT WAS ASKED.** B7 (the SEO / static public surface pass) and B8 (land `scripts/validate-public-claims.mjs` GREEN
+and prove it can fail), both recorded as the next tasks. B7 exists because B6's own live verification found the defect.
+
+**WHAT WAS WRONG — the largest leak in the repository, invisible to every gate.**
+`index.html` is the one file every visitor and every crawler receives BEFORE any JavaScript runs, and it shipped the
+ENTIRE obsolete pre-B3 public site inside its `<noscript>` block: the retired positioning, the regulated position and
+its registrations, the commercial model and its arithmetic, another company's rules and vocabulary, the companies
+carriage is bought from, an invented sourcing-corridor claim, the internal portal inventory and a stale duplicate of
+BOTH legal documents dated 30 August 2026. The same file carried FOUR JSON-LD blocks — read by every search engine and
+AI crawler that consumes structured data — publishing the regulated position, an internal feature inventory naming the
+carrier monitor and the supplier set, the supplier names themselves, and a permissions line naming the carrier
+environment Phase P9 removed. Its bootstrap meta, `og:` and `twitter:` descriptions each restated the retired
+positioning in their own words. It survived four batches of public-messaging work because the browser checks render
+with JavaScript on (so `<noscript>` is never seen) and `validate:wording` scans `src/` only.
+
+**A second, smaller set:** `src/lib/seo/publicRoutes.ts` published 'customs clearance' (red-line family 2) in the
+`/uk-market-access` meta description and the retired positioning as the home description, and `public/robots.txt`
+**WHAT WAS DONE — B7.**
+- **`index.html` rebuilt:** the body noscript is now a NOTICE (what the site is, enable JavaScript, the public contact
+  address) and nothing else; the JSON-LD states only what can be evidenced in public, and the SoftwareApplication node
+  with its internal `featureList` is GONE rather than restated (REMOVE before ADD); one description is published in
+  every place it appears — bootstrap meta, `og:description`, `twitter:description` and all three JSON-LD descriptions.
+- **`src/lib/seo/publicRoutes.ts`:** the home description is DERIVED from `PUBLIC_PROMISE` (the public-copy owner)
+  instead of being the retired wording retyped; `/uk-market-access` states the offer in outcome terms and names no
+  mechanism.
+- **`public/robots.txt`:** the stale `/carrier` line removed; the `/api/` comment no longer says 'API endpoints'.
+- **Gates:** `validate-seo-foundation.mjs` §F pins one description everywhere, requires every JSON-LD block to parse
+  with the owner's description, requires the noscript to stay a notice (no section headings, under 900 chars, the
+  public contact address only), DERIVES a new robots invariant from `PRIVATE_ROUTE_PREFIXES` (every `Disallow:` must be
+  a declared prefix — the check that catches a stale line) and REPOINTS the sitemap private-path check off a
+  hand-written regex that still listed `/carrier`. `verify-live-demo.mjs` gained **L14** (six checks over the DEPLOYED
+  bytes). `index.html`, `public/robots.txt` and `public/sitemap.xml` are DECLARED in BOTH scope guards.
+- **Three mutation proofs, each file restored byte-identical:** a diverging `og:description` failed; an `<h2>` content
+  fork inside the noscript failed; the stale `Disallow: /carrier` failed.
+
+**WHAT WAS DONE — B8.**
+- **`scripts/validate-public-claims.mjs` (NEW)** — the gate `src/config/positioning.ts` §11's own header promised in
+  B1 and which never existed, which is why every red-line defect since was found by hand. It READS the eight declared
+  families and 48 patterns from the owner (never retyped; never scanned — scanning the owner reports its own
+  definitions as violations, measured at nine), scans the published route copy (8), the static public files
+  (`index.html` in full, `robots.txt` with its machine directives stripped, `sitemap.xml`) and **18 RENDERED pages**
+  (every declared route in both shells, plus the assessment DRIVEN to its result). It FAILS CLOSED below eight
+  families or thirty patterns, on a short route list, on an empty scan, or when a render produced no text or threw.
+  Registered as `npm run validate:public-claims`; the corpus glob picks it up, so CI enforces it.
+- **Three mutation proofs, each file restored byte-identical:** a red-line term returning to a rendered page (caught in
+  both shells), a red-line term in a shipped `index.html` comment, and the owner losing a family (8 to 7) which trips
+  the fail-closed floor.
+- **A FOURTH DEFECT, found by the gate's own live verification and fixed at source (`6492f88`): it built a DEVELOPMENT
+  bundle.** The gate creates a vite dev server (for `ssrLoadModule`), which sets `process.env.NODE_ENV = 'development'`
+  in the gate's own process; `execFileSync` passes the environment to the child, so the gate scanned a development
+  bundle — measured: vendor **2,526,228** bytes containing `react-dom.development` against the production **2,200,128**
+  containing `react-dom.production`, every chunk hash different — and it left that dev build in `dist/`, which is what
+  made `verify:live`'s L10 fail on the next run. The env is now explicit, a NEW assertion proves the bundle is the
+  production one (proved able to fail by forcing development), and after the fix the gate's build emits
+  `assets/index-DzcHbeVG.js` — byte-for-byte the DEPLOYED entry.
+- **A FIFTH DEFECT, found by the re-runs and fixed (`c59f31f`): a slow host could hide the verification.** Every
+  navigation used `waitUntil: 'networkidle'` against SHARED hosting, which throws after 30s when the host is merely
+  slow, and nothing caught it — so the WHOLE script died mid-run with no PASS/FAIL total and L12, L13 and L14 never
+  ran (measured three times: `/how-it-works`, the homepage, `/uk-market-access`). A shared `gotoLive()` now waits for
+  the document, gives the SPA a bounded render window and a settle, and each call site COUNTS a failure against its own
+  check. Proven against the degraded host: **171 PASS / 1 FAIL** and **163 PASS / 1 FAIL**, each naming the timed-out
+  page, with L13 and L14 still executed. The host's own flakiness was measured independently — **5 plain `curl`
+  requests: 3 × HTTP 200 in 1.2–3.4s, 2 × never connected (http=000, 25s)** — so the failures are the host, not the
+  build, and nothing deployed changed between the runs.
+
+**VERIFIED — real output.** `npx tsc --noEmit` 0 errors · `npm run build` clean (entry `assets/index-DzcHbeVG.js`) ·
+**`npm run validate:all` 122 PASS / 0 FAIL** (122 validators) · `npx eslint` clean on every changed file · browser
+specs 20 passed (public-pages 14, public-chrome 6) and 6 passed (seo-foundation) · **LIVE `npm run verify:live` 176
+PASS / 0 FAIL** (exit 0), L11 seven pages × two shells, L13 the live result driven in both shells, **L14 the six
+static-surface checks** (deployed bootstrap description IS the owner's promise, noscript a 749-char notice, delivered
+`index.html` bytes carry NO red-line claim, every deployed robots disallow a declared prefix), L10 the deployed entry
+asset the local verified `dist/` build.
+**One L10 failure was observed first and is explained:** `dist/` had been left holding a bundle built while a mutation
+was in place (the B8 mutation proofs build the bundle), so it did not contain the deployed entry asset; rebuilding from
+the clean tree reproduced `assets/index-DzcHbeVG.js` exactly and the re-run printed 176 PASS / 0 FAIL.
+
+**Checkpoint:** **`31a3ad4`** (B7, deployed and live-verified) plus **`91a6ae9`** (B8, no runtime change) plus the state
+commit that carries this section. Pushed to `origin/redesign/foundation`.
+
+**NOT FINISHED, AND SAID SO.** Nothing in the public-messaging workstream — **B1–B8 are complete and live.** The next
+task is the recorded **BATCH 2** (Amazon accuracy, AV-024 first), which is a different workstream.
+
+
+still disallowed `/carrier` for a surface P9 removed — a stale line the "every private prefix is disallowed" check
+could not see.
+
+**A third, found in my own work:** the first draft of B7's explanatory comments in `index.html` repeated all nine
+banned terms. A comment in a SHIPPED file is published copy; the red-line probe caught it before deployment.
+
+
+## PUBLIC-MESSAGING BATCH B6 — THE EXPLORE ASSESSMENT ONTO THE PUBLIC SHELL, SIX RENDERED RED-LINE CLAIMS CLEARED AT SOURCE — DEPLOYED AND LIVE-VERIFIED (session 51, 2026-09-29) — PREVIOUS
 
 **WHAT WAS ASKED.** B6 of the recorded public-messaging plan: the Explore UK Market Fit assessment was the last public
 surface that had not been through the B3/B5 treatment.
