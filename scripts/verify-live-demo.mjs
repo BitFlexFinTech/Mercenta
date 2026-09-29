@@ -47,6 +47,27 @@ function check(name, ok) {
   else { fail++; failures.push(name); console.log(`  FAIL  ${name}`); }
 }
 
+/**
+ * §B8 FIX (2026-09-29) — NAVIGATION THAT SURVIVES A SLOW SHARED HOST.
+ *
+ * Every navigation this script performs targets SHARED hosting, and
+ * `waitUntil: 'networkidle'` throws after 30s when the host is merely slow —
+ * measured twice in one session: once on `/how-it-works`, and once on the homepage
+ * itself. A thrown timeout ended the WHOLE script, so the run printed no PASS/FAIL
+ * total and every later check (L12, L13, L14) never ran at all: a slow host could
+ * hide part of the verification completely.
+ *
+ * The document is now waited for (`domcontentloaded`, 45s), then the SPA is given
+ * its render window (`networkidle`, bounded to 15s and IGNORED when the host is
+ * slow) plus a short settle. Only a document that cannot be fetched at all throws,
+ * and every call site counts that as a FAIL for its own check instead of aborting.
+ */
+async function gotoLive(page, url) {
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(600);
+}
+
 function parseRgbString(s) {
   const m = s && s.match(/rgba?\(([^)]+)\)/);
   if (!m) return null;
@@ -118,7 +139,13 @@ function readRedLines() {
       console.log(`\n--- ${theme} @ ${width}px ---`);
       const page = await browser.newPage({ viewport: { width, height: width < 700 ? 844 : 900 } });
       await page.addInitScript((t) => { try { window.localStorage.setItem('mercenta.theme', t); } catch (e) { /* private mode */ } }, theme);
-      await page.goto(SITE, { waitUntil: 'networkidle' });
+      try {
+        await gotoLive(page, SITE);
+      } catch (navError) {
+        check(`L1–L9 ${theme} @ ${width}px NAVIGATION FAILED (${String(navError).split('\n')[0].slice(0, 120)})`, false);
+        await page.close();
+        continue;
+      }
       await page.evaluate(async () => {
         const step = Math.max(200, window.innerHeight / 2);
         for (let y = 0; y < document.body.scrollHeight; y += step) {
@@ -313,7 +340,23 @@ function readRedLines() {
        */
       const pageErrors = [];
       page.on('pageerror', (e) => pageErrors.push(String(e.message).slice(0, 120)));
-      await page.goto(`${SITE}${meta.path}`, { waitUntil: 'networkidle' });
+      /**
+       * §B8 FIX (2026-09-29) — A LOCAL FAILURE MUST NOT ABORT THE WHOLE VERIFICATION.
+       *
+       * This check drives a SHARED HOST, and a navigation that never reaches
+       * `networkidle` used to throw out of the whole script: the run died mid-way
+       * with no PASS/FAIL total and none of L12, L13 or L14 ran at all (observed —
+       * the failure was recorded as an unhandled `TimeoutError` on
+       * `/how-it-works`). The failure is now COUNTED against this page and the
+       * run continues, so one slow page cannot hide the rest of the verification.
+       */
+      try {
+        await gotoLive(page, `${SITE}${meta.path}`);
+      } catch (navError) {
+        check(`L11 ${meta.path} [${theme}] NAVIGATION FAILED (${String(navError).split('\n')[0].slice(0, 120)})`, false);
+        await page.close();
+        continue;
+      }
       await page.waitForTimeout(250);
       const d = await page.evaluate(() => {
         const eyebrow = document.querySelector('main p.font-mono');
@@ -419,7 +462,13 @@ function readRedLines() {
     }, theme);
     const pageErrors = [];
     page.on('pageerror', (e) => pageErrors.push(String(e.message).slice(0, 120)));
-    await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
+    try {
+      await gotoLive(page, `${SITE}/`);
+    } catch (navError) {
+      check(`L12 [${theme}] NAVIGATION FAILED (${String(navError).split('\n')[0].slice(0, 120)})`, false);
+      await page.close();
+      continue;
+    }
     await page.waitForTimeout(250);
 
     const first = await page.evaluate(({ region, cats, headings, settings }) => {
@@ -507,28 +556,38 @@ function readRedLines() {
     await page.addInitScript((t) => { try { window.localStorage.setItem('mercenta.theme', t); } catch (e) { /* private mode */ } }, theme);
     const pageErrors = [];
     page.on('pageerror', (e) => pageErrors.push(String(e.message).slice(0, 120)));
-    await page.goto(`${SITE}${EXPLORE_PATH}`, { waitUntil: 'networkidle' });
-    await page.getByTestId('ukmf-brand-name').fill('Live Verification Brand');
-    await page.getByTestId('ukmf-website').fill('https://live-verification.example.com');
-    await page.getByTestId('ukmf-country').selectOption('Germany');
-    await page.getByTestId('ukmf-category').selectOption('Home');
-    await page.getByTestId('uk-market-fit-next').click();
-    await page.getByTestId('ukmf-lead-time').fill('200');
-    await page.getByTestId('ukmf-wholesale-cost').fill('8');
-    await page.getByTestId('ukmf-retail-price').fill('15');
-    await page.getByTestId('uk-market-fit-submit').click();
-    await page.getByTestId('uk-market-fit-result').waitFor({ timeout: 20000 });
-    await page.waitForTimeout(200);
-
-    const driven = await page.evaluate(() => {
-      let shellEl = document.querySelector('main');
-      while (shellEl && !shellEl.hasAttribute('data-shell-theme')) shellEl = shellEl.parentElement;
-      return {
-        shell: shellEl ? shellEl.getAttribute('data-shell-theme') : null,
-        overflow: document.documentElement.scrollWidth - window.innerWidth,
-        text: document.body.innerText,
-      };
-    });
+    /**
+     * §B8 FIX (2026-09-29) — same reason as L11: a slow shared host or a changed
+     * test id must COUNT against this check, not abort the run and hide L14.
+     */
+    let driven;
+    try {
+      await gotoLive(page, `${SITE}${EXPLORE_PATH}`);
+      await page.getByTestId('ukmf-brand-name').fill('Live Verification Brand');
+      await page.getByTestId('ukmf-website').fill('https://live-verification.example.com');
+      await page.getByTestId('ukmf-country').selectOption('Germany');
+      await page.getByTestId('ukmf-category').selectOption('Home');
+      await page.getByTestId('uk-market-fit-next').click();
+      await page.getByTestId('ukmf-lead-time').fill('200');
+      await page.getByTestId('ukmf-wholesale-cost').fill('8');
+      await page.getByTestId('ukmf-retail-price').fill('15');
+      await page.getByTestId('uk-market-fit-submit').click();
+      await page.getByTestId('uk-market-fit-result').waitFor({ timeout: 20000 });
+      await page.waitForTimeout(200);
+      driven = await page.evaluate(() => {
+        let shellEl = document.querySelector('main');
+        while (shellEl && !shellEl.hasAttribute('data-shell-theme')) shellEl = shellEl.parentElement;
+        return {
+          shell: shellEl ? shellEl.getAttribute('data-shell-theme') : null,
+          overflow: document.documentElement.scrollWidth - window.innerWidth,
+          text: document.body.innerText,
+        };
+      });
+    } catch (driveError) {
+      check(`L13 ${EXPLORE_PATH} [${theme}] COULD NOT BE DRIVEN (${String(driveError).split('\n')[0].slice(0, 120)})`, false);
+      await page.close();
+      continue;
+    }
     check(`L13 ${EXPLORE_PATH} [${theme}] took the ${expectedShell} shell (got ${driven.shell})`, driven.shell === expectedShell);
     check(`L13 ${EXPLORE_PATH} [${theme}] has no horizontal overflow at 390`, driven.overflow <= 0);
     const hits = redLines.filter((re) => re.test(driven.text)).map((re) => re.source);
@@ -560,8 +619,9 @@ function readRedLines() {
    * prefix the route model still declares (B7 removed a stale `/carrier` line).
    */
   console.log('\n--- L14 the deployed static public surface ---');
-  const liveHome = await fetch(`${SITE}/`).then((r) => r.text());
-  const publicCopySrc = readFileSync(path.join(ROOT, 'src/config/positioning.ts'), 'utf8');
+  try {
+    const liveHome = await fetch(`${SITE}/`).then((r) => r.text());
+    const publicCopySrc = readFileSync(path.join(ROOT, 'src/config/positioning.ts'), 'utf8');
   const promiseBlock = publicCopySrc.match(/export const PUBLIC_PROMISE =\s*([\s\S]*?);/);
   const promise = promiseBlock
     ? (promiseBlock[1].match(/'([^']*)'/g) || []).map((s) => s.slice(1, -1)).join('').trim()
@@ -605,6 +665,13 @@ function readRedLines() {
     );
   } else {
     check('L14 SKIPPED — the owner declarations could not be read, so the static surface was NOT verified', false);
+  }
+  } catch (l14Error) {
+    /**
+     * §B8 FIX (2026-09-29) — a slow host must COUNT, not abort: an un-caught
+     * `fetch` here ended the run with no PASS/FAIL total (observed).
+     */
+    check(`L14 the deployed static surface could NOT be fetched (${String(l14Error).split('\n')[0].slice(0, 120)})`, false);
   }
 
   await browser.close();
