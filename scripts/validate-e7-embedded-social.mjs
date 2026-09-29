@@ -640,6 +640,12 @@ try {
     'src/components/marketing/ExploreUkMarketFit.tsx',
     'src/components/marketing/PublicNav.tsx',
     'src/components/marketing/PublicFooter.tsx',
+    /**
+     * §PUBLIC MESSAGING B4 (2026-09-28) — the cookie notice is a NEW public
+     * surface file, so it is DECLARED here. Same mechanism, unweakened: a changed
+     * source/test file in NO declared set is still refused.
+     */
+    'src/components/marketing/CookieNotice.tsx',
     'src/components/marketing/PrivacyPolicy.tsx',
     'src/components/marketing/TermsOfService.tsx',
     'scripts/validate-public-claims.mjs',
@@ -659,6 +665,12 @@ try {
     'scripts/validate-all.sh',
     'e2e/homepage-editor.spec.ts',
     'package.json',
+    /**
+     * §PUBLIC MESSAGING B4 (2026-09-28) — the live check gained the footer and
+     * cookie-notice assertions (L12). It already sat in E6's public-messaging
+     * scope; it is declared here too so this guard's own union is complete.
+     */
+    'scripts/verify-live-demo.mjs',
   ];
 
   /**

@@ -1,11 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { BRAND_NAME } from '@/config/brand';
-import { EXPLORE_UK_MARKET_FIT_CTA, PRE_AUDIT_TESTIDS } from '@/config/ukMarketFit';
+import { PRE_AUDIT_TESTIDS } from '@/config/ukMarketFit';
+import {
+  PUBLIC_NAV,
+  type PublicLinkPage,
+} from '@/config/positioning';
 import { cn } from '@/utils/cn';
 import logoMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
-export type PublicPage = 'home' | 'how-it-works' | 'uk-market-access' | 'for-brands' | 'faq' | 'privacy' | 'terms' | 'explore-uk-market-fit';
+/**
+ * §PUBLIC MESSAGING B4 (2026-09-28) — THE LINK LABELS ARE SETTLED IN ONE PLACE.
+ *
+ * The label list used to be a literal in THIS file, while the footer held its own
+ * copy of the same labels — so the same destination could be named two different
+ * ways on the same screen, and the two files could drift apart with nothing to
+ * catch it. `src/config/positioning.ts` §12 now owns the labels, the groups and
+ * the columns; this file and the footer both READ them.
+ *
+ * `PublicPage` is kept as the exported name (every page component imports it) but
+ * is now the owner's own route union, so a route cannot exist in the type without
+ * existing in the navigation model.
+ */
+export type PublicPage = PublicLinkPage;
 
 interface PublicNavProps {
   currentPage: PublicPage;
@@ -13,50 +30,7 @@ interface PublicNavProps {
   onOpenPortal: () => void;
 }
 
-const NAV_LINKS: { label: string; page: PublicPage; children?: { label: string; page: PublicPage }[] }[] = [
-  {
-    label: 'Solutions & Services',
-    page: 'how-it-works',
-    children: [
-      { label: EXPLORE_UK_MARKET_FIT_CTA, page: 'explore-uk-market-fit' },
-      { label: 'How It Works', page: 'how-it-works' },
-      { label: 'UK Market Access', page: 'uk-market-access' },
-      { label: 'For Brands', page: 'for-brands' },
-    ],
-  },
-  {
-    label: 'Resources',
-    page: 'faq',
-    children: [
-      { label: 'FAQ', page: 'faq' },
-      { label: 'Privacy Policy', page: 'privacy' },
-      { label: 'Terms of Service', page: 'terms' },
-    ],
-  },
-];
-
-function NavLink({
-  label,
-  page,
-  onNavigate,
-  className,
-}: {
-  label: string;
-  page: PublicPage;
-  onNavigate: (p: PublicPage) => void;
-  className?: string;
-}) {
-  const href = `/${page === 'home' ? '' : page}`;
-  return (
-    <a
-      href={href}
-      onClick={(e) => { e.preventDefault(); onNavigate(page); }}
-      className={cn('text-xs text-zinc-400 hover:text-brass-400 transition-colors', className)}
-    >
-      {label}
-    </a>
-  );
-}
+const NAV_LINKS = PUBLIC_NAV;
 
 export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -95,18 +69,20 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
         <div className="hidden md:flex items-center gap-6" ref={dropdownRef}>
           {NAV_LINKS.map((item) => (
             <div key={item.page} className="relative">
-              {item.children ? (
-                <button
-                  onClick={() => setOpenDropdown(openDropdown === item.page ? null : item.page)}
-                  className="flex items-center gap-1 text-xs text-zinc-400 hover:text-brass-400 transition-colors"
-                >
-                  {item.label}
-                  <ChevronDown className={cn('w-3 h-3 transition-transform', openDropdown === item.page && 'rotate-180')} />
-                </button>
-              ) : (
-                <NavLink label={item.label} page={item.page} onNavigate={handleNav} />
-              )}
-              {item.children && openDropdown === item.page && (
+              {/*
+                §B4 — every group in the owner's model HAS children, so the old
+                "group without children renders a plain link" branch was dead
+                code. It is removed rather than kept as an unreachable path.
+              */}
+              <button
+                onClick={() => setOpenDropdown(openDropdown === item.page ? null : item.page)}
+                aria-expanded={openDropdown === item.page}
+                className="flex items-center gap-1 text-xs text-zinc-400 hover:text-brass-400 transition-colors"
+              >
+                {item.label}
+                <ChevronDown className={cn('w-3 h-3 transition-transform', openDropdown === item.page && 'rotate-180')} />
+              </button>
+              {openDropdown === item.page && (
                 <div className="absolute top-full left-0 mt-2 w-52 bg-ink-850 border border-white/[0.08] rounded-xl shadow-2xl py-2 animate-fade-in">
                   {item.children.map((child) => (
                     <a
@@ -154,27 +130,16 @@ export function PublicNav({ currentPage, onNavigate, onOpenPortal }: PublicNavPr
             Home
           </a>
           {NAV_LINKS.flatMap((item) =>
-            item.children
-              ? item.children.map((child) => (
-                  <a
-                    key={child.page}
-                    href={`/${child.page}`}
-                    onClick={(e) => { e.preventDefault(); handleNav(child.page); }}
-                    className={cn('block text-sm text-zinc-400 hover:text-brass-400 pl-4', currentPage === child.page && 'text-brass-400')}
-                  >
-                    {child.label}
-                  </a>
-                ))
-              : (
-                  <a
-                    key={item.page}
-                    href={`/${item.page === 'home' ? '' : item.page}`}
-                    onClick={(e) => { e.preventDefault(); handleNav(item.page); }}
-                    className={cn('block text-sm text-zinc-400 hover:text-brass-400', currentPage === item.page && 'text-brass-400')}
-                  >
-                    {item.label}
-                  </a>
-                )
+            item.children.map((child) => (
+              <a
+                key={child.page}
+                href={`/${child.page}`}
+                onClick={(e) => { e.preventDefault(); handleNav(child.page); }}
+                className={cn('block text-sm text-zinc-400 hover:text-brass-400 pl-4', currentPage === child.page && 'text-brass-400')}
+              >
+                {child.label}
+              </a>
+            ))
           )}
           <button
             onClick={() => { setMobileOpen(false); onOpenPortal(); }}

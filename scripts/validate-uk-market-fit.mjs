@@ -72,7 +72,22 @@ try {
     !/c\.hero\.secondaryCta/.test(HOME_COPY));
   test('Partner Login remains the header utility action', NAV.includes('Partner Login') && NAV.includes('PRE_AUDIT_TESTIDS.headerUtility'));
   test('the header utility action carries a declared test id', NAV.includes('data-testid={PRE_AUDIT_TESTIDS.headerUtility}'));
-  test('the assessment is discoverable from the public nav', NAV.includes("page: 'explore-uk-market-fit'"));
+  /**
+   * §PUBLIC MESSAGING B4 (2026-09-28) — REPOINTED, not weakened.
+   *
+   * OLD CONTRACT: the assessment's route appeared as a literal inside
+   * `PublicNav.tsx`, so finding `page: 'explore-uk-market-fit'` there proved it
+   * was reachable from the header.
+   *
+   * NEW CONTRACT: the header reads its links from the navigation owner, so the
+   * route literal now lives in `src/config/positioning.ts` §12 and the header
+   * consumes it. The INTENT is unchanged — the assessment is discoverable from
+   * the public navigation — and it is asserted at BOTH hops, so removing the
+   * route from the model OR dropping the header's consumption still fails.
+   */
+  const POSITIONING = read('src/config/positioning.ts');
+  test('the assessment is discoverable from the public nav',
+    POSITIONING.includes("page: 'explore-uk-market-fit'") && NAV.includes('PUBLIC_NAV'));
   test('the assessment has its own public route', cfg.EXPLORE_UK_MARKET_FIT_PATH === '/explore-uk-market-fit');
   test('the route is detected for direct URL access',
     // §CLEAN-SLATE RECONCILIATION 2026-09-21 — REPOINTED (intent unchanged).
@@ -85,7 +100,29 @@ try {
     // other public route, from ONE declaration.
     HOME.includes('resolveRoute(window.location.pathname)') &&
       read('src/lib/seo/publicRoutes.ts').includes('EXPLORE_UK_MARKET_FIT_PATH'));
-  test('the public page union includes the assessment', NAV.includes("'explore-uk-market-fit'"));
+  /**
+   * §PUBLIC MESSAGING B4 (2026-09-28) — REPOINTED, not weakened.
+   *
+   * OLD CONTRACT: the exported `PublicPage` union was a literal in
+   * `PublicNav.tsx`, so the assessment's membership was proven by finding it in
+   * that file.
+   *
+   * NEW CONTRACT: the union is declared ONCE in the navigation owner
+   * (`src/config/positioning.ts` → `PublicLinkPage`) and `PublicPage` derives from
+   * it, so a route cannot exist in the type without existing in the model. The
+   * check now proves BOTH: the route is a member of the owner's union, and the
+   * header's type is that union.
+   */
+  test('the public page union includes the assessment', (() => {
+    /**
+     * The union BODY only — `[\s\S]*?` from the declaration was satisfied by the
+     * later `PUBLIC_LINK` entry, so removing the route from the type union still
+     * passed. Measured: that mutation is caught by this form.
+     */
+    const unionBody = (POSITIONING.match(/export type PublicLinkPage =([\s\S]*?);/) || [])[1] || '';
+    return unionBody.includes("'explore-uk-market-fit'") &&
+      /export type PublicPage = PublicLinkPage/.test(NAV);
+  })());
   test('the assessment surface is code-split (not in the homepage bundle)', /lazy\(\(\) =>\s*import\('@\/components\/marketing\/ExploreUkMarketFit'\)/.test(HOME));
 
   /* ── B. Required validation + progressive collection ───────────────────── */

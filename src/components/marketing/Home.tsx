@@ -16,6 +16,7 @@ import { PrivacyPolicy } from '@/components/marketing/PrivacyPolicy';
 import { TermsOfService } from '@/components/marketing/TermsOfService';
 import { PublicNav, type PublicPage } from '@/components/marketing/PublicNav';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
+import { CookieNotice } from '@/components/marketing/CookieNotice';
 
 // §Lazy-load — code-split these pages so they don't block the homepage bundle
 const HowItWorks = lazy(() => import('@/components/marketing/HowItWorks').then(m => ({ default: m.HowItWorks })));
@@ -79,7 +80,31 @@ function useScrollReveal(active: boolean) {
   }, [active]);
 }
 
+/**
+ * §PUBLIC MESSAGING B4 (2026-09-28) — EVERY public page carries the cookie
+ * notice, not just the homepage.
+ *
+ * The notice is appended by the router rather than by each page, so a new public
+ * page cannot be added and silently omit it. It sits OUTSIDE the page component's
+ * own `data-shell-theme` root, which is why `CookieNotice` sets that attribute on
+ * itself.
+ */
 function renderPublicPage(
+  page: PublicPage,
+  onNavigate: (p: PublicPage | null) => void,
+  openPortal: () => void,
+) {
+  const body = renderPublicPageBody(page, onNavigate, openPortal);
+  if (!body) return null;
+  return (
+    <>
+      {body}
+      <CookieNotice onNavigate={onNavigate} />
+    </>
+  );
+}
+
+function renderPublicPageBody(
   page: PublicPage,
   onNavigate: (p: PublicPage | null) => void,
   openPortal: () => void,
@@ -695,6 +720,8 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
       </section>
 
       <PublicFooter onNavigate={navigate} onOpenPortal={openPortal} />
+      {/* §B4 — the cookie notice, on the homepage as on every other public page. */}
+      <CookieNotice onNavigate={navigate} />
     </div>
   );
 }

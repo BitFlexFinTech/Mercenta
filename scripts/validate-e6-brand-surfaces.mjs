@@ -1515,6 +1515,12 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/components/marketing/ExploreUkMarketFit.tsx',
   'src/components/marketing/PublicNav.tsx',
   'src/components/marketing/PublicFooter.tsx',
+  /**
+   * §PUBLIC MESSAGING B4 (2026-09-28) — the cookie notice. New file, so it is
+   * DECLARED here (the same remedy this guard documents for a legitimately new
+   * file) rather than left as an unexplained working-tree change.
+   */
+  'src/components/marketing/CookieNotice.tsx',
   'src/components/marketing/PrivacyPolicy.tsx',
   'src/components/marketing/TermsOfService.tsx',
   'scripts/validate-public-claims.mjs',
@@ -2005,6 +2011,134 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
       ];
       return ids.join(',') === EXPECTED.join(',');
     })());
+
+  /**
+   * §PUBLIC MESSAGING B4 (2026-09-28) — THE HEADER, THE FOOTER AND THE COOKIE NOTICE.
+   *
+   * WHY THESE EXIST. B4's three deliverables are exactly the class of change that
+   * passes BOTH a typecheck and a build while being wrong, because each defect is
+   * a SECOND COPY of something that already exists:
+   *
+   *   · the footer held its own ten-category literal, duplicating
+   *     `APPROVED_CATEGORIES` in `src/types.ts`;
+   *   · the footer and the header each held their own copy of the link labels, so
+   *     one screen could name the same destination two ways;
+   *   · the footer described the business with wording the pages had retired.
+   *
+   * None of those breaks a build. The assertions below read the OWNER MODULE (not
+   * its source text), so a label renamed in the owner cannot leave the header and
+   * the footer disagreeing — which is the drift the SSOT rule forbids.
+   */
+  const positioning = await server.ssrLoadModule('/src/config/positioning.ts');
+  const typesModule = await server.ssrLoadModule('/src/types.ts');
+  const navSrc = readSrc('src/components/marketing/PublicNav.tsx');
+  const footerSrc = readSrc('src/components/marketing/PublicFooter.tsx');
+  const noticeSrc = readSrc('src/components/marketing/CookieNotice.tsx');
+  const homeSrc = readSrc('src/components/marketing/Home.tsx');
+  const indexHtml = readSrc('index.html');
+
+  test('B4 the navigation model is declared ONCE, in positioning.ts §12',
+    Array.isArray(positioning.PUBLIC_NAV) && positioning.PUBLIC_NAV.length === 2 &&
+    !!positioning.PUBLIC_LINK && Array.isArray(positioning.PUBLIC_FOOTER_COLUMNS));
+
+  /**
+   * §B4 — no owner label may appear as a QUOTED LITERAL in the header or the
+   * footer. This is the strong form of "reads the owner": the earlier
+   * `!/label:\s*['"]/` check caught only object-literal syntax, so a component
+   * could still override a label inline (`{'Privacy policy'}`) and pass while
+   * drifting from the model. Measured: that mutation passed the weak check and is
+   * caught by this one.
+   */
+  const ownerLabels = [
+    ...positioning.PUBLIC_NAV.map((g) => g.label),
+    ...positioning.PUBLIC_NAV.flatMap((g) => g.children.map((c) => c.label)),
+    positioning.PUBLIC_COOKIE_SETTINGS_LABEL,
+  ];
+  const quotedOwnerLabels = (src) => {
+    const c = code(src);
+    return ownerLabels.filter((l) => {
+      const escaped = l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(`['"\`]${escaped}['"\`]`).test(c);
+    });
+  };
+
+  test('B4 the header READS the owner and retypes NO owner label', (() => {
+    const c = code(navSrc);
+    return c.includes('PUBLIC_NAV') && c.includes('{child.label}') && c.includes('{item.label}') &&
+      quotedOwnerLabels(navSrc).length === 0;
+  })());
+
+  test('B4 the footer READS the owner and retypes NO owner label', (() => {
+    const c = code(footerSrc);
+    return c.includes('PUBLIC_FOOTER_COLUMNS') && c.includes('{link.label}') && c.includes('{col.heading}') &&
+      quotedOwnerLabels(footerSrc).length === 0;
+  })());
+
+  test('B4 the footer does NOT retype the ten categories (it reads APPROVED_CATEGORIES)',
+    code(footerSrc).includes('APPROVED_CATEGORIES') &&
+    !code(footerSrc).includes('Health & Personal Care') &&
+    typesModule.APPROVED_CATEGORIES.length === 10);
+
+  test('B4 the footer declares the five-column shape',
+    /lg:grid-cols-5/.test(code(footerSrc)));
+
+  test('B4 the footer no longer publishes the retired description', (() => {
+    /**
+     * CODE, not prose: the footer's own explanatory comment deliberately NAMES
+     * the retired wording so a future session cannot re-introduce it as though it
+     * were new. Asserting against raw source would forbid documenting the fix.
+     */
+    const retired = 'Self-service wholesale distribution platform';
+    return !code(footerSrc).includes(retired) && code(footerSrc).includes('PUBLIC_PROMISE') &&
+      positioning.PUBLIC_PROMISE.length > 0;
+  })());
+
+  test('B4 the header and the footer publish the SAME label for every shared route', (() => {
+    const headerLinks = positioning.PUBLIC_NAV.flatMap((g) => g.children);
+    const footerLinks = positioning.PUBLIC_FOOTER_COLUMNS
+      .filter((c) => c.kind === 'links')
+      .flatMap((c) => c.links);
+    const byPage = new Map(headerLinks.map((l) => [l.page, l.label]));
+    /**
+     * Every footer link must exist in the header model with the identical label,
+     * and the header must offer at least the footer's routes (not fewer).
+     */
+    return footerLinks.length > 0 && footerLinks.every((l) => byPage.get(l.page) === l.label) &&
+      headerLinks.length >= footerLinks.length;
+  })());
+
+  test('B4 the EXPLORE route is in the footer model (the prop now admits it)',
+    positioning.PUBLIC_FOOTER_COLUMNS.some(
+      (c) => c.kind === 'links' && c.links.some((l) => l.page === 'explore-uk-market-fit')));
+
+  test('B4 the cookie notice is REAL: it records the answer and can be re-opened',
+    noticeSrc.includes('COOKIE_NOTICE_STORAGE_KEY') &&
+    noticeSrc.includes('localStorage.setItem') &&
+    noticeSrc.includes('localStorage.removeItem') &&
+    noticeSrc.includes('COOKIE_SETTINGS_EVENT'));
+
+  test('B4 the footer offers the working re-open control',
+    code(footerSrc).includes('COOKIE_SETTINGS_EVENT') &&
+    code(footerSrc).includes('dispatchEvent') &&
+    code(footerSrc).includes('PUBLIC_COOKIE_SETTINGS_LABEL'));
+
+  test('B4 the notice renders on the homepage AND on every public sub-page', (() => {
+    /**
+     * Two render sites by design: one inside the router wrapper (every public
+     * sub-page) and one on the homepage, which returns its own tree. A third
+     * would mean a page had grown its own copy; a single one would mean a whole
+     * surface was missing the notice.
+     */
+    const renderCount = (homeSrc.match(/<CookieNotice/g) || []).length;
+    return renderCount === 2 &&
+      homeSrc.includes('renderPublicPageBody') &&
+      homeSrc.includes("from '@/components/marketing/CookieNotice'");
+  })());
+
+  test('B4 the notice\u2019s honesty claim is true of the actual page (no analytics script)',
+    positioning.PUBLIC_COOKIE_NOTICE.body.includes('no advertising or tracking cookies') &&
+    positioning.PUBLIC_COOKIE_NOTICE.body.includes('no analytics') &&
+    !/googletagmanager|google-analytics|gtag\(|hotjar|posthog|mixpanel|segment\.com/i.test(indexHtml));
 
   test('F9 ZERO external network calls across the whole suite', externalFetches === 0);
 

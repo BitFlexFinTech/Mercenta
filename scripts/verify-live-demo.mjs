@@ -302,6 +302,130 @@ function readRedLines() {
     check(`L11 ${meta.path} publishes no red-line claim in either shell (hits: ${hits.join(', ') || 'none'})`, hits.length === 0);
   }
 
+  /* ── L12 — B4: THE FIVE-COLUMN FOOTER AND THE REAL COOKIE NOTICE ───────────
+   * WHY THIS EXISTS. B4 introduced both, and BOTH can be broken while every
+   * automated check stays green:
+   *
+   *  · THE FOOTER'S CATEGORIES ARE READ from `APPROVED_CATEGORIES`. That is the
+   *    whole point (one source of truth), but it also means a detached or
+   *    truncated canonical list renders the wrong number of categories with no
+   *    error anywhere — so the count is asserted against the owner's own list.
+   *  · THE COOKIE NOTICE'S ONLY REAL JOB is that answering it STICKS — it records
+   *    the answer and does not come back on the next page load — and that it can
+   *    be re-opened. A notice that reappears on every visit is decorative, and
+   *    neither a typecheck nor a build can see the difference. So the answer is
+   *    clicked, the page is RELOADED, and the absence is asserted; then the
+   *    footer's control is clicked and the return is asserted.
+   *
+   * The region label, the button labels and the canonical list are READ from their
+   * owners (`positioning.ts`, `types.ts`) rather than retyped here, for the same
+   * reason L11 reads the red lines: a second copy of a rule passes while the owner
+   * changes.
+   */
+  const positioningSrc = readFileSync(path.join(ROOT, 'src/config/positioning.ts'), 'utf8');
+  const typesSrc = readFileSync(path.join(ROOT, 'src/types.ts'), 'utf8');
+  const readConst = (src, re) => { const m = src.match(re); return m ? m[1] : ''; };
+
+  const noticeRegion = readConst(positioningSrc, /export const PUBLIC_COOKIE_NOTICE_REGION = '([^']+)'/);
+  const acknowledgeLabel = readConst(positioningSrc, /acknowledgeLabel: '([^']+)'/);
+  const settingsLabel = readConst(positioningSrc, /export const PUBLIC_COOKIE_SETTINGS_LABEL = '([^']+)'/);
+  const canonicalCategories = (() => {
+    const m = typesSrc.match(/export const APPROVED_CATEGORIES = \[([\s\S]*?)\] as const;/);
+    return m ? [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1]) : [];
+  })();
+  const footerHeadings = (() => {
+    const m = positioningSrc.match(/export const PUBLIC_FOOTER_COLUMNS[\s\S]*?\n\] as const;/);
+    return m
+      ? [...m[0].matchAll(/heading: '([^']+)'|heading: PUBLIC_NAV\[0\]\.label/g)]
+          .map((x) => x[1] || 'Solutions & Services')
+      : [];
+  })();
+
+  check(`L12 the canonical category list was READ from src/types.ts (found ${canonicalCategories.length})`,
+    canonicalCategories.length === 10);
+  check(`L12 the notice's own labels were READ from positioning.ts (region "${noticeRegion}", action "${acknowledgeLabel}", settings "${settingsLabel}")`,
+    noticeRegion.length > 0 && acknowledgeLabel.length > 0 && settingsLabel.length > 0);
+  check(`L12 the footer declares four owner columns plus the brand column (found ${footerHeadings.length})`,
+    footerHeadings.length === 4);
+
+  for (const theme of ['minimal-light', 'bold']) {
+    const expectedShell = theme === 'minimal-light' ? 'light' : 'dark';
+    console.log(`\n--- L12 footer + cookie notice @ 390px, ${theme} ---`);
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    /**
+     * A FIRST-TIME VISITOR. `browser.newPage()` gives a fresh context, so no
+     * cookie acknowledgement is stored and the notice must show. Only the THEME is
+     * seeded — and deliberately NOT by clearing the cookie key here, because an
+     * init script also runs on the reload below, which would make the stickiness
+     * assertion pass or fail for the wrong reason.
+     */
+    await page.addInitScript((t) => {
+      try { window.localStorage.setItem('mercenta.theme', t); } catch (e) { /* private mode */ }
+    }, theme);
+    const pageErrors = [];
+    page.on('pageerror', (e) => pageErrors.push(String(e.message).slice(0, 120)));
+    await page.goto(`${SITE}/`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(250);
+
+    const first = await page.evaluate(({ region, cats, headings, settings }) => {
+      const f = document.querySelector('footer');
+      const notice = document.querySelector(`[role="region"][aria-label="${region}"]`);
+      const h4s = f ? [...f.querySelectorAll('h4')].map((x) => x.innerText.trim()) : [];
+      const shellEl = document.querySelector('[data-shell-theme]');
+      return {
+        hasFooter: !!f,
+        noticeVisible: !!notice,
+        noticeInsideShell: notice ? notice.getAttribute('data-shell-theme') : null,
+        catFound: cats.filter((c) => f && f.innerText.includes(c)).length,
+        headFound: headings.filter((h) => h4s.includes(h)).length,
+        hasSettings: !!(f && f.innerText.includes(settings)),
+        shell: shellEl ? shellEl.getAttribute('data-shell-theme') : null,
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    }, { region: noticeRegion, cats: canonicalCategories, headings: footerHeadings, settings: settingsLabel });
+
+    check(`L12 [${theme}] the footer rendered`, first.hasFooter);
+    check(`L12 [${theme}] the footer carries all ${canonicalCategories.length} canonical categories (found ${first.catFound})`,
+      first.catFound === canonicalCategories.length);
+    check(`L12 [${theme}] the footer carries all four owner column headings (found ${first.headFound})`,
+      first.headFound === footerHeadings.length);
+    check(`L12 [${theme}] the footer offers the "${settingsLabel}" control`, first.hasSettings);
+    check(`L12 [${theme}] the cookie notice is shown to a first-time visitor`, first.noticeVisible);
+    check(`L12 [${theme}] the notice takes the shell theme (attribute ${first.noticeInsideShell})`,
+      first.noticeInsideShell === expectedShell);
+    check(`L12 [${theme}] took the ${expectedShell} shell (got ${first.shell})`, first.shell === expectedShell);
+    check(`L12 [${theme}] has no horizontal overflow at 390`, first.overflow <= 0);
+
+    /** Answer it, then RELOAD: a decorative notice comes back, this one must not. */
+    let clickError = '';
+    try {
+      await page.getByRole('button', { name: acknowledgeLabel, exact: false }).first().click({ timeout: 5000 });
+    } catch (e) { clickError = String(e.message).slice(0, 80); }
+    await page.waitForTimeout(200);
+    const closedRegion = (region) => !!document.querySelector(`[role="region"][aria-label="${region}"]`);
+    const afterClick = await page.evaluate(closedRegion, noticeRegion);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(250);
+    const afterReload = await page.evaluate(closedRegion, noticeRegion);
+
+    check(`L12 [${theme}] answering the notice closed it${clickError ? ` (click error: ${clickError})` : ''}`,
+      clickError === '' && afterClick === false);
+    check(`L12 [${theme}] the answer STICKS across a reload (the notice did not return)`, afterReload === false);
+
+    /** And it must be re-openable, or the choice could never be revisited. */
+    let reopenError = '';
+    try {
+      await page.getByRole('button', { name: settingsLabel, exact: false }).first().click({ timeout: 5000 });
+    } catch (e) { reopenError = String(e.message).slice(0, 80); }
+    await page.waitForTimeout(200);
+    const afterReopen = await page.evaluate(closedRegion, noticeRegion);
+
+    check(`L12 [${theme}] "${settingsLabel}" re-opens the notice${reopenError ? ` (click error: ${reopenError})` : ''}`,
+      reopenError === '' && afterReopen === true);
+    check(`L12 [${theme}] rendered with no uncaught error (errors: ${pageErrors.join(' | ') || 'none'})`, pageErrors.length === 0);
+    await page.close();
+  }
+
   await browser.close();
 
   console.log(`\nLIVE VERIFICATION: ${pass} PASS / ${fail} FAIL`);

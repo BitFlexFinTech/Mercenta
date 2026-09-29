@@ -36,6 +36,12 @@
 import { BRAND_LEGAL_NAME, BRAND_DOMAIN } from './brand';
 import { COMPANY_REGISTRATION } from './company';
 /**
+ * §PUBLIC MESSAGING B4 (2026-09-28) — the Explore CTA's wording is declared once
+ * in `src/config/ukMarketFit.ts` and READ here, never retyped, so the header,
+ * the footer and the button that opens the assessment cannot disagree.
+ */
+import { EXPLORE_UK_MARKET_FIT_CTA } from './ukMarketFit';
+/**
  * §PUBLIC MESSAGING B3 (2026-09-28) — the ten approved categories are declared
  * ONCE in `src/types.ts` and READ here, never retyped, so the FAQ answer and the
  * product rules cannot disagree about which categories exist.
@@ -476,3 +482,133 @@ export const PUBLIC_CLAIM_RED_LINES: readonly PublicClaimRedLine[] = [
 
 /** The number of declared families. The gate refuses a list smaller than this. */
 export const PUBLIC_CLAIM_RED_LINE_FAMILIES = 8;
+
+/* ── 12. The public navigation model ───────────────────────────────────────
+ * WHY THIS EXISTS (B4, 2026-09-28). The header (`PublicNav`) and the footer
+ * (`PublicFooter`) publish the SAME link labels and each held its own literal,
+ * so the two could disagree about what a link is called on one screen. The
+ * footer's `onNavigate` prop did not even admit the Explore route the header
+ * offered. ONE list, read by both, makes that impossible; and because a nav
+ * label is a public string, it belongs here with the rest of them.
+ *
+ * The individual links are declared ONCE as `PUBLIC_LINK` and merely REFERENCED
+ * by the groups and columns below, so a rename is one edit and cannot leave the
+ * header and the footer saying different things.
+ *
+ * The Explore label is NOT retyped: `src/config/ukMarketFit.ts` is the declared
+ * owner of that CTA's wording, exactly as the header already treats it.
+ */
+
+/** Every public route a header or footer link may target. */
+export type PublicLinkPage =
+  | 'home'
+  | 'how-it-works'
+  | 'uk-market-access'
+  | 'for-brands'
+  | 'faq'
+  | 'privacy'
+  | 'terms'
+  | 'explore-uk-market-fit';
+
+export interface PublicNavLink {
+  label: string;
+  page: PublicLinkPage;
+}
+
+export interface PublicNavGroup extends PublicNavLink {
+  children: readonly PublicNavLink[];
+}
+
+/** The public links, each declared once and referred to everywhere else. */
+export const PUBLIC_LINK = {
+  explore: { label: EXPLORE_UK_MARKET_FIT_CTA, page: 'explore-uk-market-fit' },
+  howItWorks: { label: 'How It Works', page: 'how-it-works' },
+  ukMarketAccess: { label: 'UK Market Access', page: 'uk-market-access' },
+  forBrands: { label: 'For Brands', page: 'for-brands' },
+  faq: { label: 'FAQ', page: 'faq' },
+  privacy: { label: 'Privacy Policy', page: 'privacy' },
+  terms: { label: 'Terms of Service', page: 'terms' },
+} as const satisfies Record<string, PublicNavLink>;
+
+/** The header's two groups, in order. The footer reuses these labels. */
+export const PUBLIC_NAV: readonly PublicNavGroup[] = [
+  {
+    label: 'Solutions & Services',
+    page: PUBLIC_LINK.howItWorks.page,
+    children: [
+      PUBLIC_LINK.explore,
+      PUBLIC_LINK.howItWorks,
+      PUBLIC_LINK.ukMarketAccess,
+      PUBLIC_LINK.forBrands,
+    ],
+  },
+  {
+    label: 'Resources',
+    page: PUBLIC_LINK.faq.page,
+    children: [PUBLIC_LINK.faq, PUBLIC_LINK.privacy, PUBLIC_LINK.terms],
+  },
+] as const;
+
+/**
+ * The footer's columns, in order. The brand column (logo, promise and the
+ * access CTA) is rendered by the footer itself and is therefore not listed here;
+ * these are the four that follow it, making the declared FIVE-column shape.
+ *
+ * `kind: 'categories'` is not a link list — it renders `APPROVED_CATEGORIES`, so
+ * the ten product categories exist in exactly one place in the codebase rather
+ * than being retyped into the footer (they were, until B4).
+ *
+ * The heading strings are declared here (not in the footer) so the header and
+ * the footer cannot name the same destination two different ways.
+ */
+export type PublicFooterColumn =
+  | { kind: 'links'; heading: string; links: readonly PublicNavLink[]; withCookieSettings?: boolean }
+  | { kind: 'categories'; heading: string };
+
+export const PUBLIC_FOOTER_COLUMNS: readonly PublicFooterColumn[] = [
+  { kind: 'links', heading: PUBLIC_NAV[0].label, links: PUBLIC_NAV[0].children },
+  { kind: 'categories', heading: 'Product Categories' },
+  { kind: 'links', heading: 'Resources', links: [PUBLIC_LINK.faq], withCookieSettings: true },
+  { kind: 'links', heading: 'Legal', links: [PUBLIC_LINK.privacy, PUBLIC_LINK.terms] },
+] as const;
+
+/** The control that re-opens the cookie notice after it has been answered. */
+export const PUBLIC_COOKIE_SETTINGS_LABEL = 'Cookie settings';
+
+/* ── 13. The cookie notice ─────────────────────────────────────────────────
+ * WHAT IT MAY SAY — and why it says this and not more.
+ *
+ * A notice that offers an "analytics" or "advertising" choice would be a FALSE
+ * statement: the public site uses neither. Verified this session — `index.html`,
+ * `package.json` and `src/main.tsx` load no analytics, tag-manager, session-
+ * replay or advertising script, and the only thing the public surface writes to
+ * a visitor's device is `mercenta.theme` (ThemeContext) plus this notice's own
+ * dismissal. Both are strictly functional, stay on the device, and are never
+ * shared. A "reject" button that rejected nothing would be the kind of
+ * decorative control this project forbids, so the notice states the truth and
+ * offers the one action that is real.
+ *
+ * The privacy policy is the place for the full picture; this is a notice, not a
+ * policy.
+ */
+export interface PublicCookieNotice {
+  heading: string;
+  body: string;
+  /** The single real action: record that the notice has been read. */
+  acknowledgeLabel: string;
+  /** Where the visitor reads the full picture. */
+  policyLabel: string;
+}
+
+export const PUBLIC_COOKIE_NOTICE: PublicCookieNotice = {
+  heading: 'Cookies on this site',
+  body:
+    'This website sets no advertising or tracking cookies and uses no analytics. Two things are kept on your ' +
+    'own device — the theme you chose and the fact that you have read this notice. Neither leaves your device ' +
+    'or is shared with anyone.',
+  acknowledgeLabel: 'Understood',
+  policyLabel: PUBLIC_LINK.privacy.label,
+};
+
+/** The heading of the notice's region, for assistive technology. */
+export const PUBLIC_COOKIE_NOTICE_REGION = 'Cookie notice';

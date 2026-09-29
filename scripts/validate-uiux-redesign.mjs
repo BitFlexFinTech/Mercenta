@@ -818,9 +818,23 @@ check(
 check('the pre-audit surface is responsive (single column below md)', UKMF_SRC.includes('grid-cols-1 md:grid-cols-2'));
 check('the pre-audit surface has no leftover bespoke page container', !UKMF_SRC.includes('max-w-[1400px] mx-auto'));
 check(
+  /**
+   * §PUBLIC MESSAGING B4 (2026-09-28) — REPOINTED, not weakened.
+   *
+   * OLD CONTRACT: the header consumed `EXPLORE_UK_MARKET_FIT_CTA` directly, so
+   * the label's ONE owner was proven by finding that import in `PublicNav.tsx`.
+   *
+   * NEW CONTRACT: the label is still declared exactly ONCE
+   * (`src/config/ukMarketFit.ts`), but the header now consumes it THROUGH the
+   * navigation owner (`src/config/positioning.ts` §12), so the header and the
+   * footer cannot name the same route differently. The INTENT is identical — one
+   * declaration, consumed by the surfaces — and it is now asserted at both hops,
+   * so a second copy of the label in either file still fails this check.
+   */
   'the pre-audit CTA label is declared ONCE and consumed by the nav and the hero',
   UKMF_CFG.includes("EXPLORE_UK_MARKET_FIT_CTA = 'Explore UK Market Fit'") &&
-    UKMF_NAV.includes('EXPLORE_UK_MARKET_FIT_CTA') &&
+    read('src/config/positioning.ts').includes('EXPLORE_UK_MARKET_FIT_CTA') &&
+    UKMF_NAV.includes('PUBLIC_NAV') &&
     read('src/components/marketing/Home.tsx').includes('c.hero.primaryCta')
 );
 check(
