@@ -36,7 +36,7 @@
 import { BRAND_LEGAL_NAME, BRAND_DOMAIN } from './brand';
 import { COMPANY_REGISTRATION } from './company';
 /**
- * §PUBLIC MESSAGING B4 (2026-09-28) — the Explore CTA's wording is declared once
+ * §PUBLIC MESSAGING B4 (2026-09-29) — the Explore CTA's wording is declared once
  * in `src/config/ukMarketFit.ts` and READ here, never retyped, so the header,
  * the footer and the button that opens the assessment cannot disagree.
  */
@@ -484,7 +484,7 @@ export const PUBLIC_CLAIM_RED_LINES: readonly PublicClaimRedLine[] = [
 export const PUBLIC_CLAIM_RED_LINE_FAMILIES = 8;
 
 /* ── 12. The public navigation model ───────────────────────────────────────
- * WHY THIS EXISTS (B4, 2026-09-28). The header (`PublicNav`) and the footer
+ * WHY THIS EXISTS (B4, 2026-09-29). The header (`PublicNav`) and the footer
  * (`PublicFooter`) publish the SAME link labels and each held its own literal,
  * so the two could disagree about what a link is called on one screen. The
  * footer's `onNavigate` prop did not even admit the Explore route the header

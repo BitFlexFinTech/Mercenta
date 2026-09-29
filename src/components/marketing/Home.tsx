@@ -81,7 +81,7 @@ function useScrollReveal(active: boolean) {
 }
 
 /**
- * §PUBLIC MESSAGING B4 (2026-09-28) — EVERY public page carries the cookie
+ * §PUBLIC MESSAGING B4 (2026-09-29) — EVERY public page carries the cookie
  * notice, not just the homepage.
  *
  * The notice is appended by the router rather than by each page, so a new public

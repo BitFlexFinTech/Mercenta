@@ -73,7 +73,7 @@ try {
   test('Partner Login remains the header utility action', NAV.includes('Partner Login') && NAV.includes('PRE_AUDIT_TESTIDS.headerUtility'));
   test('the header utility action carries a declared test id', NAV.includes('data-testid={PRE_AUDIT_TESTIDS.headerUtility}'));
   /**
-   * §PUBLIC MESSAGING B4 (2026-09-28) — REPOINTED, not weakened.
+   * §PUBLIC MESSAGING B4 (2026-09-29) — REPOINTED, not weakened.
    *
    * OLD CONTRACT: the assessment's route appeared as a literal inside
    * `PublicNav.tsx`, so finding `page: 'explore-uk-market-fit'` there proved it
@@ -101,7 +101,7 @@ try {
     HOME.includes('resolveRoute(window.location.pathname)') &&
       read('src/lib/seo/publicRoutes.ts').includes('EXPLORE_UK_MARKET_FIT_PATH'));
   /**
-   * §PUBLIC MESSAGING B4 (2026-09-28) — REPOINTED, not weakened.
+   * §PUBLIC MESSAGING B4 (2026-09-29) — REPOINTED, not weakened.
    *
    * OLD CONTRACT: the exported `PublicPage` union was a literal in
    * `PublicNav.tsx`, so the assessment's membership was proven by finding it in

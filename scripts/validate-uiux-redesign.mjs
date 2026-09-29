@@ -819,7 +819,7 @@ check('the pre-audit surface is responsive (single column below md)', UKMF_SRC.i
 check('the pre-audit surface has no leftover bespoke page container', !UKMF_SRC.includes('max-w-[1400px] mx-auto'));
 check(
   /**
-   * §PUBLIC MESSAGING B4 (2026-09-28) — REPOINTED, not weakened.
+   * §PUBLIC MESSAGING B4 (2026-09-29) — REPOINTED, not weakened.
    *
    * OLD CONTRACT: the header consumed `EXPLORE_UK_MARKET_FIT_CTA` directly, so
    * the label's ONE owner was proven by finding that import in `PublicNav.tsx`.

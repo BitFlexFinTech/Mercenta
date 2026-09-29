@@ -641,7 +641,7 @@ try {
     'src/components/marketing/PublicNav.tsx',
     'src/components/marketing/PublicFooter.tsx',
     /**
-     * §PUBLIC MESSAGING B4 (2026-09-28) — the cookie notice is a NEW public
+     * §PUBLIC MESSAGING B4 (2026-09-29) — the cookie notice is a NEW public
      * surface file, so it is DECLARED here. Same mechanism, unweakened: a changed
      * source/test file in NO declared set is still refused.
      */
@@ -664,9 +664,17 @@ try {
      */
     'scripts/validate-all.sh',
     'e2e/homepage-editor.spec.ts',
+    /**
+     * §PUBLIC MESSAGING B4 (2026-09-29) — the public-chrome e2e spec.
+     */
+    'e2e/public-chrome.spec.ts',
+    /**
+     * §PUBLIC MESSAGING B3/B4 (2026-09-29) — the inner-public-pages e2e spec.
+     */
+    'e2e/public-pages.spec.ts',
     'package.json',
     /**
-     * §PUBLIC MESSAGING B4 (2026-09-28) — the live check gained the footer and
+     * §PUBLIC MESSAGING B4 (2026-09-29) — the live check gained the footer and
      * cookie-notice assertions (L12). It already sat in E6's public-messaging
      * scope; it is declared here too so this guard's own union is complete.
      */

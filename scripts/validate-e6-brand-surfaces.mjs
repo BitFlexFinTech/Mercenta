@@ -1516,7 +1516,7 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/components/marketing/PublicNav.tsx',
   'src/components/marketing/PublicFooter.tsx',
   /**
-   * §PUBLIC MESSAGING B4 (2026-09-28) — the cookie notice. New file, so it is
+   * §PUBLIC MESSAGING B4 (2026-09-29) — the cookie notice. New file, so it is
    * DECLARED here (the same remedy this guard documents for a legitimately new
    * file) rather than left as an unexplained working-tree change.
    */
@@ -1559,6 +1559,18 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
    */
   'scripts/validate-all.sh',
   'e2e/homepage-editor.spec.ts',
+  /**
+   * §PUBLIC MESSAGING B4 (2026-09-29) — the public-chrome e2e spec. New file, so
+   * it is DECLARED here rather than left as an unexplained working-tree change.
+   */
+  'e2e/public-chrome.spec.ts',
+  /**
+   * §PUBLIC MESSAGING B3/B4 (2026-09-29) — the inner-public-pages e2e spec. It
+   * smoke-renders the four pages B3 rewrote and closes the recorded registry
+   * defect that the B3 row declared `built_and_tested` while NO e2e spec
+   * referenced it (only a live check did).
+   */
+  'e2e/public-pages.spec.ts',
   'package.json',
 ]);
 
@@ -2013,7 +2025,7 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
     })());
 
   /**
-   * §PUBLIC MESSAGING B4 (2026-09-28) — THE HEADER, THE FOOTER AND THE COOKIE NOTICE.
+   * §PUBLIC MESSAGING B4 (2026-09-29) — THE HEADER, THE FOOTER AND THE COOKIE NOTICE.
    *
    * WHY THESE EXIST. B4's three deliverables are exactly the class of change that
    * passes BOTH a typecheck and a build while being wrong, because each defect is

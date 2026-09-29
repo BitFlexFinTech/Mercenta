@@ -26,7 +26,73 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## PUBLIC-MESSAGING BATCH B3 — THE FOUR INNER PUBLIC PAGES REWRITTEN FROM THE OUTCOME UP, DEPLOYED AND LIVE-VERIFIED (session 48, 2026-09-28) — CURRENT
+## PUBLIC-MESSAGING BATCH B4 — THE FOOTER REBUILT TO FIVE COLUMNS, A REAL COOKIE NOTICE, AND EVERY PUBLIC LABEL UNDER ONE OWNER — DEPLOYED AND LIVE-VERIFIED (session 49, 2026-09-29) — CURRENT
+
+**WHAT WAS ASKED.** B4 of the recorded public-messaging plan: rebuild the footer to its five-column shape, add a REAL
+cookie notice, and settle the nav labels.
+
+**WHAT WAS WRONG — and why a typecheck and a build could not see any of it.** Each defect was either MISSING or a
+SECOND COPY of something that already existed.
+1. **The footer was four columns, not five, and held its own copy of every label** — so the header and the footer
+   could name the same destination two different ways, and its `onNavigate` prop could not even express the Explore
+   route the header offered.
+2. **The footer kept a hand-maintained TEN-CATEGORY LITERAL** duplicating `APPROVED_CATEGORIES` in `src/types.ts` —
+   two sources of truth for the ten approved categories, exactly what the SSOT rule forbids and the
+   dataset-completeness check exists to catch.
+3. **The footer's brand column published a description the site had already retired**: *"Self-service wholesale
+   distribution platform connecting independent brands with UK retail channels"* — the wording B3 removed from
+   `HowItWorks`, and contradicted by `PUBLIC_CATEGORY` (*"Retail channel partner"*).
+4. **There was NO cookie notice at all**, so a visitor's device was written to (the theme choice) with nothing telling
+   them so, and nothing recording that they had been told.
+
+**WHAT WAS DONE.**
+- `src/config/positioning.ts` grew **§12 the public navigation model** (`PUBLIC_LINK` — each link declared once;
+  `PUBLIC_NAV` — the header's two groups; `PUBLIC_FOOTER_COLUMNS` — the footer's four owner columns) and **§13 the
+  cookie notice copy**. The header, the footer and every label now read the same declaration.
+- **The footer is five columns** (brand · Solutions & Services · Product Categories · Resources · Legal), reads
+  `APPROVED_CATEGORIES` and `PUBLIC_PROMISE` from their owners, and takes the owner's route union.
+- **`src/components/marketing/CookieNotice.tsx` (NEW)** — a REAL notice, not a decorative one: it RECORDS the answer
+  (so it does not return on the next visit) and the footer's **"Cookie settings"** control RE-OPENS it. It is rendered
+  by the router on the homepage **and every public sub-page**, so a new page cannot silently omit it.
+- **IT IS HONEST, NOT DECORATIVE.** It offers no accept/reject control for a capability that does not exist:
+  verified this session, `index.html`, `package.json` and `src/main.tsx` load **no analytics, tag-manager,
+  session-replay or advertising script**, and the public surface writes only `mercenta.theme` plus this notice's own
+  record. A "reject" button that rejected nothing would be a lie told in a button.
+- A dead branch (group without children) and the now-unused `NavLink` component were REMOVED rather than left
+  unreachable.
+
+**GATES — EACH PROVED ABLE TO FAIL BY MUTATION, every file restored byte-identical.**
+- `validate-e6-brand-surfaces.mjs`: **13 new B4 assertions** — owner-read labels (no quoted owner label in either
+  file), the category list read from `APPROVED_CATEGORIES`, the five-column shape, the retired description gone from
+  CODE, header/footer label agreement, the notice's realism, the footer's re-open control, the notice's two render
+  sites, and the notice's honesty claim asserted against the ACTUAL page.
+- `scripts/verify-live-demo.mjs`: **L12** — the footer's ten canonical categories and four owner headings, the notice
+  shown to a first-time visitor, the notice taking the shell theme, the answer CLOSING it, **the answer STICKING
+  ACROSS A RELOAD**, and "Cookie settings" RE-OPENING it — in BOTH shells.
+- `validate-uiux-redesign.mjs` + `validate-uk-market-fit.mjs`: **REPOINTED, not weakened**, to the CTA label's and
+  the public-route union's NEW owner, with an inline `§PUBLIC MESSAGING B4 … REPOINTED` comment recording the old
+  contract. The uk-market-fit union check was then **TIGHTENED** because mutation showed the first form passing (the
+  loose `[\s\S]*?` was satisfied by a later occurrence instead of the type union itself).
+- `validate-e7-embedded-social.mjs` scope: `CookieNotice.tsx` and `verify-live-demo.mjs` declared.
+- **Mutation proofs (all restored byte-identical):** footer retypes the categories → FAIL; footer overrides a label
+  inline → FAIL; footer drops to four columns → FAIL; the notice stops recording the answer → FAIL (and in the LIVE
+  check: 124 PASS / **2 FAIL**, so the live gate can fail too); the router stops rendering the notice on sub-pages →
+  FAIL.
+- **A gate of mine was WRONG and I fixed it:** the first "no label literal" form used `!/label:\s*['"]/`, which an
+  inline JSX override (`{'Privacy policy'}`) passed. Measured, then replaced with the strong quoted-label form.
+
+**GATES ON THE COMMITTED TREE.** `npx tsc --noEmit` 0 errors · `npm run build` ✓ 8.00s (deployed) ·
+`npm run validate:all` **121 PASS / 0 FAIL** (all 121 validators) · `npm run verify:live` against the demo
+**126 PASS / 0 FAIL**. Commit **`26245e6`**, pushed, deployed (`scripts/deploy-demo.sh`, 20 new / 11 modified files),
+live entry `assets/index-DR3nIR7u.js` **byte-identical to the local `dist/`** (320,916 bytes both sides) — L10 asserts
+this, so the deployment is not stale.
+
+**NOT FINISHED, AND SAID SO.** B5 (privacy + terms), B6 (Explore UI-only), B7 (SEO) and B8
+(`scripts/validate-public-claims.mjs` GREEN) remain open, and **B8 cannot land until B5 clears the four red-line hits
+on record.**
+
+
+## PUBLIC-MESSAGING BATCH B3 — THE FOUR INNER PUBLIC PAGES REWRITTEN FROM THE OUTCOME UP, DEPLOYED AND LIVE-VERIFIED (session 48, 2026-09-28) — PREVIOUS
 
 **WHAT WAS ASKED.** The Founder's report: the homepage was right, the pages behind it were not.
 

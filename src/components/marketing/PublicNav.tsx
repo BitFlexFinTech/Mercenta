@@ -10,7 +10,7 @@ import logoMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { ChevronDown, Menu, X } from 'lucide-react';
 
 /**
- * §PUBLIC MESSAGING B4 (2026-09-28) — THE LINK LABELS ARE SETTLED IN ONE PLACE.
+ * §PUBLIC MESSAGING B4 (2026-09-29) — THE LINK LABELS ARE SETTLED IN ONE PLACE.
  *
  * The label list used to be a literal in THIS file, while the footer held its own
  * copy of the same labels — so the same destination could be named two different

@@ -405,7 +405,13 @@ function readRedLines() {
     const closedRegion = (region) => !!document.querySelector(`[role="region"][aria-label="${region}"]`);
     const afterClick = await page.evaluate(closedRegion, noticeRegion);
     await page.reload({ waitUntil: 'networkidle' });
-    await page.waitForTimeout(250);
+    /**
+     * THE SETTLE IS REQUIRED, and it is the same race the e2e spec had to fix:
+     * the notice starts hidden and is revealed by a mount effect, so a "must NOT
+     * appear" reading taken too early passes before the component has had a chance
+     * to (wrongly) appear. 600ms covers the measured appear time with margin.
+     */
+    await page.waitForTimeout(600);
     const afterReload = await page.evaluate(closedRegion, noticeRegion);
 
     check(`L12 [${theme}] answering the notice closed it${clickError ? ` (click error: ${clickError})` : ''}`,
