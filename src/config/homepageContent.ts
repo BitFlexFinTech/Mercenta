@@ -211,7 +211,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       {
         title: 'Your approval comes first',
         description:
-          'Nothing happens to your products or your money that you have not agreed to. That is the whole point of the partnership.',
+          'Nothing happens to your products or your money that you have not agreed to. That is the whole point of working with us.',
         icon: 'check',
       },
     ],

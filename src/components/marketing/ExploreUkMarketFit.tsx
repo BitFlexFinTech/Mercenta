@@ -678,7 +678,7 @@ export function ExploreUkMarketFit({
                   <p className="mt-4 inline-flex items-center gap-2 text-xs text-[var(--mr-palette-green)]">
                     <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                     Review requested. Mercenta can now see this assessment. Your brand is still a
-                    prospect — a Mercenta partnership starts only after a separate, gated onboarding.
+                    prospect — working with Mercenta starts only after a separate onboarding review.
                   </p>
                 ) : (
                   <div className="mt-4 flex flex-col sm:flex-row sm:items-end gap-3">

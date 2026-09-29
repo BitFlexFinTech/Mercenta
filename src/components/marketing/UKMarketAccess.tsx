@@ -1,65 +1,142 @@
+import { useTheme } from '@/context/ThemeContext';
 import { PublicNav, type PublicPage } from './PublicNav';
 import { PublicFooter } from './PublicFooter';
+import {
+  PUBLIC_CATEGORY,
+  PUBLIC_PROMISE,
+  PUBLIC_BARRIERS,
+  PUBLIC_AUDIENCES,
+  PUBLIC_MARKETS,
+  PUBLIC_MARKETS_SENTENCE,
+  PUBLIC_INVITATION_HEADING,
+  PUBLIC_INVITATION_BODY,
+} from '@/config/positioning';
+import { EXPLORE_UK_MARKET_FIT_CTA } from '@/config/ukMarketFit';
+import { ArrowRight } from 'lucide-react';
+
+/**
+ * §PUBLIC MESSAGING B3 (2026-09-28) — REWRITTEN FROM THE OUTCOME UP.
+ *
+ * WHAT WAS WRONG. This page published the operating model in a heading: it
+ * named the regulated position it holds, the authority it deals with, the
+ * registrations it carries and the companies it buys carriage from — and it
+ * invented three "sourcing corridors" the business does not actually run.
+ * A competitor could have read the model straight off it.
+ *
+ * NOW. The barriers a brand is actually measuring itself against (§9), the
+ * markets its brands really come from (§6), the two audiences (§2) and the
+ * closing invitation (§1). No regulated position, no authority, no
+ * intermediary, no supplier, no invented route.
+ *
+ * DESIGN. The four cards take the CANONICAL HUE -> DOMAIN colours
+ * (`src/config/themes.ts`): the two paperwork barriers are compliance (amber),
+ * keeping stock moving is logistics (orange) and getting onto the shelf is the
+ * order flow (orders, indigo) — the colour says which kind of work the barrier
+ * creates, rather than decorating the card.
+ */
+const BARRIER_DOMAIN: readonly string[] = [
+  'var(--mr-palette-amber)',
+  'var(--mr-palette-amber)',
+  'var(--mr-palette-orange)',
+  'var(--mr-palette-indigo)',
+];
 
 export function UKMarketAccess({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) => void; onOpenPortal: () => void }) {
+  const { shellMode } = useTheme();
+
   return (
-    <div className="min-h-screen bg-ink text-parchment font-plex">
+    <div data-shell-theme={shellMode} className="min-h-screen font-plex" style={{ backgroundColor: 'var(--mr-bg)' }}>
       <PublicNav currentPage="uk-market-access" onNavigate={onNavigate} onOpenPortal={onOpenPortal} />
-      <main className="pt-24 pb-16 px-6">
-        <div className="max-w-4xl mx-auto space-y-12">
-          <section className="text-center">
-            <h1 className="font-display text-3xl md:text-4xl font-semibold mb-4">UK Market Access</h1>
-            <p className="text-sm text-steel max-w-2xl mx-auto leading-relaxed">
-              Mercenta Partners is a UK-based wholesale distribution platform and importer of record.
-              We provide international brands with the infrastructure needed to enter and operate in the UK retail market.
+      <main className="pt-24 pb-16">
+        <section className="px-6 pb-12">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="font-mono uppercase text-ds-micro tracking-[0.06em] text-brass sm:text-ds-label sm:tracking-[0.25em]">
+              {PUBLIC_CATEGORY}
             </p>
-          </section>
+            <h1 className="mt-4 font-display text-3xl font-semibold leading-[1.12] md:text-4xl">UK market access</h1>
+            <p className="mt-4 text-sm leading-relaxed md:text-base" style={{ color: 'var(--mr-text-muted)' }}>
+              {PUBLIC_PROMISE}
+            </p>
+          </div>
+        </section>
 
-          <section className="bg-ink-900 border border-white/[0.06] rounded-xl p-8">
-            <h2 className="font-display text-xl font-semibold mb-4">UK Importer of Record</h2>
-            <p className="text-sm text-steel leading-relaxed mb-4">
-              Mercenta is EORI registered and acts as the UK importer of record for brands distributing through our network.
-              We handle customs clearance, compliance documentation, and UK regulatory requirements including UKCA/CE marking, REACH, and GPSR.
+          <section className="border-t border-white/[0.06] px-6 py-16">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="mb-3 text-center font-display text-2xl font-semibold md:text-3xl">
+              What stands between you and a UK shelf
+            </h2>
+            <p className="mx-auto mb-10 max-w-2xl text-center text-sm" style={{ color: 'var(--mr-text-muted)' }}>
+              Four things — and none of them are about your product. They are the reason a good product from
+              outside the UK often never gets here.
             </p>
-            <ul className="text-sm text-steel space-y-2 list-disc list-inside">
-              <li>EORI registered UK importer of record</li>
-              <li>HMRC customs clearance and duty management</li>
-              <li>UKCA/CE compliance oversight</li>
-              <li>VAT and duty handling</li>
-              <li>Product compliance documentation management</li>
-            </ul>
-          </section>
-
-          <section className="bg-ink-900 border border-white/[0.06] rounded-xl p-8">
-            <h2 className="font-display text-xl font-semibold mb-4">Distribution Infrastructure</h2>
-            <p className="text-sm text-steel leading-relaxed mb-4">
-              Brands ship products to our UK distribution hub, where inventory is received, processed, and distributed to retail channels.
-              Every shipment is tracked through the platform from origin to retail fulfilment.
-            </p>
-            <p className="text-sm text-steel leading-relaxed">
-              Mercenta operates its own carrier accounts — DHL for international freight and
-              Palletline for UK domestic — connected by API, providing routing for sea and air freight.
-            </p>
-          </section>
-
-          <section className="bg-ink-900 border border-white/[0.06] rounded-xl p-8">
-            <h2 className="font-display text-xl font-semibold mb-4">Global Sourcing Routes</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="bg-ink-800 rounded-lg p-4">
-                <h3 className="text-brass font-semibold mb-1">North America</h3>
-                <p className="text-xs text-steel">US brands enter through established trade corridors into UK retail channels.</p>
-              </div>
-              <div className="bg-ink-800 rounded-lg p-4">
-                <h3 className="text-brass font-semibold mb-1">Europe</h3>
-                <p className="text-xs text-steel">EU brands move by road freight into UK distribution with full compliance handled.</p>
-              </div>
-              <div className="bg-ink-800 rounded-lg p-4">
-                <h3 className="text-brass font-semibold mb-1">Africa</h3>
-                <p className="text-xs text-steel">African brands ship through our depot network into UK retail channels.</p>
-              </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {PUBLIC_BARRIERS.map((barrier, i) => (
+                <div
+                  key={barrier.title}
+                  className="rounded-xl border border-t-[3px] border-white/[0.06] bg-ink-850 p-5"
+                  style={{ borderTopColor: BARRIER_DOMAIN[i % BARRIER_DOMAIN.length] }}
+                >
+                  <h3 className="mb-2 font-display text-base font-semibold text-parchment">{barrier.title}</h3>
+                  <p className="text-sm leading-relaxed text-steel">{barrier.body}</p>
+                </div>
+              ))}
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
+
+          <section className="border-t border-white/[0.06] px-6 py-16">
+          <div className="mx-auto max-w-4xl">
+            <h2 className="mb-3 text-center font-display text-2xl font-semibold md:text-3xl">
+              Where our brands come from
+            </h2>
+            <p className="mx-auto mb-8 max-w-2xl text-center text-sm" style={{ color: 'var(--mr-text-muted)' }}>
+              {PUBLIC_MARKETS_SENTENCE} If your product travels well, the distance is not the problem.
+            </p>
+            <ul className="flex flex-wrap justify-center gap-2">
+              {PUBLIC_MARKETS.map((market) => (
+                <li
+                  key={market}
+                  className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 font-mono text-ds-label"
+                  style={{ color: 'var(--mr-text-muted)' }}
+                >
+                  {market}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="border-t border-white/[0.06] px-6 py-16">
+          <div className="mx-auto max-w-4xl">
+            <h2 className="mb-10 text-center font-display text-2xl font-semibold md:text-3xl">
+              Which of these is you?
+            </h2>
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.06] md:grid-cols-2">
+              {PUBLIC_AUDIENCES.map((audience) => (
+                <div key={audience.id} className="bg-ink-850 p-6">
+                  <h3 className="mb-2 font-display text-base font-semibold text-parchment">{audience.heading}</h3>
+                  <p className="text-sm leading-relaxed text-steel">{audience.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-t border-white/[0.06] px-6 py-16">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="mb-3 font-display text-2xl font-semibold md:text-3xl">{PUBLIC_INVITATION_HEADING}</h2>
+            <p className="mx-auto mb-8 max-w-xl text-sm" style={{ color: 'var(--mr-text-muted)' }}>
+              {PUBLIC_INVITATION_BODY}
+            </p>
+            <button
+              onClick={() => onNavigate('explore-uk-market-fit')}
+              className="inline-flex items-center gap-2 rounded-lg bg-palette-indigo px-6 py-3 font-semibold text-on-palette transition-colors hover:opacity-90"
+            >
+              {EXPLORE_UK_MARKET_FIT_CTA}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        </section>
       </main>
       <PublicFooter onNavigate={onNavigate} onOpenPortal={onOpenPortal} />
     </div>

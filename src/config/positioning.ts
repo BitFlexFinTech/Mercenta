@@ -11,9 +11,12 @@
  * operating model hands it to anyone who reads it.
  *
  * This module is the single owner of the public message. Every public surface
- * reads from here, so the eight pages cannot drift apart again, and
- * `scripts/validate-public-claims.mjs` fails the build if the internal detail
- * returns.
+ * reads from here, so the eight pages cannot drift apart again. The red-line
+ * DATA in §11 is what `scripts/validate-public-claims.mjs` compiles into a build
+ * gate — PENDING: that gate is landed in batch B8, so until it exists this list
+ * is the contract and the copy below is the only thing holding it. (The header
+ * previously stated the gate as if it were already running. It was not, and a
+ * gate that is claimed but absent is worse than one that is honestly pending.)
  *
  * THE TWO RULES THIS FILE ENCODES
  * -------------------------------
@@ -32,6 +35,12 @@
  */
 import { BRAND_LEGAL_NAME, BRAND_DOMAIN } from './brand';
 import { COMPANY_REGISTRATION } from './company';
+/**
+ * §PUBLIC MESSAGING B3 (2026-09-28) — the ten approved categories are declared
+ * ONCE in `src/types.ts` and READ here, never retyped, so the FAQ answer and the
+ * product rules cannot disagree about which categories exist.
+ */
+import { APPROVED_CATEGORIES } from '@/types';
 
 /* ── 1. The category and the promise ─────────────────────────────────────── */
 
@@ -50,6 +59,16 @@ export const PUBLIC_PROMISE =
 export const PUBLIC_HERO_SUBHEADING =
   'Mercenta is the retail channel partner for brands that want the UK handled. You keep the product, the brand ' +
   'and every decision. We carry the orders, the freight, the paperwork and the payments.';
+
+/**
+ * §B3 — the invitation every inner public page closes with. It lives here rather
+ * than being retyped on four pages, so the four cannot drift apart or invent a
+ * promise the homepage does not make.
+ */
+export const PUBLIC_INVITATION_HEADING = 'Find out whether the UK wants your products';
+export const PUBLIC_INVITATION_BODY =
+  'The market assessment on this site is free, and the read is worth having whether or not you take it any ' +
+  'further.';
 
 /* ── 2. The two audiences (both first-class) ─────────────────────────────── */
 
@@ -207,7 +226,177 @@ export function publicCompanyLine(): string {
   return parts.join(' · ');
 }
 
-/* ── 8. THE RED LINES — what a public surface may never say ───────────────
+/* ── 8. How it works — the journey, told as outcomes ───────────────────────
+ * A genuine sequence, and therefore the ONE thing on these pages that may carry
+ * numbers: a step order is information, not decoration. It says what happens to
+ * a brand's product and to the brand's decisions — never how the operation is
+ * built, who it is bought from, or what the commercial terms are.
+ */
+
+export interface PublicStep {
+  title: string;
+  body: string;
+}
+
+export const PUBLIC_HOW_IT_WORKS: readonly PublicStep[] = [
+  {
+    title: 'Tell us what you make',
+    body:
+      'Send the product, the brand and where it is made. You get an honest read on whether the UK market ' +
+      'wants it — before either of us spends anything.',
+  },
+  {
+    title: 'We agree what stays yours',
+    body:
+      'The product, the brand, the pricing and every decision about them stay with you. What you hand over ' +
+      'is the retail side: the orders, the movement, the paperwork and the payments.',
+  },
+  {
+    title: 'We make it saleable here',
+    body:
+      'Everything the UK asks of a seller before it will buy — a presence, the paperwork, somewhere for the ' +
+      'stock to live and a way onto the shelf — stops being a list you work through.',
+  },
+  {
+    title: 'Orders start arriving',
+    body:
+      'They land in your workspace with what they are worth and what is waiting on you. You approve, amend ' +
+      'or decline, and that decision is what we act on.',
+  },
+  {
+    title: 'You watch it land, and get paid',
+    body:
+      'Goods, documents and money move in one place you can see, and settlements arrive on the terms you ' +
+      'agreed — every deduction explained against the order behind it.',
+  },
+] as const;
+
+/* ── 9. UK market access — the barriers, told as outcomes ─────────────────
+ * The same four barriers the two audiences describe in §2, stated once here as
+ * the list a brand measures itself against. Naming the barrier is the point;
+ * explaining how it is cleared is the red line, so none of that mechanism
+ * appears — no regulated position, no authority, no intermediary, no supplier.
+ */
+
+export interface PublicBarrier {
+  title: string;
+  body: string;
+}
+
+export const PUBLIC_BARRIERS: readonly PublicBarrier[] = [
+  {
+    title: 'A presence in the UK',
+    body:
+      'The UK expects a seller it can hold to. You get one without opening an office, a warehouse or a ' +
+      'payroll here.',
+  },
+  {
+    title: 'The paperwork, kept current',
+    body:
+      'The registrations, certificates and renewals that stand between a product and a shelf stay up to ' +
+      'date — and stay off your desk.',
+  },
+  {
+    title: 'Somewhere for the stock to live',
+    body:
+      'Your stock is received and moved on from here, so you are not paying for space in a country you do ' +
+      'not operate in.',
+  },
+  {
+    title: 'A way onto the shelf',
+    body:
+      'The retail side of the market — the buyers, the terms, the delivery expectations — is what we do ' +
+      'every day, so it is not something you learn from scratch.',
+  },
+] as const;
+
+/* ── 10. For brands — the split, and the answers ──────────────────────────
+ * `PUBLIC_BRAND_SPLIT` is the honest answer to "who does what": one row per
+ * thing a brand keeps, paired with what we carry instead. It is the ONLY
+ * canonical statement of that division, so no page can contradict another.
+ * `PUBLIC_FAQ` derives every answer it can from the sections above, so an
+ * answer cannot drift from the page it came from.
+ */
+
+export interface PublicSplit {
+  /** What the brand keeps. */
+  keep: string;
+  /** What Mercenta carries instead of them. */
+  carried: string;
+}
+
+export const PUBLIC_BRAND_SPLIT: readonly PublicSplit[] = [
+  { keep: 'Your product and your brand', carried: 'Getting it onto a UK shelf, moved, landed and delivered' },
+  { keep: 'Your pricing', carried: 'The paperwork that has to stay current for it to keep selling' },
+  { keep: 'Your approvals', carried: 'The orders, the buyers and the delivery expectations behind them' },
+  { keep: 'Your decisions', carried: 'The invoices, the deductions and the chasing behind the money' },
+] as const;
+
+export interface PublicFaqItem {
+  q: string;
+  a: string;
+}
+
+/** Built from §6, so the answer can never disagree with the markets list. */
+export const PUBLIC_MARKETS_SENTENCE =
+  `Brands reach us from ${PUBLIC_MARKETS.slice(0, -1).join(', ')} and ` +
+  `${PUBLIC_MARKETS[PUBLIC_MARKETS.length - 1]}.`;
+
+/**
+ * THE PUBLIC ANSWERS. Every answer that can be derived IS derived, so a change
+ * to the promise, the outcomes, the markets or the statutory record flows to the
+ * FAQ from one edit. The answers that are written out carry no mechanism, no
+ * commercial arithmetic, no supplier and no third party's vocabulary.
+ */
+export const PUBLIC_FAQ: readonly PublicFaqItem[] = [
+  { q: 'What is Mercenta?', a: PUBLIC_PROMISE },
+  {
+    q: 'Who is this for?',
+    a:
+      'Two kinds of brand. One is outside the UK and wants in; the other is already selling here and wants ' +
+      'the retail side carried. Both want the same thing — the product stays theirs and the operation stops ' +
+      'being theirs.',
+  },
+  {
+    q: 'What stops being my job?',
+    a: `Four things. ${PUBLIC_OUTCOMES.map((o) => o.title).join(' · ')}.`,
+  },
+  {
+    q: 'What stays mine?',
+    a:
+      'The product, the brand, the pricing and every decision about them. You approve, amend or decline — ' +
+      'nothing happens to your products or your money that you have not agreed to.',
+  },
+  { q: 'Where do your brands come from?', a: PUBLIC_MARKETS_SENTENCE },
+  {
+    q: 'Which product categories do you work in?',
+    a: `We work in ten product categories: ${APPROVED_CATEGORIES.join(', ')}.`,
+  },
+  {
+    q: 'What does it cost?',
+    a:
+      'What you pay is agreed privately with you before anything starts, and it is never published here. It ' +
+      'does not change without your agreement.',
+  },
+  {
+    q: 'How does a brand get started?',
+    a:
+      'Start with the market assessment on this site. If that read is worth acting on, we take you through ' +
+      'the rest — your details, your products and the documents the UK will ask for.',
+  },
+  {
+    q: 'What happens when something goes wrong?',
+    a:
+      'You hear it from us. If a figure is an estimate we say so; if a consignment is late or a document is ' +
+      'rejected, you are told what happened and what is being done about it.',
+  },
+  {
+    q: 'Where is Mercenta based?',
+    a: `${PUBLIC_COMPANY_NAME} is a UK company. ${PUBLIC_JURISDICTION_LINE}.`,
+  },
+] as const;
+
+/* ── 11. THE RED LINES — what a public surface may never say ──────────────
  *
  * This list is DATA, not prose, because `scripts/validate-public-claims.mjs`
  * compiles it and fails the build when one of these returns to a public surface.

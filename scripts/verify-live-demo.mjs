@@ -65,6 +65,38 @@ function near(a, b, tol = 3) {
   return a && b && Math.abs(a.r - b.r) <= tol && Math.abs(a.g - b.g) <= tol && Math.abs(a.b - b.b) <= tol;
 }
 
+/**
+ * §L11 — the red-line patterns, READ FROM THEIR OWNER.
+ *
+ * `src/config/positioning.ts` declares what a public surface may never say, and
+ * it is the single owner of that list. Retyping the terms here would create a
+ * second source of truth for the same rule — the file would then pass while the
+ * owner changed, which is precisely the drift this project's SSOT rule forbids.
+ * So the list is parsed out of the owner at run time, and the caller FAILS
+ * CLOSED when it cannot be read or does not hold all eight families.
+ *
+ * The owner's own pattern literals are necessarily written in escaped source
+ * form (`'\\bDHL\\b'`), so the escape is unwound before the regex is built.
+ */
+function readRedLines() {
+  const file = path.join(ROOT, 'src/config/positioning.ts');
+  if (!existsSync(file)) return [];
+  const src = readFileSync(file, 'utf8');
+  const start = src.indexOf('export const PUBLIC_CLAIM_RED_LINES');
+  if (start === -1) return [];
+  const patterns = [];
+  const arrays = /patterns: \[([^\]]*)\]/g;
+  let m;
+  while ((m = arrays.exec(src.slice(start)))) {
+    for (const lit of m[1].matchAll(/'([^']+)'/g)) {
+      patterns.push(new RegExp(lit[1].replace(/\\\\/g, '\\'), 'i'));
+    }
+  }
+  const families = new Set((src.slice(start).match(/id: '[a-z-]+'/g) || []).map((s) => s));
+  patterns.familyCount = families.size;
+  return patterns;
+}
+
 (async () => {
   console.log(`\nLIVE HOMEPAGE VERIFICATION — ${SITE}`);
 
@@ -197,6 +229,79 @@ function near(a, b, tol = 3) {
       await page.close();
     }
   }
+  /* ── L11 — THE FOUR INNER PUBLIC PAGES (§PUBLIC MESSAGING B3) ─────────────
+   * WHY THIS EXISTS. The four inner pages each published the operating model —
+   * the regulated position, the authorities it deals with, the companies
+   * carriage is bought from, another company's programme vocabulary and the
+   * commercial arithmetic — and they hardcoded the dark palette, so they ignored
+   * the light shell entirely. Neither a typecheck nor a build can see either
+   * defect: they exist only in a rendered page, at a real viewport.
+   *
+   * The red-line list is read from its owner (see `readRedLines`), and the check
+   * FAILS CLOSED: if the list cannot be read, or holds fewer than the eight
+   * declared families, these pages are NOT reported as clean.
+   */
+  const redLines = readRedLines();
+  check(
+    `L11 the eight red-line families were read from positioning.ts (found ${redLines.familyCount || 0})`,
+    redLines.familyCount === 8
+  );
+
+  const INNER_PAGES = [
+    { path: '/how-it-works', h1: 'how mercenta works' },
+    { path: '/uk-market-access', h1: 'uk market access' },
+    { path: '/for-brands', h1: 'for brands' },
+    { path: '/faq', h1: 'questions brands ask us' },
+  ];
+
+  for (const meta of INNER_PAGES) {
+    const texts = [];
+    /**
+     * BOTH SHELLS. The defect being closed here is that these pages hardcoded
+     * the dark palette and ignored the light shell completely, so each page is
+     * rendered under both and the shell attribute it actually took is asserted.
+     */
+    for (const theme of ['bold', 'minimal-light']) {
+      const expectedShell = theme === 'minimal-light' ? 'light' : 'dark';
+      console.log(`\n--- ${meta.path} @ 390px, ${theme} ---`);
+      const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+      await page.addInitScript((t) => { try { window.localStorage.setItem('mercenta.theme', t); } catch (e) { /* private mode */ } }, theme);
+      /**
+       * A page that renders but throws is still broken, and a thrown error is
+       * invisible to typecheck and to the build — so every inner page is held to
+       * "rendered with no uncaught error".
+       */
+      const pageErrors = [];
+      page.on('pageerror', (e) => pageErrors.push(String(e.message).slice(0, 120)));
+      await page.goto(`${SITE}${meta.path}`, { waitUntil: 'networkidle' });
+      await page.waitForTimeout(250);
+      const d = await page.evaluate(() => {
+        const eyebrow = document.querySelector('main p.font-mono');
+        const cs = eyebrow ? getComputedStyle(eyebrow) : null;
+        const lh = cs ? parseFloat(cs.lineHeight) : 0;
+        const shellEl = document.querySelector('[data-shell-theme]');
+        return {
+          h1: (document.querySelector('h1') || {}).innerText || '',
+          overflow: document.documentElement.scrollWidth - window.innerWidth,
+          eyebrowLines: eyebrow && lh ? Math.round(eyebrow.getBoundingClientRect().height / lh) : null,
+          shell: shellEl ? shellEl.getAttribute('data-shell-theme') : null,
+          text: document.body.innerText,
+        };
+      });
+
+      check(`L11 ${meta.path} [${theme}] renders its canonical heading`, d.h1.trim().toLowerCase().includes(meta.h1));
+      check(`L11 ${meta.path} [${theme}] took the ${expectedShell} shell (got ${d.shell})`, d.shell === expectedShell);
+      check(`L11 ${meta.path} [${theme}] has no horizontal overflow at 390`, d.overflow <= 0);
+      check(`L11 ${meta.path} [${theme}] eyebrow holds one line at 390 (lines=${d.eyebrowLines})`, d.eyebrowLines === 1);
+      check(`L11 ${meta.path} [${theme}] rendered with no uncaught error (errors: ${pageErrors.join(' | ') || 'none'})`, pageErrors.length === 0);
+      texts.push(d.text);
+      await page.close();
+    }
+
+    const hits = redLines.filter((re) => texts.some((t) => re.test(t))).map((re) => re.source);
+    check(`L11 ${meta.path} publishes no red-line claim in either shell (hits: ${hits.join(', ') || 'none'})`, hits.length === 0);
+  }
+
   await browser.close();
 
   console.log(`\nLIVE VERIFICATION: ${pass} PASS / ${fail} FAIL`);
