@@ -26,7 +26,84 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## THE HOMEPAGE DESIGN WAS REJECTED AND RE-DONE — THE PREFERRED DESIGN IS RESTORED, AND ITS REAL DEFECTS ARE FIXED (session 47, 2026-09-28) — CURRENT
+## PUBLIC-MESSAGING BATCH B3 — THE FOUR INNER PUBLIC PAGES REWRITTEN FROM THE OUTCOME UP, DEPLOYED AND LIVE-VERIFIED (session 48, 2026-09-28) — CURRENT
+
+**WHAT WAS ASKED.** The Founder's report: the homepage was right, the pages behind it were not.
+
+**WHAT WAS WRONG — per page, read from the source, not guessed.**
+`HowItWorks` called the business *"a self-service wholesale distribution platform and UK importer of record"*, ran a
+"Who Does What" column headed **Carriers** listing DHL and Palletline, told brands to *"Acknowledge within 24
+hours"*, published the internal shipment stages (HMRC, Destination Fulfilment Centre) and required *"Brand
+Registry"* — five red-line families in one page. `UKMarketAccess` gave the operating model a **section heading**
+(*"UK Importer of Record"*), listed EORI registrations and HMRC duty management, said Mercenta *"operates its own
+carrier accounts — DHL … Palletline … connected by API"*, and **invented three sourcing corridors the business does
+not run**. `ForBrands` was a twelve-item inventory of the platform's own screens (Team Messaging, Social Accounts,
+Reports, Contracts). `FAQ` published the model in **nine of ten** answers.
+**A second defect nobody had named:** all four pages **hardcoded the dark palette**, so `data-shell-theme` was set
+by the homepage and by nothing else — a theme the platform supports never reached three quarters of its own public
+pages. Neither defect is visible to a typecheck or a build.
+
+**WHAT WAS DONE.** `src/config/positioning.ts` — the ONE owner — grew **§8 the journey**, **§9 the four barriers**,
+**§10 the keep/carry split and the public FAQ**, plus the shared closing invitation; every string on the four pages
+now comes from it, and derivable answers ARE derived (the categories answer reads `APPROVED_CATEGORIES` from
+`src/types.ts`; the markets answer is built from `PUBLIC_MARKETS`). **Design at the 94c4d86 standard:** theme-aware
+root, the canonical section-header pattern, the 11px micro eyebrow that holds ONE line at 390, colours obeying the
+canonical **HUE → DOMAIN** law (logistics=orange · compliance=amber · finance=green · orders=indigo), and numbering
+kept only where the sequence is real (the five journey steps).
+
+**GATES ON THE COMMITTED TREE.** `npx tsc --noEmit` 0 errors · `npm run lint` 0 · `npm run build` ✓ 7.95s
+(deployed) · `npm run validate:all` **121 PASS / 0 FAIL** · `e2e/seo-foundation.spec.ts` 6 passed ·
+`e2e/accessibility + design-system` 27 passed · `npm run verify:live` against the demo **99 PASS / 0 FAIL**.
+Commit **`8cd189f`**, pushed, deployed (`scripts/deploy-demo.sh`, 31 files), live entry
+`assets/index-CcrxtVr8.js` **byte-identical to the local `dist/`** (319,710 bytes both sides).
+
+**NEW LIVE CHECKS (L11) — AND PROVED ABLE TO FAIL.** All four inner pages are now rendered at 390px in **both
+shells** and held to: canonical heading, **the shell actually taken**, no horizontal overflow, a one-line eyebrow,
+**no uncaught page error**, and **no red-line claim** — the list READ from `positioning.ts` rather than retyped, and
+failing CLOSED if fewer than eight families are found. Proof it can fail: injecting *"HMRC commission"* into the FAQ
+printed `FAIL L11 /faq publishes no red-line claim (hits: \bHMRC\b, \bcommission\b)` and **90 PASS / 1 FAIL**, then
+restored **byte-identical** (sha256 `10ef2d213aa47809099604d154d636440e9538b58bac59c1dab119cbf7f0a6dc`) and back to
+99/0.
+
+**DEFECTS FOUND AND FIXED AT SOURCE THIS SESSION** (full inventory — nothing parked):
+1. **Four public pages published the operating model** (five red-line families across them) → rewritten; L11 proves
+   zero hits live, in both shells.
+2. **Four public pages ignored the shell theme** (`data-shell-theme` absent) → theme-aware root; L11 asserts the
+   shell actually taken.
+3. **`homepageContent.ts` — "the whole point of the partnership"** and **`ExploreUkMarketFit.tsx` — "a Mercenta
+   partnership starts only after…"** → both reworded at source, because the B8 gate cannot land green while they
+   stand.
+4. **`positioning.ts`'s header claimed `scripts/validate-public-claims.mjs` "fails the build if the internal detail
+   returns" — that gate does not exist** (it is B8) → the header now says so. A gate claimed but absent is worse than
+   one honestly pending.
+5. **The Master Matrix's 5,505-line re-encoding** (an earlier commit in this session rewrote untouched lines through
+   a JSON round-trip, making a three-row change unreviewable) → re-applied as text surgery; content proved identical
+   (**0 differing entries by value**, same order, same `_meta`), so the reviewable diff is now 16/7 lines. Commit
+   `bb98329`.
+6. **`_meta.total_entries` was gated by nothing** (corrected by hand three sessions running) → new
+   `scripts/validate-registry-integrity.mjs`, **proved able to fail** (508 → 999 exits 1; restored byte-identical,
+   sha256 `18df98f51e8fc934e438cff5`). Commit `bb98329`.
+7. **`npm run validate:all` never ran the registered `validate:wording` gate** — 2 of 44 registered `validate:*`
+   scripts are not matched by the `scripts/validate-*.mjs` glob, and one of them is a REAL outward-facing gate. That
+   is precisely the failure mode `validate-all.sh`'s own header describes. The sweep now **discovers** the unmatched
+   registered validators from `package.json` and runs them (121 validators, not 120), **proved able to fail**: with a
+   banned phrase installed, the sweep printed `FAIL  validate:wording (exit 1)`, named it in `FAILED:`, and exited 1
+   — then the phrase was removed and `positioning.ts` verified **byte-identical**
+   (sha256 `664c8c1dd3f037718de9999bab2be0a52c781194c214b7950cb09cc793b27566`).
+
+**REMAINING, RECORDED — the next batch, not a parked exception:** **four red-line hits remain inside
+`PrivacyPolicy.tsx` and `TermsOfService.tsx`** — `:30` "VAT and EORI numbers", `:52` "HMRC requirement",
+`TermsOfService.tsx:36` "Acknowledge POs within 24 hours per retail network requirements", `:44` "Mercenta charges
+commission on each PO". Those two files are **batch B5**, and **B8 cannot land until they are rewritten**. The three
+requirements B8's gate must meet were learned by running the check here: read the list from its owner, scan RENDERED
+strings (never the owner's own pattern literals, which self-match), and fail closed below eight families.
+
+**HONEST LIMITS.** This session verified the four inner pages at **390px in both shells**, plus the homepage at
+1440/390 (L1–L10). It did **not** render the four pages at desktop widths in a browser this session — the desktop
+layout is covered by the specs above and by the shared section pattern, but that is an inference, not a measurement.
+The dark-theme indigo AA failure (**4.38:1**) is unchanged and still needs the Founder's design decision.
+
+## THE HOMEPAGE DESIGN WAS REJECTED AND RE-DONE — THE PREFERRED DESIGN IS RESTORED, AND ITS REAL DEFECTS ARE FIXED (session 47, 2026-09-28) — CURRENT FOR THE HOMEPAGE DESIGN (superseded as the newest record by session 48 above)
 
 **What is now true:** the Founder rejected `472aac2` — *"this design is ugly. you did not put any thought into it.
 you dont seem to have actually used the design skills that you were supposed to use. you need to redo the design.

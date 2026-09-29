@@ -1543,6 +1543,15 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
    * declared here because it is a new application-source script.
    */
   'scripts/validate-registry-integrity.mjs',
+  /**
+   * §PUBLIC MESSAGING B3 (2026-09-28) — `validate-all.sh` now also runs the
+   * registered `validate:*` npm scripts that the `scripts/validate-*.mjs` glob
+   * does NOT match. `validate:wording` (scripts/lint-wording.mjs) is one of
+   * them, and it is a REAL outward-facing gate that had never run inside a
+   * whole-corpus sweep. The list is discovered from package.json, so a future
+   * `validate:*` script cannot silently fall outside the sweep again.
+   */
+  'scripts/validate-all.sh',
   'e2e/homepage-editor.spec.ts',
   'package.json',
 ]);

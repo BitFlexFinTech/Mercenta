@@ -34,8 +34,33 @@ for f in scripts/validate-*.mjs; do
   fi
 done
 
+# ── §SSOT — THE REGISTERED VALIDATORS THE GLOB DOES NOT MATCH ───────────────
+# The loop above runs every `scripts/validate-*.mjs` FILE. Two registered
+# `validate:*` npm scripts are not matched by that glob:
+#   validate:wording  ->  scripts/lint-wording.mjs  (a REAL outward-facing gate)
+#   validate:all      ->  this script               (must never recurse)
+# Until this block existed, `npm run validate:all` printed a whole-corpus green
+# while the WORDING gate had never run — which is exactly the failure mode this
+# file's own header describes. The list is DISCOVERED from package.json rather
+# than retyped, so a future `validate:*` script cannot silently fall outside the
+# sweep again. Measured when this was added: 2 of 44 registered validate:*
+# scripts were unmatched, and one of them (`validate:wording`) is a real gate.
+UNMATCHED=$(node -e 'const p=require("./package.json");for(const [k,v] of Object.entries(p.scripts)){if(k.startsWith("validate:")===false)continue;if(k==="validate:all")continue;const m=v.match(/scripts\/([A-Za-z0-9_.-]+\.mjs)/);if(m&&/^validate-/.test(m[1]))continue;console.log(k)}')
+for name in $UNMATCHED; do
+  OUT=$(npm run --silent "$name" 2>&1)
+  CODE=$?
+  if [ "$CODE" -eq 0 ]; then
+    PASS=$((PASS + 1))
+  else
+    FAIL=$((FAIL + 1))
+    FAILED="$FAILED $name"
+    echo "FAIL  $name (exit $CODE)"
+    echo "$OUT" | grep -iE '✗|FAIL|Error:' | head -4 | sed 's/^/        /'
+  fi
+done
+
 echo "=================================="
-echo "FULL VALIDATOR CORPUS: $PASS PASS / $FAIL FAIL (of $((PASS + FAIL)) files)"
+echo "FULL VALIDATOR CORPUS: $PASS PASS / $FAIL FAIL (of $((PASS + FAIL)) validators: every scripts/validate-*.mjs file, plus every registered validate:* script the glob does not match)"
 if [ -n "$FAILED" ]; then
   echo "FAILED:$FAILED"
 fi

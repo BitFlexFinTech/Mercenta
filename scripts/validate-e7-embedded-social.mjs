@@ -650,6 +650,13 @@ try {
     'scripts/validate-uk-market-fit.mjs',
     'scripts/validate-e6-brand-surfaces.mjs',
     'scripts/validate-e7-embedded-social.mjs',
+    /**
+     * §PUBLIC MESSAGING B3 (2026-09-28) — `validate-all.sh` now also runs the
+     * registered `validate:*` npm scripts the `scripts/validate-*.mjs` glob does
+     * NOT match (`validate:wording` is one, and it had never run in a
+     * whole-corpus sweep). Discovered from package.json, so it cannot drift.
+     */
+    'scripts/validate-all.sh',
     'e2e/homepage-editor.spec.ts',
     'package.json',
   ];
