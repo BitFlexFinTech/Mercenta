@@ -26,7 +26,71 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## PUBLIC-MESSAGING BATCH B5 — THE TWO LEGAL DOCUMENTS REBUILT ON THE OWNER'S FACTS, THE FOUR RED-LINE CLAIMS CLEARED — DEPLOYED AND LIVE-VERIFIED (session 50, 2026-09-29) — CURRENT
+## PUBLIC-MESSAGING BATCH B6 — THE EXPLORE ASSESSMENT ONTO THE PUBLIC SHELL, SIX RENDERED RED-LINE CLAIMS CLEARED AT SOURCE — DEPLOYED AND LIVE-VERIFIED (session 51, 2026-09-29) — CURRENT
+
+**WHAT WAS ASKED.** B6 of the recorded public-messaging plan: the Explore UK Market Fit assessment was the last public
+surface that had not been through the B3/B5 treatment.
+
+**WHAT WAS WRONG — nothing a typecheck or a build can see, and the third defect was invisible to every existing gate.**
+1. **IT DID NOT TAKE THE SHELL THEME.** The root was `bg-ink text-parchment` with no `data-shell-theme`, so the
+   light-shell remap layer never activated inside the page. MEASURED ON THE RENDERED PAGE: `<main>` had **no enclosing
+   `[data-shell-theme]` element at all** — the only one on the page belonged to the cookie notice, which is exactly why
+   the e2e assertion that merely looked for the attribute passed while the light shell never reached the page. Two
+   secondary buttons rendered **LITERAL `text-white`** (invisible on a light surface) and every hairline stayed
+   white-alpha.
+2. **IT PUBLISHED SIX RED-LINE CLAIMS**, found by DRIVING the assessment to its result and scanning the RENDERED text
+   against `src/config/positioning.ts` §11: `customs clearance` (regulated position), `gross spread` and `net margin`
+   (the commercial arithmetic), `Marketplace API` (platform internals), `acknowledgement` (another company's
+   vocabulary) and `partnership` (an unevidenced claim). Three came from the ENGINE's own result copy, one from the
+   config's disclaimer, one from a declared educational-gap label and one from the research source labels.
+3. **IT PUBLISHED THE OPERATOR'S READINESS STRING AND THE RESEARCH VENDORS.** `Research source: … {status.reason}`
+   rendered the internal refusal reason — which NAMES `firecrawl`, `keepa` and `amazon_sp_api`, because that is what an
+   operator needs to act — and the source notes repeated each vendor beside its registry mode.
+
+**WHAT WAS DONE.**
+- **`ExploreUkMarketFit.tsx`** now takes the shell theme, opens with the SAME canonical eyebrow as the other six public
+  pages (so the live one-line-eyebrow check measures THIS page), renders `text-parchment` instead of a literal
+  `text-white` on its two secondary buttons, reads `status.publicReason`, and no longer renders the internal provider id.
+- **All six red-line strings fixed AT SOURCE:** `ukMarketFitEngine.ts` (the observed evidence rows, the commercial
+  rationale, two unknown rows), `ukMarketFit.ts` (the disclaimer's denial, the `po_acknowledgement` gap label, the
+  `marketplace_api` source label), `researchProvider.ts` (the public source note) plus the new **`publicReason`**. The
+  arithmetic, the fields, the order and the determinism are unchanged; the operator's readiness `reason` is unchanged
+  and still names the providers — it simply no longer reaches a public page.
+- **Gates extended or repointed, never weakened:** `validate-uk-market-fit.mjs` scans **1,986 rendered strings across
+  six fixtures × three input shapes** (reading §11 from its owner, fail-closed on an empty scan, per-fixture non-empty)
+  and gained the `publicReason`/vendor assertions plus three declared REPOINTs; `validate-uiux-redesign.mjs` gained the
+  pre-audit shell-theme contract; `e2e/public-pages.spec.ts` now covers seven pages × two themes and measures the shell
+  root that ENCLOSES `<main>`; `e2e/uk-market-fit.spec.ts` test 8 drives the result and scans it (test 5's disclaimer
+  pin repointed); `verify-live-demo.mjs` gained L13 (the live result, driven, both shells) and the route READ from its
+  owner.
+
+**VERIFIED — real output.** `npx tsc --noEmit` 0 errors · `npm run build` clean (entry `assets/index-CwVA-ITR.js`,
+321,021 bytes) · `npm run validate:all` **121 PASS / 0 FAIL** · `npx eslint` clean on every changed file · browser
+specs **30 passed** (public-pages 14, public-chrome 6, uk-market-fit 10) · **LIVE `npm run verify:live` 170 PASS / 0
+FAIL** (exit 0), L11 covering the seven public pages × two shells and **L13 driving the live assessment to its result
+in both shells** with zero red-line hits, no research vendor and no internal provider id; L10 proved the deployed
+entry asset is the local verified `dist/` build.
+**GATES PROVED ABLE TO FAIL BY MUTATION, each file restored byte-identical:** engine `import clearance` → `customs
+clearance` printed 5 violations in the validator and failed the browser spec (sha256
+`490a1b9f0dd7799dc7d3951122b3ac309c38255979c0a86862870cb6b97304f6`); removing the page's shell root failed BOTH
+`/explore-uk-market-fit` themes while the other six pages passed (sha256
+`2bce303945415ff587f0ee03400b8b01faed5402583ede71bbc1e89d2664abee`).
+
+**Checkpoint:** **`5b80519`** (+ the state commit that carries this section), pushed to `origin/redesign/foundation`,
+deployed via `scripts/deploy-demo.sh`, live-verified.
+
+**FOUND BY B6's LIVE VERIFICATION, AND THE NEXT TASK IN THIS SESSION.** `index.html` ships the **obsolete pre-B3 public
+site inside its `<noscript>` block** — the retired positioning, "UK Importer of Record — EORI Registered", "UK customs
+clearance", "Commission per PO", "Acknowledge POs within 24 hours" and the carrier names — with matching JSON-LD and
+bootstrap meta copy. NO gate scans that file: the e2e/live checks render with JavaScript on (so `<noscript>` is never
+seen) and `validate:wording` scans `src/` only. That is B7, and B8's gate will scan the static public files so it
+cannot return.
+
+**NOT FINISHED, AND SAID SO.** B7 (the SEO / static public surface pass) and B8 (`scripts/validate-public-claims.mjs`
+GREEN, proved able to fail) remain open.
+
+
+## PUBLIC-MESSAGING BATCH B5 — THE TWO LEGAL DOCUMENTS REBUILT ON THE OWNER'S FACTS, THE FOUR RED-LINE CLAIMS CLEARED — DEPLOYED AND LIVE-VERIFIED (session 50, 2026-09-29) — PREVIOUS
 
 **WHAT WAS ASKED.** B5 of the recorded public-messaging plan: rewrite `PrivacyPolicy.tsx` and `TermsOfService.tsx` on
 `publicCompanyLine()` and the derived contact addresses, take the shell theme as B3 did, and clear the four red-line
