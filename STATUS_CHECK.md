@@ -83,13 +83,37 @@ SECOND COPY of something that already existed.
 
 **GATES ON THE COMMITTED TREE.** `npx tsc --noEmit` 0 errors · `npm run build` ✓ 8.00s (deployed) ·
 `npm run validate:all` **121 PASS / 0 FAIL** (all 121 validators) · `npm run verify:live` against the demo
-**126 PASS / 0 FAIL**. Commit **`26245e6`**, pushed, deployed (`scripts/deploy-demo.sh`, 20 new / 11 modified files),
+**126 PASS / 0 FAIL**. Commits **`26245e6`** (the implementation) and **`8b79763`** (the test/date tranche), pushed, deployed
+(`scripts/deploy-demo.sh`, 31 files modified),
 live entry `assets/index-DR3nIR7u.js` **byte-identical to the local `dist/`** (320,916 bytes both sides) — L10 asserts
 this, so the deployment is not stale.
 
 **NOT FINISHED, AND SAID SO.** B5 (privacy + terms), B6 (Explore UI-only), B7 (SEO) and B8
 (`scripts/validate-public-claims.mjs` GREEN) remain open, and **B8 cannot land until B5 clears the four red-line hits
 on record.**
+
+**A SECOND TRANCHE CLOSED THREE DEFECTS FOUND WHILE RECORDING B4 (commit `8b79763`).**
+1. **The public pages had NO e2e coverage at all**, and the B3 registry row declared `built_and_tested` while no
+browser spec referenced it — only the live check did. Added **`e2e/public-pages.spec.ts`** (the four inner pages:
+canonical heading, the shell actually taken, no horizontal overflow at 390, no uncaught error, and **no red-line
+claim** — the claim list READ from `positioning.ts` §11) and **`e2e/public-chrome.spec.ts`** (the five-column footer,
+the canonical category count, the nav/footer label agreement, the notice shown, the notice **sticking across a
+reload**, and the re-open control). **10 tests pass.** **Proved able to fail:** injecting *"HMRC customs clearance"*
+into `FAQ.tsx` printed `red-line claims found on /faq: regulated-position:\bHMRC\b, regulated-position:\bcustoms
+clearance\b` and the FAQ test failed (1 failed / 3 passed), then restored **byte-identical**.
+2. **A "must NOT appear" assertion of mine could pass for the WRONG REASON.** The notice starts hidden and is revealed
+by a mount effect, so `toHaveCount(0)` straight after a reload passed before the component could wrongly appear.
+**Measured:** with a mutant that stopped recording the answer, the notice DID return on reload and the test still
+passed. Both gates now wait for the page to be mounted and observe a **600ms settle** first; the same mutant now
+**fails** the test (1 failed / 5 passed).
+3. **Every B4 reference carried the wrong date.** Sessions 47/48 were 2026-09-28; this session is **2026-09-29** (the
+commit timestamp proves it). **20 references corrected** across the source, the gates and the state documents. B3's
+and session 47's `2026-09-28` references were deliberately left untouched.
+
+**ALSO FIXED AT SOURCE:** two registry rows whose evidence quoted a path with a section suffix
+(`"src/config/positioning.ts §12–§13"`), which the reachability check cannot resolve, so both reported *File not
+found* — the B3 row's was pre-existing, and the B4 row must not repeat it. Both rows are now clean in
+`verify-registry`.
 
 
 ## PUBLIC-MESSAGING BATCH B3 — THE FOUR INNER PUBLIC PAGES REWRITTEN FROM THE OUTCOME UP, DEPLOYED AND LIVE-VERIFIED (session 48, 2026-09-28) — PREVIOUS
