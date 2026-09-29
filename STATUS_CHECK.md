@@ -3175,3 +3175,62 @@ registry divergence (P6 left `not_started`) was reconciled. No provider is conta
 **Status / checkpoint / deploy / live verification:** recorded in the `CURRENT RESUME STATE` block at the top of
 `PROJECT_STATUS.md`.
 
+
+---
+
+## SESSION 52 — 2026-09-29 — **BATCH 2c (`AV-024`) CLOSED: THE CHANNEL-ISSUED ORDER REVISION IS REAL, VISIBLE AND REACHABLE, AND IT IS LIVE**
+
+**Audit-before-work.** Resumed from `PROJECT_STATUS.md → CURRENT RESUME STATE` (no transcript). The recorded
+`NEXT TASK` was: finish Batch 2c — build the two AV-024 surfaces (the brand's notice and the console's revision
+history), then close the batch out. The domain half (derivation, writer, ingestion, shipment refusal, gate) was
+already built and uncommitted from the previous session; its two surfaces were the part left unbuilt.
+
+**Built (this session).**
+1. **The brand's notice** — `src/components/brand/BrandPurchaseOrders.tsx → ChannelRevisionNotice`, rendered ON THE
+   ORDER ITSELF (visible without expanding) and again in the record preview: the version the brand is working from,
+   what the retail channel changed (label + the change's own detail), Mercenta's review flag when a recorded decision
+   was undercut, that a stale acknowledgement must be updated before the order can ship, and the rule rendered from
+   `PO_REVISION_RULE_TEXT`. Renders NOTHING for an unrevised order.
+2. **The console's history** — `src/components/admin/AdminPurchaseOrderDetail.tsx → ChannelRevisionHistory`: EVERY
+   recorded revision, oldest first, with its version, observed time, `(sim)` provenance, value before → after, each
+   change labelled from the owner with its own detail, the recorded review reason and a stated stale-acknowledgement
+   line.
+3. **Reachability (mock-first)** — `src/components/admin/AdminPurchaseOrderList.tsx`: an honestly-labelled
+   “Simulate a channel order change (sim)” control that issues the change through the mock channel seam and
+   RE-READS through the ONE ingestion owner. It states that no live call was made and is REFUSED unless a
+   SIMULATED channel read is active. Without it the revision path was unreachable from the product and could only
+   ever have been proved by a script — i.e. dead UI.
+4. **Gates** — `scripts/validate-po-revision-ingestion.mjs` grew **75 → 102 assertions** (§9 adds the surface
+   assertions and a runtime projection of exactly what the surfaces render: every row labelled, non-empty,
+   non-redundant, one row per declared kind). NEW `e2e/po-revision-surfaces.spec.ts` (3 tests). NEW live check
+   **L15** in `scripts/verify-live-demo.mjs`.
+5. **Scope guards** — both `scripts/validate-e6-brand-surfaces.mjs` §BATCH2C_PO_REVISION_SCOPE and
+   `scripts/validate-e7-embedded-social.mjs` §BATCH2C_PO_REVISION_DECLARED gained the two surfaces, the console
+   control, the browser spec and the live check.
+
+**Defects found and FIXED AT SOURCE (none recorded as exceptions).**
+- A revision's `detail` repeated its own change-kind label, so a rendered row read “ship / delivery window —
+  delivery window: ship / delivery window … → …”. The owner now writes `subject: previous → current`, and the gate
+  fails if a rendered row repeats its label.
+- The simulated channel's window change mapped BOTH boundaries onto one fixed date, collapsing the order's window to
+  a single day (measured 7 days → 0 days). Both boundaries now shift by the same 14 days; the gate pins the preserved
+  length and the 14-day shift.
+- `docs/AMAZON_RECONCILIATION_STATUS.md` carried two wrong figures and one missing row: **AV-006 was applied but
+  absent from the applied table**, “14 INCOMPLETE” contradicted the table's own 13, and the single MODELLED IN PART
+  row was omitted. The counts were recomputed from the table's columns and the paragraph now states it is derived.
+
+**Evidence.** `npm run validate:po-revision` **102 PASS / 0 FAIL**; **FIVE mutation proofs**, each file restored
+byte-identical (brand surface re-types the rule → 3 failures; console renders only the latest revision → 1; a rendered
+row loses its label → 2; the detail repeats its label → 1; the window collapses to one day → 2; hashes recorded in
+the registry `_meta.batch2c_po_revision`). `e2e/po-revision-surfaces.spec.ts` **3 passed**. `npm run validate:all`
+**125 PASS / 0 FAIL** · `npx tsc --noEmit` clean · `npx eslint` clean · `npm run build` ✓.
+
+**Delivery.** Committed **`33bc45c`**, pushed to `origin/redesign/foundation`, deployed through
+`scripts/deploy-demo.sh` (exit 0) and **verified live**: `npm run verify:live` = **173 PASS / 1 FAIL** with **L15
+(the whole flow, both surfaces) 10/10 PASS** and **L10** proving the deployed entry asset
+`assets/index-BN3sIvR6.js` is byte-for-byte the local verified build. The one failure is
+`L1–L9 bold @ 1440px NAVIGATION FAILED (page.goto timeout at 90s)` — a HOST navigation timeout (the same homepage
+rendered in both shells in L12 in that run; a dedicated single-page drive of the flow passed 11/11; `curl` returned
+200 in 2.1–6.9s on five consecutive attempts). Recorded as an open host-side item, never as a product exception.
+The live check's `gotoLive` now waits up to 90s and retries once (measured 20 PASS / 23 FAIL before that change).
+

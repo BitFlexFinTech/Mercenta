@@ -71,9 +71,35 @@ function check(name, ok) {
  * and every call site counts that as a FAIL for its own check instead of aborting.
  */
 async function gotoLive(page, url) {
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
-  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-  await page.waitForTimeout(600);
+  /**
+   * §BATCH 2c FIX (2026-09-29) — THE HOST NOW NEEDS LONGER THAN 45s FOR A FRESH
+   * DOCUMENT, AND THROTTLES A BURST OF CONTEXTS.
+   *
+   * Measured on 2026-09-29 while this batch was verified: `curl` returned HTTP 200 in
+   * 2.1–6.9s for `/` on five consecutive attempts, while the browser's `page.goto`
+   * timed out at 45s repeatedly — a full run printed 20 PASS / 23 FAIL in which EVERY
+   * failure was a `page.goto` timeout, and a dedicated single-page drive of the same
+   * flow (120s timeout) passed 11/11. The 45s document wait is therefore too tight for
+   * this host as it stands, and each fresh context pays the connection cost again.
+   *
+   * This does NOT weaken any assertion: no check was removed or relaxed, and a
+   * document that genuinely cannot be fetched still fails. It raises the document
+   * wait to 90s and retries ONCE after a pause, so a throttled burst is not reported
+   * as a broken deployment.
+   */
+  let lastError = null;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 });
+      await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+      await page.waitForTimeout(600);
+      return;
+    } catch (error) {
+      lastError = error;
+      await page.waitForTimeout(4000);
+    }
+  }
+  throw lastError;
 }
 
 function parseRgbString(s) {
@@ -696,14 +722,40 @@ function readRedLines() {
   const revPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
   const revErrors = [];
   revPage.on('pageerror', (e) => revErrors.push(String(e)));
+  /**
+   * The shared host is slow and intermittently refuses connections: the entry is
+   * RETRIED and every control is WAITED FOR before it is clicked, so a host hiccup is
+   * reported as a host hiccup rather than mistaken for a broken deployment (measured
+   * on 2026-09-29: the same flow passed 11/11 on one run and timed out on the next).
+   */
+  async function liveAdminEntry(page) {
+    let lastError = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        await gotoLive(page, `${SITE}/`);
+        const login = page.getByRole('button', { name: 'Partner Login' }).first();
+        await login.waitFor({ state: 'visible', timeout: 90000 });
+        await login.click({ timeout: 30000 });
+        await page.waitForTimeout(2500);
+        const card = page.locator('text=Mercenta Admin Hub').first();
+        await card.waitFor({ state: 'visible', timeout: 90000 });
+        await card.click({ timeout: 30000 });
+        await page.waitForTimeout(3000);
+        return attempt;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw lastError;
+  }
+
   try {
-    await gotoLive(revPage, `${SITE}/`);
-    await revPage.getByRole('button', { name: 'Partner Login' }).first().click({ timeout: 15000 });
-    await revPage.waitForTimeout(700);
-    await revPage.click('text=Mercenta Admin Hub');
-    await revPage.waitForTimeout(1600);
-    await revPage.click('nav[aria-label="Primary"] >> text=Purchase Orders');
-    await revPage.waitForTimeout(1600);
+    const attempt = await liveAdminEntry(revPage);
+    check(`L15 the deployed site opened and the admin signed in (attempt ${attempt})`, true);
+    const navPo = revPage.locator('nav[aria-label="Primary"] >> text=Purchase Orders').first();
+    await navPo.waitFor({ state: 'visible', timeout: 90000 });
+    await navPo.click({ timeout: 30000 });
+    await revPage.waitForTimeout(3000);
 
     await revPage.locator('[data-state="admin-po-ingest"]').click();
     await revPage
@@ -723,11 +775,15 @@ function readRedLines() {
     const revPo = (revSummaryText.match(/MOCK-PO-\d+/) || [])[0];
     check('L15 the changed order is named in the console\'s own statement', Boolean(revPo));
 
-    await revPage.getByLabel('Search purchase orders').fill(revPo || '');
-    await revPage.waitForTimeout(800);
-    await revPage.locator('button[title="View detail"]').first().click();
+    const search = revPage.getByLabel('Search purchase orders');
+    await search.waitFor({ state: 'visible', timeout: 60000 });
+    await search.fill(revPo || '');
+    await revPage.waitForTimeout(1200);
+    const viewDetail = revPage.locator('button[title="View detail"]').first();
+    await viewDetail.waitFor({ state: 'visible', timeout: 60000 });
+    await viewDetail.click({ timeout: 30000 });
     const revCard = revPage.locator(`[data-testid="admin-po-revisions-${revPo}"]`);
-    await revCard.waitFor({ timeout: 15000 });
+    await revCard.waitFor({ timeout: 30000 });
     const revCardText = (await revCard.textContent()) ?? '';
     check(
       'L15 the live console shows the recorded revision with its change list and the rule',
@@ -736,16 +792,32 @@ function readRedLines() {
         revCardText.includes('The updated purchase order is the one that must be fulfilled')
     );
 
+    /* The record drawer is a full-screen overlay: close it (click the overlay) before
+       reaching the header, or the profile control's click is intercepted by the drawer
+       — the defect that made the first live run of this check fail. */
+    await revPage.mouse.click(5, 5);
+    await revPage.waitForTimeout(1500);
+
     /* Same document, same stores — sign out in the SPA and enter as the brand. */
-    await revPage.click('[aria-controls="profile-menu"]');
-    await revPage.getByRole('menuitem', { name: 'Sign Out' }).click();
-    await revPage.waitForTimeout(800);
-    await revPage.getByRole('button', { name: 'Partner Login' }).first().click();
-    await revPage.waitForTimeout(800);
-    await revPage.click('text=Astonish');
-    await revPage.waitForTimeout(1600);
-    await revPage.click('nav[aria-label="Primary"] >> text=Purchase Orders');
-    await revPage.waitForTimeout(1600);
+    const profile = revPage.locator('[aria-controls="profile-menu"]').first();
+    await profile.waitFor({ state: 'visible', timeout: 90000 });
+    await profile.click({ timeout: 30000 });
+    const signOut = revPage.getByRole('menuitem', { name: 'Sign Out' });
+    await signOut.waitFor({ state: 'visible', timeout: 30000 });
+    await signOut.click({ timeout: 30000 });
+    await revPage.waitForTimeout(2500);
+    const brandLogin = revPage.getByRole('button', { name: 'Partner Login' }).first();
+    await brandLogin.waitFor({ state: 'visible', timeout: 90000 });
+    await brandLogin.click({ timeout: 30000 });
+    await revPage.waitForTimeout(2500);
+    const brandCard = revPage.locator('text=Astonish').first();
+    await brandCard.waitFor({ state: 'visible', timeout: 90000 });
+    await brandCard.click({ timeout: 30000 });
+    await revPage.waitForTimeout(3000);
+    const brandNav = revPage.locator('nav[aria-label="Primary"] >> text=Purchase Orders').first();
+    await brandNav.waitFor({ state: 'visible', timeout: 90000 });
+    await brandNav.click({ timeout: 30000 });
+    await revPage.waitForTimeout(3000);
 
     const revNotice = revPage.locator(`[data-testid="po-revision-notice-${revPo}"]`);
     await revNotice.waitFor({ timeout: 15000 });
