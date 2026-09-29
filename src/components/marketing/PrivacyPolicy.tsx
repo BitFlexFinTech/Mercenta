@@ -1,82 +1,173 @@
+import { PublicLegalDocument, LegalLink, type PublicLegalSection } from './PublicLegalDocument';
+import type { PublicPage } from './PublicNav';
+import {
+  PUBLIC_COMPANY_NAME,
+  PUBLIC_COOKIE_NOTICE,
+  PUBLIC_COOKIE_SETTINGS_LABEL,
+  PUBLIC_PRIVACY_EMAIL,
+  publicCompanyLine,
+} from '@/config/positioning';
+
 /**
- * §Batch -4 item 7 — Privacy Policy page.
- * UK GDPR compliant draft. Reflects actual data collected by Mercenta.
+ * §PUBLIC MESSAGING B5 (2026-09-29) — REWRITTEN ON THE OWNER'S OWN FACTS.
+ *
+ * WHAT WAS WRONG. Four classes of defect, none of which a typecheck or a build
+ * can see:
+ *
+ *  1. IT PUBLISHED THE REGULATED POSITION. "VAT and EORI numbers" in §2 and the
+ *     "HMRC requirement" in §5 are two of the red-line claims
+ *     `src/config/positioning.ts` §11 exists to stop — they say which positions
+ *     Mercenta holds, and that position is the barrier the business exists to
+ *     remove for a brand. Both statements are gone; every data category a policy
+ *     has to list is still listed.
+ *  2. IT CARRIED ITS OWN COPY OF THE COMPANY'S IDENTITY AND CONTACT ADDRESS,
+ *     `mercenta.co.uk` included — facts that have owners (`src/config/brand.ts`,
+ *     `src/config/company.ts`), derived through §7 of the positioning owner. Both
+ *     are now READ: `publicCompanyLine()` and `PUBLIC_PRIVACY_EMAIL`.
+ *  3. IT DID NOT TAKE THE SHELL THEME (`bg-black text-white`), so the light shell
+ *     was ignored entirely — the defect B3 fixed on the four inner pages and B4
+ *     on the footer, left standing on the documents a brand reads before signing.
+ *  4. IT SAID NOTHING ABOUT WHAT IS STORED ON A VISITOR'S DEVICE, while
+ *     `positioning.ts` §13 describes this page as "the place for the full
+ *     picture". §6 now carries that picture, and READS the notice's own copy from
+ *     its owner, so the notice and the policy cannot describe the same behaviour
+ *     differently.
+ *
+ * The chrome (nav, footer, eyebrow, revision date, shell theme) comes from
+ * `PublicLegalDocument`, shared with the terms, so the two documents cannot
+ * drift apart.
  */
-export function PrivacyPolicy({ onBack }: { onBack?: () => void }) {
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-3xl mx-auto px-6 py-16">
-        {onBack && (
-          <button onClick={onBack} className="text-xs text-zinc-500 hover:text-white mb-6 transition-colors">
-            &larr; Back to homepage
-          </button>
-        )}
-        <h1 className="text-2xl font-bold mb-1">Privacy Policy</h1>
-        <p className="text-xs text-zinc-500 mb-8">Last updated: 30 August 2026</p>
-        <p className="text-sm text-zinc-400 mb-8">
-          This policy explains how Mercenta Partners Ltd collects, uses, and protects
-          your personal data, in compliance with UK GDPR and the Data Protection Act 2018.
+export function PrivacyPolicy({ onNavigate, onOpenPortal }: { onNavigate: (p: PublicPage) => void; onOpenPortal: () => void }) {
+  const sections: readonly PublicLegalSection[] = [
+    {
+      title: '1. Who we are',
+      body: (
+        <>
+          <p>{publicCompanyLine()}</p>
+          <p className="mt-2">
+            This policy covers this website, the platform it describes, and any contact you have with us about
+            either.
+          </p>
+        </>
+      ),
+    },
+    {
+      title: '2. What we collect',
+      body: (
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Identity: your name, job title, company name and signatory authority</li>
+          <li>Contact: business email address, telephone number and business address</li>
+          <li>
+            Financial: bank account details and the business tax identifiers we need in order to pay you and to
+            account for tax
+          </li>
+          <li>Transaction: order history, shipments, the documents that support them and catalogue content</li>
+          <li>Communications: platform messages, support tickets and call notes</li>
+          <li>Technical: IP address, browser type and login timestamps</li>
+        </ul>
+      ),
+    },
+    {
+      title: '3. Why we are allowed to hold it',
+      body: (
+        <ul className="list-disc pl-5 space-y-1">
+          <li>
+            <strong>Contract performance:</strong> running your orders, shipments and payments
+          </li>
+          <li>
+            <strong>Legitimate interests:</strong> fraud prevention, platform security and improving the service
+          </li>
+          <li>
+            <strong>Legal obligation:</strong> tax reporting and record-keeping
+          </li>
+          <li>
+            <strong>Consent:</strong> marketing, and only where you have opted in
+          </li>
+        </ul>
+      ),
+    },
+    {
+      title: '4. Who we share it with',
+      body: (
+        <p>
+          Only the providers that deliver the service to you — the logistics and payments providers we engage —
+          together with regulators or public authorities where the law requires it. We never sell personal data.
         </p>
+      ),
+    },
+    {
+      title: '5. How long we keep it',
+      body: (
+        <p>
+          Personal data is kept for the business relationship plus six years, the period UK tax law requires, and is
+          then securely deleted or anonymised.
+        </p>
+      ),
+    },
+    {
+      /**
+       * §B5 — THE SECTION THAT MAKES `positioning.ts` §13 TRUE. The owner states
+       * that the privacy policy is "the place for the full picture" of what is
+       * stored on a visitor's device, and the policy said nothing about it. The
+       * notice's copy is READ from its owner rather than rewritten here, so the
+       * notice and the policy cannot describe the same behaviour differently —
+       * and the re-open control's label is read for the same reason.
+       */
+      title: '6. What is stored on your device',
+      body: (
+        <>
+          <p>{PUBLIC_COOKIE_NOTICE.body}</p>
+          <p className="mt-2">
+            That notice can be read again at any time from the “{PUBLIC_COOKIE_SETTINGS_LABEL}” control in the
+            footer of every page on this site.
+          </p>
+        </>
+      ),
+    },
+    {
+      title: '7. Your rights',
+      body: (
+        <p>
+          Access, rectification, erasure, restriction, portability, objection and the right to withdraw consent at
+          any time — write to{' '}
+          <LegalLink href={`mailto:${PUBLIC_PRIVACY_EMAIL}`}>{PUBLIC_PRIVACY_EMAIL}</LegalLink>.
+        </p>
+      ),
+    },
+    {
+      title: '8. Security',
+      body: <p>Encryption in transit, access controls, hosting in the UK and regular review.</p>,
+    },
+    {
+      title: '9. Contact',
+      body: (
+        <>
+          <p>
+            Privacy questions: <LegalLink href={`mailto:${PUBLIC_PRIVACY_EMAIL}`}>{PUBLIC_PRIVACY_EMAIL}</LegalLink>
+          </p>
+          <p className="mt-1">
+            The UK regulator for data protection is the Information Commissioner’s Office, Wycliffe House, Water
+            Lane, Wilmslow SK9 5AF — <LegalLink href="https://ico.org.uk">ico.org.uk</LegalLink>
+          </p>
+        </>
+      ),
+    },
+  ];
 
-        <Section title="1. Who we are">
-          <p>Mercenta Partners Ltd is a UK wholesale distribution platform. Contact us at{' '}
-            <a href="mailto:privacy@mercenta.co.uk" className="text-brass-400 hover:underline">privacy@mercenta.co.uk</a>.</p>
-        </Section>
-
-        <Section title="2. What we collect">
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Identity: name, job title, company name, signatory authority</li>
-            <li>Contact: business email, phone, registered address</li>
-            <li>Financial: bank account details, sort code, VAT and EORI numbers</li>
-            <li>Transaction: purchase order history, shipments, compliance documents, catalog content</li>
-            <li>Communications: platform messages, support tickets, call logs</li>
-            <li>Technical: IP address, browser type, login timestamps</li>
-          </ul>
-        </Section>
-
-        <Section title="3. Legal basis">
-          <ul className="list-disc pl-5 space-y-1">
-            <li><strong>Contract performance:</strong> processing orders, shipments, payments</li>
-            <li><strong>Legitimate interests:</strong> CRM, fraud prevention, platform improvement</li>
-            <li><strong>Legal obligation:</strong> tax reporting, customs, regulatory compliance</li>
-            <li><strong>Consent:</strong> marketing (opt-in only)</li>
-          </ul>
-        </Section>
-
-        <Section title="4. Data sharing">
-          <p>We share data with fulfilment partners, payment processors (Stripe), carriers,
-            and regulators as required. We never sell personal data or scrape social media.</p>
-        </Section>
-
-        <Section title="5. Retention">
-          <p>Data is retained for the business relationship plus six years (HMRC requirement),
-            then securely deleted or anonymised.</p>
-        </Section>
-
-        <Section title="6. Your rights">
-          <p>Access, rectify, erase, restrict, port, or withdraw consent — email{' '}
-            <a href="mailto:privacy@mercenta.co.uk" className="text-brass-400 hover:underline">privacy@mercenta.co.uk</a>.</p>
-        </Section>
-
-        <Section title="7. Security">
-          <p>Encryption in transit (TLS), access controls, UK data centre hosting, regular reviews.</p>
-        </Section>
-
-        <Section title="8. Contact">
-          <p>Privacy queries: <a href="mailto:privacy@mercenta.co.uk" className="text-brass-400 hover:underline">privacy@mercenta.co.uk</a></p>
-          <p className="mt-1">Regulator: ICO, Wycliffe House, Wilmslow SK9 5AF —{' '}
-            <a href="https://ico.org.uk" className="text-brass-400 hover:underline">ico.org.uk</a></p>
-        </Section>
-      </div>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-6">
-      <h2 className="text-base font-semibold text-white mb-2">{title}</h2>
-      <div className="text-sm text-zinc-400 leading-relaxed">{children}</div>
-    </section>
+    <PublicLegalDocument
+      page="privacy"
+      heading="Privacy Policy"
+      onNavigate={onNavigate}
+      onOpenPortal={onOpenPortal}
+      intro={
+        <>
+          This policy explains how {PUBLIC_COMPANY_NAME} collects, uses and protects personal data, in line with the
+          UK GDPR and the Data Protection Act 2018. Write to us at{' '}
+          <LegalLink href={`mailto:${PUBLIC_PRIVACY_EMAIL}`}>{PUBLIC_PRIVACY_EMAIL}</LegalLink>.
+        </>
+      }
+      sections={sections}
+    />
   );
 }

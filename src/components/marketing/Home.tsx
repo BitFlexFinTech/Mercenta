@@ -109,8 +109,13 @@ function renderPublicPageBody(
   onNavigate: (p: PublicPage | null) => void,
   openPortal: () => void,
 ) {
-  if (page === 'privacy') return <PrivacyPolicy onBack={() => onNavigate(null)} />;
-  if (page === 'terms') return <TermsOfService onBack={() => onNavigate(null)} />;
+  /*
+    §B5 — the two legal documents now take the public shell (navigation, footer
+    and the shell theme) like every other public page, so they are handed the
+    same callbacks as their siblings instead of a lone "back" action.
+  */
+  if (page === 'privacy') return <PrivacyPolicy onNavigate={onNavigate} onOpenPortal={openPortal} />;
+  if (page === 'terms') return <TermsOfService onNavigate={onNavigate} onOpenPortal={openPortal} />;
   if (page === 'how-it-works') return (
     <Suspense fallback={<div className="min-h-screen bg-ink flex items-center justify-center"><p className="text-xs text-zinc-500">Loading...</p></div>}>
       <HowItWorks onNavigate={onNavigate as any} onOpenPortal={openPortal} />

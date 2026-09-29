@@ -646,6 +646,12 @@ try {
      * source/test file in NO declared set is still refused.
      */
     'src/components/marketing/CookieNotice.tsx',
+    /**
+     * §PUBLIC MESSAGING B5 (2026-09-29) — the shared shell for the two legal
+     * documents. Same mechanism, unweakened: a changed source/test file in NO
+     * declared set is still refused.
+     */
+    'src/components/marketing/PublicLegalDocument.tsx',
     'src/components/marketing/PrivacyPolicy.tsx',
     'src/components/marketing/TermsOfService.tsx',
     'scripts/validate-public-claims.mjs',

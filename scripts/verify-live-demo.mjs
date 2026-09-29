@@ -252,6 +252,15 @@ function readRedLines() {
     { path: '/uk-market-access', h1: 'uk market access' },
     { path: '/for-brands', h1: 'for brands' },
     { path: '/faq', h1: 'questions brands ask us' },
+    /**
+     * §B5 (2026-09-29) — the two legal documents joined the four marketing pages
+     * here. Until B5 they hardcoded the dark palette (so the light shell was
+     * ignored), carried no navigation or footer, hardcoded the company identity
+     * and its contact address, and published two red-line claims each. Every one
+     * of those properties is asserted below, against the DEPLOYED site.
+     */
+    { path: '/privacy', h1: 'privacy policy' },
+    { path: '/terms', h1: 'terms of service' },
   ];
 
   for (const meta of INNER_PAGES) {

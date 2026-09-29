@@ -1521,6 +1521,15 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
    * file) rather than left as an unexplained working-tree change.
    */
   'src/components/marketing/CookieNotice.tsx',
+  /**
+   * §PUBLIC MESSAGING B5 (2026-09-29) — the shared shell for the two legal
+   * documents (`PrivacyPolicy.tsx` + `TermsOfService.tsx`), so the chrome, the
+   * eyebrow and the revision date exist once instead of twice. A NEW file, so it
+   * is DECLARED here — and in the E7 guard's `PUBLIC_MESSAGING_DECLARED` — by the
+   * remedy both guards document, rather than left as an unexplained working-tree
+   * change.
+   */
+  'src/components/marketing/PublicLegalDocument.tsx',
   'src/components/marketing/PrivacyPolicy.tsx',
   'src/components/marketing/TermsOfService.tsx',
   'scripts/validate-public-claims.mjs',

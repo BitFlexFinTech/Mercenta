@@ -612,3 +612,23 @@ export const PUBLIC_COOKIE_NOTICE: PublicCookieNotice = {
 
 /** The heading of the notice's region, for assistive technology. */
 export const PUBLIC_COOKIE_NOTICE_REGION = 'Cookie notice';
+
+/* ── 14. The two legal pages' shared facts ─────────────────────────────────
+ * ADDED IN B5 (2026-09-29).
+ *
+ * The privacy policy and the terms are the last two public documents, and until
+ * B5 they were the only public surfaces holding their own copy of the company's
+ * identity: each retyped "Mercenta Partners Ltd", each retyped its contact
+ * address (`privacy@…` / `legal@…`), each dated itself "30 August 2026"
+ * independently, and each hardcoded the dark palette so the light shell was
+ * ignored. A change to the registered name or the domain could therefore leave
+ * the two documents disagreeing with the footer and with each other.
+ *
+ * Both now derive every company fact and both addresses from §7, and share ONE
+ * revision date. That date is the only fact this section adds — it must not
+ * exist twice, which is exactly the drift `publicCompanyLine()` was created to
+ * prevent for the identity.
+ */
+
+/** The revision date shown on both legal documents. One owner; both read it. */
+export const PUBLIC_LEGAL_LAST_UPDATED = '29 September 2026';

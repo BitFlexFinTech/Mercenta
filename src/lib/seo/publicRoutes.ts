@@ -35,7 +35,7 @@
  *   `src/components/marketing/Home.tsx`       — path ↔ public view mapping
  *   `scripts/validate-seo-foundation.mjs`     — pins robots.txt/sitemap.xml
  */
-import { BRAND_DOMAIN, BRAND_NAME } from '@/config/brand';
+import { BRAND_DOMAIN, BRAND_LEGAL_NAME, BRAND_NAME } from '@/config/brand';
 import { EXPLORE_UK_MARKET_FIT_PATH } from '@/config/ukMarketFit';
 
 /** The public page ids — the SAME union `PublicNav` renders. */
@@ -128,7 +128,14 @@ export const PUBLIC_ROUTES: readonly PublicRouteDefinition[] = [
     page: 'privacy',
     title: `Privacy Policy — ${BRAND_NAME}`,
     description:
-      'How Mercenta Partners Ltd collects, uses, shares and retains personal data, and the rights available under UK GDPR.',
+      /**
+       * §B5 (2026-09-29) — DERIVED, NOT RETYPED. This description used to spell
+       * out "Mercenta Partners Ltd" by hand, a second copy of a fact whose owner
+       * is `src/config/brand.ts` (and which `positioning.ts` §7 derives its own
+       * public company line from). The public surfaces are not allowed two
+       * spellings of the company's name, so the literal is gone.
+       */
+      `How ${BRAND_LEGAL_NAME} collects, uses, shares and retains personal data, and the rights available under UK GDPR.`,
     robots: 'index, follow',
     changefreq: 'monthly',
     priority: '0.6',
