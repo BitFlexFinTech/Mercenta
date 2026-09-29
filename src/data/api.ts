@@ -38,6 +38,12 @@ import {
   poNeedsAutoRejection,
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
+/**
+ * §BATCH 2c (`AV-024`) — the DERIVED revision position of a purchase order (whether
+ * the channel has cancelled it, and whether the brand's acknowledgement answers an
+ * EARLIER version of the order). One owner; the writer asks it, never re-derives.
+ */
+import { poRevisionState } from '@/lib/commerce/poRevisions';
 import {
   PO_ACK_AUTO_REJECT_REASON,
   PO_ACK_SYSTEM_ACTOR_ID,
@@ -992,6 +998,35 @@ export function acknowledgePurchaseOrder(
    */
   const isAmendment = Boolean(po.acknowledgedAt);
 
+  /**
+   * §BATCH 2c (`AV-024`) — THE CHANNEL'S VERSION OF THIS ORDER DECIDES TWO THINGS.
+   *
+   *   · `channelCancelled` — the channel cancelled the order, so NO acknowledgement
+   *     may be recorded against it (fail-closed: the order is not Mercenta's to
+   *     accept). The brand must not ship it, and the shipment gate refuses too.
+   *   · `acknowledgementStale` — a channel revision arrived AFTER the recorded
+   *     decision, so the brand's acknowledgement answers an EARLIER version of the
+   *     order. Answering the channel's current version is then REQUIRED, and the
+   *     declared 48-hour update window cannot be read as forbidding it: that window
+   *     governs what the VENDOR may still change, while this submission is the vendor
+   *     fulfilling *"the updated purchase order"* (`AV-024`). Without this, an order
+   *     the channel had changed could never be made shippable again — the opposite of
+   *     the documented obligation.
+   *
+   * Both facts are DERIVED from the recorded revisions (one owner), never re-read
+   * from a surface or a flag.
+   */
+  const revisionState = poRevisionState(po);
+  if (revisionState.channelCancelled) {
+    return {
+      ok: false,
+      error:
+        `The retail channel has CANCELLED order ${po.poNumber}, so it cannot be acknowledged. The cancellation ` +
+        `stands until the channel reinstates the order, and no shipment may be derived from it.`,
+    };
+  }
+  const answeringChannelRevision = revisionState.acknowledgementStale;
+
   const warnings: string[] = [];
 
   /**
@@ -1035,7 +1070,13 @@ export function acknowledgePurchaseOrder(
    * rather than a Mercenta invention — and because it is checked HERE, no alternate
    * path (admin on-behalf, simulation, a direct store call) can bypass it.
    */
-  if (isAmendment) {
+  /**
+   * §BATCH 2c (`AV-024`) — a submission that ANSWERS A CHANNEL REVISION is not
+   * judged by the 48-hour update window: that window governs what the VENDOR may
+   * still change of its own accord, and the channel's change set the new version
+   * this acknowledgement must answer (see the derivation above).
+   */
+  if (isAmendment && !answeringChannelRevision) {
     const amendmentBlock = amendmentRefusal(po, lineAcks, now);
     if (amendmentBlock) return { ok: false, error: amendmentBlock };
   }
@@ -1058,7 +1099,7 @@ export function acknowledgePurchaseOrder(
    * duplicate acknowledgement of the same PO is refused") is preserved, while a
    * genuine change now takes the amendment path above.
    */
-  if (isAmendment && amendedGroups.length === 0) {
+  if (isAmendment && amendedGroups.length === 0 && !answeringChannelRevision) {
     return {
       ok: false,
       error:
@@ -1185,6 +1226,15 @@ export function acknowledgePurchaseOrder(
    */
   if (isAmendment) po.lastAmendedAt = decidedAtIso;
   else po.acknowledgedAt = decidedAtIso;
+  /**
+   * §BATCH 2c (`AV-024`) — WHICH VERSION OF THE ORDER THIS DECISION ANSWERED.
+   *
+   * Recorded on EVERY decision (first or amendment), so a LATER channel revision
+   * makes the acknowledgement detectably STALE and a shipment derived from a stale
+   * acknowledgement can be refused. The number recorded is the order's version at
+   * the instant of the decision — the version the brand actually answered.
+   */
+  po.acknowledgedRevision = po.revisionNumber ?? 0;
   // Acknowledgment advances the workflow: any accepted/backordered volume
   // means accepted; an all-rejected PO means rejected.
   // §all-or-line-item-complete — acknowledgment must be all-or-line-item-complete:
@@ -1257,7 +1307,15 @@ export function acknowledgePurchaseOrder(
       (isAmendment
         ? `Timeliness: ${timeliness} against the ${PO_ACK_UPDATE_WINDOW_HOURS}-hour update window ` +
           `(closes ${updateWindow?.deadline ?? 'unreadable'}).`
-        : `Timeliness: ${timeliness} against the 24-hour acknowledgement window (deadline ${window.deadline ?? 'unreadable'}).`),
+        : `Timeliness: ${timeliness} against the 24-hour acknowledgement window (deadline ${window.deadline ?? 'unreadable'}).`) +
+      /**
+       * §BATCH 2c (`AV-024`) — the audit trail states, in words, that this decision
+       * answered a CHANNEL-ISSUED revision rather than the brand changing its own
+       * mind. The record is then unambiguous without diffing history.
+       */
+      (answeringChannelRevision
+        ? ` This decision answers channel revision ${revisionState.revisionNumber} of the order.`
+        : ''),
     metadata: {
       actorLabel,
       acceptedLines: acceptedLines.map((l) => l.sku),
@@ -1272,6 +1330,13 @@ export function acknowledgePurchaseOrder(
       updateWindowOpen: updateWindow?.open ?? false,
       updateDeadline: updateWindow?.deadline ?? null,
       changedGroups: amendedGroups,
+      /**
+       * §BATCH 2c (`AV-024`) — the version of the order the decision answered, and
+       * whether it answered a channel revision, so the audit can never confuse a
+       * brand amendment with a response to the channel's own change.
+       */
+      orderRevision: po.revisionNumber ?? 0,
+      answeringChannelRevision,
     },
   });
 
@@ -1828,6 +1893,38 @@ export function createShipmentForPO(
 
   // §11 — carrier is decided by the canonical routing rule, not by free choice.
   const brand = demoBrands.find((b) => b.id === po.brandId);
+
+  /**
+   * §BATCH 2c (`AV-024`) — A SUPERSEDED ORDER IS NEVER SHIPPED.
+   *
+   * The retail channel may change a purchase order after it is issued, and the
+   * vendor must fulfil the UPDATED one. If a revision arrived AFTER the brand's
+   * acknowledgement, that acknowledgement answers an EARLIER version of the order —
+   * and the documented risk in `AV-024` is exactly *"a brand could ship a superseded
+   * PO"*. Both refusals are DERIVED from the recorded revisions (one owner,
+   * `src/lib/commerce/poRevisions.ts`), so no surface and no flag can omit them, and
+   * a PO the channel never revised is unaffected.
+   */
+  const revisionState = poRevisionState(po);
+  if (revisionState.channelCancelled) {
+    return {
+      ok: false,
+      warnings,
+      error: `The retail channel has CANCELLED ${po.poNumber}, so no shipment may be derived from it.`,
+    };
+  }
+  if (revisionState.acknowledgementStale) {
+    return {
+      ok: false,
+      warnings,
+      error:
+        `The retail channel changed ${po.poNumber} after it was acknowledged (now revision ` +
+        `${revisionState.revisionNumber}). The acknowledgement answers an earlier version of the order, so no ` +
+        `shipment may be derived from it until the acknowledgement is updated — the updated purchase order is the ` +
+        `one that must be fulfilled.`,
+    };
+  }
+
   const carrierCheck = validateCarrierForShipment({
     carrier: asn.carrier,
     brandNation: brand?.nation,

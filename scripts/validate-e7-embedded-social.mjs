@@ -616,6 +616,54 @@ try {
   ];
 
   /**
+   * §BATCH 2c (2026-09-29) — the channel-revision phase's declared surface (see the
+   * note where it is spread below). NOTE: `src/lib/spapi/client.ts` is deliberately
+   * ABSENT until the Founder decides whether the channel's read shape may carry the
+   * two OPTIONAL fields the cancel/uncancel and order-type kinds need — that file is
+   * on the project's own PROTECTED list, so the decision is the Founder's, not mine.
+   */
+  const BATCH2C_PO_REVISION_DECLARED = [
+    'src/types.ts',
+    'src/config/purchaseOrders.ts',
+    'src/lib/commerce/poRevisions.ts',
+    'src/lib/commerce/channelPurchaseOrderIngestion.ts',
+    'src/lib/spapi/mockClient.ts',
+    'src/data/api.ts',
+    /**
+     * §BATCH 2c SURFACES (2026-09-29) — the two surfaces the phase requires and the
+     * console control that makes the channel event reachable from the product (see the
+     * fuller note in `validate-e6-brand-surfaces.mjs` §BATCH2C_PO_REVISION_SCOPE).
+     */
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'src/components/admin/AdminPurchaseOrderDetail.tsx',
+    'src/components/admin/AdminPurchaseOrderList.tsx',
+    'e2e/po-revision-surfaces.spec.ts',
+    'scripts/verify-live-demo.mjs',
+    'scripts/validate-po-revision-ingestion.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+  /**
+   * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
+   * rule already existed and was still not followed; this phase makes it checkable.
+   */
+  const PLAIN_ENGLISH_ENFORCEMENT_DECLARED = [
+    'scripts/check-plain-english.mjs',
+    'scripts/validate-plain-english-enforcement.mjs',
+    'scripts/validate-rules-application.mjs',
+    '.clinerules/plain-english-responses.md',
+    '.clinerules/project-state-contract.md',
+    '.clinerules/operating-model.md',
+    '.clinerules/protection-rules.md',
+    'PROJECT_STATUS.md',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+  /**
    * §PUBLIC MESSAGING BATCH (2026-09-28) — the public-surfaces batch's declared
    * surface. It gives the public message ONE owner (`src/config/positioning.ts`),
    * rewrites the eight public pages around the OUTCOME for the brand instead of
@@ -1586,6 +1634,24 @@ try {
      * §BATCH 2b — the PO amendment-window phase's declared surface (see above).
      */
     ...BATCH2B_AMENDMENT_WINDOW_DECLARED,
+    /**
+     * §BATCH 2c (2026-09-29) — the channel-revision phase's declared surface: the
+     * retail channel may change a purchase order after it is issued and the vendor
+     * must fulfil the UPDATED one (`AV-024`). One pure owner derives the revision
+     * (`src/lib/commerce/poRevisions.ts`), the ingestion owner records it, the
+     * acknowledgement writer records which version the brand answered, and a
+     * shipment against a SUPERSEDED acknowledgement is refused. Same mechanism as
+     * every phase above: a changed source/test file outside EVERY declared set is
+     * still refused.
+     */
+    ...BATCH2C_PO_REVISION_DECLARED,
+    /**
+     * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
+     * rule already existed and was still not followed, so this phase makes it
+     * CHECKABLE: a jargon checker, a gate that fails when the rule is missing or has
+     * drifted, and a mandatory owner-facing summary in `PROJECT_STATUS.md`.
+     */
+    ...PLAIN_ENGLISH_ENFORCEMENT_DECLARED,
     /**
      * §PUBLIC MESSAGING — the public-surfaces batch's declared surface (see above).
      */

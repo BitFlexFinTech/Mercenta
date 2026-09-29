@@ -31,8 +31,19 @@ import {
 /**
  * §BATCH 2b (`AV-006`) — the channel's 48-hour UPDATE rule is rendered from its ONE
  * owner; the surface never re-types the window.
+ *
+ * §BATCH 2c (`AV-024`) — the CHANNEL's own change of an order is a different fact
+ * from a brand amendment, so its rule statement and its change labels come from the
+ * same owner too. The brand is told which version of the order it is working from,
+ * what the channel changed, and whether its acknowledgement must be brought up to
+ * the updated order — never re-derived on this surface.
  */
-import { PO_AMENDMENT_WINDOW_RULE_TEXT } from '@/config/purchaseOrders';
+import {
+  PO_AMENDMENT_WINDOW_RULE_TEXT,
+  PO_CHANNEL_CHANGE_KIND_LABELS,
+  PO_REVISION_RULE_TEXT,
+} from '@/config/purchaseOrders';
+import { poRevisionState } from '@/lib/commerce/poRevisions';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import {
   instructionLineFor,
@@ -760,6 +771,12 @@ export function BrandPurchaseOrders() {
                 </div>
               </div>
 
+              {/* §BATCH 2c (`AV-024`) — the retail CHANNEL changed this order. The
+                  notice is on the order itself (not behind a control), because the
+                  brand must know which version it is working from before it decides
+                  anything. It renders nothing for an unrevised order. */}
+              <ChannelRevisionNotice po={po} />
+
               {/* Inline brand communication (shared layer, same thread as Messages Hub) */}
               {contactingPO?.id === po.id && (
                 <div className="mt-3 pt-3 border-t border-white/[0.05]">
@@ -1313,6 +1330,87 @@ export function BrandPurchaseOrders() {
   );
 }
 
+/* ── CHANNEL-ISSUED REVISION NOTICE (§BATCH 2c / `AV-024`) ──────────────────
+ *
+ * A channel-issued revision is the RETAIL CHANNEL changing the ORDER. It is not a
+ * brand amendment to its own acknowledgement (`AV-006`), so the brand must be told:
+ *
+ *   · which VERSION of the order it is working from (`poRevisionState`, the ONE
+ *     owner of that answer — never re-derived here);
+ *   · exactly what changed, labelled from the ONE change-kind map;
+ *   · when the channel's change undercut a decision the brand had already recorded,
+ *     that Mercenta's own review flag applies and the acknowledgement must be
+ *     brought up to the updated order before anything can ship;
+ *   · and the rule itself, rendered from `PO_REVISION_RULE_TEXT`.
+ *
+ * It renders NOTHING when the channel has never changed the order, so no brand is
+ * ever shown an empty notice. Pure and module-level (no hooks).
+ */
+function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
+  const state = poRevisionState(po);
+  if (state.revisionNumber === 0) return null;
+  const latest = state.latest;
+  return (
+    <div
+      className="mt-3 rounded-lg border border-sky-500/20 bg-sky-500/10 p-3"
+      data-testid={`po-revision-notice-${po.poNumber}`}
+    >
+      <p className="text-ds-label text-sky-200">
+        The retail channel changed this purchase order — you are working from version{' '}
+        {state.revisionNumber} of it.
+      </p>
+      {state.channelCancelled && (
+        <p
+          className="mt-1 text-ds-label text-red-300"
+          data-testid={`po-revision-cancelled-${po.poNumber}`}
+        >
+          The retail channel cancelled this order.
+        </p>
+      )}
+      {latest && latest.changes.length > 0 && (
+        <ul className="mt-1.5 space-y-0.5" data-testid={`po-revision-changes-${po.poNumber}`}>
+          {latest.changes.map((change, index) => (
+            <li
+              key={`${change.kind}-${change.subject}-${index}`}
+              className="text-ds-micro text-sky-100/80"
+            >
+              {PO_CHANNEL_CHANGE_KIND_LABELS[change.kind]} — {change.detail}
+            </li>
+          ))}
+        </ul>
+      )}
+      {latest && latest.changes.length === 0 && (
+        <p className="mt-1.5 text-ds-micro text-sky-100/80">
+          {latest.changeKinds.map((kind) => PO_CHANNEL_CHANGE_KIND_LABELS[kind]).join(' · ')}
+        </p>
+      )}
+      {latest?.reviewReason && (
+        <p
+          className="mt-1.5 text-ds-micro text-amber-300"
+          data-testid={`po-revision-review-${po.poNumber}`}
+        >
+          {latest.reviewReason}
+        </p>
+      )}
+      {state.acknowledgementStale && (
+        <p
+          className="mt-1.5 text-ds-micro text-amber-300"
+          data-testid={`po-revision-stale-${po.poNumber}`}
+        >
+          Your acknowledgement answers an earlier version of this order, so it must be updated
+          before this order can be shipped.
+        </p>
+      )}
+      <p
+        className="mt-1.5 text-ds-micro text-sky-200/70"
+        data-testid={`po-revision-rule-${po.poNumber}`}
+      >
+        {PO_REVISION_RULE_TEXT}
+      </p>
+    </div>
+  );
+}
+
 /* ── RECORD PREVIEW BODY ────────────────────────────────────────────────────
  * Only the sections a brand-owned purchase order genuinely supports. No
  * cross-tenant data and no admin-only fields are exposed here.
@@ -1373,6 +1471,10 @@ function BrandPoPreviewBody({
           </span>
         )}
       </div>
+
+      {/* §BATCH 2c (`AV-024`) — the preview states the same channel revision the row
+          does, so the record the brand opens cannot omit it. */}
+      <ChannelRevisionNotice po={po} />
 
       <RecordFieldList
         fields={[

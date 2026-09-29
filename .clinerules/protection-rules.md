@@ -1,4 +1,8 @@
 > ## ⚠ AUTHORITY ORDER (2026-09-21 rule migration · updated 2026-09-22)
+> **PLAIN ENGLISH IS A HARD STOP (installed 2026-09-29) — read `.clinerules/plain-english-responses.md`
+> and obey it in EVERY message to the Founder, including questions and option lists. An unexplained
+> technical word is a FAILED task. It outranks all brevity/budget guidance.**
+
 > 1. The CURRENT Founder execution directive for this session.
 > 2. **`.clinerules/operating-model.md`** — the canonical operating model (scope authority, COMMIT/DEPLOY
 >    definitions, the mandatory delivery chain, the genuine hard stops) **and §10/§11 — the ONE completion

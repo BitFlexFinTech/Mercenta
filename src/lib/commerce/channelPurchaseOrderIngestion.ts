@@ -47,12 +47,30 @@
  * P12 built that read (`src/lib/commerce/channelReceivingSync.ts`). This module
  * still makes NO channel-status claim of its own: ingestion routes the PO from its
  * own lines, and the channel's status is read by that separate owner.
+ *
+ * §BATCH 2c (`AV-024`) — REPOINTED (old contract recorded). This module's re-read
+ * branch used to report `already_present` and change NOTHING, whatever the channel
+ * said, which is now known to be wrong: the retail channel can change a purchase
+ * order after it is issued and the vendor is required to fulfil the UPDATED one
+ * (register `AV-024`), so a changed order kept its SUPERSEDED quantities and a
+ * brand could ship a superseded purchase order. A polled read is now COMPARED
+ * against the held record and a documented change is recorded as a channel-issued
+ * REVISION (`src/lib/commerce/poRevisions.ts`), audited as `po_revision_received`,
+ * idempotent by CONTENT — a replay of the same channel read finds no change and
+ * records nothing — and refused outright when the changed order no longer routes or
+ * would move between tenants. The counter `revised` was added for it;
+ * `ingested`/`alreadyPresent`/`refused` keep their existing meanings, so no existing
+ * consumer's number changes meaning.
  */
 import type { PurchaseOrder, ShipToParty } from '@/types';
 import { demoAuditLog, demoPurchaseOrders } from '@/data/demoStore';
 import { COMMISSION_RATE_PLACEHOLDER } from '@/config/commercial';
 import { fcByCode } from '@/config/destinationFc';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
+import {
+  applyChannelPoRevision,
+  deriveChannelPoRevision,
+} from '@/lib/commerce/poRevisions';
 import type {
   ChannelPurchaseOrder,
   ChannelPurchaseOrderReadResult,
@@ -140,7 +158,12 @@ export interface ChannelPoReader {
 
 export interface ChannelIngestionOutcome {
   channelPurchaseOrderId: string;
-  status: 'ingested' | 'already_present' | 'refused';
+  status:
+    | 'ingested'
+    /** §BATCH 2c (`AV-024`) — the channel CHANGED an order this record already held. */
+    | 'revised'
+    | 'already_present'
+    | 'refused';
   /** The tenant the PO was routed to, or null when it was refused. */
   brandId: string | null;
   reason?: string;
@@ -159,6 +182,12 @@ export interface ChannelIngestionResult {
   ingested: number;
   alreadyPresent: number;
   refused: number;
+  /**
+   * §BATCH 2c (`AV-024`) — how many CHANNEL-ISSUED REVISIONS this read recorded. A
+   * replay of the same channel read records nothing (the record already matches the
+   * channel's read), so this can never count the same change twice.
+   */
+  revised: number;
   outcomes: ChannelIngestionOutcome[];
   error?: string;
 }
@@ -229,6 +258,16 @@ function buildPurchaseOrder(
     })),
     /** Truthful provenance — present only when the seam says it was simulated. */
     ...(channelPo.simulated ? { mode: 'simulation' as const, simulated: true } : {}),
+    /**
+     * §BATCH 2c (`AV-024`) — the channel's declared BASELINE, recorded at ingestion
+     * so a later poll compares against what the channel actually said rather than
+     * against an absent value. `revisionNumber` starts at 0: the channel has
+     * changed nothing since Mercenta filed this order.
+     */
+    revisionNumber: 0,
+    ...(channelPo.orderType
+      ? { channelOrderType: channelPo.orderType }
+      : {}),
     /** Retained so no surface has to re-derive when the PO arrived. */
     receivedAt: now.toISOString(),
   };
@@ -256,6 +295,7 @@ export async function ingestChannelPurchaseOrders(input: {
       ingested: 0,
       alreadyPresent: 0,
       refused: 0,
+      revised: 0,
       outcomes: [],
       error:
         read.error ??
@@ -274,12 +314,107 @@ export async function ingestChannelPurchaseOrders(input: {
      */
     const existing = demoPurchaseOrders.find((p) => p.poNumber === channelPo.purchaseOrderId);
     if (existing) {
+      /**
+       * §BATCH 2c (`AV-024`) — THE CHANNEL MAY HAVE CHANGED THIS ORDER.
+       *
+       * §BATCH 2c — REPOINTED (old contract recorded): this branch reported
+       * `already_present` and changed NOTHING, whatever the channel now said. The
+       * retail channel can change a purchase order after it is issued and the
+       * vendor is required to fulfil the UPDATED one (register `AV-024`), so that
+       * behaviour silently kept the SUPERSEDED quantities — a brand could ship a
+       * superseded purchase order. The read is now COMPARED against the record and
+       * a documented change is recorded as a channel-issued REVISION.
+       *
+       * FAIL CLOSED: a changed read that no longer routes, or that routes to a
+       * DIFFERENT tenant, is refused and the held order is left exactly as it is.
+       * A channel order is one brand's order and never moves between tenants.
+       */
+      const verdict = routeChannelPurchaseOrder(channelPo, input.catalogue);
+      if (!verdict.ok) {
+        outcomes.push({
+          channelPurchaseOrderId: channelPo.purchaseOrderId,
+          status: 'refused',
+          brandId: null,
+          reason: `${verdict.reason} The order already held is left exactly as it is.`,
+        });
+        continue;
+      }
+      if (verdict.brandId !== existing.brandId) {
+        outcomes.push({
+          channelPurchaseOrderId: channelPo.purchaseOrderId,
+          status: 'refused',
+          brandId: null,
+          reason:
+            `${channelPo.purchaseOrderId} is held for ${existing.brandId}, but the channel's read now routes to ` +
+            `${verdict.brandId} — a channel order is one brand's order and never moves between tenants. Held for ` +
+            `Mercenta review; nothing was changed.`,
+        });
+        continue;
+      }
+
+      const now = clock();
+      const derived = deriveChannelPoRevision(existing, channelPo, now.toISOString());
+      if (!derived.ok) {
+        if (derived.code === 'CHANNEL_REVISION_UNCHANGED') {
+          outcomes.push({
+            channelPurchaseOrderId: channelPo.purchaseOrderId,
+            status: 'already_present',
+            brandId: existing.brandId,
+            po: existing,
+            reason:
+              `${channelPo.purchaseOrderId} is already held for ${existing.brandId} at version ` +
+              `${existing.revisionNumber ?? 0} — the channel's read carries no change against it.`,
+          });
+        } else {
+          outcomes.push({
+            channelPurchaseOrderId: channelPo.purchaseOrderId,
+            status: 'refused',
+            brandId: null,
+            reason: derived.reason,
+          });
+        }
+        continue;
+      }
+
+      const revision = derived.revision;
+      /**
+       * NO SEPARATE REPLAY GUARD IS NEEDED — and one would be harmful. Applying a
+       * revision leaves the record matching the channel's read, so a replay finds no
+       * change and reports `already_present`; a guard keyed on the digest would
+       * instead SKIP a genuine re-read of an earlier snapshot and leave the record
+       * holding a superseded version, which is the defect `AV-024` is about.
+       */
+      applyChannelPoRevision(existing, revision, channelPo);
+      notifyCanonicalStoreChange();
+      demoAuditLog.push({
+        id: `audit-${now.getTime()}-${Math.random().toString(36).slice(2, 6)}`,
+        createdAt: now.toISOString(),
+        actorId: input.actorId,
+        action: 'po_revision_received',
+        entityType: 'purchase_order',
+        entityId: existing.id,
+        brandId: existing.brandId,
+        reason:
+          `${input.actorId}: the retail channel changed ${channelPo.purchaseOrderId} — revision ` +
+          `${revision.revisionNumber} recorded (${revision.changeKinds.join(', ')})${revision.simulated ? '. Simulated channel read; no live channel call was made.' : '.'}`,
+        metadata: {
+          actorId: input.actorId,
+          channelSource: CHANNEL_PO_SOURCE,
+          revisionNumber: revision.revisionNumber,
+          revisionDigest: revision.digest,
+          changeKinds: revision.changeKinds,
+          previousPoValue: revision.previousPoValue,
+          newPoValue: revision.newPoValue,
+          undercutsAcknowledgement: revision.undercutsAcknowledgement,
+          simulated: revision.simulated,
+        },
+      });
       outcomes.push({
         channelPurchaseOrderId: channelPo.purchaseOrderId,
-        status: 'already_present',
+        status: 'revised',
         brandId: existing.brandId,
         po: existing,
-        reason: `${channelPo.purchaseOrderId} is already held for ${existing.brandId} — a channel purchase order cannot be ingested twice.`,
+        reason: `${channelPo.purchaseOrderId}: revision ${revision.revisionNumber} recorded — ${revision.changeKinds.join(', ')}.`,
       });
       continue;
     }
@@ -341,6 +476,12 @@ export async function ingestChannelPurchaseOrders(input: {
     ingested: outcomes.filter((o) => o.status === 'ingested').length,
     alreadyPresent: outcomes.filter((o) => o.status === 'already_present').length,
     refused: outcomes.filter((o) => o.status === 'refused').length,
+    /**
+     * §BATCH 2c (`AV-024`) — a channel-issued revision is counted SEPARATELY from an
+     * ingestion, so a read's report can never present a revised order as a new one
+     * (or hide the change inside `already_present`).
+     */
+    revised: outcomes.filter((o) => o.status === 'revised').length,
     outcomes,
   };
 }

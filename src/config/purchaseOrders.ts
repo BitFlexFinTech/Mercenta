@@ -36,7 +36,13 @@
  *      three reasons: `TemporarilyUnavailable` · `InvalidProductIdentifier` ·
  *      `ObsoleteProduct`.
  */
-import { PO_REJECTION_CODES, type PoRejectionCode, type PurchaseOrderStatus } from '@/types';
+import {
+  PO_CHANNEL_CHANGE_KINDS,
+  PO_REJECTION_CODES,
+  type PoChannelChangeKind,
+  type PoRejectionCode,
+  type PurchaseOrderStatus,
+} from '@/types';
 
 /**
  * AMAZON-DOCUMENTED — the acknowledgement window. Deadline = `orderDate + 24h`.
@@ -170,6 +176,66 @@ export const PO_ACK_STATUSES_WITH_OBLIGATION: readonly PurchaseOrderStatus[] = [
 /** Amazon's own PO lifecycle vocabulary, as derived for a Mercenta PO. */
 export const PO_CHANNEL_STATES = ['new', 'acknowledged', 'closed', 'unknown'] as const;
 export type PoChannelState = (typeof PO_CHANNEL_STATES)[number];
+
+/**
+ * §BATCH 2c (`AV-024`) — THE ONE PLACE THE CHANNEL'S CHANGE LIST IS LABELLED.
+ *
+ * The vocabulary itself is declared in `src/types.ts`
+ * (`PO_CHANNEL_CHANGE_KINDS`) because it is the CHANNEL's own, exactly like
+ * `PO_REJECTION_CODES`; this config attaches the operator-readable label for each
+ * kind, so a surface or an audit line never invents its own wording. The guard
+ * below fails at module load if the two ever drift apart.
+ */
+export const PO_CHANNEL_CHANGE_KIND_LABELS: Record<PoChannelChangeKind, string> = {
+  window: 'ship / delivery window',
+  quantity: 'ordered quantity',
+  item_cancellation: 'a line the channel removed',
+  cost: 'unit cost price',
+  new_item: 'a line the channel added',
+  cancel: 'cancellation of the order',
+  uncancel: 'reinstatement of the order',
+  order_type: 'order type',
+  destination_fc: 'destination fulfilment centre',
+  freight_term: 'freight term',
+};
+
+for (const kind of PO_CHANNEL_CHANGE_KINDS) {
+  if (!PO_CHANNEL_CHANGE_KIND_LABELS[kind]) {
+    throw new Error(
+      `[purchaseOrders] the channel's change kind "${kind}" has no declared label. Every documented change ` +
+        `kind must be labelled once, here, so no surface invents its own wording.`
+    );
+  }
+}
+
+/**
+ * §BATCH 2c (`AV-024`) — THE ONE OPERATOR-FACING STATEMENT OF THE REVISION RULE.
+ *
+ * The retail channel may change a purchase order after it has been issued, and
+ * the vendor is required to fulfil the UPDATED purchase order; Mercenta discovers
+ * a change by polling the channel's order read. Surfaces render THIS string
+ * instead of writing their own copy, so the rule cannot drift between the brand
+ * portal and the admin console. Wording-safe: it states the documented obligation
+ * and claims no channel relationship, permission or outcome.
+ */
+export const PO_REVISION_RULE_TEXT =
+  'When a purchase order has been issued the retail channel can still change it — the order window, the ordered ' +
+  'quantity, a line, the cost price, the destination or the freight term. The updated purchase order is the one ' +
+  'that must be fulfilled, so Mercenta records every change and shows you which version of the order you are ' +
+  'working from.';
+
+/**
+ * §BATCH 2c (`AV-024`) — MERCENTA'S OWN review flag (labelled as Mercenta's, never
+ * as a channel rule), stated only when a channel change undercut a decision the
+ * brand had already made. The updated order still stands; the acknowledgement
+ * must be brought up to it before any shipment is derived from the record.
+ */
+export const PO_REVISION_REVIEW_REASON =
+  'Mercenta review required: the channel changed this order in a way that undercuts the acknowledgement already ' +
+  'recorded — a quantity reduced below the acknowledged units, a cancelled line that had been acknowledged, or ' +
+  'cancellation of the order. The updated order stands, and the acknowledgement must be updated before any ' +
+  'shipment is derived from this purchase order.';
+
 
 /**
  * THE ONE OPERATOR-FACING STATEMENT OF THE WINDOW RULE. Surfaces render this

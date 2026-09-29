@@ -133,6 +133,8 @@ const OPS_REFUSALS = {
     'INVENTORY_QUANTITY_INVALID — a pushed quantity must be a number that is zero or greater.',
   inventoryUnitUndeclared:
     'INVENTORY_UNIT_UNDECLARED — a push must declare the unit of measure (Eaches/Cases).',
+  poRevisionUnknown:
+    'CHANNEL_PO_UNKNOWN — the simulated channel does not hold that purchase order (AV-024).',
 } as const;
 
 interface MockShipmentRequest {
@@ -162,6 +164,18 @@ let invoiceCounter = 0;
 
 let inventoryUpdateCounter = 0;
 
+/**
+ * §BATCH 2c (`AV-024`) — the simulated channel's ORDER SET is now its LIVE state,
+ * not a fixed list: the channel can change an order after it is issued (that is the
+ * whole point of `AV-024`), so a simulated revision must be able to alter it. The
+ * BASELINE below is the only thing that never changes, and `resetMockAmazonState()`
+ * restores the live set from it.
+ */
+const clonePoPool = (pool: readonly ChannelPurchaseOrder[]): ChannelPurchaseOrder[] =>
+  pool.map((po) => ({ ...po, lines: po.lines.map((l) => ({ ...l })) }));
+
+let mockPoPool: ChannelPurchaseOrder[] = [];
+
 export function resetMockAmazonState(): void {
   submissions.clear();
   submissionCounter = 0;
@@ -173,6 +187,13 @@ export function resetMockAmazonState(): void {
   usedInvoiceNumbers.clear();
   invoiceCounter = 0;
   inventoryUpdateCounter = 0;
+  /**
+   * §BATCH 2c (`AV-024`) — the simulated channel's CURRENT order set is restored
+   * from its baseline, so a simulated revision issued in one run can never leak into
+   * the next. Before this the pool was static and immutable; it is now the channel's
+   * live set, and the baseline is the only thing that is fixed.
+   */
+  mockPoPool = clonePoPool(MOCK_PO_BASELINE);
 }
 
 /** The padded simulated reference helper (one form, so ids cannot drift apart). */
@@ -239,10 +260,17 @@ function simulatedChannelPo(input: {
       : { deliveryWindowStart: iso(21), deliveryWindowEnd: iso(28) }),
     lines,
     simulated: true,
+    /**
+     * §BATCH 2c (`AV-024`) — the channel's own order STATE and TYPE, so a simulated
+     * revision of either is representable and a real read that carries neither is
+     * still honest (both fields are optional by design).
+     */
+    channelStatus: 'open',
+    orderType: 'PO',
   };
 }
 
-const MOCK_PO_POOL: ChannelPurchaseOrder[] = [
+const MOCK_PO_BASELINE: ChannelPurchaseOrder[] = [
   simulatedChannelPo({
     purchaseOrderId: 'MOCK-PO-8841',
     brandId: 'brand-astonish',
@@ -280,6 +308,93 @@ const MOCK_PO_POOL: ChannelPurchaseOrder[] = [
     simulated: true,
   },
 ];
+/** The channel's LIVE order set, initialised from the baseline. */
+mockPoPool = clonePoPool(MOCK_PO_BASELINE);
+
+/** Why a simulated revision could not be issued. A stated code, never free text. */
+export type MockChannelPoRevisionRefusal = 'CHANNEL_PO_UNKNOWN';
+
+/**
+ * §BATCH 2c (`AV-024`) — THE SIMULATED CHANNEL CHANGES ONE OF ITS ORDERS.
+ *
+ * The retail channel can change a purchase order after it is issued and the vendor
+ * must fulfil the UPDATED one (register `AV-024`); this is that event, simulated.
+ * It is the ONLY way the revision path is reachable from the product, and it follows
+ * the standing mock-first rules: deterministic, in-memory, ZERO live network calls,
+ * unmistakably simulated (`MOCK-PO-…`), and honestly labelled — the record it
+ * produces carries `simulated: true`.
+ *
+ * `resetMockAmazonState()` restores the baseline, so a revision issued in one run
+ * never leaks into the next.
+ *
+ * Deliberately NOT a random mutation: the caller states what the channel does, so a
+ * validator can pin each documented change kind instead of hoping to hit it.
+ */
+export function simulateMockChannelPoRevision(
+  purchaseOrderId: string,
+  options: {
+    /** Reduce this line's ordered units (default: the order's first line). */
+    vendorSku?: string;
+    /** Units the channel removes (default: a quarter of the ordered units, at least 1). */
+    reduceBy?: number;
+    /** Remove this line from the order entirely (the channel's item cancellation). */
+    cancelLine?: string;
+    /** Cancel the whole order (the channel's cancel). */
+    cancelOrder?: boolean;
+  } = {}
+): { ok: boolean; error?: string; revision?: ChannelPurchaseOrder } {
+  const index = mockPoPool.findIndex((po) => po.purchaseOrderId === purchaseOrderId);
+  if (index === -1) {
+    return {
+      ok: false,
+      error: `${OPS_REFUSALS.poRevisionUnknown} (${purchaseOrderId})`,
+    };
+  }
+  const current = mockPoPool[index];
+
+  if (options.cancelOrder) {
+    const revision: ChannelPurchaseOrder = { ...current, channelStatus: 'cancelled' };
+    mockPoPool = mockPoPool.map((po, i) => (i === index ? revision : po));
+    return { ok: true, revision };
+  }
+
+  const target = options.vendorSku ?? current.lines[0]?.vendorSku;
+  const nextLines = current.lines
+    .filter((l) => l.vendorSku !== options.cancelLine)
+    .map((l) => {
+      if (l.vendorSku !== target) return { ...l };
+      const removed = options.reduceBy ?? Math.max(1, Math.floor(l.quantity / 4));
+      return { ...l, quantity: Math.max(0, l.quantity - removed) };
+    });
+
+  /**
+   * The channel's window moves WITH the change, so `window` is genuinely detected.
+   *
+   * §BATCH 2c (`AV-024`) — DEFECT FIXED AT SOURCE. This previously mapped BOTH
+   * boundaries onto the same fixed date (`orderDate + 28 days`), which collapsed the
+   * order's window to a single day — a revision no real channel would issue, and a
+   * change whose detail read `2026-10-17 … 2026-10-24 → 2026-10-24 … 2026-10-24`.
+   * Both boundaries now shift by the SAME 14 days, so the window keeps its length and
+   * only its dates move. The gate pins the preserved length.
+   */
+  const moved = (iso: string | undefined) =>
+    iso === undefined
+      ? undefined
+      : new Date(new Date(iso).getTime() + 14 * 864e5).toISOString().slice(0, 10);
+  const revision: ChannelPurchaseOrder = {
+    ...current,
+    lines: nextLines,
+    ...(current.freightTerm === 'collect'
+      ? { shipWindowStart: moved(current.shipWindowStart), shipWindowEnd: moved(current.shipWindowEnd) }
+      : {
+          deliveryWindowStart: moved(current.deliveryWindowStart),
+          deliveryWindowEnd: moved(current.deliveryWindowEnd),
+        }),
+  };
+  mockPoPool = mockPoPool.map((po, i) => (i === index ? revision : po));
+  return { ok: true, revision };
+}
+
 
 function delay(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
@@ -353,7 +468,7 @@ export function createMockSpApiClient(_transport?: FetchLike) {
      */
     async fetchPurchaseOrders(_sinceIso: string): Promise<ChannelPurchaseOrderReadResult> {
       await delay(150);
-      return { ok: true, purchaseOrders: MOCK_PO_POOL.slice() };
+      return { ok: true, purchaseOrders: mockPoPool.slice() };
     },
 
     async confirmShipment(_purchaseOrderId: string): Promise<{
@@ -413,7 +528,7 @@ export function createMockSpApiClient(_transport?: FetchLike) {
       const ids = purchaseOrderIds.map((v) => v.trim()).filter(Boolean);
       if (ids.length === 0) return { ok: false, error: OPS_REFUSALS.statusIdsEmpty };
 
-      const known = new Map(MOCK_PO_POOL.map((po) => [po.purchaseOrderId, po]));
+      const known = new Map(mockPoPool.map((po) => [po.purchaseOrderId, po]));
       const statuses: NonNullable<ChannelPurchaseOrdersStatusResult['statuses']> = [];
       const unknownPurchaseOrderIds: string[] = [];
 

@@ -546,6 +546,67 @@ const isProjectStateDoc = (p) =>
 
 
 /** Paths that must never appear in the E6 change set. */
+const BATCH2C_PO_REVISION_SCOPE = new Set([
+  'src/types.ts',                                  /* PROTECTED prefix — the revision SHAPES + the channel's change vocabulary */
+  'src/config/purchaseOrders.ts',                   /* the labels + the ONE operator statement */
+  'src/lib/commerce/poRevisions.ts',                /* NEW — the ONE owner of a channel-issued revision */
+  'src/lib/commerce/channelPurchaseOrderIngestion.ts', /* the ONE writer that records it */
+  'src/lib/spapi/mockClient.ts',                    /* mock-first: the simulated channel issues a revision */
+  'src/data/api.ts',                                /* the acknowledgement writer + the SUPERSEDED-PO shipment refusal */
+  'scripts/validate-po-revision-ingestion.mjs',     /* NEW — this phase's gate */
+  /**
+   * §BATCH 2c SURFACES (2026-09-29) — the two surfaces the phase requires, plus the
+   * console control that makes the channel event REACHABLE from the product:
+   *   · `BrandPurchaseOrders.tsx` — the brand's notice on the order itself (which
+   *     version it is working from, what the channel changed, whether its
+   *     acknowledgement must be updated), derived from the ONE owner.
+   *   · `AdminPurchaseOrderDetail.tsx` — every recorded revision with its change list
+   *     and Mercenta's review flag when a decision was undercut.
+   *   · `AdminPurchaseOrderList.tsx` — the honestly-labelled simulated channel change
+   *     (mock-first), refused unless a SIMULATED channel read is active.
+   *   · `poRevisions.ts` / `mockClient.ts` are already declared above; the change-detail
+   *     wording and the simulated window shift were FIXED AT SOURCE here (the detail
+   *     repeated its own kind label; the window collapsed to a single day).
+   */
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'src/components/admin/AdminPurchaseOrderDetail.tsx',
+  'src/components/admin/AdminPurchaseOrderList.tsx',
+  'e2e/po-revision-surfaces.spec.ts',               /* NEW — the browser proof of both surfaces */
+  'scripts/verify-live-demo.mjs',                   /* L15 — the SAME flow driven on the deployed site */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+/**
+ * §PLAIN-ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the rule that asks for
+ * plain English already existed and was still not followed, so the owner was offered a
+ * decision in words they could not evaluate and the work stopped. This phase turns the
+ * rule into something the build CHECKS: a jargon checker the owner-facing summary must
+ * pass, and a gate that fails if the rule is missing from any folder the assistant
+ * reads, if those copies drift apart, or if the hard-stop wording is removed.
+ *
+ * Declared set: the two new scripts, the rule file itself (kept in the project so it
+ * cannot be lost), the state contract that names the new mandatory field, and the
+ * phases' own scope guards.
+ */
+const PLAIN_ENGLISH_ENFORCEMENT_SCOPE = new Set([
+  'scripts/check-plain-english.mjs',                /* NEW — the jargon checker */
+  'scripts/validate-plain-english-enforcement.mjs', /* NEW — the gate */
+  'scripts/validate-rules-application.mjs',         /* NEW — the ALL-RULES gate (Founder directive) */
+  '.clinerules/plain-english-responses.md',         /* the rule, kept in the project */
+  '.clinerules/project-state-contract.md',          /* the new mandatory field is declared there */
+  '.clinerules/operating-model.md',
+  '.clinerules/protection-rules.md',
+  'PROJECT_STATUS.md',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+
+/* ── the modules under test ───────────────────────────────────────────────── */
+
 const PROTECTED_PREFIXES = [
   'src/lib/intelligence/',
   'src/lib/postiz/',
@@ -1679,6 +1740,13 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
         [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — the public-surfaces batch's declared scope (see above). */
+        /** §BATCH 2c — the channel-revision phase's declared surface (see above). */
+        BATCH2C_PO_REVISION_SCOPE.has(p) ||
+        [...BATCH2C_PO_REVISION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
+        PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
+        [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
@@ -1714,6 +1782,13 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2b — same declaration, second protected-path check (F5b). */
         BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
         [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2c — same declaration, second protected-path check (F5b). */
+        BATCH2C_PO_REVISION_SCOPE.has(p) ||
+        [...BATCH2C_PO_REVISION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PLAIN ENGLISH ENFORCEMENT — same declaration, second protected-path check (F5b). */
+        PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
+        [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -1976,6 +2051,13 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2b — the PO amendment-window phase (see above). */
           BATCH2B_AMENDMENT_WINDOW_SCOPE.has(p) ||
           [...BATCH2B_AMENDMENT_WINDOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2c — the channel-revision phase's declared surface (see above). */
+          BATCH2C_PO_REVISION_SCOPE.has(p) ||
+          [...BATCH2C_PO_REVISION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
+          PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
+          [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

@@ -20,6 +20,17 @@ import {
   poNeedsAutoRejection,
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
+/**
+ * §BATCH 2c (`AV-024`) — the CHANNEL-ISSUED revision position of this order is read
+ * from its ONE owner (`poRevisionState`) and the rule/labels from the config, exactly
+ * as the brand surface does. The console never re-derives the version and never
+ * re-types the obligation.
+ */
+import { poRevisionState } from '@/lib/commerce/poRevisions';
+import {
+  PO_CHANNEL_CHANGE_KIND_LABELS,
+  PO_REVISION_RULE_TEXT,
+} from '@/config/purchaseOrders';
 import {
   listChannelInstructions,
   requeueChannelInstruction,
@@ -404,6 +415,10 @@ function beginOnBehalfAsn() {
             </table>
           </Card>
 
+          {/* §BATCH 2c (`AV-024`) — the channel's own revisions of this order, with
+              the recorded change list. Renders nothing for an unrevised order. */}
+          <ChannelRevisionHistory po={po} />
+
           {/**
             * §P13 / S7 — the acceptance is offered EXACTLY when the owner permits
             * one (Amazon's `New` set INSIDE the window). Past the limit the domain
@@ -691,6 +706,118 @@ function beginOnBehalfAsn() {
   );
 }
 /* Line item row for admin detail view */
+/* ── CHANNEL-ISSUED REVISION HISTORY (§BATCH 2c / `AV-024`) ─────────────────
+ *
+ * WHY THIS EXISTS: the retail channel can change a purchase order AFTER it was
+ * issued, and the vendor must fulfil the UPDATED one; Mercenta discovers a change
+ * by polling the channel's own order read. Before this surface, an operator could
+ * not see that the channel had changed an order, which version the brand had
+ * acknowledged, or that a recorded decision had been undercut — the documented
+ * AV-024 risk.
+ *
+ * It renders EVERY recorded revision, oldest first (the record's `revisions` list is
+ * append-only, so nothing here is reconstructed from the current state), and for
+ * each one states: the version, when it was observed, whether the read was a
+ * SIMULATED channel read, the value before and after, each change labelled from the
+ * ONE change-kind map with its own detail, and Mercenta's review flag when the
+ * change undercut an acknowledgement already recorded. The rule statement is
+ * rendered from `PO_REVISION_RULE_TEXT` rather than written again here.
+ *
+ * Renders NOTHING for an order the channel has never changed.
+ */
+function ChannelRevisionHistory({ po }: { po: PurchaseOrder }) {
+  const state = poRevisionState(po);
+  const revisions = po.revisions ?? [];
+  if (revisions.length === 0) return null;
+  return (
+    <Card
+      title={`Channel revisions (${revisions.length})`}
+      data-testid={`admin-po-revisions-${po.poNumber}`}
+    >
+      <p className="text-ds-micro text-zinc-500" data-testid={`admin-po-revision-rule-${po.poNumber}`}>
+        {PO_REVISION_RULE_TEXT}
+      </p>
+      {state.channelCancelled && (
+        <p className="mt-2 text-ds-label text-red-300" data-testid={`admin-po-revision-cancelled-${po.poNumber}`}>
+          The retail channel has cancelled this order. The record holds its current version and the
+          cancellation cannot be acknowledged or shipped.
+        </p>
+      )}
+      {state.acknowledgementStale && (
+        <p className="mt-2 text-ds-micro text-amber-300" data-testid={`admin-po-revision-stale-${po.poNumber}`}>
+          The acknowledgement on this order answers an EARLIER version (version{' '}
+          {po.acknowledgedRevision ?? 0}) while the channel's current version is {state.revisionNumber},
+          so it is stale and no shipment may be derived from it.
+        </p>
+      )}
+      <div className="mt-2 space-y-2">
+        {revisions.map((revision) => (
+          <div
+            key={revision.digest}
+            className="rounded-md border border-white/[0.06] bg-ink-900 p-2.5"
+            data-testid={`admin-po-revision-${po.poNumber}-${revision.revisionNumber}`}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="flex items-center gap-2 text-ds-label text-zinc-200">
+                <History className="w-3 h-3 text-zinc-500" />
+                Version {revision.revisionNumber} — the retail channel&apos;s current order
+                {revision.simulated && (
+                  <Badge className="text-ds-micro bg-brass-500/15 text-brass-400 border-brass-500/20">
+                    (sim)
+                  </Badge>
+                )}
+              </span>
+              <span className="flex items-center gap-3 text-ds-micro font-mono text-zinc-500">
+                <span>{revision.observedAt.slice(0, 16).replace('T', ' ')}</span>
+                {revision.previousPoValue !== revision.newPoValue && (
+                  <span>
+                    {String.fromCharCode(163)}
+                    {revision.previousPoValue.toFixed(2)} → {String.fromCharCode(163)}
+                    {revision.newPoValue.toFixed(2)}
+                  </span>
+                )}
+              </span>
+            </div>
+            {revision.changes.length > 0 ? (
+              <ul className="mt-1.5 space-y-0.5">
+                {revision.changes.map((change, index) => (
+                  <li
+                    key={`${change.kind}-${change.subject}-${index}`}
+                    className="text-ds-micro text-zinc-400"
+                  >
+                    <span className="text-zinc-300">{PO_CHANNEL_CHANGE_KIND_LABELS[change.kind]}</span>
+                    {' — '}
+                    {change.detail}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              /**
+               * A revision always declares its kinds. If a recorded revision carries no
+               * change rows (a cancellation recorded without detail), the kinds are
+               * still stated rather than rendering an empty body.
+               */
+              <p className="mt-1.5 text-ds-micro text-zinc-400">
+                {revision.changeKinds
+                  .map((kind) => PO_CHANNEL_CHANGE_KIND_LABELS[kind])
+                  .join(' · ')}
+              </p>
+            )}
+            {revision.reviewReason && (
+              <p
+                className="mt-1.5 text-ds-micro text-amber-300"
+                data-testid={`admin-po-revision-review-${po.poNumber}-${revision.revisionNumber}`}
+              >
+                {revision.reviewReason}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function AdminPoLineItemRow({
   line, isOnBehalf, ackStatus, ackPrice, ackShipDate, ackRejectionCode,
   onAckStatusChange, onAckPriceChange,

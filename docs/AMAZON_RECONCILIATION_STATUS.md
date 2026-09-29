@@ -63,7 +63,7 @@ nothing, and increment S0/S1-a applied nothing from this register.
 | AV-021 | Payments architecture | CONFIRMED | **KEEP** — never present as an Amazon process | — | NO ACTION REQUIRED |
 | AV-022 | Invoice rules | MODELLED IN PART (P7, 2026-09-23) | **BUILD (in part) — the number/zero-value/cancel rules and the parallel-testing precondition are implemented (`src/lib/commerce/invoiceRegistry.ts` + `INVOICE_NUMBER_RULES` + `PRODUCTION_READINESS.md`); bill-to/Payee matching, credit notes and the `submitInvoices` API submission (P12) remain** | S7 | APPLIED 2026-09-23 (P7) |
 | AV-023 | Ack price ↔ invoice price | INCOMPLETE | **BUILD** — enforce the match at ack/invoice time | S5 | OPEN — not applied |
-| AV-024 | PO changes | INCOMPLETE | **BUILD** — PO-revision concept + change ingestion when live | S5 | OPEN — not applied |
+| AV-024 | PO changes | INCOMPLETE | **APPLIED (Batch 2c, 2026-09-29)** — the channel-issued revision now exists as a first-class concept. `src/types.ts` declares the channel's ten documented change kinds (`PO_CHANNEL_CHANGE_KINDS`) and the ONE `PurchaseOrderRevision` / `PoRevisionChange` shape; `src/lib/commerce/poRevisions.ts` is the ONE owner (pure `deriveChannelPoRevision`, the single writer `applyChannelPoRevision`, the derived `poRevisionState`), failing CLOSED on an identity mismatch, a read with no lines or an unreadable order date, and reporting NO revision when a read carries no documented change. The ingestion owner records the revision, audits it as `po_revision_received` (actor, tenant, kinds, simulated provenance), is idempotent by digest (a replay records nothing) and REFUSES a changed order that no longer routes or that would move between tenants; the record is MOVED to the channel's current version while the SUPERSEDED version (including every line's `ackHistory`) is retained inside the revision. A change that undercuts a recorded decision (a quantity below the acknowledged units, a cancelled acknowledged line, cancellation of the order) sets `undercutsAcknowledgement`, which makes the acknowledgement STALE and makes `createShipmentForPO` REFUSE — so the documented risk *“a brand could ship a superseded PO”* is closed. `src/config/purchaseOrders.ts` owns the change-kind labels and the ONE operator statement (`PO_REVISION_RULE_TEXT`). Surfaces: the BRAND's order row and preview state that the retail channel changed the order, which version it is working from, exactly what changed and that a stale acknowledgement must be updated; the CONSOLE's record shows EVERY recorded revision with its change list and Mercenta's review flag when a decision was undercut. The event is REACHABLE from the product through a SIMULATED channel change (`simulateMockChannelPoRevision`), honestly labelled and refused unless a simulated channel read is active. Asserted by `npm run validate:po-revision` (102 assertions, executing the real modules) and `e2e/po-revision-surfaces.spec.ts` (3 browser tests). Two defects found while proving it were FIXED AT SOURCE, not recorded: a revision's `detail` repeated its own kind label, and the simulated window change collapsed the order's window to a single day (both pinned by the gate). | S5 | **APPLIED** |
 | AV-025 | Naming | INFERENCE | **RELABEL** — rename the internal concept (e.g. "brand-direct supply") | S3 | OPEN — not applied |
 | AV-026 | Supply route | MERCENTA RULE | **KEEP** — keep the wording honest | — | NO ACTION REQUIRED |
 
@@ -98,17 +98,22 @@ nothing, and increment S0/S1-a applied nothing from this register.
 |---|---|---|
 | **KEEP — no action required** (CONFIRMED + MERCENTA RULE) | **16** | AV-004, AV-005, AV-012, AV-014b, AV-021, AV-026, AV-028, AV-029, AV-030, AV-036, AV-037, AV-038, AV-041 + AV-001, AV-018, AV-039 (keep, with a labelled follow-up) |
 | **RELABEL** (attribution/wording wrong, behaviour may stay) | **9** | AV-002, AV-003, AV-017, AV-019, AV-019b, AV-020b, AV-025, AV-031, AV-044 |
-| **BUILD** (documented Amazon behaviour not represented) | **16** | AV-007, AV-008, AV-009, AV-010, AV-010b, AV-011, AV-014, AV-015, AV-016, AV-022, AV-023, AV-024, AV-040, AV-042, AV-043, AV-045 (AV-006 moved to APPLIED in Batch 2b, 2026-09-28) |
+| **BUILD** (documented Amazon behaviour not represented) | **15** | AV-007, AV-008, AV-009, AV-010, AV-010b, AV-011, AV-014, AV-015, AV-016, AV-022, AV-023, AV-040, AV-042, AV-043, AV-045 (AV-006 moved to APPLIED in Batch 2b, 2026-09-28; **AV-024 moved to APPLIED in Batch 2c, 2026-09-29**) |
 | **REMOVE / RE-MODEL (pending approval or decision)** | **3** | AV-013 (T-6), AV-027 (T-4), AV-032 |
 | **EVIDENCE-BLOCKED** (cannot be done truthfully yet) | **7** | AV-020, AV-033, AV-034, AV-035, AV-046, AV-047, AV-048 |
 | **Total** | **52** | — |
 
-**Applied so far: 8 of 52 — corrected 2026-09-28.** This section previously claimed "1 of 52 (AV-003)", which
-was false (three further findings had already been applied and were still listed as open).
+**Applied so far: 9 of 52** — corrected 2026-09-29. This section previously claimed "1 of 52 (AV-003)", which
+was false (three further findings had already been applied and were still listed as open). On 2026-09-29 the
+count was cross-checked against the disposition table above and found to be one short: **AV-006's own row reads
+APPLIED but it was missing from this table** — a stale record, now fixed. The count and the paragraph below are
+DERIVED from the table's own status column (a row counts as APPLIED only when its status column says APPLIED);
+this table additionally lists **AV-022**, which is applied IN PART and is therefore NOT in that count.
 
 | Applied finding | Increment | What is now true | Gate |
 |---|---|---|---|
 | **AV-003** | S8, 2026-09-25 | the unsupported *"vendor performance"* claim is removed from every onboarding carrier | `npm run validate:po-ack-onboarding` (repo-wide sweep = 0 carriers) |
+| **AV-006** | Batch 2b, 2026-09-28 | the channel's 48-hour acknowledgement UPDATE window is modelled, enforced at the domain boundary and taught from its owner | `npm run validate:po-amendment-window` (31 assertions) |
 | **AV-007** | Wave 3, 2026-09-22 | a rejected line can never later become accepted/backordered (permanent, enforced at the domain boundary) | `npm run validate:wave3-logistics`, `npm run validate:po-acknowledgement-enforcement` |
 | **AV-010** | Wave 3, 2026-09-22 | a backorder is offered ONLY where the channel's `isBackOrderAllowed` is `true`; missing/unknown fails closed | `npm run validate:wave3-logistics` |
 | **AV-019** | Batch 2a, 2026-09-28 | the deduction taxonomy is declared once as Mercenta's own working taxonomy and every surface says so | `npm run validate:amazon-attribution` |
@@ -116,13 +121,17 @@ was false (three further findings had already been applied and were still listed
 | **AV-020b** | Batch 2a, 2026-09-28 | the restock target is declared once as Mercenta's own operational target, and the removed channel-visibility announcement cannot return | `npm run validate:amazon-attribution` |
 | **AV-022** | P7, 2026-09-23 | invoice number/zero-value/cancel rules + the parallel-testing precondition implemented (`src/lib/commerce/invoiceRegistry.ts`); bill-to/Payee matching, credit notes and `submitInvoices` (P12) remain | `npm run validate:invoicing` |
 | **AV-027** | P5, 2026-09-23 | the mandatory `mercenta_hub` stage is deleted and replaced by `destination_fc` (the FC declared on the PO) | register POST-REGISTER CHANGE record + code evidence above |
+| **AV-024** | Batch 2c, 2026-09-29 | a channel-issued revision of a purchase order is derived, recorded, audited, idempotent and gated; the record moves to the channel's current version with the superseded one retained; a change that undercuts a recorded decision makes the acknowledgement stale and REFUSES a shipment; the brand is told and the console shows every revision | `npm run validate:po-revision` (102 assertions), `e2e/po-revision-surfaces.spec.ts` (3 browser tests) |
 
 **The open position, derived (not asserted):** of the 52 findings, **16 are KEEP rows that need no further
 work** (7 CONFIRMED + 9 MERCENTA RULE) **minus the 3 that carry a labelled follow-up (AV-001, AV-018,
-AV-039)** → **13 need nothing**; **8 are APPLIED**; therefore **31 remain OPEN** — being the 28 findings
-still open *by classification* (**14 INCOMPLETE · 1 UNSUPPORTED (AV-032) · 6 UNKNOWN · 2 CONTRADICTED · 5
-INFERENCE**) **plus the 3 labelled follow-ups**. **7 of the 31 are EVIDENCE-BLOCKED** (AV-020, AV-033,
-AV-034, AV-035, AV-046, AV-047, AV-048). The register remains a plan, not a record of work.
+AV-039)** → **13 need nothing**; **9 are APPLIED**; therefore **30 remain OPEN** — being the 27 findings
+still open *by classification* (**12 INCOMPLETE · 1 UNSUPPORTED (AV-032) · 1 MODELLED IN PART (AV-022) ·
+6 UNKNOWN · 2 CONTRADICTED · 5 INFERENCE**) **plus the 3 labelled follow-ups**. **7 of the 30 are
+EVIDENCE-BLOCKED** (AV-020, AV-033, AV-034, AV-035, AV-046, AV-047, AV-048). The register remains a plan, not
+a record of work. *(Recomputed 2026-09-29 from the disposition table above, which is why the figures here
+differ from the previous hand-written ones: "14 INCOMPLETE" was wrong — the table held 13 open INCOMPLETE rows
+before AV-024 was applied — and the single MODELLED IN PART row had been omitted.)*
 
 ---
 

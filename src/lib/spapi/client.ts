@@ -95,6 +95,21 @@ export interface ChannelPurchaseOrder {
   /** The FC on the PO (register `S5`) — the destination the channel declared. */
   shipToPartyId: string;
   freightTerm?: 'collect' | 'prepaid';
+  /**
+   * §BATCH 2c (`AV-024`) — the channel's own STATE for this order, when the read
+   * carries it. `cancelled` is the channel cancelling the order; `open` after a
+   * cancellation is the channel reinstating it (the register's *cancel/uncancel*).
+   *
+   * OPTIONAL BY DESIGN: an absent value means THIS READ DOES NOT CARRY A STATE —
+   * never "the order is not cancelled". The revision owner reads absence as "no
+   * state change is claimed", and no surface may turn absence into a decision.
+   */
+  channelStatus?: 'open' | 'cancelled';
+  /**
+   * §BATCH 2c (`AV-024`) — the channel's order type, when the read carries it.
+   * Same rule as `channelStatus`: absent means not carried, never "unchanged".
+   */
+  orderType?: string;
   /** Present for Freight Collect POs (the channel's own ship window). */
   shipWindowStart?: string;
   shipWindowEnd?: string;

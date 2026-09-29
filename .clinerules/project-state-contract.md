@@ -42,6 +42,8 @@ The block is a compact FIELD LIST, never prose. It must always contain exactly t
 | `OUTSTANDING BLOCKER` | `none`, or the exact blocker and the exact next action |
 | `NEXT TASK` | One line: the task the next session must start |
 | `EXACT NEXT STARTING POINT` | The file(s)/command to open first |
+| `PLAIN SUMMARY (OWNER-FACING)` | **Added 2026-09-29 (`.clinerules/plain-english-responses.md`, HARD STOP).** A short plain-English summary of what changed and what it means for the owner, written so a non-technical reader understands it on one read: no banned word (repository · branch · commit · push · deploy · endpoint · schema · migration · refactor · idempotent · validator · gate · typecheck · lint · module · dependency · mock · seam · API · JSON · CI · pipeline · hash · regression · fixture · tenant · RBAC · SSOT · scope guard · protected path · provenance · canonical) without an explanation in brackets immediately after it. `npm run validate:plain-english` FAILS the build when the field is missing, empty, or contains unexplained jargon. |
+| `RULES APPLIED THIS SESSION` | **Added 2026-09-29 (Founder directive: the rule-application fix applies to EVERY rule).** One line recording the mode the session classified the request as and the specialist(s) it actually applied: `MODE: QUESTION \| ANALYZE \| PLAN \| IMPLEMENT · EXPERTS: <names> · WHY: <one clause>`. `npm run validate:rules-application` FAILS the build when the field is missing, when the mode is not one of the four, or when no specialist is named — so "I read the rules" is never accepted as evidence of applying them. |
 
 Obligations:
 

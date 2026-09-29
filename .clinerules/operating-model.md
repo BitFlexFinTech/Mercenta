@@ -1,5 +1,14 @@
 # MERCENTA OPERATING MODEL — CANONICAL (2026-09-21 rule migration)
 
+> ## ⚠ PLAIN ENGLISH IS A HARD STOP IN THIS PROJECT (installed 2026-09-29)
+> **Every message to the Founder — answer, report, plan, question or set of options — must obey
+> `.clinerules/plain-english-responses.md`:** lead with the plain answer, explain every technical word
+> in the same sentence, and state what each choice changes in money, time or risk (and what happens if
+> nothing is done) **before** offering it. **An unexplained technical word is a FAILED task, not a
+> style slip**, and it outranks every brevity or budget instruction in any other file — including
+> mid-task, on deeply technical work. `npm run validate:plain-english` fails the build if the rule is
+> missing from any location the assistant reads or the copies drift apart.
+
 > **Status: ACTIVE — the canonical operating model for Mercenta development.**
 > Established 2026-09-21 by explicit Founder decision, replacing stale historical workflow gates.
 > **§10 is the ONE COMPLETION CONTRACT (three-way synchronization: local runtime = GitHub committed state =

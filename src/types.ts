@@ -1619,6 +1619,113 @@ export interface PurchaseOrder {
    * surface and the audit trail can show both without overwriting either.
    */
   lastAmendedAt?: string;
+  /**
+   * §BATCH 2c (`AV-024`) — THE CHANNEL'S CURRENT VERSION OF THIS ORDER.
+   *
+   * The retail channel may change a purchase order after it is issued and the
+   * vendor is required to fulfil the UPDATED one, so this record must be able to
+   * say WHICH version it holds. `0` means the channel has never revised this
+   * order (and `undefined` means a legacy/seed row that is never re-labelled);
+   * every observed channel change increments it by one.
+   */
+  revisionNumber?: number;
+  /** §BATCH 2c (`AV-024`) — when the channel's latest revision was observed. */
+  lastRevisedAt?: string;
+  /**
+   * §BATCH 2c (`AV-024`) — every channel-issued revision, oldest first.
+   *
+   * APPEND-ONLY: the superseded value of every changed field is retained inside
+   * the revision that replaced it, so the earlier version of the order is never
+   * destroyed — it is moved into history.
+   */
+  revisions?: PurchaseOrderRevision[];
+  /**
+   * §BATCH 2c (`AV-024`) — WHICH VERSION the brand's acknowledgement answered.
+   *
+   * Written by the ONE acknowledgement writer (`src/data/api.ts →
+   * acknowledgePurchaseOrder`) as the PO's `revisionNumber` at decision time. A
+   * later channel revision therefore leaves the acknowledgement STALE, and a
+   * shipment against a stale acknowledgement is REFUSED — which is the documented
+   * risk in `AV-024`: *"a brand could ship a superseded PO"*.
+   */
+  acknowledgedRevision?: number;
+  /**
+   * §BATCH 2c (`AV-024`) — the channel's own ORDER TYPE, when the read carries it.
+   * Recorded at ingestion as the baseline and updated by a revision, so an
+   * order-type change is detectable without a second source of truth.
+   */
+  channelOrderType?: string;
+}
+
+/**
+ * §BATCH 2c (`AV-024`) — ONE documented change inside a channel-issued revision.
+ *
+ * `previous` is the SUPERSEDED value and `current` is the channel's value after
+ * the change; both are rendered as strings so one shape can carry a quantity, a
+ * date, a price, a destination code or a term without a second type. `null` on
+ * `previous` means the thing did not exist before (a new line); `null` on
+ * `current` means the channel removed it (a cancelled line). The pair is what
+ * makes the change auditable: history is moved into the record, never discarded.
+ */
+export interface PoRevisionChange {
+  kind: PoChannelChangeKind;
+  /** What changed, in the platform's own terms — a line SKU, a window, a term. */
+  subject: string;
+  previous: string | null;
+  current: string | null;
+  /** Operator-readable statement of the change, derived from the two values. */
+  detail: string;
+}
+
+/**
+ * §BATCH 2c (`AV-024`) — ONE channel-issued revision of a purchase order.
+ *
+ * Produced ONLY by the ingestion owner when a polled channel read differs from
+ * the canonical record (`src/lib/commerce/channelPurchaseOrderIngestion.ts`),
+ * derived purely by `src/lib/commerce/poRevisions.ts`. It is NOT a brand
+ * amendment: a brand's change to its own acknowledgement is governed by the
+ * declared update window (`AV-006`,
+ * `src/lib/commerce/poAcknowledgementWindow.ts`), which this shape never
+ * touches. The two are separate by construction — the channel changes the ORDER,
+ * the brand changes its ACKNOWLEDGEMENT of it.
+ */
+export interface PurchaseOrderRevision {
+  /** 1-based; the PO's `revisionNumber` AFTER this revision was applied. */
+  revisionNumber: number;
+  /** When Mercenta observed the channel's change (the polling read). */
+  observedAt: string;
+  /** The ONE way a channel-issued revision reaches this record. */
+  source: 'channel_poll';
+  /** TRUE when the read that produced this revision was a SIMULATED channel read. */
+  simulated: boolean;
+  /** The declared kinds this revision changed — a subset of PO_CHANNEL_CHANGE_KINDS. */
+  changeKinds: PoChannelChangeKind[];
+  changes: PoRevisionChange[];
+  /** Deterministic identity of this revision, so a replay records it exactly ONCE. */
+  digest: string;
+  /** The channel's PO value before and after, so a value change is visible. */
+  previousPoValue: number;
+  newPoValue: number;
+  /**
+   * TRUE when the channel's change undercut a decision the brand had ALREADY
+   * made — a quantity reduced below the acknowledged units, a line the brand had
+   * acknowledged being cancelled, or the order itself being cancelled. The record
+   * IS updated to the channel's current version (the vendor must fulfil the
+   * updated order) AND the acknowledgement becomes stale, so no shipment may be
+   * derived from it until the brand re-acknowledges. Fail-closed.
+   */
+  undercutsAcknowledgement: boolean;
+  /** Mercenta's own review flag — stated only when `undercutsAcknowledgement`. */
+  reviewReason: string | null;
+  /**
+   * The line items EXACTLY as they stood BEFORE this revision, including each
+   * line's acknowledgement status and its append-only `ackHistory`.
+   *
+   * A line the channel cancelled leaves the CURRENT order (the record must show
+   * the channel's current version) but its whole history is preserved here — so
+   * history is MOVED into the record, never destroyed.
+   */
+  supersededLines: PurchaseOrderLineItem[];
 }
 
 /** §Stage-24 — line-item level acknowledgment, not whole-PO toggle. */
@@ -1631,6 +1738,48 @@ export const PO_REJECTION_CODES = [
   'ObsoleteProduct',
 ] as const;
 export type PoRejectionCode = (typeof PO_REJECTION_CODES)[number];
+
+/**
+ * §BATCH 2c (`AV-024`) — THE CHANNEL'S DOCUMENTED PURCHASE-ORDER CHANGE KINDS.
+ *
+ * The retail channel may change a purchase order AFTER it is issued, and the
+ * vendor is required to fulfil the UPDATED purchase order; Mercenta discovers a
+ * change by polling the channel's order read
+ * (`docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` → `AV-024`, sources
+ * S3/S4). Before this declaration Mercenta had no concept of a channel-issued
+ * revision at all: an ingestion re-read of a CHANGED order reported
+ * `already_present` and the canonical record kept the SUPERSEDED quantities, so
+ * a brand could ship a superseded purchase order.
+ *
+ * The documented change set is declared ONCE, here — the channel's own
+ * vocabulary, exactly as the register records it:
+ *
+ *   window · quantity · item cancellation · cost · new item ·
+ *   cancel/uncancel · type · destination FC · freight
+ *
+ * This lives in the canonical types file (not in a config, not in a component)
+ * for the same reason `PO_REJECTION_CODES` does: it is the CHANNEL's vocabulary.
+ * `src/config/purchaseOrders.ts` imports it to attach the operator-readable
+ * labels and the ONE operator-facing statement. Nothing else may re-type it.
+ *
+ * HONEST LIMIT: a kind is only ever reported when the channel's own response
+ * carries the field the kind is derived from. An absent field means "this read
+ * does not carry it" — never "it did not change". The derivation states that
+ * explicitly (`src/lib/commerce/poRevisions.ts`).
+ */
+export const PO_CHANNEL_CHANGE_KINDS = [
+  'window',
+  'quantity',
+  'item_cancellation',
+  'cost',
+  'new_item',
+  'cancel',
+  'uncancel',
+  'order_type',
+  'destination_fc',
+  'freight_term',
+] as const;
+export type PoChannelChangeKind = (typeof PO_CHANNEL_CHANGE_KINDS)[number];
 
 export interface PurchaseOrderLineItem {
   sku: string;

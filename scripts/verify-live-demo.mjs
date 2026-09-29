@@ -25,6 +25,14 @@
  *   L9  the five canonical section headings are present
  *   L10 the deployed bundle is the build this repository produced (the live
  *       entry asset must exist byte-for-byte in the local dist/)
+ *   L11 the public inner pages, in BOTH shells (B3 · B5 · B6)
+ *   L12 the five-column footer and the real cookie notice (B4)
+ *   L13 the Explore assessment's RESULT, driven and scanned live (B6)
+ *   L14 the deployed STATIC public surface — index.html, its noscript, its
+ *       JSON-LD-free bootstrap copy and robots.txt (B7)
+ *   L15 the channel-issued purchase-order revision, driven live end to end:
+ *       read the channel → issue the change → re-read → the console's revision
+ *       history → the brand's own notice (BATCH 2c · AV-024)
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -673,6 +681,104 @@ function readRedLines() {
      */
     check(`L14 the deployed static surface could NOT be fetched (${String(l14Error).split('\n')[0].slice(0, 120)})`, false);
   }
+
+  /* ── L15 — BATCH 2c (AV-024): THE CHANNEL-ISSUED REVISION, DRIVEN LIVE ──────
+   * WHY THIS EXISTS. The two surfaces this batch adds — the BRAND's notice that the
+   * retail channel changed the order and the CONSOLE's revision history — cannot be
+   * proved by any public-page check: they exist only AFTER the channel has changed an
+   * order. This drives that event on the DEPLOYED site through the product's OWN
+   * controls (read the channel → issue the change → re-read → open the record) and
+   * then switches to the brand WITHOUT reloading, so the same in-memory stores are
+   * carried across, and asserts the notice the brand is actually shown. Asserting the
+   * source instead would prove nothing about the deployed bundle.
+   */
+  console.log('\n--- L15 the channel-issued order revision, driven on the live site ---');
+  const revPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const revErrors = [];
+  revPage.on('pageerror', (e) => revErrors.push(String(e)));
+  try {
+    await gotoLive(revPage, `${SITE}/`);
+    await revPage.getByRole('button', { name: 'Partner Login' }).first().click({ timeout: 15000 });
+    await revPage.waitForTimeout(700);
+    await revPage.click('text=Mercenta Admin Hub');
+    await revPage.waitForTimeout(1600);
+    await revPage.click('nav[aria-label="Primary"] >> text=Purchase Orders');
+    await revPage.waitForTimeout(1600);
+
+    await revPage.locator('[data-state="admin-po-ingest"]').click();
+    await revPage
+      .locator('[data-state="channel-mode"]', { hasText: 'Simulation' })
+      .first()
+      .waitFor({ timeout: 20000 });
+    check('L15 the live console took a SIMULATED channel read (no live channel call)', true);
+
+    await revPage.locator('[data-state="admin-po-simulate-change"]').click({ timeout: 15000 });
+    const revSummary = revPage.locator('[data-state="po-revision-simulate-summary"]');
+    await revSummary.waitFor({ timeout: 20000 });
+    const revSummaryText = (await revSummary.textContent()) ?? '';
+    check(
+      `L15 the live console issued the channel change and the re-read recorded version 1 (${revSummaryText.slice(0, 70)}…)`,
+      /version 1/.test(revSummaryText)
+    );
+    const revPo = (revSummaryText.match(/MOCK-PO-\d+/) || [])[0];
+    check('L15 the changed order is named in the console\'s own statement', Boolean(revPo));
+
+    await revPage.getByLabel('Search purchase orders').fill(revPo || '');
+    await revPage.waitForTimeout(800);
+    await revPage.locator('button[title="View detail"]').first().click();
+    const revCard = revPage.locator(`[data-testid="admin-po-revisions-${revPo}"]`);
+    await revCard.waitFor({ timeout: 15000 });
+    const revCardText = (await revCard.textContent()) ?? '';
+    check(
+      'L15 the live console shows the recorded revision with its change list and the rule',
+      /Version 1/.test(revCardText) &&
+        /ordered quantity|cost price|ship \/ delivery window/.test(revCardText) &&
+        revCardText.includes('The updated purchase order is the one that must be fulfilled')
+    );
+
+    /* Same document, same stores — sign out in the SPA and enter as the brand. */
+    await revPage.click('[aria-controls="profile-menu"]');
+    await revPage.getByRole('menuitem', { name: 'Sign Out' }).click();
+    await revPage.waitForTimeout(800);
+    await revPage.getByRole('button', { name: 'Partner Login' }).first().click();
+    await revPage.waitForTimeout(800);
+    await revPage.click('text=Astonish');
+    await revPage.waitForTimeout(1600);
+    await revPage.click('nav[aria-label="Primary"] >> text=Purchase Orders');
+    await revPage.waitForTimeout(1600);
+
+    const revNotice = revPage.locator(`[data-testid="po-revision-notice-${revPo}"]`);
+    await revNotice.waitFor({ timeout: 15000 });
+    const revNoticeText = (await revNotice.textContent()) ?? '';
+    check(
+      'L15 the LIVE brand surface says the channel changed the order and which version it is working from',
+      /working from version 1/.test(revNoticeText)
+    );
+    check(
+      'L15 the LIVE brand notice states what changed, labelled from the owner',
+      /ordered quantity/.test(revNoticeText)
+    );
+    check(
+      'L15 the LIVE brand notice renders the ONE rule statement',
+      revNoticeText.includes('The updated purchase order is the one that must be fulfilled')
+    );
+    check(
+      'L15 the LIVE brand notice appears ONLY for the changed order (not a banner)',
+      (await revPage.locator('[data-testid^="po-revision-notice-"]').count()) === 1
+    );
+    check(
+      `L15 the driven revision flow rendered with no uncaught error (errors: ${revErrors.join(' | ') || 'none'})`,
+      revErrors.length === 0
+    );
+  } catch (revError) {
+    check(
+      `L15 the channel-issued revision could NOT be driven live (${String(revError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await revPage.close();
+
+  await browser.close();
 
   await browser.close();
 

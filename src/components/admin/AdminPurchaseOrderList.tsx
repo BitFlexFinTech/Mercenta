@@ -16,6 +16,14 @@ import {
 } from '@/data/queries';
 import { ingestChannelPurchaseOrders } from '@/data/api';
 import type { ChannelIngestionResult } from '@/lib/commerce/channelPurchaseOrderIngestion';
+/**
+ * §BATCH 2c (`AV-024`) — the SIMULATED channel can change one of its own orders.
+ * This is the ONLY seam that produces the documented event (the retail channel
+ * changing an order after it was issued), so the revision path is reachable from the
+ * product rather than only from a validator. Mock-first: deterministic, in-memory,
+ * zero live network calls, and refused unless a SIMULATED channel read is active.
+ */
+import { simulateMockChannelPoRevision } from '@/lib/spapi/mockClient';
 import { Button, Card, StatusBadge } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { AdminPurchaseOrderDetail } from '@/components/admin/AdminPurchaseOrderDetail';
@@ -48,7 +56,7 @@ import {
 } from '@/lib/statusPresentation';
 import type { Deduction, PurchaseOrder } from '@/types';
 import type { DemoShipment } from '@/data/demoData';
-import { Search, Eye, RefreshCw } from 'lucide-react';
+import { Search, Eye, RefreshCw, FlaskConical } from 'lucide-react';
 
 const STATUS_ORDER = ['received', 'under_review', 'accepted', 'ready_to_fulfil', 'shipped', 'delivered', 'rejected'];
 
@@ -75,6 +83,9 @@ export function AdminPurchaseOrderList() {
   const [ingestBusy, setIngestBusy] = useState(false);
   const [ingestResult, setIngestResult] = useState<ChannelIngestionResult | null>(null);
   const [ingestError, setIngestError] = useState<string | null>(null);
+  /* §BATCH 2c (`AV-024`) — the simulated channel-change control's own state. */
+  const [revisionBusy, setRevisionBusy] = useState(false);
+  const [revisionNotice, setRevisionNotice] = useState<string | null>(null);
   /* §UI/UX Wave 2 completion — workspace state: queue density (REAL — it changes
      the rendered row padding), the simulated-only filter, and the record preview. */
   const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
@@ -156,6 +167,79 @@ export function AdminPurchaseOrderList() {
       );
     } finally {
       setIngestBusy(false);
+    }
+  }
+
+  /**
+   * §BATCH 2c (`AV-024`) — THE SIMULATED CHANNEL CHANGES ONE OF ITS ORDERS.
+   *
+   * The documented event is the retail channel changing a purchase order AFTER it was
+   * issued (the vendor must then fulfil the UPDATED one). Nothing else in the product
+   * can produce that event, so without this control the whole revision path — the
+   * derivation, the record, the audit line, the brand's notice and this console's
+   * revision history — would be unreachable and could only ever be proved by a
+   * script. This is that event, SIMULATED.
+   *
+   * It is refused unless a SIMULATED channel read is active (a live channel is never
+   * assumed to be simulated — the platform's standing fail-closed rule), and it never
+   * writes a second path: the change goes through the mock channel seam and is then
+   * RE-READ through the ONE ingestion owner, so the revision is derived, recorded and
+   * audited by exactly the code a real channel change would use. No live call is made.
+   */
+  async function handleSimulateChannelChange() {
+    if (!canCurrentUserMutate || revisionBusy) return;
+    if (ingestResult?.mode !== 'mock') {
+      setRevisionNotice(
+        'Refused: read the retail channel first — a simulated change is only available while a simulated channel read is active.'
+      );
+      return;
+    }
+    setRevisionBusy(true);
+    setRevisionNotice(null);
+    try {
+      /**
+       * The simulated channel knows only its own orders, and it states which are its
+       * own (`CHANNEL_PO_UNKNOWN`), so the first order it recognises is changed. A
+       * demo-seeded record it does not own is never counted as a change.
+       */
+      let changed: ReturnType<typeof simulateMockChannelPoRevision> | null = null;
+      let target: PurchaseOrder | null = null;
+      for (const candidate of pos.filter((p) => p.simulated === true)) {
+        const attempt = simulateMockChannelPoRevision(candidate.poNumber);
+        if (attempt.ok) {
+          changed = attempt;
+          target = candidate;
+          break;
+        }
+      }
+      if (!changed || !target) {
+        setRevisionNotice(
+          'No order this simulated channel owns is held yet — read the retail channel, then try again. No live channel call was made.'
+        );
+        return;
+      }
+      const read = await ingestChannelPurchaseOrders({ actorId: session?.role ?? 'Mercenta Admin' });
+      setIngestResult(read);
+      const outcome = read.outcomes.find(
+        (o) => o.channelPurchaseOrderId === target!.poNumber
+      );
+      const version = outcome?.po?.revisionNumber;
+      setRevisionNotice(
+        outcome?.status === 'revised'
+          ? `The simulated retail channel changed ${target.poNumber}; Mercenta's re-read recorded version ${version} (${
+              outcome.po?.revisions?.[outcome.po.revisions.length - 1]?.changeKinds.join(', ') ?? 'change recorded'
+            }). No live channel call was made.`
+          : `The simulated retail channel changed ${target.poNumber}, but the re-read did not record a revision (${outcome?.status ?? 'no outcome stated'}). No live channel call was made.`
+      );
+      qc.invalidateQueries();
+    } catch (err) {
+      setRevisionNotice(
+        err instanceof Error
+          ? `The simulated channel change failed: ${err.message}. No live channel call was made.`
+          : 'The simulated channel change failed. No live channel call was made.'
+      );
+    } finally {
+      setRevisionBusy(false);
     }
   }
 
@@ -367,6 +451,43 @@ return (
               {ingestResult?.mode === 'mock' && (
                 <span className="rounded border border-brass-500/20 bg-brass-500/15 px-1.5 py-0.5 text-ds-micro text-brass-400">
                   Simulated read — no live channel call was made
+                </span>
+              )}
+            </div>
+
+            {/* §BATCH 2c (`AV-024`) — THE SIMULATED CHANNEL CHANGES ONE OF ITS ORDERS.
+                The retail channel may change a purchase order after it was issued, and
+                the vendor must fulfil the UPDATED one; the change is discovered by
+                re-reading the channel. This issues that event through the mock channel
+                seam and re-reads through the ONE ingestion owner, so the revision is
+                derived, recorded and audited by the real code path. Refused unless a
+                SIMULATED channel read is active: a live channel is never assumed to be
+                simulated, and no live call is ever made from here. */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="secondary"
+                className="text-ds-micro"
+                data-state="admin-po-simulate-change"
+                disabled={!canCurrentUserMutate || revisionBusy || ingestResult?.mode !== 'mock'}
+                title={
+                  !canCurrentUserMutate
+                    ? 'View-only staff cannot change channel data'
+                    : ingestResult?.mode !== 'mock'
+                      ? 'Read the retail channel first — this control stays refused until a simulated channel read is active'
+                      : 'The simulated retail channel changes one of its orders, then Mercenta re-reads it (no live channel call)'
+                }
+                onClick={handleSimulateChannelChange}
+              >
+                <FlaskConical className="w-3 h-3 mr-1" />
+                Simulate a channel order change (sim)
+              </Button>
+              {revisionNotice && (
+                <span
+                  className="text-ds-micro text-brass-400"
+                  role="status"
+                  data-state="po-revision-simulate-summary"
+                >
+                  {revisionNotice}
                 </span>
               )}
             </div>
