@@ -26,7 +26,65 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## PUBLIC-MESSAGING BATCH B4 — THE FOOTER REBUILT TO FIVE COLUMNS, A REAL COOKIE NOTICE, AND EVERY PUBLIC LABEL UNDER ONE OWNER — DEPLOYED AND LIVE-VERIFIED (session 49, 2026-09-29) — CURRENT
+## PUBLIC-MESSAGING BATCH B5 — THE TWO LEGAL DOCUMENTS REBUILT ON THE OWNER'S FACTS, THE FOUR RED-LINE CLAIMS CLEARED — DEPLOYED AND LIVE-VERIFIED (session 50, 2026-09-29) — CURRENT
+
+**WHAT WAS ASKED.** B5 of the recorded public-messaging plan: rewrite `PrivacyPolicy.tsx` and `TermsOfService.tsx` on
+`publicCompanyLine()` and the derived contact addresses, take the shell theme as B3 did, and clear the four red-line
+hits that were blocking B8.
+
+**WHAT WAS WRONG — SEVEN defects, none of which a typecheck or a build can see.**
+1. **Both documents published the regulated position and the commercial model.** `PrivacyPolicy.tsx`: "VAT and EORI
+   numbers" (§2) and "HMRC requirement" (§5). `TermsOfService.tsx`: "Acknowledge POs within 24 hours per retail
+   network requirements" (§3) and "Mercenta charges commission on each PO" (§4). Four claims in three red-line
+   families — `regulated-position`, `third-party-rules`, `commercial-structure`.
+2. **Both hardcoded the dark palette** (`bg-black text-white`), so the light shell never reached the two documents a
+   brand reads before signing anything — the defect B3 fixed on the four inner pages, left standing here.
+3. **Neither carried the public navigation or the footer**, so a visitor had no route back into the site.
+4. **Each held its own copy of the company's identity and of its contact address**, and each dated itself
+   ("30 August 2026") independently — three facts with owners, retyped twice.
+5. **`positioning.ts` §13 describes the privacy policy as "the place for the full picture"** of what is stored on a
+   visitor's device, and the policy said nothing about it at all.
+6. **`src/lib/seo/publicRoutes.ts` spelled "Mercenta Partners Ltd" by hand** in the privacy page's meta description —
+   a second copy of a fact owned by `src/config/brand.ts`.
+7. **The B3 e2e assertion claimed more than it checked.** `e2e/public-pages.spec.ts` asserted only that a
+   `[data-shell-theme]` element was VISIBLE, while its test name claimed the page "takes the shell" — a page that
+   hardcoded the palette passed. The defect it existed for was only caught after deployment.
+
+**WHAT WAS DONE.**
+- **`src/components/marketing/PublicLegalDocument.tsx` (NEW)** — the shared shell for the two documents: the eyebrow,
+  the heading, the one revision date, the section renderer, `PublicNav`, `PublicFooter` and the shell theme. The
+  chrome exists ONCE, so the two documents cannot drift apart from each other either.
+- **`src/components/marketing/PrivacyPolicy.tsx` + `TermsOfService.tsx`** rewritten on the owner: `publicCompanyLine()`,
+  `PUBLIC_COMPANY_NAME`, `PUBLIC_PRIVACY_EMAIL`, `PUBLIC_LEGAL_EMAIL`, `PUBLIC_COOKIE_NOTICE`,
+  `PUBLIC_COOKIE_SETTINGS_LABEL`, and `PUBLIC_LINK.privacy.label` for the cross-link. Every data category a privacy
+  policy must list is still listed; the mechanism is gone. Terms §3 now tells the brand what matters (a short window
+  exists for a reply, and an order can be lost when it closes) instead of another company's rule.
+- **`src/config/positioning.ts` §14** declares **the ONE revision date** (`PUBLIC_LEGAL_LAST_UPDATED`).
+- **The privacy policy gained §6 "What is stored on your device"**, which READS `PUBLIC_COOKIE_NOTICE.body` from its
+  owner — making §13 of the owner true, and making the notice and the policy structurally unable to disagree.
+- **`src/lib/seo/publicRoutes.ts`** — the legal name in the privacy description is derived now.
+- **`e2e/public-pages.spec.ts`** now renders all six inner pages under BOTH themes and asserts **the shell actually
+  taken** (dark under `bold`, light under `minimal-light`) — the assertion its name always claimed.
+- **`scripts/verify-live-demo.mjs` L11 extended to six pages × two shells**; both scope guards declare the new file.
+
+**VERIFIED — real output.** `npx tsc --noEmit` 0 errors · `npm run build` clean (entry `assets/index-D-9hbQTy.js`,
+321,010 bytes) · **`npm run validate:all` 121 PASS / 0 FAIL** · **`npx playwright test e2e/public-pages.spec.ts
+e2e/public-chrome.spec.ts` 18 passed** (12 = six pages × two themes) · **LIVE `npm run verify:live` 148 PASS / 0
+FAIL** on `https://demo.mercenta.co.uk`, L11 covering `/privacy` and `/terms` in both shells **with zero red-line hits
+in the rendered page**, and L10 proving the deployed entry asset is the local verified `dist/` build.
+**GATE PROVED ABLE TO FAIL BY MUTATION:** pinning the shared shell's `data-shell-theme` to `dark` failed
+`/privacy [minimal-light]` on the shell assertion (1 failed / 1 passed); `PublicLegalDocument.tsx` was restored
+**byte-identical** (sha256 `2fcee3e8f10296576c821674244356d3f551ecab15e01628787d639dadbf7f0b`).
+
+**Checkpoint:** **`1cc0a42`** (+ the state commit that carries this section), pushed to `origin/redesign/foundation`,
+deployed via `scripts/deploy-demo.sh` (31 files: 19 new · 12 modified · 19 removed · 4,974,726 bytes).
+
+**NOT FINISHED, AND SAID SO.** B6 (Explore UI-only), B7 (SEO) and B8 (`scripts/validate-public-claims.mjs` GREEN,
+proved able to fail) remain open. **The four hits that blocked B8 are cleared, so B8 can land.**
+
+
+
+## PUBLIC-MESSAGING BATCH B4 — THE FOOTER REBUILT TO FIVE COLUMNS, A REAL COOKIE NOTICE, AND EVERY PUBLIC LABEL UNDER ONE OWNER — DEPLOYED AND LIVE-VERIFIED (session 49, 2026-09-29) — PREVIOUS
 
 **WHAT WAS ASKED.** B4 of the recorded public-messaging plan: rebuild the footer to its five-column shape, add a REAL
 cookie notice, and settle the nav labels.
