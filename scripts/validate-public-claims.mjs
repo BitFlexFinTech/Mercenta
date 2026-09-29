@@ -165,10 +165,41 @@ try {
   );
 
   /* ── 4. THE RENDERED PUBLIC PAGES (what a visitor with JavaScript sees) ────── */
-  console.log('\n§B8 claims gate — building the bundle the scan renders…');
-  execFileSync('npm', ['run', 'build'], { cwd: ROOT, stdio: 'pipe' });
+  /**
+   * §B8 — REPAIRED BEFORE IT WAS TRUSTED: THIS GATE MUST BUILD THE PRODUCTION BUNDLE.
+   *
+   * `createViteServer` above sets `process.env.NODE_ENV = 'development'` in THIS
+   * process, and `execFileSync` passes the environment to the child — so the first
+   * version of this gate built a DEVELOPMENT bundle and scanned that. Measured:
+   * vendor 2,526,228 bytes containing `react-dom.development`, against the
+   * production 2,200,128 bytes containing `react-dom.production`, with every chunk
+   * hash different. It also left that dev build in `dist/`, which made
+   * `npm run verify:live`'s L10 (the deployed asset must be the local build) fail on
+   * a following run — that is how this was found.
+   *
+   * The environment is now EXPLICIT, and the assertion below proves the bundle
+   * really is the production one, so a gate that renders a bundle nobody deploys
+   * cannot pass silently.
+   */
+  console.log('\n§B8 claims gate — building the PRODUCTION bundle the scan renders…');
+  execFileSync('npm', ['run', 'build'], {
+    cwd: ROOT,
+    stdio: 'pipe',
+    env: { ...process.env, NODE_ENV: 'production' },
+  });
   const distDir = join(ROOT, 'dist');
   test('the build emitted the files this scan renders', existsSync(join(distDir, 'index.html')));
+
+  const builtEntry = (read('dist/index.html').match(/assets\/(index-[A-Za-z0-9_-]+\.js)/) || [])[1];
+  const builtVendorName = builtEntry
+    ? (read(`dist/assets/${builtEntry}`).match(/(vendor-[A-Za-z0-9_-]+\.js)/) || [])[1]
+    : null;
+  const builtVendor = builtVendorName ? read(`dist/assets/${builtVendorName}`) : '';
+  test(
+    `the gate renders the PRODUCTION bundle, not a development one (entry ${builtEntry || 'NONE'}, vendor ${builtVendorName || 'NONE'})`,
+    Boolean(builtEntry) && Boolean(builtVendorName) && builtVendor.length > 100000 &&
+      !builtVendor.includes('react-dom.development')
+  );
 
   /**
    * A tiny static server over `dist/` — no new dependency, no Vite involvement
