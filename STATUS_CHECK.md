@@ -71,6 +71,19 @@ white text on a deeper indigo). The affected text is **NOT** claimed to pass AA.
 `npm run verify:live`, declared in `§PUBLIC_MESSAGING_SCOPE`, and it reads the palette token FROM THE PAGE so it
 cannot drift from `themes.ts`.
 
+**Two NEW GATES added this session, each closing a defect that had been recorded as unfixed:** `npm run
+verify:live` (live check promoted out of `/tmp`, reads the palette token from the page) and
+`scripts/validate-registry-integrity.mjs` (gates the `_meta.total_entries` drift that three sessions corrected by
+hand; **proved able to fail** — `508 → 999` exits 1 — and restored byte-identical, sha256
+`18df98f51e8fc934e438cff5`).
+
+**New finding, BLOCKED on a vocabulary decision:** 32 rows are missing at least one of
+{description, source, evidence, last_verified}, and 3 rows carry a status outside `_meta.status_enum` —
+`batchE-carrier-views-e2e`=`removed`, `batchF-support-views-e2e`=`removed`,
+`cleanup-p9-remove-3pl-carrier-surface`=`complete`. Exact next action: decide whether those become declared
+statuses or the rows are re-statused with `superseded_by` carrying the removal, then assert it. No gate is
+asserted for these today, because a gate that fails on arrival is not progress.
+
 **Canonical source:** the `CURRENT RESUME STATE` block of `PROJECT_STATUS.md`. **`git status --porcelain` EMPTY**
 after the state checkpoint.
 

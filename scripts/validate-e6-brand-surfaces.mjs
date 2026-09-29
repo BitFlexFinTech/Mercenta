@@ -1535,6 +1535,14 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
    * this guard documents for a legitimately new file.
    */
   'scripts/verify-live-demo.mjs',
+  /**
+   * §PUBLIC MESSAGING (2026-09-28, session 47) — the registry integrity gate.
+   * `_meta.total_entries` drifted from the real entries.length across three
+   * sessions (505 -> 506 -> 507) and NOTHING checked it. This file is named
+   * `validate-*.mjs` so validate-all.sh picks it up automatically, and it is
+   * declared here because it is a new application-source script.
+   */
+  'scripts/validate-registry-integrity.mjs',
   'e2e/homepage-editor.spec.ts',
   'package.json',
 ]);
