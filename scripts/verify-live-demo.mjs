@@ -561,8 +561,8 @@ function readRedLines() {
    */
   console.log('\n--- L14 the deployed static public surface ---');
   const liveHome = await fetch(`${SITE}/`).then((r) => r.text());
-  const positioningSrc = readFileSync(path.join(ROOT, 'src/config/positioning.ts'), 'utf8');
-  const promiseBlock = positioningSrc.match(/export const PUBLIC_PROMISE =\s*([\s\S]*?);/);
+  const publicCopySrc = readFileSync(path.join(ROOT, 'src/config/positioning.ts'), 'utf8');
+  const promiseBlock = publicCopySrc.match(/export const PUBLIC_PROMISE =\s*([\s\S]*?);/);
   const promise = promiseBlock
     ? (promiseBlock[1].match(/'([^']*)'/g) || []).map((s) => s.slice(1, -1)).join('').trim()
     : null;

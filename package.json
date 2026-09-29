@@ -25,6 +25,7 @@
     "validate:workspace-shell": "node scripts/validate-workspace-shell.mjs",
     "validate:canonical-propagation": "node scripts/validate-canonical-propagation.mjs",
     "validate:seo": "node scripts/validate-seo-foundation.mjs",
+    "validate:public-claims": "node scripts/validate-public-claims.mjs",
     "validate:bounded-ai": "node scripts/validate-bounded-ai.mjs",
     "validate:routing": "node scripts/validate-routing-gateways.mjs",
     "validate:uk-market-fit": "node scripts/validate-uk-market-fit.mjs",
