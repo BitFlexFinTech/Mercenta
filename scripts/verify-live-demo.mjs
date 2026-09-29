@@ -545,6 +545,68 @@ function readRedLines() {
     check('L13 SKIPPED — the assessment route was not readable from its owner, so the result view was NOT verified', false);
   }
 
+  /* ── L14 — B7: THE STATIC PUBLIC SURFACE, AS DEPLOYED ───────────────────────
+   * WHY THIS EXISTS. `index.html` is the one file every visitor and every crawler
+   * receives BEFORE any JavaScript runs, and until B7 it shipped the ENTIRE
+   * obsolete pre-B3 site inside a `<noscript>` block, with matching JSON-LD and
+   * bootstrap meta copy. No browser check can see any of that (they all run with
+   * JavaScript on, so `<noscript>` is never rendered), which is exactly why it
+   * survived four batches of public-messaging work.
+   *
+   * This asserts the DEPLOYED bytes: the bootstrap description is the owner's own
+   * promise (READ from `src/config/positioning.ts`, never retyped here), the
+   * noscript is a notice rather than a content fork, no red-line pattern appears
+   * anywhere in the delivered HTML, and every `/robots.txt` disallow is a private
+   * prefix the route model still declares (B7 removed a stale `/carrier` line).
+   */
+  console.log('\n--- L14 the deployed static public surface ---');
+  const liveHome = await fetch(`${SITE}/`).then((r) => r.text());
+  const positioningSrc = readFileSync(path.join(ROOT, 'src/config/positioning.ts'), 'utf8');
+  const promiseBlock = positioningSrc.match(/export const PUBLIC_PROMISE =\s*([\s\S]*?);/);
+  const promise = promiseBlock
+    ? (promiseBlock[1].match(/'([^']*)'/g) || []).map((s) => s.slice(1, -1)).join('').trim()
+    : null;
+  check(
+    `L14 the home promise was READ from its owner (${promise ? `${promise.slice(0, 48)}…` : 'NOT FOUND'})`,
+    Boolean(promise && promise.length > 30)
+  );
+  const routesSrc = readFileSync(path.join(ROOT, 'src/lib/seo/publicRoutes.ts'), 'utf8');
+  const privatePrefixesBlock = routesSrc.match(/PRIVATE_ROUTE_PREFIXES[^=]*=\s*\[([\s\S]*?)\]/);
+  const privatePrefixes = privatePrefixesBlock
+    ? [...privatePrefixesBlock[1].matchAll(/'([^']+)'/g)].map((m) => m[1])
+    : [];
+  check(
+    `L14 the private route prefixes were READ from their owner (${privatePrefixes.length} found)`,
+    privatePrefixes.length >= 6
+  );
+  if (promise && privatePrefixes.length > 0) {
+    check(
+      "L14 the DEPLOYED bootstrap description is the owner's own promise (no second wording of the home page)",
+      liveHome.includes(promise)
+    );
+    const liveNoscript = (liveHome.match(/<body>[\s\S]*?<noscript>([\s\S]*?)<\/noscript>/) || [])[1] || '';
+    check(
+      `L14 the deployed noscript is a NOTICE, not a content fork (${liveNoscript.trim().length} chars, no section headings)`,
+      liveNoscript.trim().length > 0 && liveNoscript.trim().length < 900 && !/<h2|<h3|<ul/i.test(liveNoscript)
+    );
+    const homeHits = redLines.filter((re) => re.test(liveHome)).map((re) => re.source);
+    check(
+      `L14 the DEPLOYED index.html publishes no red-line claim anywhere in its bytes (hits: ${homeHits.join(', ') || 'none'})`,
+      homeHits.length === 0
+    );
+    const liveRobots = await fetch(`${SITE}/robots.txt`).then((r) => r.text()).catch(() => '');
+    const liveDisallows = [...liveRobots.matchAll(/^Disallow:\s*(\S+)/gm)].map((m) => m[1]);
+    const staleDisallows = liveDisallows.filter(
+      (p) => !privatePrefixes.some((prefix) => p === prefix || p.startsWith(prefix))
+    );
+    check(
+      `L14 every deployed robots.txt disallow is a DECLARED private prefix (stale: ${staleDisallows.join(', ') || 'none'})`,
+      liveDisallows.length >= 6 && staleDisallows.length === 0
+    );
+  } else {
+    check('L14 SKIPPED — the owner declarations could not be read, so the static surface was NOT verified', false);
+  }
+
   await browser.close();
 
   console.log(`\nLIVE VERIFICATION: ${pass} PASS / ${fail} FAIL`);

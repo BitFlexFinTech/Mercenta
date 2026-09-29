@@ -1533,6 +1533,19 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/components/marketing/PrivacyPolicy.tsx',
   'src/components/marketing/TermsOfService.tsx',
   'scripts/validate-public-claims.mjs',
+  /**
+   * §PUBLIC MESSAGING B7 (2026-09-29) — THE STATIC PUBLIC SURFACE IS A PUBLIC
+   * SURFACE. `index.html` is the one file every visitor and every crawler receives
+   * before any JavaScript runs, and until B7 no gate scanned it: it shipped the
+   * ENTIRE obsolete pre-B3 site inside a `<noscript>` block plus matching JSON-LD
+   * and bootstrap meta copy. `public/robots.txt` and `public/sitemap.xml` are
+   * delivered to crawlers and are pinned by `validate-seo-foundation.mjs`. All
+   * three are DECLARED here (the remedy this guard documents for a legitimately
+   * changed file) rather than left as unexplained working-tree changes.
+   */
+  'index.html',
+  'public/robots.txt',
+  'public/sitemap.xml',
   'scripts/validate-company-control-centre.mjs',
   'scripts/validate-homepage-editor.mjs',
   'scripts/validate-uiux-redesign.mjs',

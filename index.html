@@ -6,12 +6,22 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Bootstrap metadata: the SAME values the route SSOT declares for "/"
-         (`src/lib/seo/publicRoutes.ts`). The runtime layer overwrites title,
-         description, canonical, robots and og:url per route. -->
+
+    <!-- ── BOOTSTRAP METADATA — BOOTSTRAP ONLY ──────────────────────────────
+         §B7 (2026-09-29). Every value below is the SAME one the route SSOT
+         declares for "/" (`src/lib/seo/publicRoutes.ts` → PUBLIC_ROUTE_BY_PAGE.home),
+         and `scripts/validate-seo-foundation.mjs` FAILS if the two drift apart.
+         The runtime route-metadata layer overwrites title, description,
+         canonical, robots and og:url for every route.
+
+         WHAT WAS WRONG. The description was the positioning B3 RETIRED, and
+         `PUBLIC_CATEGORY` ("Retail channel partner") contradicts it. It is now the
+         public-copy owner's own one-sentence promise, so the homepage's search
+         description and its hero cannot describe the business two different ways.
+    -->
     <meta
       name="description"
-      content="A self-service wholesale distribution platform connecting independent brands with UK retail channels. Manage catalogues, purchase orders, shipments, compliance, and retail relationships from a single portal."
+      content="Mercenta takes the UK retail side of your business off your desk — from the production line to the shelf — and gives you one place to watch it happen."
     />
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow" />
@@ -22,23 +32,24 @@
          private/unknown path. Never add a second canonical link. -->
     <link rel="canonical" href="https://mercenta.co.uk/" id="route-canonical" />
 
-    <!-- Open Graph -->
+    <!-- Open Graph — §B7: the SAME description as the SSOT home description and
+         the SAME title. One page, one description; never a second wording of it. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Mercenta Partners" />
-    <meta property="og:title" content="Mercenta Partners — Self-Service Wholesale Distribution Platform" />
+    <meta property="og:title" content="Mercenta Partners" />
     <meta
       property="og:description"
-      content="A self-service wholesale distribution platform connecting independent brands with UK retail channels. Manage catalogues, purchase orders, shipments, compliance, and retail relationships from a single portal."
+      content="Mercenta takes the UK retail side of your business off your desk — from the production line to the shelf — and gives you one place to watch it happen."
     />
     <meta property="og:url" content="https://mercenta.co.uk/" />
     <meta property="og:locale" content="en_GB" />
 
     <!-- Twitter Card / Summary Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Mercenta Partners — Self-Service Wholesale Distribution Platform" />
+    <meta name="twitter:title" content="Mercenta Partners" />
     <meta
       name="twitter:description"
-      content="Mercenta Partners is a self-service wholesale distribution platform that connects independent brands with UK retail channels."
+      content="Mercenta takes the UK retail side of your business off your desk — from the production line to the shelf — and gives you one place to watch it happen."
     />
 
     <!-- Open Graph image -->
@@ -47,7 +58,8 @@
     <meta property="og:image:height" content="180" />
     <meta name="twitter:image" content="https://mercenta.co.uk/apple-touch-icon.png" />
     <meta name="theme-color" content="#0C1219" />
-    
+
+
     <!-- Font loading — parallel preconnect + stylesheet replaces render-blocking @import in CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -60,24 +72,22 @@
     <!-- Static bootstrap title: main.tsx overrides this with BRAND_NAME at runtime. -->
     <title>Mercenta Partners</title>
 
-    <!-- JSON-LD Structured Data — factually describing the existing platform from code analysis -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Mercenta Partners",
-      "legalName": "Mercenta Partners Ltd",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
-      "description": "Self-service wholesale distribution platform connecting independent brands with UK retail channels. Brands manage catalogues, purchase orders, shipments, compliance documentation, contracts, returns, and analytics through a single portal. Mercenta provides UK import, customs clearance, and distribution infrastructure.",
-      "url": "https://mercenta.co.uk/",
-      "applicationSubCategory": "Wholesale Distribution Platform",
-      "featureList": "Product catalog management, Purchase order management, Shipment tracking, Compliance document management, UK customs clearance, Carrier integration (DHL, FedEx, BAK, Palletline), Contract management, Returns tracking, Sales analytics, Brand CRM, Billing and invoicing, Retail pipeline management, Marketing hub, Multi-user role access (Brand Partner, Admin, Super Admin, 3PL Carrier), Partner application/onboarding wizard, Product research, Social account management",
-      "permissions": "Requires authenticated account for brand/admin/carrier portals. Public homepage accessible without authentication.",
-      "processorRequirements": "Web browser with JavaScript enabled. Single-page application built with React."
-    }
-    </script>
+    <!-- ── JSON-LD — REWRITTEN IN B7 (2026-09-29) ────────────────────────────
+         WHAT WAS WRONG. These blocks are read by every search engine and AI
+         crawler that consumes structured data, and they published the regulated
+         position, the commercial model, an internal feature inventory (naming the
+         carrier monitor and the supplier set), the supplier names themselves, and
+         a permissions line naming the carrier environment Phase P9 removed.
 
+         NOW. Each node states only what the platform can evidence in public: who
+         it is, where it operates, the one honest page description and a contact
+         address that exists. The SoftwareApplication node is GONE rather than
+         restated — an internal feature inventory is not a public fact (REMOVE
+         before ADD). `scripts/validate-seo-foundation.mjs` pins EVERY description
+         in this file to the SSOT home description, and
+         `scripts/validate-public-claims.mjs` scans this file for the declared
+         red lines, because a comment in a SHIPPED file is published too.
+    -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -85,14 +95,14 @@
       "name": "Mercenta Partners",
       "legalName": "Mercenta Partners Ltd",
       "url": "https://mercenta.co.uk/",
-      "description": "Mercenta Partners is a self-service wholesale distribution platform and UK importer of record that connects independent brands from North America, Europe, and Africa with UK retail channels.",
+      "description": "Mercenta takes the UK retail side of your business off your desk — from the production line to the shelf — and gives you one place to watch it happen.",
       "areaServed": [
         { "@type": "Country", "name": "United Kingdom" }
       ],
       "contactPoint": {
         "@type": "ContactPoint",
-        "email": "privacy@mercenta.co.uk",
-        "contactType": "privacy inquiries"
+        "email": "hello@mercenta.co.uk",
+        "contactType": "customer enquiries"
       }
     }
     </script>
@@ -103,7 +113,7 @@
       "@type": "WebSite",
       "name": "Mercenta Partners",
       "url": "https://mercenta.co.uk/",
-      "description": "Mercenta Partners self-service wholesale distribution platform for brands entering the UK market."
+      "description": "Mercenta takes the UK retail side of your business off your desk — from the production line to the shelf — and gives you one place to watch it happen."
     }
     </script>
 
@@ -112,113 +122,41 @@
       "@context": "https://schema.org",
       "@type": "WebPage",
       "name": "Mercenta Partners — Home",
-      "description": "Public homepage of the Mercenta Partners self-service wholesale distribution platform. Learn about brand onboarding, UK market distribution, and platform capabilities.",
       "url": "https://mercenta.co.uk/",
+      "inLanguage": "en-GB",
+      "description": "Mercenta takes the UK retail side of your business off your desk — from the production line to the shelf — and gives you one place to watch it happen.",
       "isPartOf": {
         "@type": "WebSite",
-        "name": "Mercenta Partners",
         "url": "https://mercenta.co.uk/"
-      },
-      "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mercenta.co.uk/" }
-        ]
       }
     }
     </script>
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      §B7 (2026-09-29) — A NOTICE, NOT A SECOND COPY OF THE SITE.
+
+      This block used to contain the ENTIRE pre-B3 public site: the retired
+      positioning, the regulated position and its registrations, the commercial
+      model and its arithmetic, another company's rules and vocabulary, the
+      companies carriage is bought from, an invented sourcing-corridor claim, the
+      internal portal inventory, and a stale duplicate of BOTH legal documents
+      dated 30 August 2026 — every one of the claims
+      `src/config/positioning.ts` §11 declares a public surface may never make.
+
+      It was invisible to every gate: the browser checks render with JavaScript
+      on (so `<noscript>` is never seen), and `validate:wording` scans `src/` only.
+      What remains is the one thing a visitor without JavaScript actually needs.
+      The site's real copy lives in its owners (`src/config/positioning.ts`) and
+      is never forked here — and this block is now scanned like any other public
+      copy (`scripts/validate-public-claims.mjs`).
+    -->
     <noscript>
-      <div style="padding: 2rem; max-width: 720px; margin: 0 auto; font-family: sans-serif;">
+      <div style="padding: 2rem; max-width: 720px; margin: 0 auto; font-family: sans-serif; line-height: 1.6;">
         <h1>Mercenta Partners</h1>
-        <p>Self-service wholesale distribution platform connecting independent brands with UK retail channels.</p>
-
-        <h2>How Mercenta Works</h2>
-        <p>Your brand. The UK market. No infrastructure required. Mercenta Partners is a self-service platform that gets independent brands into the UK market. You onboard yourself, manage your catalogue, and track every order in real-time. Mercenta handles distribution, UK customs clearance, and retail channel placement.</p>
-        <ul>
-          <li>Onboard your brand &mdash; Submit products and compliance documents. Self-service, no waiting.</li>
-          <li>We distribute &mdash; Your products go live across UK retail channels with full logistics handled.</li>
-          <li>You manage from your portal &mdash; Acknowledge orders, track shipments, monitor performance. Real-time.</li>
-        </ul>
-
-        <h2>Services</h2>
-        <ul>
-          <li><strong>Every Order in Real-Time</strong> &mdash; See every order the moment it is placed. No monthly reports.</li>
-          <li><strong>Live Shipment Tracking</strong> &mdash; Track every shipment from origin to delivery.</li>
-          <li><strong>UK-Based Distribution</strong> &mdash; UK distribution for independent brands across health, home, kitchen, and consumer categories.</li>
-          <li><strong>Automated Order-to-Fulfilment</strong> &mdash; Full order-to-fulfilment cycle automation for UK market access.</li>
-        </ul>
-
-        <h2>Global Sourcing Routes</h2>
-        <ul>
-          <li><strong>North America</strong> &mdash; US brands enter through trade corridors into UK retail channels.</li>
-          <li><strong>Europe</strong> &mdash; EU brands by road freight into UK distribution with compliance handled.</li>
-          <li><strong>Africa</strong> &mdash; African brands through depot network into UK retail channels.</li>
-        </ul>
-
-        <h2>User Roles</h2>
-        <ul>
-          <li><strong>Brand Partner</strong> &mdash; Brands distributing through Mercenta's UK retail network. Manage products, catalogue, purchase orders, shipments, compliance, contracts, returns, analytics, reports, team messages, social accounts, settings.</li>
-          <li><strong>Mercenta Admin</strong> &mdash; Internal operations. Manage brand CRM, fulfillment track, retail pipeline, purchase orders, logistics, carriers, catalog, compliance, billing, contracts, communications, helpdesk, returns, monitoring, marketing.</li>
-          <li><strong>Super Admin</strong> &mdash; Full platform access: staff management, audit log, integration settings, system admin.</li>
-          <li><strong>3PL Carrier</strong> &mdash; DHL, FedEx, BAK Logistics manifest management and tracking portal.</li>
-        </ul>
-
-        <h2>Brand Portal Sections</h2>
-        <p>Dashboard, Onboarding &amp; Legal, Contracts, Purchase Orders, Product Catalog, Inbound Shipments, UK Compliance, Returns, Analytics, Reports, Documents &amp; Account, Support &amp; Team, Social Accounts, Settings.</p>
-
-        <h2>Admin Portal Sections</h2>
-        <p>Brand CRM, Fulfillment Track, Retail Pipeline, Purchase Orders (Admin), Logistics Control, Carrier Integration Monitor, Global Catalog Manager, Compliance Approvals, Billing, Contract Cycle, Communications, Helpdesk, Returns Tracking, Monitoring, Marketing, Super Admin Panel, Audit Log, Integration Settings.</p>
-
-        <h2>Privacy Policy</h2>
-        <p>Last updated: 30 August 2026. Mercenta Partners Ltd complies with UK GDPR and the Data Protection Act 2018.</p>
-        <h3>1. Who we are</h3>
-        <p>Mercenta Partners Ltd, a UK wholesale distribution platform. Contact: privacy@mercenta.co.uk</p>
-        <h3>2. What we collect</h3>
-        <p>Identity (name, job title, company), Contact (business email, phone, address), Financial (bank details, VAT/EORI), Transaction (PO history, shipments, compliance docs), Communications (messages, tickets), Technical (IP, browser, login timestamps).</p>
-        <h3>3. Legal basis</h3>
-        <p>Contract performance (orders, shipments, payments), legitimate interests (CRM, fraud prevention), legal obligation (tax, customs), consent (marketing, opt-in only).</p>
-        <h3>4. Data sharing</h3>
-        <p>Shared with fulfilment partners, Stripe, carriers, regulators. Never sold.</p>
-        <h3>5. Retention</h3>
-        <p>Business relationship plus six years (HMRC), then deleted or anonymised.</p>
-        <h3>6. Your rights</h3>
-        <p>Access, rectify, erase, restrict, port, withdraw consent. Email privacy@mercenta.co.uk</p>
-        <h3>7. Contact</h3>
-        <p>privacy@mercenta.co.uk. Regulator: ICO, ico.org.uk</p>
-
-        <h2>Terms of Service</h2>
-        <p>Last updated: 30 August 2026</p>
-        <h3>1. Acceptance</h3>
-        <p>By using the Mercenta Partners Ltd platform, you agree to these Terms.</p>
-        <h3>2. Definitions</h3>
-        <p>Platform: Mercenta wholesale distribution system. Brand: product supplier. Retail Network: UK fulfilment partners. PO: purchase order.</p>
-        <h3>3. Brand obligations</h3>
-        <p>Accurate product info and compliance docs. Acknowledge POs within 24 hours. Fulfil accepted POs. Notify changes.</p>
-        <h3>4. Platform fees</h3>
-        <p>Commission per PO fulfilled plus logistics and service fees. Deducted from remittance.</p>
-        <h3>5. Payment terms</h3>
-        <p>Per commercial agreement schedule, subject to PO verification and delivery confirmation.</p>
-        <h3>6. Compliance</h3>
-        <p>Brands ensure UK regulation compliance (UKCA/CE, REACH, GPSR). Non-compliant products may be suspended.</p>
-        <h3>7. Liability</h3>
-        <p>Liability limited to fees paid in preceding 12 months. No liability for indirect losses.</p>
-        <h3>8. Termination</h3>
-        <p>30 days written notice. Mercenta may suspend for breach or non-compliance.</p>
-        <h3>9. Governing law</h3>
-        <p>England and Wales. Exclusive jurisdiction of English courts.</p>
-        <h3>10. Contact</h3>
-        <p>legal@mercenta.co.uk</p>
-
-        <h2>Platform Features</h2>
-        <p>Product catalog management, Purchase order management, Shipment tracking, Compliance document management, UK customs clearance, Carrier integration (DHL, FedEx, BAK, Palletline), Contract management, Returns tracking, Sales analytics, Brand CRM, Billing and invoicing, Retail pipeline management, Marketing hub, Multi-user role access (Brand Partner, Admin, Super Admin, 3PL Carrier), Partner application/onboarding wizard, Social account management.</p>
-
-        <h2>Contact</h2>
-        <p>Privacy inquiries: <a href="mailto:privacy@mercenta.co.uk">privacy@mercenta.co.uk</a></p>
-        <p>Legal inquiries: <a href="mailto:legal@mercenta.co.uk">legal@mercenta.co.uk</a></p>
-        <p>Mercenta Partners Ltd &middot; UK Importer of Record &mdash; EORI Registered</p>
+        <p>This site needs JavaScript to run. Please enable JavaScript in your browser, then reload the page.</p>
+        <p>You can reach us at <a href="mailto:hello@mercenta.co.uk">hello@mercenta.co.uk</a>.</p>
       </div>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

@@ -32,11 +32,10 @@ Allow: /assets/            # JS/CSS bundles (required for rendering)
 Disallow: /login           # Authentication gateway
 Disallow: /admin           # Mercenta Admin Hub (requires login)
 Disallow: /brand           # Brand Partner Portal (requires login)
-Disallow: /carrier         # 3PL Carrier Terminal (requires login)
 Disallow: /account         # Account management (requires login)
 Disallow: /dashboard       # Brand/Admin dashboards (requires login)
 Disallow: /internal        # Internal tools and administration
-Disallow: /api/            # Private API endpoints
+Disallow: /api/            # Private application routes (never public)
 
 # Sitemap
 Sitemap: https://mercenta.co.uk/sitemap.xml

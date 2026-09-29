@@ -655,6 +655,16 @@ try {
     'src/components/marketing/PrivacyPolicy.tsx',
     'src/components/marketing/TermsOfService.tsx',
     'scripts/validate-public-claims.mjs',
+    /**
+     * §PUBLIC MESSAGING B7 (2026-09-29) — the STATIC public surface (see the same
+     * declaration in E6). `index.html` reached every visitor with the obsolete
+     * pre-B3 site inside its `<noscript>` block and no gate scanned it; these three
+     * files are now scanned by `validate-public-claims.mjs` (B8) and pinned by
+     * `validate-seo-foundation.mjs` (B7).
+     */
+    'index.html',
+    'public/robots.txt',
+    'public/sitemap.xml',
     'scripts/validate-company-control-centre.mjs',
     'scripts/validate-homepage-editor.mjs',
     'scripts/validate-uiux-redesign.mjs',

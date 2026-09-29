@@ -42,6 +42,11 @@ const read = (p) => readFileSync(resolve(process.cwd(), p), 'utf8');
 try {
   const routes = await server.ssrLoadModule('/src/lib/seo/publicRoutes.ts');
   const meta = await server.ssrLoadModule('/src/lib/seo/routeMetadata.ts');
+  /**
+   * §B7 (2026-09-29) — the public-copy owner, so the STATIC public surface can be
+   * checked against the same declarations the rendered pages read.
+   */
+  const positioningOwner = await server.ssrLoadModule('/src/config/positioning.ts');
 
   const originalFetch = globalThis.fetch;
   let networkCalls = 0;
@@ -105,6 +110,24 @@ try {
   const missingDisallow = routes.PRIVATE_ROUTE_PREFIXES.filter((p) => !robots.includes(`Disallow: ${p}`));
   test('robots.txt disallows every declared private prefix', missingDisallow.length === 0, missingDisallow.join(', '));
   test('robots.txt points at the sitemap', /Sitemap: https:\/\/mercenta\.co\.uk\/sitemap\.xml/.test(robots));
+  /**
+   * §B7 (2026-09-29) — robots.txt CANNOT ANNOUNCE A ROUTE THAT IS NOT DECLARED.
+   *
+   * It carried `Disallow: /carrier` for the 3PL carrier surface Phase P9 removed,
+   * so the file told every crawler about a route Mercenta no longer serves. The
+   * "every private prefix is disallowed" check above cannot see that: an extra
+   * disallow passes a subset test. This asserts the OTHER direction, derived from
+   * the owner, so a removed surface cannot leave a stale line behind.
+   */
+  const disallowedPaths = [...robots.matchAll(/^Disallow:\s*(\S+)/gm)].map((m) => m[1]);
+  const undeclaredDisallow = disallowedPaths.filter(
+    (p) => !routes.PRIVATE_ROUTE_PREFIXES.some((prefix) => p === prefix || p.startsWith(prefix))
+  );
+  test(
+    'every Disallow path in robots.txt is a DECLARED private prefix (no stale route announced)',
+    disallowedPaths.length > 0 && undeclaredDisallow.length === 0,
+    undeclaredDisallow.join(', ')
+  );
 
   /* ── D. sitemap.xml ─────────────────────────────────────────────────────── */
   const sitemap = read('public/sitemap.xml');
@@ -116,7 +139,15 @@ try {
   test('sitemap.xml lists no duplicate URL', new Set(locs).size === locs.length);
   test(
     'sitemap.xml lists NO private path',
-    !locs.some((u) => /(\/admin|\/brand|\/carrier|\/login|\/account|\/dashboard|\/internal|\/api\/)/.test(u))
+    !locs.some((u) => routes.PRIVATE_ROUTE_PREFIXES.some((p) => u.includes(p)))
+    /**
+     * §B7 (2026-09-29) — REPOINTED to the owner, not weakened.
+     * OLD CONTRACT: a hand-written regex listing the private prefixes, including
+     * `/carrier` — a path the model had ALREADY removed (P9). A hand-written list
+     * of the owner's own prefixes is a second source of truth that goes stale in
+     * exactly the way this one did. It now derives from
+     * `PRIVATE_ROUTE_PREFIXES`, so the check cannot disagree with the model.
+     */
   );
   test('the sitemap and robots.txt agree on the public set', locs.length === declared.length, `${locs.length} vs ${declared.length}`);
 
@@ -148,6 +179,78 @@ try {
   test('the canonical element is the runtime-rewritable bootstrap (id="route-canonical")', indexHtml.includes('id="route-canonical"'));
   test('the bootstrap canonical is documented as bootstrap-only', /BOOTSTRAP ONLY/.test(indexHtml));
   test('the bootstrap description still matches the SSOT home description', indexHtml.includes(declared[0].description.slice(0, 60)));
+
+  /**
+   * §B7 (2026-09-29) — ONE PAGE, ONE DESCRIPTION, EVERYWHERE IT IS PUBLISHED.
+   *
+   * The og: and twitter: descriptions were their own wording of the same page and
+   * the JSON-LD carried a third. Each is now asserted EQUAL to the SSOT home
+   * description, so a reworded page cannot leave a share card — or a crawler's
+   * structured data — advertising different copy from the page itself.
+   */
+  const metaContent = (name) => {
+    const m = indexHtml.match(new RegExp(`(?:name|property)="${name}"[\\s\\S]*?content="([^"]*)"`));
+    return m ? m[1] : '';
+  };
+  test('the bootstrap meta description is the SSOT home description', metaContent('description') === declared[0].description);
+  test('og:description is the SSOT home description', metaContent('og:description') === declared[0].description);
+  test('twitter:description is the SSOT home description', metaContent('twitter:description') === declared[0].description);
+  test(
+    'og:title and twitter:title are the SSOT home title',
+    metaContent('og:title') === declared[0].title && metaContent('twitter:title') === declared[0].title,
+    `${metaContent('og:title')} / ${metaContent('twitter:title')}`
+  );
+
+  /**
+   * §B7 (2026-09-29) — THE STRUCTURED DATA STATES ONLY WHAT CAN BE EVIDENCED.
+   *
+   * These blocks are read by every search engine and AI crawler that consumes
+   * structured data, and they used to publish the regulated position, an internal
+   * feature inventory and the supplier names. Every block must now PARSE, and every
+   * description inside one must be the SSOT home description.
+   */
+  const ldBlocks = [...indexHtml.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  test('at least three JSON-LD blocks are declared', ldBlocks.length >= 3, String(ldBlocks.length));
+  test(
+    'every JSON-LD block parses as JSON',
+    ldBlocks.every((b) => {
+      try {
+        JSON.parse(b);
+        return true;
+      } catch {
+        return false;
+      }
+    })
+  );
+  const ldDescriptions = [...indexHtml.matchAll(/"description": "([^"]*)"/g)].map((m) => m[1]);
+  test(
+    'every JSON-LD description is the SSOT home description',
+    ldDescriptions.length >= 3 && ldDescriptions.every((d) => d === declared[0].description),
+    `${ldDescriptions.length} description(s)`
+  );
+
+  /**
+   * §B7 (2026-09-29) — THE NOSCRIPT IS A NOTICE, NOT A SECOND SITE.
+   *
+   * The body's `<noscript>` used to hold the ENTIRE pre-B3 public site — the
+   * positioning, the regulated position, the commercial model, another company's
+   * vocabulary, the suppliers, the portal inventory and a stale duplicate of both
+   * legal documents. No browser check could see it (they run with JavaScript on),
+   * so its SHAPE is pinned here: a heading, the JavaScript notice and the public
+   * contact address, with NO content sections at all. The CLAIM scan over this file
+   * is `scripts/validate-public-claims.mjs` (B8).
+   */
+  const bodyNoscript = (indexHtml.match(/<body>[\s\S]*?<noscript>([\s\S]*?)<\/noscript>/) || [])[1] || '';
+  test(
+    'the body noscript is a notice, not a content fork (no <h2>/<h3>/<ul> sections)',
+    bodyNoscript.trim().length > 0 && !/<h2|<h3|<ul/i.test(bodyNoscript)
+  );
+  test('the body noscript stays short', bodyNoscript.length > 0 && bodyNoscript.length < 900, `${bodyNoscript.length} chars`);
+  test(
+    'the body noscript names the public contact address and no other address',
+    bodyNoscript.includes(positioningOwner.PUBLIC_CONTACT_EMAIL) &&
+      !/@mercenta\.co\.uk/.test(bodyNoscript.split(positioningOwner.PUBLIC_CONTACT_EMAIL).join(''))
+  );
 
   /* ── G. The writer is mounted ───────────────────────────────────────────── */
   const appSource = read('src/App.tsx');

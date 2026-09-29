@@ -37,6 +37,16 @@
  */
 import { BRAND_DOMAIN, BRAND_LEGAL_NAME, BRAND_NAME } from '@/config/brand';
 import { EXPLORE_UK_MARKET_FIT_PATH } from '@/config/ukMarketFit';
+/**
+ * §B7 (2026-09-29) — THE HOME DESCRIPTION IS DERIVED FROM ITS OWNER.
+ *
+ * `src/config/positioning.ts` §1 is the ONE declaration of what Mercenta says in
+ * public, and PUBLIC_PROMISE is that declaration's one-sentence promise. The home
+ * route's description used to be a second wording of it (the RETIRED positioning),
+ * so the homepage's search description and its own hero described the business two
+ * different ways. It now reads the owner.
+ */
+import { PUBLIC_PROMISE } from '@/config/positioning';
 
 /** The public page ids — the SAME union `PublicNav` renders. */
 export type PublicRoutePage =
@@ -77,8 +87,15 @@ export const PUBLIC_ROUTES: readonly PublicRouteDefinition[] = [
     page: 'home',
     // Preserved deliberately: the homepage title is the brand, as before.
     title: BRAND_NAME,
-    description:
-      'A self-service wholesale distribution platform connecting independent brands with UK retail channels. Manage catalogues, purchase orders, shipments, compliance, and retail relationships from a single portal.',
+    /**
+     * §B7 (2026-09-29) — DERIVED, NOT RETYPED. This description was the RETIRED
+     * positioning ("a self-service wholesale distribution platform…"), which
+     * `PUBLIC_CATEGORY` — "Retail channel partner" — contradicts and which B3
+     * removed from every public page. It is now the owner's own one-sentence
+     * promise. `index.html`'s bootstrap copy carries the SAME string, and
+     * `scripts/validate-seo-foundation.mjs` fails if the two drift.
+     */
+    description: PUBLIC_PROMISE,
     robots: 'index, follow',
     changefreq: 'weekly',
     priority: '1.0',
@@ -97,8 +114,14 @@ export const PUBLIC_ROUTES: readonly PublicRouteDefinition[] = [
     path: '/uk-market-access',
     page: 'uk-market-access',
     title: `UK Market Access — ${BRAND_NAME}`,
+    /**
+     * §B7 (2026-09-29) — the previous description published the regulated position
+     * ("customs clearance" — `src/config/positioning.ts` §11 family 2) in the page's
+     * search and AI-crawler description. This states the same offer in outcome
+     * terms and names no mechanism, no authority and no supplier.
+     */
     description:
-      'UK market access for independent brands: import, customs clearance and retail-channel distribution delivered through one operating platform.',
+      'What it takes for an independent brand to sell into the UK, and which parts of that Mercenta carries for you.',
     robots: 'index, follow',
     changefreq: 'monthly',
     priority: '0.7',
