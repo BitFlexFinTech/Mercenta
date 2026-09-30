@@ -39,6 +39,9 @@
  *   L17 the compliance document set on the DEPLOYED brand surface: three
  *       universal documents, the category document, and the reclassified
  *       brand-ownership control nowhere required (BATCH 2e · AV-031/AV-032)
+ *   L18 the delivery appointment on the DEPLOYED brand surface: the channel's
+ *       own appointment state, the window rule's verdict, and the rule's words
+ *       rendered rather than assumed compliant (BATCH 2i · AV-045)
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -1021,6 +1024,86 @@ function readRedLines() {
     );
   }
   await compPage.close();
+
+  /* ── L18 — BATCH 2i (AV-045): THE DELIVERY APPOINTMENT, ON THE LIVE SITE ────
+   * WHY THIS EXISTS. The brand Logistics Hub now states, for every consignment,
+   * the retail channel's DELIVERY APPOINTMENT and the channel's own window rule
+   * (a carrier-requested delivery date must fall within the purchase order's
+   * delivery window). What the brand is shown on the DEPLOYED surface is the only
+   * proof that matters: the appointment must be present, its state and its window
+   * verdict must come from the documented vocabulary (never an invented value),
+   * and the rule's own words must be rendered rather than assumed compliant.
+   * Driven through the product's own controls; asserting the source would prove
+   * nothing about the deployed bundle.
+   */
+  console.log('\n--- L18 the delivery appointment, on the live brand surface ---');
+  const apptPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const apptErrors = [];
+  apptPage.on('pageerror', (e) => apptErrors.push(String(e)));
+  try {
+    let apptEntryAttempt = 0;
+    let apptEntryError = null;
+    for (let attempt = 1; attempt <= 3 && apptEntryAttempt === 0; attempt++) {
+      try {
+        await gotoLive(apptPage, `${SITE}/`);
+        const login = apptPage.getByRole('button', { name: 'Partner Login' }).first();
+        await login.waitFor({ state: 'visible', timeout: 90000 });
+        await login.click({ timeout: 30000 });
+        await apptPage.waitForTimeout(2500);
+        const card = apptPage.locator('text=Tapatío').first();
+        await card.waitFor({ state: 'visible', timeout: 90000 });
+        await card.click({ timeout: 30000 });
+        await apptPage.waitForTimeout(3000);
+        apptEntryAttempt = attempt;
+      } catch (err) {
+        apptEntryError = err;
+      }
+    }
+    if (apptEntryAttempt === 0) throw apptEntryError ?? new Error('entry failed');
+    check(`L18 the deployed site opened and the brand signed in (attempt ${apptEntryAttempt})`, true);
+
+    const apptNav = apptPage.locator('nav[aria-label="Primary"] >> text=Logistics Hub').first();
+    await apptNav.waitFor({ state: 'visible', timeout: 90000 });
+    await apptNav.click({ timeout: 30000 });
+    await apptPage.waitForTimeout(2500);
+
+    const apptRow = apptPage.locator('[data-testid^="logistics-row-"]').first();
+    await apptRow.waitFor({ state: 'visible', timeout: 90000 });
+    await apptRow.click({ timeout: 30000 });
+    await apptPage.waitForTimeout(1500);
+
+    const appt = apptPage.getByTestId('logistics-appointment');
+    await appt.waitFor({ state: 'visible', timeout: 90000 });
+    const apptState = await appt.getAttribute('data-appointment-state');
+    const apptWindow = await appt.getAttribute('data-appointment-window');
+    check(
+      `L18 the LIVE appointment state is one of the channel's documented states (${apptState})`,
+      ['Pending', 'Scheduled', 'Arrived', 'Deleted', 'Cancelled', 'Defect', 'Closed', 'unknown'].includes(apptState)
+    );
+    check(
+      `L18 the LIVE window verdict is one of the documented codes (${apptWindow})`,
+      ['within-window', 'before-window', 'after-window', 'no-delivery-window', 'undocumented-date'].includes(apptWindow)
+    );
+    const apptText = (await appt.textContent()) ?? '';
+    check('L18 the LIVE surface names the appointment', /Delivery appointment:/i.test(apptText));
+    check(
+      'L18 the LIVE window rule is stated — inside the window, or a refusal with a reason',
+      apptWindow === 'within-window'
+        ? /falls within the purchase order/i.test(apptText)
+        : /no delivery window|cannot be established|is before|is after/i.test(apptText),
+      apptText.slice(0, 120)
+    );
+    check(
+      `L18 the driven appointment surface rendered with no uncaught error (errors: ${apptErrors.join(' | ') || 'none'})`,
+      apptErrors.length === 0
+    );
+  } catch (apptError) {
+    check(
+      `L18 the delivery appointment could NOT be driven live (${String(apptError).split('\\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await apptPage.close();
 
   await browser.close();
 

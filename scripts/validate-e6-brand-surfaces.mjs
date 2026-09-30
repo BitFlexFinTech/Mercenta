@@ -731,6 +731,7 @@ const BATCH2I_DELIVERY_APPOINTMENT_SCOPE = new Set([
   'src/data/demoData.ts',
   'src/components/brand/LogisticsHub.tsx',
   'scripts/validate-delivery-appointment.mjs',      /* NEW — this phase's gate */
+  'scripts/verify-live-demo.mjs',                   /* +L18 — the appointment on the deployed surface */
   'e2e/delivery-appointment.spec.ts',               /* NEW — the browser proof */
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',

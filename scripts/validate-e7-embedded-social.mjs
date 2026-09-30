@@ -726,6 +726,7 @@ try {
     'src/data/demoData.ts',
     'src/components/brand/LogisticsHub.tsx',
     'scripts/validate-delivery-appointment.mjs',
+    'scripts/verify-live-demo.mjs',
     'e2e/delivery-appointment.spec.ts',
     'scripts/validate-e6-brand-surfaces.mjs',
     'scripts/validate-e7-embedded-social.mjs',
