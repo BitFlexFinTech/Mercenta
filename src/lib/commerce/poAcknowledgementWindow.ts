@@ -38,7 +38,6 @@ import {
   PO_ACK_AUTO_REJECT_REASON,
   PO_ACK_NOTIFICATION_HOURS,
   PO_ACK_ON_BEHALF_WINDOW_HOURS,
-  PO_ACK_STATUSES_WITH_OBLIGATION,
   PO_ACK_UPDATE_WINDOW_HOURS,
   PO_ACK_WINDOW_RULE_TEXT,
   PO_AMENDABLE_FIELD_GROUP_LABELS,
@@ -49,6 +48,15 @@ import {
   type PoChannelState,
 } from '@/config/purchaseOrders';
 import type { PoRejectionCode, PurchaseOrder } from '@/types';
+/**
+ * §BATCH 2h (`AV-043`) — WHICH CHANNEL POSITION A STATUS OCCUPIES IS DECLARED
+ * ONCE, in the mapping owner, in both directions. This module used to decide it
+ * here with its own status pair (`po.status === 'rejected' || po.status ===
+ * 'delivered'`) plus a config list — an implicit mapping that could not be
+ * reversed and would silently disagree with the rest of the platform the moment a
+ * status was added. It now ASKS the owner.
+ */
+import { channelStateForStatus } from '@/lib/commerce/poChannelVocabulary';
 
 const HOUR_MS = 3_600_000;
 const MINUTE_MS = 60_000;
@@ -291,7 +299,11 @@ export function poAcknowledgementWindow(
 ): PoAcknowledgementWindow {
   const nowMs = instantOf(now);
   const recorded = poAcknowledgementRecorded(po);
-  const obligation = PO_ACK_STATUSES_WITH_OBLIGATION.includes(po.status);
+  /**
+   * §BATCH 2h (`AV-043`) — the order's CHANNEL position, taken from the ONE
+   * mapping owner rather than decided here.
+   */
+  const statusState = channelStateForStatus(po.status);
   const deadline = poAcknowledgementDeadline(po);
 
   const base = {
@@ -324,8 +336,26 @@ export function poAcknowledgementWindow(
   const hoursLeft = msLeft / HOUR_MS;
   const autoRejectAtMs = deadlineMs - PO_ACK_ON_BEHALF_WINDOW_HOURS * HOUR_MS;
 
-  /** Amazon's `Closed` set — completed or rejected: no action remains. */
-  if (po.status === 'rejected' || po.status === 'delivered') {
+  /**
+   * §BATCH 2h (`AV-043`) — FAIL CLOSED on a status the platform does not
+   * recognise. Before the mapping had ONE owner this case fell into the `New`
+   * branch (because an unknown status was simply "not in the obligation list"),
+   * so an order whose lifecycle position could not be derived was offered as an
+   * ACTIONABLE acknowledgement — exactly the class of phantom work item this
+   * module exists to prevent. An unknown position now offers no channel action.
+   */
+  if (statusState === 'unknown') {
+    return {
+      ...base,
+      channelState: 'unknown',
+      history: true,
+      inQueue: false,
+      reason: `Status "${po.status}" is not one of the declared purchase-order lifecycle statuses, so the order's channel position cannot be derived — no channel action is offered (fail-closed).`,
+    };
+  }
+
+  /** The channel's `Closed` set — completed or rejected: no action remains. */
+  if (statusState === 'closed') {
     return {
       ...base,
       channelState: 'closed',
@@ -341,8 +371,8 @@ export function poAcknowledgementWindow(
     };
   }
 
-  /** Amazon's `Acknowledged` set — the decision is recorded, or none is owed. */
-  if (recorded || !obligation) {
+  /** The channel's `Acknowledged` set — the decision is recorded, or none is owed. */
+  if (recorded || statusState === 'acknowledged') {
     return {
       ...base,
       channelState: 'acknowledged',

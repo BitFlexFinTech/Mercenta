@@ -43,6 +43,12 @@ import {
   type PoRejectionCode,
   type PurchaseOrderStatus,
 } from '@/types';
+/**
+ * §BATCH 2h (`AV-043`) — the PO vocabulary mapping's ONE owner. Imported as a
+ * VALUE (not a type) so `PO_ACK_STATUSES_WITH_OBLIGATION` below can be DERIVED
+ * from it instead of writing the same two statuses down a second time.
+ */
+import { mercentaStatusesForChannelState } from '@/lib/commerce/poChannelVocabulary';
 
 /**
  * AMAZON-DOCUMENTED — the acknowledgement window. Deadline = `orderDate + 24h`.
@@ -164,14 +170,19 @@ export type PoAckTimeliness = (typeof PO_ACK_TIMELINESS)[number];
 export const PO_ACK_SYSTEM_ACTOR_ID = 'mercenta-system:po-acknowledgement';
 
 /**
- * The statuses that carry an acknowledgement OBLIGATION — i.e. Amazon's `New`
+ * The statuses that carry an acknowledgement OBLIGATION — i.e. the channel's `New`
  * set for an operational PO. A PO in any other status is already past the
  * acknowledgement decision and therefore derives NO acknowledgement work.
+ *
+ * §BATCH 2h (`AV-043`) — DERIVED, never re-typed. This set IS "the statuses whose
+ * channel lifecycle position is `New`", and `src/lib/commerce/poChannelVocabulary.ts`
+ * owns that mapping in both directions. Writing `'received'` / `'under_review'`
+ * out here as well would be a SECOND representation of one fact: it would drift
+ * the moment a lifecycle status is added, and the set and the mapping would then
+ * silently disagree about which orders are actionable.
  */
-export const PO_ACK_STATUSES_WITH_OBLIGATION: readonly PurchaseOrderStatus[] = [
-  'received',
-  'under_review',
-];
+export const PO_ACK_STATUSES_WITH_OBLIGATION: readonly PurchaseOrderStatus[] =
+  mercentaStatusesForChannelState('new');
 
 /** Amazon's own PO lifecycle vocabulary, as derived for a Mercenta PO. */
 export const PO_CHANNEL_STATES = ['new', 'acknowledged', 'closed', 'unknown'] as const;

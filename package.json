@@ -58,6 +58,7 @@
     "validate:po-revision": "node scripts/validate-po-revision-ingestion.mjs",
     "validate:ack-invoice-price": "node scripts/validate-ack-invoice-price.mjs",
     "validate:compliance-attribution": "node scripts/validate-compliance-attribution.mjs",
+    "validate:po-channel-vocabulary": "node scripts/validate-po-channel-vocabulary.mjs",
     "validate:po-ack-window": "node scripts/validate-po-acknowledgement-window.mjs",
     "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",
     "validate:po-ack-work": "node scripts/validate-po-acknowledgement-work.mjs",

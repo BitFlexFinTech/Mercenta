@@ -33,11 +33,16 @@
  * operational the moment real credentials are configured — a credentials change,
  * not a code change.
  */
-import type { PurchaseOrder, ReceivingStatus } from '@/types';
+import type { PurchaseOrder, PurchaseOrderStatus, ReceivingStatus } from '@/types';
 import type {
   ChannelPurchaseOrderStatus,
   ChannelPurchaseOrdersStatusResult,
 } from '@/lib/spapi/client';
+import type { PoChannelState } from '@/config/purchaseOrders';
+import {
+  channelStateForSeamStatus,
+  mercentaStatusesForChannelState,
+} from '@/lib/commerce/poChannelVocabulary';
 import { demoPurchaseOrders } from '@/data/demoStore';
 import { deriveReceivingStatus } from './receivingStatus';
 
@@ -69,6 +74,29 @@ export interface ChannelReceivingReading {
   mercentaReceivingStatus: ReceivingStatus;
   /** TRUE when the channel's view and Mercenta's own disagree. */
   differs: boolean;
+  /**
+   * §BATCH 2h (`AV-043`) — the normalised CHANNEL POSITION this read places the
+   * order in, derived from the seam's own status word by the ONE mapping owner.
+   * Without it a reader had to assume the seam's word and Mercenta's lifecycle
+   * meant the same thing.
+   */
+  channelState: PoChannelState;
+  /**
+   * §BATCH 2h (`AV-043`) — the Mercenta statuses this channel position COULD be,
+   * reported as a set because the channel genuinely does not distinguish them
+   * (`open` covers both `received` and `under_review`). A single status here would
+   * be an invention.
+   */
+  mercentaStatusCandidates: readonly PurchaseOrderStatus[];
+  /** §BATCH 2h — TRUE when more than one Mercenta status remains possible. */
+  statusAmbiguous: boolean;
+  /**
+   * §BATCH 2h — TRUE when the purchase order MERCENTA holds is in a status the
+   * channel's read does not cover, i.e. the two descriptions of the same order
+   * disagree. Reported, never auto-corrected: resolving it is an operator
+   * decision, and it is what the audit meant by *"ambiguous status reporting"*.
+   */
+  statusDiffersFromChannel: boolean;
   /** TRUE whenever this reading could not have come from a live channel call. */
   simulated: boolean;
 }
@@ -152,6 +180,13 @@ export async function readChannelReceivingStatus(input: {
       continue;
     }
     const mercentaReceivingStatus = deriveReceivingStatus(po);
+    /**
+     * §BATCH 2h (`AV-043`) — the channel's own state word is translated by the ONE
+     * mapping owner, so a reader never has to guess whether the seam's `open` and
+     * Mercenta's lifecycle mean the same thing.
+     */
+    const channelState = channelStateForSeamStatus(status.status);
+    const mercentaStatusCandidates = mercentaStatusesForChannelState(channelState);
     readings.push({
       channelPurchaseOrderId: status.purchaseOrderId,
       poId: po.id,
@@ -166,6 +201,11 @@ export async function readChannelReceivingStatus(input: {
       ...(status.receivedDate ? { receivedDate: status.receivedDate } : {}),
       mercentaReceivingStatus,
       differs: status.receivingStatus !== mercentaReceivingStatus,
+      channelState,
+      mercentaStatusCandidates,
+      statusAmbiguous: mercentaStatusCandidates.length > 1,
+      statusDiffersFromChannel:
+        mercentaStatusCandidates.length > 0 && !mercentaStatusCandidates.includes(po.status),
       simulated: status.simulated,
     });
   }

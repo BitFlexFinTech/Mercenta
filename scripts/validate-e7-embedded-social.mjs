@@ -700,6 +700,23 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
     'package.json',
   ];
+  /**
+   * §BATCH 2h — THE PO VOCABULARY MAPPING (`AV-043`, 2026-09-30). Fuller note in
+   * `validate-e6-brand-surfaces.mjs` §BATCH2H_PO_VOCABULARY_SCOPE.
+   */
+  const BATCH2H_PO_VOCABULARY_DECLARED = [
+    'src/types.ts',
+    'src/config/purchaseOrders.ts',
+    'src/lib/commerce/poChannelVocabulary.ts',
+    'src/lib/commerce/poAcknowledgementWindow.ts',
+    'src/lib/commerce/channelReceivingSync.ts',
+    'scripts/validate-po-channel-vocabulary.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+
 
   /**
    * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
@@ -1722,6 +1739,11 @@ try {
      * drifted, and a mandatory owner-facing summary in `PROJECT_STATUS.md`.
      */
     ...PLAIN_ENGLISH_ENFORCEMENT_DECLARED,
+    /**
+     * §BATCH 2h — THE PO VOCABULARY MAPPING (`AV-043`, 2026-09-30). Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §BATCH2H_PO_VOCABULARY_SCOPE.
+     */
+    ...BATCH2H_PO_VOCABULARY_DECLARED,
     /**
      * §PUBLIC MESSAGING — the public-surfaces batch's declared surface (see above).
      */

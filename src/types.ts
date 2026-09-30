@@ -1781,6 +1781,67 @@ export const PO_CHANNEL_CHANGE_KINDS = [
 ] as const;
 export type PoChannelChangeKind = (typeof PO_CHANNEL_CHANGE_KINDS)[number];
 
+/**
+ * §BATCH 2h (`AV-043`) — THE RETAIL CHANNEL'S OWN PURCHASE-ORDER VOCABULARY.
+ *
+ * WHAT THE AUDIT FOUND
+ * --------------------
+ * The Phase 0A audit registered `AV-043`: Mercenta has its own purchase-order
+ * lifecycle (`received` → `under_review` → `accepted` → `rejected` →
+ * `ready_to_fulfil` → `shipped` → `delivered`) and its own per-line vocabulary
+ * (`unacknowledged` / `accepted` / `rejected` / `backordered`), while the retail
+ * channel speaks its OWN words — `purchaseOrderState` (`New` / `Acknowledged` /
+ * `Closed`), `purchaseOrderStatus` (`OPEN` / `CLOSED`), `itemConfirmationStatus`
+ * (`ACCEPTED` / `REJECTED` / `PARTIALLY_ACCEPTED`) and `poItemState`
+ * (`Canceled`) — and **nothing in the platform declared which of one side's
+ * words meant which of the other's**. The register named the consequence
+ * exactly: *"Mapping bugs at live integration; ambiguous status reporting."*
+ *
+ * WHY THEY LIVE HERE
+ * ------------------
+ * These are the CHANNEL's words, not Mercenta's, so — exactly like
+ * `PO_REJECTION_CODES` and `PO_CHANNEL_CHANGE_KINDS` — they are declared ONCE in
+ * the canonical types file and nowhere else. The mapping in BOTH directions (what
+ * each channel value means for Mercenta, and what the platform sends in each of
+ * its own statuses) has ONE owner:
+ * `src/lib/commerce/poChannelVocabulary.ts`.
+ *
+ * EVIDENCE
+ * --------
+ * `docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` §5.2, with sources S4
+ * (cancel-and-change orders: `purchaseOrderState = New`, `poItemState=Canceled`)
+ * and S5 (purchase-order status: `purchaseOrderStatus`, `itemConfirmationStatus`,
+ * `receivingStatus`, `shipToPartyId`). ONLY values those sources state are
+ * declared here: there is deliberately NO invented channel word for a
+ * Mercenta-only concept. A backordered line is the clearest example — the
+ * channel's confirmation vocabulary has no such value, so none is invented for it
+ * (see the owner's `CHANNEL_LINE_VOCABULARY_BY_ACK_STATUS`).
+ *
+ * FAIL-CLOSED RULE
+ * ----------------
+ * A value that is not in these lists is UNKNOWN. An unknown channel value is
+ * never coerced into a Mercenta status; the owner returns no mapping and states
+ * why.
+ */
+export const CHANNEL_PO_ORDER_STATES = ['New', 'Acknowledged', 'Closed'] as const;
+export type ChannelPoOrderState = (typeof CHANNEL_PO_ORDER_STATES)[number];
+
+/** The channel's own `purchaseOrderStatus` (source `S5`). */
+export const CHANNEL_PO_ORDER_STATUSES = ['OPEN', 'CLOSED'] as const;
+export type ChannelPoOrderStatus = (typeof CHANNEL_PO_ORDER_STATUSES)[number];
+
+/** The channel's own per-line `itemConfirmationStatus` (sources `S4`/`S5`). */
+export const CHANNEL_ITEM_CONFIRMATION_STATUSES = [
+  'ACCEPTED',
+  'REJECTED',
+  'PARTIALLY_ACCEPTED',
+] as const;
+export type ChannelItemConfirmationStatus = (typeof CHANNEL_ITEM_CONFIRMATION_STATUSES)[number];
+
+/** The channel's own per-line state when IT cancels a line (source `S4`). */
+export const CHANNEL_PO_ITEM_STATES = ['Canceled'] as const;
+export type ChannelPoItemState = (typeof CHANNEL_PO_ITEM_STATES)[number];
+
 export interface PurchaseOrderLineItem {
   sku: string;
   productName: string;

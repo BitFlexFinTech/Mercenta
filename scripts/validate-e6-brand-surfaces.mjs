@@ -664,6 +664,46 @@ const BATCH2F_WORDING_GUARD_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
+/**
+ * §BATCH 2h (`AV-043`, 2026-09-30) — THE PO VOCABULARY MAPPING.
+ *
+ * The audit found *"two vocabularies with no declared mapping"*: Mercenta's own
+ * purchase-order and line statuses, and the retail channel's (`purchaseOrderState`,
+ * `purchaseOrderStatus`, `itemConfirmationStatus`, `poItemState`), with nothing in
+ * writing linking them — *"mapping bugs at live integration; ambiguous status
+ * reporting"*. This phase declares the mapping ONCE, in both directions, and makes
+ * the acknowledgement window consult it instead of deciding the channel position
+ * itself.
+ *
+ * Declared set — every file the phase touches, named:
+ *   · `poChannelVocabulary.ts` — NEW: the ONE owner (forward table, reverse set,
+ *     line vocabulary, the seam's status correspondence, the module-load guards).
+ *   · `src/types.ts` — the CHANNEL's raw vocabulary declared once (the same rule
+ *     that puts `PO_REJECTION_CODES` and `PO_CHANNEL_CHANGE_KINDS` there).
+ *   · `src/config/purchaseOrders.ts` — `PO_ACK_STATUSES_WITH_OBLIGATION` DERIVED
+ *     from the owner instead of re-typed as a second copy of the same fact.
+ *   · `src/lib/commerce/poAcknowledgementWindow.ts` — its hidden private mapping
+ *     removed; it now asks the owner, and an undeclared status offers NO action.
+ *   · `src/lib/commerce/channelReceivingSync.ts` — the integration boundary reports
+ *     the mapped channel position and Mercenta's candidate statuses, so the two can
+ *     never be silently assumed equal.
+ *   · the gate, the two scope guards and `package.json` that register it.
+ * NOTHING PROTECTED IS TOUCHED: `src/lib/spapi/client.ts` is unchanged — the seam's
+ * status union is pinned by a compile-time assertion in the owner instead.
+ */
+const BATCH2H_PO_VOCABULARY_SCOPE = new Set([
+  'src/types.ts',
+  'src/config/purchaseOrders.ts',
+  'src/lib/commerce/poChannelVocabulary.ts',        /* NEW — the ONE owner */
+  'src/lib/commerce/poAcknowledgementWindow.ts',
+  'src/lib/commerce/channelReceivingSync.ts',
+  'scripts/validate-po-channel-vocabulary.mjs',     /* NEW — this phase's gate */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+
 
 /**
  * §PLAIN-ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the rule that asks for
@@ -1839,6 +1879,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2f — the programme-claim wording guard (see above). */
         BATCH2F_WORDING_GUARD_SCOPE.has(p) ||
         [...BATCH2F_WORDING_GUARD_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2h — the PO vocabulary mapping (see above). */
+        BATCH2H_PO_VOCABULARY_SCOPE.has(p) ||
+        [...BATCH2H_PO_VOCABULARY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -1890,6 +1933,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2f — same declaration, second protected-path check (F5b). */
         BATCH2F_WORDING_GUARD_SCOPE.has(p) ||
         [...BATCH2F_WORDING_GUARD_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2h — same declaration, second protected-path check (F5b). */
+        BATCH2H_PO_VOCABULARY_SCOPE.has(p) ||
+        [...BATCH2H_PO_VOCABULARY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — same declaration, second protected-path check (F5b). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
