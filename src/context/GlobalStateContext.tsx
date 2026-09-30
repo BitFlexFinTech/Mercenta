@@ -381,7 +381,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           { id: `gate-${brandId}-loa`, brandId, type: 'letter_of_authorization' as const, status: 'under_review' },
           { id: `gate-${brandId}-ps`, brandId, type: 'product_safety_ukca' as const, status: 'under_review' },
           { id: `gate-${brandId}-ic`, brandId, type: 'insurance_certificate' as const, status: 'under_review' },
-          { id: `gate-${brandId}-brc`, brandId, type: 'brand_registry_confirmation' as const, status: 'under_review' },
         ]);
       }
       setDemoRegion(dossier.region);

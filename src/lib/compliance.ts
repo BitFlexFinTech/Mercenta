@@ -7,25 +7,57 @@ import type { ComplianceDocument, ApprovedCategory, BrandAgreementType } from '@
  * required ComplianceDocument is `approved` AND both mandatory legal agreements
  * (§4.1 Logistics SLAs & §4.2 Chargeback Indemnity) are accepted.
  *
- * Document requirements vary by CATEGORY — Amazon UK requires different
- * compliance documents for Baby products vs Consumer Electronics vs Grocery.
- * This module is the single source of truth for category-specific requirements.
+ * Document requirements vary by CATEGORY. §AV-031 — the obligations behind the
+ * category documents are UK/EU LAW (UKCA, CPNP/SCNP, WEEE, food-contact,
+ * EN 71/1888, HACCP/BRC, textile labelling, type approval), and the universal
+ * documents are Mercenta's own vendor-of-record obligations. NONE of them is a
+ * marketplace rule, and this module never claims one is. This module is the
+ * single source of truth for category-specific requirements.
  *
  * It is mirrored server-side by the DB trigger so submissions can never be
  * approved client-side only.
  */
 
-/** Base documents every brand must have approved, regardless of category. */
+/**
+ * Base documents every brand must have approved, regardless of category.
+ *
+ * §AV-032 — THREE universal documents. `brand_registry_confirmation` used to be
+ * a fourth; "Amazon Brand Registry" is a SELLER / brand-owner programme with no
+ * vendor obligation behind it, so requiring it could BLOCK a brand on a document
+ * nothing actually requires. It has been removed from the hard gate and is now
+ * an OPTIONAL Mercenta onboarding control (see `OPTIONAL_MERCENTA_CONTROLS`).
+ */
 export const BASE_REQUIRED_DOCUMENTS: ComplianceDocument['type'][] = [
   'letter_of_authorization',
   'product_safety_ukca',
   'insurance_certificate',
-  'brand_registry_confirmation',
+];
+
+/**
+ * §AV-032 — OPTIONAL MERCENTA CONTROLS.
+ *
+ * Documents Mercenta MAY request as its OWN onboarding control. They are NOT
+ * regulatory obligations and NOT marketplace requirements; they are NEVER part
+ * of the hard gate, and a brand is NEVER blocked on one. Declared here — rather
+ * than silently deleted — so the reclassification is explicit and auditable.
+ */
+export const OPTIONAL_MERCENTA_CONTROLS: {
+  type: ComplianceDocument['type'];
+  label: string;
+  rationale: string;
+}[] = [
+  {
+    type: 'brand_registry_confirmation',
+    label: 'Brand Ownership Confirmation (Mercenta onboarding control)',
+    rationale:
+      'Optional Mercenta onboarding control. Mercenta MAY ask a brand to confirm it is the authorised owner of the brand it supplies; the mandatory Letter of Authorization already evidences authority, so this is never a requirement and never blocks a brand.',
+  },
 ];
 
 /**
  * Category-specific additional documents.
- * Each category has its own extra requirements based on Amazon UK marketplace rules.
+ * Each category has its own extra requirements, driven by UK/EU product law
+ * (§AV-031) — never by a marketplace rule.
  */
 export const CATEGORY_SPECIFIC_DOCUMENTS: Record<ApprovedCategory, ComplianceDocument['type'][]> = {
   'Home': [],
@@ -54,7 +86,7 @@ export const CATEGORY_DOC_LABELS: Record<ComplianceDocument['type'], string> = {
   letter_of_authorization: 'Letter of Authorization',
   product_safety_ukca: 'Product Safety (UKCA)',
   insurance_certificate: 'Product Liability Insurance Certificate',
-  brand_registry_confirmation: 'Brand Registry Confirmation',
+  brand_registry_confirmation: 'Brand Ownership Confirmation (Mercenta onboarding control)',
   baby_product_safety: 'Baby Product Safety Certificate (EN 71 / EN 1888)',
   cosmetic_notification_cpnp: 'Cosmetic Product Notification (CPNP/SCNP)',
   food_contact_material: 'Food Contact Material Compliance',
@@ -74,9 +106,11 @@ export const CATEGORY_DOC_LABELS: Record<ComplianceDocument['type'], string> = {
  * Interpretive decisions (reconciled against the existing architecture, not a
  * generic internet checklist):
  *
- *  - The four BASE documents are UNIVERSAL: every brand, every category must
+ *  - The three BASE documents are UNIVERSAL: every brand, every category must
  *    hold them, because Mercenta is the vendor of record and carries the
- *    liability. They are never conditional.
+ *    liability. They are never conditional. (`brand_registry_confirmation` was
+ *    a fourth until §AV-032 removed it from the hard gate — it is now an
+ *    optional Mercenta control, never a requirement.)
  *  - Category documents are CONDITIONAL ON THE PRODUCT, not on the category
  *    name alone. A Kitchen brand that sells no food-contact item does not owe a
  *    food-contact declaration; a Grocery brand selling only shelf-stable dry
@@ -130,8 +164,6 @@ const BASE_REQUIREMENT_RATIONALE: Record<string, string> = {
     'Products placed on the UK market must carry a valid UKCA conformity position.',
   insurance_certificate:
     'Mercenta carries product liability exposure for goods it distributes.',
-  brand_registry_confirmation:
-    'Confirms the applicant is the authorised owner of the brand it is listing.',
 };
 
 interface CategoryRequirementRule {

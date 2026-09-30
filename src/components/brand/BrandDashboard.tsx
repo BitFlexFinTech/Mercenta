@@ -120,7 +120,7 @@ const PO_IN_FLIGHT: ReadonlySet<PurchaseOrderStatus> = new Set([
 
 const DOC_LABELS: Record<string, string> = {
   letter_of_authorization: 'Letter of authorization',
-  brand_registry_confirmation: 'Brand registry confirmation',
+  brand_registry_confirmation: 'Brand ownership confirmation (Mercenta control)',
   product_safety_ukca: 'Product safety (UKCA)',
   insurance_certificate: 'Insurance certificate',
   cosmetic_notification_cpnp: 'Cosmetic notification (CPNP)',

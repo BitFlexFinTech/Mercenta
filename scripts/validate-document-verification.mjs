@@ -7,7 +7,7 @@
  *
  *   A. REQUIREMENTS — category-aware, universal + conditional rules; narrowing
  *      only when the platform positively knows a condition does not apply
- *      (fail-closed default); the four universal documents are never conditional.
+ *      (fail-closed default); the three universal documents are never conditional.
  *   B. PROVIDER SEAM — interchangeable provider selection; automated structural
  *      rules are REAL and explicitly NOT external; the simulation seam is only
  *      reachable in a positively-identified `simulation` mode; every other mode
@@ -46,22 +46,22 @@ try {
   console.log('\n── A. Requirements (category-aware, conditional, fail-closed) ──');
 
   const kitchen = compliance.getComplianceRequirements('Kitchen');
-  test('universal requirements are the four base documents',
-    kitchen.filter((r) => r.scope === 'universal').length === 4 &&
+  test('universal requirements are the three base documents',
+    kitchen.filter((r) => r.scope === 'universal').length === 3 &&
       compliance.BASE_REQUIRED_DOCUMENTS.every((t) =>
         kitchen.some((r) => r.type === t && r.scope === 'universal')));
   test('Kitchen adds exactly one conditional category requirement',
     kitchen.filter((r) => r.scope === 'conditional').length === 1 &&
       kitchen.some((r) => r.type === 'food_contact_material' && r.condition === 'touchesFood'));
   test('Office Products has NO category requirement (base only)',
-    compliance.getRequiredDocumentsForCategory('Office Products').length === 4);
+    compliance.getRequiredDocumentsForCategory('Office Products').length === 3);
   test('every requirement states WHY it is required',
     kitchen.every((r) => typeof r.rationale === 'string' && r.rationale.length > 20));
   test('with NO product context the conditional rule still applies (fail-closed)',
-    compliance.getRequiredDocumentsForContext('Kitchen').length === 5 &&
-      compliance.getRequiredDocumentsForContext('Kitchen', { touchesFood: undefined }).length === 5);
+    compliance.getRequiredDocumentsForContext('Kitchen').length === 4 &&
+      compliance.getRequiredDocumentsForContext('Kitchen', { touchesFood: undefined }).length === 4);
   test('a positively-known non-applicable condition NARROWS the requirement',
-    compliance.getRequiredDocumentsForContext('Kitchen', { touchesFood: false }).length === 4 &&
+    compliance.getRequiredDocumentsForContext('Kitchen', { touchesFood: false }).length === 3 &&
       !compliance.getRequiredDocumentsForContext('Kitchen', { touchesFood: false })
         .includes('food_contact_material'));
   test('a positively-applicable condition keeps the requirement',
@@ -148,9 +148,9 @@ try {
     })());
 
   test('category requirement counts are unchanged from the canonical map',
-    compliance.getRequiredDocumentsForContext('Automotive').length === 5 &&
-      compliance.getRequiredDocumentsForContext('Grocery').length === 5 &&
-      compliance.getRequiredDocumentsForContext('Apparel').length === 5);
+    compliance.getRequiredDocumentsForContext('Automotive').length === 4 &&
+      compliance.getRequiredDocumentsForContext('Grocery').length === 4 &&
+      compliance.getRequiredDocumentsForContext('Apparel').length === 4);
 
   /* ── C. LIFECYCLE ────────────────────────────────────────────────────── */
   console.log('\n── C. Lifecycle (submit → verify → reject → replace → gate) ──');

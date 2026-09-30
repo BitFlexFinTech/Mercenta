@@ -696,12 +696,20 @@ export const DEMO_CONTRACTS: Contract[] = ALL_DEMO_BRANDS.map((brand, i) => {
 
 type ComplianceDocStatus = ComplianceDocument['status'];
 
-/** The four documents EVERY brand must hold, in canonical order. */
+/**
+ * The three documents EVERY brand must hold, in canonical order.
+ *
+ * §AV-032 — `brand_registry_confirmation` was a fourth until the Amazon-truth
+ * reconciliation: "Amazon Brand Registry" is a seller/brand-owner programme with
+ * no vendor obligation behind it, so a brand could be BLOCKED on a document
+ * nothing requires. It is now an optional Mercenta onboarding control
+ * (`src/lib/compliance.ts → OPTIONAL_MERCENTA_CONTROLS`) and is generated
+ * nowhere as a required document.
+ */
 const BASE_COMPLIANCE_TYPES = [
   'letter_of_authorization',
   'product_safety_ukca',
   'insurance_certificate',
-  'brand_registry_confirmation',
 ] as const;
 
 type ComplianceBaseType = (typeof BASE_COMPLIANCE_TYPES)[number];
@@ -745,7 +753,6 @@ export const DEMO_COMPLIANCE_SCENARIOS = {
       letter_of_authorization: 'approved',
       product_safety_ukca: 'approved',
       insurance_certificate: 'approved',
-      brand_registry_confirmation: 'approved',
     },
     categoryDocument: 'approved',
   },
@@ -757,19 +764,17 @@ export const DEMO_COMPLIANCE_SCENARIOS = {
       letter_of_authorization: 'approved',
       product_safety_ukca: 'under_review',
       insurance_certificate: 'missing',
-      brand_registry_confirmation: 'approved',
     },
     categoryDocument: 'missing',
   },
 
-  /** Early stage: the brand registry confirmation is the one document outstanding. */
-  registry_pending: {
-    why: 'Early submission: documents uploaded but not yet verified; brand registry confirmation outstanding.',
+  /** Early stage: every base document is in review — none approved yet. */
+  early_submission: {
+    why: 'Early submission: all base documents uploaded, none approved yet.',
     base: {
       letter_of_authorization: 'uploaded',
       product_safety_ukca: 'uploaded',
       insurance_certificate: 'under_review',
-      brand_registry_confirmation: 'missing',
     },
     categoryDocument: 'missing',
   },
@@ -781,41 +786,38 @@ export const DEMO_COMPLIANCE_SCENARIOS = {
       letter_of_authorization: 'approved',
       product_safety_ukca: 'approved',
       insurance_certificate: 'approved',
-      brand_registry_confirmation: 'approved',
     },
     categoryDocument: 'missing',
   },
 
   /**
-   * §Phase 7F — the BLOCKED compliance-scenario tenant (Le Creuset): 0/5 approved,
+   * §Phase 7F — the BLOCKED compliance-scenario tenant (Le Creuset): 0/4 approved,
    * including one 'rejected' so the failure reason + Replace action on that row are
    * exercised end-to-end (§M2). Its contract is 'active' and both mandatory
    * §4.1/§4.2 agreements are accepted, so the document state is the SOLE reason the
    * gate blocks — exactly what e2e/compliance-gate.spec.ts asserts.
    */
   lecreuset_blocked: {
-    why: 'Compliance matrix: 0 of 5 documents approved, with one rejected outcome exercised.',
+    why: 'Compliance matrix: 0 of 4 documents approved, with a missing and a rejected outcome exercised.',
     base: {
       letter_of_authorization: 'uploaded',
       product_safety_ukca: 'under_review',
-      insurance_certificate: 'uploaded',
-      brand_registry_confirmation: 'missing',
+      insurance_certificate: 'missing',
     },
     categoryDocument: 'rejected',
   },
 
   /**
-   * §Phase 7F — the 4/5 compliance-scenario tenant (Autoglym): every base document
-   * approved, the category document (type approval) outstanding. Active contract +
-   * both agreements accepted, so the gate blocks on the document alone.
+   * §Phase 7F — the 4-document compliance-scenario tenant (Autoglym): every base
+   * document approved, the category document (type approval) outstanding. Active
+   * contract + both agreements accepted, so the gate blocks on the document alone.
    */
   autoglym_one_document_outstanding: {
-    why: 'Compliance matrix: 4 of 5 documents approved; the category type approval is outstanding.',
+    why: 'Compliance matrix: 3 of 4 documents approved; the category type approval is outstanding.',
     base: {
       letter_of_authorization: 'approved',
       product_safety_ukca: 'approved',
       insurance_certificate: 'approved',
-      brand_registry_confirmation: 'approved',
     },
     categoryDocument: 'missing',
   },
@@ -834,22 +836,22 @@ export type ComplianceScenarioName = keyof typeof DEMO_COMPLIANCE_SCENARIOS;
 export const DEMO_COMPLIANCE_SCENARIO_BY_BRAND: Record<string, ComplianceScenarioName> = {
   'brand-astonish': 'gate_cleared', // cleared operational tenant (Home)
   'brand-seep': 'insurance_pending',
-  'brand-delphis': 'registry_pending',
+  'brand-delphis': 'early_submission',
   'brand-kitkin': 'category_pending', // Baby → baby_product_safety outstanding
   'brand-bulldog': 'insurance_pending', // Health & Personal Care → CPNP outstanding
-  'brand-joseph': 'registry_pending', // Kitchen → food contact material outstanding
+  'brand-joseph': 'early_submission', // Kitchen → food contact material outstanding
   'brand-roberts': 'category_pending', // Consumer Electronics → WEEE outstanding
   'brand-clipper': 'insurance_pending', // Grocery → food safety certificate outstanding
-  'brand-regatta': 'registry_pending', // Apparel → textile labelling outstanding
-  'brand-autoglym': 'autoglym_one_document_outstanding', // §Phase 7F scenario tenant (4/5)
+  'brand-regatta': 'early_submission', // Apparel → textile labelling outstanding
+  'brand-autoglym': 'autoglym_one_document_outstanding', // §Phase 7F scenario tenant (3/4)
   'brand-tapatio': 'gate_cleared', // cleared operational tenant (Grocery)
-  'brand-cholula': 'registry_pending',
+  'brand-cholula': 'early_submission',
   'brand-valentina': 'category_pending',
   'brand-flybyjing': 'insurance_pending',
-  'brand-locknlock': 'registry_pending',
-  'brand-lecreuset': 'lecreuset_blocked', // §Phase 7F scenario tenant (0/5)
+  'brand-locknlock': 'early_submission',
+  'brand-lecreuset': 'lecreuset_blocked', // §Phase 7F scenario tenant (0/4)
   'brand-moleskine': 'insurance_pending',
-  'brand-sennheiser': 'registry_pending',
+  'brand-sennheiser': 'early_submission',
   'brand-vileda': 'category_pending',
   'brand-logitech': 'insurance_pending',
 };
@@ -878,17 +880,19 @@ export function complianceScenarioFor(brandId: string): ComplianceDocumentScenar
  * a fabricated work item impossible to land unnoticed: the gate compares the derived
  * compliance work list against these numbers and fails otherwise.
  *
- * Measured from the canonical seed on 2026-09-27: 20 brands × 4 base documents (80)
- * + 15 category documents (95), of which 27 are blocking.
+ * Measured from the canonical seed on 2026-09-29 — §AV-032 removed the fourth
+ * base document (`brand_registry_confirmation` is now an optional Mercenta
+ * control, generated nowhere as a requirement): 20 brands × 3 base documents (60)
+ * + 15 category documents (75), of which 21 are blocking.
  */
 export const DEMO_COMPLIANCE_BASELINE = {
-  documents: 95,
-  blockingDocuments: 27,
+  documents: 75,
+  blockingDocuments: 21,
 } as const;
 
 const COMPLIANCE_TYPES = BASE_COMPLIANCE_TYPES;
 
-/** Category-specific extra compliance docs per Amazon UK requirements. */
+/** Category-specific extra compliance docs, driven by UK/EU product law (§AV-031). */
 const CATEGORY_EXTRA_DOCS: Record<string, { type: ComplianceDocument['type']; label: string }[]> = {
   'Baby': [{ type: 'baby_product_safety', label: 'Baby Product Safety (EN 71 / EN 1888)' }],
   'Health & Personal Care': [{ type: 'cosmetic_notification_cpnp', label: 'Cosmetic Product Notification (CPNP/SCNP)' }],

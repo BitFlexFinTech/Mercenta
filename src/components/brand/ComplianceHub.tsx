@@ -233,8 +233,8 @@ function ComplianceUploadCard({
   // parameter, not `category` (an array `docs` in slot 2 type-checks because
   // both are positional; the previous shift fed the boolean into `category`).
   // §Phase 7F — category-aware required list + full agreement inputs so this
-  // card's gate agrees EXACTLY with the Product Catalog gate (5-doc categories
-  // previously fell through to an undefined-category 4-doc computation).
+  // card's gate agrees EXACTLY with the Product Catalog gate (categories with an
+  // extra document previously fell through to the base-only computation).
   const requiredTypes = category ? getRequiredDocumentsForCategory(category) : REQUIRED_DOCUMENT_TYPES;
   const gate = evaluateComplianceGate(brandDocs, category, hasSignedAgreement, logisticsSlaAccepted, chargebackIndemnityAccepted);
   // §M2 — the verification standing: required / submitted / under review /

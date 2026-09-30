@@ -110,7 +110,7 @@ test.describe('Phase D — status semantics & decision queue', () => {
     await loginAs(page, 'Le Creuset', 1100);
     await openNav(page, 'UK Compliance');
 
-    // The 0/5 scenario tenant holds a present-but-not-approved registry doc.
+    // The 0/4 scenario tenant holds a present-but-not-approved insurance certificate.
     const missing = page.locator('[data-status="missing"]').first();
     await expect(missing).toBeVisible({ timeout: 6000 });
     await expect(missing).toHaveAttribute('role', 'status');

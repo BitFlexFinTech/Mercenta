@@ -47,6 +47,7 @@
  */
 import { useCallback, useMemo, useState } from 'react';
 import {
+  useBrandAgreements,
   useBrands,
   useCatalogSubmissions,
   useCommissions,
@@ -61,6 +62,7 @@ import {
 import { computeBrandNetShare, normalisePayoutTrack, resolveCommissionRatePct } from '@/lib/billing/payouts';
 import { renewalUrgency } from '@/lib/contracts';
 import { demoTickets } from '@/lib/helpdesk/ticketStore';
+import { evaluateComplianceGate } from '@/lib/compliance';
 import {
   demoCommerceInvoices,
   getAllCommercePayments,
@@ -85,7 +87,7 @@ import {
   MercentaDoughnut,
   MercentaLineChart,
 } from '@/components/shared/charts/MercentaCharts';
-import { STATUS_LABELS } from '@/types';
+import { isApprovedCategory, STATUS_LABELS } from '@/types';
 import type { AdminDepartment, ShipmentStatus } from '@/types';
 import type { PaletteDomain } from '@/config/themes';
 import { operatingCostSummary } from '@/lib/costs/costSummary';
@@ -102,12 +104,12 @@ const PO_IN_FLIGHT: ReadonlySet<string> = new Set([
   'shipped',
   'delivered',
 ]);
-const REQUIRED_DOC_TYPES: readonly string[] = [
-  'letter_of_authorization',
-  'product_safety_ukca',
-  'insurance_certificate',
-  'brand_registry_confirmation',
-];
+/* §AV-032 — the required-document list is NOT re-declared here. It is read from
+ * its single owner (`src/lib/compliance.ts → BASE_REQUIRED_DOCUMENTS`) so this
+ * dashboard can never disagree with the compliance gate. The local copy this
+ * replaced still listed `brand_registry_confirmation`, which is no longer a
+ * requirement — that duplicate is what made the admin "compliance cleared" count
+ * treat a non-required document as blocking. */
 const URGENCY_LABEL: Record<string, string> = {
   expired: 'EXPIRED',
   '7d': '≤7 DAYS',
@@ -137,6 +139,9 @@ export function AdminDashboard({
   const posQuery = usePurchaseOrders();
   const docsQuery = useComplianceDocuments();
   const contractsQuery = useContracts();
+  /** §AV-032 — the mandatory brand agreements are part of the REAL gate, so the
+   *  gate count below must read them; the previous derivation ignored them. */
+  const agreementsQuery = useBrandAgreements();
   const messagesQuery = useMessages();
   const shipmentsQuery = useShipmentsAll();
   const deductionsQuery = useDeductions();
@@ -159,6 +164,7 @@ export function AdminDashboard({
   const posData = posQuery.data;
   const docsData = docsQuery.data;
   const contractsData = contractsQuery.data;
+  const agreementsData = agreementsQuery.data;
   const messagesData = messagesQuery.data;
   const shipmentsData = shipmentsQuery.data;
   const commissionsData = commissionsQuery.data;
@@ -175,6 +181,7 @@ export function AdminDashboard({
     posAll: posData?.data ?? [] as NonNullable<typeof posData>['data'],
     docsAll: docsData?.data ?? [] as NonNullable<typeof docsData>['data'],
     contractsAll: contractsData?.data ?? [] as NonNullable<typeof contractsData>['data'],
+    agreementsAll: agreementsData?.data ?? [] as NonNullable<typeof agreementsData>['data'],
     messagesAll: messagesData?.data ?? [] as NonNullable<typeof messagesData>['data'],
     shipmentsAll: shipmentsData?.data ?? [] as NonNullable<typeof shipmentsData>['data'],
     commissionsAll: commissionsData?.data ?? [] as NonNullable<typeof commissionsData>['data'],
@@ -185,6 +192,7 @@ export function AdminDashboard({
     posData,
     docsData,
     contractsData,
+    agreementsData,
     messagesData,
     shipmentsData,
     commissionsData,
@@ -195,6 +203,7 @@ export function AdminDashboard({
     posAll,
     docsAll,
     contractsAll,
+    agreementsAll,
     messagesAll,
     shipmentsAll,
     commissionsAll,
@@ -207,6 +216,7 @@ export function AdminDashboard({
     posQuery.isError ||
     docsQuery.isError ||
     contractsQuery.isError ||
+    agreementsQuery.isError ||
     messagesQuery.isError ||
     shipmentsQuery.isError ||
     submissionsQuery.isError ||
@@ -220,6 +230,7 @@ export function AdminDashboard({
       posQuery.isPending ||
       docsQuery.isPending ||
       contractsQuery.isPending ||
+      agreementsQuery.isPending ||
       messagesQuery.isPending ||
       shipmentsQuery.isPending ||
       deductionsQuery.isPending ||
@@ -296,18 +307,26 @@ export function AdminDashboard({
   );
   const brandsWithPendingDocs = new Set(docsPending.map((d) => d.brandId)).size;
 
-  /** Gate: every required doc approved AND a signed/active contract (existing rule). */
+  /**
+   * §AV-032 — the gate count now runs the CANONICAL gate rule
+   * (`evaluateComplianceGate`), not a bespoke re-derivation. The previous version
+   * checked only the base documents + a contract, so it IGNORED the
+   * category-specific document and the two mandatory agreements — it could report
+   * a brand as compliance-cleared while the real gate blocked it.
+   */
   const complianceCleared = brands.filter((b) => {
     const brandDocs = docsAll.filter((d) => d.brandId === b.id);
     const hasContract = contractsAll.some(
       (c) => c.brandId === b.id && (c.status === 'signed' || c.status === 'active')
     );
-    return (
-      REQUIRED_DOC_TYPES.every((t) =>
-        brandDocs.some((d) => d.type === t && d.status === 'approved')
-      ) &&
-      hasContract
-    );
+    const brandAgreements = agreementsAll.filter((a) => a.brandId === b.id);
+    return evaluateComplianceGate(
+      brandDocs,
+      isApprovedCategory(b.category) ? b.category : undefined,
+      hasContract,
+      brandAgreements.some((a) => a.agreementType === 'logistics_sla'),
+      brandAgreements.some((a) => a.agreementType === 'chargeback_indemnity')
+    ).cleared;
   }).length;
   const complianceBlocked = Math.max(brands.length - complianceCleared, 0);
 

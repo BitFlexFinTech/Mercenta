@@ -608,6 +608,40 @@ const BATCH2D_ACK_INVOICE_PRICE_SCOPE = new Set([
 ]);
 
 /**
+ * §BATCH 2e — THE COMPLIANCE ATTRIBUTION FAMILY (`AV-031` + `AV-032`, 2026-09-29).
+ *
+ * `AV-032` (UNSUPPORTED): `brand_registry_confirmation` was a BASE REQUIRED
+ * compliance document, so a brand could be BLOCKED on it, although "Amazon Brand
+ * Registry" is a seller/brand-owner programme with no vendor obligation behind it.
+ * It is now reclassified as an OPTIONAL Mercenta onboarding control
+ * (`src/lib/compliance.ts → OPTIONAL_MERCENTA_CONTROLS`), relabelled away from the
+ * marketplace term, removed from the hard gate and from the demo seed, and the
+ * admin overview no longer re-declares the required list by hand.
+ * `AV-031` (CONTRADICTED): the module attributed the obligations to "Amazon UK
+ * requirements / marketplace rules" instead of UK/EU law + Mercenta's own controls.
+ *
+ * Declared set: the owner, the demo seed + its declared baseline, the surfaces
+ * that render or derive the list, the hand-written admin duplicate, the new gate,
+ * the three browser specs it repoints, and the two scope guards themselves.
+ */
+const BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE = new Set([
+  'src/lib/compliance.ts',
+  'src/data/demoData.ts',
+  'src/context/GlobalStateContext.tsx',
+  'src/components/brand/BrandDashboard.tsx',
+  'src/components/brand/ComplianceHub.tsx',
+  'src/components/admin/AdminDashboard.tsx',
+  'e2e/compliance-gate.spec.ts',
+  'e2e/catalog-product-management.spec.ts',
+  'e2e/status-semantics.spec.ts',
+  'scripts/validate-document-verification.mjs',
+  'scripts/validate-compliance-attribution.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+/**
  * §PLAIN-ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the rule that asks for
  * plain English already existed and was still not followed, so the owner was offered a
  * decision in words they could not evaluate and the work stopped. This phase turns the
@@ -1775,6 +1809,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2d — the acknowledgement↔invoice price-match phase's declared surface (see above). */
         BATCH2D_ACK_INVOICE_PRICE_SCOPE.has(p) ||
         [...BATCH2D_ACK_INVOICE_PRICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2e — the compliance-attribution family (see above). */
+        BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE.has(p) ||
+        [...BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -1820,6 +1857,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2d — same declaration, second protected-path check (F5b). */
         BATCH2D_ACK_INVOICE_PRICE_SCOPE.has(p) ||
         [...BATCH2D_ACK_INVOICE_PRICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2e — same declaration, second protected-path check (F5b). */
+        BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE.has(p) ||
+        [...BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — same declaration, second protected-path check (F5b). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -2092,6 +2132,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2d — the acknowledgement↔invoice price-match phase's declared surface (see above). */
           BATCH2D_ACK_INVOICE_PRICE_SCOPE.has(p) ||
           [...BATCH2D_ACK_INVOICE_PRICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2e — the compliance-attribution family (see above). */
+          BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE.has(p) ||
+          [...BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
           PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
           [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

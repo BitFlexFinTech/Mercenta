@@ -664,6 +664,29 @@ try {
   ];
 
   /**
+   * §BATCH 2e — THE COMPLIANCE ATTRIBUTION FAMILY (`AV-031` + `AV-032`).
+   * Fuller note in `validate-e6-brand-surfaces.mjs` §BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE.
+   * Same mechanism as every phase above: a changed source/test file outside EVERY
+   * declared set is still refused.
+   */
+  const BATCH2E_COMPLIANCE_ATTRIBUTION_DECLARED = [
+    'src/lib/compliance.ts',
+    'src/data/demoData.ts',
+    'src/context/GlobalStateContext.tsx',
+    'src/components/brand/BrandDashboard.tsx',
+    'src/components/brand/ComplianceHub.tsx',
+    'src/components/admin/AdminDashboard.tsx',
+    'e2e/compliance-gate.spec.ts',
+    'e2e/catalog-product-management.spec.ts',
+    'e2e/status-semantics.spec.ts',
+    'scripts/validate-document-verification.mjs',
+    'scripts/validate-compliance-attribution.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+  /**
    * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
    * rule already existed and was still not followed; this phase makes it checkable.
    */
@@ -1664,6 +1687,7 @@ try {
      */
     ...BATCH2C_PO_REVISION_DECLARED,
     ...BATCH2D_ACK_INVOICE_PRICE_DECLARED,
+    ...BATCH2E_COMPLIANCE_ATTRIBUTION_DECLARED,
     /**
      * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
      * rule already existed and was still not followed, so this phase makes it

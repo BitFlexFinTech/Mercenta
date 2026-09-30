@@ -119,6 +119,19 @@ second copy of a window is declared, or if the removed wording returns** — pro
 times. `AV-020` remains EVIDENCE-BLOCKED, and the reason is now recorded precisely: the platform's
 "fulfillment score" is Mercenta's OWN financing-track score, and no channel scorecard is invented.
 
+### 2e. The compliance attribution family — **DONE (session 54, 2026-09-29)**
+
+`AV-031` / `AV-032` — the compliance module attributed its document obligations to the retail channel and
+required a **seller-programme document as a hard gate**. Both are now **APPLIED**: `brand_registry_confirmation`
+is reclassified as an **optional Mercenta onboarding control** (declared in `OPTIONAL_MERCENTA_CONTROLS`,
+relabelled "Brand Ownership Confirmation", never in the required set, never blocking), the three universal
+documents are the vendor-of-record obligations (LOA, UKCA, product-liability insurance), the category
+documents are attributed to **UK/EU law**, the demo seed no longer generates the document
+(baseline recomputed: 75 / 21), and the admin overview's hand-written duplicate of the required list is
+deleted in favour of the canonical owner. `npm run validate:compliance-attribution` **fails if it returns**
+(18 assertions, executing the real modules; proved able to fail twice). **No migration or protected path was
+touched** — the SQL seed's own staleness is recorded as BLOCKED in the session report.
+
 **Start here (named, highest business risk):**
 
 | ID | What is wrong | Why it matters |
@@ -128,12 +141,12 @@ times. `AV-020` remains EVIDENCE-BLOCKED, and the reason is now recorded precise
 | **AV-006** | ~~The **48-hour amendment window** is not modelled~~ — **APPLIED (Batch 2b, 2026-09-28)**: the window is declared once, derived fail-closed, enforced at the domain boundary (a second submission is an AMENDMENT) and told to the brand, gated by `validate:po-amendment-window`. Not start work. | — |
 | ~~**AV-007**~~ | ~~A rejected line can be re-acknowledged~~ — **APPLIED (Wave 3, 2026-09-22)**; the rejection is now permanent and enforced at the domain boundary. Not start work. | — |
 | ~~**AV-020b**~~ (AV-010 is **APPLIED**, Wave 3) | ~~The invented 30-day backorder restock countdown~~ — **APPLIED (Batch 2a, 2026-09-28)**: Mercenta's own restock reminder, attribution rendered, removed wording gated absent. Not start work. | — |
-| **AV-008 / AV-023** | Ack ↔ invoice price/time rules incomplete | Finance mismatch |
-| **AV-032** | The compliance document set is **unsupported** by evidence | A regulatory claim without a source |
+| ~~**AV-008 / AV-023**~~ | ~~Ack ↔ invoice price/time rules incomplete~~ — **APPLIED (Batch 2d, 2026-09-29)**: one owner for the rule + the ceiling, enforced fail-closed, both writers bill the acknowledged price, gated by `validate:ack-invoice-price`. Not start work. | — |
+| ~~**AV-032**~~ | ~~The compliance document set is **unsupported** by evidence~~ — **APPLIED (Batch 2e, 2026-09-29)**: reclassified as an optional Mercenta control, never blocking, gated by `validate:compliance-attribution`. Not start work. | — |
 | **AV-040 / AV-042 / AV-043 / AV-045** | SP-API coverage, wording safeguards, PO vocabulary, delivery appointments incomplete | Incomplete fidelity to the channel |
 
-**Then:** the remaining INCOMPLETE rows (AV-009/011/014/015/016/010b), the CONTRADICTED rows (AV-013/031 —
-AV-027 is applied), and the INFERENCE rows that must be **relabelled** (AV-002/017/025/033/044).
+**Then:** the remaining INCOMPLETE rows (AV-009/011/014/015/016/010b), the CONTRADICTED row (AV-013 —
+AV-027 and **AV-031** are applied), and the INFERENCE rows that must be **relabelled** (AV-002/017/025/033/044).
 
 **Do NOT guess the UNKNOWNs** (AV-020/034/035/046/047/048): they need a **signed-in Vendor Central session**
 (founder-only) — record as EVIDENCE-BLOCKED until then.

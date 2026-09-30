@@ -103,7 +103,7 @@ test.describe('E3 — catalog submission lifecycle (simulated)', () => {
   });
 
   test('2. a non-compliant tenant cannot submit from the catalog at all', async ({ page }) => {
-    // Autoglym is 4/5 documents → the gate still blocks (unchanged rule).
+    // Autoglym is 3/4 documents → the gate still blocks (unchanged rule).
     await loginAs(page, 'Autoglym', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();

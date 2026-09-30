@@ -2,16 +2,19 @@
  * Phase 7F - Compliance Gate tests.
  *
  * Phase 7F added deterministic compliance-scenario PORTAL tenants to the
- * canonical demo dataset (src/data/demoData.ts → COMPLIANCE_SCENARIO_DOC_STATES):
- *   - "Le Creuset"      — 0/5 required docs approved (Kitchen → 5
- *     required; uploaded/under_review/missing). Contract active + both
+ * canonical demo dataset (src/data/demoData.ts → DEMO_COMPLIANCE_SCENARIOS):
+ *   - "Le Creuset"      — 0/4 required docs approved (Kitchen → 4
+ *     required; uploaded/under_review/missing/rejected). Contract active + both
  *     §4.1/§4.2 agreements accepted → gate blocked by the DOCUMENT state alone.
- *   - "Autoglym" — 4/5 approved (type_approval missing) →
+ *   - "Autoglym" — 3/4 approved (type_approval missing) →
  *     gate still blocked by the single remaining document.
  *
  * The fully-cleared path is covered by the existing cleared tenants:
- *   - "Astonish" — exactly 5/5 (Health & Personal Care).
- *   - "Tapatío"       — 4/4 (Office Products, no category extra).
+ *   - "Astonish" — exactly 4/4 (Health & Personal Care).
+ *   - "Tapatío"       — 4/4 (Grocery, category document approved).
+ *
+ * §AV-032 — the required set is THREE universal documents. `brand_registry_
+ * confirmation` is no longer required, and is never blocking, anywhere in this spec.
  *
  * The tests assert user-visible behavior (catalog CTA + gate banner + the
  * compliance page gate card) — never the data store alone.
@@ -20,7 +23,7 @@ import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
 
 test.describe('Compliance Gate', () => {
-  test('1. 0/5 docs -> catalog blocked', async ({ page }) => {
+  test('1. 0/4 docs -> catalog blocked', async ({ page }) => {
     await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
@@ -33,7 +36,7 @@ test.describe('Compliance Gate', () => {
     // The gate banner is honest about the blocking document state.
     await expect(page.getByText('Catalog Sync Disabled').first()).toBeVisible({ timeout: 4000 });
     await expect(page.locator('text=Pending review: letter of authorization').first()).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('text=Pending review: brand registry confirmation').first()).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=Pending review: insurance certificate').first()).toBeVisible({ timeout: 3000 });
     // No cleared-tenant leakage: the enabled CTA must not exist for this tenant.
     await expect(page.locator('button', { hasText: 'Add New Product' })).not.toBeVisible({ timeout: 2000 });
 
@@ -42,10 +45,10 @@ test.describe('Compliance Gate', () => {
     await page.waitForTimeout(900);
     const gateCard = page.locator('text=Compliance gate not yet cleared').first();
     await expect(gateCard).toBeVisible({ timeout: 6000 });
-    await expect(page.locator('text=5 item(s) remain.').first()).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=4 item(s) remain.').first()).toBeVisible({ timeout: 3000 });
   });
 
-  test('2. 4/5 docs -> still blocked', async ({ page }) => {
+  test('2. 3/4 docs -> still blocked', async ({ page }) => {
     await loginAs(page, 'Autoglym', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
@@ -57,12 +60,12 @@ test.describe('Compliance Gate', () => {
     await expect(locked).toBeDisabled();
     await expect(page.getByText('Catalog Sync Disabled').first()).toBeVisible({ timeout: 4000 });
     await expect(page.locator('text=Pending review: type approval').first()).toBeVisible({ timeout: 3000 });
-    // The four approved base documents do NOT unlock the gate on their own.
+    // The three approved base documents do NOT unlock the gate on their own.
     await expect(page.locator('button', { hasText: 'Add New Product' })).not.toBeVisible({ timeout: 2000 });
   });
 
-  test('3. 5/5 docs + signed/active contract -> catalog enabled', async ({ page }) => {
-    // Astonish — Health & Personal Care: exactly 5/5 required docs approved.
+  test('3. 4/4 docs + signed/active contract -> catalog enabled', async ({ page }) => {
+    // Astonish — Health & Personal Care: exactly 4/4 required docs approved.
     await loginAs(page, 'Astonish', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
@@ -72,7 +75,7 @@ test.describe('Compliance Gate', () => {
     await expect(addBtn).toBeEnabled();
     await expect(page.locator('button', { hasText: 'Catalog Locked' })).not.toBeVisible({ timeout: 2000 });
 
-    // Tapatío — Office Products: 4/4 required docs approved (cleared).
+    // Tapatío — Grocery: 4/4 required docs approved (cleared).
     await loginAs(page, 'Tapatío', 1100);
     const nav2 = page.locator('nav[aria-label="Primary"]');
     await nav2.getByText('Product Catalog').first().click();
@@ -97,8 +100,8 @@ test.describe('Compliance Gate', () => {
    * the row's own status badge stayed on its pre-upload value (the user saw
    * "Document uploaded and marked for review." next to a stale badge).
    *
-   * Le Creuset (brand-lecreuset) is the 0/5 scenario tenant; its
-   * brand_registry_confirmation document is present with status `missing`.
+   * Le Creuset (brand-lecreuset) is the 0/4 scenario tenant; its
+   * insurance_certificate document is present with status `missing`.
    */
   test('5. brand document Upload reflects immediately (no reload, no approval)', async ({ page }) => {
     await loginAs(page, 'Le Creuset', 1100);
@@ -110,7 +113,7 @@ test.describe('Compliance Gate', () => {
     // (§M2 added one wrapper level inside the row for the requirement rationale
     // and verification verdict, so the traversal depth grew by one.)
     const row = page
-      .getByText('brand registry confirmation', { exact: true })
+      .getByText('insurance certificate', { exact: true })
       .first()
       .locator('..')
       .locator('..')
@@ -127,6 +130,6 @@ test.describe('Compliance Gate', () => {
     // 3. Honest state: an upload is NOT an approval — the gate still blocks with
     //    the same number of non-approved documents (missing → under_review).
     await expect(page.locator('text=Compliance gate not yet cleared').first()).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('text=5 item(s) remain.').first()).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=4 item(s) remain.').first()).toBeVisible({ timeout: 3000 });
   });
 });

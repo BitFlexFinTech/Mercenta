@@ -71,8 +71,8 @@ nothing, and increment S0/S1-a applied nothing from this register.
 | AV-028 | Lead time target | MERCENTA RULE | **KEEP** — never present as an Amazon requirement | — | NO ACTION REQUIRED |
 | AV-029 | Pack concepts | CONFIRMED | **KEEP** | — | NO ACTION REQUIRED |
 | AV-030 | MOQ honesty | MERCENTA RULE | **KEEP** | — | NO ACTION REQUIRED |
-| AV-031 | Compliance attribution | CONTRADICTED | **RELABEL** — attribute to UK/EU regulation + Mercenta onboarding control, never to Amazon | S2b | OPEN — not applied |
-| AV-032 | Compliance set | UNSUPPORTED | **RELABEL/REMOVE** — remove or reclassify as an optional Mercenta control | S2b | OPEN — decision required |
+| AV-031 | Compliance attribution | CONTRADICTED | **RELABEL** — attribute to UK/EU regulation + Mercenta onboarding control, never to Amazon | S2b | **APPLIED (Batch 2e, 2026-09-29)** — the compliance module no longer attributes its document obligations to the retail channel. The header now names the UK/EU LAW behind the category documents (UKCA, CPNP/SCNP, WEEE, food-contact, EN 71/1888, HACCP/BRC, textile labelling, type approval) and the universal documents as Mercenta's OWN vendor-of-record obligations; the category map's "Amazon UK marketplace rules" comment is gone, and so is the demo seed's "per Amazon UK requirements" comment. Asserted by `npm run validate:compliance-attribution` (a source + comment sweep that fails if any line claims the channel requires the documents) — proved able to fail. |
+| AV-032 | Compliance set | UNSUPPORTED | **RELABEL/REMOVE** — remove or reclassify as an optional Mercenta control | S2b | **APPLIED (Batch 2e, 2026-09-29)** — **DECISION TAKEN: RECLASSIFY** (the non-destructive branch this row offered), never remove. `brand_registry_confirmation` is removed from `BASE_REQUIRED_DOCUMENTS` (three universal documents remain: LOA, UKCA, product-liability insurance), is NOT a category or conditional requirement, is DECLARED in the new `OPTIONAL_MERCENTA_CONTROLS` with its own rationale, and is relabelled **"Brand Ownership Confirmation (Mercenta onboarding control)"** — it can never block a brand again (a missing or rejected record no longer affects any gate decision). The demo seed no longer generates the document (**baseline recomputed: 75 documents / 21 blocking**) and the admin overview's hand-written duplicate of the required list is deleted in favour of the canonical owner. **No protected path or migration was touched.** Asserted by `npm run validate:compliance-attribution` (18 assertions, executing the real modules; two mutation proofs, both restored byte-identical) and `e2e/compliance-gate.spec.ts` (repointed counts, 15 browser tests green across the three repointed specs). |
 | AV-033 | Catalogue images | INFERENCE | **EVIDENCE-BLOCKED** — verify image requirements against Amazon documentation, then cite it | S8 | OPEN — not applied |
 | AV-034 | Marketplace ID | UNKNOWN | **EVIDENCE-BLOCKED** — verify before live activation | S7/S8 | OPEN — not applied |
 | AV-035 | Catalogue submission | UNKNOWN | **EVIDENCE-BLOCKED — BLOCKING S8** — verify the Vendor catalogue route; `transformProductForCatalog` has no documented Vendor target | S8 | OPEN — not applied |
@@ -97,13 +97,13 @@ nothing, and increment S0/S1-a applied nothing from this register.
 | Disposition | Count | IDs |
 |---|---|---|
 | **KEEP — no action required** (CONFIRMED + MERCENTA RULE) | **16** | AV-004, AV-005, AV-012, AV-014b, AV-021, AV-026, AV-028, AV-029, AV-030, AV-036, AV-037, AV-038, AV-041 + AV-001, AV-018, AV-039 (keep, with a labelled follow-up) |
-| **RELABEL** (attribution/wording wrong, behaviour may stay) | **9** | AV-002, AV-003, AV-017, AV-019, AV-019b, AV-020b, AV-025, AV-031, AV-044 |
+| **RELABEL** (attribution/wording wrong, behaviour may stay) | **9 (5 APPLIED · 4 still open)** | AV-002, AV-003, AV-017, AV-019, AV-019b, AV-020b, AV-025, AV-031, AV-044 — AV-003 applied S8, AV-019/AV-019b/AV-020b applied Batch 2a, **AV-031 applied Batch 2e (2026-09-29)**; still open: AV-002, AV-017, AV-025, AV-044. |
 | **BUILD** (documented Amazon behaviour not represented) | **16 (6 APPLIED · 10 still open)** | AV-006, AV-007, AV-008, AV-009, AV-010, AV-010b, AV-011, AV-014, AV-015, AV-016, AV-023, AV-024, AV-040, AV-042, AV-043, AV-045 — AV-006 applied Batch 2b, AV-007/AV-010 applied Wave 3, AV-024 applied Batch 2c, **AV-008/AV-023 applied Batch 2d (2026-09-29)**; the 10 still open are AV-009, AV-010b, AV-011, AV-014, AV-015, AV-016, AV-040, AV-042, AV-043, AV-045. **REPOINTED 2026-09-29:** this row previously read **15** while LISTING AV-007 and AV-010 (already applied) and OMITTING AV-006/AV-024; the count and the list now agree, and AV-022 (classified MODELLED IN PART, P7) is not a BUILD row. |
-| **REMOVE / RE-MODEL (pending approval or decision)** | **3** | AV-013 (T-6), AV-027 (T-4), AV-032 |
+| **REMOVE / RE-MODEL (pending approval or decision)** | **3 (2 APPLIED · 1 still open)** | AV-013 (T-6), AV-027 (T-4), AV-032 — AV-027 applied P5, **AV-032 applied Batch 2e (2026-09-29) by RECLASSIFYING it as an optional Mercenta control rather than removing it**; still open: AV-013 (needs decision T-6). |
 | **EVIDENCE-BLOCKED** (cannot be done truthfully yet) | **7** | AV-020, AV-033, AV-034, AV-035, AV-046, AV-047, AV-048 |
 | **Total** | **52** | — |
 
-**Applied so far: 11 of 52** — corrected 2026-09-29 (Batch 2d adds **AV-008** and **AV-023**). See the disposition
+**Applied so far: 13 of 52** — corrected 2026-09-29 (Batch 2e adds **AV-031** and **AV-032**; Batch 2d added **AV-008** and **AV-023**). See the disposition
 table above; the count and the paragraph below are DERIVED from the table's own status column (a row counts as
 APPLIED only when its status column says APPLIED); **AV-022** is applied IN PART and is therefore NOT in that count.
 
@@ -121,15 +121,18 @@ APPLIED only when its status column says APPLIED); **AV-022** is applied IN PART
 | **AV-024** | Batch 2c, 2026-09-29 | a channel-issued revision of a purchase order is derived, recorded, audited, idempotent and gated; the record moves to the channel's current version with the superseded one retained; a change that undercuts a recorded decision makes the acknowledgement stale and REFUSES a shipment; the brand is told and the console shows every revision | `npm run validate:po-revision` (102 assertions), `e2e/po-revision-surfaces.spec.ts` (3 browser tests) |
 | **AV-008** | Batch 2d, 2026-09-29 | the acknowledgement ↔ invoice price rule has ONE owner; the acknowledged price can never exceed the order price (enforced, fail-closed at the domain boundary); a divergence is warned with the channel's own rule and shown on both surfaces | `npm run validate:ack-invoice-price` (38 assertions), `e2e/ack-invoice-price.spec.ts` (2 browser tests) |
 | **AV-023** | Batch 2d, 2026-09-29 | the invoice and the channel submission bill the price the acknowledgement recorded, so the acknowledgement and the invoice match by construction (the channel's documented rule) | `npm run validate:ack-invoice-price` (executed invoice amount + executed channel payload) |
+| **AV-031** | Batch 2e, 2026-09-29 | the compliance documents are attributed to UK/EU law + Mercenta's own onboarding controls, never to the retail channel's requirements | `npm run validate:compliance-attribution` (source + comment sweep: no channel-requirement claim in the module or the seed; mutation-proved) |
+| **AV-032** | Batch 2e, 2026-09-29 | `brand_registry_confirmation` is reclassified as an OPTIONAL Mercenta onboarding control — not required, never blocking, declared with its rationale, relabelled away from the seller-programme term, removed from the demo seed and from the admin overview's hand-written duplicate | `npm run validate:compliance-attribution` (18 assertions, executed modules; 2 mutation proofs), `e2e/compliance-gate.spec.ts` |
 
 **The open position, derived (not asserted):** of the 52 findings, **16 are KEEP rows that need no further
 work** (7 CONFIRMED + 9 MERCENTA RULE) **minus the 3 that carry a labelled follow-up (AV-001, AV-018,
-AV-039)** → **13 need nothing**; **11 are APPLIED**; therefore **28 remain OPEN** — being the 25 findings
-still open *by classification* (**10 INCOMPLETE · 1 UNSUPPORTED (AV-032) · 1 MODELLED IN PART (AV-022) ·
-6 UNKNOWN · 2 CONTRADICTED · 5 INFERENCE**) **plus the 3 labelled follow-ups**. **7 of the 28 are
+AV-039)** → **13 need nothing**; **13 are APPLIED**; therefore **26 remain OPEN** — being the 23 findings
+still open *by classification* (**10 INCOMPLETE · 0 UNSUPPORTED · 1 MODELLED IN PART (AV-022) ·
+6 UNKNOWN · 1 CONTRADICTED · 5 INFERENCE**) **plus the 3 labelled follow-ups**. **7 of the 26 are
 EVIDENCE-BLOCKED** (AV-020, AV-033, AV-034, AV-035, AV-046, AV-047, AV-048). The register remains a plan, not
-a record of work. *(Recomputed 2026-09-29 — Batch 2d applied AV-008 and AV-023, which were two of the INCOMPLETE
-rows, so 12 → 10 INCOMPLETE and 9 → 11 APPLIED. The figures are derived from the disposition table above.)*
+a record of work. *(Recomputed 2026-09-29 — Batch 2e applied AV-031 (CONTRADICTED) and AV-032 (UNSUPPORTED),
+so 2 → 1 CONTRADICTED, 1 → 0 UNSUPPORTED and 11 → 13 APPLIED. The figures are derived from the disposition
+table above.)*
 
 ---
 
