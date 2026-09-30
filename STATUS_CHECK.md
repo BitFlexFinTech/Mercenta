@@ -26,7 +26,73 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## BATCH 2e — THE COMPLIANCE SET NO LONGER BLOCKS A BRAND ON A SELLER-PROGRAMME DOCUMENT, AND THE OBLIGATIONS ARE ATTRIBUTED TO THEIR REAL AUTHORITY — DEPLOYED AND LIVE-VERIFIED (session 54, 2026-09-29) — CURRENT
+## BATCH 2f (`AV-042`) + BATCH 2g (`AV-040`) — THE PROGRAMME-CLAIM WORDING GUARD NOW CATCHES PO-GUARANTEE PHRASING, AND THE `AV-040` DISPOSITION RECORD IS CORRECTED — DEPLOYED; LIVE VERIFICATION PARTIAL (TWO HOST NAVIGATION TIMEOUTS) (session 55, 2026-09-29) — CURRENT
+
+**What was wrong.**
+- **`AV-042`** (Wording safeguards, MEDIUM/HIGH): the canonical business rules ban *"guaranteed purchase orders"* /
+  *"Amazon guaranteed POs"*, but `AMAZON_WORDING_RULES` listed only sales/revenue/acceptance/approval/launch/
+  placement/listing — so a PO-guarantee claim could pass the gate. The set also missed four phrasings
+  `.clinerules/mercenta-business-model.md` bans by name ("Amazon wholesale loophole", "Amazon will buy your
+  products", "we sell directly to Amazon", "we bypass Amazon").
+- **`AV-040`** (SP-API coverage, HIGH/HIGH): **two false statements in opposite directions.** The disposition row
+  read "OPEN — not applied" although **EIGHT** seam operations existed (§P4 built `submitAcknowledgement`; §P12
+  built `getPurchaseOrdersStatus`, `submitShipmentRequest`, `getShipmentDetails`, `getShipmentLabels`,
+  `submitShipmentConfirmations`, `submitInvoices`, `submitInventoryUpdate`). Meanwhile the §P4 and §P12 registry
+  blocks **both claimed "Closes AV-040"**, although `getTransaction` (the Vendor Retail Procurement Transaction
+  Status API, source `S12`) was never implemented anywhere in the seam.
+
+**What was done.**
+- `src/lib/intelligence/amazonWording.ts` — six rules added: purchase-order guarantee in **both word orders**
+  (`"guaranteed POs"` and `"your POs are guaranteed"`), plus the four named phrasings. The module header records
+  the `AV-042` rule.
+- `scripts/validate-wording-guard.mjs` (NEW; `npm run validate:wording-guard`) — **EXECUTES the real module**:
+  every banned phrasing must be caught; the honest vocabulary ("PO potential" / "estimated PO opportunity" /
+  "demand potential") must **PASS**; `sanitiseAmazonClaim` must **REPAIR** a PO claim; a self-check proves the gate
+  is not vacuous; and the `AV-042` record row must not revert to "OPEN — not applied".
+- `scripts/validate-p12-spapi-seam.mjs` — five assertions **pin the `AV-040` row against the code**: the row
+  exists; it is not "OPEN — not applied"; it states a **PARTIAL** application; it names `getTransaction`; and the
+  **SEAM and the RECORD agree** (`getTransaction` still absent from both clients) — so neither a stale claim nor a
+  silent addition can drift again.
+- Records corrected **at source**: `docs/AMAZON_RECONCILIATION_STATUS.md` (`AV-040` → MODELLED IN PART with the
+  remaining operation named and evidence-blocked; `AV-042` → APPLIED; the derived counts recomputed to
+  **14 APPLIED / 25 open**), the register's POST-REGISTER CHANGE note, `docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md`
+  row 9, `docs/NEXT_BUILD_PLAN_2026-09-27.md` §BATCH 2, and the §P4/§P12 registry descriptions (REPOINTED, old
+  claim recorded inline).
+- Both scope guards declare the phase (`BATCH2F_WORDING_GUARD_SCOPE` / `BATCH2F_WORDING_GUARD_DECLARED`) — the
+  **FIRST Amazon-accuracy phase to change a PROTECTED path** (`src/lib/intelligence/`). The guards were
+  **DECLARED, never weakened**: an unexplained protected change still fails.
+
+**Evidence.** `npm run validate:wording-guard` **PASS**; **mutation-proved** — removing the two PO-guarantee rules
+made the gate report **2 failures / 7 phrasings missed**, and the owner file was restored **byte-identical**
+(sha256 `ef6fde0712af4573179fe02ef82fd94180f6b56747a3ce58a70acb7a2cecaad5`). `npm run validate:p12-spapi-seam`
+**64 PASS / 0 FAIL** (was 59). `npm run validate:all` **128 PASS / 0 FAIL** (was 127 — the new gate is the +1).
+`npm run typecheck` **0 errors** · `npm run lint` **0** · `npm run build` ✓ · `npm run validate:wording`
+**0 violations** · `validate-e6` PASS · `validate-e7` PASS · `validate-resume-state` PASS · `validate:plain-english`
+PASS · `validate:rules-application` PASS.
+
+**Delivery.** Committed **`1e24916`**, pushed to `origin/redesign/foundation` (`0f21f22..1e24916`, no `--force`).
+Deployed through `scripts/deploy-demo.sh` from a clean tree at `1e24916` (exit 0; 4,990,608 bytes; 19 stale files
+removed).
+
+**Live verification — PARTIAL, and stated honestly.** `npm run verify:live` = **180 PASS / 14 FAIL (exit 1)**.
+**ALL 14 failures come from TWO HOST NAVIGATION TIMEOUTS** — the homepage `bold @ 390px` block (which cascades
+into its ten `L1–L9` assertions, all reading `null`) and `/explore-uk-market-fit @ 390px minimal-light` — each a
+`page.goto` exceeding 90s on the shared demo host, which also transferred this deploy at **14.2 KiB/s**
+(344 seconds). This is the **host-side class** recorded in sessions 49–53, **never a product fault**; **L10 PASS
+confirms the deployed entry asset is the local verified build**, and `L11–L17` passed on every page that loaded.
+The three-way status is therefore **DEPLOYMENT EXECUTED — LIVE VERIFICATION PARTIAL — NOT COMPLETE**, and is
+**not** reported as complete.
+
+**The one remaining `AV-040` operation is BLOCKED, not parked.** `getTransaction` cannot be modelled truthfully:
+the project's own research records only *"POST transactions can be status-checked"* (`S12`) — no request/response
+shape and no status vocabulary — so building it would be invention, the exact defect class this register exists to
+remove. The exact missing input and the exact next action are recorded in `PROJECT_STATUS.md → OUTSTANDING BLOCKER (0)`;
+it stays in the roadmap as work.
+
+---
+
+
+## BATCH 2e — THE COMPLIANCE SET NO LONGER BLOCKS A BRAND ON A SELLER-PROGRAMME DOCUMENT, AND THE OBLIGATIONS ARE ATTRIBUTED TO THEIR REAL AUTHORITY — DEPLOYED AND LIVE-VERIFIED (session 54, 2026-09-29) — SUPERSEDED BY BATCH 2f + 2g (session 55)
 
 **Increment identity:** this session is the **compliance attribution family** of BATCH 2 (Amazon accuracy), register **`AV-031`** (CONTRADICTED, measured CRITICAL) + **`AV-032`** (UNSUPPORTED). Branch `redesign/foundation`. **NO PROTECTED PATH AND NO MIGRATION WAS TOUCHED.**
 
