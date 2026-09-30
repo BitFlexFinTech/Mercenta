@@ -26,7 +26,74 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## BATCH 2f (`AV-042`) + BATCH 2g (`AV-040`) — THE PROGRAMME-CLAIM WORDING GUARD NOW CATCHES PO-GUARANTEE PHRASING, AND THE `AV-040` DISPOSITION RECORD IS CORRECTED — DEPLOYED; LIVE VERIFICATION PARTIAL (TWO HOST NAVIGATION TIMEOUTS) (session 55, 2026-09-29) — CURRENT
+## BATCH 2h (`AV-043`) — THE PURCHASE-ORDER VOCABULARY MAPPING NOW EXISTS IN ONE PLACE AND IN BOTH DIRECTIONS, AND THE ACKNOWLEDGEMENT WINDOW ASKS IT INSTEAD OF DECIDING THE CHANNEL POSITION ITSELF — DEPLOYED; LIVE VERIFICATION PARTIAL (HOST NAVIGATION TIMEOUTS) (session 56, 2026-09-30) — CURRENT
+
+**What was wrong.** The audit registered `AV-043` as *"two vocabularies with no declared mapping"*. Mercenta has its own
+lifecycle (`received` · `under_review` · `accepted` · `rejected` · `ready_to_fulfil` · `shipped` · `delivered`) and its
+own line vocabulary (`unacknowledged` · `accepted` · `rejected` · `backordered`); the retail channel speaks
+`purchaseOrderState` (`New`/`Acknowledged`/`Closed`), `purchaseOrderStatus` (`OPEN`/`CLOSED`),
+`itemConfirmationStatus` (`ACCEPTED`/`REJECTED`/`PARTIALLY_ACCEPTED`) and `poItemState` (`Canceled`). **Nothing in the
+platform wrote down which word on one side meant which on the other**, and the register named the consequence exactly:
+*"Mapping bugs at live integration; ambiguous status reporting."*
+
+A partial, implicit version of the mapping DID exist — inside `src/lib/commerce/poAcknowledgementWindow.ts`, as a
+hard-coded status pair plus a config list. An implicit mapping is worse than none: it cannot be found, cannot be
+reversed, and would silently disagree with the rest of the platform the moment a lifecycle status is added.
+**The fix (one owner, both directions).**
+- `src/lib/commerce/poChannelVocabulary.ts` (NEW) is the ONE owner. **Forward**: `PO_CHANNEL_STATE_BY_STATUS` is TOTAL
+  over the seven statuses and the channel's own values are DERIVED from it, never re-typed. **Reverse**: a channel read
+  resolves to the Mercenta statuses it COULD be — reported as a SET, because the channel's `OPEN` genuinely covers both
+  the un-acknowledged and the acknowledged position, and collapsing that to one status would be an invention.
+  **Lines**: `accepted` → `ACCEPTED`, `rejected` → `REJECTED`, `unacknowledged` → nothing; a **backorder** → the
+  channel's `ACCEPTED` flagged `mercentaSubState: true`, because the channel documents NO backorder value and
+  Mercenta's own word must never go on the wire. **Aggregate**: `PARTIALLY_ACCEPTED` is mapped as the channel's
+  aggregate result, and the reverse line map reads NO per-line status from it.
+- **FAILS CLOSED everywhere it cannot read**: an absent pair, an undocumented value, or two fields that contradict each
+  other returns `resolved: false`, NO candidates and a stated reason — never a guessed status.
+- `src/types.ts` declares the CHANNEL's raw vocabulary once (`CHANNEL_PO_ORDER_STATES`, `CHANNEL_PO_ORDER_STATUSES`,
+  `CHANNEL_ITEM_CONFIRMATION_STATUSES`, `CHANNEL_PO_ITEM_STATES`) — the same rule that puts `PO_REJECTION_CODES` and
+  `PO_CHANNEL_CHANGE_KINDS` there. **`src/lib/spapi/client.ts` was NOT touched** (a protected path); the seam's own
+  status union is instead pinned by a **compile-time assertion** in the owner, so it cannot drift unnoticed.
+- `poAcknowledgementWindow.ts` — its private mapping is DELETED and it asks the owner. **A second defect was found and
+  fixed there**: an undeclared status used to fall into the `New` branch (it was simply "not in the obligation list"),
+  so an order whose channel position could not be derived was offered as **actionable work**. It is now `unknown` with
+  no actionable control.
+- `src/config/purchaseOrders.ts` — `PO_ACK_STATUSES_WITH_OBLIGATION` is **DERIVED**
+  (`mercentaStatusesForChannelState('new')`) instead of being written out a second time as the same fact.
+- `src/lib/commerce/channelReceivingSync.ts` — the integration boundary now reports `channelState`,
+  `mercentaStatusCandidates`, `statusAmbiguous` and `statusDiffersFromChannel`, so the seam's word and Mercenta's own
+  status can never again be silently assumed equal.
+
+
+**Gate.** `scripts/validate-po-channel-vocabulary.mjs` (NEW, registered as `npm run validate:po-channel-vocabulary`; **50
+assertions**) bundles the REAL modules through the project's own esbuild + `@` alias and asserts RUNNING behaviour: one
+owner and no re-typing; the forward map total and fail-closed; the reverse map the exact inverse with `OPEN` honestly
+covering two positions; contradictions and undocumented values refused WITH a reason; the window equal to the owner for
+every status and offering no work for an undeclared one; no Mercenta-only word sent as a channel value; the seam's
+vocabulary pinned; and zero network calls.
+
+**Evidence.** `npm run validate:all` **129 PASS / 0 FAIL** (was 128 — the new gate is +1) · `npm run typecheck` **0** ·
+`npm run lint` **0** · `npm run build` ✓ · `npm run validate:wording` **0 violations** · the nine acknowledgement gates
+(window, programme, enforcement, work, brand, admin, notifications, on-behalf, onboarding) all PASS ·
+`p12-spapi-seam` **64/0** · `po-revision-ingestion` **102/0** · `channel-po-ingestion` **39/0** · validate-e6 +
+validate-e7 PASS · the seven purchase-order browser specs **26 passed**. **Three mutation proofs**, each restored
+byte-identical (sha256 `7a459487ef8e2c3f12d2755b788f3c525d72d46bd44c7b88f7bea32a096be232`): `received` → `closed` ⇒
+**6 failures**; re-typing the obligation set in the config ⇒ **1 failure**; making the window decide the position
+itself ⇒ **2 failures**.
+
+**Delivery.** Committed **`e219ef8`**, pushed to `origin/redesign/foundation` (`d439066..e219ef8`, no `--force`),
+deployed through `scripts/deploy-demo.sh` (exit 0; 4,994,442 bytes in 312s; 19 new, 12 modified, 20 stale files
+removed). `npm run verify:live` = **79 PASS / 16 FAIL** — **every failure a 90-second HOST TIMEOUT** on a host that
+transferred this deploy at 15.7 KiB/s, including `L15` (the channel-revision walkthrough) which therefore **could not be
+driven and is NOT claimed to have passed**. **`L10` PASS proves the deployed entry asset `assets/index-CEbD4Oa9.js` IS
+this session's local build**; `L14` PASS, `L16` PASS and `L17` 6/6 PASS on the pages that loaded. **Batch 2h changes no
+surface a user sees**, so its own evidence is the executed gate. Recorded as **DEPLOYMENT EXECUTED — LIVE VERIFICATION
+PARTIAL — NOT COMPLETE**, with the host timeouts carried as an open host-side item, never as a product exception.
+
+
+
+
+## BATCH 2f (`AV-042`) + BATCH 2g (`AV-040`) — THE PROGRAMME-CLAIM WORDING GUARD NOW CATCHES PO-GUARANTEE PHRASING, AND THE `AV-040` DISPOSITION RECORD IS CORRECTED — DEPLOYED; LIVE VERIFICATION PARTIAL (TWO HOST NAVIGATION TIMEOUTS) (session 55, 2026-09-29) — SUPERSEDED BY BATCH 2h (session 56)
 
 **What was wrong.**
 - **`AV-042`** (Wording safeguards, MEDIUM/HIGH): the canonical business rules ban *"guaranteed purchase orders"* /
