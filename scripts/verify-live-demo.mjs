@@ -33,6 +33,12 @@
  *   L15 the channel-issued purchase-order revision, driven live end to end:
  *       read the channel → issue the change → re-read → the console's revision
  *       history → the brand's own notice (BATCH 2c · AV-024)
+ *   L16 the acknowledgement ↔ invoice price rule, driven live end to end:
+ *       the ceiling refuses a higher price · a lower price is accepted, warned
+ *       and shown on the order (BATCH 2d · AV-008/AV-023)
+ *   L17 the compliance document set on the DEPLOYED brand surface: three
+ *       universal documents, the category document, and the reclassified
+ *       brand-ownership control nowhere required (BATCH 2e · AV-031/AV-032)
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -939,6 +945,82 @@ function readRedLines() {
     );
   }
   await ackPage.close();
+
+  /* ── L17 — BATCH 2e (AV-031 / AV-032): THE COMPLIANCE SET, ON THE LIVE SITE ──
+   * WHY THIS EXISTS. §AV-032 removed `brand_registry_confirmation` from the HARD
+   * GATE — it is a seller-programme concept, reclassified as an optional Mercenta
+   * onboarding control — and §AV-031 re-attributed the remaining documents to UK/EU
+   * law + Mercenta's own obligations. What the BRAND is shown on the DEPLOYED
+   * compliance surface is the only proof that matters: the required list must be the
+   * three universal documents plus this tenant's category document, the removed
+   * document must NOT appear anywhere the brand can read, and the gate must count
+   * only what it actually requires (0 of 4, never 0 of 5). Driven through the
+   * product's own controls; asserting the source would prove nothing about the
+   * deployed bundle.
+   */
+  console.log('\n--- L17 the compliance document set, on the live brand surface ---');
+  const compPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const compErrors = [];
+  compPage.on('pageerror', (e) => compErrors.push(String(e)));
+  try {
+    /** The shared host is slow and intermittently refuses connections — retry the entry. */
+    let compEntryAttempt = 0;
+    let compEntryError = null;
+    for (let attempt = 1; attempt <= 3 && compEntryAttempt === 0; attempt++) {
+      try {
+        await gotoLive(compPage, `${SITE}/`);
+        const login = compPage.getByRole('button', { name: 'Partner Login' }).first();
+        await login.waitFor({ state: 'visible', timeout: 90000 });
+        await login.click({ timeout: 30000 });
+        await compPage.waitForTimeout(2500);
+        const card = compPage.locator('text=Le Creuset').first();
+        await card.waitFor({ state: 'visible', timeout: 90000 });
+        await card.click({ timeout: 30000 });
+        await compPage.waitForTimeout(3000);
+        compEntryAttempt = attempt;
+      } catch (err) {
+        compEntryError = err;
+      }
+    }
+    if (compEntryAttempt === 0) throw compEntryError ?? new Error('entry failed');
+    check(`L17 the deployed site opened and the blocked brand signed in (attempt ${compEntryAttempt})`, true);
+
+    const compNav = compPage.locator('nav[aria-label="Primary"] >> text=UK Compliance').first();
+    await compNav.waitFor({ state: 'visible', timeout: 90000 });
+    await compNav.click({ timeout: 30000 });
+    await compPage.waitForTimeout(2500);
+
+    const compText = (await compPage.locator('body').innerText()).replace(/\s+/g, ' ');
+    check(
+      'L17 the LIVE brand compliance surface never shows the reclassified control (no "brand registry")',
+      !/brand registry/i.test(compText),
+      compText.match(/.{0,60}brand registry.{0,60}/i)?.[0] ?? ''
+    );
+    check(
+      'L17 the LIVE required list names the three universal documents',
+      /Letter of Authorization/i.test(compText) &&
+        /Product Safety \(UKCA\)/i.test(compText) &&
+        /Product Liability Insurance Certificate/i.test(compText)
+    );
+    check(
+      'L17 the LIVE required list still names the category document (Kitchen → food contact material)',
+      /Food Contact Material Compliance/i.test(compText)
+    );
+    check(
+      'L17 the LIVE gate counts only what it requires (0 of 4, not 0 of 5)',
+      /Compliance gate not yet cleared/.test(compText) && /4 item\(s\) remain\./.test(compText)
+    );
+    check(
+      `L17 the driven compliance surface rendered with no uncaught error (errors: ${compErrors.join(' | ') || 'none'})`,
+      compErrors.length === 0
+    );
+  } catch (compError) {
+    check(
+      `L17 the compliance document set could NOT be driven live (${String(compError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await compPage.close();
 
   await browser.close();
 

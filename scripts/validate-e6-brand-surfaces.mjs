@@ -636,6 +636,7 @@ const BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE = new Set([
   'e2e/status-semantics.spec.ts',
   'scripts/validate-document-verification.mjs',
   'scripts/validate-compliance-attribution.mjs',
+  'scripts/verify-live-demo.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
   'package.json',
