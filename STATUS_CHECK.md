@@ -26,7 +26,52 @@ RECONCILED (required work committed, unneeded material removed) — there is no 
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## PUBLIC-MESSAGING BATCHES B7 + B8 — THE STATIC PUBLIC SURFACE REBUILT AND THE CLAIMS GATE LANDED — DEPLOYED AND LIVE-VERIFIED (session 51, 2026-09-29) — CURRENT
+## BATCH 2d — THE ACKNOWLEDGEMENT ↔ INVOICE PRICE RULE ENFORCED, AND BOTH WRITERS NOW BILL THE ACKNOWLEDGED PRICE — DEPLOYED AND LIVE-VERIFIED (session 53, 2026-09-29) — CURRENT
+
+**WHAT WAS ASKED.** Continue Batch 2 (Amazon accuracy) at the recorded next findings `AV-008` / `AV-023`.
+
+**WHAT WAS WRONG — and the second part was worse than "not applied".**
+`AV-008`: the platform RECORDED the brand's acknowledged unit price (`acknowledgedUnitPrice`) but matched it against
+nothing and enforced no ceiling — although the channel documents that *"the price cannot be higher than the price
+submitted in the purchase order"*. `AV-023`: `commerceLifecycle.issueCommerceInvoice` billed each goods line at the
+ORDER's `unitPrice`, and `api.submitCommerceInvoiceToChannel` told the channel the ORDER's price — so the platform
+itself created the very divergence the channel's payment system compares and may delay payment over, while the
+acknowledgement's own warning told it to use the acknowledged price. The rule text was also inline in `api.ts` with
+no owner, and the admin surface re-typed the comparison and its title.
+
+**WHAT WAS BUILT.** `src/lib/commerce/invoicePriceMatch.ts` (NEW) is the ONE owner: the channel's documented match
+rule and ceiling, `acknowledgedUnitPriceFor`, `ackPriceDivergence`/`ackPriceDivergences`, `ackPriceDivergenceWarning`,
+the ONE surface title, and `ackPriceCeilingRefusal`. `src/data/api.ts` enforces the ceiling in
+`acknowledgePurchaseOrder`'s fail-closed per-line pre-pass, records the acknowledged price whenever submitted (so an
+amendment returning it to the order price CLEARS a stale divergence), warns with the owner's wording, and sends the
+acknowledged price per line to the channel. `commerceLifecycle.issueCommerceInvoice` bills at the acknowledged price,
+so the invoice and the acknowledgement MATCH by construction. Both surfaces render from the owner: the admin
+discrepancy panel and a new brand `AckPriceNotice` on the order itself and in the record preview (renders nothing
+without a divergence).
+
+**PROOF.** `npm run validate:ack-invoice-price` (NEW, **38 assertions, 0 failures**) EXECUTES the real modules and
+asserts the executed invoice amount (8 × 90 = 720, not 800) and the executed channel payload (90); it was proved able
+to fail twice (mutating the derivation → 4 failures; mutating the ceiling → 5 failures) and the file was restored
+byte-identical (`b05cbe59…`). `e2e/ack-invoice-price.spec.ts` **2 passed**. `verify:live` gained **L16 (6/6 PASS on
+the deployed site)**. Locally: `validate:all` **126 PASS / 0 FAIL**, `npm run typecheck` clean, `npm run lint` clean,
+`npm run build` ✓.
+
+**DEFECTS FIXED AT SOURCE (never recorded as exceptions).** (a) the missing ceiling; (b) the invoice and the channel
+submission billing the order price; (c) the rule text having no owner and the admin title being re-typed;
+(d) **`docs/AMAZON_RECONCILIATION_STATUS.md`'s own derived counts were wrong** — the BUILD row said **15** while
+listing already-applied rows and omitting applied ones, and the applied/open figures needed recomputing after this
+batch (now **11 APPLIED · 28 OPEN**, BUILD **16 (6 applied, 10 open)**); (e) a duplicate `await browser.close();` in
+`scripts/verify-live-demo.mjs`; (f) **the project's documented `npx tsc --noEmit` checks almost NOTHING** (the root
+`tsconfig.json` declares `files: []` and only references — it stayed silent while `src/data/api.ts` held an
+undefined-variable error); the authoritative command is `npm run typecheck`, and the stale instruction was corrected.
+
+**LIVE.** Deployed through `scripts/deploy-demo.sh` (exit 0) and verified on `https://demo.mercenta.co.uk`:
+`verify:live` **127 PASS / 10 FAIL**, every failure a HOST navigation timeout at 390px (`page.goto` 90s), with L16
+6/6, L15 9/9, L10 PASS (the deployed entry asset `assets/index-vF1_Yna_.js` is the local verified build) and L14
+PASS. **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `07590c5`.**
+
+## PREVIOUS — PUBLIC-MESSAGING BATCHES B7 + B8 — THE STATIC PUBLIC SURFACE REBUILT AND THE CLAIMS GATE LANDED — DEPLOYED AND LIVE-VERIFIED (session 51, 2026-09-29) — SUPERSEDED BY BATCH 2c AND 2d
+
 
 **WHAT WAS ASKED.** B7 (the SEO / static public surface pass) and B8 (land `scripts/validate-public-claims.mjs` GREEN
 and prove it can fail), both recorded as the next tasks. B7 exists because B6's own live verification found the defect.

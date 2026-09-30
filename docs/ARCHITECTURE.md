@@ -114,14 +114,18 @@ localStorage-persisted).
 
 ## 8. Known baseline defects (documented — RESOLVED)
 
-Both former baseline typecheck failures are **RESOLVED** at HEAD (`npx tsc --noEmit` exits 0):
+Both former baseline typecheck failures are **RESOLVED** at HEAD (`npm run typecheck` — `tsc --noEmit -p
+tsconfig.app.json` — exits 0):
 
 | File | Status |
 |---|---|
 | `src/lib/intelligence/outreachGenerator.ts` | Fixed 2026-09-08 — typecheck green; dead file left in tree (not in the Vite build graph). |
 | `src/components/admin/XeroConnection.tsx` | **REMOVED in Phase 1 (2026-09-16)** — dead duplicate component (0 importers); Xero lives in `AccountingPanel.tsx`. |
 
-Consequence: `npm run build` passes and `npx tsc --noEmit` exits 0 at HEAD.
+Consequence: `npm run build` passes and `npm run typecheck` exits 0 at HEAD. **Corrected 2026-09-29 (Batch 2d):**
+this section previously cited bare `npx tsc --noEmit`, which at the repository root checks almost nothing (the root
+`tsconfig.json` has `files: []` and only references). The claim was vacuous, not evidence — the authoritative command
+is `npm run typecheck`.
 
 ## 9. Performance invariants (must not regress)
 

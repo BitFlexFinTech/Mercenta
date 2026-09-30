@@ -131,7 +131,12 @@ safety rule is a critical failure. The retired clauses above and below have **no
 ## Standing Requirements (apply to EVERY task):
 
 Before claiming a task is complete, you MUST:
-1. Run: npx tsc --noEmit — confirm 0 new errors
+1. Run: npm run typecheck — confirm 0 new errors. **REPOINTED 2026-09-29 (Batch 2d):** this line used to say
+   `npx tsc --noEmit`, which at the repository root checks almost NOTHING — the root `tsconfig.json` declares
+   `files: []` and only project `references`, so plain `tsc` has nothing to check and exits 0 even when `src/` holds
+   a real error (observed: it stayed silent while `src/data/api.ts` contained an undefined-variable error). The
+   authoritative command is the project's own `npm run typecheck` (`tsc --noEmit -p tsconfig.app.json`), which
+   caught it immediately. Use that.
 2. Run: npm run build — confirm it compiles
 3. If the task involves UI or user-facing changes: run the
    relevant Playwright tests (npx playwright test [relevant-spec])
