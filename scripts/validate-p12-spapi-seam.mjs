@@ -691,6 +691,25 @@ check(
 );
 check('the gate is registered as an npm script', /"validate:p12-spapi-seam"/.test(read('package.json')));
 
+/* ── §BATCH 2g (`AV-040`) — the disposition RECORD must match the code ──────── */
+/*  The record said "OPEN — not applied" for months while EIGHT seam operations
+ *  existed, which under-reported the work in the opposite direction. These
+ *  checks make the row and the code agree, so neither a stale "not applied" nor
+ *  a silent addition/removal can drift again. */
+const reconRow = (read('docs/AMAZON_RECONCILIATION_STATUS.md').split('\n')
+  .find((l) => l.startsWith('| AV-040 ')) ?? '');
+check('§AV-040 the reconciliation row exists', reconRow.length > 0);
+check('§AV-040 the row no longer claims "OPEN — not applied"',
+  !/OPEN\s*—\s*not applied/i.test(reconRow));
+check('§AV-040 the row states a PARTIAL application, not full completion',
+  /PARTIALLY APPLIED/i.test(reconRow) && /BLOCKED ON EVIDENCE/i.test(reconRow));
+check('§AV-040 the row names `getTransaction` as the ONE remaining documented operation',
+  /getTransaction/.test(reconRow));
+check('§AV-040 the seam and the record AGREE: `getTransaction` is still not implemented',
+  !/getTransaction/.test(read('src/lib/spapi/client.ts')) &&
+    !/getTransaction/.test(read('src/lib/spapi/mockClient.ts')),
+  'a seam method was added/removed — update the AV-040 row in the same change');
+
 console.log('');
 if (fail === 0) {
   console.log(`P12_SPAPI_SEAM_VALIDATION_PASS (${pass} passed, 0 failed)`);

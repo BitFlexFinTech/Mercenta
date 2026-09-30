@@ -10,7 +10,10 @@
  *
  * THE RULES (§17):
  *   • never claim Amazon approval, endorsement, partnership or a programme place;
- *   • never promise guaranteed sales, acceptance, launch or approval;
+ *   • never promise guaranteed sales, acceptance, launch or approval — and, per
+ *     the canonical business rules, never guarantee a purchase order either
+ *     (`docs/AMAZON_RECONCILIATION_STATUS.md` → `AV-042`; the honest vocabulary
+ *     is "PO potential" / "estimated PO opportunity" / "demand potential");
  *   • never imply Mercenta decides or controls Amazon's decision;
  *   • never present a projection as measured Amazon data;
  *   • any reference to an Amazon programme must carry the verification note,
@@ -39,6 +42,32 @@ export const AMAZON_WORDING_RULES: readonly AmazonWordingRule[] = [
   { pattern: /\bborn\s+to\s+run\s+(place|place\s+guaranteed|guarantee)\b/i, reason: 'Claims a place in an Amazon programme.' },
   { pattern: /\bamazon\s+will\s+(definitely|certainly|guaranteed)\b/i, reason: 'Promises an Amazon decision.' },
   { pattern: /\bwe\s+are\s+an\s+amazon\s+(vendor|seller)\s+of\s+record\s+for\s+you\b/i, reason: 'Misstates the vendor-of-record relationship.' },
+
+  /* ── §BATCH 2f (`AV-042`) — PURCHASE-ORDER GUARANTEE PHRASING ──────────────
+   * The rule above lists sales/revenue/acceptance/approval/launch/placement/
+   * listing but NOT purchase orders, so a PO-guarantee claim could pass this
+   * gate although the canonical business rules ban it outright:
+   *
+   *   `.clinerules/mercenta-business-model.md` — banned in outward-facing copy:
+   *   *"guaranteed purchase orders"*, *"Amazon guaranteed POs"*; and *"never call
+   *   a channel PO 'guaranteed' — use PO potential, estimated PO opportunity,
+   *   demand potential"*.
+   *
+   * Both word orders are covered, exactly as the general guarantee rule above
+   * covers both directions ("guaranteed POs" AND "your POs are guaranteed").
+   */
+  { pattern: /\bguaranteed?\s+(purchase\s+orders?|pos?|orders?)\b/i, reason: 'Promises a guaranteed purchase order — a channel decision Mercenta does not control. Use "estimated PO opportunity" / "demand potential".' },
+  { pattern: /\b(purchase\s+orders?|pos?|orders?)\b[^.\n]{0,24}\bguaranteed\b/i, reason: 'Promises a guaranteed purchase order (reversed phrasing). Use "estimated PO opportunity" / "demand potential".' },
+
+  /* ── §BATCH 2f (`AV-042`) — THE OTHER PHRASINGS THE CANONICAL BUSINESS RULES
+   * BAN BY NAME, which this gate must therefore also catch (each is quoted
+   * verbatim from `.clinerules/mercenta-business-model.md` → "Amazon wording
+   * safeguards"). Prior to this the gate caught none of them.
+   */
+  { pattern: /\bamazon\s+wholesale\s+loophole\b/i, reason: 'Presents the channel relationship as a loophole — banned outward-facing wording.' },
+  { pattern: /\bamazon\s+will\s+buy\s+(your|the)\b/i, reason: 'Claims Amazon will buy the products — an unverified channel commitment.' },
+  { pattern: /\bwe\s+sell\s+directly\s+to\s+amazon\b/i, reason: 'Claims Mercenta sells directly to Amazon — banned outward-facing wording.' },
+  { pattern: /\bwe\s+bypass\s+amazon\b/i, reason: 'Claims Mercenta bypasses Amazon — banned outward-facing wording.' },
 ];
 
 /**

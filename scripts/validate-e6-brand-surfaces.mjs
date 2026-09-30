@@ -643,6 +643,29 @@ const BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE = new Set([
 ]);
 
 /**
+ * §BATCH 2f (`AV-042`, 2026-09-29) — THE PROGRAMME-CLAIM WORDING GUARD.
+ *
+ * The canonical business rules ban *"guaranteed purchase orders"* / *"Amazon
+ * guaranteed POs"*, but the programme-claim regex set in the PROTECTED
+ * `src/lib/intelligence/amazonWording.ts` listed only sales/revenue/acceptance/
+ * approval/launch/placement/listing, so a PO-guarantee claim could pass the gate.
+ * Batch 2f extends the set (both word orders) and also covers the four further
+ * phrasings `.clinerules/mercenta-business-model.md` bans by name. The file is
+ * DECLARED here (not widened): the F5/F5b/F6 contract is unchanged — a changed
+ * file in NO declared set still fails.
+ *
+ * Declared set: the rule owner (PROTECTED prefix), the new gate, and the two
+ * scope guards + `package.json` that register it.
+ */
+const BATCH2F_WORDING_GUARD_SCOPE = new Set([
+  'src/lib/intelligence/amazonWording.ts',          /* the rule owner (PROTECTED) */
+  'scripts/validate-wording-guard.mjs',             /* NEW — this phase's gate */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+/**
  * §PLAIN-ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the rule that asks for
  * plain English already existed and was still not followed, so the owner was offered a
  * decision in words they could not evaluate and the work stopped. This phase turns the
@@ -1813,6 +1836,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2e — the compliance-attribution family (see above). */
         BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE.has(p) ||
         [...BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2f — the programme-claim wording guard (see above). */
+        BATCH2F_WORDING_GUARD_SCOPE.has(p) ||
+        [...BATCH2F_WORDING_GUARD_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -1861,6 +1887,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2e — same declaration, second protected-path check (F5b). */
         BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE.has(p) ||
         [...BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2f — same declaration, second protected-path check (F5b). */
+        BATCH2F_WORDING_GUARD_SCOPE.has(p) ||
+        [...BATCH2F_WORDING_GUARD_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — same declaration, second protected-path check (F5b). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -2136,6 +2165,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2e — the compliance-attribution family (see above). */
           BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE.has(p) ||
           [...BATCH2E_COMPLIANCE_ATTRIBUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2f — the programme-claim wording guard (see above). */
+          BATCH2F_WORDING_GUARD_SCOPE.has(p) ||
+          [...BATCH2F_WORDING_GUARD_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
           PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
           [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

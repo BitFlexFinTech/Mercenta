@@ -676,7 +676,7 @@ Nothing below may be modelled until the evidence is obtained and cited:
 | 6 | **Routing re-model** — remove the brand Routing Request mechanic, drop the unsupported 10am-Pacific claim, make `mercenta_hub` optional | **CLOSED IN PART (2026-09-22)** — the unsupported 10am-Pacific claim is REMOVED and the deadline is Mercenta-owned; the routing mechanic and the optional-`mercenta_hub` re-model remain | **S4** |
 | 7 | **Catalogue Amazon contract fidelity** (submission route, image requirements, marketplace ID) | **EVIDENCE-BLOCKED** | **S8** |
 | 8 | **Deduction/chargeback taxonomy fidelity** | **EVIDENCE-BLOCKED** | later |
-| 9 | **Amazon Vendor SP-API surface** (`submitAcknowledgement`, `getPurchaseOrdersStatus`, `submitInvoices`, `SubmitShipments`, `GetShipmentDetails`, `SubmitShipmentConfirmations`, `getTransaction`) | **NOT IMPLEMENTED** | **S7** |
+| 9 | **Amazon Vendor SP-API surface** (`submitAcknowledgement`, `getPurchaseOrdersStatus`, `submitInvoices`, `SubmitShipments`, `GetShipmentDetails`, `SubmitShipmentConfirmations`, `getTransaction`) | **MODELLED IN PART (2026-09-29)** — eight operations are implemented on both clients of the seam and gated (`npm run validate:p12-spapi-seam`, 59 assertions); only **`getTransaction`** remains, and it is **EVIDENCE-BLOCKED** (no documented request/response shape or status vocabulary, so modelling it would be invention) | **S7** |
 | 10 | **Payoneer-primary payout rework** across all five sources (T-1) | **DECIDED, NOT APPLIED** — see §7.1 | **S11** |
 | 11 | **Full 358-declaration E2E suite re-run** | **NOT RUN in S2a** (subset of 50 run) | **S12** |
 | 12 | `monitoring`, `whatsapp` views — feature assertions (render-only today) | **PARTIALLY VERIFIED** | **S12** |

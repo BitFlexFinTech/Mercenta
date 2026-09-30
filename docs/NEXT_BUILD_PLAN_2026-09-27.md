@@ -92,10 +92,12 @@ measured **116/116 PASS** on 2026-09-28. The remaining leg is the live verificat
 ## BATCH 2 — AMAZON ACCURACY (the 37 open findings; start with the HIGH ones)
 
 **Register of record:** `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` (52 findings AV-001…AV-048)
-with dispositions in `docs/AMAZON_RECONCILIATION_STATUS.md`. **As at 2026-09-28 (Batch 2b applied): 9 APPLIED
-(AV-003, AV-006, AV-007, AV-010, AV-019, AV-019b, AV-020b, AV-022, AV-027), 30 still OPEN** (13 INCOMPLETE ·
-1 UNSUPPORTED · 6 UNKNOWN · 2 CONTRADICTED · 5 INFERENCE = 27 by classification, plus the 3 KEEP rows
-carrying a labelled follow-up — AV-001, AV-018, AV-039; 7 of the 30 EVIDENCE-BLOCKED).
+with dispositions in `docs/AMAZON_RECONCILIATION_STATUS.md`. **As at 2026-09-29 (Batches 2c–2g applied): 14 APPLIED
+(AV-003, AV-006, AV-007, AV-008, AV-010, AV-019, AV-019b, AV-020b, AV-023, AV-024, AV-027, AV-031, AV-032, AV-042 —
+plus AV-022 IN PART, which is not counted), 25 still OPEN** (8 INCOMPLETE · 0 UNSUPPORTED · 2 MODELLED IN PART ·
+6 UNKNOWN · 1 CONTRADICTED · 5 INFERENCE = 22 by classification, plus the 3 KEEP rows carrying a labelled
+follow-up — AV-001, AV-018, AV-039; 7 rows EVIDENCE-BLOCKED, and **AV-040's remaining `getTransaction` operation is
+evidence-blocked too**).
 
 ### 2b. The amendment window — **DONE (session 44, 2026-09-28)**
 
@@ -143,10 +145,12 @@ touched** — the SQL seed's own staleness is recorded as BLOCKED in the session
 | ~~**AV-020b**~~ (AV-010 is **APPLIED**, Wave 3) | ~~The invented 30-day backorder restock countdown~~ — **APPLIED (Batch 2a, 2026-09-28)**: Mercenta's own restock reminder, attribution rendered, removed wording gated absent. Not start work. | — |
 | ~~**AV-008 / AV-023**~~ | ~~Ack ↔ invoice price/time rules incomplete~~ — **APPLIED (Batch 2d, 2026-09-29)**: one owner for the rule + the ceiling, enforced fail-closed, both writers bill the acknowledged price, gated by `validate:ack-invoice-price`. Not start work. | — |
 | ~~**AV-032**~~ | ~~The compliance document set is **unsupported** by evidence~~ — **APPLIED (Batch 2e, 2026-09-29)**: reclassified as an optional Mercenta control, never blocking, gated by `validate:compliance-attribution`. Not start work. | — |
-| **AV-040 / AV-042 / AV-043 / AV-045** | SP-API coverage, wording safeguards, PO vocabulary, delivery appointments incomplete | Incomplete fidelity to the channel |
+| **AV-043 / AV-045** (+ **AV-040** PARTIAL) | PO vocabulary and delivery appointments incomplete; **AV-042 is APPLIED (Batch 2f) — not start work**, and **AV-040 is PARTIAL** (six of its seven named SP-API operations are built and gated; only `getTransaction` remains, evidence-blocked) | Incomplete fidelity to the channel |
 
-**Then:** the remaining INCOMPLETE rows (AV-009/011/014/015/016/010b), the CONTRADICTED row (AV-013 —
-AV-027 and **AV-031** are applied), and the INFERENCE rows that must be **relabelled** (AV-002/017/025/033/044).
+**Then:** the remaining INCOMPLETE rows (AV-009/011/014/015/016/010b) and PO vocabulary (`AV-043`), the
+CONTRADICTED row (AV-013 — AV-027 and **AV-031** are applied), and the INFERENCE rows that must be **relabelled**
+(AV-002/017/025/033/044). **AV-042 is APPLIED (Batch 2f) — not start work.** **AV-040's one remaining operation
+(`getTransaction`) is EVIDENCE-BLOCKED**: do not model it from guesswork.
 
 **Do NOT guess the UNKNOWNs** (AV-020/034/035/046/047/048): they need a **signed-in Vendor Central session**
 (founder-only) — record as EVIDENCE-BLOCKED until then.

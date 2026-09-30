@@ -207,3 +207,28 @@ were APPLIED in code by P5**, so their evidence pointers are annotated:
   data, and the PO remains the authoritative destination — P5 makes the PO authoritative **in code** as well as in
   wording) and `AV-040` (unchanged: one of eight operations implemented by P4; the rest stay with P12). The audit's
   APPLIED count was 0 at audit time; two findings have since been applied by later, separately verified increments.
+
+---
+
+## POST-REGISTER CHANGE — 2026-09-24 (§P12) and 2026-09-29 (Batches 2f / 2g)
+
+This register remains the **record of the repository as audited on 2026-09-20**; its findings are unchanged. Later,
+separately verified increments have since applied some of them, so their evidence pointers are annotated:
+
+- **`AV-040` — PARTIALLY APPLIED (six of the seven named operations).** §P12 (2026-09-24) implemented the rest of
+  the documented Vendor surface on BOTH clients of the seam — `getPurchaseOrdersStatus`, `submitShipmentRequest`
+  (= `SubmitShipments`), `getShipmentDetails`, `getShipmentLabels` (refused BY RULE outside NA),
+  `submitShipmentConfirmations`, `submitInvoices` and `submitInventoryUpdate`. Together with `submitAcknowledgement`
+  (§P4) that is **eight seam operations**, gated by `npm run validate:p12-spapi-seam` (**59 assertions**, executing
+  the real modules). The finding is **NOT dismissed**: **`getTransaction` (the Vendor Retail Procurement Transaction
+  Status API, source `S12`) remains NOT implemented**, and it is **BLOCKED ON EVIDENCE** — the project's research
+  records no request/response shape and no status vocabulary for it, so modelling it would be invention. **Batch 2g
+  (2026-09-29)** corrected the disposition record, which had still read "OPEN — not applied" and therefore
+  under-reported the eight operations that actually exist; that stale claim is now pinned against by the gate.
+- **`AV-042` — APPLIED (Batch 2f, 2026-09-29).** The programme-claim rule set in
+  `src/lib/intelligence/amazonWording.ts` now catches purchase-order guarantee phrasing in **both** word orders,
+  plus the four phrasings `.clinerules/mercenta-business-model.md` bans by name that the set previously let
+  through. Gated by `npm run validate:wording-guard`. `scripts/lint-wording.mjs` enforces a **different**
+  (channel-naming) rule set and is unchanged.
+
+- The register's other findings are untouched. The audit's APPLIED count was 0 at audit time.

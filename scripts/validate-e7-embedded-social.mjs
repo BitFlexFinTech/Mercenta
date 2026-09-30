@@ -688,6 +688,20 @@ try {
   ];
 
   /**
+   * §BATCH 2f — THE PROGRAMME-CLAIM WORDING GUARD (`AV-042`, 2026-09-29).
+   * Fuller note in `validate-e6-brand-surfaces.mjs` §BATCH2F_WORDING_GUARD_SCOPE.
+   * Same mechanism as every phase above: a changed source/test file outside EVERY
+   * declared set is still refused.
+   */
+  const BATCH2F_WORDING_GUARD_DECLARED = [
+    'src/lib/intelligence/amazonWording.ts',
+    'scripts/validate-wording-guard.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+  /**
    * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
    * rule already existed and was still not followed; this phase makes it checkable.
    */
@@ -1491,7 +1505,15 @@ try {
           !P12_SPAPI_SEAM_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §S9 — the receipt → invoice automation's declared surface (see above). */
           !S9_RECEIPT_INVOICE_DECLARED.includes(f) &&
-          !S9_RECEIPT_INVOICE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !S9_RECEIPT_INVOICE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2f (`AV-042`) — this is the FIRST Amazon-accuracy phase to touch a
+           * PROTECTED path (`src/lib/intelligence/amazonWording.ts`, whose rule set it
+           * extends), so its declared surface must be accepted here too. The contract is
+           * UNCHANGED: an UNEXPLAINED protected change still fails.
+           */
+          !BATCH2F_WORDING_GUARD_DECLARED.includes(f) &&
+          !BATCH2F_WORDING_GUARD_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1689,6 +1711,10 @@ try {
     ...BATCH2C_PO_REVISION_DECLARED,
     ...BATCH2D_ACK_INVOICE_PRICE_DECLARED,
     ...BATCH2E_COMPLIANCE_ATTRIBUTION_DECLARED,
+    /**
+     * §BATCH 2f — THE PROGRAMME-CLAIM WORDING GUARD (`AV-042`, 2026-09-29).
+     */
+    ...BATCH2F_WORDING_GUARD_DECLARED,
     /**
      * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
      * rule already existed and was still not followed, so this phase makes it

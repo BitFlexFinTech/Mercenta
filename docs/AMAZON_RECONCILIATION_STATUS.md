@@ -80,9 +80,9 @@ nothing, and increment S0/S1-a applied nothing from this register.
 | AV-037 | Commercial model | MERCENTA RULE | **KEEP** — never imply Amazon endorses either model | — | NO ACTION REQUIRED |
 | AV-038 | VAT | MERCENTA RULE | **KEEP** | — | NO ACTION REQUIRED |
 | AV-039 | Freight economics | MERCENTA RULE | **KEEP** — collect lane must not inherit Mercenta shipping margin | S3 | OPEN — not applied |
-| AV-040 | SP-API coverage | INCOMPLETE | **BUILD** — extend the seam (mock-first) to the documented Vendor operations | S7 | OPEN — not applied |
+| AV-040 | SP-API coverage | **MODELLED IN PART (Batch 2g, 2026-09-29)** | **BUILD** — extend the seam (mock-first) to the documented Vendor operations | S7 | **PARTIALLY APPLIED (Batch 2g, 2026-09-29)** — **six of the seven documented operations this row named are now implemented on BOTH clients of the seam and gated:** `submitAcknowledgement` (§P4) and `getPurchaseOrdersStatus`, `submitShipmentRequest` (= the register's `SubmitShipments`), `getShipmentDetails`, `submitShipmentConfirmations`, `submitInvoices` (§P12). §P12 also added two further documented operations the row's list did not name (`getShipmentLabels`, refused BY RULE outside NA, and `submitInventoryUpdate`), so **eight seam operations exist in total**. **The seventh named operation — `getTransaction` (the Vendor Retail Procurement Transaction Status API, source `S12`) — is NOT implemented and is BLOCKED ON EVIDENCE**, exactly like the register's other evidence-blocked rows: the project's own research records only *"POST transactions can be status-checked; sandbox Dynamic"* (`docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` §S12) — **no request/response shape and no status vocabulary** — so modelling it would be INVENTION, the exact defect class this register exists to remove, and **it must never be reported as working**. Exact missing input: the signed-in Vendor Central / developer-docs descriptions of the transaction-status request and its status values (the same founder-only class as `AV-048`). Exact next action: read them, then add the operation to both clients with a gate. Evidence: `npm run validate:p12-spapi-seam` (**59 assertions**, executing the real modules), which now ALSO pins this row's wording so the stale claim cannot return. |
 | AV-041 | Cases | MERCENTA RULE | **KEEP** | — | NO ACTION REQUIRED |
-| AV-042 | Wording safeguards | INCOMPLETE | **BUILD** — extend the banned-phrase pattern list to PO/purchase-order guarantee wording | S2b | OPEN — not applied |
+| AV-042 | Wording safeguards | INCOMPLETE | **BUILD** — extend the banned-phrase pattern list to PO/purchase-order guarantee wording | S2b | **APPLIED (Batch 2f, 2026-09-29)** — the programme-claim rule set (`src/lib/intelligence/amazonWording.ts → AMAZON_WORDING_RULES`) now catches purchase-order guarantee phrasing in BOTH word orders (`"guaranteed POs"` and `"your POs are guaranteed"`), covering the canonical bans *"guaranteed purchase orders"* / *"Amazon guaranteed POs"*, **and** the four further phrasings `.clinerules/mercenta-business-model.md` bans by name — "Amazon wholesale loophole", "Amazon will buy your products", "we sell directly to Amazon", "we bypass Amazon" — none of which the set previously caught. `sanitiseAmazonClaim` now repairs a PO-guarantee claim as it already repaired the other claim types; the honest vocabulary ("PO potential" / "estimated PO opportunity" / "demand potential") is asserted to PASS, so the gate cannot block honest copy. The static channel-naming gate (`scripts/lint-wording.mjs`) is a DIFFERENT rule set and is unchanged and still green. Asserted by `npm run validate:wording-guard` (executes the real module; includes a self-check proving the gate reports misses when a rule is removed). |
 | AV-043 | PO vocabulary | INCOMPLETE | **BUILD** — declare an explicit bidirectional PO vocabulary mapping | S5 | OPEN — not applied |
 | AV-044 | Simulation | INFERENCE | **RELABEL/REPAIR** — correct the underlying claims; scenarios then inherit the correction | S2b | OPEN — not applied |
 | AV-045 | Delivery appointments | INCOMPLETE | **BUILD** — add the appointment concept | S3 | OPEN — not applied |
@@ -98,12 +98,13 @@ nothing, and increment S0/S1-a applied nothing from this register.
 |---|---|---|
 | **KEEP — no action required** (CONFIRMED + MERCENTA RULE) | **16** | AV-004, AV-005, AV-012, AV-014b, AV-021, AV-026, AV-028, AV-029, AV-030, AV-036, AV-037, AV-038, AV-041 + AV-001, AV-018, AV-039 (keep, with a labelled follow-up) |
 | **RELABEL** (attribution/wording wrong, behaviour may stay) | **9 (5 APPLIED · 4 still open)** | AV-002, AV-003, AV-017, AV-019, AV-019b, AV-020b, AV-025, AV-031, AV-044 — AV-003 applied S8, AV-019/AV-019b/AV-020b applied Batch 2a, **AV-031 applied Batch 2e (2026-09-29)**; still open: AV-002, AV-017, AV-025, AV-044. |
-| **BUILD** (documented Amazon behaviour not represented) | **16 (6 APPLIED · 10 still open)** | AV-006, AV-007, AV-008, AV-009, AV-010, AV-010b, AV-011, AV-014, AV-015, AV-016, AV-023, AV-024, AV-040, AV-042, AV-043, AV-045 — AV-006 applied Batch 2b, AV-007/AV-010 applied Wave 3, AV-024 applied Batch 2c, **AV-008/AV-023 applied Batch 2d (2026-09-29)**; the 10 still open are AV-009, AV-010b, AV-011, AV-014, AV-015, AV-016, AV-040, AV-042, AV-043, AV-045. **REPOINTED 2026-09-29:** this row previously read **15** while LISTING AV-007 and AV-010 (already applied) and OMITTING AV-006/AV-024; the count and the list now agree, and AV-022 (classified MODELLED IN PART, P7) is not a BUILD row. |
+| **BUILD** (documented Amazon behaviour not represented) | **16 (7 APPLIED · 9 still open)** | AV-006, AV-007, AV-008, AV-009, AV-010, AV-010b, AV-011, AV-014, AV-015, AV-016, AV-023, AV-024, AV-040, AV-042, AV-043, AV-045 — AV-006 applied Batch 2b, AV-007/AV-010 applied Wave 3, AV-024 applied Batch 2c, **AV-008/AV-023 applied Batch 2d (2026-09-29)**, **AV-042 applied Batch 2f (2026-09-29)**; the 9 still open are AV-009, AV-010b, AV-011, AV-014, AV-015, AV-016, AV-040 (PARTIAL — one evidence-blocked operation), AV-043, AV-045. **REPOINTED 2026-09-29:** this row previously read **15** while LISTING AV-007 and AV-010 (already applied) and OMITTING AV-006/AV-024; the count and the list now agree, and AV-022 (classified MODELLED IN PART, P7) is not a BUILD row. |
 | **REMOVE / RE-MODEL (pending approval or decision)** | **3 (2 APPLIED · 1 still open)** | AV-013 (T-6), AV-027 (T-4), AV-032 — AV-027 applied P5, **AV-032 applied Batch 2e (2026-09-29) by RECLASSIFYING it as an optional Mercenta control rather than removing it**; still open: AV-013 (needs decision T-6). |
 | **EVIDENCE-BLOCKED** (cannot be done truthfully yet) | **7** | AV-020, AV-033, AV-034, AV-035, AV-046, AV-047, AV-048 |
 | **Total** | **52** | — |
 
-**Applied so far: 13 of 52** — corrected 2026-09-29 (Batch 2e adds **AV-031** and **AV-032**; Batch 2d added **AV-008** and **AV-023**). See the disposition
+**Applied so far: 14 of 52** — corrected 2026-09-29 (Batch 2f adds **AV-042**; Batch 2e added **AV-031** and
+**AV-032**; Batch 2d added **AV-008** and **AV-023**). See the disposition
 table above; the count and the paragraph below are DERIVED from the table's own status column (a row counts as
 APPLIED only when its status column says APPLIED); **AV-022** is applied IN PART and is therefore NOT in that count.
 
@@ -123,16 +124,20 @@ APPLIED only when its status column says APPLIED); **AV-022** is applied IN PART
 | **AV-023** | Batch 2d, 2026-09-29 | the invoice and the channel submission bill the price the acknowledgement recorded, so the acknowledgement and the invoice match by construction (the channel's documented rule) | `npm run validate:ack-invoice-price` (executed invoice amount + executed channel payload) |
 | **AV-031** | Batch 2e, 2026-09-29 | the compliance documents are attributed to UK/EU law + Mercenta's own onboarding controls, never to the retail channel's requirements | `npm run validate:compliance-attribution` (source + comment sweep: no channel-requirement claim in the module or the seed; mutation-proved) |
 | **AV-032** | Batch 2e, 2026-09-29 | `brand_registry_confirmation` is reclassified as an OPTIONAL Mercenta onboarding control — not required, never blocking, declared with its rationale, relabelled away from the seller-programme term, removed from the demo seed and from the admin overview's hand-written duplicate | `npm run validate:compliance-attribution` (18 assertions, executed modules; 2 mutation proofs), `e2e/compliance-gate.spec.ts` |
+| **AV-042** | Batch 2f, 2026-09-29 | the programme-claim rule set catches purchase-order guarantee phrasing in both word orders, plus the four phrasings the canonical business rules ban by name; the honest PO vocabulary is asserted to PASS and a PO claim is repaired rather than passed | `npm run validate:wording-guard` (executes the real module; every banned phrasing caught; honest vocabulary passes; self-check proves the gate is not vacuous; mutation-proved — file restored byte-identical) |
 
 **The open position, derived (not asserted):** of the 52 findings, **16 are KEEP rows that need no further
 work** (7 CONFIRMED + 9 MERCENTA RULE) **minus the 3 that carry a labelled follow-up (AV-001, AV-018,
-AV-039)** → **13 need nothing**; **13 are APPLIED**; therefore **26 remain OPEN** — being the 23 findings
-still open *by classification* (**10 INCOMPLETE · 0 UNSUPPORTED · 1 MODELLED IN PART (AV-022) ·
-6 UNKNOWN · 1 CONTRADICTED · 5 INFERENCE**) **plus the 3 labelled follow-ups**. **7 of the 26 are
-EVIDENCE-BLOCKED** (AV-020, AV-033, AV-034, AV-035, AV-046, AV-047, AV-048). The register remains a plan, not
-a record of work. *(Recomputed 2026-09-29 — Batch 2e applied AV-031 (CONTRADICTED) and AV-032 (UNSUPPORTED),
-so 2 → 1 CONTRADICTED, 1 → 0 UNSUPPORTED and 11 → 13 APPLIED. The figures are derived from the disposition
-table above.)*
+AV-039)** → **13 need nothing**; **14 are APPLIED**; therefore **25 remain OPEN** — being the 22 findings
+still open *by classification* (**8 INCOMPLETE · 0 UNSUPPORTED · 2 MODELLED IN PART (AV-022, AV-040) ·
+6 UNKNOWN · 1 CONTRADICTED · 5 INFERENCE**) **plus the 3 labelled follow-ups**. **7 rows of the 25 are
+EVIDENCE-BLOCKED** (AV-020, AV-033, AV-034, AV-035, AV-046, AV-047, AV-048) — **and AV-040's one remaining
+operation is evidence-blocked too, inside an otherwise partially-applied row**. The register remains a plan, not
+a record of work. *(Recomputed 2026-09-29 — Batch 2f applied AV-042 (BUILD): 13 → 14 APPLIED and 10 → 9
+INCOMPLETE; Batch 2g reclassified AV-040 as MODELLED IN PART (9 → 8 INCOMPLETE, 1 → 2 MODELLED IN PART),
+leaving the 22 open-by-classification figure unchanged. Batch 2e applied AV-031 (CONTRADICTED) and AV-032
+(UNSUPPORTED), so 2 → 1 CONTRADICTED, 1 → 0 UNSUPPORTED and 11 → 13 APPLIED. The figures are derived from the
+disposition table above.)*
 
 ---
 
