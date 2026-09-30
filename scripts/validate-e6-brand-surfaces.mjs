@@ -703,6 +703,40 @@ const BATCH2H_PO_VOCABULARY_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §BATCH 2i (`AV-045`, 2026-09-30) — THE DELIVERY-APPOINTMENT CONCEPT.
+ *
+ * The audit found Mercenta modelled NO appointment concept even though inbound
+ * delivery to the retail channel is appointment-based and the channel documents
+ * one hard rule about it — *"Carrier Requested Delivery Date must fall within the
+ * PO's Delivery Window"* (`S15`) — with real performance consequences. This phase
+ * adds the concept ONCE, fail-closed, and renders it.
+ *
+ * Declared set — every file the phase touches, named:
+ *   · `src/types.ts` — the channel's appointment vocabulary declared once (the
+ *     same rule as `CHANNEL_PO_ORDER_STATES`), plus the verdict/projection shapes.
+ *   · `src/lib/shipping/deliveryAppointment.ts` — NEW: the ONE owner (behaviour
+ *     table, fail-closed resolution, the window rule, the derivation, presentation).
+ *   · `src/data/api.ts` — the ONE projection point (`attachShipmentAppointment`),
+ *     composed into both shipment readers beside the ETA.
+ *   · `src/data/demoData.ts` — `DemoShipment` gains the optional projection field.
+ *   · `src/components/brand/LogisticsHub.tsx` — renders the appointment and the
+ *     window verdict through the owner's presentation.
+ *   · the gate, the browser spec, the two scope guards and `package.json`.
+ */
+const BATCH2I_DELIVERY_APPOINTMENT_SCOPE = new Set([
+  'src/types.ts',
+  'src/lib/shipping/deliveryAppointment.ts',        /* NEW — the ONE owner */
+  'src/data/api.ts',
+  'src/data/demoData.ts',
+  'src/components/brand/LogisticsHub.tsx',
+  'scripts/validate-delivery-appointment.mjs',      /* NEW — this phase's gate */
+  'e2e/delivery-appointment.spec.ts',               /* NEW — the browser proof */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 
 /**
@@ -1882,6 +1916,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2h — the PO vocabulary mapping (see above). */
         BATCH2H_PO_VOCABULARY_SCOPE.has(p) ||
         [...BATCH2H_PO_VOCABULARY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2i — the delivery-appointment concept (see above). */
+        BATCH2I_DELIVERY_APPOINTMENT_SCOPE.has(p) ||
+        [...BATCH2I_DELIVERY_APPOINTMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -1936,6 +1973,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2h — same declaration, second protected-path check (F5b). */
         BATCH2H_PO_VOCABULARY_SCOPE.has(p) ||
         [...BATCH2H_PO_VOCABULARY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2i — same declaration, second protected-path check (F5b). */
+        BATCH2I_DELIVERY_APPOINTMENT_SCOPE.has(p) ||
+        [...BATCH2I_DELIVERY_APPOINTMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — same declaration, second protected-path check (F5b). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -2214,6 +2254,19 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2f — the programme-claim wording guard (see above). */
           BATCH2F_WORDING_GUARD_SCOPE.has(p) ||
           [...BATCH2F_WORDING_GUARD_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /**
+           * §BATCH 2h — the PO vocabulary mapping (see above). ADDED here (2026-09-30,
+           * Batch 2i): this set was declared in F5/F5b but NOT in F6, which broke the
+           * invariant F5/F5b's own note states — all three guards must read the SAME
+           * canonical declared scope. An undeclared change was still refused; the
+           * omission meant a later touch of a Batch 2h file would have been reported as
+           * an F6 offender.
+           */
+          BATCH2H_PO_VOCABULARY_SCOPE.has(p) ||
+          [...BATCH2H_PO_VOCABULARY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2i — the delivery-appointment concept (see above). */
+          BATCH2I_DELIVERY_APPOINTMENT_SCOPE.has(p) ||
+          [...BATCH2I_DELIVERY_APPOINTMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
           PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
           [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

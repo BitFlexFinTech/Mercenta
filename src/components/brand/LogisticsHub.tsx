@@ -43,6 +43,7 @@ import {
 import { buildOperationalMap } from '@/lib/logistics/operationsMap';
 import { currentQueryParam } from '@/lib/runtime/productRoutes';
 import { etaPresentation, isEtaAtRisk } from '@/lib/logistics/shipmentEta';
+import { appointmentPresentation } from '@/lib/shipping/deliveryAppointment';
 import { buildDeliveryPerformance, performanceLabel } from '@/lib/logistics/deliveryPerformance';
 import {
   deriveCarrierEligibility,
@@ -671,6 +672,8 @@ export function LogisticsHub() {
             title?: string;
             /** §WAVE 3 — the canonical ETA projection from the data layer. */
             eta?: import('@/types').ShipmentEta | null;
+            /** §BATCH 2i (`AV-045`) — the canonical appointment projection from the data layer. */
+            appointment?: import('@/types').DeliveryAppointment | null;
           };
           const po = raw.poNumber ? poByNumber.get(raw.poNumber) : undefined;
           return {
@@ -696,6 +699,8 @@ export function LogisticsHub() {
             simulated: po?.simulated,
             /** §WAVE 3 — the canonical ETA projection attached by the data layer. */
             eta: raw.eta ?? undefined,
+            /** §BATCH 2i (`AV-045`) — the canonical appointment projection attached by the data layer. */
+            appointment: raw.appointment ?? undefined,
           };
         }),
     [shipmentsQuery.data, session?.tier, session?.tenantId, poByNumber]
@@ -999,6 +1004,21 @@ export function LogisticsHub() {
     [liveShipments, selectedId]
   );
 
+  /**
+   * §BATCH 2i (`AV-045`) — the SELECTED consignment's delivery appointment, and
+   * its presentation in the owner's own words. Derived from the same
+   * tenant-scoped rows the map plots, so the inspector can never describe an
+   * appointment the operator was not given.
+   */
+  const selectedAppointment = useMemo(
+    () => liveShipments.find((s) => s.id === selectedId)?.appointment ?? null,
+    [liveShipments, selectedId]
+  );
+  const selectedAppointmentView = useMemo(
+    () => (selectedAppointment ? appointmentPresentation(selectedAppointment) : null),
+    [selectedAppointment]
+  );
+
   return (
     <WorkspaceFrame>
       <WorkspaceHeader
@@ -1152,6 +1172,10 @@ export function LogisticsHub() {
                     const presentation = eta
                       ? etaPresentation(eta)
                       : { label: 'ETA unavailable', detail: 'No ETA projection is attached to this consignment.', tone: 'unavailable' as const };
+                    /** §BATCH 2i (`AV-045`) — the appointment, in the owner's own words. */
+                    const appointmentView = shipment.appointment
+                      ? appointmentPresentation(shipment.appointment)
+                      : null;
                     return (
                       <li
                         key={shipment.id}
@@ -1163,6 +1187,17 @@ export function LogisticsHub() {
                         <span className="text-ds-micro text-zinc-500">{presentation.detail}</span>
                         {isEtaAtRisk(eta ?? { date: null, basis: 'unavailable', simulated: false, source: '' }, shipment.delayed, shipment.exception) && (
                           <span className="text-ds-micro text-state-warning">At risk against its declared window</span>
+                        )}
+                        {appointmentView && (
+                          <span
+                            data-testid={`appointment-${shipment.reference}`}
+                            data-appointment-state={shipment.appointment?.state ?? 'unknown'}
+                            data-appointment-window={shipment.appointment?.window.code ?? 'unknown'}
+                            className="basis-full text-ds-micro leading-relaxed text-zinc-400"
+                          >
+                            <span className="text-zinc-300">Delivery appointment: {appointmentView.label}.</span>{' '}
+                            {appointmentView.windowDetail}
+                          </span>
                         )}
                       </li>
                     );
@@ -1323,6 +1358,32 @@ export function LogisticsHub() {
                     <p className="text-ds-micro leading-relaxed text-zinc-500" data-testid="logistics-eta-basis">
                       {etaPresentation(selectedEta).detail}
                     </p>
+                  )}
+
+                  {/*
+                    §BATCH 2i (`AV-045`) — the delivery appointment, in the owner's
+                    own words: the state, the window rule's verdict, and the basis.
+                    Appointment-based inbound delivery is the retail channel's own
+                    documented model, so the operator sees it where the ETA lives.
+                  */}
+                  {selectedAppointment && selectedAppointmentView && (
+                    <>
+                      <p
+                        className="text-ds-micro leading-relaxed text-zinc-400"
+                        data-testid="logistics-appointment"
+                        data-appointment-state={selectedAppointment.state}
+                        data-appointment-window={selectedAppointment.window.code}
+                      >
+                        <span className="text-zinc-300">Delivery appointment: {selectedAppointmentView.label}.</span>{' '}
+                        {selectedAppointmentView.windowDetail}
+                      </p>
+                      <p
+                        className="text-ds-micro leading-relaxed text-zinc-500"
+                        data-testid="logistics-appointment-basis"
+                      >
+                        {selectedAppointmentView.detail}
+                      </p>
+                    </>
                   )}
 
                   <div className="rounded-ds-md border border-white/[0.06] bg-white/[0.02] p-2.5">

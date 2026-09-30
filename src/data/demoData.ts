@@ -36,6 +36,7 @@ import type {
   PurchaseOrder,
   PurchaseOrderStatus,
   ShipmentEta,
+  DeliveryAppointment,
 } from '@/types';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import { AMAZON_PARTNERED_CARRIER } from '@/config/shipping';
@@ -590,6 +591,14 @@ export interface DemoShipment {
    * it can never drift from the PO it is derived from.
    */
   eta?: ShipmentEta;
+  /**
+   * §BATCH 2i (`AV-045`) — the canonical APPOINTMENT projection, attached on
+   * READ by `src/data/api.ts → attachShipmentAppointment` (derived from the
+   * linked PO's declared delivery window + the consignment's milestone and
+   * recorded delay/exception state). Like the ETA it is a projection, not stored
+   * state, so it can never drift from the PO it is derived from.
+   */
+  appointment?: DeliveryAppointment;
 }
 
 /**

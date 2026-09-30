@@ -234,6 +234,8 @@ export interface Shipment {
   trackingNumber: string;
   /** §WAVE 3 — the canonical ETA projection (see `ShipmentEta`). */
   eta?: ShipmentEta;
+  /** §BATCH 2i (`AV-045`) — the canonical appointment projection (see `DeliveryAppointment`). */
+  appointment?: DeliveryAppointment;
 }
 
 /**
@@ -273,6 +275,88 @@ export interface ShipmentEta {
   /** True when the date is derived/simulated — never a provider confirmation. */
   simulated: boolean;
   /** Where the estimate comes from. Rendered verbatim; never hidden. */
+  source: string;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * §BATCH 2i (`AV-045`) — THE DELIVERY-APPOINTMENT VOCABULARY.
+ *
+ * Inbound delivery to a retail-channel fulfilment centre is APPOINTMENT-BASED:
+ * the carrier requests a delivery date and the channel confirms a slot. These
+ * seven states are the CHANNEL'S OWN vocabulary (source S15 — Carrier Central),
+ * declared ONCE here exactly as the purchase-order channel vocabulary is
+ * (`CHANNEL_PO_ORDER_STATES`). The behaviour each state implies, the resolution
+ * of an unrecognised value, and the rule that a carrier-requested delivery date
+ * must fall inside the purchase order's Delivery Window live in the ONE owner:
+ * `src/lib/shipping/deliveryAppointment.ts`.
+ *
+ * An UNKNOWN request (the channel's FPY eligibility threshold, the dispute-style
+ * windows) is deliberately NOT modelled — the platform's own research records it
+ * as informational only, and inventing a threshold would be the defect class the
+ * Amazon-accuracy work exists to remove.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+export type ChannelAppointmentState =
+  | 'Pending'
+  | 'Scheduled'
+  | 'Arrived'
+  | 'Deleted'
+  | 'Cancelled'
+  | 'Defect'
+  | 'Closed';
+
+export const CHANNEL_APPOINTMENT_STATES: readonly ChannelAppointmentState[] = [
+  'Pending',
+  'Scheduled',
+  'Arrived',
+  'Deleted',
+  'Cancelled',
+  'Defect',
+  'Closed',
+];
+
+/**
+ * The verdict of the documented window rule — *"Carrier Requested Delivery Date
+ * must fall within the PO's Delivery Window"* (S15). `ok` is true ONLY when a
+ * declared delivery window exists and the requested date falls inside it; every
+ * other outcome is a stated refusal, never an assumption.
+ */
+export type AppointmentWindowVerdictCode =
+  | 'within-window'
+  | 'before-window'
+  | 'after-window'
+  | 'no-delivery-window'
+  | 'undocumented-date';
+
+export interface AppointmentWindowVerdict {
+  ok: boolean;
+  code: AppointmentWindowVerdictCode;
+  /** Plain statement of the verdict. Rendered verbatim; never hidden. */
+  reason: string;
+}
+
+/**
+ * §BATCH 2i (`AV-045`) — THE CANONICAL APPOINTMENT PROJECTION.
+ *
+ * Like `ShipmentEta`, this is a DERIVED projection attached on read (never stored
+ * state) so it cannot drift from the purchase order it is derived from. No live
+ * carrier reports appointments today, so `simulated` is true for every derived
+ * appointment and the `source` says so; a channel-confirmed appointment would
+ * arrive with `simulated: false` and a provider source, which this shape already
+ * supports.
+ */
+export type DeliveryAppointmentBasis = 'derived' | 'unavailable';
+
+export interface DeliveryAppointment {
+  /** The channel's appointment state, or `unknown` when none can be derived. */
+  state: ChannelAppointmentState | 'unknown';
+  basis: DeliveryAppointmentBasis;
+  /** The carrier-requested delivery date (ISO YYYY-MM-DD), or null. */
+  carrierRequestedDeliveryDate: string | null;
+  /** The window rule's verdict — never assumed `ok`. */
+  window: AppointmentWindowVerdict;
+  /** True while the projection is derived/simulated — never a channel confirmation. */
+  simulated: boolean;
   source: string;
 }
 

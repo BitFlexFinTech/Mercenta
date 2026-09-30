@@ -92,10 +92,10 @@ measured **116/116 PASS** on 2026-09-28. The remaining leg is the live verificat
 ## BATCH 2 — AMAZON ACCURACY (the 37 open findings; start with the HIGH ones)
 
 **Register of record:** `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` (52 findings AV-001…AV-048)
-with dispositions in `docs/AMAZON_RECONCILIATION_STATUS.md`. **As at 2026-09-30 (Batches 2c–2h applied): 15 APPLIED
+with dispositions in `docs/AMAZON_RECONCILIATION_STATUS.md`. **As at 2026-09-30 (Batches 2c–2i applied): 16 APPLIED
 (AV-003, AV-006, AV-007, AV-008, AV-010, AV-019, AV-019b, AV-020b, AV-023, AV-024, AV-027, AV-031, AV-032, AV-042,
-AV-043 — plus AV-022 IN PART, which is not counted), 24 still OPEN** (7 INCOMPLETE · 0 UNSUPPORTED · 2 MODELLED IN PART ·
-6 UNKNOWN · 1 CONTRADICTED · 5 INFERENCE = 21 by classification, plus the 3 KEEP rows carrying a labelled
+AV-043, AV-045 — plus AV-022 IN PART, which is not counted), 23 still OPEN** (6 INCOMPLETE · 0 UNSUPPORTED · 2 MODELLED IN PART ·
+6 UNKNOWN · 1 CONTRADICTED · 5 INFERENCE = 20 by classification, plus the 3 KEEP rows carrying a labelled
 follow-up — AV-001, AV-018, AV-039; 7 rows EVIDENCE-BLOCKED, and **AV-040's remaining `getTransaction` operation is
 evidence-blocked too**).
 
@@ -146,11 +146,11 @@ touched** — the SQL seed's own staleness is recorded as BLOCKED in the session
 | ~~**AV-008 / AV-023**~~ | ~~Ack ↔ invoice price/time rules incomplete~~ — **APPLIED (Batch 2d, 2026-09-29)**: one owner for the rule + the ceiling, enforced fail-closed, both writers bill the acknowledged price, gated by `validate:ack-invoice-price`. Not start work. | — |
 | ~~**AV-032**~~ | ~~The compliance document set is **unsupported** by evidence~~ — **APPLIED (Batch 2e, 2026-09-29)**: reclassified as an optional Mercenta control, never blocking, gated by `validate:compliance-attribution`. Not start work. | — |
 | ~~**AV-043**~~ | ~~PO vocabulary ↔ the channel's vocabulary declared nowhere~~ — **APPLIED (Batch 2h, 2026-09-30)**: ONE owner declares the mapping in both directions (forward total, reverse an honest set), the acknowledgement window asks it, `PO_ACK_STATUSES_WITH_OBLIGATION` is derived from it, an undeclared status offers no work, and an undocumented or contradictory channel read fails closed with a reason. Gated by `validate:po-channel-vocabulary`. Not start work. | — |
-| **AV-045** (+ **AV-040** PARTIAL) | Delivery appointments are not modelled; **AV-042 is APPLIED (Batch 2f) — not start work**, **AV-043 is APPLIED (Batch 2h) — not start work**, and **AV-040 is PARTIAL** (six of its seven named SP-API operations are built and gated; only `getTransaction` remains, evidence-blocked) | Incomplete fidelity to the channel |
+| ~~**AV-045**~~ (+ **AV-040** PARTIAL) | ~~Delivery appointments are not modelled~~ — **APPLIED (Batch 2i, 2026-09-30)**: ONE owner declares the channel's appointment states, the fail-closed resolution (an undocumented/absent state is `unknown`), the CRDD-within-delivery-window rule and a labelled-simulated derivation; the Logistics Hub renders the state and the verdict; the FPY eligibility threshold is recorded as not-public and never computed. Gated by `validate:delivery-appointment` + `e2e/delivery-appointment.spec.ts`. **Not start work.** **AV-042 is APPLIED (Batch 2f) — not start work**, **AV-043 is APPLIED (Batch 2h) — not start work**, and **AV-040 is PARTIAL** (six of its seven named SP-API operations are built and gated; only `getTransaction` remains, evidence-blocked) | Incomplete fidelity to the channel |
 
 **Then:** the remaining INCOMPLETE rows (AV-009/011/014/015/016/010b), the
 CONTRADICTED row (AV-013 — AV-027 and **AV-031** are applied), and the INFERENCE rows that must be **relabelled**
-(AV-002/017/025/033/044). **AV-042 is APPLIED (Batch 2f) and AV-043 is APPLIED (Batch 2h) — not start work.** **AV-040's one remaining operation
+(AV-002/017/025/033/044). **AV-042 is APPLIED (Batch 2f), AV-043 is APPLIED (Batch 2h) and AV-045 is APPLIED (Batch 2i) — not start work.** **AV-040's one remaining operation
 (`getTransaction`) is EVIDENCE-BLOCKED**: do not model it from guesswork.
 
 **Do NOT guess the UNKNOWNs** (AV-020/034/035/046/047/048): they need a **signed-in Vendor Central session**

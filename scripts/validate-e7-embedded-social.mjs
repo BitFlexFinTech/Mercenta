@@ -715,6 +715,22 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
     'package.json',
   ];
+  /**
+   * §BATCH 2i — THE DELIVERY-APPOINTMENT CONCEPT (`AV-045`, 2026-09-30). Fuller
+   * note in `validate-e6-brand-surfaces.mjs` §BATCH2I_DELIVERY_APPOINTMENT_SCOPE.
+   */
+  const BATCH2I_DELIVERY_APPOINTMENT_DECLARED = [
+    'src/types.ts',
+    'src/lib/shipping/deliveryAppointment.ts',
+    'src/data/api.ts',
+    'src/data/demoData.ts',
+    'src/components/brand/LogisticsHub.tsx',
+    'scripts/validate-delivery-appointment.mjs',
+    'e2e/delivery-appointment.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
 
 
 
@@ -1530,7 +1546,14 @@ try {
            * UNCHANGED: an UNEXPLAINED protected change still fails.
            */
           !BATCH2F_WORDING_GUARD_DECLARED.includes(f) &&
-          !BATCH2F_WORDING_GUARD_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH2F_WORDING_GUARD_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2i (`AV-045`) — the appointment phase touches no protected path,
+           * but its declared surface is accepted here exactly as every other phase's
+           * is. An UNEXPLAINED protected change still fails.
+           */
+          !BATCH2I_DELIVERY_APPOINTMENT_DECLARED.includes(f) &&
+          !BATCH2I_DELIVERY_APPOINTMENT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1744,6 +1767,10 @@ try {
      * `validate-e6-brand-surfaces.mjs` §BATCH2H_PO_VOCABULARY_SCOPE.
      */
     ...BATCH2H_PO_VOCABULARY_DECLARED,
+    /**
+     * §BATCH 2i — THE DELIVERY-APPOINTMENT CONCEPT (`AV-045`, 2026-09-30).
+     */
+    ...BATCH2I_DELIVERY_APPOINTMENT_DECLARED,
     /**
      * §PUBLIC MESSAGING — the public-surfaces batch's declared surface (see above).
      */

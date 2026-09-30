@@ -81,8 +81,9 @@ import {
   type ChannelInventoryPushRecord,
 } from '@/lib/inventory/channelInventoryPush';
 import { deriveShipmentEta, etaWindowKindFor } from '@/lib/logistics/shipmentEta';
+import { deriveDeliveryAppointment } from '@/lib/shipping/deliveryAppointment';
 import type { DemoShipment } from '@/data/demoData';
-import type { ShipmentEta } from '@/types';
+import type { DeliveryAppointment, ShipmentEta } from '@/types';
 import { originForBrand } from '@/config/logisticsGeo';
 import { declaredShipToParty, destinationLabelForPo } from '@/config/destinationFc';
 import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
@@ -2124,13 +2125,44 @@ export function attachShipmentEta(shipment: DemoShipment): DemoShipment & { eta:
   };
 }
 
+/**
+ * §BATCH 2i (`AV-045`) — THE CANONICAL APPOINTMENT PROJECTION.
+ *
+ * ONE derivation point for every consignment read, exactly like the ETA above.
+ * Inbound delivery to the retail channel is appointment-based (`S15`), so the
+ * appointment is derived from the consignment's own canonical record — its
+ * milestone, its recorded delay/exception state, and the linked PO's DECLARED
+ * delivery window — and it always carries its basis, its source, and the window
+ * rule's verdict. An appointment is never claimed to be channel-confirmed, and a
+ * requested date is never invented when no window is declared.
+ */
+export function attachShipmentAppointment(
+  shipment: DemoShipment
+): DemoShipment & { appointment: DeliveryAppointment } {
+  const po = demoPurchaseOrders.find((p) => p.poNumber === shipment.poNumber);
+  return {
+    ...shipment,
+    appointment: deriveDeliveryAppointment({
+      milestone: shipment.status,
+      delayed: shipment.delayed,
+      exception: shipment.exception,
+      deliveryWindowStart: po?.deliveryWindowStart ?? null,
+      deliveryWindowEnd: po?.deliveryWindowEnd ?? null,
+      simulated: true,
+    }),
+  };
+}
+
 export async function fetchShipmentsAll() {
   const result = await queryOrSeed('shipments', demoShipments);
-  return { ...result, data: result.data.map(attachShipmentEta) };
+  return { ...result, data: result.data.map(attachShipmentEta).map(attachShipmentAppointment) };
 }
 
 export function fetchShipmentsForBrand(brandId: string) {
-  return demoShipments.filter((s) => s.brandId === brandId).map(attachShipmentEta);
+  return demoShipments
+    .filter((s) => s.brandId === brandId)
+    .map(attachShipmentEta)
+    .map(attachShipmentAppointment);
 }
 
 /* ── Catalog with owning-brand join (Global Catalog Manager) ── */
