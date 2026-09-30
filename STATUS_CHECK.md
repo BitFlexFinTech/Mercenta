@@ -3538,7 +3538,13 @@ to the statement's own body, never weakened. (5) My own edit overwrote the regis
 ✓ (`assets/index-C4KYCvrU.js`) · `validate:po-ack-duties` **43/0** · validate-e6 + validate-e7 **PASS** ·
 `e2e/po-ack-duties.spec.ts` **4 passed**.
 
-**Delivery.** The Batch 2j commit is pushed to `origin/redesign/foundation` (no `--force`) and deployed with
-`scripts/deploy-demo.sh` from a clean tree to `demo.mercenta.co.uk`; the live result and the commit hash are recorded
-in `PROJECT_STATUS.md → CURRENT RESUME STATE` by the state commit that follows (no application runtime change).
+**Delivery (three-way).** Committed **`fd0958e`** → pushed to `origin/redesign/foundation` (`1576fd1..fd0958e`, no
+`--force`) → deployed with `scripts/deploy-demo.sh` from a clean tree (exit 0; 5,011,172 bytes in 225s at 21.7 KiB/s;
+20 new files, 11 modified, 20 stale removed). **LIVE: `npm run verify:live` = 165 PASS / 4 FAIL**, and **all 4 failures
+are HOST-SIDE navigation timeouts on UNRELATED PUBLIC pages** (`L1–L9` at 390px and at bold 1440px/390px, and `L11`
+`/how-it-works` with `ERR_ADDRESS_UNREACHABLE`) — which also skipped their inner checks, hence the lower total than the
+previous session's 204. **The changed behaviour itself is VERIFIED live: `L19` (NEW) PASSED 5/5** on the deployed brand
+surface, and **`L10` PASS proves the deployed entry asset `assets/index-C4KYCvrU.js` is this session's local build**.
+**Status: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED for this increment, with the four host timeouts recorded rather
+than hidden.**
 
