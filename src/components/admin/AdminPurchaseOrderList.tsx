@@ -14,8 +14,13 @@ import {
   useDeductions,
   useShipmentsAll,
 } from '@/data/queries';
-import { ingestChannelPurchaseOrders } from '@/data/api';
+import { ingestChannelPurchaseOrders, recordChannelPurchaseOrderHold } from '@/data/api';
 import type { ChannelIngestionResult } from '@/lib/commerce/channelPurchaseOrderIngestion';
+/**
+ * §BATCH 2j (`AV-010b`) — the hold statement type is declared ONCE with the channel's hold
+ * vocabulary (`src/types.ts`), so no surface re-types the literal pair.
+ */
+import type { PoChannelHoldStatement } from '@/types';
 /**
  * §BATCH 2c (`AV-024`) — the SIMULATED channel can change one of its own orders.
  * This is the ONLY seam that produces the documented event (the retail channel
@@ -86,6 +91,9 @@ export function AdminPurchaseOrderList() {
   /* §BATCH 2c (`AV-024`) — the simulated channel-change control's own state. */
   const [revisionBusy, setRevisionBusy] = useState(false);
   const [revisionNotice, setRevisionNotice] = useState<string | null>(null);
+  /* §BATCH 2j (`AV-010b`) — the simulated channel-HOLD control's own state. */
+  const [holdBusy, setHoldBusy] = useState(false);
+  const [holdNotice, setHoldNotice] = useState<string | null>(null);
   /* §UI/UX Wave 2 completion — workspace state: queue density (REAL — it changes
      the rendered row padding), the simulated-only filter, and the record preview. */
   const [density, setDensity] = useState<'compact' | 'comfortable'>('compact');
@@ -240,6 +248,55 @@ export function AdminPurchaseOrderList() {
       );
     } finally {
       setRevisionBusy(false);
+    }
+  }
+
+  /**
+   * §BATCH 2j (`AV-010b`) — THE SIMULATED CHANNEL PLACES (OR LIFTS) A HOLD ON ONE OF ITS
+   * ORDERS.
+   *
+   * The channel documents a duty that attaches to a HELD order — *"Vendors must reject any
+   * purchase order that is on hold past the 24-hour time limit"* — but no source the
+   * platform holds says how a hold is signalled on the channel's order read, so the state
+   * cannot be read; it can only be RECORDED when the channel states it. This control makes
+   * that statement reachable in the deployed demo, and it is unmistakably SIMULATED: it is
+   * refused unless a simulated channel read is active, and the recorder it calls REFUSES any
+   * statement that claims to be live (no live channel call is made or implied).
+   */
+  async function handleSimulateChannelHold(state: PoChannelHoldStatement) {
+    if (!canCurrentUserMutate || holdBusy) return;
+    if (ingestResult?.mode !== 'mock') {
+      setHoldNotice(
+        'Refused: read the retail channel first — a simulated hold is only available while a simulated channel read is active.'
+      );
+      return;
+    }
+    setHoldBusy(true);
+    setHoldNotice(null);
+    try {
+      const actor = session?.role ?? 'Mercenta Admin';
+      /** The simulated channel owns its own orders; a demo-seeded record it does not own is never touched. */
+      const target = pos.find((p) => p.simulated === true) ?? null;
+      if (!target) {
+        setHoldNotice(
+          'No simulated channel order is held yet — read the retail channel, then try again. No live channel call was made.'
+        );
+        return;
+      }
+      const result = recordChannelPurchaseOrderHold(target.id, state, {
+        recordedBy: actor,
+        simulated: true,
+      });
+      setHoldNotice(
+        result.ok
+          ? result.written
+            ? `The simulated retail channel's hold statement for ${target.poNumber} was recorded as "${state}". No live channel call was made.`
+            : `${target.poNumber} already carries this hold statement — nothing was written twice.`
+          : `Refused: ${result.error}`
+      );
+      qc.invalidateQueries();
+    } finally {
+      setHoldBusy(false);
     }
   }
 
@@ -488,6 +545,56 @@ return (
                   data-state="po-revision-simulate-summary"
                 >
                   {revisionNotice}
+                </span>
+              )}
+            </div>
+
+            {/* §BATCH 2j (`AV-010b`) — THE SIMULATED CHANNEL PLACES OR LIFTS A HOLD.
+                The hold is a real documented channel state with a real duty attached (a held
+                order must be rejected past its 24-hour limit), but no source the platform
+                holds documents how the channel's order read signals it — so the statement is
+                RECORDED when it is made, never guessed, and this control makes it reachable
+                in the deployed demo. No live channel call is made or implied. */}
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="secondary"
+                className="text-ds-micro"
+                data-state="admin-po-simulate-hold"
+                disabled={!canCurrentUserMutate || holdBusy || ingestResult?.mode !== 'mock'}
+                title={
+                  !canCurrentUserMutate
+                    ? 'View-only staff cannot change channel data'
+                    : ingestResult?.mode !== 'mock'
+                      ? 'Read the retail channel first — this control stays refused until a simulated channel read is active'
+                      : 'The simulated retail channel places a hold on one of its orders (no live channel call)'
+                }
+                onClick={() => handleSimulateChannelHold('declared')}
+              >
+                <FlaskConical className="w-3 h-3 mr-1" />
+                Simulate a channel hold (sim)
+              </Button>
+              <Button
+                variant="secondary"
+                className="text-ds-micro"
+                data-state="admin-po-simulate-hold-lift"
+                disabled={!canCurrentUserMutate || holdBusy || ingestResult?.mode !== 'mock'}
+                title={
+                  ingestResult?.mode !== 'mock'
+                    ? 'Read the retail channel first — this control stays refused until a simulated channel read is active'
+                    : 'The simulated retail channel lifts its hold (no live channel call)'
+                }
+                onClick={() => handleSimulateChannelHold('cleared')}
+              >
+                <FlaskConical className="w-3 h-3 mr-1" />
+                Simulate a hold lift (sim)
+              </Button>
+              {holdNotice && (
+                <span
+                  className="text-ds-micro text-brass-400"
+                  role="status"
+                  data-state="po-hold-simulate-summary"
+                >
+                  {holdNotice}
                 </span>
               )}
             </div>

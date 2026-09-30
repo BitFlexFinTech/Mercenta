@@ -31,13 +31,24 @@ import { BACKORDER_RESTOCK_TARGET } from '@/config/deductions';
 import {
   amendmentChangedGroups,
   amendmentRefusal,
+  holdRejectionPermitted,
   lateAcceptanceRefusal,
+  onHoldRejectionRefusal,
   poAckTimeliness,
   poAcknowledgementWindow,
   poAmendmentWindow,
+  poChannelHoldDuty,
+  poChannelHoldWarning,
   poNeedsAutoRejection,
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
+/**
+ * §BATCH 2j (`AV-009`) — the COMPLETENESS of an acknowledgement has ONE owner: it states
+ * the channel's documented completeness rule, derives which lines a submission leaves
+ * undecided, and produces the ONE statement the brand is told. The writer asks it before
+ * anything is written and never re-types the rule.
+ */
+import { poAcknowledgementCompleteness } from '@/lib/commerce/poAcknowledgementCompleteness';
 /**
  * §BATCH 2c (`AV-024`) — the DERIVED revision position of a purchase order (whether
  * the channel has cancelled it, and whether the brand's acknowledgement answers an
@@ -60,6 +71,7 @@ import {
   PO_ACK_AUTO_REJECT_REASON,
   PO_ACK_SYSTEM_ACTOR_ID,
   PO_ACK_UPDATE_WINDOW_HOURS,
+  PO_ON_HOLD_REJECT_RULE_TEXT,
 } from '@/config/purchaseOrders';
 import { issueChannelInstruction, instructionLineFor } from '@/lib/commerce/channelInstructions';
 import {
@@ -83,7 +95,15 @@ import {
 import { deriveShipmentEta, etaWindowKindFor } from '@/lib/logistics/shipmentEta';
 import { deriveDeliveryAppointment } from '@/lib/shipping/deliveryAppointment';
 import type { DemoShipment } from '@/data/demoData';
-import type { DeliveryAppointment, ShipmentEta } from '@/types';
+import type { DeliveryAppointment, PoChannelHoldStatement, ShipmentEta } from '@/types';
+/**
+ * §BATCH 2j (`AV-010b`) — the declared channel hold vocabulary, imported as a VALUE because
+ * a statement is VALIDATED against it before it is recorded (an undeclared state is refused,
+ * never stored). It is declared once in `src/types.ts`, beside every other channel
+ * vocabulary — the same rule that puts `CHANNEL_PO_ORDER_STATES` and `PO_REJECTION_CODES`
+ * there.
+ */
+import { PO_CHANNEL_HOLD_STATES } from '@/types';
 import { originForBrand } from '@/config/logisticsGeo';
 import { declaredShipToParty, destinationLabelForPo } from '@/config/destinationFc';
 import { REQUIRED_SUBMISSION_FIELDS } from '@/lib/catalog/productCompleteness';
@@ -1099,7 +1119,32 @@ export function acknowledgePurchaseOrder(
    * still change of its own accord, and the channel's change set the new version
    * this acknowledgement must answer (see the derivation above).
    */
-  if (isAmendment && !answeringChannelRevision) {
+  /**
+   * §BATCH 2j (`AV-010b`) — WHETHER THIS SUBMISSION IS THE REJECTION THE CHANNEL
+   * REQUIRES, and therefore may not be refused by the platform's own update window.
+   *
+   * Computed HERE — before the update window is consulted — because the channel's hold
+   * rule REQUIRES the rejection while the update window would otherwise refuse the
+   * quantity change a rejection implies, and the more specific duty wins. Before this,
+   * an order the channel had placed on hold could not be rejected at all once the
+   * 48-hour window had closed.
+   */
+  const allLinesRejected = po.lineItems.every((line) => {
+    const ack = lineAcks.find((a) => a.sku === line.sku);
+    return !ack || ack.ackStatus === 'unacknowledged' || ack.ackStatus === 'rejected';
+  });
+  const holdRejection = holdRejectionPermitted(po, allLinesRejected, now);
+
+  /**
+   * §BATCH 2c (`AV-024`) — a submission that ANSWERS A CHANNEL REVISION is not
+   * judged by the 48-hour update window: that window governs what the VENDOR may
+   * still change of its own accord, and the channel's change set the new version
+   * this acknowledgement must answer (see the derivation above).
+   *
+   * §BATCH 2j (`AV-010b`) — nor is the rejection the channel REQUIRES of an order it
+   * holds (`holdRejection` above).
+   */
+  if (isAmendment && !answeringChannelRevision && !holdRejection) {
     const amendmentBlock = amendmentRefusal(po, lineAcks, now);
     if (amendmentBlock) return { ok: false, error: amendmentBlock };
   }
@@ -1122,7 +1167,7 @@ export function acknowledgePurchaseOrder(
    * duplicate acknowledgement of the same PO is refused") is preserved, while a
    * genuine change now takes the amendment path above.
    */
-  if (isAmendment && amendedGroups.length === 0 && !answeringChannelRevision) {
+  if (isAmendment && amendedGroups.length === 0 && !answeringChannelRevision && !holdRejection) {
     return {
       ok: false,
       error:
@@ -1150,10 +1195,37 @@ export function acknowledgePurchaseOrder(
   /** §P13 — the derived window, read once and reused by the refusal, the
       timeliness classifier and the audit entry below. */
   const window = poAcknowledgementWindow(po, decidedAt);
-  const allLinesRejected = po.lineItems.every((line) => {
-    const ack = lineAcks.find((a) => a.sku === line.sku);
-    return !ack || ack.ackStatus === 'unacknowledged' || ack.ackStatus === 'rejected';
-  });
+
+  /**
+   * §BATCH 2j (`AV-010b`) — THE CHANNEL'S ON-HOLD DUTY, ENFORCED.
+   *
+   * Checked BEFORE the general late rule because it is the more specific fact: for an
+   * order the channel is HOLDING, the documented action past the limit is a rejection, and
+   * the brand must be told THAT reason rather than the generic one. An all-rejected
+   * submission is the required action and is permitted. A record whose hold state could
+   * not be READ refuses nothing here — `unknown` is never read as "held", the duty is
+   * reported as unverified instead.
+   */
+  const holdRefusal = onHoldRejectionRefusal(po, allLinesRejected, decidedAt);
+  if (holdRefusal) return { ok: false, error: holdRefusal };
+
+  /**
+   * §BATCH 2j (`AV-010b`) — a decision recorded INSIDE the limit on a held order is
+   * valid (inside 24 hours any decision is), but the channel's rule still stands for the
+   * order, so the brand is warned rather than left to discover it.
+   */
+  const holdWarning = poChannelHoldWarning(po, decidedAt);
+  if (holdWarning) warnings.push(holdWarning);
+
+  /**
+   * §BATCH 2j (`AV-009`) — THE COMPLETENESS OF THIS SUBMISSION, DERIVED BEFORE ANYTHING IS
+   * WRITTEN. After the write, an undecided line is indistinguishable from an explicitly
+   * rejected one, so this verdict and the lines it names could not be recovered later; it
+   * is computed once, here, told to the caller, and RECORDED below.
+   */
+  const completeness = poAcknowledgementCompleteness(po, lineAcks);
+  if (completeness.statement) warnings.push(completeness.statement);
+
   if (!isAmendment) {
     const lateRefusal = lateAcceptanceRefusal(po, allLinesRejected, decidedAt);
     if (lateRefusal) return { ok: false, error: lateRefusal };
@@ -1260,6 +1332,28 @@ export function acknowledgePurchaseOrder(
    * the instant of the decision — the version the brand actually answered.
    */
   po.acknowledgedRevision = po.revisionNumber ?? 0;
+
+  /**
+   * §BATCH 2j (`AV-009`) — WHAT THIS SUBMISSION LEFT UNDECIDED, RECORDED.
+   *
+   * The completeness verdict was derived BEFORE the write; the loop above has since turned
+   * every undecided line into a rejection, which IS the channel's documented consequence, so
+   * this is the last moment at which the fact is still visible. It is RECORDED because it
+   * cannot be derived afterwards — once written, an implicit rejection is identical to an
+   * explicit one.
+   *
+   * WHY THERE IS NO CLEARING BRANCH (corrected inside this batch — the first draft cleared
+   * the record as soon as a later submission decided every line, and that branch was
+   * UNREACHABLE): a line the channel implicitly rejected is rejected PERMANENTLY (`AV-007` —
+   * a rejection can never later become an acceptance), so no later submission can turn the
+   * omitted lines into a different outcome; and a submission that merely restates the same
+   * decisions changes no documented field, so the writer refuses it as a duplicate. The
+   * recorded fact is therefore HISTORICAL and stays true, which is how the surface states it
+   * ("rejected because the acknowledgement did not include it").
+   */
+  if (completeness.judgeable && completeness.missing.length > 0) {
+    po.implicitlyRejectedLines = [...completeness.missing];
+  }
   // Acknowledgment advances the workflow: any accepted/backordered volume
   // means accepted; an all-rejected PO means rejected.
   // §all-or-line-item-complete — acknowledgment must be all-or-line-item-complete:
@@ -1334,6 +1428,15 @@ export function acknowledgePurchaseOrder(
           `(closes ${updateWindow?.deadline ?? 'unreadable'}).`
         : `Timeliness: ${timeliness} against the 24-hour acknowledgement window (deadline ${window.deadline ?? 'unreadable'}).`) +
       /**
+       * §BATCH 2j (`AV-009`) — the audit trail states, IN WORDS, that the submission was
+       * incomplete, so "why was this line rejected" is answerable from the record alone
+       * rather than only from the line's status.
+       */
+      (completeness.missing.length > 0
+        ? ` The acknowledgement omitted ${completeness.missing.length} of ${po.lineItems.length} lines ` +
+          `(${completeness.missing.join(', ')}), which the channel implicitly rejects — the lines are recorded on the order.`
+        : '') +
+      /**
        * §BATCH 2c (`AV-024`) — the audit trail states, in words, that this decision
        * answered a CHANNEL-ISSUED revision rather than the brand changing its own
        * mind. The record is then unambiguous without diffing history.
@@ -1362,6 +1465,13 @@ export function acknowledgePurchaseOrder(
        */
       orderRevision: po.revisionNumber ?? 0,
       answeringChannelRevision,
+      /**
+       * §BATCH 2j (`AV-009` / `AV-010b`) — the two verdicts this batch introduced, on every
+       * acknowledgement record: which lines the submission omitted, and what the record
+       * says about a channel hold.
+       */
+      implicitlyRejectedLines: completeness.missing,
+      channelHoldState: poChannelHoldDuty(po, decidedAt).state,
     },
   });
 
@@ -1502,6 +1612,108 @@ export function autoRejectPurchaseOrderOnBehalf(
 
   notifyCanonicalStoreChange();
   return { ok: true, instructionId, timeliness: 'on_behalf' };
+}
+
+/* ── §BATCH 2j (`AV-010b`) — RECORDING THE CHANNEL'S HOLD STATEMENT ────────── */
+
+/**
+ * §BATCH 2j (`AV-010b`) — THE ONE WRITER OF THE CHANNEL'S HOLD STATEMENT.
+ *
+ * The retail channel documents a duty that attaches to a HELD order (source `S2`):
+ * *"You have 24 hours to accept a purchase order. Vendors must reject any purchase order
+ * that is on hold past the 24-hour time limit."* Before this batch the platform had no
+ * hold concept at all, so the duty could neither be stated nor enforced — and an order the
+ * channel was holding looked exactly like one it was not.
+ *
+ * WHAT IT DOES
+ * ------------
+ * Records the STATEMENT (`declared` / `cleared`) on the canonical purchase-order record
+ * with its instant, its actor and its provenance, and writes ONE attributed audit entry.
+ * A derived `unknown` is never stored: absence of a statement MEANS unknown, and unknown is
+ * reported as unverified rather than read as "not held".
+ *
+ * FAIL CLOSED ON A LIVE CLAIM
+ * ---------------------------
+ * A statement claiming to come from a LIVE channel read is REFUSED. The channel's order
+ * read carries no hold signal today — the seam's read shape is a protected interface and no
+ * source the platform holds documents the field — so the only statement it can truthfully
+ * record is a SIMULATED one, labelled as such. Extending that read is recorded as BLOCKED
+ * (see the register row), never guessed.
+ *
+ * IDEMPOTENT BY VALUE: re-recording the statement already on the record writes nothing a
+ * second time, so a surface may call it safely.
+ */
+export function recordChannelPurchaseOrderHold(
+  poId: string,
+  state: PoChannelHoldStatement,
+  options: {
+    /** WHO is recording it — required, because every statement is attributed. */
+    recordedBy: string;
+    /** TRUE = recorded from the simulated channel path (the only truthful source today). */
+    simulated?: boolean;
+    now?: Date | string | number;
+  }
+): { ok: boolean; error?: string; written?: boolean; state?: PoChannelHoldStatement } {
+  const po = demoPurchaseOrders.find((p) => p.id === poId);
+  if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
+
+  if (!(PO_CHANNEL_HOLD_STATES as readonly string[]).includes(state)) {
+    return {
+      ok: false,
+      error:
+        `"${String(state)}" is not one of the declared channel hold states ` +
+        `(${PO_CHANNEL_HOLD_STATES.join(', ')}) — an undeclared statement is refused rather than recorded (fail-closed).`,
+    };
+  }
+  if (!options?.recordedBy) {
+    return {
+      ok: false,
+      error: 'A hold statement must be attributed, so the recording identity is required.',
+    };
+  }
+  if (options.simulated !== true) {
+    return {
+      ok: false,
+      error:
+        'Refused: no live channel read can carry a hold statement yet — the channel’s order read has no hold ' +
+        'field, and no source the platform holds documents one. Only a statement recorded from the simulated ' +
+        'channel path, labelled as simulated, can be recorded today.',
+    };
+  }
+
+  if (po.channelHold?.state === state && po.channelHold.simulated) {
+    return { ok: true, written: false, state };
+  }
+
+  const at = new Date(options.now ?? new Date()).toISOString();
+  po.channelHold = { state, recordedAt: at, simulated: true, recordedBy: options.recordedBy };
+
+  const duty = poChannelHoldDuty(po, at);
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: at,
+    actorId: options.recordedBy,
+    action: 'purchase_order_channel_hold_recorded',
+    entityType: 'purchase_order',
+    entityId: po.id,
+    brandId: po.brandId,
+    reason:
+      `${options.recordedBy}: the retail channel's hold statement for PO ${po.poNumber} was recorded as ` +
+      `"${state}" (${duty.stateLabel}). SIMULATED channel statement — no live channel call was made. ` +
+      `${duty.statement} ${PO_ON_HOLD_REJECT_RULE_TEXT}`,
+    metadata: {
+      poNumber: po.poNumber,
+      holdState: state,
+      simulated: true,
+      recordedAt: at,
+      /** The duty the statement triggers, so the audit answers "what does this require?". */
+      requiredAction: duty.requiredAction,
+      holdDeadline: duty.deadline,
+    },
+  });
+
+  notifyCanonicalStoreChange();
+  return { ok: true, written: true, state };
 }
 
 /* ── §P13 / S4 — THE DRAFT THE BRAND APPROVES, AND THE APPROVAL THAT EXECUTES ── */

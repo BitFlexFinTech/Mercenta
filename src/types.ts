@@ -1739,6 +1739,30 @@ export interface PurchaseOrder {
    * order-type change is detectable without a second source of truth.
    */
   channelOrderType?: string;
+  /**
+   * §BATCH 2j (`AV-010b`) — THE CHANNEL'S HOLD STATEMENT, when it has made one.
+   *
+   * ABSENT MEANS THIS RECORD CARRIES NO HOLD STATEMENT — never *"the order is not
+   * on hold"*. The derived state is then `unknown` and says so (see
+   * `PO_CHANNEL_HOLD_STATES`), and the channel's documented duty to reject a held
+   * order past its 24-hour limit is reported as unverified instead of assumed
+   * satisfied. Written by the ONE recorder
+   * (`src/data/api.ts → recordChannelPurchaseOrderHold`).
+   */
+  channelHold?: PoChannelHoldRecord;
+  /**
+   * §BATCH 2j (`AV-009`) — THE LINES THE CHANNEL REJECTED BECAUSE THE ACKNOWLEDGEMENT
+   * OMITTED THEM.
+   *
+   * Amazon documents that an acknowledgement must cover every line item and that
+   * *"if you do not provide all line items …, Amazon implicitly rejects the missing
+   * line items"*. This is RECORDED rather than derived because it cannot be derived
+   * afterwards: once written, an implicit rejection is indistinguishable from an
+   * explicit one (same status, same channel rejection code), so the fact that the
+   * submission was INCOMPLETE would otherwise be lost. Absent = the submission
+   * covered every line (or no submission is recorded yet).
+   */
+  implicitlyRejectedLines?: string[];
 }
 
 /**
@@ -1925,6 +1949,59 @@ export type ChannelItemConfirmationStatus = (typeof CHANNEL_ITEM_CONFIRMATION_ST
 /** The channel's own per-line state when IT cancels a line (source `S4`). */
 export const CHANNEL_PO_ITEM_STATES = ['Canceled'] as const;
 export type ChannelPoItemState = (typeof CHANNEL_PO_ITEM_STATES)[number];
+
+/**
+ * §BATCH 2j (`AV-010b`) — THE CHANNEL'S HOLD FACT FOR A PURCHASE ORDER.
+ *
+ * The retail channel documents one hard duty about a held order (source `S2`):
+ * *"You have 24 hours to accept a purchase order. Vendors must reject any purchase
+ * order that is on hold past the 24-hour time limit."* So the platform must be able
+ * to say WHETHER the channel is holding an order — and must never assume.
+ *
+ * THREE-VALUED BY DESIGN, and the third value is the fail-closed half:
+ *
+ *   · `declared` — the channel has told us this order is on hold. Recorded with its
+ *                  instant and its provenance (see `PoChannelHoldRecord`).
+ *   · `cleared`  — the channel has told us the hold is lifted.
+ *   · `unknown`  — THIS RECORD CARRIES NO HOLD STATEMENT. The platform's own
+ *                  research has not established how the channel's order read signals
+ *                  a hold, so absence is read as *"we were not told"* and NEVER as
+ *                  *"the order is not on hold"*. The duty is then reported as
+ *                  UNVERIFIED rather than silently treated as satisfied.
+ *
+ * The duty itself, its refusal and every operator-facing statement are derived by
+ * the ONE owner: `src/lib/commerce/poAcknowledgementWindow.ts → poChannelHoldDuty`.
+ */
+export const PO_CHANNEL_HOLD_STATES = ['declared', 'cleared', 'unknown'] as const;
+export type PoChannelHoldState = (typeof PO_CHANNEL_HOLD_STATES)[number];
+
+/**
+ * §BATCH 2j (`AV-010b`) — a hold statement that can actually be RECORDED.
+ *
+ * `unknown` is DERIVED from a record's absence and can never be written down, so it is
+ * excluded here rather than re-typed as a literal pair at each call site: the writer, the
+ * console control and the record all name this ONE type.
+ */
+export type PoChannelHoldStatement = Exclude<PoChannelHoldState, 'unknown'>;
+
+/**
+ * §BATCH 2j (`AV-010b`) — ONE recorded hold statement from the retail channel.
+ *
+ * Only a REAL statement is ever stored, so `unknown` can never be written down: it
+ * is DERIVED from this record's absence. `simulated` is what keeps the demo honest
+ * — the statement below is recorded by the platform's simulated channel path, and
+ * no surface may present it as a live channel confirmation.
+ */
+export interface PoChannelHoldRecord {
+  /** `declared` while the channel holds the order; `cleared` once the hold is lifted. */
+  state: PoChannelHoldStatement;
+  /** When the statement was received (ISO). */
+  recordedAt: string;
+  /** TRUE when the statement came from the simulated channel path (no live call occurred). */
+  simulated: boolean;
+  /** WHO recorded it — the acting identity, so the statement is attributable. */
+  recordedBy: string;
+}
 
 export interface PurchaseOrderLineItem {
   sku: string;

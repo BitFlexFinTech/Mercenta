@@ -25,9 +25,16 @@ import {
 import {
   poAcknowledgementWindow,
   poAmendmentWindow,
+  poChannelHoldDuty,
   poNeedsAutoRejection,
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
+/**
+ * §BATCH 2j (`AV-009`) — the channel's COMPLETENESS rule and which lines a submission
+ * leaves undecided come from the rule's ONE owner, so the brand is told BEFORE it submits
+ * that an undecided line is rejected, rather than discovering it afterwards.
+ */
+import { poAcknowledgementCompleteness } from '@/lib/commerce/poAcknowledgementCompleteness';
 /**
  * §BATCH 2d (`AV-008` / `AV-023`) — the brand is told, on the order itself, that the
  * invoice bills the price it acknowledged and that a price differing from the order
@@ -50,6 +57,7 @@ import {
  * the updated order — never re-derived on this surface.
  */
 import {
+  PO_ACK_COMPLETENESS_RULE_TEXT,
   PO_AMENDMENT_WINDOW_RULE_TEXT,
   PO_CHANNEL_CHANGE_KIND_LABELS,
   PO_REVISION_RULE_TEXT,
@@ -790,6 +798,14 @@ export function BrandPurchaseOrders() {
               {/* §BATCH 2d (`AV-008` / `AV-023`) — and the acknowledged-price notice,
                   so the brand sees the price its invoice will bill before anything else. */}
               <AckPriceNotice po={po} />
+              {/* §BATCH 2j (`AV-010b`) — the channel's HOLD statement, when the record
+                  carries one (declared or lifted). Renders nothing when the record carries
+                  no statement — an unread hold state is stated where the duty is judged,
+                  inside the acknowledgement panel, never invented as "not held". */}
+              <ChannelHoldNotice po={po} />
+              {/* §BATCH 2j (`AV-009`) — which lines the channel implicitly rejected because
+                  the acknowledgement omitted them. Renders nothing for a complete one. */}
+              <ImplicitRejectionNotice po={po} />
               {/* Inline brand communication (shared layer, same thread as Messages Hub) */}
               {contactingPO?.id === po.id && (
                 <div className="mt-3 pt-3 border-t border-white/[0.05]">
@@ -829,6 +845,14 @@ export function BrandPurchaseOrders() {
                   >
                     {poAcknowledgementWindow(po).reason}
                   </p>
+                  {/* §BATCH 2j (`AV-010b`) — THE CHANNEL'S HOLD DUTY, stated by its OWNER at
+                      the moment of decision. An order whose hold state has not been read says
+                      exactly that: the duty is UNVERIFIED, never assumed satisfied. */}
+                  <HoldDutyLine po={po} />
+                  {/* §BATCH 2j (`AV-009`) — the completeness of the submission being prepared,
+                      derived by the rule's owner BEFORE it is sent, so the brand can decide
+                      every line rather than have the channel reject the ones it omitted. */}
+                  <SubmitCompletenessNotice po={po} lineAcks={lineAcks} />
                   {po.lineItems.map((li) => {
                     const a = lineAcks[li.sku];
                     if (!a) return null;
@@ -1456,6 +1480,120 @@ function AckPriceNotice({ po }: { po: PurchaseOrder }) {
   );
 }
 
+/**
+ * §BATCH 2j (`AV-010b`) — THE CHANNEL'S HOLD STATEMENT ON THE ORDER.
+ *
+ * Renders ONLY when the record actually carries a statement from the channel (`declared` or
+ * `cleared`), because an order whose hold state was never read has nothing truthful to show
+ * here — and showing "not on hold" for an unread state is exactly the assumption this batch
+ * removed. The unread state is stated where the duty is judged, inside the acknowledgement
+ * panel. Every word comes from the rule's ONE owner; this component derives nothing.
+ */
+function ChannelHoldNotice({ po }: { po: PurchaseOrder }) {
+  const duty = poChannelHoldDuty(po);
+  if (!po.channelHold) return null;
+  return (
+    <div
+      className={cn(
+        'mt-3 rounded-lg border p-3',
+        duty.held ? 'border-amber-500/20 bg-amber-500/10' : 'border-white/[0.06] bg-white/[0.02]'
+      )}
+      data-testid={`po-channel-hold-${po.poNumber}`}
+    >
+      <p className={cn('text-ds-label', duty.held ? 'text-amber-200' : 'text-zinc-300')}>
+        {duty.held ? 'Retail channel hold: this order is on hold' : 'Retail channel hold lifted'}
+      </p>
+      <p className="mt-1.5 text-ds-micro text-zinc-300/90">{duty.statement}</p>
+      <p className="mt-1.5 text-ds-micro text-zinc-500">{duty.ruleText}</p>
+    </div>
+  );
+}
+
+/**
+ * §BATCH 2j (`AV-009`) — WHICH LINES THE CHANNEL REJECTED BECAUSE THE ACKNOWLEDGEMENT
+ * OMITTED THEM.
+ *
+ * Read from the order's own record (`implicitlyRejectedLines`), which is the only place the
+ * fact survives — after the write, an implicit rejection looks exactly like an explicit one.
+ * Renders nothing when the submission covered every line. The rule is quoted from its owner.
+ */
+function ImplicitRejectionNotice({ po }: { po: PurchaseOrder }) {
+  const lines = po.implicitlyRejectedLines ?? [];
+  if (lines.length === 0) return null;
+  return (
+    <div
+      className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3"
+      data-testid={`po-implicit-rejections-${po.poNumber}`}
+    >
+      <p className="text-ds-label text-amber-200">
+        The acknowledgement omitted {lines.length} of {po.lineItems.length} lines
+      </p>
+      <ul className="mt-1.5 space-y-0.5">
+        {lines.map((sku) => (
+          <li key={sku} className="text-ds-micro text-amber-100/80">
+            {sku} — rejected because the acknowledgement did not include it
+          </li>
+        ))}
+      </ul>
+      <p className="mt-1.5 text-ds-micro text-amber-200/70">{PO_ACK_COMPLETENESS_RULE_TEXT}</p>
+    </div>
+  );
+}
+
+/**
+ * §BATCH 2j (`AV-010b`) — THE HOLD DUTY INSIDE THE ACKNOWLEDGEMENT PANEL.
+ *
+ * Stated on EVERY order the panel is open for, because this is where the duty is judged: a
+ * record that carries no hold statement reports the duty as UNVERIFIED — the honest answer —
+ * rather than silently implying the order is not held. Wording: the rule's ONE owner.
+ */
+function HoldDutyLine({ po }: { po: PurchaseOrder }) {
+  const duty = poChannelHoldDuty(po);
+  return (
+    <p
+      className="text-ds-micro text-amber-200/80"
+      data-testid={`po-hold-duty-${po.poNumber}`}
+    >
+      {duty.statement} {duty.ruleText}
+    </p>
+  );
+}
+
+/**
+ * §BATCH 2j (`AV-009`) — THE COMPLETENESS RULE AT THE MOMENT OF SUBMISSION.
+ *
+ * The channel requires a COMPLETE acknowledgement and rejects a line the submission omits, so
+ * the rule is stated here on every acknowledgement — and when the panel's current choices would
+ * leave a line undecided, the owner's verdict names those lines instead. Both come from the ONE
+ * owner; the surface decides nothing.
+ *
+ * WHY IT ALWAYS RENDERS (and is therefore not dead UI): the brand panel decides every line by
+ * design, so in the demo the verdict is "complete" and this line states the requirement. An
+ * INCOMPLETE submission reaches the writer from other callers (an integration read, an admin
+ * action), and this line, the writer's warning and the record then all state what happened.
+ */
+function SubmitCompletenessNotice({
+  po,
+  lineAcks,
+}: {
+  po: PurchaseOrder;
+  lineAcks: Record<string, { ackStatus: string }>;
+}) {
+  const verdict = poAcknowledgementCompleteness(
+    po,
+    Object.entries(lineAcks).map(([sku, a]) => ({ sku, ackStatus: a.ackStatus }))
+  );
+  return (
+    <p
+      className={`text-ds-micro ${verdict.statement ? 'text-amber-200/80' : 'text-zinc-400'}`}
+      data-testid={`po-submit-completeness-${po.poNumber}`}
+      data-completeness={verdict.complete ? 'complete' : 'incomplete'}
+    >
+      {verdict.statement ?? verdict.ruleText}
+    </p>
+  );
+}
+
 /* ── RECORD PREVIEW BODY ────────────────────────────────────────────────────
  * Only the sections a brand-owned purchase order genuinely supports. No
  * cross-tenant data and no admin-only fields are exposed here.
@@ -1524,6 +1662,12 @@ function BrandPoPreviewBody({
       {/* §BATCH 2d (`AV-008` / `AV-023`) — the preview states the acknowledged-price
           divergence too, so the record the brand opens cannot omit it. */}
       <AckPriceNotice po={po} />
+
+      {/* §BATCH 2j (`AV-010b` / `AV-009`) — and the channel's hold statement plus the
+          lines its completeness rule rejected, so the record the brand opens cannot omit
+          either fact. Both render nothing when there is nothing to state. */}
+      <ChannelHoldNotice po={po} />
+      <ImplicitRejectionNotice po={po} />
 
       <RecordFieldList
         fields={[

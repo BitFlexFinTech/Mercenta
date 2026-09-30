@@ -43,11 +43,13 @@ import {
   PO_AMENDABLE_FIELD_GROUP_LABELS,
   PO_AMENDABLE_FIELD_GROUPS,
   PO_AMENDABLE_FIELD_GROUPS_AFTER_WINDOW,
+  PO_CHANNEL_HOLD_STATE_LABELS,
+  PO_ON_HOLD_REJECT_RULE_TEXT,
   type PoAckTimeliness,
   type PoAmendableFieldGroup,
   type PoChannelState,
 } from '@/config/purchaseOrders';
-import type { PoRejectionCode, PurchaseOrder } from '@/types';
+import type { PoChannelHoldState, PoRejectionCode, PurchaseOrder } from '@/types';
 /**
  * §BATCH 2h (`AV-043`) — WHICH CHANNEL POSITION A STATUS OCCUPIES IS DECLARED
  * ONCE, in the mapping owner, in both directions. This module used to decide it
@@ -646,4 +648,148 @@ export function sortPosByUrgency(
 export { PO_ACK_WINDOW_RULE_TEXT };
 /** §P13 — the timeliness vocabulary is config-owned; re-exported for consumers. */
 export type { PoAckTimeliness };
+
+/* ── §BATCH 2j (`AV-010b`) — THE CHANNEL'S ON-HOLD REJECTION DUTY ─────────── */
+
+/**
+ * WHAT THE RECORD SAYS ABOUT A CHANNEL HOLD, AND WHAT THE CHANNEL'S RULE THEREFORE
+ * REQUIRES OF THIS ORDER.
+ *
+ * The `state` is DERIVED from the record, never stored: a record carrying no hold
+ * statement is `unknown`, which means *"we were not told"* — never *"the order is not
+ * on hold"*. The platform's research has not established how the channel's order read
+ * signals a hold, so `unknown` is reported as UNVERIFIED rather than silently treated as
+ * satisfied (that is the fail-closed half of `PO_CHANNEL_HOLD_STATES`).
+ */
+export interface PoChannelHoldDuty {
+  /** `declared` · `cleared` · `unknown`. */
+  state: PoChannelHoldState;
+  /** TRUE only when the channel has DECLARED a hold that has not been cleared. */
+  held: boolean;
+  /** TRUE when the record carries no hold statement at all — the duty is UNVERIFIED. */
+  unread: boolean;
+  /** TRUE when the channel's 24-hour limit has passed and only a rejection is valid. */
+  pastLimit: boolean;
+  /** The action the channel's rule requires of this order, or null when it requires none. */
+  requiredAction: 'reject' | null;
+  /** The channel's rule, quoted from its config owner. */
+  ruleText: string;
+  /** The instant the 24-hour limit falls, when the window is readable. */
+  deadline: string | null;
+  /** The ONE statement of the duty for the record and the surfaces. */
+  statement: string;
+  /** TRUE when the recorded hold statement came from the SIMULATED channel path. */
+  simulated: boolean;
+  /** The operator-readable label of the derived state (config-owned wording). */
+  stateLabel: string;
+}
+
+/** Derive the channel's hold duty for ONE purchase order at an INSTANT. Pure. */
+export function poChannelHoldDuty(
+  po: PurchaseOrder,
+  now: Date | string | number = new Date()
+): PoChannelHoldDuty {
+  const record = po.channelHold ?? null;
+  const state: PoChannelHoldState = record ? record.state : 'unknown';
+  const held = state === 'declared';
+  const window = poAcknowledgementWindow(po, now);
+  /**
+   * `pastLimit` is read from the window owner (`mustReject` = the 24-hour limit has
+   * passed on an order whose channel position is still `New`), so the duty and the window
+   * can never state different limits — `PO_ACKNOWLEDGEMENT_HOURS` is declared once.
+   */
+  const pastLimit = window.channelState === 'new' && window.mustReject;
+  const limitOn = window.deadline?.slice(0, 10) ?? 'record';
+
+  const statement = held
+    ? `The retail channel has this order ON HOLD${
+        record
+          ? ` (statement recorded ${record.recordedAt.slice(0, 10)}${
+              record.simulated ? ', simulated — no live channel call was made' : ''
+            })`
+          : ''
+      }. Its 24-hour limit ${
+        pastLimit ? `passed on ${limitOn}, so the documented action is a rejection` : `falls on ${limitOn}`
+      }.`
+    : state === 'cleared'
+      ? 'The retail channel has lifted its hold on this order, so the channel’s on-hold rejection duty no longer applies.'
+      : 'This record carries no statement from the retail channel about a hold, and the channel’s own signal for a hold is not established by the platform’s evidence — so the on-hold rejection duty is UNVERIFIED here, never assumed satisfied.';
+
+  return {
+    state,
+    held,
+    unread: state === 'unknown',
+    pastLimit,
+    requiredAction: held && pastLimit ? 'reject' : null,
+    ruleText: PO_ON_HOLD_REJECT_RULE_TEXT,
+    deadline: window.deadline,
+    statement,
+    simulated: record?.simulated ?? false,
+    stateLabel: PO_CHANNEL_HOLD_STATE_LABELS[state],
+  };
+}
+
+/**
+ * THE CHANNEL'S ON-HOLD DUTY, ENFORCED — the refusal for a submission that accepts or
+ * backorders an order the channel has on hold past its 24-hour limit, or `null` when the
+ * rule refuses nothing.
+ *
+ * The documented action is the ONLY valid one past the limit, so an all-rejected
+ * submission is permitted (that IS the required rejection) and every other decision is
+ * refused. A record whose hold state could not be READ refuses NOTHING here: the duty is
+ * unverified, and inventing a refusal from an unread state would be the same defect in the
+ * opposite direction.
+ */
+export function onHoldRejectionRefusal(
+  po: PurchaseOrder,
+  allLinesRejected: boolean,
+  now: Date | string | number = new Date()
+): string | null {
+  const duty = poChannelHoldDuty(po, now);
+  if (duty.requiredAction !== 'reject' || allLinesRejected) return null;
+  return (
+    `PO ${po.poNumber}: the retail channel has this order ON HOLD and its 24-hour limit passed on ${
+      duty.deadline?.slice(0, 10) ?? 'record'
+    }. ${PO_ON_HOLD_REJECT_RULE_TEXT} An acceptance or backorder is refused — submit the rejection the channel requires.`
+  );
+}
+
+/**
+ * The WARNING recorded when a HELD order is decided inside its limit. The decision is
+ * valid (inside 24 hours any decision is), but the channel's rule still stands for the
+ * order, so the brand is told rather than left to discover it.
+ */
+export function poChannelHoldWarning(
+  po: PurchaseOrder,
+  now: Date | string | number = new Date()
+): string | null {
+  const duty = poChannelHoldDuty(po, now);
+  if (!duty.held || duty.pastLimit) return null;
+  return (
+    `PO ${po.poNumber}: the retail channel has this order ON HOLD. ${PO_ON_HOLD_REJECT_RULE_TEXT} Its limit falls on ` +
+    `${duty.deadline?.slice(0, 10) ?? 'record'}.${
+      duty.simulated ? ' (The hold statement is simulated — no live channel call was made.)' : ''
+    }`
+  );
+}
+
+/**
+ * TRUE when a submission IS the rejection the channel requires of a held order — and
+ * therefore must be permitted even where the platform's own UPDATE window would refuse it.
+ *
+ * §BATCH 2j — DEFECT FIXED AT SOURCE. Before this, an order the channel had placed on
+ * hold could not be REJECTED once the 48-hour update window had closed: that window accepts
+ * only ship-date/delivery-date changes after it closes, so the quantity change a rejection
+ * implies was refused — and the channel-REQUIRED action became impossible to perform
+ * through the platform. Both are channel rules, and for this one action the specific duty
+ * wins: `AV-006`'s window governs what we *"only expect to receive"* of the VENDOR's own
+ * changes, while the hold rule states what the vendor MUST do.
+ */
+export function holdRejectionPermitted(
+  po: PurchaseOrder,
+  allLinesRejected: boolean,
+  now: Date | string | number = new Date()
+): boolean {
+  return allLinesRejected && poChannelHoldDuty(po, now).requiredAction === 'reject';
+}
 

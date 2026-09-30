@@ -148,10 +148,15 @@ touched** — the SQL seed's own staleness is recorded as BLOCKED in the session
 | ~~**AV-043**~~ | ~~PO vocabulary ↔ the channel's vocabulary declared nowhere~~ — **APPLIED (Batch 2h, 2026-09-30)**: ONE owner declares the mapping in both directions (forward total, reverse an honest set), the acknowledgement window asks it, `PO_ACK_STATUSES_WITH_OBLIGATION` is derived from it, an undeclared status offers no work, and an undocumented or contradictory channel read fails closed with a reason. Gated by `validate:po-channel-vocabulary`. Not start work. | — |
 | ~~**AV-045**~~ (+ **AV-040** PARTIAL) | ~~Delivery appointments are not modelled~~ — **APPLIED (Batch 2i, 2026-09-30)**: ONE owner declares the channel's appointment states, the fail-closed resolution (an undocumented/absent state is `unknown`), the CRDD-within-delivery-window rule and a labelled-simulated derivation; the Logistics Hub renders the state and the verdict; the FPY eligibility threshold is recorded as not-public and never computed. Gated by `validate:delivery-appointment` + `e2e/delivery-appointment.spec.ts`. **Not start work.** **AV-042 is APPLIED (Batch 2f) — not start work**, **AV-043 is APPLIED (Batch 2h) — not start work**, and **AV-040 is PARTIAL** (six of its seven named SP-API operations are built and gated; only `getTransaction` remains, evidence-blocked) | Incomplete fidelity to the channel |
 
-**Then:** the remaining INCOMPLETE rows (AV-009/011/014/015/016/010b), the
+**Then:** the remaining INCOMPLETE rows — **`AV-011`** and **`AV-015`** — where **`AV-009` and `AV-010b` are
+APPLIED (Batch 2j, 2026-09-30) — not start work**, and **`AV-014`/`AV-016` are MODELLED IN PART with their
+remaining halves named in their own rows (the register's "OPEN — not applied" on them was FALSE and was
+corrected)**: `AV-014` needs a boundary that REFUSES a caller-supplied pickup date earlier than the documented
+two business days, and `AV-016` needs pallet-level ASN structure. Also the
 CONTRADICTED row (AV-013 — AV-027 and **AV-031** are applied), and the INFERENCE rows that must be **relabelled**
 (AV-002/017/025/033/044). **AV-042 is APPLIED (Batch 2f), AV-043 is APPLIED (Batch 2h) and AV-045 is APPLIED (Batch 2i) — not start work.** **AV-040's one remaining operation
-(`getTransaction`) is EVIDENCE-BLOCKED**: do not model it from guesswork.
+(`getTransaction`) is EVIDENCE-BLOCKED**: do not model it from guesswork. **AV-010b's own remaining half is
+EVIDENCE-BLOCKED too**: the channel's SIGNAL for a hold is undocumented in the evidence the platform holds.
 
 **Do NOT guess the UNKNOWNs** (AV-020/034/035/046/047/048): they need a **signed-in Vendor Central session**
 (founder-only) — record as EVIDENCE-BLOCKED until then.

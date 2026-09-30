@@ -103,7 +103,20 @@ test(
 test(
   'the short form is derived from the window constant (no hand-typed window)',
   (() => {
-    const decl = code('src/config/purchaseOrders.ts').split('PO_ACK_ONBOARDING_STATEMENT = {')[1] ?? '';
+    /**
+     * §BATCH 2j (`AV-009` / `AV-010b`) — REPOINTED, never weakened. The old contract
+     * recorded here: this split took EVERYTHING after
+     * `PO_ACK_ONBOARDING_STATEMENT = {` to the end of the FILE, so the moment any later
+     * declaration in the same config contained the digits of the window (Batch 2j added
+     * the on-hold rule, whose text says "24-hour"), the check failed without the
+     * statement itself having changed at all. The assertion it MEANS to make is about
+     * the STATEMENT'S OWN BODY, so it now reads exactly that: from the statement to its
+     * closing `} as const;`. A hand-typed window INSIDE the statement still fails.
+     */
+    const decl =
+      (code('src/config/purchaseOrders.ts').split('PO_ACK_ONBOARDING_STATEMENT = {')[1] ?? '').split(
+        '} as const;'
+      )[0] ?? '';
     return (
       S.shortText.includes(String(cfg.PO_ACKNOWLEDGEMENT_HOURS)) &&
       /\$\{PO_ACKNOWLEDGEMENT_HOURS\}/.test(decl) &&

@@ -1105,6 +1105,86 @@ function readRedLines() {
   }
   await apptPage.close();
 
+  /* ── L19 — BATCH 2j (AV-009 / AV-010b): THE ACKNOWLEDGEMENT'S DUTIES, LIVE ──
+   * WHY THIS EXISTS. The brand's acknowledgement panel now states the retail
+   * channel's COMPLETENESS rule and its ON-HOLD duty, both from the rule owners. On
+   * the DEPLOYED surface the duty must be present and honest: either the channel has
+   * stated a hold (and the rule is quoted) or the duty is reported UNVERIFIED —
+   * never a silent "not on hold". The completeness verdict must be exposed as data,
+   * so a notice that never says anything cannot pass as proof. Driven through the
+   * product's own controls; asserting the source would prove nothing about the
+   * deployed bundle.
+   */
+  console.log('\n--- L19 the acknowledgement’s on-hold and completeness duties, live ---');
+  const dutyPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const dutyErrors = [];
+  dutyPage.on('pageerror', (e) => dutyErrors.push(String(e)));
+  try {
+    let dutyEntryAttempt = 0;
+    let dutyEntryError = null;
+    for (let attempt = 1; attempt <= 3 && dutyEntryAttempt === 0; attempt++) {
+      try {
+        await gotoLive(dutyPage, `${SITE}/`);
+        const login = dutyPage.getByRole('button', { name: 'Partner Login' }).first();
+        await login.waitFor({ state: 'visible', timeout: 90000 });
+        await login.click({ timeout: 30000 });
+        await dutyPage.waitForTimeout(2500);
+        const card = dutyPage.locator('text=Tapatío').first();
+        await card.waitFor({ state: 'visible', timeout: 90000 });
+        await card.click({ timeout: 30000 });
+        await dutyPage.waitForTimeout(3000);
+        dutyEntryAttempt = attempt;
+      } catch (err) {
+        dutyEntryError = err;
+      }
+    }
+    if (dutyEntryAttempt === 0) throw dutyEntryError ?? new Error('entry failed');
+    check(`L19 the deployed site opened and the brand signed in (attempt ${dutyEntryAttempt})`, true);
+
+    const dutyNav = dutyPage.locator('nav[aria-label="Primary"] >> text=Purchase Orders').first();
+    await dutyNav.waitFor({ state: 'visible', timeout: 90000 });
+    await dutyNav.click({ timeout: 30000 });
+    await dutyPage.waitForTimeout(2500);
+
+    const ackButton = dutyPage.locator('button', { hasText: 'Acknowledge' }).first();
+    await ackButton.waitFor({ state: 'visible', timeout: 90000 });
+    await ackButton.click({ timeout: 30000 });
+    await dutyPage.waitForTimeout(1500);
+
+    const dutyLine = dutyPage.locator('[data-testid^="po-hold-duty-"]').first();
+    await dutyLine.waitFor({ state: 'visible', timeout: 90000 });
+    const dutyText = (await dutyLine.textContent()) ?? '';
+    check(
+      'L19 the LIVE on-hold duty is stated — UNVERIFIED, or the channel’s hold with its rule',
+      /UNVERIFIED|ON HOLD/i.test(dutyText),
+      dutyText.slice(0, 140)
+    );
+
+    const completenessLine = dutyPage.locator('[data-testid^="po-submit-completeness-"]').first();
+    await completenessLine.waitFor({ state: 'visible', timeout: 90000 });
+    const completenessVerdict = await completenessLine.getAttribute('data-completeness');
+    check(
+      `L19 the LIVE completeness verdict is real data (${completenessVerdict})`,
+      ['complete', 'incomplete'].includes(completenessVerdict)
+    );
+    const completenessText = (await completenessLine.textContent()) ?? '';
+    check(
+      'L19 the LIVE completeness line states the channel’s requirement (or the lines left undecided)',
+      /complete acknowledgement/i.test(completenessText) || /undecided/i.test(completenessText),
+      completenessText.slice(0, 140)
+    );
+    check(
+      `L19 the driven acknowledgement surface rendered with no uncaught error (errors: ${dutyErrors.join(' | ') || 'none'})`,
+      dutyErrors.length === 0
+    );
+  } catch (dutyError) {
+    check(
+      `L19 the acknowledgement duties could NOT be driven live (${String(dutyError).split('\\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await dutyPage.close();
+
   await browser.close();
 
   console.log(`\nLIVE VERIFICATION: ${pass} PASS / ${fail} FAIL`);

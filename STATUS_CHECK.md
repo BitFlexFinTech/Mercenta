@@ -3500,3 +3500,45 @@ on the deployed brand surface** (state `Defect`, window `within-window`, the rul
 L15, L16 and L17 also PASS.
 **Status: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.**
 
+
+---
+
+## SESSION 58 — BATCH 2j: `AV-009` + `AV-010b` — THE ACKNOWLEDGEMENT'S COMPLETENESS AND ON-HOLD DUTIES (2026-09-30)
+
+**Authorized by** the recorded `NEXT TASK` (continue Batch 2 at the remaining INCOMPLETE rows).
+
+**Built.** The channel's **completeness** rule now has ONE owner
+(`src/lib/commerce/poAcknowledgementCompleteness.ts`, NEW): the verdict is derived from the ORDER's own lines (an
+omitted or `unacknowledged` line is missing; extra/unknown SKUs cannot make a submission look complete; an order with
+no readable lines is never complete), and it is computed BEFORE the write — afterwards an implicit rejection is
+indistinguishable from an explicit one. The writer states the rule to the caller and RECORDS the omitted lines on the
+order and in the audit trail; the brand panel states the rule at submission with the verdict exposed as
+`data-completeness`. The channel's **on-hold** duty is now a real three-valued state (`PO_CHANNEL_HOLD_STATES` =
+declared · cleared · unknown) derived by the acknowledgement-window owner: a record carrying no statement reports the
+duty **UNVERIFIED** (never "not held"), the refusal fires only on a declared hold past its limit, the all-rejected
+submission the channel requires is permitted, and a statement claiming a LIVE source is refused. The hold is reachable
+in the deployed demo through a guarded, labelled console simulation.
+
+**Gates.** `npm run validate:po-ack-duties` (NEW; **43 assertions**; bundles and EXECUTES the real owners AND the domain
+writer with `fetch` sabotaged) and `e2e/po-ack-duties.spec.ts` (**4 passed**); the gate is **proved able to fail three
+ways** (2, 1 and 6 failures), each file restored byte-identical by hash. New scope declared in BOTH `validate-e6` and
+`validate-e7`; nothing protected touched.
+
+**Defects FIXED at source (not described).** (1) An UNREACHABLE branch in my first draft (clearing the omitted-lines
+record on a later complete submission — impossible, because a channel rejection is permanent and a no-change
+restatement is refused as a duplicate). (2) A held order could not be REJECTED past the 48-hour update window, so the
+channel-required action was impossible to perform (`holdRejectionPermitted`). (3) The register's **"OPEN — not
+applied"** on `AV-014` and `AV-016` was FALSE (P6/P8 had built and gated those halves) — corrected in the rows, the
+truth-validation doc and every derived count. (4) `validate-po-acknowledgement-onboarding-surfaces` read "everything
+after the statement" in the config, so any later declaration mentioning the window's digits failed it — **REPOINTED**
+to the statement's own body, never weakened. (5) My own edit overwrote the registry's historical `batch2i`
+`next_plan`; restored, and Batch 2j recorded as its own entry.
+
+**Evidence.** `validate:all` **131 PASS / 0 FAIL** (was 130 PASS + 1 FAIL) · `typecheck` **0** · `lint` **0** · `build`
+✓ (`assets/index-C4KYCvrU.js`) · `validate:po-ack-duties` **43/0** · validate-e6 + validate-e7 **PASS** ·
+`e2e/po-ack-duties.spec.ts` **4 passed**.
+
+**Delivery.** The Batch 2j commit is pushed to `origin/redesign/foundation` (no `--force`) and deployed with
+`scripts/deploy-demo.sh` from a clean tree to `demo.mercenta.co.uk`; the live result and the commit hash are recorded
+in `PROJECT_STATUS.md → CURRENT RESUME STATE` by the state commit that follows (no application runtime change).
+

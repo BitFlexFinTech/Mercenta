@@ -738,6 +738,47 @@ const BATCH2I_DELIVERY_APPOINTMENT_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §BATCH 2j (`AV-009` / `AV-010b`, 2026-09-30) — THE ACKNOWLEDGEMENT'S TWO DUTIES.
+ *
+ * The audit registered two open findings about the acknowledgement: the channel requires a
+ * COMPLETE acknowledgement and rejects an omitted line (`AV-009`), and *"Vendors must reject
+ * any purchase order that is on hold past the 24-hour time limit"* (`AV-010b`). The platform
+ * applied the first consequence without declaring the rule, and had no hold concept at all.
+ *
+ * Declared set — every file the phase touches, named:
+ *   · `src/types.ts` — the channel's three-valued hold vocabulary + the recordable statement
+ *     type + the purchase-order fields (`channelHold`, `implicitlyRejectedLines`).
+ *   · `src/config/purchaseOrders.ts` — the TWO rule statements and the hold-state labels
+ *     (declared once; the module-load guard fails if a state loses its label).
+ *   · `src/lib/commerce/poAcknowledgementCompleteness.ts` — NEW: the completeness owner.
+ *   · `src/lib/commerce/poAcknowledgementWindow.ts` — the hold duty, its refusal, its warning
+ *     and the override that lets the channel-REQUIRED rejection through the update window.
+ *   · `src/data/api.ts` — enforcement, the record of the omission, the audit facts, and the
+ *     ONE hold-statement recorder (which REFUSES a statement claiming a live source).
+ *   · `src/components/brand/BrandPurchaseOrders.tsx` — renders both duties from the owners.
+ *   · `src/components/admin/AdminPurchaseOrderList.tsx` — the simulated declaration that makes
+ *     the hold REACHABLE in the deployed demo, refused unless a simulated read is active.
+ *   · the gate, the browser spec, the two scope guards and `package.json`.
+ * NOTHING PROTECTED IS TOUCHED: `src/lib/spapi/client.ts` (the seam's read shape) is
+ * UNCHANGED — the channel's hold signal is not documented in the evidence the platform holds,
+ * so extending that read is recorded as BLOCKED rather than guessed.
+ */
+const BATCH2J_PO_ACK_DUTIES_SCOPE = new Set([
+  'src/types.ts',
+  'src/config/purchaseOrders.ts',
+  'src/lib/commerce/poAcknowledgementCompleteness.ts',  /* NEW — the completeness owner */
+  'src/lib/commerce/poAcknowledgementWindow.ts',
+  'src/data/api.ts',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'src/components/admin/AdminPurchaseOrderList.tsx',
+  'scripts/validate-po-ack-duties.mjs',                 /* NEW — this phase's gate */
+  'e2e/po-ack-duties.spec.ts',                          /* NEW — the browser proof */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 
 /**
@@ -1920,6 +1961,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2i — the delivery-appointment concept (see above). */
         BATCH2I_DELIVERY_APPOINTMENT_SCOPE.has(p) ||
         [...BATCH2I_DELIVERY_APPOINTMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2j — the acknowledgement's completeness and on-hold duties (see above). */
+        BATCH2J_PO_ACK_DUTIES_SCOPE.has(p) ||
+        [...BATCH2J_PO_ACK_DUTIES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -1977,6 +2021,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2i — same declaration, second protected-path check (F5b). */
         BATCH2I_DELIVERY_APPOINTMENT_SCOPE.has(p) ||
         [...BATCH2I_DELIVERY_APPOINTMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2j — same declaration, second protected-path check (F5b). */
+        BATCH2J_PO_ACK_DUTIES_SCOPE.has(p) ||
+        [...BATCH2J_PO_ACK_DUTIES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — same declaration, second protected-path check (F5b). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -2268,6 +2315,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2i — the delivery-appointment concept (see above). */
           BATCH2I_DELIVERY_APPOINTMENT_SCOPE.has(p) ||
           [...BATCH2I_DELIVERY_APPOINTMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2j — the acknowledgement's two duties (see above). */
+          BATCH2J_PO_ACK_DUTIES_SCOPE.has(p) ||
+          [...BATCH2J_PO_ACK_DUTIES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
           PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
           [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

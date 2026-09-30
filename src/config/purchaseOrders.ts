@@ -38,8 +38,10 @@
  */
 import {
   PO_CHANNEL_CHANGE_KINDS,
+  PO_CHANNEL_HOLD_STATES,
   PO_REJECTION_CODES,
   type PoChannelChangeKind,
+  type PoChannelHoldState,
   type PoRejectionCode,
   type PurchaseOrderStatus,
 } from '@/types';
@@ -320,3 +322,64 @@ export const PO_ACK_ONBOARDING_STATEMENT = {
     `the rejection the channel requires on your behalf. That schedule and that on-behalf action are Mercenta's own ` +
     `operating process, not channel rules.`,
 } as const;
+
+/**
+ * §BATCH 2j (`AV-009`) — THE CHANNEL'S DOCUMENTED COMPLETENESS RULE (ONE declaration).
+ *
+ * AMAZON-DOCUMENTED (source `S2`): *"You must provide a complete acknowledgement,
+ * including all purchase order line items… If you do not provide all line items…,
+ * Amazon implicitly rejects the missing line items."*
+ *
+ * Before this the platform DID apply the consequence — an omitted line was written
+ * as a rejection — but the rule that produces it was not declared anywhere, so it
+ * could not be stated to the brand at the moment of submission, could not be
+ * asserted by a gate, and left no record that the submission had been incomplete.
+ *
+ * The one declaration is consumed by the derivation
+ * (`src/lib/commerce/poAcknowledgementCompleteness.ts`), the enforcement in the
+ * acknowledgement writer, and every surface that states it. Nothing re-types it.
+ */
+export const PO_ACK_COMPLETENESS_RULE_TEXT =
+  'The retail channel requires a complete acknowledgement covering every line on the purchase order. A line ' +
+  'that is not acknowledged is rejected, so the order is never left undecided.';
+
+/**
+ * §BATCH 2j (`AV-010b`) — THE CHANNEL'S DOCUMENTED ON-HOLD DUTY (ONE declaration).
+ *
+ * AMAZON-DOCUMENTED (source `S2`): *"You have 24 hours to accept a purchase order.
+ * Vendors must reject any purchase order that is on hold past the 24-hour time
+ * limit."*
+ *
+ * The 24-hour limit itself is NOT re-declared here — it is `PO_ACKNOWLEDGEMENT_HOURS`
+ * above, so the duty and the window can never state different limits. What this
+ * declaration adds is the DUTY that attaches to the held state, and it is what every
+ * refusal and every surface quotes.
+ *
+ * WHAT THE PLATFORM DOES **NOT** CLAIM: the channel's own signal for a hold is not
+ * established by the evidence the platform holds, so a record that carries no hold
+ * statement is `unknown` (see `PO_CHANNEL_HOLD_STATES`) and the duty is reported as
+ * unverified — never silently read as "not held".
+ */
+export const PO_ON_HOLD_REJECT_RULE_TEXT =
+  'A purchase order the retail channel has placed on hold must be rejected once its 24-hour limit has passed. ' +
+  'Mercenta records the hold so that requirement is never missed.';
+
+/**
+ * §BATCH 2j (`AV-010b`) — the operator-readable label of every declared hold state.
+ * Declared once, so a surface never invents its own wording; the guard below fails
+ * at module load if a state is ever added without a label.
+ */
+export const PO_CHANNEL_HOLD_STATE_LABELS: Record<PoChannelHoldState, string> = {
+  declared: 'on hold at the retail channel',
+  cleared: 'channel hold lifted',
+  unknown: 'hold state not read',
+};
+
+for (const state of PO_CHANNEL_HOLD_STATES) {
+  if (!PO_CHANNEL_HOLD_STATE_LABELS[state]) {
+    throw new Error(
+      `[purchaseOrders] the channel hold state "${state}" has no declared label. Every declared state must be ` +
+        `labelled once, here, so no surface invents its own wording.`
+    );
+  }
+}

@@ -732,6 +732,28 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
     'package.json',
   ];
+  /**
+   * §BATCH 2j — THE ACKNOWLEDGEMENT'S COMPLETENESS AND ON-HOLD DUTIES (`AV-009` /
+   * `AV-010b`, 2026-09-30). Fuller note in `validate-e6-brand-surfaces.mjs`
+   * §BATCH2J_PO_ACK_DUTIES_SCOPE. Same mechanism as every phase above: a changed
+   * source/test file outside EVERY declared set is still refused, and the protected seam
+   * (`src/lib/spapi/client.ts`) is untouched — the channel's hold signal is not documented
+   * in the evidence the platform holds, so extending that read is recorded as BLOCKED.
+   */
+  const BATCH2J_PO_ACK_DUTIES_DECLARED = [
+    'src/types.ts',
+    'src/config/purchaseOrders.ts',
+    'src/lib/commerce/poAcknowledgementCompleteness.ts',
+    'src/lib/commerce/poAcknowledgementWindow.ts',
+    'src/data/api.ts',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'src/components/admin/AdminPurchaseOrderList.tsx',
+    'scripts/validate-po-ack-duties.mjs',
+    'e2e/po-ack-duties.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
 
 
 
@@ -1554,7 +1576,14 @@ try {
            * is. An UNEXPLAINED protected change still fails.
            */
           !BATCH2I_DELIVERY_APPOINTMENT_DECLARED.includes(f) &&
-          !BATCH2I_DELIVERY_APPOINTMENT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH2I_DELIVERY_APPOINTMENT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2j (`AV-009` / `AV-010b`) — the two acknowledgement duties touch no
+           * protected path either; their declared surface is accepted here exactly as every
+           * other phase's is. An UNEXPLAINED protected change still fails.
+           */
+          !BATCH2J_PO_ACK_DUTIES_DECLARED.includes(f) &&
+          !BATCH2J_PO_ACK_DUTIES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1772,6 +1801,10 @@ try {
      * §BATCH 2i — THE DELIVERY-APPOINTMENT CONCEPT (`AV-045`, 2026-09-30).
      */
     ...BATCH2I_DELIVERY_APPOINTMENT_DECLARED,
+    /**
+     * §BATCH 2j — THE ACKNOWLEDGEMENT'S TWO DUTIES (`AV-009` / `AV-010b`, 2026-09-30).
+     */
+    ...BATCH2J_PO_ACK_DUTIES_DECLARED,
     /**
      * §PUBLIC MESSAGING — the public-surfaces batch's declared surface (see above).
      */
