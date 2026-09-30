@@ -3433,3 +3433,70 @@ rendered in both shells in L12 in that run; a dedicated single-page drive of the
 200 in 2.1–6.9s on five consecutive attempts). Recorded as an open host-side item, never as a product exception.
 The live check's `gotoLive` now waits up to 90s and retries once (measured 20 PASS / 23 FAIL before that change).
 
+
+---
+
+## SESSION RECORD — BATCH 2i (`AV-045`): THE DELIVERY-APPOINTMENT CONCEPT (2026-09-30)
+
+**The finding.** `docs/AMAZON_RECONCILIATION_STATUS.md` row `AV-045` — *"Delivery appointments — INCOMPLETE — BUILD:
+add the appointment concept"* (owning increment S3). Source `S15` documents that inbound delivery to a
+retail-channel fulfilment centre is **appointment-based**, that the **Carrier Requested Delivery Date must fall
+within the PO's Delivery Window**, that window compliance feeds shipper AND carrier performance, and that the
+channel's appointment states are **Pending · Scheduled · Arrived · Deleted · Cancelled · Defect · Closed**. Mercenta
+modelled NONE of it; `deliveryWindowEnd` was rendered as a bare "Deliver by" date.
+
+**What was built (one owner, fail-closed, rendered).**
+- `src/lib/shipping/deliveryAppointment.ts` (NEW) — the ONE owner: `APPOINTMENT_STATE_BEHAVIOUR` (total over the seven
+  states; label, live/actionable/terminal, the milestone a state is consistent with, and a plain meaning), guarded at
+  import time; `resolveChannelAppointmentState` (an undocumented or absent value → `unknown` with a stated reason,
+  never defaulted); `validateAppointmentWithinDeliveryWindow` (a date before/after the window, **no delivery window
+  declared**, or an undocumented/impossible date each REFUSED with a reason — a ship window is never substituted);
+  `deriveDeliveryAppointment` (arrived → `Arrived`, delay/exception → `Defect`, declared window → `Scheduled`,
+  nothing declared → `Pending`; every derived appointment `simulated: true` with a source that says so);
+  `appointmentPresentation`; and the honest record `CHANNEL_FPY_THRESHOLD_DOCUMENTED = false` plus the channel's own
+  defect-rate definition (`S15`).
+- `src/types.ts` — the channel's appointment vocabulary declared ONCE (`ChannelAppointmentState`,
+  `CHANNEL_APPOINTMENT_STATES`) with `AppointmentWindowVerdict` / `DeliveryAppointment`, and `Shipment.appointment?`
+  — the same SSOT rule `CHANNEL_PO_ORDER_STATES` follows.
+- `src/data/api.ts` — the ONE projection point `attachShipmentAppointment`, composed into BOTH shipment readers
+  beside the ETA projection; `src/data/demoData.ts` — `DemoShipment` gains the optional field.
+- `src/components/brand/LogisticsHub.tsx` — renders the appointment state and the window verdict in the owner's own
+  words, in the consignment inspector and the ETA-coverage drill-down.
+
+**DEFECT FOUND AND FIXED AT SOURCE (mutation-proving found it).** With the type guard weakened, resolution CRASHED
+(`Cannot read properties of undefined`) instead of failing closed — a recognition bug would have become a runtime
+error on the read path. The behaviour lookup is now re-checked and returns `unknown`; the gate pins the hardening.
+
+**Gate.** `scripts/validate-delivery-appointment.mjs` (NEW, registered as `npm run validate:delivery-appointment`; **53
+assertions**) bundles the REAL modules with the project's own esbuild and `@` alias and asserts RUNNING behaviour with
+`fetch` sabotaged: one owner; the vocabulary is exactly the seven documented states; the behaviour table is total and
+its live/actionable/terminal/milestone sets are pinned; an undocumented/absent/empty value is `unknown` with a reason;
+the window rule passes only `within-window` and refuses before/after/no-window/undocumented-date/impossible with a
+reason; the derivation reflects arrival and a recorded delay, invents no date, and is always `simulated`; the
+presentation never overstates; the data layer and the brand surface CONSUME the owner; and no network call is made.
+**MUTATION-PROVED FOUR WAYS** — each 1 failure, file restored byte-identical (owner sha256
+`1b11902fab1a2403178e767e6c50db8f49d6e35031d0777e82b581aa6026ad5b`): (1) type guard weakened; (2) early window bound
+ignored; (3) derivation forced to claim a confirmation; (4) the defensive lookup removed.
+
+**Records corrected at source.** The reconciliation row (`AV-045` → APPLIED), the applied-findings table, the BUILD
+summary row (**9 APPLIED / 7 open**), the derived open position (**16 APPLIED / 23 open**, recomputed from the table),
+the truth-validation §S15 and §9 rows (no longer "not modelled at all"), and the build plan's Batch 2 counts and
+next-step list.
+
+**Scope guards.** `BATCH2I_DELIVERY_APPOINTMENT_SCOPE` / `_DECLARED` added to BOTH guards, and accepted by F5, F5b and
+F6. **A pre-existing inconsistency was fixed at source:** the Batch 2h set was declared in F5/F5b but NOT in F6,
+contradicting the guards' own stated invariant that all three read the SAME declared scope.
+
+**Evidence.** `npm run validate:all` **130 PASS / 0 FAIL** (was 129) · `npm run typecheck` **0** · `npm run lint` **0**
+· `npm run build` ✓ · `validate:delivery-appointment` **53/0** · validate-e6 + validate-e7 **PASS** ·
+`e2e/delivery-appointment.spec.ts` **3 passed**.
+
+**Delivery (three-way).** Committed **`b3b54c8`** → pushed to `origin/redesign/foundation` → deployed with
+`scripts/deploy-demo.sh` from a clean tree (exit 0; 5,001,791 bytes in 366s at 13.3 KiB/s; 11 files modified, 20 stale
+files removed). `355bb7a` adds the live check **L18** (no application runtime change); the state commit follows.
+**LIVE: `npm run verify:live` = 204 PASS / 0 FAIL** — the first fully clean live run — with **`L10` PASS proving the
+deployed entry asset `assets/index-BwEPgj2q.js` is this session's local build** and **`L18` PASS proving the appointment
+on the deployed brand surface** (state `Defect`, window `within-window`, the rule's words rendered, no uncaught error);
+L15, L16 and L17 also PASS.
+**Status: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.**
+
