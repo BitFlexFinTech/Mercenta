@@ -44,6 +44,18 @@ import {
  * EARLIER version of the order). One owner; the writer asks it, never re-derives.
  */
 import { poRevisionState } from '@/lib/commerce/poRevisions';
+/**
+ * §BATCH 2d (`AV-008` / `AV-023`) — the acknowledgement ↔ invoice unit-price match
+ * rule has ONE owner (`invoicePriceMatch.ts`): the price ceiling this writer enforces,
+ * the price the invoice and channel submission must bill, and the divergence warning.
+ * The writer asks it; it never re-types the rule.
+ */
+import {
+  acknowledgedUnitPriceFor,
+  ackPriceCeilingRefusal,
+  ackPriceDivergence,
+  ackPriceDivergenceWarning,
+} from '@/lib/commerce/invoicePriceMatch';
 import {
   PO_ACK_AUTO_REJECT_REASON,
   PO_ACK_SYSTEM_ACTOR_ID,
@@ -953,6 +965,16 @@ function ackSubmissionRefusal(
       return `Line ${line.sku}: acknowledged quantity must be at least 1.`;
     }
   }
+
+  /**
+   * §BATCH 2d (`AV-008`, rule R2) — the channel documented that the acknowledged cost
+   * price cannot be higher than the price submitted on the purchase order. The ceiling
+   * is enforced HERE, in the same fail-closed pre-pass as every other per-line
+   * requirement, so no caller — brand, admin on-behalf or simulation — can submit a
+   * price the channel would refuse. The rule and its wording live in the ONE owner.
+   */
+  const priceCeiling = ackPriceCeilingRefusal(po, lineAcks);
+  if (priceCeiling) return priceCeiling;
   return null;
 }
 
@@ -1180,15 +1202,17 @@ export function acknowledgePurchaseOrder(
      */
     const qty = ack.acknowledgedQty ?? line.quantity;
 
-    // §Batch-3 — cost-price consistency check
-    const ackedPrice = ack.unitPrice ?? line.unitPrice;
-    if (Math.abs(ackedPrice - line.unitPrice) > 0.001) {
-      line.acknowledgedUnitPrice = ackedPrice;
-      warnings.push(
-        `Line ${line.sku}: acknowledged unit price (£${ackedPrice.toFixed(2)}) differs from PO unit price (£${line.unitPrice.toFixed(2)}). ` +
-        `Invoicing should use the acknowledged price — flag for admin review if this is unexpected.`
-      );
-    }
+    /**
+     * §Batch-3 / §BATCH 2d (`AV-008` / `AV-023`) — cost-price consistency, owned by
+     * `invoicePriceMatch.ts`. The ceiling (a price above the order) was already refused
+     * in the pre-pass; here the acknowledged price is RECORDED whenever the caller sent
+     * one — including when it equals the order price, so an amendment that returns the
+     * price to the order price CLEARS a stale divergence — and the owner's warning
+     * states the channel's match rule for any line that genuinely diverges.
+     */
+    if (ack.unitPrice !== undefined) line.acknowledgedUnitPrice = ack.unitPrice;
+    const priceDivergence = ackPriceDivergence(line);
+    if (priceDivergence) warnings.push(ackPriceDivergenceWarning(priceDivergence));
 
     // §Batch-3 — push to history instead of overwriting current state
     const historyEntry: import('@/types').AckHistoryEntry = {
@@ -1197,7 +1221,7 @@ export function acknowledgePurchaseOrder(
       acknowledgedQty: ack.ackStatus === 'rejected' ? 0 : qty,
       rejectionCode: ack.rejectionCode,
       scheduledShipDate: ack.scheduledShipDate,
-      unitPrice: ackedPrice,
+      unitPrice: ack.unitPrice ?? line.unitPrice,
       timeliness,
       amended: isAmendment,
       withinUpdateWindow: updateWindow?.open ?? false,
@@ -2886,6 +2910,12 @@ export async function readChannelReceivingSync(
  * from the PO's own lines at the quantities the invoice bills (`receivedQty` when
  * the receipt established them, otherwise the acknowledged quantity — the SAME
  * rule `commerceLifecycle` invoices by).
+ *
+ * §BATCH 2d (`AV-008` / `AV-023`) — the per-line UNIT PRICE is the price the
+ * acknowledgement recorded (`invoicePriceMatch.acknowledgedUnitPriceFor`), which is
+ * exactly the price `commerceLifecycle.issueCommerceInvoice` bills the invoice at, so
+ * the channel is told the figure the platform issued and its match rule is met. Before
+ * this both sent the ORDER's price, contradicting the acknowledgement.
  */
 export async function submitCommerceInvoiceToChannel(input: {
   invoiceId: string;
@@ -2916,7 +2946,7 @@ export async function submitCommerceInvoiceToChannel(input: {
     lines: (po?.lineItems ?? []).map((line) => ({
       vendorSku: line.sku,
       quantity: line.receivedQty ?? line.acknowledgedQty ?? line.quantity,
-      unitPrice: line.unitPrice,
+      unitPrice: acknowledgedUnitPriceFor(line),
     })),
   });
 }

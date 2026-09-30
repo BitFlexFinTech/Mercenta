@@ -55,6 +55,7 @@
     "validate:plain-english": "node scripts/validate-plain-english-enforcement.mjs",
     "validate:rules-application": "node scripts/validate-rules-application.mjs",
     "validate:po-revision": "node scripts/validate-po-revision-ingestion.mjs",
+    "validate:ack-invoice-price": "node scripts/validate-ack-invoice-price.mjs",
     "validate:po-ack-window": "node scripts/validate-po-acknowledgement-window.mjs",
     "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",
     "validate:po-ack-work": "node scripts/validate-po-acknowledgement-work.mjs",

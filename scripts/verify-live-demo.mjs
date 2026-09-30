@@ -850,7 +850,95 @@ function readRedLines() {
   }
   await revPage.close();
 
-  await browser.close();
+  /* ── L16 — BATCH 2d (AV-008 / AV-023): THE ACKNOWLEDGED PRICE, DRIVEN LIVE ──
+   * WHY THIS EXISTS. The acknowledgement ↔ invoice price rule changes what the BRAND
+   * is told when it acknowledges at a price that differs from the order's: a price
+   * ABOVE the order price is REFUSED with the channel's own rule, and a price BELOW it
+   * is accepted, warned, and then shown on the order as the price the invoice will
+   * bill. None of that can be proved from a public page — it exists only after a brand
+   * acknowledges. This drives it on the DEPLOYED site through the product's own
+   * controls and asserts what the brand is actually shown. Asserting the source instead
+   * would prove nothing about the deployed bundle.
+   */
+  console.log('\n--- L16 the acknowledged price rule, driven on the live site ---');
+  const ackPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const ackErrors = [];
+  ackPage.on('pageerror', (e) => ackErrors.push(String(e)));
+  try {
+    /** The shared host is slow and intermittently refuses connections — retry the entry. */
+    let ackEntryAttempt = 0;
+    let ackEntryError = null;
+    for (let attempt = 1; attempt <= 3 && ackEntryAttempt === 0; attempt++) {
+      try {
+        await gotoLive(ackPage, `${SITE}/`);
+        const login = ackPage.getByRole('button', { name: 'Partner Login' }).first();
+        await login.waitFor({ state: 'visible', timeout: 90000 });
+        await login.click({ timeout: 30000 });
+        await ackPage.waitForTimeout(2500);
+        const card = ackPage.locator('text=Astonish').first();
+        await card.waitFor({ state: 'visible', timeout: 90000 });
+        await card.click({ timeout: 30000 });
+        await ackPage.waitForTimeout(3000);
+        ackEntryAttempt = attempt;
+      } catch (err) {
+        ackEntryError = err;
+      }
+    }
+    if (ackEntryAttempt === 0) throw ackEntryError ?? new Error('entry failed');
+    check(`L16 the deployed site opened and the brand signed in (attempt ${ackEntryAttempt})`, true);
+
+    const ackNav = ackPage.locator('nav[aria-label="Primary"] >> text=Purchase Orders').first();
+    await ackNav.waitFor({ state: 'visible', timeout: 90000 });
+    await ackNav.click({ timeout: 30000 });
+    await ackPage.waitForTimeout(3000);
+
+    const ackButton = ackPage.getByRole('button', { name: 'Acknowledge', exact: true }).first();
+    await ackButton.waitFor({ state: 'visible', timeout: 90000 });
+    await ackButton.click({ timeout: 30000 });
+    const priceInput = ackPage.getByLabel(/Unit price/).first();
+    await priceInput.waitFor({ state: 'visible', timeout: 60000 });
+    const orderPrice = Number(await priceInput.inputValue());
+    check(`L16 the live acknowledgement panel opened on the order price (${orderPrice})`, orderPrice > 0);
+
+    /* The CEILING: a price ABOVE the order price is refused with the channel's rule. */
+    await priceInput.fill(String(orderPrice + 10));
+    await ackPage.getByRole('button', { name: 'Submit acknowledgment' }).click({ timeout: 30000 });
+    const ackStatus = ackPage.locator('div[role="status"]');
+    await ackStatus.waitFor({ timeout: 30000 });
+    const refusalText = (await ackStatus.textContent()) ?? '';
+    check(
+      'L16 the LIVE acknowledgement REFUSES a price above the order price, with the channel\'s rule',
+      /cannot be higher/.test(refusalText) && /AV-008/.test(refusalText)
+    );
+
+    /* A LOWER acknowledged price is ACCEPTED, WARNED, and shown on the order. */
+    await priceInput.fill(String(Math.max(0.01, orderPrice - 10)));
+    await ackPage.getByRole('button', { name: 'Submit acknowledgment' }).click({ timeout: 30000 });
+    await ackPage.waitForTimeout(2500);
+    const warnText = (await ackPage.locator('div[role="status"]').first().textContent()) ?? '';
+    check(
+      'L16 the LIVE submission is ACCEPTED and warns with the channel\'s own match rule',
+      /may delay payment/.test(warnText)
+    );
+    const ackNotice = ackPage.locator('[data-testid^="ack-price-notice-"]').first();
+    await ackNotice.waitFor({ timeout: 20000 });
+    const noticeText = (await ackNotice.textContent()) ?? '';
+    check(
+      'L16 the LIVE order states the acknowledged price is what the invoice bills',
+      /Acknowledged price differs from the order price/.test(noticeText) &&
+        /your invoice bills the acknowledged price/.test(noticeText)
+    );
+    check(
+      `L16 the driven acknowledged-price flow rendered with no uncaught error (errors: ${ackErrors.join(' | ') || 'none'})`,
+      ackErrors.length === 0
+    );
+  } catch (ackError) {
+    check(
+      `L16 the acknowledged-price rule could NOT be driven live (${String(ackError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await ackPage.close();
 
   await browser.close();
 

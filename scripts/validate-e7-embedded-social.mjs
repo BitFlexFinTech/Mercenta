@@ -646,6 +646,24 @@ try {
   ];
 
   /**
+   * §BATCH 2d — ACKNOWLEDGEMENT ↔ INVOICE PRICE MATCH (2026-09-29, register `AV-008` /
+   * `AV-023`). Fuller note in `validate-e6-brand-surfaces.mjs` §BATCH2D_ACK_INVOICE_PRICE_SCOPE.
+   */
+  const BATCH2D_ACK_INVOICE_PRICE_DECLARED = [
+    'src/lib/commerce/invoicePriceMatch.ts',
+    'src/data/api.ts',
+    'src/lib/commerce/commerceLifecycle.ts',
+    'src/components/admin/AdminPurchaseOrderDetail.tsx',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'e2e/ack-invoice-price.spec.ts',
+    'scripts/validate-ack-invoice-price.mjs',
+    'scripts/verify-live-demo.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+  /**
    * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
    * rule already existed and was still not followed; this phase makes it checkable.
    */
@@ -1645,6 +1663,7 @@ try {
      * still refused.
      */
     ...BATCH2C_PO_REVISION_DECLARED,
+    ...BATCH2D_ACK_INVOICE_PRICE_DECLARED,
     /**
      * §PLAIN ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the plain-English
      * rule already existed and was still not followed, so this phase makes it

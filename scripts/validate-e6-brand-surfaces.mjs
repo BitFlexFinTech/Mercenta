@@ -579,6 +579,35 @@ const BATCH2C_PO_REVISION_SCOPE = new Set([
 ]);
 
 /**
+ * §BATCH 2d — ACKNOWLEDGEMENT ↔ INVOICE PRICE MATCH (2026-09-29, register `AV-008` /
+ * `AV-023`). The phase gives the ack↔invoice unit-price rule ONE owner, enforces the
+ * documented ceiling (an acknowledged price may never exceed the order price), makes
+ * the invoice and the channel submission bill the ACKNOWLEDGED price, and surfaces the
+ * divergence warning. Declared set — every file the phase touches, named:
+ *   · `invoicePriceMatch.ts` — NEW: the ONE owner (rule text, derivation, ceiling,
+ *     divergence, warning). Nothing else re-derives the comparison.
+ *   · `src/data/api.ts` — the ceiling enforced in the acknowledgement pre-pass, the
+ *     acknowledged price RECORDED, and the channel submission's per-line price.
+ *   · `src/lib/commerce/commerceLifecycle.ts` — the invoice bills the acknowledged price.
+ *   · the two surfaces — the admin discrepancy box and the brand notice, both rendered
+ *     from the owner.
+ *   · the gate, the browser spec and the two scope guards themselves.
+ */
+const BATCH2D_ACK_INVOICE_PRICE_SCOPE = new Set([
+  'src/lib/commerce/invoicePriceMatch.ts',
+  'src/data/api.ts',
+  'src/lib/commerce/commerceLifecycle.ts',
+  'src/components/admin/AdminPurchaseOrderDetail.tsx',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'e2e/ack-invoice-price.spec.ts',
+  'scripts/validate-ack-invoice-price.mjs',
+  'scripts/verify-live-demo.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+/**
  * §PLAIN-ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the rule that asks for
  * plain English already existed and was still not followed, so the owner was offered a
  * decision in words they could not evaluate and the work stopped. This phase turns the
@@ -1743,6 +1772,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2c — the channel-revision phase's declared surface (see above). */
         BATCH2C_PO_REVISION_SCOPE.has(p) ||
         [...BATCH2C_PO_REVISION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2d — the acknowledgement↔invoice price-match phase's declared surface (see above). */
+        BATCH2D_ACK_INVOICE_PRICE_SCOPE.has(p) ||
+        [...BATCH2D_ACK_INVOICE_PRICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -1785,6 +1817,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2c — same declaration, second protected-path check (F5b). */
         BATCH2C_PO_REVISION_SCOPE.has(p) ||
         [...BATCH2C_PO_REVISION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2d — same declaration, second protected-path check (F5b). */
+        BATCH2D_ACK_INVOICE_PRICE_SCOPE.has(p) ||
+        [...BATCH2D_ACK_INVOICE_PRICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — same declaration, second protected-path check (F5b). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -2054,6 +2089,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2c — the channel-revision phase's declared surface (see above). */
           BATCH2C_PO_REVISION_SCOPE.has(p) ||
           [...BATCH2C_PO_REVISION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2d — the acknowledgement↔invoice price-match phase's declared surface (see above). */
+          BATCH2D_ACK_INVOICE_PRICE_SCOPE.has(p) ||
+          [...BATCH2D_ACK_INVOICE_PRICE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
           PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
           [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

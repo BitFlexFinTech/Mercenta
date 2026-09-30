@@ -29,6 +29,17 @@ import {
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
 /**
+ * §BATCH 2d (`AV-008` / `AV-023`) — the brand is told, on the order itself, that the
+ * invoice bills the price it acknowledged and that a price differing from the order
+ * price is the divergence the channel's payment system compares. The divergence and
+ * its wording come from the rule's ONE owner (`invoicePriceMatch.ts`).
+ */
+import {
+  ACK_INVOICE_PRICE_RULE_TEXT,
+  ACK_PRICE_DISCREPANCY_TITLE,
+  ackPriceDivergences,
+} from '@/lib/commerce/invoicePriceMatch';
+/**
  * §BATCH 2b (`AV-006`) — the channel's 48-hour UPDATE rule is rendered from its ONE
  * owner; the surface never re-types the window.
  *
@@ -776,7 +787,9 @@ export function BrandPurchaseOrders() {
                   brand must know which version it is working from before it decides
                   anything. It renders nothing for an unrevised order. */}
               <ChannelRevisionNotice po={po} />
-
+              {/* §BATCH 2d (`AV-008` / `AV-023`) — and the acknowledged-price notice,
+                  so the brand sees the price its invoice will bill before anything else. */}
+              <AckPriceNotice po={po} />
               {/* Inline brand communication (shared layer, same thread as Messages Hub) */}
               {contactingPO?.id === po.id && (
                 <div className="mt-3 pt-3 border-t border-white/[0.05]">
@@ -1411,6 +1424,38 @@ function ChannelRevisionNotice({ po }: { po: PurchaseOrder }) {
   );
 }
 
+/**
+ * §BATCH 2d (`AV-008` / `AV-023`) — THE BRAND-FACING ACKNOWLEDGED-PRICE NOTICE.
+ *
+ * Shown on the order itself, and only when the price the brand acknowledged differs
+ * from the order price. It states (a) the order price and the acknowledged price, (b)
+ * that the invoice bills the acknowledged price — so the acknowledgement and the
+ * invoice match, and (c) the channel's own documented rule that its payment system
+ * compares the two and may delay payment when they differ. Derived entirely from the
+ * rule's ONE owner; renders nothing for an order with no divergence.
+ */
+function AckPriceNotice({ po }: { po: PurchaseOrder }) {
+  const divergences = ackPriceDivergences(po);
+  if (divergences.length === 0) return null;
+  return (
+    <div
+      className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3"
+      data-testid={`ack-price-notice-${po.poNumber}`}
+    >
+      <p className="text-ds-label text-amber-200">{ACK_PRICE_DISCREPANCY_TITLE}</p>
+      <ul className="mt-1.5 space-y-0.5">
+        {divergences.map((d) => (
+          <li key={d.sku} className="text-ds-micro text-amber-100/80">
+            {d.sku}: order unit price £{d.poUnitPrice.toFixed(2)} → acknowledged £
+            {d.acknowledgedUnitPrice.toFixed(2)} — your invoice bills the acknowledged price
+          </li>
+        ))}
+      </ul>
+      <p className="mt-1.5 text-ds-micro text-amber-200/70">{ACK_INVOICE_PRICE_RULE_TEXT}</p>
+    </div>
+  );
+}
+
 /* ── RECORD PREVIEW BODY ────────────────────────────────────────────────────
  * Only the sections a brand-owned purchase order genuinely supports. No
  * cross-tenant data and no admin-only fields are exposed here.
@@ -1475,6 +1520,10 @@ function BrandPoPreviewBody({
       {/* §BATCH 2c (`AV-024`) — the preview states the same channel revision the row
           does, so the record the brand opens cannot omit it. */}
       <ChannelRevisionNotice po={po} />
+
+      {/* §BATCH 2d (`AV-008` / `AV-023`) — the preview states the acknowledged-price
+          divergence too, so the record the brand opens cannot omit it. */}
+      <AckPriceNotice po={po} />
 
       <RecordFieldList
         fields={[

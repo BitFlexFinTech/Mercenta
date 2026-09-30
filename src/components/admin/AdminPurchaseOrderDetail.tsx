@@ -51,6 +51,17 @@ import { PO_REJECTION_CODES } from '@/types';
 import { AlertTriangle, CheckCircle2, X, Truck, Gavel, History } from 'lucide-react';
 import { carrierOptionsForLane, selectCarrierForShipment } from '@/lib/shipping/carrierRouting';
 import { backOrderAvailabilityLabel, canBackOrderLine } from '@/lib/commerce/backorderGate';
+/**
+ * §BATCH 2d (`AV-008` / `AV-023`) — the acknowledgement ↔ invoice price DIVERGENCE and
+ * its warning are derived by the rule's ONE owner (`invoicePriceMatch.ts`); this surface
+ * renders the owner's own wording and never re-derives the comparison.
+ */
+import {
+  ACK_INVOICE_PRICE_RULE_TEXT,
+  ACK_PRICE_DISCREPANCY_TITLE,
+  ackPriceDivergence,
+  ackPriceDivergences,
+} from '@/lib/commerce/invoicePriceMatch';
 
 /**
  * §Canonical model §11 — the on-behalf ASN offers only Mercenta carrier
@@ -666,16 +677,21 @@ function beginOnBehalfAsn() {
             </Card>
           )}
 
-          {po.lineItems.some((li) => li.acknowledgedUnitPrice && Math.abs(li.acknowledgedUnitPrice - li.unitPrice) > 0.001) && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+          {ackPriceDivergences(po).length > 0 && (
+            <div
+              className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3"
+              data-testid={`ack-price-discrepancy-${po.poNumber}`}
+            >
               <p className="text-ds-label text-amber-300 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5" /> Cost-price discrepancies detected
+                <AlertTriangle className="w-3.5 h-3.5" /> {ACK_PRICE_DISCREPANCY_TITLE}
               </p>
-              {po.lineItems.filter((li) => li.acknowledgedUnitPrice && Math.abs(li.acknowledgedUnitPrice - li.unitPrice) > 0.001).map((li) => (
-                <p key={li.sku} className="text-ds-micro text-amber-400/70 mt-1">
-                  {li.sku}: PO unit price {String.fromCharCode(163)}{li.unitPrice.toFixed(2)} to acknowledged {String.fromCharCode(163)}{li.acknowledgedUnitPrice!.toFixed(2)}
+              {ackPriceDivergences(po).map((d) => (
+                <p key={d.sku} className="text-ds-micro text-amber-400/70 mt-1">
+                  {d.sku}: order unit price {String.fromCharCode(163)}{d.poUnitPrice.toFixed(2)} → acknowledged{' '}
+                  {String.fromCharCode(163)}{d.acknowledgedUnitPrice.toFixed(2)} — the invoice bills the acknowledged price
                 </p>
               ))}
+              <p className="text-ds-micro text-amber-300/70 mt-1">{ACK_INVOICE_PRICE_RULE_TEXT}</p>
             </div>
           )}
 
@@ -839,6 +855,9 @@ function AdminPoLineItemRow({
     );
   };
 
+  /** §BATCH 2d — the owner-derived divergence between the order price and the acknowledged price. */
+  const priceDivergence = ackPriceDivergence(line);
+
   return (<tr className="align-top">
     <td className="px-3 py-2 font-mono text-xs text-zinc-400">{line.sku}</td>
     <td className="px-3 py-2 text-xs text-zinc-300"><span className="font-medium">{line.productName}</span></td>
@@ -854,8 +873,10 @@ function AdminPoLineItemRow({
       ) : (
         String.fromCharCode(163) + line.unitPrice.toFixed(2)
       )}
-      {line.acknowledgedUnitPrice && Math.abs(line.acknowledgedUnitPrice - line.unitPrice) > 0.001 && (
-        <span className="text-ds-micro text-amber-400 block">was {String.fromCharCode(163)}{line.acknowledgedUnitPrice.toFixed(2)}</span>
+      {priceDivergence && (
+        <span className="text-ds-micro text-amber-400 block">
+          acknowledged {String.fromCharCode(163)}{priceDivergence.acknowledgedUnitPrice.toFixed(2)}
+        </span>
       )}
     </td>
     <td className="px-3 py-2 text-center">

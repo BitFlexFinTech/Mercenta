@@ -58,6 +58,14 @@ import * as store from '@/data/demoStore';
 import { findOrCreateTicketForBrand } from '@/lib/helpdesk/ticketStore';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
 import { getChannelInstructionForPO, markChannelInstructionActioned } from './channelInstructions';
+/**
+ * §BATCH 2d (`AV-008` / `AV-023`) — the invoice bills the price the acknowledgement
+ * recorded, from the rule's ONE owner (`invoicePriceMatch.ts`). Before this the writer
+ * used the ORDER's `unitPrice`, so the invoice could disagree with the acknowledgement
+ * the channel had accepted — the exact divergence the channel's payment system compares
+ * (`AV-023`) and that the acknowledgement's own warning told the platform to avoid.
+ */
+import { acknowledgedUnitPriceFor } from './invoicePriceMatch';
 /** §P13 / S7 — the acknowledgement obligation family has ONE owner (the config). */
 import { PO_ACK_STATUSES_WITH_OBLIGATION } from '@/config/purchaseOrders';
 import { beginProxyProcessing } from './proxyProcessor';
@@ -845,9 +853,16 @@ export function issueCommerceInvoice(
     .filter((l) => l.ackStatus !== 'rejected')
     .map((l) => {
       const qty = l.receivedQty ?? l.acknowledgedQty ?? l.quantity;
+      /**
+       * §BATCH 2d (`AV-008` / `AV-023`) — the invoiced unit price is the price the
+       * acknowledgement RECORDED (`acknowledgedUnitPriceFor`), so the invoice and the
+       * acknowledgement MATCH by construction — the channel's documented rule. The
+       * order price is used only when no acknowledgement price was recorded.
+       */
+      const unitPrice = acknowledgedUnitPriceFor(l);
       return {
-        description: `${l.sku} — ${qty} × £${l.unitPrice.toFixed(2)} received on ${po.poNumber}`,
-        amountGbp: round2(qty * l.unitPrice),
+        description: `${l.sku} — ${qty} × £${unitPrice.toFixed(2)} received on ${po.poNumber}`,
+        amountGbp: round2(qty * unitPrice),
       };
     });
   const lines = [
