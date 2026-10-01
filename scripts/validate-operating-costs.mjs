@@ -91,23 +91,37 @@ try {
       policy.isModelAllowed('openai/gpt-4o') === false);
 
   /* ── the usage log + cost protection ─────────────────────────────────── */
+  /**
+   * §REPOINTED (2026-10-01) — ONE CLOCK FOR THE WHOLE SCENARIO (old contract, for the
+   * record): this block used to record its entries with the REAL clock while the summary
+   * further down was taken with a PINNED instant (`2026-09-15T10:00:00.000Z`).
+   * `aiUsageSummary(now)` filters the log by `now`'s month, so the pinned summary found
+   * NONE of the real-clock entries: the assertion "the summary counts calls, cache hits,
+   * refusals and an estimated projection" therefore passed only while the machine's date
+   * happened to sit inside that one month, and failed on 2026-10-01 — with no product
+   * change — because the month rolled over. A gate that depends on the calendar is a
+   * defect, not a gate. Every writer and the summary now take THIS one instant, so the
+   * check is about the LOG; the ceiling is still driven by real values (£3 × 12 > the
+   * declared monthly ceiling), so the assertion can still genuinely fail.
+   */
+  const now = new Date();
   log.resetAiUsageLog();
   test('the log starts empty and the protection state is normal',
-    log.aiUsageEntries().length === 0 && log.costProtectionState().state === 'normal');
-  const cached = log.authoriseAiCall({ taskId: 'discovery_fit_scoring', cachedResultAvailable: true });
+    log.aiUsageEntries().length === 0 && log.costProtectionState(now).state === 'normal');
+  const cached = log.authoriseAiCall({ taskId: 'discovery_fit_scoring', cachedResultAvailable: true, now });
   test('a cached result is reused and costs nothing',
     cached.status === 'cache_hit' && cached.fallback === 'cached');
-  test('the cache hit is recorded and adds no cost', log.spendThisMonth() === 0);
+  test('the cache hit is recorded and adds no cost', log.spendThisMonth(now) === 0);
   // FREE-only: discovery_fit_scoring is not free-sufficient → refused, zero cost.
-  const refusedAi = log.authoriseAiCall({ taskId: 'discovery_fit_scoring', entity: 'Astonish Traders', tokens: 300 });
+  const refusedAi = log.authoriseAiCall({ taskId: 'discovery_fit_scoring', entity: 'Astonish Traders', tokens: 300, now });
   test('a non-free AI task is REFUSED under the FREE-only policy and costs nothing',
-    refusedAi.allowed === false && refusedAi.status === 'refused_budget' && log.spendThisMonth() === 0);
+    refusedAi.allowed === false && refusedAi.status === 'refused_budget' && log.spendThisMonth(now) === 0);
   const entry = log.aiUsageEntries()[log.aiUsageEntries().length - 1];
   test('the refused entry records the task and a zero-cost refusal (no paid model)',
     entry.taskId === 'discovery_fit_scoring' && entry.status === 'refused_budget' &&
       entry.estimatedCostGbp === 0 && entry.tier !== 'paid_max');
   test('a deterministic task cannot spend (fallback is deterministic)',
-    log.authoriseAiCall({ taskId: 'estimated_sales_narrative' }).fallback === 'deterministic');
+    log.authoriseAiCall({ taskId: 'estimated_sales_narrative', now }).fallback === 'deterministic');
   // Free tier: a task an approved FREE model CAN handle is authorised at zero cost.
   const freeDecision = policy.selectRuntimeModel({
     id: 'free_eligible', description: 'free task', deterministic: false, cacheable: true,
@@ -117,8 +131,11 @@ try {
     freeDecision.tier === 'free_model' && freeDecision.model === policy.FREE_RUNTIME_MODELS[0] &&
       freeDecision.estimatedCostGbp === 0 && freeDecision.refused === false);
 
-  // Drive the monthly ceiling over the limit with recorded spend.
-  const now = new Date('2026-09-15T10:00:00.000Z');
+  // Drive the monthly ceiling over the limit with recorded spend — ON THE SCENARIO'S
+  // OWN CLOCK (`now`, declared above), so these entries sit in the same month the
+  // summary below reads. The old pinned `2026-09-15T10:00:00.000Z` is REMOVED: it made
+  // the summary's month filter disagree with the entries' real month (see the
+  // §REPOINTED note above).
   for (let i = 0; i < 12; i++) {
     log.aiUsageEntries().push({
       id: `synthetic-${i}`, at: now.toISOString(), taskId: 'x', model: null, tier: 'paid_max',

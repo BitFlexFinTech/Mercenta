@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-09-30",
+    "last_updated": "2026-10-01",
     "status_enum": [
       "not_started",
       "built",
@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 516,
+    "total_entries": 517,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -5751,6 +5751,15 @@
       "status": "built_and_tested",
       "evidence": "src/lib/compliance.ts (three universal documents; OPTIONAL_MERCENTA_CONTROLS declared; UK/EU attribution); src/data/demoData.ts (three base types; early_submission scenario; DEMO_COMPLIANCE_BASELINE 75/21); src/components/admin/AdminDashboard.tsx (duplicate deleted; canonical gate + useBrandAgreements); src/components/brand/BrandDashboard.tsx; src/components/brand/ComplianceHub.tsx; src/context/GlobalStateContext.tsx; e2e/compliance-gate.spec.ts + status-semantics + catalog-product-management (repointed); scripts/validate-document-verification.mjs (repointed); scripts/verify-live-demo.mjs L17; scripts/validate-compliance-attribution.mjs (NEW gate, 18 assertions, EXECUTES the real modules); commits 1de688e (deployed) + 835c6bc. LOCAL: npm run validate:all 127 PASS / 0 FAIL; npm run typecheck 0; npm run lint 0; npm run build ✓; npm run validate:compliance-attribution 18 PASS / 0 FAIL with TWO MUTATION PROOFS (re-adding the document to the required set → 6 failures; restoring the 'Amazon UK requires' claim → 1 failure), the owner restored byte-identical (sha256 6523899d00514fd2685adc4bd1b67de37e6c1dc5bd60fdb49a22069adbc35); browser specs 15 passed. LIVE: deployed via scripts/deploy-demo.sh (exit 0) and npm run verify:live = 198 PASS / 0 FAIL (exit 0), the first fully green live run, with L17 6/6 PASS.",
       "last_verified": "2026-09-29",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p0-whole-loop-trace",
+      "description": "P0 OF THE CLEAN-UP/VERIFICATION PLAN — THE WHOLE LOOP IS PROVED END TO END AND PRINTED, AND THE OWNER’S FOUR QUESTIONS ARE ANSWERED WITH OUTPUT. A new gate drives ONE seeded channel order all the way: arrive (channel seam, mock) → route by vendor SKU (derived, never supplied by a caller) → brand decides → MERCENTA answers the channel → automatic ASN + channel confirmation + document pack → receipt → AUTOMATIC invoice → payment → reconciliation → human-approved payout → settlement, printing every step’s real values (who acted, which writer, what was recorded, what the channel returned and in which mode). It also proves the fail-closed refusal of a PO whose line matches no catalogue product, the replay-idempotency of both the read and the channel action, and the double-payout guard, and it answers question 4 FROM THE SOURCE: consignment documents can be OPENED and PRINTED (the carrier label/waybill through the carrier’s own dialogue, which calls the browser print dialog) but there is NO file-download control anywhere in logistics — recorded as P0-fix, BLOCKED on the owner’s decision D3, and never to be described as a download until it exists. NO PRODUCT CODE WAS CHANGED by P0; its only code change is a GATE fix (recorded in the evidence).",
+      "source": "docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md §3 P0 (the recorded next task in PROJECT_STATUS.md → CURRENT RESUME STATE). Declared in scripts/validate-e6-brand-surfaces.mjs §P0_LOOP_TRACE_SCOPE and scripts/validate-e7-embedded-social.mjs §P0_LOOP_TRACE_DECLARED (both scope guards included in their own declared sets).",
+      "status": "built_and_tested",
+      "evidence": "scripts/validate-commerce-loop.mjs (NEW gate, 30 checks, EXECUTES the shipped modules via the project’s own esbuild with fetch SABOTAGED), registered as npm run validate:commerce-loop and declared in BOTH scope guards + package.json. LOCAL: validate:all 133 PASS / 0 FAIL (exit 0); typecheck 0; lint 0 errors (1 pre-existing warning); build ✓. MUTATION-PROVED ×2, each restored byte-identical: removing the fail-closed routing refusal → 3 failures (channelPurchaseOrderIngestion.ts sha256 1b4264a7646cb68e640e1230afd2675accc4975a38a967253aff4d4f18261f26); removing the automatic ASN filing → 6 failures (proxyProcessor.ts sha256 7d138cf25a39d52251c445247be13368f341b4222c003e0fcf00e683853d73b7). Browser leg: e2e/channel-po-ingestion.spec.ts + e2e/po-ack-duties.spec.ts = 9 passed. ALSO FIXED AT SOURCE (a GATE defect): scripts/validate-operating-costs.mjs recorded its usage entries on the REAL clock but summarised them at a PINNED instant (2026-09-15T10:00:00.000Z), so it passed only while the machine’s date sat inside that month and FAILED on 2026-10-01 with no product change; it now takes ONE clock. Proof: 44/44 PASS, and the mismatched-clock mutation fails it (2 failures); restored byte-identical (sha256 f9d25b5b2e7b5aa42ea67993fe9b8a5619bed895680965e612b5bd74a1a2e1fe).",
+      "last_verified": "2026-10-01",
       "superseded_by": null
     }
   ]

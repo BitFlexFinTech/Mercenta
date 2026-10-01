@@ -855,6 +855,35 @@ const PLAIN_ENGLISH_ENFORCEMENT_SCOPE = new Set([
 ]);
 
 
+/**
+ * §P0 — THE WHOLE-LOOP TRACE (2026-10-01, `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` P0).
+ *
+ * P0 is a PROOF phase, not a feature phase: it drives ONE seeded order through
+ * arrive → route → decide → channel ack → ASN → confirmation → invoice → payout and
+ * PRINTS every step, and answers the owner's fourth question FROM THE SOURCE
+ * (consignment documents are OPENABLE and PRINTABLE; there is NO file-download
+ * control, so any expectation of one is a gap flagged for the owner's decision D3).
+ *
+ * Its one product-code change is in a GATE: `validate-operating-costs.mjs` pinned its
+ * summary to a fixed instant while recording its entries on the real clock, so it
+ * passed only while the machine's date sat inside that one month and failed on
+ * 2026-10-01 with no product change. A check that depends on the calendar is a defect,
+ * not a gate; it now takes ONE clock. Declared set below.
+ */
+const P0_LOOP_TRACE_SCOPE = new Set([
+  'scripts/validate-commerce-loop.mjs',            /* NEW — the P0 trace gate */
+  'scripts/validate-operating-costs.mjs',          /* the date-dependent check, fixed at source */
+  'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+  'PROJECT_STATUS.md',
+  'HANDOFF.md',
+  'STATUS_CHECK.md',
+  'requirements-registry.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+
 /* ── the modules under test ───────────────────────────────────────────────── */
 
 const PROTECTED_PREFIXES = [
@@ -2018,6 +2047,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
 
+        /** §P0 — the whole-loop trace phase's declared surface (see above). */
+        P0_LOOP_TRACE_SCOPE.has(p) ||
+        [...P0_LOOP_TRACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
@@ -2081,6 +2114,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
 
+        /** §P0 — same declaration, second protected-path check (F5b). */
+        P0_LOOP_TRACE_SCOPE.has(p) ||
+        [...P0_LOOP_TRACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2378,6 +2414,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
           [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
 
+          /** §P0 — the whole-loop trace phase's declared surface (see above). */
+          P0_LOOP_TRACE_SCOPE.has(p) ||
+          [...P0_LOOP_TRACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

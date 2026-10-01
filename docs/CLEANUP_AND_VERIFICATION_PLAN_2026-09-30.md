@@ -1,7 +1,9 @@
 # CLEAN-UP, VERIFICATION AND "ONE SWITCH" PLAN — 2026-09-30
 
-**Status:** PLAN ONLY — **no product code has been changed.** Every finding below was read from the code in
-this session, with the file named so it can be checked.
+**Status:** **P0 IS DONE (2026-10-01)** — the whole loop is now traced and printed by a real gate
+(`npm run validate:commerce-loop`, 30/30) and the owner's four questions are answered with output. **P1–P6 are still
+PLAN ONLY: no other product code has been changed.** Every finding below was read from the code, with the file named so
+it can be checked.
 
 **Owner:** Founder/Super Admin. **Agreed by:** not yet — the owner asked for the plan *before* any change, so
 each phase waits for a go-ahead where a decision is flagged.
@@ -115,7 +117,7 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 
 | P# | Goal | Acceptance gate (a real command / observable) | Status |
 |---|---|---|---|
-| **P0** | PROVE THE LOOP END TO END — one order, every step, with output | a new validator that DRIVES one seeded order through arrive → route → decide → channel ack → ASN → confirmation → invoice → payout and PRINTS each step; plus a browser run of the same order on the brand screen | NOT STARTED |
+| **P0** | PROVE THE LOOP END TO END — one order, every step, with output | a new validator that DRIVES one seeded order through arrive → route → decide → channel ack → ASN → confirmation → invoice → payout and PRINTS each step; plus a browser run of the same order on the brand screen | **DONE (2026-10-01)** — `npm run validate:commerce-loop` **30/30 PASS** (mutation-proved ×2: the fail-closed routing refusal removed ⇒ 3 failures; the automatic ASN filing removed ⇒ 6 failures; both restored byte-identical). Browser leg: `e2e/channel-po-ingestion.spec.ts` + `e2e/po-ack-duties.spec.ts` **9 passed**. One finding recorded for **P0-fix** (see below). |
 | **P1** | ONE SWITCH (the environment owner) | `npm run validate:environment` (new) proves: demo needs no credential; live never falls back to seed; an unconfigured provider is UNAVAILABLE, never simulated; every seam reads the owner, not its own flag | NOT STARTED |
 | **P2** | ONE DEMO BRAND | `validate:demo-completeness` + browser suites green after the seed and the login list are reduced and the checks REPOINTED (never weakened); tenant isolation still proves one brand cannot see another's data | NOT STARTED |
 | **P3** | EVERY BUTTON IS WIRED (UI audit) | `npm run validate:ui-wiring` (new) walks every button/control in `src/components/**` and fails on: no handler, a handler that only changes local state, a control whose label promises an action it does not perform | NOT STARTED |
@@ -133,7 +135,58 @@ Every step must print its real outcome: who acted, what writer ran, what was rec
 3. on acceptance, is the ASN created automatically and the confirmation sent? (show the consignment id);
 4. can the brand DOWNLOAD a label/document for that consignment? (this is the unverified item from §1.3 — if it
    cannot, P0 records it as a defect for P0-fix, not as a plan).
-**Gate:** the validator output plus a browser screenshot/spec run. **Status: NOT STARTED.**
+**Gate:** the validator output plus a browser screenshot/spec run. **Status: DONE (2026-10-01).**
+
+#### P0 — THE EXECUTED TRACE, AND THE FOUR ANSWERS
+
+`npm run validate:commerce-loop` (`scripts/validate-commerce-loop.mjs`, NEW) bundles the SHIPPED modules with the
+project's own esbuild through its own `@` alias, SABOTAGES `fetch` so any live call fails the run, drives ONE seeded
+order the whole way and PRINTS every step. Measured output on 2026-10-01 (brand-astonish, `MOCK-PO-8841`):
+
+| Step | Who acted | What was recorded (real values) |
+|---|---|---|
+| arrive | the channel seam (mode `mock` — no live call) | 4 orders read: 3 routed, 1 refused |
+| route by SKU | `routeChannelPurchaseOrder` (derives the brand) | each order landed with the brand owning its SKUs |
+| refuse | same owner, fail-closed | `MOCK-PO-8844` refused: SKU `MOCK-UNKNOWN-0001` matches no product — whole order held |
+| decide | brand → `acknowledgePurchaseOrder` | ACCEPTED, timeliness `on_time`, PO → `accepted`, instruction `instr-ack-po-channel-MOCK-PO-8841` |
+| channel ack | MERCENTA (`mercenta-proxy-automation`) | `MOCK-ACK-00001`, status `accepted`, mode `mock` |
+| routing request | MERCENTA | `MOCK-SHP-REQ-00001`, carrier `palletline`, mode `mock` |
+| ASN + confirmation | MERCENTA, AUTOMATIC on acceptance | consignment `shipment-po-channel-MOCK-PO-8841`; channel confirmation `MOCK-ASN-00001` (mock); 1 consignment, a replay adds none |
+| document pack | MERCENTA, automatic | 5 applicable, 4 ready |
+| receive → invoice | `staff-001` → the S9 automation (`mercenta-system:receipt-invoice`) | PO `delivered`, no shortfalls; invoice `SIM-INV-MOCK-PO-8841` £3,852.80, terms 30d, due 2026-10-31, status `issued` |
+| payment → reconcile | `staff-001` | £3,852.80 `simulated_bank_transfer` (simulated); reconciliation `reconciled`, net to brand £3,027.20, accounting `simulation` |
+| payout | `staff-001` (human approval) | SETTLED £3,027.20 via `mock_tr_payoneer_000001` (Payoneer, mode `mock`); a SECOND attempt REFUSED — one payout row |
+| audit | the canonical log | every step attributed: `asn_filed`, `channel_instruction_actioned`, `commerce_invoice_issued`, `commerce_payment_recorded`, `payment_reconciled`, `commission_payout_settled` |
+
+**The answers, with output:**
+1. **Yes** — routing is derived from the PO's own lines, so a mis-routed order is impossible by construction; the
+   deliberately unmatched SKU is refused WHOLE (brandId `null`, reason printed).
+2. **Yes** — the brand's decision becomes an INSTRUCTION, and MERCENTA (never the brand) performs the channel action;
+   the acknowledgement id/status/mode is printed above.
+3. **Yes** — the ASN is filed automatically on acceptance, the consignment is created, and the CHANNEL's own
+   confirmation id is recorded (never conflated with a local filing).
+4. **NO FILE DOWNLOAD EXISTS.** The brand can OPEN every applicable document and PRINT the carrier label/waybill
+   through the carrier's own dialogue (which calls the browser print dialog — "Save as PDF" is the browser's). There
+   is no download control anywhere in the logistics surface (asserted against the source, with the negative pinned).
+
+#### P0-fix — THE RECORDED FINDING (BLOCKED on the owner's decision D3)
+
+Programme decision 6 states the Logistics Hub is *"where brands download shipping labels + ALL PO documents"*. What is
+implemented is OPEN + PRINT, not DOWNLOAD. This is recorded here as **P0-fix**, deliberately NOT fixed inside P0
+(P0's scope is "change nothing"), and it is **BLOCKED** on **D3** — the owner's decision on whether a brand should
+download a CARRIER label (DHL/Palletline) per consignment or only the document pack. **Exact next action:** take D3,
+then add the download control for the chosen artefacts (the platform already has one file-export pattern,
+`src/components/brand/BrandContractView.tsx`) and gate it with a browser assertion. **Until then the capability must
+not be described as a download.**
+
+#### P0 also fixed a defect at its source (a gate, not a feature)
+
+`scripts/validate-operating-costs.mjs` recorded its usage entries on the REAL clock but summarised them on a PINNED
+instant (`2026-09-15T10:00:00.000Z`), so *"the summary counts calls, cache hits, refusals and an estimated
+projection"* passed only while the machine's date sat inside that one month and FAILED on 2026-10-01 with no product
+change. A check that depends on the calendar is a defect, not a gate; it now takes ONE clock. Proof: 44/44 PASS, and
+the mutation that reintroduces a MISMATCHED clock fails it (2 failures); restored byte-identical.
+
 
 ### P1 — THE ONE SWITCH
 **In scope:** the environment owner (`src/config/environment.ts`), every seam repointed to it, the data layer's
@@ -194,7 +247,7 @@ verify each change LIVE → record the three-way status in `PROJECT_STATUS.md` �
 |---|---|---|---|---|
 | **D1** | One demo brand: which brand, and should the extra one-click demo logins be removed or kept? | P2 | one clean test brand; less noise (cost: one phase) | testing stays noisy; brand-to-brand differences keep hiding bugs |
 | **D2** | Which feature areas are OUT of scope for `Amazon ↔ Mercenta ↔ Brand`? | P5 | a genuinely simpler platform (cost: deletes working code) | platform stays larger than the business needs; no breakage |
-| **D3** | Should the brand download a CARRIER label (DHL/Palletline) per consignment, or only the document pack? | P0→P1 | P0 knows what "labels" must mean (cost: none) | P0 reports it as unverified |
+| **D3** | Should the brand download a CARRIER label (DHL/Palletline) per consignment, or only the document pack? | P0-fix→P1 | P0 knows what "labels" must mean (cost: none) | the platform can open/print a label but cannot DOWNLOAD one (P0 measured this on 2026-10-01) |
 | **D4** | Live Amazon credentials: prepare the go-live steps now, or wait for the keys? | P6/live leg | the switch is provable end to end | the live leg stays blocked |
 
 ## 6. DEFINITION OF DONE FOR THIS PLAN

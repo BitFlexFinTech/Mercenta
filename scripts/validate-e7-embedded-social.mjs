@@ -881,6 +881,26 @@ try {
   ];
 
   /**
+   * §P0 — THE WHOLE-LOOP TRACE (2026-10-01, `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md`
+   * P0). Fuller note in `validate-e6-brand-surfaces.mjs` §P0_LOOP_TRACE_SCOPE. Same mechanism
+   * as every phase above: a changed source/test file outside EVERY declared set is still
+   * refused, and no protected path is touched.
+   */
+  const P0_LOOP_TRACE_DECLARED = [
+    'scripts/validate-commerce-loop.mjs',
+    'scripts/validate-operating-costs.mjs',
+    'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+    'requirements-registry.json',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+
+  /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
    *
    * Same declaration mechanism as SPRINT_WORK_LAYER_DECLARED above: the files
@@ -1612,7 +1632,13 @@ try {
            * their declared surface is accepted here exactly as every other phase's is.
            */
           !OWNER_REPORTED_DEFECTS_DECLARED.includes(f) &&
-          !OWNER_REPORTED_DEFECTS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !OWNER_REPORTED_DEFECTS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §P0 — the whole-loop trace phase touches no protected path; its declared
+           * surface is accepted here exactly as every other phase's is.
+           */
+          !P0_LOOP_TRACE_DECLARED.includes(f) &&
+          !P0_LOOP_TRACE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1842,6 +1868,10 @@ try {
      * §PUBLIC MESSAGING — the public-surfaces batch's declared surface (see above).
      */
     ...PUBLIC_MESSAGING_DECLARED,
+    /**
+     * §P0 — the whole-loop trace phase's declared surface (see above).
+     */
+    ...P0_LOOP_TRACE_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
