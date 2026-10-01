@@ -97,8 +97,17 @@ test(
   'the inline §REPOINTED record must survive'
 );
 test(
-  'the admin detail’s ACCEPTANCE control is offered by the owner’s `inQueue`',
-  /\{ackWindow\.inQueue && !onBehalfAck && \(/.test(DETAIL)
+  'the admin detail’s ACCEPTANCE control is offered by the owner’s `inQueue` AND the authority owner',
+  /**
+   * §REPOINTED 2026-09-30 (owner-reported defect, STRENGTHENED — never weakened). The old
+   * contract recorded here: `/{ackWindow\.inQueue && !onBehalfAck && \(/`. The owner reported
+   * that a Super Admin could acknowledge any order for a brand at any time with nothing
+   * recording the brand's agreement, so the control is now offered ONLY where the authority
+   * owner permits it as well.
+   */
+  /\{ackWindow\.inQueue && !onBehalfAck && onBehalfAuthority\.permitted === 'any_decision' && \(/.test(
+    DETAIL
+  ) && /poOnBehalfAuthority\(/.test(DETAIL)
 );
 test(
   'the admin detail no longer hand-rolls the actionability predicate (old predicate absent as code)',

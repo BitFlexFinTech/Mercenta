@@ -50,6 +50,15 @@ import {
  */
 import { poAcknowledgementCompleteness } from '@/lib/commerce/poAcknowledgementCompleteness';
 /**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — WHO MAY DECIDE A BRAND'S ORDER has
+ * ONE owner (`poOnBehalfAuthority.ts`): it derives whether the brand authorised Mercenta to
+ * decide an order, what the closing window permits, and the refusal this writer enforces.
+ */
+import {
+  onBehalfDecisionRefusal,
+  poOnBehalfAuthority,
+} from '@/lib/commerce/poOnBehalfAuthority';
+/**
  * §BATCH 2c (`AV-024`) — the DERIVED revision position of a purchase order (whether
  * the channel has cancelled it, and whether the brand's acknowledgement answers an
  * EARLIER version of the order). One owner; the writer asks it, never re-derives.
@@ -71,6 +80,7 @@ import {
   PO_ACK_AUTO_REJECT_REASON,
   PO_ACK_SYSTEM_ACTOR_ID,
   PO_ACK_UPDATE_WINDOW_HOURS,
+  PO_ON_BEHALF_AUTHORITY_RULE_TEXT,
   PO_ON_HOLD_REJECT_RULE_TEXT,
 } from '@/config/purchaseOrders';
 import { issueChannelInstruction, instructionLineFor } from '@/lib/commerce/channelInstructions';
@@ -1136,6 +1146,19 @@ export function acknowledgePurchaseOrder(
   const holdRejection = holdRejectionPermitted(po, allLinesRejected, now);
 
   /**
+   * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — MERCENTA MAY NOT DECIDE A
+   * BRAND'S ORDER FOR IT WITHOUT THE BRAND'S WORD.
+   *
+   * An ON-BEHALF submission (`actorStaffId` present) is refused unless the brand has
+   * authorised that order, or the channel's limit is imminent and the submission is the
+   * ALL-REJECTED decision the channel requires. This is checked in the WRITER — not by
+   * hiding a button — so no surface, no alternate caller and no future UI can bypass it.
+   * A brand's own submission (`actorStaffId` absent) is untouched by this rule.
+   */
+  const onBehalfRefusal = onBehalfDecisionRefusal(po, allLinesRejected, actorStaffId, now);
+  if (onBehalfRefusal) return { ok: false, error: onBehalfRefusal };
+
+  /**
    * §BATCH 2c (`AV-024`) — a submission that ANSWERS A CHANNEL REVISION is not
    * judged by the 48-hour update window: that window governs what the VENDOR may
    * still change of its own accord, and the channel's change set the new version
@@ -1472,6 +1495,12 @@ export function acknowledgePurchaseOrder(
        */
       implicitlyRejectedLines: completeness.missing,
       channelHoldState: poChannelHoldDuty(po, decidedAt).state,
+      /**
+       * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — an ON-BEHALF decision records
+       * the authority it relied on, so the trail answers "on what basis did Mercenta decide
+       * this for the brand?" without re-deriving it.
+       */
+      ...(actorStaffId ? { onBehalfAuthority: poOnBehalfAuthority(po, decidedAt).state } : {}),
     },
   });
 
@@ -1714,6 +1743,126 @@ export function recordChannelPurchaseOrderHold(
 
   notifyCanonicalStoreChange();
   return { ok: true, written: true, state };
+}
+
+/* ── THE BRAND'S AUTHORISATION FOR MERCENTA TO DECIDE AN ORDER ─────────────── */
+
+/**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE ONE WRITER OF THE BRAND'S
+ * AUTHORISATION.
+ *
+ * The brand (from its own portal) — or Mercenta recording the brand's own instruction,
+ * attributed to whoever recorded it — states that Mercenta may decide THIS purchase order
+ * for it. That record is what turns an on-behalf decision from an unauthorised override
+ * into an authorised one (`src/lib/commerce/poOnBehalfAuthority.ts`), and it is what the
+ * writer checks before it will record an on-behalf acceptance at all.
+ *
+ * IDEMPOTENT BY VALUE: re-granting while a grant is in force writes nothing a second time.
+ * A WITHDRAWAL is recorded as `withdrawn` rather than deleted, so the history of the
+ * brand's instruction survives.
+ */
+export function authoriseOnBehalfDecisions(
+  poId: string,
+  options: {
+    /** WHO is recording it — the brand identity, or the admin recording the brand's instruction. */
+    recordedBy: string;
+    /** The brand's own words, or the instruction being recorded. Required — never blank. */
+    note: string;
+    now?: Date | string | number;
+  }
+): { ok: boolean; error?: string; written?: boolean } {
+  const po = demoPurchaseOrders.find((p) => p.id === poId);
+  if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
+  if (!options?.recordedBy) {
+    return { ok: false, error: 'An authorisation must be attributed, so the recording identity is required.' };
+  }
+  if (!options?.note || !options.note.trim()) {
+    return {
+      ok: false,
+      error:
+        'An authorisation must state the brand’s words (or the instruction being recorded), because the record is ' +
+        'what proves Mercenta was authorised. A blank note is refused.',
+    };
+  }
+  if (po.decisionAuthorisation?.state === 'granted') {
+    return { ok: true, written: false };
+  }
+
+  const at = new Date(options.now ?? new Date()).toISOString();
+  po.decisionAuthorisation = {
+    state: 'granted',
+    recordedBy: options.recordedBy,
+    grantedAt: at,
+    note: options.note.trim(),
+  };
+
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: at,
+    actorId: options.recordedBy,
+    action: 'po_on_behalf_authorised',
+    entityType: 'purchase_order',
+    entityId: po.id,
+    brandId: po.brandId,
+    reason:
+      `${options.recordedBy}: the brand authorised Mercenta to decide PO ${po.poNumber} on its behalf — ` +
+      `“${options.note.trim()}”. ${PO_ON_BEHALF_AUTHORITY_RULE_TEXT}`,
+    metadata: { poNumber: po.poNumber, authorisedAt: at },
+  });
+
+  notifyCanonicalStoreChange();
+  return { ok: true, written: true };
+}
+
+/**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE AUTHORISATION CAN BE
+ * WITHDRAWN, and the withdrawal is RECORDED rather than deleting the grant, so the history
+ * of what the brand permitted (and when it stopped permitting it) survives.
+ */
+export function withdrawOnBehalfAuthorisation(
+  poId: string,
+  options: { withdrawnBy: string; reason: string; now?: Date | string | number }
+): { ok: boolean; error?: string; written?: boolean } {
+  const po = demoPurchaseOrders.find((p) => p.id === poId);
+  if (!po) return { ok: false, error: `Unknown purchase order: ${poId}` };
+  if (!options?.withdrawnBy) {
+    return { ok: false, error: 'A withdrawal must be attributed, so the acting identity is required.' };
+  }
+  if (!options?.reason || !options.reason.trim()) {
+    return {
+      ok: false,
+      error: 'A withdrawal requires a reason. Mercenta never removes a brand’s instruction without one.',
+    };
+  }
+  if (!po.decisionAuthorisation || po.decisionAuthorisation.state !== 'granted') {
+    return { ok: false, error: `PO ${po.poNumber} carries no authorisation to withdraw.` };
+  }
+
+  const at = new Date(options.now ?? new Date()).toISOString();
+  po.decisionAuthorisation = {
+    ...po.decisionAuthorisation,
+    state: 'withdrawn',
+    withdrawnAt: at,
+    withdrawnBy: options.withdrawnBy,
+  };
+
+  demoAuditLog.push({
+    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    createdAt: at,
+    actorId: options.withdrawnBy,
+    action: 'po_on_behalf_authorisation_withdrawn',
+    entityType: 'purchase_order',
+    entityId: po.id,
+    brandId: po.brandId,
+    reason:
+      `${options.withdrawnBy}: the authorisation for Mercenta to decide PO ${po.poNumber} was WITHDRAWN — ` +
+      `${options.reason.trim()}. The grant is retained in the record; Mercenta may now act only inside the ` +
+      `closing window, and only to record the rejection the channel requires.`,
+    metadata: { poNumber: po.poNumber, withdrawnAt: at },
+  });
+
+  notifyCanonicalStoreChange();
+  return { ok: true, written: true };
 }
 
 /* ── §P13 / S4 — THE DRAFT THE BRAND APPROVES, AND THE APPROVAL THAT EXECUTES ── */

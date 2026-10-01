@@ -160,9 +160,19 @@ export const APPLICATION_STATUS_ORDER: ApplicationStatus[] = [
  * Purchase-order lifecycle. The labels are the exact strings the brand PO list
  * already rendered (`STATUS_LABEL` in BrandPurchaseOrders) — consolidated here so
  * the brand list, the admin list and the admin detail can never disagree.
+ *
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — `received` WAS LABELLED
+ * "Received", WHICH IS A DIFFERENT FACT. This lifecycle state means *the purchase
+ * order arrived FROM the retail channel* — the order's first state, before anything
+ * has been decided, shipped or delivered. The word "Received" also labelled the
+ * SHIPMENT'S goods-received state (`src/lib/commerce/receivingStatus.ts`, meaning the
+ * goods reached the fulfilment centre), so one word carried two opposite meanings and
+ * an unacknowledged order could read as though its goods had already arrived. Each
+ * concept now says which it is: this one is "Received from channel"; the goods one is
+ * "Goods received at the FC".
  */
 const PO_STATUS: Record<PurchaseOrderStatus, StatusPresentation> = {
-  received: { label: 'Received', tone: 'info', dataStatus: 'received', actionable: true },
+  received: { label: 'Received from channel', tone: 'info', dataStatus: 'received', actionable: true },
   under_review: { label: 'Under Review', tone: 'warning', dataStatus: 'under_review', actionable: true },
   accepted: { label: 'Accepted', tone: 'success', dataStatus: 'accepted', actionable: true },
   rejected: { label: 'Rejected', tone: 'danger', dataStatus: 'rejected', actionable: false },
@@ -571,6 +581,26 @@ export function commissionStatusPresentation(status: CommissionStatus | string):
  * only — the domain status is the PO's own status.
  */
 export function ackDeadlinePresentation(hoursLeft: number): StatusPresentation {
+  /**
+   * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE EXACT FIGURE IS
+   * NEVER PRINTED AS A DECIMAL. `hoursLeft` is precise (`msLeft / 3_600_000`), so
+   * interpolating it produced labels like "Ack within 20.971255833333334h" on the
+   * purchase-order surfaces and in Work Management. It is now stated the way a
+   * person reads a countdown — whole hours and minutes, with the minutes omitted
+   * when they are zero — derived from the SAME figure the window owner supplied, so
+   * no second clock is introduced.
+   *
+   * FAIL CLOSED on an unusable figure: an unreadable window says so and offers no
+   * urgency, instead of rendering `NaN`.
+   */
+  if (!Number.isFinite(hoursLeft)) {
+    return {
+      label: 'Ack window unreadable',
+      tone: 'neutral',
+      dataStatus: 'ack_unknown',
+      actionable: false,
+    };
+  }
   if (hoursLeft <= 0) {
     return {
       // §Dashboard-cleanup P0 — AV-002: state the RISK, never an unsupported
@@ -581,8 +611,12 @@ export function ackDeadlinePresentation(hoursLeft: number): StatusPresentation {
       actionable: true,
     };
   }
+  const wholeHours = Math.floor(hoursLeft);
+  const roundedMinutes = Math.round((hoursLeft - wholeHours) * 60);
+  const hours = roundedMinutes === 60 ? wholeHours + 1 : wholeHours;
+  const minutes = roundedMinutes === 60 ? 0 : roundedMinutes;
   return {
-    label: `Ack within ${hoursLeft}h`,
+    label: minutes > 0 ? `Ack within ${hours}h ${minutes}m` : `Ack within ${hours}h`,
     tone: hoursLeft <= 6 ? 'danger' : 'warning',
     dataStatus: hoursLeft <= 6 ? 'ack_urgent' : 'ack_due',
     actionable: true,

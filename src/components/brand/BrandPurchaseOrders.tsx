@@ -6,9 +6,11 @@ import { useApp } from '@/context/GlobalStateContext';
 import {
   acknowledgePurchaseOrder,
   approveOnBehalfRejection,
+  authoriseOnBehalfDecisions,
   draftOnBehalfRejection,
   fetchBrands,
   fetchPurchaseOrders,
+  withdrawOnBehalfAuthorisation,
 } from '@/data/api';
 /**
  * §P13 / S4 / S6 — the on-behalf DRAFT is derived by the rule's OWNER
@@ -35,6 +37,12 @@ import {
  * that an undecided line is rejected, rather than discovering it afterwards.
  */
 import { poAcknowledgementCompleteness } from '@/lib/commerce/poAcknowledgementCompleteness';
+/**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — the brand's authorisation for
+ * Mercenta to decide an order is derived by its ONE owner, so this surface states the same
+ * position the writer enforces.
+ */
+import { poOnBehalfAuthority } from '@/lib/commerce/poOnBehalfAuthority';
 /**
  * §BATCH 2d (`AV-008` / `AV-023`) — the brand is told, on the order itself, that the
  * invoice bills the price it acknowledged and that a price differing from the order
@@ -556,7 +564,14 @@ export function BrandPurchaseOrders() {
           },
           {
             id: 'brand-po-actionable',
-            label: 'Received',
+            /**
+             * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — this tile said
+             * "Received", which read as *the goods arrived* while it actually counts
+             * orders whose first lifecycle state is "the order arrived from the
+             * channel". The label now comes FROM THE OWNER
+             * (`poStatusPresentation`), so it cannot drift from the badge on the row.
+             */
+            label: poStatusPresentation('received').label,
             value: String(pos.filter((p) => p.status === 'received').length),
             context: 'Awaiting your decision',
             onOpen: () => setStatusFilter('received'),
@@ -806,6 +821,10 @@ export function BrandPurchaseOrders() {
               {/* §BATCH 2j (`AV-009`) — which lines the channel implicitly rejected because
                   the acknowledgement omitted them. Renders nothing for a complete one. */}
               <ImplicitRejectionNotice po={po} />
+              {/* §DEFECT FIXED (owner-reported, 2026-09-30) — the brand's own authorisation
+                  for Mercenta to decide this order. Renders nothing inside the closing window
+                  or once the order is decided. */}
+              <OnBehalfAuthorisationControl po={po} actor={`${po.brandId} (brand)`} />
               {/* Inline brand communication (shared layer, same thread as Messages Hub) */}
               {contactingPO?.id === po.id && (
                 <div className="mt-3 pt-3 border-t border-white/[0.05]">
@@ -1536,6 +1555,90 @@ function ImplicitRejectionNotice({ po }: { po: PurchaseOrder }) {
         ))}
       </ul>
       <p className="mt-1.5 text-ds-micro text-amber-200/70">{PO_ACK_COMPLETENESS_RULE_TEXT}</p>
+    </div>
+  );
+}
+
+/**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE BRAND'S SIDE OF THE ON-BEHALF RULE.
+ *
+ * This is the "authorised" half. The brand states, on the order itself, that Mercenta may
+ * decide it — which is what permits an on-behalf decision at ANY time. Without a recorded
+ * authorisation Mercenta may only record the rejection the channel requires inside the
+ * closing window (`src/lib/commerce/poOnBehalfAuthority.ts` is the ONE owner of that rule,
+ * and the writer enforces it). Renders nothing once the order is decided.
+ */
+function OnBehalfAuthorisationControl({ po, actor }: { po: PurchaseOrder; actor: string }) {
+  const authority = poOnBehalfAuthority(po);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [note, setNote] = useState('');
+
+  if (authority.closingWindow || authority.pastLimit) return null;
+
+  return (
+    <div
+      className="mt-3 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3"
+      data-testid={`po-on-behalf-authorisation-${po.poNumber}`}
+      data-authorisation-state={authority.state}
+    >
+      <p className="text-ds-label text-zinc-300">
+        Mercenta deciding this order for you: {authority.stateLabel}
+      </p>
+      <p className="mt-1 text-ds-micro leading-snug text-zinc-500">{authority.statement}</p>
+      <p className="mt-1 text-ds-micro leading-snug text-zinc-500">{authority.ruleText}</p>
+      {authority.state !== 'granted' && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Say what Mercenta may do (your own words)"
+            className="min-w-[16rem] flex-1 rounded border border-white/[0.08] bg-ink-900 px-2 py-1 text-ds-micro text-white"
+            data-testid={`po-on-behalf-note-${po.poNumber}`}
+          />
+          <Button
+            className="text-xs"
+            disabled={busy || note.trim().length === 0}
+            onClick={() => {
+              setBusy(true);
+              const result = authoriseOnBehalfDecisions(po.id, { recordedBy: actor, note });
+              setNotice(
+                result.ok
+                  ? result.written
+                    ? 'Recorded: Mercenta may decide this order for you. It will be attributed to you.'
+                    : 'This order already carries your authorisation.'
+                  : result.error ?? 'Refused.'
+              );
+              setBusy(false);
+            }}
+          >
+            Authorise Mercenta to decide this order
+          </Button>
+        </div>
+      )}
+      {authority.state === 'granted' && (
+        <Button
+          variant="ghost"
+          className="mt-2 text-xs"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            const result = withdrawOnBehalfAuthorisation(po.id, {
+              withdrawnBy: actor,
+              reason: 'The brand withdrew its authorisation from its own order screen.',
+            });
+            setNotice(result.ok ? 'Authorisation withdrawn. Mercenta will not decide this order for you.' : result.error ?? 'Refused.');
+            setBusy(false);
+          }}
+        >
+          Withdraw that authorisation
+        </Button>
+      )}
+      {notice && (
+        <p className="mt-1.5 text-ds-micro text-brass-300" data-testid={`po-on-behalf-notice-${po.poNumber}`}>
+          {notice}
+        </p>
+      )}
     </div>
   );
 }

@@ -50,6 +50,14 @@ try {
   /* ── modules under test (the EXISTING architecture) ── */
   const store = await server.ssrLoadModule('/src/data/demoStore.ts');
   const commerce = await server.ssrLoadModule('/src/lib/commerce/commerceLifecycle.ts');
+  /**
+   * §REPOINTED 2026-09-30 (owner-reported defect, never weakened) — the AUTHORITY owner.
+   * The owner reported that a Super Admin could acknowledge a brand's order with no
+   * authorisation at all; the writer now requires the brand's RECORDED authorisation, so this
+   * gate records it first (exactly as the brand's own portal does) and still proves the admin
+   * CAN operate the lifecycle.
+   */
+  const api = await server.ssrLoadModule('/src/data/api.ts');
   const catalog = await server.ssrLoadModule('/src/lib/catalog/catalogLifecycle.ts');
   const mockAmazon = await server.ssrLoadModule('/src/lib/spapi/mockClient.ts');
 
@@ -97,8 +105,23 @@ try {
   test('B1 a brand-created simulated PO exists for the admin to operate',
     created.ok === true && created.value.simulated === true);
 
+  /**
+   * §REPOINTED 2026-09-30 (owner-reported defect, never weakened). The old contract recorded
+   * here: the admin acknowledged the PO with NO authorisation from the brand. The owner
+   * reported that as a real risk — an on-behalf ACCEPTANCE commits the brand to supply goods
+   * Mercenta cannot see — so the writer now requires the brand's RECORDED authorisation (or
+   * the closing window plus the channel-required rejection). The gate records the brand's
+   * authorisation first and STILL proves the admin can operate the lifecycle.
+   */
+  const authorised = await api.authoriseOnBehalfDecisions(poId, {
+    recordedBy: `brand:${ZAMBEZI}`,
+    note: 'Decide this order for us — the E5 admin-staff suite exercises the lifecycle.',
+  });
+  test('B1b the brand’s authorisation is recorded before the admin acts',
+    authorised.ok === true && authorised.written === true);
+
   const adminAck = commerce.acknowledgeCommercePurchaseOrder(poId, adminActor);
-  test('B2 an ADMIN actor (global scope, no tenant pin) can acknowledge the PO',
+  test('B2 an ADMIN actor (global scope, no tenant pin) can acknowledge the PO once the brand has authorised it',
     adminAck.ok === true && adminAck.value.status === 'accepted');
   test('B3 the admin operation is attributed on the ONE existing audit log',
     store.demoAuditLog.some(

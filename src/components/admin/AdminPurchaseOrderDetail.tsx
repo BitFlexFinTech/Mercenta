@@ -21,6 +21,11 @@ import {
   poOnBehalfRejectionDraft,
 } from '@/lib/commerce/poAcknowledgementWindow';
 /**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — WHO MAY DECIDE A BRAND'S ORDER is
+ * derived by its ONE owner, so this surface states the same position the writer enforces.
+ */
+import { poOnBehalfAuthority } from '@/lib/commerce/poOnBehalfAuthority';
+/**
  * §BATCH 2c (`AV-024`) — the CHANNEL-ISSUED revision position of this order is read
  * from its ONE owner (`poRevisionState`) and the rule/labels from the config, exactly
  * as the brand surface does. The console never re-derives the version and never
@@ -214,6 +219,13 @@ const [onBehalfAsn, setOnBehalfAsn] = useState(false);
       ? ackDeadlinePresentation(ackWindow.hoursLeft)
       : null;
   const ackBadge = ackHeaderBadge(po, ackWindow);
+  /**
+   * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — WHO MAY DECIDE THIS ORDER, read
+   * from its ONE owner. The surface now STATES the position and offers the on-behalf control
+   * only where the writer would accept it, so an operator is never left guessing why the
+   * platform refuses (and the writer refuses regardless of what this surface offers).
+   */
+  const onBehalfAuthority = poOnBehalfAuthority(po);
 const thePo = po;
   function beginOnBehalfAck() {
     setOnBehalfAck(true);
@@ -438,13 +450,39 @@ function beginOnBehalfAsn() {
             * unreadable window fails closed, and the owner's own `reason` states
             * why no acceptance is on offer.
             */}
-          {ackWindow.inQueue && !onBehalfAck && (
+          {/**
+            * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE ON-BEHALF CONTROL
+            * STATES ITS AUTHORITY.
+            *
+            * The owner reported that a Super Admin could acknowledge any order for a brand at
+            * any time with nothing recording the brand's agreement. The writer now REFUSES
+            * that (`onBehalfDecisionRefusal`), and this surface states why: the brand's
+            * authorisation, or the closing window and the channel-required rejection only.
+            */}
+          <p
+            className="text-ds-micro leading-snug text-zinc-500"
+            data-testid={`admin-po-on-behalf-authority-${po.poNumber}`}
+            data-on-behalf-permitted={onBehalfAuthority.permitted}
+          >
+            {onBehalfAuthority.statement} {onBehalfAuthority.ruleText}
+          </p>
+          {ackWindow.inQueue && !onBehalfAck && onBehalfAuthority.permitted === 'any_decision' && (
             <div className="flex gap-2">
               <Button className="text-xs" onClick={beginOnBehalfAck}>
                 <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                 Acknowledge on behalf of {brandName}
               </Button>
             </div>
+          )}
+          {ackWindow.inQueue && !onBehalfAck && onBehalfAuthority.permitted === 'rejection_only' && (
+            <p
+              className="text-ds-micro leading-snug text-amber-300/90"
+              data-testid={`admin-po-on-behalf-rejection-only-${po.poNumber}`}
+            >
+              Without the brand’s authorisation Mercenta may record ONLY the rejection the retail channel
+              requires — never an acceptance. Use the channel-required rejection below, which the brand is asked
+              to approve.
+            </p>
           )}
           {!ackWindow.inQueue && !onBehalfAck && (
             <p

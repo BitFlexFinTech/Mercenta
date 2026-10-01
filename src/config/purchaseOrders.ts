@@ -39,9 +39,11 @@
 import {
   PO_CHANNEL_CHANGE_KINDS,
   PO_CHANNEL_HOLD_STATES,
+  PO_DECISION_AUTHORISATION_STATES,
   PO_REJECTION_CODES,
   type PoChannelChangeKind,
   type PoChannelHoldState,
+  type PoDecisionAuthorisationState,
   type PoRejectionCode,
   type PurchaseOrderStatus,
 } from '@/types';
@@ -363,6 +365,42 @@ export const PO_ACK_COMPLETENESS_RULE_TEXT =
 export const PO_ON_HOLD_REJECT_RULE_TEXT =
   'A purchase order the retail channel has placed on hold must be rejected once its 24-hour limit has passed. ' +
   'Mercenta records the hold so that requirement is never missed.';
+
+/**
+ * §BATCH ("on-behalf authority") — MERCENTA'S OWN RULE ABOUT ACTING FOR A BRAND
+ * (ONE declaration, labelled as MERCENTA'S — never as a channel rule).
+ *
+ * The retail channel documents that a vendor must reject an order it holds past the
+ * 24-hour limit; it says NOTHING about who inside a vendor may press the button. That
+ * split is MERCENTA's own operating rule, so it is stated as Mercenta's and is never
+ * presented as something the channel requires.
+ *
+ * THE RULE: Mercenta may record a brand's decision for it ONLY when the brand has
+ * authorised that order, or when the channel's limit is imminent (inside the declared
+ * closing window) AND the decision is the rejection the channel requires. Mercenta never
+ * commits a brand to SUPPLY goods on the brand's behalf without the brand's own word,
+ * because Mercenta cannot see the brand's stock.
+ */
+export const PO_ON_BEHALF_AUTHORITY_RULE_TEXT =
+  'Mercenta may record a purchase-order decision for a brand only when the brand has authorised Mercenta to ' +
+  'decide that order, or when the 24-hour limit is imminent and the decision is the rejection the retail ' +
+  'channel requires. Mercenta never accepts an order on a brand’s behalf without the brand’s own ' +
+  'authorisation, because Mercenta cannot see the brand’s stock.';
+
+/** The operator-readable label of every declared authorisation state (declared once). */
+export const PO_DECISION_AUTHORISATION_LABELS: Record<PoDecisionAuthorisationState, string> = {
+  granted: 'the brand authorised Mercenta to decide this order',
+  withdrawn: 'the brand withdrew that authorisation',
+};
+
+for (const state of PO_DECISION_AUTHORISATION_STATES) {
+  if (!PO_DECISION_AUTHORISATION_LABELS[state]) {
+    throw new Error(
+      `[purchaseOrders] the decision-authorisation state "${state}" has no declared label. Every state must be ` +
+        `labelled once, here, so no surface invents its own wording.`
+    );
+  }
+}
 
 /**
  * §BATCH 2j (`AV-010b`) — the operator-readable label of every declared hold state.

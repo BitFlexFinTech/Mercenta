@@ -85,8 +85,11 @@ test.describe('§P12 — the receiving sync reads the CHANNEL, truthfully', () =
     await expect(readings).toHaveCount(3);
 
     // Every reading states the channel's view AND Mercenta's own, per AV-018.
+    // §REPOINTED 2026-09-30 (owner-reported defect, never weakened): the goods-received
+    // vocabulary now names the goods and the place, so it cannot be confused with the
+    // order's own first state ("Received from channel"). Same fact, clearer words.
     const body = (await page.locator('[data-testid="channel-receiving-sync"]').innerText()) ?? '';
-    expect(body).toMatch(/channel: Not received · Mercenta:/);
+    expect(body).toMatch(/channel: Goods not received at the FC · Mercenta:/);
     // The read is REPORTED, never written: the surface says so.
     expect(body).toMatch(/never written/);
   });

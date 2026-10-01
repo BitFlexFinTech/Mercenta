@@ -3548,3 +3548,51 @@ surface, and **`L10` PASS proves the deployed entry asset `assets/index-C4KYCvrU
 **Status: COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED for this increment, with the four host timeouts recorded rather
 than hidden.**
 
+---
+
+## SESSION 59 — THE OWNER'S FIVE REPORTED DEFECTS (2026-09-30, IN PROGRESS — NOT COMPLETE)
+
+**The owner reported five defects in the RUNNING product. All five were real, and all five are fixed at
+source in this commit.** This entry records the true state; the `CURRENT RESUME STATE` block above still
+describes Batch 2j, which is what is deployed, and it will be updated when this work is closed.
+
+1. **A raw decimal countdown** (`Ack within 20.971255833333334h`). Cause: `ackDeadlinePresentation`
+   interpolated the EXACT figure (`msLeft / 3_600_000`) into the label. Fixed: it now states whole hours and
+   minutes and fails closed on an unreadable figure. It also reproduced on the brand surface, the admin list,
+   the admin detail and — through the owner's own reason string — in Work Management.
+2. **A Super Admin could acknowledge ANY order on a brand's behalf with nothing recording the brand's
+   agreement.** Fixed at source with a new ONE owner (`src/lib/commerce/poOnBehalfAuthority.ts`): an on-behalf
+   decision now requires the brand's RECORDED authorisation, or — without one — the closing window AND the
+   all-rejected submission the channel requires. An on-behalf ACCEPTANCE can therefore never commit a brand to
+   supply goods Mercenta cannot see, and the rule is enforced in the WRITER, not by hiding a button. The brand
+   can grant and withdraw the authorisation from its own order screen; both are attributed and audited, and a
+   withdrawal is recorded rather than deleted. Gate: `npm run validate:on-behalf-authority` (23 assertions,
+   executing the real writer; PROVED able to fail — 8 failures, file restored byte-identical
+   sha256 `aa220d20…`).
+3. **Work categories carried no colour while the priority did.** Fixed: `WORK_SOURCE_TONES` declares a tone
+   per category ONCE (guarded at module load), and the category renders as a coloured badge in the board, the
+   reminder list and the record drawer.
+4. **Three drawer buttons nobody could explain ("Open record" / "Start" / "Block").** Fixed: they are now
+   labelled "Mark in progress" / "Mark blocked" with a hover explanation, plus a line in the drawer stating
+   that they only write a NOTE on the list while the work itself is settled on the record.
+5. **A purchase order showing "Received" beside a live acknowledgement countdown.** Cause: ONE WORD CARRIED
+   TWO MEANINGS — the PO lifecycle's first state was "Received" (the ORDER arrived from the channel) while the
+   goods-received state was ALSO "Received". Fixed: the PO state is now "Received from channel" and the goods
+   states are "Goods received at the FC" / "Goods partly received at the FC" / "Goods not received at the FC";
+   the brand's own hand-typed copy of the PO label now reads the canonical owner.
+
+**Gates repointed (never weakened, old contract recorded inline):** `validate-po-acknowledgement-admin-surfaces`
+(the acceptance control is now offered by `inQueue` AND the authority owner) and `validate-e5-admin-surfaces`
+(it now records the brand's authorisation before the admin acts, and still proves the admin can operate the
+lifecycle). Two e2e assertions were repointed to the corrected goods-received wording.
+
+**Open, and NOT claimed as done:**
+- **`npm run validate:operating-costs` FAILS (`the summary counts calls, cache hits, refusals and an estimated
+  projection`).** It appeared during this session and it loads four cost modules this work never touched
+  (`operatingCosts.ts`, `modelPolicy.ts`, `usageLog.ts`, `costSummary.ts`), so it is probably unrelated — and
+  today is the LAST DAY OF THE MONTH, the exact boundary such a monthly summary can be fragile on. **It is
+  UNVERIFIED as cause, and must be diagnosed before any whole-sweep claim.**
+- The demo has **NOT** been deployed from this commit, so this work has **no live verification**, and the
+  three-way status is **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE**.
+
+

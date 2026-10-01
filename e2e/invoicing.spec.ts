@@ -103,8 +103,12 @@ test.describe('P7 — admin invoicing', () => {
     );
 
     // §P7 — the receiving status is visible (the channel's own concept, AV-018).
+    // §REPOINTED 2026-09-30 (owner-reported defect, never weakened): the goods-received
+    // label no longer reads "Received", because that word also labelled the ORDER's first
+    // lifecycle state ("Received from channel") — one word, two opposite meanings. The
+    // assertion still proves the SAME fact: this badge shows the goods-received state.
     const receivingBadge = page.locator('[data-state="admin-commerce-receiving-status"]').first();
-    await expect(receivingBadge).toContainText('Received', { timeout: 6000 });
+    await expect(receivingBadge).toContainText(/goods received at the FC/i, { timeout: 6000 });
     const termsLine = page.locator('[data-state="admin-commerce-invoice-terms"]').first();
     await expect(termsLine).toContainText('60-day terms', { timeout: 6000 });
     await expect(termsLine).toContainText('(derived)');

@@ -111,10 +111,21 @@ export function summariseReceiving(po: Pick<PurchaseOrder, 'lineItems'>): Receiv
   };
 }
 
+/**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THESE ARE THE GOODS, NOT THE
+ * ORDER. These labels previously read "Received" / "Partially received" / "Not
+ * received" while the purchase-order lifecycle's OWN first state was ALSO labelled
+ * "Received" (meaning the ORDER arrived from the channel). One word therefore carried
+ * two opposite meanings on the same screens, and an order nobody had acknowledged yet
+ * could read as though its goods had already reached the fulfilment centre. Every
+ * label here now names the GOODS and the PLACE, so the two facts can never be
+ * confused again (`src/lib/statusPresentation.ts → PO_STATUS.received` is
+ * "Received from channel").
+ */
 export const RECEIVING_STATUS_LABELS: Record<ReceivingStatus, string> = {
-  not_received: 'Not received',
-  partially_received: 'Partially received',
-  received: 'Received',
+  not_received: 'Goods not received at the FC',
+  partially_received: 'Goods partly received at the FC',
+  received: 'Goods received at the FC',
 };
 
 /** The receiving-status presentation token used by the shared StatusBadge. */

@@ -30,6 +30,7 @@ import {
   WORK_COUNT_SETS,
   WORK_PRIORITY_LABELS,
   WORK_SOURCE_LABELS,
+  WORK_SOURCE_TONES,
   WORK_STATUS_LABELS,
   brandLabel,
   canResolveFromWorkLayer,
@@ -97,6 +98,24 @@ const STATUS_TONE: Record<WorkStatus, StatusTone> = {
   blocked: 'danger',
   done: 'success',
 };
+
+/**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE CATEGORY IS COLOUR-CODED.
+ *
+ * The work list coloured the PRIORITY and rendered the CATEGORY as plain grey text, so
+ * the one label that says WHAT KIND of work this is — a fulfilment window, a purchase-order
+ * acknowledgement, a commercial review, a compliance expiry — carried no signal at all. The
+ * category now renders through the design system's own badge with the tone declared once
+ * per category (`WORK_SOURCE_TONES`, guarded at module load in the work layer). Colour is
+ * never the only indicator: the badge keeps its text and its accessible name.
+ */
+function SourceBadge({ source }: { source: WorkSource }) {
+  return (
+    <StatusBadge tone={WORK_SOURCE_TONES[source]} dataStatus={`work-source-${source}`}>
+      {WORK_SOURCE_LABELS[source]}
+    </StatusBadge>
+  );
+}
 
 const SOURCE_OPTIONS: WorkSource[] = [
   'po_acknowledgement',
@@ -675,9 +694,7 @@ function KanbanBoard({
                     style={{ backgroundColor: DOMAIN_COLOURS[PRIORITY_DOMAIN[w.priority]].solid }}
                   />
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-ds-micro font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                      {WORK_SOURCE_LABELS[w.source]}
-                    </span>
+                    <SourceBadge source={w.source} />
                     <StatusBadge tone={PRIORITY_TONE[w.priority]} dataStatus={PRIORITY_TONE[w.priority]}>
                       {WORK_PRIORITY_LABELS[w.priority]}
                     </StatusBadge>
@@ -848,9 +865,7 @@ function ReminderList({
                     <StatusBadge tone={BUCKET_TONE[r.bucket]} dataStatus={BUCKET_TONE[r.bucket]}>
                       {REMINDER_BUCKET_LABELS[r.bucket]}
                     </StatusBadge>
-                    <span className="text-ds-micro font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                      {WORK_SOURCE_LABELS[r.source]}
-                    </span>
+                    <SourceBadge source={r.source} />
                   </div>
                   <p className="mt-1 text-xs font-medium text-white">{r.title}</p>
                   <p className="mt-0.5 text-ds-label leading-snug text-zinc-500">{r.detail}</p>
@@ -1150,8 +1165,9 @@ function WorkRecordDrawer({
                     className="text-ds-label"
                     data-testid="work-drawer-start"
                     onClick={() => setWorkItemStatus(item.id, 'in_progress', actor)}
+                    title="Writes a note on THIS work record saying you have started it. It does not change the order, the deadline or anything on the record itself."
                   >
-                    Start
+                    Mark in progress
                   </Button>
                 )}
                 {item.status !== 'blocked' && (
@@ -1160,8 +1176,9 @@ function WorkRecordDrawer({
                     className="text-ds-label"
                     data-testid="work-drawer-block"
                     onClick={() => setWorkItemStatus(item.id, 'blocked', actor)}
+                    title="Writes a note on THIS work record saying you cannot proceed. It does not stop the order, the deadline or the work."
                   >
-                    Block
+                    Mark blocked
                   </Button>
                 )}
                 {item.status !== 'open' && (
@@ -1170,10 +1187,29 @@ function WorkRecordDrawer({
                     className="text-ds-label"
                     data-testid="work-drawer-clear-mark"
                     onClick={() => reopenWorkItem(item.id, actor, 'Cleared the operator mark from the work record')}
+                    title="Removes your note and returns this item to Open."
                   >
                     Clear mark
                   </Button>
                 )}
+                {/**
+                  * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE BUTTONS NOW SAY
+                  * WHAT THEY DO. The owner asked what these three buttons are FOR, which is the
+                  * honest signal that the labels ("Start" / "Block") implied capabilities they do
+                  * not have: they only write a NOTE on this list, while the work itself is settled
+                  * on the record. This line states the split in place, and each button carries the
+                  * same explanation on hover.
+                  */}
+                <p
+                  className="w-full text-ds-micro leading-snug text-zinc-500"
+                  data-testid="work-drawer-actions-explainer"
+                >
+                  <span className="text-zinc-400">{openLabel}</span> takes you to the record where this is
+                  actually settled — this item closes by doing THAT work, not by ticking a box here.{' '}
+                  <span className="text-zinc-400">Mark in progress</span> and{' '}
+                  <span className="text-zinc-400">Mark blocked</span> only write a note on this list for you and
+                  your colleagues; they change nothing on the order.
+                </p>
               </>
             ) : (
               <>
@@ -1198,8 +1234,9 @@ function WorkRecordDrawer({
                         className="text-ds-label"
                         data-testid="work-drawer-start"
                         onClick={() => setWorkItemStatus(item.id, 'in_progress', actor)}
+                        title="Writes a note on THIS work record saying you have started it. It does not change the record itself."
                       >
-                        Start
+                        Mark in progress
                       </Button>
                     )}
                   </>
@@ -1243,7 +1280,7 @@ function WorkRecordDrawer({
         <div className="space-y-4">
           <RecordFieldList
             fields={[
-              { label: 'Source', value: WORK_SOURCE_LABELS[item.source] },
+              { label: 'Source', value: <SourceBadge source={item.source} /> },
               { label: 'Priority', value: WORK_PRIORITY_LABELS[item.priority] },
               ...(typeof item.rank === 'number'
                 ? [{ label: 'Founder rank', value: `#${item.rank}` }]

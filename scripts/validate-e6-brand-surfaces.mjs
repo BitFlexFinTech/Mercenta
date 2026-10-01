@@ -782,6 +782,53 @@ const BATCH2J_PO_ACK_DUTIES_SCOPE = new Set([
 
 
 /**
+ * §OWNER-REPORTED DEFECTS (2026-09-30) — THE FIVE DEFECTS THE OWNER FOUND IN THE RUNNING
+ * PRODUCT, FIXED AT SOURCE.
+ *
+ * The owner reported: a raw decimal countdown ("Ack within 20.9712…h"); a Super Admin able to
+ * acknowledge on a brand's behalf with no authorisation; work categories carrying no colour
+ * while the priority did; three unexplained drawer buttons; and a purchase order showing
+ * "Received" beside a live acknowledgement countdown (impossible).
+ *
+ * Declared set — every file this work touches, named:
+ *   · `src/lib/statusPresentation.ts` — the countdown is stated as whole hours + minutes (and
+ *     fails closed on an unreadable figure); `PO_STATUS.received` is now "Received from
+ *     channel", because "Received" also labelled the GOODS-received state.
+ *   · `src/lib/commerce/receivingStatus.ts` — the goods labels now name the goods and the
+ *     place ("Goods received at the FC"), so one word no longer carries two meanings.
+ *   · `src/types.ts`, `src/config/purchaseOrders.ts`, `src/lib/commerce/poOnBehalfAuthority.ts`
+ *     (NEW) and `src/data/api.ts` — the on-behalf AUTHORITY rule: an on-behalf decision now
+ *     requires the brand's recorded authorisation, or the closing window plus the
+ *     channel-required all-rejected submission, ENFORCED IN THE WRITER.
+ *   · `src/components/admin/AdminPurchaseOrderDetail.tsx` and
+ *     `src/components/brand/BrandPurchaseOrders.tsx` — the surfaces state the authority, and
+ *     the brand can record/withdraw it.
+ *   · `src/lib/work/workStore.ts` and `src/components/shared/WorkWorkspace.tsx` — every work
+ *     category gets a declared tone (one owner), and the drawer's buttons say what they do.
+ *   · `e2e/invoicing.spec.ts` and `e2e/p12-channel-operations.spec.ts` — REPOINTED to the
+ *     corrected goods-received wording (never weakened; same facts).
+ *   · the new gate, the two scope guards and `package.json`.
+ */
+const OWNER_REPORTED_DEFECTS_SCOPE = new Set([
+  'src/lib/statusPresentation.ts',
+  'src/lib/commerce/receivingStatus.ts',
+  'src/types.ts',
+  'src/config/purchaseOrders.ts',
+  'src/lib/commerce/poOnBehalfAuthority.ts',        /* NEW — the authority owner */
+  'src/data/api.ts',
+  'src/components/admin/AdminPurchaseOrderDetail.tsx',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'src/lib/work/workStore.ts',
+  'src/components/shared/WorkWorkspace.tsx',
+  'scripts/validate-on-behalf-authority.mjs',       /* NEW — this work's gate */
+  'e2e/invoicing.spec.ts',
+  'e2e/p12-channel-operations.spec.ts',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+/**
  * §PLAIN-ENGLISH ENFORCEMENT (2026-09-29, Founder directive) — the rule that asks for
  * plain English already existed and was still not followed, so the owner was offered a
  * decision in words they could not evaluate and the work stopped. This phase turns the
@@ -1964,6 +2011,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2j — the acknowledgement's completeness and on-hold duties (see above). */
         BATCH2J_PO_ACK_DUTIES_SCOPE.has(p) ||
         [...BATCH2J_PO_ACK_DUTIES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §OWNER-REPORTED DEFECTS — the five reported defects, fixed at source (see above). */
+        OWNER_REPORTED_DEFECTS_SCOPE.has(p) ||
+        [...OWNER_REPORTED_DEFECTS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -2024,6 +2074,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2j — same declaration, second protected-path check (F5b). */
         BATCH2J_PO_ACK_DUTIES_SCOPE.has(p) ||
         [...BATCH2J_PO_ACK_DUTIES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §OWNER-REPORTED DEFECTS — same declaration, second protected-path check (F5b). */
+        OWNER_REPORTED_DEFECTS_SCOPE.has(p) ||
+        [...OWNER_REPORTED_DEFECTS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PLAIN ENGLISH ENFORCEMENT — same declaration, second protected-path check (F5b). */
         PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
         [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
@@ -2318,6 +2371,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2j — the acknowledgement's two duties (see above). */
           BATCH2J_PO_ACK_DUTIES_SCOPE.has(p) ||
           [...BATCH2J_PO_ACK_DUTIES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §OWNER-REPORTED DEFECTS — the five reported defects (see above). */
+          OWNER_REPORTED_DEFECTS_SCOPE.has(p) ||
+          [...OWNER_REPORTED_DEFECTS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PLAIN ENGLISH ENFORCEMENT — the plain-English rule made checkable (see above). */
           PLAIN_ENGLISH_ENFORCEMENT_SCOPE.has(p) ||
           [...PLAIN_ENGLISH_ENFORCEMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

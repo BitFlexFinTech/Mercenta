@@ -754,6 +754,29 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
     'package.json',
   ];
+  /**
+   * §OWNER-REPORTED DEFECTS (2026-09-30) — the five defects the OWNER found in the running
+   * product, fixed at source. Fuller note in `validate-e6-brand-surfaces.mjs`
+   * §OWNER_REPORTED_DEFECTS_SCOPE.
+   */
+  const OWNER_REPORTED_DEFECTS_DECLARED = [
+    'src/lib/statusPresentation.ts',
+    'src/lib/commerce/receivingStatus.ts',
+    'src/types.ts',
+    'src/config/purchaseOrders.ts',
+    'src/lib/commerce/poOnBehalfAuthority.ts',
+    'src/data/api.ts',
+    'src/components/admin/AdminPurchaseOrderDetail.tsx',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'src/lib/work/workStore.ts',
+    'src/components/shared/WorkWorkspace.tsx',
+    'scripts/validate-on-behalf-authority.mjs',
+    'e2e/invoicing.spec.ts',
+    'e2e/p12-channel-operations.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
 
 
 
@@ -1583,7 +1606,13 @@ try {
            * other phase's is. An UNEXPLAINED protected change still fails.
            */
           !BATCH2J_PO_ACK_DUTIES_DECLARED.includes(f) &&
-          !BATCH2J_PO_ACK_DUTIES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH2J_PO_ACK_DUTIES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §OWNER-REPORTED DEFECTS (2026-09-30) — the reported defects touch no protected path;
+           * their declared surface is accepted here exactly as every other phase's is.
+           */
+          !OWNER_REPORTED_DEFECTS_DECLARED.includes(f) &&
+          !OWNER_REPORTED_DEFECTS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1805,6 +1834,10 @@ try {
      * §BATCH 2j — THE ACKNOWLEDGEMENT'S TWO DUTIES (`AV-009` / `AV-010b`, 2026-09-30).
      */
     ...BATCH2J_PO_ACK_DUTIES_DECLARED,
+    /**
+     * §OWNER-REPORTED DEFECTS — the five defects the owner found, fixed at source.
+     */
+    ...OWNER_REPORTED_DEFECTS_DECLARED,
     /**
      * §PUBLIC MESSAGING — the public-surfaces batch's declared surface (see above).
      */

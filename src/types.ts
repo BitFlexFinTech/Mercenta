@@ -1763,6 +1763,16 @@ export interface PurchaseOrder {
    * covered every line (or no submission is recorded yet).
    */
   implicitlyRejectedLines?: string[];
+  /**
+   * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE BRAND'S AUTHORISATION FOR
+   * MERCENTA TO DECIDE THIS ORDER ON ITS BEHALF.
+   *
+   * ABSENT MEANS NO AUTHORISATION HAS BEEN GRANTED — never *"the brand agreed"*. The ONE
+   * writer is `src/data/api.ts → authoriseOnBehalfDecisions` (and its withdrawal), and the
+   * ONE reader that turns it into a permission is
+   * `src/lib/commerce/poOnBehalfAuthority.ts`, which the acknowledgement writer enforces.
+   */
+  decisionAuthorisation?: PoDecisionAuthorisation;
 }
 
 /**
@@ -2001,6 +2011,50 @@ export interface PoChannelHoldRecord {
   simulated: boolean;
   /** WHO recorded it — the acting identity, so the statement is attributable. */
   recordedBy: string;
+}
+
+/**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE BRAND'S AUTHORISATION FOR
+ * MERCENTA TO DECIDE A PURCHASE ORDER ON ITS BEHALF.
+ *
+ * WHY THIS EXISTS. Mercenta operates the retail-channel account, so it CAN record a
+ * brand's decision for it — but an operator committing a brand to SUPPLY goods the
+ * operator cannot see (an acceptance) or REJECTING an order the brand could have
+ * fulfilled is a decision about the brand's stock and money. The owner reported that a
+ * Super Admin could do exactly that, at any time inside the 24-hour window, with nothing
+ * recording the brand's agreement. That was true, and it is a real risk.
+ *
+ * The platform's answer is that an on-behalf decision requires ONE OF TWO RECORDED
+ * CONDITIONS, enforced in the writer (`src/lib/commerce/poOnBehalfAuthority.ts`):
+ *
+ *   1. `granted`  — THE BRAND AUTHORISED IT. The brand (or Mercenta recording the brand's
+ *                   own instruction, attributed) states that Mercenta may decide this
+ *                   order for it. Permits any decision, and is WITHDRAWABLE while the
+ *                   order is still open.
+ *   2. the CLOSING WINDOW — no authorisation, but the channel's own limit is imminent
+ *                   (`PO_ACK_ON_BEHALF_WINDOW_HOURS` left or less) or already passed, and
+ *                   the decision is the ALL-REJECTED ONE the channel requires. This path
+ *                   can never promise supply, because it cannot accept anything.
+ *
+ * ABSENT MEANS NO AUTHORISATION HAS BEEN GRANTED — never "the brand agreed". A withdrawn
+ * authorisation is recorded as withdrawn rather than deleted, so the history of the
+ * brand's instruction survives.
+ */
+export const PO_DECISION_AUTHORISATION_STATES = ['granted', 'withdrawn'] as const;
+export type PoDecisionAuthorisationState = (typeof PO_DECISION_AUTHORISATION_STATES)[number];
+
+export interface PoDecisionAuthorisation {
+  state: PoDecisionAuthorisationState;
+  /** WHO recorded the authorisation — the brand's identity, or an admin recording its instruction. */
+  recordedBy: string;
+  /** When it was granted (ISO). */
+  grantedAt: string;
+  /** When it was withdrawn, if it has been. */
+  withdrawnAt?: string;
+  /** WHO withdrew it. */
+  withdrawnBy?: string;
+  /** The brand's own words, or the instruction Mercenta recorded. Required — never blank. */
+  note: string;
 }
 
 export interface PurchaseOrderLineItem {

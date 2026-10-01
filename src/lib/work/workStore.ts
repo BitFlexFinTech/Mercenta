@@ -189,6 +189,69 @@ export const WORK_SOURCE_LABELS: Record<WorkSource, string> = {
 };
 
 /**
+ * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — EVERY CATEGORY IS COLOUR-CODED.
+ *
+ * The work list coloured the PRIORITY (critical · high · normal) and rendered the
+ * CATEGORY as plain grey text. The owner's point is exactly right: the category is what
+ * tells an operator what kind of problem they are looking at — a fulfilment window, a
+ * purchase-order acknowledgement, a commercial review, a compliance expiry — and it was
+ * the one thing with no visual signal at all.
+ *
+ * The tone is declared ONCE here, beside the labels, in the platform's EXISTING status
+ * vocabulary (the same tones every other badge uses), and it is grouped by what each
+ * category actually threatens, so the colours mean something:
+ *
+ *   danger   — a hard external deadline or a blocked gate: miss it and the record
+ *              itself fails (a channel acknowledgement limit, a compliance expiry, a
+ *              shipment that has gone wrong).
+ *   warning  — a clock that costs money or stock if it runs out (a fulfilment window,
+ *              an invoice due, a contract renewal).
+ *   info     — a decision or a claim is owed by someone else (a dispute, a return, a
+ *              commercial-information request).
+ *   brass    — a MERCENTA decision (the commercial review) — the platform's own
+ *              "we must decide" colour.
+ *   neutral  — nothing is at risk; a routine or self-created item.
+ *
+ * A module-load guard fails the build if a category is ever added without a declared
+ * tone, so no surface has to invent one.
+ */
+export const WORK_SOURCE_TONES: Record<
+  WorkSource,
+  'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'brass'
+> = {
+  po_acknowledgement: 'danger',
+  po_window: 'warning',
+  compliance_expiry: 'danger',
+  invoice_due: 'warning',
+  deduction_dispute: 'info',
+  shipment_exception: 'danger',
+  return_action: 'info',
+  outreach_followup: 'neutral',
+  contract_renewal: 'warning',
+  onboarding_step: 'neutral',
+  commercial_remediation: 'info',
+  commercial_review: 'brass',
+  founder_compliance: 'brass',
+  founder_setup: 'brass',
+  founder_application: 'brass',
+  founder_integration: 'brass',
+  founder_opportunity: 'brass',
+  founder_funding: 'brass',
+  founder_finance: 'brass',
+  founder_ai_cost: 'brass',
+  manual: 'neutral',
+};
+
+for (const source of Object.keys(WORK_SOURCE_LABELS) as WorkSource[]) {
+  if (!WORK_SOURCE_TONES[source]) {
+    throw new Error(
+      `[work] the work category "${source}" has no declared tone. Every category must be colour-coded once, ` +
+        `here, beside its label, so no surface invents a colour.`
+    );
+  }
+}
+
+/**
  * §SSOT — EVERY DERIVED SOURCE DECLARES HOW IT CLOSES.
  *
  * A derived work item exists because a canonical RECORD qualifies. It must
