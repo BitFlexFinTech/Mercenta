@@ -887,6 +887,7 @@
       ],
       "mutation_proofs": "PROVED ABLE TO FAIL THREE WAYS, each file restored byte-identical (hashes verified before and after): (1) the fail-closed default in poChannelHoldDuty changed from 'unknown' to 'cleared' → 2 failures (sha256 ee9b3c689624a4c51aefe2d0442fdc071d07964a5be9d72da9f9f4137b5c5c22); (2) the writer's on-hold refusal replaced with null → 1 failure, and it revealed that WITHOUT the on-hold refusal the generic late rule refuses with a DIFFERENT reason that does not quote the duty (sha256 7417da9c91f1d4186d48d8d03e6360fa3b2f95db718741ad88e022b96aad6fa0); (3) completeness derived from the SUBMISSION instead of the order → 6 failures (sha256 15e35cd52997412f2bc418edd1dc64580e167a07217071da899d6673daa9c0fe).",
       "measurements": "npm run validate:all 131 PASS / 0 FAIL (was 130 PASS + 1 FAIL: the new gate is +1, and the repointed onboarding gate now passes); npm run typecheck 0; npm run lint 0; npm run build ✓ (entry asset assets/index-C4KYCvrU.js); validate-e6 + validate-e7 PASS with the new scope declared in BOTH. Browser: e2e/po-ack-duties.spec.ts 4 passed.",
+      "next_plan": "SUPERSEDED AS THE CURRENT PLAN BY docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md (P0-P6). A new session resumes from PROJECT_STATUS.md → CURRENT RESUME STATE, which names P0 of that plan. BATCH 2's remaining rows (AV-011, AV-015) are PAUSED, not abandoned, until the plan's phases are done.",
       "three_way_status": "See the CURRENT RESUME STATE block of PROJECT_STATUS.md — the single source for this increment's three-way status."
     }
   },
