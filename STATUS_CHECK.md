@@ -24,9 +24,52 @@ NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tre
 actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
 RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
+## P0 OF THE CLEAN-UP/VERIFICATION PLAN — THE WHOLE LOOP IS PROVED END TO END AND PRINTED, AND THE OWNER'S FOUR QUESTIONS ARE ANSWERED WITH OUTPUT (session 58, 2026-10-01) — **CURRENT**
+
+**What this session did.** It executed **P0** of `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` — the recorded
+next task — which is a PROOF phase, not a feature phase, and it left the product's application code unchanged.
+
+**The new gate.** `scripts/validate-commerce-loop.mjs` (registered as `npm run validate:commerce-loop`; declared in
+BOTH scope guards, `§P0_LOOP_TRACE_SCOPE` / `§P0_LOOP_TRACE_DECLARED`, and in the Master Matrix as
+`cleanup-p0-whole-loop-trace`). It bundles the SHIPPED modules with the project's own esbuild through its own `@`
+alias, SABOTAGES `fetch` (so any live call fails the run), drives ONE seeded channel order the whole way and PRINTS
+every step's real values: arrive through the channel seam (mock) → route by vendor SKU (the brand is DERIVED, never
+supplied) → the brand decides → MERCENTA answers the channel → the ASN is filed AUTOMATICALLY and the channel's own
+confirmation id is recorded → the document pack is generated → receipt → the invoice is raised AUTOMATICALLY by
+`mercenta-system:receipt-invoice` → the payment is recorded and reconciled → a human-approved payout SETTLES through
+the simulated Payoneer rail. It asserts 30 properties, including the fail-closed refusal of a PO whose line matches no
+catalogue product, the replay-idempotency of both the read and the channel action, and the double-payout guard.
+
+**The four answers, with output.** (1) Routing by SKU is correct and fail-closed — the deliberately unmatched SKU
+refused the WHOLE order (`brandId null`). (2) The brand's decision becomes an INSTRUCTION and MERCENTA (never the
+brand) performs the channel action; the acknowledgement id/status/mode is printed. (3) The ASN is automatic on
+acceptance, the consignment is created, and the CHANNEL's own confirmation is recorded (never conflated with a local
+filing). (4) **Consignment documents can be OPENED and PRINTED, but there is NO file-download control** — recorded as
+**P0-fix**, **BLOCKED on the owner's decision D3**, and never to be described as a download until it exists.
+
+**Defect found and FIXED at source (a gate, not a feature).** `scripts/validate-operating-costs.mjs` recorded its usage
+entries on the REAL clock but summarised them at a PINNED instant (`2026-09-15T10:00:00.000Z`), so the assertion
+*"the summary counts calls, cache hits, refusals and an estimated projection"* passed only while the machine's date sat
+inside that one month and FAILED on 2026-10-01 with no product change. A check that depends on the calendar is a defect,
+not a gate. It now takes ONE clock for writers and summary (44/44 PASS), and the mutation that reintroduces a
+MISMATCHED clock fails it (2 failures).
+
+**Evidence (measured this session).** `validate:all` **133 PASS / 0 FAIL** (exit 0) · `typecheck` **0** · `lint` **0
+errors** (1 pre-existing warning) · `build` **✓** · the NEW gate **30/30 PASS**, mutation-proved ×2 against real
+regressions (removing the fail-closed routing refusal → 3 failures; removing the automatic ASN filing → 6 failures;
+`src/lib/commerce/channelPurchaseOrderIngestion.ts` and `src/lib/commerce/proxyProcessor.ts` restored byte-identical,
+sha256 `1b4264a7…` and `7d138cf2…`) · browser leg **9 passed** (`e2e/channel-po-ingestion.spec.ts` +
+`e2e/po-ack-duties.spec.ts`) · commit **`f660ed9`**, pushed to `origin/redesign/foundation`.
+
+**Three-way status.** **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE**, and for THIS increment the three-way gate
+is **NOT APPLICABLE** (`operating-model.md` §10.4): no application runtime changed. **Recorded, not hidden:** the demo
+still serves `fd0958e`, so the product fixes committed at `ef48534` are **not yet live** — deployment is **P6** of the
+plan, after **P1–P5**. **Next: P1 (the one switch)**, gated by a NEW `validate:environment`.
+
+
 `Review Zip/*.zip`) are gitignored and never tracked.
 
-## BATCH 2h (`AV-043`) — THE PURCHASE-ORDER VOCABULARY MAPPING NOW EXISTS IN ONE PLACE AND IN BOTH DIRECTIONS, AND THE ACKNOWLEDGEMENT WINDOW ASKS IT INSTEAD OF DECIDING THE CHANNEL POSITION ITSELF — DEPLOYED; LIVE VERIFICATION PARTIAL (HOST NAVIGATION TIMEOUTS) (session 56, 2026-09-30) — CURRENT
+## BATCH 2h (`AV-043`) — THE PURCHASE-ORDER VOCABULARY MAPPING NOW EXISTS IN ONE PLACE AND IN BOTH DIRECTIONS, AND THE ACKNOWLEDGEMENT WINDOW ASKS IT INSTEAD OF DECIDING THE CHANNEL POSITION ITSELF — DEPLOYED; LIVE VERIFICATION PARTIAL (HOST NAVIGATION TIMEOUTS) (session 56, 2026-09-30) — SUPERSEDED BY P0 (2026-10-01), ABOVE
 
 **What was wrong.** The audit registered `AV-043` as *"two vocabularies with no declared mapping"*. Mercenta has its own
 lifecycle (`received` · `under_review` · `accepted` · `rejected` · `ready_to_fulfil` · `shipped` · `delivered`) and its
