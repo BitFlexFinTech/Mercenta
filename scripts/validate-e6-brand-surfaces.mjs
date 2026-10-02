@@ -942,6 +942,39 @@ const P1_ENVIRONMENT_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §P1-fix — THE DOWNLOAD CONTROL (2026-10-02, owner decision D3 = print AND download).
+ *
+ * P0 recorded a finding (P0-fix): programme decision 6 says the Logistics Hub is *"where
+ * brands download shipping labels + ALL PO documents"*, but only OPEN/PRINT existed — no
+ * file download. The owner then decided **D3 = BOTH**, so this phase adds the download:
+ *   · `poDocumentPack.ts` — the pack owner gains the pack-as-a-file renderer
+ *     (`renderPoDocumentPackHtml`) and safe filename helpers; nothing is re-rendered.
+ *   · `PoDocumentPackPanel.tsx` — a per-document DOWNLOAD beside Open/Print, plus a
+ *     WHOLE-PACK download ("all PO documents" in one file).
+ *   · `LogisticsHub.tsx` — the carrier-label and waybill DIALOGUES gain Download, so the
+ *     brand can download a DHL/Palletline label as well as print it; ONE renderer per
+ *     artefact is preserved (the file is the dialogue's own rendered node).
+ *   · `validate-po-documents.mjs` — extended (executed) to prove the pack file is real,
+ *     complete, honest and safely named.
+ *   · `validate-commerce-loop.mjs` — §6 REPOINTED (the download now exists; the old
+ *     "no download" contract is recorded inline). No validator was weakened.
+ * The F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file outside EVERY declared set
+ * still fails, and no protected path is touched.
+ */
+const P1FIX_DOWNLOAD_CONTROL_SCOPE = new Set([
+  'src/lib/documents/poDocumentPack.ts',                     /* the pack owner + pack-as-a-file */
+  'src/components/shared/logistics/PoDocumentPackPanel.tsx', /* per-document + whole-pack Download */
+  'src/components/brand/LogisticsHub.tsx',                   /* the label/waybill dialogues DOWNLOAD */
+  'scripts/validate-po-documents.mjs',                       /* the extended (executed) pack gate */
+  'scripts/validate-commerce-loop.mjs',                      /* §6 repointed: the download exists */
+  'e2e/po-documents.spec.ts',                                /* the browser proof of the download */
+  'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 
 /* ── the modules under test ───────────────────────────────────────────────── */
@@ -2119,7 +2152,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §P1 — the ONE SWITCH (see above). Same declaration, first protected-path check (F5). */
         P1_ENVIRONMENT_SCOPE.has(p) ||
-        [...P1_ENVIRONMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...P1_ENVIRONMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P1-fix — the DOWNLOAD CONTROL (see above). First protected-path check (F5). */
+        P1FIX_DOWNLOAD_CONTROL_SCOPE.has(p) ||
+        [...P1FIX_DOWNLOAD_CONTROL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2190,6 +2226,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §P1 — the ONE SWITCH (see above). Same declaration, second protected-path check (F5b). */
         P1_ENVIRONMENT_SCOPE.has(p) ||
         [...P1_ENVIRONMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P1-fix — the DOWNLOAD CONTROL (see above). Second protected-path check (F5b). */
+        P1FIX_DOWNLOAD_CONTROL_SCOPE.has(p) ||
+        [...P1FIX_DOWNLOAD_CONTROL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2496,6 +2535,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §P1 — the ONE SWITCH (see above). */
           P1_ENVIRONMENT_SCOPE.has(p) ||
           [...P1_ENVIRONMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P1-fix — the DOWNLOAD CONTROL (see above). */
+          P1FIX_DOWNLOAD_CONTROL_SCOPE.has(p) ||
+          [...P1FIX_DOWNLOAD_CONTROL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

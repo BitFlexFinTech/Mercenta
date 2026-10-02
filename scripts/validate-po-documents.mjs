@@ -64,6 +64,7 @@ import {
 } from '@/lib/documents/sscc';
 import {
   buildPoDocumentPack, cartonIdentifiersFor, documentsAwaitingDownload,
+  renderPoDocumentPackHtml, poDocumentPackFileName, poDocumentFileName, poDocumentFileStem,
 } from '@/lib/documents/poDocumentPack';
 import {
   PICKUP_LEAD_TIME, earliestRequestedPickUp, buildCollectChain, arnOnRecord,
@@ -157,6 +158,24 @@ out.destination = {
 };
 
 out.cartons = cartonIdentifiersFor('PO-9100', asn.cartons);
+
+/* 2b — the pack AS A FILE (P1-fix, owner decision D3 = print AND download).
+   Built from a pack with a MIX of ready and not-ready documents, so the file's
+   honesty (what it includes vs what it lists with a reason) is actually exercised. */
+const filePack = packOf(intlPo, { nation: 'Germany', asn });
+const readyDocs = filePack.documents.filter((d) => d.applicable && d.ready && d.html);
+const notIncluded = filePack.documents.filter((d) => !(d.applicable && d.ready && d.html));
+const packHtml = renderPoDocumentPackHtml(filePack);
+out.packFile = {
+  fileName: poDocumentPackFileName(filePack),
+  docFileName: poDocumentFileName(readyDocs[0], filePack.poNumber),
+  unsafeStem: poDocumentFileStem('../../etc/passwd'),
+  html: packHtml,
+  htmlAgain: renderPoDocumentPackHtml(filePack),
+  readyCount: readyDocs.length,
+  includesAllReadyHtml: readyDocs.every((d) => packHtml.includes(d.html)),
+  notIncludedTitles: notIncluded.map((d) => d.title),
+};
 
 /* 3 — the document-download rule (the ONE rule the badge and notification share). */
 const byStatus = (s) => documentsAwaitingDownload({ ...intlPo, status: s });
@@ -512,6 +531,36 @@ const brandHubSource = fs.readFileSync(
 check(
   '§P10: the brand Hub mounts the queue with TENANT-SCOPED purchase orders',
   brandHubSource.includes('pos={scopedPos}') && brandHubSource.includes('scope="brand"')
+);
+
+/**
+ * §P1-fix (2026-10-02, owner decision D3 = print AND download) — THE DOWNLOAD CONTROL.
+ *
+ * P0 asked whether a brand could DOWNLOAD a consignment document and answered NO (only
+ * OPEN/PRINT existed). The owner then chose BOTH, so the pack now renders a WHOLE-PACK
+ * file and the surface offers Download. These assertions EXECUTE the pack owner (not a
+ * text grep) to prove the file is real, complete, honest and safe to name.
+ */
+const PF = result.packFile;
+check(
+  '§P1-fix: the pack renders a WHOLE-PACK file, and rendering it twice is byte-identical',
+  typeof PF.html === 'string' && PF.html.length > 400 && PF.html === PF.htmlAgain
+);
+check(
+  '§P1-fix: the pack file CONTAINS every ready document by its OWN html (nothing omitted)',
+  PF.readyCount >= 1 && PF.includesAllReadyHtml
+);
+check(
+  '§P1-fix: every document NOT included is listed WITH its reason — the file is never a fake',
+  PF.notIncludedTitles.every((t) => PF.html.includes(t)) && PF.html.includes('not included')
+);
+check(
+  '§P1-fix: the download filename is SAFE — no path separator and no traversal dots',
+  !/[/\\]/.test(PF.fileName) &&
+    !/[.][.]/.test(PF.fileName) &&
+    PF.docFileName.endsWith('.html') &&
+    PF.unsafeStem === 'etc-passwd' &&
+    PF.unsafeStem.length > 0
 );
 
 

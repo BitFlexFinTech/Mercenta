@@ -29,6 +29,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
+  Download,
   FileText,
   Info,
   Printer,
@@ -38,9 +39,18 @@ import type { ChannelInstruction, Product, PurchaseOrder } from '@/types';
 import { asnForInstruction } from '@/lib/commerce/proxyProcessor';
 import {
   buildPoDocumentPack,
+  poDocumentFileName,
+  poDocumentPackFileName,
+  renderPoDocumentPackHtml,
   type PoCarrierReference,
   type PoDocument,
 } from '@/lib/documents/poDocumentPack';
+/**
+ * §P1-fix — the ONE file-export helper. `downloadHtml` is the platform's existing
+ * browser file-download seam (no dependency, no network), so the download control
+ * reuses it rather than hand-rolling a second `createObjectURL` copy.
+ */
+import { downloadHtml } from '@/lib/founder/documentExport';
 import { buildCollectChain, type CollectChain } from '@/lib/shipping/collectChain';
 /** §P12 — the channel's label rule is read from its ONE canonical owner. */
 import { channelShipmentLabelsAvailability } from '@/config/shipping';
@@ -301,16 +311,45 @@ export function PoDocumentPackPanel({
     [po, instruction, shipmentStatus]
   );
 
+  /**
+   * §P1-fix — DOWNLOAD ONE DOCUMENT. Only a document this pack produces as HTML
+   * (renderer `inline_html`) can be downloaded here; a carrier label / waybill has
+   * no file of its own and is downloaded from the dialogue that renders it, so this
+   * can never offer a file that does not exist.
+   */
+  const downloadDocument = (doc: PoDocument) => {
+    if (!doc.html) return;
+    downloadHtml(poDocumentFileName(doc, pack.poNumber), doc.html);
+  };
+
+  /** §P1-fix — DOWNLOAD THE WHOLE PACK as one file (the "ALL PO documents" deliverable). */
+  const downloadPack = () => {
+    downloadHtml(poDocumentPackFileName(pack), renderPoDocumentPackHtml(pack));
+  };
+
   return (
     <div data-testid="po-documents-panel">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <p className="text-ds-micro uppercase tracking-[0.12em] text-zinc-500">
           Documents for this PO
         </p>
-        <span className="font-mono text-ds-micro text-zinc-400" data-testid="po-documents-summary">
-          {pack.readyCount}/{pack.applicableCount} ready ·{' '}
-          {pack.lane === 'international' ? 'International' : 'UK domestic'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-ds-micro text-zinc-400" data-testid="po-documents-summary">
+            {pack.readyCount}/{pack.applicableCount} ready ·{' '}
+            {pack.lane === 'international' ? 'International' : 'UK domestic'}
+          </span>
+          {/* §P1-fix (owner D3 = print AND download) — the WHOLE pack as one file. */}
+          <Button
+            size="sm"
+            variant="secondary"
+            data-testid="po-documents-download-pack"
+            onClick={downloadPack}
+            title={`Download all ${pack.readyCount} ready document(s) as one file`}
+          >
+            <Download className="h-3 w-3" aria-hidden="true" />
+            Download pack
+          </Button>
+        </div>
       </div>
       <p className="mt-1 text-ds-micro leading-relaxed text-zinc-500">
         Generated automatically when Mercenta accepted {pack.poNumber}. Destination:{' '}
@@ -370,6 +409,25 @@ export function PoDocumentPackPanel({
                   >
                     {doc.renderer === 'inline_html' ? 'Open' : 'Print'}
                   </Button>
+                  {/*
+                    §P1-fix (owner D3 = print AND download) — DOWNLOAD beside Open/Print.
+                    Shown only for a document this pack produces as a file (an
+                    `inline_html` document); a carrier label / waybill is downloaded
+                    from the dialogue that renders it, so this never offers a file
+                    that does not exist.
+                  */}
+                  {openable && doc.html && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title={`Download ${doc.title}`}
+                      data-testid={`po-document-download-${doc.kind}`}
+                      onClick={() => downloadDocument(doc)}
+                    >
+                      <Download className="h-3 w-3" aria-hidden="true" />
+                      <span className="sr-only">Download {doc.title}</span>
+                    </Button>
+                  )}
                 </div>
               </div>
 

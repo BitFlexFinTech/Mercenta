@@ -270,3 +270,53 @@ test.describe('§P10 — the Logistics Hub download queue', () => {
     );
   });
 });
+
+/**
+ * §P1-fix — THE DOWNLOAD CONTROL (owner decision D3 = print AND download).
+ *
+ * P0 recorded the GAP: the brand could OPEN and PRINT a consignment's documents but
+ * could not DOWNLOAD a file. These tests prove the download now EXISTS and produces a
+ * real file in a real browser — one document, the WHOLE pack as one file, and the
+ * carrier label from the dialogue that renders it.
+ */
+test.describe('§P1-fix — the document download control', () => {
+  test('9. a ready document and the whole pack DOWNLOAD as real files beside Open/Print', async ({
+    page,
+  }) => {
+    await acceptAndOpenDocuments(page, 'Tapatío', 'PO-9002');
+
+    const panel = page.locator('[data-testid="po-documents-panel"]');
+    await expect(panel).toBeVisible({ timeout: 8000 });
+
+    // The SSCC carton labels are READY (generated from the ASN Mercenta filed), so a
+    // Download sits beside their Open control — the "Download sibling" of P1-fix.
+    const docDownload = panel.locator('[data-testid="po-document-download-sscc_carton_labels"]');
+    await expect(docDownload).toBeVisible();
+
+    const single = page.waitForEvent('download');
+    await docDownload.click();
+    expect((await single).suggestedFilename()).toMatch(/^PO-9002-sscc_carton_labels\.html$/);
+
+    // The WHOLE pack downloads as ONE file (decision 6: "brands download … ALL PO documents").
+    const whole = page.waitForEvent('download');
+    await panel.locator('[data-testid="po-documents-download-pack"]').click();
+    expect((await whole).suggestedFilename()).toMatch(/^PO-9002-document-pack\.html$/);
+  });
+
+  test('10. the carrier label dialogue DOWNLOADS the label it renders (owner D3)', async ({
+    page,
+  }) => {
+    await acceptAndOpenDocuments(page, 'Tapatío', 'PO-9002');
+
+    await page.locator('[data-testid="po-document-open-carrier_label"]').click();
+    const dialog = page.locator('[data-testid="logistics-labels-dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 6000 });
+
+    const download = page.waitForEvent('download');
+    await dialog.locator('[data-testid="logistics-labels-download"]').click();
+    expect((await download).suggestedFilename()).toMatch(/^shipping-label-.*\.html$/);
+
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
+  });
+});

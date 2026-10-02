@@ -936,6 +936,26 @@ try {
     'package.json',
   ];
 
+  /**
+   * §P1-fix — THE DOWNLOAD CONTROL (2026-10-02, owner decision D3 = print AND download).
+   * The declared surface of the download-control phase (see the fuller note in
+   * `validate-e6-brand-surfaces.mjs` §P1FIX_DOWNLOAD_CONTROL_SCOPE). Same mechanism as
+   * every phase above: a changed source/test file outside EVERY declared set is still
+   * refused, and no protected path is touched.
+   */
+  const P1FIX_DOWNLOAD_CONTROL_DECLARED = [
+    'src/lib/documents/poDocumentPack.ts',
+    'src/components/shared/logistics/PoDocumentPackPanel.tsx',
+    'src/components/brand/LogisticsHub.tsx',
+    'scripts/validate-po-documents.mjs',
+    'scripts/validate-commerce-loop.mjs',
+    'e2e/po-documents.spec.ts',
+    'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1689,7 +1709,13 @@ try {
            * UNEXPLAINED protected change still fails.
            */
           !P1_ENVIRONMENT_DECLARED.includes(f) &&
-          !P1_ENVIRONMENT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P1_ENVIRONMENT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §P1-fix — THE DOWNLOAD CONTROL (2026-10-02) — touches no protected path, but
+           * its declared surface is accepted here exactly as every other phase's is.
+           */
+          !P1FIX_DOWNLOAD_CONTROL_DECLARED.includes(f) &&
+          !P1FIX_DOWNLOAD_CONTROL_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1931,6 +1957,10 @@ try {
      * §P1 — THE ONE SWITCH (2026-10-02) — the environment-owner surface (see above).
      */
     ...P1_ENVIRONMENT_DECLARED,
+    /**
+     * §P1-fix — THE DOWNLOAD CONTROL (2026-10-02) — the download-control surface (see above).
+     */
+    ...P1FIX_DOWNLOAD_CONTROL_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

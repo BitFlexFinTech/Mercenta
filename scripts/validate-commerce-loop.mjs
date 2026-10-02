@@ -31,8 +31,9 @@
  *     payout) stops reaching a SETTLED payout, or a payout stops being idempotent;
  *   · any live network call is made;
  *   · the source loses the truth this gate reports about the label/document question
- *     (the pack is PRINTABLE/OPENABLE and there is NO file-download control), so the
- *     owner's expectation cannot silently drift again.
+ *     (the pack is PRINTABLE/OPENABLE and, since the owner chose D3 = print AND
+ *     download, also DOWNLOADABLE as a real file), so the owner's expectation cannot
+ *     silently drift again.
  *
  * Run: node scripts/validate-commerce-loop.mjs
  */
@@ -547,17 +548,6 @@ check('the whole loop made ZERO external calls', result.networkCalls === 0, `obs
 console.log('\n§ 6. Question 4 — can a brand DOWNLOAD a label/document for the consignment?\n');
 const packPanel = code('src/components/shared/logistics/PoDocumentPackPanel.tsx');
 const hub = code('src/components/brand/LogisticsHub.tsx');
-const logisticsDir = path.join(ROOT, 'src/components/shared/logistics');
-const walked = fs.readdirSync(logisticsDir, { withFileTypes: true }).flatMap((entry) =>
-  entry.isDirectory()
-    ? []
-    : /\.(ts|tsx)$/.test(entry.name)
-      ? [path.join(logisticsDir, entry.name)]
-      : []
-);
-const logisticsCode = walked
-  .map((f) => fs.readFileSync(f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''))
-  .join('\n');
 
 check('the pack surface offers an OPEN control for an inline document',
   /Open/.test(packPanel) && /setOpenDoc/.test(packPanel));
@@ -565,19 +555,37 @@ check('the pack surface offers a PRINT control that opens the carrier own dialog
   /Print/.test(packPanel) && /onOpenCarrierArtefact/.test(packPanel));
 check('the carrier label dialogue renders a PRINTABLE label and calls window.print()',
   /printable-label/.test(hub) && /window\.print\(\)/.test(hub) && /Print labels/.test(hub));
-check('NO consignment document is offered as a FILE DOWNLOAD anywhere in logistics',
-  !/createObjectURL/.test(logisticsCode) && !/\.download\s*=/.test(logisticsCode) &&
-    !/createObjectURL/.test(packPanel),
-  'a download control was found — the answer below would be wrong');
-check('the pack surface cannot claim a download it does not implement',
-  !/Download/.test(packPanel),
-  'the panel promises a download it does not perform');
+/*
+  §P1-fix (2026-10-02) — REPOINTED, not weakened.
+
+  OLD CONTRACT (recorded, not deleted): P0 answered question 4 with NO — this gate
+  asserted `NO consignment document is offered as a FILE DOWNLOAD anywhere in logistics`
+  and `the pack surface cannot claim a download it does not implement`, and printed the
+  GAP against programme decision 6 ("brands download … ALL PO documents") awaiting the
+  owner's decision D3. That was the truth while no download existed. The owner then chose
+  D3 = BOTH (print AND download), so the SAME gate now asserts the download EXISTS and is
+  HONEST. The negative is retained as an inverted guard below: the surface must no longer
+  present itself as download-less, i.e. a regression that removes the control fails here.
+*/
+check('the pack surface offers a per-document DOWNLOAD for a file it produces',
+  /po-document-download-/.test(packPanel) && /downloadDocument/.test(packPanel) &&
+    /downloadHtml/.test(packPanel));
+check('the pack surface offers a WHOLE-PACK download ("all PO documents" in one file)',
+  /po-documents-download-pack/.test(packPanel) && /renderPoDocumentPackHtml/.test(packPanel));
+check('the download can NEVER offer a file the pack does not produce (guarded by doc.html)',
+  /openable && doc\.html/.test(packPanel));
+check('the carrier label dialogue is DOWNLOADABLE as well as printable (owner D3)',
+  /logistics-labels-download/.test(hub) && /printable-label/.test(hub) && /window\.print\(\)/.test(hub));
+check('the waybill dialogue is DOWNLOADABLE as well as printable (owner D3)',
+  /logistics-waybill-download/.test(hub) && /printable-waybill/.test(hub) && /window\.print\(\)/.test(hub));
+check('the download reuses ONE renderer — it serialises the SAME rendered artefact, not a copy',
+  /downloadRenderedArtefact/.test(hub) && /node\.innerHTML/.test(hub));
 console.log('  ANSWER: the brand can OPEN and PRINT every applicable document (the carrier');
 console.log('          label/waybill through the carrier own dialogue, which calls the');
-console.log('          browser print dialog — "Save as PDF" is the browser, not ours).');
-console.log('          There is NO file-download control for a consignment document.');
-console.log('          That is a GAP against programme decision 6 ("brands download their');
-console.log('          shipping labels + ALL PO documents") and needs the owner decision D3.');
+console.log('          browser print dialog — "Save as PDF" is the browser, not ours), and');
+console.log('          since owner decision D3 it can DOWNLOAD: each pack document as its own');
+console.log('          file, the WHOLE pack as one file, and the carrier label/waybill from');
+console.log('          the dialogue that renders them. This closes P0-fix against decision 6.');
 
 /* ── Summary ──────────────────────────────────────────────────────────────── */
 console.log('');

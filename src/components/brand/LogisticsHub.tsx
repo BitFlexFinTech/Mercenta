@@ -60,6 +60,13 @@ import { LogisticsHero } from '@/components/shared/logistics/LogisticsHero';
  */
 import { PoDocumentPackPanel } from '@/components/shared/logistics/PoDocumentPackPanel';
 /**
+ * §P1-fix (owner decision D3 = print AND download) — the ONE browser file-export
+ * helper the platform already exposes. The carrier-label and waybill dialogues use
+ * it to download their OWN rendered artefact, so the brand can DOWNLOAD a DHL /
+ * Palletline label as well as print it.
+ */
+import { downloadHtml } from '@/lib/founder/documentExport';
+/**
  * §P10 (programme §4 P10) — the Hub's completion surfaces, each backed by its ONE owner:
  * the download QUEUE (same rule as the badge), the CARRIER PROVIDER CONFIGURATION and the
  * CONSOLIDATION posture (programme decision 11).
@@ -105,6 +112,7 @@ import {
   Info,
   Route,
   ArrowRight,
+  Download,
 } from 'lucide-react';
 
 const MILESTONES: {
@@ -200,9 +208,30 @@ function LogisticDialog({
   );
 }
 
+/* ── §P1-fix — download a dialogue's OWN rendered artefact ───────────────── */
+
+/**
+ * Download a rendered artefact's file (owner decision D3 = print AND download).
+ * The node passed in IS the dialogue's own renderer — one renderer per artefact —
+ * so its `innerHTML` becomes a self-contained HTML file and no second copy of the
+ * label/waybill markup exists. The base stylesheet stands in for the app's utility
+ * classes and the barcode bars carry their own inline sizes, so the file is faithful.
+ */
+function downloadRenderedArtefact(node: HTMLElement | null, filename: string, title: string): void {
+  if (!node) return;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
+  <style>
+    body{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#000;padding:32px}
+    dl{display:grid;grid-template-columns:auto 1fr;gap:8px 24px;margin:0}
+    dt{color:#555}
+  </style></head><body>${node.innerHTML}</body></html>`;
+  downloadHtml(filename, html);
+}
+
 /* ── WAYBILL ──────────────────────────────────────────────────────────── */
 
 function WaybillModal({ shipment, onClose }: { shipment: Shipment; onClose: () => void }) {
+  const printableRef = useRef<HTMLDivElement | null>(null);
   return (
     <LogisticDialog
       title="Freight waybill"
@@ -210,7 +239,7 @@ function WaybillModal({ shipment, onClose }: { shipment: Shipment; onClose: () =
       onClose={onClose}
       testId="logistics-waybill-dialog"
     >
-      <div className="rounded-ds-md bg-white p-5 text-black" id="printable-waybill">
+      <div ref={printableRef} className="rounded-ds-md bg-white p-5 text-black" id="printable-waybill">
         <div className="mb-4 flex items-center justify-between border-b-2 border-black pb-3">
           <div>
             <div className="text-base font-bold uppercase tracking-tight">{BRAND_NAME}</div>
@@ -262,13 +291,19 @@ function WaybillModal({ shipment, onClose }: { shipment: Shipment; onClose: () =
           <div className="font-mono text-xl tracking-widest">{shipment.trackingNumber}</div>
           <div className="mt-3 flex justify-center gap-0.5">
             {Array.from({ length: 40 }).map((_, i) => (
+              /*
+                §P1-fix — the bar sizes are INLINE, not utility classes, so the
+                downloaded waybill file keeps its barcode (utilities are not carried
+                into the standalone HTML).
+              */
               <div
                 key={i}
-                className={cn(
-                  'w-0.5 bg-black',
-                  (i + shipment.reference.length) % 3 === 0 ? 'h-8' : 'h-6'
-                )}
-                style={{ opacity: i % 4 === 0 ? 1 : 0.3 }}
+                style={{
+                  width: 2,
+                  height: (i + shipment.reference.length) % 3 === 0 ? 32 : 24,
+                  backgroundColor: '#000',
+                  opacity: i % 4 === 0 ? 1 : 0.3,
+                }}
               />
             ))}
           </div>
@@ -278,6 +313,21 @@ function WaybillModal({ shipment, onClose }: { shipment: Shipment; onClose: () =
       <div className="mt-4 flex justify-end gap-2">
         <Button variant="secondary" onClick={onClose}>
           Close
+        </Button>
+        {/* §P1-fix — DOWNLOAD beside Print (owner decision D3). */}
+        <Button
+          variant="secondary"
+          data-testid="logistics-waybill-download"
+          onClick={() =>
+            downloadRenderedArtefact(
+              printableRef.current,
+              `waybill-${shipment.trackingNumber || shipment.reference}.html`,
+              'Freight waybill'
+            )
+          }
+        >
+          <Download className="h-3.5 w-3.5" />
+          Download
         </Button>
         <Button onClick={() => window.print()}>
           <Printer className="h-3.5 w-3.5" />
@@ -299,6 +349,7 @@ function LabelsModal({
   shipment: Shipment & { brandId?: string; poNumber?: string };
   onClose: () => void;
 }) {
+  const printableRef = useRef<HTMLDivElement | null>(null);
   return (
     <LogisticDialog
       title="Shipping labels"
@@ -307,7 +358,7 @@ function LabelsModal({
       width="max-w-3xl"
       testId="logistics-labels-dialog"
     >
-      <div className="rounded-ds-md bg-white p-6 font-mono text-black" id="printable-label">
+      <div ref={printableRef} className="rounded-ds-md bg-white p-6 font-mono text-black" id="printable-label">
         <div className="mb-4 border-b-2 border-black pb-3 text-center">
           <div className="text-ds-title font-bold uppercase">Shipping Label</div>
           <div className="text-ds-label text-zinc-600">{BRAND_NAME}</div>
@@ -328,6 +379,22 @@ function LabelsModal({
       <div className="mt-4 flex justify-end gap-2">
         <Button variant="secondary" onClick={onClose}>
           Close
+        </Button>
+        {/* §P1-fix — DOWNLOAD beside Print (owner decision D3: the brand may DOWNLOAD
+            a DHL/Palletline carrier label as well as print it). */}
+        <Button
+          variant="secondary"
+          data-testid="logistics-labels-download"
+          onClick={() =>
+            downloadRenderedArtefact(
+              printableRef.current,
+              `shipping-label-${shipment.poNumber || shipment.reference}.html`,
+              'Shipping label'
+            )
+          }
+        >
+          <Download className="h-3 w-3" />
+          Download
         </Button>
         <Button onClick={() => window.print()}>
           <Printer className="h-3 w-3" />

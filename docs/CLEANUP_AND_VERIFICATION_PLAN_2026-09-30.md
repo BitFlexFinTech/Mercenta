@@ -11,9 +11,13 @@ is exactly ONE plan and it cannot drift (exactly the rule this file already carr
   gate (`validate:amazon-vendor-codes`, 20/20). Both change no application runtime.
 - **P1 IS DONE (2026-10-02).** The ONE SWITCH now exists (`src/config/environment.ts`), the data layer's seed fallback
   is demo-only, the provider-mode machine reads the owner, and the switch is operable in one obvious place —
-  `npm run validate:environment` **16/16** proves it (mutation-proved). **P1-fix – P6 product work is still PLANNED:
-  no OTHER product runtime code has been changed.** Every finding below was read from the code, with the file named so
-  it can be checked.
+  `npm run validate:environment` **16/16** proves it (mutation-proved).
+- **P1-fix IS DONE (2026-10-02).** The DOWNLOAD CONTROL now exists (owner decision **D3 = print AND download**): each
+  pack document downloads as its own file, the WHOLE pack downloads as one file, and the carrier label / waybill
+  download from the dialogue that renders them. Proved by an executed gate (`validate:po-documents` **57/57**), a
+  REPOINTED commerce-loop §6, and a browser run of `e2e/po-documents.spec.ts` (**10 passed**).
+- **P2 – P6 product work is still PLANNED: no OTHER product runtime code has been changed** beyond P1 and P1-fix.
+  Every finding below was read from the code, with the file named so it can be checked.
 
 **Owner:** Founder/Super Admin. **Owner decisions:** D1, D3 and D4 ANSWERED; D2 DEFERRED (skip P5 for now) — see §5.
 
@@ -130,7 +134,7 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 | **P0** | PROVE THE LOOP END TO END — one order, every step, with output | a new validator that DRIVES one seeded order through arrive → route → decide → channel ack → ASN → confirmation → invoice → payout and PRINTS each step; plus a browser run of the same order on the brand screen | **DONE (2026-10-01)** — `npm run validate:commerce-loop` **30/30 PASS** (mutation-proved ×2: the fail-closed routing refusal removed ⇒ 3 failures; the automatic ASN filing removed ⇒ 6 failures; both restored byte-identical). Browser leg: `e2e/channel-po-ingestion.spec.ts` + `e2e/po-ack-duties.spec.ts` **9 passed**. One finding recorded for **P1-fix** (see below). |
 | **P0a** | HOUSEKEEPING — BACK UP THE OWNER'S FOLDERS | the owner's `Products/` folder is saved into the project (its macOS `​.DS_Store` junk skipped), the working tree is clean, and the standing rule is recorded: *"when the owner adds a folder, back it up"* | **DONE (2026-10-02)** — `Products/` backed up; rule recorded in `PROJECT_STATUS.md`/`HANDOFF.md`/`.clinerules`. No application runtime change. |
 | **P1** | ONE SWITCH (the environment owner) | `npm run validate:environment` (new) proves: demo needs no credential; live never falls back to seed; an unconfigured provider is UNAVAILABLE, never simulated; every seam reads the owner, not its own flag | **DONE (2026-10-02)** — `src/config/environment.ts` (NEW) is the ONE owner; `src/data/api.ts` routes EVERY seed fallback through `seedFallback` (demo-only); `modeForState` reads `environmentDefaultMode`; the switch is operable in the Simulation Control Centre; `npm run validate:environment` **16/16** — mutation-proved ×2 (`seedFallback` broken ⇒ 1 failure; the provider-default mapping broken ⇒ 2 failures; both restored byte-identical); the fail-closed `isProviderSimulationSafe` rule is UNCHANGED; browser `e2e/simulation-control.spec.ts` ONE-SWITCH test **1 passed**. |
-| **P1-fix** | DOWNLOAD CONTROL (was "P0-fix") — a Download button beside Open/Print for a consignment's documents | the logistics surface offers **Download** for the chosen artefacts (owner **D3** = print **and** download), asserted by a browser check; the capability may be called a "download" only once this exists | NOT STARTED — **unblocked** by owner decision **D3** (2026-10-02) |
+| **P1-fix** | DOWNLOAD CONTROL (was "P0-fix") — a Download button beside Open/Print for a consignment's documents | the logistics surface offers **Download** for the chosen artefacts (owner **D3** = print **and** download), asserted by a browser check; the capability may be called a "download" only once this exists | **DONE (2026-10-02)** — `PoDocumentPackPanel.tsx` gains a per-document **Download** beside Open/Print and a **Download pack** (all ready documents in one file); `poDocumentPack.ts` owns the file (`renderPoDocumentPackHtml` + safe filenames); `LogisticsHub.tsx` label/waybill dialogues gain Download (owner D3's carrier label). Gates: `validate:po-documents` **57/57** (executed), commerce-loop §6 **REPOINTED**, e2e `po-documents.spec.ts` **10 passed**. |
 | **P1a** | AMAZON VENDOR-CODE → CATEGORY REGISTRY | `src/config/amazonVendorCodes.ts` holds the owner's vendor codes with each category stored VERBATIM as Amazon Vendor Central shows it; two codes are marked "To Be Confirmed" and linking a category to them is BLOCKED until the owner confirms with Amazon; gated by `validate:amazon-vendor-codes` | **DONE (2026-10-02)** — registry + gate **20/20**; no guessed mapping; no application runtime change. |
 | **P2** | TWO DEMO BRANDS (was "one") | `validate:demo-completeness` + browser suites green after the seed and the login list are reduced to the two demo brands and the checks REPOINTED (never weakened); tenant isolation still proves one brand cannot see another's data | NOT STARTED — owner **D1** = **two** demo brands |
 | **P3** | EVERY BUTTON IS WIRED (UI audit) | `npm run validate:ui-wiring` (new) walks every button/control in `src/components/**` and fails on: no handler, a handler that only changes local state, a control whose label promises an action it does not perform | NOT STARTED |
@@ -178,19 +182,32 @@ order the whole way and PRINTS every step. Measured output on 2026-10-01 (brand-
    the acknowledgement id/status/mode is printed above.
 3. **Yes** — the ASN is filed automatically on acceptance, the consignment is created, and the CHANNEL's own
    confirmation id is recorded (never conflated with a local filing).
-4. **NO FILE DOWNLOAD EXISTS.** The brand can OPEN every applicable document and PRINT the carrier label/waybill
-   through the carrier's own dialogue (which calls the browser print dialog — "Save as PDF" is the browser's). There
-   is no download control anywhere in the logistics surface (asserted against the source, with the negative pinned).
+4. **ANSWER AT P0 — NO FILE DOWNLOAD EXISTED.** The brand can OPEN every applicable document and PRINT the carrier
+   label/waybill through the carrier's own dialogue (which calls the browser print dialog — "Save as PDF" is the
+   browser's). At P0 there was no download control anywhere in the logistics surface (asserted against the source,
+   with the negative pinned). **This answer is HISTORICAL: it was resolved by P1-fix on 2026-10-02 — see the
+   "P0-fix — RESOLVED" section below.**
 
-#### P0-fix — THE RECORDED FINDING (BLOCKED on the owner's decision D3)
+#### P0-fix — THE RECORDED FINDING (RESOLVED by P1-fix, 2026-10-02)
 
-Programme decision 6 states the Logistics Hub is *"where brands download shipping labels + ALL PO documents"*. What is
-implemented is OPEN + PRINT, not DOWNLOAD. This is recorded here as **P0-fix**, deliberately NOT fixed inside P0
-(P0's scope is "change nothing"), and it is **BLOCKED** on **D3** — the owner's decision on whether a brand should
-download a CARRIER label (DHL/Palletline) per consignment or only the document pack. **Exact next action:** take D3,
-then add the download control for the chosen artefacts (the platform already has one file-export pattern,
-`src/components/brand/BrandContractView.tsx`) and gate it with a browser assertion. **Until then the capability must
-not be described as a download.**
+Programme decision 6 states the Logistics Hub is *"where brands download shipping labels + ALL PO documents"*. At P0,
+only OPEN + PRINT was implemented, not DOWNLOAD — recorded here as **P0-fix**, deliberately NOT fixed inside P0 (P0's
+scope is "change nothing"). The owner then decided **D3 = BOTH** (print AND download), which unblocked the fix.
+
+**RESOLVED (2026-10-02), in P1-fix.** The download now exists and is honest:
+- each applicable, READY pack document downloads as its own file (the pack owns its HTML);
+- the WHOLE pack downloads as ONE file — decision 6's literal *"ALL PO documents"* — and a document that is not
+  ready/not applicable is listed **with its reason**, never faked;
+- the carrier label and the freight waybill download **from the dialogue that renders them** (one renderer per
+  artefact preserved), which is owner D3's carrier-label half;
+- filenames are sanitised (no path separator, no traversal dots) and the file-export seam is the platform's existing
+  helper (`src/lib/founder/documentExport.ts → downloadHtml`), not a new duplicate.
+
+**Gates:** `npm run validate:po-documents` **57 assertions** (EXECUTING the pack owner: the whole-pack file is
+deterministic, contains every ready document's own HTML, states every excluded document with its reason, and is
+safely named) · `validate-commerce-loop` §6 **REPOINTED** (records the old "no download" contract inline and now
+asserts the download exists) · browser `e2e/po-documents.spec.ts` **10 passed** (two new tests capture a real
+download event for a single document, the whole pack, and the carrier label).
 
 #### P0 also fixed a defect at its source (a gate, not a feature)
 

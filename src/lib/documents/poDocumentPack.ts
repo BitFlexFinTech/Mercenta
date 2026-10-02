@@ -610,3 +610,65 @@ export function buildPoDocumentPack(input: {
 export function documentsAwaitingDownload(po: PurchaseOrder): boolean {
   return po.status === 'accepted' || po.status === 'ready_to_fulfil';
 }
+
+/* ── THE PACK AS A FILE (P1-fix, owner decision D3 = print AND download) ───── */
+
+/**
+ * A safe file stem for a download: letters, digits, dot, dash and underscore only.
+ * A reference can be pasted from anywhere, so anything else becomes a dash — a
+ * filename must never carry a path separator or a shell character.
+ */
+export function poDocumentFileStem(value: string): string {
+  const stem = value
+    .replace(/[^A-Za-z0-9._-]+/g, '-')
+    .replace(/\.{2,}/g, '-')
+    .replace(/^[.-]+|[.-]+$/g, '');
+  return stem || 'document';
+}
+
+/** The filename ONE document downloads as (e.g. `PO-9002-packing_list_delivery_note.html`). */
+export function poDocumentFileName(doc: PoDocument, poNumber: string): string {
+  return `${poDocumentFileStem(poNumber)}-${poDocumentFileStem(doc.kind)}.html`;
+}
+
+/** The filename the WHOLE pack downloads as. */
+export function poDocumentPackFileName(pack: PoDocumentPack): string {
+  return `${poDocumentFileStem(pack.poNumber)}-document-pack.html`;
+}
+
+/**
+ * Render the WHOLE pack as ONE self-contained HTML file — programme decision 6's
+ * "brands download shipping labels + ALL PO documents". It is honest by
+ * construction: a document that is applicable and READY is included by its OWN
+ * HTML (this module owns it, so nothing is re-rendered here), and a document that
+ * is not applicable or not ready is listed WITH ITS REASON rather than omitted or
+ * faked. The file therefore never implies an artefact it does not contain.
+ */
+export function renderPoDocumentPackHtml(pack: PoDocumentPack): string {
+  const sections = pack.documents
+    .map((doc) => {
+      if (doc.applicable && doc.ready && doc.html) {
+        return `<section style="page-break-after:always">${doc.html}</section>`;
+      }
+      const why =
+        doc.notApplicableReason ?? doc.notReadyReason ?? 'No printable content is on the record yet.';
+      return `<section style="page-break-after:always">
+        <h2 style="font-size:16px">${escapeHtml(doc.title)} — not included</h2>
+        <p style="color:#555">${escapeHtml(why)}</p>
+      </section>`;
+    })
+    .join('\n');
+
+  return `<!doctype html><html><head><meta charset="utf-8">
+  <title>${escapeHtml(pack.poNumber)} — document pack</title></head>
+  <body style="font-family:Georgia,serif;max-width:760px;margin:32px auto;color:#0C1219">
+    <h1 style="font-size:20px">${escapeHtml(pack.poNumber)} — document pack</h1>
+    <p style="font-size:12px;color:#555">
+      ${escapeHtml(pack.brandName)} · destination ${escapeHtml(pack.destinationLabel)} ·
+      ${pack.readyCount}/${pack.applicableCount} documents ready · generated ${escapeHtml(pack.generatedAt)}
+    </p>
+    ${pack.notices.map((notice) => `<p style="font-size:12px;color:#555">${escapeHtml(notice)}</p>`).join('\n')}
+    <hr/>
+    ${sections}
+  </body></html>`;
+}
