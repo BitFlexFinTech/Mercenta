@@ -65,6 +65,8 @@
     "validate:amazon-vendor-codes": "node scripts/validate-amazon-vendor-codes.mjs",
     "validate:environment": "node scripts/validate-environment.mjs",
     "validate:ui-wiring": "node scripts/validate-ui-wiring.mjs",
+    "validate:dead-code": "node scripts/validate-dead-code.mjs",
+    "validate:duplicate-owners": "node scripts/validate-duplicate-owners.mjs",
     "validate:on-behalf-authority": "node scripts/validate-on-behalf-authority.mjs",
     "validate:po-ack-window": "node scripts/validate-po-acknowledgement-window.mjs",
     "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",

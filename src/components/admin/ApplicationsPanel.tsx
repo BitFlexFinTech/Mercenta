@@ -17,7 +17,18 @@ import {
   Flag, UserPlus, ExternalLink, Clock,
 } from 'lucide-react';
 
-const STATUS_LABELS: Record<string, string> = { all:'All', pending:'Pending', flagged:'Flagged', info_requested:'Info Requested', approved:'Approved', rejected:'Rejected' };
+/**
+ * §P4 (2026-10-02) — A SECOND STATUS-LABEL OWNER IS GONE (DEFECT FIXED AT SOURCE).
+ *
+ * This file used to declare its own `STATUS_LABELS` map with `Pending` / `Flagged`
+ * / `Info Requested` / `Approved` / `Rejected` — the SAME strings the canonical
+ * owner `src/lib/statusPresentation.ts` already owns via `applicationStatusPresentation`.
+ * The two were used side by side in this one screen (the row badges read the
+ * canonical owner, the filter chips read the local copy), so a change to one
+ * label set could silently disagree with the other. The filter now reads the ONE
+ * owner, so the chip and the badge on the row can never drift. Gated by
+ * `npm run validate:duplicate-owners`.
+ */
 const LINK_ICONS: Record<string, {icon:string;color:string;label:string}> = {
   verified:{icon:'\u2705',color:'text-emerald-400',label:'Verified'},
   unreachable:{icon:'\u274c',color:'text-red-400',label:'Unreachable'},
@@ -165,7 +176,7 @@ return(<div className="space-y-4">
             className={cn('text-left px-3 py-2.5 rounded-ds-md border transition-ds',
               active?'bg-brass-500/15 border-brass-500/40':'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.14]')}>
             <div className="text-lg font-semibold text-white tabular-nums">{count}</div>
-            <div className="text-ds-label text-zinc-400">{f==='all'?'All applications':STATUS_LABELS[f]}</div>
+            <div className="text-ds-label text-zinc-400">{f==='all'?'All applications':applicationStatusPresentation(f).label}</div>
           </button>
         );
       })}

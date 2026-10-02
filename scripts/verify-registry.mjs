@@ -205,7 +205,7 @@ for (const entry of entries) {
           'BankFinancingSection.tsx','InvestorPitchSection.tsx',
           'MonitoringDashboard.tsx','HelpdeskDashboard.tsx',
           'ProductResearchSection.tsx','ManufacturerSourcingSection.tsx',
-          'GrantsInvestorsSection.tsx','engine.ts','firecrawlResearch.ts',
+          'GrantsInvestorsSection.tsx','engine.ts','firecrawlClient.ts',
           'wordingSafety.ts','budget.ts',
         ];
         const filtered = unique.filter(f => knownFiles.some(k => f.endsWith(k)) || f.includes('/'));

@@ -1035,6 +1035,33 @@ const P3_UI_WIRING_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §P4 — DEAD CODE AND DUPLICATE OWNERS (2026-10-02). The plan's fourth phase.
+ *
+ * The new `validate:dead-code` gate (0 undeclared candidates) removed the two
+ * files nothing imported — `dailyReport.ts` (no consumer, no documentation) and
+ * `firecrawlResearch.ts` (the unreached glue of the firecrawl seam) — and the
+ * `src/data/api.ts` ASN auto-push stub was RESOLVED at source (the channel
+ * confirmation is owned by `fileChannelShipmentConfirmation`, not a local
+ * aspirational entry). The new `validate:duplicate-owners` gate consolidated the
+ * second application-status label map (`ApplicationsPanel.tsx`) onto the ONE
+ * owner (`statusPresentation.ts`). F5/F5b/F6 contract UNCHANGED: a changed SOURCE
+ * file outside EVERY declared set still fails.
+ */
+const P4_CLEANUP_SCOPE = new Set([
+  'src/data/api.ts',                          /* the ASN auto-push stub resolved at source */
+  'src/components/admin/ApplicationsPanel.tsx',/* the duplicate STATUS_LABELS map removed */
+  'src/lib/research/dailyReport.ts',          /* DELETED — unreferenced, undocumented */
+  'src/lib/discovery/firecrawlResearch.ts',   /* DELETED — the unreached firecrawl glue */
+  'scripts/validate-dead-code.mjs',           /* NEW — this phase's gate */
+  'scripts/validate-duplicate-owners.mjs',    /* NEW — this phase's gate */
+  'scripts/verify-registry.mjs',              /* knownFiles repointed (firecrawlResearch.ts → firecrawlClient.ts) */
+  'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2220,7 +2247,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...P2_TWO_DEMO_BRANDS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §P3 — EVERY BUTTON IS WIRED (see above). First protected-path check (F5). */
         P3_UI_WIRING_SCOPE.has(p) ||
-        [...P3_UI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...P3_UI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P4 — DEAD CODE + DUPLICATE OWNERS (see above). First protected-path check (F5). */
+        P4_CLEANUP_SCOPE.has(p) ||
+        [...P4_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2300,6 +2330,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §P3 — EVERY BUTTON IS WIRED (see above). Second protected-path check (F5b). */
         P3_UI_WIRING_SCOPE.has(p) ||
         [...P3_UI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P4 — DEAD CODE + DUPLICATE OWNERS (see above). Second protected-path check (F5b). */
+        P4_CLEANUP_SCOPE.has(p) ||
+        [...P4_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2615,6 +2648,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §P3 — EVERY BUTTON IS WIRED (see above). */
           P3_UI_WIRING_SCOPE.has(p) ||
           [...P3_UI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P4 — DEAD CODE + DUPLICATE OWNERS (see above). */
+          P4_CLEANUP_SCOPE.has(p) ||
+          [...P4_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

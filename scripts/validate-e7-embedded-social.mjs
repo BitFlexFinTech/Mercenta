@@ -1006,6 +1006,27 @@ try {
     'package.json',
   ];
 
+  /**
+   * §P4 — DEAD CODE AND DUPLICATE OWNERS (2026-10-02). The new `validate:dead-code`
+   * gate removed the two files nothing imported and RESOLVED the `api.ts` ASN
+   * auto-push stub at source; the new `validate:duplicate-owners` gate consolidated
+   * the second application-status label map onto the ONE owner. Fuller note in
+   * `validate-e6-brand-surfaces.mjs` §P4_CLEANUP_SCOPE. Same mechanism: a changed
+   * source/test file outside EVERY declared set is still refused.
+   */
+  const P4_CLEANUP_DECLARED = [
+    'src/data/api.ts',
+    'src/components/admin/ApplicationsPanel.tsx',
+    'src/lib/research/dailyReport.ts',
+    'src/lib/discovery/firecrawlResearch.ts',
+    'scripts/validate-dead-code.mjs',
+    'scripts/validate-duplicate-owners.mjs',
+    'scripts/verify-registry.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1771,7 +1792,13 @@ try {
            * its declared surface is accepted here exactly as every other phase's is.
            */
           !P3_UI_WIRING_DECLARED.includes(f) &&
-          !P3_UI_WIRING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P3_UI_WIRING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §P4 — DEAD CODE + DUPLICATE OWNERS (2026-10-02) — touches no protected
+           * path, but its declared surface is accepted here as every phase's is.
+           */
+          !P4_CLEANUP_DECLARED.includes(f) &&
+          !P4_CLEANUP_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2025,6 +2052,10 @@ try {
      * §P3 — EVERY BUTTON IS WIRED (2026-10-02) — the UI-wiring surface (see above).
      */
     ...P3_UI_WIRING_DECLARED,
+    /**
+     * §P4 — DEAD CODE + DUPLICATE OWNERS (2026-10-02) — the cleanup surface (see above).
+     */
+    ...P4_CLEANUP_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

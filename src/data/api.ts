@@ -2444,19 +2444,23 @@ export function createShipmentForPO(
     metadata: { actorLabel: actorLabelCreate, carrier: asn.carrier, cartonCount: asn.cartons.length, unitCount: asn.cartons.reduce((a, c) => a + c.quantity, 0), shortfallCount: shortfalls.length, deductionId },
   });
 
-// §ASN auto-push stub — when shipment is confirmed, log that an ASN would be pushed
-  // TODO: Replace with real SP-API PUT /vendor/shipping call when Amazon account is approved
-  demoAuditLog.push({
-    id: 'audit-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-    createdAt: new Date().toISOString(),
-    actorId: actorStaffId ?? po.brandId,
-    action: 'asn_auto_generated',
-    entityType: 'shipment',
-    entityId: shipmentId,
-    brandId: po.brandId,
-    reason: 'ASN auto-generated for PO ' + po.poNumber + ', shipment ' + shipmentId + '. Would be pushed to the live retail-channel API once the integration is connected.',
-    metadata: { poNumber: po.poNumber, shipmentId: shipmentId, carrier: asn.carrier },
-  });
+/**
+  * §P4 (2026-10-02) — THE LAST UNFINISHED-WORK MARKER IN src/ IS RESOLVED, NOT PENDING.
+  *
+  * This used to write an `asn_auto_generated` audit entry claiming the channel
+  * confirmation *"… Would be pushed to the live retail-channel API once the
+  * integration is connected."* That statement had become FALSE, and it duplicated
+  * a real owner. The channel confirmation is now PERFORMED by
+  * `fileChannelShipmentConfirmation` (`src/lib/shipping/channelShipmentOperations.ts`
+  * — the SP-API `submitShipmentConfirmations` seam, register `AV-015`), which is
+  * called on the automatic acceptance path in `src/lib/commerce/proxyProcessor.ts`.
+  * A second, aspirational entry here would misdescribe that filing, so it is gone.
+  *
+  * This writer records ONLY the LOCAL consignment (the `asn_filed` entry above).
+  * The channel ASN is the shipping owner's; the seam is mock-first, so entering
+  * real SP-API credentials activates the live call with NO code change. Gated by
+  * `npm run validate:dead-code` (DC4: no unfinished-work marker may reappear in src/).
+  */
   notifyCanonicalStoreChange();
   return { ok: true, shipmentId, warnings, deductionId };
 }

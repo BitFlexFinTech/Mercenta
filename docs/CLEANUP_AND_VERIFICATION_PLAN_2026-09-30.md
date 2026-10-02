@@ -16,7 +16,8 @@ is exactly ONE plan and it cannot drift (exactly the rule this file already carr
   pack document downloads as its own file, the WHOLE pack downloads as one file, and the carrier label / waybill
   download from the dialogue that renders them. Proved by an executed gate (`validate:po-documents` **57/57**), a
   REPOINTED commerce-loop §6, and a browser run of `e2e/po-documents.spec.ts` (**10 passed**).
-- **P2 – P6 product work is still PLANNED: no OTHER product runtime code has been changed** beyond P1 and P1-fix.
+- **P2, P3 and P4 product work is DONE (2026-10-02); P5 is DEFERRED (owner D2); P6 (close) is executed in the
+  same session as P4.** No OTHER product runtime code has been changed beyond P1, P1-fix, P2, P3 and P4.
   Every finding below was read from the code, with the file named so it can be checked.
 
 **Owner:** Founder/Super Admin. **Owner decisions:** D1, D3 and D4 ANSWERED; D2 DEFERRED (skip P5 for now) — see §5.
@@ -92,11 +93,20 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 
 ### 1.5 Dead code and complexity — measured, not guessed
 
-* **7 of 411 files under `src/` are never referenced by name; 2 of those are legitimate ambient/test files.**
+* **7 of 411 files under `src/` are never referenced BY NAME; 2 of those are legitimate ambient/test files.**
   Candidate removals: `src/lib/discovery/firecrawlResearch.ts`, `src/lib/research/dailyReport.ts`,
   `src/lib/research/resellerTracker.ts`, `src/lib/whatsapp/whatsAppEscalation.ts`; plus
   `src/testing/TestProviders.tsx` (check the test config first). Keep `src/vite-env.d.ts`,
   `src/lib/discovery/banned-patterns.d.ts`.
+  **CORRECTED BY P4 (2026-10-02) — this list was a src-ONLY guess; the measured truth differs.** P4's
+  import-aware gate (`validate-dead-code`) found that only **TWO** files are genuinely unreferenced —
+  `src/lib/research/dailyReport.ts` and `src/lib/discovery/firecrawlResearch.ts` — and DELETED both.
+  `resellerTracker.ts` and `whatsAppEscalation.ts` ARE imported by corpus validators
+  (`validate-reseller-tracker.mjs`, `validate-whatsapp.mjs`) and `TestProviders.tsx` by
+  `validate-stage15/16/26.mjs`, so risk **R3** ("the dead-code gate must include tests/tooling") KEPT all
+  three. `src/lib/discovery/firecrawlClient.ts` is kept as a DECLARED-UNWIRED SEAM (a registry-documented
+  controlled-live candidate; removing a seam is a feature decision deferred to P5/D2) and the gate names
+  it explicitly.
 * **Exactly ONE `TODO` remains in all of `src/`** — `src/data/api.ts` (the ASN auto-push stub: *"Replace with
   real SP-API PUT /vendor/shipping call when Amazon account is approved"*). It is a known, labelled stub.
 * **Buttons:** a scan for dead controls found **zero** empty click handlers and **one** intentional placeholder
@@ -138,7 +148,7 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 | **P1a** | AMAZON VENDOR-CODE → CATEGORY REGISTRY | `src/config/amazonVendorCodes.ts` holds the owner's vendor codes with each category stored VERBATIM as Amazon Vendor Central shows it; two codes are marked "To Be Confirmed" and linking a category to them is BLOCKED until the owner confirms with Amazon; gated by `validate:amazon-vendor-codes` | **DONE (2026-10-02)** — registry + gate **20/20**; no guessed mapping; no application runtime change. |
 | **P2** | TWO DEMO BRANDS | **DONE (2026-10-02).** The demo universe is reduced from 20 businesses to **FOUR**: Astonish + Tapatío (Model A/B, both CLEARED and trading), Le Creuset (the BLOCKED compliance-scenario tenant = the gate demo), and Kit & Kin (STILL IN ONBOARDING = the wizard + the unapproved-brand Social demo). The ten approved categories stay KNOWN to the system via the vendor-code registry (`src/config/amazonVendorCodes.ts`) — no longer one business per category. `npm run validate:all` **135/0**; typecheck 0 · lint 0 · build ✓; the checks/browser specs that named a removed business were REPOINTED (never weakened, each recording its old contract inline); tenant isolation is still proven with the two trading tenants. A REAL DEFECT was fixed at source (the Companies House registrar re-seeded on every call, so at 3 brands EVERY lookup was rate-limited). See §3 P2. |
 | **P3** | EVERY BUTTON IS WIRED (UI audit) | `npm run validate:ui-wiring` (new) walks every button/control in `src/components/**` and fails on: no handler, a handler that only changes local state, a control whose label promises an action it does not perform | **DONE (2026-10-02)** — `scripts/validate-ui-wiring.mjs` (NEW) scans all 143 component files and fails on W1 no wiring, W2 empty handler, W3 an action-labelled control that only changes local state, W4 a lost domain writer (14 audited controls), W5 the fixed defect returning, W6 the style-guide exception drifting. The audit FIXED three real defects at source: `BrandSettings.tsx` "Change Password" / "Enable 2FA" (no handler, no password/2FA system — removed, the panel now states the fact); `ComplianceHub.tsx` "Review & Confirm" (only CLOSED a modal while promising to lock values — now RECORDS a real, audited confirmation via the new ONE writer `demoStore.confirmCustomsDocument`, and the tile shows "Confirmed"); and the chart hit target `role="button"` (made genuinely activatable by click/Enter/Space). **Mutation-proved ×3** (W1, W3, W5 each fail when mutated, each file restored byte-identical). See §3 P3. |
-| **P4** | DEAD CODE + DUPLICATE OWNERS | a dead-code gate (the scan used in §1.5, as a script) returns 0 candidates; the four candidates are deleted with the reason recorded; duplicate owners consolidated to one each | NOT STARTED |
+| **P4** | DEAD CODE + DUPLICATE OWNERS | a dead-code gate (the scan used in §1.5, as a script) returns 0 candidates; the unreferenced files are deleted with the reason recorded; duplicate owners consolidated to one each | **DONE (2026-10-02)** — `npm run validate:dead-code` (NEW; IMPORT-aware; 0 undeclared candidates + no `TODO`/`FIXME` stub) and `npm run validate:duplicate-owners` (NEW; one-owner checks). MEASURED, correcting §1.5's src-only guess: only TWO files were truly unreferenced and both were DELETED (`src/lib/research/dailyReport.ts`, `src/lib/discovery/firecrawlResearch.ts`); validator-imported modules were KEPT (R3); `firecrawlClient.ts` kept as a declared-unwired seam; the `src/data/api.ts` ASN auto-push stub RESOLVED at source; the `ApplicationsPanel.tsx` duplicate status-label map consolidated. See §3 P4. |
 | **P5** | SIMPLIFICATION (owner's list only) | only the feature areas the owner names as out of scope are removed; the FULL sweep + browser suites green; nothing working is removed silently | **DEFERRED — owner D2** (skip P5 for now; decide later). Nothing is deleted. |
 | **P6** | CLOSE | full sweep, browser suites, deploy to `demo.mercenta.co.uk`, LIVE verification of each change, then the three-way status recorded | NOT STARTED |
 
@@ -304,6 +314,40 @@ record the old contract inline). **Out of scope:** removing working features (th
 `validate:dead-code` script (0 candidates) + the full sweep.
 **Known duplicate-owner candidates to sweep:** PO status labels, "Received"-class wording, simulated badges,
 per-seam mode reads.
+
+**DONE (2026-10-02).** `scripts/validate-dead-code.mjs` (`npm run validate:dead-code`) is an IMPORT-aware scan of every
+`.ts/.tsx` under `src/` (excluding `.d.ts`) against every quoted module specifier in `src/`, `scripts/`, `e2e/`,
+`supabase/` and the repo root — so a reference from a validator (tests/tooling, plan risk R3) COUNTS, while a mention
+inside prose or a registry evidence string does NOT. It passes only with **0 undeclared candidates**, pins the two
+deleted files (DC2), proves it reads `index.html` by detecting `src/main.tsx` (DC3), FAILS on any `TODO`/`FIXME` stub in
+`src/` (DC4), and keeps the ONE declared-unwired exception honest (DC5 — it must still exist AND still be unreferenced).
+`scripts/validate-duplicate-owners.mjs` (`npm run validate:duplicate-owners`) pins the ONE owner of the
+application-status and PO-status vocabularies and the "Received"-class disambiguation.
+
+**Defects FIXED at source (measured, not guessed):**
+1. **Dead code — TWO files DELETED:** `src/lib/research/dailyReport.ts` (no consumer, no documentation) and
+   `src/lib/discovery/firecrawlResearch.ts` (the unreached glue of the firecrawl seam). The §1.5 four-file list was a
+   src-only guess; the import-aware gate measured the truth and KEPT `resellerTracker.ts`, `whatsAppEscalation.ts` and
+   `TestProviders.tsx` (validator-imported) plus `firecrawlClient.ts` (a documented seam).
+2. **The ONE stub RESOLVED:** `src/data/api.ts` wrote an `asn_auto_generated` entry claiming the channel confirmation
+   "would be pushed … once the integration is connected" — FALSE, and a duplicate of the real owner
+   `fileChannelShipmentConfirmation` (`src/lib/shipping/channelShipmentOperations.ts`, the SP-API
+   `submitShipmentConfirmations` seam, `AV-015`). The aspirational entry is gone.
+3. **Duplicate owner FIXED:** `src/components/admin/ApplicationsPanel.tsx` kept a local `STATUS_LABELS` map with the
+   same labels the canonical `applicationStatusPresentation` owns, used side-by-side in ONE screen; it now reads the ONE
+   owner.
+
+**Named candidates VERIFIED already consolidated (no change needed):** PO status labels
+(`statusPresentation.poStatusPresentation`); the "Received"-class wording (the §DEFECT FIXED disambiguation, "Received
+from channel" vs "Goods received at the FC"); the simulated badges (each is a context-specific statement about a
+specific provider — `DEMO_OPERATIONAL_STATE_LABEL` for the work workspace — not a duplicated single value); per-seam
+mode reads (the mode DECISION is owned by `src/config/environment.ts` from P1; the remaining `mode === 'mock'` reads are
+DISPLAY, not decisions).
+
+**Evidence.** `validate:dead-code` **9/9 PASS** (mutation-proved: a synthetic orphan failed DC1; a re-added `TODO`
+failed DC4; both mutants removed). `validate:duplicate-owners` **7/7 PASS** (mutation-proved: a second
+`info_requested → "Info Requested"` map failed DO2; removed). `validate:all` **138/0**; typecheck 0 · lint 0 · build ✓;
+E6 + E7 PASS (P4 surface declared in both).
 
 ### P5 — SIMPLIFICATION (owner's decision required)
 **In scope:** only the areas the owner names. **Gate:** full sweep + browser suites green.
