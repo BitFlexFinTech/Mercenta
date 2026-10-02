@@ -34,6 +34,11 @@ import { useCanonicalStoreVersion } from '@/data/queries';
 import { demoCommerceInvoices } from '@/data/demoStore';
 import { Badge, Button, Card } from '@/components/ui';
 import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
+import { verifyAcknowledgement } from '@/lib/commerce/poAcknowledgementVerification';
+import {
+  asnBeforeReceiptVerdict,
+  channelReceivingReportsReceived,
+} from '@/lib/shipping/asnBeforeReceipt';
 import { refreshChannelRoutingInstructions } from '@/lib/commerce/proxyProcessor';
 import { applyChannelReceivingReadingToStore } from '@/lib/commerce/commerceLifecycle';
 import { readChannelReceivingSync, submitCommerceInvoiceToChannel } from '@/data/api';
@@ -70,6 +75,61 @@ export function ChannelOperationsPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [version]
   );
+
+  /**
+   * §BATCH 2k (`AV-011`) — THE ACKNOWLEDGEMENT CONFIRMATION STEP. For every purchase
+   * order the channel read reported, verify whether the acknowledgement Mercenta
+   * TRANSMITTED actually appeared, using the SAME read's channel state and the
+   * transmission instant recorded when Mercenta filed it. No second channel call is
+   * made here: the receiving read above is reused, exactly as the owner intends.
+   */
+  const ackVerification = useMemo(() => {
+    const submittedAtByPo = new Map<string, string>();
+    for (const instruction of listChannelInstructions({ type: 'po_acknowledgement' })) {
+      const at = instruction.outcome?.channelAcknowledgement?.submittedAt;
+      if (at && !submittedAtByPo.has(instruction.purchaseOrderId)) {
+        submittedAtByPo.set(instruction.purchaseOrderId, at);
+      }
+    }
+    const byPo: Record<string, ReturnType<typeof verifyAcknowledgement>> = {};
+    for (const reading of receiving?.readings ?? []) {
+      byPo[reading.poId] = verifyAcknowledgement({
+        submittedAt: submittedAtByPo.get(reading.poId) ?? null,
+        channelState: reading.channelStatus,
+        simulated: reading.simulated,
+      });
+    }
+    return byPo;
+    // The canonical store version is the change signal for the instruction store.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [version, receiving]);
+
+  /**
+   * §BATCH 2l (`AV-015`) — THE ASN-BEFORE-RECEIPT ORDERING. For every purchase order the
+   * channel read reported, compare the ASN filing instant against the channel's OWN
+   * logged receipt, so the documented chargeback trigger is SURFACED rather than silent.
+   * Like the verification above, this REUSES the one receiving read — no second call.
+   */
+  const asnVerdict = useMemo(() => {
+    const filedAtByPo = new Map<string, string>();
+    for (const instruction of listChannelInstructions()) {
+      const at = instruction.outcome?.asn?.filedAt;
+      if (at && !filedAtByPo.has(instruction.purchaseOrderId)) {
+        filedAtByPo.set(instruction.purchaseOrderId, at);
+      }
+    }
+    const byPo: Record<string, ReturnType<typeof asnBeforeReceiptVerdict>> = {};
+    for (const reading of receiving?.readings ?? []) {
+      byPo[reading.poId] = asnBeforeReceiptVerdict({
+        asnFiledAt: filedAtByPo.get(reading.poId) ?? null,
+        channelReportsReceived: channelReceivingReportsReceived(reading.channelReceivingStatus),
+        receivedAt: reading.receivedDate ?? null,
+      });
+    }
+    return byPo;
+    // The canonical store version is the change signal for the instruction store.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [version, receiving]);
 
   /** Every invoice still IN FORCE — the only ones the channel may be sent. */
   const invoiceRows = useMemo(
@@ -229,6 +289,46 @@ export function ChannelOperationsPanel() {
                   {RECEIVING_STATUS_LABELS[reading.mercentaReceivingStatus]} ·{' '}
                   {reading.lines.reduce((sum, l) => sum + l.receivedQty, 0)} unit(s) received
                   {reading.differs ? ' · the two views differ' : ''}
+                  {/*
+                    §BATCH 2k (`AV-011`) — the CONFIRMATION step that was missing: an
+                    acknowledgement could silently fail because nothing checked it
+                    appeared. The verdict below comes from the channel's OWN read state
+                    (already obtained above) and the recorded transmission instant; a
+                    simulated read is labelled, and an unread state is never "confirmed".
+                  */}
+                  {ackVerification[reading.poId] && (
+                    <span
+                      data-state={`ack-verification-${ackVerification[reading.poId].state}`}
+                      className={
+                        ackVerification[reading.poId].atRisk
+                          ? 'mt-0.5 block text-ds-micro text-amber-300'
+                          : 'mt-0.5 block text-ds-micro text-zinc-400'
+                      }
+                    >
+                      Acknowledgement: {ackVerification[reading.poId].stateLabel} —{' '}
+                      {ackVerification[reading.poId].statement}
+                    </span>
+                  )}
+                  {/*
+                    §BATCH 2l (`AV-015`) — the ASN-before-receipt ordering, surfaced. The
+                    channel documents that the confirmation must reach it BEFORE the goods
+                    are received ("missing or delayed shipment confirmations result in
+                    chargebacks"); the verdict compares the filing instant against the
+                    channel's own logged receipt.
+                  */}
+                  {asnVerdict[reading.poId] && (
+                    <span
+                      data-state={`asn-before-receipt-${asnVerdict[reading.poId].state}`}
+                      className={
+                        asnVerdict[reading.poId].exposed
+                          ? 'mt-0.5 block text-ds-micro text-amber-300'
+                          : 'mt-0.5 block text-ds-micro text-zinc-400'
+                      }
+                    >
+                      ASN before receipt: {asnVerdict[reading.poId].stateLabel} —{' '}
+                      {asnVerdict[reading.poId].statement}
+                    </span>
+                  )}
                   {/*
                     §P12 — the canonical WRITE path is here, not hidden: a LIVE reading is
                     applied through the canonical receiving step, and a SIMULATED one is never

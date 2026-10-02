@@ -167,6 +167,13 @@ export async function processChannelInstruction(
     edgeFunctionBase: '/functions/v1/spapi',
   });
   let ack: { ok: boolean; acknowledgementId?: string; status?: 'accepted' | 'partially_accepted' | 'rejected'; error?: string };
+  /**
+   * §BATCH 2k (`AV-011`) — the INSTANT the acknowledgement was transmitted, recorded
+   * so the channel's documented 30-minute appearance window has a real start. Set only
+   * once the seam has actually answered (a throw means NOTHING was transmitted, so the
+   * record stays `not_submitted` rather than claiming a transmission that did not happen).
+   */
+  let ackSubmittedAt: string | undefined;
   try {
     ack = await client.submitAcknowledgement({
       purchaseOrderNumber: po.poNumber,
@@ -179,6 +186,7 @@ export async function processChannelInstruction(
         unitPrice: l.unitPrice,
       })),
     });
+    ackSubmittedAt = new Date().toISOString();
   } catch (err) {
     /** No verified connection ⇒ the seam throws. Reported honestly, never hidden. */
     ack = { ok: false, error: err instanceof Error ? err.message : String(err) };
@@ -189,6 +197,7 @@ export async function processChannelInstruction(
     status: ack.status,
     mode,
     error: ack.error,
+    ...(ackSubmittedAt ? { submittedAt: ackSubmittedAt } : {}),
   };
 
   if (!ack.ok) {
@@ -367,6 +376,8 @@ export async function processChannelInstruction(
         filed: true,
         shipmentId: filed.shipmentId,
         reference: asnReference,
+        /** §BATCH 2l (`AV-015`) — WHEN the ASN was filed, for the before-receipt ordering rule. */
+        filedAt: new Date().toISOString(),
         ...(filed.deductionId ? { deductionId: filed.deductionId } : {}),
         ...(channelConfirmation?.confirmationId
           ? { channelConfirmationId: channelConfirmation.confirmationId }

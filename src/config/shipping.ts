@@ -19,6 +19,8 @@
  */
 
 import type { CarrierId, ShippingLane } from '@/types';
+/** §BATCH 2l (`AV-015`) — the ASN-before-receipt vocabulary's ONE owner lives in `@/types`. */
+import { ASN_BEFORE_RECEIPT_STATES, type AsnBeforeReceiptState } from '@/types';
 /** The UK marketplace id's ONE canonical home (§P12 reads it, never retypes it). */
 import { UK_MARKETPLACE_ID } from '@/lib/spapi/transform';
 
@@ -255,4 +257,40 @@ export function channelShipmentLabelsAvailability(
     region,
     reason: `${region === 'unknown' ? 'MARKETPLACE_REGION_UNKNOWN' : 'LABELS_NOT_GENERATED_IN_REGION'} — ${CHANNEL_SHIPMENT_LABEL_RULE.statement} ${CHANNEL_SHIPMENT_LABEL_RULE.source}`,
   };
+}
+
+/**
+ * AMAZON-DOCUMENTED (`AV-015`) — the ASN-BEFORE-RECEIPT rule, quoted from the channel's
+ * own documentation (source `S9` of the Phase 0A audit).
+ *
+ * The rule was recorded in the platform's evidence but ENFORCED NOWHERE and SURFACED
+ * NOWHERE: a consignment could be received at the channel with no confirmation on file
+ * and nothing said so. The ONE owner (`src/lib/shipping/asnBeforeReceipt.ts`) now derives
+ * the verdict and its operator-facing statement from this declaration, so the documented
+ * chargeback trigger is visible rather than silent.
+ */
+export const ASN_BEFORE_RECEIPT_RULE_TEXT =
+  'The retail channel requires the shipment confirmation (the ASN) to reach it BEFORE the goods are received at ' +
+  'its fulfilment centre. Missing or delayed shipment confirmations result in chargebacks, so Mercenta reports ' +
+  'whether the confirmation was on file before the receipt was logged.';
+
+/**
+ * §BATCH 2l (`AV-015`) — the operator-readable label of every declared ASN-before-receipt
+ * state. Declared once, so a surface never invents its own wording; the guard below fails
+ * at module load if a state is ever added without a label.
+ */
+export const ASN_BEFORE_RECEIPT_STATE_LABELS: Record<AsnBeforeReceiptState, string> = {
+  compliant: 'the confirmation was on file before the receipt',
+  pending: 'not received yet — the ordering rule is not due',
+  exposed: 'received WITHOUT the confirmation on file first — chargeback risk',
+  unknown: 'not verifiable — the channel’s receiving state could not be read',
+};
+
+for (const state of ASN_BEFORE_RECEIPT_STATES) {
+  if (!ASN_BEFORE_RECEIPT_STATE_LABELS[state]) {
+    throw new Error(
+      `[shipping] the ASN-before-receipt state "${state}" has no declared label. Every declared state must be ` +
+        `labelled once, here, so no surface invents its own wording.`
+    );
+  }
 }

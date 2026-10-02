@@ -37,10 +37,12 @@
  *      `ObsoleteProduct`.
  */
 import {
+  PO_ACK_VERIFICATION_STATES,
   PO_CHANNEL_CHANGE_KINDS,
   PO_CHANNEL_HOLD_STATES,
   PO_DECISION_AUTHORISATION_STATES,
   PO_REJECTION_CODES,
+  type PoAckVerificationState,
   type PoChannelChangeKind,
   type PoChannelHoldState,
   type PoDecisionAuthorisationState,
@@ -418,6 +420,51 @@ for (const state of PO_CHANNEL_HOLD_STATES) {
     throw new Error(
       `[purchaseOrders] the channel hold state "${state}" has no declared label. Every declared state must be ` +
         `labelled once, here, so no surface invents its own wording.`
+    );
+  }
+}
+
+/**
+ * AMAZON-DOCUMENTED (`AV-011`) — the APPEARANCE WINDOW of a transmitted acknowledgement.
+ *
+ * The channel documents both that an acknowledgement's status is VERIFIABLE and that
+ * *"if the original or updated version doesn't appear after 30 minutes"* something is
+ * wrong. This is that window, declared ONCE here so the verification owner and every
+ * surface measure it identically and never restate the number.
+ */
+export const PO_ACK_VERIFICATION_WINDOW_MINUTES = 30;
+
+/**
+ * §BATCH 2k (`AV-011`) — THE VERIFICATION RULE, quoted from the channel's own
+ * documentation. Mercenta invents nothing: the acknowledgement may be verified after
+ * submission, and 30 minutes is the channel's own appearance window. Before this, the
+ * platform TRANSMITTED an acknowledgement and never confirmed it arrived, so an ack
+ * could silently fail (`src/lib/commerce/poAcknowledgementVerification.ts` now closes
+ * that gap by reading the channel's own order state back).
+ */
+export const PO_ACK_VERIFICATION_RULE_TEXT =
+  'The retail channel documents that an acknowledgement can be verified after it is submitted, and that if the ' +
+  'original or updated version does not appear within 30 minutes the acknowledgement may not have landed. ' +
+  'Mercenta therefore reads the channel’s own order state back to confirm the acknowledgement appeared.';
+
+/**
+ * §BATCH 2k (`AV-011`) — the operator-readable label of every declared verification
+ * state. Declared once, so a surface never invents its own wording; the guard below
+ * fails at module load if a state is ever added without a label.
+ */
+export const PO_ACK_VERIFICATION_STATE_LABELS: Record<PoAckVerificationState, string> = {
+  not_submitted: 'nothing transmitted yet',
+  awaiting_visibility: 'transmitted — inside the 30-minute appearance window',
+  confirmed: 'the channel reports the order acknowledged',
+  not_confirmed: 'not confirmed within 30 minutes — at risk',
+  unreadable: 'not verifiable — the channel’s state could not be read',
+};
+
+for (const state of PO_ACK_VERIFICATION_STATES) {
+  if (!PO_ACK_VERIFICATION_STATE_LABELS[state]) {
+    throw new Error(
+      `[purchaseOrders] the acknowledgement verification state "${state}" has no declared label. Every declared ` +
+        `state must be labelled once, here, so no surface invents its own wording.`
     );
   }
 }

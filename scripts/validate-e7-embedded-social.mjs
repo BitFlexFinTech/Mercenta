@@ -1027,6 +1027,44 @@ try {
     'package.json',
   ];
 
+  /**
+   * §BATCH 2k — THE ACKNOWLEDGEMENT-VERIFICATION PHASE (`AV-011`, 2026-10-02). The new
+   * `validate:ack-verification` gate proves the confirmation step the audit found missing
+   * (Mercenta transmitted an acknowledgement and never confirmed it arrived). Fuller note
+   * in `validate-e6-brand-surfaces.mjs` §BATCH2K_ACK_VERIFICATION_SCOPE. Same mechanism: a
+   * changed source/test file outside EVERY declared set is still refused.
+   */
+  const BATCH2K_ACK_VERIFICATION_DECLARED = [
+    'src/types.ts',
+    'src/config/purchaseOrders.ts',
+    'src/lib/commerce/poAcknowledgementVerification.ts',
+    'src/lib/commerce/proxyProcessor.ts',
+    'src/components/admin/ChannelOperationsPanel.tsx',
+    'scripts/validate-ack-verification.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+  /**
+   * §BATCH 2l — THE ASN-BEFORE-RECEIPT PHASE (`AV-015`, 2026-10-02). The new
+   * `validate:asn-before-receipt` gate proves the ordering the audit found unenforced and
+   * unsurfaced (the confirmation must reach the channel before the goods do). Fuller note
+   * in `validate-e6-brand-surfaces.mjs` §BATCH2L_ASN_BEFORE_RECEIPT_SCOPE. Same mechanism:
+   * a changed source/test file outside EVERY declared set is still refused.
+   */
+  const BATCH2L_ASN_BEFORE_RECEIPT_DECLARED = [
+    'src/types.ts',
+    'src/config/shipping.ts',
+    'src/lib/shipping/asnBeforeReceipt.ts',
+    'src/lib/commerce/proxyProcessor.ts',
+    'src/components/admin/ChannelOperationsPanel.tsx',
+    'scripts/validate-asn-before-receipt.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1798,7 +1836,19 @@ try {
            * path, but its declared surface is accepted here as every phase's is.
            */
           !P4_CLEANUP_DECLARED.includes(f) &&
-          !P4_CLEANUP_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P4_CLEANUP_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2k — THE ACKNOWLEDGEMENT-VERIFICATION PHASE (2026-10-02) — touches no
+           * protected path, but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH2K_ACK_VERIFICATION_DECLARED.includes(f) &&
+          !BATCH2K_ACK_VERIFICATION_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2l — THE ASN-BEFORE-RECEIPT PHASE (2026-10-02) — touches no protected
+           * path, but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH2L_ASN_BEFORE_RECEIPT_DECLARED.includes(f) &&
+          !BATCH2L_ASN_BEFORE_RECEIPT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2056,6 +2106,14 @@ try {
      * §P4 — DEAD CODE + DUPLICATE OWNERS (2026-10-02) — the cleanup surface (see above).
      */
     ...P4_CLEANUP_DECLARED,
+    /**
+     * §BATCH 2k — THE ACKNOWLEDGEMENT-VERIFICATION PHASE (2026-10-02) — the verification surface (see above).
+     */
+    ...BATCH2K_ACK_VERIFICATION_DECLARED,
+    /**
+     * §BATCH 2l — THE ASN-BEFORE-RECEIPT PHASE (2026-10-02) — the ordering surface (see above).
+     */
+    ...BATCH2L_ASN_BEFORE_RECEIPT_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

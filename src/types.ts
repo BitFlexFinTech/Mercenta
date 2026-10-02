@@ -2014,6 +2014,74 @@ export interface PoChannelHoldRecord {
 }
 
 /**
+ * §BATCH 2k (`AV-011`) — THE VERIFICATION STATE OF A TRANSMITTED ACKNOWLEDGEMENT.
+ *
+ * The Phase 0A audit registered `AV-011`: Mercenta transmits an acknowledgement to
+ * the retail channel but never CONFIRMS it arrived, so *an ack could silently fail*.
+ * The channel documents that an acknowledgement is verifiable — its status can be
+ * read back (Vendor Central / the Transaction Status API) and *"if the original or
+ * updated version doesn't appear after 30 minutes"* something is wrong.
+ *
+ * This is the ONE vocabulary of that confirmation step, declared here and consumed
+ * by the ONE owner (`src/lib/commerce/poAcknowledgementVerification.ts`):
+ *
+ *   · `not_submitted`       — no acknowledgement has been transmitted for this order,
+ *                             so there is nothing to confirm. The DUTY here is the
+ *                             acknowledgement window's (`AV-001`), not this one.
+ *   · `awaiting_visibility` — transmitted, and the channel's documented 30-minute
+ *                             appearance window has NOT yet elapsed. Nothing is
+ *                             concluded: the version may still appear.
+ *   · `confirmed`           — the channel's OWN order state reports the order as
+ *                             acknowledged (or beyond), so the version APPEARED.
+ *   · `not_confirmed`       — the appearance window has elapsed and the channel's own
+ *                             read does NOT report the order acknowledged: the
+ *                             documented at-risk condition. Surfaced, never hidden.
+ *   · `unreadable`          — the channel's own state could not be read, or the
+ *                             transmission time is not readable, so nothing can be
+ *                             concluded. FAIL CLOSED — an unread state is NEVER
+ *                             reported as `confirmed`.
+ *
+ * A `confirmed` verdict from a SIMULATED channel read is still labelled simulated:
+ * the state is honest about what the channel reported, and the provenance is never
+ * conflated with a live confirmation.
+ */
+export const PO_ACK_VERIFICATION_STATES = [
+  'not_submitted',
+  'awaiting_visibility',
+  'confirmed',
+  'not_confirmed',
+  'unreadable',
+] as const;
+export type PoAckVerificationState = (typeof PO_ACK_VERIFICATION_STATES)[number];
+
+/**
+ * §BATCH 2l (`AV-015`) — THE ASN-BEFORE-RECEIPT VERDICT.
+ *
+ * The Phase 0A audit registered `AV-015`: the channel documents that *"Amazon must
+ * receive the shipment confirmation prior to the product being received at the Amazon
+ * fulfillment center. Missing or delayed shipment confirmations result in
+ * chargebacks"* — and the platform ENFORCED it nowhere and SURFACED it nowhere, so a
+ * consignment could be received with no confirmation on file and nothing said so.
+ *
+ * This is the ONE vocabulary of that ordering rule, declared here and consumed by the
+ * ONE owner (`src/lib/shipping/asnBeforeReceipt.ts`):
+ *
+ *   · `compliant` — the goods were received AND the confirmation was on file no later
+ *                   than the receipt, so the documented ordering rule was met.
+ *   · `pending`   — the channel has not logged a receipt, so the ordering rule is not
+ *                   yet due. The statement still says whether the confirmation is on
+ *                   file, because it must reach the channel BEFORE the goods do.
+ *   · `exposed`   — the goods were received and the confirmation was NOT on file first
+ *                   (absent, or filed AFTER the receipt): the documented chargeback
+ *                   trigger. Surfaced, never hidden.
+ *   · `unknown`   — the channel's receiving state could not be read, or a receipt was
+ *                   logged without a readable instant. FAIL CLOSED — an unread state is
+ *                   NEVER reported as `compliant`.
+ */
+export const ASN_BEFORE_RECEIPT_STATES = ['compliant', 'pending', 'exposed', 'unknown'] as const;
+export type AsnBeforeReceiptState = (typeof ASN_BEFORE_RECEIPT_STATES)[number];
+
+/**
  * §DEFECT FIXED AT SOURCE (owner-reported, 2026-09-30) — THE BRAND'S AUTHORISATION FOR
  * MERCENTA TO DECIDE A PURCHASE ORDER ON ITS BEHALF.
  *
@@ -2249,6 +2317,13 @@ export interface ChannelInstructionOutcome {
     /** `mock` means NO live call occurred — recorded, never inferred. */
     mode: 'mock' | 'real';
     error?: string;
+    /**
+     * §BATCH 2k (`AV-011`) — WHEN the acknowledgement was transmitted to the channel
+     * (ISO). Recorded at the moment of transmission, so the 30-minute appearance
+     * window (`src/lib/commerce/poAcknowledgementVerification.ts`) is measured from
+     * the real transmission instant and never re-derived from a later record.
+     */
+    submittedAt?: string;
   };
   /** The routing / shipment request Mercenta raised. */
   routingRequest?: {
@@ -2320,6 +2395,13 @@ export interface ChannelInstructionOutcome {
     channelConfirmationId?: string;
     /** §P12 — the seam's provenance for the channel confirmation. */
     channelMode?: 'mock' | 'real';
+    /**
+     * §BATCH 2l (`AV-015`) — WHEN Mercenta filed the ASN (ISO). Recorded so the
+     * channel's documented "confirmation BEFORE receipt" ordering
+     * (`src/lib/shipping/asnBeforeReceipt.ts`) can be judged against the channel's own
+     * logged receipt date, rather than inferred from a later record.
+     */
+    filedAt?: string;
   };
   /**
    * §P6 — THE DOCUMENT PACK WAS GENERATED FOR THIS PO (programme decision 9:

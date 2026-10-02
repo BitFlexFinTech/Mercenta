@@ -1062,6 +1062,56 @@ const P4_CLEANUP_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §BATCH 2k (`AV-011`) — THE ACKNOWLEDGEMENT-VERIFICATION PHASE (2026-10-02).
+ *
+ * Register `AV-011`: Mercenta transmitted an acknowledgement to the retail channel and
+ * never CONFIRMED it arrived, so *"an ack could silently fail"*. The phase adds the
+ * confirmation step as ONE owner (`src/lib/commerce/poAcknowledgementVerification.ts`)
+ * that reads the channel's OWN order state back (the already-built
+ * `getPurchaseOrdersStatus`) and FAILS CLOSED; records the transmission instant on the
+ * instruction outcome; surfaces the verdict in the channel-operations console (which
+ * REUSES the receiving read — no second channel call, no invented channel vocabulary);
+ * and proves it with the NEW gate `scripts/validate-ack-verification.mjs`. F5/F5b/F6
+ * contract UNCHANGED: a changed SOURCE file outside EVERY declared set still fails.
+ */
+const BATCH2K_ACK_VERIFICATION_SCOPE = new Set([
+  'src/types.ts',                                     /* the ONE verification vocabulary + the recorded instant */
+  'src/config/purchaseOrders.ts',                     /* the 30-minute window, the rule text, the state labels */
+  'src/lib/commerce/poAcknowledgementVerification.ts',/* NEW — the ONE owner */
+  'src/lib/commerce/proxyProcessor.ts',               /* records the transmission instant */
+  'src/components/admin/ChannelOperationsPanel.tsx',  /* surfaces the verdict, reusing the reading */
+  'scripts/validate-ack-verification.mjs',            /* NEW — this phase's gate */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+/**
+ * §BATCH 2l (`AV-015`) — THE ASN-BEFORE-RECEIPT PHASE (2026-10-02).
+ *
+ * Register `AV-015`: the channel documents that the shipment confirmation must reach it
+ * BEFORE the goods are received, and that missing/delayed confirmations cause
+ * chargebacks — but the platform enforced and surfaced the ordering NOWHERE. The phase
+ * adds the ordering owner (`src/lib/shipping/asnBeforeReceipt.ts`) that compares the ASN
+ * filing instant against the channel's OWN logged receipt (the already-built
+ * `getPurchaseOrdersStatus` read) and FAILS CLOSED; records the filing instant on the
+ * instruction outcome; surfaces the verdict in the channel-operations console (reusing
+ * the one receiving read); and proves it with the NEW gate
+ * `scripts/validate-asn-before-receipt.mjs`. F5/F5b/F6 contract UNCHANGED.
+ */
+const BATCH2L_ASN_BEFORE_RECEIPT_SCOPE = new Set([
+  'src/types.ts',                                     /* the ONE ordering vocabulary + the filing instant */
+  'src/config/shipping.ts',                           /* the rule text and the state labels */
+  'src/lib/shipping/asnBeforeReceipt.ts',             /* NEW — the ONE owner */
+  'src/lib/commerce/proxyProcessor.ts',               /* records the ASN filing instant */
+  'src/components/admin/ChannelOperationsPanel.tsx',  /* surfaces the verdict, reusing the reading */
+  'scripts/validate-asn-before-receipt.mjs',          /* NEW — this phase's gate */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2250,7 +2300,13 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...P3_UI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §P4 — DEAD CODE + DUPLICATE OWNERS (see above). First protected-path check (F5). */
         P4_CLEANUP_SCOPE.has(p) ||
-        [...P4_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...P4_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2k — the acknowledgement-verification phase (see above). First protected-path check (F5). */
+        BATCH2K_ACK_VERIFICATION_SCOPE.has(p) ||
+        [...BATCH2K_ACK_VERIFICATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2l — the ASN-before-receipt phase (see above). First protected-path check (F5). */
+        BATCH2L_ASN_BEFORE_RECEIPT_SCOPE.has(p) ||
+        [...BATCH2L_ASN_BEFORE_RECEIPT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2333,6 +2389,12 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §P4 — DEAD CODE + DUPLICATE OWNERS (see above). Second protected-path check (F5b). */
         P4_CLEANUP_SCOPE.has(p) ||
         [...P4_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2k — same declaration, second protected-path check (F5b). */
+        BATCH2K_ACK_VERIFICATION_SCOPE.has(p) ||
+        [...BATCH2K_ACK_VERIFICATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2l — the ASN-before-receipt phase (see above). Second protected-path check (F5b). */
+        BATCH2L_ASN_BEFORE_RECEIPT_SCOPE.has(p) ||
+        [...BATCH2L_ASN_BEFORE_RECEIPT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2651,6 +2713,12 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §P4 — DEAD CODE + DUPLICATE OWNERS (see above). */
           P4_CLEANUP_SCOPE.has(p) ||
           [...P4_CLEANUP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2k — the acknowledgement-verification phase (see above). */
+          BATCH2K_ACK_VERIFICATION_SCOPE.has(p) ||
+          [...BATCH2K_ACK_VERIFICATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2l — the ASN-before-receipt phase (see above). */
+          BATCH2L_ASN_BEFORE_RECEIPT_SCOPE.has(p) ||
+          [...BATCH2L_ASN_BEFORE_RECEIPT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
