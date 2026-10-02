@@ -24,7 +24,24 @@ NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tre
 actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
 RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
-## P0a + P1a + THE PLAN MERGE — THE TWO PLANS ARE NOW ONE, `Products/` IS BACKED UP, THE AMAZON VENDOR-CODE → CATEGORY REGISTRY IS SAVED, AND TWO CALENDAR-DEPENDENT GATES WERE FIXED (session 59, 2026-10-02) — **CURRENT**
+## P1 OF THE CLEAN-UP/VERIFICATION PLAN — **THE ONE SWITCH**: A SINGLE ENVIRONMENT OWNER, A DEMO-ONLY SEED FALLBACK, AND UNAVAILABLE-NOT-SIMULATED PROVIDERS (session 60, 2026-10-02) — **CURRENT**
+
+**What this session did** (the recorded `NEXT TASK` = **P1**, the ONE SWITCH):
+1. **Built the single environment owner** — `src/config/environment.ts` (NEW): `EnvironmentMode = 'demo' | 'live'`; the build default from `VITE_ENVIRONMENT` (anything but the exact value `live` means demo, so the demo host needs no variable); a runtime switch remembered in localStorage that always WINS over the build default; `seedFallback` (demo-only) and `environmentDefaultMode` (live maps a registry default of `simulation` → `available`).
+2. **Made the data layer's seed fallback DEMO-ONLY** — `src/data/api.ts`: all 6 seed-fallback sites (`queryOrSeed` ×2, `fetchBrands` ×2, `paginatedQueryOrSeed` ×2) now route through `seedFallback`, so in `live` the repositories return NOTHING — a live platform can never serve a fake row.
+3. **Repointed the provider-mode machine** — `src/integrations/types.ts`: `modeForState` reads `environmentDefaultMode`, so an unconfigured provider in `live` is UNAVAILABLE (`available`), never simulation. The fail-closed `isProviderSimulationSafe` rule is UNCHANGED.
+4. **Made the switch operable in ONE obvious place** — `src/components/admin/integrations/SimulationControl.tsx` (the Simulation Control Centre).
+
+**New gate:** `npm run validate:environment` (`scripts/validate-environment.mjs`, 16 checks, EXECUTING the real modules via Vite `ssrLoadModule`), declared in BOTH scope guards (`§P1_ENVIRONMENT_SCOPE` / `§P1_ENVIRONMENT_DECLARED`) and registered in `package.json`. Browser proof: `e2e/simulation-control.spec.ts` ONE-SWITCH test.
+
+**A plan defect FIXED at source:** `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` no longer says "P1–P6 still PLANNED", and no longer heads P2 "ONE DEMO BRAND" (which contradicted D1 = **two** demo brands); the P1 row/section now carry the DONE evidence.
+
+**Evidence (measured this session).** `validate:all` **135 PASS / 0 FAIL** (exit 0) · `typecheck` **0** · `lint` **0 errors** · `build` **✓** · the NEW gate **16/16**, MUTATION-PROVED ×2 (breaking `seedFallback` → 1 failure; breaking the provider-default mapping → 2 failures; each restored byte-identical, `environment.ts` sha256 `3f9585a3e396cfb45a99a70f9867cd12180097c76818ce75395b47d2aa5d7962`) · both scope guards (E6 + E7) PASS · browser **1 passed** · committed **`00b7542`** and pushed · **deployed** (exit 0; live `index-BSQXgh2W.js` = the local verified build) · **LIVE: `verify:live` 209 PASS / 0 FAIL**.
+
+**Three-way status.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** (see `PROJECT_STATUS.md` → CURRENT RESUME STATE). **Next: P1-fix** (the Download control, owner D3), then P2 (two demo brands — D1), P3, P4, P6. P5 DEFERRED (D2).
+
+
+## P0a + P1a + THE PLAN MERGE — THE TWO PLANS ARE NOW ONE, `Products/` IS BACKED UP, THE AMAZON VENDOR-CODE → CATEGORY REGISTRY IS SAVED, AND TWO CALENDAR-DEPENDENT GATES WERE FIXED (session 59, 2026-10-02) — SUPERSEDED BY P1 (session 60, 2026-10-02)
 
 **What this session did** (owner directive 2026-10-02):
 1. **Merged the two plans into ONE.** `docs/NEXT_BUILD_PLAN_2026-09-27.md` is folded into `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §6 and reduced to a pointer; there is exactly ONE plan of record and it cannot drift.

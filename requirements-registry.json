@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-10-01",
+    "last_updated": "2026-10-02",
     "status_enum": [
       "not_started",
       "built",
@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 518,
+    "total_entries": 519,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -5768,6 +5768,15 @@
       "source": "Owner directive 2026-10-02 (merge the plans; back up new folders; save the vendor codes so they are answered from the project, never the chat). Declared in scripts/validate-e6-brand-surfaces.mjs §MERGED_PLAN_AND_VENDOR_CODES_SCOPE and scripts/validate-e7-embedded-social.mjs §MERGED_PLAN_AND_VENDOR_CODES_DECLARED.",
       "status": "built_and_tested",
       "evidence": "src/config/amazonVendorCodes.ts (NEW); scripts/validate-amazon-vendor-codes.mjs (NEW gate, 20 assertions, EXECUTES the module via Node type-stripping); docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md (merged; §3 P0a/P1a rows + §5 decisions + §6 backlog); docs/NEXT_BUILD_PLAN_2026-09-27.md (now a pointer); .clinerules/mercenta-business-model.md (§Vendor codes → category); both scope guards; package.json (validate:amazon-vendor-codes). ALSO FIXED AT SOURCE (two calendar-dependent gates, pre-existing at HEAD, proved by a stash test): scripts/validate-work-layer.mjs pinned the work clock to the stale literal '2026-09-19' while the demo seed uses the real clock, so the reminder sweep raised NOTHING as the date advanced → it now pins to the real date; src/data/demoData.ts fixed the first demo contract's renewal to the literal '2026-10-01' → now RELATIVE (today + 12 days). LOCAL: validate:all 134 PASS / 0 FAIL (exit 0); typecheck 0; lint 0 (after removing the word 'Amazon' from a config string, which the wording gate bans); build ✓. MUTATION-PROVED ×3, each restored byte-identical: linking a category to SV5QE → 2 failures; re-pinning work-layer to '2026-09-19' → 5 failures; re-fixing the contract renewal to a past date → 1 failure.",
+      "last_verified": "2026-10-02",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p1-one-switch-environment-owner",
+      "description": "P1 OF THE CLEAN-UP/VERIFICATION PLAN — THE ONE SWITCH (2026-10-02). One environment owner decides whether the WHOLE platform runs in `demo` or `live`: src/config/environment.ts holds EnvironmentMode = 'demo' | 'live', reads the build default from VITE_ENVIRONMENT (anything but the exact value `live` means demo, so the demo host needs no variable), and keeps a runtime switch (remembered in localStorage, always winning over the build default). In `demo` the seed fallback returns seeded data and every provider stays simulated (no credential needed); in `live` the seed fallback returns NOTHING (a live platform can never serve a fake row) and an unconfigured provider resolves to `available` — UNAVAILABLE, NEVER simulation. The data layer's seed fallback is DEMO-ONLY; the provider-mode machine (modeForState) reads the owner; the switch is operable in ONE obvious place (the Simulation Control Centre). The fail-closed isProviderSimulationSafe rule is UNCHANGED.",
+      "source": "docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md §3 P1 (the recorded next task in PROJECT_STATUS.md → CURRENT RESUME STATE). Declared in scripts/validate-e6-brand-surfaces.mjs §P1_ENVIRONMENT_SCOPE and scripts/validate-e7-embedded-social.mjs §P1_ENVIRONMENT_DECLARED (both scope guards included in their own declared sets).",
+      "status": "built_and_tested",
+      "evidence": "src/config/environment.ts (NEW — the ONE owner: EnvironmentMode, the build default from VITE_ENVIRONMENT, the runtime switch in localStorage, seedFallback, environmentDefaultMode); src/data/api.ts (6 seed-fallback sites routed through seedFallback, so `live` returns nothing); src/integrations/types.ts (modeForState reads environmentDefaultMode; isProviderSimulationSafe unchanged); src/components/admin/integrations/SimulationControl.tsx (the switch, in one place). scripts/validate-environment.mjs (NEW gate, registered as npm run validate:environment; 16 checks EXECUTING the real modules via Vite ssrLoadModule), declared in BOTH scope guards + package.json. Browser: e2e/simulation-control.spec.ts ONE-SWITCH test. Plan defect FIXED at source: docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md no longer says 'P1–P6 still PLANNED' and no longer heads P2 'ONE DEMO BRAND' (contradicting D1 = two brands). LOCAL: validate:all 135 PASS / 0 FAIL (exit 0); typecheck 0; lint 0 errors; build ✓; e6 + e7 PASS. MUTATION-PROVED ×2, each restored byte-identical: breaking seedFallback → 1 failure (environment.ts sha256 3f9585a3e396cfb45a99a70f9867cd12180097c76818ce75395b47d2aa5d7962); breaking the provider-default mapping → 2 failures. LIVE: deploy exit 0 (live asset index-BSQXgh2W.js, byte-identical to the local verified build); verify:live 209 PASS / 0 FAIL.",
       "last_verified": "2026-10-02",
       "superseded_by": null
     }
