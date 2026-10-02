@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 519,
+    "total_entries": 520,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -5777,6 +5777,15 @@
       "source": "docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md §3 P1 (the recorded next task in PROJECT_STATUS.md → CURRENT RESUME STATE). Declared in scripts/validate-e6-brand-surfaces.mjs §P1_ENVIRONMENT_SCOPE and scripts/validate-e7-embedded-social.mjs §P1_ENVIRONMENT_DECLARED (both scope guards included in their own declared sets).",
       "status": "built_and_tested",
       "evidence": "src/config/environment.ts (NEW — the ONE owner: EnvironmentMode, the build default from VITE_ENVIRONMENT, the runtime switch in localStorage, seedFallback, environmentDefaultMode); src/data/api.ts (6 seed-fallback sites routed through seedFallback, so `live` returns nothing); src/integrations/types.ts (modeForState reads environmentDefaultMode; isProviderSimulationSafe unchanged); src/components/admin/integrations/SimulationControl.tsx (the switch, in one place). scripts/validate-environment.mjs (NEW gate, registered as npm run validate:environment; 16 checks EXECUTING the real modules via Vite ssrLoadModule), declared in BOTH scope guards + package.json. Browser: e2e/simulation-control.spec.ts ONE-SWITCH test. Plan defect FIXED at source: docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md no longer says 'P1–P6 still PLANNED' and no longer heads P2 'ONE DEMO BRAND' (contradicting D1 = two brands). LOCAL: validate:all 135 PASS / 0 FAIL (exit 0); typecheck 0; lint 0 errors; build ✓; e6 + e7 PASS. MUTATION-PROVED ×2, each restored byte-identical: breaking seedFallback → 1 failure (environment.ts sha256 3f9585a3e396cfb45a99a70f9867cd12180097c76818ce75395b47d2aa5d7962); breaking the provider-default mapping → 2 failures. LIVE: deploy exit 0 (live asset index-BSQXgh2W.js, byte-identical to the local verified build); verify:live 209 PASS / 0 FAIL.",
+      "last_verified": "2026-10-02",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p1fix-document-download-control",
+      "description": "P1-fix OF THE CLEAN-UP/VERIFICATION PLAN — THE DOWNLOAD CONTROL (2026-10-02, owner decision D3 = print AND download). The P0 gap is closed: a consignment document pack can now be DOWNLOADED, not only opened/printed. Per-document Download beside Open/Print (each applicable, READY document as its own file); a WHOLE-PACK download (decision 6: ALL PO documents in one self-contained file, each excluded document listed WITH its reason, never faked); and the carrier label / freight waybill download from the DIALOGUE that renders them (one renderer per artefact preserved). The pack owner owns the file (deterministic, no network); filenames are sanitised (no path separator, no traversal dots); the file-export seam reuses the platform EXISTING helper downloadHtml (no duplicate createObjectURL).",
+      "source": "docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md §3 P1-fix + §4 P0-fix RESOLVED. Declared in scripts/validate-e6-brand-surfaces.mjs §P1FIX_DOWNLOAD_CONTROL_SCOPE and scripts/validate-e7-embedded-social.mjs §P1FIX_DOWNLOAD_CONTROL_DECLARED (both scope guards included in their own declared sets).",
+      "status": "built_and_tested",
+      "evidence": "src/lib/documents/poDocumentPack.ts (NEW renderPoDocumentPackHtml + poDocumentFileStem/poDocumentFileName/poDocumentPackFileName); src/components/shared/logistics/PoDocumentPackPanel.tsx (per-document Download + Download pack, reusing downloadHtml); src/components/brand/LogisticsHub.tsx (Download in the carrier-label and waybill dialogues via downloadRenderedArtefact — the dialogue own rendered node; waybill barcode bars moved to inline sizes so the file keeps its barcode); scripts/validate-po-documents.mjs EXTENDED (57 assertions, EXECUTING the pack owner: whole-pack file deterministic, contains every ready document own html, states every excluded document with its reason, filename safe); scripts/validate-commerce-loop.mjs §6 REPOINTED (old no-download contract recorded inline; now asserts the download exists) 34/34; e2e/po-documents.spec.ts 10 passed (2 NEW tests capture a real download event). LOCAL: validate:all 135 PASS / 0 FAIL (exit 0); typecheck 0; lint 0 errors; build ✓; e6 + e7 PASS. LIVE: deploy exit 0 (live asset index-Dw7vDEJO.js, byte-identical to the local verified build); verify:live 195 PASS / 2 FAIL (both HOST TIMEOUTS: L13 fill 30s, L15 waitFor 90s — the documented host-speed class, not product regressions).",
       "last_verified": "2026-10-02",
       "superseded_by": null
     }
