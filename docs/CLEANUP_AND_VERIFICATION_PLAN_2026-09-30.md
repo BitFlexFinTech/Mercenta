@@ -137,7 +137,7 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 | **P1-fix** | DOWNLOAD CONTROL (was "P0-fix") — a Download button beside Open/Print for a consignment's documents | the logistics surface offers **Download** for the chosen artefacts (owner **D3** = print **and** download), asserted by a browser check; the capability may be called a "download" only once this exists | **DONE (2026-10-02)** — `PoDocumentPackPanel.tsx` gains a per-document **Download** beside Open/Print and a **Download pack** (all ready documents in one file); `poDocumentPack.ts` owns the file (`renderPoDocumentPackHtml` + safe filenames); `LogisticsHub.tsx` label/waybill dialogues gain Download (owner D3's carrier label). Gates: `validate:po-documents` **57/57** (executed), commerce-loop §6 **REPOINTED**, e2e `po-documents.spec.ts` **10 passed**. |
 | **P1a** | AMAZON VENDOR-CODE → CATEGORY REGISTRY | `src/config/amazonVendorCodes.ts` holds the owner's vendor codes with each category stored VERBATIM as Amazon Vendor Central shows it; two codes are marked "To Be Confirmed" and linking a category to them is BLOCKED until the owner confirms with Amazon; gated by `validate:amazon-vendor-codes` | **DONE (2026-10-02)** — registry + gate **20/20**; no guessed mapping; no application runtime change. |
 | **P2** | TWO DEMO BRANDS | **DONE (2026-10-02).** The demo universe is reduced from 20 businesses to **FOUR**: Astonish + Tapatío (Model A/B, both CLEARED and trading), Le Creuset (the BLOCKED compliance-scenario tenant = the gate demo), and Kit & Kin (STILL IN ONBOARDING = the wizard + the unapproved-brand Social demo). The ten approved categories stay KNOWN to the system via the vendor-code registry (`src/config/amazonVendorCodes.ts`) — no longer one business per category. `npm run validate:all` **135/0**; typecheck 0 · lint 0 · build ✓; the checks/browser specs that named a removed business were REPOINTED (never weakened, each recording its old contract inline); tenant isolation is still proven with the two trading tenants. A REAL DEFECT was fixed at source (the Companies House registrar re-seeded on every call, so at 3 brands EVERY lookup was rate-limited). See §3 P2. |
-| **P3** | EVERY BUTTON IS WIRED (UI audit) | `npm run validate:ui-wiring` (new) walks every button/control in `src/components/**` and fails on: no handler, a handler that only changes local state, a control whose label promises an action it does not perform | NOT STARTED |
+| **P3** | EVERY BUTTON IS WIRED (UI audit) | `npm run validate:ui-wiring` (new) walks every button/control in `src/components/**` and fails on: no handler, a handler that only changes local state, a control whose label promises an action it does not perform | **DONE (2026-10-02)** — `scripts/validate-ui-wiring.mjs` (NEW) scans all 143 component files and fails on W1 no wiring, W2 empty handler, W3 an action-labelled control that only changes local state, W4 a lost domain writer (14 audited controls), W5 the fixed defect returning, W6 the style-guide exception drifting. The audit FIXED three real defects at source: `BrandSettings.tsx` "Change Password" / "Enable 2FA" (no handler, no password/2FA system — removed, the panel now states the fact); `ComplianceHub.tsx` "Review & Confirm" (only CLOSED a modal while promising to lock values — now RECORDS a real, audited confirmation via the new ONE writer `demoStore.confirmCustomsDocument`, and the tile shows "Confirmed"); and the chart hit target `role="button"` (made genuinely activatable by click/Enter/Space). **Mutation-proved ×3** (W1, W3, W5 each fail when mutated, each file restored byte-identical). See §3 P3. |
 | **P4** | DEAD CODE + DUPLICATE OWNERS | a dead-code gate (the scan used in §1.5, as a script) returns 0 candidates; the four candidates are deleted with the reason recorded; duplicate owners consolidated to one each | NOT STARTED |
 | **P5** | SIMPLIFICATION (owner's list only) | only the feature areas the owner names as out of scope are removed; the FULL sweep + browser suites green; nothing working is removed silently | **DEFERRED — owner D2** (skip P5 for now; decide later). Nothing is deleted. |
 | **P6** | CLOSE | full sweep, browser suites, deploy to `demo.mercenta.co.uk`, LIVE verification of each change, then the three-way status recorded | NOT STARTED |
@@ -270,6 +270,32 @@ exactly this class). **Out of scope:** restyling. **Depends on:** P0. **Gate:** 
 suites. **Method:** for every `<Button`/`role="button"`/control: does a handler exist; does it reach a domain
 WRITER (a real state change) or only local state; if it only annotates, does the UI SAY so; if it is
 unavailable, does it say why instead of silently doing nothing.
+
+**DONE (2026-10-02).** `scripts/validate-ui-wiring.mjs` (`npm run validate:ui-wiring`) walks all 143
+`.tsx` files under `src/components/**` (comments stripped, so commented-out JSX is never counted) and
+asserts six things: **W1** every `<button>`/`<Button>`/`role="button"` is wired (the design-system style
+guide, `DesignSystemShowcase.tsx`, is the one declared specimen exception); **W2** no empty handler; **W3**
+every action-labelled control reaches a real writer (not only a React setter — a bare function reference
+counts, and the one legitimate "reveal the form" control is allow-listed with its reason); **W4** a curated
+manifest of **14 domain-critical controls** still reaches its writer symbol; **W5** the fixed defect cannot
+return; **W6** the style-guide exception is still the style guide.
+
+**Defects FIXED at source (the audit found exactly three):**
+1. `src/components/brand/BrandSettings.tsx` — **"Change Password" and "Enable 2FA" had NO handler.** They
+   rendered the look of a security action and did nothing; Mercenta holds no password/2FA (sign-in is
+   role-based; external services use OAuth). The two false controls were removed and the panel now states the
+   fact (W5 fails if either returns).
+2. `src/components/brand/ComplianceHub.tsx` — **"Review & Confirm" only CLOSED the modal** while its own copy
+   said "Confirming locks these values." It now RECORDS a real, audited confirmation through the new ONE
+   writer `src/data/demoStore.ts → confirmCustomsDocument` (on the same canonical `recordComplianceAudit` log,
+   no second audit system), and the tile shows a **Confirmed** badge.
+3. `src/components/shared/charts/MercentaCharts.tsx` — the chart hit target declared `role="button"` but had
+   no activation; a click and Enter/Space now genuinely reveal the point's value.
+
+**Evidence.** `validate:ui-wiring` **6/6 PASS** (mutation-proved ×3: W1/W3/W5 each fail when mutated, each
+file restored byte-identical); the whole corpus `validate:all` **136/0**; `typecheck` 0 · `lint` 0 · `build` ✓;
+E6 + E7 PASS (P3 surface declared in both); browser `compliance-sim` + `compliance-gate` **7 passed**,
+`brand-operational-surfaces` + `uiux-foundation` + `dashboard` **27 passed**.
 
 ### P4 — DEAD CODE AND DUPLICATE OWNERS
 **In scope:** the ≈4 unreferenced files (§1.5) deleted with the reason recorded; the one remaining `TODO` stub

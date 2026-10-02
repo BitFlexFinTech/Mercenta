@@ -24,7 +24,18 @@ NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tre
 actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
 RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
-## P2 OF THE CLEAN-UP/VERIFICATION PLAN — **THE DEMO UNIVERSE IS REDUCED TO FOUR BUSINESSES** (session 62, 2026-10-02) — **CURRENT**
+## P3 OF THE CLEAN-UP/VERIFICATION PLAN — **EVERY BUTTON IS WIRED**: THREE DECORATIVE / OVER-PROMISING CONTROLS FIXED AT SOURCE, AND A NEW `validate:ui-wiring` GATE (session 63, 2026-10-02) — **CURRENT**
+
+**What this session did** (the recorded `NEXT TASK` = **P3**, "every button is wired"):
+1. **New gate** — `scripts/validate-ui-wiring.mjs` (`npm run validate:ui-wiring`) parses every `.tsx` under `src/components/**` (comments stripped) and fails on **W1** an unwired control, **W2** an empty handler, **W3** an action-labelled control that only changes local state, **W4** a domain-critical control that lost its writer (14-entry manifest), **W5** the fixed defect returning, **W6** the style-guide exception drifting. Registered in `package.json`; auto-run by the corpus.
+2. **DEFECT FIXED at source #1** — `src/components/brand/BrandSettings.tsx`: "Change Password" and "Enable 2FA" had NO handler (a false promise — Mercenta holds no password/2FA). Removed; the panel states role-based sign-in / OAuth instead. W5 fails if either returns.
+3. **DEFECT FIXED at source #2** — `src/components/brand/ComplianceHub.tsx`: "Review & Confirm" only CLOSED the modal while its copy said "Confirming locks these values." It now RECORDS a real, audited confirmation via the new ONE writer and the tile shows a **Confirmed** badge (button disables once confirmed).
+4. **DEFECT FIXED at source #3** — `src/components/shared/charts/MercentaCharts.tsx`: the chart hit target declared `role="button"` with no activation; a click and Enter/Space now reveal the point's value.
+5. **ONE writer added** — `src/data/demoStore.ts → confirmCustomsDocument` / `isCustomsDocumentConfirmed`, recording on the EXISTING canonical `recordComplianceAudit` log (no second audit system).
+6. **Declared in BOTH scope guards** — `§P3_UI_WIRING_SCOPE` (E6) and `§P3_UI_WIRING_DECLARED` (E7).
+7. **Evidence** — `validate:all` **136/0** (corpus grew 135→136) · typecheck **0** · lint **0** · build ✓ · `validate:ui-wiring` **6/6** mutation-proved ×3 (W1/W3/W5 each fail when mutated, each file restored byte-identical) · E6 + E7 PASS · browser `compliance-sim`+`compliance-gate` **7 passed**, `brand-operational-surfaces`+`uiux-foundation`+`dashboard` **27 passed**.
+
+## P2 OF THE CLEAN-UP/VERIFICATION PLAN — **THE DEMO UNIVERSE IS REDUCED TO FOUR BUSINESSES** (session 62, 2026-10-02) — SUPERSEDED BY P3 (session 63, 2026-10-02)
 
 **What this session did** (the recorded `NEXT TASK` = **P2**, owner decision **D1**):
 1. **The seed holds FOUR businesses** — `src/data/demoData.ts`: **Astonish** (Model A commission, CLEARED & trading), **Tapatío** (Model B buy/resell, CLEARED & trading), **Le Creuset** (the BLOCKED compliance-scenario tenant = the gate demo), **Kit & Kin** (STILL IN ONBOARDING = the wizard demo + an UNAPPROVED brand the Social gate refuses). One login card per business; `CLEARED_BRAND_IDS` = [Astonish, Tapatío]; `COMPLIANCE_SCENARIO_BRAND_IDS` = [Le Creuset]; `DEMO_COMPLIANCE_BASELINE` = 15 documents / 4 blocking. The ten approved categories stay KNOWN to the system via the Amazon vendor-code registry (`src/config/amazonVendorCodes.ts`) — no longer one business per category.

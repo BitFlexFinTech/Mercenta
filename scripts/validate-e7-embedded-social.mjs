@@ -985,6 +985,27 @@ try {
     'package.json',
   ];
 
+  /**
+   * §P3 — EVERY BUTTON IS WIRED (2026-10-02). The UI-wiring audit fixed two
+   * decorative controls in `BrandSettings.tsx`, made `ComplianceHub.tsx`'s
+   * "Review & Confirm" record a REAL confirmation, made the chart's
+   * `role="button"` hit target genuinely activatable, and added the ONE writer
+   * (`demoStore.ts → confirmCustomsDocument`). The new gate is
+   * `validate-ui-wiring.mjs`. Fuller note in `validate-e6-brand-surfaces.mjs`
+   * §P3_UI_WIRING_SCOPE. Same mechanism: a changed source/test file outside
+   * EVERY declared set is still refused.
+   */
+  const P3_UI_WIRING_DECLARED = [
+    'src/components/brand/BrandSettings.tsx',
+    'src/components/brand/ComplianceHub.tsx',
+    'src/components/shared/charts/MercentaCharts.tsx',
+    'src/data/demoStore.ts',
+    'scripts/validate-ui-wiring.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1744,7 +1765,13 @@ try {
            * its declared surface is accepted here exactly as every other phase's is.
            */
           !P1FIX_DOWNLOAD_CONTROL_DECLARED.includes(f) &&
-          !P1FIX_DOWNLOAD_CONTROL_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P1FIX_DOWNLOAD_CONTROL_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §P3 — EVERY BUTTON IS WIRED (2026-10-02) — touches no protected path, but
+           * its declared surface is accepted here exactly as every other phase's is.
+           */
+          !P3_UI_WIRING_DECLARED.includes(f) &&
+          !P3_UI_WIRING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1994,6 +2021,10 @@ try {
      * §P2 — TWO DEMO BRANDS (2026-10-02) — the reduced-universe surface (see above).
      */
     ...P2_TWO_DEMO_BRANDS_DECLARED,
+    /**
+     * §P3 — EVERY BUTTON IS WIRED (2026-10-02) — the UI-wiring surface (see above).
+     */
+    ...P3_UI_WIRING_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

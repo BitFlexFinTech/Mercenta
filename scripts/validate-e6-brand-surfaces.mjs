@@ -1010,6 +1010,31 @@ const P2_TWO_DEMO_BRANDS_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §P3 — EVERY BUTTON IS WIRED (2026-10-02).
+ *
+ * The UI-wiring audit (`docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §3 P3)
+ * found and FIXED two decorative controls in `BrandSettings.tsx` ("Change
+ * Password" / "Enable 2FA" — no handler, and no password/2FA system exists) and
+ * ONE over-promising control in `ComplianceHub.tsx` ("Review & Confirm" only
+ * CLOSED the modal while promising to lock values); the chart's `role="button"`
+ * hit target was made genuinely activatable; and `demoStore.ts` gained the ONE
+ * writer that records a brand's customs-document confirmation. The new gate is
+ * `validate-ui-wiring.mjs`. F5/F5b/F6 contract UNCHANGED: a changed SOURCE file
+ * outside EVERY declared set still fails.
+ */
+const P3_UI_WIRING_SCOPE = new Set([
+  'src/components/brand/BrandSettings.tsx',          /* the two false security controls removed */
+  'src/components/brand/ComplianceHub.tsx',          /* Review & Confirm now records a real confirmation */
+  'src/components/shared/charts/MercentaCharts.tsx', /* role="button" made genuinely activatable */
+  'src/data/demoStore.ts',                           /* NEW: confirmCustomsDocument — the ONE writer */
+  'scripts/validate-ui-wiring.mjs',                  /* NEW — this phase's gate */
+  'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2192,7 +2217,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...P1FIX_DOWNLOAD_CONTROL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §P2 — TWO DEMO BRANDS (see above). First protected-path check (F5). */
         P2_TWO_DEMO_BRANDS_SCOPE.has(p) ||
-        [...P2_TWO_DEMO_BRANDS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...P2_TWO_DEMO_BRANDS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P3 — EVERY BUTTON IS WIRED (see above). First protected-path check (F5). */
+        P3_UI_WIRING_SCOPE.has(p) ||
+        [...P3_UI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2269,6 +2297,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §P2 — TWO DEMO BRANDS (see above). Second protected-path check (F5b). */
         P2_TWO_DEMO_BRANDS_SCOPE.has(p) ||
         [...P2_TWO_DEMO_BRANDS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P3 — EVERY BUTTON IS WIRED (see above). Second protected-path check (F5b). */
+        P3_UI_WIRING_SCOPE.has(p) ||
+        [...P3_UI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2581,6 +2612,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §P2 — TWO DEMO BRANDS (see above). */
           P2_TWO_DEMO_BRANDS_SCOPE.has(p) ||
           [...P2_TWO_DEMO_BRANDS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P3 — EVERY BUTTON IS WIRED (see above). */
+          P3_UI_WIRING_SCOPE.has(p) ||
+          [...P3_UI_WIRING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

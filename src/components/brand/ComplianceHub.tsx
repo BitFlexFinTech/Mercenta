@@ -18,6 +18,7 @@ import { MERCENTA_EORI, MERCENTA_VAT } from '@/config/customs';
 import { generateCustomsDocBundle, type CustomsDocumentBundle } from '@/lib/customsDocs';
 import { useBrands, useProducts, usePurchaseOrders, useComplianceDocuments, useContracts, useBrandAgreements } from '@/data/queries';
 import { uploadComplianceDoc } from '@/data/api';
+import { confirmCustomsDocument, isCustomsDocumentConfirmed } from '@/data/demoStore';
 import { evaluateComplianceGate, getRequiredDocumentsForCategory, CATEGORY_DOC_LABELS, REQUIRED_DOCUMENT_TYPES, latestDocumentsByType } from '@/lib/compliance';
 import {
   documentVerificationStanding,
@@ -63,6 +64,33 @@ export function ComplianceHub() {
   );
 
   const [previewDoc, setPreviewDoc] = useState<CustomsDocumentBundle | null>(null);
+  /**
+   * §P3 — a confirmation is recorded in the canonical store; this counter is
+   * bumped when it happens so the tiles re-render and reflect the confirmed
+   * state. (Referenced in the tile key below, which is what makes the re-render
+   * real — the store read itself happens during render via `isConfirmed`.)
+   */
+  const [confirmTick, setConfirmTick] = useState(0);
+  const [previewPoId, setPreviewPoId] = useState<string | null>(null);
+  const isConfirmed = (poId: string, docType: string) => isCustomsDocumentConfirmed(`${poId}:${docType}`);
+  /**
+   * §P3 — the ONE writer behind "Review & Confirm": it records the brand's
+   * confirmation of the previewed document on the canonical audit log and closes
+   * the modal. Before P3 the control only closed the modal — it promised a
+   * confirmation that never happened.
+   */
+  const confirmPreviewDoc = () => {
+    if (!previewDoc || !previewPoId) return;
+    confirmCustomsDocument(
+      `${previewPoId}:${previewDoc.type}`,
+      tenantId ?? '',
+      tenantId ?? 'brand',
+      `Brand confirmed the auto-generated ${previewDoc.title} for ${previewPoId}`
+    );
+    setConfirmTick((t) => t + 1);
+    setPreviewDoc(null);
+    setPreviewPoId(null);
+  };
 
   const docBundles = useMemo(
     () =>
@@ -151,28 +179,39 @@ export function ComplianceHub() {
                 </Badge>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                {docs.map((doc) => (
-                  <button
-                    key={doc.type}
-                    onClick={() => setPreviewDoc(doc)}
-                    className={cn(
-                      'text-left bg-ink-900 border border-white/[0.06] hover:border-brass/40 rounded-lg p-3 transition-colors group'
-                    )}
-                  >
-                    <FileCheck2 className="w-4 h-4 text-brass mb-1.5" />
-                    <div className="text-ds-label font-medium text-white">{doc.title}</div>
-                    <ul className="mt-1 space-y-0.5">
-                      {doc.preFilled.slice(0, 2).map((f) => (
-                        <li key={f.label} className="font-mono text-ds-micro text-zinc-600 truncate">
-                          {f.label}: {f.value}
-                        </li>
-                      ))}
-                    </ul>
-                    <span className="inline-flex items-center gap-1 text-ds-micro text-brass mt-2 opacity-70 group-hover:opacity-100">
-                      <Eye className="w-3 h-3" /> Review &amp; confirm
-                    </span>
-                  </button>
-                ))}
+                {docs.map((doc) => {
+                  const confirmed = isConfirmed(po.id, doc.type);
+                  return (
+                    <button
+                      key={doc.type + confirmTick}
+                      onClick={() => { setPreviewDoc(doc); setPreviewPoId(po.id); }}
+                      className={cn(
+                        'text-left bg-ink-900 border rounded-lg p-3 transition-colors group',
+                        confirmed ? 'border-emerald-500/30' : 'border-white/[0.06] hover:border-brass/40'
+                      )}
+                    >
+                      <div className="flex items-start justify-between">
+                        <FileCheck2 className="w-4 h-4 text-brass mb-1.5" />
+                        {confirmed && (
+                          <Badge className="text-ds-micro bg-emerald-500/15 text-emerald-300 border-emerald-500/20">
+                            Confirmed
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-ds-label font-medium text-white">{doc.title}</div>
+                      <ul className="mt-1 space-y-0.5">
+                        {doc.preFilled.slice(0, 2).map((f) => (
+                          <li key={f.label} className="font-mono text-ds-micro text-zinc-600 truncate">
+                            {f.label}: {f.value}
+                          </li>
+                        ))}
+                      </ul>
+                      <span className="inline-flex items-center gap-1 text-ds-micro text-brass mt-2 opacity-70 group-hover:opacity-100">
+                        <Eye className="w-3 h-3" /> {confirmed ? 'Review' : <>Review &amp; confirm</>}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -190,11 +229,15 @@ export function ComplianceHub() {
             />
             <div className="p-4 flex items-center justify-between bg-ink-850">
               <span className="text-xs text-zinc-400">
-                {previewDoc.title} — pre-filled from PO data. Confirming locks these values.
+                {previewDoc.title} — pre-filled from PO data. Confirming records your confirmation of these values.
               </span>
               <div className="flex gap-2">
-                <Button variant="ghost" onClick={() => setPreviewDoc(null)}>Close</Button>
-                <Button onClick={() => setPreviewDoc(null)}>Review &amp; Confirm</Button>
+                <Button variant="ghost" onClick={() => { setPreviewDoc(null); setPreviewPoId(null); }}>Close</Button>
+                {previewPoId && isConfirmed(previewPoId, previewDoc.type) ? (
+                  <Button disabled>Confirmed</Button>
+                ) : (
+                  <Button onClick={confirmPreviewDoc}>Review &amp; Confirm</Button>
+                )}
               </div>
             </div>
           </Card>

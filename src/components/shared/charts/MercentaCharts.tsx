@@ -225,6 +225,19 @@ export function MercentaLineChart({
                   onMouseLeave={() => setHover((h) => (h === i ? null : h))}
                   onFocus={() => setHover(i)}
                   onBlur={() => setHover((h) => (h === i ? null : h))}
+                  /* §P3 — the role now tells the truth: `role="button"` promised
+                     an ACTIVATION that did not exist (hover/focus showed the
+                     tooltip, but a click or Enter/Space did nothing). A click,
+                     Enter or Space now reveals the point's value, so the control
+                     does what its role announces. `Enter` is the key SVG elements
+                     report for both Enter and NumpadEnter; Space is `' '`. */
+                  onClick={() => setHover(i)}
+                  onKeyDown={(ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') {
+                      ev.preventDefault();
+                      setHover(i);
+                    }
+                  }}
                 />
               </g>
             ))}

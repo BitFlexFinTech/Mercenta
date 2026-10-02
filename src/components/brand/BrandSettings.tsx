@@ -195,14 +195,28 @@ function BankSection({ brandId }: { brandId: string }) {
 function LoginSection() {
   return (
     <Card title="Login Settings">
+      {/*
+        §P3 — THE SECURITY CONTROLS NOW TELL THE TRUTH (defect FIXED at source).
+
+        Two `<Button>`s stood here — "Change Password" and "Enable 2FA" — with NO
+        handler: they rendered the look of an account-security action and did
+        nothing when clicked. Mercenta holds no password or 2FA of its own: brand
+        and operator sign-in is role-based (the one-click login), and external
+        services connect by OAuth, which never hands Mercenta a password
+        (`src/config/google.ts`, the integrations registry). A "change password"
+        control therefore cannot honestly exist. Per P3 — "if it is unavailable,
+        it says why instead of silently doing nothing" — the two false controls
+        are replaced by the plain fact. `npm run validate:ui-wiring` fails if a
+        control labelled "Change Password" or "Enable 2FA" ever returns.
+      */}
       <div className="space-y-3 text-xs text-zinc-300">
         <div className="flex items-center justify-between border-b border-white/[0.04] pb-2">
-          <span>Password</span>
-          <Button className="text-ds-micro">Change Password</Button>
+          <span>Sign-in method</span>
+          <span className="text-ds-micro text-zinc-500">Role-based — no Mercenta password to change</span>
         </div>
         <div className="flex items-center justify-between border-b border-white/[0.04] pb-2">
           <span>Two-factor authentication</span>
-          <Button className="text-ds-micro">Enable 2FA</Button>
+          <span className="text-ds-micro text-zinc-500">Not offered — contacts use their own provider’s 2FA</span>
         </div>
         <div className="flex items-center justify-between pb-2">
           <span>Active sessions</span>

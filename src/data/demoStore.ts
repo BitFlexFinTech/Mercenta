@@ -274,6 +274,37 @@ export function recordComplianceAudit(
   return entry;
 }
 
+/**
+ * §P3 — THE BRAND'S CONFIRMATION OF AN AUTO-GENERATED CUSTOMS DOCUMENT.
+ *
+ * The brand-facing compliance hub presents Mercenta's auto-generated customs
+ * documents (commercial invoice, packing list, UKCA declaration) and asks the
+ * brand to review and confirm them — "confirming locks these values"
+ * (`docs/MERCENTA_BUSINESS_MODEL.md`: the brand reviews and confirms, it never
+ * recreates a document). Until P3 the "Review & Confirm" control only CLOSED the
+ * preview modal: it promised a confirmation that was never recorded. This is the
+ * ONE writer that records that confirmation, on the SAME canonical audit log
+ * (`recordComplianceAudit`) every other compliance action uses — no second
+ * audit system. The key is `poId:docType`, so a confirmation is per document.
+ */
+const demoCustomsConfirmations = new Set<string>();
+
+export function confirmCustomsDocument(
+  key: string,
+  brandId: string,
+  actorId: string,
+  reason: string
+): void {
+  demoCustomsConfirmations.add(key);
+  recordComplianceAudit('customs_document_confirmed', key, brandId, reason, actorId, {
+    confirmedKey: key,
+  });
+}
+
+export function isCustomsDocumentConfirmed(key: string): boolean {
+  return demoCustomsConfirmations.has(key);
+}
+
 /** §Stage-6 — amend an existing shipment's carrier/status. */
 export function amendShipment(
   shipmentId: string,
