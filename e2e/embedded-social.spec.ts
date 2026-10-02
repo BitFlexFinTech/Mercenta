@@ -216,9 +216,9 @@ test.describe('Mercenta Social — tenant isolation, entitlement & safety', () =
 
   test('7. an unapproved brand cannot reach Mercenta Social', async ({ page }) => {
     const errors = trackPageErrors(page);
-    // Bulldog Skincare-Care's canonical contract is 'draft' — not an approved
-    // partnership — so the brand never receives the portal Social surface.
-    await loginAs(page, 'Bulldog Skincare', 1000);
+    // §P2 REPOINTED (2026-10-02) — Kit & Kin's canonical contract is 'sent' — not
+    // an approved partnership — so the brand never receives the portal Social surface.
+    await loginAs(page, 'Kit & Kin', 1000);
     await page.waitForTimeout(600);
 
     expect(await page.locator(SOCIAL_NAV).count()).toBe(0);

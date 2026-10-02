@@ -31,7 +31,7 @@ try {
   /* ── §5 stored per brand ─────────────────────────────────────────────── */
 
   test('every demo brand declares its own commercial model (one source of truth)',
-    demoData.ALL_DEMO_BRANDS.length >= 12 &&
+    demoData.ALL_DEMO_BRANDS.length >= 2 &&
       demoData.ALL_DEMO_BRANDS.every((b) => cfg.isCommercialModel(b.commercialModel)),
     String(demoData.ALL_DEMO_BRANDS.length));
   test('the demo deliberately mixes both models (never one assumed default)',
@@ -47,9 +47,9 @@ try {
 
   /* ── §5 persistence + audit (the write path) ──────────────────────────── */
 
-  const before = store.commercialModelAuditFor('brand-roberts').length;
+  const before = store.commercialModelAuditFor('brand-astonish').length;
   const changed = store.setBrandCommercialModel({
-    brandId: 'brand-roberts',
+    brandId: 'brand-astonish',
     model: 'buy_resell',
     actorId: 'staff-001',
     reason: 'validator: agreed at review',
@@ -57,19 +57,19 @@ try {
   });
   test('a Super Admin change persists on the brand record',
     changed.ok === true &&
-      store.getBrandCommercialModelRecord('brand-roberts').model === 'buy_resell');
+      store.getBrandCommercialModelRecord('brand-astonish').model === 'buy_resell');
   test('the change appends a canonical audit row (history preserved)',
-    store.commercialModelAuditFor('brand-roberts').length === before + 1 &&
+    store.commercialModelAuditFor('brand-astonish').length === before + 1 &&
       store
-        .commercialModelAuditFor('brand-roberts')
+        .commercialModelAuditFor('brand-astonish')
         .some((e) => e.action === 'commercial_model_changed'));
   test('the audit row records that compliance was NOT changed by the model',
     store
-      .commercialModelAuditFor('brand-roberts')
+      .commercialModelAuditFor('brand-astonish')
       .every((e) => e.metadata?.complianceUnchanged === true));
 
   const noReason = store.setBrandCommercialModel({
-    brandId: 'brand-roberts',
+    brandId: 'brand-astonish',
     model: 'commission_agent',
     actorId: 'staff-001',
     reason: '',
@@ -77,7 +77,7 @@ try {
   });
   test('an override with no reason is REFUSED (auditability is mandatory)', noReason.ok === false);
   const unknown = store.setBrandCommercialModel({
-    brandId: 'brand-roberts',
+    brandId: 'brand-astonish',
     model: 'revenue_share',
     actorId: 'staff-001',
     reason: 'validator probe',

@@ -956,6 +956,35 @@ try {
     'package.json',
   ];
 
+  /**
+   * §P2 (owner decision D1, 2026-10-02) — TWO DEMO BRANDS. The demo universe is
+   * reduced to THREE businesses (Astonish + Tapatío cleared/trading, Le Creuset
+   * blocked); the ten categories stay known via the vendor-code registry; and a
+   * defect was fixed at source in the Companies House registrar seed. Fuller note
+   * in `validate-e6-brand-surfaces.mjs` §P2_TWO_DEMO_BRANDS_SCOPE. Same mechanism:
+   * a changed source/test file outside EVERY declared set is still refused.
+   */
+  const P2_TWO_DEMO_BRANDS_DECLARED = [
+    'src/data/demoData.ts',
+    'src/lib/compliance/companiesHouseMock.ts',
+    'src/lib/compliance/complianceSync.ts',
+    'scripts/validate-demo-completeness.mjs',
+    'scripts/validate-commercial-model-selection.mjs',
+    'scripts/validate-amazon-ads.mjs',
+    'scripts/validate-review-s1.mjs',
+    'scripts/validate-review-s6.mjs',
+    'scripts/validate-stage16.mjs',
+    'e2e/compliance-gate.spec.ts',
+    'e2e/catalog-product-management.spec.ts',
+    'e2e/document-verification.spec.ts',
+    'e2e/embedded-social.spec.ts',
+    'e2e/amazon-ads-dashboard.spec.ts',
+    'e2e/founder-operating-system.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1961,6 +1990,10 @@ try {
      * §P1-fix — THE DOWNLOAD CONTROL (2026-10-02) — the download-control surface (see above).
      */
     ...P1FIX_DOWNLOAD_CONTROL_DECLARED,
+    /**
+     * §P2 — TWO DEMO BRANDS (2026-10-02) — the reduced-universe surface (see above).
+     */
+    ...P2_TWO_DEMO_BRANDS_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

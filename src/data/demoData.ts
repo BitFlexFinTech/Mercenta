@@ -106,100 +106,84 @@ export const DEMO_MODEL_A_BRAND_ID = 'brand-astonish';
 export const DEMO_MODEL_B_BRAND_ID = 'brand-tapatio';
 
 /**
- * Phase 4 — canonical **20 REAL brands** (10 UK + 10 international). All ten
- * approved categories are covered. UK list first, international second. The
- * international group preserves the real brands already present in the BI
- * prospect universe (Tapatío, Cholula, Valentina, Fly By Jing). Every row
- * carries the real brand's public website as §12 evidence; nothing that is
- * unverified (ASINs, sales, rankings, revenue, contracts, contact people) is
- * asserted as fact on the canonical record.
+ * §P2 (owner decision D1, 2026-10-02) — the demo universe is THREE businesses,
+ * not twenty. All are real companies and each row carries the real brand's
+ * public website as §12 evidence; nothing unverified (ASINs, sales, rankings,
+ * revenue, contracts, contact people) is asserted as fact.
+ *
+ *   Brand A — Astonish (Model A, commission/agent) — CLEARED, trading tenant.
+ *   Brand B — Tapatío  (Model B, buy/resell)       — CLEARED, trading tenant.
+ *   Brand C — Le Creuset (Model B, buy/resell)     — BLOCKED compliance-scenario
+ *             tenant: its documents are not approved, so the compliance gate
+ *             blocks it (the demo's compliance-gate demonstration).
+ *
+ * Two CLEARED trading tenants are kept so "one business cannot see another's
+ * data" (tenant isolation) stays provable; the blocked tenant demonstrates the
+ * gate. The TEN approved Amazon categories remain KNOWN to the system through
+ * the Amazon vendor-code registry (`src/config/amazonVendorCodes.ts`) — the demo
+ * no longer carries one business per category. The retired 17-brand universe is
+ * recorded in the git history and `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md`.
  */
 export const DEMO_BRANDS: DemoBrand[] = [
-  // ── UK (10) ──────────────────────────────────────────────────────
+  // Brand A — Astonish (Model A, commission/agent); CLEARED, trading tenant.
   { id: 'brand-astonish', name: 'Astonish', category: 'Home', region: 'europe', nation: 'United Kingdom', email: 'trade@astonish.example', signatory: 'Trade team (contact TBC)', track: 'financed', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-astonish'] },
-  { id: 'brand-seep', name: 'Seep', category: 'Home', region: 'europe', nation: 'United Kingdom', email: 'trade@seep.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'uk', website: BRAND_SITE['brand-seep'] },
-  { id: 'brand-delphis', name: 'Delphis Eco', category: 'Home', region: 'europe', nation: 'United Kingdom', email: 'trade@delphis.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-delphis'] },
-  { id: 'brand-kitkin', name: 'Kit & Kin', category: 'Baby', region: 'europe', nation: 'United Kingdom', email: 'trade@kitandkin.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-kitkin'] },
-  { id: 'brand-bulldog', name: 'Bulldog Skincare', category: 'Health & Personal Care', region: 'europe', nation: 'United Kingdom', email: 'trade@bulldog.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'draft', commercialModel: 'buy_resell', market: 'uk', website: BRAND_SITE['brand-bulldog'] },
-  { id: 'brand-joseph', name: 'Joseph Joseph', category: 'Kitchen', region: 'europe', nation: 'United Kingdom', email: 'trade@joseph.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-joseph'] },
-  { id: 'brand-roberts', name: 'Roberts Radio', category: 'Consumer Electronics', region: 'europe', nation: 'United Kingdom', email: 'trade@roberts.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'uk', website: BRAND_SITE['brand-roberts'] },
-  { id: 'brand-clipper', name: 'Clipper Teas', category: 'Grocery', region: 'europe', nation: 'United Kingdom', email: 'trade@clipper.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-clipper'] },
-  { id: 'brand-regatta', name: 'Regatta', category: 'Apparel', region: 'europe', nation: 'United Kingdom', email: 'trade@regatta.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'uk', website: BRAND_SITE['brand-regatta'] },
-  { id: 'brand-autoglym', name: 'Autoglym', category: 'Automotive', region: 'europe', nation: 'United Kingdom', email: 'trade@autoglym.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-autoglym'] },
-  // ── International (10) — real brands already present as BI prospects ──
+  // Brand B — Tapatío (Model B, buy/resell); CLEARED, trading tenant.
   { id: 'brand-tapatio', name: 'Tapatío', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@tapatio.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-tapatio'] },
-  { id: 'brand-cholula', name: 'Cholula', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@cholula.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'international', website: BRAND_SITE['brand-cholula'] },
-  { id: 'brand-valentina', name: 'Valentina', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@valentina.example', signatory: 'Trade team (contact TBC)', track: 'financed', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-valentina'] },
-  { id: 'brand-flybyjing', name: 'Fly By Jing', category: 'Grocery', region: 'north_america', nation: 'United States', email: 'trade@flybyjing.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'international', website: BRAND_SITE['brand-flybyjing'] },
-  { id: 'brand-locknlock', name: 'LocknLock', category: 'Kitchen', region: 'europe', nation: 'South Korea', email: 'trade@locknlock.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-locknlock'] },
-  { id: 'brand-lecreuset', name: 'Le Creuset', category: 'Kitchen', region: 'europe', nation: 'France', email: 'trade@lecreuset.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-lecreuset'] },
-  { id: 'brand-moleskine', name: 'Moleskine', category: 'Office Products', region: 'europe', nation: 'Italy', email: 'trade@moleskine.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'commission_agent', market: 'international', website: BRAND_SITE['brand-moleskine'] },
-  { id: 'brand-sennheiser', name: 'Sennheiser', category: 'Consumer Electronics', region: 'europe', nation: 'Germany', email: 'trade@sennheiser.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-sennheiser'] },
-  { id: 'brand-vileda', name: 'Vileda', category: 'Home', region: 'europe', nation: 'Germany', email: 'trade@vileda.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'commission_agent', market: 'international', website: BRAND_SITE['brand-vileda'] },
-  { id: 'brand-logitech', name: 'Logitech', category: 'Personal Computer', region: 'europe', nation: 'Switzerland', email: 'trade@logitech.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'active', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-logitech'] },
+  // Brand C — Le Creuset (Model B, buy/resell); BLOCKED compliance-scenario tenant.
+  { id: 'brand-lecreuset', name: 'Le Creuset', category: 'Kitchen', region: 'europe', nation: 'France', email: 'trade@lecreuset.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'signed', commercialModel: 'buy_resell', market: 'international', website: BRAND_SITE['brand-lecreuset'] },
+  // Brand D — Kit & Kin: a brand STILL IN ONBOARDING (not yet in the portal). It
+  // demonstrates the onboarding wizard AND an UNAPPROVED brand (contract 'sent' →
+  // the Social gate refuses it). No operational data.
+  { id: 'brand-kitkin', name: 'Kit & Kin', category: 'Baby', region: 'europe', nation: 'United Kingdom', email: 'trade@kitandkin.example', signatory: 'Trade team (contact TBC)', track: 'direct_fulfillment', contractStatus: 'sent', commercialModel: 'commission_agent', market: 'uk', website: BRAND_SITE['brand-kitkin'] },
 ];
 
-// Personal Computer category — Logitech (real) is the Personal Computer
-// member of the canonical 20 above. Kept as a named re-export so existing
-// consumers of the old single-PC export keep compiling; the row itself is a
-// REFERENCE into DEMO_BRANDS (never a second brand source).
-export const DEMO_BRAND_PC: DemoBrand =
-  DEMO_BRANDS.find((b) => b.category === 'Personal Computer')!;
+// §P2 — the retired single-PC re-export (`DEMO_BRAND_PC`) is gone with the
+// reduced brand list: nothing imported it, and the Personal Computer category
+// remains KNOWN to the system through the Amazon vendor-code registry
+// (`src/config/amazonVendorCodes.ts`), not through a demo brand.
 
 /**
- * §Phase 7F / §Phase 4 — Deterministic compliance-scenario tenants.
- *
- * These brands reached the PORTAL (onboarded = true) but are NOT gate-cleared,
- * so the compliance gate can be genuinely exercised in the meaningful states
- * the product claims to support (see `DEMO_COMPLIANCE_SCENARIOS` and the
- * compliance matrix in PROJECT_STATUS.md). Phase 4 repointed them onto REAL
- * brands from the canonical 20 (the previous tenants were invented companies):
- *
- *   Le Creuset  — 0/5 required docs approved (Kitchen → 5 required)
- *   Autoglym    — 4/5 required docs approved (Automotive → 5 required)
- *
- * Their contracts are 'active' and both mandatory §4.1/§4.2 agreements are
- * accepted (derived automatically), so the ONLY reason their gate blocks is
- * the document state — exactly what the compliance-gate E2E asserts. The
- * entries are references into DEMO_BRANDS (single source of truth).
+ * §P2 — the demo's compliance-scenario tenant. It is Le Creuset (Brand C), which
+ * reaches the PORTAL (onboarded) but is NOT gate-cleared, so the compliance gate
+ * is genuinely exercised in the blocked state (see `DEMO_COMPLIANCE_SCENARIOS` and
+ * the compliance matrix in PROJECT_STATUS.md). Its document statuses are declared
+ * BY NAME in `DEMO_COMPLIANCE_SCENARIO_BY_BRAND` below; its contract is 'signed'
+ * and both mandatory §4.1/§4.2 agreements are accepted (derived automatically), so
+ * the ONLY reason its gate blocks is the document state — exactly what the
+ * compliance-gate browser test asserts. The entry is a REFERENCE into DEMO_BRANDS
+ * (single source of truth).
  */
 export const DEMO_BRANDS_COMPLIANCE_SCENARIOS: DemoBrand[] = [
   DEMO_BRANDS.find((b) => b.id === 'brand-lecreuset')!,
-  DEMO_BRANDS.find((b) => b.id === 'brand-autoglym')!,
 ];
 
 /**
- * ALL_DEMO_BRANDS — THE canonical universe = the 20 real brands. Exactly one
- * source of truth: there is deliberately no second (fake) brand list anywhere.
+ * ALL_DEMO_BRANDS — THE canonical universe = the THREE demo businesses. Exactly
+ * one source of truth: there is deliberately no second (fake) brand list anywhere.
  */
 export const ALL_DEMO_BRANDS: DemoBrand[] = [...DEMO_BRANDS];
 
 /**
- * §Phase 4 / §16 — REPRESENTATIVE demo-login subset.
- *
- * The one-click login deliberately shows a *representative* set of cards, NOT
- * one button per brand (20 buttons would overwhelm investors). The subset is
- * declared here next to the canonical 20 and every ID is a reference into it —
- * so the login UI can never become a second, hidden source of brands. All the
- * operational demo accounts behind these cards are real canonical 20 tenants.
+ * §P2 (owner decision D1) — the one-click demo login shows THREE cards: the two
+ * DEMO businesses (Brand A Astonish, Brand B Tapatío — one per commercial model,
+ * both trading) plus the BLOCKED compliance-scenario tenant (Brand C Le Creuset),
+ * so an operator can see BOTH gate states. Every id is a reference into
+ * `DEMO_BRANDS`, so the login UI can never become a second, hidden source of brands.
  */
 export const DEMO_LOGIN_BRAND_IDS: string[] = [
   'brand-astonish',
   'brand-tapatio',
-  'brand-kitkin',
-  'brand-bulldog',
   'brand-lecreuset',
-  'brand-autoglym',
+  'brand-kitkin',
 ];
 
 /**
- * Brands that have cleared the compliance gate and thus have operational
- * data (products, POs, shipments). All other brands are still in onboarding
- * with only their profile, compliance docs, and contract visible.
- *
- * Phase 4: the two cleared operational tenants are ONE UK brand (Astonish,
- * Home) and ONE international brand (Tapatío, Grocery) — both real, and both
- * demonstrate the Money Chain end-to-end in simulated mode.
+ * Brands that have cleared the compliance gate and thus have operational data
+ * (products, POs, shipments). In the §P2 universe the TWO cleared trading
+ * tenants are Brand A (Astonish, Home) and Brand B (Tapatío, Grocery) — both
+ * demonstrate the Money Chain end-to-end in simulated mode AND provide the two
+ * data-bearing parties the tenant-isolation proof needs. Brand C (Le Creuset)
+ * is the blocked compliance-scenario tenant and carries profile/docs/contract only.
  */
 export const CLEARED_BRAND_IDS: string[] = [
   'brand-astonish',
@@ -207,13 +191,12 @@ export const CLEARED_BRAND_IDS: string[] = [
 ];
 
 /**
- * §Phase 7F — compliance-scenario tenant IDs (portal-accessible, NOT cleared).
- * Deterministic demo states so the compliance gate can be genuinely exercised.
+ * §P2 — compliance-scenario tenant IDs (portal-accessible, NOT cleared).
+ * Deterministic demo state so the compliance gate can be genuinely exercised.
  * See `DEMO_BRANDS_COMPLIANCE_SCENARIOS` above and `DEMO_COMPLIANCE_SCENARIOS` below.
  */
 export const COMPLIANCE_SCENARIO_BRAND_IDS: string[] = [
   'brand-lecreuset',
-  'brand-autoglym',
 ];
 
 /**
@@ -778,47 +761,15 @@ export const DEMO_COMPLIANCE_SCENARIOS = {
     categoryDocument: 'approved',
   },
 
-  /** Mid-review: the insurance certificate is the one document outstanding. */
-  insurance_pending: {
-    why: 'Compliance review in progress: the insurance certificate is not approved yet.',
-    base: {
-      letter_of_authorization: 'approved',
-      product_safety_ukca: 'under_review',
-      insurance_certificate: 'missing',
-    },
-    categoryDocument: 'missing',
-  },
-
-  /** Early stage: every base document is in review — none approved yet. */
-  early_submission: {
-    why: 'Early submission: all base documents uploaded, none approved yet.',
-    base: {
-      letter_of_authorization: 'uploaded',
-      product_safety_ukca: 'uploaded',
-      insurance_certificate: 'under_review',
-    },
-    categoryDocument: 'missing',
-  },
-
-  /** Base documents approved; only the category-specific document is outstanding. */
-  category_pending: {
-    why: 'Base documents approved; the category-specific document has not been submitted.',
-    base: {
-      letter_of_authorization: 'approved',
-      product_safety_ukca: 'approved',
-      insurance_certificate: 'approved',
-    },
-    categoryDocument: 'missing',
-  },
-
   /**
-   * §Phase 7F — the BLOCKED compliance-scenario tenant (Le Creuset): 0/4 approved,
-   * including one 'rejected' so the failure reason + Replace action on that row are
-   * exercised end-to-end (§M2). Its contract is 'active' and both mandatory
-   * §4.1/§4.2 agreements are accepted, so the document state is the SOLE reason the
-   * gate blocks — exactly what e2e/compliance-gate.spec.ts asserts.
+   * §P2 — the BLOCKED compliance-scenario tenant (Brand C, Le Creuset): 0 of 4
+   * approved, including one 'rejected' so the failure reason + Replace action on
+   * that row are exercised end-to-end (§M2). Its contract is 'active' and both
+   * mandatory §4.1/§4.2 agreements are accepted, so the document state is the
+   * SOLE reason the gate blocks — exactly what `e2e/compliance-gate.spec.ts` and
+   * the compliance matrix assert.
    */
-  lecreuset_blocked: {
+  gate_blocked: {
     why: 'Compliance matrix: 0 of 4 documents approved, with a missing and a rejected outcome exercised.',
     base: {
       letter_of_authorization: 'uploaded',
@@ -826,21 +777,6 @@ export const DEMO_COMPLIANCE_SCENARIOS = {
       insurance_certificate: 'missing',
     },
     categoryDocument: 'rejected',
-  },
-
-  /**
-   * §Phase 7F — the 4-document compliance-scenario tenant (Autoglym): every base
-   * document approved, the category document (type approval) outstanding. Active
-   * contract + both agreements accepted, so the gate blocks on the document alone.
-   */
-  autoglym_one_document_outstanding: {
-    why: 'Compliance matrix: 3 of 4 documents approved; the category type approval is outstanding.',
-    base: {
-      letter_of_authorization: 'approved',
-      product_safety_ukca: 'approved',
-      insurance_certificate: 'approved',
-    },
-    categoryDocument: 'missing',
   },
 } satisfies Record<string, ComplianceDocumentScenario>;
 
@@ -855,26 +791,10 @@ export type ComplianceScenarioName = keyof typeof DEMO_COMPLIANCE_SCENARIOS;
  * `CLEARED_BRAND_IDS` and the `gate_cleared` assignment cannot drift apart.
  */
 export const DEMO_COMPLIANCE_SCENARIO_BY_BRAND: Record<string, ComplianceScenarioName> = {
-  'brand-astonish': 'gate_cleared', // cleared operational tenant (Home)
-  'brand-seep': 'insurance_pending',
-  'brand-delphis': 'early_submission',
-  'brand-kitkin': 'category_pending', // Baby → baby_product_safety outstanding
-  'brand-bulldog': 'insurance_pending', // Health & Personal Care → CPNP outstanding
-  'brand-joseph': 'early_submission', // Kitchen → food contact material outstanding
-  'brand-roberts': 'category_pending', // Consumer Electronics → WEEE outstanding
-  'brand-clipper': 'insurance_pending', // Grocery → food safety certificate outstanding
-  'brand-regatta': 'early_submission', // Apparel → textile labelling outstanding
-  'brand-autoglym': 'autoglym_one_document_outstanding', // §Phase 7F scenario tenant (3/4)
-  'brand-tapatio': 'gate_cleared', // cleared operational tenant (Grocery)
-  'brand-cholula': 'early_submission',
-  'brand-valentina': 'category_pending',
-  'brand-flybyjing': 'insurance_pending',
-  'brand-locknlock': 'early_submission',
-  'brand-lecreuset': 'lecreuset_blocked', // §Phase 7F scenario tenant (0/4)
-  'brand-moleskine': 'insurance_pending',
-  'brand-sennheiser': 'early_submission',
-  'brand-vileda': 'category_pending',
-  'brand-logitech': 'insurance_pending',
+  'brand-astonish': 'gate_cleared', // Brand A — cleared, trading tenant (Home)
+  'brand-tapatio': 'gate_cleared', // Brand B — cleared, trading tenant (Grocery)
+  'brand-lecreuset': 'gate_blocked', // Brand C — blocked compliance-scenario tenant (Kitchen)
+  'brand-kitkin': 'gate_blocked', // Brand D — in-onboarding tenant (Baby); no operational data
 };
 
 /**
@@ -901,14 +821,16 @@ export function complianceScenarioFor(brandId: string): ComplianceDocumentScenar
  * a fabricated work item impossible to land unnoticed: the gate compares the derived
  * compliance work list against these numbers and fails otherwise.
  *
- * Measured from the canonical seed on 2026-09-29 — §AV-032 removed the fourth
- * base document (`brand_registry_confirmation` is now an optional Mercenta
- * control, generated nowhere as a requirement): 20 brands × 3 base documents (60)
- * + 15 category documents (75), of which 21 are blocking.
+ * Re-measured for §P2 (four businesses, 2026-10-02): 3 base documents × 4 brands
+ * (12) + 3 category documents (Tapatío/Grocery, Le Creuset/Kitchen, Kit & Kin/Baby)
+ * = 15 documents. The work-layer gate defines a BLOCKING document as one whose
+ * status is `missing` or `rejected`; Le Creuset (blocked) has 2 and Kit & Kin
+ * (in onboarding) has 2 — its missing insurance certificate and its rejected
+ * category document. Astonish and Tapatío are gate_cleared and contribute 0.
  */
 export const DEMO_COMPLIANCE_BASELINE = {
-  documents: 75,
-  blockingDocuments: 21,
+  documents: 15,
+  blockingDocuments: 4,
 } as const;
 
 const COMPLIANCE_TYPES = BASE_COMPLIANCE_TYPES;

@@ -148,7 +148,7 @@ try {
   const decodedCrm = crmHtml.replace(/&amp;/g, '&').replace(/&#x27;/g, "'");
   const crmBrandNames = lastSeed.demoBrands.map((b) => b.profile.businessName);
   test('brand CRM lists every canonical brand',
-    crmBrandNames.length >= 11 && crmBrandNames.every((n) => decodedCrm.includes(n)),
+    crmBrandNames.length >= 3 && crmBrandNames.every((n) => decodedCrm.includes(n)),
     crmBrandNames.filter((n) => !decodedCrm.includes(n)).join(', '));
   test('brand CRM uses approved categories', crmHtml.includes('Health &amp; Personal Care') || crmHtml.includes('Health & Personal Care'));
   // §M9 repoint — the empty state is now "Select a brand." and the track override

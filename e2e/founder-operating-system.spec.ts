@@ -114,8 +114,9 @@ test.describe('Founder Operating System — Control Centre', () => {
     // The view count is the canonical section count — never a hand-kept number.
     await expect(page.getByRole('tab')).toHaveCount(TEN_OPERATING_VIEWS);
 
-    // The brand count is the canonical demo universe (20), not a fabricated figure.
-    await expect(page.getByTestId('control-metric-value-brands')).toHaveText('20');
+    // §P2 REPOINTED (2026-10-02) — the brand count is the canonical demo universe
+    // (now FOUR businesses), not a fabricated figure.
+    await expect(page.getByTestId('control-metric-value-brands')).toHaveText('4');
 
     // Every metric tile is a real drill-down (the button is the drill-down).
     await expect(page.getByTestId('control-metric-open-work')).toBeVisible();

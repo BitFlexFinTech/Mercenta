@@ -13,10 +13,10 @@
 import { test, expect } from '@playwright/test';
 import { loginAs } from './helpers/auth';
 
-// ALL_DEMO_BRANDS = 20 canonical real brands (10 UK + 10 international).
-const BRAND_UNIVERSE = 20;
-// demoAdSpend = brands where i % 3 === 0 → active. 20 brands → indices 0,3,6,9,12,15,18.
-const ACTIVE_CAMPAIGNS = 7;
+// §P2 REPOINTED (2026-10-02) — ALL_DEMO_BRANDS is now the FOUR-business demo universe.
+const BRAND_UNIVERSE = 4;
+// demoAdSpend = brands where i % 3 === 0 → active. 4 brands → indices 0 and 3.
+const ACTIVE_CAMPAIGNS = 2;
 
 test.describe('Phase 1 — Amazon Ads dashboard (REQUIRED §12)', () => {
   test('1. reachable from Super Admin nav and renders the seam truthfully', async ({ page }) => {

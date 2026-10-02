@@ -23,13 +23,21 @@ try {
   // §Phase 7F — derive from the canonical dataset instead of a hardcoded count
   // (the dataset now includes 2 deterministic compliance-scenario tenants).
   test('every canonical demo brand is seeded', brands.length === demo.ALL_DEMO_BRANDS.length);
-  const categoriesCovered = new Set(brands.map((b) => b.category));
-  const missing = demo.approvedCategories?.() ?? [];
-  // All 10 approved categories present:
   const catsMod = await server.ssrLoadModule('/src/types.ts');
   const approved = catsMod.APPROVED_CATEGORIES;
-  const allCovered = approved.every((c) => categoriesCovered.has(c));
-  test('all 10 approved categories covered', allCovered);
+  // §P2 REPOINTED (2026-10-02) — the demo no longer carries one brand per
+  // approved category (it is THREE businesses), so "all 10 categories covered by
+  // demo brands" is no longer the truth. The ten categories stay KNOWN to the
+  // system: declared once in APPROVED_CATEGORIES and tied to vendor codes in
+  // `src/config/amazonVendorCodes.ts`. The demo assertion is now that every demo
+  // brand's category IS an approved category, and the ten are still declared and
+  // still carried by the vendor-code registry.
+  test('every demo brand category is an approved category',
+    brands.every((b) => approved.includes(b.category)));
+  test('the ten approved categories are still declared once', approved.length === 10);
+  const vcMod = await server.ssrLoadModule('/src/config/amazonVendorCodes.ts');
+  test('the ten approved categories are KNOWN via the Amazon vendor-code registry',
+    vcMod.AMAZON_VENDOR_CODES.length === 10);
 
   // ── PO states ──
   const pos = (await api.fetchPurchaseOrders()).data;
@@ -84,7 +92,10 @@ try {
   // ── Contracts / compliance / messages variety ──
   const contracts = (await api.fetchContracts()).data;
   const contractStates = new Set(contracts.map((c) => c.status));
-  test('contracts in ≥4 distinct states', contractStates.size >= 4);
+  // §P2 REPOINTED (2026-10-02) — the demo is three businesses, so at most three
+  // contract states can exist; the intent (the demo shows contracts in MORE THAN
+  // ONE state) is kept against the new universe.
+  test('contracts in ≥2 distinct states', contractStates.size >= 2);
   const docs = (await api.fetchComplianceDocuments()).data;
   const docStates = new Set(docs.map((d) => d.status));
   test('compliance docs in varied states', docStates.size >= 3);

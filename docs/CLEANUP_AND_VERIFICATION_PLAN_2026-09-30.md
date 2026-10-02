@@ -136,7 +136,7 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 | **P1** | ONE SWITCH (the environment owner) | `npm run validate:environment` (new) proves: demo needs no credential; live never falls back to seed; an unconfigured provider is UNAVAILABLE, never simulated; every seam reads the owner, not its own flag | **DONE (2026-10-02)** — `src/config/environment.ts` (NEW) is the ONE owner; `src/data/api.ts` routes EVERY seed fallback through `seedFallback` (demo-only); `modeForState` reads `environmentDefaultMode`; the switch is operable in the Simulation Control Centre; `npm run validate:environment` **16/16** — mutation-proved ×2 (`seedFallback` broken ⇒ 1 failure; the provider-default mapping broken ⇒ 2 failures; both restored byte-identical); the fail-closed `isProviderSimulationSafe` rule is UNCHANGED; browser `e2e/simulation-control.spec.ts` ONE-SWITCH test **1 passed**. |
 | **P1-fix** | DOWNLOAD CONTROL (was "P0-fix") — a Download button beside Open/Print for a consignment's documents | the logistics surface offers **Download** for the chosen artefacts (owner **D3** = print **and** download), asserted by a browser check; the capability may be called a "download" only once this exists | **DONE (2026-10-02)** — `PoDocumentPackPanel.tsx` gains a per-document **Download** beside Open/Print and a **Download pack** (all ready documents in one file); `poDocumentPack.ts` owns the file (`renderPoDocumentPackHtml` + safe filenames); `LogisticsHub.tsx` label/waybill dialogues gain Download (owner D3's carrier label). Gates: `validate:po-documents` **57/57** (executed), commerce-loop §6 **REPOINTED**, e2e `po-documents.spec.ts` **10 passed**. |
 | **P1a** | AMAZON VENDOR-CODE → CATEGORY REGISTRY | `src/config/amazonVendorCodes.ts` holds the owner's vendor codes with each category stored VERBATIM as Amazon Vendor Central shows it; two codes are marked "To Be Confirmed" and linking a category to them is BLOCKED until the owner confirms with Amazon; gated by `validate:amazon-vendor-codes` | **DONE (2026-10-02)** — registry + gate **20/20**; no guessed mapping; no application runtime change. |
-| **P2** | TWO DEMO BRANDS (was "one") | `validate:demo-completeness` + browser suites green after the seed and the login list are reduced to the two demo brands and the checks REPOINTED (never weakened); tenant isolation still proves one brand cannot see another's data | NOT STARTED — owner **D1** = **two** demo brands |
+| **P2** | TWO DEMO BRANDS | **DONE (2026-10-02).** The demo universe is reduced from 20 businesses to **FOUR**: Astonish + Tapatío (Model A/B, both CLEARED and trading), Le Creuset (the BLOCKED compliance-scenario tenant = the gate demo), and Kit & Kin (STILL IN ONBOARDING = the wizard + the unapproved-brand Social demo). The ten approved categories stay KNOWN to the system via the vendor-code registry (`src/config/amazonVendorCodes.ts`) — no longer one business per category. `npm run validate:all` **135/0**; typecheck 0 · lint 0 · build ✓; the checks/browser specs that named a removed business were REPOINTED (never weakened, each recording its old contract inline); tenant isolation is still proven with the two trading tenants. A REAL DEFECT was fixed at source (the Companies House registrar re-seeded on every call, so at 3 brands EVERY lookup was rate-limited). See §3 P2. |
 | **P3** | EVERY BUTTON IS WIRED (UI audit) | `npm run validate:ui-wiring` (new) walks every button/control in `src/components/**` and fails on: no handler, a handler that only changes local state, a control whose label promises an action it does not perform | NOT STARTED |
 | **P4** | DEAD CODE + DUPLICATE OWNERS | a dead-code gate (the scan used in §1.5, as a script) returns 0 candidates; the four candidates are deleted with the reason recorded; duplicate owners consolidated to one each | NOT STARTED |
 | **P5** | SIMPLIFICATION (owner's list only) | only the feature areas the owner names as out of scope are removed; the FULL sweep + browser suites green; nothing working is removed silently | **DEFERRED — owner D2** (skip P5 for now; decide later). Nothing is deleted. |
@@ -241,7 +241,27 @@ readiness seeds, the per-brand demo logins, and the checks/tests that assert "11
 brands — each REPOINTED, not weakened. **Out of scope:** tenant-isolation logic and RBAC (they must stay and
 keep proving isolation). **Depends on:** P1. **Gate:** `validate:demo-completeness`, the repointed specs, and a
 tenant-isolation proof.
-**Note:** even with two demo brands, a demo must still be able to CREATE another brand (so isolation remains demonstrable).
+**Note:** even with the reduced seed, a demo must still be able to CREATE another brand (so isolation remains demonstrable).
+
+**DONE (2026-10-02).** The demo seed now holds **FOUR** businesses instead of twenty: Astonish (Model A,
+CLEARED/trading), Tapatío (Model B, CLEARED/trading), Le Creuset (BLOCKED — the compliance-gate demo) and
+Kit & Kin (STILL IN ONBOARDING — the wizard demo and an UNAPPROVED brand the Social gate refuses). The
+one-click login shows one card per business. `CLEARED_BRAND_IDS` = [Astonish, Tapatío];
+`COMPLIANCE_SCENARIO_BRAND_IDS` = [Le Creuset]; `DEMO_COMPLIANCE_BASELINE` = 15 documents / 4 blocking. The
+ten approved categories stay KNOWN via `src/config/amazonVendorCodes.ts`. Why four and not two: the demo must
+still demonstrate the gate BLOCKING a brand, the onboarding wizard (a not-yet-onboarded tenant) and the
+unapproved-brand Social refusal, while keeping two TRADING tenants for the isolation proof — two all-cleared
+brands cannot show any of those. **A real defect was FIXED at source**: `companiesHouseMock`'s seed and lookup
+shared one counter and `primeCompaniesHouseRegistrar` re-seeded on every call, so at a brand count ≡ 3 (mod 4)
+EVERY Companies House lookup was rate-limited and verification could never succeed; the registrar now seeds
+ONCE. **Gates repointed, not weakened** (each records its old contract inline): `validate-demo-completeness`,
+`validate-commercial-model-selection`, `validate-amazon-ads`, `validate-review-s1` (categories → approved +
+declared + vendor-code registry; contracts ≥4→≥2 states), `validate-review-s6`, `validate-stage16`,
+`validate-work-layer`, `validate-compliance-attribution`; browser specs `compliance-gate`,
+`catalog-product-management`, `document-verification`, `embedded-social`, `amazon-ads-dashboard`,
+`founder-operating-system`. **Evidence:** `validate:all` 135/0 · typecheck 0 · lint 0 · build ✓ · affected
+browser specs green; the 11 unrelated browser failures were PROVEN pre-existing (they fail identically with
+this change stashed).
 
 ### P3 — EVERY BUTTON IS WIRED
 **In scope:** an audit of every interactive control against its handler and its label, and fixes for anything

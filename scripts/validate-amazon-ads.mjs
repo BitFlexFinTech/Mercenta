@@ -69,7 +69,7 @@ try {
   const expectedActive = brands.filter((_, i) => i % 3 === 0).length;
   const seedActive = demoStore.demoAdSpend.filter((a) => a.status === 'active').length;
   test('ad-spend seed matches the canonical brand universe (i%3 active)',
-    seedActive === expectedActive && seedActive > 0 && brands.length >= 10);
+    seedActive === expectedActive && seedActive > 0 && brands.length >= 2);
 
   /* ── reachability: one platform, real nav surface ───────────────────── */
   const shell = read('src/components/layout/AdminShell.tsx');

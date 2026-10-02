@@ -31,6 +31,7 @@ import type { ChCompany } from './companiesHouseClient';
 import { isProviderSimulationSafe } from '@/integrations/types';
 import type { ProviderResolutionMode } from '@/integrations/types';
 import { notifyCanonicalStoreChange } from '@/lib/domain/canonicalSignal';
+import { isCompaniesHouseRegistrarSeeded } from './companiesHouseMock';
 
 export interface ComplianceInput {
   getMode?: (id: string) => ProviderResolutionMode;
@@ -61,8 +62,19 @@ export interface ComplianceResult {
   [key: string]: unknown;
 }
 
-/** Seed the simulated registrar with the real demo brand registry. */
+/**
+ * Seed the simulated registrar with the real demo brand registry — ONCE.
+ *
+ * §P2 DEFECT FIXED AT SOURCE (2026-10-02): this used to re-seed on EVERY
+ * `verifyBrandCompany` call. Because `seedCompaniesHouse` resets the shared
+ * lookup counter, re-seeding made the FIRST lookup land on the "every 4th lookup
+ * is rate-limited" slot whenever the brand count ≡ 3 (mod 4). With the §P2
+ * three-brand registry, EVERY lookup was therefore rate-limited, so a company
+ * verification could never succeed. Seeding once keeps the registrar correct and
+ * leaves the retry cadence intact (the 4th LOOKUP is still the one limited).
+ */
 export function primeCompaniesHouseRegistrar(): void {
+  if (isCompaniesHouseRegistrarSeeded()) return;
   seedCompaniesHouse(
     ALL_DEMO_BRANDS.map((b) => ({ id: b.id, name: b.name, dissolved: b.id === 'brand-kalahari' }))
   );

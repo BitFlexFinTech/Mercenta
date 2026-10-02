@@ -103,8 +103,9 @@ test.describe('E3 — catalog submission lifecycle (simulated)', () => {
   });
 
   test('2. a non-compliant tenant cannot submit from the catalog at all', async ({ page }) => {
-    // Autoglym is 3/4 documents → the gate still blocks (unchanged rule).
-    await loginAs(page, 'Autoglym', 1100);
+    // §P2 REPOINTED (2026-10-02) — Le Creuset is the blocked tenant; the gate
+    // still blocks its catalog entirely.
+    await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);

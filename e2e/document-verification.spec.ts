@@ -86,14 +86,15 @@ test.describe('Document verification — Mercenta Admin review', () => {
 
 test.describe('Document verification — brand surface', () => {
   test('4. a submission becomes "under review" and is never auto-approved', async ({ page }) => {
-    // Autoglym's type_approval document is `missing` with NO artefact.
-    await loginAs(page, 'Autoglym', 1100);
+    // §P2 REPOINTED (2026-10-02) — Le Creuset's insurance_certificate document is
+    // `missing` with NO artefact.
+    await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('UK Compliance').first().click();
     await page.waitForTimeout(900);
 
     const row = page
-      .getByText('type approval', { exact: true })
+      .getByText('insurance certificate', { exact: true })
       .first()
       .locator('..')
       .locator('..')

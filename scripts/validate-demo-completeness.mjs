@@ -41,9 +41,9 @@ console.log('\n📊 Batch-30 Demo Data Completeness & Uniqueness Audit\n');
 const demoData = read('src/data/demoData.ts');
 const demoStore = read('src/data/demoStore.ts');
 
-// Verify all 11 brands exist (10 + 1 PC)
+// Verify the demo brands exist (the §P2 universe is THREE businesses)
 const brandCount = (demoData.match(/id: 'brand-/g) || []).length;
-check(`All 11 demo brands defined (found ${brandCount})`, brandCount >= 11);
+check(`All 3 demo brands defined (found ${brandCount})`, brandCount >= 3);
 
 // Verify DEMO_PRODUCTS has products per brand
 check('DEMO_PRODUCTS exports products array', demoData.includes('DEMO_PRODUCTS'));

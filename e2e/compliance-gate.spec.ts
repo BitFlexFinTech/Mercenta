@@ -48,19 +48,23 @@ test.describe('Compliance Gate', () => {
     await expect(page.locator('text=4 item(s) remain.').first()).toBeVisible({ timeout: 3000 });
   });
 
-  test('2. 3/4 docs -> still blocked', async ({ page }) => {
-    await loginAs(page, 'Autoglym', 1100);
+  test('2. a tenant blocked by its document state cannot use the catalog', async ({ page }) => {
+    // §P2 REPOINTED (2026-10-02) — the demo is now four businesses; the old "3/4"
+    // (Autoglym) scenario is no longer seeded, so this test asserts the SAME
+    // invariant on the blocked tenant (Le Creuset): the gate blocks the catalog on
+    // the DOCUMENT state alone, including the category document.
+    await loginAs(page, 'Le Creuset', 1100);
     const nav = page.locator('nav[aria-label="Primary"]');
     await nav.getByText('Product Catalog').first().click();
     await page.waitForTimeout(900);
 
-    // Only ONE document is missing (type_approval) yet the gate still blocks.
     const locked = page.locator('button', { hasText: 'Catalog Locked' }).first();
     await expect(locked).toBeVisible({ timeout: 6000 });
     await expect(locked).toBeDisabled();
     await expect(page.getByText('Catalog Sync Disabled').first()).toBeVisible({ timeout: 4000 });
-    await expect(page.locator('text=Pending review: type approval').first()).toBeVisible({ timeout: 3000 });
-    // The three approved base documents do NOT unlock the gate on their own.
+    // The category document (Kitchen → food contact material) is one of the blockers.
+    await expect(page.locator('text=Pending review: food contact material').first()).toBeVisible({ timeout: 3000 });
+    // The non-approved documents do NOT unlock the gate on their own.
     await expect(page.locator('button', { hasText: 'Add New Product' })).not.toBeVisible({ timeout: 2000 });
   });
 

@@ -89,14 +89,18 @@ export function resetMockCompaniesHouseState(): void {
   detailCounter = 0;
 }
 
-/** Deterministic default seed (matches the demo brand registry). */
+/** True once the simulated registrar has been seeded (with any brand). */
+export function isCompaniesHouseRegistrarSeeded(): boolean {
+  return registry.size > 0;
+}
+
+/** Deterministic default seed (matches the §P2 demo brand registry). */
 export function ensureCompaniesHouseSeed(): void {
   if (registry.size > 0) return;
   seedCompaniesHouse([
     { id: 'brand-astonish', name: 'Astonish' },
     { id: 'brand-tapatio', name: 'Tapatío' },
-    { id: 'brand-seep', name: 'Seep' },
-    { id: 'brand-clipper', name: 'Clipper Teas' },
+    { id: 'brand-lecreuset', name: 'Le Creuset' },
   ]);
 }
 

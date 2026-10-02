@@ -975,6 +975,40 @@ const P1FIX_DOWNLOAD_CONTROL_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §P2 (owner decision D1, 2026-10-02) — TWO DEMO BRANDS.
+ *
+ * The demo universe is reduced from twenty businesses to THREE: Brand A Astonish
+ * and Brand B Tapatío (both cleared/trading) plus Brand C Le Creuset (the blocked
+ * compliance-scenario tenant). The ten approved Amazon categories stay KNOWN to the
+ * system through the vendor-code registry (`src/config/amazonVendorCodes.ts`), not
+ * through demo brands. This phase also FIXED A DEFECT AT SOURCE: `companiesHouseMock`'s
+ * shared counter made the Companies House lookup always rate-limited at a brand
+ * count ≡ 3 (mod 4), so `primeCompaniesHouseRegistrar` now seeds the registrar ONCE.
+ *
+ * Declared set — every file the phase touches, named. The F5/F5b/F6 contract is
+ * UNCHANGED: a changed SOURCE file outside EVERY declared set still fails.
+ */
+const P2_TWO_DEMO_BRANDS_SCOPE = new Set([
+  'src/data/demoData.ts',                        /* the three-brand seed + its baseline */
+  'src/lib/compliance/companiesHouseMock.ts',    /* registrar seed-once + current brands */
+  'src/lib/compliance/complianceSync.ts',        /* prime-once (defect fixed at source) */
+  'scripts/validate-demo-completeness.mjs',      /* repointed to the 3-brand universe */
+  'scripts/validate-commercial-model-selection.mjs',
+  'scripts/validate-amazon-ads.mjs',
+  'scripts/validate-review-s1.mjs',              /* categories → the vendor-code registry */
+  'scripts/validate-review-s6.mjs',
+  'scripts/validate-stage16.mjs',
+  'e2e/compliance-gate.spec.ts',                 /* the gate demo repointed to Le Creuset */
+  'e2e/catalog-product-management.spec.ts',      /* the blocked-catalog repoint */
+  'e2e/document-verification.spec.ts',           /* the missing-document repoint */
+  'e2e/embedded-social.spec.ts',                 /* the unapproved-brand repoint */
+  'e2e/amazon-ads-dashboard.spec.ts',            /* the brand-universe count repoint */
+  'e2e/founder-operating-system.spec.ts',        /* the brand-count metric repoint */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
 
 
 /* ── the modules under test ───────────────────────────────────────────────── */
@@ -2155,7 +2189,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...P1_ENVIRONMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §P1-fix — the DOWNLOAD CONTROL (see above). First protected-path check (F5). */
         P1FIX_DOWNLOAD_CONTROL_SCOPE.has(p) ||
-        [...P1FIX_DOWNLOAD_CONTROL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...P1FIX_DOWNLOAD_CONTROL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P2 — TWO DEMO BRANDS (see above). First protected-path check (F5). */
+        P2_TWO_DEMO_BRANDS_SCOPE.has(p) ||
+        [...P2_TWO_DEMO_BRANDS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2229,6 +2266,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §P1-fix — the DOWNLOAD CONTROL (see above). Second protected-path check (F5b). */
         P1FIX_DOWNLOAD_CONTROL_SCOPE.has(p) ||
         [...P1FIX_DOWNLOAD_CONTROL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P2 — TWO DEMO BRANDS (see above). Second protected-path check (F5b). */
+        P2_TWO_DEMO_BRANDS_SCOPE.has(p) ||
+        [...P2_TWO_DEMO_BRANDS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2538,6 +2578,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §P1-fix — the DOWNLOAD CONTROL (see above). */
           P1FIX_DOWNLOAD_CONTROL_SCOPE.has(p) ||
           [...P1FIX_DOWNLOAD_CONTROL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P2 — TWO DEMO BRANDS (see above). */
+          P2_TWO_DEMO_BRANDS_SCOPE.has(p) ||
+          [...P2_TWO_DEMO_BRANDS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
