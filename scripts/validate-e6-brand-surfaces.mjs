@@ -917,6 +917,32 @@ const MERGED_PLAN_AND_VENDOR_CODES_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §P1 — THE ONE SWITCH (2026-10-02). The declared surface of the environment-owner
+ * phase (`docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §3 P1): ONE owner of
+ * the platform environment (`src/config/environment.ts`, NEW); the data layer's
+ * seed fallback made DEMO-ONLY (`src/data/api.ts`); the provider-mode machine
+ * repointed to the owner (`src/integrations/types.ts`); the switch made operable
+ * in one obvious place (`SimulationControl.tsx`); its gate
+ * (`scripts/validate-environment.mjs`, NEW). NO protected path is touched.
+ *
+ * The F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file outside EVERY
+ * declared set still fails.
+ */
+const P1_ENVIRONMENT_SCOPE = new Set([
+  'src/config/environment.ts',                              /* NEW — the ONE owner */
+  'scripts/validate-environment.mjs',                       /* NEW — its gate */
+  'src/data/api.ts',                                        /* the seed fallback is demo-only */
+  'src/integrations/types.ts',                              /* modeForState reads the owner */
+  'src/components/admin/integrations/SimulationControl.tsx', /* the switch, in one place */
+  'e2e/simulation-control.spec.ts',                         /* the browser proof of the switch */
+  'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2090,7 +2116,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...MERGED_PLAN_AND_VENDOR_CODES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
 
         PUBLIC_MESSAGING_SCOPE.has(p) ||
-        [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P1 — the ONE SWITCH (see above). Same declaration, first protected-path check (F5). */
+        P1_ENVIRONMENT_SCOPE.has(p) ||
+        [...P1_ENVIRONMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2158,6 +2187,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §MERGED PLAN + AMAZON VENDOR CODES — same declaration, second protected-path check (F5b). */
         MERGED_PLAN_AND_VENDOR_CODES_SCOPE.has(p) ||
         [...MERGED_PLAN_AND_VENDOR_CODES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §P1 — the ONE SWITCH (see above). Same declaration, second protected-path check (F5b). */
+        P1_ENVIRONMENT_SCOPE.has(p) ||
+        [...P1_ENVIRONMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2461,6 +2493,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §MERGED PLAN + AMAZON VENDOR CODES — the merged-plan + vendor-code surface (see above). */
           MERGED_PLAN_AND_VENDOR_CODES_SCOPE.has(p) ||
           [...MERGED_PLAN_AND_VENDOR_CODES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §P1 — the ONE SWITCH (see above). */
+          P1_ENVIRONMENT_SCOPE.has(p) ||
+          [...P1_ENVIRONMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

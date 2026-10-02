@@ -10,6 +10,12 @@
  * or demoStore fixtures directly.
  */
 import { supabase } from '@/lib/supabase';
+/**
+ * §P1 — THE ONE SWITCH. The seed fallback is DEMO-ONLY: in `live` this returns
+ * an empty array, so a live platform can never serve a fake row. The decision
+ * lives in `src/config/environment.ts`, not here.
+ */
+import { seedFallback } from '@/config/environment';
 import { evaluateComplianceGate, latestDocumentsByType } from '@/lib/compliance';
 import { submitDocumentForVerification } from '@/lib/verification/documentVerification';
 import { validateCarrierForShipment } from '@/lib/shipping/carrierRouting';
@@ -259,12 +265,12 @@ async function queryOrSeed<T>(
   seed: T[],
   select = '*'
 ): Promise<{ data: T[]; source: DataSource }> {
-  if (!supabase) return { data: seed.slice(), source: 'seed' };
+  if (!supabase) return { data: seedFallback(seed), source: 'seed' };
   await _ensureBrandIdMap();
   const { data, error } = await supabase.from(table).select(select);
   if (error) {
     console.warn(`[api] Supabase query failed for "${table}", using demo fallback:`, error.message);
-    return { data: seed, source: 'seed' };
+    return { data: seedFallback(seed), source: 'seed' };
   }
   const rows = (data ?? []) as T[];
   return { data: _translateRows(rows), source: 'supabase' };
@@ -272,12 +278,12 @@ async function queryOrSeed<T>(
 
 /* ── Brands — custom query maps Supabase columns to DemoBrandRow shape ── */
 export async function fetchBrands(): Promise<{ data: DemoBrandRow[]; source: DataSource }> {
-  if (!supabase) return { data: demoBrands, source: 'seed' };
+  if (!supabase) return { data: seedFallback(demoBrands), source: 'seed' };
   await _ensureBrandIdMap();
   const { data, error } = await supabase.from('brands').select('*');
   if (error) {
     console.warn('[api] Supabase query failed for "brands", using demo fallback:', error.message);
-    return { data: demoBrands, source: 'seed' };
+    return { data: seedFallback(demoBrands), source: 'seed' };
   }
   const mapped: DemoBrandRow[] = (data ?? []).map((row: Record<string, unknown>) => ({
     id: (row.legacy_demo_id as string) ?? (row.id as string),
@@ -3091,7 +3097,7 @@ async function paginatedQueryOrSeed<T>(
   const { page, pageSize, orderBy, orderDir } = normalizePagination(p);
 
   if (!supabase) {
-    let all = [...seed];
+    let all = seedFallback(seed);
     if (brandFilter) all = all.filter(brandFilter);
     // Order deterministically by the requested column.
     const key = (row: T): string => {
@@ -3132,7 +3138,7 @@ async function paginatedQueryOrSeed<T>(
   if (error) {
     console.warn(`[api] Supabase paginated query failed for "${table}", using demo fallback:`, error.message);
     // Fall through to seed-based pagination below
-    let all = [...seed];
+    let all = seedFallback(seed);
     if (brandFilter) all = all.filter(brandFilter);
     const key = (row: T): string => {
       const v = (row as any)[orderBy];

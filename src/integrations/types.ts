@@ -1,5 +1,14 @@
 /** §14 — one-click integrations framework. */
 
+/**
+ * §P1 — THE ONE SWITCH decides a provider's DEFAULT mode. `modeForState` is the
+ * single place a registry default becomes an operational mode, so wiring the
+ * environment here repoints every default resolution at once: in `live` an
+ * otherwise-simulated unconfigured provider becomes `available` (UNAVAILABLE),
+ * never simulation.
+ */
+import { environmentDefaultMode } from '@/config/environment';
+
 export type IntegrationId =
   | 'amazon_sp_api'
   | 'amazon_ads'
@@ -260,13 +269,13 @@ export function modeForState(
   state: IntegrationState | undefined,
   defaultMode: IntegrationMode
 ): IntegrationMode {
-  if (!state) return defaultMode;
+  if (!state) return environmentDefaultMode(defaultMode);
   if (state.disabled) return 'disabled';
   if (state.status === 'connected') return state.sandbox ? 'simulation' : 'live';
   if (state.status === 'connecting') return 'configuring';
   if (state.status === 'code_received') return 'configuring';
   if (state.status === 'needs_attention') return state.error ? 'error' : 'degraded';
-  return defaultMode;
+  return environmentDefaultMode(defaultMode);
 }
 
 /* ── §Phase 4 — authoritative provider-mode safety resolution ───────────── */

@@ -26,10 +26,23 @@
  * PARTIAL — it does not remove scenario-created demo-store records.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 import { isProviderSimulationSafe, resolveProviderMode } from '@/integrations/types';
+/**
+ * §P1 — THE ONE SWITCH. The single environment owner. This surface is the ONE
+ * obvious place the platform's demo/live switch is flipped.
+ */
+import {
+  buildDefaultEnvironmentMode,
+  environmentMode,
+  isEnvironmentOverridden,
+  resetEnvironmentMode,
+  setEnvironmentMode,
+  subscribeEnvironment,
+  type EnvironmentMode,
+} from '@/config/environment';
 import type { IntegrationId } from '@/integrations/types';
 import { Badge, Button, Card, Input } from '@/components/ui';
 import { cn } from '@/utils/cn';
@@ -52,6 +65,7 @@ import {
   FlaskConical,
   Loader2,
   Play,
+  Power,
   RotateCcw,
   ShieldCheck,
 } from 'lucide-react';
@@ -126,6 +140,65 @@ const SCENARIO_META: Record<ScenarioId, ScenarioMeta> = {
  * §Phase 4 — authoritative boundary check is defined via the shared resolver
  * (isProviderSimulationSafe / resolveProviderMode) in the scenario panel.
  */
+
+/**
+ * §P1 — THE ONE SWITCH (the environment owner, made operable).
+ *
+ * ONE obvious control flips the WHOLE platform between `demo` (seeded data,
+ * every external provider simulated, no credential required) and `live` (real
+ * data only — NO seed fallback, and an unconfigured provider is UNAVAILABLE,
+ * never simulated). It writes to the single owner (`src/config/environment.ts`);
+ * nothing else in the platform decides demo-vs-live for itself.
+ */
+function EnvironmentSwitch() {
+  const [mode, setMode] = useState<EnvironmentMode>(environmentMode);
+  useEffect(() => subscribeEnvironment(() => setMode(environmentMode())), []);
+
+  const isDemo = mode === 'demo';
+  const defaultMode = buildDefaultEnvironmentMode();
+
+  return (
+    <Card className="p-4" data-testid="environment-switch">
+      <div className="flex items-center justify-between gap-3 flex-wrap" data-environment-switch={mode}>
+        <div>
+          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <Power className="w-4 h-4 text-brass-300" /> Platform environment
+          </h3>
+          <p className="text-ds-label text-zinc-500 mt-0.5 max-w-2xl leading-relaxed">
+            {isDemo
+              ? 'Demo — seeded data, every external provider simulated, no credential required. This is the platform default.'
+              : 'Live — real data only. There is no seed fallback (an empty platform is correct), and a provider with no configured credentials is UNAVAILABLE, never simulated.'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {isEnvironmentOverridden() && (
+            <span data-environment-override className="text-ds-micro text-zinc-500">
+              override · default {defaultMode}
+            </span>
+          )}
+          <Badge
+            className={cn(
+              'text-ds-micro uppercase tracking-wide border',
+              isDemo
+                ? 'bg-amber-500/15 text-amber-300 border-amber-500/20'
+                : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
+            )}
+          >
+            {isDemo ? 'Demo' : 'Live'}
+          </Badge>
+          {isEnvironmentOverridden() && (
+            <Button variant="ghost" className="text-xs" onClick={() => resetEnvironmentMode()}>
+              Reset to default ({defaultMode})
+            </Button>
+          )}
+          <Button variant="secondary" className="text-xs" onClick={() => setEnvironmentMode(isDemo ? 'live' : 'demo')}>
+            {isDemo ? 'Switch to Live' : 'Switch to Demo'}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 export function SimulationControl() {
   const { session } = useApp();
@@ -238,6 +311,9 @@ export function SimulationControl() {
           Simulation only
         </Badge>
       </div>
+
+      {/* §P1 — THE ONE SWITCH: the platform demo/live environment, in one place. */}
+      <EnvironmentSwitch />
 
       {/* §Phase E2E — the investor-demo orchestration (the SAME simulation
           architecture; it drives the canonical domain end-to-end). */}

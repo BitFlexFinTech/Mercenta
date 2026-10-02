@@ -917,6 +917,25 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
   ];
 
+  /**
+   * §P1 — THE ONE SWITCH (2026-10-02). The environment-owner phase's declared
+   * surface (see `validate-e6-brand-surfaces.mjs` §P1_ENVIRONMENT_SCOPE). Same
+   * mechanism as every phase above: a changed source/test file outside EVERY
+   * declared set is still refused, and no protected path is touched.
+   */
+  const P1_ENVIRONMENT_DECLARED = [
+    'src/config/environment.ts',
+    'scripts/validate-environment.mjs',
+    'src/data/api.ts',
+    'src/integrations/types.ts',
+    'src/components/admin/integrations/SimulationControl.tsx',
+    'e2e/simulation-control.spec.ts',
+    'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1663,7 +1682,14 @@ try {
            * phase's is. An UNEXPLAINED protected change still fails.
            */
           !MERGED_PLAN_AND_VENDOR_CODES_DECLARED.includes(f) &&
-          !MERGED_PLAN_AND_VENDOR_CODES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !MERGED_PLAN_AND_VENDOR_CODES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §P1 — THE ONE SWITCH (2026-10-02) — touches no protected path, but its
+           * declared surface is accepted here exactly as every other phase's is. An
+           * UNEXPLAINED protected change still fails.
+           */
+          !P1_ENVIRONMENT_DECLARED.includes(f) &&
+          !P1_ENVIRONMENT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1901,6 +1927,10 @@ try {
      * §MERGED PLAN + AMAZON VENDOR CODES — the merged-plan + vendor-code surface (see above).
      */
     ...MERGED_PLAN_AND_VENDOR_CODES_DECLARED,
+    /**
+     * §P1 — THE ONE SWITCH (2026-10-02) — the environment-owner surface (see above).
+     */
+    ...P1_ENVIRONMENT_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

@@ -176,6 +176,22 @@ test.describe('Simulation Control Centre — reset', () => {
   });
 });
 
+test.describe('Simulation Control Centre — the ONE SWITCH (P1)', () => {
+  test('the platform environment switch renders and flips demo ↔ live', async ({ page }) => {
+    await loginAsSuperAdmin(page);
+    await openSimulationTab(page);
+    const sw = page.locator('[data-testid="environment-switch"]').first();
+    await expect(sw).toBeVisible({ timeout: 8000 });
+    const head = sw.locator('[data-environment-switch]').first();
+    await expect(head).toHaveAttribute('data-environment-switch', 'demo');
+    await sw.locator('text=Switch to Live').click();
+    await expect(head).toHaveAttribute('data-environment-switch', 'live');
+    // Restore the build default so the switch (and local storage) is left clean.
+    await sw.locator('text=Switch to Demo').click();
+    await expect(head).toHaveAttribute('data-environment-switch', 'demo');
+  });
+});
+
 test.describe('Simulation Control Centre — responsive screenshots', () => {
   const VIEWPORTS = [
     { name: '1920x1080', w: 1920, h: 1080 },

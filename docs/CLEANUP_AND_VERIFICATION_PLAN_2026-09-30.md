@@ -9,8 +9,11 @@ is exactly ONE plan and it cannot drift (exactly the rule this file already carr
 - **P0a and P1a are DONE (2026-10-02)** — the owner's `Products/` folder is **BACKED UP** and the standing folder
   rule recorded; the **Amazon vendor-code → category registry** exists as `src/config/amazonVendorCodes.ts` with its
   gate (`validate:amazon-vendor-codes`, 20/20). Both change no application runtime.
-- **P1–P6 product work is still PLANNED: no product runtime code has been changed.** Every finding below was read from
-  the code, with the file named so it can be checked.
+- **P1 IS DONE (2026-10-02).** The ONE SWITCH now exists (`src/config/environment.ts`), the data layer's seed fallback
+  is demo-only, the provider-mode machine reads the owner, and the switch is operable in one obvious place —
+  `npm run validate:environment` **16/16** proves it (mutation-proved). **P1-fix – P6 product work is still PLANNED:
+  no OTHER product runtime code has been changed.** Every finding below was read from the code, with the file named so
+  it can be checked.
 
 **Owner:** Founder/Super Admin. **Owner decisions:** D1, D3 and D4 ANSWERED; D2 DEFERRED (skip P5 for now) — see §5.
 
@@ -107,7 +110,7 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 1. **ONE owner of the platform's environment**, e.g. `src/config/environment.ts`:
    `EnvironmentMode = 'demo' | 'live'`, read by every seam and every surface. Nothing else decides "am I
    simulated?" for itself.
-2. **In `demo`:** seeded data (one demo brand, see P2) + every provider simulated + every surface labelled
+2. **In `demo`:** seeded data (**two** demo brands — one per commercial model, see P2 and D1) + every provider simulated + every surface labelled
    SIMULATED. Running it must not require a single credential.
 3. **In `live`:** real data only. **No seed fallback.** A provider with no credentials resolves to
    `configured`/`not_registered` and its features are visibly UNAVAILABLE — never silently simulated. An empty
@@ -126,7 +129,7 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 |---|---|---|---|
 | **P0** | PROVE THE LOOP END TO END — one order, every step, with output | a new validator that DRIVES one seeded order through arrive → route → decide → channel ack → ASN → confirmation → invoice → payout and PRINTS each step; plus a browser run of the same order on the brand screen | **DONE (2026-10-01)** — `npm run validate:commerce-loop` **30/30 PASS** (mutation-proved ×2: the fail-closed routing refusal removed ⇒ 3 failures; the automatic ASN filing removed ⇒ 6 failures; both restored byte-identical). Browser leg: `e2e/channel-po-ingestion.spec.ts` + `e2e/po-ack-duties.spec.ts` **9 passed**. One finding recorded for **P1-fix** (see below). |
 | **P0a** | HOUSEKEEPING — BACK UP THE OWNER'S FOLDERS | the owner's `Products/` folder is saved into the project (its macOS `​.DS_Store` junk skipped), the working tree is clean, and the standing rule is recorded: *"when the owner adds a folder, back it up"* | **DONE (2026-10-02)** — `Products/` backed up; rule recorded in `PROJECT_STATUS.md`/`HANDOFF.md`/`.clinerules`. No application runtime change. |
-| **P1** | ONE SWITCH (the environment owner) | `npm run validate:environment` (new) proves: demo needs no credential; live never falls back to seed; an unconfigured provider is UNAVAILABLE, never simulated; every seam reads the owner, not its own flag | NOT STARTED |
+| **P1** | ONE SWITCH (the environment owner) | `npm run validate:environment` (new) proves: demo needs no credential; live never falls back to seed; an unconfigured provider is UNAVAILABLE, never simulated; every seam reads the owner, not its own flag | **DONE (2026-10-02)** — `src/config/environment.ts` (NEW) is the ONE owner; `src/data/api.ts` routes EVERY seed fallback through `seedFallback` (demo-only); `modeForState` reads `environmentDefaultMode`; the switch is operable in the Simulation Control Centre; `npm run validate:environment` **16/16** — mutation-proved ×2 (`seedFallback` broken ⇒ 1 failure; the provider-default mapping broken ⇒ 2 failures; both restored byte-identical); the fail-closed `isProviderSimulationSafe` rule is UNCHANGED; browser `e2e/simulation-control.spec.ts` ONE-SWITCH test **1 passed**. |
 | **P1-fix** | DOWNLOAD CONTROL (was "P0-fix") — a Download button beside Open/Print for a consignment's documents | the logistics surface offers **Download** for the chosen artefacts (owner **D3** = print **and** download), asserted by a browser check; the capability may be called a "download" only once this exists | NOT STARTED — **unblocked** by owner decision **D3** (2026-10-02) |
 | **P1a** | AMAZON VENDOR-CODE → CATEGORY REGISTRY | `src/config/amazonVendorCodes.ts` holds the owner's vendor codes with each category stored VERBATIM as Amazon Vendor Central shows it; two codes are marked "To Be Confirmed" and linking a category to them is BLOCKED until the owner confirms with Amazon; gated by `validate:amazon-vendor-codes` | **DONE (2026-10-02)** — registry + gate **20/20**; no guessed mapping; no application runtime change. |
 | **P2** | TWO DEMO BRANDS (was "one") | `validate:demo-completeness` + browser suites green after the seed and the login list are reduced to the two demo brands and the checks REPOINTED (never weakened); tenant isolation still proves one brand cannot see another's data | NOT STARTED — owner **D1** = **two** demo brands |
@@ -198,21 +201,30 @@ change. A check that depends on the calendar is a defect, not a gate; it now tak
 the mutation that reintroduces a MISMATCHED clock fails it (2 failures); restored byte-identical.
 
 
-### P1 — THE ONE SWITCH
+### P1 — THE ONE SWITCH — **DONE (2026-10-02)**
 **In scope:** the environment owner (`src/config/environment.ts`), every seam repointed to it, the data layer's
 seed fallback made conditional on `demo`, honest UNAVAILABLE states, the toggle UI in one obvious place.
 **Out of scope:** adding new providers; changing the existing fail-closed `isProviderSimulationSafe` rule.
 **Depends on:** P0 (so we change a loop we can prove). **Gate:** `validate:environment`.
 **Regression hotspots:** every seam that currently reads `mode === 'live'` (≈10 files found in §1.4), the
 integrations registry, and the surfaces that show "simulated" badges.
+**DONE — built:** `src/config/environment.ts` (NEW — the ONE owner: `EnvironmentMode`, the build default from
+`VITE_ENVIRONMENT`, the runtime switch in localStorage, `seedFallback`, `environmentDefaultMode`); `src/data/api.ts`
+(every seed fallback routed through `seedFallback`, so `live` returns NOTHING); `src/integrations/types.ts`
+(`modeForState` reads `environmentDefaultMode`, so an unconfigured provider in `live` is `available`/UNAVAILABLE, not
+simulation); `SimulationControl.tsx` (the switch, in one obvious place).
+**DONE — proved:** `npm run validate:environment` **16/16** (mutation-proved ×2, both restored byte-identical);
+`validate:all` **135 PASS / 0 FAIL**; typecheck 0; lint 0; build ✓; browser `e2e/simulation-control.spec.ts`
+ONE-SWITCH test **1 passed**. Scope declared in BOTH guards (E6 + E7). The fail-closed `isProviderSimulationSafe`
+rule is UNCHANGED.
 
-### P2 — ONE DEMO BRAND
+### P2 — TWO DEMO BRANDS
 **In scope:** the seed (`src/data/demoData.ts` → `DEMO_BRANDS`, `ALL_DEMO_BRANDS`), the per-brand dossiers and
 readiness seeds, the per-brand demo logins, and the checks/tests that assert "11 brands" or sign in as other
 brands — each REPOINTED, not weakened. **Out of scope:** tenant-isolation logic and RBAC (they must stay and
 keep proving isolation). **Depends on:** P1. **Gate:** `validate:demo-completeness`, the repointed specs, and a
 tenant-isolation proof.
-**Note:** a one-brand demo must still be able to CREATE a second brand (so isolation remains demonstrable).
+**Note:** even with two demo brands, a demo must still be able to CREATE another brand (so isolation remains demonstrable).
 
 ### P3 — EVERY BUTTON IS WIRED
 **In scope:** an audit of every interactive control against its handler and its label, and fixes for anything
