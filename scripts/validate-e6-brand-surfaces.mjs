@@ -1082,6 +1082,7 @@ const BATCH2K_ACK_VERIFICATION_SCOPE = new Set([
   'src/lib/commerce/proxyProcessor.ts',               /* records the transmission instant */
   'src/components/admin/ChannelOperationsPanel.tsx',  /* surfaces the verdict, reusing the reading */
   'scripts/validate-ack-verification.mjs',            /* NEW — this phase's gate */
+  'scripts/verify-live-demo.mjs',                     /* +L20 — the live check of both verdicts */
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
   'package.json',
@@ -1107,6 +1108,7 @@ const BATCH2L_ASN_BEFORE_RECEIPT_SCOPE = new Set([
   'src/lib/commerce/proxyProcessor.ts',               /* records the ASN filing instant */
   'src/components/admin/ChannelOperationsPanel.tsx',  /* surfaces the verdict, reusing the reading */
   'scripts/validate-asn-before-receipt.mjs',          /* NEW — this phase's gate */
+  'scripts/verify-live-demo.mjs',                     /* +L20 — the live check of both verdicts */
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
   'package.json',

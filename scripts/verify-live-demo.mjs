@@ -1185,6 +1185,82 @@ function readRedLines() {
   }
   await dutyPage.close();
 
+  /* ── L20 — BATCH 2k + BATCH 2l (AV-011 / AV-015): THE CONFIRMATION STEP AND THE
+   * BEFORE-RECEIPT ORDERING, LIVE ──
+   * WHY THIS EXISTS. The channel-operations console now shows, per receiving reading,
+   * (a) whether the acknowledgement Mercenta TRANSMITTED appeared (`AV-011`) and (b)
+   * whether the ASN was on file BEFORE the receipt (`AV-015`). On the DEPLOYED surface
+   * both verdicts must be REAL DATA (a documented state carried as an attribute), not a
+   * decorative line, so a notice that never says anything cannot pass as proof. The
+   * channel's POs are ingested first through the product's own entry point (the same
+   * session, because a re-login resets the in-memory store), then the console is driven
+   * through its own control — a source assertion would prove nothing about the bundle.
+   */
+  console.log('\n--- L20 the acknowledgement-confirmation and ASN-before-receipt verdicts, live ---');
+  const verPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const verErrors = [];
+  verPage.on('pageerror', (e) => verErrors.push(String(e)));
+  try {
+    const verAttempt = await liveAdminEntry(verPage);
+    check(`L20 the deployed site opened and the admin signed in (attempt ${verAttempt})`, true);
+
+    const verPoNav = verPage.locator('nav[aria-label="Primary"] >> text=Purchase Orders').first();
+    await verPoNav.waitFor({ state: 'visible', timeout: 90000 });
+    await verPoNav.click({ timeout: 30000 });
+    await verPage.waitForTimeout(2500);
+    await verPage.locator('[data-state="admin-po-ingest"]').click({ timeout: 30000 });
+    await verPage.waitForTimeout(2500);
+
+    const verNav = verPage.locator('nav[aria-label="Primary"] >> text=Retail Pipeline').first();
+    await verNav.waitFor({ state: 'visible', timeout: 90000 });
+    await verNav.click({ timeout: 30000 });
+    await verPage.waitForTimeout(2500);
+
+    const readButton = verPage.locator('[data-state="channel-receiving-read"]').first();
+    await readButton.waitFor({ state: 'visible', timeout: 90000 });
+    await readButton.click({ timeout: 30000 });
+    await verPage.waitForTimeout(2500);
+
+    const ackVerdict = verPage.locator('[data-state^="ack-verification-"]').first();
+    await ackVerdict.waitFor({ state: 'visible', timeout: 60000 });
+    const ackState = ((await ackVerdict.getAttribute('data-state')) ?? '').replace('ack-verification-', '');
+    check(
+      `L20 the LIVE acknowledgement verdict is a documented state (${ackState})`,
+      ['not_submitted', 'awaiting_visibility', 'confirmed', 'not_confirmed', 'unreadable'].includes(ackState)
+    );
+    const ackVerdictText = (await ackVerdict.textContent()) ?? '';
+    check(
+      'L20 the LIVE acknowledgement verdict names the confirmation step',
+      /Acknowledgement:/i.test(ackVerdictText),
+      ackVerdictText.slice(0, 140)
+    );
+
+    const asnVerdict = verPage.locator('[data-state^="asn-before-receipt-"]').first();
+    await asnVerdict.waitFor({ state: 'visible', timeout: 60000 });
+    const asnState = ((await asnVerdict.getAttribute('data-state')) ?? '').replace('asn-before-receipt-', '');
+    check(
+      `L20 the LIVE ASN-before-receipt verdict is a documented state (${asnState})`,
+      ['compliant', 'pending', 'exposed', 'unknown'].includes(asnState)
+    );
+    const asnVerdictText = (await asnVerdict.textContent()) ?? '';
+    check(
+      'L20 the LIVE ASN verdict names the ordering',
+      /ASN before receipt:/i.test(asnVerdictText),
+      asnVerdictText.slice(0, 140)
+    );
+
+    check(
+      `L20 the driven console rendered with no uncaught error (errors: ${verErrors.join(' | ') || 'none'})`,
+      verErrors.length === 0
+    );
+  } catch (verError) {
+    check(
+      `L20 the confirmation/ordering verdicts could NOT be driven live (${String(verError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await verPage.close();
+
   await browser.close();
 
   console.log(`\nLIVE VERIFICATION: ${pass} PASS / ${fail} FAIL`);

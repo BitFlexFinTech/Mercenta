@@ -3708,4 +3708,65 @@ lifecycle). Two e2e assertions were repointed to the corrected goods-received wo
 - The demo has **NOT** been deployed from this commit, so this work has **no live verification**, and the
   three-way status is **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE**.
 
+---
+
+## SESSION — BATCH 2k + BATCH 2l: ACKNOWLEDGEMENT VERIFICATION (`AV-011`) AND ASN-BEFORE-RECEIPT (`AV-015`) — 2026-10-02
+
+**MODE: IMPLEMENT · EXPERTS: senior-software-engineer, senior-software-architect, project-manager.** Resumed the
+recorded `NEXT TASK` (`BATCH 2`, starting at `AV-011` then `AV-015`).
+
+**BUILT.**
+- `src/lib/commerce/poAcknowledgementVerification.ts` (NEW) — the ONE owner of the confirmation step the audit
+  found missing (`AV-011`): after Mercenta TRANSMITS an acknowledgement it reads the channel's OWN order state
+  back (`getPurchaseOrdersStatus`, source `S5` / register `AV-018`) and derives a verdict against the channel's
+  documented **30-minute** appearance window (`not_submitted` · `awaiting_visibility` · `confirmed` ·
+  `not_confirmed` · `unreadable`). PURE and FAIL-CLOSED (an unreadable time/state/instant is `unreadable`, never
+  `confirmed`). The channel's Transaction-Status vocabulary is NOT invented, so `AV-040`'s evidence-blocked
+  `getTransaction` stays blocked.
+- `src/lib/shipping/asnBeforeReceipt.ts` (NEW) — the ONE owner of the "confirmation BEFORE receipt" ordering
+  (`AV-015`), whose breach the channel says causes chargebacks: the ASN filing instant compared with the
+  channel's own logged receipt → `compliant` · `pending` · `exposed` · `unknown` (fail closed).
+- `src/types.ts` — `PO_ACK_VERIFICATION_STATES` + `PoAckVerificationState`; `ASN_BEFORE_RECEIPT_STATES` +
+  `AsnBeforeReceiptState`; `ChannelInstructionOutcome.channelAcknowledgement.submittedAt`;
+  `ChannelInstructionOutcome.asn.filedAt`.
+- `src/config/purchaseOrders.ts` (`PO_ACK_VERIFICATION_WINDOW_MINUTES = 30` + rule text + labels) and
+  `src/config/shipping.ts` (`ASN_BEFORE_RECEIPT_RULE_TEXT` + labels), both guarded at import time.
+- `src/lib/commerce/proxyProcessor.ts` — records the transmission instant (`submittedAt`, only once the seam
+  answers) and the ASN filing instant (`filedAt`).
+- `src/components/admin/ChannelOperationsPanel.tsx` — renders BOTH verdicts per receiving reading, REUSING the
+  one read (no second channel call).
+- `scripts/validate-ack-verification.mjs` (gate; `npm run validate:ack-verification`) and
+  `scripts/validate-asn-before-receipt.mjs` (gate; `npm run validate:asn-before-receipt`) — both execute the real
+  modules (esbuild + `@` alias, `fetch` sabotaged). `scripts/verify-live-demo.mjs` **+L20**.
+- Both phases declared in BOTH guards: `BATCH2K_ACK_VERIFICATION_SCOPE` + `BATCH2L_ASN_BEFORE_RECEIPT_SCOPE`
+  (E6, F5/F5b/F6) and their `*_DECLARED` twins (E7). NOTHING PROTECTED WAS TOUCHED.
+
+**TESTED.** `npm run validate:all` **140 PASS / 0 FAIL** (corpus 138 → 140) · `npm run typecheck` **0** ·
+`npm run lint` **0** · `npm run build` **✓** · both scope guards PASS (`validate-e6` exit 0; `validate-e7` 121
+assertions / 0 failures) · `validate:ack-verification` **33/0**, `validate:asn-before-receipt` **28/0** — each
+gate **mutation-proved twice** (6/6 failures and 2/1 failures respectively), every mutant file restored
+byte-identical (sha256 `da653466…` and `eff6d8cd…`) · the affected browser spec re-run GREEN
+(`e2e/p12-channel-operations.spec.ts` = 5 passed) · `validate:resume-state` / `validate:plain-english` /
+`validate:rules-application` all PASS.
+
+**RESULT — COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Committed **`e0e9adc`**, pushed to
+`origin/redesign/foundation`, **deployed** via `scripts/deploy-demo.sh` (exit 0; 19 new + 12 modified files),
+and **live-verified**: `npm run verify:live` = **215 PASS / 0 FAIL**, including the NEW **L20**, which drove the
+DEPLOYED console and read BOTH new verdicts as documented states (`not_submitted`, `pending`).
+
+**RECORDS.** `docs/AMAZON_RECONCILIATION_STATUS.md` (`AV-011` + `AV-015` → APPLIED; the applied-findings table
+gains both rows; the BUILD summary row 11 → 13 APPLIED / 5 → 3 open; "Applied so far" 18 → 20 of 52; the derived
+open position 20 → 18) · `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` (both rows carry a dated
+APPLIED note) · `docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` (§8 and §9 rows updated) ·
+`requirements-registry.json` (new increment `batch2kl_ack_verification_and_asn_before_receipt`) ·
+`docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §6 · `PROJECT_STATUS.md` + `HANDOFF.md`.
+
+**DEFECT INVENTORY (this session).** One item found and FIXED at source: an earlier `useMemo` in
+`ChannelOperationsPanel.tsx` took the OLDEST recorded instant (the instruction store is newest-first, so a plain
+`Map.set` kept the last write); both lookups now keep the NEWEST (`!map.has(...)`), which the `validate-ui-wiring`
+corpus gate and the local build confirm. No defect was parked; no known exceptions introduced.
+
+**NEXT.** Continue `BATCH 2` — `AV-014` and `AV-016` (both MODELLED IN PART), then `AV-013` (CONTRADICTED), then
+the four INFERENCE relabels; then `Batch 3`. `AV-040`'s `getTransaction` stays EVIDENCE-BLOCKED.
+
 
