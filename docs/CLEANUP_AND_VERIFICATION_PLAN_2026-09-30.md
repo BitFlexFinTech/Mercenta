@@ -1,12 +1,18 @@
 # CLEAN-UP, VERIFICATION AND "ONE SWITCH" PLAN — 2026-09-30
 
-**Status:** **P0 IS DONE (2026-10-01)** — the whole loop is now traced and printed by a real gate
-(`npm run validate:commerce-loop`, 30/30) and the owner's four questions are answered with output. **P1–P6 are still
-PLAN ONLY: no other product code has been changed.** Every finding below was read from the code, with the file named so
-it can be checked.
+**Status:** **THE SINGLE PLAN OF RECORD (2026-10-02).** This file is the ONE plan — the former
+`docs/NEXT_BUILD_PLAN_2026-09-27.md` is **MERGED INTO IT here (§6)** and reduced to a pointer at this file, so there
+is exactly ONE plan and it cannot drift (exactly the rule this file already carried).
 
-**Owner:** Founder/Super Admin. **Agreed by:** not yet — the owner asked for the plan *before* any change, so
-each phase waits for a go-ahead where a decision is flagged.
+- **P0 IS DONE (2026-10-01)** — the whole loop is traced and printed by a real gate
+  (`npm run validate:commerce-loop`, 30/30) and the owner's four questions are answered with output.
+- **P0a and P1a are DONE (2026-10-02)** — the owner's `Products/` folder is **BACKED UP** and the standing folder
+  rule recorded; the **Amazon vendor-code → category registry** exists as `src/config/amazonVendorCodes.ts` with its
+  gate (`validate:amazon-vendor-codes`, 20/20). Both change no application runtime.
+- **P1–P6 product work is still PLANNED: no product runtime code has been changed.** Every finding below was read from
+  the code, with the file named so it can be checked.
+
+**Owner:** Founder/Super Admin. **Owner decisions:** D1, D3 and D4 ANSWERED; D2 DEFERRED (skip P5 for now) — see §5.
 
 ---
 
@@ -21,8 +27,9 @@ Type **"continue where you left off"**. A new session must then, in this order:
 4. `git --no-pager log --oneline -5` and `git status --porcelain`.
 5. Start at the phase whose `STATUS` is not `DONE`, in order. Never skip P0.
 
-**The plan is owned here, and only here.** When a phase finishes, update ITS row in this file (status + the
-evidence produced), then update `PROJECT_STATUS.md` + `HANDOFF.md`. Do not create a second plan document.
+**The plan is owned here, and only here.** The former `docs/NEXT_BUILD_PLAN_2026-09-27.md` was MERGED into this file
+(§6) on 2026-10-02 and is now a pointer — there is exactly ONE plan. When a phase finishes, update ITS row in this
+file (status + the evidence produced), then update `PROJECT_STATUS.md` + `HANDOFF.md`. Do not create a second plan.
 
 ---
 
@@ -117,12 +124,15 @@ if there is no real user it stays empty") is **not** today's behaviour, and this
 
 | P# | Goal | Acceptance gate (a real command / observable) | Status |
 |---|---|---|---|
-| **P0** | PROVE THE LOOP END TO END — one order, every step, with output | a new validator that DRIVES one seeded order through arrive → route → decide → channel ack → ASN → confirmation → invoice → payout and PRINTS each step; plus a browser run of the same order on the brand screen | **DONE (2026-10-01)** — `npm run validate:commerce-loop` **30/30 PASS** (mutation-proved ×2: the fail-closed routing refusal removed ⇒ 3 failures; the automatic ASN filing removed ⇒ 6 failures; both restored byte-identical). Browser leg: `e2e/channel-po-ingestion.spec.ts` + `e2e/po-ack-duties.spec.ts` **9 passed**. One finding recorded for **P0-fix** (see below). |
+| **P0** | PROVE THE LOOP END TO END — one order, every step, with output | a new validator that DRIVES one seeded order through arrive → route → decide → channel ack → ASN → confirmation → invoice → payout and PRINTS each step; plus a browser run of the same order on the brand screen | **DONE (2026-10-01)** — `npm run validate:commerce-loop` **30/30 PASS** (mutation-proved ×2: the fail-closed routing refusal removed ⇒ 3 failures; the automatic ASN filing removed ⇒ 6 failures; both restored byte-identical). Browser leg: `e2e/channel-po-ingestion.spec.ts` + `e2e/po-ack-duties.spec.ts` **9 passed**. One finding recorded for **P1-fix** (see below). |
+| **P0a** | HOUSEKEEPING — BACK UP THE OWNER'S FOLDERS | the owner's `Products/` folder is saved into the project (its macOS `​.DS_Store` junk skipped), the working tree is clean, and the standing rule is recorded: *"when the owner adds a folder, back it up"* | **DONE (2026-10-02)** — `Products/` backed up; rule recorded in `PROJECT_STATUS.md`/`HANDOFF.md`/`.clinerules`. No application runtime change. |
 | **P1** | ONE SWITCH (the environment owner) | `npm run validate:environment` (new) proves: demo needs no credential; live never falls back to seed; an unconfigured provider is UNAVAILABLE, never simulated; every seam reads the owner, not its own flag | NOT STARTED |
-| **P2** | ONE DEMO BRAND | `validate:demo-completeness` + browser suites green after the seed and the login list are reduced and the checks REPOINTED (never weakened); tenant isolation still proves one brand cannot see another's data | NOT STARTED |
+| **P1-fix** | DOWNLOAD CONTROL (was "P0-fix") — a Download button beside Open/Print for a consignment's documents | the logistics surface offers **Download** for the chosen artefacts (owner **D3** = print **and** download), asserted by a browser check; the capability may be called a "download" only once this exists | NOT STARTED — **unblocked** by owner decision **D3** (2026-10-02) |
+| **P1a** | AMAZON VENDOR-CODE → CATEGORY REGISTRY | `src/config/amazonVendorCodes.ts` holds the owner's vendor codes with each category stored VERBATIM as Amazon Vendor Central shows it; two codes are marked "To Be Confirmed" and linking a category to them is BLOCKED until the owner confirms with Amazon; gated by `validate:amazon-vendor-codes` | **DONE (2026-10-02)** — registry + gate **20/20**; no guessed mapping; no application runtime change. |
+| **P2** | TWO DEMO BRANDS (was "one") | `validate:demo-completeness` + browser suites green after the seed and the login list are reduced to the two demo brands and the checks REPOINTED (never weakened); tenant isolation still proves one brand cannot see another's data | NOT STARTED — owner **D1** = **two** demo brands |
 | **P3** | EVERY BUTTON IS WIRED (UI audit) | `npm run validate:ui-wiring` (new) walks every button/control in `src/components/**` and fails on: no handler, a handler that only changes local state, a control whose label promises an action it does not perform | NOT STARTED |
 | **P4** | DEAD CODE + DUPLICATE OWNERS | a dead-code gate (the scan used in §1.5, as a script) returns 0 candidates; the four candidates are deleted with the reason recorded; duplicate owners consolidated to one each | NOT STARTED |
-| **P5** | SIMPLIFICATION (owner's list only) | only the feature areas the owner names as out of scope are removed; the FULL sweep + browser suites green; nothing working is removed silently | NOT STARTED — waiting on decision D2 |
+| **P5** | SIMPLIFICATION (owner's list only) | only the feature areas the owner names as out of scope are removed; the FULL sweep + browser suites green; nothing working is removed silently | **DEFERRED — owner D2** (skip P5 for now; decide later). Nothing is deleted. |
 | **P6** | CLOSE | full sweep, browser suites, deploy to `demo.mercenta.co.uk`, LIVE verification of each change, then the three-way status recorded | NOT STARTED |
 
 ### P0 — PROVE THE LOOP (do this first, change nothing)
@@ -241,16 +251,48 @@ verify each change LIVE → record the three-way status in `PROJECT_STATUS.md` �
 | R4 | Live mode showing a fake seed | `src/data/api.ts` seed fallback | P1's gate asserts live NEVER falls back to the seed |
 | R5 | The live Amazon leg is BLOCKED on credentials + the server-side helper | `src/lib/spapi`, `supabase/functions` | keep it labelled simulated; do not fake it |
 
-## 5. OPEN DECISIONS (owner)
+## 5. OWNER DECISIONS — ALL TAKEN (2026-10-02)
 
-| D# | Decision needed | Blocks | Consequence of deciding | Consequence of NOT deciding |
-|---|---|---|---|---|
-| **D1** | One demo brand: which brand, and should the extra one-click demo logins be removed or kept? | P2 | one clean test brand; less noise (cost: one phase) | testing stays noisy; brand-to-brand differences keep hiding bugs |
-| **D2** | Which feature areas are OUT of scope for `Amazon ↔ Mercenta ↔ Brand`? | P5 | a genuinely simpler platform (cost: deletes working code) | platform stays larger than the business needs; no breakage |
-| **D3** | Should the brand download a CARRIER label (DHL/Palletline) per consignment, or only the document pack? | P0-fix→P1 | P0 knows what "labels" must mean (cost: none) | the platform can open/print a label but cannot DOWNLOAD one (P0 measured this on 2026-10-01) |
-| **D4** | Live Amazon credentials: prepare the go-live steps now, or wait for the keys? | P6/live leg | the switch is provable end to end | the live leg stays blocked |
+| D# | Decision needed | Owner's answer (2026-10-02) | Effect |
+|---|---|---|---|
+| **D1** | How many demo brands, and what happens to the extra one-click demo logins? | **TWO demo brands** — one per commercial model (Brand A = Model A commission; Brand B = Model B resell). The extra demo logins reduce to one per demo brand. | P2 becomes **two** demo brands, not one. |
+| **D2** | Which feature areas are OUT of scope for `Amazon ↔ Mercenta ↔ Brand`? | **DEFERRED — skip P5 for now, decide later.** | P5 is skipped; **nothing is deleted**; the platform stays as it is. |
+| **D3** | Should a brand DOWNLOAD a carrier label (DHL/Palletline) per consignment, or only open/print the document pack? | **BOTH — print AND download.** | **P1-fix is unblocked**: add a Download control beside Open/Print. |
+| **D4** | Live Amazon credentials: prepare the go-live steps now, or wait for the keys? | **WAIT for the real keys.** | The live Amazon leg stays off and labelled simulated; no go-live prep now. |
 
-## 6. DEFINITION OF DONE FOR THIS PLAN
+**Vendor-code categories** (not a D-number; owner instruction 2026-10-02): the two codes without a category
+(`SV5QE`, `SV76D`) stay **"To Be Confirmed"**; linking a category to them is **BLOCKED** until the owner confirms
+with Amazon. All other category strings are stored **verbatim** as Amazon Vendor Central shows them.
+
+---
+
+## 6. THE MERGED PLAN — the batch backlog folded in from `NEXT_BUILD_PLAN_2026-09-27.md`
+
+The former `docs/NEXT_BUILD_PLAN_2026-09-27.md` is MERGED here (2026-10-02) and is now a pointer. Its remaining work
+is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 phases above run; the leftovers are:
+
+**Batch 1 — make the key handover real (no credentials needed).**
+- 1b (connect-wizard backend) — **DONE (2026-09-28)**; 1c (CI wiring) — **DONE (2026-09-28)**.
+- 1a (the 12 SP-API / 3 DHL / 5 Palletline server helpers) — built and gated (`validate:integration-proxy`).
+- **Delivery leg still OPEN**: the two Edge Functions + the migration are server-side and need a Supabase credential
+  + CLI the environment does not hold. Reported, never faked.
+
+**Batch 2 — Amazon accuracy** (register: `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md`). Leftovers:
+- `AV-011`, `AV-015` (still INCOMPLETE) · `AV-013` (CONTRADICTED) · `AV-014` and `AV-016` (MODELLED IN PART — their
+  remaining halves are named in their own rows) · the four **INFERENCE relabels** (`AV-002/017/025/033/044`).
+- **EVIDENCE-BLOCKED** (do NOT model from guesswork): `AV-010b`'s read half (the channel's hold signal is
+  undocumented) and `AV-040`'s last operation (`getTransaction`). The six UNKNOWNs
+  (`AV-020/034/035/046/047/048`) need a **signed-in Vendor Central session** (a founder action).
+
+**Batch 3 — prove what we claim, and close the declared gaps.**
+- The ~126 "built but never independently re-verified" registry rows (run the page-by-page functional parity audit).
+- **S7 — the contract closing path**: build the canonical `renewContract` / `terminateContract` writer so
+  `demoContracts` stops having no writer.
+- The declared gaps (`contract_renewal` + the `founder_*` rows): give each a closing path, or record why it has none.
+
+---
+
+## 7. DEFINITION OF DONE FOR THIS PLAN
 
 `demo` runs the whole `Amazon → Mercenta → brand → Mercenta → Amazon` loop with one seeded brand and one
 switch; `live` shows real (or honestly empty) data and never a fake row; every button is wired to a real writer

@@ -62,6 +62,7 @@
     "validate:delivery-appointment": "node scripts/validate-delivery-appointment.mjs",
     "validate:po-ack-duties": "node scripts/validate-po-ack-duties.mjs",
     "validate:commerce-loop": "node scripts/validate-commerce-loop.mjs",
+    "validate:amazon-vendor-codes": "node scripts/validate-amazon-vendor-codes.mjs",
     "validate:on-behalf-authority": "node scripts/validate-on-behalf-authority.mjs",
     "validate:po-ack-window": "node scripts/validate-po-acknowledgement-window.mjs",
     "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",

@@ -899,6 +899,24 @@ try {
     'package.json',
   ];
 
+  /**
+   * §MERGED PLAN + AMAZON VENDOR CODES (2026-10-02). Fuller note in
+   * `validate-e6-brand-surfaces.mjs` §MERGED_PLAN_AND_VENDOR_CODES_SCOPE. Same
+   * mechanism as every phase above: a changed source/test file outside EVERY
+   * declared set is still refused, and no protected path is touched.
+   */
+  const MERGED_PLAN_AND_VENDOR_CODES_DECLARED = [
+    'src/config/amazonVendorCodes.ts',
+    'scripts/validate-amazon-vendor-codes.mjs',
+    'Products/',
+    /** §DEFECT FIXED AT SOURCE (2026-10-02) — the two calendar-dependent gates. */
+    'scripts/validate-work-layer.mjs',
+    'src/data/demoData.ts',
+    'package.json',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1638,7 +1656,14 @@ try {
            * surface is accepted here exactly as every other phase's is.
            */
           !P0_LOOP_TRACE_DECLARED.includes(f) &&
-          !P0_LOOP_TRACE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !P0_LOOP_TRACE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §MERGED PLAN + AMAZON VENDOR CODES — the merged-plan + vendor-code surface;
+           * it touches no protected path, but is accepted here exactly as every other
+           * phase's is. An UNEXPLAINED protected change still fails.
+           */
+          !MERGED_PLAN_AND_VENDOR_CODES_DECLARED.includes(f) &&
+          !MERGED_PLAN_AND_VENDOR_CODES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -1872,6 +1897,10 @@ try {
      * §P0 — the whole-loop trace phase's declared surface (see above).
      */
     ...P0_LOOP_TRACE_DECLARED,
+    /**
+     * §MERGED PLAN + AMAZON VENDOR CODES — the merged-plan + vendor-code surface (see above).
+     */
+    ...MERGED_PLAN_AND_VENDOR_CODES_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

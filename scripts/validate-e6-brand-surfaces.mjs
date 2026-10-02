@@ -883,6 +883,40 @@ const P0_LOOP_TRACE_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §MERGED PLAN + AMAZON VENDOR CODES (2026-10-02) — the declared surface.
+ *
+ * Two increments, both recorded in `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md`
+ * (now the SINGLE plan of record — the former `docs/NEXT_BUILD_PLAN_2026-09-27.md`
+ * is merged into it and reduced to a pointer):
+ *   · P0a — the owner's product-data folder `Products/` is BACKED UP (saved into the
+ *     project), and the standing rule "when the owner adds a folder, back it up" is
+ *     recorded.
+ *   · P1a — the Amazon vendor-code → category registry
+ *     (`src/config/amazonVendorCodes.ts`, NEW) is saved VERBATIM, with its gate
+ *     (`scripts/validate-amazon-vendor-codes.mjs`, NEW).
+ * The F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file outside EVERY declared
+ * set still fails, and no protected path is touched.
+ */
+const MERGED_PLAN_AND_VENDOR_CODES_SCOPE = new Set([
+  'src/config/amazonVendorCodes.ts',              /* NEW — the vendor-code registry */
+  'scripts/validate-amazon-vendor-codes.mjs',     /* NEW — its gate */
+  'Products/',                                    /* the owner's product-data folder, backed up (P0a) */
+  /**
+   * §DEFECT FIXED AT SOURCE (2026-10-02) — TWO calendar-dependent gates.
+   * `scripts/validate-work-layer.mjs` pinned the work clock to the stale literal
+   * '2026-09-19', and `src/data/demoData.ts` fixed the first demo contract's
+   * renewal to the literal '2026-10-01'. Both fell behind the real date, so two
+   * gates failed with NO product change. Each now derives its date from the real
+   * clock (see the inline notes in both files).
+   */
+  'scripts/validate-work-layer.mjs',
+  'src/data/demoData.ts',
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2051,6 +2085,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         P0_LOOP_TRACE_SCOPE.has(p) ||
         [...P0_LOOP_TRACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
 
+        /** §MERGED PLAN + AMAZON VENDOR CODES — the merged-plan + vendor-code surface (see above). */
+        MERGED_PLAN_AND_VENDOR_CODES_SCOPE.has(p) ||
+        [...MERGED_PLAN_AND_VENDOR_CODES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
@@ -2117,6 +2155,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §P0 — same declaration, second protected-path check (F5b). */
         P0_LOOP_TRACE_SCOPE.has(p) ||
         [...P0_LOOP_TRACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §MERGED PLAN + AMAZON VENDOR CODES — same declaration, second protected-path check (F5b). */
+        MERGED_PLAN_AND_VENDOR_CODES_SCOPE.has(p) ||
+        [...MERGED_PLAN_AND_VENDOR_CODES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2417,6 +2458,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §P0 — the whole-loop trace phase's declared surface (see above). */
           P0_LOOP_TRACE_SCOPE.has(p) ||
           [...P0_LOOP_TRACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §MERGED PLAN + AMAZON VENDOR CODES — the merged-plan + vendor-code surface (see above). */
+          MERGED_PLAN_AND_VENDOR_CODES_SCOPE.has(p) ||
+          [...MERGED_PLAN_AND_VENDOR_CODES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

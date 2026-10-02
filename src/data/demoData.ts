@@ -689,9 +689,21 @@ export const DEMO_CONTRACTS: Contract[] = ALL_DEMO_BRANDS.map((brand, i) => {
     monthlyFee: MONTHLY_FEE_PLACEHOLDER_GBP,
     fulfillmentTrack: brand.track,
     effectiveDate: `${year}-0${(i % 8) + 1}-01`,
-    // First brand renews INSIDE the §13 60-day window — exercises the
-    // urgency badge + renewal-draft path in demo data (staggered renewals).
-    renewalDate: i === 0 ? `${year}-10-01` : `${year + 1}-0${(i % 8) + 1}-01`,
+    /**
+     * First brand renews INSIDE the §13 60-day window — exercises the urgency
+     * badge + renewal-draft path in demo data (staggered renewals).
+     *
+     * §DEFECT FIXED AT SOURCE (2026-10-02) — RELATIVE, not the stale literal
+     * `${year}-10-01`. The old fixed date fell into the PAST as the real calendar
+     * advanced, so the Stage-9 "renewal urgency badge" assertion failed with NO
+     * product change — a gate that depended on the calendar (the same class
+     * `scripts/validate-operating-costs.mjs` was fixed for on 2026-10-01). 12 days
+     * out keeps the demonstration true on ANY day and still matches the original
+     * intent (2026-09-19 → 2026-10-01 was a 12-day gap).
+     */
+    renewalDate: i === 0
+      ? new Date(Date.now() + 12 * 864e5).toISOString().slice(0, 10)
+      : `${year + 1}-0${(i % 8) + 1}-01`,
     documentUrl: '',
     signatories:
       brand.contractStatus === 'draft' || brand.contractStatus === 'sent'

@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 517,
+    "total_entries": 518,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -5760,6 +5760,15 @@
       "status": "built_and_tested",
       "evidence": "scripts/validate-commerce-loop.mjs (NEW gate, 30 checks, EXECUTES the shipped modules via the project’s own esbuild with fetch SABOTAGED), registered as npm run validate:commerce-loop and declared in BOTH scope guards + package.json. LOCAL: validate:all 133 PASS / 0 FAIL (exit 0); typecheck 0; lint 0 errors (1 pre-existing warning); build ✓. MUTATION-PROVED ×2, each restored byte-identical: removing the fail-closed routing refusal → 3 failures (channelPurchaseOrderIngestion.ts sha256 1b4264a7646cb68e640e1230afd2675accc4975a38a967253aff4d4f18261f26); removing the automatic ASN filing → 6 failures (proxyProcessor.ts sha256 7d138cf25a39d52251c445247be13368f341b4222c003e0fcf00e683853d73b7). Browser leg: e2e/channel-po-ingestion.spec.ts + e2e/po-ack-duties.spec.ts = 9 passed. ALSO FIXED AT SOURCE (a GATE defect): scripts/validate-operating-costs.mjs recorded its usage entries on the REAL clock but summarised them at a PINNED instant (2026-09-15T10:00:00.000Z), so it passed only while the machine’s date sat inside that month and FAILED on 2026-10-01 with no product change; it now takes ONE clock. Proof: 44/44 PASS, and the mismatched-clock mutation fails it (2 failures); restored byte-identical (sha256 f9d25b5b2e7b5aa42ea67993fe9b8a5619bed895680965e612b5bd74a1a2e1fe).",
       "last_verified": "2026-10-01",
+      "superseded_by": null
+    },
+    {
+      "id": "cleanup-p0a-p1a-vendor-codes-and-merged-plan",
+      "description": "P0a + P1a OF THE CLEAN-UP/VERIFICATION PLAN, PLUS THE PLAN MERGE (owner directive 2026-10-02). (1) THE PLANS ARE MERGED INTO ONE: the former docs/NEXT_BUILD_PLAN_2026-09-27.md is folded into docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md §6 and reduced to a pointer, so there is exactly ONE plan of record and it cannot drift. (2) THE OWNER'S Products/ FOLDER IS BACKED UP (its macOS .DS_Store junk skipped); the standing rule \"when the owner adds a folder, back it up\" is recorded. (3) THE AMAZON VENDOR-CODE → CATEGORY REGISTRY: src/config/amazonVendorCodes.ts holds the ten vendor codes with each category stored VERBATIM as Amazon Vendor Central shows it; the two codes the owner has not yet confirmed (SV5QE, SV76D) carry category: null + categoryConfirmed: false and are marked \"To Be Confirmed\"; linking a category to them is BLOCKED until the owner confirms with Amazon — the gate REFUSES to guess. Owner decisions recorded: D1 = two demo brands · D2 = DEFERRED (skip P5) · D3 = print AND download · D4 = wait for the keys.",
+      "source": "Owner directive 2026-10-02 (merge the plans; back up new folders; save the vendor codes so they are answered from the project, never the chat). Declared in scripts/validate-e6-brand-surfaces.mjs §MERGED_PLAN_AND_VENDOR_CODES_SCOPE and scripts/validate-e7-embedded-social.mjs §MERGED_PLAN_AND_VENDOR_CODES_DECLARED.",
+      "status": "built_and_tested",
+      "evidence": "src/config/amazonVendorCodes.ts (NEW); scripts/validate-amazon-vendor-codes.mjs (NEW gate, 20 assertions, EXECUTES the module via Node type-stripping); docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md (merged; §3 P0a/P1a rows + §5 decisions + §6 backlog); docs/NEXT_BUILD_PLAN_2026-09-27.md (now a pointer); .clinerules/mercenta-business-model.md (§Vendor codes → category); both scope guards; package.json (validate:amazon-vendor-codes). ALSO FIXED AT SOURCE (two calendar-dependent gates, pre-existing at HEAD, proved by a stash test): scripts/validate-work-layer.mjs pinned the work clock to the stale literal '2026-09-19' while the demo seed uses the real clock, so the reminder sweep raised NOTHING as the date advanced → it now pins to the real date; src/data/demoData.ts fixed the first demo contract's renewal to the literal '2026-10-01' → now RELATIVE (today + 12 days). LOCAL: validate:all 134 PASS / 0 FAIL (exit 0); typecheck 0; lint 0 (after removing the word 'Amazon' from a config string, which the wording gate bans); build ✓. MUTATION-PROVED ×3, each restored byte-identical: linking a category to SV5QE → 2 failures; re-pinning work-layer to '2026-09-19' → 5 failures; re-fixing the contract renewal to a past date → 1 failure.",
+      "last_verified": "2026-10-02",
       "superseded_by": null
     }
   ]

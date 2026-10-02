@@ -213,6 +213,23 @@ including in Brand Intelligence, Brand Discovery, opportunity discovery
 fundraising opportunity records. Do not spend AI/provider calls analysing
 out-of-category products.
 
+### Vendor codes → category (read the project, never ask, never re-look-up)
+
+The **vendor codes** Mercenta's Amazon Vendor Central account holds, and the
+category each is shown against **in Amazon Vendor Central**, are declared ONCE in
+**`src/config/amazonVendorCodes.ts`** (gated by
+`node scripts/validate-amazon-vendor-codes.mjs`, `npm run validate:amazon-vendor-codes`).
+
+- The category string there is stored **VERBATIM** as Amazon Vendor Central shows
+  it — it is deliberately NOT normalised to, or merged with, `APPROVED_CATEGORIES`.
+- Codes whose category the Founder has not yet confirmed with Amazon carry
+  `category: null` and `categoryConfirmed: false` and are marked **"To Be
+  Confirmed"**. **Linking a category to those codes is BLOCKED until the Founder
+  confirms with Amazon — never guess which category a blank code is.**
+- **When asked about a vendor code or a category, ANSWER FROM THIS FILE.** Do not
+  ask the Founder to repeat it and do not look it up in the chat (that costs the
+  Founder money). Read `src/config/amazonVendorCodes.ts`.
+
 ## Amazon wording safeguards (M12)
 
 This is a compliance requirement, not a style preference. Mercenta NEVER uses

@@ -17,6 +17,24 @@ import { readFileSync } from 'node:fs';
 
 const server = await createServer({ server: { middlewareMode: true }, logLevel: 'error' });
 
+/**
+ * §DEFECT FIXED AT SOURCE (2026-10-02) — the work clock is pinned to the SAME
+ * date the DEMO SEED uses, not a stale literal.
+ *
+ * WHY: `src/data/demoData.ts` derives the demo PO dates from the REAL clock
+ * (`Date.now()`), and this validator's own note (above) states the acknowledgement
+ * window is judged against the real clock too. But `demoToday()` — which drives
+ * every due/overdue/due-soon bucket AND `runReminderSweep`'s `sweptAt` — was
+ * pinned to the fixed literal '2026-09-19'. As the real calendar advanced past
+ * that date, the seed's deadlines moved but the pin did not, so the two clocks
+ * diverged and the reminder sweep raised NOTHING (`raised=0`) with NO product
+ * change — a gate that depended on the calendar, not a gate (the same class
+ * `scripts/validate-operating-costs.mjs` was fixed for on 2026-10-01).
+ *
+ * The pin now takes the seed's own date, so buckets and window agree on ANY day.
+ */
+const SEED_TODAY = new Date().toISOString().slice(0, 10);
+
 let failures = 0;
 function test(name, cond, extra) {
   console.log(`${cond ? '✓' : '✗'} ${name}${cond || !extra ? '' : ` — ${extra}`}`);
@@ -65,7 +83,7 @@ test(
  * `deriveWorkItems(now)` is the seam; `scripts/validate-po-acknowledgement-work.mjs`
  * asserts both directions.
  */
-work.setDemoClock('2026-09-19');
+work.setDemoClock(SEED_TODAY);
 const first = work.deriveWorkItems();
 const second = work.deriveWorkItems();
 test('derivation returns the same number of items', first.length === second.length);
@@ -320,7 +338,7 @@ test(
 const baseline = work.deriveWorkItems().length;
 const reset = work.resetWorkStore();
 test('reset reports what it cleared', reset.manualItemsCleared >= 1 && reset.clockUnpinned === true);
-work.setDemoClock('2026-09-19');
+work.setDemoClock(SEED_TODAY);
 test('after reset the derived set is back to baseline', work.deriveWorkItems().length === baseline);
 test(
   'after reset no manual task remains',
@@ -332,7 +350,7 @@ test(
 );
 
 /* ── 8. Overdue derivation is clock-driven and deterministic ──────────────── */
-work.setDemoClock('2026-09-19');
+work.setDemoClock(SEED_TODAY);
 const overdueAt = work.overdueWorkItems('admin').length;
 work.setDemoClock('2027-06-01');
 const overdueLater = work.overdueWorkItems('admin').length;
@@ -371,7 +389,7 @@ test(
 /* ── 10. The sweep is idempotent and deterministic ────────────────────────── */
 work.resetWorkStore();
 runner.resetReminderStore();
-work.setDemoClock('2026-09-19');
+work.setDemoClock(SEED_TODAY);
 feed.resetEvents();
 
 const sweep1 = runner.runReminderSweep('admin', null, 'test:runner');
@@ -508,7 +526,7 @@ test(
 /* ── 14. invoice_due derivation from the canonical invoice/payment pair ──── */
 work.resetWorkStore();
 runner.resetReminderStore();
-work.setDemoClock('2026-09-19');
+work.setDemoClock(SEED_TODAY);
 const invoiceBrand = tenantA;
 const invoice = {
   id: `cinv-${invoiceBrand}-TEST-PO-1`,
@@ -651,7 +669,7 @@ test(
 work.resetWorkStore();
 runner.resetReminderStore();
 acq.removeOnboarding(onboarding.id);
-work.setDemoClock('2026-09-19');
+work.setDemoClock(SEED_TODAY);
 const baselineAfter = work.deriveWorkItems().length;
 const sweepAfterReset = runner.runReminderSweep('admin', null, 'test:runner');
 test('after reset the sweep runs from a clean ledger', sweepAfterReset.raised.length > 0);

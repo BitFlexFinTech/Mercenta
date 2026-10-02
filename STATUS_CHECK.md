@@ -24,7 +24,23 @@ NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tre
 actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
 RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
-## P0 OF THE CLEAN-UP/VERIFICATION PLAN — THE WHOLE LOOP IS PROVED END TO END AND PRINTED, AND THE OWNER'S FOUR QUESTIONS ARE ANSWERED WITH OUTPUT (session 58, 2026-10-01) — **CURRENT**
+## P0a + P1a + THE PLAN MERGE — THE TWO PLANS ARE NOW ONE, `Products/` IS BACKED UP, THE AMAZON VENDOR-CODE → CATEGORY REGISTRY IS SAVED, AND TWO CALENDAR-DEPENDENT GATES WERE FIXED (session 59, 2026-10-02) — **CURRENT**
+
+**What this session did** (owner directive 2026-10-02):
+1. **Merged the two plans into ONE.** `docs/NEXT_BUILD_PLAN_2026-09-27.md` is folded into `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §6 and reduced to a pointer; there is exactly ONE plan of record and it cannot drift.
+2. **Backed up the owner's `Products/` folder** (P0a) — saved into the project (its macOS `.DS_Store` junk skipped); the standing rule *"when the owner adds a folder, back it up"* is recorded.
+3. **Saved the Amazon vendor-code → category registry** (P1a) — `src/config/amazonVendorCodes.ts` holds the ten codes with each category stored VERBATIM as Amazon Vendor Central shows it; `SV5QE` and `SV76D` are marked **"To Be Confirmed"** and linking a category to them is **BLOCKED on the owner confirming with Amazon**; gate `npm run validate:amazon-vendor-codes` (20 assertions, EXECUTES the module).
+4. **Recorded the owner's decisions:** D1 = two demo brands · D2 = DEFERRED (skip P5) · D3 = print AND download · D4 = wait for the keys.
+
+**Two calendar-dependent gates FOUND and FIXED at source** (both PRE-EXISTING at HEAD — proved by a stash test on a clean tree):
+- `scripts/validate-work-layer.mjs` pinned the work clock to the stale literal `2026-09-19` while the demo seed derives its dates from the real clock, so the reminder sweep raised NOTHING (`raised=0`) as the date advanced. It now pins to the real date.
+- `src/data/demoData.ts` fixed the first demo contract's renewal to the literal `2026-10-01`, which fell into the past; it is now RELATIVE (today + 12 days).
+
+**Evidence (measured this session).** `validate:all` **134 PASS / 0 FAIL** (exit 0) · `typecheck` **0** · `lint` **0 errors** · `build` **✓** · the NEW gate **20/20**, mutation-proved ×3 (linking SV5QE → 2 failures; re-pinning work-layer → 5 failures; re-fixing the renewal → 1 failure; each restored byte-identical) · both scope guards (E6 + E7) PASS.
+
+**Three-way status.** **VERIFIED LOCAL/COMMITTED CHECKPOINT — NOT COMPLETE** (the three-way leg is executed at this close — see `PROJECT_STATUS.md` → DEMO DEPLOYMENT / LIVE VERIFICATION). **Next: P1 (the one switch).**
+
+## P0 OF THE CLEAN-UP/VERIFICATION PLAN — THE WHOLE LOOP IS PROVED END TO END AND PRINTED, AND THE OWNER'S FOUR QUESTIONS ARE ANSWERED WITH OUTPUT (session 58, 2026-10-01) — SUPERSEDED BY SESSION 59
 
 **What this session did.** It executed **P0** of `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` — the recorded
 next task — which is a PROOF phase, not a feature phase, and it left the product's application code unchanged.
