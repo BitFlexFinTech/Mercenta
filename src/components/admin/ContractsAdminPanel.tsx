@@ -11,13 +11,21 @@ import {
 import { buildDistributionAgreement } from '@/lib/agreement';
 import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
+import { useApp } from '@/context/GlobalStateContext';
+/**
+ * §SSOT S7 — THE contract-cycle writers. The panel's drafts now go to the
+ * CANONICAL store (never local component state), and the panel offers the two
+ * real closing paths — renew (advance the term) and terminate — so the work
+ * layer's `contract_renewal` item clears BY DOING THE WORK.
+ */
+import { saveContractDraft, renewContract, terminateContract } from '@/data/demoStore';
 import type { Contract, FulfillmentTrack } from '@/types';
 import type { DemoBrandRow } from '@/data/demoData';
 import { Badge, Button, Card, Input } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { DataTable } from '@/components/shared/DataTable';
 import { cn } from '@/utils/cn';
-import { FileText, Lock, Plus, Eye, X, History, RotateCcw, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { FileText, Lock, Plus, Eye, X, History, RotateCcw, CheckCircle2, Clock, AlertTriangle, Ban } from 'lucide-react';
 
 function UrgencyBadge({ renewalDate }: { renewalDate: string }) {
   const urgency = renewalUrgency(renewalDate, new Date().toISOString());
@@ -47,6 +55,8 @@ function prefillTerms(
 
 export function ContractsAdminPanel() {
   const { integrations } = useIntegrations();
+  const { actingStaffId, canCurrentUserMutate } = useApp();
+  const actor = actingStaffId ?? 'staff:contracts';
   const esign = integrations.esignature;
   const esignLive = esign?.status === 'connected' && !esign.sandbox;
 
@@ -56,15 +66,17 @@ export function ContractsAdminPanel() {
   const contractsQuery = useContracts();
   const scoresQuery = useFulfillmentScores();
 
-  const [extraDrafts, setExtraDrafts] = useState<Contract[]>([]);
   const [generateFor, setGenerateFor] = useState<DemoBrandRow | null>(null);
   const [viewingContract, setViewingContract] = useState<Contract | null>(null);
 
   const brands = brandsQuery.data?.data ?? [];
-  const allContracts = useMemo(
-    () => [...extraDrafts, ...(contractsQuery.data?.data ?? [])],
-    [contractsQuery.data, extraDrafts]
-  );
+  /**
+   * §SSOT S7 — the table is the CANONICAL store, drafts included. The panel no
+   * longer keeps a parallel `extraDrafts` array in local state; every draft is
+   * written through `saveContractDraft` and returns via `useContracts`, which the
+   * canonical change signal refetches.
+   */
+  const allContracts = contractsQuery.data?.data ?? [];
 
   return (
     <WorkspaceFrame className="space-y-4">
@@ -169,7 +181,7 @@ export function ContractsAdminPanel() {
           scores={scoresQuery.data?.data ?? []}
           esignLive={esignLive}
           onClose={() => setGenerateFor(null)}
-          onCreate={(draft) => setExtraDrafts((prev) => [draft, ...prev])}
+          onCreate={(draft) => saveContractDraft(draft, actor)}
           onSend={(envelopeId) => setLastEnvelope(envelopeId)}
         />
       )}
@@ -180,8 +192,9 @@ export function ContractsAdminPanel() {
           contract={viewingContract}
           allContracts={allContracts}
           brands={brands}
+          canMutate={canCurrentUserMutate}
+          actor={actor}
           onClose={() => setViewingContract(null)}
-          onCreateDraft={(draft) => setExtraDrafts((prev) => [draft, ...prev])}
         />
       )}
     </WorkspaceFrame>
@@ -347,20 +360,25 @@ function ContractVersionHistory({ contracts, currentVersion }: { contracts: Cont
 
 
 /** Contract detail modal with document view and version history tabs */
-function ContractDetailModal({ contract, allContracts, brands, onClose, onCreateDraft }: {
+function ContractDetailModal({ contract, allContracts, brands, canMutate, actor, onClose }: {
   contract: Contract;
   allContracts: Contract[];
   brands: DemoBrandRow[];
+  canMutate: boolean;
+  actor: string;
   onClose: () => void;
-  onCreateDraft: (draft: Contract) => void;
 }) {
   const [tab, setTab] = useState<'document' | 'history'>('document');
   const brandId = contract.brandId;
   const brandName = brands.find((b) => b.id === brandId)?.profile.businessName ?? brandId;
   const brandCategory = brands.find((b) => b.id === brandId)?.category ?? 'Home';
   const brandVersions = useMemo(() => allContracts.filter((c) => c.brandId === brandId), [allContracts, brandId]);
-  const handleCreateRenewalDraft = () => { const draft = createRenewalDraft(contract); onCreateDraft(draft); };
-  const handleCreateAmendment = () => { const newTrack = contract.fulfillmentTrack === 'financed' ? 'direct_fulfillment' : 'financed'; const draft = createTrackAmendment(contract, newTrack); onCreateDraft(draft); };
+  /* §SSOT S7 — all four write paths go to the CANONICAL store (no local state). */
+  const handleCreateRenewalDraft = () => { saveContractDraft(createRenewalDraft(contract), actor); onClose(); };
+  const handleCreateAmendment = () => { const newTrack = contract.fulfillmentTrack === 'financed' ? 'direct_fulfillment' : 'financed'; saveContractDraft(createTrackAmendment(contract, newTrack), actor); onClose(); };
+  /* The two real CLOSING paths for the work layer's `contract_renewal` item. */
+  const handleRenew = () => { renewContract(contract.id, actor); onClose(); };
+  const handleTerminate = () => { terminateContract(contract.id, actor, 'Terminated from the Contract Cycle console'); onClose(); };
   return (
     <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
       <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col bg-ink-850 border-white/[0.08]">
@@ -382,8 +400,10 @@ function ContractDetailModal({ contract, allContracts, brands, onClose, onCreate
             </pre>
             <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06]">
               <div className="flex items-center gap-2">
-                {contract.status !== 'draft' && <Button className="text-ds-micro" variant="ghost" onClick={handleCreateRenewalDraft}><RotateCcw className="w-3 h-3 mr-1" /> Create Renewal Draft</Button>}
-                {contract.status === 'active' && <Button className="text-ds-micro" variant="ghost" onClick={handleCreateAmendment}><AlertTriangle className="w-3 h-3 mr-1" /> Create Track Amendment</Button>}
+                {canMutate && contract.status !== 'draft' && <Button className="text-ds-micro" variant="ghost" onClick={handleCreateRenewalDraft}><RotateCcw className="w-3 h-3 mr-1" /> Create Renewal Draft</Button>}
+                {canMutate && contract.status === 'active' && <Button className="text-ds-micro" variant="ghost" onClick={handleCreateAmendment}><AlertTriangle className="w-3 h-3 mr-1" /> Create Track Amendment</Button>}
+                {canMutate && contract.status !== 'terminated' && <Button className="text-ds-micro" variant="ghost" onClick={handleRenew}><CheckCircle2 className="w-3 h-3 mr-1" /> Renew (advance term)</Button>}
+                {canMutate && contract.status !== 'terminated' && <Button className="text-ds-micro" variant="ghost" onClick={handleTerminate}><Ban className="w-3 h-3 mr-1" /> Terminate</Button>}
               </div>
               <Button variant="ghost" onClick={onClose}>Close</Button>
             </div>

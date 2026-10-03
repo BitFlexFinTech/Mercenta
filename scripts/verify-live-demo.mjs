@@ -1479,6 +1479,56 @@ function readRedLines() {
     );
   }
   await trkPage.close();
+  /* ── L24 — BATCH 3a (S7): THE CONTRACT CLOSING CONTROLS, LIVE ─────────────
+   * WHY THIS EXISTS. `demoContracts` was the one canonical collection with no
+   * writer, and the admin Contracts console's drafts lived only in local state, so
+   * a renewal/termination could never actually close the work layer's
+   * `contract_renewal` item. The console now offers the two real closing paths.
+   * On the DEPLOYED surface those controls must RENDER in the contract detail modal
+   * (a source assertion would prove nothing about the bundle); the admin view is
+   * driven through the product's own navigation and its rendered text read.
+   */
+  console.log('\n--- L24 the contract closing controls, on the live admin surface ---');
+  const conPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const conErrors = [];
+  conPage.on('pageerror', (e) => conErrors.push(String(e)));
+  try {
+    const conAttempt = await liveAdminEntry(conPage);
+    check(`L24 the deployed site opened and the admin signed in (attempt ${conAttempt})`, true);
+
+    const conNav = conPage.locator('nav[aria-label="Primary"] >> text=Contract Cycle').first();
+    await conNav.waitFor({ state: 'visible', timeout: 90000 });
+    await conNav.click({ timeout: 30000 });
+    await conPage.waitForTimeout(2500);
+
+    const conView = conPage.getByRole('button', { name: 'View' }).first();
+    await conView.waitFor({ state: 'visible', timeout: 60000 });
+    await conView.click({ timeout: 30000 });
+    await conPage.waitForTimeout(1200);
+
+    const conBody = (await conPage.locator('body').innerText({ timeout: 60000 })) ?? '';
+    check(
+      'L24 the LIVE contract detail exposes the RENEW (advance term) closing control',
+      /Renew \(advance term\)/i.test(conBody),
+      conBody.slice(0, 180)
+    );
+    check(
+      'L24 the LIVE contract detail exposes the TERMINATE closing control',
+      /Terminate/i.test(conBody)
+    );
+    check(
+      `L24 the driven console rendered with no uncaught error (errors: ${conErrors.join(' | ') || 'none'})`,
+      conErrors.length === 0
+    );
+  } catch (conError) {
+    check(
+      `L24 the contract closing controls could NOT be driven live (${String(conError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await conPage.close();
+
+
 
   await pltPage.close();
 

@@ -319,16 +319,17 @@ export const WORK_SOURCE_CLOSING: Record<WorkSource, WorkSourceClosing> = {
     writer: 'updateProspect',
   },
   /**
-   * DECLARED GAP (discovered 2026-09-26). `demoContracts` has NO writer anywhere in
-   * the platform — every reference is a read — and `ContractsAdminPanel` keeps a
-   * renewal DRAFT in local component state (`extraDrafts`) instead of in the
-   * canonical store. So a renewal cannot close this item, and the renewal flow is
-   * itself a second source of truth for contracts.
+   * §SSOT S7 — CLOSED (2026-10-03). `demoContracts` now HAS writers
+   * (`renewContract` / `terminateContract`), and the panel's drafts live in the
+   * canonical store (`saveContractDraft`), not in local component state. The
+   * renewal item therefore clears BY DOING THE WORK: renewing advances the term
+   * (the renewalDate leaves the horizon) or terminating excludes the contract from
+   * the derivation. (Before S7 this was a declared gap with `writer: null`.)
    */
   contract_renewal: {
     via: 'Renew the contract (advance its term) or terminate it',
     owner: 'src/data/demoStore.ts',
-    writer: null,
+    writer: 'renewContract / terminateContract',
   },
   onboarding_step: {
     via: 'Complete the onboarding step',

@@ -5733,11 +5733,11 @@
     },
     {
       "id": "ssot-work-layer-s7-contract-closing-path",
-      "description": "§SSOT S7 (NOT STARTED) — contract_renewal has no closing path: demoContracts has no writer anywhere and ContractsAdminPanel keeps renewal drafts in LOCAL component state (extraDrafts). Needs a canonical contract writer (renewContract/terminateContract) and the renewal draft written to the canonical store",
-      "source": "§SSOT programme 2026-09-26 — owner: src/data/demoStore.ts (demoContracts) + src/components/admin/ContractsAdminPanel.tsx + src/lib/work/workStore.ts (WORK_SOURCE_CLOSING.contract_renewal.writer = null)",
-      "status": "not_started",
-      "evidence": "Finding F5 recorded in docs/WORK_LAYER_SSOT_2026-09-26.md and declared by WORK_SOURCE_CLOSING_GAPS, printed on every run of scripts/validate-work-layer.mjs; not implemented as at 2026-09-26",
-      "last_verified": "2026-09-26",
+      "description": "§SSOT S7 — DONE (Batch 3a, 2026-10-03). The contract closing path EXISTS: `demoContracts` now HAS writers. `src/data/demoStore.ts` gains `saveContractDraft` (writes every draft — new agreement, renewal draft, track amendment — to the canonical store, idempotent by id, audited), `renewContract` (advances a contract's term — effectiveDate := old renewal, renewalDate +1yr, version++ — so the work layer's contract_renewal item clears BY DOING THE WORK) and `terminateContract` (sets status terminated, idempotent, refuses an unknown contract). `ContractsAdminPanel` no longer keeps a parallel `extraDrafts` array in LOCAL component state: its table is the canonical store alone and its four write paths route through the writers, with new Renew/Terminate controls gated on the mutation right. `WORK_SOURCE_CLOSING.contract_renewal.writer` is repointed from null to 'renewContract / terminateContract'.",
+      "source": "§SSOT programme 2026-09-26 — owner: src/data/demoStore.ts (demoContracts) + src/components/admin/ContractsAdminPanel.tsx + src/lib/work/workStore.ts (WORK_SOURCE_CLOSING.contract_renewal.writer)",
+      "status": "built_and_tested",
+      "evidence": "Gate scripts/validate-contract-closing.mjs (npm run validate:contract-closing, 20 assertions) executes the writers against the real store and drives the work derivation: saveContractDraft writes + audits + is idempotent; renewContract/renew clears the contract_renewal work item; terminate clears it + is idempotent + refuses unknown; the panel holds NO local draft state; mutation-proved (a null writer and a re-introduced local extraDrafts each FAIL it; files restored byte-identical). Live: verify-live-demo.mjs L24. Was Finding F5 in docs/WORK_LAYER_SSOT_2026-09-26.md.",
+      "last_verified": "2026-10-03",
       "superseded_by": null
     },
     {

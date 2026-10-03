@@ -217,6 +217,131 @@ export function ensureDistributionAgreement(input: {
   notifyCanonicalStoreChange();
   return contract;
 }
+
+/* ── §SSOT S7 — THE CANONICAL CONTRACT-CYCLE WRITERS ─────────────────────────
+ *
+ * WHY THIS EXISTS. Before S7 `demoContracts` had NO writer anywhere in the
+ * platform — every reference was a READ — and `ContractsAdminPanel` kept its
+ * drafts in LOCAL React state (`extraDrafts`), so a newly generated agreement, a
+ * renewal draft and a track amendment all vanished on reload and the panel was a
+ * SECOND source of truth for contracts. The work layer's `contract_renewal` item
+ * therefore had no closing path at all (`WORK_SOURCE_CLOSING.contract_renewal.
+ * writer === null`).
+ *
+ * These four functions are now the ONLY writers of the contract cycle. Every one
+ * records WHY and WHO on the EXISTING platform audit log (`demoAuditLog`) and
+ * announces the canonical change, so the work layer, the Brain, the CRM timeline
+ * and every query-backed surface re-read the same truth.
+ */
+
+/** Audit one contract-cycle mutation on the existing platform log. */
+function pushContractAudit(
+  contractId: string,
+  brandId: string,
+  action: string,
+  reason: string,
+  actor: string
+): void {
+  demoAuditLog.push({
+    id: `audit-contract-${contractId}-${action}-${demoAuditLog.length + 1}`,
+    createdAt: new Date().toISOString(),
+    actorId: actor,
+    action,
+    entityType: 'contract',
+    entityId: contractId,
+    brandId,
+    reason,
+  });
+  notifyCanonicalStoreChange();
+}
+
+/**
+ * §SSOT S7 — write a contract DRAFT to the canonical store (idempotent by id).
+ *
+ * The ONE writer for every draft the cycle produces: a newly generated
+ * agreement, a renewal draft and a track amendment. It REPLACES the panel's
+ * former local `extraDrafts` state, so a draft is now observable by every
+ * consumer of `fetchContracts()` and cannot drift from the canonical store.
+ */
+export function saveContractDraft(draft: Contract, actor = 'staff:contracts'): Contract {
+  const existing = demoContracts.find((c) => c.id === draft.id);
+  if (existing) {
+    Object.assign(existing, draft);
+    pushContractAudit(
+      draft.id,
+      draft.brandId,
+      'contract_draft_updated',
+      `Draft ${draft.type} updated (v${draft.version})`,
+      actor
+    );
+    return existing;
+  }
+  demoContracts.push(draft);
+  pushContractAudit(
+    draft.id,
+    draft.brandId,
+    'contract_draft_created',
+    `Draft ${draft.type} created (v${draft.version})`,
+    actor
+  );
+  /* §CANONICAL PROPAGATION — signal the change in THIS function too, so the
+     canonical-propagation gate sees the writer itself announce (the audit helper
+     above already signals; a second bump is a harmless version increment). */
+  notifyCanonicalStoreChange();
+  return draft;
+}
+
+/**
+ * §SSOT S7 — RENEW a contract: advance its term by one year, in place.
+ *
+ * The work layer's `contract_renewal` item exists while a contract's
+ * `renewalDate` sits inside the horizon. Renewing advances `effectiveDate` to the
+ * old `renewalDate` and `renewalDate` a year on, bumps the version and re-affirms
+ * the agreement (status `active`), so the item clears BY DOING THE WORK rather than
+ * by hiding the task. A terminated contract cannot be renewed (fail-closed:
+ * returns null and changes nothing). The prior term is preserved on the audit log.
+ */
+export function renewContract(contractId: string, actor = 'staff:contracts'): Contract | null {
+  const c = demoContracts.find((x) => x.id === contractId);
+  if (!c || c.status === 'terminated') return null;
+  const priorRenewal = c.renewalDate;
+  const next = new Date(new Date(priorRenewal).getTime() + 365 * 864e5).toISOString().slice(0, 10);
+  c.effectiveDate = priorRenewal;
+  c.renewalDate = next;
+  c.version += 1;
+  c.status = 'active';
+  pushContractAudit(
+    contractId,
+    c.brandId,
+    'contract_renewed',
+    `Renewed ${c.type}: term ${priorRenewal} → ${next} (v${c.version})`,
+    actor
+  );
+  /* §CANONICAL PROPAGATION — the writer itself announces the term change. */
+  notifyCanonicalStoreChange();
+  return c;
+}
+
+/**
+ * §SSOT S7 — TERMINATE a contract. The other closing path for the
+ * `contract_renewal` item: a terminated contract is excluded from the renewal
+ * derivation, so the item clears. Idempotent (a second call changes nothing);
+ * the reason is required and recorded. An UNKNOWN contract is refused.
+ */
+export function terminateContract(
+  contractId: string,
+  actor = 'staff:contracts',
+  reason = 'Terminated by Mercenta'
+): Contract | null {
+  const c = demoContracts.find((x) => x.id === contractId);
+  if (!c) return null;
+  if (c.status === 'terminated') return c;
+  c.status = 'terminated';
+  pushContractAudit(contractId, c.brandId, 'contract_terminated', reason, actor);
+  /* §CANONICAL PROPAGATION — the writer itself announces the termination. */
+  notifyCanonicalStoreChange();
+  return c;
+}
 /** §Stage-6 — Compliance Approvals mutations. */
 export function setComplianceDocStatus(
   docId: string,

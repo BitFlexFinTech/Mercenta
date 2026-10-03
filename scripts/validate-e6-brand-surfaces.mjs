@@ -1224,6 +1224,25 @@ const BATCH2P_INFERENCE_RELABELS_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
+/**
+ * §BATCH 3a — THE CONTRACT CLOSING PATH (S7, 2026-10-03).
+ *
+ * `demoContracts` was the one canonical collection with NO writer anywhere and
+ * `ContractsAdminPanel` kept its drafts in local state, so the work layer's
+ * `contract_renewal` item had no closing path. The declared surface:
+ */
+const BATCH3A_S7_CONTRACT_CLOSING_SCOPE = new Set([
+  'src/data/demoStore.ts',                          /* the FOUR canonical writers (NEW) */
+  'src/lib/work/workStore.ts',                      /* WORK_SOURCE_CLOSING.contract_renewal.writer repointed */
+  'src/components/admin/ContractsAdminPanel.tsx',   /* drafts -> canonical store; Renew + Terminate controls */
+  'scripts/validate-contract-closing.mjs',          /* NEW - this phase's gate */
+  'scripts/validate-review-s5.mjs',                 /* repointed: no local extraDrafts */
+  'scripts/validate-e6-brand-surfaces.mjs',         /* this declaration */
+  'scripts/validate-e7-embedded-social.mjs',        /* the mirrored declaration */
+  'package.json',                                   /* validate:contract-closing registered */
+]);
+
+
 
 
 /* ── the modules under test ───────────────────────────────────────────────── */
@@ -2431,7 +2450,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH2O_AV013_RECONCILIATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2p — the four INFERENCE relabels (see above). First protected-path check (F5). */
         BATCH2P_INFERENCE_RELABELS_SCOPE.has(p) ||
-        [...BATCH2P_INFERENCE_RELABELS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2P_INFERENCE_RELABELS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 3a — the contract closing path (see above). First protected-path check (F5). */
+        BATCH3A_S7_CONTRACT_CLOSING_SCOPE.has(p) ||
+        [...BATCH3A_S7_CONTRACT_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2532,6 +2554,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2p — the four INFERENCE relabels (see above). Second protected-path check (F5b). */
         BATCH2P_INFERENCE_RELABELS_SCOPE.has(p) ||
         [...BATCH2P_INFERENCE_RELABELS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 3a — the contract closing path (see above). Second protected-path check (F5b). */
+        BATCH3A_S7_CONTRACT_CLOSING_SCOPE.has(p) ||
+        [...BATCH3A_S7_CONTRACT_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2868,6 +2893,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2p — the four INFERENCE relabels (see above). */
           BATCH2P_INFERENCE_RELABELS_SCOPE.has(p) ||
           [...BATCH2P_INFERENCE_RELABELS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 3a — the contract closing path (see above). */
+          BATCH3A_S7_CONTRACT_CLOSING_SCOPE.has(p) ||
+          [...BATCH3A_S7_CONTRACT_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

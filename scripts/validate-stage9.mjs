@@ -137,6 +137,9 @@ try {
   try {
     const aCtx = await adminServer.ssrLoadModule('/src/integrations/IntegrationsContext.tsx');
     const aApi = await adminServer.ssrLoadModule('/src/data/api.ts');
+    /* §SSOT S7 — the panel reads the acting staff id + mutation right from the app
+       context, so the render must provide it, exactly as the app does. */
+    const aApp = await adminServer.ssrLoadModule('/src/context/GlobalStateContext.tsx');
     const aPanel = await adminServer.ssrLoadModule('/src/components/admin/ContractsAdminPanel.tsx');
     const aQc = new QueryClient();
     // Canonical demoStore universe across all keys — zambezi's contract now
@@ -147,9 +150,10 @@ try {
     aQc.setQueryData(['fulfillment-scores'], { data: (await aApi.fetchFulfillmentScores()).data, source: 'seed' });
 
     const adminHtml = renderToString(
-      createElement(aCtx.IntegrationsProvider, null,
-        createElement(QueryClientProvider, { client: aQc },
-          createElement(aPanel.ContractsAdminPanel)))
+      createElement(aApp.AppProvider, null,
+        createElement(aCtx.IntegrationsProvider, null,
+          createElement(QueryClientProvider, { client: aQc },
+            createElement(aPanel.ContractsAdminPanel))))
     );
     test('admin CRM lists contracts with statuses', adminHtml.includes('Contract Cycle') &&
       adminHtml.includes('Active') && adminHtml.includes('Signed'));

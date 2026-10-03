@@ -48,15 +48,19 @@ try {
   let adminHtml = '';
   try {
     const aIctx = await adminServer.ssrLoadModule('/src/integrations/IntegrationsContext.tsx');
+    /* §SSOT S7 — the panel now reads the acting staff id + mutation right from
+       the app context, so the render must provide it, exactly as the app does. */
+    const aApp = await adminServer.ssrLoadModule('/src/context/GlobalStateContext.tsx');
     const aPanel = await adminServer.ssrLoadModule('/src/components/admin/ContractsAdminPanel.tsx');
     const aQc = new QueryClient();
     aQc.setQueryData(['brands'], { data: seedMod.demoBrands, source: 'seed' });
     aQc.setQueryData(['contracts'], { data: contracts, source: 'seed' });
     aQc.setQueryData(['fulfillment-scores'], { data: (await apiMod.fetchFulfillmentScores()).data, source: 'seed' });
     adminHtml = renderToString(
-      createElement(aIctx.IntegrationsProvider, null,
-        createElement(QueryClientProvider, { client: aQc },
-          createElement(aPanel.ContractsAdminPanel)))
+      createElement(aApp.AppProvider, null,
+        createElement(aIctx.IntegrationsProvider, null,
+          createElement(QueryClientProvider, { client: aQc },
+            createElement(aPanel.ContractsAdminPanel))))
     );
   } finally {
     await adminServer.close();
@@ -83,9 +87,19 @@ try {
     `admin rows have View actions (${viewButtons} on page 1 of ${pageCount || 1})`,
     viewButtons > 0 && viewButtons <= 10 && (pageCount === 1 || viewButtons === 10)
   );
+  // §SSOT S7 — REPOINTED (the old contract, recorded): the admin table used to be
+  // backed by a LOCAL `extraDrafts` array merged with the query
+  // ("[...extraDrafts, ...(contractsQuery.data?.data ?? [])]"), which was a second
+  // source of truth for contracts (it vanished on reload). The table is now the
+  // CANONICAL store alone, and every draft/closure goes through the store's writers.
   test('admin table is backed by the full canonical dataset, drafts included',
     adminSrc.includes('rows={allContracts}') &&
-      adminSrc.includes("[...extraDrafts, ...(contractsQuery.data?.data ?? [])]"));
+      adminSrc.includes('const allContracts = contractsQuery.data?.data ?? [];') &&
+      !adminSrc.includes('setExtraDrafts'));
+  test('the panel writes drafts and closures through the canonical store',
+    adminSrc.includes('saveContractDraft') &&
+      adminSrc.includes('renewContract') &&
+      adminSrc.includes('terminateContract'));
   test('admin table paginates so every contract is reachable',
     pageCount >= 1 && plainAdmin.includes('aria-label="Next page"'));
 

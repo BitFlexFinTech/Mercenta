@@ -117,13 +117,24 @@ work items could not be closed by doing the work, and nothing enforced any of it
   `.github/workflows/ci.yml` runs `npm ci` → `typecheck` → `lint` → `build` → `validate:wording` → `validate:all` on
   every push and every pull request, kept honest by `scripts/validate-ci-wiring.mjs` (39 assertions, PROVED ABLE TO
   FAIL). *The pre-Batch-1c text here read "CI wiring still outstanding" — corrected at source, recorded not deleted.*
-- **S7 — the contract closing path (F5).** A canonical contract writer (`renewContract` /
-  `terminateContract`) and the renewal draft written to the canonical store instead of component state.
+- **S7 — the contract closing path (F5) — DONE (2026-10-03, Batch 3a).** The canonical contract writers
+  `renewContract` / `terminateContract` now exist in `src/data/demoStore.ts` (plus `saveContractDraft`, which
+  writes every draft — a new agreement, a renewal draft and a track amendment — to the canonical store).
+  `ContractsAdminPanel` no longer keeps a parallel `extraDrafts` array in local React state: its table is the
+  canonical store alone and its four write paths route through the writers. `WORK_SOURCE_CLOSING.contract_renewal.
+  writer` is repointed from `null` to `renewContract / terminateContract`, so a renewal or termination clears the
+  work item BY DOING THE WORK. Gate: `scripts/validate-contract-closing.mjs` (`npm run validate:contract-closing`,
+  20 assertions; mutation-proved — a null writer and a re-introduced local draft state each fail it, files restored
+  byte-identical). Live: `verify-live-demo.mjs` L24 drives the deployed admin Contracts console and asserts the
+  Renew/Terminate controls render in the contract detail.
 
 ## §4 DECLARED GAPS (no closing path yet — reported, never hidden)
 
-`contract_renewal` · `founder_compliance` · `founder_setup` · `founder_integration` ·
+`founder_compliance` · `founder_setup` · `founder_integration` ·
 `founder_funding` · `founder_finance` · `founder_ai_cost`
+
+`contract_renewal` was the seventh gap; it was CLOSED by **S7 (Batch 3a, 2026-10-03)** — `demoContracts` now has
+writers. The six `founder_*` gaps remain and are Batch 3b.
 
 Declared in `src/lib/work/workStore.ts → WORK_SOURCE_CLOSING`, enumerated by
 `WORK_SOURCE_CLOSING_GAPS`, and printed on every run of `scripts/validate-work-layer.mjs`.

@@ -1159,6 +1159,23 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
     'package.json',
   ];
+  /**
+   * §BATCH 3a — THE CONTRACT CLOSING PATH (S7, 2026-10-03). The declared surface of
+   * the phase that gives `demoContracts` its writers (the work layer's
+   * `contract_renewal` item had no closing path). Mirrors the E6 declaration.
+   */
+  const BATCH3A_S7_CONTRACT_CLOSING_DECLARED = [
+    'src/data/demoStore.ts',
+    'src/lib/work/workStore.ts',
+    'src/components/admin/ContractsAdminPanel.tsx',
+    'scripts/validate-contract-closing.mjs',
+    'scripts/validate-review-s5.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
+
 
 
   /**
@@ -1967,7 +1984,13 @@ try {
            * but its declared surface is accepted here as every phase's is.
            */
           !BATCH2P_INFERENCE_RELABELS_DECLARED.includes(f) &&
-          !BATCH2P_INFERENCE_RELABELS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH2P_INFERENCE_RELABELS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 3a — THE CONTRACT CLOSING PATH (S7, 2026-10-03) — touches no protected path,
+           * but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH3A_S7_CONTRACT_CLOSING_DECLARED.includes(f) &&
+          !BATCH3A_S7_CONTRACT_CLOSING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );

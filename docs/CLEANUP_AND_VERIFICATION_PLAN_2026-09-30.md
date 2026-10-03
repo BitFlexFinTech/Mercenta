@@ -404,11 +404,16 @@ is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 pha
   undocumented) and `AV-040`'s last operation (`getTransaction`). The six UNKNOWNs
   (`AV-020/034/035/046/047/048`) need a **signed-in Vendor Central session** (a founder action).
 
-**Batch 3 — prove what we claim, and close the declared gaps.**
-- The ~126 "built but never independently re-verified" registry rows (run the page-by-page functional parity audit).
-- **S7 — the contract closing path**: build the canonical `renewContract` / `terminateContract` writer so
-  `demoContracts` stops having no writer.
-- The declared gaps (`contract_renewal` + the `founder_*` rows): give each a closing path, or record why it has none.
+**Batch 3 — prove what we claim, and close the declared gaps.** (Split into 3a / 3b / 3c, 2026-10-03.)
+- **3a — S7, the contract closing path — DONE (2026-10-03).** `demoContracts` now HAS writers
+  (`renewContract` / `terminateContract` in `src/data/demoStore.ts`, plus `saveContractDraft`), the admin
+  `ContractsAdminPanel` writes drafts to the canonical store instead of local state, and
+  `WORK_SOURCE_CLOSING.contract_renewal.writer` is no longer null. Gate `validate:contract-closing` (20
+  assertions, mutation-proved); live check `L24`. This closed the `contract_renewal` declared gap.
+- **3b — the remaining declared gaps** (the six `founder_*` rows): give each a closing path, or record why it has
+  none.
+- **3c — the ~126 "built but never independently re-verified" registry rows** (the page-by-page functional parity
+  audit).
 
 ---
 
