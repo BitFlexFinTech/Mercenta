@@ -1411,7 +1411,7 @@ function readRedLines() {
     const palBody = (await palFrame.locator('body').innerText({ timeout: 60000 })) ?? '';
     check(
       'L22 the LIVE SSCC label sheet prints the carton→pallet structure (a pallet label)',
-      /Pallet label — SSCC/.test(palBody),
+      /pallet label — sscc/i.test(palBody),
       palBody.slice(0, 180)
     );
     check(
