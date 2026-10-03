@@ -24,7 +24,18 @@ NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tre
 actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
 RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`,
-## P3 OF THE CLEAN-UP/VERIFICATION PLAN — **EVERY BUTTON IS WIRED**: THREE DECORATIVE / OVER-PROMISING CONTROLS FIXED AT SOURCE, AND A NEW `validate:ui-wiring` GATE (session 63, 2026-10-02) — **CURRENT**
+## BATCH 2m OF THE AMAZON-ACCURACY WORK — **THE CHANNEL PICKUP LEAD TIME IS NOW ENFORCED** (`AV-014`), WITH A NEW `validate:pickup-lead-time` GATE (session 64, 2026-10-03) — **CURRENT**
+
+**What this session did** (the recorded `NEXT TASK` = resume `BATCH 2` at its MODELLED-IN-PART rows; this session closed `AV-014` — `AV-016`'s pallet half remains):
+1. **The finding** — the channel documents that a Freight Collect vendor's `requestedPickUp` must be *"a date at least two business days after the current date"*. From P6 the date was DERIVED and SURFACED from ONE owner, but no boundary REFUSED a caller-supplied value earlier than it, so a collect request could be raised earlier than the channel allows.
+2. **The fix — ONE owner, ENFORCED at the boundary** — `src/lib/shipping/collectChain.ts` gained the fail-closed `validateRequestedPickUp` (refusals `REQUESTED_PICKUP_MISSING` · `REQUESTED_PICKUP_UNREADABLE` · `REQUESTED_PICKUP_TOO_EARLY`) and the operator verdict `pickupLeadTimeVerdict`; `src/lib/shipping/channelShipmentOperations.ts → raiseChannelShipmentRequest` REFUSES a collect request whose date is missing, unreadable or too early BEFORE any channel call (the consolidation invariants are still checked first); `src/components/admin/ChannelOperationsPanel.tsx` shows the verdict per Freight Collect purchase order, from the ONE owner.
+3. **A stale statement FIXED at source** — `docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md` claimed the carrier-assignment timing was "Not modelled", which was FALSE from P6 (this row was corrected).
+4. **New gate** — `scripts/validate-pickup-lead-time.mjs` (`npm run validate:pickup-lead-time`, 24 assertions), executing the real owner AND the boundary with `fetch` sabotaged; MUTATION-PROVED TWICE (7 and 4 failures), each file restored byte-identical (`74bbcc9c…` / `dcc68ab4…`). The p12 seam gate was STRENGTHENED (57 → 67).
+5. **Declared in BOTH scope guards** — `BATCH2M_PICKUP_LEAD_TIME_SCOPE` (E6, all three checks F5/F5b/F6) and `BATCH2M_PICKUP_LEAD_TIME_DECLARED` (E7).
+6. **Evidence** — `validate:all` **141/0** (corpus 140 → 141) · typecheck **0** · lint **0** · build ✓ · browser `p12-channel-operations` **6 passed** · E6 + E7 PASS · committed `6b2355a`, pushed, deployed (exit 0, 5,031,604 bytes) · `verify:live` **219 PASS / 0 FAIL** incl. the NEW **L21**. **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.**
+
+
+## P3 OF THE CLEAN-UP/VERIFICATION PLAN — **EVERY BUTTON IS WIRED**: THREE DECORATIVE / OVER-PROMISING CONTROLS FIXED AT SOURCE, AND A NEW `validate:ui-wiring` GATE (session 63, 2026-10-02) — SUPERSEDED BY BATCH 2m (session 64, 2026-10-03)
 
 **What this session did** (the recorded `NEXT TASK` = **P3**, "every button is wired"):
 1. **New gate** — `scripts/validate-ui-wiring.mjs` (`npm run validate:ui-wiring`) parses every `.tsx` under `src/components/**` (comments stripped) and fails on **W1** an unwired control, **W2** an empty handler, **W3** an action-labelled control that only changes local state, **W4** a domain-critical control that lost its writer (14-entry manifest), **W5** the fixed defect returning, **W6** the style-guide exception drifting. Registered in `package.json`; auto-run by the corpus.
