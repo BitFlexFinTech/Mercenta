@@ -1545,6 +1545,10 @@ function readRedLines() {
   fndPage.on('pageerror', (e) => fndErrors.push(String(e)));
   try {
     await gotoLive(fndPage, `${SITE}/`);
+    const fndLogin = fndPage.getByRole('button', { name: 'Partner Login' }).first();
+    await fndLogin.waitFor({ state: 'visible', timeout: 90000 });
+    await fndLogin.click({ timeout: 30000 });
+    await fndPage.waitForTimeout(2500);
     const saLogin = fndPage.locator('text=Super Admin').first();
     await saLogin.waitFor({ state: 'visible', timeout: 90000 });
     await saLogin.click({ timeout: 30000 });
@@ -1556,15 +1560,28 @@ function readRedLines() {
     await fndNav.click({ timeout: 30000 });
     await fndPage.waitForTimeout(2500);
 
+    /* The workspace defaults to the CALENDAR view; the closing path renders in the
+       item drawer, which the LIST rows open, so switch to List first. */
+    const listView = fndPage.locator('[aria-label="Work view"] >> text=List').first();
+    await listView.waitFor({ state: 'visible', timeout: 60000 });
+    await listView.click({ timeout: 30000 });
+    await fndPage.waitForTimeout(1200);
+
     const fndFilter = fndPage.locator('[data-testid="work-source-filter"]');
     await fndFilter.waitFor({ state: 'visible', timeout: 60000 });
     await fndFilter.selectOption('founder_setup');
     await fndPage.waitForTimeout(1500);
 
-    const firstRow = fndPage.locator('[data-testid^="queue-"]').first();
+    const firstRow = fndPage.locator('[data-testid^="work-row-"]').first();
     await firstRow.waitFor({ state: 'visible', timeout: 60000 });
-    await firstRow.click({ timeout: 30000 });
-    await fndPage.waitForTimeout(1500);
+    /* The row is an <li>; its own title button opens the drawer. */
+    const rowBtn = firstRow.getByRole('button').first();
+    if (await rowBtn.count()) {
+      await rowBtn.click({ timeout: 30000 });
+    } else {
+      await firstRow.click({ timeout: 30000 });
+    }
+    await fndPage.waitForTimeout(1800);
 
     const closingText =
       (await fndPage
