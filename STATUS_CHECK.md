@@ -3795,3 +3795,46 @@ corpus gate and the local build confirm. No defect was parked; no known exceptio
 the four INFERENCE relabels; then `Batch 3`. `AV-040`'s `getTransaction` stays EVIDENCE-BLOCKED.
 
 
+
+## SESSION — BATCH 2o: `AV-013` RECONCILED AND MADE CHECKABLE (2026-10-03)
+
+**WHAT.** Resume `BATCH 2` at the CONTRADICTED register row `AV-013` ("Routing Request due by 10am Pacific the day
+before the ship window closes"). Investigation found the PRODUCT work was ALREADY DONE — Wave 3 removed the claim and
+re-declared the deadline ONCE as Mercenta's OWN readiness target (`src/lib/shipping/routingReadiness.ts`), §P4
+reconciled the brand-side mechanic (the `RoutingRequestForm` placeholder → read-only `RoutingRequestStatus`, commit
+`fe20521`), the master feature matrix (`D09-12`) and the Master Matrix (`discovered-routing-request-removal`) already
+said CLOSED — while the reconciliation-status doc, the feature matrix `D09-11`, the plan §6, four registry `next_plan`
+strings and the register row still said OPEN. That cross-source contradiction was the defect.
+
+**THE GATE.** `scripts/validate-wave3-logistics.mjs` gains **§8** (61/0, was 57/0): a repo-wide, comment-stripped,
+whitespace-normalised sweep of `src/` whose EVERY `10am`/`10:00 Pacific|PT` mention must sit inside a
+documented-removal window (removed / unsupported / not established / `AV-013`); a bare assertion FAILS it. Plus the
+inline-record assertion (the old claim is documented as removed) and the owner-consumption assertion (the routing
+component imports `@/lib/shipping/routingReadiness`, renders `routingReadinessNotice()`, and no `RoutingRequestForm`
+remains). **Mutation-proved TWICE** — a re-introduced claim and a re-added `RoutingRequestForm` each turn it red
+(1 failure each); both files restored byte-identical (`f4063afc…` / `cc78bcd4…`).
+
+**RECORDS FIXED AT SOURCE.** `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` (AV-013 row → APPLIED note) ·
+`docs/AMAZON_RECONCILIATION_STATUS.md` (AV-013 row APPLIED; counts 22 → 23 applied; the REMOVE/re-model line 3/3; a
+new applied-findings row; §5 evidence item 6; the T-6 note; and the FALSE charter line "It does not claim any finding
+has been fixed") · `docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md` (`D09-11` SUPERSEDED → RECONCILED, §P4) ·
+`docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §6 · `requirements-registry.json` (the
+`discovered-routing-request-removal` row reconciled + four stale `next_plan` strings) · `PROJECT_STATUS.md` +
+`HANDOFF.md`.
+
+**NO application runtime change** — the only touched application files are validators; the surface is declared in
+BOTH scope guards (`BATCH2O_AV013_RECONCILIATION_SCOPE` in E6 — all three checks; `BATCH2O_AV013_RECONCILIATION_DECLARED`
+in E7). Deployment is therefore NOT APPLICABLE.
+
+**EVIDENCE.** `validate:all` **142/0** (exit 0) · typecheck **0** · lint **0** · build **✓** · E6 + E7 PASS ·
+`validate:wave3-logistics` **61/0** · browser `e2e/logistics-wave3.spec.ts` **7 passed** (incl. test 6 asserting the
+claim ABSENT) · committed **`faa5fcb`**, pushed.
+
+**DEFECT INVENTORY (this session).** FIXED at source: (1) the cross-source contradiction (records claiming AV-013 OPEN
+while the code and the higher-authority records said CLOSED) — repaired in every stale file, with the absence now
+gated; (2) the false charter line in the reconciliation-status doc. No defect was parked; no known exceptions
+introduced.
+
+**NEXT.** Continue `BATCH 2` — the four INFERENCE relabels (`AV-002/017/025/044`; `AV-033` is EVIDENCE-BLOCKED); then
+`Batch 3`. `AV-040`'s `getTransaction` stays EVIDENCE-BLOCKED.
+
