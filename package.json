@@ -70,6 +70,7 @@
     "validate:inference-relabels": "node scripts/validate-inference-relabels.mjs",
     "validate:contract-closing": "node scripts/validate-contract-closing.mjs",
     "validate:founder-closing": "node scripts/validate-founder-closing.mjs",
+    "validate:built-rows": "node scripts/validate-built-rows.mjs",
     "validate:environment": "node scripts/validate-environment.mjs",
     "validate:ui-wiring": "node scripts/validate-ui-wiring.mjs",
     "validate:dead-code": "node scripts/validate-dead-code.mjs",

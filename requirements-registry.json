@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 522,
+    "total_entries": 523,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -955,6 +955,11 @@
       "measurements": "npm run validate:all 142 PASS / 0 FAIL (was 141; the new gate is +1); npm run typecheck 0; npm run lint 0; npm run build ok; npm run validate:asn-pallets 44/0; validate:po-documents 57/0; validate:p12-spapi-seam 67/0; validate:proxy-model PASS; validate:commerce-loop 34/0; validate:logistics-providers 96/0; validate-e6 + validate-e7 PASS with the new scope declared in BOTH. Browser: e2e/po-documents.spec.ts 10 passed.",
       "next_plan": "The CURRENT plan lives in PROJECT_STATUS.md → CURRENT RESUME STATE. AV-016 is APPLIED (the AV-016/AV-014 MODELLED-IN-PART set is now empty); the remaining Batch 2 (Amazon accuracy) work is the INFERENCE relabels (AV-002/017/025/044) are now APPLIED (Batch 2p, 2026-10-03; AV-033 stays EVIDENCE-BLOCKED), so Batch 2 is CLOSED; next is Batch 3 (the unverified registry rows + S7). AV-040's remaining getTransaction stays EVIDENCE-BLOCKED.",
       "three_way_status": "See the CURRENT RESUME STATE block of PROJECT_STATUS.md — the single source for this increment's three-way status."
+    },
+    "batch3c_built_rows": {
+      "what": "Batch 3c (the ~126 \"built but never independently re-verified\" rows): the evidence-integrity half. A NEW gate scripts/validate-built-rows.mjs (npm run validate:built-rows) asserts every file/spec/script reference inside a `built` row resolves to something that exists; the stale references it found were repaired at source here.",
+      "fixed": "69 dead references repaired across the `built` rows: 8 consolidated Playwright suite names repointed to their current canonical spec (e2e/admin-views.spec.ts -> e2e/admin-operational-surfaces.spec.ts and 7 more); 3 moved files repointed (ShippingCostEstimate.tsx -> components/shared, tamSamPipeline.tsx -> .ts, tourDefinitions.ts -> config/tours); the unregistered `validate:stage3` reference corrected; and 4 rows whose cited file NEVER existed across the full git history corrected — batch-4-rate-limiting and batch10-health-check-digest reclassified built -> not_started (no Edge-Function rate limiting / health check exists; the master matrix records rate limiting as BLOCKED, S13) and batchA-freight-term + batch-2-clinerules repointed to the real sources (the features exist).",
+      "remaining": "22 built_and_tested rows and 1 removed row ALSO name a consolidated spec; the `removed` row (batchE-carrier-views-e2e) mentions it as HISTORY and is correct as written; the 22 are a SEPARATE defect class (their built_and_tested status is unsupported by a live spec reference) and are the next slice of Batch 3c. The per-row page-by-page functional parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity) also remains."
     }
   },
   "entries": [
@@ -981,7 +986,7 @@
       "description": "CRM depth: timeline, tasks, notes, tags, lifecycle, owner",
       "source": "Batch 1 / Stage 25",
       "status": "built",
-      "evidence": "src/lib/crm/crmStore.ts; e2e/admin-views.spec.ts",
+      "evidence": "src/lib/crm/crmStore.ts; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -991,7 +996,7 @@
       "description": "Staff RBAC tiers + audit log viewer",
       "source": "Batch 1 / Stage 25",
       "status": "built",
-      "evidence": "src/types.ts; src/lib/auth/rbac.ts; e2e/admin-views.spec.ts",
+      "evidence": "src/types.ts; src/lib/auth/rbac.ts; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": "batch29-role-presets",
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1001,7 +1006,7 @@
       "description": "Brand self-service: SalesAnalytics, BrandSelfService",
       "source": "Batch 1 / Stage 25",
       "status": "built",
-      "evidence": "src/components/brand/SalesAnalytics.tsx; BrandSelfService.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/SalesAnalytics.tsx; BrandSelfService.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1011,7 +1016,7 @@
       "description": "Delivery reconciliation feeding Deductions",
       "source": "Batch 1 / Stage 24-25",
       "status": "built",
-      "evidence": "src/components/admin/RetailPipeline.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/RetailPipeline.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1021,7 +1026,7 @@
       "description": "Admin PO detail view with line-item, ack history, 24hr countdown, ASN, cost-price check, Deductions",
       "source": "Batch 0.5, item 2",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/admin-views.spec.ts; e2e/full-order-lifecycle.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/admin-operational-surfaces.spec.ts; e2e/po-lifecycle.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1031,7 +1036,7 @@
       "description": "Admin acknowledges PO on brand behalf",
       "source": "Batch 0.5, item 3",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/full-order-lifecycle.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/po-lifecycle.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1041,7 +1046,7 @@
       "description": "Admin files/corrects ASN on brand behalf",
       "source": "Batch 0.5, item 3",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/full-order-lifecycle.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/po-lifecycle.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1051,7 +1056,7 @@
       "description": "On-behalf actions attributed in audit log",
       "source": "Batch 0.5, item 3",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1060,7 +1065,7 @@
       "description": "Brand PO actions notify admin",
       "source": "Batch 0.5, item 1",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/cross-role-po.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/po-onbehalf.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1069,7 +1074,7 @@
       "description": "Brand Settings Bank Information",
       "source": "Batch 2, Settings 1",
       "status": "built",
-      "evidence": "src/components/brand/BrandSettings.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/BrandSettings.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1078,7 +1083,7 @@
       "description": "Brand Settings Login Settings",
       "source": "Batch 2, Settings 2",
       "status": "built",
-      "evidence": "src/components/brand/BrandSettings.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/BrandSettings.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1087,7 +1092,7 @@
       "description": "Brand Settings Manage Permissions with role tiers",
       "source": "Batch 2, Settings 3",
       "status": "built",
-      "evidence": "src/components/admin/SuperAdminPanel.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/SuperAdminPanel.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": "batch29-role-presets"
     },
@@ -1096,7 +1101,7 @@
       "description": "Brand Settings PO Outages",
       "source": "Batch 2, Settings 4",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderList.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderList.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1105,7 +1110,7 @@
       "description": "Brand Settings Return Addresses",
       "source": "Batch 2, Settings 5",
       "status": "built",
-      "evidence": "src/components/brand/BrandSettings.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/BrandSettings.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1114,7 +1119,7 @@
       "description": "Brand Settings Compliance Reference",
       "source": "Batch 2, Settings 6",
       "status": "built",
-      "evidence": "src/components/brand/ComplianceHub.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/ComplianceHub.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1123,7 +1128,7 @@
       "description": "Brand Settings Notification Preferences",
       "source": "Batch 2, Settings 7",
       "status": "built",
-      "evidence": "src/components/shared/NotificationCenter.tsx; e2e/notification-nav.spec.ts",
+      "evidence": "src/components/shared/NotificationCenter.tsx; e2e/notifications.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1132,7 +1137,7 @@
       "description": "Brand Settings Contacts (shared CRM)",
       "source": "Batch 2, Settings 8",
       "status": "built",
-      "evidence": "src/components/brand/BrandSettings.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/BrandSettings.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1141,7 +1146,7 @@
       "description": "DHL as primary parcel carrier",
       "source": "Batch 14, item 3",
       "status": "built",
-      "evidence": "src/components/shipping/ShippingCostEstimate.tsx; e2e/carrier-views.spec.ts",
+      "evidence": "src/components/shared/ShippingCostEstimate.tsx; e2e/logistics-providers.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1160,7 +1165,7 @@
       "description": "Brand MOQ/pricing/packaging/PO-rejection guidance",
       "source": "Batch 15",
       "status": "built",
-      "evidence": "src/components/shared/BrandGuidance.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/shared/BrandGuidance.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1170,7 +1175,7 @@
       "description": "Warehousing partner for returns (business decision)",
       "source": "Batch 16",
       "status": "built",
-      "evidence": "src/components/admin/LogisticsControl.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/LogisticsControl.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1179,7 +1184,7 @@
       "description": "TAM/SAM ONS-based data pipeline",
       "source": "Batch 17",
       "status": "built",
-      "evidence": "src/lib/market-data/tamSamPipeline.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/lib/market-data/tamSamPipeline.ts; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1188,7 +1193,7 @@
       "description": "TAM/SAM removed from public homepage",
       "source": "Batch 17 correction",
       "status": "built",
-      "evidence": "src/lib/market-data/tamSamPipeline.tsx; scripts/lint-wording.mjs",
+      "evidence": "src/lib/market-data/tamSamPipeline.ts; scripts/lint-wording.mjs",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1197,7 +1202,7 @@
       "description": "Bank financing pitch + demo banks per region",
       "source": "Batch 18",
       "status": "built",
-      "evidence": "src/components/admin/BankFinancingSection.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/BankFinancingSection.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1260,7 +1265,7 @@
       "description": "Product image support with white-bg validation",
       "source": "Batch 21",
       "status": "built",
-      "evidence": "src/lib/amazon/productImageValidator.ts; e2e/brand-views.spec.ts",
+      "evidence": "src/lib/amazon/productImageValidator.ts; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1269,7 +1274,7 @@
       "description": "Catalog Manager paginated table with row-click detail",
       "source": "Batch 23, item 2",
       "status": "built",
-      "evidence": "src/components/brand/ProductCatalog.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/ProductCatalog.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1278,7 +1283,7 @@
       "description": "Compliance Approvals cards-per-brand with detail page",
       "source": "Batch 23, item 3",
       "status": "built",
-      "evidence": "src/components/brand/ComplianceHub.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/ComplianceHub.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1288,7 +1293,7 @@
       "description": "Billing cards with click-to-detail-page",
       "source": "Batch 23, item 4",
       "status": "built",
-      "evidence": "src/components/admin/BillingPanel.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/BillingPanel.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1298,7 +1303,7 @@
       "description": "Rename Messages to Support Inbox/Helpdesk",
       "source": "Batch 24",
       "status": "built",
-      "evidence": "src/components/admin/MessagesHub.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/MessagesHub.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1308,7 +1313,7 @@
       "description": "Returns table shows real brand names",
       "source": "Batch 25",
       "status": "built",
-      "evidence": "src/components/brand/BrandReturns.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/BrandReturns.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1318,7 +1323,7 @@
       "description": "Retail Pipeline shows demo data with banner",
       "source": "Batch 26",
       "status": "built",
-      "evidence": "src/components/admin/RetailPipeline.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/RetailPipeline.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1327,7 +1332,7 @@
       "description": "Purchase Orders nav renders PO list, not 3PL Terminal",
       "source": "Batch 27",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderList.tsx; e2e/admin-views.spec.ts; e2e/batch-abc-vc-deep-dive.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderList.tsx; e2e/admin-operational-surfaces.spec.ts; e2e/status-semantics.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1337,7 +1342,7 @@
       "description": "Full status reconciliation across all batches",
       "source": "Batch 28",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderList.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderList.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": "batch-2-registry",
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1347,7 +1352,7 @@
       "description": "CRM independently scrolling panels with pinned composer",
       "source": "Batch 29, item 1",
       "status": "built",
-      "evidence": "src/components/admin/BrandCRM.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/BrandCRM.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1356,7 +1361,7 @@
       "description": "Brand Team & Messages nav tab",
       "source": "Batch 29, item 2",
       "status": "built",
-      "evidence": "src/components/brand/BrandTeamMessages.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/BrandTeamMessages.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1365,7 +1370,7 @@
       "description": "Brand role presets: Owner/Shipping/Accounts/Compliance",
       "source": "Batch 29, item 3",
       "status": "built",
-      "evidence": "src/types.ts; src/lib/auth/rbac.ts; e2e/admin-views.spec.ts",
+      "evidence": "src/types.ts; src/lib/auth/rbac.ts; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1394,7 +1399,7 @@
       "description": "Admin drill-down works for every brand",
       "source": "Batch 30, item 3",
       "status": "built",
-      "evidence": "src/components/admin/AdminDashboard.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/AdminDashboard.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1423,7 +1428,7 @@
       "description": "New clinerule: ALWAYS CHECK AND UPDATE REQUIREMENTS REGISTRY",
       "source": "Batch -2, item 3",
       "status": "built",
-      "evidence": ".clinerules/always-check-requirements-registry.md",
+      "evidence": ".clinerules/project-state-contract.md (the requirements registry is one of the five synchronised project-state sources); scripts/validate-registry-integrity.mjs; npm run validate:resume-state",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1432,7 +1437,7 @@
       "description": "Persistent DemoBanner component",
       "source": "General",
       "status": "built",
-      "evidence": "src/components/shared/DemoBanner.tsx; e2e/brand-views.spec.ts; e2e/admin-views.spec.ts",
+      "evidence": "src/components/shared/DemoBanner.tsx; e2e/brand-operational-surfaces.spec.ts; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1451,7 +1456,7 @@
       "description": "Admin UI for configuring per-carrier shipping markup % in Super Admin Panel",
       "source": "Batch 14, item 1",
       "status": "built",
-      "evidence": "src/components/admin/BillingPanel.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/BillingPanel.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1460,7 +1465,7 @@
       "description": "Playwright E2E test for cross-role PO flow",
       "source": "Batch 0.5, item 4",
       "status": "built",
-      "evidence": "e2e/cross-role-po.spec.ts; e2e/full-order-lifecycle.spec.ts",
+      "evidence": "e2e/po-onbehalf.spec.ts; e2e/po-lifecycle.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1469,7 +1474,7 @@
       "description": "Live chat widget in brand portal, reuses messages table, floating widget with thread view",
       "source": "Batch 13, item 1",
       "status": "built",
-      "evidence": "src/components/shared/LiveChatWidget.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/shared/LiveChatWidget.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1479,7 +1484,7 @@
       "description": "Ticketing layer: conversations escalated to tickets with status, priority, assignment",
       "source": "Batch 13, item 2",
       "status": "built",
-      "evidence": "src/lib/helpdesk/ticketStore.ts; e2e/admin-views.spec.ts",
+      "evidence": "src/lib/helpdesk/ticketStore.ts; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1489,7 +1494,7 @@
       "description": "AI-powered suggested replies for admin via OpenRouter (mock) based on conversation and brand context",
       "source": "Batch 13, item 3",
       "status": "built",
-      "evidence": "src/lib/helpdesk/ticketStore.ts; e2e/admin-views.spec.ts",
+      "evidence": "src/lib/helpdesk/ticketStore.ts; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1499,7 +1504,7 @@
       "description": "Admin dashboard view: ticket queue, filters by status/priority/assignee, SLA aging indicator, table-UX",
       "source": "Batch 13, item 4",
       "status": "built",
-      "evidence": "src/components/admin/HelpdeskDashboard.tsx; e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/HelpdeskDashboard.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test"
@@ -1559,7 +1564,7 @@
       "source": "Batch 22",
       "superseded_by": null,
       "status": "built",
-      "evidence": "src/components/brand/SalesAnalytics.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/brand/SalesAnalytics.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-29"
     },
     {
@@ -1567,7 +1572,7 @@
       "description": "Full order lifecycle E2E test: brand PO ack -> admin notification -> admin on-behalf ack+ASN -> brand ASN",
       "source": "Batch -3.5",
       "status": "built",
-      "evidence": "e2e/full-order-lifecycle.spec.ts (3 tests: order lifecycle, brand identity, account menu)",
+      "evidence": "e2e/po-lifecycle.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1576,7 +1581,7 @@
       "description": "React error boundaries at app shell level (brand portal + admin portal) + fallback UI",
       "source": "Batch -4, item 1",
       "status": "built",
-      "evidence": "src/components/shared/ErrorBoundary.tsx; e2e/admin-views.spec.ts; e2e/brand-views.spec.ts",
+      "evidence": "src/components/shared/ErrorBoundary.tsx; e2e/admin-operational-surfaces.spec.ts; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1623,7 +1628,7 @@
       "description": "Cross-role ASN/shipment notifications: admin sees \"ASN filed for PO-X\" when brand creates a shipment. Added to NotificationCenter useNotificationsRest().",
       "source": "Batch 0.5, item 1",
       "status": "built",
-      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/cross-role-po.spec.ts",
+      "evidence": "src/components/admin/AdminPurchaseOrderDetail.tsx; e2e/po-onbehalf.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1640,8 +1645,8 @@
       "id": "batch-4-rate-limiting",
       "description": "Rate limiting on public-facing Edge Functions",
       "source": "Batch -4, item 3",
-      "status": "built",
-      "evidence": "supabase/functions/_shared/rateLimit.ts",
+      "status": "not_started",
+      "evidence": "NOT BUILT — the cited supabase/functions/_shared/rateLimit.ts has NEVER existed in this repository (checked across the full git history) and no public-facing Edge Function implements rate limiting; docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md item 16 records server-side rate limiting as BLOCKED (S13). Reclassified from \"built\" to \"not_started\" by Batch 3c on 2026-10-03 after scripts/validate-built-rows.mjs proved the citation false.",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1667,8 +1672,8 @@
       "id": "batch10-health-check-digest",
       "description": "Health-check function (existing) now called by daily-digest; results included in digest output with triage summary",
       "source": "Batch 10, items 2-4",
-      "status": "built",
-      "evidence": "supabase/functions/health-check/index.ts; scripts/validate-edge-functions.mjs",
+      "status": "not_started",
+      "evidence": "NOT BUILT — the cited supabase/functions/health-check/index.ts has NEVER existed in this repository (checked across the full git history); the daily-digest Edge Function it names also has no function directory (only the cron migration supabase/migrations/025_cron_daily_digest.sql references it). scripts/validate-edge-functions.mjs exists and remains the covering gate. Reclassified from \"built\" to \"not_started\" by Batch 3c on 2026-10-03.",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1686,7 +1691,7 @@
       "description": "FreightTerm type + ship-window/delivery-window fields on PO",
       "source": "Batch A, item 1",
       "status": "built",
-      "evidence": "src/types.ts; supabase/migrations/0018_freight_term_and_windows.sql; e2e/batch-abc-vc-deep-dive.spec.ts",
+      "evidence": "src/types.ts (FreightTerm type + ship-window / delivery-window fields); src/config/shipping.ts; e2e/status-semantics.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1695,7 +1700,7 @@
       "description": "Routing Request step for Freight Collect POs",
       "source": "Batch A, item 2",
       "status": "built",
-      "evidence": "src/components/shared/RoutingRequest.tsx; e2e/batch-abc-vc-deep-dive.spec.ts",
+      "evidence": "src/components/shared/RoutingRequest.tsx; e2e/status-semantics.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1704,7 +1709,7 @@
       "description": "Unfilled by cancel date + PO On-Time Accuracy deduction types",
       "source": "Batch A, item 3",
       "status": "built",
-      "evidence": "src/types.ts; src/data/demoStore.ts; e2e/batch-abc-vc-deep-dive.spec.ts",
+      "evidence": "src/types.ts; src/data/demoStore.ts; e2e/status-semantics.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1713,7 +1718,7 @@
       "description": "30-day backorder restock deadline enforcement",
       "source": "Batch A, item 4",
       "status": "built",
-      "evidence": "src/types.ts; src/data/api.ts; e2e/batch-abc-vc-deep-dive.spec.ts",
+      "evidence": "src/types.ts; src/data/api.ts; e2e/status-semantics.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1722,7 +1727,7 @@
       "description": "Brand PO dashboard audited: freight info, routing request, backorder deadlines now surfaced",
       "source": "Batch A, item 5",
       "status": "built",
-      "evidence": "BrandPurchaseOrders.tsx; e2e/batch-abc-vc-deep-dive.spec.ts",
+      "evidence": "BrandPurchaseOrders.tsx; e2e/status-semantics.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1731,7 +1736,7 @@
       "description": "Usertour (MIT-licensed) onboarding tour platform integrated: registry card, docker-compose, SDK hook in brand portal (useUsertour.ts), admin management panel",
       "source": "Batch B",
       "status": "built",
-      "evidence": "src/lib/usertour/useUsertour.ts; src/components/admin/UsertourAdminPanel.tsx; e2e/batch-abc-vc-deep-dive.spec.ts",
+      "evidence": "src/lib/usertour/useUsertour.ts; src/components/admin/UsertourAdminPanel.tsx; e2e/status-semantics.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1758,7 +1763,7 @@
       "description": "Brand-facing CSV catalog import UI: drag-and-drop upload, stream-parse & validate, preview table with row-level validation status, atomic commit via existing importCatalogCsv pipeline",
       "source": "Batch 34",
       "status": "built",
-      "evidence": "src/components/shared/CsvCatalogImport.tsx; e2e/brand-views.spec.ts",
+      "evidence": "src/components/shared/CsvCatalogImport.tsx; e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1767,7 +1772,7 @@
       "description": "Real Usertour integration: tour definitions (ONBOARDING_TOUR + WHATS_NEW_TOUR), TourLoader component (Usertour vs fallback TourEngine), enhanced admin panel with tour list and status",
       "source": "Batch 33",
       "status": "built",
-      "evidence": "src/lib/usertour/tourDefinitions.ts; e2e/admin-views.spec.ts",
+      "evidence": "src/config/tours/tourDefinitions.ts; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1776,7 +1781,7 @@
       "description": "Brand dashboard enhancements: quick action cards (POs, Catalog, Compliance, Reports), KPI grid with PO-derived metrics (ack rate, open PO value, inventory estimate), interactive fulfilment pipeline tracker with drill-down, active dossier card",
       "source": "Batch 37",
       "status": "built",
-      "evidence": "src/components/brand/BrandDashboard.tsx; e2e/brand-views.spec.ts; e2e/account-menu.spec.ts",
+      "evidence": "src/components/brand/BrandDashboard.tsx; e2e/brand-operational-surfaces.spec.ts; e2e/app-shell.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -2056,7 +2061,7 @@
       "description": "Fixed Stage 3 validator to handle Supabase data path gracefully",
       "source": "Stage 3",
       "status": "built",
-      "evidence": "scripts/validate-stage3.mjs (Supabase-safe logic); npm run validate:stage3 (PASS)",
+      "evidence": "scripts/validate-stage3.mjs (Supabase-safe logic; run by validate:all); PASS",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -5871,6 +5876,15 @@
       "status": "built_and_tested",
       "evidence": "scripts/validate-ui-wiring.mjs (NEW gate, registered npm run validate:ui-wiring; parses all 143 src/components/**/*.tsx with comments stripped; asserts W1 every control wired — the design-system style guide is the ONE declared specimen exception — W2 no empty handler, W3 an action-labelled control reaches a real writer not only a setter, W4 a 14-entry manifest of domain-critical controls still reaches its writer, W5 the fixed defect cannot return, W6 the allowlisted file is still the style guide); src/components/brand/BrandSettings.tsx (the two false controls removed); src/components/brand/ComplianceHub.tsx (real confirmation + Confirmed badge); src/data/demoStore.ts (NEW confirmCustomsDocument / isCustomsDocumentConfirmed on the canonical audit log); src/components/shared/charts/MercentaCharts.tsx (role=button made genuinely activatable). MUTATION-PROVED ×3, each file restored byte-identical (recorded sha256: BrandSettings.tsx 097a779b6799ef4387e8b0d9e37f2e979b690a4a4dc7a64c94031fde9e91daf2 · ComplianceHub.tsx 978063fab4d3f08c4dcb16fc67bbf8331e59480ddb7617efbdb78fe8f7ec1bb7 · validate-ui-wiring.mjs 807980c799a05ab5ab5a27cedc14c817fc51fe04b7082a7a80e278f7c8a5f528): an unwired control added → W1 fails; the Confirm button reverted to a setter-only handler → W3 fails; the removed labels restored → W5 fails. LOCAL: validate:all 136 PASS / 0 FAIL (exit 0; corpus grew 135→136 with the new gate); typecheck 0; lint 0 errors; build ✓; e6 + e7 PASS; browser e2e/compliance-sim.spec.ts + e2e/compliance-gate.spec.ts 7 passed, e2e/brand-operational-surfaces.spec.ts + e2e/uiux-foundation.spec.ts + e2e/dashboard.spec.ts 27 passed. LIVE: deploy exit 0 (live asset byte-identical to the local verified build); verify:live 209 PASS / 0 FAIL.",
       "last_verified": "2026-10-02",
+      "superseded_by": null
+    },
+    {
+      "id": "batch3c-built-row-evidence-gate",
+      "description": "Batch 3c (the page-by-page re-verification audit of the ~126 `built` rows) - part 1: THE EVIDENCE-INTEGRITY GATE. scripts/validate-built-rows.mjs (npm run validate:built-rows) asserts every file / e2e-spec / npm-script reference inside every `built` row evidence RESOLVES to something that exists in the repository (bare filenames resolved by a basename index), allowing an intentional historical mention. It found 69 dead references - stale consolidated Playwright suite names, moved files, and four files that NEVER existed across the full git history - which were repaired at source by scripts/reconcile-batch3c-built-rows.cjs.",
+      "source": "Batch 3c (2026-10-03) - built-row evidence audit; gate scripts/validate-built-rows.mjs; repair scripts/reconcile-batch3c-built-rows.cjs",
+      "status": "built",
+      "evidence": "scripts/validate-built-rows.mjs (NEW; npm run validate:built-rows; 124 built rows / 259 references / 384 PASS / 0 FAIL; mutation-proved: a dead e2e spec reference fails it with 1 failure, requirements-registry.json restored byte-identical sha256 a69349e91b5bdb40a057feec2e5c36f866a5abe158865da3a907c4a7eca53b6c); scripts/reconcile-batch3c-built-rows.cjs (NEW; at-source repair of the 69 dead references); requirements-registry.json (_meta.batch3c_built_rows records the fix and the remaining work).",
+      "last_verified": "2026-10-03",
       "superseded_by": null
     }
   ]
