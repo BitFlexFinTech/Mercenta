@@ -44,6 +44,29 @@ async function seedSimulatedPo(page: import('@playwright/test').Page, advance = 
     const created = await mod.createCommercePurchaseOrder('brand-astonish', product.sku, 40, brandActor);
     if (!created.ok) return { ok: false, reason: String(created.error) };
     const poId = created.value.id;
+    /**
+     * §Batch 3c part 2 (REPOINT — the old contract is recorded here, not weakened):
+     *
+     * This seed used to acknowledge as the ADMIN with NO brand authorisation on
+     * record. That is no longer a legal on-behalf decision:
+     * `src/lib/commerce/poOnBehalfAuthority.ts` refuses an on-behalf ACCEPTANCE
+     * unless the brand authorised Mercenta for that order (or the closing window
+     * is imminent and the submission is the rejection the channel requires). The
+     * refusal is enforced in the WRITER (`src/data/api.ts`), never merely by
+     * hiding a button — so the admin's acknowledgement was legitimately rejected
+     * and the whole lifecycle stalled. These tests are titled "an AUTHORISED admin
+     * operates the simulated lifecycle", so the seed now establishes the
+     * precondition they always claimed: the brand's authorisation is recorded
+     * through the ONE canonical writer, exactly as the product's own brand surface
+     * does (`BrandPurchaseOrders.tsx`). Behaviour is unchanged; the missing
+     * precondition is now real.
+     */
+    const api = await import('/src/data/api.ts');
+    const auth = api.authoriseOnBehalfDecisions(poId, {
+      recordedBy: 'brand:brand-astonish',
+      note: 'Brand A authorises Mercenta to decide this order on its behalf (browser-spec seed).',
+    });
+    if (!auth.ok) return { ok: false, reason: String(auth.error) };
     if (shouldAdvance) {
       mod.acknowledgeCommercePurchaseOrder(poId, adminActor);
       mod.fulfilCommercePurchaseOrder(poId, adminActor);

@@ -45,6 +45,20 @@ async function seedSimulatedPo(page: import('@playwright/test').Page, advance = 
     const created = await mod.createCommercePurchaseOrder('brand-astonish', product.sku, 40, brandActor);
     if (!created.ok) return { ok: false, reason: String(created.error) };
     const poId = created.value.id;
+    /**
+     * §Batch 3c part 2 (REPOINT — the old contract is recorded, not weakened):
+     * the admin acknowledgement below is an ON-BEHALF decision, and
+     * `src/lib/commerce/poOnBehalfAuthority.ts` now refuses an on-behalf
+     * ACCEPTANCE unless the brand authorised Mercenta for that order (enforced in
+     * the WRITER `src/data/api.ts`). The brand's authorisation is therefore
+     * recorded through the ONE canonical writer before the lifecycle is driven.
+     */
+    const api = await import('/src/data/api.ts');
+    const auth = api.authoriseOnBehalfDecisions(poId, {
+      recordedBy: 'brand:brand-astonish',
+      note: 'Brand A authorises Mercenta to decide this order on its behalf (browser-spec seed).',
+    });
+    if (!auth.ok) return { ok: false, reason: String(auth.error) };
     if (shouldAdvance) {
       mod.acknowledgeCommercePurchaseOrder(poId, adminActor);
       mod.fulfilCommercePurchaseOrder(poId, adminActor);
@@ -169,34 +183,31 @@ test.describe('P7 — admin invoicing', () => {
     await loginAs(page, 'Super Admin — Tadii', 1200);
 
     // §P7/AV-018 — a DELIVERED but unreceived PO cannot be invoiced, in the live build.
+    /**
+     * §Batch 3c part 2 (REPOINT — the old contract recorded, not weakened): this
+     * block used to FABRICATE the delivered-but-unreceived order by pushing a raw
+     * object into an array imported from `/src/data/demoStore.ts`. That module
+     * instance is NOT the one the running application's writers and readers use
+     * (Vite dev keys modules by URL, so the bare `.ts` import is a SEPARATE
+     * instance), so `issueCommerceInvoice` correctly reported NOT_FOUND — the test
+     * was probing a phantom store rather than the product. It now builds the exact
+     * state through the CANONICAL writers the application itself uses: create the
+     * order, then advance it to `delivered` WITHOUT logging a receipt, which is the
+     * only way the receipt gate can be exercised for real.
+     */
     const refused = await page.evaluate(async () => {
+      const api = await import('/src/data/api.ts');
       const mod = await import('/src/lib/commerce/commerceLifecycle.ts');
-      const store = await import('/src/data/demoStore.ts');
       const adminActor = { staffId: 'staff-001', canMutate: true };
-      store.demoPurchaseOrders.push({
-        id: 'po-e2e-unreceived',
-        brandId: 'brand-astonish',
-        poNumber: 'PO-E2E-UNRECEIVED',
-        status: 'delivered',
-        poValue: 100,
-        commissionRate: 0.2,
-        commissionAmount: 20,
-        orderDate: '2026-09-01T00:00:00.000Z',
-        mode: 'simulation',
-        simulated: true,
-        lineItems: [
-          {
-            sku: 'SKU-E2E',
-            productName: 'unreceived widget',
-            quantity: 1,
-            unitPrice: 100,
-            commodityCode: '1234',
-            ackStatus: 'accepted',
-            acknowledgedQty: 1,
-          },
-        ],
-      });
-      const result = mod.issueCommerceInvoice('po-e2e-unreceived', adminActor);
+      const created = api.createSimulatedPurchaseOrder(
+        'brand-astonish',
+        [{ sku: 'SKU-E2E', productName: 'unreceived widget', quantity: 1, unitPrice: 100, commodityCode: '1234' }],
+        'SKU-E2E'
+      );
+      if (!created.ok) return { ok: false, error: `SEED_FAILED: ${created.error}` };
+      // Advance to DELIVERED without any received quantity — no receipt on record.
+      await api.updatePurchaseOrderStatus(created.po.id, 'delivered');
+      const result = mod.issueCommerceInvoice(created.po.id, adminActor);
       return { ok: result.ok, error: result.ok ? '' : result.error };
     });
     expect(refused.ok).toBe(false);

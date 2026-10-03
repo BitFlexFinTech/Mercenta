@@ -39,6 +39,27 @@ async function adminPoDetail(page: any, poNumber: string) {
   await expect(page.getByRole('heading', { name: poNumber }).first()).toBeVisible({ timeout: 5000 });
 }
 
+/**
+ * §Batch 3c part 2 (REPOINT — the old contract is recorded, not weakened): the
+ * on-behalf ACCEPTANCE control is offered only when the brand authorised Mercenta
+ * for that order (`src/lib/commerce/poOnBehalfAuthority.ts`), enforced in the
+ * writer `src/data/api.ts`. This records the brand's authorisation through the ONE
+ * canonical writer so the surface reflects the AUTHORISED case.
+ */
+async function authoriseOnBehalfForPo(page: any, poNumber: string) {
+  await page.evaluate(async (n: string) => {
+    const store = await import('/src/data/demoStore.ts');
+    const api = await import('/src/data/api.ts');
+    const po = store.demoPurchaseOrders.find((p: { poNumber: string }) => p.poNumber === n);
+    if (po) {
+      api.authoriseOnBehalfDecisions(po.id, {
+        recordedBy: `brand:${po.brandId}`,
+        note: 'Brand authorises Mercenta to decide this order (browser-spec seed).',
+      });
+    }
+  }, poNumber);
+}
+
 test.describe('Admin acknowledgement surfaces (§P13 / S7)', () => {
   test('1. the list and its record preview present the window from its owner', async ({ page }) => {
     await adminPurchaseOrders(page);
@@ -65,6 +86,7 @@ test.describe('Admin acknowledgement surfaces (§P13 / S7)', () => {
     page,
   }) => {
     await adminPurchaseOrders(page);
+    await authoriseOnBehalfForPo(page, 'PO-9001');
     await adminPoDetail(page, 'PO-9001');
 
     /** The owner's urgency, with the closing window called out (Mercenta may act for the brand). */
@@ -78,7 +100,10 @@ test.describe('Admin acknowledgement surfaces (§P13 / S7)', () => {
     await expect(tile).toContainText(/Ack within/);
     await expect(tile).not.toContainText('EXPIRED');
 
-    /** Inside the window the owner permits an acceptance, so the control IS offered. */
+    /** The brand has AUTHORISED Mercenta for this order, so the owner permits an
+     *  ACCEPTANCE and the on-behalf control IS offered. (Without that authorisation
+     *  the owner permits ONLY the channel-required rejection — see
+     *  `src/lib/commerce/poOnBehalfAuthority.ts`, enforced in the writer.) */
     await expect(page.locator('button', { hasText: 'Acknowledge on behalf of' })).toBeVisible({
       timeout: 6000,
     });

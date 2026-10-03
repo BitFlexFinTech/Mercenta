@@ -78,6 +78,24 @@ test.describe('Proxy model — Mercenta acts, the brand decides', () => {
 
   test('4. the admin PO detail shows the instruction to Mercenta and its outcome', async ({ page }) => {
     await loginAs(page, 'Mercenta Admin Hub', 1100);
+    /**
+     * §Batch 3c part 2 (REPOINT — the old contract is recorded, not weakened): the
+     * on-behalf ACCEPTANCE below is permitted only when the brand authorised
+     * Mercenta for that order (`src/lib/commerce/poOnBehalfAuthority.ts`, enforced
+     * in the writer `src/data/api.ts`). `PO-9002` arrives unauthorised, so the
+     * brand's authorisation is recorded through the ONE canonical writer first.
+     */
+    await page.evaluate(async () => {
+      const store = await import('/src/data/demoStore.ts');
+      const api = await import('/src/data/api.ts');
+      const po = store.demoPurchaseOrders.find((p) => p.poNumber === 'PO-9002');
+      if (po) {
+        api.authoriseOnBehalfDecisions(po.id, {
+          recordedBy: `brand:${po.brandId}`,
+          note: 'Brand authorises Mercenta to decide this order (browser-spec seed).',
+        });
+      }
+    });
     await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
     await page.waitForTimeout(1000);
     const row = page

@@ -48,6 +48,25 @@ async function openPackingCorrection(page: any) {
  */
 async function adminOpenAsnPanel(page: any, brandName: string, poNumber: string) {
   await loginAs(page, 'Mercenta Admin Hub', 1100);
+  /**
+   * §Batch 3c part 2 (REPOINT — the old contract is recorded, not weakened): the
+   * acknowledgement below is an ON-BEHALF ACCEPTANCE, which
+   * `src/lib/commerce/poOnBehalfAuthority.ts` now permits only when the brand
+   * authorised Mercenta for that order (enforced in the WRITER `src/data/api.ts`,
+   * not by hiding a button). The seam POs (`PO-9001` / `PO-9002`) arrive without
+   * that authorisation, so it is recorded through the ONE canonical writer first.
+   */
+  await page.evaluate(async (n) => {
+    const store = await import('/src/data/demoStore.ts');
+    const api = await import('/src/data/api.ts');
+    const po = store.demoPurchaseOrders.find((p) => p.poNumber === n);
+    if (po) {
+      api.authoriseOnBehalfDecisions(po.id, {
+        recordedBy: `brand:${po.brandId}`,
+        note: 'Brand authorises Mercenta to decide this order (browser-spec seed).',
+      });
+    }
+  }, poNumber);
   await page.click('nav[aria-label="Primary"] >> text=Purchase Orders');
   await page.waitForTimeout(1000);
   const row = page
