@@ -34,6 +34,7 @@ import type {
 } from '@/lib/spapi/client';
 import type { ChannelInstruction } from '@/types';
 import { checkConsolidatable } from './consolidation';
+import { validateRequestedPickUp } from './collectChain';
 
 /** The seam shape this owner needs — the SP-API client satisfies it exactly. */
 export interface ChannelShipmentOperationsReader {
@@ -102,6 +103,32 @@ export async function raiseChannelShipmentRequest(input: {
       simulated: false,
       refusal: check.error,
     };
+  }
+
+  /**
+   * §BATCH 2m (`AV-014`) — ENFORCE the channel's pickup lead time at the boundary.
+   *
+   * The channel documents that `requestedPickUp` must be "a date at least two
+   * business days after the current date". From P6 the date was DERIVED and
+   * SURFACED from the owner (`./collectChain`) but a caller-supplied value was
+   * never REFUSED, so a collect request could be submitted earlier than the
+   * channel allows. Here the submitted value is validated BEFORE any channel call:
+   * a missing, unreadable or too-early date is refused with the stated reason and
+   * NO request is made. (The consolidation invariants are checked first, so an
+   * empty/duplicate/cross-tenant declaration is still refused for its own reason.)
+   */
+  if (input.freightTerm === 'collect') {
+    const pickup = validateRequestedPickUp(input.requestedPickUp);
+    if (!pickup.ok) {
+      return {
+        ok: false,
+        purchaseOrderNumbers: check.poNumbers,
+        awaitingCarrierAssignment: false,
+        mode: 'mock',
+        simulated: false,
+        refusal: `SHIPMENT_REQUEST_REFUSED — ${pickup.error}`,
+      };
+    }
   }
 
   const response = await input.reader.submitShipmentRequest({

@@ -120,4 +120,33 @@ test.describe('§P12 — the receiving sync reads the CHANNEL, truthfully', () =
     );
     expect(await page.locator('[data-testid^="channel-apply-"]').count()).toBe(0);
   });
+
+  /**
+   * §BATCH 2m (`AV-014`) — the channel pickup lead time, surfaced. The channel documents
+   * that a collect vendor's `requestedPickUp` must be "a date at least two business days
+   * after the current date"; from P6 the date was derived from the owner but never SHOWN.
+   * The console now states the verdict per Freight Collect purchase order, from the ONE
+   * owner (`collectChain.ts`). Two of the channel's three ingested POs are collect
+   * (MOCK-PO-8842 / MOCK-PO-8843), so at least one verdict is present.
+   */
+  test('6. a Freight Collect PO carries the channel pickup lead-time verdict (§AV-014)', async ({
+    page,
+  }) => {
+    await ingestChannelPosThenOpenConsole(page);
+    await page.locator('[data-state="channel-receiving-read"]').click();
+    await expect(page.locator('[data-testid="channel-receiving-readings"] li').first()).toBeVisible({
+      timeout: 12000,
+    });
+
+    const verdict = page.locator('[data-state^="pickup-lead-time-"]').first();
+    await expect(verdict).toBeVisible({ timeout: 12000 });
+    const state = ((await verdict.getAttribute('data-state')) ?? '').replace('pickup-lead-time-', '');
+    expect([
+      'no_channel_pickup',
+      'within_lead_time',
+      'too_early',
+      'unreadable',
+    ]).toContain(state);
+    await expect(verdict).toContainText(/Channel pickup lead time:/);
+  });
 });

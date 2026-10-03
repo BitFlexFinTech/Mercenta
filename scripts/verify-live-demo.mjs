@@ -42,6 +42,13 @@
  *   L18 the delivery appointment on the DEPLOYED brand surface: the channel's
  *       own appointment state, the window rule's verdict, and the rule's words
  *       rendered rather than assumed compliant (BATCH 2i · AV-045)
+ *   L19 the acknowledgement's completeness and on-hold duties on the DEPLOYED
+ *       brand surface (BATCH 2j · AV-009/AV-010b)
+ *   L20 the acknowledgement-confirmation and ASN-before-receipt verdicts on the
+ *       DEPLOYED channel-operations console, reusing the one receiving read
+ *       (BATCH 2k/2l · AV-011/AV-015)
+ *   L21 the channel pickup lead-time verdict on the DEPLOYED console, per
+ *       Freight Collect purchase order (BATCH 2m · AV-014)
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -1260,6 +1267,66 @@ function readRedLines() {
     );
   }
   await verPage.close();
+
+  /* ── L21 — BATCH 2m (AV-014): THE CHANNEL PICKUP LEAD TIME, LIVE ──
+   * WHY THIS EXISTS. The channel-operations console now shows, per Freight Collect purchase
+   * order, whether the pickup Mercenta asked for satisfies the channel's documented lead time
+   * (at least two business days' notice). On the DEPLOYED surface the verdict must be REAL
+   * DATA (a documented state carried as an attribute), not a decorative line. The channel's
+   * POs are ingested first through the product's own entry point (the same session, because a
+   * re-login resets the in-memory store), then the console is driven through its own control —
+   * a source assertion would prove nothing about the bundle.
+   */
+  console.log('\n--- L21 the channel pickup lead-time verdict, live ---');
+  const pltPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const pltErrors = [];
+  pltPage.on('pageerror', (e) => pltErrors.push(String(e)));
+  try {
+    const pltAttempt = await liveAdminEntry(pltPage);
+    check(`L21 the deployed site opened and the admin signed in (attempt ${pltAttempt})`, true);
+
+    const pltPoNav = pltPage.locator('nav[aria-label="Primary"] >> text=Purchase Orders').first();
+    await pltPoNav.waitFor({ state: 'visible', timeout: 90000 });
+    await pltPoNav.click({ timeout: 30000 });
+    await pltPage.waitForTimeout(2500);
+    await pltPage.locator('[data-state="admin-po-ingest"]').click({ timeout: 30000 });
+    await pltPage.waitForTimeout(2500);
+
+    const pltNav = pltPage.locator('nav[aria-label="Primary"] >> text=Retail Pipeline').first();
+    await pltNav.waitFor({ state: 'visible', timeout: 90000 });
+    await pltNav.click({ timeout: 30000 });
+    await pltPage.waitForTimeout(2500);
+
+    const pltRead = pltPage.locator('[data-state="channel-receiving-read"]').first();
+    await pltRead.waitFor({ state: 'visible', timeout: 90000 });
+    await pltRead.click({ timeout: 30000 });
+    await pltPage.waitForTimeout(2500);
+
+    const pltVerdict = pltPage.locator('[data-state^="pickup-lead-time-"]').first();
+    await pltVerdict.waitFor({ state: 'visible', timeout: 60000 });
+    const pltState = ((await pltVerdict.getAttribute('data-state')) ?? '').replace('pickup-lead-time-', '');
+    check(
+      `L21 the LIVE pickup lead-time verdict is a documented state (${pltState})`,
+      ['no_channel_pickup', 'within_lead_time', 'too_early', 'unreadable'].includes(pltState)
+    );
+    const pltText = (await pltVerdict.textContent()) ?? '';
+    check(
+      'L21 the LIVE pickup verdict names the lead time',
+      /Channel pickup lead time:/i.test(pltText),
+      pltText.slice(0, 140)
+    );
+
+    check(
+      `L21 the driven console rendered with no uncaught error (errors: ${pltErrors.join(' | ') || 'none'})`,
+      pltErrors.length === 0
+    );
+  } catch (pltError) {
+    check(
+      `L21 the pickup lead-time verdict could NOT be driven live (${String(pltError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await pltPage.close();
 
   await browser.close();
 

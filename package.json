@@ -63,6 +63,7 @@
     "validate:po-ack-duties": "node scripts/validate-po-ack-duties.mjs",
     "validate:ack-verification": "node scripts/validate-ack-verification.mjs",
     "validate:asn-before-receipt": "node scripts/validate-asn-before-receipt.mjs",
+    "validate:pickup-lead-time": "node scripts/validate-pickup-lead-time.mjs",
     "validate:commerce-loop": "node scripts/validate-commerce-loop.mjs",
     "validate:amazon-vendor-codes": "node scripts/validate-amazon-vendor-codes.mjs",
     "validate:environment": "node scripts/validate-environment.mjs",

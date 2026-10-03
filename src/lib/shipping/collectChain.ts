@@ -60,6 +60,120 @@ export function earliestRequestedPickUp(from: Date = new Date()): string {
   return date.toISOString().slice(0, 10);
 }
 
+/** True only when a value is a real calendar date in `YYYY-MM-DD` form. */
+function isCalendarDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const ms = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(ms) && new Date(ms).toISOString().slice(0, 10) === value;
+}
+
+/**
+ * §BATCH 2m (`AV-014`) — the STATED refusals of a submitted `requestedPickUp`.
+ *
+ * The rule was DERIVED and SURFACED from P6 onward but never ENFORCED against a
+ * value a caller submits: a caller could ask the channel to collect BEFORE the
+ * two business days the channel documents, and nothing refused it. These are the
+ * reasons the boundary now returns instead.
+ */
+export const REQUESTED_PICKUP_REFUSALS = {
+  missing:
+    'REQUESTED_PICKUP_MISSING — a Freight Collect shipment request must declare requestedPickUp ("a date at least two business days after the current date").',
+  unreadable:
+    'REQUESTED_PICKUP_UNREADABLE — requestedPickUp is not a readable calendar date (YYYY-MM-DD).',
+  tooEarly: (value: string, earliest: string, businessDays: number) =>
+    `REQUESTED_PICKUP_TOO_EARLY — requestedPickUp ${value} is earlier than the channel's documented pickup lead time: the date must be at least ${businessDays} business days after the current date (no earlier than ${earliest}).`,
+} as const;
+
+export type RequestedPickUpCheck =
+  | { ok: true; requestedPickUp: string; earliest: string }
+  | { ok: false; error: string };
+
+/**
+ * §BATCH 2m (`AV-014`) — ENFORCE the channel's pickup lead time against a
+ * SUBMITTED value. FAIL CLOSED: a missing, unreadable or too-early date is
+ * REFUSED with a stated reason; only a date at or after
+ * `earliestRequestedPickUp(from)` is accepted. Pure — no clock is read beyond
+ * the caller-supplied `from`, so a gate can prove it deterministically.
+ */
+export function validateRequestedPickUp(
+  requestedPickUp: string | undefined,
+  from: Date = new Date()
+): RequestedPickUpCheck {
+  const earliest = earliestRequestedPickUp(from);
+  const value = requestedPickUp?.trim();
+  if (!value) return { ok: false, error: REQUESTED_PICKUP_REFUSALS.missing };
+  if (!isCalendarDate(value)) {
+    return { ok: false, error: REQUESTED_PICKUP_REFUSALS.unreadable };
+  }
+  if (value < earliest) {
+    return {
+      ok: false,
+      error: REQUESTED_PICKUP_REFUSALS.tooEarly(value, earliest, PICKUP_LEAD_TIME.businessDays),
+    };
+  }
+  return { ok: true, requestedPickUp: value, earliest };
+}
+
+/** The documented lead-time verdict for a recorded (or absent) `requestedPickUp`. */
+export type PickupLeadTimeState =
+  | 'no_channel_pickup'
+  | 'within_lead_time'
+  | 'too_early'
+  | 'unreadable';
+
+export interface PickupLeadTimeVerdict {
+  state: PickupLeadTimeState;
+  requestedPickUp: string | null;
+  earliest: string;
+  ruleText: string;
+  statement: string;
+}
+
+/**
+ * §BATCH 2m (`AV-014`) — the operator-facing verdict for a purchase order's
+ * recorded `requestedPickUp`, so the enforced rule is VISIBLE, not silent. When
+ * the value is judged, it is judged from `from` (the instant the request was
+ * raised), because the lead time is measured from the day Mercenta asked.
+ */
+export function pickupLeadTimeVerdict(
+  requestedPickUp: string | null | undefined,
+  from: Date = new Date()
+): PickupLeadTimeVerdict {
+  const earliest = earliestRequestedPickUp(from);
+  const value = requestedPickUp?.trim();
+  if (!value) {
+    return {
+      state: 'no_channel_pickup',
+      requestedPickUp: null,
+      earliest,
+      ruleText: PICKUP_LEAD_TIME.basis,
+      statement:
+        `Freight Collect — no channel pickup has been requested yet. The channel requires ` +
+        `requestedPickUp to be at least ${PICKUP_LEAD_TIME.businessDays} business days after the ` +
+        `current date (no earlier than ${earliest}).`,
+    };
+  }
+  const check = validateRequestedPickUp(value, from);
+  if (!check.ok) {
+    return {
+      state: isCalendarDate(value) && value < earliest ? 'too_early' : 'unreadable',
+      requestedPickUp: value,
+      earliest,
+      ruleText: PICKUP_LEAD_TIME.basis,
+      statement: check.error,
+    };
+  }
+  return {
+    state: 'within_lead_time',
+    requestedPickUp: value,
+    earliest,
+    ruleText: PICKUP_LEAD_TIME.basis,
+    statement:
+      `Requested pickup ${value} satisfies the channel's lead time — no earlier than ${earliest}, ` +
+      `at least ${PICKUP_LEAD_TIME.businessDays} business days' notice.`,
+  };
+}
+
 /** The channel's routing instructions exactly as recorded — or null. Never derived. */
 export function routingInstructionsOnRecord(
   instruction?: ChannelInstruction | null

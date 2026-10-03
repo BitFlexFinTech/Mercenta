@@ -1114,6 +1114,31 @@ const BATCH2L_ASN_BEFORE_RECEIPT_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §BATCH 2m (`AV-014`) — THE CHANNEL PICKUP LEAD-TIME ENFORCEMENT PHASE (2026-10-03).
+ *
+ * Register `AV-014`: the channel documents that a collect vendor's `requestedPickUp` must
+ * be "a date at least two business days after the current date". From P6 the platform
+ * DERIVED and SURFACED that date but never ENFORCED it against a submitted value, so a
+ * shipment request could be raised EARLIER than the channel allows. The phase adds the
+ * fail-closed validator to the ONE owner (`src/lib/shipping/collectChain.ts`), enforces it
+ * at the seam boundary (`src/lib/shipping/channelShipmentOperations.ts`), surfaces the
+ * verdict on the channel-operations console, strengthens the p12 seam gate, and proves it
+ * with the NEW gate `scripts/validate-pickup-lead-time.mjs`. F5/F5b/F6 contract UNCHANGED.
+ */
+const BATCH2M_PICKUP_LEAD_TIME_SCOPE = new Set([
+  'src/lib/shipping/collectChain.ts',                 /* the ONE owner + the enforcement validator */
+  'src/lib/shipping/channelShipmentOperations.ts',    /* the boundary that refuses BEFORE any channel call */
+  'src/components/admin/ChannelOperationsPanel.tsx',  /* surfaces the lead-time verdict from the owner */
+  'scripts/validate-p12-spapi-seam.mjs',              /* strengthened: the boundary refusals are asserted */
+  'scripts/validate-pickup-lead-time.mjs',            /* NEW — this phase's gate */
+  'scripts/verify-live-demo.mjs',                     /* +L21 — the live check of the lead-time verdicts */
+  'e2e/p12-channel-operations.spec.ts',               /* the browser proof of the surfaced verdict */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2308,7 +2333,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH2K_ACK_VERIFICATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2l — the ASN-before-receipt phase (see above). First protected-path check (F5). */
         BATCH2L_ASN_BEFORE_RECEIPT_SCOPE.has(p) ||
-        [...BATCH2L_ASN_BEFORE_RECEIPT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2L_ASN_BEFORE_RECEIPT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2m — the pickup lead-time phase (see above). First protected-path check (F5). */
+        BATCH2M_PICKUP_LEAD_TIME_SCOPE.has(p) ||
+        [...BATCH2M_PICKUP_LEAD_TIME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2397,6 +2425,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2l — the ASN-before-receipt phase (see above). Second protected-path check (F5b). */
         BATCH2L_ASN_BEFORE_RECEIPT_SCOPE.has(p) ||
         [...BATCH2L_ASN_BEFORE_RECEIPT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2m — the pickup lead-time phase (see above). Second protected-path check (F5b). */
+        BATCH2M_PICKUP_LEAD_TIME_SCOPE.has(p) ||
+        [...BATCH2M_PICKUP_LEAD_TIME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2721,6 +2752,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2l — the ASN-before-receipt phase (see above). */
           BATCH2L_ASN_BEFORE_RECEIPT_SCOPE.has(p) ||
           [...BATCH2L_ASN_BEFORE_RECEIPT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2m — the pickup lead-time phase (see above). */
+          BATCH2M_PICKUP_LEAD_TIME_SCOPE.has(p) ||
+          [...BATCH2M_PICKUP_LEAD_TIME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

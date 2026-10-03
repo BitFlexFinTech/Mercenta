@@ -1067,6 +1067,26 @@ try {
     'package.json',
   ];
 
+  /**
+   * §BATCH 2m — THE CHANNEL PICKUP LEAD-TIME ENFORCEMENT PHASE (`AV-014`, 2026-10-03). The
+   * fail-closed validator and its enforcement at the seam boundary prove the lead time the audit
+   * found unenforced (a submitter could ask the channel to collect earlier than the documented two
+   * business days). Fuller note in `validate-e6-brand-surfaces.mjs` §BATCH2M_PICKUP_LEAD_TIME_SCOPE.
+   * Same mechanism: a changed source/test file outside EVERY declared set is still refused.
+   */
+  const BATCH2M_PICKUP_LEAD_TIME_DECLARED = [
+    'src/lib/shipping/collectChain.ts',
+    'src/lib/shipping/channelShipmentOperations.ts',
+    'src/components/admin/ChannelOperationsPanel.tsx',
+    'scripts/validate-p12-spapi-seam.mjs',
+    'scripts/validate-pickup-lead-time.mjs',
+    'scripts/verify-live-demo.mjs',
+    'e2e/p12-channel-operations.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1850,7 +1870,13 @@ try {
            * path, but its declared surface is accepted here as every phase's is.
            */
           !BATCH2L_ASN_BEFORE_RECEIPT_DECLARED.includes(f) &&
-          !BATCH2L_ASN_BEFORE_RECEIPT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH2L_ASN_BEFORE_RECEIPT_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2m — THE PICKUP LEAD-TIME PHASE (2026-10-03) — touches no protected path,
+           * but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH2M_PICKUP_LEAD_TIME_DECLARED.includes(f) &&
+          !BATCH2M_PICKUP_LEAD_TIME_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2116,6 +2142,10 @@ try {
      * §BATCH 2l — THE ASN-BEFORE-RECEIPT PHASE (2026-10-02) — the ordering surface (see above).
      */
     ...BATCH2L_ASN_BEFORE_RECEIPT_DECLARED,
+    /**
+     * §BATCH 2m — THE PICKUP LEAD-TIME PHASE (2026-10-03) — the lead-time surface (see above).
+     */
+    ...BATCH2M_PICKUP_LEAD_TIME_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

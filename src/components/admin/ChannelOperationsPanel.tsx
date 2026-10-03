@@ -31,7 +31,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { useCanonicalStoreVersion } from '@/data/queries';
-import { demoCommerceInvoices } from '@/data/demoStore';
+import { demoCommerceInvoices, demoPurchaseOrders } from '@/data/demoStore';
 import { Badge, Button, Card } from '@/components/ui';
 import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
 import { verifyAcknowledgement } from '@/lib/commerce/poAcknowledgementVerification';
@@ -39,6 +39,7 @@ import {
   asnBeforeReceiptVerdict,
   channelReceivingReportsReceived,
 } from '@/lib/shipping/asnBeforeReceipt';
+import { pickupLeadTimeVerdict } from '@/lib/shipping/collectChain';
 import { refreshChannelRoutingInstructions } from '@/lib/commerce/proxyProcessor';
 import { applyChannelReceivingReadingToStore } from '@/lib/commerce/commerceLifecycle';
 import { readChannelReceivingSync, submitCommerceInvoiceToChannel } from '@/data/api';
@@ -127,6 +128,41 @@ export function ChannelOperationsPanel() {
       });
     }
     return byPo;
+    // The canonical store version is the change signal for the instruction store.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [version, receiving]);
+
+  /**
+   * §BATCH 2m (`AV-014`) — THE CHANNEL PICKUP LEAD TIME, SURFACED. For every Freight
+   * Collect purchase order the channel read reported, show whether the pickup Mercenta
+   * asked for satisfies the channel's documented lead time (at least two business days'
+   * notice). The verdict is computed by the ONE owner (`collectChain.ts`) from the date
+   * recorded on the routing request, judged from the instant the request was raised —
+   * no second channel call, no re-derived date.
+   */
+  const pickupVerdict = useMemo(() => {
+    const requestedByPoNumber = new Map<string, { requestedPickUp: string; actionedAt?: string }>();
+    for (const instruction of listChannelInstructions()) {
+      const rr = instruction.outcome?.routingRequest;
+      if (rr?.requestedPickUp && !requestedByPoNumber.has(instruction.poNumber)) {
+        requestedByPoNumber.set(instruction.poNumber, {
+          requestedPickUp: rr.requestedPickUp,
+          ...(instruction.outcome?.actionedAt ? { actionedAt: instruction.outcome.actionedAt } : {}),
+        });
+      }
+    }
+    const poById = new Map(demoPurchaseOrders.map((p) => [p.id, p]));
+    const out: Record<string, ReturnType<typeof pickupLeadTimeVerdict>> = {};
+    for (const reading of receiving?.readings ?? []) {
+      const po = poById.get(reading.poId);
+      if (!po || po.freightTerm !== 'collect') continue;
+      const recorded = requestedByPoNumber.get(po.poNumber);
+      out[reading.poId] = pickupLeadTimeVerdict(
+        recorded?.requestedPickUp ?? null,
+        recorded?.actionedAt ? new Date(recorded.actionedAt) : new Date()
+      );
+    }
+    return out;
     // The canonical store version is the change signal for the instruction store.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version, receiving]);
@@ -327,6 +363,26 @@ export function ChannelOperationsPanel() {
                     >
                       ASN before receipt: {asnVerdict[reading.poId].stateLabel} —{' '}
                       {asnVerdict[reading.poId].statement}
+                    </span>
+                  )}
+                  {/*
+                    §BATCH 2m (`AV-014`) — the CHANNEL PICKUP LEAD TIME, surfaced. The
+                    channel documents that a collect vendor's requestedPickUp must be "a
+                    date at least two business days after the current date"; from P6 the
+                    date was DERIVED from the owner but never ENFORCED or SHOWN. The
+                    verdict below comes from the ONE owner (`collectChain.ts`) using the
+                    date recorded on the routing request.
+                  */}
+                  {pickupVerdict[reading.poId] && (
+                    <span
+                      data-state={`pickup-lead-time-${pickupVerdict[reading.poId].state}`}
+                      className={
+                        pickupVerdict[reading.poId].state === 'within_lead_time'
+                          ? 'mt-0.5 block text-ds-micro text-zinc-400'
+                          : 'mt-0.5 block text-ds-micro text-amber-300'
+                      }
+                    >
+                      Channel pickup lead time: {pickupVerdict[reading.poId].statement}
                     </span>
                   )}
                   {/*

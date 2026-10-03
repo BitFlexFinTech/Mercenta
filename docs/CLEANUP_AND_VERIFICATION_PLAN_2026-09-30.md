@@ -397,8 +397,8 @@ is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 pha
   + CLI the environment does not hold. Reported, never faked.
 
 **Batch 2 — Amazon accuracy** (register: `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md`). Leftovers:
-- `AV-011` and `AV-015` — **APPLIED (Batch 2k + Batch 2l, 2026-10-02)**. Remaining: `AV-013` (CONTRADICTED) ·
-  `AV-014` and `AV-016` (MODELLED IN PART — their remaining halves are named in their own rows) · the four
+- `AV-011`, `AV-015` and `AV-014` — **APPLIED (Batch 2k + 2l + 2m, 2026-10-02/03)**. Remaining: `AV-013`
+  (CONTRADICTED) · `AV-016` (MODELLED IN PART — its pallet-level ASN half is named in its own row) · the four
   **INFERENCE relabels** (`AV-002/017/025/033/044`).
 - **EVIDENCE-BLOCKED** (do NOT model from guesswork): `AV-010b`'s read half (the channel's hold signal is
   undocumented) and `AV-040`'s last operation (`getTransaction`). The six UNKNOWNs

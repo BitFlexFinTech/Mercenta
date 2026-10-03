@@ -63,6 +63,7 @@ import {
 import { pushInventoryToChannel } from '@/lib/inventory/channelInventoryPush';
 import { declaredShipToParty } from '@/config/destinationFc';
 import { TRUCKLOAD_CONFIRMATION_LIMIT } from '@/lib/shipping/consolidation';
+import { earliestRequestedPickUp } from '@/lib/shipping/collectChain';
 import { demoProducts, demoPurchaseOrders } from '@/data/demoStore';
 import { ingestChannelPurchaseOrders } from '@/lib/commerce/channelPurchaseOrderIngestion';
 
@@ -183,7 +184,7 @@ out.clientGuards = {
 /* 5/6 — the shipment request, the routing instructions, and the ASN. */
 const single = [{ poNumber: 'MOCK-PO-8842', brandId: 'brand-tapatio' }];
 const request = await raiseChannelShipmentRequest({
-  reader: mock, purchaseOrders: single, freightTerm: 'collect', shipToPartyId: FC, requestedPickUp: '2026-10-01',
+  reader: mock, purchaseOrders: single, freightTerm: 'collect', shipToPartyId: FC, requestedPickUp: earliestRequestedPickUp(),
 });
 out.request = request;
 out.requestEmpty = await raiseChannelShipmentRequest({
@@ -203,6 +204,16 @@ out.requestTooLarge = await raiseChannelShipmentRequest({
   reader: mock,
   purchaseOrders: Array.from({ length: TRUCKLOAD_CONFIRMATION_LIMIT + 1 }, (_, i) => ({ poNumber: 'PO-' + i, brandId: 'brand-tapatio' })),
   freightTerm: 'collect', shipToPartyId: FC,
+});
+/* §BATCH 2m (AV-014) — the pickup lead time is ENFORCED (refusals do not reach the channel). */
+out.requestTooEarlyPickUp = await raiseChannelShipmentRequest({
+  reader: mock, purchaseOrders: single, freightTerm: 'collect', shipToPartyId: FC, requestedPickUp: '2000-01-01',
+});
+out.requestMissingPickUp = await raiseChannelShipmentRequest({
+  reader: mock, purchaseOrders: single, freightTerm: 'collect', shipToPartyId: FC,
+});
+out.requestUnreadablePickUp = await raiseChannelShipmentRequest({
+  reader: mock, purchaseOrders: single, freightTerm: 'collect', shipToPartyId: FC, requestedPickUp: 'next-tuesday',
 });
 out.truckloadLimit = TRUCKLOAD_CONFIRMATION_LIMIT;
 const requestId = request.shipmentRequestId;
@@ -475,6 +486,27 @@ check(
   'the CHANNEL ITSELF refuses a declaration above the truckload limit',
   /^SHIPMENT_REQUEST_TOO_LARGE/.test(result.clientGuards.requestTooLarge.refusal ?? ''),
   JSON.stringify(result.clientGuards.requestTooLarge)
+);
+/* §BATCH 2m (AV-014) — the pickup lead time is ENFORCED against a SUBMITTED value. */
+console.log('§BATCH 2m (AV-014) — the channel pickup lead time is ENFORCED at the boundary');
+check(
+  'a TOO-EARLY caller-supplied requestedPickUp is refused, stating the documented lead time',
+  result.requestTooEarlyPickUp.ok === false &&
+    /^SHIPMENT_REQUEST_REFUSED/.test(result.requestTooEarlyPickUp.refusal ?? '') &&
+    /REQUESTED_PICKUP_TOO_EARLY/.test(result.requestTooEarlyPickUp.refusal ?? ''),
+  result.requestTooEarlyPickUp.refusal
+);
+check(
+  'a MISSING requestedPickUp on a collect request is refused (fail closed)',
+  result.requestMissingPickUp.ok === false &&
+    /REQUESTED_PICKUP_MISSING/.test(result.requestMissingPickUp.refusal ?? ''),
+  result.requestMissingPickUp.refusal
+);
+check(
+  'an UNREADABLE requestedPickUp is refused (fail closed)',
+  result.requestUnreadablePickUp.ok === false &&
+    /REQUESTED_PICKUP_UNREADABLE/.test(result.requestUnreadablePickUp.refusal ?? ''),
+  result.requestUnreadablePickUp.refusal
 );
 check(
   'the CHANNEL refuses an empty status read and an unnamed inventory SKU',
