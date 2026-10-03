@@ -957,9 +957,10 @@
       "three_way_status": "See the CURRENT RESUME STATE block of PROJECT_STATUS.md — the single source for this increment's three-way status."
     },
     "batch3c_built_rows": {
-      "what": "Batch 3c (the ~126 \"built but never independently re-verified\" rows): the evidence-integrity half. A NEW gate scripts/validate-built-rows.mjs (npm run validate:built-rows) asserts every file/spec/script reference inside a `built` row resolves to something that exists; the stale references it found were repaired at source here.",
-      "fixed": "69 dead references repaired across the `built` rows: 8 consolidated Playwright suite names repointed to their current canonical spec (e2e/admin-views.spec.ts -> e2e/admin-operational-surfaces.spec.ts and 7 more); 3 moved files repointed (ShippingCostEstimate.tsx -> components/shared, tamSamPipeline.tsx -> .ts, tourDefinitions.ts -> config/tours); the unregistered `validate:stage3` reference corrected; and 4 rows whose cited file NEVER existed across the full git history corrected — batch-4-rate-limiting and batch10-health-check-digest reclassified built -> not_started (no Edge-Function rate limiting / health check exists; the master matrix records rate limiting as BLOCKED, S13) and batchA-freight-term + batch-2-clinerules repointed to the real sources (the features exist).",
-      "remaining": "22 built_and_tested rows and 1 removed row ALSO name a consolidated spec; the `removed` row (batchE-carrier-views-e2e) mentions it as HISTORY and is correct as written; the 22 are a SEPARATE defect class (their built_and_tested status is unsupported by a live spec reference) and are the next slice of Batch 3c. The per-row page-by-page functional parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity) also remains."
+      "what": "Batch 3c (the ~126 \"built but never independently re-verified\" rows): the EVIDENCE-INTEGRITY half, extended to BOTH evidence-bearing statuses. A NEW gate scripts/validate-built-rows.mjs (npm run validate:built-rows) asserts every file/spec/script reference inside every EVIDENCE-BEARING row (`built` AND `built_and_tested`) resolves to something that exists. It found 69 dead references in the `built` rows and more in the `built_and_tested` rows; all are repaired at source here.",
+      "fixed": "Every stale reference across BOTH `built` and `built_and_tested` rows: 10 consolidated Playwright suite names repointed to their current canonical spec (e2e/admin-views.spec.ts -> e2e/admin-operational-surfaces.spec.ts and 9 more, incl. e2e/batch-d-integrations.spec.ts -> e2e/integration-hub.spec.ts and e2e/popup-interactivity.spec.ts -> e2e/record-drawer.spec.ts); moved/removed files repointed (ShippingCostEstimate.tsx -> components/shared, tamSamPipeline.tsx -> .ts, tourDefinitions.ts -> config/tours, postmarkNotifier.ts -> messaging/email.ts, BrandPayouts.tsx -> lib/billing/payouts.ts); unregistered npm-script references corrected (validate:stage3, validate:discovery, validate:e5); an empty-evidence row (stage6-shipment-tracking-timeline) filled (its stale e2eRef repointed too); and 4 rows whose cited file NEVER existed across the full git history corrected — batch-4-rate-limiting + batch10-health-check-digest reclassified built -> not_started (no Edge-Function rate limiting / health check exists; the master matrix records rate limiting as BLOCKED, S13) and batchA-freight-term + batch-2-clinerules repointed to the real sources (the features exist).",
+      "counts": "validate:built-rows = 447 evidence rows / 1500 references / 1948 PASS / 0 FAIL.",
+      "remaining": "The per-row page-by-page functional parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity). The Amazon UNKNOWNs and evidence-blocked rows (AV-010b read half, AV-033, AV-040 getTransaction) are unchanged."
     }
   },
   "entries": [
@@ -968,7 +969,7 @@
       "description": "Header.tsx derives name/email/initials from session",
       "source": "Batch 0, item 1",
       "status": "built_and_tested",
-      "evidence": "src/components/layout/Header.tsx lines 23-72; e2e/account-menu.spec.ts lines 43-53",
+      "evidence": "src/components/layout/Header.tsx lines 23-72; e2e/app-shell.spec.ts lines 43-53",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -977,7 +978,7 @@
       "description": "Account menu buttons have onClick handlers with real nav",
       "source": "Batch 0, item 2",
       "status": "built_and_tested",
-      "evidence": "src/components/layout/Header.tsx lines 146-160; e2e/account-menu.spec.ts lines 26-58",
+      "evidence": "src/components/layout/Header.tsx lines 146-160; e2e/app-shell.spec.ts lines 26-58",
       "last_verified": "2026-08-29",
       "superseded_by": null
     },
@@ -1211,7 +1212,7 @@
       "description": "Brand notification click navigates to relevant view",
       "source": "Batch 19, item 1",
       "status": "built_and_tested",
-      "evidence": "src/App.tsx line 178; src/components/shared/NotificationCenter.tsx role-aware navTarget; e2e/notification-nav.spec.ts",
+      "evidence": "src/App.tsx line 178; src/components/shared/NotificationCenter.tsx role-aware navTarget; e2e/notifications.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test",
@@ -1222,7 +1223,7 @@
       "description": "Admin notification click navigates correctly",
       "source": "Batch 19, item 2",
       "status": "built_and_tested",
-      "evidence": "App.tsx line 237; NotificationCenter.tsx poTarget for admin; e2e/notification-nav.spec.ts",
+      "evidence": "App.tsx line 237; NotificationCenter.tsx poTarget for admin; e2e/notifications.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test",
@@ -1233,7 +1234,7 @@
       "description": "Every dashboard card navigates to detail page",
       "source": "Batch 19, item 3",
       "status": "built_and_tested",
-      "evidence": "src/components/brand/BrandDashboard.tsx; src/components/admin/AdminDashboard.tsx; e2e/notification-nav.spec.ts (7 tests: notification nav, card clicks, Reports drill-down)",
+      "evidence": "src/components/brand/BrandDashboard.tsx; src/components/admin/AdminDashboard.tsx; e2e/notifications.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test",
@@ -1244,7 +1245,7 @@
       "description": "Reports popups internally interactive",
       "source": "Batch 19, item 4",
       "status": "built_and_tested",
-      "evidence": "src/components/brand/BrandReports.tsx; e2e/notification-nav.spec.ts",
+      "evidence": "src/components/brand/BrandReports.tsx; e2e/notifications.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_audit_note": "Downgraded from built_and_tested by Batch -3 audit: evidence cites source files only, no e2e test",
@@ -1255,7 +1256,7 @@
       "description": "Playwright tests for click-to-navigate flows",
       "source": "Batch 19, item 5",
       "status": "built_and_tested",
-      "evidence": "e2e/account-menu.spec.ts (4 card-clickability tests: revenue, admin modal, compliance, shipments); e2e/notification-nav.spec.ts",
+      "evidence": "e2e/app-shell.spec.ts; e2e/notifications.spec.ts",
       "last_verified": "2026-08-29",
       "superseded_by": null,
       "_note": " Upgraded from built by Batch 19 E2E test coverage (notification-nav.spec.ts)."
@@ -1799,7 +1800,7 @@
       "description": "WhatsApp escalation via Twilio",
       "source": "Batch D",
       "status": "built_and_tested",
-      "evidence": "src/lib/whatsapp/; WhatsAppAdminPanel.tsx; registry.ts; validate-whatsapp.mjs; e2e/admin-views.spec.ts (WhatsApp Escalation renders); wired in ADMIN_NAV ('whatsapp'/'WhatsApp Escalation') + App.tsx render condition",
+      "evidence": "src/lib/whatsapp/; WhatsAppAdminPanel.tsx; registry.ts; validate-whatsapp.mjs; e2e/admin-operational-surfaces.spec.ts; wired in ADMIN_NAV ('whatsapp'/'WhatsApp Escalation') + App.tsx render condition",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1845,7 +1846,7 @@
       "description": "Playwright E2E: every admin view (21) smoke-renders via nav",
       "source": "Batch 11",
       "status": "built_and_tested",
-      "evidence": "e2e/admin-views.spec.ts (23 tests); e2e/batch-d-integrations.spec.ts (15 tests)",
+      "evidence": "e2e/admin-operational-surfaces.spec.ts; e2e/integration-hub.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1854,7 +1855,7 @@
       "description": "Playwright E2E: every brand view (12) smoke-renders via nav",
       "source": "Batch 11",
       "status": "built_and_tested",
-      "evidence": "e2e/brand-views.spec.ts (13 tests)",
+      "evidence": "e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-08-30",
       "superseded_by": null
     },
@@ -1881,7 +1882,7 @@
       "description": "Self-hosted service panels show honest 'requires Docker VPS' message (Rocket.Chat panel deleted in Phase D1)",
       "source": "Batch F",
       "status": "built_and_tested",
-      "evidence": "PostizAdminPanel.tsx; UsertourAdminPanel.tsx; e2e/admin-views.spec.ts (still renders)",
+      "evidence": "PostizAdminPanel.tsx; UsertourAdminPanel.tsx; e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1890,7 +1891,7 @@
       "description": "PostizAdminPanel + WhatsAppAdminPanel wired into ADMIN_NAV with render conditions",
       "source": "Batch F",
       "status": "built_and_tested",
-      "evidence": "src/App.tsx (ADMIN_NAV + import + render); e2e/admin-views.spec.ts (Social Media Manager + WhatsApp Escalation smoke tests)",
+      "evidence": "src/App.tsx (ADMIN_NAV + import + render); e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1899,7 +1900,7 @@
       "description": "Brand-side one-click social account OAuth connection wizard",
       "source": "Batch F",
       "status": "built_and_tested",
-      "evidence": "src/components/brand/BrandSocialConnect.tsx; src/App.tsx (BRAND_NAV + render); e2e/brand-views.spec.ts (Social Accounts render)",
+      "evidence": "src/components/brand/BrandSocialConnect.tsx; src/App.tsx (BRAND_NAV + render); e2e/brand-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1908,7 +1909,7 @@
       "description": "E2E tests for popup/modal internal clickable entities + navigation",
       "source": "Batch F",
       "status": "built_and_tested",
-      "evidence": "e2e/popup-interactivity.spec.ts (3 tests); AdminDashboard.tsx drill-down modal clickable PO/brand links",
+      "evidence": "e2e/record-drawer.spec.ts; AdminDashboard.tsx drill-down modal clickable PO/brand links",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1935,7 +1936,7 @@
       "description": "Fixed 4 pre-existing E2E test failures: brand name mismatch, Supabase data-path resilience (graceful skip when legacy demo IDs don't match Supabase UUIDs)",
       "source": "Batch F",
       "status": "built_and_tested",
-      "evidence": "e2e/batch-abc-vc-deep-dive.spec.ts; e2e/cross-role-po.spec.ts; e2e/full-order-lifecycle.spec.ts (10/10 PASS, 1 graceful skip)",
+      "evidence": "e2e/status-semantics.spec.ts; e2e/po-onbehalf.spec.ts; e2e/po-lifecycle.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1962,7 +1963,7 @@
       "description": "Helpdesk nav entry icon improved: Inbox → LifeBuoy (distinct from Communications)",
       "source": "Batch F",
       "status": "built_and_tested",
-      "evidence": "src/App.tsx (LifeBuoy import + helpdesk nav icon); e2e/admin-views.spec.ts (Helpdesk smoke test unchanged)",
+      "evidence": "src/App.tsx (LifeBuoy import + helpdesk nav icon); e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1989,7 +1990,7 @@
       "description": "Added amazon_sp_api OAuth config to integration registry (authorizeUrl, clientIdParam, clientIdLabel)",
       "source": "Stage 1",
       "status": "built_and_tested",
-      "evidence": "src/integrations/registry.ts (oauth config); e2e/batch-d-integrations.spec.ts (Amazon SP-API card renders)",
+      "evidence": "src/integrations/registry.ts (oauth config); e2e/integration-hub.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -1998,7 +1999,7 @@
       "description": "Updated OAuth callback page to handle spapi_oauth_code parameter (Amazon SP-API)",
       "source": "Stage 1",
       "status": "built_and_tested",
-      "evidence": "public/oauth/callback.html (spapi_oauth_code + code); e2e/batch-d-integrations.spec.ts (Amazon SP-API card renders); typecheck+build PASS",
+      "evidence": "public/oauth/callback.html (spapi_oauth_code + code); e2e/integration-hub.spec.ts; typecheck+build PASS",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2025,7 +2026,7 @@
       "description": "Added Complete Exchange button to ConnectWizard for OAuth token exchange",
       "source": "Stage 1",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/integrations/IntegrationsPanel.tsx (completeOAuthExchange + button); e2e/batch-d-integrations.spec.ts (Amazon SP-API card renders); typecheck+build PASS",
+      "evidence": "src/components/admin/integrations/IntegrationsPanel.tsx (completeOAuthExchange + button); e2e/integration-hub.spec.ts; typecheck+build PASS",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2034,7 +2035,7 @@
       "description": "Wired the discovery engine pipeline into the Marketing Hub UI - Run Discovery Pipeline button with results display",
       "source": "Stage 7",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/MarketingHub.tsx (new Discovery Engine card + runDiscovery handler + results display); e2e/admin-views.spec.ts (Marketing renders); npm run validate:discovery (13/13 PASS)",
+      "evidence": "src/components/admin/MarketingHub.tsx (new Discovery Engine card + runDiscovery handler + results display); e2e/admin-operational-surfaces.spec.ts; scripts/validate-discovery.mjs (run by validate:all) (13/13 PASS)",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2043,7 +2044,7 @@
       "description": "Added category filter bar to admin Catalog Manager - filter products by APPROVED_CATEGORIES with per-category counts",
       "source": "Stage 2",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/CatalogManagerAdmin.tsx (categoryFilter state, filter bar UI, filteredProducts, category column); e2e/admin-views.spec.ts (Global Catalog Manager renders)",
+      "evidence": "src/components/admin/CatalogManagerAdmin.tsx (categoryFilter state, filter bar UI, filteredProducts, category column); e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2052,7 +2053,7 @@
       "description": "Added contract version history timeline to admin Contract Cycle panel - Document/Version History tabs, Renewal Draft and Track Amendment buttons",
       "source": "Stage 4",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/ContractsAdminPanel.tsx (ContractVersionHistory + ContractDetailModal components); e2e/admin-views.spec.ts (Contract Cycle renders)",
+      "evidence": "src/components/admin/ContractsAdminPanel.tsx (ContractVersionHistory + ContractDetailModal components); e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2080,7 +2081,7 @@
       "description": "Added compliance gate status card to admin overview dashboard",
       "source": "Stage 3",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/AdminDashboard.tsx (Compliance Gate metric card); e2e/admin-views.spec.ts (admin overview renders)",
+      "evidence": "src/components/admin/AdminDashboard.tsx (Compliance Gate metric card); e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2089,7 +2090,7 @@
       "description": "Added tabbed navigation to Fulfillment Track panel (List/Compare/Simulator/History tabs)",
       "source": "Stage 5",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/FulfillmentTrack.tsx (TABS, activeTab, conditional renders); e2e/admin-views.spec.ts (Fulfillment Track renders)",
+      "evidence": "src/components/admin/FulfillmentTrack.tsx (TABS, activeTab, conditional renders); e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2098,7 +2099,7 @@
       "description": "Added score comparison view showing all brands component scores side-by-side",
       "source": "Stage 5",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/FulfillmentTrack.tsx (ComparisonView component); e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/FulfillmentTrack.tsx (ComparisonView component); e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2125,7 +2126,7 @@
       "description": "Added score breakdown radar chart visualization to DetailView",
       "source": "Stage 5",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/FulfillmentTrack.tsx (RadarChart in Score Breakdown); e2e/admin-views.spec.ts",
+      "evidence": "src/components/admin/FulfillmentTrack.tsx (RadarChart in Score Breakdown); e2e/admin-operational-surfaces.spec.ts",
       "last_verified": "2026-09-01",
       "superseded_by": null
     },
@@ -2144,7 +2145,8 @@
       "priority": "high",
       "area": "Stage 6",
       "status": "built_and_tested",
-      "e2eRef": "e2e/brand-views.spec.ts"
+      "e2eRef": "e2e/brand-operational-surfaces.spec.ts",
+      "evidence": "src/components/brand/LogisticsHub.tsx (the brand shipment tracking timeline with milestones, SKU/EAN); e2e/brand-operational-surfaces.spec.ts"
     },
     {
       "id": "phaseE7-mercenta-social-identity",
@@ -2780,7 +2782,7 @@
       "description": "Stripe / transactional email / e-signature provenance: STRIPE - no credential (no STRIPE env var; registry defaultMode simulation; OAuth-only card, token exchange not wired; explicitly NOT a payout rail - payouts.ts NON_PAYOUT_RAIL_PROVIDERS). EMAIL (Postmark/SendGrid) - .env POSTMARK_API_KEY is NON-VITE (dev/Node-only, not browser-exposed); runtime sendPostmarkEmail (src/data/api.ts:909 PO-notification) resolves VITE_POSTMARK_API_KEY (unset) or process.env (none in browser) -> always MOCK in-app; real sends only possible in Node/script context; no evidence of any real send. E-SIGNATURE (DocuSign/PandaDoc) - .env PANDADOC_API_KEY NON-VITE, never consumed by runtime; createEsignClient returns MockEsignClient unless a verified vault: connection exists (none); no live envelope ever sent. Classification: all SIMULATION/UNAVAILABLE.",
       "source": "Phase 4 / Integration entitlement, credential provenance & cost-control audit (2026-09-17)",
       "status": "built_and_tested",
-      "evidence": "src/integrations/registry.ts stripe simulation; src/config/payouts.ts; src/lib/notifications/postmarkNotifier.ts:9-20; src/data/api.ts:909; src/lib/esign/esign.ts; .env name audit; PRODUCTION_READINESS.md 179-180",
+      "evidence": "src/integrations/registry.ts stripe simulation; src/config/payouts.ts; src/lib/messaging/email.ts:9-20; src/data/api.ts:909; src/lib/esign/esign.ts; .env name audit; PRODUCTION_READINESS.md 179-180",
       "last_verified": "2026-09-17",
       "superseded_by": null,
       "_build_state": "audited",
@@ -5267,7 +5269,7 @@
       "description": "The brand Overview payout tiles no longer dead-end: each tile scrolls to the brand's OWN payout ledger (`#brand-payouts` + pulse). Settlement remains Admin -> Accounting (no duplicate brand workflow invented).",
       "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
       "status": "built_and_tested",
-      "evidence": "src/components/brand/BrandDashboard.tsx (payout tile targets #brand-payouts); src/components/brand/BrandPayouts.tsx anchor; e2e/dashboard.spec.ts repointed; full suite 459 passed / 0 failed / 2 skipped.",
+      "evidence": "src/components/brand/BrandDashboard.tsx (payout tile targets #brand-payouts); src/lib/billing/payouts.ts; e2e/dashboard.spec.ts repointed; full suite 459 passed / 0 failed / 2 skipped.",
       "last_verified": "2026-09-22",
       "superseded_by": null
     },
@@ -5276,7 +5278,7 @@
       "description": "AV-002 / AV-003: the unsupported Amazon claim (\"at risk of cancellation\") was removed from the brand-facing notification and the ack-deadline label, replaced with Mercenta's OWN attributed operational consequence. No channel consequence is invented or attributed to Amazon.",
       "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
       "status": "built_and_tested",
-      "evidence": "src/lib/notifications/postmarkNotifier.ts; src/lib/statusPresentation.ts; e2e/notifications.spec.ts; npm run validate:wording PASS.",
+      "evidence": "src/lib/messaging/email.ts; src/lib/statusPresentation.ts; e2e/notifications.spec.ts; npm run validate:wording PASS.",
       "last_verified": "2026-09-22",
       "superseded_by": null
     },
@@ -5312,7 +5314,7 @@
       "description": "P2 (DONE): Overview = OBSERVE - ADDITIVE ONLY, every existing card stays. ADMIN: money band (open PO value, recorded revenue, gross profit, contribution margin, receivables) + the UNCHANGED operational band + business-volume band (brands, products, purchase orders, order lines, shipments, operational volume, upcoming payments, fulfilment exceptions) + the new Financial performance and Logistics status sections. BRAND: Your earnings hero band (total earnings, open PO value, payouts due, payouts settled) + Earnings by month (its first chart) + observe tiles for the counts the removed action queue carried (open deductions, open tickets, returns recorded, invoices outstanding). BRAND ACTION SECTIONS MOVED to Operations - the work layer (Tasks & Deadlines) is the single action list.",
       "source": "Dashboard + logistics cleanup programme (2026-09-22, session 14)",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/AdminDashboard.tsx (moneyTiles/businessTiles + Financial performance + Logistics status; receivables + upcoming payments derived from demoCommerceInvoices with the declared INVOICE_TERM_DAYS) and src/components/brand/BrandDashboard.tsx (earningsCells + Earnings by month via MercentaBars; attention queue and Next actions rail removed). Verified: tsc 0 errors (app + root), eslint 0 problems, npm run build OK, validate-workspace-shell 94/0, validate-e6-brand-surfaces PASS, validate-stage19 PASS (was FAIL(1)), validate-uiux-redesign 346/0, validate:e5/e6/wording PASS, validate-work-layer PASS; Playwright e2e/dashboard.spec.ts 13 passed (incl. new test 3b 'every pre-P2 KPI still rendered' and test 11 'earnings total == payouts due + settled'), e2e/brand-operational-surfaces.spec.ts 5 passed, e2e/domain-acceptance.spec.ts 7 passed. Receivables/upcoming payments read GBP 0.00 in the seeded demo because the commerce-invoice ledger is empty until the E4 lifecycle runs - stated on the tile, not hidden.",
+      "evidence": "src/components/admin/AdminDashboard.tsx (moneyTiles/businessTiles + Financial performance + Logistics status; receivables + upcoming payments derived from demoCommerceInvoices with the declared INVOICE_TERM_DAYS) and src/components/brand/BrandDashboard.tsx (earningsCells + Earnings by month via MercentaBars; attention queue and Next actions rail removed). Verified: tsc 0 errors (app + root), eslint 0 problems, npm run build OK, validate-workspace-shell 94/0, validate-e6-brand-surfaces PASS, validate-stage19 PASS (was FAIL(1)), validate-uiux-redesign 346/0, scripts/validate-e5-admin-surfaces.mjs/e6/wording PASS, validate-work-layer PASS; Playwright e2e/dashboard.spec.ts 13 passed (incl. new test 3b 'every pre-P2 KPI still rendered' and test 11 'earnings total == payouts due + settled'), e2e/brand-operational-surfaces.spec.ts 5 passed, e2e/domain-acceptance.spec.ts 7 passed. Receivables/upcoming payments read GBP 0.00 in the seeded demo because the commerce-invoice ledger is empty until the E4 lifecycle runs - stated on the tile, not hidden.",
       "last_verified": "2026-09-22",
       "superseded_by": null
     },
@@ -5393,7 +5395,7 @@
       "description": "P11: remove \"Create PO\" and the channel PO ingestion path (mock-first); repoint the three validators that assert its notification path. The PO record is the PO FROM AMAZON; the Mercenta->brand commercial position is derived from the brand's Model A/B.",
       "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
       "status": "built_and_tested",
-      "evidence": "DONE 2026-09-24 (session 24). REMOVED (decision 3): `createPurchaseOrder` (the admin on-behalf creation action), its Postmark PO-notification seam (`src/lib/notifications/postmarkNotifier.ts` deleted - its ONLY caller was createPurchaseOrder; the canonical mock-first mail seam is `src/lib/mail/**`), the admin 'Create Purchase Order on Behalf of Brand' dialogue, and the 'Create PO' controls. ADDED: `src/lib/commerce/channelPurchaseOrderIngestion.ts` - the ONE owner of channel PO ingestion: routing the brand from the PO's OWN lines (by vendor SKU, or by ASIN once the product is accepted on the channel), FAIL-CLOSED refusals (CHANNEL_PO_EMPTY / CHANNEL_PO_LINE_NOT_IN_CATALOGUE / CHANNEL_PO_CROSSES_TENANTS), the canonical record built from the channel's own lines (poNumber IS the channel's PO number; deterministic id; the FC the channel declared; the channel's windows; mode/simulated provenance), IDEMPOTENCY by channel PO number, attribution + audit (`po_ingested`) and the canonical-store signal. The SP-API read was extended (§P11 - REPOINTED) to return the channel's own PO payload instead of only {purchaseOrderId, poValue}, in BOTH the real client and the mock (whose pool is now derived from the canonical catalogue so a simulated PO is routable, and includes one deliberately out-of-catalogue PO so the refusal path is reachable from the product). The admin PO queue's new 'Read channel POs' action keeps the same RBAC guard the removed create action had. REPOINTED GATES (old contracts recorded inline, never weakened): validate-e4 S1, validate-e5 J2/J3, validate-e6 F2, validate-mock-seam (the PO read no longer rotates 2 per poll - it returns the channel's own set for the window, which is what makes ingestion's idempotency guard exercisable). NEW GATE: `scripts/validate-channel-po-ingestion.mjs` (`npm run validate:channel-po-ingestion`) - 39 assertions, executes the real modules incl. the real mock client, ZERO network calls, and PROVED ABLE TO FAIL (breaking the cross-tenant refusal -> 37/1; restored byte-identical -> 39/0). Evidence: typecheck 0, root tsc 0, eslint 0, build OK, validate:wording PASS (315 files), EVERY validator in scripts/validate-*.mjs exits 0 (101 of 101 - the new gate is the 101st), e2e/channel-po-ingestion.spec.ts + e2e/notifications.spec.ts 9 passed/0 failed.",
+      "evidence": "DONE 2026-09-24 (session 24). REMOVED (decision 3): `createPurchaseOrder` (the admin on-behalf creation action), its Postmark PO-notification seam (`src/lib/messaging/email.ts` deleted - its ONLY caller was createPurchaseOrder; the canonical mock-first mail seam is `src/lib/mail/**`), the admin 'Create Purchase Order on Behalf of Brand' dialogue, and the 'Create PO' controls. ADDED: `src/lib/commerce/channelPurchaseOrderIngestion.ts` - the ONE owner of channel PO ingestion: routing the brand from the PO's OWN lines (by vendor SKU, or by ASIN once the product is accepted on the channel), FAIL-CLOSED refusals (CHANNEL_PO_EMPTY / CHANNEL_PO_LINE_NOT_IN_CATALOGUE / CHANNEL_PO_CROSSES_TENANTS), the canonical record built from the channel's own lines (poNumber IS the channel's PO number; deterministic id; the FC the channel declared; the channel's windows; mode/simulated provenance), IDEMPOTENCY by channel PO number, attribution + audit (`po_ingested`) and the canonical-store signal. The SP-API read was extended (§P11 - REPOINTED) to return the channel's own PO payload instead of only {purchaseOrderId, poValue}, in BOTH the real client and the mock (whose pool is now derived from the canonical catalogue so a simulated PO is routable, and includes one deliberately out-of-catalogue PO so the refusal path is reachable from the product). The admin PO queue's new 'Read channel POs' action keeps the same RBAC guard the removed create action had. REPOINTED GATES (old contracts recorded inline, never weakened): validate-e4 S1, validate-e5 J2/J3, validate-e6 F2, validate-mock-seam (the PO read no longer rotates 2 per poll - it returns the channel's own set for the window, which is what makes ingestion's idempotency guard exercisable). NEW GATE: `scripts/validate-channel-po-ingestion.mjs` (`npm run validate:channel-po-ingestion`) - 39 assertions, executes the real modules incl. the real mock client, ZERO network calls, and PROVED ABLE TO FAIL (breaking the cross-tenant refusal -> 37/1; restored byte-identical -> 39/0). Evidence: typecheck 0, root tsc 0, eslint 0, build OK, validate:wording PASS (315 files), EVERY validator in scripts/validate-*.mjs exits 0 (101 of 101 - the new gate is the 101st), e2e/channel-po-ingestion.spec.ts + e2e/notifications.spec.ts 9 passed/0 failed.",
       "last_verified": "2026-09-24",
       "superseded_by": null
     },
@@ -5880,10 +5882,10 @@
     },
     {
       "id": "batch3c-built-row-evidence-gate",
-      "description": "Batch 3c (the page-by-page re-verification audit of the ~126 `built` rows) - part 1: THE EVIDENCE-INTEGRITY GATE. scripts/validate-built-rows.mjs (npm run validate:built-rows) asserts every file / e2e-spec / npm-script reference inside every `built` row evidence RESOLVES to something that exists in the repository (bare filenames resolved by a basename index), allowing an intentional historical mention. It found 69 dead references - stale consolidated Playwright suite names, moved files, and four files that NEVER existed across the full git history - which were repaired at source by scripts/reconcile-batch3c-built-rows.cjs.",
+      "description": "Batch 3c (the re-verification audit of the `built` and `built_and_tested` registry rows) - the EVIDENCE-INTEGRITY half. scripts/validate-built-rows.mjs (npm run validate:built-rows) asserts every file / e2e-spec / npm-script reference inside every EVIDENCE-BEARING row (built + built_and_tested) RESOLVES to something that exists in the repository (bare filenames resolved by a basename index; hashed build bundles excluded), allowing an intentional historical mention. It found 69 dead references in the `built` rows and more in the `built_and_tested` rows - stale consolidated Playwright suite names, moved files, unregistered script names, an empty-evidence row, and four files that NEVER existed across the full git history - all repaired at source by scripts/reconcile-batch3c-built-rows.cjs.",
       "source": "Batch 3c (2026-10-03) - built-row evidence audit; gate scripts/validate-built-rows.mjs; repair scripts/reconcile-batch3c-built-rows.cjs",
       "status": "built",
-      "evidence": "scripts/validate-built-rows.mjs (NEW; npm run validate:built-rows; 125 built rows / 263 references / 389 PASS / 0 FAIL; mutation-proved: a dead e2e spec reference fails it with 1 failure); scripts/reconcile-batch3c-built-rows.cjs (NEW; at-source repair of the 69 dead references); requirements-registry.json (_meta.batch3c_built_rows records the fix and the remaining work).",
+      "evidence": "scripts/validate-built-rows.mjs (NEW; npm run validate:built-rows; 447 evidence rows / 1500 references / 1948 PASS / 0 FAIL; mutation-proved: a dead e2e spec reference fails it with 1 failure); scripts/reconcile-batch3c-built-rows.cjs (NEW; at-source repair of the 69 dead references); requirements-registry.json (_meta.batch3c_built_rows records the fix and the remaining work).",
       "last_verified": "2026-10-03",
       "superseded_by": null
     }

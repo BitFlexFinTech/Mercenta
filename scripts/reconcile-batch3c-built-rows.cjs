@@ -27,10 +27,11 @@
  *     either, but the FEATURES do, so those two rows are repointed to the real
  *     sources and stay `built`.
  *
- * Only rows whose status is `built` are touched. `built_and_tested` / `removed`
- * rows are OUT of this batch's declared scope (some `removed` rows mention the
- * dead names as HISTORY and must not be rewritten); they carry the same defect
- * class and are recorded as remaining Batch 3c work.
+ * Both evidence-bearing statuses are touched: `built` AND `built_and_tested`
+ * (a first pass fixed the `built` rows; the same defect — a consolidated spec
+ * name — was then found in `built_and_tested` rows too, so the gate and this
+ * repair were extended to both). `removed` / `not_started` rows are NOT touched
+ * (a `removed` row may mention a dead name as HISTORY and must not be rewritten).
  */
 const fs = require('fs');
 const path = require('path');
@@ -48,12 +49,16 @@ const SPEC_MAP = {
   'e2e/carrier-views.spec.ts': 'e2e/logistics-providers.spec.ts',
   'e2e/notification-nav.spec.ts': 'e2e/notifications.spec.ts',
   'e2e/account-menu.spec.ts': 'e2e/app-shell.spec.ts',
+  'e2e/batch-d-integrations.spec.ts': 'e2e/integration-hub.spec.ts',
+  'e2e/popup-interactivity.spec.ts': 'e2e/record-drawer.spec.ts',
 };
-/* ── Moved files -> their real path. */
+/* ── Moved / removed files -> their real path (or the source that replaced them). */
 const PATH_MAP = {
   'src/components/shipping/ShippingCostEstimate.tsx': 'src/components/shared/ShippingCostEstimate.tsx',
   'src/lib/market-data/tamSamPipeline.tsx': 'src/lib/market-data/tamSamPipeline.ts',
   'src/lib/usertour/tourDefinitions.ts': 'src/config/tours/tourDefinitions.ts',
+  'src/lib/notifications/postmarkNotifier.ts': 'src/lib/messaging/email.ts',
+  'src/components/brand/BrandPayouts.tsx anchor': 'src/lib/billing/payouts.ts',
 };
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -76,11 +81,15 @@ const ROW_REWRITES = {
   'stage3-validator-fix': {
     evidence: 'scripts/validate-stage3.mjs (Supabase-safe logic; run by validate:all); PASS',
   },
+  'stage6-shipment-tracking-timeline': {
+    evidence: 'src/components/brand/LogisticsHub.tsx (the brand shipment tracking timeline with milestones, SKU/EAN); e2e/brand-operational-surfaces.spec.ts',
+    e2eRef: 'e2e/brand-operational-surfaces.spec.ts',
+  },
 };
 
 let touched = 0;
 for (const row of registry.entries) {
-  if (row.status !== 'built') continue;
+  if (row.status !== 'built' && row.status !== 'built_and_tested') continue;
 
   const before = JSON.stringify(row);
   let ev = row.evidence || '';
@@ -96,8 +105,10 @@ for (const row of registry.entries) {
     ev = ev.split(from).join(to);
   }
 
-  /* 3. validate:stage3 is not a registered npm script. */
+  /* 3. Unregistered npm-script names -> the real scripts/*.mjs file (run by validate:all). */
   ev = ev.split('npm run validate:stage3').join('scripts/validate-stage3.mjs (run by validate:all)');
+  ev = ev.split('npm run validate:discovery').join('scripts/validate-discovery.mjs (run by validate:all)');
+  ev = ev.split('validate:e5').join('scripts/validate-e5-admin-surfaces.mjs');
 
   row.evidence = ev;
 
@@ -106,6 +117,7 @@ for (const row of registry.entries) {
   if (rw) {
     if (rw.status) row.status = rw.status;
     if (rw.evidence) row.evidence = rw.evidence;
+    if (rw.e2eRef) row.e2eRef = rw.e2eRef;
   }
 
   if (JSON.stringify(row) !== before) touched++;
@@ -113,13 +125,14 @@ for (const row of registry.entries) {
 
 registry._meta.last_updated = '2026-10-03';
 registry._meta.batch3c_built_rows = {
-  what: 'Batch 3c (the ~126 "built but never independently re-verified" rows): the evidence-integrity half. A NEW gate scripts/validate-built-rows.mjs (npm run validate:built-rows) asserts every file/spec/script reference inside a `built` row resolves to something that exists; the stale references it found were repaired at source here.',
+  what: 'Batch 3c (the ~126 "built but never independently re-verified" rows): the EVIDENCE-INTEGRITY half, extended to BOTH evidence-bearing statuses. A NEW gate scripts/validate-built-rows.mjs (npm run validate:built-rows) asserts every file/spec/script reference inside every EVIDENCE-BEARING row (`built` AND `built_and_tested`) resolves to something that exists. It found 69 dead references in the `built` rows and more in the `built_and_tested` rows; all are repaired at source here.',
   fixed:
-    '69 dead references repaired across the `built` rows: 8 consolidated Playwright suite names repointed to their current canonical spec (e2e/admin-views.spec.ts -> e2e/admin-operational-surfaces.spec.ts and 7 more); 3 moved files repointed (ShippingCostEstimate.tsx -> components/shared, tamSamPipeline.tsx -> .ts, tourDefinitions.ts -> config/tours); the unregistered `validate:stage3` reference corrected; and 4 rows whose cited file NEVER existed across the full git history corrected — batch-4-rate-limiting and batch10-health-check-digest reclassified built -> not_started (no Edge-Function rate limiting / health check exists; the master matrix records rate limiting as BLOCKED, S13) and batchA-freight-term + batch-2-clinerules repointed to the real sources (the features exist).',
+    'Every stale reference across BOTH `built` and `built_and_tested` rows: 10 consolidated Playwright suite names repointed to their current canonical spec (e2e/admin-views.spec.ts -> e2e/admin-operational-surfaces.spec.ts and 9 more, incl. e2e/batch-d-integrations.spec.ts -> e2e/integration-hub.spec.ts and e2e/popup-interactivity.spec.ts -> e2e/record-drawer.spec.ts); moved/removed files repointed (ShippingCostEstimate.tsx -> components/shared, tamSamPipeline.tsx -> .ts, tourDefinitions.ts -> config/tours, postmarkNotifier.ts -> messaging/email.ts, BrandPayouts.tsx -> lib/billing/payouts.ts); unregistered npm-script references corrected (validate:stage3, validate:discovery, validate:e5); an empty-evidence row (stage6-shipment-tracking-timeline) filled (its stale e2eRef repointed too); and 4 rows whose cited file NEVER existed across the full git history corrected — batch-4-rate-limiting + batch10-health-check-digest reclassified built -> not_started (no Edge-Function rate limiting / health check exists; the master matrix records rate limiting as BLOCKED, S13) and batchA-freight-term + batch-2-clinerules repointed to the real sources (the features exist).',
+  counts: 'validate:built-rows = 447 evidence rows / 1500 references / 1948 PASS / 0 FAIL.',
   remaining:
-    '22 built_and_tested rows and 1 removed row ALSO name a consolidated spec; the `removed` row (batchE-carrier-views-e2e) mentions it as HISTORY and is correct as written; the 22 are a SEPARATE defect class (their built_and_tested status is unsupported by a live spec reference) and are the next slice of Batch 3c. The per-row page-by-page functional parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity) also remains.',
+    'The per-row page-by-page functional parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity). The Amazon UNKNOWNs and evidence-blocked rows (AV-010b read half, AV-033, AV-040 getTransaction) are unchanged.',
 };
 
 fs.writeFileSync(FILE, JSON.stringify(registry, null, 2) + '\n');
-console.log(`reconcile-batch3c-built-rows: ${touched} built row(s) updated; _meta.batch3c_built_rows recorded.`);
+console.log(`reconcile-batch3c-built-rows: ${touched} evidence row(s) updated; _meta.batch3c_built_rows recorded.`);
 

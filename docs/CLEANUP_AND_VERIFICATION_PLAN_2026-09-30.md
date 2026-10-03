@@ -416,12 +416,13 @@ is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 pha
   (25 assertions, mutation-proved); live check `L25`.
 - **3c — the ~126 "built but never independently re-verified" registry rows** (the page-by-page functional parity
   audit). **Part 1 — DONE (2026-10-03): the evidence-integrity half.** A NEW gate `scripts/validate-built-rows.mjs`
-  (`npm run validate:built-rows`) asserts every file / e2e-spec / npm-script reference inside every `built` row
-  RESOLVES to something that exists; it found 69 DEAD references, all repaired at source by
-  `scripts/reconcile-batch3c-built-rows.cjs` (8 consolidated Playwright suite names repointed, 3 moved files fixed,
-  `validate:stage3` corrected, and 4 rows citing a file that NEVER existed across the full git history corrected —
-  2 reclassified `built` → `not_started`, 2 repointed). **Part 2 — REMAINING:** 22 `built_and_tested` rows also name
-  a consolidated spec, and the per-row page-by-page parity audit remains.
+  (`npm run validate:built-rows`) asserts every file / e2e-spec / npm-script reference inside every EVIDENCE-BEARING
+  row (`built` AND `built_and_tested`) RESOLVES to something that exists; it found 69 dead references in the `built`
+  rows and more in the `built_and_tested` rows, all repaired at source by `scripts/reconcile-batch3c-built-rows.cjs`
+  (10 consolidated Playwright suite names repointed, 5 moved/removed files fixed, 3 unregistered npm-script names
+  corrected, an empty-evidence row filled, and 4 rows citing a file that NEVER existed across the full git history
+  corrected — 2 reclassified `built` → `not_started`, 2 repointed). **Part 2 — REMAINING:** the per-row page-by-page
+  parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity).
 
 ---
 

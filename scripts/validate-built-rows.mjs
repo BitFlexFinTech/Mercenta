@@ -112,23 +112,30 @@ function resolveToken(token) {
   return { ok: false, detail: `bare filename not found anywhere: ${token}` };
 }
 
-const built = entries.filter((e) => e.status === 'built');
-check(`the registry has ${built.length} rows with status "built"`, built.length > 0);
+/* Evidence-bearing rows: `built` AND `built_and_tested` — both cite implementation
+ * evidence; both must resolve. (`removed` rows mention dead names as HISTORY.) */
+const built = entries.filter((e) => e.status === 'built' || e.status === 'built_and_tested');
+check(`the registry has ${built.length} evidence-bearing rows (built + built_and_tested)`, built.length > 0);
+
+/* A hashed build-bundle filename (e.g. index-BSQXgh2W.js) is a BUILD OUTPUT, not a
+ * source file — it is never present in the tracked tree and must not be flagged. */
+const BUNDLE = /^(index|vendor|main|runtime|chunk|assets)-[A-Za-z0-9_]{4,}\.(js|css)$/;
 
 let refsChecked = 0;
 for (const row of built) {
   const ev = row.evidence || '';
-  check(`built row "${row.id}" has non-empty evidence`, ev.trim().length > 0);
+  check(`row "${row.id}" has non-empty evidence`, ev.trim().length > 0);
 
   /* File references */
   for (const m of ev.matchAll(FILE_TOKEN)) {
     const token = m[0];
+    if (BUNDLE.test(token)) continue;            // hashed build bundle, not source
     const around = ev.slice(Math.max(0, m.index - 60), m.index + token.length + 60);
     if (HISTORICAL.test(around)) continue;       // recorded removal, not a live claim
     if (/^MERCENTA_[A-Z_]+$/.test(token)) continue;
     const r = resolveToken(token);
     refsChecked++;
-    check(`built row "${row.id}" cites an existing file: ${token}`, r.ok, r.detail);
+    check(`row "${row.id}" cites an existing file: ${token}`, r.ok, r.detail);
   }
 
   /* Registered-script references */
@@ -140,7 +147,7 @@ for (const row of built) {
   }
 }
 
-console.log(`\nBUILT-ROW EVIDENCE INTEGRITY: ${built.length} built rows · ${refsChecked} references checked · ${pass} PASS / ${fail} FAIL`);
+console.log(`\nEVIDENCE-ROW INTEGRITY: ${built.length} evidence rows (built + built_and_tested) · ${refsChecked} references checked · ${pass} PASS / ${fail} FAIL`);
 if (fail > 0) console.log(dead.map((d) => `  x ${d}`).join('\n'));
 console.log(fail === 0 ? 'BUILT_ROWS_VALIDATION_PASS' : `BUILT_ROWS_VALIDATION_FAIL (${fail})`);
 process.exit(fail === 0 ? 0 : 1);
