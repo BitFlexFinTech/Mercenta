@@ -274,6 +274,16 @@ export interface WorkSourceClosing {
   via: string;
   owner: string;
   writer: string | null;
+  /**
+   * §BATCH 3b (2026-10-03) — WHY a source is still a declared gap (`writer:
+   * null`). A gap must state, in one line, which of its derived items DO close and
+   * which genuinely HAVE NO closing action — so "no closing path yet" is never a
+   * silent shrug. Required for every `null` writer, and forbidden on a source that
+   * HAS a writer; `scripts/validate-founder-closing.mjs` fails if either is
+   * violated, so the reason cannot rot (it is the machine-readable form of the
+   * same reason recorded in `docs/WORK_LAYER_SSOT_2026-09-26.md` §4).
+   */
+  reason?: string;
 }
 
 export const WORK_SOURCE_CLOSING: Record<WorkSource, WorkSourceClosing> = {
@@ -348,23 +358,41 @@ export const WORK_SOURCE_CLOSING: Record<WorkSource, WorkSourceClosing> = {
   },
   founder_compliance: {
     via: 'Complete the company-register check in the founder console',
-    owner: 'src/lib/commandCentre/commandCentre.ts',
+    owner: 'src/data/companyStore.ts',
     writer: null,
+    reason:
+      'PARTIAL. The register-read items DO close — `recordRegistrarSnapshot` clears `company-read-register` / `company-read-failed`, and `storeGovernmentSecret` clears `company-government-secrets` — and the confirmation statement closes via `recordManualFiling` + `confirmConfirmationStatementFromRegister`. The `company-accounts` item has NO closing action: annual accounts are prepared and filed OUTSIDE Mercenta on the official service, and this store records no accounts-filed state for it to clear on. The source therefore stays a declared gap.',
   },
+  /**
+   * §BATCH 3b — CLOSED (2026-10-03). `founder_setup` was declared a gap because its
+   * owner was the DERIVATION (`commandCentre.ts`), not the stores that actually own
+   * the records. Every item it derives already has a real closing writer, so it is
+   * no longer a gap: the Google items close through `src/data/googleStore.ts`
+   * (`setGoogleClientId` / `markGoogleConnected` / `saveGoogleSetupRun`) and the
+   * launch items through `src/data/launchStore.ts` (`markLaunchSubmitted`). Gate:
+   * `scripts/validate-founder-closing.mjs`.
+   */
   founder_setup: {
     via: 'Complete the platform setup item (Google / launch)',
-    owner: 'src/lib/commandCentre/commandCentre.ts',
-    writer: null,
+    owner: 'src/data/googleStore.ts + src/data/launchStore.ts',
+    writer: 'setGoogleClientId / markGoogleConnected / saveGoogleSetupRun / markLaunchSubmitted',
   },
   founder_application: {
     via: 'Decide the brand application',
     owner: 'src/data/applicationStore.ts',
     writer: 'updateApplicationStatus',
   },
+  /**
+   * §BATCH 3b — CLOSED (2026-10-03). The item is raised (work layer section 12)
+   * from the canonical connection mirror whenever a provider reports an `error` and
+   * is not deliberately disabled, and cleared the moment the operator repairs or
+   * reconnects that provider — the connection owner's writers clear the error.
+   * Gate: `scripts/validate-founder-closing.mjs` drives the mirror both ways.
+   */
   founder_integration: {
     via: 'Clear the provider error — repair or reconnect the integration',
-    owner: 'src/integrations/connections.ts',
-    writer: null,
+    owner: 'src/integrations/IntegrationsContext.tsx',
+    writer: 'completeApiKeyConnect / markGoogleConnected / disconnect / setMode',
   },
   founder_opportunity: {
     via: 'Progress the prospect / opportunity in CRM',
@@ -373,18 +401,24 @@ export const WORK_SOURCE_CLOSING: Record<WorkSource, WorkSourceClosing> = {
   },
   founder_funding: {
     via: 'Progress the funding route or relationship',
-    owner: 'src/lib/commandCentre/commandCentre.ts',
+    owner: 'src/lib/founder/fundingPipeline.ts',
     writer: null,
+    reason:
+      'PARTIAL. The funding-route items DO close: `recordFundingSubmission` (after `recordFounderApproval`) records the founder\'s own submission and the derivation stops emitting that route. The remaining items have NO closing action: `partner-*` and `relationship-*` are prospective routes derived from the FOUNDER_PARTNER_TARGETS config (stage `not_approached`, no writer mutates it), `founder-investor-route` is a plan roll-up, and `fundraising-summary` is a count. The source therefore stays a declared gap.',
   },
   founder_finance: {
     via: 'Record the finance/contribution decision',
-    owner: 'src/lib/commandCentre/commandCentre.ts',
+    owner: 'src/lib/costs/costSummary.ts',
     writer: null,
+    reason:
+      'NONE. The source derives exactly ONE item — `finance-contribution`, a provisional gross-contribution figure from `operatingCostSummary`. It is an informational roll-up of the cost model, not an action: no record change makes it disappear and no decision closes it, so the platform has no closing path.',
   },
   founder_ai_cost: {
     via: 'Resolve the AI cost-protection action',
-    owner: 'src/lib/commandCentre/commandCentre.ts',
+    owner: 'src/lib/costs/usageLog.ts',
     writer: null,
+    reason:
+      'NONE. `ai-cost-summary` is a usage roll-up and `ai-cost-protection` appears only while spend is above the ceiling; the only thing that returns it to normal is a GLOBAL usage reset (`resetAiUsageLog`), which is a demo reset, not the founder doing the work. No substantive platform action closes it, so the platform has no closing path.',
   },
   manual: {
     via: 'The work layer itself — a manual task has no canonical record, so the work layer IS its single source of truth',

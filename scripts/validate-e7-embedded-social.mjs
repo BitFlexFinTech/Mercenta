@@ -1175,6 +1175,26 @@ try {
     'package.json',
   ];
 
+  /**
+   * §BATCH 3b — THE FOUNDER CLOSING PATHS (2026-10-03). The declared surface of the
+   * phase that repoints the six founder work sources' owners, CLOSES `founder_setup`
+   * and `founder_integration` (they already had a real closing path), and records a
+   * machine-readable reason for the four that stay gaps. Mirrors the E6 declaration.
+   */
+  const BATCH3B_FOUNDER_CLOSING_DECLARED = [
+    'src/lib/work/workStore.ts',
+    'scripts/validate-founder-closing.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'scripts/verify-live-demo.mjs',
+    'package.json',
+    'docs/WORK_LAYER_SSOT_2026-09-26.md',
+    'requirements-registry.json',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+  ];
+
 
 
 
@@ -1990,7 +2010,13 @@ try {
            * but its declared surface is accepted here as every phase's is.
            */
           !BATCH3A_S7_CONTRACT_CLOSING_DECLARED.includes(f) &&
-          !BATCH3A_S7_CONTRACT_CLOSING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH3A_S7_CONTRACT_CLOSING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 3b — THE FOUNDER CLOSING PATHS (2026-10-03) — touches no protected path,
+           * but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH3B_FOUNDER_CLOSING_DECLARED.includes(f) &&
+          !BATCH3B_FOUNDER_CLOSING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );

@@ -1241,6 +1241,27 @@ const BATCH3A_S7_CONTRACT_CLOSING_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',        /* the mirrored declaration */
   'package.json',                                   /* validate:contract-closing registered */
 ]);
+/**
+ * §BATCH 3b — THE FOUNDER CLOSING PATHS (2026-10-03).
+ *
+ * Six founder-console work sources were declared gaps (`writer: null`). This phase
+ * repoints each `owner` to the store that actually owns its records, CLOSES the two
+ * that already had a real closing path (`founder_setup`, `founder_integration`), and
+ * records a machine-readable `reason` on the four that stay gaps. The declared surface:
+ */
+const BATCH3B_FOUNDER_CLOSING_SCOPE = new Set([
+  'src/lib/work/workStore.ts',                      /* owners repointed; two gaps closed; four reasons added */
+  'scripts/validate-founder-closing.mjs',           /* NEW - this phase's gate */
+  'scripts/validate-e6-brand-surfaces.mjs',         /* this declaration */
+  'scripts/validate-e7-embedded-social.mjs',        /* the mirrored declaration */
+  'scripts/verify-live-demo.mjs',                   /* NEW - the L25 live check */
+  'package.json',                                   /* validate:founder-closing registered */
+  'docs/WORK_LAYER_SSOT_2026-09-26.md',             /* §3/§4 updated */
+  'requirements-registry.json',                     /* gap rows reconciled */
+  'PROJECT_STATUS.md',                              /* state */
+  'HANDOFF.md',                                     /* mirrored state */
+  'STATUS_CHECK.md',                                /* session record */
+]);
 
 
 
@@ -2453,7 +2474,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH2P_INFERENCE_RELABELS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 3a — the contract closing path (see above). First protected-path check (F5). */
         BATCH3A_S7_CONTRACT_CLOSING_SCOPE.has(p) ||
-        [...BATCH3A_S7_CONTRACT_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH3A_S7_CONTRACT_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 3b — the founder closing paths (see above). First protected-path check (F5). */
+        BATCH3B_FOUNDER_CLOSING_SCOPE.has(p) ||
+        [...BATCH3B_FOUNDER_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2557,6 +2581,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 3a — the contract closing path (see above). Second protected-path check (F5b). */
         BATCH3A_S7_CONTRACT_CLOSING_SCOPE.has(p) ||
         [...BATCH3A_S7_CONTRACT_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 3b — the founder closing paths (see above). Second protected-path check (F5b). */
+        BATCH3B_FOUNDER_CLOSING_SCOPE.has(p) ||
+        [...BATCH3B_FOUNDER_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2896,6 +2923,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 3a — the contract closing path (see above). */
           BATCH3A_S7_CONTRACT_CLOSING_SCOPE.has(p) ||
           [...BATCH3A_S7_CONTRACT_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 3b — the founder closing paths (see above). */
+          BATCH3B_FOUNDER_CLOSING_SCOPE.has(p) ||
+          [...BATCH3B_FOUNDER_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

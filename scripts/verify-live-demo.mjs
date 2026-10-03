@@ -1530,6 +1530,64 @@ function readRedLines() {
   }
   await conPage.close();
 
+  /* ── L25 — BATCH 3b: THE FOUNDER CLOSING PATH, LIVE ────────────────────────
+   * WHY THIS EXISTS. Six founder work sources were declared gaps; `founder_setup`
+   * and `founder_integration` ALREADY had a real closing path and are now declared
+   * (their `owner` had named the DERIVATION, not the stores). The work drawer
+   * renders the closing path from the ONE declaration (`describeWorkClosing`), so a
+   * Super-Admin Work Management screen on the DEPLOYED bundle must show the declared
+   * writer for a `founder_setup` item — never the old "NO closing path" text. The
+   * surface is driven through the product's own navigation and its rendered text read.
+   */
+  console.log('\n--- L25 the founder closing path, on the live Super-Admin surface ---');
+  const fndPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const fndErrors = [];
+  fndPage.on('pageerror', (e) => fndErrors.push(String(e)));
+  try {
+    await gotoLive(fndPage, `${SITE}/`);
+    const saLogin = fndPage.locator('text=Super Admin').first();
+    await saLogin.waitFor({ state: 'visible', timeout: 90000 });
+    await saLogin.click({ timeout: 30000 });
+    await fndPage.waitForTimeout(3500);
+    check('L25 the deployed site opened and the Super Admin signed in', true);
+
+    const fndNav = fndPage.locator('nav[aria-label="Primary"] >> text=Work Management').first();
+    await fndNav.waitFor({ state: 'visible', timeout: 90000 });
+    await fndNav.click({ timeout: 30000 });
+    await fndPage.waitForTimeout(2500);
+
+    const fndFilter = fndPage.locator('[data-testid="work-source-filter"]');
+    await fndFilter.waitFor({ state: 'visible', timeout: 60000 });
+    await fndFilter.selectOption('founder_setup');
+    await fndPage.waitForTimeout(1500);
+
+    const firstRow = fndPage.locator('[data-testid^="queue-"]').first();
+    await firstRow.waitFor({ state: 'visible', timeout: 60000 });
+    await firstRow.click({ timeout: 30000 });
+    await fndPage.waitForTimeout(1500);
+
+    const closingText =
+      (await fndPage
+        .locator('[data-testid="work-drawer-closing"]')
+        .first()
+        .innerText({ timeout: 30000 })) ?? '';
+    check(
+      'L25 the LIVE founder_setup drawer renders the DECLARED closing writer (no longer a gap)',
+      /markLaunchSubmitted/.test(closingText) && /googleStore\.ts/.test(closingText),
+      closingText.slice(0, 160)
+    );
+    check(
+      `L25 the driven work surface rendered with no uncaught error (errors: ${fndErrors.join(' | ') || 'none'})`,
+      fndErrors.length === 0
+    );
+  } catch (fndError) {
+    check(
+      `L25 the founder closing path could NOT be driven live (${String(fndError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await fndPage.close();
+
 
 
   await pltPage.close();

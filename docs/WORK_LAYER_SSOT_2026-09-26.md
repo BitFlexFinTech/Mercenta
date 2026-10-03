@@ -130,11 +130,40 @@ work items could not be closed by doing the work, and nothing enforced any of it
 
 ## §4 DECLARED GAPS (no closing path yet — reported, never hidden)
 
-`founder_compliance` · `founder_setup` · `founder_integration` ·
-`founder_funding` · `founder_finance` · `founder_ai_cost`
+`founder_compliance` · `founder_funding` · `founder_finance` · `founder_ai_cost`
 
 `contract_renewal` was the seventh gap; it was CLOSED by **S7 (Batch 3a, 2026-10-03)** — `demoContracts` now has
-writers. The six `founder_*` gaps remain and are Batch 3b.
+writers.
 
-Declared in `src/lib/work/workStore.ts → WORK_SOURCE_CLOSING`, enumerated by
-`WORK_SOURCE_CLOSING_GAPS`, and printed on every run of `scripts/validate-work-layer.mjs`.
+### Batch 3b (2026-10-03) — six founder gaps examined: two CLOSED, four stay gaps WITH a recorded reason
+
+Each founder work source was examined and its real closing path (or the honest absence of one) established. Every
+`WORK_SOURCE_CLOSING` entry now names its **true owner** (the store that owns the record), not the derivation
+module.
+
+- **CLOSED — `founder_setup`.** It was a FALSE gap: every item it derives already closes by doing the work. The
+  Google items close through `src/data/googleStore.ts` (`setGoogleClientId` / `markGoogleConnected` /
+  `saveGoogleSetupRun`) and the launch items through `src/data/launchStore.ts` (`markLaunchSubmitted`). The
+  declaration previously named the DERIVATION as the owner, so the writer was never stated.
+- **CLOSED — `founder_integration`.** Also a FALSE gap: the item is raised from the canonical connection mirror
+  while a provider reports an `error` and cleared the moment the operator repairs or reconnects it, through the
+  connection owner's writers (`completeApiKeyConnect` / `markGoogleConnected` / `disconnect` / `setMode` in
+  `src/integrations/IntegrationsContext.tsx`).
+- **GAP — `founder_compliance` (PARTIAL).** The register-read items DO close (`recordRegistrarSnapshot`), the
+  credential item closes (`storeGovernmentSecret`) and the confirmation statement closes
+  (`recordManualFiling` + `confirmConfirmationStatementFromRegister`). The **annual-accounts** item has no closing
+  action: accounts are prepared and filed OUTSIDE Mercenta on the official service and `companyStore` records no
+  accounts-filed state for it to clear on.
+- **GAP — `founder_funding` (PARTIAL).** The funding-route items DO close (`recordFundingSubmission` after
+  `recordFounderApproval`). The `partner-*` / `relationship-*` routes are derived from the `FOUNDER_PARTNER_TARGETS`
+  config (stage `not_approached`, no writer mutates it), `founder-investor-route` is a plan roll-up and
+  `fundraising-summary` is a count — none has a closing action.
+- **GAP — `founder_finance` (NONE).** Its one item, `finance-contribution`, is a provisional gross-contribution
+  roll-up of the cost model — not an action; nothing closes it.
+- **GAP — `founder_ai_cost` (NONE).** `ai-cost-summary` is a usage roll-up and `ai-cost-protection` clears only via
+  a GLOBAL usage reset (`resetAiUsageLog`), which is a demo reset, not the founder doing the work.
+
+Declared in `src/lib/work/workStore.ts → WORK_SOURCE_CLOSING`, enumerated by `WORK_SOURCE_CLOSING_GAPS`, each gap
+carrying a machine-readable `reason`, and printed on every run of `scripts/validate-work-layer.mjs`. Proven by
+`scripts/validate-founder-closing.mjs` (`npm run validate:founder-closing`) — **mutation-proved twice** (a nulled
+`founder_setup.writer` ⇒ 5 failures; an emptied gap reason ⇒ 1; `workStore.ts` restored byte-identical each time).
