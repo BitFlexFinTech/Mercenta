@@ -1501,20 +1501,22 @@ function readRedLines() {
     await conNav.click({ timeout: 30000 });
     await conPage.waitForTimeout(2500);
 
-    const conView = conPage.getByRole('button', { name: 'View' }).first();
+    const conView = conPage.getByRole('button', { name: 'View', exact: true }).first();
     await conView.waitFor({ state: 'visible', timeout: 60000 });
     await conView.click({ timeout: 30000 });
     await conPage.waitForTimeout(1200);
 
-    const conBody = (await conPage.locator('body').innerText({ timeout: 60000 })) ?? '';
+    /* The controls live in the contract DETAIL modal; assert on the BUTTONS (an
+       exact name — plain `name: 'View'` also matches the "Overview" controls, and
+       a bare `/Terminate/` also matches the status filter's "Terminated" option, so
+       both would be false positives). */
     check(
       'L24 the LIVE contract detail exposes the RENEW (advance term) closing control',
-      /Renew \(advance term\)/i.test(conBody),
-      conBody.slice(0, 180)
+      await conPage.getByRole('button', { name: 'Renew (advance term)' }).first().isVisible().catch(() => false)
     );
     check(
       'L24 the LIVE contract detail exposes the TERMINATE closing control',
-      /Terminate/i.test(conBody)
+      await conPage.getByRole('button', { name: 'Terminate', exact: true }).first().isVisible().catch(() => false)
     );
     check(
       `L24 the driven console rendered with no uncaught error (errors: ${conErrors.join(' | ') || 'none'})`,
