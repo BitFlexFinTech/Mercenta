@@ -1436,6 +1436,50 @@ function readRedLines() {
   }
   await palPage.close();
 
+  /* ── L23 — BATCH 2p (AV-025): THE FULFILMENT-TRACK LABEL, LIVE ────────────
+   * WHY THIS EXISTS. The audit recorded that Mercenta's OWN fulfilment concept was
+   * labelled with the retail channel's programme name ("Direct Fulfillment" — a
+   * distinct Amazon programme, register AV-025). It is now labelled from its ONE
+   * owner, "Brand-direct supply", on every surface. On the DEPLOYED surface that
+   * label must be the RENDERED one (and the colliding name absent) — a source
+   * assertion would prove nothing about the bundle. The admin "Fulfillment Track"
+   * view is driven through the product's own navigation and its rendered text read.
+   */
+  console.log('\n--- L23 the fulfilment-track label, on the live admin surface ---');
+  const trkPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const trkErrors = [];
+  trkPage.on('pageerror', (e) => trkErrors.push(String(e)));
+  try {
+    const trkAttempt = await liveAdminEntry(trkPage);
+    check(`L23 the deployed site opened and the admin signed in (attempt ${trkAttempt})`, true);
+
+    const trkNav = trkPage.locator('nav[aria-label="Primary"] >> text=Fulfillment Track').first();
+    await trkNav.waitFor({ state: 'visible', timeout: 90000 });
+    await trkNav.click({ timeout: 30000 });
+    await trkPage.waitForTimeout(2500);
+
+    const trkBody = (await trkPage.locator('body').innerText({ timeout: 60000 })) ?? '';
+    check(
+      'L23 the LIVE fulfilment-track surface renders the ONE OWNER label "Brand-direct supply"',
+      /Brand-direct supply/i.test(trkBody),
+      trkBody.slice(0, 180)
+    );
+    check(
+      'L23 the LIVE surface does NOT render the colliding channel programme name "Direct Fulfillment"',
+      !/Direct Fulfillment/i.test(trkBody)
+    );
+    check(
+      `L23 the driven surface rendered with no uncaught error (errors: ${trkErrors.join(' | ') || 'none'})`,
+      trkErrors.length === 0
+    );
+  } catch (trkError) {
+    check(
+      `L23 the track label could NOT be driven live (${String(trkError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await trkPage.close();
+
   await pltPage.close();
 
   await browser.close();

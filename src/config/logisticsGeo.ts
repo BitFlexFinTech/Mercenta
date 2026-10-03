@@ -17,8 +17,9 @@
  *   - `INITIAL_SHIPMENTS` (bootstrap.ts) additionally carry real CITIES
  *     (Harare, Durban, Nairobi, Lagos, Cape Town, Austin, Munich) and real UK
  *     gateways (London, Felixstowe, Heathrow, Coventry).
- *   - Amazon UK fulfilment centres are declared WITH postcodes in
- *     `src/types.ts → DEFAULT_UK_FC_LIST`.
+ *   - UK fulfilment centres are declared WITH postcodes in
+ *     `src/types.ts → DEFAULT_UK_FC_LIST` — a MERCENTA-MAINTAINED convenience list,
+ *     not an Amazon-published directory (register `AV-017`; §Batch 2p).
  *
  * Therefore the map plots COUNTRY-CENTROID precision for country-only origins
  * and CITY precision where a city is actually named.
@@ -106,7 +107,8 @@ const CITY_POINTS: Record<string, { lat: number; lon: number; kind: GeoNodeKind;
    company's registered address on customs documents, not the shipment route. */
 
 /**
- * Amazon UK fulfilment-centre CITY coordinates, keyed by FC city. The CITY is
+ * UK fulfilment-centre CITY coordinates (Mercenta-maintained list, register
+ * `AV-017`; §Batch 2p), keyed by FC city. The CITY is
  * the declared fact (`src/types.ts → DEFAULT_UK_FC_LIST`); the coordinate is
  * city-level only. Amazon destination ASSIGNMENTS themselves are not declared in
  * this repository, so the map never claims a specific FC for a shipment.

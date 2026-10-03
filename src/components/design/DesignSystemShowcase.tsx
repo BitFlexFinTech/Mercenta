@@ -258,7 +258,7 @@ export function DesignSystemShowcase() {
         eyebrow="Brand account"
         title="Astonish"
         status={<StatusBadge tone="success" dataStatus="active">Active</StatusBadge>}
-        description="Home · UK distribution · Direct fulfilment"
+        description="Home · UK distribution · Brand-direct supply"
         actions={<Button variant="secondary">Manage</Button>}
       />
 

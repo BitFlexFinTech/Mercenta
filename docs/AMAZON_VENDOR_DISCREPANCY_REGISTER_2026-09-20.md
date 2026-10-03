@@ -231,4 +231,31 @@ separately verified increments have since applied some of them, so their evidenc
   through. Gated by `npm run validate:wording-guard`. `scripts/lint-wording.mjs` enforces a **different**
   (channel-naming) rule set and is unchanged.
 
+
+---
+
+## POST-REGISTER CHANGE — 2026-10-03 (Batch 2p, the four INFERENCE relabels)
+
+This register remains the **record of the repository as audited on 2026-09-20**; its findings are unchanged. Batch 2p
+applied the four remaining **INFERENCE** rows, so their evidence pointers are annotated:
+
+- **`AV-002` — APPLIED.** The acknowledgement consequence is stated as a **risk**, never an unstated certainty: the
+  ack-overdue label reads *"at risk of cancellation"*, the notification copy asserts no cancellation, and the stale
+  `PurchaseOrder` comment that still read *"at risk of forced cancellation"* is corrected at source. (The register's
+  original carrier `postmarkNotifier.ts` no longer exists; the surviving carriers are `statusPresentation.ts` and the
+  notification module.) Gated by `npm run validate:inference-relabels` (repo-wide, comment-stripped sweep: no `src/`
+  CODE asserts "forced cancellation").
+- **`AV-017` — APPLIED.** `src/types.ts → DEFAULT_UK_FC_LIST` is re-declared as a **MERCENTA-MAINTAINED convenience
+  list**, never an Amazon-published directory (no channel source publishes one, `S5`), and the PO's `shipToParty`
+  remains the authoritative destination (`src/config/destinationFc.ts`). Gated by `npm run validate:inference-relabels`.
+- **`AV-025` — APPLIED.** The internal fulfilment track is labelled from its ONE owner **"Brand-direct supply"**
+  (`src/config/fulfillmentTrack.ts`), never the channel's **Vendor Direct Fulfillment** programme name; every surface
+  and the agreement clause header read the owner. Gated by `npm run validate:inference-relabels`; the three browser
+  specs that asserted the old label were repointed (16 passed).
+- **`AV-044` — APPLIED.** The deterministic simulation carries no unverified channel claim (it inherits the corrected
+  `AV-013` / `AV-003` claims) and keeps its safety gate that refuses a non-simulation provider. Gated by
+  `npm run validate:inference-relabels`.
+- No other row is affected. **`AV-033`** (the fifth INFERENCE) stays **EVIDENCE-BLOCKED**. The audit's APPLIED count was
+  0 at audit time; the four rows above are the last INFERENCE findings to leave the open set.
+
 - The register's other findings are untouched. The audit's APPLIED count was 0 at audit time.

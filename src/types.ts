@@ -1648,8 +1648,12 @@ export interface PurchaseOrder {
   rejectionReason?: string;
   /**
    * §Stage-24 — PO acknowledgment (Vendor Central semantics).
-   * Hard business rule: unacknowledged after 24h from receipt = at risk of
-   * forced cancellation. Deadline is orderDate + 24h; surfaced as a countdown.
+   * The 24-hour acknowledgement window IS a published channel rule: a vendor must
+   * acknowledge within 24 hours of receipt (register `AV-001`, source `S2`). What
+   * the channel does NOT state is that a missed window FORCES a cancellation — that
+   * is an INFERENCE, not a channel fact (register `AV-002`), so the platform states
+   * the RISK, never a certainty. Deadline is orderDate + 24h; surfaced as a countdown.
+   * §Batch 2p.
    */
   acknowledgedAt?: string;
   /**
@@ -2468,9 +2472,17 @@ export interface ShippingMargin {
   brandBilledPrice: number; // GBP
   createdAt: string;
 }
-/* ── §Batch-14 — Amazon UK Fulfilment Centres ────────────────────────── */
+/* ── §Batch-14 — UK Fulfilment Centres (MERCENTA-MAINTAINED convenience data) ── */
 
-/** Admin-editable list of Amazon UK FCs, seed with real codes. */
+/**
+ * §Batch 2p (`AV-017`) — a MERCENTA-MAINTAINED convenience list of UK fulfilment
+ * centres, seeded with codes seen on purchase orders. It is NOT an Amazon-published
+ * directory: no channel source publishes one (register `AV-017`, source `S5`), and
+ * the AUTHORITATIVE destination is always the FC the channel declares on the PO
+ * (`PurchaseOrder.shipToParty`, resolved once in `src/config/destinationFc.ts`).
+ * Treat every entry here as a display/plotting convenience — never as the channel's
+ * own list.
+ */
 export const DEFAULT_UK_FC_LIST: AmazonFulfilmentCentre[] = [
   { code: 'LBA1', name: 'Doncaster (LBA1)', city: 'Doncaster', postcode: 'DN4 5FB' },
   { code: 'LBA2', name: 'Doncaster (LBA2)', city: 'Doncaster', postcode: 'DN4 5GE' },

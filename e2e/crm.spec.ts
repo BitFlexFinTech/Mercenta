@@ -81,7 +81,7 @@ test.describe('Brand CRM', () => {
     await page.locator('button.rounded-xl').filter({ hasText: 'Fulfillment Track' }).first().click();
     await page.waitForTimeout(500);
     await expect(page.locator('text=Admin action on behalf of brand').first()).toBeVisible({ timeout: 4000 });
-    const select = page.locator('select').filter({ hasText: /Direct Fulfillment|Financed/ }).first();
+    const select = page.locator('select').filter({ hasText: /Brand-direct supply|Financed/ }).first();
     await expect(select).toBeVisible({ timeout: 3000 });
     await select.selectOption('direct_fulfillment');
     const reason = page.locator('input[placeholder="Override reason"]');
@@ -90,7 +90,7 @@ test.describe('Brand CRM', () => {
     await page.locator('button', { hasText: 'Override' }).first().click();
     // The override persists onto the brand row.
     await expect(async () => {
-      const val = await page.locator('select').filter({ hasText: /Direct Fulfillment|Financed/ }).first().inputValue();
+      const val = await page.locator('select').filter({ hasText: /Brand-direct supply|Financed/ }).first().inputValue();
       if (val !== 'direct_fulfillment') throw new Error('not persisted yet');
     }).toPass({ timeout: 4000 });
   });

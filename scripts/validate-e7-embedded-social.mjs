@@ -1127,6 +1127,39 @@ try {
     'scripts/validate-e7-embedded-social.mjs',
   ];
 
+  /**
+   * §BATCH 2p (2026-10-03) — THE FOUR INFERENCE RELABELS (`AV-002` / `AV-017` /
+   * `AV-025` / `AV-044`). The canonical declaration is BATCH2P_INFERENCE_RELABELS_SCOPE
+   * in scripts/validate-e6-brand-surfaces.mjs; this is the same file list echoed for
+   * the E7 guard, which cannot import from the other validator. An UNEXPLAINED
+   * change still fails.
+   */
+  const BATCH2P_INFERENCE_RELABELS_DECLARED = [
+    'src/config/fulfillmentTrack.ts',
+    'src/components/brand/OnboardingWizard.tsx',
+    'src/components/admin/FulfillmentTrack.tsx',
+    'src/components/admin/BrandCRM.tsx',
+    'src/components/admin/ContractsAdminPanel.tsx',
+    'src/components/admin/ApplicationsPanel.tsx',
+    'src/components/brand/BrandPurchaseOrders.tsx',
+    'src/components/design/DesignSystemShowcase.tsx',
+    'src/lib/agreement.ts',
+    'src/types.ts',
+    'src/config/logisticsGeo.ts',
+    'scripts/validate-inference-relabels.mjs',
+    'scripts/validate-review-s2.mjs',
+    'scripts/validate-stage6.mjs',
+    'scripts/validate-stage14.mjs',
+    'scripts/validate-stage16.mjs',
+    'scripts/verify-live-demo.mjs',
+    'e2e/crm.spec.ts',
+    'e2e/onboarding.spec.ts',
+    'e2e/fulfillment-tracks.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1928,7 +1961,13 @@ try {
            * but its declared surface is accepted here as every phase's is.
            */
           !BATCH2O_AV013_RECONCILIATION_DECLARED.includes(f) &&
-          !BATCH2O_AV013_RECONCILIATION_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH2O_AV013_RECONCILIATION_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2p — THE FOUR INFERENCE RELABELS (2026-10-03) — touches no protected path,
+           * but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH2P_INFERENCE_RELABELS_DECLARED.includes(f) &&
+          !BATCH2P_INFERENCE_RELABELS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2206,6 +2245,10 @@ try {
      * §BATCH 2o — THE AV-013 RECONCILIATION PHASE (2026-10-03) — the reconciliation surface (see above).
      */
     ...BATCH2O_AV013_RECONCILIATION_DECLARED,
+    /**
+     * §BATCH 2p — THE FOUR INFERENCE RELABELS (2026-10-03) — the relabel surface (see above).
+     */
+    ...BATCH2P_INFERENCE_RELABELS_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

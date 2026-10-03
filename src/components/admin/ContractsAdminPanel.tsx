@@ -9,6 +9,7 @@ import {
   createTrackAmendment,
 } from '@/lib/contracts';
 import { buildDistributionAgreement } from '@/lib/agreement';
+import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 import { COMMISSION_RATE_PLACEHOLDER, MONTHLY_FEE_PLACEHOLDER_GBP } from '@/config/commercial';
 import type { Contract, FulfillmentTrack } from '@/types';
 import type { DemoBrandRow } from '@/data/demoData';
@@ -277,9 +278,9 @@ function GenerateModal({
               onChange={(e) => setTrack(e.target.value as FulfillmentTrack)}
               className="w-full bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white cursor-pointer"
             >
-              <option value="direct_fulfillment">Direct fulfillment</option>
-              <option value="financed">Financed</option>
-              <option value="unassigned">Unassigned</option>
+              <option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option>
+              <option value="financed">{fulfillmentTrackLabel('financed')}</option>
+              <option value="unassigned">{fulfillmentTrackLabel('unassigned')}</option>
             </select>
           </div>
         </div>

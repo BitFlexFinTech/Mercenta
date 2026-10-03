@@ -397,8 +397,9 @@ is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 pha
   + CLI the environment does not hold. Reported, never faked.
 
 **Batch 2 — Amazon accuracy** (register: `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md`). Leftovers:
-- `AV-011`, `AV-015`, `AV-014`, `AV-016` and `AV-013` — **APPLIED (Batch 2k + 2l + 2m + 2n + 2o, 2026-10-02/03)**. Remaining:
-  the four **INFERENCE relabels** (`AV-002/017/025/044`; `AV-033` is EVIDENCE-BLOCKED).
+- `AV-011`, `AV-015`, `AV-014`, `AV-016` and `AV-013` — **APPLIED (Batch 2k + 2l + 2m + 2n + 2o, 2026-10-02/03)**.
+- The four **INFERENCE relabels** (`AV-002/017/025/044`) — **APPLIED (Batch 2p, 2026-10-03)**; `AV-033` is EVIDENCE-BLOCKED.
+  **`BATCH 2` (Amazon accuracy) is now CLOSED** on everything the platform can do without a signed-in Vendor Central session.
 - **EVIDENCE-BLOCKED** (do NOT model from guesswork): `AV-010b`'s read half (the channel's hold signal is
   undocumented) and `AV-040`'s last operation (`getTransaction`). The six UNKNOWNs
   (`AV-020/034/035/046/047/048`) need a **signed-in Vendor Central session** (a founder action).

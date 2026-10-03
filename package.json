@@ -67,6 +67,7 @@
     "validate:asn-pallets": "node scripts/validate-asn-pallets.mjs",
     "validate:commerce-loop": "node scripts/validate-commerce-loop.mjs",
     "validate:amazon-vendor-codes": "node scripts/validate-amazon-vendor-codes.mjs",
+    "validate:inference-relabels": "node scripts/validate-inference-relabels.mjs",
     "validate:environment": "node scripts/validate-environment.mjs",
     "validate:ui-wiring": "node scripts/validate-ui-wiring.mjs",
     "validate:dead-code": "node scripts/validate-dead-code.mjs",

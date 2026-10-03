@@ -17,7 +17,7 @@ async function openTracks(page: any) {
 test.describe('Fulfilment Tracks', () => {
   test('1. Direct model is documented', async ({ page }) => {
     await openTracks(page);
-    await expect(page.getByText(/Direct Fulfillment/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Brand-direct supply/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('2. Financed model is documented', async ({ page }) => {

@@ -59,8 +59,9 @@ try {
     category: 'Home',
     fulfillmentTrack: 'direct_fulfillment',
   });
+  /* §Batch 2p (`AV-025`) — REPOINTED: the clause header reads the ONE OWNER label. */
   test('onboarding generates contract matching SELECTED track',
-    agreementForTrack.includes('PAYMENT TERMS (DIRECT FULFILLMENT)'));
+    agreementForTrack.includes('PAYMENT TERMS (BRAND-DIRECT SUPPLY)'));
 
   // Step 3: upload product with image into the catalog.
   const newProduct = {

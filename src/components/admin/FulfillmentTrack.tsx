@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { useBrands, useFulfillmentScores } from '@/data/queries';
 import { applyFulfillmentOverride, recalculateAllScores } from '@/data/api';
 import type { FulfillmentScore, FulfillmentTrack } from '@/types';
+import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 import type { DemoBrandRow } from '@/data/demoData';
 import { isBorderline, scoreBrand, computeComponentScores, type ScoreInputs } from '@/lib/scoring';
 import { Badge, Card, Button, DataTable, Input } from '@/components/ui';
@@ -27,8 +28,7 @@ function TrackBadge({ track }: { track: FulfillmentTrack }) {
     financed: 'bg-blue-500/15 text-blue-300 border-blue-500/20',
     unassigned: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/20',
   };
-  const label =
-    track === 'direct_fulfillment' ? 'Direct fulfillment' : track === 'financed' ? 'Financed' : 'Unassigned';
+  const label = fulfillmentTrackLabel(track);
   return <Badge className={cn('text-ds-micro', map[track])}>{label}</Badge>;
 }
 
@@ -61,9 +61,9 @@ function ScoreBar({ label, value, max }: { label: string; value: number; max: nu
 
 const TRACK_FILTERS: { value: FulfillmentTrack | 'all'; label: string }[] = [
   { value: 'all', label: 'All tracks' },
-  { value: 'direct_fulfillment', label: 'Direct fulfillment' },
-  { value: 'financed', label: 'Financed' },
-  { value: 'unassigned', label: 'Unassigned' },
+  { value: 'direct_fulfillment', label: fulfillmentTrackLabel('direct_fulfillment') },
+  { value: 'financed', label: fulfillmentTrackLabel('financed') },
+  { value: 'unassigned', label: fulfillmentTrackLabel('unassigned') },
 ];
 
 export function FulfillmentTrackPanel() {
@@ -141,7 +141,7 @@ export function FulfillmentTrackPanel() {
       <WorkspaceHeader
         eyebrow="ADMIN HUB · COMMERCE"
         title="Fulfillment Track"
-        description="Auto-scored brand placement — Direct Fulfillment vs Financed, per brand."
+        description="Auto-scored brand placement — Brand-direct supply vs Financed, per brand."
       />
 
       {/* Tab bar */}
@@ -389,9 +389,9 @@ function DetailView({
               onChange={(e) => setOverrideTrack(e.target.value as FulfillmentTrack)}
               className="bg-ink-900 border border-white/[0.08] rounded-md px-2.5 py-2 text-xs text-white cursor-pointer"
             >
-              <option value="direct_fulfillment">Direct fulfillment</option>
-              <option value="financed">Financed</option>
-              <option value="unassigned">Unassigned</option>
+              <option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option>
+              <option value="financed">{fulfillmentTrackLabel('financed')}</option>
+              <option value="unassigned">{fulfillmentTrackLabel('unassigned')}</option>
             </select>
             <input
               type="text"

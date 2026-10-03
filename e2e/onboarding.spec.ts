@@ -32,17 +32,17 @@ test.describe('Onboarding Wizard', () => {
     await expect(page.getByText(/Financed/i).first()).toBeVisible({ timeout: 2000 });
   });
 
-  test('3. Working capital "yes" steers to Direct Fulfillment', async ({ page }) => {
+  test('3. Working capital "yes" steers to Brand-direct supply', async ({ page }) => {
     await freshBrand(page);
     await wizardToStep(page, 4, { track: 'direct' });
     await expect(page.getByText(/System recommendation:/i).first()).toBeVisible({ timeout: 6000 });
-    await expect(page.getByText(/Direct Fulfillment/i).first()).toBeVisible({ timeout: 2000 });
+    await expect(page.getByText(/Brand-direct supply/i).first()).toBeVisible({ timeout: 2000 });
   });
 
   test('4. Step-4 cards expose both track options', async ({ page }) => {
     await freshBrand(page);
     await wizardToStep(page, 4);
-    const directCard = page.locator('button').filter({ hasText: /Direct Fulfillment/ }).first();
+    const directCard = page.locator('button').filter({ hasText: /Brand-direct supply/ }).first();
     await expect(directCard).toBeVisible({ timeout: 5000 });
     await expect(page.locator('button').filter({ hasText: /Financed/ }).first()).toBeVisible();
   });
@@ -64,7 +64,7 @@ test.describe('Onboarding Wizard', () => {
     await page.locator('button.rounded-xl').filter({ hasText: 'Fulfillment Track' }).first().click();
     await page.waitForTimeout(500);
     // The override panel exposes a track select (the reason input is beside it).
-    const select = page.locator('select').filter({ hasText: /Direct Fulfillment|Financed/ }).first();
+    const select = page.locator('select').filter({ hasText: /Brand-direct supply|Financed/ }).first();
     await expect(select).toBeVisible({ timeout: 4000 });
     await select.selectOption('direct_fulfillment');
     const reasonInput = page.locator('input[placeholder="Override reason"]');
@@ -73,7 +73,7 @@ test.describe('Onboarding Wizard', () => {
     await page.locator('button', { hasText: 'Override' }).first().click();
     // The persisted track is applied to the brand row.
     await expect(async () => {
-      const val = await page.locator('select').filter({ hasText: /Direct Fulfillment|Financed/ }).first().inputValue();
+      const val = await page.locator('select').filter({ hasText: /Brand-direct supply|Financed/ }).first().inputValue();
       if (val !== 'direct_fulfillment') throw new Error('not persisted yet');
     }).toPass({ timeout: 4000 });
   });

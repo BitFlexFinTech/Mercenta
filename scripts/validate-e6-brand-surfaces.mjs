@@ -1185,6 +1185,46 @@ const BATCH2O_AV013_RECONCILIATION_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §BATCH 2p (2026-10-03) — THE FOUR INFERENCE RELABELS (`AV-002` / `AV-017` /
+ * `AV-025` / `AV-044`). The audit classified four findings INFERENCE (an Amazon
+ * fact the channel does not state); the disposition was RELABEL. The declared
+ * surface is the ONE new label owner, the surfaces that now consume it, the files
+ * whose wording/attribution was corrected, the new gate + the validators/specs
+ * repointed to it, and the two scope guards themselves. F5/F5b/F6's contract is
+ * UNCHANGED: a changed file in NO declared set still fails.
+ */
+const BATCH2P_INFERENCE_RELABELS_SCOPE = new Set([
+  /* §AV-025 — the ONE track-label owner (NEW) */
+  'src/config/fulfillmentTrack.ts',
+  /* §AV-025 — the surfaces that now read the owner (no re-typed label) */
+  'src/components/brand/OnboardingWizard.tsx',
+  'src/components/admin/FulfillmentTrack.tsx',
+  'src/components/admin/BrandCRM.tsx',
+  'src/components/admin/ContractsAdminPanel.tsx',
+  'src/components/admin/ApplicationsPanel.tsx',
+  'src/components/brand/BrandPurchaseOrders.tsx',
+  'src/components/design/DesignSystemShowcase.tsx',
+  'src/lib/agreement.ts',
+  /* §AV-002 / §AV-017 — the canonical type comments corrected at source */
+  'src/types.ts',
+  'src/config/logisticsGeo.ts',
+  /* the NEW gate + the validators/specs repointed to the relabelled contract */
+  'scripts/validate-inference-relabels.mjs',
+  'scripts/validate-review-s2.mjs',
+  'scripts/validate-stage6.mjs',
+  'scripts/validate-stage14.mjs',
+  'scripts/validate-stage16.mjs',
+  'scripts/verify-live-demo.mjs',                  /* the L23 live check for the relabelled surface */
+  'e2e/crm.spec.ts',
+  'e2e/onboarding.spec.ts',
+  'e2e/fulfillment-tracks.spec.ts',
+  /* the two scope guards + the registry entry that names the new gate */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2388,7 +2428,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH2N_ASN_PALLETS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2o — the AV-013 reconciliation (see above). First protected-path check (F5). */
         BATCH2O_AV013_RECONCILIATION_SCOPE.has(p) ||
-        [...BATCH2O_AV013_RECONCILIATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2O_AV013_RECONCILIATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2p — the four INFERENCE relabels (see above). First protected-path check (F5). */
+        BATCH2P_INFERENCE_RELABELS_SCOPE.has(p) ||
+        [...BATCH2P_INFERENCE_RELABELS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2486,6 +2529,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2o — the AV-013 reconciliation (see above). Second protected-path check (F5b). */
         BATCH2O_AV013_RECONCILIATION_SCOPE.has(p) ||
         [...BATCH2O_AV013_RECONCILIATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2p — the four INFERENCE relabels (see above). Second protected-path check (F5b). */
+        BATCH2P_INFERENCE_RELABELS_SCOPE.has(p) ||
+        [...BATCH2P_INFERENCE_RELABELS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2819,6 +2865,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2o — the AV-013 reconciliation (see above). */
           BATCH2O_AV013_RECONCILIATION_SCOPE.has(p) ||
           [...BATCH2O_AV013_RECONCILIATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2p — the four INFERENCE relabels (see above). */
+          BATCH2P_INFERENCE_RELABELS_SCOPE.has(p) ||
+          [...BATCH2P_INFERENCE_RELABELS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

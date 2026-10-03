@@ -11,6 +11,7 @@ import {
 } from '@/config/commercialModel';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { Button, Input, Select, Checkbox } from '@/components/ui';
+import { fulfillmentTrackLabel, FULFILLMENT_TRACK_HINTS } from '@/config/fulfillmentTrack';
 import { BrandGuidance } from '@/components/shared/BrandGuidance';
 import { cn } from '@/utils/cn';
 import type { BrandRegion, FulfillmentTrack, FinancingPartner } from '@/types';
@@ -577,9 +578,7 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
               <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-xs text-zinc-400">
                 System recommendation:{' '}
                 <span className="text-white font-medium">
-                  {recommendedTrack === 'direct_fulfillment'
-                    ? 'Direct Fulfillment'
-                    : 'Financed'}
+                  {fulfillmentTrackLabel(recommendedTrack)}
                 </span>{' '}
               </div>
 
@@ -588,13 +587,13 @@ export function OnboardingWizard({ initialStep = 1 }: { initialStep?: number }) 
                   [
                     {
                       value: 'direct_fulfillment',
-                      label: 'Direct Fulfillment',
-                      hint: 'You ship confirmed POs directly; we remit your share of net proceeds.',
+                      label: fulfillmentTrackLabel('direct_fulfillment'),
+                      hint: FULFILLMENT_TRACK_HINTS.direct_fulfillment,
                     },
                     {
                       value: 'financed',
-                      label: 'Financed',
-                      hint: 'Mercenta purchases inventory at Ex-Works and handles fulfilment.',
+                      label: fulfillmentTrackLabel('financed'),
+                      hint: FULFILLMENT_TRACK_HINTS.financed,
                     },
                   ] as const
                 ).map((opt) => (

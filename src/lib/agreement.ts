@@ -16,6 +16,7 @@
  * than silently editing a signed agreement.
  */
 import { BRAND_LEGAL_NAME } from '@/config/brand';
+import { FULFILLMENT_TRACK_LABELS } from '@/config/fulfillmentTrack';
 
 export interface AgreementData {
   businessName: string;
@@ -42,10 +43,15 @@ const APPOINTMENT_CLAUSE = `1. APPOINTMENT. Distributor is hereby appointed as t
    and wholesale distributor of the Brand's products, routing inventory via
    direct UK retail placement through established national retail networks.`;
 
-/** DIRECT FULFILLMENT variant of the Payment Terms clause block.
- *  Outward-facing wording: the fulfilment destination is described
- *  generically — never by retail-channel name. */
-const PAYMENT_TERMS_DIRECT = (d: AgreementData) => `2. PAYMENT TERMS (DIRECT FULFILLMENT). The Brand ships confirmed purchase
+/**
+ * §Batch 2p (`AV-025`) — BRAND-DIRECT SUPPLY variant of the Payment Terms clause
+ * block. The clause header reads the track's ONE OWNER label, never the retail
+ * channel's programme name ("Direct Fulfillment" is a distinct Amazon programme,
+ * so borrowing it for Mercenta's own concept is a name collision). Outward-facing
+ * wording: the fulfilment destination is described generically — never by
+ * retail-channel name.
+ */
+const PAYMENT_TERMS_DIRECT = (d: AgreementData) => `2. PAYMENT TERMS (${FULFILLMENT_TRACK_LABELS.direct_fulfillment.toUpperCase()}). The Brand ships confirmed purchase
    orders directly to Distributor's designated UK fulfilment centre. ${`Distributor retains a Retail Performance Fee of ${d.commissionRate}%`} of net
    PO proceeds and remits the Brand's share within 10 business days of
    Distributor receiving payment from the retail channel. A platform fee of GBP

@@ -80,7 +80,9 @@ try {
     createElement(g.AppProvider, null, createElement(w.OnboardingWizard, { initialStep: 4 }))
   );
   test('wizard shows Fulfillment Track selector', html.includes('Fulfillment Track'));
-  test('wizard shows both model options', html.includes('Direct Fulfillment') && html.includes('Financed'));
+  /* §Batch 2p (`AV-025`) — REPOINTED: the track's label is now the ONE OWNER's
+     "Brand-direct supply" (never the retail channel's programme name). */
+  test('wizard shows both model options', html.includes('Brand-direct supply') && html.includes('Financed'));
   test('wizard explains amendment-not-silent-edit policy',
     /formal\s+amendment/.test(html));
 

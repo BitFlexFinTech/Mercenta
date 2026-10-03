@@ -74,12 +74,14 @@ try {
   const directOut = agreement.buildDistributionAgreement({ ...base, fulfillmentTrack: 'direct_fulfillment' });
   const financedOut = agreement.buildDistributionAgreement({ ...base, fulfillmentTrack: 'financed' });
   test('generated contracts differ between tracks', directOut !== financedOut);
-  test('direct output contains DIRECT FULFILLMENT payment clause',
-    directOut.includes('PAYMENT TERMS (DIRECT FULFILLMENT)'));
+  /* §Batch 2p (`AV-025`) — REPOINTED: the clause header reads the track's ONE OWNER
+     label "BRAND-DIRECT SUPPLY", never the retail channel's programme name. */
+  test('direct output contains BRAND-DIRECT SUPPLY payment clause',
+    directOut.includes('PAYMENT TERMS (BRAND-DIRECT SUPPLY)'));
   test('financed output contains FINANCED payment clause',
     financedOut.includes('PAYMENT TERMS (FINANCED)'));
   test('neither output leaks the other variant',
-    !directOut.includes('(FINANCED)') && !financedOut.includes('(DIRECT FULFILLMENT)'));
+    !directOut.includes('(FINANCED)') && !financedOut.includes('(BRAND-DIRECT SUPPLY)'));
   test('both outputs wording-safe (no retail-channel naming)',
     !/amazon|vendor central|\b1P\b/i.test(directOut + financedOut));
   test('legal entity pulled from BRAND_LEGAL_NAME config in both',

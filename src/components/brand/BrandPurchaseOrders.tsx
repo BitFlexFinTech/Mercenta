@@ -70,6 +70,7 @@ import {
   PO_CHANNEL_CHANGE_KIND_LABELS,
   PO_REVISION_RULE_TEXT,
 } from '@/config/purchaseOrders';
+import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 import { poRevisionState } from '@/lib/commerce/poRevisions';
 import { useCanonicalStoreVersion } from '@/data/queries';
 import {
@@ -1303,7 +1304,7 @@ export function BrandPurchaseOrders() {
                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-ds-label text-blue-200 flex items-start gap-2">
                       <Truck className="w-4 h-4 mt-0.5 flex-shrink-0" />
                       <span>
-                        Direct fulfilment — Mercenta raises the shipment request and files the ASN
+                        {fulfillmentTrackLabel('direct_fulfillment')} — Mercenta raises the shipment request and files the ASN
                         for this PO. Your part is to ship on time and to say here if your physical
                         packing differs from the acknowledged quantities.
                       </span>

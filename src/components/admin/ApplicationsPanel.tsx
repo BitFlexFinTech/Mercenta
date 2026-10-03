@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { Card, Button, StatusBadge } from '@/components/ui';
+import { fulfillmentTrackLabel } from '@/config/fulfillmentTrack';
 import { cn } from '@/utils/cn';
 import {
   demoApplications,
@@ -96,7 +97,7 @@ function ManualBrandForm({onDone}:{onDone:()=>void}) {
       <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Facebook</label><input type="text" value={fb} onChange={e=>setFb(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white" placeholder="https://facebook.com/..."/></div>
     </div>
     <div className="grid grid-cols-2 gap-4">
-      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Fulfillment Track</label><select value={track} onChange={e=>setTrack(e.target.value as 'direct_fulfillment'|'financed')} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white"><option value="direct_fulfillment">Direct</option><option value="financed">Financed</option></select></div>
+      <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Fulfillment Track</label><select value={track} onChange={e=>setTrack(e.target.value as 'direct_fulfillment'|'financed')} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white"><option value="direct_fulfillment">{fulfillmentTrackLabel('direct_fulfillment')}</option><option value="financed">{fulfillmentTrackLabel('financed')}</option></select></div>
       <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Source</label><select value={src} onChange={e=>setSrc(e.target.value)} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white">{SOURCE_OPTS.map(s=><option key={s} value={s}>{s}</option>)}</select></div>
     </div>
     <div><label className="block text-xs font-medium text-zinc-400 mb-1.5">Internal Notes</label><textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={3} className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 resize-none" placeholder="Admin-only notes..."/></div>

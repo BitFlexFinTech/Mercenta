@@ -167,7 +167,9 @@ try {
   test('panel offers a per-row drill-down into the brand score',
     plainHtml.includes('View') || plainHtml.includes('Score ≥') || plainHtml.includes('Needs review'));
   test('panel shows Needs review badge (borderline zambezi @57)', html.includes('Needs review'));
-  test('panel shows both track badge types', html.includes('Direct fulfillment') && html.includes('Financed'));
+  /* §Batch 2p (`AV-025`) — REPOINTED: the track's label is now the ONE OWNER's
+     "Brand-direct supply" (never the retail channel's programme name). */
+  test('panel shows both track badge types', html.includes('Brand-direct supply') && html.includes('Financed'));
   test('filters render', html.includes('All tracks') && html.includes('Score ≥'));
 
   console.log(failures === 0 ? 'STAGE6_VALIDATION_PASS' : `STAGE6_VALIDATION_FAIL (${failures} failures)`);
