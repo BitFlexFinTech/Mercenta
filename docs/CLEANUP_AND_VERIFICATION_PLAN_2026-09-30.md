@@ -410,10 +410,18 @@ is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 pha
   `ContractsAdminPanel` writes drafts to the canonical store instead of local state, and
   `WORK_SOURCE_CLOSING.contract_renewal.writer` is no longer null. Gate `validate:contract-closing` (20
   assertions, mutation-proved); live check `L24`. This closed the `contract_renewal` declared gap.
-- **3b — the remaining declared gaps** (the six `founder_*` rows): give each a closing path, or record why it has
-  none.
+- **3b — the remaining declared gaps** (the six `founder_*` rows) — **DONE (2026-10-03).** `founder_setup` and
+  `founder_integration` were FALSE gaps and are CLOSED; `founder_compliance`/`founder_funding` (PARTIAL) and
+  `founder_finance`/`founder_ai_cost` (NONE) each carry a machine-readable `reason`. Gate `validate:founder-closing`
+  (25 assertions, mutation-proved); live check `L25`.
 - **3c — the ~126 "built but never independently re-verified" registry rows** (the page-by-page functional parity
-  audit).
+  audit). **Part 1 — DONE (2026-10-03): the evidence-integrity half.** A NEW gate `scripts/validate-built-rows.mjs`
+  (`npm run validate:built-rows`) asserts every file / e2e-spec / npm-script reference inside every `built` row
+  RESOLVES to something that exists; it found 69 DEAD references, all repaired at source by
+  `scripts/reconcile-batch3c-built-rows.cjs` (8 consolidated Playwright suite names repointed, 3 moved files fixed,
+  `validate:stage3` corrected, and 4 rows citing a file that NEVER existed across the full git history corrected —
+  2 reclassified `built` → `not_started`, 2 repointed). **Part 2 — REMAINING:** 22 `built_and_tested` rows also name
+  a consolidated spec, and the per-row page-by-page parity audit remains.
 
 ---
 
