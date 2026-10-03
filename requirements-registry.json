@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 524,
+    "total_entries": 525,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -962,7 +962,8 @@
       "counts": "validate:built-rows = 447 evidence rows / 1500 references / 1948 PASS / 0 FAIL.",
       "remaining": "The per-row page-by-page functional parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity). The Amazon UNKNOWNs and evidence-blocked rows (AV-010b read half, AV-033, AV-040 getTransaction) are unchanged."
     },
-    "batch3c_part2a_onbehalf_specs": "Batch 3c part 2a (2026-10-03): the eleven PRE-EXISTING browser-spec failures (outstanding blocker C) all shared ONE root cause - they predated the 2026-09-30 on-behalf authority fix (src/lib/commerce/poOnBehalfAuthority.ts) and drove an on-behalf ACCEPTANCE with no brand authorisation, so the writer (src/data/api.ts) legitimately refused them. Each was repointed at source; the brand authorisation is recorded via the ONE canonical writer authoriseOnBehalfDecisions. NEW gate scripts/validate-onbehalf-spec-authorisation.mjs. Full browser suite now 561 passed / 0 failed."
+    "batch3c_part2a_onbehalf_specs": "Batch 3c part 2a (2026-10-03): the eleven PRE-EXISTING browser-spec failures (outstanding blocker C) all shared ONE root cause - they predated the 2026-09-30 on-behalf authority fix (src/lib/commerce/poOnBehalfAuthority.ts) and drove an on-behalf ACCEPTANCE with no brand authorisation, so the writer (src/data/api.ts) legitimately refused them. Each was repointed at source; the brand authorisation is recorded via the ONE canonical writer authoriseOnBehalfDecisions. NEW gate scripts/validate-onbehalf-spec-authorisation.mjs. Full browser suite now 561 passed / 0 failed.",
+    "batch3c_part2b_functional_parity": "Batch 3c part 2b (2026-10-03): the remaining page-by-page parity dimensions of the evidence-bearing rows - dataset completeness, name-implies-capability and interactivity. NEW gate scripts/validate-functional-parity.mjs (npm run validate:functional-parity) makes them mechanical: F1 pins the react-hooks rules-of-hooks/exhaustive-deps guards at ERROR (plus the plugin dependency); F2 asserts every listing surface reads its canonical dataset (no hardcoded subset); F3 asserts every CRM/Hub/Centre/Manager/Control component implements its capability INLINE and never redirects; F4 asserts every MetricBand fed a MetricTileData[] has a drill-down. It found and FIXED one real defect: src/components/admin/MercentaBrain.tsx rendered six KPI tiles with NO drill-down (a wall of dead numbers); each now drills into the set it counts, proved in a browser by e2e/mercenta-brain.spec.ts test 11."
   },
   "entries": [
     {
@@ -4892,8 +4893,8 @@
       "description": "MERCENTA BRAIN — first-class interactive product surface (Super Admin / Founder): deterministic radial cluster layout (no force simulation, no randomness), interactive SVG canvas with pan/zoom/select/clear plus explicit zoom controls, search + cluster + knowledge-status + entity-type filters, a truthful \"visible of TOTAL\" entity list (the keyboard-accessible equivalent of the graph, sharing one selection state), and an inspector showing canonical properties, the authority model with its explanation, every relationship with its evidence, the provenance pointer and a drill-down to the real destination view. Super-Admin only: hidden from the nav for every other tier AND guarded at render. Overview / Operational Dashboard / Brain remain three separate destinations.",
       "source": "Complete Platform Redesign + Mercenta Brain workstream 2026-09-21",
       "status": "built_and_tested",
-      "evidence": "src/components/admin/MercentaBrain.tsx; src/components/shared/brain/BrainCanvas.tsx; src/lib/intelligence/brain/layout.ts; src/components/layout/AdminShell.tsx (nav + render guard); e2e/mercenta-brain.spec.ts (10 passed, 0 failed — executed)",
-      "last_verified": "2026-09-21",
+      "evidence": "src/components/admin/MercentaBrain.tsx; src/components/shared/brain/BrainCanvas.tsx; src/lib/intelligence/brain/layout.ts; src/components/layout/AdminShell.tsx (nav + render guard); e2e/mercenta-brain.spec.ts (11 passed, 0 failed — executed). Batch 3c part 2b (2026-10-03) FIXED a real interactivity defect here: the six-tile KPI band rendered every metric with NO drill-down (mandatory parity check 5). Each tile now carries a real onOpen that filters the entity list to the set it counts (Entities -> all; Relationships -> entities with an edge; Verified/Simulation/Unknown -> that status; Human authority -> authority=human), and test 11 proves each drill-down in Chromium. Pinned by scripts/validate-functional-parity.mjs.",
+      "last_verified": "2026-10-03",
       "superseded_by": null
     },
     {
@@ -5896,6 +5897,15 @@
       "source": "Batch 3c part 2a (2026-10-03)",
       "status": "built",
       "evidence": "scripts/validate-onbehalf-spec-authorisation.mjs; e2e/proxy-model.spec.ts",
+      "last_verified": "2026-10-03",
+      "superseded_by": null
+    },
+    {
+      "id": "batch3c-part2b-functional-parity-gate",
+      "description": "Batch 3c part 2b — the remaining page-by-page functional-parity dimensions of the evidence-bearing registry rows (global rule 06-page-by-page-functional-parity-audit.md): dataset completeness, name-implies-capability and interactivity. scripts/validate-functional-parity.mjs (npm run validate:functional-parity) makes them mechanical. It found and FIXED one real defect: the Mercenta Brain's six-tile KPI band had no drill-down (mandatory check 5).",
+      "source": "Batch 3c part 2b (2026-10-03); gate scripts/validate-functional-parity.mjs",
+      "status": "built_and_tested",
+      "evidence": "scripts/validate-functional-parity.mjs (NEW; npm run validate:functional-parity; 40 assertions / 0 failures; F1 pins react-hooks rules-of-hooks + exhaustive-deps at ERROR and the plugin dependency; F2 10 dataset-consumer assertions; F3 10 named components implement their capability inline AND never redirect; F4 no dead metric band + the Brain's six tiles each drill down + the audited tiles keep their drill-down + the metric primitive renders a real button). Mutation-proved x4, each file restored byte-identical: eslint rules-of-hooks error->warn fails F1 (eslint.config.js sha256 ab7e9ccbad115cfa617e3e422c6a9cae28abb186d7eb71c73c176ae80cfe434f); BrandCRM useBrands removed fails F2 and BrandCrmDepth removed fails F3 (BrandCRM.tsx sha256 84ef4b128ece438627e86ef05eff144cf28c2bf4cf47155f9a7f451ebd21475d); MercentaBrain onOpen removed fails F4 (MercentaBrain.tsx sha256 52aae9158704212189820e198a1d1e9650b7d6991fc5b3d7f66e5658ce5183dd). Browser: e2e/mercenta-brain.spec.ts test 11 proves every KPI tile drills into the set it counts (11 passed). LIVE: scripts/verify-live-demo.mjs gains L26 (Super Administrator -> Mercenta Brain -> all six tiles drill down; the Verified tile filters the live list to 116 of 120; the Entities tile restores 120 of 120); verify:live 240 PASS / 0 FAIL incl. L26. src/components/admin/MercentaBrain.tsx (the fix); requirements-registry.json (_meta.batch3c_part2b_functional_parity); scope guards BATCH3C_PARITY_SCOPE (E6, all three checks) + BATCH3C_PARITY_DECLARED (E7, incl. its combined list). DEPLOYED @ 7f71d4b and live-verified on https://demo.mercenta.co.uk.",
       "last_verified": "2026-10-03",
       "superseded_by": null
     }
