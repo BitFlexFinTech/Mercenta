@@ -1624,8 +1624,19 @@ function readRedLines() {
   const brnErrors = [];
   brnPage.on('pageerror', (e) => brnErrors.push(String(e)));
   try {
-    const brnAttempt = await liveAdminEntry(brnPage);
-    check(`L26 the deployed site opened and the admin signed in (attempt ${brnAttempt})`, true);
+    /* The Brain is Super-Admin-only (hidden in the nav for every other tier), so
+       L26 signs in as the SUPER ADMIN — `liveAdminEntry`'s "Mercenta Admin Hub"
+       tier does not carry the Brain nav item. Mirrors L25's login. */
+    await gotoLive(brnPage, `${SITE}/`);
+    const brnLogin = brnPage.getByRole('button', { name: 'Partner Login' }).first();
+    await brnLogin.waitFor({ state: 'visible', timeout: 90000 });
+    await brnLogin.click({ timeout: 30000 });
+    await brnPage.waitForTimeout(2500);
+    const brnSa = brnPage.locator('text=Super Admin').first();
+    await brnSa.waitFor({ state: 'visible', timeout: 90000 });
+    await brnSa.click({ timeout: 30000 });
+    await brnPage.waitForTimeout(3500);
+    check('L26 the deployed site opened and the Super Admin signed in', true);
 
     const brnNav = brnPage.locator('nav[aria-label="Primary"] >> text=Mercenta Brain').first();
     await brnNav.waitFor({ state: 'visible', timeout: 90000 });
