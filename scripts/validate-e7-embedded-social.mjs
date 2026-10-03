@@ -1113,6 +1113,20 @@ try {
     'package.json',
   ];
 
+  /**
+   * §BATCH 2o — THE AV-013 RECONCILIATION PHASE (2026-10-03). A RECORDS-ONLY increment plus ONE
+   * validator extension: the unsupported "10am Pacific" routing deadline (register finding AV-013)
+   * was already removed from the product in Wave 3 and the brand-side mechanic reconciled in §P4;
+   * this phase makes that reconciliation CHECKABLE (a repo-wide, comment-stripped sweep in
+   * `validate:wave3-logistics` §8) and repairs every stale record that still called AV-013 OPEN.
+   * NO application runtime behaviour changes — the only touched application files are validators.
+   */
+  const BATCH2O_AV013_RECONCILIATION_DECLARED = [
+    'scripts/validate-wave3-logistics.mjs',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1908,7 +1922,13 @@ try {
            * but its declared surface is accepted here as every phase's is.
            */
           !BATCH2N_ASN_PALLETS_DECLARED.includes(f) &&
-          !BATCH2N_ASN_PALLETS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH2N_ASN_PALLETS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2o — THE AV-013 RECONCILIATION PHASE (2026-10-03) — touches no protected path,
+           * but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH2O_AV013_RECONCILIATION_DECLARED.includes(f) &&
+          !BATCH2O_AV013_RECONCILIATION_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2182,6 +2202,10 @@ try {
      * §BATCH 2n — THE ASN PALLET-STRUCTURE PHASE (2026-10-03) — the pallet surface (see above).
      */
     ...BATCH2N_ASN_PALLETS_DECLARED,
+    /**
+     * §BATCH 2o — THE AV-013 RECONCILIATION PHASE (2026-10-03) — the reconciliation surface (see above).
+     */
+    ...BATCH2O_AV013_RECONCILIATION_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

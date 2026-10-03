@@ -1171,6 +1171,20 @@ const BATCH2N_ASN_PALLETS_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §BATCH 2o — THE AV-013 RECONCILIATION PHASE (2026-10-03). A RECORDS-ONLY increment plus ONE
+ * validator extension: the unsupported "10am Pacific" routing deadline (register finding AV-013)
+ * was already removed from the product in Wave 3 and the brand-side mechanic reconciled in §P4;
+ * this phase makes that reconciliation CHECKABLE (a repo-wide, comment-stripped sweep in
+ * `validate:wave3-logistics` §8) and repairs every stale record that still called AV-013 OPEN.
+ * NO application runtime behaviour changes — the only touched application files are validators.
+ */
+const BATCH2O_AV013_RECONCILIATION_SCOPE = new Set([
+  'scripts/validate-wave3-logistics.mjs',          /* §8 — the repo-wide AV-013 claim-absence sweep + inline-record + owner-consumption assertions */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2371,7 +2385,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH2M_PICKUP_LEAD_TIME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2n — the ASN pallet-structure phase (see above). First protected-path check (F5). */
         BATCH2N_ASN_PALLETS_SCOPE.has(p) ||
-        [...BATCH2N_ASN_PALLETS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2N_ASN_PALLETS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2o — the AV-013 reconciliation (see above). First protected-path check (F5). */
+        BATCH2O_AV013_RECONCILIATION_SCOPE.has(p) ||
+        [...BATCH2O_AV013_RECONCILIATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2466,6 +2483,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2n — the ASN pallet-structure phase (see above). Second protected-path check (F5b). */
         BATCH2N_ASN_PALLETS_SCOPE.has(p) ||
         [...BATCH2N_ASN_PALLETS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2o — the AV-013 reconciliation (see above). Second protected-path check (F5b). */
+        BATCH2O_AV013_RECONCILIATION_SCOPE.has(p) ||
+        [...BATCH2O_AV013_RECONCILIATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2796,6 +2816,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2n — the ASN pallet-structure phase (see above). */
           BATCH2N_ASN_PALLETS_SCOPE.has(p) ||
           [...BATCH2N_ASN_PALLETS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2o — the AV-013 reconciliation (see above). */
+          BATCH2O_AV013_RECONCILIATION_SCOPE.has(p) ||
+          [...BATCH2O_AV013_RECONCILIATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

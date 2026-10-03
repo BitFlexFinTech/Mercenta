@@ -678,6 +678,88 @@ check(
   'fetch was replaced with a throwing stub before the first derivation'
 );
 
+/* ── 8. §BATCH 2o (AV-013) — the unsupported channel routing deadline is GONE ──
+ *
+ * The register classified `AV-013` CONTRADICTED: the product asserted, as a
+ * retail-channel rule, that a "Routing Request [is] due by 10am Pacific the day
+ * before the ship window closes". No Amazon source reached states it. Wave 3
+ * removed the claim and re-declared the deadline ONCE as Mercenta's OWN
+ * readiness target; §P4 reconciled the brand-side mechanic (the
+ * `RoutingRequestForm` placeholder became read-only status). This section makes
+ * that reconciliation CHECKABLE rather than merely asserted: it proves the
+ * unsupported claim survives only in explanatory COMMENTS (never as code), that
+ * the removal is documented inline, and that the routing surfaces consume the
+ * ONE Mercenta-owned target.
+ *
+ * Mirrors the repo-wide sweep pattern of `validate-po-ack-onboarding.mjs` §D
+ * (comment-stripped, whitespace-normalised), so a wrapped or reformatted copy
+ * cannot hide from the gate.
+ */
+console.log('\n§ BATCH 2o (AV-013) — no unsupported channel routing deadline remains as code\n');
+
+const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+function walkSrc(dir, out = []) {
+  for (const entry of fs.readdirSync(dir)) {
+    const full = path.join(dir, entry);
+    if (fs.statSync(full).isDirectory()) walkSrc(full, out);
+    else if (/\.tsx?$/.test(entry)) out.push(full);
+  }
+  return out;
+}
+/**
+ * The unsupported claim may survive ONLY as a documented removal reference.
+ *
+ * EVERY occurrence of the deadline token in CODE (comments stripped) must sit
+ * within an explanatory window that names it as removed / unsupported / not
+ * established / `AV-013`. An occurrence WITHOUT such a qualifier is a
+ * re-introduction of the unsupported claim — exactly what this gate exists to
+ * catch. (The old `collectChain.ts` string that names the "removed, unsupported
+ * '10am Pacific' claim" is therefore correctly allowed; a fresh "due by 10am
+ * Pacific" assertion is not.)
+ */
+const DEADLINE_TOKEN = /10\s?(?:am|:00)\s?(?:Pacific|PT)\b/i;
+const REMOVAL_QUALIFIER =
+  /(removed|unsupported|not established|no amazon source|no channel source|former|av-013)/i;
+const bareTokenOffenders = walkSrc(path.join(ROOT, 'src'))
+  .map((f) => ({ f, body: stripComments(fs.readFileSync(f, 'utf8')).replace(/\s+/g, ' ') }))
+  .filter(({ body }) => {
+    const m = body.match(DEADLINE_TOKEN);
+    if (!m || m.index === undefined) return false;
+    const window = body.slice(Math.max(0, m.index - 160), m.index + 160);
+    return !REMOVAL_QUALIFIER.test(window);
+  })
+  .map(({ f }) => path.relative(ROOT, f));
+check(
+  'no src file asserts the unsupported "10am Pacific" channel deadline as code' +
+    ' (any mention must be a documented removal reference)',
+  bareTokenOffenders.length === 0,
+  bareTokenOffenders.join(', ')
+);
+
+// The removal is RECORDED INLINE (comments preserved, so the OLD contract stays visible and
+// the reason it was removed cannot be lost) — the §REPOINTED discipline this repo requires.
+const OWNER_SRC = fs.readFileSync(path.join(ROOT, 'src/lib/shipping/routingReadiness.ts'), 'utf8');
+const COMPONENT_SRC = fs.readFileSync(path.join(ROOT, 'src/components/shared/RoutingRequest.tsx'), 'utf8');
+check(
+  'the removal is recorded inline (the OLD "10am Pacific" claim is documented as unsupported/removed)',
+  /10am Pacific/.test(OWNER_SRC) && /NOT established by any Amazon source|unsupported/i.test(OWNER_SRC) &&
+    /10am Pacific/.test(COMPONENT_SRC)
+);
+
+// The routing surfaces CONSUME the ONE Mercenta-owned target (no re-typed deadline) …
+const COMPONENT_CODE = stripComments(COMPONENT_SRC);
+check(
+  'the routing component consumes the ONE Mercenta-owned target (no re-typed deadline)',
+  /from '@\/lib\/shipping\/routingReadiness'/.test(COMPONENT_CODE) &&
+    /ROUTING_READINESS\.label/.test(COMPONENT_CODE) &&
+    /routingReadinessNotice\(\)/.test(COMPONENT_CODE)
+);
+// … and the brand-side routing-request placeholder form is gone (reconciled in §P4).
+check(
+  'the brand-side routing-request placeholder form is gone (reconciled in §P4)',
+  !/RoutingRequestForm/.test(COMPONENT_CODE)
+);
+
 console.log('');
 if (fail === 0) {
   console.log(`WAVE3_LOGISTICS_VALIDATION_PASS (${pass} passed, 0 failed)`);
