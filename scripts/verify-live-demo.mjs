@@ -52,6 +52,12 @@
  *   L22 the ASN's carton→pallet structure on the DEPLOYED brand surface: the
  *       pallet label (its own SSCC container identifier) and the structure's
  *       stated basis (BATCH 2n · AV-016)
+ *   L23 the fulfilment-track label on the DEPLOYED admin surface (BATCH 2p · AV-025)
+ *   L24 the contract closing controls (Renew / Terminate) on the DEPLOYED admin
+ *       surface (BATCH 3a · S7)
+ *   L25 the founder closing path on the DEPLOYED Super-Admin work surface (BATCH 3b)
+ *   L26 the Mercenta Brain's KPI drill-down on the DEPLOYED Super-Admin surface:
+ *       every tile opens into the set it counts (BATCH 3c part 2b)
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -1604,6 +1610,81 @@ function readRedLines() {
     );
   }
   await fndPage.close();
+
+  /* ── L26 — BATCH 3c PART 2b: THE BRAIN'S KPI DRILL-DOWN, LIVE ───────────────
+   * WHY THIS EXISTS. The mandatory parity audit (check 5) requires every metric
+   * card to open into the set it counts. The Mercenta Brain's six-tile KPI band
+   * previously rendered every tile with NO drill-down (a wall of dead numbers);
+   * each tile now filters the entity list to its set. A source assertion would
+   * prove nothing about the DEPLOYED bundle, so the tiles are clicked on the live
+   * Super-Admin surface and the rendered entity list is read.
+   */
+  console.log('\n--- L26 the Brain KPI drill-down, on the live Super-Admin surface ---');
+  const brnPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const brnErrors = [];
+  brnPage.on('pageerror', (e) => brnErrors.push(String(e)));
+  try {
+    const brnAttempt = await liveAdminEntry(brnPage);
+    check(`L26 the deployed site opened and the admin signed in (attempt ${brnAttempt})`, true);
+
+    const brnNav = brnPage.locator('nav[aria-label="Primary"] >> text=Mercenta Brain').first();
+    await brnNav.waitFor({ state: 'visible', timeout: 90000 });
+    await brnNav.click({ timeout: 30000 });
+    await brnPage.getByTestId('brain-counts').waitFor({ state: 'visible', timeout: 60000 });
+    await brnPage.waitForTimeout(1200);
+
+    /* every one of the six tiles carries a real drill-down button */
+    const brnIds = ['entities', 'relationships', 'verified', 'simulation', 'unknown', 'human'];
+    const brnMissing = [];
+    for (const id of brnIds) {
+      const ok = await brnPage.getByTestId(`kpi-open-${id}`).first().isVisible().catch(() => false);
+      if (!ok) brnMissing.push(id);
+    }
+    check(
+      `L26 all six KPI tiles expose a drill-down button on the DEPLOYED build${
+        brnMissing.length ? ` (missing: ${brnMissing.join(', ')})` : ''
+      }`,
+      brnMissing.length === 0
+    );
+
+    /* clicking the Verified tile filters the entity list to that tile's set */
+    const brnRows = brnPage.locator('[data-testid^="brain-entity-"]');
+    const brnAll = await brnRows.count();
+    await brnPage.getByTestId('kpi-open-verified').click({ timeout: 30000 });
+    await brnPage.waitForTimeout(1200);
+    const brnShown = await brnRows.count();
+    const brnBadges = brnPage.locator('[data-testid^="brain-entity-"] [data-status]');
+    const brnBadgeCount = await brnBadges.count();
+    let brnAllVerified = brnBadgeCount > 0;
+    for (let i = 0; i < brnBadgeCount; i++) {
+      const v = await brnBadges.nth(i).getAttribute('data-status');
+      if (v !== 'verified') { brnAllVerified = false; break; }
+    }
+    check(
+      `L26 clicking the Verified tile filters the LIVE entity list to verified entities (${brnShown} of ${brnAll} shown)`,
+      brnShown > 0 && brnShown <= brnAll && brnAllVerified
+    );
+
+    /* the Entities tile restores the full set */
+    await brnPage.getByTestId('kpi-open-entities').click({ timeout: 30000 });
+    await brnPage.waitForTimeout(1000);
+    const brnRestored = await brnRows.count();
+    check(
+      `L26 the Entities tile restores the full set on the DEPLOYED build (${brnRestored} of ${brnAll})`,
+      brnRestored === brnAll
+    );
+
+    check(
+      `L26 the driven Brain surface rendered with no uncaught error (errors: ${brnErrors.join(' | ') || 'none'})`,
+      brnErrors.length === 0
+    );
+  } catch (brnError) {
+    check(
+      `L26 the Brain KPI drill-down could NOT be driven live (${String(brnError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await brnPage.close();
 
 
 

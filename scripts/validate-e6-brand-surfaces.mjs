@@ -1278,6 +1278,7 @@ const BATCH3C_PARITY_SCOPE = new Set([
   'e2e/mercenta-brain.spec.ts',                     /* NEW - the KPI drill-down browser test */
   'scripts/validate-e6-brand-surfaces.mjs',         /* this declaration */
   'scripts/validate-e7-embedded-social.mjs',        /* the mirrored declaration */
+  'scripts/verify-live-demo.mjs',                   /* NEW - the L26 live check */
   'package.json',                                   /* validate:functional-parity registered */
   'requirements-registry.json',                     /* the audited rows reconciled */
   'PROJECT_STATUS.md',                              /* state */

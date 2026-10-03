@@ -1207,6 +1207,7 @@ try {
     'e2e/mercenta-brain.spec.ts',
     'scripts/validate-e6-brand-surfaces.mjs',
     'scripts/validate-e7-embedded-social.mjs',
+    'scripts/verify-live-demo.mjs',
     'package.json',
     'requirements-registry.json',
     'PROJECT_STATUS.md',
