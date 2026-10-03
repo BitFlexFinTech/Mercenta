@@ -421,8 +421,16 @@ is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 pha
   rows and more in the `built_and_tested` rows, all repaired at source by `scripts/reconcile-batch3c-built-rows.cjs`
   (10 consolidated Playwright suite names repointed, 5 moved/removed files fixed, 3 unregistered npm-script names
   corrected, an empty-evidence row filled, and 4 rows citing a file that NEVER existed across the full git history
-  corrected — 2 reclassified `built` → `not_started`, 2 repointed). **Part 2 — REMAINING:** the per-row page-by-page
-  parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity).
+  corrected — 2 reclassified `built` → `not_started`, 2 repointed). **Part 2a — DONE (2026-10-03): the browser
+  evidence made honest.** The whole PRE-EXISTING browser-failure class (11 specs — `admin-operational-surfaces` ×3,
+  `invoicing` ×3, `proxy-model`, `po-admin-ack-surface`, `shipment-asn` ×2) shared ONE root cause: they predated the
+  2026-09-30 on-behalf authority fix (`src/lib/commerce/poOnBehalfAuthority.ts`), so each drove an on-behalf ACCEPTANCE
+  with no brand authorisation on record and was legitimately refused by the writer. Each was repointed at source (the
+  brand's authorisation now recorded through the ONE canonical writer `authoriseOnBehalfDecisions`; the `invoicing`
+  receipt-gate test builds its order through canonical writers instead of a phantom store instance). NEW gate
+  `scripts/validate-onbehalf-spec-authorisation.mjs` (`npm run validate:onbehalf-spec-authorisation`, mutation-proved).
+  The FULL browser suite is now **561 passed / 2 skipped / 0 failed** (was 11 failures). **Part 2b — REMAINING:** the
+  remaining page-by-page parity dimensions (dataset completeness / name-implies-capability / interactivity).
 
 ---
 

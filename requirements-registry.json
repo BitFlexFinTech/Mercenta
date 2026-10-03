@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 523,
+    "total_entries": 524,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -961,7 +961,8 @@
       "fixed": "Every stale reference across BOTH `built` and `built_and_tested` rows: 10 consolidated Playwright suite names repointed to their current canonical spec (e2e/admin-views.spec.ts -> e2e/admin-operational-surfaces.spec.ts and 9 more, incl. e2e/batch-d-integrations.spec.ts -> e2e/integration-hub.spec.ts and e2e/popup-interactivity.spec.ts -> e2e/record-drawer.spec.ts); moved/removed files repointed (ShippingCostEstimate.tsx -> components/shared, tamSamPipeline.tsx -> .ts, tourDefinitions.ts -> config/tours, postmarkNotifier.ts -> messaging/email.ts, BrandPayouts.tsx -> lib/billing/payouts.ts); unregistered npm-script references corrected (validate:stage3, validate:discovery, validate:e5); an empty-evidence row (stage6-shipment-tracking-timeline) filled (its stale e2eRef repointed too); and 4 rows whose cited file NEVER existed across the full git history corrected — batch-4-rate-limiting + batch10-health-check-digest reclassified built -> not_started (no Edge-Function rate limiting / health check exists; the master matrix records rate limiting as BLOCKED, S13) and batchA-freight-term + batch-2-clinerules repointed to the real sources (the features exist).",
       "counts": "validate:built-rows = 447 evidence rows / 1500 references / 1948 PASS / 0 FAIL.",
       "remaining": "The per-row page-by-page functional parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity). The Amazon UNKNOWNs and evidence-blocked rows (AV-010b read half, AV-033, AV-040 getTransaction) are unchanged."
-    }
+    },
+    "batch3c_part2a_onbehalf_specs": "Batch 3c part 2a (2026-10-03): the eleven PRE-EXISTING browser-spec failures (outstanding blocker C) all shared ONE root cause - they predated the 2026-09-30 on-behalf authority fix (src/lib/commerce/poOnBehalfAuthority.ts) and drove an on-behalf ACCEPTANCE with no brand authorisation, so the writer (src/data/api.ts) legitimately refused them. Each was repointed at source; the brand authorisation is recorded via the ONE canonical writer authoriseOnBehalfDecisions. NEW gate scripts/validate-onbehalf-spec-authorisation.mjs. Full browser suite now 561 passed / 0 failed."
   },
   "entries": [
     {
@@ -5886,6 +5887,15 @@
       "source": "Batch 3c (2026-10-03) - built-row evidence audit; gate scripts/validate-built-rows.mjs; repair scripts/reconcile-batch3c-built-rows.cjs",
       "status": "built",
       "evidence": "scripts/validate-built-rows.mjs (NEW; npm run validate:built-rows; 447 evidence rows / 1500 references / 1948 PASS / 0 FAIL; mutation-proved: a dead e2e spec reference fails it with 1 failure); scripts/reconcile-batch3c-built-rows.cjs (NEW; at-source repair of the 69 dead references); requirements-registry.json (_meta.batch3c_built_rows records the fix and the remaining work).",
+      "last_verified": "2026-10-03",
+      "superseded_by": null
+    },
+    {
+      "id": "batch3c-part2a-onbehalf-spec-authorisation",
+      "description": "Batch 3c part 2a: every on-behalf acceptance browser spec records the brand authorisation (the 11 stale specs repointed; suite green 561/0)",
+      "source": "Batch 3c part 2a (2026-10-03)",
+      "status": "built",
+      "evidence": "scripts/validate-onbehalf-spec-authorisation.mjs; e2e/proxy-model.spec.ts",
       "last_verified": "2026-10-03",
       "superseded_by": null
     }
