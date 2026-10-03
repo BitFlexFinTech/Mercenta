@@ -1262,6 +1262,28 @@ const BATCH3B_FOUNDER_CLOSING_SCOPE = new Set([
   'HANDOFF.md',                                     /* mirrored state */
   'STATUS_CHECK.md',                                /* session record */
 ]);
+/**
+ * §BATCH 3c PART 2b — THE FUNCTIONAL-PARITY GATE (2026-10-03).
+ *
+ * The remaining page-by-page parity dimensions of the `built` rows (global rule
+ * `06-page-by-page-functional-parity-audit.md`): dataset completeness,
+ * name-implies-capability and interactivity. This phase FIXES one real defect the
+ * audit found — the Mercenta Brain's KPI band rendered six metric tiles with NO
+ * drill-down (a wall of dead numbers, mandatory check 5) — and adds the gate that
+ * keeps the whole class from returning. The declared surface:
+ */
+const BATCH3C_PARITY_SCOPE = new Set([
+  'src/components/admin/MercentaBrain.tsx',         /* the fixed KPI band: every tile now drills down */
+  'scripts/validate-functional-parity.mjs',         /* NEW - this phase's gate */
+  'e2e/mercenta-brain.spec.ts',                     /* NEW - the KPI drill-down browser test */
+  'scripts/validate-e6-brand-surfaces.mjs',         /* this declaration */
+  'scripts/validate-e7-embedded-social.mjs',        /* the mirrored declaration */
+  'package.json',                                   /* validate:functional-parity registered */
+  'requirements-registry.json',                     /* the audited rows reconciled */
+  'PROJECT_STATUS.md',                              /* state */
+  'HANDOFF.md',                                     /* mirrored state */
+  'STATUS_CHECK.md',                                /* session record */
+]);
 
 
 
@@ -2477,7 +2499,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH3A_S7_CONTRACT_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 3b — the founder closing paths (see above). First protected-path check (F5). */
         BATCH3B_FOUNDER_CLOSING_SCOPE.has(p) ||
-        [...BATCH3B_FOUNDER_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH3B_FOUNDER_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 3c part 2b — the functional-parity gate (see above). First protected-path check (F5). */
+        BATCH3C_PARITY_SCOPE.has(p) ||
+        [...BATCH3C_PARITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2584,6 +2609,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 3b — the founder closing paths (see above). Second protected-path check (F5b). */
         BATCH3B_FOUNDER_CLOSING_SCOPE.has(p) ||
         [...BATCH3B_FOUNDER_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 3c part 2b — the functional-parity gate (see above). Second protected-path check (F5b). */
+        BATCH3C_PARITY_SCOPE.has(p) ||
+        [...BATCH3C_PARITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2926,6 +2954,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 3b — the founder closing paths (see above). */
           BATCH3B_FOUNDER_CLOSING_SCOPE.has(p) ||
           [...BATCH3B_FOUNDER_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 3c part 2b — the functional-parity gate (see above). */
+          BATCH3C_PARITY_SCOPE.has(p) ||
+          [...BATCH3C_PARITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

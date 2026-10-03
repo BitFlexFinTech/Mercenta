@@ -77,6 +77,7 @@
     "validate:duplicate-owners": "node scripts/validate-duplicate-owners.mjs",
     "validate:on-behalf-authority": "node scripts/validate-on-behalf-authority.mjs",
     "validate:onbehalf-spec-authorisation": "node scripts/validate-onbehalf-spec-authorisation.mjs",
+    "validate:functional-parity": "node scripts/validate-functional-parity.mjs",
     "validate:po-ack-window": "node scripts/validate-po-acknowledgement-window.mjs",
     "validate:po-ack-enforcement": "node scripts/validate-po-acknowledgement-enforcement.mjs",
     "validate:po-ack-work": "node scripts/validate-po-acknowledgement-work.mjs",

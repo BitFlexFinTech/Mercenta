@@ -1195,6 +1195,25 @@ try {
     'STATUS_CHECK.md',
   ];
 
+  /**
+   * §BATCH 3c PART 2b — THE FUNCTIONAL-PARITY GATE (2026-10-03). The declared
+   * surface of the phase that fixes the Mercenta Brain's dead-end KPI band and
+   * adds the gate for the three remaining page-by-page parity dimensions. Mirrors
+   * the E6 declaration.
+   */
+  const BATCH3C_PARITY_DECLARED = [
+    'src/components/admin/MercentaBrain.tsx',
+    'scripts/validate-functional-parity.mjs',
+    'e2e/mercenta-brain.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+    'requirements-registry.json',
+    'PROJECT_STATUS.md',
+    'HANDOFF.md',
+    'STATUS_CHECK.md',
+  ];
+
 
 
 
@@ -2016,7 +2035,13 @@ try {
            * but its declared surface is accepted here as every phase's is.
            */
           !BATCH3B_FOUNDER_CLOSING_DECLARED.includes(f) &&
-          !BATCH3B_FOUNDER_CLOSING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH3B_FOUNDER_CLOSING_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 3c PART 2b — THE FUNCTIONAL-PARITY GATE (2026-10-03) — touches no
+           * protected path, but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH3C_PARITY_DECLARED.includes(f) &&
+          !BATCH3C_PARITY_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2298,6 +2323,10 @@ try {
      * §BATCH 2p — THE FOUR INFERENCE RELABELS (2026-10-03) — the relabel surface (see above).
      */
     ...BATCH2P_INFERENCE_RELABELS_DECLARED,
+    /**
+     * §BATCH 3c PART 2b — THE FUNCTIONAL-PARITY GATE (2026-10-03) — the parity surface (see above).
+     */
+    ...BATCH3C_PARITY_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

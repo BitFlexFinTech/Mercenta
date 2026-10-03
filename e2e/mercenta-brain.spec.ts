@@ -231,4 +231,42 @@ test.describe('Mercenta Brain — interactive product surface', () => {
     await page.screenshot({ path: `${SHOTS}/brand-map-1440.png` });
     expect(pageErrors).toEqual([]);
   });
+
+  test('11. every KPI tile drills down into the set it counts (part 2b interactivity)', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (e) => pageErrors.push(String(e)));
+    await openBrain(page);
+
+    const total = (await readCounts(page)).entities;
+
+    // (a) every tile carries a real, focusable drill-down button — no dead number.
+    for (const id of ['entities', 'relationships', 'verified', 'simulation', 'unknown', 'human']) {
+      await expect(page.getByTestId(`kpi-open-${id}`)).toBeVisible();
+    }
+
+    // (b) DATASET COMPLETENESS: the "Entities" tile equals the canonical graph total.
+    await expect(page.getByTestId('kpi-entities')).toContainText(String(total));
+
+    // (c) the "Verified" tile drills into EXACTLY the verified entities.
+    const rows = page.locator('[data-testid^="brain-entity-"]');
+    const allRows = await rows.count();
+    await page.getByTestId('kpi-open-verified').click();
+    const shown = await rows.count();
+    expect(shown).toBeGreaterThan(0);
+    expect(shown).toBeLessThanOrEqual(allRows);
+    const badges = page.locator('[data-testid^="brain-entity-"] [data-status]');
+    const badgeCount = await badges.count();
+    expect(badgeCount).toBeGreaterThan(0);
+    for (let i = 0; i < badgeCount; i++) {
+      await expect(badges.nth(i)).toHaveAttribute('data-status', 'verified');
+    }
+
+    // (d) the "Entities" tile restores the full set (clearFilters).
+    await page.getByTestId('kpi-open-entities').click();
+    await expect(rows.first()).toBeVisible();
+    expect(await rows.count()).toBe(allRows);
+
+    await page.screenshot({ path: `${SHOTS}/brain-kpi-drilldown.png` });
+    expect(pageErrors).toEqual([]);
+  });
 });

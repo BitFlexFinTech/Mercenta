@@ -119,13 +119,35 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
   const [cluster, setCluster] = useState('all');
   const [status, setStatus] = useState('all');
   const [kind, setKind] = useState('all');
+  /**
+   * §Batch 3c part 2b — the two extra filter dimensions the KPI band drills into
+   * (mandatory parity check 5: every metric card must open into the set it counts).
+   * `authority` filters by the entity's authority model (code/automation/agent/
+   * mixed/human); `linked` narrows to entities that actually carry a relationship.
+   * Both are driven by a KPI tile and reset by `clearFilters` — never a second,
+   * competing way to see the same number.
+   */
+  const [authority, setAuthority] = useState('all');
+  const [linked, setLinked] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  /** Node ids that appear in at least one edge — the reachable set behind "Relationships". */
+  const linkedIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const edge of graph.edges) {
+      ids.add(edge.from);
+      ids.add(edge.to);
+    }
+    return ids;
+  }, [graph.edges]);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return graph.nodes.filter((node) => {
       if (cluster !== 'all' && BRAIN_KIND_DEFINITIONS[node.kind].cluster !== cluster) return false;
       if (status !== 'all' && node.status !== status) return false;
+      if (authority !== 'all' && node.authority !== authority) return false;
+      if (linked && !linkedIds.has(node.id)) return false;
       if (kind !== 'all' && node.kind !== kind) return false;
       if (!needle) return true;
       return (
@@ -135,7 +157,7 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
         (node.ref ?? '').toLowerCase().includes(needle)
       );
     });
-  }, [graph.nodes, query, cluster, status, kind]);
+  }, [graph.nodes, query, cluster, status, authority, linked, linkedIds, kind]);
 
   const visibleIds = useMemo(() => new Set(visible.map((n) => n.id)), [visible]);
   const selected = selectedId ? brainNodeById(graph, selectedId) : undefined;
@@ -155,6 +177,21 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
     ];
   }, [graph.nodes]);
 
+  const clearFilters = () => {
+    setQuery('');
+    setCluster('all');
+    setStatus('all');
+    setKind('all');
+    setAuthority('all');
+    setLinked(false);
+  };
+
+  /**
+   * §Batch 3c part 2b — EVERY KPI tile now drills down into the set it counts
+   * (mandatory parity check 5). Each `onOpen` applies the filter that makes the
+   * tile's number a REACHABLE set of entity rows in the list below, and
+   * `clearFilters` restores the full graph — so no metric is a dead-end number.
+   */
   const kpis: MetricTileData[] = [
     {
       id: 'entities',
@@ -164,6 +201,7 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
       tone: 'info',
       statusText: 'Projected from domain',
       domain: 'intelligence',
+      onOpen: clearFilters,
     },
     {
       id: 'relationships',
@@ -173,6 +211,10 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
       tone: 'info',
       statusText: 'Evidence-backed',
       domain: 'orders',
+      onOpen: () => {
+        clearFilters();
+        setLinked(true);
+      },
     },
     {
       id: 'verified',
@@ -182,6 +224,7 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
       tone: 'success',
       statusText: 'VERIFIED',
       domain: 'compliance',
+      onOpen: () => setStatus('verified'),
     },
     {
       id: 'simulation',
@@ -191,6 +234,7 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
       tone: 'info',
       statusText: 'SIMULATION',
       domain: 'logistics',
+      onOpen: () => setStatus('simulation'),
     },
     {
       id: 'unknown',
@@ -200,6 +244,7 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
       tone: 'neutral',
       statusText: 'UNKNOWN',
       domain: 'risk',
+      onOpen: () => setStatus('unknown'),
     },
     {
       id: 'human',
@@ -209,15 +254,9 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
       tone: 'brass',
       statusText: 'HUMAN',
       domain: 'communications',
+      onOpen: () => setAuthority('human'),
     },
   ];
-
-  const clearFilters = () => {
-    setQuery('');
-    setCluster('all');
-    setStatus('all');
-    setKind('all');
-  };
 
   return (
     <WorkspaceFrame>
@@ -355,9 +394,9 @@ export function MercentaBrain({ onNavigate }: { onNavigate?: (view: string) => v
           title={`Entities (${visible.length} of ${graph.nodes.length})`}
           description="The keyboard- and screen-reader-accessible equivalent of the graph. Selecting here selects in the graph."
           action={
-            kind !== 'all' ? (
-              <Button variant="ghost" size="sm" onClick={() => setKind('all')}>
-                Clear type filter
+            kind !== 'all' || authority !== 'all' || linked || status !== 'all' || cluster !== 'all' || query.trim() ? (
+              <Button variant="ghost" size="sm" onClick={clearFilters} data-testid="brain-clear-inline">
+                Clear filters
               </Button>
             ) : undefined
           }
