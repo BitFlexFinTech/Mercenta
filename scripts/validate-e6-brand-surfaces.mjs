@@ -1139,6 +1139,38 @@ const BATCH2M_PICKUP_LEAD_TIME_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §BATCH 2n — THE ASN PALLET-STRUCTURE PHASE (`AV-016`, 2026-10-03). The channel
+ * documents the ASN as carrying "carton + pallet structures"; the platform modelled
+ * the CARTON half only. This phase adds the ONE owner of the carton→pallet grouping
+ * (`src/lib/shipping/asnPallets.ts`), declares the capacity once
+ * (`ASN_PALLET_PROFILE` in `src/config/shipping.ts`), gives each pallet its own SSCC
+ * (`src/lib/documents/sscc.ts`), carries the structure on the ASN record
+ * (`src/data/api.ts`), sends it with the channel confirmation
+ * (`src/lib/spapi/client.ts`, `src/lib/spapi/mockClient.ts`,
+ * `src/lib/shipping/channelShipmentOperations.ts`), states it on the documents
+ * (`src/lib/documents/poDocumentPack.ts`) and gates it
+ * (`scripts/validate-asn-pallets.mjs`). Same mechanism as every phase above: a changed
+ * SOURCE file outside EVERY declared set is still refused.
+ */
+const BATCH2N_ASN_PALLETS_SCOPE = new Set([
+  'src/config/shipping.ts',                        /* ASN_PALLET_PROFILE — the ONE declared capacity */
+  'src/lib/shipping/asnPallets.ts',                /* NEW — the ONE owner of the carton→pallet grouping */
+  'src/lib/documents/sscc.ts',                     /* ssccForPallet — generation stays in the ONE SSCC owner */
+  'src/data/api.ts',                               /* AsnPallet + AsnDetail.pallets + the partition invariant */
+  'src/lib/commerce/proxyProcessor.ts',            /* asnForInstruction carries the structure + sends it */
+  'src/lib/spapi/client.ts',                       /* the ASN payload's pallet-level structure */
+  'src/lib/spapi/mockClient.ts',                   /* the simulated channel refuses an inconsistent structure */
+  'src/lib/shipping/channelShipmentOperations.ts', /* the confirmation carries the pallets to the channel */
+  'src/lib/documents/poDocumentPack.ts',           /* the documents state the pallet structure */
+  'scripts/validate-asn-pallets.mjs',              /* NEW — this phase's gate */
+  'scripts/verify-live-demo.mjs',                  /* +L22 — the live check of the pallet structure */
+  'e2e/po-documents.spec.ts',                      /* the browser proof the labels render a pallet structure */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 
 /* ── the modules under test ───────────────────────────────────────────────── */
 
@@ -2336,7 +2368,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH2L_ASN_BEFORE_RECEIPT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 2m — the pickup lead-time phase (see above). First protected-path check (F5). */
         BATCH2M_PICKUP_LEAD_TIME_SCOPE.has(p) ||
-        [...BATCH2M_PICKUP_LEAD_TIME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH2M_PICKUP_LEAD_TIME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2n — the ASN pallet-structure phase (see above). First protected-path check (F5). */
+        BATCH2N_ASN_PALLETS_SCOPE.has(p) ||
+        [...BATCH2N_ASN_PALLETS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -2428,6 +2463,9 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         /** §BATCH 2m — the pickup lead-time phase (see above). Second protected-path check (F5b). */
         BATCH2M_PICKUP_LEAD_TIME_SCOPE.has(p) ||
         [...BATCH2M_PICKUP_LEAD_TIME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §BATCH 2n — the ASN pallet-structure phase (see above). Second protected-path check (F5b). */
+        BATCH2N_ASN_PALLETS_SCOPE.has(p) ||
+        [...BATCH2N_ASN_PALLETS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
@@ -2755,6 +2793,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §BATCH 2m — the pickup lead-time phase (see above). */
           BATCH2M_PICKUP_LEAD_TIME_SCOPE.has(p) ||
           [...BATCH2M_PICKUP_LEAD_TIME_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 2n — the ASN pallet-structure phase (see above). */
+          BATCH2N_ASN_PALLETS_SCOPE.has(p) ||
+          [...BATCH2N_ASN_PALLETS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))

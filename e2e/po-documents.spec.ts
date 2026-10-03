@@ -136,6 +136,13 @@ test.describe('§P6 — the PO document pack (continued)', () => {
 
     const frame = page.frameLocator('[data-testid="po-document-frame"]');
     await expect(frame.locator('body')).toContainText(/Carton 1 of \d/);
+    /**
+     * §BATCH 2n (`AV-016`) — the sheet also states the CARTON→PALLET structure the
+     * channel documents (the ASN carries "carton + pallet structures"): one pallet
+     * label per pallet, each with the pallet's own SSCC container identifier.
+     */
+    await expect(frame.locator('body')).toContainText(/Pallet label — SSCC/);
+    await expect(frame.locator('body')).toContainText(/Pallet 1 of \d/);
     const body = (await frame.locator('body').innerText()) ?? '';
     // Complete 18-digit SSCCs are printed, each under the placeholder prefix.
     const identifiers = body.match(/\b0{8}\d{10}\b/g) ?? [];

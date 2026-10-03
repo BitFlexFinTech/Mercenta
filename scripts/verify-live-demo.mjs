@@ -49,6 +49,9 @@
  *       (BATCH 2k/2l · AV-011/AV-015)
  *   L21 the channel pickup lead-time verdict on the DEPLOYED console, per
  *       Freight Collect purchase order (BATCH 2m · AV-014)
+ *   L22 the ASN's carton→pallet structure on the DEPLOYED brand surface: the
+ *       pallet label (its own SSCC container identifier) and the structure's
+ *       stated basis (BATCH 2n · AV-016)
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -1326,6 +1329,113 @@ function readRedLines() {
       false
     );
   }
+
+  /* ── L22 — BATCH 2n (AV-016): THE ASN PALLET STRUCTURE, LIVE ──────────────
+   * WHY THIS EXISTS. The channel documents that the shipment confirmation (the ASN)
+   * it receives carries "carton + pallet structures". The platform now derives the
+   * carton→pallet grouping and prints, on the consignment's SSCC label sheet, one
+   * pallet label per pallet carrying the pallet's OWN SSCC container identifier, with
+   * the structure's basis stated so Mercenta's model is never presented as a channel
+   * rule. On the DEPLOYED surface that structure must be REAL DATA rendered from the
+   * filed ASN — not a decorative line. The brand accepts a purchase order through the
+   * product's own control (which files the ASN automatically and makes the pack
+   * ready), opens the pack's SSCC label sheet and the pallet structure is read from
+   * the rendered document. Asserting the source would prove nothing about the bundle.
+   */
+  console.log('\n--- L22 the ASN pallet structure, on the live brand surface ---');
+  const palPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const palErrors = [];
+  palPage.on('pageerror', (e) => palErrors.push(String(e)));
+  try {
+    let palEntryAttempt = 0;
+    let palEntryError = null;
+    for (let attempt = 1; attempt <= 3 && palEntryAttempt === 0; attempt++) {
+      try {
+        await gotoLive(palPage, `${SITE}/`);
+        const login = palPage.getByRole('button', { name: 'Partner Login' }).first();
+        await login.waitFor({ state: 'visible', timeout: 90000 });
+        await login.click({ timeout: 30000 });
+        await palPage.waitForTimeout(2500);
+        const card = palPage.locator('text=Tapatío').first();
+        await card.waitFor({ state: 'visible', timeout: 90000 });
+        await card.click({ timeout: 30000 });
+        await palPage.waitForTimeout(3000);
+        palEntryAttempt = attempt;
+      } catch (err) {
+        palEntryError = err;
+      }
+    }
+    if (palEntryAttempt === 0) throw palEntryError ?? new Error('entry failed');
+    check(`L22 the deployed site opened and the brand signed in (attempt ${palEntryAttempt})`, true);
+
+    const palPoNav = palPage.locator('nav[aria-label="Primary"] >> text=Purchase Orders').first();
+    await palPoNav.waitFor({ state: 'visible', timeout: 90000 });
+    await palPoNav.click({ timeout: 30000 });
+    await palPage.waitForTimeout(2500);
+
+    /** Accept the order through the product's own control so Mercenta files the ASN. */
+    const palRow = palPage.locator('text=PO-9002').first();
+    await palRow.waitFor({ state: 'visible', timeout: 90000 });
+    await palRow.click({ timeout: 30000 });
+    await palPage.waitForTimeout(1200);
+    const palAck = palPage.locator('button', { hasText: 'Acknowledge' }).first();
+    if (await palAck.isVisible({ timeout: 6000 }).catch(() => false)) {
+      await palAck.click({ timeout: 30000 });
+      await palPage.waitForTimeout(1200);
+      const palSubmit = palPage.locator('button', { hasText: 'Submit acknowledgment' }).first();
+      if (await palSubmit.isVisible({ timeout: 6000 }).catch(() => false)) {
+        await palSubmit.click({ timeout: 30000 });
+        await palPage.waitForTimeout(3500);
+      }
+    }
+
+    const palNav = palPage.locator('nav[aria-label="Primary"] >> text=Logistics Hub').first();
+    await palNav.waitFor({ state: 'visible', timeout: 90000 });
+    await palNav.click({ timeout: 30000 });
+    await palPage.waitForTimeout(3000);
+
+    const palOpen =
+      palPage.locator('[data-testid="po-documents-queue-open-PO-9002"]').first();
+    const fallbackOpen = palPage.locator('[data-testid^="po-documents-queue-open-"]').first();
+    const openControl = (await palOpen.count()) > 0 ? palOpen : fallbackOpen;
+    await openControl.waitFor({ state: 'visible', timeout: 90000 });
+    await openControl.click({ timeout: 30000 });
+    await palPage.waitForTimeout(1500);
+
+    const palDoc = palPage.locator('[data-testid="po-document-open-sscc_carton_labels"]').first();
+    await palDoc.waitFor({ state: 'visible', timeout: 90000 });
+    await palDoc.click({ timeout: 30000 });
+    await palPage.waitForTimeout(1500);
+
+    const palFrame = palPage.frameLocator('[data-testid="po-document-frame"]');
+    const palBody = (await palFrame.locator('body').innerText({ timeout: 60000 })) ?? '';
+    check(
+      'L22 the LIVE SSCC label sheet prints the carton→pallet structure (a pallet label)',
+      /Pallet label — SSCC/.test(palBody),
+      palBody.slice(0, 180)
+    );
+    check(
+      'L22 the LIVE pallet label names the pallet and its SSCC container identifier',
+      /Pallet \d+ of \d+/.test(palBody),
+      (palBody.match(/Pallet \d+ of \d+/) ?? [''])[0]
+    );
+    check(
+      'L22 the LIVE structure states MERCENTA’s own model (never a channel rule)',
+      /not a retail-channel rule/i.test(palBody),
+      palBody.slice(0, 180)
+    );
+    check(
+      `L22 the driven document surface rendered with no uncaught error (errors: ${palErrors.join(' | ') || 'none'})`,
+      palErrors.length === 0
+    );
+  } catch (palError) {
+    check(
+      `L22 the pallet structure could NOT be driven live (${String(palError).slice(0, 140)})`,
+      false
+    );
+  }
+  await palPage.close();
+
   await pltPage.close();
 
   await browser.close();

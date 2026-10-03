@@ -38,6 +38,7 @@ import { DESTINATION_NOT_DECLARED } from '@/config/logisticsGeo';
 import { resolveShippingLane } from '@/lib/shipping/carrierRouting';
 import { generateCustomsDocBundle } from '@/lib/customsDocs';
 import { SSCC_GS1_PREFIX, SSCC_PLACEHOLDER_NOTICE, ssccForCarton } from './sscc';
+import { ASN_PALLET_PROFILE } from '@/config/shipping';
 
 export type PoDocumentKind =
   | 'sscc_carton_labels'
@@ -67,6 +68,14 @@ export interface PoCartonIdentifier {
   sscc: string;
   weightKg: number;
   dimensions: string;
+  /**
+   * §BATCH 2n (`AV-016`) — the 1-based pallet this carton is loaded on, and that
+   * pallet's own SSCC container identifier. Present only when the ASN carries a
+   * carton→pallet structure (the channel documents the ASN as carrying
+   * "carton + pallet structures").
+   */
+  pallet?: number;
+  palletSscc?: string;
 }
 
 export interface PoDocument {
@@ -162,17 +171,24 @@ function fieldTable(fields: PoDocumentField[]): string {
  */
 export function cartonIdentifiersFor(
   poNumber: string,
-  cartons: AsnDetail['cartons']
+  cartons: AsnDetail['cartons'],
+  pallets?: AsnDetail['pallets']
 ): PoCartonIdentifier[] {
-  return cartons.map((carton, index) => ({
-    carton: index + 1,
-    of: cartons.length,
-    sku: carton.sku,
-    quantity: carton.quantity,
-    sscc: ssccForCarton(poNumber, index + 1),
-    weightKg: carton.weightKg,
-    dimensions: `${carton.lengthCm}×${carton.widthCm}×${carton.heightCm} cm`,
-  }));
+  return cartons.map((carton, index) => {
+    const cartonNumber = index + 1;
+    /** §BATCH 2n (`AV-016`) — the pallet this carton loads onto, when a structure exists. */
+    const pallet = pallets?.find((p) => p.cartons.includes(cartonNumber));
+    return {
+      carton: cartonNumber,
+      of: cartons.length,
+      sku: carton.sku,
+      quantity: carton.quantity,
+      sscc: ssccForCarton(poNumber, cartonNumber),
+      weightKg: carton.weightKg,
+      dimensions: `${carton.lengthCm}×${carton.widthCm}×${carton.heightCm} cm`,
+      ...(pallet ? { pallet: pallet.pallet, palletSscc: pallet.sscc } : {}),
+    };
+  });
 }
 
 /* ── 1. SSCC carton labels ────────────────────────────────────────────────── */
@@ -181,7 +197,8 @@ function ssccLabelsDocument(
   poNumber: string,
   brandName: string,
   destinationLabel: string,
-  cartons: PoCartonIdentifier[]
+  cartons: PoCartonIdentifier[],
+  pallets?: AsnDetail['pallets']
 ): PoDocument {
   const ready = cartons.length > 0;
   const labels = cartons
@@ -193,17 +210,50 @@ function ssccLabelsDocument(
         <div style="font-size:12px">Carton ${carton.carton} of ${carton.of}</div>
         <div style="font-size:12px">SKU ${escapeHtml(carton.sku)} · ${carton.quantity} units · ${carton.weightKg} kg · ${escapeHtml(carton.dimensions)}</div>
         <div style="font-size:12px">Ship to: ${escapeHtml(destinationLabel)}</div>
+        ${
+          carton.pallet
+            ? `<div style="font-size:12px">Pallet ${carton.pallet}${carton.palletSscc ? ` · ${carton.palletSscc}` : ''}</div>`
+            : ''
+        }
         <div style="font-family:monospace;font-size:18px;letter-spacing:.12em;margin-top:8px">${carton.sscc}</div>
         <div style="font-size:10px;color:#7a1f1f">${escapeHtml(SSCC_GS1_PREFIX.placeholderLabel)}</div>
       </div>`
     )
     .join('\n');
 
+  /**
+   * §BATCH 2n (`AV-016`) — THE PALLET STRUCTURE, printed on the same label sheet.
+   *
+   * One label per pallet (its own SSCC container identifier and the cartons it
+   * carries), so the carton→pallet grouping the ASN declares is on the artefact the
+   * warehouse applies. The Mercenta-declared basis is printed beneath it, so it can
+   * never be mistaken for a retail-channel rule.
+   */
+  const palletSection =
+    pallets && pallets.length > 0
+      ? `
+    <h2 style="font-size:15px;margin-top:28px">Pallet structure — label per pallet</h2>
+    ${pallets
+      .map(
+        (pallet) => `
+      <div style="border:1px solid #0C1219;padding:12px;margin:10px 0">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em">Pallet label — SSCC</div>
+        <div style="font-size:16px;font-weight:bold">${escapeHtml(brandName)} · ${escapeHtml(poNumber)}</div>
+        <div style="font-size:12px">Pallet ${pallet.pallet} of ${pallet.of} · cartons ${pallet.cartons.join(', ')} · ${pallet.weightKg} kg</div>
+        <div style="font-size:12px">Ship to: ${escapeHtml(destinationLabel)}</div>
+        <div style="font-family:monospace;font-size:18px;letter-spacing:.12em;margin-top:8px">${pallet.sscc}</div>
+        <div style="font-size:10px;color:#7a1f1f">${escapeHtml(SSCC_GS1_PREFIX.placeholderLabel)}</div>
+      </div>`
+      )
+      .join('\n')}
+    <p style="font-size:11px;color:#555">${escapeHtml(ASN_PALLET_PROFILE.basis)}</p>`
+      : '';
+
   return {
     kind: 'sscc_carton_labels',
     title: 'SSCC carton labels',
     purpose:
-      'One GS1 SSCC-18 container identifier per carton, which the ASN declares to the retail channel. Print one label per carton and apply it before dispatch.',
+      'One GS1 SSCC-18 container identifier per carton, and — where the ASN carries a pallet structure — one per pallet, which the ASN declares to the retail channel. Print one label per carton and per pallet and apply them before dispatch.',
     laneScope: 'all_lanes',
     applicable: true,
     ready,
@@ -218,12 +268,13 @@ function ssccLabelsDocument(
     renderer: 'inline_html',
     fields: [
       { label: 'Cartons', value: String(cartons.length) },
+      { label: 'Pallets', value: String(pallets?.length ?? 0) },
       { label: 'SSCC prefix status', value: 'unassigned placeholder (not a licensed GS1 prefix)' },
       { label: 'Ship to', value: destinationLabel },
     ],
     ...(ready
       ? {
-          html: printableShell('SSCC carton labels', poNumber, labels),
+          html: printableShell('SSCC carton labels', poNumber, labels + palletSection),
           cartonIdentifiers: cartons,
         }
       : {}),
@@ -363,7 +414,8 @@ function packingListDocument(
   po: PurchaseOrder,
   brandName: string,
   destinationLabel: string,
-  cartons: AsnDetail['cartons']
+  cartons: AsnDetail['cartons'],
+  pallets?: AsnDetail['pallets']
 ): PoDocument {
   const { lines, basis } = packingLines(po, cartons);
   const rows = lines
@@ -395,6 +447,8 @@ function packingListDocument(
       { label: 'Delivery note', value: `DN-${po.poNumber}` },
       { label: 'Deliver to (destination FC)', value: destinationLabel },
       { label: 'Cartons', value: String(cartons.length || '—') },
+      /** §BATCH 2n (`AV-016`) — the pallet structure the ASN declares. */
+      { label: 'Pallets', value: String(pallets?.length ?? 0) },
     ])}
     <p style="font-size:12px;margin-top:16px">
       Received by: ______________________  Date: ____________  Signature: ______________________
@@ -416,6 +470,8 @@ function packingListDocument(
     fields: [
       { label: 'Lines', value: String(lines.length) },
       { label: 'Cartons', value: String(cartons.length) },
+      /** §BATCH 2n (`AV-016`) — the pallet structure the ASN declares. */
+      { label: 'Pallets', value: String(pallets?.length ?? 0) },
       { label: 'Basis', value: basis },
     ],
     ...(lines.length > 0
@@ -448,10 +504,37 @@ function asnSheetDocument(
     { label: 'Cartons', value: String(asn?.cartons.length ?? 0) },
     { label: 'Units', value: String(units) },
     { label: 'SSCC identifiers', value: String(identifiers.length) },
+    { label: 'Pallets', value: String(asn?.pallets?.length ?? 0) },
     { label: 'Destination FC', value: destinationLabel },
     ...(asn?.lotNumber ? [{ label: 'Lot number', value: asn.lotNumber }] : []),
     ...(asn?.expiryDate ? [{ label: 'Expiry date', value: asn.expiryDate }] : []),
   ];
+
+  /**
+   * §BATCH 2n (`AV-016`) — THE PALLET STRUCTURE on the ASN sheet. The channel
+   * documents the ASN as carrying "carton + pallet structures", so the sheet that
+   * records what Mercenta filed states the pallets and the cartons each carries —
+   * with the Mercenta-declared basis, never presented as a channel rule.
+   */
+  const palletRows = (asn?.pallets ?? [])
+    .map(
+      (pallet) =>
+        `<tr><td>${pallet.pallet} of ${pallet.of}</td><td>${pallet.cartons.join(', ')}</td>` +
+        `<td style="text-align:right">${pallet.weightKg} kg</td>` +
+        `<td style="font-family:monospace">${pallet.sscc}</td></tr>`
+    )
+    .join('\n');
+  const palletSection =
+    (asn?.pallets?.length ?? 0) > 0
+      ? `
+    <h2 style="font-size:15px;margin-top:24px">Pallet structure</h2>
+    <table width="100%" cellpadding="4" style="border-collapse:collapse">
+      <thead><tr><th align="left">Pallet</th><th align="left">Cartons</th>
+      <th align="right">Weight</th><th align="left">Pallet SSCC</th></tr></thead>
+      <tbody>${palletRows}</tbody>
+    </table>
+    <p style="font-size:11px;color:#555">${escapeHtml(ASN_PALLET_PROFILE.basis)}</p>`
+      : '';
 
   const body = `
     <p>Advance Shipment Notice filed by Mercenta for purchase order ${escapeHtml(po.poNumber)}.</p>
@@ -468,7 +551,7 @@ function asnSheetDocument(
              <td style="font-family:monospace">${carton.sscc}</td></tr>`
         )
         .join('\n')}</tbody>
-    </table>
+    </table>${palletSection}
     <p style="font-size:12px;margin-top:16px">
       The retail channel must receive the shipment confirmation <strong>before</strong> the goods are
       received at the fulfilment centre; missing or delayed shipment confirmations result in chargebacks.
@@ -558,13 +641,15 @@ export function buildPoDocumentPack(input: {
   const lane = resolveShippingLane({ brandNation: input.brandNation ?? null });
   const destinationLabel = destinationLabelForPo(po);
   const cartons = input.asn?.cartons ?? [];
-  const identifiers = cartonIdentifiersFor(po.poNumber, cartons);
+  /** §BATCH 2n (`AV-016`) — the ASN's carton→pallet structure, when it carries one. */
+  const pallets = input.asn?.pallets;
+  const identifiers = cartonIdentifiersFor(po.poNumber, cartons, pallets);
 
   const documents: PoDocument[] = [
-    ssccLabelsDocument(po.poNumber, brandName, destinationLabel, identifiers),
+    ssccLabelsDocument(po.poNumber, brandName, destinationLabel, identifiers, pallets),
     carrierLabelDocument(destinationLabel, input.carrier),
     waybillDocument(po.poNumber, destinationLabel, input.carrier),
-    packingListDocument(po, brandName, destinationLabel, cartons),
+    packingListDocument(po, brandName, destinationLabel, cartons, pallets),
     asnSheetDocument(po, destinationLabel, input.asn, identifiers, input.instruction),
     ...customsDocuments(po, brandName, input.products ?? [], lane),
   ];

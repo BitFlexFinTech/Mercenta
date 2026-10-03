@@ -294,3 +294,47 @@ for (const state of ASN_BEFORE_RECEIPT_STATES) {
     );
   }
 }
+
+/**
+ * §BATCH 2n (`AV-016`) — THE ASN PALLET PROFILE (the ONE declaration of how
+ * cartons are stacked for the ASN).
+ *
+ * WHY THIS EXISTS
+ * ---------------
+ * The channel documents that the ASN it receives carries *“carton + pallet
+ * structures”* (source `S9` of the Phase 0A audit; `AV-016`). The platform
+ * modelled the CARTON structure — and its SSCC identifiers — from P6, but a
+ * carton was never assigned to a PALLET, so the ASN carried no pallet structure
+ * at all: `AsnDetail` held cartons plus a loose pallet COUNT used only for
+ * freight costing (`ShippingEstimateInput.palletCount`), which is a different
+ * concept and is deliberately NOT reused here.
+ *
+ * WHAT THIS IS — AND IS NOT
+ * -------------------------
+ * This is **Mercenta's OWN declared packing model** — how many cartons Mercenta
+ * stacks on one pallet in this environment. It is **NOT a retail-channel rule**:
+ * no channel source reached states a cartons-per-pallet figure, and presenting
+ * Mercenta's own assumption as if the channel required it would be a false
+ * claim. The carton→pallet grouping itself is DERIVED from this declaration by
+ * ONE owner (`src/lib/shipping/asnPallets.ts`), so the pallet structure on the
+ * ASN is deterministic and there can never be a second, drifting copy.
+ *
+ * ACTIVATION: when a brand's real pallet profile is recorded, it replaces this
+ * value. The grouping owner accepts an explicit capacity, so wiring the real
+ * profile through changes no caller shape and no file outside this one.
+ */
+export const ASN_PALLET_PROFILE = {
+  /** Cartons Mercenta stacks on one pallet — Mercenta's declared model, not a channel rule. */
+  cartonsPerPallet: 6,
+  /** Whose model this is. Stated so no surface can attribute it to the retail channel. */
+  owner: 'Mercenta',
+  /** The stated basis, rendered wherever the structure is shown. */
+  basis:
+    'Mercenta-declared ASN pallet profile for this environment — a packing assumption, not a retail-channel rule.',
+  /** How the real packing replaces it. */
+  activation:
+    'Replaced by a brand’s declared pallet profile once it is recorded; the grouping owner accepts an explicit capacity, so nothing else changes.',
+  /** The channel's OWN documented evidence this models. */
+  channelEvidence:
+    'The retail channel documents that the shipment confirmation (ASN) it receives carries carton and pallet structures (source S9, register AV-016).',
+} as const;

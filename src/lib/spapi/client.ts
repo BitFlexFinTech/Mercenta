@@ -264,9 +264,31 @@ export interface ShipmentConfirmationCarton {
   quantity: number;
   /** The PO this carton carries (per-carton reference — programme §3). */
   purchaseOrderNumber: string;
+  /**
+   * §BATCH 2n (`AV-016`) — the SSCC of the PALLET this carton is loaded on. The
+   * channel documents the ASN as carrying "carton + pallet structures"; this is
+   * the carton→pallet grouping, taken from the ONE owner
+   * (`src/lib/shipping/asnPallets.ts`), never retyped here.
+   */
+  palletId?: string;
   /** Required where the category mandates lot traceability. */
   lotNumber?: string;
   expiryDate?: string;
+}
+
+/**
+ * §BATCH 2n (`AV-016`) — one PALLET of the ASN's pallet-level structure.
+ *
+ * The channel documents that the shipment confirmation carries carton + pallet
+ * structures (source `S9`, register `AV-016`). A pallet is a GS1 logistic unit
+ * with its own SSCC container identifier (`palletId`), and it names the cartons it
+ * carries by the confirmation's own `cartonId`.
+ */
+export interface ShipmentConfirmationPallet {
+  /** The pallet's SSCC-18 container identifier. */
+  palletId: string;
+  /** The cartons (by the confirmation's `cartonId`) this pallet carries. */
+  cartonIds: string[];
 }
 
 /** §P12 — the ASN payload (`submitShipmentConfirmations`). */
@@ -276,6 +298,11 @@ export interface ShipmentConfirmationPayload {
   /** Every purchase order the confirmation covers (1..n). */
   purchaseOrderNumbers: string[];
   cartons: ShipmentConfirmationCarton[];
+  /**
+   * §BATCH 2n (`AV-016`) — the pallet-level structure (carton→pallet grouping).
+   * Present only when the consignment declares a pallet structure.
+   */
+  pallets?: ShipmentConfirmationPallet[];
   carrier?: string;
 }
 

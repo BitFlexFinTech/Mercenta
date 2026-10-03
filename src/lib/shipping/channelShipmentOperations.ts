@@ -26,6 +26,7 @@
  */
 import type {
   ShipmentConfirmationCarton,
+  ShipmentConfirmationPallet,
   ShipmentConfirmationPayload,
   ShipmentConfirmationResult,
   ShipmentDetailsResult,
@@ -231,6 +232,12 @@ export async function fileChannelShipmentConfirmation(input: {
   shipmentId: string;
   purchaseOrderNumbers: readonly string[];
   cartons: readonly ShipmentConfirmationCarton[];
+  /**
+   * §BATCH 2n (`AV-016`) — the ASN's pallet-level structure (the carton→pallet
+   * grouping), from the ONE owner (`src/lib/shipping/asnPallets.ts` via the
+   * proxy processor). Omitted when the consignment declares no pallet structure.
+   */
+  pallets?: readonly ShipmentConfirmationPallet[];
   carrier?: string;
 }): Promise<ChannelShipmentConfirmationOutcome> {
   const purchaseOrderNumbers = input.purchaseOrderNumbers.map((v) => v.trim()).filter(Boolean);
@@ -256,6 +263,10 @@ export async function fileChannelShipmentConfirmation(input: {
     shipmentId: input.shipmentId,
     purchaseOrderNumbers,
     cartons: input.cartons.map((c) => ({ ...c })),
+    /** §BATCH 2n (`AV-016`) — the pallet structure travels with the ASN. */
+    ...(input.pallets?.length
+      ? { pallets: input.pallets.map((p) => ({ palletId: p.palletId, cartonIds: [...p.cartonIds] })) }
+      : {}),
     ...(input.carrier ? { carrier: input.carrier } : {}),
   });
   if (!response.ok) {

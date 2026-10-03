@@ -75,13 +75,14 @@ export function ssccCheckDigit(base17: string): number {
 }
 
 /**
- * A deterministic 9-digit serial reference for one carton.
+ * A deterministic 9-digit serial reference for one logistic unit.
  *
- * FNV-1a over `${poNumber}#${cartonIndex}` — pure, order-independent and stable
- * across processes, so a reprinted label is identical.
+ * FNV-1a over the caller's input string — pure, order-independent and stable
+ * across processes, so a reprinted label is identical. The input is namespaced by
+ * the CALLER (`#<cartonIndex>` for a carton, `#PALLET#<palletIndex>` for a pallet)
+ * so a carton and a pallet can never collide on the same serial.
  */
-function serialReference(poNumber: string, cartonIndex: number): string {
-  const input = `${poNumber}#${cartonIndex}`;
+function serialReference(input: string): string {
   let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i += 1) {
     hash ^= input.charCodeAt(i);
@@ -105,7 +106,23 @@ export function buildSscc18(serial: string): string {
  * carton keeps its identifier when the pack is regenerated.
  */
 export function ssccForCarton(poNumber: string, cartonIndex: number): string {
-  return buildSscc18(serialReference(poNumber, Math.max(1, Math.trunc(cartonIndex))));
+  return buildSscc18(serialReference(`${poNumber}#${Math.max(1, Math.trunc(cartonIndex))}`));
+}
+
+/**
+ * §BATCH 2n (`AV-016`) — the SSCC-18 for one PALLET of one purchase order.
+ *
+ * A pallet is a GS1 **logistic unit** exactly as a carton is, so it carries its
+ * own SSCC container identifier (the channel documents the ASN as carrying
+ * "carton + pallet structures"). The serial is namespaced (`#PALLET#`) so a
+ * pallet identifier can never collide with a carton's. `palletIndex` is 1-based
+ * and part of the hashed input, so a pallet keeps its identifier when the
+ * structure is regenerated. Generation stays in THIS one owner.
+ */
+export function ssccForPallet(poNumber: string, palletIndex: number): string {
+  return buildSscc18(
+    serialReference(`${poNumber}#PALLET#${Math.max(1, Math.trunc(palletIndex))}`)
+  );
 }
 
 /** Is this SSCC-18 structurally valid (18 digits + a correct check digit)? */

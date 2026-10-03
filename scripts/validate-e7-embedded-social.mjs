@@ -1087,6 +1087,32 @@ try {
     'package.json',
   ];
 
+  /**
+   * §BATCH 2n — THE ASN PALLET-STRUCTURE PHASE (`AV-016`, 2026-10-03). The channel documents the ASN as
+   * carrying "carton + pallet structures"; the carton half was modelled, the pallet half was not. This
+   * phase adds the ONE owner of the carton→pallet grouping, carries it on the ASN record and the channel
+   * confirmation, states it on the documents and gates it. Fuller note in
+   * `validate-e6-brand-surfaces.mjs` §BATCH2N_ASN_PALLETS_SCOPE. Same mechanism: a changed source/test file
+   * outside EVERY declared set is still refused.
+   */
+  const BATCH2N_ASN_PALLETS_DECLARED = [
+    'src/config/shipping.ts',
+    'src/lib/shipping/asnPallets.ts',
+    'src/lib/documents/sscc.ts',
+    'src/data/api.ts',
+    'src/lib/commerce/proxyProcessor.ts',
+    'src/lib/spapi/client.ts',
+    'src/lib/spapi/mockClient.ts',
+    'src/lib/shipping/channelShipmentOperations.ts',
+    'src/lib/documents/poDocumentPack.ts',
+    'scripts/validate-asn-pallets.mjs',
+    'scripts/verify-live-demo.mjs',
+    'e2e/po-documents.spec.ts',
+    'scripts/validate-e6-brand-surfaces.mjs',
+    'scripts/validate-e7-embedded-social.mjs',
+    'package.json',
+  ];
+
 
   /**
    * §Sprint 2 — deterministic platform completion (2026-09-19) — REPOINTED.
@@ -1876,7 +1902,13 @@ try {
            * but its declared surface is accepted here as every phase's is.
            */
           !BATCH2M_PICKUP_LEAD_TIME_DECLARED.includes(f) &&
-          !BATCH2M_PICKUP_LEAD_TIME_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH2M_PICKUP_LEAD_TIME_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /**
+           * §BATCH 2n — THE ASN PALLET-STRUCTURE PHASE (2026-10-03) — touches no protected path,
+           * but its declared surface is accepted here as every phase's is.
+           */
+          !BATCH2N_ASN_PALLETS_DECLARED.includes(f) &&
+          !BATCH2N_ASN_PALLETS_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2146,6 +2178,10 @@ try {
      * §BATCH 2m — THE PICKUP LEAD-TIME PHASE (2026-10-03) — the lead-time surface (see above).
      */
     ...BATCH2M_PICKUP_LEAD_TIME_DECLARED,
+    /**
+     * §BATCH 2n — THE ASN PALLET-STRUCTURE PHASE (2026-10-03) — the pallet surface (see above).
+     */
+    ...BATCH2N_ASN_PALLETS_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

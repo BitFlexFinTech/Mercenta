@@ -2143,9 +2143,43 @@ export interface AsnCarton {
   heightCm: number;
 }
 
+/**
+ * §BATCH 2n (`AV-016`) — ONE pallet of an ASN's carton→pallet structure.
+ *
+ * The channel documents that the shipment confirmation it receives carries
+ * *“carton + pallet structures”* (source `S9`), but a carton was never assigned
+ * to a pallet. This is a cargo PALLET (a GS1 logistic unit with its own SSCC
+ * container identifier) — deliberately distinct from `ShippingEstimateInput`'s
+ * `palletCount`, which is a loose figure used only for freight costing.
+ *
+ * Declared ONCE here and consumed by the ASN record, the channel confirmation and
+ * every document — no component keeps its own copy. Derived by ONE owner,
+ * `src/lib/shipping/asnPallets.ts`.
+ */
+export interface AsnPallet {
+  /** 1-based pallet number within the consignment. */
+  pallet: number;
+  /** How many pallets the consignment is loaded onto. */
+  of: number;
+  /** The pallet's own GS1 SSCC-18 container identifier (a logistic unit). */
+  sscc: string;
+  /** The 1-based carton numbers this pallet carries, in loading order. */
+  cartons: number[];
+  /** The pallet's gross weight (kg) — the sum of the cartons it carries. */
+  weightKg: number;
+}
+
 /** §Stage-24 — genuine ASN-level detail, not a generic "shipment created" flag. */
 export interface AsnDetail {
   cartons: AsnCarton[];
+  /**
+   * §BATCH 2n (`AV-016`) — the ASN's carton→pallet structure. Every carton is
+   * assigned to a pallet, each pallet carrying its own SSCC container identifier
+   * (the channel documents the ASN as carrying "carton + pallet structures").
+   * Derived by ONE owner, `src/lib/shipping/asnPallets.ts`, so it can never drift
+   * from the cartons it groups. Absent only where no carton structure exists.
+   */
+  pallets?: AsnPallet[];
   shipDate: string;
   carrier: string;
   proNumber?: string;
@@ -2331,6 +2365,40 @@ export function createShipmentForPO(
   }
   if (!asn.cartons.length) {
     return { ok: false, warnings, error: 'An ASN requires at least one carton.' };
+  }
+  /**
+   * §BATCH 2n (`AV-016`) — the ASN's pallet structure, WHEN DECLARED, must PARTITION
+   * its cartons: every carton on exactly one pallet, and no pallet naming a carton
+   * that does not exist. An inconsistent structure is refused rather than filed, so
+   * the carton→pallet grouping the channel is told can never disagree with the
+   * cartons themselves. A caller that declares no pallets is unaffected.
+   */
+  if (asn.pallets && asn.pallets.length > 0) {
+    const assigned = new Set<number>();
+    for (const pallet of asn.pallets) {
+      for (const cartonNumber of pallet.cartons) {
+        if (
+          !Number.isInteger(cartonNumber) ||
+          cartonNumber < 1 ||
+          cartonNumber > asn.cartons.length ||
+          assigned.has(cartonNumber)
+        ) {
+          return {
+            ok: false,
+            warnings,
+            error: `The ASN pallet structure is inconsistent: carton ${cartonNumber} is not assigned to exactly one pallet.`,
+          };
+        }
+        assigned.add(cartonNumber);
+      }
+    }
+    if (assigned.size !== asn.cartons.length) {
+      return {
+        ok: false,
+        warnings,
+        error: `The ASN pallet structure is incomplete: ${asn.cartons.length - assigned.size} carton(s) are on no pallet.`,
+      };
+    }
   }
   if (!asn.shipDate) {
     return { ok: false, warnings, error: 'An ASN requires a ship date.' };

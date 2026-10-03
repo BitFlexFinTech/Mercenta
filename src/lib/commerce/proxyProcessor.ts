@@ -45,6 +45,7 @@ import {
 } from './channelInstructions';
 import { buildPoDocumentPack } from '@/lib/documents/poDocumentPack';
 import { earliestRequestedPickUp } from '@/lib/shipping/collectChain';
+import { palletsForCartons } from '@/lib/shipping/asnPallets';
 import { emitPoDocumentsReady } from '@/lib/events/eventFeed';
 import {
   fileChannelShipmentConfirmation,
@@ -126,8 +127,20 @@ export function asnForInstruction(
           };
         });
 
+  /**
+   * §BATCH 2n (`AV-016`) — THE PALLET STRUCTURE (the carton→pallet grouping).
+   *
+   * Derived from the SAME cartons by the ONE owner
+   * (`src/lib/shipping/asnPallets.ts`), so the channel confirmation and every
+   * document describe the identical loading and the structure can never drift from
+   * the cartons it groups. The channel documents the ASN as carrying
+   * "carton + pallet structures".
+   */
+  const pallets = palletsForCartons(po.poNumber, cartons);
+
   return {
     cartons,
+    pallets,
     /** Dispatched within the channel's ship window when one is declared. */
     shipDate: po.shipWindowStart ?? new Date().toISOString().slice(0, 10),
     carrier,
@@ -335,14 +348,38 @@ export async function processChannelInstruction(
         shipmentId: filed.shipmentId ?? `shp-${po.id}`,
         purchaseOrderNumbers: [po.poNumber],
         carrier: asn.carrier,
-        cartons: asn.cartons.map((carton, index) => ({
-          cartonId: `${po.poNumber}-C${index + 1}`,
-          vendorSku: carton.sku,
-          quantity: carton.quantity,
-          purchaseOrderNumber: po.poNumber,
-          ...(asn.lotNumber ? { lotNumber: asn.lotNumber } : {}),
-          ...(asn.expiryDate ? { expiryDate: asn.expiryDate } : {}),
-        })),
+        cartons: asn.cartons.map((carton, index) => {
+          const cartonNumber = index + 1;
+          /**
+           * §BATCH 2n (`AV-016`) — the pallet this carton is loaded on, read from
+           * the ONE owner's structure. Every carton names its own pallet, which IS
+           * the carton→pallet grouping the channel documents.
+           */
+          const palletId = asn.pallets?.find((p) => p.cartons.includes(cartonNumber))?.sscc;
+          return {
+            cartonId: `${po.poNumber}-C${cartonNumber}`,
+            vendorSku: carton.sku,
+            quantity: carton.quantity,
+            purchaseOrderNumber: po.poNumber,
+            ...(palletId ? { palletId } : {}),
+            ...(asn.lotNumber ? { lotNumber: asn.lotNumber } : {}),
+            ...(asn.expiryDate ? { expiryDate: asn.expiryDate } : {}),
+          };
+        }),
+        /**
+         * §BATCH 2n (`AV-016`) — the pallet-level structure itself: the channel's
+         * documented "carton + pallet structures". Sent only when a structure
+         * exists, so a carton-only confirmation is never padded with a fabricated
+         * pallet.
+         */
+        ...(asn.pallets?.length
+          ? {
+              pallets: asn.pallets.map((pallet) => ({
+                palletId: pallet.sscc,
+                cartonIds: pallet.cartons.map((n) => `${po.poNumber}-C${n}`),
+              })),
+            }
+          : {}),
       })
     : undefined;
 

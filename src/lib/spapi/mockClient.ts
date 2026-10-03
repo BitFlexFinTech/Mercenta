@@ -124,6 +124,19 @@ const OPS_REFUSALS = {
     'SHIPMENT_CONFIRMATION_CARTON_WITHOUT_PO — every carton must reference the purchase order it carries.',
   confirmationCartonPoNotDeclared:
     'SHIPMENT_CONFIRMATION_CARTON_PO_NOT_DECLARED — a carton references a purchase order the confirmation does not declare.',
+  /**
+   * §BATCH 2n (`AV-016`) — the ASN's carton→pallet structure must be internally
+   * consistent: a carton that names a pallet must name one the confirmation
+   * declares, a declared pallet must carry at least one declared carton, and the
+   * carton's pallet and the pallet's carton list must agree. An inconsistent
+   * structure is refused rather than accepted silently.
+   */
+  confirmationPalletUndeclared:
+    'SHIPMENT_CONFIRMATION_PALLET_UNDECLARED — a carton names a pallet the confirmation does not declare.',
+  confirmationPalletEmpty:
+    'SHIPMENT_CONFIRMATION_PALLET_EMPTY — a declared pallet carries no carton.',
+  confirmationCartonPalletMismatch:
+    'SHIPMENT_CONFIRMATION_CARTON_PALLET_MISMATCH — the carton and the declared pallet structure disagree.',
   invoiceNumberMissing: 'INVOICE_NUMBER_MISSING — the channel requires an Invoice ID (AV-022).',
   invoiceZeroValue: 'INVOICE_ZERO_VALUE — a zero-value invoice fails (AV-022).',
   invoiceNumberReused:
@@ -675,6 +688,46 @@ export function createMockSpApiClient(_transport?: FetchLike) {
           ok: false,
           error: `${OPS_REFUSALS.confirmationCartonPoNotDeclared} (carton ${outside.cartonId} → ${outside.purchaseOrderNumber})`,
         };
+      }
+
+      /**
+       * §BATCH 2n (`AV-016`) — the carton→pallet structure, when declared, must be
+       * internally consistent. An inconsistent structure is refused rather than
+       * accepted silently (the same fail-closed discipline the carton/PO checks
+       * above apply).
+       */
+      const pallets = payload.pallets ?? [];
+      if (pallets.length > 0) {
+        const cartonById = new Map(cartons.map((c) => [c.cartonId, c]));
+        const declaredPalletIds = new Set(pallets.map((p) => p.palletId));
+        const strayCarton = cartons.find((c) => c.palletId && !declaredPalletIds.has(c.palletId));
+        if (strayCarton) {
+          return {
+            ok: false,
+            error: `${OPS_REFUSALS.confirmationPalletUndeclared} (carton ${strayCarton.cartonId} → pallet ${strayCarton.palletId})`,
+          };
+        }
+        for (const pallet of pallets) {
+          if (pallet.cartonIds.length === 0) {
+            return { ok: false, error: `${OPS_REFUSALS.confirmationPalletEmpty} (pallet ${pallet.palletId})` };
+          }
+          const unknown = pallet.cartonIds.find((id) => !cartonById.has(id));
+          if (unknown) {
+            return {
+              ok: false,
+              error: `${OPS_REFUSALS.confirmationCartonPalletMismatch} (pallet ${pallet.palletId} → carton ${unknown})`,
+            };
+          }
+          const disagreeing = pallet.cartonIds.find(
+            (id) => cartonById.get(id)?.palletId !== pallet.palletId
+          );
+          if (disagreeing) {
+            return {
+              ok: false,
+              error: `${OPS_REFUSALS.confirmationCartonPalletMismatch} (carton ${disagreeing} does not name pallet ${pallet.palletId})`,
+            };
+          }
+        }
       }
 
       confirmationCounter += 1;
