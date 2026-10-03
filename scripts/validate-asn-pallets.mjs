@@ -475,6 +475,31 @@ check('the document pack renders the pallet structure', /Pallet structure/.test(
 console.log('\n§ 9. The executed modules made no network call\n');
 check('the executed entry ran with fetch sabotaged', result.network === 'sabotaged');
 
+/* ── 10. the record states the truth about AV-016 ──────────────────────────── */
+
+console.log('\n§ 10. The record states the truth about AV-016 (no stale statement survives)\n');
+const register = read('docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md');
+const reconcile = read('docs/AMAZON_RECONCILIATION_STATUS.md');
+const truth = read('docs/AMAZON_VENDOR_TRUTH_VALIDATION_2026-09-20.md');
+check(
+  'the discrepancy register’s AV-016 row is APPLIED, not INCOMPLETE',
+  /^\| AV-016 \|[^\n]*\*\*APPLIED/m.test(register)
+);
+check(
+  'the reconciliation status records the AV-016 row as APPLIED',
+  /^\| AV-016 \| ASN content \| \*\*APPLIED\*\* \|/m.test(reconcile)
+);
+check(
+  'the truth-validation §8 records the ASN-content row as APPLIED (Batch 2n)',
+  /^\| ASN content:[^\n]*\*\*APPLIED \(Batch 2n, 2026-10-03\)\*\*/m.test(truth)
+);
+check(
+  'STATUS_CHECK.md’s operating-rules paragraph is COMPLETE (not truncated mid-sentence)',
+  /gitignored — see the "GENERATED ARTEFACTS" block in `\.gitignore`\. Tracking them made the tree dirty after every Playwright run\./.test(
+    read('STATUS_CHECK.md')
+  )
+);
+
 /* ── summary ───────────────────────────────────────────────────────────────── */
 
 console.log('');
