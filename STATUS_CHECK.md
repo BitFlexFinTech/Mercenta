@@ -24,7 +24,20 @@ NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tre
 actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
 RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
 Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
-## BATCH 2n OF THE AMAZON-ACCURACY WORK — **THE ASN'S PALLET-LEVEL STRUCTURE NOW EXISTS** (`AV-016`), WITH A NEW `validate:asn-pallets` GATE (session 65, 2026-10-03) — **CURRENT**
+## BATCH 2p OF THE AMAZON-ACCURACY WORK — **THE FOUR INFERENCE RELABELS** (`AV-002`/`AV-017`/`AV-025`/`AV-044`) ARE APPLIED, WITH A NEW `validate:inference-relabels` GATE — **`BATCH 2` IS CLOSED BUT FOR THE EVIDENCE-BLOCKED ROWS** (session 66, 2026-10-03) — **CURRENT**
+
+**What this session did** (the recorded `NEXT TASK` = continue `BATCH 2` at the four INFERENCE relabels):
+1. **AV-002 (PO ack)** — the acknowledgement consequence is stated as a RISK, never the unstated certainty "forced cancellation": the ack-overdue label reads "at risk of cancellation", the notification copy asserts no cancellation, and the stale `PurchaseOrder` comment that read "at risk of forced cancellation" is corrected at source.
+2. **AV-017 (destinations)** — `DEFAULT_UK_FC_LIST` is re-declared a MERCENTA-MAINTAINED convenience list (never an Amazon-published directory) and the geography comment says so; the PO's `shipToParty` stays the authoritative destination.
+3. **AV-025 (naming)** — the internal fulfilment track is labelled from ONE NEW owner `src/config/fulfillmentTrack.ts` → **"Brand-direct supply"**, never the channel's **Vendor Direct Fulfillment** programme name; every surface (onboarding wizard, admin fulfilment-track panel, CRM, contract admin, applications, brand POs, the design showcase) and the agreement clause header read the owner (fail-closed to "Unassigned").
+4. **AV-044 (simulation)** — the deterministic simulation carries no unverified channel claim (it INHERITS the corrected `AV-013`/`AV-003` claims) and keeps its safety gate (`isProviderSimulationSafe` / `safety_refused`).
+5. **New gate** — `scripts/validate-inference-relabels.mjs` (`npm run validate:inference-relabels`, 15 assertions): a repo-wide, comment-stripped `src/` sweep plus owner/consumer/agreement/simulation assertions. **Mutation-proved TWICE** — a re-introduced "Direct Fulfillment" label and a re-introduced "forced cancellation" each fail it; both files restored byte-identical (`da56f055…` / `0c2ef642…`).
+6. **Records reconciled at source** — register POST-REGISTER CHANGE 2026-10-03 · reconciliation status (four rows APPLIED; RELABEL 9/9; "27 of 52"; the open-position paragraph recomputed, also correcting its Batch 2o omission) · plan §6 · registry (new row + `_meta.total_entries` 521 → 522 + four `next_plan` strings).
+7. **Declared in BOTH scope guards** — `BATCH2P_INFERENCE_RELABELS_SCOPE` (E6, all three checks F5/F5b/F6) and `BATCH2P_INFERENCE_RELABELS_DECLARED` (E7). `scripts/verify-live-demo.mjs` gained **`L23`**.
+8. **Evidence** — `validate:all` **143/0** (corpus 142 → 143) · typecheck **0** · lint **0** · build ✓ · E6 + E7 PASS · browser `onboarding`+`crm`+`fulfillment-tracks` **16 passed** · committed `2e3969e`, pushed, DEPLOYED (exit 0, user-facing change) · `verify:live` **228 PASS / 0 FAIL** incl. the NEW **`L23`**. **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.**
+
+
+## BATCH 2n OF THE AMAZON-ACCURACY WORK — **THE ASN'S PALLET-LEVEL STRUCTURE NOW EXISTS** (`AV-016`), WITH A NEW `validate:asn-pallets` GATE (session 65, 2026-10-03) — SUPERSEDED BY BATCH 2o (`AV-013`, 2026-10-03) AND BATCH 2p (session 66, 2026-10-03)
 
 **What this session did** (the recorded `NEXT TASK` = resume `BATCH 2` at `AV-016`; this session closed it — the AV-016/AV-014 MODELLED-IN-PART set is now empty):
 1. **The finding** — the retail channel documents that the shipment confirmation (the ASN) it receives carries *"carton + pallet structures"*. From P6 the platform modelled the CARTON half (one `AsnCarton` per carton, each with its own SSCC-18), but a carton was never assigned to a PALLET: the ASN had no pallet structure at all, only a loose `palletCount` used for freight costing (a different concept).
@@ -3837,4 +3850,44 @@ introduced.
 
 **NEXT.** Continue `BATCH 2` — the four INFERENCE relabels (`AV-002/017/025/044`; `AV-033` is EVIDENCE-BLOCKED); then
 `Batch 3`. `AV-040`'s `getTransaction` stays EVIDENCE-BLOCKED.
+
+
+## SESSION — BATCH 2p: THE FOUR INFERENCE RELABELS APPLIED AND MADE CHECKABLE (2026-10-03)
+
+**WHAT.** Resume `BATCH 2` at the four INFERENCE rows. **(AV-002)** the ack consequence is stated as a RISK (label
+"at risk of cancellation"; the notification asserts no cancellation; the stale `PurchaseOrder` comment that read
+"at risk of forced cancellation" corrected). **(AV-017)** `DEFAULT_UK_FC_LIST` re-declared a MERCENTA-MAINTAINED
+convenience list (never an Amazon directory); the PO's `shipToParty` stays authoritative. **(AV-025)** the internal
+track labelled from ONE NEW owner `src/config/fulfillmentTrack.ts` → "Brand-direct supply", never the channel's
+"Vendor Direct Fulfillment"; every surface + the agreement clause read the owner. **(AV-044)** the simulation carries
+no unverified channel claim and keeps its safety gate.
+
+**THE GATE.** `scripts/validate-inference-relabels.mjs` (NEW; `npm run validate:inference-relabels`, 15 assertions):
+a repo-wide, comment-stripped `src/` sweep (no CODE may assert "forced cancellation", present the FC list as an
+Amazon directory, or render "Direct Fulfillment") plus owner/consumer/agreement/simulation assertions.
+**Mutation-proved TWICE** — a re-introduced "Direct Fulfillment" label and a re-introduced "forced cancellation"
+each turn it red; both files restored byte-identical (`da56f055…` / `0c2ef642…`).
+
+**RECORDS FIXED AT SOURCE.** `docs/AMAZON_VENDOR_DISCREPANCY_REGISTER_2026-09-20.md` (POST-REGISTER CHANGE
+2026-10-03) · `docs/AMAZON_RECONCILIATION_STATUS.md` (four rows APPLIED; RELABEL 9/9; "27 of 52"; the open-position
+paragraph recomputed — ALSO correcting its Batch 2o omission) · `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md`
+§6 (`BATCH 2` closed) · `requirements-registry.json` (new row + `_meta.total_entries` 521 → 522 + four `next_plan`
+strings) · `PROJECT_STATUS.md` + `HANDOFF.md`.
+
+**USER-FACING** — labels and copy changed, so the surface is declared in BOTH scope guards
+(`BATCH2P_INFERENCE_RELABELS_SCOPE` in E6 — all three checks; `BATCH2P_INFERENCE_RELABELS_DECLARED` in E7);
+`scripts/verify-live-demo.mjs` gained `L23`. **DEPLOYED and LIVE-VERIFIED.**
+
+**EVIDENCE.** `validate:all` **143/0** (corpus 142 → 143) · typecheck **0** · lint **0** · build **✓** · E6 + E7 PASS ·
+browser `onboarding`+`crm`+`fulfillment-tracks` **16 passed** · committed **`2e3969e`**, pushed, deployed (exit 0) ·
+`verify:live` **228 PASS / 0 FAIL** incl. the NEW **`L23`**. **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.**
+
+**DEFECT INVENTORY (this session).** FIXED at source: (1) the stale `PurchaseOrder` comment asserting "forced
+cancellation"; (2) the reconciliation-status open-position paragraph left at the Batch 2n figures (it had missed
+Batch 2o's AV-013) — recomputed; (3) the newly-found carriers (`BrandPurchaseOrders.tsx` copy and the
+`DesignSystemShowcase` demo copy) that the repo-wide sweep exposed. No defect parked; no known exceptions introduced.
+
+**NEXT.** `BATCH 2` is CLOSED but for the evidence-blocked rows. Begin `BATCH 3` — `S7` (`demoContracts` has no
+writer), the page-by-page functional parity audit of the ~126 unverified registry rows, and the declared gaps.
+`AV-033`, `AV-040`'s `getTransaction` and `AV-010b`'s read half stay EVIDENCE-BLOCKED.
 
