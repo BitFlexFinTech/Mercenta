@@ -2347,6 +2347,7 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/integrations/registry.ts',
     'scripts/validate-supply-route-logistics.mjs',
     'scripts/validate-mock-providers.mjs',
+    'scripts/verify-live-demo.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

@@ -60,6 +60,9 @@
  *       every tile opens into the set it counts (BATCH 3c part 2b)
  *   L27 the platform-mode switch on the DEPLOYED Super-Admin surface (§Batch-0):
  *       the ONE switch states the current mode in words
+ *   L28 the Delta Fulfillment 3PL card on the DEPLOYED Super-Admin Integration
+ *       Settings surface (§PHASE 3 Stage 2): the 3PL provider is registered and
+ *       the provider count has grown by exactly one (23)
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -1752,6 +1755,54 @@ function readRedLines() {
     );
   }
   await modePage.close();
+
+  /* ── L28 — §PHASE 3 STAGE 2: THE DELTA FULFILLMENT 3PL CARD, LIVE ───────────
+   * WHY THIS EXISTS. Stage 2 registers the 3PL FULFILMENT partner (Delta
+   * Fulfillment) in the Integrations Hub so its mode is authoritative. A source
+   * assertion proves nothing about the DEPLOYED bundle, so the Super-Admin
+   * Integration Settings surface is opened on the live site and the card is read
+   * from the rendered list — it must be present, and the provider count must have
+   * grown by exactly one.
+   */
+  console.log('\n--- L28 the Delta Fulfillment 3PL card, on the live Super-Admin surface ---');
+  const dltPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const dltErrors = [];
+  dltPage.on('pageerror', (e) => dltErrors.push(String(e)));
+  try {
+    await gotoLive(dltPage, `${SITE}/`);
+    const dltLogin = dltPage.getByRole('button', { name: 'Partner Login' }).first();
+    await dltLogin.waitFor({ state: 'visible', timeout: 90000 });
+    await dltLogin.click({ timeout: 30000 });
+    await dltPage.waitForTimeout(2500);
+    const dltSa = dltPage.locator('text=Super Admin').first();
+    await dltSa.waitFor({ state: 'visible', timeout: 90000 });
+    await dltSa.click({ timeout: 30000 });
+    await dltPage.waitForTimeout(3500);
+    check('L28 the deployed site opened and the Super Admin signed in', true);
+
+    const dltNav = dltPage.locator('nav[aria-label="Primary"] >> text=Integration Settings').first();
+    await dltNav.waitFor({ state: 'visible', timeout: 90000 });
+    await dltNav.click({ timeout: 30000 });
+    await dltPage.waitForTimeout(2500);
+
+    const hub = dltPage.getByTestId('integration-hub').first();
+    await hub.waitFor({ state: 'visible', timeout: 60000 });
+    const hubText = (await hub.innerText()) ?? '';
+    check('L28 the DEPLOYED Integration Hub renders the Delta Fulfillment 3PL card',
+      /Delta Fulfillment \(3PL\)/.test(hubText));
+    check('L28 the deployed provider count includes the 3PL partner (23 providers)',
+      /23 providers/.test(hubText));
+    check(
+      `L28 the driven Integrations Hub rendered with no uncaught error (errors: ${dltErrors.join(' | ') || 'none'})`,
+      dltErrors.length === 0
+    );
+  } catch (dltError) {
+    check(
+      `L28 the Delta Fulfillment card could NOT be driven live (${String(dltError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await dltPage.close();
 
 
 

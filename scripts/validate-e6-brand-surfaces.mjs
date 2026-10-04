@@ -2302,6 +2302,7 @@ const PHASE3_SUPPLY_ROUTE_SCOPE = new Set([
   'src/integrations/registry.ts',
   'scripts/validate-supply-route-logistics.mjs',
   'scripts/validate-mock-providers.mjs',
+  'scripts/verify-live-demo.mjs',                  /* +L28 — the 3PL card on the deployed Hub */
 ]);
 
 
