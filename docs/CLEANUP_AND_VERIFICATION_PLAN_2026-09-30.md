@@ -435,6 +435,14 @@ is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 pha
   fixed the Brain's dead-end KPI band. `§2026-10-04 — REPOINTED`: this line previously read *"Part 2b — REMAINING"* and
   was one session stale; the fix is guarded by `scripts/validate-no-stale-blockers.mjs`.
 
+**REMAINING (added 2026-10-04 by the records clean-up) — the editor / type-check gap ("Option A").**
+121 TypeScript files outside `src` (96 in `e2e/`, 23 in `supabase/functions/`, plus `playwright.config.ts`
+and `scripts/brain-runtime-check.ts`) belong to NO TypeScript project, so the editor checks them with wrong
+defaults and shows ~178 invented problems, and the project never type-checks them at all. Fix: give `e2e/`
+and `supabase/functions/` proper projects, reference them from the root `tsconfig.json`, and add them to the
+checks. Recorded as registry row `editor-typecheck-gap-e2e-and-functions`. This is a records/quality task with
+no application-runtime change; it is scheduled for the next available build slot, after the current build work.
+
 ---
 
 ## 7. DEFINITION OF DONE FOR THIS PLAN

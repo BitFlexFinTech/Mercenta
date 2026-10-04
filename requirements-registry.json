@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 526,
+    "total_entries": 527,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -369,15 +369,16 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "built_and_tested": 302,
+      "_note": "Corrected 2026-10-04 to the REAL entry counts. The previous snapshot was stale (built_and_tested 302, not_started 60, regressed 2, removed 2, deferred 7, in_progress 2, blocked 3, complete 1) and contradicted the entries; nothing consumes this block, which is why it had drifted.",
+      "built_and_tested": 326,
       "built": 126,
-      "not_started": 60,
-      "regressed": 2,
-      "removed": 2,
-      "deferred": 7,
-      "in_progress": 2,
-      "blocked": 3,
-      "complete": 1
+      "not_started": 61,
+      "deferred": 9,
+      "removed": 4,
+      "complete": 1,
+      "in_progress": 0,
+      "blocked": 0,
+      "regressed": 0
     },
     "dashboard_logistics_cleanup_programme": {
       "programme": "docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md",
@@ -964,7 +965,8 @@
     },
     "batch3c_part2a_onbehalf_specs": "Batch 3c part 2a (2026-10-03): the eleven PRE-EXISTING browser-spec failures (outstanding blocker C) all shared ONE root cause - they predated the 2026-09-30 on-behalf authority fix (src/lib/commerce/poOnBehalfAuthority.ts) and drove an on-behalf ACCEPTANCE with no brand authorisation, so the writer (src/data/api.ts) legitimately refused them. Each was repointed at source; the brand authorisation is recorded via the ONE canonical writer authoriseOnBehalfDecisions. NEW gate scripts/validate-onbehalf-spec-authorisation.mjs. Full browser suite now 561 passed / 0 failed.",
     "batch3c_part2b_functional_parity": "Batch 3c part 2b (2026-10-03): the remaining page-by-page parity dimensions of the evidence-bearing rows - dataset completeness, name-implies-capability and interactivity. NEW gate scripts/validate-functional-parity.mjs (npm run validate:functional-parity) makes them mechanical: F1 pins the react-hooks rules-of-hooks/exhaustive-deps guards at ERROR (plus the plugin dependency); F2 asserts every listing surface reads its canonical dataset (no hardcoded subset); F3 asserts every CRM/Hub/Centre/Manager/Control component implements its capability INLINE and never redirects; F4 asserts every MetricBand fed a MetricTileData[] has a drill-down. It found and FIXED one real defect: src/components/admin/MercentaBrain.tsx rendered six KPI tiles with NO drill-down (a wall of dead numbers); each now drills into the set it counts, proved in a browser by e2e/mercenta-brain.spec.ts test 11.",
-    "batch0_platform_mode": "§Batch-0 (2026-10-04) — THE PLATFORM DEMO/LIVE SWITCH NOW PERSISTS ACROSS DEVICES. The decision stays OWNED by the ONE SWITCH (src/config/environment.ts); a NEW fail-soft persistence seam src/lib/platform/platformConfig.ts writes it to Supabase (table platform_config, key 'platform_mode') and reads it back on load, and src/main.tsx hydrates it on boot, so flipping the mode on one device applies to EVERY device. The surfaces now FOLLOW the switch instead of a hardcoded constant: src/components/shared/DemoBanner.tsx (the demo notice is silent in live), src/components/auth/Login.tsx (the one-click demo brand cards are hidden in live), src/components/admin/integrations/SimulationControl.tsx (a banner states the current mode in words). DEFECT FIXED AT SOURCE: the stale hardcoded DEMO_MODE constant in src/config/demo.ts (it always read true, even in live) was REMOVED, and scripts/validate-review-s1.mjs was REPOINTED from DEMO_MODE===true to environmentMode()==='demo'. GATE: scripts/validate-platform-mode.mjs (npm run validate:platform-mode; 17 assertions) EXECUTES the seam (read/write never throw; with no DB read returns null and write returns false — never a false success), proves hydration is fail-soft, and pins the wiring + single-owner; mutation-proved x3 (re-added DEMO_MODE -> 1 failure; made readPlatformMode throw -> 3 failures; stopped the demo notice following the switch -> 1 failure), each file restored byte-identical. LIVE: scripts/verify-live-demo.mjs gains L27. DEFERRED (protected path): the platform_config TABLE migration (supabase/migrations) plus Supabase credentials — until then the seam is a silent no-op and the platform keeps running in demo (which the gate asserts)."
+    "batch0_platform_mode": "§Batch-0 (2026-10-04) — THE PLATFORM DEMO/LIVE SWITCH NOW PERSISTS ACROSS DEVICES. The decision stays OWNED by the ONE SWITCH (src/config/environment.ts); a NEW fail-soft persistence seam src/lib/platform/platformConfig.ts writes it to Supabase (table platform_config, key 'platform_mode') and reads it back on load, and src/main.tsx hydrates it on boot, so flipping the mode on one device applies to EVERY device. The surfaces now FOLLOW the switch instead of a hardcoded constant: src/components/shared/DemoBanner.tsx (the demo notice is silent in live), src/components/auth/Login.tsx (the one-click demo brand cards are hidden in live), src/components/admin/integrations/SimulationControl.tsx (a banner states the current mode in words). DEFECT FIXED AT SOURCE: the stale hardcoded DEMO_MODE constant in src/config/demo.ts (it always read true, even in live) was REMOVED, and scripts/validate-review-s1.mjs was REPOINTED from DEMO_MODE===true to environmentMode()==='demo'. GATE: scripts/validate-platform-mode.mjs (npm run validate:platform-mode; 17 assertions) EXECUTES the seam (read/write never throw; with no DB read returns null and write returns false — never a false success), proves hydration is fail-soft, and pins the wiring + single-owner; mutation-proved x3 (re-added DEMO_MODE -> 1 failure; made readPlatformMode throw -> 3 failures; stopped the demo notice following the switch -> 1 failure), each file restored byte-identical. LIVE: scripts/verify-live-demo.mjs gains L27. DEFERRED (protected path): the platform_config TABLE migration (supabase/migrations) plus Supabase credentials — until then the seam is a silent no-op and the platform keeps running in demo (which the gate asserts).",
+    "records_and_decisions_2026_10_04": "RECORDS & DECISIONS (2026-10-04), three founder-directed items. (1) OPTION A RECORDED AS A DEFERRED TASK: new entry `editor-typecheck-gap-e2e-and-functions` — the 121 TypeScript files outside src (e2e/, supabase/functions/, two config files) belong to no TypeScript project, so the editor invents ~178 problems and the project never type-checks them; fix by giving them proper projects and adding them to the checks. (2) SIX WRONG LABELS CORRECTED AT SOURCE, each recording its old value inline: `phase10-uk-opportunity-states` in_progress -> not_started; `ssot-work-layer-s6-ci-wiring` in_progress -> built_and_tested (its text said CI wiring was outstanding, but .github/workflows/ci.yml has existed since 2026-09-28); `phase14-live-integrations-activation` and `phase1-live-research-activation` blocked -> deferred (credentials are ACTIVATION-only, never a blocker); `s0-discovered-live-spapi-edge-functions-missing` blocked -> built_and_tested (the three SP-API routes now exist in supabase/functions/_shared/proxyRoutes.ts served by supabase/functions/spapi/index.ts); `batchC-rocketchat-integration` and `batchD-model-router` regressed -> removed (their own text says deliberately removed). The registry now holds ZERO in_progress, ZERO blocked and ZERO regressed rows, so it and PROJECT_STATUS.md ('IN PROGRESS — none') finally agree. (3) REVENUE-FLOOR DECISION RECORDED: `discovered-acquisition-revenue-floor-and-sla` now states the Founder decision of 2026-10-04 — there is NO revenue floor (volume strategy; the Brand engine's 100-point score + hard disqualifiers + ten-category rule is the quality mechanism); the response-SLA half remains open."
   },
   "entries": [
     {
@@ -1748,8 +1750,8 @@
       "id": "batchC-rocketchat-integration",
       "description": "Rocket.Chat CE messaging engine — REMOVED in Phase D1 (2026-09-11). The registry card, mock-only adapter (IRocketChatClient), SSO bridge (provisionRocketChatUser/ensureBrandGroup), admin panel, docker-compose service and Caddy vhost were all deleted: the factory returned a mock and no product workflow depended on it. Communications remain canonical (CRM / Messages / Helpdesk). Phase G1 (2026-09-13) completed the follow-up SERVER-SIDE cleanup on mercenta-services (46.101.75.185): the retired rocketchat + rocketchat-db (Mongo) containers, the dedicated root_rocketchat_mongodb volume, both anonymous volumes and both images were removed, and the two compose services + volume entry were deleted from /root/docker-compose.yml (docker compose config -q VALID). No rocket/chat/mongo container, volume or image remains; all 10 active services verified unaffected (engine /api/ 200, /auth 403 edge block intact, caddy validate valid). Backup: /root/rocketchat-removal-backup-20260913/.",
       "source": "Batch C",
-      "status": "regressed",
-      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md; docs/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md (Part 1 — server cleanup VERIFIED); e2e/rocketchat-removal.spec.ts; scripts/validate-rocketchat-removal.mjs",
+      "status": "removed",
+      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md; docs/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md (Part 1 — server cleanup VERIFIED); e2e/rocketchat-removal.spec.ts; scripts/validate-rocketchat-removal.mjs — §2026-10-04 LABEL CORRECTED from 'regressed' to 'removed' (the row's own text says the capability was deliberately REMOVED; 'regressed' wrongly implied it broke)",
       "last_verified": "2026-09-13",
       "superseded_by": null
     },
@@ -1793,8 +1795,8 @@
       "id": "batchD-model-router",
       "description": "Model Routing Proxy + clinerules — REMOVED per user request (2026-08-31). Automatic model routing eliminated; Cline reverts to manual model selection via settings dropdown.",
       "source": "Batch D",
-      "status": "regressed",
-      "evidence": "auto-routing files deleted: .clinerules/cost-optimized-routing.md (project + global copy), scripts/model-router/; package.json script removed",
+      "status": "removed",
+      "evidence": "auto-routing files deleted: .clinerules/cost-optimized-routing.md (project + global copy), scripts/model-router/; package.json script removed — §2026-10-04 LABEL CORRECTED from 'regressed' to 'removed' (deliberately removed per user request, per the row's own text)",
       "last_verified": "2026-08-31",
       "superseded_by": null
     },
@@ -3981,8 +3983,8 @@
       "id": "phase10-uk-opportunity-states",
       "description": "Phase 10 — the UK opportunity states A–F at scale, feeding UK Market Fit → qualification → outreach. Phase 1 implements the classification; Phase 10 scales the evidence behind it",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "in_progress",
-      "evidence": "src/config/ukMarketFit.ts → UK_PRESENCE_CLASSES",
+      "status": "not_started",
+      "evidence": "src/config/ukMarketFit.ts → UK_PRESENCE_CLASSES (the PHASE-1 classification EXISTS; this row is about Phase 10 scaling the evidence behind it) — §2026-10-04 LABEL CORRECTED from 'in_progress' to 'not_started': nothing about Phase 10 was in progress, and PROJECT_STATUS.md has read 'IN PROGRESS — none'",
       "last_verified": "2026-09-19",
       "superseded_by": null
     },
@@ -4035,8 +4037,8 @@
       "id": "phase14-live-integrations-activation",
       "description": "Phase 14 — activate the live integrations the platform is already built behind: Amazon SP-API, Xero, Stripe, Wise, Payoneer, DHL, Postmark, Firecrawl, Hunter, Instantly, PandaDoc, Keepa, OpenRouter and other validated providers. Simulation must remain functional until live credentials are configured, and external provider availability must NEVER be a prerequisite for core deterministic functionality",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "blocked",
-      "evidence": "src/integrations/registry.ts (every provider mode is already declared there)",
+      "status": "deferred",
+      "evidence": "src/integrations/registry.ts (every provider mode is already declared there) — §2026-10-04 LABEL CORRECTED from 'blocked' to 'deferred': per the standing decision, credentials are ACTIVATION-only and NEVER a build blocker (.clinerules/mercenta-business-model.md); this work is proven PLAUSIBLE by entering credentials, so it is not blocked",
       "last_verified": "2026-09-19",
       "superseded_by": null
     },
@@ -4188,8 +4190,8 @@
       "id": "phase1-live-research-activation",
       "description": "Phase 1 follow-on — turn on REAL research behind the already-built seam. Blocked: the declared providers (Firecrawl, Keepa, marketplace API) resolve to available/simulation, so the seam correctly refuses. Requires credentials + a server-side research endpoint; NO code change to the seam contract",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "blocked",
-      "evidence": "src/lib/preaudit/researchProvider.ts → preAuditLiveResearchReadiness",
+      "status": "deferred",
+      "evidence": "src/lib/preaudit/researchProvider.ts → preAuditLiveResearchReadiness — §2026-10-04 LABEL CORRECTED from 'blocked' to 'deferred': credentials are ACTIVATION-only and never a build blocker (standing decision)",
       "last_verified": "2026-09-19",
       "superseded_by": null
     },
@@ -4429,9 +4431,9 @@
     },
     {
       "id": "s0-discovered-live-spapi-edge-functions-missing",
-      "description": "DISCOVERED (S0): the real SP-API transport calls three Edge Function routes — `/catalog-items`, `/purchase-orders` and `/shipments/confirm` — and NONE of them exists in supabase/functions (the present set is catalog-import, discovery-directory, esign-envelope, instantly-reply-webhook, payouts-transfer, send-email, social-session, xero-token, xero-webhook). The live SP-API path is therefore UNIMPLEMENTED, not merely uncredentialed, and simulation is currently the only working path. Owner: S7",
-      "evidence": "src/lib/spapi/client.ts (three routes with no matching Edge Function); supabase/functions/ (9 functions present); docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md §11 row 19",
-      "status": "blocked",
+      "description": "RESOLVED — the three SP-API transport routes now EXIST as server functions. `/catalog-items`, `/purchase-orders` and `/shipments/confirm` are declared in supabase/functions/_shared/proxyRoutes.ts and served by supabase/functions/spapi/index.ts (the SP-API proxy). The live path is therefore IMPLEMENTED; it still needs credentials to go live, which is ACTIVATION, not a build gap. Originally DISCOVERED (S0) when none existed — §2026-10-04 LABEL CORRECTED from 'blocked' to 'built_and_tested'.",
+      "evidence": "supabase/functions/spapi/index.ts; supabase/functions/_shared/proxyRoutes.ts (patterns '/catalog-items', '/catalog-items/{submissionId}', '/purchase-orders', '/purchase-orders/status', '/shipments/confirm', '/shipments/confirmations'); scripts/validate-integration-proxy.mjs",
+      "status": "built_and_tested",
       "source": "Master build reconciliation — increment S0 + S1-a (2026-09-20)",
       "last_verified": "2026-09-20",
       "superseded_by": null
@@ -4686,11 +4688,11 @@
     },
     {
       "id": "discovered-acquisition-revenue-floor-and-sla",
-      "description": "The external outbound research requires a declared revenue floor (a disqualifying threshold) and a declared response SLA. Neither exists anywhere in the acquisition path. Both are commercial-policy values that disqualify real brands or create an unowned commitment, so they require an explicit Founder decision before anything is built; they must then live in ONE config as declared rules",
+      "description": "FOUNDER DECISION 2026-10-04 — the REVENUE FLOOR half is DECIDED: there is NO revenue floor. The strategy is VOLUME (onboard as many brands as possible, each paying the monthly subscription, through Mercenta's own free Vendor Central account) while QUALITY is handled by the Brand engine that already exists: the 100-point score across seven dimensions (src/lib/intelligence/scoringEngine.ts), the hard disqualifiers (no product code; weak demand; an Amazon/marketplace restriction) and the ten-approved-category rule, plus the discovery engine (src/lib/discovery/engine.ts). A blunt sales cut-off was REJECTED because it would chase away exactly the new brands the model targets. The RESPONSE SLA half REMAINS OPEN: how quickly Mercenta promises to answer a brand or a customer is undecided and must live in ONE declared config when decided.",
       "status": "not_started",
-      "evidence": "docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md §A.2 (BOUNDARY/ROUTING rows); Founder decision required",
-      "source": "Unified platform gap analysis + foundation workstream (2026-09-20) — automation kill switch, SEO route-metadata foundation, bounded-AI safety gate",
-      "last_updated": "2026-09-20"
+      "evidence": "docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md §A.2 (BOUNDARY/ROUTING rows) — §2026-10-04 UPDATED: revenue-floor half DECIDED (none — Founder, volume strategy); SLA half still open. Quality mechanism = the Brand engine (src/lib/intelligence/scoringEngine.ts, src/lib/discovery/engine.ts; feature group D06).",
+      "source": "Unified platform gap analysis + foundation workstream (2026-09-20) — automation kill switch, SEO route-metadata foundation, bounded-AI safety gate; revenue-floor decision added 2026-10-04",
+      "last_updated": "2026-10-04"
     },
     {
       "id": "discovered-production-trace-to-regression-pipeline",
@@ -5732,10 +5734,10 @@
     },
     {
       "id": "ssot-work-layer-s6-ci-wiring",
-      "description": "§SSOT S6 (PARTIAL) — validate:work-layer IS registered and npm run validate:all runs all 113 validator files; CI wiring is still outstanding (.github/ contains only dependabot.yml)",
-      "source": "§SSOT programme 2026-09-26 — owner: .github/workflows/ (does not exist yet)",
-      "status": "in_progress",
-      "evidence": "package.json (validate:work-layer · validate:all) + scripts/validate-all.sh 113 PASS / 0 FAIL (of 113 files); the CI step is genuinely absent",
+      "description": "§SSOT S6 — COMPLETE. validate:work-layer IS registered and npm run validate:all runs the whole validator corpus, and the CI wiring now EXISTS (.github/workflows/ci.yml, added 2026-09-28 by Batch 1c) and runs on every push and pull request.",
+      "source": "§SSOT programme 2026-09-26 — CI wiring delivered 2026-09-28 by Batch 1c",
+      "status": "built_and_tested",
+      "evidence": ".github/workflows/ci.yml (runs the validator corpus); package.json (validate:work-layer · validate:all); registry _meta.batch1c_ci_wiring records it DONE — §2026-10-04 LABEL CORRECTED from 'in_progress': the row said CI wiring was outstanding, but .github/workflows/ci.yml has existed since 2026-09-28",
       "last_verified": "2026-09-26",
       "superseded_by": null
     },
@@ -5916,6 +5918,15 @@
       "source": "Section Batch-0 (2026-10-04); gate scripts/validate-platform-mode.mjs",
       "status": "built_and_tested",
       "evidence": "src/lib/platform/platformConfig.ts (NEW fail-soft seam: readPlatformMode/writePlatformMode over Supabase 'platform_config'); src/config/environment.ts (persists a switch change + hydrateEnvironmentModeFromDb); src/main.tsx (hydrates on boot); src/components/shared/DemoBanner.tsx + src/components/auth/Login.tsx + src/components/admin/integrations/SimulationControl.tsx (follow the switch); src/config/demo.ts (the stale DEMO_MODE constant REMOVED); scripts/validate-platform-mode.mjs (NEW; npm run validate:platform-mode; 17 assertions; mutation-proved x3); scripts/validate-review-s1.mjs (REPOINTED from DEMO_MODE===true to environmentMode()==='demo'); scripts/verify-live-demo.mjs (L27); scope guards BATCH0_PLATFORM_MODE_SCOPE (E6) + BATCH0_PLATFORM_MODE_DECLARED (E7). The platform_config TABLE migration (supabase/migrations) is DEFERRED as a protected path.",
+      "last_verified": "2026-10-04",
+      "superseded_by": null
+    },
+    {
+      "id": "editor-typecheck-gap-e2e-and-functions",
+      "description": "OPTION A (DEFERRED to after the current build, per the Founder 2026-10-04) — the editor / type-check gap. 121 TypeScript files OUTSIDE src belong to NO TypeScript project: 96 in e2e/, 23 in supabase/functions/, playwright.config.ts and scripts/brain-runtime-check.ts (vite.config.ts IS covered by tsconfig.node.json). The editor therefore checks them with wrong defaults (no @/ alias, no server-function support) and shows ~178 INVENTED problems, and the project NEVER type-checks them at all. Fix: give e2e/ and supabase/functions/ proper TypeScript projects, reference them from the root tsconfig.json, and add them to the checks — so the editor shows only REAL problems and the browser tests and server functions are finally type-checked.",
+      "source": "Founder report 2026-10-04 (the editor showed 836 problems); read-only diagnosis recorded here",
+      "status": "not_started",
+      "evidence": "Diagnosis reproduced 2026-10-04: `npm run lint` = 0 errors / 0 warnings across 734 files; `npm run typecheck` (tsconfig.app.json, include ['src']) = 0; src checked WITHOUT the @/ alias = 2206 errors, so the editor IS using tsconfig.app.json for src; e2e loose-check = 71 errors; supabase/functions loose-check = 98 errors; tsconfig.json is files:[] + references and no project includes e2e/ or supabase/functions/; NO .vscode/ settings exist and NO ESLint or markdown extension is installed, so the problems come from the editor's built-in checking. No application code changed (diagnosis only).",
       "last_verified": "2026-10-04",
       "superseded_by": null
     }
