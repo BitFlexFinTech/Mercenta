@@ -3975,4 +3975,32 @@ writer), the page-by-page functional parity audit of the ~126 unverified registr
 
 **NEXT.** BATCH 3 and §Batch-0 are COMPLETE. Every remaining item needs a founder action.
 
+---
+
+## SESSION — RECORDS CLEAN-UP: STALE RECORDS REPAIRED AT SOURCE + THE "CREDENTIALS NEVER BLOCK THE BUILD" STANDING DECISION (2026-10-04)
+
+**MODE / EXPERTS.** MODE: IMPLEMENT · EXPERTS: senior-software-engineer, project-manager · WHY: the Founder reported two defects — repeated credential asks, and stale records.
+
+**THE FOUNDER REPORT.** (1) *"we dont have the amazon credentials yet ... that should not stop the build ... why do you keep asking me for them?"* (2) *"why are there stale records etc? this is unacceptable."*
+
+**ROOT CAUSE (stated honestly).** (1) The STATE FILES framed the Amazon credential items as "OUTSTANDING BLOCKER" / "founder action", so every session — including the assistant — read that line and repeated the ask, even though the rule already said credentials are ACTIVATION-only. (2) Sessions updated the resume block + registry by hand but left three DERIVED documents stale, and NOTHING checked them.
+
+**BUILT (every defect fixed at source).**
+- `.clinerules/mercenta-business-model.md` — NEW subsection **"Credentials are PENDING, are NEVER a build blocker, and are NEVER asked for"** (the standing decision).
+- `PRODUCTION_READINESS.md` — "P9–P12 are NOT STARTED" → the programme is COMPLETE; the false `api.ts` "marked TODO at that call site" → the wiring exists and the repo holds ZERO TODO markers. Inline `§2026-10-04 — REPOINTED` notes.
+- `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §6 — "Part 2b — REMAINING" → DONE.
+- `HANDOFF.md` — the old "NEXT PLAN — BATCHES 1, 2 and 3" section marked **HISTORICAL / SUPERSEDED**.
+- The resume block + HANDOFF — `OUTSTANDING BLOCKER` now names ONLY the protected `platform_config` migration and states plainly that credentials are NEVER a blocker and never to be requested.
+- `scripts/validate-no-stale-blockers.mjs` (**NEW**; `npm run validate:no-stale-blockers`; 10 assertions) — the guard.
+- `package.json` registers it.
+
+**TESTED.** `validate:all` **150 PASS / 0 FAIL** (exit 0; +1 the NEW gate) · `typecheck` **0** · `lint` **0** · `build` **✓** · the NEW gate **10/10**, **mutation-proved ×2** (re-added the stale `P9–P12` claim → 1 failure; weakened the rule → 1 failure; both files restored byte-identical: `PRODUCTION_READINESS.md` `5a70f97a…`, `mercenta-business-model.md` `94f028d2…`) · `validate:resume-state` PASS.
+
+**RESULT.** **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change).** Committed `4883e44`, pushed to `origin/redesign/foundation` (no `--force`). No demo deploy (no application runtime change).
+
+**DEFECT INVENTORY.** FIXED at source, all gated by the new validator: (1) the credential-blocker framing in the state files; (2) `PRODUCTION_READINESS.md` "P9–P12 are NOT STARTED"; (3) `PRODUCTION_READINESS.md` false `api.ts` "TODO"; (4) the single plan's "Part 2b — REMAINING"; (5) `HANDOFF.md`'s stale "NEXT PLAN" section. No defect parked.
+
+**NEXT.** The build continues on the NON-CREDENTIAL backlog. No credential is required and none is requested.
+
+
 
