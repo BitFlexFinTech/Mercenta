@@ -41,6 +41,8 @@
     "validate:conversion-gate": "node scripts/validate-conversion-gate.mjs",
     "validate:work-layer": "node scripts/validate-work-layer.mjs",
     "validate:all": "bash scripts/validate-all.sh",
+    "catalogue:e2e": "node scripts/e2e-catalogue.mjs --doc",
+    "test:e2e": "playwright test",
     "verify:live": "node scripts/verify-live-demo.mjs",
     "validate:inventory": "node scripts/validate-p8-inventory.mjs",
     "validate:logistics-providers": "node scripts/validate-logistics-providers.mjs",

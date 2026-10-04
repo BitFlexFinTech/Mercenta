@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 529,
+    "total_entries": 530,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -5948,6 +5948,15 @@
       "source": "Founder report 2026-10-04 (the editor showed 836 problems); read-only diagnosis recorded here",
       "status": "built_and_tested",
       "evidence": "Fixed 2026-10-04. `npm run typecheck` = 0 across ALL FOUR projects (app + node + e2e + functions; was src-only). The new coverage found and FIXED real latent defects: 30 in 9 e2e specs (a wrong Playwright `exact` option in multi-tenant.spec.ts; a double-prefixed KPI selector in uiux-foundation.spec.ts that made a test UNABLE TO FAIL; ~28 strict-DOM / union-narrowing issues) and 4 in scripts/brain-runtime-check.ts (edge.label / edge.note read properties a BrainEdge does not have, so its channel-leak scan silently collected nothing; a Set<string> typing error; two duplicate report keys where a spread overwrote the graph counts). NEW gate `scripts/validate-typecheck-coverage.mjs` (`npm run validate:typecheck-coverage`, 20 assertions) fails if the coverage is removed — MUTATION-PROVED (dropping tsconfig.e2e.json from `typecheck` => 1 failure; `package.json` restored byte-identical sha256 6cddfabdf2b31a9a4a0e419618916d5a026ab0ec1c47a9ee538357b50bf661ac). `npm run validate:all` 151/0; lint 0; build OK; the 9 affected browser specs 65 passed. E6 scope guard's F6 surface declared for the new files. No application runtime change (tests, tsconfig and tooling only) => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-04",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e-scenario-catalogue-and-traceability-gate",
+      "description": "§BATCH 0 (2026-10-04) — THE E2E SCENARIO CATALOGUE + TRACEABILITY GATE. The end-to-end suite must cover EVERY scenario for the ENTIRE platform, and that must be MACHINE-HELD rather than claimed. ONE owner of the scenario list, `docs/scenario-catalogue.json`, holds the scenario list plus the METHOD (the eight axes — object · actor · trigger · outcome · data_condition · tenancy · provider_mode · time — whose cross-product with an object lifecycle defines the space). `scripts/e2e-catalogue.mjs` seeds it from the existing specs (`--seed`) and projects it to the GENERATED document `docs/E2E_SCENARIO_CATALOGUE.md` (`--doc`); `scripts/validate-e2e-scenarios.mjs` is the GATE (swept automatically by `npm run validate:all`, because the corpus globs `scripts/validate-*.mjs`). The gate fails if: the catalogue is malformed; a scenario names a spec that does not exist (missing test); a capability has no scenario; a scenario id is duplicated; an e2e spec is named by NO scenario (orphan test); or the generated doc has DRIFTED from the owner. Seeded at 95 scenarios across 8 capability families (one per existing spec). The catalogue owner deliberately lives in `docs/` so it is OUTSIDE the product-source scans and the E6 F6 source-scope. No application runtime change — a validator, a generator, a catalogue and npm scripts only.",
+      "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform', saved and always tested, with every issue fixed permanently",
+      "status": "built_and_tested",
+      "evidence": "`node scripts/validate-e2e-scenarios.mjs` = 13/13 checks PASS (95 scenarios · 8 capabilities); MUTATION-PROVED TWICE — (A) appending a line to `docs/E2E_SCENARIO_CATALOGUE.md` => 1 failure ('the generated document MATCHES the owner'), restored byte-identical sha256 02563363ed802aed50605a02438617ab5e2536ec7fa774392a1519d35a02b018; (B) pointing a scenario at `e2e/DOES-NOT-EXIST.spec.ts` => 2 failures ('no missing test' + 'no orphan test'), restored byte-identical sha256 c59a2dc03416be4b851a6459d1c3d067b0aee80131a1f6da028c4bb0ffbe2607. `npm run validate:all` 153 PASS / 0 FAIL (was 152 — the gate adds one). `npm run typecheck` 0; `npm run lint` 0; `npm run build` ✓. `npm run validate:ci-wiring` PASS (the new scripts are `catalogue:e2e`/`test:e2e`, NOT `validate:*`, so the CI-reachability invariant is untouched; Playwright stays OUT of CI by the project's own gate). E6 F6 + E7 declared surface extended (`E2E_SCENARIO_CATALOGUE_SCOPE` / the E7 `allowed` list). Non-credential, non-runtime governance increment => three-way NOT APPLICABLE.",
       "last_verified": "2026-10-04",
       "superseded_by": null
     }

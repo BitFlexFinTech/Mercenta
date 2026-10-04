@@ -2086,6 +2086,12 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     // same guard and keeps the invariant intact: anything outside `scripts/` is
     // still refused.
     'scripts/',
+    // §BATCH 0 (2026-10-04) — the E2E scenario catalogue owner (the generated doc
+    // and the generator/gate scripts are covered above by `scripts/` and `docs/`).
+    // Same mechanism, unweakened: a changed source/test file in NO declared set
+    // still fails.
+    'docs/scenario-catalogue.json',
+    'package.json',
     // §Phase M13 — the declared surface of the current phase (see M13_DECLARED above).
     ...M13_DECLARED,
     // §Phase 4 — canonical 20-real-brand universe (see PHASE4_DECLARED above):

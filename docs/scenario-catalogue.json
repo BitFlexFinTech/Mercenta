@@ -1,0 +1,942 @@
+{
+  "_comment": "§BATCH 0 — THE ONE OWNER of the end-to-end SCENARIO CATALOGUE. docs/E2E_SCENARIO_CATALOGUE.md is GENERATED from this file (do NOT edit the doc by hand). The gate is scripts/validate-e2e-scenarios.mjs. Regenerate the doc with: node scripts/e2e-catalogue.mjs --doc",
+  "meta": {
+    "owner": "docs/scenario-catalogue.json",
+    "generatedDoc": "docs/E2E_SCENARIO_CATALOGUE.md",
+    "generator": "node scripts/e2e-catalogue.mjs --doc"
+  },
+  "method": {
+    "principle": "A scenario is a cell in the cross-product of an object lifecycle with the axes below; only meaningful cells are listed, and the gate refuses BOTH an orphan test (a spec no scenario names) and a missing one (a scenario whose spec does not exist).",
+    "axes": {
+      "object": [
+        "PO-line",
+        "PO",
+        "shipment",
+        "ASN",
+        "document",
+        "invoice",
+        "payment",
+        "deduction",
+        "return",
+        "case",
+        "compliance_doc",
+        "contract",
+        "onboarding",
+        "payout"
+      ],
+      "actor": [
+        "brand_user",
+        "brand_admin",
+        "mercenta_admin",
+        "super_admin",
+        "channel",
+        "carrier",
+        "system"
+      ],
+      "trigger": [
+        "channel_event",
+        "brand_action",
+        "admin_action",
+        "time_deadline",
+        "provider_event",
+        "system_sweep"
+      ],
+      "outcome": [
+        "success",
+        "refusal",
+        "exception",
+        "timeout",
+        "override"
+      ],
+      "data_condition": [
+        "complete",
+        "incomplete",
+        "unknown",
+        "conflicting",
+        "duplicate"
+      ],
+      "tenancy": [
+        "own_tenant",
+        "cross_tenant_refused"
+      ],
+      "provider_mode": [
+        "simulation",
+        "live",
+        "degraded",
+        "unknown_refused"
+      ],
+      "time": [
+        "before_window",
+        "at_boundary",
+        "past_window"
+      ]
+    }
+  },
+  "capabilities": [
+    "brands_marketing",
+    "commerce_logistics",
+    "finance",
+    "founder",
+    "integrations",
+    "onboarding_acquisition",
+    "operations",
+    "platform"
+  ],
+  "scenarios": [
+    {
+      "id": "spec-access-gate",
+      "capability": "platform",
+      "journey": "access gate",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/access-gate.spec.ts",
+      "expects": "The access gate journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-accessibility",
+      "capability": "platform",
+      "journey": "accessibility",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/accessibility.spec.ts",
+      "expects": "The accessibility journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-ack-invoice-price",
+      "capability": "commerce_logistics",
+      "journey": "ack invoice price",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/ack-invoice-price.spec.ts",
+      "expects": "The ack invoice price journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-acquisition-pipeline",
+      "capability": "onboarding_acquisition",
+      "journey": "acquisition pipeline",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/acquisition-pipeline.spec.ts",
+      "expects": "The acquisition pipeline journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-admin-operational-surfaces",
+      "capability": "platform",
+      "journey": "admin operational surfaces",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/admin-operational-surfaces.spec.ts",
+      "expects": "The admin operational surfaces journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-amazon-ads-dashboard",
+      "capability": "brands_marketing",
+      "journey": "amazon ads dashboard",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/amazon-ads-dashboard.spec.ts",
+      "expects": "The amazon ads dashboard journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-app-shell",
+      "capability": "platform",
+      "journey": "app shell",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/app-shell.spec.ts",
+      "expects": "The app shell journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-bi-intelligence-preservation",
+      "capability": "platform",
+      "journey": "bi intelligence preservation",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/bi-intelligence-preservation.spec.ts",
+      "expects": "The bi intelligence preservation journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-billing",
+      "capability": "finance",
+      "journey": "billing",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/billing.spec.ts",
+      "expects": "The billing journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-brand-advertising",
+      "capability": "platform",
+      "journey": "brand advertising",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/brand-advertising.spec.ts",
+      "expects": "The brand advertising journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-brand-case-workflow",
+      "capability": "operations",
+      "journey": "brand case workflow",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/brand-case-workflow.spec.ts",
+      "expects": "The brand case workflow journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-brand-intelligence-lifecycle",
+      "capability": "brands_marketing",
+      "journey": "brand intelligence lifecycle",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/brand-intelligence-lifecycle.spec.ts",
+      "expects": "The brand intelligence lifecycle journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-brand-operational-surfaces",
+      "capability": "platform",
+      "journey": "brand operational surfaces",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/brand-operational-surfaces.spec.ts",
+      "expects": "The brand operational surfaces journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-brand-payouts",
+      "capability": "finance",
+      "journey": "brand payouts",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/brand-payouts.spec.ts",
+      "expects": "The brand payouts journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-canonical-propagation",
+      "capability": "platform",
+      "journey": "canonical propagation",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/canonical-propagation.spec.ts",
+      "expects": "The canonical propagation journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-catalog-product-management",
+      "capability": "commerce_logistics",
+      "journey": "catalog product management",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/catalog-product-management.spec.ts",
+      "expects": "The catalog product management journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-channel-po-ingestion",
+      "capability": "commerce_logistics",
+      "journey": "channel po ingestion",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/channel-po-ingestion.spec.ts",
+      "expects": "The channel po ingestion journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-command-centre",
+      "capability": "operations",
+      "journey": "command centre",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/command-centre.spec.ts",
+      "expects": "The command centre journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-commerce-operational-simulation",
+      "capability": "platform",
+      "journey": "commerce operational simulation",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/commerce-operational-simulation.spec.ts",
+      "expects": "The commerce operational simulation journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-commercial-model",
+      "capability": "onboarding_acquisition",
+      "journey": "commercial model",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/commercial-model.spec.ts",
+      "expects": "The commercial model journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-commercial-readiness",
+      "capability": "onboarding_acquisition",
+      "journey": "commercial readiness",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/commercial-readiness.spec.ts",
+      "expects": "The commercial readiness journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-company-control-centre",
+      "capability": "founder",
+      "journey": "company control centre",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/company-control-centre.spec.ts",
+      "expects": "The company control centre journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-compliance-gate",
+      "capability": "commerce_logistics",
+      "journey": "compliance gate",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/compliance-gate.spec.ts",
+      "expects": "The compliance gate journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-compliance-sim",
+      "capability": "commerce_logistics",
+      "journey": "compliance sim",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/compliance-sim.spec.ts",
+      "expects": "The compliance sim journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-conversion-gate",
+      "capability": "onboarding_acquisition",
+      "journey": "conversion gate",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/conversion-gate.spec.ts",
+      "expects": "The conversion gate journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-crm",
+      "capability": "brands_marketing",
+      "journey": "crm",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/crm.spec.ts",
+      "expects": "The crm journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-dashboard",
+      "capability": "platform",
+      "journey": "dashboard",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/dashboard.spec.ts",
+      "expects": "The dashboard journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-deductions",
+      "capability": "finance",
+      "journey": "deductions",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/deductions.spec.ts",
+      "expects": "The deductions journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-delivery-appointment",
+      "capability": "commerce_logistics",
+      "journey": "delivery appointment",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/delivery-appointment.spec.ts",
+      "expects": "The delivery appointment journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-design-system",
+      "capability": "platform",
+      "journey": "design system",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/design-system.spec.ts",
+      "expects": "The design system journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-deterministic-journey",
+      "capability": "platform",
+      "journey": "deterministic journey",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/deterministic-journey.spec.ts",
+      "expects": "The deterministic journey journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-disputes",
+      "capability": "finance",
+      "journey": "disputes",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/disputes.spec.ts",
+      "expects": "The disputes journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-document-verification",
+      "capability": "platform",
+      "journey": "document verification",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/document-verification.spec.ts",
+      "expects": "The document verification journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-domain-acceptance",
+      "capability": "platform",
+      "journey": "domain acceptance",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/domain-acceptance.spec.ts",
+      "expects": "The domain acceptance journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-domain-persistence",
+      "capability": "platform",
+      "journey": "domain persistence",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/domain-persistence.spec.ts",
+      "expects": "The domain persistence journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-embedded-social",
+      "capability": "integrations",
+      "journey": "embedded social",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/embedded-social.spec.ts",
+      "expects": "The embedded social journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-founder-investor-centre",
+      "capability": "founder",
+      "journey": "founder investor centre",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/founder-investor-centre.spec.ts",
+      "expects": "The founder investor centre journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-founder-operating-system",
+      "capability": "founder",
+      "journey": "founder operating system",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "expects": "The founder operating system journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-fulfillment-tracks",
+      "capability": "commerce_logistics",
+      "journey": "fulfillment tracks",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/fulfillment-tracks.spec.ts",
+      "expects": "The fulfillment tracks journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-funding-pipeline",
+      "capability": "founder",
+      "journey": "funding pipeline",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/funding-pipeline.spec.ts",
+      "expects": "The funding pipeline journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-google-setup",
+      "capability": "integrations",
+      "journey": "google setup",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/google-setup.spec.ts",
+      "expects": "The google setup journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-homepage-editor",
+      "capability": "platform",
+      "journey": "homepage editor",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/homepage-editor.spec.ts",
+      "expects": "The homepage editor journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-integration-hub",
+      "capability": "integrations",
+      "journey": "integration hub",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/integration-hub.spec.ts",
+      "expects": "The integration hub journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-inventory",
+      "capability": "commerce_logistics",
+      "journey": "inventory",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/inventory.spec.ts",
+      "expects": "The inventory journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-investor-demo",
+      "capability": "founder",
+      "journey": "investor demo",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/investor-demo.spec.ts",
+      "expects": "The investor demo journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-invoicing",
+      "capability": "finance",
+      "journey": "invoicing",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/invoicing.spec.ts",
+      "expects": "The invoicing journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-launch-centre",
+      "capability": "platform",
+      "journey": "launch centre",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/launch-centre.spec.ts",
+      "expects": "The launch centre journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-legal-agreements",
+      "capability": "platform",
+      "journey": "legal agreements",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/legal-agreements.spec.ts",
+      "expects": "The legal agreements journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-listing-analyzer",
+      "capability": "platform",
+      "journey": "listing analyzer",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/listing-analyzer.spec.ts",
+      "expects": "The listing analyzer journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-logistics-hero",
+      "capability": "commerce_logistics",
+      "journey": "logistics hero",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "expects": "The logistics hero journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-logistics-hub-map",
+      "capability": "commerce_logistics",
+      "journey": "logistics hub map",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "expects": "The logistics hub map journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-logistics-providers",
+      "capability": "commerce_logistics",
+      "journey": "logistics providers",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/logistics-providers.spec.ts",
+      "expects": "The logistics providers journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-logistics-wave3",
+      "capability": "commerce_logistics",
+      "journey": "logistics wave3",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/logistics-wave3.spec.ts",
+      "expects": "The logistics wave3 journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-mercenta-brain",
+      "capability": "operations",
+      "journey": "mercenta brain",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "expects": "The mercenta brain journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-multi-tenant",
+      "capability": "platform",
+      "journey": "multi tenant",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/multi-tenant.spec.ts",
+      "expects": "The multi tenant journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-notifications",
+      "capability": "operations",
+      "journey": "notifications",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/notifications.spec.ts",
+      "expects": "The notifications journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-onboarding-handoff",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding handoff",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/onboarding-handoff.spec.ts",
+      "expects": "The onboarding handoff journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-onboarding-workflow",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding workflow",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/onboarding-workflow.spec.ts",
+      "expects": "The onboarding workflow journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-onboarding",
+      "capability": "onboarding_acquisition",
+      "journey": "onboarding",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/onboarding.spec.ts",
+      "expects": "The onboarding journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-operating-costs",
+      "capability": "finance",
+      "journey": "operating costs",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/operating-costs.spec.ts",
+      "expects": "The operating costs journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-opportunity-discovery",
+      "capability": "onboarding_acquisition",
+      "journey": "opportunity discovery",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/opportunity-discovery.spec.ts",
+      "expects": "The opportunity discovery journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-outreach-provider-hardening",
+      "capability": "platform",
+      "journey": "outreach provider hardening",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/outreach-provider-hardening.spec.ts",
+      "expects": "The outreach provider hardening journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-p12-channel-operations",
+      "capability": "platform",
+      "journey": "p12 channel operations",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/p12-channel-operations.spec.ts",
+      "expects": "The p12 channel operations journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-ack-duties",
+      "capability": "commerce_logistics",
+      "journey": "po ack duties",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-ack-duties.spec.ts",
+      "expects": "The po ack duties journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-admin-ack-surface",
+      "capability": "commerce_logistics",
+      "journey": "po admin ack surface",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-admin-ack-surface.spec.ts",
+      "expects": "The po admin ack surface journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-brand-ack-surface",
+      "capability": "commerce_logistics",
+      "journey": "po brand ack surface",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-brand-ack-surface.spec.ts",
+      "expects": "The po brand ack surface journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-documents",
+      "capability": "commerce_logistics",
+      "journey": "po documents",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-documents.spec.ts",
+      "expects": "The po documents journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-lifecycle",
+      "capability": "commerce_logistics",
+      "journey": "po lifecycle",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-lifecycle.spec.ts",
+      "expects": "The po lifecycle journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-notification-fanout",
+      "capability": "commerce_logistics",
+      "journey": "po notification fanout",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-notification-fanout.spec.ts",
+      "expects": "The po notification fanout journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-onbehalf",
+      "capability": "commerce_logistics",
+      "journey": "po onbehalf",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-onbehalf.spec.ts",
+      "expects": "The po onbehalf journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-onboarding-ack-surfaces",
+      "capability": "onboarding_acquisition",
+      "journey": "po onboarding ack surfaces",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-onboarding-ack-surfaces.spec.ts",
+      "expects": "The po onboarding ack surfaces journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-po-revision-surfaces",
+      "capability": "commerce_logistics",
+      "journey": "po revision surfaces",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/po-revision-surfaces.spec.ts",
+      "expects": "The po revision surfaces journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-proxy-model",
+      "capability": "platform",
+      "journey": "proxy model",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/proxy-model.spec.ts",
+      "expects": "The proxy model journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-public-chrome",
+      "capability": "platform",
+      "journey": "public chrome",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/public-chrome.spec.ts",
+      "expects": "The public chrome journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-public-pages",
+      "capability": "platform",
+      "journey": "public pages",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/public-pages.spec.ts",
+      "expects": "The public pages journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-rakazo",
+      "capability": "platform",
+      "journey": "rakazo",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/rakazo.spec.ts",
+      "expects": "The rakazo journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-record-drawer",
+      "capability": "platform",
+      "journey": "record drawer",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/record-drawer.spec.ts",
+      "expects": "The record drawer journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-redesign-surfaces",
+      "capability": "platform",
+      "journey": "redesign surfaces",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/redesign-surfaces.spec.ts",
+      "expects": "The redesign surfaces journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-rocketchat-removal",
+      "capability": "platform",
+      "journey": "rocketchat removal",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/rocketchat-removal.spec.ts",
+      "expects": "The rocketchat removal journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-runtime-entry",
+      "capability": "platform",
+      "journey": "runtime entry",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/runtime-entry.spec.ts",
+      "expects": "The runtime entry journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-sales-estimator",
+      "capability": "platform",
+      "journey": "sales estimator",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/sales-estimator.spec.ts",
+      "expects": "The sales estimator journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-seo-foundation",
+      "capability": "platform",
+      "journey": "seo foundation",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/seo-foundation.spec.ts",
+      "expects": "The seo foundation journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-shipment-asn",
+      "capability": "commerce_logistics",
+      "journey": "shipment asn",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/shipment-asn.spec.ts",
+      "expects": "The shipment asn journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-simulation-control",
+      "capability": "platform",
+      "journey": "simulation control",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/simulation-control.spec.ts",
+      "expects": "The simulation control journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-status-semantics",
+      "capability": "platform",
+      "journey": "status semantics",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/status-semantics.spec.ts",
+      "expects": "The status semantics journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-supply-route-escalation",
+      "capability": "commerce_logistics",
+      "journey": "supply route escalation",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "expects": "The supply route escalation journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-table-migrations",
+      "capability": "platform",
+      "journey": "table migrations",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/table-migrations.spec.ts",
+      "expects": "The table migrations journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-table-responsive",
+      "capability": "commerce_logistics",
+      "journey": "table responsive",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/table-responsive.spec.ts",
+      "expects": "The table responsive journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-tours",
+      "capability": "operations",
+      "journey": "tours",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "expects": "The tours journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-uiux-foundation",
+      "capability": "platform",
+      "journey": "uiux foundation",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/uiux-foundation.spec.ts",
+      "expects": "The uiux foundation journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-uiux-redesign",
+      "capability": "platform",
+      "journey": "uiux redesign",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/uiux-redesign.spec.ts",
+      "expects": "The uiux redesign journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-uk-market-fit",
+      "capability": "onboarding_acquisition",
+      "journey": "uk market fit",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/uk-market-fit.spec.ts",
+      "expects": "The uk market fit journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-work-layer",
+      "capability": "operations",
+      "journey": "work layer",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "expects": "The work layer journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-workstream-b-intelligence",
+      "capability": "operations",
+      "journey": "workstream b intelligence",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/workstream-b-intelligence.spec.ts",
+      "expects": "The workstream b intelligence journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "spec-xero",
+      "capability": "finance",
+      "journey": "xero",
+      "actor": "mixed",
+      "type": "happy",
+      "spec": "e2e/xero.spec.ts",
+      "expects": "The xero journey renders and behaves as its spec asserts."
+    }
+  ]
+}

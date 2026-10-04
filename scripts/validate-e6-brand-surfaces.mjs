@@ -2313,6 +2313,31 @@ const PHASE3_SUPPLY_ROUTE_SCOPE = new Set([
   'e2e/supply-route-escalation.spec.ts',
 ]);
 
+/**
+ * §BATCH 0 (2026-10-04) — THE E2E SCENARIO CATALOGUE + TRACEABILITY GATE.
+ *
+ * The end-to-end suite must cover EVERY scenario for the ENTIRE platform, and
+ * that must be machine-held rather than claimed. This phase adds the ONE owner of
+ * the scenario list (`e2e/scenario-catalogue.json`), the generator that projects
+ * it to `docs/E2E_SCENARIO_CATALOGUE.md` (`scripts/e2e-catalogue.mjs`), and the
+ * gate `scripts/validate-e2e-scenarios.mjs` (swept by `npm run validate:all`,
+ * because the corpus globs `scripts/validate-*.mjs`) which refuses an orphan test,
+ * a missing test, an uncovered capability, or a doc that has drifted from the
+ * owner. Declared set — every file this phase adds or touches, named. The
+ * F5/F5b/F6 contract is UNCHANGED: a changed SOURCE file outside EVERY declared
+ * set is still refused. (`docs/` and the guard files themselves are already
+ * accepted by earlier rules; the explicit entries keep the union honest.)
+ */
+const E2E_SCENARIO_CATALOGUE_SCOPE = new Set([
+  'docs/scenario-catalogue.json',                  /* THE ONE owner of the scenario list (docs/ is outside the product source scan) */
+  'scripts/e2e-catalogue.mjs',                     /* the generator (--seed / --doc) */
+  'scripts/validate-e2e-scenarios.mjs',            /* the traceability gate */
+  'docs/E2E_SCENARIO_CATALOGUE.md',                /* the GENERATED document */
+  'package.json',                                  /* catalogue:e2e + test:e2e scripts */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3036,7 +3061,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...OPTION_A_TYPECHECK_COVERAGE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 3 — the supply route + logistics escalation (see above). */
           PHASE3_SUPPLY_ROUTE_SCOPE.has(p) ||
-          [...PHASE3_SUPPLY_ROUTE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE3_SUPPLY_ROUTE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH 0 — the E2E scenario catalogue + traceability gate (see above). */
+          E2E_SCENARIO_CATALOGUE_SCOPE.has(p) ||
+          [...E2E_SCENARIO_CATALOGUE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
