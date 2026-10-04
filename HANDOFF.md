@@ -14,8 +14,8 @@ LAST VERIFIED COMMIT: **`c305845`** — 'chore(products): add the universal prod
 GITHUB PUSH: **PUSHED** — `origin/redesign/foundation` @ `c305845` (no `--force`); the state commit follows.
 DEMO DEPLOYMENT: **deployed @ `c305845`** — via `scripts/deploy-demo.sh`, to `demo.mercenta.co.uk` only (20 new / 12 modified uploaded; 19 stale removed).
 LIVE VERIFICATION: **verified on `https://demo.mercenta.co.uk`** — verify:live **244 PASS / 0 FAIL** incl. the NEW `L27` (the deployed Super-Admin switch surface states `demo` and its words match; zero uncaught errors).
-OUTSTANDING BLOCKER: **(N) the `platform_config` TABLE migration is DEFERRED (a PROTECTED path)** — persistence is wired fail-soft but inert until the table + Supabase credentials exist. **(A) the two vendor codes `SV5QE` / `SV76D` have NO category, BLOCKED on the owner confirming with Amazon.** Then blockers (D)–(M) and the four declared work-layer gaps.
-NEXT TASK: **BATCH 3 AND §BATCH-0 ARE COMPLETE.** Every remaining item needs a FOUNDER action (the EVIDENCE-BLOCKED / UNKNOWN Amazon items, the two vendor codes, approval for the protected `platform_config` migration). Confirm the next scope with the founder.
+OUTSTANDING BLOCKER: **(N) the `platform_config` TABLE migration is DEFERRED (a PROTECTED path)** — persistence is wired fail-soft but inert until approved. **No other item blocks the build.** **The Amazon Vendor Central credentials are PENDING FROM THE FOUNDER and are NEVER a build blocker** — per `.clinerules/mercenta-business-model.md` they are an ACTIVATION step only; **do NOT ask for them.** The two vendor codes (`SV5QE`, `SV76D`) and the evidence-blocked Amazon findings are VERIFICATION-LATER (never guessed, never a blocker). No credential is required for any remaining build work.
+NEXT TASK: **BATCH 3 AND §BATCH-0 ARE COMPLETE.** **No credential is needed for the remaining build work and none is to be requested.** The build continues on the NON-CREDENTIAL BACKLOG: the single plan's §6 leftovers (only the server-side delivery leg is credential-gated, and that is ACTIVATION-LATER), the two regressed rows (`batchC-rocketchat-integration`, `batchD-model-router`), the tooling items, the legacy UI-redesign backlog and the Phase 15 launch gates. The Founder directs which to take; no credential is involved.
 EXACT NEXT STARTING POINT: `src/lib/platform/platformConfig.ts` + `scripts/validate-platform-mode.mjs` + `requirements-registry.json` (_meta.batch0_platform_mode).
 RULES APPLIED THIS SESSION: MODE: IMPLEMENT · EXPERTS: skill-router, senior-software-engineer, project-manager · WHY: "continue where you left off" — the repository (not the chat) held an unfinished §Batch-0; the engineer finished it at source (gate + DEMO_MODE defect, mutation-proved) and the project-manager closed commit → push → deploy → live verify.
 PLAIN SUMMARY (OWNER-FACING):
@@ -77,10 +77,14 @@ or stack-specific content (`business-analyst`, `senior-software-architect`, `sen
 `00-task-mode-selection` → `06-page-by-page-functional-parity-audit` set). The stale project path in
 `05-thoroughness-overrides-brevity.md` was corrected to `/Users/tadii/Desktop/1. Mercenta`.
 
-## NEXT PLAN — BATCHES 1, 2 and 3 (recorded 2026-09-27)
+## NEXT PLAN — BATCHES 1, 2 and 3 (recorded 2026-09-27) — ⚠ HISTORICAL / SUPERSEDED (all three are DONE or CLOSED — do NOT resume from this section)
 
-**Detail: `docs/NEXT_BUILD_PLAN_2026-09-27.md` · State: `CURRENT RESUME STATE`.** Resume with "continue where you
-left off".
+**Detail: `docs/NEXT_BUILD_PLAN_2026-09-27.md` (now a POINTER to the single plan) · State: `CURRENT RESUME STATE`.**
+The three batches below were completed after this section was written: **BATCH 1** built and gated its server helpers
+(1b/1c DONE; the server-side delivery leg needs a Supabase credential — an ACTIVATION step, **never a build blocker**);
+**BATCH 2** (Amazon accuracy) is CLOSED; **BATCH 3** (3a / 3b / 3c) is DONE — see
+`docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §6, the single plan of record.
+
 
 1. **BATCH 1 — make the key handover real (simulation only, no credentials needed):** build the server helpers
    the REAL clients already call but which DO NOT EXIST — **Amazon SP-API ×12 routes** (`src/lib/spapi/client.ts`

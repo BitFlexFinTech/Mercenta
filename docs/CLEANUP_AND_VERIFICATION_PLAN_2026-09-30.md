@@ -429,8 +429,11 @@ is owned by THIS file. It was **PAUSED — not abandoned** while the P0–P6 pha
   brand's authorisation now recorded through the ONE canonical writer `authoriseOnBehalfDecisions`; the `invoicing`
   receipt-gate test builds its order through canonical writers instead of a phantom store instance). NEW gate
   `scripts/validate-onbehalf-spec-authorisation.mjs` (`npm run validate:onbehalf-spec-authorisation`, mutation-proved).
-  The FULL browser suite is now **561 passed / 2 skipped / 0 failed** (was 11 failures). **Part 2b — REMAINING:** the
-  remaining page-by-page parity dimensions (dataset completeness / name-implies-capability / interactivity).
+  The FULL browser suite is now **561 passed / 2 skipped / 0 failed** (was 11 failures). **Part 2b — DONE (2026-10-03):**
+  the remaining page-by-page parity dimensions (dataset completeness / name-implies-capability / interactivity), made
+  mechanical by `scripts/validate-functional-parity.mjs` (`npm run validate:functional-parity`), which also found and
+  fixed the Brain's dead-end KPI band. `§2026-10-04 — REPOINTED`: this line previously read *"Part 2b — REMAINING"* and
+  was one session stale; the fix is guarded by `scripts/validate-no-stale-blockers.mjs`.
 
 ---
 

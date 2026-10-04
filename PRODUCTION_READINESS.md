@@ -1,14 +1,14 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: session 21 (23 Sep) — the DASHBOARD + LOGISTICS CLEANUP PROGRAMME. P0, P0.4, P1, P2, P3, P4, P5, P6, P7
-and P8 are DONE, committed and (for the product phases) verified live on the demo; P9–P12 are NOT STARTED. Plan + the
-11 binding Founder decisions: `docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md` (each completed phase's
-evidence is in `PROJECT_STATUS.md` and in that document's per-phase sections). Everything below is still simulated;
-nothing was re-labelled live.**
+**Last updated: 2026-10-04 (§Batch-0 — the platform-mode persistence).**
 
-> **Addendum — session 36 (26 Sep): the §CG section immediately below was ADDED by the conversion-gate increment; the
-> P9–P12 sentence in the paragraph above is stale (P9–P13 and the whole PO-ACK programme are complete — see
-> `PROJECT_STATUS.md`). Only the §CG entry is new; the rest of this file has not been re-reviewed by that session.**
+**Status of the DASHBOARD + LOGISTICS CLEANUP PROGRAMME: COMPLETE.** Every phase — P0, P0.4, P1–P13 — is DONE, and the
+programme's own status line reads *"the programme has no remaining phase"*
+(`docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md`). The whole PO-ACK programme, **BATCH 3** and **§Batch-0**
+are also complete. `§2026-10-04 — REPOINTED`: this header previously read *"P9–P12 are NOT STARTED"*, which was one
+session stale (P9–P13 were already done); the stale sentence is corrected here and the fix is guarded by
+`scripts/validate-no-stale-blockers.mjs`. Everything below is still simulated; nothing was re-labelled live.
+
 
 ## §CG — THE CONVERSION GATE (session 36, 26 Sep): what is honest about it, and its one go-live prerequisite
 
@@ -438,7 +438,7 @@ file existed). That is fixed:
 
 | Integration | Currently active | What's needed to go live | Where it's entered | Code changes needed |
 |---|---|---|---|---|
-| Amazon SP-API | `MockAmazonSPAPIClient` (simulated submissions, PO pool) | Admin registers an app in Amazon Developer Console for the Vendor Central account → LWA Client ID + Secret; one-time OAuth consent | Integrations wizard → **Amazon Selling Partner API** card (real popup path already exists; enter public Client ID, complete consent, Edge Function exchanges + Vault-stores refresh token, `credentials` passed to `createSPApiClientForConnection`) | None (wire stored credential ref into `api.ts` factory call — marked TODO at that call site) |
+| Amazon SP-API | `MockAmazonSPAPIClient` (simulated submissions, PO pool) | Admin registers an app in Amazon Developer Console for the Vendor Central account → LWA Client ID + Secret; one-time OAuth consent | Integrations wizard → **Amazon Selling Partner API** card (real popup path already exists; enter public Client ID, complete consent, Edge Function exchanges + Vault-stores refresh token, `credentials` passed to `createSPApiClientForConnection`) | **None** — `src/data/api.ts` already wires the stored connection through `createSPApiClientForConnection(...)` (8 call sites); there is no TODO. `§2026-10-04 — REPOINTED`: this cell previously read *"wire stored credential ref into `api.ts` factory call — marked TODO at that call site"*, but the wiring exists and the repository holds ZERO `TODO`/`FIXME` markers. |
 | Stripe | `MockStripeClient` (`mock:sub-…` ids, dunning path simulated); Billing panel renders fully in "(Mock) mode" | Free Stripe account → test keys today, live keys at launch | Integrations wizard → **Stripe** card (OAuth/test-key path); factory `createStripeClientForConnection` flips to real on a verified connection | None expected |
 | DocuSign / PandaDoc | `MockEsignClient` (envelope lifecycle + every-4th decline simulated); Send-for-Signature works end-to-end via factory | Account signup on whichever provider the business holds; free developer sandbox exists for both | Integrations wizard → **E-Signature** card | Deploy `esign-envelope` Edge Function + wire its Vault lookup (`resolveToken`); factory's `getConnection` returns the Vault-backed connection |
 | Postmark/SendGrid | `MockMailClient` (simulated hard-bounce on malformed recipients) | Free Postmark/SendGrid trial account + server API token | Integrations wizard → **Transactional Email** card (live test-call already implemented); factory `createMailClient` flips to real | Deploy `send-email` Edge Function + wire its Vault lookup (`resolveToken`) |

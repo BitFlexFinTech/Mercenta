@@ -178,6 +178,26 @@ Every simulated action must be **truthfully labelled** as simulation/demo/mock
 and must make **zero live network calls**. Never represent simulated data as a
 successful live external transaction.
 
+### Credentials are PENDING, are NEVER a build blocker, and are NEVER asked for (standing decision, 2026-10-04)
+
+The Founder has stated plainly that the **Amazon Vendor Central credentials are pending and will be supplied when
+obtained**, and that **their absence must never stop the build**. This is a STANDING DECISION, not a per-session
+question, and it applies to every credential (Amazon, Xero, Wise, Payoneer, DHL, Palletline, HMRC, Companies House,
+social OAuth, a Supabase project, an OpenRouter key, …):
+
+- **Never ask the Founder for credentials**, and never re-raise them as an open question. When a credential is
+  supplied it is entered once and the already-built functionality turns on.
+- **Never list a credential — nor a vendor code awaiting Amazon's confirmation, nor an evidence-blocked Amazon
+  finding — as a "build blocker" or a "founder action" that must be cleared before work continues.** They belong under
+  ACTIVATION / VERIFICATION-LATER, never under a blocker that stops the build.
+- **Keep building everything that does not need them.** Every external path already has a mock-first seam
+  (`Mock*Client` + `Real*Client`), so the whole platform stays buildable, demonstrable and testable with NO credential.
+- The ONLY genuine hard stops are those in `.clinerules/operating-model.md` §7 (a protected path, an irreversible
+  action, a missing business decision, a paid-service activation) — **never a pending credential**.
+
+Guarded by `scripts/validate-no-stale-blockers.mjs` (`npm run validate:no-stale-blockers`).
+
+
 ## Admin override
 
 Admin may correct PO mappings, routing, commercial model, calculations,
