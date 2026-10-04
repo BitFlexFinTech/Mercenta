@@ -10,7 +10,7 @@ resume from the repository, never from the transcript).**
 LAST COMPLETED TASK: **§BATCH 0 (2026-10-04) — THE E2E SCENARIO CATALOGUE + TRACEABILITY GATE.** ONE owner `docs/scenario-catalogue.json` (the scenario list + the METHOD eight axes), the generator `scripts/e2e-catalogue.mjs` (`--seed` / `--doc`), the GENERATED document `docs/E2E_SCENARIO_CATALOGUE.md`, and the gate `scripts/validate-e2e-scenarios.mjs` (swept by `npm run validate:all`). Seeded 95 scenarios across 8 capability families; the gate refuses a missing test, an orphan test, an uncovered capability, a duplicate id, or a drifted document — MUTATION-PROVED TWICE. Registry row `e2e-scenario-catalogue-and-traceability-gate` (total_entries 529→530).
 CURRENT VERIFIED STATE: **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change).** typecheck **0** · lint **0** · build ✓ · validate:all **153/0** (was 152) · registry integrity **7/0** · validate:e2e-scenarios **13/13** · validate:ci-wiring **PASS**.
 CURRENT BRANCH: redesign/foundation
-LAST VERIFIED COMMIT: **`390e5a0`** — 'test(e2e-batch0): the E2E scenario catalogue owner, its generated document and the traceability gate'. The state commit follows.
+LAST VERIFIED COMMIT: **`75168a0`** — 'test(e2e-batch0): the E2E scenario catalogue owner, its generated document and the traceability gate'. The state commit follows.
 GITHUB PUSH: **PUSHED** — `origin/redesign/foundation` (no `--force`); the state commit follows.
 DEMO DEPLOYMENT: **NOT APPLICABLE (no application runtime change)** — a validator, a generator, a catalogue and npm scripts only.
 LIVE VERIFICATION: **NOT APPLICABLE (no application runtime change)** — nothing new to verify on https://demo.mercenta.co.uk.
