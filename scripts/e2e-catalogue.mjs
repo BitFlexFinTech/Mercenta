@@ -19,7 +19,7 @@ import { pathToFileURL } from 'node:url';
 
 const ROOT = new URL('../', import.meta.url);
 const CATALOGUE = 'docs/scenario-catalogue.json';
-const DOC = 'docs/E2E_SCENARIO_CATALOGUE.md';
+const DOC = 'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md';
 
 const abs = (p) => new URL(p, ROOT);
 const read = (p) => readFileSync(abs(p), 'utf8');
@@ -90,10 +90,10 @@ export function renderDoc(c) {
     byCap.get(s.capability).push(s);
   }
   const lines = [];
-  lines.push('# E2E SCENARIO CATALOGUE');
+  lines.push('# WHOLE-PLATFORM E2E COVERAGE MATRIX');
   lines.push('');
   lines.push('> **GENERATED FILE — do not edit by hand.** The ONE owner is');
-  lines.push('> `e2e/scenario-catalogue.json`; regenerate this document with');
+  lines.push(`> \`${c.meta.owner}\`; regenerate this document with`);
   lines.push('> `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`');
   lines.push('> fails if this document drifts from the owner.');
   lines.push('');

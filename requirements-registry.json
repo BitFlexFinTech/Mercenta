@@ -1754,7 +1754,7 @@
       "description": "Rocket.Chat CE messaging engine — REMOVED in Phase D1 (2026-09-11). The registry card, mock-only adapter (IRocketChatClient), SSO bridge (provisionRocketChatUser/ensureBrandGroup), admin panel, docker-compose service and Caddy vhost were all deleted: the factory returned a mock and no product workflow depended on it. Communications remain canonical (CRM / Messages / Helpdesk). Phase G1 (2026-09-13) completed the follow-up SERVER-SIDE cleanup on mercenta-services (46.101.75.185): the retired rocketchat + rocketchat-db (Mongo) containers, the dedicated root_rocketchat_mongodb volume, both anonymous volumes and both images were removed, and the two compose services + volume entry were deleted from /root/docker-compose.yml (docker compose config -q VALID). No rocket/chat/mongo container, volume or image remains; all 10 active services verified unaffected (engine /api/ 200, /auth 403 edge block intact, caddy validate valid). Backup: /root/rocketchat-removal-backup-20260913/.",
       "source": "Batch C",
       "status": "removed",
-      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md; docs/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md (Part 1 — server cleanup VERIFIED); e2e/rocketchat-removal.spec.ts; scripts/validate-rocketchat-removal.mjs — §2026-10-04 LABEL CORRECTED from 'regressed' to 'removed' (the row's own text says the capability was deliberately REMOVED; 'regressed' wrongly implied it broke)",
+      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASED1_2026-09-11.md; docs/archive/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md (Part 1 — server cleanup VERIFIED); e2e/rocketchat-removal.spec.ts; scripts/validate-rocketchat-removal.mjs — §2026-10-04 LABEL CORRECTED from 'regressed' to 'removed' (the row's own text says the capability was deliberately REMOVED; 'regressed' wrongly implied it broke)",
       "last_verified": "2026-09-13",
       "superseded_by": null
     },
@@ -1763,7 +1763,7 @@
       "description": "Brand-facing Deductions Ledger (Tour 5 surface) — BUILT 2026-09-13. Rendered on the brand Analytics AND Reports views (src/components/brand/DeductionsLedger.tsx), carrying the four canonical Tour-5 anchors (deductions-ledger, deductions-categories, deductions-dispute-btn, deductions-outcome-info) that previously existed in NO component, so e2e/tours.spec.ts t5 had only ever skipped. Reuses the canonical E4 tenant-scoped domain read model (listBrandCommerceExceptions — tenant check inside the domain) and the canonical openCommerceDispute with a brand-pinned CommerceActor (RBAC + tenant + audit in the domain, refusals verbatim); refreshes via useCanonicalStoreVersion; reports the REAL recorded dispute outcome (no self-declared wins); marks (sim) from the canonical flag; honest empty states. No new store, no second workflow, no new visual language, NO migration (023 remains newest).",
       "source": "Phase G1",
       "status": "built_and_tested",
-      "evidence": "docs/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md (Part 2); e2e/tours.spec.ts t5 (genuine functional + tenant-isolation test, PASSES); full browser suite 209 passed / 0 failed / 3 skipped; typecheck 0; npm run lint 0; build PASS",
+      "evidence": "docs/archive/PRODUCT_CONSOLIDATION_PHASEG1_2026-09-13.md (Part 2); e2e/tours.spec.ts t5 (genuine functional + tenant-isolation test, PASSES); full browser suite 209 passed / 0 failed / 3 skipped; typecheck 0; npm run lint 0; build PASS",
       "last_verified": "2026-09-13",
       "superseded_by": null
     },
@@ -2170,7 +2170,7 @@
       "description": "Complete engine feature inventory derived from the RUNNING deployed application (v1.47.0): 8 brand modules, 35 providers, 40+ tables, route/controller surface",
       "source": "Phase E7",
       "status": "built_and_tested",
-      "evidence": "src/config/mercentaSocial.ts (SOCIAL_MODULES / SOCIAL_PROVIDERS / SOCIAL_ENGINE_VERIFIED); docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md section 3; verified on droplet mercenta-services, container root-postiz-1",
+      "evidence": "src/config/mercentaSocial.ts (SOCIAL_MODULES / SOCIAL_PROVIDERS / SOCIAL_ENGINE_VERIFIED); docs/archive/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md section 3; verified on droplet mercenta-services, container root-postiz-1",
       "last_verified": "2026-09-12",
       "superseded_by": null
     },
@@ -2242,7 +2242,7 @@
       "description": "Verified engine deployment defects recorded: backend 502 (Temporal missing), self-registration OPEN, MAIN_URL/FRONTEND_URL localhost, container-local media storage, droplet RAM 73.7 percent",
       "source": "Phase E7",
       "status": "built_and_tested",
-      "evidence": "src/config/mercentaSocial.ts (SOCIAL_DEPLOYMENT_FINDINGS, 6 findings); admin findings panel; docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 2.5 and 8; PRODUCTION_READINESS.md",
+      "evidence": "src/config/mercentaSocial.ts (SOCIAL_DEPLOYMENT_FINDINGS, 6 findings); admin findings panel; docs/archive/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 2.5 and 8; PRODUCTION_READINESS.md",
       "last_verified": "2026-09-12",
       "superseded_by": null
     },
@@ -2251,7 +2251,7 @@
       "description": "Engine-side link, channel connect, publishing and the Mercenta to engine session bridge are NOT implemented: they require the deployment fix (Temporal/502) plus a server-side provisioning call",
       "source": "Phase E7",
       "status": "built",
-      "evidence": "src/lib/social/workspace.ts (engineLinked:false, engineOrganizationId null, simulated:true - reported truthfully); docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 5.4, 9.3, 9.4",
+      "evidence": "src/lib/social/workspace.ts (engineLinked:false, engineOrganizationId null, simulated:true - reported truthfully); docs/archive/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md sections 5.4, 9.3, 9.4",
       "last_verified": "2026-09-12",
       "superseded_by": null
     },
@@ -2992,9 +2992,9 @@
     {
       "id": "uiux-wave4-brain-3d",
       "description": "Wave 4 — the Mercenta Brain is a GENUINE 3D spatial experience, not a restyled 2D graph: real WebGL rendering (three.js via react-three-fiber), perspective camera with orbit navigation (drei OrbitControls), a spatial wheel of five cluster sectors, depth-stratified records, animated relationships with travelling signals, interactive entity selection with contextual detail, and reduced-motion behaviour. Built by reusing three@0.186.0 (MIT), @react-three/fiber@8.18.0 (MIT) and @react-three/drei@9.122.0 (MIT) — R3F v8 pinned for React 18.3 compatibility. Canonical Brain DATA is unchanged: buildGraph.ts untouched, zero network calls, tenant scoping unchanged.",
-      "source": "Full UI/UX redesign — Wave 4 (Brain: genuine 3D). Decision record: docs/UIUX_WAVE4_BRAIN_3D_2026-09-22.md",
+      "source": "Full UI/UX redesign — Wave 4 (Brain: genuine 3D). Decision record: docs/archive/UIUX_WAVE4_BRAIN_3D_2026-09-22.md",
       "status": "built_and_tested",
-      "evidence": "src/components/shared/brain/{BrainCanvas,BrainCanvas3D,BrainScene}.tsx; src/lib/intelligence/brain/{layout3d,project}.ts; src/lib/hooks/useWebglPalette.ts; docs/UIUX_WAVE4_BRAIN_3D_2026-09-22.md; validate-mercenta-brain.mjs PASS (30 assertions, runtime executed, 0 network calls); e2e/mercenta-brain.spec.ts 10 passed; e2e/accessibility.spec.ts 16 passed; e2e/redesign-surfaces.spec.ts 11 passed; e2e/canonical-propagation + runtime-entry 10 passed; tsc exit 0; build exit 0",
+      "evidence": "src/components/shared/brain/{BrainCanvas,BrainCanvas3D,BrainScene}.tsx; src/lib/intelligence/brain/{layout3d,project}.ts; src/lib/hooks/useWebglPalette.ts; docs/archive/UIUX_WAVE4_BRAIN_3D_2026-09-22.md; validate-mercenta-brain.mjs PASS (30 assertions, runtime executed, 0 network calls); e2e/mercenta-brain.spec.ts 10 passed; e2e/accessibility.spec.ts 16 passed; e2e/redesign-surfaces.spec.ts 11 passed; e2e/canonical-propagation + runtime-entry 10 passed; tsc exit 0; build exit 0",
       "last_verified": "2026-09-22",
       "superseded_by": null,
       "_audit_note": "Replaces the flat 2D SVG BrainCanvas. Three real defects were found by browser measurement (overlapping hit boxes; unreachable off-frustum records; zero positioned targets before the first animation frame) and fixed at the root. The entity layer remains real DOM with the same brain-node-<id> testids, so keyboard/screen-reader access and the acceptance suite survive the move to WebGL."
@@ -3149,7 +3149,7 @@
       "description": "UI/UX Wave 2 — page-by-page visual migration EXPLICITLY DEFERRED by explicit STOP condition: Brand Overview, Brand Operational, Marketplace Intelligence, Orders & Distribution, Finance, Super Admin surface redesigns and broader component migration. NOT STARTED by design.",
       "source": "UI/UX redesign phase — Wave 2 (deferred pending explicit approval)",
       "status": "built_and_tested",
-      "evidence": "scripts/validate-uiux-redesign.mjs; e2e/uiux-redesign.spec.ts (the Wave-2 redesign suite) — DEFERRAL LIFTED, the wave was implemented. Historical record retained: the Wave-1 session stopped before the page-by-page surfaces. Wave 2 delivered the workspace primitives, the Operations Overview workspace, the shell/navigation redesign, the chart-system work and the homepage redesign; the surfaces that remain are tracked by 'uiux-wave2-core-surfaces-remaining'. See docs/UIUX_REDESIGN_WAVE2_2026-09-18.md.",
+      "evidence": "scripts/validate-uiux-redesign.mjs; e2e/uiux-redesign.spec.ts (the Wave-2 redesign suite) — DEFERRAL LIFTED, the wave was implemented. Historical record retained: the Wave-1 session stopped before the page-by-page surfaces. Wave 2 delivered the workspace primitives, the Operations Overview workspace, the shell/navigation redesign, the chart-system work and the homepage redesign; the surfaces that remain are tracked by 'uiux-wave2-core-surfaces-remaining'. See docs/archive/UIUX_REDESIGN_WAVE2_2026-09-18.md.",
       "last_verified": "2026-09-18",
       "superseded_by": "uiux-wave2-operations-overview-workspace"
     },
@@ -3546,7 +3546,7 @@
       "description": "PERMANENT PROJECT-STATE / EXTERNAL-REVIEW CONTRACT: a documented, always-current statement of the platform position in five synchronised sources (the requirements registry, PROJECT_STATUS.md CURRENT PLATFORM POSITION + numbered CURRENT REMAINING ROADMAP, HANDOFF.md, the sprint report, and the final Cline report), plus the standing rule that no completed work may be listed as remaining and no discovered work may be silently dropped.",
       "source": "Founder OS sprint 2026-09-19 — section 2 project-state contract",
       "status": "built",
-      "evidence": "requirements-registry.json; scripts/verify-registry.mjs (exit 0); .clinerules/project-state-contract.md; PROJECT_STATUS.md; HANDOFF.md; docs/SPRINT_FOUNDER_OPERATING_SYSTEM_2026-09-19.md",
+      "evidence": "requirements-registry.json; scripts/verify-registry.mjs (exit 0); .clinerules/project-state-contract.md; PROJECT_STATUS.md; HANDOFF.md; docs/archive/SPRINT_FOUNDER_OPERATING_SYSTEM_2026-09-19.md",
       "last_verified": "2026-09-19",
       "superseded_by": null
     },
@@ -4809,7 +4809,7 @@
       "id": "uiux-wave3-redesign-record",
       "description": "The Wave 3 redesign record: the measured defects (each with file/line evidence), what was built and why, the contracts preserved, the open-source evaluation with explicit ADOPT/REFERENCE/REJECT/BUILD-CUSTOM decisions, the caught regression with its root cause and process failure, the honest statement of what is NOT done, and the environment/authority confirmations (no .env, no credential, no live activation, no Git mutation, no commit)",
       "status": "built",
-      "evidence": "docs/UIUX_REDESIGN_WAVE3_2026-09-20.md",
+      "evidence": "docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-09-20"
     },
@@ -4825,7 +4825,7 @@
       "id": "uiux-wave3-part2-admin-dashboard-composition",
       "description": "NOT DONE in Part 1. The `AdminDashboard` (Operations Overview) COMPOSITION was not restructured; only its header, metric hierarchy and the shell around it changed. The \"Command centre\" block is still one long list of equally-weighted rows rather than a scannable, prioritised attention surface. This is roadmap item 1 and the next execution scope",
       "status": "not_started",
-      "evidence": "PROJECT_STATUS.md heading 3 item 1; docs/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 2",
+      "evidence": "PROJECT_STATUS.md heading 3 item 1; docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 2",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-09-20"
     },
@@ -4833,7 +4833,7 @@
       "id": "uiux-wave3-part3-brand-surfaces",
       "description": "NOT DONE in Part 1. The Brand surface redesign (BrandDashboard, BrandPurchaseOrders, ProductCatalog, LogisticsHub, ComplianceHub, BrandSupport, BrandSettings, BrandReports, SalesAnalytics, …) has not been started. The brand experience should feel like a polished enterprise partner portal, not an admin template",
       "status": "not_started",
-      "evidence": "PROJECT_STATUS.md heading 3 item 2; docs/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 3",
+      "evidence": "PROJECT_STATUS.md heading 3 item 2; docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 3",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-09-20"
     },
@@ -4841,7 +4841,7 @@
       "id": "uiux-wave3-part4-tables-forms-drawers",
       "description": "NOT DONE in Part 1. Page-level tables / forms / filters / drawers (`DataTable`, `workspace.tsx` `Queue`, `RecordDrawer`) have not been redesigned. Open-source candidates were evaluated and deliberately NOT adopted: TanStack Table / AG Grid are REFERENCE only, because the repo already has a canonical `DataTable` + `Queue` with Playwright contracts on both and replacing them is a separate larger decision",
       "status": "not_started",
-      "evidence": "PROJECT_STATUS.md heading 3 item 3; docs/UIUX_REDESIGN_WAVE3_2026-09-20.md §5 and §8. Owner: Wave 3 Part 4",
+      "evidence": "PROJECT_STATUS.md heading 3 item 3; docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md §5 and §8. Owner: Wave 3 Part 4",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-09-20"
     },
@@ -4849,7 +4849,7 @@
       "id": "uiux-wave3-part5-state-redesign",
       "description": "NOT DONE in Part 1. Empty / loading / error / permission state redesign beyond what already existed has not been attempted as a systematic pass",
       "status": "not_started",
-      "evidence": "PROJECT_STATUS.md heading 3 item 4; docs/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 5",
+      "evidence": "PROJECT_STATUS.md heading 3 item 4; docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 5",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-09-20"
     },
@@ -5232,7 +5232,7 @@
       "description": "UI/UX Wave 3 — the CINEMATIC LOGISTICS HERO, as a SECTION of the SAME Brand Logistics Hub page (never a second page): a real WebGL scene (three/R3F) with a FIXED camera, no controls, no event handlers and `pointerEvents: none` on the scene host so page scrolling is never intercepted. Aircraft, container ships and articulated lorries are rendered from merged primitives, one InstancedMesh per type. An accessible text alternative (counts, origins, regions), a visible truth legend, a reduced-motion static composition and the required dataset attribution are rendered on the surface, and the panel states in words what the view does and does not claim. The operational map, filters, inspector, artefacts and tenant scoping of the Hub are unchanged.",
       "source": "Wave 3 (2026-09-22 founder directive)",
       "status": "built_and_tested",
-      "evidence": "src/components/shared/logistics/LogisticsHero.tsx; src/components/shared/logistics/LogisticsHeroScene.tsx; src/components/brand/LogisticsHub.tsx (hero section on the same route); e2e/logistics-hero.spec.ts 10 passed; docs/UIUX_REDESIGN_WAVE3_LOGISTICS_HERO_2026-09-22.md; screenshot review found and fixed three real defects (framing, light-on-light copy in the light theme, ships rendering across land)",
+      "evidence": "src/components/shared/logistics/LogisticsHero.tsx; src/components/shared/logistics/LogisticsHeroScene.tsx; src/components/brand/LogisticsHub.tsx (hero section on the same route); e2e/logistics-hero.spec.ts 10 passed; docs/archive/UIUX_REDESIGN_WAVE3_LOGISTICS_HERO_2026-09-22.md; screenshot review found and fixed three real defects (framing, light-on-light copy in the light theme, ships rendering across land)",
       "last_verified": "2026-09-22",
       "superseded_by": null
     },
@@ -5953,10 +5953,10 @@
     },
     {
       "id": "e2e-scenario-catalogue-and-traceability-gate",
-      "description": "§BATCH 0 (2026-10-04) — THE E2E SCENARIO CATALOGUE + TRACEABILITY GATE. The end-to-end suite must cover EVERY scenario for the ENTIRE platform, and that must be MACHINE-HELD rather than claimed. ONE owner of the scenario list, `docs/scenario-catalogue.json`, holds the scenario list plus the METHOD (the eight axes — object · actor · trigger · outcome · data_condition · tenancy · provider_mode · time — whose cross-product with an object lifecycle defines the space). `scripts/e2e-catalogue.mjs` seeds it from the existing specs (`--seed`) and projects it to the GENERATED document `docs/E2E_SCENARIO_CATALOGUE.md` (`--doc`); `scripts/validate-e2e-scenarios.mjs` is the GATE (swept automatically by `npm run validate:all`, because the corpus globs `scripts/validate-*.mjs`). The gate fails if: the catalogue is malformed; a scenario names a spec that does not exist (missing test); a capability has no scenario; a scenario id is duplicated; an e2e spec is named by NO scenario (orphan test); or the generated doc has DRIFTED from the owner. Seeded at 95 scenarios across 8 capability families (one per existing spec). The catalogue owner deliberately lives in `docs/` so it is OUTSIDE the product-source scans and the E6 F6 source-scope. No application runtime change — a validator, a generator, a catalogue and npm scripts only.",
+      "description": "§BATCH 0 (2026-10-04) — THE E2E SCENARIO CATALOGUE + TRACEABILITY GATE. The end-to-end suite must cover EVERY scenario for the ENTIRE platform, and that must be MACHINE-HELD rather than claimed. ONE owner of the scenario list, `docs/scenario-catalogue.json`, holds the scenario list plus the METHOD (the eight axes — object · actor · trigger · outcome · data_condition · tenancy · provider_mode · time — whose cross-product with an object lifecycle defines the space). `scripts/e2e-catalogue.mjs` seeds it from the existing specs (`--seed`) and projects it to the GENERATED document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` (`--doc`); `scripts/validate-e2e-scenarios.mjs` is the GATE (swept automatically by `npm run validate:all`, because the corpus globs `scripts/validate-*.mjs`). The gate fails if: the catalogue is malformed; a scenario names a spec that does not exist (missing test); a capability has no scenario; a scenario id is duplicated; an e2e spec is named by NO scenario (orphan test); or the generated doc has DRIFTED from the owner. Seeded at 95 scenarios across 8 capability families (one per existing spec). The catalogue owner deliberately lives in `docs/` so it is OUTSIDE the product-source scans and the E6 F6 source-scope. No application runtime change — a validator, a generator, a catalogue and npm scripts only.",
       "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform', saved and always tested, with every issue fixed permanently",
       "status": "built_and_tested",
-      "evidence": "`node scripts/validate-e2e-scenarios.mjs` = 13/13 checks PASS (95 scenarios · 8 capabilities); MUTATION-PROVED TWICE — (A) appending a line to `docs/E2E_SCENARIO_CATALOGUE.md` => 1 failure ('the generated document MATCHES the owner'), restored byte-identical sha256 02563363ed802aed50605a02438617ab5e2536ec7fa774392a1519d35a02b018; (B) pointing a scenario at `e2e/DOES-NOT-EXIST.spec.ts` => 2 failures ('no missing test' + 'no orphan test'), restored byte-identical sha256 c59a2dc03416be4b851a6459d1c3d067b0aee80131a1f6da028c4bb0ffbe2607. `npm run validate:all` 153 PASS / 0 FAIL (was 152 — the gate adds one). `npm run typecheck` 0; `npm run lint` 0; `npm run build` ✓. `npm run validate:ci-wiring` PASS (the new scripts are `catalogue:e2e`/`test:e2e`, NOT `validate:*`, so the CI-reachability invariant is untouched; Playwright stays OUT of CI by the project's own gate). E6 F6 + E7 declared surface extended (`E2E_SCENARIO_CATALOGUE_SCOPE` / the E7 `allowed` list). Non-credential, non-runtime governance increment => three-way NOT APPLICABLE.",
+      "evidence": "`node scripts/validate-e2e-scenarios.mjs` = 13/13 checks PASS (95 scenarios · 8 capabilities); MUTATION-PROVED TWICE — (A) appending a line to `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` => 1 failure ('the generated document MATCHES the owner'), restored byte-identical sha256 02563363ed802aed50605a02438617ab5e2536ec7fa774392a1519d35a02b018; (B) pointing a scenario at `e2e/DOES-NOT-EXIST.spec.ts` => 2 failures ('no missing test' + 'no orphan test'), restored byte-identical sha256 c59a2dc03416be4b851a6459d1c3d067b0aee80131a1f6da028c4bb0ffbe2607. `npm run validate:all` 153 PASS / 0 FAIL (was 152 — the gate adds one). `npm run typecheck` 0; `npm run lint` 0; `npm run build` ✓. `npm run validate:ci-wiring` PASS (the new scripts are `catalogue:e2e`/`test:e2e`, NOT `validate:*`, so the CI-reachability invariant is untouched; Playwright stays OUT of CI by the project's own gate). E6 F6 + E7 declared surface extended (`E2E_SCENARIO_CATALOGUE_SCOPE` / the E7 `allowed` list). Non-credential, non-runtime governance increment => three-way NOT APPLICABLE. §REPO-CLEANUP (same session): my duplicate E2E doc was CONSOLIDATED into the one generated doc `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` (the stale hand-written matrix archived to `docs/archive/`); the retired-platform guard + spec renamed to neutral names (`validate-retired-platforms` / `retired-platforms.spec.ts`); 37 superseded files archived to `docs/archive/` (history preserved); 9 registry citations + `validate-po-ack-programme` + `validate-e7` repointed. `validate:all` re-run = 153/0.",
       "last_verified": "2026-10-04",
       "superseded_by": null
     }

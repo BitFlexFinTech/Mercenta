@@ -77,7 +77,7 @@ function walk(dir, out = []) {
 }
 /* ── 1. THE STAGE INVENTORY (the programme's own declared set) ──────────────── */
 
-const PROGRAMME_DOC = 'docs/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md';
+const PROGRAMME_DOC = 'docs/archive/SPRINT_PO_ACKNOWLEDGEMENT_2026-09-24.md';
 
 /**
  * The ten stages, each with the gate it shipped and the npm script that runs it.

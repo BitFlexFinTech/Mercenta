@@ -459,7 +459,7 @@ Read a row together with its domain contract block. Together they carry all 26 d
 | `D14-05` | Social / Postiz / embedded social | brand `social`, admin `postiz` | **VERIFIED** | `e2e/embedded-social.spec.ts` |
 | `D14-06` | WhatsApp (Twilio) | admin `whatsapp` | **PARTIALLY VERIFIED** | render-only today (gap R4) |
 | `D14-07` | UserTour in-app tours + KB link | `usertour` + `TourEngine` | **VERIFIED** | `e2e/tours.spec.ts` |
-| `D14-08` | Rocket.Chat removal | historical removal retained as a regression guard | **VERIFIED** | `e2e/rocketchat-removal.spec.ts` |
+| `D14-08` | Rocket.Chat removal | historical removal retained as a regression guard | **VERIFIED** | `e2e/retired-platforms.spec.ts` |
 
 **Domain contract — D14:** module `src/lib/crm/crmStore.ts`, `src/lib/messaging/**`, `src/lib/notifications/**`, `src/lib/social/**`, `src/lib/postiz/**`, `src/lib/whatsapp/**`, `src/lib/usertour/**`, `src/data/api.ts` (`logMessage`). Every outbound message is logged in the single canonical messages store; no surface keeps its own copy.
 

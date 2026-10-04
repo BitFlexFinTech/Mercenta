@@ -2332,10 +2332,36 @@ const E2E_SCENARIO_CATALOGUE_SCOPE = new Set([
   'docs/scenario-catalogue.json',                  /* THE ONE owner of the scenario list (docs/ is outside the product source scan) */
   'scripts/e2e-catalogue.mjs',                     /* the generator (--seed / --doc) */
   'scripts/validate-e2e-scenarios.mjs',            /* the traceability gate */
-  'docs/E2E_SCENARIO_CATALOGUE.md',                /* the GENERATED document */
+  'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md',    /* the GENERATED document (took the established name; the stale hand-written one is archived) */
   'package.json',                                  /* catalogue:e2e + test:e2e scripts */
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
+  /**
+   * §REPO-CLEANUP (2026-10-04) — dead ROOT relics archived into `docs/archive/` (history
+   * preserved, not destroyed). These five were referenced by ZERO live files; the docs/
+   * historical series moved with them is already invisible to this guard (any `docs/`
+   * path is project-state, not source). The move is declared here so the ROOT deletions
+   * are not unexplained source changes. `MERCENTA_ARCHITECTURE.md` / `MERCENTA_MASTER_CONTEXT.md`
+   * are deliberately LEFT at the root (the guards' declared sets name them).
+   */
+  'MASTER_CHATGPT_HANDOFF.md',
+  'MERCENTA_FORENSIC_AUDIT.md',
+  'MERCENTA_PRODUCT_ARCHITECTURE_AUDIT_2026-09-10.md',
+  'AUDIT_REPORT.md',
+  'Mercenta Build 1.rtf',
+  'scripts/validate-po-ack-programme.mjs',   /* its programme doc repointed to docs/archive/ (the doc was relocated, not changed) */
+  'scripts/validate-e7-embedded-social.mjs',
+  /**
+   * §REPO-CLEANUP (2026-10-04) — the retired-platform guard and its browser spec
+   * RENAMED to neutral names so no live FILE NAME carries the removed product's
+   * name (the guard's body must still name the token to TEST its absence, and it
+   * is in its own SKIP_FILES, so it never flags itself). The old names are
+   * declared because their deletion appears in the change set.
+   */
+  'scripts/validate-rocketchat-removal.mjs',
+  'scripts/validate-retired-platforms.mjs',
+  'e2e/rocketchat-removal.spec.ts',
+  'e2e/retired-platforms.spec.ts',
 ]);
 
 

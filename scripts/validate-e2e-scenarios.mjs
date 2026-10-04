@@ -39,7 +39,7 @@ const test = (name, ok, detail) => {
 };
 
 const CATALOGUE = 'docs/scenario-catalogue.json';
-const DOC = 'docs/E2E_SCENARIO_CATALOGUE.md';
+const DOC = 'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md';
 
 test(`the catalogue owner exists (${CATALOGUE})`, existsSync(abs(CATALOGUE)));
 let c = null;

@@ -44,10 +44,19 @@ const INTENTIONAL = [
   // Phase D1's removal note in the self-hosted services stack (documents that
   // the service was deleted — not a service definition).
   { file: 'docker-compose.services.yml', contains: 'Phase D1 (2026-09-11): Rocket.Chat removed' },
+  /**
+   * §REPO-CLEANUP (2026-10-04) — the E6/E7 SCOPE GUARDS must NAME the retired
+   * guard's old paths to declare their rename in the change set. Those are
+   * declaration lines (test metadata), not product code; allowed per-line here so
+   * the guards themselves are still scanned for any OTHER occurrence.
+   */
+  { file: 'scripts/validate-e6-brand-surfaces.mjs', contains: 'validate-rocketchat-removal.mjs' },
+  { file: 'scripts/validate-e6-brand-surfaces.mjs', contains: 'rocketchat-removal.spec.ts' },
+  { file: 'scripts/validate-e7-embedded-social.mjs', contains: 'rocketchat-removal.spec.ts' },
 ];
 const SKIP_FILES = new Set([
-  'e2e/rocketchat-removal.spec.ts',
-  'scripts/validate-rocketchat-removal.mjs',
+  'e2e/retired-platforms.spec.ts',
+  'scripts/validate-retired-platforms.mjs',
 ]);
 const SCAN_DIRS = ['src', 'e2e', 'scripts', 'supabase'];
 const SCAN_EXTS = ['.ts', '.tsx', '.js', '.mjs', '.cjs', '.yml', '.yaml', '.json'];

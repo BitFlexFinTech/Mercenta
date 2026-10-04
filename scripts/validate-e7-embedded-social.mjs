@@ -2091,6 +2091,8 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     // Same mechanism, unweakened: a changed source/test file in NO declared set
     // still fails.
     'docs/scenario-catalogue.json',
+    'e2e/retired-platforms.spec.ts',
+    'e2e/rocketchat-removal.spec.ts',
     'package.json',
     // §Phase M13 — the declared surface of the current phase (see M13_DECLARED above).
     ...M13_DECLARED,
@@ -2431,7 +2433,7 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     !srcFiles.some((f) => /src\/lib\/social\/(calendar|scheduler|media|analytics)/.test(f))
   );
 
-  test('E7 phase documentation exists', existsSync(join(process.cwd(), 'docs/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md')));
+  test('E7 phase documentation exists (archived 2026-10-04 under docs/archive/, history preserved)', existsSync(join(process.cwd(), 'docs/archive/PRODUCT_CONSOLIDATION_PHASEE7_2026-09-12.md')));
 
   /* ── 8. §Phase E8 — live engine link, SSO bridge and deployment config ── */
   section('8. Engine link (E8) & deployment configuration');

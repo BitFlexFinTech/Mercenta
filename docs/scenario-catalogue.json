@@ -2,7 +2,7 @@
   "_comment": "§BATCH 0 — THE ONE OWNER of the end-to-end SCENARIO CATALOGUE. docs/E2E_SCENARIO_CATALOGUE.md is GENERATED from this file (do NOT edit the doc by hand). The gate is scripts/validate-e2e-scenarios.mjs. Regenerate the doc with: node scripts/e2e-catalogue.mjs --doc",
   "meta": {
     "owner": "docs/scenario-catalogue.json",
-    "generatedDoc": "docs/E2E_SCENARIO_CATALOGUE.md",
+    "generatedDoc": "docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md",
     "generator": "node scripts/e2e-catalogue.mjs --doc"
   },
   "method": {
@@ -786,13 +786,13 @@
       "expects": "The redesign surfaces journey renders and behaves as its spec asserts."
     },
     {
-      "id": "spec-rocketchat-removal",
+      "id": "spec-retired-platforms",
       "capability": "platform",
-      "journey": "rocketchat removal",
+      "journey": "retired platforms",
       "actor": "mixed",
       "type": "happy",
-      "spec": "e2e/rocketchat-removal.spec.ts",
-      "expects": "The rocketchat removal journey renders and behaves as its spec asserts."
+      "spec": "e2e/retired-platforms.spec.ts",
+      "expects": "The retired platforms journey renders and behaves as its spec asserts."
     },
     {
       "id": "spec-runtime-entry",
