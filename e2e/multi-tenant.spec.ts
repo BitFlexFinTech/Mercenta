@@ -47,7 +47,7 @@ test.describe('Multi-Tenant Isolation', () => {
 
   test('3. Brand A cannot see Brand B deductions', async ({ page }) => {
     await loginAsBrand(page, 'Astonish');
-    const deductionsText = page.locator('text=deduction', { exact: false });
+    const deductionsText = page.getByText('deduction', { exact: false });
     const deductionCount = await deductionsText.count().catch(() => 0);
     // Cannot verify negative without cross-tenant data, but at minimum ensure no crash
     expect(deductionCount).toBeGreaterThanOrEqual(0);

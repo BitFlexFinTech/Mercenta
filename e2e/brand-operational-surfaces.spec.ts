@@ -247,7 +247,7 @@ test.describe('E6 — brand operational surfaces', () => {
       const foreign = { staffId: 'brand:brand-tapatio', canMutate: true, tenantId: 'brand-tapatio' };
       const viewOnly = { staffId: 'staff-005', canMutate: false, tenantId: 'brand-astonish' };
       const actsBefore = store.getCommerceActivitiesForBrand('brand-astonish').length;
-      const statusBefore = api.fetchPurchaseOrder(poId).status;
+      const statusBefore = api.fetchPurchaseOrder(poId)?.status;
 
       const foreignAck = mod.acknowledgeCommercePurchaseOrder(poId, foreign);
       const viewOnlyAck = mod.acknowledgeCommercePurchaseOrder(poId, viewOnly);
@@ -256,12 +256,12 @@ test.describe('E6 — brand operational surfaces', () => {
       return {
         skipped: false,
         foreignAckOk: foreignAck.ok,
-        foreignAckError: String(foreignAck.error ?? ''),
+        foreignAckError: foreignAck.ok ? '' : foreignAck.error,
         viewOnlyAckOk: viewOnlyAck.ok,
-        viewOnlyAckError: String(viewOnlyAck.error ?? ''),
+        viewOnlyAckError: viewOnlyAck.ok ? '' : viewOnlyAck.error,
         foreignReadOk: foreignRead.ok,
         actsUnchanged: store.getCommerceActivitiesForBrand('brand-astonish').length === actsBefore,
-        statusUnchanged: api.fetchPurchaseOrder(poId).status === statusBefore,
+        statusUnchanged: api.fetchPurchaseOrder(poId)?.status === statusBefore,
       };
     });
 

@@ -179,7 +179,7 @@ test.describe('UI/UX Wave 2 — navigation & themes', () => {
     await page.waitForTimeout(400);
     const options = await page.evaluate(() =>
       Array.from(document.querySelectorAll('[data-theme-option]')).map(
-        (e) => (e as HTMLElement).dataset.themeOption
+        (e) => (e as HTMLElement).dataset.themeOption ?? ''
       )
     );
     expect(options).toEqual([

@@ -34,7 +34,7 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
     const rootTheme = await page.evaluate(() => document.documentElement.dataset.mercentaTheme);
     expect(rootTheme).toBe('minimal-light');
     const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    const [r, g, b] = bodyBg.match(/\d+/g).map(Number);
+    const [r, g, b] = (bodyBg.match(/\d+/g) ?? []).map(Number);
     expect(r).toBeGreaterThan(230);
     expect(g).toBeGreaterThan(230);
     expect(b).toBeGreaterThan(230);
@@ -45,7 +45,9 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
     await page.locator('[data-testid="theme-selector"]').click();
     await page.waitForTimeout(400);
     const options = await page.evaluate(() =>
-      Array.from(document.querySelectorAll('[data-theme-option]')).map((e) => e.dataset.themeOption)
+      Array.from(document.querySelectorAll('[data-theme-option]')).map(
+        (e) => (e as HTMLElement).dataset.themeOption
+      )
     );
     expect(options).toEqual([
       'minimal-light', 'professional', 'bold', 'fun', 'serious',
@@ -74,7 +76,7 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
         expect((r + g + b) / 3).toBeLessThan(40);
         expect(b > r + 18 && b > g + 18).toBe(false);
       } else {
-        const [r, g, b] = vars.bg.replace('#', '').match(/../g).map((x) => parseInt(x, 16));
+        const [r, g, b] = (vars.bg.replace('#', '').match(/../g) ?? []).map((x) => parseInt(x, 16));
         expect(r).toBeGreaterThan(220);
         expect(g).toBeGreaterThan(220);
       }
@@ -88,10 +90,10 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
     await loginAs(page, 'Super Admin — Tadii', 1400);
     const kpiIds = ['kpi-value-pending-pos', 'kpi-value-docs-pending', 'kpi-value-renewals'];
     const baseline = await page.evaluate((ids) => {
-      const out = {};
+      const out: Record<string, string | null> = {};
       for (const id of ids) {
-        const el = document.querySelector(`[data-testid="kpi-value-${id}"]`);
-        out[id] = el ? el.textContent.trim() : null;
+        const el = document.querySelector(`[data-testid="${id}"]`);
+        out[id] = el ? el.textContent?.trim() ?? null : null;
       }
       return out;
     }, kpiIds);
@@ -103,10 +105,10 @@ test.describe('UI/UX Wave 1 — theme foundation', () => {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(250);
       const now = await page.evaluate((ids) => {
-        const out = {};
+        const out: Record<string, string | null> = {};
         for (const id of ids) {
-          const el = document.querySelector(`[data-testid="kpi-value-${id}"]`);
-          out[id] = el ? el.textContent.trim() : null;
+          const el = document.querySelector(`[data-testid="${id}"]`);
+          out[id] = el ? el.textContent?.trim() ?? null : null;
         }
         return out;
       }, kpiIds);
@@ -154,7 +156,9 @@ test.describe('UI/UX Wave 1 — presentation seams', () => {
     await page.locator('[data-testid="notification-center"]').click();
     await page.waitForTimeout(600);
     const severities = await page.evaluate(() =>
-      Array.from(document.querySelectorAll('[data-notification]')).map((e) => e.dataset.severity)
+      Array.from(document.querySelectorAll('[data-notification]')).map(
+        (e) => (e as HTMLElement).dataset.severity
+      )
     );
     expect(severities.length).toBeGreaterThan(0);
     for (const s of severities) {
@@ -172,7 +176,7 @@ test.describe('UI/UX Wave 1 — presentation seams', () => {
     await page.waitForTimeout(900);
     const initials = await page.evaluate(() => {
       const el = document.querySelector('[aria-label="Tadii Mercenta avatar"]');
-      return el ? el.textContent.trim() : null;
+      return el ? el.textContent?.trim() ?? null : null;
     });
     expect(initials).toBe('TM');
     const logoFound = await page.evaluate(() =>
@@ -196,7 +200,7 @@ test.describe('UI/UX Wave 1 — presentation seams', () => {
     expect(line).toBe('1.5');
     const ring = await page.evaluate(() => {
       const svg = document.querySelector('[data-chart="doughnut"]');
-      return svg ? svg.dataset.chartRing : null;
+      return svg ? (svg as HTMLElement).dataset.chartRing : null;
     });
     expect(ring).toMatch(/^(11|12)px$/); // canonical thin ring values
   });

@@ -2248,6 +2248,37 @@ const BATCH2B_AMENDMENT_WINDOW_SCOPE = new Set([
  * no Xero, no billing).
  */
 const BATCH0_PLATFORM_MODE_SCOPE = new Set(['src/lib/platform/', 'src/config/environment.ts', 'src/main.tsx', 'src/components/shared/DemoBanner.tsx', 'src/components/auth/Login.tsx', 'src/components/admin/integrations/SimulationControl.tsx', 'scripts/validate-e6-brand-surfaces.mjs', 'scripts/validate-e7-embedded-social.mjs']);
+
+/**
+ * §OPTION-A — THE TYPE-CHECK COVERAGE (2026-10-04).
+ *
+ * F6's contract is UNCHANGED: a changed SOURCE file that sits in NO declared set
+ * still FAILS. This set declares the surface of §OPTION-A — the fix for the
+ * editor/type-check gap the Founder asked to keep: 121 TypeScript files OUTSIDE
+ * `src` (96 `e2e/`, 23 `supabase/functions/`, `playwright.config.ts`,
+ * `scripts/brain-runtime-check.ts`) belonged to NO TypeScript project, so the
+ * editor invented ~178 problems and `npm run typecheck` never checked them.
+ *
+ *   · `tsconfig.e2e.json`          — NEW: the Playwright browser-test project
+ *   · `tsconfig.functions.json`    — NEW: the Supabase Edge Function project
+ *   · `tsconfig.json`              — now references the two new projects
+ *   · `tsconfig.node.json`         — now also covers `scripts/brain-runtime-check.ts`
+ *   · `supabase/functions/_types/` — NEW: the ambient Edge-runtime types the
+ *                                     functions project resolves `Deno`/remote
+ *                                     URLs from (directory prefix)
+ *
+ * The `e2e/**.spec.ts` edits this phase made are covered by the existing e2e
+ * scope above; `scripts/**` (incl. the new coverage gate) is already allowed.
+ */
+const OPTION_A_TYPECHECK_COVERAGE_SCOPE = new Set([
+  'tsconfig.json',
+  'tsconfig.node.json',
+  'tsconfig.e2e.json',
+  'tsconfig.functions.json',
+  'supabase/functions/_types/',
+]);
+
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -2963,7 +2994,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           PUBLIC_MESSAGING_SCOPE.has(p) ||
           [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           BATCH0_PLATFORM_MODE_SCOPE.has(p) ||
-          [...BATCH0_PLATFORM_MODE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...BATCH0_PLATFORM_MODE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §OPTION-A — the type-check coverage (see above). */
+          OPTION_A_TYPECHECK_COVERAGE_SCOPE.has(p) ||
+          [...OPTION_A_TYPECHECK_COVERAGE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

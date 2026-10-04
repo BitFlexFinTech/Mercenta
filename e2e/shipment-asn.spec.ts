@@ -56,7 +56,7 @@ async function adminOpenAsnPanel(page: any, brandName: string, poNumber: string)
    * not by hiding a button). The seam POs (`PO-9001` / `PO-9002`) arrive without
    * that authorisation, so it is recorded through the ONE canonical writer first.
    */
-  await page.evaluate(async (n) => {
+  await page.evaluate(async (n: string) => {
     const store = await import('/src/data/demoStore.ts');
     const api = await import('/src/data/api.ts');
     const po = store.demoPurchaseOrders.find((p) => p.poNumber === n);

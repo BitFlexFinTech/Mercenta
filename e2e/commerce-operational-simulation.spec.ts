@@ -145,7 +145,7 @@ test.describe('E4 — operational commerce simulation', () => {
       return {
         skipped: false as const,
         ok: res.ok,
-        error: String(res.error ?? ''),
+        error: res.ok ? '' : res.error,
         status: after?.status,
         outcome: after?.dispute?.outcome ?? null,
       };
@@ -291,18 +291,18 @@ test.describe('E4 — operational commerce simulation', () => {
       const foreignActor = { staffId: 'brand:brand-tapatio', canMutate: true, tenantId: 'brand-tapatio' };
       const viewOnlyActor = { staffId: 'staff-005', canMutate: false, tenantId: 'brand-astonish' };
 
-      const statusBefore = api.fetchPurchaseOrder(po.id).status;
+      const statusBefore = api.fetchPurchaseOrder(po.id)?.status;
       const foreignAck = mod.acknowledgeCommercePurchaseOrder(po.id, foreignActor);
       const viewOnlyAck = mod.acknowledgeCommercePurchaseOrder(po.id, viewOnlyActor);
       const foreignRead = mod.listBrandCommerceActivity('brand-astonish', foreignActor);
-      const statusAfter = api.fetchPurchaseOrder(po.id).status;
+      const statusAfter = api.fetchPurchaseOrder(po.id)?.status;
 
       return {
         skipped: false,
         foreignAckOk: foreignAck.ok,
-        foreignAckError: String(foreignAck.error ?? ''),
+        foreignAckError: foreignAck.ok ? '' : foreignAck.error,
         viewOnlyAckOk: viewOnlyAck.ok,
-        viewOnlyAckError: String(viewOnlyAck.error ?? ''),
+        viewOnlyAckError: viewOnlyAck.ok ? '' : viewOnlyAck.error,
         foreignReadOk: foreignRead.ok,
         statusBefore,
         statusAfter,

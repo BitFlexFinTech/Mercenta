@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2023"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -11,6 +11,15 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* §OPTION-A (2026-10-04) — `scripts/brain-runtime-check.ts` (the only stray
+       `.ts` in scripts/) imports the app through the `@/` alias, so the tooling
+       project needs the same mapping the application uses. */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
 
     /* Linting */
     "strict": true,
@@ -18,5 +27,5 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "scripts/brain-runtime-check.ts", "src/vite-env.d.ts"]
 }

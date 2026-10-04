@@ -110,8 +110,16 @@ function brandRenderedCopy(): string[] {
     if (n.subtitle) out.push(n.subtitle);
   }
   for (const e of brand.edges) {
-    if (e.label) out.push(e.label);
-    if (e.note) out.push(e.note);
+    /* §OPTION-A — the rendered copy of an EDGE is its relation definition: the
+       Brain UI renders `BRAIN_RELATION_DEFINITIONS[edge.kind].label`
+       (`MercentaBrain.tsx`). A `BrainEdge` itself carries no `label`/`note`, so
+       the previous code read two properties that do not exist and silently
+       collected nothing — this scan is now real. */
+    const def = BRAIN_RELATION_DEFINITIONS[e.kind];
+    if (def) {
+      out.push(def.label);
+      out.push(def.note);
+    }
   }
   return out;
 }
@@ -167,7 +175,7 @@ check(
 
 /* ── 3. Relationship-model coverage (§5) ─────────────────────────────────── */
 
-const relationKinds = new Set(mercenta.edges.map((e) => e.kind));
+const relationKinds = new Set<string>(mercenta.edges.map((e) => e.kind));
 /** Relations that must exist from the canonical seed alone. */
 for (const required of [
   'owns', 'maps_to', 'authorised_by', 'sends', 'belongs_to', 'contains',
@@ -242,8 +250,8 @@ check('cluster summaries account for every node', mercenta.clusters.reduce((s, c
 /* ── Evidence output ─────────────────────────────────────────────────────── */
 
 const report = {
-  MERCENTA_SCOPE: { nodes: mercenta.nodes.length, edges: mercenta.edges.length, ...mStats },
-  BRAND_SCOPE: { tenantId: 'brand-astonish', nodes: brand.nodes.length, edges: brand.edges.length, ...brandStats },
+  MERCENTA_SCOPE: { ...mStats, nodes: mercenta.nodes.length, edges: mercenta.edges.length },
+  BRAND_SCOPE: { tenantId: 'brand-astonish', ...brandStats, nodes: brand.nodes.length, edges: brand.edges.length },
   UNKNOWN_TENANT: { nodes: unknownTenant.nodes.length, refused: unknownTenant.exclusions.length > 0 },
   KINDS: mKinds,
   RELATIONS: [...relationKinds].sort(),

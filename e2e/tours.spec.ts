@@ -1,10 +1,10 @@
 /** Guided onboarding tour tests. */
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers/auth';
 
 test.describe('Brand Guided Tours', () => {
 
-  async function loginAsBrand(page, name) {
+  async function loginAsBrand(page: Page, name: string) {
     await loginAs(page, name);
     const ob = page.locator('text=Onboarding').first();
     if (await ob.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -13,7 +13,7 @@ test.describe('Brand Guided Tours', () => {
     }
   }
 
-  async function cardVisible(page) {
+  async function cardVisible(page: Page) {
     return page.locator('text=Welcome to Mercenta Partners')
       .or(page.locator('text=New PO Arrived'))
       .or(page.locator('text=Deductions Ledger'))

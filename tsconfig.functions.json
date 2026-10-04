@@ -1,0 +1,39 @@
+{
+  /* §OPTION-A (2026-10-04) — the Supabase Edge Function project.
+     These functions run on Deno (Supabase's edge runtime), not on the Vite/Node
+     build, and until this file existed they belonged to NO TypeScript project:
+     the editor invented ~98 problems and `npm run typecheck` never checked them.
+     This project covers them so the editor shows only REAL problems.
+
+     `supabase/functions/_types/edge-runtime.d.ts` declares the Deno runtime
+     surface the functions use (`Deno.env.get`, `Deno.serve`) and the `deno.land`
+     std modules they import by URL. The `@supabase/supabase-js` URL import is
+     mapped below to the REAL installed package so the Supabase client calls are
+     genuinely type-checked rather than treated as opaque. `noEmit` — these files
+     are deployed by the Supabase CLI, never compiled by this project. */
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* The remote URL import the functions use → the real installed package's types */
+    "baseUrl": ".",
+    "paths": {
+      "https://esm.sh/@supabase/supabase-js@2.57.4": ["./node_modules/@supabase/supabase-js"]
+    },
+
+    /* Linting — the same strictness the application code is held to */
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["supabase/functions"]
+}

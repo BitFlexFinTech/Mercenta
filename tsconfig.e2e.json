@@ -1,0 +1,51 @@
+{
+  /* §OPTION-A (2026-10-04) — the Playwright browser-test project.
+     Until this file existed, the 96 TypeScript files under `e2e/` plus
+     `playwright.config.ts` belonged to NO TypeScript project, so the editor
+     checked them with wrong defaults and `npm run typecheck` never checked them
+     at all. This project covers them so the editor shows only REAL problems.
+
+     The options mirror `tsconfig.app.json` (same libs, same bundler mode, same
+     strictness) so a spec and the `src/` module it imports are read the same way.
+     The specs import the app with RELATIVE paths (`../src/...`), never the `@/`
+     alias, so no path mapping is needed here. Playwright and @axe-core/playwright
+     are imported explicitly, so their types resolve from node_modules; @types/node
+     provides `node:fs`/`node:path`. `noEmit` — the specs run through Playwright's
+     own loader, they are never compiled to disk. */
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode — matches tsconfig.app.json */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* §OPTION-A — the browser-runtime import map.
+       Several specs load APPLICATION modules from INSIDE `page.evaluate(...)` with
+       a leading-slash URL — `import('/src/lib/commerce/commerceLifecycle.ts')` —
+       because the Vite dev server serves the project root, so `/src/...` IS
+       `<root>/src/...` in the browser. tsc cannot resolve a leading-slash URL on
+       its own and would invent ~70 "Cannot find module '/src/...'" errors. This
+       mapping points the browser URL at the real source, so tsc CHECKS the same
+       module the browser loads (types and all) rather than suppressing it. */
+    "baseUrl": ".",
+    "paths": {
+      "/src/*": ["src/*"],
+      "@/*": ["src/*"]
+    },
+
+    /* Linting — the same strictness the application code is held to */
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["e2e", "playwright.config.ts", "src/vite-env.d.ts"]
+}

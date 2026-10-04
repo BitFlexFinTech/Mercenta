@@ -11,7 +11,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.e2e.json && tsc --noEmit -p tsconfig.functions.json",
     "validate:wording": "node scripts/lint-wording.mjs",
     "validate:wording-guard": "node scripts/validate-wording-guard.mjs",
     "validate:typography": "node scripts/validate-typography-scale.mjs",
@@ -88,7 +88,8 @@
     "validate:po-ack-brand": "node scripts/validate-po-acknowledgement-brand-surfaces.mjs",
     "validate:po-ack-admin": "node scripts/validate-po-acknowledgement-admin-surfaces.mjs",
     "validate:po-ack-onboarding": "node scripts/validate-po-acknowledgement-onboarding-surfaces.mjs",
-    "validate:production-boot": "node scripts/validate-production-boot.mjs"
+    "validate:production-boot": "node scripts/validate-production-boot.mjs",
+    "validate:typecheck-coverage": "node scripts/validate-typecheck-coverage.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

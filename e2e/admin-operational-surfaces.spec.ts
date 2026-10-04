@@ -246,7 +246,7 @@ test.describe('E5 — admin operational surfaces', () => {
       const foreignActor = { staffId: 'brand:brand-tapatio', canMutate: true, tenantId: 'brand-tapatio' };
 
       const actsBefore = store.getCommerceActivitiesForBrand('brand-astonish').length;
-      const statusBefore = api.fetchPurchaseOrder(po.id).status;
+      const statusBefore = api.fetchPurchaseOrder(po.id)?.status;
 
       const viewOnlyRes = mod.acknowledgeCommercePurchaseOrder(po.id, viewOnlyActor);
       const foreignRes = mod.acknowledgeCommercePurchaseOrder(po.id, foreignActor);
@@ -254,11 +254,11 @@ test.describe('E5 — admin operational surfaces', () => {
       return {
         skipped: false,
         viewOnlyOk: viewOnlyRes.ok,
-        viewOnlyError: String(viewOnlyRes.error ?? ''),
+        viewOnlyError: viewOnlyRes.ok ? '' : viewOnlyRes.error,
         foreignOk: foreignRes.ok,
-        foreignError: String(foreignRes.error ?? ''),
+        foreignError: foreignRes.ok ? '' : foreignRes.error,
         actsUnchanged: store.getCommerceActivitiesForBrand('brand-astonish').length === actsBefore,
-        statusUnchanged: api.fetchPurchaseOrder(po.id).status === statusBefore,
+        statusUnchanged: api.fetchPurchaseOrder(po.id)?.status === statusBefore,
       };
     });
 

@@ -248,7 +248,7 @@ test.describe('B. Deterministic exception journey — occur → work → act →
     await page.locator('button[data-state="commerce-raise-exception"]').first().click();
     const raised = page.getByText(/Raise exception: ded-/).first();
     await expect(raised).toBeVisible({ timeout: 8000 });
-    const deductionId = ((await raised.innerText()).match(/ded-[a-z0-9-]+/i) ?? [])[0];
+    const deductionId = ((await raised.innerText()).match(/ded-[a-z0-9-]+/i) ?? [])[0] ?? '';
     expect(deductionId).toBeTruthy();
 
     /* The brand evidences the dispute — a brand may open and evidence one, but
