@@ -2330,6 +2330,15 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
      */
     ...BATCH3C_PARITY_DECLARED,
     ...BATCH0_PLATFORM_MODE_DECLARED,
+    /**
+     * §PHASE 3 — THE SUPPLY ROUTE + LOGISTICS ESCALATION (2026-10-04): the 3PL
+     * partner is DELTA FULFILLMENT. This phase adds the fulfilment-partner config
+     * and the supply-route / escalation domain. It touches no protected path.
+     * Same mechanism: a changed source/test file outside EVERY declared set is
+     * still refused.
+     */
+    'src/config/fulfillment.ts',
+    'src/lib/fulfillment/',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

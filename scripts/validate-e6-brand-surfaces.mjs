@@ -2278,6 +2278,23 @@ const OPTION_A_TYPECHECK_COVERAGE_SCOPE = new Set([
   'supabase/functions/_types/',
 ]);
 
+/**
+ * §PHASE 3 — THE SUPPLY ROUTE + LOGISTICS ESCALATION (2026-10-04).
+ *
+ * The Founder directed that the platform's 3PL partner is **Delta Fulfillment**
+ * and that the routing to it must be worked out. This phase adds the
+ * fulfilment-partner configuration and the deterministic supply-route /
+ * fail-closed escalation domain. It touches NO protected path (the DHL+Palletline
+ * carrier model and the `CarrierId` list are UNCHANGED — a 3PL fulfils, it does
+ * not carry). Same mechanism as every phase above: a changed source/test file
+ * outside EVERY declared set is still refused.
+ */
+const PHASE3_SUPPLY_ROUTE_SCOPE = new Set([
+  'src/config/fulfillment.ts',
+  'src/lib/fulfillment/',
+]);
+
+
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
@@ -2997,7 +3014,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH0_PLATFORM_MODE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §OPTION-A — the type-check coverage (see above). */
           OPTION_A_TYPECHECK_COVERAGE_SCOPE.has(p) ||
-          [...OPTION_A_TYPECHECK_COVERAGE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...OPTION_A_TYPECHECK_COVERAGE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 3 — the supply route + logistics escalation (see above). */
+          PHASE3_SUPPLY_ROUTE_SCOPE.has(p) ||
+          [...PHASE3_SUPPLY_ROUTE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

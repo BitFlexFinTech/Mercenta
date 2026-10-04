@@ -369,10 +369,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Corrected 2026-10-04 to the REAL entry counts, then updated the same day when §OPTION-A closed `editor-typecheck-gap-e2e-and-functions` (not_started 61 -> 60; built_and_tested 326 -> 327). The block is a snapshot; nothing consumes it, which is why it drifts — it is kept truthful by hand.",
+      "_note": "Corrected 2026-10-04 to the REAL entry counts, then updated when §OPTION-A closed `editor-typecheck-gap-e2e-and-functions` (not_started 61 -> 60; built_and_tested 326 -> 327) and §PHASE 3 built `phase3-supply-route-profile` + `phase3-logistics-escalation-engine` (not_started 60 -> 58; built 126 -> 128). The block is a snapshot; nothing consumes it, which is why it drifts — it is kept truthful by hand.",
       "built_and_tested": 327,
-      "built": 126,
-      "not_started": 60,
+      "built": 128,
+      "not_started": 58,
       "deferred": 9,
       "removed": 4,
       "complete": 1,
@@ -3829,20 +3829,20 @@
     },
     {
       "id": "phase3-supply-route-profile",
-      "description": "Phase 3 — the Supply Route Profile: origin, ship-from, production/export lead time, freight mode, transit estimate, customs and customs buffer, UK final mile, appointment requirements, total expected door-to-FC, safety buffer, planning lead time and variability",
+      "description": "Phase 3 — the Supply Route Profile: origin, ship-from, production/export lead time, freight mode, transit estimate, customs and customs buffer, UK final mile, appointment requirements, total expected door-to-FC, safety buffer, planning lead time and variability. §PHASE 3 (2026-10-04) — BUILT: src/lib/fulfillment/supplyRoute.ts builds the profile deterministically (pure, no AI, no network); a missing component yields null and is NAMED in `unknowns` rather than guessed. §REPOINTED: previous status was `not_started`.",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 3",
-      "last_verified": "2026-09-19",
+      "status": "built",
+      "evidence": "src/lib/fulfillment/supplyRoute.ts (buildSupplyRouteProfile) + scripts/validate-supply-route-logistics.mjs (npm run validate:supply-route-logistics, 20 assertions, mutation-proved) + src/lib/fulfillment/index.ts",
+      "last_verified": "2026-10-04",
       "superseded_by": null
     },
     {
       "id": "phase3-logistics-escalation-engine",
-      "description": "Phase 3 — the Logistics Escalation Engine that determines when a 3PL / UK inventory buffer / consolidation route may be appropriate. A universal maximum lead-time rule is explicitly NOT to be invented",
+      "description": "Phase 3 — the Logistics Escalation Engine that determines when a 3PL / UK inventory buffer / consolidation route may be appropriate. A universal maximum lead-time rule is explicitly NOT to be invented. §PHASE 3 (2026-10-04) — BUILT: src/lib/fulfillment/escalation.ts fails CLOSED (unagreed thresholds, or an unknown route/frequency → `review` with no partner recommended) and, when it escalates, NAMES the declared 3PL partner DELTA FULFILLMENT (src/config/fulfillment.ts). §REPOINTED: previous status was `not_started`.",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 3",
-      "last_verified": "2026-09-19",
+      "status": "built",
+      "evidence": "src/lib/fulfillment/escalation.ts (evaluateLogisticsEscalation) + src/config/fulfillment.ts (Delta Fulfillment, null-by-default thresholds) + scripts/validate-supply-route-logistics.mjs (npm run validate:supply-route-logistics, 20 assertions, mutation-proved)",
+      "last_verified": "2026-10-04",
       "superseded_by": null
     },
     {

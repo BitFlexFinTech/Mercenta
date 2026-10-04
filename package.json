@@ -89,7 +89,8 @@
     "validate:po-ack-admin": "node scripts/validate-po-acknowledgement-admin-surfaces.mjs",
     "validate:po-ack-onboarding": "node scripts/validate-po-acknowledgement-onboarding-surfaces.mjs",
     "validate:production-boot": "node scripts/validate-production-boot.mjs",
-    "validate:typecheck-coverage": "node scripts/validate-typecheck-coverage.mjs"
+    "validate:typecheck-coverage": "node scripts/validate-typecheck-coverage.mjs",
+    "validate:supply-route-logistics": "node scripts/validate-supply-route-logistics.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
