@@ -106,6 +106,30 @@ if (c) {
     orphan.join(', ')
   );
 
+  /* ── 6b. traceability: a scenario that names its proving TEST must find it ──
+   *
+   * §BATCH 1 — the enumeration must be traceable to individual test cases, not
+   * merely to a file. A scenario MAY declare `test` (a substring of the
+   * Playwright test title that proves it); when it does, that title must be
+   * present in the named spec, so a scenario cannot claim coverage that the
+   * spec does not actually contain. Every platform-foundation scenario (`pf-*`)
+   * MUST declare it, so the Batch 1 enumeration is pinned to real tests.
+   */
+  const SCENARIO_TEST_REQUIRED = /^pf-/;
+  const withTest = (c.scenarios ?? []).filter((s) => s.test);
+  const notFound = withTest.filter((s) => existsSync(abs(s.spec)) && !read(s.spec).includes(s.test));
+  test(
+    'every scenario that names its proving test finds that test in its spec',
+    notFound.length === 0,
+    notFound.map((s) => `${s.id} -> "${s.test}" is NOT in ${s.spec}`).join(', ')
+  );
+  const untraced = (c.scenarios ?? []).filter((s) => SCENARIO_TEST_REQUIRED.test(s.id) && !s.test);
+  test(
+    'every platform-foundation scenario (pf-*) is traceable to a named test',
+    untraced.length === 0,
+    untraced.map((s) => s.id).join(', ')
+  );
+
   /* ── 7. the generated doc matches the owner ──────────────────────────────── */
   test(`the generated document exists (${DOC})`, existsSync(abs(DOC)));
   if (existsSync(abs(DOC))) {
@@ -119,7 +143,7 @@ if (c) {
   }
 
   console.log(
-    `\n[e2e-scenarios] ${checks - failures}/${checks} checks pass · ${(c.scenarios ?? []).length} scenarios · ${(c.capabilities ?? []).length} capabilities`
+    `\n[e2e-scenarios] ${checks - failures}/${checks} checks pass · ${(c.scenarios ?? []).length} scenarios (${withTest.length} traceable to a test) · ${(c.capabilities ?? []).length} capabilities`
   );
 }
 

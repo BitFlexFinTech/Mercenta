@@ -40,7 +40,7 @@ function capabilityOf(journey) {
 /** Every method axis — the cross-product that DEFINES the scenario space. */
 const AXES = {
   object: ['PO-line', 'PO', 'shipment', 'ASN', 'document', 'invoice', 'payment', 'deduction', 'return', 'case', 'compliance_doc', 'contract', 'onboarding', 'payout'],
-  actor: ['brand_user', 'brand_admin', 'mercenta_admin', 'super_admin', 'channel', 'carrier', 'system'],
+  actor: ['brand_user', 'brand_admin', 'mercenta_admin', 'super_admin', 'channel', 'carrier', 'system', 'public_visitor'],
   trigger: ['channel_event', 'brand_action', 'admin_action', 'time_deadline', 'provider_event', 'system_sweep'],
   outcome: ['success', 'refusal', 'exception', 'timeout', 'override'],
   data_condition: ['complete', 'incomplete', 'unknown', 'conflicting', 'duplicate'],
@@ -117,10 +117,12 @@ export function renderDoc(c) {
   lines.push('');
   lines.push('## Scenarios');
   lines.push('');
-  lines.push('| id | capability | actor | type | spec |');
-  lines.push('|---|---|---|---|---|');
+  lines.push('| id | capability | actor | type | spec | proved by (test) |');
+  lines.push('|---|---|---|---|---|---|');
   for (const s of [...c.scenarios].sort((a, b) => a.id.localeCompare(b.id))) {
-    lines.push(`| ${s.id} | ${s.capability} | ${s.actor} | ${s.type} | \`${s.spec}\` |`);
+    /* §BATCH 1 — `proved by` names the individual test that proves the scenario,
+       so the enumeration is traceable to a real case (the gate enforces it). */
+    lines.push(`| ${s.id} | ${s.capability} | ${s.actor} | ${s.type} | \`${s.spec}\` | ${s.test ? `\`${s.test}\`` : '—'} |`);
   }
   lines.push('');
   return lines.join('\n');

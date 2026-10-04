@@ -31,7 +31,8 @@
         "super_admin",
         "channel",
         "carrier",
-        "system"
+        "system",
+        "public_visitor"
       ],
       "trigger": [
         "channel_event",
@@ -937,6 +938,316 @@
       "type": "happy",
       "spec": "e2e/xero.spec.ts",
       "expects": "The xero journey renders and behaves as its spec asserts."
+    },
+    {
+      "id": "pf-access-gate-entry",
+      "capability": "platform",
+      "journey": "platform foundations — access gate entry",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/access-gate.spec.ts",
+      "test": "1. Login page shows Partner Login and Request Partner Access",
+      "expects": "The public entry offers Partner Login and exposes the Request Partner Access application route."
+    },
+    {
+      "id": "pf-access-gate-link-required",
+      "capability": "platform",
+      "journey": "platform foundations — access gate application refused",
+      "actor": "public_visitor",
+      "type": "refusal",
+      "spec": "e2e/access-gate.spec.ts",
+      "test": "2. Application form validates at least one link required",
+      "expects": "A complete-looking application with no trading link is REFUSED with 'Please provide at least one link'; it never advances."
+    },
+    {
+      "id": "pf-access-gate-submitted",
+      "capability": "platform",
+      "journey": "platform foundations — access gate application received",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/access-gate.spec.ts",
+      "test": "3. Application submitted with website link",
+      "expects": "An application carrying a website link reaches the 'Application Received' confirmation."
+    },
+    {
+      "id": "pf-access-gate-admin-sees-application",
+      "capability": "platform",
+      "journey": "platform foundations — access gate operator review",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/access-gate.spec.ts",
+      "test": "4. Admin sees application",
+      "expects": "A submitted application is visible in the Super Admin Applications surface."
+    },
+    {
+      "id": "pf-access-gate-approved-into-onboarding",
+      "capability": "platform",
+      "journey": "platform foundations — access gate approval creates onboarding",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/access-gate.spec.ts",
+      "test": "6. Admin approves a partner application",
+      "expects": "Approving confirms the application and creates ONE onboarding record keyed to the SAME tenant id the brand login card uses (brand-app-app-0001), and the brand then enters its portal."
+    },
+    {
+      "id": "pf-access-gate-rejected",
+      "capability": "platform",
+      "journey": "platform foundations — access gate rejection",
+      "actor": "super_admin",
+      "type": "refusal",
+      "spec": "e2e/access-gate.spec.ts",
+      "test": "7. Admin rejects brand",
+      "expects": "Rejecting confirms '<name> rejected' and the row's decision actions are gone, because the application is no longer pending."
+    },
+    {
+      "id": "pf-rbac-non-super-nav-hidden",
+      "capability": "platform",
+      "journey": "platform foundations — RBAC hides super-only destinations",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/app-shell.spec.ts",
+      "test": "Non-super Admin does not see super-only views in the nav",
+      "expects": "The admin rail hides Super Admin, Audit Log and Integration Settings from a non-super admin while keeping Brand CRM and Billing."
+    },
+    {
+      "id": "pf-rbac-brand-nav-hidden",
+      "capability": "platform",
+      "journey": "platform foundations — RBAC hides admin-only destinations from a brand",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/app-shell.spec.ts",
+      "test": "Brand — admin-only views hidden; render-side auth intact",
+      "expects": "The brand rail hides Audit Log, Super Admin and Integration Settings."
+    },
+    {
+      "id": "pf-runtime-cold-deep-link-addressed",
+      "capability": "platform",
+      "journey": "platform foundations — a cold deep link keeps its address",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/runtime-entry.spec.ts",
+      "test": "a cold product deep link keeps its address and lands on the requested view",
+      "expects": "A cold product deep link keeps its address and shows the login entry; after the one-click demo login the REQUESTED view renders."
+    },
+    {
+      "id": "pf-session-refresh-restores",
+      "capability": "platform",
+      "journey": "platform foundations — session survives a refresh",
+      "actor": "brand_user",
+      "type": "persistence",
+      "spec": "e2e/runtime-entry.spec.ts",
+      "test": "F5 in place stays in place (no silent sign-out)",
+      "expects": "After login a refresh keeps the same product view and the login entry does not return."
+    },
+    {
+      "id": "pf-session-back-forward",
+      "capability": "platform",
+      "journey": "platform foundations — Back/Forward stay in the product",
+      "actor": "brand_user",
+      "type": "persistence",
+      "spec": "e2e/runtime-entry.spec.ts",
+      "test": "Back/Forward move between product views instead of leaving the app",
+      "expects": "Browser Back and Forward move between product views rather than leaving the application."
+    },
+    {
+      "id": "pf-session-removed-address-refused",
+      "capability": "platform",
+      "journey": "platform foundations — a removed address fails closed",
+      "actor": "public_visitor",
+      "type": "refusal",
+      "spec": "e2e/runtime-entry.spec.ts",
+      "test": "the removed carrier address fails closed (no carrier shell exists)",
+      "expects": "The removed /carrier/manifest address resolves to the public site (fail-closed): the public entry renders, no product nav exists and no carrier surface is resurrected."
+    },
+    {
+      "id": "pf-rbac-refused-super-view",
+      "capability": "platform",
+      "journey": "platform foundations — RBAC refuses a Super-Admin-only view at render",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/runtime-entry.spec.ts",
+      "test": "a tier that may not enter an environment is refused (AccessDenied, not the panel)",
+      "expects": "A Mercenta Admin may enter the admin environment but a Super-Admin-only view addressed by URL renders 'Super Admin Access Required', not the panel."
+    },
+    {
+      "id": "pf-session-tamper-fails-closed",
+      "capability": "platform",
+      "journey": "platform foundations — a tampered session fails closed",
+      "actor": "system",
+      "type": "refusal",
+      "spec": "e2e/runtime-entry.spec.ts",
+      "test": "a tampered or unknown persisted session fails CLOSED",
+      "expects": "A brand-tier session claiming the admin environment, an unknown tenant and a malformed stored value are each refused on restore — never half-restored."
+    },
+    {
+      "id": "pf-public-stays-public-with-session",
+      "capability": "platform",
+      "journey": "platform foundations — a public address stays public with a live session",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/runtime-entry.spec.ts",
+      "test": "is still the public marketing homepage",
+      "expects": "`/` remains the public marketing homepage both with and without a live session; the address decides the environment."
+    },
+    {
+      "id": "pf-tenant-pos-scoped",
+      "capability": "platform",
+      "journey": "platform foundations — tenant isolation on purchase orders",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/multi-tenant.spec.ts",
+      "test": "Brand A cannot see Brand B POs",
+      "expects": "The brand's PO surface shows its OWN POs and none of another brand's (PO-9002 / PO-9003 absent)."
+    },
+    {
+      "id": "pf-tenant-messages-scoped",
+      "capability": "platform",
+      "journey": "platform foundations — tenant isolation on messages",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/multi-tenant.spec.ts",
+      "test": "Brand A cannot see Brand B messages",
+      "expects": "The brand's support surface renders with no other brand's name or messages present."
+    },
+    {
+      "id": "pf-tenant-payout-ledger-scoped",
+      "capability": "platform",
+      "journey": "platform foundations — tenant isolation on the payout ledger",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/multi-tenant.spec.ts",
+      "test": "payout ledger is tenant-scoped",
+      "expects": "A brand's payout ledger holds its OWN rows and none of another brand's."
+    },
+    {
+      "id": "pf-tenant-admin-sees-all-brands",
+      "capability": "platform",
+      "journey": "platform foundations — cross-tenant read is admin-only",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/multi-tenant.spec.ts",
+      "test": "Admin can see all brands",
+      "expects": "Cross-tenant reads are admin-only: the admin surface lists more than one brand."
+    },
+    {
+      "id": "pf-tenant-carrier-console-admin-only",
+      "capability": "platform",
+      "journey": "platform foundations — the carrier console is admin-only",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/multi-tenant.spec.ts",
+      "test": "the carrier tenant is gone and the carrier console is admin-only",
+      "expects": "A brand session reaches its OWN Logistics Hub but never the Mercenta-side carrier console."
+    },
+    {
+      "id": "pf-audit-surface-a11y",
+      "capability": "platform",
+      "journey": "platform foundations — the Audit Log surface is accessible",
+      "actor": "super_admin",
+      "type": "a11y",
+      "spec": "e2e/accessibility.spec.ts",
+      "test": "4. Audit log is structurally sound and scan-clean",
+      "expects": "The Admin Audit Log surface passes the structural skeleton and the accessibility scan."
+    },
+    {
+      "id": "pf-audit-surface-renders",
+      "capability": "platform",
+      "journey": "platform foundations — the Audit Log surface renders",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/crm.spec.ts",
+      "test": "5. Audit log renders",
+      "expects": "The Audit Log destination opens the 'Admin Audit Log' surface for a Super Admin."
+    },
+    {
+      "id": "pf-audit-on-behalf-attributed",
+      "capability": "platform",
+      "journey": "platform foundations — an on-behalf action is attributed",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/crm.spec.ts",
+      "test": "6. On-behalf actions are attributed in the audit log",
+      "expects": "A real on-behalf admin action (a fulfillment-track override) writes the 'fulfillment_track_override' entry visible in the Audit Log."
+    },
+    {
+      "id": "pf-audit-money-path-entry",
+      "capability": "platform",
+      "journey": "platform foundations — a money-path action is audited",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/brand-payouts.spec.ts",
+      "test": "settling a payout reports mock mode, clears it from pending and audits it",
+      "expects": "Settling a commission payout writes the canonical audit row ('commission_payout_settled'), visible in the Super Admin-only Audit Log."
+    },
+    {
+      "id": "pf-public-pages-render-shell-noredline",
+      "capability": "platform",
+      "journey": "platform foundations — the seven public pages render, take the shell and publish no internal detail",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/public-pages.spec.ts",
+      "test": "shell and publishes no internal detail",
+      "expects": "Each of the seven public pages renders its H1, takes the expected shell theme under both themes, has no horizontal overflow at 390 and publishes no red-line claim."
+    },
+    {
+      "id": "pf-public-chrome-footer-categories",
+      "capability": "platform",
+      "journey": "platform foundations — the public footer carries the canonical categories",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/public-chrome.spec.ts",
+      "test": "the footer carries the five-column shape",
+      "expects": "The footer carries the owner's five columns and EXACTLY the canonical APPROVED_CATEGORIES list (read from the owner, not retyped)."
+    },
+    {
+      "id": "pf-public-cookie-notice-sticky",
+      "capability": "platform",
+      "journey": "platform foundations — the cookie notice choice sticks",
+      "actor": "public_visitor",
+      "type": "persistence",
+      "spec": "e2e/public-chrome.spec.ts",
+      "test": "answering the notice STICKS across a reload",
+      "expects": "Answering the cookie notice sticks across a reload and the footer can re-open it."
+    },
+    {
+      "id": "pf-public-header-labels-agree",
+      "capability": "platform",
+      "journey": "platform foundations — public chrome labels agree with their owner",
+      "actor": "public_visitor",
+      "type": "happy",
+      "spec": "e2e/public-chrome.spec.ts",
+      "test": "the footer agrees with them",
+      "expects": "The header publishes the owner's nav labels and every footer link uses the SAME label for the same route."
+    },
+    {
+      "id": "pf-design-system-canonical-kit",
+      "capability": "platform",
+      "journey": "platform foundations — the design system kit renders",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/design-system.spec.ts",
+      "test": "canonical kit renders",
+      "expects": "Super Admin → Design System renders the canonical kit (typography, buttons, statuses, alerts, forms, tabs, table)."
+    },
+    {
+      "id": "pf-design-system-focus-visible",
+      "capability": "platform",
+      "journey": "platform foundations — keyboard focus-visible is present",
+      "actor": "super_admin",
+      "type": "a11y",
+      "spec": "e2e/design-system.spec.ts",
+      "test": "focus-visible outline is visible on keyboard focus of a Button",
+      "expects": "A canonical Button shows a visible keyboard focus-visible outline."
+    },
+    {
+      "id": "pf-design-system-no-overflow",
+      "capability": "platform",
+      "journey": "platform foundations — the design system has no horizontal overflow",
+      "actor": "super_admin",
+      "type": "responsive",
+      "spec": "e2e/design-system.spec.ts",
+      "test": "(no horizontal overflow)",
+      "expects": "The Design System surface has no horizontal overflow at each target viewport."
     }
   ]
 }
