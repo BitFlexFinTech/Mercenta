@@ -4002,5 +4002,34 @@ writer), the page-by-page functional parity audit of the ~126 unverified registr
 
 **NEXT.** The build continues on the NON-CREDENTIAL backlog. No credential is required and none is requested.
 
+---
+
+## SESSION — RECORDS, LABELS AND DECISIONS: "OPTION A" RECORDED, SIX WRONG LABELS FIXED, THE REVENUE-FLOOR DECISION RECORDED, A MISSING GLOBAL RULE MIRRORED (2026-10-04)
+
+**MODE / EXPERTS.** MODE: IMPLEMENT · EXPERTS: senior-software-engineer, project-manager · WHY: the Founder approved (Act mode) the plan built in the previous plan-mode turns.
+
+**BUILT.**
+- `requirements-registry.json` — NEW row `editor-typecheck-gap-e2e-and-functions` ("Option A", `not_started`); **SIX** status corrections, each recording its old value inline; `discovered-acquisition-revenue-floor-and-sla` records the Founder decision (no revenue floor); `_meta.status_counts` corrected from a stale snapshot; `_meta.records_and_decisions_2026_10_04` changelog; `total_entries` 526 → 527.
+- `.clinerules/data-must-be-real-sources.md` (**NEW**) — the missing mirror of a global rule (the manifest's `mirroredInProjects` requires it); its absence was FAILING `validate:rules-application`. Byte-identical copy added (sha256 `c4771d2a…`).
+- `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §6 — the "Option A" task added.
+
+**THE SIX LABEL CORRECTIONS** (each recording its old value inline):
+1. `phase10-uk-opportunity-states` in_progress → not_started.
+2. `ssot-work-layer-s6-ci-wiring` in_progress → built_and_tested (its text said CI wiring was outstanding; `.github/workflows/ci.yml` has existed since 2026-09-28).
+3. `phase14-live-integrations-activation` blocked → deferred.
+4. `phase1-live-research-activation` blocked → deferred.
+5. `s0-discovered-live-spapi-edge-functions-missing` blocked → built_and_tested (the three SP-API routes now exist in `supabase/functions/_shared/proxyRoutes.ts`, served by `supabase/functions/spapi/index.ts`).
+6. `batchC-rocketchat-integration` + `batchD-model-router` regressed → removed.
+
+The registry now holds **ZERO** in_progress, **ZERO** blocked and **ZERO** regressed rows, so it agrees with `PROJECT_STATUS.md` ("IN PROGRESS — none").
+
+**TESTED.** `validate:all` **150 PASS / 0 FAIL** (exit 0) · typecheck **0** · lint **0** · build **✓** · registry integrity **7/0** · `validate:built-rows` **1980/0** · `validate:rules-application` **21/0** (FAILING before the missing rule mirror was added) · `validate:no-stale-blockers` **10/10**.
+
+**RESULT.** **VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change).** Committed `6ce3baf`, pushed to `origin/redesign/foundation` (no `--force`). No demo deploy (no application runtime change).
+
+**DEFECT INVENTORY.** FIXED at source: (1) six wrong registry labels; (2) the drifted `_meta.status_counts` snapshot; (3) the missing `.clinerules/data-must-be-real-sources.md` mirror (which failed `validate:rules-application`). No defect parked.
+
+**NEXT.** The recorded "Option A" task (after the current build work), or the next item the Founder directs. No credential required.
+
 
 
