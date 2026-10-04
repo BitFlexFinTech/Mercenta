@@ -41,6 +41,32 @@ file (status + the evidence produced), then update `PROJECT_STATUS.md` + `HANDOF
 
 ---
 
+## 0b. THE AGREED ORDER (2026-10-04, Founder-approved) — THE SINGLE EXECUTION ORDER
+
+**The Founder settled the execution order on 2026-10-04** after a real confusion: the E2E coverage programme had
+jumped ahead of work that had been recorded as "next". This section is now THE order; a resuming session follows it.
+
+**A name collision was the root cause and is now FIXED.** This project used the label "Batch N" for THREE different
+sets of work (the 2026-09-27 build plan; the integration / PO / Phase-3 work; and the E2E programme), so the resume
+note and the roadmap section contradicted each other. The E2E programme is therefore RENAMED to its OWN label —
+**E2E Coverage Programme: E2E-0 … E2E-8** — and the live state files no longer use "Batch" for it. History in
+`STATUS_CHECK.md` is preserved verbatim, with a note.
+
+| # | Order | Work | Status |
+|---|---|---|---|
+| 0 | **FIRST** | **Save the plan + fix the records** (this section; the E2E rename; ONE next task in the resume block) | DONE (2026-10-04) |
+| 1 | **NEXT** | **PHASE 15 GO-LIVE CHECKLIST** — the launch gate (the Phase 15 rows in `requirements-registry.json`; `PRODUCTION_READINESS.md`). Gates blocked on an infrastructure / domain / Founder decision are marked BLOCKED with the exact missing input; the rest proceed. | NOT STARTED |
+| 2 | after 1 | **The remaining BUILD BACKLOG** — this plan's §6 leftovers, the two regressed rows, the tooling items | NOT STARTED |
+| 3 | after 2 | **The E2E COVERAGE PROGRAMME (E2E-2 onward)** — PAUSED, not deleted. Resume at the next domain (onboarding+acquisition · PO+documents · shipment+logistics+Delta+returns · finance · compliance · operations · integrations · founder). | PAUSED (E2E-0, E2E-1 done) |
+| 4 | last | **The legacy UI-redesign backlog** — cosmetic / consistency only | NOT STARTED |
+
+**Why this order.** Phase 15 is the gate that must pass before real public launch — the highest business value and
+the smallest, bounded job — and it is what was recorded as "next" before the E2E programme jumped ahead. The E2E
+coverage programme is large and open-ended, and is best finished on a settled product; it then strengthens the launch
+evidence rather than delaying it. **Nothing is deleted:** the E2E catalogue, generator and gate already built remain
+in place.
+
+---
 ## 1. WHAT THE SYSTEM ACTUALLY DOES TODAY (verified this session)
 
 ### 1.1 CONFIRMED CORRECT — the routing you described is already implemented
