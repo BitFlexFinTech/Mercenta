@@ -3945,3 +3945,34 @@ Batch 2o's AV-013) — recomputed; (3) the newly-found carriers (`BrandPurchaseO
 writer), the page-by-page functional parity audit of the ~126 unverified registry rows, and the declared gaps.
 `AV-033`, `AV-040`'s `getTransaction` and `AV-010b`'s read half stay EVIDENCE-BLOCKED.
 
+---
+
+## SESSION — §BATCH-0: THE PLATFORM DEMO/LIVE SWITCH NOW PERSISTS ACROSS DEVICES (2026-10-04)
+
+**MODE / EXPERTS.** MODE: IMPLEMENT · EXPERTS: skill-router, senior-software-engineer, project-manager · WHY: "continue where you left off" — the repository (not the chat) held an UNFINISHED §Batch-0.
+
+**THE FINDING (resume state vs repository).** The resume state said BATCH 3 was complete, but `git status` showed UNCOMMITTED application work dated 2026-10-04 — a "§Batch-0" that persists the platform demo/live switch to Supabase so the choice applies on EVERY device. The resume state and the repository DISAGREED; per `.clinerules/operating-model.md` §12.5 the repository won. The work was finished and shipped, not re-invented, and the resume state was corrected to record it.
+
+**BUILT.**
+- `src/lib/platform/platformConfig.ts` (**NEW**) — the ONE fail-soft persistence seam over Supabase `platform_config` (key `platform_mode`). It holds NO environment storage key and reads NO Vite build variable (so the `validate-environment` SSOT check stays true), and the Supabase client is imported LAZILY.
+- `src/config/environment.ts` — persists every switch change through the seam and gains `hydrateEnvironmentModeFromDb()` (a no-op without a DB).
+- `src/main.tsx` — hydrates the platform mode on boot (fail-soft).
+- `src/components/shared/DemoBanner.tsx`, `src/components/auth/Login.tsx`, `src/components/admin/integrations/SimulationControl.tsx` — now FOLLOW the ONE switch (demo notice silent in live; one-click demo brand cards hidden in live; the switch screen states the current mode in words via `data-environment-banner`).
+- **DEFECT FIXED AT SOURCE:** the stale hardcoded `DEMO_MODE` constant (a second source of truth that read `true` even in live) REMOVED from `src/config/demo.ts`; `scripts/validate-review-s1.mjs` REPOINTED from `DEMO_MODE === true` to `environmentMode() === 'demo'`; the stale `src/data/demoStore.ts` comment corrected.
+- `scripts/validate-platform-mode.mjs` (**NEW**; `npm run validate:platform-mode`; 17 assertions) — EXECUTES the seam (read/write never throw; with no DB read→null, write→false — never a false success), proves hydration is fail-soft, pins the wiring + single-owner, and asserts the `DEMO_MODE` constant is gone.
+- `scripts/verify-live-demo.mjs` — NEW `L27`.
+- `requirements-registry.json` — `_meta.batch0_platform_mode` records the change + a NEW row `batch0-platform-mode-persistence`; `_meta.total_entries` 525 → 526.
+- Scope guards declare the surface: `BATCH0_PLATFORM_MODE_SCOPE` (E6) / `BATCH0_PLATFORM_MODE_DECLARED` (E7).
+- `Products/0. Universal Template_2026-10-03T20_20_00Z.xlsm` — an inherited founder upload, committed as its own commit (`c305845`) per the clean-tree reconciliation.
+
+**TESTED.** `validate:all` **149 PASS / 0 FAIL** (exit 0; +1 is the NEW gate) · `typecheck` **0** · `lint` **0** · `build` **✓** · the NEW gate **17/17**, **mutation-proved ×3** (re-added `DEMO_MODE` → 1 failure; made `readPlatformMode` throw → 3 failures; stopped the demo notice following the switch → 1 failure; each file restored byte-identical: `demo.ts` `c74a70b1…`, `platformConfig.ts` `4ecc2f77…`, `DemoBanner.tsx` `a40d5442…`) · `validate:built-rows` **1970/0** · registry integrity **7/0** · E6 + E7 PASS · browser `e2e/app-shell.spec.ts` + `e2e/integration-hub.spec.ts` **28 passed / 0 failed** · LIVE `verify:live` **244 PASS / 0 FAIL** incl. the NEW `L27`.
+
+**RESULT.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Committed `a0cb49f` (+ `c305845`), PUSHED to `origin/redesign/foundation` (no `--force`), DEPLOYED to `demo.mercenta.co.uk` (20 new / 12 modified files), and LIVE-VERIFIED there.
+
+**BLOCKED (protected path).** The `platform_config` TABLE migration (`supabase/migrations` is a PROTECTED path) plus Supabase credentials. Until then the seam is a silent no-op and the platform keeps running in demo — which the new gate asserts. The cross-device persistence behaviour is NOT working until that table exists and is never reported as working.
+
+**DEFECT INVENTORY (this session).** FIXED at source: (1) the stale hardcoded `DEMO_MODE` constant (removed; repointed `validate-review-s1`; gated); (2) the stale `src/data/demoStore.ts` comment naming `DEMO_MODE`. No defect parked; no known exceptions introduced. The `platform_config` migration is BLOCKED as above.
+
+**NEXT.** BATCH 3 and §Batch-0 are COMPLETE. Every remaining item needs a founder action.
+
+
