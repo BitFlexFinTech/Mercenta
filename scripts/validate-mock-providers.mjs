@@ -451,6 +451,118 @@ try {
   } finally {
     globalThis.fetch = realFetchForPll;
   }
+/* ── §PHASE 3 DELTA FULFILLMENT simulation (the 3PL fulfilment partner) ──
+     The Founder declared the platform's 3PL partner is Delta Fulfillment. A 3PL
+     FULFILS, it does not carry (goods still move on DHL + Palletline). This block
+     proves the Delta seam end-to-end: the inbound receipt lifecycle, the inventory
+     buffer, an outbound dispatch through its lifecycle, a warehouse exception +
+     retry recovery, a transient outage + recovery, the fulfilment invoice, and
+     that a credential-only swap activates the real path. */
+  const deltaMod = await server.ssrLoadModule('/src/lib/fulfillment/index.ts');
+  const deltaMockMod = await server.ssrLoadModule('/src/lib/fulfillment/mockClient.ts');
+  deltaMod.resetMockDeltaState();
+  let deltaNetworkCalls = 0;
+  const realFetchForDelta = globalThis.fetch;
+  globalThis.fetch = async () => {
+    deltaNetworkCalls++;
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  try {
+    const seam = deltaMod.createDeltaFulfillmentClientForConnection({
+      credentials: null,
+      edgeFunctionBase: '/functions/v1',
+    });
+    test('delta: factory → MOCK without credentials', seam.mode === 'mock');
+    const client = seam.client;
+
+    const receipt = await client.createInboundReceipt({
+      reference: 'PO-DLT-1', units: 240, totalWeightKg: 480, warehouse: 'Delta UK 1',
+    });
+    test('delta: inbound receipt booked with an unmistakable simulated id',
+      receipt.ok === true && /^MOCK-DLT-RCPT-\d{4}$/.test(receipt.receiptNumber ?? '') &&
+        receipt.labelState === 'created');
+
+    const r1 = await client.getInboundReceiptStatus(receipt.receiptNumber);
+    const r2 = await client.getInboundReceiptStatus(receipt.receiptNumber);
+    const r3 = await client.getInboundReceiptStatus(receipt.receiptNumber);
+    const r4 = await client.getInboundReceiptStatus(receipt.receiptNumber);
+    test('delta: deterministic inbound lifecycle to putaway',
+      r1.milestone === 'receipt_created' && r2.milestone === 'in_transit_to_3pl' &&
+        r3.milestone === 'received_at_3pl' && r4.milestone === 'putaway');
+
+    const inv = await client.getInventoryLevel('SKU-DLT-1');
+    test('delta: the inventory buffer is deterministic and self-consistent',
+      inv.ok === true && inv.sku === 'SKU-DLT-1' &&
+        (inv.onHandUnits ?? 0) === (inv.availableUnits ?? 0) + (inv.allocatedUnits ?? 0));
+
+    const disp = await client.createDispatch({ reference: 'PO-DLT-1', sku: 'SKU-DLT-1', units: 120 });
+    test('delta: dispatch booked with an unmistakable simulated id',
+      disp.ok === true && /^MOCK-DLT-DSP-\d{4}$/.test(disp.dispatchNumber ?? ''));
+
+    const d1 = await client.getDispatchStatus(disp.dispatchNumber);
+    const d2 = await client.getDispatchStatus(disp.dispatchNumber);
+    const d3 = await client.getDispatchStatus(disp.dispatchNumber);
+    const d4 = await client.getDispatchStatus(disp.dispatchNumber);
+    const d5 = await client.getDispatchStatus(disp.dispatchNumber);
+    const d6 = await client.getDispatchStatus(disp.dispatchNumber);
+    test('delta: deterministic outbound lifecycle to the FC',
+      d1.milestone === 'dispatch_created' && d2.milestone === 'allocated' &&
+        d3.milestone === 'picked' && d4.milestone === 'packed' &&
+        d5.milestone === 'handed_to_carrier' && d6.milestone === 'delivered_to_fc');
+    test('delta: a delivered dispatch maps onto the canonical destination FC',
+      deltaMod.deltaDispatchMilestoneToShipmentStatus('delivered_to_fc') === 'destination_fc' &&
+        deltaMod.deltaDispatchMilestoneToShipmentStatus('packed') === 'bak_depot');
+
+    const invoice = await client.getFulfillmentInvoice(disp.dispatchNumber);
+    test('delta: fulfilment invoice returns the 3PL cost (never the brand charge)',
+      invoice.ok === true && typeof invoice.fulfilmentCostGbp === 'number' &&
+        invoice.fulfilmentCostGbp > 0 && !!invoice.invoiceNumber);
+// The 5th dispatch raises a warehouse exception; the retry recovers it.
+    let exDisp = null;
+    for (let i = 0; i < 4; i += 1) {
+      exDisp = await client.createDispatch({ reference: `PO-DLT-EX-${i}`, sku: 'SKU', units: 1 });
+    }
+    await client.getDispatchStatus(exDisp.dispatchNumber);
+    await client.getDispatchStatus(exDisp.dispatchNumber);
+    await client.getDispatchStatus(exDisp.dispatchNumber);
+    await client.getDispatchStatus(exDisp.dispatchNumber);
+    const exHit = await client.getDispatchStatus(exDisp.dispatchNumber);
+    const exCleared = await client.getDispatchStatus(exDisp.dispatchNumber);
+    test('delta: a warehouse exception is raised then cleared on retry',
+      exHit.exception === true && exCleared.exception === false);
+
+    // Transient provider outage: exactly one failed poll, then recovery.
+    const t1 = await client.createDispatch({ reference: 'PO-DLT-TRANSIENT', sku: 'SKU', units: 1 });
+    test('delta: transient failure armed',
+      deltaMockMod.simulateDeltaTransientFailure(t1.dispatchNumber) === true);
+    const tFail = await client.getDispatchStatus(t1.dispatchNumber);
+    const tRecovered = await client.getDispatchStatus(t1.dispatchNumber);
+    test('delta: transient failure then recovery on retry',
+      tFail.ok === false && tRecovered.ok === true);
+
+    // The real path is a CREDENTIAL-ONLY swap — no other code change.
+    const spyTransport = async () => ({
+      ok: true, status: 200,
+      json: async () => ({ dispatchNumber: 'DLT-LIVE-1', labelState: 'created' }),
+    });
+    const realSeam = deltaMod.createDeltaFulfillmentClientForConnectionWithTransport(
+      { credentials: { secretRef: 'vault:delta', verified: true }, edgeFunctionBase: '/functions/v1' },
+      spyTransport
+    );
+    test('delta: verified non-mock credential → REAL client', realSeam.mode === 'real');
+    const liveDisp = await realSeam.client.createDispatch({ reference: 'PO-LIVE', sku: 'SKU', units: 2 });
+    test('delta: real client returns the provider dispatch',
+      liveDisp.ok === true && liveDisp.dispatchNumber === 'DLT-LIVE-1');
+    const sandboxSeam = deltaMod.createDeltaFulfillmentClientForConnectionWithTransport(
+      { credentials: { secretRef: 'vault:delta', verified: false }, edgeFunctionBase: '/functions/v1' },
+      spyTransport
+    );
+    test('delta: sandbox credential stays on the MOCK path', sandboxSeam.mode === 'mock');
+
+    test('delta: the whole simulation performed ZERO network calls', deltaNetworkCalls === 0);
+  } finally {
+    globalThis.fetch = realFetchForDelta;
+  }
 
     console.log(failures === 0 ? 'MOCK_PROVIDERS_VALIDATION_PASS' : `MOCK_PROVIDERS_VALIDATION_FAIL (${failures} failures)`);
 } finally {

@@ -247,6 +247,29 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     ],
     testCallDescription: 'Palletline consignment query against the connected Mercenta account',
   },
+  /**
+   * §PHASE 3 — the 3PL FULFILMENT partner. A 3PL fulfils, it does NOT carry, so
+   * this card sits beside the carriers but is not one of them; goods still move on
+   * DHL (international) and Palletline (UK domestic). Simulated end-to-end until
+   * real credentials are entered.
+   */
+  delta_fulfillment: {
+    id: 'delta_fulfillment',
+    name: 'Delta Fulfillment (3PL)',
+    description:
+      "Mercenta's 3PL fulfilment partner — UK warehousing, an inventory buffer, consolidation and the final-mile hand-off to the channel's fulfilment centre. A 3PL fulfils, it does not carry: goods still move on DHL (international) and Palletline (UK domestic). Simulated end-to-end (inbound receipt, putaway, inventory buffer, outbound dispatch, exception recovery, fulfilment invoice) until real Delta Fulfillment credentials are entered; the live adapter activates with no code change.",
+    authMethod: 'api_key',
+    fields: [
+      {
+        key: 'api_key',
+        label: 'Account credential (via Edge Function)',
+        placeholder: 'Delta Fulfillment account credential',
+        secret: true,
+      },
+    ],
+    testCallDescription:
+      'Delta Fulfillment inventory query against the connected Mercenta account',
+  },
   xero: {
     id: 'xero',
     name: 'Xero',
@@ -363,6 +386,7 @@ export const INTEGRATION_ORDER: IntegrationId[] = [
   // finance providers with authoritative simulation defaults.
   'dhl',
   'palletline',
+  'delta_fulfillment',
   'xero',
   'companies_house',
   'hmrc',
@@ -415,6 +439,11 @@ export const INTEGRATION_META: Record<IntegrationId, IntegrationMeta> = {
   // authoritative state: a simulated Palletline consignment is fully demoable
   // with zero network calls, and entering credentials activates the live path.
   palletline: { category: 'logistics', defaultMode: 'simulation' },
+  // §PHASE 3 — the 3PL fulfilment partner (Delta Fulfillment). The mock/real
+  // adapter now EXISTS (`src/lib/fulfillment/`), so simulation is the
+  // authoritative state: a simulated 3PL route is fully demoable with zero
+  // network calls, and entering credentials activates the live path.
+  delta_fulfillment: { category: 'logistics', defaultMode: 'simulation' },
   xero: { category: 'finance', defaultMode: 'simulation' },
   // §Priority-1 — compliance providers. No live credentials held today;
   // simulation is the authoritative documented state.

@@ -2339,6 +2339,14 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
      */
     'src/config/fulfillment.ts',
     'src/lib/fulfillment/',
+    /**
+     * §STAGE 2 (2026-10-04) — Delta Fulfillment WIRED IN (see E6's
+     * PHASE3_SUPPLY_ROUTE_SCOPE): the Hub registration + both behavioural gates.
+     */
+    'src/integrations/types.ts',
+    'src/integrations/registry.ts',
+    'scripts/validate-supply-route-logistics.mjs',
+    'scripts/validate-mock-providers.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

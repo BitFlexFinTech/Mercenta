@@ -32,6 +32,11 @@ export type IntegrationId =
   // so its mode is authoritative (no adapter yet → `available`, never
   // simulation-by-accident).
   | 'palletline'
+  // §PHASE 3 — the 3PL FULFILMENT partner (Delta Fulfillment). A 3PL fulfils,
+  // it does not carry, so it is registered HERE rather than as a carrier.
+  // Registered so its mode is authoritative and the mock-first adapter
+  // (`src/lib/fulfillment/`) can never be treated as live by accident.
+  | 'delta_fulfillment'
   | 'xero'
   // §Priority-1 — compliance providers registered so their mode is
   // authoritative and the safety gate can resolve them (never UNKNOWN).
@@ -228,6 +233,10 @@ export const INITIAL_INTEGRATIONS: IntegrationsMap = {
   // §Canonical model §11 — registered so the routing rule's carrier resolves
   // authoritatively. No live adapter yet: defaultMode is `available`.
   palletline: { status: 'disconnected', sandbox: false },
+  // §PHASE 3 — the 3PL fulfilment partner (Delta Fulfillment). Registered so its
+  // mode is authoritative; entering real credentials activates the already-built
+  // mock-first adapter (`src/lib/fulfillment/`).
+  delta_fulfillment: { status: 'disconnected', sandbox: false },
   xero: { status: 'disconnected', sandbox: false },
   // §Priority-1 — compliance providers simulation-capable by docs-verified
   // current state (no live credentials held). Registered so the safety gate

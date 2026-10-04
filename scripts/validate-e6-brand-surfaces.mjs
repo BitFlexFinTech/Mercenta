@@ -2292,6 +2292,16 @@ const OPTION_A_TYPECHECK_COVERAGE_SCOPE = new Set([
 const PHASE3_SUPPLY_ROUTE_SCOPE = new Set([
   'src/config/fulfillment.ts',
   'src/lib/fulfillment/',
+  /**
+   * §STAGE 2 (2026-10-04) — Delta Fulfillment WIRED IN. The 3PL provider is now
+   * registered in the Integrations Hub so its mode is authoritative, and its
+   * mock-first adapter + both behavioural gates are the phase's surface. A 3PL
+   * fulfils, it does not carry — the carrier model stays untouched.
+   */
+  'src/integrations/types.ts',
+  'src/integrations/registry.ts',
+  'scripts/validate-supply-route-logistics.mjs',
+  'scripts/validate-mock-providers.mjs',
 ]);
 
 

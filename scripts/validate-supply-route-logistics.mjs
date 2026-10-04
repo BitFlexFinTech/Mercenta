@@ -20,6 +20,12 @@
  *   · a universal maximum-lead-time rule is invented (a real number where the
  *     business has agreed none).
  *
+ * §STAGE 2 (2026-10-04) — Delta Fulfillment is now WIRED IN. This gate also fails
+ * if the 3PL provider stops being authoritative in the Integrations Hub (registry
+ * card / order / meta), if its provider-mode resolution stops being `simulation`,
+ * if the mock-first factory stops returning the MOCK client with no credentials,
+ * or if the client seam loses one of its 3PL operations.
+ *
  * Every mutation-sensitive assertion was PROVED ABLE TO FAIL (see the session
  * report); the mutated file was restored byte-identical.
  *
@@ -55,6 +61,11 @@ import { evaluateLogisticsEscalation } from '@/lib/fulfillment/escalation';
 import {
   FULFILLMENT_PARTNERS, FULFILLMENT_ESCALATION_THRESHOLDS, DECLARED_3PL_PARTNER, getFulfillmentPartner,
 } from '@/config/fulfillment';
+import { createDeltaFulfillmentClientForConnection } from '@/lib/fulfillment/index';
+import {
+  defaultIntegrationMode, INTEGRATION_ORDER, INTEGRATION_META, INTEGRATION_REGISTRY,
+} from '@/integrations/registry';
+import { INITIAL_INTEGRATIONS } from '@/integrations/types';
 
 const full = buildSupplyRouteProfile({
   origin: 'Portugal', shipFrom: 'Porto factory',
@@ -84,11 +95,22 @@ const unknownRoute = evaluateLogisticsEscalation({ route: missingTransit, poFreq
 let undeclaredRefused = false;
 try { getFulfillmentPartner('acme_3pl'); } catch { undeclaredRefused = true; }
 
+const deltaSeam = createDeltaFulfillmentClientForConnection({
+  credentials: null, edgeFunctionBase: '/functions/v1',
+});
+
 console.log('__RESULT__' + JSON.stringify({
   full, missingTransit, noCustoms, escalate, direct, unagreed, noFreq, unknownRoute,
   partners: FULFILLMENT_PARTNERS, declared: DECLARED_3PL_PARTNER,
   canonicalThresholds: FULFILLMENT_ESCALATION_THRESHOLDS, undeclaredRefused,
   partner: getFulfillmentPartner(DECLARED_3PL_PARTNER),
+  deltaRegistry: !!INTEGRATION_REGISTRY.delta_fulfillment,
+  deltaInOrder: INTEGRATION_ORDER.includes('delta_fulfillment'),
+  deltaMeta: INTEGRATION_META.delta_fulfillment,
+  deltaInitial: INITIAL_INTEGRATIONS.delta_fulfillment,
+  deltaMode: defaultIntegrationMode('delta_fulfillment'),
+  deltaSeamMode: deltaSeam.mode,
+  deltaMethods: Object.keys(deltaSeam.client),
 }));
 `;
 
@@ -171,6 +193,36 @@ check('the engine reads INJECTABLE thresholds (not a hard-coded number)',
 const cfgSrc = read('src/config/fulfillment.ts');
 check('the config declares Delta Fulfillment as a 3PL',
   /'delta_fulfillment'/.test(cfgSrc) && /role:\s*'3pl'/.test(cfgSrc));
+
+/* ── 6. Delta Fulfillment is wired in as the authoritative 3PL provider ──── */
+check('Delta Fulfillment is registered in the Integrations Hub registry',
+  r.deltaRegistry === true);
+check('delta_fulfillment is in INTEGRATION_ORDER (rendered by the wizard)',
+  r.deltaInOrder === true);
+check('its Hub meta is logistics + simulation (the authoritative mode)',
+  r.deltaMeta?.category === 'logistics' && r.deltaMeta?.defaultMode === 'simulation',
+  JSON.stringify(r.deltaMeta));
+check('it starts disconnected (never pre-connected)',
+  r.deltaInitial?.status === 'disconnected', JSON.stringify(r.deltaInitial));
+check('the canonical provider-mode resolution is `simulation` (never unknown/not_registered)',
+  r.deltaMode === 'simulation', `got ${r.deltaMode}`);
+check('the mock-first factory returns the MOCK client with NO credentials',
+  r.deltaSeamMode === 'mock', `got ${r.deltaSeamMode}`);
+check('the client seam exposes the 3PL operations (inbound, inventory, dispatch, invoice)',
+  ['createInboundReceipt', 'getInboundReceiptStatus', 'getInventoryLevel', 'createDispatch',
+    'getDispatchStatus', 'getFulfillmentInvoice'].every((m) => r.deltaMethods.includes(m)),
+  JSON.stringify(r.deltaMethods));
+
+/* ── 7. source guards for the Delta adapter ─────────────────────────────── */
+const idxSrc = read('src/lib/fulfillment/index.ts');
+check('the factory refuses a `mock:` secretRef for the live path',
+  /isMockDeltaSecret\(credentials\.secretRef\)/.test(idxSrc));
+const deltaClientSrc = read('src/lib/fulfillment/client.ts');
+check('the live client talks through the delta-fulfillment Edge Function path',
+  /delta-fulfillment\//.test(deltaClientSrc));
+check('a 3PL fulfils — the adapter imports no carrier lane choice',
+  !/from ['"]@\/config\/shipping['"]/.test(deltaClientSrc) &&
+    !/chooseCarrier\s*\(/.test(deltaClientSrc));
 
 /* ── summary ────────────────────────────────────────────────────────────── */
 console.log('');
