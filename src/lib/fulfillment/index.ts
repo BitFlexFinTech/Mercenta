@@ -28,6 +28,12 @@ export type {
   SupplyRouteProfile,
 } from './supplyRoute';
 export { SUPPLY_ROUTE_BASIS, buildSupplyRouteProfile } from './supplyRoute';
+export type { SupplyRouteRecordInput } from './routeFromRecords';
+export {
+  ROUTE_DERIVATION_BASIS,
+  deriveSupplyRouteInput,
+  freightModeForShipmentStatus,
+} from './routeFromRecords';
 export type {
   LogisticsRouteDecision,
   LogisticsEscalationInput,

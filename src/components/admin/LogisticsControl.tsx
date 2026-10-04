@@ -36,6 +36,10 @@ import { buildOperationalMap } from '@/lib/logistics/operationsMap';
 import { PoDocumentQueuePanel } from '@/components/shared/logistics/PoDocumentQueuePanel';
 import { CarrierProviderConfigurationPanel } from '@/components/shared/logistics/CarrierProviderConfigurationPanel';
 import { ConsolidationPosturePanel } from '@/components/shared/logistics/ConsolidationPosturePanel';
+import {
+  SupplyRouteEscalationPanel,
+  type SupplyRouteConsignment,
+} from '@/components/shared/logistics/SupplyRouteEscalationPanel';
 import { carrierProviderConfigurations } from '@/lib/shipping/providerConfiguration';
 import { listChannelInstructions } from '@/lib/commerce/channelInstructions';
 import {
@@ -110,7 +114,9 @@ export function LogisticsControl({
   // Stable identity so the downstream useMemo deps don't churn every render.
   const shipments = useMemo(() => shipmentsQuery.data?.data ?? [], [shipmentsQuery.data]);
   const brandsQuery = useBrands();
-  const brands = brandsQuery.data?.data ?? [];
+  // §PHASE 3 STAGE 3 — stable identity (the route-consignment join below is a
+  // useMemo input), using the same pattern as the shipments query above.
+  const brands = useMemo(() => brandsQuery.data?.data ?? [], [brandsQuery.data]);
   // §Phase E5 (G6) — stable identity (the PO list is a join input below), using
   // the same pattern as the shipments query above.
   const poQuery = usePurchaseOrders();
@@ -180,6 +186,28 @@ export function LogisticsControl({
   const providerConfigurations = useMemo(
     () => carrierProviderConfigurations({ modes, connections: integrations }),
     [modes, integrations]
+  );
+
+  /**
+   * §PHASE 3 STAGE 3 — the consignments the Supply Route & 3PL escalation panel
+   * reads. The panel derives the route from these recorded facts only
+   * (`src/lib/fulfillment/routeFromRecords.ts`); nothing is invented here.
+   */
+  const routeConsignments: SupplyRouteConsignment[] = useMemo(
+    () =>
+      shipments.map((s) => {
+        const brand = brands.find((b) => b.id === s.brandId);
+        return {
+          id: s.id,
+          poNumber: s.poNumber,
+          brandName: brand?.profile.businessName ?? s.brandId,
+          brandNation: brand?.nation ?? null,
+          origin: s.origin ?? null,
+          shipmentStatus: s.status,
+          appointmentRequired: !!s.appointment,
+        };
+      }),
+    [shipments, brands]
   );
 
   /** The instruction Mercenta actioned for a PO — the same rule the brand Hub uses. */
@@ -651,6 +679,20 @@ export function LogisticsControl({
           scope="admin"
           onOpenIntegrations={onOpenIntegrations}
         />
+      </WorkspaceSection>
+
+      {/* ── §PHASE 3 STAGE 3 — SUPPLY ROUTE & 3PL ESCALATION ─────────────────
+          The Phase 3 route model and the fail-closed escalation engine, surfaced
+          for the operator: the declared 3PL partner (Delta Fulfillment), the
+          escalation posture, and — per consignment — the derived route and the
+          decision. A 3PL fulfils, it does not carry, so this sits beside the
+          carrier configuration without changing the carrier model. */}
+      <WorkspaceSection
+        title="Supply route & 3PL escalation"
+        description="The declared supply route for a consignment and whether a UK inventory buffer / 3PL (Delta Fulfillment) route may be appropriate. Fail-closed: while the escalation thresholds are not agreed, every decision routes to human review and no 3PL is recommended."
+        domain="logistics"
+      >
+        <SupplyRouteEscalationPanel consignments={routeConsignments} />
       </WorkspaceSection>
 
       {/* ── §P10 — PO DOCUMENTS AWAITING DOWNLOAD ────────────────────────────

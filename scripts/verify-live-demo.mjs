@@ -63,6 +63,9 @@
  *   L28 the Delta Fulfillment 3PL card on the DEPLOYED Super-Admin Integration
  *       Settings surface (§PHASE 3 Stage 2): the 3PL provider is registered and
  *       the provider count has grown by exactly one (23)
+ *   L29 the Supply Route & 3PL escalation surface on the DEPLOYED admin Logistics
+ *       Hub (§PHASE 3 Stage 3): the declared 3PL partner, the not-agreed
+ *       thresholds and the fail-closed review decision
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -1803,6 +1806,53 @@ function readRedLines() {
     );
   }
   await dltPage.close();
+
+  /* ── L29 — §PHASE 3 STAGE 3: THE SUPPLY ROUTE SURFACE, LIVE ────────────────
+   * WHY THIS EXISTS. Stage 3 surfaces the Phase 3 route model and the fail-closed
+   * escalation decision on the admin Logistics Hub. A source assertion proves
+   * nothing about the DEPLOYED bundle, so the section is read from the live page:
+   * the 3PL partner must be named, the thresholds must read as not agreed, and the
+   * decision must be the fail-closed human review.
+   */
+  console.log('\n--- L29 the supply route & 3PL escalation surface, on the live admin Logistics Hub ---');
+  const rtPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const rtErrors = [];
+  rtPage.on('pageerror', (e) => rtErrors.push(String(e)));
+  try {
+    await liveAdminEntry(rtPage);
+    check('L29 the deployed site opened and the admin signed in', true);
+    const rtNav = rtPage.locator('nav[aria-label="Primary"] >> text=Logistics Hub').first();
+    await rtNav.waitFor({ state: 'visible', timeout: 90000 });
+    await rtNav.click({ timeout: 30000 });
+    await rtPage.waitForTimeout(2500);
+
+    const rtPanel = rtPage.locator('[data-testid="supply-route-escalation"]').first();
+    await rtPanel.waitFor({ state: 'visible', timeout: 60000 });
+    check('L29 the DEPLOYED admin Logistics Hub renders the supply route section', true);
+
+    const rtPartner = ((await rtPage.locator('[data-testid="supply-route-partner"]').first().innerText()) ?? '');
+    check(`L29 the deployed surface NAMES the declared 3PL partner (${rtPartner.trim().slice(0, 40)})`,
+      /Delta Fulfillment/.test(rtPartner));
+
+    const rtThresholds = ((await rtPage.locator('[data-testid="supply-route-thresholds"]').first().innerText()) ?? '');
+    check('L29 the deployed thresholds are stated as NOT AGREED', /not agreed/i.test(rtThresholds));
+
+    const rtDecision = rtPage.locator('[data-testid="supply-route-decision"]').first();
+    const rtDecisionValue = await rtDecision.getAttribute('data-decision');
+    check(`L29 the deployed decision FAILS CLOSED (review, no 3PL) (${rtDecisionValue})`,
+      rtDecisionValue === 'review');
+
+    check(
+      `L29 the driven surface rendered with no uncaught error (errors: ${rtErrors.join(' | ') || 'none'})`,
+      rtErrors.length === 0
+    );
+  } catch (rtError) {
+    check(
+      `L29 the supply route surface could NOT be driven live (${String(rtError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await rtPage.close();
 
 
 

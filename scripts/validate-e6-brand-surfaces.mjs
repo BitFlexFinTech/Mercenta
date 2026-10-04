@@ -2303,6 +2303,14 @@ const PHASE3_SUPPLY_ROUTE_SCOPE = new Set([
   'scripts/validate-supply-route-logistics.mjs',
   'scripts/validate-mock-providers.mjs',
   'scripts/verify-live-demo.mjs',                  /* +L28 — the 3PL card on the deployed Hub */
+  /**
+   * §STAGE 3 (2026-10-04) — the SUPPLY ROUTE & 3PL ESCALATION SURFACE. The
+   * derivation owner, the panel, its host section and its browser spec. A 3PL
+   * fulfils, it does not carry — the carrier model stays untouched.
+   */
+  'src/components/shared/logistics/SupplyRouteEscalationPanel.tsx',
+  'src/components/admin/LogisticsControl.tsx',
+  'e2e/supply-route-escalation.spec.ts',
 ]);
 
 

@@ -2348,6 +2348,10 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'scripts/validate-supply-route-logistics.mjs',
     'scripts/validate-mock-providers.mjs',
     'scripts/verify-live-demo.mjs',
+    /** §STAGE 3 (2026-10-04) — the supply route & 3PL escalation surface. */
+    'src/components/shared/logistics/SupplyRouteEscalationPanel.tsx',
+    'src/components/admin/LogisticsControl.tsx',
+    'e2e/supply-route-escalation.spec.ts',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

@@ -59,6 +59,9 @@ const ENTRY = `
 import { buildSupplyRouteProfile } from '@/lib/fulfillment/supplyRoute';
 import { evaluateLogisticsEscalation } from '@/lib/fulfillment/escalation';
 import {
+  deriveSupplyRouteInput, freightModeForShipmentStatus,
+} from '@/lib/fulfillment/routeFromRecords';
+import {
   FULFILLMENT_PARTNERS, FULFILLMENT_ESCALATION_THRESHOLDS, DECLARED_3PL_PARTNER, getFulfillmentPartner,
 } from '@/config/fulfillment';
 import { createDeltaFulfillmentClientForConnection } from '@/lib/fulfillment/index';
@@ -99,6 +102,17 @@ const deltaSeam = createDeltaFulfillmentClientForConnection({
   credentials: null, edgeFunctionBase: '/functions/v1',
 });
 
+/* §STAGE 3 — the surface's derivation owner, EXECUTED on real record shapes. */
+const intlRoute = buildSupplyRouteProfile(deriveSupplyRouteInput({
+  origin: 'Portugal depot', brandNation: 'Portugal', shipmentStatus: 'sea_transit',
+  appointmentRequired: true,
+}));
+const ukRoute = buildSupplyRouteProfile(deriveSupplyRouteInput({
+  origin: 'United Kingdom depot', brandNation: 'United Kingdom', shipmentStatus: 'bak_depot',
+  appointmentRequired: false,
+}));
+const intlDecision = evaluateLogisticsEscalation({ route: intlRoute, poFrequencyPerMonth: null });
+
 console.log('__RESULT__' + JSON.stringify({
   full, missingTransit, noCustoms, escalate, direct, unagreed, noFreq, unknownRoute,
   partners: FULFILLMENT_PARTNERS, declared: DECLARED_3PL_PARTNER,
@@ -111,6 +125,10 @@ console.log('__RESULT__' + JSON.stringify({
   deltaMode: defaultIntegrationMode('delta_fulfillment'),
   deltaSeamMode: deltaSeam.mode,
   deltaMethods: Object.keys(deltaSeam.client),
+  intlRoute, ukRoute, intlDecision,
+  freightSea: freightModeForShipmentStatus('sea_transit'),
+  freightAir: freightModeForShipmentStatus('air_transit'),
+  freightOther: freightModeForShipmentStatus('bak_depot'),
 }));
 `;
 
@@ -223,6 +241,38 @@ check('the live client talks through the delta-fulfillment Edge Function path',
 check('a 3PL fulfils — the adapter imports no carrier lane choice',
   !/from ['"]@\/config\/shipping['"]/.test(deltaClientSrc) &&
     !/chooseCarrier\s*\(/.test(deltaClientSrc));
+
+/* ── 8. §STAGE 3 — the surface's derivation is real and fails closed ─────── */
+check('freight mode derives from the consignment status (sea / air / unknown)',
+  r.freightSea === 'sea' && r.freightAir === 'air' && r.freightOther === 'unknown',
+  `${r.freightSea}/${r.freightAir}/${r.freightOther}`);
+check('a non-UK lane DERIVES customs required; a UK lane does not',
+  r.intlRoute.customsRequired === true && r.ukRoute.customsRequired === false);
+check('the derived route NAMES its unrecorded fields (never estimates them)',
+  r.intlRoute.totalDoorToFcDays === null &&
+    ['production lead time', 'export lead time', 'transit estimate', 'safety buffer']
+      .every((f) => r.intlRoute.unknowns.some((u) => u.includes(f))),
+  JSON.stringify(r.intlRoute.unknowns));
+check('with the canonical (unagreed) thresholds the surfaced decision fails CLOSED to review',
+  r.intlDecision.decision === 'review' && r.intlDecision.partnerId === null &&
+    r.intlDecision.thresholdsAgreed === false, JSON.stringify(r.intlDecision));
+
+/* ── 9. source guards for the Stage 3 surface ───────────────────────────── */
+const panelSrc = read('src/components/shared/logistics/SupplyRouteEscalationPanel.tsx');
+check('the surface derives + decides through the ONE domain (no private arithmetic)',
+  /deriveSupplyRouteInput/.test(panelSrc) && /buildSupplyRouteProfile/.test(panelSrc) &&
+    /evaluateLogisticsEscalation/.test(panelSrc));
+check('the surface reads the partner + thresholds from the config (no hardcoded name/number)',
+  /getFulfillmentPartner\(DECLARED_3PL_PARTNER\)/.test(panelSrc) &&
+    /FULFILLMENT_ESCALATION_THRESHOLDS/.test(panelSrc) &&
+    !/'Delta Fulfillment'/.test(panelSrc));
+check('the surface renders the decision, the reasons, the unknowns and the partner mode',
+  /data-testid="supply-route-decision"/.test(panelSrc) &&
+    /data-testid="supply-route-reasons"/.test(panelSrc) &&
+    /data-testid="supply-route-unknowns"/.test(panelSrc) &&
+    /data-testid="supply-route-partner-mode"/.test(panelSrc));
+check('the Logistics Hub renders the surface',
+  /<SupplyRouteEscalationPanel/.test(read('src/components/admin/LogisticsControl.tsx')));
 
 /* ── summary ────────────────────────────────────────────────────────────── */
 console.log('');

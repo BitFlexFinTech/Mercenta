@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 528,
+    "total_entries": 529,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -66,6 +66,7 @@
         "phase3-supply-route-profile",
         "phase3-logistics-escalation-engine",
         "phase3-delta-fulfillment-adapter",
+        "phase3-supply-route-surface",
         "phase4-onboarding-academy-curriculum",
         "phase4-learning-loop-validate",
         "phase5-tutorial-recording",
@@ -3852,6 +3853,15 @@
       "source": "Founder directive (2026-10-04) — the platform's 3PL partner is Delta Fulfillment and the back-end wiring to it must be worked out (Batch 3, Stage 2).",
       "status": "built",
       "evidence": "src/lib/fulfillment/client.ts + mockClient.ts + transform.ts + index.ts (createDeltaFulfillmentClientForConnection) + src/integrations/types.ts + registry.ts + scripts/validate-supply-route-logistics.mjs (30 assertions incl. the Hub registration) + scripts/validate-mock-providers.mjs (the delta seam block: 20 assertions)",
+      "last_verified": "2026-10-04",
+      "superseded_by": null
+    },
+    {
+      "id": "phase3-supply-route-surface",
+      "description": "Phase 3 — the operator-facing SURFACE for the supply route + escalation decision. §PHASE 3 STAGE 3 (2026-10-04) — BUILT: the Mercenta Admin Logistics Hub renders a 'Supply route & 3PL escalation' section whose panel states the declared 3PL partner (Delta Fulfillment, with its truthful provider mode), the escalation posture (thresholds NOT AGREED), and — per consignment — the DERIVED supply-route profile and the escalation DECISION with its reasons. Fail-closed by construction: the route comes only from recorded facts (`src/lib/fulfillment/routeFromRecords.ts`), every field the records do not hold is NAMED as unknown (never estimated), and while the thresholds are unagreed the decision routes to human review and no 3PL is recommended.",
+      "source": "Founder directive (2026-10-04) — Batch 3 Stage 3: a surface that shows the supply route + escalation decision.",
+      "status": "built",
+      "evidence": "src/components/shared/logistics/SupplyRouteEscalationPanel.tsx + src/lib/fulfillment/routeFromRecords.ts + src/components/admin/LogisticsControl.tsx (the section) + scripts/validate-supply-route-logistics.mjs (38 assertions incl. the Stage 3 derivation + source guards) + e2e/supply-route-escalation.spec.ts (8 browser assertions)",
       "last_verified": "2026-10-04",
       "superseded_by": null
     },
