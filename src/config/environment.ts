@@ -138,3 +138,30 @@ export function environmentDefaultMode(providerDefault: IntegrationMode): Integr
   if (currentMode === 'live' && providerDefault === 'simulation') return 'available';
   return providerDefault;
 }
+
+/* §Batch-0 — PERSIST every environment switch change to Supabase so the
+   choice applies on EVERY device. Fail-soft: no DB (demo) or a missing
+   table is a silent no-op; the switch keeps working exactly as before. */
+subscribeEnvironment(() => {
+  void import('@/lib/platform/platformConfig').then((m) => m.writePlatformMode(currentMode)).catch(() => {});
+});
+
+/**
+ * §Batch-0 — HYDRATE the switch from the database on load.
+ *
+ * The persisted platform_config value is authoritative across devices; with no
+ * DB configured (demo) or before the table exists this is a no-op and the
+ * build/local value stands. Never throws.
+ */
+export async function hydrateEnvironmentModeFromDb(): Promise<void> {
+  try {
+    const { readPlatformMode } = await import('@/lib/platform/platformConfig');
+    const persisted = await readPlatformMode();
+    if (persisted !== 'demo' && persisted !== 'live') return;
+    if (persisted === currentMode) return;
+    currentMode = persisted;
+    for (const l of listeners) l();
+  } catch {
+    /* fail-soft — keep the build/local value */
+  }
+}

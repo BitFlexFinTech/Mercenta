@@ -6,6 +6,7 @@ import { approvedApplicationBrands } from '@/data/applicationStore';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
 import { cn } from '@/utils/cn';
 import type { Environment, SessionRole } from '@/types';
+import { environmentMode, subscribeEnvironment } from '@/config/environment';
 import { PartnerApplicationForm, ApplicationReceived } from './PartnerApplicationForm';
 import {
   ArrowLeft,
@@ -77,6 +78,8 @@ export function Login() {
   const { signIn, setEnvironment, activateDemoBrand, activateOnboardingBrand } = useApp();
   const [showForm, setShowForm] = useState(false);
   const [appSubmitted, setAppSubmitted] = useState(false);
+  const [isDemo, setIsDemo] = useState(() => environmentMode() === 'demo');
+  useEffect(() => subscribeEnvironment(() => setIsDemo(environmentMode() === 'demo')), []);
 
   /**
    * §Phase E2 — brands whose tenant came from the CANONICAL onboarding record.
@@ -107,7 +110,7 @@ export function Login() {
   // second hidden brand source. Real onboarding records always render.
   const demoSubset = DEMO_LOGIN_BRAND_IDS;
   const allBrands = [
-    ...ALL_DEMO_BRANDS.filter(b => demoSubset.includes(b.id)).map(b => ({ id: b.id, name: b.name, nation: b.nation, category: b.category, signatory: b.signatory, track: b.track, contractStatus: b.contractStatus, fromApp: false as const })),
+    ...(isDemo ? ALL_DEMO_BRANDS.filter(b => demoSubset.includes(b.id)).map(b => ({ id: b.id, name: b.name, nation: b.nation, category: b.category, signatory: b.signatory, track: b.track, contractStatus: b.contractStatus, fromApp: false as const })) : []),
     ...approvedApplicationBrands.map(b => ({ id: b.id, name: b.name, nation: b.country, category: b.category, signatory: b.signatory, track: b.track, contractStatus: 'active' as const, fromApp: true as const })),
   ];
 

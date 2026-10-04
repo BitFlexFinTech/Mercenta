@@ -37,3 +37,9 @@ createRoot(document.getElementById('root')!).render(
 queueMicrotask(() => {
   import('./lib/monitoring/sentry').then((m) => m.initSentry());
 });
+
+// §Batch-0 — hydrate the platform demo/live mode from Supabase on boot
+// (fail-soft: a no-op in demo and before the platform_config table exists).
+queueMicrotask(() => {
+  import('./config/environment').then((m) => m.hydrateEnvironmentModeFromDb()).catch(() => {});
+});

@@ -2247,6 +2247,7 @@ const BATCH2B_AMENDMENT_WINDOW_SCOPE = new Set([
  * still refused. Nothing protected is touched (no migration, no provider client,
  * no Xero, no billing).
  */
+const BATCH0_PLATFORM_MODE_SCOPE = new Set(['src/lib/platform/', 'src/config/environment.ts', 'src/main.tsx', 'src/components/shared/DemoBanner.tsx', 'src/components/auth/Login.tsx', 'src/components/admin/integrations/SimulationControl.tsx', 'scripts/validate-e6-brand-surfaces.mjs', 'scripts/validate-e7-embedded-social.mjs']);
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -2960,7 +2961,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...BATCH3C_PARITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PUBLIC MESSAGING — the public-surfaces batch (see above). */
           PUBLIC_MESSAGING_SCOPE.has(p) ||
-          [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          BATCH0_PLATFORM_MODE_SCOPE.has(p) ||
+          [...BATCH0_PLATFORM_MODE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

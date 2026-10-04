@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-10-03",
+    "last_updated": "2026-10-04",
     "status_enum": [
       "not_started",
       "built",
@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 525,
+    "total_entries": 526,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -963,7 +963,8 @@
       "remaining": "The per-row page-by-page functional parity audit (smoke-render / dataset completeness / name-implies-capability / interactivity). The Amazon UNKNOWNs and evidence-blocked rows (AV-010b read half, AV-033, AV-040 getTransaction) are unchanged."
     },
     "batch3c_part2a_onbehalf_specs": "Batch 3c part 2a (2026-10-03): the eleven PRE-EXISTING browser-spec failures (outstanding blocker C) all shared ONE root cause - they predated the 2026-09-30 on-behalf authority fix (src/lib/commerce/poOnBehalfAuthority.ts) and drove an on-behalf ACCEPTANCE with no brand authorisation, so the writer (src/data/api.ts) legitimately refused them. Each was repointed at source; the brand authorisation is recorded via the ONE canonical writer authoriseOnBehalfDecisions. NEW gate scripts/validate-onbehalf-spec-authorisation.mjs. Full browser suite now 561 passed / 0 failed.",
-    "batch3c_part2b_functional_parity": "Batch 3c part 2b (2026-10-03): the remaining page-by-page parity dimensions of the evidence-bearing rows - dataset completeness, name-implies-capability and interactivity. NEW gate scripts/validate-functional-parity.mjs (npm run validate:functional-parity) makes them mechanical: F1 pins the react-hooks rules-of-hooks/exhaustive-deps guards at ERROR (plus the plugin dependency); F2 asserts every listing surface reads its canonical dataset (no hardcoded subset); F3 asserts every CRM/Hub/Centre/Manager/Control component implements its capability INLINE and never redirects; F4 asserts every MetricBand fed a MetricTileData[] has a drill-down. It found and FIXED one real defect: src/components/admin/MercentaBrain.tsx rendered six KPI tiles with NO drill-down (a wall of dead numbers); each now drills into the set it counts, proved in a browser by e2e/mercenta-brain.spec.ts test 11."
+    "batch3c_part2b_functional_parity": "Batch 3c part 2b (2026-10-03): the remaining page-by-page parity dimensions of the evidence-bearing rows - dataset completeness, name-implies-capability and interactivity. NEW gate scripts/validate-functional-parity.mjs (npm run validate:functional-parity) makes them mechanical: F1 pins the react-hooks rules-of-hooks/exhaustive-deps guards at ERROR (plus the plugin dependency); F2 asserts every listing surface reads its canonical dataset (no hardcoded subset); F3 asserts every CRM/Hub/Centre/Manager/Control component implements its capability INLINE and never redirects; F4 asserts every MetricBand fed a MetricTileData[] has a drill-down. It found and FIXED one real defect: src/components/admin/MercentaBrain.tsx rendered six KPI tiles with NO drill-down (a wall of dead numbers); each now drills into the set it counts, proved in a browser by e2e/mercenta-brain.spec.ts test 11.",
+    "batch0_platform_mode": "§Batch-0 (2026-10-04) — THE PLATFORM DEMO/LIVE SWITCH NOW PERSISTS ACROSS DEVICES. The decision stays OWNED by the ONE SWITCH (src/config/environment.ts); a NEW fail-soft persistence seam src/lib/platform/platformConfig.ts writes it to Supabase (table platform_config, key 'platform_mode') and reads it back on load, and src/main.tsx hydrates it on boot, so flipping the mode on one device applies to EVERY device. The surfaces now FOLLOW the switch instead of a hardcoded constant: src/components/shared/DemoBanner.tsx (the demo notice is silent in live), src/components/auth/Login.tsx (the one-click demo brand cards are hidden in live), src/components/admin/integrations/SimulationControl.tsx (a banner states the current mode in words). DEFECT FIXED AT SOURCE: the stale hardcoded DEMO_MODE constant in src/config/demo.ts (it always read true, even in live) was REMOVED, and scripts/validate-review-s1.mjs was REPOINTED from DEMO_MODE===true to environmentMode()==='demo'. GATE: scripts/validate-platform-mode.mjs (npm run validate:platform-mode; 17 assertions) EXECUTES the seam (read/write never throw; with no DB read returns null and write returns false — never a false success), proves hydration is fail-soft, and pins the wiring + single-owner; mutation-proved x3 (re-added DEMO_MODE -> 1 failure; made readPlatformMode throw -> 3 failures; stopped the demo notice following the switch -> 1 failure), each file restored byte-identical. LIVE: scripts/verify-live-demo.mjs gains L27. DEFERRED (protected path): the platform_config TABLE migration (supabase/migrations) plus Supabase credentials — until then the seam is a silent no-op and the platform keeps running in demo (which the gate asserts)."
   },
   "entries": [
     {
@@ -5907,6 +5908,15 @@
       "status": "built_and_tested",
       "evidence": "scripts/validate-functional-parity.mjs (NEW; npm run validate:functional-parity; 40 assertions / 0 failures; F1 pins react-hooks rules-of-hooks + exhaustive-deps at ERROR and the plugin dependency; F2 10 dataset-consumer assertions; F3 10 named components implement their capability inline AND never redirect; F4 no dead metric band + the Brain's six tiles each drill down + the audited tiles keep their drill-down + the metric primitive renders a real button). Mutation-proved x4, each file restored byte-identical: eslint rules-of-hooks error->warn fails F1 (eslint.config.js sha256 ab7e9ccbad115cfa617e3e422c6a9cae28abb186d7eb71c73c176ae80cfe434f); BrandCRM useBrands removed fails F2 and BrandCrmDepth removed fails F3 (BrandCRM.tsx sha256 84ef4b128ece438627e86ef05eff144cf28c2bf4cf47155f9a7f451ebd21475d); MercentaBrain onOpen removed fails F4 (MercentaBrain.tsx sha256 52aae9158704212189820e198a1d1e9650b7d6991fc5b3d7f66e5658ce5183dd). Browser: e2e/mercenta-brain.spec.ts test 11 proves every KPI tile drills into the set it counts (11 passed). LIVE: scripts/verify-live-demo.mjs gains L26 (Super Administrator -> Mercenta Brain -> all six tiles drill down; the Verified tile filters the live list to 116 of 120; the Entities tile restores 120 of 120); verify:live 240 PASS / 0 FAIL incl. L26. src/components/admin/MercentaBrain.tsx (the fix); requirements-registry.json (_meta.batch3c_part2b_functional_parity); scope guards BATCH3C_PARITY_SCOPE (E6, all three checks) + BATCH3C_PARITY_DECLARED (E7, incl. its combined list). DEPLOYED @ 7f71d4b and live-verified on https://demo.mercenta.co.uk.",
       "last_verified": "2026-10-03",
+      "superseded_by": null
+    },
+    {
+      "id": "batch0-platform-mode-persistence",
+      "description": "§Batch-0 — the platform demo/live switch is persisted to Supabase so the mode applies on EVERY device, and the demo notice / login surface / switch surface all FOLLOW the ONE switch instead of a hardcoded DEMO_MODE constant (removed).",
+      "source": "Section Batch-0 (2026-10-04); gate scripts/validate-platform-mode.mjs",
+      "status": "built_and_tested",
+      "evidence": "src/lib/platform/platformConfig.ts (NEW fail-soft seam: readPlatformMode/writePlatformMode over Supabase 'platform_config'); src/config/environment.ts (persists a switch change + hydrateEnvironmentModeFromDb); src/main.tsx (hydrates on boot); src/components/shared/DemoBanner.tsx + src/components/auth/Login.tsx + src/components/admin/integrations/SimulationControl.tsx (follow the switch); src/config/demo.ts (the stale DEMO_MODE constant REMOVED); scripts/validate-platform-mode.mjs (NEW; npm run validate:platform-mode; 17 assertions; mutation-proved x3); scripts/validate-review-s1.mjs (REPOINTED from DEMO_MODE===true to environmentMode()==='demo'); scripts/verify-live-demo.mjs (L27); scope guards BATCH0_PLATFORM_MODE_SCOPE (E6) + BATCH0_PLATFORM_MODE_DECLARED (E7). The platform_config TABLE migration (supabase/migrations) is DEFERRED as a protected path.",
+      "last_verified": "2026-10-04",
       "superseded_by": null
     }
   ]

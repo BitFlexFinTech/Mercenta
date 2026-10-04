@@ -142,12 +142,15 @@ try {
           createElement(pipeMod.RetailPipelinePanel))))
   );
   test('retail pipeline shows live-shaped demo submissions', pipeHtml.includes('Catalog Submissions'));
-  // §Phase M10 — the banner text is read from its single declaration
-  // (src/config/demo.ts) instead of a hardcoded 'Demo data' literal, so the
-  // assertion can never drift from the copy the platform actually shows.
+  // §Batch-0 — REPOINTED (2026-10-04): the previous contract pinned the
+  // hardcoded `DEMO_MODE === true` constant, which §Batch-0 REMOVED (a stale
+  // second source of truth — it read `true` even in live). The demo notice now
+  // renders iff the ONE switch (`src/config/environment.ts`) is demo, so assert
+  // THAT instead of the deleted constant.
+  const envCfg = await server.ssrLoadModule('/src/config/environment.ts');
   const demoCfg = await server.ssrLoadModule('/src/config/demo.ts');
   test('retail pipeline shows the canonical investor-demo notice',
-    demoCfg.DEMO_MODE === true && pipeHtml.includes(demoCfg.DEMO_BANNER_TEXT));
+    envCfg.environmentMode() === 'demo' && pipeHtml.includes(demoCfg.DEMO_BANNER_TEXT));
 
   const billHtml = renderToString(
     createElement(appCtx.AppProvider, null,

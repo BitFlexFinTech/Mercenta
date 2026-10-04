@@ -1,14 +1,18 @@
 /**
- * §Demo-mode configuration.
+ * §Demo-mode configuration — the demo COPY and labels only.
  *
- * DEMO_MODE is ON until real credentials are connected via Settings →
- * Integrations. In demo mode every module is populated from src/data/demoStore.ts,
- * shaped EXACTLY like the live integration's response so switching to live
- * data requires zero UI changes. The data-fetching layer (src/data/api.ts)
- * decides seed-vs-live per module based on connection status.
+ * The DEMO-vs-LIVE decision is OWNED by the ONE SWITCH
+ * (`src/config/environment.ts → environmentMode()`); this module no longer
+ * decides it. While the platform is in demo, every module is populated from
+ * src/data/demoStore.ts, shaped EXACTLY like the live integration's response so
+ * switching to live data requires zero UI changes. The data-fetching layer
+ * (src/data/api.ts) decides seed-vs-live per module from the owner.
+ *
+ * §Batch-0 (2026-10-04) — the old hardcoded `DEMO_MODE = true` constant was
+ * REMOVED. It always read `true` (even in live), so once every surface followed
+ * the switch it was a stale second source of truth. `environmentMode()` is now
+ * the ONLY answer to "is the platform in demo?".
  */
-export const DEMO_MODE = true;
-
 export const DEMO_BANNER_TEXT =
   'Investor Demo Mode — all data is simulated for presentation purposes. Connect real integrations in Settings to activate live data flow.';
 

@@ -1,7 +1,8 @@
 /**
  * §Stage-1 Demo store — THE single demo-mode source of truth.
  *
- * Every admin/brand view reads through here while DEMO_MODE is on. When a
+ * Every admin/brand view reads through here while the platform is in demo
+ * (`src/config/environment.ts → environmentMode()`, the ONE switch). When a
  * real integration connects, its fetcher replaces the array for that module
  * only; consumers never change. Mutations (e.g. PO accept/reject) mutate
  * these arrays so all views see changes immediately (single source of truth).

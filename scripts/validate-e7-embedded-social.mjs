@@ -810,6 +810,7 @@ try {
    * Same mechanism as every phase above: a changed source/test file outside EVERY
    * declared set is still refused.
    */
+const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environment.ts', 'src/main.tsx', 'src/components/shared/DemoBanner.tsx', 'src/components/auth/Login.tsx', 'src/components/admin/integrations/SimulationControl.tsx'];
   const PUBLIC_MESSAGING_DECLARED = [
     'src/config/positioning.ts',
     'src/config/company.ts',
@@ -2328,6 +2329,7 @@ try {
      * §BATCH 3c PART 2b — THE FUNCTIONAL-PARITY GATE (2026-10-03) — the parity surface (see above).
      */
     ...BATCH3C_PARITY_DECLARED,
+    ...BATCH0_PLATFORM_MODE_DECLARED,
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

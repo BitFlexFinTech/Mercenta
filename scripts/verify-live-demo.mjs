@@ -58,6 +58,8 @@
  *   L25 the founder closing path on the DEPLOYED Super-Admin work surface (BATCH 3b)
  *   L26 the Mercenta Brain's KPI drill-down on the DEPLOYED Super-Admin surface:
  *       every tile opens into the set it counts (BATCH 3c part 2b)
+ *   L27 the platform-mode switch on the DEPLOYED Super-Admin surface (§Batch-0):
+ *       the ONE switch states the current mode in words
  *
  * It reports PASS/FAIL per check and exits non-zero on any failure, so it can
  * gate a release. It never writes to the site.
@@ -1696,6 +1698,62 @@ function readRedLines() {
     );
   }
   await brnPage.close();
+  /* ── L27 — §Batch-0: THE PLATFORM-MODE SWITCH, LIVE ─────────────────────────
+   * WHY THIS EXISTS. §Batch-0 makes `src/config/environment.ts` the ONE switch
+   * the demo notice, the login surface and the switch surface all follow, and
+   * persists its decision through a fail-soft Supabase seam. A source assertion
+   * proves nothing about the DEPLOYED bundle, so the switch surface is opened on
+   * the live Super-Admin panel and the CURRENT mode is read from the rendered
+   * banner — it must state a real mode in words.
+   */
+  console.log('\n--- L27 the platform-mode switch, on the live Super-Admin surface ---');
+  const modePage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const modeErrors = [];
+  modePage.on('pageerror', (e) => modeErrors.push(String(e)));
+  try {
+    await gotoLive(modePage, `${SITE}/`);
+    const modeLogin = modePage.getByRole('button', { name: 'Partner Login' }).first();
+    await modeLogin.waitFor({ state: 'visible', timeout: 90000 });
+    await modeLogin.click({ timeout: 30000 });
+    await modePage.waitForTimeout(2500);
+    const modeSaLogin = modePage.locator('text=Super Admin').first();
+    await modeSaLogin.waitFor({ state: 'visible', timeout: 90000 });
+    await modeSaLogin.click({ timeout: 30000 });
+    await modePage.waitForTimeout(3500);
+    check('L27 the deployed site opened and the Super Admin signed in', true);
+
+    const modeNav = modePage.locator('nav[aria-label="Primary"] >> text=Super Admin').first();
+    await modeNav.waitFor({ state: 'visible', timeout: 90000 });
+    await modeNav.click({ timeout: 30000 });
+    await modePage.waitForTimeout(2000);
+
+    const modeTab = modePage.getByTestId('super-admin-tab-simulation').first();
+    await modeTab.waitFor({ state: 'visible', timeout: 60000 });
+    await modeTab.click({ timeout: 30000 });
+    await modePage.waitForTimeout(1500);
+
+    const modeBanner = modePage.locator('[data-environment-banner]').first();
+    await modeBanner.waitFor({ state: 'visible', timeout: 60000 });
+    const mode = await modeBanner.getAttribute('data-environment-banner');
+    const modeWords = ((await modeBanner.innerText()) ?? '').trim();
+    check(`L27 the DEPLOYED switch surface states the current mode (${mode})`, mode === 'demo' || mode === 'live');
+    check(
+      `L27 the banner words match the current mode (${modeWords.slice(0, 60)})`,
+      mode === 'demo' ? /DEMO MODE/i.test(modeWords) : /LIVE MODE/i.test(modeWords)
+    );
+    check(
+      `L27 the driven switch surface rendered with no uncaught error (errors: ${modeErrors.join(' | ') || 'none'})`,
+      modeErrors.length === 0
+    );
+  } catch (modeError) {
+    check(
+      `L27 the platform-mode switch could NOT be driven live (${String(modeError).split('\n')[0].slice(0, 140)})`,
+      false
+    );
+  }
+  await modePage.close();
+
+
 
 
 

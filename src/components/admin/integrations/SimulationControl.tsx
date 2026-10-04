@@ -159,6 +159,10 @@ function EnvironmentSwitch() {
 
   return (
     <Card className="p-4" data-testid="environment-switch">
+      <div data-environment-banner={mode} className="mt-3 rounded-lg border border-white/[0.08] bg-white/[0.03] p-2 text-ds-label text-zinc-300 flex items-start gap-2">
+        <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+        <span>{isDemo ? 'DEMO MODE: you are viewing demo data. No real data or API calls.' : 'LIVE MODE: some integrations are not yet connected. Connect them in Settings.'}</span>
+      </div>
       <div className="flex items-center justify-between gap-3 flex-wrap" data-environment-switch={mode}>
         <div>
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
