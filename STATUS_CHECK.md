@@ -4173,3 +4173,33 @@ The registry now holds **ZERO** in_progress, **ZERO** blocked and **ZERO** regre
 
 **DEFECT INVENTORY.** FIXED at source: the support-chat corner collision (a mitigation replaced by a root fix), gated by a mutation-proved validator. No defect parked; no new blocker.
 
+---
+
+## SESSION — §ADMIN-SHELL-CHUNK: THE PORTAL-SHELL BUNDLES FIXED AT THE ROOT (2026-10-05)
+
+**MODE / EXPERTS.** MODE: IMPLEMENT · EXPERTS: senior-software-engineer · WHY: the recorded `NEXT TASK` authorised picking the next non-credential build item, and `07-fix-defects-at-source.md` required fixing the recorded build-output defect `discovered-adminshell-chunk-size` (and the SAME defect found in BrandShell in the same session) at the root.
+
+**DEFECT (from the registry row).** `discovered-adminshell-chunk-size` recorded a REAL build-output finding: the single `AdminShell-*.js` chunk was **909 kB** (230 kB gzip) because the admin shell EAGERLY imported all ~34 admin view panels — so every operator downloaded every panel to open any one of them, and `vite build` warned ("Some chunks are larger than 500 kB after minification"). While fixing it, the SAME defect was found in `BrandShell` (**~637 kB**, 24 eagerly imported brand panels).
+
+**BUILT.**
+- `src/components/layout/AdminShell.tsx` — all ~34 admin view panels are now `React.lazy(() => import(…))` dynamic imports rendered inside a `<Suspense>` (NEW `AdminViewFallback`). Chunk **909 kB → 16.92 kB**.
+- `src/components/layout/BrandShell.tsx` — the 24 brand view panels are now lazy + `<Suspense>` (NEW `BrandViewFallback`), and the un-onboarded `OnboardingWizard` early return carries its own boundary. Chunk **~637 kB → 28.57 kB**.
+- `node_modules` still lands in the ONE `vendor` chunk (§P3) — asserted by the gate AND by `validate-production-boot` (which BOOTS the built bundle, so a chunk-graph regression cannot hide).
+- `scripts/validate-admin-shell-bundle.mjs` (**NEW**, `npm run validate:admin-shell-bundle`, **17 assertions covering BOTH shells**), **PROVED ABLE TO FAIL** (7/9 fail on the pre-fix bundle) and mutation-proved (reverting ONE panel to an eager import fails 2 assertions; `AdminShell.tsx` restored byte-identical, sha256 `fdb9d6d7…`).
+- `scripts/validate-amazon-ads.mjs` — **REPOINTED** (not weakened): the old eager `import { AmazonAdsDashboard }` pin replaced by the dynamic-import pin, with the old contract recorded inline.
+- `requirements-registry.json` — `discovered-adminshell-chunk-size` `not_started` → `built_and_tested`; NEW row `discovered-brandshell-chunk-size`; TWO STALE rows reconciled at source (`cleanup-p8-inventory-asin` + `cleanup-p10-logistics-hub-completion` — they claimed no code existed while the programme doc §12/§14 and the code + gates record P8/P10 DONE). `scripts/reconcile-admin-shell-chunk-registry.cjs` + `scripts/reconcile-brand-shell-chunk-registry.cjs` (**NEW**). `not_started` 40 → 37.
+- Surface declared in BOTH scope guards (`ADMIN_SHELL_CHUNK_SCOPE` in E6; entries in E7). Plan §0b item 2 records the fourth concrete build item.
+
+**TESTED.** `validate:all` **164 PASS / 0 FAIL** · typecheck **0** (all 4 projects) · lint **0** · build ✓ · `validate:admin-shell-bundle` **17/17** · `validate:amazon-ads` **19/19** · `validate:no-stale-blockers` **13/13** · `validate:resume-state` **49/0** · `validate:built-rows` **2166/0** · browser **38 passed** (app-shell + brand-operational-surfaces + inventory + logistics-providers) · LIVE `verify:live` **267 PASS / 0 FAIL** + a direct bundle check (the live `index.html` references EXACTLY the local build's assets; the live `assets/AdminShell-BC1fghCV.js` is 16,930 bytes and `assets/BrandShell-1WrWb_5k.js` is 28,577 bytes).
+
+**RESULT.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Work commits `80b92fb` + `e90933b`, pushed to `origin/redesign/foundation` (no `--force`), deployed via `scripts/deploy-demo.sh` to `https://demo.mercenta.co.uk` (New: 113 files, Modified: 17; Removed: 81 obsolete chunks), live-verified.
+
+**DEFECT INVENTORY.**
+- **FIXED at source:** the AdminShell eager-import defect (909 kB → 16.92 kB) — gate `validate-admin-shell-bundle` (17 assertions, proved able to fail + mutation-proved).
+- **FIXED at source:** the SAME defect in BrandShell (~637 kB → 28.57 kB) — same gate, BrandShell section.
+- **FIXED at source:** `scripts/validate-amazon-ads.mjs` pinned the OLD eager import; REPOINTED to the dynamic import (old contract recorded inline).
+- **FIXED at source:** TWO STALE registry rows (`cleanup-p8-inventory-asin`, `cleanup-p10-logistics-hub-completion`) claiming no code existed — reconciled to `built_and_tested` with the code + gates as evidence (old values in `_audit_note`).
+- **FIXED at source:** the plan-doc note re-introduced the literal phrase "NOT STARTED" on the build-backlog line, which `validate:no-stale-blockers` correctly caught — reworded.
+- **NO defect parked; NO new blocker.** The ONLY remaining >500 kB chunk is the deliberate single `vendor` chunk (§P3 — splitting it caused production mount crashes), recorded as a documented trade-off, not a defect.
+
+**NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; 37 `not_started` rows remain. No credential required.
