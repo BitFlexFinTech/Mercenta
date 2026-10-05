@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-reposide-registry.cjs after the Phase 15 repo-side audits/owners increment (4 rows restated; +4 rows); then adjusted 2026-10-05 by the §RATE-LIMIT increment (batch-4-rate-limiting not_started -> built: not_started 44 -> 43, built 141 -> 142). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-reposide-registry.cjs after the Phase 15 repo-side audits/owners increment (4 rows restated; +4 rows); adjusted 2026-10-05 by the §RATE-LIMIT increment (batch-4-rate-limiting not_started -> built: not_started 44 -> 43, built 141 -> 142); then adjusted 2026-10-05 by the §BATCH10 increment (batch10-health-check-digest not_started -> built: not_started 43 -> 42, built 142 -> 143). Snapshot only.",
       "built_and_tested": 333,
-      "built": 142,
-      "not_started": 43,
+      "built": 143,
+      "not_started": 42,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1729,11 +1729,12 @@
     },
     {
       "id": "batch10-health-check-digest",
-      "description": "Health-check function (existing) now called by daily-digest; results included in digest output with triage summary",
+      "description": "§BATCH10 (2026-10-05): the health-check Edge Function now EXISTS and the daily-digest Edge Function CALLS the SAME shared readiness owner and includes its results with a triage summary. OLD DESCRIPTION RECORDED INLINE: \"Health-check function (existing) now called by daily-digest; results included in digest output with triage summary\" — the word \"(existing)\" was FALSE; the file never existed.",
       "source": "Batch 10, items 2-4",
-      "status": "not_started",
-      "evidence": "NOT BUILT — the cited supabase/functions/health-check/index.ts has NEVER existed in this repository (checked across the full git history); the daily-digest Edge Function it names also has no function directory (only the cron migration supabase/migrations/025_cron_daily_digest.sql references it). scripts/validate-edge-functions.mjs exists and remains the covering gate. Reclassified from \"built\" to \"not_started\" by Batch 3c on 2026-10-03.",
-      "last_verified": "2026-08-30",
+      "status": "built",
+      "evidence": "supabase/functions/_shared/readiness.ts (NEW — the ONE owner: evaluateReadiness + collectServerChecks + envPresenceCheck); supabase/functions/health-check/index.ts (NEW); supabase/functions/daily-digest/index.ts (NEW); supabase/functions/_shared/rateLimit.ts (both buckets added); scripts/validate-health-digest.mjs (npm run validate:health-digest, 39 assertions, mutation-proved twice); supabase/migrations/025_cron_daily_digest.sql (the cron this serves).",
+      "last_verified": "2026-10-05",
+      "_audit_note": "§BATCH10 (2026-10-05) — STATUS RAISED not_started -> built (old value recorded inline). The row previously carried evidence 'NOT BUILT — the cited supabase/functions/health-check/index.ts has NEVER existed …'. Both functions now exist, share ONE readiness owner and are gated. Why `built` and not `built_and_tested`: there is no hosted Supabase project, so the Edge-Function runtime cannot be exercised — the same honest limit the §RATE-LIMIT row records.",
       "superseded_by": null
     },
     {

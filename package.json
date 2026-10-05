@@ -96,6 +96,7 @@
     "validate:phase15-launch": "node scripts/validate-phase15-launch.mjs",
     "validate:data-inventory": "node scripts/validate-data-inventory.mjs",
     "validate:rate-limiting": "node scripts/validate-rate-limiting.mjs",
+    "validate:health-digest": "node scripts/validate-health-digest.mjs",
     "validate:api-exposure": "node scripts/validate-api-exposure.mjs",
     "validate:production-hygiene": "node scripts/validate-production-hygiene.mjs",
     "validate:health-readiness": "node scripts/validate-health-readiness.mjs",

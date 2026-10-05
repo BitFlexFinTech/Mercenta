@@ -1,6 +1,25 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: 2026-10-05 (§PHASE 15 — the third-party data inventory built; the `maplibre-gl` critical resolved).**
+**Last updated: 2026-10-05 (§BATCH10 — the health-check + daily-digest pair built and gated).**
+
+## §BATCH10 — THE HEALTH-CHECK + DAILY-DIGEST PAIR (2026-10-05)
+
+Two Edge Functions the registry recorded as missing, and which had NEVER existed across the full git history, are now
+BUILT and gated: `supabase/functions/health-check/index.ts` exposes an HONEST server-side readiness result, and
+`supabase/functions/daily-digest/index.ts` — the endpoint `supabase/migrations/025_cron_daily_digest.sql` posts to every
+morning — CALLS the SAME shared owner (`supabase/functions/_shared/readiness.ts`) and includes the health result plus a
+TRIAGE SUMMARY in the digest it returns. Gate: `npm run validate:health-digest` (39 assertions, mutation-proved twice).
+Both functions are rate-limited (the limiter now covers 16 functions).
+
+**DEPLOY-TIME / ACTIVATION items (NOT blockers):**
+- These functions are served by a **Supabase project**, which does not exist yet in this environment; they are deployed
+  with `supabase functions deploy health-check` / `supabase functions deploy daily-digest`. Until then the pair is
+  verified LOCAL/COMMITTED only and cannot be exercised on the demo.
+- `supabase/migrations/025_cron_daily_digest.sql` still carries its deploy-time placeholders (`<PROJECT_REF>`,
+  `<SERVICE_ROLE_KEY>`) and has not been applied to any database.
+- Readiness reports `unknown` for a server that is not configured (an activation state, never dressed as a pass) and
+  `fail` only when something CONFIGURED is broken. The digest never invents a section: with no canonical content it says
+  so and points at `src/lib/automation/digest.ts → buildDailyDigest`.
 
 ## §PHASE 15 — THE LAUNCH GATE (2026-10-05): what is now pinned, and exactly what is still BLOCKED
 

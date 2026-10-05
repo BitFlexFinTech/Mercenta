@@ -2406,6 +2406,8 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
      */
     'scripts/validate-rate-limiting.mjs',
     'scripts/validate-no-stale-blockers.mjs',
+    /** §BATCH10 — the health-check + daily-digest pair (same mechanism). */
+    'scripts/validate-health-digest.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

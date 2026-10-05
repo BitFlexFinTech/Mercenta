@@ -2441,6 +2441,31 @@ const RATE_LIMIT_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §BATCH10 (2026-10-05) — THE HEALTH-CHECK + DAILY-DIGEST PAIR.
+ *
+ * The registry row `batch10-health-check-digest` recorded that a "health-check
+ * function" was meant to exist and that a `daily-digest` Edge Function was meant
+ * to call it — and that NEITHER file had EVER existed across the full git history,
+ * while the `pg_cron` migration posts every morning to `/functions/v1/daily-digest`.
+ * This phase builds the ONE shared readiness owner
+ * (`supabase/functions/_shared/readiness.ts`), the two functions, and the gate
+ * `scripts/validate-health-digest.mjs`.
+ *
+ * Declared surface: the whole Edge-Function tree (the two NEW `index.ts` files add
+ * the rate-limit guard; `_shared/` holds the NEW owner and gains two buckets), the
+ * gate, `package.json` that registers it, and BOTH scope guards themselves. Nothing
+ * PROTECTED is touched. The F5/F5b/F6 contract is UNCHANGED — a changed source file
+ * in NO declared set still fails.
+ */
+const HEALTH_DIGEST_SCOPE = new Set([
+  'supabase/functions/',
+  'scripts/validate-health-digest.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3171,7 +3196,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE15_LAUNCH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §RATE-LIMIT — the public-endpoint rate limiter (see above). */
           RATE_LIMIT_SCOPE.has(p) ||
-          [...RATE_LIMIT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...RATE_LIMIT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §BATCH10 — the health-check + daily-digest pair (see above). */
+          HEALTH_DIGEST_SCOPE.has(p) ||
+          [...HEALTH_DIGEST_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

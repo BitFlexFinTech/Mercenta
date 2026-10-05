@@ -76,6 +76,8 @@ export const FUNCTION_BUCKETS: readonly string[] = [
   'catalog-import',
   'discovery-directory',
   'payouts-transfer',
+  'health-check',
+  'daily-digest',
 ];
 
 /** Used for any bucket without a declared policy — the limiter is never unlimited. */
@@ -102,6 +104,10 @@ export const RATE_LIMIT_POLICIES: Record<string, RateLimitPolicy> = {
   'discovery-directory': { limit: 60, windowMs: 60_000 },
   'xero-webhook': { limit: 300, windowMs: 60_000 },
   'instantly-reply-webhook': { limit: 300, windowMs: 60_000 },
+  // §BATCH10 — the readiness/digest pair. `health-check` is a cheap operator read
+  // (generous); `daily-digest` is a once-a-morning cron trigger (tight).
+  'health-check': { limit: 120, windowMs: 60_000 },
+  'daily-digest': { limit: 12, windowMs: 60_000 },
 };
 
 /** Memory cap for the in-isolate store — bounded, swept by window (never a timer). */
