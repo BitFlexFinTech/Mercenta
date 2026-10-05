@@ -1,9 +1,23 @@
 /**
  * §Batch-13 — Brand live chat widget.
  *
- * Floating chat widget in the brand portal that reuses the existing
- * messages table for thread history. Messages are logged via the same
- * logMessage pipeline that admin MessagesHub uses.
+ * §FLOAT-LAUNCHER (2026-10-05) — MOVED INTO SHELL CHROME.
+ *
+ * The collapsed trigger used to be a `fixed bottom-6 right-6 z-50 w-12 h-12`
+ * floating button. Because the workspace `<main>` is the scroll container, that
+ * button permanently covered the bottom-right 48×48 region — exactly where
+ * table row actions and drawer footers come to rest. A REAL regression was
+ * caught by it once (migrating Product Catalog to the taller canonical header
+ * pushed a catalogue row into the launcher band and made "Check result"
+ * unclickable); the underlying collision was only MITIGATED then, never fixed
+ * at the root.
+ *
+ * It is now an INLINE control in the header chrome that opens the panel as a
+ * header-anchored dropdown — the same pattern already used by the profile menu,
+ * ThemeSelector and NotificationCenter. No fixed bottom-right element remains,
+ * so the corner can never be covered again. The message / ticket behaviour is
+ * unchanged: messages still log through `logMessage` into the canonical store
+ * and still open a helpdesk ticket, exactly as before.
  */
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
@@ -11,8 +25,7 @@ import { useMessages } from '@/data/queries';
 import { logMessage } from '@/data/api';
 import { findOrCreateTicketForBrand, appendMessageToTicket } from '@/lib/helpdesk/ticketStore';
 import { cn } from '@/utils/cn';
-import { MessageSquare, X, Send, MinusCircle, Bot } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { MessageSquare, Send, MinusCircle, Bot } from 'lucide-react';
 
 export function LiveChatWidget() {
   const { session, brandProfile } = useApp();
@@ -62,21 +75,34 @@ export function LiveChatWidget() {
   if (!brandId) return null;
 
   return (
-    <>
-      {/* Chat button */}
-      {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-brass-500 hover:bg-brass-400 text-white shadow-xl flex items-center justify-center transition-all hover:scale-105"
-          aria-label="Open live chat"
-        >
-          <MessageSquare className="w-5 h-5" />
-        </button>
-      )}
+    <div className="relative" data-testid="live-chat-widget">
+      {/*
+        §FLOAT-LAUNCHER — the trigger is INLINE header chrome, never a fixed
+        corner overlay. It opens the panel below it as a header-anchored
+        dropdown, so it can never cover a table's bottom-right row actions.
+      */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="live-chat-panel"
+        aria-label={open ? 'Close support chat' : 'Open support chat'}
+        title="Support chat"
+        data-testid="live-chat-trigger"
+        className="relative flex h-8 w-8 items-center justify-center rounded-ds-md text-zinc-500 transition-ds duration-ds-fast hover:bg-white/[0.06] hover:text-zinc-300"
+      >
+        <MessageSquare className="h-4 w-4" aria-hidden="true" />
+      </button>
 
-      {/* Chat panel */}
+      {/* Chat panel — header-anchored dropdown (same shape as the profile menu) */}
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 w-[360px] h-[500px] bg-ink-850 border border-white/[0.08] rounded-xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+        <div
+          id="live-chat-panel"
+          role="dialog"
+          aria-label="Mercenta support chat"
+          data-testid="live-chat-panel"
+          className="absolute right-0 top-full z-50 mt-2 flex h-[500px] max-h-[70vh] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-ink-850 shadow-2xl animate-fade-in"
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-ink-900">
             <div className="flex items-center gap-2.5">
@@ -142,6 +168,6 @@ export function LiveChatWidget() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -31,6 +31,12 @@ interface AppShellProps {
   commandGroups?: CommandGroup[];
   /** Placeholder wording for the palette (shell-specific). */
   commandPlaceholder?: string;
+  /**
+   * §FLOAT-LAUNCHER — optional shell-supplied header chrome actions. The brand
+   * shell passes the support-chat trigger here so it lives in the header chrome
+   * instead of a fixed bottom-right overlay that covers table row actions.
+   */
+  headerActions?: ReactNode;
 }
 
 
@@ -48,6 +54,7 @@ export function AppShell({
   onNavNotification,
   commandGroups,
   commandPlaceholder,
+  headerActions,
 }: AppShellProps) {
   useApp();
   const { shellMode } = useTheme();
@@ -209,6 +216,7 @@ export function AppShell({
           onNavApiKeys={onNavApiKeys}
           onNavNotification={onNavNotification}
           onOpenSearch={() => setPaletteOpen(true)}
+          extraActions={headerActions}
         />
         <main
           id="main-content"

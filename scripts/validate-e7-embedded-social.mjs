@@ -2408,6 +2408,17 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'scripts/validate-no-stale-blockers.mjs',
     /** §BATCH10 — the health-check + daily-digest pair (same mechanism). */
     'scripts/validate-health-digest.mjs',
+    /**
+     * §FLOAT-LAUNCHER (2026-10-05) — the support-chat corner-collision fix: the
+     * trigger moved out of a fixed bottom-right overlay into the shell header
+     * chrome. Fuller note in `validate-e6-brand-surfaces.mjs` §FLOAT_LAUNCHER_SCOPE.
+     * Same mechanism: a changed source/test file outside EVERY declared set is
+     * still refused. `BrandShell.tsx` is already declared above.
+     */
+    'src/components/shared/LiveChatWidget.tsx',
+    'src/components/layout/Header.tsx',
+    'src/components/layout/AppShell.tsx',
+    'scripts/validate-float-launcher-collision.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

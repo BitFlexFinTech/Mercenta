@@ -2466,6 +2466,27 @@ const HEALTH_DIGEST_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §FLOAT-LAUNCHER (2026-10-05) — the support-chat CORNER-COLLISION fix.
+ *
+ * The brand support-chat trigger moved OUT of a permanently-visible
+ * `fixed bottom-6 right-6` overlay (which covered the bottom-right of every
+ * workspace — table row actions and drawer footers) and INTO the shell header
+ * chrome as a header-anchored dropdown. Declared here exactly as §BATCH10
+ * declared its surface above: a changed source/test file outside EVERY declared
+ * set still FAILS this guard.
+ */
+const FLOAT_LAUNCHER_SCOPE = new Set([
+  'src/components/shared/LiveChatWidget.tsx',
+  'src/components/layout/Header.tsx',
+  'src/components/layout/AppShell.tsx',
+  'src/components/layout/BrandShell.tsx',
+  'scripts/validate-float-launcher-collision.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3199,7 +3220,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...RATE_LIMIT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH10 — the health-check + daily-digest pair (see above). */
           HEALTH_DIGEST_SCOPE.has(p) ||
-          [...HEALTH_DIGEST_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...HEALTH_DIGEST_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §FLOAT-LAUNCHER — the support-chat corner-collision fix (see above). */
+          FLOAT_LAUNCHER_SCOPE.has(p) ||
+          [...FLOAT_LAUNCHER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

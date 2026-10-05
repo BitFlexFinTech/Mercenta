@@ -77,6 +77,7 @@
     "validate:platform-mode": "node scripts/validate-platform-mode.mjs",
     "validate:no-stale-blockers": "node scripts/validate-no-stale-blockers.mjs",
     "validate:ui-wiring": "node scripts/validate-ui-wiring.mjs",
+    "validate:float-launcher": "node scripts/validate-float-launcher-collision.mjs",
     "validate:dead-code": "node scripts/validate-dead-code.mjs",
     "validate:duplicate-owners": "node scripts/validate-duplicate-owners.mjs",
     "validate:on-behalf-authority": "node scripts/validate-on-behalf-authority.mjs",

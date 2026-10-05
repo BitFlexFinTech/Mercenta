@@ -190,6 +190,7 @@ export default function BrandShell() {
       onNavBilling={() => setBrandView('settings')}
       onNavApiKeys={() => setBrandView('settings')}
       onNavNotification={(v) => setBrandView(v)}
+      headerActions={<LiveChatWidget />}
     >
       <ErrorBoundary sectionLabel="Brand portal">
         <IntegrationsProvider>
@@ -223,7 +224,6 @@ export default function BrandShell() {
               <SalesEstimatorCard />
             </div>
           )}
-          <LiveChatWidget />
           <TourLoader currentView={brandView} isBrandPortal={true} />
           <UsertourBrandBridge />
         </IntegrationsProvider>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, type RefObject } from 'react';
+import { useEffect, useState, useRef, type RefObject, type ReactNode } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { ChevronDown, Menu, Settings, CreditCard, Key, Search, LogOut } from 'lucide-react';
 import brandMark from '@/assets/mercenta-mark-dark-bg.svg';
@@ -26,6 +26,13 @@ interface HeaderProps {
   onNavNotification?: (view: string) => void;
   /** §UI/UX Wave 2 — open the global command palette (⌘K). */
   onOpenSearch?: () => void;
+  /**
+   * §FLOAT-LAUNCHER — optional extra chrome actions rendered in the right-hand
+   * action group (e.g. the brand support-chat trigger). Supplied by the shell so
+   * a role-specific affordance lives in chrome instead of a floating overlay
+   * that could cover workspace content.
+   */
+  extraActions?: ReactNode;
 }
 
 /**
@@ -93,6 +100,7 @@ export function Header({
   onNavApiKeys,
   onNavNotification,
   onOpenSearch,
+  extraActions,
 }: HeaderProps) {
   const { signOut } = useApp();
   const identity = useSessionIdentity();
@@ -186,6 +194,9 @@ export function Header({
       </button>
 
       <div className="ml-auto flex flex-shrink-0 items-center gap-2 sm:gap-3">
+        {/* §FLOAT-LAUNCHER — shell-supplied chrome actions (e.g. support chat). */}
+        {extraActions}
+
         {/* §Stage-19.3 §UI/UX — severity-aware real notification center */}
         <NotificationCenter onNavigate={onNavNotification} />
 

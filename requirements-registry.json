@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-reposide-registry.cjs after the Phase 15 repo-side audits/owners increment (4 rows restated; +4 rows); adjusted 2026-10-05 by the §RATE-LIMIT increment (batch-4-rate-limiting not_started -> built: not_started 44 -> 43, built 141 -> 142); then adjusted 2026-10-05 by the §BATCH10 increment (batch10-health-check-digest not_started -> built: not_started 43 -> 42, built 142 -> 143). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-reposide-registry.cjs after the Phase 15 repo-side audits/owners increment (4 rows restated; +4 rows); adjusted 2026-10-05 by the §RATE-LIMIT increment (batch-4-rate-limiting not_started -> built: not_started 44 -> 43, built 141 -> 142); then adjusted 2026-10-05 by the §BATCH10 increment (batch10-health-check-digest not_started -> built: not_started 43 -> 42, built 142 -> 143); then adjusted 2026-10-05 by the §FLOAT-LAUNCHER increment (redesign-float-launcher-collision not_started -> built: not_started 42 -> 41, built 143 -> 144). Snapshot only.",
       "built_and_tested": 333,
-      "built": 143,
-      "not_started": 42,
+      "built": 144,
+      "not_started": 41,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -5127,11 +5127,11 @@
     },
     {
       "id": "redesign-float-launcher-collision",
-      "description": "REAL DEFECT DIAGNOSED (mitigated, NOT fixed at the root). The fixed live-chat launcher (48px, 24px inset, bottom-right, z-50) permanently covers the bottom-right 48x48 region of the operational workspace — exactly where table row actions and drawer footers live. It was detected by a real regression during this pass: migrating Product Catalog to the taller canonical header shifted a catalogue row into the launcher band and made \"Check result\" unclickable. Mitigated by keeping the redesigned header to a single-line description; the underlying collision remains for any surface whose action row comes to rest in that corner. Recommended fix (NOT applied): move the support launcher into the shell chrome or reserve the corner.",
+      "description": "FIXED AT THE ROOT (2026-10-05). The support-chat trigger was a permanently-visible fixed bottom-right overlay (`fixed bottom-6 right-6 z-50 w-12 h-12`) that covered the bottom-right 48x48 of every brand workspace — where table row actions and drawer footers rest (a real regression made the Product Catalog 'Check result' action unclickable; it had only been MITIGATED then, never fixed). The trigger is now INLINE header chrome: BrandShell supplies it through AppShell's `headerActions` slot, the Header renders it in its action group, and the panel opens as a header-anchored dropdown (`absolute right-0 top-full`) — the same pattern as the profile menu / ThemeSelector / NotificationCenter. No fixed bottom-right element remains, so the corner can never be covered again. Chat behaviour is unchanged (logMessage + helpdesk ticket, tenant-scoped).",
       "source": "Complete Platform Redesign — remaining surfaces pass (2026-09-21 session 3)",
-      "status": "not_started",
-      "evidence": "e2e/catalog-product-management.spec.ts (1 failed before the fix, 4 passed after; root-caused by reverting the migration and re-running); src/components/shared/LiveChatWidget.tsx lines 68-74 (fixed bottom-6 right-6 z-50 w-12 h-12)",
-      "last_verified": "2026-09-21",
+      "status": "built",
+      "evidence": "scripts/validate-float-launcher-collision.mjs (16 assertions, mutation-proved: reintroducing `fixed bottom-6 right-6` fails 3 assertions; a duplicated body mount fails the single-mount assertion; both files restored byte-identical); src/components/shared/LiveChatWidget.tsx; src/components/layout/Header.tsx; src/components/layout/AppShell.tsx; src/components/layout/BrandShell.tsx; e2e/catalog-product-management.spec.ts",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
