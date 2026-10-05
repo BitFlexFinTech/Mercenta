@@ -51,9 +51,10 @@ gates.push({
   id: 'phase15-security',
   label: 'Security (secrets · headers · RBAC/RLS · dependency audit)',
   blocked:
-    'BLOCKED — (a) HTTPS/TLS enforcement lives on the host/domain and cannot be set from the repository; ' +
-    '(b) the remaining `npm audit` critical is `maplibre-gl` (logistics map) and the fix is a BREAKING major ' +
-    'upgrade needing a regression pass of the map — not applied blind.',
+    'BLOCKED — HTTPS/TLS enforcement lives on the host/domain and cannot be set from the repository. ' +
+    '(The former second blocker — the `maplibre-gl` critical — is RESOLVED, 2026-10-05: it was a DECLARED-BUT-UNUSED ' +
+    'dependency, so it was upgraded to a patched line and no map regression was needed; the audit critical count is 0. ' +
+    'The patched line is asserted below so it cannot regress.)',
   check() {
     const gi = read('.gitignore');
     test('security: `.env` is gitignored', /^\.env$/m.test(gi));
@@ -68,6 +69,16 @@ gates.push({
     test('security: RBAC/RLS tenant gates exist', has('scripts/validate-rls-hardening.mjs') && has('scripts/validate-tenant-coherence.mjs'));
     const src = read('src/config/brand.ts') + read('src/main.tsx');
     test('security: no obvious secret literal in first-party source', !/sk-[A-Za-z0-9]{24,}|AKIA[0-9A-Z]{16}/.test(src));
+    /* §PHASE 15 (2026-10-05) — the `maplibre-gl` critical is RESOLVED. It was a
+       DECLARED-BUT-UNUSED dependency (imported by zero files), so the honest fix
+       was the RISK-FREE one: move it onto a patched line (>=6.4.1 clears
+       GHSA-jrc7-96c5-q579), NOT a breaking upgrade plus a map regression — there
+       was no map to regress. This assertion fails the build if the declared range
+       is ever put back into the vulnerable `<=6.4.0` band. */
+    const deps = JSON.parse(read('package.json')).dependencies || {};
+    const mv = String(deps['maplibre-gl'] || '').replace(/[^0-9.]/g, '').split('.').map(Number);
+    test('security: maplibre-gl stays on a patched line (>=6.4.1, clears GHSA-jrc7-96c5-q579)',
+      mv[0] > 6 || (mv[0] === 6 && (mv[1] > 4 || (mv[1] === 4 && mv[2] >= 1))));
   },
 });
 

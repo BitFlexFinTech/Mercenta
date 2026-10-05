@@ -1,6 +1,6 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: 2026-10-05 (§PHASE 15 — the third-party data inventory built).**
+**Last updated: 2026-10-05 (§PHASE 15 — the third-party data inventory built; the `maplibre-gl` critical resolved).**
 
 ## §PHASE 15 — THE LAUNCH GATE (2026-10-05): what is now pinned, and exactly what is still BLOCKED
 
@@ -22,7 +22,7 @@ X-Frame-Options, Referrer-Policy, Permissions-Policy); and the dependency securi
 
 | Gate | Exact missing input |
 |---|---|
-| `phase15-security` | (a) HTTPS/TLS enforcement is host/domain-level; (b) the remaining `npm audit` critical is `maplibre-gl`, whose fix is a **breaking major upgrade** needing a logistics-map regression pass |
+| `phase15-security` | HTTPS/TLS enforcement is host/domain-level. **(b) is now RESOLVED (2026-10-05):** the `maplibre-gl` critical was a **DECLARED-BUT-UNUSED** dependency, so it was moved onto a **patched line** (`6.12.0`, clears GHSA-jrc7-96c5-q579) — **no map regression was needed because there is no map using it** — and the audit critical count is now **0** (asserted in the gate) |
 | `phase15-database-infrastructure` | a PRODUCTION Supabase project — backup schedule, restore rehearsal, DR drill |
 | `phase15-legal-privacy` | legal sign-off of the published privacy policy / terms + of the third-party data inventory — **the inventory is now BUILT** (`src/config/dataProcessing.ts`, gated by `validate:data-inventory`), so only the human sign-off remains |
 | `phase15-analytics` | a BUSINESS DECISION: which analytics provider (if any) and on what lawful basis. Until then NO analytics script is loaded (asserted) |
@@ -32,6 +32,16 @@ X-Frame-Options, Referrer-Policy, Permissions-Policy); and the dependency securi
 | `phase15-final-launch-gate` | BLOCKED BY DEPENDENCY — it is the gate OVER the others; it closes when they close |
 
 **No credential was asked for and none is required for any remaining build work.**
+
+**§PHASE 15 (2026-10-05, follow-up) — THE `maplibre-gl` CRITICAL IS RESOLVED, AND THE OLD DESCRIPTION WAS WRONG.** The
+security gate had recorded its remaining `npm audit` critical as a *"breaking major upgrade needing a logistics-map
+regression pass"*. That description was **false**: `maplibre-gl` is declared in `package.json` but **imported by ZERO
+files** (the logistics map is hand-drawn SVG; the 3D hero uses `three`) — the project's own note admitted it was
+*"installed … but not yet integrated"*. The honest, risk-free fix was therefore the project's own rule — **REMOVE/UPGRADE
+before ADD** — so the unused package was moved from `5.24.0` onto the patched line `6.12.0` (advisories **12 → 11**, the
+**1 critical → 0**), with **no regression pass** because there was nothing to regress. `scripts/validate-phase15-launch.mjs`
+now **asserts the package stays on a patched line** (`>=6.4.1`), proved able to fail (downgrading it re-tripped the gate;
+the file was restored byte-identical). The package is **kept** — deliberately — for the future 3D logistics map.
 
 **§PHASE 15 (2026-10-05, follow-up) — THE THIRD-PARTY DATA INVENTORY IS NOW CODE, NOT PROSE.** The legal/privacy gate's
 "third-party data inventory" now exists as a single-owner module, `src/config/dataProcessing.ts`: every supplier Mercenta

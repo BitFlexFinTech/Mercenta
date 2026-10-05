@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 534,
+    "total_entries": 535,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,9 +371,9 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-data-inventory-registry.cjs after the third-party data inventory increment (phase15-legal-privacy restated; +1 row phase15-data-inventory-owner). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-maplibre-registry.cjs after the maplibre-gl critical fix (phase15-security: blocker (b) resolved; +1 row phase15-maplibre-critical-resolved). Snapshot only.",
       "built_and_tested": 333,
-      "built": 136,
+      "built": 137,
       "not_started": 44,
       "removed": 4,
       "deferred": 9,
@@ -983,6 +983,14 @@
       ],
       "validator": "scripts/validate-data-inventory.mjs",
       "note": "src/config/dataProcessing.ts is the ONE owner of the processor inventory; the privacy policy reads its public-safe projection. Gates: validate:data-inventory (15 assertions) + validate:phase15-launch now 63/63 repo-side."
+    },
+    "maplibre_critical_increment": {
+      "increment": "§PHASE 15 — THE maplibre-gl CRITICAL RESOLVED (2026-10-05)",
+      "added": [
+        "phase15-maplibre-critical-resolved"
+      ],
+      "validator": "scripts/validate-phase15-launch.mjs",
+      "note": "The critical was on a DECLARED-BUT-UNUSED dependency; the fix was the risk-free upgrade to a patched line, not a breaking upgrade + regression pass. The gate asserts the declared range stays >=6.4.1. Launch gate repo-side now 64/64."
     }
   },
   "entries": [
@@ -4091,7 +4099,7 @@
       "description": "Phase 15 — security launch gate: remove frontend secrets, server-side production secrets, HTTPS, authentication security, RBAC, tenant isolation, RLS/database security, API exposure audit and a dependency/security audit",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
       "status": "built",
-      "evidence": "scripts/validate-phase15-launch.mjs; public/.htaccess (response security headers: HSTS, nosniff, X-Frame-Options SAMEORIGIN, Referrer-Policy, Permissions-Policy) · .gitignore (.env never tracked; only .env.example is) · scripts/validate-rls-hardening.mjs · scripts/validate-tenant-coherence.mjs · dependency audit: `npm audit fix` 33 -> 12 advisories. §Phase 15 BLOCKED (was: not_started): (a) HTTPS/TLS enforcement is host/domain-level; (b) the remaining critical is maplibre-gl, fix = breaking major upgrade needing a logistics-map regression pass.",
+      "evidence": "scripts/validate-phase15-launch.mjs; public/.htaccess (response security headers: HSTS, nosniff, X-Frame-Options SAMEORIGIN, Referrer-Policy, Permissions-Policy) · .gitignore (.env never tracked; only .env.example is) · scripts/validate-rls-hardening.mjs · scripts/validate-tenant-coherence.mjs · dependency audit: `npm audit fix` 33 -> 12 advisories, then the maplibre-gl critical cleared by upgrading the DECLARED-BUT-UNUSED package to a patched line (5.24.0 -> 6.12.0), 12 -> 11 advisories, 0 critical (asserted in the gate). §Phase 15 BLOCKED (was: not_started): HTTPS/TLS enforcement is host/domain-level. The former second blocker — the maplibre-gl critical — is RESOLVED (2026-10-05): it was a declared-but-unused dependency, upgraded to a patched line with no map regression needed.",
       "last_verified": "2026-10-05",
       "superseded_by": null
     },
@@ -6007,6 +6015,15 @@
       "source": "§Phase 15 legal/privacy gate (2026-10-05)",
       "status": "built",
       "evidence": "src/config/dataProcessing.ts; scripts/validate-data-inventory.mjs; package.json · src/components/marketing/PrivacyPolicy.tsx. §Phase 15: 23 processors declared, 17 public-safe categories, 2 reasoned exclusions; the gate proves every registered provider is declared or consciously excluded, the legal sign-off stays PENDING, and no supplier name leaks into the public projection — proved able to fail (2 mutations, file restored byte-identical).",
+      "last_verified": "2026-10-05",
+      "superseded_by": null
+    },
+    {
+      "id": "phase15-maplibre-critical-resolved",
+      "description": "Phase 15 — the `maplibre-gl` audit critical resolved: the DECLARED-BUT-UNUSED dependency was moved onto a patched line (5.24.0 -> 6.12.0, clearing GHSA-jrc7-96c5-q579) with no map regression, and the false \"breaking upgrade + regression pass\" description was corrected at every citation; the launch gate now asserts the package cannot be downgraded back into the vulnerable band",
+      "source": "§Phase 15 security gate (2026-10-05)",
+      "status": "built",
+      "evidence": "scripts/validate-phase15-launch.mjs; package.json (maplibre-gl ^6.12.0) · package-lock.json · PRODUCTION_READINESS.md · scripts/reconcile-phase15-launch-registry.cjs. §Phase 15 (2026-10-05): npm audit 12 -> 11 advisories, the 1 critical -> 0. The gate asserts the declared range stays >=6.4.1 and was PROVED ABLE TO FAIL — a downgrade to ^5.24.0 re-tripped the gate with exit 1, and package.json was restored byte-identical, sha256 78280a2f0c37…. The package is imported by zero files (the logistics map is SVG; the 3D hero uses three), so no regression pass was needed. The package is KEPT deliberately for the future 3D logistics map.",
       "last_verified": "2026-10-05",
       "superseded_by": null
     }
