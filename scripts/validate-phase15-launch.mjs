@@ -3,8 +3,8 @@
 // WHY THIS EXISTS
 // ---------------
 // Phase 15 (Production Readiness + Launch Gate) is the ONE gate that must pass
-// before a public production launch. It is 14 rows in `requirements-registry.json`
-// (`phase15-*`) and it lived, until now, only as prose: `PRODUCTION_READINESS.md`
+// before a public production launch. It is the `phase15-*` rows in
+// `requirements-registry.json` and it lived, until now, only as prose: `PRODUCTION_READINESS.md`
 // and `GO_LIVE.md` describe it, but NOTHING failed if a repository-side guarantee a
 // gate depends on silently regressed. This validator makes each gate's
 // REPOSITORY-SIDE requirement executable.
@@ -261,14 +261,20 @@ gates.push({
   id: 'phase15-legal-privacy',
   label: 'Legal & privacy (privacy policy · terms · cookie consent · data inventory)',
   blocked:
-    'BLOCKED — the privacy policy, terms and a working cookie notice ARE built (asserted here); the gate now ' +
-    'needs LEGAL SIGN-OFF of the published wording and a third-party data inventory — a human/business decision, ' +
-    'not a repository change.',
+    'BLOCKED — the privacy policy, terms, cookie notice AND the third-party data inventory ARE built (all ' +
+    'asserted here); the gate now needs LEGAL SIGN-OFF of the published wording and of the inventory — a ' +
+    'human/business decision, not a repository change.',
   check() {
     test('legal: privacy policy view exists', has('src/components/marketing/PrivacyPolicy.tsx'));
     test('legal: terms view exists', has('src/components/marketing/TermsOfService.tsx'));
     test('legal: cookie notice exists and is re-openable', /COOKIE_SETTINGS_EVENT/.test(read('src/components/marketing/CookieNotice.tsx')));
     test('legal: /privacy and /terms are declared public routes', /'privacy'/.test(read('src/lib/seo/publicRoutes.ts')) && /'terms'/.test(read('src/lib/seo/publicRoutes.ts')));
+    /* §PHASE 15 (2026-10-05) — the third-party data inventory owner + its gate. The
+       inventory is BUILT and gated; only legal sign-off remains (see the BLOCKED text). */
+    test('legal: the third-party data inventory owner exists', has('src/config/dataProcessing.ts'));
+    test('legal: the data-inventory gate exists', has('scripts/validate-data-inventory.mjs'));
+    test('legal: the privacy policy derives its processor list from the inventory owner',
+      /from ['"]@\/config\/dataProcessing['"]/.test(read('src/components/marketing/PrivacyPolicy.tsx')));
   },
 });
 

@@ -2390,6 +2390,13 @@ const PHASE15_LAUNCH_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
   'PRODUCTION_READINESS.md',
   'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+  /* §PHASE 15 (2026-10-05, follow-up) — the THIRD-PARTY DATA INVENTORY as code:
+     the single owner (the UK GDPR Article 30 register), a NEW gate, its registry
+     reconcile script, and the privacy policy wired to READ the owner. */
+  'src/config/dataProcessing.ts',
+  'scripts/validate-data-inventory.mjs',
+  'scripts/reconcile-data-inventory-registry.cjs',
+  'src/components/marketing/PrivacyPolicy.tsx',
 ]);
 
 const PUBLIC_MESSAGING_SCOPE = new Set([

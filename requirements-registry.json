@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 533,
+    "total_entries": 534,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,9 +371,9 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-launch-registry.cjs after the Phase 15 launch-gate increment (14 phase15-* rows restated from not_started to their true status; +1 row phase15-launch-gate-validator). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-data-inventory-registry.cjs after the third-party data inventory increment (phase15-legal-privacy restated; +1 row phase15-data-inventory-owner). Snapshot only.",
       "built_and_tested": 333,
-      "built": 135,
+      "built": 136,
       "not_started": 44,
       "removed": 4,
       "deferred": 9,
@@ -975,6 +975,14 @@
       ],
       "validator": "scripts/validate-phase15-launch.mjs",
       "note": "Repo-side gates read built/built_and_tested; gates needing external input read blocked with the exact input named. Repo-side assertions: 56/56 pass. Custom 404 added; .htaccess security headers added; npm audit fix 33 -> 12 advisories."
+    },
+    "data_inventory_increment": {
+      "increment": "§PHASE 15 — THIRD-PARTY DATA INVENTORY (2026-10-05)",
+      "added": [
+        "phase15-data-inventory-owner"
+      ],
+      "validator": "scripts/validate-data-inventory.mjs",
+      "note": "src/config/dataProcessing.ts is the ONE owner of the processor inventory; the privacy policy reads its public-safe projection. Gates: validate:data-inventory (15 assertions) + validate:phase15-launch now 63/63 repo-side."
     }
   },
   "entries": [
@@ -4074,7 +4082,7 @@
       "description": "Phase 15 — legal/privacy launch gate: privacy policy, terms & conditions, cookie consent and a third-party data inventory",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
       "status": "blocked",
-      "evidence": "src/config/positioning.ts; src/components/marketing/PrivacyPolicy.tsx; src/components/marketing/TermsOfService.tsx · src/components/marketing/CookieNotice.tsx · scripts/validate-phase15-launch.mjs. §Phase 15 BLOCKED (was: not_started): the privacy policy, terms and a working cookie notice ARE built; the gate now needs LEGAL SIGN-OFF of the published wording and the third-party data inventory — a human/business decision, not a repository change.",
+      "evidence": "src/config/dataProcessing.ts; src/components/marketing/PrivacyPolicy.tsx · src/components/marketing/TermsOfService.tsx · src/components/marketing/CookieNotice.tsx · scripts/validate-phase15-launch.mjs · scripts/validate-data-inventory.mjs. §Phase 15 (2026-10-05, was: blocked): the privacy policy, terms, cookie notice AND the third-party data inventory are now BUILT — the policy derives its processor list from the inventory owner, gated by `validate:data-inventory`. STILL BLOCKED on LEGAL SIGN-OFF of the published wording and of the inventory — a human/business decision, not a repository change.",
       "last_verified": "2026-10-05",
       "superseded_by": null
     },
@@ -5990,6 +5998,15 @@
       "source": "§Phase 15 launch gate (2026-10-05)",
       "status": "built",
       "evidence": "scripts/validate-phase15-launch.mjs (npm run validate:phase15-launch) · e2e/public-pages.spec.ts (the 404 case) · public/.htaccess; proved able to fail (the 404 file was renamed, the gate exited 1, the file was restored byte-identical)",
+      "last_verified": "2026-10-05",
+      "superseded_by": null
+    },
+    {
+      "id": "phase15-data-inventory-owner",
+      "description": "Phase 15 — the third-party data inventory (UK GDPR Article 30 register) as a single-owner module, plus the gate that keeps it complete against the integration registry and prevents a supplier name leaking into public copy",
+      "source": "§Phase 15 legal/privacy gate (2026-10-05)",
+      "status": "built",
+      "evidence": "src/config/dataProcessing.ts; scripts/validate-data-inventory.mjs; package.json · src/components/marketing/PrivacyPolicy.tsx. §Phase 15: 23 processors declared, 17 public-safe categories, 2 reasoned exclusions; the gate proves every registered provider is declared or consciously excluded, the legal sign-off stays PENDING, and no supplier name leaks into the public projection — proved able to fail (2 mutations, file restored byte-identical).",
       "last_verified": "2026-10-05",
       "superseded_by": null
     }

@@ -93,7 +93,8 @@
     "validate:production-boot": "node scripts/validate-production-boot.mjs",
     "validate:typecheck-coverage": "node scripts/validate-typecheck-coverage.mjs",
     "validate:supply-route-logistics": "node scripts/validate-supply-route-logistics.mjs",
-    "validate:phase15-launch": "node scripts/validate-phase15-launch.mjs"
+    "validate:phase15-launch": "node scripts/validate-phase15-launch.mjs",
+    "validate:data-inventory": "node scripts/validate-data-inventory.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

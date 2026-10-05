@@ -7,6 +7,15 @@ import {
   PUBLIC_PRIVACY_EMAIL,
   publicCompanyLine,
 } from '@/config/positioning';
+/**
+ * §PHASE 15 (2026-10-05) — the "who we share it with" section now READS the
+ * third-party data inventory (`src/config/dataProcessing.ts`) instead of holding
+ * its own prose. The policy can therefore no longer silently fall behind the
+ * platform when a new processor is engaged — the one list is the inventory, and
+ * `scripts/validate-data-inventory.mjs` fails if a registered processor has no
+ * public-safe row here. Supplier NAMES never appear: only the public-safe kind.
+ */
+import { publicProcessorCategories } from '@/config/dataProcessing';
 
 /**
  * §PUBLIC MESSAGING B5 (2026-09-29) — REWRITTEN ON THE OWNER'S OWN FACTS.
@@ -89,10 +98,20 @@ export function PrivacyPolicy({ onNavigate, onOpenPortal }: { onNavigate: (p: Pu
     {
       title: '4. Who we share it with',
       body: (
-        <p>
-          Only the providers that deliver the service to you — the logistics and payments providers we engage —
-          together with regulators or public authorities where the law requires it. We never sell personal data.
-        </p>
+        <>
+          <p>
+            We share personal data only with the providers that deliver the service to you — the kinds listed
+            below — together with regulators or public authorities where the law requires it. We never sell
+            personal data, and we never share it for advertising.
+          </p>
+          <ul className="list-disc pl-5 space-y-1 mt-2">
+            {publicProcessorCategories().map((c) => (
+              <li key={c.category}>
+                <strong>{c.label}:</strong> {c.purpose}
+              </li>
+            ))}
+          </ul>
+        </>
       ),
     },
     {

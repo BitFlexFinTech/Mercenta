@@ -1,6 +1,6 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: 2026-10-05 (§PHASE 15 — THE LAUNCH GATE, worked).**
+**Last updated: 2026-10-05 (§PHASE 15 — the third-party data inventory built).**
 
 ## §PHASE 15 — THE LAUNCH GATE (2026-10-05): what is now pinned, and exactly what is still BLOCKED
 
@@ -24,7 +24,7 @@ X-Frame-Options, Referrer-Policy, Permissions-Policy); and the dependency securi
 |---|---|
 | `phase15-security` | (a) HTTPS/TLS enforcement is host/domain-level; (b) the remaining `npm audit` critical is `maplibre-gl`, whose fix is a **breaking major upgrade** needing a logistics-map regression pass |
 | `phase15-database-infrastructure` | a PRODUCTION Supabase project — backup schedule, restore rehearsal, DR drill |
-| `phase15-legal-privacy` | legal sign-off of the published privacy policy / terms + a third-party data inventory (a human decision) |
+| `phase15-legal-privacy` | legal sign-off of the published privacy policy / terms + of the third-party data inventory — **the inventory is now BUILT** (`src/config/dataProcessing.ts`, gated by `validate:data-inventory`), so only the human sign-off remains |
 | `phase15-analytics` | a BUSINESS DECISION: which analytics provider (if any) and on what lawful basis. Until then NO analytics script is loaded (asserted) |
 | `phase15-production-data-cleanup` | the live database/domain for the PRODUCTION content audit (repo-side checks pass) |
 | `phase15-communications-email-auth` | SPF/DKIM/DMARC DNS records on the sending domain + the sending provider chosen |
@@ -32,6 +32,18 @@ X-Frame-Options, Referrer-Policy, Permissions-Policy); and the dependency securi
 | `phase15-final-launch-gate` | BLOCKED BY DEPENDENCY — it is the gate OVER the others; it closes when they close |
 
 **No credential was asked for and none is required for any remaining build work.**
+
+**§PHASE 15 (2026-10-05, follow-up) — THE THIRD-PARTY DATA INVENTORY IS NOW CODE, NOT PROSE.** The legal/privacy gate's
+"third-party data inventory" now exists as a single-owner module, `src/config/dataProcessing.ts`: every supplier Mercenta
+engages is declared once (purpose · lawful basis from a closed set · personal-data categories · data-residency · whether a
+DPA is required · the integration provider it corresponds to · active/planned). `scripts/validate-data-inventory.mjs`
+(`npm run validate:data-inventory`, **15 assertions**) EXECUTES the module and forces every provider registered in
+`src/integrations/types.ts` to be either declared or consciously EXCLUDED with a reason, so a new integration can never
+silently process personal data undeclared. The privacy policy's "who we share it with" section now READS the module's
+public-safe projection (supplier names never appear in public copy). **The gate is still BLOCKED on legal sign-off** — the
+one declaration `DATA_PROCESSING_LEGAL_SIGNOFF.state === 'pending_legal_sign_off'` is asserted, so the gate cannot be
+reported closed while it is open. The launch gate's repo-side assertions rose to **63/63**.
+
 
 **Status of the DASHBOARD + LOGISTICS CLEANUP PROGRAMME: COMPLETE.** Every phase — P0, P0.4, P1–P13 — is DONE, and the
 programme's own status line reads *"the programme has no remaining phase"*

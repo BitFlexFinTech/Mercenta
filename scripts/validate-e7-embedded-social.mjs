@@ -2372,6 +2372,14 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/components/marketing/Home.tsx',
     'e2e/public-pages.spec.ts',
     'scripts/verify-live-demo.mjs',
+    /**
+     * §PHASE 15 (2026-10-05, follow-up) — THE THIRD-PARTY DATA INVENTORY as code:
+     * the single owner, a NEW gate, its reconcile script and the privacy policy.
+     */
+    'src/config/dataProcessing.ts',
+    'scripts/validate-data-inventory.mjs',
+    'scripts/reconcile-data-inventory-registry.cjs',
+    'src/components/marketing/PrivacyPolicy.tsx',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
