@@ -380,7 +380,7 @@ check('§P8 the deployed bundle carries the identifier-shape rule', bundleProbe.
 check('§P8 the deployed bundle refuses the simulated placeholder as a real identifier', bundleProbe.p8AsinPlaceholder === true, probeDetail);
 check('§P8 the deployed bundle carries the unmistakably-simulated identifier prefix', bundleProbe.p8SimAsin === true, probeDetail);
 /* §P9 (programme decision 4) — the deployed bundle IS the carrier-removal build. */
-check('§P9 the deployed bundle carries the REHOMED carrier console (attributed to the Mercenta operator)', bundleProbe.p9ConsoleRehomed === true, probeDetail);
+check('§P9 the deployed bundle carries the REHOMED carrier console (attributed to the Founder / Super Admin)', bundleProbe.p9ConsoleRehomed === true, probeDetail);
 check('§P9 the deployed bundle carries NO carrier login card', bundleProbe.p9CarrierLoginGone === true, probeDetail);
 check('§P9 the deployed bundle carries NO carrier navigation (BAK Logistics Hub / API Request Auditor)', bundleProbe.p9CarrierNavGone === true, probeDetail);
 check('§P9 the deployed bundle carries NO admin Carrier Monitor', bundleProbe.p9CarrierMonitorGone === true, probeDetail);

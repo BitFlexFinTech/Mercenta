@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-reposide-registry.cjs after the Phase 15 repo-side audits/owners increment (4 rows restated; +4 rows); adjusted 2026-10-05 by the §RATE-LIMIT increment (batch-4-rate-limiting not_started -> built: not_started 44 -> 43, built 141 -> 142); then adjusted 2026-10-05 by the §BATCH10 increment (batch10-health-check-digest not_started -> built: not_started 43 -> 42, built 142 -> 143); then adjusted 2026-10-05 by the §FLOAT-LAUNCHER increment (redesign-float-launcher-collision not_started -> built: not_started 42 -> 41, built 143 -> 144). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-operator-terminology-registry.cjs after the §OPERATOR-RELABEL increment (s0-discovered-operator-terminology-reconciliation not_started -> built). Snapshot only.",
       "built_and_tested": 333,
-      "built": 144,
-      "not_started": 41,
+      "built": 145,
+      "not_started": 40,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1018,6 +1018,17 @@
         "scripts/validate-rate-limiting.mjs"
       ],
       "note": "The registry row batch-4-rate-limiting was raised not_started -> built (old value recorded inline in its _audit_note). ONE owner supabase/functions/_shared/rateLimit.ts, wired into ALL 14 Edge Functions after each CORS preflight branch. Status is `built`, NOT `built_and_tested`, because no browser e2e can exercise an Edge Function without a deployed Supabase project (the same reason stage1-token-exchange-edge-function stays `built`). HONEST LIMIT: the limiter is per-isolate/best-effort; a durable store plugs into the RateLimitStore seam. `npm run validate:rate-limiting` = 66 assertions, mutation-proved twice."
+    },
+    "operator_relabel_increment": {
+      "increment": "§OPERATOR-RELABEL — the non-canonical role name relabelled (2026-10-05)",
+      "restated": [
+        "s0-discovered-operator-terminology-reconciliation"
+      ],
+      "added": [],
+      "validators": [
+        "scripts/validate-operator-terminology.mjs"
+      ],
+      "note": "T-3: the canonical human control role is Founder / Super Admin, not \"Mercenta Operator\". The phrase was relabelled across 16 `src/` occurrences + 1 Edge Function (10 files); Staff/RBAC untouched. Status is `built`, not `built_and_tested`: no browser spec exercises the role-name copy; the node gate is the proof."
     }
   },
   "entries": [
@@ -4522,12 +4533,13 @@
     },
     {
       "id": "s0-discovered-operator-terminology-reconciliation",
-      "description": "DISCOVERED (S0): the phrase \"Mercenta operator\" is used as a human review role in nine source locations, which contradicts Founder decision T-3 (the canonical human control role is Founder / Super Admin). This is a wording reconciliation only — the existing Staff/RBAC functionality is retained per T-5 and must not be deleted to remove the terminology. Owner: later increment (T-3)",
-      "evidence": "src/lib/verification/documentVerification.ts (lines 23, 258, 266, 601); src/integrations/registry.ts (line 297); src/components/admin/AccountingPanel.tsx (line 178); src/components/admin/ComplianceApprovals.tsx (lines 115, 116, 142)",
-      "status": "not_started",
+      "description": "DISCOVERED (S0): the phrase \"Mercenta operator\" was used as a human review role in source locations, which contradicted Founder decision T-3 (the canonical human control role is Founder / Super Admin). DONE — RELABELLED (2026-10-05): the non-canonical role name was replaced with **\"Founder / Super Admin\"** across 16 `src/` occurrences + 1 Edge Function (10 files). This was a wording reconciliation only — the existing Staff/RBAC functionality is retained per T-5 and was NOT deleted to remove the terminology.",
+      "evidence": "scripts/validate-operator-terminology.mjs (npm run validate:operator-terminology) — asserts NO file under `src/` or `supabase/functions/` uses the non-canonical role name, that every relabelled file names the canonical \"Founder / Super Admin\", and that the records are no longer stale; mutation-proved (reintroducing the old phrase in a `src/` file trips the gate, exit 1). Relabelled files: src/integrations/registry.ts; src/components/admin/LogisticsControl.tsx; src/components/admin/AccountingPanel.tsx; src/components/admin/ComplianceApprovals.tsx; src/lib/commerce/channelPurchaseOrderIngestion.ts; src/lib/simulation/investorDemo.ts; src/lib/verification/documentVerification.ts; src/lib/finance/financialReconciliation.ts; src/data/api.ts; supabase/functions/payouts-transfer/index.ts. Records updated: docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md (D13-14); docs/AMAZON_RECONCILIATION_STATUS.md (T-3).",
+      "status": "built",
       "source": "Master build reconciliation — increment S0 + S1-a (2026-09-20)",
-      "last_verified": "2026-09-20",
-      "superseded_by": null
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "§OPERATOR-RELABEL (2026-10-05) — STATUS RAISED not_started -> built (old value recorded inline, never deleted). OLD status: \"not_started\". OLD description: \"DISCOVERED (S0): the phrase \"Mercenta operator\" is used as a human review role in nine source locations, which contradicts Founder decision T-3 (the canonical human control role is Founder / Super Admin). This is a wording reconciliation only — the existing Staff/RBAC functionality is retained per T-5 and must not be deleted to remove the terminology. Owner: later increment (T-3)\". OLD evidence: \"src/lib/verification/documentVerification.ts (lines 23, 258, 266, 601); src/integrations/registry.ts (line 297); src/components/admin/AccountingPanel.tsx (line 178); src/components/admin/ComplianceApprovals.tsx (lines 115, 116, 142)\". The phrase is deliberately preserved in decision records and historical reconcile scripts as a NEGATIVE quotation (T-3 records that \"Mercenta Operator\" is NOT canonical); the gate therefore scans application code only."
     },
     {
       "id": "s0-discovered-carrier-architecture-disposition",

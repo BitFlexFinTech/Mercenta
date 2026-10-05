@@ -101,7 +101,8 @@
     "validate:api-exposure": "node scripts/validate-api-exposure.mjs",
     "validate:production-hygiene": "node scripts/validate-production-hygiene.mjs",
     "validate:health-readiness": "node scripts/validate-health-readiness.mjs",
-    "validate:email-templates": "node scripts/validate-email-templates.mjs"
+    "validate:email-templates": "node scripts/validate-email-templates.mjs",
+    "validate:operator-terminology": "node scripts/validate-operator-terminology.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

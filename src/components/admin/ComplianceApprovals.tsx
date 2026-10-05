@@ -112,8 +112,8 @@ export function ComplianceApprovals() {
       { staffId: reviewer, canMutate: true },
       decision,
       decision === 'approve'
-        ? 'Document reviewed and accepted by the Mercenta operator.'
-        : 'Document rejected by the Mercenta operator — a replacement is required.'
+        ? 'Document reviewed and accepted by the Founder / Super Admin.'
+        : 'Document rejected by the Founder / Super Admin — a replacement is required.'
     );
     setNote(
       result.ok
@@ -139,7 +139,7 @@ export function ComplianceApprovals() {
       <WorkspaceHeader
         eyebrow="Admin Hub · Compliance"
         title="Compliance Approvals"
-        description="Per-brand cards · automated verification, then Mercenta operator review"
+        description="Per-brand cards · automated verification, then Founder / Super Admin review"
         meta={
           <>
             <span className="text-ds-label text-zinc-500">

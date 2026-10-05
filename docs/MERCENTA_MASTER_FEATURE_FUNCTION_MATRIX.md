@@ -434,7 +434,7 @@ Read a row together with its domain contract block. Together they carry all 26 d
 | `D13-11` | Duplicate / replay handling | Provider escalation is idempotent (`t.amazonCase` short-circuit); response recording is idempotent | domain | **VERIFIED** | `ticketStore.ts` idempotency branches + #2 |
 | `D13-12` | Knowledge Base content | 7 canonical articles (`kb-welcome`, `kb-dashboard`, `kb-purchase-orders`, `kb-catalog`, `kb-shipments`, `kb-compliance`, `kb-guidance`) | brand + admin | **VERIFIED** | `scripts/validate-kb-sufficiency.mjs` (every mapped id resolves) |
 | `D13-13` | Support-chat ticket path | `LiveChatWidget` → `findOrCreateTicketForBrand` (legacy ticket path, distinct from canonical cases) | brand | **PARTIALLY VERIFIED** | `e2e/crm.spec.ts` |
-| `D13-14` | "Mercenta Operator" wording | 9 source occurrences of a non-canonical role name | copy | **OPEN — RELABEL** | T-3: Founder/Super Admin is the canonical human control role. Staff/RBAC functionality is **not** deleted; relabelling is a later increment |
+| `D13-14` | "Mercenta Operator" wording | 16 `src/` occurrences + 1 Edge Function of a non-canonical role name (the recorded "9" was a 2026-09-20 snapshot) | copy | **DONE — RELABELLED (2026-10-05)** | T-3: Founder/Super Admin is the canonical human control role. Relabelled to **"Founder / Super Admin"** across 10 files (`src/integrations/registry.ts`, `src/components/admin/{LogisticsControl,AccountingPanel,ComplianceApprovals}.tsx`, `src/lib/commerce/channelPurchaseOrderIngestion.ts`, `src/lib/simulation/investorDemo.ts`, `src/lib/verification/documentVerification.ts`, `src/lib/finance/financialReconciliation.ts`, `src/data/api.ts`, `supabase/functions/payouts-transfer/index.ts`); Staff/RBAC functionality is **not** deleted. Gate: `npm run validate:operator-terminology` (mutation-proved) |
 
 **Domain contract — D13**
 - **Module:** `src/lib/helpdesk/kbSufficiency.ts` (new), `ticketStore.ts`, `amazonCaseClient.ts`, `src/data/knowledgeBase.ts`, `src/components/brand/BrandSupport.tsx` (new), `src/components/admin/HelpdeskDashboard.tsx`.
@@ -686,7 +686,7 @@ Nothing below may be modelled until the evidence is obtained and cited:
 | 16 | Server-side security verification (headers, CORS, rate limiting, secret-history scan) | **PARTIAL (2026-10-05) — RATE LIMITING now BUILT**: the ONE owner `supabase/functions/_shared/rateLimit.ts` guards ALL 14 Edge Functions (after the CORS preflight branch) and is gated by `npm run validate:rate-limiting` (66 assertions). Response headers + browser secret-exposure are covered by the Phase 15 repo-side audits (`npm run validate:api-exposure`, `public/.htaccess`). The limiter is per-isolate/best-effort (honest limit — see PRODUCTION_READINESS.md) | **S13** |
 | 17 | **Miro** connection (provider + real callback endpoint + sync path) | **BLOCKED — documented, not activated** | **S13** |
 | 18 | `carriers` admin view + `CarrierShell` reconciliation toward the Logistics Hub | **INTENTIONALLY EXCLUDED** (T-2) | Logistics Hub increment |
-| 19 | "Mercenta Operator" wording (9 occurrences) | **OPEN — RELABEL** (T-3) | later |
+| 19 | "Mercenta Operator" wording | **DONE — RELABELLED (2026-10-05)** (T-3) — relabelled to "Founder / Super Admin"; gate `npm run validate:operator-terminology` | done |
 | 20 | Amazon mis-attribution copy (AV-031) | **OPEN — RELABEL** | S5/S7 |
 | 21 | Scheduler TRIGGER wiring (seam declared + tested, trigger not wired) | **NOT IMPLEMENTED** | later |
 

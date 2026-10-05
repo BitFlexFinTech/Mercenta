@@ -2419,6 +2419,20 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/components/layout/Header.tsx',
     'src/components/layout/AppShell.tsx',
     'scripts/validate-float-launcher-collision.mjs',
+    /**
+     * §OPERATOR-RELABEL (2026-10-05) — the non-canonical role name relabelled to
+     * the canonical "Founder / Super Admin" (T-3). Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §OPERATOR_RELABEL_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is still refused.
+     * `src/data/api.ts` and `src/lib/simulation/investorDemo.ts` are declared above.
+     */
+    'src/integrations/registry.ts',
+    'src/components/admin/LogisticsControl.tsx',
+    'src/components/admin/AccountingPanel.tsx',
+    'src/components/admin/ComplianceApprovals.tsx',
+    'src/lib/commerce/channelPurchaseOrderIngestion.ts',
+    'src/lib/verification/documentVerification.ts',
+    'src/lib/finance/financialReconciliation.ts',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

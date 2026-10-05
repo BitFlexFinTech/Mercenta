@@ -2487,6 +2487,44 @@ const FLOAT_LAUNCHER_SCOPE = new Set([
   'package.json',
 ]);
 
+/**
+ * §OPERATOR-RELABEL (2026-10-05) — the non-canonical role name relabelled.
+ *
+ * Founder decision T-3 (`docs/AMAZON_RECONCILIATION_STATUS.md`) declares the
+ * canonical human control role to be **Founder / Super Admin**, NOT "Mercenta
+ * Operator". The phrase had leaked into application code as a human review/approval
+ * role (16 `src/` occurrences + 1 Edge Function) — a role the type system does not
+ * contain. Matrix row D13-14 recorded it as OPEN — RELABEL.
+ *
+ * Declared surface: every file whose copy carried the non-canonical role name (now
+ * "Founder / Super Admin"), the NEW gate `scripts/validate-operator-terminology.mjs`,
+ * its reconcile script, the two validators whose check TITLES named the old role, the
+ * historical reconcile script whose row entry is repointed, the two records updated
+ * (matrix D13-14 + the T-3 register row), `requirements-registry.json`, and BOTH scope
+ * guards themselves. Staff/RBAC functionality is UNTOUCHED. The F5/F5b/F6 contract is
+ * UNCHANGED — a changed source file in NO declared set still fails.
+ */
+const OPERATOR_RELABEL_SCOPE = new Set([
+  'src/integrations/registry.ts',
+  'src/components/admin/LogisticsControl.tsx',
+  'src/components/admin/AccountingPanel.tsx',
+  'src/components/admin/ComplianceApprovals.tsx',
+  'src/lib/commerce/channelPurchaseOrderIngestion.ts',
+  'src/lib/verification/documentVerification.ts',
+  'src/lib/finance/financialReconciliation.ts',
+  'scripts/validate-operator-terminology.mjs',
+  'scripts/reconcile-operator-terminology-registry.cjs',
+  'scripts/validate-workspace-shell.mjs',
+  'scripts/verify-demo-live.mjs',
+  'scripts/reconcile-master-build-reconciliation-registry.cjs',
+  'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+  'docs/AMAZON_RECONCILIATION_STATUS.md',
+  'requirements-registry.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3223,7 +3261,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...HEALTH_DIGEST_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §FLOAT-LAUNCHER — the support-chat corner-collision fix (see above). */
           FLOAT_LAUNCHER_SCOPE.has(p) ||
-          [...FLOAT_LAUNCHER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...FLOAT_LAUNCHER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §OPERATOR-RELABEL — the non-canonical role name relabelled (see above). */
+          OPERATOR_RELABEL_SCOPE.has(p) ||
+          [...OPERATOR_RELABEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

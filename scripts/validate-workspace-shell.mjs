@@ -227,7 +227,7 @@ check('§P9 the rehomed carrier console composes the canonical frame',
 check('§P9 the rehomed carrier console exposes the canonical manifest hooks',
   logisticsControlSrc.includes('dataTable="carrier-manifest"') &&
     logisticsControlSrc.includes('aria-label={`Update milestone for ${s.reference}`}'));
-check('§P9 the advance is attributed to the Mercenta operator (not a carrier login)',
+check('§P9 the advance is attributed to the Founder / Super Admin (not a carrier login)',
   logisticsControlSrc.includes("actorId: 'mercenta-admin-logistics'") &&
     !logisticsControlSrc.includes("'carrier-terminal'"));
 

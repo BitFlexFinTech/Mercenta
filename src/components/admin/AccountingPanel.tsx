@@ -176,7 +176,7 @@ export function AccountingPanel() {
       { staffId: actingStaffId, canMutate: true },
       status === 'verified'
         ? {
-            verificationMethod: 'Mercenta operator review',
+            verificationMethod: 'Founder / Super Admin review',
             verificationRef: `SIM-VERIFY-${destinationId}-${destinationVersion + 1}`,
           }
         : { reason: 'Suspended pending account review by Mercenta.' }

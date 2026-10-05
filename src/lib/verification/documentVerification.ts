@@ -20,7 +20,7 @@
  *      evidence reference is unmistakably fake (`SIM-DOC-VERIFY-…`).
  *
  *   3. `manual_mercenta_admin` — the FIRST-CLASS manual operational path. An
- *      authorised Mercenta operator reviews the document and records a decision
+ *      authorised Founder / Super Admin reviews the document and records a decision
  *      with their identity as the verifier. Not a workaround: a supported route.
  *
  *   4. `unavailable_document_verification` — FAIL-CLOSED. Used for every other
@@ -256,7 +256,7 @@ export class ManualDocumentVerificationProvider implements DocumentVerificationP
       return {
         result: 'fail',
         status: 'failed',
-        failureReason: input.operatorReason?.trim() || 'rejected by Mercenta operator review',
+        failureReason: input.operatorReason?.trim() || 'rejected by Founder / Super Admin review',
         ...(input.reference ? { evidenceReference: input.reference } : {}),
       };
     }
@@ -264,7 +264,7 @@ export class ManualDocumentVerificationProvider implements DocumentVerificationP
       result: 'pass',
       status: 'verified',
       ...(input.reference ? { evidenceReference: input.reference } : {}),
-      notes: input.operatorReason?.trim() || 'approved by Mercenta operator review',
+      notes: input.operatorReason?.trim() || 'approved by Founder / Super Admin review',
     };
   }
 }
@@ -601,7 +601,7 @@ export async function verifyDocumentVersion(
 /* ── Manual Mercenta Admin verification (first-class path) ───────────────── */
 
 /**
- * An authorised Mercenta operator records a manual verification decision.
+ * An authorised Founder / Super Admin records a manual verification decision.
  * Identity, method, result and reason are all recorded — and a manual APPROVE
  * still cannot clear a requirement with no document on file.
  */

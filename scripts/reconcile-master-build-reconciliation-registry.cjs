@@ -84,9 +84,9 @@ const DISCOVERED = [
   ],
   [
     's0-discovered-operator-terminology-reconciliation',
-    'DISCOVERED (S0): the phrase "Mercenta operator" is used as a human review role in nine source locations, which contradicts Founder decision T-3 (the canonical human control role is Founder / Super Admin). This is a wording reconciliation only — the existing Staff/RBAC functionality is retained per T-5 and must not be deleted to remove the terminology. Owner: later increment (T-3)',
-    'not_started',
-    'src/lib/verification/documentVerification.ts (lines 23, 258, 266, 601); src/integrations/registry.ts (line 297); src/components/admin/AccountingPanel.tsx (line 178); src/components/admin/ComplianceApprovals.tsx (lines 115, 116, 142)',
+    'DISCOVERED (S0): the phrase "Mercenta operator" is used as a human review role in nine source locations, which contradicts Founder decision T-3 (the canonical human control role is Founder / Super Admin). This is a wording reconciliation only — the existing Staff/RBAC functionality is retained per T-5 and must not be deleted to remove the terminology. DONE — RELABELLED (2026-10-05): the phrase was replaced with "Founder / Super Admin" across 16 `src/` occurrences + 1 Edge Function (10 files); gate `npm run validate:operator-terminology`.',
+    'built',
+    'scripts/validate-operator-terminology.mjs (npm run validate:operator-terminology); docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md (D13-14); docs/AMAZON_RECONCILIATION_STATUS.md (T-3)',
   ],
   [
     's0-discovered-carrier-architecture-disposition',

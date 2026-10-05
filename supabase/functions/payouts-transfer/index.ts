@@ -158,7 +158,7 @@ Deno.serve(async (req: Request) => {
     return json(
       {
         error:
-          'PAYOUT_NOT_APPROVED — a brand payout requires explicit Mercenta operator approval before any instruction reaches the rail',
+          'PAYOUT_NOT_APPROVED — a brand payout requires explicit Founder / Super Admin approval before any instruction reaches the rail',
       },
       403
     );

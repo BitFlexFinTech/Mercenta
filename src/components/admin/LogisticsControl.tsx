@@ -70,7 +70,7 @@ import type { WorkSource } from '@/lib/work/types';
  *
  * WHAT IS DIFFERENT (and better)
  * ------------------------------
- *   · The advance is attributed to the acting MERCENTA operator
+ *   · The advance is attributed to the acting Founder / Super Admin
  *     (`mercenta-admin-logistics`), not to a fictional carrier login.
  *   · The shipment's OWN `brandId` is passed (the old terminal hardcoded
  *     `brand-astonish` for every row).
@@ -743,7 +743,7 @@ export function LogisticsControl({
         a consignment's next carrier milestone and reading the request/response
         log behind it — belongs to MERCENTA, so it lives here, on the operator's
         Logistics Hub. Same domain path (`advanceShipmentViaDhl`), attributed to
-        the acting Mercenta operator, fail-closed when a provider does not
+        the acting Founder / Super Admin, fail-closed when a provider does not
         positively resolve simulation/live, and zero live network calls.
       */}
       <WorkspaceSection

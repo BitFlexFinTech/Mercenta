@@ -507,7 +507,7 @@ export async function fetchSpApiPurchaseOrders(
  * (one source of truth for SKUs) — never a second list.
  */
 export async function ingestChannelPurchaseOrders(input: {
-  /** The Mercenta operator performing the read (attribution + audit). */
+  /** The Founder / Super Admin performing the read (attribution + audit). */
   actorId: string;
   /** Only POs received since this instant are read. */
   sinceIso?: string;

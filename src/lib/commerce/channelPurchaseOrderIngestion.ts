@@ -282,7 +282,7 @@ export async function ingestChannelPurchaseOrders(input: {
   reader: ChannelPoReader;
   catalogue: ChannelCatalogueEntry[];
   sinceIso: string;
-  /** The Mercenta operator performing the read — every outcome is attributed. */
+  /** The Founder / Super Admin performing the read — every outcome is attributed. */
   actorId: string;
   /** Injectable clock (deterministic tests). */
   now?: () => Date;

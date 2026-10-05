@@ -318,7 +318,7 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     id: 'wise',
     name: 'Wise (secondary payout rail)',
     description:
-      'Secondary rail, used only when deliberately selected. Simulated until real Wise API credentials are configured; a payout is only ever submitted after Mercenta operator approval.',
+      'Secondary rail, used only when deliberately selected. Simulated until real Wise API credentials are configured; a payout is only ever submitted after Founder / Super Admin approval.',
     authMethod: 'api_key',
     fields: [
       {
@@ -334,7 +334,7 @@ export const INTEGRATION_REGISTRY: Record<IntegrationId, IntegrationDefinition> 
     id: 'payoneer',
     name: 'Payoneer (default payout rail)',
     description:
-      'Default rail Mercenta pays brand settlements through, and the canonical retail-channel payment account. Simulated until real Payoneer program credentials are configured; never auto-sent without Mercenta operator approval.',
+      'Default rail Mercenta pays brand settlements through, and the canonical retail-channel payment account. Simulated until real Payoneer program credentials are configured; never auto-sent without Founder / Super Admin approval.',
     authMethod: 'api_key',
     fields: [
       {

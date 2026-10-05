@@ -1680,7 +1680,7 @@ export async function runInvestorDemo(
       throw new Error('a payout was sent to an unverified destination');
     }
     const verified = setDestinationStatus(destination.id, 'verified', ops, {
-      verificationMethod: 'Mercenta operator review (simulated)',
+      verificationMethod: 'Founder / Super Admin review (simulated)',
       verificationRef: `SIM-DEST-VERIFY-${tenant}`,
     });
     if (!verified.ok) throw new Error(`destination verification refused: ${verified.error}`);

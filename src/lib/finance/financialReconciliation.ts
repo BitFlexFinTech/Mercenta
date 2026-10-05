@@ -598,7 +598,7 @@ export function setDestinationStatus(
   }
   destination.status = status;
   if (status === 'verified') {
-    destination.verificationMethod = detail.verificationMethod ?? 'Mercenta operator review';
+    destination.verificationMethod = detail.verificationMethod ?? 'Founder / Super Admin review';
     destination.verificationRef = detail.verificationRef;
     destination.verifiedAt = new Date().toISOString();
     destination.verifiedBy = actor.staffId;
