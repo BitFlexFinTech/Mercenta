@@ -2371,6 +2371,7 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/components/marketing/NotFound.tsx',
     'src/components/marketing/Home.tsx',
     'e2e/public-pages.spec.ts',
+    'scripts/verify-live-demo.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

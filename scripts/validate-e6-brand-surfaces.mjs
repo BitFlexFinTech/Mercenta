@@ -2383,6 +2383,7 @@ const PHASE15_LAUNCH_SCOPE = new Set([
   'src/components/marketing/Home.tsx',        /* renders the 404 for an unknown address */
   'e2e/public-pages.spec.ts',                 /* the browser proof of the 404 */
   'public/.htaccess',                         /* response security headers */
+  'scripts/verify-live-demo.mjs',             /* L30 — the live 404 + headers check */
   'package.json',                             /* validate:phase15-launch */
   'package-lock.json',                        /* the npm audit fix */
   'scripts/validate-e6-brand-surfaces.mjs',

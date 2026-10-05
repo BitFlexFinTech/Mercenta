@@ -1859,6 +1859,40 @@ function readRedLines() {
 
 
   await pltPage.close();
+  /* ── L30 — §PHASE 15: THE CUSTOM 404 + SECURITY HEADERS, LIVE ──────────────
+   * The launch gate's website-integrity and security items, verified against the
+   * DEPLOYED site: an unknown address must render the custom 404 (it previously
+   * rendered the homepage), and the host must send the response security headers
+   * added to `public/.htaccess`. Reproducible here — not a throwaway script. */
+  console.log('\n--- L30 the custom 404 and the response security headers, as deployed ---');
+  try {
+    const nfRes = await fetch(`${SITE}/this-page-does-not-exist`, { redirect: 'manual' });
+    const h = nfRes.headers;
+    check(`L30 the deployed host sends Strict-Transport-Security (${h.get('strict-transport-security') || 'MISSING'})`, /max-age=/.test(h.get('strict-transport-security') || ''));
+    check('L30 the deployed host sends X-Content-Type-Options: nosniff', /nosniff/.test(h.get('x-content-type-options') || ''));
+    check('L30 the deployed host sends X-Frame-Options', Boolean(h.get('x-frame-options')));
+    check('L30 the deployed host sends Referrer-Policy', Boolean(h.get('referrer-policy')));
+
+    const nfPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const nfErrors = [];
+    nfPage.on('pageerror', (e) => nfErrors.push(e.message));
+    try {
+      await gotoLive(nfPage, `${SITE}/this-page-does-not-exist`);
+      const h1 = ((await nfPage.locator('h1').first().textContent().catch(() => '')) || '').trim();
+      const buttons = await nfPage.locator('button').allTextContents();
+      check(`L30 an unknown address shows the custom 404, not the homepage (heading: ${h1.slice(0, 40)})`, /couldn.t find that page/i.test(h1));
+      check('L30 the 404 offers "Back to homepage"', buttons.some((b) => /back to homepage/i.test(b)));
+      check('L30 the 404 offers "Partner Login"', buttons.some((b) => /partner login/i.test(b)));
+      check(`L30 the deployed 404 rendered with no uncaught error (errors: ${nfErrors.join(' | ') || 'none'})`, nfErrors.length === 0);
+    } catch (nfError) {
+      check(`L30 the deployed 404 could NOT be driven (${String(nfError).split('\n')[0].slice(0, 120)})`, false);
+    }
+    await nfPage.close();
+  } catch (l30Error) {
+    check(`L30 the deployed 404 / headers could NOT be fetched (${String(l30Error).split('\n')[0].slice(0, 120)})`, false);
+  }
+
+
 
   await browser.close();
 
