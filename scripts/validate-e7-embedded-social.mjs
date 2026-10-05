@@ -2405,6 +2405,7 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
      * themselves live under `supabase/functions/`, which this guard does not scope.
      */
     'scripts/validate-rate-limiting.mjs',
+    'scripts/validate-no-stale-blockers.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

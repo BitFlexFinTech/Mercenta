@@ -2435,6 +2435,7 @@ const PHASE15_LAUNCH_SCOPE = new Set([
 const RATE_LIMIT_SCOPE = new Set([
   'supabase/functions/',
   'scripts/validate-rate-limiting.mjs',
+  'scripts/validate-no-stale-blockers.mjs',
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
   'package.json',

@@ -64,6 +64,26 @@ const plan = stripRepointed(read('docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.
 test('the single plan no longer says "Part 2b - REMAINING"', !/Part 2b.{0,3}REMAINING/.test(plan));
 test('the single plan records Part 2b as DONE', /Part 2b.{0,3}DONE/.test(plan));
 
+/**
+ * §RATE-LIMIT (2026-10-05) — two MORE stale records in the single plan, fixed at
+ * source that session. Its order-item 2 was marked **NOT STARTED** and its text
+ * named two pieces of "remaining" work that did not exist: "the two regressed
+ * rows" (the registry holds ZERO `regressed` rows — both were removed 2026-10-04)
+ * and "the tooling items" (no such list exists anywhere). The assertions below
+ * pin the CORRECTED state, so the stale claims cannot return as live claims.
+ */
+test(
+  'the single plan no longer marks the remaining BUILD BACKLOG as NOT STARTED',
+  !/remaining BUILD BACKLOG[^\n]*NOT STARTED/i.test(plan)
+);
+test('the single plan records the §RATE-LIMIT increment', /RATE LIMITER/i.test(plan));
+const registry = JSON.parse(read('requirements-registry.json'));
+const regressedRows = (registry.entries ?? []).filter((e) => e.status === 'regressed');
+test(
+  'the registry holds ZERO regressed rows (the old "two regressed rows" claim is provably false)',
+  regressedRows.length === 0
+);
+
 /* 5. HANDOFF's old NEXT PLAN section is marked historical (not a live resume point) */
 test(
   "HANDOFF's old NEXT PLAN section is marked SUPERSEDED",
