@@ -18,6 +18,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
 
 const ALLOWED_PROVIDERS = ['docusign', 'pandadoc'];
 
@@ -100,6 +101,8 @@ async function resolveToken(secretRef: string): Promise<string | null> {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'esign-envelope', corsHeaders());
+  if (limited) return limited;
 
   const url = new URL(req.url);
   const pathId = url.pathname.split('/').filter(Boolean).pop() ?? '';

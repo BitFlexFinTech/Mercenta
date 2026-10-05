@@ -24,6 +24,7 @@ import {
   type ProxyRequest,
 } from '../_shared/proxyRoutes.ts';
 import { operatorFromAuthorization } from '../_shared/operatorAuth.ts';
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
 
 const PROVIDER = 'palletline' as const;
 
@@ -44,6 +45,8 @@ function json(body: unknown, status: number): Response {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'palletline', corsHeaders());
+  if (limited) return limited;
 
   const secretRef = req.headers.get('X-Secret-Ref');
   const mode = resolveProxyMode(secretRef);

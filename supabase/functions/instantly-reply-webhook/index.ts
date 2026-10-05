@@ -23,6 +23,8 @@
  * (the shared secret is the authentication mechanism for this endpoint)
  */
 
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
+
 const HOT_LEAD_INTENT_KEYWORDS = [
   'price', 'pricing', 'cost', 'quote',
   'call', 'talk', 'chat',
@@ -73,6 +75,8 @@ Deno.serve(async (req: Request) => {
     });
 
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
+  const limited = rateLimitGuard(req, 'instantly-reply-webhook', corsHeaders);
+  if (limited) return limited;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   // ── (1) OPTIONAL SHARED-SECRET VERIFICATION ─────────────────────────────

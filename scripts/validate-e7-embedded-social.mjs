@@ -2398,6 +2398,13 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'scripts/validate-email-templates.mjs',
     'scripts/reconcile-phase15-reposide-registry.cjs',
     'GO_LIVE.md',
+    /**
+     * §RATE-LIMIT (2026-10-05) — the public-endpoint rate limiter. FULLER NOTE in
+     * `validate-e6-brand-surfaces.mjs` §RATE_LIMIT_SCOPE. Same mechanism: a changed
+     * source/test file outside EVERY declared set is still refused. The functions
+     * themselves live under `supabase/functions/`, which this guard does not scope.
+     */
+    'scripts/validate-rate-limiting.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

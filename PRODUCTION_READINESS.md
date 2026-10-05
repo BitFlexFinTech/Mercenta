@@ -487,6 +487,31 @@ file existed). That is fixed:
 | 1 | The **deployment** of Batch 1's server-side work | `scripts/deploy-demo.sh` + a Supabase credential/CLI for the Edge Functions | CI proves the repository builds and every gate passes in a clean environment; it does **not** publish anything, so the demo remains behind the repository |
 | 2 | Nothing else | — | This increment adds no credential requirement of its own |
 
+## §RATE-LIMIT — the public-endpoint rate limiter (2026-10-05): what it is, and its ONE honest limit
+
+**BUILT.** `supabase/functions/_shared/rateLimit.ts` is the ONE owner. Every Edge Function calls
+`rateLimitGuard(req, '<function>', corsHeaders())` immediately after its CORS preflight branch, so a
+browser preflight is never limited. Gate: `npm run validate:rate-limiting` (66 assertions; also runs inside
+`npm run validate:all`), which DISCOVERS every function folder and fails if a function has no policy or
+skips the guard. Registry row: `batch-4-rate-limiting` (raised `not_started` → `built_and_tested`).
+
+**THE ONE HONEST LIMIT (stated, not hidden).** The limiter is a FIXED-WINDOW counter kept IN MEMORY in
+the function's own isolate. Supabase runs each Edge Function as many short-lived Deno isolates, so the
+limit is **PER INSTANCE and BEST-EFFORT**: it stops a single abusive caller hammering a warm instance, but
+it is **NOT a global, cluster-wide quota**, and a caller spread across many cold instances can exceed it.
+
+**THE UPGRADE PATH (activation work — NO function change).** A durable, cluster-wide limiter (a Postgres
+counter or a hosted store) plugs in through the `RateLimitStore` seam in that same file, so swapping the
+store is the only change and every function stays as it is. Until a Supabase project + credential exist,
+the in-memory store is in force — strictly better than the unbounded state it replaced.
+
+**Per-function limits** (declared once in `RATE_LIMIT_POLICIES`; overridable per deployment with
+`RATE_LIMIT_<BUCKET>_LIMIT` / `RATE_LIMIT_<BUCKET>_WINDOW_MS`): read-heavy simulated proxies 120/min;
+the credential-writing endpoints (`integration-connect`, `spapi-token-exchange`) and `payouts-transfer`
+30/min; the remaining endpoints 60/min; the external webhooks (`xero-webhook`, `instantly-reply-webhook`)
+300/min so a legitimate burst is not refused. An unknown bucket falls back to the 60/min DEFAULT — it is
+never unlimited.
+
 ## Integration credentials
 
 | Integration | Currently active | What's needed to go live | Where it's entered | Code changes needed |

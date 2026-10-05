@@ -35,6 +35,8 @@
  * (keep JWT verification ON — this is a money path.)
  */
 
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
+
 const RAIL_SIMULATION_PREFIX: Record<string, string> = {
   wise: 'mock_tr_wise_',
   payoneer: 'mock_tr_payoneer_',
@@ -104,6 +106,8 @@ function simulateTransfer(rail: string, idempotencyKey: string): string {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'payouts-transfer', corsHeaders());
+  if (limited) return limited;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';

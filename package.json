@@ -95,6 +95,7 @@
     "validate:supply-route-logistics": "node scripts/validate-supply-route-logistics.mjs",
     "validate:phase15-launch": "node scripts/validate-phase15-launch.mjs",
     "validate:data-inventory": "node scripts/validate-data-inventory.mjs",
+    "validate:rate-limiting": "node scripts/validate-rate-limiting.mjs",
     "validate:api-exposure": "node scripts/validate-api-exposure.mjs",
     "validate:production-hygiene": "node scripts/validate-production-hygiene.mjs",
     "validate:health-readiness": "node scripts/validate-health-readiness.mjs",

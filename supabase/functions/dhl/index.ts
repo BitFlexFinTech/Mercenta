@@ -25,6 +25,7 @@ import {
 import { defaultLiveFetch } from '../_shared/liveFetch.ts';
 import { parseCredentialBlob, readVaultSecret } from '../_shared/vault.ts';
 import { operatorFromAuthorization } from '../_shared/operatorAuth.ts';
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
 import { createDhlLiveCall, type DhlLiveCredentials } from '../_shared/live/dhlLive.ts';
 
 const PROVIDER = 'dhl' as const;
@@ -65,6 +66,8 @@ async function resolveCredentials(secretRef: string | null): Promise<DhlLiveCred
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'dhl', corsHeaders());
+  if (limited) return limited;
 
   const secretRef = req.headers.get('X-Secret-Ref');
   const mode = resolveProxyMode(secretRef);

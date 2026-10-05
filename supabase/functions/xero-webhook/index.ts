@@ -13,6 +13,7 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createHmac, timingSafeEqual } from 'https://deno.land/std@0.177.0/crypto/mod.ts';
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
 
 interface WebhookEvent {
   resourceId: string;
@@ -85,6 +86,8 @@ serve(async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
+  const limited = rateLimitGuard(req, 'xero-webhook', {});
+  if (limited) return limited;
 
   // Read body
   const bodyText = await req.text();

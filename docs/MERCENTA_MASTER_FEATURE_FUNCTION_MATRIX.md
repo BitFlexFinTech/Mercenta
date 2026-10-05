@@ -683,7 +683,7 @@ Nothing below may be modelled until the evidence is obtained and cited:
 | 13 | Super Admin `research`, `manufacturer`, `financing` tabs — no feature assertions | **NOT VERIFIED** | **S12** |
 | 14 | `partnerships`, brand `documents`/`reports` — no dedicated spec | **PARTIALLY VERIFIED** | **S12** |
 | 15 | Pagination behaviour + error-boundary containment under a real render fault | **NOT AUTOMATED** | **S12** |
-| 16 | Server-side security verification (headers, CORS, rate limiting, secret-history scan) | **BLOCKED** | **S13** |
+| 16 | Server-side security verification (headers, CORS, rate limiting, secret-history scan) | **PARTIAL (2026-10-05) — RATE LIMITING now BUILT**: the ONE owner `supabase/functions/_shared/rateLimit.ts` guards ALL 14 Edge Functions (after the CORS preflight branch) and is gated by `npm run validate:rate-limiting` (66 assertions). Response headers + browser secret-exposure are covered by the Phase 15 repo-side audits (`npm run validate:api-exposure`, `public/.htaccess`). The limiter is per-isolate/best-effort (honest limit — see PRODUCTION_READINESS.md) | **S13** |
 | 17 | **Miro** connection (provider + real callback endpoint + sync path) | **BLOCKED — documented, not activated** | **S13** |
 | 18 | `carriers` admin view + `CarrierShell` reconciliation toward the Logistics Hub | **INTENTIONALLY EXCLUDED** (T-2) | Logistics Hub increment |
 | 19 | "Mercenta Operator" wording (9 occurrences) | **OPEN — RELABEL** (T-3) | later |

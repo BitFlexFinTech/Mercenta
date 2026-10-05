@@ -17,6 +17,7 @@
 import { handleProviderConnect, type ConnectRequest } from '../_shared/providerConnect.ts';
 import { credentialSecretName, writeVaultSecret } from '../_shared/vault.ts';
 import { operatorFromAuthorization } from '../_shared/operatorAuth.ts';
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
 import { defaultLiveFetch } from '../_shared/liveFetch.ts';
 
 function corsHeaders(): Record<string, string> {
@@ -36,6 +37,8 @@ function json(body: unknown, status: number): Response {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'integration-connect', corsHeaders());
+  if (limited) return limited;
   if (req.method !== 'POST') return json({ ok: false, error: 'POST required.' }, 405);
 
   let body: ConnectRequest;

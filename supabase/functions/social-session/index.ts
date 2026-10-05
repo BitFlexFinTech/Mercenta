@@ -25,6 +25,8 @@
  * Deploy:  supabase functions deploy social-session
  * Secrets: SOCIAL_SSO_SECRET, SOCIAL_ENGINE_URL, SOCIAL_SSO_ALLOW_DEMO
  */
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
+
 const ENGINE_URL = Deno.env.get('SOCIAL_ENGINE_URL') ?? '';
 const SSO_SECRET = Deno.env.get('SOCIAL_SSO_SECRET') ?? '';
 const ALLOW_DEMO = Deno.env.get('SOCIAL_SSO_ALLOW_DEMO') === 'true';
@@ -72,6 +74,8 @@ async function mintToken(tenant: string, ttlSeconds = 300): Promise<string> {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+  const limited = rateLimitGuard(req, 'social-session', CORS);
+  if (limited) return limited;
   if (req.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
 
   if (!ENGINE_URL || !SSO_SECRET) {

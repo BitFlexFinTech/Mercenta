@@ -18,6 +18,7 @@
 import { handleSpapiTokenExchange, type TokenExchangeRequest } from '../_shared/tokenExchange.ts';
 import { credentialSecretName, writeVaultSecret } from '../_shared/vault.ts';
 import { operatorFromAuthorization } from '../_shared/operatorAuth.ts';
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
 import { defaultLiveFetch } from '../_shared/liveFetch.ts';
 
 function corsHeaders(): Record<string, string> {
@@ -37,6 +38,8 @@ function json(body: unknown, status: number): Response {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'spapi-token-exchange', corsHeaders());
+  if (limited) return limited;
   if (req.method !== 'POST') return json({ ok: false, error: 'POST required.' }, 405);
 
   let body: TokenExchangeRequest;

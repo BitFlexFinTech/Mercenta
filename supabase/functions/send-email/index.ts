@@ -27,6 +27,7 @@ const PROVIDER_ENDPOINTS: Record<string, string> = {
 };
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
 
 interface SendEmailBody {
   to?: string;
@@ -93,6 +94,8 @@ async function resolveToken(secretRef: string): Promise<string | null> {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'send-email', corsHeaders());
+  if (limited) return limited;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   let body: SendEmailBody;

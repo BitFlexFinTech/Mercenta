@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-reposide-registry.cjs after the Phase 15 repo-side audits/owners increment (4 rows restated; +4 rows). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-reposide-registry.cjs after the Phase 15 repo-side audits/owners increment (4 rows restated; +4 rows); then adjusted 2026-10-05 by the §RATE-LIMIT increment (batch-4-rate-limiting not_started -> built: not_started 44 -> 43, built 141 -> 142). Snapshot only.",
       "built_and_tested": 333,
-      "built": 141,
-      "not_started": 44,
+      "built": 142,
+      "not_started": 43,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1007,6 +1007,17 @@
         "scripts/validate-email-templates.mjs"
       ],
       "note": "Three real defects fixed at source (a browser secret-read attempt; a debug console.log in production; a FABRICATED health check) plus a literal-backslash-n email line-break bug. Launch gate repo-side now 68/68."
+    },
+    "rate_limit_increment": {
+      "increment": "§RATE-LIMIT — THE PUBLIC-ENDPOINT RATE LIMITER (2026-10-05)",
+      "restated": [
+        "batch-4-rate-limiting"
+      ],
+      "added": [],
+      "validators": [
+        "scripts/validate-rate-limiting.mjs"
+      ],
+      "note": "The registry row batch-4-rate-limiting was raised not_started -> built (old value recorded inline in its _audit_note). ONE owner supabase/functions/_shared/rateLimit.ts, wired into ALL 14 Edge Functions after each CORS preflight branch. Status is `built`, NOT `built_and_tested`, because no browser e2e can exercise an Edge Function without a deployed Supabase project (the same reason stage1-token-exchange-edge-function stays `built`). HONEST LIMIT: the limiter is per-isolate/best-effort; a durable store plugs into the RateLimitStore seam. `npm run validate:rate-limiting` = 66 assertions, mutation-proved twice."
     }
   },
   "entries": [
@@ -1690,11 +1701,12 @@
     },
     {
       "id": "batch-4-rate-limiting",
-      "description": "Rate limiting on public-facing Edge Functions",
+      "description": "Rate limiting on public-facing Edge Functions — BUILT 2026-10-05. The ONE owner supabase/functions/_shared/rateLimit.ts (a fixed-window, per-isolate limiter with a swappable store seam) is wired into ALL 14 Edge Functions via rateLimitGuard(req, '<bucket>', corsHeaders()), placed AFTER each function's CORS preflight branch, and gated by scripts/validate-rate-limiting.mjs. Status is `built`, NOT `built_and_tested`: no browser e2e can exercise an Edge Function without a deployed Supabase project — the same reason stage1-token-exchange-edge-function stays `built`.",
       "source": "Batch -4, item 3",
-      "status": "not_started",
-      "evidence": "NOT BUILT — the cited supabase/functions/_shared/rateLimit.ts has NEVER existed in this repository (checked across the full git history) and no public-facing Edge Function implements rate limiting; docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md item 16 records server-side rate limiting as BLOCKED (S13). Reclassified from \"built\" to \"not_started\" by Batch 3c on 2026-10-03 after scripts/validate-built-rows.mjs proved the citation false.",
-      "last_verified": "2026-08-30",
+      "status": "built",
+      "evidence": "supabase/functions/_shared/rateLimit.ts; every supabase/functions/*/index.ts calls the guard; scripts/validate-rate-limiting.mjs (npm run validate:rate-limiting) has 66 assertions and EXECUTES the limiter — under/at/over-limit, window reset, caller independence, unknown-bucket default, honest 429 — mutation-proved twice, both files restored byte-identical.",
+      "_audit_note": "§RATE-LIMIT (2026-10-05) — STATUS RAISED, OLD VALUE RECORDED NOT DELETED. OLD status: `not_started`. OLD evidence: 'NOT BUILT — the cited supabase/functions/_shared/rateLimit.ts has NEVER existed in this repository … no public-facing Edge Function implements rate limiting … item 16 records server-side rate limiting as BLOCKED (S13).' That text was TRUE when written (Batch 3c reclassified the row built -> not_started on 2026-10-03 because the citation was false). It is now FALSE: the file EXISTS, every function calls it, and the master matrix item 16 is corrected at source. HONEST LIMIT (stated, not hidden): the limiter is a fixed-window counter kept in the function's own memory, so it is PER INSTANCE and BEST-EFFORT — NOT a global, cluster-wide quota. A durable store plugs into the RateLimitStore seam with zero function changes; recorded as ACTIVATION work in PRODUCTION_READINESS.md.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {

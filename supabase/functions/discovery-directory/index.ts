@@ -23,6 +23,8 @@
  * Deploy: supabase functions deploy discovery-directory
  */
 
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
+
 /** Deterministic simulated directory leads — no network of any kind. */
 const MOCK_POOL = [
   {
@@ -89,6 +91,8 @@ function json(body: unknown, status: number): Response {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'discovery-directory', corsHeaders());
+  if (limited) return limited;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   let body: { segments?: string[]; urls?: string[] };

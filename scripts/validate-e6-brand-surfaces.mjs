@@ -2418,6 +2418,28 @@ const PHASE15_LAUNCH_SCOPE = new Set([
   'GO_LIVE.md',
 ]);
 
+/**
+ * §RATE-LIMIT (2026-10-05) — THE PUBLIC-ENDPOINT RATE LIMITER.
+ *
+ * The registry row `batch-4-rate-limiting` (also named by the launch gate's final
+ * security audit) recorded that NO public-facing Edge Function implemented rate
+ * limiting and that the file it once cited had NEVER existed. This phase builds the
+ * ONE owner (`supabase/functions/_shared/rateLimit.ts`), wires EVERY Edge Function
+ * to it and adds the gate `scripts/validate-rate-limiting.mjs`.
+ *
+ * Declared surface: the whole Edge-Function tree (each `index.ts` gains the guard;
+ * `_shared/` holds the NEW owner), the gate, `package.json` that registers it, and
+ * BOTH scope guards themselves. Nothing PROTECTED is touched. The F5/F5b/F6
+ * contract is UNCHANGED — a changed source file in NO declared set still fails.
+ */
+const RATE_LIMIT_SCOPE = new Set([
+  'supabase/functions/',
+  'scripts/validate-rate-limiting.mjs',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'package.json',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3145,7 +3167,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...E2E_SCENARIO_CATALOGUE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 15 — the launch gate (see above). */
           PHASE15_LAUNCH_SCOPE.has(p) ||
-          [...PHASE15_LAUNCH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE15_LAUNCH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §RATE-LIMIT — the public-endpoint rate limiter (see above). */
+          RATE_LIMIT_SCOPE.has(p) ||
+          [...RATE_LIMIT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

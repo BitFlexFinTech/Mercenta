@@ -24,6 +24,8 @@
  * Deploy: supabase functions deploy catalog-import
  */
 
+import { rateLimitGuard } from '../_shared/rateLimit.ts';
+
 interface CatalogRow {
   sku?: string;
   title?: string;
@@ -77,6 +79,8 @@ function firstInvalidRow(rows: CatalogRow[]): number | null {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
+  const limited = rateLimitGuard(req, 'catalog-import', corsHeaders());
+  if (limited) return limited;
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   let body: ImportBody;
