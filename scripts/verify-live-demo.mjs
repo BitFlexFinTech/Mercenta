@@ -1894,6 +1894,30 @@ function readRedLines() {
 
 
 
+  /* ── L31 — §PHASE 15: THE DATA-INVENTORY-DERIVED PRIVACY POLICY, LIVE ─────
+   * The legal/privacy gate's third-party data inventory is now CODE
+   * (`src/config/dataProcessing.ts`), and the privacy policy DERIVES its "who we
+   * share it with" list from that owner. This proves the change is LIVE: the
+   * DEPLOYED /privacy page renders rows built from the owner. (L11 already
+   * guards that the page still publishes no supplier NAME, via the red-line
+   * families — so this checks presence, L11 checks the absence.) */
+  console.log('\n--- L31 the privacy policy derived from the third-party data inventory, as deployed ---');
+  const pvPage = await browser.newPage({ viewport: { width: 1440, height: 950 } });
+  const pvErrors = [];
+  pvPage.on('pageerror', (e) => pvErrors.push(e.message));
+  try {
+    await gotoLive(pvPage, `${SITE}/privacy`);
+    const pvText = await pvPage.locator('body').innerText();
+    check('L31 the deployed privacy policy states the data-sharing principle', /we never sell personal data/i.test(pvText));
+    check('L31 the deployed privacy policy lists the HOSTING processor category (derived from the owner)', /hosting and platform infrastructure/i.test(pvText));
+    check('L31 the deployed privacy policy lists the FREIGHT processor category (derived from the owner)', /freight and delivery/i.test(pvText));
+    check('L31 the deployed privacy policy lists the SETTLEMENTS processor category (derived from the owner)', /brand settlements/i.test(pvText));
+    check(`L31 the deployed privacy policy rendered with no uncaught error (errors: ${pvErrors.join(' | ') || 'none'})`, pvErrors.length === 0);
+  } catch (pvError) {
+    check(`L31 the deployed privacy policy could NOT be driven (${String(pvError).split('\n')[0].slice(0, 140)})`, false);
+  }
+  await pvPage.close();
+
   await browser.close();
 
   console.log(`\nLIVE VERIFICATION: ${pass} PASS / ${fail} FAIL`);
