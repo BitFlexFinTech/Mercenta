@@ -4142,3 +4142,25 @@ The registry now holds **ZERO** in_progress, **ZERO** blocked and **ZERO** regre
 
 
 
+
+---
+
+## SESSION — §FLOAT-LAUNCHER: THE SUPPORT-CHAT CORNER-COLLISION FIXED AT THE ROOT (2026-10-05)
+
+**MODE / EXPERTS.** MODE: IMPLEMENT · EXPERTS: senior-software-engineer · WHY: the recorded `NEXT TASK` authorised picking the next non-credential build item, and `07-fix-defects-at-source.md` required fixing the diagnosed-but-unfixed REAL defect `redesign-float-launcher-collision` at its root.
+
+**DEFECT (from the registry row).** The brand support-chat trigger was a permanently-visible `fixed bottom-6 right-6 z-50 w-12 h-12` overlay. Because the workspace `<main>` is the scroll container, it sat over the bottom-right 48×48 of EVERY brand workspace — where a table's last-row actions and a drawer footer rest. It had been caught once by a real regression (Product Catalog "Check result" became unclickable) and only MITIGATED (header kept to one line); the collision remained for any surface whose action row came to rest in that corner. Fixing a defect "at the source" means it must not exist — a mitigation is not a fix.
+
+**BUILT.**
+- `src/components/shared/LiveChatWidget.tsx` — the trigger is now an inline, labelled, `aria-expanded` header control (`data-testid=live-chat-trigger`); the panel opens as a header-anchored dropdown (`absolute right-0 top-full`, `role=dialog`) — the SAME shape the profile menu / ThemeSelector / NotificationCenter already use. No `fixed` element remains. Chat behaviour unchanged (logMessage + helpdesk ticket, tenant-scoped).
+- `src/components/layout/AppShell.tsx` + `src/components/layout/Header.tsx` — a NEW optional `headerActions` (AppShell) → `extraActions` (Header) chrome slot.
+- `src/components/layout/BrandShell.tsx` — mounts the widget through `headerActions={<LiveChatWidget />}` instead of the body.
+- `scripts/validate-float-launcher-collision.mjs` (**NEW**, `npm run validate:float-launcher`, **16 assertions**, mutation-proved TWICE — a reintroduced `fixed bottom-6 right-6` failed 3 assertions; a duplicated body mount failed the single-mount assertion; both files restored byte-identical, sha256 recorded). Surface declared in BOTH scope guards (`FLOAT_LAUNCHER_SCOPE` in E6; an entry in E7).
+- `requirements-registry.json` — row `redesign-float-launcher-collision` `not_started` → `built`; `_meta.status_counts` (not_started 42 → 41, built 143 → 144).
+
+**TESTED.** `validate:all` **162 PASS / 0 FAIL** · typecheck **0** (all 4 projects) · lint **0** · build **✓** · `validate:float-launcher` **16/16** · `validate:e6` PASS · `validate:e7` **121/0** · registry integrity **7/0** · `validate:built-rows` **2127/0** · browser **32 passed** (catalog-product-management 4 · app-shell 23 · brand-operational-surfaces 5) · LIVE `verify:live` **267/0** + a direct bundle check (the live `assets/BrandShell-BoSvjw2_.js` contains `live-chat-trigger`/`live-chat-panel`, zero occurrences of the old corner overlay).
+
+**RESULT.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Work commit `de1e1d8`, pushed to `origin/redesign/foundation` (no `--force`), deployed via `scripts/deploy-demo.sh` to `https://demo.mercenta.co.uk`, live-verified.
+
+**DEFECT INVENTORY.** FIXED at source: the support-chat corner collision (a mitigation replaced by a root fix), gated by a mutation-proved validator. No defect parked; no new blocker.
+
