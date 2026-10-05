@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 539,
+    "total_entries": 540,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,8 +371,8 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-admin-shell-chunk-registry.cjs after the §ADMIN-SHELL-CHUNK increment (discovered-adminshell-chunk-size not_started -> built_and_tested; the two STALE cleanup rows cleanup-p8-inventory-asin + cleanup-p10-logistics-hub-completion not_started -> built_and_tested). Snapshot only.",
-      "built_and_tested": 336,
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-brand-shell-chunk-registry.cjs after the §ADMIN-SHELL-CHUNK increment added the row discovered-brandshell-chunk-size (the sibling script reconciled discovered-adminshell-chunk-size + the two STALE cleanup rows). Snapshot only.",
+      "built_and_tested": 337,
       "built": 145,
       "not_started": 37,
       "removed": 4,
@@ -6119,6 +6119,15 @@
       "source": "§Phase 15 communications gate (2026-10-05, 3rd follow-up)",
       "status": "built",
       "evidence": "src/lib/mail/templates.ts; (the ONE owner) · src/components/admin/ApplicationsPanel.tsx (repointed) · scripts/validate-email-templates.mjs (13 assertions, EXECUTES the templates, PROVED ABLE TO FAIL — doubling the backslashes re-tripped it, file restored byte-identical). Registered as `validate:email-templates`.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null
+    },
+    {
+      "id": "discovered-brandshell-chunk-size",
+      "description": "DISCOVERED (2026-10-05, this session) while fixing `discovered-adminshell-chunk-size`: the SAME defect existed in the BRAND portal shell. `BrandShell` eagerly imported all 24 brand view panels, so they all landed in ONE ~637 kB `BrandShell-*.js` chunk and a brand downloaded every panel to open any one of them. FIXED at source: every panel is now a `React.lazy(() => import(…))` dynamic import rendered inside a `<Suspense>` (plus a `BrandViewFallback`), so the shell chunk is 28.57 kB (9.07 kB gzip). APP-code splitting only — `node_modules` still lands in the ONE `vendor` chunk (§P3).",
+      "source": "Discovered while fixing discovered-adminshell-chunk-size (§ADMIN-SHELL-CHUNK, 2026-10-05)",
+      "status": "built_and_tested",
+      "evidence": "scripts/validate-admin-shell-bundle.mjs (npm run validate:admin-shell-bundle) — its BrandShell section asserts the shell holds NO static import from `@/components/brand/`, declares ≥20 `lazy(() => import(` bindings, renders its switch inside a `<Suspense>`, holds the BrandShell chunk ≤ 300 kB, and splits ≥18 of 23 panels (incl. the heaviest, ProductCatalog + LogisticsHub) into their own chunks. Browser: e2e/brand-operational-surfaces.spec.ts + e2e/app-shell.spec.ts render the brand shell and navigate its views, loading the lazily-split chunks.",
       "last_verified": "2026-10-05",
       "superseded_by": null
     }

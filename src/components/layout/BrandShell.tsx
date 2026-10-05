@@ -1,9 +1,15 @@
 /**
  * BrandShell — brand portal environment. Lazy-loaded from App.tsx.
- * All brand components are statically imported here — this file
- * is only loaded when environment === 'brand'.
+ *
+ * §ADMIN-SHELL-CHUNK (2026-10-05) — the brand portal's view panels are LAZY, not
+ * eagerly imported. The shell is itself lazy-loaded from App.tsx, but importing
+ * every panel statically still put them all in ONE ~637 kB `BrandShell-*.js`
+ * chunk, so a brand downloaded every panel to open any one of them. Each panel is
+ * now a `React.lazy(() => import(…))` dynamic import rendered inside a
+ * `<Suspense>`, so the shell ships small and a panel's chunk loads only when its
+ * view is opened. `node_modules` still lands in the ONE `vendor` chunk (§P3).
  */
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
 import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
@@ -12,29 +18,35 @@ import { LiveChatWidget } from '@/components/shared/LiveChatWidget';
 import { TourLoader } from '@/components/shared/TourLoader';
 import { UsertourBrandBridge } from '@/components/shared/UsertourBrandBridge';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
-import { BrandDashboard } from '@/components/brand/BrandDashboard';
-import { OnboardingWizard } from '@/components/brand/OnboardingWizard';
-import { OnboardingSummary } from '@/components/brand/OnboardingSummary';
-import { ProductCatalog } from '@/components/brand/ProductCatalog';
-import { BrandInventory } from '@/components/brand/BrandInventory';
-import { LogisticsHub } from '@/components/brand/LogisticsHub';
-import { ComplianceHub } from '@/components/brand/ComplianceHub';
-import { BrandContractView } from '@/components/brand/BrandContractView';
-import { BrandPurchaseOrders } from '@/components/brand/BrandPurchaseOrders';
-import { BrandReturns } from '@/components/brand/BrandReturns';
-import { BrandReports } from '@/components/brand/BrandReports';
-import { BrandSelfService } from '@/components/brand/BrandSelfService';
-import { BrandSettings } from '@/components/brand/BrandSettings';
-import { BrandTeamMessages } from '@/components/brand/BrandTeamMessages';
-import { BrandSocialConnect } from '@/components/brand/BrandSocialConnect';
-import { BrandIntelligence } from '@/components/brand/BrandIntelligence';
-import { CommercialReadiness } from '@/components/brand/CommercialReadiness';
-import { BrandAdvertising } from '@/components/brand/BrandAdvertising';
-import { ListingAnalyzer } from '@/components/brand/ListingAnalyzer';
-import { SalesEstimatorCard } from '@/components/brand/SalesEstimatorCard';
-import { SalesAnalytics } from '@/components/brand/SalesAnalytics';
-import { BrandWorkCalendar, BrandWorkManagement } from '@/components/brand/WorkManagement';
-import { BrandSupport } from '@/components/brand/BrandSupport';
+/*
+  §ADMIN-SHELL-CHUNK (2026-10-05) — the brand portal's view panels, LAZY.
+  (See the file header for why.) `OnboardingWizard` is needed IMMEDIATELY by an
+  un-onboarded brand, so the early return below wraps it in its own `<Suspense>`.
+*/
+const BrandDashboard = lazy(() => import('@/components/brand/BrandDashboard').then((m) => ({ default: m.BrandDashboard })));
+const OnboardingWizard = lazy(() => import('@/components/brand/OnboardingWizard').then((m) => ({ default: m.OnboardingWizard })));
+const OnboardingSummary = lazy(() => import('@/components/brand/OnboardingSummary').then((m) => ({ default: m.OnboardingSummary })));
+const ProductCatalog = lazy(() => import('@/components/brand/ProductCatalog').then((m) => ({ default: m.ProductCatalog })));
+const BrandInventory = lazy(() => import('@/components/brand/BrandInventory').then((m) => ({ default: m.BrandInventory })));
+const LogisticsHub = lazy(() => import('@/components/brand/LogisticsHub').then((m) => ({ default: m.LogisticsHub })));
+const ComplianceHub = lazy(() => import('@/components/brand/ComplianceHub').then((m) => ({ default: m.ComplianceHub })));
+const BrandContractView = lazy(() => import('@/components/brand/BrandContractView').then((m) => ({ default: m.BrandContractView })));
+const BrandPurchaseOrders = lazy(() => import('@/components/brand/BrandPurchaseOrders').then((m) => ({ default: m.BrandPurchaseOrders })));
+const BrandReturns = lazy(() => import('@/components/brand/BrandReturns').then((m) => ({ default: m.BrandReturns })));
+const BrandReports = lazy(() => import('@/components/brand/BrandReports').then((m) => ({ default: m.BrandReports })));
+const BrandSelfService = lazy(() => import('@/components/brand/BrandSelfService').then((m) => ({ default: m.BrandSelfService })));
+const BrandSettings = lazy(() => import('@/components/brand/BrandSettings').then((m) => ({ default: m.BrandSettings })));
+const BrandTeamMessages = lazy(() => import('@/components/brand/BrandTeamMessages').then((m) => ({ default: m.BrandTeamMessages })));
+const BrandSocialConnect = lazy(() => import('@/components/brand/BrandSocialConnect').then((m) => ({ default: m.BrandSocialConnect })));
+const BrandIntelligence = lazy(() => import('@/components/brand/BrandIntelligence').then((m) => ({ default: m.BrandIntelligence })));
+const CommercialReadiness = lazy(() => import('@/components/brand/CommercialReadiness').then((m) => ({ default: m.CommercialReadiness })));
+const BrandAdvertising = lazy(() => import('@/components/brand/BrandAdvertising').then((m) => ({ default: m.BrandAdvertising })));
+const ListingAnalyzer = lazy(() => import('@/components/brand/ListingAnalyzer').then((m) => ({ default: m.ListingAnalyzer })));
+const SalesEstimatorCard = lazy(() => import('@/components/brand/SalesEstimatorCard').then((m) => ({ default: m.SalesEstimatorCard })));
+const SalesAnalytics = lazy(() => import('@/components/brand/SalesAnalytics').then((m) => ({ default: m.SalesAnalytics })));
+const BrandWorkManagement = lazy(() => import('@/components/brand/WorkManagement').then((m) => ({ default: m.BrandWorkManagement })));
+const BrandWorkCalendar = lazy(() => import('@/components/brand/WorkManagement').then((m) => ({ default: m.BrandWorkCalendar })));
+const BrandSupport = lazy(() => import('@/components/brand/BrandSupport').then((m) => ({ default: m.BrandSupport })));
 import { MERCENTA_SOCIAL } from '@/config/mercentaSocial';
 import { NAV_BADGE_LABELS, useBrandNavBadges } from '@/lib/nav/navBadges';
 import {
@@ -121,6 +133,24 @@ const BRAND_VIEW_IDS: readonly string[] = BRAND_SECTIONS.flatMap((s) =>
   s.items.map((i) => i.id)
 );
 
+/**
+ * §ADMIN-SHELL-CHUNK — the in-shell fallback shown while a lazily-loaded brand
+ * panel's chunk is fetched. It renders INSIDE the shell chrome (nav + header stay
+ * mounted), so switching views never blanks the workspace.
+ */
+function BrandViewFallback() {
+  return (
+    <div
+      className="flex items-center justify-center rounded-ds-lg border border-white/5 bg-ink-850 p-10"
+      role="status"
+      aria-live="polite"
+      data-testid="brand-view-loading"
+    >
+      <span className="text-sm text-zinc-500">Loading…</span>
+    </div>
+  );
+}
+
 export default function BrandShell() {
   const { brandProfile } = useApp();
   /**
@@ -160,7 +190,15 @@ export default function BrandShell() {
     ),
   }));
 
-  if (!brandProfile.onboarded) return <OnboardingWizard />;
+  /* §ADMIN-SHELL-CHUNK — `OnboardingWizard` is lazy, and this early return sits
+     OUTSIDE the main view `<Suspense>` below, so it carries its own boundary. */
+  if (!brandProfile.onboarded) {
+    return (
+      <Suspense fallback={<BrandViewFallback />}>
+        <OnboardingWizard />
+      </Suspense>
+    );
+  }
 
   const bc = brandView === 'overview' ? 'Dashboard'
     : brandView === 'onboarding' ? 'Onboarding & Legal'
@@ -194,38 +232,42 @@ export default function BrandShell() {
     >
       <ErrorBoundary sectionLabel="Brand portal">
         <IntegrationsProvider>
-          {brandView === 'overview' && <BrandDashboard onNavigate={setBrandView} />}
-          {brandView === 'onboarding' && (brandProfile.onboarded ? <OnboardingSummary onNavigate={setBrandView} /> : <OnboardingWizard />)}
-          {brandView === 'catalog' && <ProductCatalog />}
-          {/* §P8 — inventory linked to the catalogue (programme decision 5). */}
-          {brandView === 'inventory' && <BrandInventory />}
-          {brandView === 'commercial_readiness' && <CommercialReadiness />}
-          {brandView === 'contracts' && <BrandContractView />}
-          {brandView === 'purchase_orders' && <BrandPurchaseOrders />}
-          {brandView === 'logistics' && <LogisticsHub />}
-          {brandView === 'compliance' && <ComplianceHub />}
-          {brandView === 'analytics' && <SalesAnalytics />}
-          {brandView === 'documents' && <BrandSelfService />}
-          {brandView === 'returns' && <BrandReturns />}
-          {brandView === 'reports' && <BrandReports onNavigate={setBrandView} />}
-          {brandView === 'settings' && <BrandSettings />}
-          {/* §Sprint — canonical work layer: the brand's own tasks/deadlines + calendar. */}
-          {brandView === 'work' && <BrandWorkManagement onNavigate={setBrandView} />}
-          {brandView === 'calendar' && <BrandWorkCalendar onNavigate={setBrandView} />}
-          {brandView === 'team' && <BrandTeamMessages />}
-          {/* §Brief §6 — the brand's own case surface (Mercenta-mediated). */}
-          {brandView === 'cases' && <BrandSupport />}
-          {brandView === 'social' && <BrandSocialConnect />}
-          {brandView === 'market' && (
-            <div className="space-y-4">
-              <BrandIntelligence />
-              <BrandAdvertising />
-              <ListingAnalyzer />
-              <SalesEstimatorCard />
-            </div>
-          )}
-          <TourLoader currentView={brandView} isBrandPortal={true} />
-          <UsertourBrandBridge />
+          {/* §ADMIN-SHELL-CHUNK — the lazily-loaded view panels resolve inside this
+              boundary; the shell chrome (nav + header) stays mounted. */}
+          <Suspense fallback={<BrandViewFallback />}>
+            {brandView === 'overview' && <BrandDashboard onNavigate={setBrandView} />}
+            {brandView === 'onboarding' && (brandProfile.onboarded ? <OnboardingSummary onNavigate={setBrandView} /> : <OnboardingWizard />)}
+            {brandView === 'catalog' && <ProductCatalog />}
+            {/* §P8 — inventory linked to the catalogue (programme decision 5). */}
+            {brandView === 'inventory' && <BrandInventory />}
+            {brandView === 'commercial_readiness' && <CommercialReadiness />}
+            {brandView === 'contracts' && <BrandContractView />}
+            {brandView === 'purchase_orders' && <BrandPurchaseOrders />}
+            {brandView === 'logistics' && <LogisticsHub />}
+            {brandView === 'compliance' && <ComplianceHub />}
+            {brandView === 'analytics' && <SalesAnalytics />}
+            {brandView === 'documents' && <BrandSelfService />}
+            {brandView === 'returns' && <BrandReturns />}
+            {brandView === 'reports' && <BrandReports onNavigate={setBrandView} />}
+            {brandView === 'settings' && <BrandSettings />}
+            {/* §Sprint — canonical work layer: the brand's own tasks/deadlines + calendar. */}
+            {brandView === 'work' && <BrandWorkManagement onNavigate={setBrandView} />}
+            {brandView === 'calendar' && <BrandWorkCalendar onNavigate={setBrandView} />}
+            {brandView === 'team' && <BrandTeamMessages />}
+            {/* §Brief §6 — the brand's own case surface (Mercenta-mediated). */}
+            {brandView === 'cases' && <BrandSupport />}
+            {brandView === 'social' && <BrandSocialConnect />}
+            {brandView === 'market' && (
+              <div className="space-y-4">
+                <BrandIntelligence />
+                <BrandAdvertising />
+                <ListingAnalyzer />
+                <SalesEstimatorCard />
+              </div>
+            )}
+            <TourLoader currentView={brandView} isBrandPortal={true} />
+            <UsertourBrandBridge />
+          </Suspense>
         </IntegrationsProvider>
       </ErrorBoundary>
     </AppShell>

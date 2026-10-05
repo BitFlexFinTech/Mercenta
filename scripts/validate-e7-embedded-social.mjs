@@ -2439,9 +2439,11 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
      * a changed source/test file outside EVERY declared set is still refused.
      */
     'src/components/layout/AdminShell.tsx',
+    'src/components/layout/BrandShell.tsx',
     'scripts/validate-admin-shell-bundle.mjs',
     'scripts/validate-amazon-ads.mjs',
     'scripts/reconcile-admin-shell-chunk-registry.cjs',
+    'scripts/reconcile-brand-shell-chunk-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

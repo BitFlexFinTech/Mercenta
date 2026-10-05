@@ -1,4 +1,4 @@
-// §ADMIN-SHELL-CHUNK — THE ADMIN-SHELL BUNDLE BUDGET GATE.
+// §ADMIN-SHELL-CHUNK — THE PORTAL-SHELL BUNDLE BUDGET GATE (AdminShell + BrandShell).
 //
 // WHY THIS EXISTS
 // ---------------
@@ -7,6 +7,10 @@
 // the shell EAGERLY imported all ~34 admin view panels — so an operator
 // downloaded every panel to open any one of them, and `vite build` warned
 // ("Some chunks are larger than 500 kB after minification").
+//
+// The SAME defect was found in `BrandShell` in the same session — ~637 kB, 24
+// eagerly imported brand view panels — and is fixed in the same increment, so
+// this gate covers BOTH portal shells (AdminShell AND BrandShell).
 //
 // The fix is APP-level code splitting: each panel is reached by a
 // `React.lazy(() => import(…))` dynamic import and rendered inside a
@@ -51,46 +55,83 @@ const test = (name, ok, detail) => {
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const read = (p) => readFileSync(`${ROOT}/${p}`, 'utf8');
-/** The budget, in kB, the admin shell chunk must stay under. */
-const ADMIN_SHELL_BUDGET_KB = 300;
-/** How many of the ~33 panels must be split into their own chunk. */
-const MIN_PANEL_CHUNKS = 25;
-/** How many `lazy(() => import(` bindings the shell must declare. */
-const MIN_LAZY = 30;
-
-
-
-/** Every admin view panel basename the shell lazily loads (Vite names a
- *  dynamic-import chunk `<basename>-<hash>.js`). */
-const PANEL_BASENAMES = [
-  'AdminDashboard', 'LogisticsControl', 'BrandCRM', 'CatalogManagerAdmin',
-  'ComplianceApprovals', 'MarketingHub', 'IntegrationsPanel', 'UsertourAdminPanel',
-  'PostizAdminPanel', 'WhatsAppAdminPanel', 'FulfillmentTrack', 'RetailPipeline',
-  'BillingPanel', 'ContractsAdminPanel', 'MessagesHub', 'HelpdeskDashboard',
-  'ReturnsTrackingDashboard', 'MonitoringDashboard', 'AdminPurchaseOrderList',
-  'SuperAdminPanel', 'AdminAuditLog', 'BrandIntelligencePanel',
-  'BrandIntelligenceStrategyPanel', 'OpportunityDiscoveryPanel',
-  'ProductDiscoveryPanel', 'RegionalPriorityPanel', 'AmazonAdsDashboard',
-  'FounderControlCentre', 'MercentaBrain', 'FounderInvestorCentre',
-  'PartnershipsCentre', 'OnboardingPipeline', 'WorkManagement',
+/**
+ * The portal shells this gate covers. §ADMIN-SHELL-CHUNK (2026-10-05) found the
+ * SAME defect in BOTH: a shell that eagerly imported all of its view panels put
+ * them all in ONE chunk (AdminShell 909 kB, BrandShell ~637 kB), so a user
+ * downloaded every panel to open any one of them.
+ *
+ * Vite names a dynamic-import chunk `<basename>-<hash>.js`, which is how the
+ * "is this panel split into its own chunk?" assertions below work.
+ */
+const SHELLS = [
+  {
+    label: 'AdminShell',
+    file: 'src/components/layout/AdminShell.tsx',
+    dir: '@/components/admin/',
+    /** the shell chunk budget, in kB (measured 16.57 kB after the split) */
+    budget: 300,
+    /** how many of the panels must be split into their own chunk */
+    minPanels: 25,
+    /** how many `lazy(() => import(` bindings the shell must declare */
+    minLazy: 30,
+    panels: [
+      'AdminDashboard', 'LogisticsControl', 'BrandCRM', 'CatalogManagerAdmin',
+      'ComplianceApprovals', 'MarketingHub', 'IntegrationsPanel', 'UsertourAdminPanel',
+      'PostizAdminPanel', 'WhatsAppAdminPanel', 'FulfillmentTrack', 'RetailPipeline',
+      'BillingPanel', 'ContractsAdminPanel', 'MessagesHub', 'HelpdeskDashboard',
+      'ReturnsTrackingDashboard', 'MonitoringDashboard', 'AdminPurchaseOrderList',
+      'SuperAdminPanel', 'AdminAuditLog', 'BrandIntelligencePanel',
+      'BrandIntelligenceStrategyPanel', 'OpportunityDiscoveryPanel',
+      'ProductDiscoveryPanel', 'RegionalPriorityPanel', 'AmazonAdsDashboard',
+      'FounderControlCentre', 'MercentaBrain', 'FounderInvestorCentre',
+      'PartnershipsCentre', 'OnboardingPipeline', 'WorkManagement',
+    ],
+    heavy: ['AdminDashboard', 'MercentaBrain'],
+  },
+  {
+    label: 'BrandShell',
+    file: 'src/components/layout/BrandShell.tsx',
+    dir: '@/components/brand/',
+    /** the shell chunk budget, in kB */
+    budget: 300,
+    minPanels: 18,
+    minLazy: 20,
+    panels: [
+      'BrandDashboard', 'OnboardingWizard', 'OnboardingSummary', 'ProductCatalog',
+      'BrandInventory', 'LogisticsHub', 'ComplianceHub', 'BrandContractView',
+      'BrandPurchaseOrders', 'BrandReturns', 'BrandReports', 'BrandSelfService',
+      'BrandSettings', 'BrandTeamMessages', 'BrandSocialConnect', 'BrandIntelligence',
+      'CommercialReadiness', 'BrandAdvertising', 'ListingAnalyzer',
+      'SalesEstimatorCard', 'SalesAnalytics', 'WorkManagement', 'BrandSupport',
+    ],
+    heavy: ['ProductCatalog', 'LogisticsHub'],
+  },
 ];
 
-/* ── 1–3. the source contract ─────────────────────────────────────────────── */
-const shellPath = 'src/components/layout/AdminShell.tsx';
-const shell = read(shellPath);
 
-const eagerAdminImports = [...shell.matchAll(/^\s*import[^;]*from\s+'@\/components\/admin\/[^']+';/gm)].map(
-  (m) => m[0].trim()
-);
-test('AdminShell holds NO static import from @/components/admin/ (every panel is a dynamic import)',
-  eagerAdminImports.length === 0, eagerAdminImports.join(' | '));
 
-const lazyBindings = [...shell.matchAll(/lazy\(\s*\(\)\s*=>\s*import\(/g)].length;
-test(`AdminShell declares at least ${MIN_LAZY} lazy(() => import(...)) panel bindings`,
-  lazyBindings >= MIN_LAZY, `${lazyBindings} found`);
 
-test('AdminShell renders its view switch inside a <Suspense>',
-  /<Suspense\b/.test(shell));
+/* ── 1–3. the source contract (per shell) ─────────────────────────────────── */
+for (const s of SHELLS) {
+  const src = read(s.file);
+
+  // An EAGER import is `… from '@/components/<dir>/…';`. A LAZY one is
+  // `import('@/components/<dir>/…')` — which contains no `from '`, so this
+  // discriminates cleanly.
+  const eager = src
+    .split('\n')
+    .filter((l) => /^\s*import\b/.test(l) && l.includes(`from '${s.dir}`));
+  test(`${s.label} holds NO static import from ${s.dir} (every panel is a dynamic import)`,
+    eager.length === 0, eager.map((l) => l.trim()).join(' | '));
+
+  const lazyBindings = [...src.matchAll(/lazy\(\s*\(\)\s*=>\s*import\(/g)].length;
+  test(`${s.label} declares at least ${s.minLazy} lazy(() => import(...)) panel bindings`,
+    lazyBindings >= s.minLazy, `${lazyBindings} found`);
+
+  test(`${s.label} renders its view switch inside a <Suspense>`,
+    /<Suspense\b/.test(src));
+}
 
 /* ── 4–7. the build output ────────────────────────────────────────────────── */
 const noBuild = process.argv.includes('--no-build');
@@ -110,24 +151,24 @@ if (!existsSync(distAssets)) {
   test('exactly ONE vendor chunk exists (the §P3 single-vendor invariant holds)',
     vendor.length === 1, vendor.join(', '));
 
-  const shellChunk = js.filter((f) => /^AdminShell-.*\.js$/.test(f));
-  test('an AdminShell chunk exists', shellChunk.length === 1, shellChunk.join(', '));
-  if (shellChunk.length === 1) {
-    const kb = sizeKb(shellChunk[0]);
-    test(`the AdminShell chunk is ≤ ${ADMIN_SHELL_BUDGET_KB} kB (was 909 kB before the split)`,
-      kb <= ADMIN_SHELL_BUDGET_KB, `${shellChunk[0]} = ${kb.toFixed(2)} kB`);
-  }
+  const has = (base) => js.some((f) => new RegExp(`^${base}-[^/]*\\.js$`).test(f));
 
-  const panelChunks = PANEL_BASENAMES.filter((n) =>
-    js.some((f) => new RegExp(`^${n}-[^/]*\\.js$`).test(f))
-  );
-  test(`at least ${MIN_PANEL_CHUNKS} of ${PANEL_BASENAMES.length} panels are split into their own chunk`,
-    panelChunks.length >= MIN_PANEL_CHUNKS,
-    `${panelChunks.length} found: ${panelChunks.join(', ')}`);
+  for (const s of SHELLS) {
+    const shellChunk = js.filter((f) => new RegExp(`^${s.label}-.*\\.js$`).test(f));
+    test(`a ${s.label} chunk exists`, shellChunk.length === 1, shellChunk.join(', '));
+    if (shellChunk.length === 1) {
+      const kb = sizeKb(shellChunk[0]);
+      test(`the ${s.label} chunk is ≤ ${s.budget} kB`,
+        kb <= s.budget, `${shellChunk[0]} = ${kb.toFixed(2)} kB`);
+    }
 
-  for (const heavy of ['AdminDashboard', 'MercentaBrain']) {
-    test(`the heavy panel "${heavy}" is split into its own chunk`,
-      js.some((f) => new RegExp(`^${heavy}-[^/]*\\.js$`).test(f)));
+    const split = s.panels.filter(has);
+    test(`at least ${s.minPanels} of ${s.panels.length} ${s.label} panels are split into their own chunk`,
+      split.length >= s.minPanels, `${split.length} found: ${split.join(', ')}`);
+
+    for (const heavy of s.heavy) {
+      test(`the heavy ${s.label} panel "${heavy}" is split into its own chunk`, has(heavy));
+    }
   }
 }
 

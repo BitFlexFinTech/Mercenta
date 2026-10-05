@@ -2548,9 +2548,11 @@ const OPERATOR_RELABEL_SCOPE = new Set([
  */
 const ADMIN_SHELL_CHUNK_SCOPE = new Set([
   'src/components/layout/AdminShell.tsx',
+  'src/components/layout/BrandShell.tsx',
   'scripts/validate-admin-shell-bundle.mjs',
   'scripts/validate-amazon-ads.mjs',
   'scripts/reconcile-admin-shell-chunk-registry.cjs',
+  'scripts/reconcile-brand-shell-chunk-registry.cjs',
   'requirements-registry.json',
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
