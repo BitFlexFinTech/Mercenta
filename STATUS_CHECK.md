@@ -4203,3 +4203,26 @@ The registry now holds **ZERO** in_progress, **ZERO** blocked and **ZERO** regre
 - **NO defect parked; NO new blocker.** The ONLY remaining >500 kB chunk is the deliberate single `vendor` chunk (§P3 — splitting it caused production mount crashes), recorded as a documented trade-off, not a defect.
 
 **NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; 37 `not_started` rows remain. No credential required.
+
+---
+
+## §PHASE 13 — THE CLAIMS REGISTRY (2026-10-05)
+
+**BUILT.** The Phase 13 roadmap row `phase13-claims-registry` recorded that Mercenta needed ONE GREEN (supported) / AMBER (requires verification) / RED (do not use) governance index over every claim its outward-facing content may make. FOUR canonical claim-rule owners already existed — `src/lib/discovery/banned-patterns.mjs` (`BANNED_PATTERNS`), `src/lib/intelligence/amazonWording.ts` (`AMAZON_WORDING_RULES`), `src/config/positioning.ts` (`PUBLIC_CLAIM_RED_LINES`), `src/config/ukMarketFit.ts` (`PRE_AUDIT_PROHIBITED_PROMISES`) — each already gated, but nothing declared them together or classified them.
+
+- `src/lib/compliance/claimsRegistry.ts` (**NEW**, the ONE owner) — **12 classes (8 RED / 3 AMBER / 1 GREEN)**. It re-implements NO rule: every class POINTS AT its canonical owner (`{ module, symbol }`). `lintClaims(text, channel)` classifies content (RED is the hard block; AMBER names the qualifier the copy must carry); `claimClassesForChannel`, `registrySummary`, and module-load guards (fail-closed) complete it.
+- `src/lib/discovery/engine.ts` — **WIRED**: the acquisition outreach copy now lints through the registry (`lintClaims(subject, 'acquisition')`), a strict superset of the previous `lintOutwardWording` call, so behaviour is preserved and a programme claim now fails too. The owner is USED in the product, not merely declared.
+- `scripts/validate-claims-registry.mjs` (**NEW**, `npm run validate:claims-registry`, **22 assertions**) — every class resolves to a real owner export; every RED example is caught by that owner; every AMBER qualifier is real and used by a surface; no canonical owner is left un-registered; the lint executes; **and the gate is PROVED ABLE TO FAIL** (self-check on a bogus symbol + an uncaught example).
+- `scripts/lint-wording.mjs` — the registry is a DEFINITIONS file (its examples must contain the channel name to TEST the owners), excluded exactly as `amazonWording.ts` already is; the exclusion is guarded by the new gate's section I (no component imports it).
+- `requirements-registry.json` — row `phase13-claims-registry` raised `not_started` → `built` (old value in `_audit_note`; `status_counts` built 145→146, not_started 37→36). Surface declared in BOTH scope guards (`CLAIMS_REGISTRY_SCOPE` in E6; entries in E7). Plan §0b item 2 records the fifth concrete build item.
+
+**TESTED.** `validate:all` **165 PASS / 0 FAIL** · typecheck **0** (all 4 projects) · lint **0** · build ✓ · `validate:claims-registry` **22/22** · `validate:wording` PASS · `validate:wording-guard` PASS · `validate:public-claims` PASS · `validate:uk-market-fit` PASS · `validate:sales-estimator` 30/30 · `validate:admin-shell-bundle` 17/17 · `validate:production-boot` PASS · `validate:discovery` PASS · E6/E7 scope guards PASS · browser **8 passed** (acquisition-pipeline + workstream-b-intelligence) · LIVE `verify:live` **267 PASS / 0 FAIL** + a direct bundle check (the live `index.html` references EXACTLY the local build's assets; the live `assets/AdminShell-BUa9etTh.js` is 16,930 bytes and `assets/BrandShell-B36Ht64a.js` is 28,577 bytes, byte-identical to local).
+
+**RESULT.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Work commit `cbe7dc5`, pushed to `origin/redesign/foundation` (no `--force`), deployed via `scripts/deploy-demo.sh` to `https://demo.mercenta.co.uk` (Removed: 106 obsolete files; exit 0), live-verified.
+
+**DEFECT INVENTORY.**
+- **FIXED at source:** `scripts/lint-wording.mjs` flagged the new registry because its examples quote the channel name — the correct fix is the DEFINITIONS-file exclusion (the same treatment `amazonWording.ts` already had), NOT weakening the gate; guarded by the new gate's section I (no component imports the registry).
+- **FIXED at source:** the `_meta.status_counts` snapshot in `requirements-registry.json` went stale the moment the row was raised — recomputed (built 145→146, not_started 37→36).
+- **NO defect parked; NO new blocker.** §PHASE 13 is a library + gate with no runtime dependency.
+
+**NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; 36 `not_started` rows remain. No credential required.
