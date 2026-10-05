@@ -2366,6 +2366,31 @@ const E2E_SCENARIO_CATALOGUE_SCOPE = new Set([
 
 
 
+/**
+ * §PHASE 15 — THE LAUNCH GATE (2026-10-05). The production-readiness/launch gate
+ * (14 `phase15-*` registry rows). This increment adds the ONE launch-gate
+ * validator, makes the SEO SSOT's `unknown` verdict render a real custom 404
+ * (it previously showed the homepage), and hardens the shipped `.htaccess` with
+ * response security headers. It also carries the dependency security-audit fix
+ * (`npm audit fix`, 33 → 12 advisories). NO PROTECTED PATH is touched.
+ *
+ * Declared set — every file the phase touches, named. The F5/F5b/F6 contract is
+ * UNCHANGED: a changed SOURCE file outside EVERY declared set still fails.
+ */
+const PHASE15_LAUNCH_SCOPE = new Set([
+  'scripts/validate-phase15-launch.mjs',      /* NEW — the ONE launch-gate validator */
+  'src/components/marketing/NotFound.tsx',    /* NEW — the custom 404 view */
+  'src/components/marketing/Home.tsx',        /* renders the 404 for an unknown address */
+  'e2e/public-pages.spec.ts',                 /* the browser proof of the 404 */
+  'public/.htaccess',                         /* response security headers */
+  'package.json',                             /* validate:phase15-launch */
+  'package-lock.json',                        /* the npm audit fix */
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+  'PRODUCTION_READINESS.md',
+  'docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3090,7 +3115,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE3_SUPPLY_ROUTE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §BATCH 0 — the E2E scenario catalogue + traceability gate (see above). */
           E2E_SCENARIO_CATALOGUE_SCOPE.has(p) ||
-          [...E2E_SCENARIO_CATALOGUE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...E2E_SCENARIO_CATALOGUE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 15 — the launch gate (see above). */
+          PHASE15_LAUNCH_SCOPE.has(p) ||
+          [...PHASE15_LAUNCH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

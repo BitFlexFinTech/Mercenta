@@ -2360,6 +2360,17 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/components/shared/logistics/SupplyRouteEscalationPanel.tsx',
     'src/components/admin/LogisticsControl.tsx',
     'e2e/supply-route-escalation.spec.ts',
+    /**
+     * §PHASE 15 — THE LAUNCH GATE (2026-10-05). The production-readiness/launch
+     * gate: the ONE launch-gate validator, the custom 404 (the SEO SSOT's `unknown`
+     * verdict now has a matching view instead of the homepage), the browser proof
+     * of it, and both scope guards. Same mechanism: a changed source/test file
+     * outside EVERY declared set is still refused. No protected path touched.
+     */
+    'scripts/validate-phase15-launch.mjs',
+    'src/components/marketing/NotFound.tsx',
+    'src/components/marketing/Home.tsx',
+    'e2e/public-pages.spec.ts',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

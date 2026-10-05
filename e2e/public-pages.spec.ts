@@ -143,3 +143,27 @@ test.describe('The seven public pages — render, shell theme and no red-line cl
     }
   }
 });
+
+/**
+ * §PHASE 15 — THE CUSTOM 404 (website-integrity launch gate).
+ *
+ * The site is an SPA whose host serves `index.html` for EVERY path, so before this
+ * gate an unknown address silently rendered the HOMEPAGE. This asserts the SSOT's
+ * `unknown` verdict now has a matching VIEW: a real "not found" page with a heading
+ * and the two real exits, and no uncaught error.
+ */
+test.describe('§Phase 15 — an unknown address renders the custom 404, not the homepage', () => {
+  test('/this-page-does-not-exist shows the 404 view with real exits', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(e.message));
+
+    await page.goto('/this-page-does-not-exist');
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/couldn.t find that page/i);
+    await expect(page.getByRole('button', { name: /back to homepage/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /partner login/i })).toBeVisible();
+
+    expect(errors).toEqual([]);
+  });
+});
+

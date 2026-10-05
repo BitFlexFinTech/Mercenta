@@ -29,6 +29,23 @@ RewriteRule . /index.html [L,QSA]
   Header set Cache-Control "public, max-age=86400"
 </FilesMatch>
 
+# ── Security headers (§Phase 15 — security launch gate) ──
+# Sent by the Apache host for every response. HTTPS itself is enforced at the
+# host/domain level (out of the repository's control); these headers harden the
+# content the host serves.
+<IfModule mod_headers.c>
+  # Force HTTPS for this host for one year (per-host; no includeSubDomains/preload).
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # Never let a browser guess a declared type into a script (MIME sniffing).
+  Header always set X-Content-Type-Options "nosniff"
+  # Do not leak the full URL to other origins.
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # This site is never framed by another origin.
+  Header always set X-Frame-Options "SAMEORIGIN"
+  # Turn off browser features this site does not use.
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+</IfModule>
+
 # Security: Deny access to .env and internal files
 <FilesMatch "\.(env|env\.deploy|env\.example|md|log)$">
   Require all denied

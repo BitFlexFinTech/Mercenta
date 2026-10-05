@@ -17,6 +17,8 @@ import { TermsOfService } from '@/components/marketing/TermsOfService';
 import { PublicNav, type PublicPage } from '@/components/marketing/PublicNav';
 import { PublicFooter } from '@/components/marketing/PublicFooter';
 import { CookieNotice } from '@/components/marketing/CookieNotice';
+// §Phase 15 — the custom 404 view (website-integrity launch gate).
+import { NotFound } from '@/components/marketing/NotFound';
 
 // §Lazy-load — code-split these pages so they don't block the homepage bundle
 const HowItWorks = lazy(() => import('@/components/marketing/HowItWorks').then(m => ({ default: m.HowItWorks })));
@@ -149,6 +151,8 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
   const { setEnvironment } = useApp();
   const { shellMode } = useTheme();
   const [publicView, setPublicView] = useState<PublicPage | null>(null);
+  // §Phase 15 — an address that names nothing renders the 404 view, not the homepage.
+  const [notFound, setNotFound] = useState(false);
 
   // §Crawlability — resolve direct URL access from the SEO SSOT (was an inline
   // path chain that had to be kept in sync with robots.txt/sitemap by hand).
@@ -156,6 +160,9 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
     const resolved = resolveRoute(window.location.pathname);
     if (resolved.kind === 'public' && resolved.route.page !== 'home') {
       setPublicView(resolved.route.page as PublicPage);
+    } else if (resolved.kind === 'unknown') {
+      // §Phase 15 — the SSOT says this address means nothing; show the 404.
+      setNotFound(true);
     }
   }, []);
 
@@ -190,6 +197,10 @@ export function Home({ content: c = DEFAULT_HOMEPAGE_CONTENT }: { content?: Home
   useScrollReveal(!reducedMotion);
 
   // Conditional pages rendered as early return AFTER all hooks.
+  // §Phase 15 — an unknown address shows the 404 view (never the homepage).
+  if (notFound) {
+    return <NotFound onNavigate={() => navigate('home')} onOpenPortal={openPortal} />;
+  }
   if (publicView && publicView !== 'home') {
     return renderPublicPage(publicView, navigate, openPortal);
   }

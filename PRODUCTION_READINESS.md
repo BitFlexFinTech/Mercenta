@@ -1,6 +1,37 @@
 # PRODUCTION_READINESS.md — go-live checklist
 
-**Last updated: 2026-10-04 (§Batch-0 — the platform-mode persistence).**
+**Last updated: 2026-10-05 (§PHASE 15 — THE LAUNCH GATE, worked).**
+
+## §PHASE 15 — THE LAUNCH GATE (2026-10-05): what is now pinned, and exactly what is still BLOCKED
+
+Phase 15 (Production Readiness + Launch Gate) is the ONE gate that must pass before a public launch. It is 15
+`phase15-*` rows in `requirements-registry.json`, and until this session it lived only as prose. It is now made
+**executable** by `scripts/validate-phase15-launch.mjs` (`npm run validate:phase15-launch`): one assertion group per
+gate, each printing **PASS** or **BLOCKED with the EXACT missing input** — so no gate silently passes and no gate
+silently stays blocked. Its repo-side assertions are **60/60**; the gate was proved able to fail (a file the 404 gate
+depends on was renamed, the validator exited 1, and the file was restored byte-identical).
+
+**Cleared this session (repository-side requirements met):** SEO · performance · accessibility · responsive ·
+conversion · reliability/degradation · website integrity. **Work done:** a REAL custom 404
+(`src/components/marketing/NotFound.tsx` + the `Home.tsx` wiring + an `e2e/public-pages.spec.ts` case) so an unknown
+address no longer renders the homepage; response security headers in `public/.htaccess` (HSTS, nosniff,
+X-Frame-Options, Referrer-Policy, Permissions-Policy); and the dependency security-audit fix (`npm audit fix`,
+**33 → 12** advisories).
+
+**BLOCKED — the exact missing input, per gate (NOT a build blocker; each needs input the repository cannot supply):**
+
+| Gate | Exact missing input |
+|---|---|
+| `phase15-security` | (a) HTTPS/TLS enforcement is host/domain-level; (b) the remaining `npm audit` critical is `maplibre-gl`, whose fix is a **breaking major upgrade** needing a logistics-map regression pass |
+| `phase15-database-infrastructure` | a PRODUCTION Supabase project — backup schedule, restore rehearsal, DR drill |
+| `phase15-legal-privacy` | legal sign-off of the published privacy policy / terms + a third-party data inventory (a human decision) |
+| `phase15-analytics` | a BUSINESS DECISION: which analytics provider (if any) and on what lawful basis. Until then NO analytics script is loaded (asserted) |
+| `phase15-production-data-cleanup` | the live database/domain for the PRODUCTION content audit (repo-side checks pass) |
+| `phase15-communications-email-auth` | SPF/DKIM/DMARC DNS records on the sending domain + the sending provider chosen |
+| `phase15-deployment-dns-ssl` | final DNS/domain/SSL on the production domain (host-level `GO_LIVE.md` steps) |
+| `phase15-final-launch-gate` | BLOCKED BY DEPENDENCY — it is the gate OVER the others; it closes when they close |
+
+**No credential was asked for and none is required for any remaining build work.**
 
 **Status of the DASHBOARD + LOGISTICS CLEANUP PROGRAMME: COMPLETE.** Every phase — P0, P0.4, P1–P13 — is DONE, and the
 programme's own status line reads *"the programme has no remaining phase"*

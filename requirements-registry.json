@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-10-04",
+    "last_updated": "2026-10-05",
     "status_enum": [
       "not_started",
       "built",
@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 532,
+    "total_entries": 533,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,16 +371,14 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Corrected 2026-10-04 to the REAL entry counts, then updated when §OPTION-A closed `editor-typecheck-gap-e2e-and-functions` (not_started 61 -> 60; built_and_tested 326 -> 327), §PHASE 3 built `phase3-supply-route-profile` + `phase3-logistics-escalation-engine` (not_started 60 -> 58; built 126 -> 128), and §BATCH 1 added `batch1-e2e-platform-foundations` (built_and_tested 327 -> 328). The block is a snapshot; nothing consumes it, which is why it drifts — it is kept truthful by hand.",
-      "built_and_tested": 328,
-      "built": 129,
-      "not_started": 58,
-      "deferred": 9,
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-launch-registry.cjs after the Phase 15 launch-gate increment (14 phase15-* rows restated from not_started to their true status; +1 row phase15-launch-gate-validator). Snapshot only.",
+      "built_and_tested": 333,
+      "built": 135,
+      "not_started": 44,
       "removed": 4,
-      "complete": 1,
-      "in_progress": 0,
-      "blocked": 0,
-      "regressed": 0
+      "deferred": 9,
+      "blocked": 7,
+      "complete": 1
     },
     "dashboard_logistics_cleanup_programme": {
       "programme": "docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md",
@@ -969,7 +967,15 @@
     "batch3c_part2b_functional_parity": "Batch 3c part 2b (2026-10-03): the remaining page-by-page parity dimensions of the evidence-bearing rows - dataset completeness, name-implies-capability and interactivity. NEW gate scripts/validate-functional-parity.mjs (npm run validate:functional-parity) makes them mechanical: F1 pins the react-hooks rules-of-hooks/exhaustive-deps guards at ERROR (plus the plugin dependency); F2 asserts every listing surface reads its canonical dataset (no hardcoded subset); F3 asserts every CRM/Hub/Centre/Manager/Control component implements its capability INLINE and never redirects; F4 asserts every MetricBand fed a MetricTileData[] has a drill-down. It found and FIXED one real defect: src/components/admin/MercentaBrain.tsx rendered six KPI tiles with NO drill-down (a wall of dead numbers); each now drills into the set it counts, proved in a browser by e2e/mercenta-brain.spec.ts test 11.",
     "batch0_platform_mode": "§Batch-0 (2026-10-04) — THE PLATFORM DEMO/LIVE SWITCH NOW PERSISTS ACROSS DEVICES. The decision stays OWNED by the ONE SWITCH (src/config/environment.ts); a NEW fail-soft persistence seam src/lib/platform/platformConfig.ts writes it to Supabase (table platform_config, key 'platform_mode') and reads it back on load, and src/main.tsx hydrates it on boot, so flipping the mode on one device applies to EVERY device. The surfaces now FOLLOW the switch instead of a hardcoded constant: src/components/shared/DemoBanner.tsx (the demo notice is silent in live), src/components/auth/Login.tsx (the one-click demo brand cards are hidden in live), src/components/admin/integrations/SimulationControl.tsx (a banner states the current mode in words). DEFECT FIXED AT SOURCE: the stale hardcoded DEMO_MODE constant in src/config/demo.ts (it always read true, even in live) was REMOVED, and scripts/validate-review-s1.mjs was REPOINTED from DEMO_MODE===true to environmentMode()==='demo'. GATE: scripts/validate-platform-mode.mjs (npm run validate:platform-mode; 17 assertions) EXECUTES the seam (read/write never throw; with no DB read returns null and write returns false — never a false success), proves hydration is fail-soft, and pins the wiring + single-owner; mutation-proved x3 (re-added DEMO_MODE -> 1 failure; made readPlatformMode throw -> 3 failures; stopped the demo notice following the switch -> 1 failure), each file restored byte-identical. LIVE: scripts/verify-live-demo.mjs gains L27. DEFERRED (protected path): the platform_config TABLE migration (supabase/migrations) plus Supabase credentials — until then the seam is a silent no-op and the platform keeps running in demo (which the gate asserts).",
     "records_and_decisions_2026_10_04": "RECORDS & DECISIONS (2026-10-04), three founder-directed items. (1) OPTION A RECORDED AS A DEFERRED TASK: new entry `editor-typecheck-gap-e2e-and-functions` — the 121 TypeScript files outside src (e2e/, supabase/functions/, two config files) belong to no TypeScript project, so the editor invents ~178 problems and the project never type-checks them; fix by giving them proper projects and adding them to the checks. (2) SIX WRONG LABELS CORRECTED AT SOURCE, each recording its old value inline: `phase10-uk-opportunity-states` in_progress -> not_started; `ssot-work-layer-s6-ci-wiring` in_progress -> built_and_tested (its text said CI wiring was outstanding, but .github/workflows/ci.yml has existed since 2026-09-28); `phase14-live-integrations-activation` and `phase1-live-research-activation` blocked -> deferred (credentials are ACTIVATION-only, never a blocker); `s0-discovered-live-spapi-edge-functions-missing` blocked -> built_and_tested (the three SP-API routes now exist in supabase/functions/_shared/proxyRoutes.ts served by supabase/functions/spapi/index.ts); `batchC-rocketchat-integration` and `batchD-model-router` regressed -> removed (their own text says deliberately removed). The registry now holds ZERO in_progress, ZERO blocked and ZERO regressed rows, so it and PROJECT_STATUS.md ('IN PROGRESS — none') finally agree. (3) REVENUE-FLOOR DECISION RECORDED: `discovered-acquisition-revenue-floor-and-sla` now states the Founder decision of 2026-10-04 — there is NO revenue floor (volume strategy; the Brand engine's 100-point score + hard disqualifiers + ten-category rule is the quality mechanism); the response-SLA half remains open.",
-    "option_a_typecheck_coverage": "§OPTION-A (2026-10-04) — THE EDITOR / TYPE-CHECK GAP CLOSED. 121 TypeScript files outside src (96 e2e, 23 supabase/functions, playwright.config.ts, scripts/brain-runtime-check.ts) belonged to NO TypeScript project, so the editor invented ~178 problems and `npm run typecheck` never checked them. NEW projects tsconfig.e2e.json (Playwright) and tsconfig.functions.json (Edge Functions); tsconfig.node.json extended to cover scripts/brain-runtime-check.ts; root tsconfig.json references all four; `npm run typecheck` now runs ALL FOUR. Browser-runtime imports (import('/src/...') inside page.evaluate) are mapped to the real source via `paths`; the Deno runtime surface is declared in supabase/functions/_types/edge-runtime.d.ts. REAL DEFECTS FIXED at source: multi-tenant.spec.ts used an invalid Playwright `exact` option on locator(); uiux-foundation.spec.ts used a double-prefixed KPI selector that made a test UNABLE TO FAIL; scripts/brain-runtime-check.ts read edge.label/edge.note (not on BrainEdge, so its channel-leak scan collected nothing) and had two duplicate report keys. NEW gate scripts/validate-typecheck-coverage.mjs (npm run validate:typecheck-coverage, 20 assertions) MUTATION-PROVED (dropping tsconfig.e2e.json from typecheck => 1 failure; package.json restored byte-identical). validate:all 151/0; lint 0; build OK; the 9 affected browser specs 65 passed. No application runtime change => three-way NOT APPLICABLE."
+    "option_a_typecheck_coverage": "§OPTION-A (2026-10-04) — THE EDITOR / TYPE-CHECK GAP CLOSED. 121 TypeScript files outside src (96 e2e, 23 supabase/functions, playwright.config.ts, scripts/brain-runtime-check.ts) belonged to NO TypeScript project, so the editor invented ~178 problems and `npm run typecheck` never checked them. NEW projects tsconfig.e2e.json (Playwright) and tsconfig.functions.json (Edge Functions); tsconfig.node.json extended to cover scripts/brain-runtime-check.ts; root tsconfig.json references all four; `npm run typecheck` now runs ALL FOUR. Browser-runtime imports (import('/src/...') inside page.evaluate) are mapped to the real source via `paths`; the Deno runtime surface is declared in supabase/functions/_types/edge-runtime.d.ts. REAL DEFECTS FIXED at source: multi-tenant.spec.ts used an invalid Playwright `exact` option on locator(); uiux-foundation.spec.ts used a double-prefixed KPI selector that made a test UNABLE TO FAIL; scripts/brain-runtime-check.ts read edge.label/edge.note (not on BrainEdge, so its channel-leak scan collected nothing) and had two duplicate report keys. NEW gate scripts/validate-typecheck-coverage.mjs (npm run validate:typecheck-coverage, 20 assertions) MUTATION-PROVED (dropping tsconfig.e2e.json from typecheck => 1 failure; package.json restored byte-identical). validate:all 151/0; lint 0; build OK; the 9 affected browser specs 65 passed. No application runtime change => three-way NOT APPLICABLE.",
+    "phase15_launch_gate": {
+      "increment": "§PHASE 15 — THE LAUNCH GATE (2026-10-05)",
+      "added": [
+        "phase15-launch-gate-validator"
+      ],
+      "validator": "scripts/validate-phase15-launch.mjs",
+      "note": "Repo-side gates read built/built_and_tested; gates needing external input read blocked with the exact input named. Repo-side assertions: 56/56 pass. Custom 404 added; .htaccess security headers added; npm audit fix 33 -> 12 advisories."
+    }
   },
   "entries": [
     {
@@ -4067,63 +4073,63 @@
       "id": "phase15-legal-privacy",
       "description": "Phase 15 — legal/privacy launch gate: privacy policy, terms & conditions, cookie consent and a third-party data inventory",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "blocked",
+      "evidence": "src/config/positioning.ts; src/components/marketing/PrivacyPolicy.tsx; src/components/marketing/TermsOfService.tsx · src/components/marketing/CookieNotice.tsx · scripts/validate-phase15-launch.mjs. §Phase 15 BLOCKED (was: not_started): the privacy policy, terms and a working cookie notice ARE built; the gate now needs LEGAL SIGN-OFF of the published wording and the third-party data inventory — a human/business decision, not a repository change.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-security",
       "description": "Phase 15 — security launch gate: remove frontend secrets, server-side production secrets, HTTPS, authentication security, RBAC, tenant isolation, RLS/database security, API exposure audit and a dependency/security audit",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "built",
+      "evidence": "scripts/validate-phase15-launch.mjs; public/.htaccess (response security headers: HSTS, nosniff, X-Frame-Options SAMEORIGIN, Referrer-Policy, Permissions-Policy) · .gitignore (.env never tracked; only .env.example is) · scripts/validate-rls-hardening.mjs · scripts/validate-tenant-coherence.mjs · dependency audit: `npm audit fix` 33 -> 12 advisories. §Phase 15 BLOCKED (was: not_started): (a) HTTPS/TLS enforcement is host/domain-level; (b) the remaining critical is maplibre-gl, fix = breaking major upgrade needing a logistics-map regression pass.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-database-infrastructure",
       "description": "Phase 15 — database/infrastructure launch gate: production DB audit, backups, a restore test, disaster recovery, error monitoring and health monitoring",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "blocked",
+      "evidence": "scripts/validate-rls-hardening.mjs; PRODUCTION_READINESS.md; supabase/migrations/ · src/lib/monitoring/sentry.ts (error-monitoring seam, no-op without VITE_SENTRY_DSN) · src/components/shared/ErrorBoundary.tsx. §Phase 15 BLOCKED (was: not_started): needs a PRODUCTION Supabase project — backup schedule, a restore rehearsal and the DR drill only run against the live database; repo-side RLS/migrations are asserted and pass.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-seo",
       "description": "Phase 15 — SEO launch gate: meta titles/descriptions, sitemap, robots.txt, canonical URLs, Open Graph/social preview, favicon and image alt text",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "built_and_tested",
+      "evidence": "scripts/validate-seo-foundation.mjs; public/robots.txt · public/sitemap.xml · e2e/seo-foundation.spec.ts · src/lib/seo/publicRoutes.ts · index.html. §Phase 15 (was: not_started): the SEO foundation was already built; this session pinned it in the launch gate.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-performance",
       "description": "Phase 15 — performance launch gate: image compression/optimisation, page speed, bundle optimisation and caching",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "built",
+      "evidence": "public/.htaccess (mod_deflate gzip/brotli + immutable hashed-asset caching); vite.config.ts (one deliberate vendor chunk) · src/App.tsx (lazy shells) · scripts/validate-phase15-launch.mjs. §Phase 15 (was: not_started): repository-side performance is in place; field page-speed measurement needs the deployed production domain.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-accessibility",
       "description": "Phase 15 — accessibility launch gate: colour contrast, keyboard navigation, focus states, screen-reader semantics and reduced motion",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "built_and_tested",
+      "evidence": "src/index.css (canonical focus-visible + prefers-reduced-motion); e2e/accessibility.spec.ts · scripts/validate-phase15-launch.mjs · src/components/marketing/CookieNotice.tsx. §Phase 15 (was: not_started).",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-responsive",
       "description": "Phase 15 — responsive launch gate: mobile, tablet, desktop, browser compatibility and touch interaction",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "built_and_tested",
+      "evidence": "scripts/layout-audit.mjs; e2e/table-responsive.spec.ts · scripts/validate-phase15-launch.mjs · index.html (viewport). §Phase 15 (was: not_started).",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
@@ -4131,8 +4137,8 @@
       "description": "Phase 15 — conversion launch gate: form validation, spam protection, submission reliability, the primary CTA and the Partner Login hierarchy. ALL FOUR PARTS ARE NOW DONE. The CTA hierarchy was done in Phase 1 (\"Explore UK Market Fit\" is the primary hero CTA and Partner Login is a separate header utility action). SESSION 36 (2026-09-26) closed the remainder — 'spam protection and submission reliability remain' — and the gaps were verified ABSENT in the code BEFORE implementing: no honeypot, no rate limit and no duplicate rule existed anywhere in the public path; the submit handler had no try/catch (a throw left the button stuck on '...' with no message and no reset); the real link verification (10s per link, CORS-blocked for most hosts) ran INSIDE the submit handler, so it held the applicant open; a double submit could record two applications; and validation was three checks with parseInt() turning a non-numeric product count into NaN. NOW: ONE SSOT (src/config/partnerApplication.ts) declares the honeypot, the minimum fill time, the session attempt budget, the duplicate window, the field limits, the country list and every applicant-facing sentence; ONE pure fail-closed decision owner (src/lib/onboarding/applicationGuard.ts) validates and decides with an INJECTED clock and zero network; the store (src/data/applicationStore.ts) counts REFUSED attempts too, enforces the duplicate fail-safe at the DOMAIN boundary and patches verification after the record exists; the form (src/components/auth/PartnerApplicationForm.tsx) renders the honeypot unannounced and unfocusable, shows a per-field announced refusal (aria-invalid + role=alert + focus), stops a double click with a synchronous ref, cannot leave the button stuck (try/catch/finally) and records the application BEFORE the third-party check runs. NOTE: the phone field's '*' marker was REMOVED because the label claimed a requirement the domain never enforced (BrandApplication.phone is nullable); it is now labelled (optional) — making a phone COMPULSORY is a commercial decision for the Founder, not a defect fix. PHONE — NOW COMPULSORY (Founder decision, 2026-09-26): the phone moved from OPTIONAL to REQUIRED. An empty, whitespace-only, separator-only or non-string answer is REFUSED as missing_phone and NOTHING is recorded; the accepted payload and the stored record are NON-NULLABLE (NormalisedApplication.phone, BrandApplication.phone and submitApplication's input contract are all `string`); the form labels the field with a required '*', no longer says (optional), and writes the country's declared dialling code + the applicant's digits; and the reviewer can now READ the number on the application card (ApplicationsPanel showed SKUs/Revenue/Submitted only, so a compulsory number would have been collected and hidden). REPOINTED in the same pass: the sentence above records the OPPOSITE contract (the '*' removed because the domain did not enforce a phone) — the invariant is the same one, label matches domain, now pointed at the new source of truth.",
       "source": "Mercenta roadmap reconciliation (2026-09-19); remainder closed by §CG increment (2026-09-26, session 36)",
       "status": "built_and_tested",
-      "evidence": "src/config/partnerApplication.ts (SSOT, incl. missing_phone + the compulsory-phone declaration) · src/lib/onboarding/applicationGuard.ts (pure, fail-closed, injected clock; refuses an empty phone) · src/data/applicationStore.ts (attempt ledger + duplicate fail-safe + deferred link patch + non-nullable phone input) · src/components/auth/PartnerApplicationForm.tsx (required phone label) · src/components/admin/ApplicationsPanel.tsx (the reviewer reads the number) · scripts/validate-conversion-gate.mjs (npm run validate:conversion-gate, proved able to fail) · e2e/conversion-gate.spec.ts (6 browser cases incl. the missing-phone refusal and hanging third-party hosts) · scripts/verify-demo-live.mjs §P13/CG (deployed legs) · docs/CONVERSION_GATE_2026-09-26.md",
-      "last_verified": "2026-09-26",
+      "evidence": "scripts/validate-phase15-launch.mjs; src/config/partnerApplication.ts · src/lib/onboarding/applicationGuard.ts · e2e/conversion-gate.spec.ts. §Phase 15 (already built_and_tested): the launch gate now also pins it.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
@@ -4148,63 +4154,63 @@
       "id": "phase15-analytics",
       "description": "Phase 15 — analytics launch gate: analytics setup, consent-aware tracking, conversion funnel and acquisition attribution",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "blocked",
+      "evidence": "scripts/validate-phase15-launch.mjs; src/components/marketing/CookieNotice.tsx; public/robots.txt. §Phase 15 BLOCKED (was: not_started): needs a BUSINESS DECISION — which analytics provider (if any) and on what lawful basis. Until then the honest stance holds: NO analytics script is loaded and the cookie notice says so (asserted by the launch validator).",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-reliability-degradation",
       "description": "Phase 15 — reliability launch gate: AI outage, OpenRouter outage, automation-provider outage, email-provider outage and integration outage behaviour, retry behaviour and graceful degradation",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "built",
+      "evidence": "scripts/validate-provider-mode-safety.mjs; scripts/validate-mock-seam.mjs · scripts/validate-mock-providers.mjs · src/components/shared/ErrorBoundary.tsx · scripts/validate-phase15-launch.mjs. §Phase 15 (was: not_started): outage/retry/graceful-degradation behaviour is the provider-mode + mock-first seam already built.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-production-data-cleanup",
       "description": "Phase 15 — production data launch gate: remove accidental test data and debug content, production environment audit and development endpoint audit",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "blocked",
+      "evidence": "scripts/validate-dead-code.mjs; scripts/validate-production-boot.mjs · scripts/validate-phase15-launch.mjs. §Phase 15 BLOCKED (was: not_started): the PRODUCTION-environment content audit needs the live database/domain; repo-side checks (no TODO/FIXME, no debugger, no debug endpoints) pass.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-website-integrity",
       "description": "Phase 15 — website integrity launch gate: broken links, a custom 404, a production crawl and critical journey verification",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "built_and_tested",
+      "evidence": "e2e/public-pages.spec.ts; src/components/marketing/NotFound.tsx; src/components/marketing/Home.tsx · public/robots.txt · public/sitemap.xml. §Phase 15 (was: not_started): an unknown address now renders a real custom 404 (it previously rendered the homepage); robots/sitemap were already present.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-communications-email-auth",
       "description": "Phase 15 — communications launch gate: transactional email, SPF, DKIM, DMARC and production email templates",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "PRODUCTION_READINESS.md",
-      "last_verified": "2026-09-19",
+      "status": "blocked",
+      "evidence": "src/integrations/types.ts; scripts/validate-mock-providers.mjs · GO_LIVE.md. §Phase 15 BLOCKED (was: not_started): SPF/DKIM/DMARC are DNS records only the sending domain owner can publish; production email templates need the sending provider chosen first. The mail seam is present.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-deployment-dns-ssl",
       "description": "Phase 15 — deployment launch gate: DNS, domain, SSL, deployment verification, rollback procedure and release procedure",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "GO_LIVE.md + scripts/deploy-demo.sh",
-      "last_verified": "2026-09-19",
+      "status": "blocked",
+      "evidence": "scripts/deploy-demo.sh; GO_LIVE.md · scripts/verify-live-demo.mjs. §Phase 15 BLOCKED (was: not_started): final DNS/domain/SSL are host-level actions in the GO_LIVE.md playbook, not repository changes; deploy path + verification + rollback are asserted and present.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
       "id": "phase15-final-launch-gate",
       "description": "Phase 15 — the FINAL gate: full security audit, full functional audit, full E2E audit, production smoke test and a launch acceptance report",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 15",
-      "last_verified": "2026-09-19",
+      "status": "blocked",
+      "evidence": "scripts/validate-e2e-scenarios.mjs; scripts/validate-all.sh · scripts/verify-live-demo.mjs · scripts/validate-phase15-launch.mjs. §Phase 15 BLOCKED BY DEPENDENCY (was: not_started): it is the gate OVER the other gates’ results, so it stays open until the BLOCKED gates above close.",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
@@ -5976,6 +5982,15 @@
       "status": "built",
       "evidence": "docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md §0b (the agreed order, Founder-approved); PROJECT_STATUS.md resume block (NEXT TASK = the Phase 15 go-live checklist); HANDOFF.md (mirror); PRODUCTION_READINESS.md (the go-live checklist); requirements-registry.json (the two E2E rows renamed E2E-0 / E2E-1). `scripts/validate-e2e-scenarios.mjs` 15/15; `npm run validate:all` PASS; `npm run validate:resume-state` PASS.",
       "last_verified": "2026-10-04",
+      "superseded_by": null
+    },
+    {
+      "id": "phase15-launch-gate-validator",
+      "description": "Phase 15 — the ONE launch-gate validator: one assertion group per launch gate, each printing PASS or BLOCKED with the EXACT missing input, so no gate silently passes and no gate silently stays blocked",
+      "source": "§Phase 15 launch gate (2026-10-05)",
+      "status": "built",
+      "evidence": "scripts/validate-phase15-launch.mjs (npm run validate:phase15-launch) · e2e/public-pages.spec.ts (the 404 case) · public/.htaccess; proved able to fail (the 404 file was renamed, the gate exited 1, the file was restored byte-identical)",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     }
   ]
