@@ -10,6 +10,7 @@ import {
   approvedApplicationBrands,
 } from '@/data/applicationStore';
 import { createMockMailClient } from '@/lib/mail/mail';
+import { welcomeEmailTemplate, applicationApprovedTemplate, applicationRejectedTemplate, applicationInfoRequestedTemplate } from '@/lib/mail/templates';
 import { applicationStatusPresentation, APPLICATION_STATUS_ORDER } from '@/lib/statusPresentation';
 import { beginOnboardingFromApplication, beginOnboardingForManualBrand, tenantIdForApplication } from '@/lib/onboarding/onboardingLifecycle';
 import type { BrandApplication, ApplicationStatus } from '@/types';
@@ -71,9 +72,11 @@ function ManualBrandForm({onDone}:{onDone:()=>void}) {
     if (!onboarding.ok) { setErr(onboarding.error); setBusy(false); return; }
     const bid = onboarding.value.brandId;
     addApprovedBrand({id:bid,name:cn.trim(),category:cat,country:co.trim(),email:em.trim(),signatory:ct.trim(),track});
-    await mailClient.sendEmail({to:em.trim(),subject:'Welcome to Mercenta Partners',text:`Hi ${ct.trim()},\\n\\nYour brand account is ready. Log in at: https://mercenta.co.uk`});
-    const adm=actingStaff?.name??'Admin';
-    console.log(`[audit] Brand ${cn.trim()} created manually by ${adm} via ${src}`);
+    await mailClient.sendEmail({ to: em.trim(), ...welcomeEmailTemplate(ct.trim()) });
+    // §PHASE 15 (production-hygiene audit, 2026-10-05) — the console.log that used
+    // to sit here was DEBUG OUTPUT leaking into the production bundle; the manual
+    // creation is already recorded by the canonical onboarding writer
+    // (`beginOnboardingForManualBrand`). Guarded by `scripts/validate-production-hygiene.mjs`.
     setBusy(false);onDone();
   };
 
@@ -134,18 +137,15 @@ export function ApplicationsPanel() {
       addApprovedBrand({id:brandId,name:app.companyName,category:app.category,country:app.country,
         email:`${app.companyName.toLowerCase().replace(/\\s+/g,'.')}@example.com`,signatory:app.companyName,track:'direct_fulfillment'});
       await mailClient.sendEmail({to:`${app.companyName.toLowerCase().replace(/\\s+/g,'.')}@example.com`,
-        subject:'Your Mercenta Partners application has been approved',
-        text:`Dear ${app.companyName},\\n\\nYour application has been approved! Log in at: https://mercenta.co.uk`});
+        ...applicationApprovedTemplate(app.companyName)});
       setMsg(`${app.companyName} approved and onboarding started`);
     }else if(action==='rejected'){
       await mailClient.sendEmail({to:`${app.companyName.toLowerCase().replace(/\\s+/g,'.')}@example.com`,
-        subject:'Update on your Mercenta Partners application',
-        text:`Dear ${app.companyName},\\n\\nThank you for your interest. We're not able to onboard your brand at this time.`});
+        ...applicationRejectedTemplate(app.companyName)});
       setMsg(`${app.companyName} rejected`);
     }else if(action==='info_requested'&&notes){
       await mailClient.sendEmail({to:`${app.companyName.toLowerCase().replace(/\\s+/g,'.')}@example.com`,
-        subject:'Additional information required',
-        text:`Dear ${app.companyName},\\n\\nWe need: ${notes}`});
+        ...applicationInfoRequestedTemplate(app.companyName, notes)});
       setMsg(`Info requested from ${app.companyName}`);
     }else if(action==='flagged'){
       setMsg(`${app.companyName} flagged for review`);

@@ -172,3 +172,22 @@ If any step fails: stop, roll back (§8), fix in the repository, redeploy.
   reached through this playbook.
 - Never commit `.env`; never print secrets in logs or reports.
 - Keep the protected baseline ancestry intact (no rebase/force-push/amend).
+
+## 10. Release procedure
+
+A **release** is a named, recorded cut of a VERIFIED commit. It is not the same as
+a deploy (a deploy puts a build on a host). Added 2026-10-05 to make the
+"release procedure" the `phase15-deployment-dns-ssl` gate declares explicit.
+
+1. Confirm the repository gate is green on the EXACT commit being released:
+   `npm run typecheck` (0 errors), `npm run lint` (0 problems), `npm run build`
+   (builds), and `npm run validate:all` (every validator PASS).
+2. Confirm the working tree is EMPTY (`git status --porcelain` prints nothing) and
+   the commit is PUSHED to `origin/<branch>`.
+3. Record the release: the commit hash in `PROJECT_STATUS.md` → `CURRENT RESUME
+   STATE` (`LAST VERIFIED COMMIT`) together with the three-way status. A release
+   with a dirty tree, an unverified commit, or an unpushed commit is NOT a release.
+4. Deploy the released commit (§5), then OPEN the live site and verify the change
+   actually runs there (`.clinerules/operating-model.md` §10/§11).
+5. Record every release — commit hash, date, and the live verification — in
+   `PRODUCTION_READINESS.md`.

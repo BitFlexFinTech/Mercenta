@@ -54,7 +54,9 @@ gates.push({
     'BLOCKED — HTTPS/TLS enforcement lives on the host/domain and cannot be set from the repository. ' +
     '(The former second blocker — the `maplibre-gl` critical — is RESOLVED, 2026-10-05: it was a DECLARED-BUT-UNUSED ' +
     'dependency, so it was upgraded to a patched line and no map regression was needed; the audit critical count is 0. ' +
-    'The patched line is asserted below so it cannot regress.)',
+    'The patched line is asserted below so it cannot regress.) The API-EXPOSURE audit is now BUILT and asserted here ' +
+    '(no non-`VITE_` env read, a declared browser-safe var allowlist, a secret-literal scan, auth pinned to the ' +
+    'RBAC/tenant/RLS gates).',
   check() {
     const gi = read('.gitignore');
     test('security: `.env` is gitignored', /^\.env$/m.test(gi));
@@ -79,6 +81,10 @@ gates.push({
     const mv = String(deps['maplibre-gl'] || '').replace(/[^0-9.]/g, '').split('.').map(Number);
     test('security: maplibre-gl stays on a patched line (>=6.4.1, clears GHSA-jrc7-96c5-q579)',
       mv[0] > 6 || (mv[0] === 6 && (mv[1] > 4 || (mv[1] === 4 && mv[2] >= 1))));
+    /* §PHASE 15 (2026-10-05) — the "API exposure audit" the security scope names
+       now EXISTS as a gate (no non-`VITE_` env read, a declared browser-safe var
+       allowlist, no secret literal, auth pinned to the RBAC/tenant/RLS gates). */
+    test('security: the API-exposure / secret-exposure audit gate exists', has('scripts/validate-api-exposure.mjs'));
   },
 });
 
@@ -88,14 +94,17 @@ gates.push({
   label: 'Database & infrastructure (backups · restore test · DR · monitoring)',
   blocked:
     'BLOCKED — needs a PRODUCTION Supabase project (no credential in this environment): the backup schedule, a ' +
-    'restore rehearsal and the disaster-recovery drill can only run against the live database. Repo-side RLS ' +
-    'and migrations are asserted here and pass.',
+    'restore rehearsal and the disaster-recovery drill can only run against the live database. Error monitoring ' +
+    '(the Sentry seam) and HEALTH MONITORING (the honest readiness owner + gate) are now BUILT and asserted here, ' +
+    'and the repo-side RLS and migrations are asserted and pass.',
   check() {
     test('database: migrations directory is present', has('supabase/migrations'));
     test('database: RLS hardening gate exists', has('scripts/validate-rls-hardening.mjs'));
     test('database: DB hardening gate exists', has('scripts/validate-db-hardening.mjs'));
     test('database: error-monitoring seam exists (Sentry, no-op without DSN)', has('src/lib/monitoring/sentry.ts'));
     test('database: an app error boundary exists', has('src/components/shared/ErrorBoundary.tsx'));
+    /* §PHASE 15 (2026-10-05) — "health monitoring" now has an HONEST owner + gate. */
+    test('database: the honest health/readiness gate exists (no fabricated health)', has('scripts/validate-health-readiness.mjs'));
   },
 });
 
@@ -204,11 +213,14 @@ gates.push({
   label: 'Production data cleanup (no test data · no debug · prod/dev endpoint audit)',
   blocked:
     'BLOCKED (partial) — the PRODUCTION-environment content audit needs the live database/domain; the ' +
-    'repository-side checks (no TODO/FIXME, no debugger, no debug endpoints) are asserted here and pass.',
+    'repository-side checks (no TODO/FIXME, no debug output, no dev-only endpoints) are asserted here and pass.',
   check() {
     test('cleanup: no TODO/FIXME markers in the app entry', !/TODO|FIXME/.test(read('src/App.tsx')));
     test('cleanup: dead-code gate exists', has('scripts/validate-dead-code.mjs'));
     test('cleanup: production-boot gate exists', has('scripts/validate-production-boot.mjs'));
+    /* §PHASE 15 (2026-10-05) — the "development endpoint audit" and "no debug
+       content" the production-data-cleanup scope names now EXIST as a gate. */
+    test('cleanup: the production-hygiene audit gate exists (no debug content / dev endpoints)', has('scripts/validate-production-hygiene.mjs'));
   },
 });
 
@@ -235,6 +247,9 @@ gates.push({
   check() {
     test('communications: a mail client seam exists', has('src/integrations/types.ts'));
     test('communications: mock provider gate exists', has('scripts/validate-mock-providers.mjs'));
+    /* §PHASE 15 (2026-10-05) — "production email templates" now have ONE owner + a gate. */
+    test('communications: the transaction-email template owner + gate exist',
+      has('src/lib/mail/templates.ts') && has('scripts/validate-email-templates.mjs'));
   },
 });
 

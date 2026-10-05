@@ -2397,6 +2397,25 @@ const PHASE15_LAUNCH_SCOPE = new Set([
   'scripts/validate-data-inventory.mjs',
   'scripts/reconcile-data-inventory-registry.cjs',
   'src/components/marketing/PrivacyPolicy.tsx',
+  /* §PHASE 15 (2026-10-05, 3rd follow-up) — the repo-side scope the launch gate
+     declares but nothing checked: the API-exposure / secret audit, the
+     production-hygiene audit (debug content / dev endpoints), the honest health
+     owner (replacing the fabricated `Math.random` health), the transaction-email
+     template owner (fixing the literal-backslash-n line break), and the release
+     procedure in GO_LIVE. `src/services/xero/xeroClient.ts` is a PROTECTED prefix
+     — its one-line secret-read removal is declared here and is awaiting explicit
+     Founder sign-off (see the session report). */
+  'src/lib/monitoring/health.ts',
+  'src/components/admin/MonitoringDashboard.tsx',
+  'src/lib/mail/templates.ts',
+  'src/components/admin/ApplicationsPanel.tsx',
+  'src/services/xero/xeroClient.ts',
+  'scripts/validate-api-exposure.mjs',
+  'scripts/validate-production-hygiene.mjs',
+  'scripts/validate-health-readiness.mjs',
+  'scripts/validate-email-templates.mjs',
+  'scripts/reconcile-phase15-reposide-registry.cjs',
+  'GO_LIVE.md',
 ]);
 
 const PUBLIC_MESSAGING_SCOPE = new Set([

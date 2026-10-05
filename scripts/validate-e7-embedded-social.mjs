@@ -2380,6 +2380,24 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'scripts/validate-data-inventory.mjs',
     'scripts/reconcile-data-inventory-registry.cjs',
     'src/components/marketing/PrivacyPolicy.tsx',
+    /**
+     * §PHASE 15 (2026-10-05, 3rd follow-up) — the repo-side scope the launch gate
+     * declares but nothing checked: the API-exposure / secret audit, the
+     * production-hygiene audit, the honest health owner, the transaction-email
+     * template owner and the release procedure. `src/services/xero/xeroClient.ts`
+     * is a PROTECTED prefix — declared, awaiting Founder sign-off.
+     */
+    'src/lib/monitoring/health.ts',
+    'src/components/admin/MonitoringDashboard.tsx',
+    'src/lib/mail/templates.ts',
+    'src/components/admin/ApplicationsPanel.tsx',
+    'src/services/xero/xeroClient.ts',
+    'scripts/validate-api-exposure.mjs',
+    'scripts/validate-production-hygiene.mjs',
+    'scripts/validate-health-readiness.mjs',
+    'scripts/validate-email-templates.mjs',
+    'scripts/reconcile-phase15-reposide-registry.cjs',
+    'GO_LIVE.md',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

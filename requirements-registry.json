@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 535,
+    "total_entries": 539,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,9 +371,9 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-maplibre-registry.cjs after the maplibre-gl critical fix (phase15-security: blocker (b) resolved; +1 row phase15-maplibre-critical-resolved). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-phase15-reposide-registry.cjs after the Phase 15 repo-side audits/owners increment (4 rows restated; +4 rows). Snapshot only.",
       "built_and_tested": 333,
-      "built": 137,
+      "built": 141,
       "not_started": 44,
       "removed": 4,
       "deferred": 9,
@@ -991,6 +991,22 @@
       ],
       "validator": "scripts/validate-phase15-launch.mjs",
       "note": "The critical was on a DECLARED-BUT-UNUSED dependency; the fix was the risk-free upgrade to a patched line, not a breaking upgrade + regression pass. The gate asserts the declared range stays >=6.4.1. Launch gate repo-side now 64/64."
+    },
+    "phase15_reposide_increment": {
+      "increment": "§PHASE 15 — THE REPO-SIDE SCOPE THE GATE DECLARED BUT NOTHING CHECKED (2026-10-05)",
+      "added": [
+        "phase15-api-exposure-audit",
+        "phase15-production-hygiene-audit",
+        "phase15-health-readiness-owner",
+        "phase15-email-template-owner"
+      ],
+      "validators": [
+        "scripts/validate-api-exposure.mjs",
+        "scripts/validate-production-hygiene.mjs",
+        "scripts/validate-health-readiness.mjs",
+        "scripts/validate-email-templates.mjs"
+      ],
+      "note": "Three real defects fixed at source (a browser secret-read attempt; a debug console.log in production; a FABRICATED health check) plus a literal-backslash-n email line-break bug. Launch gate repo-side now 68/68."
     }
   },
   "entries": [
@@ -4099,7 +4115,7 @@
       "description": "Phase 15 — security launch gate: remove frontend secrets, server-side production secrets, HTTPS, authentication security, RBAC, tenant isolation, RLS/database security, API exposure audit and a dependency/security audit",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
       "status": "built",
-      "evidence": "scripts/validate-phase15-launch.mjs; public/.htaccess (response security headers: HSTS, nosniff, X-Frame-Options SAMEORIGIN, Referrer-Policy, Permissions-Policy) · .gitignore (.env never tracked; only .env.example is) · scripts/validate-rls-hardening.mjs · scripts/validate-tenant-coherence.mjs · dependency audit: `npm audit fix` 33 -> 12 advisories, then the maplibre-gl critical cleared by upgrading the DECLARED-BUT-UNUSED package to a patched line (5.24.0 -> 6.12.0), 12 -> 11 advisories, 0 critical (asserted in the gate). §Phase 15 BLOCKED (was: not_started): HTTPS/TLS enforcement is host/domain-level. The former second blocker — the maplibre-gl critical — is RESOLVED (2026-10-05): it was a declared-but-unused dependency, upgraded to a patched line with no map regression needed.",
+      "evidence": "scripts/validate-phase15-launch.mjs; scripts/validate-api-exposure.mjs · public/.htaccess (security headers) · .gitignore (.env never tracked) · scripts/validate-rls-hardening.mjs · scripts/validate-tenant-coherence.mjs. §Phase 15 (2026-10-05, 3rd follow-up): the \"API exposure audit\" the scope names is now BUILT — `validate:api-exposure` (7 assertions) asserts NO non-`VITE_` env read ships, every `VITE_` var read is on a declared browser-safe allowlist, no secret literal ships, and auth is pinned to the RBAC/tenant/RLS gates; it also caught and FIXED a browser attempt to read a secret token name (xeroClient — PROTECTED, Founder-approved). STILL BLOCKED: HTTPS/TLS enforcement is host/domain-level (the demo host already 301-redirects to HTTPS).",
       "last_verified": "2026-10-05",
       "superseded_by": null
     },
@@ -4108,7 +4124,7 @@
       "description": "Phase 15 — database/infrastructure launch gate: production DB audit, backups, a restore test, disaster recovery, error monitoring and health monitoring",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
       "status": "blocked",
-      "evidence": "scripts/validate-rls-hardening.mjs; PRODUCTION_READINESS.md; supabase/migrations/ · src/lib/monitoring/sentry.ts (error-monitoring seam, no-op without VITE_SENTRY_DSN) · src/components/shared/ErrorBoundary.tsx. §Phase 15 BLOCKED (was: not_started): needs a PRODUCTION Supabase project — backup schedule, a restore rehearsal and the DR drill only run against the live database; repo-side RLS/migrations are asserted and pass.",
+      "evidence": "scripts/validate-rls-hardening.mjs; scripts/validate-health-readiness.mjs · supabase/migrations/ · src/lib/monitoring/sentry.ts (error-monitoring seam) · src/lib/monitoring/health.ts · src/components/shared/ErrorBoundary.tsx. §Phase 15 (2026-10-05, 3rd follow-up): \"health monitoring\" is now BUILT as an HONEST owner — `validate:health-readiness` (11 assertions) replaces the dashboard fabricated health (`Math.random()` + invented \"Database: ok ... 240ms\" readings) with a deterministic read of real signals. STILL BLOCKED: a PRODUCTION Supabase project — the backup schedule, restore rehearsal and DR drill only run against the live database.",
       "last_verified": "2026-10-05",
       "superseded_by": null
     },
@@ -4189,7 +4205,7 @@
       "description": "Phase 15 — production data launch gate: remove accidental test data and debug content, production environment audit and development endpoint audit",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
       "status": "blocked",
-      "evidence": "scripts/validate-dead-code.mjs; scripts/validate-production-boot.mjs · scripts/validate-phase15-launch.mjs. §Phase 15 BLOCKED (was: not_started): the PRODUCTION-environment content audit needs the live database/domain; repo-side checks (no TODO/FIXME, no debugger, no debug endpoints) pass.",
+      "evidence": "scripts/validate-production-hygiene.mjs; scripts/validate-dead-code.mjs · scripts/validate-production-boot.mjs. §Phase 15 (2026-10-05, 3rd follow-up): the \"no debug content / development endpoint audit\" the scope names is now BUILT — `validate:production-hygiene` (3 assertions) asserts no `console.log`/`console.debug`/`debugger`, no `TODO`/`FIXME`, and no undeclared dev-only host in shipped source; it caught and FIXED a debug `console.log` that shipped to production. STILL BLOCKED: the PRODUCTION-environment content audit needs the live database/domain.",
       "last_verified": "2026-10-05",
       "superseded_by": null
     },
@@ -4207,7 +4223,7 @@
       "description": "Phase 15 — communications launch gate: transactional email, SPF, DKIM, DMARC and production email templates",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
       "status": "blocked",
-      "evidence": "src/integrations/types.ts; scripts/validate-mock-providers.mjs · GO_LIVE.md. §Phase 15 BLOCKED (was: not_started): SPF/DKIM/DMARC are DNS records only the sending domain owner can publish; production email templates need the sending provider chosen first. The mail seam is present.",
+      "evidence": "src/lib/mail/mail.ts; src/lib/mail/templates.ts · scripts/validate-email-templates.mjs · scripts/validate-mock-providers.mjs. §Phase 15 (2026-10-05, 3rd follow-up): \"production email templates\" now have ONE owner — `validate:email-templates` (13 assertions) proves each template and FIXED a real bug: every body used a literal backslash-n instead of a line break. STILL BLOCKED: SPF/DKIM/DMARC DNS records + the sending provider chosen (external).",
       "last_verified": "2026-10-05",
       "superseded_by": null
     },
@@ -6024,6 +6040,42 @@
       "source": "§Phase 15 security gate (2026-10-05)",
       "status": "built",
       "evidence": "scripts/validate-phase15-launch.mjs; package.json (maplibre-gl ^6.12.0) · package-lock.json · PRODUCTION_READINESS.md · scripts/reconcile-phase15-launch-registry.cjs. §Phase 15 (2026-10-05): npm audit 12 -> 11 advisories, the 1 critical -> 0. The gate asserts the declared range stays >=6.4.1 and was PROVED ABLE TO FAIL — a downgrade to ^5.24.0 re-tripped the gate with exit 1, and package.json was restored byte-identical, sha256 78280a2f0c37…. The package is imported by zero files (the logistics map is SVG; the 3D hero uses three), so no regression pass was needed. The package is KEPT deliberately for the future 3D logistics map.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null
+    },
+    {
+      "id": "phase15-api-exposure-audit",
+      "description": "Phase 15 — the security launch gate API exposure audit: a gate that refuses any non-`VITE_` env read in shipped source (the browser can only read `VITE_` vars), keeps every `VITE_` read on a declared browser-safe allowlist, scans for secret literals, and pins authentication security to the RBAC/tenant/RLS gates",
+      "source": "§Phase 15 security gate (2026-10-05, 3rd follow-up)",
+      "status": "built",
+      "evidence": "scripts/validate-api-exposure.mjs; (7 assertions, PROVED ABLE TO FAIL — injecting a non-`VITE_` read re-tripped it, file restored byte-identical) · src/services/xero/xeroClient.ts (PROTECTED path — a browser secret-read attempt removed, Founder-approved, behaviour-preserving). Registered as `validate:api-exposure`.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null
+    },
+    {
+      "id": "phase15-production-hygiene-audit",
+      "description": "Phase 15 — the production-data-cleanup gate no-debug-content / development-endpoint audit: a gate that refuses debug output and placeholder markers in shipped source and allows dev-only hosts only via a declared allowlist",
+      "source": "§Phase 15 production-data-cleanup gate (2026-10-05, 3rd follow-up)",
+      "status": "built",
+      "evidence": "scripts/validate-production-hygiene.mjs; (3 assertions, PROVED ABLE TO FAIL — injecting `console.log` re-tripped it, file restored byte-identical) · src/components/admin/ApplicationsPanel.tsx (a debug `console.log` that shipped to production removed). Registered as `validate:production-hygiene`.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null
+    },
+    {
+      "id": "phase15-health-readiness-owner",
+      "description": "Phase 15 — health monitoring: an HONEST readiness owner replacing the Monitoring dashboard fabricated health (a `Math.random()` check plus an invented database/Edge-Function response time), reading only signals the client genuinely holds and stating plainly what it cannot probe",
+      "source": "§Phase 15 database/infrastructure gate (2026-10-05, 3rd follow-up)",
+      "status": "built",
+      "evidence": "src/lib/monitoring/health.ts; (the pure owner) · src/components/admin/MonitoringDashboard.tsx (rewired) · scripts/validate-health-readiness.mjs (11 assertions, EXECUTES the owner, PROVED ABLE TO FAIL — re-introducing `Math.random()` re-tripped it, file restored byte-identical). Registered as `validate:health-readiness`.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null
+    },
+    {
+      "id": "phase15-email-template-owner",
+      "description": "Phase 15 — production email templates: the ONE owner of transactional email copy, and the fix of a real line-break bug (every body used a literal backslash-n instead of a newline)",
+      "source": "§Phase 15 communications gate (2026-10-05, 3rd follow-up)",
+      "status": "built",
+      "evidence": "src/lib/mail/templates.ts; (the ONE owner) · src/components/admin/ApplicationsPanel.tsx (repointed) · scripts/validate-email-templates.mjs (13 assertions, EXECUTES the templates, PROVED ABLE TO FAIL — doubling the backslashes re-tripped it, file restored byte-identical). Registered as `validate:email-templates`.",
       "last_verified": "2026-10-05",
       "superseded_by": null
     }

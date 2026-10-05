@@ -429,8 +429,15 @@ export function createXeroClient(
   accessToken?: string,
   tenantId?: string,
 ): IXeroClient {
-  const resolvedAccessToken = accessToken || import.meta.env.XERO_ACCESS_TOKEN || '';
-  const resolvedTenantId = tenantId || import.meta.env.XERO_TENANT_ID || '';
+  /* §PHASE 15 (API-exposure audit, 2026-10-05) — the browser must NEVER read a
+     secret. This factory previously fell back to the non-`VITE_` vars
+     `XERO_ACCESS_TOKEN` / `XERO_TENANT_ID`, which Vite never exposes to the
+     client, so the read was ALWAYS `undefined` AND it encoded an intent to ship
+     a token into the browser bundle. The access token now comes ONLY from the caller
+     (the connection seam / Edge Function). No token ⇒ the honest Mock client, exactly
+     as before. Guarded by `scripts/validate-api-exposure.mjs`. */
+  const resolvedAccessToken = accessToken || '';
+  const resolvedTenantId = tenantId || '';
   if (!resolvedAccessToken || !resolvedTenantId) {
     return new MockXeroClient();
   }

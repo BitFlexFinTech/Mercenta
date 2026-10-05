@@ -5,11 +5,13 @@
  * Reads the same event stream as the daily digest.
  */
 import { useState } from 'react';
-import { useApp } from '@/context/GlobalStateContext';
 import { Card, Badge, Button } from '@/components/ui';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { cn } from '@/utils/cn';
 import { triageAlert } from '@/lib/monitoring/alertTriage';
+import { computeReadiness } from '@/lib/monitoring/health';
+import { useIntegrations } from '@/integrations/IntegrationsContext';
+import { environmentMode } from '@/config/environment';
 import { Shield, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 
 interface HealthCheckEntry {
@@ -20,52 +22,43 @@ interface HealthCheckEntry {
   severity: 'critical' | 'high' | 'info';
 }
 
-const MOCK_HEALTH_CHECKS: HealthCheckEntry[] = [
-  {
-    id: 'hc-001',
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    healthy: true,
-    summary: 'All systems operational. Database: ok. Edge Functions: ok. Response: 240ms.',
-    severity: 'info',
-  },
-  {
-    id: 'hc-002',
-    timestamp: new Date(Date.now() - 86400000).toISOString(),
-    healthy: true,
-    summary: 'All systems operational. Database: ok. Edge Functions: ok. Response: 310ms.',
-    severity: 'info',
-  },
-];
+/* §PHASE 15 (2026-10-05) — the fabricated `MOCK_HEALTH_CHECKS` history was REMOVED.
+   It presented invented "Database: ok … Response: 240ms" lines as real probe
+   results. The check now reads REAL local signals via `computeReadiness`
+   (`src/lib/monitoring/health.ts`) and the history starts empty until a check is
+   actually run. Guarded by `scripts/validate-health-readiness.mjs`. */
 
 export function MonitoringDashboard() {
-  const [entries, setEntries] = useState<HealthCheckEntry[]>(MOCK_HEALTH_CHECKS);
+  const { modes } = useIntegrations();
+  const [entries, setEntries] = useState<HealthCheckEntry[]>([]);
   const [running, setRunning] = useState(false);
   const [triageResults, setTriageResults] = useState<Record<string, string>>({});
 
   async function handleRunCheck() {
     setRunning(true);
-    // Simulate a health check
-    await new Promise((r) => setTimeout(r, 1500));
-    const mockHealthy = Math.random() > 0.2;
+    // A brief, honest UI settle — the check itself reads LOCAL state only.
+    await new Promise((r) => setTimeout(r, 400));
+    const result = computeReadiness(
+      environmentMode(),
+      Object.entries(modes).map(([id, mode]) => ({ id, mode }))
+    );
     const entry: HealthCheckEntry = {
       id: 'hc-' + Date.now(),
       timestamp: new Date().toISOString(),
-      healthy: mockHealthy,
-      summary: mockHealthy
-        ? 'All systems operational. Database: ok. Edge Functions: ok. Response: ' + Math.round(200 + Math.random() * 200) + 'ms.'
-        : 'Degraded: database response slow (1200ms). Edge Functions: ok.',
-      severity: mockHealthy ? 'info' : 'high',
+      healthy: result.healthy,
+      summary: result.summary,
+      severity: result.severity,
     };
     setEntries(function(prev) { return [entry, ...prev]; });
     setRunning(false);
 
-    // Triage any unhealthy results
-    if (!mockHealthy) {
-      const result = await triageAlert({
-        alertTitle: 'Health check: degraded performance',
-        description: 'Database response time exceeded threshold. Edge Functions OK.',
+    // Triage only a genuinely unhealthy result.
+    if (!result.healthy) {
+      const triage = await triageAlert({
+        alertTitle: 'Health check: integrations need attention',
+        description: result.summary,
       });
-      setTriageResults(function(prev) { return { ...prev, [entry.id]: result.summary }; });
+      setTriageResults(function(prev) { return { ...prev, [entry.id]: triage.summary }; });
     }
   }
 
@@ -103,6 +96,12 @@ export function MonitoringDashboard() {
           <span className="text-xs font-medium text-white">Health Check History</span>
         </div>
         <div className="divide-y divide-white/[0.04]">
+          {entries.length === 0 && (
+            <div className="px-4 py-3 text-ds-label text-zinc-500">
+              No health checks have been run in this session. Press &ldquo;Run Health Check&rdquo; to read
+              the platform&rsquo;s current readiness.
+            </div>
+          )}
           {entries.map(function(e) {
             return (
               <div key={e.id} className="px-4 py-2.5 flex items-center justify-between">
