@@ -2444,6 +2444,17 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'scripts/validate-amazon-ads.mjs',
     'scripts/reconcile-admin-shell-chunk-registry.cjs',
     'scripts/reconcile-brand-shell-chunk-registry.cjs',
+    /**
+     * §PHASE 13 (2026-10-05) — the CLAIMS REGISTRY. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §CLAIMS_REGISTRY_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is still refused.
+     * `src/lib/intelligence/amazonWording.ts` — a PROTECTED prefix — is NOT
+     * touched; the registry only READS it.
+     */
+    'src/lib/compliance/claimsRegistry.ts',
+    'src/lib/discovery/engine.ts',
+    'scripts/validate-claims-registry.mjs',
+    'scripts/lint-wording.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

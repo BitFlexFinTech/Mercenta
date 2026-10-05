@@ -2559,6 +2559,46 @@ const ADMIN_SHELL_CHUNK_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 13 — THE CLAIMS REGISTRY (2026-10-05).
+ *
+ * The Phase 13 roadmap row `phase13-claims-registry` recorded that Mercenta
+ * needed ONE GREEN / AMBER / RED governance index over every claim its
+ * outward-facing content may make. Four canonical claim-rule owners already
+ * existed (banned-patterns, amazonWording, positioning's public red lines,
+ * ukMarketFit's prohibited promises), each with its own gate, but nothing
+ * declared them all in one place or classified them. This phase adds that owner.
+ *
+ * Declared surface — every file the phase touches, named:
+ *   · `src/lib/compliance/claimsRegistry.ts` — NEW: the ONE owner (the registry,
+ *     the lint, the module-load guards). It re-implements NO rule; every class
+ *     points at its canonical owner.
+ *   · `src/lib/discovery/engine.ts` — the acquisition outreach copy now lints
+ *     through the registry (`lintClaims(subject, 'acquisition')`), so the owner
+ *     is USED in the product, not merely declared. Behaviour-preserving: the
+ *     registry is a strict superset of the previous `lintOutwardWording` call.
+ *   · `scripts/validate-claims-registry.mjs` — NEW: this phase's gate.
+ *   · `scripts/lint-wording.mjs` — the registry is a DEFINITIONS file (its
+ *     examples must contain the channel name to TEST the owners), excluded the
+ *     same way `amazonWording.ts` already is; the exclusion is guarded by the
+ *     new gate's section I (no component imports it).
+ *   · `package.json` (the new npm script) and BOTH scope guards themselves.
+ *
+ * F6's contract is UNCHANGED and NOT weakened: a working-tree path in NO
+ * declared set still fails, and no protected path appears in the change set.
+ * (`src/lib/intelligence/amazonWording.ts` — a PROTECTED prefix — is NOT touched;
+ * the registry only READS it.)
+ */
+const CLAIMS_REGISTRY_SCOPE = new Set([
+  'src/lib/compliance/claimsRegistry.ts',           /* NEW — the ONE owner */
+  'src/lib/discovery/engine.ts',                    /* the acquisition outreach path now lints via the owner */
+  'scripts/validate-claims-registry.mjs',           /* NEW — this phase's gate */
+  'scripts/lint-wording.mjs',                       /* the definitions-file exclusion (guarded by the new gate) */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3303,7 +3343,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...OPERATOR_RELABEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §ADMIN-SHELL-CHUNK — the admin-shell bundle budget (see above). */
           ADMIN_SHELL_CHUNK_SCOPE.has(p) ||
-          [...ADMIN_SHELL_CHUNK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...ADMIN_SHELL_CHUNK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 13 — the claims registry (see above). */
+          CLAIMS_REGISTRY_SCOPE.has(p) ||
+          [...CLAIMS_REGISTRY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

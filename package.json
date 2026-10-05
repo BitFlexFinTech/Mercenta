@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.e2e.json && tsc --noEmit -p tsconfig.functions.json",
     "validate:wording": "node scripts/lint-wording.mjs",
     "validate:wording-guard": "node scripts/validate-wording-guard.mjs",
+    "validate:claims-registry": "node scripts/validate-claims-registry.mjs",
     "validate:typography": "node scripts/validate-typography-scale.mjs",
     "migrate:typography": "node scripts/migrate-micro-typography.mjs",
     "validate:commercial-readiness": "node scripts/validate-commercial-readiness.mjs",

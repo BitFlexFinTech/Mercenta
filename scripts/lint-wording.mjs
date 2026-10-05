@@ -79,6 +79,14 @@ const EXCLUDED = [
   // excluded: its regex literals and reasons necessarily contain the channel name
   // in order to MATCH claims).
   'src/lib/intelligence/amazonWording.ts',
+  // §PHASE 13 — the CLAIMS REGISTRY. Same class as `amazonWording.ts` above: it
+  // is a DEFINITIONS / INDEX file whose `concern` text and `example` strings
+  // necessarily contain the channel name and the banned phrasings in order to
+  // name and TEST them. It renders nothing. Excluding it does NOT weaken the
+  // gate — `scripts/validate-claims-registry.mjs` asserts every class points at
+  // a real canonical owner, and (section I) that NO component imports it, so it
+  // can never become a rendered-copy loophole.
+  'src/lib/compliance/claimsRegistry.ts',
 ];
 
 function isExcluded(rel) {

@@ -14,7 +14,15 @@
 
 import { chargeService, remainingBudget } from './budget';
 import { authoriseAiCall, recordAiCallOutcome } from '@/lib/costs/usageLog';
-import { lintOutwardWording } from './wordingSafety';
+/**
+ * §PHASE 13 — the outreach copy is checked against the CLAIMS REGISTRY (the ONE
+ * governance index over every claim, `src/lib/compliance/claimsRegistry.ts`),
+ * which itself applies the canonical outward-wording owner. This replaces the
+ * direct `lintOutwardWording` call: the registry is a strict superset (it runs
+ * the channel-naming owner PLUS the programme-claim owner), so the copy that
+ * passed before still passes, and a programme claim now fails as well.
+ */
+import { lintClaims } from '@/lib/compliance/claimsRegistry';
 
 export interface RawDiscoveryLead {
   companyName: string;
@@ -312,7 +320,7 @@ export async function runDiscoveryPipeline(
       '{{company}}',
       raw.companyName
     );
-    const lint = lintOutwardWording(subject);
+    const lint = lintClaims(subject, 'acquisition');
     if (!lint.safe) {
       dropped += 1;
       opts.onLead?.(lead, false, `wording lint: ${lint.hits[0]?.reason}`);

@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-brand-shell-chunk-registry.cjs after the §ADMIN-SHELL-CHUNK increment added the row discovered-brandshell-chunk-size (the sibling script reconciled discovered-adminshell-chunk-size + the two STALE cleanup rows). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 after the §PHASE 13 increment raised phase13-claims-registry not_started → built (no row added or removed: total_entries stays 540; built +1, not_started -1). Previous snapshot was the §ADMIN-SHELL-CHUNK increment. Snapshot only.",
       "built_and_tested": 337,
-      "built": 145,
-      "not_started": 37,
+      "built": 146,
+      "not_started": 36,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -4122,11 +4122,12 @@
     },
     {
       "id": "phase13-claims-registry",
-      "description": "Phase 13 — the Claims Registry (GREEN = supported · AMBER = requires verification/approval · RED = do not use) governing the website, AI-generated content, email, social, acquisition campaigns and sales material. Principle: CHANNEL-NEUTRAL BY DEFAULT, CHANNEL-SPECIFIC WHERE OPERATIONALLY NECESSARY, NEVER MISLEADING",
+      "description": "Phase 13 — the Claims Registry (GREEN = supported · AMBER = requires verification/approval · RED = do not use) governing the website, AI-generated content, email, social, acquisition campaigns and sales material. Principle: CHANNEL-NEUTRAL BY DEFAULT, CHANNEL-SPECIFIC WHERE OPERATIONALLY NECESSARY, NEVER MISLEADING. BUILT as the ONE governance index: `src/lib/compliance/claimsRegistry.ts` declares every class of claim with its status and POINTS AT its canonical owner (module+symbol — it re-implements NO rule); `lintClaims(text, channel)` classifies content; the class is USED by the acquisition outreach path.",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 13",
-      "last_verified": "2026-09-19",
+      "status": "built",
+      "evidence": "src/lib/compliance/claimsRegistry.ts (the ONE owner — 12 classes: 8 RED / 3 AMBER / 1 GREEN, indexing the four canonical claim owners: src/lib/discovery/banned-patterns.mjs, src/lib/intelligence/amazonWording.ts, src/config/positioning.ts, src/config/ukMarketFit.ts); src/lib/discovery/engine.ts (wired: outreach copy lints via `lintClaims(subject, 'acquisition')`); scripts/validate-claims-registry.mjs (new gate, npm run validate:claims-registry — every class resolves to a real owner, every RED example is caught by it, every AMBER qualifier is used by a surface, no owner is un-registered, lint executes, self-check proved able to fail); scripts/lint-wording.mjs (definitions-file exclusion, guarded by the new gate section I)",
+      "_audit_note": "§PHASE 13 (2026-10-05) — status raised not_started → built. The former evidence was a documentation pointer only (docs — roadmap §PHASE 13) with no code. The registry re-implements NO rule: it indexes the FOUR owners that already enforced these claims, so no second source of truth was created. It is gated (validate:claims-registry) and mutation-proved (a RED example changed to a neutral sentence fails the gate; claimsRegistry.ts restored byte-identical, sha256 70ffb21dc5f75a38c0641c6dbe4c89b34499881a4d01092e6a300d674257cbd1). Status stays `built` (not `built_and_tested`) because that enum requires an e2e reference and this owner has no rendered surface — it is a library + gate, wired into the acquisition engine (which its own validator covers).",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {
