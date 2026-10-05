@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 after the §PHASE 13 increment raised phase13-claims-registry not_started → built (no row added or removed: total_entries stays 540; built +1, not_started -1). Previous snapshot was the §ADMIN-SHELL-CHUNK increment. Snapshot only.",
+      "_note": "Recomputed 2026-10-05 after the §ACQ-CONVERSION increment raised discovered-acquisition-conversion-measurement not_started → built (no row added or removed: total_entries stays 540; built +1, not_started -1). Previous snapshot was the §PHASE 13 increment. Snapshot only.",
       "built_and_tested": 337,
-      "built": 146,
-      "not_started": 36,
+      "built": 147,
+      "not_started": 35,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -4778,11 +4778,13 @@
     },
     {
       "id": "discovered-acquisition-conversion-measurement",
-      "description": "The prospective-brand/outbound system reports COUNTS (pipeline totals, per-stage, follow-ups overdue) but derives NO conversion rates (reply rate, positive-reply rate, meeting rate, close rate) and no segment-level reporting (category, region, source, owner, message version). Without rates the placement/list/copy diagnosis step is impossible. The substrate exists — `classifyInboundReply` already distinguishes intent — so the correct implementation reuses it and adds NO new state. Deliberately not built yet: the definitions of \"reply\", \"positive\" and \"meeting\" must be agreed so a second definition cannot contradict the canonical classifier",
-      "status": "not_started",
-      "evidence": "docs/UNIFIED_PLATFORM_GAP_ANALYSIS_2026-09-20.md §A.3 (Finding A-1); src/lib/acquisition/acquisitionEngine.ts; src/lib/marketing.ts (classifyInboundReply)",
+      "description": "The prospective-brand/outbound system reported COUNTS (pipeline totals, per-stage, follow-ups overdue) but derived NO conversion rates (reply rate, positive-reply rate, meeting rate, close rate) and no segment-level reporting. Without rates the placement/list/copy diagnosis step was impossible. BUILT (2026-10-05) as the ONE owner `src/lib/acquisition/conversionMetrics.ts`, DERIVED entirely from the canonical stage machine: it adds NO new state and re-classifies NOTHING, so the definitions cannot contradict the canonical classifier — CONTACTED = stage >= follow_up (an outreach was SENT; a DRAFT does not count), REPLIED = stage >= response, ENGAGED = stage >= meeting, CONVERTED = active_brand. It reports reply / engagement / conversion / reply-to-engagement rates (a rate with a zero denominator is `null`, never a misleading 0) plus segment breakdowns by category, source and owner, and is wired into the Founder Control Centre.",
       "source": "Unified platform gap analysis + foundation workstream (2026-09-20) — automation kill switch, SEO route-metadata foundation, bounded-AI safety gate",
-      "last_updated": "2026-09-20"
+      "status": "built",
+      "evidence": "src/lib/acquisition/conversionMetrics.ts (the ONE owner — funnel + rates + segments over canonical AcquisitionRecord[], derived from ACQUISITION_STAGES); src/lib/commandCentre/controlCentre.ts (computes the model, exposes `acquisitionConversion`, adds four rate metric cards); src/components/admin/FounderControlCentre.tsx (renders the Conversion section); scripts/validate-acquisition-conversion.mjs (new gate, npm run validate:acquisition-conversion — every step points at a real canonical stage, the funnel is monotonic and excludes the draft stage, the arithmetic is executed on known input, a zero denominator yields null, the segments partition the records, the owner is USED, and a self-check proves the gate can fail)",
+      "_audit_note": "§ACQ-CONVERSION (2026-10-05) — status raised not_started → built. The row’s own open concern (the definitions of reply/positive/meeting must not contradict the canonical classifier) is resolved by defining every step as a CANONICAL STAGE rather than re-classifying intent, so the owner adds no second definition and no new state. Gated (validate:acquisition-conversion, mutation-proved: changing the contacted threshold follow_up → outreach fails 6 assertions; src/lib/acquisition/conversionMetrics.ts restored byte-identical, sha256 f688f5524b0241ba6d79aa908d2412ed3bd92f079595ba9e543118be2d993839). Status stays `built` (not `built_and_tested`): that enum requires an e2e reference; this increment has a rendered surface covered by the existing Control Centre browser spec and its own gate.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null
     },
     {
       "id": "discovered-acquisition-revenue-floor-and-sla",

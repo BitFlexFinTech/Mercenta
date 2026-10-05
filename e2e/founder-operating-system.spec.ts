@@ -220,6 +220,12 @@ test.describe('Founder Operating System — Control Centre', () => {
     await expect(page.locator('[data-pipeline-stage]')).toHaveCount(11);
     await expect(page.locator('[data-testid^="control-acquisition-row-"]').first()).toBeVisible();
 
+    // §ACQ-CONVERSION — the funnel RATES render, derived from the SAME canonical
+    // records the pipeline above shows (contacted / replied / engaged / converted).
+    await expect(page.getByTestId('control-acquisition-conversion')).toBeVisible();
+    await expect(page.getByTestId('control-acquisition-conversion')).toContainText('Contacted');
+    await expect(page.getByTestId('control-acquisition-conversion')).toContainText('Converted');
+
     // The first prospect row opens the EXISTING destination that owns its stage.
     await page.locator('[data-testid^="control-acquisition-row-"]').first().locator('button').click();
     await expect(

@@ -2599,6 +2599,31 @@ const CLAIMS_REGISTRY_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §ACQ-CONVERSION (2026-10-05) — the acquisition conversion measurement.
+ *
+ * The registry row `discovered-acquisition-conversion-measurement` recorded that
+ * the outbound system reported COUNTS but derived NO conversion rates, so the
+ * placement/list/copy diagnosis step was impossible. This increment adds the ONE
+ * owner of the funnel (`src/lib/acquisition/conversionMetrics.ts`), DERIVED from
+ * the canonical stage machine (no second definition, no new state), wires it into
+ * the Founder Control Centre, and gates it.
+ *
+ * Destination is declared here (the remedy this guard documents for a legitimately
+ * new/changed file) rather than left as an unexplained working-tree change. F6's
+ * contract is UNCHANGED and NOT weakened: a working-tree path in NO declared set
+ * still fails, and no protected path appears in the change set.
+ */
+const ACQ_CONVERSION_SCOPE = new Set([
+  'src/lib/acquisition/conversionMetrics.ts',       /* NEW — the ONE owner */
+  'src/lib/commandCentre/controlCentre.ts',         /* computes + exposes the conversion model */
+  'src/components/admin/FounderControlCentre.tsx',  /* renders the Conversion section */
+  'scripts/validate-acquisition-conversion.mjs',    /* NEW — this phase's gate */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3346,7 +3371,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...ADMIN_SHELL_CHUNK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 13 — the claims registry (see above). */
           CLAIMS_REGISTRY_SCOPE.has(p) ||
-          [...CLAIMS_REGISTRY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...CLAIMS_REGISTRY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §ACQ-CONVERSION — the acquisition conversion measurement (see above). */
+          ACQ_CONVERSION_SCOPE.has(p) ||
+          [...ACQ_CONVERSION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

@@ -68,6 +68,7 @@ import { askMercenta, buildFounderBrief, type FounderBrief, type MercentaAnswer 
 import { useWorkVersion } from '@/lib/work/useWork';
 import { useCommercialReadinessVersion } from '@/lib/commercial/useCommercialReadiness';
 import { feedAssessmentToAcquisition } from '@/lib/preaudit/preAuditAcquisitionBridge';
+import { formatRate } from '@/lib/acquisition/conversionMetrics';
 import type { PreAuditQueueRow, CommercialReadinessQueueRow } from '@/lib/commandCentre/controlCentre';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 
@@ -474,6 +475,51 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 }))}
                 onSelect={() => go('crm')}
               />
+            </WorkspaceSection>
+
+            {/*
+              §ACQ-CONVERSION — the funnel RATES, derived from the SAME canonical
+              records the Pipeline above shows. Every figure is a count of
+              prospects that actually reached a canonical stage (contacted = an
+              outreach was sent; replied = a response exists; engaged = a
+              meeting/negotiation/pilot is in progress; converted = the onboarding
+              completed). Nothing here re-classifies a reply: the definitions live
+              once, in `src/lib/acquisition/conversionMetrics.ts`.
+            */}
+            <WorkspaceSection
+              title="Conversion"
+              description="Rates over the canonical prospect store. A rate with a zero denominator is shown as — rather than a misleading 0%."
+              domain="intelligence"
+            >
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="control-acquisition-conversion">
+                {[
+                  { label: 'Contacted', count: model.acquisitionConversion.counts.contacted, sub: 'outreach sent' },
+                  { label: 'Replied', count: model.acquisitionConversion.counts.replied, sub: `${formatRate(model.acquisitionConversion.rates.replyRate)} of contacted` },
+                  { label: 'Engaged', count: model.acquisitionConversion.counts.engaged, sub: `${formatRate(model.acquisitionConversion.rates.engagementRate)} of contacted` },
+                  { label: 'Converted', count: model.acquisitionConversion.counts.converted, sub: `${formatRate(model.acquisitionConversion.rates.conversionRate)} of contacted` },
+                ].map((funnel) => (
+                  <div key={funnel.label} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{funnel.label}</p>
+                    <p className="mt-1 font-mono text-lg text-zinc-100">{funnel.count}</p>
+                    <p className="text-ds-micro text-brass-300">{funnel.sub}</p>
+                  </div>
+                ))}
+              </div>
+              {model.acquisitionConversion.byCategory.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">By category</p>
+                  <ul className="mt-1 space-y-1" data-testid="control-conversion-by-category">
+                    {model.acquisitionConversion.byCategory.map((s) => (
+                      <li key={s.key} className="flex justify-between gap-3 text-ds-label">
+                        <span className="text-zinc-300">{s.key}</span>
+                        <span className="font-mono text-zinc-400">
+                          {s.counts.contacted} contacted · {s.counts.replied} replied · {s.counts.converted} converted
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </WorkspaceSection>
             <WorkspaceSection
               title="Prospects"

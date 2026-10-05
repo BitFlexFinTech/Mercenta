@@ -66,6 +66,11 @@ import {
 } from '@/lib/automation/registry';
 import { aiAvailability, type AiAvailability } from '@/lib/ai/founderAiClient';
 import { acquisitionPipeline, type AcquisitionPipelineModel } from '@/lib/acquisition/acquisitionEngine';
+import {
+  computeConversionMetrics,
+  formatRate,
+  type AcquisitionConversionMetrics,
+} from '@/lib/acquisition/conversionMetrics';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
 import { allPreAuditAssessments } from '@/data/preAuditStore';
@@ -235,6 +240,12 @@ export interface ControlCentreModel {
   metrics: Record<ControlCentreSectionId, ControlMetric[]>;
   attention: ControlAttentionItem[];
   acquisition: AcquisitionPipelineModel;
+  /**
+   * §ACQ-CONVERSION — the acquisition conversion funnel + rates, derived from
+   * the SAME canonical records the pipeline above reports (no second definition;
+   * see `src/lib/acquisition/conversionMetrics.ts`).
+   */
+  acquisitionConversion: AcquisitionConversionMetrics;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -272,6 +283,7 @@ export function buildControlCentre(): ControlCentreModel {
   const critical = work.filter((w) => w.priority === 'critical');
   const reminders = getActiveReminders('admin');
   const acquisition = acquisitionPipeline();
+  const acquisitionConversion = computeConversionMetrics(acquisition.records);
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -440,6 +452,11 @@ export function buildControlCentre(): ControlCentreModel {
       metric('acq-approval', 'Awaiting approval', String(acquisition.awaitingApproval), acquisition.awaitingApproval > 0 ? 'warning' : 'success', 'Human gate', 'Nothing is sent until the founder approves.', 'crm'),
       metric('acq-followup', 'Follow-ups due', String(acquisition.followUpsDue + acquisition.followUpsOverdue), acquisition.followUpsOverdue > 0 ? 'danger' : 'info', 'Cadence', `${acquisition.followUpsOverdue} overdue.`, 'crm'),
       metric('acq-brands', 'Activated brands', String(acquisition.activatedBrands), 'success', 'Converted', 'Only a completed onboarding makes a prospect a tenant.', 'onboarding_pipeline'),
+      /* §ACQ-CONVERSION — the rates over the same canonical records. */
+      metric('acq-reply-rate', 'Reply rate', formatRate(acquisitionConversion.rates.replyRate), acquisitionConversion.rates.replyRate === null ? 'neutral' : 'info', `of ${acquisitionConversion.counts.contacted} contacted`, 'Replied ÷ contacted — a canonical response exists on the prospect record.', 'crm'),
+      metric('acq-engagement-rate', 'Engagement rate', formatRate(acquisitionConversion.rates.engagementRate), acquisitionConversion.rates.engagementRate === null ? 'neutral' : 'info', `of ${acquisitionConversion.counts.contacted} contacted`, 'Reached a meeting, negotiation or pilot ÷ contacted.', 'crm'),
+      metric('acq-conversion-rate', 'Conversion rate', formatRate(acquisitionConversion.rates.conversionRate), acquisitionConversion.counts.converted > 0 ? 'success' : 'neutral', `${acquisitionConversion.counts.converted} activated`, 'Only a completed onboarding counts as converted.', 'onboarding_pipeline'),
+      metric('acq-reply-engagement', 'Reply → engagement', formatRate(acquisitionConversion.rates.replyToEngagementRate), 'neutral', `of ${acquisitionConversion.counts.replied} replies`, 'Of those who replied, the share that engaged — the canonical "positive reply" measure.', 'crm'),
     ],
     operations: [
       metric('ops-pos', 'Open purchase orders', String(openPos.length), 'neutral', 'Order book', `${unacknowledged.length} unacknowledged.`, 'purchase_orders_admin'),
@@ -559,6 +576,7 @@ export function buildControlCentre(): ControlCentreModel {
     metrics,
     attention,
     acquisition,
+    acquisitionConversion,
     preAudit,
     commercial,
     intelligence,
