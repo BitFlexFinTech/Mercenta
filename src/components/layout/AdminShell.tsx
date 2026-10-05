@@ -2,51 +2,66 @@
  * AdminShell — admin portal environment. Lazy-loaded from App.tsx.
  * Only loaded when environment === 'admin'.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useApp } from '@/context/GlobalStateContext';
 import { AppShell } from '@/components/layout/AppShell';
 import { WorkspaceFrame, WorkspaceHeader } from '@/components/shared/workspace';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { IntegrationsProvider } from '@/integrations/IntegrationsContext';
 import { currentPathname, pushProductPath, resolveProductView } from '@/lib/runtime/productRoutes';
-import { AdminDashboard } from '@/components/admin/AdminDashboard';
-import { LogisticsControl } from '@/components/admin/LogisticsControl';
-/* §P9 (programme decision 4) — `import { CarrierIntegrationMonitor } from
-   '@/components/admin/CarrierMonitor'` is REMOVED: the admin "Carrier Monitor"
-   destination (matrix D04-18 / D10-13) is gone. Provider/connection health is
-   owned by the canonical Integrations surface (`IntegrationsPanel`), which reads
-   the provider-mode registry rather than a second, hand-written health feed. */
-import { BrandCRM } from '@/components/admin/BrandCRM';
-import { CatalogManagerAdmin } from '@/components/admin/CatalogManagerAdmin';
-import { ComplianceApprovals } from '@/components/admin/ComplianceApprovals';
-import { MarketingHub } from '@/components/admin/MarketingHub';
-import { IntegrationsPanel } from '@/components/admin/integrations/IntegrationsPanel';
-import { UsertourAdminPanel } from '@/components/admin/UsertourAdminPanel';
-import { PostizAdminPanel } from '@/components/admin/PostizAdminPanel';
-import { WhatsAppAdminPanel } from '@/components/admin/WhatsAppAdminPanel';
-import { FulfillmentTrackPanel } from '@/components/admin/FulfillmentTrack';
-import { RetailPipelinePanel } from '@/components/admin/RetailPipeline';
-import { BillingPanel } from '@/components/admin/BillingPanel';
-import { ContractsAdminPanel } from '@/components/admin/ContractsAdminPanel';
-import { MessagesHub } from '@/components/admin/MessagesHub';
-import { HelpdeskDashboard } from '@/components/admin/HelpdeskDashboard';
-import { ReturnsTrackingDashboard } from '@/components/admin/ReturnsTrackingDashboard';
-import { MonitoringDashboard } from '@/components/admin/MonitoringDashboard';
-import { AdminPurchaseOrderList } from '@/components/admin/AdminPurchaseOrderList';
-import { SuperAdminPanel } from '@/components/admin/SuperAdminPanel';
-import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
-import { BrandIntelligencePanel } from '@/components/admin/BrandIntelligencePanel';
-import { BrandIntelligenceStrategyPanel } from '@/components/admin/BrandIntelligenceStrategyPanel';
-import { OpportunityDiscoveryPanel } from '@/components/admin/OpportunityDiscoveryPanel';
-import { ProductDiscoveryPanel } from '@/components/admin/ProductDiscoveryPanel';
-import { RegionalPriorityPanel } from '@/components/admin/RegionalPriorityPanel';
-import { AmazonAdsDashboard } from '@/components/admin/AmazonAdsDashboard';
-import { FounderControlCentre } from '@/components/admin/FounderControlCentre';
-import { MercentaBrain } from '@/components/admin/MercentaBrain';
-import { FounderInvestorCentre } from '@/components/admin/FounderInvestorCentre';
-import { PartnershipsCentre } from '@/components/admin/PartnershipsCentre';
-import { OnboardingPipeline } from '@/components/admin/OnboardingPipeline';
-import { AdminWorkCalendar, AdminWorkManagement } from '@/components/admin/WorkManagement';
+/*
+  §ADMIN-SHELL-CHUNK (2026-10-05) — the admin portal's view panels are LAZY.
+
+  WHY. `discovered-adminshell-chunk-size` measured the single `AdminShell-*.js`
+  chunk at 909 kB (230 kB gzip): the shell imported all ~34 panels EAGERLY, so
+  every operator downloaded every panel to open any one of them, and `vite build`
+  warned that a chunk exceeded 500 kB. Each panel is now reached by a dynamic
+  import (`React.lazy`) and rendered inside the `<Suspense>` in the view switch
+  below, so the shell ships small and a panel's chunk loads only when its view is
+  opened. This is APP-code splitting only — `node_modules` still lands in the ONE
+  `vendor` chunk required by the §P3 initialisation-cycle fix (asserted by
+  `scripts/validate-admin-shell-bundle.mjs` and `validate-production-boot.mjs`).
+
+  §P9 (programme decision 4) — `import { CarrierIntegrationMonitor } from
+  '@/components/admin/CarrierMonitor'` is REMOVED: the admin "Carrier Monitor"
+  destination (matrix D04-18 / D10-13) is gone. Provider/connection health is
+  owned by the canonical Integrations surface (`IntegrationsPanel`), which reads
+  the provider-mode registry rather than a second, hand-written health feed.
+*/
+const AdminDashboard = lazy(() => import('@/components/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
+const LogisticsControl = lazy(() => import('@/components/admin/LogisticsControl').then((m) => ({ default: m.LogisticsControl })));
+const BrandCRM = lazy(() => import('@/components/admin/BrandCRM').then((m) => ({ default: m.BrandCRM })));
+const CatalogManagerAdmin = lazy(() => import('@/components/admin/CatalogManagerAdmin').then((m) => ({ default: m.CatalogManagerAdmin })));
+const ComplianceApprovals = lazy(() => import('@/components/admin/ComplianceApprovals').then((m) => ({ default: m.ComplianceApprovals })));
+const MarketingHub = lazy(() => import('@/components/admin/MarketingHub').then((m) => ({ default: m.MarketingHub })));
+const IntegrationsPanel = lazy(() => import('@/components/admin/integrations/IntegrationsPanel').then((m) => ({ default: m.IntegrationsPanel })));
+const UsertourAdminPanel = lazy(() => import('@/components/admin/UsertourAdminPanel').then((m) => ({ default: m.UsertourAdminPanel })));
+const PostizAdminPanel = lazy(() => import('@/components/admin/PostizAdminPanel').then((m) => ({ default: m.PostizAdminPanel })));
+const WhatsAppAdminPanel = lazy(() => import('@/components/admin/WhatsAppAdminPanel').then((m) => ({ default: m.WhatsAppAdminPanel })));
+const FulfillmentTrackPanel = lazy(() => import('@/components/admin/FulfillmentTrack').then((m) => ({ default: m.FulfillmentTrackPanel })));
+const RetailPipelinePanel = lazy(() => import('@/components/admin/RetailPipeline').then((m) => ({ default: m.RetailPipelinePanel })));
+const BillingPanel = lazy(() => import('@/components/admin/BillingPanel').then((m) => ({ default: m.BillingPanel })));
+const ContractsAdminPanel = lazy(() => import('@/components/admin/ContractsAdminPanel').then((m) => ({ default: m.ContractsAdminPanel })));
+const MessagesHub = lazy(() => import('@/components/admin/MessagesHub').then((m) => ({ default: m.MessagesHub })));
+const HelpdeskDashboard = lazy(() => import('@/components/admin/HelpdeskDashboard').then((m) => ({ default: m.HelpdeskDashboard })));
+const ReturnsTrackingDashboard = lazy(() => import('@/components/admin/ReturnsTrackingDashboard').then((m) => ({ default: m.ReturnsTrackingDashboard })));
+const MonitoringDashboard = lazy(() => import('@/components/admin/MonitoringDashboard').then((m) => ({ default: m.MonitoringDashboard })));
+const AdminPurchaseOrderList = lazy(() => import('@/components/admin/AdminPurchaseOrderList').then((m) => ({ default: m.AdminPurchaseOrderList })));
+const SuperAdminPanel = lazy(() => import('@/components/admin/SuperAdminPanel').then((m) => ({ default: m.SuperAdminPanel })));
+const AdminAuditLog = lazy(() => import('@/components/admin/AdminAuditLog').then((m) => ({ default: m.AdminAuditLog })));
+const BrandIntelligencePanel = lazy(() => import('@/components/admin/BrandIntelligencePanel').then((m) => ({ default: m.BrandIntelligencePanel })));
+const BrandIntelligenceStrategyPanel = lazy(() => import('@/components/admin/BrandIntelligenceStrategyPanel').then((m) => ({ default: m.BrandIntelligenceStrategyPanel })));
+const OpportunityDiscoveryPanel = lazy(() => import('@/components/admin/OpportunityDiscoveryPanel').then((m) => ({ default: m.OpportunityDiscoveryPanel })));
+const ProductDiscoveryPanel = lazy(() => import('@/components/admin/ProductDiscoveryPanel').then((m) => ({ default: m.ProductDiscoveryPanel })));
+const RegionalPriorityPanel = lazy(() => import('@/components/admin/RegionalPriorityPanel').then((m) => ({ default: m.RegionalPriorityPanel })));
+const AmazonAdsDashboard = lazy(() => import('@/components/admin/AmazonAdsDashboard').then((m) => ({ default: m.AmazonAdsDashboard })));
+const FounderControlCentre = lazy(() => import('@/components/admin/FounderControlCentre').then((m) => ({ default: m.FounderControlCentre })));
+const MercentaBrain = lazy(() => import('@/components/admin/MercentaBrain').then((m) => ({ default: m.MercentaBrain })));
+const FounderInvestorCentre = lazy(() => import('@/components/admin/FounderInvestorCentre').then((m) => ({ default: m.FounderInvestorCentre })));
+const PartnershipsCentre = lazy(() => import('@/components/admin/PartnershipsCentre').then((m) => ({ default: m.PartnershipsCentre })));
+const OnboardingPipeline = lazy(() => import('@/components/admin/OnboardingPipeline').then((m) => ({ default: m.OnboardingPipeline })));
+const AdminWorkManagement = lazy(() => import('@/components/admin/WorkManagement').then((m) => ({ default: m.AdminWorkManagement })));
+const AdminWorkCalendar = lazy(() => import('@/components/admin/WorkManagement').then((m) => ({ default: m.AdminWorkCalendar })));
 import { NAV_BADGE_LABELS, useAdminNavBadges } from '@/lib/nav/navBadges';
 import { usePurchaseOrders } from '@/data/queries';
 import type { CommandGroup } from '@/components/shared/CommandPalette';
@@ -298,73 +313,99 @@ export default function AdminShell() {
     >
       <ErrorBoundary sectionLabel="Admin portal">
         <IntegrationsProvider>
-          {adminView === 'overview' && <AdminDashboard department={deptMap[adminView]} onNavigate={setAdminView} />}
-          {/* §Founder OS — the founder/Super-Admin operating centre. Guarded a
-              second time at render (defense in depth), like the other private
-              founder surfaces. */}
-          {adminView === 'control_centre' && (isSuper ? <FounderControlCentre onNavigate={setAdminView} /> : <AccessDenied />)}
-          {/* §MERCENTA BRAIN — the relationship/intelligence destination. Guarded
-              a second time at render (defense in depth), like the other
-              Super-Admin-only surfaces. */}
-          {adminView === 'brain' && (isSuper ? <MercentaBrain onNavigate={setAdminView} /> : <AccessDenied />)}
-          {/* §Sprint — canonical work layer: tasks/deadlines + derived calendar. */}
-          {adminView === 'work' && <AdminWorkManagement onNavigate={setAdminView} />}
-          {adminView === 'calendar' && <AdminWorkCalendar onNavigate={setAdminView} />}
-          {adminView === 'crm' && <BrandCRM />}
-          {adminView === 'onboarding_pipeline' && <OnboardingPipeline />}
-          {adminView === 'fulfillment_track' && <FulfillmentTrackPanel />}
-          {adminView === 'retail_pipeline' && <RetailPipelinePanel />}
-          {adminView === 'purchase_orders_admin' && <AdminPurchaseOrderList />}
-          {adminView === 'billing' && <BillingPanel />}
-          {adminView === 'contracts_admin' && <ContractsAdminPanel />}
-          {adminView === 'messages' && <MessagesHub />}
-          {adminView === 'helpdesk' && <HelpdeskDashboard />}
-          {adminView === 'returns_tracking' && <ReturnsTrackingDashboard />}
-          {adminView === 'monitoring' && <MonitoringDashboard />}
-          {adminView === 'catalog' && <CatalogManagerAdmin />}
-          {adminView === 'logistics' && (
-            /* §P10 — the Logistics Hub states each carrier account's configuration and
-               hands off to the ONE surface that owns credentials. The hand-off is offered
-               ONLY where the canonical RBAC permits the destination (Integration Settings
-               is super-admin-only), so no session receives a control that lands on
-               AccessDenied; a non-super operator still reads the full configuration. */
-            <LogisticsControl
-              onOpenIntegrations={isSuper ? () => setAdminView('integrations') : undefined}
-            />
-          )}
-          {/* §P9 (programme decision 4) — `{adminView === 'carriers' && <CarrierIntegrationMonitor />}`
-              is REMOVED. The retired destination rendered a hand-written per-carrier
-              health feed (including FedEx/BAK, which are not Mercenta accounts).
-              Provider connection health lives on the Integrations surface. */}
-          {adminView === 'compliance' && <ComplianceApprovals />}
-          {adminView === 'marketing' && <MarketingHub />}
-          {adminView === 'amazon_ads' && <AmazonAdsDashboard />}
-          {adminView === 'brand_intelligence' && (isSuper ? (
-            <div className="space-y-4">
-              <BrandIntelligenceStrategyPanel />
-              {/*
-                §Workstream B (Step B) — internal product discovery + regional
-                priority derivation panels, SUPER ADMIN ONLY, derived purely from
-                canonical prospect/ASIN/opportunity evidence (no new engines).
-              */}
-              <ProductDiscoveryPanel />
-              <RegionalPriorityPanel />
-              <OpportunityDiscoveryPanel />
-              <BrandIntelligencePanel />
-            </div>
-          ) : <AccessDenied />)}
-          {adminView === 'super_admin' && (isSuper ? <SuperAdminPanel /> : <AccessDenied />)}
-          {/* §21/M12 — founder-only views, guarded a second time at render. */}
-          {adminView === 'founder_centre' && (isSuper ? <FounderInvestorCentre /> : <AccessDenied />)}
-          {adminView === 'partnerships' && (isSuper ? <PartnershipsCentre /> : <AccessDenied />)}
-          {adminView === 'audit_log' && (isSuper ? <AdminAuditLog /> : <AccessDenied />)}
-          {adminView === 'integrations' && (isSuper ? <IntegrationsPanel /> : <AccessDenied />)}
-          {adminView === 'usertour' && <UsertourAdminPanel />}
-          {adminView === 'postiz' && <PostizAdminPanel />}
-          {adminView === 'whatsapp' && <WhatsAppAdminPanel />}
+          {/* §ADMIN-SHELL-CHUNK — the lazily-loaded view panels resolve inside this
+              boundary; the shell chrome (nav + header) stays mounted, so a view
+              switch never blanks the workspace. */}
+          <Suspense fallback={<AdminViewFallback />}>
+            {adminView === 'overview' && <AdminDashboard department={deptMap[adminView]} onNavigate={setAdminView} />}
+            {/* §Founder OS — the founder/Super-Admin operating centre. Guarded a
+                second time at render (defense in depth), like the other private
+                founder surfaces. */}
+            {adminView === 'control_centre' && (isSuper ? <FounderControlCentre onNavigate={setAdminView} /> : <AccessDenied />)}
+            {/* §MERCENTA BRAIN — the relationship/intelligence destination. Guarded
+                a second time at render (defense in depth), like the other
+                Super-Admin-only surfaces. */}
+            {adminView === 'brain' && (isSuper ? <MercentaBrain onNavigate={setAdminView} /> : <AccessDenied />)}
+            {/* §Sprint — canonical work layer: tasks/deadlines + derived calendar. */}
+            {adminView === 'work' && <AdminWorkManagement onNavigate={setAdminView} />}
+            {adminView === 'calendar' && <AdminWorkCalendar onNavigate={setAdminView} />}
+            {adminView === 'crm' && <BrandCRM />}
+            {adminView === 'onboarding_pipeline' && <OnboardingPipeline />}
+            {adminView === 'fulfillment_track' && <FulfillmentTrackPanel />}
+            {adminView === 'retail_pipeline' && <RetailPipelinePanel />}
+            {adminView === 'purchase_orders_admin' && <AdminPurchaseOrderList />}
+            {adminView === 'billing' && <BillingPanel />}
+            {adminView === 'contracts_admin' && <ContractsAdminPanel />}
+            {adminView === 'messages' && <MessagesHub />}
+            {adminView === 'helpdesk' && <HelpdeskDashboard />}
+            {adminView === 'returns_tracking' && <ReturnsTrackingDashboard />}
+            {adminView === 'monitoring' && <MonitoringDashboard />}
+            {adminView === 'catalog' && <CatalogManagerAdmin />}
+            {adminView === 'logistics' && (
+              /* §P10 — the Logistics Hub states each carrier account's configuration and
+                 hands off to the ONE surface that owns credentials. The hand-off is offered
+                 ONLY where the canonical RBAC permits the destination (Integration Settings
+                 is super-admin-only), so no session receives a control that lands on
+                 AccessDenied; a non-super operator still reads the full configuration. */
+              <LogisticsControl
+                onOpenIntegrations={isSuper ? () => setAdminView('integrations') : undefined}
+              />
+            )}
+            {/* §P9 (programme decision 4) — `{adminView === 'carriers' && <CarrierIntegrationMonitor />}`
+                is REMOVED. The retired destination rendered a hand-written per-carrier
+                health feed (including FedEx/BAK, which are not Mercenta accounts).
+                Provider connection health lives on the Integrations surface. */}
+            {adminView === 'compliance' && <ComplianceApprovals />}
+            {adminView === 'marketing' && <MarketingHub />}
+            {adminView === 'amazon_ads' && <AmazonAdsDashboard />}
+            {adminView === 'brand_intelligence' && (isSuper ? (
+              <div className="space-y-4">
+                <BrandIntelligenceStrategyPanel />
+                {/*
+                  §Workstream B (Step B) — internal product discovery + regional
+                  priority derivation panels, SUPER ADMIN ONLY, derived purely from
+                  canonical prospect/ASIN/opportunity evidence (no new engines).
+                */}
+                <ProductDiscoveryPanel />
+                <RegionalPriorityPanel />
+                <OpportunityDiscoveryPanel />
+                <BrandIntelligencePanel />
+              </div>
+            ) : <AccessDenied />)}
+            {adminView === 'super_admin' && (isSuper ? <SuperAdminPanel /> : <AccessDenied />)}
+            {/* §21/M12 — founder-only views, guarded a second time at render. */}
+            {adminView === 'founder_centre' && (isSuper ? <FounderInvestorCentre /> : <AccessDenied />)}
+            {adminView === 'partnerships' && (isSuper ? <PartnershipsCentre /> : <AccessDenied />)}
+            {adminView === 'audit_log' && (isSuper ? <AdminAuditLog /> : <AccessDenied />)}
+            {adminView === 'integrations' && (isSuper ? <IntegrationsPanel /> : <AccessDenied />)}
+            {adminView === 'usertour' && <UsertourAdminPanel />}
+            {adminView === 'postiz' && <PostizAdminPanel />}
+            {adminView === 'whatsapp' && <WhatsAppAdminPanel />}
+          </Suspense>
         </IntegrationsProvider>
       </ErrorBoundary>
     </AppShell>
+  );
+}
+
+/**
+ * §ADMIN-SHELL-CHUNK — the in-shell fallback shown while a lazily-loaded admin
+ * panel's chunk is fetched. It renders INSIDE the shell chrome (the nav rail and
+ * header stay mounted), so switching views never blanks the workspace; the
+ * panel's own chunk then swaps in. It announces itself to assistive tech.
+ */
+function AdminViewFallback() {
+  return (
+    <WorkspaceFrame className="space-y-4">
+      <div
+        className="flex items-center justify-center rounded-ds-lg border border-white/5 bg-ink-850 p-10"
+        role="status"
+        aria-live="polite"
+        data-testid="admin-view-loading"
+      >
+        <span className="text-sm text-zinc-500">Loading…</span>
+      </div>
+    </WorkspaceFrame>
   );
 }
 

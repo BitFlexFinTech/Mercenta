@@ -76,7 +76,17 @@ try {
   test('dashboard is a Super Admin nav surface',
     /id: 'amazon_ads'/.test(shell) &&
     /adminView === 'amazon_ads' && <AmazonAdsDashboard/.test(shell) &&
-    /import \{ AmazonAdsDashboard \}/.test(shell));
+    /**
+     * §ADMIN-SHELL-CHUNK (2026-10-05) — REPOINTED, not weakened.
+     *
+     * The admin shell no longer EAGERLY imports any admin panel: each panel is
+     * reached by a `React.lazy(() => import(…))` dynamic import (so the shell
+     * chunk is 16.57 kB, not 909 kB). The INVARIANT is unchanged — the Amazon Ads
+     * dashboard is a reachable Super Admin nav surface — so the assertion now
+     * pins the DYNAMIC import instead of the old eager statement.
+     * OLD CONTRACT (recorded): /import \{ AmazonAdsDashboard \}/.test(shell).
+     */
+    /const AmazonAdsDashboard = lazy\(\(\) => import\('@\/components\/admin\/AmazonAdsDashboard'\)/.test(shell));
 
   /* ── operating-costs advertising_commission stays honest ────────────── */
   const streams = cost.revenueByStream();

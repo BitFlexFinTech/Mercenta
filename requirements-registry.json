@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-operator-terminology-registry.cjs after the §OPERATOR-RELABEL increment (s0-discovered-operator-terminology-reconciliation not_started -> built). Snapshot only.",
-      "built_and_tested": 333,
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-admin-shell-chunk-registry.cjs after the §ADMIN-SHELL-CHUNK increment (discovered-adminshell-chunk-size not_started -> built_and_tested; the two STALE cleanup rows cleanup-p8-inventory-asin + cleanup-p10-logistics-hub-completion not_started -> built_and_tested). Snapshot only.",
+      "built_and_tested": 336,
       "built": 145,
-      "not_started": 40,
+      "not_started": 37,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1029,6 +1029,19 @@
         "scripts/validate-operator-terminology.mjs"
       ],
       "note": "T-3: the canonical human control role is Founder / Super Admin, not \"Mercenta Operator\". The phrase was relabelled across 16 `src/` occurrences + 1 Edge Function (10 files); Staff/RBAC untouched. Status is `built`, not `built_and_tested`: no browser spec exercises the role-name copy; the node gate is the proof."
+    },
+    "admin_shell_chunk_increment": {
+      "increment": "§ADMIN-SHELL-CHUNK — the admin-shell bundle budget (2026-10-05)",
+      "restated": [
+        "discovered-adminshell-chunk-size",
+        "cleanup-p8-inventory-asin",
+        "cleanup-p10-logistics-hub-completion"
+      ],
+      "added": [],
+      "validators": [
+        "scripts/validate-admin-shell-bundle.mjs"
+      ],
+      "note": "The admin shell imported all ~34 panels eagerly (909 kB chunk). Each panel is now lazy + Suspense, so the shell chunk is 16.57 kB. The two cleanup rows were STALE (they claimed no code existed while the programme document and the code + gates record P8/P10 DONE) — reconciled at source, not mirrored."
     }
   },
   "entries": [
@@ -4942,11 +4955,14 @@
     },
     {
       "id": "discovered-adminshell-chunk-size",
-      "description": "DISCOVERED by this session s own build output: the `AdminShell` chunk is 1,010 kB (263 kB gzip) and the build warns about it. A real performance finding, owned separately — it was NOT introduced by this increment and was NOT addressed by it",
-      "status": "not_started",
-      "evidence": "`npm run build` output (AdminShell-DuA4e77W.js 1,009.90 kB, gzip 263.82 kB); PROJECT_STATUS.md heading 3 item 7. Owner: performance workstream",
+      "description": "DISCOVERED by a build output: the `AdminShell` chunk was 1,010 kB (263 kB gzip) and the build warned about it, because the admin shell imported all ~34 admin view panels EAGERLY. FIXED (2026-10-05): every panel is now a `React.lazy(() => import(…))` dynamic import rendered inside a `<Suspense>`, so the shell chunk is 16.57 kB (4.83 kB gzip) and a panel's chunk loads only when its view is opened. APP-code splitting only — `node_modules` still lands in the ONE `vendor` chunk required by the §P3 initialisation-cycle fix (asserted here and by validate-production-boot).",
+      "status": "built_and_tested",
+      "evidence": "scripts/validate-admin-shell-bundle.mjs (npm run validate:admin-shell-bundle) — asserts the shell holds NO static import from `@/components/admin/`, declares ≥30 `lazy(() => import(` bindings, renders its switch inside a `<Suspense>`, keeps exactly ONE `vendor` chunk, holds the AdminShell chunk ≤ 300 kB, and splits ≥25 panels (incl. the heaviest, AdminDashboard + MercentaBrain) into their own chunks. PROVED ABLE TO FAIL against the pre-fix bundle (7/9 assertions fail: eager imports, no lazy bindings, no Suspense, 890 kB shell chunk, 0 panel chunks). Browser: e2e/app-shell.spec.ts navigates admin destinations (e.g. `nav >> text=Super Admin`) and therefore loads the lazily-split panel chunks.",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
-      "last_updated": "2026-09-20"
+      "last_updated": "2026-09-20",
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "§ADMIN-SHELL-CHUNK (2026-10-05) — STATUS RAISED not_started -> built_and_tested (old value recorded inline, never deleted). OLD status: \"not_started\". OLD description: \"DISCOVERED by this session s own build output: the `AdminShell` chunk is 1,010 kB (263 kB gzip) and the build warns about it. A real performance finding, owned separately — it was NOT introduced by this increment and was NOT addressed by it\". OLD evidence: \"`npm run build` output (AdminShell-DuA4e77W.js 1,009.90 kB, gzip 263.82 kB); PROJECT_STATUS.md heading 3 item 7. Owner: performance workstream\". This row was a genuine PERFORMANCE defect, not a coverage gap."
     },
     {
       "id": "mercenta-brain-entity-model",
@@ -5454,12 +5470,13 @@
     },
     {
       "id": "cleanup-p8-inventory-asin",
-      "description": "P8: inventory linked to the brand's catalogue with an ASIN field - brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation; the code never invents a real-looking ASIN).",
+      "description": "P8: inventory linked to the brand's catalogue with an ASIN field - brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation; the code never invents a real-looking ASIN). DONE (programme P8, 2026-09-23).",
       "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
-      "status": "not_started",
-      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
-      "last_verified": "2026-09-22",
-      "superseded_by": null
+      "status": "built_and_tested",
+      "evidence": "scripts/validate-p8-inventory.mjs (npm run validate:inventory) — the §P8 contract gate (append-only movement ledger, every figure derived; Eaches/Cases fail-closed; the declaration path + the channel-assignment path; the attributed admin override). Domain owners: src/lib/inventory/inventoryLifecycle.ts, src/lib/inventory/inventoryRecord.ts, src/lib/inventory/channelInventoryPush.ts. Browser: e2e/inventory.spec.ts (real Chromium walkthrough of the P8 surfaces). Programme record: docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §12.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "§ADMIN-SHELL-CHUNK (2026-10-05) — STATUS RAISED not_started -> built_and_tested (old value recorded inline, never deleted). OLD status: \"not_started\". OLD description: \"P8: inventory linked to the brand's catalogue with an ASIN field - brand-entered inside Mercenta (never an Amazon login); ASIN added by the brand if the product already exists, otherwise populated by Mercenta when Amazon accepts the product (clearly-simulated placeholder in simulation; the code never invents a real-looking ASIN).\". OLD evidence: \"Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.\". This row was STALE — two sources of truth disagreed. The programme document §12 and the code + gate record P8 DONE, while this row still claimed \"NOT STARTED - no code exists yet\"."
     },
     {
       "id": "cleanup-p9-remove-3pl-carrier-surface",
@@ -5472,12 +5489,13 @@
     },
     {
       "id": "cleanup-p10-logistics-hub-completion",
-      "description": "P10: Logistics Hub completion - provider configuration + the PO documents; consolidation recorded as documented-but-DEFERRED with the model supporting 1..n POs.",
+      "description": "P10: Logistics Hub completion - provider configuration + the PO documents; consolidation recorded as documented-but-DEFERRED with the model supporting 1..n POs. DONE (programme P10, 2026-09-24).",
       "source": "Dashboard + logistics cleanup programme (2026-09-22, session 13)",
-      "status": "not_started",
-      "evidence": "Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.",
-      "last_verified": "2026-09-22",
-      "superseded_by": null
+      "status": "built_and_tested",
+      "evidence": "scripts/validate-po-documents.mjs (npm run validate:po-documents) — the PO-document gate (53 assertions), including the §P10 provider-configuration + PO-document-download-queue assertions; scripts/validate-logistics-providers.mjs (npm run validate:logistics-providers, 96 assertions) proves the domain behaviour. Browser: e2e/logistics-providers.spec.ts (real Chromium walkthrough). Programme record: docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md §14 (matrix D10-10, decision 11).",
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "§ADMIN-SHELL-CHUNK (2026-10-05) — STATUS RAISED not_started -> built_and_tested (old value recorded inline, never deleted). OLD status: \"not_started\". OLD description: \"P10: Logistics Hub completion - provider configuration + the PO documents; consolidation recorded as documented-but-DEFERRED with the model supporting 1..n POs.\". OLD evidence: \"Planned in docs/DASHBOARD_LOGISTICS_CLEANUP_PROGRAMME_2026-09-22.md (section 4, phase table). NOT STARTED - no code exists yet.\". This row was STALE — two sources of truth disagreed. The programme document §14 and the code + gates record P10 DONE, while this row still claimed \"NOT STARTED - no code exists yet\"."
     },
     {
       "id": "cleanup-p11-remove-create-po",

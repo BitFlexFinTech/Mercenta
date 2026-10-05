@@ -2524,6 +2524,40 @@ const OPERATOR_RELABEL_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
   'package.json',
 ]);
+/**
+ * §ADMIN-SHELL-CHUNK (2026-10-05) — the admin-shell bundle budget.
+ *
+ * `discovered-adminshell-chunk-size` recorded a REAL build-output finding: the
+ * single `AdminShell-*.js` chunk was 909 kB (230 kB gzip) because the shell
+ * EAGERLY imported all ~34 admin view panels, so every operator downloaded every
+ * panel to open any one of them, and `vite build` warned about a >500 kB chunk.
+ *
+ * Each panel is now reached by a `React.lazy(() => import(…))` dynamic import and
+ * rendered inside a `<Suspense>`, so the shell chunk is **16.57 kB** and a panel's
+ * chunk loads only when its view is opened. This is APP-code splitting only —
+ * `node_modules` still lands in the ONE `vendor` chunk required by the §P3
+ * initialisation-cycle fix.
+ *
+ * Declared surface: the shell itself, the NEW gate
+ * `scripts/validate-admin-shell-bundle.mjs`, its reconcile script,
+ * `requirements-registry.json` (the `discovered-adminshell-chunk-size` row raised,
+ * plus two STALE `cleanup-*` rows reconciled — they claimed "no code exists yet"
+ * while the code and gates exist), `package.json` (the new npm script), and BOTH
+ * scope guards themselves. The F5/F5b/F6 contract is UNCHANGED — a changed source
+ * file in NO declared set still fails.
+ */
+const ADMIN_SHELL_CHUNK_SCOPE = new Set([
+  'src/components/layout/AdminShell.tsx',
+  'scripts/validate-admin-shell-bundle.mjs',
+  'scripts/validate-amazon-ads.mjs',
+  'scripts/reconcile-admin-shell-chunk-registry.cjs',
+  'requirements-registry.json',
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
+
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
@@ -3264,7 +3298,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...FLOAT_LAUNCHER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §OPERATOR-RELABEL — the non-canonical role name relabelled (see above). */
           OPERATOR_RELABEL_SCOPE.has(p) ||
-          [...OPERATOR_RELABEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...OPERATOR_RELABEL_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §ADMIN-SHELL-CHUNK — the admin-shell bundle budget (see above). */
+          ADMIN_SHELL_CHUNK_SCOPE.has(p) ||
+          [...ADMIN_SHELL_CHUNK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

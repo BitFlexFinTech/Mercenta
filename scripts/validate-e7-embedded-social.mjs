@@ -2433,6 +2433,15 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/commerce/channelPurchaseOrderIngestion.ts',
     'src/lib/verification/documentVerification.ts',
     'src/lib/finance/financialReconciliation.ts',
+    /**
+     * §ADMIN-SHELL-CHUNK (2026-10-05) — the admin-shell bundle budget. Fuller note
+     * in `validate-e6-brand-surfaces.mjs` §ADMIN_SHELL_CHUNK_SCOPE. Same mechanism:
+     * a changed source/test file outside EVERY declared set is still refused.
+     */
+    'src/components/layout/AdminShell.tsx',
+    'scripts/validate-admin-shell-bundle.mjs',
+    'scripts/validate-amazon-ads.mjs',
+    'scripts/reconcile-admin-shell-chunk-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
