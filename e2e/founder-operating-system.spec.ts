@@ -263,6 +263,32 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 6 — the deterministic financing router. The Finance view must render
+   * the three financing routes with a real count and advance per route, derived
+   * from the canonical Model B purchase orders through the ONE owner (which
+   * reuses the canonical exclusive-gateway evaluator). Financing is internal:
+   * this is the Super-Admin view, never a brand's.
+   */
+  test('9. the financing routes render on the Finance view', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Finance/ }).click();
+
+    const panel = page.getByTestId('control-financing-routes');
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText('Self-funded');
+    await expect(panel).toContainText('facility');
+    await expect(page.getByTestId('control-financing-decisions')).toBeVisible();
+    // The routing policy is labelled as an illustration, never as Mercenta's real policy.
+    await expect(page.getByTestId('control-financing-basis')).toContainText('Illustrative');
+
+    await page.screenshot({ path: `${SHOTS}/09-financing-routes.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

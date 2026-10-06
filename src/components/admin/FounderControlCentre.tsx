@@ -800,6 +800,55 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
         )}
 
 
+        {section === 'finance' && (
+          <WorkspaceSection
+            title="Financing routes (Model B)"
+            description="Each Model B purchase is routed to exactly ONE financing route — self-funded, a facility draw, or an external referral — by the deterministic financing router, which REUSES the platform's canonical exclusive-gateway evaluator. No AI, no model call. Financing is internal and is never shown to a brand."
+            domain="finance"
+          >
+            <div
+              className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+              data-testid="control-financing-routes"
+            >
+              {model.financingRouting.byRoute.map((b) => (
+                <div
+                  key={b.routeId}
+                  className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3"
+                >
+                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{b.label}</p>
+                  <p className="mt-1 font-mono text-lg text-zinc-100">{b.count}</p>
+                  <p className="text-ds-micro text-brass-300">{formatGbp(b.advanceGbp)} advance</p>
+                </div>
+              ))}
+            </div>
+            <ul className="mt-4 space-y-1" data-testid="control-financing-decisions">
+              {model.financingRouting.decisions.map((d) => (
+                <li
+                  key={d.purchaseId}
+                  className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label"
+                >
+                  <span className="flex justify-between gap-3">
+                    <span className="text-zinc-300">
+                      {d.brandName} · {d.purchaseId}
+                    </span>
+                    <span className="font-mono text-zinc-400">
+                      {d.routeId
+                        ? (model.financingRouting.routes.find((r) => r.routeId === d.routeId)?.label ??
+                          d.routeId)
+                        : 'refused — queued for review'}
+                    </span>
+                  </span>
+                  <span className="text-ds-micro text-zinc-500">{d.rationale}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-financing-basis">
+              {model.financingRouting.basis} {model.financingRouting.label}.{' '}
+              {model.financingRouting.disclaimer}
+            </p>
+          </WorkspaceSection>
+        )}
+
         {section === 'compliance' && (
           <WorkspaceSection
             title="Compliance"

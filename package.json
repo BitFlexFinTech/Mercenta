@@ -107,7 +107,8 @@
     "validate:admin-shell-bundle": "node scripts/validate-admin-shell-bundle.mjs",
     "validate:acquisition-conversion": "node scripts/validate-acquisition-conversion.mjs",
     "validate:capital-requirement": "node scripts/validate-capital-requirement.mjs",
-    "validate:object-resolution": "node scripts/validate-object-resolution.mjs"
+    "validate:object-resolution": "node scripts/validate-object-resolution.mjs",
+    "validate:financing-router": "node scripts/validate-financing-router.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

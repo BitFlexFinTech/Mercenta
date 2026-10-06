@@ -79,6 +79,11 @@ import {
   type CapitalRequirement,
   type FinancedPurchase,
 } from '@/lib/finance/capitalRequirement';
+import { DEMO_FINANCING_ROUTING } from '@/config/financingRouter';
+import {
+  routeFinancing,
+  type FinancingRoutingSummary,
+} from '@/lib/finance/financingRouter';
 import {
   summariseResolutions,
   type ExternalObjectRef,
@@ -269,6 +274,14 @@ export interface ControlCentreModel {
    */
   capitalRequirement: CapitalRequirement;
   /**
+   * §PHASE 6 — the deterministic financing router: each Model B purchase is routed
+   * to exactly one financing route (self-funded / facility draw / external
+   * referral) through the ONE owner (`src/lib/finance/financingRouter.ts`), which
+   * reuses the canonical exclusive-gateway evaluator. NO AI. Super-Admin only;
+   * financing is an internal treasury concern and is never shown to a brand.
+   */
+  financingRouting: FinancingRoutingSummary;
+  /**
    * §D21 — whole-platform object resolution. Every canonical channel object (each
    * purchase order's Amazon PO number, each consignment's carrier reference) is
    * resolved through the ONE resolver
@@ -336,6 +349,16 @@ export function buildControlCentre(): ControlCentreModel {
       supplierCostGbp: Math.round(po.poValue * MODEL_B_ACQUISITION_RATIO * 100) / 100,
     }));
   const capitalRequirement = computeCapitalRequirement(DEMO_CAPITAL_FACILITY, modelBPurchases);
+
+  /* ── §PHASE 6 — the deterministic financing router ──
+     Route each Model B purchase to exactly one financing route through the ONE
+     owner (`src/lib/finance/financingRouter.ts`), which reuses the canonical
+     exclusive-gateway evaluator. No AI, no second engine. */
+  const financingRouting = routeFinancing(
+    DEMO_CAPITAL_FACILITY,
+    modelBPurchases,
+    DEMO_FINANCING_ROUTING
+  );
 
   /* ── §D21 — whole-platform object resolution ──
      Build the canonical resolution index from the SAME records the platform
@@ -567,6 +590,9 @@ export function buildControlCentre(): ControlCentreModel {
       metric('fin-revenue', 'Recorded revenue', `£${revenueTotal.toLocaleString('en-GB')}`, 'neutral', 'Canonical streams', 'Per-stream labels are preserved on the Accounting surface.', 'accounting'),
       metric('fin-capital-required', 'Model B capital need', formatGbp(capitalRequirement.totalRequiredFundingGbp), capitalRequirement.withinCapacity ? 'info' : 'danger', 'Internal treasury', capitalRequirement.basis, 'control_centre'),
       metric('fin-facility-utilisation', 'Facility utilisation', `${capitalRequirement.facilityUtilisationPct.toFixed(1)}%`, capitalRequirement.facilityUtilisationPct > 80 ? 'warning' : 'info', 'Capital facility', `${capitalRequirement.outstandingFinancedPurchases} purchase(s) financed · ${formatGbp(capitalRequirement.totalAdvanceDrawnGbp)} advanced.`, 'control_centre'),
+      /* §PHASE 6 — the deterministic financing router over the canonical Model B purchases. */
+      metric('fin-financing-routed', 'Financing routed', String(financingRouting.decisions.length - financingRouting.refusedCount), financingRouting.refusedCount > 0 ? 'warning' : 'info', 'Financing router', financingRouting.basis, 'control_centre'),
+      metric('fin-financing-external', 'External referrals', String(financingRouting.externalReferralCount), financingRouting.externalReferralCount > 0 ? 'warning' : 'info', 'Financing router', `${financingRouting.selfFundedCount} self-funded · ${financingRouting.facilityDrawCount} facility draw · ${financingRouting.externalReferralCount} external referral — routed deterministically, no AI.`, 'control_centre'),
     ],
     compliance: [
       metric('comp-missing', 'Missing', String(missingDocs.length), missingDocs.length > 0 ? 'danger' : 'success', 'Blocking', 'A missing document blocks the gate.', 'compliance'),
@@ -676,6 +702,7 @@ export function buildControlCentre(): ControlCentreModel {
     acquisition,
     acquisitionConversion,
     capitalRequirement,
+    financingRouting,
     objectResolution,
     preAudit,
     commercial,
@@ -704,6 +731,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'AI', value: 'src/lib/ai/founderAiClient.ts — provider registry + free-model policy' },
       { label: 'Finance', value: 'src/lib/costs/costSummary.ts — canonical revenue streams' },
       { label: 'Capital (Model B)', value: 'src/lib/finance/capitalRequirement.ts + src/config/financing.ts — the internal capital model over the canonical Model B purchase orders' },
+      { label: 'Financing router', value: 'src/lib/finance/financingRouter.ts + src/config/financingRouter.ts — the deterministic financing router (reuses the canonical exclusive-gateway evaluator)' },
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
     ],
   };

@@ -2672,6 +2672,28 @@ const OBJECT_RESOLUTION_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 6 (2026-10-05) — THE DETERMINISTIC FINANCING ROUTER.
+ *
+ * Phase 6's second row (`phase6-financing-router-deterministic`): each Model B
+ * purchase is routed to exactly ONE financing route by the ONE owner
+ * (`src/lib/finance/financingRouter.ts`), reusing the canonical exclusive-gateway
+ * evaluator — no AI, no second engine. Same mechanism: a working-tree file in NO
+ * declared set still fails, and financing stays internal (Super-Admin surface only).
+ */
+const FINANCING_ROUTER_SCOPE = new Set([
+  'src/config/financingRouter.ts',                  /* NEW — the ONE routing config */
+  'src/lib/finance/financingRouter.ts',             /* NEW — the ONE owner */
+  'src/lib/commandCentre/controlCentre.ts',         /* computes + exposes the routing summary */
+  'src/components/admin/FounderControlCentre.tsx',  /* renders the Financing routes section */
+  'scripts/validate-financing-router.mjs',          /* NEW — this phase's gate */
+  'scripts/reconcile-financing-router-registry.cjs',/* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',           /* test 9 renders the Financing routes section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3428,7 +3450,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...CAPITAL_REQUIREMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §D21 — whole-platform object resolution (see above). */
           OBJECT_RESOLUTION_SCOPE.has(p) ||
-          [...OBJECT_RESOLUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...OBJECT_RESOLUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 6 — the deterministic financing router (see above). */
+          FINANCING_ROUTER_SCOPE.has(p) ||
+          [...FINANCING_ROUTER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

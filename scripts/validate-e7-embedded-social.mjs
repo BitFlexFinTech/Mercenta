@@ -2487,6 +2487,17 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'scripts/validate-object-resolution.mjs',
     'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
     'requirements-registry.json',
+    /**
+     * §PHASE 6 (2026-10-05) — the deterministic financing router. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §FINANCING_ROUTER_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is refused. Financing is
+     * internal — the surface lives on the Super-Admin Founder Control Centre only.
+     */
+    'src/config/financingRouter.ts',
+    'src/lib/finance/financingRouter.ts',
+    'scripts/validate-financing-router.mjs',
+    'scripts/reconcile-financing-router-registry.cjs',
+    'e2e/founder-operating-system.spec.ts',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
