@@ -2535,6 +2535,7 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/education/',
     'scripts/validate-learning-loop.mjs',
     'scripts/reconcile-learning-loop-registry.cjs',
+    'scripts/verify-live-demo.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

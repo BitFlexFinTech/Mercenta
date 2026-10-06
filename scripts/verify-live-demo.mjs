@@ -1527,7 +1527,21 @@ function readRedLines() {
     const conView = conPage.getByRole('button', { name: 'View', exact: true }).first();
     await conView.waitFor({ state: 'visible', timeout: 60000 });
     await conView.click({ timeout: 30000 });
-    await conPage.waitForTimeout(1200);
+    /**
+     * §FIX (2026-10-05) — the contract detail modal is a LAZY chunk. A fixed 1.2s
+     * wait read the modal before its closing controls had mounted on the slow
+     * shared host (the RENEW button was absent while TERMINATE was present), so the
+     * RENEW presence assertion produced a spurious failure and no page error was
+     * raised — a false failure, observed for real this session (L24 failed 1
+     * assertion on the first deploy, then passed 267/0 on a re-run). Wait for the
+     * modal's closing controls, instead of a blind fixed delay — the same fix
+     * already applied to L17.
+     */
+    await conPage
+      .getByRole('button', { name: 'Terminate', exact: true })
+      .first()
+      .waitFor({ state: 'visible', timeout: 90000 })
+      .catch(() => {});
 
     /* The controls live in the contract DETAIL modal; assert on the BUTTONS (an
        exact name — plain `name: 'View'` also matches the "Overview" controls, and

@@ -2786,6 +2786,7 @@ const PHASE4_LEARNING_LOOP_SCOPE = new Set([
   'src/components/admin/FounderControlCentre.tsx', /* renders the Brand learning loop section */
   'scripts/validate-learning-loop.mjs',            /* NEW — this phase's gate */
   'scripts/reconcile-learning-loop-registry.cjs',  /* NEW — the registry reconciliation */
+  'scripts/verify-live-demo.mjs',                  /* L24 fixed at source (blind delay → wait for the modal) */
   'e2e/founder-operating-system.spec.ts',          /* test 11 renders the Brand learning loop section */
   'package.json',
   'scripts/validate-e6-brand-surfaces.mjs',
