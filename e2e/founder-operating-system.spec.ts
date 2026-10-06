@@ -367,6 +367,34 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 5 — CONTEXTUAL EDUCATION. The Brands view must render the "why do we
+   * need this?" explanation on each real field, linked to the canonical Knowledge
+   * Base article (LEARN) and the canonical guided tour of the screen (WATCH). The
+   * surface must state that the help text is linked, not duplicated, and the
+   * labelled DEMO field must resolve to its article.
+   */
+  test('13. the contextual education renders with the Knowledge Base link', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Brands/ }).click();
+
+    const screens = page.getByTestId('contextual-education-screens');
+    await expect(screens).toBeVisible();
+    await expect(screens).toContainText('Product catalogue');
+    await expect(screens).toContainText('Purchase orders');
+    // Each field explanation LINKS to its canonical Knowledge Base article.
+    await expect(page.getByTestId('contextual-education-fields')).toContainText('Learn more:');
+    await expect(page.getByTestId('contextual-education-rule')).toContainText('Linked to the Knowledge Base');
+    // The labelled DEMO field resolves to its article.
+    await expect(page.getByTestId('contextual-education-demo')).toContainText('Acknowledged quantity');
+
+    await page.screenshot({ path: `${SHOTS}/13-contextual-education.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

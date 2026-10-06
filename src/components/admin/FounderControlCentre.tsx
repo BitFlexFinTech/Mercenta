@@ -460,6 +460,60 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 {model.onboardingCurriculum.basis} {model.onboardingCurriculum.disclaimer}
               </p>
             </WorkspaceSection>
+
+            {/* §PHASE 5 — contextual education. Each real field on a real screen
+                carries a "why do we need this?" explanation that LINKS to the
+                canonical Knowledge Base article (LEARN) and the canonical guided
+                tour of that screen (WATCH). The help text is never duplicated. */}
+            <WorkspaceSection
+              title="Contextual education"
+              description="Every real field on a real screen carries a short “why do we need this?” explanation, linked to the canonical Knowledge Base article that teaches it (Learn) and the canonical guided tour of that screen (Watch). The help text is never duplicated, and an unknown field or a missing article is refused rather than guessed."
+              domain="communications"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="contextual-education-rule">
+                  {model.contextualEducation.reuseCanonicalKb && model.contextualEducation.attachToRealScreens
+                    ? 'Linked to the Knowledge Base + tours'
+                    : 'KB LINK NOT ENFORCED'}
+                </span>
+              }
+            >
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="contextual-education-screens">
+                {model.contextualEducation.screens.map((s) => (
+                  <li key={s.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{s.label}</p>
+                    <p className="mt-1 text-ds-micro text-zinc-500">
+                      {s.fieldCount} field{s.fieldCount === 1 ? '' : 's'}
+                      {s.tourName ? ` · tour: ${s.tourName}` : ''}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              <ul className="mt-4 space-y-2" data-testid="contextual-education-fields">
+                {model.contextualEducation.explanations.map((e) => (
+                  <li key={e.key} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <p className="text-ds-label text-zinc-300">
+                      <span className="font-mono">{e.screenLabel}</span> · {e.label}
+                    </p>
+                    <p className="mt-1 text-ds-micro text-zinc-500">{e.why}</p>
+                    <p className="mt-1 text-ds-micro text-zinc-600">Learn more: {e.articleTitle}</p>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4" data-testid="contextual-education-demo">
+                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                  DEMO field ({model.contextualEducation.explanationCount} explanation(s))
+                  {model.contextualEducation.demo ? ` — ${model.contextualEducation.demo.label}` : ''}
+                </p>
+                {model.contextualEducation.demo && (
+                  <p className="mt-1 text-ds-label text-zinc-300">
+                    {model.contextualEducation.demo.why} Learn more: {model.contextualEducation.demo.articleTitle}
+                  </p>
+                )}
+              </div>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="contextual-education-basis">
+                {model.contextualEducation.basis} {model.contextualEducation.disclaimer}
+              </p>
+            </WorkspaceSection>
           </>
         )}
 

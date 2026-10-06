@@ -2544,6 +2544,14 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/config/onboardingCurriculum.ts',
     'scripts/validate-onboarding-curriculum.mjs',
     'scripts/reconcile-onboarding-curriculum-registry.cjs',
+    /**
+     * §PHASE 5 (2026-10-05) — contextual education. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE5_CONTEXTUAL_EDUCATION_SCOPE. Same
+     * mechanism: a changed source/test file outside EVERY declared set is refused.
+     */
+    'src/config/contextualEducation.ts',
+    'scripts/validate-contextual-education.mjs',
+    'scripts/reconcile-contextual-education-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

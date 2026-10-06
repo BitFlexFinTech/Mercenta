@@ -2818,6 +2818,28 @@ const PHASE4_ONBOARDING_CURRICULUM_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 5 — CONTEXTUAL EDUCATION (2026-10-05) — the OWNER of the "why do we need
+ * this?" explanation attached to each real field on a real screen, LINKING it to
+ * the canonical Knowledge Base article (LEARN) and the canonical guided tour of
+ * that screen (WATCH). Declared at module scope by the same
+ * PHASE4_ONBOARDING_CURRICULUM_SCOPE precedent, so the F5/F5b/F6 guards keep
+ * refusing anything outside it. F5/F5b/F6's contract is UNCHANGED: a source file in
+ * NO declared set still fails.
+ */
+const PHASE5_CONTEXTUAL_EDUCATION_SCOPE = new Set([
+  'src/config/contextualEducation.ts',            /* NEW — the ONE owner */
+  'src/lib/education/',                            /* the resolver lives beside the learning loop */
+  'src/lib/commandCentre/controlCentre.ts',        /* exposes `contextualEducation` */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the contextual-education section */
+  'scripts/validate-contextual-education.mjs',     /* NEW — this phase's gate */
+  'scripts/reconcile-contextual-education-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',          /* test 13 renders the contextual-education section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3592,7 +3614,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE4_LEARNING_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 4 (follow-up) — the onboarding academy curriculum (see above). */
           PHASE4_ONBOARDING_CURRICULUM_SCOPE.has(p) ||
-          [...PHASE4_ONBOARDING_CURRICULUM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE4_ONBOARDING_CURRICULUM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 5 — contextual education (see above). */
+          PHASE5_CONTEXTUAL_EDUCATION_SCOPE.has(p) ||
+          [...PHASE5_CONTEXTUAL_EDUCATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

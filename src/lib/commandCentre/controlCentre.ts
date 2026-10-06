@@ -106,6 +106,10 @@ import {
   buildOnboardingCurriculumSummary,
   type OnboardingCurriculumSummary,
 } from '@/lib/education/resolveCurriculum';
+import {
+  buildContextualEducationSummary,
+  type ContextualEducationSummary,
+} from '@/lib/education/resolveContextualHelp';
 import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
@@ -340,6 +344,16 @@ export interface ControlCentreModel {
    * is complete. Super-Admin governance view.
    */
   onboardingCurriculum: OnboardingCurriculumSummary;
+  /**
+   * §PHASE 5 — contextual education. Each real field on a real screen carries a
+   * short "why do we need this?" explanation (`src/config/contextualEducation.ts`)
+   * that LINKS to the canonical Knowledge Base article which teaches it (LEARN)
+   * and to the canonical guided tour of that screen (WATCH) — the help text is
+   * never duplicated. Resolved purely by
+   * `src/lib/education/resolveContextualHelp.ts`; an unknown field, or one whose
+   * article does not exist, is REFUSED (fail closed). Super-Admin governance view.
+   */
+  contextualEducation: ContextualEducationSummary;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -472,6 +486,12 @@ export function buildControlCentre(): ControlCentreModel {
      (`src/lib/education/resolveCurriculum.ts`), which reuses the learning loop so a
      stage closes only when its topics' VALIDATE gates are satisfied. */
   const onboardingCurriculum = buildOnboardingCurriculumSummary();
+  /* ── §PHASE 5 — contextual education ──
+     The field explanations + a labelled DEMO field, resolved from the ONE owner
+     (`src/lib/education/resolveContextualHelp.ts`), which resolves each
+     explanation's canonical Knowledge Base article and guided tour live — the help
+     text is never duplicated. */
+  const contextualEducation = buildContextualEducationSummary();
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -786,6 +806,7 @@ export function buildControlCentre(): ControlCentreModel {
     countryFramework,
     learningLoop,
     onboardingCurriculum,
+    contextualEducation,
     preAudit,
     commercial,
     intelligence,
@@ -819,6 +840,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },
       { label: 'Brand learning loop', value: 'src/config/learningLoop.ts + src/lib/education/resolveLearningProgress.ts — the LEARN → WATCH → DO → VALIDATE → COMPLETE loop over the canonical educational gaps; LEARN/WATCH reuse the canonical Knowledge Base article and guided tour, and VALIDATE is a gate satisfied only by a real signal' },
       { label: 'Onboarding academy curriculum', value: 'src/config/onboardingCurriculum.ts + src/lib/education/resolveCurriculum.ts — the five canonical stages (Understand Mercenta · Commercial · Product & Packaging · Product Readiness · Operations) plus the final readiness stage, over the SAME canonical educational gaps; the final readiness stage is reached only once every teaching stage is complete' },
+      { label: 'Contextual education', value: 'src/config/contextualEducation.ts + src/lib/education/resolveContextualHelp.ts — the "why do we need this?" explanation on each real field, LINKING to the canonical Knowledge Base article (LEARN) and the canonical guided tour of that screen (WATCH); the help text is never duplicated, and an unknown field or a missing article is REFUSED' },
     ],
   };
 }
