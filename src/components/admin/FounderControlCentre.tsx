@@ -642,6 +642,65 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             />
           </WorkspaceSection>
         )}
+        {/*
+          §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. Every canonical channel object
+          (each PO's Amazon PO number, each consignment's carrier reference) is run
+          through the ONE resolver to its Mercenta record, brand and tenant. The
+          section states how many resolved and QUEUES anything that did not resolve
+          to exactly one tenant for founder review — ownership is never guessed and
+          never leaks across tenants. Super-Admin only (rendered behind the guard).
+        */}
+        {section === 'operations' && (
+          <WorkspaceSection
+            title="Object resolution"
+            description="The canonical chain Amazon object → Mercenta object → brand → tenant, resolved by the ONE resolver over the channel objects the platform holds. An object that matches nothing is UNKNOWN; one that matches more than one tenant FAILS CLOSED. Both are queued here for founder review — ownership is never guessed."
+            domain="logistics"
+          >
+            <div
+              className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+              data-testid="control-object-resolution"
+            >
+              {[
+                { label: 'Channel objects', value: String(model.objectResolution.total), sub: 'POs + consignments' },
+                { label: 'Resolved', value: String(model.objectResolution.resolved), sub: 'one tenant each' },
+                { label: 'Unknown', value: String(model.objectResolution.unknown), sub: 'no match · queued' },
+                { label: 'Cross-tenant', value: String(model.objectResolution.crossTenant), sub: 'fails closed · queued' },
+                { label: 'Replays deduped', value: String(model.objectResolution.replays), sub: 'duplicates contained' },
+              ].map((tile) => (
+                <div key={tile.label} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</p>
+                  <p className="mt-1 font-mono text-lg text-zinc-100">{tile.value}</p>
+                  <p className="text-ds-micro text-brass-300">{tile.sub}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-object-resolution-basis">
+              {model.objectResolution.basis}
+            </p>
+            <Queue
+              rows={model.objectResolution.unresolved.map((r) => ({
+                id: r.key,
+                ref: `${r.ref.objectType} · ${r.ref.externalId}`,
+                title: `Unresolved ${r.ref.objectType} "${r.ref.externalId}"`,
+                meta: r.reason,
+                status: {
+                  tone: r.outcome === 'cross_tenant' ? 'danger' : 'warning',
+                  label: r.outcome === 'cross_tenant' ? 'Cross-tenant' : 'Unknown',
+                },
+                domain: 'logistics',
+                testId: `control-object-resolution-${r.key}`,
+              }))}
+              empty={
+                <EmptyState
+                  title="Every channel object resolved to exactly one tenant"
+                  description="No purchase order or consignment is awaiting ownership resolution. If a channel object arrives that matches nothing, or that matches more than one tenant, it appears here for review — never silently assigned."
+                />
+              }
+            />
+          </WorkspaceSection>
+        )}
+
+
 
 
         {section === 'finance' && (

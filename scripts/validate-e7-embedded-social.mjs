@@ -2474,6 +2474,19 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/config/financing.ts',
     'src/lib/finance/capitalRequirement.ts',
     'scripts/validate-capital-requirement.mjs',
+    /**
+     * §D21 (2026-10-05) — whole-platform object resolution. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §OBJECT_RESOLUTION_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is refused. Resolution is
+     * internal ownership control — the surface lives on the Super-Admin Founder
+     * Control Centre only.
+     */
+    'src/lib/resolution/',
+    'src/lib/commandCentre/controlCentre.ts',
+    'src/components/admin/FounderControlCentre.tsx',
+    'scripts/validate-object-resolution.mjs',
+    'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',
+    'requirements-registry.json',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

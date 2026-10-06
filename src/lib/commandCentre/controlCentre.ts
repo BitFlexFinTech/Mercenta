@@ -79,6 +79,12 @@ import {
   type CapitalRequirement,
   type FinancedPurchase,
 } from '@/lib/finance/capitalRequirement';
+import {
+  summariseResolutions,
+  type ExternalObjectRef,
+  type ResolvableObject,
+  type ResolutionSummary,
+} from '@/lib/resolution/objectResolution';
 import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
@@ -262,6 +268,15 @@ export interface ControlCentreModel {
    * internal treasury concern and is never shown to a brand.
    */
   capitalRequirement: CapitalRequirement;
+  /**
+   * §D21 — whole-platform object resolution. Every canonical channel object (each
+   * purchase order's Amazon PO number, each consignment's carrier reference) is
+   * resolved through the ONE resolver
+   * (`src/lib/resolution/objectResolution.ts`) to its Mercenta record, brand and
+   * tenant; anything that fails to resolve is queued for founder review.
+   * Super-Admin only; resolution is an internal ownership control.
+   */
+  objectResolution: ResolutionSummary;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -321,6 +336,47 @@ export function buildControlCentre(): ControlCentreModel {
       supplierCostGbp: Math.round(po.poValue * MODEL_B_ACQUISITION_RATIO * 100) / 100,
     }));
   const capitalRequirement = computeCapitalRequirement(DEMO_CAPITAL_FACILITY, modelBPurchases);
+
+  /* ── §D21 — whole-platform object resolution ──
+     Build the canonical resolution index from the SAME records the platform
+     already holds (each purchase order carries the channel's PO number; each
+     consignment carries its carrier reference). The ONE resolver
+     (`src/lib/resolution/objectResolution.ts`) then maps every channel object to
+     its Mercenta record, brand and tenant; anything that does not resolve to
+     exactly one tenant is routed to the founder review queue. Nothing here
+     re-implements ownership matching. */
+  const brandNameById = new Map(demoBrands.map((b) => [b.id, b.profile.businessName]));
+  const resolutionSources: ResolvableObject[] = [
+    ...demoPurchaseOrders.map((po) => ({
+      objectType: 'purchase_order' as const,
+      externalId: po.poNumber,
+      mercentaId: po.id,
+      brandId: po.brandId,
+      brandName: brandNameById.get(po.brandId) ?? po.brandId,
+      tenantId: po.brandId,
+    })),
+    ...demoShipments.map((s) => ({
+      objectType: 'shipment' as const,
+      externalId: s.reference,
+      mercentaId: s.id,
+      brandId: s.brandId,
+      brandName: brandNameById.get(s.brandId) ?? s.brandId,
+      tenantId: s.brandId,
+    })),
+  ];
+  const resolutionRefs: ExternalObjectRef[] = [
+    ...demoPurchaseOrders.map((po) => ({
+      source: 'amazon_vendor_central' as const,
+      objectType: 'purchase_order' as const,
+      externalId: po.poNumber,
+    })),
+    ...demoShipments.map((s) => ({
+      source: 'amazon_vendor_central' as const,
+      objectType: 'shipment' as const,
+      externalId: s.reference,
+    })),
+  ];
+  const objectResolution = summariseResolutions(resolutionRefs, resolutionSources);
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -500,6 +556,9 @@ export function buildControlCentre(): ControlCentreModel {
       metric('ops-shipments', 'Shipments tracked', String(demoShipments.length), 'info', 'Carrier', `${delayedShipments.length} delayed · ${shipmentExceptions.length} exceptions.`, 'logistics'),
       metric('ops-exceptions', 'Shipment exceptions', String(shipmentExceptions.length), shipmentExceptions.length > 0 ? 'danger' : 'success', 'Carrier seam', 'Exceptions derived from the carrier simulation.', 'logistics'),
       metric('ops-returns', 'Returns in progress', String(returns.length), 'neutral', 'Warehouse', 'Returns not yet confirmed by the brand.', 'returns_tracking'),
+      /* §D21 — whole-platform object resolution over the canonical channel objects. */
+      metric('ops-obj-resolved', 'Objects resolved', String(objectResolution.resolved), objectResolution.fullyResolved ? 'success' : 'warning', 'Object resolution', `${objectResolution.resolved} of ${objectResolution.total} channel object(s) resolved to exactly one tenant.`, 'control_centre'),
+      metric('ops-obj-unresolved', 'Unresolved ownership', String(objectResolution.unknown + objectResolution.crossTenant), objectResolution.fullyResolved ? 'success' : 'danger', 'Founder queue', `${objectResolution.unknown} unknown · ${objectResolution.crossTenant} cross-tenant — fail closed, never guessed.`, 'control_centre'),
     ],
     finance: [
       metric('fin-unpaid', 'Unpaid invoices', String(unpaidInvoices.length), unpaidInvoices.length > 0 ? 'warning' : 'success', 'Receivables', `${overdueInvoices.length} past the payment terms on the invoice itself (derived; 14/30/60 per invoice).`, 'accounting'),
@@ -617,6 +676,7 @@ export function buildControlCentre(): ControlCentreModel {
     acquisition,
     acquisitionConversion,
     capitalRequirement,
+    objectResolution,
     preAudit,
     commercial,
     intelligence,
@@ -644,6 +704,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'AI', value: 'src/lib/ai/founderAiClient.ts — provider registry + free-model policy' },
       { label: 'Finance', value: 'src/lib/costs/costSummary.ts — canonical revenue streams' },
       { label: 'Capital (Model B)', value: 'src/lib/finance/capitalRequirement.ts + src/config/financing.ts — the internal capital model over the canonical Model B purchase orders' },
+      { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
     ],
   };
 }

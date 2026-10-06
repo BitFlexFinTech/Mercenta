@@ -2646,6 +2646,32 @@ const CAPITAL_REQUIREMENT_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §D21 (2026-10-05) — WHOLE-PLATFORM OBJECT RESOLUTION.
+ *
+ * The master-matrix row D21 (harden §25 / §32 row 1) recorded the platform's
+ * largest open architectural gap: there was NO single mechanism resolving an
+ * inbound channel object (Amazon PO number, invoice id, tracking number) to its
+ * Mercenta record, brand and tenant — grep for `resolveObject` / `externalObjectId`
+ * / `exceptionQueue` found 0 hits. This increment adds the ONE owner
+ * (`src/lib/resolution/objectResolution.ts`) with a declared `UNKNOWN` outcome, a
+ * fail-closed `cross_tenant` outcome, replay awareness and a founder review queue;
+ * wires it into the Founder Control Centre Operations view; and gates it.
+ * Same mechanism: a working-tree file in NO declared set still fails, and no
+ * protected path appears in the change set.
+ */
+const OBJECT_RESOLUTION_SCOPE = new Set([
+  'src/lib/resolution/',                            /* NEW — the ONE resolver (dir: git reports the new folder) */
+  'src/lib/commandCentre/controlCentre.ts',         /* resolves + exposes the resolution summary */
+  'src/components/admin/FounderControlCentre.tsx',  /* renders the Object resolution section */
+  'scripts/validate-object-resolution.mjs',         /* NEW — this phase's gate */
+  'docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md',/* D21 rows reconciled at source */
+  'requirements-registry.json',
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3399,7 +3425,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...ACQ_CONVERSION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 6 — the internal capital model behind Model B (see above). */
           CAPITAL_REQUIREMENT_SCOPE.has(p) ||
-          [...CAPITAL_REQUIREMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...CAPITAL_REQUIREMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §D21 — whole-platform object resolution (see above). */
+          OBJECT_RESOLUTION_SCOPE.has(p) ||
+          [...OBJECT_RESOLUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 after the §PHASE 6 (capital) increment raised phase6-capital-requirement-model not_started → built (no row added or removed: total_entries stays 540; built +1, not_started -1). Previous snapshot was the §ACQ-CONVERSION increment. Snapshot only.",
+      "_note": "Recomputed 2026-10-05 after the §D21 (object resolution) increment raised discovered-whole-platform-object-resolution not_started → built (no row added or removed: total_entries stays 540; built +1, not_started -1). Previous snapshot was the §PHASE 6 (capital) increment. Snapshot only.",
       "built_and_tested": 337,
-      "built": 148,
-      "not_started": 34,
+      "built": 149,
+      "not_started": 33,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -4639,12 +4639,14 @@
     },
     {
       "id": "discovered-whole-platform-object-resolution",
-      "description": "Whole-platform object resolution (Amazon event/data → Amazon object → Mercenta object → brand → tenant) does not exist: grep finds no resolver module, no `externalObjectId`/`amazonObjectId` field, and no unresolved-ownership Founder queue. Per-domain tenant scoping IS correct, so this is a genuine new architecture increment rather than a refactor. Deliberately NOT half-built: a partial resolver used by some modules only would be worse than the honest gap",
-      "evidence": "docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md §25 (D21) + §32 row 1; repo-wide grep for resolveObject/resolveAmazonObject/ownershipResolution/exceptionQueue = 0 hits. Owner: S2a (roadmap)",
-      "status": "not_started",
+      "description": "Whole-platform object resolution (Amazon event/data → Amazon object → Mercenta object → brand → tenant). BUILT 2026-10-05: the ONE resolver `src/lib/resolution/objectResolution.ts` implements the canonical chain deterministically, with a declared `unknown` outcome (never guessed), a fail-closed `cross_tenant` outcome (a single channel id matching more than one tenant is refused, never picked — zero cross-tenant leakage), replay awareness through a `ResolutionLedger` (a re-delivered object returns the SAME chain, flagged `replay: true`, and never mints a second owner) and a founder review queue (`buildUnresolvedQueue`). It is USED: `src/lib/commandCentre/controlCentre.ts` builds the index from the canonical PO + consignment records and exposes `objectResolution`; `src/components/admin/FounderControlCentre.tsx` renders an Object resolution section + review queue on the Operations view (Super-Admin only). HONEST LIMIT: this builds the ONE mechanism and wires it into the Control Centre; reconciling EVERY existing module's own read model to this shared contract is the remaining follow-on (recorded, not silently claimed done). Gated by `npm run validate:object-resolution` (42 assertions), proved able to fail.",
+      "evidence": "src/lib/resolution/objectResolution.ts (the ONE resolver); src/lib/commandCentre/controlCentre.ts (resolves + exposes objectResolution); src/components/admin/FounderControlCentre.tsx (the Object resolution section); scripts/validate-object-resolution.mjs (npm run validate:object-resolution, mutation-proved); e2e/founder-operating-system.spec.ts test 8; docs/MERCENTA_MASTER_FEATURE_FUNCTION_MATRIX.md §25 (D21) + §32 row 1.",
+      "status": "built",
       "source": "S2a — canonical brand case surface + KB sufficiency evaluator + tenant-safe relevant-data lookup (2026-09-20)",
-      "last_verified": "2026-09-20",
-      "superseded_by": null
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "not_started → built (2026-10-05, §D21). Old description recorded the gap (no resolver module; 0 grep hits)."
+
     },
     {
       "id": "discovered-payout-rail-default-contradiction",

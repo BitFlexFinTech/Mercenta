@@ -263,6 +263,30 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
+   * resolution of the canonical channel objects (each PO's Amazon PO number, each
+   * consignment's carrier reference) through the ONE resolver — the count resolved
+   * to exactly one tenant, and a founder review queue for anything that did not.
+   * Ownership is never guessed and never leaks across tenants.
+   */
+  test('8. the object resolution renders on the Operations view', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Operations/ }).click();
+
+    const panel = page.getByTestId('control-object-resolution');
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText('Resolved');
+    await expect(panel).toContainText('Cross-tenant');
+    await expect(page.getByTestId('control-object-resolution-basis')).toBeVisible();
+
+    await page.screenshot({ path: `${SHOTS}/08-object-resolution.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §FOUNDATION — THE GLOBAL HALT (kill switch), verified in a real browser.
    *
    * One act must stop EVERY automation, and the halt must be enforced in the

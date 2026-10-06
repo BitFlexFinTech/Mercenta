@@ -566,12 +566,12 @@ Amazon event / data → Amazon object → Mercenta object → Brand → Tenant
 
 | ID | Requirement | Status | Evidence |
 |---|---|---|---|
-| `D21-01` | ONE reusable resolution mechanism (no per-module ad-hoc ownership logic) | **NOT IMPLEMENTED** | Grep for `resolveObject` / `resolveAmazonObject` / `ownershipResolution` / `exceptionQueue` → **0 hits**. No `amazonObjectId` / `externalObjectId` / `sourceObjectId` field exists in `src/types.ts` |
-| `D21-02` | Deterministic, tenant-safe, auditable resolution | **NOT IMPLEMENTED** | today each domain resolves ownership inside its own read model (e.g. `listCasesForBrand`, `productsForBrandFromStore`) — correct per domain, but **not** one canonical resolver |
-| `D21-03` | Duplicate / replay awareness | **PARTIALLY IMPLEMENTED** | idempotency keys exist per seam (`requestKey` for cases, `catalogSubmissionId`, `commerceActivityId`); there is no platform-level replay ledger |
-| `D21-04` | No guessing; unknown ownership fails safely | **PARTIALLY IMPLEMENTED** | the S2a case evaluator fails closed on an unknown/cross-tenant reference; other modules have not been reconciled to a shared contract |
-| `D21-05` | Unresolved objects → Founder exception / review | **NOT IMPLEMENTED** | no canonical unresolved-ownership queue exists |
-| `D21-06` | Cross-module reference consistency | **NOT IMPLEMENTED** | no shared resolution contract to be consistent with |
+| `D21-01` | ONE reusable resolution mechanism (no per-module ad-hoc ownership logic) | **BUILT (2026-10-05)** | `src/lib/resolution/objectResolution.ts` — the ONE resolver. `npm run validate:object-resolution` (42 assertions, mutation-proved) proves one mechanism; the Control Centre resolves through it |
+| `D21-02` | Deterministic, tenant-safe, auditable resolution | **BUILT (2026-10-05)** | `resolveObject` returns the same chain for the same input (gate §B); every chain names the Mercenta object, brand and tenant |
+| `D21-03` | Duplicate / replay awareness | **BUILT (2026-10-05)** | the platform-level `ResolutionLedger` returns the FIRST chain on a replay, flagged `replay: true` — a duplicate cannot mint a second owner (gate §E) |
+| `D21-04` | No guessing; unknown ownership fails safely | **BUILT (2026-10-05)** | `unknown` (no match) and `cross_tenant` (>1 tenant) are declared fail-closed outcomes; the cross-tenant case is never picked (gate §C/§D) |
+| `D21-05` | Unresolved objects → Founder exception / review | **BUILT (2026-10-05)** | `buildUnresolvedQueue` collects every fail-closed outcome; `FounderControlCentre.tsx` renders the review queue on the Operations view (gate §F) |
+| `D21-06` | Cross-module reference consistency | **BUILT (2026-10-05)** | one shared contract (`ExternalObjectRef` / `ResolvableObject` / `ResolutionChain`) every module can be reconciled to. **HONEST LIMIT:** the resolver + its Control Centre use are BUILT; reconciling EVERY existing module's own read model to this contract is the recorded follow-on |
 
 **Assessment (evidence-based, not aspirational):** the platform has **strong per-domain tenant scoping** but **no platform-level resolver**. Building one is a genuine architecture increment, not a refactor of something that exists. It is therefore recorded as the **top remaining architectural item (owner S2a of the pre-existing roadmap)** with the contract above — and **no partial resolver has been invented in this workstream**, because a half-built resolver that some modules use and others ignore would be worse than the honest gap.
 
@@ -668,7 +668,7 @@ Nothing below may be modelled until the evidence is obtained and cited:
 
 | # | Gap | State | Owner |
 |---|---|---|---|
-| 1 | **Whole-platform object resolution** (Amazon object → Mercenta object → brand → tenant), incl. an unresolved-ownership Founder queue | **NOT IMPLEMENTED** — see D21 | **S2a (roadmap)** |
+| 1 | **Whole-platform object resolution** (Amazon object → Mercenta object → brand → tenant), incl. an unresolved-ownership Founder queue | **BUILT (2026-10-05)** — see D21. The ONE resolver `src/lib/resolution/objectResolution.ts` (deterministic · fail-closed `unknown`/`cross_tenant` · replay ledger · founder review queue), USED by the Control Centre and gated by `npm run validate:object-resolution`. Reconciling every existing module's own read model to the shared contract is the recorded follow-on | **S2a (roadmap)** |
 | 2 | **Logistics Hub** (provider eligibility by route/freight terms/configured capability; collect/WE-PAY; prepaid; consolidation; performance) | **PARTIAL — provider eligibility DERIVED, ETA + delivery performance ADDED (2026-09-22)**; consolidation outstanding | Logistics Hub increment |
 | 3 | **Logistics Map Engine** (LIVE VERIFIED / SIMULATED / AMBIENT, clickable markers) | **CLOSED IN PART (2026-09-21)** — implemented and browser-verified; no provider licensed or activated | **S10** |
 | 4 | **Durable credential vault** (entry, replacement, masked readback, validation, enable/disable) — today an in-memory `Map` | **NOT IMPLEMENTED** | **S2c** |
