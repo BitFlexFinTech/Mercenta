@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 after the §PHASE 9 (country framework) increment (phase9-country-framework not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 by scripts/reconcile-learning-loop-registry.cjs after the §PHASE 4 (brand learning loop) increment (phase4-learning-loop-validate not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 153,
-      "not_started": 29,
+      "built": 154,
+      "not_started": 28,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1053,6 +1053,17 @@
         "scripts/validate-financing-router.mjs"
       ],
       "note": "Phase 6 now has BOTH halves built: the internal capital model (how much) and this router (where the need is met). The router reuses the canonical exclusive-gateway evaluator — no second routing engine — and is internally Super-Admin only. Status is `built`, not `built_and_tested`: no browser spec exercises it."
+    },
+    "learning_loop_increment": {
+      "increment": "§PHASE 4 — the brand learning loop (2026-10-05)",
+      "restated": [
+        "phase4-learning-loop-validate"
+      ],
+      "added": [],
+      "validators": [
+        "scripts/validate-learning-loop.mjs"
+      ],
+      "note": "The Phase-4 seams existed but had no owner for the loop itself. The owner + the pure resolver declare and enforce LEARN → WATCH → DO → VALIDATE → COMPLETE over the canonical educational gaps, with VALIDATE as the ONE gate satisfied only by a real signal — a topic is never complete merely because the brand acted. It is internally Super-Admin only and deterministic (no AI, no clock)."
     }
   },
   "entries": [
@@ -3962,12 +3973,13 @@
     },
     {
       "id": "phase4-learning-loop-validate",
-      "description": "Phase 4 — the LEARN → WATCH → DO → VALIDATE → COMPLETE loop, including the VALIDATE gate that proves a brand can actually do the step",
+      "description": "Phase 4 — the LEARN → WATCH → DO → VALIDATE → COMPLETE brand education loop, including the VALIDATE gate that proves a brand can actually do the step. BUILT (2026-10-05): the ONE owner `src/config/learningLoop.ts` declares the five stages (LEARN reads the canonical Knowledge Base article, WATCH completes the canonical guided tour, DO performs the real action, VALIDATE is the GATE, COMPLETE is reached only once VALIDATE is satisfied), the two pinned invariants (VALIDATE_REQUIRES_EVIDENCE, STAGES_ARE_SEQUENTIAL) and the per-gap sources; the pure resolver `src/lib/education/resolveLearningProgress.ts` enforces the loop SEQUENTIALLY, makes completion depend ONLY on a real validation signal (acting is NOT completion), and FAILS CLOSED on an unknown topic or a validation signal that arrives before the action. The topic list is DERIVED from the canonical `PRE_AUDIT_EDUCATIONAL_GAPS` — no second list. Super-Admin governance view on the Founder Control Centre.",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 4",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/config/learningLoop.ts (the ONE owner); src/lib/education/resolveLearningProgress.ts (the pure resolver); src/lib/commandCentre/controlCentre.ts (computes + exposes learningLoop); src/components/admin/FounderControlCentre.tsx (Brands → Brand learning loop, Super-Admin only); gate scripts/validate-learning-loop.mjs (npm run validate:learning-loop, 35 assertions, mutation-proved TWICE); e2e/founder-operating-system.spec.ts test 11 renders it live.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 4 (brand learning loop) (2026-10-05) — STATUS RAISED not_started -> built (old value recorded inline, never deleted). OLD status: \"not_started\". OLD evidence (STALE — the cited \"docs — roadmap §PHASE 4\" does not exist): \"docs — roadmap §PHASE 4\". Built as the ONE owner + the pure resolver over the canonical educational gaps, reusing the canonical Knowledge Base article + guided tour; surface declared in BOTH scope guards (E6 PHASE4_LEARNING_LOOP_SCOPE; E7 entries)."
     },
     {
       "id": "phase5-tutorial-recording",

@@ -2524,6 +2524,17 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/config/countryFramework.ts',
     'src/lib/geography/',
     'scripts/validate-country-framework.mjs',
+    /**
+     * §PHASE 4 (2026-10-05) — the brand learning loop. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE4_LEARNING_LOOP_SCOPE. Same mechanism:
+     * a changed source/test file outside EVERY declared set is refused. The loop is
+     * internal governance — the surface lives on the Super-Admin Founder Control
+     * Centre only.
+     */
+    'src/config/learningLoop.ts',
+    'src/lib/education/',
+    'scripts/validate-learning-loop.mjs',
+    'scripts/reconcile-learning-loop-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

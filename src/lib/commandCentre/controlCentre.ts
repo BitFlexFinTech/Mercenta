@@ -98,6 +98,10 @@ import {
   buildCountryFrameworkSummary,
   type CountryFrameworkSummary,
 } from '@/lib/geography/resolveCountry';
+import {
+  buildLearningLoopSummary,
+  type LearningLoopSummary,
+} from '@/lib/education/resolveLearningProgress';
 import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
@@ -314,6 +318,15 @@ export interface ControlCentreModel {
    * marketplace** (pinned). Super-Admin view.
    */
   countryFramework: CountryFrameworkSummary;
+  /**
+   * §PHASE 4 — the brand learning loop. A brand progresses through a topic
+   * LEARN → WATCH → DO → VALIDATE → COMPLETE (`src/config/learningLoop.ts`),
+   * resolved purely by `src/lib/education/resolveLearningProgress.ts`. VALIDATE is
+   * a GATE satisfied only by a real signal — a topic is never complete merely
+   * because the brand said so. Super-Admin governance view; the loop DEFINITION
+   * and a labelled DEMO topic's progress.
+   */
+  learningLoop: LearningLoopSummary;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -436,6 +449,11 @@ export function buildControlCentre(): ControlCentreModel {
      marketplace role is a cited fact; Zimbabwe is never a marketplace. Nothing here
      re-derives a role or invents a policy. */
   const countryFramework = buildCountryFrameworkSummary();
+
+  /* ── §PHASE 4 — the brand learning loop ──
+     The five-stage loop + a labelled DEMO topic, resolved from the ONE owner
+     (`src/lib/education/resolveLearningProgress.ts`). */
+  const learningLoop = buildLearningLoopSummary();
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -748,6 +766,7 @@ export function buildControlCentre(): ControlCentreModel {
     objectResolution,
     localisation,
     countryFramework,
+    learningLoop,
     preAudit,
     commercial,
     intelligence,
@@ -779,6 +798,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
       { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },
+      { label: 'Brand learning loop', value: 'src/config/learningLoop.ts + src/lib/education/resolveLearningProgress.ts — the LEARN → WATCH → DO → VALIDATE → COMPLETE loop over the canonical educational gaps; LEARN/WATCH reuse the canonical Knowledge Base article and guided tour, and VALIDATE is a gate satisfied only by a real signal' },
     ],
   };
 }

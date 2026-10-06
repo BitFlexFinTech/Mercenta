@@ -357,21 +357,63 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
         )}
 
         {section === 'brands' && (
-          <WorkspaceSection
-            title="Portfolio"
-            description="Brand totals, trading position and compliance readiness — the full table lives in Brand CRM."
-            domain="communications"
-          >
-            <Queue
-              rows={[]}
-              empty={
-                <EmptyState
-                  title="Brand records live in Brand CRM"
-                  description="Open Brand CRM for the full portfolio table, onboarding state and compliance readiness. The metrics above are derived from the canonical brand, PO and compliance records."
-                />
+          <>
+            <WorkspaceSection
+              title="Portfolio"
+              description="Brand totals, trading position and compliance readiness — the full table lives in Brand CRM."
+              domain="communications"
+            >
+              <Queue
+                rows={[]}
+                empty={
+                  <EmptyState
+                    title="Brand records live in Brand CRM"
+                    description="Open Brand CRM for the full portfolio table, onboarding state and compliance readiness. The metrics above are derived from the canonical brand, PO and compliance records."
+                  />
+                }
+              />
+            </WorkspaceSection>
+
+            {/* §PHASE 4 — the brand learning loop. The loop DEFINITION plus a
+                labelled DEMO topic resolved from the ONE owner. VALIDATE is a
+                GATE: a topic is never complete merely because the brand acted. */}
+            <WorkspaceSection
+              title="Brand learning loop"
+              description="A brand progresses through a topic LEARN → WATCH → DO → VALIDATE → COMPLETE. LEARN reads the canonical Knowledge Base article and WATCH completes the canonical guided tour; VALIDATE is a gate satisfied only by a real signal — a topic is never complete merely because the brand said so."
+              domain="communications"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="learning-loop-gate">
+                  {model.learningLoop.validateRequiresEvidence ? 'VALIDATE is a gate' : 'VALIDATION NOT ENFORCED'}
+                </span>
               }
-            />
-          </WorkspaceSection>
+            >
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="learning-loop-stages">
+                {model.learningLoop.stages.map((s) => (
+                  <li key={s.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                      {s.label}
+                      {s.gate ? ' · gate' : ''}
+                    </p>
+                    <p className="mt-1 text-ds-label text-zinc-300">{s.meaning}</p>
+                    <p className="mt-1 text-ds-micro text-zinc-500">{s.action}</p>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4" data-testid="learning-loop-demo">
+                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                  DEMO topic ({model.learningLoop.topicCount} canonical topic(s)) — {model.learningLoop.demo.label}
+                  {model.learningLoop.demo.academyStage ? ` · academy stage ${model.learningLoop.demo.academyStage}` : ''}
+                </p>
+                <p className="mt-1 text-ds-label text-zinc-300">
+                  current stage: <span className="font-mono">{model.learningLoop.demo.currentStage}</span> ·{' '}
+                  {model.learningLoop.demo.complete ? 'complete' : 'not complete'}
+                </p>
+              </div>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="learning-loop-basis">
+                {model.learningLoop.basis} {model.learningLoop.disclaimer}
+              </p>
+            </WorkspaceSection>
+          </>
         )}
 
         {/* §Phase 2 — the commercial readiness workspace. It extends THIS Control

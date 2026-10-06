@@ -2766,6 +2766,32 @@ const PHASE9_COUNTRY_FRAMEWORK_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 4 (2026-10-05) — THE BRAND LEARNING LOOP — declared surface.
+ *
+ * The master-matrix row `phase4-learning-loop-validate` recorded the Phase-4 loop
+ * LEARN → WATCH → DO → VALIDATE → COMPLETE, including the VALIDATE gate that
+ * proves a brand can actually do the step. The Phase-4 seams already existed
+ * (`academyStage` on `commercialReadiness`, `PRE_AUDIT_EDUCATIONAL_GAPS`,
+ * `KB_ARTICLES`, `TOUR_REGISTRY`) but had NO owner for the loop itself. This
+ * increment adds the ONE owner (`src/config/learningLoop.ts`) and the pure resolver
+ * (`src/lib/education/resolveLearningProgress.ts`), wires them into the Founder
+ * Control Centre, and gates them. F6's contract is UNCHANGED: a working-tree file
+ * in NO declared set still fails.
+ */
+const PHASE4_LEARNING_LOOP_SCOPE = new Set([
+  'src/config/learningLoop.ts',                    /* NEW — the ONE owner */
+  'src/lib/education/',                            /* NEW — the resolver (dir: git reports the new folder) */
+  'src/lib/commandCentre/controlCentre.ts',        /* exposes `learningLoop` */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the Brand learning loop section */
+  'scripts/validate-learning-loop.mjs',            /* NEW — this phase's gate */
+  'scripts/reconcile-learning-loop-registry.cjs',  /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',          /* test 11 renders the Brand learning loop section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3534,7 +3560,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE9_LOCALISATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 9 (follow-up) — the country framework (see above). */
           PHASE9_COUNTRY_FRAMEWORK_SCOPE.has(p) ||
-          [...PHASE9_COUNTRY_FRAMEWORK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE9_COUNTRY_FRAMEWORK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 4 — the brand learning loop (see above). */
+          PHASE4_LEARNING_LOOP_SCOPE.has(p) ||
+          [...PHASE4_LEARNING_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

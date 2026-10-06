@@ -314,6 +314,33 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 4 — THE BRAND LEARNING LOOP. The Brands view must render the five-stage
+   * loop (LEARN → WATCH → DO → VALIDATE → COMPLETE) with VALIDATE named as the ONE
+   * gate, and a labelled DEMO topic that is honestly NOT complete (it has acted but
+   * not validated) — proving a topic is never closed merely because the brand acted.
+   */
+  test('11. the brand learning loop renders with VALIDATE as the gate', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Brands/ }).click();
+
+    const panel = page.getByTestId('learning-loop-stages');
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText('Learn');
+    await expect(panel).toContainText('Validate');
+    await expect(panel).toContainText('gate');
+    // The gate is stated on the surface, not merely held in code.
+    await expect(page.getByTestId('learning-loop-gate')).toContainText('VALIDATE is a gate');
+    // The labelled DEMO topic has acted but not validated — so it is NOT complete.
+    await expect(page.getByTestId('learning-loop-demo')).toContainText('not complete');
+
+    await page.screenshot({ path: `${SHOTS}/11-learning-loop.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved
