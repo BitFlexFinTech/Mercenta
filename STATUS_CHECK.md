@@ -4229,7 +4229,7 @@ The registry now holds **ZERO** in_progress, **ZERO** blocked and **ZERO** regre
 
 ---
 
-## §ACQ-CONVERSION — THE ACQUISITION CONVERSION MEASUREMENT (session 87, 2026-10-05) — **CURRENT**
+## §ACQ-CONVERSION — THE ACQUISITION CONVERSION MEASUREMENT (session 87, 2026-10-05) — **SUPERSEDED BY §PHASE 6 (CAPITAL)**
 
 **BUILT.** The registry row `discovered-acquisition-conversion-measurement` recorded that the prospective-brand / outbound system reported COUNTS (pipeline totals, per-stage, follow-ups overdue) but derived NO conversion rates, so the placement / list / copy diagnosis step was impossible. `src/lib/acquisition/conversionMetrics.ts` (**NEW**, the ONE owner) DERIVES the funnel ENTIRELY from the canonical stage machine (`acquisitionStageOf` in `acquisitionEngine.ts`) — **CONTACTED** = stage ≥ `follow_up` (a SENT outreach; a DRAFT `outreach` does NOT count), **REPLIED** = stage ≥ `response`, **ENGAGED** = stage ≥ `meeting`, **CONVERTED** = `active_brand`. It therefore adds NO new state and re-classifies NOTHING, so it cannot contradict the canonical classifier — the exact open concern the row named. It reports reply / engagement / conversion / reply-to-engagement rates (a zero denominator yields `null`, never a misleading 0) plus segment breakdowns by **category, source and owner**.
 
@@ -4246,4 +4246,27 @@ The registry now holds **ZERO** in_progress, **ZERO** blocked and **ZERO** regre
 - **NO defect parked; NO new blocker.** §ACQ-CONVERSION is a pure library + model projection with no credential and no external dependency.
 
 **NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; 35 `not_started` rows remain. No credential required.
+
+
+---
+
+## §PHASE 6 — THE INTERNAL CAPITAL MODEL BEHIND MODEL B (session 88, 2026-10-05) — **CURRENT**
+
+**BUILT.** The registry row `phase6-capital-requirement-model` recorded that the internal working-capital model behind Model B did not exist. Model B means Mercenta buys the goods from the brand and is repaid by the retail channel, so it needs working capital in between. Built as the ONE owner of that arithmetic.
+
+- `src/lib/finance/capitalRequirement.ts` (**NEW**, the ONE owner) — pure, deterministic: per purchase `advance = supplierCost × advanceRate`, `fee = advance × feePctPerTerm`, `repayment = advance + fee`, `grossSpread = receivable − supplierCost`, `netMargin = grossSpread − fee`; plus portfolio totals, facility utilisation, available-after and concentration-by-brand against the facility's own limit. It re-derives nothing: the facility terms come from the config owner and the Model B acquisition economics come from the canonical commercial-model owner (`MODEL_B_ACQUISITION_RATIO`, DERIVED — never retyped).
+- `src/config/financing.ts` (**NEW**, the ONE facility config) — `CAPITAL_FACILITY_CONFIGURED = false` (the real facility terms are an undecided commercial matter, so NO production figure is computed) plus `DEMO_CAPITAL_FACILITY`, a LABELLED illustration (the same discipline as `src/config/vat.ts`).
+- **USED in the product:** `src/lib/commandCentre/controlCentre.ts` derives the model from the canonical Model B brand's purchase orders (`DEMO_MODEL_B_BRAND_ID`), exposes `capitalRequirement` and adds two finance metric cards; `src/components/admin/FounderControlCentre.tsx` renders a **Capital requirement (Model B)** section on the Finance view (Super-Admin only — financing is internal and is never shown to a brand; the gate asserts NO brand component imports the owner).
+- **Gated** by NEW `scripts/validate-capital-requirement.mjs` (`npm run validate:capital-requirement`): the arithmetic on known input; an over-committed facility is STATED (negative available-after, >100% utilisation), never clamped; concentration partitions the advance and flags breaches; an empty facility is undrawn with no NaN; the acquisition ratio is derived; the owner is USED; and a self-check proves the gate can fail.
+- `requirements-registry.json` — row `phase6-capital-requirement-model` raised `not_started` → `built` (old value in `_audit_note`; `status_counts` built 147→148, not_started 35→34). Surface declared in BOTH scope guards (`CAPITAL_REQUIREMENT_SCOPE` in E6; entries in E7). Plan §0b item 2 records the seventh concrete build item. Browser spec `e2e/founder-operating-system.spec.ts` test 7 asserts the section renders.
+
+**TESTED.** `validate:all` **167 PASS / 0 FAIL** · typecheck **0** (all 4 projects) · lint **0** · build ✓ · `validate:capital-requirement` PASS (mutation-proved: dropping `advanceRate` from the advance fails **11** assertions; `capitalRequirement.ts` restored byte-identical, sha256 `c4d16028d2d8f9de196bcc08a2e257ae7770dfff52cd48efaaf93c367ddb8acf`) · `validate:built-rows` 2190/0 · `validate:registry-integrity` 7/0 · E6/E7 scope guards PASS · browser `founder-operating-system.spec.ts` **7 passed** · LIVE `verify:live` **267 PASS / 0 FAIL** + a direct bundle check (live `assets/FounderControlCentre-BWGFqzg5.js` = 58,510 bytes, byte-identical to the local verified build; live index `index-BMsBG_RX.js`).
+
+**RESULT.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED.** Work commit `893bc07`, pushed to `origin/redesign/foundation` (no `--force`), deployed via `scripts/deploy-demo.sh` to `https://demo.mercenta.co.uk` (New: 106 files, Modified: 24, Removed: 106 obsolete files; exit 0), live-verified.
+
+**DEFECT INVENTORY.**
+- **FIXED at source:** `STATUS_CHECK.md`'s previous block (§ACQ-CONVERSION) was tagged **CURRENT** although §PHASE 6 is the later session — retagged **SUPERSEDED BY §PHASE 6 (CAPITAL)** so no stale "current" claim stands.
+- **NO defect parked; NO new blocker.** §PHASE 6 is a pure deterministic library + a model projection with no credential and no external dependency. The demo's applied supplier-cost ratio (0.75) is a LABELLED illustration derived from the canonical Model B demo economics, because the demo PO records carry no stored supplier cost — stated on the surface and in the config owner, never presented as a stored fact.
+
+**NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; 34 `not_started` rows remain. No credential required.
 
