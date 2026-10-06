@@ -2498,6 +2498,14 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'scripts/validate-financing-router.mjs',
     'scripts/reconcile-financing-router-registry.cjs',
     'e2e/founder-operating-system.spec.ts',
+    /**
+     * §PHASE 10 (2026-10-05) — the product identity layer. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE10_PRODUCT_IDENTITY_SCOPE. Same
+     * mechanism: a changed source/test file outside EVERY declared set is refused.
+     */
+    'src/lib/catalog/productIdentity.ts',
+    'src/lib/preaudit/ukMarketFitEngine.ts',
+    'scripts/validate-product-identity.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-financing-router-registry.cjs after the §PHASE 6 (financing router) increment (phase6-financing-router-deterministic not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 after the §PHASE 10 (product identity layer) increment (phase10-product-identity-layer not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 150,
-      "not_started": 32,
+      "built": 151,
+      "not_started": 31,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -4081,12 +4081,13 @@
     },
     {
       "id": "phase10-product-identity-layer",
-      "description": "Phase 10 — the product identity layer over the BRAND + ASIN + SOURCE MARKETPLACE acquisition unit: source ASIN, destination ASIN, GTIN/EAN/UPC, brand, model, normalized identity, marketplace, and exact/probable/related match",
+      "description": "Phase 10 — the product identity layer over the BRAND + ASIN + SOURCE MARKETPLACE acquisition unit: source ASIN, destination ASIN, GTIN/EAN/UPC, brand, model, normalized identity, marketplace, and exact/probable/related match. DONE (2026-10-05): the ONE owner `src/lib/catalog/productIdentity.ts` classifies a raw identifier (REUSING the canonical channel-identifier shape in `src/lib/catalog/asin.ts`), validates the published GS1 modulo-10 check digit for every GTIN length, normalises brand/model/name through the canonical `normalizeBrandKey`, and derives the match relationship (exact/probable/related/none/unknown) strongest-evidence-first — FAILING CLOSED to `unknown` when there is nothing to compare. The ad-hoc identifier regex that used to live inside the pre-audit engine was REMOVED and consolidated onto the owner.",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 10",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/lib/catalog/productIdentity.ts (the ONE owner: GS1 check digit + identifier classifier + normalised identity + fail-closed relationship); src/lib/catalog/asin.ts (the REUSED channel-identifier shape — not re-declared); src/lib/intelligence/prospectPipeline.ts → normalizeBrandKey (the REUSED brand key); src/lib/preaudit/ukMarketFitEngine.ts → buildProductOpportunities (consolidated onto the owner); gate scripts/validate-product-identity.mjs (npm run validate:product-identity, 45 assertions, mutation-proved twice).",
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 10 (product identity layer) (2026-10-05) — STATUS RAISED not_started -> built (old value recorded inline, never deleted). OLD status: \"not_started\". OLD evidence (STALE — the cited \"docs — roadmap §PHASE 10\" does not exist as a document): \"docs — roadmap §PHASE 10\". Built as the ONE owner reusing the canonical ASIN shape + the canonical brand key; the pre-audit engine was consolidated onto it; surface declared in BOTH scope guards (E6 PHASE10_PRODUCT_IDENTITY_SCOPE; E7 entries)."
     },
     {
       "id": "phase10-uk-opportunity-states",

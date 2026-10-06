@@ -62,6 +62,10 @@ import {
 } from '@/config/ukMarketFit';
 import { normalizeBrandKey } from '@/lib/intelligence/prospectPipeline';
 import { demoToday } from '@/lib/work/workStore';
+import {
+  deriveMatchRelationship,
+  parseProductIdentifiers,
+} from '@/lib/catalog/productIdentity';
 import type { PreAuditResearchResult } from './researchProvider';
 
 export { NO_SINGLE_SUCCESS_SCORE };
@@ -1017,20 +1021,28 @@ export function buildProductOpportunities(
 ): ProductOpportunity[] {
   const fixture = research.fixture;
   const identifiers = input.productIdentifiers ?? [];
-  const asinLike = identifiers.filter((v) => /^B0[A-Z0-9]{8}$/i.test(v.trim()));
-  const gtinLike = identifiers.filter((v) => /^\d{8,14}$/.test(v.trim()));
+  /**
+   * §PHASE 10 — the identity rules are read from the ONE owner
+   * (`src/lib/catalog/productIdentity.ts`). This function holds NO identifier
+   * regex and NO relationship heuristic of its own: the channel-identifier shape
+   * lives in the canonical ASIN owner, and the barcode + relationship rules in
+   * the identity owner, so the three can never drift apart.
+   */
+  const identities = parseProductIdentifiers(identifiers);
 
   const readiness: ProductOpportunity['readinessState'] = input.knownDocumentation?.length
     ? 'partially_documented'
     : 'not_documented';
 
-  const matchRelationship: ProductOpportunity['matchRelationship'] = !fixture
-    ? 'unknown'
-    : fixture.exactProductListedInUk
-      ? 'exact'
-      : fixture.equivalentProductListedInUk
-        ? 'probable'
-        : 'none';
+  const matchRelationship: ProductOpportunity['matchRelationship'] = deriveMatchRelationship({
+    source: { brand: input.brandName, productName: input.productName ?? null, identifiers },
+    observation: fixture
+      ? {
+          exactListed: fixture.exactProductListedInUk,
+          equivalentListed: fixture.equivalentProductListedInUk,
+        }
+      : null,
+  });
 
   const supply = indicators.find((i) => i.id === 'supply_viability')!;
   const commercial = indicators.find((i) => i.id === 'commercial_opportunity')!;
@@ -1048,11 +1060,11 @@ export function buildProductOpportunities(
       brand: input.brandName,
       sourceMarket: input.country,
       productName: input.productName ?? null,
-      sourceAsin: asinLike[0] ?? null,
+      sourceAsin: identities.sourceAsin,
       ukAsin: null,
-      gtin: gtinLike[0] ?? null,
-      ean: gtinLike.find((v) => v.trim().length === 13) ?? null,
-      upc: gtinLike.find((v) => v.trim().length === 12) ?? null,
+      gtin: identities.gtin,
+      ean: identities.ean,
+      upc: identities.upc,
       model: null,
       matchRelationship,
       category: input.category,

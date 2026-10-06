@@ -2694,6 +2694,30 @@ const FINANCING_ROUTER_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 10 (2026-10-05) — THE PRODUCT IDENTITY LAYER — declared surface.
+ *
+ * The master-matrix row `phase10-product-identity-layer` recorded the acquisition
+ * unit's identity rules (BRAND + ASIN + SOURCE MARKETPLACE): what a raw
+ * identifier IS, and how a source-market product relates to the UK one
+ * (`exact` · `probable` · `related` · `none` · `unknown`). Those rules existed
+ * ONLY as an ad-hoc regex probe inside the pre-audit engine, which additionally
+ * duplicated the ASIN shape already owned by `src/lib/catalog/asin.ts`. This
+ * increment adds the ONE owner (`src/lib/catalog/productIdentity.ts` — the GS1
+ * check digit, the identifier classifier and the fail-closed relationship),
+ * consolidates the pre-audit engine onto it, and gates it.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE10_PRODUCT_IDENTITY_SCOPE = new Set([
+  'src/lib/catalog/productIdentity.ts',            /* NEW — the ONE owner */
+  'src/lib/preaudit/ukMarketFitEngine.ts',         /* consolidated onto the owner */
+  'scripts/validate-product-identity.mjs',         /* NEW — this phase's gate */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3453,7 +3477,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...OBJECT_RESOLUTION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 6 — the deterministic financing router (see above). */
           FINANCING_ROUTER_SCOPE.has(p) ||
-          [...FINANCING_ROUTER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...FINANCING_ROUTER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 10 — the product identity layer (see above). */
+          PHASE10_PRODUCT_IDENTITY_SCOPE.has(p) ||
+          [...PHASE10_PRODUCT_IDENTITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
