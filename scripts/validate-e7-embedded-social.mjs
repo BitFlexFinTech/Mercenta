@@ -2464,6 +2464,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/commandCentre/controlCentre.ts',
     'src/components/admin/FounderControlCentre.tsx',
     'scripts/validate-acquisition-conversion.mjs',
+    /**
+     * §PHASE 6 (2026-10-05) — the internal capital model behind Model B.
+     * Fuller note in `validate-e6-brand-surfaces.mjs` §CAPITAL_REQUIREMENT_SCOPE.
+     * Same mechanism: a changed source/test file outside EVERY declared set is
+     * refused. Financing is internal — the surface lives on the Super-Admin
+     * Founder Control Centre only.
+     */
+    'src/config/financing.ts',
+    'src/lib/finance/capitalRequirement.ts',
+    'scripts/validate-capital-requirement.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

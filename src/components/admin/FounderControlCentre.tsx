@@ -69,6 +69,7 @@ import { useWorkVersion } from '@/lib/work/useWork';
 import { useCommercialReadinessVersion } from '@/lib/commercial/useCommercialReadiness';
 import { feedAssessmentToAcquisition } from '@/lib/preaudit/preAuditAcquisitionBridge';
 import { formatRate } from '@/lib/acquisition/conversionMetrics';
+import { formatGbp } from '@/lib/finance/capitalRequirement';
 import type { PreAuditQueueRow, CommercialReadinessQueueRow } from '@/lib/commandCentre/controlCentre';
 import { useIntegrations } from '@/integrations/IntegrationsContext';
 
@@ -667,6 +668,78 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             />
           </WorkspaceSection>
         )}
+
+        {section === 'finance' && (
+          <WorkspaceSection
+            title="Capital requirement (Model B)"
+            description="Model B means Mercenta buys the goods and is repaid by the channel, so it needs working capital in between. Every figure comes from the ONE capital model over the canonical Model B purchase orders — financing is internal and is never shown to a brand."
+            domain="finance"
+          >
+            <div
+              className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
+              data-testid="control-capital-requirement"
+            >
+              {[
+                {
+                  label: 'Capital needed',
+                  value: formatGbp(model.capitalRequirement.totalRequiredFundingGbp),
+                  sub: 'supplier cost',
+                },
+                {
+                  label: 'Advance drawn',
+                  value: formatGbp(model.capitalRequirement.totalAdvanceDrawnGbp),
+                  sub: `${(model.capitalRequirement.facility.advanceRate * 100).toFixed(0)}% of cost`,
+                },
+                {
+                  label: 'Utilisation',
+                  value: `${model.capitalRequirement.facilityUtilisationPct.toFixed(1)}%`,
+                  sub: model.capitalRequirement.withinCapacity ? 'within capacity' : 'over capacity',
+                },
+                {
+                  label: 'Available after',
+                  value: formatGbp(model.capitalRequirement.availableCapitalAfterGbp),
+                  sub: 'facility capital',
+                },
+                {
+                  label: 'Financing fees',
+                  value: formatGbp(model.capitalRequirement.totalFinancingFeesGbp),
+                  sub: `over ${model.capitalRequirement.facility.termDays} days`,
+                },
+                {
+                  label: 'Purchases financed',
+                  value: String(model.capitalRequirement.outstandingFinancedPurchases),
+                  sub: 'Model B orders',
+                },
+              ].map((tile) => (
+                <div key={tile.label} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{tile.label}</p>
+                  <p className="mt-1 font-mono text-lg text-zinc-100">{tile.value}</p>
+                  <p className="text-ds-micro text-brass-300">{tile.sub}</p>
+                </div>
+              ))}
+            </div>
+            {model.capitalRequirement.concentration.length > 0 && (
+              <div className="mt-4">
+                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Concentration by brand</p>
+                <ul className="mt-1 space-y-1" data-testid="control-capital-concentration">
+                  {model.capitalRequirement.concentration.map((c) => (
+                    <li key={c.brandId} className="flex justify-between gap-3 text-ds-label">
+                      <span className="text-zinc-300">{c.brandName}</span>
+                      <span className="font-mono text-zinc-400">
+                        {formatGbp(c.advanceGbp)} · {c.sharePct.toFixed(1)}%
+                        {c.breachesLimit ? ' · over limit' : ''}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-capital-basis">
+              {model.capitalRequirement.facility.label}. {model.capitalRequirement.facility.disclaimer}
+            </p>
+          </WorkspaceSection>
+        )}
+
 
         {section === 'compliance' && (
           <WorkspaceSection

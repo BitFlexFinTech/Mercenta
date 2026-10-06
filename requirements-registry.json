@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 after the §ACQ-CONVERSION increment raised discovered-acquisition-conversion-measurement not_started → built (no row added or removed: total_entries stays 540; built +1, not_started -1). Previous snapshot was the §PHASE 13 increment. Snapshot only.",
+      "_note": "Recomputed 2026-10-05 after the §PHASE 6 (capital) increment raised phase6-capital-requirement-model not_started → built (no row added or removed: total_entries stays 540; built +1, not_started -1). Previous snapshot was the §ACQ-CONVERSION increment. Snapshot only.",
       "built_and_tested": 337,
-      "built": 147,
-      "not_started": 35,
+      "built": 148,
+      "not_started": 34,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -3989,10 +3989,11 @@
       "id": "phase6-capital-requirement-model",
       "description": "Phase 6 — the internal capital model behind Model B: PO value, supplier cost, required funding, available capital, facility capacity, advance rate, fees, term, expected repayment, outstanding financed purchases, facility utilisation, concentration controls, currency and margin",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 6",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/lib/finance/capitalRequirement.ts (the ONE owner) + src/config/financing.ts (the ONE facility config) + src/lib/commandCentre/controlCentre.ts (computes + exposes the model) + src/components/admin/FounderControlCentre.tsx (renders the Capital section, Super-Admin only); gate scripts/validate-capital-requirement.mjs (npm run validate:capital-requirement, mutation-proved); e2e/founder-operating-system.spec.ts renders it live.",
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 6 (2026-10-05) — status raised not_started → built. The row named an internal capital model behind Model B that did not exist. Built as the ONE owner (capitalRequirement.ts) over a config-gated facility (financing.ts: CAPITAL_FACILITY_CONFIGURED=false — the real terms are undecided, so the figures shown are a LABELLED illustration). Derived from the canonical Model B brand’s purchase orders; the demo PO records carry no stored supplier cost, so the supplier cost applied is the canonical demo Model B acquisition ratio (0.75) — labelled as an illustration on the surface. Gated by validate:capital-requirement, proved able to fail. Status stays built (not built_and_tested): that enum requires an e2e reference; the surface is covered by the Founder OS browser spec and its own gate."
     },
     {
       "id": "phase6-financing-router-deterministic",

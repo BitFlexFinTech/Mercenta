@@ -2624,6 +2624,28 @@ const ACQ_CONVERSION_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 6 (2026-10-05) — the internal capital model behind Model B.
+ *
+ * The registry row `phase6-capital-requirement-model` recorded that the internal
+ * working-capital model did not exist. This increment adds the ONE owner
+ * (`src/lib/finance/capitalRequirement.ts`) and its config
+ * (`src/config/financing.ts`), wires it into the Founder Control Centre (the
+ * Super-Admin finance view — financing is internal and never shown to a brand),
+ * and gates it. Same mechanism: a working-tree file in NO declared set still
+ * fails, and no protected path appears in the change set.
+ */
+const CAPITAL_REQUIREMENT_SCOPE = new Set([
+  'src/config/financing.ts',                        /* NEW — the ONE facility config */
+  'src/lib/finance/capitalRequirement.ts',          /* NEW — the ONE owner */
+  'src/lib/commandCentre/controlCentre.ts',         /* computes + exposes the capital model */
+  'src/components/admin/FounderControlCentre.tsx',  /* renders the Capital section */
+  'scripts/validate-capital-requirement.mjs',       /* NEW — this phase's gate */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3374,7 +3396,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...CLAIMS_REGISTRY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §ACQ-CONVERSION — the acquisition conversion measurement (see above). */
           ACQ_CONVERSION_SCOPE.has(p) ||
-          [...ACQ_CONVERSION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...ACQ_CONVERSION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 6 — the internal capital model behind Model B (see above). */
+          CAPITAL_REQUIREMENT_SCOPE.has(p) ||
+          [...CAPITAL_REQUIREMENT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

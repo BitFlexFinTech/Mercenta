@@ -105,7 +105,8 @@
     "validate:email-templates": "node scripts/validate-email-templates.mjs",
     "validate:operator-terminology": "node scripts/validate-operator-terminology.mjs",
     "validate:admin-shell-bundle": "node scripts/validate-admin-shell-bundle.mjs",
-    "validate:acquisition-conversion": "node scripts/validate-acquisition-conversion.mjs"
+    "validate:acquisition-conversion": "node scripts/validate-acquisition-conversion.mjs",
+    "validate:capital-requirement": "node scripts/validate-capital-requirement.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

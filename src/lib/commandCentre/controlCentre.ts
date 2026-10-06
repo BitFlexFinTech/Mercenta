@@ -71,6 +71,15 @@ import {
   formatRate,
   type AcquisitionConversionMetrics,
 } from '@/lib/acquisition/conversionMetrics';
+import { DEMO_CAPITAL_FACILITY } from '@/config/financing';
+import {
+  computeCapitalRequirement,
+  formatGbp,
+  MODEL_B_ACQUISITION_RATIO,
+  type CapitalRequirement,
+  type FinancedPurchase,
+} from '@/lib/finance/capitalRequirement';
+import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
 import { allPreAuditAssessments } from '@/data/preAuditStore';
@@ -246,6 +255,13 @@ export interface ControlCentreModel {
    * see `src/lib/acquisition/conversionMetrics.ts`).
    */
   acquisitionConversion: AcquisitionConversionMetrics;
+  /**
+   * §PHASE 6 — the internal capital model behind Model B, derived from the
+   * canonical Model B brand's purchase orders through the ONE owner
+   * (`src/lib/finance/capitalRequirement.ts`). Super-Admin only; financing is an
+   * internal treasury concern and is never shown to a brand.
+   */
+  capitalRequirement: CapitalRequirement;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -284,6 +300,27 @@ export function buildControlCentre(): ControlCentreModel {
   const reminders = getActiveReminders('admin');
   const acquisition = acquisitionPipeline();
   const acquisitionConversion = computeConversionMetrics(acquisition.records);
+
+  /* ── §PHASE 6 — the internal capital model behind Model B ──
+     Derived from the canonical Model B brand's purchase orders. The demo PO
+     records do not carry a stored supplier cost, so each purchase's cost is the
+     canonical demo Model B acquisition ratio applied to the receivable — an
+     ILLUSTRATION, labelled as such on the surface (a real purchase carries its
+     own supplier cost). Nothing here re-derives the arithmetic: the ONE owner
+     (`src/lib/finance/capitalRequirement.ts`) does that. */
+  const modelBBrandName =
+    demoBrands.find((b) => b.id === DEMO_MODEL_B_BRAND_ID)?.profile.businessName ??
+    DEMO_MODEL_B_BRAND_ID;
+  const modelBPurchases: FinancedPurchase[] = demoPurchaseOrders
+    .filter((po) => po.brandId === DEMO_MODEL_B_BRAND_ID)
+    .map((po) => ({
+      id: po.id,
+      brandId: po.brandId,
+      brandName: modelBBrandName,
+      channelReceivableGbp: po.poValue,
+      supplierCostGbp: Math.round(po.poValue * MODEL_B_ACQUISITION_RATIO * 100) / 100,
+    }));
+  const capitalRequirement = computeCapitalRequirement(DEMO_CAPITAL_FACILITY, modelBPurchases);
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -469,6 +506,8 @@ export function buildControlCentre(): ControlCentreModel {
       metric('fin-deductions', 'Open deductions', String(openDeductions.length), openDeductions.length > 0 ? 'warning' : 'success', 'Chargebacks', `${overdueDeductions.length} past the declared dispute window.`, 'accounting'),
       metric('fin-reminders', 'Active reminders', String(reminders.length), reminders.length > 0 ? 'warning' : 'success', 'Escalations', 'Raised by the deterministic reminder sweep.', 'work'),
       metric('fin-revenue', 'Recorded revenue', `£${revenueTotal.toLocaleString('en-GB')}`, 'neutral', 'Canonical streams', 'Per-stream labels are preserved on the Accounting surface.', 'accounting'),
+      metric('fin-capital-required', 'Model B capital need', formatGbp(capitalRequirement.totalRequiredFundingGbp), capitalRequirement.withinCapacity ? 'info' : 'danger', 'Internal treasury', capitalRequirement.basis, 'control_centre'),
+      metric('fin-facility-utilisation', 'Facility utilisation', `${capitalRequirement.facilityUtilisationPct.toFixed(1)}%`, capitalRequirement.facilityUtilisationPct > 80 ? 'warning' : 'info', 'Capital facility', `${capitalRequirement.outstandingFinancedPurchases} purchase(s) financed · ${formatGbp(capitalRequirement.totalAdvanceDrawnGbp)} advanced.`, 'control_centre'),
     ],
     compliance: [
       metric('comp-missing', 'Missing', String(missingDocs.length), missingDocs.length > 0 ? 'danger' : 'success', 'Blocking', 'A missing document blocks the gate.', 'compliance'),
@@ -577,6 +616,7 @@ export function buildControlCentre(): ControlCentreModel {
     attention,
     acquisition,
     acquisitionConversion,
+    capitalRequirement,
     preAudit,
     commercial,
     intelligence,
@@ -603,6 +643,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Intelligence', value: 'src/lib/intelligence/intelligenceLayer.ts — canonical findings' },
       { label: 'AI', value: 'src/lib/ai/founderAiClient.ts — provider registry + free-model policy' },
       { label: 'Finance', value: 'src/lib/costs/costSummary.ts — canonical revenue streams' },
+      { label: 'Capital (Model B)', value: 'src/lib/finance/capitalRequirement.ts + src/config/financing.ts — the internal capital model over the canonical Model B purchase orders' },
     ],
   };
 }

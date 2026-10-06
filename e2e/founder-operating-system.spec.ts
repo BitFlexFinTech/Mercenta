@@ -238,6 +238,31 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 6 — the internal capital model behind Model B. The Finance view must
+   * render the capital requirement derived from the canonical Model B purchase
+   * orders, and must label the facility terms as an ILLUSTRATION (the real
+   * facility is not configured). Financing is internal: this is the Super-Admin
+   * view, never a brand's.
+   */
+  test('7. the Model B capital requirement renders on the Finance view', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Finance/ }).click();
+
+    await expect(page.getByTestId('control-capital-requirement')).toBeVisible();
+    await expect(page.getByTestId('control-capital-requirement')).toContainText('Capital needed');
+    await expect(page.getByTestId('control-capital-requirement')).toContainText('Utilisation');
+    await expect(page.getByTestId('control-capital-concentration')).toBeVisible();
+    // The facility terms are labelled as an illustration, never as Mercenta's real facility.
+    await expect(page.getByTestId('control-capital-basis')).toContainText('Illustrative');
+
+    await page.screenshot({ path: `${SHOTS}/07-capital-requirement.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §FOUNDATION — THE GLOBAL HALT (kill switch), verified in a real browser.
    *
    * One act must stop EVERY automation, and the halt must be enforced in the
