@@ -2840,6 +2840,29 @@ const PHASE5_CONTEXTUAL_EDUCATION_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 5 — SHARED WORKFLOW REUSE (2026-10-06) — the OWNER of the canonical
+ * journeys through the real screens that E2E tests, tutorial recordings and
+ * onboarding walkthroughs ALL reuse. One automation: the canonical guided tour
+ * defines the journey, its `data-tour` anchors are the SAME contract the E2E test
+ * drives, and the steps are DERIVED from the tour (no second list). Declared at
+ * module scope by the PHASE4_ONBOARDING_CURRICULUM_SCOPE precedent, so the
+ * F5/F5b/F6 guards keep refusing anything outside it. F5/F5b/F6's contract is
+ * UNCHANGED: a source file in NO declared set still fails.
+ */
+const PHASE5_SHARED_WORKFLOW_SCOPE = new Set([
+  'src/config/sharedWorkflows.ts',                 /* NEW — the ONE owner */
+  'src/lib/education/',                            /* the resolver lives beside the learning loop */
+  'src/lib/commandCentre/controlCentre.ts',        /* exposes `sharedWorkflows` */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the shared-workflows section */
+  'scripts/validate-shared-workflow-reuse.mjs',    /* NEW — this phase's gate */
+  'scripts/reconcile-shared-workflow-reuse-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',          /* test 14 renders the shared-workflows section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3617,7 +3640,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE4_ONBOARDING_CURRICULUM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 5 — contextual education (see above). */
           PHASE5_CONTEXTUAL_EDUCATION_SCOPE.has(p) ||
-          [...PHASE5_CONTEXTUAL_EDUCATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE5_CONTEXTUAL_EDUCATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 5 — shared workflow reuse (see above). */
+          PHASE5_SHARED_WORKFLOW_SCOPE.has(p) ||
+          [...PHASE5_SHARED_WORKFLOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

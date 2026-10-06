@@ -395,6 +395,35 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 5 — SHARED WORKFLOW REUSE. ONE automation supports the E2E test, the
+   * tutorial recording and the onboarding walkthrough: the canonical guided tour
+   * defines the journey and its `data-tour` anchors are the SAME contract the E2E
+   * test drives, and the steps are DERIVED from the tour (no second list).
+   */
+  test('14. the shared workflows render with one automation for three consumers', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Brands/ }).click();
+
+    const consumers = page.getByTestId('shared-workflows-consumers');
+    await expect(consumers).toBeVisible();
+    await expect(consumers).toContainText('Onboarding walkthrough');
+    await expect(consumers).toContainText('Tutorial recording');
+    await expect(consumers).toContainText('E2E test');
+    // Each workflow links to its canonical tour, E2E spec and Knowledge Base article.
+    await expect(page.getByTestId('shared-workflows-list')).toContainText('test:');
+    await expect(page.getByTestId('shared-workflows-list')).toContainText('Learn:');
+    await expect(page.getByTestId('shared-workflows-rule')).toContainText('One automation');
+    // The labelled DEMO workflow resolves with its derived anchors.
+    await expect(page.getByTestId('shared-workflows-demo')).toContainText('Acknowledge a purchase order');
+
+    await page.screenshot({ path: `${SHOTS}/14-shared-workflows.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

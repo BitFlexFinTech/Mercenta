@@ -514,6 +514,58 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 {model.contextualEducation.basis} {model.contextualEducation.disclaimer}
               </p>
             </WorkspaceSection>
+
+            {/* §PHASE 5 — shared workflow reuse. The canonical journeys through the
+                real screens that E2E tests, tutorial recordings and onboarding
+                walkthroughs ALL reuse: the canonical guided tour defines the
+                journey, its data-tour anchors are the SAME contract the E2E test
+                drives, and the steps are DERIVED from the tour (no second list). */}
+            <WorkspaceSection
+              title="Shared workflows"
+              description="Each canonical journey through the real screens — used once and reused by the E2E test, the tutorial recording and the onboarding walkthrough. The steps are derived from the canonical guided tour, so the three consumers can never describe the same journey differently, and the data-tour anchors are the same contract the E2E test drives."
+              domain="communications"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="shared-workflows-rule">
+                  {model.sharedWorkflows.oneOwner && model.sharedWorkflows.reuseCanonicalTours && model.sharedWorkflows.mapToRealE2eSpecs
+                    ? 'One automation · three consumers'
+                    : 'SHARED WORKFLOW NOT ENFORCED'}
+                </span>
+              }
+            >
+              <ul className="mb-4 flex flex-wrap gap-2" data-testid="shared-workflows-consumers">
+                {model.sharedWorkflows.consumers.map((c) => (
+                  <li key={c.id} className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-ds-micro text-zinc-400">
+                    {c.label}
+                  </li>
+                ))}
+              </ul>
+              <ul className="space-y-2" data-testid="shared-workflows-list">
+                {model.sharedWorkflows.workflows.map((w) => (
+                  <li key={w.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <p className="text-ds-label text-zinc-300">{w.label}</p>
+                    <p className="mt-1 text-ds-micro text-zinc-500">{w.description}</p>
+                    <p className="mt-1 text-ds-micro text-zinc-600">
+                      {w.stepCount} step{w.stepCount === 1 ? '' : 's'} · tour: {w.tourName} · test: {w.e2eSpec} · Learn: {w.articleTitle}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4" data-testid="shared-workflows-demo">
+                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                  DEMO workflow ({model.sharedWorkflows.workflowCount} workflow(s))
+                  {model.sharedWorkflows.demo ? ` — ${model.sharedWorkflows.demo.label}` : ''}
+                </p>
+                {model.sharedWorkflows.demo && (
+                  <p className="mt-1 text-ds-micro text-zinc-500">
+                    {model.sharedWorkflows.demo.stepCount} steps · {model.sharedWorkflows.demo.consumerCount} consumers · anchors:{' '}
+                    <span className="font-mono">{model.sharedWorkflows.demo.anchors.join(', ')}</span>
+                  </p>
+                )}
+              </div>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="shared-workflows-basis">
+                {model.sharedWorkflows.basis} {model.sharedWorkflows.disclaimer}
+              </p>
+            </WorkspaceSection>
           </>
         )}
 

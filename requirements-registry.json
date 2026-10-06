@@ -2,7 +2,7 @@
   "_meta": {
     "project": "Mercenta Partners",
     "description": "Requirements registry",
-    "last_updated": "2026-10-05",
+    "last_updated": "2026-10-06",
     "status_enum": [
       "not_started",
       "built",
@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 by scripts/reconcile-contextual-education-registry.cjs after the §PHASE 5 (contextual education) increment (phase5-contextual-education not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-06 by scripts/reconcile-shared-workflow-reuse-registry.cjs after the §PHASE 5 (shared workflow reuse) increment (phase5-shared-workflow-reuse not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 156,
-      "not_started": 26,
+      "built": 157,
+      "not_started": 25,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1086,6 +1086,17 @@
         "scripts/validate-contextual-education.mjs"
       ],
       "note": "The Phase-5 seam (a Knowledge Base + guided-tour architecture) existed but had no owner for the field explanations. The owner + the pure fail-closed resolver declare the \"why do we need this?\" explanation for each real field on a real screen and LINK it to the canonical KB article + tour; an unknown field or a missing article is REFUSED. It is internally Super-Admin only and deterministic (no AI, no clock)."
+    },
+    "shared_workflow_reuse_increment": {
+      "increment": "§PHASE 5 — shared workflow reuse (2026-10-06)",
+      "restated": [
+        "phase5-shared-workflow-reuse"
+      ],
+      "added": [],
+      "validators": [
+        "scripts/validate-shared-workflow-reuse.mjs"
+      ],
+      "note": "The Phase-5 seam (guided tours + the data-tour anchor contract) existed but had no owner declaring the canonical WORKFLOWS that the E2E test, the tutorial recording and the onboarding walkthrough all reuse. The owner + the pure fail-closed resolver declare each journey and derive its steps from the canonical tour; an unknown workflow or a missing tour is REFUSED. It is internally Super-Admin only and deterministic (no AI, no clock)."
     }
   },
   "entries": [
@@ -4025,12 +4036,13 @@
     },
     {
       "id": "phase5-shared-workflow-reuse",
-      "description": "Phase 5 — shared workflows so ONE automation supports E2E tests + tutorial recordings + onboarding walkthroughs",
+      "description": "Phase 5 — shared workflows so ONE automation supports E2E tests + tutorial recordings + onboarding walkthroughs. BUILT (2026-10-06): the ONE owner `src/config/sharedWorkflows.ts` declares each canonical journey through the real screens and LINKS it to the single automation all three consumers share — the canonical guided tour drives the onboarding walkthrough AND the tutorial recording, and the same `data-tour` anchors drive the E2E test (pinned invariants ONE_WORKFLOW_OWNER + WORKFLOWS_REUSE_CANONICAL_TOURS + WORKFLOWS_MAP_TO_REAL_E2E_SPECS). The steps are DERIVED from the canonical tour, so there is no second list. The pure fail-closed resolver `src/lib/education/resolveSharedWorkflow.ts` resolves each workflow live; an UNKNOWN workflow id is REFUSED (WORKFLOW_UNKNOWN) and a workflow whose tour does not exist is REFUSED (WORKFLOW_TOUR_MISSING). Super-Admin governance view on the Founder Control Centre.",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 5",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/config/sharedWorkflows.ts (the ONE owner); src/lib/education/resolveSharedWorkflow.ts (the pure fail-closed resolver, deriving the steps from the canonical tour); src/lib/commandCentre/controlCentre.ts (computes + exposes sharedWorkflows); src/components/admin/FounderControlCentre.tsx (Brands → Shared workflows, Super-Admin only); gate scripts/validate-shared-workflow-reuse.mjs (npm run validate:shared-workflow-reuse, mutation-proved TWICE); e2e/founder-operating-system.spec.ts test 14 renders it live.",
+      "last_verified": "2026-10-06",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 5 (shared workflow reuse) (2026-10-06) — STATUS RAISED not_started -> built (old value recorded inline, never deleted). OLD status: \"not_started\". OLD evidence: \"docs — roadmap §PHASE 5\". Built as the ONE owner + the pure fail-closed resolver over the canonical tour registry + Knowledge Base, so ONE automation serves the E2E test, the tutorial recording and the onboarding walkthrough and the three can never describe the same journey differently. Surface declared in BOTH scope guards (E6 PHASE5_SHARED_WORKFLOW_SCOPE; E7 entries)."
     },
     {
       "id": "phase6-capital-requirement-model",

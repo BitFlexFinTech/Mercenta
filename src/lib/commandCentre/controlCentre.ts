@@ -110,6 +110,10 @@ import {
   buildContextualEducationSummary,
   type ContextualEducationSummary,
 } from '@/lib/education/resolveContextualHelp';
+import {
+  buildSharedWorkflowSummary,
+  type SharedWorkflowSummary,
+} from '@/lib/education/resolveSharedWorkflow';
 import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
@@ -354,6 +358,16 @@ export interface ControlCentreModel {
    * article does not exist, is REFUSED (fail closed). Super-Admin governance view.
    */
   contextualEducation: ContextualEducationSummary;
+  /**
+   * §PHASE 5 — shared workflow reuse. The canonical journeys through the real
+   * screens (`src/config/sharedWorkflows.ts`) that E2E tests, tutorial recordings
+   * and onboarding walkthroughs ALL reuse: the canonical guided tour defines the
+   * journey, its `data-tour` anchors are the SAME contract the E2E test drives,
+   * and the steps are DERIVED from the tour so there is no second list. Resolved
+   * purely by `src/lib/education/resolveSharedWorkflow.ts`; an unknown workflow,
+   * or one whose tour does not exist, is REFUSED (fail closed). Super-Admin view.
+   */
+  sharedWorkflows: SharedWorkflowSummary;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -492,6 +506,12 @@ export function buildControlCentre(): ControlCentreModel {
      explanation's canonical Knowledge Base article and guided tour live — the help
      text is never duplicated. */
   const contextualEducation = buildContextualEducationSummary();
+  /* ── §PHASE 5 — shared workflow reuse ──
+     The canonical journeys + a labelled DEMO workflow, resolved from the ONE owner
+     (`src/lib/education/resolveSharedWorkflow.ts`). The steps are DERIVED from the
+     canonical guided tour, and its data-tour anchors are the SAME contract the E2E
+     test drives — one automation for the walkthrough, the recording and the test. */
+  const sharedWorkflows = buildSharedWorkflowSummary();
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -807,6 +827,7 @@ export function buildControlCentre(): ControlCentreModel {
     learningLoop,
     onboardingCurriculum,
     contextualEducation,
+    sharedWorkflows,
     preAudit,
     commercial,
     intelligence,
@@ -841,6 +862,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Brand learning loop', value: 'src/config/learningLoop.ts + src/lib/education/resolveLearningProgress.ts — the LEARN → WATCH → DO → VALIDATE → COMPLETE loop over the canonical educational gaps; LEARN/WATCH reuse the canonical Knowledge Base article and guided tour, and VALIDATE is a gate satisfied only by a real signal' },
       { label: 'Onboarding academy curriculum', value: 'src/config/onboardingCurriculum.ts + src/lib/education/resolveCurriculum.ts — the five canonical stages (Understand Mercenta · Commercial · Product & Packaging · Product Readiness · Operations) plus the final readiness stage, over the SAME canonical educational gaps; the final readiness stage is reached only once every teaching stage is complete' },
       { label: 'Contextual education', value: 'src/config/contextualEducation.ts + src/lib/education/resolveContextualHelp.ts — the "why do we need this?" explanation on each real field, LINKING to the canonical Knowledge Base article (LEARN) and the canonical guided tour of that screen (WATCH); the help text is never duplicated, and an unknown field or a missing article is REFUSED' },
+      { label: 'Shared workflows', value: 'src/config/sharedWorkflows.ts + src/lib/education/resolveSharedWorkflow.ts — the canonical journeys through the real screens that E2E tests, tutorial recordings and onboarding walkthroughs ALL reuse; the steps are DERIVED from the canonical guided tour (no second list), its data-tour anchors are the SAME contract the E2E test drives, and every workflow names a canonical tour, E2E spec and Knowledge Base article' },
     ],
   };
 }

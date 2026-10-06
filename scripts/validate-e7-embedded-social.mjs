@@ -2552,6 +2552,14 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/config/contextualEducation.ts',
     'scripts/validate-contextual-education.mjs',
     'scripts/reconcile-contextual-education-registry.cjs',
+    /**
+     * §PHASE 5 (2026-10-06) — shared workflow reuse. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE5_SHARED_WORKFLOW_SCOPE. Same
+     * mechanism: a changed source/test file outside EVERY declared set is refused.
+     */
+    'src/config/sharedWorkflows.ts',
+    'scripts/validate-shared-workflow-reuse.mjs',
+    'scripts/reconcile-shared-workflow-reuse-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
