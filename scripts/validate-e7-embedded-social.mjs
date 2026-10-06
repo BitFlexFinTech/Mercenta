@@ -2506,6 +2506,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/catalog/productIdentity.ts',
     'src/lib/preaudit/ukMarketFitEngine.ts',
     'scripts/validate-product-identity.mjs',
+    /**
+     * §PHASE 9 (2026-10-05) — the localisation / currency separation. Fuller note
+     * in `validate-e6-brand-surfaces.mjs` §PHASE9_LOCALISATION_SCOPE. Same
+     * mechanism: a changed source/test file outside EVERY declared set is refused.
+     */
+    'src/config/localisation.ts',
+    'src/lib/localisation/',
+    'src/lib/commandCentre/controlCentre.ts',
+    'src/components/admin/FounderControlCentre.tsx',
+    'scripts/validate-localisation.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

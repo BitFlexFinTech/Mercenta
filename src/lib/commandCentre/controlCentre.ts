@@ -90,6 +90,10 @@ import {
   type ResolvableObject,
   type ResolutionSummary,
 } from '@/lib/resolution/objectResolution';
+import {
+  buildLocalisationSummary,
+  type LocalisationSummary,
+} from '@/lib/localisation/resolveLocalisation';
 import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
@@ -290,6 +294,14 @@ export interface ControlCentreModel {
    * Super-Admin only; resolution is an internal ownership control.
    */
   objectResolution: ResolutionSummary;
+  /**
+   * §PHASE 9 — the localisation + currency framework. Locale, DISPLAY currency and
+   * SETTLEMENT currency are THREE SEPARATE concepts (`src/config/localisation.ts`),
+   * resolved purely by `src/lib/localisation/resolveLocalisation.ts`. A detected
+   * country produces a SUGGESTION only (never forced); the settlement currency is a
+   * commercial-terms fact and is never inferred. Super-Admin view.
+   */
+  localisation: LocalisationSummary;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -400,6 +412,12 @@ export function buildControlCentre(): ControlCentreModel {
     })),
   ];
   const objectResolution = summariseResolutions(resolutionRefs, resolutionSources);
+  /* ── §PHASE 9 — the localisation + currency framework ──
+     The three concepts (locale · display currency · settlement currency) are
+     resolved from the ONE owner (`src/lib/localisation/resolveLocalisation.ts`),
+     which reads the canonical source markets. Nothing here re-implements a
+     currency rule or invents a settlement currency. */
+  const localisation = buildLocalisationSummary();
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -561,6 +579,9 @@ export function buildControlCentre(): ControlCentreModel {
       metric('comm-blocked', 'Blocked', String(commercial.blocked), commercial.blocked > 0 ? 'danger' : 'success', 'Not viable as priced', 'The observed economics or volume genuinely do not work.', 'control_centre'),
       metric('comm-review', 'Human review', String(commercial.humanReview), commercial.humanReview > 0 ? 'warning' : 'success', 'Mercenta decision', 'A condition could not be evaluated, so the gate fails closed rather than inventing a rule.', 'control_centre'),
       metric('comm-guidance', 'Brand guidance topics', String(commercial.brandGuidanceTopics), 'info', 'Academy seam', 'Every guidance topic links to a real Knowledge Base article — the brand is never left to guess.', 'control_centre'),
+      /* §PHASE 9 — the localisation + currency framework over the canonical source markets. */
+      metric('comm-locale-markets', 'Markets localised', String(localisation.markets.length), 'info', 'Phase 9', `${localisation.markets.length} canonical source market(s) carry a locale + display-currency suggestion — a suggestion only, never forced.`, 'control_centre'),
+      metric('comm-currency-concepts', 'Currency concepts', localisation.conceptsSeparate ? 'Separate' : 'COLLAPSED', localisation.conceptsSeparate ? 'success' : 'danger', 'Locale · display · settlement', 'Locale, display currency and settlement currency are three separate concepts; the settlement currency is never inferred.', 'control_centre'),
     ],
     acquisition: [
       metric('acq-prospects', 'Prospects', String(acquisition.total), 'neutral', 'Canonical BI store', `${acquisition.active} active · ${acquisition.disqualified} disqualified.`, 'crm'),
@@ -704,6 +725,7 @@ export function buildControlCentre(): ControlCentreModel {
     capitalRequirement,
     financingRouting,
     objectResolution,
+    localisation,
     preAudit,
     commercial,
     intelligence,
@@ -733,6 +755,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Capital (Model B)', value: 'src/lib/finance/capitalRequirement.ts + src/config/financing.ts — the internal capital model over the canonical Model B purchase orders' },
       { label: 'Financing router', value: 'src/lib/finance/financingRouter.ts + src/config/financingRouter.ts — the deterministic financing router (reuses the canonical exclusive-gateway evaluator)' },
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
+      { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
     ],
   };
 }

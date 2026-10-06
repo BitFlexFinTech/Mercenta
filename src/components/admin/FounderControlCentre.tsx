@@ -455,6 +455,45 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 }
               />
             </WorkspaceSection>
+
+            <WorkspaceSection
+              title="Localisation & currency"
+              description="Locale, DISPLAY currency and SETTLEMENT currency are three separate concepts. A detected country produces a SUGGESTION only — an explicit choice always wins — and a brand's settlement currency comes from its commercial terms, never from the reader's locale."
+              domain="finance"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="localisation-concepts">
+                  {model.localisation.conceptsSeparate ? 'Three separate concepts' : 'CONCEPTS COLLAPSED'}
+                </span>
+              }
+            >
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="localisation-concepts-grid">
+                {model.localisation.concepts.map((c) => (
+                  <li key={c.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{c.label}</p>
+                    <p className="mt-1 text-ds-label text-zinc-300">{c.description}</p>
+                    <p className="mt-1 text-ds-micro text-zinc-500">{c.source}</p>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4" data-testid="localisation-markets">
+                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                  Canonical source markets ({model.localisation.markets.length}) — suggested locale · display currency
+                </p>
+                <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+                  {model.localisation.markets.map((m) => (
+                    <li key={m.countryCode} className="flex justify-between gap-3 text-ds-label">
+                      <span className="text-zinc-300">{m.countryLabel}</span>
+                      <span className="font-mono text-zinc-400">
+                        {m.suggestedLocale} · {m.suggestedDisplayCurrency}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="localisation-basis">
+                {model.localisation.basis} {model.localisation.disclaimer}
+              </p>
+            </WorkspaceSection>
           </>
         )}
 

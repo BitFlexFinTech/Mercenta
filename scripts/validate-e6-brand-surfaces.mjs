@@ -2718,6 +2718,29 @@ const PHASE10_PRODUCT_IDENTITY_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 9 (2026-10-05) — THE LOCALISATION / CURRENCY SEPARATION — declared surface.
+ *
+ * The master-matrix row `phase9-locale-currency-settlement-separation` recorded
+ * that LOCALE, DISPLAY currency and SETTLEMENT currency must be THREE SEPARATE
+ * concepts, with country detection RECOMMENDING rather than forcing. grep for
+ * `settlementCurrency` / `displayCurrency` / `formatCurrency` found 0 hits, so
+ * this increment adds the ONE owner (`src/config/localisation.ts`), the pure
+ * resolver (`src/lib/localisation/resolveLocalisation.ts`) and this phase's gate,
+ * and wires them into the Founder Control Centre. F6's contract is UNCHANGED: a
+ * working-tree file in NO declared set still fails.
+ */
+const PHASE9_LOCALISATION_SCOPE = new Set([
+  'src/config/localisation.ts',                    /* NEW — the ONE owner */
+  'src/lib/localisation/',                         /* NEW — the resolver (dir: git reports the new folder) */
+  'src/lib/commandCentre/controlCentre.ts',        /* exposes `localisation` */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the Localisation section */
+  'scripts/validate-localisation.mjs',             /* NEW — this phase's gate */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3480,7 +3503,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...FINANCING_ROUTER_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 10 — the product identity layer (see above). */
           PHASE10_PRODUCT_IDENTITY_SCOPE.has(p) ||
-          [...PHASE10_PRODUCT_IDENTITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE10_PRODUCT_IDENTITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 9 — the localisation / currency separation (see above). */
+          PHASE9_LOCALISATION_SCOPE.has(p) ||
+          [...PHASE9_LOCALISATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

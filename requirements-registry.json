@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 after the §PHASE 10 (product identity layer) increment (phase10-product-identity-layer not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 after the §PHASE 9 (localisation / currency separation) increment (phase9-locale-currency-settlement-separation not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 151,
-      "not_started": 31,
+      "built": 152,
+      "not_started": 30,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -4063,12 +4063,13 @@
     },
     {
       "id": "phase9-locale-currency-settlement-separation",
-      "description": "Phase 9 — locale, display currency and settlement currency as THREE SEPARATE concepts, with country detection recommending rather than forcing",
+      "description": "Phase 9 — locale, display currency and settlement currency as THREE SEPARATE concepts, with country detection recommending rather than forcing. DONE (2026-10-05): the ONE owner `src/config/localisation.ts` declares the three concepts (each with its own distinct source, never collapsed), the pinned invariants (`CURRENCY_CONCEPTS_ARE_SEPARATE`, `SUGGESTIONS_NEVER_FORCE`), the supported locales/currencies and the country → suggestion map; the pure resolver `src/lib/localisation/resolveLocalisation.ts` applies them — an EXPLICIT choice always wins, a detected country produces a SUGGESTION only (`forced` is always false), an unsupported value is REFUSED, and the SETTLEMENT currency is NEVER inferred (it comes only from the commercial terms supplied, else it is null). USED: `src/lib/commandCentre/controlCentre.ts` exposes `localisation` and two commercial metric cards; `src/components/admin/FounderControlCentre.tsx` renders a **Localisation & currency** section (Super-Admin).",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 9",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/config/localisation.ts (the ONE owner: the three concepts + pinned invariants + supported sets + country suggestions); src/lib/localisation/resolveLocalisation.ts (the pure resolver: explicit wins, country suggests, settlement never inferred, unsupported refused); src/lib/commandCentre/controlCentre.ts (exposes localisation); src/components/admin/FounderControlCentre.tsx (renders the Localisation & currency section); gate scripts/validate-localisation.mjs (npm run validate:localisation, 37 assertions, mutation-proved twice).",
+      "last_verified": "2026-10-05",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 9 (localisation / currency separation) (2026-10-05) — STATUS RAISED not_started -> built (old value recorded inline, never deleted). OLD status: \"not_started\". OLD evidence (STALE — the cited \"docs — roadmap §PHASE 9\" does not exist as a document): \"docs — roadmap §PHASE 9\". Built as the ONE owner + the pure resolver (no duplicate owner: grep for settlementCurrency/displayCurrency/formatCurrency found 0 hits before this); surface declared in BOTH scope guards (E6 PHASE9_LOCALISATION_SCOPE; E7 entries)."
     },
     {
       "id": "phase9-localization-seo-hreflang",
