@@ -1109,6 +1109,61 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
           </WorkspaceSection>
         )}
 
+        {/* §PHASE 7 — the financier lifecycle. The forward-only, fail-closed state
+            machine a financing partner moves through: RESEARCHED → … → ACTIVE
+            PARTNER (reachable ONLY through a completed PILOT) with REJECTED /
+            PARKED off-ramps. A provider is never marked ACTIVE merely because it
+            was researched. Partnering is internal: Super-Admin only, never a brand's. */}
+        {section === 'finance' && (
+          <WorkspaceSection
+            title="Financier lifecycle (Phase 7)"
+            description="Every financing partner moves through ONE forward-only lifecycle — Researched → Qualified → Target → Contacted → Engaged → Due diligence → Terms → Pilot → Active partner — with Rejected and Parked as off-ramps. A provider is never marked ACTIVE merely because it was researched: Active partner is reachable only through a completed Pilot, and an illegal move is refused rather than guessed."
+            domain="finance"
+            action={
+              <span className="text-ds-micro text-zinc-500" data-testid="financier-lifecycle-rule">
+                {model.financierLifecycle.activeRequiresPilot && model.financierLifecycle.forwardOnly
+                  ? 'ACTIVE requires a completed PILOT'
+                  : 'LIFECYCLE NOT ENFORCED'}
+              </span>
+            }
+          >
+            <ol className="flex flex-wrap items-center gap-1" data-testid="control-financier-lifecycle">
+              {model.financierLifecycle.stages.map((s, i) => (
+                <li key={s.id} className="flex items-center gap-1">
+                  <span className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-ds-micro text-zinc-300">
+                    {s.label}
+                  </span>
+                  {i < model.financierLifecycle.stageCount - 1 && (
+                    <span className="text-ds-micro text-zinc-600">→</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+            <p className="mt-2 text-ds-micro text-zinc-500">
+              Off-ramps:{' '}
+              <span className="text-zinc-400">
+                {model.financierLifecycle.offRamps.map((o) => o.label).join(' · ')}
+              </span>
+            </p>
+            <ul className="mt-4 space-y-1" data-testid="control-financier-lifecycle-candidates">
+              {model.financierLifecycle.candidates.map((c) => (
+                <li key={c.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                  <span className="flex justify-between gap-3">
+                    <span className="text-zinc-300">{c.label}</span>
+                    <span className="font-mono text-zinc-400">{c.stageLabel}</span>
+                  </span>
+                  <span className="text-ds-micro text-zinc-500">
+                    Next: {c.nextStages.length ? c.nextStages.map((n) => n.label).join(' · ') : 'terminal'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-financier-lifecycle-basis">
+              {model.financierLifecycle.basis} {model.financierLifecycle.disclaimer}
+            </p>
+          </WorkspaceSection>
+        )}
+
         {section === 'compliance' && (
           <WorkspaceSection
             title="Compliance"

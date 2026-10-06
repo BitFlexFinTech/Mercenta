@@ -424,6 +424,34 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 7 — the financier lifecycle. The Finance view must render the
+   * forward-only lifecycle a financing partner moves through, with the rule that a
+   * provider is NEVER marked ACTIVE merely because it was researched — ACTIVE
+   * PARTNER is reachable only through a completed PILOT — made explicit on the
+   * surface. Partnering is internal: this is the Super-Admin view, never a brand's.
+   */
+  test('15. the financier lifecycle renders with ACTIVE requiring a completed PILOT', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Finance/ }).click();
+
+    const path = page.getByTestId('control-financier-lifecycle');
+    await expect(path).toBeVisible();
+    await expect(path).toContainText('Researched');
+    await expect(path).toContainText('Active partner');
+    await expect(page.getByTestId('control-financier-lifecycle-candidates')).toBeVisible();
+    // The non-negotiable rule is stated on the surface.
+    await expect(page.getByTestId('financier-lifecycle-rule')).toContainText('ACTIVE requires a completed PILOT');
+    // The lifecycle is honestly labelled, and the machine is deterministic.
+    await expect(page.getByTestId('control-financier-lifecycle-basis')).toContainText('deterministic');
+
+    await page.screenshot({ path: `${SHOTS}/15-financier-lifecycle.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

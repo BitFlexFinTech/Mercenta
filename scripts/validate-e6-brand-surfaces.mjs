@@ -2863,6 +2863,33 @@ const PHASE5_SHARED_WORKFLOW_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 7 (2026-10-06) — THE FINANCIER LIFECYCLE — declared surface.
+ *
+ * The registry row `phase7-financier-lifecycle` recorded the lifecycle a financing
+ * partner moves through (RESEARCHED → QUALIFIED → … → ACTIVE PARTNER, or REJECTED /
+ * PARKED) and the rule that a provider is NEVER marked ACTIVE merely because it was
+ * researched. This increment adds the ONE owner (`src/config/financierLifecycle.ts`
+ * — the forward-only, fail-closed lifecycle whose transitions are DERIVED from the
+ * ordered stages) and the pure resolver (`src/lib/finance/financierLifecycle.ts`),
+ * and gates them. Partnering is internal: the surface lives on the Super-Admin
+ * Founder Control Centre only.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE7_FINANCIER_LIFECYCLE_SCOPE = new Set([
+  'src/config/financierLifecycle.ts',              /* NEW — the ONE lifecycle owner */
+  'src/lib/finance/financierLifecycle.ts',         /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',        /* computes + exposes the lifecycle summary */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the Financier lifecycle section */
+  'scripts/validate-financier-lifecycle.mjs',      /* NEW — this phase's gate */
+  'scripts/reconcile-financier-lifecycle-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',          /* test 15 renders the Financier lifecycle section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3643,7 +3670,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE5_CONTEXTUAL_EDUCATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 5 — shared workflow reuse (see above). */
           PHASE5_SHARED_WORKFLOW_SCOPE.has(p) ||
-          [...PHASE5_SHARED_WORKFLOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE5_SHARED_WORKFLOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 7 — the financier lifecycle (see above). */
+          PHASE7_FINANCIER_LIFECYCLE_SCOPE.has(p) ||
+          [...PHASE7_FINANCIER_LIFECYCLE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

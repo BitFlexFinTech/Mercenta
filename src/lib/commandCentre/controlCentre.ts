@@ -85,6 +85,10 @@ import {
   type FinancingRoutingSummary,
 } from '@/lib/finance/financingRouter';
 import {
+  buildFinancierLifecycleSummary,
+  type FinancierLifecycleSummary,
+} from '@/lib/finance/financierLifecycle';
+import {
   summariseResolutions,
   type ExternalObjectRef,
   type ResolvableObject,
@@ -306,6 +310,15 @@ export interface ControlCentreModel {
    */
   financingRouting: FinancingRoutingSummary;
   /**
+   * §PHASE 7 — the financier lifecycle: the forward-only, fail-closed state
+   * machine a financing partner moves through (RESEARCHED → … → ACTIVE PARTNER,
+   * reachable ONLY through a completed PILOT; REJECTED / PARKED as off-ramps),
+   * declared by the ONE owner (`src/config/financierLifecycle.ts`) and applied by
+   * the pure resolver (`src/lib/finance/financierLifecycle.ts`). NO AI. Super-Admin
+   * only; the partner approach is internal and is never shown to a brand.
+   */
+  financierLifecycle: FinancierLifecycleSummary;
+  /**
    * §D21 — whole-platform object resolution. Every canonical channel object (each
    * purchase order's Amazon PO number, each consignment's carrier reference) is
    * resolved through the ONE resolver
@@ -437,6 +450,14 @@ export function buildControlCentre(): ControlCentreModel {
     modelBPurchases,
     DEMO_FINANCING_ROUTING
   );
+
+  /* ── §PHASE 7 — the financier lifecycle ──
+     The forward-only, fail-closed state machine a financing partner moves through,
+     from the ONE owner (`src/config/financierLifecycle.ts`) via the pure resolver
+     (`src/lib/finance/financierLifecycle.ts`). ACTIVE PARTNER is reachable ONLY
+     from PILOT — a provider is never marked ACTIVE merely because it was
+     researched. No AI, no clock. */
+  const financierLifecycle = buildFinancierLifecycleSummary();
 
   /* ── §D21 — whole-platform object resolution ──
      Build the canonical resolution index from the SAME records the platform
@@ -821,6 +842,7 @@ export function buildControlCentre(): ControlCentreModel {
     acquisitionConversion,
     capitalRequirement,
     financingRouting,
+    financierLifecycle,
     objectResolution,
     localisation,
     countryFramework,
@@ -856,6 +878,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Finance', value: 'src/lib/costs/costSummary.ts — canonical revenue streams' },
       { label: 'Capital (Model B)', value: 'src/lib/finance/capitalRequirement.ts + src/config/financing.ts — the internal capital model over the canonical Model B purchase orders' },
       { label: 'Financing router', value: 'src/lib/finance/financingRouter.ts + src/config/financingRouter.ts — the deterministic financing router (reuses the canonical exclusive-gateway evaluator)' },
+      { label: 'Financier lifecycle (Phase 7)', value: 'src/config/financierLifecycle.ts + src/lib/finance/financierLifecycle.ts — the forward-only, fail-closed lifecycle of a financing partner (RESEARCHED → … → ACTIVE PARTNER, reachable ONLY through PILOT, with REJECTED / PARKED off-ramps); the transitions are derived from the ordered stages and an unknown stage or an illegal move is refused' },
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
       { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },

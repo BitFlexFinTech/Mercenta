@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-06 by scripts/reconcile-shared-workflow-reuse-registry.cjs after the §PHASE 5 (shared workflow reuse) increment (phase5-shared-workflow-reuse not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-06 by scripts/reconcile-financier-lifecycle-registry.cjs after the §PHASE 7 (financier lifecycle) increment (phase7-financier-lifecycle not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 157,
-      "not_started": 25,
+      "built": 158,
+      "not_started": 24,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1097,6 +1097,17 @@
         "scripts/validate-shared-workflow-reuse.mjs"
       ],
       "note": "The Phase-5 seam (guided tours + the data-tour anchor contract) existed but had no owner declaring the canonical WORKFLOWS that the E2E test, the tutorial recording and the onboarding walkthrough all reuse. The owner + the pure fail-closed resolver declare each journey and derive its steps from the canonical tour; an unknown workflow or a missing tour is REFUSED. It is internally Super-Admin only and deterministic (no AI, no clock)."
+    },
+    "financier_lifecycle_increment": {
+      "increment": "§PHASE 7 — the financier lifecycle (2026-10-06)",
+      "restated": [
+        "phase7-financier-lifecycle"
+      ],
+      "added": [],
+      "validators": [
+        "scripts/validate-financier-lifecycle.mjs"
+      ],
+      "note": "The financier lifecycle (the approach Mercenta makes to a financing partner) had no owner; it was described only in the roadmap. The owner + the pure fail-closed resolver declare it once: forward-only, one stage at a time, ACTIVE PARTNER reachable ONLY through PILOT, with REJECTED / PARKED off-ramps; an unknown stage or an illegal move is REFUSED. It is internal (Super-Admin only) and deterministic (no AI, no clock)."
     }
   },
   "entries": [
@@ -4075,12 +4086,13 @@
     },
     {
       "id": "phase7-financier-lifecycle",
-      "description": "Phase 7 — the financier lifecycle RESEARCHED → QUALIFIED → TARGET → CONTACTED → ENGAGED → DUE DILIGENCE → TERMS → PILOT → ACTIVE PARTNER (or REJECTED / PARKED). A provider is NEVER marked ACTIVE merely because it was researched",
+      "description": "Phase 7 — the financier lifecycle RESEARCHED → QUALIFIED → TARGET → CONTACTED → ENGAGED → DUE DILIGENCE → TERMS → PILOT → ACTIVE PARTNER (or REJECTED / PARKED), where a provider is NEVER marked ACTIVE merely because it was researched. BUILT (2026-10-06): the ONE owner `src/config/financierLifecycle.ts` declares the forward-only, fail-closed lifecycle — the transitions are DERIVED from the ordered stages (one forward step plus the two off-ramps), ACTIVE PARTNER and REJECTED are terminal and PARKED re-enters at RESEARCHED. The pure resolver `src/lib/finance/financierLifecycle.ts` applies it: ACTIVE PARTNER is reachable ONLY from PILOT (a researched provider is REFUSED with FINANCIER_ACTIVE_REQUIRES_PILOT), an unknown stage is REFUSED (FINANCIER_STAGE_UNKNOWN) and an undeclared move is REFUSED (FINANCIER_TRANSITION_ILLEGAL). Deterministic (no AI, no clock) and internal (Super-Admin surface only).",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 7",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/config/financierLifecycle.ts (the ONE owner); src/lib/finance/financierLifecycle.ts (the pure fail-closed resolver); src/lib/commandCentre/controlCentre.ts (computes + exposes financierLifecycle); src/components/admin/FounderControlCentre.tsx (Finance → Financier lifecycle, Super-Admin only); gate scripts/validate-financier-lifecycle.mjs (npm run validate:financier-lifecycle, mutation-proved TWICE); e2e/founder-operating-system.spec.ts test 15 renders it live.",
+      "last_verified": "2026-10-06",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 7 (financier lifecycle) (2026-10-06) — STATUS RAISED not_started -> built (old value recorded inline, never deleted). OLD status: \"not_started\". OLD evidence: \"docs — roadmap §PHASE 7\" (a STALE \"roadmap §PHASE 7\" citation, fixed at source). Built as the ONE owner + the pure fail-closed resolver: a financing partner advances one stage at a time and ACTIVE PARTNER is reachable ONLY through a completed PILOT — a provider is never marked ACTIVE merely because it was researched. Surface declared in BOTH scope guards (E6 PHASE7_FINANCIER_LIFECYCLE_SCOPE; E7 entries)."
     },
     {
       "id": "phase7-founder-outreach-pipeline",

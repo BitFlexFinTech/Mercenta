@@ -115,7 +115,8 @@
     "validate:learning-loop": "node scripts/validate-learning-loop.mjs",
     "validate:onboarding-curriculum": "node scripts/validate-onboarding-curriculum.mjs",
     "validate:contextual-education": "node scripts/validate-contextual-education.mjs",
-    "validate:shared-workflow-reuse": "node scripts/validate-shared-workflow-reuse.mjs"
+    "validate:shared-workflow-reuse": "node scripts/validate-shared-workflow-reuse.mjs",
+    "validate:financier-lifecycle": "node scripts/validate-financier-lifecycle.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
