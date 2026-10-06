@@ -1015,7 +1015,16 @@ function readRedLines() {
     const compNav = compPage.locator('nav[aria-label="Primary"] >> text=UK Compliance').first();
     await compNav.waitFor({ state: 'visible', timeout: 90000 });
     await compNav.click({ timeout: 30000 });
-    await compPage.waitForTimeout(2500);
+    /**
+     * §FIX (2026-10-05) — the compliance surface is a LAZY chunk. A fixed 2.5s
+     * wait read an UNMOUNTED page on the slow shared host (the required list was
+     * absent), so the PRESENCE assertions produced a spurious failure while the
+     * ABSENCE assertions passed and no page error was raised — a false failure,
+     * observed for real this session (L17 failed 3 assertions on the first deploy,
+     * then passed 267/0 on a re-run). Wait for the gate text the surface renders,
+     * instead of a blind fixed delay.
+     */
+    await compPage.getByText(/Compliance gate/).first().waitFor({ state: 'visible', timeout: 90000 });
 
     const compText = (await compPage.locator('body').innerText()).replace(/\s+/g, ' ');
     check(
