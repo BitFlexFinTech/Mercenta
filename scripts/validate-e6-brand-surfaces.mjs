@@ -2741,6 +2741,31 @@ const PHASE9_LOCALISATION_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 9 (2026-10-05, follow-up) — THE COUNTRY FRAMEWORK — declared surface.
+ *
+ * The master-matrix row `phase9-country-framework` recorded the country framework:
+ * every country classified into AMAZON_MARKETPLACE · BRAND_ORIGIN_MARKET ·
+ * ACQUISITION_PRIORITY_MARKET · ACCELERATOR_PRIORITY_MARKET · LOCALIZATION_ONLY ·
+ * FUTURE_MARKET, with the hard invariant that **Zimbabwe is an operating/home
+ * market and is NEVER an Amazon marketplace**. grep for `AMAZON_MARKETPLACE` /
+ * `BRAND_ORIGIN_MARKET` found only the registry row and the roadmap script, so this
+ * increment adds the ONE owner (`src/config/countryFramework.ts`), the pure resolver
+ * (`src/lib/geography/resolveCountry.ts`) and this phase's gate, and wires them
+ * into the Founder Control Centre. F6's contract is UNCHANGED: a working-tree file
+ * in NO declared set still fails.
+ */
+const PHASE9_COUNTRY_FRAMEWORK_SCOPE = new Set([
+  'src/config/countryFramework.ts',                /* NEW — the ONE owner */
+  'src/lib/geography/',                            /* NEW — the resolver (dir: git reports the new folder) */
+  'src/lib/commandCentre/controlCentre.ts',        /* exposes `countryFramework` */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the Country framework section */
+  'scripts/validate-country-framework.mjs',        /* NEW — this phase's gate */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3506,7 +3531,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE10_PRODUCT_IDENTITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 9 — the localisation / currency separation (see above). */
           PHASE9_LOCALISATION_SCOPE.has(p) ||
-          [...PHASE9_LOCALISATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE9_LOCALISATION_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 9 (follow-up) — the country framework (see above). */
+          PHASE9_COUNTRY_FRAMEWORK_SCOPE.has(p) ||
+          [...PHASE9_COUNTRY_FRAMEWORK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

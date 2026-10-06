@@ -94,6 +94,10 @@ import {
   buildLocalisationSummary,
   type LocalisationSummary,
 } from '@/lib/localisation/resolveLocalisation';
+import {
+  buildCountryFrameworkSummary,
+  type CountryFrameworkSummary,
+} from '@/lib/geography/resolveCountry';
 import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
@@ -302,6 +306,14 @@ export interface ControlCentreModel {
    * commercial-terms fact and is never inferred. Super-Admin view.
    */
   localisation: LocalisationSummary;
+  /**
+   * §PHASE 9 — the country framework. Every country is classified into one or more
+   * of the SIX roles (`src/config/countryFramework.ts`), resolved purely by
+   * `src/lib/geography/resolveCountry.ts`. The marketplace role is FACTUAL and
+   * sourced; **Zimbabwe is an operating/home market and is NEVER an Amazon
+   * marketplace** (pinned). Super-Admin view.
+   */
+  countryFramework: CountryFrameworkSummary;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -418,6 +430,12 @@ export function buildControlCentre(): ControlCentreModel {
      which reads the canonical source markets. Nothing here re-implements a
      currency rule or invents a settlement currency. */
   const localisation = buildLocalisationSummary();
+  /* ── §PHASE 9 — the country framework ──
+     Every country's roles come from the ONE owner (`src/config/countryFramework.ts`)
+     through the pure resolver (`src/lib/geography/resolveCountry.ts`). The
+     marketplace role is a cited fact; Zimbabwe is never a marketplace. Nothing here
+     re-derives a role or invents a policy. */
+  const countryFramework = buildCountryFrameworkSummary();
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -582,6 +600,9 @@ export function buildControlCentre(): ControlCentreModel {
       /* §PHASE 9 — the localisation + currency framework over the canonical source markets. */
       metric('comm-locale-markets', 'Markets localised', String(localisation.markets.length), 'info', 'Phase 9', `${localisation.markets.length} canonical source market(s) carry a locale + display-currency suggestion — a suggestion only, never forced.`, 'control_centre'),
       metric('comm-currency-concepts', 'Currency concepts', localisation.conceptsSeparate ? 'Separate' : 'COLLAPSED', localisation.conceptsSeparate ? 'success' : 'danger', 'Locale · display · settlement', 'Locale, display currency and settlement currency are three separate concepts; the settlement currency is never inferred.', 'control_centre'),
+      /* §PHASE 9 — the country framework: the marketplace role is a cited fact and Zimbabwe is never a marketplace. */
+      metric('comm-countries', 'Countries classified', String(countryFramework.countryCount), 'info', `${countryFramework.marketplaceCount} marketplace(s)`, 'Every country is classified into one or more of the six canonical roles from the ONE country-framework owner.', 'control_centre'),
+      metric('comm-zimbabwe-marketplace', 'Zimbabwe a marketplace', countryFramework.zimbabweNeverMarketplace ? 'No' : 'YES — DEFECT', countryFramework.zimbabweNeverMarketplace ? 'success' : 'danger', 'Operating/home market', 'Zimbabwe is an operating/home brand-origin market and is never represented as a marketplace (pinned invariant).', 'control_centre'),
     ],
     acquisition: [
       metric('acq-prospects', 'Prospects', String(acquisition.total), 'neutral', 'Canonical BI store', `${acquisition.active} active · ${acquisition.disqualified} disqualified.`, 'crm'),
@@ -726,6 +747,7 @@ export function buildControlCentre(): ControlCentreModel {
     financingRouting,
     objectResolution,
     localisation,
+    countryFramework,
     preAudit,
     commercial,
     intelligence,
@@ -756,6 +778,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Financing router', value: 'src/lib/finance/financingRouter.ts + src/config/financingRouter.ts — the deterministic financing router (reuses the canonical exclusive-gateway evaluator)' },
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
+      { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },
     ],
   };
 }

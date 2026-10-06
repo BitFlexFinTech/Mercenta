@@ -87,6 +87,17 @@ const EXCLUDED = [
   // a real canonical owner, and (section I) that NO component imports it, so it
   // can never become a rendered-copy loophole.
   'src/lib/compliance/claimsRegistry.ts',
+  // §PHASE 9 (2026-10-05, follow-up) — THE COUNTRY FRAMEWORK. Same class as
+  // `amazonWording.ts` / `claimsRegistry.ts` above: it is the internal DEFINITIONS
+  // + PROVENANCE owner whose role LABELS and `source` strings necessarily name the
+  // retail channel (to define what an “Amazon marketplace” IS, and to cite the real
+  // published marketplace-IDs reference — the data-must-be-real rule requires the
+  // publisher be named). It renders nothing a brand can see; its summary is drawn
+  // ONLY on the Super-Admin Control Centre. Excluding it does NOT weaken the gate —
+  // `scripts/validate-country-framework.mjs` asserts NO brand-facing component
+  // imports the owner or its resolver, so it can never become a rendered-copy
+  // loophole. Every outward-facing surface stays fully linted.
+  'src/config/countryFramework.ts',
 ];
 
 function isExcluded(rel) {

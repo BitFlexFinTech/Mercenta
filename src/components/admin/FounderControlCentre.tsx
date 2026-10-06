@@ -494,6 +494,32 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 {model.localisation.basis} {model.localisation.disclaimer}
               </p>
             </WorkspaceSection>
+
+            <WorkspaceSection
+              title="Country framework"
+              description="Every country is classified into one or more of six roles. The marketplace role is a published fact, cited to the channel's own marketplace-IDs reference; a brand-origin market is the canonical source-market list; the priority roles are Mercenta's own decisions. Zimbabwe is an operating/home market and is never a marketplace."
+              domain="finance"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="country-framework-zimbabwe">
+                  {model.countryFramework.zimbabweNeverMarketplace ? 'Zimbabwe never a marketplace' : 'ZIMBABWE IS MARKED A MARKETPLACE'}
+                </span>
+              }
+            >
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="country-framework-roles">
+                {model.countryFramework.roles.map((role) => (
+                  <li key={role.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{role.label}</p>
+                    <p className="mt-1 text-ds-label text-zinc-300">{role.description}</p>
+                    <p className="mt-1 text-ds-micro text-zinc-500">
+                      {role.kind === 'factual' ? 'Factual' : 'Policy'} · {model.countryFramework.byRole[role.id]} country(ies)
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="country-framework-basis">
+                {model.countryFramework.basis} {model.countryFramework.disclaimer} Source: {model.countryFramework.source}
+              </p>
+            </WorkspaceSection>
           </>
         )}
 

@@ -2516,6 +2516,14 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/commandCentre/controlCentre.ts',
     'src/components/admin/FounderControlCentre.tsx',
     'scripts/validate-localisation.mjs',
+    /**
+     * §PHASE 9 (2026-10-05, follow-up) — the country framework. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE9_COUNTRY_FRAMEWORK_SCOPE. Same
+     * mechanism: a changed source/test file outside EVERY declared set is refused.
+     */
+    'src/config/countryFramework.ts',
+    'src/lib/geography/',
+    'scripts/validate-country-framework.mjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

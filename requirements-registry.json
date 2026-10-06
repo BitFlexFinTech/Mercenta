@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-05 after the §PHASE 9 (localisation / currency separation) increment (phase9-locale-currency-settlement-separation not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-05 after the §PHASE 9 (country framework) increment (phase9-country-framework not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 152,
-      "not_started": 30,
+      "built": 153,
+      "not_started": 29,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -4056,9 +4056,10 @@
       "id": "phase9-country-framework",
       "description": "Phase 9 — the country framework (AMAZON_MARKETPLACE · BRAND_ORIGIN_MARKET · ACQUISITION_PRIORITY_MARKET · ACCELERATOR_PRIORITY_MARKET · LOCALIZATION_ONLY · FUTURE_MARKET) across North America, Europe, the Middle East, Asia-Pacific and Africa. Zimbabwe is technically supported as an operating/home market and must NEVER be represented as an Amazon marketplace",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 9",
-      "last_verified": "2026-09-19",
+      "_audit_note": "BUILT 2026-10-05 (was not_started). ONE owner `src/config/countryFramework.ts` (the six roles with their kind — factual vs policy — the SOURCED marketplace set, the pinned Zimbabwe invariant, the policy sets) + the pure resolver `src/lib/geography/resolveCountry.ts` (a country holds the marketplace role only with a published id; an unlisted country resolves to NO roles, fail closed); the marketplace role is cited to Amazon SP-API 'Marketplace IDs'; the brand-origin role REUSES the canonical SOURCE_MARKETS (no second list); the priority/accelerator/localisation-only/future roles are Mercenta policy shipped UNCONFIGURED. USED by the Founder Control Centre. Gated by `npm run validate:country-framework` (35 assertions, mutation-proved TWICE). Surface declared in BOTH scope guards.",
+      "status": "built",
+      "evidence": "src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts (owners); scripts/validate-country-framework.mjs (35 assertions, mutation-proved twice); src/lib/commandCentre/controlCentre.ts (exposes `countryFramework`); src/components/admin/FounderControlCentre.tsx (Country framework section); Amazon SP-API 'Marketplace IDs' (developer-docs.amazon.com/sp-api/docs/marketplace-ids) — the source for the marketplace set",
+      "last_verified": "2026-10-05",
       "superseded_by": null
     },
     {

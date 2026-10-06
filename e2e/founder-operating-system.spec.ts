@@ -289,6 +289,31 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 9 (follow-up) — THE COUNTRY FRAMEWORK. The Commercial view must render
+   * the six country roles from the ONE owner, and — the hard invariant — must state
+   * that Zimbabwe is an operating/home market and NEVER a marketplace. The
+   * marketplace role is a cited fact; the surface names its source.
+   */
+  test('10. the country framework renders with Zimbabwe never a marketplace', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Commercial/ }).click();
+
+    const panel = page.getByTestId('country-framework-roles');
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText('Amazon marketplace');
+    await expect(panel).toContainText('Brand-origin market');
+    // The hard invariant is stated on the surface, not merely held in code.
+    await expect(page.getByTestId('country-framework-zimbabwe')).toContainText('Zimbabwe never a marketplace');
+    await expect(page.getByTestId('country-framework-basis')).toContainText('Source:');
+
+    await page.screenshot({ path: `${SHOTS}/10-country-framework.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

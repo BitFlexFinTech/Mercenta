@@ -110,7 +110,8 @@
     "validate:object-resolution": "node scripts/validate-object-resolution.mjs",
     "validate:financing-router": "node scripts/validate-financing-router.mjs",
     "validate:product-identity": "node scripts/validate-product-identity.mjs",
-    "validate:localisation": "node scripts/validate-localisation.mjs"
+    "validate:localisation": "node scripts/validate-localisation.mjs",
+    "validate:country-framework": "node scripts/validate-country-framework.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
