@@ -2536,6 +2536,14 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'scripts/validate-learning-loop.mjs',
     'scripts/reconcile-learning-loop-registry.cjs',
     'scripts/verify-live-demo.mjs',
+    /**
+     * §PHASE 4 (2026-10-05, follow-up) — the onboarding academy curriculum. Fuller
+     * note in `validate-e6-brand-surfaces.mjs` §PHASE4_ONBOARDING_CURRICULUM_SCOPE.
+     * Same mechanism: a changed source/test file outside EVERY declared set is refused.
+     */
+    'src/config/onboardingCurriculum.ts',
+    'scripts/validate-onboarding-curriculum.mjs',
+    'scripts/reconcile-onboarding-curriculum-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

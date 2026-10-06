@@ -413,6 +413,53 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 {model.learningLoop.basis} {model.learningLoop.disclaimer}
               </p>
             </WorkspaceSection>
+
+            {/* §PHASE 4 — the onboarding academy curriculum. The ORDERED five stages
+                plus the final readiness stage, from the ONE owner. The DEMO position
+                is labelled; the final readiness stage is a RESULT reached only once
+                every teaching stage is complete. */}
+            <WorkspaceSection
+              title="Onboarding academy curriculum"
+              description="A brand works through the five canonical stages — Understand Mercenta · Commercial · Product & Packaging · Product Readiness · Operations — and then the final readiness stage. Each stage's topics come from the canonical educational gaps, and a topic counts only once its learning loop reaches VALIDATE. The final readiness stage is a result, never a button."
+              domain="communications"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="curriculum-readiness-rule">
+                  {model.onboardingCurriculum.finalReadinessRequiresAllStages
+                    ? 'Readiness requires every stage'
+                    : 'READINESS NOT ENFORCED'}
+                </span>
+              }
+            >
+              <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="curriculum-stages">
+                {model.onboardingCurriculum.stages.map((s) => (
+                  <li key={s.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                      {s.order}. {s.label}
+                      {s.gating ? ' · teaching' : s.kind === 'readiness' ? ' · final' : ' · orientation'}
+                    </p>
+                    <p className="mt-1 text-ds-micro text-zinc-500">
+                      {s.topicCount} topic{s.topicCount === 1 ? '' : 's'}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-4" data-testid="curriculum-demo">
+                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                  DEMO position ({model.onboardingCurriculum.topicCount} canonical topic(s)) —{' '}
+                  {model.onboardingCurriculum.demo.currentStageLabel}
+                </p>
+                <p className="mt-1 text-ds-label text-zinc-300">
+                  current stage:{' '}
+                  <span className="font-mono">{model.onboardingCurriculum.demo.currentStageId}</span> ·{' '}
+                  {model.onboardingCurriculum.demo.readinessReached
+                    ? 'catalogue-ready'
+                    : 'not yet catalogue-ready'}
+                </p>
+              </div>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="curriculum-basis">
+                {model.onboardingCurriculum.basis} {model.onboardingCurriculum.disclaimer}
+              </p>
+            </WorkspaceSection>
           </>
         )}
 

@@ -2793,6 +2793,31 @@ const PHASE4_LEARNING_LOOP_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 4 (2026-10-05, follow-up) — THE ONBOARDING ACADEMY CURRICULUM — declared surface.
+ *
+ * The master-matrix row `phase4-onboarding-academy-curriculum` recorded the Brand
+ * Education / Onboarding Academy curriculum "across its five stages plus the final
+ * product/catalogue readiness stage". The Academy seams already existed (the
+ * per-gap `academyStage`, `PRE_AUDIT_EDUCATIONAL_GAPS`, and the sibling learning
+ * loop). This increment adds the ONE owner (`src/config/onboardingCurriculum.ts`)
+ * and the pure resolver (`src/lib/education/resolveCurriculum.ts`) that reuse the
+ * learning loop, wires them into the Founder Control Centre, and gates them. F6's
+ * contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE4_ONBOARDING_CURRICULUM_SCOPE = new Set([
+  'src/config/onboardingCurriculum.ts',            /* NEW — the ONE owner */
+  'src/lib/education/',                            /* the resolver lives beside the learning loop */
+  'src/lib/commandCentre/controlCentre.ts',        /* exposes `onboardingCurriculum` */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the curriculum section */
+  'scripts/validate-onboarding-curriculum.mjs',    /* NEW — this phase's gate */
+  'scripts/reconcile-onboarding-curriculum-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',          /* test 12 renders the curriculum section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3564,7 +3589,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE9_COUNTRY_FRAMEWORK_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 4 — the brand learning loop (see above). */
           PHASE4_LEARNING_LOOP_SCOPE.has(p) ||
-          [...PHASE4_LEARNING_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE4_LEARNING_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 4 (follow-up) — the onboarding academy curriculum (see above). */
+          PHASE4_ONBOARDING_CURRICULUM_SCOPE.has(p) ||
+          [...PHASE4_ONBOARDING_CURRICULUM_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

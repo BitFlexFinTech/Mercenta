@@ -341,6 +341,32 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 4 — THE ONBOARDING ACADEMY CURRICULUM. The Brands view must render the
+   * five canonical stages plus the final readiness stage from the ONE owner, and
+   * must state the rule that the final readiness stage requires every teaching
+   * stage. The labelled DEMO position must be honestly NOT catalogue-ready.
+   */
+  test('12. the onboarding academy curriculum renders with the readiness rule', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Brands/ }).click();
+
+    const panel = page.getByTestId('curriculum-stages');
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText('Understand Mercenta');
+    await expect(panel).toContainText('Operations');
+    // The final readiness stage is named, and the rule is stated on the surface.
+    await expect(page.getByTestId('curriculum-readiness-rule')).toContainText('Readiness requires every stage');
+    // The labelled DEMO position is honestly NOT catalogue-ready.
+    await expect(page.getByTestId('curriculum-demo')).toContainText('not yet catalogue-ready');
+
+    await page.screenshot({ path: `${SHOTS}/12-onboarding-curriculum.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

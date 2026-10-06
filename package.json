@@ -112,7 +112,8 @@
     "validate:product-identity": "node scripts/validate-product-identity.mjs",
     "validate:localisation": "node scripts/validate-localisation.mjs",
     "validate:country-framework": "node scripts/validate-country-framework.mjs",
-    "validate:learning-loop": "node scripts/validate-learning-loop.mjs"
+    "validate:learning-loop": "node scripts/validate-learning-loop.mjs",
+    "validate:onboarding-curriculum": "node scripts/validate-onboarding-curriculum.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

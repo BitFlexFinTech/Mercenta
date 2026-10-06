@@ -102,6 +102,10 @@ import {
   buildLearningLoopSummary,
   type LearningLoopSummary,
 } from '@/lib/education/resolveLearningProgress';
+import {
+  buildOnboardingCurriculumSummary,
+  type OnboardingCurriculumSummary,
+} from '@/lib/education/resolveCurriculum';
 import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
@@ -327,6 +331,15 @@ export interface ControlCentreModel {
    * and a labelled DEMO topic's progress.
    */
   learningLoop: LearningLoopSummary;
+  /**
+   * §PHASE 4 — the onboarding academy curriculum. The ORDERED stages a brand
+   * progresses through (`src/config/onboardingCurriculum.ts`), resolved purely by
+   * `src/lib/education/resolveCurriculum.ts`, which reuses the learning loop so a
+   * topic — and therefore a stage — is complete ONLY when its VALIDATE gate is
+   * satisfied. The final readiness stage is reached ONLY once every teaching stage
+   * is complete. Super-Admin governance view.
+   */
+  onboardingCurriculum: OnboardingCurriculumSummary;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -454,6 +467,11 @@ export function buildControlCentre(): ControlCentreModel {
      The five-stage loop + a labelled DEMO topic, resolved from the ONE owner
      (`src/lib/education/resolveLearningProgress.ts`). */
   const learningLoop = buildLearningLoopSummary();
+  /* ── §PHASE 4 — the onboarding academy curriculum ──
+     The ORDERED stages + a labelled DEMO position, resolved from the ONE owner
+     (`src/lib/education/resolveCurriculum.ts`), which reuses the learning loop so a
+     stage closes only when its topics' VALIDATE gates are satisfied. */
+  const onboardingCurriculum = buildOnboardingCurriculumSummary();
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -767,6 +785,7 @@ export function buildControlCentre(): ControlCentreModel {
     localisation,
     countryFramework,
     learningLoop,
+    onboardingCurriculum,
     preAudit,
     commercial,
     intelligence,
@@ -799,6 +818,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
       { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },
       { label: 'Brand learning loop', value: 'src/config/learningLoop.ts + src/lib/education/resolveLearningProgress.ts — the LEARN → WATCH → DO → VALIDATE → COMPLETE loop over the canonical educational gaps; LEARN/WATCH reuse the canonical Knowledge Base article and guided tour, and VALIDATE is a gate satisfied only by a real signal' },
+      { label: 'Onboarding academy curriculum', value: 'src/config/onboardingCurriculum.ts + src/lib/education/resolveCurriculum.ts — the five canonical stages (Understand Mercenta · Commercial · Product & Packaging · Product Readiness · Operations) plus the final readiness stage, over the SAME canonical educational gaps; the final readiness stage is reached only once every teaching stage is complete' },
     ],
   };
 }
