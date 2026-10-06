@@ -2890,6 +2890,35 @@ const PHASE7_FINANCIER_LIFECYCLE_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 8 (2026-10-06) — THE FOUNDER CAPITAL WORKSPACE / PITCH WORKSPACE — declared surface.
+ *
+ * The registry row `phase8-financier-pitch-workspace` records the founder capital
+ * workspace — Mercenta overview, business model, Vendor infrastructure, acquisition
+ * pipeline, purchase volumes, supplier payment requirements, capital requirements,
+ * facility request, repayment model, risk controls, evidence, documents, contact
+ * history, meetings, follow-ups and pitch preparation — with the rule that "AI may
+ * help prepare/explain; the financial numbers stay deterministic". This increment adds
+ * the ONE owner (`src/config/pitchWorkspace.ts` — the section structure, each section
+ * naming how its content is produced) and the pure resolver
+ * (`src/lib/finance/pitchWorkspace.ts`), and gates them. The capital case is internal:
+ * the surface lives on the Super-Admin Founder Control Centre only.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE8_PITCH_WORKSPACE_SCOPE = new Set([
+  'src/config/pitchWorkspace.ts',              /* NEW — the ONE workspace owner */
+  'src/lib/finance/pitchWorkspace.ts',         /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',    /* computes + exposes the workspace summary */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the Pitch workspace section */
+  'scripts/validate-pitch-workspace.mjs',      /* NEW — this phase's gate */
+  'scripts/reconcile-pitch-workspace-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',      /* test 16 renders the Pitch workspace section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 
 
 const PUBLIC_MESSAGING_SCOPE = new Set([
@@ -3673,7 +3702,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE5_SHARED_WORKFLOW_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 7 — the financier lifecycle (see above). */
           PHASE7_FINANCIER_LIFECYCLE_SCOPE.has(p) ||
-          [...PHASE7_FINANCIER_LIFECYCLE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE7_FINANCIER_LIFECYCLE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 8 — the founder capital workspace / pitch workspace (see above). */
+          PHASE8_PITCH_WORKSPACE_SCOPE.has(p) ||
+          [...PHASE8_PITCH_WORKSPACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

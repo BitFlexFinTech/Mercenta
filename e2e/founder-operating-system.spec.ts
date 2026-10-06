@@ -452,6 +452,35 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 8 — the founder capital workspace / pitch workspace. The Finance view must
+   * render the ordered workspace sections with the rule that every FINANCIAL figure
+   * comes from its deterministic canonical owner (AI may help the narrative only)
+   * made explicit, and an honest readiness state. The capital case is internal: this
+   * is the Super-Admin view, never a brand's.
+   */
+  test('16. the pitch workspace renders with financials staying deterministic', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Finance/ }).click();
+
+    const sections = page.getByTestId('control-pitch-workspace');
+    await expect(sections).toBeVisible();
+    await expect(sections).toContainText('Capital requirements');
+    await expect(sections).toContainText('Pitch preparation');
+    await expect(sections).toContainText('Deterministic (canonical owner)');
+    // The non-negotiable rule is stated on the surface.
+    await expect(page.getByTestId('pitch-workspace-rule')).toContainText('Financial figures stay deterministic');
+    await expect(page.getByTestId('control-pitch-workspace-readiness')).toBeVisible();
+    // The workspace is honestly labelled, and the machine is deterministic.
+    await expect(page.getByTestId('control-pitch-workspace-basis')).toContainText('deterministic');
+
+    await page.screenshot({ path: `${SHOTS}/16-pitch-workspace.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

@@ -2571,6 +2571,17 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/finance/financierLifecycle.ts',
     'scripts/validate-financier-lifecycle.mjs',
     'scripts/reconcile-financier-lifecycle-registry.cjs',
+    /**
+     * §PHASE 8 (2026-10-06) — the founder capital workspace / pitch workspace. Fuller
+     * note in `validate-e6-brand-surfaces.mjs` §PHASE8_PITCH_WORKSPACE_SCOPE. Same
+     * mechanism: a changed source/test file outside EVERY declared set is refused. The
+     * capital case is internal — the surface lives on the Super-Admin Founder Control
+     * Centre only.
+     */
+    'src/config/pitchWorkspace.ts',
+    'src/lib/finance/pitchWorkspace.ts',
+    'scripts/validate-pitch-workspace.mjs',
+    'scripts/reconcile-pitch-workspace-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

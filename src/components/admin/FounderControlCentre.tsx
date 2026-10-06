@@ -1164,6 +1164,57 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
           </WorkspaceSection>
         )}
 
+        {/* §PHASE 8 — the founder capital workspace / pitch workspace. The ordered
+            sections Mercenta prepares for a financing partner, each naming HOW its
+            content is produced: every FINANCIAL figure comes from its deterministic
+            canonical owner and AI may help only the narrative. The workspace is not
+            ready while a required section is missing. Internal: Super-Admin only. */}
+        {section === 'finance' && (
+          <WorkspaceSection
+            title="Pitch workspace (Phase 8)"
+            description="The founder capital workspace: overview, business model, Vendor infrastructure, acquisition pipeline, purchase volumes, supplier payment requirements, capital requirements, facility request, repayment model, risk controls, evidence, documents, contact history, meetings, follow-ups and pitch preparation. Every financial figure comes from its deterministic canonical owner — AI may help prepare and explain the narrative only, never a number."
+            domain="finance"
+            action={
+              <span className="text-ds-micro text-zinc-500" data-testid="pitch-workspace-rule">
+                {model.pitchWorkspace.financialsDeterministic && model.pitchWorkspace.oneOwner
+                  ? 'Financial figures stay deterministic'
+                  : 'FINANCIALS NOT ENFORCED'}
+              </span>
+            }
+          >
+            <ul className="space-y-1" data-testid="control-pitch-workspace">
+              {model.pitchWorkspace.sections.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label"
+                >
+                  <span className="flex justify-between gap-3">
+                    <span className="text-zinc-300">
+                      {s.label}
+                      {s.required && <span className="ml-2 text-ds-micro text-zinc-500">required</span>}
+                    </span>
+                    <span className="font-mono text-zinc-400">{s.kindLabel}</span>
+                  </span>
+                  <span className="text-ds-micro text-zinc-500">
+                    {s.sourceOwner ? `Source: ${s.sourceOwner}` : 'Mercenta prose'}
+                    {s.aiMayDraft ? ' · AI may draft' : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-pitch-workspace-readiness">
+              {model.pitchWorkspace.requiresAllRequiredSections
+                ? model.pitchWorkspace.readiness.ready
+                  ? 'Ready — every required section is present.'
+                  : `Not ready — required section missing: ${model.pitchWorkspace.readiness.missingRequired.join(', ')}.`
+                : 'READINESS NOT ENFORCED'}
+            </p>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-pitch-workspace-basis">
+              {model.pitchWorkspace.basis} {model.pitchWorkspace.disclaimer}
+            </p>
+          </WorkspaceSection>
+        )}
+
         {section === 'compliance' && (
           <WorkspaceSection
             title="Compliance"
