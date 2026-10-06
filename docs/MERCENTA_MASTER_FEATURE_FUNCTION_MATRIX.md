@@ -566,7 +566,7 @@ Amazon event / data → Amazon object → Mercenta object → Brand → Tenant
 
 | ID | Requirement | Status | Evidence |
 |---|---|---|---|
-| `D21-01` | ONE reusable resolution mechanism (no per-module ad-hoc ownership logic) | **BUILT (2026-10-05)** | `src/lib/resolution/objectResolution.ts` — the ONE resolver. `npm run validate:object-resolution` (42 assertions, mutation-proved) proves one mechanism; the Control Centre resolves through it |
+| `D21-01` | ONE reusable resolution mechanism (no per-module ad-hoc ownership logic) | **BUILT (2026-10-05)** | `src/lib/resolution/objectResolution.ts` — the ONE resolver. `npm run validate:object-resolution` (32 assertions, mutation-proved) proves one mechanism; the Control Centre resolves through it |
 | `D21-02` | Deterministic, tenant-safe, auditable resolution | **BUILT (2026-10-05)** | `resolveObject` returns the same chain for the same input (gate §B); every chain names the Mercenta object, brand and tenant |
 | `D21-03` | Duplicate / replay awareness | **BUILT (2026-10-05)** | the platform-level `ResolutionLedger` returns the FIRST chain on a replay, flagged `replay: true` — a duplicate cannot mint a second owner (gate §E) |
 | `D21-04` | No guessing; unknown ownership fails safely | **BUILT (2026-10-05)** | `unknown` (no match) and `cross_tenant` (>1 tenant) are declared fail-closed outcomes; the cross-tenant case is never picked (gate §C/§D) |
