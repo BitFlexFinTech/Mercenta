@@ -93,6 +93,10 @@ import {
   type PitchWorkspaceSummary,
 } from '@/lib/finance/pitchWorkspace';
 import {
+  buildFounderOutreachSummary,
+  type FounderOutreachSummary,
+} from '@/lib/finance/founderOutreach';
+import {
   summariseResolutions,
   type ExternalObjectRef,
   type ResolvableObject,
@@ -336,6 +340,18 @@ export interface ControlCentreModel {
    */
   pitchWorkspace: PitchWorkspaceSummary;
   /**
+   * §PHASE 7 — the founder outreach pipeline. The ordered approach Mercenta runs over
+   * the financing-partner universe (channels, touchpoint types and a deterministic
+   * follow-up cadence of day OFFSETS), declared by the ONE owner
+   * (`src/config/founderOutreach.ts`) and applied by the pure resolver
+   * (`src/lib/finance/founderOutreach.ts`). Outreach begins at the TARGET stage and is
+   * forward-only: a followed-up provider must already have been contacted, every
+   * touchpoint names a declared channel and type, and an unknown channel/type/stage is
+   * REFUSED. NO AI, no clock. Super-Admin only; the partner approach is internal and is
+   * never shown to a brand.
+   */
+  founderOutreach: FounderOutreachSummary;
+  /**
    * §D21 — whole-platform object resolution. Every canonical channel object (each
    * purchase order's Amazon PO number, each consignment's carrier reference) is
    * resolved through the ONE resolver
@@ -483,6 +499,14 @@ export function buildControlCentre(): ControlCentreModel {
      deterministic canonical owner — AI may help prepare/explain the narrative only,
      never a figure. No clock, no randomness. */
   const pitchWorkspace = buildPitchWorkspaceSummary();
+
+  /* ── §PHASE 7 — the founder outreach pipeline ──
+     The ordered approach Mercenta runs over the financing-partner universe, from the
+     ONE owner (`src/config/founderOutreach.ts`) via the pure resolver
+     (`src/lib/finance/founderOutreach.ts`). Outreach begins at TARGET and is
+     forward-only — a followed-up provider must already have been contacted, and an
+     unknown channel, type or stage is refused. No AI, no clock. */
+  const founderOutreach = buildFounderOutreachSummary();
 
   /* ── §D21 — whole-platform object resolution ──
      Build the canonical resolution index from the SAME records the platform
@@ -869,6 +893,7 @@ export function buildControlCentre(): ControlCentreModel {
     financingRouting,
     financierLifecycle,
     pitchWorkspace,
+    founderOutreach,
     objectResolution,
     localisation,
     countryFramework,
@@ -906,6 +931,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Financing router', value: 'src/lib/finance/financingRouter.ts + src/config/financingRouter.ts — the deterministic financing router (reuses the canonical exclusive-gateway evaluator)' },
       { label: 'Financier lifecycle (Phase 7)', value: 'src/config/financierLifecycle.ts + src/lib/finance/financierLifecycle.ts — the forward-only, fail-closed lifecycle of a financing partner (RESEARCHED → … → ACTIVE PARTNER, reachable ONLY through PILOT, with REJECTED / PARKED off-ramps); the transitions are derived from the ordered stages and an unknown stage or an illegal move is refused' },
       { label: 'Pitch workspace (Phase 8)', value: 'src/config/pitchWorkspace.ts + src/lib/finance/pitchWorkspace.ts — the founder capital workspace: each section names HOW its content is produced, so every financial figure comes from its deterministic canonical owner and AI may help only the narrative; an unknown section, an AI-produced figure or an incomplete pitch is refused' },
+      { label: 'Founder outreach pipeline (Phase 7)', value: 'src/config/founderOutreach.ts + src/lib/finance/founderOutreach.ts — the ordered approach over the financing-partner universe: declared channels, touchpoint types and a deterministic cadence of day OFFSETS; outreach begins at the TARGET stage and is forward-only (a follow-up requires an open contact), and an unknown channel, type or stage is refused' },
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
       { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },

@@ -1215,6 +1215,64 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
           </WorkspaceSection>
         )}
 
+        {/* §PHASE 7 — the founder outreach pipeline. The ordered approach over the
+            financing-partner universe: declared channels, touchpoint types and a
+            deterministic cadence of day OFFSETS. Outreach begins at the TARGET stage
+            and is forward-only — a followed-up provider must already have been
+            contacted, and an unknown channel, type or stage is refused rather than
+            guessed. Internal: Super-Admin only, never a brand's. */}
+        {section === 'finance' && (
+          <WorkspaceSection
+            title="Founder outreach pipeline (Phase 7)"
+            description="The ordered approach Mercenta runs over the financing-partner universe: declared channels, touchpoint types and a deterministic follow-up cadence of day OFFSETS. Outreach begins at the TARGET stage and is forward-only — a follow-up requires a provider already at CONTACTED or beyond — and a touchpoint naming an unknown channel, type or stage is refused rather than guessed."
+            domain="finance"
+            action={
+              <span className="text-ds-micro text-zinc-500" data-testid="founder-outreach-rule">
+                {model.founderOutreach.requiresTargetStage && model.founderOutreach.followUpRequiresContact
+                  ? 'Outreach begins at TARGET · follow-up requires a contact'
+                  : 'PIPELINE NOT ENFORCED'}
+              </span>
+            }
+          >
+            <ol className="flex flex-wrap items-center gap-1" data-testid="control-founder-outreach-cadence">
+              {model.founderOutreach.cadence.map((s, i) => (
+                <li key={s.id} className="flex items-center gap-1">
+                  <span className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-ds-micro text-zinc-300">
+                    Day {s.dayOffset} · {s.typeLabel}
+                  </span>
+                  {i < model.founderOutreach.cadenceCount - 1 && (
+                    <span className="text-ds-micro text-zinc-600">→</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+            <p className="mt-2 text-ds-micro text-zinc-500">
+              Channels:{' '}
+              <span className="text-zinc-400">
+                {model.founderOutreach.channels.map((c) => c.label).join(' · ')}
+              </span>
+            </p>
+            <ul className="mt-4 space-y-1" data-testid="control-founder-outreach-touchpoints">
+              {model.founderOutreach.demoTouchpoints.map((t) => (
+                <li key={t.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                  <span className="flex justify-between gap-3">
+                    <span className="text-zinc-300">
+                      {t.providerStageLabel} · {t.channelLabel} · {t.typeLabel}
+                    </span>
+                    <span className="font-mono text-zinc-400">
+                      {t.allowed ? 'allowed' : t.refusal}
+                    </span>
+                  </span>
+                  <span className="text-ds-micro text-zinc-500">{t.providerLabel}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-founder-outreach-basis">
+              {model.founderOutreach.basis} {model.founderOutreach.disclaimer}
+            </p>
+          </WorkspaceSection>
+        )}
+
         {section === 'compliance' && (
           <WorkspaceSection
             title="Compliance"

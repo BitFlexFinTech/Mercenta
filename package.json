@@ -117,6 +117,7 @@
     "validate:contextual-education": "node scripts/validate-contextual-education.mjs",
     "validate:shared-workflow-reuse": "node scripts/validate-shared-workflow-reuse.mjs",
     "validate:financier-lifecycle": "node scripts/validate-financier-lifecycle.mjs",
+    "validate:founder-outreach": "node scripts/validate-founder-outreach.mjs",
     "validate:pitch-workspace": "node scripts/validate-pitch-workspace.mjs"
   },
   "dependencies": {

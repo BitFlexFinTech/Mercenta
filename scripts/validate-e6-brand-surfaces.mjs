@@ -2921,6 +2921,33 @@ const PHASE8_PITCH_WORKSPACE_SCOPE = new Set([
 
 
 
+/**
+ * §PHASE 7 (2026-10-06) — THE FOUNDER OUTREACH PIPELINE — declared surface.
+ *
+ * The registry row `phase7-founder-outreach-pipeline` records the outreach pipeline
+ * Mercenta runs over the financing-partner universe: the ordered approach that moves a
+ * financing partner along the canonical financier lifecycle from TARGET → CONTACTED →
+ * ENGAGED. This increment adds the ONE owner (`src/config/founderOutreach.ts` — the
+ * declared channels, touchpoint types and a deterministic cadence of day OFFSETS, with
+ * the three stages REUSED from the lifecycle owner) and the pure resolver
+ * (`src/lib/finance/founderOutreach.ts`), and gates them. The partner approach is
+ * internal: the surface lives on the Super-Admin Founder Control Centre only.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE7_FOUNDER_OUTREACH_SCOPE = new Set([
+  'src/config/founderOutreach.ts',             /* NEW — the ONE outreach pipeline owner */
+  'src/lib/finance/founderOutreach.ts',        /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',    /* computes + exposes the outreach summary */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the Founder outreach pipeline section */
+  'scripts/validate-founder-outreach.mjs',     /* NEW — this phase's gate */
+  'scripts/reconcile-founder-outreach-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',      /* test 17 renders the outreach pipeline section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3705,7 +3732,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE7_FINANCIER_LIFECYCLE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 8 — the founder capital workspace / pitch workspace (see above). */
           PHASE8_PITCH_WORKSPACE_SCOPE.has(p) ||
-          [...PHASE8_PITCH_WORKSPACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE8_PITCH_WORKSPACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 7 — the founder outreach pipeline (see above). */
+          PHASE7_FOUNDER_OUTREACH_SCOPE.has(p) ||
+          [...PHASE7_FOUNDER_OUTREACH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

@@ -481,6 +481,35 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 7 — the founder outreach pipeline. The Finance view must render the declared
+   * cadence and the labelled illustrative touchpoints, with the forward-only rule (a
+   * follow-up requires an open contact) enforced, not merely written. The approach is
+   * internal: this is the Super-Admin view, never a brand's.
+   */
+  test('17. the founder outreach pipeline renders with the forward-only rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Finance/ }).click();
+
+    const cadence = page.getByTestId('control-founder-outreach-cadence');
+    await expect(cadence).toBeVisible();
+    await expect(cadence).toContainText('Initial contact');
+    await expect(cadence).toContainText('Day 21');
+
+    const touchpoints = page.getByTestId('control-founder-outreach-touchpoints');
+    await expect(touchpoints).toContainText('allowed');
+    // The forward-only rule is enforced, not merely written.
+    await expect(touchpoints).toContainText('OUTREACH_FOLLOWUP_REQUIRES_CONTACT');
+    await expect(page.getByTestId('founder-outreach-rule')).toContainText('Outreach begins at TARGET');
+    await expect(page.getByTestId('control-founder-outreach-basis')).toContainText('deterministic');
+
+    await page.screenshot({ path: `${SHOTS}/17-founder-outreach.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

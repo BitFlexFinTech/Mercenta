@@ -2582,6 +2582,17 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/finance/pitchWorkspace.ts',
     'scripts/validate-pitch-workspace.mjs',
     'scripts/reconcile-pitch-workspace-registry.cjs',
+    /**
+     * §PHASE 7 (2026-10-06) — the founder outreach pipeline. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE7_FOUNDER_OUTREACH_SCOPE. Same mechanism:
+     * a changed source/test file outside EVERY declared set is refused. The partner
+     * approach is internal — the surface lives on the Super-Admin Founder Control
+     * Centre only.
+     */
+    'src/config/founderOutreach.ts',
+    'src/lib/finance/founderOutreach.ts',
+    'scripts/validate-founder-outreach.mjs',
+    'scripts/reconcile-founder-outreach-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
