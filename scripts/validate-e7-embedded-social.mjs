@@ -2680,6 +2680,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/intelligence/integratedLoop.ts',
     'scripts/validate-integrated-loop.mjs',
     'scripts/reconcile-integrated-loop-registry.cjs',
+    /**
+     * §PHASE 7 (2026-10-07) — THE FINANCIER UNIVERSE. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE7_FINANCIER_UNIVERSE_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is refused. The universe is
+     * internal — the surface lives on the Super-Admin Founder Control Centre (Finance view).
+     */
+    'src/config/financierUniverse.ts',
+    'src/lib/finance/financierUniverse.ts',
+    'scripts/validate-financier-universe.mjs',
+    'scripts/reconcile-financier-universe-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

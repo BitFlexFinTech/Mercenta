@@ -1446,6 +1446,74 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
           </WorkspaceSection>
         )}
 
+        {/* §PHASE 7 — the financier universe. The REAL financing-partner universe:
+            the provider taxonomy, the market scope, the full record and the research
+            discipline. A provider enters ONLY with a NAMED, PUBLISHED source and a
+            LAST-RESEARCHED date; an unknown type/market, an unsourced or undated
+            entry, and an illustrative placeholder are all refused. The real universe
+            holds ZERO providers — nothing is invented. Internal: Super-Admin only. */}
+        {section === 'finance' && (
+          <WorkspaceSection
+            title="Financier universe (Phase 7)"
+            description="The REAL financing-partner universe — banks and PO / inventory / trade / receivables financiers, working-capital, SME and e-commerce finance providers and alternative-credit funds across the UK, Europe, Africa, the US and other markets. Every provider must carry the FULL record: a legal name, a declared type, at least one declared market, a NAMED, PUBLISHED source and a LAST-RESEARCHED date. An unknown type or market, an unsourced or undated entry, and an illustrative placeholder are all refused — no provider is ever invented."
+            domain="finance"
+            action={
+              <span className="text-ds-micro text-zinc-500" data-testid="financier-universe-rule">
+                {model.financierUniverse.requiresNamedSource && model.financierUniverse.requiresResearchDate && model.financierUniverse.failsClosed
+                  ? 'Named source + research date required'
+                  : 'UNIVERSE NOT ENFORCED'}
+              </span>
+            }
+          >
+            <p className="text-ds-micro text-zinc-500">
+              Provider types:{' '}
+              <span className="text-zinc-400" data-testid="control-financier-universe-types">
+                {model.financierUniverse.providerTypes.map((t) => t.label).join(' · ')}
+              </span>
+            </p>
+            <p className="mt-1 text-ds-micro text-zinc-500">
+              Markets:{' '}
+              <span className="text-zinc-400" data-testid="control-financier-universe-markets">
+                {model.financierUniverse.markets.map((m) => m.label).join(' · ')}
+              </span>
+            </p>
+            <ul className="mt-4 space-y-1" data-testid="control-financier-universe-fields">
+              {model.financierUniverse.recordFields.map((f) => (
+                <li key={f.key} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                  <span className="flex justify-between gap-3">
+                    <span className="text-zinc-300">{f.label}</span>
+                    <span className="font-mono text-zinc-400">{f.requiredForRealEntry ? 'required' : 'optional'}</span>
+                  </span>
+                  <span className="text-ds-micro text-zinc-500">{f.requirement}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-ds-micro text-zinc-500" data-testid="control-financier-universe-real">
+              Real providers in the universe: <span className="font-mono text-zinc-300">{model.financierUniverse.realCount}</span> — none has been researched yet; every entry below is an unmistakable placeholder.
+            </p>
+            <ul className="mt-2 space-y-1" data-testid="control-financier-universe-placeholders">
+              {model.financierUniverse.illustrative.map((r) => (
+                <li key={r.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                  <span className="flex justify-between gap-3">
+                    <span className="text-zinc-300">{r.providerTypeLabel} · {r.marketLabels.join(', ')}</span>
+                    <span className="font-mono text-zinc-400">{r.allowed ? 'allowed' : r.refusal}</span>
+                  </span>
+                  <span className="text-ds-micro text-zinc-500">{r.legalName}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-financier-universe-refusal">
+              Fail-closed proof: {model.financierUniverse.exampleRefusal.refusal} — {model.financierUniverse.exampleRefusal.reason}
+            </p>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-financier-universe-rule-text">
+              {model.financierUniverse.rules.join(' ')}
+            </p>
+            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="control-financier-universe-basis">
+              {model.financierUniverse.basis} {model.financierUniverse.disclaimer}
+            </p>
+          </WorkspaceSection>
+        )}
+
         {section === 'compliance' && (
           <WorkspaceSection
             title="Compliance"

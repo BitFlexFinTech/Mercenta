@@ -2949,6 +2949,32 @@ const PHASE7_FOUNDER_OUTREACH_SCOPE = new Set([
 ]);
 
 /**
+ * §PHASE 7 (2026-10-07) — THE FINANCIER UNIVERSE — declared surface.
+ *
+ * The registry row `phase7-financier-universe-research` records the REAL
+ * financing-partner universe (the provider taxonomy, the market scope, the full
+ * financier record and the research discipline). This increment adds the ONE
+ * owner (`src/config/financierUniverse.ts` — the taxonomy, markets, record shape
+ * and the rule that a provider enters ONLY with a named published source and a
+ * last-researched date) and the pure resolver
+ * (`src/lib/finance/financierUniverse.ts`), and gates them. The universe is
+ * internal: the surface lives on the Super-Admin Founder Control Centre only.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE7_FINANCIER_UNIVERSE_SCOPE = new Set([
+  'src/config/financierUniverse.ts',             /* NEW — the ONE universe owner */
+  'src/lib/finance/financierUniverse.ts',        /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',      /* computes + exposes the universe summary */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the Financier universe section */
+  'scripts/validate-financier-universe.mjs',     /* NEW — this phase's gate */
+  'scripts/reconcile-financier-universe-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',        /* test 22 renders the financier universe section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+]);
+
+/**
  * §PHASE 9 (2026-10-06) — LOCALIZATION, SEO AND HREFLANG — declared surface.
  *
  * The registry row `phase9-localization-seo-hreflang` records the locale presentation
@@ -3859,6 +3885,9 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           /** §PHASE 7 — the founder outreach pipeline (see above). */
           PHASE7_FOUNDER_OUTREACH_SCOPE.has(p) ||
           [...PHASE7_FOUNDER_OUTREACH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 7 — the financier universe (see above). */
+          PHASE7_FINANCIER_UNIVERSE_SCOPE.has(p) ||
+          [...PHASE7_FINANCIER_UNIVERSE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 9 — localization / SEO / hreflang (see above). */
           PHASE9_LOCALIZATION_SEO_SCOPE.has(p) ||
           [...PHASE9_LOCALIZATION_SEO_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||

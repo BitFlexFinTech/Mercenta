@@ -672,6 +672,33 @@ test.describe('Founder Operating System — Control Centre', () => {
     expect(external).toEqual([]);
     expect(pageErrors).toEqual([]);
   });
+
+  /**
+   * §PHASE 7 — the financier universe. The Finance view must render the REAL
+   * financing-partner universe with the evidence rule enforced: every provider
+   * carries a declared type, market, a NAMED source and a research date, and an
+   * illustrative placeholder is refused. The real universe holds ZERO providers —
+   * nothing is invented to fill it.
+   */
+  test('22. the financier universe renders on the Finance view with the source-evidence rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Finance/ }).click();
+
+    const placeholders = page.getByTestId('control-financier-universe-placeholders').locator('li');
+    await expect(placeholders).toHaveCount(3);
+    await expect(page.getByTestId('control-financier-universe-real')).toContainText('Real providers in the universe: 0');
+    // The evidence rule is enforced, not merely written: a placeholder is refused.
+    await expect(page.getByTestId('control-financier-universe-refusal')).toContainText('FINANCIER_IS_ILLUSTRATIVE_NOT_A_RESEARCHED_PROVIDER');
+    await expect(page.getByTestId('financier-universe-rule')).toContainText('Named source + research date required');
+    await expect(page.getByTestId('control-financier-universe-basis')).toContainText('ZERO real providers');
+
+    await page.screenshot({ path: `${SHOTS}/22-financier-universe.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
 });
 
 test.describe('Founder Operating System — RBAC', () => {

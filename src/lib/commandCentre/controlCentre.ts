@@ -97,6 +97,10 @@ import {
   type FounderOutreachSummary,
 } from '@/lib/finance/founderOutreach';
 import {
+  buildFinancierUniverseSummary,
+  type FinancierUniverseSummary,
+} from '@/lib/finance/financierUniverse';
+import {
   summariseResolutions,
   type ExternalObjectRef,
   type ResolvableObject,
@@ -368,6 +372,18 @@ export interface ControlCentreModel {
    */
   founderOutreach: FounderOutreachSummary;
   /**
+   * §PHASE 7 — the financier universe. The REAL financing-partner universe (the
+   * provider taxonomy, the market scope, the full record and the research
+   * discipline), declared by the ONE owner (`src/config/financierUniverse.ts`) and
+   * applied by the pure resolver (`src/lib/finance/financierUniverse.ts`). The
+   * platform's evidence rule applies: a provider may enter ONLY with a NAMED,
+   * PUBLISHED source and a LAST-RESEARCHED date — an unknown type/market, an
+   * unsourced or undated entry, and an illustrative placeholder are all REFUSED,
+   * so no provider is ever invented. The universe holds ZERO real providers today.
+   * NO AI, no clock. Super-Admin only; the treasury universe is never shown to a brand.
+   */
+  financierUniverse: FinancierUniverseSummary;
+  /**
    * §D21 — whole-platform object resolution. Every canonical channel object (each
    * purchase order's Amazon PO number, each consignment's carrier reference) is
    * resolved through the ONE resolver
@@ -567,6 +583,16 @@ export function buildControlCentre(): ControlCentreModel {
      forward-only — a followed-up provider must already have been contacted, and an
      unknown channel, type or stage is refused. No AI, no clock. */
   const founderOutreach = buildFounderOutreachSummary();
+
+  /* ── §PHASE 7 — the financier universe ──
+     The REAL financing-partner universe (taxonomy, markets, full record and the
+     research discipline) from the ONE owner (`src/config/financierUniverse.ts`)
+     via the pure resolver (`src/lib/finance/financierUniverse.ts`). A provider
+     enters ONLY with a named, published source and a last-researched date; an
+     unknown type/market, an unsourced or undated entry, and an illustrative
+     placeholder are refused. The real universe holds ZERO providers today — nothing
+     is invented. No AI, no clock. */
+  const financierUniverse = buildFinancierUniverseSummary();
 
   /* ── §D21 — whole-platform object resolution ──
      Build the canonical resolution index from the SAME records the platform
@@ -881,6 +907,9 @@ export function buildControlCentre(): ControlCentreModel {
       /* §PHASE 6 — the deterministic financing router over the canonical Model B purchases. */
       metric('fin-financing-routed', 'Financing routed', String(financingRouting.decisions.length - financingRouting.refusedCount), financingRouting.refusedCount > 0 ? 'warning' : 'info', 'Financing router', financingRouting.basis, 'control_centre'),
       metric('fin-financing-external', 'External referrals', String(financingRouting.externalReferralCount), financingRouting.externalReferralCount > 0 ? 'warning' : 'info', 'Financing router', `${financingRouting.selfFundedCount} self-funded · ${financingRouting.facilityDrawCount} facility draw · ${financingRouting.externalReferralCount} external referral — routed deterministically, no AI.`, 'control_centre'),
+      /* §PHASE 7 — the financier universe: a provider enters only with a named source and a research date. */
+      metric('fin-universe-real', 'Financier universe', String(financierUniverse.realCount), financierUniverse.realCount > 0 ? 'info' : 'neutral', 'Evidence-backed providers', 'The number of REAL financing partners in the universe. A provider enters ONLY with a NAMED, PUBLISHED source and a LAST-RESEARCHED date — nothing is invented, so this stays 0 until real partners are researched.', 'control_centre'),
+      metric('fin-universe-rule', 'Source evidence required', financierUniverse.requiresNamedSource && financierUniverse.requiresResearchDate && financierUniverse.failsClosed ? 'Enforced' : 'NO — DEFECT', financierUniverse.requiresNamedSource && financierUniverse.failsClosed ? 'success' : 'danger', 'no invented figure', 'An unknown provider type or market, an unsourced or undated entry, and an illustrative placeholder are all REFUSED — a financing partner is never invented to fill the universe.', 'control_centre'),
     ],
     compliance: [
       metric('comp-missing', 'Missing', String(missingDocs.length), missingDocs.length > 0 ? 'danger' : 'success', 'Blocking', 'A missing document blocks the gate.', 'compliance'),
@@ -994,6 +1023,7 @@ export function buildControlCentre(): ControlCentreModel {
     financierLifecycle,
     pitchWorkspace,
     founderOutreach,
+    financierUniverse,
     objectResolution,
     localisation,
     localisationSeo,
@@ -1036,6 +1066,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Financier lifecycle (Phase 7)', value: 'src/config/financierLifecycle.ts + src/lib/finance/financierLifecycle.ts — the forward-only, fail-closed lifecycle of a financing partner (RESEARCHED → … → ACTIVE PARTNER, reachable ONLY through PILOT, with REJECTED / PARKED off-ramps); the transitions are derived from the ordered stages and an unknown stage or an illegal move is refused' },
       { label: 'Pitch workspace (Phase 8)', value: 'src/config/pitchWorkspace.ts + src/lib/finance/pitchWorkspace.ts — the founder capital workspace: each section names HOW its content is produced, so every financial figure comes from its deterministic canonical owner and AI may help only the narrative; an unknown section, an AI-produced figure or an incomplete pitch is refused' },
       { label: 'Founder outreach pipeline (Phase 7)', value: 'src/config/founderOutreach.ts + src/lib/finance/founderOutreach.ts — the ordered approach over the financing-partner universe: declared channels, touchpoint types and a deterministic cadence of day OFFSETS; outreach begins at the TARGET stage and is forward-only (a follow-up requires an open contact), and an unknown channel, type or stage is refused' },
+      { label: 'Financier universe (Phase 7)', value: 'src/config/financierUniverse.ts + src/lib/finance/financierUniverse.ts — the REAL financing-partner universe: the provider taxonomy, the market scope, the full financier record and the research discipline. A provider enters ONLY with a NAMED, PUBLISHED source and a LAST-RESEARCHED date; an unknown provider type or market, an unsourced or undated entry, and an illustrative placeholder are all REFUSED, so no provider is ever invented — the real universe holds ZERO providers until they are researched' },
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
       { label: 'Localization / SEO / hreflang (Phase 9)', value: 'src/config/localisationSeo.ts + src/lib/localisation/localisationSeo.ts — the number/date/time conventions (separators read from Intl), the per-market IANA timezones, the localized-URL strategy and the FAIL-CLOSED hreflang rule: an alternate is emitted only for a served content locale and only for a public route, with x-default self-referencing the served default' },

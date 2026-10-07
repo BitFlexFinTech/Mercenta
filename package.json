@@ -122,7 +122,8 @@
     "validate:localisation-seo": "node scripts/validate-localisation-seo.mjs",
     "validate:amazon-governance": "node scripts/validate-amazon-governance.mjs",
     "validate:founder-intelligence": "node scripts/validate-founder-intelligence.mjs",
-    "validate:integrated-loop": "node scripts/validate-integrated-loop.mjs"
+    "validate:integrated-loop": "node scripts/validate-integrated-loop.mjs",
+    "validate:financier-universe": "node scripts/validate-financier-universe.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
