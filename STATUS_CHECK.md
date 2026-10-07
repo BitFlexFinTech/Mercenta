@@ -4368,3 +4368,27 @@ The registry now holds **ZERO** in_progress, **ZERO** blocked and **ZERO** regre
 
 **NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; 34 `not_started` rows remain. No credential required.
 
+
+## §PHASE 9 — LOCALIZATION, SEO AND HREFLANG (2026-10-06) — NEWEST RECORD
+
+**BUILT.** The registry row `phase9-localization-seo-hreflang` recorded the locale presentation conventions and the search metadata that must agree with them. Much already existed (`src/config/localisation.ts` for locales/currencies; `src/lib/seo/publicRoutes.ts` for the public routes); this increment BRIDGES them and adds the genuinely missing pieces.
+
+- `src/config/localisationSeo.ts` (**NEW**, the ONE owner) — `SERVED_CONTENT_LOCALES` = `['en-GB']` (honest — English only), the localized-URL strategy, `LOCALE_FORMAT_CONVENTIONS` (number/date/time per locale; the decimal + group separators are READ from `Intl.NumberFormat`, never hand-typed), `MARKET_TIMEZONES` (per canonical source market) and `MARKET_MESSAGING_SLOTS` (each naming its canonical owner — payment availability → `src/config/payouts.ts`), with pinned invariants + fail-closed module guards.
+- `src/lib/localisation/localisationSeo.ts` (**NEW**, the pure fail-closed resolver) — `buildHreflangAlternates` emits a self-referencing alternate per served content locale plus `x-default` ONLY for a public route (a private/unknown path is REFUSED `HREFLANG_ROUTE_NOT_PUBLIC`); `evaluateHreflangLocale` REFUSES an unserved locale (`HREFLANG_LOCALE_NOT_SERVED`); `resolveLocaleFormatting` REFUSES an undeclared locale (`SEOFORMAT_LOCALE_UNKNOWN`). No locale and no page is ever invented.
+- **BRIDGED into the SEO runtime:** `src/lib/seo/routeMetadata.ts` now carries `hreflangAlternates` and `applyRouteMetadata` writes the alternate link tags (idempotent).
+- **USED:** `controlCentre.ts` exposes `localisationSeo` (+ 3 metrics + a dataSources entry); `FounderControlCentre.tsx` renders a **Localization, SEO & hreflang** sub-section on the Commercial view (Super-Admin only).
+- **Gated** by NEW `scripts/validate-localisation-seo.mjs` (`npm run validate:localisation-seo`, **45 assertions**), **mutation-proved TWICE** (mutating the pinned invariant failed 1 assertion; disabling the served-locale guard failed 2; both restored byte-identical — `src/config/localisationSeo.ts` sha256 `f0218bae5006afabafbb5cf69b285802320fbefbc9b9eb68bc76171614cac624`, `src/lib/localisation/localisationSeo.ts` sha256 `ef46ae522e8b38a63f5c086fbda9b2830d7da5169b24935167255f341d9a61f6`).
+- Surface declared in BOTH scope guards (`PHASE9_LOCALIZATION_SEO_SCOPE` in E6; entries in E7). `package.json` registers `validate:localisation-seo`. Browser spec `e2e/founder-operating-system.spec.ts` test 18 PASS.
+- `requirements-registry.json` — row `phase9-localization-seo-hreflang` `not_started` → `built` (old value inline in `_audit_note`; `status_counts` built 160→161, not_started 22→21); the STALE `docs — roadmap §PHASE 9` evidence fixed at source. Reconciled by `scripts/reconcile-localisation-seo-registry.cjs`.
+
+**TESTED.** typecheck **0** (all 4 projects) · lint **0** · build ✓ · `validate:localisation-seo` PASS (45, mutation-proved twice) · `validate:all` **180 PASS / 0 FAIL** · `validate:resume-state` PASS (49) · E6/E7 scope guards PASS · browser `founder-operating-system.spec.ts` **18 passed** (full spec).
+
+**RESULT.** **VERIFIED LOCAL/COMMITTED CHECKPOINT** (app-runtime commit `04ff72c`); the demo leg is executed in this task's close (deploy + live verify).
+
+**DEFECT INVENTORY.**
+- **FIXED at source:** the registry's stale `docs — roadmap §PHASE 9` evidence citation (it named a doc section, not the built artefacts) — replaced by the real artefacts in the reconcile script.
+- **NO defect parked; NO new blocker.** §PHASE 9 is a pure deterministic config + resolver + an SEO-runtime wiring, with no credential and no external dependency.
+- **HONESTY (by design, not a defect):** only English (en-GB) content is served today, so the hreflang set is a self-reference + x-default; the resolver REFUSES any locale Mercenta does not actually serve rather than advertising a page that does not exist.
+
+**NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; 21 `not_started` rows remain. No credential required.
+
