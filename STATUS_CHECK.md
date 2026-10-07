@@ -4400,3 +4400,64 @@ The registry now holds **ZERO** in_progress, **ZERO** blocked and **ZERO** regre
 
 **NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; 21 `not_started` rows remain. No credential required.
 
+
+---
+
+## §PHASE 11 — FOUNDER INTELLIGENCE EXPANSION (2026-10-06)
+
+**WHAT THE ROW REQUIRED.** `phase11-founder-intelligence-expansion` recorded the founder intelligence
+expansion: the platform must answer the founder's STANDING QUESTIONS (what is happening, what needs
+attention, what opportunities exist, what is blocked, which brands to pursue, which products matter,
+which POs need action, where capital is tied up, where financing is needed, which financier
+conversations need follow-up, what changed this week) with the one non-negotiable rule: **"AI
+summarises; canonical deterministic data stays the source of truth."**
+
+**BUILT.**
+- `src/config/founderIntelligence.ts` (**NEW**, the ONE owner) — `FOUNDER_QUESTIONS` declares the
+  ELEVEN founder questions ONCE, each naming the canonical owner (`dataOwner`) that DETERMINISTICALLY
+  answers it; the producer values (`canonical_owner` / `ai` / `human`), the produce kinds (`data` /
+  `summary`), pinned invariants `ONE_FOUNDER_INTELLIGENCE_OWNER` +
+  `FOUNDER_INTELLIGENCE_ANSWERS_FROM_CANONICAL_DATA` + `FOUNDER_INTELLIGENCE_AI_MAY_ONLY_SUMMARISE` +
+  `FOUNDER_INTELLIGENCE_FAILS_CLOSED`, and fail-closed module-load guards (≥1 question, unique ids,
+  every field present, every question must allow AI to summarise — AI is never the data source).
+- `src/lib/intelligence/founderIntelligence.ts` (**NEW**, the pure fail-closed resolver) —
+  `resolveFounderQuestion` (unknown → null) and `evaluateFounderAnswer` REFUSE an unknown question
+  (`FOUNDER_QUESTION_UNKNOWN`), an AI-supplied figure (`FOUNDER_AI_MAY_ONLY_SUMMARISE`) and any
+  non-canonical data producer (`FOUNDER_DATA_REQUIRES_CANONICAL_OWNER`), while ALLOWING a summary by
+  AI/human and the canonical owner supplying the data; `buildFounderIntelligenceSummary` computes the
+  summary + a LIVE fail-closed example.
+- **USED:** `controlCentre.ts` exposes `founderIntelligence` (+ 2 metrics + a dataSources entry);
+  `FounderControlCentre.tsx` renders a **Founder intelligence** section on the Business view
+  (Super-Admin only).
+- **Gated** by NEW `scripts/validate-founder-intelligence.mjs` (`npm run validate:founder-intelligence`,
+  **30 assertions**), **mutation-proved TWICE** (a bogus canonical-owner path failed the on-disk
+  existence check; breaking the AI-refuses-data rule failed 2 assertions; both restored byte-identical,
+  `src/config/founderIntelligence.ts` sha256 `c38b81e8…`, `src/lib/intelligence/founderIntelligence.ts`
+  sha256 `50aae58f…`). Surface declared in BOTH scope guards (`PHASE11_FOUNDER_INTELLIGENCE_SCOPE` in E6
+  F5/F5b/F6; `PHASE11_FOUNDER_INTELLIGENCE_DECLARED` + allowed entries in E7). Browser spec
+  `e2e/founder-operating-system.spec.ts` test 20 PASS.
+- `requirements-registry.json` — row `phase11-founder-intelligence-expansion` `not_started` → `built`
+  (old value inline in `_audit_note`; `status_counts` built 162→163, not_started 20→19); the row's
+  evidence reconciled to the real artefacts. Reconciled by
+  `scripts/reconcile-founder-intelligence-registry.cjs`.
+
+**TESTED.** typecheck **0** (all 4 projects) · lint **0** · build ✓ ·
+`validate:founder-intelligence` PASS (30, mutation-proved twice) · `validate:all` **182 PASS / 0 FAIL**
+· `validate:resume-state` PASS · E6/E7 scope guards PASS · browser `founder-operating-system.spec.ts`
+**20 passed** (full spec) · LIVE `verify:live` **267 PASS / 0 FAIL** · the deployed
+`assets/FounderControlCentre-Dm63cKbb.js` (160,988 bytes, sha256 `fb17edbf…`) BYTE-IDENTICAL to the
+local verified build.
+
+**RESULT.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** (app-runtime commit `9d79deb`, deployed to
+`demo.mercenta.co.uk`, live-verified 267/0).
+
+**DEFECT INVENTORY.**
+- **NO defect introduced.** §PHASE 11 is a pure deterministic config + resolver + a Control-Centre
+  surface, with no credential and no external dependency.
+- **HONESTY (by design, not a defect):** the expansion re-derives NO figure of its own — every question
+  points at the canonical owner that already computes the answer, so no number is held twice; and the
+  platform REFUSES an AI-supplied figure rather than presenting one as fact.
+
+**NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; **19** `not_started` rows remain. No
+credential required.
+
