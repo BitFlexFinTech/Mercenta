@@ -101,6 +101,11 @@ import {
   type FinancierUniverseSummary,
 } from '@/lib/finance/financierUniverse';
 import {
+  buildAcquisitionIntelligenceSummary,
+  type AcquisitionIntelligenceSummary,
+} from '@/lib/intelligence/acquisitionIntelligence';
+import { defaultIntegrationMode } from '@/integrations/registry';
+import {
   summariseResolutions,
   type ExternalObjectRef,
   type ResolvableObject,
@@ -384,6 +389,17 @@ export interface ControlCentreModel {
    */
   financierUniverse: FinancierUniverseSummary;
   /**
+   * §PHASE 10 — acquisition intelligence at scale. The dimensions acquisition
+   * intelligence scales over and the research sources that may supply them,
+   * declared by the ONE owner (`src/config/acquisitionIntelligence.ts`) and applied
+   * by the pure resolver (`src/lib/intelligence/acquisitionIntelligence.ts`). A
+   * signal may rest only on a DECLARED source that SUPPLIES its dimension and whose
+   * canonical integration provider is genuinely available; when no provider is
+   * available the platform produces NO value — it is REFUSED, never fabricated.
+   * NO AI, no clock. Super-Admin only; the intelligence is never shown to a brand.
+   */
+  acquisitionIntelligence: AcquisitionIntelligenceSummary;
+  /**
    * §D21 — whole-platform object resolution. Every canonical channel object (each
    * purchase order's Amazon PO number, each consignment's carrier reference) is
    * resolved through the ONE resolver
@@ -593,6 +609,16 @@ export function buildControlCentre(): ControlCentreModel {
      placeholder are refused. The real universe holds ZERO providers today — nothing
      is invented. No AI, no clock. */
   const financierUniverse = buildFinancierUniverseSummary();
+
+  /* ── §PHASE 10 — acquisition intelligence at scale ──
+     The dimensions and the research sources (REUSED from the canonical integration
+     registry) from the ONE owner (`src/config/acquisitionIntelligence.ts`) via the
+     pure resolver (`src/lib/intelligence/acquisitionIntelligence.ts`). A signal may
+     rest only on a declared source that SUPPLIES its dimension and whose provider is
+     genuinely available (`live`/`configured`); when no provider is available NO value
+     is produced — never fabricated. No AI, no clock. */
+  const acquisitionIntelligence = buildAcquisitionIntelligenceSummary((providerId) =>
+    ['live', 'configured'].includes(defaultIntegrationMode(providerId)));
 
   /* ── §D21 — whole-platform object resolution ──
      Build the canonical resolution index from the SAME records the platform
@@ -884,6 +910,9 @@ export function buildControlCentre(): ControlCentreModel {
       metric('acq-brands', 'Activated brands', String(acquisition.activatedBrands), 'success', 'Converted', 'Only a completed onboarding makes a prospect a tenant.', 'onboarding_pipeline'),
       /* §ACQ-CONVERSION — the rates over the same canonical records. */
       metric('acq-reply-rate', 'Reply rate', formatRate(acquisitionConversion.rates.replyRate), acquisitionConversion.rates.replyRate === null ? 'neutral' : 'info', `of ${acquisitionConversion.counts.contacted} contacted`, 'Replied ÷ contacted — a canonical response exists on the prospect record.', 'crm'),
+      /* §PHASE 10 — acquisition intelligence at scale: real sources in, no fabricated figure out. */
+      metric('acq-intel-real', 'Acquisition signals', String(acquisitionIntelligence.realSignalCount), acquisitionIntelligence.realSignalCount > 0 ? 'info' : 'neutral', 'Evidence-backed intelligence', 'The number of REAL acquisition signals produced from an available research provider. A signal rests ONLY on a declared source that supplies its dimension — when no provider is available NO value is produced, so this stays 0 until a real provider is activated.', 'control_centre'),
+      metric('acq-intel-sources', 'Research sources available', `${acquisitionIntelligence.availableSourceCount}/${acquisitionIntelligence.sources.length}`, acquisitionIntelligence.availableSourceCount > 0 ? 'success' : 'neutral', 'Reused providers', 'The declared research sources whose canonical integration provider is genuinely available. Sources REUSE the platform provider registry; an unavailable provider means no signal is fabricated from it.', 'integrations'),
       metric('acq-engagement-rate', 'Engagement rate', formatRate(acquisitionConversion.rates.engagementRate), acquisitionConversion.rates.engagementRate === null ? 'neutral' : 'info', `of ${acquisitionConversion.counts.contacted} contacted`, 'Reached a meeting, negotiation or pilot ÷ contacted.', 'crm'),
       metric('acq-conversion-rate', 'Conversion rate', formatRate(acquisitionConversion.rates.conversionRate), acquisitionConversion.counts.converted > 0 ? 'success' : 'neutral', `${acquisitionConversion.counts.converted} activated`, 'Only a completed onboarding counts as converted.', 'onboarding_pipeline'),
       metric('acq-reply-engagement', 'Reply → engagement', formatRate(acquisitionConversion.rates.replyToEngagementRate), 'neutral', `of ${acquisitionConversion.counts.replied} replies`, 'Of those who replied, the share that engaged — the canonical "positive reply" measure.', 'crm'),
@@ -1024,6 +1053,7 @@ export function buildControlCentre(): ControlCentreModel {
     pitchWorkspace,
     founderOutreach,
     financierUniverse,
+    acquisitionIntelligence,
     objectResolution,
     localisation,
     localisationSeo,
@@ -1078,6 +1108,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Onboarding academy curriculum', value: 'src/config/onboardingCurriculum.ts + src/lib/education/resolveCurriculum.ts — the five canonical stages (Understand Mercenta · Commercial · Product & Packaging · Product Readiness · Operations) plus the final readiness stage, over the SAME canonical educational gaps; the final readiness stage is reached only once every teaching stage is complete' },
       { label: 'Contextual education', value: 'src/config/contextualEducation.ts + src/lib/education/resolveContextualHelp.ts — the "why do we need this?" explanation on each real field, LINKING to the canonical Knowledge Base article (LEARN) and the canonical guided tour of that screen (WATCH); the help text is never duplicated, and an unknown field or a missing article is REFUSED' },
       { label: 'Shared workflows', value: 'src/config/sharedWorkflows.ts + src/lib/education/resolveSharedWorkflow.ts — the canonical journeys through the real screens that E2E tests, tutorial recordings and onboarding walkthroughs ALL reuse; the steps are DERIVED from the canonical guided tour (no second list), its data-tour anchors are the SAME contract the E2E test drives, and every workflow names a canonical tour, E2E spec and Knowledge Base article' },
+      { label: 'Acquisition intelligence (Phase 10)', value: 'src/config/acquisitionIntelligence.ts + src/lib/intelligence/acquisitionIntelligence.ts — the dimensions acquisition intelligence scales over and the research sources that may supply them, each REUSING a canonical integration-registry provider id. A signal rests ONLY on a DECLARED source that SUPPLIES its dimension and whose provider is genuinely available; an unknown dimension, an unknown source, a source that does not supply the dimension, and a signal with no available provider are all REFUSED — when no provider exists NO value is produced, never fabricated. AI may only summarise' },
     ],
   };
 }

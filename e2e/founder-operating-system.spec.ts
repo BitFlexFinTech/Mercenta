@@ -699,6 +699,32 @@ test.describe('Founder Operating System — Control Centre', () => {
     expect(pageErrors).toEqual([]);
   });
 
+  /**
+   * §PHASE 10 — acquisition intelligence at scale. The Business view must render the
+   * acquisition-intelligence section with the never-fabricate rule enforced: a signal
+   * rests only on a DECLARED source that SUPPLIES its dimension and whose provider is
+   * genuinely available, so every signal is refused until a real provider is activated.
+   */
+  test('23. the acquisition intelligence renders on the Business view with the never-fabricate rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+
+    const sources = page.getByTestId('control-acquisition-intelligence-sources').locator('li');
+    await expect(sources).toHaveCount(6);
+    const demos = page.getByTestId('control-acquisition-intelligence-demonstrations').locator('li');
+    await expect(demos).toHaveCount(5);
+    await expect(page.getByTestId('control-acquisition-intelligence-real')).toContainText('Real acquisition signals produced: 0');
+    // The never-fabricate rule is enforced, not merely written: the example is refused.
+    await expect(page.getByTestId('control-acquisition-intelligence-refusal')).toContainText('INTELLIGENCE_UNAVAILABLE_WITHOUT_PROVIDER');
+    await expect(page.getByTestId('acquisition-intelligence-rule')).toContainText('Real source required');
+    await expect(page.getByTestId('control-acquisition-intelligence-basis')).toContainText('ever fabricated');
+
+    await page.screenshot({ path: `${SHOTS}/23-acquisition-intelligence.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
 });
 
 test.describe('Founder Operating System — RBAC', () => {

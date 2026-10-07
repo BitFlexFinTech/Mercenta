@@ -2975,6 +2975,32 @@ const PHASE7_FINANCIER_UNIVERSE_SCOPE = new Set([
 ]);
 
 /**
+ * §PHASE 10 (2026-10-08) — ACQUISITION INTELLIGENCE AT SCALE — declared surface.
+ *
+ * The registry row `phase10-acquisition-intelligence-scale` records that acquisition
+ * intelligence must operate AT SCALE over the REAL research sources and must NEVER be
+ * fabricated when no provider exists. This increment adds the ONE owner
+ * (`src/config/acquisitionIntelligence.ts` — the dimensions and the research sources,
+ * each REUSING a canonical integration-registry provider id) and the pure resolver
+ * (`src/lib/intelligence/acquisitionIntelligence.ts`), and gates them. The intelligence
+ * is internal: the surface lives on the Super-Admin Founder Control Centre only.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE10_ACQUISITION_INTELLIGENCE_SCOPE = new Set([
+  'src/config/acquisitionIntelligence.ts',           /* NEW — the ONE intelligence owner */
+  'src/lib/intelligence/acquisitionIntelligence.ts', /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',          /* computes + exposes the summary */
+  'src/components/admin/FounderControlCentre.tsx',   /* renders the acquisition intelligence section */
+  'scripts/validate-acquisition-intelligence.mjs',   /* NEW — this phase's gate */
+  'scripts/reconcile-acquisition-intelligence-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',            /* test 23 renders the acquisition intelligence section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+]);
+
+
+/**
  * §PHASE 9 (2026-10-06) — LOCALIZATION, SEO AND HREFLANG — declared surface.
  *
  * The registry row `phase9-localization-seo-hreflang` records the locale presentation
@@ -3344,7 +3370,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 12 — the integrated loop's declared surface (see above). */
         PHASE12_INTEGRATED_LOOP_SCOPE.has(p) ||
-        [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 10 — acquisition intelligence at scale's declared surface (see above). */
+        PHASE10_ACQUISITION_INTELLIGENCE_SCOPE.has(p) ||
+        [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3465,7 +3494,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 12 — same declaration, second protected-path check (F5b). */
         PHASE12_INTEGRATED_LOOP_SCOPE.has(p) ||
-        [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 10 — same declaration, second protected-path check (F5b). */
+        PHASE10_ACQUISITION_INTELLIGENCE_SCOPE.has(p) ||
+        [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -3899,7 +3931,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 12 — the integrated loop (see above). */
           PHASE12_INTEGRATED_LOOP_SCOPE.has(p) ||
-          [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 10 — acquisition intelligence at scale (see above). */
+          PHASE10_ACQUISITION_INTELLIGENCE_SCOPE.has(p) ||
+          [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

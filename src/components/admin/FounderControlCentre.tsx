@@ -435,6 +435,66 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.integratedLoop.basis} {model.integratedLoop.disclaimer}
             </p>
           </WorkspaceSection>
+
+          {/* §PHASE 10 — acquisition intelligence at scale. The dimensions acquisition
+              intelligence scales over and the research sources that may supply them,
+              declared once. A signal may rest only on a DECLARED source that SUPPLIES
+              its dimension and whose canonical provider is genuinely available; when no
+              provider is available NO value is produced — never fabricated. The research
+              sources REUSE the platform's own provider registry. Internal: Super-Admin only. */}
+          <WorkspaceSection
+            title="Acquisition intelligence at scale (Phase 10)"
+            description="Acquisition intelligence operating at scale over the REAL research sources: the dimensions it scales over (brand profile, product catalogue, demand signal, competition landscape, company register, decision-maker contact) and the research sources that may supply them — each REUSING a canonical integration-registry provider. A signal may rest only on a DECLARED source that SUPPLIES its dimension and whose provider is genuinely available; an unknown dimension, an unknown source, a source that does not supply the dimension, and a signal with no available provider are all refused — when no provider is available NO value is produced, never fabricated. AI may only summarise."
+            domain="orders"
+            action={
+              <span className="text-ds-micro text-zinc-500" data-testid="acquisition-intelligence-rule">
+                {model.acquisitionIntelligence.requiresNamedSource && model.acquisitionIntelligence.neverFabricates && model.acquisitionIntelligence.sourcesReused
+                  ? 'Real source required · never fabricated'
+                  : 'INTELLIGENCE RULE NOT ENFORCED'}
+              </span>
+            }
+          >
+            <p className="text-ds-micro text-zinc-500">
+              Dimensions:{' '}
+              <span className="text-zinc-400" data-testid="control-acquisition-intelligence-dimensions">
+                {model.acquisitionIntelligence.dimensions.map((d) => d.label).join(' · ')}
+              </span>
+            </p>
+            <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="control-acquisition-intelligence-sources">
+              {model.acquisitionIntelligence.sources.map((s) => (
+                <li key={s.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                  <span className="flex justify-between gap-3">
+                    <span className="text-ds-label text-zinc-200">{s.label}</span>
+                    <span className="font-mono text-ds-micro text-zinc-400">{s.available ? 'available' : 'not available'}</span>
+                  </span>
+                  <span className="mt-1 block font-mono text-ds-micro text-zinc-600">{s.providerId}</span>
+                  <span className="mt-1 block text-ds-micro text-zinc-500">{s.suppliedLabels.join(', ')}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-ds-micro text-zinc-500" data-testid="control-acquisition-intelligence-real">
+              Real acquisition signals produced: <span className="font-mono text-zinc-300">{model.acquisitionIntelligence.realSignalCount}</span> — {model.acquisitionIntelligence.availableSourceCount} of {model.acquisitionIntelligence.sources.length} research source(s) available; every signal below is an unmistakable demonstration and is refused.
+            </p>
+            <ul className="mt-2 space-y-1" data-testid="control-acquisition-intelligence-demonstrations">
+              {model.acquisitionIntelligence.demonstrations.map((d) => (
+                <li key={d.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                  <span className="flex justify-between gap-3">
+                    <span className="text-zinc-300">{d.dimensionLabel} · {d.sourceLabel}</span>
+                    <span className="font-mono text-zinc-400">{d.allowed ? 'allowed' : d.refusal}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-acquisition-intelligence-refusal">
+              Fail-closed proof: {model.acquisitionIntelligence.exampleRefusal.refusal} — {model.acquisitionIntelligence.exampleRefusal.reason}
+            </p>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-acquisition-intelligence-rule-text">
+              {model.acquisitionIntelligence.rules.join(' ')}
+            </p>
+            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="control-acquisition-intelligence-basis">
+              {model.acquisitionIntelligence.basis} {model.acquisitionIntelligence.disclaimer}
+            </p>
+          </WorkspaceSection>
           </>
         )}
 

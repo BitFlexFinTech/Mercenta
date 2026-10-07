@@ -502,6 +502,18 @@ try {
     'scripts/validate-integrated-loop.mjs',
     'scripts/reconcile-integrated-loop-registry.cjs',
   ];
+  /**
+   * §PHASE 10 (2026-10-08) — ACQUISITION INTELLIGENCE AT SCALE adds a NEW file under the E7
+   * PROTECTED `src/lib/intelligence/` prefix (it modifies none) and DECLARES it here, exactly
+   * as the §PHASE 12 increment did. The contract is unchanged: an UNEXPLAINED protected change
+   * still fails.
+   */
+  const PHASE10_ACQUISITION_INTELLIGENCE_DECLARED = [
+    'src/config/acquisitionIntelligence.ts',
+    'src/lib/intelligence/acquisitionIntelligence.ts',
+    'scripts/validate-acquisition-intelligence.mjs',
+    'scripts/reconcile-acquisition-intelligence-registry.cjs',
+  ];
   // §Phase 4 — canonical 20-real-brand universe. The file-touch proxy needs the
   // same extension M13/E8 gave it before: the working tree now legitimately
   // contains the Phase-4 surface (canonical SSOT + every consumer repointed).
@@ -2088,7 +2100,10 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
           !PHASE11_FOUNDER_INTELLIGENCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §PHASE 12 — the integrated loop's declared surface. */
           !PHASE12_INTEGRATED_LOOP_DECLARED.includes(f) &&
-          !PHASE12_INTEGRATED_LOOP_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !PHASE12_INTEGRATED_LOOP_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §PHASE 10 — acquisition intelligence at scale's declared surface. */
+          !PHASE10_ACQUISITION_INTELLIGENCE_DECLARED.includes(f) &&
+          !PHASE10_ACQUISITION_INTELLIGENCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2690,6 +2705,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/finance/financierUniverse.ts',
     'scripts/validate-financier-universe.mjs',
     'scripts/reconcile-financier-universe-registry.cjs',
+    /**
+     * §PHASE 10 (2026-10-08) — ACQUISITION INTELLIGENCE AT SCALE. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE10_ACQUISITION_INTELLIGENCE_SCOPE. Same mechanism:
+     * a changed source/test file outside EVERY declared set is refused. The intelligence is
+     * internal — the surface lives on the Super-Admin Founder Control Centre (Business view).
+     */
+    'src/config/acquisitionIntelligence.ts',
+    'src/lib/intelligence/acquisitionIntelligence.ts',
+    'scripts/validate-acquisition-intelligence.mjs',
+    'scripts/reconcile-acquisition-intelligence-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
