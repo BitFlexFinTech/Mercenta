@@ -3034,6 +3034,25 @@ const PHASE11_FOUNDER_INTELLIGENCE_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 12 (2026-10-06) — the INTEGRATED ACQUISITION → CAPITAL → OPERATIONS LOOP. Same
+ * remedy as §PHASE 11: the increment ADDS two NEW files (a config owner and a pure resolver)
+ * and DECLARES them here. F6's contract is UNCHANGED — a working-tree file in NO declared set
+ * still fails.
+ */
+const PHASE12_INTEGRATED_LOOP_SCOPE = new Set([
+  'src/config/integratedLoop.ts',                        /* NEW — the ONE loop owner */
+  'src/lib/intelligence/integratedLoop.ts',              /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',              /* computes + exposes the loop summary */
+  'src/components/admin/FounderControlCentre.tsx',       /* renders the integrated loop section */
+  'scripts/validate-integrated-loop.mjs',                /* NEW — this phase's gate */
+  'scripts/reconcile-integrated-loop-registry.cjs',      /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',                /* test 21 renders the loop section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3296,7 +3315,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 11 — the founder intelligence expansion's declared surface (see above). */
         PHASE11_FOUNDER_INTELLIGENCE_SCOPE.has(p) ||
-        [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 12 — the integrated loop's declared surface (see above). */
+        PHASE12_INTEGRATED_LOOP_SCOPE.has(p) ||
+        [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3414,7 +3436,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 11 — same declaration, second protected-path check (F5b). */
         PHASE11_FOUNDER_INTELLIGENCE_SCOPE.has(p) ||
-        [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 12 — same declaration, second protected-path check (F5b). */
+        PHASE12_INTEGRATED_LOOP_SCOPE.has(p) ||
+        [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -3842,7 +3867,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 11 — the founder intelligence expansion (see above). */
           PHASE11_FOUNDER_INTELLIGENCE_SCOPE.has(p) ||
-          [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 12 — the integrated loop (see above). */
+          PHASE12_INTEGRATED_LOOP_SCOPE.has(p) ||
+          [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

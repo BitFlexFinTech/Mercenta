@@ -357,6 +357,7 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
         )}
 
         {section === 'business' && (
+          <>
           <WorkspaceSection
             title="Founder intelligence"
             description="The founder's standing questions, declared once. Every answer names the CANONICAL owner that deterministically computes its data — AI may SUMMARISE an answer but never supply the data behind one, so canonical deterministic data stays the source of truth."
@@ -387,6 +388,54 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.founderIntelligence.basis} {model.founderIntelligence.disclaimer}
             </p>
           </WorkspaceSection>
+
+          {/* §PHASE 12 — the integrated acquisition → capital → operations loop. The
+              end-to-end journey declared once; each stage names the canonical owner that
+              deterministically owns it. The loop is forward-only and closes into the
+              founder's own intelligence. Internal: Super-Admin only. */}
+          <WorkspaceSection
+            title="Integrated loop (Phase 12)"
+            description="The end-to-end acquisition → capital → operations loop, declared once: discovery → Explore UK Market Fit → qualification → outreach → onboarding → product readiness → commercial terms → Mercenta purchase → supply-route analysis → capital requirement → financing eligibility → financing → supplier purchase → Vendor operations → PO → fulfilment → invoice → payment → repayment → margin → Founder Intelligence. Every stage names the CANONICAL owner that deterministically owns its behaviour; the moves are DERIVED from the ordered list, so the loop is forward-only and closes into the founder's own intelligence — an illegal move is refused rather than guessed."
+            domain="orders"
+            action={
+              <span className="text-ds-micro text-zinc-500" data-testid="control-integrated-loop-status">
+                {model.integratedLoop.stageCount} stages · forward-only · closes into Founder Intelligence
+              </span>
+            }
+          >
+            <ol className="flex flex-wrap items-center gap-1" data-testid="control-integrated-loop">
+              {model.integratedLoop.stages.map((s, i) => (
+                <li key={s.id} className="flex items-center gap-1">
+                  <span className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-ds-micro text-zinc-300">
+                    {s.label}
+                  </span>
+                  {i < model.integratedLoop.stageCount - 1 && (
+                    <span className="text-ds-micro text-zinc-600">→</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+            <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="control-integrated-loop-stages">
+              {model.integratedLoop.stages.map((s) => (
+                <li key={s.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                  <p className="text-ds-label text-zinc-200">{s.label}</p>
+                  <p className="mt-1 text-ds-micro text-zinc-500">{s.about}</p>
+                  <p className="mt-1 font-mono text-ds-micro text-zinc-600">{s.dataOwner}</p>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-integrated-loop-refusal">
+              Fail-closed proof: {model.integratedLoop.exampleRefusal.from} → {model.integratedLoop.exampleRefusal.to} →{' '}
+              {model.integratedLoop.exampleRefusal.refusal}. {model.integratedLoop.exampleRefusal.reason}
+            </p>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-integrated-loop-rule">
+              {model.integratedLoop.rules.join(' ')}
+            </p>
+            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="control-integrated-loop-basis">
+              {model.integratedLoop.basis} {model.integratedLoop.disclaimer}
+            </p>
+          </WorkspaceSection>
+          </>
         )}
 
         {section === 'brands' && (

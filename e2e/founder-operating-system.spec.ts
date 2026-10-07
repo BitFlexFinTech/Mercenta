@@ -650,6 +650,28 @@ test.describe('Founder Operating System — Control Centre', () => {
     expect(external).toEqual([]);
     expect(pageErrors).toEqual([]);
   });
+
+  /**
+   * §PHASE 12 — the integrated acquisition → capital → operations loop. The Business view must
+   * render the end-to-end loop declared once, each stage naming the canonical owner that
+   * deterministically owns it, with the fail-closed proof (an illegal move is refused) computed
+   * LIVE from the resolver. The loop is forward-only and closes into founder intelligence.
+   */
+  test('21. the integrated loop renders on the Business view with the forward-only rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+
+    const stages = page.getByTestId('control-integrated-loop-stages').locator('li');
+    await expect(stages).toHaveCount(21);
+    await expect(page.getByTestId('control-integrated-loop-refusal')).toContainText('INTEGRATED_LOOP_TRANSITION_ILLEGAL');
+    await expect(page.getByTestId('control-integrated-loop-rule')).toContainText('forward-only');
+    await expect(page.getByTestId('control-integrated-loop-basis')).toContainText('deterministic');
+
+    await page.screenshot({ path: `${SHOTS}/21-integrated-loop.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
 });
 
 test.describe('Founder Operating System — RBAC', () => {

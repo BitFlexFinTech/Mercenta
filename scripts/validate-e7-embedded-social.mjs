@@ -490,6 +490,18 @@ try {
     'scripts/validate-founder-intelligence.mjs',
     'scripts/reconcile-founder-intelligence-registry.cjs',
   ];
+  /**
+   * §PHASE 12 (2026-10-06) — the INTEGRATED ACQUISITION → CAPITAL → OPERATIONS LOOP adds a NEW
+   * file under the E7 PROTECTED `src/lib/intelligence/` prefix (it modifies none) and DECLARES it
+   * here, exactly as the §PHASE 11 increment did. The contract is unchanged: an UNEXPLAINED
+   * protected change still fails.
+   */
+  const PHASE12_INTEGRATED_LOOP_DECLARED = [
+    'src/config/integratedLoop.ts',
+    'src/lib/intelligence/integratedLoop.ts',
+    'scripts/validate-integrated-loop.mjs',
+    'scripts/reconcile-integrated-loop-registry.cjs',
+  ];
   // §Phase 4 — canonical 20-real-brand universe. The file-touch proxy needs the
   // same extension M13/E8 gave it before: the working tree now legitimately
   // contains the Phase-4 surface (canonical SSOT + every consumer repointed).
@@ -2073,7 +2085,10 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
           !PHASE13_AMAZON_GOVERNANCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §PHASE 11 — the founder intelligence expansion's declared surface. */
           !PHASE11_FOUNDER_INTELLIGENCE_DECLARED.includes(f) &&
-          !PHASE11_FOUNDER_INTELLIGENCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !PHASE11_FOUNDER_INTELLIGENCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §PHASE 12 — the integrated loop's declared surface. */
+          !PHASE12_INTEGRATED_LOOP_DECLARED.includes(f) &&
+          !PHASE12_INTEGRATED_LOOP_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2655,6 +2670,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/intelligence/founderIntelligence.ts',
     'scripts/validate-founder-intelligence.mjs',
     'scripts/reconcile-founder-intelligence-registry.cjs',
+    /**
+     * §PHASE 12 (2026-10-06) — the INTEGRATED ACQUISITION → CAPITAL → OPERATIONS LOOP. Fuller
+     * note in `validate-e6-brand-surfaces.mjs` §PHASE12_INTEGRATED_LOOP_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is refused. The loop is internal — the
+     * surface lives on the Super-Admin Founder Control Centre (Business view).
+     */
+    'src/config/integratedLoop.ts',
+    'src/lib/intelligence/integratedLoop.ts',
+    'scripts/validate-integrated-loop.mjs',
+    'scripts/reconcile-integrated-loop-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
