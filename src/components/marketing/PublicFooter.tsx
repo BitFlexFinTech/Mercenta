@@ -114,7 +114,16 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
           ))}
         </div>
 
-        <div className="border-t border-white/[0.06] pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        {/*
+          §FOOTER COPYRIGHT (2026-10-07, OWNER DIRECTIVE) — the copyright line is
+          CENTRED in the footer. It previously sat on the right of a
+          `justify-between` row; the bottom bar is now a centred, stacked column
+          so the notice "© <year> <brand>. All rights reserved." reads in the
+          middle of the footer. The year stays DERIVED (`new Date().getFullYear()`)
+          and the brand stays READ from `src/config/brand.ts`, so the line can
+          never go stale or disagree with the rest of the site.
+        */}
+        <div className="border-t border-white/[0.06] pt-6 flex flex-col items-center gap-2 text-center">
           {/*
             §PUBLIC MESSAGING (2026-09-28) — THE LEGAL LINE CARRIES THE COMPANY'S
             PUBLIC IDENTITY AND NOTHING ELSE. It previously read "… · UK Importer
@@ -124,7 +133,7 @@ export function PublicFooter({ onNavigate, onOpenPortal }: PublicFooterProps) {
             record), so the footer, the privacy policy and the terms cannot
             disagree, and nothing internal can be retyped here.
           */}
-          <div className="font-mono text-ds-micro text-steel tracking-wide text-center md:text-left">
+          <div className="font-mono text-ds-micro text-steel tracking-wide">
             {publicCompanyLine()}
           </div>
           <div className="font-mono text-ds-micro text-steel">
