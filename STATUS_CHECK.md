@@ -4584,3 +4584,52 @@ invariant failed **1**); both files restored **byte-identical** (owner sha256
 the registry's `not_started` build rows (**16** remain, e.g. `phase10-uk-opportunity-states` /
 `phase5-tutorial-recording`). No credential required.
 
+## §PHASE 10 — THE UK OPPORTUNITY STATES AT SCALE (EVIDENCE PER STATE + FAIL-CLOSED ASSERTION) (2026-10-08)
+
+**REQUEST MODE.** IMPLEMENT · EXPERTS: senior-software-engineer + senior-software-architect · WHY: the
+recorded `NEXT TASK` authorised picking the next non-credential build item; `phase10-uk-opportunity-states`
+is a Phase 10 roadmap row (the six UK opportunity states A–F at scale).
+
+**BUILT.** The registry row `phase10-uk-opportunity-states` recorded that the six UK opportunity states A–F
+must operate AT SCALE, feeding UK Market Fit → qualification → outreach; §PHASE 1 already implements the
+classification and PHASE 10 scales the EVIDENCE behind it.
+- `src/config/ukOpportunityStates.ts` (**NEW**, the ONE owner) — the four evidence sources that may back a
+  state (each REUSING a canonical integration-registry provider id: amazon_sp_api · keepa · firecrawl ·
+  companies_house), the chain the states feed (stage ids REUSED from the integrated loop: uk-market-fit →
+  qualification → outreach), and the SCALED EVIDENCE for each of the six states A–F (ids and labels REUSED
+  from `UK_PRESENCE_CLASSES`); a module-load guard REFUSES a duplicate/empty taxonomy, an evidence source
+  with no provider id, a state that is not one of the six classes, a state whose label differs from the
+  class label, and a state naming an undeclared evidence source.
+- `src/lib/intelligence/ukOpportunityStates.ts` (**NEW**, the pure fail-closed resolver) — a state may be
+  asserted ONLY when it names a DECLARED evidence source and EVERY one of its sources is backed by a
+  genuinely available provider: an unknown state REFUSED `STATE_UNKNOWN`, no evidence REFUSED
+  `STATE_REQUIRES_EVIDENCE`, an unknown evidence source REFUSED `STATE_EVIDENCE_SOURCE_UNKNOWN`, and no
+  available provider REFUSED `STATE_UNAVAILABLE_WITHOUT_EVIDENCE` (never fabricated). Availability is
+  INJECTED, so the resolver is PURE; the default is "nothing available" — nothing is asserted. Asserted
+  count: ZERO.
+- USED: `controlCentre.ts` exposes `ukOpportunityStates` (+ 2 metrics + a dataSources entry);
+  `FounderControlCentre.tsx` renders a **UK opportunity states at scale (Phase 10)** section (Business
+  view, Super-Admin only). NEW gate `scripts/validate-uk-opportunity-states.mjs` (`npm run
+  validate:uk-opportunity-states`, **34 assertions**). The gate proves the states REUSE the canonical
+  presence classes, the evidence sources REUSE canonical providers, the chain REUSES the integrated-loop
+  stage ids, and NO brand import. Surface declared in BOTH scope guards
+  (`PHASE10_UK_OPPORTUNITY_STATES_SCOPE` in E6 F5/F5b/F6; `PHASE10_UK_OPPORTUNITY_STATES_DECLARED` + allowed
+  entries in E7). Registry row `not_started` → `built` (built 166→167, not_started 16→15).
+
+**COMMITTED.** app-runtime commit **`7197925`**, pushed to `origin/redesign/foundation`; the state/docs
+commit that carries this block follows. Tree clean.
+
+**TESTED.** typecheck **0** (all 4 projects) · lint **0** · build ✓ · `validate:uk-opportunity-states` **34/34**
+· `validate:all` **186 PASS / 0 FAIL** · E6 PASS · E7 PASS (121) · browser `founder-operating-system.spec.ts`
+**24 passed** · LIVE `verify:live` **267 PASS / 0 FAIL** + the live `assets/FounderControlCentre-CSnH9DQU.js`
+(209,536 bytes) BYTE-IDENTICAL to the local build (sha256
+`8ee4323b638dfd411bdc5c6eafcc69b06fade1da4e7483d5349dc50f966d8b06`). The new gate was **MUTATION-PROVED
+TWICE** (disabling the unavailable-provider refusal failed **3** assertions; flipping the reuse-classes
+pinned invariant failed **1**); both files restored **byte-identical** (owner sha256
+`5fa1ed0095605766e3d82816c39ad76dca642d8f042ae6fa456b19003a7a96b9`; resolver sha256
+`443b01f92df9c4fd3259166fde0b18f0052dae9aea4224bbca3b5d6dbcc2f978`).
+
+**RESULT.** DONE. `phase10-uk-opportunity-states` is COMPLETE; the next work is order item 2 continued from
+the registry's `not_started` build rows (**15** remain, e.g. `phase5-tutorial-recording` and the
+`discovered-*` architecture increments). No credential required.
+
