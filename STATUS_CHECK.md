@@ -4470,3 +4470,68 @@ local verified build.
 **NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; **19** `not_started` rows remain. No
 credential required.
 
+
+---
+
+## §PHASE 7 — THE FINANCIER UNIVERSE (FINANCING-PARTNER RECORD + SOURCE-EVIDENCE DISCIPLINE) (2026-10-07)
+
+**REQUEST MODE.** IMPLEMENT · EXPERTS: senior-software-engineer + senior-software-architect · WHY: the
+recorded `NEXT TASK` authorised picking the next non-credential build item; `phase7-financier-universe-research`
+is named first among the remaining rows and is pointed at by three existing modules.
+
+**BUILT.** The registry row `phase7-financier-universe-research` recorded the REAL financing-partner universe
+with the full financier record, source evidence and a last-researched date, and three modules
+(`src/config/financierLifecycle.ts`, `src/config/founderOutreach.ts`, `src/config/pitchWorkspace.ts`)
+DELIBERATELY held no provider and pointed at it as the missing owner.
+- `src/config/financierUniverse.ts` (**NEW**, the ONE owner) — the NINE provider types (bank · PO / inventory /
+  trade / receivables finance · working capital · SME finance · e-commerce finance · alternative credit), the
+  FIVE markets (UK · Europe · Africa · US · other), the FIVE-FIELD financier record (legal name · provider type ·
+  markets · the named source evidence · the last-researched date) and the research discipline declared ONCE; a
+  module-load guard REFUSES a real (non-illustrative) entry carrying no source or no last-researched date.
+- `src/lib/finance/financierUniverse.ts` (**NEW**, the pure fail-closed resolver) — a provider enters ONLY with a
+  NAMED, PUBLISHED source and a LAST-RESEARCHED date: an unknown provider type REFUSED
+  `FINANCIER_PROVIDER_TYPE_UNKNOWN`, an unknown/missing market REFUSED `FINANCIER_MARKET_UNKNOWN`, an illustrative
+  placeholder REFUSED `FINANCIER_IS_ILLUSTRATIVE_NOT_A_RESEARCHED_PROVIDER`, an entry with no named source REFUSED
+  `FINANCIER_REQUIRES_NAMED_SOURCE` and an entry with no research date REFUSED `FINANCIER_REQUIRES_RESEARCH_DATE`.
+  The real universe holds ZERO providers — nothing is invented (this is the platform's own evidence rule applied
+  to financing partners). `buildFinancierUniverseSummary` computes the summary + a LIVE fail-closed example.
+- **USED:** `controlCentre.ts` exposes `financierUniverse` (+ 2 metrics + a dataSources entry);
+  `FounderControlCentre.tsx` renders a **Financier universe (Phase 7)** section on the Finance view (Super-Admin
+  only).
+- **Gated** by NEW `scripts/validate-financier-universe.mjs` (`npm run validate:financier-universe`, **34
+  assertions**), **mutation-proved TWICE** (removing the illustrative refusal failed 3 assertions; making the
+  `source` field no longer required failed 1 assertion; both restored byte-identical,
+  `src/config/financierUniverse.ts` sha256 `151b9746…`, `src/lib/finance/financierUniverse.ts` sha256
+  `c15e5d76…`). Surface declared in the E6 scope guard (`PHASE7_FINANCIER_UNIVERSE_SCOPE`) and the E7 `allowed`
+  list (the files touch no E7 protected prefix). Browser spec `e2e/founder-operating-system.spec.ts` test 22 PASS
+  (22/22 in the spec).
+- `requirements-registry.json` — row `phase7-financier-universe-research` `not_started` → `built` (old value
+  inline in `_audit_note`; `status_counts` built 164→165, not_started 18→17); the row's evidence reconciled to the
+  real artefacts. Reconciled by `scripts/reconcile-financier-universe-registry.cjs`.
+
+**TESTED.** typecheck **0** (all 4 projects) · lint **0** · build ✓ · `validate:financier-universe` PASS (34,
+mutation-proved twice) · `validate:all` **184 PASS / 0 FAIL** · E6/E7 scope guards PASS · browser
+`founder-operating-system.spec.ts` **22 passed** (full spec) · LIVE `verify:live` **267 PASS / 0 FAIL** · the
+deployed `assets/FounderControlCentre-CIa130EO.js` (184,559 bytes, sha256 `e51dd59c…`) BYTE-IDENTICAL to the
+local verified build.
+
+**DEPLOY NOTE.** The first `deploy-demo.sh` FTP upload was interrupted, which left `AdminShell-DZ67WxeY.js`
+temporarily served as the SPA HTML fallback and made the authenticated-shell live checks time out. A clean, complete
+re-deploy (5,254,769 bytes, “Done.”) restored it; `verify:live` then passed 267/0. This was a deployment-completeness
+issue, NOT a code regression — the new bundle was byte-identical to the local build throughout.
+
+**RESULT.** **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED** (app-runtime commit `72211e1`, deployed to
+`demo.mercenta.co.uk`, live-verified 267/0).
+
+**DEFECT INVENTORY.**
+- **NO defect introduced.** §PHASE 7 is a pure deterministic config + resolver + a Control-Centre surface, with no
+  credential and no external dependency.
+- **HONESTY (by design, not a defect):** the universe re-derives NO figure of its own and holds ZERO real providers
+  — a provider enters only with a named, published source and a last-researched date, so no provider is ever
+  invented. Populating it with real partners is an explicitly-pending DATA action (research), not a build task.
+- **Deployment gap (FIXED in-session):** the interrupted upload was corrected by a complete re-deploy; `verify:live`
+  is green.
+
+**NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; **17** `not_started` rows remain. No credential
+required.
+
