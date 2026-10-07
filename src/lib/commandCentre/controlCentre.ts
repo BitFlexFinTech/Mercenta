@@ -111,6 +111,10 @@ import {
   type LocalisationSeoSummary,
 } from '@/lib/localisation/localisationSeo';
 import {
+  buildAmazonGovernanceSummary,
+  type AmazonGovernanceSummary,
+} from '@/lib/intelligence/amazonRelationshipGovernance';
+import {
   buildCountryFrameworkSummary,
   type CountryFrameworkSummary,
 } from '@/lib/geography/resolveCountry';
@@ -383,6 +387,17 @@ export interface ControlCentreModel {
    */
   localisationSeo: LocalisationSeoSummary;
   /**
+   * §PHASE 13 — the Amazon relationship governance. The cross-cutting governance over the
+   * authoritative sources of Mercenta's retail-channel relationship (vendor agreement, current
+   * policies, additional terms, channel communications, programme documentation, API agreements,
+   * trademark permissions, written permissions, account instructions), declared by the ONE owner
+   * (`src/config/amazonRelationshipGovernance.ts`) and applied by the pure resolver
+   * (`src/lib/intelligence/amazonRelationshipGovernance.ts`). A claim may rest only on a source
+   * actually held AND verified; nothing is verified with the channel today, so every relationship
+   * claim fails closed. Super-Admin view.
+   */
+  amazonGovernance: AmazonGovernanceSummary;
+  /**
    * §PHASE 9 — the country framework. Every country is classified into one or more
    * of the SIX roles (`src/config/countryFramework.ts`), resolved purely by
    * `src/lib/geography/resolveCountry.ts`. The marketplace role is FACTUAL and
@@ -575,6 +590,13 @@ export function buildControlCentre(): ControlCentreModel {
      alternate is emitted only for a served content locale and only for a public route.
      Nothing here invents a locale or a page. */
   const localisationSeo = buildLocalisationSeoSummary();
+  /* ── §PHASE 13 — the Amazon relationship governance ──
+     The authoritative-source universe and the fail-closed governance rule, from the ONE owner
+     (`src/config/amazonRelationshipGovernance.ts`) through the pure resolver
+     (`src/lib/intelligence/amazonRelationshipGovernance.ts`). A claim may rest only on a source
+     actually held AND verified; nothing is verified with the channel today. Nothing here invents
+     a permission or a source. */
+  const amazonGovernance = buildAmazonGovernanceSummary();
   /* ── §PHASE 9 — the country framework ──
      Every country's roles come from the ONE owner (`src/config/countryFramework.ts`)
      through the pure resolver (`src/lib/geography/resolveCountry.ts`). The
@@ -771,6 +793,8 @@ export function buildControlCentre(): ControlCentreModel {
       metric('comm-seo-served-locales', 'Content languages served', String(localisationSeo.servedContentLocales.length), 'info', 'hreflang: en-GB + x-default', `Mercenta publishes content in ${localisationSeo.servedContentLocales.join(', ')} only, so every hreflang alternate is a self-reference — no page is advertised that is not actually served.`, 'control_centre'),
       metric('comm-seo-formats', 'Locale formats', String(localisationSeo.formatCount), 'info', 'number · date · time', 'Every supported locale carries a declared number/date/time convention; the separators are read from the platform’s own Intl runtime, never hand-typed.', 'control_centre'),
       metric('comm-seo-timezones', 'Market timezones', String(localisationSeo.marketCount), 'info', 'canonical source markets', 'Every canonical source market carries a declared IANA reference timezone, so a reader in that market is shown times in their own zone.', 'control_centre'),
+      metric('gov-channel-sources', 'Channel authoritative sources', String(amazonGovernance.sourceCount), 'info', 'vendor agreement · policies · permissions', 'The nine document classes Mercenta’s retail-channel relationship rests on are declared once; each names the codebase owner of the behaviour it governs.', 'control_centre'),
+      metric('gov-channel-verified', 'Verified sources', String(amazonGovernance.verifiedCount), amazonGovernance.verifiedCount === 0 ? 'warning' : 'success', 'fail-closed', 'Nothing is verified with the channel today, so every relationship claim fails closed — a claim may rest only on a source actually held and verified.', 'control_centre'),
       /* §PHASE 9 — the country framework: the marketplace role is a cited fact and Zimbabwe is never a marketplace. */
       metric('comm-countries', 'Countries classified', String(countryFramework.countryCount), 'info', `${countryFramework.marketplaceCount} marketplace(s)`, 'Every country is classified into one or more of the six canonical roles from the ONE country-framework owner.', 'control_centre'),
       metric('comm-zimbabwe-marketplace', 'Zimbabwe a marketplace', countryFramework.zimbabweNeverMarketplace ? 'No' : 'YES — DEFECT', countryFramework.zimbabweNeverMarketplace ? 'success' : 'danger', 'Operating/home market', 'Zimbabwe is an operating/home brand-origin market and is never represented as a marketplace (pinned invariant).', 'control_centre'),
@@ -922,6 +946,7 @@ export function buildControlCentre(): ControlCentreModel {
     objectResolution,
     localisation,
     localisationSeo,
+    amazonGovernance,
     countryFramework,
     learningLoop,
     onboardingCurriculum,
@@ -961,6 +986,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
       { label: 'Localization / SEO / hreflang (Phase 9)', value: 'src/config/localisationSeo.ts + src/lib/localisation/localisationSeo.ts — the number/date/time conventions (separators read from Intl), the per-market IANA timezones, the localized-URL strategy and the FAIL-CLOSED hreflang rule: an alternate is emitted only for a served content locale and only for a public route, with x-default self-referencing the served default' },
+      { label: 'Retail-channel relationship governance (Phase 13)', value: 'src/config/amazonRelationshipGovernance.ts + src/lib/intelligence/amazonRelationshipGovernance.ts — the cross-cutting governance over the nine authoritative sources (vendor agreement, current policies, additional terms, channel communications, programme documentation, API agreements, trademark permissions, written permissions, account instructions) and the FAIL-CLOSED rule over them: a claim may rest only on a source actually held AND verified, an unknown source is refused, and the programme status is reused from the wording owner (`src/lib/intelligence/amazonWording.ts`) rather than held twice' },
       { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },
       { label: 'Brand learning loop', value: 'src/config/learningLoop.ts + src/lib/education/resolveLearningProgress.ts — the LEARN → WATCH → DO → VALIDATE → COMPLETE loop over the canonical educational gaps; LEARN/WATCH reuse the canonical Knowledge Base article and guided tour, and VALIDATE is a gate satisfied only by a real signal' },
       { label: 'Onboarding academy curriculum', value: 'src/config/onboardingCurriculum.ts + src/lib/education/resolveCurriculum.ts — the five canonical stages (Understand Mercenta · Commercial · Product & Packaging · Product Readiness · Operations) plus the final readiness stage, over the SAME canonical educational gaps; the final readiness stage is reached only once every teaching stage is complete' },

@@ -2977,6 +2977,35 @@ const PHASE9_LOCALIZATION_SEO_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 13 — AMAZON RELATIONSHIP GOVERNANCE (2026-10-06).
+ *
+ * The row `phase13-amazon-relationship-governance` records the cross-cutting governance over
+ * the authoritative sources of Mercenta's retail-channel relationship (vendor agreement,
+ * current policies, additional terms, channel communications, programme documentation, API
+ * agreements, trademark permissions, written permissions, account instructions). This
+ * increment builds the ONE owner (`src/config/amazonRelationshipGovernance.ts`), the pure
+ * fail-closed resolver (`src/lib/intelligence/amazonRelationshipGovernance.ts`), surfaces it
+ * on the Super-Admin Founder Control Centre and gates it.
+ *
+ * NOTE ON THE PROTECTED PREFIX: `src/lib/intelligence/` is a PROTECTED prefix, but this
+ * increment ADDS a NEW file there (it modifies none) and DECLARES it here — exactly as
+ * `src/lib/intelligence/listingAnalyzer.ts` did. F6's contract is UNCHANGED: a working-tree
+ * file in NO declared set still fails.
+ */
+const PHASE13_AMAZON_GOVERNANCE_SCOPE = new Set([
+  'src/config/amazonRelationshipGovernance.ts',          /* NEW — the ONE governance owner */
+  'src/lib/intelligence/amazonRelationshipGovernance.ts', /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',              /* computes + exposes the governance summary */
+  'src/components/admin/FounderControlCentre.tsx',       /* renders the Amazon governance section */
+  'scripts/validate-amazon-governance.mjs',              /* NEW — this phase's gate */
+  'scripts/reconcile-amazon-governance-registry.cjs',    /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',                /* test 19 renders the governance section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3233,7 +3262,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH3B_FOUNDER_CLOSING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §BATCH 3c part 2b — the functional-parity gate (see above). First protected-path check (F5). */
         BATCH3C_PARITY_SCOPE.has(p) ||
-        [...BATCH3C_PARITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...BATCH3C_PARITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 13 — the Amazon relationship governance's declared surface (see above). */
+        PHASE13_AMAZON_GOVERNANCE_SCOPE.has(p) ||
+        [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3345,7 +3377,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH3C_PARITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PUBLIC MESSAGING — same declaration, second protected-path check (F5b). */
         PUBLIC_MESSAGING_SCOPE.has(p) ||
-        [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 13 — same declaration, second protected-path check (F5b). */
+        PHASE13_AMAZON_GOVERNANCE_SCOPE.has(p) ||
+        [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -3767,7 +3802,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE7_FOUNDER_OUTREACH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 9 — localization / SEO / hreflang (see above). */
           PHASE9_LOCALIZATION_SEO_SCOPE.has(p) ||
-          [...PHASE9_LOCALIZATION_SEO_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE9_LOCALIZATION_SEO_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 13 — Amazon relationship governance (see above). */
+          PHASE13_AMAZON_GOVERNANCE_SCOPE.has(p) ||
+          [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

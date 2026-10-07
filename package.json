@@ -119,7 +119,8 @@
     "validate:financier-lifecycle": "node scripts/validate-financier-lifecycle.mjs",
     "validate:founder-outreach": "node scripts/validate-founder-outreach.mjs",
     "validate:pitch-workspace": "node scripts/validate-pitch-workspace.mjs",
-    "validate:localisation-seo": "node scripts/validate-localisation-seo.mjs"
+    "validate:localisation-seo": "node scripts/validate-localisation-seo.mjs",
+    "validate:amazon-governance": "node scripts/validate-amazon-governance.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

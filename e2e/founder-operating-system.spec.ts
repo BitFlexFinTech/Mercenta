@@ -540,6 +540,37 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 13 — AMAZON RELATIONSHIP GOVERNANCE. The Commercial view must render the
+   * governance over the nine authoritative sources with the fail-closed rule enforced: the
+   * programme status is honestly unconfirmed, no source is verified, and the live example
+   * REFUSES a claim that rests on an unverified source.
+   */
+  test('19. the Amazon relationship governance renders with the fail-closed rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Commercial/ }).click();
+
+    const status = page.getByTestId('amazon-governance-status');
+    await expect(status).toBeVisible();
+    await expect(status).toContainText('not_confirmed_with_amazon');
+    await expect(status).toContainText('0 verified');
+
+    const sources = page.getByTestId('amazon-governance-sources');
+    await expect(sources).toContainText('vendor-agreement');
+    await expect(sources).toContainText('not_held');
+
+    // The fail-closed rule is enforced live, not merely written.
+    await expect(page.getByTestId('amazon-governance-refusal')).toContainText('CLAIM_REQUIRES_VERIFIED_SOURCE');
+    await expect(page.getByTestId('amazon-governance-rule')).toContainText('verified');
+    await expect(page.getByTestId('amazon-governance-basis')).toContainText('fails');
+
+    await page.screenshot({ path: `${SHOTS}/19-amazon-governance.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

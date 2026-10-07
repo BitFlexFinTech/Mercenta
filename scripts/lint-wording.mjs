@@ -98,6 +98,17 @@ const EXCLUDED = [
   // imports the owner or its resolver, so it can never become a rendered-copy
   // loophole. Every outward-facing surface stays fully linted.
   'src/config/countryFramework.ts',
+  // §PHASE 13 (2026-10-06) — THE AMAZON RELATIONSHIP GOVERNANCE. Same class as
+  // `amazonWording.ts` / `claimsRegistry.ts` / `countryFramework.ts` above: it is the
+  // internal DEFINITIONS owner of the authoritative-source universe, whose source LABELS
+  // necessarily name the retail channel (the vendor agreement IS Amazon Vendor Central's;
+  // the data-must-be-real rule requires the real document be named) in order to define what
+  // governs the relationship. It renders nothing a brand can see; its summary is drawn ONLY
+  // on the Super-Admin Control Centre. Excluding it does NOT weaken the gate —
+  // `scripts/validate-amazon-governance.mjs` (§F) asserts NO brand-facing component imports
+  // the owner or its resolver, so it can never become a rendered-copy loophole. Every
+  // outward-facing surface stays fully linted.
+  'src/config/amazonRelationshipGovernance.ts',
 ];
 
 function isExcluded(rel) {

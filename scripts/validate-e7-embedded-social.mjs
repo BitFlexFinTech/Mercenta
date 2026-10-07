@@ -466,6 +466,18 @@ try {
     'src/components/design/',
     'src/components/margaret/',
   ];
+  /**
+   * §PHASE 13 (2026-10-06) — the AMAZON RELATIONSHIP GOVERNANCE adds a NEW file under the
+   * E7 PROTECTED `src/lib/intelligence/` prefix (it modifies none) and DECLARES it here,
+   * exactly as `listingAnalyzer.ts` and the Founders OS layers did. The contract is unchanged:
+   * an UNEXPLAINED protected change still fails.
+   */
+  const PHASE13_AMAZON_GOVERNANCE_DECLARED = [
+    'src/config/amazonRelationshipGovernance.ts',
+    'src/lib/intelligence/amazonRelationshipGovernance.ts',
+    'scripts/validate-amazon-governance.mjs',
+    'scripts/reconcile-amazon-governance-registry.cjs',
+  ];
   // §Phase 4 — canonical 20-real-brand universe. The file-touch proxy needs the
   // same extension M13/E8 gave it before: the working tree now legitimately
   // contains the Phase-4 surface (canonical SSOT + every consumer repointed).
@@ -2043,7 +2055,10 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
            * protected path, but its declared surface is accepted here as every phase's is.
            */
           !BATCH3C_PARITY_DECLARED.includes(f) &&
-          !BATCH3C_PARITY_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !BATCH3C_PARITY_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §PHASE 13 — the Amazon relationship governance's declared surface. */
+          !PHASE13_AMAZON_GOVERNANCE_DECLARED.includes(f) &&
+          !PHASE13_AMAZON_GOVERNANCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2605,6 +2620,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/seo/routeMetadata.ts',
     'scripts/validate-localisation-seo.mjs',
     'scripts/reconcile-localisation-seo-registry.cjs',
+    /**
+     * §PHASE 13 (2026-10-06) — the AMAZON RELATIONSHIP GOVERNANCE. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE13_AMAZON_GOVERNANCE_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is refused. The governance is
+     * internal — the surface lives on the Super-Admin Founder Control Centre.
+     */
+    'src/config/amazonRelationshipGovernance.ts',
+    'src/lib/intelligence/amazonRelationshipGovernance.ts',
+    'scripts/validate-amazon-governance.mjs',
+    'scripts/reconcile-amazon-governance-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

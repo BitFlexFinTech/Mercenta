@@ -748,6 +748,40 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
             </WorkspaceSection>
 
             <WorkspaceSection
+              title="Amazon relationship governance"
+              description="Mercenta's retail-channel relationship rests on nine authoritative documents (vendor agreement, current policies, additional terms, channel communications, programme documentation, API agreements, trademark permissions, written permissions, account instructions). A claim may rest only on a source Mercenta actually holds AND has verified — nothing is verified with the channel today, so every relationship claim fails closed."
+              domain="finance"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="amazon-governance-status">
+                  {model.amazonGovernance.programmeStatus} · {model.amazonGovernance.verifiedCount} verified / {model.amazonGovernance.sourceCount}
+                </span>
+              }
+            >
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3" data-testid="amazon-governance-sources">
+                {model.amazonGovernance.sources.map((s) => (
+                  <li key={s.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-ds-micro uppercase tracking-wide text-zinc-500">{s.id}</p>
+                      <span className={`text-ds-micro ${s.status === 'verified' ? 'text-emerald-400' : 'text-amber-400'}`}>{s.status}</span>
+                    </div>
+                    <p className="mt-1 text-ds-label text-zinc-300">{s.label}</p>
+                    <p className="mt-1 text-ds-micro text-zinc-500">{s.governs}</p>
+                    <p className="mt-1 font-mono text-ds-micro text-zinc-600">{s.canonicalOwner}</p>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="amazon-governance-refusal">
+                Fail-closed proof: “{model.amazonGovernance.exampleRefusal.claim}” → {model.amazonGovernance.exampleRefusal.refusal}. {model.amazonGovernance.exampleRefusal.reason}
+              </p>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="amazon-governance-rule">
+                {model.amazonGovernance.rules.join(' ')}
+              </p>
+              <p className="mt-2 text-ds-micro text-zinc-500" data-testid="amazon-governance-basis">
+                {model.amazonGovernance.basis} {model.amazonGovernance.disclaimer}
+              </p>
+            </WorkspaceSection>
+
+            <WorkspaceSection
               title="Country framework"
               description="Every country is classified into one or more of six roles. The marketplace role is a published fact, cited to the channel's own marketplace-IDs reference; a brand-origin market is the canonical source-market list; the priority roles are Mercenta's own decisions. Zimbabwe is an operating/home market and is never a marketplace."
               domain="finance"
