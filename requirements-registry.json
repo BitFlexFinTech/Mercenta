@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 by scripts/reconcile-uk-opportunity-states-registry.cjs after the §PHASE 10 (UK opportunity states at scale) increment (phase10-uk-opportunity-states not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-08 by scripts/reconcile-tutorial-recordings-registry.cjs after the §PHASE 5 (tutorial recordings) increment (phase5-tutorial-recording not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 167,
-      "not_started": 15,
+      "built": 168,
+      "not_started": 14,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -4127,12 +4127,13 @@
     },
     {
       "id": "phase5-tutorial-recording",
-      "description": "Phase 5 — real Mercenta UI tutorial recordings (Playwright-driven, real mouse movement and clicks), with tutorial versioning, UI-version compatibility, outdated-tutorial detection and reusable assets",
+      "description": "Phase 5 — the tutorial recordings, with tutorial versioning, UI-version compatibility, outdated-tutorial detection and reusable assets. BUILT (2026-10-08): the ONE owner `src/config/tutorialRecordings.ts` declares the ONE served UI version and the tutorial catalogue — one recording per canonical SHARED WORKFLOW (the workflow ids REUSED from `src/config/sharedWorkflows.ts`, never re-declared), each declaring the UI version it is compatible with, its own version and its reusable asset (one asset per workflow, derived from the workflow id). The pure fail-closed resolver `src/lib/education/resolveTutorialRecording.ts` applies ONE rule: a recording is CURRENT only when its asset genuinely exists AND its compatible UI version equals the served version; an unknown id, no workflow, an unknown workflow and a missing asset are ALL refused, an uncaptured asset is PENDING and a recording on an older UI version is DETECTED as OUTDATED — never shown as if it worked. Deterministic (no AI, no clock) and internal (Super-Admin only).",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "docs — roadmap §PHASE 5",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/config/tutorialRecordings.ts (the ONE owner — the served UI version + the tutorial catalogue, each recording REUSING a canonical shared workflow and declaring a compatible UI version, its version and a reusable asset); src/lib/education/resolveTutorialRecording.ts (the pure fail-closed resolver); src/lib/commandCentre/controlCentre.ts (computes + exposes tutorialRecordings); src/components/admin/FounderControlCentre.tsx (Communications → Tutorial recordings, Super-Admin only); gate scripts/validate-tutorial-recordings.mjs (npm run validate:tutorial-recordings, 35 assertions, mutation-proved TWICE); e2e/founder-operating-system.spec.ts test 25 renders it live.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 5 (tutorial recordings) (2026-10-08) — STATUS RAISED not_started -> built (old values recorded inline, never deleted). OLD status: \"not_started\". OLD description: \"Phase 5 — real Mercenta UI tutorial recordings (Playwright-driven, real mouse movement and clicks), with tutorial versioning, UI-version compatibility, outdated-tutorial detection and reusable assets\". OLD evidence: \"docs — roadmap §PHASE 5\". Built as the ONE owner + the pure fail-closed resolver: one recording per canonical shared workflow (workflow ids REUSED), each declaring the UI version it is compatible with against the ONE served version; a recording is CURRENT only when its asset genuinely exists AND its version matches the served version, an uncaptured tutorial is PENDING and an older-UI-version recording is DETECTED as OUTDATED — nothing is ever fabricated. Surface declared in the E6 scope guard (PHASE5_TUTORIAL_RECORDINGS_SCOPE)."
     },
     {
       "id": "phase5-contextual-education",

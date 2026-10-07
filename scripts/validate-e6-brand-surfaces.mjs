@@ -3029,6 +3029,34 @@ const PHASE10_UK_OPPORTUNITY_STATES_SCOPE = new Set([
 
 
 /**
+ * §PHASE 5 (2026-10-08) — THE TUTORIAL RECORDINGS — declared surface.
+ *
+ * The registry row `phase5-tutorial-recording` records that the platform needs
+ * REAL Mercenta UI tutorial recordings with tutorial VERSIONING, UI-VERSION
+ * COMPATIBILITY, OUTDATED-tutorial DETECTION and REUSABLE ASSETS. This increment
+ * adds the ONE owner (`src/config/tutorialRecordings.ts` — the served UI version
+ * + the tutorial catalogue, one recording per canonical SHARED WORKFLOW, the
+ * workflow ids REUSED) and the pure fail-closed resolver
+ * (`src/lib/education/resolveTutorialRecording.ts`), and gates them. The
+ * recordings are internal: the surface lives on the Super-Admin Founder Control
+ * Centre (Communications view) only.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE5_TUTORIAL_RECORDINGS_SCOPE = new Set([
+  'src/config/tutorialRecordings.ts',                     /* NEW — the ONE recordings owner */
+  'src/lib/education/resolveTutorialRecording.ts',        /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',               /* computes + exposes the summary */
+  'src/components/admin/FounderControlCentre.tsx',        /* renders the tutorial recordings section */
+  'scripts/validate-tutorial-recordings.mjs',             /* NEW — this phase's gate */
+  'scripts/reconcile-tutorial-recordings-registry.cjs',   /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',                 /* test 25 renders the tutorial recordings section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+]);
+
+
+/**
  * §PHASE 9 (2026-10-06) — LOCALIZATION, SEO AND HREFLANG — declared surface.
  *
  * The registry row `phase9-localization-seo-hreflang` records the locale presentation
@@ -3404,7 +3432,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 10 — the UK opportunity states at scale's declared surface (see above). */
         PHASE10_UK_OPPORTUNITY_STATES_SCOPE.has(p) ||
-        [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 5 — the tutorial recordings' declared surface (see above). */
+        PHASE5_TUTORIAL_RECORDINGS_SCOPE.has(p) ||
+        [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3531,7 +3562,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 10 — the UK opportunity states at scale, second protected-path check (F5b). */
         PHASE10_UK_OPPORTUNITY_STATES_SCOPE.has(p) ||
-        [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 5 — the tutorial recordings, second protected-path check (F5b). */
+        PHASE5_TUTORIAL_RECORDINGS_SCOPE.has(p) ||
+        [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -3971,7 +4005,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 10 — the UK opportunity states at scale (see above). */
           PHASE10_UK_OPPORTUNITY_STATES_SCOPE.has(p) ||
-          [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 5 — the tutorial recordings (see above). */
+          PHASE5_TUTORIAL_RECORDINGS_SCOPE.has(p) ||
+          [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

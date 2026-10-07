@@ -752,6 +752,35 @@ test.describe('Founder Operating System — Control Centre', () => {
     expect(pageErrors).toEqual([]);
   });
 
+  /**
+   * §PHASE 5 — the tutorial recordings. The Communications view must render the
+   * tutorial recordings section with the versioning rule enforced: one recording
+   * per canonical shared workflow, each declaring the UI version it is compatible
+   * with, so an uncaptured tutorial is PENDING and a recording on an older UI
+   * version is DETECTED as OUTDATED — never shown as if it worked.
+   */
+  test('25. the tutorial recordings render with the versioning rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Brands/ }).click();
+
+    const recordings = page.getByTestId('control-tutorial-recordings-list').locator('li');
+    await expect(recordings).toHaveCount(6);
+    // No recording asset is captured yet, so every tutorial is pending.
+    await expect(page.getByTestId('control-tutorial-recordings-counts')).toContainText('Pending: 6');
+    await expect(page.getByTestId('control-tutorial-recordings-counts')).toContainText('Current: 0');
+    // The outdated-detection rule is enforced, not merely written: the live example fires.
+    await expect(page.getByTestId('control-tutorial-recordings-examples')).toContainText('TUTORIAL_OUTDATED');
+    await expect(page.getByTestId('tutorial-recordings-rule')).toContainText('Versioned');
+    await expect(page.getByTestId('control-tutorial-recordings-basis')).toContainText('fabricated');
+    await expect(page.getByTestId('control-tutorial-recordings-served')).toContainText('2026.10');
+
+    await page.screenshot({ path: `${SHOTS}/25-tutorial-recordings.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
 });
 
 test.describe('Founder Operating System — RBAC', () => {

@@ -768,6 +768,64 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
                 {model.sharedWorkflows.basis} {model.sharedWorkflows.disclaimer}
               </p>
             </WorkspaceSection>
+
+            {/* §PHASE 5 — the tutorial recordings. The tutorial catalogue with
+                versioning, UI-version compatibility, outdated detection and
+                reusable assets: one recording per canonical shared workflow (the
+                workflow ids REUSED), each declaring the UI version it is compatible
+                with against the ONE served version. A recording is current only when
+                its asset genuinely exists AND its compatible version equals the
+                served version; an uncaptured tutorial is pending and a recording on
+                an older UI version is detected as outdated. */}
+            <WorkspaceSection
+              title="Tutorial recordings (Phase 5)"
+              description="The tutorial recordings that teach each canonical journey: one recording per shared workflow (the workflow ids reused, never re-declared), each declaring the UI version it is compatible with, its own version and its reusable asset. A recording is current only when its asset genuinely exists and its compatible UI version equals the served version; an uncaptured tutorial is pending and a recording on an older UI version is detected as outdated — never shown as if it worked."
+              domain="communications"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="tutorial-recordings-rule">
+                  {model.tutorialRecordings.oneOwner && model.tutorialRecordings.reusesSharedWorkflows && model.tutorialRecordings.declaresCompatibleUiVersion && model.tutorialRecordings.detectsOutdated
+                    ? 'Versioned · outdated detected'
+                    : 'TUTORIAL RULE NOT ENFORCED'}
+                </span>
+              }
+            >
+              <p className="text-ds-micro text-zinc-500">
+                Served UI version:{' '}
+                <span className="font-mono text-zinc-400" data-testid="control-tutorial-recordings-served">
+                  {model.tutorialRecordings.servedUiVersion}
+                </span>{' '}
+                · assets: <span className="font-mono text-zinc-400">{model.tutorialRecordings.assetDir}</span>
+              </p>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-tutorial-recordings-counts">
+                Current: <span className="font-mono text-zinc-300">{model.tutorialRecordings.currentCount}</span> · Outdated: <span className="font-mono text-zinc-300">{model.tutorialRecordings.outdatedCount}</span> · Pending: <span className="font-mono text-zinc-300">{model.tutorialRecordings.pendingCount}</span> of {model.tutorialRecordings.recordingCount} recording(s) across {model.tutorialRecordings.workflowCount} workflow(s); every tutorial is pending because no recording asset has been captured yet.
+              </p>
+              <ul className="mt-4 space-y-2" data-testid="control-tutorial-recordings-list">
+                {model.tutorialRecordings.recordings.map((t) => (
+                  <li key={t.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <span className="flex justify-between gap-3">
+                      <span className="text-ds-label text-zinc-300">{t.title}</span>
+                      <span className="font-mono text-ds-micro text-zinc-400">{t.playable ? 'current' : t.refusal}</span>
+                    </span>
+                    <span className="mt-1 block text-ds-micro text-zinc-600">
+                      workflow: {t.workflowLabel} · compatible UI: {t.compatibleUiVersion} · v{t.tutorialVersion} · {t.asset}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4" data-testid="control-tutorial-recordings-examples">
+                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Live rules (computed, not written)</p>
+                <p className="mt-1 text-ds-micro text-zinc-500">
+                  Current: <span className="font-mono text-zinc-400">{model.tutorialRecordings.exampleCurrent.refusal ?? 'current'}</span>
+                </p>
+                <p className="mt-1 text-ds-micro text-zinc-500">
+                  Outdated: <span className="font-mono text-zinc-400">{model.tutorialRecordings.exampleOutdated.refusal ?? model.tutorialRecordings.exampleOutdated.status}</span> — {model.tutorialRecordings.exampleOutdated.reason}
+                </p>
+              </div>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-tutorial-recordings-basis">
+                {model.tutorialRecordings.basis} {model.tutorialRecordings.disclaimer}
+              </p>
+            </WorkspaceSection>
+
           </>
         )}
 

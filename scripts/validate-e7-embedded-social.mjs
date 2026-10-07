@@ -2740,6 +2740,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/intelligence/ukOpportunityStates.ts',
     'scripts/validate-uk-opportunity-states.mjs',
     'scripts/reconcile-uk-opportunity-states-registry.cjs',
+    /**
+     * §PHASE 5 (2026-10-08) — THE TUTORIAL RECORDINGS. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE5_TUTORIAL_RECORDINGS_SCOPE. Same mechanism:
+     * a changed source/test file outside EVERY declared set is refused. The recordings are
+     * internal — the surface lives on the Super-Admin Founder Control Centre (Communications view).
+     */
+    'src/config/tutorialRecordings.ts',
+    'src/lib/education/resolveTutorialRecording.ts',
+    'scripts/validate-tutorial-recordings.mjs',
+    'scripts/reconcile-tutorial-recordings-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
