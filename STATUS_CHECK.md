@@ -4535,3 +4535,52 @@ issue, NOT a code regression — the new bundle was byte-identical to the local 
 **NEXT.** ORDER ITEM 2 (the remaining build backlog) — CONTINUE; **17** `not_started` rows remain. No credential
 required.
 
+
+
+---
+
+## §PHASE 10 — ACQUISITION INTELLIGENCE AT SCALE (DIMENSIONS + RESEARCH SOURCES + NEVER-FABRICATE RULE) (2026-10-08)
+
+**REQUEST MODE.** IMPLEMENT · EXPERTS: senior-software-engineer + senior-software-architect · WHY: the
+recorded `NEXT TASK` authorised picking the next non-credential build item; `phase10-acquisition-intelligence-scale`
+is a Phase 10 roadmap row (acquisition intelligence at scale over the real research sources).
+
+**BUILT.** The registry row `phase10-acquisition-intelligence-scale` recorded that acquisition intelligence must
+operate AT SCALE over the REAL research sources and must NEVER be fabricated when no provider exists.
+- `src/config/acquisitionIntelligence.ts` (**NEW**, the ONE owner) — the SIX dimensions (brand profile · product
+  catalogue · demand signal · competition landscape · company register · decision-maker contact) and the SIX
+  research sources that may supply them, each REUSING a canonical integration-registry provider id (amazon_sp_api ·
+  keepa · firecrawl · companies_house · hunter · lead_sourcing — AI/openrouter is NOT a source); a module-load guard
+  REFUSES an empty/duplicate taxonomy, a source with no provider id, a source supplying no dimension, and a source
+  supplying an UNDECLARED dimension.
+- `src/lib/intelligence/acquisitionIntelligence.ts` (**NEW**, the pure fail-closed resolver) — a signal exists ONLY
+  when it names a DECLARED source that SUPPLIES its dimension and whose backing provider is genuinely available: an
+  unknown dimension REFUSED `INTELLIGENCE_DIMENSION_UNKNOWN`, no source REFUSED `INTELLIGENCE_REQUIRES_NAMED_SOURCE`,
+  an unknown source REFUSED `INTELLIGENCE_SOURCE_UNKNOWN`, a source that does not supply the dimension REFUSED
+  `INTELLIGENCE_SOURCE_DOES_NOT_SUPPLY_DIMENSION`, and no available provider REFUSED
+  `INTELLIGENCE_UNAVAILABLE_WITHOUT_PROVIDER` (never fabricated). Availability is INJECTED, so the resolver is PURE;
+  the default is "nothing available" — nothing is fabricated. Real signal count: ZERO.
+- USED: `controlCentre.ts` exposes `acquisitionIntelligence` (+ 2 metrics + a dataSources entry);
+  `FounderControlCentre.tsx` renders an **Acquisition intelligence at scale (Phase 10)** section (Business view,
+  Super-Admin only). NEW gate `scripts/validate-acquisition-intelligence.mjs` (`npm run
+  validate:acquisition-intelligence`, **30 assertions**). The gate proves every source provider is a canonical
+  integration provider, AI is NOT a source, and NO brand import. Surface declared in BOTH scope guards
+  (`PHASE10_ACQUISITION_INTELLIGENCE_SCOPE` in E6 F5/F5b/F6; `PHASE10_ACQUISITION_INTELLIGENCE_DECLARED` + allowed
+  entries in E7). Registry row `not_started` → `built` (built 165→166, not_started 17→16).
+
+**COMMITTED.** app-runtime commit **`7f9577e`**, pushed to `origin/redesign/foundation`; the state/docs commit that
+carries this block follows. Tree clean.
+
+**TESTED.** typecheck **0** (all 4 projects) · lint **0** · build ✓ · `validate:acquisition-intelligence` **30/30** ·
+`validate:all` **185 PASS / 0 FAIL** · E6 PASS · E7 PASS · browser `founder-operating-system.spec.ts` **23 passed** ·
+LIVE `verify:live` **267 PASS / 0 FAIL** + the live `assets/FounderControlCentre-CIajakbB.js` (197,161 bytes)
+BYTE-IDENTICAL to the local build (sha256 `99170ce002c927316de3fa690a5936e32608238cc794597e9a101ba64abaa90a`). The new
+gate was **MUTATION-PROVED TWICE** (disabling the never-fabricate refusal failed **3** assertions; flipping a pinned
+invariant failed **1**); both files restored **byte-identical** (owner sha256
+`d1f9ea457e1de71be10d7e2cc534550e8b222744887d445fdaa3250a5d18cc99`; resolver sha256
+`4d5ee21614eb791b3e7634ed38b624bc07229489d3c701066fe6f8a4b3b3afba`).
+
+**RESULT.** DONE. `phase10-acquisition-intelligence-scale` is COMPLETE; the next work is order item 2 continued from
+the registry's `not_started` build rows (**16** remain, e.g. `phase10-uk-opportunity-states` /
+`phase5-tutorial-recording`). No credential required.
+
