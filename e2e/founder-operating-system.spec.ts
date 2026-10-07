@@ -725,6 +725,33 @@ test.describe('Founder Operating System — Control Centre', () => {
     expect(pageErrors).toEqual([]);
   });
 
+  /**
+   * §PHASE 10 — the UK opportunity states at scale. The Business view must render the
+   * UK-opportunity-states section with the evidence rule enforced: a state is asserted
+   * only when every evidence source behind it is backed by a genuinely available
+   * provider, so every state is refused until a real provider is activated.
+   */
+  test('24. the UK opportunity states render on the Business view with the evidence rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+
+    const sources = page.getByTestId('control-uk-opportunity-states-sources').locator('li');
+    await expect(sources).toHaveCount(4);
+    const states = page.getByTestId('control-uk-opportunity-states-states').locator('li');
+    await expect(states).toHaveCount(6);
+    await expect(page.getByTestId('control-uk-opportunity-states-real')).toContainText('States asserted: 0');
+    // The evidence rule is enforced, not merely written: the example is refused.
+    await expect(page.getByTestId('control-uk-opportunity-states-refusal')).toContainText('STATE_UNAVAILABLE_WITHOUT_EVIDENCE');
+    await expect(page.getByTestId('uk-opportunity-states-rule')).toContainText('Evidence required');
+    await expect(page.getByTestId('control-uk-opportunity-states-basis')).toContainText('ever fabricated');
+    await expect(page.getByTestId('control-uk-opportunity-states-chain')).toContainText('Explore UK Market Fit');
+
+    await page.screenshot({ path: `${SHOTS}/24-uk-opportunity-states.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
 });
 
 test.describe('Founder Operating System — RBAC', () => {

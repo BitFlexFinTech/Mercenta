@@ -124,7 +124,8 @@
     "validate:founder-intelligence": "node scripts/validate-founder-intelligence.mjs",
     "validate:integrated-loop": "node scripts/validate-integrated-loop.mjs",
     "validate:financier-universe": "node scripts/validate-financier-universe.mjs",
-    "validate:acquisition-intelligence": "node scripts/validate-acquisition-intelligence.mjs"
+    "validate:acquisition-intelligence": "node scripts/validate-acquisition-intelligence.mjs",
+    "validate:uk-opportunity-states": "node scripts/validate-uk-opportunity-states.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

@@ -514,6 +514,18 @@ try {
     'scripts/validate-acquisition-intelligence.mjs',
     'scripts/reconcile-acquisition-intelligence-registry.cjs',
   ];
+  /**
+   * §PHASE 10 (2026-10-08) — THE UK OPPORTUNITY STATES AT SCALE adds NEW files under the E7
+   * PROTECTED `src/lib/intelligence/` prefix (it modifies none) and DECLARES them here, exactly
+   * as the acquisition-intelligence increment did. The contract is unchanged: an UNEXPLAINED
+   * protected change still fails.
+   */
+  const PHASE10_UK_OPPORTUNITY_STATES_DECLARED = [
+    'src/config/ukOpportunityStates.ts',
+    'src/lib/intelligence/ukOpportunityStates.ts',
+    'scripts/validate-uk-opportunity-states.mjs',
+    'scripts/reconcile-uk-opportunity-states-registry.cjs',
+  ];
   // §Phase 4 — canonical 20-real-brand universe. The file-touch proxy needs the
   // same extension M13/E8 gave it before: the working tree now legitimately
   // contains the Phase-4 surface (canonical SSOT + every consumer repointed).
@@ -2103,7 +2115,10 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
           !PHASE12_INTEGRATED_LOOP_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §PHASE 10 — acquisition intelligence at scale's declared surface. */
           !PHASE10_ACQUISITION_INTELLIGENCE_DECLARED.includes(f) &&
-          !PHASE10_ACQUISITION_INTELLIGENCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !PHASE10_ACQUISITION_INTELLIGENCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §PHASE 10 — the UK opportunity states at scale's declared surface. */
+          !PHASE10_UK_OPPORTUNITY_STATES_DECLARED.includes(f) &&
+          !PHASE10_UK_OPPORTUNITY_STATES_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2715,6 +2730,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/intelligence/acquisitionIntelligence.ts',
     'scripts/validate-acquisition-intelligence.mjs',
     'scripts/reconcile-acquisition-intelligence-registry.cjs',
+    /**
+     * §PHASE 10 (2026-10-08) — THE UK OPPORTUNITY STATES AT SCALE. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE10_UK_OPPORTUNITY_STATES_SCOPE. Same mechanism:
+     * a changed source/test file outside EVERY declared set is refused. The states are
+     * internal — the surface lives on the Super-Admin Founder Control Centre (Business view).
+     */
+    'src/config/ukOpportunityStates.ts',
+    'src/lib/intelligence/ukOpportunityStates.ts',
+    'scripts/validate-uk-opportunity-states.mjs',
+    'scripts/reconcile-uk-opportunity-states-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

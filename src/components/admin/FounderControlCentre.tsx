@@ -495,6 +495,66 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               {model.acquisitionIntelligence.basis} {model.acquisitionIntelligence.disclaimer}
             </p>
           </WorkspaceSection>
+
+          {/* §PHASE 10 — the UK opportunity states at scale. For each of the six §PHASE 1
+              states A–F, the EVIDENCE it rests on at scale, declared once. A state is
+              asserted only when every evidence source behind it is backed by an available
+              provider; when no provider is available NO state is asserted — never
+              fabricated. The states feed the canonical UK Market Fit → qualification →
+              outreach chain. Internal: Super-Admin only. */}
+          <WorkspaceSection
+            title="UK opportunity states at scale (Phase 10)"
+            description="The six §PHASE 1 UK opportunity states A–F at scale: for each state, the EVIDENCE it rests on — each evidence source REUSING a canonical integration-registry provider. A state may be asserted only when it names a DECLARED evidence source and every one of its sources is backed by a genuinely available provider; an unknown state, a state with no evidence and a state naming an unknown source are all refused — when no provider is available NO state is asserted, never fabricated. The states feed the UK Market Fit → qualification → outreach chain."
+            domain="orders"
+            action={
+              <span className="text-ds-micro text-zinc-500" data-testid="uk-opportunity-states-rule">
+                {model.ukOpportunityStates.requiresEvidence && model.ukOpportunityStates.neverFabricates && model.ukOpportunityStates.reusesClasses
+                  ? 'Evidence required · never fabricated'
+                  : 'STATE RULE NOT ENFORCED'}
+              </span>
+            }
+          >
+            <p className="text-ds-micro text-zinc-500">
+              Chain:{' '}
+              <span className="text-zinc-400" data-testid="control-uk-opportunity-states-chain">
+                {model.ukOpportunityStates.chainStages.map((s) => s.label).join(' → ')}
+              </span>
+            </p>
+            <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="control-uk-opportunity-states-sources">
+              {model.ukOpportunityStates.evidenceSources.map((s) => (
+                <li key={s.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                  <span className="flex justify-between gap-3">
+                    <span className="text-ds-label text-zinc-200">{s.label}</span>
+                    <span className="font-mono text-ds-micro text-zinc-400">{s.available ? 'available' : 'not available'}</span>
+                  </span>
+                  <span className="mt-1 block font-mono text-ds-micro text-zinc-600">{s.providerId}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-ds-micro text-zinc-500" data-testid="control-uk-opportunity-states-real">
+              States asserted: <span className="font-mono text-zinc-300">{model.ukOpportunityStates.realAssertedCount}</span> — {model.ukOpportunityStates.availableEvidenceSourceCount} of {model.ukOpportunityStates.evidenceSources.length} evidence source(s) available; every state below is refused because the evidence behind it is not available.
+            </p>
+            <ul className="mt-2 space-y-1" data-testid="control-uk-opportunity-states-states">
+              {model.ukOpportunityStates.states.map((st) => (
+                <li key={st.id} className="flex flex-col gap-0.5 border-b border-white/[0.06] pb-1 text-ds-label">
+                  <span className="flex justify-between gap-3">
+                    <span className="text-zinc-300">{st.id} — {st.label}</span>
+                    <span className="font-mono text-zinc-400">{st.assertable ? 'asserted' : st.refusal}</span>
+                  </span>
+                  <span className="text-ds-micro text-zinc-600">Evidence: {st.evidenceLabels.join(' · ')}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-uk-opportunity-states-refusal">
+              Fail-closed proof: {model.ukOpportunityStates.exampleRefusal.refusal} — {model.ukOpportunityStates.exampleRefusal.reason}
+            </p>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-uk-opportunity-states-rule-text">
+              {model.ukOpportunityStates.rules.join(' ')}
+            </p>
+            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="control-uk-opportunity-states-basis">
+              {model.ukOpportunityStates.basis} {model.ukOpportunityStates.disclaimer}
+            </p>
+          </WorkspaceSection>
           </>
         )}
 

@@ -3001,6 +3001,34 @@ const PHASE10_ACQUISITION_INTELLIGENCE_SCOPE = new Set([
 
 
 /**
+ * §PHASE 10 (2026-10-08) — THE UK OPPORTUNITY STATES AT SCALE — declared surface.
+ *
+ * The registry row `phase10-uk-opportunity-states` records that the six UK
+ * opportunity states A–F must operate AT SCALE, feeding UK Market Fit →
+ * qualification → outreach, and that §PHASE 1 implements the classification while
+ * PHASE 10 scales the EVIDENCE behind it. This increment adds the ONE owner
+ * (`src/config/ukOpportunityStates.ts` — the evidence sources + the six states,
+ * REUSING the canonical `UK_PRESENCE_CLASSES` and the integrated-loop stage ids)
+ * and the pure fail-closed resolver
+ * (`src/lib/intelligence/ukOpportunityStates.ts`), and gates them. The states are
+ * internal: the surface lives on the Super-Admin Founder Control Centre only.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE10_UK_OPPORTUNITY_STATES_SCOPE = new Set([
+  'src/config/ukOpportunityStates.ts',                    /* NEW — the ONE states owner */
+  'src/lib/intelligence/ukOpportunityStates.ts',          /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',               /* computes + exposes the summary */
+  'src/components/admin/FounderControlCentre.tsx',        /* renders the UK opportunity states section */
+  'scripts/validate-uk-opportunity-states.mjs',           /* NEW — this phase's gate */
+  'scripts/reconcile-uk-opportunity-states-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',                 /* test 24 renders the UK opportunity states section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+]);
+
+
+/**
  * §PHASE 9 (2026-10-06) — LOCALIZATION, SEO AND HREFLANG — declared surface.
  *
  * The registry row `phase9-localization-seo-hreflang` records the locale presentation
@@ -3373,7 +3401,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 10 — acquisition intelligence at scale's declared surface (see above). */
         PHASE10_ACQUISITION_INTELLIGENCE_SCOPE.has(p) ||
-        [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 10 — the UK opportunity states at scale's declared surface (see above). */
+        PHASE10_UK_OPPORTUNITY_STATES_SCOPE.has(p) ||
+        [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3497,7 +3528,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 10 — same declaration, second protected-path check (F5b). */
         PHASE10_ACQUISITION_INTELLIGENCE_SCOPE.has(p) ||
-        [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 10 — the UK opportunity states at scale, second protected-path check (F5b). */
+        PHASE10_UK_OPPORTUNITY_STATES_SCOPE.has(p) ||
+        [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -3934,7 +3968,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE12_INTEGRATED_LOOP_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 10 — acquisition intelligence at scale (see above). */
           PHASE10_ACQUISITION_INTELLIGENCE_SCOPE.has(p) ||
-          [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE10_ACQUISITION_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 10 — the UK opportunity states at scale (see above). */
+          PHASE10_UK_OPPORTUNITY_STATES_SCOPE.has(p) ||
+          [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
