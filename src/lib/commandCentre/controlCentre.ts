@@ -159,6 +159,10 @@ import {
   buildTutorialRecordingsSummary,
   type TutorialRecordingsSummary,
 } from '@/lib/education/resolveTutorialRecording';
+import {
+  buildCredentialVaultSummary,
+  type CredentialVaultSummary,
+} from '@/lib/integrations/resolveCredentialVault';
 import { DEMO_MODEL_B_BRAND_ID } from '@/data/demoData';
 import { intelligenceSummary, type IntelligenceSummary } from '@/lib/intelligence/intelligenceLayer';
 import { revenueByStream } from '@/lib/costs/costSummary';
@@ -537,6 +541,19 @@ export interface ControlCentreModel {
    * version is DETECTED as OUTDATED (fail closed). Super-Admin view.
    */
   tutorialRecordings: TutorialRecordingsSummary;
+  /**
+   * §CREDENTIAL VAULT — the durable credential architecture required by T-7 /
+   * matrix D16-05. One contract per integration provider, DERIVED from the
+   * canonical registry (which providers exist, OAuth vs API-key, and the secret
+   * fields each requires — never re-declared), with entry, replacement, secure
+   * persistence, masked readback, validation and enable/disable. Resolved purely
+   * by `src/lib/integrations/resolveCredentialVault.ts`; a credential is USABLE
+   * only when the provider is declared, a value is STORED, the credential is
+   * ENABLED, every required field is present AND the store is DURABLE — the
+   * in-memory store the integration layer holds today is NOT durable, so no
+   * provider resolves as a production credential (fail closed). Super-Admin view.
+   */
+  credentialVault: CredentialVaultSummary;
   /** §Phase 1 — the Explore UK Market Fit pre-audit queue (canonical records). */
   preAudit: PreAuditQueueModel;
   /** §Phase 2 — the commercial readiness queue (canonical readiness records). */
@@ -772,6 +789,15 @@ export function buildControlCentre(): ControlCentreModel {
      captured yet, so every tutorial is PENDING (fail closed) — none is shown as
      playable, and the live OUTDATED example proves the detection rule fires. */
   const tutorialRecordings = buildTutorialRecordingsSummary();
+  /* ── §CREDENTIAL VAULT — the durable credential architecture (T-7 / D16-05) ──
+     One contract per integration provider, DERIVED from the canonical registry
+     (never re-declared) through the pure resolver
+     (`src/lib/integrations/resolveCredentialVault.ts`). The store is INJECTED and
+     defaults to the honest non-durable, empty store the integration layer holds
+     today, so every provider resolves as NOT STORED / NOT DURABLE (fail closed) —
+     no provider is asserted as a production credential, and the live examples
+     prove both the USABLE and the NOT-DURABLE branches fire. */
+  const credentialVault = buildCredentialVaultSummary();
   const intelligence = intelligenceSummary();
   const automation = automationHealth();
   const automationTotals = automationSummary();
@@ -967,6 +993,9 @@ export function buildControlCentre(): ControlCentreModel {
       metric('uk-opp-states-evidence-sources', 'Opportunity evidence sources available', `${ukOpportunityStates.availableEvidenceSourceCount}/${ukOpportunityStates.evidenceSources.length}`, ukOpportunityStates.availableEvidenceSourceCount > 0 ? 'success' : 'neutral', 'Reused providers', 'The declared evidence sources behind the six UK opportunity states whose canonical integration provider is genuinely available. Sources REUSE the platform provider registry; an unavailable provider means no state is asserted from it.', 'integrations'),
       metric('tutorial-recordings-current', 'Tutorial recordings current', `${tutorialRecordings.currentCount}/${tutorialRecordings.recordingCount}`, tutorialRecordings.currentCount > 0 ? 'info' : 'neutral', 'Recorded against the served UI', 'The tutorial recordings that are CURRENT and playable because their asset genuinely exists AND their compatible UI version equals the served UI version. No recording asset is captured yet, so every tutorial is PENDING — none is shown as playable until captured.', 'control_centre'),
       metric('tutorial-recordings-outdated', 'Tutorial recordings outdated', String(tutorialRecordings.outdatedCount), tutorialRecordings.outdatedCount > 0 ? 'warning' : 'neutral', 'Older UI version detected', 'The tutorial recordings DETECTED as OUTDATED because the UI version they are compatible with differs from the served version. A recording on an older UI version is flagged, never shown as current.', 'control_centre'),
+      /* §CREDENTIAL VAULT (T-7 / D16-05) — the durable credential architecture. */
+      metric('credential-vault-usable', 'Credentials usable', `${credentialVault.usableCount}/${credentialVault.providerCount}`, credentialVault.usableCount > 0 ? 'success' : 'neutral', 'Durable, enabled, complete', 'The integration providers whose credential is USABLE — declared in the vault contract, stored, enabled, with every provider-specific secret field present AND on a DURABLE store. The in-memory store the integration layer holds today is NOT durable, so this stays 0 until the durable vault is activated: nothing is treated as a production credential on a non-durable store.', 'integrations'),
+      metric('credential-vault-providers', 'Vault providers', String(credentialVault.providerCount), 'neutral', 'One contract each', 'The integration providers the vault holds a DERIVED contract for — whether each is OAuth or API-key and which secret fields it requires, taken from the canonical integration registry (never re-declared). No credential values are held here; only the contract.', 'integrations'),
       metric('acq-engagement-rate', 'Engagement rate', formatRate(acquisitionConversion.rates.engagementRate), acquisitionConversion.rates.engagementRate === null ? 'neutral' : 'info', `of ${acquisitionConversion.counts.contacted} contacted`, 'Reached a meeting, negotiation or pilot ÷ contacted.', 'crm'),
       metric('acq-conversion-rate', 'Conversion rate', formatRate(acquisitionConversion.rates.conversionRate), acquisitionConversion.counts.converted > 0 ? 'success' : 'neutral', `${acquisitionConversion.counts.converted} activated`, 'Only a completed onboarding counts as converted.', 'onboarding_pipeline'),
       metric('acq-reply-engagement', 'Reply → engagement', formatRate(acquisitionConversion.rates.replyToEngagementRate), 'neutral', `of ${acquisitionConversion.counts.replied} replies`, 'Of those who replied, the share that engaged — the canonical "positive reply" measure.', 'crm'),
@@ -1121,6 +1150,7 @@ export function buildControlCentre(): ControlCentreModel {
     contextualEducation,
     sharedWorkflows,
     tutorialRecordings,
+    credentialVault,
     preAudit,
     commercial,
     intelligence,
@@ -1165,6 +1195,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Contextual education', value: 'src/config/contextualEducation.ts + src/lib/education/resolveContextualHelp.ts — the "why do we need this?" explanation on each real field, LINKING to the canonical Knowledge Base article (LEARN) and the canonical guided tour of that screen (WATCH); the help text is never duplicated, and an unknown field or a missing article is REFUSED' },
       { label: 'Shared workflows', value: 'src/config/sharedWorkflows.ts + src/lib/education/resolveSharedWorkflow.ts — the canonical journeys through the real screens that E2E tests, tutorial recordings and onboarding walkthroughs ALL reuse; the steps are DERIVED from the canonical guided tour (no second list), its data-tour anchors are the SAME contract the E2E test drives, and every workflow names a canonical tour, E2E spec and Knowledge Base article' },
       { label: 'Tutorial recordings', value: 'src/config/tutorialRecordings.ts + src/lib/education/resolveTutorialRecording.ts — the tutorial catalogue with versioning, UI-version compatibility, outdated detection and reusable assets; one recording per canonical shared workflow (the workflow ids REUSED, never re-declared), each declaring the UI version it is compatible with against the ONE served version. A recording is CURRENT only when its asset genuinely exists AND its compatible version equals the served version; an uncaptured tutorial is PENDING and a recording on an older UI version is DETECTED as OUTDATED — never shown as if it worked' },
+      { label: 'Credential vault (T-7)', value: 'src/config/credentialVault.ts + src/lib/integrations/resolveCredentialVault.ts — the durable credential architecture required by T-7: one contract per integration provider, DERIVED from the canonical registry (which are OAuth or API-key and which secret fields each requires — never re-declared), with entry, replacement, secure persistence, masked readback, validation and enable/disable. A credential is USABLE only when the provider is declared, a value is stored, the credential is enabled, every required field is present AND the store is DURABLE; the in-memory store the integration layer holds today is NOT durable, so no provider resolves as a production credential — only a mask is ever read back, never the value (fail closed)' },
       { label: 'Acquisition intelligence (Phase 10)', value: 'src/config/acquisitionIntelligence.ts + src/lib/intelligence/acquisitionIntelligence.ts — the dimensions acquisition intelligence scales over and the research sources that may supply them, each REUSING a canonical integration-registry provider id. A signal rests ONLY on a DECLARED source that SUPPLIES its dimension and whose provider is genuinely available; an unknown dimension, an unknown source, a source that does not supply the dimension, and a signal with no available provider are all REFUSED — when no provider exists NO value is produced, never fabricated. AI may only summarise' },
       { label: 'UK opportunity states at scale (Phase 10)', value: 'src/config/ukOpportunityStates.ts + src/lib/intelligence/ukOpportunityStates.ts — the six §PHASE 1 UK opportunity states A–F (ids and labels REUSED from UK_PRESENCE_CLASSES) and the EVIDENCE each rests on at scale, each evidence source REUSING a canonical integration-registry provider id. A state is asserted ONLY when it names a DECLARED evidence source and every one of its sources is backed by a genuinely available provider; an unknown state, a state with no evidence and a state naming an unknown source are all REFUSED — when no provider exists NO state is asserted, never fabricated. The states feed the canonical UK Market Fit → qualification → outreach chain (stage ids reused from the integrated loop)' },
     ],

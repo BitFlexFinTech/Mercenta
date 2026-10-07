@@ -126,7 +126,8 @@
     "validate:financier-universe": "node scripts/validate-financier-universe.mjs",
     "validate:acquisition-intelligence": "node scripts/validate-acquisition-intelligence.mjs",
     "validate:uk-opportunity-states": "node scripts/validate-uk-opportunity-states.mjs",
-    "validate:tutorial-recordings": "node scripts/validate-tutorial-recordings.mjs"
+    "validate:tutorial-recordings": "node scripts/validate-tutorial-recordings.mjs",
+    "validate:credential-vault": "node scripts/validate-credential-vault.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

@@ -3057,6 +3057,34 @@ const PHASE5_TUTORIAL_RECORDINGS_SCOPE = new Set([
 
 
 /**
+ * §CREDENTIAL VAULT (2026-10-08) — T-7 / matrix D16-05 — declared surface.
+ *
+ * The registry row `discovered-credential-vault` records that the durable
+ * credential architecture required by Founder decision T-7 (Super Admin entry,
+ * replacement, secure persistence, masked readback, validation, enable/disable and
+ * provider-specific fields, with credentials never exposed in the frontend) is not
+ * implemented. This increment adds the ONE owner (`src/config/credentialVault.ts`)
+ * and the pure resolver (`src/lib/integrations/resolveCredentialVault.ts`), wires
+ * the summary into the Super-Admin Founder Control Centre and gates them. The
+ * provider-specific fields are DERIVED from the canonical integration registry —
+ * never re-declared.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const CREDENTIAL_VAULT_SCOPE = new Set([
+  'src/config/credentialVault.ts',                     /* NEW — the ONE vault owner */
+  'src/lib/integrations/resolveCredentialVault.ts',    /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',            /* computes + exposes the summary */
+  'src/components/admin/FounderControlCentre.tsx',     /* renders the credential vault section */
+  'scripts/validate-credential-vault.mjs',             /* NEW — this phase's gate */
+  'scripts/reconcile-credential-vault-registry.cjs',   /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',              /* test 26 renders the credential vault section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+]);
+
+
+/**
  * §PHASE 9 (2026-10-06) — LOCALIZATION, SEO AND HREFLANG — declared surface.
  *
  * The registry row `phase9-localization-seo-hreflang` records the locale presentation
@@ -3435,7 +3463,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 5 — the tutorial recordings' declared surface (see above). */
         PHASE5_TUTORIAL_RECORDINGS_SCOPE.has(p) ||
-        [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §CREDENTIAL VAULT — the vault's declared surface (see above). First protected-path check (F5). */
+        CREDENTIAL_VAULT_SCOPE.has(p) ||
+        [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3565,7 +3596,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 5 — the tutorial recordings, second protected-path check (F5b). */
         PHASE5_TUTORIAL_RECORDINGS_SCOPE.has(p) ||
-        [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §CREDENTIAL VAULT — same declaration, second protected-path check (F5b). */
+        CREDENTIAL_VAULT_SCOPE.has(p) ||
+        [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -4008,7 +4042,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE10_UK_OPPORTUNITY_STATES_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 5 — the tutorial recordings (see above). */
           PHASE5_TUTORIAL_RECORDINGS_SCOPE.has(p) ||
-          [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE5_TUTORIAL_RECORDINGS_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §CREDENTIAL VAULT — the vault's declared surface (see above). */
+          CREDENTIAL_VAULT_SCOPE.has(p) ||
+          [...CREDENTIAL_VAULT_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

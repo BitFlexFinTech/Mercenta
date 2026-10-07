@@ -781,6 +781,35 @@ test.describe('Founder Operating System — Control Centre', () => {
     expect(pageErrors).toEqual([]);
   });
 
+  /**
+   * §CREDENTIAL VAULT (T-7 / matrix D16-05). The Brands view must render the
+   * credential vault section with the durability rule enforced: one contract per
+   * integration provider (derived from the canonical registry), a credential
+   * usable only from a DURABLE store — the in-memory store held today is NOT
+   * durable, so nothing resolves as a production credential.
+   */
+  test('26. the credential vault renders with the durability rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Brands/ }).click();
+
+    const providers = page.getByTestId('control-credential-vault-list').locator('li');
+    await expect(providers).toHaveCount(23);
+    // The store held today is in-memory (not durable), so nothing is usable.
+    await expect(page.getByTestId('control-credential-vault-counts')).toContainText('Usable: 0');
+    await expect(page.getByTestId('control-credential-vault-counts')).toContainText('in-memory (not durable)');
+    // The durability rule is enforced, not merely written: the live example fires.
+    await expect(page.getByTestId('control-credential-vault-example-notdurable')).toContainText('VAULT_NOT_DURABLE');
+    await expect(page.getByTestId('control-credential-vault-example-usable')).toContainText('Durable: usable');
+    await expect(page.getByTestId('credential-vault-rule')).toContainText('Durable');
+    await expect(page.getByTestId('control-credential-vault-basis')).toContainText('never leaves');
+
+    await page.screenshot({ path: `${SHOTS}/26-credential-vault.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
 });
 
 test.describe('Founder Operating System — RBAC', () => {

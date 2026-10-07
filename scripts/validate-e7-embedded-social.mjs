@@ -2750,6 +2750,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/education/resolveTutorialRecording.ts',
     'scripts/validate-tutorial-recordings.mjs',
     'scripts/reconcile-tutorial-recordings-registry.cjs',
+    /**
+     * §CREDENTIAL VAULT (2026-10-08) — T-7 / matrix D16-05. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §CREDENTIAL_VAULT_SCOPE. Same mechanism:
+     * a changed source/test file outside EVERY declared set is refused. The vault is
+     * internal — the surface lives on the Super-Admin Founder Control Centre (Brands view).
+     */
+    'src/config/credentialVault.ts',
+    'src/lib/integrations/resolveCredentialVault.ts',
+    'scripts/validate-credential-vault.mjs',
+    'scripts/reconcile-credential-vault-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

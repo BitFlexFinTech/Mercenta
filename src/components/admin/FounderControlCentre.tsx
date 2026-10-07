@@ -829,6 +829,59 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
           </>
         )}
 
+        {/* §CREDENTIAL VAULT (T-7 / D16-05) — the durable credential architecture.
+            One contract per integration provider, DERIVED from the canonical
+            registry (never re-declared): a credential is usable only when the
+            provider is declared, a value is stored, the credential is enabled,
+            every required field is present AND the store is durable. The in-memory
+            store held today is NOT durable, so no provider resolves as a production
+            credential; only a mask is ever read back, never the value. */}
+        {section === 'brands' && (
+          <>
+            <WorkspaceSection
+              title="Credential vault (T-7)"
+              description="The durable credential architecture: one contract per integration provider, derived from the canonical registry (which are OAuth or API-key and which secret fields each requires — reused, never re-declared). A credential is usable only when the provider is declared, a value is stored, the credential is enabled, every required field is present and the store is durable. The in-memory store held today is not durable, so no provider resolves as a production credential; only a mask is ever read back, never the value."
+              domain="risk"
+              action={
+                <span className="text-ds-micro text-zinc-500" data-testid="credential-vault-rule">
+                  {model.credentialVault.oneOwner && model.credentialVault.reusesProviderFieldOwner && model.credentialVault.masksReadback && model.credentialVault.neverExposesValue && model.credentialVault.failsClosed
+                    ? 'Durable · masked · fail-closed'
+                    : 'VAULT RULE NOT ENFORCED'}
+                </span>
+              }
+            >
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-credential-vault-counts">
+                Usable: <span className="font-mono text-zinc-300">{model.credentialVault.usableCount}</span> · Stored: <span className="font-mono text-zinc-300">{model.credentialVault.storedCount}</span> · Disabled: <span className="font-mono text-zinc-300">{model.credentialVault.disabledCount}</span> of {model.credentialVault.providerCount} provider(s); the store is {model.credentialVault.durableStore ? 'durable' : 'in-memory (not durable)'}, so no credential resolves as a production credential yet.
+              </p>
+              <ul className="mt-4 space-y-2" data-testid="control-credential-vault-list">
+                {model.credentialVault.providers.map((p) => (
+                  <li key={p.providerId} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                    <span className="flex justify-between gap-3">
+                      <span className="text-ds-label text-zinc-300">{p.providerId}</span>
+                      <span className="font-mono text-ds-micro text-zinc-400">{p.usable ? 'usable' : p.refusal}</span>
+                    </span>
+                    <span className="mt-1 block text-ds-micro text-zinc-600">
+                      {p.authMethod} · fields: {p.secretFieldKeys.length > 0 ? p.secretFieldKeys.join(', ') : '—'} · {p.masked ?? 'no value stored'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4" data-testid="control-credential-vault-examples">
+                <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Live rules (computed, not written)</p>
+                <p className="mt-1 text-ds-micro text-zinc-500" data-testid="control-credential-vault-example-usable">
+                  Durable: <span className="font-mono text-zinc-400">{model.credentialVault.exampleUsable.usable ? 'usable' : model.credentialVault.exampleUsable.refusal}</span> — {model.credentialVault.exampleUsable.reason}
+                </p>
+                <p className="mt-1 text-ds-micro text-zinc-500" data-testid="control-credential-vault-example-notdurable">
+                  In-memory: <span className="font-mono text-zinc-400">{model.credentialVault.exampleNotDurable.refusal ?? (model.credentialVault.exampleNotDurable.usable ? 'usable' : 'unknown')}</span> — {model.credentialVault.exampleNotDurable.reason}
+                </p>
+              </div>
+              <p className="mt-3 text-ds-micro text-zinc-500" data-testid="control-credential-vault-basis">
+                {model.credentialVault.basis} {model.credentialVault.disclaimer}
+              </p>
+            </WorkspaceSection>
+          </>
+        )}
+
         {/* §Phase 2 — the commercial readiness workspace. It extends THIS Control
             Centre rather than adding a second dashboard: every row is a canonical
             readiness record, every row opens the record drawer with the evaluated
