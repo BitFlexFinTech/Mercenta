@@ -510,6 +510,36 @@ test.describe('Founder Operating System — Control Centre', () => {
   });
 
   /**
+   * §PHASE 9 — LOCALIZATION / SEO / HREFLANG. The Finance view must render the framework:
+   * the ONE served content language, a self-referencing hreflang per public route, the
+   * per-market timezones, the locale number/date formats and the fail-closed rule — so the
+   * founder can see that no page is ever advertised in a language Mercenta does not serve.
+   */
+  test('18. the localization / SEO / hreflang framework renders with the fail-closed rule enforced', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+    await page.getByRole('tab', { name: /^Commercial/ }).click();
+
+    const served = page.getByTestId('localisation-seo-served');
+    await expect(served).toBeVisible();
+    await expect(served).toContainText('en-GB');
+
+    const alternates = page.getByTestId('localisation-seo-alt');
+    await expect(alternates).toContainText('x-default');
+
+    await expect(page.getByTestId('localisation-seo-formats')).toContainText('1,234.5');
+    await expect(page.getByTestId('localisation-seo-timezones')).toContainText('Europe/London');
+    // The fail-closed rule is enforced, not merely written.
+    await expect(page.getByTestId('localisation-seo-rule')).toContainText('served content');
+    await expect(page.getByTestId('localisation-seo-basis')).toContainText('en-GB');
+
+    await page.screenshot({ path: `${SHOTS}/18-localisation-seo.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  /**
    * §D21 — WHOLE-PLATFORM OBJECT RESOLUTION. The Operations view must render the
    * resolution of the canonical channel objects (each PO's Amazon PO number, each
    * consignment's carrier reference) through the ONE resolver — the count resolved

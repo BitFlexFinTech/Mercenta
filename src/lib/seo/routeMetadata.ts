@@ -28,6 +28,13 @@ import {
   SITE_ORIGIN,
   type PublicRoutePage,
 } from './publicRoutes';
+/**
+ * §PHASE 9 — LOCALIZATION / SEO / HREFLANG. A public route also carries its hreflang
+ * alternates, built by the ONE resolver (`src/lib/localisation/localisationSeo.ts`). The
+ * resolver is FAIL-CLOSED: only a served content locale is ever emitted, and a non-public
+ * path carries none. This module never invents an alternate of its own.
+ */
+import { buildHreflangAlternates, type HreflangAlternate } from '@/lib/localisation/localisationSeo';
 
 export type RobotsDirective = 'index, follow' | 'noindex, nofollow';
 
@@ -40,6 +47,12 @@ export interface RouteMetadata {
   robots: RobotsDirective;
   /** Absolute canonical URL, or `null` when the route must not be canonicalised. */
   canonicalUrl: string | null;
+  /**
+   * §PHASE 9 — the hreflang alternates for this route. EMPTY for a private or unknown
+   * path (fail-closed) and for a public route only ever a self-referencing alternate per
+   * SERVED content locale plus `x-default`.
+   */
+  hreflangAlternates: HreflangAlternate[];
   /** The public view this path maps to (public routes only). */
   publicPage: PublicRoutePage | null;
   reason: string;
@@ -63,6 +76,7 @@ export function buildRouteMetadata(input: RouteMetadataInput): RouteMetadata {
       description: `Authenticated Mercenta portal session. This surface is private and is not published to search engines.`,
       robots: 'noindex, nofollow',
       canonicalUrl: null,
+      hreflangAlternates: [],
       publicPage: null,
       reason: `The active app environment is "${input.environment}" (authenticated), so the document must not be indexed.`,
     };
@@ -77,6 +91,7 @@ export function buildRouteMetadata(input: RouteMetadataInput): RouteMetadata {
       description: route.description,
       robots: route.robots,
       canonicalUrl: route.path === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${route.path}`,
+      hreflangAlternates: buildHreflangAlternates(route.path).alternates,
       publicPage: route.page,
       reason: `${route.path} is a declared public route.`,
     };
@@ -89,6 +104,7 @@ export function buildRouteMetadata(input: RouteMetadataInput): RouteMetadata {
     description: `This address is not a published page of the ${BRAND_NAME} platform.`,
     robots: 'noindex, nofollow',
     canonicalUrl: null,
+    hreflangAlternates: [],
     publicPage: null,
     reason: resolved.reason,
   };
@@ -113,6 +129,22 @@ function upsertMeta(doc: Document, attr: 'name' | 'property', key: string, conte
 }
 
 /**
+ * Write the hreflang alternates for the current route. Idempotent: it removes EVERY
+ * existing alternate link first, so navigating from a page that had alternates to one that
+ * must not (a private/unknown path) never leaves a stale language alternate behind.
+ */
+function applyHreflangAlternates(doc: Document, alternates: readonly HreflangAlternate[]): void {
+  doc.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
+  for (const alt of alternates) {
+    const el = doc.createElement('link');
+    el.setAttribute('rel', 'alternate');
+    el.setAttribute('hreflang', alt.hreflang);
+    el.setAttribute('href', alt.href);
+    doc.head.appendChild(el);
+  }
+}
+
+/**
  * Write the metadata into the live document. Idempotent: calling it twice with
  * the same metadata is a no-op in effect, and it never appends duplicates.
  */
@@ -125,6 +157,7 @@ export function applyRouteMetadata(meta: RouteMetadata, doc: Document = document
   upsertMeta(doc, 'property', 'og:description', meta.description);
   upsertMeta(doc, 'name', 'twitter:title', meta.title);
   upsertMeta(doc, 'name', 'twitter:description', meta.description);
+  applyHreflangAlternates(doc, meta.hreflangAlternates);
 
   // The canonical link is the bootstrap tag with a stable id, so there is
   // exactly ONE canonical element in the document at all times.

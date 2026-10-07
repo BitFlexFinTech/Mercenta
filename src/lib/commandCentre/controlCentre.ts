@@ -107,6 +107,10 @@ import {
   type LocalisationSummary,
 } from '@/lib/localisation/resolveLocalisation';
 import {
+  buildLocalisationSeoSummary,
+  type LocalisationSeoSummary,
+} from '@/lib/localisation/localisationSeo';
+import {
   buildCountryFrameworkSummary,
   type CountryFrameworkSummary,
 } from '@/lib/geography/resolveCountry';
@@ -369,6 +373,16 @@ export interface ControlCentreModel {
    */
   localisation: LocalisationSummary;
   /**
+   * §PHASE 9 — the localization, SEO and hreflang framework. The presentation conventions
+   * (number/date/time formats), the per-market timezones, the localized-URL strategy and a
+   * FAIL-CLOSED hreflang rule, declared by the ONE owner
+   * (`src/config/localisationSeo.ts`) and applied by the pure resolver
+   * (`src/lib/localisation/localisationSeo.ts`). A hreflang alternate is emitted ONLY for a
+   * language Mercenta actually serves content in (en-GB today) and ONLY for a public route;
+   * `x-default` always self-references the served default. Super-Admin view.
+   */
+  localisationSeo: LocalisationSeoSummary;
+  /**
    * §PHASE 9 — the country framework. Every country is classified into one or more
    * of the SIX roles (`src/config/countryFramework.ts`), resolved purely by
    * `src/lib/geography/resolveCountry.ts`. The marketplace role is FACTUAL and
@@ -554,6 +568,13 @@ export function buildControlCentre(): ControlCentreModel {
      which reads the canonical source markets. Nothing here re-implements a
      currency rule or invents a settlement currency. */
   const localisation = buildLocalisationSummary();
+  /* ── §PHASE 9 — the localization, SEO and hreflang framework ──
+     The presentation conventions, the per-market timezones, the localized-URL strategy and
+     the FAIL-CLOSED hreflang rule, from the ONE owner (`src/config/localisationSeo.ts`)
+     through the pure resolver (`src/lib/localisation/localisationSeo.ts`). A hreflang
+     alternate is emitted only for a served content locale and only for a public route.
+     Nothing here invents a locale or a page. */
+  const localisationSeo = buildLocalisationSeoSummary();
   /* ── §PHASE 9 — the country framework ──
      Every country's roles come from the ONE owner (`src/config/countryFramework.ts`)
      through the pure resolver (`src/lib/geography/resolveCountry.ts`). The
@@ -746,6 +767,10 @@ export function buildControlCentre(): ControlCentreModel {
       /* §PHASE 9 — the localisation + currency framework over the canonical source markets. */
       metric('comm-locale-markets', 'Markets localised', String(localisation.markets.length), 'info', 'Phase 9', `${localisation.markets.length} canonical source market(s) carry a locale + display-currency suggestion — a suggestion only, never forced.`, 'control_centre'),
       metric('comm-currency-concepts', 'Currency concepts', localisation.conceptsSeparate ? 'Separate' : 'COLLAPSED', localisation.conceptsSeparate ? 'success' : 'danger', 'Locale · display · settlement', 'Locale, display currency and settlement currency are three separate concepts; the settlement currency is never inferred.', 'control_centre'),
+      /* §PHASE 9 — the localization / SEO / hreflang framework (served locales + formats). */
+      metric('comm-seo-served-locales', 'Content languages served', String(localisationSeo.servedContentLocales.length), 'info', 'hreflang: en-GB + x-default', `Mercenta publishes content in ${localisationSeo.servedContentLocales.join(', ')} only, so every hreflang alternate is a self-reference — no page is advertised that is not actually served.`, 'control_centre'),
+      metric('comm-seo-formats', 'Locale formats', String(localisationSeo.formatCount), 'info', 'number · date · time', 'Every supported locale carries a declared number/date/time convention; the separators are read from the platform’s own Intl runtime, never hand-typed.', 'control_centre'),
+      metric('comm-seo-timezones', 'Market timezones', String(localisationSeo.marketCount), 'info', 'canonical source markets', 'Every canonical source market carries a declared IANA reference timezone, so a reader in that market is shown times in their own zone.', 'control_centre'),
       /* §PHASE 9 — the country framework: the marketplace role is a cited fact and Zimbabwe is never a marketplace. */
       metric('comm-countries', 'Countries classified', String(countryFramework.countryCount), 'info', `${countryFramework.marketplaceCount} marketplace(s)`, 'Every country is classified into one or more of the six canonical roles from the ONE country-framework owner.', 'control_centre'),
       metric('comm-zimbabwe-marketplace', 'Zimbabwe a marketplace', countryFramework.zimbabweNeverMarketplace ? 'No' : 'YES — DEFECT', countryFramework.zimbabweNeverMarketplace ? 'success' : 'danger', 'Operating/home market', 'Zimbabwe is an operating/home brand-origin market and is never represented as a marketplace (pinned invariant).', 'control_centre'),
@@ -896,6 +921,7 @@ export function buildControlCentre(): ControlCentreModel {
     founderOutreach,
     objectResolution,
     localisation,
+    localisationSeo,
     countryFramework,
     learningLoop,
     onboardingCurriculum,
@@ -934,6 +960,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Founder outreach pipeline (Phase 7)', value: 'src/config/founderOutreach.ts + src/lib/finance/founderOutreach.ts — the ordered approach over the financing-partner universe: declared channels, touchpoint types and a deterministic cadence of day OFFSETS; outreach begins at the TARGET stage and is forward-only (a follow-up requires an open contact), and an unknown channel, type or stage is refused' },
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
+      { label: 'Localization / SEO / hreflang (Phase 9)', value: 'src/config/localisationSeo.ts + src/lib/localisation/localisationSeo.ts — the number/date/time conventions (separators read from Intl), the per-market IANA timezones, the localized-URL strategy and the FAIL-CLOSED hreflang rule: an alternate is emitted only for a served content locale and only for a public route, with x-default self-referencing the served default' },
       { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },
       { label: 'Brand learning loop', value: 'src/config/learningLoop.ts + src/lib/education/resolveLearningProgress.ts — the LEARN → WATCH → DO → VALIDATE → COMPLETE loop over the canonical educational gaps; LEARN/WATCH reuse the canonical Knowledge Base article and guided tour, and VALIDATE is a gate satisfied only by a real signal' },
       { label: 'Onboarding academy curriculum', value: 'src/config/onboardingCurriculum.ts + src/lib/education/resolveCurriculum.ts — the five canonical stages (Understand Mercenta · Commercial · Product & Packaging · Product Readiness · Operations) plus the final readiness stage, over the SAME canonical educational gaps; the final readiness stage is reached only once every teaching stage is complete' },

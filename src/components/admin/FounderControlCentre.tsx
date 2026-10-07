@@ -688,6 +688,63 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
               <p className="mt-3 text-ds-micro text-zinc-500" data-testid="localisation-basis">
                 {model.localisation.basis} {model.localisation.disclaimer}
               </p>
+              {/* §PHASE 9 — the localization / SEO / hreflang framework (formats, timezones, hreflang). */}
+              <div className="mt-5 border-t border-white/[0.06] pt-4" data-testid="localisation-seo">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">Localization, SEO &amp; hreflang</p>
+                  <span className="text-ds-micro text-zinc-500" data-testid="localisation-seo-served">
+                    Served languages: {model.localisationSeo.servedContentLocales.join(', ')} · hreflang {model.localisationSeo.hreflangDefault} + {model.localisationSeo.hreflangXDefault}
+                  </span>
+                </div>
+                <div className="mt-3" data-testid="localisation-seo-alt">
+                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                    Public routes ({model.localisationSeo.publicRouteCount}) — self-referencing hreflang
+                  </p>
+                  <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+                    {model.localisationSeo.publicRouteAlternates.map((r) => (
+                      <li key={r.path} className="flex justify-between gap-3 text-ds-label">
+                        <span className="font-mono text-zinc-400">{r.path}</span>
+                        <span className="text-zinc-400">{r.alternates.map((a) => a.hreflang).join(' · ')}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-1 text-ds-micro text-zinc-500">
+                    {model.localisationSeo.refusedNonPublic} private/unknown path(s) refused — a hreflang alternate requires a public route.
+                  </p>
+                </div>
+                <div className="mt-3" data-testid="localisation-seo-formats">
+                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                    Locale formats ({model.localisationSeo.formatCount}) — number · date · clock
+                  </p>
+                  <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+                    {model.localisationSeo.formatConventions.map((c) => (
+                      <li key={c.locale} className="flex justify-between gap-3 text-ds-label">
+                        <span className="font-mono text-zinc-400">{c.locale}</span>
+                        <span className="text-zinc-400">{c.numbersExample} · {c.dateExample} · {c.timeCycle}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-3" data-testid="localisation-seo-timezones">
+                  <p className="text-ds-micro uppercase tracking-wide text-zinc-500">
+                    Market timezones ({model.localisationSeo.marketCount})
+                  </p>
+                  <ul className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+                    {model.localisationSeo.markets.map((m) => (
+                      <li key={m.countryCode} className="flex justify-between gap-3 text-ds-label">
+                        <span className="text-zinc-300">{m.countryLabel}</span>
+                        <span className="font-mono text-zinc-400">{m.timezone}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="mt-3 text-ds-micro text-zinc-500" data-testid="localisation-seo-rule">
+                  {model.localisationSeo.rules.join(' ')}
+                </p>
+                <p className="mt-2 text-ds-micro text-zinc-500" data-testid="localisation-seo-basis">
+                  {model.localisationSeo.basis} {model.localisationSeo.disclaimer}
+                </p>
+              </div>
             </WorkspaceSection>
 
             <WorkspaceSection

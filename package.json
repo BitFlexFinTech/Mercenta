@@ -118,7 +118,8 @@
     "validate:shared-workflow-reuse": "node scripts/validate-shared-workflow-reuse.mjs",
     "validate:financier-lifecycle": "node scripts/validate-financier-lifecycle.mjs",
     "validate:founder-outreach": "node scripts/validate-founder-outreach.mjs",
-    "validate:pitch-workspace": "node scripts/validate-pitch-workspace.mjs"
+    "validate:pitch-workspace": "node scripts/validate-pitch-workspace.mjs",
+    "validate:localisation-seo": "node scripts/validate-localisation-seo.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",

@@ -2593,6 +2593,18 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/finance/founderOutreach.ts',
     'scripts/validate-founder-outreach.mjs',
     'scripts/reconcile-founder-outreach-registry.cjs',
+    /**
+     * §PHASE 9 (2026-10-06) — localization / SEO / hreflang. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE9_LOCALIZATION_SEO_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is refused. The framework is
+     * internal — the surface lives on the Super-Admin Founder Control Centre (and the SEO
+     * runtime), never a brand screen.
+     */
+    'src/config/localisationSeo.ts',
+    'src/lib/localisation/localisationSeo.ts',
+    'src/lib/seo/routeMetadata.ts',
+    'scripts/validate-localisation-seo.mjs',
+    'scripts/reconcile-localisation-seo-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(

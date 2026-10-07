@@ -2948,6 +2948,35 @@ const PHASE7_FOUNDER_OUTREACH_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 9 (2026-10-06) — LOCALIZATION, SEO AND HREFLANG — declared surface.
+ *
+ * The registry row `phase9-localization-seo-hreflang` records the locale presentation
+ * conventions (number/date/time formats), the per-market timezones, the localized-URL
+ * strategy and a FAIL-CLOSED hreflang rule, all of which BRIDGE the existing canonical
+ * owners (`src/config/localisation.ts` and `src/lib/seo/publicRoutes.ts`) without
+ * re-declaring them. This increment adds the ONE owner
+ * (`src/config/localisationSeo.ts`) and the pure resolver
+ * (`src/lib/localisation/localisationSeo.ts`), wires the hreflang alternates into the SEO
+ * runtime (`src/lib/seo/routeMetadata.ts`) and surfaces the framework on the Super-Admin
+ * Founder Control Centre, and gates them.
+ *
+ * F6's contract is UNCHANGED: a working-tree file in NO declared set still fails.
+ */
+const PHASE9_LOCALIZATION_SEO_SCOPE = new Set([
+  'src/config/localisationSeo.ts',             /* NEW — the ONE localisation/seo owner */
+  'src/lib/localisation/localisationSeo.ts',   /* NEW — the pure fail-closed resolver */
+  'src/lib/seo/routeMetadata.ts',              /* carries + applies the hreflang alternates */
+  'src/lib/commandCentre/controlCentre.ts',    /* computes + exposes the SEO summary */
+  'src/components/admin/FounderControlCentre.tsx', /* renders the localisation/SEO section */
+  'scripts/validate-localisation-seo.mjs',     /* NEW — this phase's gate */
+  'scripts/reconcile-localisation-seo-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',      /* test 18 renders the localisation/SEO section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3735,7 +3764,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE8_PITCH_WORKSPACE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 7 — the founder outreach pipeline (see above). */
           PHASE7_FOUNDER_OUTREACH_SCOPE.has(p) ||
-          [...PHASE7_FOUNDER_OUTREACH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE7_FOUNDER_OUTREACH_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 9 — localization / SEO / hreflang (see above). */
+          PHASE9_LOCALIZATION_SEO_SCOPE.has(p) ||
+          [...PHASE9_LOCALIZATION_SEO_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(
