@@ -629,6 +629,27 @@ test.describe('Founder Operating System — Control Centre', () => {
     expect(external).toEqual([]);
     expect(pageErrors).toEqual([]);
   });
+
+  /**
+   * §PHASE 11 (2026-10-06) — the FOUNDER INTELLIGENCE EXPANSION. The Business view renders
+   * the founder's eleven standing questions, each naming the canonical owner that
+   * deterministically answers it, and shows the fail-closed proof (an AI-supplied figure is
+   * refused) computed LIVE from the resolver.
+   */
+  test('20. the founder intelligence section renders on the Business view', async ({ page }) => {
+    const external = watchForExternalCalls(page);
+    const pageErrors = watchForPageErrors(page);
+    await openControlCentre(page);
+
+    const questions = page.getByTestId('founder-intelligence-questions').locator('li');
+    await expect(questions).toHaveCount(11);
+    await expect(page.getByTestId('founder-intelligence-refusal')).toContainText('FOUNDER_AI_MAY_ONLY_SUMMARISE');
+    await expect(page.getByTestId('founder-intelligence-basis')).toContainText('canonical');
+
+    await page.screenshot({ path: `${SHOTS}/20-founder-intelligence.png`, fullPage: false });
+    expect(external).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
 });
 
 test.describe('Founder Operating System — RBAC', () => {

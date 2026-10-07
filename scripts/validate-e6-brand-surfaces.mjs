@@ -3006,6 +3006,34 @@ const PHASE13_AMAZON_GOVERNANCE_SCOPE = new Set([
   'scripts/validate-e7-embedded-social.mjs',
 ]);
 
+/**
+ * §PHASE 11 — THE FOUNDER INTELLIGENCE EXPANSION (2026-10-06).
+ *
+ * The row `phase11-founder-intelligence-expansion` records the founder intelligence
+ * expansion: the founder's standing questions, each answered from a canonical deterministic
+ * owner, with AI permitted to SUMMARISE only. This increment builds the ONE owner
+ * (`src/config/founderIntelligence.ts`), the pure fail-closed resolver
+ * (`src/lib/intelligence/founderIntelligence.ts`), surfaces it on the Super-Admin Founder
+ * Control Centre (Business view) and gates it.
+ *
+ * NOTE ON THE PROTECTED PREFIX: `src/lib/intelligence/` is a PROTECTED prefix, but this
+ * increment ADDS a NEW file there (it modifies none) and DECLARES it here — exactly as
+ * `amazonRelationshipGovernance.ts` did. F6's contract is UNCHANGED: a working-tree file in
+ * NO declared set still fails.
+ */
+const PHASE11_FOUNDER_INTELLIGENCE_SCOPE = new Set([
+  'src/config/founderIntelligence.ts',                   /* NEW — the ONE intelligence owner */
+  'src/lib/intelligence/founderIntelligence.ts',         /* NEW — the pure fail-closed resolver */
+  'src/lib/commandCentre/controlCentre.ts',              /* computes + exposes the intelligence summary */
+  'src/components/admin/FounderControlCentre.tsx',       /* renders the founder intelligence section */
+  'scripts/validate-founder-intelligence.mjs',           /* NEW — this phase's gate */
+  'scripts/reconcile-founder-intelligence-registry.cjs', /* NEW — the registry reconciliation */
+  'e2e/founder-operating-system.spec.ts',                /* test 20 renders the intelligence section */
+  'package.json',
+  'scripts/validate-e6-brand-surfaces.mjs',
+  'scripts/validate-e7-embedded-social.mjs',
+]);
+
 const PUBLIC_MESSAGING_SCOPE = new Set([
   'src/config/positioning.ts',
   'src/config/company.ts',
@@ -3265,7 +3293,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...BATCH3C_PARITY_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 13 — the Amazon relationship governance's declared surface (see above). */
         PHASE13_AMAZON_GOVERNANCE_SCOPE.has(p) ||
-        [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 11 — the founder intelligence expansion's declared surface (see above). */
+        PHASE11_FOUNDER_INTELLIGENCE_SCOPE.has(p) ||
+        [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
   test('F5b the ONLY protected-area files allowed to move are the declared ones',
     changed
       .filter((p) => !GENERATED_ARTEFACTS.some((pre) => p.startsWith(pre)))
@@ -3380,7 +3411,10 @@ const PUBLIC_MESSAGING_SCOPE = new Set([
         [...PUBLIC_MESSAGING_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
         /** §PHASE 13 — same declaration, second protected-path check (F5b). */
         PHASE13_AMAZON_GOVERNANCE_SCOPE.has(p) ||
-        [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
+        [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+        /** §PHASE 11 — same declaration, second protected-path check (F5b). */
+        PHASE11_FOUNDER_INTELLIGENCE_SCOPE.has(p) ||
+        [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))));
 /**
  * §UI/UX Wave 2 (2026-09-18) — the UI/UX redesign wave scope, declared here in
  * the same naming/allowing mechanism as E7_SCOPE / PHASE4_SCOPE /
@@ -3805,7 +3839,10 @@ const BATCH1_INTEGRATION_PROXY_SCOPE = new Set([
           [...PHASE9_LOCALIZATION_SEO_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
           /** §PHASE 13 — Amazon relationship governance (see above). */
           PHASE13_AMAZON_GOVERNANCE_SCOPE.has(p) ||
-          [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
+          [...PHASE13_AMAZON_GOVERNANCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s)) ||
+          /** §PHASE 11 — the founder intelligence expansion (see above). */
+          PHASE11_FOUNDER_INTELLIGENCE_SCOPE.has(p) ||
+          [...PHASE11_FOUNDER_INTELLIGENCE_SCOPE].some((s) => s.endsWith('/') && p.startsWith(s))
         )
     );
   test(

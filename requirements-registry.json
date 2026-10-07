@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-06 by scripts/reconcile-amazon-governance-registry.cjs after the §PHASE 13 (Amazon relationship governance) increment (phase13-amazon-relationship-governance not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-06 by scripts/reconcile-founder-intelligence-registry.cjs after the §PHASE 11 (founder intelligence expansion) increment (phase11-founder-intelligence-expansion not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 162,
-      "not_started": 20,
+      "built": 163,
+      "not_started": 19,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1152,6 +1152,17 @@
         "scripts/validate-amazon-governance.mjs"
       ],
       "note": "The authoritative sources of Mercenta’s retail-channel relationship had no single owner; the row was described only in the roadmap. The owner declares the nine document classes once and the pure fail-closed resolver applies ONE rule over them: a claim may rest only on a source actually held AND verified, an unknown source is refused, and the programme status is reused from the wording owner (`src/lib/intelligence/amazonWording.ts`) rather than held twice. It is internal (Super-Admin) and deterministic (no AI, no clock)."
+    },
+    "founder_intelligence_increment": {
+      "increment": "§PHASE 11 — Founder intelligence expansion (2026-10-06)",
+      "restated": [
+        "phase11-founder-intelligence-expansion"
+      ],
+      "added": [],
+      "validators": [
+        "scripts/validate-founder-intelligence.mjs"
+      ],
+      "note": "The founder’s standing questions had no single owner. The owner declares the eleven questions once and the pure fail-closed resolver applies ONE rule over them: the data behind an answer comes only from its declared canonical owner, AI may only summarise, and an unknown question is refused. It is internal (Super-Admin) and deterministic (no AI, no clock)."
     }
   },
   "entries": [
@@ -4218,12 +4229,13 @@
     },
     {
       "id": "phase11-founder-intelligence-expansion",
-      "description": "Phase 11 — the founder intelligence expansion answering: what is happening, what needs attention, what opportunities exist, what is blocked, which brands to pursue, which products matter, which POs need action, where capital is tied up, where financing is needed, which financier conversations need follow-up and what changed this week. AI summarises; canonical deterministic data stays the source of truth",
+      "description": "Phase 11 — the founder intelligence expansion: the founder’s standing questions (what is happening, what needs attention, what opportunities exist, what is blocked, which brands to pursue, which products matter, which POs need action, where capital is tied up, where financing is needed, which financier conversations need follow-up, what changed this week). BUILT (2026-10-06): the ONE owner `src/config/founderIntelligence.ts` declares the eleven questions once, each naming the canonical owner that DETERMINISTICALLY answers it; the pure resolver `src/lib/intelligence/founderIntelligence.ts` applies ONE rule FAIL-CLOSED — the DATA behind an answer comes only from its declared canonical owner (AI is REFUSED as the producer of data), while AI (or a human) MAY produce a SUMMARY. An unknown question is REFUSED. Canonical deterministic data stays the source of truth. Deterministic (no AI, no clock) and internal (Super-Admin surface only).",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "src/lib/intelligence/intelligenceLayer.ts (the existing findings layer this extends)",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/config/founderIntelligence.ts (the ONE owner — the eleven founder questions + the rule over them); src/lib/intelligence/founderIntelligence.ts (the pure fail-closed resolver); src/lib/commandCentre/controlCentre.ts (computes + exposes founderIntelligence); src/components/admin/FounderControlCentre.tsx (Business → Founder intelligence, Super-Admin only); gate scripts/validate-founder-intelligence.mjs (npm run validate:founder-intelligence, mutation-proved TWICE); e2e/founder-operating-system.spec.ts test 20 renders it live.",
+      "last_verified": "2026-10-06",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 11 (Founder intelligence expansion) (2026-10-06) — STATUS RAISED not_started -> built (old value recorded inline, never deleted). OLD status: \"not_started\". OLD evidence: \"src/lib/intelligence/intelligenceLayer.ts (the existing findings layer this extends)\". Built as the ONE owner + the pure fail-closed resolver: every question names the canonical owner that deterministically answers it, AI may only SUMMARISE (an AI-supplied figure is refused), and an unknown question is refused. Surface declared in BOTH scope guards (E6 PHASE11_FOUNDER_INTELLIGENCE_SCOPE; E7 PHASE11_FOUNDER_INTELLIGENCE_DECLARED + allowed entries)."
     },
     {
       "id": "phase12-integrated-acquisition-capital-operations-loop",

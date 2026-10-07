@@ -115,6 +115,10 @@ import {
   type AmazonGovernanceSummary,
 } from '@/lib/intelligence/amazonRelationshipGovernance';
 import {
+  buildFounderIntelligenceSummary,
+  type FounderIntelligenceSummary,
+} from '@/lib/intelligence/founderIntelligence';
+import {
   buildCountryFrameworkSummary,
   type CountryFrameworkSummary,
 } from '@/lib/geography/resolveCountry';
@@ -398,6 +402,17 @@ export interface ControlCentreModel {
    */
   amazonGovernance: AmazonGovernanceSummary;
   /**
+   * §PHASE 11 — the founder intelligence expansion. The founder's standing questions
+   * (what is happening, what needs attention, what opportunities exist, what is blocked,
+   * which brands to pursue, which products matter, which POs need action, where capital is
+   * tied up, where financing is needed, which financier conversations need follow-up, what
+   * changed this week), declared by the ONE owner (`src/config/founderIntelligence.ts`)
+   * and applied by the pure resolver (`src/lib/intelligence/founderIntelligence.ts`).
+   * Every question names the canonical owner that DETERMINISTICALLY answers it; AI may
+   * only SUMMARISE — an AI-supplied figure is refused. Super-Admin view.
+   */
+  founderIntelligence: FounderIntelligenceSummary;
+  /**
    * §PHASE 9 — the country framework. Every country is classified into one or more
    * of the SIX roles (`src/config/countryFramework.ts`), resolved purely by
    * `src/lib/geography/resolveCountry.ts`. The marketplace role is FACTUAL and
@@ -597,6 +612,13 @@ export function buildControlCentre(): ControlCentreModel {
      actually held AND verified; nothing is verified with the channel today. Nothing here invents
      a permission or a source. */
   const amazonGovernance = buildAmazonGovernanceSummary();
+  /* ── §PHASE 11 — the founder intelligence expansion ──
+     The founder's standing questions and the rule over them, from the ONE owner
+     (`src/config/founderIntelligence.ts`) through the pure resolver
+     (`src/lib/intelligence/founderIntelligence.ts`). Every question names the canonical
+     owner that deterministically answers it; AI may only summarise. Nothing here invents
+     a figure or a question. */
+  const founderIntelligence = buildFounderIntelligenceSummary();
   /* ── §PHASE 9 — the country framework ──
      Every country's roles come from the ONE owner (`src/config/countryFramework.ts`)
      through the pure resolver (`src/lib/geography/resolveCountry.ts`). The
@@ -772,6 +794,9 @@ export function buildControlCentre(): ControlCentreModel {
       metric('open-work', 'Open work', String(work.length), work.length > 0 ? 'warning' : 'success', 'Operating layer', `${critical.length} critical · ${overdue.length} overdue.`, 'work'),
       metric('revenue', 'Recorded revenue', `£${revenueTotal.toLocaleString('en-GB')}`, 'neutral', 'Canonical streams', 'Commission + shipping margin only; nothing blended.', 'accounting'),
       metric('attention', 'Attention items', String(critical.length + overdue.length), critical.length + overdue.length > 0 ? 'danger' : 'success', 'Needs a decision', 'Critical work plus work past deadline.', 'work'),
+      /* §PHASE 11 — the founder intelligence expansion: every question answers from a named canonical owner. */
+      metric('fi-questions', 'Founder questions', String(founderIntelligence.questionCount), 'info', 'canonical owners', 'The founder’s standing questions are declared once; each names the canonical owner that deterministically answers it — the expansion re-derives no figure of its own.', 'control_centre'),
+      metric('fi-ai-summarise', 'AI may summarise', founderIntelligence.aiMayOnlySummarise ? 'Only' : 'NO — DEFECT', founderIntelligence.aiMayOnlySummarise ? 'success' : 'danger', 'never the figure', 'AI may summarise an answer; an AI-supplied figure is refused — AI is never the source of the data.', 'control_centre'),
     ],
     brands: [
       metric('brand-total', 'Brands', String(demoBrands.length), 'neutral', 'Portfolio', 'Canonical brand records.', 'crm'),
@@ -947,6 +972,7 @@ export function buildControlCentre(): ControlCentreModel {
     localisation,
     localisationSeo,
     amazonGovernance,
+    founderIntelligence,
     countryFramework,
     learningLoop,
     onboardingCurriculum,
@@ -986,6 +1012,7 @@ export function buildControlCentre(): ControlCentreModel {
       { label: 'Object resolution', value: 'src/lib/resolution/objectResolution.ts — the ONE resolver over the canonical PO + shipment channel objects' },
       { label: 'Localisation', value: 'src/config/localisation.ts + src/lib/localisation/resolveLocalisation.ts — the three separate concepts (locale · display currency · settlement currency) over the canonical source markets' },
       { label: 'Localization / SEO / hreflang (Phase 9)', value: 'src/config/localisationSeo.ts + src/lib/localisation/localisationSeo.ts — the number/date/time conventions (separators read from Intl), the per-market IANA timezones, the localized-URL strategy and the FAIL-CLOSED hreflang rule: an alternate is emitted only for a served content locale and only for a public route, with x-default self-referencing the served default' },
+      { label: 'Founder intelligence (Phase 11)', value: 'src/config/founderIntelligence.ts + src/lib/intelligence/founderIntelligence.ts — the founder’s standing questions (what is happening, what needs attention, what opportunities exist, what is blocked, which brands to pursue, which products matter, which POs need action, where capital is tied up, where financing is needed, which financier conversations need follow-up, what changed this week), each naming the canonical owner that DETERMINISTICALLY answers it; AI may only SUMMARISE (an AI-supplied figure is refused), so canonical deterministic data stays the source of truth' },
       { label: 'Retail-channel relationship governance (Phase 13)', value: 'src/config/amazonRelationshipGovernance.ts + src/lib/intelligence/amazonRelationshipGovernance.ts — the cross-cutting governance over the nine authoritative sources (vendor agreement, current policies, additional terms, channel communications, programme documentation, API agreements, trademark permissions, written permissions, account instructions) and the FAIL-CLOSED rule over them: a claim may rest only on a source actually held AND verified, an unknown source is refused, and the programme status is reused from the wording owner (`src/lib/intelligence/amazonWording.ts`) rather than held twice' },
       { label: 'Country framework', value: 'src/config/countryFramework.ts + src/lib/geography/resolveCountry.ts — the six country roles over the canonical source markets; the marketplace role is cited to the channel’s own marketplace-IDs reference and Zimbabwe is never a marketplace' },
       { label: 'Brand learning loop', value: 'src/config/learningLoop.ts + src/lib/education/resolveLearningProgress.ts — the LEARN → WATCH → DO → VALIDATE → COMPLETE loop over the canonical educational gaps; LEARN/WATCH reuse the canonical Knowledge Base article and guided tour, and VALIDATE is a gate satisfied only by a real signal' },

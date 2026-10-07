@@ -356,6 +356,39 @@ export function FounderControlCentre({ onNavigate }: { onNavigate: (view: string
           </p>
         )}
 
+        {section === 'business' && (
+          <WorkspaceSection
+            title="Founder intelligence"
+            description="The founder's standing questions, declared once. Every answer names the CANONICAL owner that deterministically computes its data — AI may SUMMARISE an answer but never supply the data behind one, so canonical deterministic data stays the source of truth."
+            domain="orders"
+            action={
+              <span className="text-ds-micro text-zinc-500" data-testid="founder-intelligence-status">
+                {model.founderIntelligence.questionCount} questions · AI may only summarise
+              </span>
+            }
+          >
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="founder-intelligence-questions">
+              {model.founderIntelligence.questions.map((q) => (
+                <li key={q.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
+                  <p className="text-ds-label text-zinc-200">{q.question}</p>
+                  <p className="mt-1 text-ds-micro text-zinc-500">{q.about}</p>
+                  <p className="mt-1 font-mono text-ds-micro text-zinc-600">{q.dataOwner}</p>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="founder-intelligence-refusal">
+              Fail-closed proof: AI supplying the data for “{model.founderIntelligence.exampleRefusal.question}” →{' '}
+              {model.founderIntelligence.exampleRefusal.refusal}. {model.founderIntelligence.exampleRefusal.reason}
+            </p>
+            <p className="mt-3 text-ds-micro text-zinc-500" data-testid="founder-intelligence-rule">
+              {model.founderIntelligence.rules.join(' ')}
+            </p>
+            <p className="mt-2 text-ds-micro text-zinc-500" data-testid="founder-intelligence-basis">
+              {model.founderIntelligence.basis} {model.founderIntelligence.disclaimer}
+            </p>
+          </WorkspaceSection>
+        )}
+
         {section === 'brands' && (
           <>
             <WorkspaceSection

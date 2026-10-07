@@ -478,6 +478,18 @@ try {
     'scripts/validate-amazon-governance.mjs',
     'scripts/reconcile-amazon-governance-registry.cjs',
   ];
+  /**
+   * §PHASE 11 (2026-10-06) — the FOUNDER INTELLIGENCE EXPANSION adds a NEW file under the
+   * E7 PROTECTED `src/lib/intelligence/` prefix (it modifies none) and DECLARES it here,
+   * exactly as `amazonRelationshipGovernance.ts` and the Founders OS layers did. The contract
+   * is unchanged: an UNEXPLAINED protected change still fails.
+   */
+  const PHASE11_FOUNDER_INTELLIGENCE_DECLARED = [
+    'src/config/founderIntelligence.ts',
+    'src/lib/intelligence/founderIntelligence.ts',
+    'scripts/validate-founder-intelligence.mjs',
+    'scripts/reconcile-founder-intelligence-registry.cjs',
+  ];
   // §Phase 4 — canonical 20-real-brand universe. The file-touch proxy needs the
   // same extension M13/E8 gave it before: the working tree now legitimately
   // contains the Phase-4 surface (canonical SSOT + every consumer repointed).
@@ -2058,7 +2070,10 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
           !BATCH3C_PARITY_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
           /** §PHASE 13 — the Amazon relationship governance's declared surface. */
           !PHASE13_AMAZON_GOVERNANCE_DECLARED.includes(f) &&
-          !PHASE13_AMAZON_GOVERNANCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
+          !PHASE13_AMAZON_GOVERNANCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p)) &&
+          /** §PHASE 11 — the founder intelligence expansion's declared surface. */
+          !PHASE11_FOUNDER_INTELLIGENCE_DECLARED.includes(f) &&
+          !PHASE11_FOUNDER_INTELLIGENCE_DECLARED.some((p) => p.endsWith('/') && f.startsWith(p))
       )
       .some((f) => protectedPaths.some((p) => f.startsWith(p)))
   );
@@ -2630,6 +2645,16 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'src/lib/intelligence/amazonRelationshipGovernance.ts',
     'scripts/validate-amazon-governance.mjs',
     'scripts/reconcile-amazon-governance-registry.cjs',
+    /**
+     * §PHASE 11 (2026-10-06) — the FOUNDER INTELLIGENCE EXPANSION. Fuller note in
+     * `validate-e6-brand-surfaces.mjs` §PHASE11_FOUNDER_INTELLIGENCE_SCOPE. Same mechanism: a
+     * changed source/test file outside EVERY declared set is refused. The intelligence is
+     * internal — the surface lives on the Super-Admin Founder Control Centre (Business view).
+     */
+    'src/config/founderIntelligence.ts',
+    'src/lib/intelligence/founderIntelligence.ts',
+    'scripts/validate-founder-intelligence.mjs',
+    'scripts/reconcile-founder-intelligence-registry.cjs',
   ];
   const e7Source = e7Changed.filter((f) => /^(src|scripts|e2e)\//.test(f));
   test(
