@@ -371,10 +371,10 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-06 by scripts/reconcile-localisation-seo-registry.cjs after the §PHASE 9 (localization / SEO / hreflang) increment (phase9-localization-seo-hreflang not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
+      "_note": "Recomputed 2026-10-06 by scripts/reconcile-amazon-governance-registry.cjs after the §PHASE 13 (Amazon relationship governance) increment (phase13-amazon-relationship-governance not_started -> built; no row added or removed: total_entries stays 540; built +1, not_started -1). Snapshot only.",
       "built_and_tested": 337,
-      "built": 161,
-      "not_started": 21,
+      "built": 162,
+      "not_started": 20,
       "removed": 4,
       "deferred": 9,
       "blocked": 7,
@@ -1141,6 +1141,17 @@
         "scripts/validate-localisation-seo.mjs"
       ],
       "note": "The locale presentation conventions and the search metadata had no owner; the row was described only in the roadmap. The owner + the pure fail-closed resolver declare them once and BRIDGE the existing canonical owners (`src/config/localisation.ts` for locales/currencies, `src/lib/seo/publicRoutes.ts` for the public routes) without re-declaring them: hreflang is emitted only for a served content locale (en-GB today) and only for a public route, x-default self-references the served default, and no page is ever advertised in a language Mercenta does not serve. It is internal (Super-Admin + the SEO runtime) and deterministic (no AI, no clock)."
+    },
+    "amazon_governance_increment": {
+      "increment": "§PHASE 13 — Amazon relationship governance (2026-10-06)",
+      "restated": [
+        "phase13-amazon-relationship-governance"
+      ],
+      "added": [],
+      "validators": [
+        "scripts/validate-amazon-governance.mjs"
+      ],
+      "note": "The authoritative sources of Mercenta’s retail-channel relationship had no single owner; the row was described only in the roadmap. The owner declares the nine document classes once and the pure fail-closed resolver applies ONE rule over them: a claim may rest only on a source actually held AND verified, an unknown source is refused, and the programme status is reused from the wording owner (`src/lib/intelligence/amazonWording.ts`) rather than held twice. It is internal (Super-Admin) and deterministic (no AI, no clock)."
     }
   },
   "entries": [
@@ -4225,12 +4236,13 @@
     },
     {
       "id": "phase13-amazon-relationship-governance",
-      "description": "Phase 13 — the cross-cutting governance system over the authoritative sources (Vendor agreement, current Amazon policies, additional terms, Amazon communications, program documentation, API agreements, trademark permissions, written permissions, account instructions)",
+      "description": "Phase 13 — the cross-cutting governance over the AUTHORITATIVE SOURCES of Mercenta’s retail-channel relationship (vendor agreement, current policies, additional terms, channel communications, programme documentation, API agreements, trademark permissions, written permissions, account instructions). BUILT (2026-10-06): the ONE owner `src/config/amazonRelationshipGovernance.ts` declares the nine document classes once (each naming the codebase owner of the behaviour it governs) and the governance rule over them; the pure resolver `src/lib/intelligence/amazonRelationshipGovernance.ts` applies it FAIL-CLOSED — a claim may cite only a declared source (an unknown id is REFUSED), the claim wording must still pass the canonical wording safeguard (a failing claim is REFUSED), and a claim may rest only on a source actually held AND verified (an unverified source is REFUSED). Nothing is verified with the channel today, so every relationship claim currently fails closed. The programme status is REUSED from `src/lib/intelligence/amazonWording.ts`, never re-typed. Deterministic (no AI, no clock) and internal (Super-Admin surface only).",
       "source": "Mercenta roadmap reconciliation (2026-09-19)",
-      "status": "not_started",
-      "evidence": "src/lib/intelligence/amazonWording.ts (the existing claim rules this governs)",
-      "last_verified": "2026-09-19",
-      "superseded_by": null
+      "status": "built",
+      "evidence": "src/config/amazonRelationshipGovernance.ts (the ONE owner — the authoritative-source universe + the fail-closed rule); src/lib/intelligence/amazonRelationshipGovernance.ts (the pure fail-closed resolver); src/lib/intelligence/amazonWording.ts (the wording owner this governance rests on — READ, never modified); src/lib/commandCentre/controlCentre.ts (computes + exposes amazonGovernance); src/components/admin/FounderControlCentre.tsx (Commercial → Amazon relationship governance, Super-Admin only); gate scripts/validate-amazon-governance.mjs (npm run validate:amazon-governance, 32 assertions, mutation-proved TWICE); e2e/founder-operating-system.spec.ts test 19 renders it live.",
+      "last_verified": "2026-10-06",
+      "superseded_by": null,
+      "_audit_note": "§PHASE 13 (Amazon relationship governance) (2026-10-06) — STATUS RAISED not_started -> built (old value recorded inline, never deleted). OLD status: \"not_started\". OLD evidence: \"src/lib/intelligence/amazonWording.ts (the existing claim rules this governs)\". Built as the ONE owner + the pure fail-closed resolver: a claim rests only on a source actually held AND verified, an unknown source and a wording-failing claim are REFUSED, and the programme status is reused from the wording owner (no second copy). Surface declared in BOTH scope guards (E6 PHASE13_AMAZON_GOVERNANCE_SCOPE; E7 PHASE13_AMAZON_GOVERNANCE_DECLARED + allowed entries)."
     },
     {
       "id": "phase13-claims-registry",
