@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 546,
+    "total_entries": 547,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -6374,6 +6374,15 @@
       "status": "built_and_tested",
       "evidence": "scripts/validate-admin-shell-bundle.mjs (npm run validate:admin-shell-bundle) — its BrandShell section asserts the shell holds NO static import from `@/components/brand/`, declares ≥20 `lazy(() => import(` bindings, renders its switch inside a `<Suspense>`, holds the BrandShell chunk ≤ 300 kB, and splits ≥18 of 23 panels (incl. the heaviest, ProductCatalog + LogisticsHub) into their own chunks. Browser: e2e/brand-operational-surfaces.spec.ts + e2e/app-shell.spec.ts render the brand shell and navigate its views, loading the lazily-split chunks.",
       "last_verified": "2026-10-05",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e-coverage-finance-domain",
+      "description": "E2E-5 (2026-10-08) — E2E COVERAGE, THE FINANCE DOMAIN. Extends the ONE scenario catalogue (`docs/scenario-catalogue.json`, the E2E-0 owner) across the finance domain: 25 `fi-*` scenarios added (286 -> 311 total), each TRACEABLE to the individual Playwright test that proves it via a `test` field. The 25 span SEVEN specs — billing (4) · brand payouts (4) · the deductions ledger (1, run once per canonical category) · deduction disputes (5) · admin invoicing (3) · operating costs (3) · Xero accounting (5). The gate `scripts/validate-e2e-scenarios.mjs` is EXTENDED so EVERY `fi-*` scenario, like every `pf-*`/`oa-*`/`po-*`/`sl-*` one, MUST name its proving test, plus a self-check pinning the traceable-prefix set to exactly `pf-` + `oa-` + `po-` + `sl-` + `fi-`; the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` is regenerated from the owner. Domain boundary is EVIDENCE-BASED: the seven specs the catalogue itself classifies under the `finance` capability (billing, brand payouts, deductions, disputes, invoicing, operating costs, Xero) — `ack-invoice-price` is NOT here because it is classified `commerce_logistics`, and the founder/investor funding surfaces are NOT here because they are classified `founder`. No application runtime change.",
+      "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-5 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
+      "status": "built",
+      "evidence": "`docs/scenario-catalogue.json` 286 -> 311 scenarios (25 `fi-*` finance, all traceable to a test; `finance` 7 -> 32). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (311 scenarios · 216 traceable · 8 capabilities; was 16/16 at 286). MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string in an `fi-*` scenario => 2 failures, exit 1; (B) the prefix set narrowed with `fi-` dropped => 1 failure (the self-check), exit 1; (C) an `fi-*` scenario with no `test` field => 2 failures, exit 1; each file restored byte-identical (catalogue sha256 7f8a6db83eb7cb3913e122c613d3612b3d1a4bdc10e4cba2d6879ab6ce9d409e; gate sha256 b37e44d8bea72302b630e1851b54a67abe6110fb509fbe6bfee43858fe31668a). `npm run validate:all` 188 PASS / 0 FAIL; typecheck 0 (all four projects); lint 0; build ✓. BROWSER LEG — every in-domain spec in real Chromium = 30 passed / 0 failed / 0 skipped (the seven finance specs: billing 4 · brand payouts 4 · deductions 6 · disputes 5 · invoicing 3 · operating costs 3 · Xero 5), covering all 25 scenario declarations. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
       "superseded_by": null
     }
   ]

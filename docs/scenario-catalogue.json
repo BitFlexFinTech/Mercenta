@@ -2848,6 +2848,256 @@
       "spec": "e2e/app-shell.spec.ts",
       "test": "Admin — grouping is structural (Operations is the action centre)",
       "expects": "For the operator, Returns Tracking sits in the Operations group — the action centre — alongside the Logistics Hub, so a queue an operator acts on is never filed as an observe-only item."
+    },
+    {
+      "id": "fi-billing-invoice-fee-commissions",
+      "capability": "finance",
+      "journey": "finance — billing — the invoice carries the monthly fee and the channel commissions",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/billing.spec.ts",
+      "test": "1. Invoice: monthly fee + commissions",
+      "expects": "The Billing view renders a real invoice row carrying the monthly fee and the channel commissions in pounds — the invoice is built from the canonical billing data, not a placeholder."
+    },
+    {
+      "id": "fi-billing-remittance-net",
+      "capability": "finance",
+      "journey": "finance — billing — the remittance states gross less commission less deductions equals net paid",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/billing.spec.ts",
+      "test": "2. Remittance: gross - commission - deductions = net",
+      "expects": "The remittance statement shows the 'net paid' figure and the gross-less-commission-less-deductions working, so the money leaving Mercenta is traceable."
+    },
+    {
+      "id": "fi-billing-stripe-mock-honest",
+      "capability": "finance",
+      "journey": "finance — billing — the mock Stripe mode is disclosed, never shown as live",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/billing.spec.ts",
+      "test": "3. Mock-Stripe mode rendered honestly",
+      "expects": "The Billing view states that Stripe runs in its simulated mode — a simulated billing rail is never presented as a live one."
+    },
+    {
+      "id": "fi-billing-shipping-margin",
+      "capability": "finance",
+      "journey": "finance — billing — the shipping margin shows carrier cost against the marked-up price",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/billing.spec.ts",
+      "test": "4. Shipping margin: carrier cost vs. marked-up price",
+      "expects": "The Billing view renders the shipping margin with the carrier cost and the marked-up price kept separate in pounds."
+    },
+    {
+      "id": "fi-payout-pending-derived",
+      "capability": "finance",
+      "journey": "finance — brand payouts — the pending set is derived from the canonical commission store",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/brand-payouts.spec.ts",
+      "test": "1. pending payouts are derived from the canonical commission store",
+      "expects": "The Accounting tab's payout table shows REAL rows derived from the canonical commission store (the hardcoded 'No pending payouts' row is gone), with the canonical status / reconciliation / payout vocabularies and the money columns present."
+    },
+    {
+      "id": "fi-payout-settle-mock-audited",
+      "capability": "finance",
+      "journey": "finance — brand payouts — settling a payout reports its mode, clears it from pending and audits it",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/brand-payouts.spec.ts",
+      "test": "2. settling a payout reports mock mode, clears it from pending and audits it",
+      "expects": "Settling a commission reports its transfer mode truthfully (a simulated payout, no live Stripe call), removes that commission from the pending set and writes the canonical audit row."
+    },
+    {
+      "id": "fi-payout-reconciled-identity",
+      "capability": "finance",
+      "journey": "finance — brand payouts — a reconciled PO shows the payment identity that reconciled it",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/brand-payouts.spec.ts",
+      "test": "3. a reconciled PO shows the payment identity that reconciled it",
+      "expects": "The Reconciliation column renders the canonical state and the channel payment id (cpay-) for a reconciled PO, and the operational payout state is rendered from the canonical vocabulary."
+    },
+    {
+      "id": "fi-payout-refused-condition",
+      "capability": "finance",
+      "journey": "finance — brand payouts — a payout failing a condition is refused with its recorded reason",
+      "actor": "super_admin",
+      "type": "refusal",
+      "spec": "e2e/brand-payouts.spec.ts",
+      "test": "4. a payout that fails a condition is refused with its recorded reason",
+      "expects": "Suspending the brand's payout destination makes the payout REFUSED with its real blocker (PAYOUT_BLOCKED 'must be verified'), no transfer is claimed and the commission stays in the payable set."
+    },
+    {
+      "id": "fi-deduction-ledger-categories",
+      "capability": "finance",
+      "journey": "finance — deductions ledger — each canonical deduction category renders with its amount and status",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/deductions.spec.ts",
+      "test": "Deduction category: ${dtype} appears in ledger with amount/status",
+      "expects": "The admin Retail Pipeline ledger renders every canonical deduction category — Late Shipment / Mislabeled Carton / Non Compliance Fine / Co Op / Unfilled By Cancel Date / Po On Time Accuracy — each with its amount cell (£) and its status badge (open/accepted/resolved/disputed)."
+    },
+    {
+      "id": "fi-dispute-open-marks-disputed",
+      "capability": "finance",
+      "journey": "finance — disputes — opening a dispute marks the deduction disputed",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/disputes.spec.ts",
+      "test": "1. Open dispute marks the deduction disputed",
+      "expects": "Recording a dispute against a deduction (with its evidence note) moves that deduction to 'disputed'."
+    },
+    {
+      "id": "fi-dispute-won-zeroed",
+      "capability": "finance",
+      "journey": "finance — disputes — a won dispute zeroes the deduction",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/disputes.spec.ts",
+      "test": "2. Outcome: won -> zeroed",
+      "expects": "A won dispute shows its outcome and the deduction is zeroed."
+    },
+    {
+      "id": "fi-dispute-lost-stands",
+      "capability": "finance",
+      "journey": "finance — disputes — a lost dispute leaves the deduction standing",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/disputes.spec.ts",
+      "test": "3. Outcome: lost -> stands",
+      "expects": "A lost dispute shows its outcome and the deduction stands."
+    },
+    {
+      "id": "fi-dispute-resolution-controls",
+      "capability": "finance",
+      "journey": "finance — disputes — the won/partial/lost resolution controls are actionable",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/disputes.spec.ts",
+      "test": "4. Disputed deduction exposes the won/partial/lost resolution controls",
+      "expects": "A disputed deduction exposes the real won/partial/lost resolution affordance; using it does not crash or redirect, and the ledger remains intact."
+    },
+    {
+      "id": "fi-dispute-audited",
+      "capability": "finance",
+      "journey": "finance — disputes — the dispute write is recorded in the Admin Audit Log",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/disputes.spec.ts",
+      "test": "5. Dispute write is recorded in the Admin Audit Log",
+      "expects": "A dispute write surfaces in the Admin Audit Log's filter registry as deduction_disputed — the financial action is audited."
+    },
+    {
+      "id": "fi-invoice-terms-due-date",
+      "capability": "finance",
+      "journey": "finance — invoicing — the payment terms are chosen per invoice and the due date follows them",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/invoicing.spec.ts",
+      "test": "1. admin: the terms are chosen per invoice and the derived due date follows them",
+      "expects": "The admin invoicing surface chooses the invoice's own terms (14/30/60) and derives the due date from those terms, with the receiving status visible."
+    },
+    {
+      "id": "fi-invoice-cancel-reissue-new-number",
+      "capability": "finance",
+      "journey": "finance — invoicing — a wrong invoice is cancelled and re-issued under a NEW number",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/invoicing.spec.ts",
+      "test": "2. admin: a wrong invoice is cancelled and re-issued under a NEW number (AV-022)",
+      "expects": "A wrong invoice is cancelled with a stated reason and re-issued under a NEW number; the cancelled number is shown consumed and is never reused (AV-022)."
+    },
+    {
+      "id": "fi-invoice-receipt-gate-registry",
+      "capability": "finance",
+      "journey": "finance — invoicing — the receipt gate and the number registry are enforced",
+      "actor": "super_admin",
+      "type": "refusal",
+      "spec": "e2e/invoicing.spec.ts",
+      "test": "3. the receipt gate and the number registry are enforced in the LIVE build",
+      "expects": "A delivered-but-unreceived PO cannot be invoiced — issuing is refused with RECEIPT_REQUIRED (AV-018) — and the invoice-number registry ledger is visible on the Accounting surface."
+    },
+    {
+      "id": "fi-costs-providers-honest",
+      "capability": "finance",
+      "journey": "finance — operating costs — provider lines are labelled and no live billing API is claimed",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/operating-costs.spec.ts",
+      "test": "1. it renders the provider lines, labels and the honest disclaimer",
+      "expects": "The Operating Costs panel renders every provider line labelled MANUAL/ESTIMATED/NOT CONNECTED, states that no live billing API is connected, and never claims a line is LIVE."
+    },
+    {
+      "id": "fi-costs-ai-ceilings",
+      "capability": "finance",
+      "journey": "finance — operating costs — the AI section reports the policy model, ceilings and cost protection",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/operating-costs.spec.ts",
+      "test": "2. the AI section shows the policy model, ceilings and cost protection",
+      "expects": "The AI section reports the policy model, the cost-protection state and honest usage counters (zero calls, zero refusals) while stating that nothing is claimed."
+    },
+    {
+      "id": "fi-costs-pricing-founder-gated",
+      "capability": "finance",
+      "journey": "finance — operating costs — pricing is unset and founder-gated, and the break-even is derived",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/operating-costs.spec.ts",
+      "test": "3. pricing stays unset + founder-gated, and the break-even figure is derived",
+      "expects": "The pricing inputs are flagged as requiring founder approval with the subscription price shown as unset (£0.00/month) and the break-even subscription per brand DERIVED, not stated."
+    },
+    {
+      "id": "fi-xero-not-connected",
+      "capability": "finance",
+      "journey": "finance — Xero — the Accounting tab shows the Not Connected state",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/xero.spec.ts",
+      "test": "1. Accounting tab shows \"Not Connected\" state",
+      "expects": "The Accounting tab shows the honest Xero 'Not Connected' state — a disconnected accounting provider is never shown as connected."
+    },
+    {
+      "id": "fi-xero-credentials-form",
+      "capability": "finance",
+      "journey": "finance — Xero — the credentials form is reachable",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/xero.spec.ts",
+      "test": "2. \"Enter Xero Credentials\" form appears",
+      "expects": "Choosing 'Enter Xero Credentials' opens the Xero API credentials form — the one-click connect shape for the accounting provider."
+    },
+    {
+      "id": "fi-xero-financial-summary",
+      "capability": "finance",
+      "journey": "finance — Xero — the Financial Summary section renders",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/xero.spec.ts",
+      "test": "3. Financial Summary section renders",
+      "expects": "The Accounting tab renders the Financial Summary section."
+    },
+    {
+      "id": "fi-xero-summary-placeholder",
+      "capability": "finance",
+      "journey": "finance — Xero — the summary shows its not-connected placeholder",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/xero.spec.ts",
+      "test": "4. Summary shows placeholder when not connected",
+      "expects": "While Xero is not connected the Financial Summary shows the 'Connect Xero to see financial summary' placeholder rather than fabricated figures."
+    },
+    {
+      "id": "fi-xero-connection-control",
+      "capability": "finance",
+      "journey": "finance — Xero — a connection status or credentials control is present",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/xero.spec.ts",
+      "test": "5. Connection status or credentials control present",
+      "expects": "A connection status or a credentials control is present on the surface — the provider is always operable or honestly reported as not connected."
     }
   ]
 }

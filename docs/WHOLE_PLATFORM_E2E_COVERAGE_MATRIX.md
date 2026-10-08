@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 286 · **Capabilities:** 8
+**Scenarios:** 311 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -26,7 +26,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 |---|---|
 | brands_marketing | 3 |
 | commerce_logistics | 135 |
-| finance | 7 |
+| finance | 32 |
 | founder | 5 |
 | integrations | 3 |
 | onboarding_acquisition | 58 |
@@ -37,6 +37,31 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 
 | id | capability | actor | type | spec | proved by (test) |
 |---|---|---|---|---|---|
+| fi-billing-invoice-fee-commissions | finance | mercenta_admin | happy | `e2e/billing.spec.ts` | `1. Invoice: monthly fee + commissions` |
+| fi-billing-remittance-net | finance | mercenta_admin | happy | `e2e/billing.spec.ts` | `2. Remittance: gross - commission - deductions = net` |
+| fi-billing-shipping-margin | finance | mercenta_admin | happy | `e2e/billing.spec.ts` | `4. Shipping margin: carrier cost vs. marked-up price` |
+| fi-billing-stripe-mock-honest | finance | mercenta_admin | happy | `e2e/billing.spec.ts` | `3. Mock-Stripe mode rendered honestly` |
+| fi-costs-ai-ceilings | finance | super_admin | happy | `e2e/operating-costs.spec.ts` | `2. the AI section shows the policy model, ceilings and cost protection` |
+| fi-costs-pricing-founder-gated | finance | super_admin | happy | `e2e/operating-costs.spec.ts` | `3. pricing stays unset + founder-gated, and the break-even figure is derived` |
+| fi-costs-providers-honest | finance | super_admin | happy | `e2e/operating-costs.spec.ts` | `1. it renders the provider lines, labels and the honest disclaimer` |
+| fi-deduction-ledger-categories | finance | mercenta_admin | happy | `e2e/deductions.spec.ts` | `Deduction category: ${dtype} appears in ledger with amount/status` |
+| fi-dispute-audited | finance | super_admin | happy | `e2e/disputes.spec.ts` | `5. Dispute write is recorded in the Admin Audit Log` |
+| fi-dispute-lost-stands | finance | mercenta_admin | happy | `e2e/disputes.spec.ts` | `3. Outcome: lost -> stands` |
+| fi-dispute-open-marks-disputed | finance | mercenta_admin | happy | `e2e/disputes.spec.ts` | `1. Open dispute marks the deduction disputed` |
+| fi-dispute-resolution-controls | finance | mercenta_admin | happy | `e2e/disputes.spec.ts` | `4. Disputed deduction exposes the won/partial/lost resolution controls` |
+| fi-dispute-won-zeroed | finance | mercenta_admin | happy | `e2e/disputes.spec.ts` | `2. Outcome: won -> zeroed` |
+| fi-invoice-cancel-reissue-new-number | finance | super_admin | happy | `e2e/invoicing.spec.ts` | `2. admin: a wrong invoice is cancelled and re-issued under a NEW number (AV-022)` |
+| fi-invoice-receipt-gate-registry | finance | super_admin | refusal | `e2e/invoicing.spec.ts` | `3. the receipt gate and the number registry are enforced in the LIVE build` |
+| fi-invoice-terms-due-date | finance | super_admin | happy | `e2e/invoicing.spec.ts` | `1. admin: the terms are chosen per invoice and the derived due date follows them` |
+| fi-payout-pending-derived | finance | super_admin | happy | `e2e/brand-payouts.spec.ts` | `1. pending payouts are derived from the canonical commission store` |
+| fi-payout-reconciled-identity | finance | super_admin | happy | `e2e/brand-payouts.spec.ts` | `3. a reconciled PO shows the payment identity that reconciled it` |
+| fi-payout-refused-condition | finance | super_admin | refusal | `e2e/brand-payouts.spec.ts` | `4. a payout that fails a condition is refused with its recorded reason` |
+| fi-payout-settle-mock-audited | finance | super_admin | happy | `e2e/brand-payouts.spec.ts` | `2. settling a payout reports mock mode, clears it from pending and audits it` |
+| fi-xero-connection-control | finance | super_admin | happy | `e2e/xero.spec.ts` | `5. Connection status or credentials control present` |
+| fi-xero-credentials-form | finance | super_admin | happy | `e2e/xero.spec.ts` | `2. "Enter Xero Credentials" form appears` |
+| fi-xero-financial-summary | finance | super_admin | happy | `e2e/xero.spec.ts` | `3. Financial Summary section renders` |
+| fi-xero-not-connected | finance | super_admin | happy | `e2e/xero.spec.ts` | `1. Accounting tab shows "Not Connected" state` |
+| fi-xero-summary-placeholder | finance | super_admin | happy | `e2e/xero.spec.ts` | `4. Summary shows placeholder when not connected` |
 | oa-ack-guidance-admin-preview | onboarding_acquisition | mercenta_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `3. the admin tour-management preview shows the OWNER’s rule (never a copy)` |
 | oa-ack-guidance-brand-tour | onboarding_acquisition | brand_user | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `1. the brand tour step and the KB article it links to teach the OWNER’s rule` |
 | oa-ack-guidance-wizard | onboarding_acquisition | brand_admin | happy | `e2e/po-onboarding-ack-surfaces.spec.ts` | `2. the wizard’s operational-guidance step states the OWNER’s rule` |
