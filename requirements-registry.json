@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 554,
+    "total_entries": 555,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,8 +371,8 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 after the E2E-9 increment (e2e-coverage-founder-domain added as built). §DEFECT FIXED AT SOURCE (rule 07, E2E-9): this snapshot had been left at the E2E-4 figures while E2E-5/E2E-6/E2E-7/E2E-8 each added built rows, so it understated `built` (175 vs the true 182 before E2E-9). It is now RECOMPUTED from the entries themselves: 337 + 183 + 12 + 5 + 9 + 7 + 1 = 554. Snapshot only.",
-      "built_and_tested": 337,
+      "_note": "Recomputed 2026-10-08 after the order-item-4 / Wave-3-Part-2 increment. §CHANGES THIS SESSION: `uiux-wave3-part2-admin-dashboard-composition` not_started -> built_and_tested (the band-fill composition fix, browser-proved) and ONE discovered row added (`discovered-overview-vestigial-toolbar-strip`, not_started). Recomputed FROM THE ENTRIES THEMSELVES: 338 + 183 + 12 + 5 + 9 + 7 + 1 = 555. Snapshot only.",
+      "built_and_tested": 338,
       "built": 183,
       "not_started": 12,
       "removed": 5,
@@ -5089,17 +5089,18 @@
     },
     {
       "id": "uiux-wave3-part2-admin-dashboard-composition",
-      "description": "NOT DONE in Part 1. The `AdminDashboard` (Operations Overview) COMPOSITION was not restructured; only its header, metric hierarchy and the shell around it changed. The \"Command centre\" block is still one long list of equally-weighted rows rather than a scannable, prioritised attention surface. This is roadmap item 1 and the next execution scope",
-      "status": "not_started",
-      "evidence": "PROJECT_STATUS.md heading 3 item 1; docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 2",
+      "description": "COMPOSITION DELIVERED (order item 4, 2026-10-08). The 2026-09-20 statement this row carried was FALSE by then and is corrected AT SOURCE (rule 07): it claimed the surface was still the \"Operations Overview\" and that the \"Command centre\" block sat on it as one long list of equally-weighted rows. The Command Centre was REMOVED from this surface on 2026-09-22 by the recorded §Dashboard-cleanup consolidation (it answers \"what needs doing\", and its authoritative owner is the Control Centre; the page became `Overview` and the surface is a READ-ONLY observe view), and the composition WAS restructured after this row was written — §P2 added the money hero band and the business-volume band, Wave 2 bound domains to real chart series, and the §P5 copy pass renamed the page. What genuinely remained was a real composition defect on the bands, found by RENDERING the surface (never visible to typecheck/lint/build): the metric band is a hairline grid whose 1px gaps ARE the dividers, so any band whose tile count is not a multiple of its column count painted the divider colour as an EMPTY CELL — \"Business position\" (5 tiles in a 4-up grid) left three holes and \"Operations\" (7 tiles) left one. FIXED AT THE OWNER (`MetricBand`): the band now lays out on a 12-track grid and gives each tile a track span, so every row is full and a trailing part-row's tiles share the remaining tracks EQUALLY (no mixed tile widths either). Measured in a real browser at 1440: the 5-tile band = 4 x 203 + 1 full-width 814; the 7-tile band = 4 x 203 + 3 x 271. Even rows keep their previous tile width exactly (203px), so nothing else on the surface moved.",
+      "status": "built_and_tested",
+      "evidence": "`src/components/shared/workspace.tsx` — `MetricBand` + its `bandColumnSpans` layout rule (ONE owner). `e2e/dashboard.spec.ts` — new test 8 (\"no band row leaves an empty cell\") at 1440 and 390, EXECUTED: 2 passed, measuring the RENDERED geometry of every band on the surface. GATE MUTATION-PROVED BOTH WAYS: with the span rule reverted to its pre-fix behaviour the test FAILS at BOTH viewports (\"a 1-tile row must fill the band (span 177.5 vs grid 356)\", non-zero exit) and passes again once the rule is restored — the file was restored byte-identical (sha256 982890f5c56396c77e62b2e1f62b7cfa06217e8b865ec4698b55eb7eb4adadf2). BROWSER LEG — the whole Overview spec = 15 passed; the wider band-consuming sweep (15 spec files: dashboard, design-system, uiux-redesign, app-shell, admin/brand operational surfaces, work-layer, billing, brand-payouts, invoicing, integration-hub, founder OS, command centre, accessibility, multi-tenant) = 154 passed / 0 failed. `npm run validate:all` = 188 PASS / 0 FAIL · typecheck 0 · lint 0 · build ok. `docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md` §8 remains the honest Wave-3 Part-1 scope statement; the remaining Part-2 observation (the now-vestigial toolbar strip) is its own row, `discovered-overview-vestigial-toolbar-strip`.",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
-      "last_updated": "2026-09-20"
+      "last_updated": "2026-10-08",
+      "last_verified": "2026-10-08"
     },
     {
       "id": "uiux-wave3-part3-brand-surfaces",
       "description": "NOT DONE in Part 1. The Brand surface redesign (BrandDashboard, BrandPurchaseOrders, ProductCatalog, LogisticsHub, ComplianceHub, BrandSupport, BrandSettings, BrandReports, SalesAnalytics, …) has not been started. The brand experience should feel like a polished enterprise partner portal, not an admin template",
       "status": "not_started",
-      "evidence": "PROJECT_STATUS.md heading 3 item 2; docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 3",
+      "evidence": "§REPOINTED 2026-10-08 (rule 07) — this cited `PROJECT_STATUS.md` \"heading 3 item 2\", a heading that no longer exists in that form (the current block's heading 3 is a pointer to the resume state, so the citation pointed at nothing). Canonical owner: `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b, order item 4 (the legacy UI-redesign backlog). Honest Wave-3 Part-1 scope statement: `docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md` §8. Owner: Wave 3 Part 3",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-09-20"
     },
@@ -5107,7 +5108,7 @@
       "id": "uiux-wave3-part4-tables-forms-drawers",
       "description": "NOT DONE in Part 1. Page-level tables / forms / filters / drawers (`DataTable`, `workspace.tsx` `Queue`, `RecordDrawer`) have not been redesigned. Open-source candidates were evaluated and deliberately NOT adopted: TanStack Table / AG Grid are REFERENCE only, because the repo already has a canonical `DataTable` + `Queue` with Playwright contracts on both and replacing them is a separate larger decision",
       "status": "not_started",
-      "evidence": "PROJECT_STATUS.md heading 3 item 3; docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md §5 and §8. Owner: Wave 3 Part 4",
+      "evidence": "§REPOINTED 2026-10-08 (rule 07) — this cited `PROJECT_STATUS.md` \"heading 3 item 3\", a heading that no longer exists in that form (the current block's heading 3 is a pointer to the resume state). Canonical owner: `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b, order item 4 (the legacy UI-redesign backlog). Honest Wave-3 Part-1 scope statement: `docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md` §5 and §8. Owner: Wave 3 Part 4",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
       "last_updated": "2026-09-20"
     },
@@ -5115,9 +5116,17 @@
       "id": "uiux-wave3-part5-state-redesign",
       "description": "NOT DONE in Part 1. Empty / loading / error / permission state redesign beyond what already existed has not been attempted as a systematic pass",
       "status": "not_started",
-      "evidence": "PROJECT_STATUS.md heading 3 item 4; docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md §8. Owner: Wave 3 Part 5",
+      "evidence": "§REPOINTED 2026-10-08 (rule 07) — this cited `PROJECT_STATUS.md` \"heading 3 item 4\", a heading that no longer exists in that form (the current block's heading 3 is a pointer to the resume state). Canonical owner: `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b, order item 4 (the legacy UI-redesign backlog). Honest Wave-3 Part-1 scope statement: `docs/archive/UIUX_REDESIGN_WAVE3_2026-09-20.md` §8. NOTE (2026-10-08): the canonical state primitives already exist (`src/components/ui.tsx` → `EmptyState`, `Skeleton`, `Alert`, and `src/components/shared/ErrorBoundary.tsx`), so this pass is a systematic APPLICATION across surfaces, not a build-from-nothing. Owner: Wave 3 Part 5",
       "source": "UI/UX Redesign Wave 3 Part 1 (2026-09-20) — enterprise shell, workspace hierarchy, operational type scale",
-      "last_updated": "2026-09-20"
+      "last_updated": "2026-10-08"
+    },
+    {
+      "id": "discovered-overview-vestigial-toolbar-strip",
+      "description": "DISCOVERED 2026-10-08 by RENDERING the Admin Overview for order item 4 (Wave 3 Part 2). The Overview's sticky workspace toolbar now holds ONE non-interactive hint (\"⌘K for records and destinations\") because the controls it was built for — the Density and Group-rows `Queue` options — were removed by the recorded 2026-09-22 §Dashboard-cleanup consolidation (\"the overview is a read-only business view; row-density controls belong to the surfaces that own a table\"). A bordered, backdrop-blurred sticky strip whose only content is an inert hint reads as an empty control bar, and the hint duplicates the app bar's own command bar (`app-search-trigger`, which the same hint names and which is hidden below md). NOT FIXED THIS SESSION and NOT parked (rule 07) — both fixes are DECISIONS, not defects to change silently: (a) remove the strip and move the hint into the header's `meta` facts line — this contradicts the Wave-2 workspace architecture that `e2e/uiux-redesign.spec.ts` test 1 asserts (\"frame + context bar + header + sticky toolbar + metric band + pipeline + context rail\"), so that assertion and its comment would need a documented §REPOINTED; or (b) make the strip OPERABLE (a real \"Search records and destinations ⌘K\" control) — the palette is SHELL state (`AppShell.tsx → setPaletteOpen`, passed only to `Header.tsx`), so a page-level trigger needs new shell plumbing, an architectural addition this batch must not smuggle in. Exact next action: pick (a) or (b); the row then proceeds as ordinary work.",
+      "status": "not_started",
+      "evidence": "RENDERED evidence captured this session at 1440 and 390 (the strip is visible as an empty bordered bar under the header); `src/components/admin/AdminDashboard.tsx` (the `toolbar=` prop it passes); `src/components/layout/Header.tsx` (`app-search-trigger`, `hidden ... md:flex` — the same affordance, hidden below md); `e2e/uiux-redesign.spec.ts` test 1 (the workspace-architecture contract option (a) would repoint).",
+      "source": "Order item 4 (the legacy UI-redesign backlog, `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b) — the Wave 3 Part 2 render review",
+      "last_updated": "2026-10-08"
     },
     {
       "id": "uiux-wave3-theme-alpha-shims-removal",

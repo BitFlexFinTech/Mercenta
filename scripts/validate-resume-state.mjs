@@ -37,6 +37,16 @@
 //      `BATCH`/`S` token to pass. The regex now accepts `BATCH n`, `S n` AND
 //      `E2E-n`, while STILL requiring BOTH files to name the SAME token. The
 //      widened vocabulary is proved able to work by the self-check below.
+//      §REPOINTED (2026-10-08) — NOT weakened, and the SAME class of breakage as
+//      the note above. The order item 3 (E2E coverage) programme COMPLETED at
+//      E2E-9, so the next work is named by the plan it lives in
+//      (`docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b) as "order item 4",
+//      whose first open row is "Wave 3 Part 3" — a label the old `BATCH n` / `S n`
+//      / `E2E-n` vocabulary could NOT express, so a resume state that is CORRECT
+//      would have failed this gate. `WAVE n` is now accepted as a fourth token.
+//      The drift check is UNCHANGED in strength: both files must still name the
+//      SAME first token, and the negative self-check below still requires a
+//      resume state with no token to fail.
 //   5. `EXACT NEXT STARTING POINT` in `PROJECT_STATUS.md` names real files — the
 //      backticked paths in it must exist on disk. A resume state pointing a new
 //      session at a file that does not exist is the same class of defect as the
@@ -131,7 +141,7 @@ for (const field of FIELDS) {
 /** The first `BATCH n[a-z]?` / `S<n>` token named by a NEXT TASK line, or ''. */
 const firstTaskToken = (text) => {
   const value = fieldValue(text, 'NEXT TASK');
-  const m = value.match(/\b(?:BATCH|E2E|S)\s?-?\d+[a-z]?\b/i);
+  const m = value.match(/\b(?:BATCH|E2E|WAVE|S)\s?-?\d+[a-z]?\b/i);
   return m ? m[0].toUpperCase().replace(/\s+/g, ' ') : '';
 };
 const statusToken = firstTaskToken(status);
@@ -144,10 +154,11 @@ test(
   `PROJECT_STATUS="${statusToken}" vs HANDOFF="${handoffToken}"`
 );
 test(
-  'the next-task token vocabulary accepts BATCH n, S n AND the renamed E2E-n label (self-check)',
+  'the next-task token vocabulary accepts BATCH n, S n, the renamed E2E-n label AND the plan WAVE-n label (self-check)',
   firstTaskToken('NEXT TASK: BATCH 2 — x') === 'BATCH 2' &&
     firstTaskToken('NEXT TASK: S12 — x') === 'S12' &&
     firstTaskToken('NEXT TASK: resume at E2E-2 — x') === 'E2E-2' &&
+    firstTaskToken('NEXT TASK: WAVE 3 PART 3 — x') === 'WAVE 3' &&
     firstTaskToken('NEXT TASK: nothing to see here') === '',
 );
 

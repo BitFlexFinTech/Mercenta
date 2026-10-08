@@ -491,3 +491,62 @@ test.describe('Dashboard — responsive & shell integrity', () => {
     await page.waitForTimeout(350);
   });
 });
+
+test.describe('§UI/UX Wave 3 Part 2 — metric bands fill every row', () => {
+  /**
+   * The band is a hairline grid (the 1px gaps ARE the dividers). A row that is
+   * not exactly full therefore paints the divider colour as an EMPTY CELL — a
+   * hole. That was the real defect on this surface: "Business position" is 5
+   * tiles in a 4-up grid (4 + 1 orphan, three holes) and "Operations" is 7 tiles
+   * (4 + 3, one hole). This test measures the RENDERED geometry, which typecheck,
+   * lint and build cannot see: for every band, every row's tiles must span the
+   * band's full width. It fails on the pre-fix code (a 1-tile row spanning a
+   * quarter of the band) and passes once the spans are distributed.
+   */
+  async function bandRows(page: import('@playwright/test').Page) {
+    return page.getByTestId('metric-band').evaluateAll((bands) =>
+      bands.map((band) => {
+        const grid = band.firstElementChild as HTMLElement | null;
+        const gridWidth = grid ? grid.getBoundingClientRect().width : 0;
+        const rows = new Map<number, { left: number; right: number }[]>();
+        for (const tile of Array.from(grid?.children ?? [])) {
+          const rect = tile.getBoundingClientRect();
+          const key = Math.round(rect.top);
+          const list = rows.get(key) ?? [];
+          list.push({ left: rect.left, right: rect.right });
+          rows.set(key, list);
+        }
+        return {
+          gridWidth,
+          rows: [...rows.values()].map((row) => ({
+            tiles: row.length,
+            span: Math.max(...row.map((r) => r.right)) - Math.min(...row.map((r) => r.left)),
+          })),
+        };
+      })
+    );
+  }
+
+  for (const vp of [
+    { w: 1440, h: 900 },
+    { w: 390, h: 844 },
+  ]) {
+    test(`8. no band row leaves an empty cell at ${vp.w}px`, async ({ page }) => {
+      await openAdminDashboard(page);
+      await page.setViewportSize({ width: vp.w, height: vp.h });
+      await page.waitForTimeout(500);
+
+      const bands = await bandRows(page);
+      expect(bands.length, 'the overview renders metric bands').toBeGreaterThan(0);
+      for (const band of bands) {
+        expect(band.rows.length, 'a band has at least one row').toBeGreaterThan(0);
+        for (const row of band.rows) {
+          expect(
+            Math.abs(row.span - band.gridWidth),
+            `a ${row.tiles}-tile row must fill the band (span ${row.span} vs grid ${band.gridWidth})`
+          ).toBeLessThanOrEqual(1.5);
+        }
+      }
+    });
+  }
+});

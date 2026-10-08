@@ -425,6 +425,70 @@ function MetricBody({ data }: { data: MetricTileData }) {
 }
 
 /**
+ * §UI/UX Wave 3 Part 2 (2026-10-08) — BAND FILL.
+ *
+ * The band is a hairline grid: the 1px gaps ARE the dividers, because the grid
+ * paints `bg-white/[0.06]` and each tile paints its own `bg-ink-900` on top. A
+ * row that is not exactly full therefore shows the divider colour as an EMPTY
+ * CELL — a hole in the band.
+ *
+ * That happened whenever a band's tile count was not a multiple of its column
+ * count, which was the case on the Admin Overview: "Business position" is 5
+ * tiles in a 4-up grid (4 + 1 orphan, three holes) and "Operations" is 7 tiles
+ * (4 + 3, one hole). It was visible in the browser and measured at 1440 and 390.
+ *
+ * The band therefore lays out on a 12-TRACK grid and gives each tile a track
+ * span: a full row is always 12 tracks, and the trailing part-row shares 12
+ * equally between its tiles. 12 divides by every trailing count this component
+ * can see (1, 2, 3), so the trailing tiles are the SAME width as each other —
+ * no mixed tile widths and no hole. A trailing single tile spans the full row.
+ *
+ * Examples (cols = 4): 8 tiles → 4 + 4; 7 tiles → 4 + 3×(12/3); 5 tiles → 4 + 1
+ * full-width. Base grid is 2 columns, so the same function runs with cols = 2.
+ */
+/**
+ * §UI/UX Wave 3 Part 2 — the band's own layout rule, kept with the band (the
+ * owner). Not exported: this file exports components only (react-refresh).
+ */
+const BAND_TRACKS = 12;
+
+function bandColumnSpans(count: number, cols: number): number[] {
+  const spans = Array.from({ length: count }, () => 1);
+  if (count === 0 || cols < 2 || BAND_TRACKS % cols !== 0) return spans;
+  const perTile = BAND_TRACKS / cols;
+  const filled = spans.map(() => perTile);
+  const remainder = count % cols;
+  if (remainder !== 0 && BAND_TRACKS % remainder === 0) {
+    const trailing = BAND_TRACKS / remainder;
+    for (let i = count - remainder; i < count; i++) filled[i] = trailing;
+  }
+  return filled;
+}
+
+/**
+ * Static span class literals. They are written out in full (never composed from
+ * a variable) because Tailwind's scanner only generates a class it can SEE in
+ * the source. Spans are track counts on the 12-track grid, at the base grid and
+ * at md+ (where the `columns` prop applies).
+ */
+const BAND_BASE_SPAN: Record<number, string> = {
+  1: 'col-span-1',
+  2: 'col-span-2',
+  3: 'col-span-3',
+  4: 'col-span-4',
+  6: 'col-span-6',
+  12: 'col-span-12',
+};
+const BAND_MD_SPAN: Record<number, string> = {
+  1: 'md:col-span-1',
+  2: 'md:col-span-2',
+  3: 'md:col-span-3',
+  4: 'md:col-span-4',
+  6: 'md:col-span-6',
+  12: 'md:col-span-12',
+};
+
+/**
  * Compact metric band — ONE surface, hairline-divided cells, so the numbers read
  * as a group rather than competing elevated cards.
  */
@@ -440,12 +504,17 @@ export function MetricBand({
   /** Cell columns at md+ (2 at base). */
   columns?: 2 | 3 | 4;
 }) {
-  const mdCols = { 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-4' }[columns];
+  /** §UI/UX Wave 3 Part 2 — every row fills, at BOTH the base and md grids. */
+  const baseSpans = bandColumnSpans(items.length, 2);
+  const mdSpans = bandColumnSpans(items.length, columns);
   return (
-    <div className={cn('overflow-hidden rounded-ds-lg border border-white/[0.06]', className)}>
-      <div className={cn('grid grid-cols-2 gap-px bg-white/[0.06]', mdCols)}>
-        {items.map((m) => (
-          <div key={m.id}>
+    <div
+      className={cn('overflow-hidden rounded-ds-lg border border-white/[0.06]', className)}
+      data-testid="metric-band"
+    >
+      <div className="grid grid-cols-12 gap-px bg-white/[0.06]">
+        {items.map((m, i) => (
+          <div key={m.id} className={cn(BAND_BASE_SPAN[baseSpans[i]], BAND_MD_SPAN[mdSpans[i]])}>
             {loading ? (
               <div className="min-h-[80px] space-y-2.5 bg-ink-900 px-3.5 py-3">
                 <div className="h-2.5 w-16 animate-pulse rounded bg-white/[0.06]" />
