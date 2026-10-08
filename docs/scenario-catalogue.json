@@ -3258,6 +3258,506 @@
       "spec": "e2e/compliance-sim.spec.ts",
       "test": "DHL status button advances the shipment milestone (simulated)",
       "expects": "On the operator's Logistics Hub, the Carrier API console's 'DHL status → next milestone' control advances the shipment milestone through the simulation and shows the transition — a carrier never logs in, so the control belongs to the surface operating the carrier account."
+    },
+    {
+      "id": "op-case-sufficiency-gate",
+      "capability": "operations",
+      "journey": "operations — brand cases — the sufficiency gate fails closed, then opens on the brand’s own record",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/brand-case-workflow.spec.ts",
+      "test": "1. the brand-visible sufficiency gate fails closed, then opens on its own record",
+      "expects": "A category that requires an anchor, with no anchor, is NOT internally resolvable (fail-closed and visible); supplying the brand’s OWN record flips it to internally resolvable."
+    },
+    {
+      "id": "op-case-full-lifecycle",
+      "capability": "operations",
+      "journey": "operations — brand cases — brand → Mercenta review → escalation (simulated) → response → resolution → brand",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/brand-case-workflow.spec.ts",
+      "test": "2. brand → Mercenta review → escalation (simulated) → response → resolution → brand",
+      "expects": "The full case chain runs in the real UI: the brand opens a case, Mercenta reviews, escalation to the channel is SIMULATED and labelled with a mock provider reference, the channel response returns to the SAME case, Mercenta resolves it, and the brand sees the resolution — with zero external calls."
+    },
+    {
+      "id": "op-case-tenant-isolation",
+      "capability": "operations",
+      "journey": "operations — brand cases — another brand never sees this brand’s case",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/brand-case-workflow.spec.ts",
+      "test": "3. tenant isolation — another brand never sees this brand’s case",
+      "expects": "A case belonging to one brand is never visible in another tenant’s portal — the other brand’s case list is empty."
+    },
+    {
+      "id": "op-command-work-management-founder-console",
+      "capability": "operations",
+      "journey": "operations — command centre — Work Management carries the founder console, one hand-off per row",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/command-centre.spec.ts",
+      "test": "1. Work Management carries the founder console, one hand-off per row",
+      "expects": "The founder console is projected into Work Management as founder work rows, each with a hand-off control, drawn from the canonical stores (Companies House register, Google)."
+    },
+    {
+      "id": "op-command-handoff-exact-tab",
+      "capability": "operations",
+      "journey": "operations — command centre — a founder hand-off routes to the exact Super Admin tab",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/command-centre.spec.ts",
+      "test": "2. a founder hand-off routes to the exact Super Admin tab (no hunting)",
+      "expects": "Opening a founder row shows its drawer naming the destination tab, and the hand-off lands on that exact tab (Company, not the default Staff) — no hunting through screens."
+    },
+    {
+      "id": "op-command-source-filters-single-list",
+      "capability": "operations",
+      "journey": "operations — command centre — the founder categories are real source filters and there is ONE action list",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/command-centre.spec.ts",
+      "test": "3. the founder categories are real source filters, and the Control Centre has no second list",
+      "expects": "Each founder category is a real source filter that filters the list, and the Control Centre no longer renders a second action list — it points at the single one."
+    },
+    {
+      "id": "op-command-rank-why-funding-route",
+      "capability": "operations",
+      "journey": "operations — command centre — every founder row shows its rank and WHY, and the funding slot routes",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/command-centre.spec.ts",
+      "test": "4. every founder row shows its rank and WHY, and the funding slot routes",
+      "expects": "Every founder row states its rank and an explicit WHY breakdown (score), and the funding slot is a real derived route whose hand-off lands on the funding pipeline — no dead CTAs."
+    },
+    {
+      "id": "op-brain-operating-graph-counts",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — the real operating graph renders with domain-derived counts",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "1. renders the real operating graph with domain-derived counts",
+      "expects": "The operating graph renders real SVG entities (>50 nodes) with domain-derived counts (entities >100, relationships >50, types >20) and cluster sectors — never an image or an empty frame."
+    },
+    {
+      "id": "op-brain-filters-truthful-total",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — filters change the rendered set and the total stays truthful",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "2. filters change the rendered set and the total stays truthful",
+      "expects": "Search and kind filters are real state changes that narrow the rendered set below the true total; the heading names the labelled total and the Simulation tab badges every shown entity as simulation."
+    },
+    {
+      "id": "op-brain-empty-state-honest",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — a no-match filter shows an honest empty state",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "3. a no-match filter shows an honest empty state",
+      "expects": "A no-match filter shows an honest empty state that says nothing was hidden and nothing was invented, and clearing the filters restores the nodes."
+    },
+    {
+      "id": "op-brain-entity-inspector",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — selecting an entity shows its detail, provenance, authority and relationships",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "4. selecting an entity shows its detail, provenance, authority and relationships",
+      "expects": "Selecting an entity shows its inspector with the canonical provenance module it was read from, a non-empty authority note, and its relationships with their evidence."
+    },
+    {
+      "id": "op-brain-relationship-reselect",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — relationship inspection re-selects the related entity",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "5. relationship inspection re-selects the related entity",
+      "expects": "Clicking a relationship navigates the inspector to the related entity — the inspector describes the entity navigated TO, not the origin."
+    },
+    {
+      "id": "op-brain-entity-list-keyboard",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — the entity list is the keyboard-accessible equivalent",
+      "actor": "super_admin",
+      "type": "a11y",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "6. the entity list is the keyboard-accessible equivalent",
+      "expects": "The entity list is a keyboard-accessible equivalent of the graph: focusing an entity and pressing Enter opens its inspector and marks it pressed."
+    },
+    {
+      "id": "op-brain-zoom-controls",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — zoom controls work and the graph stays usable",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "7. zoom controls work and the graph stays usable",
+      "expects": "Zoom in/out/reset move the stated zoom level (100% → 125% → 80% → 100%) and the graph still renders its nodes."
+    },
+    {
+      "id": "op-brain-responsive-no-overflow",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — no horizontal overflow at 1440 / 1280 / 1024 / 390",
+      "actor": "super_admin",
+      "type": "responsive",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "8. responsive: no horizontal overflow at 1440 / 1280 / 1024 / 390",
+      "expects": "The Brain composes without horizontal overflow at 1440 / 1280 / 1024 / 390 and the canvas stays visible at each width."
+    },
+    {
+      "id": "op-brain-reduced-motion",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — reduced motion is honoured without breaking rendering",
+      "actor": "super_admin",
+      "type": "a11y",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "9. reduced motion is honoured without breaking rendering",
+      "expects": "Under reduced-motion the canvas still renders its nodes and selection still opens the inspector — motion reduction does not break the surface."
+    },
+    {
+      "id": "op-brain-tenant-boundary-brand-map",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — a brand sees its own map, never the Brain",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "10. tenant boundary: a brand sees its own map, never the Brain",
+      "expects": "A brand session has no Mercenta Brain destination; its Market Intel map shows only its own records and never leaks Mercenta-internal machinery or another tenant, and it states the boundary."
+    },
+    {
+      "id": "op-brain-kpi-drilldown",
+      "capability": "operations",
+      "journey": "operations — Mercenta Brain — every KPI tile drills down into the set it counts",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/mercenta-brain.spec.ts",
+      "test": "11. every KPI tile drills down into the set it counts (part 2b interactivity)",
+      "expects": "Every KPI tile carries a real focusable drill-down and the Entities tile equals the canonical graph total — no dead number."
+    },
+    {
+      "id": "op-notify-channel-read-entry",
+      "capability": "operations",
+      "journey": "operations — channel-read ingestion — the admin channel-read entry is the only way a PO arrives",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/notifications.spec.ts",
+      "test": "1. Admin channel-read entry exists (the ONLY way a PO arrives)",
+      "expects": "The admin Purchase Orders surface exposes the channel-read ingest entry and the removed “Create PO” action does NOT exist — Mercenta never creates a purchase order."
+    },
+    {
+      "id": "op-notify-brand-accept-consignment",
+      "capability": "operations",
+      "journey": "operations — acknowledgement auto-fulfilment — the brand’s decision makes Mercenta act and a consignment appear",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/notifications.spec.ts",
+      "test": "2. Brand accepts all lines -> Mercenta acts and the consignment appears in logistics",
+      "expects": "When the brand issues its decision, Mercenta performs the channel action and its filed ASN creates the REAL consignment in the Logistics Hub (no brand-supplied carton detail required)."
+    },
+    {
+      "id": "op-notify-ack-simulated-provenance",
+      "capability": "operations",
+      "journey": "operations — channel acknowledgement — Mercenta transmits it with simulated provenance",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/notifications.spec.ts",
+      "test": "3. Mercenta transmits the acknowledgement to the retail channel (simulated)",
+      "expects": "The channel acknowledgement is Mercenta’s step and is recorded as SIMULATED (no live channel call) — a mock submission is never presented as a live transaction."
+    },
+    {
+      "id": "op-notify-labels-modal",
+      "capability": "operations",
+      "journey": "operations — logistics labels — the Labels modal opens for the consignment Mercenta filed",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/notifications.spec.ts",
+      "test": "4. Labels modal opens for the consignment Mercenta filed",
+      "expects": "The Labels modal opens for the consignment Mercenta filed from the brand’s accepted PO, showing the shipping label."
+    },
+    {
+      "id": "op-tour-orientation-autostart",
+      "capability": "operations",
+      "journey": "operations — guided tours — the orientation tour auto-starts for a new brand",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "1. Tour 1 auto-starts for new brand",
+      "expects": "The orientation tour auto-starts for a new brand, scoped to the tour engine’s own card so dashboard comms cannot false-positive."
+    },
+    {
+      "id": "op-tour-completed-no-retrigger",
+      "capability": "operations",
+      "journey": "operations — guided tours — a completed orientation tour does not re-trigger",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "2. Completed Tour 1 does not re-trigger",
+      "expects": "Once the orientation tour is completed it does not re-trigger on the dashboard, while other per-view tours may still legitimately start."
+    },
+    {
+      "id": "op-tour-skip-confirmation",
+      "capability": "operations",
+      "journey": "operations — guided tours — skipping the orientation tour shows a confirmation",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "3. Skip Tour 1 shows confirmation",
+      "expects": "Dismissing the orientation tour shows a “Skip Tour?” confirmation, and confirming it removes the tour card."
+    },
+    {
+      "id": "op-tour-po-triggers-tour3",
+      "capability": "operations",
+      "journey": "operations — guided tours — the Purchase Orders page triggers its own tour",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "4. PO page triggers Tour 3",
+      "expects": "Opening the brand’s Purchase Orders page triggers that view’s tour (“New PO Arrived”)."
+    },
+    {
+      "id": "op-tour-deductions-ledger-scoped",
+      "capability": "operations",
+      "journey": "operations — guided tours — the deductions ledger tour surface is tenant-scoped and acts for real",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "5. Deductions ledger on Analytics (Tour 5 surface)",
+      "expects": "The brand deductions ledger on Analytics renders all four tour anchors; it is TENANT-SCOPED (another brand’s deduction POs never leak, the brand’s own does) and opening a dispute drives the canonical domain action."
+    },
+    {
+      "id": "op-tour-steps-advance",
+      "capability": "operations",
+      "journey": "operations — guided tours — tour steps advance correctly",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "6. Tour steps advance correctly",
+      "expects": "Advancing the orientation tour moves to the exact declared step titles (Your Dashboard, then Purchase Orders — 24-Hour Rule)."
+    },
+    {
+      "id": "op-tour-settings-restart",
+      "capability": "operations",
+      "journey": "operations — guided tours — Settings offers a Restart Tour control",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "7. Settings has restart tour",
+      "expects": "The Settings Guided Tours tab lists every tour with a Restart Tour control, and restarting the orientation tour relaunches it through the existing engine."
+    },
+    {
+      "id": "op-tour-selectors-resolve",
+      "capability": "operations",
+      "journey": "operations — guided tours — every tour anchor selector resolves",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "8. Tour selectors resolve",
+      "expects": "Every tour anchor (dashboard, PO nav, catalog, logistics, compliance, settings) resolves to a visible element, so no tour step points at a missing target."
+    },
+    {
+      "id": "op-tour-catalog-triggers-tour2",
+      "capability": "operations",
+      "journey": "operations — guided tours — the Catalog page triggers its own tour",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "9. Catalog page triggers Tour 2",
+      "expects": "Opening the brand’s Catalog page triggers that view’s tour (“Adding a Product”)."
+    },
+    {
+      "id": "op-tour-kb-article-panel",
+      "capability": "operations",
+      "journey": "operations — guided tours — a tour step opens its contextual Knowledge Base article",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/tours.spec.ts",
+      "test": "10. Tour step opens the contextual Knowledge Base article (§14)",
+      "expects": "The orientation step’s “learn more” control opens the contextual Knowledge Base article panel and closing it dismisses the panel."
+    },
+    {
+      "id": "op-work-rbac-no-founder-console",
+      "capability": "operations",
+      "journey": "operations — work layer — a non-Super-Admin admin never sees the founder console",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "0a. a NON-Super-Admin admin session never sees the founder console",
+      "expects": "In the SAME list an ordinary admin session sees ZERO founder rows and is offered no founder source filter, while the operational work (e.g. the PO-acknowledgement filter) is still present — the shared component is scoped by role, not merely rendered."
+    },
+    {
+      "id": "op-work-super-admin-founder-console",
+      "capability": "operations",
+      "journey": "operations — work layer — a Super Admin sees the founder console in the same list",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "0b. a Super Admin session DOES see the founder console in the same list",
+      "expects": "A Super Admin session sees the founder console rows in the same Work Management list."
+    },
+    {
+      "id": "op-work-workspace-architecture",
+      "capability": "operations",
+      "journey": "operations — work layer — the workspace composes and renders real work",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "1. composes the workspace architecture and renders real work",
+      "expects": "The workspace composes frame + header + toolbar + metric band, the open-work tile equals the rendered row count, and the surface labels its seeded state as simulated (no live provider)."
+    },
+    {
+      "id": "op-work-badge-labelled-attention",
+      "capability": "operations",
+      "journey": "operations — work layer — the badge is labelled and counts the attention set, not the open set",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "1b. §SSOT S5 — the work badge is LABELLED and counts the attention set, not the open set",
+      "expects": "The nav badge equals the Needs-attention tile (one owner, one scope) and both the badge and the tiles state which declared set they count."
+    },
+    {
+      "id": "op-work-filters-search-real",
+      "capability": "operations",
+      "journey": "operations — work layer — the priority filter and search are real state changes",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "2. priority filter and search are real state changes",
+      "expects": "The priority filter genuinely narrows the list and a no-match search yields zero rows; clearing both restores the original count."
+    },
+    {
+      "id": "op-work-record-drawer-activity",
+      "capability": "operations",
+      "journey": "operations — work layer — a row opens the shared record drawer with its activity trail",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "3. a row opens the shared record drawer with its activity trail",
+      "expects": "Opening a row shows the shared record drawer carrying that item’s activity trail."
+    },
+    {
+      "id": "op-work-kanban-board",
+      "capability": "operations",
+      "journey": "operations — work layer — the kanban board is a real view over the same items",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "4. kanban is a real board over the same items",
+      "expects": "The kanban board is a real board over the same work items as the list."
+    },
+    {
+      "id": "op-work-owning-action-not-resolve",
+      "capability": "operations",
+      "journey": "operations — work layer — a record-qualified row offers the OWNING action and a mark never hides it",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "5. a record-qualified row offers the OWNING action, and a mark never hides it",
+      "expects": "Record-qualified work offers NO Resolve button — it names its owning action — and an operator mark is an annotation that can never remove the item; the owning action hands off to the record’s own workspace."
+    },
+    {
+      "id": "op-work-manual-task-resolves",
+      "capability": "operations",
+      "journey": "operations — work layer — a manual task still resolves and leaves the list",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "5b. a MANUAL task still resolves and leaves the list (the work layer owns it)",
+      "expects": "A manually created task — which the work layer genuinely owns — still offers Resolve and leaves the list when resolved."
+    },
+    {
+      "id": "op-work-calendar-month-grid",
+      "capability": "operations",
+      "journey": "operations — work layer — the calendar is a real derived month grid",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "6. calendar is a real derived month grid",
+      "expects": "The Calendar is a real derived month grid: the label moves forward and back with the prev/next controls, the grid always holds 42 cells, and a calendar entry opens the record drawer."
+    },
+    {
+      "id": "op-work-no-overflow-390",
+      "capability": "operations",
+      "journey": "operations — work layer — no horizontal overflow at 390px",
+      "actor": "mercenta_admin",
+      "type": "responsive",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "7. no horizontal overflow at 390px",
+      "expects": "The admin workspace composes with no horizontal overflow at 390px and the metric band stays visible."
+    },
+    {
+      "id": "op-work-brand-own-work-only",
+      "capability": "operations",
+      "journey": "operations — work layer — a brand sees its own work only",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "8. a brand sees its OWN work only",
+      "expects": "A brand’s Tasks & Deadlines shows a strictly smaller set than the operator’s, and every brand row also appears in the operator’s list — cross-tenant leakage is impossible."
+    },
+    {
+      "id": "op-work-brand-create-task-views",
+      "capability": "operations",
+      "journey": "operations — work layer — a brand can create a task and it appears across the views",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "9. a brand can create a task and it appears across the views",
+      "expects": "A brand creating a task sees it added to the list, the board and the calendar."
+    },
+    {
+      "id": "op-work-reset-baseline",
+      "capability": "operations",
+      "journey": "operations — work layer — reset restores the deterministic baseline",
+      "actor": "brand_user",
+      "type": "persistence",
+      "spec": "e2e/work-layer.spec.ts",
+      "test": "10. reset restores the deterministic baseline",
+      "expects": "Reset removes the temporary task and restores the deterministic baseline row count."
+    },
+    {
+      "id": "op-bi-super-admin-full-surface",
+      "capability": "operations",
+      "journey": "operations — brand intelligence — a Super Admin sees the full proprietary BI surface",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/workstream-b-intelligence.spec.ts",
+      "test": "1. Super Admin sees the full proprietary BI surface incl. Product Discovery + Regional Priority",
+      "expects": "A Super Admin sees the full proprietary Brand Intelligence surface — Product Discovery, Regional Priority (internal) and the canonical prospect table."
+    },
+    {
+      "id": "op-bi-non-super-denied",
+      "capability": "operations",
+      "journey": "operations — brand intelligence — non-Super staff are denied the proprietary BI surface",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/workstream-b-intelligence.spec.ts",
+      "test": "2. Non-Super staff are denied the proprietary BI surface (nav hidden, not merely relabelled)",
+      "expects": "The Brand Intelligence nav item is ABSENT for non-Super staff (hidden, not relabelled), while their own surfaces remain intact."
+    },
+    {
+      "id": "op-bi-brand-qualitative-only",
+      "capability": "operations",
+      "journey": "operations — brand intelligence — a brand sees qualitative positioning only",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/workstream-b-intelligence.spec.ts",
+      "test": "3. Brand-facing Market Intel shows qualitative positioning only — no raw score, no tier badges",
+      "expects": "A brand’s Market Intel shows qualitative positioning and NO raw score or internal tier badge on any brand surface."
+    },
+    {
+      "id": "op-bi-internal-notes-audited",
+      "capability": "operations",
+      "journey": "operations — brand intelligence — the internal notes editor saves with an audited event",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/workstream-b-intelligence.spec.ts",
+      "test": "4. Internal notes editor saves via the canonical store with an audited lifecycle event",
+      "expects": "The internal notes editor saves through the canonical store (with a confirmation), the change appears on the prospect timeline as an audited event, and re-opening Notes re-reads the live store."
     }
   ]
 }

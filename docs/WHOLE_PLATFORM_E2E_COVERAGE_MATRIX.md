@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 327 · **Capabilities:** 8
+**Scenarios:** 377 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -30,7 +30,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | founder | 5 |
 | integrations | 3 |
 | onboarding_acquisition | 58 |
-| operations | 7 |
+| operations | 57 |
 | platform | 77 |
 
 ## Scenarios
@@ -125,6 +125,56 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | oa-workflow-derived-pipeline | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding-workflow.spec.ts` | `2. The pipeline is derived (0 when empty) and brand sessions cannot reach it` |
 | oa-workflow-manual-creation | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding-workflow.spec.ts` | `3. Manual creation → canonical record → the brand tenant can enter its portal` |
 | oa-workflow-operational | onboarding_acquisition | mercenta_admin | happy | `e2e/onboarding-workflow.spec.ts` | `1. Admin operates an acquisition-origin onboarding to OPERATIONAL in the pipeline` |
+| op-bi-brand-qualitative-only | operations | brand_user | happy | `e2e/workstream-b-intelligence.spec.ts` | `3. Brand-facing Market Intel shows qualitative positioning only — no raw score, no tier badges` |
+| op-bi-internal-notes-audited | operations | super_admin | happy | `e2e/workstream-b-intelligence.spec.ts` | `4. Internal notes editor saves via the canonical store with an audited lifecycle event` |
+| op-bi-non-super-denied | operations | mercenta_admin | refusal | `e2e/workstream-b-intelligence.spec.ts` | `2. Non-Super staff are denied the proprietary BI surface (nav hidden, not merely relabelled)` |
+| op-bi-super-admin-full-surface | operations | super_admin | happy | `e2e/workstream-b-intelligence.spec.ts` | `1. Super Admin sees the full proprietary BI surface incl. Product Discovery + Regional Priority` |
+| op-brain-empty-state-honest | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `3. a no-match filter shows an honest empty state` |
+| op-brain-entity-inspector | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `4. selecting an entity shows its detail, provenance, authority and relationships` |
+| op-brain-entity-list-keyboard | operations | super_admin | a11y | `e2e/mercenta-brain.spec.ts` | `6. the entity list is the keyboard-accessible equivalent` |
+| op-brain-filters-truthful-total | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `2. filters change the rendered set and the total stays truthful` |
+| op-brain-kpi-drilldown | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `11. every KPI tile drills down into the set it counts (part 2b interactivity)` |
+| op-brain-operating-graph-counts | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `1. renders the real operating graph with domain-derived counts` |
+| op-brain-reduced-motion | operations | super_admin | a11y | `e2e/mercenta-brain.spec.ts` | `9. reduced motion is honoured without breaking rendering` |
+| op-brain-relationship-reselect | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `5. relationship inspection re-selects the related entity` |
+| op-brain-responsive-no-overflow | operations | super_admin | responsive | `e2e/mercenta-brain.spec.ts` | `8. responsive: no horizontal overflow at 1440 / 1280 / 1024 / 390` |
+| op-brain-tenant-boundary-brand-map | operations | brand_user | refusal | `e2e/mercenta-brain.spec.ts` | `10. tenant boundary: a brand sees its own map, never the Brain` |
+| op-brain-zoom-controls | operations | super_admin | happy | `e2e/mercenta-brain.spec.ts` | `7. zoom controls work and the graph stays usable` |
+| op-case-full-lifecycle | operations | mercenta_admin | happy | `e2e/brand-case-workflow.spec.ts` | `2. brand → Mercenta review → escalation (simulated) → response → resolution → brand` |
+| op-case-sufficiency-gate | operations | brand_user | refusal | `e2e/brand-case-workflow.spec.ts` | `1. the brand-visible sufficiency gate fails closed, then opens on its own record` |
+| op-case-tenant-isolation | operations | brand_user | refusal | `e2e/brand-case-workflow.spec.ts` | `3. tenant isolation — another brand never sees this brand’s case` |
+| op-command-handoff-exact-tab | operations | super_admin | happy | `e2e/command-centre.spec.ts` | `2. a founder hand-off routes to the exact Super Admin tab (no hunting)` |
+| op-command-rank-why-funding-route | operations | super_admin | happy | `e2e/command-centre.spec.ts` | `4. every founder row shows its rank and WHY, and the funding slot routes` |
+| op-command-source-filters-single-list | operations | super_admin | happy | `e2e/command-centre.spec.ts` | `3. the founder categories are real source filters, and the Control Centre has no second list` |
+| op-command-work-management-founder-console | operations | super_admin | happy | `e2e/command-centre.spec.ts` | `1. Work Management carries the founder console, one hand-off per row` |
+| op-notify-ack-simulated-provenance | operations | mercenta_admin | happy | `e2e/notifications.spec.ts` | `3. Mercenta transmits the acknowledgement to the retail channel (simulated)` |
+| op-notify-brand-accept-consignment | operations | brand_user | happy | `e2e/notifications.spec.ts` | `2. Brand accepts all lines -> Mercenta acts and the consignment appears in logistics` |
+| op-notify-channel-read-entry | operations | mercenta_admin | happy | `e2e/notifications.spec.ts` | `1. Admin channel-read entry exists (the ONLY way a PO arrives)` |
+| op-notify-labels-modal | operations | mercenta_admin | happy | `e2e/notifications.spec.ts` | `4. Labels modal opens for the consignment Mercenta filed` |
+| op-tour-catalog-triggers-tour2 | operations | brand_user | happy | `e2e/tours.spec.ts` | `9. Catalog page triggers Tour 2` |
+| op-tour-completed-no-retrigger | operations | brand_user | happy | `e2e/tours.spec.ts` | `2. Completed Tour 1 does not re-trigger` |
+| op-tour-deductions-ledger-scoped | operations | brand_user | happy | `e2e/tours.spec.ts` | `5. Deductions ledger on Analytics (Tour 5 surface)` |
+| op-tour-kb-article-panel | operations | brand_user | happy | `e2e/tours.spec.ts` | `10. Tour step opens the contextual Knowledge Base article (§14)` |
+| op-tour-orientation-autostart | operations | brand_user | happy | `e2e/tours.spec.ts` | `1. Tour 1 auto-starts for new brand` |
+| op-tour-po-triggers-tour3 | operations | brand_user | happy | `e2e/tours.spec.ts` | `4. PO page triggers Tour 3` |
+| op-tour-selectors-resolve | operations | brand_user | happy | `e2e/tours.spec.ts` | `8. Tour selectors resolve` |
+| op-tour-settings-restart | operations | brand_user | happy | `e2e/tours.spec.ts` | `7. Settings has restart tour` |
+| op-tour-skip-confirmation | operations | brand_user | happy | `e2e/tours.spec.ts` | `3. Skip Tour 1 shows confirmation` |
+| op-tour-steps-advance | operations | brand_user | happy | `e2e/tours.spec.ts` | `6. Tour steps advance correctly` |
+| op-work-badge-labelled-attention | operations | mercenta_admin | happy | `e2e/work-layer.spec.ts` | `1b. §SSOT S5 — the work badge is LABELLED and counts the attention set, not the open set` |
+| op-work-brand-create-task-views | operations | brand_user | happy | `e2e/work-layer.spec.ts` | `9. a brand can create a task and it appears across the views` |
+| op-work-brand-own-work-only | operations | brand_user | refusal | `e2e/work-layer.spec.ts` | `8. a brand sees its OWN work only` |
+| op-work-calendar-month-grid | operations | mercenta_admin | happy | `e2e/work-layer.spec.ts` | `6. calendar is a real derived month grid` |
+| op-work-filters-search-real | operations | mercenta_admin | happy | `e2e/work-layer.spec.ts` | `2. priority filter and search are real state changes` |
+| op-work-kanban-board | operations | mercenta_admin | happy | `e2e/work-layer.spec.ts` | `4. kanban is a real board over the same items` |
+| op-work-manual-task-resolves | operations | mercenta_admin | happy | `e2e/work-layer.spec.ts` | `5b. a MANUAL task still resolves and leaves the list (the work layer owns it)` |
+| op-work-no-overflow-390 | operations | mercenta_admin | responsive | `e2e/work-layer.spec.ts` | `7. no horizontal overflow at 390px` |
+| op-work-owning-action-not-resolve | operations | mercenta_admin | happy | `e2e/work-layer.spec.ts` | `5. a record-qualified row offers the OWNING action, and a mark never hides it` |
+| op-work-rbac-no-founder-console | operations | mercenta_admin | refusal | `e2e/work-layer.spec.ts` | `0a. a NON-Super-Admin admin session never sees the founder console` |
+| op-work-record-drawer-activity | operations | mercenta_admin | happy | `e2e/work-layer.spec.ts` | `3. a row opens the shared record drawer with its activity trail` |
+| op-work-reset-baseline | operations | brand_user | persistence | `e2e/work-layer.spec.ts` | `10. reset restores the deterministic baseline` |
+| op-work-super-admin-founder-console | operations | super_admin | happy | `e2e/work-layer.spec.ts` | `0b. a Super Admin session DOES see the founder console in the same list` |
+| op-work-workspace-architecture | operations | mercenta_admin | happy | `e2e/work-layer.spec.ts` | `1. composes the workspace architecture and renders real work` |
 | pf-access-gate-admin-sees-application | platform | mercenta_admin | happy | `e2e/access-gate.spec.ts` | `4. Admin sees application` |
 | pf-access-gate-approved-into-onboarding | platform | super_admin | happy | `e2e/access-gate.spec.ts` | `6. Admin approves a partner application` |
 | pf-access-gate-entry | platform | public_visitor | happy | `e2e/access-gate.spec.ts` | `1. Login page shows Partner Login and Request Partner Access` |

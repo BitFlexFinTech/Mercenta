@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 549,
+    "total_entries": 550,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -6400,6 +6400,15 @@
       "source": "Discovered during E2E-6 while defining the compliance domain boundary; fixed in the same session per rule 07 (fix defects at source, never park a fixable defect).",
       "status": "built",
       "evidence": "New scenario `sl-carrier-console-dhl-milestone` (`docs/scenario-catalogue.json`, `sl-*` 66 -> 67), pinned to the real test `DHL status button advances the shipment milestone (simulated)` in `e2e/compliance-sim.spec.ts`. The gate (16/16) now requires its proving test as it does for every `sl-*` scenario, and the browser leg ran it green (16 passed / 0 failed across the four specs). Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e-coverage-operations-domain",
+      "description": "E2E-7 (2026-10-08) — E2E COVERAGE, THE OPERATIONS DOMAIN. Extends the ONE scenario catalogue (`docs/scenario-catalogue.json`, the E2E-0 owner) across the operations domain: 50 `op-*` scenarios added (327 -> 377 total), each TRACEABLE to the individual Playwright test that proves it via a `test` field. The 50 span SEVEN specs — the work layer (14) · Mercenta Brain (11) · guided tours (10) · the command centre (4) · channel-read ingestion & auto-fulfilment / notifications (4) · brand-intelligence boundaries (4) · the canonical brand case workflow (3). The gate `scripts/validate-e2e-scenarios.mjs` is EXTENDED so EVERY `op-*` scenario, like every `pf-*`/`oa-*`/`po-*`/`sl-*`/`fi-*`/`co-*` one, MUST name its proving test, plus a self-check pinning the traceable-prefix set to `pf-` + `oa-` + `po-` + `sl-` + `fi-` + `co-` + `op-`; the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` is regenerated from the owner. Domain boundary: the specs the catalogue ITSELF classifies under the `operations` capability (the SAME capability-based method E2E-5 used for `finance`), which the app own navigation corroborates (AdminShell Operations group: Work Management · Purchase Orders · Logistics Hub · Returns Tracking · Calendar; BrandShell Operations: POs · Logistics Hub · Returns · Tasks & Deadlines · Calendar). HONEST NOTE: that capability is a keyword-derived bucket, so three of the seven specs have their subject elsewhere (notifications -> channel/commerce, workstream-b-intelligence -> brand intelligence, brand-case-workflow -> cases); they are enumerated here because the catalogue is the SSOT for the capability assignment, and each scenario journey names its real subject. No application runtime change.",
+      "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-7 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
+      "status": "built",
+      "evidence": "`docs/scenario-catalogue.json` 327 -> 377 scenarios (50 `op-*` operations, all traceable to a test; `operations` 7 -> 57). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (377 scenarios · 282 traceable · 8 capabilities). MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string in an `op-*` scenario => 2 failures, exit 1; (B) the prefix set narrowed with `op-` dropped => 1 failure (the self-check), exit 1; (C) an `op-*` scenario with no `test` field => 2 failures, exit 1; each file restored byte-identical (catalogue sha256 cecc44743116da1f871e1524e847edc05e821be0e059eb1c888a6dabbff23676; gate sha256 eeb3dacb156d11a472c694b09da11558cdb2b81a966e645c94230d8433c1726e). `npm run validate:all` 188 PASS / 0 FAIL; typecheck 0 (all four projects); lint 0; build ✓. BROWSER LEG — the seven operations specs in real Chromium = 50 passed / 0 failed / 0 skipped (work layer 14 · Mercenta Brain 11 · tours 10 · command centre 4 · notifications 4 · brand-intelligence 4 · brand case workflow 3), covering all 50 op-* declarations. Non-runtime governance increment => three-way NOT APPLICABLE.",
       "last_verified": "2026-10-08",
       "superseded_by": null
     }
