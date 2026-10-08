@@ -567,6 +567,14 @@ it operable, which needs new shell plumbing for the palette — so it has its ow
 **NEXT.** Order item 4 continues at **Wave 3 Part 3** (the brand surfaces), then Part 4 (tables/forms/drawers) and Part 5
 (states) — unless the Founder settles the decision-blocked rows first. No credential is required for any of them.
 
+**OUTCOME — THREE-WAY GATE.** This was an application-runtime change, so §10 applied in full and was satisfied:
+`b1e6675` is pushed to `origin/redesign/foundation`, deployed to `https://demo.mercenta.co.uk` via `scripts/deploy-demo.sh`
+(the mirror COMPLETED), and the changed functionality was verified on the live site (every metric band measured at 1440:
+4 × 203 + 1 × 814 full-width · 4 × 203 + 3 × 271 · 8 × 203 — no empty cell). The project's own `npm run verify:live` ran
+against the deployed site at **263 PASS / 1 FAIL**, the single failure being an `L27` HOST navigation timeout
+(`page.goto` exceeded 90 s on the shared demo host) rather than a behavioural assertion — it was re-driven directly and
+PASSED. Status: **COMPLETE — LOCAL/GITHUB/DEMO SYNCHRONIZED at `b1e6675`**.
+
 
 ---
 
