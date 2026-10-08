@@ -25,6 +25,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const SRC = join(ROOT, 'src');
@@ -82,6 +83,43 @@ test(
   'production-hygiene: no undeclared dev-only host (`localhost` / `127.0.0.1`) in shipped source',
   undeclaredHosts.length === 0,
   undeclaredHosts.map(rel).join(', ')
+);
+
+/* ── D: no transient/generated artefact under `Review Zip/` is TRACKED ──────── */
+/**
+ * §E2E-8 (2026-10-08) — DEFECT FIXED AT SOURCE (rule 07). A review-zip build left
+ * an Info-ZIP transient temp file (`ziXXXXXX`) inside `Review Zip/`, and because
+ * `.gitignore` only ignored `Review Zip/*.zip`, `git add -A` COMMITTED it (a 4.5 MB
+ * generated artefact). The ignore rule is now broad (`Review Zip/*` +
+ * `!Review Zip/INCIDENT-LOG.md`), and THIS assertion is the gate that fails if a
+ * tracked generated artefact ever returns: the ONLY path git may track under
+ * `Review Zip/` is `Review Zip/INCIDENT-LOG.md`.
+ */
+const ONLY_TRACKED_REVIEW_ZIP_FILE = 'Review Zip/INCIDENT-LOG.md';
+let trackedReviewZip = null;
+try {
+  trackedReviewZip = execFileSync('git', ['-C', ROOT, 'ls-files', '--', 'Review Zip'], {
+    encoding: 'utf8',
+  })
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+} catch (e) {
+  trackedReviewZip = null;
+}
+test(
+  'production-hygiene: git tracks ONLY the intentional file under `Review Zip/` (no generated artefact)',
+  Array.isArray(trackedReviewZip) && trackedReviewZip.every((p) => p === ONLY_TRACKED_REVIEW_ZIP_FILE),
+  trackedReviewZip === null
+    ? 'could not run `git ls-files`'
+    : trackedReviewZip.filter((p) => p !== ONLY_TRACKED_REVIEW_ZIP_FILE).join(', ')
+);
+
+/* The ignore rule itself must be broad enough (git never reads the export script). */
+const gitignore = readFileSync(join(ROOT, '.gitignore'), 'utf8');
+test(
+  'production-hygiene: .gitignore ignores `Review Zip/*` and re-includes INCIDENT-LOG.md',
+  /^Review Zip\/\*$/m.test(gitignore) && /^!Review Zip\/INCIDENT-LOG\.md$/m.test(gitignore)
 );
 
 console.log('');

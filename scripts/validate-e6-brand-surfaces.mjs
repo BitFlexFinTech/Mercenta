@@ -2355,6 +2355,13 @@ const E2E_SCENARIO_CATALOGUE_SCOPE = new Set([
    * or removed. Declared here rather than left unexplained.
    */
   'e2e/embedded-social.spec.ts',
+  /**
+   * §E2E-8 (2026-10-08) — `.gitignore` is declared because the review-zip temp-file
+   * defect (see `scripts/validate-production-hygiene.mjs` §D) is fixed by BROADENING
+   * the ignore rule to `Review Zip/*` + `!Review Zip/INCIDENT-LOG.md`, so ANY
+   * transient artefact a zip build leaves there can never be committed again.
+   */
+  '.gitignore',
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
   /**

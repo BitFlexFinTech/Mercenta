@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 552,
+    "total_entries": 553,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -6427,6 +6427,15 @@
       "source": "Discovered during E2E-8 while enumerating the integrations domain; fixed in the same session per rule 07 (fix defects at source, never park a fixable defect).",
       "status": "built",
       "evidence": "The three `expect(await workspaceId(page)).toBe(before)` occurrences are gone (grep count 3 -> 0) and are replaced by `await waitForWorkspaceId(page, before)`; the helpers carry 40s polls and the file a 120s per-test budget (grep-verifiable). E6 PASS · E7 PASS (121/0) · `validate:all` 188 PASS / 0 FAIL · typecheck 0 · build ✓. The spec runs green in isolation (1/1) and 19/19 in 5 of 6 consecutive parallel runs; the residual 1/6 is the disclosed ambient-load sensitivity. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e8-review-zip-temp-artefact-tracked",
+      "description": "E2E-8 (2026-10-08) — DEFECT FIXED AT SOURCE (rule 07). While closing the session, `git add -A` COMMITTED a 4.5 MB GENERATED artefact: an Info-ZIP transient temp file (`Review Zip/ziePvPew`) left beside the archive by the review-zip export. `.gitignore` only ignored `Review Zip/*.zip`, so the temp file was NOT ignored (git never reads the export script, so the ignore is the only defence). VERIFIED SAFE BEFORE FIXING: the committed blob was extracted and inspected — it contains NO `.env` entry and no gitignored tree, so no secret left the machine. FIXED: (a) the file is UNTRACKED; (b) `.gitignore` now ignores EVERYTHING under `Review Zip/` except the intentionally-tracked `INCIDENT-LOG.md`; (c) a GATE was added to `scripts/validate-production-hygiene.mjs` §D that FAILS if git tracks anything under `Review Zip/` other than `INCIDENT-LOG.md`, or if the ignore rule loses its broad form. E6 declares `.gitignore` as a changed file. HONEST LIMIT: the 4.5 MB blob remains in the PUSHED git HISTORY (rewriting history needs a force-push, which the project forbids); it is inert and secret-free, and no future occurrence is possible.",
+      "source": "Discovered by the mandatory clean-tree check at task close; fixed in the same session per rule 07 (fix defects at source, never park a fixable defect).",
+      "status": "built",
+      "evidence": "`git ls-files -- \"Review Zip\"` now lists ONLY `Review Zip/INCIDENT-LOG.md`; `.gitignore` carries `Review Zip/*` + `!Review Zip/INCIDENT-LOG.md`. GATE MUTATION-PROVED TWICE — (A) force-tracking a dummy `Review Zip/ziMUTANT` ⇒ the tracked-artefact assertion FAILS (PRODUCTION_HYGIENE_FAIL 4/5); (B) narrowing `.gitignore` back to `Review Zip/*.zip` ⇒ the ignore-rule assertion FAILS (4/5); each restored and re-run ⇒ PASS 5/5. E6 PASS (the `.gitignore` change is declared) · E7 PASS (121/0) · `validate:all` 188 PASS / 0 FAIL. Non-runtime governance increment => three-way NOT APPLICABLE.",
       "last_verified": "2026-10-08",
       "superseded_by": null
     }

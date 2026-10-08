@@ -47,7 +47,13 @@ forensic-captures/
 playwright-report/
 test-results/
 e2e-report/
-Review Zip/*.zip
+# §E2E-8 (2026-10-08) — ignore EVERYTHING under `Review Zip/` except the one file
+# that is deliberately tracked. The previous rule (`Review Zip/*.zip` only) let a
+# binder's own transient temp file (Info-ZIP creates `ziXXXXXX` beside the archive
+# while it builds) be committed by `git add -A`. `git` never reads the export
+# script, so the ignore must be broad enough on its own.
+Review Zip/*
+!Review Zip/INCIDENT-LOG.md
 
 # ── §Wave 3 — RAW GEOGRAPHY DATASET CACHE (NEVER TRACKED) ─────────────────────
 # `scripts/build-logistics-hero-geo.mjs` downloads the authoritative datasets
