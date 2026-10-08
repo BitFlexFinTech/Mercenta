@@ -159,8 +159,22 @@ if (c) {
    * pinned to the real test that proves it. The self-check below now asserts the
    * prefix set covers ALL EIGHT enumerated domains and never the auto-seeded
    * `spec-*` rows.
+   *
+   * §E2E-9 — the SAME obligation is extended to the founder domain
+   * (`fo-*`: the company / government control centre · the founder investor centre
+   * & partnerships · the Founder Operating System Control Centre's operating views
+   * and its automation catalogue, acquisition pipeline, capital/financing/pitch/
+   * outreach, country · learning-loop · curriculum · contextual-education ·
+   * shared-workflow · governance/intelligence sections, the credential vault and
+   * the tutorial recordings · the funding / accelerator pipeline · the investor
+   * demo and its tenant-isolation, RBAC, error-recovery and responsive checks), so
+   * each enumerated scenario there is pinned to the real test that proves it. The
+   * self-check below now asserts the prefix set covers ALL NINE enumerated domains
+   * and never the auto-seeded `spec-*` rows — the LAST named domain of the
+   * programme, so the nine enumerated prefixes + the auto-seeded base are now the
+   * full catalogue.
    */
-  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-|sl-|fi-|co-|op-|in-)/;
+  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-|sl-|fi-|co-|op-|in-|fo-)/;
   const withTest = (c.scenarios ?? []).filter((s) => s.test);
   const notFound = withTest.filter((s) => existsSync(abs(s.spec)) && !read(s.spec).includes(s.test));
   test(
@@ -170,15 +184,15 @@ if (c) {
   );
   const untraced = (c.scenarios ?? []).filter((s) => SCENARIO_TEST_REQUIRED.test(s.id) && !s.test);
   test(
-    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents, sl-* shipment & logistics, fi-* finance, co-* compliance, op-* operations, in-* integrations) is traceable to a named test',
+    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents, sl-* shipment & logistics, fi-* finance, co-* compliance, op-* operations, in-* integrations, fo-* founder) is traceable to a named test',
     untraced.length === 0,
     untraced.map((s) => s.id).join(', ')
   );
-  /* §E2E-4/§E2E-5/§E2E-6/§E2E-7/§E2E-8 — self-check: the enumeration prefix set
-   * itself must be what we think it is, so a future rename cannot silently drop a
-   * whole domain's traceability. */
+  /* §E2E-4/§E2E-5/§E2E-6/§E2E-7/§E2E-8/§E2E-9 — self-check: the enumeration prefix
+   * set itself must be what we think it is, so a future rename cannot silently drop
+   * a whole domain's traceability. */
   test(
-    'the traceable-prefix set covers all eight enumerated domains (pf-, oa-, po-, sl-, fi-, co-, op- and in-)',
+    'the traceable-prefix set covers all nine enumerated domains (pf-, oa-, po-, sl-, fi-, co-, op-, in- and fo-)',
     SCENARIO_TEST_REQUIRED.test('pf-x') &&
       SCENARIO_TEST_REQUIRED.test('oa-x') &&
       SCENARIO_TEST_REQUIRED.test('po-x') &&
@@ -187,6 +201,7 @@ if (c) {
       SCENARIO_TEST_REQUIRED.test('co-x') &&
       SCENARIO_TEST_REQUIRED.test('op-x') &&
       SCENARIO_TEST_REQUIRED.test('in-x') &&
+      SCENARIO_TEST_REQUIRED.test('fo-x') &&
       !SCENARIO_TEST_REQUIRED.test('spec-x'),
     String(SCENARIO_TEST_REQUIRED)
   );

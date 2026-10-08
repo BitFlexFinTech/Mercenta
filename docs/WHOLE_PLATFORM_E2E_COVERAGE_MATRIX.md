@@ -5,7 +5,7 @@
 > `node scripts/e2e-catalogue.mjs --doc`. The gate `scripts/validate-e2e-scenarios.mjs`
 > fails if this document drifts from the owner.
 
-**Scenarios:** 396 · **Capabilities:** 8
+**Scenarios:** 440 · **Capabilities:** 8
 
 ## The method (the axes that define the space)
 
@@ -27,7 +27,7 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | brands_marketing | 3 |
 | commerce_logistics | 142 |
 | finance | 32 |
-| founder | 5 |
+| founder | 49 |
 | integrations | 22 |
 | onboarding_acquisition | 58 |
 | operations | 57 |
@@ -77,6 +77,50 @@ A scenario is a cell in the cross-product of an object lifecycle with the axes b
 | fi-xero-financial-summary | finance | super_admin | happy | `e2e/xero.spec.ts` | `3. Financial Summary section renders` |
 | fi-xero-not-connected | finance | super_admin | happy | `e2e/xero.spec.ts` | `1. Accounting tab shows "Not Connected" state` |
 | fi-xero-summary-placeholder | finance | super_admin | happy | `e2e/xero.spec.ts` | `4. Summary shows placeholder when not connected` |
+| fo-company-approval-gate-refusal | founder | super_admin | refusal | `e2e/company-control-centre.spec.ts` | `3. the approval gate and the no-filing-channel refusal are real` |
+| fo-company-credential-masked | founder | super_admin | happy | `e2e/company-control-centre.spec.ts` | `4. a government credential is stored as a mask and never rendered in full` |
+| fo-company-identity-honest | founder | super_admin | happy | `e2e/company-control-centre.spec.ts` | `1. it renders the company identity, the unread register and the honest notices` |
+| fo-company-read-register-simulated | founder | super_admin | happy | `e2e/company-control-centre.spec.ts` | `2. reading the register performs a real (simulated, labelled) registrar read` |
+| fo-demo-25-stage-lifecycle | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `1. the full 25-stage lifecycle runs in the browser and every stage reports OK` |
+| fo-demo-accessible-names | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `7. accessibility: real accessible names, and status is never colour-only` |
+| fo-demo-deterministic-replay | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `3. reset → replay reproduces the same digest (deterministic)` |
+| fo-demo-failure-drills-recovered | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `6. the deterministic failure drills are executed and recovered` |
+| fo-demo-rbac-non-super-admin | founder | mercenta_admin | refusal | `e2e/investor-demo.spec.ts` | `5. a non-Super-Admin session cannot reach the investor demo controls` |
+| fo-demo-responsive-no-overflow | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `the investor demo surface runs with no horizontal overflow` |
+| fo-demo-tenant-isolation-rbac | founder | super_admin | refusal | `e2e/investor-demo.spec.ts` | `4. brand-pinned actors are refused cross-tenant and operator-only actions IN THE DOMAIN` |
+| fo-demo-zero-external-calls | founder | super_admin | happy | `e2e/investor-demo.spec.ts` | `2. a completed run makes no external provider call` |
+| fo-funding-approval-gate | founder | super_admin | refusal | `e2e/funding-pipeline.spec.ts` | `3. the approval gate is real: no approval ⇒ no recorded submission` |
+| fo-funding-draft-not-submitted | founder | super_admin | happy | `e2e/funding-pipeline.spec.ts` | `2. generation produces a NOT SUBMITTED draft that passed the wording gate` |
+| fo-funding-real-opportunities | founder | super_admin | happy | `e2e/funding-pipeline.spec.ts` | `1. the three REAL opportunities render with their real urls and honest labels` |
+| fo-investor-centre-super-admin | founder | super_admin | happy | `e2e/founder-investor-centre.spec.ts` | `1. the Super Admin gets pitches, questions, practice and generated artefacts` |
+| fo-investor-rbac-non-super-admin | founder | mercenta_admin | refusal | `e2e/founder-investor-centre.spec.ts` | `3. a non-Super-Admin account never sees the private founder surfaces` |
+| fo-os-acquisition-intelligence-never-fabricate | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `23. the acquisition intelligence renders on the Business view with the never-fabricate rule enforced` |
+| fo-os-acquisition-pipeline | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `4. the acquisition pipeline renders all eleven lifecycle stages` |
+| fo-os-ai-truthful-no-provider | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `3. Founder Ops AI tells the truth when no provider is configured` |
+| fo-os-amazon-governance-fail-closed | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `19. the Amazon relationship governance renders with the fail-closed rule enforced` |
+| fo-os-automation-catalogue | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `2. the automation catalogue is real — run, suppress, fail, retry, disable` |
+| fo-os-capital-requirement | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `7. the Model B capital requirement renders on the Finance view` |
+| fo-os-contextual-education | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `13. the contextual education renders with the Knowledge Base link` |
+| fo-os-country-framework | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `10. the country framework renders with Zimbabwe never a marketplace` |
+| fo-os-credential-vault-durability | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `26. the credential vault renders with the durability rule enforced` |
+| fo-os-financier-lifecycle | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `15. the financier lifecycle renders with ACTIVE requiring a completed PILOT` |
+| fo-os-financier-universe-evidence | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `22. the financier universe renders on the Finance view with the source-evidence rule enforced` |
+| fo-os-financing-routes | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `9. the financing routes render on the Finance view` |
+| fo-os-founder-intelligence | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `20. the founder intelligence section renders on the Business view` |
+| fo-os-global-halt | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `6. the global halt stops every automation and is honestly reported` |
+| fo-os-integrated-loop-forward-only | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `21. the integrated loop renders on the Business view with the forward-only rule enforced` |
+| fo-os-learning-loop | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `11. the brand learning loop renders with VALIDATE as the gate` |
+| fo-os-localisation-seo-fail-closed | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `18. the localization / SEO / hreflang framework renders with the fail-closed rule enforced` |
+| fo-os-object-resolution | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `8. the object resolution renders on the Operations view` |
+| fo-os-onboarding-curriculum | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `12. the onboarding academy curriculum renders with the readiness rule` |
+| fo-os-outreach-forward-only | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `17. the founder outreach pipeline renders with the forward-only rule enforced` |
+| fo-os-pitch-workspace | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `16. the pitch workspace renders with financials staying deterministic` |
+| fo-os-rbac-non-super-admin | founder | mercenta_admin | refusal | `e2e/founder-operating-system.spec.ts` | `5. a non-Super-Admin session never reaches the Control Centre` |
+| fo-os-shared-workflows | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `14. the shared workflows render with one automation for three consumers` |
+| fo-os-ten-views-canonical | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `1. renders the ten operating views over real canonical figures` |
+| fo-os-tutorial-recordings | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `25. the tutorial recordings render with the versioning rule enforced` |
+| fo-os-uk-opportunity-states-evidence | founder | super_admin | happy | `e2e/founder-operating-system.spec.ts` | `24. the UK opportunity states render on the Business view with the evidence rule enforced` |
+| fo-partnerships-send-simulated | founder | super_admin | happy | `e2e/founder-investor-centre.spec.ts` | `2. partnerships generate and SEND explicitly through the simulated seam` |
 | in-google-setup-bad-client-id | integrations | super_admin | refusal | `e2e/google-setup.spec.ts` | `3. an implausible OAuth client id is refused before any Google window opens` |
 | in-google-setup-honest | integrations | super_admin | happy | `e2e/google-setup.spec.ts` | `1. it renders the personal account, the no-password policy and the honest un-run state` |
 | in-google-setup-run-simulated | integrations | super_admin | happy | `e2e/google-setup.spec.ts` | `2. running the setup executes the whole plan and labels it SIMULATED` |

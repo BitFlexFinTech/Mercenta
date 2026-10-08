@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 553,
+    "total_entries": 554,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,9 +371,9 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 after the E2E-4 increment (four rows added as built: e2e-coverage-shipment-logistics-delta-returns-domain, e2e3-commerce-logistics-count-correction, e2e-record-drawer-mobile-overflow-budget-defect and e2e-programme-end-label-correction). Previously: the E2E-3 increment (e2e-coverage-purchase-order-documents-domain added as built). Snapshot only.",
+      "_note": "Recomputed 2026-10-08 after the E2E-9 increment (e2e-coverage-founder-domain added as built). §DEFECT FIXED AT SOURCE (rule 07, E2E-9): this snapshot had been left at the E2E-4 figures while E2E-5/E2E-6/E2E-7/E2E-8 each added built rows, so it understated `built` (175 vs the true 182 before E2E-9). It is now RECOMPUTED from the entries themselves: 337 + 183 + 12 + 5 + 9 + 7 + 1 = 554. Snapshot only.",
       "built_and_tested": 337,
-      "built": 175,
+      "built": 183,
       "not_started": 12,
       "removed": 5,
       "deferred": 9,
@@ -6436,6 +6436,15 @@
       "source": "Discovered by the mandatory clean-tree check at task close; fixed in the same session per rule 07 (fix defects at source, never park a fixable defect).",
       "status": "built",
       "evidence": "`git ls-files -- \"Review Zip\"` now lists ONLY `Review Zip/INCIDENT-LOG.md`; `.gitignore` carries `Review Zip/*` + `!Review Zip/INCIDENT-LOG.md`. GATE MUTATION-PROVED TWICE — (A) force-tracking a dummy `Review Zip/ziMUTANT` ⇒ the tracked-artefact assertion FAILS (PRODUCTION_HYGIENE_FAIL 4/5); (B) narrowing `.gitignore` back to `Review Zip/*.zip` ⇒ the ignore-rule assertion FAILS (4/5); each restored and re-run ⇒ PASS 5/5. E6 PASS (the `.gitignore` change is declared) · E7 PASS (121/0) · `validate:all` 188 PASS / 0 FAIL. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e-coverage-founder-domain",
+      "description": "E2E-9 (2026-10-08) — E2E COVERAGE, THE FOUNDER DOMAIN (THE LAST NAMED DOMAIN OF THE PROGRAMME). Extends the ONE scenario catalogue (`docs/scenario-catalogue.json`, the E2E-0 owner) across the founder domain: 44 `fo-*` scenarios added (396 -> 440 total), each TRACEABLE to the individual Playwright test that proves it via a `test` field. The 44 span FIVE specs — the company / government control centre (4) · the founder investor centre & partnerships (3) · the Founder Operating System Control Centre and its twenty-six sections (26) · the funding / accelerator pipeline (3) · the investor demo incl. its tenant-isolation, RBAC, error-recovery, accessibility and responsive checks (8). `founder` coverage 5 -> 49. The gate `scripts/validate-e2e-scenarios.mjs` is EXTENDED so EVERY `fo-*` scenario, like every `pf-*`/`oa-*`/`po-*`/`sl-*`/`fi-*`/`co-*`/`op-*`/`in-*` one, MUST name its proving test, plus a self-check pinning the traceable-prefix set to `pf-` + `oa-` + `po-` + `sl-` + `fi-` + `co-` + `op-` + `in-` + `fo-`; the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` is regenerated from the owner. Domain boundary: the specs the catalogue ITSELF classifies under the `founder` capability (the SAME capability-based method E2E-5/E2E-7/E2E-8 used), corroborated by the app's own navigation (`AdminShell.tsx` Super-Admin group: Company · Control Centre · Grants & Investors; the founder investor centre and partnerships are Super-Admin-only surfaces). This COMPLETES the E2E coverage programme's named domains (E2E-0 … E2E-9). No application runtime change.",
+      "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-9 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
+      "status": "built",
+      "evidence": "`docs/scenario-catalogue.json` 396 -> 440 scenarios (44 `fo-*` founder, all traceable to a test; `founder` 5 -> 49). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (440 scenarios · 345 traceable · 8 capabilities); the self-check now pins NINE enumerated domains. GATE MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string in a `fo-*` scenario => exit 1, 2 failures (the proving-test check + the generated-doc drift); (B) the prefix set narrowed with `fo-` dropped => exit 1, 1 failure (the self-check); (C) a `fo-*` scenario with no `test` field => exit 1, 2 failures (the traceability check + the generated-doc drift). Each file restored byte-identical (catalogue sha256 9bbe1d7c791806f62af6a2c3dddf460bb51e12989021dbe53b8278fa5c497721; gate sha256 54b3e9495e44a650efd67186cb0f9389a1c33d81b4284a30f2d137cc7853d8a4). No orphan test, no missing test. BROWSER LEG — the five founder specs run in real Chromium = 46 passed / 0 failed / 0 skipped / 0 flaky (4 company control centre · 3 investor centre · 26 Founder OS Control Centre · 3 funding pipeline · 10 investor demo incl. its three responsive viewports). `npm run validate:all` PASS · typecheck 0 · lint 0 · build ok. Non-runtime governance increment => three-way NOT APPLICABLE.",
       "last_verified": "2026-10-08",
       "superseded_by": null
     }

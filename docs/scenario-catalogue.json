@@ -3948,6 +3948,446 @@
       "spec": "e2e/embedded-social.spec.ts",
       "test": "9. admin control centre reports the verified engine, mode and findings",
       "expects": "The operator’s Social Media control centre reports the verified engine identity (v1.47.0), its mode (Simulation/Connected), the workspace count and the recorded findings (engine operational; branded hostname has no DNS)."
+    },
+    {
+      "id": "fo-company-identity-honest",
+      "capability": "founder",
+      "journey": "founder — company / government control centre — the identity, the unread register and the honest notices render",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/company-control-centre.spec.ts",
+      "test": "1. it renders the company identity, the unread register and the honest notices",
+      "expects": "The Company Control Centre renders Mercenta’s founder-supplied identity (Company Control Centre — Mercenta Partners Ltd, company number 17457777), states that Mercenta holds no official electronic-filing channel and shows HMRC as READY / NOT CONNECTED; with nothing read, no registrar fact is presented as known (the record says it was not read from the register), the workflow stage is detect, and there are no page errors."
+    },
+    {
+      "id": "fo-company-read-register-simulated",
+      "capability": "founder",
+      "journey": "founder — company / government control centre — reading the register is a real, labelled simulated registrar read",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/company-control-centre.spec.ts",
+      "test": "2. reading the register performs a real (simulated, labelled) registrar read",
+      "expects": "Clicking Read company record performs a real registrar read through the simulation-first adapter and LABELS the result SIMULATED (the message names a simulated registrar and the record is stamped SIMULATED REGISTRAR); the officers section honestly says Mercenta does not fill this in."
+    },
+    {
+      "id": "fo-company-approval-gate-refusal",
+      "capability": "founder",
+      "journey": "founder — company / government control centre — the approval gate and the no-filing-channel refusal are real",
+      "actor": "super_admin",
+      "type": "refusal",
+      "spec": "e2e/company-control-centre.spec.ts",
+      "test": "3. the approval gate and the no-filing-channel refusal are real",
+      "expects": "The approval gate is real: with no registrar-read confirmation-statement date, Approve is REFUSED with a truthful message (Read the register first) rather than an invented date, and File via connected service REFUSES because no official electronic-filing channel exists; the stage stays detect."
+    },
+    {
+      "id": "fo-company-credential-masked",
+      "capability": "founder",
+      "journey": "founder — company / government control centre — a government credential is stored as a mask and never rendered in full",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/company-control-centre.spec.ts",
+      "test": "4. a government credential is stored as a mask and never rendered in full",
+      "expects": "A government credential can be stored and only a MASK is ever rendered — the stored row shows only the last four characters and the full secret NEVER appears in the DOM."
+    },
+    {
+      "id": "fo-investor-centre-super-admin",
+      "capability": "founder",
+      "journey": "founder — investor centre — the Super Admin gets pitches, questions, practice and generated artefacts",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-investor-centre.spec.ts",
+      "test": "1. the Super Admin gets pitches, questions, practice and generated artefacts",
+      "expects": "The Founder Investor Centre renders the canonical honesty notice (read from its SINGLE source of truth, never a vendor name), all five pitch lengths, the business model’s canonical figures (£2,000 / £2,270), difficult questions that expand to model answers, meeting-practice timings and a generated founder brief — with no page errors."
+    },
+    {
+      "id": "fo-partnerships-send-simulated",
+      "capability": "founder",
+      "journey": "founder — partnerships & fundraising — generate and SEND explicitly through the simulated seam",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-investor-centre.spec.ts",
+      "test": "2. partnerships generate and SEND explicitly through the simulated seam",
+      "expects": "The Partnerships centre presents prospective routes only (no partnership exists; the fundraising plan claims no commitments), generates a recipient-specific message that passed the wording gate, and REFUSES to send until the explicit confirmation is ticked; sending goes through the simulated seam and reports SIMULATED with network calls 0."
+    },
+    {
+      "id": "fo-investor-rbac-non-super-admin",
+      "capability": "founder",
+      "journey": "founder — investor centre — a non-Super-Admin account never sees the private founder surfaces",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/founder-investor-centre.spec.ts",
+      "test": "3. a non-Super-Admin account never sees the private founder surfaces",
+      "expects": "A non-Super-Admin session never sees the private founder navigation — Founder Investor Centre, Partnerships & Fundraising and Super Admin are all absent, and the investor-centre surface is never rendered."
+    },
+    {
+      "id": "fo-os-ten-views-canonical",
+      "capability": "founder",
+      "journey": "founder — operating system — the Control Centre renders the ten operating views over real canonical figures",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "1. renders the ten operating views over real canonical figures",
+      "expects": "The Control Centre renders the ten canonical operating views (Business · Brands · Commercial · Acquisition · Operations · Finance · Compliance · Automation · AI · Audit) over real canonical figures (the brand count is the canonical 4), every metric tile is a real drill-down, and the run makes ZERO external calls with no page errors."
+    },
+    {
+      "id": "fo-os-automation-catalogue",
+      "capability": "founder",
+      "journey": "founder — operating system — the automation catalogue is real: run, suppress, fail, retry, disable",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "2. the automation catalogue is real — run, suppress, fail, retry, disable",
+      "expects": "The automation catalogue lists the canonical declared automations and behaves really: a run produces a run record with a deterministic id, an identical second run is suppressed (duplicate_suppressed, no duplicate work), a simulated failure is observable, a retry recovers it, a disabled automation reports disabled with no side effect, and the declared scheduler seam and optional dependencies are stated on the surface."
+    },
+    {
+      "id": "fo-os-ai-truthful-no-provider",
+      "capability": "founder",
+      "journey": "founder — operating system — Founder Ops AI tells the truth when no provider is configured",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "3. Founder Ops AI tells the truth when no provider is configured",
+      "expects": "Founder Ops AI is truthful: with no provider configured it says so and shows a DETERMINISTIC brief, answers Ask Mercenta from canonical records with an intent and citations, and REFUSES a question it cannot answer from canonical data (I answer only from Mercenta records) instead of inventing one."
+    },
+    {
+      "id": "fo-os-acquisition-pipeline",
+      "capability": "founder",
+      "journey": "founder — operating system — the acquisition pipeline renders all eleven lifecycle stages",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "4. the acquisition pipeline renders all eleven lifecycle stages",
+      "expects": "The Acquisition view renders all eleven lifecycle stages and the funnel conversion rates derived from the SAME canonical records the pipeline shows; opening a prospect row lands on the EXISTING destination that owns its stage (Brand CRM / Brand Intelligence / Onboarding) — a prospect is not a brand."
+    },
+    {
+      "id": "fo-os-rbac-non-super-admin",
+      "capability": "founder",
+      "journey": "founder — operating system — a non-Super-Admin session never reaches the Control Centre",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "5. a non-Super-Admin session never reaches the Control Centre",
+      "expects": "A non-Super-Admin session never sees the Control Centre nav entry, and the Control Centre heading and automation table are never rendered — the RBAC boundary holds, not merely a hidden button."
+    },
+    {
+      "id": "fo-os-global-halt",
+      "capability": "founder",
+      "journey": "founder — operating system — the global halt stops every automation and is honestly reported",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "6. the global halt stops every automation and is honestly reported",
+      "expects": "The global halt stops EVERY automation in the DOMAIN: with the halt engaged a run reports halted with no side effect and the panel reads HALTED; clearing the halt restores normal operation immediately."
+    },
+    {
+      "id": "fo-os-capital-requirement",
+      "capability": "founder",
+      "journey": "founder — operating system — the Model B capital requirement renders on the Finance view",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "7. the Model B capital requirement renders on the Finance view",
+      "expects": "The Finance view renders the Model B capital requirement derived from the canonical Model B purchase orders (capital needed · utilisation · concentration), with the facility terms labelled as an ILLUSTRATION, never as Mercenta’s real facility."
+    },
+    {
+      "id": "fo-os-object-resolution",
+      "capability": "founder",
+      "journey": "founder — operating system — the object resolution renders on the Operations view",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "8. the object resolution renders on the Operations view",
+      "expects": "The Operations view renders the resolution of the canonical channel objects (each PO’s Amazon PO number, each consignment’s carrier reference) through the ONE resolver — resolved to exactly one tenant, with a cross-tenant review queue for anything that did not; ownership is never guessed and never leaks across tenants."
+    },
+    {
+      "id": "fo-os-financing-routes",
+      "capability": "founder",
+      "journey": "founder — operating system — the financing routes render on the Finance view",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "9. the financing routes render on the Finance view",
+      "expects": "The Finance view renders the three financing routes with a real count and advance per route derived from the canonical Model B purchase orders through the ONE owner, with the routing policy labelled as an ILLUSTRATION, never as Mercenta’s real policy."
+    },
+    {
+      "id": "fo-os-country-framework",
+      "capability": "founder",
+      "journey": "founder — operating system — the country framework renders with Zimbabwe never a marketplace",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "10. the country framework renders with Zimbabwe never a marketplace",
+      "expects": "The Commercial view renders the six country roles from the ONE owner and STATES the hard invariant that Zimbabwe is an operating/home market and NEVER a marketplace, with the marketplace role a cited fact naming its source."
+    },
+    {
+      "id": "fo-os-learning-loop",
+      "capability": "founder",
+      "journey": "founder — operating system — the brand learning loop renders with VALIDATE as the gate",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "11. the brand learning loop renders with VALIDATE as the gate",
+      "expects": "The Brands view renders the five-stage brand learning loop (LEARN → WATCH → DO → VALIDATE → COMPLETE) with VALIDATE named as the ONE gate on the surface, and a labelled DEMO topic that has acted but not validated is honestly NOT complete."
+    },
+    {
+      "id": "fo-os-onboarding-curriculum",
+      "capability": "founder",
+      "journey": "founder — operating system — the onboarding academy curriculum renders with the readiness rule",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "12. the onboarding academy curriculum renders with the readiness rule",
+      "expects": "The Brands view renders the onboarding academy curriculum from the ONE owner and states the readiness rule (readiness requires every teaching stage); the labelled DEMO position is honestly NOT catalogue-ready."
+    },
+    {
+      "id": "fo-os-contextual-education",
+      "capability": "founder",
+      "journey": "founder — operating system — the contextual education renders with the Knowledge Base link",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "13. the contextual education renders with the Knowledge Base link",
+      "expects": "The Brands view renders the contextual education so each field explanation LINKS to its canonical Knowledge Base article and its guided tour (linked, not duplicated), and a labelled DEMO field resolves to its article."
+    },
+    {
+      "id": "fo-os-shared-workflows",
+      "capability": "founder",
+      "journey": "founder — operating system — the shared workflows render with one automation for three consumers",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "14. the shared workflows render with one automation for three consumers",
+      "expects": "The Brands view renders the shared workflows where ONE automation serves three consumers (onboarding walkthrough · tutorial recording · E2E test), each linking to its canonical tour, E2E spec and Knowledge Base article; the steps are DERIVED from the tour — no second list."
+    },
+    {
+      "id": "fo-os-financier-lifecycle",
+      "capability": "founder",
+      "journey": "founder — operating system — the financier lifecycle renders with ACTIVE requiring a completed PILOT",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "15. the financier lifecycle renders with ACTIVE requiring a completed PILOT",
+      "expects": "The Finance view renders the financier lifecycle from Researched to Active partner and STATES the non-negotiable rule that ACTIVE requires a completed PILOT; the machine is labelled deterministic."
+    },
+    {
+      "id": "fo-os-pitch-workspace",
+      "capability": "founder",
+      "journey": "founder — operating system — the pitch workspace renders with financials staying deterministic",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "16. the pitch workspace renders with financials staying deterministic",
+      "expects": "The Finance view renders the ordered pitch/capital workspace sections and STATES the rule that every financial figure stays deterministic (its canonical owner; AI may help the narrative only), with an honest readiness state."
+    },
+    {
+      "id": "fo-os-outreach-forward-only",
+      "capability": "founder",
+      "journey": "founder — operating system — the founder outreach pipeline renders with the forward-only rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "17. the founder outreach pipeline renders with the forward-only rule enforced",
+      "expects": "The Finance view renders the founder outreach cadence and labelled illustrative touchpoints, with the forward-only rule ENFORCED (a follow-up requires an open contact — OUTREACH_FOLLOWUP_REQUIRES_CONTACT), not merely written."
+    },
+    {
+      "id": "fo-os-localisation-seo-fail-closed",
+      "capability": "founder",
+      "journey": "founder — operating system — the localization / SEO / hreflang framework renders with the fail-closed rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "18. the localization / SEO / hreflang framework renders with the fail-closed rule enforced",
+      "expects": "The Commercial view renders the localisation/SEO/hreflang framework: the ONE served content language (en-GB), a self-referencing hreflang per public route (with x-default), the per-market timezones and locale formats, and the fail-closed rule ENFORCED — no page is ever advertised in a language Mercenta does not serve."
+    },
+    {
+      "id": "fo-os-amazon-governance-fail-closed",
+      "capability": "founder",
+      "journey": "founder — operating system — the Amazon relationship governance renders with the fail-closed rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "19. the Amazon relationship governance renders with the fail-closed rule enforced",
+      "expects": "The Commercial view renders the Amazon relationship governance over the nine authoritative sources with the fail-closed rule ENFORCED: the programme status is honestly unconfirmed (not_confirmed_with_amazon, 0 verified), the vendor-agreement source is honestly not_held, and a claim resting on an unverified source is REFUSED (CLAIM_REQUIRES_VERIFIED_SOURCE)."
+    },
+    {
+      "id": "fo-os-founder-intelligence",
+      "capability": "founder",
+      "journey": "founder — operating system — the founder intelligence section renders on the Business view",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "20. the founder intelligence section renders on the Business view",
+      "expects": "The Business view renders the founder’s eleven standing questions, each naming the canonical owner that deterministically answers it, with the fail-closed proof computed LIVE from the resolver (an AI-supplied figure is refused — FOUNDER_AI_MAY_ONLY_SUMMARISE)."
+    },
+    {
+      "id": "fo-os-integrated-loop-forward-only",
+      "capability": "founder",
+      "journey": "founder — operating system — the integrated loop renders on the Business view with the forward-only rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "21. the integrated loop renders on the Business view with the forward-only rule enforced",
+      "expects": "The Business view renders the integrated acquisition → capital → operations loop’s twenty-one stages, each naming the canonical owner that deterministically owns it, with the forward-only rule ENFORCED (INTEGRATED_LOOP_TRANSITION_ILLEGAL) computed LIVE; the loop is deterministic and closes into founder intelligence."
+    },
+    {
+      "id": "fo-os-financier-universe-evidence",
+      "capability": "founder",
+      "journey": "founder — operating system — the financier universe renders on the Finance view with the source-evidence rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "22. the financier universe renders on the Finance view with the source-evidence rule enforced",
+      "expects": "The Finance view renders the REAL financing-partner universe with the source-evidence rule ENFORCED: every provider needs a declared type, market, NAMED source and research date, an illustrative placeholder is REFUSED (FINANCIER_IS_ILLUSTRATIVE_NOT_A_RESEARCHED_PROVIDER), and the real universe honestly holds ZERO providers — nothing is invented to fill it."
+    },
+    {
+      "id": "fo-os-acquisition-intelligence-never-fabricate",
+      "capability": "founder",
+      "journey": "founder — operating system — the acquisition intelligence renders on the Business view with the never-fabricate rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "23. the acquisition intelligence renders on the Business view with the never-fabricate rule enforced",
+      "expects": "The Business view renders the acquisition-intelligence section with the never-fabricate rule ENFORCED: a signal rests only on a DECLARED source that SUPPLIES its dimension and whose provider is genuinely available, so the example is REFUSED (INTELLIGENCE_UNAVAILABLE_WITHOUT_PROVIDER) and real acquisition signals produced is honestly 0."
+    },
+    {
+      "id": "fo-os-uk-opportunity-states-evidence",
+      "capability": "founder",
+      "journey": "founder — operating system — the UK opportunity states render on the Business view with the evidence rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "24. the UK opportunity states render on the Business view with the evidence rule enforced",
+      "expects": "The Business view renders the UK opportunity states with the evidence rule ENFORCED: a state is asserted only when every evidence source behind it is backed by a genuinely available provider, so the example is REFUSED (STATE_UNAVAILABLE_WITHOUT_EVIDENCE), states asserted is honestly 0, and the chain links to Explore UK Market Fit."
+    },
+    {
+      "id": "fo-os-tutorial-recordings",
+      "capability": "founder",
+      "journey": "founder — operating system — the tutorial recordings render with the versioning rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "25. the tutorial recordings render with the versioning rule enforced",
+      "expects": "The Brands view renders the tutorial recordings — one per canonical shared workflow, each declaring the UI version it is compatible with — with the versioning rule ENFORCED: with no asset captured every tutorial is honestly PENDING (Pending: 6, Current: 0) and a recording on an older UI version is DETECTED as OUTDATED (TUTORIAL_OUTDATED), never shown as if it worked."
+    },
+    {
+      "id": "fo-os-credential-vault-durability",
+      "capability": "founder",
+      "journey": "founder — operating system — the credential vault renders with the durability rule enforced",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/founder-operating-system.spec.ts",
+      "test": "26. the credential vault renders with the durability rule enforced",
+      "expects": "The Brands view renders the credential vault — one contract per canonical integration provider (the twenty-three registered) — with the durability rule ENFORCED: a credential is usable only from a DURABLE store, and the in-memory store held today is not durable, so Usable is honestly 0 (VAULT_NOT_DURABLE) while a durable example reports usable."
+    },
+    {
+      "id": "fo-funding-real-opportunities",
+      "capability": "founder",
+      "journey": "founder — funding pipeline — the three REAL opportunities render with their real urls and honest labels",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/funding-pipeline.spec.ts",
+      "test": "1. the three REAL opportunities render with their real urls and honest labels",
+      "expects": "The founder funding pipeline renders the three §10 opportunities with their REAL urls and claim-classed researched terms; terms the research never stated are labelled NOT STATED in the research (never an invented amount, term or deadline), the honest disclaimer always shows, and no submitted claim appears."
+    },
+    {
+      "id": "fo-funding-draft-not-submitted",
+      "capability": "founder",
+      "journey": "founder — funding pipeline — generation produces a NOT SUBMITTED draft that passed the wording gate",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/funding-pipeline.spec.ts",
+      "test": "2. generation produces a NOT SUBMITTED draft that passed the wording gate",
+      "expects": "Generating an application produces a draft that says NOT SUBMITTED and passed the wording gate, and the notice states that NOTHING has been submitted."
+    },
+    {
+      "id": "fo-funding-approval-gate",
+      "capability": "founder",
+      "journey": "founder — funding pipeline — the approval gate is real: no approval means no recorded submission",
+      "actor": "super_admin",
+      "type": "refusal",
+      "spec": "e2e/funding-pipeline.spec.ts",
+      "test": "3. the approval gate is real: no approval ⇒ no recorded submission",
+      "expects": "The §31 approval gate is real end to end: a submission is REFUSED outright before any approval, a reference plus the confirmation is still NOT enough without approval (the stage stays Discovered), recording the founder’s approval moves the stage to Founder approval recording NO submission, and only then is the founder’s own submission recordable, recording THEIR reference."
+    },
+    {
+      "id": "fo-demo-25-stage-lifecycle",
+      "capability": "founder",
+      "journey": "founder — investor demo — the full 25-stage lifecycle runs in the browser and every stage reports OK",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/investor-demo.spec.ts",
+      "test": "1. the full 25-stage lifecycle runs in the browser and every stage reports OK",
+      "expects": "The investor demo runs the full 25-stage lifecycle in the browser with every stage present and reporting OK, states both commercial models’ canonical figures (£2,000 / £8,000 / £2,500 / £2,270) and the real consequences (£504.00, a mock_tr_ payout, gate BLOCKED, a sim-rel_ release), and reports network calls 0 with zero external calls and no page errors."
+    },
+    {
+      "id": "fo-demo-zero-external-calls",
+      "capability": "founder",
+      "journey": "founder — investor demo — a completed run makes no external provider call",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/investor-demo.spec.ts",
+      "test": "2. a completed run makes no external provider call",
+      "expects": "A completed investor-demo run makes ZERO external provider calls, observed by the browser itself."
+    },
+    {
+      "id": "fo-demo-deterministic-replay",
+      "capability": "founder",
+      "journey": "founder — investor demo — reset then replay reproduces the same digest (deterministic)",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/investor-demo.spec.ts",
+      "test": "3. reset → replay reproduces the same digest (deterministic)",
+      "expects": "Reset then replay of the investor demo reproduces the SAME digest (deterministic, no duplicates) and the surface confirms it is identical to the previous run."
+    },
+    {
+      "id": "fo-demo-tenant-isolation-rbac",
+      "capability": "founder",
+      "journey": "founder — investor demo — brand-pinned actors are refused cross-tenant and operator-only actions IN THE DOMAIN",
+      "actor": "super_admin",
+      "type": "refusal",
+      "spec": "e2e/investor-demo.spec.ts",
+      "test": "4. brand-pinned actors are refused cross-tenant and operator-only actions IN THE DOMAIN",
+      "expects": "Tenant isolation and RBAC hold IN THE DOMAIN (not merely hidden buttons): against the run’s OWN canonical state, a foreign actor’s activity and exceptions are refused, a brand cannot initiate onboarding, a view-only actor’s acknowledgement is refused, an operator read is allowed and no foreign ledger leaks — with zero external calls."
+    },
+    {
+      "id": "fo-demo-rbac-non-super-admin",
+      "capability": "founder",
+      "journey": "founder — investor demo — a non-Super-Admin session cannot reach the investor demo controls",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/investor-demo.spec.ts",
+      "test": "5. a non-Super-Admin session cannot reach the investor demo controls",
+      "expects": "A non-Super-Admin session cannot reach the investor demo: the Super Admin nav item (and therefore the Simulation tab) is filtered, and the run and reset controls are never rendered."
+    },
+    {
+      "id": "fo-demo-failure-drills-recovered",
+      "capability": "founder",
+      "journey": "founder — investor demo — the deterministic failure drills are executed and recovered",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/investor-demo.spec.ts",
+      "test": "6. the deterministic failure drills are executed and recovered",
+      "expects": "The deterministic failure/recovery drills are executed and recovered: compliance blocked→corrected, invalid submission rejected→corrected, shipment delayed→recovered, payout declined→retried→settled, integration outage→recovered, and an unauthorised action and tenant mismatch refused; the acknowledgement window refuses a duplicate and the compliance gate shows BLOCKED then CLEARED through pending verification."
+    },
+    {
+      "id": "fo-demo-accessible-names",
+      "capability": "founder",
+      "journey": "founder — investor demo — accessibility: real accessible names, and status is never colour-only",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/investor-demo.spec.ts",
+      "test": "7. accessibility: real accessible names, and status is never colour-only",
+      "expects": "The investor demo surface is accessible: controls are addressed by their real accessible names (Run investor demo · Reset demo environment), the lifecycle is a labelled list of 25 items and every entry states its status in TEXT (OK / BLOCKED / ERROR) — status is never colour-only."
+    },
+    {
+      "id": "fo-demo-responsive-no-overflow",
+      "capability": "founder",
+      "journey": "founder — investor demo — the surface runs with no horizontal overflow at every required viewport",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/investor-demo.spec.ts",
+      "test": "the investor demo surface runs with no horizontal overflow",
+      "expects": "The investor demo surface runs with no horizontal page overflow at each required viewport (375x812 · 768x1024 · 1440x900), the controls remain reachable and the final stage is present at width."
     }
   ]
 }

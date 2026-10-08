@@ -493,12 +493,29 @@ check(
   'the truth-validation §8 records the ASN-content row as APPLIED (Batch 2n)',
   /^\| ASN content:[^\n]*\*\*APPLIED \(Batch 2n, 2026-10-03\)\*\*/m.test(truth)
 );
-check(
-  'STATUS_CHECK.md’s operating-rules paragraph is COMPLETE (not truncated mid-sentence)',
-  /gitignored — see the "GENERATED ARTEFACTS" block in `\.gitignore`\. Tracking them made the tree dirty after every Playwright run\./.test(
-    read('STATUS_CHECK.md')
-  )
-);
+/* §E2E-9 (2026-10-08) — STRENGTHENED. This check previously only asserted that ONE
+ * sentence ("Generated artefacts … Tracking them made the tree dirty …") was
+ * present, so it PASSED even though the CLEAN-TREE INVARIANT paragraph had been
+ * SPLIT mid-sentence by the inserted session-history block (it read "…permitted
+ * only while work is" near the top and resumed "actively in progress…" ~55 lines
+ * below). It now asserts the FIVE lines are CONSECUTIVE, so a future insertion
+ * that splits the paragraph again FAILS. The paragraph itself was repaired at
+ * source in the same session (the continuation was moved back). */
+{
+  const sc = read('STATUS_CHECK.md').split('\n');
+  const ci = sc.findIndex((l) => l.startsWith('**CLEAN-TREE INVARIANT (added 2026-09-21'));
+  check(
+    'STATUS_CHECK.md’s operating-rules paragraph is COMPLETE and CONTIGUOUS (not split mid-sentence by the session notes)',
+    ci >= 0 &&
+      sc[ci].includes('`git status --porcelain` MUST print') &&
+      sc[ci + 1].startsWith('NOTHING** at every checkpoint, delivery, handoff and end of session.') &&
+      sc[ci + 1].endsWith('A dirty tree is permitted only while work is') &&
+      sc[ci + 2].startsWith('actively in progress inside a session; it is never an acceptable checkpoint or handoff.') &&
+      sc[ci + 2].endsWith('Inherited dirtiness is') &&
+      sc[ci + 3].startsWith('RECONCILED (required work committed, unneeded material removed)') &&
+      sc[ci + 4].includes('gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.')
+  );
+}
 
 /* ── summary ───────────────────────────────────────────────────────────────── */
 

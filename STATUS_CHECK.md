@@ -21,6 +21,24 @@ discipline · script-only review zip.
 
 **CLEAN-TREE INVARIANT (added 2026-09-21, `operating-model.md` §6):** **`git status --porcelain` MUST print
 NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tree is permitted only while work is
+actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
+RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
+Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
+
+
+## §E2E-9 — E2E COVERAGE, THE FOUNDER DOMAIN (session 119, 2026-10-08)
+
+1. **What this session did** — the Founder said "continue". The recorded `NEXT TASK` said order item 3 (the E2E coverage programme) resumed at **E2E-9** — the LAST named domain — exactly as the prior session recorded. This session executed E2E-9: it enumerated the founder domain in the ONE scenario catalogue, traceable to the individual test that proves each scenario. **NO application runtime code changed** — a catalogue, its generated document, a validator, one registry row and the state sources: three-way status **NOT APPLICABLE (no application runtime change)**.
+
+2. **BUILT / CHANGED** — (1) `docs/scenario-catalogue.json` (the E2E-0 ONE owner) extended **396 → 440 scenarios** with **44 `fo-*`** founder scenarios, each carrying a `test` field naming the exact Playwright test title that proves it. The 44 span FIVE specs — the company / government control centre (4) · the founder investor centre & partnerships (3) · the Founder Operating System Control Centre and its twenty-six sections (26) · the funding / accelerator pipeline (3) · the investor demo incl. its tenant-isolation, RBAC, error-recovery, accessibility and responsive checks (8); `founder` coverage **5 → 49**. **The domain boundary** uses the SAME capability-based method as E2E-5/E2E-7/E2E-8: the specs the catalogue ITSELF classifies under the `founder` capability, corroborated by the app's own navigation (`AdminShell.tsx` Super-Admin group: Company · Control Centre · Grants & Investors; the founder investor centre and partnerships are Super-Admin-only surfaces). (2) `scripts/validate-e2e-scenarios.mjs` — **§EXTENDED, not weakened**: `SCENARIO_TEST_REQUIRED` `/^(pf-|oa-|po-|sl-|fi-|co-|op-|in-)/` → `/^(pf-|oa-|po-|sl-|fi-|co-|op-|in-|fo-)/` so every `fo-*` scenario MUST name its proving test, plus the self-check widened to assert the prefix set covers all NINE enumerated domains and never the auto-seeded `spec-*` rows. **16/16**. (3) `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` REGENERATED from the owner. (4) plan §0b order item 3 updated to record E2E-9 done — the programme's named domains are COMPLETE. (5) registry row `e2e-coverage-founder-domain` added (`_meta.total_entries` 553 → 554).
+
+3. **TESTED** — `validate:e2e-scenarios` **16/16** (440 scenarios · 345 traceable · 8 capabilities) · `validate:all` **188 PASS / 0 FAIL** · typecheck **0** (all four projects) · lint **0** · build ✓ · E6 PASS · E7 PASS · BROWSER LEG: the five founder specs in real Chromium = **46 passed / 0 failed / 0 skipped / 0 flaky** (company control centre 4 · investor centre 3 · Founder OS Control Centre 26 · funding pipeline 3 · investor demo 10 incl. its three responsive viewports). **MUTATION-PROVED THREE TIMES** — (A) a wrong proving-test string in a `fo-*` scenario ⇒ 2 failures, **exit 1**; (B) a narrowed prefix set with `fo-` dropped ⇒ 1 failure (the self-check), **exit 1**; (C) a `fo-*` scenario with no `test` field ⇒ 2 failures, **exit 1**. Each file restored **byte-identical** (catalogue sha256 `9bbe1d7c791806f62af6a2c3dddf460bb51e12989021dbe53b8278fa5c497721`; gate sha256 `54b3e9495e44a650efd67186cb0f9389a1c33d81b4284a30f2d137cc7853d8a4`).
+
+4. **DEFECTS FIXED AT SOURCE (rule 07)** — (a) the registry `_meta.status_counts` snapshot had been left at the E2E-4 figures while E2E-5/E2E-6/E2E-7/E2E-8 each added built rows, so it understated `built` (175 vs the true 182); it is now RECOMPUTED from the entries themselves (554 = 337 + 183 + 12 + 5 + 9 + 7 + 1). (b) THIS file's CLEAN-TREE INVARIANT preface paragraph had been SPLIT mid-sentence by the inserted session-history block (it read "...A dirty tree is permitted only while work is" at the top and resumed at "actively in progress..." ~55 lines below); the continuation is MOVED back to complete the paragraph — no content removed.
+
+5. **RESULT — VERIFIED COMMITTED CHECKPOINT — THREE-WAY NOT APPLICABLE (no application runtime change).** No deploy was required or performed; the live site continues to serve the last verified application-runtime commit `5cec2b3` (the last RECORDED live `verify:live` 267/0 stands; a fresh live check is not possible from this session's environment). **NEXT** — order item 3 is COMPLETE (the E2E coverage programme's named domains E2E-0 … E2E-9 are all done); the next work is either the residual auto-seeded `spec-*` base rows (a Founder decision) or order item 4 (the legacy UI-redesign backlog). No credential required.
+
+
 ## §E2E-8 — E2E COVERAGE, THE INTEGRATIONS DOMAIN (session 118, 2026-10-08)
 
 1. **What this session did** — the Founder said "continue". The recorded `NEXT TASK` said order item 3 (the E2E coverage programme) resumed at **E2E-8**, exactly as the prior session recorded. This session executed E2E-8: it enumerated the integrations domain in the ONE scenario catalogue, traceable to the individual test that proves each scenario. **NO application runtime code changed** — a catalogue, its generated document, a validator, one hardened test file, two scope guards and two registry rows: three-way status **NOT APPLICABLE (no application runtime change)**.
@@ -75,9 +93,6 @@ NOTHING** at every checkpoint, delivery, handoff and end of session. A dirty tre
 
 
 
-actively in progress inside a session; it is never an acceptable checkpoint or handoff. Inherited dirtiness is
-RECONCILED (required work committed, unneeded material removed) — there is no "leave it dirty for later" outcome.
-Generated artefacts (`test-screenshots/`, `forensic-captures/`, `playwright-report/`, `test-results/`, `e2e-report/`, `Review Zip/*.zip`) are reproducible outputs and are gitignored — see the "GENERATED ARTEFACTS" block in `.gitignore`. Tracking them made the tree dirty after every Playwright run.
 
 
 ## §E2E-2 — E2E COVERAGE, THE ONBOARDING & ACQUISITION DOMAIN (session 112, 2026-10-08)
