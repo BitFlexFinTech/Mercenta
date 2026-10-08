@@ -2334,6 +2334,16 @@ const E2E_SCENARIO_CATALOGUE_SCOPE = new Set([
   'scripts/validate-e2e-scenarios.mjs',            /* the traceability gate */
   'docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md',    /* the GENERATED document (took the established name; the stale hand-written one is archived) */
   'package.json',                                  /* catalogue:e2e + test:e2e scripts */
+  /**
+   * §E2E-4 (2026-10-08) — the shipment & logistics enumeration exposed a
+   * PRE-EXISTING brittle budget in `e2e/record-drawer.spec.ts` (its test 9 walks
+   * three admin surfaces and, at 390x844, consumed ~28s of Playwright's 30s
+   * default, so it timed out under the suite's normal parallel load while the
+   * other three viewports passed in the same run). The fix is AT SOURCE — that
+   * ONE test's budget, no assertion touched — and the changed test file is
+   * declared here rather than left unexplained.
+   */
+  'e2e/record-drawer.spec.ts',
   'scripts/validate-e6-brand-surfaces.mjs',
   'scripts/validate-e7-embedded-social.mjs',
   /**

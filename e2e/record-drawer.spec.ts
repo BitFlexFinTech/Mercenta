@@ -251,6 +251,18 @@ test.describe('Migrated surfaces — responsive + no horizontal overflow', () =>
 
   for (const vp of VIEWPORTS) {
     test(`9. admin record queues at ${vp.w}x${vp.h} — no horizontal overflow`, async ({ page }) => {
+      /**
+       * §E2E-4 — MEASURED BUDGET FIX (a defect found by this session's E2E-4 browser
+       * leg, fixed at source). This test walks THREE admin surfaces, and at 390x844
+       * each one first needs the off-canvas nav opened. MEASURED 2026-10-08: in
+       * isolation it consumes ~28s of Playwright's 30s default, so under the suite's
+       * normal parallel load it timed out at the mobile viewport while the other
+       * three viewports passed in the SAME run — i.e. it was flaky by construction.
+       * The budget is raised for THIS test only. NOT ONE ASSERTION IS CHANGED: the
+       * same three surfaces are walked at the same four viewports and the same
+       * `scrollWidth - clientWidth <= 1` rule is applied to each.
+       */
+      test.setTimeout(90_000);
       await page.setViewportSize({ width: vp.w, height: vp.h });
       await loginAs(page, 'Mercenta Admin Hub', 1100);
 

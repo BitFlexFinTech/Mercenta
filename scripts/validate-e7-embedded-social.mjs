@@ -2168,6 +2168,13 @@ const BATCH0_PLATFORM_MODE_DECLARED = ['src/lib/platform/', 'src/config/environm
     'docs/scenario-catalogue.json',
     'e2e/retired-platforms.spec.ts',
     'e2e/rocketchat-removal.spec.ts',
+    // §E2E-4 (2026-10-08) — the shipment & logistics enumeration exposed a
+    // PRE-EXISTING brittle budget in this spec (test 9 walks three admin surfaces
+    // and, at 390x844, consumed ~28s of the 30s default, so it timed out under the
+    // suite's normal parallel load). Fixed AT SOURCE by raising that ONE test's
+    // budget; no assertion was changed or removed. Declared here so the single
+    // changed test file is not an unexplained change.
+    'e2e/record-drawer.spec.ts',
     'package.json',
     // §Phase M13 — the declared surface of the current phase (see M13_DECLARED above).
     ...M13_DECLARED,

@@ -123,8 +123,16 @@ if (c) {
    * domain (`po-*`), so each enumerated scenario in that domain is pinned to the
    * real test that proves it. A self-check below asserts the prefix set covers
    * ALL THREE enumerated domains and never the auto-seeded `spec-*` rows.
+   *
+   * §E2E-4 — the SAME obligation is extended to the shipment & logistics domain
+   * (`sl-*`: shipment & ASN · the logistics hero and operational map · carrier
+   * providers · channel constraints · delivery appointments · the Delta 3PL
+   * supply route · fulfilment tracks · returns tracking), so each enumerated
+   * scenario there is pinned to the real test that proves it. The self-check
+   * below now asserts the prefix set covers ALL FOUR enumerated domains and
+   * never the auto-seeded `spec-*` rows.
    */
-  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-)/;
+  const SCENARIO_TEST_REQUIRED = /^(pf-|oa-|po-|sl-)/;
   const withTest = (c.scenarios ?? []).filter((s) => s.test);
   const notFound = withTest.filter((s) => existsSync(abs(s.spec)) && !read(s.spec).includes(s.test));
   test(
@@ -134,17 +142,18 @@ if (c) {
   );
   const untraced = (c.scenarios ?? []).filter((s) => SCENARIO_TEST_REQUIRED.test(s.id) && !s.test);
   test(
-    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents) is traceable to a named test',
+    'every enumerated scenario (pf-* platform foundations, oa-* onboarding & acquisition, po-* purchase order & documents, sl-* shipment & logistics) is traceable to a named test',
     untraced.length === 0,
     untraced.map((s) => s.id).join(', ')
   );
-  /* §E2E-3 — self-check: the enumeration prefix set itself must be what we think it
+  /* §E2E-4 — self-check: the enumeration prefix set itself must be what we think it
    * is, so a future rename cannot silently drop a whole domain's traceability. */
   test(
-    'the traceable-prefix set covers all three enumerated domains (pf-, oa- and po-)',
+    'the traceable-prefix set covers all four enumerated domains (pf-, oa-, po- and sl-)',
     SCENARIO_TEST_REQUIRED.test('pf-x') &&
       SCENARIO_TEST_REQUIRED.test('oa-x') &&
       SCENARIO_TEST_REQUIRED.test('po-x') &&
+      SCENARIO_TEST_REQUIRED.test('sl-x') &&
       !SCENARIO_TEST_REQUIRED.test('spec-x'),
     String(SCENARIO_TEST_REQUIRED)
   );

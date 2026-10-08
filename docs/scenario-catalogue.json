@@ -2188,6 +2188,666 @@
       "spec": "e2e/ack-invoice-price.spec.ts",
       "test": "2. a LOWER acknowledged price is accepted, warned, and shown on the order",
       "expects": "A LOWER acknowledged price is accepted, warned about, and shown on the order — the reduced price is visible, not hidden."
+    },
+    {
+      "id": "sl-shipment-packing-correction-files-asn",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — shipment & ASN — a packing correction reaches Mercenta, which files the ASN",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/shipment-asn.spec.ts",
+      "test": "1. Packing correction reaches Mercenta, which files the ASN",
+      "expects": "The brand records a packing correction — the only packing job the brand does — and MERCENTA files the ASN from it (a real consignment appears); the brand never files the channel ASN itself."
+    },
+    {
+      "id": "sl-shipment-shortfall-deduction",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — shipment & ASN — packed quantity below the acknowledged quantity",
+      "actor": "brand_user",
+      "type": "exception",
+      "spec": "e2e/shipment-asn.spec.ts",
+      "test": "2. Packed qty below acknowledged qty -> shortfall logged as deduction",
+      "expects": "A packed quantity below the acknowledged quantity raises a shortage-claim deduction — the shortfall is recorded on the ledger, never silently absorbed."
+    },
+    {
+      "id": "sl-shipment-freight-collect-routing-mercenta",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — shipment & ASN — freight collect raises the routing step as MERCENTA's own action",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/shipment-asn.spec.ts",
+      "test": "3. Amazon freight (collect) -> routing step raised by MERCENTA, and NO unsupported channel deadline",
+      "expects": "A Freight Collect order raises the routing/shipment step attributed to MERCENTA and presents no unsupported channel deadline — the proxy direction (Mercenta arranges, the brand sees status) is preserved."
+    },
+    {
+      "id": "sl-shipment-freight-prepaid-window",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — shipment & ASN — freight prepaid respects the fixed delivery window",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/shipment-asn.spec.ts",
+      "test": "4. Vendor freight (prepaid) -> fixed delivery window respected",
+      "expects": "A prepaid (Vendor freight) order respects the fixed delivery window stated on the order."
+    },
+    {
+      "id": "sl-shipment-milestone-delivered-live",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — shipment & ASN — the delivered milestone updates the status shown on retail",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/shipment-asn.spec.ts",
+      "test": "5. Shipment marked delivered -> status updates to live on retail",
+      "expects": "Marking a shipment delivered from Mercenta's own surface advances the consignment milestone and updates the status presented on retail — carriers never log into Mercenta."
+    },
+    {
+      "id": "sl-shipment-onbehalf-asn-regulated-lot-expiry",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — shipment & ASN — the on-behalf ASN for a regulated brand requires lot and expiry",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/shipment-asn.spec.ts",
+      "test": "6. Admin on-behalf ASN for a regulated Grocery brand -> lot + expiry required and submitted",
+      "expects": "For a REGULATED (Grocery) brand Mercenta files the on-behalf ASN only WITH lot and expiry details — the regulatory requirement is enforced on the on-behalf path too."
+    },
+    {
+      "id": "sl-shipment-onbehalf-asn-non-regulated",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — shipment & ASN — the on-behalf ASN for a non-regulated brand needs no lot or expiry",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/shipment-asn.spec.ts",
+      "test": "7. Admin on-behalf ASN for a non-regulated brand -> submits without lot/expiry",
+      "expects": "For a NON-regulated brand the same on-behalf ASN submits without lot or expiry — the requirement is category-aware and is never applied blanket."
+    },
+    {
+      "id": "sl-hero-and-map-one-page",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — the hero and the operational map are one page",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "1. the hero and the operational map are ONE page",
+      "expects": "The cinematic hero and the operational map render on the SAME page, so the hero is a section of the working surface rather than a separate destination."
+    },
+    {
+      "id": "sl-hero-fixed-camera-scrolls",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — fixed camera, no pointer capture, the page still scrolls",
+      "actor": "brand_user",
+      "type": "a11y",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "2/3. fixed camera, no pointer capture, the page still scrolls",
+      "expects": "The hero camera is fixed and the canvas never captures the pointer, so the page still scrolls with the pointer over the hero — the section never traps the reader."
+    },
+    {
+      "id": "sl-hero-fleet-and-origins",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — many vehicles, lanes and origins",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "4/5. many aircraft, many ships, many road vehicles, many origins",
+      "expects": "The hero actually contains multiple aircraft, ships and road vehicles across multiple origins and lanes — the scene is populated from data, not a single static image."
+    },
+    {
+      "id": "sl-hero-authentic-geography",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — authentic, generated, attributed geography",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "6. authentic, generated, attributed geography (no hand-drawn shapes)",
+      "expects": "The hero's geography is authentic and generated from an attributed dataset — there are no hand-drawn countries or invented coastlines."
+    },
+    {
+      "id": "sl-hero-truth-labels-ambient",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — truth labels, and ambient traffic is never a shipment",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "7/8/11. truth semantics are labelled and ambient is never a shipment",
+      "expects": "LIVE VERIFIED / SIMULATED / AMBIENT are labelled in words (never by colour alone), ambient traffic is explicitly stated NOT to be a Mercenta shipment, and nothing is called live when no provider resolved live."
+    },
+    {
+      "id": "sl-hero-canonical-consignments",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — the hero plots the canonical consignments",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "9. the hero plots the same brand consignments as the operational map",
+      "expects": "The hero plots exactly the same brand consignments as the operational map — one canonical set of records, not a second decorative dataset."
+    },
+    {
+      "id": "sl-hero-reduced-motion",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — reduced motion keeps a meaningful static view",
+      "actor": "brand_user",
+      "type": "a11y",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "10. reduced motion keeps a meaningful static view",
+      "expects": "With reduced motion requested the hero keeps a meaningful static view and says so — the reader who cannot take animation still gets the information."
+    },
+    {
+      "id": "sl-hero-no-external-call",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — the hero makes no external network call",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "12. the hero makes no external network call",
+      "expects": "The hero makes NO external network call — the visual is rendered from local data, so nothing leaves the platform."
+    },
+    {
+      "id": "sl-hero-controls-interactive",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — the operational controls stay interactive",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "13. the operational controls remain interactive below the hero",
+      "expects": "The operational controls below the hero remain fully interactive — the hero adds presentation, it does not disable the working surface."
+    },
+    {
+      "id": "sl-hero-no-horizontal-overflow",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hero — no horizontal overflow at desktop or mobile",
+      "actor": "brand_user",
+      "type": "responsive",
+      "spec": "e2e/logistics-hero.spec.ts",
+      "test": "14. no horizontal overflow at desktop and mobile widths",
+      "expects": "The hero composes without horizontal overflow at desktop and mobile widths."
+    },
+    {
+      "id": "sl-hub-map-interactive",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — a real interactive map renders in the workspace",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "1. renders the workspace and a real interactive map",
+      "expects": "The Logistics Hub renders its workspace with a real interactive map — the map is a working surface, not a picture."
+    },
+    {
+      "id": "sl-hub-map-leg-per-consignment",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — one leg is drawn per visible consignment",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "2. draws one leg per visible consignment from declared coordinates",
+      "expects": "The map draws one leg per visible consignment, from the coordinates the records actually declare — no drawn lane without a record behind it."
+    },
+    {
+      "id": "sl-hub-map-zoom",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — zoom changes the rendered view",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "3. zoom actually changes the rendered view",
+      "expects": "The zoom controls genuinely change the rendered view rather than being decorative."
+    },
+    {
+      "id": "sl-hub-map-inspector-evidence",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — selecting a consignment opens its evidence",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "4. selecting a consignment opens the inspector with its evidence",
+      "expects": "Selecting a consignment on the map opens the inspector showing that consignment's evidence — the detail is reachable from the map itself."
+    },
+    {
+      "id": "sl-hub-map-evidence-filter",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — the evidence filter changes the map and the list together",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "5. the evidence filter changes the drawn set and the list",
+      "expects": "The evidence filter genuinely changes both the drawn set on the map and the accompanying list — the two never disagree."
+    },
+    {
+      "id": "sl-hub-map-nothing-falsely-live",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — evidence is labelled and nothing is falsely live",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "6/7. evidence is labelled and nothing is falsely live",
+      "expects": "The evidence states are labelled in words (never colour-only) and NOTHING is presented as live without a provider reference — the count of live claims is honestly zero here."
+    },
+    {
+      "id": "sl-hub-map-freight-responsibility",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — freight responsibility is stated truthfully",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "8/9/10. freight responsibility is stated truthfully",
+      "expects": "Freight Collect is labelled channel-arranged (no false Mercenta choice), Freight Prepaid is labelled Mercenta-arranged, and the honest geographic notice is rendered — precision is never invented."
+    },
+    {
+      "id": "sl-hub-map-reduced-motion",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — reduced motion disables the ambient drift",
+      "actor": "brand_user",
+      "type": "a11y",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "11. reduced motion disables the ambient drift",
+      "expects": "With reduced motion requested the map's ambient drift is disabled — motion is a preference, never a requirement."
+    },
+    {
+      "id": "sl-hub-map-responsive",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — no horizontal overflow at any required viewport",
+      "actor": "brand_user",
+      "type": "responsive",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "12. no horizontal overflow at any required viewport",
+      "expects": "The operational map composes without horizontal overflow at every required viewport (1440 / 1280 / 1024 / 390)."
+    },
+    {
+      "id": "sl-hub-map-tenant-isolation",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — one brand never sees another brand's consignments",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "13. tenant isolation — one brand never sees another brand’s consignments",
+      "expects": "Tenant isolation holds on the map: brand B never sees brand A's consignments, and a cross-tenant read fails closed."
+    },
+    {
+      "id": "sl-hub-map-artefacts-and-empty-state",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — the empty state and the shipping artefacts still work",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "14/15. artefacts still open and close",
+      "expects": "The empty state renders when the filters exclude everything, and the Waybill / Labels / Track artefacts still open and close."
+    },
+    {
+      "id": "sl-hub-map-search",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — search narrows the map and the list together",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "16. search narrows the map and the list together",
+      "expects": "Searching narrows the drawn map and the list together, so the two views of the same records never diverge."
+    },
+    {
+      "id": "sl-hub-map-arrival-node-is-po-fc",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map — the arrival node is the purchase order's destination fulfilment centre",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "17. §P5 — the arrival node is the destination FC on the PO, never a hub",
+      "expects": "The arrival node drawn on the map is the DESTINATION fulfilment centre declared on the purchase order — never a hub the platform substituted."
+    },
+    {
+      "id": "sl-hub-admin-map-truth-labelling",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map (admin) — the canonical truth labelling",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "A. the admin map renders with the canonical truth labelling",
+      "expects": "The ADMIN map renders the same canonical truth labelling as the brand surface — one owner of the labelling, not two."
+    },
+    {
+      "id": "sl-hub-admin-map-real-consignment",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map (admin) — a consignment from the real order lifecycle appears",
+      "actor": "mercenta_admin",
+      "type": "persistence",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "B. a consignment created through the real PO lifecycle appears on the admin map",
+      "expects": "A consignment raised through the REAL purchase-order lifecycle appears on the admin map — the operator sees what the domain actually holds, not a fixture."
+    },
+    {
+      "id": "sl-hub-admin-map-evidence-filter",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — operational map (admin) — the evidence filter changes the drawn set",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/logistics-hub-map.spec.ts",
+      "test": "C. the evidence filter genuinely changes the drawn set",
+      "expects": "On the admin map the evidence filter genuinely changes the drawn set — the operator's filter is real, not decorative."
+    },
+    {
+      "id": "sl-providers-carrier-accounts",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — carrier providers — both Mercenta carrier accounts are stated with their lane",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-providers.spec.ts",
+      "test": "1. both Mercenta carrier accounts are stated with their lane and real state",
+      "expects": "The brand hub states BOTH Mercenta carrier accounts (DHL international, Palletline UK domestic) with their lane, capability and truthful state, and states that MERCENTA configures them — a brand never selects or configures a carrier."
+    },
+    {
+      "id": "sl-providers-brand-no-credential-form",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — carrier providers — the brand surface exposes no credential form and no cost base",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/logistics-providers.spec.ts",
+      "test": "2. the brand surface exposes no credential form and no cost base",
+      "expects": "The brand's logistics surface exposes NO credential form and NO carrier cost base — Mercenta's commercial terms with a carrier are never shown to a brand."
+    },
+    {
+      "id": "sl-providers-consolidation-deferred",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — carrier providers — consolidation is shown as deferred, with its evidence",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-providers.spec.ts",
+      "test": "3. consolidation is shown as DEFERRED with its documented evidence and invariants",
+      "expects": "The consolidation posture is shown as DEFERRED with the channel evidence that justifies it and its invariants — recorded honestly, neither silently implemented nor designed out."
+    },
+    {
+      "id": "sl-providers-super-admin-handoff",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — carrier providers (admin) — the super admin reaches the one credential-owning surface",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/logistics-providers.spec.ts",
+      "test": "4. the SUPER ADMIN sees the provider configuration and reaches Integration Settings",
+      "expects": "The Super Admin sees the provider configuration and reaches Integration Settings — the ONE surface that owns credentials — with no dead link and no second credential form."
+    },
+    {
+      "id": "sl-providers-admin-staff-no-dead-end",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — carrier providers (admin) — an admin-staff session gets no dead-end hand-off",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/logistics-providers.spec.ts",
+      "test": "4b. an admin-STAFF session gets the configuration but NO dead-end hand-off",
+      "expects": "An admin-STAFF session sees the same configuration but is offered NO hand-off it cannot use — a control that leads nowhere is refused by the surface itself."
+    },
+    {
+      "id": "sl-providers-operator-cross-tenant-queue",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — carrier providers (admin) — the operator sees the cross-tenant document queue",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/logistics-providers.spec.ts",
+      "test": "5. the operator sees the cross-tenant PO-document queue and the same posture",
+      "expects": "The operator sees the cross-tenant purchase-order document queue naming each brand — the operator's scope, not a brand's — alongside the same consolidation posture."
+    },
+    {
+      "id": "sl-wave3-backorder-allowed",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — channel constraints — the channel allows a backorder and the acknowledgement succeeds",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-wave3.spec.ts",
+      "test": "1. a line the channel allows still offers Backordered, and the ack succeeds",
+      "expects": "Where the retail channel allows a backorder the brand is offered Backordered and the acknowledgement succeeds — the option is offered because the CHANNEL allows it."
+    },
+    {
+      "id": "sl-wave3-backorder-refused",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — channel constraints — a line the channel does not allow explains why",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/logistics-wave3.spec.ts",
+      "test": "2. a line the channel does NOT allow offers no Backordered option and explains why",
+      "expects": "Where the channel does NOT allow it, no Backordered option is offered and the reason is stated — the constraint fails closed and is visible rather than hidden."
+    },
+    {
+      "id": "sl-wave3-eta-with-basis",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hub — an ETA is shown with its basis",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-wave3.spec.ts",
+      "test": "3. the Hub shows an ETA with an explicit basis, never a bare date",
+      "expects": "The Hub shows an ETA together with the basis it comes from — never a bare date with no explanation of where it came from."
+    },
+    {
+      "id": "sl-wave3-carrier-eligibility",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hub — carrier eligibility is derived and names the provider state",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-wave3.spec.ts",
+      "test": "4. carrier eligibility is derived and names the provider state",
+      "expects": "The carriers offered for a consignment are DERIVED from the routing rules and each one names its provider state — a brand is never offered a carrier the rules would refuse."
+    },
+    {
+      "id": "sl-wave3-delivery-performance-drilldown",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hub — delivery performance opens a real drill-down",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-wave3.spec.ts",
+      "test": "5. delivery performance opens a real drill-down and never invents a rate",
+      "expects": "Delivery performance opens a real drill-down, and a rate with no sample behind it is never shown as a percentage — an unmeasured figure is stated as unmeasured."
+    },
+    {
+      "id": "sl-wave3-no-unsupported-deadline",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hub — no unsupported channel deadline is presented",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/logistics-wave3.spec.ts",
+      "test": "6. no unsupported \"10am Pacific\" channel deadline is presented",
+      "expects": "No unsupported channel deadline (the North-American \"10am Pacific\" claim) is presented anywhere on the Hub — an unsupported rule is refused, not repeated."
+    },
+    {
+      "id": "sl-wave3-accept-takes-to-hub",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — logistics hub — accepting an order leads straight to its shipping documents",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/logistics-wave3.spec.ts",
+      "test": "7. after accepting a PO the brand is taken to that PO in the Logistics Hub",
+      "expects": "After accepting a purchase order the brand is taken straight to that order's shipping documents in the Logistics Hub — acceptance leads somewhere real."
+    },
+    {
+      "id": "sl-appointment-inspector-window-verdict",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — delivery appointment — the inspector shows the appointment and the window verdict",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/delivery-appointment.spec.ts",
+      "test": "1. the consignment inspector shows the appointment and the window verdict",
+      "expects": "The consignment inspector shows the delivery appointment with its state and the window rule's verdict exposed as data — never a bare label with nothing behind it."
+    },
+    {
+      "id": "sl-appointment-eta-coverage-detail",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — delivery appointment — the ETA-coverage tile opens the per-consignment detail",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/delivery-appointment.spec.ts",
+      "test": "2. the ETA-coverage tile opens the detail, and every consignment names a documented state",
+      "expects": "The ETA-coverage tile opens the per-consignment detail, and every consignment there carries an appointment whose state and window code come from the channel's DOCUMENTED vocabulary — never an invented one."
+    },
+    {
+      "id": "sl-appointment-window-rule-stated",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — delivery appointment — the window rule is always stated",
+      "actor": "brand_user",
+      "type": "refusal",
+      "spec": "e2e/delivery-appointment.spec.ts",
+      "test": "3. the window rule is always stated — inside the window, or a refusal with a reason",
+      "expects": "The window rule's own wording is always rendered — either inside the window or a stated refusal with its reason — so compliance is never silently assumed."
+    },
+    {
+      "id": "sl-shipment-progression-simulation",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — shipment simulation — the DHL progression runs to milestones and a waybill",
+      "actor": "super_admin",
+      "type": "happy",
+      "spec": "e2e/simulation-control.spec.ts",
+      "test": "Run SHIPMENT_PROGRESSION succeeds with milestone steps + waybill",
+      "expects": "The SHIPMENT_PROGRESSION simulation runs the DHL carrier path to milestone steps and a waybill, labelled as the simulation it is."
+    },
+    {
+      "id": "sl-delta-panel-renders",
+      "capability": "commerce_logistics",
+      "journey": "3PL (Delta Fulfillment) — the supply route & escalation surface renders on the admin Logistics Hub",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "test": "1. the section renders on the admin Logistics Hub",
+      "expects": "The supply route & 3PL escalation section renders on the Mercenta Admin Logistics Hub with the operator's own heading — the operator's surface, not a brand's."
+    },
+    {
+      "id": "sl-delta-partner-named-not-carrier",
+      "capability": "commerce_logistics",
+      "journey": "3PL (Delta Fulfillment) — the declared partner is named and is stated to be a 3PL, not a carrier",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "test": "2. the declared 3PL partner is named and stated as a 3PL (fulfils, does not carry)",
+      "expects": "The declared 3PL partner is named (Delta Fulfillment) and is stated to be a 3PL that FULFILS but does NOT carry — goods still move on DHL and Palletline."
+    },
+    {
+      "id": "sl-delta-partner-mode-truthful",
+      "capability": "commerce_logistics",
+      "journey": "3PL (Delta Fulfillment) — the partner's provider mode is stated truthfully",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "test": "3. the partner mode is stated truthfully (Simulation, never Live)",
+      "expects": "The partner's provider mode reads Simulation and never Live while no real credential exists — a simulated provider is never presented as a live one."
+    },
+    {
+      "id": "sl-delta-thresholds-not-agreed",
+      "capability": "commerce_logistics",
+      "journey": "3PL (Delta Fulfillment) — the escalation thresholds are shown as not agreed",
+      "actor": "mercenta_admin",
+      "type": "boundary",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "test": "4. the escalation thresholds are shown as not agreed",
+      "expects": "The escalation thresholds are shown as NOT AGREED — an unagreed commercial term is named as unsettled rather than invented."
+    },
+    {
+      "id": "sl-delta-escalation-fails-closed",
+      "capability": "commerce_logistics",
+      "journey": "3PL (Delta Fulfillment) — the escalation decision fails closed to human review",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "test": "5. the decision FAILS CLOSED — human review, no 3PL recommended",
+      "expects": "With the thresholds unsettled the decision FAILS CLOSED: the outcome is human review and NO 3PL is recommended, with the reasons rendered."
+    },
+    {
+      "id": "sl-delta-unknown-fields-named",
+      "capability": "commerce_logistics",
+      "journey": "3PL (Delta Fulfillment) — unrecorded fields are named as unknown, with the derivation stated",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "test": "6. the unrecorded fields are NAMED as unknown, with the derivation stated",
+      "expects": "Every field the records do not hold is NAMED as unknown (never estimated), and the derived route states what it was derived from."
+    },
+    {
+      "id": "sl-delta-no-false-live-claim",
+      "capability": "commerce_logistics",
+      "journey": "3PL (Delta Fulfillment) — the panel makes no false live claim",
+      "actor": "mercenta_admin",
+      "type": "refusal",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "test": "7. the panel makes no false live claim",
+      "expects": "The panel makes no false live claim anywhere — nothing on it is described as live while the provider is simulated."
+    },
+    {
+      "id": "sl-delta-no-horizontal-overflow",
+      "capability": "commerce_logistics",
+      "journey": "3PL (Delta Fulfillment) — no horizontal overflow at desktop or mobile",
+      "actor": "mercenta_admin",
+      "type": "responsive",
+      "spec": "e2e/supply-route-escalation.spec.ts",
+      "test": "8. no horizontal overflow at desktop and mobile widths",
+      "expects": "The 3PL escalation panel composes without horizontal overflow at desktop and mobile widths."
+    },
+    {
+      "id": "sl-fulfilment-direct-model",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — fulfilment tracks — the brand-direct supply model is documented",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/fulfillment-tracks.spec.ts",
+      "test": "1. Direct model is documented",
+      "expects": "The Fulfilment Track surface documents the brand-direct supply model — the model is stated, not assumed."
+    },
+    {
+      "id": "sl-fulfilment-financed-model",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — fulfilment tracks — the financed supply model is documented",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/fulfillment-tracks.spec.ts",
+      "test": "2. Financed model is documented",
+      "expects": "The Fulfilment Track surface documents the FINANCED supply model alongside the direct one."
+    },
+    {
+      "id": "sl-fulfilment-scoreboard",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — fulfilment tracks — the per-brand scoreboard renders real scores",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/fulfillment-tracks.spec.ts",
+      "test": "3. Scoreboard renders per-brand scores",
+      "expects": "The per-brand fulfilment scoreboard renders scores drawn from the real records."
+    },
+    {
+      "id": "sl-fulfilment-borderline-review",
+      "capability": "commerce_logistics",
+      "journey": "shipment & logistics — fulfilment tracks — a borderline score raises the admin review flag",
+      "actor": "mercenta_admin",
+      "type": "boundary",
+      "spec": "e2e/fulfillment-tracks.spec.ts",
+      "test": "4. Score borderline -> admin review flag",
+      "expects": "A borderline fulfilment score raises the admin review flag where the seeded bands produce one, and the spec states honestly when no band is borderline."
+    },
+    {
+      "id": "sl-returns-admin-queue-drawer-advance",
+      "capability": "commerce_logistics",
+      "journey": "returns tracking — the admin queue opens the return record and Advance is a real transition",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/record-drawer.spec.ts",
+      "test": "5. returns row click opens the preview drawer and Advance is real",
+      "expects": "Clicking a row in the admin Returns Tracking queue opens that return's record drawer with its stage timeline, and Advance performs a REAL stage transition on the record the drawer is reading."
+    },
+    {
+      "id": "sl-returns-admin-queue-responsive",
+      "capability": "commerce_logistics",
+      "journey": "returns tracking — the admin record queues compose without horizontal overflow",
+      "actor": "mercenta_admin",
+      "type": "responsive",
+      "spec": "e2e/record-drawer.spec.ts",
+      "test": "9. admin record queues at ${vp.w}x${vp.h} — no horizontal overflow",
+      "expects": "The admin record queues — purchase orders, compliance approvals and Returns Tracking — compose without horizontal overflow at 1440 / 1280 / 1024 / 390."
+    },
+    {
+      "id": "sl-returns-brand-destination",
+      "capability": "commerce_logistics",
+      "journey": "returns tracking — the brand's own Returns destination is present in its navigation",
+      "actor": "brand_user",
+      "type": "happy",
+      "spec": "e2e/app-shell.spec.ts",
+      "test": "Brand — grouped IA renders with brand sections",
+      "expects": "The brand's grouped navigation carries its own Returns destination in the Operations group — the brand reaches its returns queue from the shell."
+    },
+    {
+      "id": "sl-returns-admin-destination-under-operations",
+      "capability": "commerce_logistics",
+      "journey": "returns tracking — Returns Tracking sits in the operator's action centre",
+      "actor": "mercenta_admin",
+      "type": "happy",
+      "spec": "e2e/app-shell.spec.ts",
+      "test": "Admin — grouping is structural (Operations is the action centre)",
+      "expects": "For the operator, Returns Tracking sits in the Operations group — the action centre — alongside the Logistics Hub, so a queue an operator acts on is never filed as an observe-only item."
     }
   ]
 }

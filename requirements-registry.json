@@ -12,7 +12,7 @@
       "deferred",
       "blocked"
     ],
-    "total_entries": 542,
+    "total_entries": 545,
     "founder_os_sprint": {
       "sprint": "Founder Operating System + Free-First Autonomous Operations (2026-09-19)",
       "added": [
@@ -371,9 +371,9 @@
       "honest_limitation": "a live use_skill invocation could not be executed in the installing session (the tool was absent from that session's toolset and the Cline UI cannot be driven from the file system) — loadability is verified against the installed extension and the validator; invocation is to be confirmed in the next session via the `/` slash commands"
     },
     "status_counts": {
-      "_note": "Recomputed 2026-10-08 after the E2E-3 increment (e2e-coverage-purchase-order-documents-domain added as built). Previously: the E2E-2 increment (e2e-coverage-onboarding-acquisition-domain added as built). Snapshot only.",
+      "_note": "Recomputed 2026-10-08 after the E2E-4 increment (three rows added as built: e2e-coverage-shipment-logistics-delta-returns-domain, e2e3-commerce-logistics-count-correction and e2e-record-drawer-mobile-overflow-budget-defect). Previously: the E2E-3 increment (e2e-coverage-purchase-order-documents-domain added as built). Snapshot only.",
       "built_and_tested": 337,
-      "built": 171,
+      "built": 174,
       "not_started": 12,
       "removed": 5,
       "deferred": 9,
@@ -6255,7 +6255,34 @@
       "description": "E2E-3 (2026-10-08) — E2E COVERAGE, THE PURCHASE-ORDER & DOCUMENTS DOMAIN. Extends the ONE scenario catalogue (`docs/scenario-catalogue.json`, the E2E-0 owner) across the purchase-order & documents domain: 46 `po-*` scenarios added (174 -> 220 total), each TRACEABLE to the individual Playwright test that proves it via a `test` field. The 46 span eleven specs — PO document pack (10) · PO lifecycle (6) · channel PO ingestion (5) · acknowledgement duties (4) · admin acknowledgement surface (3) · brand acknowledgement surface (4) · notification fan-out (2) · on-behalf draft (3) · acknowledgement onboarding surfaces (4) · channel-issued order revision (3) · acknowledged price (2). The gate `scripts/validate-e2e-scenarios.mjs` is EXTENDED so EVERY `po-*` scenario, like every `pf-*` and `oa-*` one, MUST name its proving test, plus a self-check pinning the traceable-prefix set to exactly `pf-` + `oa-` + `po-`; the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` is regenerated from the owner. No application runtime change.",
       "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-3 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
       "status": "built",
-      "evidence": "`docs/scenario-catalogue.json` 174 -> 220 scenarios (46 `po-*` purchase order & documents, all traceable to a test; `commerce_logistics` 15 -> 61). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (220 scenarios · 125 traceable · 8 capabilities). MUTATION-PROVED (see the session report). `npm run validate:all` PASS / 0 FAIL; typecheck 0; build ✓. BROWSER LEG: the eleven domain specs in real Chromium = 46 passed / 0 failed. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "evidence": "`docs/scenario-catalogue.json` 174 -> 220 scenarios (46 `po-*` purchase order & documents, all traceable to a test; `commerce_logistics` 23 -> 69 — §CORRECTED 2026-10-08 by the E2E-4 session: this row previously read `15 -> 61`, a MISCOUNT, and the committed catalogue was re-counted at `ad8818a` (23) and `7df4ebe` (69) to establish the true figures). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (220 scenarios · 125 traceable · 8 capabilities). MUTATION-PROVED (see the session report). `npm run validate:all` PASS / 0 FAIL; typecheck 0; build ✓. BROWSER LEG: the eleven domain specs in real Chromium = 46 passed / 0 failed. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e-coverage-shipment-logistics-delta-returns-domain",
+      "description": "E2E-4 (2026-10-08) — E2E COVERAGE, THE SHIPMENT + LOGISTICS + DELTA + RETURNS DOMAIN. Extends the ONE scenario catalogue (`docs/scenario-catalogue.json`, the E2E-0 owner) across the shipment & logistics domain: 66 `sl-*` scenarios added (220 -> 286 total), each TRACEABLE to the individual Playwright test that proves it via a `test` field. The 66 span ELEVEN specs — shipment & ASN (7) · logistics hero (10) · operational map (16) · carrier providers (6) · channel constraints (7) · delivery appointment (3) · the Delta 3PL supply route (8) · fulfilment tracks (4) · returns-tracking queue (2) · shell returns destinations (2) · the DHL shipment simulation (1). The gate `scripts/validate-e2e-scenarios.mjs` is EXTENDED so EVERY `sl-*` scenario, like every `pf-*`/`oa-*`/`po-*` one, MUST name its proving test, plus a self-check pinning the traceable-prefix set to exactly `pf-` + `oa-` + `po-` + `sl-`; the generated document `docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md` is regenerated from the owner. Domain boundary is EVIDENCE-BASED: the specs whose subject is shipping/logistics/3PL/returns, plus the returns surfaces that sit beside the Logistics Hub in the app's own navigation (`AdminShell.tsx` returns_tracking / `BrandShell.tsx` returns); the Inventory surface is deliberately EXCLUDED because the app's own note places it in the Catalogue section, not Operations. No application runtime change.",
+      "source": "Founder directive 2026-10-04 — 'the playwright needs to be every possible scenario for the entire platform'; order item 3 (the E2E coverage programme) resumed at E2E-4 per `docs/CLEANUP_AND_VERIFICATION_PLAN_2026-09-30.md` §0b.",
+      "status": "built",
+      "evidence": "`docs/scenario-catalogue.json` 220 -> 286 scenarios (66 `sl-*` shipment & logistics, all traceable to a test; `commerce_logistics` 69 -> 135). `scripts/validate-e2e-scenarios.mjs` = 16/16 checks PASS (286 scenarios · 191 traceable · 8 capabilities; was 16/16 at 220). MUTATION-PROVED THREE TIMES — (A) a wrong proving-test string in an `sl-*` scenario => 2 failures; (B) the prefix set narrowed with `sl-` dropped => 1 failure (the self-check), exit 1; (C) an `sl-*` scenario with no `test` field => 2 failures, exit 1; each file restored byte-identical (catalogue sha256 2ed624c91ae5e242394caec0afa8454ce9c00de56ab2060e9912b90fd504692b; gate sha256 ee8794b041b7798d103b72e016f99b2041156e58f9eacfe331f9af825ac0ed0e). `npm run validate:all` 188 PASS / 0 FAIL; typecheck 0 (all four projects); lint 0; build ✓. BROWSER LEG — every in-domain spec in real Chromium = 69 passed / 0 failed / 0 skipped (61 the nine shipment/logistics specs · 1 the DHL progression · 5 the returns queue incl. its four viewports · 2 the shell returns destinations), covering all 66 scenario declarations. NOTE (honesty): this increment ALSO repaired a false count in the E2E-3 records — see row `e2e3-commerce-logistics-count-correction`. Non-runtime governance increment => three-way NOT APPLICABLE.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e3-commerce-logistics-count-correction",
+      "description": "§DEFECT FIXED AT SOURCE (2026-10-08, found by the E2E-4 session) — THE E2E-3 SESSION'S OWN CAPABILITY COUNT WAS FALSE. Three live records stated that the purchase-order & documents increment took the catalogue's `commerce_logistics` coverage '15 -> 61'. Both numbers were wrong: re-counting the committed owner shows 23 rows before E2E-3 (`ad8818a`) and 69 after it (`7df4ebe`). The defect is fixed AT SOURCE in all three live citations (PROJECT_STATUS.md, STATUS_CHECK.md, this registry's E2E-3 row), each now carrying the true figures with a §CORRECTED note naming the evidence, so a future session cannot re-derive the wrong number from the records. The E2E-2 figures ('onboarding_acquisition 10 -> 58') were checked the same way and are CORRECT.",
+      "source": "Rule 07 (fix defects at source) — the false count was discovered by the E2E-4 session while establishing the same measurement for its own increment.",
+      "status": "built",
+      "evidence": "Re-counted from git: `git show ad8818a:docs/scenario-catalogue.json` => 174 scenarios, commerce_logistics 23; `git show 7df4ebe:docs/scenario-catalogue.json` => 220 scenarios, commerce_logistics 69; `git show 6316cbc:...` => 126 scenarios, onboarding_acquisition 10 (confirming E2E-2's 10 -> 58 as correct). Corrected at all three live citations; a grep for the old figures now returns only the §CORRECTED notes that name them as wrong.",
+      "last_verified": "2026-10-08",
+      "superseded_by": null
+    },
+    {
+      "id": "e2e-record-drawer-mobile-overflow-budget-defect",
+      "description": "§DEFECT FIXED AT SOURCE (2026-10-08, found by the E2E-4 browser leg) — `e2e/record-drawer.spec.ts` test 9 ('admin record queues at 390x844 — no horizontal overflow') was BRITTLE BY CONSTRUCTION. The test walks THREE admin surfaces and, at the mobile viewport, must first open the off-canvas nav for each; measured in isolation it consumes ~28s of Playwright's 30s default budget, so under the suite's normal parallel load it TIMED OUT while the other three viewports passed in the same run. Fixed at source by raising THAT one test's budget to 90s via `test.setTimeout`; NOT ONE ASSERTION was changed, removed or weakened (the same three surfaces, the same four viewports, the same `scrollWidth - clientWidth <= 1` rule). The changed test file is DECLARED in both scope guards (E6 `E2E_SCENARIO_CATALOGUE_SCOPE`, E7's declared list) rather than left as an unexplained change, and the fix carries its gate: the spec was re-run in full and is green under the normal parallel load.",
+      "source": "Rule 07 (fix defects at source — never park, never only report) — discovered when the E2E-4 enumeration pinned this test as the proving test for `sl-returns-admin-queue-responsive`.",
+      "status": "built",
+      "evidence": "BEFORE: the full record-drawer spec run with 8 workers showed 1 failed / 4 passed, the failure being 'Test timeout of 30000ms exceeded' at record-drawer.spec.ts:263 inside the 390x844 variant; the same test PASSED alone at 28.0s of its 30s budget (a 2s margin, i.e. flaky under load), and the working tree at that moment changed NO application source and NO test file (git status: PROJECT_STATUS.md, STATUS_CHECK.md, docs/WHOLE_PLATFORM_E2E_COVERAGE_MATRIX.md, docs/scenario-catalogue.json, requirements-registry.json, scripts/validate-e2e-scenarios.mjs). AFTER: `npx playwright test e2e/record-drawer.spec.ts` = 13 passed / 0 failed (34.7s, 8 workers), the 390x844 variant completing in 26.6s; the E2E-4 browser leg's returns run = 5 passed / 0 failed; `validate-e6-brand-surfaces` PASS and `validate-e7-embedded-social` PASS (121 assertions, 0 failures) with the declaration in place; `npm run validate:all` 188 PASS / 0 FAIL.",
       "last_verified": "2026-10-08",
       "superseded_by": null
     },
